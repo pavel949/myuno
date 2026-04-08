@@ -51,7 +51,7 @@ export default function DeveloperProjects() {
                   <h3 className="text-[hsl(var(--nb-text))] font-semibold truncate">{project.name_en}</h3>
                   <NbProjectStatusBadge status={project.project_status || 'under_construction'} />
                   {project.is_approved === false && (
-                    <span className="nb-badge bg-amber-500/15 text-amber-400 border-amber-500/30">На проверке</span>
+                    <span className="nb-badge bg-warning/15 text-warning border-warning/30">На проверке</span>
                   )}
                 </div>
                 <div className="flex items-center gap-4 text-sm text-[hsl(var(--nb-text-secondary))]">

@@ -63,8 +63,8 @@ export default function ContractAnalysisPage() {
   };
 
   const riskColor = (score: number) => {
-    if (score <= 3) return 'text-emerald-500';
-    if (score <= 6) return 'text-amber-500';
+    if (score <= 3) return 'text-success';
+    if (score <= 6) return 'text-warning';
     return 'text-destructive';
   };
 
@@ -173,7 +173,7 @@ export default function ContractAnalysisPage() {
               <Card>
                 <CardContent className="p-4">
                   <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                    <CheckCircle2 className="w-4 h-4 text-success" />
                     {t ? 'Ключевые условия' : 'Key Terms'}
                   </h3>
                   <div className="flex flex-wrap gap-1.5">

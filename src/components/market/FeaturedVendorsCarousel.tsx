@@ -99,7 +99,7 @@ export const FeaturedVendorsCarousel: React.FC<FeaturedVendorsCarouselProps> = (
       <div className="px-4 max-w-[1536px] mx-auto">
         <UnifiedSectionHeader
           icon={CheckCircle2}
-          iconColor="text-emerald-500"
+          iconColor="text-success"
           title={isRu ? 'Проверенные продавцы' : 'Verified Vendors'}
           viewAllPath="/market/vendors"
           viewAllLabel={isRu ? 'Все' : 'All'}

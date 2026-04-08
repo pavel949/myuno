@@ -101,7 +101,7 @@ const CONTENT_TYPES: ContentType[] = [
     descEn: 'Flower arrangements',
     descRu: 'Цветочные композиции',
     route: '/admin/flowers',
-    color: 'bg-rose-500/10 text-rose-600 border-rose-500/30',
+    color: 'bg-coral/10 text-coral border-coral/30',
   },
   {
     id: 'property',
@@ -111,7 +111,7 @@ const CONTENT_TYPES: ContentType[] = [
     descEn: 'Real estate listings',
     descRu: 'Объекты недвижимости',
     route: '/admin/properties',
-    color: 'bg-teal-500/10 text-teal-600 border-teal-500/30',
+    color: 'bg-teal/10 text-teal border-teal/30',
   },
   {
     id: 'vehicle',
@@ -121,7 +121,7 @@ const CONTENT_TYPES: ContentType[] = [
     descEn: 'Cars, bikes, scooters',
     descRu: 'Авто, мото, скутеры',
     route: '/admin/vehicles',
-    color: 'bg-cyan-500/10 text-cyan-600 border-cyan-500/30',
+    color: 'bg-accent-cyan/10 text-accent-cyan border-accent-cyan/30',
   },
   {
     id: 'yacht',
@@ -131,7 +131,7 @@ const CONTENT_TYPES: ContentType[] = [
     descEn: 'Boats and yachts',
     descRu: 'Лодки и яхты',
     route: '/admin/yachts',
-    color: 'bg-sky-500/10 text-sky-600 border-sky-500/30',
+    color: 'bg-accent-cyan/10 text-accent-cyan border-accent-cyan/30',
   },
 ];
 

@@ -121,6 +121,17 @@ export default {
           build: "hsl(var(--cluster-build))",
         },
       },
+      zIndex: {
+        base: 'var(--z-base)',
+        sticky: 'var(--z-sticky)',
+        dropdown: 'var(--z-dropdown)',
+        overlay: 'var(--z-overlay)',
+        modal: 'var(--z-modal)',
+        popover: 'var(--z-popover)',
+        toast: 'var(--z-toast)',
+        tooltip: 'var(--z-tooltip)',
+        max: 'var(--z-max)',
+      },
       borderRadius: {
         lg: "var(--radius-lg)",
         md: "var(--radius-md)",

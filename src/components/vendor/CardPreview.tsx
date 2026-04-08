@@ -169,7 +169,7 @@ export function CardPreview(props: CardPreviewProps) {
                 </Badge>
               )}
               {(props as ProductPreviewProps).isPopular && (
-                <Badge className="bg-amber-500 text-white text-xs">
+                <Badge className="bg-warning text-white text-xs">
                   {isRussian ? 'Хит' : 'Hit'}
                 </Badge>
               )}
@@ -198,7 +198,7 @@ export function CardPreview(props: CardPreviewProps) {
 
         {/* Verified badge simulation */}
         <div className="absolute top-2 right-2">
-          <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center">
+          <div className="w-5 h-5 rounded-full bg-success flex items-center justify-center">
             <CheckCircle2 className="w-3 h-3 text-white" />
           </div>
         </div>

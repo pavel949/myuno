@@ -93,7 +93,7 @@ export default function AdminNewbuilds() {
                 {p.price_from && <NbPriceDisplay price={p.price_from} className="text-sm text-primary" />}
               </div>
               <div className="flex gap-2">
-                <Button size="sm" onClick={() => updateProject.mutate({ id: p.id, updates: { is_approved: true } })} className="bg-green-600 hover:bg-green-700">
+                <Button size="sm" onClick={() => updateProject.mutate({ id: p.id, updates: { is_approved: true } })} className="bg-success hover:bg-success/90">
                   <Check className="w-4 h-4 mr-1" /> Одобрить
                 </Button>
                 <Button size="sm" variant="destructive" onClick={() => updateProject.mutate({ id: p.id, updates: { is_active: false } })}>
@@ -128,12 +128,12 @@ export default function AdminNewbuilds() {
                     <td className="p-3">{p.price_from ? <NbPriceDisplay price={p.price_from} /> : '—'}</td>
                     <td className="p-3">
                       <Button size="sm" variant="ghost" onClick={() => updateProject.mutate({ id: p.id, updates: { is_featured: !p.is_featured } })}>
-                        {p.is_featured ? <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" /> : <StarOff className="w-4 h-4 text-muted-foreground" />}
+                        {p.is_featured ? <Star className="w-4 h-4 text-warning fill-warning" /> : <StarOff className="w-4 h-4 text-muted-foreground" />}
                       </Button>
                     </td>
                     <td className="p-3">
                       <Button size="sm" variant="ghost" onClick={() => updateProject.mutate({ id: p.id, updates: { is_approved: !p.is_approved } })}>
-                        {p.is_approved ? <Check className="w-4 h-4 text-green-500" /> : <X className="w-4 h-4 text-red-500" />}
+                        {p.is_approved ? <Check className="w-4 h-4 text-success" /> : <X className="w-4 h-4 text-destructive" />}
                       </Button>
                     </td>
                   </tr>
@@ -156,7 +156,7 @@ export default function AdminNewbuilds() {
                 variant="outline"
                 onClick={() => updateDeveloper.mutate({ id: d.id, updates: { is_verified: !d.is_verified } })}
               >
-                {d.is_verified ? <Shield className="w-4 h-4 text-green-500 mr-1" /> : <ShieldOff className="w-4 h-4 text-muted-foreground mr-1" />}
+                {d.is_verified ? <Shield className="w-4 h-4 text-success mr-1" /> : <ShieldOff className="w-4 h-4 text-muted-foreground mr-1" />}
                 {d.is_verified ? 'Верифицирован' : 'Верифицировать'}
               </Button>
             </div>

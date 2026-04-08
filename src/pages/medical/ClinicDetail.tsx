@@ -108,12 +108,12 @@ const ClinicDetail = () => {
                     {language === 'ru' ? 'Аккредитован' : 'Accredited'}
                   </Badge>
                 )}
-                {clinic.is_24h && <Badge className="bg-green-500 text-xs">24/7</Badge>}
+                {clinic.is_24h && <Badge className="bg-success text-xs">24/7</Badge>}
               </div>
             </div>
             <div className="text-right">
               <div className="flex items-center gap-1">
-                <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                <Star className="w-5 h-5 fill-warning text-warning" />
                 <span className="font-bold">{clinic.rating}</span>
               </div>
               <p className="text-sm text-muted-foreground">{clinic.review_count} reviews</p>

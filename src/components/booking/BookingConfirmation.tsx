@@ -102,11 +102,11 @@ export function BookingConfirmation({
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-        className={`w-20 h-20 rounded-full flex items-center justify-center mb-6 ${isRequest ? 'bg-amber-100 dark:bg-amber-900/40' : 'bg-green-100 dark:bg-green-900'}`}
+        className={`w-20 h-20 rounded-full flex items-center justify-center mb-6 ${isRequest ? 'bg-warning/10' : 'bg-success/10'}`}
       >
         {isRequest
-          ? <Clock className="w-10 h-10 text-amber-600 dark:text-amber-400" />
-          : <CheckCircle className="w-10 h-10 text-green-600 dark:text-green-400" />
+          ? <Clock className="w-10 h-10 text-warning" />
+          : <CheckCircle className="w-10 h-10 text-success" />
         }
       </motion.div>
 
@@ -174,10 +174,10 @@ export function BookingConfirmation({
               </div>
               {isRequest ? (
                 <div className="flex justify-between text-sm">
-                  <span className="text-amber-600 dark:text-amber-400 font-medium">
+                  <span className="text-warning font-medium">
                     {language === 'ru' ? `Депозит (будет выставлен)` : `Deposit (to be invoiced)`}
                   </span>
-                  <span className="text-amber-600 dark:text-amber-400 font-medium">
+                  <span className="text-warning font-medium">
                     {currencySymbol}{depositAmount.toLocaleString()}
                   </span>
                 </div>
@@ -226,7 +226,7 @@ export function BookingConfirmation({
           </div>
           {isCash && (
             <div className="flex items-center gap-1.5 bg-background px-3 py-1.5 rounded-lg text-sm">
-              <MessageCircle className="w-3.5 h-3.5 text-green-600" />
+              <MessageCircle className="w-3.5 h-3.5 text-success" />
               <span>WhatsApp</span>
             </div>
           )}

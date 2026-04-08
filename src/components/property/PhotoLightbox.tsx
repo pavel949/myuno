@@ -50,7 +50,7 @@ export function PhotoLightbox({ images, initialIndex = 0, open, onClose }: Photo
   if (!open || images.length === 0) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] bg-black flex flex-col" role="dialog" aria-modal="true">
+    <div className="fixed inset-0 z-modal bg-black flex flex-col" role="dialog" aria-modal="true">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 text-white/90">
         <button onClick={onClose} className="p-2 rounded-full hover:bg-white/10 transition-colors">

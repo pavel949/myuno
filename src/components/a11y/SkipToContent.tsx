@@ -25,7 +25,7 @@ export function SkipToContent({
       onClick={handleClick}
       className={cn(
         "sr-only focus:not-sr-only",
-        "fixed top-2 left-2 z-[9999]",
+        "fixed top-2 left-2 z-max",
         "px-4 py-2 rounded-lg",
         "bg-primary text-primary-foreground",
         "font-medium text-sm",

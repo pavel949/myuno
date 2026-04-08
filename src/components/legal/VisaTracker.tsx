@@ -30,17 +30,17 @@ function getDaysRemaining(expiryDate: string): number {
 function getUrgencyColor(days: number): string {
   if (days < 0) return 'text-destructive';
   if (days <= 7) return 'text-destructive';
-  if (days <= 14) return 'text-orange-500';
-  if (days <= 30) return 'text-amber-500';
-  return 'text-emerald-500';
+  if (days <= 14) return 'text-warning';
+  if (days <= 30) return 'text-warning';
+  return 'text-success';
 }
 
 function getUrgencyBg(days: number): string {
   if (days < 0) return 'bg-destructive/10 border-destructive/30';
   if (days <= 7) return 'bg-destructive/10 border-destructive/30';
-  if (days <= 14) return 'bg-orange-500/10 border-orange-500/30';
-  if (days <= 30) return 'bg-amber-500/10 border-amber-500/30';
-  return 'bg-emerald-500/10 border-emerald-500/30';
+  if (days <= 14) return 'bg-warning/10 border-warning/30';
+  if (days <= 30) return 'bg-warning/10 border-warning/30';
+  return 'bg-success/10 border-success/30';
 }
 
 export function VisaTracker() {

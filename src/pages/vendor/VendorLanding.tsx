@@ -98,9 +98,9 @@ export default function VendorLanding() {
       icon: Crown,
       level: 'Premium',
       levelRu: 'Премиум',
-      color: 'text-amber-500',
-      bg: 'bg-amber-500/5',
-      border: 'border-amber-500/30',
+      color: 'text-warning',
+      bg: 'bg-warning/5',
+      border: 'border-warning/30',
       desc: isRu ? 'Рейтинг 4.5+ и 50+ заказов' : 'Rating 4.5+ & 50+ orders',
       perks: isRu 
         ? ['Топ выдачи', 'Сниженная комиссия', 'Персональный менеджер']

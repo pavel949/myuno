@@ -79,8 +79,8 @@ export default function ForgotPassword() {
         <div className="w-full max-w-md">
           {isSuccess ? (
             <div className="text-center space-y-6">
-              <div className="w-16 h-16 mx-auto rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
+              <div className="w-16 h-16 mx-auto rounded-full bg-success/10 flex items-center justify-center">
+                <CheckCircle className="w-8 h-8 text-success" />
               </div>
               <h1 className="text-2xl font-display font-bold">
                 {language === 'ru' ? 'Проверьте почту' : 'Check your email'}

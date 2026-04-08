@@ -62,7 +62,7 @@ export default function ReferralPage() {
                     </p>
                   </div>
                   {ref.status === 'completed' ? (
-                    <div className="flex items-center gap-1 text-green-600">
+                    <div className="flex items-center gap-1 text-success">
                       <CheckCircle className="w-4 h-4" />
                       <span className="text-xs font-medium">+฿{ref.referrer_bonus}</span>
                     </div>

@@ -492,7 +492,7 @@ export default function AdminProperties() {
               variant={approvalFilter === f.key ? 'default' : 'outline'}
               size="sm"
               onClick={() => setApprovalFilter(f.key)}
-              className={f.key === 'pending' && pendingCount > 0 && approvalFilter !== 'pending' ? 'border-amber-500 text-amber-700 dark:text-amber-400' : ''}
+              className={f.key === 'pending' && pendingCount > 0 && approvalFilter !== 'pending' ? 'border-warning text-warning' : ''}
             >
               {isRussian ? f.labelRu : f.labelEn}
               {f.key !== 'all' && (

@@ -97,7 +97,7 @@ export function IOSInstallGuide({ onClose }: IOSInstallGuideProps) {
       ),
     },
     {
-      icon: <CheckCircle2 className="w-12 h-12 text-green-500" />,
+      icon: <CheckCircle2 className="w-12 h-12 text-success" />,
       title: text.step3Title,
       description: text.step3Desc,
       visual: (
@@ -122,7 +122,7 @@ export function IOSInstallGuide({ onClose }: IOSInstallGuideProps) {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7 }}
-            className="mt-4 flex items-center gap-2 text-green-500"
+            className="mt-4 flex items-center gap-2 text-success"
           >
             <CheckCircle2 className="w-5 h-5" />
             <span className="text-sm font-medium">{text.done}</span>

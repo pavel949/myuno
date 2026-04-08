@@ -322,7 +322,7 @@ export const OnboardingModal = memo(forwardRef<HTMLDivElement, OnboardingModalPr
     return (
       <div
         ref={ref}
-        className="fixed inset-0 z-[9999] flex flex-col"
+        className="fixed inset-0 z-max flex flex-col"
         style={{ background: 'rgba(8,16,30,0.97)' }}
       >
         {/* Progress */}

@@ -37,20 +37,20 @@ export const TrustScoreCard = ({
   const { language } = useLanguage();
 
   const getTrustLevel = (score: number) => {
-    if (score >= 90) return { 
+    if (score >= 90) return {
       level: language === 'ru' ? 'Превосходно' : 'Excellent',
-      color: 'text-green-500',
-      bg: 'bg-green-500'
+      color: 'text-success',
+      bg: 'bg-success'
     };
-    if (score >= 75) return { 
+    if (score >= 75) return {
       level: language === 'ru' ? 'Очень хорошо' : 'Very Good',
-      color: 'text-blue-500',
-      bg: 'bg-blue-500'
+      color: 'text-info',
+      bg: 'bg-info'
     };
-    if (score >= 60) return { 
+    if (score >= 60) return {
       level: language === 'ru' ? 'Хорошо' : 'Good',
-      color: 'text-yellow-500',
-      bg: 'bg-yellow-500'
+      color: 'text-warning',
+      bg: 'bg-warning'
     };
     return { 
       level: language === 'ru' ? 'Новичок' : 'New',
@@ -69,7 +69,7 @@ export const TrustScoreCard = ({
             <ShieldCheck className={`w-6 h-6 ${trustLevel.color}`} />
           </div>
           {isVerified && (
-            <CheckCircle className="w-4 h-4 text-green-500 absolute -bottom-0.5 -right-0.5 bg-background rounded-full" />
+            <CheckCircle className="w-4 h-4 text-success absolute -bottom-0.5 -right-0.5 bg-background rounded-full" />
           )}
         </div>
         <div className="flex-1">
@@ -98,7 +98,7 @@ export const TrustScoreCard = ({
                     </div>
                   </div>
                   {isVerified && (
-                    <div className="absolute -bottom-1 -right-1 bg-green-500 rounded-full p-1">
+                    <div className="absolute -bottom-1 -right-1 bg-success rounded-full p-1">
                       <CheckCircle className="w-4 h-4 text-white" />
                     </div>
                   )}
@@ -130,8 +130,8 @@ export const TrustScoreCard = ({
         <div className="p-4 grid grid-cols-2 gap-4">
           {stats.totalBookings !== undefined && (
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
-                <Users className="w-5 h-5 text-blue-500" />
+              <div className="w-10 h-10 rounded-full bg-info/10 flex items-center justify-center">
+                <Users className="w-5 h-5 text-info" />
               </div>
               <div>
                 <div className="font-semibold">{stats.totalBookings}+</div>
@@ -144,8 +144,8 @@ export const TrustScoreCard = ({
 
           {stats.responseRate !== undefined && (
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center">
-                <TrendingUp className="w-5 h-5 text-green-500" />
+              <div className="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-success" />
               </div>
               <div>
                 <div className="font-semibold">{stats.responseRate}%</div>
@@ -158,8 +158,8 @@ export const TrustScoreCard = ({
 
           {stats.responseTime && (
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center">
-                <Clock className="w-5 h-5 text-purple-500" />
+              <div className="w-10 h-10 rounded-full bg-accent-purple/10 flex items-center justify-center">
+                <Clock className="w-5 h-5 text-accent-purple" />
               </div>
               <div>
                 <div className="font-semibold">{stats.responseTime}</div>
@@ -172,8 +172,8 @@ export const TrustScoreCard = ({
 
           {stats.memberSince && (
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center">
-                <Calendar className="w-5 h-5 text-orange-500" />
+              <div className="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center">
+                <Calendar className="w-5 h-5 text-warning" />
               </div>
               <div>
                 <div className="font-semibold">{stats.memberSince}</div>
@@ -186,8 +186,8 @@ export const TrustScoreCard = ({
 
           {stats.repeatCustomers !== undefined && (
             <div className="flex items-center gap-3 col-span-2">
-              <div className="w-10 h-10 rounded-full bg-yellow-500/10 flex items-center justify-center">
-                <Award className="w-5 h-5 text-yellow-500" />
+              <div className="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center">
+                <Award className="w-5 h-5 text-warning" />
               </div>
               <div>
                 <div className="font-semibold">{stats.repeatCustomers}%</div>

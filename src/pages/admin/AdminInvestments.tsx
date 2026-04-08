@@ -414,8 +414,8 @@ export default function AdminInvestments() {
                             <div>
                               <div className="font-medium flex items-center gap-2">
                                 {isRu ? project.title_ru : project.title_en}
-                                {project.is_featured && <Star className="h-4 w-4 text-amber-500" />}
-                                {project.is_hot && <Flame className="h-4 w-4 text-orange-500" />}
+                                {project.is_featured && <Star className="h-4 w-4 text-warning" />}
+                                {project.is_hot && <Flame className="h-4 w-4 text-warning" />}
                               </div>
                               {project.district && (
                                 <div className="text-sm text-muted-foreground">{project.district}</div>
@@ -618,7 +618,7 @@ export default function AdminInvestments() {
               <div className="grid grid-cols-3 gap-4 pt-4">
                 <div className="flex items-center justify-between">
                   <Label className="flex items-center gap-2">
-                    <Star className="h-4 w-4 text-amber-500" />
+                    <Star className="h-4 w-4 text-warning" />
                     Featured
                   </Label>
                   <Switch
@@ -628,7 +628,7 @@ export default function AdminInvestments() {
                 </div>
                 <div className="flex items-center justify-between">
                   <Label className="flex items-center gap-2">
-                    <Flame className="h-4 w-4 text-orange-500" />
+                    <Flame className="h-4 w-4 text-warning" />
                     Hot
                   </Label>
                   <Switch

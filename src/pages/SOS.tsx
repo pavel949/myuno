@@ -106,8 +106,8 @@ const serviceLinks = [
     desc: 'Tow, fuel, battery, tires',
     descRu: 'Эвакуатор, топливо, аккумулятор',
     path: '/services?category=road-assistance',
-    color: 'text-amber-500',
-    bg: 'bg-amber-500/10'
+    color: 'text-warning',
+    bg: 'bg-warning/10'
   },
   { 
     id: 'locksmith', 
@@ -117,8 +117,8 @@ const serviceLinks = [
     desc: 'Keys, locks, safes',
     descRu: 'Ключи, замки, сейфы',
     path: '/services?category=locksmith',
-    color: 'text-slate-500',
-    bg: 'bg-slate-500/10'
+    color: 'text-muted-foreground',
+    bg: 'bg-muted/10'
   },
 ];
 
@@ -316,7 +316,7 @@ export default function SOS() {
           <div className="flex gap-2">
             <Button
               size="sm"
-              className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+              className="flex-1 bg-gradient-to-r from-warning to-warning hover:from-warning hover:to-warning text-white"
               onClick={() => window.location.href = getTelLink()}
             >
               <Phone className="w-4 h-4 mr-1.5" />
@@ -325,7 +325,7 @@ export default function SOS() {
             <Button
               size="sm"
               variant="outline"
-              className="flex-1 border-amber-500/50 text-amber-600 hover:bg-amber-500/10"
+              className="flex-1 border-warning/50 text-warning hover:bg-warning/10"
               onClick={() => window.open(COMPANY_CONTACTS.whatsapp.link, '_blank')}
             >
               <MessageCircle className="w-4 h-4 mr-1.5" />
@@ -359,24 +359,24 @@ export default function SOS() {
 
         {/* VIP Concierge Link */}
         <button 
-          className="w-full mb-5 p-3 rounded-xl bg-gradient-to-r from-violet-500/10 to-purple-500/10 border border-purple-500/30 flex items-center justify-between hover:border-purple-500/50 transition-colors"
+          className="w-full mb-5 p-3 rounded-xl bg-gradient-to-r from-accent-purple/10 to-accent-purple/10 border border-accent-purple/30 flex items-center justify-between hover:border-accent-purple/50 transition-colors"
           onClick={() => navigate('/vip-concierge')}
         >
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-full bg-gradient-to-r from-violet-500 to-purple-500">
+            <div className="p-2 rounded-full bg-gradient-to-r from-accent-purple to-accent-purple">
               <Crown className="w-5 h-5 text-white" />
             </div>
             <div className="text-left">
               <div className="font-semibold text-sm flex items-center gap-1">
                 {language === 'ru' ? 'VIP Консьерж' : 'VIP Concierge'}
-                <Sparkles className="w-3 h-3 text-purple-500" />
+                <Sparkles className="w-3 h-3 text-accent-purple" />
               </div>
               <div className="text-xs text-muted-foreground">
                 {language === 'ru' ? 'Вертолёты, яхты, повара...' : 'Helicopters, yachts, chefs...'}
               </div>
             </div>
           </div>
-          <ChevronRight className="w-5 h-5 text-purple-500" />
+          <ChevronRight className="w-5 h-5 text-accent-purple" />
         </button>
 
         {/* Service Links */}
@@ -453,7 +453,7 @@ export default function SOS() {
 
         {/* Grouped Tips - Accordion Style */}
         <div className="flex items-center gap-2 mb-3">
-          <Lightbulb className="w-5 h-5 text-amber-500" />
+          <Lightbulb className="w-5 h-5 text-warning" />
           <h2 className="font-semibold text-lg">
             {language === 'ru' ? 'Что делать если...' : 'What to do if...'}
           </h2>
@@ -511,7 +511,7 @@ export default function SOS() {
         >
           {isSOSCached ? (
             <>
-              <CheckCircle2 className="w-4 h-4 text-green-500" />
+              <CheckCircle2 className="w-4 h-4 text-success" />
               {language === 'ru' ? 'Сохранено для офлайн' : 'Saved for offline'}
             </>
           ) : (

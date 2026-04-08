@@ -78,7 +78,7 @@ export function PWAUpdatePrompt() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 100, scale: 0.9 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="fixed bottom-20 left-4 right-4 z-[100] md:left-auto md:right-6 md:bottom-6 md:w-96"
+          className="fixed bottom-20 left-4 right-4 z-toast md:left-auto md:right-6 md:bottom-6 md:w-96"
         >
           <div className="bg-background/95 backdrop-blur-xl border-2 border-primary/50 rounded-2xl p-4 shadow-2xl shadow-primary/20">
             <div className="flex items-start gap-3">

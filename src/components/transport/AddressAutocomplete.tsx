@@ -231,7 +231,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
       </div>
 
       {showDropdown && (
-        <div className="absolute z-[100] left-0 right-0 mt-1 bg-popover border border-border rounded-xl shadow-lg max-h-[60vh] overflow-y-auto touch-pan-y">
+        <div className="absolute z-popover left-0 right-0 mt-1 bg-popover border border-border rounded-xl shadow-lg max-h-[60vh] overflow-y-auto touch-pan-y">
           {/* Use my location */}
           <button
             type="button"

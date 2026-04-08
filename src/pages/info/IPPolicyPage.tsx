@@ -367,9 +367,9 @@ export default function IPPolicyPage() {
                 <h4 className="font-medium text-sm mb-3">{isRu ? 'Зарегистрированные ®' : 'Registered ®'}</h4>
                 <div className="grid gap-2">
                   {trademarks.registered.map((tm, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-2 bg-green-500/5 border border-green-500/20 rounded-lg">
+                    <div key={idx} className="flex items-center justify-between p-2 bg-success/5 border border-success/20 rounded-lg">
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/30">®</Badge>
+                        <Badge variant="outline" className="bg-success/10 text-success border-success/30">®</Badge>
                         <span className="font-medium text-sm">{tm.name}</span>
                       </div>
                       <span className="text-xs text-muted-foreground">{tm.description}</span>
@@ -381,9 +381,9 @@ export default function IPPolicyPage() {
                 <h4 className="font-medium text-sm mb-3">{isRu ? 'В процессе регистрации ™' : 'Pending Registration ™'}</h4>
                 <div className="grid gap-2">
                   {trademarks.pending.map((tm, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-2 bg-amber-500/5 border border-amber-500/20 rounded-lg">
+                    <div key={idx} className="flex items-center justify-between p-2 bg-warning/5 border border-warning/20 rounded-lg">
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/30">™</Badge>
+                        <Badge variant="outline" className="bg-warning/10 text-warning border-warning/30">™</Badge>
                         <span className="font-medium text-sm">{tm.name}</span>
                       </div>
                       <span className="text-xs text-muted-foreground">{tm.description}</span>
@@ -497,14 +497,14 @@ export default function IPPolicyPage() {
             <ul className="space-y-2">
               {userContentLicense.warranties.items.map((item, idx) => (
                 <li key={idx} className="text-sm flex items-start gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+                  <CheckCircle2 className="h-4 w-4 text-success mt-0.5 shrink-0" />
                   {item}
                 </li>
               ))}
             </ul>
           </CardContent>
         </Card>
-        <Card className="mb-8 border-amber-500/30 bg-amber-500/5">
+        <Card className="mb-8 border-warning/30 bg-warning/5">
           <CardContent className="pt-4">
             <p className="text-sm text-muted-foreground">
               ⚠️ {userContentLicense.retention}
@@ -521,9 +521,9 @@ export default function IPPolicyPage() {
           <CardContent className="pt-6">
             <div className="space-y-2">
               {permittedUse.map((item, idx) => (
-                <div key={idx} className={`flex items-start gap-2 p-2 rounded-lg ${item.allowed ? 'bg-green-500/5' : 'bg-red-500/5'}`}>
+                <div key={idx} className={`flex items-start gap-2 p-2 rounded-lg ${item.allowed ? 'bg-success/5' : 'bg-destructive/5'}`}>
                   {item.allowed ? (
-                    <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+                    <CheckCircle2 className="h-4 w-4 text-success mt-0.5 shrink-0" />
                   ) : (
                     <XCircle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
                   )}

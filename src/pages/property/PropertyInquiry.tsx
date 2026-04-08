@@ -268,7 +268,7 @@ export default function PropertyInquiry() {
               </div>
 
               {pricing.discount > 0 && (
-                <div className="flex items-center justify-between text-sm text-green-600">
+                <div className="flex items-center justify-between text-sm text-success">
                   <span>
                     {pricing.discountPercent}% {isRu ? 'скидка' : 'discount'}
                     {pricing.discountPercent === rentalTerms?.monthly_discount
@@ -445,7 +445,7 @@ export default function PropertyInquiry() {
                         </p>
                       )}
                       {rentalTerms?.late_checkout_penalty && (
-                        <p className="text-xs text-amber-600">
+                        <p className="text-xs text-warning">
                           {isRu ? `Поздний выезд: ${formatPrice(rentalTerms.late_checkout_penalty)}` : `Late checkout: ${formatPrice(rentalTerms.late_checkout_penalty)}`}
                         </p>
                       )}

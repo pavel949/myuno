@@ -84,10 +84,10 @@ const OrderItem: React.FC<{
   onNavigate: (id: string) => void;
 }> = ({ order, isRu, onNavigate }) => {
   const statusColors: Record<string, string> = {
-    completed: 'text-green-600 bg-green-50 dark:bg-green-950/30',
-    confirmed: 'text-blue-600 bg-blue-50 dark:bg-blue-950/30',
-    pending: 'text-amber-600 bg-amber-50 dark:bg-amber-950/30',
-    cancelled: 'text-red-600 bg-red-50 dark:bg-red-950/30',
+    completed: 'text-success bg-success/10 dark:bg-success/10',
+    confirmed: 'text-info bg-info/10 dark:bg-info/10',
+    pending: 'text-warning bg-warning/10 dark:bg-warning/10',
+    cancelled: 'text-destructive bg-destructive/10 dark:bg-destructive/10',
   };
   
   return (
@@ -180,13 +180,13 @@ export default function GuestProfile() {
             icon={TrendingUp} 
             value={`${((data?.stats.totalSpent || 0) / 1000).toFixed(0)}k`} 
             label={isRu ? 'Потрачено ฿' : 'Spent ฿'}
-            color="text-emerald-500"
+            color="text-success"
           />
           <StatCard 
             icon={Heart} 
             value={String(data?.stats.categories.length || 0)} 
             label={isRu ? 'Категории' : 'Categories'}
-            color="text-rose-500"
+            color="text-coral"
           />
         </motion.div>
 

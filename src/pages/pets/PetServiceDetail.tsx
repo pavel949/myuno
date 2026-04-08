@@ -148,7 +148,7 @@ export default function PetServiceDetail() {
             <TabsContent value="features" className="mt-4 space-y-2">
               {features.length > 0 ? features.map((f, i) => (
                 <div key={i} className="flex items-center gap-2 text-sm">
-                  <Check className="w-4 h-4 text-emerald-500" /><span>{f}</span>
+                  <Check className="w-4 h-4 text-success" /><span>{f}</span>
                 </div>
               )) : (
                 <p className="text-muted-foreground text-center py-4">{language === 'ru' ? 'Информация скоро появится' : 'Coming soon'}</p>

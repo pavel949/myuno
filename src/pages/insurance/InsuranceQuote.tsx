@@ -70,8 +70,8 @@ export default function InsuranceQuote() {
     return (
       <AppLayout showBottomNav={false}>
         <div className="p-4 flex flex-col items-center justify-center min-h-[70vh] text-center">
-          <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center mb-4">
-            <CheckCircle2 className="w-8 h-8 text-green-500" />
+          <div className="w-16 h-16 rounded-full bg-success/20 flex items-center justify-center mb-4">
+            <CheckCircle2 className="w-8 h-8 text-success" />
           </div>
           <h1 className="text-xl font-bold mb-2">
             {language === 'ru' ? 'Заявка отправлена!' : 'Quote Request Submitted!'}

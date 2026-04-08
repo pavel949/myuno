@@ -126,7 +126,7 @@ export default function MyDocuments() {
                   className={cn(
                     "relative overflow-hidden",
                     expired && "border-destructive/50",
-                    expiringSoon && "border-amber-500/50"
+                    expiringSoon && "border-warning/50"
                   )}
                 >
                   <div className="flex items-start gap-4">

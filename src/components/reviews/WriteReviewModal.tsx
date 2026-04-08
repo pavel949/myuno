@@ -232,7 +232,7 @@ export function WriteReviewModal({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="pros" className="flex items-center gap-1">
-                <span className="text-green-500 font-bold">+</span>
+                <span className="text-success font-bold">+</span>
                 {language === 'ru' ? 'Плюсы' : 'Pros'}
               </Label>
               <Textarea
@@ -246,7 +246,7 @@ export function WriteReviewModal({
             </div>
             <div className="space-y-2">
               <Label htmlFor="cons" className="flex items-center gap-1">
-                <span className="text-red-500 font-bold">−</span>
+                <span className="text-destructive font-bold">−</span>
                 {language === 'ru' ? 'Минусы' : 'Cons'}
               </Label>
               <Textarea

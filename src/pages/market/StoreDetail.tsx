@@ -225,7 +225,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, language, quantity, 
       <div className="relative aspect-square">
         <img src={product.image} alt={language === 'ru' ? product.nameRu : product.nameEn} className="w-full h-full object-cover" />
         {product.originalPrice && (
-          <Badge className="absolute top-2 left-2 bg-red-500 text-white text-[10px]">-{Math.round((1 - product.price / product.originalPrice) * 100)}%</Badge>
+          <Badge className="absolute top-2 left-2 bg-destructive text-white text-[10px]">-{Math.round((1 - product.price / product.originalPrice) * 100)}%</Badge>
         )}
       </div>
       <div className="p-3">

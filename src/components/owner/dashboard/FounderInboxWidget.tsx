@@ -9,9 +9,9 @@ import { useFounderInbox, type FounderInboxItem } from '@/hooks/useFounderInbox'
 import { APP_ROUTES } from '@/lib/config/routes';
 
 const SOURCE_CONFIG = {
-  task: { icon: ClipboardList, color: 'bg-blue-500/10 text-blue-600', label: 'Task', labelRu: 'Задача', route: APP_ROUTES.MC_TASKS },
-  deal: { icon: Handshake, color: 'bg-emerald-500/10 text-emerald-600', label: 'Deal', labelRu: 'Сделка', route: APP_ROUTES.MC_SALES },
-  prospect: { icon: Target, color: 'bg-purple-500/10 text-purple-600', label: 'Prospect', labelRu: 'Проспект', route: '/mc/vendor-acquisition' },
+  task: { icon: ClipboardList, color: 'bg-info/10 text-info', label: 'Task', labelRu: 'Задача', route: APP_ROUTES.MC_TASKS },
+  deal: { icon: Handshake, color: 'bg-success/10 text-success', label: 'Deal', labelRu: 'Сделка', route: APP_ROUTES.MC_SALES },
+  prospect: { icon: Target, color: 'bg-accent-purple/10 text-accent-purple', label: 'Prospect', labelRu: 'Проспект', route: '/mc/vendor-acquisition' },
 };
 
 const PRIORITY_BADGE: Record<string, string> = {

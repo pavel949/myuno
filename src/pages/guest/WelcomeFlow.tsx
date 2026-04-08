@@ -37,7 +37,7 @@ const WELCOME_SERVICES: WelcomeService[] = [
   {
     id: 'transfer',
     icon: Car,
-    gradient: 'from-slate-600 to-slate-800',
+    gradient: 'from-muted-foreground to-muted-foreground',
     path: '/transport/airport-transfer',
     labelEn: 'Airport Transfer',
     labelRu: 'Трансфер из аэропорта',
@@ -50,7 +50,7 @@ const WELCOME_SERVICES: WelcomeService[] = [
   {
     id: 'restaurants',
     icon: UtensilsCrossed,
-    gradient: 'from-orange-400 to-red-500',
+    gradient: 'from-warning to-destructive',
     path: '/restaurants',
     labelEn: 'Restaurants',
     labelRu: 'Рестораны',
@@ -63,7 +63,7 @@ const WELCOME_SERVICES: WelcomeService[] = [
   {
     id: 'experiences',
     icon: MapPin,
-    gradient: 'from-emerald-400 to-teal-600',
+    gradient: 'from-success to-teal',
     path: '/experiences',
     labelEn: 'Tours & Activities',
     labelRu: 'Туры и активности',
@@ -74,7 +74,7 @@ const WELCOME_SERVICES: WelcomeService[] = [
   {
     id: 'yachts',
     icon: Ship,
-    gradient: 'from-cyan-400 to-blue-600',
+    gradient: 'from-accent-cyan to-info',
     path: '/yachts',
     labelEn: 'Yacht Charters',
     labelRu: 'Аренда яхт',
@@ -84,7 +84,7 @@ const WELCOME_SERVICES: WelcomeService[] = [
   {
     id: 'cleaning',
     icon: Brush,
-    gradient: 'from-teal-400 to-cyan-500',
+    gradient: 'from-teal to-accent-cyan',
     path: '/cleaning',
     labelEn: 'Extra Cleaning',
     labelRu: 'Доп. уборка',
@@ -94,7 +94,7 @@ const WELCOME_SERVICES: WelcomeService[] = [
   {
     id: 'grocery',
     icon: ShoppingCart,
-    gradient: 'from-green-400 to-emerald-600',
+    gradient: 'from-success to-success',
     path: '/market',
     labelEn: 'Grocery Delivery',
     labelRu: 'Доставка продуктов',
@@ -104,7 +104,7 @@ const WELCOME_SERVICES: WelcomeService[] = [
   {
     id: 'flowers',
     icon: Flower2,
-    gradient: 'from-pink-400 to-rose-500',
+    gradient: 'from-accent-coral to-accent-coral',
     path: '/flowers',
     labelEn: 'Flowers',
     labelRu: 'Цветы',
@@ -114,7 +114,7 @@ const WELCOME_SERVICES: WelcomeService[] = [
   {
     id: 'water',
     icon: Waves,
-    gradient: 'from-blue-400 to-cyan-500',
+    gradient: 'from-info to-accent-cyan',
     path: '/experiences?type=activity',
     labelEn: 'Water Sports',
     labelRu: 'Водный спорт',
@@ -124,7 +124,7 @@ const WELCOME_SERVICES: WelcomeService[] = [
   {
     id: 'fitness',
     icon: Dumbbell,
-    gradient: 'from-violet-400 to-purple-600',
+    gradient: 'from-accent-purple to-accent-purple',
     path: '/fitness',
     labelEn: 'Fitness',
     labelRu: 'Фитнес',
@@ -134,7 +134,7 @@ const WELCOME_SERVICES: WelcomeService[] = [
   {
     id: 'spa',
     icon: Heart,
-    gradient: 'from-rose-300 to-pink-500',
+    gradient: 'from-accent-coral to-accent-coral',
     path: '/beauty',
     labelEn: 'Spa & Beauty',
     labelRu: 'Спа и красота',
@@ -144,7 +144,7 @@ const WELCOME_SERVICES: WelcomeService[] = [
   {
     id: 'babysitter',
     icon: Baby,
-    gradient: 'from-amber-300 to-orange-400',
+    gradient: 'from-warning to-warning',
     path: '/babysitter',
     labelEn: 'Babysitter',
     labelRu: 'Няня',
@@ -154,7 +154,7 @@ const WELCOME_SERVICES: WelcomeService[] = [
   {
     id: 'concierge',
     icon: Sparkles,
-    gradient: 'from-amber-400 to-yellow-500',
+    gradient: 'from-warning to-warning',
     path: '/vip-concierge',
     labelEn: 'VIP Concierge',
     labelRu: 'VIP-консьерж',

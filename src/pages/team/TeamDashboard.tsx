@@ -120,36 +120,36 @@ export default function TeamDashboard() {
 
         {/* Stats Row */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <Card className="p-4 bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200">
+          <Card className="p-4 bg-warning/10 border-warning/20">
             <div className="flex items-center gap-3">
-              <Inbox className="h-8 w-8 text-yellow-600" />
+              <Inbox className="h-8 w-8 text-warning" />
               <div>
                 <p className="text-2xl font-bold">{leadStats.pending}</p>
                 <p className="text-xs text-muted-foreground">{isRu ? 'Новые лиды' : 'New Leads'}</p>
               </div>
             </div>
           </Card>
-          <Card className="p-4 bg-red-50 dark:bg-red-950/30 border-red-200">
+          <Card className="p-4 bg-destructive/10 border-destructive/20">
             <div className="flex items-center gap-3">
-              <AlertTriangle className="h-8 w-8 text-red-600" />
+              <AlertTriangle className="h-8 w-8 text-destructive" />
               <div>
                 <p className="text-2xl font-bold">{leadStats.overdue}</p>
                 <p className="text-xs text-muted-foreground">{isRu ? 'Просрочено' : 'Overdue'}</p>
               </div>
             </div>
           </Card>
-          <Card className="p-4 bg-blue-50 dark:bg-blue-950/30 border-blue-200">
+          <Card className="p-4 bg-info/10 border-info/20">
             <div className="flex items-center gap-3">
-              <Clock className="h-8 w-8 text-blue-600" />
+              <Clock className="h-8 w-8 text-info" />
               <div>
                 <p className="text-2xl font-bold">{leadStats.inProgress}</p>
                 <p className="text-xs text-muted-foreground">{isRu ? 'В работе' : 'In Progress'}</p>
               </div>
             </div>
           </Card>
-          <Card className="p-4 bg-green-50 dark:bg-green-950/30 border-green-200">
+          <Card className="p-4 bg-success/10 border-success/20">
             <div className="flex items-center gap-3">
-              <CheckCircle2 className="h-8 w-8 text-green-600" />
+              <CheckCircle2 className="h-8 w-8 text-success" />
               <div>
                 <p className="text-2xl font-bold">{leadStats.completed}</p>
                 <p className="text-xs text-muted-foreground">{isRu ? 'Завершено' : 'Completed'}</p>

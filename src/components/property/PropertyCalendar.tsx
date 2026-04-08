@@ -385,7 +385,7 @@ export function PropertyCalendar({
                     isPast && "opacity-30 cursor-not-allowed",
                     isToday(day) && !conflictCount && "ring-2 ring-primary",
                     isSelected && !conflictCount && "ring-2 ring-primary bg-primary/10",
-                    conflictCount > 0 && "ring-2 ring-red-500 bg-red-500/5",
+                    conflictCount > 0 && "ring-2 ring-destructive bg-destructive/5",
                     !isSelected && !isPast && !conflictCount && statusColors[status],
                     !isPast && !conflictCount && "hover:ring-2 hover:ring-primary/50"
                   )}

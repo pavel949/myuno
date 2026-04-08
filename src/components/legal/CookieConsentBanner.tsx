@@ -95,7 +95,7 @@ export const CookieConsentBanner = forwardRef<HTMLDivElement>(function CookieCon
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 100, opacity: 0 }}
-        className="fixed bottom-0 left-0 right-0 z-[9999] p-4 pb-safe pointer-events-none"
+        className="fixed bottom-0 left-0 right-0 z-max p-4 pb-safe pointer-events-none"
       >
         <div
           className="max-w-lg mx-auto bg-card border border-border rounded-2xl shadow-2xl overflow-hidden pointer-events-auto isolate"

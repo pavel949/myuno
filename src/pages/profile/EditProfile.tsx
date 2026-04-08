@@ -297,7 +297,7 @@ export default function EditProfile() {
             {/* Emergency Contact Section */}
             <SectionCard>
               <div className="flex items-center gap-2 mb-4">
-                <AlertTriangle className="w-4 h-4 text-amber-500" />
+                <AlertTriangle className="w-4 h-4 text-warning" />
                 <SectionTitle className="mb-0">{t.emergencyContact}</SectionTitle>
               </div>
               <p className="text-xs text-muted-foreground mb-4">{t.emergencyNote}</p>

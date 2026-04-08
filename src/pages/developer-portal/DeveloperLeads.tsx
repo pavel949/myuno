@@ -12,7 +12,7 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 function ScoreBadge({ score }: { score: number }) {
-  const color = score >= 71 ? 'nb-badge-completed' : score >= 41 ? 'nb-badge-construction' : 'bg-red-500/15 text-red-400 border-red-500/30';
+  const color = score >= 71 ? 'nb-badge-completed' : score >= 41 ? 'nb-badge-construction' : 'bg-destructive/15 text-destructive border-destructive/30';
   return <span className={`nb-badge ${color}`}>{score}</span>;
 }
 

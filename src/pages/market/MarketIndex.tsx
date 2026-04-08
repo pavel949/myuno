@@ -355,7 +355,7 @@ const MarketIndex = () => {
             <div className="px-4 md:px-6 lg:px-8 max-w-[1800px] mx-auto">
               <UnifiedSectionHeader
                 icon={Flame}
-                iconColor="text-orange-500"
+                iconColor="text-warning"
                 title={isRu ? 'Хиты продаж' : 'Bestsellers'}
                 viewAllPath="/market/category/popular"
                 viewAllLabel={isRu ? 'Все' : 'All'}
@@ -390,7 +390,7 @@ const MarketIndex = () => {
             <div className="px-4 md:px-6 lg:px-8 max-w-[1800px] mx-auto">
               <UnifiedSectionHeader
                 icon={Sparkles}
-                iconColor="text-purple-500"
+                iconColor="text-accent-purple"
                 title={isRu ? 'Новинки' : 'New Arrivals'}
                 viewAllPath="/market/category/new"
                 viewAllLabel={isRu ? 'Все' : 'All'}

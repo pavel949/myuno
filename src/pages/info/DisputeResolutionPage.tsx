@@ -125,7 +125,7 @@ export default function DisputeResolutionPage() {
         ? ['Аренда яхт и катеров', 'Туры и экскурсии', 'Транспорт (escrow)', 'Маркетплейс товаров']
         : ['Boat charters', 'Tours & excursions', 'Transport (escrow)', 'Marketplace products'],
       maxCoverage: isRu ? 'До 100% стоимости' : 'Up to 100% of cost',
-      color: 'bg-green-500/10 border-green-500/30',
+      color: 'bg-success/10 border-success/30',
     },
     {
       category: isRu ? 'Покрытие депозита' : 'Deposit Coverage',
@@ -133,7 +133,7 @@ export default function DisputeResolutionPage() {
         ? ['Краткосрочная аренда', 'Рестораны (no-show)', 'Красота и СПА', 'Медицина']
         : ['Short-term rentals', 'Restaurants (no-show)', 'Beauty & SPA', 'Medical'],
       maxCoverage: isRu ? 'До суммы депозита' : 'Up to deposit amount',
-      color: 'bg-yellow-500/10 border-yellow-500/30',
+      color: 'bg-warning/10 border-warning/30',
     },
     {
       category: isRu ? 'Только лид-защита' : 'Lead Protection Only',
@@ -141,7 +141,7 @@ export default function DisputeResolutionPage() {
         ? ['Долгосрочная аренда', 'Визы', 'Юридические услуги', 'Образование']
         : ['Long-term rentals', 'Visas', 'Legal services', 'Education'],
       maxCoverage: isRu ? 'Возврат lead-fee' : 'Lead-fee refund',
-      color: 'bg-orange-500/10 border-orange-500/30',
+      color: 'bg-warning/10 border-warning/30',
     },
   ];
 
@@ -249,7 +249,7 @@ export default function DisputeResolutionPage() {
                     <tr key={index} className={`border-t ${!item.covered ? 'bg-destructive/5' : ''}`}>
                       <td className="p-3 flex items-center gap-2">
                         {item.covered ? (
-                          <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+                          <CheckCircle className="h-4 w-4 text-success flex-shrink-0" />
                         ) : (
                           <XCircle className="h-4 w-4 text-destructive flex-shrink-0" />
                         )}

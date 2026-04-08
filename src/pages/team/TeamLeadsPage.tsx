@@ -99,23 +99,23 @@ export default function TeamLeadsPage() {
 
         {/* Stats */}
         <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-5 gap-2">
-          <Card className="p-3 text-center bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200">
+          <Card className="p-3 text-center bg-warning/10 border-warning/20">
             <p className="text-xl font-bold">{stats.pending}</p>
             <p className="text-xs text-muted-foreground">{isRu ? 'Новые' : 'New'}</p>
           </Card>
-          <Card className="p-3 text-center bg-red-50 dark:bg-red-950/30 border-red-200">
+          <Card className="p-3 text-center bg-destructive/10 border-destructive/20">
             <p className="text-xl font-bold">{stats.overdue}</p>
             <p className="text-xs text-muted-foreground">{isRu ? 'Просрочено' : 'Overdue'}</p>
           </Card>
-          <Card className="p-3 text-center bg-blue-50 dark:bg-blue-950/30 border-blue-200">
+          <Card className="p-3 text-center bg-info/10 border-info/20">
             <p className="text-xl font-bold">{stats.contacted}</p>
             <p className="text-xs text-muted-foreground">{isRu ? 'Связались' : 'Contacted'}</p>
           </Card>
-          <Card className="p-3 text-center bg-indigo-50 dark:bg-indigo-950/30 border-indigo-200">
+          <Card className="p-3 text-center bg-accent/10 border-accent/20">
             <p className="text-xl font-bold">{stats.inProgress}</p>
             <p className="text-xs text-muted-foreground">{isRu ? 'В работе' : 'In Progress'}</p>
           </Card>
-          <Card className="p-3 text-center bg-green-50 dark:bg-green-950/30 border-green-200">
+          <Card className="p-3 text-center bg-success/10 border-success/20">
             <p className="text-xl font-bold">{stats.completed}</p>
             <p className="text-xs text-muted-foreground">{isRu ? 'Готово' : 'Done'}</p>
           </Card>
@@ -183,7 +183,7 @@ export default function TeamLeadsPage() {
                   
                   return (
                     <Card key={lead.id} className={cn(
-                      sla.isOverdue && lead.status === 'pending' && 'border-red-300 bg-red-50/50 dark:border-red-700 dark:bg-red-950/20'
+                      sla.isOverdue && lead.status === 'pending' && 'border-destructive/30 bg-destructive/5'
                     )}>
                       <CardContent className="p-4">
                         <div className="flex items-start gap-3">

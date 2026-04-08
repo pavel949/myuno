@@ -709,7 +709,7 @@ const FlowersOrder = () => {
               {/* Cash Option */}
               <label className="flex items-center gap-3 p-4 rounded-xl border border-border cursor-pointer hover:border-primary/30 transition-all">
                 <RadioGroupItem value="cash" id="cash" />
-                <div className="w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center">
+                <div className="w-5 h-5 rounded-full bg-success/20 flex items-center justify-center">
                   <span className="text-xs">฿</span>
                 </div>
                 <div className="flex-1">

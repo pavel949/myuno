@@ -101,7 +101,7 @@ export function TeamSidebar({ className }: TeamSidebarProps) {
 
         {/* Streak */}
         {(stats?.streak_days || 0) > 0 && (
-          <div className="mt-2 flex items-center gap-1 text-xs text-amber-500">
+          <div className="mt-2 flex items-center gap-1 text-xs text-warning">
             <Sparkles className="h-3 w-3" />
             <span>{stats?.streak_days} {isRu ? 'дней подряд' : 'day streak'}</span>
           </div>

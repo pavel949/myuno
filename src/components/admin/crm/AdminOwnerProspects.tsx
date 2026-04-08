@@ -16,11 +16,11 @@ import { formatDistanceToNow } from 'date-fns';
 const STATUSES = ['new', 'contacted', 'interested', 'converted', 'lost'] as const;
 
 const statusColors: Record<string, string> = {
-  new: 'bg-blue-100 text-blue-800',
-  contacted: 'bg-yellow-100 text-yellow-800',
-  interested: 'bg-purple-100 text-purple-800',
-  converted: 'bg-green-100 text-green-800',
-  lost: 'bg-red-100 text-red-800',
+  new: 'bg-info/10 text-info',
+  contacted: 'bg-warning/10 text-warning',
+  interested: 'bg-accent-purple/10 text-accent-purple',
+  converted: 'bg-success/10 text-success',
+  lost: 'bg-destructive/10 text-destructive',
 };
 
 export function AdminOwnerProspects() {

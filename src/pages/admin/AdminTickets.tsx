@@ -209,7 +209,7 @@ export default function AdminTickets() {
                     return (
                       <TableRow 
                         key={ticket.id}
-                        className={`cursor-pointer hover:bg-muted/50 ${isOverdue ? 'bg-red-50' : ''}`}
+                        className={`cursor-pointer hover:bg-muted/50 ${isOverdue ? 'bg-destructive/5' : ''}`}
                         onClick={() => navigate(`/admin/tickets/${ticket.id}`)}
                       >
                         <TableCell className="font-mono text-sm">
@@ -229,7 +229,7 @@ export default function AdminTickets() {
                         </TableCell>
                         <TableCell>
                           {ticket.sla_deadline ? (
-                            <span className={`text-xs ${isOverdue ? 'text-red-600 font-medium' : 'text-muted-foreground'}`}>
+                            <span className={`text-xs ${isOverdue ? 'text-destructive font-medium' : 'text-muted-foreground'}`}>
                               {isOverdue ? 'Просрочено' : formatDistanceToNow(new Date(ticket.sla_deadline), { locale: ru })}
                             </span>
                           ) : (

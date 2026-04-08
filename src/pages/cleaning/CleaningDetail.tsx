@@ -60,7 +60,7 @@ export default function CleaningDetail() {
 
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1">
-              <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
+              <Star className="w-5 h-5 fill-warning text-warning" />
               <span className="font-semibold">{currentService.rating}</span>
               <span className="text-muted-foreground">({currentService.reviewCount})</span>
             </div>

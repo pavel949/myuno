@@ -41,7 +41,7 @@ export const CrossSellSection = memo(function CrossSellSection({
     <section className={cn('py-6', className)}>
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-amber-500" />
+          <Sparkles className="w-4 h-4 text-warning" />
           <h3 className="font-semibold text-foreground">
             {language === 'ru' ? sectionTitle.ru : sectionTitle.en}
           </h3>

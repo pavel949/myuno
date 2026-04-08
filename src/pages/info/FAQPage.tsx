@@ -284,13 +284,13 @@ export default function FAQPage() {
         <div className="grid grid-cols-2 gap-3 my-4">
           <Button variant="outline" asChild className="h-auto py-3 flex-col gap-1">
             <Link to="/g-trust">
-              <Shield className="w-5 h-5 text-amber-600" />
+              <Shield className="w-5 h-5 text-warning" />
               <span className="text-xs">G-Trust</span>
             </Link>
           </Button>
           <Button variant="outline" asChild className="h-auto py-3 flex-col gap-1">
             <Link to="/partners">
-              <Building2 className="w-5 h-5 text-blue-600" />
+              <Building2 className="w-5 h-5 text-info" />
               <span className="text-xs">{isRu ? 'Партнёрам' : isTh ? 'สำหรับพันธมิตร' : 'For Partners'}</span>
             </Link>
           </Button>

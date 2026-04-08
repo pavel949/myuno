@@ -96,15 +96,15 @@ export function MarketHero({ totalProducts, totalCategories, freeDeliveryThresho
         {/* Trust Badges Row */}
         <div className="flex flex-wrap gap-x-4 gap-y-2 pt-4 border-t border-white/20">
           <TrustBadge 
-            icon={<ShieldCheck className="w-4 h-4 text-emerald-300" />} 
+            icon={<ShieldCheck className="w-4 h-4 text-success" />}
             label={isRu ? 'Проверенные продавцы' : 'Verified sellers'} 
           />
           <TrustBadge 
-            icon={<Truck className="w-4 h-4 text-sky-300" />} 
+            icon={<Truck className="w-4 h-4 text-info" />}
             label={isRu ? `Бесплатно от ฿${freeDeliveryThreshold}` : `Free from ฿${freeDeliveryThreshold}`} 
           />
           <TrustBadge 
-            icon={<Clock className="w-4 h-4 text-amber-300" />} 
+            icon={<Clock className="w-4 h-4 text-warning" />}
             label={isRu ? 'Экспресс 45 мин' : '45 min express'} 
           />
         </div>

@@ -45,7 +45,7 @@ function RibbonButton({ icon, emoji, label, onClick, variant = 'default' }: Cate
   const variants = {
     default: 'bg-muted/60 hover:bg-muted text-foreground',
     primary: 'bg-primary/10 hover:bg-primary/20 text-primary',
-    accent: 'bg-gradient-to-r from-orange-100 to-amber-100 dark:from-orange-900/30 dark:to-amber-900/30 hover:from-orange-200 hover:to-amber-200 text-orange-700 dark:text-orange-300',
+    accent: 'bg-warning/10 hover:bg-warning/20 text-warning',
   };
 
   return (
@@ -110,18 +110,18 @@ export function CategoryRibbon() {
           <div className="w-px h-6 bg-border" />
 
           <RibbonButton
-            icon={<Flame className="w-4 h-4 text-orange-500" />}
+            icon={<Flame className="w-4 h-4 text-warning" />}
             label={language === 'ru' ? 'Акции' : 'Deals'}
             onClick={() => navigate('/market/category/deals')}
             variant="accent"
           />
           <RibbonButton
-            icon={<Star className="w-4 h-4 text-amber-500" />}
+            icon={<Star className="w-4 h-4 text-warning" />}
             label={language === 'ru' ? 'Хиты' : 'Hits'}
             onClick={() => navigate('/market/category/popular')}
           />
           <RibbonButton
-            icon={<Sparkles className="w-4 h-4 text-purple-500" />}
+            icon={<Sparkles className="w-4 h-4 text-accent-purple" />}
             label={language === 'ru' ? 'Новинки' : 'New'}
             onClick={() => navigate('/market/category/new')}
           />

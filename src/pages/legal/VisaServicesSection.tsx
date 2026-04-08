@@ -60,9 +60,9 @@ export function VisaServicesSection({ limit = 6, showTitle = true }: VisaService
                     variant="outline" 
                     className={`text-xs ${
                       visa.visa_type === 'elite' 
-                        ? 'border-amber-500 text-amber-600 bg-amber-50 dark:bg-amber-500/10' 
+                        ? 'border-warning text-warning bg-warning/10'
                         : visa.visa_type === 'retirement'
-                        ? 'border-emerald-500 text-emerald-600 bg-emerald-50 dark:bg-emerald-500/10'
+                        ? 'border-success text-success bg-success/10'
                         : ''
                     }`}
                   >

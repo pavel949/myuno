@@ -105,7 +105,7 @@ export function PartnerCTACard() {
           
           {/* Bottom CTA */}
           <div className="flex items-center gap-2 pt-1">
-            <Zap className="w-4 h-4 text-amber-300" />
+            <Zap className="w-4 h-4 text-warning" />
             <span className="text-white/90 text-sm">
               {isRu 
                 ? 'Бесплатная регистрация • Комиссия от 5%' 

@@ -141,10 +141,10 @@ export default function ChannelManager() {
           </TabsList>
 
           <TabsContent value="connections" className="space-y-4 mt-4">
-            <Card className="bg-gradient-to-br from-rose-500/10 to-pink-500/10 border-rose-200 dark:border-rose-800">
+            <Card className="bg-gradient-to-br from-coral/10 to-coral/10 border-coral/20">
               <CardContent className="pt-4">
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-xl bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center text-3xl shrink-0">🏠</div>
+                  <div className="w-14 h-14 rounded-xl bg-coral/10 flex items-center justify-center text-3xl shrink-0">🏠</div>
                   <div className="flex-1">
                     <h3 className="font-semibold">{isRu ? 'Импорт листинга с Airbnb' : 'Import listing from Airbnb'}</h3>
                     <p className="text-sm text-muted-foreground">

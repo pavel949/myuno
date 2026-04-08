@@ -172,7 +172,7 @@ export default function PetTransport() {
           
           <div className="space-y-3">
             <div className="relative">
-              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-emerald-500" />
+              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-success" />
               <Input
                 value={originCity}
                 onChange={(e) => setOriginCity(e.target.value)}
@@ -238,7 +238,7 @@ export default function PetTransport() {
           <div className="space-y-2">
             {includedServices.map((service, i) => (
               <div key={i} className="flex items-center gap-2 text-sm">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
                 <span>{language === 'ru' ? service.textRu : service.text}</span>
               </div>
             ))}

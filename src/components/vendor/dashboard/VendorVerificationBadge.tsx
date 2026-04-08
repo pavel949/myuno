@@ -32,9 +32,9 @@ const LEVELS = {
   },
   premium: {
     icon: Crown,
-    color: 'text-amber-500',
-    bg: 'bg-amber-500/5',
-    border: 'border-amber-500/30',
+    color: 'text-warning',
+    bg: 'bg-warning/5',
+    border: 'border-warning/30',
   },
 };
 
@@ -116,7 +116,7 @@ export function VendorVerificationBadge({
         )}
 
         {level === 'premium' && (
-          <div className="flex items-center gap-1.5 text-xs text-amber-600">
+          <div className="flex items-center gap-1.5 text-xs text-warning">
             <CheckCircle2 className="h-3.5 w-3.5" />
             {isRu ? 'Максимальный уровень достигнут' : 'Maximum level achieved'}
           </div>

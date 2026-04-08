@@ -94,7 +94,7 @@ export default function VenueDetail() {
           <div className="absolute bottom-4 left-4 flex gap-2">
             <Badge className="bg-primary text-primary-foreground">{typeLabel}</Badge>
             {venue.is_featured && (
-              <Badge variant="secondary" className="bg-yellow-500 text-white">
+              <Badge variant="secondary" className="bg-warning text-white">
                 ⭐ {language === 'ru' ? 'Популярное' : 'Featured'}
               </Badge>
             )}

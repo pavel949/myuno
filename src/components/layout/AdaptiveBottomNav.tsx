@@ -126,7 +126,7 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
       <>
         <nav
           ref={ref}
-          className="fixed bottom-0 left-0 right-0 z-[100] md:hidden"
+          className="fixed bottom-0 left-0 right-0 z-overlay md:hidden"
           style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
           {...props}
         >

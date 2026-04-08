@@ -116,11 +116,11 @@ const AdvanceRequested = () => {
                 <span className="text-muted-foreground">
                   {language === 'ru' ? 'Сервис myUNO (5%)' : 'myUNO Service (5%)'}
                 </span>
-                <span className="text-amber-600">+฿{state.conciergeFee.toLocaleString()}</span>
+                <span className="text-warning">+฿{state.conciergeFee.toLocaleString()}</span>
               </div>
               <div className="border-t pt-3 flex justify-between font-semibold text-lg">
                 <span>{language === 'ru' ? 'К оплате' : 'Total to Pay'}</span>
-                <span className="text-amber-600">฿{state.totalWithFee.toLocaleString()}</span>
+                <span className="text-warning">฿{state.totalWithFee.toLocaleString()}</span>
               </div>
             </div>
           </div>

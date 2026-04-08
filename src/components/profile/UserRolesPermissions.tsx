@@ -111,7 +111,7 @@ export function UserRolesPermissions() {
       {memberships.length > 0 && (
         <SectionCard>
           <div className="flex items-center gap-2 mb-3">
-            <Building2 className="w-4 h-4 text-teal-600" />
+            <Building2 className="w-4 h-4 text-teal" />
             <h3 className="text-sm font-semibold">
               {isRu ? 'Управляющие компании' : 'Management Companies'}
             </h3>

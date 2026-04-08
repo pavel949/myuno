@@ -30,23 +30,23 @@ const tierColors: Record<string, { bg: string; text: string; border: string; pro
     border: "border-muted",
     progress: "bg-muted-foreground"
   },
-  blue: { 
-    bg: "bg-blue-500/10", 
-    text: "text-blue-600", 
-    border: "border-blue-500/30",
-    progress: "bg-blue-500"
+  blue: {
+    bg: "bg-info/10",
+    text: "text-info",
+    border: "border-info/30",
+    progress: "bg-info"
   },
-  purple: { 
-    bg: "bg-purple-500/10", 
-    text: "text-purple-600", 
-    border: "border-purple-500/30",
-    progress: "bg-purple-500"
+  purple: {
+    bg: "bg-accent-purple/10",
+    text: "text-accent-purple",
+    border: "border-accent-purple/30",
+    progress: "bg-accent-purple"
   },
-  amber: { 
-    bg: "bg-amber-500/10", 
-    text: "text-amber-600", 
-    border: "border-amber-500/30",
-    progress: "bg-amber-500"
+  amber: {
+    bg: "bg-warning/10",
+    text: "text-warning",
+    border: "border-warning/30",
+    progress: "bg-warning"
   },
 };
 

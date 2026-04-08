@@ -153,7 +153,7 @@ export default function GuestTripDetail() {
 
   const statusBadge = {
     upcoming: { label: isRu ? 'Предстоящая' : 'Upcoming', variant: 'default' as const },
-    active: { label: isRu ? 'Сейчас' : 'Active', variant: 'default' as const, className: 'bg-green-500' },
+    active: { label: isRu ? 'Сейчас' : 'Active', variant: 'default' as const, className: 'bg-success' },
     completed: { label: isRu ? 'Завершена' : 'Completed', variant: 'secondary' as const },
   }[tripStatus];
 

@@ -144,7 +144,7 @@ export const ExitIntentModal = memo(function ExitIntentModal({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={handleClose}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-overlay"
           />
           
           {/* Modal */}
@@ -153,7 +153,7 @@ export const ExitIntentModal = memo(function ExitIntentModal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: -20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-md z-[101]"
+            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-md z-modal"
           >
             <div className="bg-card rounded-2xl border border-border/50 shadow-2xl overflow-hidden">
               {/* Header with gradient */}
@@ -196,11 +196,11 @@ export const ExitIntentModal = memo(function ExitIntentModal({
                   <span>{c.benefit1}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <Shield className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                  <Shield className="w-4 h-4 text-success flex-shrink-0" />
                   <span>{c.benefit2}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <Clock className="w-4 h-4 text-amber-500 flex-shrink-0" />
+                  <Clock className="w-4 h-4 text-warning flex-shrink-0" />
                   <span>{c.benefit3}</span>
                 </div>
               </div>

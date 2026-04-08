@@ -219,7 +219,7 @@ export default function HowItWorks() {
                     <p className="text-sm text-muted-foreground">{step.desc}</p>
                   </div>
                   {i < t.steps.length - 1 && (
-                    <CheckCircle className="w-5 h-5 text-green-500 shrink-0 mt-2" />
+                    <CheckCircle className="w-5 h-5 text-success shrink-0 mt-2" />
                   )}
                 </div>
               ))}

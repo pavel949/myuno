@@ -100,7 +100,7 @@ function NoteCard({ note, isOwn, onDelete }: NoteCardProps) {
   return (
     <div className={cn(
       "p-3 rounded-lg border",
-      note.is_important && "border-amber-300 bg-amber-50/50 dark:border-amber-800 dark:bg-amber-950/20"
+      note.is_important && "border-warning/30 bg-warning/5"
     )}>
       <div className="flex items-start gap-3">
         <Avatar className="h-7 w-7">

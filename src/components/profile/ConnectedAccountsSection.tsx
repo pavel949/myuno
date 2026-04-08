@@ -57,7 +57,7 @@ const providers = [
       </svg>
     ),
     bgColor: 'bg-white border',
-    textColor: 'text-gray-700',
+    textColor: 'text-muted-foreground',
   },
   {
     id: 'apple' as const,
@@ -126,7 +126,7 @@ export function ConnectedAccountsSection() {
                   <div>
                     <p className="text-sm font-medium">{provider.name}</p>
                     {isConnected && (
-                      <p className="text-xs text-green-600 flex items-center gap-1">
+                      <p className="text-xs text-success flex items-center gap-1">
                         <Check className="w-3 h-3" />
                         {t.connected}
                       </p>

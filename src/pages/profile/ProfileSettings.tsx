@@ -343,11 +343,11 @@ export default function ProfileSettings() {
 
           {/* Emergency Contact */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-            <div className="flex items-center gap-2 mb-3 text-sm font-medium text-amber-600">
+            <div className="flex items-center gap-2 mb-3 text-sm font-medium text-warning">
               <AlertTriangle className="w-4 h-4" />
               {isRu ? 'Экстренный контакт' : 'Emergency Contact'}
             </div>
-            <SectionCard className="space-y-4 border-amber-500/20">
+            <SectionCard className="space-y-4 border-warning/20">
               <p className="text-xs text-muted-foreground -mt-2 mb-2">
                 {isRu 
                   ? 'Этот контакт будет использован в экстренных ситуациях во время вашего путешествия.'

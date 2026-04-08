@@ -199,6 +199,12 @@ body {
 }
 
 @layer components {
+  /* Standard loading spinner sizes */
+  .spinner-sm { @apply h-4 w-4; }
+  .spinner-md { @apply h-6 w-6; }
+  .spinner-lg { @apply h-8 w-8; }
+  .spinner-xl { @apply h-12 w-12; }
+
   .text-balance {
     text-wrap: balance;
   }

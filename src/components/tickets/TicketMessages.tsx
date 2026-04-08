@@ -153,7 +153,7 @@ export function TicketMessages({
                   </div>
 
                   <Card className={cn(
-                    msg.is_internal && 'bg-yellow-50 border-yellow-200',
+                    msg.is_internal && 'bg-warning/5 border-warning/20',
                     msg.sender_type === 'system' && 'bg-muted/50'
                   )}>
                     <CardContent className="p-3">

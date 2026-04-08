@@ -74,8 +74,8 @@ export const FeaturedServicesGallery = memo(function FeaturedServicesGallery({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="p-2 bg-gradient-to-br from-amber-500/20 to-orange-500/10 rounded-xl">
-            <Sparkles className="w-5 h-5 text-amber-500" />
+          <div className="p-2 bg-gradient-to-br from-warning/20 to-warning/10 rounded-xl">
+            <Sparkles className="w-5 h-5 text-warning" />
           </div>
           <div>
             <h2 className="text-lg font-bold">{displayTitle}</h2>

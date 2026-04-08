@@ -117,8 +117,8 @@ export default function PartnerAgreementPage() {
           <VerificationCard
             icon={Crown}
             level={isRu ? 'Премиум' : 'Premium'}
-            color="text-amber-500"
-            bg="bg-amber-500/5"
+            color="text-warning"
+            bg="bg-warning/5"
             desc={isRu ? 'Рейтинг 4.5+ и 50+ заказов' : 'Rating 4.5+ & 50+ orders'}
             perks={isRu 
               ? ['Топ выдачи', 'Сниженная комиссия', 'Персональный менеджер']

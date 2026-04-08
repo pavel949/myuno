@@ -45,9 +45,9 @@ export const ExploreVerticalsSheet = memo(function ExploreVerticalsSheet({
       )}
     >
       <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center ring-1 ring-black/[0.04] dark:ring-white/[0.06]">
-        <LayoutGrid className="w-5 h-5 text-gray-900 dark:text-gray-100" />
+        <LayoutGrid className="w-5 h-5 text-foreground" />
       </div>
-      <span className="text-[10px] font-medium text-gray-900 dark:text-gray-100">
+      <span className="text-[10px] font-medium text-foreground">
         {language === 'ru' ? 'Ещё' : 'More'}
       </span>
     </button>

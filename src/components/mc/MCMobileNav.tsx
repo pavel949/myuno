@@ -55,7 +55,7 @@ export function MCMobileNav() {
   return (
     <>
       {fabOpen && (
-        <div className="fixed inset-0 z-[60] bg-foreground/40 backdrop-blur-sm md:hidden" onClick={() => setFabOpen(false)}>
+        <div className="fixed inset-0 z-overlay bg-foreground/40 backdrop-blur-sm md:hidden" onClick={() => setFabOpen(false)}>
           <div className="absolute bottom-24 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3">
             {QUICK_ACTIONS.map((action, i) => {
               const Icon = action.icon;
@@ -82,7 +82,7 @@ export function MCMobileNav() {
       <button
         onClick={() => setFabOpen(!fabOpen)}
         className={cn(
-          "fixed z-[70] md:hidden bottom-[76px] left-1/2 -translate-x-1/2 w-14 h-14 rounded-full [box-shadow:var(--shadow-elevation-4)] flex items-center justify-center transition-all duration-200",
+          "fixed z-modal md:hidden bottom-[76px] left-1/2 -translate-x-1/2 w-14 h-14 rounded-full [box-shadow:var(--shadow-elevation-4)] flex items-center justify-center transition-all duration-200",
           fabOpen ? "bg-foreground text-background rotate-45" : "bg-primary text-primary-foreground"
         )}
       >

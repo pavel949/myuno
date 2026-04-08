@@ -9,7 +9,7 @@ import { AlertTriangle, Clock, CheckCircle, XCircle, Eye } from 'lucide-react';
 const STATUS_CONFIG: Record<string, { icon: React.ElementType; color: string; labelEn: string; labelRu: string }> = {
   open: { icon: AlertTriangle, color: 'text-warning', labelEn: 'Open', labelRu: 'Открыт' },
   under_review: { icon: Eye, color: 'text-primary', labelEn: 'Under Review', labelRu: 'На рассмотрении' },
-  resolved: { icon: CheckCircle, color: 'text-emerald-600', labelEn: 'Resolved', labelRu: 'Решён' },
+  resolved: { icon: CheckCircle, color: 'text-success', labelEn: 'Resolved', labelRu: 'Решён' },
   rejected: { icon: XCircle, color: 'text-destructive', labelEn: 'Rejected', labelRu: 'Отклонён' },
 };
 

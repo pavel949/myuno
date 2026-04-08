@@ -566,11 +566,11 @@ export default function RefundPolicyPage() {
         </div>
 
         {/* G-Trust Link */}
-        <Card className="mb-6 border-amber-500/30 bg-gradient-to-r from-amber-500/5 to-transparent">
+        <Card className="mb-6 border-warning/30 bg-gradient-to-r from-warning/5 to-transparent">
           <CardContent className="pt-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <ShieldCheck className="h-6 w-6 text-amber-500" />
+                <ShieldCheck className="h-6 w-6 text-warning" />
                 <div>
                   <p className="font-medium">{isRu ? 'G-Trust защита' : 'G-Trust Protection'}</p>
                   <p className="text-sm text-muted-foreground">

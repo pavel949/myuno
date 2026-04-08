@@ -215,7 +215,7 @@ export default function PropertyMap() {
             distanceFilter={distanceFilter}
             className="flex-1"
             icon="🏠"
-            iconBgColor="bg-emerald-600"
+            iconBgColor="bg-success"
           />
         )}
       </div>

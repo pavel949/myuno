@@ -29,8 +29,8 @@ const GTrustPage = () => {
       title: isRu ? 'Юридическое соответствие' : isTh ? 'การปฏิบัติตามกฎหมาย' : 'Legal Compliance',
       subtitle: isRu ? 'Pillar 1' : 'Pillar 1',
       weight: '30%',
-      color: 'from-blue-500 to-indigo-500',
-      bgColor: 'bg-blue-500/10 border-blue-500/20',
+      color: 'from-info to-info',
+      bgColor: 'bg-info/10 border-info/20',
       items: isRu 
         ? [
             'Регистрация бизнеса (DBD / MOC Thailand)',
@@ -64,8 +64,8 @@ const GTrustPage = () => {
       title: isRu ? 'Модель качества' : isTh ? 'แบบจำลองคุณภาพ' : 'Quality Model',
       subtitle: isRu ? 'Pillar 2' : 'Pillar 2',
       weight: '40%',
-      color: 'from-green-500 to-emerald-500',
-      bgColor: 'bg-green-500/10 border-green-500/20',
+      color: 'from-success to-success',
+      bgColor: 'bg-success/10 border-success/20',
       items: isRu 
         ? [
             'Первичный аудит при онбординге',
@@ -99,8 +99,8 @@ const GTrustPage = () => {
       title: isRu ? 'Социальная верификация' : isTh ? 'การยืนยันทางสังคม' : 'Social Verification',
       subtitle: isRu ? 'Pillar 3' : 'Pillar 3',
       weight: '30%',
-      color: 'from-pink-500 to-rose-500',
-      bgColor: 'bg-pink-500/10 border-pink-500/20',
+      color: 'from-coral to-coral',
+      bgColor: 'bg-coral/10 border-coral/20',
       items: isRu 
         ? [
             'Верифицированные отзывы (только от клиентов)',
@@ -135,7 +135,7 @@ const GTrustPage = () => {
     {
       level: isRu ? 'Basic' : 'Basic',
       badge: '🔵',
-      color: 'bg-slate-500',
+      color: 'bg-muted',
       legal: isRu ? '✓ Базовая проверка' : isTh ? '✓ การตรวจสอบเบื้องต้น' : '✓ Basic check',
       quality: '—',
       social: '—',
@@ -148,7 +148,7 @@ const GTrustPage = () => {
     {
       level: isRu ? 'Verified' : 'Verified',
       badge: '🔷',
-      color: 'bg-blue-500',
+      color: 'bg-info',
       legal: isRu ? '✓ Полная проверка' : isTh ? '✓ การตรวจสอบเต็มรูปแบบ' : '✓ Full verification',
       quality: isRu ? '✓ Первичный аудит' : isTh ? '✓ การตรวจสอบเบื้องต้น' : '✓ Initial audit',
       social: '—',
@@ -161,7 +161,7 @@ const GTrustPage = () => {
     {
       level: isRu ? 'Trusted' : 'Trusted',
       badge: '✅',
-      color: 'bg-green-500',
+      color: 'bg-success',
       legal: isRu ? '✓ Полная проверка' : isTh ? '✓ การตรวจสอบเต็มรูปแบบ' : '✓ Full verification',
       quality: isRu ? '✓ Регулярный аудит' : isTh ? '✓ การตรวจสอบเป็นประจำ' : '✓ Regular audit',
       social: isRu ? '✓ Рейтинг 4.5+' : isTh ? '✓ เรตติ้ง 4.5+' : '✓ Rating 4.5+',
@@ -174,7 +174,7 @@ const GTrustPage = () => {
     {
       level: isRu ? 'Premium' : 'Premium',
       badge: '⭐',
-      color: 'bg-amber-500',
+      color: 'bg-warning',
       legal: isRu ? '✓ Полная проверка' : isTh ? '✓ การตรวจสอบเต็มรูปแบบ' : '✓ Full verification',
       quality: isRu ? '✓ Mystery Shopping' : isTh ? '✓ Mystery Shopping' : '✓ Mystery Shopping',
       social: isRu ? '✓ Рейтинг 4.8+' : isTh ? '✓ เรตติ้ง 4.8+' : '✓ Rating 4.8+',
@@ -196,7 +196,7 @@ const GTrustPage = () => {
         : isTh 
         ? "คืนเงินเต็มจำนวนหากบริการไม่ได้รับหรือไม่ตรงกับคำอธิบาย"
         : "Full refund if the service was not provided or doesn't match the description",
-      color: "text-green-600"
+      color: "text-success"
     },
     {
       icon: ShieldCheck,
@@ -206,7 +206,7 @@ const GTrustPage = () => {
         : isTh 
         ? "การชำระเงินทั้งหมดได้รับการคุ้มครอง เงินจะถูกโอนให้ผู้ให้บริการหลังจากยืนยันบริการแล้วเท่านั้น"
         : "All payments are protected. Funds are released to providers only after service confirmation",
-      color: "text-blue-600"
+      color: "text-info"
     },
     {
       icon: HeadphonesIcon,
@@ -216,7 +216,7 @@ const GTrustPage = () => {
         : isTh 
         ? "สนับสนุนตลอด 24 ชั่วโมงเป็นภาษารัสเซีย อังกฤษ และไทย"
         : "Round-the-clock support in Russian, English, and Thai",
-      color: "text-purple-600"
+      color: "text-accent-purple"
     },
     {
       icon: Eye,
@@ -226,7 +226,7 @@ const GTrustPage = () => {
         : isTh 
         ? "ไม่มีค่าธรรมเนียมซ่อนเร้น ราคาที่คุณเห็นคือราคาสุดท้าย"
         : "No hidden fees. The price you see is the final price",
-      color: "text-amber-600"
+      color: "text-warning"
     }
   ];
 
@@ -256,17 +256,17 @@ const GTrustPage = () => {
 
   // Trust Score Criteria
   const trustScoreCriteria = [
-    { label: isRu ? "Юридическое соответствие" : isTh ? "การปฏิบัติตามกฎหมาย" : "Legal Compliance", weight: "30%", color: "bg-blue-500" },
-    { label: isRu ? "Модель качества" : isTh ? "แบบจำลองคุณภาพ" : "Quality Model", weight: "40%", color: "bg-green-500" },
-    { label: isRu ? "Социальная верификация" : isTh ? "การยืนยันทางสังคม" : "Social Verification", weight: "30%", color: "bg-pink-500" }
+    { label: isRu ? "Юридическое соответствие" : isTh ? "การปฏิบัติตามกฎหมาย" : "Legal Compliance", weight: "30%", color: "bg-info" },
+    { label: isRu ? "Модель качества" : isTh ? "แบบจำลองคุณภาพ" : "Quality Model", weight: "40%", color: "bg-success" },
+    { label: isRu ? "Социальная верификация" : isTh ? "การยืนยันทางสังคม" : "Social Verification", weight: "30%", color: "bg-coral" }
   ];
 
   // Trust Score Levels
   const trustScoreLevels = [
-    { range: "90-100%", label: isRu ? "Превосходно" : isTh ? "ยอดเยี่ยม" : "Excellent", color: "text-green-600", bg: "bg-green-500" },
-    { range: "75-89%", label: isRu ? "Отлично" : isTh ? "ดีมาก" : "Great", color: "text-blue-600", bg: "bg-blue-500" },
-    { range: "60-74%", label: isRu ? "Хорошо" : isTh ? "ดี" : "Good", color: "text-amber-600", bg: "bg-amber-500" },
-    { range: "<60%", label: isRu ? "Требует улучшения" : isTh ? "ต้องปรับปรุง" : "Needs Improvement", color: "text-red-600", bg: "bg-red-500" }
+    { range: "90-100%", label: isRu ? "Превосходно" : isTh ? "ยอดเยี่ยม" : "Excellent", color: "text-success", bg: "bg-success" },
+    { range: "75-89%", label: isRu ? "Отлично" : isTh ? "ดีมาก" : "Great", color: "text-info", bg: "bg-info" },
+    { range: "60-74%", label: isRu ? "Хорошо" : isTh ? "ดี" : "Good", color: "text-warning", bg: "bg-warning" },
+    { range: "<60%", label: isRu ? "Требует улучшения" : isTh ? "ต้องปรับปรุง" : "Needs Improvement", color: "text-destructive", bg: "bg-destructive" }
   ];
 
   const SectionHeader = ({ icon: Icon, title }: { icon: React.ComponentType<{ className?: string }>, title: string }) => (
@@ -288,7 +288,7 @@ const GTrustPage = () => {
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-500 via-amber-600 to-orange-600 p-6 md:p-8 text-white mb-6"
+          className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-warning via-warning to-warning p-6 md:p-8 text-white mb-6"
         >
           <div className="absolute top-0 right-0 opacity-10">
             <Shield className="w-48 h-48 -mr-12 -mt-12" />
@@ -345,7 +345,7 @@ const GTrustPage = () => {
                       <ul className="grid grid-cols-1 md:grid-cols-2 gap-1">
                         {pillar.items.map((item, i) => (
                           <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
-                            <CheckCircle2 className="w-3 h-3 text-green-500 mt-0.5 shrink-0" />
+                            <CheckCircle2 className="w-3 h-3 text-success mt-0.5 shrink-0" />
                             <span>{item}</span>
                           </li>
                         ))}
@@ -366,9 +366,9 @@ const GTrustPage = () => {
               <thead>
                 <tr className="border-b">
                   <th className="text-left py-2 px-2 font-medium">{isRu ? "Уровень" : isTh ? "ระดับ" : "Level"}</th>
-                  <th className="text-center py-2 px-2 font-medium text-blue-600">Legal</th>
-                  <th className="text-center py-2 px-2 font-medium text-green-600">Quality</th>
-                  <th className="text-center py-2 px-2 font-medium text-pink-600">Social</th>
+                  <th className="text-center py-2 px-2 font-medium text-info">Legal</th>
+                  <th className="text-center py-2 px-2 font-medium text-success">Quality</th>
+                  <th className="text-center py-2 px-2 font-medium text-coral">Social</th>
                 </tr>
               </thead>
               <tbody>
@@ -474,9 +474,9 @@ const GTrustPage = () => {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: index * 0.05 }}
-                className="p-4 rounded-xl bg-green-500/10 border border-green-500/20 text-center"
+                className="p-4 rounded-xl bg-success/10 border border-success/20 text-center"
               >
-                <item.icon className="w-6 h-6 mx-auto mb-2 text-green-600" />
+                <item.icon className="w-6 h-6 mx-auto mb-2 text-success" />
                 <h4 className="font-medium text-sm mb-1">{item.title}</h4>
                 <p className="text-xs text-muted-foreground">{item.desc}</p>
               </motion.div>
@@ -494,9 +494,9 @@ const GTrustPage = () => {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="flex gap-3 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20"
+                className="flex gap-3 p-3 rounded-lg bg-info/10 border border-info/20"
               >
-                <item.icon className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                <item.icon className="w-5 h-5 text-info flex-shrink-0 mt-0.5" />
                 <div>
                   <h4 className="font-medium text-sm">{item.title}</h4>
                   <p className="text-xs text-muted-foreground">{item.desc}</p>
@@ -516,9 +516,9 @@ const GTrustPage = () => {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="flex gap-3 p-3 rounded-lg bg-purple-500/10 border border-purple-500/20"
+                className="flex gap-3 p-3 rounded-lg bg-accent-purple/10 border border-accent-purple/20"
               >
-                <item.icon className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
+                <item.icon className="w-5 h-5 text-accent-purple flex-shrink-0 mt-0.5" />
                 <div>
                   <h4 className="font-medium text-sm">{item.title}</h4>
                   <p className="text-xs text-muted-foreground">{item.desc}</p>
@@ -529,8 +529,8 @@ const GTrustPage = () => {
         </SectionCard>
 
         {/* CTA Section */}
-        <SectionCard className="text-center bg-gradient-to-br from-amber-500/10 to-orange-500/10 border-amber-500/20">
-          <ShieldCheck className="w-12 h-12 text-amber-600 mx-auto mb-4" />
+        <SectionCard className="text-center bg-gradient-to-br from-warning/10 to-warning/10 border-warning/20">
+          <ShieldCheck className="w-12 h-12 text-warning mx-auto mb-4" />
           <h2 className="text-xl font-bold mb-2">
             {isRu ? "Ваша безопасность — наш приоритет" : isTh ? "ความปลอดภัยของคุณคือสิ่งสำคัญของเรา" : "Your Safety is Our Priority"}
           </h2>

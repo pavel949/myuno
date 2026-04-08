@@ -135,7 +135,7 @@ const FlowerShopDetail = () => {
             <Button variant="ghost" size="icon" onClick={() => navigate('/flowers')} className="bg-black/20 backdrop-blur-sm text-white hover:bg-black/40"><ArrowLeft className="w-5 h-5" /></Button>
             <div className="flex gap-2">
               <Button variant="ghost" size="icon" onClick={() => setIsFavorite(!isFavorite)} className="bg-black/20 backdrop-blur-sm text-white hover:bg-black/40">
-                <Heart className={cn("w-5 h-5", isFavorite && "fill-red-500 text-red-500")} />
+                <Heart className={cn("w-5 h-5", isFavorite && "fill-destructive text-destructive")} />
               </Button>
               <Button variant="ghost" size="icon" className="bg-black/20 backdrop-blur-sm text-white hover:bg-black/40"><Share2 className="w-5 h-5" /></Button>
             </div>

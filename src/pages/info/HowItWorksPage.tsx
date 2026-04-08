@@ -360,7 +360,7 @@ export default function HowItWorksPage() {
             <div className="space-y-3">
               {quickStart.map((item, index) => (
                 <div key={index} className="flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center text-xs font-bold">
+                  <div className="w-6 h-6 rounded-full bg-success text-white flex items-center justify-center text-xs font-bold">
                     {index + 1}
                   </div>
                   <span className="flex-1 text-sm">{item.step}</span>

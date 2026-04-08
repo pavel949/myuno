@@ -71,7 +71,7 @@ export function PreBookingClarity({
           <ul className="space-y-1">
             {included.map((item, i) => (
               <li key={i} className="flex items-start gap-2 text-sm">
-                <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
+                <Check className="w-3.5 h-3.5 text-success shrink-0 mt-0.5" />
                 <span>{item}</span>
               </li>
             ))}
@@ -120,7 +120,7 @@ export function PreBookingClarity({
             )}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400 hover:underline"
+            className="flex items-center gap-2 text-sm text-success hover:underline"
           >
             <MessageCircle className="w-3.5 h-3.5" />
             {isRu ? 'Вопросы? Напишите нам' : 'Questions? Message us'}

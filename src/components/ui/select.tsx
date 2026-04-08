@@ -67,7 +67,7 @@ const SelectContent = React.forwardRef<
       ref={ref}
       className={cn(
         // P0 FIX: Changed overflow-hidden to overflow-y-auto, increased max-h, added touch-pan-y for mobile
-        "relative z-[999] max-h-[min(400px,60vh)] min-w-[8rem] overflow-y-auto touch-pan-y overscroll-contain",
+        "relative z-popover max-h-[min(400px,60vh)] min-w-[8rem] overflow-y-auto touch-pan-y overscroll-contain",
         "rounded-md border bg-popover text-popover-foreground shadow-lg",
         "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
         position === "popper" &&

@@ -49,15 +49,15 @@ export function UploadProgress({
         )}
         
         {status === 'done' && (
-          <div className="bg-green-500 rounded-full p-2">
+          <div className="bg-success rounded-full p-2">
             <Check className="h-6 w-6 text-white" />
           </div>
         )}
         
         {status === 'error' && (
           <>
-            <AlertCircle className="h-8 w-8 text-red-400 mb-2" />
-            <span className="text-red-400 text-xs text-center px-2">{error}</span>
+            <AlertCircle className="h-8 w-8 text-destructive mb-2" />
+            <span className="text-destructive text-xs text-center px-2">{error}</span>
           </>
         )}
       </div>

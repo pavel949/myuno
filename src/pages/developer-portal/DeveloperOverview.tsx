@@ -61,7 +61,7 @@ export default function DeveloperOverview() {
           Добрый день, <span className="text-[hsl(var(--nb-gold))]">{developer.name_en}</span>
         </h1>
         {!developer.is_verified && (
-          <p className="text-sm text-amber-400 mt-2">⏳ Аккаунт на проверке</p>
+          <p className="text-sm text-warning mt-2">⏳ Аккаунт на проверке</p>
         )}
       </div>
 

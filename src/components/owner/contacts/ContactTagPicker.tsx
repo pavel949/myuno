@@ -126,7 +126,7 @@ export function ContactTagPicker({ companyId, selectedTags, onToggle, readonly, 
               <span>{isRu ? 'Тег' : 'Tag'}</span>
             </button>
           </PopoverTrigger>
-          <PopoverContent className="w-64 p-0 z-[999]" align="start">
+          <PopoverContent className="w-64 p-0 z-popover" align="start">
             {showManage ? (
               <ManageView
                 tags={tags}

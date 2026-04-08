@@ -161,7 +161,7 @@ const EventDetail = () => {
             {event.rating > 0 && (
               <div className="text-right">
                 <div className="flex items-center gap-1">
-                  <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                  <Star className="w-5 h-5 fill-warning text-warning" />
                   <span className="font-bold">{event.rating}</span>
                 </div>
                 <p className="text-sm text-muted-foreground">{event.review_count} reviews</p>
@@ -195,13 +195,13 @@ const EventDetail = () => {
         {(event.age_policy !== 'all_ages' || (event.dress_code && event.dress_code !== 'none')) && (
           <div className="flex gap-3 mb-6">
             {event.age_policy && event.age_policy !== 'all_ages' && (
-              <div className="flex items-center gap-2 bg-orange-50 dark:bg-orange-950/30 text-orange-700 dark:text-orange-400 rounded-lg px-3 py-2 text-sm">
+              <div className="flex items-center gap-2 bg-warning/10 text-warning rounded-lg px-3 py-2 text-sm">
                 <ShieldCheck className="w-4 h-4" />
                 {AGE_POLICY_LABELS[event.age_policy]?.[language === 'ru' ? 'ru' : 'en'] || event.age_policy}
               </div>
             )}
             {event.dress_code && event.dress_code !== 'none' && (
-              <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 rounded-lg px-3 py-2 text-sm">
+              <div className="flex items-center gap-2 bg-info/10 text-info rounded-lg px-3 py-2 text-sm">
                 👔 {DRESS_CODE_LABELS[event.dress_code]?.[language === 'ru' ? 'ru' : 'en'] || event.dress_code}
               </div>
             )}
@@ -290,7 +290,7 @@ const EventDetail = () => {
         {event.excludes.length > 0 && (
           <div className="mb-6">
             <h3 className="font-semibold mb-2 flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-orange-500" />
+              <AlertCircle className="w-4 h-4 text-warning" />
               {language === 'ru' ? 'Не включено' : 'Not Included'}
             </h3>
             <div className="grid grid-cols-1 gap-2">

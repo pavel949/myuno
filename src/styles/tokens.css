@@ -140,6 +140,17 @@
   --glow-via: 224 100% 65%;
   --glow-to: 190 80% 55%;
 
+  /* Z-index layers */
+  --z-base: 1;
+  --z-sticky: 40;
+  --z-dropdown: 50;
+  --z-overlay: 60;
+  --z-modal: 70;
+  --z-popover: 80;
+  --z-toast: 90;
+  --z-tooltip: 100;
+  --z-max: 9999;
+
   /* Brand */
   --brand-google-blue: 212 100% 43%;
   --brand-google-green: 145 100% 34%;

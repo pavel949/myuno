@@ -327,7 +327,7 @@ export default function QuickExpense() {
         </Collapsible>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-md border-t z-[55]" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 5rem)' }}>
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-md border-t z-sticky" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 5rem)' }}>
         <Button
           className="w-full h-12 text-base font-semibold shadow-lg"
           disabled={!canSubmit || isSubmitting}

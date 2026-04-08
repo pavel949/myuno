@@ -411,9 +411,9 @@ export default function PrivacyPage() {
         </Card>
 
         {/* Children */}
-        <Card className="mb-8 border-amber-500/30">
+        <Card className="mb-8 border-warning/30">
           <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2 text-amber-700 dark:text-amber-400">
+            <CardTitle className="text-base flex items-center gap-2 text-warning">
               <AlertTriangle className="h-4 w-4" />
               {isRu ? '8. Дети' : '8. Children'}
             </CardTitle>

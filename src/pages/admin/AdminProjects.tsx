@@ -471,7 +471,7 @@ export default function AdminProjects() {
                       {project.address}
                     </p>
                   ) : (
-                    <p className="text-sm text-amber-600 mt-1">
+                    <p className="text-sm text-warning mt-1">
                       {isRu ? 'Адрес не указан' : 'Address missing'}
                     </p>
                   )}

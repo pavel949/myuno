@@ -132,36 +132,36 @@ const BabysitterDetail = () => {
           <div className="lg:col-span-2">
             <div className="bg-white rounded-lg shadow-md p-6">
               <h2 className="text-2xl font-semibold mb-4">{language === 'en' ? 'About Me' : 'Обо мне'}</h2>
-              <p className="text-gray-700">{description}</p>
+              <p className="text-muted-foreground">{description}</p>
 
               <div className="mt-6">
                 <h3 className="text-xl font-semibold mb-3">{language === 'en' ? 'Details' : 'Подробности'}</h3>
                 <div className="flex items-center space-x-2 mb-2">
-                  <Star className="text-yellow-500" size={16} />
+                  <Star className="text-warning" size={16} />
                   <span>{babysitter.rating} ({babysitter.reviewCount} {language === 'en' ? 'reviews' : 'отзывов'})</span>
                 </div>
                 <div className="flex items-center space-x-2 mb-2">
-                  <Baby className="text-gray-500" size={16} />
+                  <Baby className="text-muted-foreground" size={16} />
                   <span>{experience}</span>
                 </div>
                 <div className="flex items-center space-x-2 mb-2">
-                  <Languages className="text-gray-500" size={16} />
+                  <Languages className="text-muted-foreground" size={16} />
                   <span>{languages.join(', ')}</span>
                 </div>
                 <div className="flex items-center space-x-2 mb-2">
-                  <GraduationCap className="text-gray-500" size={16} />
+                  <GraduationCap className="text-muted-foreground" size={16} />
                   <span>{language === 'en' ? 'Age Groups' : 'Возрастные группы'}: {ageGroups.join(', ')}</span>
                 </div>
                 <div className="flex items-center space-x-2 mb-2">
-                  <CheckCircle2 className="text-gray-500" size={16} />
+                  <CheckCircle2 className="text-muted-foreground" size={16} />
                   <span>{language === 'en' ? 'Certifications' : 'Сертификаты'}: {certifications.join(', ')}</span>
                 </div>
                 <div className="flex items-center space-x-2 mb-2">
-                  <Shield className="text-gray-500" size={16} />
+                  <Shield className="text-muted-foreground" size={16} />
                   <span>{babysitter.isVerified ? (language === 'en' ? 'Verified Babysitter' : 'Проверенная няня') : (language === 'en' ? 'Not Verified' : 'Не проверено')}</span>
                 </div>
                 <div className="flex items-center space-x-2 mb-2">
-                  <Calendar className="text-gray-500" size={16} />
+                  <Calendar className="text-muted-foreground" size={16} />
                   <span>{babysitter.available ? (language === 'en' ? 'Available' : 'Доступна') : (language === 'en' ? 'Not Available' : 'Не доступна')}</span>
                 </div>
               </div>
@@ -172,7 +172,7 @@ const BabysitterDetail = () => {
             <div className="bg-white rounded-lg shadow-md p-6">
               <h2 className="text-2xl font-semibold mb-4">{language === 'en' ? 'Book Now' : 'Заказать'}</h2>
               <div className="mb-4">
-                <span className="text-gray-700">{language === 'en' ? 'Price per hour' : 'Цена за час'}:</span>
+                <span className="text-muted-foreground">{language === 'en' ? 'Price per hour' : 'Цена за час'}:</span>
                 <span className="ml-2 font-semibold">{babysitter.pricePerHour} RUB</span>
               </div>
               <Button>{language === 'en' ? 'Contact Babysitter' : 'Связаться с няней'}</Button>

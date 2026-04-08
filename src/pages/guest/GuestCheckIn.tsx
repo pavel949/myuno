@@ -138,9 +138,9 @@ export default function GuestCheckIn() {
           title={isRu ? 'Онлайн регистрация' : 'Online Check-in'} 
           showBack 
         />
-        <Card className="border-yellow-500/50 bg-yellow-500/5">
+        <Card className="border-warning/50 bg-warning/5">
           <CardContent className="p-6 text-center">
-            <Clock className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
+            <Clock className="w-16 h-16 text-warning mx-auto mb-4" />
             <h2 className="text-xl font-bold mb-2">
               {isRu ? 'Ожидайте подтверждения' : 'Awaiting Confirmation'}
             </h2>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Lock, Eye, EyeOff, CheckCircle, ArrowLeft, AlertCircle } from 'lucide-react';
+import { Lock, Eye, EyeOff, CheckCircle, ArrowLeft, AlertCircle, Loader2 } from 'lucide-react';
 import { z } from 'zod';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { PremiumButton } from '@/components/uno/PremiumButton';
@@ -135,7 +135,7 @@ export default function ResetPassword() {
         <div className="w-full max-w-md">
           {linkStatus === 'checking' ? (
             <div className="text-center space-y-6 py-8">
-              <div className="w-12 h-12 mx-auto border-2 border-primary border-t-transparent rounded-full animate-spin" />
+              <Loader2 className="spinner-xl animate-spin text-primary mx-auto" />
               <p className="text-muted-foreground">
                 {language === 'ru' ? 'Проверка ссылки...' : 'Checking link...'}
               </p>
@@ -174,8 +174,8 @@ export default function ResetPassword() {
             </div>
           ) : isSuccess ? (
             <div className="text-center space-y-6">
-              <div className="w-16 h-16 mx-auto rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
+              <div className="w-16 h-16 mx-auto rounded-full bg-success/10 flex items-center justify-center">
+                <CheckCircle className="w-8 h-8 text-success" />
               </div>
               <h1 className="text-2xl font-display font-bold">
                 {language === 'ru' ? 'Пароль изменён!' : 'Password updated!'}

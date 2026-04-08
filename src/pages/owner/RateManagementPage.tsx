@@ -336,12 +336,12 @@ export default function RateManagementPage() {
 /* ─── Activity log helpers ─── */
 function ActivityActionBadge({ action, isRu }: { action: string; isRu: boolean }) {
   const labels: Record<string, [string, string, string]> = {
-    price_override: ['Price Override', 'Изменение цены', 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'],
-    base_price_changed: ['Base Price', 'Базовая цена', 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300'],
-    season_created: ['Season Created', 'Сезон создан', 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'],
-    season_updated: ['Season Updated', 'Сезон обновлён', 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300'],
-    season_deleted: ['Season Deleted', 'Сезон удалён', 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'],
-    availability_changed: ['Availability', 'Доступность', 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300'],
+    price_override: ['Price Override', 'Изменение цены', 'bg-info/10 text-info'],
+    base_price_changed: ['Base Price', 'Базовая цена', 'bg-accent-purple/10 text-accent-purple'],
+    season_created: ['Season Created', 'Сезон создан', 'bg-success/10 text-success'],
+    season_updated: ['Season Updated', 'Сезон обновлён', 'bg-warning/10 text-warning'],
+    season_deleted: ['Season Deleted', 'Сезон удалён', 'bg-destructive/10 text-destructive'],
+    availability_changed: ['Availability', 'Доступность', 'bg-success/10 text-success'],
   };
   const [en, rur, color] = labels[action] || [action, action, 'bg-muted text-muted-foreground'];
   return <Badge className={cn("text-[10px] font-normal", color)}>{isRu ? rur : en}</Badge>;

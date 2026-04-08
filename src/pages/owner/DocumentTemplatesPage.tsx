@@ -692,7 +692,7 @@ export default function DocumentTemplatesPage() {
                         </SelectContent>
                       </Select>
                       {inventoryItems && inventoryItems.length > 0 && (
-                        <p className="text-xs text-green-600">
+                        <p className="text-xs text-success">
                           ✓ {inventoryItems.length} {isRu ? 'предметов загружено' : 'items loaded'}
                         </p>
                       )}

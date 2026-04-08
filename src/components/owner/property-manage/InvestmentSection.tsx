@@ -399,11 +399,11 @@ interface MetricCardProps {
 
 function MetricCard({ label, value, trend, trendUp, highlight }: MetricCardProps) {
   return (
-    <div className={`p-3 rounded-xl border ${highlight ? 'bg-green-500/10 border-green-500/20' : 'bg-muted/50'}`}>
+    <div className={`p-3 rounded-xl border ${highlight ? 'bg-success/10 border-success/20' : 'bg-muted/50'}`}>
       <p className="text-xs text-muted-foreground mb-1">{label}</p>
-      <p className={`text-lg font-bold ${highlight ? 'text-green-600' : ''}`}>{value}</p>
+      <p className={`text-lg font-bold ${highlight ? 'text-success' : ''}`}>{value}</p>
       {trend && (
-        <p className={`text-xs ${trendUp ? 'text-green-600' : 'text-muted-foreground'}`}>
+        <p className={`text-xs ${trendUp ? 'text-success' : 'text-muted-foreground'}`}>
           {trend}
         </p>
       )}

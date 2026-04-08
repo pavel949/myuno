@@ -345,7 +345,7 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
             {isOpen && (
               <motion.div
                 key="search-modal"
-                className="fixed inset-0 z-[100] bg-background"
+                className="fixed inset-0 z-modal bg-background"
                 initial={{ y: '100%' }}
                 animate={{ y: 0 }}
                 exit={{ y: '100%' }}

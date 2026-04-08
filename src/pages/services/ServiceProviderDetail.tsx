@@ -166,7 +166,7 @@ const ServiceProviderDetail = () => {
         {/* Header */}
         <div className="relative">
           <BackButton fallbackPath="/services" variant="overlay" className="absolute top-4 left-4 z-10" />
-          <div className="h-32 bg-gradient-to-br from-blue-500 to-cyan-500" />
+          <div className="h-32 bg-gradient-to-br from-info to-info" />
           <div className="absolute -bottom-12 left-4">
             <div className="relative">
               <img
@@ -175,7 +175,7 @@ const ServiceProviderDetail = () => {
                 className="w-24 h-24 rounded-full border-4 border-background object-cover"
               />
               {provider.available && (
-                <div className="absolute bottom-1 right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-background flex items-center justify-center">
+                <div className="absolute bottom-1 right-1 w-6 h-6 bg-success rounded-full border-2 border-background flex items-center justify-center">
                   <div className="w-2.5 h-2.5 bg-white rounded-full" />
                 </div>
               )}
@@ -195,7 +195,7 @@ const ServiceProviderDetail = () => {
               </div>
               <p className="text-muted-foreground">{provider.categoryName}</p>
             </div>
-            <Badge variant="default" className="bg-green-500">
+            <Badge variant="default" className="bg-success">
               {language === "ru" ? "Доступен" : "Available"}
             </Badge>
           </div>
@@ -203,7 +203,7 @@ const ServiceProviderDetail = () => {
           {/* Stats */}
           <div className="flex items-center gap-4 mt-3 text-sm">
             <div className="flex items-center gap-1">
-              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+              <Star className="w-4 h-4 fill-warning text-warning" />
               <span className="font-semibold">{provider.rating}</span>
               <span className="text-muted-foreground">({provider.reviewsList.length} отзывов)</span>
             </div>
@@ -341,8 +341,8 @@ const ServiceProviderDetail = () => {
                 </div>
               </div>
 
-              <div className="p-4 bg-green-500/10 rounded-xl">
-                <p className="text-sm text-green-600 font-medium">
+              <div className="p-4 bg-success/10 rounded-xl">
+                <p className="text-sm text-success font-medium">
                   {provider.responseTime}
                 </p>
               </div>
@@ -363,7 +363,7 @@ const ServiceProviderDetail = () => {
                         key={i}
                         className={`w-4 h-4 ${
                           i < review.rating
-                            ? "fill-yellow-400 text-yellow-400"
+                            ? "fill-warning text-warning"
                             : "text-muted-foreground"
                         }`}
                       />

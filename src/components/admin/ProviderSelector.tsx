@@ -224,7 +224,7 @@ export function ProviderSelector({
             </Button>
           </PopoverTrigger>
           <PopoverContent
-            className="w-[--radix-popover-trigger-width] p-0 z-[100]"
+            className="w-[--radix-popover-trigger-width] p-0 z-popover"
             align="start"
             onOpenAutoFocus={(e) => e.preventDefault()}
           >

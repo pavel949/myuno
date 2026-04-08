@@ -141,8 +141,8 @@ export function DocumentQualityTips({
             key={tip.id}
             className={cn(
               "flex items-start gap-2 text-sm p-2 rounded-lg",
-              tip.status === 'success' && "bg-green-500/10 text-green-700 dark:text-green-400",
-              tip.status === 'warning' && "bg-amber-500/10 text-amber-700 dark:text-amber-400",
+              tip.status === 'success' && "bg-success/10 text-success",
+              tip.status === 'warning' && "bg-warning/10 text-warning",
               tip.status === 'info' && "bg-muted text-muted-foreground"
             )}
           >

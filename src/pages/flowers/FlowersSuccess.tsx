@@ -164,10 +164,10 @@ const FlowersSuccess = () => {
         <div className="text-center space-y-6 max-w-md w-full">
           {/* Success animation */}
           <div className="relative">
-            <div className="w-24 h-24 mx-auto rounded-full bg-green-500/10 flex items-center justify-center animate-in zoom-in duration-500">
-              <CheckCircle className="w-12 h-12 text-green-500" />
+            <div className="w-24 h-24 mx-auto rounded-full bg-success/10 flex items-center justify-center animate-in zoom-in duration-500">
+              <CheckCircle className="w-12 h-12 text-success" />
             </div>
-            <div className="absolute inset-0 w-24 h-24 mx-auto rounded-full bg-green-500/20 animate-ping" />
+            <div className="absolute inset-0 w-24 h-24 mx-auto rounded-full bg-success/20 animate-ping" />
           </div>
 
           {/* Message */}

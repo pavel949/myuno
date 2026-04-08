@@ -69,7 +69,7 @@ export function FormFieldWithHelp({
   const inputClasses = cn(
     'transition-colors',
     hasError && 'border-destructive focus-visible:ring-destructive',
-    showValid && 'border-green-500 focus-visible:ring-green-500'
+    showValid && 'border-success focus-visible:ring-success'
   );
 
   const renderInput = () => {

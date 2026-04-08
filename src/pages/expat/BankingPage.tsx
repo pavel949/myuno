@@ -72,10 +72,10 @@ const BankingPage = () => {
         </Tabs>
 
         {/* Info Card */}
-        <Card className="mb-4 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border-emerald-500/20">
+        <Card className="mb-4 bg-gradient-to-r from-success/10 to-teal/10 border-success/20">
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
-              <Landmark className="h-5 w-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+              <Landmark className="h-5 w-5 text-success flex-shrink-0 mt-0.5" />
               <div>
                 <h3 className="font-medium text-sm mb-1">
                   {isRussian ? 'Открытие счёта для иностранцев' : 'Opening Account for Foreigners'}
@@ -154,7 +154,7 @@ const BankingPage = () => {
               <>
                 <DialogHeader>
                   <DialogTitle className="flex items-center gap-2">
-                    <Landmark className="h-5 w-5 text-emerald-600" />
+                    <Landmark className="h-5 w-5 text-success" />
                     {getName(selectedBank)}
                   </DialogTitle>
                 </DialogHeader>
@@ -290,14 +290,14 @@ const BankCard = ({ bank, isRussian, getName, getDescription, onClick }: BankCar
           <div className="flex items-center gap-3 mt-2 text-xs">
             {bank.rating > 0 && (
               <span className="flex items-center gap-1">
-                <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
+                <Star className="h-3 w-3 fill-warning text-warning" />
                 {bank.rating.toFixed(1)}
               </span>
             )}
             <div className="flex items-center gap-1 text-muted-foreground">
               {bank.online_banking && <Globe className="h-3 w-3" />}
               {bank.mobile_app && <Smartphone className="h-3 w-3" />}
-              {bank.accepts_foreigners && <CheckCircle2 className="h-3 w-3 text-green-500" />}
+              {bank.accepts_foreigners && <CheckCircle2 className="h-3 w-3 text-success" />}
             </div>
           </div>
         </div>

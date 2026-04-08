@@ -168,7 +168,7 @@ export function MultiSelect({
         </Button>
       </PopoverTrigger>
       <PopoverContent 
-        className="w-[--radix-popover-trigger-width] p-0 z-[999]" 
+        className="w-[--radix-popover-trigger-width] p-0 z-popover"
         align="start"
       >
         <Command shouldFilter={false}>

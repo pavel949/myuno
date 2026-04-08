@@ -120,7 +120,7 @@ export function ProfileCompletionCard() {
                 }`}
               >
                 {item.completed ? (
-                  <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 text-success flex-shrink-0" />
                 ) : (
                   <Circle className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                 )}

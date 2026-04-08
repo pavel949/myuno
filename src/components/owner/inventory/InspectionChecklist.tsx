@@ -28,7 +28,7 @@ interface InspectionItem {
 
 const STATUS_CONFIG: Record<InspectionStatus, { label: { en: string; ru: string }; icon: typeof Check; color: string }> = {
   ok: { label: { en: 'OK', ru: 'ОК' }, icon: Check, color: 'text-success' },
-  damaged: { label: { en: 'Damaged', ru: 'Повреждено' }, icon: AlertTriangle, color: 'text-amber-600' },
+  damaged: { label: { en: 'Damaged', ru: 'Повреждено' }, icon: AlertTriangle, color: 'text-warning' },
   missing: { label: { en: 'Missing', ru: 'Отсутствует' }, icon: X, color: 'text-destructive' },
 };
 
@@ -173,7 +173,7 @@ export default function InspectionChecklist() {
                     </div>
                     <div className="flex items-center gap-2 text-xs">
                       <span className="text-success font-medium">{insItems.length - dmg - miss} ✓</span>
-                      {dmg > 0 && <span className="text-amber-600 font-medium">{dmg} ⚠</span>}
+                      {dmg > 0 && <span className="text-warning font-medium">{dmg} ⚠</span>}
                       {miss > 0 && <span className="text-destructive font-medium">{miss} ✗</span>}
                     </div>
                   </div>
@@ -223,7 +223,7 @@ export default function InspectionChecklist() {
             <>
               <div className="flex items-center gap-3 text-xs">
                 <span className="text-muted-foreground">{isRu ? 'Итого:' : 'Total:'} {checklist.length}</span>
-                {damagedCount > 0 && <Badge variant="outline" className="text-amber-600 border-amber-300">⚠ {damagedCount}</Badge>}
+                {damagedCount > 0 && <Badge variant="outline" className="text-warning border-warning/30">⚠ {damagedCount}</Badge>}
                 {missingCount > 0 && <Badge variant="outline" className="text-destructive border-destructive/30">✗ {missingCount}</Badge>}
               </div>
 

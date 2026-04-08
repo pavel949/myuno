@@ -104,13 +104,13 @@ export default function TicketDetail() {
             </div>
 
             {ticket.resolution && (
-              <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-                <h4 className="text-sm font-medium text-green-800 mb-1">
+              <div className="mt-4 p-3 bg-success/10 border border-success/20 rounded-lg">
+                <h4 className="text-sm font-medium text-success mb-1">
                   {language === 'ru' ? 'Решение:' : 'Resolution:'}
                 </h4>
-                <p className="text-sm text-green-700">{ticket.resolution}</p>
+                <p className="text-sm text-success">{ticket.resolution}</p>
                 {ticket.refund_amount && (
-                  <p className="text-sm text-green-700 mt-1">
+                  <p className="text-sm text-success mt-1">
                     {language === 'ru' ? 'Сумма возврата: ' : 'Refund amount: '}
                     ฿{ticket.refund_amount.toLocaleString()}
                   </p>

@@ -181,7 +181,7 @@ const BouquetDetail = () => {
             </Button>
             <div className="flex gap-2">
               <Button variant="ghost" size="icon" onClick={() => setIsFavorite(!isFavorite)} className="bg-black/20 backdrop-blur-sm text-white hover:bg-black/40">
-                <Heart className={cn("w-5 h-5", isFavorite && "fill-red-500 text-red-500")} />
+                <Heart className={cn("w-5 h-5", isFavorite && "fill-destructive text-destructive")} />
               </Button>
               <Button variant="ghost" size="icon" className="bg-black/20 backdrop-blur-sm text-white hover:bg-black/40">
                 <Share2 className="w-5 h-5" />
@@ -198,7 +198,7 @@ const BouquetDetail = () => {
             )}
             {socialProof && (
               <Badge className="bg-background/90 text-foreground text-xs backdrop-blur-sm border-0">
-                <Star className="w-3 h-3 mr-1 text-amber-500" />
+                <Star className="w-3 h-3 mr-1 text-warning" />
                 {isRu 
                   ? socialProof === 'Most ordered this week' ? 'Самый заказываемый на этой неделе'
                     : socialProof === 'Customer favorite' ? 'Любимец покупателей'
@@ -429,7 +429,7 @@ const BouquetDetail = () => {
                     const modifiedBouquet = { ...bouquet, price: currentPrice };
                     buyNow(modifiedBouquet, 1, { size: selectedSize, sizeVariant: currentVariant });
                   }}
-                  className="flex-1 h-12 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+                  className="flex-1 h-12 bg-gradient-to-r from-warning to-warning/80 hover:from-warning/90 hover:to-warning/70 text-white"
                 >
                   <Zap className="w-5 h-5 mr-2" />
                   {isRu ? 'Купить сейчас' : 'Buy Now'}
@@ -462,7 +462,7 @@ const BouquetDetail = () => {
                     const modifiedBouquet = { ...bouquet, price: currentPrice };
                     buyNow(modifiedBouquet, quantity, { size: selectedSize, sizeVariant: currentVariant });
                   }}
-                  className="flex-1 h-12 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+                  className="flex-1 h-12 bg-gradient-to-r from-warning to-warning/80 hover:from-warning/90 hover:to-warning/70 text-white"
                 >
                   <Zap className="w-5 h-5 mr-2" />
                   {isRu ? 'Купить' : 'Buy'}

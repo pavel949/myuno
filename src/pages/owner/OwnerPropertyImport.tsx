@@ -34,10 +34,10 @@ type ImportMode = 'spreadsheet' | 'url' | 'ai';
 
 // Supported OTA platforms
 const OTA_PLATFORMS = [
-  { id: 'airbnb', name: 'Airbnb', icon: '🏠', color: 'bg-red-100 text-red-800' },
-  { id: 'booking', name: 'Booking.com', icon: '🏨', color: 'bg-blue-100 text-blue-800' },
-  { id: 'vrbo', name: 'VRBO', icon: '🏡', color: 'bg-purple-100 text-purple-800' },
-  { id: 'expedia', name: 'Expedia', icon: '✈️', color: 'bg-yellow-100 text-yellow-800' },
+  { id: 'airbnb', name: 'Airbnb', icon: '🏠', color: 'bg-destructive/10 text-destructive' },
+  { id: 'booking', name: 'Booking.com', icon: '🏨', color: 'bg-info/10 text-info' },
+  { id: 'vrbo', name: 'VRBO', icon: '🏡', color: 'bg-accent-purple/10 text-accent-purple' },
+  { id: 'expedia', name: 'Expedia', icon: '✈️', color: 'bg-warning/10 text-warning' },
 ];
 
 // Fields that can be imported
@@ -394,7 +394,7 @@ export default function OwnerPropertyImport() {
                     />
                     {platform && (
                       <p className="text-sm text-muted-foreground flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        <CheckCircle2 className="h-4 w-4 text-success" />
                         {isRu ? 'Обнаружено:' : 'Detected:'} {platform.icon} {platform.name}
                       </p>
                     )}
@@ -507,12 +507,12 @@ export default function OwnerPropertyImport() {
       {/* Step: AI Result */}
       {step === 'ai-result' && intakeSession && intakeSession.items.length > 0 && (
         <div className="space-y-6">
-          <Alert className="border-green-500/50 bg-green-50 dark:bg-green-950/20">
-            <CheckCircle2 className="h-5 w-5 text-green-600" />
-            <AlertTitle className="text-green-800 dark:text-green-200">
+          <Alert className="border-success/50 bg-success/5 dark:bg-success/10">
+            <CheckCircle2 className="h-5 w-5 text-success" />
+            <AlertTitle className="text-success dark:text-success">
               {isRu ? 'Данные успешно извлечены!' : 'Data Successfully Extracted!'}
             </AlertTitle>
-            <AlertDescription className="text-green-700 dark:text-green-300">
+            <AlertDescription className="text-success dark:text-success">
               {isRu 
                 ? 'AI обработал текст и извлёк информацию об объекте'
                 : 'AI processed the text and extracted property information'
@@ -598,8 +598,8 @@ export default function OwnerPropertyImport() {
 
                   {/* Warnings */}
                   {item.missingRequiredFields.length > 0 && (
-                    <Alert variant="default" className="border-yellow-500/50">
-                      <AlertCircle className="h-4 w-4 text-yellow-600" />
+                    <Alert variant="default" className="border-warning/50">
+                      <AlertCircle className="h-4 w-4 text-warning" />
                       <AlertDescription className="text-sm">
                         {isRu ? 'Не удалось извлечь:' : 'Could not extract:'} {item.missingRequiredFields.join(', ')}
                       </AlertDescription>
@@ -637,12 +637,12 @@ export default function OwnerPropertyImport() {
       {/* Step: Blocked - OTA restricts automated access */}
       {step === 'blocked' && (
         <div className="space-y-6">
-          <Alert variant="destructive" className="border-orange-500/50 bg-orange-50 dark:bg-orange-950/20">
-            <ShieldAlert className="h-5 w-5 text-orange-600" />
-            <AlertTitle className="text-orange-800 dark:text-orange-200">
+          <Alert variant="destructive" className="border-warning/50 bg-warning/5 dark:bg-warning/10">
+            <ShieldAlert className="h-5 w-5 text-warning" />
+            <AlertTitle className="text-warning dark:text-warning">
               {isRu ? 'Площадка ограничивает автоматический доступ' : 'Platform Restricts Automated Access'}
             </AlertTitle>
-            <AlertDescription className="text-orange-700 dark:text-orange-300">
+            <AlertDescription className="text-warning dark:text-warning">
               {isRu 
                 ? 'Airbnb и некоторые другие площадки блокируют автоматическое считывание данных. Это ограничение на стороне площадки, а не ошибка системы.'
                 : 'Airbnb and some other platforms block automated data extraction. This is a platform-side restriction, not a system error.'
