@@ -430,6 +430,7 @@ export const OwnerSetupWizard = lazy(() => import('@/pages/owner/OwnerSetupWizar
 export const OwnerPortfolio = lazy(() => import('@/pages/owner/OwnerPortfolio'));
 export const OwnerRevenueDashboard = lazy(() => import('@/pages/owner/OwnerRevenueDashboard'));
 
+export const MCBookingsPage = lazy(() => import('@/pages/owner/MCBookingsPage'));
 export const OwnerPerformance = lazy(() => import('@/pages/owner/OwnerPerformance'));
 export const OwnerSuperhost = lazy(() => import('@/pages/owner/OwnerSuperhost'));
 export const OwnerTrendsAndTips = lazy(() => import('@/pages/owner/OwnerTrendsAndTips'));

@@ -626,7 +626,7 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="properties/:id/juristic-requests" element={<LazyPage><Pages.JuristicRequestsPage /></LazyPage>} />
           <Route path="properties/:id/portal-settings" element={<LazyPage><Pages.OwnerPortalSettingsPage /></LazyPage>} />
           <Route path="calendar" element={<LazyPage><Pages.OwnerCalendar /></LazyPage>} />
-          <Route path="bookings" element={<Navigate to="/mc/calendar" replace />} />
+          <Route path="bookings" element={<Navigate to="/mc/bookings-list" replace />} />
           <Route path="operations" element={<LazyPage><Pages.OwnerOperations /></LazyPage>} />
           <Route path="finance" element={<LazyPage><Pages.FinanceOverview /></LazyPage>} />
           <Route path="financials" element={<LazyPage><Pages.OwnerFinancials /></LazyPage>} />
@@ -684,6 +684,7 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="insurance" element={<LazyPage><Pages.DocumentsInsurancePage /></LazyPage>} />
           <Route path="owners" element={<LazyPage><Pages.OwnerOwnersPage /></LazyPage>} />
           <Route path="owners/:id" element={<LazyPage><Pages.OwnerDetailPage /></LazyPage>} />
+          <Route path="bookings-list" element={<LazyPage><Pages.MCBookingsPage /></LazyPage>} />
           <Route path="performance" element={<LazyPage><Pages.OwnerPerformance /></LazyPage>} />
           <Route path="trends" element={<LazyPage><Pages.OwnerTrendsAndTips /></LazyPage>} />
           <Route path="account-settings" element={<LazyPage><Pages.OwnerAccountSettings /></LazyPage>} />

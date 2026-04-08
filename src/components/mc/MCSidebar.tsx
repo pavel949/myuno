@@ -2,7 +2,7 @@ import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Building2, CalendarDays, Crown, CreditCard, DollarSign,
-  Users, Zap, FileText as FileTextIcon, BarChart3,
+  Users, Zap, FileText as FileTextIcon, BarChart3, CalendarCheck,
   ContactRound, Home, ChevronDown, TrendingUp, PackageOpen,
   Receipt, Settings, Tag, Star, ShieldCheck, MessageSquare, Radio,
   BookOpen, FileText, Megaphone, Truck, ClipboardList, Shuffle,
@@ -47,6 +47,7 @@ export const navigationGroups: NavGroup[] = [
     defaultOpen: true,
     items: [
       { title: 'Dashboard', titleRu: 'Обзор', path: APP_ROUTES.MC, icon: LayoutDashboard },
+      { title: 'Bookings', titleRu: 'Бронирования', path: APP_ROUTES.MC_BOOKINGS_LIST, icon: CalendarCheck },
       { title: 'Calendar', titleRu: 'Календарь', path: APP_ROUTES.MC_CALENDAR, icon: CalendarDays },
       { title: 'Tasks', titleRu: 'Задачи', path: APP_ROUTES.MC_TASKS, icon: ClipboardList, badgeKey: 'tasks' },
       { title: 'Messages', titleRu: 'Сообщения', path: APP_ROUTES.MC_MESSAGES, icon: MessageSquare, badgeKey: 'messages' },
