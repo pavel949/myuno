@@ -4,12 +4,13 @@
  */
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, MapPin, Building2, TrendingUp, ChevronRight, Check } from 'lucide-react';
+import { Search, MapPin, Building2, TrendingUp, ChevronRight, Check, Calculator, Shield, Map, Compass, GitCompareArrows } from 'lucide-react';
 import NewbuildsLayout from '@/components/newbuilds/NewbuildsLayout';
 import { NbProjectCard } from '@/components/newbuilds/NbProjectCard';
 import { NbPriceDisplay } from '@/components/newbuilds/NbPriceDisplay';
 import { NbLeadForm } from '@/components/newbuilds/NbLeadForm';
 import { useNewbuildProjects, useNewbuildStats } from '@/hooks/useNewbuildProjects';
+import { PHUKET_AREAS } from '@/lib/config/phuketAreas';
 import { Skeleton } from '@/components/ui/skeleton';
 import { APP_ROUTES } from '@/lib/config/routes';
 
@@ -142,6 +143,81 @@ export default function NewbuildsLanding() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {gridProjects.map(p => (
             <NbProjectCard key={p.id} project={p} />
+          ))}
+        </div>
+      </section>
+
+      {/* ── TOOLS & SERVICES ── */}
+      <section className="px-4 py-16 max-w-7xl mx-auto">
+        <h2 className="nb-display text-2xl md:text-3xl mb-2" style={{ color: 'hsl(var(--nb-text))' }}>
+          Инструменты инвестора
+        </h2>
+        <p className="text-sm mb-8" style={{ color: 'hsl(var(--nb-muted))' }}>
+          Всё для принятия взвешенного решения об инвестициях в новостройки Пхукета
+        </p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[
+            { icon: Calculator, label: 'ROI Калькулятор', desc: 'Рассчитайте доходность', path: '/newbuilds/calculator' },
+            { icon: Map, label: 'Карта проектов', desc: 'Все проекты на карте', path: '/newbuilds/map' },
+            { icon: Compass, label: 'Гид по районам', desc: '10 районов Пхукета', path: '/newbuilds/areas' },
+            { icon: Shield, label: 'Due Diligence', desc: 'Чек-лист покупателя', path: '/newbuilds/due-diligence' },
+          ].map(tool => {
+            const Icon = tool.icon;
+            return (
+              <Link key={tool.path} to={tool.path} className="nb-glass p-5 text-center group hover:border-[hsl(var(--nb-gold)/0.5)] transition-all">
+                <div className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center" style={{ background: 'hsl(var(--nb-gold) / 0.12)' }}>
+                  <Icon className="w-6 h-6" style={{ color: 'hsl(var(--nb-gold))' }} />
+                </div>
+                <h3 className="nb-display text-base mb-1" style={{ color: 'hsl(var(--nb-text))' }}>{tool.label}</h3>
+                <p className="text-xs" style={{ color: 'hsl(var(--nb-muted))' }}>{tool.desc}</p>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ── AREA GUIDES QUICK LINKS ── */}
+      <section className="px-4 py-16" style={{ background: 'hsl(var(--nb-surface))' }}>
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="nb-display text-2xl md:text-3xl" style={{ color: 'hsl(var(--nb-text))' }}>Районы Пхукета</h2>
+            <Link to="/newbuilds/areas" className="text-sm flex items-center gap-1" style={{ color: 'hsl(var(--nb-gold))' }}>
+              Все районы <ChevronRight className="w-4 h-4" />
+            </Link>
+          </div>
+          <div className="flex gap-3 overflow-x-auto pb-2">
+            {PHUKET_AREAS.slice(0, 6).map(area => (
+              <Link
+                key={area.slug}
+                to={`/newbuilds/areas/${area.slug}`}
+                className="nb-glass p-4 min-w-[200px] flex-shrink-0 group hover:border-[hsl(var(--nb-gold)/0.5)] transition-all"
+              >
+                <h3 className="nb-display text-base mb-1" style={{ color: 'hsl(var(--nb-text))' }}>{area.name_ru}</h3>
+                <div className="flex items-center gap-3 text-xs" style={{ color: 'hsl(var(--nb-muted))' }}>
+                  <span className="nb-mono" style={{ color: 'hsl(var(--nb-gold))' }}>฿{(area.avg_price_sqm / 1000).toFixed(0)}K/м²</span>
+                  <span style={{ color: 'hsl(142 70% 55%)' }}>{area.avg_yield}%</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── WHY INVEST ── */}
+      <section className="px-4 py-16 max-w-7xl mx-auto">
+        <h2 className="nb-display text-2xl md:text-3xl mb-8 text-center" style={{ color: 'hsl(var(--nb-text))' }}>
+          Почему инвестировать в Пхукет
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[
+            { title: 'Рост цен 5-8% в год', desc: 'Стабильный рост рынка недвижимости. Пхукет — один из самых востребованных островов Юго-Восточной Азии.' },
+            { title: 'Доходность 6-8% годовых', desc: 'Высокий туристический поток обеспечивает стабильную арендную доходность круглый год.' },
+            { title: 'Freehold для иностранцев', desc: 'Иностранцы могут владеть квартирами в freehold. Прозрачная юридическая система и защита прав покупателей.' },
+          ].map(item => (
+            <div key={item.title} className="nb-glass p-6 space-y-3">
+              <h3 className="nb-display text-lg" style={{ color: 'hsl(var(--nb-gold))' }}>{item.title}</h3>
+              <p className="text-sm leading-relaxed" style={{ color: 'hsl(var(--nb-text-secondary))' }}>{item.desc}</p>
+            </div>
           ))}
         </div>
       </section>
