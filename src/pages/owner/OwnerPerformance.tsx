@@ -56,10 +56,34 @@ export default function OwnerPerformance() {
 
   const kpis = data?.kpis ?? { bookedNights: 0, bookingValue: 0, fiveStarPercent: 100 };
   const chartData = data?.chartData ?? [];
+  const cmp = data?.comparison ?? { bookedNightsChange: 0, bookingValueChange: 0, fiveStarPercentChange: 0, occupancyRateChange: 0 };
+  const forecast = data?.forecast ?? [];
   const quality = data?.quality ?? { averageRating: 0, fiveStarCount: 0, belowFiveCount: 0, totalReviews: 0, recentIssues: 0 };
   const occupancy = data?.occupancy ?? { occupancyRate: 0, cancellationRate: 0, avgStayDays: 0, pricePerNight: 0 };
   const conversion = data?.conversion ?? { bookingConversion: 0, bookingToArrivalDays: 0, repeatGuestPercent: 0, wishlistAdds: 0 };
   const tips = data?.tips ?? [];
+
+  // Chart data with forecast appended (null value for main, null forecast for existing)
+  const combinedChartData = [
+    ...chartData.map(d => ({ ...d, forecast: null as number | null })),
+    // bridge: last real point repeated as first forecast point
+    ...(forecast.length > 0 && chartData.length > 0
+      ? [{ name: chartData[chartData.length - 1].name, value: null as number | null, forecast: chartData[chartData.length - 1].value }]
+      : []),
+    ...forecast.map(d => ({ name: d.name, value: null as number | null, forecast: d.forecast })),
+  ];
+
+  const ChangeBadge = ({ value, suffix = '%' }: { value: number; suffix?: string }) => {
+    if (value === 0) return null;
+    const positive = value > 0;
+    const Icon = positive ? TrendingUp : TrendingDown;
+    return (
+      <span className={cn('inline-flex items-center gap-0.5 text-xs font-medium', positive ? 'text-green-600' : 'text-red-500')}>
+        <Icon className="w-3 h-3" />
+        {positive ? '+' : ''}{value}{suffix}
+      </span>
+    );
+  };
 
   return (
     <PageContainer>
@@ -139,18 +163,21 @@ export default function OwnerPerformance() {
       <div className="grid grid-cols-3 gap-3 mb-6">
         <div className="text-center">
           <div className="text-2xl font-bold">{kpis.bookedNights}</div>
+          <ChangeBadge value={cmp.bookedNightsChange} />
           <p className="text-xs text-muted-foreground mt-1">
             {isRu ? 'Забронированные ночи' : 'Booked nights'}
           </p>
         </div>
         <div className="text-center">
           <div className="text-2xl font-bold">{formatPrice(kpis.bookingValue)}</div>
+          <ChangeBadge value={cmp.bookingValueChange} />
           <p className="text-xs text-muted-foreground mt-1">
             {isRu ? 'Стоимость бронирования' : 'Booking value'}
           </p>
         </div>
         <div className="text-center">
           <div className="text-2xl font-bold">{kpis.fiveStarPercent}%</div>
+          <ChangeBadge value={cmp.fiveStarPercentChange} suffix="pp" />
           <p className="text-xs text-muted-foreground mt-1">
             {isRu ? '5-звездочный рейтинг' : '5-star rating'}
           </p>
@@ -160,20 +187,35 @@ export default function OwnerPerformance() {
       {/* Revenue Trend Chart */}
       <Card className="mb-6">
         <CardContent className="p-5">
-          <h2 className="text-lg font-bold mb-4">{isRu ? 'Динамика выручки' : 'Revenue Trend'}</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold">{isRu ? 'Динамика выручки' : 'Revenue Trend'}</h2>
+            {forecast.length > 0 && (
+              <Badge variant="outline" className="text-xs gap-1">
+                <TrendingUp className="w-3 h-3" />
+                {isRu ? 'Прогноз' : 'Forecast'}
+              </Badge>
+            )}
+          </div>
           <div className="h-48">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData}>
+              <AreaChart data={combinedChartData}>
                 <defs>
                   <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="colorForecast" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.1} />
                     <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <XAxis dataKey="name" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
                 <YAxis hide />
                 <Tooltip
-                  formatter={(value: number) => [formatPrice(value), isRu ? 'Выручка' : 'Revenue']}
+                  formatter={(value: number, name: string) => [
+                    formatPrice(value),
+                    name === 'forecast' ? (isRu ? 'Прогноз' : 'Forecast') : (isRu ? 'Выручка' : 'Revenue'),
+                  ]}
                   contentStyle={{ fontSize: 12, borderRadius: 8 }}
                 />
                 <Area
@@ -182,6 +224,16 @@ export default function OwnerPerformance() {
                   stroke="hsl(var(--primary))"
                   strokeWidth={2}
                   fill="url(#colorRevenue)"
+                  connectNulls={false}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="forecast"
+                  stroke="hsl(var(--primary))"
+                  strokeWidth={2}
+                  strokeDasharray="5 3"
+                  fill="url(#colorForecast)"
+                  connectNulls={false}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -299,6 +351,7 @@ export default function OwnerPerformance() {
           <div className="grid grid-cols-2 gap-y-5 gap-x-4">
             <div>
               <div className="text-2xl font-bold">{occupancy.occupancyRate}%</div>
+              <ChangeBadge value={cmp.occupancyRateChange} suffix="pp" />
               <p className="text-sm text-muted-foreground">
                 {isRu ? 'Показатель занятости' : 'Occupancy rate'}
               </p>
