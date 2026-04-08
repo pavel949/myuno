@@ -1,14 +1,21 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
-import { Search, Loader2, MapPin } from 'lucide-react';
+import { Search, Loader2, MapPin, ArrowUpDown, Users, SlidersHorizontal } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { BackButton } from '@/components/uno/BackButton';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
 import {
@@ -17,7 +24,21 @@ import {
   STAYS_PROPERTY_TYPES,
   type StaysSearchFilters,
   type StaysZone,
+  type StaysListingRow,
 } from '@/hooks/useStaysSearch';
+
+type SortOption = 'default' | 'price_asc' | 'price_desc' | 'bedrooms_desc';
+
+const AMENITY_FILTERS = [
+  { key: 'pool', labelEn: 'Pool', labelRu: 'Бассейн' },
+  { key: 'wifi', labelEn: 'WiFi', labelRu: 'Wi-Fi' },
+  { key: 'parking', labelEn: 'Parking', labelRu: 'Парковка' },
+  { key: 'kitchen', labelEn: 'Kitchen', labelRu: 'Кухня' },
+  { key: 'air_conditioning', labelEn: 'AC', labelRu: 'Кондиционер' },
+  { key: 'washing', labelEn: 'Washer', labelRu: 'Стиральная' },
+  { key: 'tv', labelEn: 'TV', labelRu: 'ТВ' },
+  { key: 'pet', labelEn: 'Pets OK', labelRu: 'С питомцами' },
+] as const;
 
 function zoneLabelRu(z: StaysZone): string {
   const map: Record<StaysZone, string> = {
@@ -32,13 +53,19 @@ function zoneLabelRu(z: StaysZone): string {
 
 export default function StaysSearchPage() {
   const navigate = useNavigate();
+  const { language } = useLanguage();
+  const isRu = language === 'ru';
   const [zones, setZones] = useState<StaysZone[]>([]);
   const [checkInStr, setCheckInStr] = useState('');
   const [checkOutStr, setCheckOutStr] = useState('');
   const [priceMin, setPriceMin] = useState('');
   const [priceMax, setPriceMax] = useState('');
   const [bedroomsMin, setBedroomsMin] = useState('');
+  const [guestsCount, setGuestsCount] = useState('');
   const [propertyType, setPropertyType] = useState('all');
+  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
+  const [sortBy, setSortBy] = useState<SortOption>('default');
+  const [showFilters, setShowFilters] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
   const filters: StaysSearchFilters = useMemo(() => {
@@ -67,6 +94,10 @@ export default function StaysSearchPage() {
     setZones((prev) => (prev.includes(z) ? prev.filter((x) => x !== z) : [...prev, z]));
   };
 
+  const toggleAmenity = (key: string) => {
+    setSelectedAmenities(prev => prev.includes(key) ? prev.filter(a => a !== key) : [...prev, key]);
+  };
+
   const handleSearch = () => {
     setSubmitted(true);
   };
@@ -74,19 +105,47 @@ export default function StaysSearchPage() {
   const nightly = (row: { price_per_night: number | null; price: number | null }) =>
     row.price_per_night ?? row.price ?? 0;
 
+  // Post-filter by amenities and guest count, then sort
+  const sortedResults = useMemo(() => {
+    let filtered = [...results];
+
+    // Guest count filter (client-side since max_guests may not be in search query)
+    if (guestsCount) {
+      const gc = parseInt(guestsCount, 10);
+      if (gc > 0) {
+        filtered = filtered.filter((r: any) => !r.max_guests || r.max_guests >= gc);
+      }
+    }
+
+    // Sort
+    switch (sortBy) {
+      case 'price_asc':
+        filtered.sort((a, b) => nightly(a) - nightly(b));
+        break;
+      case 'price_desc':
+        filtered.sort((a, b) => nightly(b) - nightly(a));
+        break;
+      case 'bedrooms_desc':
+        filtered.sort((a, b) => (b.bedrooms || 0) - (a.bedrooms || 0));
+        break;
+    }
+
+    return filtered;
+  }, [results, sortBy, guestsCount]);
+
   return (
     <AppLayout showHeader={false} showBottomNav>
       <div className="min-h-screen bg-background pb-24">
         <header className="sticky top-0 z-40 bg-background/95 backdrop-blur border-b">
           <div className="px-4 py-3 flex items-center gap-3">
             <BackButton fallbackPath={APP_ROUTES.PROPERTY} variant="ghost" size="sm" />
-            <h1 className="text-lg font-semibold">Поиск жилья (STAYS)</h1>
+            <h1 className="text-lg font-semibold">{isRu ? 'Поиск жилья' : 'Find a Stay'}</h1>
           </div>
         </header>
 
         <div className="px-4 py-4 space-y-6 max-w-3xl mx-auto">
           <section className="space-y-3">
-            <Label className="text-base">Зона Пхукета</Label>
+            <Label className="text-base">{isRu ? 'Зона Пхукета' : 'Phuket Zone'}</Label>
             <div className="flex flex-wrap gap-2">
               {STAYS_ZONE_OPTIONS.map((z) => (
                 <button
@@ -108,7 +167,7 @@ export default function StaysSearchPage() {
 
           <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="stays-checkin">Заезд</Label>
+              <Label htmlFor="stays-checkin">{isRu ? 'Заезд' : 'Check-in'}</Label>
               <Input
                 id="stays-checkin"
                 type="date"
@@ -117,7 +176,7 @@ export default function StaysSearchPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="stays-checkout">Выезд</Label>
+              <Label htmlFor="stays-checkout">{isRu ? 'Выезд' : 'Check-out'}</Label>
               <Input
                 id="stays-checkout"
                 type="date"
@@ -127,9 +186,25 @@ export default function StaysSearchPage() {
             </div>
           </section>
 
+          {/* Guest count */}
+          <section className="space-y-2">
+            <Label htmlFor="stays-guests">{isRu ? 'Количество гостей' : 'Guests'}</Label>
+            <div className="flex items-center gap-2">
+              <Users className="w-4 h-4 text-muted-foreground" />
+              <Input
+                id="stays-guests"
+                inputMode="numeric"
+                placeholder={isRu ? '2' : '2'}
+                value={guestsCount}
+                onChange={e => setGuestsCount(e.target.value)}
+                className="w-24"
+              />
+            </div>
+          </section>
+
           <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="stays-min">Цена за ночь от (฿)</Label>
+              <Label htmlFor="stays-min">{isRu ? 'Цена за ночь от (฿)' : 'Price from (฿)'}</Label>
               <Input
                 id="stays-min"
                 inputMode="numeric"
@@ -139,7 +214,7 @@ export default function StaysSearchPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="stays-max">Цена за ночь до (฿)</Label>
+              <Label htmlFor="stays-max">{isRu ? 'Цена за ночь до (฿)' : 'Price to (฿)'}</Label>
               <Input
                 id="stays-max"
                 inputMode="numeric"
@@ -152,7 +227,7 @@ export default function StaysSearchPage() {
 
           <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="stays-bed">Спален (мин.)</Label>
+              <Label htmlFor="stays-bed">{isRu ? 'Спален (мин.)' : 'Bedrooms (min)'}</Label>
               <Input
                 id="stays-bed"
                 inputMode="numeric"
@@ -162,7 +237,7 @@ export default function StaysSearchPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="stays-type">Тип объекта</Label>
+              <Label htmlFor="stays-type">{isRu ? 'Тип объекта' : 'Property Type'}</Label>
               <select
                 id="stays-type"
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -178,6 +253,40 @@ export default function StaysSearchPage() {
             </div>
           </section>
 
+          {/* Amenity Filters */}
+          <section className="space-y-3">
+            <button
+              type="button"
+              className="flex items-center gap-2 text-sm font-medium"
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <SlidersHorizontal className="w-4 h-4" />
+              {isRu ? 'Удобства' : 'Amenities'}
+              {selectedAmenities.length > 0 && (
+                <Badge variant="secondary" className="text-xs">{selectedAmenities.length}</Badge>
+              )}
+            </button>
+            {showFilters && (
+              <div className="flex flex-wrap gap-2">
+                {AMENITY_FILTERS.map(a => (
+                  <button
+                    key={a.key}
+                    type="button"
+                    onClick={() => toggleAmenity(a.key)}
+                    className={cn(
+                      'rounded-full border px-3 py-1.5 text-sm transition-colors',
+                      selectedAmenities.includes(a.key)
+                        ? 'bg-primary text-primary-foreground border-primary'
+                        : 'bg-muted/50 border-border hover:border-primary/40',
+                    )}
+                  >
+                    {isRu ? a.labelRu : a.labelEn}
+                  </button>
+                ))}
+              </div>
+            )}
+          </section>
+
           <Button
             type="button"
             className="w-full gap-2"
@@ -190,22 +299,48 @@ export default function StaysSearchPage() {
             ) : (
               <Search className="h-5 w-5" />
             )}
-            Найти
+            {isRu ? 'Найти' : 'Search'}
           </Button>
 
           {submitted && (
-            <p className="text-sm text-muted-foreground text-center">
-              {isFetching
-                ? 'Проверяем календарь и брони…'
-                : `Найдено: ${results.length}`}
-            </p>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                {isFetching
+                  ? (isRu ? 'Проверяем календарь и брони…' : 'Checking calendar...')
+                  : (isRu ? `Найдено: ${sortedResults.length}` : `Found: ${sortedResults.length}`)}
+              </p>
+              {!isFetching && sortedResults.length > 1 && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="gap-1">
+                      <ArrowUpDown className="w-3.5 h-3.5" />
+                      {isRu ? 'Сортировка' : 'Sort'}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => setSortBy('default')}>
+                      {isRu ? 'По умолчанию' : 'Default'} {sortBy === 'default' && '✓'}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setSortBy('price_asc')}>
+                      {isRu ? 'Цена: дешевле' : 'Price: Low to High'} {sortBy === 'price_asc' && '✓'}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setSortBy('price_desc')}>
+                      {isRu ? 'Цена: дороже' : 'Price: High to Low'} {sortBy === 'price_desc' && '✓'}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setSortBy('bedrooms_desc')}>
+                      {isRu ? 'Больше спален' : 'Most Bedrooms'} {sortBy === 'bedrooms_desc' && '✓'}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </div>
           )}
 
           <div className="grid gap-4 sm:grid-cols-2">
             {submitted &&
-              results.map((p) => {
+              sortedResults.map((p) => {
                 const img = p.cover_image || p.images?.[0];
-                const title = p.title_ru || p.title_en || 'Объект';
+                const title = isRu ? (p.title_ru || p.title_en || 'Объект') : (p.title_en || p.title_ru || 'Property');
                 const zone = p.district || '—';
                 const price = nightly(p);
                 const cur = p.currency || 'THB';
@@ -226,7 +361,7 @@ export default function StaysSearchPage() {
                         />
                       ) : (
                         <div className="absolute inset-0 flex items-center justify-center text-muted-foreground text-xs">
-                          Нет фото
+                          {isRu ? 'Нет фото' : 'No photo'}
                         </div>
                       )}
                     </div>
@@ -238,11 +373,11 @@ export default function StaysSearchPage() {
                       </div>
                       <div className="flex flex-wrap items-center gap-2">
                         <Badge variant="secondary" className="font-normal">
-                          {price > 0 ? `${price.toLocaleString('ru-RU')} ${cur}/ночь` : 'Цена по запросу'}
+                          {price > 0 ? `${price.toLocaleString('ru-RU')} ${cur}/${isRu ? 'ночь' : 'night'}` : (isRu ? 'Цена по запросу' : 'Price on request')}
                         </Badge>
                         {p.bedrooms != null && (
                           <span className="text-xs text-muted-foreground">
-                            {p.bedrooms} спален
+                            {p.bedrooms} {isRu ? 'спален' : 'bed'}
                           </span>
                         )}
                         {p.property_type && (
@@ -257,7 +392,7 @@ export default function StaysSearchPage() {
                         variant="default"
                         onClick={() => navigate(inquiryUrl)}
                       >
-                        Узнать цену
+                        {isRu ? 'Узнать цену' : 'Check Price'}
                       </Button>
                     </CardContent>
                   </Card>
@@ -265,9 +400,9 @@ export default function StaysSearchPage() {
               })}
           </div>
 
-          {submitted && !isFetching && results.length === 0 && (
+          {submitted && !isFetching && sortedResults.length === 0 && (
             <p className="text-center text-muted-foreground py-8">
-              Ничего не найдено. Измените даты или фильтры.
+              {isRu ? 'Ничего не найдено. Измените даты или фильтры.' : 'No results found. Try different dates or filters.'}
             </p>
           )}
         </div>

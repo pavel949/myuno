@@ -41,6 +41,7 @@ import { ReviewsSection } from '@/components/reviews/ReviewsSection';
 import { PhotoLightbox } from '@/components/property/PhotoLightbox';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Calendar } from '@/components/ui/calendar';
+import { usePropertyAvailabilityManagement } from '@/hooks/usePropertyAvailabilityManagement';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -76,6 +77,17 @@ export default function PropertyDetail() {
   const [guestCount, setGuestCount] = useState(2);
   const isMobile = useIsMobile();
   const isRu = language === 'ru';
+
+  // Fetch availability for calendar
+  const { availability } = usePropertyAvailabilityManagement(id);
+  const unavailableDates = new Set(
+    availability
+      .filter((a: any) => a.status === 'blocked' || a.status === 'booked')
+      .map((a: any) => {
+        const d = a.date instanceof Date ? a.date : new Date(a.date);
+        return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+      })
+  );
 
   // Fetch real property from DB
   const { data: dbProperty, isLoading } = usePropertyWithRentalTerms(id);
@@ -800,7 +812,23 @@ export default function PropertyDetail() {
                   selected={dateRange}
                   onSelect={setDateRange}
                   numberOfMonths={1}
-                  disabled={(date) => date < new Date()}
+                  disabled={(date) => {
+                    if (date < new Date()) return true;
+                    const key = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+                    return unavailableDates.has(key);
+                  }}
+                  modifiers={{
+                    booked: availability
+                      .filter((a: any) => a.status === 'booked')
+                      .map((a: any) => a.date instanceof Date ? a.date : new Date(a.date)),
+                    blocked: availability
+                      .filter((a: any) => a.status === 'blocked')
+                      .map((a: any) => a.date instanceof Date ? a.date : new Date(a.date)),
+                  }}
+                  modifiersStyles={{
+                    booked: { textDecoration: 'line-through', opacity: 0.4 },
+                    blocked: { textDecoration: 'line-through', opacity: 0.3 },
+                  }}
                   className="pointer-events-auto"
                 />
               </div>
