@@ -324,6 +324,7 @@ export const APP_ROUTES = {
   MC_BOOKINGS: '/mc/bookings',
 
   // ── MC Performance & Settings ──
+  MC_BOOKINGS_LIST: '/mc/bookings-list',
   MC_PERFORMANCE: '/mc/performance',
   MC_TRENDS: '/mc/trends',
   MC_ACCOUNT_SETTINGS: '/mc/account-settings',
