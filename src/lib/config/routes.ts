@@ -323,6 +323,12 @@ export const APP_ROUTES = {
   MC_SUPPORT_CHAT: '/mc/support-chat',
   MC_BOOKINGS: '/mc/bookings',
 
+  // ── MC Performance & Settings ──
+  MC_PERFORMANCE: '/mc/performance',
+  MC_TRENDS: '/mc/trends',
+  MC_ACCOUNT_SETTINGS: '/mc/account-settings',
+  MC_SUPERHOST: '/mc/superhost',
+
   // ── Owner Portal (individual owners) ──
   OWNER: '/owner',
   OWNER_LANDING: '/owner',
