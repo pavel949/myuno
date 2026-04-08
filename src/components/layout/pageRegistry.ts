@@ -58,6 +58,12 @@ export const NewbuildsCatalog = lazy(() => import('@/pages/newbuilds/NewbuildsCa
 export const NewbuildDetail = lazy(() => import('@/pages/newbuilds/NewbuildDetail'));
 export const NewbuildsDevelopers = lazy(() => import('@/pages/newbuilds/NewbuildsDevelopers'));
 export const NewbuildDeveloperDetail = lazy(() => import('@/pages/newbuilds/NewbuildDeveloperDetail'));
+export const NewbuildsMap = lazy(() => import('@/pages/newbuilds/NewbuildsMap'));
+export const NewbuildsCalculator = lazy(() => import('@/pages/newbuilds/NewbuildsCalculator'));
+export const NewbuildsCompare = lazy(() => import('@/pages/newbuilds/NewbuildsCompare'));
+export const NewbuildsAreaGuides = lazy(() => import('@/pages/newbuilds/NewbuildsAreaGuides'));
+export const NewbuildsAreaDetail = lazy(() => import('@/pages/newbuilds/NewbuildsAreaDetail'));
+export const NewbuildsDueDiligence = lazy(() => import('@/pages/newbuilds/NewbuildsDueDiligence'));
 
 // ── Developer Portal ──
 export const DeveloperPortalLayout = lazy(() => import('@/components/newbuilds/DeveloperPortalLayout'));

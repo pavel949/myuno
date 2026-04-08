@@ -256,7 +256,13 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/newbuilds/projects/:slug" element={<LazyPage><Pages.NewbuildDetail /></LazyPage>} />
         <Route path={APP_ROUTES.NEWBUILDS_DEVELOPERS} element={<LazyPage><Pages.NewbuildsDevelopers /></LazyPage>} />
         <Route path="/newbuilds/developers/:slug" element={<LazyPage><Pages.NewbuildDeveloperDetail /></LazyPage>} />
-        
+        <Route path={APP_ROUTES.NEWBUILDS_MAP} element={<LazyPage><Pages.NewbuildsMap /></LazyPage>} />
+        <Route path={APP_ROUTES.NEWBUILDS_CALCULATOR} element={<LazyPage><Pages.NewbuildsCalculator /></LazyPage>} />
+        <Route path={APP_ROUTES.NEWBUILDS_COMPARE} element={<LazyPage><Pages.NewbuildsCompare /></LazyPage>} />
+        <Route path={APP_ROUTES.NEWBUILDS_AREAS} element={<LazyPage><Pages.NewbuildsAreaGuides /></LazyPage>} />
+        <Route path="/newbuilds/areas/:slug" element={<LazyPage><Pages.NewbuildsAreaDetail /></LazyPage>} />
+        <Route path={APP_ROUTES.NEWBUILDS_DUE_DILIGENCE} element={<LazyPage><Pages.NewbuildsDueDiligence /></LazyPage>} />
+
         {/* ── Developer Portal ── */}
         <Route path="/developer-portal" element={<Suspense fallback={<LoadingState />}><Pages.DeveloperPortalLayout /></Suspense>}>
           <Route index element={<LazyPage><Pages.DeveloperOverview /></LazyPage>} />
