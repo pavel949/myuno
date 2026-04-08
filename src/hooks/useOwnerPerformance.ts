@@ -55,7 +55,7 @@ export function useOwnerPerformance(period: PeriodKey) {
   const { activeCompany } = useActiveCompany();
 
   return useQuery<PerformanceData>({
-    queryKey: ['owner-performance', user?.id, activeCompany?.id, period],
+    queryKey: ['owner-performance', user?.id, activeCompany?.company_id, period],
     queryFn: async () => {
       if (!user?.id) throw new Error('Not authenticated');
 
@@ -70,8 +70,8 @@ export function useOwnerPerformance(period: PeriodKey) {
         .select('id, title, price_per_night')
         .eq('status', 'active');
 
-      if (activeCompany?.id) {
-        propertyQuery = propertyQuery.eq('company_id', activeCompany.id);
+      if (activeCompany?.company_id) {
+        propertyQuery = propertyQuery.eq('management_company_id', activeCompany.company_id);
       } else {
         propertyQuery = propertyQuery.eq('owner_id', user.id);
       }
@@ -81,11 +81,11 @@ export function useOwnerPerformance(period: PeriodKey) {
       const totalProperties = propertyIds.length || 1;
 
       // Fetch bookings
-      let bookingsData: { nights: number; total_price: number; status: string; created_at: string }[] = [];
+      let bookingsData: { check_in: string; check_out: string; total_amount: number | null; status: string | null; created_at: string }[] = [];
       if (propertyIds.length > 0) {
         const { data } = await supabase
-          .from('bookings')
-          .select('nights, total_price, status, created_at')
+          .from('property_bookings')
+          .select('check_in, check_out, total_amount, status, created_at')
           .in('property_id', propertyIds)
           .gte('created_at', sinceISO);
         bookingsData = data ?? [];
@@ -94,8 +94,11 @@ export function useOwnerPerformance(period: PeriodKey) {
       const confirmedBookings = bookingsData.filter(b => b.status !== 'cancelled');
       const cancelledBookings = bookingsData.filter(b => b.status === 'cancelled');
 
-      const bookedNights = confirmedBookings.reduce((sum, b) => sum + (b.nights || 0), 0);
-      const bookingValue = confirmedBookings.reduce((sum, b) => sum + (b.total_price || 0), 0);
+      const calcNights = (b: { check_in: string; check_out: string }) =>
+        Math.max(1, Math.ceil((new Date(b.check_out).getTime() - new Date(b.check_in).getTime()) / 86400000));
+
+      const bookedNights = confirmedBookings.reduce((sum, b) => sum + calcNights(b), 0);
+      const bookingValue = confirmedBookings.reduce((sum, b) => sum + (b.total_amount || 0), 0);
       const totalDaysInPeriod = days * totalProperties;
       const occupancyRate = totalDaysInPeriod > 0
         ? Math.round((bookedNights / totalDaysInPeriod) * 1000) / 10
@@ -112,21 +115,22 @@ export function useOwnerPerformance(period: PeriodKey) {
         : 0;
 
       // Fetch reviews
-      let reviewsData: { rating: number; created_at: string }[] = [];
+      let reviewsData: { rating: number | null; created_at: string | null }[] = [];
       if (propertyIds.length > 0) {
         const { data } = await supabase
-          .from('reviews')
+          .from('property_reviews')
           .select('rating, created_at')
           .in('property_id', propertyIds)
           .gte('created_at', sinceISO);
         reviewsData = data ?? [];
       }
 
-      const totalReviews = reviewsData.length;
-      const fiveStarCount = reviewsData.filter(r => r.rating === 5).length;
-      const belowFiveCount = reviewsData.filter(r => r.rating < 5).length;
+      const ratedReviews = reviewsData.filter(r => r.rating != null);
+      const totalReviews = ratedReviews.length;
+      const fiveStarCount = ratedReviews.filter(r => r.rating === 5).length;
+      const belowFiveCount = ratedReviews.filter(r => (r.rating ?? 0) < 5).length;
       const averageRating = totalReviews > 0
-        ? Math.round((reviewsData.reduce((sum, r) => sum + r.rating, 0) / totalReviews) * 10) / 10
+        ? Math.round((ratedReviews.reduce((sum, r) => sum + (r.rating ?? 0), 0) / totalReviews) * 10) / 10
         : 0;
       const fiveStarPercent = totalReviews > 0
         ? Math.round((fiveStarCount / totalReviews) * 1000) / 10

@@ -2,9 +2,9 @@ import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Building2, CalendarDays, Crown, CreditCard, DollarSign,
-  Users, Zap, FileText as FileTextIcon, BarChart3 as DashboardIcon,
+  Users, Zap, FileText as FileTextIcon, BarChart3,
   ContactRound, Home, ChevronDown, TrendingUp, PackageOpen,
-  Receipt, Settings, Tag, Star, ShieldCheck, BarChart3, MessageSquare, Radio,
+  Receipt, Settings, Tag, Star, ShieldCheck, MessageSquare, Radio,
   BookOpen, FileText, Megaphone, Truck, ClipboardList, Shuffle,
   ArrowLeftRight, Target,
 } from 'lucide-react';
@@ -107,14 +107,13 @@ export const navigationGroups: NavGroup[] = [
     labelRu: 'CRM и продажи',
     defaultOpen: false,
     items: [
-      { title: 'CRM Dashboard', titleRu: 'CRM Обзор', path: APP_ROUTES.MC_CRM_DASHBOARD, icon: DashboardIcon },
+      { title: 'CRM Dashboard', titleRu: 'CRM Обзор', path: APP_ROUTES.MC_CRM_DASHBOARD, icon: BarChart3 },
       { title: 'Contacts', titleRu: 'Контакты', path: APP_ROUTES.MC_CONTACTS, icon: ContactRound },
       { title: 'Sales Pipeline', titleRu: 'Воронка продаж', path: APP_ROUTES.MC_SALES, icon: TrendingUp },
       { title: 'Owners', titleRu: 'Собственники', path: APP_ROUTES.MC_OWNERS, icon: Crown },
       { title: 'Vendor Acquisition', titleRu: 'Привлечение вендоров', path: APP_ROUTES.MC_VENDOR_ACQUISITION, icon: Target },
       { title: 'Sequences', titleRu: 'Цепочки', path: APP_ROUTES.MC_SEQUENCES, icon: Zap },
       { title: 'Quotes', titleRu: 'КП', path: APP_ROUTES.MC_QUOTES, icon: FileTextIcon },
-      { title: 'Reviews', titleRu: 'Отзывы', path: APP_ROUTES.MC_REVIEWS, icon: Star },
     ],
   },
   {
