@@ -17,6 +17,18 @@ export interface ChartDataPoint {
   value: number;
 }
 
+export interface PeriodComparison {
+  bookedNightsChange: number;     // % change vs previous period
+  bookingValueChange: number;
+  fiveStarPercentChange: number;
+  occupancyRateChange: number;
+}
+
+export interface ForecastPoint {
+  name: string;
+  forecast: number;
+}
+
 export interface PerformanceData {
   kpis: {
     bookedNights: number;
@@ -24,6 +36,8 @@ export interface PerformanceData {
     fiveStarPercent: number;
   };
   chartData: ChartDataPoint[];
+  comparison: PeriodComparison;
+  forecast: ForecastPoint[];
   quality: {
     averageRating: number;
     fiveStarCount: number;
@@ -183,6 +197,55 @@ export function useOwnerPerformance(period: PeriodKey) {
         },
       ];
 
+      // ── Previous period comparison ──
+      const prevSince = new Date();
+      prevSince.setDate(prevSince.getDate() - days * 2);
+      const prevUntil = new Date();
+      prevUntil.setDate(prevUntil.getDate() - days);
+
+      let prevBookingsData: typeof bookingsData = [];
+      if (propertyIds.length > 0) {
+        const { data: prevData } = await supabase
+          .from('property_bookings')
+          .select('check_in, check_out, total_amount, status, created_at')
+          .in('property_id', propertyIds)
+          .gte('created_at', prevSince.toISOString())
+          .lt('created_at', prevUntil.toISOString());
+        prevBookingsData = prevData ?? [];
+      }
+
+      const prevConfirmed = prevBookingsData.filter(b => b.status !== 'cancelled');
+      const prevBookedNights = prevConfirmed.reduce((sum, b) => sum + calcNights(b), 0);
+      const prevBookingValue = prevConfirmed.reduce((sum, b) => sum + (b.total_amount || 0), 0);
+      const prevTotalDays = days * totalProperties;
+      const prevOccupancyRate = prevTotalDays > 0 ? Math.round((prevBookedNights / prevTotalDays) * 1000) / 10 : 0;
+
+      let prevReviewsData: typeof reviewsData = [];
+      if (propertyIds.length > 0) {
+        const { data: prevRevData } = await supabase
+          .from('property_reviews')
+          .select('rating, created_at')
+          .in('property_id', propertyIds)
+          .gte('created_at', prevSince.toISOString())
+          .lt('created_at', prevUntil.toISOString());
+        prevReviewsData = prevRevData ?? [];
+      }
+      const prevRated = prevReviewsData.filter(r => r.rating != null);
+      const prevFiveStarCount = prevRated.filter(r => r.rating === 5).length;
+      const prevFiveStarPercent = prevRated.length > 0
+        ? Math.round((prevFiveStarCount / prevRated.length) * 1000) / 10
+        : 100;
+
+      const pctChange = (cur: number, prev: number) =>
+        prev === 0 ? (cur > 0 ? 100 : 0) : Math.round(((cur - prev) / prev) * 1000) / 10;
+
+      const comparison: import('./useOwnerPerformance').PeriodComparison = {
+        bookedNightsChange: pctChange(bookedNights, prevBookedNights),
+        bookingValueChange: pctChange(bookingValue, prevBookingValue),
+        fiveStarPercentChange: Math.round((fiveStarPercent - prevFiveStarPercent) * 10) / 10,
+        occupancyRateChange: Math.round((occupancyRate - prevOccupancyRate) * 10) / 10,
+      };
+
       // Build chart data from real bookings grouped by date bucket
       const chartData: ChartDataPoint[] = (() => {
         const isMonthly = period === '365d';
@@ -219,6 +282,40 @@ export function useOwnerPerformance(period: PeriodKey) {
         });
       })();
 
+      // ── Forecast: simple linear trend extrapolation ──
+      const forecast: import('./useOwnerPerformance').ForecastPoint[] = (() => {
+        const vals = chartData.map(d => d.value);
+        const n = vals.length;
+        if (n < 2) return [];
+
+        // Linear regression: y = a + b*x
+        const sumX = n * (n - 1) / 2;
+        const sumY = vals.reduce((s, v) => s + v, 0);
+        const sumXY = vals.reduce((s, v, i) => s + i * v, 0);
+        const sumX2 = n * (n - 1) * (2 * n - 1) / 6;
+        const b = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX) || 0;
+        const a = (sumY - b * sumX) / n;
+
+        const isMonthly = period === '365d';
+        const forecastCount = isMonthly ? 3 : Math.min(Math.ceil(n * 0.3), 7);
+        const points: import('./useOwnerPerformance').ForecastPoint[] = [];
+
+        for (let i = 0; i < forecastCount; i++) {
+          const idx = n + i;
+          const d = new Date();
+          if (isMonthly) {
+            d.setMonth(d.getMonth() + i + 1);
+          } else {
+            d.setDate(d.getDate() + i + 1);
+          }
+          const name = isMonthly
+            ? d.toLocaleDateString('ru', { month: 'short' })
+            : d.toLocaleDateString('ru', { day: 'numeric', month: 'short' });
+          points.push({ name, forecast: Math.max(0, Math.round(a + b * idx)) });
+        }
+        return points;
+      })();
+
       return {
         kpis: {
           bookedNights,
@@ -226,6 +323,8 @@ export function useOwnerPerformance(period: PeriodKey) {
           fiveStarPercent,
         },
         chartData,
+        comparison,
+        forecast,
         quality: {
           averageRating,
           fiveStarCount,

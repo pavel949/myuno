@@ -5,12 +5,14 @@ import { ru } from 'date-fns/locale';
 import {
   Search, Filter, ChevronDown, MoreHorizontal, Calendar, Users,
   Phone, Mail, MessageCircle, CheckCircle2, XCircle, LogIn, LogOut,
-  Plus, Download, Building2, Clock, ArrowUpDown, Eye,
+  Plus, Download, Building2, Clock, ArrowUpDown, Eye, Check, X,
 } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAllPropertyBookings, type PropertyBooking } from '@/hooks/usePropertyBookings';
+import { supabase } from '@/integrations/supabase/client';
 import { BookingDetailSheet } from '@/components/owner/BookingDetailSheet';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
@@ -63,6 +65,7 @@ export default function MCBookingsPage() {
   const [sortKey, setSortKey] = useState<SortKey>('check_in');
   const [sortAsc, setSortAsc] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<PropertyBooking | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const filteredBookings = useMemo(() => {
     if (!bookings) return [];
@@ -142,6 +145,48 @@ export default function MCBookingsPage() {
     }
   };
 
+  const toggleSelectBooking = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === filteredBookings.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filteredBookings.map(b => b.id)));
+    }
+  };
+
+  const exportCSV = () => {
+    const rows = filteredBookings.map(b => ({
+      guest: b.guest_name || '',
+      email: b.guest_email || '',
+      phone: b.guest_phone || '',
+      check_in: b.check_in,
+      check_out: b.check_out,
+      nights: differenceInDays(new Date(b.check_out), new Date(b.check_in)),
+      guests: b.guests_count || '',
+      amount: b.total_amount || 0,
+      currency: b.currency || 'THB',
+      status: b.status || 'pending',
+      property: (b as any).owner_properties?.title || b.property_id,
+      source: b.source || 'manual',
+    }));
+    const header = Object.keys(rows[0] || {}).join(',');
+    const csv = [header, ...rows.map(r => Object.values(r).map(v => `"${v}"`).join(','))].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `bookings-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   if (isLoading) {
     return (
       <PageContainer>
@@ -158,10 +203,16 @@ export default function MCBookingsPage() {
       <PageHeader
         title={isRu ? 'Бронирования' : 'Bookings'}
         actions={
-          <Button size="sm" onClick={() => navigate('/mc/calendar')}>
-            <Plus className="w-4 h-4 mr-1" />
-            {isRu ? 'Новое' : 'New'}
-          </Button>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={exportCSV}>
+              <Download className="w-4 h-4 mr-1" />
+              CSV
+            </Button>
+            <Button size="sm" onClick={() => navigate('/mc/calendar')}>
+              <Plus className="w-4 h-4 mr-1" />
+              {isRu ? 'Новое' : 'New'}
+            </Button>
+          </div>
         }
       />
 
@@ -243,6 +294,50 @@ export default function MCBookingsPage() {
         </TabsList>
       </Tabs>
 
+      {/* Bulk Actions Toolbar */}
+      {selectedIds.size > 0 && (
+        <div className="flex items-center gap-2 mb-3 p-3 bg-primary/5 border border-primary/20 rounded-lg">
+          <Checkbox
+            checked={selectedIds.size === filteredBookings.length}
+            onCheckedChange={toggleSelectAll}
+          />
+          <span className="text-sm font-medium">
+            {selectedIds.size} {isRu ? 'выбрано' : 'selected'}
+          </span>
+          <div className="flex gap-2 ml-auto">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                // Mark confirmed
+                const ids = Array.from(selectedIds);
+                supabase.from('orders').update({ status: 'confirmed' }).in('id', ids).then(() => {
+                  setSelectedIds(new Set());
+                  window.location.reload();
+                });
+              }}
+            >
+              <Check className="w-3.5 h-3.5 mr-1" />
+              {isRu ? 'Подтвердить' : 'Confirm'}
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                const ids = Array.from(selectedIds);
+                supabase.from('orders').update({ status: 'cancelled' }).in('id', ids).then(() => {
+                  setSelectedIds(new Set());
+                  window.location.reload();
+                });
+              }}
+            >
+              <X className="w-3.5 h-3.5 mr-1" />
+              {isRu ? 'Отменить' : 'Cancel'}
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Bookings List */}
       {filteredBookings.length === 0 ? (
         <Card>
@@ -277,11 +372,18 @@ export default function MCBookingsPage() {
                 <CardContent className="p-4">
                   {/* Top row: Guest + Status */}
                   <div className="flex items-start justify-between mb-2">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-sm truncate">
-                        {booking.guest_name || (isRu ? 'Гость' : 'Guest')}
-                      </h3>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                    <div className="flex items-start gap-2 flex-1 min-w-0">
+                      <Checkbox
+                        checked={selectedIds.has(booking.id)}
+                        onCheckedChange={() => toggleSelectBooking(booking.id)}
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex-shrink-0 mt-0.5"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-sm truncate">
+                          {booking.guest_name || (isRu ? 'Гость' : 'Guest')}
+                        </h3>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
                         {booking.guest_phone && (
                           <span className="flex items-center gap-0.5">
                             <Phone className="w-3 h-3" />
@@ -294,6 +396,7 @@ export default function MCBookingsPage() {
                             {booking.guest_email}
                           </span>
                         )}
+                        </div>
                       </div>
                     </div>
                     <Badge variant={statusCfg.variant} className={cn('ml-2 flex-shrink-0', statusCfg.color)}>

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGuestServiceOrders, CreateServiceOrderInput } from '@/hooks/useServiceOrders';
+import { useGuestChatList } from '@/hooks/useGuestPropertyChat';
 import { useGuestPropertyBookings } from '@/hooks/usePropertyBookings';
 import { Button } from '@/components/ui/button';
 import {
@@ -55,6 +56,8 @@ export default function MyStay() {
     createOrder,
     rateOrder,
   } = useGuestServiceOrders();
+
+  const { totalUnread } = useGuestChatList();
 
   const currentBooking = activeBookings[0];
   const isLoading = bookingsLoading || ordersLoading;
@@ -141,7 +144,7 @@ export default function MyStay() {
       <GuestServicesBlock />
 
       {/* Row 3: Messages */}
-      <GuestMessagesBlock unreadCount={0} loading={isLoading} />
+      <GuestMessagesBlock unreadCount={totalUnread} loading={isLoading} />
 
       {/* Past Trips */}
       {pastBookings && pastBookings.length > 0 && (
