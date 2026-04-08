@@ -68,6 +68,7 @@ export default function GuestCheckIn() {
     arrival_flight: '',
     needs_transfer: false,
     rules_accepted: false,
+    data_consent: false,
   });
 
   // Pre-fill form with existing data
@@ -478,11 +479,37 @@ export default function GuestCheckIn() {
                 required
               />
               <Label htmlFor="rules_accepted" className="cursor-pointer">
-                {isRu 
+                {isRu
                   ? 'Я прочитал(а) и согласен(на) с правилами проживания'
                   : 'I have read and agree to the house rules'
                 } *
               </Label>
+            </div>
+
+            {/* GDPR / Data Protection Consent */}
+            <div className="mt-4 p-3 border rounded-lg bg-muted/30">
+              <div className="flex items-start gap-2 mb-2">
+                <Shield className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                <p className="text-xs text-muted-foreground">
+                  {isRu
+                    ? 'Ваши персональные данные (паспорт, контактная информация) будут обработаны в соответствии с законодательством о защите данных (PDPA/GDPR). Данные хранятся в зашифрованном виде и используются только для оформления проживания. Вы можете запросить удаление данных после выезда.'
+                    : 'Your personal data (passport, contact information) will be processed in accordance with data protection laws (PDPA/GDPR). Data is stored encrypted and used only for accommodation purposes. You may request data deletion after checkout.'}
+                </p>
+              </div>
+              <div className="flex items-start space-x-3">
+                <Checkbox
+                  id="data_consent"
+                  checked={(formData as any).data_consent}
+                  onCheckedChange={(checked) => handleChange('data_consent', checked as boolean)}
+                  required
+                />
+                <Label htmlFor="data_consent" className="cursor-pointer text-sm">
+                  {isRu
+                    ? 'Я даю согласие на обработку моих персональных данных'
+                    : 'I consent to the processing of my personal data'
+                  } *
+                </Label>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -491,7 +518,7 @@ export default function GuestCheckIn() {
           type="submit" 
           className="w-full" 
           size="lg"
-          disabled={!formData.rules_accepted || submitCheckIn.isPending}
+          disabled={!formData.rules_accepted || !(formData as any).data_consent || submitCheckIn.isPending}
         >
           {submitCheckIn.isPending ? (
             <>
