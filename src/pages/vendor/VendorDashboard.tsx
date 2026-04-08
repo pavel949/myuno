@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserContext } from '@/hooks/useUserContext';
@@ -18,6 +20,7 @@ import {
   Eye,
   MoreHorizontal
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { format, subDays } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import {
@@ -66,9 +69,6 @@ const VendorDashboard = () => {
   
   // Period selector state
   const [chartPeriod, setChartPeriod] = useState<Period>('7d');
-  
-  // Onboarding state (would normally come from API)
-  const [showOnboarding, setShowOnboarding] = useState(true);
 
   const isRu = language === 'ru';
   const locale = isRu ? ru : enUS;
@@ -159,6 +159,42 @@ const VendorDashboard = () => {
     return steps;
   }, [user, stats]);
 
+  // Onboarding state: auto-hide when complete, persist dismissal in localStorage
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    if (!user?.id) return false;
+    const dismissed = localStorage.getItem(`vendor-onboarding-dismissed-${user.id}`);
+    return !dismissed;
+  });
+  const handleDismissOnboarding = () => {
+    setShowOnboarding(false);
+    if (user?.id) {
+      localStorage.setItem(`vendor-onboarding-dismissed-${user.id}`, 'true');
+    }
+  };
+
+  // New orders in last 24h (distinct from total pending)
+  const newOrdersCount = useMemo(() => {
+    if (!orders) return 0;
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    return orders.filter(o => o.status === 'pending' && new Date(o.created_at) > oneDayAgo).length;
+  }, [orders]);
+
+  // Unread notifications count from database
+  const { data: unreadCount = 0 } = useQuery({
+    queryKey: ['vendor-unread-notifications', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return 0;
+      const { count } = await supabase
+        .from('notifications')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('is_read', false);
+      return count || 0;
+    },
+    enabled: !!user?.id,
+    staleTime: 30_000,
+  });
+
   if (isLoading) {
     return (
       <div className="p-4 md:p-6 lg:p-8 space-y-4 max-w-[1536px] mx-auto w-full">
@@ -176,10 +212,10 @@ const VendorDashboard = () => {
   return (
     <div className="p-4 md:p-6 lg:p-8 pb-24 md:pb-8 space-y-4 max-w-[1536px] mx-auto w-full">
       {/* Onboarding Checklist */}
-      {showOnboarding && (
-        <VendorOnboardingChecklist 
+      {showOnboarding && completedOnboardingSteps.length < 3 && (
+        <VendorOnboardingChecklist
           completedSteps={completedOnboardingSteps}
-          onDismiss={() => setShowOnboarding(false)}
+          onDismiss={handleDismissOnboarding}
         />
       )}
 
@@ -202,7 +238,7 @@ const VendorDashboard = () => {
       {/* Verification Level Badge */}
       <VendorVerificationBadge
         isVerified={currentOrg?.is_verified || false}
-        rating={0}
+        rating={vendorProfile?.rating || 0}
         bookingsCount={stats.completedCount || 0}
       />
 
@@ -245,7 +281,7 @@ const VendorDashboard = () => {
         />
       </div>
 
-      <VendorAlertPanel newOrders={stats.pendingCount} pendingConfirmation={stats.pendingCount} unreadMessages={0} loading={ordersLoading} />
+      <VendorAlertPanel newOrders={newOrdersCount} pendingConfirmation={stats.pendingCount} unreadMessages={unreadCount} loading={ordersLoading} />
       
       {/* Revenue Chart with Period Selector */}
       <VendorRevenueChart 
@@ -337,9 +373,9 @@ const VendorDashboard = () => {
         open={showBulkImport}
         onOpenChange={setShowBulkImport}
         vertical={bulkImportVertical}
-        onImport={async (rows) => {
-          // TODO: Implement bulk import via edge function
-          return { success: rows.length, failed: 0 };
+        onImport={async () => {
+          toast.info(isRu ? 'Массовый импорт скоро будет доступен' : 'Bulk import coming soon');
+          return { success: 0, failed: 0 };
         }}
       />
     </div>
