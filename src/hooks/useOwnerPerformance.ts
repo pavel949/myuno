@@ -12,12 +12,18 @@ export interface PerformanceTip {
   totalCount: number;
 }
 
+export interface ChartDataPoint {
+  name: string;
+  value: number;
+}
+
 export interface PerformanceData {
   kpis: {
     bookedNights: number;
     bookingValue: number;
     fiveStarPercent: number;
   };
+  chartData: ChartDataPoint[];
   quality: {
     averageRating: number;
     fiveStarCount: number;
@@ -177,12 +183,49 @@ export function useOwnerPerformance(period: PeriodKey) {
         },
       ];
 
+      // Build chart data from real bookings grouped by date bucket
+      const chartData: ChartDataPoint[] = (() => {
+        const isMonthly = period === '365d';
+        const bucketCount = isMonthly ? 12 : days;
+        const buckets: Record<string, number> = {};
+
+        for (let i = 0; i < bucketCount; i++) {
+          const d = new Date();
+          if (isMonthly) {
+            d.setMonth(d.getMonth() - (bucketCount - 1 - i));
+            buckets[`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`] = 0;
+          } else {
+            d.setDate(d.getDate() - (bucketCount - 1 - i));
+            buckets[d.toISOString().slice(0, 10)] = 0;
+          }
+        }
+
+        for (const b of confirmedBookings) {
+          const created = new Date(b.created_at);
+          const key = isMonthly
+            ? `${created.getFullYear()}-${String(created.getMonth() + 1).padStart(2, '0')}`
+            : created.toISOString().slice(0, 10);
+          if (key in buckets) {
+            buckets[key] += b.total_amount || 0;
+          }
+        }
+
+        return Object.entries(buckets).map(([key, value]) => {
+          const d = new Date(isMonthly ? `${key}-01` : key);
+          const name = isMonthly
+            ? d.toLocaleDateString('ru', { month: 'short' })
+            : d.toLocaleDateString('ru', { day: 'numeric', month: 'short' });
+          return { name, value: Math.round(value) };
+        });
+      })();
+
       return {
         kpis: {
           bookedNights,
           bookingValue,
           fiveStarPercent,
         },
+        chartData,
         quality: {
           averageRating,
           fiveStarCount,
