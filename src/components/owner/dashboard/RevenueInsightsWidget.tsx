@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TrendingUp, TrendingDown, Check, X, Sparkles, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { getCurrencySymbol } from '@/lib/config/currencies';
 
 interface PricingRecommendation {
@@ -69,9 +69,7 @@ export function RevenueInsightsWidget() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['pricing-recommendations'] });
-      toast({
-        title: isRu ? 'Рекомендация обновлена' : 'Recommendation updated',
-      });
+      toast(isRu ? 'Рекомендация обновлена' : 'Recommendation updated');
     },
   });
 

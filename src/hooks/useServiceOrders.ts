@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 export interface ServiceOrder {
   id: string;
@@ -97,17 +97,10 @@ export function useGuestServiceOrders() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['guest-service-orders'] });
-      toast({
-        title: 'Заказ создан',
-        description: 'Ваш заказ успешно создан и ожидает обработки',
-      });
+      toast('Заказ создан', { description: 'Ваш заказ успешно создан и ожидает обработки' });
     },
     onError: (error) => {
-      toast({
-        title: 'Ошибка',
-        description: error.message,
-        variant: 'destructive',
-      });
+      toast.error('Ошибка', { description: error.message });
     },
   });
 
@@ -124,9 +117,7 @@ export function useGuestServiceOrders() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['guest-service-orders'] });
-      toast({
-        title: 'Заказ отменён',
-      });
+      toast('Заказ отменён');
     },
   });
 
@@ -143,9 +134,7 @@ export function useGuestServiceOrders() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['guest-service-orders'] });
-      toast({
-        title: 'Спасибо за отзыв!',
-      });
+      toast('Спасибо за отзыв!');
     },
   });
 
@@ -230,7 +219,7 @@ export function useStaffServiceOrders() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['staff-service-orders'] });
-      toast({ title: 'Заказ начат' });
+      toast('Заказ начат');
     },
   });
 
@@ -251,7 +240,7 @@ export function useStaffServiceOrders() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['staff-service-orders'] });
-      toast({ title: 'Заказ завершён' });
+      toast('Заказ завершён');
     },
   });
 
@@ -331,7 +320,7 @@ export function useAdminServiceOrders(filters?: { status?: string; priority?: st
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-service-orders'] });
-      toast({ title: 'Исполнитель назначен' });
+      toast('Исполнитель назначен');
     },
   });
 
