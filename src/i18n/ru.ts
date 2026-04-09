@@ -25,7 +25,19 @@ export const ru: Record<string, string> = {
   'auth.createAccount': 'Создать аккаунт',
   'auth.welcomeBack': 'С возвращением!',
   'auth.getStarted': 'Начните сейчас',
-  
+  'auth.signInOrSignUp': 'Вход или Регистрация',
+  'auth.register': 'Регистрация',
+  'auth.signingIn': 'Данные для входа',
+  'auth.personalInfo': 'Личная информация',
+  'auth.phone': 'Мобильный телефон',
+  'auth.firstName': 'Имя',
+  'auth.lastName': 'Фамилия',
+  'auth.confirmPassword': 'Подтвердите пароль',
+  'auth.referralCode': 'Реферальный код',
+  'auth.continue': 'Продолжить',
+  'auth.back': 'Назад',
+  'auth.termsNotice': 'Регистрируясь, вы соглашаетесь с условиями использования и политикой конфиденциальности, а также подтверждаете, что вам не менее 10 лет.',
+
   // Common actions
   'action.book': 'Забронировать',
   'action.cancel': 'Отмена',

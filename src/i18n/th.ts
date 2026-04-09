@@ -25,6 +25,18 @@ export const th: Record<string, string> = {
   'auth.createAccount': 'สร้างบัญชี',
   'auth.welcomeBack': 'ยินดีต้อนรับกลับ!',
   'auth.getStarted': 'เริ่มต้นใช้งาน',
+  'auth.signInOrSignUp': 'เข้าสู่ระบบ หรือ สมัครสมาชิก',
+  'auth.register': 'ลงทะเบียน',
+  'auth.signingIn': 'การลงชื่อเข้าระบบ',
+  'auth.personalInfo': 'ข้อมูลส่วนบุคคล',
+  'auth.phone': 'โทรศัพท์มือถือ',
+  'auth.firstName': 'ชื่อ',
+  'auth.lastName': 'นามสกุล',
+  'auth.confirmPassword': 'ยืนยันรหัสผ่าน',
+  'auth.referralCode': 'รหัสอ้างอิง',
+  'auth.continue': 'ดำเนินการต่อ',
+  'auth.back': 'กลับ',
+  'auth.termsNotice': 'หากคุณสมัครสมาชิก จะถือว่าคุณได้ยินยอม ข้อกำหนดและเงื่อนไข พร้อมทั้ง นโยบายความเป็นส่วนตัว และยืนยันแล้วว่าคุณมีอายุ 10 ปีขึ้นไป',
   
   // Common actions
   'action.book': 'จองเลย',
