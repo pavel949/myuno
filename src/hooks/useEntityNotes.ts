@@ -1,8 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
 
+import { toast } from 'sonner';
 export interface EntityNote {
   id: string;
   user_id: string;
@@ -36,8 +36,7 @@ export type EntityType =
  */
 export function useEntityNotes(entityType: EntityType, entityId: string) {
   const { user } = useAuth();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
+const queryClient = useQueryClient();
 
   const { data: notes, isLoading } = useQuery({
     queryKey: ['entity-notes', entityType, entityId],
@@ -104,10 +103,10 @@ export function useEntityNotes(entityType: EntityType, entityId: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['entity-notes', entityType, entityId] });
-      toast({ title: 'Заметка добавлена' });
+      toast('Заметка добавлена');
     },
     onError: () => {
-      toast({ title: 'Ошибка добавления заметки', variant: 'destructive' });
+      toast.error('Ошибка добавления заметки');
     },
   });
 
@@ -150,9 +149,8 @@ export function useEntityNotes(entityType: EntityType, entityId: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['entity-notes', entityType, entityId] });
-      toast({ title: 'Заметка удалена' });
-    },
-  });
+      toast('Заметка удалена' });
+    });
 
   const importantNotes = notes?.filter(n => n.is_important) || [];
   const notesCount = notes?.length || 0;

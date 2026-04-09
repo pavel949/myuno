@@ -7,7 +7,7 @@
  */
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { translations, type Language } from '@/i18n';
+import { getTranslations, loadTranslations as loadI18n, type Language } from '@/i18n';
 
 export type { Language };
 
@@ -38,9 +38,17 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const [isLoadingTranslations, setIsLoadingTranslations] = useState(true);
 
   const setLanguage = useCallback((lang: Language) => {
-    setLanguageState(lang);
-    localStorage.setItem('myuno-language', lang);
+    // Preload static translations for the new language before switching
+    loadI18n(lang).then(() => {
+      setLanguageState(lang);
+      localStorage.setItem('myuno-language', lang);
+    });
   }, []);
+
+  // Eagerly load static translations for current language
+  useEffect(() => {
+    loadI18n(language);
+  }, [language]);
 
   // Load translations from DB with caching
   useEffect(() => {
@@ -132,7 +140,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       const value = custom[language];
       if (value) return value;
     }
-    return translations[language][key] || translations['en'][key] || key;
+    return getTranslations(language)[key] || getTranslations('en')[key] || key;
   }, [language, customTranslations]);
 
   const value = useMemo(() => ({

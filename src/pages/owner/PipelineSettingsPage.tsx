@@ -11,10 +11,10 @@ import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, Plus, GripVertical, Trash2, Save, Pencil, X, Check, Upload } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { TAG_COLOR_PALETTE } from '@/hooks/useContactTags';
 
+import { toast } from 'sonner';
 // ─── Reusable option list editor ───
 
 function OptionListEditor({
@@ -30,9 +30,7 @@ function OptionListEditor({
   const createOption = useCreateCrmOption();
   const updateOption = useUpdateCrmOption();
   const deleteOption = useDeleteCrmOption();
-  const { toast } = useToast();
-
-  const [showAdd, setShowAdd] = useState(false);
+const [showAdd, setShowAdd] = useState(false);
   const [newItem, setNewItem] = useState({ value: '', label_en: '', label_ru: '', color: '#3b82f6' });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editData, setEditData] = useState({ label_en: '', label_ru: '', color: '' });
@@ -40,7 +38,7 @@ function OptionListEditor({
   const handleAdd = async () => {
     const value = newItem.value.trim().toLowerCase().replace(/\s+/g, '_');
     if (!value || !newItem.label_en.trim() || !newItem.label_ru.trim()) {
-      toast({ title: isRu ? 'Заполните все поля' : 'Fill all fields', variant: 'destructive' });
+      toast.error(isRu ? 'Заполните все поля' : 'Fill all fields');
       return;
     }
     try {
@@ -59,24 +57,24 @@ function OptionListEditor({
         is_active: true,
         sort_order: options.length + 1,
       });
-      toast({ title: isRu ? 'Добавлено' : 'Added' });
+      toast(isRu ? 'Добавлено' : 'Added');
       setNewItem({ value: '', label_en: '', label_ru: '', color: '#3b82f6' });
       setShowAdd(false);
     } catch {
-      toast({ title: isRu ? 'Ошибка (возможно дубликат)' : 'Error (possibly duplicate)', variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка (возможно дубликат)' : 'Error (possibly duplicate)');
     }
   };
 
   const handleDelete = async (opt: CrmCustomOption) => {
     if (opt.is_system) {
-      toast({ title: isRu ? 'Системный элемент нельзя удалить' : 'Cannot delete system item', variant: 'destructive' });
+      toast.error(isRu ? 'Системный элемент нельзя удалить' : 'Cannot delete system item');
       return;
     }
     try {
       await deleteOption.mutateAsync(opt.id);
-      toast({ title: isRu ? 'Удалено' : 'Deleted' });
+      toast(isRu ? 'Удалено' : 'Deleted');
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 
@@ -89,9 +87,9 @@ function OptionListEditor({
     try {
       await updateOption.mutateAsync({ id, label_en: editData.label_en, label_ru: editData.label_ru, color: editData.color });
       setEditingId(null);
-      toast({ title: isRu ? 'Сохранено' : 'Saved' });
+      toast(isRu ? 'Сохранено' : 'Saved');
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 
@@ -189,9 +187,7 @@ function StagesEditor({ companyId, isRu }: { companyId: string; isRu: boolean })
   const { data: stages = [], isLoading } = useAllPipelineStages(companyId);
   const createStage = useCreatePipelineStage();
   const deleteStage = useDeletePipelineStage();
-  const { toast } = useToast();
-
-  const [selectedType, setSelectedType] = useState<DealType>('sale');
+const [selectedType, setSelectedType] = useState<DealType>('sale');
   const [showAdd, setShowAdd] = useState(false);
   const [newStage, setNewStage] = useState({ stage_key: '', name_en: '', name_ru: '', short_label: '', color: '#6366f1', probability: '0.5' });
 
@@ -199,7 +195,7 @@ function StagesEditor({ companyId, isRu }: { companyId: string; isRu: boolean })
 
   const handleAdd = async () => {
     if (!newStage.stage_key || !newStage.name_en || !newStage.name_ru) {
-      toast({ title: isRu ? 'Заполните все поля' : 'Fill all fields', variant: 'destructive' });
+      toast.error(isRu ? 'Заполните все поля' : 'Fill all fields');
       return;
     }
     try {
@@ -216,24 +212,24 @@ function StagesEditor({ companyId, isRu }: { companyId: string; isRu: boolean })
         is_system: false,
         is_active: true,
       });
-      toast({ title: isRu ? 'Этап добавлен' : 'Stage added' });
+      toast(isRu ? 'Этап добавлен' : 'Stage added');
       setNewStage({ stage_key: '', name_en: '', name_ru: '', short_label: '', color: '#6366f1', probability: '0.5' });
       setShowAdd(false);
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 
   const handleDelete = async (stage: PipelineStage) => {
     if (stage.is_system) {
-      toast({ title: isRu ? 'Системный этап нельзя удалить' : 'Cannot delete system stage', variant: 'destructive' });
+      toast.error(isRu ? 'Системный этап нельзя удалить' : 'Cannot delete system stage');
       return;
     }
     try {
       await deleteStage.mutateAsync(stage.id);
-      toast({ title: isRu ? 'Этап удалён' : 'Stage deleted' });
+      toast(isRu ? 'Этап удалён' : 'Stage deleted');
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 
@@ -242,9 +238,9 @@ function StagesEditor({ companyId, isRu }: { companyId: string; isRu: boolean })
       for (const s of DEFAULT_STAGES.map(s => ({ ...s, deal_type: dealType, company_id: companyId }))) {
         await createStage.mutateAsync(s);
       }
-      toast({ title: isRu ? 'Стандартные этапы созданы' : 'Default stages created' });
+      toast(isRu ? 'Стандартные этапы созданы' : 'Default stages created');
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 

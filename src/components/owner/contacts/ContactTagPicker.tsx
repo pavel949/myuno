@@ -11,8 +11,8 @@ import { X, Plus, Tag, Settings2, Trash2, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useContactTags, useCreateContactTag, useDeleteContactTag, ContactTag, TAG_COLOR_PALETTE } from '@/hooks/useContactTags';
-import { useToast } from '@/hooks/use-toast';
 
+import { toast } from 'sonner';
 interface ContactTagPickerProps {
   companyId: string | undefined;
   selectedTags: string[];  // tag names stored on contact
@@ -27,9 +27,7 @@ export function ContactTagPicker({ companyId, selectedTags, onToggle, readonly, 
   const { data: tags = [] } = useContactTags(companyId);
   const createTag = useCreateContactTag();
   const deleteTag = useDeleteContactTag();
-  const { toast } = useToast();
-
-  const [open, setOpen] = useState(false);
+const [open, setOpen] = useState(false);
   const [newTagName, setNewTagName] = useState('');
   const [newTagColor, setNewTagColor] = useState(TAG_COLOR_PALETTE[7]); // blue default
   const [showManage, setShowManage] = useState(false);
@@ -38,7 +36,7 @@ export function ContactTagPicker({ companyId, selectedTags, onToggle, readonly, 
     const name = newTagName.trim();
     if (!name || !companyId) return;
     if (tags.some(t => t.name.toLowerCase() === name.toLowerCase())) {
-      toast({ title: isRu ? 'Тег уже существует' : 'Tag already exists', variant: 'destructive' });
+      toast.error(isRu ? 'Тег уже существует' : 'Tag already exists');
       return;
     }
     try {
@@ -46,7 +44,7 @@ export function ContactTagPicker({ companyId, selectedTags, onToggle, readonly, 
       onToggle(name); // auto-select the new tag
       setNewTagName('');
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 
@@ -58,7 +56,7 @@ export function ContactTagPicker({ companyId, selectedTags, onToggle, readonly, 
         onToggle(tag.name);
       }
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 

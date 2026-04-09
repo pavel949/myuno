@@ -1,4 +1,4 @@
-import { useSupabaseCRUD } from './useSupabaseCRUD';
+import { useVerticalCRUD } from './useVerticalCRUD';
 
 export type EntityType = 'institution' | 'individual';
 
@@ -38,12 +38,7 @@ export interface VendorEducationProvider {
 }
 
 export function useVendorEducation(providerId?: string) {
-  const { items, isLoading, create, update, remove, refetch } = useSupabaseCRUD<VendorEducationProvider>({
-    table: 'education_providers',
-    providerId,
-    providerIdField: 'provider_id',
-    orderByColumn: 'created_at',
-    orderAscending: false,
+  const { items, isLoading, create, update, remove, refetch } = useVerticalCRUD<VendorEducationProvider>('education', providerId, {
     select: 'id,provider_id,name_en,name_ru,description_en,description_ru,provider_type,subjects,age_groups,qualifications,languages,price_per_hour,price_per_course,currency,address,district,phone,email,website,cover_image,images,is_online,is_active,is_featured,is_verified,rating,review_count,lat,lng,created_at,updated_at',
   });
 

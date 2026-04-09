@@ -9,7 +9,7 @@ import { PremiumButton } from '@/components/uno/PremiumButton';
 import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
 import { cn } from '@/lib/utils';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { PasswordStrengthIndicator } from '@/components/auth/PasswordStrengthIndicator';
 import { UnderlineInput } from '@/components/auth/UnderlineInput';
@@ -42,7 +42,6 @@ export default function Auth() {
 
   const { user, signIn, signUp, isLoading: authLoading } = useAuth();
   const { t, language } = useLanguage();
-  const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
   const isRu = language === 'ru';
@@ -122,14 +121,12 @@ export default function Auth() {
   const handleSignup = async () => {
     if (!validateRegisterStep()) return;
     if (!termsAccepted) {
-      toast({
-        title: isTh ? 'กรุณายอมรับข้อกำหนด' : isRu ? 'Примите условия' : 'Accept terms',
+      toast.error(isTh ? 'กรุณายอมรับข้อกำหนด' : isRu ? 'Примите условия' : 'Accept terms', {
         description: isTh
           ? 'คุณต้องยอมรับข้อกำหนดและเงื่อนไข'
           : isRu
             ? 'Необходимо принять Условия использования'
             : 'You must accept the Terms of Service',
-        variant: 'destructive',
       });
       return;
     }
@@ -158,10 +155,8 @@ export default function Auth() {
               ? 'Пароль должен содержать не менее 6 символов'
               : 'Password must be at least 6 characters';
         }
-        toast({
-          title: isTh ? 'การลงทะเบียนล้มเหลว' : isRu ? 'Ошибка регистрации' : 'Registration failed',
+        toast.error(isTh ? 'การลงทะเบียนล้มเหลว' : isRu ? 'Ошибка регистрации' : 'Registration failed', {
           description,
-          variant: 'destructive',
         });
       } else {
         if (referralCode && data?.user) {
@@ -186,8 +181,7 @@ export default function Auth() {
           },
         }).catch(err => console.error('Signup notification error:', err));
 
-        toast({
-          title: isTh ? 'ยินดีต้อนรับ!' : isRu ? '🎉 Добро пожаловать!' : '🎉 Welcome aboard!',
+        toast(isTh ? 'ยินดีต้อนรับ!' : isRu ? '🎉 Добро пожаловать!' : '🎉 Welcome aboard!', {
           description: isTh
             ? 'สร้างบัญชีเรียบร้อยแล้ว กรุณาตรวจสอบอีเมลเพื่อยืนยัน'
             : isRu
@@ -198,14 +192,12 @@ export default function Auth() {
         navigate(redirectPath, { replace: true });
       }
     } catch {
-      toast({
-        title: isTh ? 'ข้อผิดพลาด' : isRu ? 'Ошибка' : 'Error',
+      toast.error(isTh ? 'ข้อผิดพลาด' : isRu ? 'Ошибка' : 'Error', {
         description: isTh
           ? 'เกิดข้อผิดพลาดที่ไม่คาดคิด'
           : isRu
             ? 'Произошла непредвиденная ошибка'
             : 'An unexpected error occurred',
-        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
@@ -238,28 +230,23 @@ export default function Auth() {
           description = error.message;
         }
 
-        toast({
-          title: isTh ? 'เข้าสู่ระบบล้มเหลว' : isRu ? 'Ошибка входа' : 'Login failed',
+        toast.error(isTh ? 'เข้าสู่ระบบล้มเหลว' : isRu ? 'Ошибка входа' : 'Login failed', {
           description,
-          variant: 'destructive',
         });
       } else {
         setLoginAttempts(0);
-        toast({
-          title: t('auth.welcomeBack'),
+        toast(t('auth.welcomeBack'), {
           description: isTh ? 'เข้าสู่ระบบสำเร็จ' : isRu ? 'Вход выполнен успешно' : 'Successfully logged in',
         });
       }
     } catch {
       setLoginAttempts(prev => prev + 1);
-      toast({
-        title: isTh ? 'ข้อผิดพลาด' : isRu ? 'Ошибка' : 'Error',
+      toast.error(isTh ? 'ข้อผิดพลาด' : isRu ? 'Ошибка' : 'Error', {
         description: isTh
           ? 'เกิดข้อผิดพลาดที่ไม่คาดคิด'
           : isRu
             ? 'Произошла непредвиденная ошибка'
             : 'An unexpected error occurred',
-        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);

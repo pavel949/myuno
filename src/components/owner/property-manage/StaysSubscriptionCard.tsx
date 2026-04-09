@@ -11,7 +11,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
 import {
   useStaysTiers,
   usePropertyStaysSubscription,
@@ -19,6 +18,7 @@ import {
 } from '@/hooks/useStaysSubscription';
 import { cn } from '@/lib/utils';
 
+import { toast } from 'sonner';
 interface StaysSubscriptionCardProps {
   propertyId: string;
   isRu: boolean;
@@ -27,8 +27,7 @@ interface StaysSubscriptionCardProps {
 const ACTIVE_LIKE = new Set(['active', 'trialing', 'past_due']);
 
 export function StaysSubscriptionCard({ propertyId, isRu }: StaysSubscriptionCardProps) {
-  const { toast } = useToast();
-  const [searchParams, setSearchParams] = useSearchParams();
+const [searchParams, setSearchParams] = useSearchParams();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedTierCode, setSelectedTierCode] = useState<string>('starter');
 
@@ -39,8 +38,7 @@ export function StaysSubscriptionCard({ propertyId, isRu }: StaysSubscriptionCar
   useEffect(() => {
     const flag = searchParams.get('stays_sub');
     if (flag === 'success') {
-      toast({
-        title: isRu ? 'Подписка Stays' : 'Stays subscription',
+      toast(isRu ? 'Подписка Stays' : 'Stays subscription', {
         description: isRu
           ? 'Оплата прошла успешно. Статус обновится через несколько секунд.'
           : 'Payment successful. Status will update shortly.',
@@ -49,15 +47,12 @@ export function StaysSubscriptionCard({ propertyId, isRu }: StaysSubscriptionCar
       next.delete('stays_sub');
       setSearchParams(next, { replace: true });
     } else if (flag === 'cancelled') {
-      toast({
-        title: isRu ? 'Оплата отменена' : 'Checkout cancelled',
-        variant: 'destructive',
-      });
+      toast.error(isRu ? 'Оплата отменена' : 'Checkout cancelled');
       const next = new URLSearchParams(searchParams);
       next.delete('stays_sub');
       setSearchParams(next, { replace: true });
     }
-  }, [searchParams, setSearchParams, toast, isRu]);
+  }, [searchParams, setSearchParams, isRu]);
 
   const loading = tiersLoading || subLoading;
   const status = subscription?.status ?? null;
@@ -72,10 +67,8 @@ export function StaysSubscriptionCard({ propertyId, isRu }: StaysSubscriptionCar
       });
       window.location.href = url;
     } catch (e) {
-      toast({
-        title: isRu ? 'Ошибка' : 'Error',
+      toast.error(isRu ? 'Ошибка' : 'Error', {
         description: e instanceof Error ? e.message : 'Checkout failed',
-        variant: 'destructive',
       });
     }
   };

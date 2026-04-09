@@ -19,10 +19,10 @@ import {
   MapPin, Phone, Mail, Globe, Instagram, Star,
   MessageSquare, Sparkles, Loader2, Facebook, Send
 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
+import { toast } from 'sonner';
 interface VendorProspectPanelProps {
   prospect: VendorProspect;
 }
@@ -30,9 +30,7 @@ interface VendorProspectPanelProps {
 export function VendorProspectPanel({ prospect }: VendorProspectPanelProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const { toast } = useToast();
-  
-  const updateProspect = useUpdateProspect();
+const updateProspect = useUpdateProspect();
   const scoreProspect = useScoreProspect();
   const logActivity = useLogActivity();
   
@@ -51,9 +49,9 @@ export function VendorProspectPanel({ prospect }: VendorProspectPanelProps) {
     setIsScoring(true);
     try {
       await scoreProspect.mutateAsync(prospect.id);
-      toast({ title: isRu ? 'Оценка обновлена' : 'Score updated' });
+      toast(isRu ? 'Оценка обновлена' : 'Score updated');
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Failed', variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка' : 'Failed');
     } finally {
       setIsScoring(false);
     }
@@ -63,7 +61,7 @@ export function VendorProspectPanel({ prospect }: VendorProspectPanelProps) {
     if (!noteText.trim()) return;
     logActivity.mutate({ prospect_id: prospect.id, activity_type: 'note', new_value: noteText });
     setNoteText('');
-    toast({ title: isRu ? 'Заметка добавлена' : 'Note added' });
+    toast(isRu ? 'Заметка добавлена' : 'Note added');
   };
 
   return (

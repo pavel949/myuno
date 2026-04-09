@@ -7,7 +7,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
-import { toast } from '@/hooks/use-toast';
 import { ORDER_STATUS_CONFIG } from '@/types/orders';
 import type { OrderStatus } from '@/types/orders';
 import {
@@ -16,6 +15,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 
+import { toast } from 'sonner';
 interface AdminOrderDetailSheetProps {
   orderId: string | null;
   onClose: () => void;
@@ -115,8 +115,7 @@ export function AdminOrderDetailSheet({ orderId, onClose, onStatusChanged }: Adm
       const label = isRu
         ? ORDER_STATUS_CONFIG[newStatus]?.labelRu
         : ORDER_STATUS_CONFIG[newStatus]?.labelEn;
-      toast({
-        title: isRu ? 'Статус обновлён' : 'Status Updated',
+      toast(isRu ? 'Статус обновлён' : 'Status Updated', {
         description: isRu ? `Заказ переведён в "${label}"` : `Order moved to "${label}"`,
       });
       queryClient.invalidateQueries({ queryKey: ['admin-order-detail', orderId] });
@@ -126,10 +125,8 @@ export function AdminOrderDetailSheet({ orderId, onClose, onStatusChanged }: Adm
       setCancelReason('');
     },
     onError: (err: any) => {
-      toast({
-        title: isRu ? 'Ошибка' : 'Error',
+      toast.error(isRu ? 'Ошибка' : 'Error', {
         description: err.message,
-        variant: 'destructive',
       });
     },
   });
@@ -169,7 +166,7 @@ export function AdminOrderDetailSheet({ orderId, onClose, onStatusChanged }: Adm
     ].filter(Boolean).join('\n');
 
     navigator.clipboard.writeText(lines);
-    toast({ title: isRu ? 'Скопировано!' : 'Copied!' });
+    toast(isRu ? 'Скопировано!' : 'Copied!');
   };
 
   const openWhatsApp = () => {

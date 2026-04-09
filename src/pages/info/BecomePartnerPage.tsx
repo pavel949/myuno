@@ -26,10 +26,10 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 
+import { toast } from 'sonner';
 const businessCategories = [
   { id: 'services', icon: Briefcase, labelRu: 'Услуги', labelEn: 'Services' },
   { id: 'food', icon: Utensils, labelRu: 'Еда и напитки', labelEn: 'Food & Drinks' },
@@ -51,8 +51,7 @@ const benefits = [
 export default function BecomePartnerPage() {
   const { language } = useLanguage();
   const { user } = useAuth();
-  const { toast } = useToast();
-  const navigate = useNavigate();
+const navigate = useNavigate();
   
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -70,10 +69,7 @@ export default function BecomePartnerPage() {
     e.preventDefault();
     
     if (!selectedCategory) {
-      toast({
-        title: language === 'ru' ? 'Выберите категорию' : 'Select a category',
-        variant: 'destructive',
-      });
+      toast.error(language === 'ru' ? 'Выберите категорию' : 'Select a category');
       return;
     }
 
@@ -105,20 +101,17 @@ export default function BecomePartnerPage() {
       }
 
       setIsSubmitted(true);
-      toast({
-        title: language === 'ru' ? 'Заявка отправлена!' : 'Application submitted!',
+      toast(language === 'ru' ? 'Заявка отправлена!' : 'Application submitted!', {
         description: language === 'ru'
           ? 'Мы свяжемся с вами в ближайшее время'
           : 'We will contact you soon',
       });
     } catch (error) {
       console.error('Error submitting application:', error);
-      toast({
-        title: language === 'ru' ? 'Ошибка' : 'Error',
+      toast.error(language === 'ru' ? 'Ошибка' : 'Error', {
         description: language === 'ru' 
           ? 'Не удалось отправить заявку. Попробуйте позже.' 
           : 'Failed to submit application. Please try again.',
-        variant: 'destructive',
       });
     } finally {
       setIsSubmitting(false);

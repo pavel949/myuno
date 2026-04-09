@@ -1,6 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useToast } from '@/hooks/use-toast';
 import { usePropertyAvailabilityManagement } from '@/hooks/usePropertyAvailabilityManagement';
 import { usePropertyBookings } from '@/hooks/usePropertyBookings';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -13,6 +12,7 @@ import { ru } from 'date-fns/locale';
 import { Lock, Unlock, AlertTriangle } from 'lucide-react';
 import type { DateRange } from 'react-day-picker';
 
+import { toast } from 'sonner';
 interface BlockDatesDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -31,8 +31,7 @@ export function BlockDatesDialog({
   onSuccess,
 }: BlockDatesDialogProps) {
   const { language } = useLanguage();
-  const { toast } = useToast();
-  const isRu = language === 'ru';
+const isRu = language === 'ru';
   
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [note, setNote] = useState('');
@@ -79,12 +78,10 @@ export function BlockDatesDialog({
     if (!dateRange?.from) return;
     
     if (mode === 'block' && hasConflicts) {
-      toast({
-        title: isRu ? 'Ошибка' : 'Error',
+      toast.error(isRu ? 'Ошибка' : 'Error', {
         description: isRu 
           ? 'Невозможно заблокировать даты с существующими бронированиями'
           : 'Cannot block dates with existing bookings',
-        variant: 'destructive',
       });
       return;
     }
@@ -105,8 +102,7 @@ export function BlockDatesDialog({
         
         await upsertAvailability(entries);
         
-        toast({
-          title: isRu ? 'Даты закрыты' : 'Dates Blocked',
+        toast(isRu ? 'Даты закрыты' : 'Dates Blocked', {
           description: isRu 
             ? `${dates.length} ${dates.length === 1 ? 'дата закрыта' : 'дат закрыто'}`
             : `${dates.length} ${dates.length === 1 ? 'date' : 'dates'} blocked`,
@@ -115,8 +111,7 @@ export function BlockDatesDialog({
         // Unblock dates
         await deleteAvailability(dates);
         
-        toast({
-          title: isRu ? 'Даты открыты' : 'Dates Unblocked',
+        toast(isRu ? 'Даты открыты' : 'Dates Unblocked', {
           description: isRu 
             ? `${dates.length} ${dates.length === 1 ? 'дата открыта' : 'дат открыто'}`
             : `${dates.length} ${dates.length === 1 ? 'date' : 'dates'} unblocked`,
@@ -129,10 +124,8 @@ export function BlockDatesDialog({
       setNote('');
     } catch (error) {
       console.error('Error managing dates:', error);
-      toast({
-        title: isRu ? 'Ошибка' : 'Error',
+      toast.error(isRu ? 'Ошибка' : 'Error', {
         description: isRu ? 'Не удалось обновить даты' : 'Failed to update dates',
-        variant: 'destructive',
       });
     } finally {
       setIsSubmitting(false);

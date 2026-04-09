@@ -20,9 +20,9 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
-import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
+import { toast } from 'sonner';
 interface Props {
   contactId: string;
   companyId: string;
@@ -32,8 +32,7 @@ export function RemindersList({ contactId, companyId }: Props) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const locale = isRu ? ru : enUS;
-  const { toast } = useToast();
-  const { user } = useAuth();
+const { user } = useAuth();
 
   const { data: reminders = [], isLoading } = useContactReminders(contactId);
   const createMutation = useCreateContactReminder();
@@ -54,30 +53,30 @@ export function RemindersList({ contactId, companyId }: Props) {
         note: note.trim() || undefined,
         createdBy: user?.id,
       });
-      toast({ title: isRu ? 'Напоминание создано' : 'Reminder created' });
+      toast(isRu ? 'Напоминание создано' : 'Reminder created');
       setDialogOpen(false);
       setReminderAt('');
       setNote('');
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 
   const handleDismiss = async (id: string) => {
     try {
       await dismissMutation.mutateAsync({ id, contactId });
-      toast({ title: isRu ? 'Выполнено' : 'Done' });
+      toast(isRu ? 'Выполнено' : 'Done');
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 
   const handleDelete = async (id: string) => {
     try {
       await deleteMutation.mutateAsync({ id, contactId });
-      toast({ title: isRu ? 'Удалено' : 'Deleted' });
+      toast(isRu ? 'Удалено' : 'Deleted');
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 

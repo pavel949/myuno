@@ -2,7 +2,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useToast } from '@/hooks/use-toast';
 import { useUserContext } from '@/hooks/useUserContext';
 import { openWhatsApp } from '@/hooks/useChat';
 import { format } from 'date-fns';
@@ -10,6 +9,7 @@ import { createErrorHandler } from '@/lib/errorHandler';
 import { getLocalizedRpcError, isRpcError } from '@/lib/rpcErrorMessages';
 import type { Database } from '@/integrations/supabase/types';
 
+import { toast } from 'sonner';
 const errorLog = createErrorHandler('useOrders');
 
 // Type definitions
@@ -146,8 +146,7 @@ export interface CreateOrderResult {
 export function useOrders() {
   const { user } = useAuth();
   const { language } = useLanguage();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
+const queryClient = useQueryClient();
 
   const t = (key: string) => {
     const translations: Record<string, Record<string, string>> = {
@@ -190,7 +189,7 @@ export function useOrders() {
   const createOrderMutation = useMutation({
     mutationFn: async (input: CreateOrderInput): Promise<CreateOrderResult> => {
       if (!user?.id) {
-        toast({ title: t('order.loginRequired'), variant: 'destructive' });
+        toast.error(t('order.loginRequired'));
         return { success: false, error: 'not_authenticated' };
       }
 
@@ -327,8 +326,7 @@ export function useOrders() {
         },
       }).catch(err => errorLog.silent(err, 'send_admin_notification'));
 
-      toast({ 
-        title: t('order.success'),
+      toast(t('order.success'), {
         description: orderNumber,
       });
 
@@ -354,10 +352,8 @@ export function useOrders() {
       errorLog.error(error, 'create_order');
       // P0 FIX: Use localized error message instead of generic one
       const localizedError = getLocalizedRpcError(error, language as 'en' | 'ru');
-      toast({ 
-        title: t('order.error'), 
+      toast.error(t('order.error'), {
         description: localizedError,
-        variant: 'destructive' 
       });
     },
   });
@@ -392,7 +388,7 @@ export function useOrders() {
         reason: 'Cancelled by customer',
       });
 
-      toast({ title: t('order.cancelled') });
+      toast(t('order.cancelled'));
       return true;
     },
     onSuccess: () => {

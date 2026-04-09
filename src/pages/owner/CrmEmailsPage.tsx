@@ -11,9 +11,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Plus, Mail, Send, Trash2, Eye } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 
+import { toast } from 'sonner';
 const STATUS_BADGE: Record<string, string> = {
   draft: 'secondary',
   sent: 'default',
@@ -30,8 +30,7 @@ export default function CrmEmailsPage() {
   const { data: emails = [], isLoading, isError: emailsError, refetch: refetchEmails } = useCrmEmails(companyId);
   const createEmail = useCreateCrmEmail();
   const sendEmail = useSendCrmEmail();
-  const { toast } = useToast();
-  const [open, setOpen] = useState(false);
+const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ to_email: '', subject: '', body_html: '' });
 
   const handleCreate = async () => {
@@ -52,18 +51,18 @@ export default function CrmEmailsPage() {
       });
       setOpen(false);
       setForm({ to_email: '', subject: '', body_html: '' });
-      toast({ title: isRu ? 'Черновик создан' : 'Draft created' });
+      toast(isRu ? 'Черновик создан' : 'Draft created');
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 
   const handleSend = async (id: string) => {
     try {
       await sendEmail.mutateAsync(id);
-      toast({ title: isRu ? 'Email отправлен' : 'Email sent' });
+      toast(isRu ? 'Email отправлен' : 'Email sent');
     } catch {
-      toast({ title: isRu ? 'Ошибка отправки' : 'Send failed', variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка отправки' : 'Send failed');
     }
   };
 

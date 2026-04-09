@@ -1,4 +1,4 @@
-import { useSupabaseCRUD } from './useSupabaseCRUD';
+import { useVerticalCRUD } from './useVerticalCRUD';
 
 export interface VendorClinic {
   id: string;
@@ -33,12 +33,7 @@ export interface VendorClinic {
 }
 
 export function useVendorClinics(providerId?: string) {
-  const { items, isLoading, create, update, remove, refetch } = useSupabaseCRUD<VendorClinic>({
-    table: 'clinics',
-    providerId,
-    providerIdField: 'provider_id',
-    orderByColumn: 'created_at',
-    orderAscending: false,
+  const { items, isLoading, create, update, remove, refetch } = useVerticalCRUD<VendorClinic>('medical', providerId, {
     select: 'id,provider_id,name_en,name_ru,description_en,description_ru,clinic_type,specialty,cover_image,images,address,district,lat,lng,phone,email,website,working_hours,languages,is_24h,is_verified,is_featured,is_active,rating,review_count,consultation_price,currency,created_at,updated_at',
   });
 

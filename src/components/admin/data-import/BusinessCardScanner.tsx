@@ -8,11 +8,11 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import browserImageCompression from 'browser-image-compression';
 
+import { toast } from 'sonner';
 interface ExtractedData {
   company_name?: string;
   company_name_thai?: string;
@@ -67,8 +67,7 @@ const VERTICALS = [
 
 export function BusinessCardScanner({ onProviderCreated }: BusinessCardScannerProps) {
   const { language } = useLanguage();
-  const { toast } = useToast();
-  const isRu = language === 'ru';
+const isRu = language === 'ru';
   
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -104,13 +103,11 @@ export function BusinessCardScanner({ onProviderCreated }: BusinessCardScannerPr
       reader.readAsDataURL(compressed);
     } catch (err) {
       console.error('Error processing file:', err);
-      toast({
-        title: isRu ? 'Ошибка' : 'Error',
+      toast.error(isRu ? 'Ошибка' : 'Error', {
         description: isRu ? 'Не удалось обработать изображение' : 'Failed to process image',
-        variant: 'destructive',
       });
     }
-  }, [isRu, toast]);
+  }, [isRu]);
 
   // Start camera
   const startCamera = useCallback(async () => {
@@ -126,13 +123,11 @@ export function BusinessCardScanner({ onProviderCreated }: BusinessCardScannerPr
       }
     } catch (err) {
       console.error('Camera access error:', err);
-      toast({
-        title: isRu ? 'Ошибка камеры' : 'Camera Error',
+      toast.error(isRu ? 'Ошибка камеры' : 'Camera Error', {
         description: isRu ? 'Не удалось получить доступ к камере' : 'Failed to access camera',
-        variant: 'destructive',
       });
     }
-  }, [isRu, toast]);
+  }, [isRu]);
 
   // Stop camera
   const stopCamera = useCallback(() => {
@@ -178,31 +173,26 @@ export function BusinessCardScanner({ onProviderCreated }: BusinessCardScannerPr
       setExtractedData(data);
       setEditedData(data);
 
-      toast({
-        title: isRu ? 'Карточка распознана' : 'Card Scanned',
+      toast(isRu ? 'Карточка распознана' : 'Card Scanned', {
         description: isRu 
           ? `Уверенность: ${data.confidence}%` 
           : `Confidence: ${data.confidence}%`,
       });
     } catch (err) {
       console.error('Scan error:', err);
-      toast({
-        title: isRu ? 'Ошибка сканирования' : 'Scan Error',
+      toast.error(isRu ? 'Ошибка сканирования' : 'Scan Error', {
         description: isRu ? 'Не удалось распознать карточку' : 'Failed to scan card',
-        variant: 'destructive',
       });
     } finally {
       setIsProcessing(false);
     }
-  }, [isRu, toast]);
+  }, [isRu]);
 
   // Create provider from extracted data
   const createProvider = useCallback(async () => {
     if (!editedData?.company_name) {
-      toast({
-        title: isRu ? 'Ошибка' : 'Error',
+      toast.error(isRu ? 'Ошибка' : 'Error', {
         description: isRu ? 'Название компании обязательно' : 'Company name is required',
-        variant: 'destructive',
       });
       return;
     }
@@ -236,8 +226,7 @@ export function BusinessCardScanner({ onProviderCreated }: BusinessCardScannerPr
 
       if (error) throw error;
 
-      toast({
-        title: isRu ? 'Провайдер создан' : 'Provider Created',
+      toast(isRu ? 'Провайдер создан' : 'Provider Created', {
         description: editedData.company_name,
       });
 
@@ -250,15 +239,13 @@ export function BusinessCardScanner({ onProviderCreated }: BusinessCardScannerPr
 
     } catch (err) {
       console.error('Create provider error:', err);
-      toast({
-        title: isRu ? 'Ошибка создания' : 'Creation Error',
+      toast.error(isRu ? 'Ошибка создания' : 'Creation Error', {
         description: isRu ? 'Не удалось создать провайдера' : 'Failed to create provider',
-        variant: 'destructive',
       });
     } finally {
       setIsCreating(false);
     }
-  }, [editedData, isRu, toast, onProviderCreated]);
+  }, [editedData, isRu, onProviderCreated]);
 
   // Reset scanner
   const resetScanner = useCallback(() => {

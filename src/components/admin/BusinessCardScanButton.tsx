@@ -8,10 +8,10 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import browserImageCompression from 'browser-image-compression';
 
+import { toast } from 'sonner';
 export interface ScannedProviderData {
   name: string;
   business_category: string;
@@ -37,8 +37,7 @@ export function BusinessCardScanButton({
   className,
 }: BusinessCardScanButtonProps) {
   const { language } = useLanguage();
-  const { toast } = useToast();
-  const isRu = language === 'ru';
+const isRu = language === 'ru';
 
   const [isOpen, setIsOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -109,8 +108,7 @@ export function BusinessCardScanButton({
 
       onDataExtracted(formData);
 
-      toast({
-        title: isRu ? 'Данные извлечены' : 'Data Extracted',
+      toast(isRu ? 'Данные извлечены' : 'Data Extracted', {
         description: isRu
           ? `Уверенность: ${data.confidence}%. Проверьте и сохраните.`
           : `Confidence: ${data.confidence}%. Review and save.`,
@@ -119,15 +117,13 @@ export function BusinessCardScanButton({
       handleClose();
     } catch (err) {
       console.error('Scan error:', err);
-      toast({
-        title: isRu ? 'Ошибка сканирования' : 'Scan Error',
+      toast.error(isRu ? 'Ошибка сканирования' : 'Scan Error', {
         description: isRu ? 'Не удалось распознать карточку' : 'Failed to scan card',
-        variant: 'destructive',
       });
     } finally {
       setIsProcessing(false);
     }
-  }, [isRu, toast, onDataExtracted, handleClose]);
+  }, [isRu, onDataExtracted, handleClose]);
 
   const handleFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -149,13 +145,11 @@ export function BusinessCardScanButton({
       reader.readAsDataURL(compressed);
     } catch (err) {
       console.error('Error processing file:', err);
-      toast({
-        title: isRu ? 'Ошибка' : 'Error',
+      toast.error(isRu ? 'Ошибка' : 'Error', {
         description: isRu ? 'Не удалось обработать изображение' : 'Failed to process image',
-        variant: 'destructive',
       });
     }
-  }, [isRu, toast, processImage]);
+  }, [isRu, processImage]);
 
   // CRITICAL: getUserMedia called directly in click handler for gesture context
   const startCamera = useCallback(async () => {
@@ -178,22 +172,18 @@ export function BusinessCardScanButton({
       setIsCameraActive(false);
       
       if (err.name === 'NotAllowedError') {
-        toast({
-          title: isRu ? 'Доступ запрещён' : 'Access Denied',
+        toast.error(isRu ? 'Доступ запрещён' : 'Access Denied', {
           description: isRu 
             ? 'Разрешите доступ к камере в настройках браузера' 
             : 'Please allow camera access in browser settings',
-          variant: 'destructive',
         });
       } else {
-        toast({
-          title: isRu ? 'Ошибка камеры' : 'Camera Error',
+        toast.error(isRu ? 'Ошибка камеры' : 'Camera Error', {
           description: isRu ? 'Не удалось получить доступ к камере' : 'Failed to access camera',
-          variant: 'destructive',
         });
       }
     }
-  }, [isRu, toast]);
+  }, [isRu]);
 
   const capturePhoto = useCallback(() => {
     if (!videoRef.current) return;
