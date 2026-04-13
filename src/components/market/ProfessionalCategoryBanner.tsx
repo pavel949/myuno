@@ -8,17 +8,17 @@ import { MarketplaceCategory, MarketplaceProduct } from '@/types/marketplace';
 import { Badge } from '@/components/ui/badge';
 
 // Editorial-style category images
-import groceriesImg from '@/assets/categories/groceries.jpg';
-import thaiFashionImg from '@/assets/categories/thai-fashion.jpg';
-import cosmeticsImg from '@/assets/categories/cosmetics.jpg';
-import souvenirsImg from '@/assets/categories/souvenirs.jpg';
-import homeDecorImg from '@/assets/categories/home-decor.jpg';
-import babyKidsImg from '@/assets/categories/baby-kids.jpg';
-import healthPharmacyImg from '@/assets/categories/health-pharmacy.jpg';
-import seafoodImg from '@/assets/categories/seafood.jpg';
-import organicImg from '@/assets/categories/organic.jpg';
-import meatImg from '@/assets/categories/meat.jpg';
-import defaultMarketImg from '@/assets/categories/default-market.jpg';
+import groceriesImg from '@/assets/categories/groceries.webp';
+import thaiFashionImg from '@/assets/categories/thai-fashion.webp';
+import cosmeticsImg from '@/assets/categories/cosmetics.webp';
+import souvenirsImg from '@/assets/categories/souvenirs.webp';
+import homeDecorImg from '@/assets/categories/home-decor.webp';
+import babyKidsImg from '@/assets/categories/baby-kids.webp';
+import healthPharmacyImg from '@/assets/categories/health-pharmacy.webp';
+import seafoodImg from '@/assets/categories/seafood.webp';
+import organicImg from '@/assets/categories/organic.webp';
+import meatImg from '@/assets/categories/meat.webp';
+import defaultMarketImg from '@/assets/categories/default-market.webp';
 
 interface ProfessionalCategoryBannerProps {
   categories: MarketplaceCategory[];

@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -306,7 +307,7 @@ export function useIntakeAgent() {
           .maybeSingle();
         
         if (existing) {
-          console.log('[INTAKE] CRM contact already exists:', existing.id);
+          logger.log('[INTAKE] CRM contact already exists:', existing.id);
           return;
         }
       }
@@ -332,7 +333,7 @@ export function useIntakeAgent() {
       if (contactError) {
         console.error('[INTAKE] Failed to create CRM contact:', contactError);
       } else {
-        console.log('[INTAKE] CRM contact created:', contact?.id);
+        logger.log('[INTAKE] CRM contact created:', contact?.id);
         toast.success(
           language === 'ru'
             ? 'Контакт добавлен в CRM'

@@ -5,6 +5,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
+import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
 import { LEAD_VERTICALS, LeadVerticalConfig, LeadFormField } from '@/lib/leadVerticalConfig';
 
@@ -58,7 +59,7 @@ export function useLeadConfigs() {
         }
 
         if (!data || data.length === 0) {
-          console.info('No lead configs in DB, using static fallback');
+          logger.info('No lead configs in DB, using static fallback');
           return LEAD_VERTICALS;
         }
 

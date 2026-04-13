@@ -1,5 +1,7 @@
 // App version for PWA cache busting
 // Increment this when deploying significant changes
+import { logger } from '@/lib/logger';
+
 export const APP_VERSION = '3.40.0';
 
 // Injected by vite `define` at build-time — always reflects the actual build moment,
@@ -25,13 +27,13 @@ export async function checkForUpdates(): Promise<boolean> {
 
 // Force cache clear function - can be called manually
 export async function forceCleanAllCaches(): Promise<void> {
-  console.log('[myUNO] Force cleaning all caches...');
+  logger.log('[myUNO] Force cleaning all caches...');
   
   // 1. Unregister ALL service workers FIRST (most important)
   if ('serviceWorker' in navigator) {
     const registrations = await navigator.serviceWorker.getRegistrations();
     await Promise.all(registrations.map(reg => {
-      console.log('[myUNO] Unregistering SW:', reg.scope);
+      logger.log('[myUNO] Unregistering SW:', reg.scope);
       return reg.unregister();
     }));
   }
@@ -40,7 +42,7 @@ export async function forceCleanAllCaches(): Promise<void> {
   if ('caches' in window) {
     const keys = await caches.keys();
     await Promise.all(keys.map(key => {
-      console.log('[myUNO] Deleting cache:', key);
+      logger.log('[myUNO] Deleting cache:', key);
       return caches.delete(key);
     }));
   }
@@ -48,12 +50,12 @@ export async function forceCleanAllCaches(): Promise<void> {
   // 3. Clear sessionStorage 
   sessionStorage.clear();
   
-  console.log('[myUNO] All caches cleared');
+  logger.log('[myUNO] All caches cleared');
 }
 
 // Log version on load — clean up stale keys on version change
 if (typeof window !== 'undefined') {
-  console.log(`[myUNO] v${APP_VERSION} | ${BUILD_TIMESTAMP}`);
+  logger.log(`[myUNO] v${APP_VERSION} | ${BUILD_TIMESTAMP}`);
 
   const storedVersion = localStorage.getItem('app_version');
   if (storedVersion && storedVersion !== APP_VERSION) {
@@ -61,7 +63,7 @@ if (typeof window !== 'undefined') {
     const STALE_KEYS = ['manifest_version', 'last_cache_cleanup', 'pwa_installed'];
     STALE_KEYS.forEach((key) => {
       if (localStorage.getItem(key) !== null) {
-        console.log(`[myUNO] Purging stale key: ${key}`);
+        logger.log(`[myUNO] Purging stale key: ${key}`);
         localStorage.removeItem(key);
       }
     });

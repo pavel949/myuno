@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { ArrowRight, Gift } from 'lucide-react';
 import { PropertyTourLeadForm } from '@/components/property/PropertyTourLeadForm';
-import propertyTourImg from '@/assets/solutions/property-tour.jpg';
+import propertyTourImg from '@/assets/solutions/property-tour.webp';
 
 export function PropertyTourBanner() {
   const { language } = useLanguage();
