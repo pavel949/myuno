@@ -48,14 +48,14 @@ Deno.serve(createCheckoutHandler("create-wellness-checkout", (body, userId) => {
     });
   }
 
-  let orderId: string;
+  const origin = Deno.env.get("SITE_URL") || "https://myuno.app";
 
-  return {
+  const spec: CheckoutSpec = {
     lineItems,
     totalAmount: totalWithFee,
     currency,
-    successUrl: `\${origin}/wellness/order/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancelUrl: `\${origin}/${vertical}?canceled=true`,
+    successUrl: `${origin}/wellness/order/success?session_id={CHECKOUT_SESSION_ID}`,
+    cancelUrl: `${origin}/${vertical}?canceled=true`,
     metadata: {
       type: "service_payment",
       vertical: String(vertical),
@@ -103,7 +103,10 @@ Deno.serve(createCheckoutHandler("create-wellness-checkout", (body, userId) => {
         throw new Error("Failed to create order");
       }
 
-      orderId = orderData;
+      // Attach order_id to metadata so it reaches the Stripe session
+      spec.metadata.order_id = String(orderData);
     },
-  } satisfies CheckoutSpec;
+  };
+
+  return spec;
 }));
