@@ -1,8 +1,26 @@
 import { useEffect, useState, useCallback } from 'react';
-import { driver, DriveStep } from 'driver.js';
-import 'driver.js/dist/driver.css';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useLocation } from 'react-router-dom';
+
+// driver.js types (inline to avoid eager import)
+interface DriveStep {
+  element?: string;
+  popover?: {
+    title: string;
+    description: string;
+    side?: string;
+    align?: string;
+  };
+}
+
+/** Lazy-load driver.js + CSS only when a tour actually starts (~40KB saved from initial bundle) */
+async function loadDriver() {
+  const [mod] = await Promise.all([
+    import('driver.js'),
+    import('driver.js/dist/driver.css'),
+  ]);
+  return mod.driver;
+}
 
 const TOUR_STORAGE_KEY = 'uno_owner_tour_completed';
 
@@ -100,9 +118,9 @@ export function OwnerOnboardingTour({
   const location = useLocation();
   const [hasStarted, setHasStarted] = useState(false);
 
-  const startTour = useCallback(() => {
+  const startTour = useCallback(async () => {
     const steps = dashboardSteps[language] || dashboardSteps.en;
-    
+
     const availableSteps = steps.filter(step => {
       if (!step.element) return true;
       return document.querySelector(step.element as string);
@@ -110,6 +128,7 @@ export function OwnerOnboardingTour({
 
     if (availableSteps.length === 0) return;
 
+    const driver = await loadDriver();
     const driverObj = driver({
       showProgress: true,
       showButtons: ['next', 'previous', 'close'],
@@ -147,9 +166,9 @@ export function OwnerOnboardingTour({
 export function useOwnerTour() {
   const { language } = useLanguage();
 
-  const startTour = useCallback(() => {
+  const startTour = useCallback(async () => {
     const steps = dashboardSteps[language] || dashboardSteps.en;
-    
+
     const availableSteps = steps.filter(step => {
       if (!step.element) return true;
       return document.querySelector(step.element as string);
@@ -157,6 +176,7 @@ export function useOwnerTour() {
 
     if (availableSteps.length === 0) return;
 
+    const driver = await loadDriver();
     const driverObj = driver({
       showProgress: true,
       showButtons: ['next', 'previous', 'close'],
