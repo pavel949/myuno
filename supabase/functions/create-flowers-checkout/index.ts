@@ -1,341 +1,119 @@
-// Deno.serve used (native edge runtime)
-import { createStripeClient } from "../_shared/stripe.ts";
+import { createCheckoutHandler } from "../_shared/checkout-factory.ts";
+import type { CheckoutSpec, StripeLineItem } from "../_shared/checkout-factory.ts";
 import { createClient } from "../_shared/supabase.ts";
-import { withRateLimit, RATE_LIMITS } from '../_shared/rate-limit.ts';
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://myuno.app",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
+// Mutable state to pass order data between beforeStripe and the return
+let _orderId = "";
+let _orderNumber = "";
+let _paymentIntentId = "";
 
-interface FlowersCheckoutRequest {
-  items: Array<{
-    id: string;
-    name: string;
-    quantity: number;
-    price: number;
-  }>;
-  delivery_fee: number;
-  gift_wrap_fee: number;
-  total_amount: number;
-  currency?: string;
-  recipient_name: string;
-  recipient_phone: string;
-  delivery_address: string;
-  delivery_date: string;
-  delivery_slot: string;
-  message?: string;
-  gift_wrap: boolean;
-  provider_id?: string;
-  provider_name?: string;
-}
+Deno.serve(createCheckoutHandler("create-flowers-checkout", (body, userId) => {
+  const b = body as Record<string, any>;
+  const {
+    items = [], delivery_fee = 0, gift_wrap_fee = 0, total_amount = 0,
+    currency = "THB", recipient_name, recipient_phone, delivery_address,
+    delivery_date, delivery_slot, message, gift_wrap, provider_id, provider_name,
+  } = b;
 
-Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+  if (!items.length) throw new Error("Cart is empty");
+
+  // Build Stripe line items
+  const lineItems: StripeLineItem[] = items.map((item: any) => ({
+    price_data: {
+      currency: currency.toLowerCase(),
+      product_data: { name: item.name },
+      unit_amount: Math.round(item.price * 100),
+    },
+    quantity: item.quantity,
+  }));
+
+  if (delivery_fee > 0) {
+    lineItems.push({
+      price_data: { currency: currency.toLowerCase(), product_data: { name: "Delivery / Доставка" }, unit_amount: Math.round(delivery_fee * 100) },
+      quantity: 1,
+    });
   }
 
-  try {
-    console.log("create-flowers-checkout: Starting request processing");
-    
-    // Anon client for auth verification only
-    const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? ""
-    );
-
-    // Service role client for all DB writes (anon client fails RLS INSERT policies)
-    const supabaseAdmin = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-    );
-
-    // Authenticate user
-    const authHeader = req.headers.get("Authorization");
-    console.log("create-flowers-checkout: Auth header present:", !!authHeader);
-    
-    if (!authHeader) {
-      console.error("create-flowers-checkout: No authorization header");
-      return new Response(
-        JSON.stringify({ error: "Please sign in to continue" }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 401,
-        }
-      );
-    }
-
-    const token = authHeader.replace("Bearer ", "");
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
-    
-    if (userError || !user) {
-      console.error("create-flowers-checkout: User authentication failed:", userError);
-      return new Response(
-        JSON.stringify({ error: "Session expired. Please sign in again." }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 401,
-        }
-      );
-    }
-
-    // Rate limiting - payment endpoints (20/min)
-    const rateLimitResponse = await withRateLimit(
-      req,
-      'create-flowers-checkout',
-      RATE_LIMITS.payment,
-      corsHeaders,
-      user.id
-    );
-    if (rateLimitResponse) return rateLimitResponse;
-
-    console.log("create-flowers-checkout: User authenticated:", user.id);
-
-    const body: FlowersCheckoutRequest = await req.json();
-    const { 
-      items, 
-      delivery_fee, 
-      gift_wrap_fee, 
-      total_amount, 
-      currency = "THB",
-      recipient_name,
-      recipient_phone,
-      delivery_address,
-      delivery_date,
-      delivery_slot,
-      message,
-      gift_wrap,
-      provider_id,
-      provider_name
-    } = body;
-
-    if (!items || items.length === 0) {
-      throw new Error("Cart is empty");
-    }
-
-    if (total_amount < 1) {
-      throw new Error("Total must be at least 1");
-    }
-
-    // ===== CREATE ORDER IN DATABASE =====
-    const orderMetadata = {
-      recipient_name,
-      recipient_phone,
-      delivery_address,
-      delivery_date,
-      delivery_slot,
-      message_card: message || "",
-      gift_wrap,
-      provider_name: provider_name || "",
-    };
-
-    const { data: order, error: orderError } = await supabaseAdmin
-      .from('orders')
-      .insert({
-        order_type: 'flower',
-        customer_user_id: user.id,
-        provider_org_id: provider_id || null,
-        status: 'pending',
-        start_at: delivery_date ? `${delivery_date}T00:00:00Z` : null,
-        total_amount,
-        currency,
-        metadata: orderMetadata,
-      })
-      .select()
-      .single();
-
-    if (orderError || !order) {
-      console.error("create-flowers-checkout: Failed to create order:", orderError);
-      throw new Error("Failed to create order");
-    }
-
-    console.log("create-flowers-checkout: Order created:", order.id, order.order_number);
-
-    // Create order items for each bouquet
-    const orderItems: Array<Record<string, unknown>> = items.map(item => ({
-      order_id: order.id,
-      product_id: item.id,
-      item_name: item.name,
-      item_type: 'flower',
-      qty: item.quantity,
-      unit_price: item.price,
-      amount: item.quantity * item.price,
-      status: 'pending',
-    }));
-
-    // Add delivery fee as line item
-    if (delivery_fee > 0) {
-      orderItems.push({
-        order_id: order.id,
-        product_id: null,
-        item_name: 'Delivery / Доставка',
-        item_type: 'delivery',
-        qty: 1,
-        unit_price: delivery_fee,
-        amount: delivery_fee,
-        status: 'pending',
-      });
-    }
-
-    // Add gift wrap as line item
-    if (gift_wrap && gift_wrap_fee > 0) {
-      orderItems.push({
-        order_id: order.id,
-        product_id: null,
-        item_name: 'Gift Wrap / Праздничная упаковка',
-        item_type: 'gift_wrap',
-        qty: 1,
-        unit_price: gift_wrap_fee,
-        amount: gift_wrap_fee,
-        status: 'pending',
-      });
-    }
-
-    const { error: itemsError } = await supabaseAdmin
-      .from('order_items')
-      .insert(orderItems);
-
-    if (itemsError) {
-      console.error("create-flowers-checkout: Failed to create order items:", itemsError);
-      await supabaseAdmin.from('orders').delete().eq('id', order.id);
-      throw new Error("Failed to create order items");
-    }
-
-    // Create delivery address
-    await supabaseAdmin.from('order_addresses').insert({
-      order_id: order.id,
-      address_type: 'delivery',
-      address_text: delivery_address,
+  if (gift_wrap && gift_wrap_fee > 0) {
+    lineItems.push({
+      price_data: { currency: currency.toLowerCase(), product_data: { name: "Gift Wrap / Праздничная упаковка" }, unit_amount: Math.round(gift_wrap_fee * 100) },
+      quantity: 1,
     });
-
-    // Create initial status history
-    await supabaseAdmin.from('order_status_history').insert({
-      order_id: order.id,
-      from_status: null,
-      to_status: 'pending',
-      actor_user_id: user.id,
-      reason: 'Flower order created',
-    });
-
-    // Create payment intent record
-    const { data: paymentIntent } = await supabaseAdmin
-      .from('payment_intents')
-      .insert({
-        order_id: order.id,
-        amount: total_amount,
-        currency,
-        method: 'stripe',
-        status: 'pending',
-      })
-      .select()
-      .single();
-
-    // ===== STRIPE CHECKOUT =====
-    const stripe = createStripeClient();
-
-    const customers = await stripe.customers.list({
-      email: user.email,
-      limit: 1,
-    });
-
-    let customerId: string;
-    if (customers.data.length > 0) {
-      customerId = customers.data[0].id;
-    } else {
-      const customer = await stripe.customers.create({
-        email: user.email,
-        metadata: { supabase_user_id: user.id },
-      });
-      customerId = customer.id;
-    }
-
-    const origin = req.headers.get("origin") || Deno.env.get("SITE_URL") || "https://uno.ae";
-
-    // Build line items for Stripe display
-    const lineItems = items.map(item => ({
-      price_data: {
-        currency: currency.toLowerCase(),
-        product_data: {
-          name: item.name,
-        },
-        unit_amount: Math.round(item.price * 100),
-      },
-      quantity: item.quantity,
-    }));
-
-    if (delivery_fee > 0) {
-      lineItems.push({
-        price_data: {
-          currency: currency.toLowerCase(),
-          product_data: { name: "Delivery / Доставка" },
-          unit_amount: Math.round(delivery_fee * 100),
-        },
-        quantity: 1,
-      });
-    }
-
-    if (gift_wrap && gift_wrap_fee > 0) {
-      lineItems.push({
-        price_data: {
-          currency: currency.toLowerCase(),
-          product_data: { name: "Gift Wrap / Праздничная упаковка" },
-          unit_amount: Math.round(gift_wrap_fee * 100),
-        },
-        quantity: 1,
-      });
-    }
-
-    const paymentMethods: ("card" | "promptpay")[] = currency.toUpperCase() === "THB" 
-      ? ["card", "promptpay"] 
-      : ["card"];
-    
-    const session = await stripe.checkout.sessions.create({
-      customer: customerId,
-      payment_method_types: paymentMethods,
-      line_items: lineItems,
-      mode: "payment",
-      success_url: `${origin}/flowers/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/flowers/order?canceled=true`,
-      metadata: {
-        order_id: order.id,
-        order_number: order.order_number,
-        user_id: user.id,
-        payment_intent_id: paymentIntent?.id || '',
-        type: "order_payment",
-      },
-    });
-
-    console.log("Flowers checkout session created:", session.id, "for order:", order.id);
-
-    // Update payment intent with Stripe session ID
-    if (paymentIntent) {
-      await supabaseAdmin
-        .from('payment_intents')
-        .update({ provider_ref: session.id })
-        .eq('id', paymentIntent.id);
-    }
-
-    return new Response(
-      JSON.stringify({ 
-        url: session.url, 
-        sessionId: session.id,
-        orderId: order.id,
-        orderNumber: order.order_number,
-      }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      }
-    );
-  } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    console.error("Error creating flowers checkout:", errorMessage);
-    return new Response(
-      JSON.stringify({ error: errorMessage }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 400,
-      }
-    );
   }
-});
+
+  return {
+    lineItems,
+    totalAmount: total_amount,
+    currency,
+    successUrl: undefined,
+    cancelUrl: undefined,
+    metadata: {
+      checkout_type: "flowers",
+      order_id: "", // Will be set in afterStripe via Stripe metadata update — or use the mutable
+    },
+
+    async beforeStripe(admin: ReturnType<typeof createClient>) {
+      // Create order
+      const { data: order, error: orderError } = await admin
+        .from("orders")
+        .insert({
+          order_type: "flower",
+          customer_user_id: userId,
+          provider_org_id: provider_id || null,
+          status: "pending",
+          start_at: delivery_date ? `${delivery_date}T00:00:00Z` : null,
+          total_amount,
+          currency,
+          metadata: {
+            recipient_name, recipient_phone, delivery_address,
+            delivery_date, delivery_slot, message_card: message || "",
+            gift_wrap, provider_name: provider_name || "",
+          },
+        })
+        .select()
+        .single();
+
+      if (orderError || !order) throw new Error("Failed to create order");
+      _orderId = order.id;
+      _orderNumber = order.order_number;
+
+      // Create order items
+      const orderItems: any[] = items.map((item: any) => ({
+        order_id: order.id, product_id: item.id, item_name: item.name,
+        item_type: "flower", qty: item.quantity, unit_price: item.price,
+        amount: item.quantity * item.price, status: "pending",
+      }));
+      if (delivery_fee > 0) {
+        orderItems.push({ order_id: order.id, item_name: "Delivery / Доставка", item_type: "delivery", qty: 1, unit_price: delivery_fee, amount: delivery_fee, status: "pending" });
+      }
+      if (gift_wrap && gift_wrap_fee > 0) {
+        orderItems.push({ order_id: order.id, item_name: "Gift Wrap / Праздничная упаковка", item_type: "gift_wrap", qty: 1, unit_price: gift_wrap_fee, amount: gift_wrap_fee, status: "pending" });
+      }
+
+      const { error: itemsErr } = await admin.from("order_items").insert(orderItems);
+      if (itemsErr) {
+        await admin.from("orders").delete().eq("id", order.id);
+        throw new Error("Failed to create order items");
+      }
+
+      // Address, status history, payment intent
+      await admin.from("order_addresses").insert({ order_id: order.id, address_type: "delivery", address_text: delivery_address });
+      await admin.from("order_status_history").insert({ order_id: order.id, from_status: null, to_status: "pending", actor_user_id: userId, reason: "Flower order created" });
+
+      const { data: pi } = await admin.from("payment_intents").insert({ order_id: order.id, amount: total_amount, currency, method: "stripe", status: "pending" }).select().single();
+      _paymentIntentId = pi?.id || "";
+
+      // Patch metadata with order info (Stripe session will carry these)
+      // We mutate the spec metadata in-place
+      (body as any).__orderId = order.id;
+      (body as any).__orderNumber = order.order_number;
+      (body as any).__paymentIntentId = pi?.id || "";
+    },
+
+    async afterStripe(admin: ReturnType<typeof createClient>, sessionId: string) {
+      if (_paymentIntentId) {
+        await admin.from("payment_intents").update({ provider_ref: sessionId }).eq("id", _paymentIntentId);
+      }
+    },
+  } satisfies CheckoutSpec;
+}));
