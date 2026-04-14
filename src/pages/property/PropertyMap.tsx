@@ -70,7 +70,7 @@ export default function PropertyMap() {
   }, []);
 
   const handlePropertySelect = (propertyId: string) => {
-    navigate(`/property/${propertyId}`);
+    navigate(APP_ROUTES.PROPERTY_DETAIL(propertyId));
   };
 
   return (

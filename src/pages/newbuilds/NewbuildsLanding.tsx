@@ -118,6 +118,63 @@ export default function NewbuildsLanding() {
         </div>
       </section>
 
+      {/* ── PEYLAA SPOTLIGHT ── */}
+      <section className="px-4 py-12 max-w-7xl mx-auto">
+        <Link
+          to="/peylaa"
+          className="nb-glass group block overflow-hidden relative"
+          style={{ borderColor: 'hsl(var(--nb-gold) / 0.3)' }}
+        >
+          <div className="flex flex-col md:flex-row">
+            <div className="md:w-[45%] relative overflow-hidden">
+              <img
+                src="https://bhmvnorkswapjkmbvykk.supabase.co/storage/v1/object/public/media/exterior/peylaa_drone-shot-with-3d-building.jpg"
+                alt="PEYLAA Phuket"
+                className="w-full h-[220px] md:h-[320px] object-cover group-hover:scale-105 transition-transform duration-700"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/70 hidden md:block" />
+              <div className="absolute top-3 left-3 flex gap-2">
+                <span className="nb-badge" style={{ background: 'hsl(var(--nb-gold))', color: 'hsl(var(--nb-bg))' }}>
+                  SPOTLIGHT
+                </span>
+                <span className="nb-badge" style={{ background: 'hsl(var(--nb-gold) / 0.15)', color: 'hsl(var(--nb-gold))', border: '1px solid hsl(var(--nb-gold) / 0.3)' }}>
+                  MARRIOTT
+                </span>
+              </div>
+            </div>
+            <div className="flex-1 p-6 md:p-8 flex flex-col justify-between">
+              <div>
+                <p className="nb-label mb-2">AUTOGRAPH COLLECTION RESIDENCES</p>
+                <h3 className="nb-display text-2xl md:text-3xl mb-3" style={{ color: 'hsl(var(--nb-text))' }}>
+                  PEYLAA Phuket
+                </h3>
+                <p className="text-sm md:text-base mb-4" style={{ color: 'hsl(var(--nb-muted))', fontFamily: 'var(--font-body-nb)' }}>
+                  Первый проект Autograph Collection в Азии. 408 резиденций в Bang Tao.
+                  Полная отделка. Статус Marriott Bonvoy Gold Elite.
+                </p>
+                <div className="flex flex-wrap gap-4 mb-4">
+                  <div>
+                    <span className="nb-mono text-lg font-bold" style={{ color: 'hsl(var(--nb-gold))' }}>฿7.1M</span>
+                    <span className="text-xs ml-1" style={{ color: 'hsl(var(--nb-muted))' }}>от</span>
+                  </div>
+                  <div>
+                    <span className="nb-mono text-lg font-bold" style={{ color: 'hsl(var(--nb-text))' }}>408</span>
+                    <span className="text-xs ml-1" style={{ color: 'hsl(var(--nb-muted))' }}>юнитов</span>
+                  </div>
+                  <div>
+                    <span className="nb-mono text-lg font-bold" style={{ color: 'hsl(var(--nb-text))' }}>Q4 2027</span>
+                    <span className="text-xs ml-1" style={{ color: 'hsl(var(--nb-muted))' }}>сдача</span>
+                  </div>
+                </div>
+              </div>
+              <span className="text-sm font-medium group-hover:text-[hsl(var(--nb-gold))] transition-colors inline-flex items-center gap-1" style={{ color: 'hsl(var(--nb-text))' }}>
+                Открыть каталог резиденций <ChevronRight className="w-4 h-4" />
+              </span>
+            </div>
+          </div>
+        </Link>
+      </section>
+
       {/* ── FEATURED PROJECTS ── */}
       {featuredProjects.length > 0 && (
         <section className="px-4 py-16 max-w-7xl mx-auto">
@@ -134,7 +191,7 @@ export default function NewbuildsLanding() {
       <section className="px-4 py-16 max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <h2 className="nb-display text-2xl md:text-3xl" style={{ color: 'hsl(var(--nb-text))' }}>Все проекты</h2>
-          <Link to={APP_ROUTES.NEWBUILDS_PROJECTS} className="text-sm flex items-center gap-1 transition-colors hover:opacity-80" style={{ color: 'hsl(var(--nb-gold))' }}>
+          <Link to={APP_ROUTES.OFFPLAN} className="text-sm flex items-center gap-1 transition-colors hover:opacity-80" style={{ color: 'hsl(var(--nb-gold))' }}>
             Смотреть все {stats?.projectCount || ''} проектов <ChevronRight className="w-4 h-4" />
           </Link>
         </div>

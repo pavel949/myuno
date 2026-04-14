@@ -11,6 +11,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { CompareProvider } from '@/components/property/PropertyCompare';
 import { cn } from '@/lib/utils';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 interface TabConfig {
   id: string;
@@ -28,15 +29,15 @@ const TABS: TabConfig[] = [
     labelEn: 'Rent',
     labelRu: 'Аренда',
     icon: Home,
-    path: '/property?mode=rent',
-    matchPaths: ['/property'],
+    path: `${APP_ROUTES.PROPERTY}?mode=rent`,
+    matchPaths: [APP_ROUTES.PROPERTY],
   },
   {
     id: 'buy',
     labelEn: 'Buy',
     labelRu: 'Купить',
     icon: ShoppingCart,
-    path: '/property?mode=buy',
+    path: `${APP_ROUTES.PROPERTY}?mode=buy`,
     matchPaths: [],
   },
   {
@@ -44,16 +45,16 @@ const TABS: TabConfig[] = [
     labelEn: 'New Build',
     labelRu: 'Новостройки',
     icon: Building2,
-    path: '/property/offplan',
-    matchPaths: ['/property/offplan', '/property/developers', '/property/projects'],
+    path: APP_ROUTES.OFFPLAN,
+    matchPaths: [APP_ROUTES.OFFPLAN, APP_ROUTES.DEVELOPERS, APP_ROUTES.COMPLEXES],
   },
   {
     id: 'resale',
     labelEn: 'Resale',
     labelRu: 'Вторичка',
     icon: ArrowRightLeft,
-    path: '/property/resale',
-    matchPaths: ['/property/resale'],
+    path: APP_ROUTES.RESALE,
+    matchPaths: [APP_ROUTES.RESALE],
   },
   {
     id: 'my',
@@ -68,11 +69,11 @@ const TABS: TabConfig[] = [
 
 function getActiveTab(pathname: string, search: string): string {
   if (pathname.startsWith('/property/my')) return 'my';
-  if (pathname.startsWith('/property/invest')) return 'my';
-  if (pathname.startsWith('/property/resale')) return 'resale';
-  if (pathname.startsWith('/property/offplan') || pathname.startsWith('/property/developers') || pathname.startsWith('/property/projects')) return 'newbuild';
+  if (pathname.startsWith(APP_ROUTES.INVEST)) return 'my';
+  if (pathname.startsWith(APP_ROUTES.RESALE)) return 'resale';
+  if (pathname.startsWith(APP_ROUTES.OFFPLAN) || pathname.startsWith(APP_ROUTES.DEVELOPERS) || pathname.startsWith(APP_ROUTES.COMPLEXES)) return 'newbuild';
   
-  if (pathname === '/property' || pathname.startsWith('/property/search') || pathname.startsWith('/property/map') || pathname.startsWith('/property/consultation')) {
+  if (pathname === APP_ROUTES.PROPERTY || pathname.startsWith(APP_ROUTES.PROPERTY_SEARCH) || pathname.startsWith(APP_ROUTES.PROPERTY_MAP) || pathname.startsWith(APP_ROUTES.PROPERTY_CONSULTATION)) {
     const params = new URLSearchParams(search);
     if (params.get('mode') === 'buy') return 'buy';
     return 'rent';
@@ -127,7 +128,7 @@ export function PropertyHubTabs() {
 export default function PropertyHub() {
   const location = useLocation();
   // PropertyIndex has its own sticky header that embeds the tabs — avoid double nav
-  const isIndexRoute = location.pathname === '/property' || location.pathname === '/property/';
+  const isIndexRoute = location.pathname === APP_ROUTES.PROPERTY || location.pathname === `${APP_ROUTES.PROPERTY}/`;
   return (
     <CompareProvider>
       {!isIndexRoute && <PropertyHubTabs />}

@@ -6,6 +6,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import * as LucideIcons from 'lucide-react';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 interface ServiceItem {
   labelRu: string;
@@ -36,7 +37,7 @@ const CLUSTER_SERVICES: Record<string, ServiceItem[]> = {
   ],
   invest: [
     { labelRu: 'Поиск', labelEn: 'Search', icon: 'Search', path: '/property' },
-    { labelRu: 'Off-Plan', labelEn: 'Off-Plan', icon: 'Building', path: '/offplan' },
+    { labelRu: 'Off-Plan', labelEn: 'Off-Plan', icon: 'Building', path: APP_ROUTES.OFFPLAN },
     { labelRu: 'ROI', labelEn: 'ROI Calculator', icon: 'BarChart3', path: '/invest' },
     { labelRu: 'Вторичка', labelEn: 'Resale', icon: 'Building2', path: '/property/resale' },
   ],

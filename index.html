@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="en" class="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -162,18 +162,18 @@
     <style>
       *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
       html{-webkit-text-size-adjust:100%;font-family:'DM Sans',system-ui,-apple-system,sans-serif}
-      body{min-height:100vh;background:#08101E;color:#EDF2FF;-webkit-font-smoothing:antialiased}
-      html.light body{background:#fafaf9;color:#1a1a19}
+      body{min-height:100vh;background:#fafaf9;color:#1a1a19;-webkit-font-smoothing:antialiased}
+      html.dark body{background:#08101E;color:#EDF2FF}
       #root{min-height:100vh;display:flex;flex-direction:column}
-      .uno-splash{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#08101E}
-      html.light .uno-splash{background:#fafaf9}
-      .uno-splash svg{width:48px;height:48px;animation:uno-spin 1s linear infinite}
-      html.light .uno-splash svg{stroke:#0d6e4f}
+      .uno-splash{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#fafaf9}
+      html.dark .uno-splash{background:#08101E}
+      .uno-splash svg{width:48px;height:48px;animation:uno-spin 1s linear infinite;stroke:#0d6e4f}
+      html.dark .uno-splash svg{stroke:#00D68F}
       @keyframes uno-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
     </style>
     <!-- Apply stored theme before paint to prevent flash -->
     <script>
-      (function(){try{var t=localStorage.getItem('myuno-theme');if(t==='light'||(t==='system'&&window.matchMedia('(prefers-color-scheme:light)').matches)){document.documentElement.classList.remove('dark');document.documentElement.classList.add('light')}}catch(e){}})();
+      (function(){try{var t=localStorage.getItem('myuno-theme');if(t!=='light'&&t!=='dark'&&t!=='system')t='light';var r='dark';if(t==='light')r='light';else if(t==='system')r=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';else r='dark';var d=document.documentElement;d.classList.remove('light','dark');d.classList.add(r);}catch(e){}})();
     </script>
     <div id="root">
       <div class="uno-splash" aria-label="Loading myUNO">

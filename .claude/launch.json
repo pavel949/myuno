@@ -1,0 +1,19 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "myUNO Dev Server",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "cd /d C:\\Users\\pavel\\OneDrive\\Apps\\myUNO && set VITE_BYPASS_COMING_SOON=true && npm run dev -- --port 8080"],
+      "port": 8080,
+      "autoPort": true
+    },
+    {
+      "name": "myUNO Preview",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "preview"],
+      "port": 4173,
+      "autoPort": true
+    }
+  ]
+}

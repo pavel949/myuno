@@ -20,6 +20,7 @@ import { PropertyHubTabs } from './PropertyHub';
 import { AirbnbCategoryRibbon } from '@/components/property/PropertyCategoryIcons.ribbon';
 import { CrossSellSection } from '@/components/crosssell';
 import { cn } from '@/lib/utils';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { UniversalFilter, FilterValues } from '@/components/filters/UniversalFilter';
@@ -141,7 +142,7 @@ export default function PropertyIndex() {
   }, [allProperties, selectedCategories, filterValues]);
 
   const handlePropertyClick = useCallback((id: string) => {
-    navigate(`/property/${id}`);
+    navigate(APP_ROUTES.PROPERTY_DETAIL(id));
   }, [navigate]);
 
   const handleSearch = useCallback((params: SearchParams) => {
@@ -155,7 +156,7 @@ export default function PropertyIndex() {
     if (params.amenities.length > 0) qp.set('amenities', params.amenities.join(','));
     if (params.instantBooking) qp.set('instant', '1');
     qp.set('mode', propertyMode);
-    navigate(`/property/search?${qp.toString()}`);
+    navigate(`${APP_ROUTES.PROPERTY_SEARCH}?${qp.toString()}`);
   }, [navigate, propertyMode]);
 
   return (
@@ -283,7 +284,7 @@ export default function PropertyIndex() {
               </div>
               {filteredProperties.length > 20 && (
                 <div className="mt-6 text-center">
-                  <Button variant="outline" className="gap-2" onClick={() => navigate('/property/search')}>
+                  <Button variant="outline" className="gap-2" onClick={() => navigate(APP_ROUTES.PROPERTY_SEARCH)}>
                     {isRu ? `Показать все ${filteredProperties.length}` : `Show all ${filteredProperties.length}`}
                     <ArrowRight className="w-4 h-4" />
                   </Button>

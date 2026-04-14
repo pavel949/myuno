@@ -3,13 +3,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
-export type ConsultationRequestType = 
+export type ConsultationRequestType =
   | 'vacation_rental'
   | 'property_consultation'
   | 'property_tour'
   | 'full_management'
   | 'investment_advice'
   | 'channel_management'
+  | 'developer_partnership'
   // Universal lead types
   | 'long_term_rental'
   | 'property_purchase'
@@ -145,6 +146,9 @@ export interface CreateConsultationInput {
   notes?: string;
   guests_count?: number;
   children_count?: number;
+  vertical_metadata?: Record<string, unknown>;
+  entry_point?: string;
+  lead_source?: string;
 }
 
 export function useConsultationRequests() {
@@ -270,6 +274,24 @@ export function useConsultationRequests() {
     },
   });
 
+  // B2B: Phuket developer / project partnership (newbuilds, leads, co-marketing)
+  const requestDeveloperPartnership = useMutation({
+    mutationFn: async (input: Omit<CreateConsultationInput, 'request_type'>) => {
+      return createConsultation.mutateAsync({
+        ...input,
+        request_type: 'developer_partnership',
+      });
+    },
+    onSuccess: () => {
+      toast.success(
+        'Заявка отправлена! Команда myUNO свяжется с вами для обсуждения партнёрства.'
+      );
+    },
+    onError: () => {
+      toast.error('Ошибка при отправке заявки. Попробуйте ещё раз.');
+    },
+  });
+
   // Request channel management
   const requestChannelManagement = useMutation({
     mutationFn: async (input: Omit<CreateConsultationInput, 'request_type'>) => {
@@ -295,6 +317,7 @@ export function useConsultationRequests() {
     requestFullManagement,
     requestInvestmentAdvice,
     requestVacationRental,
+    requestDeveloperPartnership,
     requestChannelManagement,
   };
 }

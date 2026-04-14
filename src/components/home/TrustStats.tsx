@@ -7,12 +7,10 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Shield, Home, CalendarCheck, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useSectionReveal } from '@/hooks/useScrollBehavior';
 
 export const TrustStats = memo(function TrustStats() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const sectionRef = useSectionReveal<HTMLElement>();
 
   const { data: stats } = useQuery({
     queryKey: ['trust-stats-home'],
@@ -39,7 +37,7 @@ export const TrustStats = memo(function TrustStats() {
   ];
 
   return (
-    <section ref={sectionRef} className="section-reveal anim-stats space-y-4">
+    <section className="anim-stats space-y-4">
       <div className="rounded-[var(--radius-lg)] p-5"
         style={{
           background: 'hsl(var(--bg-surface))',

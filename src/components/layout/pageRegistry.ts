@@ -13,6 +13,8 @@ export const ResetPassword = lazy(() => import('@/pages/auth/ResetPassword'));
 
 // ── Core ──
 export const ForManagementCompanies = lazy(() => import('@/pages/ForManagementCompanies'));
+export const ForDevelopers = lazy(() => import('@/pages/ForDevelopers'));
+export const ForLocalServices = lazy(() => import('@/pages/ForLocalServices'));
 export const Discover = lazy(() => import('@/components/navigation/NavigatorPage'));
 export const PlatformCatalog = lazy(() => import('@/pages/PlatformCatalog'));
 export const MapView = lazy(() => import('@/pages/MapView'));
@@ -52,12 +54,11 @@ export const ManagementCompanyProfile = lazy(() => import('@/pages/property/Mana
 export const ResaleIndex = lazy(() => import('@/pages/property/ResaleIndex'));
 export const ResaleDetail = lazy(() => import('@/pages/property/ResaleDetail'));
 
-// ── Newbuilds (Premium Section) ──
+// ── PEYLAA ──
+export const PeylaaLanding = lazy(() => import('@/pages/peylaa/PeylaaLanding'));
+
+// ── Newbuilds (Premium marketing landing only; catalog → Property Hub /property/offplan) ──
 export const NewbuildsLanding = lazy(() => import('@/pages/newbuilds/NewbuildsLanding'));
-export const NewbuildsCatalog = lazy(() => import('@/pages/newbuilds/NewbuildsCatalog'));
-export const NewbuildDetail = lazy(() => import('@/pages/newbuilds/NewbuildDetail'));
-export const NewbuildsDevelopers = lazy(() => import('@/pages/newbuilds/NewbuildsDevelopers'));
-export const NewbuildDeveloperDetail = lazy(() => import('@/pages/newbuilds/NewbuildDeveloperDetail'));
 
 // ── Developer Portal ──
 export const DeveloperPortalLayout = lazy(() => import('@/components/newbuilds/DeveloperPortalLayout'));

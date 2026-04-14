@@ -12,6 +12,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 interface ProjectInfoCardProps {
   project: PropertyProject;
@@ -59,7 +60,7 @@ export function ProjectInfoCard({ project, className }: ProjectInfoCardProps) {
   const amenities = project.amenities || [];
 
   const handleExploreProject = () => {
-    navigate(`/property/project/${project.id}`);
+    navigate(APP_ROUTES.PROJECT_DETAIL(project.id));
   };
 
   return (

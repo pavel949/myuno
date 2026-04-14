@@ -3,6 +3,17 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "rewrites": [
+    {
+      "source": "/peylaa",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(facebookexternalhit|Facebot|Twitterbot|TelegramBot|WhatsApp|LinkedInBot|Slackbot|vkShare|Pinterestbot).*"
+        }
+      ],
+      "destination": "/api/peylaa-og"
+    },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

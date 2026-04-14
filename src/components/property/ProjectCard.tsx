@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { BADGE_SYSTEM } from '@/lib/designTokens';
 
 interface ProjectCardProps {
@@ -39,7 +40,7 @@ export const ProjectCard = forwardRef<HTMLDivElement, ProjectCardProps>(
   const propertyCount = (project as any).propertyCount || project.total_units || 0;
 
   const handleClick = () => {
-    navigate(`/property/project/${project.id}`);
+    navigate(APP_ROUTES.PROJECT_DETAIL(project.id));
   };
 
   if (variant === 'featured') {

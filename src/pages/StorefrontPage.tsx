@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Building2, MapPin, Bed, Bath, Star } from 'lucide-react';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 export default function StorefrontPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -146,7 +147,7 @@ export default function StorefrontPage() {
             <Card
               key={prop.id}
               className="cursor-pointer hover:shadow-md transition-shadow overflow-hidden"
-              onClick={() => navigate(`/property/${prop.id}`)}
+              onClick={() => navigate(APP_ROUTES.PROPERTY_DETAIL(prop.id))}
             >
               {prop.cover_image && (
                 <div className="aspect-[4/3] overflow-hidden">

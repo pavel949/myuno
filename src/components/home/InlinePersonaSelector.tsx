@@ -1,7 +1,7 @@
 import React, { memo, useMemo } from 'react';
 import {
   Plane, Home, Building2, TrendingUp, Baby, Heart,
-  Music, Dumbbell, Briefcase, Laptop, PawPrint, Globe, Check,
+  Music, Dumbbell, Briefcase, Laptop, PawPrint, Globe, Check, HardHat, Store,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserPersonas, UserPersona, PERSONA_INFO } from '@/hooks/useUserPersonas';
@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 
 const ICON_MAP: Record<string, React.ElementType> = {
   Plane, Home, Building2, TrendingUp, Baby, Heart,
-  Music, Dumbbell, Briefcase, Laptop, PawPrint, Globe,
+  Music, Dumbbell, Briefcase, Laptop, PawPrint, Globe, HardHat, Store,
 };
 
 const PERSONA_GRADIENTS: Record<UserPersona, string> = {
@@ -25,6 +25,8 @@ const PERSONA_GRADIENTS: Record<UserPersona, string> = {
   active: 'linear-gradient(135deg, #f97316, #ea580c)',
   business: 'linear-gradient(135deg, #64748b, #475569)',
   nomad: 'linear-gradient(135deg, #14b8a6, #0d9488)',
+  real_estate_developer: 'linear-gradient(135deg, #0ea5e9, #0369a1)',
+  local_services_provider: 'linear-gradient(135deg, #22c55e, #15803d)',
 };
 
 /** Primary personas shown on first visit (4 main use cases) */

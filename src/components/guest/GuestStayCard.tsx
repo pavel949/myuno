@@ -16,6 +16,7 @@ import {
 import { format, differenceInDays, isToday, isTomorrow } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 interface GuestStayCardProps {
   booking: {
@@ -105,7 +106,7 @@ export function GuestStayCard({ booking, loading }: GuestStayCardProps) {
         {/* Property Info */}
         <div 
           className="p-4 flex gap-4 cursor-pointer hover:bg-muted/30 transition-colors"
-          onClick={() => booking.property?.id && navigate(`/property/${booking.property.id}`)}
+          onClick={() => booking.property?.id && navigate(APP_ROUTES.PROPERTY_DETAIL(booking.property.id))}
         >
           <div className="w-20 h-20 rounded-xl overflow-hidden bg-muted flex-shrink-0">
             {booking.property?.cover_image ? (

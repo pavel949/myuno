@@ -60,7 +60,7 @@ const Index = () => {
   const isLoggedIn = !!user;
 
   // Show property sections only for relevant personas
-  const PROPERTY_PERSONAS = new Set(['investor', 'property_owner', 'resident', 'relocation']);
+  const PROPERTY_PERSONAS = new Set(['investor', 'property_owner', 'resident', 'relocation', 'real_estate_developer']);
   const showPropertySections = personas.length === 0 || personas.some(p => PROPERTY_PERSONAS.has(p));
 
   return (

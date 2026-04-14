@@ -11,13 +11,14 @@ import {
   Utensils, Sparkles, Stethoscope, ClipboardList, ShoppingBag, Users,
   FileSearch, Calculator, Shield, FileText,
   Calendar, BarChart3, Wrench, PenTool, DollarSign,
-  Building, Search, LineChart
+  Building, Search, LineChart, Palette,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { cn } from '@/lib/utils';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 interface ClusterService {
   labelRu: string;
@@ -31,6 +32,9 @@ interface Cluster {
   id: string;
   labelRu: string;
   labelEn: string;
+  /** Who this block is for + value (shown under title) */
+  valueRu: string;
+  valueEn: string;
   color: string;
   icon: React.ElementType;
   services: ClusterService[];
@@ -38,67 +42,178 @@ interface Cluster {
 
 const CLUSTERS: Cluster[] = [
   {
-    id: 'arrive', labelRu: 'ПРИЕХАТЬ', labelEn: 'ARRIVE', color: '#00D68F', icon: Plane,
+    id: 'arrive',
+    labelRu: 'ПРИЕХАТЬ',
+    labelEn: 'ARRIVE',
+    valueRu: 'Туристы и новые резиденты: дорога от аэропорта, связь, деньги, мобильность.',
+    valueEn: 'Tourists & new residents: airport transfers, connectivity, money, getting around.',
+    color: '#00D68F',
+    icon: Plane,
     services: [
-      { labelRu: 'Трансферы', labelEn: 'Transfers', icon: Car, path: '/transport/airport-transfer', status: 'available' },
-      { labelRu: 'SIM-карты', labelEn: 'SIM Cards', icon: Smartphone, path: '/sim', status: 'available' },
-      { labelRu: 'Курсы валют', labelEn: 'Exchange Rates', icon: ArrowLeftRight, path: '/exchange', status: 'available' },
-      { labelRu: 'Аренда авто', labelEn: 'Car Rental', icon: Car, path: '/transport', status: 'available' },
-      { labelRu: 'Банковский счёт', labelEn: 'Bank Account', icon: Landmark, path: '/banking', status: 'available' },
-      { labelRu: 'Fast Track', labelEn: 'Fast Track', icon: Zap, path: '/transport/fast-track', status: 'available' },
+      { labelRu: 'Трансферы', labelEn: 'Transfers', icon: Car, path: APP_ROUTES.AIRPORT_TRANSFER, status: 'available' },
+      { labelRu: 'SIM-карты', labelEn: 'SIM Cards', icon: Smartphone, path: APP_ROUTES.SIM_START, status: 'available' },
+      { labelRu: 'Курсы валют', labelEn: 'Exchange Rates', icon: ArrowLeftRight, path: APP_ROUTES.EXCHANGE, status: 'available' },
+      { labelRu: 'Аренда авто', labelEn: 'Car Rental', icon: Car, path: APP_ROUTES.TRANSPORT, status: 'available' },
+      { labelRu: 'Банковский счёт', labelEn: 'Bank Account', icon: Landmark, path: APP_ROUTES.BANKING, status: 'available' },
+      { labelRu: 'Fast Track', labelEn: 'Fast Track', icon: Zap, path: APP_ROUTES.FAST_TRACK, status: 'available' },
     ],
   },
   {
-    id: 'live', labelRu: 'ЖИТЬ', labelEn: 'LIVE', color: '#4E7BFF', icon: Home,
+    id: 'live',
+    labelRu: 'ЖИТЬ',
+    labelEn: 'LIVE',
+    valueRu: 'Резиденты: быт, здоровье, еда, покупки — без хаоса в десяти приложениях.',
+    valueEn: 'Residents: dining, wellness, home services, shopping — one place.',
+    color: '#4E7BFF',
+    icon: Home,
     services: [
-      { labelRu: 'Рестораны', labelEn: 'Restaurants', icon: Utensils, path: '/restaurants', status: 'available' },
-      { labelRu: 'Уборка', labelEn: 'Cleaning', icon: Sparkles, path: '/cleaning', status: 'available' },
-      { labelRu: 'Медицина', labelEn: 'Medical', icon: Stethoscope, path: '/medical', status: 'available' },
-      { labelRu: 'Задачи', labelEn: 'Tasks', icon: ClipboardList, path: '/tasks', status: 'soon' },
-      { labelRu: 'Маркет', labelEn: 'Market', icon: ShoppingBag, path: '/market', status: 'available' },
-      { labelRu: 'CRM', labelEn: 'CRM', icon: Users, path: '/mc/crm-dashboard', status: 'pro' },
+      { labelRu: 'Рестораны', labelEn: 'Restaurants', icon: Utensils, path: APP_ROUTES.RESTAURANTS, status: 'available' },
+      { labelRu: 'Уборка', labelEn: 'Cleaning', icon: Sparkles, path: APP_ROUTES.CLEANING, status: 'available' },
+      { labelRu: 'Медицина', labelEn: 'Medical', icon: Stethoscope, path: APP_ROUTES.MEDICAL, status: 'available' },
+      { labelRu: 'Услуги', labelEn: 'Home services', icon: Wrench, path: APP_ROUTES.SERVICES, status: 'available' },
+      { labelRu: 'Маркет', labelEn: 'Market', icon: ShoppingBag, path: APP_ROUTES.MARKET, status: 'available' },
+      { labelRu: 'Красота', labelEn: 'Beauty & spa', icon: Palette, path: APP_ROUTES.BEAUTY, status: 'available' },
     ],
   },
   {
-    id: 'legal', labelRu: 'ЛЕГАЛЬНО', labelEn: 'STAY LEGAL', color: '#F59E0B', icon: Scale,
+    id: 'legal',
+    labelRu: 'ЛЕГАЛЬНО',
+    labelEn: 'STAY LEGAL',
+    valueRu: 'Статус, налоги, договоры и страховки — спокойствие и соответствие правилам.',
+    valueEn: 'Visa status, taxes, contracts & insurance — stay compliant with less stress.',
+    color: '#F59E0B',
+    icon: Scale,
     services: [
-      { labelRu: 'Визы', labelEn: 'Visas', icon: Plane, path: '/visa', status: 'available' },
-      { labelRu: 'Налоги', labelEn: 'Taxes', icon: Calculator, path: '/tax', status: 'available' },
-      { labelRu: 'ContractAI', labelEn: 'ContractAI', icon: FileSearch, path: '/legal/contract-analysis', status: 'available' },
-      { labelRu: 'Страхование', labelEn: 'Insurance', icon: Shield, path: '/insurance', status: 'available' },
+      { labelRu: 'Визы', labelEn: 'Visas', icon: Plane, path: APP_ROUTES.VISA_IMMIGRATION, status: 'available' },
+      { labelRu: 'Налоги', labelEn: 'Taxes', icon: Calculator, path: APP_ROUTES.TAX_NAV, status: 'available' },
+      { labelRu: 'ContractAI', labelEn: 'ContractAI', icon: FileSearch, path: APP_ROUTES.CONTRACT_ANALYSIS, status: 'available' },
+      { labelRu: 'Страхование', labelEn: 'Insurance', icon: Shield, path: APP_ROUTES.INSURANCE, status: 'available' },
     ],
   },
   {
-    id: 'invest', labelRu: 'КУПИТЬ', labelEn: 'INVEST', color: '#A855F7', icon: TrendingUp,
+    id: 'invest',
+    labelRu: 'КУПИТЬ',
+    labelEn: 'INVEST',
+    valueRu: 'Покупатели и инвесторы: каталог, новостройки, вторичка, застройщики, ROI.',
+    valueEn: 'Buyers & investors: search, off-plan, resale, developers, ROI tools.',
+    color: '#A855F7',
+    icon: TrendingUp,
     services: [
-      { labelRu: 'Поиск недвижимости', labelEn: 'Property Search', icon: Search, path: '/property', status: 'available' },
-      { labelRu: 'Новостройки', labelEn: 'New Developments', icon: Building2, path: '/newbuilds', status: 'available' },
-      { labelRu: 'Вторичка', labelEn: 'Resale', icon: Building2, path: '/property/resale', status: 'available' },
-      { labelRu: 'Застройщики', labelEn: 'Developers', icon: Users, path: '/newbuilds/developers', status: 'available' },
-      { labelRu: 'ROI калькулятор', labelEn: 'ROI Calculator', icon: BarChart3, path: '/property/invest', status: 'available' },
-      { labelRu: 'DueDiligence AI', labelEn: 'DueDiligence AI', icon: Shield, path: '/property/invest', status: 'soon' },
+      { labelRu: 'Поиск недвижимости', labelEn: 'Property Search', icon: Search, path: APP_ROUTES.PROPERTY, status: 'available' },
+      { labelRu: 'Новостройки', labelEn: 'New Developments', icon: Building2, path: APP_ROUTES.OFFPLAN, status: 'available' },
+      { labelRu: 'Вторичка', labelEn: 'Resale', icon: Building2, path: APP_ROUTES.RESALE, status: 'available' },
+      { labelRu: 'Застройщики', labelEn: 'Developers', icon: Users, path: APP_ROUTES.DEVELOPERS, status: 'available' },
+      { labelRu: 'ROI / инвестиции', labelEn: 'ROI & invest hub', icon: BarChart3, path: APP_ROUTES.INVEST, status: 'available' },
+      { labelRu: 'DueDiligence AI', labelEn: 'DueDiligence AI', icon: Shield, path: APP_ROUTES.INVEST, status: 'soon' },
     ],
   },
   {
-    id: 'manage', labelRu: 'УПРАВЛЯТЬ', labelEn: 'MANAGE', color: '#06B6D4', icon: Building2,
+    id: 'manage',
+    labelRu: 'УПРАВЛЯТЬ',
+    labelEn: 'MANAGE',
+    valueRu: 'Собственники и управляющие: брони, финансы, операции, CRM — один кабинет.',
+    valueEn: 'Hosts & managers: bookings, money, ops, CRM — one workspace.',
+    color: '#06B6D4',
+    icon: Building2,
     services: [
-      { labelRu: 'StaySync', labelEn: 'StaySync', icon: Calendar, path: '/mc', status: 'available' },
-      { labelRu: 'Календарь', labelEn: 'Calendar', icon: Calendar, path: '/mc/calendar', status: 'available' },
-      { labelRu: 'Финансы', labelEn: 'Finances', icon: DollarSign, path: '/mc/finance', status: 'available' },
-      { labelRu: 'Клининг', labelEn: 'Cleaning', icon: Sparkles, path: '/mc/housekeeping', status: 'available' },
-      { labelRu: 'Отчёты', labelEn: 'Reports', icon: BarChart3, path: '/mc/analytics', status: 'pro' },
+      { labelRu: 'Кабинет MC', labelEn: 'MC dashboard', icon: Calendar, path: '/mc', status: 'available' },
+      { labelRu: 'Календарь', labelEn: 'Calendar', icon: Calendar, path: APP_ROUTES.MC_CALENDAR, status: 'available' },
+      { labelRu: 'Финансы', labelEn: 'Finances', icon: DollarSign, path: APP_ROUTES.MC_FINANCE, status: 'available' },
+      { labelRu: 'Операции', labelEn: 'Operations', icon: ClipboardList, path: '/mc/operations', status: 'available' },
+      { labelRu: 'Отчёты', labelEn: 'Reports', icon: BarChart3, path: APP_ROUTES.MC_REPORTS, status: 'pro' },
+      { labelRu: 'CRM', labelEn: 'CRM', icon: Users, path: APP_ROUTES.MC_CRM_DASHBOARD, status: 'pro' },
     ],
   },
   {
-    id: 'build', labelRu: 'ДЕВЕЛОПЕРАМ', labelEn: 'FOR DEVELOPERS', color: '#F43F5E', icon: HardHat,
+    id: 'build',
+    labelRu: 'ДЕВЕЛОПЕРАМ',
+    labelEn: 'FOR DEVELOPERS',
+    valueRu: 'Застройщики: портал, лиды, витрина проектов и консультации по сделкам.',
+    valueEn: 'Developers: portal, leads, project showcase & deal advisory.',
+    color: '#F43F5E',
+    icon: HardHat,
     services: [
-      { labelRu: 'Портал', labelEn: 'Portal', icon: Building, path: '/developer-portal', status: 'available' },
-      { labelRu: 'Продажи', labelEn: 'Sales', icon: LineChart, path: '/for-management-companies', status: 'available' },
-      { labelRu: 'Стройка', labelEn: 'Construction', icon: HardHat, path: '/for-management-companies', status: 'soon' },
-      { labelRu: 'MarketBrief', labelEn: 'MarketBrief', icon: PenTool, path: '/for-management-companies', status: 'soon' },
+      { labelRu: 'Портал', labelEn: 'Portal', icon: Building, path: APP_ROUTES.DEVELOPER_PORTAL, status: 'available' },
+      { labelRu: 'Застройщикам', labelEn: 'Developer program', icon: LineChart, path: APP_ROUTES.FOR_REAL_ESTATE_DEVELOPERS, status: 'available' },
+      { labelRu: 'Витрина новостроек', labelEn: 'Newbuilds showcase', icon: Building2, path: APP_ROUTES.NEWBUILDS, status: 'available' },
+      { labelRu: 'Консультация', labelEn: 'Advisory', icon: PenTool, path: APP_ROUTES.PROPERTY_CONSULTATION, status: 'available' },
     ],
   },
 ];
+
+function NavigatorStatsFooter({
+  stats,
+  isRu,
+}: {
+  stats: { properties: number; bookings: number; providers: number } | undefined;
+  isRu: boolean;
+}) {
+  const loading = stats === undefined;
+  const chunks: React.ReactNode[] = [];
+
+  if (!loading) {
+    if (stats.properties > 0) {
+      chunks.push(
+        <span key="p">
+          <span className="text-primary font-bold">{stats.properties}+</span>{' '}
+          {isRu ? 'объектов' : 'properties'}
+        </span>,
+      );
+    }
+    if (stats.bookings > 0) {
+      chunks.push(
+        <span key="b">
+          <span className="text-primary font-bold">{stats.bookings}+</span>{' '}
+          {isRu ? 'бронирований' : 'bookings'}
+        </span>,
+      );
+    }
+    if (stats.providers > 0) {
+      chunks.push(
+        <span key="v">
+          <span className="text-primary font-bold">{stats.providers}+</span>{' '}
+          {isRu ? 'партнёров' : 'partners'}
+        </span>,
+      );
+    }
+  }
+
+  if (loading) {
+    return (
+      <p className="text-xs text-muted-foreground">
+        {isRu ? 'Загрузка…' : 'Loading…'}
+      </p>
+    );
+  }
+
+  if (chunks.length === 0) {
+    return (
+      <p className="text-xs text-muted-foreground leading-relaxed">
+        {isRu
+          ? 'Сервисы и партнёры на Пхукете — в одной экосистеме. Поддержка 24/7.'
+          : 'Phuket services & partners in one ecosystem. 24/7 support.'}
+      </p>
+    );
+  }
+
+  const with247 = (
+    <span key="247">
+      <span className="text-primary font-bold">24/7</span> {isRu ? 'поддержка' : 'support'}
+    </span>
+  );
+
+  const out: React.ReactNode[] = [];
+  chunks.forEach((el, i) => {
+    out.push(el);
+    if (i < chunks.length - 1) {
+      out.push(<span key={`dot-${i}`} className="mx-2 text-muted-foreground/40">·</span>);
+    }
+  });
+  out.push(<span key="dot247" className="mx-2 text-muted-foreground/40">·</span>);
+  out.push(with247);
+
+  return <p className="text-xs text-muted-foreground leading-relaxed">{out}</p>;
+}
 
 function StatusBadge({ status, isRu }: { status: ClusterService['status']; isRu: boolean }) {
   const config = {
@@ -115,6 +230,8 @@ function StatusBadge({ status, isRu }: { status: ClusterService['status']; isRu:
     </span>
   );
 }
+
+const TOTAL_NAVIGATOR_SERVICES = CLUSTERS.reduce((n, c) => n + c.services.length, 0);
 
 export default function NavigatorPage() {
   const { language } = useLanguage();
@@ -147,12 +264,19 @@ export default function NavigatorPage() {
     <AppLayout>
       <div className="px-4 py-6 pb-24 max-w-2xl mx-auto space-y-5">
         {/* Header */}
-        <div className="text-center space-y-1">
+        <div className="text-center space-y-2">
           <h1 className="text-[22px] font-display font-bold text-foreground">
             {isRu ? 'Навигатор' : 'Navigator'}
           </h1>
-          <p className="text-sm text-muted-foreground">
-            {isRu ? '6 кластеров · 40+ сервисов · 1 экосистема' : '6 clusters · 40+ services · 1 ecosystem'}
+          <p className="text-sm text-muted-foreground leading-snug max-w-md mx-auto">
+            {isRu
+              ? `Шесть сценариев · ${TOTAL_NAVIGATOR_SERVICES} быстрых входов · одна экосистема myUNO`
+              : `Six scenarios · ${TOTAL_NAVIGATOR_SERVICES} shortcuts · one myUNO ecosystem`}
+          </p>
+          <p className="text-xs text-muted-foreground/90 leading-relaxed max-w-lg mx-auto px-1">
+            {isRu
+              ? 'Каждый блок — для своей аудитории: от прилёта и быта до сделок с недвижимостью и кабинета управляющей компании.'
+              : 'Each block matches an audience: arrival & daily life, legal, buying property, host operations, or development.'}
           </p>
         </div>
 
@@ -185,16 +309,14 @@ export default function NavigatorPage() {
                     <h3 className="text-[15px] font-display font-semibold text-foreground">
                       {isRu ? cluster.labelRu : cluster.labelEn}
                     </h3>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-[11px] text-muted-foreground leading-snug mt-1 line-clamp-2">
+                      {isRu ? cluster.valueRu : cluster.valueEn}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground/80 mt-1">
                       {serviceCount} {isRu ? 'сервисов' : 'services'}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-xs font-semibold rounded-[var(--radius-full)] px-2 py-0.5"
-                      style={{ background: cluster.color + '1A', color: cluster.color }}
-                    >
-                      {serviceCount}
-                    </span>
                     <ChevronDown
                       className={cn("w-4 h-4 text-muted-foreground transition-transform duration-300", isOpen && "rotate-180")}
                     />
@@ -216,7 +338,7 @@ export default function NavigatorPage() {
                           const SIcon = service.icon;
                           return (
                             <button
-                              key={service.labelEn}
+                              key={`${cluster.id}-${service.path}`}
                               onClick={() => service.status !== 'soon' && navigate(service.path)}
                               className={cn(
                                 "flex flex-col gap-2 p-3 rounded-[var(--radius-md)] text-left transition-all min-h-[44px]",
@@ -243,19 +365,11 @@ export default function NavigatorPage() {
           })}
         </div>
 
-        {/* Stats bar */}
+        {/* Stats bar — hide zero counts */}
         <div className="rounded-[var(--radius-md)] p-4 text-center"
           style={{ background: 'hsl(var(--bg-surface))', border: '1px solid hsl(0 0% 100% / 0.07)' }}
         >
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            <span className="text-primary font-bold">{stats?.properties ?? '…'}+</span> {isRu ? 'объектов' : 'properties'}
-            <span className="mx-2 text-muted-foreground/40">·</span>
-            <span className="text-primary font-bold">{stats?.bookings ?? '…'}+</span> {isRu ? 'бронирований' : 'bookings'}
-            <span className="mx-2 text-muted-foreground/40">·</span>
-            <span className="text-primary font-bold">{stats?.providers ?? '…'}+</span> {isRu ? 'партнёров' : 'partners'}
-            <span className="mx-2 text-muted-foreground/40">·</span>
-            <span className="text-primary font-bold">24/7</span> {isRu ? 'поддержка' : 'support'}
-          </p>
+          <NavigatorStatsFooter stats={stats} isRu={isRu} />
         </div>
       </div>
     </AppLayout>

@@ -403,7 +403,7 @@ export default function OffplanDetail() {
                 <Button 
                   variant="outline" 
                   className="w-full gap-2"
-                  onClick={() => navigate(`/property/developers/${developer.id}`)}
+                  onClick={() => navigate(APP_ROUTES.DEVELOPER_DETAIL(developer.id))}
                 >
                   {isRu ? 'Все проекты застройщика' : 'All Developer Projects'}
                   <ExternalLink className="w-4 h-4" />

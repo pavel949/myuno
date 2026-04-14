@@ -1,16 +1,19 @@
 import React, { ReactNode, forwardRef } from 'react';
 import { cn } from '@/lib/utils';
-import { AppHeader } from './AppHeader';
 import { Footer } from './Footer';
 import { ActiveSituationBanner } from '@/components/life-os/ActiveSituationBanner';
 import { useIsDesktop } from '@/hooks/use-desktop';
 import { EmailVerificationBanner } from '@/components/auth/EmailVerificationBanner';
 import { useUserTracking } from '@/hooks/useUserTracking';
+import { CustomerHeader } from './CustomerHeader';
+import { WorkspaceHeader } from './WorkspaceHeader';
+import { resolveHeaderSurface, type HeaderSurface } from '@/lib/config/routeMeta';
 
 interface AppLayoutProps {
   children: ReactNode;
   title?: string;
   showHeader?: boolean;
+  headerVariant?: HeaderSurface | 'auto';
   showBottomNav?: boolean;
   showFooter?: boolean;
   /** Show the active life situation banner below header */
@@ -25,6 +28,7 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
       children,
       title,
       showHeader = true,
+      headerVariant = 'auto',
       showBottomNav = true,
       showFooter = false,
       showSituationBanner = false,
@@ -34,6 +38,11 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
     ref
   ) => {
     const isDesktop = useIsDesktop();
+    const pathname = typeof window !== 'undefined' ? window.location.pathname : '/';
+    const resolvedHeaderSurface: HeaderSurface =
+      headerVariant === 'auto'
+        ? resolveHeaderSurface(pathname)
+        : headerVariant;
     // Activate global behavioral tracking
     useUserTracking();
     // Desktop: show header/footer unless explicitly disabled
@@ -42,7 +51,14 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
 
     return (
       <div ref={ref} className={cn("min-h-screen bg-background flex flex-col max-w-full min-w-0 overflow-x-clip overflow-y-auto", className)}>
-        {finalShowHeader && <AppHeader title={title} />}
+        {finalShowHeader && resolvedHeaderSurface === 'customer' && (
+          <CustomerHeader title={title} />
+        )}
+        {finalShowHeader && resolvedHeaderSurface === 'workspace' && (
+          <WorkspaceHeader
+            mobileTitle={title ? <h1 className="font-semibold text-lg">{title}</h1> : undefined}
+          />
+        )}
         <EmailVerificationBanner />
         {showSituationBanner && <ActiveSituationBanner />}
         

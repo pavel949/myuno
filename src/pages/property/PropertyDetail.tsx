@@ -17,6 +17,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
 import { BackButton } from '@/components/uno/BackButton';
 import { usePropertyWithRentalTerms, PropertyRentalTerms, PropertyProject } from '@/hooks/useProperties';
@@ -761,7 +762,7 @@ export default function PropertyDetail() {
                     checkOut: format(dateRange.to, 'yyyy-MM-dd'),
                     guests: guestCount.toString(),
                   });
-                  navigate(`/property/${id}/inquiry?${params.toString()}`);
+                  navigate(`${APP_ROUTES.PROPERTY_INQUIRY(id)}?${params.toString()}`);
                 } else {
                   // No dates — open date picker sheet
                   setDateSheetOpen(true);
@@ -871,7 +872,7 @@ export default function PropertyDetail() {
                       checkOut: format(dateRange.to, 'yyyy-MM-dd'),
                       guests: guestCount.toString(),
                     });
-                    navigate(`/property/${id}/inquiry?${params.toString()}`);
+                    navigate(`${APP_ROUTES.PROPERTY_INQUIRY(id)}?${params.toString()}`);
                   }
                 }}
               >

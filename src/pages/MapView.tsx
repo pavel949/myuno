@@ -14,6 +14,7 @@ import { usePropertiesForMap, transformPropertiesToMarkers } from '@/hooks/usePr
 import { useRestaurants } from '@/hooks/useRestaurants';
 import { createMapPopupHtml } from '@/lib/sanitize';
 import { getMapCenter, DEFAULT_CITY } from '@/lib/config';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 type VerticalFilter = 'all' | 'property' | 'beauty' | 'restaurant';
 
@@ -33,7 +34,7 @@ const VERTICAL_CONFIG: Record<
   Exclude<VerticalFilter, 'all'>,
   { icon: string; color: string; labelEn: string; labelRu: string; route: (id: string) => string }
 > = {
-  property: { icon: '🏠', color: '#059669', labelEn: 'Real Estate', labelRu: 'Жильё', route: (id) => `/property/${id}` },
+  property: { icon: '🏠', color: '#059669', labelEn: 'Real Estate', labelRu: 'Жильё', route: (id) => APP_ROUTES.PROPERTY_DETAIL(id) },
   beauty: { icon: '💇', color: '#6366f1', labelEn: 'Beauty', labelRu: 'Красота', route: (id) => `/beauty/salon/${id}` },
   restaurant: { icon: '🍽️', color: '#ea580c', labelEn: 'Restaurants', labelRu: 'Рестораны', route: (id) => `/restaurants/${id}` },
 };

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { MapPin, TrendingUp, Clock, Flame, Star, BadgeCheck } from 'lucide-react';
 import { MuunoScoreWidget } from './MuunoScoreWidget';
@@ -34,7 +35,7 @@ export function InvestmentCard({
   const categoryIcon = category?.icon || '💼';
 
   const handleClick = () => {
-    navigate(`/property/invest/${project.id}`);
+    navigate(APP_ROUTES.INVEST_DETAIL(project.id));
   };
 
   if (variant === 'compact') {

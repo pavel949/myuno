@@ -11,7 +11,11 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "supabase:deploy": "npx supabase functions deploy approve-partner-application && npx supabase functions deploy notify-admin-partner-application",
-    "supabase:db-push": "npx supabase db push"
+    "supabase:db-push": "npx supabase db push",
+    "offplan:fetch-seed": "node scripts/fetch-offplan-seed.mjs",
+    "offplan:import": "node scripts/import-offplan-catalog.mjs",
+    "offplan:sync": "npm run offplan:fetch-seed && npm run offplan:import",
+    "offplan:emit-sql": "node scripts/offplan-emit-sql-import.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.1.0",

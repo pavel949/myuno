@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserPersonas } from '@/hooks/useUserPersonas';
 import { useConsultationRequests } from '@/hooks/useConsultationRequests';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
@@ -18,12 +20,15 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format, addDays, differenceInDays } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
-import { 
-  Home, Search, MapPin, TrendingUp, Calendar as CalendarIcon,
+import {
+  Search, MapPin, TrendingUp, Calendar as CalendarIcon,
   Phone, MessageCircle, CheckCircle, ArrowRight, Palmtree,
-  Users, Minus, Plus, Moon
+  Users, Minus, Plus, Moon, HardHat, Building2, Megaphone,
+  LineChart, Sparkles, LayoutGrid, FileSearch, Handshake,
+  Landmark, RefreshCw, Crown,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 type RequestType = 'vacation_rental' | 'property_consultation' | 'property_tour' | 'investment_advice';
 
@@ -46,6 +51,114 @@ const PURPOSES = [
   { value: 'personal', labelEn: 'Personal living', labelRu: 'Личное проживание' },
   { value: 'investment', labelEn: 'Investment', labelRu: 'Инвестиции' },
   { value: 'rental_business', labelEn: 'Rental business', labelRu: 'Арендный бизнес' },
+];
+
+/** Phuket developer intents — stored in vertical_metadata + human-readable notes */
+const DEVELOPER_INTENTS: {
+  id: string;
+  icon: typeof Building2;
+  titleEn: string;
+  titleRu: string;
+  descEn: string;
+  descRu: string;
+}[] = [
+  {
+    id: 'newbuilds_showcase',
+    icon: LayoutGrid,
+    titleEn: 'Newbuilds on myUNO',
+    titleRu: 'Витрина новостроек',
+    descEn: 'Premium placement in the newbuilds hub, project & unit pages, media.',
+    descRu: 'Размещение в разделе новостроек, страницы проекта и юнитов, медиа.',
+  },
+  {
+    id: 'leads_and_tours',
+    icon: Users,
+    titleEn: 'Leads & showroom',
+    titleRu: 'Лиды и туры',
+    descEn: 'Qualified demand from residents, investors, relocators; tour handoffs.',
+    descRu: 'Целевые лиды резидентов, инвесторов, релокантов; организация показов.',
+  },
+  {
+    id: 'branded_campaign',
+    icon: Megaphone,
+    titleEn: 'Branded sales pages',
+    titleRu: 'Брендовые посадочные',
+    descEn: 'Dedicated funnel pages, UTM, CRM handoff (similar to flagship projects).',
+    descRu: 'Отдельные посадочные, UTM, передача в CRM (как у флагманских проектов).',
+  },
+  {
+    id: 'inventory_channel',
+    icon: LineChart,
+    titleEn: 'Inventory & channel mix',
+    titleRu: 'Остатки и каналы',
+    descEn: 'Sell-down strategy, OTA vs direct, pricing experiments with our audience.',
+    descRu: 'Стратегия остатков, OTA и прямые продажи, ценообразование под нашу аудиторию.',
+  },
+  {
+    id: 'strategic_partnership',
+    icon: Sparkles,
+    titleEn: 'Strategic partnership',
+    titleRu: 'Стратегическое партнёрство',
+    descEn: 'Bundles, data, co-marketing, or custom integration — let’s scope it.',
+    descRu: 'Пакеты, данные, совместный маркетинг или интеграции — обсудим формат.',
+  },
+  {
+    id: 'feasibility_study',
+    icon: FileSearch,
+    titleEn: 'Feasibility & market study',
+    titleRu: 'Технико-экономическое обоснование',
+    descEn: 'Demand, pricing, absorption, competition — request an advisory brief from myUNO.',
+    descRu: 'Спрос, цены, скорость продаж, конкуренты — запросите разбор и рекомендации от myUNO.',
+  },
+  {
+    id: 'sole_agency',
+    icon: Handshake,
+    titleEn: 'Sole agency arrangement',
+    titleRu: 'Эксклюзивное агентство',
+    descEn: 'Discuss exclusive or preferred representation for Phuket sales through myUNO / partners.',
+    descRu: 'Обсудить эксклюзивное или приоритетное агентирование продаж на Пхукете через myUNO и партнёров.',
+  },
+  {
+    id: 'capital_raise',
+    icon: Landmark,
+    titleEn: 'Capital raise & investors',
+    titleRu: 'Привлечение капитала',
+    descEn: 'Equity, bridge, or strategic capital — connect with our advisory network for next steps.',
+    descRu: 'Equity, бридж или стратегический капитал — свяжем с консультационной сетью для следующих шагов.',
+  },
+  {
+    id: 'restructuring',
+    icon: RefreshCw,
+    titleEn: 'Restructuring & workout',
+    titleRu: 'Реструктуризация',
+    descEn: 'Debt, JV, or project workout — confidential conversation on options and introductions.',
+    descRu: 'Долг, СП или выход из сложной фазы — конфиденциально обсудим варианты и контакты.',
+  },
+  {
+    id: 'club_sales',
+    icon: Crown,
+    titleEn: 'Club / private sales',
+    titleRu: 'Club sales',
+    descEn: 'Private rounds, member lists, or invitation-only sales — we help structure and reach buyers.',
+    descRu: 'Приватные раунды, списки участников, продажи по приглашению — поможем с форматом и охватом.',
+  },
+];
+
+const DEVELOPER_PROJECT_FORMATS = [
+  { value: 'condo_lowrise', labelEn: 'Low-rise condo', labelRu: 'Кондо low-rise' },
+  { value: 'condo_highrise', labelEn: 'High-rise condo', labelRu: 'Кондо high-rise' },
+  { value: 'villa_estate', labelEn: 'Villa / estate', labelRu: 'Виллы / посёлок' },
+  { value: 'mixed_use', labelEn: 'Mixed-use', labelRu: 'Мixed-use' },
+  { value: 'hotel_branded', labelEn: 'Hotel-branded residences', labelRu: 'Hotel-branded резиденции' },
+  { value: 'land_bank', labelEn: 'Land / future phases', labelRu: 'Земля / будущие фазы' },
+];
+
+const DEVELOPER_STAGES = [
+  { value: 'planning', labelEn: 'Planning / permits', labelRu: 'Проектирование / разрешения' },
+  { value: 'construction', labelEn: 'Under construction', labelRu: 'Строительство' },
+  { value: 'presales', labelEn: 'Pre-sales active', labelRu: 'Предпродажи' },
+  { value: 'handover', labelEn: 'Handover phase', labelRu: 'Сдача / ключи' },
+  { value: 'completed_stock', labelEn: 'Completed — inventory', labelRu: 'Сдано — остатки' },
 ];
 
 // Guest Counter Component
@@ -103,15 +216,28 @@ export default function PropertyConsultation() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const isRu = language === 'ru';
-  
-  const { 
-    requestPropertyConsultation, 
-    requestPropertyTour, 
+  const { personas } = useUserPersonas();
+  const isDeveloperPersona = personas.includes('real_estate_developer');
+
+  const {
+    requestPropertyConsultation,
+    requestPropertyTour,
     requestInvestmentAdvice,
-    requestVacationRental 
+    requestVacationRental,
+    requestDeveloperPartnership,
   } = useConsultationRequests();
 
   const [requestType, setRequestType] = useState<RequestType>('vacation_rental');
+  const [developerIntent, setDeveloperIntent] = useState(DEVELOPER_INTENTS[0].id);
+  const [developerForm, setDeveloperForm] = useState({
+    companyName: '',
+    roleTitle: '',
+    projectName: '',
+    website: '',
+    stage: '',
+    unitsApprox: '',
+    formats: [] as string[],
+  });
   const [step, setStep] = useState<'type' | 'criteria' | 'contact'>('type');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -138,6 +264,15 @@ export default function PropertyConsultation() {
     total_budget: '',
   });
 
+  const handleDeveloperFormatToggle = (value: string) => {
+    setDeveloperForm((prev) => ({
+      ...prev,
+      formats: prev.formats.includes(value)
+        ? prev.formats.filter((f) => f !== value)
+        : [...prev.formats, value],
+    }));
+  };
+
   const handlePropertyTypeToggle = (value: string) => {
     setFormData(prev => ({
       ...prev,
@@ -158,9 +293,68 @@ export default function PropertyConsultation() {
 
   const handleSubmit = async () => {
     if (!formData.name || !formData.phone) return;
-    
+
     setIsSubmitting(true);
     try {
+      if (isDeveloperPersona) {
+        const intentLabel =
+          DEVELOPER_INTENTS.find((i) => i.id === developerIntent)?.[isRu ? 'titleRu' : 'titleEn'] ??
+          developerIntent;
+        const formatLabels = developerForm.formats
+          .map(
+            (f) => DEVELOPER_PROJECT_FORMATS.find((p) => p.value === f)?.[isRu ? 'labelRu' : 'labelEn'] ?? f
+          )
+          .join(', ');
+        const districtLabels = formData.districts
+          .map((d) => DISTRICTS.find((x) => x.value === d)?.[isRu ? 'labelRu' : 'labelEn'] ?? d)
+          .join(', ');
+        const stageLabel =
+          DEVELOPER_STAGES.find((s) => s.value === developerForm.stage)?.[isRu ? 'labelRu' : 'labelEn'] ?? '';
+
+        const structuredNotes = [
+          '[Developer partnership — Phuket / myUNO]',
+          `Intent: ${developerIntent} (${intentLabel})`,
+          `Company: ${developerForm.companyName || '—'}`,
+          `Role: ${developerForm.roleTitle || '—'}`,
+          `Project: ${developerForm.projectName || '—'}`,
+          `Stage: ${stageLabel || developerForm.stage || '—'}`,
+          `Units (approx): ${developerForm.unitsApprox || '—'}`,
+          `Formats: ${formatLabels || '—'}`,
+          `Website: ${developerForm.website || '—'}`,
+          `Districts focus: ${districtLabels || '—'}`,
+          '---',
+          formData.notes?.trim() ? `Additional:\n${formData.notes.trim()}` : '',
+        ]
+          .filter(Boolean)
+          .join('\n');
+
+        await requestDeveloperPartnership.mutateAsync({
+          name: formData.name,
+          email: formData.email || undefined,
+          phone: formData.phone,
+          preferred_contact_method: formData.preferred_contact_method,
+          preferred_language: language,
+          districts: formData.districts.length > 0 ? formData.districts : undefined,
+          notes: structuredNotes,
+          vertical_metadata: {
+            persona: 'real_estate_developer',
+            intent: developerIntent,
+            companyName: developerForm.companyName,
+            roleTitle: developerForm.roleTitle,
+            projectName: developerForm.projectName,
+            website: developerForm.website,
+            stage: developerForm.stage,
+            unitsApprox: developerForm.unitsApprox,
+            formats: developerForm.formats,
+          },
+          entry_point: '/property/consultation',
+          lead_source: 'developer_persona',
+          currency: 'THB',
+        });
+        setIsSuccess(true);
+        return;
+      }
+
       const basePayload = {
         name: formData.name,
         email: formData.email || undefined,
@@ -205,10 +399,10 @@ export default function PropertyConsultation() {
           currency: 'THB',
         });
       }
-      
+
       setIsSuccess(true);
-    } catch (error) {
-      console.error('Failed to submit consultation request:', error);
+    } catch {
+      // Mutations show toast on error
     } finally {
       setIsSubmitting(false);
     }
@@ -247,22 +441,42 @@ export default function PropertyConsultation() {
             </h2>
             
             <p className="text-muted-foreground mb-8 max-w-sm">
-              {requestType === 'vacation_rental' 
-                ? (isRu 
-                    ? 'Мы подберём лучшие варианты и свяжемся с вами в течение 2 часов.' 
-                    : 'We will find the best options and contact you within 2 hours.')
-                : (isRu 
-                    ? 'Наш менеджер свяжется с вами в ближайшее время для обсуждения ваших пожеланий.' 
-                    : 'Our manager will contact you shortly to discuss your requirements.')}
+              {isDeveloperPersona
+                ? (isRu
+                    ? 'Менеджер по партнёрству застройщиков свяжется с вами и предложит следующий шаг: витрина, лиды или медиаплан.'
+                    : 'Our developer partnerships lead will reach out with next steps: listing, lead flow, or media plan.')
+                : requestType === 'vacation_rental'
+                  ? (isRu
+                      ? 'Мы подберём лучшие варианты и свяжемся с вами в течение 2 часов.'
+                      : 'We will find the best options and contact you within 2 hours.')
+                  : (isRu
+                      ? 'Наш менеджер свяжется с вами в ближайшее время для обсуждения ваших пожеланий.'
+                      : 'Our manager will contact you shortly to discuss your requirements.')}
             </p>
-            
+
             <div className="flex flex-col gap-3 w-full max-w-xs">
-              <Button onClick={() => navigate('/property')} size="lg">
-                {isRu ? 'Смотреть объекты' : 'Browse Properties'}
-              </Button>
-              <Button variant="outline" onClick={() => navigate('/')} size="lg">
-                {isRu ? 'На главную' : 'Go Home'}
-              </Button>
+              {isDeveloperPersona ? (
+                <>
+                  <Button onClick={() => navigate(APP_ROUTES.FOR_REAL_ESTATE_DEVELOPERS)} size="lg">
+                    {isRu ? 'Страница застройщика' : 'Developer landing'}
+                  </Button>
+                  <Button variant="outline" onClick={() => navigate(APP_ROUTES.NEWBUILDS)} size="lg">
+                    {isRu ? 'Каталог новостроек' : 'Newbuilds hub'}
+                  </Button>
+                  <Button variant="ghost" onClick={() => navigate('/')} size="lg">
+                    {isRu ? 'На главную' : 'Go home'}
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button onClick={() => navigate('/property')} size="lg">
+                    {isRu ? 'Смотреть объекты' : 'Browse Properties'}
+                  </Button>
+                  <Button variant="outline" onClick={() => navigate('/')} size="lg">
+                    {isRu ? 'На главную' : 'Go Home'}
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </PageContainer>
@@ -273,9 +487,19 @@ export default function PropertyConsultation() {
   return (
     <AppLayout>
       <PageContainer>
-        <PageHeader 
-          title={isRu ? 'Консультация' : 'Consultation'}
-          subtitle={isRu ? 'Поможем найти идеальный вариант' : 'We help you find the perfect option'}
+        <PageHeader
+          title={
+            isDeveloperPersona
+              ? (isRu ? 'Партнёрство застройщика' : 'Developer partnership')
+              : (isRu ? 'Консультация' : 'Consultation')
+          }
+          subtitle={
+            isDeveloperPersona
+              ? (isRu
+                  ? 'Маркетинг, TEO, эксклюзивное агентство, капитал, реструктуризация, club sales — опишите задачу, myUNO подключит нужные сервисы'
+                  : 'Marketing, feasibility, sole agency, capital, restructuring, club sales — tell us what you need and myUNO will route the right assistance')
+              : (isRu ? 'Поможем найти идеальный вариант' : 'We help you find the perfect option')
+          }
           showBack
           fallbackPath="/property"
         />
@@ -295,7 +519,56 @@ export default function PropertyConsultation() {
       </div>
 
       {/* Step 1: Request Type */}
-      {step === 'type' && (
+      {step === 'type' && isDeveloperPersona && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 text-primary mb-1">
+            <HardHat className="w-5 h-5" />
+            <span className="text-sm font-semibold uppercase tracking-wide">
+              {isRu ? 'Застройщикам Пхукета' : 'Phuket developers'}
+            </span>
+          </div>
+          <h2 className="text-lg font-semibold mb-4">
+            {isRu ? 'Какую задачу решаем?' : 'What should we solve first?'}
+          </h2>
+
+          <RadioGroup value={developerIntent} onValueChange={setDeveloperIntent}>
+            {DEVELOPER_INTENTS.map((item) => {
+              const Icon = item.icon;
+              return (
+                <label key={item.id} className="cursor-pointer">
+                  <Card
+                    className={`transition-all ${
+                      developerIntent === item.id ? 'border-primary ring-2 ring-primary/20' : ''
+                    }`}
+                  >
+                    <CardContent className="flex items-start gap-4 p-4">
+                      <RadioGroupItem value={item.id} className="mt-1" />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Icon className="w-5 h-5 text-primary" />
+                          <span className="font-medium">
+                            {isRu ? item.titleRu : item.titleEn}
+                          </span>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {isRu ? item.descRu : item.descEn}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </label>
+              );
+            })}
+          </RadioGroup>
+
+          <Button className="w-full mt-6" size="lg" onClick={() => setStep('criteria')}>
+            {isRu ? 'Далее' : 'Continue'}
+            <ArrowRight className="w-4 h-4 ml-2" />
+          </Button>
+        </div>
+      )}
+
+      {step === 'type' && !isDeveloperPersona && (
         <div className="space-y-4">
           <h2 className="text-lg font-semibold mb-4">
             {isRu ? 'Чем мы можем помочь?' : 'How can we help?'}
@@ -394,8 +667,8 @@ export default function PropertyConsultation() {
             </label>
           </RadioGroup>
 
-          <Button 
-            className="w-full mt-6" 
+          <Button
+            className="w-full mt-6"
             size="lg"
             onClick={() => setStep('criteria')}
           >
@@ -406,10 +679,153 @@ export default function PropertyConsultation() {
       )}
 
       {/* Step 2: Criteria */}
-      {step === 'criteria' && (
+      {step === 'criteria' && isDeveloperPersona && (
         <div className="space-y-6">
           <h2 className="text-lg font-semibold">
-            {requestType === 'vacation_rental' 
+            {isRu ? 'Проект и контекст' : 'Project & context'}
+          </h2>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2 sm:col-span-2">
+              <Label>{isRu ? 'Компания / бренд' : 'Company / brand'} *</Label>
+              <Input
+                placeholder={isRu ? 'Юридическое или маркетинговое название' : 'Legal or marketing name'}
+                value={developerForm.companyName}
+                onChange={(e) =>
+                  setDeveloperForm((p) => ({ ...p, companyName: e.target.value }))
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>{isRu ? 'Ваша роль' : 'Your role'}</Label>
+              <Input
+                placeholder={isRu ? 'Напр. Head of Sales' : 'e.g. Head of Sales'}
+                value={developerForm.roleTitle}
+                onChange={(e) =>
+                  setDeveloperForm((p) => ({ ...p, roleTitle: e.target.value }))
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>{isRu ? 'Название проекта' : 'Project name'}</Label>
+              <Input
+                placeholder={isRu ? 'Рабочее имя локации' : 'Working title'}
+                value={developerForm.projectName}
+                onChange={(e) =>
+                  setDeveloperForm((p) => ({ ...p, projectName: e.target.value }))
+                }
+              />
+            </div>
+            <div className="space-y-2 sm:col-span-2">
+              <Label>{isRu ? 'Сайт проекта' : 'Project website'}</Label>
+              <Input
+                type="url"
+                placeholder="https://"
+                value={developerForm.website}
+                onChange={(e) =>
+                  setDeveloperForm((p) => ({ ...p, website: e.target.value }))
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>{isRu ? 'Стадия' : 'Stage'}</Label>
+              <RadioGroup
+                value={developerForm.stage}
+                onValueChange={(v) => setDeveloperForm((p) => ({ ...p, stage: v }))}
+                className="grid gap-2"
+              >
+                {DEVELOPER_STAGES.map((s) => (
+                  <label key={s.value} className="flex items-center gap-2 cursor-pointer">
+                    <RadioGroupItem value={s.value} />
+                    <span className="text-sm">{isRu ? s.labelRu : s.labelEn}</span>
+                  </label>
+                ))}
+              </RadioGroup>
+            </div>
+            <div className="space-y-2">
+              <Label>{isRu ? 'Юнитов (примерно)' : 'Units (approx.)'}</Label>
+              <Input
+                type="text"
+                inputMode="numeric"
+                placeholder={isRu ? 'Напр. 120' : 'e.g. 120'}
+                value={developerForm.unitsApprox}
+                onChange={(e) =>
+                  setDeveloperForm((p) => ({ ...p, unitsApprox: e.target.value }))
+                }
+              />
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <Label>{isRu ? 'Формат проекта' : 'Project format'}</Label>
+            <div className="flex flex-wrap gap-2">
+              {DEVELOPER_PROJECT_FORMATS.map((fmt) => (
+                <button
+                  key={fmt.value}
+                  type="button"
+                  onClick={() => handleDeveloperFormatToggle(fmt.value)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                    developerForm.formats.includes(fmt.value)
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted hover:bg-muted/80'
+                  }`}
+                >
+                  {isRu ? fmt.labelRu : fmt.labelEn}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <Label>{isRu ? 'Приоритетные районы' : 'Priority districts'}</Label>
+            <div className="flex flex-wrap gap-2">
+              {DISTRICTS.map((district) => (
+                <button
+                  key={district.value}
+                  type="button"
+                  onClick={() => handleDistrictToggle(district.value)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                    formData.districts.includes(district.value)
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted hover:bg-muted/80'
+                  }`}
+                >
+                  {isRu ? district.labelRu : district.labelEn}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <Label>{isRu ? 'Кратко о задаче' : 'Brief for our team'}</Label>
+            <Textarea
+              placeholder={
+                isRu
+                  ? 'Что нужно от myUNO: сроки, объём, конфиденциальность, ожидаемый результат (TEO, эксклюзив, капитал, club sales и т.д.)…'
+                  : 'What you need from myUNO: timing, scale, confidentiality, desired outcome (feasibility, sole agency, capital, club sales, etc.)…'
+              }
+              value={formData.notes}
+              onChange={(e) => setFormData((prev) => ({ ...prev, notes: e.target.value }))}
+              rows={4}
+            />
+          </div>
+
+          <div className="flex gap-3 pt-4">
+            <Button variant="outline" onClick={() => setStep('type')} className="flex-1">
+              {isRu ? 'Назад' : 'Back'}
+            </Button>
+            <Button onClick={() => setStep('contact')} className="flex-1">
+              {isRu ? 'Далее' : 'Continue'}
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {step === 'criteria' && !isDeveloperPersona && (
+        <div className="space-y-6">
+          <h2 className="text-lg font-semibold">
+            {requestType === 'vacation_rental'
               ? (isRu ? 'Детали аренды' : 'Rental Details')
               : (isRu ? 'Ваши критерии' : 'Your Criteria')}
           </h2>
@@ -755,12 +1171,41 @@ export default function PropertyConsultation() {
               <div className="flex justify-between">
                 <span className="text-muted-foreground">{isRu ? 'Тип' : 'Type'}:</span>
                 <span>
-                  {requestType === 'vacation_rental' && (isRu ? 'Аренда на отпуск' : 'Vacation Rental')}
-                  {requestType === 'property_consultation' && (isRu ? 'Покупка' : 'Purchase')}
-                  {requestType === 'property_tour' && (isRu ? 'Тур' : 'Tour')}
-                  {requestType === 'investment_advice' && (isRu ? 'Инвестиции' : 'Investment')}
+                  {isDeveloperPersona
+                    ? (isRu ? 'Партнёрство застройщика' : 'Developer partnership')
+                    : requestType === 'vacation_rental'
+                      ? (isRu ? 'Аренда на отпуск' : 'Vacation Rental')
+                      : requestType === 'property_consultation'
+                        ? (isRu ? 'Покупка' : 'Purchase')
+                        : requestType === 'property_tour'
+                          ? (isRu ? 'Тур' : 'Tour')
+                          : requestType === 'investment_advice'
+                            ? (isRu ? 'Инвестиции' : 'Investment')
+                            : '—'}
                 </span>
               </div>
+              {isDeveloperPersona && (
+                <>
+                  <div className="flex justify-between gap-2">
+                    <span className="text-muted-foreground shrink-0">{isRu ? 'Задача' : 'Focus'}:</span>
+                    <span className="text-right">
+                      {DEVELOPER_INTENTS.find((i) => i.id === developerIntent)?.[isRu ? 'titleRu' : 'titleEn']}
+                    </span>
+                  </div>
+                  {developerForm.companyName && (
+                    <div className="flex justify-between gap-2">
+                      <span className="text-muted-foreground shrink-0">{isRu ? 'Компания' : 'Company'}:</span>
+                      <span className="text-right font-medium">{developerForm.companyName}</span>
+                    </div>
+                  )}
+                  {developerForm.projectName && (
+                    <div className="flex justify-between gap-2">
+                      <span className="text-muted-foreground shrink-0">{isRu ? 'Проект' : 'Project'}:</span>
+                      <span className="text-right">{developerForm.projectName}</span>
+                    </div>
+                  )}
+                </>
+              )}
               {requestType === 'vacation_rental' && formData.check_in && formData.check_out && (
                 <>
                   <div className="flex justify-between">
@@ -808,19 +1253,26 @@ export default function PropertyConsultation() {
           </Card>
 
           <div className="text-xs text-muted-foreground text-center">
-            {requestType === 'vacation_rental' 
-              ? (isRu ? 'Ответим в течение 2 часов' : 'We respond within 2 hours')
-              : (isRu ? 'Мы свяжемся с вами в ближайшее время' : 'We will contact you shortly')}
+            {isDeveloperPersona
+              ? (isRu ? 'Ответ по B2B — обычно в течение 1–2 рабочих дней' : 'B2B reply — typically within 1–2 business days')
+              : requestType === 'vacation_rental'
+                ? (isRu ? 'Ответим в течение 2 часов' : 'We respond within 2 hours')
+                : (isRu ? 'Мы свяжемся с вами в ближайшее время' : 'We will contact you shortly')}
           </div>
 
           <div className="flex gap-3 pt-2">
             <Button variant="outline" onClick={() => setStep('criteria')} className="flex-1">
               {isRu ? 'Назад' : 'Back'}
             </Button>
-            <Button 
-              onClick={handleSubmit} 
+            <Button
+              onClick={handleSubmit}
               className="flex-1"
-              disabled={!formData.name || !formData.phone || isSubmitting}
+              disabled={
+                !formData.name ||
+                !formData.phone ||
+                isSubmitting ||
+                (isDeveloperPersona && !developerForm.companyName.trim())
+              }
             >
               {isSubmitting 
                 ? (isRu ? 'Отправка...' : 'Sending...') 

@@ -20,6 +20,10 @@ import { GuestLayout } from '@/components/guest/GuestLayout';
 import { StaffLayout } from '@/components/staff/StaffLayout';
 import { useNavigationDirection } from '@/hooks/useNavigationDirection';
 import { APP_ROUTES } from '@/lib/config/routes';
+import {
+  NewbuildProjectToOffplanRedirect,
+  NewbuildDeveloperToHubRedirect,
+} from '@/components/routing/NewbuildLegacyRedirects';
 
 // Core pages - eagerly loaded for fast initial navigation
 import Index from '@/pages/Index';
@@ -49,9 +53,9 @@ const WaterBookRedirect = () => { const { id } = useParams(); return <Navigate t
 
 // Legacy redirect helpers for Property Hub migration
 const FoodRestaurantIdRedirect = () => { const { id } = useParams(); return <Navigate to={`/restaurants/${id}`} replace />; };
-const OffplanIdRedirect = () => { const { id } = useParams(); return <Navigate to={`/property/offplan/${id}`} replace />; };
-const DeveloperIdRedirect = () => { const { id } = useParams(); return <Navigate to={`/property/developers/${id}`} replace />; };
-const InvestIdRedirect = () => { const { id } = useParams(); return <Navigate to={`/property/invest/${id}`} replace />; };
+const OffplanIdRedirect = () => { const { id } = useParams(); return <Navigate to={APP_ROUTES.OFFPLAN_DETAIL(id!)} replace />; };
+const DeveloperIdRedirect = () => { const { id } = useParams(); return <Navigate to={APP_ROUTES.DEVELOPER_DETAIL(id!)} replace />; };
+const InvestIdRedirect = () => { const { id } = useParams(); return <Navigate to={APP_ROUTES.INVEST_DETAIL(id!)} replace />; };
 
 // ── Layout Wrappers ──
 
@@ -156,6 +160,8 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.BOOKING_ADVANCE_REQUESTED} element={<LazyPage><Pages.AdvanceRequested /></LazyPage>} />
         <Route path="/ref/:code" element={<LazyPage><Pages.ReferralLanding /></LazyPage>} />
         <Route path="/for-management-companies" element={<LazyPage><Pages.ForManagementCompanies /></LazyPage>} />
+        <Route path={APP_ROUTES.FOR_REAL_ESTATE_DEVELOPERS} element={<LazyPage><Pages.ForDevelopers /></LazyPage>} />
+        <Route path={APP_ROUTES.FOR_LOCAL_SERVICE_PROVIDERS} element={<LazyPage><Pages.ForLocalServices /></LazyPage>} />
         <Route path="/b/:slug" element={<LazyPage><Pages.StorefrontPage /></LazyPage>} />
         
         {/* ── LifeOS ── */}
@@ -250,12 +256,16 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.LANDING_RENTAL} element={<LazyPage><Pages.RentalLanding /></LazyPage>} />
         <Route path={APP_ROUTES.LANDING_NEW_DEVELOPMENTS} element={<Navigate to={APP_ROUTES.NEWBUILDS} replace />} />
         
+        {/* ── PEYLAA (Dedicated Sales Funnel) ── */}
+        <Route path={APP_ROUTES.PEYLAA} element={<LazyPage><Pages.PeylaaLanding /></LazyPage>} />
+        <Route path="/peylaa/unit/:unitNo" element={<LazyPage><Pages.PeylaaLanding /></LazyPage>} />
+
         {/* ── Newbuilds (Premium New Developments) ── */}
         <Route path={APP_ROUTES.NEWBUILDS} element={<LazyPage><Pages.NewbuildsLanding /></LazyPage>} />
-        <Route path={APP_ROUTES.NEWBUILDS_PROJECTS} element={<LazyPage><Pages.NewbuildsCatalog /></LazyPage>} />
-        <Route path="/newbuilds/projects/:slug" element={<LazyPage><Pages.NewbuildDetail /></LazyPage>} />
-        <Route path={APP_ROUTES.NEWBUILDS_DEVELOPERS} element={<LazyPage><Pages.NewbuildsDevelopers /></LazyPage>} />
-        <Route path="/newbuilds/developers/:slug" element={<LazyPage><Pages.NewbuildDeveloperDetail /></LazyPage>} />
+        <Route path={APP_ROUTES.NEWBUILDS_PROJECTS} element={<Navigate to={APP_ROUTES.OFFPLAN} replace />} />
+        <Route path="/newbuilds/projects/:slug" element={<NewbuildProjectToOffplanRedirect />} />
+        <Route path={APP_ROUTES.NEWBUILDS_DEVELOPERS} element={<Navigate to={APP_ROUTES.DEVELOPERS} replace />} />
+        <Route path="/newbuilds/developers/:slug" element={<NewbuildDeveloperToHubRedirect />} />
         
         {/* ── Developer Portal ── */}
         <Route path="/developer-portal" element={<Suspense fallback={<LoadingState />}><Pages.DeveloperPortalLayout /></Suspense>}>
@@ -714,7 +724,7 @@ export const AnimatedRoutes: React.FC = () => {
       </Routes>
     </AnimatePresence>
     
-    <AdaptiveBottomNav />
+    {!location.pathname.startsWith('/peylaa') && <AdaptiveBottomNav />}
     </>
   );
 };

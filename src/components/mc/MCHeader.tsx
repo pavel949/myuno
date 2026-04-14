@@ -16,6 +16,7 @@ import { CompanySwitcher } from '@/components/owner/CompanySwitcher';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { navigationGroups } from './MCSidebar';
+import { WorkspaceHeader } from '@/components/layout/WorkspaceHeader';
 
 const companyRoleLabels: Record<string, { en: string; ru: string }> = {
   director: { en: 'Director', ru: 'Директор' },
@@ -88,72 +89,75 @@ export function MCHeader() {
     : null;
 
   return (
-    <header className="sticky top-0 z-40 flex h-14 items-center gap-4 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4">
-      <SidebarTrigger data-sidebar="trigger" className="-ml-1" />
+    <WorkspaceHeader
+      leftSlot={<SidebarTrigger data-sidebar="trigger" className="-ml-1" />}
+      centerSlot={
+        <>
+          <div className="hidden md:flex items-center gap-2">
+            <CompanySwitcher />
+            {roleLabel && (
+              <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-md">
+                {roleLabel}
+              </span>
+            )}
+          </div>
 
-      <div className="hidden md:flex items-center gap-2">
-        <CompanySwitcher />
-        {roleLabel && (
-          <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-md">
-            {roleLabel}
-          </span>
-        )}
-      </div>
+          <div className="hidden md:block h-5 w-px bg-border" />
 
-      <div className="hidden md:block h-5 w-px bg-border" />
-
-      <Breadcrumb className="hidden md:flex">
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink onClick={() => navigate(APP_ROUTES.MC)} className="flex items-center gap-1 cursor-pointer hover:text-foreground">
-              <span>{isRussian ? 'Панель УК' : 'MC Dashboard'}</span>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          {breadcrumbs.slice(1).map((crumb) => (
-            <React.Fragment key={crumb.path}>
-              <BreadcrumbSeparator><ChevronRight className="h-3.5 w-3.5" /></BreadcrumbSeparator>
+          <Breadcrumb className="hidden md:flex">
+            <BreadcrumbList>
               <BreadcrumbItem>
-                {crumb.isLast ? (
-                  <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
-                ) : (
-                  <BreadcrumbLink onClick={() => navigate(crumb.path)} className="cursor-pointer hover:text-foreground">
-                    {crumb.label}
-                  </BreadcrumbLink>
-                )}
+                <BreadcrumbLink onClick={() => navigate(APP_ROUTES.MC)} className="flex items-center gap-1 cursor-pointer hover:text-foreground">
+                  <span>{isRussian ? 'Панель УК' : 'MC Dashboard'}</span>
+                </BreadcrumbLink>
               </BreadcrumbItem>
-            </React.Fragment>
-          ))}
-        </BreadcrumbList>
-      </Breadcrumb>
-
-      <div className="md:hidden flex-1 min-w-0 overflow-hidden">
-        <div className="flex items-center gap-2">
-          <CompanySwitcher />
-          <h1 className="font-semibold text-sm leading-tight truncate">{pageTitle}</h1>
+              {breadcrumbs.slice(1).map((crumb) => (
+                <React.Fragment key={crumb.path}>
+                  <BreadcrumbSeparator><ChevronRight className="h-3.5 w-3.5" /></BreadcrumbSeparator>
+                  <BreadcrumbItem>
+                    {crumb.isLast ? (
+                      <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+                    ) : (
+                      <BreadcrumbLink onClick={() => navigate(crumb.path)} className="cursor-pointer hover:text-foreground">
+                        {crumb.label}
+                      </BreadcrumbLink>
+                    )}
+                  </BreadcrumbItem>
+                </React.Fragment>
+              ))}
+            </BreadcrumbList>
+          </Breadcrumb>
+        </>
+      }
+      mobileTitle={
+        <div className="md:hidden flex-1 min-w-0 overflow-hidden">
+          <div className="flex items-center gap-2">
+            <CompanySwitcher />
+            <h1 className="font-semibold text-sm leading-tight truncate">{pageTitle}</h1>
+          </div>
+          {roleLabel && <span className="text-[10px] text-muted-foreground">{roleLabel}</span>}
         </div>
-        {roleLabel && <span className="text-[10px] text-muted-foreground">{roleLabel}</span>}
-      </div>
-
-      <div className="hidden md:block flex-1" />
-
-      <div className="flex items-center gap-1">
-        <Button variant="ghost" size="icon" onClick={() => navigate(APP_ROUTES.MC_SUPPORT_CHAT)} title={isRussian ? 'Поддержка' : 'Support'}>
-          <HelpCircle className="h-4 w-4" />
-        </Button>
-        <div className="hidden sm:flex items-center gap-1">
-          <CurrencySwitcher size="sm" />
-          <ThemeSwitcher />
+      }
+      rightSlot={
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="icon" onClick={() => navigate(APP_ROUTES.MC_SUPPORT_CHAT)} title={isRussian ? 'Поддержка' : 'Support'}>
+            <HelpCircle className="h-4 w-4" />
+          </Button>
+          <div className="hidden sm:flex items-center gap-1">
+            <CurrencySwitcher size="sm" />
+            <ThemeSwitcher />
+          </div>
+          <LanguageSwitcher />
+          <Button variant="ghost" size="icon" className="relative" onClick={() => navigate(APP_ROUTES.NOTIFICATIONS)}>
+            <Bell className="h-4 w-4" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground px-1">
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            )}
+          </Button>
         </div>
-        <LanguageSwitcher />
-        <Button variant="ghost" size="icon" className="relative" onClick={() => navigate(APP_ROUTES.NOTIFICATIONS)}>
-          <Bell className="h-4 w-4" />
-          {unreadCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground px-1">
-              {unreadCount > 9 ? '9+' : unreadCount}
-            </span>
-          )}
-        </Button>
-      </div>
-    </header>
+      }
+    />
   );
 }

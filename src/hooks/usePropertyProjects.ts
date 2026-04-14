@@ -2,8 +2,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import type { ProjectLifecycleStatus } from '@/lib/real-estate/canonicalModel';
+import { applyProjectCatalogFilters, applyProjectCatalogSort, createProjectCatalogQuery } from './projectCatalogQuery';
 
-export type ProjectStatus = 'offplan' | 'under_construction' | 'completed';
+export type ProjectStatus = ProjectLifecycleStatus;
 
 export interface PropertyProject {
   id: string;
@@ -68,11 +70,10 @@ export function usePropertyProjects() {
   return useQuery({
     queryKey: ['property-projects'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('property_projects')
-        .select('*')
-        .eq('is_active', true)
-        .order('name_en');
+      let query = createProjectCatalogQuery('*');
+      query = applyProjectCatalogFilters(query, { isActive: true });
+      query = applyProjectCatalogSort(query, 'name');
+      const { data, error } = await query;
 
       if (error) throw error;
       return data as PropertyProject[];
@@ -85,10 +86,10 @@ export function useAdminPropertyProjects() {
   return useQuery({
     queryKey: ['admin-property-projects'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('property_projects')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const { data, error } = await applyProjectCatalogSort(
+        createProjectCatalogQuery('*'),
+        'newest',
+      );
 
       if (error) throw error;
       return data as PropertyProject[];
@@ -179,11 +180,10 @@ export function useMyPropertyProjects() {
     queryFn: async () => {
       if (!user?.id) return [];
 
-      const { data, error } = await supabase
-        .from('property_projects')
-        .select('*')
-        .eq('created_by', user.id)
-        .order('created_at', { ascending: false });
+      let query = createProjectCatalogQuery('*');
+      query = applyProjectCatalogFilters(query, { createdBy: user.id });
+      query = applyProjectCatalogSort(query, 'newest');
+      const { data, error } = await query;
 
       if (error) throw error;
       return data as PropertyProject[];

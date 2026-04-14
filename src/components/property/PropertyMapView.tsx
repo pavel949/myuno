@@ -13,6 +13,7 @@ import { useGoogleMaps } from '@/contexts/GoogleMapsContext';
 import { cn } from '@/lib/utils';
 import type { Property } from '@/hooks/useProperties';
 import { DEFAULT_MAP_CENTER } from '@/lib/googleMaps';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 const DEFAULT_ZOOM = 10.5;
 
@@ -135,7 +136,7 @@ export function PropertyMapView({
                 fontSize: '12px',
               }}
               title={language === 'ru' ? property.title_ru : property.title_en}
-              onClick={() => navigate(`/property/${property.id}`)}
+              onClick={() => navigate(APP_ROUTES.PROPERTY_DETAIL(property.id))}
             />
           );
         })}

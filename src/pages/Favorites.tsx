@@ -32,6 +32,7 @@ import { AnimatedList, AnimatedItem } from '@/components/layout/AnimatedList';
 import { FavoriteCollections } from '@/components/favorites/FavoriteCollections';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 type FilterType = 'all' | 'course' | 'tutor' | 'event' | 'property' | 'vehicle' | 'clinic' | 'gym' | 'tour' | 'water_activity' | 'restaurant';
 type ViewMode = 'grid' | 'list';
@@ -68,11 +69,14 @@ export default function Favorites() {
     : favorites.filter(f => f.item_type === filter);
 
   const handleNavigate = (item: { item_type: string; item_id: string }) => {
+    if (item.item_type === 'property') {
+      navigate(APP_ROUTES.PROPERTY_DETAIL(item.item_id));
+      return;
+    }
     const routes: Record<string, string> = {
       course: `/education/course/${item.item_id}`,
       tutor: `/education/tutor/${item.item_id}`,
       event: `/events/${item.item_id}`,
-      property: `/property/${item.item_id}`,
       vehicle: `/transport/vehicle/${item.item_id}`,
       clinic: `/medical/clinic/${item.item_id}`,
       gym: `/fitness/gym/${item.item_id}`,

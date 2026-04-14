@@ -3,7 +3,7 @@
  * Shows construction status, developer, muUNO score, pricing, ROI
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Building2, 
@@ -24,6 +24,7 @@ import { cn } from '@/lib/utils';
 import { DeveloperBadge } from './DeveloperBadge';
 import { MuunoScoreWidget } from '@/components/invest/MuunoScoreWidget';
 import type { OffplanProject, ProjectStatus } from '@/hooks/useOffplanProjects';
+import { surfaceFromOffplanProject } from '@/lib/real-estate/listingViewModel';
 
 interface OffplanProjectCardProps {
   project: OffplanProject;
@@ -63,12 +64,13 @@ export function OffplanProjectCard({
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
 
-  const name = isRu ? project.nameRu : project.nameEn;
+  const surface = useMemo(() => surfaceFromOffplanProject(project), [project]);
+  const name = isRu ? surface.titleRu : surface.titleEn;
   const status = STATUS_CONFIG[project.projectStatus];
   const StatusIcon = status.icon;
 
   const handleClick = () => {
-    navigate(`/property/offplan/${project.id}`);
+    navigate(surface.href);
   };
 
   // Format completion date
@@ -83,6 +85,8 @@ export function OffplanProjectCard({
 
   return (
     <div
+      data-catalog-kind={surface.kind}
+      data-listing-id={surface.id}
       onClick={handleClick}
       className={cn(
         "group cursor-pointer rounded-2xl overflow-hidden",

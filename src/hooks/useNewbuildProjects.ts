@@ -3,6 +3,7 @@
  */
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { applyProjectCatalogFilters, applyProjectCatalogSort, createProjectCatalogQuery } from './projectCatalogQuery';
 
 export interface NewbuildProject {
   id: string;
@@ -53,27 +54,20 @@ export function useNewbuildProjects(filters?: NewbuildFilters) {
   return useQuery({
     queryKey: ['newbuild-projects', filters],
     queryFn: async (): Promise<NewbuildProject[]> => {
-      let query = supabase
-        .from('property_projects')
-        .select('*')
-        .eq('is_active', true)
-        .eq('is_approved', true);
-
-      if (filters?.location_area) query = query.eq('location_area', filters.location_area);
-      if (filters?.status) query = query.eq('project_status', filters.status);
-      if (filters?.developer_id) query = query.eq('developer_id', filters.developer_id);
-      if (filters?.price_min) query = query.gte('price_from', filters.price_min);
-      if (filters?.price_max) query = query.lte('price_from', filters.price_max);
-
-      // Sort
-      switch (filters?.sort) {
-        case 'price_asc': query = query.order('price_from', { ascending: true }); break;
-        case 'price_desc': query = query.order('price_from', { ascending: false }); break;
-        case 'progress': query = query.order('construction_progress', { ascending: false }); break;
-        case 'newest': query = query.order('created_at', { ascending: false }); break;
-        default:
-          query = query.order('is_featured', { ascending: false }).order('muuno_score', { ascending: false, nullsFirst: false });
-      }
+      let query = createProjectCatalogQuery('*');
+      query = applyProjectCatalogFilters(query, {
+        isActive: true,
+        isApproved: true,
+        locationArea: filters?.location_area,
+        statuses: filters?.status ? [filters.status] : undefined,
+        developerId: filters?.developer_id,
+        minPrice: filters?.price_min,
+        maxPrice: filters?.price_max,
+      });
+      query = applyProjectCatalogSort(
+        query,
+        filters?.sort === 'featured' || !filters?.sort ? 'featured_score' : filters.sort,
+      );
 
       const { data, error } = await query;
       if (error) throw error;

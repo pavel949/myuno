@@ -6,7 +6,6 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { MessageCircle, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
-import { useSectionReveal } from '@/hooks/useScrollBehavior';
 
 const WHATSAPP_NUMBER = '+66612345678';
 const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Hi! I need help with services in Phuket')}`;
@@ -14,13 +13,11 @@ const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER.replace(/[^0-9]/g, '')}?te
 export function WhatsAppCTA({ className }: { className?: string }) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const sectionRef = useSectionReveal<HTMLElement>();
 
   return (
     <section
-      ref={sectionRef}
       className={cn(
-        "section-reveal relative rounded-[var(--radius-lg)] overflow-hidden",
+        "relative rounded-[var(--radius-lg)] overflow-hidden",
         className
       )}
     >

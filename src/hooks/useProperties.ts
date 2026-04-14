@@ -1,6 +1,7 @@
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import type { SalonMarker } from '@/components/map/SalonMap';
 import { supabase } from '@/integrations/supabase/client';
+import { PUBLIC_CATALOG_APPROVAL_STATUS } from '@/lib/real-estate/canonicalModel';
 import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
 
 export interface Property {
@@ -12,6 +13,8 @@ export interface Property {
   property_type: string;
   listing_type: string;
   price?: number;
+  /** Sale / total asking when listing is for purchase */
+  sale_price?: number;
   price_period?: string;
   currency?: string;
   bedrooms?: number;
@@ -191,7 +194,7 @@ export function usePropertiesInfinite(filters: PropertyFilters = {}) {
         .from('properties')
         .select(PROPERTY_LIST_COLUMNS)
         .eq('is_active', true)
-        .eq('approval_status', 'approved')
+        .eq('approval_status', PUBLIC_CATALOG_APPROVAL_STATUS)
         .order('is_featured', { ascending: false })
         .order('created_at', { ascending: false })
         .range(pageParam * PAGE_SIZE, (pageParam + 1) * PAGE_SIZE - 1);
@@ -253,7 +256,7 @@ export function useProperties(filters: PropertyFilters = {}, limit = 50) {
         .from('properties')
         .select(PROPERTY_LIST_COLUMNS)
         .eq('is_active', true)
-        .eq('approval_status', 'approved')
+        .eq('approval_status', PUBLIC_CATALOG_APPROVAL_STATUS)
         .order('is_featured', { ascending: false })
         .order('created_at', { ascending: false })
         .limit(limit);

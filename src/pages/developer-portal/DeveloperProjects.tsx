@@ -77,13 +77,11 @@ export default function DeveloperProjects() {
                     <Edit className="w-4 h-4" />
                   </Button>
                 </Link>
-                {project.slug && (
-                  <Link to={APP_ROUTES.NEWBUILDS_PROJECT(project.slug)} target="_blank">
-                    <Button size="sm" variant="outline" className="border-[hsl(var(--nb-glass-border))] text-[hsl(var(--nb-text-secondary))]">
-                      <ExternalLink className="w-4 h-4" />
-                    </Button>
-                  </Link>
-                )}
+                <Link to={APP_ROUTES.OFFPLAN_DETAIL(project.id)} target="_blank" rel="noopener noreferrer">
+                  <Button size="sm" variant="outline" className="border-[hsl(var(--nb-glass-border))] text-[hsl(var(--nb-text-secondary))]">
+                    <ExternalLink className="w-4 h-4" />
+                  </Button>
+                </Link>
               </div>
             </div>
           ))}

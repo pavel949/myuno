@@ -1,6 +1,7 @@
 import React, { memo, useMemo, useCallback, useState } from 'react';
 import { MapPin, Sun, Cloud, CloudRain, Calendar, Trophy, Flame, Search, ArrowRight,
-  Plane, Home, Building2, TrendingUp, Baby, Heart, Music, Dumbbell, Briefcase, Laptop, PawPrint, Globe
+  Plane, Home, Building2, TrendingUp, Baby, Heart, Music, Dumbbell, Briefcase, Laptop, PawPrint, Globe,
+  HardHat, Store,
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -8,7 +9,13 @@ import { useWeather } from '@/hooks/useWeather';
 import { useIsDesktop } from '@/hooks/use-desktop';
 import { useAuth } from '@/contexts/AuthContext';
 import { useHeroData } from '@/hooks/useHeroData';
-import { useUserPersonas, UserPersona, PERSONA_OPTIONS, PERSONA_INFO } from '@/hooks/useUserPersonas';
+import {
+  useUserPersonas,
+  UserPersona,
+  PERSONA_OPTIONS_PRIMARY,
+  PERSONA_OPTIONS_LIFESTYLE,
+  PERSONA_INFO,
+} from '@/hooks/useUserPersonas';
 import { cn } from '@/lib/utils';
 
 function HeroSearchInput({ isRu }: { isRu: boolean }) {
@@ -48,6 +55,7 @@ function HeroSearchInput({ isRu }: { isRu: boolean }) {
 
 const PERSONA_ICONS: Record<string, React.ElementType> = {
   Plane, Home, Building2, TrendingUp, Baby, Heart, Music, Dumbbell, Briefcase, Laptop, PawPrint, Globe,
+  HardHat, Store,
 };
 
 const PERSONA_GRADIENTS: Record<UserPersona, string> = {
@@ -63,48 +71,98 @@ const PERSONA_GRADIENTS: Record<UserPersona, string> = {
   active: 'linear-gradient(135deg, #f97316, #ea580c)',
   business: 'linear-gradient(135deg, #64748b, #475569)',
   nomad: 'linear-gradient(135deg, #14b8a6, #0d9488)',
+  real_estate_developer: 'linear-gradient(135deg, #0ea5e9, #0369a1)',
+  local_services_provider: 'linear-gradient(135deg, #22c55e, #15803d)',
 };
 
-function PersonaSwitcher({ isRu }: { isRu: boolean }) {
-  const { personas, setPersonas, isSetting } = useUserPersonas();
-  const activePersona = useMemo(() => personas[0] ?? ('tourist' as UserPersona), [personas]);
-
+function PersonaChipRow({
+  personas,
+  isRu,
+  hideScrollbar,
+  isSetting,
+  setPersonas,
+  activePersona,
+}: {
+  personas: readonly UserPersona[];
+  isRu: boolean;
+  hideScrollbar: boolean;
+  isSetting: boolean;
+  setPersonas: (p: UserPersona[]) => void;
+  activePersona: UserPersona;
+}) {
   return (
-    <div className="w-full overflow-x-auto scrollbar-hide -mx-1 px-1">
+    <div
+      className={cn(
+        'w-full min-w-0 overflow-x-auto -mx-1 px-1',
+        hideScrollbar && 'scrollbar-hide'
+      )}
+    >
       <div className="flex gap-1.5 w-max py-1">
-        {PERSONA_OPTIONS.map((p) => {
+        {personas.map((p) => {
           const info = PERSONA_INFO[p];
           const Icon = PERSONA_ICONS[info.icon] || Plane;
           const isActive = activePersona === p;
           return (
             <button
               key={p}
+              type="button"
               onClick={() => setPersonas([p])}
               disabled={isSetting}
               className={cn(
-                "flex items-center gap-1.5 px-3 py-2 rounded-[var(--radius-full)] shrink-0 transition-all duration-200",
+                'flex items-center gap-1.5 px-3 py-2 rounded-[var(--radius-full)] shrink-0 transition-all duration-200',
                 isActive
-                  ? "shadow-lg ring-1 ring-white/20 text-white"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? 'shadow-lg ring-1 ring-white/20 text-white'
+                  : 'text-muted-foreground hover:text-foreground'
               )}
               style={{
-                background: isActive
-                  ? PERSONA_GRADIENTS[p]
-                  : 'hsl(var(--muted))',
-                backdropFilter: isActive ? 'none' : 'none',
+                background: isActive ? PERSONA_GRADIENTS[p] : 'hsl(var(--muted))',
               }}
             >
               <Icon className="w-4 h-4 shrink-0" strokeWidth={2} />
-              <span className={cn(
-                "text-[11px] font-semibold whitespace-nowrap leading-none",
-                isActive ? "text-white" : ""
-              )}>
+              <span
+                className={cn(
+                  'text-[11px] font-semibold whitespace-nowrap leading-none',
+                  isActive ? 'text-white' : ''
+                )}
+              >
                 {isRu ? info.labelRu : info.labelEn}
               </span>
             </button>
           );
         })}
       </div>
+    </div>
+  );
+}
+
+function PersonaSwitcher({ isRu, hideScrollbar = true }: { isRu: boolean; hideScrollbar?: boolean }) {
+  const { personas, setPersonas, isSetting } = useUserPersonas();
+  const activePersona = useMemo(() => personas[0] ?? ('tourist' as UserPersona), [personas]);
+
+  return (
+    <div className="space-y-1.5 w-full min-w-0">
+      <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground/80 px-1">
+        {isRu ? 'Кто вы' : 'Who you are'}
+      </p>
+      <PersonaChipRow
+        personas={PERSONA_OPTIONS_PRIMARY}
+        isRu={isRu}
+        hideScrollbar={hideScrollbar}
+        isSetting={isSetting}
+        setPersonas={setPersonas}
+        activePersona={activePersona}
+      />
+      <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground/80 px-1 pt-0.5">
+        {isRu ? 'Сценарий / стиль' : 'Trip style'}
+      </p>
+      <PersonaChipRow
+        personas={PERSONA_OPTIONS_LIFESTYLE}
+        isRu={isRu}
+        hideScrollbar={hideScrollbar}
+        isSetting={isSetting}
+        setPersonas={setPersonas}
+        activePersona={activePersona}
+      />
     </div>
   );
 }
@@ -201,7 +259,7 @@ export const HeroBlock = memo(function HeroBlock() {
             )}
           </div>
           
-          <PersonaSwitcher isRu={isRu} />
+          <PersonaSwitcher isRu={isRu} hideScrollbar />
           <HeroSearchInput isRu={isRu} />
         </div>
       </div>
@@ -214,8 +272,8 @@ export const HeroBlock = memo(function HeroBlock() {
       <div className="absolute inset-0 hero-bg" />
       <div className="absolute inset-0 hero-dots" />
       
-      <div className="relative flex items-start justify-between">
-        <div className="space-y-3 flex-1">
+      <div className="relative flex items-start justify-between gap-6 min-w-0">
+        <div className="space-y-3 flex-1 min-w-0">
           <p className="text-[15px] text-muted-foreground font-medium">
             {isRu ? 'Всё для жизни за рубежом — в одном месте' : 'One place for everything abroad'}
           </p>
@@ -259,14 +317,14 @@ export const HeroBlock = memo(function HeroBlock() {
               </>
             ) : null}
           </div>
-          <div className="pt-3 max-w-2xl">
-            <PersonaSwitcher isRu={isRu} />
+          <div className="pt-3 w-full min-w-0">
+            <PersonaSwitcher isRu={isRu} hideScrollbar={false} />
           </div>
         </div>
 
         <Link 
           to="/sos" 
-          className="sos-pulse flex items-center gap-2 px-4 py-2 rounded-[var(--radius-full)] transition-all hover:scale-105"
+          className="sos-pulse shrink-0 flex items-center gap-2 px-4 py-2 rounded-[var(--radius-full)] transition-all hover:scale-105"
           style={{
             background: 'rgba(239,68,68,0.15)',
             border: '1px solid rgba(239,68,68,0.4)',

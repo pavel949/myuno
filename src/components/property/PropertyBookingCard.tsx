@@ -18,6 +18,7 @@ import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { format, differenceInDays, isBefore, startOfDay } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { DateRange } from 'react-day-picker';
 
 interface PropertyBookingCardProps {
@@ -158,7 +159,7 @@ export function PropertyBookingCard({
     if (dateRange?.from) params.set('checkIn', format(dateRange.from, 'yyyy-MM-dd'));
     if (dateRange?.to) params.set('checkOut', format(dateRange.to, 'yyyy-MM-dd'));
     params.set('guests', guests.toString());
-    navigate(`/property/${propertyId}/inquiry?${params.toString()}`);
+    navigate(`${APP_ROUTES.PROPERTY_INQUIRY(propertyId)}?${params.toString()}`);
   };
 
   // Trust signals

@@ -15,6 +15,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Property } from '@/hooks/useProperties';
+import { PUBLIC_CATALOG_APPROVAL_STATUS } from '@/lib/real-estate/canonicalModel';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { cn } from '@/lib/utils';
 
 interface ProjectUnitsSectionProps {
@@ -49,6 +51,7 @@ export function ProjectUnitsSection({
         .select('*')
         .eq('project_id', projectId)
         .eq('is_active', true)
+        .eq('approval_status', PUBLIC_CATALOG_APPROVAL_STATUS)
         .order('price', { ascending: true });
 
       if (error) throw error;
@@ -247,7 +250,7 @@ function SimplePropertyCard({ property, isRu, formatPrice }: SimplePropertyCardP
 
   return (
     <div
-      onClick={() => navigate(`/property/${property.id}`)}
+      onClick={() => navigate(APP_ROUTES.PROPERTY_DETAIL(property.id))}
       className="overflow-hidden rounded-2xl bg-card border border-border cursor-pointer hover:border-primary/50 hover:shadow-lg transition-all group"
     >
       <AspectRatio ratio={4 / 3}>

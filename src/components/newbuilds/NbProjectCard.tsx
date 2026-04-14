@@ -4,6 +4,7 @@ import { MapPin } from 'lucide-react';
 import { NbProjectStatusBadge } from './NbProjectStatusBadge';
 import { NbConstructionProgress } from './NbConstructionProgress';
 import { NbPriceDisplay } from './NbPriceDisplay';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 export interface NbProjectCardData {
   id: string;
@@ -39,8 +40,14 @@ const unitTypeLabels: Record<string, string> = {
   villa: 'Вилла',
 };
 
+// Projects with dedicated landing pages — link there instead of generic detail
+const CUSTOM_LANDING: Record<string, string> = {
+  peylaa: '/peylaa',
+};
+
 export function NbProjectCard({ project, variant = 'compact' }: Props) {
-  const href = `/newbuilds/projects/${project.slug || project.id}`;
+  const slug = project.slug || project.id;
+  const href = (slug && CUSTOM_LANDING[slug]) || APP_ROUTES.OFFPLAN_DETAIL(project.id);
   const img = project.cover_image || 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&q=80';
 
   if (variant === 'featured') {

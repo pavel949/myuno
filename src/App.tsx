@@ -39,6 +39,7 @@ import { PWAUpdatePrompt } from "@/components/pwa/PWAUpdatePrompt";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "react-router-dom";
 import { composeProviders } from "@/lib/composeProviders";
+import { APP_ROUTES } from "@/lib/config/routes";
 
 const queryClient = new QueryClient({
   defaultOptions: defaultQueryClientOptions,
@@ -73,10 +74,13 @@ function ComingSoonGate({ children }: { children: React.ReactNode }) {
   // Allow auth and public marketing routes through
   const isPublicRoute = location.pathname.startsWith('/auth')
     || location.pathname.startsWith('/for-management-companies')
+    || location.pathname.startsWith(APP_ROUTES.FOR_REAL_ESTATE_DEVELOPERS)
+    || location.pathname.startsWith(APP_ROUTES.FOR_LOCAL_SERVICE_PROVIDERS)
     || location.pathname.startsWith('/vendor/join')
     || location.pathname.startsWith('/vendor/onboarding')
     || location.pathname.startsWith('/ref/')
-    || location.pathname.startsWith('/newbuilds');
+    || location.pathname.startsWith('/newbuilds')
+    || location.pathname.startsWith('/peylaa');
 
   if (bypassComingSoon || isPublicRoute || isLoading) return <>{children}</>;
   if (!user) return <UnderConstruction />;

@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { CACHE_PROFILES } from '@/lib/queryConfig';
+import { PUBLIC_CATALOG_APPROVAL_STATUS } from '@/lib/real-estate/canonicalModel';
 
 export interface CategoryCounts {
   yachts: number;
@@ -65,7 +66,7 @@ async function fetchCategoryCounts(): Promise<CategoryCounts> {
   // Single query to listings table for all verticals!
   const [listingsResult, propertiesResult, servicesResult, eventsResult, fitnessResult] = await Promise.all([
     supabase.rpc('get_listing_counts_by_vertical' as any) as any,
-    supabase.from('properties').select('id', { count: 'exact', head: true }).eq('is_active', true).eq('approval_status', 'approved'),
+    supabase.from('properties').select('id', { count: 'exact', head: true }).eq('is_active', true).eq('approval_status', PUBLIC_CATALOG_APPROVAL_STATUS),
     supabase.from('services').select('id', { count: 'exact', head: true }).eq('is_active', true),
     supabase.from('events').select('id', { count: 'exact', head: true }).eq('is_active', true),
     supabase.from('gyms').select('id', { count: 'exact', head: true }).eq('is_active', true),

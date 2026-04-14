@@ -11,6 +11,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { getPropertyTypeLabel, getDistrictLabel } from '@/lib/taxonomies';
 import { cn } from '@/lib/utils';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -179,7 +180,7 @@ function CompareSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (v:
                         </button>
                         <div
                           className="cursor-pointer"
-                          onClick={() => { onOpenChange(false); navigate(`/property/${p.id}`); }}
+                          onClick={() => { onOpenChange(false); navigate(APP_ROUTES.PROPERTY_DETAIL(p.id)); }}
                         >
                           {p.cover_image && (
                             <img src={p.cover_image} alt="" className="w-full aspect-[4/3] rounded-lg object-cover mb-2" />

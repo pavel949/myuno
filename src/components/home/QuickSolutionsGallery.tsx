@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronRight, Sparkles } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserPersonas } from '@/hooks/useUserPersonas';
+import { APP_ROUTES } from '@/lib/config/routes';
 import useEmblaCarousel from 'embla-carousel-react';
 import { SectionHeader } from '@/components/ds';
 
@@ -60,6 +61,9 @@ const SOLUTIONS: QuickSolution[] = [
   { id: 'pool', image: poolImg, labelRu: 'Обслуживание бассейна', labelEn: 'Pool maintenance', path: '/services', personas: ['property_owner'] },
   { id: 'pm', image: pmImg, labelRu: 'Управляющая компания', labelEn: 'Property management', path: '/owner', personas: ['property_owner'] },
   { id: 'renovation', image: renovationImg, labelRu: 'Ремонт и отделка', labelEn: 'Renovation', path: '/services', personas: ['property_owner'] },
+  // B2B personas
+  { id: 'dev-landing', image: roiImg, labelRu: 'Страница застройщика', labelEn: 'Developer landing', path: APP_ROUTES.FOR_REAL_ESTATE_DEVELOPERS, personas: ['real_estate_developer'] },
+  { id: 'provider-landing', image: pmImg, labelRu: 'Партнёрам сервисов', labelEn: 'Service partner landing', path: APP_ROUTES.FOR_LOCAL_SERVICE_PROVIDERS, personas: ['local_services_provider'] },
   // Universal
   { id: 'property-tour', image: propertyTourImg, labelRu: 'Бесплатный тур', labelEn: 'Free property tour', path: '/property/consultation?type=property_tour', personas: ['all'] },
   { id: 'flowers', image: flowersImg, labelRu: 'Заказать цветы', labelEn: 'Order flowers', path: '/flowers', personas: ['all'] },

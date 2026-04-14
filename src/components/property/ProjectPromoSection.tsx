@@ -40,7 +40,8 @@ export function ProjectPromoSection({ className, mode = 'rent', onProjectSelect,
     }
 
     // Buy mode - show investment angle
-    const isInvestor = personas.includes('property_owner') || personas.includes('investor');
+    const isInvestor = personas.includes('property_owner') || personas.includes('investor')
+      || personas.includes('real_estate_developer');
 
     if (isInvestor) {
       return {

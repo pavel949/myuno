@@ -6,6 +6,7 @@ import React, { memo, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserPersonas, UserPersona, PERSONA_INFO } from '@/hooks/useUserPersonas';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Sparkles, ChevronRight } from 'lucide-react';
@@ -59,12 +60,12 @@ const PERSONA_RECS: Record<UserPersona, { en: Recommendation[]; ru: Recommendati
   },
   investor: {
     en: [
-      { id: 'i1', title: 'New Projects', subtitle: 'Off-plan deals', path: '/newbuilds', emoji: '🏗️' },
+      { id: 'i1', title: 'New Projects', subtitle: 'Off-plan deals', path: APP_ROUTES.OFFPLAN, emoji: '🏗️' },
       { id: 'i2', title: 'ROI Calculator', subtitle: 'Estimate returns', path: '/invest', emoji: '📈' },
       { id: 'i3', title: 'Due Diligence', subtitle: 'AI-powered checks', path: '/invest', emoji: '🔍' },
     ],
     ru: [
-      { id: 'i1', title: 'Новостройки', subtitle: 'Off-plan проекты', path: '/newbuilds', emoji: '🏗️' },
+      { id: 'i1', title: 'Новостройки', subtitle: 'Off-plan проекты', path: APP_ROUTES.OFFPLAN, emoji: '🏗️' },
       { id: 'i2', title: 'ROI калькулятор', subtitle: 'Рассчитать доходность', path: '/invest', emoji: '📈' },
       { id: 'i3', title: 'Due Diligence', subtitle: 'AI-проверка', path: '/invest', emoji: '🔍' },
     ],
@@ -119,26 +120,26 @@ const PERSONA_RECS: Record<UserPersona, { en: Recommendation[]; ru: Recommendati
   },
   business: {
     en: [
-      { id: 'b1', title: 'Coworking', subtitle: 'Fast WiFi', path: '/services?category=coworking', emoji: '💻' },
-      { id: 'b2', title: 'Business Lawyer', subtitle: 'Company setup', path: '/legal', emoji: '⚖️' },
-      { id: 'b3', title: 'Thai Bank Account', subtitle: 'For foreigners', path: '/banking', emoji: '🏦' },
+      { id: 'b1', title: 'Business Lawyer', subtitle: 'Company setup & contracts', path: '/legal', emoji: '⚖️' },
+      { id: 'b2', title: 'Thai Bank Account', subtitle: 'For companies & founders', path: '/banking', emoji: '🏦' },
+      { id: 'b3', title: 'Coworking & Office', subtitle: 'Workspaces', path: '/services?category=coworking', emoji: '💻' },
     ],
     ru: [
-      { id: 'b1', title: 'Коворкинг', subtitle: 'Быстрый WiFi', path: '/services?category=coworking', emoji: '💻' },
-      { id: 'b2', title: 'Юрист', subtitle: 'Регистрация компании', path: '/legal', emoji: '⚖️' },
-      { id: 'b3', title: 'Счёт в банке', subtitle: 'Для иностранцев', path: '/banking', emoji: '🏦' },
+      { id: 'b1', title: 'Корпоративный юрист', subtitle: 'Компания и договоры', path: '/legal', emoji: '⚖️' },
+      { id: 'b2', title: 'Счёт в банке', subtitle: 'Для бизнеса и фаундеров', path: '/banking', emoji: '🏦' },
+      { id: 'b3', title: 'Офис и коворкинг', subtitle: 'Рабочие пространства', path: '/services?category=coworking', emoji: '💻' },
     ],
   },
   nomad: {
     en: [
-      { id: 'nm1', title: 'Coworking Spaces', subtitle: 'Top-rated', path: '/services?category=coworking', emoji: '🖥️' },
-      { id: 'nm2', title: 'SIM & Internet', subtitle: 'Best deals', path: '/services?category=connectivity', emoji: '📶' },
-      { id: 'nm3', title: 'Long-term Rental', subtitle: 'Monthly deals', path: '/property?mode=long-term', emoji: '🏠' },
+      { id: 'nm1', title: 'SIM & Internet', subtitle: 'Stay connected', path: '/services?category=connectivity', emoji: '📶' },
+      { id: 'nm2', title: 'Long-term Rental', subtitle: 'Monthly deals', path: '/property?mode=long-term', emoji: '🏠' },
+      { id: 'nm3', title: 'Work-friendly Cafés', subtitle: 'Laptop-friendly spots', path: '/restaurants?tag=cafe', emoji: '☕' },
     ],
     ru: [
-      { id: 'nm1', title: 'Коворкинги', subtitle: 'Лучшие по рейтингу', path: '/services?category=coworking', emoji: '🖥️' },
-      { id: 'nm2', title: 'SIM и интернет', subtitle: 'Лучшие тарифы', path: '/services?category=connectivity', emoji: '📶' },
-      { id: 'nm3', title: 'Долгосрочная аренда', subtitle: 'Помесячно', path: '/property?mode=long-term', emoji: '🏠' },
+      { id: 'nm1', title: 'SIM и интернет', subtitle: 'Оставайтесь на связи', path: '/services?category=connectivity', emoji: '📶' },
+      { id: 'nm2', title: 'Долгосрочная аренда', subtitle: 'Помесячно', path: '/property?mode=long-term', emoji: '🏠' },
+      { id: 'nm3', title: 'Кафе для работы', subtitle: 'С ноутбуком', path: '/restaurants?tag=cafe', emoji: '☕' },
     ],
   },
   pet_owner: {
@@ -163,6 +164,30 @@ const PERSONA_RECS: Record<UserPersona, { en: Recommendation[]; ru: Recommendati
       { id: 'rl1', title: 'Бесплатная консультация', subtitle: 'Дорожная карта переезда', path: '/relocate', emoji: '🗺️' },
       { id: 'rl2', title: 'Найти жильё', subtitle: 'Долгосрочная аренда', path: '/property?mode=long-term', emoji: '🏡' },
       { id: 'rl3', title: 'Школы для детей', subtitle: 'Международные школы', path: '/education', emoji: '🎓' },
+    ],
+  },
+  real_estate_developer: {
+    en: [
+      { id: 'd1', title: 'Developer landing', subtitle: 'Projects & leads', path: APP_ROUTES.FOR_REAL_ESTATE_DEVELOPERS, emoji: '🏗️' },
+      { id: 'd2', title: 'Newbuilds showcase', subtitle: 'Premium placement', path: APP_ROUTES.NEWBUILDS, emoji: '📣' },
+      { id: 'd3', title: 'Developer directory', subtitle: 'Join the catalog', path: APP_ROUTES.DEVELOPERS, emoji: '📇' },
+    ],
+    ru: [
+      { id: 'd1', title: 'Страница застройщика', subtitle: 'Проекты и лиды', path: APP_ROUTES.FOR_REAL_ESTATE_DEVELOPERS, emoji: '🏗️' },
+      { id: 'd2', title: 'Витрина новостроек', subtitle: 'Премиальное размещение', path: APP_ROUTES.NEWBUILDS, emoji: '📣' },
+      { id: 'd3', title: 'Каталог девелоперов', subtitle: 'Подключиться', path: APP_ROUTES.DEVELOPERS, emoji: '📇' },
+    ],
+  },
+  local_services_provider: {
+    en: [
+      { id: 'l1', title: 'Partner landing', subtitle: 'Marketplace & payouts', path: APP_ROUTES.FOR_LOCAL_SERVICE_PROVIDERS, emoji: '🤝' },
+      { id: 'l2', title: 'Become a partner', subtitle: 'Vendor onboarding', path: APP_ROUTES.VENDOR_JOIN, emoji: '✅' },
+      { id: 'l3', title: 'List with us', subtitle: 'Services or inventory', path: APP_ROUTES.LIST_WITH_US, emoji: '📝' },
+    ],
+    ru: [
+      { id: 'l1', title: 'Страница партнёра', subtitle: 'Маркетплейс и выплаты', path: APP_ROUTES.FOR_LOCAL_SERVICE_PROVIDERS, emoji: '🤝' },
+      { id: 'l2', title: 'Стать партнёром', subtitle: 'Онбординг вендора', path: APP_ROUTES.VENDOR_JOIN, emoji: '✅' },
+      { id: 'l3', title: 'Разместить у нас', subtitle: 'Услуги или каталог', path: APP_ROUTES.LIST_WITH_US, emoji: '📝' },
     ],
   },
 };

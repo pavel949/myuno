@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/uno/LoadingSpinner';
 import { cn } from '@/lib/utils';
 import { BackButton } from '@/components/uno/BackButton';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 export default function GuestMessages() {
   const { language } = useLanguage();
@@ -81,7 +82,7 @@ export default function GuestMessages() {
                   key={conv.id}
                   conversation={conv}
                   isRu={isRu}
-                  onClick={() => navigate(`/property/${conv.propertyId}?openChat=true`)}
+                  onClick={() => navigate(`${APP_ROUTES.PROPERTY_DETAIL(conv.propertyId)}?openChat=true`)}
                 />
               ))}
             </div>
