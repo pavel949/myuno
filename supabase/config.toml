@@ -31,8 +31,6 @@ project_id = "erfwtoavipwjqmylpizt"
     verify_jwt = false
   [functions.auto-lifecycle-actions]
     verify_jwt = false
-  [functions.auto-social-publish]
-    verify_jwt = false
   [functions.auto-vendor-nurture]
     verify_jwt = false
   [functions.booking-reminders]
@@ -55,35 +53,17 @@ project_id = "erfwtoavipwjqmylpizt"
     verify_jwt = false
   [functions.detect-crm-duplicates]
     verify_jwt = false
-  [functions.document-reminder-check]
-    verify_jwt = false
   [functions.enrich-projects]
     verify_jwt = false
-  [functions.etagi-scrape-projects]
-    verify_jwt = false
-  [functions.fazwaz-discover-projects]
-    verify_jwt = false
-  [functions.fazwaz-scrape-project]
-    verify_jwt = false
-  [functions.firecrawl-map]
-    verify_jwt = false
-  [functions.firecrawl-scrape]
-    verify_jwt = false
   [functions.generate-booking-voucher]
-    verify_jwt = false
-  [functions.generate-report-pdf]
     verify_jwt = false
   [functions.generate-sitemap]
     verify_jwt = false
   [functions.geocode-address]
     verify_jwt = false
-  [functions.get-mapbox-token]
-    verify_jwt = false
   [functions.get-weather]
     verify_jwt = false
   [functions.ical-sync]
-    verify_jwt = false
-  [functions.image-resize]
     verify_jwt = false
   [functions.intake-listing-agent]
     verify_jwt = false
@@ -95,8 +75,6 @@ project_id = "erfwtoavipwjqmylpizt"
     verify_jwt = false
   [functions.leads-factory]
     verify_jwt = false
-  [functions.monthly-owner-statements]
-    verify_jwt = false
   [functions.notify-admin-partner-application]
     verify_jwt = false
   [functions.notify-lead-whatsapp]
@@ -105,13 +83,7 @@ project_id = "erfwtoavipwjqmylpizt"
     verify_jwt = false
   [functions.post-order-autopilot]
     verify_jwt = false
-  [functions.property-moderation-email]
-    verify_jwt = false
   [functions.publish-telegram-post]
-    verify_jwt = false
-  [functions.restaurant-order-notifications]
-    verify_jwt = false
-  [functions.scrape-phuket-insider]
     verify_jwt = false
   [functions.send-crm-email]
     verify_jwt = false
@@ -131,8 +103,6 @@ project_id = "erfwtoavipwjqmylpizt"
     verify_jwt = false
   [functions.update-user-segments]
     verify_jwt = false
-  [functions.utility-payment-reminders]
-    verify_jwt = false
   [functions.vendor-acquisition]
     verify_jwt = false
   [functions.vendor-outreach-agent]
@@ -141,8 +111,6 @@ project_id = "erfwtoavipwjqmylpizt"
     verify_jwt = false
   [functions.whatsapp-incoming-webhook]
     verify_jwt = false
-  [functions.send-guest-welcome-whatsapp]
-    verify_jwt = false
   [functions.send-nurture-messages]
     verify_jwt = false
   [functions.register-mc]
@@ -150,10 +118,4 @@ project_id = "erfwtoavipwjqmylpizt"
   [functions.notify-vendor-order]
     verify_jwt = false
   [functions.supplier-discovery]
-    verify_jwt = false
-  [functions.firecrawl-search]
-    verify_jwt = false
-  [functions.rentals-united-sync]
-    verify_jwt = false
-  [functions.scheduled-mc-backup]
     verify_jwt = false
