@@ -26,6 +26,7 @@ export default function Profile() {
   const { activeCompany } = useActiveCompany();
   const { hasRole, isLoading: rolesLoading } = useUserContext();
   const navigate = useNavigate();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const isLoading = authLoading || rolesLoading;
 
@@ -43,8 +44,6 @@ export default function Profile() {
   }
 
   const isAdmin = hasRole('admin');
-
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
     if (isLoggingOut) return;

@@ -44,6 +44,9 @@ export default function OwnerChatRoom() {
   // Fetch property details if type is property
   const { data: property } = useOwnerProperty(type === 'property' ? id : undefined);
 
+  const { formatPrice } = useCurrency();
+  const [showBookingContext, setShowBookingContext] = useState(true);
+
   if (!user) {
     return (
       <PageContainer>
@@ -68,13 +71,10 @@ export default function OwnerChatRoom() {
     : property?.title || (isRu ? 'Чат по объекту' : 'Property Chat');
 
   const subtitle = type === 'booking'
-    ? (isRu && (booking?.properties as any)?.title_ru 
-        ? (booking?.properties as any)?.title_ru 
+    ? (isRu && (booking?.properties as any)?.title_ru
+        ? (booking?.properties as any)?.title_ru
         : (booking?.properties as any)?.title)
     : property?.address;
-
-  const { formatPrice } = useCurrency();
-  const [showBookingContext, setShowBookingContext] = useState(true);
 
   return (
     <PageContainer className="flex flex-col h-[calc(100vh-120px)]">

@@ -459,7 +459,7 @@ function FormFieldRenderer({
         </div>
       );
 
-    case 'daterange':
+    case 'daterange': {
       const dateRange = (value as { from?: Date; to?: Date }) || {};
       return (
         <div>
@@ -509,8 +509,9 @@ function FormFieldRenderer({
           </div>
         </div>
       );
+    }
 
-    case 'guests':
+    case 'guests': {
       const guests = (value as { adults: number; children: number }) || { adults: 2, children: 0 };
       return (
         <div className="space-y-2">
@@ -533,8 +534,9 @@ function FormFieldRenderer({
           </div>
         </div>
       );
+    }
 
-    case 'budget':
+    case 'budget': {
       const budget = (value as { min?: number; max?: number }) || {};
       return (
         <div>
@@ -555,6 +557,7 @@ function FormFieldRenderer({
           </div>
         </div>
       );
+    }
 
     default:
       return null;
