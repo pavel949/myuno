@@ -65,6 +65,7 @@ interface ParsedProject {
 /**
  * Parse projects from Etagi catalog markdown.
  * Each project block follows the pattern:
+// eslint-disable-next-line no-useless-escape
  *   [![](imageUrl)\\\n\\\n1/N](projectUrl) [data\\\nот \\\n\\\nPRICETHB\\\n\\\nDATE\\\n\\\nNAME\\\n\\\nADDRESS\\\n...](projectUrl)
  */
 function parseProjectsFromMarkdown(markdown: string): ParsedProject[] {
@@ -75,14 +76,18 @@ function parseProjectsFromMarkdown(markdown: string): ParsedProject[] {
 
   for (const block of blocks) {
     try {
+ 
       // Extract cover image URL
       const imgMatch = block.match(/\[!\[\]\((https:\/\/cdn\.esoft\.digital\/[^\s)]+)\)/);
       const coverImageUrl = imgMatch?.[1] || null;
 
+ 
       // Extract the text content between [ and ](url) — the second link block
       // Pattern: ] [content](url)  
-      const contentMatch = block.match(/\]\([^\)]+\)\s*\[([^\]]+)\]\(/);
+      const contentMatch = block.match(/\]\([^)]+\)\s*\[([^\]]+)\]\(/);
+ 
       if (!contentMatch) continue;
+ 
 
       const content = contentMatch[1];
       // Split by \\  (backslash-backslash which is the line separator in this format)
@@ -104,6 +109,7 @@ function parseProjectsFromMarkdown(markdown: string): ParsedProject[] {
 
         // Price: line containing THB with digits
         if (/\d.*THB/i.test(line) && !priceFrom && !/м2/i.test(line)) {
+ 
           priceFrom = parsePrice(line);
           continue;
         }
@@ -115,6 +121,7 @@ function parseProjectsFromMarkdown(markdown: string): ParsedProject[] {
         }
 
         // Name: typically ALL CAPS or mixed case, after price+date, before address
+ 
         if (!name && priceFrom && completionLine && line.length > 3 && !/^(Студии|1к|2к|3к|4к|\d+\s*предлож|Показать|Квартиры|от\s)/i.test(line)) {
           name = line.replace(/[‑–—]/g, "-");
           continue;
@@ -127,7 +134,9 @@ function parseProjectsFromMarkdown(markdown: string): ParsedProject[] {
         }
       }
 
+ 
       // Fallback: try to find name as the prominent text
+ 
       if (!name) {
         // Look for a line that looks like a project name (mixed/upper case, no digits at start)
         for (const line of lines) {
@@ -273,6 +282,7 @@ Deno.serve(async (req) => {
 
     const parsedProjects = allParsedProjects;
 
+ 
     const results = { processed: 0, upserted: 0, images_uploaded: 0, errors: [] as string[] };
 
     for (const project of parsedProjects) {

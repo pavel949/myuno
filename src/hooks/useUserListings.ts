@@ -1,15 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { UserListing, UserListingDraft, ItemCondition } from '@/types/userListing';
-import { useToast } from '@/hooks/use-toast';
 
+import { toast } from 'sonner';
 export function useUserListings() {
   const [listings, setListings] = useState<UserListing[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const { toast } = useToast();
-
-  const fetchListings = useCallback(async () => {
+const fetchListings = useCallback(async () => {
     try {
       setIsLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
@@ -44,10 +42,8 @@ export function useUserListings() {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
-        toast({
-          title: 'Authentication required',
+        toast.error('Authentication required', {
           description: 'Please sign in to create a listing',
-          variant: 'destructive',
         });
         return null;
       }
@@ -80,18 +76,15 @@ export function useUserListings() {
 
       if (insertError) throw insertError;
 
-      toast({
-        title: 'Listing created',
+      toast('Listing created', {
         description: 'Your listing has been saved as a draft',
       });
 
       await fetchListings();
       return data as UserListing;
     } catch (err) {
-      toast({
-        title: 'Error creating listing',
+      toast.error('Error creating listing', {
         description: err instanceof Error ? err.message : 'Unknown error',
-        variant: 'destructive',
       });
       return null;
     }
@@ -113,10 +106,8 @@ export function useUserListings() {
       await fetchListings();
       return true;
     } catch (err) {
-      toast({
-        title: 'Error updating listing',
+      toast.error('Error updating listing', {
         description: err instanceof Error ? err.message : 'Unknown error',
-        variant: 'destructive',
       });
       return false;
     }
@@ -134,18 +125,15 @@ export function useUserListings() {
 
       if (updateError) throw updateError;
 
-      toast({
-        title: 'Listing submitted',
+      toast('Listing submitted', {
         description: 'Your listing is now pending review',
       });
 
       await fetchListings();
       return true;
     } catch (err) {
-      toast({
-        title: 'Error publishing listing',
+      toast.error('Error publishing listing', {
         description: err instanceof Error ? err.message : 'Unknown error',
-        variant: 'destructive',
       });
       return false;
     }
@@ -160,18 +148,15 @@ export function useUserListings() {
 
       if (deleteError) throw deleteError;
 
-      toast({
-        title: 'Listing deleted',
+      toast('Listing deleted', {
         description: 'Your listing has been removed',
       });
 
       await fetchListings();
       return true;
     } catch (err) {
-      toast({
-        title: 'Error deleting listing',
+      toast.error('Error deleting listing', {
         description: err instanceof Error ? err.message : 'Unknown error',
-        variant: 'destructive',
       });
       return false;
     }
@@ -189,18 +174,15 @@ export function useUserListings() {
 
       if (updateError) throw updateError;
 
-      toast({
-        title: 'Marked as sold',
+      toast('Marked as sold', {
         description: 'Congratulations on your sale!',
       });
 
       await fetchListings();
       return true;
     } catch (err) {
-      toast({
-        title: 'Error updating listing',
+      toast.error('Error updating listing', {
         description: err instanceof Error ? err.message : 'Unknown error',
-        variant: 'destructive',
       });
       return false;
     }

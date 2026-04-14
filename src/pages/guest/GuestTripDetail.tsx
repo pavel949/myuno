@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { format, differenceInDays, isPast, isFuture, isToday } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import { 
+import {
   MapPin, Calendar, Users, Clock, Phone, MessageCircle,
   Wifi, Key, Car, AlertTriangle, CheckCircle2, Home,
-  ChevronRight, ExternalLink, Copy, Loader2
+  ChevronRight, ExternalLink, Copy, Loader2, Star, XCircle,
+  ShieldCheck
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/uno/PageHeader';
@@ -20,6 +21,15 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { TripServicesGrid } from '@/components/property/TripServicesGrid';
 import { MessageHostButton } from '@/components/property/MessageHostButton';
+import { WriteReviewModal } from '@/components/reviews/WriteReviewModal';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -64,7 +74,12 @@ export default function GuestTripDetail() {
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const isRu = language === 'ru';
+
+  const [isReviewOpen, setIsReviewOpen] = useState(false);
+  const [isCancelOpen, setIsCancelOpen] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
 
   const { data: booking, isLoading } = useQuery({
     queryKey: ['guest-booking', id],
@@ -393,7 +408,141 @@ export default function GuestTripDetail() {
             propertyId={property?.id}
           />
         )}
+
+        {/* Leave Review CTA — shown after checkout */}
+        {tripStatus === 'completed' && (
+          <Card className="border-primary/50 bg-primary/5">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <Star className="w-5 h-5 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-sm mb-1">
+                    {isRu ? 'Как прошла поездка?' : 'How was your stay?'}
+                  </h3>
+                  <p className="text-xs text-muted-foreground mb-3">
+                    {isRu
+                      ? 'Ваш отзыв поможет другим гостям и хозяину улучшить сервис.'
+                      : 'Your review helps other guests and the host improve their service.'}
+                  </p>
+                  <Button size="sm" onClick={() => setIsReviewOpen(true)}>
+                    <Star className="w-4 h-4 mr-1" />
+                    {isRu ? 'Оставить отзыв' : 'Leave a Review'}
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Cancel Booking — shown for upcoming bookings */}
+        {tripStatus === 'upcoming' && booking.status !== 'cancelled' && (
+          <Card>
+            <CardContent className="p-4">
+              {/* Cancellation Policy */}
+              <div className="flex items-start gap-2 mb-3">
+                <ShieldCheck className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-medium mb-0.5">
+                    {isRu ? 'Политика отмены' : 'Cancellation Policy'}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {isRu
+                      ? 'Бесплатная отмена до 48 часов до заезда. После — депозит не возвращается.'
+                      : 'Free cancellation up to 48 hours before check-in. After that, the deposit is non-refundable.'}
+                  </p>
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full text-destructive border-destructive/30 hover:bg-destructive/5"
+                onClick={() => setIsCancelOpen(true)}
+              >
+                <XCircle className="w-4 h-4 mr-1" />
+                {isRu ? 'Отменить бронирование' : 'Cancel Booking'}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
       </div>
+
+      {/* Write Review Modal */}
+      {property && (
+        <WriteReviewModal
+          isOpen={isReviewOpen}
+          onClose={() => setIsReviewOpen(false)}
+          itemType="property"
+          itemId={property.id}
+          itemName={isRu ? property.title_ru : property.title}
+          onSuccess={() => {
+            setIsReviewOpen(false);
+            toast.success(isRu ? 'Спасибо за отзыв!' : 'Thank you for your review!');
+          }}
+        />
+      )}
+
+      {/* Cancel Confirmation Dialog */}
+      <Dialog open={isCancelOpen} onOpenChange={setIsCancelOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {isRu ? 'Отменить бронирование?' : 'Cancel Booking?'}
+            </DialogTitle>
+            <DialogDescription>
+              {isRu
+                ? 'Это действие нельзя отменить. Возврат средств зависит от политики отмены.'
+                : 'This action cannot be undone. Refund depends on the cancellation policy.'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="p-3 bg-muted rounded-lg text-sm">
+            <p className="font-medium">{isRu ? property?.title_ru : property?.title}</p>
+            <p className="text-muted-foreground">
+              {format(new Date(booking.check_in), 'dd MMM yyyy', { locale: isRu ? ru : undefined })}
+              {' → '}
+              {format(new Date(booking.check_out), 'dd MMM yyyy', { locale: isRu ? ru : undefined })}
+            </p>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setIsCancelOpen(false)}>
+              {isRu ? 'Нет, оставить' : 'No, Keep It'}
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={isCancelling}
+              onClick={async () => {
+                setIsCancelling(true);
+                try {
+                  const { error } = await supabase
+                    .from('property_bookings')
+                    .update({
+                      status: 'cancelled',
+                      cancelled_at: new Date().toISOString(),
+                      cancelled_by: user?.id,
+                      cancellation_reason: 'guest_requested',
+                    })
+                    .eq('id', booking.id);
+
+                  if (error) throw error;
+
+                  toast.success(isRu ? 'Бронирование отменено' : 'Booking cancelled');
+                  queryClient.invalidateQueries({ queryKey: ['guest-booking', id] });
+                  setIsCancelOpen(false);
+                } catch {
+                  toast.error(isRu ? 'Ошибка отмены' : 'Cancellation failed');
+                } finally {
+                  setIsCancelling(false);
+                }
+              }}
+            >
+              {isCancelling
+                ? (isRu ? 'Отмена...' : 'Cancelling...')
+                : (isRu ? 'Да, отменить' : 'Yes, Cancel')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }

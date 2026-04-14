@@ -1,15 +1,237 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Star, MessageSquare, TrendingUp, Clock, Filter, 
-  ChevronDown, Reply, Trash2, Building2, User 
+import {
+  Star, MessageSquare, TrendingUp, Clock, Filter,
+  ChevronDown, Reply, Trash2, Building2, User, Sparkles, Loader2
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useOwnerReviews, OwnerReview } from '@/hooks/useOwnerReviews';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import { PageContainer } from '@/components/uno/PageContainer';
+
+interface OwnerReview {
+  id: string;
+  user_id: string;
+  item_type: string;
+  item_id: string;
+  rating: number;
+  title: string | null;
+  content: string | null;
+  images: string[];
+  pros: string | null;
+  cons: string | null;
+  visit_date: string | null;
+  is_verified_purchase: boolean;
+  helpful_count: number;
+  response: string | null;
+  response_at: string | null;
+  is_featured: boolean;
+  is_approved: boolean;
+  created_at: string;
+  updated_at: string;
+  // Joined data
+  property_title?: string;
+  property_title_ru?: string;
+  property_cover?: string;
+  reviewer_name?: string;
+  reviewer_avatar?: string;
+}
+
+interface ReviewStats {
+  totalReviews: number;
+  averageRating: number;
+  pendingResponses: number;
+  distribution: number[];
+  recentCount: number;
+}
+
+function useOwnerReviews() {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  const queryKey = ['owner-reviews', user?.id];
+
+  const { data, isLoading, error } = useQuery({
+    queryKey,
+    queryFn: async () => {
+      if (!user) return { reviews: [], stats: null };
+
+      // First get owner's property IDs from unified table
+      const { data: properties, error: propError } = await supabase
+        .from('properties')
+        .select('id, title_en, title_ru, cover_image')
+        .eq('owner_id', user.id);
+
+      if (propError) throw propError;
+      if (!properties?.length) return { reviews: [], stats: null };
+
+      const propertyIds = properties.map(p => p.id);
+      const propertyMap = new Map(properties.map(p => [p.id, p]));
+
+      // Get reviews for these properties
+      const { data: reviews, error: revError } = await supabase
+        .from('reviews')
+        .select(`
+          *,
+          profiles:user_id (full_name, avatar_url)
+        `)
+        .eq('item_type', 'property')
+        .in('item_id', propertyIds)
+        .order('created_at', { ascending: false });
+
+      if (revError) throw revError;
+
+      // Map reviews with property info
+      const mappedReviews: OwnerReview[] = (reviews || []).map(r => {
+        const property = propertyMap.get(r.item_id);
+        return {
+          ...r,
+          images: r.images || [],
+          property_title: property?.title_en,
+          property_title_ru: property?.title_ru,
+          property_cover: property?.cover_image,
+          reviewer_name: (r.profiles as any)?.full_name,
+          reviewer_avatar: (r.profiles as any)?.avatar_url,
+        };
+      });
+
+      // Calculate stats
+      const totalReviews = mappedReviews.length;
+      const averageRating = totalReviews > 0
+        ? mappedReviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews
+        : 0;
+      const pendingResponses = mappedReviews.filter(r => !r.response).length;
+      const distribution = [0, 0, 0, 0, 0];
+      mappedReviews.forEach(r => {
+        if (r.rating >= 1 && r.rating <= 5) {
+          distribution[r.rating - 1]++;
+        }
+      });
+
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const recentCount = mappedReviews.filter(
+        r => new Date(r.created_at) > thirtyDaysAgo
+      ).length;
+
+      const stats: ReviewStats = {
+        totalReviews,
+        averageRating,
+        pendingResponses,
+        distribution,
+        recentCount,
+      };
+
+      return { reviews: mappedReviews, stats };
+    },
+    enabled: !!user,
+  });
+
+  const respondToReview = useMutation({
+    mutationFn: async ({ reviewId, response }: { reviewId: string; response: string }) => {
+      if (!user) throw new Error('Not authenticated');
+
+      // Verify ownership: check that this review belongs to owner's property
+      const { data: properties } = await supabase
+        .from('properties')
+        .select('id')
+        .eq('owner_id', user.id);
+
+      const propertyIds = properties?.map(p => p.id) || [];
+
+      // Check if review is for owner's property
+      const { data: review, error: reviewError } = await supabase
+        .from('reviews')
+        .select('item_id')
+        .eq('id', reviewId)
+        .eq('item_type', 'property')
+        .single();
+
+      if (reviewError || !review) throw new Error('Review not found');
+      if (!propertyIds.includes(review.item_id)) {
+        throw new Error('Unauthorized: You can only respond to reviews on your properties');
+      }
+
+      const { data, error } = await supabase
+        .from('reviews')
+        .update({
+          response,
+          response_at: new Date().toISOString(),
+        })
+        .eq('id', reviewId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey });
+      toast.success('Response saved');
+    },
+    onError: () => {
+      toast.error('Failed to save response');
+    },
+  });
+
+  const deleteResponse = useMutation({
+    mutationFn: async (reviewId: string) => {
+      if (!user) throw new Error('Not authenticated');
+
+      // Verify ownership before deleting response
+      const { data: properties } = await supabase
+        .from('properties')
+        .select('id')
+        .eq('owner_id', user.id);
+
+      const propertyIds = properties?.map(p => p.id) || [];
+
+      const { data: review, error: reviewError } = await supabase
+        .from('reviews')
+        .select('item_id')
+        .eq('id', reviewId)
+        .eq('item_type', 'property')
+        .single();
+
+      if (reviewError || !review) throw new Error('Review not found');
+      if (!propertyIds.includes(review.item_id)) {
+        throw new Error('Unauthorized');
+      }
+
+      const { error } = await supabase
+        .from('reviews')
+        .update({
+          response: null,
+          response_at: null,
+        })
+        .eq('id', reviewId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey });
+      toast.success('Response deleted');
+    },
+    onError: () => {
+      toast.error('Failed to delete response');
+    },
+  });
+
+  return {
+    reviews: data?.reviews || [],
+    stats: data?.stats || null,
+    isLoading,
+    error,
+    respondToReview: respondToReview.mutateAsync,
+    deleteResponse: deleteResponse.mutateAsync,
+    isResponding: respondToReview.isPending,
+    refetch: () => queryClient.invalidateQueries({ queryKey }),
+  };
+}
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -46,6 +268,34 @@ export default function OwnerReviews() {
   const [filter, setFilter] = useState<FilterOption>('all');
   const [replyingTo, setReplyingTo] = useState<OwnerReview | null>(null);
   const [replyText, setReplyText] = useState('');
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+
+  const generateAIResponse = () => {
+    if (!replyingTo) return;
+    setIsGeneratingAI(true);
+    // Template-based suggestion (no external API needed)
+    const rating = replyingTo.rating;
+    const guestName = replyingTo.reviewer_name?.split(' ')[0] || (isRu ? 'Гость' : 'Guest');
+    let suggestion: string;
+    if (rating >= 4) {
+      suggestion = isRu
+        ? `${guestName}, спасибо за ваш отзыв и высокую оценку! Мы очень рады, что вам понравилось. Будем рады видеть вас снова!`
+        : `Thank you for your wonderful review, ${guestName}! We're thrilled you had a great experience. We'd love to welcome you back!`;
+    } else if (rating >= 3) {
+      suggestion = isRu
+        ? `${guestName}, благодарим за отзыв. Мы ценим вашу обратную связь и уже работаем над улучшениями. Надеемся, в следующий раз ваш опыт будет ещё лучше!`
+        : `Thank you for your feedback, ${guestName}. We appreciate your input and are already working on improvements. We hope your next stay will be even better!`;
+    } else {
+      suggestion = isRu
+        ? `${guestName}, благодарим за отзыв. Нам очень жаль, что ваш опыт не оправдал ожиданий. Мы серьёзно относимся к каждому замечанию и примем меры для улучшения. Пожалуйста, свяжитесь с нами — мы хотели бы всё исправить.`
+        : `Thank you for sharing your experience, ${guestName}. We're sorry it didn't meet your expectations. We take every concern seriously and are taking steps to improve. Please reach out to us directly — we'd like to make things right.`;
+    }
+    // Simulate brief delay for UX
+    setTimeout(() => {
+      setReplyText(suggestion);
+      setIsGeneratingAI(false);
+    }, 600);
+  };
 
   if (!user) {
     return (
@@ -422,6 +672,23 @@ export default function OwnerReviews() {
                 <p className="text-sm text-muted-foreground line-clamp-3">
                   {replyingTo.content || replyingTo.title || (isRu ? 'Без текста' : 'No text')}
                 </p>
+              </div>
+
+              <div className="flex justify-end">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={generateAIResponse}
+                  disabled={isGeneratingAI}
+                  className="gap-1.5"
+                >
+                  {isGeneratingAI ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Sparkles className="w-3.5 h-3.5" />
+                  )}
+                  {isRu ? 'AI-подсказка' : 'AI Suggest'}
+                </Button>
               </div>
 
               <Textarea

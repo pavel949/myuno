@@ -2,7 +2,7 @@ import React, { memo } from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { MapPin } from 'lucide-react';
-import heroImage from '@/assets/discover-hero.jpg';
+import heroImage from '@/assets/discover-hero.webp';
 
 export const DiscoverHero = memo(function DiscoverHero() {
   const { language } = useLanguage();

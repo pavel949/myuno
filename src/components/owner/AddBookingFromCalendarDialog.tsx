@@ -1,6 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useToast } from '@/hooks/use-toast';
 import { usePropertyBookings } from '@/hooks/usePropertyBookings';
 import { usePropertyAvailabilityManagement } from '@/hooks/usePropertyAvailabilityManagement';
 import { supabase } from '@/integrations/supabase/client';
@@ -22,6 +21,7 @@ import {
 import { cn } from '@/lib/utils';
 import { getCurrencySymbol, formatCurrencyAmount } from '@/lib/config/currencies';
 
+import { toast } from 'sonner';
 // Helper to maintain backward compatibility with formatPriceWithSymbol calls
 const formatPriceWithSymbol = (amount: number, currency: string = 'THB') => 
   formatCurrencyAmount(amount, currency);
@@ -65,8 +65,7 @@ export function AddBookingFromCalendarDialog({
   onSuccess,
 }: AddBookingFromCalendarDialogProps) {
   const { language } = useLanguage();
-  const { toast } = useToast();
-  const isRu = language === 'ru';
+const isRu = language === 'ru';
   
   const [checkIn, setCheckIn] = useState<Date | undefined>(initialDate);
   const [checkOut, setCheckOut] = useState<Date | undefined>();
@@ -182,10 +181,8 @@ export function AddBookingFromCalendarDialog({
       for (const file of Array.from(files)) {
         // Validate file size (max 10MB)
         if (file.size > 10 * 1024 * 1024) {
-          toast({
-            title: isRu ? 'Ошибка' : 'Error',
+          toast.error(isRu ? 'Ошибка' : 'Error', {
             description: isRu ? 'Файл слишком большой (макс. 10 МБ)' : 'File too large (max 10MB)',
-            variant: 'destructive',
           });
           continue;
         }
@@ -199,10 +196,8 @@ export function AddBookingFromCalendarDialog({
         
         if (uploadError) {
           console.error('Upload error:', uploadError);
-          toast({
-            title: isRu ? 'Ошибка загрузки' : 'Upload Error',
+          toast.error(isRu ? 'Ошибка загрузки' : 'Upload Error', {
             description: uploadError.message,
-            variant: 'destructive',
           });
           continue;
         }
@@ -218,16 +213,13 @@ export function AddBookingFromCalendarDialog({
         }]);
       }
       
-      toast({
-        title: isRu ? 'Загружено' : 'Uploaded',
+      toast(isRu ? 'Загружено' : 'Uploaded', {
         description: isRu ? 'Документы успешно загружены' : 'Documents uploaded successfully',
       });
     } catch (error) {
       console.error('Upload error:', error);
-      toast({
-        title: isRu ? 'Ошибка' : 'Error',
+      toast.error(isRu ? 'Ошибка' : 'Error', {
         description: isRu ? 'Не удалось загрузить документ' : 'Failed to upload document',
-        variant: 'destructive',
       });
     } finally {
       setIsUploadingDoc(false);
@@ -242,21 +234,17 @@ export function AddBookingFromCalendarDialog({
   
   const handleSubmit = async () => {
     if (!checkIn || !checkOut) {
-      toast({
-        title: isRu ? 'Ошибка' : 'Error',
+      toast.error(isRu ? 'Ошибка' : 'Error', {
         description: isRu ? 'Выберите даты заезда и выезда' : 'Select check-in and check-out dates',
-        variant: 'destructive',
       });
       return;
     }
     
     if (hasConflicts) {
-      toast({
-        title: isRu ? 'Ошибка' : 'Error',
+      toast.error(isRu ? 'Ошибка' : 'Error', {
         description: isRu 
           ? 'Выбранные даты пересекаются с существующими бронированиями или закрыты'
           : 'Selected dates overlap with existing bookings or are blocked',
-        variant: 'destructive',
       });
       return;
     }
@@ -282,8 +270,7 @@ export function AddBookingFromCalendarDialog({
         documents: uploadedDocs.length > 0 ? uploadedDocs.map(d => d.url) : undefined,
       });
       
-      toast({
-        title: isRu ? 'Бронирование создано' : 'Booking Created',
+      toast(isRu ? 'Бронирование создано' : 'Booking Created', {
         description: guestName 
           ? `${guestName} • ${nights} ${isRu ? 'ноч.' : 'nights'}`
           : `${nights} ${isRu ? 'ночей' : 'nights'}`,
@@ -294,10 +281,8 @@ export function AddBookingFromCalendarDialog({
       resetForm();
     } catch (error) {
       console.error('Error creating booking:', error);
-      toast({
-        title: isRu ? 'Ошибка' : 'Error',
+      toast.error(isRu ? 'Ошибка' : 'Error', {
         description: isRu ? 'Не удалось создать бронирование' : 'Failed to create booking',
-        variant: 'destructive',
       });
     } finally {
       setIsSubmitting(false);

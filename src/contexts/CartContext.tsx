@@ -10,7 +10,7 @@
  *
  * Usage: `const { items, addItem, getTotal } = useCart();`
  */
-import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './AuthContext';
 import { createErrorHandler } from '@/lib/errorHandler';
@@ -211,12 +211,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [items, user, isLoading, saveLocalCart]);
 
-  const addItem = async (newItem: Omit<CartItem, 'quantity'>) => {
-    const existingItem = items.find(item => item.id === newItem.id);
-    
-    // Optimistic update
-    const previousItems = [...items];
+  const addItem = useCallback(async (newItem: Omit<CartItem, 'quantity'>) => {
+    // Capture snapshot for rollback via functional update to avoid stale closure
+    let previousItems: CartItem[] = [];
     setItems(prev => {
+      previousItems = prev;
       const existingIndex = prev.findIndex(item => item.id === newItem.id);
       if (existingIndex >= 0) {
         const updated = [...prev];
@@ -228,40 +227,32 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     if (user) {
       try {
-        if (existingItem) {
-          const { error } = await supabase
-            .from('cart_items')
-            .update({ quantity: existingItem.quantity + 1 })
-            .eq('user_id', user.id)
-            .eq('item_id', newItem.id);
-          if (error) throw error;
-        } else {
-          const { error } = await supabase.from('cart_items').insert({
-            user_id: user.id,
-            item_id: newItem.id,
-            item_type: newItem.type,
-            name: newItem.name,
-            name_ru: newItem.nameRu,
-            price: newItem.price,
-            currency: newItem.currency,
-            quantity: 1,
-            image: newItem.image,
-            provider_id: newItem.providerId,
-            provider_name: newItem.providerName,
-            provider_name_ru: newItem.providerNameRu,
-            options: newItem.options,
-          });
-          if (error) throw error;
-        }
+        // Use upsert to avoid race condition between concurrent addItem calls
+        const { error } = await supabase.from('cart_items').upsert({
+          user_id: user.id,
+          item_id: newItem.id,
+          item_type: newItem.type,
+          name: newItem.name,
+          name_ru: newItem.nameRu,
+          price: newItem.price,
+          currency: newItem.currency,
+          quantity: (previousItems.find(i => i.id === newItem.id)?.quantity ?? 0) + 1,
+          image: newItem.image,
+          provider_id: newItem.providerId,
+          provider_name: newItem.providerName,
+          provider_name_ru: newItem.providerNameRu,
+          options: newItem.options,
+        }, { onConflict: 'user_id,item_id' });
+        if (error) throw error;
       } catch (error) {
         // Rollback on failure
         setItems(previousItems);
         errorLog.silent(error, 'add_item_to_cart');
       }
     }
-  };
+  }, [user]);
 
-  const removeItem = async (id: string) => {
+  const removeItem = useCallback(async (id: string) => {
     const previousItems = [...items];
     // Optimistic update
     setItems(prev => prev.filter(item => item.id !== id));
@@ -280,9 +271,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
         errorLog.silent(error, 'remove_item_from_cart');
       }
     }
-  };
+  }, [user]);
 
-  const updateQuantity = async (id: string, quantity: number) => {
+  const updateQuantity = useCallback(async (id: string, quantity: number) => {
     if (quantity <= 0) {
       removeItem(id);
       return;
@@ -308,9 +299,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
         errorLog.silent(error, 'update_item_quantity');
       }
     }
-  };
+  }, [user, removeItem]);
 
-  const clearCart = async () => {
+  const clearCart = useCallback(async () => {
     if (user) {
       try {
         await supabase
@@ -323,9 +314,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
 
     setItems([]);
-  };
+  }, [user]);
 
-  const clearByType = async (type: CartItem['type']) => {
+  const clearByType = useCallback(async (type: CartItem['type']) => {
     if (user) {
       try {
         await supabase
@@ -339,9 +330,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
 
     setItems(prev => prev.filter(item => item.type !== type));
-  };
+  }, [user]);
 
-  const clearByProvider = async (providerId: string) => {
+  const clearByProvider = useCallback(async (providerId: string) => {
     if (user) {
       try {
         await supabase
@@ -355,15 +346,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
 
     setItems(prev => prev.filter(item => item.providerId !== providerId));
-  };
+  }, [user]);
 
-  const getItemCount = () => {
+  const getItemCount = useCallback(() => {
     return items.reduce((sum, item) => sum + item.quantity, 0);
-  };
+  }, [items]);
 
-  const getTotal = () => {
+  const getTotal = useCallback(() => {
     return items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  };
+  }, [items]);
 
   const getItemsByType = useCallback((type: CartItem['type']) => {
     return items.filter(item => item.type === type);
@@ -385,23 +376,27 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return getProviderIds().length > 1;
   }, [getProviderIds]);
 
+  const value = useMemo(() => ({
+    items,
+    addItem,
+    removeItem,
+    updateQuantity,
+    clearCart,
+    clearByType,
+    clearByProvider,
+    getItemCount,
+    getTotal,
+    getItemsByType,
+    getItemsByProvider,
+    getProviderIds,
+    hasMultipleProviders,
+    isLoading,
+  }), [items, addItem, removeItem, updateQuantity, clearCart, clearByType, clearByProvider,
+       getItemCount, getTotal, getItemsByType, getItemsByProvider, getProviderIds,
+       hasMultipleProviders, isLoading]);
+
   return (
-    <CartContext.Provider value={{
-      items,
-      addItem,
-      removeItem,
-      updateQuantity,
-      clearCart,
-      clearByType,
-      clearByProvider,
-      getItemCount,
-      getTotal,
-      getItemsByType,
-      getItemsByProvider,
-      getProviderIds,
-      hasMultipleProviders,
-      isLoading,
-    }}>
+    <CartContext.Provider value={value}>
       {children}
     </CartContext.Provider>
   );

@@ -187,7 +187,7 @@ export function useSupabaseSingle<T>({
       setError(null);
 
       try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         const { data: result, error: queryError } = await supabase
           .from(table as any)
           .select(select)

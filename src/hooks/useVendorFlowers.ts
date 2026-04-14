@@ -1,4 +1,4 @@
-import { useSupabaseCRUD } from './useSupabaseCRUD';
+import { useVerticalCRUD } from './useVerticalCRUD';
 
 export interface VendorFlowerShop {
   id: string;
@@ -28,15 +28,7 @@ export interface VendorFlowerShop {
 }
 
 export function useVendorFlowers(providerId?: string) {
-  const { items, isLoading, create, update, remove, refetch } = useSupabaseCRUD<VendorFlowerShop>({
-    table: 'flower_shops',
-    providerId,
-    providerIdField: 'provider_id',
-    orderByColumn: 'created_at',
-    orderAscending: false,
-    select: '*',
-    showToasts: true,
-  });
+  const { items, isLoading, create, update, remove, refetch } = useVerticalCRUD<VendorFlowerShop>('flower', providerId);
 
   return {
     shops: items,

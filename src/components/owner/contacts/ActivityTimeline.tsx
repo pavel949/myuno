@@ -12,8 +12,8 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Phone, Mail, Users, FileText, MessageCircle, MessageSquare, Eye, Send, ClipboardList, CheckCircle, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import { useToast } from '@/hooks/use-toast';
 
+import { toast } from 'sonner';
 const iconMap: Record<string, React.ElementType> = {
   Phone, Mail, MailOpen: Mail, Users, FileText, MessageCircle, MessageSquare,
   CheckCircle, ArrowRight, Eye, Send, ClipboardList,
@@ -29,8 +29,7 @@ export function ActivityTimeline({ companyId, contactId, dealId }: Props) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { user } = useAuth();
-  const { toast } = useToast();
-  const { data: activities = [], isLoading } = useCrmActivities(contactId, dealId);
+const { data: activities = [], isLoading } = useCrmActivities(contactId, dealId);
   const logActivity = useLogActivity();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ activity_type: 'call', subject: '', description: '', outcome: '', duration_minutes: '' });
@@ -51,11 +50,11 @@ export function ActivityTimeline({ companyId, contactId, dealId }: Props) {
         logged_by: user.id,
         activity_date: new Date().toISOString(),
       });
-      toast({ title: isRu ? 'Активность записана' : 'Activity logged' });
+      toast(isRu ? 'Активность записана' : 'Activity logged');
       setOpen(false);
       setForm({ activity_type: 'call', subject: '', description: '', outcome: '', duration_minutes: '' });
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 

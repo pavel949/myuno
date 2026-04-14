@@ -5,7 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useVendorProfile } from '@/hooks/useVendor';
 import { useVendorExperiences, VendorExperience } from '@/hooks/useVendorExperiences';
 import { ExperienceType, EXPERIENCE_CATEGORIES } from '@/hooks/useExperiences';
-import { experienceDifficultyOptions } from '@/components/filters/ExperiencesFilters';
+import { experienceDifficultyOptions } from '@/components/filters';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';

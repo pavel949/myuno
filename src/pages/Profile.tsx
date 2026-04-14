@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { User, Settings, HelpCircle, LogOut, ChevronRight, Shield, Bell, CreditCard, Heart, Clock, Wallet, Gift, Info, FileText, Handshake, MessageCircle, ShieldCheck, Building2 } from 'lucide-react';
@@ -26,6 +26,7 @@ export default function Profile() {
   const { activeCompany } = useActiveCompany();
   const { hasRole, isLoading: rolesLoading } = useUserContext();
   const navigate = useNavigate();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const isLoading = authLoading || rolesLoading;
 
@@ -45,8 +46,14 @@ export default function Profile() {
   const isAdmin = hasRole('admin');
 
   const handleLogout = async () => {
-    await signOut();
-    navigate(APP_ROUTES.HOME);
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
+    try {
+      await signOut();
+      navigate(APP_ROUTES.HOME);
+    } finally {
+      setIsLoggingOut(false);
+    }
   };
 
   const menuItems = [
@@ -133,11 +140,12 @@ export default function Profile() {
         <ReferralCard variant="compact" />
 
         {/* Account Menu items */}
-        <SectionCard noPadding className="overflow-hidden divide-y divide-border">
+        <SectionCard noPadding className="overflow-hidden divide-y divide-border" role="navigation" aria-label={language === 'ru' ? 'Аккаунт' : 'Account'}>
           {menuItems.map((item, index) => (
             <button
               key={index}
               onClick={item.onClick}
+              aria-label={item.label}
               className="w-full flex items-center gap-3 p-4 hover:bg-secondary/50 transition-colors"
             >
               <item.icon className="w-5 h-5 text-muted-foreground" />
@@ -193,9 +201,11 @@ export default function Profile() {
           variant="ghost"
           className="w-full text-destructive hover:text-destructive hover:bg-destructive/10"
           onClick={handleLogout}
+          disabled={isLoggingOut}
+          aria-label={language === 'ru' ? 'Выйти из аккаунта' : 'Log out'}
         >
           <LogOut className="w-5 h-5 mr-2" />
-          {t('auth.logout')}
+          {isLoggingOut ? (language === 'ru' ? 'Выход...' : 'Logging out...') : t('auth.logout')}
         </PremiumButton>
       </PageContainer>
     </AppLayout>

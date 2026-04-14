@@ -2,9 +2,9 @@ import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Building2, CalendarDays, Crown, CreditCard, DollarSign,
-  Users, Zap, FileText as FileTextIcon, BarChart3 as DashboardIcon,
+  Users, Zap, FileText as FileTextIcon, BarChart3, CalendarCheck,
   ContactRound, Home, ChevronDown, TrendingUp, PackageOpen,
-  Receipt, Settings, Tag, Star, ShieldCheck, BarChart3, MessageSquare, Radio,
+  Receipt, Settings, Tag, Star, ShieldCheck, MessageSquare, Radio,
   BookOpen, FileText, Megaphone, Truck, ClipboardList, Shuffle,
   ArrowLeftRight, Target,
 } from 'lucide-react';
@@ -47,9 +47,19 @@ export const navigationGroups: NavGroup[] = [
     defaultOpen: true,
     items: [
       { title: 'Dashboard', titleRu: 'Обзор', path: APP_ROUTES.MC, icon: LayoutDashboard },
+      { title: 'Bookings', titleRu: 'Бронирования', path: APP_ROUTES.MC_BOOKINGS_LIST, icon: CalendarCheck },
       { title: 'Calendar', titleRu: 'Календарь', path: APP_ROUTES.MC_CALENDAR, icon: CalendarDays },
       { title: 'Tasks', titleRu: 'Задачи', path: APP_ROUTES.MC_TASKS, icon: ClipboardList, badgeKey: 'tasks' },
       { title: 'Messages', titleRu: 'Сообщения', path: APP_ROUTES.MC_MESSAGES, icon: MessageSquare, badgeKey: 'messages' },
+    ],
+  },
+  {
+    label: 'Insights',
+    labelRu: 'Аналитика',
+    defaultOpen: false,
+    items: [
+      { title: 'Performance', titleRu: 'Показатели', path: APP_ROUTES.MC_PERFORMANCE, icon: BarChart3 },
+      { title: 'Reviews', titleRu: 'Отзывы', path: APP_ROUTES.MC_REVIEWS, icon: Star },
     ],
   },
   {
@@ -98,14 +108,13 @@ export const navigationGroups: NavGroup[] = [
     labelRu: 'CRM и продажи',
     defaultOpen: false,
     items: [
-      { title: 'CRM Dashboard', titleRu: 'CRM Обзор', path: APP_ROUTES.MC_CRM_DASHBOARD, icon: DashboardIcon },
+      { title: 'CRM Dashboard', titleRu: 'CRM Обзор', path: APP_ROUTES.MC_CRM_DASHBOARD, icon: BarChart3 },
       { title: 'Contacts', titleRu: 'Контакты', path: APP_ROUTES.MC_CONTACTS, icon: ContactRound },
       { title: 'Sales Pipeline', titleRu: 'Воронка продаж', path: APP_ROUTES.MC_SALES, icon: TrendingUp },
       { title: 'Owners', titleRu: 'Собственники', path: APP_ROUTES.MC_OWNERS, icon: Crown },
       { title: 'Vendor Acquisition', titleRu: 'Привлечение вендоров', path: APP_ROUTES.MC_VENDOR_ACQUISITION, icon: Target },
       { title: 'Sequences', titleRu: 'Цепочки', path: APP_ROUTES.MC_SEQUENCES, icon: Zap },
       { title: 'Quotes', titleRu: 'КП', path: APP_ROUTES.MC_QUOTES, icon: FileTextIcon },
-      { title: 'Reviews', titleRu: 'Отзывы', path: APP_ROUTES.MC_REVIEWS, icon: Star },
     ],
   },
   {
@@ -130,6 +139,7 @@ const PATH_TO_MODULE: Record<string, ModuleKey> = {
   [APP_ROUTES.MC_SEQUENCES]: 'crm',
   [APP_ROUTES.MC_QUOTES]: 'crm',
   [APP_ROUTES.MC_REVIEWS]: 'crm',
+  [APP_ROUTES.MC_PERFORMANCE]: 'reports',
   [APP_ROUTES.MC_SETTINGS]: 'staff',
   [APP_ROUTES.MC_MARKETING]: 'crm',
   [APP_ROUTES.MC_VENDOR_ACQUISITION]: 'crm',
@@ -282,7 +292,10 @@ export function MCSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border p-3">
-        <div className="flex items-center gap-3">
+        <button
+          onClick={() => handleNavigate(APP_ROUTES.MC_ACCOUNT_SETTINGS)}
+          className="flex items-center gap-3 w-full rounded-md hover:bg-sidebar-accent p-1 transition-colors"
+        >
           <Avatar className="h-8 w-8">
             <AvatarImage src={profile?.avatar_url || user?.user_metadata?.avatar_url} />
             <AvatarFallback className="bg-primary/20 text-primary text-xs">
@@ -290,14 +303,14 @@ export function MCSidebar() {
             </AvatarFallback>
           </Avatar>
           {!isCollapsed && (
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 text-left">
               <p className="text-sm font-medium text-sidebar-foreground truncate">
                 {profile?.full_name || user?.email?.split('@')[0] || (isRussian ? 'Пользователь' : 'User')}
               </p>
               <p className="text-xs text-sidebar-foreground/60 truncate">{user?.email}</p>
             </div>
           )}
-        </div>
+        </button>
       </SidebarFooter>
     </Sidebar>
   );

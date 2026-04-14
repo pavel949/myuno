@@ -4,8 +4,8 @@ import { DEAL_STAGES, DEAL_STAGE_LABELS, DealStage, useBulkUpdateStage, useBulkD
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Trash2, ArrowRight, X } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 
+import { toast } from 'sonner';
 interface Props {
   selectedIds: string[];
   onClear: () => void;
@@ -14,8 +14,7 @@ interface Props {
 export function BulkActions({ selectedIds, onClear }: Props) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const { toast } = useToast();
-  const bulkStage = useBulkUpdateStage();
+const bulkStage = useBulkUpdateStage();
   const bulkDelete = useBulkDeleteDeals();
   const [targetStage, setTargetStage] = useState<string>('');
 
@@ -25,20 +24,20 @@ export function BulkActions({ selectedIds, onClear }: Props) {
     if (!targetStage) return;
     try {
       await bulkStage.mutateAsync({ ids: selectedIds, stage: targetStage as DealStage });
-      toast({ title: isRu ? `${selectedIds.length} сделок обновлено` : `${selectedIds.length} deals updated` });
+      toast(isRu ? `${selectedIds.length} сделок обновлено` : `${selectedIds.length} deals updated`);
       onClear();
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 
   const handleBulkDelete = async () => {
     try {
       await bulkDelete.mutateAsync(selectedIds);
-      toast({ title: isRu ? `${selectedIds.length} сделок удалено` : `${selectedIds.length} deals deleted` });
+      toast(isRu ? `${selectedIds.length} сделок удалено` : `${selectedIds.length} deals deleted`);
       onClear();
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 

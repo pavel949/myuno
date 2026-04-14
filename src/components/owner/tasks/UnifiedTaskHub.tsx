@@ -486,7 +486,7 @@ export function UnifiedTaskHub() {
               >
                 <Checkbox
                   checked={isTaskCompletedStatus(task.status)}
-                  onCheckedChange={(e) => { e && !isTaskCompletedStatus(task.status) && handleQuickComplete(task); }}
+                  onCheckedChange={(e) => { if (e && !isTaskCompletedStatus(task.status)) handleQuickComplete(task); }}
                   onClick={(e) => e.stopPropagation()}
                   className="flex-shrink-0"
                 />

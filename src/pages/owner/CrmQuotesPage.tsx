@@ -10,9 +10,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Plus, FileText, Trash2, Send, Check } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 
+import { toast } from 'sonner';
 const STATUS_COLORS: Record<string, string> = {
   draft: 'secondary',
   sent: 'default',
@@ -30,9 +30,7 @@ export default function CrmQuotesPage() {
   const createQuote = useCreateQuote();
   const updateQuote = useUpdateQuote();
   const deleteQuote = useDeleteQuote();
-  const { toast } = useToast();
-
-  const statusLabel = (s: string) => {
+const statusLabel = (s: string) => {
     const map: Record<string, [string, string]> = {
       draft: ['Draft', 'Черновик'],
       sent: ['Sent', 'Отправлено'],

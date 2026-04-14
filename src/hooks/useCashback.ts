@@ -23,8 +23,7 @@ export function useCashback() {
 
       if (error) throw error;
       if (checkMounted()) setSettings(data || []);
-    } catch {
-    } finally {
+    } catch { /* ignored */ } finally {
       if (checkMounted()) setIsLoading(false);
     }
   }, []);

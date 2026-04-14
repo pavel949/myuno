@@ -10,9 +10,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Plus, Calendar, Trash2, MapPin, Clock } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 
+import { toast } from 'sonner';
 export default function CrmMeetingsPage() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -22,8 +22,7 @@ export default function CrmMeetingsPage() {
   const { data: meetings = [], isLoading, isError: meetingsError, refetch: refetchMeetings } = useCrmMeetings(companyId);
   const createMeeting = useCreateMeeting();
   const deleteMeeting = useDeleteMeeting();
-  const { toast } = useToast();
-  const [open, setOpen] = useState(false);
+const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ title: '', scheduled_at: '', duration_minutes: '30', location: '' });
 
   const handleCreate = async () => {
@@ -44,9 +43,9 @@ export default function CrmMeetingsPage() {
       });
       setOpen(false);
       setForm({ title: '', scheduled_at: '', duration_minutes: '30', location: '' });
-      toast({ title: isRu ? 'Встреча создана' : 'Meeting created' });
+      toast(isRu ? 'Встреча создана' : 'Meeting created');
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 

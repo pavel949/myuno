@@ -46,6 +46,7 @@ export interface NewbuildFilters {
   price_min?: number;
   price_max?: number;
   developer_id?: string;
+  search_text?: string;
   sort?: 'newest' | 'price_asc' | 'price_desc' | 'progress' | 'featured';
 }
 
@@ -64,6 +65,10 @@ export function useNewbuildProjects(filters?: NewbuildFilters) {
       if (filters?.developer_id) query = query.eq('developer_id', filters.developer_id);
       if (filters?.price_min) query = query.gte('price_from', filters.price_min);
       if (filters?.price_max) query = query.lte('price_from', filters.price_max);
+      if (filters?.search_text) {
+        const term = `%${filters.search_text}%`;
+        query = query.or(`name_en.ilike.${term},name_ru.ilike.${term},location_area.ilike.${term},developer_name.ilike.${term}`);
+      }
 
       // Sort
       switch (filters?.sort) {

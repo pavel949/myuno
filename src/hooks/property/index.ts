@@ -3,7 +3,6 @@
  * 
  * Usage: import { usePropertyBookings, usePropertyFinancialsFull } from '@/hooks/property';
  */
-export { usePropertyAIChat } from '../usePropertyAIChat';
 export { usePropertyAvailability } from '../usePropertyAvailability';
 export { usePropertyAvailabilityManagement } from '../usePropertyAvailabilityManagement';
 export { usePropertyBookings } from '../usePropertyBookings';
@@ -19,11 +18,9 @@ export { usePropertyFinancialsFull } from '../usePropertyFinancials';
 export type { PropertyFinancialFull, FinancialStats } from '../usePropertyFinancials';
 export { usePropertyFormOptions } from '../usePropertyFormOptions';
 export { usePropertyGuidebook } from '../usePropertyGuidebook';
-export { usePropertyInventory } from '../usePropertyInventory';
 export { usePropertyKeys } from '../usePropertyKeys';
 export { usePropertyManagementTerms } from '../usePropertyManagementTerms';
 export * from '../usePropertyMarketing';
-export { usePropertyMeters } from '../usePropertyMeters';
 export { usePropertyNotes } from '../usePropertyNotes';
 export { usePropertyOwnershipInvites, useSendOwnershipInvite } from '../usePropertyOwnership';
 export { usePropertyPriceOffers } from '../usePropertyPriceOffers';

@@ -10,6 +10,14 @@ import { NbProjectStatusBadge } from '@/components/newbuilds/NbProjectStatusBadg
 import { NbConstructionProgress } from '@/components/newbuilds/NbConstructionProgress';
 import { NbPriceDisplay } from '@/components/newbuilds/NbPriceDisplay';
 import { NbLeadForm } from '@/components/newbuilds/NbLeadForm';
+import { NbROICalculator } from '@/components/newbuilds/NbROICalculator';
+import { NbServicesSection } from '@/components/newbuilds/NbServicesSection';
+import { NbInventoryTab } from '@/components/newbuilds/tabs/NbInventoryTab';
+import { NbPlansTab } from '@/components/newbuilds/tabs/NbPlansTab';
+import { NbTermsTab } from '@/components/newbuilds/tabs/NbTermsTab';
+import { NbUpdatesTab } from '@/components/newbuilds/tabs/NbUpdatesTab';
+import { NbReportsTab } from '@/components/newbuilds/tabs/NbReportsTab';
+import { NbDeveloperTab } from '@/components/newbuilds/tabs/NbDeveloperTab';
 import { useNewbuildProject } from '@/hooks/useNewbuildProjects';
 import { Skeleton } from '@/components/ui/skeleton';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -227,10 +235,38 @@ export default function NewbuildDetail() {
               </div>
             )}
 
-            {activeTab !== 'overview' && (
+            {activeTab === 'inventory' && (
+              <NbInventoryTab projectId={project.id} developerId={project.developer_id || undefined} />
+            )}
+
+            {activeTab === 'plans' && (
+              <NbPlansTab projectId={project.id} />
+            )}
+
+            {activeTab === 'terms' && (
+              <NbTermsTab projectId={project.id} />
+            )}
+
+            {activeTab === 'updates' && (
+              <NbUpdatesTab
+                projectId={project.id}
+                currentProgress={project.construction_progress}
+                completionDate={project.completion_date}
+              />
+            )}
+
+            {activeTab === 'reports' && (
+              <NbReportsTab projectId={project.id} />
+            )}
+
+            {activeTab === 'developer' && project.developer_id && (
+              <NbDeveloperTab developerId={project.developer_id} currentProjectId={project.id} />
+            )}
+
+            {activeTab === 'developer' && !project.developer_id && (
               <div className="text-center py-16">
                 <p className="nb-display text-xl" style={{ color: 'hsl(var(--nb-muted))' }}>
-                  Раздел «{TABS.find(t => t.key === activeTab)?.label}» скоро будет доступен
+                  Информация о девелопере не указана
                 </p>
               </div>
             )}
@@ -242,19 +278,18 @@ export default function NewbuildDetail() {
               <NbLeadForm projectId={project.id} developerId={project.developer_id || undefined} source="project_page" />
             </div>
 
-            {/* ROI Calculator placeholder */}
-            <div className="nb-glass p-5 space-y-3">
-              <p className="nb-label">Инвестиционный потенциал</p>
-              <p className="text-sm" style={{ color: 'hsl(var(--nb-muted))' }}>
-                Рассчитайте доходность от аренды и окупаемость вложений
-              </p>
-              <div className="space-y-2">
-                <input type="number" placeholder="Цена за ночь (฿)" className="w-full px-3 py-2 rounded-lg text-sm" style={{ background: 'hsl(var(--nb-bg))', color: 'hsl(var(--nb-text))', border: '1px solid hsl(var(--nb-gold) / 0.2)' }} />
-                <button className="w-full py-2 rounded-lg text-sm font-medium" style={{ background: 'hsl(var(--nb-gold) / 0.15)', color: 'hsl(var(--nb-gold))', border: '1px solid hsl(var(--nb-gold) / 0.3)' }}>
-                  Рассчитать
-                </button>
-              </div>
+            {/* ROI Calculator */}
+            <div className="nb-glass p-5">
+              <NbROICalculator
+                defaultPrice={project.price_from}
+                defaultRoi={(project as any).roi_projected}
+                defaultCamFee={(project as any).cam_fee_per_sqm}
+                compact
+              />
             </div>
+
+            {/* Cross-module services */}
+            <NbServicesSection />
           </div>
         </div>
       </div>

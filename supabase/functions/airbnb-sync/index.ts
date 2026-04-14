@@ -42,9 +42,11 @@ function extractAirbnbListingId(url: string): string | null {
   if (editorMatch) return editorMatch[1];
 
   // Public: /rooms/12345678
+ 
   const roomMatch = url.match(/airbnb\.[a-z.]+\/rooms\/(\d+)/);
   if (roomMatch) return roomMatch[1];
   
+ 
   // Experience/home: /h/some-slug
   const experienceMatch = url.match(/airbnb\.[a-z.]+\/h\/([a-zA-Z0-9-]+)/);
   if (experienceMatch) return experienceMatch[1];
@@ -124,6 +126,7 @@ function parseAirbnbListing(markdown: string, html: string, url: string): Airbnb
   if (guestMatch) data.maxGuests = parseInt(guestMatch[1]);
   
   const bedroomMatch = content.match(/(\d+)\s*(?:bedrooms?|спальн[а-яё]*)/i);
+ 
   if (bedroomMatch) data.bedrooms = parseInt(bedroomMatch[1]);
   
   const bathMatch = content.match(/(\d+\.?\d*)\s*(?:baths?|bathrooms?|ванн[а-яё]*)/i);
@@ -293,12 +296,14 @@ function parseAirbnbListing(markdown: string, html: string, url: string): Airbnb
     if (seenBaseUrls.has(baseUrl)) return;
     seenBaseUrls.add(baseUrl);
     photos.push({ url: photoUrl, order: photos.length });
+ 
   };
 
   // 1. From markdown image syntax
-  const mdImages = content.matchAll(/!\[.*?\]\((https:\/\/[^\)]+)\)/g);
+  const mdImages = content.matchAll(/!\[.*?\]\((https:\/\/[^)]+)\)/g);
   for (const match of mdImages) {
     if (match[1] && isPropertyPhoto(match[1])) addPhoto(match[1]);
+ 
   }
   
   // 2. From HTML img src attributes
@@ -356,7 +361,7 @@ Deno.serve(async (req) => {
     }
 
     const startTime = Date.now();
-    let connectionId = connection_id;
+    const connectionId = connection_id;
     let url = listing_url;
     let ownerId: string | null = null;
 
@@ -486,6 +491,7 @@ Deno.serve(async (req) => {
         listingData.photos = uniquePhotos.slice(0, 30);
         if (!listingData.coverPhoto) listingData.coverPhoto = uniquePhotos[0].url;
       }
+ 
     }
 
     // If still no photos, try broader muscache.com image search from HTML

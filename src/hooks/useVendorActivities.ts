@@ -1,4 +1,4 @@
-import { useSupabaseCRUD } from './useSupabaseCRUD';
+import { useVerticalCRUD } from './useVerticalCRUD';
 
 export interface VendorActivity {
   id: string;
@@ -39,12 +39,7 @@ export interface VendorActivity {
 }
 
 export function useVendorActivities(providerId?: string) {
-  const { items, isLoading, create, update, remove, refetch } = useSupabaseCRUD<VendorActivity>({
-    table: 'water_activities',
-    providerId,
-    providerIdField: 'provider_id',
-    orderByColumn: 'created_at',
-    orderAscending: false,
+  const { items, isLoading, create, update, remove, refetch } = useVerticalCRUD<VendorActivity>('water_activity', providerId, {
     select: 'id,provider_id,title_en,title_ru,description_en,description_ru,category,difficulty,duration_minutes,price,price_per,currency,min_participants,max_participants,age_restriction,meeting_point,meeting_point_lat,meeting_point_lng,location_name,includes,requirements,equipment_included,is_certified,certification_details,safety_briefing_required,cover_image,images,available_days,available_times,is_active,is_featured,rating,review_count,created_at,updated_at',
   });
 

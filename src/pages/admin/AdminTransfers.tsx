@@ -6,9 +6,9 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, Plane, MapPin, Phone, Calendar, Car } from 'lucide-react';
 import { format } from 'date-fns';
-import { useToast } from '@/hooks/use-toast';
 import type { Database } from '@/integrations/supabase/types';
 
+import { toast } from 'sonner';
 type OrderStatus = Database['public']['Enums']['order_status'];
 
 const STATUS_OPTIONS: OrderStatus[] = ['pending', 'confirmed', 'in_progress', 'completed', 'cancelled'];
@@ -24,8 +24,7 @@ const statusColors: Record<string, string> = {
 export default function AdminTransfers() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
+const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
   const { data: orders, isLoading } = useQuery({
@@ -68,10 +67,10 @@ export default function AdminTransfers() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-transfers'] });
-      toast({ title: isRu ? 'Статус обновлён' : 'Status updated' });
+      toast(isRu ? 'Статус обновлён' : 'Status updated');
     },
     onError: () => {
-      toast({ title: isRu ? 'Ошибка обновления' : 'Update failed', variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка обновления' : 'Update failed');
     },
   });
 

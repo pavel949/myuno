@@ -58,6 +58,12 @@ export const NewbuildsCatalog = lazy(() => import('@/pages/newbuilds/NewbuildsCa
 export const NewbuildDetail = lazy(() => import('@/pages/newbuilds/NewbuildDetail'));
 export const NewbuildsDevelopers = lazy(() => import('@/pages/newbuilds/NewbuildsDevelopers'));
 export const NewbuildDeveloperDetail = lazy(() => import('@/pages/newbuilds/NewbuildDeveloperDetail'));
+export const NewbuildsMap = lazy(() => import('@/pages/newbuilds/NewbuildsMap'));
+export const NewbuildsCalculator = lazy(() => import('@/pages/newbuilds/NewbuildsCalculator'));
+export const NewbuildsCompare = lazy(() => import('@/pages/newbuilds/NewbuildsCompare'));
+export const NewbuildsAreaGuides = lazy(() => import('@/pages/newbuilds/NewbuildsAreaGuides'));
+export const NewbuildsAreaDetail = lazy(() => import('@/pages/newbuilds/NewbuildsAreaDetail'));
+export const NewbuildsDueDiligence = lazy(() => import('@/pages/newbuilds/NewbuildsDueDiligence'));
 
 // ── Developer Portal ──
 export const DeveloperPortalLayout = lazy(() => import('@/components/newbuilds/DeveloperPortalLayout'));
@@ -429,6 +435,12 @@ export const PropertyQuickSetup = lazy(() => import('@/pages/owner/PropertyQuick
 export const OwnerSetupWizard = lazy(() => import('@/pages/owner/OwnerSetupWizard'));
 export const OwnerPortfolio = lazy(() => import('@/pages/owner/OwnerPortfolio'));
 export const OwnerRevenueDashboard = lazy(() => import('@/pages/owner/OwnerRevenueDashboard'));
+
+export const MCBookingsPage = lazy(() => import('@/pages/owner/MCBookingsPage'));
+export const OwnerPerformance = lazy(() => import('@/pages/owner/OwnerPerformance'));
+export const OwnerSuperhost = lazy(() => import('@/pages/owner/OwnerSuperhost'));
+export const OwnerTrendsAndTips = lazy(() => import('@/pages/owner/OwnerTrendsAndTips'));
+export const OwnerAccountSettings = lazy(() => import('@/pages/owner/OwnerAccountSettings'));
 
 export const OwnerOperations = lazy(() => import('@/pages/owner/OwnerOperations'));
 export const OwnerGuidePage = lazy(() => import('@/pages/owner/OwnerGuidePage'));

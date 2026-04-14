@@ -1,30 +1,23 @@
 /**
  * LifeOS AI Insights Panel
- * 
+ *
  * Displays AI suggestions with optional fix execution.
  * All fix actions require explicit human confirmation.
  */
 
-import React, { useState, forwardRef } from 'react';
+import React, { useState, useCallback, forwardRef } from 'react';
 import { resolveIcon } from '@/lib/iconMap';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { 
-  useLifeOSAIInsights, 
-  getAnalysisModeInfo, 
-  getImpactStyle,
-  getConfidenceStyle,
-  type AnalysisMode,
-  type AISuggestion,
-} from '@/hooks/useLifeOSAIInsights';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { 
-  Brain, 
-  ChevronDown, 
+import {
+  Brain,
+  ChevronDown,
   ChevronRight,
   AlertTriangle,
   Clock,
@@ -39,8 +32,216 @@ import {
   XCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
+type AnalysisMode =
+  | 'scenario_gaps'
+  | 'mapping_suggestions'
+  | 'catalog_hygiene'
+  | 'provider_risks';
+
+interface AISuggestion {
+  suggestion_type: 'coverage' | 'mapping' | 'hygiene' | 'risk';
+  affected_life_situation: string | null;
+  entity_type: string | null;
+  entity_id: string | null;
+  entity_title: string | null;
+  reason: string;
+  impact_level: 'LOW' | 'MEDIUM' | 'HIGH';
+  recommended_human_action: string;
+  governance_conflict: string | null;
+  confidence: 'LOW' | 'MEDIUM' | 'HIGH';
+}
+
+interface AnalysisResult {
+  mode: AnalysisMode;
+  timestamp: string;
+  data_sources: string[];
+  suggestions: AISuggestion[];
+  summary: string;
+  disclaimer: string;
+}
+
+interface UseLifeOSAIInsightsOptions {
+  situationCode?: string;
+  entityType?: string;
+}
+
+function useLifeOSAIInsights(options: UseLifeOSAIInsightsOptions = {}) {
+  const { language } = useLanguage();
+  const isRu = language === 'ru';
+  const [isLoading, setIsLoading] = useState(false);
+  const [isFixing, setIsFixing] = useState<string | null>(null);
+  const [fixResults, setFixResults] = useState<Record<number, { success: boolean; actions: string[] }>>({});
+  const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const runAnalysis = useCallback(async (mode: AnalysisMode) => {
+    setIsLoading(true);
+    setError(null);
+    setFixResults({});
+
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke('lifeos-ai-analyst', {
+        body: {
+          mode,
+          situationCode: options.situationCode,
+          entityType: options.entityType,
+          language,
+        },
+      });
+
+      if (fnError) {
+        throw new Error(fnError.message);
+      }
+
+      if (data.error) {
+        if (data.error.includes('Rate limit')) {
+          toast.error(isRu ? 'Превышен лимит' : 'Rate Limited', {
+            description: isRu
+              ? 'Слишком много запросов. Попробуйте позже.'
+              : 'Too many requests. Please try again later.',
+          });
+        } else if (data.error.includes('credits')) {
+          toast.error(isRu ? 'Кредиты исчерпаны' : 'Credits Exhausted', {
+            description: isRu
+              ? 'Свяжитесь с администратором.'
+              : 'Please contact the administrator.',
+          });
+        }
+        throw new Error(data.error);
+      }
+
+      setResult(data as AnalysisResult);
+
+      toast(isRu ? 'Анализ завершён' : 'Analysis Complete', {
+        description: isRu
+          ? `Найдено ${data.suggestions?.length || 0} рекомендаций`
+          : `Found ${data.suggestions?.length || 0} suggestions`,
+      });
+
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Analysis failed';
+      setError(message);
+      console.error('[useLifeOSAIInsights] Error:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [options.situationCode, options.entityType, language, isRu]);
+
+  const applySuggestion = useCallback(async (suggestion: AISuggestion, index: number) => {
+    setIsFixing(String(index));
+
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke('lifeos-ai-fix', {
+        body: { suggestion, language },
+      });
+
+      if (fnError) throw new Error(fnError.message);
+
+      if (data.error) throw new Error(data.error);
+
+      setFixResults(prev => ({ ...prev, [index]: { success: data.success, actions: data.actions } }));
+
+      toast(data.success
+          ? (isRu ? 'Исправление применено' : 'Fix Applied')
+          : (isRu ? 'Частично применено' : 'Partially Applied'), {
+        description: data.actions?.[0] || '',
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Fix failed';
+      setFixResults(prev => ({ ...prev, [index]: { success: false, actions: [message] } }));
+      toast.error(isRu ? 'Ошибка' : 'Error', {
+        description: message,
+      });
+    } finally {
+      setIsFixing(null);
+    }
+  }, [language, isRu]);
+
+  const clearResult = useCallback(() => {
+    setResult(null);
+    setError(null);
+    setFixResults({});
+  }, []);
+
+  return {
+    isLoading,
+    isFixing,
+    fixResults,
+    result,
+    error,
+    runAnalysis,
+    applySuggestion,
+    clearResult,
+  };
+}
+
+function getAnalysisModeInfo(mode: AnalysisMode, isRu: boolean): {
+  label: string;
+  description: string;
+  icon: string;
+} {
+  const modes: Record<AnalysisMode, { label: string; labelRu: string; description: string; descriptionRu: string; icon: string }> = {
+    scenario_gaps: {
+      label: 'Scenario Gaps',
+      labelRu: 'Пробелы сценариев',
+      description: 'Find missing or weak coverage in life situations',
+      descriptionRu: 'Найти недостающее покрытие в жизненных ситуациях',
+      icon: '🔍',
+    },
+    mapping_suggestions: {
+      label: 'Mapping Ideas',
+      labelRu: 'Идеи маппинга',
+      description: 'Suggest entities to add or weight adjustments',
+      descriptionRu: 'Предложить сущности для добавления или корректировки весов',
+      icon: '💡',
+    },
+    catalog_hygiene: {
+      label: 'Catalog Hygiene',
+      labelRu: 'Гигиена каталога',
+      description: 'Detect duplicates, inconsistencies, missing data',
+      descriptionRu: 'Обнаружить дубликаты, несоответствия, пропущенные данные',
+      icon: '🧹',
+    },
+    provider_risks: {
+      label: 'Provider Risks',
+      labelRu: 'Риски провайдеров',
+      description: 'Identify providers needing education or guidance',
+      descriptionRu: 'Определить провайдеров, нуждающихся в обучении',
+      icon: '⚠️',
+    },
+  };
+
+  const info = modes[mode];
+  return {
+    label: isRu ? info.labelRu : info.label,
+    description: isRu ? info.descriptionRu : info.description,
+    icon: info.icon,
+  };
+}
+
+function getImpactStyle(level: 'LOW' | 'MEDIUM' | 'HIGH'): string {
+  switch (level) {
+    case 'HIGH':
+      return 'bg-destructive/10 text-destructive border-destructive/30';
+    case 'MEDIUM':
+      return 'bg-warning/10 text-warning border-warning/30';
+    case 'LOW':
+      return 'bg-muted text-muted-foreground border-border';
+  }
+}
+
+function getConfidenceStyle(level: 'LOW' | 'MEDIUM' | 'HIGH'): string {
+  switch (level) {
+    case 'HIGH':
+      return 'text-success';
+    case 'MEDIUM':
+      return 'text-warning';
+    case 'LOW':
+      return 'text-muted-foreground';
+  }
+}
 interface LifeOSAIPanelProps {
   situationCode?: string;
   entityType?: string;
@@ -56,8 +257,7 @@ const ANALYSIS_MODES: AnalysisMode[] = [
 
 export function LifeOSAIPanel({ situationCode, entityType, className }: LifeOSAIPanelProps) {
   const { language } = useLanguage();
-  const { toast } = useToast();
-  const isRu = language === 'ru';
+const isRu = language === 'ru';
   
   const [selectedMode, setSelectedMode] = useState<AnalysisMode>('scenario_gaps');
   const [isExpanded, setIsExpanded] = useState(true);
@@ -74,8 +274,7 @@ export function LifeOSAIPanel({ situationCode, entityType, className }: LifeOSAI
   const copySuggestion = (suggestion: AISuggestion) => {
     const text = `${suggestion.reason}\n\nAction: ${suggestion.recommended_human_action}`;
     navigator.clipboard.writeText(text);
-    toast({
-      title: isRu ? 'Скопировано' : 'Copied',
+    toast(isRu ? 'Скопировано' : 'Copied', {
       description: isRu ? 'Рекомендация скопирована' : 'Suggestion copied to clipboard',
     });
   };

@@ -1,4 +1,4 @@
-import { useSupabaseCRUD } from './useSupabaseCRUD';
+import { useVerticalCRUD } from './useVerticalCRUD';
 
 export interface VendorLegalService {
   id: string;
@@ -32,12 +32,7 @@ export interface VendorLegalService {
 }
 
 export function useVendorLegal(providerId?: string) {
-  const { items, isLoading, create, update, remove, refetch } = useSupabaseCRUD<VendorLegalService>({
-    table: 'legal_services',
-    providerId,
-    providerIdField: 'provider_id',
-    orderByColumn: 'created_at',
-    orderAscending: false,
+  const { items, isLoading, create, update, remove, refetch } = useVerticalCRUD<VendorLegalService>('legal', providerId, {
     select: 'id,provider_id,name_en,name_ru,description_en,description_ru,service_type,specializations,languages,price_consultation,currency,address,district,phone,email,website,cover_image,images,working_hours,is_active,is_featured,is_verified,rating,review_count,lat,lng,created_at,updated_at',
   });
 

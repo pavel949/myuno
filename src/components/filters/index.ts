@@ -1,187 +1,79 @@
-// Export all filter components
+// Export filter UI components
 export { UniversalFilter, QuickFilterBar, ActiveFilters } from './UniversalFilter';
 export type { FilterConfig, FilterOption, FilterValues, FilterSection, UniversalFilterProps } from './UniversalFilter';
 
 // Nearby/Geolocation filter
 export { NearbyFilter, DistanceBadge } from './NearbyFilter';
 
-// Restaurant filters
-export { 
-  restaurantFilterConfig, 
-  deliveryFilterConfig, 
-  reservationFilterConfig,
-  cuisineOptions,
-  featureOptions,
-  occasionOptions,
-  dietaryOptions,
-  deliveryOptions,
-  sortOptions,
-} from './RestaurantFilters';
+// All filter configs and options — consolidated in a single registry
+export {
+  // Dynamic hooks
+  usePropertyFilterOptions,
+  useTransportFilterOptions,
+  useHomeServiceFilterOptions,
 
-// Flower filters
-export {
-  flowerFilterConfig,
-  flowerOccasionOptions,
-  flowerTypeOptions,
-  flowerColorOptions,
-  flowerFeatureOptions,
-  flowerDeliveryOptions,
-} from './FlowersFilters';
+  // Property
+  propertyFilterConfig, getPropertyFilterConfig,
+  propertyTypeOptions, bedroomOptions, propertyAmenityOptions, phuketDistrictOptions, listingTypeOptions,
 
-// Tour filters
-export {
-  tourFilterConfig,
-  tourTypeOptions,
-  tourDurationOptions,
-  tourGroupOptions,
-  tourFeatureOptions,
-  tourDifficultyOptions,
-} from './ToursFilters';
+  // Restaurant
+  restaurantFilterConfig, deliveryFilterConfig, reservationFilterConfig,
+  cuisineOptions, featureOptions, occasionOptions, dietaryOptions, deliveryOptions, sortOptions,
 
-// Experiences filters (unified tours + activities)
-export {
-  experienceFilterConfig,
-  experienceTypeOptions,
-  experienceCategoryOptions,
-  experienceDurationOptions,
-  experienceDifficultyOptions,
-  experienceFeatureOptions,
-  experienceGroupOptions,
-} from './ExperiencesFilters';
-export {
-  beautyFilterConfig,
-  beautyServiceOptions,
-  beautyFeatureOptions,
-  beautyAvailabilityOptions,
-} from './BeautyFilters';
+  // Beauty
+  beautyFilterConfig, beautyServiceOptions, beautyFeatureOptions, beautyAvailabilityOptions,
 
-// Property filters
-export {
-  propertyFilterConfig,
-  propertyTypeOptions,
-  bedroomOptions,
-  propertyAmenityOptions,
-  phuketDistrictOptions,
-  listingTypeOptions,
-} from './PropertyFilters';
+  // Yacht
+  yachtFilterConfig, yachtTypeOptions, yachtCapacityOptions, yachtDurationOptions, yachtAmenityOptions, yachtDestinationOptions,
 
-// Transport filters
-export {
-  transportFilterConfig,
-  vehicleTypeOptions,
-  transferTypeOptions,
-  vehicleFeatureOptions,
-  passengerOptions,
-} from './TransportFilters';
+  // Flowers
+  flowerFilterConfig, flowerOccasionOptions, flowerTypeOptions, flowerColorOptions, flowerFeatureOptions, flowerDeliveryOptions,
 
-// Yacht filters
-export {
-  yachtFilterConfig,
-  yachtTypeOptions,
-  yachtCapacityOptions,
-  yachtDurationOptions,
-  yachtAmenityOptions,
-  yachtDestinationOptions,
-} from './YachtsFilters';
+  // Tours
+  tourFilterConfig, tourTypeOptions, tourDurationOptions, tourGroupOptions, tourFeatureOptions, tourDifficultyOptions,
 
-// Medical filters
-export {
-  medicalFilterConfig,
-  medicalSpecialtyOptions,
-  clinicFeatureOptions,
-  clinicTypeOptions,
-  medicalAvailabilityOptions,
-} from './MedicalFilters';
+  // Experiences
+  experienceFilterConfig, experienceTypeOptions, experienceCategoryOptions, experienceDurationOptions,
+  experienceDifficultyOptions, experienceFeatureOptions, experienceGroupOptions,
 
-// Fitness filters
-export {
-  fitnessFilterConfig,
-  fitnessTypeOptions,
-  fitnessAmenityOptions,
-  membershipOptions,
-  scheduleOptions,
-} from './FitnessFilters';
+  // Events
+  eventsFilterConfig, eventCategoryOptions, eventFeatureOptions, eventDateOptions, eventAgePolicyOptions,
 
-// Events filters
-export {
-  eventsFilterConfig,
-  eventCategoryOptions,
-  eventFeatureOptions,
-  eventDateOptions,
-  eventAgePolicyOptions,
-} from './EventsFilters';
+  // Fitness
+  fitnessFilterConfig, fitnessTypeOptions, fitnessAmenityOptions, membershipOptions, scheduleOptions,
 
-// Services filters
-export {
-  servicesFilterConfig,
-  serviceCategoryOptions,
-  serviceFeatureOptions,
-  bookingTypeOptions,
-} from './ServicesFilters';
+  // Water
+  waterFilterConfig, waterActivityTypeOptions, waterDifficultyOptions, waterDurationOptions, waterFeatureOptions,
 
-// Market filters
-export {
-  marketFilterConfig,
-  storeCategoryOptions,
-  marketDeliveryOptions,
-  storeFeatureOptions,
-} from './MarketFilters';
+  // Medical
+  medicalFilterConfig, medicalSpecialtyOptions, clinicFeatureOptions, clinicTypeOptions, medicalAvailabilityOptions,
 
-// Water Activities filters
-export {
-  waterFilterConfig,
-  waterActivityTypeOptions,
-  waterDifficultyOptions,
-  waterDurationOptions,
-  waterFeatureOptions,
-} from './WaterFilters';
+  // Market
+  marketFilterConfig, storeCategoryOptions, marketDeliveryOptions, storeFeatureOptions,
 
-// Pharmacy filters
-export {
-  pharmacyFilterConfig,
-  pharmacyCategoryOptions,
-  pharmacyFeatureOptions,
-  pharmacyDistanceOptions,
-} from './PharmacyFilters';
+  // Cleaning
+  cleaningFilterConfig, cleaningTypeOptions, cleaningFeatureOptions, cleaningFrequencyOptions,
 
-// Pets filters
-export {
-  petsFilterConfig,
-  petServiceTypeOptions,
-  petServiceFeatureOptions,
-  petTypeOptions,
-} from './PetsFilters';
+  // Legal
+  legalFilterConfig, legalCategoryOptions, legalLanguageOptions, legalFeatureOptions,
 
-// Education filters
-export {
-  educationFilterConfig,
-  educationCategoryOptions,
-  educationAgeOptions,
-  educationTypeOptions,
-  educationFeatureOptions,
-} from './EducationFilters';
+  // Pets
+  petsFilterConfig, petServiceTypeOptions, petServiceFeatureOptions, petTypeOptions,
 
-// Cleaning filters
-export {
-  cleaningFilterConfig,
-  cleaningTypeOptions,
-  cleaningFeatureOptions,
-  cleaningFrequencyOptions,
-} from './CleaningFilters';
+  // Pharmacy
+  pharmacyFilterConfig, pharmacyCategoryOptions, pharmacyFeatureOptions, pharmacyDistanceOptions,
 
-// Babysitter filters
-export {
-  babysitterFilterConfig,
-  babysitterAgeGroupOptions,
-  babysitterLanguageOptions,
-  babysitterCertOptions,
-  babysitterFeatureOptions,
-} from './BabysitterFilters';
+  // Education
+  educationFilterConfig, educationCategoryOptions, educationAgeOptions, educationTypeOptions, educationFeatureOptions,
 
-// Legal/Business filters
-export {
-  legalFilterConfig,
-  legalCategoryOptions,
-  legalLanguageOptions,
-  legalFeatureOptions,
-} from './LegalFilters';
+  // Babysitter
+  babysitterFilterConfig, babysitterAgeGroupOptions, babysitterLanguageOptions, babysitterCertOptions, babysitterFeatureOptions,
+
+  // Services
+  servicesFilterConfig, getServicesFilterConfig,
+  serviceCategoryOptions, serviceFeatureOptions, bookingTypeOptions,
+
+  // Transport
+  transportFilterConfig, getTransportFilterConfig,
+  vehicleTypeOptions, transferTypeOptions, vehicleFeatureOptions, passengerOptions,
+} from '@/lib/filterRegistry';

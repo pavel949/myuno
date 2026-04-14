@@ -1,4 +1,4 @@
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { getStoredLang } from '@/lib/languageConfig';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -203,11 +203,11 @@ export function handleError(error: unknown, options: ErrorHandlerOptions = {}): 
       ? (toastDescriptionRu || toastDescription || defaultMsg.ru)
       : (toastDescription || defaultMsg.en);
 
-    toast({
-      title,
-      description,
-      variant: severity === 'error' || severity === 'critical' ? 'destructive' : 'default',
-    });
+    if (severity === 'error' || severity === 'critical') {
+      toast.error(title, { description });
+    } else {
+      toast(title, { description });
+    }
   }
 
   // In production, report errors/critical issues to backend

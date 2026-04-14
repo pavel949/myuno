@@ -1,4 +1,4 @@
-import { useSupabaseCRUD } from './useSupabaseCRUD';
+import { useVerticalCRUD } from './useVerticalCRUD';
 
 export interface VendorRestaurant {
   id: string;
@@ -35,12 +35,7 @@ export interface VendorRestaurant {
 }
 
 export function useVendorRestaurants(providerId?: string) {
-  const { items, isLoading, create, update, remove, refetch } = useSupabaseCRUD<VendorRestaurant>({
-    table: 'restaurants',
-    providerId,
-    providerIdField: 'provider_id',
-    orderByColumn: 'created_at',
-    orderAscending: false,
+  const { items, isLoading, create, update, remove, refetch } = useVerticalCRUD<VendorRestaurant>('restaurant', providerId, {
     select: 'id,provider_id,name_en,name_ru,description_en,description_ru,cuisine,address,district,phone,email,website,price_range,cover_image,images,working_hours,delivery_available,delivery_fee,delivery_time,min_order_amount,features,is_active,is_featured,is_verified,rating,review_count,lat,lng,created_at,updated_at,approval_status',
   });
 

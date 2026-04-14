@@ -83,6 +83,12 @@ export const APP_ROUTES = {
   NEWBUILDS_PROJECT: (slug: string) => `/newbuilds/projects/${slug}`,
   NEWBUILDS_DEVELOPERS: '/newbuilds/developers',
   NEWBUILDS_DEVELOPER: (slug: string) => `/newbuilds/developers/${slug}`,
+  NEWBUILDS_MAP: '/newbuilds/map',
+  NEWBUILDS_CALCULATOR: '/newbuilds/calculator',
+  NEWBUILDS_COMPARE: '/newbuilds/compare',
+  NEWBUILDS_AREAS: '/newbuilds/areas',
+  NEWBUILDS_AREA: (slug: string) => `/newbuilds/areas/${slug}`,
+  NEWBUILDS_DUE_DILIGENCE: '/newbuilds/due-diligence',
   DEVELOPER_PORTAL: '/developer-portal',
   ADMIN_NEWBUILDS: '/admin/newbuilds',
 
@@ -322,6 +328,13 @@ export const APP_ROUTES = {
   MC_VENDOR_ACQUISITION: '/mc/vendor-acquisition',
   MC_SUPPORT_CHAT: '/mc/support-chat',
   MC_BOOKINGS: '/mc/bookings',
+
+  // ── MC Performance & Settings ──
+  MC_BOOKINGS_LIST: '/mc/bookings-list',
+  MC_PERFORMANCE: '/mc/performance',
+  MC_TRENDS: '/mc/trends',
+  MC_ACCOUNT_SETTINGS: '/mc/account-settings',
+  MC_SUPERHOST: '/mc/superhost',
 
   // ── Owner Portal (individual owners) ──
   OWNER: '/owner',

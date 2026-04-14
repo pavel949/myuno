@@ -8,7 +8,7 @@
 
 import {
   Waves, Footprints, Eye, Mountain, TreePine, Building, Compass,
-  Droplets, Lock, Infinity, Sparkles, Bath,
+  Droplets, Lock, Infinity as InfinityIcon, Sparkles, Bath,
   Wifi, AirVent, WashingMachine, Tv, Monitor, UtensilsCrossed,
   Coffee, Shield, BedDouble, ShowerHead,
   Car, Fence, Trees, Sun, Flame, CloudRain,
@@ -57,7 +57,7 @@ export const PROPERTY_FEATURE_GROUPS: PropertyFeatureGroup[] = [
     features: [
       { id: 'private_pool', icon: Lock, labelEn: 'Private pool', labelRu: 'Свой бассейн' },
       { id: 'pool', icon: Droplets, labelEn: 'Shared pool', labelRu: 'Общий бассейн' },
-      { id: 'infinity_pool', icon: Infinity, labelEn: 'Infinity pool', labelRu: 'Инфинити-бассейн' },
+      { id: 'infinity_pool', icon: InfinityIcon, labelEn: 'Infinity pool', labelRu: 'Инфинити-бассейн' },
       { id: 'rooftop_pool', icon: Droplets, labelEn: 'Rooftop pool', labelRu: 'Бассейн на крыше' },
       { id: 'jacuzzi', icon: Bath, labelEn: 'Jacuzzi / Hot tub', labelRu: 'Джакузи' },
       { id: 'plunge_pool', icon: Droplets, labelEn: 'Plunge pool', labelRu: 'Погружной бассейн' },

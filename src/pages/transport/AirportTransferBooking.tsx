@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { useOrders, PaymentMethod } from '@/hooks/useOrders';
 import { useVehicleTypes, useTransportDestinations } from '@/hooks/useTransportConfig';
 import { useProfile } from '@/hooks/useProfile';
@@ -48,7 +48,6 @@ export default function AirportTransferBooking() {
   const [searchParams] = useSearchParams();
   const { language } = useLanguage();
   const { user } = useAuth();
-  const { toast } = useToast();
   
   const { vehicleTypes, isLoading: isLoadingVehicles } = useVehicleTypes('airport_transfer');
   const { destinations } = useTransportDestinations('airport_transfer');
@@ -171,10 +170,7 @@ export default function AirportTransferBooking() {
     e.preventDefault();
     
     if (!user) {
-      toast({
-        title: language === 'ru' ? 'Требуется авторизация' : 'Login Required',
-        variant: 'destructive',
-      });
+      toast.error(language === 'ru' ? 'Требуется авторизация' : 'Login Required');
       navigate(APP_ROUTES.AUTH);
       return;
     }
@@ -291,10 +287,8 @@ export default function AirportTransferBooking() {
           }
         } catch (err) {
           console.error('Stripe checkout error:', err);
-          toast({
-            title: language === 'ru' ? 'Ошибка оплаты' : 'Payment Error',
+          toast.error(language === 'ru' ? 'Ошибка оплаты' : 'Payment Error', {
             description: language === 'ru' ? 'Попробуйте другой способ оплаты' : 'Please try another payment method',
-            variant: 'destructive',
           });
           setIsProcessingPayment(false);
           return;

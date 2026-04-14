@@ -1,9 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { toast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
 
+import { toast } from 'sonner';
 export interface ApplianceGuide {
   id: string;
   name: string;
@@ -184,16 +184,13 @@ export function usePropertyGuidebook(propertyId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['property-guidebook', propertyId] });
-      toast({
-        title: t('Saved', 'Сохранено'),
+      toast(t('Saved', 'Сохранено'), {
         description: t('Guidebook has been updated', 'Гид по объекту обновлён'),
       });
     },
     onError: (error: Error) => {
-      toast({
-        title: t('Error', 'Ошибка'),
+      toast.error(t('Error', 'Ошибка'), {
         description: error.message,
-        variant: 'destructive',
       });
     },
   });

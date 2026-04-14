@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
 
 interface MaintenanceContextType {
   isMaintenanceMode: boolean;
@@ -64,31 +64,31 @@ export function MaintenanceProvider({ children }: { children: ReactNode }) {
 
   // Persist bypass when navigating to admin routes
   useEffect(() => {
-    if (isAdminRoute && !canBypass) {
+    if (isAdminRoute) {
       localStorage.setItem(BYPASS_KEY, 'true');
       setCanBypass(true);
     }
-  }, [isAdminRoute, canBypass]);
+  }, [isAdminRoute]);
 
-  const setMaintenanceMode = (enabled: boolean) => {
+  const setMaintenanceMode = useCallback((enabled: boolean) => {
     setIsMaintenanceMode(enabled);
     // When enabling maintenance mode, automatically grant bypass to current user
     if (enabled) {
       localStorage.setItem(BYPASS_KEY, 'true');
       setCanBypass(true);
     }
-  };
+  }, []);
 
   // Effective bypass: can bypass OR is on admin route
   const effectiveBypass = canBypass || isAdminRoute;
 
+  const value = useMemo(() => ({
+    isMaintenanceMode, setMaintenanceMode,
+    canBypass: effectiveBypass, isAdminRoute,
+  }), [isMaintenanceMode, setMaintenanceMode, effectiveBypass, isAdminRoute]);
+
   return (
-    <MaintenanceContext.Provider value={{ 
-      isMaintenanceMode, 
-      setMaintenanceMode, 
-      canBypass: effectiveBypass,
-      isAdminRoute 
-    }}>
+    <MaintenanceContext.Provider value={value}>
       {children}
     </MaintenanceContext.Provider>
   );

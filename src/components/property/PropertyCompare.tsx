@@ -248,7 +248,7 @@ export function CompareButton({ property, variant = 'ghost', size = 'sm', classN
       className={cn("gap-1.5", className)}
       onClick={(e) => {
         e.stopPropagation();
-        inCompare ? remove(property.id) : add(property);
+        if (inCompare) { remove(property.id); } else { add(property); }
       }}
     >
       <GitCompareArrows className="w-4 h-4" />

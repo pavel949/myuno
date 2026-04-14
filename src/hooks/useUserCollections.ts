@@ -28,7 +28,8 @@ export type CollectionItemType =
   | 'event'
   | 'vehicle'
   | 'gym'
-  | 'water_activity';
+  | 'water_activity'
+  | 'newbuild';
 
 export interface CollectionItem {
   id: string;
@@ -242,4 +243,8 @@ export function usePropertyFavorites() {
 
 export function useRestaurantFavorites() {
   return useUserCollections({ itemType: 'restaurant' });
+}
+
+export function useNewbuildFavorites() {
+  return useUserCollections({ itemType: 'newbuild' });
 }

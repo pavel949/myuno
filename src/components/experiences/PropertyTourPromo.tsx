@@ -3,7 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Gift, ArrowRight, MapPin, Clock, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PropertyTourLeadForm } from '@/components/property/PropertyTourLeadForm';
-import propertyTourImg from '@/assets/solutions/property-tour.jpg';
+import propertyTourImg from '@/assets/solutions/property-tour.webp';
 
 export function PropertyTourPromo() {
   const { language } = useLanguage();

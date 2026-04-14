@@ -1,11 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
 import { CACHE_PROFILES } from '@/lib/queryConfig';
 import type { SupportTicket, TicketMessage, TicketStatus, TicketPriority, ResolutionType } from './useTickets';
 
+import { toast } from 'sonner';
 export interface TicketStats {
   total: number;
   open: number;
@@ -25,8 +25,7 @@ export interface TicketFilters {
 }
 
 export function useAdminTickets() {
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
+const queryClient = useQueryClient();
   const [filters, setFilters] = useState<TicketFilters>({ status: 'all', priority: 'all' });
 
   // Stabilize filter key for query
@@ -129,15 +128,13 @@ export function useAdminTickets() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast({ title: 'Статус обновлён' });
+      toast('Статус обновлён');
       queryClient.invalidateQueries({ queryKey: ['admin-tickets'] });
       queryClient.invalidateQueries({ queryKey: ['admin-tickets-stats'] });
     },
     onError: () => {
-      toast({
-        title: 'Ошибка',
+      toast.error('Ошибка', {
         description: 'Не удалось обновить статус',
-        variant: 'destructive',
       });
     },
   });
@@ -167,14 +164,12 @@ export function useAdminTickets() {
       if (error) throw error;
     },
     onSuccess: (_, { adminId }) => {
-      toast({ title: adminId ? 'Тикет назначен' : 'Назначение снято' });
+      toast(adminId ? 'Тикет назначен' : 'Назначение снято');
       queryClient.invalidateQueries({ queryKey: ['admin-tickets'] });
     },
     onError: () => {
-      toast({
-        title: 'Ошибка',
+      toast.error('Ошибка', {
         description: 'Не удалось назначить тикет',
-        variant: 'destructive',
       });
     },
   });
@@ -199,15 +194,13 @@ export function useAdminTickets() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast({ title: 'Приоритет обновлён' });
+      toast('Приоритет обновлён');
       queryClient.invalidateQueries({ queryKey: ['admin-tickets'] });
       queryClient.invalidateQueries({ queryKey: ['admin-tickets-stats'] });
     },
     onError: () => {
-      toast({
-        title: 'Ошибка',
+      toast.error('Ошибка', {
         description: 'Не удалось обновить приоритет',
-        variant: 'destructive',
       });
     },
   });
@@ -258,15 +251,13 @@ export function useAdminTickets() {
         });
     },
     onSuccess: () => {
-      toast({ title: 'Тикет решён' });
+      toast('Тикет решён');
       queryClient.invalidateQueries({ queryKey: ['admin-tickets'] });
       queryClient.invalidateQueries({ queryKey: ['admin-tickets-stats'] });
     },
     onError: () => {
-      toast({
-        title: 'Ошибка',
+      toast.error('Ошибка', {
         description: 'Не удалось решить тикет',
-        variant: 'destructive',
       });
     },
   });
@@ -315,13 +306,11 @@ export function useAdminTickets() {
           .eq('id', ticketId);
       }
 
-      toast({ title: isInternal ? 'Заметка добавлена' : 'Ответ отправлен' });
+      toast(isInternal ? 'Заметка добавлена' : 'Ответ отправлен');
       return true;
     } catch {
-      toast({
-        title: 'Ошибка',
+      toast.error('Ошибка', {
         description: 'Не удалось отправить сообщение',
-        variant: 'destructive',
       });
       return false;
     }

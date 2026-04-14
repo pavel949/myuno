@@ -198,6 +198,24 @@ export const PropertyChatWindow: React.FC<PropertyChatWindowProps> = ({
         </div>
       )}
 
+      {/* Quick Reply Templates */}
+      {!newMessage.trim() && (
+        <div className="px-4 pt-2 flex gap-1.5 overflow-x-auto scrollbar-hide">
+          {(isRu
+            ? ['Добро пожаловать!', 'Wi-Fi пароль отправлю позже', 'Заезд с 14:00', 'Нужна помощь?', 'Приятного отдыха!']
+            : ['Welcome!', 'Will send WiFi password soon', 'Check-in from 2pm', 'Need any help?', 'Enjoy your stay!']
+          ).map((tpl) => (
+            <button
+              key={tpl}
+              onClick={() => setNewMessage(tpl)}
+              className="flex-shrink-0 px-3 py-1 rounded-full border text-xs hover:bg-muted transition-colors"
+            >
+              {tpl}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Input */}
       <div className="p-4 border-t">
         <div className="flex gap-2">

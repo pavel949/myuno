@@ -145,10 +145,11 @@ export function AdminKPIGrid() {
       onClick: () => navigate(`${APP_ROUTES.ADMIN_OPERATIONS}?tab=moderation`),
     },
     {
-      title: isRu ? 'Здоровье' : 'System Health',
-      value: '✓',
+      title: isRu ? 'Тикеты' : 'Open Tickets',
+      value: stats?.openTickets || 0,
       icon: Activity,
-      color: 'bg-success',
+      color: (stats?.openTickets || 0) > 0 ? 'bg-warning' : 'bg-success',
+      onClick: () => navigate('/admin/tickets'),
     },
   ];
 

@@ -26,7 +26,7 @@ interface BookingContactFormProps {
   onValidationChange?: (isValid: boolean) => void;
 }
 
-const PHONE_REGEX = /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,4}[-\s\.]?[0-9]{1,9}$/;
+const PHONE_REGEX = /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,4}[-\s.]?[0-9]{1,9}$/;
 
 export function BookingContactForm({
   data,
@@ -68,12 +68,14 @@ export function BookingContactForm({
         newErrors.phone = language === 'ru' ? 'Неверный формат телефона' : 'Invalid phone format';
       }
     }
+ 
     if (touched.email && data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
       newErrors.email = language === 'ru' ? 'Неверный формат email' : 'Invalid email format';
     }
     setErrors(newErrors);
     const isValid = data.name.trim().length > 0 &&
                     data.phone.trim().length > 0 &&
+ 
                     PHONE_REGEX.test(data.phone.replace(/\s/g, '')) &&
                     (!data.email || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email));
     onValidationChange?.(isValid);

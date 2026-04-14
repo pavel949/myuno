@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
+import { logger } from '@/lib/logger';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -47,10 +48,7 @@ export function PWAInstallProvider({ children }: { children: ReactNode }) {
 
     // Listen for install prompt - save globally
     const handleBeforeInstall = (e: Event) => {
-      // Use debug level to reduce console noise
-      if (import.meta.env.DEV) {
-        console.debug('[PWA] beforeinstallprompt event received');
-      }
+      logger.debug('[PWA] beforeinstallprompt event received');
       e.preventDefault();
       const promptEvent = e as BeforeInstallPromptEvent;
       globalDeferredPrompt = promptEvent;
@@ -62,10 +60,7 @@ export function PWAInstallProvider({ children }: { children: ReactNode }) {
 
     // Listen for app installed
     const handleAppInstalled = () => {
-      // Use debug level to reduce console noise
-      if (import.meta.env.DEV) {
-        console.debug('[PWA] App installed successfully');
-      }
+      logger.debug('[PWA] App installed successfully');
       setIsInstalled(true);
       globalDeferredPrompt = null;
       setDeferredPrompt(null);
@@ -84,23 +79,16 @@ export function PWAInstallProvider({ children }: { children: ReactNode }) {
     const prompt = deferredPrompt || globalDeferredPrompt;
     
     if (!prompt) {
-      // Use debug level to reduce console noise
-      if (import.meta.env.DEV) {
-        console.debug('[PWA] No install prompt available');
-      }
+      logger.debug('[PWA] No install prompt available');
       return false;
     }
 
     try {
-      if (import.meta.env.DEV) {
-        console.debug('[PWA] Triggering install prompt');
-      }
+      logger.debug('[PWA] Triggering install prompt');
       await prompt.prompt();
       const { outcome } = await prompt.userChoice;
       
-      if (import.meta.env.DEV) {
-        console.debug('[PWA] User choice:', outcome);
-      }
+      logger.debug('[PWA] User choice:', outcome);
       
       if (outcome === 'accepted') {
         setIsInstalled(true);
@@ -111,25 +99,17 @@ export function PWAInstallProvider({ children }: { children: ReactNode }) {
       }
       return false;
     } catch (error) {
-      // Use debug level for expected errors
-      if (import.meta.env.DEV) {
-        console.debug('[PWA] Install prompt error:', error);
-      }
+      logger.debug('[PWA] Install prompt error:', error);
       return false;
     }
   }, [deferredPrompt]);
 
+  const value = useMemo(() => ({
+    isInstalled, isIOS, isAndroid, isMobile, canInstall, install,
+  }), [isInstalled, isIOS, isAndroid, isMobile, canInstall, install]);
+
   return (
-    <PWAInstallContext.Provider
-      value={{
-        isInstalled,
-        isIOS,
-        isAndroid,
-        isMobile,
-        canInstall,
-        install,
-      }}
-    >
+    <PWAInstallContext.Provider value={value}>
       {children}
     </PWAInstallContext.Provider>
   );
