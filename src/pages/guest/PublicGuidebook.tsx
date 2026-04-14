@@ -6,12 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { toast } from 'sonner';
 import { 
   Wifi, Key, Phone, MapPin, Utensils, Coffee, Palmtree, ShoppingBag, Camera, Car,
   Trash2, ParkingCircle, LogOut, Copy, Check, Play, Loader2, AlertCircle, Book,
   Navigation, Clock, Home, ExternalLink, ChevronRight
 } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
 
 const categoryIcons: Record<string, React.ElementType> = {
   restaurant: Utensils, cafe: Coffee, beach: Palmtree, shopping: ShoppingBag,
@@ -38,7 +38,9 @@ export default function PublicGuidebook() {
   const copyToClipboard = async (text: string, field: string) => {
     await navigator.clipboard.writeText(text);
     setCopiedField(field);
-    toast({ title: isRu ? 'Скопировано' : 'Copied', description: text });
+    toast(isRu ? 'Скопировано' : 'Copied', {
+      description: text,
+    });
     setTimeout(() => setCopiedField(null), 2000);
   };
 

@@ -1,0 +1,196 @@
+/**
+ * /newbuilds/compare — Side-by-side project comparison
+ */
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { ChevronLeft, MapPin, Building2, Calendar, Layers, Award, TrendingUp, X } from 'lucide-react';
+import NewbuildsLayout from '@/components/newbuilds/NewbuildsLayout';
+import { useNbCompare } from '@/components/newbuilds/NbCompareProvider';
+import { NbPriceDisplay } from '@/components/newbuilds/NbPriceDisplay';
+import { NbConstructionProgress } from '@/components/newbuilds/NbConstructionProgress';
+import { NbProjectStatusBadge } from '@/components/newbuilds/NbProjectStatusBadge';
+import { NbLeadForm } from '@/components/newbuilds/NbLeadForm';
+import { APP_ROUTES } from '@/lib/config/routes';
+
+const unitTypeLabels: Record<string, string> = {
+  studio: 'Студия', '1br': '1 BR', '2br': '2 BR', '3br': '3 BR', penthouse: 'Пентхаус', villa: 'Вилла',
+};
+
+export default function NewbuildsCompare() {
+  const { items, remove, clear } = useNbCompare();
+
+  if (items.length === 0) {
+    return (
+      <NewbuildsLayout>
+        <div className="flex items-center justify-center min-h-screen px-4">
+          <div className="text-center space-y-4">
+            <p className="nb-display text-2xl" style={{ color: 'hsl(var(--nb-muted))' }}>Нет проектов для сравнения</p>
+            <p className="text-sm" style={{ color: 'hsl(var(--nb-muted))' }}>
+              Добавьте проекты к сравнению из каталога
+            </p>
+            <Link to={APP_ROUTES.NEWBUILDS_PROJECTS} className="nb-btn-gold inline-block">
+              К каталогу
+            </Link>
+          </div>
+        </div>
+      </NewbuildsLayout>
+    );
+  }
+
+  const rows: { label: string; render: (item: typeof items[0]) => React.ReactNode }[] = [
+    {
+      label: 'Фото',
+      render: item => item.cover_image ? (
+        <img src={item.cover_image} alt="" className="w-full h-32 rounded-lg object-cover" />
+      ) : <div className="w-full h-32 rounded-lg" style={{ background: 'hsl(var(--nb-surface))' }} />,
+    },
+    {
+      label: 'Статус',
+      render: item => <NbProjectStatusBadge status={item.project_status || 'under_construction'} />,
+    },
+    {
+      label: 'Цена',
+      render: item => <NbPriceDisplay price={item.price_from || null} priceTo={item.price_to} size="md" />,
+    },
+    {
+      label: 'Район',
+      render: item => (
+        <span className="flex items-center gap-1 text-sm" style={{ color: 'hsl(var(--nb-text))' }}>
+          <MapPin className="w-3.5 h-3.5" style={{ color: 'hsl(var(--nb-gold))' }} />
+          {item.location_area || '—'}
+        </span>
+      ),
+    },
+    {
+      label: 'Девелопер',
+      render: item => (
+        <span className="flex items-center gap-1 text-sm" style={{ color: 'hsl(var(--nb-text))' }}>
+          <Building2 className="w-3.5 h-3.5" style={{ color: 'hsl(var(--nb-gold))' }} />
+          {item.developer_name || '—'}
+        </span>
+      ),
+    },
+    {
+      label: 'Прогресс',
+      render: item => <NbConstructionProgress progress={item.construction_progress || 0} completionDate={item.completion_date} size="sm" />,
+    },
+    {
+      label: 'Сдача',
+      render: item => (
+        <span className="flex items-center gap-1 text-sm" style={{ color: 'hsl(var(--nb-text))' }}>
+          <Calendar className="w-3.5 h-3.5" style={{ color: 'hsl(var(--nb-gold))' }} />
+          {item.completion_date ? new Date(item.completion_date).toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' }) : '—'}
+        </span>
+      ),
+    },
+    {
+      label: 'Юнитов',
+      render: item => (
+        <span className="flex items-center gap-1 text-sm" style={{ color: 'hsl(var(--nb-text))' }}>
+          <Layers className="w-3.5 h-3.5" style={{ color: 'hsl(var(--nb-gold))' }} />
+          {item.total_units || '—'}
+        </span>
+      ),
+    },
+    {
+      label: 'Типы юнитов',
+      render: item => (
+        <div className="flex flex-wrap gap-1">
+          {(item.unit_types || []).map(t => (
+            <span key={t} className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: 'hsl(var(--nb-gold) / 0.08)', color: 'hsl(var(--nb-gold) / 0.8)' }}>
+              {unitTypeLabels[t] || t}
+            </span>
+          ))}
+          {(!item.unit_types || item.unit_types.length === 0) && <span className="text-xs" style={{ color: 'hsl(var(--nb-muted))' }}>—</span>}
+        </div>
+      ),
+    },
+    {
+      label: 'myUNO Score',
+      render: item => item.muuno_score ? (
+        <span className="flex items-center gap-1 nb-mono text-sm font-bold" style={{ color: 'hsl(var(--nb-gold))' }}>
+          <Award className="w-3.5 h-3.5" /> {item.muuno_score}
+        </span>
+      ) : <span className="text-xs" style={{ color: 'hsl(var(--nb-muted))' }}>—</span>,
+    },
+    {
+      label: 'Удобства',
+      render: item => (
+        <div className="flex flex-wrap gap-1">
+          {(item.amenities || []).slice(0, 5).map(a => (
+            <span key={a} className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: 'hsl(var(--nb-surface))', color: 'hsl(var(--nb-text-secondary))' }}>
+              {a}
+            </span>
+          ))}
+          {(!item.amenities || item.amenities.length === 0) && <span className="text-xs" style={{ color: 'hsl(var(--nb-muted))' }}>—</span>}
+        </div>
+      ),
+    },
+  ];
+
+  return (
+    <NewbuildsLayout>
+      <div className="max-w-7xl mx-auto px-4 py-10">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <Link to={APP_ROUTES.NEWBUILDS_PROJECTS} className="inline-flex items-center gap-1 text-sm mb-2" style={{ color: 'hsl(var(--nb-muted))' }}>
+              <ChevronLeft className="w-4 h-4" /> Каталог
+            </Link>
+            <h1 className="nb-display text-3xl" style={{ color: 'hsl(var(--nb-gold))' }}>Сравнение проектов</h1>
+          </div>
+          <button onClick={clear} className="text-xs px-3 py-1.5 rounded-lg" style={{ color: 'hsl(var(--nb-muted))', border: '1px solid hsl(var(--nb-gold) / 0.2)' }}>
+            Очистить
+          </button>
+        </div>
+
+        {/* Comparison table */}
+        <div className="overflow-x-auto">
+          <table className="w-full" style={{ minWidth: items.length * 250 + 150 }}>
+            {/* Header: project names */}
+            <thead>
+              <tr style={{ borderBottom: '1px solid hsl(var(--nb-gold) / 0.15)' }}>
+                <th className="text-left py-3 pr-4 w-[150px]" />
+                {items.map(item => (
+                  <th key={item.id} className="text-left py-3 px-3 min-w-[220px]">
+                    <div className="flex items-start justify-between">
+                      <Link to={`/newbuilds/projects/${item.id}`} className="nb-display text-base hover:opacity-80 transition-opacity" style={{ color: 'hsl(var(--nb-text))' }}>
+                        {item.name_ru || item.name_en}
+                      </Link>
+                      <button onClick={() => remove(item.id)} className="p-1 flex-shrink-0" style={{ color: 'hsl(var(--nb-muted))' }}>
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row, idx) => (
+                <tr key={row.label} style={{ borderBottom: '1px solid hsl(var(--nb-gold) / 0.08)', background: idx % 2 === 0 ? 'transparent' : 'hsl(var(--nb-surface) / 0.3)' }}>
+                  <td className="py-3 pr-4 text-xs font-medium align-top" style={{ color: 'hsl(var(--nb-muted))' }}>
+                    {row.label}
+                  </td>
+                  {items.map(item => (
+                    <td key={item.id} className="py-3 px-3 align-top">
+                      {row.render(item)}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Bulk lead form */}
+        <div className="nb-separator my-10" />
+        <div className="max-w-md mx-auto">
+          <div className="text-center mb-4">
+            <h3 className="nb-display text-xl" style={{ color: 'hsl(var(--nb-text))' }}>Запросить информацию</h3>
+            <p className="text-sm mt-1" style={{ color: 'hsl(var(--nb-muted))' }}>По всем {items.length} проектам одним запросом</p>
+          </div>
+          <NbLeadForm source={`compare_${items.map(i => i.id).join(',')}`} />
+        </div>
+      </div>
+    </NewbuildsLayout>
+  );
+}

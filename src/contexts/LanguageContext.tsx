@@ -5,9 +5,9 @@
  * Static translations are imported from src/i18n/ (modular files per language).
  * DB translations override static ones and are cached for 1 hour.
  */
-import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { translations, type Language } from '@/i18n';
+import { getTranslations, loadTranslations as loadI18n, type Language } from '@/i18n';
 
 export type { Language };
 
@@ -37,14 +37,24 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const [customTranslations, setCustomTranslations] = useState<CachedTranslations>({});
   const [isLoadingTranslations, setIsLoadingTranslations] = useState(true);
 
-  const setLanguage = (lang: Language) => {
-    setLanguageState(lang);
-    localStorage.setItem('myuno-language', lang);
-  };
+  const setLanguage = useCallback((lang: Language) => {
+    // Preload static translations for the new language before switching
+    loadI18n(lang).then(() => {
+      setLanguageState(lang);
+      localStorage.setItem('myuno-language', lang);
+    });
+  }, []);
+
+  // Eagerly load static translations for current language
+  useEffect(() => {
+    loadI18n(language);
+  }, [language]);
 
   // Load translations from DB with caching
   useEffect(() => {
-    const loadTranslations = async () => {
+    let cancelled = false;
+
+    const loadTranslations = async (): Promise<boolean> => {
       // Check cache first
       const cachedTimestamp = localStorage.getItem(TRANSLATIONS_CACHE_TIMESTAMP);
       const cachedData = localStorage.getItem(TRANSLATIONS_CACHE_KEY);
@@ -55,7 +65,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
           try {
             setCustomTranslations(JSON.parse(cachedData));
             setIsLoadingTranslations(false);
-            return;
+            return true;
           } catch (e) {
             // Invalid cache, continue to fetch
           }
@@ -78,38 +88,44 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
           };
         });
 
-        setCustomTranslations(map);
-        
+        if (!cancelled) setCustomTranslations(map);
+
         // Cache the results
         localStorage.setItem(TRANSLATIONS_CACHE_KEY, JSON.stringify(map));
         localStorage.setItem(TRANSLATIONS_CACHE_TIMESTAMP, Date.now().toString());
+        return true;
       } catch (err) {
         console.error('Failed to load translations from DB:', err);
         // Fallback to static translations (already in the component)
+        return false;
       } finally {
         setIsLoadingTranslations(false);
       }
     };
 
-    loadTranslations();
+    let channel: ReturnType<typeof supabase.channel> | null = null;
 
-    // Subscribe to realtime changes
-    const channel = supabase
-      .channel('translations_realtime')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'translations' },
-        () => {
-          // Invalidate cache and reload
-          localStorage.removeItem(TRANSLATIONS_CACHE_KEY);
-          localStorage.removeItem(TRANSLATIONS_CACHE_TIMESTAMP);
-          loadTranslations();
-        }
-      )
-      .subscribe();
+    loadTranslations().then((success) => {
+      if (!success) return;
+      // Only subscribe to realtime changes after initial load succeeds
+      channel = supabase
+        .channel('translations_realtime')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'translations' },
+          () => {
+            // Invalidate cache and reload
+            localStorage.removeItem(TRANSLATIONS_CACHE_KEY);
+            localStorage.removeItem(TRANSLATIONS_CACHE_TIMESTAMP);
+            loadTranslations();
+          }
+        )
+        .subscribe();
+    });
 
     return () => {
-      supabase.removeChannel(channel);
+      cancelled = true;
+      if (channel) supabase.removeChannel(channel);
     };
   }, []);
 
@@ -124,11 +140,15 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       const value = custom[language];
       if (value) return value;
     }
-    return translations[language][key] || translations['en'][key] || key;
+    return getTranslations(language)[key] || getTranslations('en')[key] || key;
   }, [language, customTranslations]);
 
+  const value = useMemo(() => ({
+    language, setLanguage, t, isLoadingTranslations,
+  }), [language, setLanguage, t, isLoadingTranslations]);
+
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t, isLoadingTranslations }}>
+    <LanguageContext.Provider value={value}>
       {children}
     </LanguageContext.Provider>
   );

@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Star, MessageSquare, TrendingUp, Clock, Filter, 
-  ChevronDown, Reply, Trash2, Building2, User 
+import {
+  Star, MessageSquare, TrendingUp, Clock, Filter,
+  ChevronDown, Reply, Trash2, Building2, User, Sparkles, Loader2
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -46,6 +46,34 @@ export default function OwnerReviews() {
   const [filter, setFilter] = useState<FilterOption>('all');
   const [replyingTo, setReplyingTo] = useState<OwnerReview | null>(null);
   const [replyText, setReplyText] = useState('');
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+
+  const generateAIResponse = () => {
+    if (!replyingTo) return;
+    setIsGeneratingAI(true);
+    // Template-based suggestion (no external API needed)
+    const rating = replyingTo.rating;
+    const guestName = replyingTo.reviewer_name?.split(' ')[0] || (isRu ? 'Гость' : 'Guest');
+    let suggestion: string;
+    if (rating >= 4) {
+      suggestion = isRu
+        ? `${guestName}, спасибо за ваш отзыв и высокую оценку! Мы очень рады, что вам понравилось. Будем рады видеть вас снова!`
+        : `Thank you for your wonderful review, ${guestName}! We're thrilled you had a great experience. We'd love to welcome you back!`;
+    } else if (rating >= 3) {
+      suggestion = isRu
+        ? `${guestName}, благодарим за отзыв. Мы ценим вашу обратную связь и уже работаем над улучшениями. Надеемся, в следующий раз ваш опыт будет ещё лучше!`
+        : `Thank you for your feedback, ${guestName}. We appreciate your input and are already working on improvements. We hope your next stay will be even better!`;
+    } else {
+      suggestion = isRu
+        ? `${guestName}, благодарим за отзыв. Нам очень жаль, что ваш опыт не оправдал ожиданий. Мы серьёзно относимся к каждому замечанию и примем меры для улучшения. Пожалуйста, свяжитесь с нами — мы хотели бы всё исправить.`
+        : `Thank you for sharing your experience, ${guestName}. We're sorry it didn't meet your expectations. We take every concern seriously and are taking steps to improve. Please reach out to us directly — we'd like to make things right.`;
+    }
+    // Simulate brief delay for UX
+    setTimeout(() => {
+      setReplyText(suggestion);
+      setIsGeneratingAI(false);
+    }, 600);
+  };
 
   if (!user) {
     return (
@@ -422,6 +450,23 @@ export default function OwnerReviews() {
                 <p className="text-sm text-muted-foreground line-clamp-3">
                   {replyingTo.content || replyingTo.title || (isRu ? 'Без текста' : 'No text')}
                 </p>
+              </div>
+
+              <div className="flex justify-end">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={generateAIResponse}
+                  disabled={isGeneratingAI}
+                  className="gap-1.5"
+                >
+                  {isGeneratingAI ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Sparkles className="w-3.5 h-3.5" />
+                  )}
+                  {isRu ? 'AI-подсказка' : 'AI Suggest'}
+                </Button>
               </div>
 
               <Textarea

@@ -3,7 +3,7 @@ import { useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMyProperties } from '@/hooks/useMyProperties';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { startOfDay, endOfDay, addDays, format, isToday } from 'date-fns';
 
@@ -180,17 +180,10 @@ export function useOperationalTasks(options?: {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['operational-tasks'] });
-      toast({
-        title: t('Task created', 'Задача создана'),
-        description: t('The task has been added', 'Задача добавлена'),
-      });
+      toast(t('Task created', 'Задача создана'), { description: t('The task has been added', 'Задача добавлена') });
     },
     onError: (error: Error) => {
-      toast({
-        title: t('Error', 'Ошибка'),
-        description: error.message,
-        variant: 'destructive',
-      });
+      toast.error(t('Error', 'Ошибка'), { description: error.message });
     },
   });
 
@@ -229,9 +222,7 @@ export function useOperationalTasks(options?: {
       return updateTaskStatus.mutateAsync({ taskId, status: 'completed' });
     },
     onSuccess: () => {
-      toast({
-        title: t('Task completed', 'Задача выполнена'),
-      });
+      toast(t('Task completed', 'Задача выполнена'));
     },
   });
 

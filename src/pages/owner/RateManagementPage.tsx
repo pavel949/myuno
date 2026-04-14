@@ -29,6 +29,7 @@ import {
   Home, Pencil, Check, X, Tag, History, ChevronDown, User,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAIPricingSuggestions } from '@/hooks/useAIPricingSuggestions';
 
 const PRICING_ACTIONS = ['price_override', 'base_price_changed', 'season_created', 'season_updated', 'season_deleted', 'availability_changed'];
 
@@ -47,6 +48,8 @@ export default function RateManagementPage() {
 
   const { data: rates, isLoading } = useOwnerRateSeasons(user?.id, selectedProperty);
   const deleteMutation = useDeleteRateSeason();
+  const aiPropId = selectedProperty !== 'all' ? selectedProperty : allProperties[0]?.property_id;
+  const { suggestions, generateSuggestions, acceptSuggestion, dismissSuggestion } = useAIPricingSuggestions(aiPropId);
 
   const activeRates = rates?.filter(r => r.is_active) || [];
 
@@ -128,6 +131,87 @@ export default function RateManagementPage() {
             ))}
           </SelectContent>
         </Select>
+      )}
+
+      {/* ─── AI Pricing Suggestions ─── */}
+      {aiPropId && (
+        <Card className="border-primary/30 bg-primary/5">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-sm flex items-center gap-2">
+                <Tag className="w-4 h-4 text-primary" />
+                {t('AI Price Suggestions', 'AI-рекомендации по ценам')}
+              </h3>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => generateSuggestions.mutate(aiPropId)}
+                disabled={generateSuggestions.isPending}
+              >
+                {generateSuggestions.isPending
+                  ? (isRu ? 'Анализ...' : 'Analyzing...')
+                  : (isRu ? 'Обновить' : 'Refresh')}
+              </Button>
+            </div>
+            {suggestions.length === 0 ? (
+              <p className="text-xs text-muted-foreground">
+                {t('No suggestions yet. Click Refresh to generate AI-powered pricing recommendations.',
+                   'Пока нет рекомендаций. Нажмите «Обновить» для AI-анализа цен.')}
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {suggestions.map(s => {
+                  const priceDiff = s.recommended_price - s.current_price;
+                  const pctChange = s.current_price > 0 ? Math.round((priceDiff / s.current_price) * 100) : 0;
+                  return (
+                    <div key={s.id} className="p-3 bg-background rounded-lg border">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs text-muted-foreground">
+                          {format(new Date(s.date_from), 'dd MMM', { locale: isRu ? ru : undefined })}
+                          {' → '}
+                          {format(new Date(s.date_to), 'dd MMM', { locale: isRu ? ru : undefined })}
+                        </span>
+                        <Badge variant={priceDiff > 0 ? 'default' : 'secondary'} className="text-xs">
+                          {priceDiff > 0 ? '+' : ''}{pctChange}%
+                        </Badge>
+                      </div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-sm line-through text-muted-foreground">
+                          {s.current_price} {s.currency}
+                        </span>
+                        <span className="text-sm font-bold">
+                          → {s.recommended_price} {s.currency}
+                        </span>
+                        <span className="text-xs text-muted-foreground ml-auto">
+                          {s.confidence}% {t('confidence', 'уверенность')}
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mb-2">{s.reasoning}</p>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="default"
+                          className="h-7 text-xs"
+                          onClick={(e) => { e.stopPropagation(); acceptSuggestion.mutate(s.id); }}
+                        >
+                          <Check className="w-3 h-3 mr-1" /> {t('Apply', 'Применить')}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-7 text-xs"
+                          onClick={(e) => { e.stopPropagation(); dismissSuggestion.mutate(s.id); }}
+                        >
+                          <X className="w-3 h-3 mr-1" /> {t('Dismiss', 'Пропустить')}
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       )}
 
       {/* ─── Section 1: Property Base Prices ─── */}

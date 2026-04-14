@@ -39,8 +39,8 @@ import {
   XCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useToast } from '@/hooks/use-toast';
 
+import { toast } from 'sonner';
 interface LifeOSAIPanelProps {
   situationCode?: string;
   entityType?: string;
@@ -56,8 +56,7 @@ const ANALYSIS_MODES: AnalysisMode[] = [
 
 export function LifeOSAIPanel({ situationCode, entityType, className }: LifeOSAIPanelProps) {
   const { language } = useLanguage();
-  const { toast } = useToast();
-  const isRu = language === 'ru';
+const isRu = language === 'ru';
   
   const [selectedMode, setSelectedMode] = useState<AnalysisMode>('scenario_gaps');
   const [isExpanded, setIsExpanded] = useState(true);
@@ -74,8 +73,7 @@ export function LifeOSAIPanel({ situationCode, entityType, className }: LifeOSAI
   const copySuggestion = (suggestion: AISuggestion) => {
     const text = `${suggestion.reason}\n\nAction: ${suggestion.recommended_human_action}`;
     navigator.clipboard.writeText(text);
-    toast({
-      title: isRu ? 'Скопировано' : 'Copied',
+    toast(isRu ? 'Скопировано' : 'Copied', {
       description: isRu ? 'Рекомендация скопирована' : 'Suggestion copied to clipboard',
     });
   };

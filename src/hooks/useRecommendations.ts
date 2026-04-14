@@ -19,7 +19,7 @@ export interface RecommendedItem {
 }
 
 // Default fallback image for items without cover_image
-import defaultFallback from '@/assets/categories/default-market.jpg';
+import defaultFallback from '@/assets/categories/default-market.webp';
 const DEFAULT_IMAGE = defaultFallback;
 
 /**

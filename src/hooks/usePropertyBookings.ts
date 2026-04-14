@@ -90,7 +90,7 @@ export function usePropertyBookings(propertyId?: string) {
   const activeCompanyId = activeCompany?.company_id ?? null;
   const queryClient = useQueryClient();
 
-  const { data: bookings, isLoading } = useQuery({
+  const { data: bookings, isLoading, error, refetch } = useQuery({
     queryKey: ['property-bookings', user?.id, activeCompanyId, propertyId],
     queryFn: async () => {
       if (!user?.id) return [];
@@ -449,6 +449,26 @@ export function usePropertyBookings(propertyId?: string) {
     },
   });
 
+  // Bulk update booking statuses
+  const bulkUpdateBookings = useMutation({
+    mutationFn: async ({ ids, status }: { ids: string[]; status: string }) => {
+      if (!ids.length) return;
+      // bookings are stored in the orders table; ids are order IDs
+      const { error } = await supabase
+        .from('orders')
+        .update({ status })
+        .in('id', ids);
+      if (error) {
+        errorLog.silent(error, 'bulk_update_bookings');
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['property-bookings', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['all-property-bookings', user?.id] });
+    },
+  });
+
   // Get bookings for a specific month
   const getBookingsForMonth = (year: number, month: number): PropertyBooking[] => {
     if (!bookings) return [];
@@ -489,12 +509,16 @@ export function usePropertyBookings(propertyId?: string) {
   return {
     bookings,
     isLoading,
+    error,
+    refetch,
     createBooking: createBooking.mutateAsync,
     updateBooking: updateBooking.mutateAsync,
     deleteBooking: deleteBooking.mutateAsync,
     isCreating: createBooking.isPending,
     isUpdating: updateBooking.isPending,
     isDeleting: deleteBooking.isPending,
+    bulkUpdateBookings: bulkUpdateBookings.mutateAsync,
+    isBulkUpdating: bulkUpdateBookings.isPending,
     getBookingsForMonth,
     isDateBooked,
     getBookingForDate,
@@ -507,7 +531,7 @@ export function useAllPropertyBookings() {
   const { activeCompany } = useActiveCompany();
   const activeCompanyId = activeCompany?.company_id ?? null;
 
-  const { data: bookings, isLoading } = useQuery({
+  const { data: bookings, isLoading, error, refetch } = useQuery({
     queryKey: ['all-property-bookings', user?.id, activeCompanyId],
     queryFn: async () => {
       if (!user?.id) return [];
@@ -596,6 +620,8 @@ export function useAllPropertyBookings() {
     upcomingBookings,
     activeBookings,
     isLoading,
+    error,
+    refetch,
   };
 }
 
@@ -603,7 +629,7 @@ export function useAllPropertyBookings() {
 export function useGuestPropertyBookings() {
   const { user } = useAuth();
 
-  const { data: bookings, isLoading } = useQuery({
+  const { data: bookings, isLoading, error, refetch } = useQuery({
     queryKey: ['guest-property-bookings', user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
@@ -689,5 +715,7 @@ export function useGuestPropertyBookings() {
     activeBookings,
     pastBookings,
     isLoading,
+    error,
+    refetch,
   };
 }

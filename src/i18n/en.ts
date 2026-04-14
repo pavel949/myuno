@@ -25,7 +25,19 @@ export const en: Record<string, string> = {
   'auth.createAccount': 'Create Account',
   'auth.welcomeBack': 'Welcome Back!',
   'auth.getStarted': 'Get Started',
-  
+  'auth.signInOrSignUp': 'Sign In or Sign Up',
+  'auth.register': 'Register',
+  'auth.signingIn': 'Signing In',
+  'auth.personalInfo': 'Personal Information',
+  'auth.phone': 'Mobile Phone',
+  'auth.firstName': 'First Name',
+  'auth.lastName': 'Last Name',
+  'auth.confirmPassword': 'Confirm Password',
+  'auth.referralCode': 'Referral Code',
+  'auth.continue': 'Continue',
+  'auth.back': 'Back',
+  'auth.termsNotice': 'By signing up, you acknowledge your agreement with the terms and conditions, encompassing the privacy policy, and affirm that you are at least 10 years old.',
+
   // Common actions
   'action.book': 'Book Now',
   'action.cancel': 'Cancel',

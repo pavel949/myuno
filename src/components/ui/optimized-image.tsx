@@ -24,11 +24,20 @@ interface OptimizedImageProps {
   fallback?: string;
 }
 
-const SUPABASE_PROJECT_ID = 'kakkwibljrjsawxgnupk';
+// Derive project ID from the Supabase URL env var instead of hardcoding
+const SUPABASE_PROJECT_ID = (() => {
+  try {
+    const url = import.meta.env.VITE_SUPABASE_URL || '';
+    const match = url.match(/https:\/\/([^.]+)\.supabase\.co/);
+    return match?.[1] || '';
+  } catch {
+    return '';
+  }
+})();
 const WIDTHS = [320, 640, 960, 1280, 1920];
 
 function isSupabaseStorageUrl(url: string): boolean {
-  return url.includes(SUPABASE_PROJECT_ID) && url.includes('/storage/v1/object/public/');
+  return SUPABASE_PROJECT_ID !== '' && url.includes(SUPABASE_PROJECT_ID) && url.includes('/storage/v1/object/public/');
 }
 
 function generateSupabaseSrcSet(_url: string, _quality: number = 80): string {

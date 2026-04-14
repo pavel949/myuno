@@ -8,10 +8,10 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useUpdateDeal, DealStage, useMyCompanyId } from '@/hooks/useAgentDeals';
 import { useAddDealActivity } from '@/hooks/useAgentDealActivities';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
 import { useCrmOptions } from '@/hooks/useCrmSettings';
 import { cn } from '@/lib/utils';
 
+import { toast } from 'sonner';
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -24,8 +24,7 @@ export function CloseDealDialog({ open, onOpenChange, dealId, currentStage, mode
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { user } = useAuth();
-  const { toast } = useToast();
-  const updateDeal = useUpdateDeal();
+const updateDeal = useUpdateDeal();
   const addActivity = useAddDealActivity();
   const { data: membership } = useMyCompanyId();
   const { data: lostReasons = [] } = useCrmOptions(membership?.company_id, 'lost_reason');
@@ -74,10 +73,10 @@ export function CloseDealDialog({ open, onOpenChange, dealId, currentStage, mode
         stage_from: currentStage,
         stage_to: mode === 'won' ? 'closed_won' : 'closed_lost',
       });
-      toast({ title: mode === 'won' ? (isRu ? 'Поздравляем! 🎉' : 'Congratulations! 🎉') : (isRu ? 'Сделка закрыта' : 'Deal closed') });
+      toast(mode === 'won' ? (isRu ? 'Поздравляем! 🎉' : 'Congratulations! 🎉') : (isRu ? 'Сделка закрыта' : 'Deal closed'));
       onOpenChange(false);
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 

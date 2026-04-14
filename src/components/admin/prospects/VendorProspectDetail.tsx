@@ -15,10 +15,10 @@ import {
   Send, Bot, Copy, MessageSquare, UserPlus,
   Sparkles, Loader2, Facebook
 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
+import { toast } from 'sonner';
 interface VendorProspectDetailProps {
   prospect: VendorProspect;
   open: boolean;
@@ -28,9 +28,7 @@ interface VendorProspectDetailProps {
 export function VendorProspectDetail({ prospect, open, onClose }: VendorProspectDetailProps) {
   const { language } = useLanguage();
   const isRussian = language === 'ru';
-  const { toast } = useToast();
-  
-  const updateProspect = useUpdateProspect();
+const updateProspect = useUpdateProspect();
   const scoreProspect = useScoreProspect();
   const generateOutreach = useGenerateOutreach();
   const logActivity = useLogActivity();
@@ -59,14 +57,9 @@ export function VendorProspectDetail({ prospect, open, onClose }: VendorProspect
         stage: prospect.status
       });
       setGeneratedMessage(result.message || '');
-      toast({
-        title: isRussian ? 'Сообщение сгенерировано' : 'Message generated',
-      });
+      toast(isRussian ? 'Сообщение сгенерировано' : 'Message generated');
     } catch (error) {
-      toast({
-        title: isRussian ? 'Ошибка генерации' : 'Generation failed',
-        variant: 'destructive'
-      });
+      toast.error(isRussian ? 'Ошибка генерации' : 'Generation failed');
     } finally {
       setIsGenerating(false);
     }
@@ -76,14 +69,9 @@ export function VendorProspectDetail({ prospect, open, onClose }: VendorProspect
     setIsScoring(true);
     try {
       await scoreProspect.mutateAsync(prospect.id);
-      toast({
-        title: isRussian ? 'Оценка обновлена' : 'Score updated',
-      });
+      toast(isRussian ? 'Оценка обновлена' : 'Score updated');
     } catch (error) {
-      toast({
-        title: isRussian ? 'Ошибка оценки' : 'Scoring failed',
-        variant: 'destructive'
-      });
+      toast.error(isRussian ? 'Ошибка оценки' : 'Scoring failed');
     } finally {
       setIsScoring(false);
     }
@@ -91,9 +79,7 @@ export function VendorProspectDetail({ prospect, open, onClose }: VendorProspect
 
   const handleCopyMessage = () => {
     navigator.clipboard.writeText(generatedMessage);
-    toast({
-      title: isRussian ? 'Скопировано' : 'Copied',
-    });
+    toast(isRussian ? 'Скопировано' : 'Copied');
   };
 
   const handleAddNote = () => {
@@ -104,14 +90,12 @@ export function VendorProspectDetail({ prospect, open, onClose }: VendorProspect
       new_value: noteText
     });
     setNoteText('');
-    toast({
-      title: isRussian ? 'Заметка добавлена' : 'Note added',
-    });
+    toast(isRussian ? 'Заметка добавлена' : 'Note added');
   };
 
   const handleConvertToCrm = async () => {
     if (!myCompany?.company_id) {
-      toast({ title: isRussian ? 'Нет активной компании' : 'No active company', variant: 'destructive' });
+      toast.error(isRussian ? 'Нет активной компании' : 'No active company');
       return;
     }
     setIsConvertingToCrm(true);
@@ -128,8 +112,7 @@ export function VendorProspectDetail({ prospect, open, onClose }: VendorProspect
           .eq('email', prospect.email)
           .maybeSingle();
         if (byEmail) {
-          toast({
-            title: isRussian ? 'Контакт уже в CRM' : 'Contact already in CRM',
+          toast(isRussian ? 'Контакт уже в CRM' : 'Contact already in CRM', {
             description: `${byEmail.first_name} (${prospect.email})`,
           });
           setIsConvertingToCrm(false);
@@ -182,15 +165,12 @@ export function VendorProspectDetail({ prospect, open, onClose }: VendorProspect
       // Mark prospect as converted
       updateProspect.mutate({ id: prospect.id, status: 'won' });
 
-      toast({
-        title: isRussian ? 'Контакт добавлен в CRM' : 'Contact added to CRM',
+      toast(isRussian ? 'Контакт добавлен в CRM' : 'Contact added to CRM', {
         description: `${firstName} ${lastName} — ${tags.join(', ')}`,
       });
     } catch (error: any) {
-      toast({
-        title: isRussian ? 'Ошибка добавления в CRM' : 'Failed to add to CRM',
+      toast.error(isRussian ? 'Ошибка добавления в CRM' : 'Failed to add to CRM', {
         description: error.message,
-        variant: 'destructive',
       });
     } finally {
       setIsConvertingToCrm(false);

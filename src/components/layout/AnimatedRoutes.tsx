@@ -256,7 +256,13 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/newbuilds/projects/:slug" element={<LazyPage><Pages.NewbuildDetail /></LazyPage>} />
         <Route path={APP_ROUTES.NEWBUILDS_DEVELOPERS} element={<LazyPage><Pages.NewbuildsDevelopers /></LazyPage>} />
         <Route path="/newbuilds/developers/:slug" element={<LazyPage><Pages.NewbuildDeveloperDetail /></LazyPage>} />
-        
+        <Route path={APP_ROUTES.NEWBUILDS_MAP} element={<LazyPage><Pages.NewbuildsMap /></LazyPage>} />
+        <Route path={APP_ROUTES.NEWBUILDS_CALCULATOR} element={<LazyPage><Pages.NewbuildsCalculator /></LazyPage>} />
+        <Route path={APP_ROUTES.NEWBUILDS_COMPARE} element={<LazyPage><Pages.NewbuildsCompare /></LazyPage>} />
+        <Route path={APP_ROUTES.NEWBUILDS_AREAS} element={<LazyPage><Pages.NewbuildsAreaGuides /></LazyPage>} />
+        <Route path="/newbuilds/areas/:slug" element={<LazyPage><Pages.NewbuildsAreaDetail /></LazyPage>} />
+        <Route path={APP_ROUTES.NEWBUILDS_DUE_DILIGENCE} element={<LazyPage><Pages.NewbuildsDueDiligence /></LazyPage>} />
+
         {/* ── Developer Portal ── */}
         <Route path="/developer-portal" element={<Suspense fallback={<LoadingState />}><Pages.DeveloperPortalLayout /></Suspense>}>
           <Route index element={<LazyPage><Pages.DeveloperOverview /></LazyPage>} />
@@ -567,9 +573,9 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/welcome/:bookingId" element={<LazyPage><Pages.WelcomeFlow /></LazyPage>} />
         
         {/* ── Provider/Vendor ── */}
-        <Route path="/provider/onboarding" element={<LazyPage><Pages.ProviderOnboarding /></LazyPage>} />
+        <Route path="/provider/onboarding" element={<LazyPage><AuthGuard><Pages.ProviderOnboarding /></AuthGuard></LazyPage>} />
         <Route path="/vendor/join" element={<LazyPage><Pages.VendorLanding /></LazyPage>} />
-        <Route path="/vendor/onboarding" element={<LazyPage><Pages.VendorOnboarding /></LazyPage>} />
+        <Route path="/vendor/onboarding" element={<LazyPage><AuthGuard><Pages.VendorOnboarding /></AuthGuard></LazyPage>} />
         
         <Route element={<VendorRouteLayout />}>
           <Route path="/vendor" element={<Pages.VendorDashboard />} />
@@ -605,7 +611,7 @@ export const AnimatedRoutes: React.FC = () => {
         
         {/* ── MC Onboarding (outside MCGuard, but requires auth) ── */}
         <Route path="/mc/onboarding" element={<LazyPage><AuthGuard><Pages.MCOnboarding /></AuthGuard></LazyPage>} />
-        <Route path="/mc/register" element={<LazyPage><Pages.MCRegistrationPage /></LazyPage>} />
+        <Route path="/mc/register" element={<LazyPage><AuthGuard><Pages.MCRegistrationPage /></AuthGuard></LazyPage>} />
         
         {/* ── MC (Management Company) Workspace ── */}
         <Route path="/mc" element={<ActiveCompanyProvider><MCGuard><MCLayout /></MCGuard></ActiveCompanyProvider>}>
@@ -626,7 +632,7 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="properties/:id/juristic-requests" element={<LazyPage><Pages.JuristicRequestsPage /></LazyPage>} />
           <Route path="properties/:id/portal-settings" element={<LazyPage><Pages.OwnerPortalSettingsPage /></LazyPage>} />
           <Route path="calendar" element={<LazyPage><Pages.OwnerCalendar /></LazyPage>} />
-          <Route path="bookings" element={<Navigate to="/mc/calendar" replace />} />
+          <Route path="bookings" element={<Navigate to="/mc/bookings-list" replace />} />
           <Route path="operations" element={<LazyPage><Pages.OwnerOperations /></LazyPage>} />
           <Route path="finance" element={<LazyPage><Pages.FinanceOverview /></LazyPage>} />
           <Route path="financials" element={<LazyPage><Pages.OwnerFinancials /></LazyPage>} />
@@ -684,6 +690,11 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="insurance" element={<LazyPage><Pages.DocumentsInsurancePage /></LazyPage>} />
           <Route path="owners" element={<LazyPage><Pages.OwnerOwnersPage /></LazyPage>} />
           <Route path="owners/:id" element={<LazyPage><Pages.OwnerDetailPage /></LazyPage>} />
+          <Route path="bookings-list" element={<LazyPage><Pages.MCBookingsPage /></LazyPage>} />
+          <Route path="performance" element={<LazyPage><Pages.OwnerPerformance /></LazyPage>} />
+          <Route path="trends" element={<LazyPage><Pages.OwnerTrendsAndTips /></LazyPage>} />
+          <Route path="account-settings" element={<LazyPage><Pages.OwnerAccountSettings /></LazyPage>} />
+          <Route path="superhost" element={<LazyPage><Pages.OwnerSuperhost /></LazyPage>} />
           {/* Pages moved from /owner */}
           <Route path="portfolio" element={<LazyPage><Pages.OwnerPortfolio /></LazyPage>} />
           <Route path="guide" element={<LazyPage><Pages.OwnerGuidePage /></LazyPage>} />

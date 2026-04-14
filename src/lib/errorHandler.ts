@@ -1,5 +1,6 @@
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { getStoredLang } from '@/lib/languageConfig';
+import { supabase } from '@/integrations/supabase/client';
 
 type ErrorSeverity = 'info' | 'warning' | 'error' | 'critical';
 
@@ -102,36 +103,24 @@ async function flushErrorQueue() {
   flushTimeout = null;
   
   try {
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-    const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-    
-    if (!supabaseUrl || !supabaseKey) return;
-    
-    // Log to analytics_events table (lightweight, no external service needed)
-    await fetch(`${supabaseUrl}/rest/v1/analytics_events`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': supabaseKey,
-        'Authorization': `Bearer ${supabaseKey}`,
-        'Prefer': 'return=minimal',
+    // Use the shared Supabase client (inherits user session / RLS)
+    const rows = batch.map(item => ({
+      event_name: `error_${item.severity}`,
+      page_path: window.location.pathname,
+      user_agent: navigator.userAgent,
+      session_id: sessionStorage.getItem('session_id') || crypto.randomUUID(),
+      event_data: {
+        message: item.error instanceof Error ? item.error.message : String(item.error),
+        stack: item.error instanceof Error ? item.error.stack?.split('\n').slice(0, 5).join('\n') : undefined,
+        component: item.context.component,
+        action: item.context.action,
+        timestamp: item.timestamp,
+        url: window.location.href,
+        metadata: item.context.metadata,
       },
-      body: JSON.stringify(batch.map(item => ({
-        event_name: `error_${item.severity}`,
-        page_path: window.location.pathname,
-        user_agent: navigator.userAgent,
-        session_id: sessionStorage.getItem('session_id') || crypto.randomUUID(),
-        event_data: {
-          message: item.error instanceof Error ? item.error.message : String(item.error),
-          stack: item.error instanceof Error ? item.error.stack?.split('\n').slice(0, 5).join('\n') : undefined,
-          component: item.context.component,
-          action: item.context.action,
-          timestamp: item.timestamp,
-          url: window.location.href,
-          metadata: item.context.metadata,
-        },
-      }))),
-    });
+    }));
+
+    await supabase.from('analytics_events').insert(rows);
   } catch {
     // Silent fail - don't create error loops
   }
@@ -214,11 +203,11 @@ export function handleError(error: unknown, options: ErrorHandlerOptions = {}): 
       ? (toastDescriptionRu || toastDescription || defaultMsg.ru)
       : (toastDescription || defaultMsg.en);
 
-    toast({
-      title,
-      description,
-      variant: severity === 'error' || severity === 'critical' ? 'destructive' : 'default',
-    });
+    if (severity === 'error' || severity === 'critical') {
+      toast.error(title, { description });
+    } else {
+      toast(title, { description });
+    }
   }
 
   // In production, report errors/critical issues to backend

@@ -6,9 +6,9 @@
 
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
 
+import { toast } from 'sonner';
 export type AnalysisMode = 
   | 'scenario_gaps'
   | 'mapping_suggestions'
@@ -44,8 +44,7 @@ interface UseLifeOSAIInsightsOptions {
 
 export function useLifeOSAIInsights(options: UseLifeOSAIInsightsOptions = {}) {
   const { language } = useLanguage();
-  const { toast } = useToast();
-  const isRu = language === 'ru';
+const isRu = language === 'ru';
   const [isLoading, setIsLoading] = useState(false);
   const [isFixing, setIsFixing] = useState<string | null>(null); // tracks which suggestion index is being fixed
   const [fixResults, setFixResults] = useState<Record<number, { success: boolean; actions: string[] }>>({});
@@ -73,20 +72,16 @@ export function useLifeOSAIInsights(options: UseLifeOSAIInsightsOptions = {}) {
 
       if (data.error) {
         if (data.error.includes('Rate limit')) {
-          toast({
-            title: isRu ? 'Превышен лимит' : 'Rate Limited',
+          toast.error(isRu ? 'Превышен лимит' : 'Rate Limited', {
             description: isRu 
               ? 'Слишком много запросов. Попробуйте позже.'
               : 'Too many requests. Please try again later.',
-            variant: 'destructive',
           });
         } else if (data.error.includes('credits')) {
-          toast({
-            title: isRu ? 'Кредиты исчерпаны' : 'Credits Exhausted',
+          toast.error(isRu ? 'Кредиты исчерпаны' : 'Credits Exhausted', {
             description: isRu
               ? 'Свяжитесь с администратором.'
               : 'Please contact the administrator.',
-            variant: 'destructive',
           });
         }
         throw new Error(data.error);
@@ -94,8 +89,7 @@ export function useLifeOSAIInsights(options: UseLifeOSAIInsightsOptions = {}) {
 
       setResult(data as AnalysisResult);
       
-      toast({
-        title: isRu ? 'Анализ завершён' : 'Analysis Complete',
+      toast(isRu ? 'Анализ завершён' : 'Analysis Complete', {
         description: isRu
           ? `Найдено ${data.suggestions?.length || 0} рекомендаций`
           : `Found ${data.suggestions?.length || 0} suggestions`,
@@ -108,7 +102,7 @@ export function useLifeOSAIInsights(options: UseLifeOSAIInsightsOptions = {}) {
     } finally {
       setIsLoading(false);
     }
-  }, [options.situationCode, options.entityType, language, toast, isRu]);
+  }, [options.situationCode, options.entityType, language, isRu]);
 
   const applySuggestion = useCallback(async (suggestion: AISuggestion, index: number) => {
     setIsFixing(String(index));
@@ -124,25 +118,21 @@ export function useLifeOSAIInsights(options: UseLifeOSAIInsightsOptions = {}) {
 
       setFixResults(prev => ({ ...prev, [index]: { success: data.success, actions: data.actions } }));
 
-      toast({
-        title: data.success
+      toast(data.success
           ? (isRu ? 'Исправление применено' : 'Fix Applied')
-          : (isRu ? 'Частично применено' : 'Partially Applied'),
+          : (isRu ? 'Частично применено' : 'Partially Applied'), {
         description: data.actions?.[0] || '',
-        variant: data.success ? 'default' : 'destructive',
       });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Fix failed';
       setFixResults(prev => ({ ...prev, [index]: { success: false, actions: [message] } }));
-      toast({
-        title: isRu ? 'Ошибка' : 'Error',
+      toast.error(isRu ? 'Ошибка' : 'Error', {
         description: message,
-        variant: 'destructive',
       });
     } finally {
       setIsFixing(null);
     }
-  }, [language, toast, isRu]);
+  }, [language, isRu]);
 
   const clearResult = useCallback(() => {
     setResult(null);

@@ -7,7 +7,7 @@ import { withRateLimit, RATE_LIMITS } from '../_shared/rate-limit.ts';
 import { requireInternalSecret } from '../_shared/internal-secret.ts';
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': 'https://myuno.app',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 

@@ -40,12 +40,12 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 
+import { toast } from 'sonner';
 interface PartnerApplication {
   id: string;
   user_id: string | null;
@@ -115,9 +115,7 @@ const categoryLabels: Record<string, { ru: string; en: string }> = {
 export default function PartnerApplicationsAdmin() {
   const { language } = useLanguage();
   const { user } = useAuth();
-  const { toast } = useToast();
-  
-  const [applications, setApplications] = useState<PartnerApplication[]>([]);
+const [applications, setApplications] = useState<PartnerApplication[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -170,12 +168,10 @@ export default function PartnerApplicationsAdmin() {
       setApplications((data as PartnerApplication[]) || []);
     } catch (error) {
       console.error('Error fetching applications:', error);
-      toast({
-        title: language === 'ru' ? 'Ошибка' : 'Error',
+      toast.error(language === 'ru' ? 'Ошибка' : 'Error', {
         description: language === 'ru' 
           ? 'Не удалось загрузить заявки' 
           : 'Failed to load applications',
-        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
@@ -204,8 +200,7 @@ export default function PartnerApplicationsAdmin() {
             app.id === selectedApp.id ? { ...app, ...updateData, status: 'approved' } as PartnerApplication : app
           )
         );
-        toast({
-          title: language === 'ru' ? 'Успешно' : 'Success',
+        toast(language === 'ru' ? 'Успешно' : 'Success', {
           description: data?.vendor_granted
             ? (language === 'ru' ? 'Заявка одобрена, доступ вендора выдан' : 'Application approved, vendor access granted')
             : (language === 'ru' ? 'Заявка одобрена (без user_id — доступ не создан)' : 'Application approved (no user_id — access not created)'),
@@ -229,8 +224,7 @@ export default function PartnerApplicationsAdmin() {
             app.id === selectedApp.id ? { ...app, ...updateData, status: newStatus } as PartnerApplication : app
           )
         );
-        toast({
-          title: language === 'ru' ? 'Успешно' : 'Success',
+        toast(language === 'ru' ? 'Успешно' : 'Success', {
           description: newStatus === 'rejected'
             ? (language === 'ru' ? 'Заявка отклонена' : 'Application rejected')
             : (language === 'ru' ? 'Статус обновлён' : 'Status updated'),
@@ -243,12 +237,10 @@ export default function PartnerApplicationsAdmin() {
       setActionType(null);
     } catch (error) {
       console.error('Error updating application:', error);
-      toast({
-        title: language === 'ru' ? 'Ошибка' : 'Error',
+      toast.error(language === 'ru' ? 'Ошибка' : 'Error', {
         description: language === 'ru'
           ? 'Не удалось обновить статус'
           : 'Failed to update status',
-        variant: 'destructive',
       });
     } finally {
       setIsProcessing(false);

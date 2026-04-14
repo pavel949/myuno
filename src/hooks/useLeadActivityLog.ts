@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 export type ActivityType = 'call' | 'email' | 'whatsapp' | 'note' | 'status_change' | 'assignment';
 export type CallResult = 'answered' | 'no_answer' | 'busy' | 'callback_requested' | 'wrong_number';
@@ -34,7 +34,6 @@ export interface CreateActivityInput {
 
 export function useLeadActivityLog(leadId?: string) {
   const { user } = useAuth();
-  const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: activities, isLoading } = useQuery({
@@ -92,11 +91,7 @@ export function useLeadActivityLog(leadId?: string) {
       queryClient.invalidateQueries({ queryKey: ['admin-lead-analytics'] });
     },
     onError: () => {
-      toast({
-        title: 'Ошибка',
-        description: 'Не удалось сохранить активность',
-        variant: 'destructive',
-      });
+      toast.error('Ошибка', { description: 'Не удалось сохранить активность' });
     },
   });
 

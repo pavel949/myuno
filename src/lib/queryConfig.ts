@@ -191,9 +191,9 @@ export const defaultQueryClientOptions = {
     staleTime: TIME.MINUTES(1),
     gcTime: TIME.MINUTES(5),
     retry: 1,
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false,
   },
   mutations: {
-    retry: 0,
+    retry: 1,
   },
 } as const;

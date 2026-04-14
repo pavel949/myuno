@@ -3,9 +3,17 @@
  * Airbnb-style photo editing tools
  */
 
-import { useState, useRef, useCallback } from 'react';
-import { Cropper, CropperRef } from 'react-advanced-cropper';
-import 'react-advanced-cropper/dist/style.css';
+import { useState, useRef, useCallback, lazy, Suspense } from 'react';
+import type { CropperRef } from 'react-advanced-cropper';
+
+// Lazy-load react-advanced-cropper (~40KB) — only needed when user enters crop mode
+const Cropper = lazy(() =>
+  import('react-advanced-cropper').then(mod => {
+    // Also load the CSS side-effect
+    import('react-advanced-cropper/dist/style.css');
+    return { default: mod.Cropper };
+  })
+);
 import {
   Dialog,
   DialogContent,
@@ -241,16 +249,18 @@ export function ImageEditor({
               />
             </div>
           ) : (
-            <Cropper
-              ref={cropperRef}
-              src={currentImage}
-              className="w-full h-full"
-              stencilProps={{
-                aspectRatio: undefined,
-                movable: true,
-                resizable: true,
-              }}
-            />
+            <Suspense fallback={<div className="w-full h-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
+              <Cropper
+                ref={cropperRef}
+                src={currentImage}
+                className="w-full h-full"
+                stencilProps={{
+                  aspectRatio: undefined,
+                  movable: true,
+                  resizable: true,
+                }}
+              />
+            </Suspense>
           )}
           
           {/* AI Enhance overlay */}

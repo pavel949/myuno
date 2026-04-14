@@ -23,7 +23,7 @@ export function VendorRevenueWidget() {
       if (!user?.id) return null;
 
       // Get provider linked to user
-      const { data: provider } = await (supabase as any)
+      const { data: provider } = await supabase
         .from('providers')
         .select('id')
         .eq('user_id', user.id)
@@ -37,28 +37,27 @@ export function VendorRevenueWidget() {
       const endOfPrevMonth = new Date(now.getFullYear(), now.getMonth(), 0).toISOString();
 
       // Orders this month + previous month
-      const sb = supabase as any;
       const [currentRes, prevRes, totalOrdersRes] = await Promise.all([
-        sb.from('orders')
+        supabase.from('orders')
           .select('total_amount')
           .eq('provider_id', provider.id)
           .eq('status', 'completed')
           .gte('created_at', startOfMonth),
-        sb.from('orders')
+        supabase.from('orders')
           .select('total_amount')
           .eq('provider_id', provider.id)
           .eq('status', 'completed')
           .gte('created_at', startOfPrevMonth)
           .lt('created_at', endOfPrevMonth),
-        sb.from('orders')
+        supabase.from('orders')
           .select('id', { count: 'exact', head: true })
           .eq('provider_id', provider.id)
           .eq('status', 'completed'),
       ]);
 
-      const currentRevenue = (currentRes.data || []).reduce((s, o) => s + Number(o.total_amount || 0), 0);
-      const prevRevenue = (prevRes.data || []).reduce((s, o) => s + Number(o.total_amount || 0), 0);
-      const totalOrders = (totalOrdersRes as any).count || 0;
+      const currentRevenue = (currentRes.data || []).reduce((s: number, o: { total_amount: number | null }) => s + Number(o.total_amount || 0), 0);
+      const prevRevenue = (prevRes.data || []).reduce((s: number, o: { total_amount: number | null }) => s + Number(o.total_amount || 0), 0);
+      const totalOrders = totalOrdersRes.count || 0;
       const growth = prevRevenue > 0 ? Math.round(((currentRevenue - prevRevenue) / prevRevenue) * 100) : 0;
 
       return {

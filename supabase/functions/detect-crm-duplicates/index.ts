@@ -2,7 +2,7 @@ import { createServiceClient } from "../_shared/supabase.ts";
 import { requireAuth } from '../_shared/auth-guard.ts';
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': 'https://myuno.app',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 

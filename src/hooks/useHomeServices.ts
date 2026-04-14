@@ -8,19 +8,19 @@ import {
 } from '@/lib/taxonomies';
 
 // Editorial-style service images
-import handymanImg from '@/assets/services/handyman.jpg';
-import plumbingImg from '@/assets/services/plumbing.jpg';
-import electricalImg from '@/assets/services/electrical.jpg';
-import acImg from '@/assets/services/ac.jpg';
-import securityImg from '@/assets/services/security.jpg';
-import cleaningImg from '@/assets/services/cleaning.jpg';
-import laundryImg from '@/assets/services/laundry.jpg';
-import pestImg from '@/assets/services/pest.jpg';
-import gardenImg from '@/assets/services/garden.jpg';
-import poolImg from '@/assets/services/pool.jpg';
-import movingImg from '@/assets/services/moving.jpg';
-import waterDeliveryImg from '@/assets/services/water-delivery.jpg';
-import roadAssistanceImg from '@/assets/services/road-assistance.jpg';
+import handymanImg from '@/assets/services/handyman.webp';
+import plumbingImg from '@/assets/services/plumbing.webp';
+import electricalImg from '@/assets/services/electrical.webp';
+import acImg from '@/assets/services/ac.webp';
+import securityImg from '@/assets/services/security.webp';
+import cleaningImg from '@/assets/services/cleaning.webp';
+import laundryImg from '@/assets/services/laundry.webp';
+import pestImg from '@/assets/services/pest.webp';
+import gardenImg from '@/assets/services/garden.webp';
+import poolImg from '@/assets/services/pool.webp';
+import movingImg from '@/assets/services/moving.webp';
+import waterDeliveryImg from '@/assets/services/water-delivery.webp';
+import roadAssistanceImg from '@/assets/services/road-assistance.webp';
 
 export interface HomeServiceProvider {
   id: string;

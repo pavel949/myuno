@@ -6,7 +6,7 @@ Steps to complete the double-booking risk reduction setup.
 
 ```bash
 # Link project first (if not already)
-npx supabase link --project-ref kakkwibljrjsawxgnupk
+npx supabase link --project-ref erfwtoavipwjqmylpizt
 
 # Push migrations
 npx supabase db push
@@ -24,7 +24,7 @@ Run in **Supabase Dashboard → SQL Editor** (replace placeholders with your val
 
 ```sql
 -- Set Supabase project URL and service role key for pg_cron
-ALTER DATABASE postgres SET app.settings.supabase_url = 'https://kakkwibljrjsawxgnupk.supabase.co';
+ALTER DATABASE postgres SET app.settings.supabase_url = 'https://erfwtoavipwjqmylpizt.supabase.co';
 ALTER DATABASE postgres SET app.settings.service_role_key = 'YOUR_SERVICE_ROLE_KEY';
 ```
 
@@ -52,7 +52,7 @@ After migrations are applied:
 
 ```bash
 # From linked project
-npx supabase gen types typescript --project-id kakkwibljrjsawxgnupk > src/integrations/supabase/types.ts
+npx supabase gen types typescript --project-id erfwtoavipwjqmylpizt > src/integrations/supabase/types.ts
 
 # Or with local Supabase (requires Docker)
 npx supabase gen types typescript --local > src/integrations/supabase/types.ts

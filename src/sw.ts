@@ -1,4 +1,5 @@
 /// <reference lib="webworker" />
+import { logger } from '@/lib/logger';
 import { precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching';
 import { registerRoute, NavigationRoute } from 'workbox-routing';
 import { NetworkFirst, NetworkOnly, CacheFirst } from 'workbox-strategies';
@@ -97,7 +98,7 @@ self.addEventListener('message', (event) => {
   if (event.data?.type === 'CACHE_SOS') {
     event.waitUntil(
       caches.open('uno-sos-cache-v1').then((cache) => {
-        console.log('[SW] Caching /sos page for offline use');
+        logger.log('[SW] Caching /sos page for offline use');
         return cache.add('/sos');
       }).catch((err) => {
         console.error('[SW] CACHE_SOS failed:', err);
@@ -108,7 +109,7 @@ self.addEventListener('message', (event) => {
 
 // ─── ACTIVATE: Delete ALL old caches + notify clients ───
 self.addEventListener('activate', (event) => {
-  console.log('[SW v3.40.0] Activated — cleaning ALL old caches');
+  logger.log('[SW v3.40.0] Activated — cleaning ALL old caches');
   const CURRENT_CACHES = ['images-v3', 'fonts-v3', 'supabase-v3', 'google-fonts-v3', 'uno-sos-cache-v1'];
   event.waitUntil(
     caches.keys().then((keys) => {
@@ -116,7 +117,7 @@ self.addEventListener('activate', (event) => {
         keys
           .filter((key) => !CURRENT_CACHES.includes(key) && !key.startsWith('workbox-precache'))
           .map((key) => {
-            console.log('[SW] Deleting old cache:', key);
+            logger.log('[SW] Deleting old cache:', key);
             return caches.delete(key);
           })
       );
@@ -124,7 +125,7 @@ self.addEventListener('activate', (event) => {
       // Notify ALL clients to hard-reload with fresh assets
       return self.clients.matchAll({ type: 'window' }).then((clients) => {
         clients.forEach((client) => {
-          console.log('[SW] Sending SW_UPDATED to client:', client.id);
+          logger.log('[SW] Sending SW_UPDATED to client:', client.id);
           client.postMessage({ type: 'SW_UPDATED' });
         });
       });
@@ -133,5 +134,5 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('install', () => {
-  console.log('[SW v3.40.0] Installing new service worker...');
+  logger.log('[SW v3.40.0] Installing new service worker...');
 });

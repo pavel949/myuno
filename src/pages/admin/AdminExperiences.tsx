@@ -5,7 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminCheck } from '@/hooks/useAdmin';
 import { useAdminExperiences, AdminExperience } from '@/hooks/useAdminExperiences';
 import { ExperienceType, EXPERIENCE_CATEGORIES } from '@/hooks/useExperiences';
-import { experienceDifficultyOptions } from '@/components/filters/ExperiencesFilters';
+import { experienceDifficultyOptions } from '@/components/filters';
 
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';

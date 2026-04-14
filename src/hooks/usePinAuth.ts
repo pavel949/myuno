@@ -6,13 +6,44 @@ const PIN_USER_KEY = 'uno_pin_user_id';
 const PIN_EMAIL_KEY = 'uno_pin_email';
 const PIN_REFRESH_TOKEN_KEY = 'uno_pin_refresh_token';
 
+// Simple obfuscation for refresh tokens in localStorage.
+// This is NOT encryption — it prevents casual exposure in devtools / XSS scraping
+// but a determined attacker with JS execution can still reverse it.
+// The real fix is to move to httpOnly cookies (Supabase PKCE flow) long-term.
+function obfuscateToken(token: string): string {
+  try {
+    return btoa(token.split('').reverse().join(''));
+  } catch {
+    return token;
+  }
+}
+
+function deobfuscateToken(stored: string): string {
+  try {
+    return atob(stored).split('').reverse().join('');
+  } catch {
+    // Fall back to raw value for tokens stored before this change
+    return stored;
+  }
+}
+
+export function storeRefreshToken(token: string) {
+  localStorage.setItem(PIN_REFRESH_TOKEN_KEY, obfuscateToken(token));
+}
+
+function readRefreshToken(): string | null {
+  const raw = localStorage.getItem(PIN_REFRESH_TOKEN_KEY);
+  if (!raw) return null;
+  return deobfuscateToken(raw);
+}
+
 // Read localStorage synchronously to prevent flicker
 function getInitialPinState() {
   try {
     const userId = localStorage.getItem(PIN_USER_KEY);
     const email = localStorage.getItem(PIN_EMAIL_KEY);
-    const refreshToken = localStorage.getItem(PIN_REFRESH_TOKEN_KEY);
-    return { userId, email, hasRefreshToken: !!refreshToken };
+    const hasRefreshToken = !!localStorage.getItem(PIN_REFRESH_TOKEN_KEY);
+    return { userId, email, hasRefreshToken };
   } catch {
     return { userId: null, email: null, hasRefreshToken: false };
   }
@@ -35,11 +66,11 @@ export function usePinAuth() {
   // This keeps PIN login working after the user logs in with password
   useEffect(() => {
     if (session?.refresh_token && savedUserId && user?.id === savedUserId) {
-      const currentStoredToken = localStorage.getItem(PIN_REFRESH_TOKEN_KEY);
+      const currentStoredToken = readRefreshToken();
       // Update if token is missing OR different - this fixes the issue where token wasn't being saved
       if (!currentStoredToken || currentStoredToken !== session.refresh_token) {
         // Token synced silently
-        localStorage.setItem(PIN_REFRESH_TOKEN_KEY, session.refresh_token);
+        storeRefreshToken(session.refresh_token);
         setHasRefreshToken(true);
       }
     }
@@ -52,7 +83,7 @@ export function usePinAuth() {
       // Storing session for future PIN login
       localStorage.setItem(PIN_USER_KEY, user.id);
       localStorage.setItem(PIN_EMAIL_KEY, user.email || '');
-      localStorage.setItem(PIN_REFRESH_TOKEN_KEY, session.refresh_token);
+      storeRefreshToken(session.refresh_token);
       setSavedUserId(user.id);
       setSavedEmail(user.email || '');
       setHasRefreshToken(true);
@@ -149,7 +180,7 @@ export function usePinAuth() {
     // Save user info and refresh token for PIN login
     localStorage.setItem(PIN_USER_KEY, user.id);
     localStorage.setItem(PIN_EMAIL_KEY, user.email || '');
-    localStorage.setItem(PIN_REFRESH_TOKEN_KEY, session.refresh_token);
+    storeRefreshToken(session.refresh_token);
     setSavedUserId(user.id);
     setSavedEmail(user.email || '');
     setHasRefreshToken(true);
@@ -161,7 +192,7 @@ export function usePinAuth() {
   // Verify PIN and restore session
   const verifyPin = useCallback(async (pin: string) => {
     const userId = localStorage.getItem(PIN_USER_KEY);
-    const refreshToken = localStorage.getItem(PIN_REFRESH_TOKEN_KEY);
+    const refreshToken = readRefreshToken();
     
     if (!userId) throw new Error('No saved user for PIN login');
     if (!refreshToken) {
@@ -191,7 +222,7 @@ export function usePinAuth() {
 
     // Update stored refresh token with the new one
     if (sessionData.session.refresh_token) {
-      localStorage.setItem(PIN_REFRESH_TOKEN_KEY, sessionData.session.refresh_token);
+      storeRefreshToken(sessionData.session.refresh_token);
       setHasRefreshToken(true);
     }
 

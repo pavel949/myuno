@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { createErrorHandler } from '@/lib/errorHandler';
 import { CURRENCIES, getCurrencySymbol, type CurrencyCode } from '@/lib/config/currencies';
@@ -107,50 +107,46 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('myuno-currency', currency);
   }, [currency]);
 
-  const setCurrency = (newCurrency: Currency) => {
+  const setCurrency = useCallback((newCurrency: Currency) => {
     setCurrencyState(newCurrency);
-  };
+  }, []);
 
-  // Build currencies object with current rates
-  const currencies: Record<Currency, CurrencyInfo> = Object.entries(currencyMeta).reduce(
-    (acc, [code, meta]) => ({
-      ...acc,
-      [code]: { ...meta, rate: rates[code as Currency] },
-    }),
-    {} as Record<Currency, CurrencyInfo>
-  );
+  // Build currencies object with current rates — memoize to avoid recreating every render
+  const currencies = useMemo<Record<Currency, CurrencyInfo>>(() =>
+    Object.entries(currencyMeta).reduce(
+      (acc, [code, meta]) => ({
+        ...acc,
+        [code]: { ...meta, rate: rates[code as Currency] },
+      }),
+      {} as Record<Currency, CurrencyInfo>
+    ), [rates]);
 
   const currencyInfo = currencies[currency];
 
-  const convertPrice = (priceInTHB: number): number => {
+  const convertPrice = useCallback((priceInTHB: number): number => {
     return Math.round(priceInTHB * currencyInfo.rate);
-  };
+  }, [currencyInfo.rate]);
 
-  const formatPrice = (priceInTHB: number, showSymbol = true): string => {
-    const converted = convertPrice(priceInTHB);
-    return showSymbol 
+  const formatPrice = useCallback((priceInTHB: number, showSymbol = true): string => {
+    const converted = Math.round(priceInTHB * currencyInfo.rate);
+    return showSymbol
       ? `${currencyInfo.symbol}${converted.toLocaleString()}`
       : converted.toLocaleString();
-  };
+  }, [currencyInfo.rate, currencyInfo.symbol]);
 
-  // Utility to get currency symbol by code (for UI components)
-  // Use canonical getCurrencySymbol from currencies.ts
-  const getCurrencySymbolFn = (code: string): string => {
+  const getCurrencySymbolFn = useCallback((code: string): string => {
     return getCurrencySymbol(code);
-  };
+  }, []);
+
+  const value = useMemo(() => ({
+    currency, setCurrency, currencyInfo, currencies,
+    formatPrice, convertPrice, getCurrencySymbol: getCurrencySymbolFn,
+    isLoading, lastUpdated,
+  }), [currency, setCurrency, currencyInfo, currencies, formatPrice, convertPrice,
+       getCurrencySymbolFn, isLoading, lastUpdated]);
 
   return (
-    <CurrencyContext.Provider value={{ 
-      currency, 
-      setCurrency, 
-      currencyInfo, 
-      currencies,
-      formatPrice, 
-      convertPrice,
-      getCurrencySymbol: getCurrencySymbolFn,
-      isLoading,
-      lastUpdated,
-    }}>
+    <CurrencyContext.Provider value={value}>
       {children}
     </CurrencyContext.Provider>
   );

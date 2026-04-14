@@ -30,7 +30,6 @@ import {
   Building2, User, ExternalLink, Hash, Smartphone,
 } from 'lucide-react';
 import { BackButton } from '@/components/uno/BackButton';
-import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow, format, differenceInYears } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { EditContactSheet } from '@/components/owner/contacts/EditContactSheet';
@@ -46,6 +45,7 @@ import { KeyDatesCard } from '@/components/owner/contacts/KeyDatesCard';
 import { RemindersList } from '@/components/owner/contacts/RemindersList';
 import { CRM_ROLES, CRM_ROLE_LABELS } from '@/types/contact';
 
+import { toast } from 'sonner';
 const noteTypeIcons: Record<string, string> = {
   note: '📝', call: '📞', meeting: '🤝', email: '📧', whatsapp: '💬',
 };
@@ -87,9 +87,7 @@ export default function ContactDetail() {
   const isRu = language === 'ru';
   const locale = isRu ? ru : enUS;
   const { user } = useAuth();
-  const { toast } = useToast();
-
-  const { data: contact, isLoading, isError } = useCrmContact(id);
+const { data: contact, isLoading, isError } = useCrmContact(id);
   const { data: notes = [] } = useContactNotes(id);
   const { data: deals = [] } = useContactDeals(id);
   const { data: activities = [] } = useCrmActivities(id);
@@ -164,19 +162,19 @@ export default function ContactDetail() {
         content: noteText.trim(),
       });
       setNoteText('');
-      toast({ title: isRu ? 'Добавлено' : 'Added' });
+      toast(isRu ? 'Добавлено' : 'Added');
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 
   const handleDelete = async () => {
     try {
       await deleteContact.mutateAsync(contact.id);
-      toast({ title: isRu ? 'Контакт удалён' : 'Contact deleted' });
+      toast(isRu ? 'Контакт удалён' : 'Contact deleted');
       navigate(APP_ROUTES.MC_CONTACTS);
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 

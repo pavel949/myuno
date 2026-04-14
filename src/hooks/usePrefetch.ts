@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
 import { CACHE_PROFILES, PREFETCH_ROUTES, queryKeys } from '@/lib/queryConfig';
 
@@ -102,7 +103,7 @@ export function usePrefetchPopularData() {
         await prefetchFeaturedContent();
       } catch (error) {
         // Silently fail - prefetching is optional
-        console.debug('Prefetch failed:', error);
+        logger.debug('Prefetch failed:', error);
       }
     });
 

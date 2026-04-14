@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { useBooking } from '@/hooks/useBooking';
 import { useVehicleTypes, VehicleType } from '@/hooks/useTransportConfig';
 import { useGoogleGeocode } from '@/hooks/useGoogleGeocode';
@@ -67,7 +67,6 @@ export default function TaxiBooking() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { user } = useAuth();
-  const { toast } = useToast();
   const { vehicleTypes, isLoading: isLoadingVehicles } = useVehicleTypes('taxi');
   const { createBooking, isSubmitting } = useBooking();
   const googleGeocode = useGoogleGeocode(language);
@@ -90,10 +89,7 @@ export default function TaxiBooking() {
   // Get current location and reverse geocode
   const useCurrentLocation = async () => {
     if (!navigator.geolocation) {
-      toast({
-        title: language === 'ru' ? 'Геолокация недоступна' : 'Geolocation unavailable',
-        variant: 'destructive',
-      });
+      toast.error(language === 'ru' ? 'Геолокация недоступна' : 'Geolocation unavailable');
       return;
     }
 
@@ -115,8 +111,7 @@ export default function TaxiBooking() {
           lat: latitude,
           lng: longitude,
         });
-        toast({
-          title: language === 'ru' ? 'Местоположение определено' : 'Location detected',
+        toast(language === 'ru' ? 'Местоположение определено' : 'Location detected', {
           description: language === 'ru' ? 'Координаты установлены' : 'Coordinates set',
         });
         return;
@@ -131,8 +126,7 @@ export default function TaxiBooking() {
         lng: longitude,
       });
 
-      toast({
-        title: language === 'ru' ? 'Местоположение определено' : 'Location detected',
+      toast(language === 'ru' ? 'Местоположение определено' : 'Location detected', {
         description: address,
       });
     } catch (error: unknown) {
@@ -149,10 +143,7 @@ export default function TaxiBooking() {
         message = language === 'ru' ? 'Превышено время ожидания' : 'Request timed out';
       }
       
-      toast({
-        title: message,
-        variant: 'destructive',
-      });
+      toast.error(message);
     } finally {
       setIsGettingCurrentLocation(false);
     }
@@ -207,19 +198,14 @@ export default function TaxiBooking() {
     e.preventDefault();
     
     if (!user) {
-      toast({
-        title: language === 'ru' ? 'Требуется авторизация' : 'Login Required',
-        variant: 'destructive',
-      });
+      toast.error(language === 'ru' ? 'Требуется авторизация' : 'Login Required');
       navigate('/auth');
       return;
     }
 
     if (!pickupLocation || !destinationLocation) {
-      toast({
-        title: language === 'ru' ? 'Укажите маршрут' : 'Enter route',
+      toast.error(language === 'ru' ? 'Укажите маршрут' : 'Enter route', {
         description: language === 'ru' ? 'Выберите точку подачи и назначения' : 'Select pickup and destination',
-        variant: 'destructive',
       });
       return;
     }

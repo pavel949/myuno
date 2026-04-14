@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useContext, useState, useMemo, type ReactNode } from 'react';
 
 interface DashboardFilterContextValue {
   selectedPropertyId: string | null; // null = all properties
@@ -12,8 +12,9 @@ const DashboardFilterContext = createContext<DashboardFilterContextValue>({
 
 export function DashboardFilterProvider({ children }: { children: ReactNode }) {
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
+  const value = useMemo(() => ({ selectedPropertyId, setSelectedPropertyId }), [selectedPropertyId]);
   return (
-    <DashboardFilterContext.Provider value={{ selectedPropertyId, setSelectedPropertyId }}>
+    <DashboardFilterContext.Provider value={value}>
       {children}
     </DashboardFilterContext.Provider>
   );

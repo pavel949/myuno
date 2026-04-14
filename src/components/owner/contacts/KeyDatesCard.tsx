@@ -15,9 +15,9 @@ import { useUpdateContact } from '@/hooks/useCrmContacts';
 import type { KeyDateEntry } from '@/types/contact';
 import { format, isPast } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
-import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
+import { toast } from 'sonner';
 interface Props {
   contactId: string;
   keyDates: KeyDateEntry[];
@@ -27,8 +27,7 @@ export function KeyDatesCard({ contactId, keyDates = [] }: Props) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const locale = isRu ? ru : enUS;
-  const { toast } = useToast();
-  const updateContact = useUpdateContact();
+const updateContact = useUpdateContact();
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [newLabel, setNewLabel] = useState('');
@@ -43,12 +42,12 @@ export function KeyDatesCard({ contactId, keyDates = [] }: Props) {
         id: contactId,
         key_dates: updated,
       } as { id: string; key_dates: KeyDateEntry[] });
-      toast({ title: isRu ? 'Дата добавлена' : 'Date added' });
+      toast(isRu ? 'Дата добавлена' : 'Date added');
       setDialogOpen(false);
       setNewLabel('');
       setNewDate('');
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 
@@ -59,9 +58,9 @@ export function KeyDatesCard({ contactId, keyDates = [] }: Props) {
         id: contactId,
         key_dates: updated,
       } as { id: string; key_dates: KeyDateEntry[] });
-      toast({ title: isRu ? 'Дата удалена' : 'Date removed' });
+      toast(isRu ? 'Дата удалена' : 'Date removed');
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 

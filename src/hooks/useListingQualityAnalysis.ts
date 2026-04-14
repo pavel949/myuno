@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 type ContentType = 'review' | 'photo' | 'listing' | 'comment';
 
 export interface QualityIssue {
@@ -61,9 +61,7 @@ export interface AnalysisResult {
 export function useListingQualityAnalysis() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResults, setAnalysisResults] = useState<Record<string, QualityArtifact>>({});
-  const { toast } = useToast();
-
-  // Analyze a single listing
+// Analyze a single listing
   const analyzeListing = useCallback(async (
     entityType: ContentType,
     entityId: string,
@@ -80,10 +78,8 @@ export function useListingQualityAnalysis() {
       });
 
       if (error) {
-        toast({
-          title: 'Analysis Failed',
+        toast.error('Analysis Failed', {
           description: error.message || 'Could not analyze listing',
-          variant: 'destructive',
         });
         return null;
       }
@@ -113,16 +109,14 @@ export function useListingQualityAnalysis() {
 
       return data as AnalysisResult;
     } catch (error) {
-      toast({
-        title: 'Error',
+      toast.error('Error', {
         description: 'Failed to analyze listing quality',
-        variant: 'destructive',
       });
       return null;
     } finally {
       setIsAnalyzing(false);
     }
-  }, [toast]);
+  }, []);
 
   // Analyze multiple listings (batch)
   const analyzeBatch = useCallback(async (
@@ -145,8 +139,7 @@ export function useListingQualityAnalysis() {
         await new Promise(resolve => setTimeout(resolve, 200));
       }
 
-      toast({
-        title: 'Batch Analysis Complete',
+      toast('Batch Analysis Complete', {
         description: `Analyzed ${successful} listings successfully${failed > 0 ? `, ${failed} failed` : ''}`,
       });
 
@@ -154,7 +147,7 @@ export function useListingQualityAnalysis() {
     } finally {
       setIsAnalyzing(false);
     }
-  }, [analyzeListing, toast]);
+  }, [analyzeListing]);
 
   // Fetch existing artifact for a listing
   const fetchArtifact = useCallback(async (
@@ -247,16 +240,13 @@ export function useListingQualityAnalysis() {
         .eq('id', artifactId);
 
       if (error) {
-        toast({
-          title: 'Error',
+        toast.error('Error', {
           description: 'Failed to update artifact',
-          variant: 'destructive',
         });
         return false;
       }
 
-      toast({
-        title: 'Updated',
+      toast('Updated', {
         description: `AI insight ${action}`,
       });
 
@@ -264,7 +254,7 @@ export function useListingQualityAnalysis() {
     } catch {
       return false;
     }
-  }, [toast]);
+  }, []);
 
   // Get cached result for an entity
   const getResult = useCallback((entityType: string, entityId: string): QualityArtifact | undefined => {

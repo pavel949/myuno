@@ -16,8 +16,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { 
   Users, Settings, Shield, Plus, Check, X, 
   Pencil, Trash2, Send, Eye, UserPlus, Search, Mail
@@ -32,15 +32,12 @@ export default function AdminUnoTeam() {
   const [addEmail, setAddEmail] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
+const queryClient = useQueryClient();
 
   const handleAddMember = async () => {
     if (!addEmail.trim()) {
-      toast({ 
-        title: isRu ? 'Ошибка' : 'Error', 
+      toast.error(isRu ? 'Ошибка' : 'Error', {
         description: isRu ? 'Введите email' : 'Enter email',
-        variant: 'destructive' 
       });
       return;
     }
@@ -55,10 +52,8 @@ export default function AdminUnoTeam() {
         .single();
 
       if (profileError || !profile) {
-        toast({ 
-          title: isRu ? 'Пользователь не найден' : 'User not found', 
+        toast.error(isRu ? 'Пользователь не найден' : 'User not found', {
           description: isRu ? 'Убедитесь, что пользователь зарегистрирован' : 'Make sure the user is registered',
-          variant: 'destructive' 
         });
         setIsAdding(false);
         return;
@@ -73,10 +68,8 @@ export default function AdminUnoTeam() {
         .single();
 
       if (existingRole) {
-        toast({ 
-          title: isRu ? 'Уже в команде' : 'Already in team', 
+        toast.error(isRu ? 'Уже в команде' : 'Already in team', {
           description: isRu ? 'Этот пользователь уже является членом myUNO Team' : 'This user is already a myUNO Team member',
-          variant: 'destructive' 
         });
         setIsAdding(false);
         return;
@@ -89,9 +82,8 @@ export default function AdminUnoTeam() {
 
       if (roleError) throw roleError;
 
-      toast({ 
-        title: isRu ? 'Успешно' : 'Success', 
-        description: isRu ? `${profile.full_name || profile.email} добавлен в myUNO Team` : `${profile.full_name || profile.email} added to myUNO Team`
+      toast(isRu ? 'Успешно' : 'Success', {
+        description: isRu ? `${profile.full_name || profile.email} добавлен в myUNO Team` : `${profile.full_name || profile.email} added to myUNO Team`,
       });
 
       queryClient.invalidateQueries({ queryKey: ['uno-team-members'] });
@@ -99,10 +91,8 @@ export default function AdminUnoTeam() {
       setAddEmail('');
     } catch (err) {
       console.error('Error adding member:', err);
-      toast({ 
-        title: isRu ? 'Ошибка' : 'Error', 
+      toast.error(isRu ? 'Ошибка' : 'Error', {
         description: isRu ? 'Не удалось добавить сотрудника' : 'Failed to add member',
-        variant: 'destructive' 
       });
     } finally {
       setIsAdding(false);
@@ -126,18 +116,15 @@ export default function AdminUnoTeam() {
         .delete()
         .eq('user_id', userId);
 
-      toast({ 
-        title: isRu ? 'Удалено' : 'Removed', 
-        description: isRu ? `${memberName} удалён из myUNO Team` : `${memberName} removed from myUNO Team`
+      toast(isRu ? 'Удалено' : 'Removed', {
+        description: isRu ? `${memberName} удалён из myUNO Team` : `${memberName} removed from myUNO Team`,
       });
 
       queryClient.invalidateQueries({ queryKey: ['uno-team-members'] });
     } catch (err) {
       console.error('Error removing member:', err);
-      toast({ 
-        title: isRu ? 'Ошибка' : 'Error', 
+      toast.error(isRu ? 'Ошибка' : 'Error', {
         description: isRu ? 'Не удалось удалить сотрудника' : 'Failed to remove member',
-        variant: 'destructive' 
       });
     }
   };

@@ -10,7 +10,6 @@ import { ResponsiveModal } from '@/components/ui/responsive-modal';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { toast } from '@/hooks/use-toast';
 import {
   Plane, Car, ShoppingCart, Flower2, Sparkles, UtensilsCrossed,
   Baby, Ship, Compass, Check, X, ArrowRight
@@ -18,6 +17,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { getCurrencySymbol } from '@/lib/config/currencies';
 
+import { toast } from 'sonner';
 const SERVICE_ICONS: Record<string, any> = {
   transfer: Plane,
   car_rental: Car,
