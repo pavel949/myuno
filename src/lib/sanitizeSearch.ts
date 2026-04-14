@@ -10,6 +10,7 @@ export function sanitizeSearchTerm(term: string): string {
   // Remove characters that PostgREST interprets as filter operators
   // Keep alphanumeric, spaces, hyphens, and common Unicode (Cyrillic, Thai, etc.)
   return term
+// eslint-disable-next-line no-useless-escape
     .replace(/[,.()\"'\\\\]/g, '') // Remove PostgREST operator chars
     .replace(/%/g, '')          // Remove wildcard chars  
     .trim()

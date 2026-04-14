@@ -55,6 +55,7 @@ function parseName(name: string): { first_name: string; last_name: string; is_co
 }
 
 export function normalizePhone(raw: string): string | null {
+// eslint-disable-next-line no-useless-escape
   let s = (raw || '').replace(/[\s\-\(\)]/g, '');
   if (!s) return null;
   s = s.replace(/\D/g, '');

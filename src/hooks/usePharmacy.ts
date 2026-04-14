@@ -70,8 +70,7 @@ export const usePharmacies = () => {
         }));
         setPharmacies(formatted);
       }
-    } catch {
-    } finally {
+    } catch { /* ignored */ } finally {
       if (isMounted.current) setIsLoading(false);
     }
   }, []);
@@ -108,8 +107,7 @@ export const usePharmacy = (pharmacyId: string | undefined) => {
             working_hours: (data.working_hours as Record<string, string>) || {},
           });
         }
-      } catch {
-      } finally {
+      } catch { /* ignored */ } finally {
         if (isMounted) setIsLoading(false);
       }
     };
@@ -144,8 +142,7 @@ export const usePharmacyProducts = (pharmacyId: string | undefined, category?: s
         
         const { data } = await query.order('name_en');
         if (isMounted) setProducts(data || []);
-      } catch {
-      } finally {
+      } catch { /* ignored */ } finally {
         if (isMounted) setIsLoading(false);
       }
     };

@@ -173,7 +173,7 @@ export function useSupabaseCRUD<T extends { id: string }>({
         }
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       const { data: result, error: insertError } = await supabase
         .from(table as any)
         .insert(insertData)
@@ -200,7 +200,7 @@ export function useSupabaseCRUD<T extends { id: string }>({
         ...data,
         updated_at: new Date().toISOString(),
       } as Record<string, unknown>);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       const { data: result, error: updateError } = await supabase
         .from(table as any)
         .update(updateData)
@@ -220,7 +220,7 @@ export function useSupabaseCRUD<T extends { id: string }>({
 
   const remove = useCallback(async (id: string) => {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       const { error: deleteError } = await supabase
         .from(table as any)
         .delete()

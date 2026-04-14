@@ -249,13 +249,13 @@ export function useAdminRestaurants(filterProviderId?: string) {
 
   useEffect(() => { let m = true; fetchData(() => m); return () => { m = false; }; }, [fetchData]);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const createRestaurant = async (data: Record<string, unknown>) => {
     const { data: result, error } = await supabase.from('listings' as any).insert({ ...data, vertical: 'restaurant', is_verified: true }).select().single();
     if (!error) await fetchData();
     return { data: result, error };
   };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const updateRestaurant = async (id: string, data: Record<string, unknown>) => {
     const { data: result, error } = await supabase.from('listings' as any).update(data).eq('id', id).select().single();
     if (!error) await fetchData();
@@ -289,13 +289,13 @@ export function useAdminSalons(filterProviderId?: string) {
 
   useEffect(() => { let m = true; fetchData(() => m); return () => { m = false; }; }, [fetchData]);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const createSalon = async (data: Record<string, unknown>) => {
     const { data: result, error } = await supabase.from('salons').insert({ ...data, is_verified: true } as any).select().single();
     if (!error) await fetchData();
     return { data: result, error };
   };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const updateSalon = async (id: string, data: Record<string, unknown>) => {
     const { data: result, error } = await supabase.from('salons').update(data as any).eq('id', id).select().single();
     if (!error) await fetchData();
@@ -330,13 +330,13 @@ export function useAdminClinics(filterProviderId?: string) {
 
   useEffect(() => { let m = true; fetchData(() => m); return () => { m = false; }; }, [fetchData]);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const createClinic = async (data: Record<string, unknown>) => {
     const { data: result, error } = await supabase.from('listings' as any).insert({ ...data, vertical: 'clinic', is_verified: true }).select().single();
     if (!error) await fetchData();
     return { data: result, error };
   };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const updateClinic = async (id: string, data: Record<string, unknown>) => {
     const { data: result, error } = await supabase.from('listings' as any).update(data).eq('id', id).select().single();
     if (!error) await fetchData();
@@ -370,13 +370,13 @@ export function useAdminGyms(filterProviderId?: string) {
 
   useEffect(() => { let m = true; fetchData(() => m); return () => { m = false; }; }, [fetchData]);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const createGym = async (data: Record<string, unknown>) => {
     const { data: result, error } = await supabase.from('gyms').insert({ ...data, is_verified: true } as any).select().single();
     if (!error) await fetchData();
     return { data: result, error };
   };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const updateGym = async (id: string, data: Record<string, unknown>) => {
     const { data: result, error } = await supabase.from('gyms').update(data as any).eq('id', id).select().single();
     if (!error) await fetchData();
@@ -411,13 +411,13 @@ export function useAdminVehicles(filterProviderId?: string) {
 
   useEffect(() => { let m = true; fetchData(() => m); return () => { m = false; }; }, [fetchData]);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const createVehicle = async (data: Record<string, unknown>) => {
     const { data: result, error } = await supabase.from('listings' as any).insert({ ...data, vertical: 'vehicle', is_verified: true }).select().single();
     if (!error) await fetchData();
     return { data: result, error };
   };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const updateVehicle = async (id: string, data: Record<string, unknown>) => {
     const { data: result, error } = await supabase.from('listings' as any).update(data).eq('id', id).select().single();
     if (!error) await fetchData();
@@ -451,13 +451,13 @@ export function useAdminEvents(filterProviderId?: string) {
 
   useEffect(() => { let m = true; fetchData(() => m); return () => { m = false; }; }, [fetchData]);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const createEvent = async (data: Record<string, unknown>) => {
     const { data: result, error } = await supabase.from('events').insert({ ...data, is_active: true } as any).select().single();
     if (!error) await fetchData();
     return { data: result, error };
   };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const updateEvent = async (id: string, data: Record<string, unknown>) => {
     const { data: result, error } = await supabase.from('events').update(data as any).eq('id', id).select().single();
     if (!error) await fetchData();

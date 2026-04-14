@@ -28,7 +28,7 @@ export function useTaskComments(taskId: string | undefined, taskSource: 'crm' | 
 
       // Fetch author names
       const authorIds = [...new Set((data || []).map((c: any) => c.author_id))];
-      let profileMap: Record<string, string> = {};
+      const profileMap: Record<string, string> = {};
       if (authorIds.length > 0) {
         const { data: profiles } = await supabase
           .from('profiles')

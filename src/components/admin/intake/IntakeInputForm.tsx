@@ -48,6 +48,7 @@ export function IntakeInputForm({ mode, onAnalyze, isProcessing }: IntakeInputFo
     
     if (mode === 'bulk_urls') {
       // Extract URLs from text
+ 
       const urlRegex = /https?:\/\/[^\s<>"{}|\\^`[\]]+/gi;
       urls = rawText.match(urlRegex) || [];
       if (urls.length === 0) {
@@ -89,6 +90,7 @@ export function IntakeInputForm({ mode, onAnalyze, isProcessing }: IntakeInputFo
   };
 
   const getHint = () => {
+ 
     if (mode === 'bulk_urls') {
       const urlCount = (rawText.match(/https?:\/\/[^\s<>"{}|\\^`[\]]+/gi) || []).length;
       return isRu 
@@ -100,6 +102,7 @@ export function IntakeInputForm({ mode, onAnalyze, isProcessing }: IntakeInputFo
       return isRu 
         ? `Найдено ${itemCount} объектов` 
         : `Found ${itemCount} items`;
+ 
     }
     if (mode === 'agent_message') {
       const emojiPattern = /(?:^|\n)\s*(?:[1-9]️⃣|[①②③④⑤⑥⑦⑧⑨⑩]|(?:[1-9]\d?)\s*[).\-])/g;

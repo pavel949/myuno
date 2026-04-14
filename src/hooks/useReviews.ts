@@ -80,8 +80,7 @@ export const useReviews = ({ itemType, itemId }: UseReviewsOptions) => {
         });
         setStats({ average, total, distribution });
       }
-    } catch {
-    } finally {
+    } catch { /* ignored */ } finally {
       if (checkMounted()) setIsLoading(false);
     }
   }, [itemType, itemId]);
@@ -173,8 +172,7 @@ export const useTrustBadges = (providerId?: string) => {
             .order('sort_order');
           if (isMounted) setBadges(data || []);
         }
-      } catch {
-      } finally {
+      } catch { /* ignored */ } finally {
         if (isMounted) setIsLoading(false);
       }
     };
