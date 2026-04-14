@@ -14,9 +14,14 @@ import { createClient } from '@supabase/supabase-js';
 import { writeFileSync, mkdirSync, existsSync } from 'fs';
 import { join } from 'path';
 
-// ── Lovable (source) credentials ──
-const SOURCE_URL = 'https://kakkwibljrjsawxgnupk.supabase.co';
-const SOURCE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtha2t3aWJsanJqc2F3eGdudXBrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5MDM3MDAsImV4cCI6MjA4MzQ3OTcwMH0.0UOwpxLxDdxh_hpS_KXf_xnArkJjKCMmMXh_s5y5Cmk';
+// ── Source credentials (set via environment variables) ──
+const SOURCE_URL = process.env.EXPORT_SUPABASE_URL;
+const SOURCE_ANON_KEY = process.env.EXPORT_SUPABASE_ANON_KEY;
+
+if (!SOURCE_URL || !SOURCE_ANON_KEY) {
+  console.error('Missing required env vars: EXPORT_SUPABASE_URL, EXPORT_SUPABASE_ANON_KEY');
+  process.exit(1);
+}
 
 const supabase = createClient(SOURCE_URL, SOURCE_ANON_KEY);
 const OUT_DIR = join(process.cwd(), 'tmp', 'export');

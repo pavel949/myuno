@@ -20,11 +20,12 @@ import { readFileSync, readdirSync, existsSync } from 'fs';
 import { join } from 'path';
 
 // ── Target (new) Supabase ──
-const TARGET_URL = 'https://erfwtoavipwjqmylpizt.supabase.co';
+const TARGET_URL = process.env.IMPORT_SUPABASE_URL;
 const TARGET_KEY = process.env.SERVICE_ROLE_KEY;
 
-if (!TARGET_KEY) {
-  console.error('❌ Set SERVICE_ROLE_KEY env var. Get it from Supabase Dashboard → Settings → API → service_role (secret).');
+if (!TARGET_URL || !TARGET_KEY) {
+  console.error('❌ Set IMPORT_SUPABASE_URL and SERVICE_ROLE_KEY env vars.');
+  console.error('   Get SERVICE_ROLE_KEY from Supabase Dashboard → Settings → API → service_role (secret).');
   process.exit(1);
 }
 

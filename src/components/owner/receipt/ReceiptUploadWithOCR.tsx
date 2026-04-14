@@ -51,7 +51,7 @@ export function ReceiptUploadWithOCR({
     setError(null);
     
     try {
-      // Use Lovable AI via edge function for OCR
+      // Use AI via edge function for OCR
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const response = await fetch(`${supabaseUrl}/functions/v1/ocr-receipt`, {
         method: 'POST',
@@ -279,7 +279,7 @@ export function ReceiptUploadWithOCR({
       {/* AI Badge */}
       <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
         <Sparkles className="h-3 w-3" />
-        <span>{isRu ? 'AI-распознавание через Lovable Cloud' : 'AI parsing via Lovable Cloud'}</span>
+        <span>{isRu ? 'AI-распознавание' : 'AI parsing'}</span>
       </div>
     </div>
   );

@@ -5,7 +5,7 @@ import { SectionCard } from '@/components/uno/SectionCard';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { lovable } from '@/integrations/lovable/index';
+import { supabase } from '@/integrations/supabase/client';
 import { LoadingSpinner } from '@/components/uno/LoadingSpinner';
 import { toast } from 'sonner';
 
@@ -85,8 +85,9 @@ export function ConnectedAccountsSection() {
   const handleConnect = async (providerId: 'google' | 'apple') => {
     setConnectingProvider(providerId);
     try {
-      const { error } = await lovable.auth.signInWithOAuth(providerId, {
-        redirect_uri: window.location.origin,
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: providerId,
+        options: { redirectTo: window.location.origin },
       });
       
       if (error) {

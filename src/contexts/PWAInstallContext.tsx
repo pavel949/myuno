@@ -32,7 +32,7 @@ export function PWAInstallProvider({ children }: { children: ReactNode }) {
     // Check if already installed - must be in standalone mode AND not in an iframe
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches 
       || (window.navigator as any).standalone === true;
-    // Avoid false positive in iframes (like Lovable preview)
+    // Avoid false positive in iframes (e.g. embedded previews)
     const isInIframe = window.self !== window.top;
     setIsInstalled(isStandalone && !isInIframe);
 

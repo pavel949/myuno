@@ -137,7 +137,7 @@ export function ImageEditor({
     toast.success('Обрезка применена');
   }, []);
 
-  // AI Enhance using Lovable AI
+  // AI Enhance via edge function
   const handleAIEnhance = useCallback(async () => {
     setIsEnhancing(true);
     

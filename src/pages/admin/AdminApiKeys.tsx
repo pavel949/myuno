@@ -268,7 +268,7 @@ export default function AdminApiKeys() {
                     <div className="rounded-md bg-muted/50 p-3 font-mono text-xs text-muted-foreground">
                       {secret.configured 
                         ? (isRu ? '✅ Ключ настроен и доступен в edge functions' : '✅ Key is configured and available in edge functions')
-                        : (isRu ? '❌ Ключ отсутствует. Добавьте через Lovable Cloud → Settings → Secrets' : '❌ Key is missing. Add via Lovable Cloud → Settings → Secrets')}
+                        : (isRu ? '❌ Ключ отсутствует. Добавьте через Supabase Dashboard → Edge Functions → Secrets' : '❌ Key is missing. Add via Supabase Dashboard → Edge Functions → Secrets')}
                       {secret.url && !secret.configured && (
                         <span className="block mt-1">
                           {isRu ? 'Получить ключ: ' : 'Get key: '}
@@ -283,9 +283,9 @@ export default function AdminApiKeys() {
           )}
           <Surface variant="card" padding="md" radius="lg" className="bg-muted/30">
             <p className="text-sm text-muted-foreground">
-              {isRu 
-                ? '⚠️ Backend секреты управляются через Lovable Cloud → Settings → Secrets. Значения никогда не передаются на клиент.'
-                : '⚠️ Backend secrets are managed via Lovable Cloud → Settings → Secrets. Values are never exposed to the client.'}
+              {isRu
+                ? '⚠️ Backend секреты управляются через Supabase Dashboard → Edge Functions → Secrets. Значения никогда не передаются на клиент.'
+                : '⚠️ Backend secrets are managed via Supabase Dashboard → Edge Functions → Secrets. Values are never exposed to the client.'}
             </p>
           </Surface>
         </TabsContent>
