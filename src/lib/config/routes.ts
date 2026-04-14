@@ -336,6 +336,17 @@ export const APP_ROUTES = {
   MC_ACCOUNT_SETTINGS: '/mc/account-settings',
   MC_SUPERHOST: '/mc/superhost',
 
+  // ── Capital CRM ──
+  CAPITAL: '/capital',
+  CAPITAL_CONTACTS: '/capital/contacts',
+  CAPITAL_CONTACT_DETAIL: (id: string) => `/capital/contacts/${id}`,
+  CAPITAL_PROJECTS: '/capital/projects',
+  CAPITAL_CAMPAIGNS: '/capital/campaigns',
+  CAPITAL_CAMPAIGN_LAUNCH: '/capital/campaigns/launch',
+  CAPITAL_OUTREACH: '/capital/outreach',
+  CAPITAL_PIPELINE: '/capital/pipeline',
+  CAPITAL_TEMPLATES: '/capital/templates',
+
   // ── Owner Portal (individual owners) ──
   OWNER: '/owner',
   OWNER_LANDING: '/owner',
