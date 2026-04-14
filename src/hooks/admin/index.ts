@@ -6,7 +6,6 @@
 export { useAdminCheck, useAdminProviders, useAdminServices, useAdminCategories } from '../useAdmin';
 export { useAdminAnalytics } from '../useAdminAnalytics';
 export { useAdminAuditLogs } from '../useAdminAuditLogs';
-export { useAdminBouquets } from '../useAdminBouquets';
 export { useAdminConsultations } from '../useAdminConsultations';
 export { useAdminYachts, useAdminActivities, useAdminProperties, useAdminRestaurants, useAdminSalons } from '../useAdminContent';
 export { useAdminContentCreation } from '../useAdminContentCreation';
@@ -18,7 +17,6 @@ export { useAdminFinance } from '../useAdminFinance';
 export { useAdminFormHotkeys } from '../useAdminFormHotkeys';
 export { useAdminInsurance } from '../useAdminInsurance';
 export { useAdminInvestmentProjects, useCreateInvestmentProject, useUpdateInvestmentProject, useDeleteInvestmentProject } from '../useAdminInvestments';
-export { useAdminMarketplaceProducts, useAdminMarketplaceCategories } from '../useAdminMarketplace';
 export { useAdminNotifications } from '../useAdminNotifications';
 export { useAdminNotificationsList } from '../useAdminNotificationsList';
 export { useAdminPayouts } from '../useAdminPayouts';
