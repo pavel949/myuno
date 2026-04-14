@@ -3,7 +3,6 @@
  * 
  * Usage: import { usePropertyBookings, usePropertyFinancialsFull } from '@/hooks/property';
  */
-export { usePropertyAIChat } from '../usePropertyAIChat';
 export { usePropertyAvailability } from '../usePropertyAvailability';
 export { usePropertyAvailabilityManagement } from '../usePropertyAvailabilityManagement';
 export { usePropertyBookings } from '../usePropertyBookings';

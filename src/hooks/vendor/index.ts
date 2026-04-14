@@ -21,7 +21,6 @@ export { useVendorPets } from '../useVendorPets';
 export { useVendorProducts } from '../useVendorProducts';
 export { useVendorProperties } from '../useVendorProperties';
 export { useVendorRestaurants } from '../useVendorRestaurants';
-export { useVendorReviews } from '../useVendorReviews';
 export { useVendorSalons } from '../useVendorSalons';
 export { useVendorSubscription } from '../useVendorSubscription';
 export { useVendorVehicles } from '../useVendorVehicles';

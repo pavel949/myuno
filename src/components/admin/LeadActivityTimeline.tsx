@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useLeadActivityLog, type LeadActivity, type ActivityType, type CallResult } from '@/hooks/useLeadActivityLog';
+import { useAuth } from '@/contexts/AuthContext';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -8,12 +11,112 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
-import { 
+import {
   Phone, Mail, MessageCircle, StickyNote, ArrowRight, UserPlus,
   Clock, CheckCircle2, XCircle, PhoneOff, PhoneForwarded, Plus
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
+
+type ActivityType = 'call' | 'email' | 'whatsapp' | 'note' | 'status_change' | 'assignment';
+type CallResult = 'answered' | 'no_answer' | 'busy' | 'callback_requested' | 'wrong_number';
+
+interface LeadActivity {
+  id: string;
+  lead_id: string;
+  user_id: string | null;
+  activity_type: ActivityType;
+  status_from: string | null;
+  status_to: string | null;
+  notes: string | null;
+  call_duration_seconds: number | null;
+  call_result: CallResult | null;
+  created_at: string;
+  // Joined fields
+  user_name?: string;
+  user_email?: string;
+}
+
+interface CreateActivityInput {
+  lead_id: string;
+  activity_type: ActivityType;
+  status_from?: string;
+  status_to?: string;
+  notes?: string;
+  call_duration_seconds?: number;
+  call_result?: CallResult;
+}
+
+function useLeadActivityLog(leadId?: string) {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  const { data: activities, isLoading } = useQuery({
+    queryKey: ['lead-activity', leadId],
+    queryFn: async () => {
+      if (!leadId) return [];
+
+      const { data, error } = await supabase
+        .from('lead_activity_log')
+        .select('*')
+        .eq('lead_id', leadId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      // Get user info for activities
+      const userIds = [...new Set((data || []).map(a => a.user_id).filter(Boolean))];
+
+      let userMap: Record<string, { full_name: string | null; email: string | null }> = {};
+      if (userIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, full_name, email')
+          .in('id', userIds);
+
+        userMap = (profiles || []).reduce((acc, p) => {
+          acc[p.id] = { full_name: p.full_name, email: p.email };
+          return acc;
+        }, {} as Record<string, { full_name: string | null; email: string | null }>);
+      }
+
+      return (data || []).map(a => ({
+        ...a,
+        user_name: a.user_id ? userMap[a.user_id]?.full_name : null,
+        user_email: a.user_id ? userMap[a.user_id]?.email : null,
+      })) as LeadActivity[];
+    },
+    enabled: !!leadId,
+  });
+
+  const logActivity = useMutation({
+    mutationFn: async (input: CreateActivityInput) => {
+      const { error } = await supabase
+        .from('lead_activity_log')
+        .insert({
+          ...input,
+          user_id: user?.id,
+        });
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['lead-activity', leadId] });
+      queryClient.invalidateQueries({ queryKey: ['team-leads'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-lead-analytics'] });
+    },
+    onError: () => {
+      toast.error('Ошибка', { description: 'Не удалось сохранить активность' });
+    },
+  });
+
+  return {
+    activities,
+    isLoading,
+    logActivity: logActivity.mutateAsync,
+    isLogging: logActivity.isPending,
+  };
+}
 
 const ACTIVITY_ICONS: Record<ActivityType, typeof Phone> = {
   call: Phone,

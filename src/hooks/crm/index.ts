@@ -18,7 +18,6 @@ export { useCrmCustomFields } from '../useCrmCustomFields';
 export { useCrmDocuments } from '../useCrmDocuments';
 export { useDetectDuplicates, useDuplicatesQuery } from '../useCrmDuplicates';
 export { useCrmEmails } from '../useCrmEmails';
-export { useCrmScoringRules } from '../useCrmLeadScoring';
 export { useCrmMeetings } from '../useCrmMeetings';
 export { useCrmPipelines } from '../useCrmPipelines';
 export { useCrmQuotes } from '../useCrmQuotes';
