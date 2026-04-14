@@ -84,7 +84,7 @@ function parseProjectsFromMarkdown(markdown: string): ParsedProject[] {
  
       // Extract the text content between [ and ](url) — the second link block
       // Pattern: ] [content](url)  
-      const contentMatch = block.match(/\]\([^\)]+\)\s*\[([^\]]+)\]\(/);
+      const contentMatch = block.match(/\]\([^)]+\)\s*\[([^\]]+)\]\(/);
  
       if (!contentMatch) continue;
  

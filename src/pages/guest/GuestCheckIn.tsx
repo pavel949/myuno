@@ -679,7 +679,7 @@ export default function GuestCheckIn() {
 
                 if (houseRules && houseRules.trim()) {
                   // Parse house rules - split by newlines or bullets
-                  const rules = houseRules.split(/[\n•\-]/).map(r => r.trim()).filter(r => r.length > 0);
+                  const rules = houseRules.split(/[\n•-]/).map(r => r.trim()).filter(r => r.length > 0);
                   return rules.map((rule, idx) => (
                     <p key={idx}>• {rule}</p>
                   ));

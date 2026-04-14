@@ -327,7 +327,7 @@ IMPORTANT RULES:
         const content = aiData.choices?.[0]?.message?.content || '';
         const jsonMatch = content.match(/\[[\s\S]*\]/);
         if (jsonMatch) {
-          try { suppliers = JSON.parse(jsonMatch[0]); } catch {}
+          try { suppliers = JSON.parse(jsonMatch[0]); } catch { /* ignored */ }
         }
       }
     } else {
@@ -335,7 +335,7 @@ IMPORTANT RULES:
       const content = aiData.choices?.[0]?.message?.content || '';
       const jsonMatch = content.match(/\[[\s\S]*\]/);
       if (jsonMatch) {
-        try { suppliers = JSON.parse(jsonMatch[0]); } catch {}
+        try { suppliers = JSON.parse(jsonMatch[0]); } catch { /* ignored */ }
       }
     }
 

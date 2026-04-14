@@ -300,7 +300,7 @@ function parseAirbnbListing(markdown: string, html: string, url: string): Airbnb
   };
 
   // 1. From markdown image syntax
-  const mdImages = content.matchAll(/!\[.*?\]\((https:\/\/[^\)]+)\)/g);
+  const mdImages = content.matchAll(/!\[.*?\]\((https:\/\/[^)]+)\)/g);
   for (const match of mdImages) {
     if (match[1] && isPropertyPhoto(match[1])) addPhoto(match[1]);
  

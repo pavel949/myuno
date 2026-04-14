@@ -26,8 +26,7 @@ interface BookingContactFormProps {
   onValidationChange?: (isValid: boolean) => void;
 }
 
-// eslint-disable-next-line no-useless-escape
-const PHONE_REGEX = /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,4}[-\s\.]?[0-9]{1,9}$/;
+const PHONE_REGEX = /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,4}[-\s.]?[0-9]{1,9}$/;
 
 export function BookingContactForm({
   data,

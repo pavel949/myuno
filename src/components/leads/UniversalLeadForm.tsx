@@ -402,7 +402,7 @@ function FormFieldRenderer({
         </div>
       );
 
-    case 'multiselect':
+    case 'multiselect': {
       const selectedValues = (value as string[]) || [];
       return (
         <div>
@@ -430,6 +430,7 @@ function FormFieldRenderer({
           </div>
         </div>
       );
+    }
 
     case 'date':
       return (

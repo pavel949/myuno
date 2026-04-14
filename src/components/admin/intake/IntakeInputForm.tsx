@@ -105,7 +105,7 @@ export function IntakeInputForm({ mode, onAnalyze, isProcessing }: IntakeInputFo
  
     }
     if (mode === 'agent_message') {
-      const emojiPattern = /(?:^|\n)\s*(?:[1-9]️⃣|[①②③④⑤⑥⑦⑧⑨⑩]|(?:[1-9]\d?)\s*[).\-])/g;
+      const emojiPattern = /(?:^|\n)\s*(?:[1-9]️⃣|[①②③④⑤⑥⑦⑧⑨⑩]|(?:[1-9]\d?)\s*[).-])/g;
       const itemCount = (rawText.match(emojiPattern) || []).length;
       return isRu 
         ? `Найдено ${itemCount} объектов в посте` 

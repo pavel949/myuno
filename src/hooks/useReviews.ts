@@ -129,11 +129,9 @@ export const useCreateReview = () => {
         cons: data.cons,
         visit_date: data.visitDate,
       });
-      
+
       if (error) throw error;
       return { success: true };
-    } catch (err) {
-      throw err;
     } finally {
       if (isMountedRef.current) setIsSubmitting(false);
     }
