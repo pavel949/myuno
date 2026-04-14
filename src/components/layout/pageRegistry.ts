@@ -523,3 +523,14 @@ export const RelocateLandingPage = lazy(() => import('@/pages/relocate/RelocateL
 export const WeddingLandingPage = lazy(() => import('@/pages/wedding/WeddingLandingPage'));
 export const KidsLandingPage = lazy(() => import('@/pages/kids/KidsLandingPage'));
 export const NomadGuidePage = lazy(() => import('@/pages/nomad/NomadGuidePage'));
+
+// ── Capital CRM ──
+export const CapitalDashboard = lazy(() => import('@/pages/capital/CapitalDashboard'));
+export const CapitalContacts = lazy(() => import('@/pages/capital/CapitalContacts'));
+export const CapitalContactDetail = lazy(() => import('@/pages/capital/CapitalContactDetail'));
+export const CapitalProjects = lazy(() => import('@/pages/capital/CapitalProjects'));
+export const CapitalCampaigns = lazy(() => import('@/pages/capital/CapitalCampaigns'));
+export const CapitalCampaignLaunch = lazy(() => import('@/pages/capital/CapitalCampaignLaunch'));
+export const CapitalOutreach = lazy(() => import('@/pages/capital/CapitalOutreach'));
+export const CapitalPipeline = lazy(() => import('@/pages/capital/CapitalPipeline'));
+export const CapitalTemplates = lazy(() => import('@/pages/capital/CapitalTemplates'));

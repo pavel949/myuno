@@ -12,6 +12,8 @@ import { PageTransition } from './PageTransition';
 import { ScrollToTop } from './ScrollToTop';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 import { AdminGuard, VendorGuard, TeamGuard, AuthGuard, StaffGuard, MCGuard } from '@/components/auth';
+import { CapitalGuard } from '@/components/capital/CapitalGuard';
+import { CapitalLayout } from '@/components/capital/CapitalLayout';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { AdaptiveBottomNav } from './AdaptiveBottomNav';
 import { MCLayout } from '@/components/mc/MCLayout';
@@ -702,6 +704,19 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="service-request" element={<LazyPage><Pages.ServiceRequest /></LazyPage>} />
           <Route path="inspection" element={<LazyPage><Pages.InspectionRequest /></LazyPage>} />
           <Route path="full-management" element={<LazyPage><Pages.FullManagement /></LazyPage>} />
+        </Route>
+
+        {/* ── Capital CRM ── */}
+        <Route path="/capital" element={<CapitalGuard><CapitalLayout /></CapitalGuard>}>
+          <Route index element={<LazyPage><Pages.CapitalDashboard /></LazyPage>} />
+          <Route path="contacts" element={<LazyPage><Pages.CapitalContacts /></LazyPage>} />
+          <Route path="contacts/:id" element={<LazyPage><Pages.CapitalContactDetail /></LazyPage>} />
+          <Route path="projects" element={<LazyPage><Pages.CapitalProjects /></LazyPage>} />
+          <Route path="campaigns" element={<LazyPage><Pages.CapitalCampaigns /></LazyPage>} />
+          <Route path="campaigns/launch" element={<LazyPage><Pages.CapitalCampaignLaunch /></LazyPage>} />
+          <Route path="outreach" element={<LazyPage><Pages.CapitalOutreach /></LazyPage>} />
+          <Route path="pipeline" element={<LazyPage><Pages.CapitalPipeline /></LazyPage>} />
+          <Route path="templates" element={<LazyPage><Pages.CapitalTemplates /></LazyPage>} />
         </Route>
 
         {/* ── Owner → MC Redirects (legacy backward compat) ── */}
