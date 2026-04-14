@@ -6,6 +6,9 @@ import { ActiveSituationBanner } from '@/components/life-os/ActiveSituationBanne
 import { useIsDesktop } from '@/hooks/use-desktop';
 import { EmailVerificationBanner } from '@/components/auth/EmailVerificationBanner';
 import { useUserTracking } from '@/hooks/useUserTracking';
+import { InstallBanner } from '@/components/pwa/InstallBanner';
+import { MobileInstallSheet } from '@/components/pwa/MobileInstallSheet';
+import { FloatingInstallButton } from '@/components/pwa/FloatingInstallButton';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -45,6 +48,11 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
         {finalShowHeader && <AppHeader title={title} />}
         <EmailVerificationBanner />
         {showSituationBanner && <ActiveSituationBanner />}
+
+        {/* PWA Install Banner — visible on all pages for mobile users */}
+        <div className="px-4 md:px-6 lg:px-8 xl:px-10 pt-2 w-full max-w-[1536px] mx-auto">
+          <InstallBanner />
+        </div>
         
         <main
            className={cn(
@@ -59,6 +67,12 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
         </main>
         
         {finalShowFooter && <Footer />}
+
+        {/* One-time prominent install prompt for mobile visitors */}
+        <MobileInstallSheet />
+
+        {/* Floating install button when user scrolls past the banner */}
+        <FloatingInstallButton />
       </div>
     );
   }

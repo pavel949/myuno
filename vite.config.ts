@@ -41,13 +41,15 @@ export default defineConfig(({ mode }) => {
           name: 'myUNO - All Services in One',
           short_name: 'myUNO',
           description: 'Все услуги в одном приложении',
-          theme_color: '#d4af37',
-          background_color: '#0a0a0b',
+          theme_color: '#00D68F',
+          background_color: '#08101E',
           display: 'standalone',
           orientation: 'portrait-primary',
           start_url: '/',
           id: '/myuno-pwa-2025',
           scope: '/',
+          // Tells Android to prefer opening the installed PWA over the browser
+          prefer_related_applications: false,
           icons: [
             {
               src: '/icons/icon-72x72.png',
@@ -65,6 +67,44 @@ export default defineConfig(({ mode }) => {
               sizes: '512x512',
               type: 'image/png',
               purpose: 'any maskable'
+            }
+          ],
+          // Screenshots trigger Chrome's richer install UI (looks like Play Store)
+          screenshots: [
+            {
+              src: '/screenshots/mobile-home.png',
+              sizes: '1080x1920',
+              type: 'image/png',
+              form_factor: 'narrow',
+              label: 'myUNO Home Screen'
+            },
+            {
+              src: '/screenshots/mobile-services.png',
+              sizes: '1080x1920',
+              type: 'image/png',
+              form_factor: 'narrow',
+              label: 'All Services in One App'
+            }
+          ],
+          // Quick actions from long-press on app icon
+          shortcuts: [
+            {
+              name: 'Property Search',
+              short_name: 'Property',
+              url: '/property',
+              icons: [{ src: '/icons/icon-192x192.png', sizes: '192x192' }]
+            },
+            {
+              name: 'Restaurants',
+              short_name: 'Food',
+              url: '/restaurants',
+              icons: [{ src: '/icons/icon-192x192.png', sizes: '192x192' }]
+            },
+            {
+              name: 'Transport',
+              short_name: 'Transport',
+              url: '/transport',
+              icons: [{ src: '/icons/icon-192x192.png', sizes: '192x192' }]
             }
           ]
         },
