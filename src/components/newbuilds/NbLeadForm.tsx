@@ -22,7 +22,7 @@ export function NbLeadForm({ projectId, developerId, source = 'project_page', co
     }
     setLoading(true);
     try {
-      const { error } = await supabase.from('nb_leads' as any).insert({
+      const { error } = await supabase.from('nb_leads').insert({
         ...form,
         project_id: projectId,
         developer_id: developerId,

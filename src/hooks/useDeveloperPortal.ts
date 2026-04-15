@@ -17,7 +17,7 @@ export interface DeveloperProfile {
   phone: string | null;
   email: string | null;
   is_verified: boolean;
-  subscription_tier: string;
+  subscription_tier: string | null;
   user_id: string | null;
 }
 
@@ -45,8 +45,8 @@ export function useDeveloperProfile() {
         phone: data.phone,
         email: data.email,
         is_verified: data.is_verified,
-        subscription_tier: (data as any).subscription_tier || 'free',
-        user_id: (data as any).user_id,
+        subscription_tier: data.subscription_tier,
+        user_id: data.user_id,
       };
     },
     enabled: !!user,

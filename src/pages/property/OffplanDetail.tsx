@@ -41,7 +41,7 @@ import {
 } from '@/components/ui/dialog';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
-import { useOffplanProjects, type ProjectStatus } from '@/hooks/useOffplanProjects';
+import { useOffplanProject, type ProjectStatus } from '@/hooks/useOffplanProjects';
 import { useDeveloper } from '@/hooks/useDevelopers';
 import { MuunoScoreWidget, ScoreBreakdown } from '@/components/invest';
 import { FundingProgress } from '@/components/invest/FundingProgress';
@@ -79,8 +79,7 @@ export default function OffplanDetail() {
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
   const [showLeadForm, setShowLeadForm] = useState(false);
-  const { data: projects, isLoading } = useOffplanProjects();
-  const project = projects?.find(p => p.id === id);
+  const { data: project, isLoading } = useOffplanProject(id);
   const { data: developer } = useDeveloper(project?.developerId || '');
 
   if (isLoading) {

@@ -18696,6 +18696,7 @@ export type Database = {
           juristic_promptpay_id: string | null
           juristic_whatsapp: string | null
           lat: number | null
+          listing_purpose: string | null
           lng: number | null
           location_area: string | null
           min_investment: number | null
@@ -18758,6 +18759,7 @@ export type Database = {
           juristic_promptpay_id?: string | null
           juristic_whatsapp?: string | null
           lat?: number | null
+          listing_purpose?: string | null
           lng?: number | null
           location_area?: string | null
           min_investment?: number | null
@@ -18820,6 +18822,7 @@ export type Database = {
           juristic_promptpay_id?: string | null
           juristic_whatsapp?: string | null
           lat?: number | null
+          listing_purpose?: string | null
           lng?: number | null
           location_area?: string | null
           min_investment?: number | null

@@ -98,7 +98,7 @@ export function usePropertyProjectsWithStats() {
           district: p.district,
           isFeatured: p.is_featured || false,
           amenities: p.amenities,
-          priceFrom: (p as any).price_from || null,
+          priceFrom: p.price_from || null,
           ...stats,
         };
       });

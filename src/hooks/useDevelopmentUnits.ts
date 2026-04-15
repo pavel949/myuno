@@ -4,6 +4,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import type { Database } from '@/integrations/supabase/types';
+
+type DevelopmentUnitRow = Database['public']['Tables']['development_units']['Row'];
+type DevelopmentUnitInsert = Database['public']['Tables']['development_units']['Insert'];
 
 export interface DevelopmentUnit {
   id: string;
@@ -12,19 +16,19 @@ export interface DevelopmentUnit {
   name_ru: string | null;
   unit_type: string;
   area_sqm: number;
-  bedrooms: number;
-  bathrooms: number;
+  bedrooms: number | null;
+  bathrooms: number | null;
   floor_from: number | null;
   floor_to: number | null;
   price: number;
   price_per_sqm: number | null;
-  total_units: number;
-  available_units: number;
+  total_units: number | null;
+  available_units: number | null;
   floor_plan_url: string | null;
   views: string[] | null;
   features: string[] | null;
-  status: string;
-  created_at: string;
+  status: string | null;
+  created_at: string | null;
 }
 
 export function useDevelopmentUnits(developmentId?: string) {
@@ -33,12 +37,12 @@ export function useDevelopmentUnits(developmentId?: string) {
     queryFn: async (): Promise<DevelopmentUnit[]> => {
       if (!developmentId) return [];
       const { data, error } = await supabase
-        .from('development_units' as any)
+        .from('development_units')
         .select('*')
         .eq('development_id', developmentId)
         .order('price', { ascending: true });
       if (error) throw error;
-      return (data || []) as unknown as DevelopmentUnit[];
+      return (data || []) as DevelopmentUnit[];
     },
     enabled: !!developmentId,
   });
@@ -47,9 +51,9 @@ export function useDevelopmentUnits(developmentId?: string) {
 export function useCreateDevelopmentUnit() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (data: Omit<DevelopmentUnit, 'id' | 'created_at'>) => {
+    mutationFn: async (data: DevelopmentUnitInsert) => {
       const { data: result, error } = await supabase
-        .from('development_units' as any)
+        .from('development_units')
         .insert(data)
         .select()
         .single();
@@ -69,7 +73,7 @@ export function useDeleteDevelopmentUnit() {
   return useMutation({
     mutationFn: async ({ id, developmentId }: { id: string; developmentId: string }) => {
       const { error } = await supabase
-        .from('development_units' as any)
+        .from('development_units')
         .delete()
         .eq('id', id);
       if (error) throw error;

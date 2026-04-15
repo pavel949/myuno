@@ -9,7 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { NbProjectCard } from '../NbProjectCard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { APP_ROUTES } from '@/lib/config/routes';
-import type { NewbuildProject } from '@/hooks/useNewbuildProjects';
+import { mapToNewbuildProject, type NewbuildProject } from '@/hooks/useNewbuildProjects';
 
 interface Props {
   developerId: string;
@@ -47,20 +47,7 @@ function useDeveloperWithProjects(developerId?: string, excludeProjectId?: strin
 
       const { data, error } = await query;
       if (error) throw error;
-      return (data || []).map((p: any) => ({
-        id: p.id, slug: p.slug, name_en: p.name_en, name_ru: p.name_ru,
-        tagline: p.tagline, description_en: p.description_en, description_ru: p.description_ru,
-        cover_image: p.cover_image, gallery_urls: p.gallery_urls || p.images, images: p.images,
-        video_url: p.video_url, location_area: p.location_area || p.district, district: p.district,
-        address: p.address, lat: p.lat, lng: p.lng, price_from: p.price_from, price_to: p.price_to,
-        unit_types: p.unit_types, total_units: p.total_units, units_available: p.units_available,
-        units_sold: p.units_sold, completion_date: p.completion_date,
-        construction_progress: p.construction_progress || 0,
-        project_status: p.project_status || 'under_construction',
-        is_featured: p.is_featured || false, is_approved: p.is_approved ?? true,
-        developer_id: p.developer_id, developer_name: p.developer_name,
-        amenities: p.amenities, muuno_score: p.muuno_score, created_at: p.created_at,
-      }));
+      return (data || []).map(mapToNewbuildProject);
     },
     enabled: !!developerId,
     staleTime: 5 * 60 * 1000,

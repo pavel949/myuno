@@ -18,7 +18,7 @@ export function useProjectReports(projectId?: string) {
     queryKey: ['project-reports', projectId],
     queryFn: async (): Promise<ProjectReport[]> => {
       if (!projectId) return [];
-      const { data, error } = await (supabase.from('nb_project_reports' as any) as any)
+      const { data, error } = await supabase.from('nb_project_reports')
         .select('*')
         .eq('project_id', projectId)
         .order('month', { ascending: false });

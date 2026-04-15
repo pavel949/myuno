@@ -38,7 +38,7 @@ export default function AdminNewbuilds() {
   const { data: leads = [] } = useQuery({
     queryKey: ['admin-nb-leads'],
     queryFn: async () => {
-      const { data, error } = await (supabase.from('nb_leads' as any) as any).select('*').order('created_at', { ascending: false });
+      const { data, error } = await supabase.from('nb_leads').select('*').order('created_at', { ascending: false });
       if (error) throw error;
       return data || [];
     },

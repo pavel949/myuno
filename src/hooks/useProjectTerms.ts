@@ -33,7 +33,7 @@ export function useProjectTerms(projectId?: string) {
     queryKey: ['project-terms', projectId],
     queryFn: async (): Promise<ProjectSpecialTerm[]> => {
       if (!projectId) return [];
-      const { data, error } = await (supabase.from('nb_special_terms' as any) as any)
+      const { data, error } = await supabase.from('nb_special_terms')
         .select('*')
         .eq('project_id', projectId)
         .order('created_at', { ascending: false });
@@ -51,7 +51,7 @@ export function useProjectPromotions(projectId?: string) {
     queryFn: async (): Promise<ProjectPromotion[]> => {
       if (!projectId) return [];
       const now = new Date().toISOString();
-      const { data, error } = await (supabase.from('nb_promotions' as any) as any)
+      const { data, error } = await supabase.from('nb_promotions')
         .select('*')
         .eq('project_id', projectId)
         .or(`ends_at.is.null,ends_at.gte.${now}`)

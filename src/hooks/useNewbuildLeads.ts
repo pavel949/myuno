@@ -1,10 +1,15 @@
 /**
- * Hooks for newbuild leads (nb_leads table)
+ * Developer CRM hooks for newbuild leads (nb_leads table).
+ * Lead CRUD for authenticated developers.
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import type { Database } from '@/integrations/supabase/types';
+
+type NbLeadRow = Database['public']['Tables']['nb_leads']['Row'];
+type NbLeadInsert = Database['public']['Tables']['nb_leads']['Insert'];
 
 export interface NewbuildLead {
   id: string;
@@ -18,12 +23,12 @@ export interface NewbuildLead {
   budget_max: number | null;
   unit_preference: string | null;
   message: string | null;
-  source: string;
-  score: number;
-  status: string;
-  transferred_to_developer: boolean;
+  source: string | null;
+  score: number | null;
+  status: string | null;
+  transferred_to_developer: boolean | null;
   transferred_at: string | null;
-  created_at: string;
+  created_at: string | null;
   // joined
   project_name?: string;
 }
@@ -33,7 +38,7 @@ export function useNewbuildLeads(filters?: { project_id?: string; status?: strin
     queryKey: ['nb-leads', filters],
     queryFn: async (): Promise<NewbuildLead[]> => {
       let query = supabase
-        .from('nb_leads' as any)
+        .from('nb_leads')
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -43,7 +48,7 @@ export function useNewbuildLeads(filters?: { project_id?: string; status?: strin
 
       const { data, error } = await query;
       if (error) throw error;
-      return (data || []) as unknown as NewbuildLead[];
+      return (data || []) as NewbuildLead[];
     },
   });
 }
@@ -52,7 +57,7 @@ export function useUpdateLeadStatus() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      const { error } = await (supabase.from('nb_leads' as any) as any).update({ status }).eq('id', id);
+      const { error } = await supabase.from('nb_leads').update({ status }).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -66,8 +71,8 @@ export function useUpdateLeadStatus() {
 export function useCreateNewbuildLead() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (data: Partial<NewbuildLead>) => {
-      const { error } = await (supabase.from('nb_leads' as any) as any).insert(data);
+    mutationFn: async (data: NbLeadInsert) => {
+      const { error } = await supabase.from('nb_leads').insert(data);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -90,10 +95,11 @@ export function useDeveloperLeads() {
         .select('id')
         .eq('user_id', user.id)
         .maybeSingle();
-      
+
       if (!dev) return [];
 
-      const { data, error } = await (supabase.from('nb_leads' as any) as any)
+      const { data, error } = await supabase
+        .from('nb_leads')
         .select('*')
         .eq('developer_id', dev.id)
         .order('created_at', { ascending: false });
