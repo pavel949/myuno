@@ -5,7 +5,7 @@ import App from "./App.tsx";
 import "./index.css";
 import { reportWebVitals } from "./lib/webVitals";
 
-// Initialize Sentry for production error monitoring
+// Initialize Sentry for production error monitoring — build refresh 2026-04-15
 const sentryDsn = import.meta.env.VITE_SENTRY_DSN;
 if (sentryDsn) {
   Sentry.init({
