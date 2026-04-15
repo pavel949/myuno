@@ -225,18 +225,6 @@ export const BabysitterBooking = lazy(() => import('@/pages/babysitter/Babysitte
 // ── Delivery ──
 export const DeliveryIndex = lazy(() => import('@/pages/delivery/DeliveryIndex'));
 
-// ── Market ──
-export const MarketIndex = lazy(() => import('@/pages/market/MarketIndex'));
-export const MarketCatalogPage = lazy(() => import('@/pages/market/MarketCatalogPage'));
-export const MarketCategoryPage = lazy(() => import('@/pages/market/MarketCategoryPage'));
-export const ProductDetailPage = lazy(() => import('@/pages/market/ProductDetailPage'));
-export const VendorPage = lazy(() => import('@/pages/market/VendorPage'));
-export const WishlistPage = lazy(() => import('@/pages/market/WishlistPage'));
-export const StoreDetail = lazy(() => import('@/pages/market/StoreDetail'));
-export const MarketCheckout = lazy(() => import('@/pages/market/MarketCheckout'));
-export const MarketSuccess = lazy(() => import('@/pages/market/MarketSuccess'));
-export const SellItemPage = lazy(() => import('@/pages/market/SellItemPage'));
-
 // ── Classifieds (Барахолка) ──
 export const ClassifiedsIndex = lazy(() => import('@/pages/classifieds/ClassifiedsIndex'));
 export const ClassifiedDetailPage = lazy(() => import('@/pages/classifieds/ClassifiedDetailPage'));

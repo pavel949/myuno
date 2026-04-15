@@ -4,7 +4,38 @@ import { APP_ROUTES } from '@/lib/config/routes';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminCheck } from '@/hooks/useAdmin';
-import { useAdminPharmacies, AdminPharmacy } from '@/hooks/useAdminPharmacies';
+import { useSupabaseCRUD } from '@/hooks/useSupabaseCRUD';
+
+interface AdminPharmacy {
+  id: string;
+  provider_id: string | null;
+  name_en: string;
+  name_ru: string;
+  description_en: string | null;
+  description_ru: string | null;
+  cover_image: string | null;
+  images: string[];
+  address: string | null;
+  lat: number | null;
+  lng: number | null;
+  phone: string | null;
+  email: string | null;
+  website: string | null;
+  working_hours: Record<string, string>;
+  delivery_available: boolean;
+  delivery_fee: number;
+  delivery_radius_km: number;
+  min_order_amount: number;
+  is_24h: boolean;
+  has_pharmacist: boolean;
+  rating: number;
+  review_count: number;
+  is_active: boolean;
+  is_verified: boolean;
+  license_number: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card } from '@/components/ui/card';
@@ -76,7 +107,7 @@ const AdminPharmacies = () => {
   const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
   const { isAdmin, isLoading: adminLoading } = useAdminCheck();
-  const { pharmacies, isLoading, createPharmacy, updatePharmacy, deletePharmacy } = useAdminPharmacies(filterProviderId);
+  const { items: pharmacies, isLoading, create: createPharmacy, update: updatePharmacy, remove: deletePharmacy } = useSupabaseCRUD<AdminPharmacy>({ table: 'pharmacies', providerId: filterProviderId, orderByColumn: 'name_en', orderAscending: true, showToasts: true });
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<AdminPharmacy | null>(null);

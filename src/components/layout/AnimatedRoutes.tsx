@@ -404,17 +404,6 @@ export const AnimatedRoutes: React.FC = () => {
         {/* ── Delivery ── */}
         <Route path="/delivery" element={<LazyPage><Pages.DeliveryIndex /></LazyPage>} />
         
-        {/* ── Market ── */}
-        <Route path="/market" element={<LazyPage><Pages.MarketIndex /></LazyPage>} />
-        <Route path="/market/categories" element={<LazyPage><Pages.MarketCatalogPage /></LazyPage>} />
-        <Route path="/market/category/:categoryId" element={<LazyPage><Pages.MarketCategoryPage /></LazyPage>} />
-        <Route path="/market/product/:productId" element={<LazyPage><Pages.ProductDetailPage /></LazyPage>} />
-        <Route path="/market/vendor/:slug" element={<LazyPage><Pages.VendorPage /></LazyPage>} />
-        <Route path="/market/wishlist" element={<LazyPage><Pages.WishlistPage /></LazyPage>} />
-        <Route path="/market/store/:id" element={<LazyPage><Pages.StoreDetail /></LazyPage>} />
-        <Route path="/market/checkout" element={<LazyPage><Pages.MarketCheckout /></LazyPage>} />
-        <Route path="/market/success" element={<LazyPage><Pages.MarketSuccess /></LazyPage>} />
-        <Route path="/sell" element={<AuthGuard><LazyPage><Pages.SellItemPage /></LazyPage></AuthGuard>} />
         
         {/* ── Classifieds (Барахолка) ── */}
         <Route path="/classifieds" element={<LazyPage><Pages.ClassifiedsIndex /></LazyPage>} />

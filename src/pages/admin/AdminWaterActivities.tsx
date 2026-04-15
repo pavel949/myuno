@@ -4,7 +4,45 @@ import { APP_ROUTES } from '@/lib/config/routes';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminCheck } from '@/hooks/useAdmin';
-import { useAdminWaterActivities, AdminWaterActivity } from '@/hooks/useAdminWaterActivities';
+import { useSupabaseCRUD } from '@/hooks/useSupabaseCRUD';
+
+interface AdminWaterActivity {
+  id: string;
+  provider_id: string | null;
+  title_en: string;
+  title_ru: string;
+  description_en: string | null;
+  description_ru: string | null;
+  category: string;
+  cover_image: string | null;
+  images: string[];
+  price: number | null;
+  price_per: string;
+  currency: string;
+  duration_minutes: number | null;
+  max_participants: number;
+  min_participants: number;
+  difficulty: string;
+  equipment_included: boolean;
+  includes: string[];
+  requirements: string[];
+  location_name: string | null;
+  meeting_point: string | null;
+  meeting_point_lat: number | null;
+  meeting_point_lng: number | null;
+  available_times: string[];
+  available_days: string[];
+  rating: number;
+  review_count: number;
+  is_active: boolean;
+  is_featured: boolean;
+  is_certified: boolean;
+  certification_details: string | null;
+  safety_briefing_required: boolean;
+  age_restriction: number;
+  created_at?: string;
+  updated_at?: string;
+}
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card } from '@/components/ui/card';
@@ -124,7 +162,7 @@ const AdminWaterActivities = () => {
   const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
   const { isAdmin, isLoading: adminLoading } = useAdminCheck();
-  const { activities, isLoading, createActivity, updateActivity, deleteActivity } = useAdminWaterActivities(filterProviderId);
+  const { items: activities, isLoading, create: createActivity, update: updateActivity, remove: deleteActivity } = useSupabaseCRUD<AdminWaterActivity>({ table: 'water_activities', providerId: filterProviderId, orderByColumn: 'title_en', orderAscending: true, showToasts: true });
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<AdminWaterActivity | null>(null);

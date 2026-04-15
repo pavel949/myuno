@@ -3,7 +3,39 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useVendorProfile } from '@/hooks/useVendor';
-import { useVendorClinics, VendorClinic } from '@/hooks/useVendorClinics';
+import { useVerticalCRUD } from '@/hooks/useVerticalCRUD';
+
+interface VendorClinic {
+  id: string;
+  provider_id: string | null;
+  name_en: string;
+  name_ru: string;
+  description_en: string | null;
+  description_ru: string | null;
+  clinic_type: string;
+  specialty: string[];
+  cover_image: string | null;
+  images: string[];
+  address: string | null;
+  district: string | null;
+  lat: number | null;
+  lng: number | null;
+  phone: string | null;
+  email: string | null;
+  website: string | null;
+  working_hours: Record<string, string>;
+  languages: string[];
+  is_24h: boolean;
+  is_verified: boolean;
+  is_featured: boolean;
+  is_active: boolean;
+  rating: number;
+  review_count: number;
+  consultation_price: number | null;
+  currency: string;
+  created_at: string;
+  updated_at: string;
+}
 import { PageContainer } from '@/components/uno/PageContainer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -86,7 +118,9 @@ const VendorClinics = () => {
   const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
   const { profile, isLoading: profileLoading } = useVendorProfile();
-  const { clinics, isLoading: clinicsLoading, createClinic, updateClinic, deleteClinic } = useVendorClinics(profile?.id);
+  const { items: clinics, isLoading: clinicsLoading, create: createClinic, update: updateClinic, remove: deleteClinic } = useVerticalCRUD<VendorClinic>('medical', profile?.id, {
+    select: 'id,provider_id,name_en,name_ru,description_en,description_ru,clinic_type,specialty,cover_image,images,address,district,lat,lng,phone,email,website,working_hours,languages,is_24h,is_verified,is_featured,is_active,rating,review_count,consultation_price,currency,created_at,updated_at',
+  });
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingClinic, setEditingClinic] = useState<VendorClinic | null>(null);

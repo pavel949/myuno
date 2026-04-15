@@ -231,16 +231,6 @@ export const APP_ROUTES = {
   // ── Delivery ──
   DELIVERY: '/delivery',
 
-  // ── Market ──
-  MARKET: '/market',
-  MARKET_CATEGORIES: '/market/categories',
-  MARKET_CATEGORY: (categoryId: string) => `/market/category/${categoryId}`,
-  MARKET_PRODUCT: (productId: string) => `/market/product/${productId}`,
-  MARKET_VENDOR: (slug: string) => `/market/vendor/${slug}`,
-  MARKET_WISHLIST: '/market/wishlist',
-  MARKET_STORE: (id: string) => `/market/store/${id}`,
-  MARKET_CHECKOUT: '/market/checkout',
-  SELL: '/sell',
 
   // ── Knowledge ──
   KNOWLEDGE: '/knowledge',
@@ -421,7 +411,7 @@ export const LEGACY_REDIRECTS: Record<string, string> = {
  */
 export const ROUTE_OWNERSHIP = {
   PUBLIC: ['/', '/auth', '/discover', '/beauty', '/property', '/restaurants', '/transport',
-    '/experiences', '/yachts', '/cleaning', '/babysitter', '/delivery', '/market',
+    '/experiences', '/yachts', '/cleaning', '/babysitter', '/delivery',
     '/flowers', '/fitness', '/medical', '/events', '/education', '/legal', '/insurance',
     '/pets', '/pharmacy', '/banking', '/veterinary', '/sim', '/exchange', '/knowledge', '/about', '/faq',
     '/contact', '/become-partner', '/g-trust', '/install', '/transfer', '/flower-delivery',
@@ -459,8 +449,6 @@ export function isValidRoute(path: string): boolean {
     /^\/property\/offplan\/[^/]+$/,
     /^\/property\/developers\/[^/]+$/,
     /^\/property\/invest\/[^/]+$/,
-    /^\/market\/category\/[^/]+$/,
-    /^\/market\/product\/[^/]+$/,
     /^\/yachts\/[^/]+$/,
     /^\/yachts\/[^/]+\/booking$/,
     /^\/beauty\/salon\/[^/]+$/,

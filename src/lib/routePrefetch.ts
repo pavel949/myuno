@@ -20,7 +20,6 @@ const routeModules: Record<string, () => Promise<unknown>> = {
   '/restaurants': () => import('@/pages/restaurants/RestaurantsIndex'),
   '/beauty': () => import('@/pages/beauty/BeautySpaIndex'),
   '/medical': () => import('@/pages/medical/MedicalIndex'),
-  '/market': () => import('@/pages/market/MarketIndex'),
   '/fitness': () => import('@/pages/fitness/FitnessIndex'),
   '/education': () => import('@/pages/education/EducationIndex'),
   '/services': () => import('@/pages/services/ServicesIndex'),

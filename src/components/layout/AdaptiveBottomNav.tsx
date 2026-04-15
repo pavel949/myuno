@@ -25,7 +25,6 @@ type NavItem = {
 const guestNavItems: NavItem[] = [
   { path: APP_ROUTES.HOME, icon: Home, labelEn: 'Home', labelRu: 'Главная' },
   { path: APP_ROUTES.DISCOVER, icon: Compass, labelEn: 'Discover', labelRu: 'Навигатор' },
-  { path: APP_ROUTES.MARKET, icon: ShoppingBag, labelEn: 'Market', labelRu: 'Маркет' },
   { path: APP_ROUTES.ACCOUNT, icon: User, labelEn: 'Me', labelRu: 'Профиль' },
 ];
 

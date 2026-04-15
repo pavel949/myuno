@@ -3,7 +3,40 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useVendorProfile } from '@/hooks/useVendor';
-import { useVendorPets, VendorPetService } from '@/hooks/useVendorPets';
+import { useVerticalCRUD } from '@/hooks/useVerticalCRUD';
+
+interface VendorPetService {
+  id: string;
+  provider_id?: string;
+  name_en: string;
+  name_ru: string;
+  description_en?: string;
+  description_ru?: string;
+  service_type?: string;
+  pet_types?: string[];
+  services_offered?: string[];
+  price_per_hour?: number;
+  price_per_day?: number;
+  currency?: string;
+  address?: string;
+  district?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  cover_image?: string;
+  images?: string[];
+  working_hours?: Record<string, unknown>;
+  has_pickup?: boolean;
+  is_active?: boolean;
+  is_featured?: boolean;
+  is_verified?: boolean;
+  rating?: number;
+  review_count?: number;
+  lat?: number;
+  lng?: number;
+  created_at: string;
+  updated_at: string;
+}
 import { PageContainer } from '@/components/uno/PageContainer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -33,7 +66,9 @@ const VendorPets = () => {
   const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
   const { profile, isLoading: profileLoading } = useVendorProfile();
-  const { services, isLoading, createService, updateService, deleteService } = useVendorPets(profile?.id);
+  const { items: services, isLoading, create: createService, update: updateService, remove: deleteService } = useVerticalCRUD<VendorPetService>('pet_service', profile?.id, {
+    select: 'id,provider_id,name_en,name_ru,description_en,description_ru,service_type,pet_types,services_offered,price_per_hour,price_per_day,currency,address,district,phone,email,website,cover_image,images,working_hours,has_pickup,is_active,is_featured,is_verified,rating,review_count,lat,lng,created_at,updated_at',
+  });
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<VendorPetService | null>(null);

@@ -3,7 +3,34 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useVendorProfile } from '@/hooks/useVendor';
-import { useVendorFlowers, VendorFlowerShop } from '@/hooks/useVendorFlowers';
+import { useVerticalCRUD } from '@/hooks/useVerticalCRUD';
+
+interface VendorFlowerShop {
+  id: string;
+  provider_id?: string;
+  name_en: string;
+  name_ru: string;
+  description_en?: string;
+  description_ru?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  cover_image?: string;
+  images?: string[];
+  working_hours?: Record<string, unknown>;
+  delivery_available?: boolean;
+  delivery_fee?: number;
+  min_order_amount?: number;
+  is_active?: boolean;
+  is_featured?: boolean;
+  is_verified?: boolean;
+  rating?: number;
+  review_count?: number;
+  lat?: number;
+  lng?: number;
+  created_at: string;
+  updated_at: string;
+}
 import { PageContainer } from '@/components/uno/PageContainer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -25,7 +52,7 @@ const VendorFlowers = () => {
   const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
   const { profile, isLoading: profileLoading } = useVendorProfile();
-  const { shops, isLoading, createShop, updateShop, deleteShop } = useVendorFlowers(profile?.id);
+  const { items: shops, isLoading, create: createShop, update: updateShop, remove: deleteShop } = useVerticalCRUD<VendorFlowerShop>('flower', profile?.id);
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<VendorFlowerShop | null>(null);

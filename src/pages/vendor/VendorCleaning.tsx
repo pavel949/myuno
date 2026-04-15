@@ -3,7 +3,32 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useVendorProfile } from '@/hooks/useVendor';
-import { useVendorCleaning, VendorCleaningService } from '@/hooks/useVendorCleaning';
+import { useVerticalCRUD } from '@/hooks/useVerticalCRUD';
+
+interface VendorCleaningService {
+  id: string;
+  provider_id?: string;
+  name_en: string;
+  name_ru: string;
+  description_en?: string;
+  description_ru?: string;
+  service_type?: string;
+  features?: string[];
+  areas_served?: string[];
+  price_per_hour?: number;
+  price_fixed?: number;
+  duration_hours?: number;
+  currency?: string;
+  cover_image?: string;
+  images?: string[];
+  is_active?: boolean;
+  is_featured?: boolean;
+  is_verified?: boolean;
+  rating?: number;
+  review_count?: number;
+  created_at: string;
+  updated_at: string;
+}
 import { PageContainer } from '@/components/uno/PageContainer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -32,7 +57,9 @@ const VendorCleaning = () => {
   const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
   const { profile, isLoading: profileLoading } = useVendorProfile();
-  const { services, isLoading, createService, updateService, deleteService } = useVendorCleaning(profile?.id);
+  const { items: services, isLoading, create: createService, update: updateService, remove: deleteService } = useVerticalCRUD<VendorCleaningService>('cleaning', profile?.id, {
+    select: 'id,provider_id,name_en,name_ru,description_en,description_ru,service_type,features,areas_served,price_per_hour,price_fixed,duration_hours,currency,cover_image,images,is_active,is_featured,is_verified,rating,review_count,created_at,updated_at',
+  });
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<VendorCleaningService | null>(null);

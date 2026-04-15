@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useVendorProfile } from '@/hooks/useVendor';
-import { useVendorProperties, VendorProperty } from '@/hooks/useVendorProperties';
+import { useVerticalCRUD } from '@/hooks/useVerticalCRUD';
+import type { VendorProperty } from '@/types/property';
 import { useFormDraft } from '@/hooks/useFormDraft';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { Card, CardContent } from '@/components/ui/card';
@@ -45,7 +46,9 @@ const VendorProperties = () => {
   const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
   const { profile, isLoading: profileLoading } = useVendorProfile();
-  const { properties, isLoading: propertiesLoading, createProperty, updateProperty, deleteProperty } = useVendorProperties(profile?.id);
+  const { items: properties, isLoading: propertiesLoading, create: createProperty, update: updateProperty, remove: deleteProperty } = useVerticalCRUD<VendorProperty>('property', profile?.id, {
+    select: 'id,title_en,title_ru,description_en,description_ru,property_type,listing_type,listing_modes,cover_image,images,bedrooms,bathrooms,max_guests,price,price_period,currency,address,district,is_active,is_featured,is_verified,rating,review_count,created_at,updated_at,approval_status,instant_booking',
+  });
   
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [editingProperty, setEditingProperty] = useState<VendorProperty | null>(null);

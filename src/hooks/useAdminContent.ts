@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Yacht } from './useYachts';
 import { VendorActivity } from './useVendorActivities';
-import { VendorProperty } from './useVendorProperties';
+import type { VendorProperty } from '@/types/property';
 
 // Admin hook for yachts - queries listings table
 export function useAdminYachts(filterProviderId?: string) {

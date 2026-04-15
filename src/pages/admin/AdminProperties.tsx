@@ -6,7 +6,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminCheck } from '@/hooks/useAdmin';
 import { useAdminProperties } from '@/hooks/useAdminContent';
 import { useManagementCompanies } from '@/hooks/useManagementCompanies';
-import { VendorProperty } from '@/hooks/useVendorProperties';
+import type { VendorProperty } from '@/types/property';
 
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';

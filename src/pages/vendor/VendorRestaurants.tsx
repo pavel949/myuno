@@ -3,7 +3,41 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useVendorProfile } from '@/hooks/useVendor';
-import { useVendorRestaurants, VendorRestaurant } from '@/hooks/useVendorRestaurants';
+import { useVerticalCRUD } from '@/hooks/useVerticalCRUD';
+
+interface VendorRestaurant {
+  id: string;
+  provider_id?: string;
+  name_en: string;
+  name_ru: string;
+  description_en?: string;
+  description_ru?: string;
+  cuisine?: string;
+  address?: string;
+  district?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  price_range?: number;
+  cover_image?: string;
+  images?: string[];
+  working_hours?: Record<string, unknown>;
+  delivery_available?: boolean;
+  delivery_fee?: number;
+  delivery_time?: string;
+  min_order_amount?: number;
+  features?: string[];
+  is_active?: boolean;
+  is_featured?: boolean;
+  is_verified?: boolean;
+  rating?: number;
+  review_count?: number;
+  lat?: number;
+  lng?: number;
+  created_at: string;
+  updated_at: string;
+  approval_status?: string;
+}
 import { PageContainer } from '@/components/uno/PageContainer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -56,7 +90,9 @@ const VendorRestaurants = () => {
   const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
   const { profile, isLoading: profileLoading } = useVendorProfile();
-  const { restaurants, isLoading, createRestaurant, updateRestaurant, deleteRestaurant } = useVendorRestaurants(profile?.id);
+  const { items: restaurants, isLoading, create: createRestaurant, update: updateRestaurant, remove: deleteRestaurant } = useVerticalCRUD<VendorRestaurant>('restaurant', profile?.id, {
+    select: 'id,provider_id,name_en,name_ru,description_en,description_ru,cuisine,address,district,phone,email,website,price_range,cover_image,images,working_hours,delivery_available,delivery_fee,delivery_time,min_order_amount,features,is_active,is_featured,is_verified,rating,review_count,lat,lng,created_at,updated_at,approval_status',
+  });
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<VendorRestaurant | null>(null);

@@ -3,7 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserContext } from '@/hooks/useUserContext';
-import { useVendorProducts, VendorProduct } from '@/hooks/useVendorProducts';
+import { useVerticalCRUD } from '@/hooks/useVerticalCRUD';
+import { MarketplaceProduct } from '@/types/marketplace';
+
+interface VendorProduct extends MarketplaceProduct {
+  vendor_id: string | null;
+  approval_status?: string;
+  rejection_reason?: string | null;
+}
 import { useVendorProfile } from '@/hooks/useVendor';
 import { useMarketplaceCategories } from '@/hooks/useMarketplaceCategories';
 import { useFormDraft } from '@/hooks/useFormDraft';
@@ -125,7 +132,9 @@ const VendorProducts = () => {
   
   // Get marketplace_vendor_id from provider profile
   const marketplaceVendorId = (profile as any)?.marketplace_vendor_id;
-  const { products, isLoading: productsLoading, createProduct, updateProduct, deleteProduct } = useVendorProducts(marketplaceVendorId);
+  const { items: products, isLoading: productsLoading, create: createProduct, update: updateProduct, remove: deleteProduct } = useVerticalCRUD<VendorProduct>('marketplace_products', marketplaceVendorId, {
+    select: 'id,name_en,name_ru,description_en,description_ru,category_id,price,original_price,currency,cover_image,images,stock_quantity,is_active,is_featured,rating,review_count,vendor_id,approval_status,rejection_reason,created_at,updated_at',
+  });
   
   const isAdmin = hasRole('admin');
   

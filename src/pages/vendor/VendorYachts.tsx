@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserContext } from '@/hooks/useUserContext';
-import { useVendorYachts } from '@/hooks/useVendorYachts';
+import { useVerticalCRUD } from '@/hooks/useVerticalCRUD';
 import { useVendorProfile } from '@/hooks/useVendor';
 import { Yacht } from '@/hooks/useYachts';
 import { useFormDraft } from '@/hooks/useFormDraft';
@@ -141,7 +141,9 @@ const VendorYachts = () => {
   const { language } = useLanguage();
   const { hasRole } = useUserContext();
   const { profile, isLoading: profileLoading } = useVendorProfile();
-  const { yachts, isLoading: yachtsLoading, createYacht, updateYacht, deleteYacht } = useVendorYachts(profile?.id);
+  const { items: yachts, isLoading: yachtsLoading, create: createYacht, update: updateYacht, remove: deleteYacht } = useVerticalCRUD<Yacht>('yacht', profile?.id, {
+    select: 'id,name_en,name_ru,description_en,description_ru,yacht_type,cover_image,images,capacity,cabins,length_meters,year_built,price_half_day,price_full_day,price_sunset,price_overnight,currency,is_active,is_featured,rating,review_count,created_at,updated_at,approval_status',
+  });
   
   const isAdmin = hasRole('admin');
   

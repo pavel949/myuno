@@ -3,7 +3,44 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useVendorProfile } from '@/hooks/useVendor';
-import { useVendorEducation, VendorEducationProvider } from '@/hooks/useVendorEducation';
+import { useVerticalCRUD } from '@/hooks/useVerticalCRUD';
+
+type EntityType = 'institution' | 'individual';
+
+interface VendorEducationProvider {
+  id: string;
+  provider_id?: string;
+  name_en: string;
+  name_ru: string;
+  description_en?: string;
+  description_ru?: string;
+  provider_type?: string;
+  entity_type?: EntityType;
+  subjects?: string[];
+  age_groups?: string[];
+  qualifications?: string[];
+  languages?: string[];
+  price_per_hour?: number;
+  price_per_course?: number;
+  currency?: string;
+  address?: string;
+  district?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  cover_image?: string;
+  images?: string[];
+  is_online?: boolean;
+  is_active?: boolean;
+  is_featured?: boolean;
+  is_verified?: boolean;
+  rating?: number;
+  review_count?: number;
+  lat?: number;
+  lng?: number;
+  created_at: string;
+  updated_at: string;
+}
 import { PageContainer } from '@/components/uno/PageContainer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -32,7 +69,9 @@ const VendorEducation = () => {
   const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
   const { profile, isLoading: profileLoading } = useVendorProfile();
-  const { providers, isLoading, createProvider, updateProvider, deleteProvider } = useVendorEducation(profile?.id);
+  const { items: providers, isLoading, create: createProvider, update: updateProvider, remove: deleteProvider } = useVerticalCRUD<VendorEducationProvider>('education', profile?.id, {
+    select: 'id,provider_id,name_en,name_ru,description_en,description_ru,provider_type,subjects,age_groups,qualifications,languages,price_per_hour,price_per_course,currency,address,district,phone,email,website,cover_image,images,is_online,is_active,is_featured,is_verified,rating,review_count,lat,lng,created_at,updated_at',
+  });
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<VendorEducationProvider | null>(null);

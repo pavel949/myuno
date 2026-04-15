@@ -3,7 +3,38 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useVendorProfile } from '@/hooks/useVendor';
-import { useVendorLegal, VendorLegalService } from '@/hooks/useVendorLegal';
+import { useVerticalCRUD } from '@/hooks/useVerticalCRUD';
+
+interface VendorLegalService {
+  id: string;
+  provider_id?: string;
+  name_en: string;
+  name_ru: string;
+  description_en?: string;
+  description_ru?: string;
+  service_type?: string;
+  specializations?: string[];
+  languages?: string[];
+  price_consultation?: number;
+  currency?: string;
+  address?: string;
+  district?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  cover_image?: string;
+  images?: string[];
+  working_hours?: Record<string, unknown>;
+  is_active?: boolean;
+  is_featured?: boolean;
+  is_verified?: boolean;
+  rating?: number;
+  review_count?: number;
+  lat?: number;
+  lng?: number;
+  created_at: string;
+  updated_at: string;
+}
 import { PageContainer } from '@/components/uno/PageContainer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -32,7 +63,9 @@ const VendorLegal = () => {
   const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
   const { profile, isLoading: profileLoading } = useVendorProfile();
-  const { services, isLoading, createService, updateService, deleteService } = useVendorLegal(profile?.id);
+  const { items: services, isLoading, create: createService, update: updateService, remove: deleteService } = useVerticalCRUD<VendorLegalService>('legal', profile?.id, {
+    select: 'id,provider_id,name_en,name_ru,description_en,description_ru,service_type,specializations,languages,price_consultation,currency,address,district,phone,email,website,cover_image,images,working_hours,is_active,is_featured,is_verified,rating,review_count,lat,lng,created_at,updated_at',
+  });
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<VendorLegalService | null>(null);

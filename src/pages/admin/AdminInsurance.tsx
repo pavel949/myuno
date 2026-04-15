@@ -4,7 +4,38 @@ import { APP_ROUTES } from '@/lib/config/routes';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminCheck } from '@/hooks/useAdmin';
-import { useAdminInsurance, AdminInsuranceProvider } from '@/hooks/useAdminInsurance';
+import { useSupabaseCRUD } from '@/hooks/useSupabaseCRUD';
+
+interface AdminInsuranceProvider {
+  id: string;
+  provider_id: string | null;
+  name_en: string;
+  name_ru: string;
+  description_en: string | null;
+  description_ru: string | null;
+  cover_image: string | null;
+  images: string[];
+  address: string | null;
+  district: string | null;
+  phone: string | null;
+  email: string | null;
+  website: string | null;
+  insurance_types: string[];
+  languages: string[];
+  min_coverage_amount: number | null;
+  max_coverage_amount: number | null;
+  license_number: string | null;
+  has_24h_support: boolean;
+  has_online_claims: boolean;
+  working_hours: Record<string, string>;
+  rating: number;
+  review_count: number;
+  is_active: boolean;
+  is_verified: boolean;
+  is_featured: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card } from '@/components/ui/card';
@@ -97,7 +128,7 @@ const AdminInsurance = () => {
   const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
   const { isAdmin, isLoading: adminLoading } = useAdminCheck();
-  const { insuranceProviders, isLoading, createInsuranceProvider, updateInsuranceProvider, deleteInsuranceProvider } = useAdminInsurance(filterProviderId);
+  const { items: insuranceProviders, isLoading, create: createInsuranceProvider, update: updateInsuranceProvider, remove: deleteInsuranceProvider } = useSupabaseCRUD<AdminInsuranceProvider>({ table: 'insurance_providers', providerId: filterProviderId, orderByColumn: 'name_en', orderAscending: true, showToasts: true });
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<AdminInsuranceProvider | null>(null);

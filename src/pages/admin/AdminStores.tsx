@@ -4,7 +4,33 @@ import { APP_ROUTES } from '@/lib/config/routes';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminCheck } from '@/hooks/useAdmin';
-import { useAdminStores, AdminStore } from '@/hooks/useAdminStores';
+import { useSupabaseCRUD } from '@/hooks/useSupabaseCRUD';
+
+interface AdminStore {
+  id: string;
+  provider_id: string | null;
+  name_en: string;
+  name_ru: string;
+  description_en: string | null;
+  description_ru: string | null;
+  category: string;
+  cover_image: string | null;
+  images: string[];
+  address: string | null;
+  phone: string | null;
+  delivery_available: boolean;
+  delivery_fee: number;
+  min_order_amount: number;
+  rating: number;
+  review_count: number;
+  is_active: boolean;
+  is_verified: boolean;
+  is_featured: boolean;
+  working_hours: Record<string, string>;
+  approval_status: string;
+  created_at?: string;
+  updated_at?: string;
+}
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card } from '@/components/ui/card';
@@ -81,7 +107,7 @@ const AdminStores = () => {
   const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
   const { isAdmin, isLoading: adminLoading } = useAdminCheck();
-  const { stores, isLoading, createStore, updateStore, deleteStore } = useAdminStores(filterProviderId);
+  const { items: stores, isLoading, create: createStore, update: updateStore, remove: deleteStore } = useSupabaseCRUD<AdminStore>({ table: 'stores', providerId: filterProviderId, orderByColumn: 'name_en', orderAscending: true, showToasts: true });
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<AdminStore | null>(null);
