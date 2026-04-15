@@ -62,10 +62,10 @@ export const MOTION = {
   normal: 'duration-150',
   slow: 'duration-250',
   entrance: 'duration-300',
-  easeDefault: 'ease-[cubic-bezier(0.4,0,0.2,1)]',
-  easeEnter: 'ease-[cubic-bezier(0,0,0.2,1)]',
-  easeExit: 'ease-[cubic-bezier(0.4,0,1,1)]',
-  easeSpring: 'ease-[cubic-bezier(0.175,0.885,0.32,1.275)]',
+  easeDefault: '[transition-timing-function:cubic-bezier(0.4,0,0.2,1)]',
+  easeEnter: '[transition-timing-function:cubic-bezier(0,0,0.2,1)]',
+  easeExit: '[transition-timing-function:cubic-bezier(0.4,0,1,1)]',
+  easeSpring: '[transition-timing-function:cubic-bezier(0.175,0.885,0.32,1.275)]',
 } as const;
 
 // ═══ Composite Card Styles ═══
