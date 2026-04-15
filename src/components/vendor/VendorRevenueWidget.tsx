@@ -38,18 +38,18 @@ export function VendorRevenueWidget() {
 
       // Orders this month + previous month
       const [currentRes, prevRes, totalOrdersRes] = await Promise.all([
-        supabase.from('orders')
+        (supabase as any).from('orders')
           .select('total_amount')
           .eq('provider_id', provider.id)
           .eq('status', 'completed')
           .gte('created_at', startOfMonth),
-        supabase.from('orders')
+        (supabase as any).from('orders')
           .select('total_amount')
           .eq('provider_id', provider.id)
           .eq('status', 'completed')
           .gte('created_at', startOfPrevMonth)
           .lt('created_at', endOfPrevMonth),
-        supabase.from('orders')
+        (supabase as any).from('orders')
           .select('id', { count: 'exact', head: true })
           .eq('provider_id', provider.id)
           .eq('status', 'completed'),

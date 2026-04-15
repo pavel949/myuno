@@ -48,6 +48,7 @@ interface CheckInFormData {
   arrival_flight?: string;
   needs_transfer: boolean;
   rules_accepted: boolean;
+  data_consent: boolean;
   signature_url?: string;
 }
 
@@ -307,6 +308,7 @@ export default function GuestCheckIn() {
         arrival_flight: checkInData.arrival_flight || '',
         needs_transfer: checkInData.needs_transfer || false,
         rules_accepted: checkInData.rules_accepted || false,
+        data_consent: (checkInData as any).data_consent || false,
       });
     }
   }, [checkInData, user]);

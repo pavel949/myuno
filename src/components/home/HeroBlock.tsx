@@ -50,7 +50,7 @@ const PERSONA_ICONS: Record<string, React.ElementType> = {
   Plane, Home, Building2, TrendingUp, Baby, Heart, Music, Dumbbell, Briefcase, Laptop, PawPrint, Globe,
 };
 
-const PERSONA_GRADIENTS: Record<UserPersona, string> = {
+const PERSONA_GRADIENTS: Partial<Record<UserPersona, string>> = {
   tourist: 'linear-gradient(135deg, #06b6d4, #0891b2)',
   resident: 'linear-gradient(135deg, #10b981, #059669)',
   relocation: 'linear-gradient(135deg, #6366f1, #4f46e5)',
@@ -63,6 +63,8 @@ const PERSONA_GRADIENTS: Record<UserPersona, string> = {
   active: 'linear-gradient(135deg, #f97316, #ea580c)',
   business: 'linear-gradient(135deg, #64748b, #475569)',
   nomad: 'linear-gradient(135deg, #14b8a6, #0d9488)',
+  real_estate_developer: 'linear-gradient(135deg, #78716c, #57534e)',
+  local_services_provider: 'linear-gradient(135deg, #22d3ee, #06b6d4)',
 };
 
 function PersonaSwitcher({ isRu }: { isRu: boolean }) {

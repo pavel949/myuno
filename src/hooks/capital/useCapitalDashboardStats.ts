@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { typedFrom } from '@/lib/untypedTables';
 import { useAuth } from '@/contexts/AuthContext';
 
 export function useCapitalDashboardStats() {
@@ -13,15 +13,15 @@ export function useCapitalDashboardStats() {
       const today = new Date().toISOString().split('T')[0];
 
       const [contacts, campaigns, outreachWeek, todayTouches, pipeline] = await Promise.all([
-        supabase.from('capital_contacts').select('id', { count: 'exact', head: true }),
-        supabase.from('capital_campaigns').select('id', { count: 'exact', head: true }).eq('status', 'active'),
-        supabase.from('capital_outreach').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo.toISOString()),
-        supabase.from('capital_outreach').select('id', { count: 'exact', head: true })
+        typedFrom('capital_contacts').select('id', { count: 'exact', head: true }),
+        typedFrom('capital_campaigns').select('id', { count: 'exact', head: true }).eq('status', 'active'),
+        typedFrom('capital_outreach').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo.toISOString()),
+        typedFrom('capital_outreach').select('id', { count: 'exact', head: true })
           .or(`sent_at.is.null,and(follow_up_date.eq.${today},follow_up_done.eq.false)`),
-        supabase.from('capital_pipeline').select('stage, commission_expected'),
+        typedFrom('capital_pipeline').select('stage, commission_expected'),
       ]);
 
-      const pipelineData = pipeline.data ?? [];
+      const pipelineData = (pipeline.data ?? []) as { stage: string; commission_expected: number | null }[];
       const totalCommission = pipelineData
         .filter((d) => d.stage !== 'closed_lost')
         .reduce((sum, d) => sum + (d.commission_expected ?? 0), 0);

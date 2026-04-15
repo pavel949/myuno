@@ -162,7 +162,7 @@ export default function Discover() {
           <div className="h-px bg-border/50" />
 
           {/* Audience filter for services */}
-          <AudienceFilterTabs value={audienceFilter} onChange={setAudienceFilter} language={language} />
+          <AudienceFilterTabs value={audienceFilter} onChange={setAudienceFilter} />
 
           {/* All Services Grid */}
           <AllServicesGrid audienceFilter={audienceFilter} />

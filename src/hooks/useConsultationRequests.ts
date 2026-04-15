@@ -181,7 +181,7 @@ export function useConsultationRequests() {
         .insert({
           ...input,
           user_id: user?.id || null,
-        })
+        } as any)
         .select()
         .single();
 

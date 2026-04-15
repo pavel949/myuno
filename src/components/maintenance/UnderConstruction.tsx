@@ -38,7 +38,7 @@ export function UnderConstruction() {
     if (!email) return;
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('email_subscriptions')
         .upsert(
           { email, source: 'coming_soon', subscribed_at: new Date().toISOString() },

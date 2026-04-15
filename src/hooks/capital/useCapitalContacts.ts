@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { typedFrom } from '@/lib/untypedTables';
 import { useAuth } from '@/contexts/AuthContext';
 import type { CapitalContact, CapitalContactInsert, CapitalContactUpdate } from '@/types/capital';
 
@@ -18,8 +18,7 @@ export function useCapitalContacts(filters?: ContactFilters) {
   const contactsQuery = useQuery({
     queryKey: ['capital-contacts', user?.id, filters],
     queryFn: async () => {
-      let query = supabase
-        .from('capital_contacts')
+      let query = typedFrom('capital_contacts')
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -48,8 +47,7 @@ export function useCapitalContacts(filters?: ContactFilters) {
 
   const createContact = useMutation({
     mutationFn: async (contact: Omit<CapitalContactInsert, 'user_id'>) => {
-      const { data, error } = await supabase
-        .from('capital_contacts')
+      const { data, error } = await typedFrom('capital_contacts')
         .insert({ ...contact, user_id: user!.id })
         .select()
         .single();
@@ -63,8 +61,7 @@ export function useCapitalContacts(filters?: ContactFilters) {
 
   const updateContact = useMutation({
     mutationFn: async ({ id, ...updates }: CapitalContactUpdate & { id: string }) => {
-      const { data, error } = await supabase
-        .from('capital_contacts')
+      const { data, error } = await typedFrom('capital_contacts')
         .update(updates)
         .eq('id', id)
         .select()
@@ -79,8 +76,7 @@ export function useCapitalContacts(filters?: ContactFilters) {
 
   const deleteContact = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('capital_contacts')
+      const { error } = await typedFrom('capital_contacts')
         .delete()
         .eq('id', id);
       if (error) throw error;
@@ -106,8 +102,7 @@ export function useCapitalContact(id: string | undefined) {
   return useQuery({
     queryKey: ['capital-contact', id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('capital_contacts')
+      const { data, error } = await typedFrom('capital_contacts')
         .select('*')
         .eq('id', id!)
         .single();

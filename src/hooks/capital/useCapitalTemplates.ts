@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { typedFrom } from '@/lib/untypedTables';
 import { useAuth } from '@/contexts/AuthContext';
 import type { CapitalMessageTemplate, CapitalMessageTemplateInsert, CapitalMessageTemplateUpdate } from '@/types/capital';
 
@@ -10,8 +10,7 @@ export function useCapitalTemplates() {
   const templatesQuery = useQuery({
     queryKey: ['capital-templates', user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('capital_message_templates')
+      const { data, error } = await typedFrom('capital_message_templates')
         .select('*')
         .order('created_at', { ascending: false });
       if (error) throw error;
@@ -22,8 +21,7 @@ export function useCapitalTemplates() {
 
   const createTemplate = useMutation({
     mutationFn: async (template: Omit<CapitalMessageTemplateInsert, 'user_id'>) => {
-      const { data, error } = await supabase
-        .from('capital_message_templates')
+      const { data, error } = await typedFrom('capital_message_templates')
         .insert({ ...template, user_id: user!.id })
         .select()
         .single();
@@ -37,8 +35,7 @@ export function useCapitalTemplates() {
 
   const updateTemplate = useMutation({
     mutationFn: async ({ id, ...updates }: CapitalMessageTemplateUpdate & { id: string }) => {
-      const { data, error } = await supabase
-        .from('capital_message_templates')
+      const { data, error } = await typedFrom('capital_message_templates')
         .update(updates)
         .eq('id', id)
         .select()
@@ -53,8 +50,7 @@ export function useCapitalTemplates() {
 
   const deleteTemplate = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('capital_message_templates')
+      const { error } = await typedFrom('capital_message_templates')
         .delete()
         .eq('id', id);
       if (error) throw error;

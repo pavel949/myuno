@@ -114,12 +114,7 @@ export function OfferGeneratorModal({ open, onOpenChange, deal }: Props) {
     <ResponsiveModal
       open={open}
       onOpenChange={onOpenChange}
-      title={
-        <span className="flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-primary" />
-          {isRu ? 'AI Генератор предложений' : 'AI Offer Generator'}
-        </span>
-      }
+      title={isRu ? 'AI Генератор предложений' : 'AI Offer Generator'}
       size="lg"
       footer={
         <div className="flex gap-2 w-full">

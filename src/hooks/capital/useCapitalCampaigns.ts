@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { typedFrom } from '@/lib/untypedTables';
 import { useAuth } from '@/contexts/AuthContext';
 import type { CapitalCampaign, CapitalCampaignInsert, CapitalCampaignUpdate } from '@/types/capital';
 
@@ -10,8 +10,7 @@ export function useCapitalCampaigns() {
   const campaignsQuery = useQuery({
     queryKey: ['capital-campaigns', user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('capital_campaigns')
+      const { data, error } = await typedFrom('capital_campaigns')
         .select('*, capital_projects(name)')
         .order('created_at', { ascending: false });
       if (error) throw error;
@@ -22,8 +21,7 @@ export function useCapitalCampaigns() {
 
   const createCampaign = useMutation({
     mutationFn: async (campaign: Omit<CapitalCampaignInsert, 'user_id'>) => {
-      const { data, error } = await supabase
-        .from('capital_campaigns')
+      const { data, error } = await typedFrom('capital_campaigns')
         .insert({ ...campaign, user_id: user!.id })
         .select()
         .single();
@@ -37,8 +35,7 @@ export function useCapitalCampaigns() {
 
   const updateCampaign = useMutation({
     mutationFn: async ({ id, ...updates }: CapitalCampaignUpdate & { id: string }) => {
-      const { data, error } = await supabase
-        .from('capital_campaigns')
+      const { data, error } = await typedFrom('capital_campaigns')
         .update(updates)
         .eq('id', id)
         .select()
@@ -53,8 +50,7 @@ export function useCapitalCampaigns() {
 
   const deleteCampaign = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('capital_campaigns')
+      const { error } = await typedFrom('capital_campaigns')
         .delete()
         .eq('id', id);
       if (error) throw error;
