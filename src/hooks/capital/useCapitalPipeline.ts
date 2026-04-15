@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { typedFrom } from '@/lib/untypedTables';
 import { useAuth } from '@/contexts/AuthContext';
 import type { CapitalPipelineDeal, CapitalPipelineDealInsert, CapitalPipelineDealUpdate, PipelineStage } from '@/types/capital';
 
@@ -10,8 +10,7 @@ export function useCapitalPipeline(contactId?: string) {
   const pipelineQuery = useQuery({
     queryKey: ['capital-pipeline', user?.id, contactId],
     queryFn: async () => {
-      let query = supabase
-        .from('capital_pipeline')
+      let query = typedFrom('capital_pipeline')
         .select('*, capital_contacts(name, phone, warmth), capital_projects(name, commission_pct)')
         .order('stage_changed_at', { ascending: false });
 
@@ -28,8 +27,7 @@ export function useCapitalPipeline(contactId?: string) {
 
   const createDeal = useMutation({
     mutationFn: async (deal: Omit<CapitalPipelineDealInsert, 'user_id'>) => {
-      const { data, error } = await supabase
-        .from('capital_pipeline')
+      const { data, error } = await typedFrom('capital_pipeline')
         .insert({ ...deal, user_id: user!.id })
         .select()
         .single();
@@ -43,8 +41,7 @@ export function useCapitalPipeline(contactId?: string) {
 
   const updateDeal = useMutation({
     mutationFn: async ({ id, ...updates }: CapitalPipelineDealUpdate & { id: string }) => {
-      const { data, error } = await supabase
-        .from('capital_pipeline')
+      const { data, error } = await typedFrom('capital_pipeline')
         .update(updates)
         .eq('id', id)
         .select()
@@ -59,8 +56,7 @@ export function useCapitalPipeline(contactId?: string) {
 
   const moveStage = useMutation({
     mutationFn: async ({ id, stage }: { id: string; stage: PipelineStage }) => {
-      const { data, error } = await supabase
-        .from('capital_pipeline')
+      const { data, error } = await typedFrom('capital_pipeline')
         .update({ stage, stage_changed_at: new Date().toISOString() })
         .eq('id', id)
         .select()
@@ -75,8 +71,7 @@ export function useCapitalPipeline(contactId?: string) {
 
   const deleteDeal = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('capital_pipeline')
+      const { error } = await typedFrom('capital_pipeline')
         .delete()
         .eq('id', id);
       if (error) throw error;
