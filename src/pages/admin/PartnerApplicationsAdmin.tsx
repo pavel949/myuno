@@ -40,6 +40,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -115,9 +116,10 @@ const categoryLabels: Record<string, { ru: string; en: string }> = {
 export default function PartnerApplicationsAdmin() {
   const { language } = useLanguage();
   const { user } = useAuth();
-const [applications, setApplications] = useState<PartnerApplication[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const { isAdmin, isLoading: adminCheckLoading } = useIsAdmin();
+
+  const [applications, setApplications] = useState<PartnerApplication[]>([]);
+  const [listLoading, setListLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedApp, setSelectedApp] = useState<PartnerApplication | null>(null);
@@ -127,37 +129,50 @@ const [applications, setApplications] = useState<PartnerApplication[]>([]);
   const [rejectionReason, setRejectionReason] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Check if user is admin
+  const isPageLoading = adminCheckLoading || (isAdmin && listLoading);
+
   useEffect(() => {
-    const checkAdminRole = async () => {
-      if (!user) {
-        setIsAdmin(false);
-        setIsLoading(false);
-        return;
-      }
+    if (!user?.id || !isAdmin || adminCheckLoading) {
+      if (!user?.id) setApplications([]);
+      return;
+    }
 
-      const { data, error } = await supabase
-        .rpc('has_role', { _user_id: user.id, _role: 'admin' });
+    let cancelled = false;
+    setListLoading(true);
 
-      if (error) {
-        console.error('Error checking admin role:', error);
-        setIsAdmin(false);
-      } else {
-        setIsAdmin(data === true);
+    void (async () => {
+      try {
+        const { data, error } = await supabase
+          .from('partner_applications')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (cancelled) return;
+        if (error) throw error;
+        setApplications((data as PartnerApplication[]) || []);
+      } catch {
+        if (!cancelled) {
+          toast.error(language === 'ru' ? 'Ошибка' : 'Error', {
+            description:
+              language === 'ru'
+                ? 'Не удалось загрузить заявки'
+                : 'Failed to load applications',
+          });
+          setApplications([]);
+        }
+      } finally {
+        if (!cancelled) setListLoading(false);
       }
-      
-      if (data === true) {
-        fetchApplications();
-      } else {
-        setIsLoading(false);
-      }
+    })();
+
+    return () => {
+      cancelled = true;
     };
-
-    checkAdminRole();
-  }, [user]);
+  }, [user?.id, isAdmin, adminCheckLoading, language]);
 
   const fetchApplications = async () => {
-    setIsLoading(true);
+    if (!user?.id || !isAdmin) return;
+    setListLoading(true);
     try {
       const { data, error } = await supabase
         .from('partner_applications')
@@ -166,15 +181,14 @@ const [applications, setApplications] = useState<PartnerApplication[]>([]);
 
       if (error) throw error;
       setApplications((data as PartnerApplication[]) || []);
-    } catch (error) {
-      console.error('Error fetching applications:', error);
+    } catch {
       toast.error(language === 'ru' ? 'Ошибка' : 'Error', {
         description: language === 'ru' 
           ? 'Не удалось загрузить заявки' 
           : 'Failed to load applications',
       });
     } finally {
-      setIsLoading(false);
+      setListLoading(false);
     }
   };
 
@@ -235,8 +249,7 @@ const [applications, setApplications] = useState<PartnerApplication[]>([]);
       setIsDetailOpen(false);
       setRejectionReason('');
       setActionType(null);
-    } catch (error) {
-      console.error('Error updating application:', error);
+    } catch {
       toast.error(language === 'ru' ? 'Ошибка' : 'Error', {
         description: language === 'ru'
           ? 'Не удалось обновить статус'
@@ -293,7 +306,7 @@ const [applications, setApplications] = useState<PartnerApplication[]>([]);
     );
   }
 
-  if (!isAdmin && !isLoading) {
+  if (!isAdmin && !isPageLoading) {
     return (
       <PageContainer>
         <div className="min-h-[60vh] flex items-center justify-center">
@@ -381,7 +394,7 @@ const [applications, setApplications] = useState<PartnerApplication[]>([]);
       </SectionCard>
 
       {/* Applications List */}
-      {isLoading ? (
+      {isPageLoading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
             <div key={i} className="h-24 bg-secondary/50 rounded-xl animate-pulse" />
