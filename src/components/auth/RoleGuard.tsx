@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserContext, type AppRole } from '@/hooks/useUserContext';
 import { useResolvedContext } from '@/hooks/useResolvedContext';
 import { LoadingSpinner } from '@/components/uno/LoadingSpinner';
 import { AccessDenied } from './AccessDenied';
+
+/** Stop blocking the shell if Supabase/React Query never settles (offline, hung RPC). */
+const ROLE_GUARD_MAX_WAIT_MS = 12_000;
 
 interface RoleGuardProps {
   children: React.ReactNode;
@@ -33,8 +36,20 @@ export function RoleGuard({
   const { hasRole, isLoading: contextLoading } = useUserContext();
   const { context, isLoading: resolvedLoading } = useResolvedContext();
 
-  // Show loading while checking auth/context
-  if (authLoading || contextLoading || resolvedLoading) {
+  const [waitDeadlinePassed, setWaitDeadlinePassed] = useState(false);
+
+  useEffect(() => {
+    setWaitDeadlinePassed(false);
+    const id = window.setTimeout(() => setWaitDeadlinePassed(true), ROLE_GUARD_MAX_WAIT_MS);
+    return () => window.clearTimeout(id);
+  }, [user?.id]);
+
+  const contextReady = !contextLoading && !resolvedLoading;
+  const authReady = !authLoading;
+  const allReady = authReady && contextReady;
+
+  // Show loading while checking auth/context, unless we hit the deadline (then fall through with best-effort roles)
+  if (!allReady && !waitDeadlinePassed) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <LoadingSpinner size="lg" />
