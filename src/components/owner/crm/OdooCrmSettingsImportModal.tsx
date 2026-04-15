@@ -65,6 +65,10 @@ function mapCategory(raw: string): CrmOptionCategory | null {
     deal_type: 'deal_type',
     task_type: 'task_type',
     lost_reason: 'lost_reason',
+    winreason: 'win_reason',
+    reasonwon: 'win_reason',
+    причинауспеха: 'win_reason',
+    win_reason: 'win_reason',
   };
   return dict[key] || null;
 }

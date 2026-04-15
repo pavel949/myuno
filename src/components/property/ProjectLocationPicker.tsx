@@ -54,6 +54,10 @@ export function ProjectLocationPicker({ value, onChange }: ProjectLocationPicker
 
   const mapRef = useRef<google.maps.Map | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  /** Avoid re-running open sync when parent re-renders (new `value` object) or user edits address field while dialog is open — that caused map flicker. */
+  const wasDialogOpenRef = useRef(false);
+  const valueRef = useRef(value);
+  valueRef.current = value;
 
   const markerPosition = useMemo(() => {
     if (selectedLocation) return { lat: selectedLocation.lat, lng: selectedLocation.lng };
@@ -69,20 +73,24 @@ export function ProjectLocationPicker({ value, onChange }: ProjectLocationPicker
     [googleGeocode]
   );
 
-  // When dialog opens: sync from value, or set default center + reverse geocode so user can confirm without typing (Airbnb-style)
+  // When dialog opens (transition only): sync from value once — not on every parent re-render or keystroke in the wizard address field.
   useEffect(() => {
+    const justOpened = isOpen && !wasDialogOpenRef.current;
+    wasDialogOpenRef.current = isOpen;
     if (!isOpen || !hasKey) return;
-    if (value?.address) {
-      setSelectedLocation({ lat: value.lat, lng: value.lng, address: value.address });
+    if (!justOpened) return;
+
+    const v = valueRef.current;
+    if (v?.address) {
+      setSelectedLocation({ lat: v.lat, lng: v.lng, address: v.address });
       return;
     }
-    if (value?.lat != null && value?.lng != null) {
-      reverseGeocode(value.lat, value.lng).then((address) => {
-        setSelectedLocation({ lat: value.lat, lng: value.lng, address: address || '' });
+    if (v?.lat != null && v?.lng != null) {
+      reverseGeocode(v.lat, v.lng).then((address) => {
+        setSelectedLocation({ lat: v.lat, lng: v.lng, address: address || '' });
       });
       return;
     }
-    // No value: start with default center and get address so user can confirm immediately
     setSelectedLocation(null);
     setIsGeocoding(true);
     const { lat, lng } = DEFAULT_MAP_CENTER;
@@ -91,16 +99,54 @@ export function ProjectLocationPicker({ value, onChange }: ProjectLocationPicker
         setSelectedLocation({ lat, lng, address: address || (isRu ? 'Пхукет, Таиланд' : 'Phuket, Thailand') });
       })
       .finally(() => setIsGeocoding(false));
-  }, [isOpen, hasKey, value?.lat, value?.lng, value?.address, reverseGeocode, isRu]);
+  }, [isOpen, hasKey, reverseGeocode, isRu]);
 
-  const onMapLoad = useCallback((map: google.maps.Map) => {
-    mapRef.current = map;
-    setTimeout(() => window.google?.maps?.event?.trigger(map, 'resize'), 150);
+  const triggerMapResize = useCallback((map: google.maps.Map | null) => {
+    if (!map) return;
+    window.google?.maps?.event?.trigger(map, 'resize');
   }, []);
+
+  const onMapLoad = useCallback(
+    (map: google.maps.Map) => {
+      mapRef.current = map;
+      const scheduleResize = () => triggerMapResize(map);
+      scheduleResize();
+      requestAnimationFrame(() => {
+        requestAnimationFrame(scheduleResize);
+      });
+      window.setTimeout(scheduleResize, 200);
+      window.setTimeout(scheduleResize, 500);
+    },
+    [triggerMapResize],
+  );
 
   const onMapUnmount = useCallback(() => {
     mapRef.current = null;
   }, []);
+
+  // Dialog animates open (scale/slide); map container gets final size after layout — resize again so tiles/gestures work.
+  useEffect(() => {
+    if (!isOpen) return;
+    const run = () => {
+      const map = mapRef.current;
+      if (map) triggerMapResize(map);
+    };
+    run();
+    let rafInner = 0;
+    const rafOuter = window.requestAnimationFrame(() => {
+      rafInner = window.requestAnimationFrame(run);
+    });
+    const t1 = window.setTimeout(run, 120);
+    const t2 = window.setTimeout(run, 350);
+    const t3 = window.setTimeout(run, 600);
+    return () => {
+      window.cancelAnimationFrame(rafOuter);
+      window.cancelAnimationFrame(rafInner);
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
+      window.clearTimeout(t3);
+    };
+  }, [isOpen, triggerMapResize]);
 
   const handleMapClick = useCallback(
     async (e: google.maps.MapMouseEvent) => {
@@ -254,21 +300,25 @@ export function ProjectLocationPicker({ value, onChange }: ProjectLocationPicker
       </div>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-3xl h-[85vh] p-0 overflow-visible flex flex-col">
-          <DialogHeader className="p-4 pb-0">
+        <DialogContent
+          overlayClassName="z-[140]"
+          className="max-w-3xl h-[85vh] max-h-[90dvh] p-0 overflow-visible flex flex-col z-[141] gap-0"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+        >
+          <DialogHeader className="p-4 pb-0 shrink-0">
             <DialogTitle>{isRu ? 'Выберите локацию проекта' : 'Select Project Location'}</DialogTitle>
           </DialogHeader>
 
           <div className="flex flex-col flex-1 min-h-0 overflow-visible">
             {/* Search: address + projects (Airbnb-style) */}
-            <div className="px-4 py-2 relative overflow-visible" ref={containerRef}>
+            <div className="px-4 py-2 relative z-[110] overflow-visible bg-background" ref={containerRef}>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => setSearchFocused(true)}
-                  onBlur={() => setTimeout(() => setSearchFocused(false), 200)}
+                  onBlur={() => setTimeout(() => setSearchFocused(false), 280)}
                   placeholder={isRu ? 'Адрес или название проекта' : 'Address or project name'}
                   className="pl-10 pr-10"
                 />
@@ -289,7 +339,7 @@ export function ProjectLocationPicker({ value, onChange }: ProjectLocationPicker
               </div>
               {/* Dropdown: addresses + projects */}
               {showSearchDropdown && (
-                <div className="absolute top-full left-4 right-4 z-50 mt-1 bg-popover border border-border rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                <div className="absolute top-full left-4 right-4 z-[120] mt-1 bg-popover border border-border rounded-lg shadow-lg max-h-60 overflow-y-auto">
                   {searching && (
                     <div className="p-3 flex items-center gap-2 text-sm text-muted-foreground">
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -366,8 +416,8 @@ export function ProjectLocationPicker({ value, onChange }: ProjectLocationPicker
               ))}
             </div>
 
-            {/* Map — primary interaction (Airbnb-style); min-height so map always has space to render */}
-            <div className="flex-1 relative min-h-[280px]">
+            {/* Map below search: lower stacking than search row; avoid isolate so map hit-testing matches visible tiles. */}
+            <div className="flex-1 relative z-0 min-h-[280px] min-w-0 touch-manipulation">
               {!hasKey && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-muted p-4 text-center text-sm text-muted-foreground">
                   <MapPin className="w-8 h-8" />
@@ -412,6 +462,8 @@ export function ProjectLocationPicker({ value, onChange }: ProjectLocationPicker
                     streetViewControl: false,
                     fullscreenControl: true,
                     zoomControl: true,
+                    gestureHandling: 'greedy',
+                    clickableIcons: false,
                   }}
                 >
                   <Marker position={markerPosition} draggable onDragEnd={handleMarkerDragEnd} />

@@ -19,7 +19,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { ArrowLeft, Phone, Mail, MessageCircle, Clock, User, FileText, Pencil, Trophy, X, Trash2, ContactRound, Pause, Archive, Play, History, MoreHorizontal, SendHorizonal, Crown, Sparkles } from 'lucide-react';
+import { ArrowLeft, Phone, Mail, MessageCircle, Clock, User, FileText, Pencil, Trophy, X, Trash2, ContactRound, Pause, Archive, Play, History, MoreHorizontal, SendHorizonal, Crown, Sparkles, Building2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format, formatDistanceToNow } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
@@ -30,6 +30,7 @@ import { DealClosingChecklist } from '@/components/owner/sales/DealClosingCheckl
 import { CommissionSummary } from '@/components/owner/sales/CommissionSummary';
 import { OfferGeneratorModal } from '@/components/owner/sales/OfferGeneratorModal';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { usePropertyProject } from '@/hooks/usePropertyProjects';
 
 const activityIcons: Record<string, React.ElementType> = {
   call: Phone,
@@ -59,6 +60,7 @@ export default function SalesDealDetail() {
   const { toast } = useToast();
 
   const { data: deal, isLoading, isError: dealError, refetch: refetchDeal } = useAgentDeal(id);
+  const { data: linkedProject } = usePropertyProject(deal?.property_project_id ?? undefined);
   const { data: activities = [] } = useDealActivities(id);
   const { data: fieldChanges = [] } = useDealFieldChanges(id);
   const updateDeal = useUpdateDeal();
@@ -236,6 +238,18 @@ export default function SalesDealDetail() {
           </span>
         </div>
 
+        {deal.property_project_id && linkedProject && (
+          <div className="flex items-start gap-2 mt-2 rounded-lg border bg-muted/40 px-3 py-2 text-sm">
+            <Building2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+            <div>
+              <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                {isRu ? 'Проект' : 'Project'}
+              </p>
+              <p className="font-medium">{isRu ? linkedProject.name_ru || linkedProject.name_en : linkedProject.name_en || linkedProject.name_ru}</p>
+            </div>
+          </div>
+        )}
+
         {deal.contact_id && (
           <button
             onClick={() => navigate(APP_ROUTES.MC_CONTACT_DETAIL(deal.contact_id!))}
@@ -309,6 +323,9 @@ export default function SalesDealDetail() {
       <div className="border rounded-xl p-4 bg-card">
         <p className="text-xs font-medium text-muted-foreground mb-2">{isRu ? 'Этап сделки' : 'Deal Stage'}</p>
         <DealStageBar currentStage={deal.stage} onStageClick={!isClosed ? handleStageChange : undefined} />
+        {deal.stage === 'closed_won' && deal.won_reason && (
+          <p className="text-xs text-success mt-1">{isRu ? 'Успех' : 'Won'}: {deal.won_reason}</p>
+        )}
         {deal.stage === 'closed_lost' && (
           <p className="text-xs text-destructive mt-1">{isRu ? 'Проигрыш' : 'Lost'}{deal.lost_reason ? `: ${deal.lost_reason}` : ''}</p>
         )}

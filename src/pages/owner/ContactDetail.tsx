@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
+import type { AgentDeal } from '@/hooks/useAgentDeals';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -6,7 +7,7 @@ import { useCrmContact, useUpdateContact, useDeleteContact } from '@/hooks/useCr
 import { APP_ROUTES } from '@/lib/config/routes';
 import { useContactNotes, useAddContactNote, useDeleteContactNote } from '@/hooks/useCrmContactNotes';
 import { useContactDeals } from '@/hooks/useCrmContacts';
-import { useCrmActivities, ACTIVITY_TYPE_CONFIG } from '@/hooks/useCrmActivities';
+import { useCrmActivities, ACTIVITY_TYPE_CONFIG, useLogActivity } from '@/hooks/useCrmActivities';
 import { useCrmTasks, useUpdateCrmTask, useCreateCrmTask } from '@/hooks/useCrmTasks';
 import { useCrmMeetings } from '@/hooks/useCrmMeetings';
 import { InlineTaskCreator } from '@/components/owner/contacts/InlineTaskCreator';
@@ -17,6 +18,7 @@ import { LifecycleStageBar } from '@/components/owner/contacts/LifecycleStageBar
 import { CrmAiAssistantPanel } from '@/components/owner/contacts/CrmAiAssistantPanel';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -44,7 +46,8 @@ import { ContactPropertiesSection } from '@/components/owner/contacts/ContactPro
 import { ContactRelationshipsCard } from '@/components/owner/contacts/ContactRelationshipsCard';
 import { KeyDatesCard } from '@/components/owner/contacts/KeyDatesCard';
 import { RemindersList } from '@/components/owner/contacts/RemindersList';
-import { CRM_ROLES, CRM_ROLE_LABELS } from '@/types/contact';
+import { CRM_ROLE_LABELS, isCrmRole } from '@/types/contact';
+import { isMaritalStatus, MARITAL_STATUS_LABELS } from '@/lib/crmContactFormPresets';
 
 const noteTypeIcons: Record<string, string> = {
   note: '📝', call: '📞', meeting: '🤝', email: '📧', whatsapp: '💬',
@@ -101,6 +104,7 @@ export default function ContactDetail() {
   const addNote = useAddContactNote();
   const deleteNote = useDeleteContactNote();
   const updateTask = useUpdateCrmTask();
+  const logActivity = useLogActivity();
 
   const [activeTab, setActiveTab] = useState('overview');
   const [showEdit, setShowEdit] = useState(false);
@@ -108,14 +112,50 @@ export default function ContactDetail() {
   const [noteType, setNoteType] = useState('note');
   const [noteText, setNoteText] = useState('');
   const [chatterTab, setChatterTab] = useState<'message' | 'note' | 'activities'>('note');
+  const [logActType, setLogActType] = useState<string>('call');
+  const [logActSubject, setLogActSubject] = useState('');
+  const [logActDescription, setLogActDescription] = useState('');
+  const [visaServiceKey, setVisaServiceKey] = useState('long_term_visa');
 
   const contactTasks = allTasks.filter(t => t.contact_id === id);
 
-  // Unified timeline
+  // Unified timeline: notes + activities + deals
   const timelineItems = useMemo(() => [
     ...notes.map(n => ({ type: 'note' as const, date: n.created_at, data: n })),
     ...activities.map(a => ({ type: 'activity' as const, date: a.activity_date, data: a })),
-  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()), [notes, activities]);
+    ...deals.map(d => ({ type: 'deal' as const, date: d.updated_at, data: d })),
+  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()), [notes, activities, deals]);
+
+  const handleLogCrmActivity = useCallback(async () => {
+    if (!user || !contact || !logActSubject.trim()) {
+      toast({ title: isRu ? 'Укажите тему' : 'Enter a subject', variant: 'destructive' });
+      return;
+    }
+    const metadata: Record<string, unknown> = {};
+    if (logActType === 'visa_consultation') {
+      metadata.service = visaServiceKey;
+    }
+    try {
+      await logActivity.mutateAsync({
+        company_id: contact.company_id,
+        contact_id: contact.id,
+        deal_id: null,
+        activity_type: logActType,
+        subject: logActSubject.trim(),
+        description: logActDescription.trim() || null,
+        duration_minutes: null,
+        outcome: null,
+        metadata: Object.keys(metadata).length ? metadata : null,
+        logged_by: user.id,
+        activity_date: new Date().toISOString(),
+      });
+      setLogActSubject('');
+      setLogActDescription('');
+      toast({ title: isRu ? 'Записано' : 'Logged' });
+    } catch {
+      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+    }
+  }, [user, contact, logActType, logActSubject, logActDescription, visaServiceKey, logActivity, isRu, toast]);
 
   if (isLoading) {
     return (
@@ -206,6 +246,25 @@ export default function ContactDetail() {
 
   // Smart button counts
   const opportunityCount = deals.filter(d => !['closed_won', 'closed_lost'].includes(d.stage)).length;
+
+  const dealCurrency = deals[0]?.currency || 'THB';
+
+  const contactDealEconomics = useMemo(() => {
+    const amount = (d: AgentDeal) => Number(d.deal_value ?? d.budget_max ?? 0);
+    let pipeline = 0;
+    let wonValue = 0;
+    let commissionEarned = 0;
+    for (const d of deals) {
+      if (d.stage === 'closed_lost') continue;
+      if (d.stage === 'closed_won') {
+        wonValue += amount(d);
+        commissionEarned += Number(d.commission_amount ?? 0);
+      } else {
+        pipeline += amount(d);
+      }
+    }
+    return { pipeline, wonValue, commissionEarned };
+  }, [deals]);
 
   return (
     <div className="px-4 md:px-6 lg:px-8 pt-4 pb-24 md:pb-8 max-w-[1536px] mx-auto">
@@ -299,12 +358,17 @@ export default function ContactDetail() {
               {/* Name + Avatar row */}
               <div className="flex items-start gap-4 mb-4">
                 <div className="flex-1 min-w-0">
-                  <h1 className="text-2xl font-bold tracking-tight">
-                    {contact.is_company
-                      ? (contact.company_name || `${contact.first_name} ${contact.last_name}`)
-                      : `${contact.first_name} ${contact.last_name}`
-                    }
-                  </h1>
+                  <div className="flex flex-wrap items-center gap-2 min-w-0">
+                    <h1 className="text-2xl font-bold tracking-tight">
+                      {contact.is_company
+                        ? (contact.company_name || `${contact.first_name} ${contact.last_name}`)
+                        : `${contact.first_name} ${contact.last_name}`
+                      }
+                    </h1>
+                    {(contact.is_vip || (contact.tags || []).some((t) => t.toUpperCase() === 'VIP')) && (
+                      <Badge className="shrink-0 bg-amber-500/15 text-amber-900 border-amber-500/30">VIP</Badge>
+                    )}
+                  </div>
                   {contact.is_company && contact.first_name && (
                     <p className="text-sm text-muted-foreground mt-0.5">
                       {contact.first_name} {contact.last_name}
@@ -328,15 +392,19 @@ export default function ContactDetail() {
                 )}
               </div>
 
-              {/* Role badge + Lifecycle Stage */}
+              {/* CRM roles + Lifecycle Stage */}
               <div className="flex flex-wrap items-center gap-2 mb-3">
-                {(contact as { crm_role?: string }).crm_role && (
-                  <Badge variant="secondary" className="text-xs">
+                {(contact.crm_roles ?? []).map((role) => (
+                  <Badge key={role} variant="secondary" className="text-xs">
                     {isRu
-                      ? CRM_ROLE_LABELS[(contact as { crm_role: string }).crm_role as keyof typeof CRM_ROLE_LABELS]?.ru
-                      : CRM_ROLE_LABELS[(contact as { crm_role: string }).crm_role as keyof typeof CRM_ROLE_LABELS]?.en}
+                      ? isCrmRole(role)
+                        ? CRM_ROLE_LABELS[role].ru
+                        : role
+                      : isCrmRole(role)
+                        ? CRM_ROLE_LABELS[role].en
+                        : role}
                   </Badge>
-                )}
+                ))}
                 <LifecycleStageBar
                   currentStage={contact.lifecycle_stage || 'lead'}
                   onChange={handleLifecycleChange}
@@ -404,6 +472,11 @@ export default function ContactDetail() {
                   <FieldRow label={isRu ? 'Язык' : 'Language'}>
                     {contact.language || <span className="text-muted-foreground/50">—</span>}
                   </FieldRow>
+                  {isMaritalStatus(contact.marital_status) && (
+                    <FieldRow label={isRu ? 'Семья (статус)' : 'Marital status'}>
+                      {isRu ? MARITAL_STATUS_LABELS[contact.marital_status].ru : MARITAL_STATUS_LABELS[contact.marital_status].en}
+                    </FieldRow>
+                  )}
                   {/* Social media */}
                   {contact.instagram && (
                     <FieldRow label="Instagram">
@@ -465,12 +538,17 @@ export default function ContactDetail() {
             {/* Overview */}
             <TabsContent value="overview" className="mt-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {(contact.birthday || contact.family_info || contact.interests?.length) && (
+                {(contact.birthday || contact.family_info || contact.interests?.length || isMaritalStatus(contact.marital_status)) && (
                   <div className="rounded-xl border bg-card p-4 space-y-3">
                     <p className="text-sm font-semibold flex items-center gap-2">
                       <Heart className="h-4 w-4 text-muted-foreground" />
                       {isRu ? 'Персональное' : 'Personal'}
                     </p>
+                    {isMaritalStatus(contact.marital_status) && (
+                      <p className="text-sm text-muted-foreground">
+                        {isRu ? MARITAL_STATUS_LABELS[contact.marital_status].ru : MARITAL_STATUS_LABELS[contact.marital_status].en}
+                      </p>
+                    )}
                     {contact.birthday && (
                       <div className="flex items-center gap-2 text-sm">
                         <Cake className={cn('h-4 w-4', birthdaySoon ? 'text-warning' : 'text-muted-foreground')} />
@@ -574,7 +652,7 @@ export default function ContactDetail() {
                             </button>
                           </div>
                         );
-                      } else {
+                      } else if (item.type === 'activity') {
                         const activity = item.data as { id: string; activity_type: string; subject?: string; description?: string; activity_date: string };
                         const config = ACTIVITY_TYPE_CONFIG[activity.activity_type];
                         const activityIcon = activity.activity_type === 'stage_change' ? '🔄' :
@@ -600,6 +678,38 @@ export default function ContactDetail() {
                             </div>
                           </div>
                         );
+                      } else {
+                        const d = item.data as AgentDeal;
+                        const stage = d.stage as DealStage;
+                        const stLabel = isRu ? DEAL_STAGE_LABELS[stage]?.ru : DEAL_STAGE_LABELS[stage]?.en;
+                        return (
+                          <button
+                            key={`deal-${d.id}`}
+                            type="button"
+                            onClick={() => navigate(APP_ROUTES.MC_SALES_DEAL(d.id))}
+                            className="flex gap-2.5 p-2 rounded-lg hover:bg-muted/30 relative w-full text-left"
+                          >
+                            <span className="flex h-[26px] w-[26px] items-center justify-center rounded-full bg-card border-2 border-primary text-xs shrink-0 z-10">
+                              💼
+                            </span>
+                            <div className="flex-1 min-w-0 pt-0.5">
+                              <span className="text-xs font-medium text-primary">{isRu ? 'Сделка' : 'Deal'}</span>
+                              <p className="text-sm font-medium mt-0.5">{d.client_name}</p>
+                              <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                                <Badge variant="secondary" className="text-[10px]">{stLabel || stage}</Badge>
+                                {(d.deal_value != null || d.budget_max != null) && (
+                                  <span className="text-[11px] text-muted-foreground">
+                                    {Number(d.deal_value ?? d.budget_max ?? 0).toLocaleString()} {d.currency || contact.currency || 'THB'}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-[11px] text-muted-foreground mt-0.5">
+                                {formatDistanceToNow(new Date(d.updated_at), { addSuffix: true, locale })}
+                              </p>
+                            </div>
+                            <ChevronRight className="h-4 w-4 text-muted-foreground/40 shrink-0 self-center" />
+                          </button>
+                        );
                       }
                     })}
                   </div>
@@ -620,6 +730,29 @@ export default function ContactDetail() {
 
             {/* Deals */}
             <TabsContent value="deals" className="mt-4 space-y-4">
+              {deals.length > 0 && (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 rounded-xl border bg-muted/30 p-4">
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide">{isRu ? 'В работе (сумма)' : 'Open pipeline'}</p>
+                    <p className="text-lg font-semibold tabular-nums">
+                      {contactDealEconomics.pipeline.toLocaleString()} {dealCurrency}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground">{isRu ? 'deal_value или budget_max' : 'deal_value or budget_max'}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide">{isRu ? 'Закрыто выиграно' : 'Closed won'}</p>
+                    <p className="text-lg font-semibold tabular-nums text-success">
+                      {contactDealEconomics.wonValue.toLocaleString()} {dealCurrency}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide">{isRu ? 'Комиссия (факт)' : 'Commission'}</p>
+                    <p className="text-lg font-semibold tabular-nums">
+                      {contactDealEconomics.commissionEarned.toLocaleString()} {dealCurrency}
+                    </p>
+                  </div>
+                </div>
+              )}
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium">{isRu ? 'Связанные сделки' : 'Linked Deals'}</p>
                 <Button variant="outline" size="sm" onClick={() => setShowCreateDeal(true)}>
@@ -648,7 +781,12 @@ export default function ContactDetail() {
                           <span className="text-sm font-medium">{d.client_name}</span>
                           <div className="flex items-center gap-2 mt-1">
                             <Badge variant="secondary" className="text-[10px]">{label || stage}</Badge>
-                            {d.budget_max && <span className="text-xs text-muted-foreground">{Number(d.budget_max).toLocaleString()} {d.currency}</span>}
+                            {(d.deal_value != null || d.budget_max != null) && (
+                              <span className="text-xs text-muted-foreground">
+                                {Number(d.deal_value ?? d.budget_max ?? 0).toLocaleString()} {d.currency || dealCurrency}
+                                {d.deal_value != null ? (isRu ? ' · сделка' : ' · deal') : (isRu ? ' · бюджет' : ' · budget')}
+                              </span>
+                            )}
                           </div>
                         </div>
                         <ChevronRight className="h-4 w-4 text-muted-foreground/40 shrink-0" />
@@ -771,6 +909,53 @@ export default function ContactDetail() {
             </div>
           )}
 
+          {chatterTab === 'activities' && user && (
+            <div className="space-y-2 rounded-xl border bg-card p-3">
+              <Select value={logActType} onValueChange={setLogActType}>
+                <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="call">{isRu ? 'Звонок' : 'Call'}</SelectItem>
+                  <SelectItem value="meeting">{isRu ? 'Встреча' : 'Meeting'}</SelectItem>
+                  <SelectItem value="whatsapp">WhatsApp</SelectItem>
+                  <SelectItem value="email_sent">Email</SelectItem>
+                  <SelectItem value="service_request">{isRu ? 'Услуга' : 'Service'}</SelectItem>
+                  <SelectItem value="visa_consultation">{isRu ? 'Виза (консультация)' : 'Visa consultation'}</SelectItem>
+                </SelectContent>
+              </Select>
+              {logActType === 'visa_consultation' && (
+                <Select value={visaServiceKey} onValueChange={setVisaServiceKey}>
+                  <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="long_term_visa">{isRu ? 'Долгосрочная виза' : 'Long-term visa'}</SelectItem>
+                    <SelectItem value="tourist_visa">{isRu ? 'Туристическая' : 'Tourist visa'}</SelectItem>
+                    <SelectItem value="elite_visa">{isRu ? 'Elite / Privilege' : 'Elite / Privilege'}</SelectItem>
+                    <SelectItem value="other">{isRu ? 'Другое' : 'Other'}</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+              <Input
+                className="h-9 text-sm"
+                placeholder={isRu ? 'Тема *' : 'Subject *'}
+                value={logActSubject}
+                onChange={(e) => setLogActSubject(e.target.value)}
+              />
+              <Textarea
+                className="text-sm min-h-[72px]"
+                placeholder={isRu ? 'Детали (необязательно)' : 'Details (optional)'}
+                value={logActDescription}
+                onChange={(e) => setLogActDescription(e.target.value)}
+              />
+              <Button
+                size="sm"
+                className="w-full"
+                onClick={handleLogCrmActivity}
+                disabled={logActivity.isPending || !logActSubject.trim()}
+              >
+                {isRu ? 'Записать взаимодействие' : 'Log interaction'}
+              </Button>
+            </div>
+          )}
+
           {/* Quick contacts */}
           <div className="flex flex-wrap gap-2">
             {contact.phone && (
@@ -835,8 +1020,8 @@ export default function ContactDetail() {
                         </button>
                       </div>
                     );
-                  } else {
-                    const activity = item.data as any;
+                  } else if (item.type === 'activity') {
+                    const activity = item.data as { id: string; activity_type: string; subject?: string; description?: string; activity_date: string };
                     const config = ACTIVITY_TYPE_CONFIG[activity.activity_type];
                     const activityIcon = activity.activity_type === 'stage_change' ? '🔄' :
                       activity.activity_type === 'workflow_executed' ? '⚡' :
@@ -862,6 +1047,40 @@ export default function ContactDetail() {
                           </p>
                         </div>
                       </div>
+                    );
+                  } else {
+                    const d = item.data as AgentDeal;
+                    const stage = d.stage as DealStage;
+                    const stLabel = isRu ? DEAL_STAGE_LABELS[stage]?.ru : DEAL_STAGE_LABELS[stage]?.en;
+                    return (
+                      <button
+                        key={`deal-${d.id}`}
+                        type="button"
+                        onClick={() => navigate(APP_ROUTES.MC_SALES_DEAL(d.id))}
+                        className="flex gap-2.5 p-2 rounded-lg hover:bg-muted/30 transition-colors relative w-full text-left"
+                      >
+                        <div className="relative z-10 shrink-0 mt-1">
+                          <span className="flex h-[26px] w-[26px] items-center justify-center rounded-full bg-card border-2 border-primary text-xs">
+                            💼
+                          </span>
+                        </div>
+                        <div className="flex-1 min-w-0 pt-0.5">
+                          <span className="text-xs font-medium text-primary">{isRu ? 'Сделка' : 'Deal'}</span>
+                          <p className="text-sm font-medium mt-0.5">{d.client_name}</p>
+                          <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                            <Badge variant="secondary" className="text-[10px]">{stLabel || stage}</Badge>
+                            {(d.deal_value != null || d.budget_max != null) && (
+                              <span className="text-[11px] text-muted-foreground">
+                                {Number(d.deal_value ?? d.budget_max ?? 0).toLocaleString()} {d.currency || contact.currency || 'THB'}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[11px] text-muted-foreground mt-0.5">
+                            {formatDistanceToNow(new Date(d.updated_at), { addSuffix: true, locale })}
+                          </p>
+                        </div>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground/40 shrink-0 self-center" />
+                      </button>
                     );
                   }
                 })}

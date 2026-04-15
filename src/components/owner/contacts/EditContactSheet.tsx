@@ -9,18 +9,24 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useUpdateContact, CrmContact } from '@/hooks/useCrmContacts';
 import { useCrmOptions } from '@/hooks/useCrmSettings';
 import { PHUKET_DISTRICTS, PROPERTY_TYPES, CURRENCIES } from '@/hooks/useAgentDeals';
-import { CRM_ROLES, CRM_ROLE_LABELS } from '@/types/contact';
+import { CRM_ROLES, CRM_ROLE_LABELS, type CrmRole } from '@/types/contact';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { X, UserCog } from 'lucide-react';
 import { ContactTagPicker } from '@/components/owner/contacts/ContactTagPicker';
+import { LeadSourceField } from '@/components/owner/contacts/LeadSourceField';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
-
-const COMMON_INTERESTS = [
-  'golf', 'diving', 'yoga', 'fitness', 'sailing', 'travel', 'wine', 'cooking',
-  'art', 'photography', 'crypto', 'business', 'kids activities', 'spa',
-];
+import { Switch } from '@/components/ui/switch';
+import {
+  CRM_COMMUNICATION_LANG_PRESETS,
+  CRM_LANG_CUSTOM_VALUE,
+  COMMON_CONTACT_INTERESTS,
+  languageForDb,
+  parseLanguageFields,
+  MARITAL_STATUS_LABELS,
+  MARITAL_STATUS_VALUES,
+} from '@/lib/crmContactFormPresets';
 
 interface Props {
   open: boolean;
@@ -47,10 +53,17 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
     facebook: contact.facebook || '',
     linkedin: contact.linkedin || '',
     contact_type: contact.contact_type || 'buyer',
-    crm_role: (contact as { crm_role?: string }).crm_role || 'other',
+    crm_roles: (() => {
+      const raw = (contact as { crm_roles?: string[] | null }).crm_roles;
+      if (Array.isArray(raw) && raw.length > 0) return raw.filter((x): x is CrmRole => (CRM_ROLES as readonly string[]).includes(x));
+      return [] as CrmRole[];
+    })(),
     source: contact.source || 'website',
     nationality: contact.nationality || '',
-    language: contact.language || '',
+    langPreset: parseLanguageFields(contact.language).preset,
+    langCustom: parseLanguageFields(contact.language).custom,
+    marital_status: contact.marital_status || '',
+    is_vip: contact.is_vip ?? (contact.tags || []).some((t) => t.toUpperCase() === 'VIP'),
     company_name: contact.company_name || '',
     job_title: contact.job_title || '',
     notes: contact.notes || '',
@@ -90,10 +103,17 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
       facebook: contact.facebook || '',
       linkedin: contact.linkedin || '',
       contact_type: contact.contact_type || 'buyer',
-      crm_role: (contact as { crm_role?: string }).crm_role || 'other',
+      crm_roles: (() => {
+        const raw = (contact as { crm_roles?: string[] | null }).crm_roles;
+        if (Array.isArray(raw) && raw.length > 0) return raw.filter((x): x is CrmRole => (CRM_ROLES as readonly string[]).includes(x));
+        return [] as CrmRole[];
+      })(),
       source: contact.source || 'website',
       nationality: contact.nationality || '',
-      language: contact.language || '',
+      langPreset: parseLanguageFields(contact.language).preset,
+      langCustom: parseLanguageFields(contact.language).custom,
+      marital_status: contact.marital_status || '',
+      is_vip: contact.is_vip ?? (contact.tags || []).some((t) => t.toUpperCase() === 'VIP'),
       company_name: contact.company_name || '',
       job_title: contact.job_title || '',
       notes: contact.notes || '',
@@ -120,11 +140,34 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
     });
   }, [contact]);
 
+  useEffect(() => {
+    if (contactTypes.length === 0 && leadSources.length === 0) return;
+    setForm((f) => {
+      const next = { ...f };
+      if (contactTypes.length > 0 && !contactTypes.some((o) => o.value === f.contact_type)) {
+        next.contact_type = contactTypes[0].value;
+      }
+      if (leadSources.length > 0 && !leadSources.some((o) => o.value === f.source)) {
+        next.source = leadSources[0].value;
+      }
+      return next;
+    });
+  }, [contactTypes, leadSources]);
+
+  const syncVipTags = (tags: string[], isVip: boolean): string[] => {
+    const hasVip = tags.some((t) => t.toUpperCase() === 'VIP');
+    if (isVip && !hasVip) return [...tags, 'VIP'];
+    if (!isVip && hasVip) return tags.filter((t) => t.toUpperCase() !== 'VIP');
+    return tags;
+  };
+
   const handleSubmit = async () => {
     if (!form.first_name.trim()) {
       toast({ title: isRu ? 'Введите имя' : 'Enter first name', variant: 'destructive' });
       return;
     }
+    const langDb = languageForDb(form.langPreset, form.langCustom);
+    const tagsOut = syncVipTags(form.tags, form.is_vip);
     try {
       await updateContact.mutateAsync({
         id: contact.id,
@@ -138,9 +181,12 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
         facebook: form.facebook || null,
         linkedin: form.linkedin || null,
         contact_type: form.contact_type,
+        crm_roles: form.crm_roles,
         source: form.source,
         nationality: form.nationality || null,
-        language: form.language || null,
+        language: langDb,
+        marital_status: form.marital_status || null,
+        is_vip: form.is_vip,
         company_name: form.company_name || null,
         job_title: form.job_title || null,
         notes: form.notes || null,
@@ -154,7 +200,7 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
         family_info: form.family_info || null,
         interests: form.interests.length ? form.interests : null,
         scoring: form.scoring ? Number(form.scoring) : 0,
-        tags: form.tags,
+        tags: tagsOut,
         mobile: form.mobile || null,
         address_street: form.address_street || null,
         address_street2: form.address_street2 || null,
@@ -168,7 +214,7 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
       toast({ title: isRu ? 'Контакт обновлён' : 'Contact updated' });
       onOpenChange(false);
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      /* useUpdateContact onError shows formatPostgrestError via sonner */
     }
   };
 
@@ -224,7 +270,7 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
         <div><Label>Facebook</Label><Input value={form.facebook} onChange={e => setForm(f => ({ ...f, facebook: e.target.value }))} placeholder="URL or username" /></div>
         <div><Label>LinkedIn</Label><Input value={form.linkedin} onChange={e => setForm(f => ({ ...f, linkedin: e.target.value }))} placeholder="URL or username" /></div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         <div>
           <Label>{isRu ? 'Тип' : 'Type'}</Label>
           <Select value={form.contact_type} onValueChange={v => setForm(f => ({ ...f, contact_type: v }))}>
@@ -232,25 +278,40 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
             <SelectContent>{contactTypes.map(t => <SelectItem key={t.value} value={t.value}>{isRu ? t.label_ru : t.label_en}</SelectItem>)}</SelectContent>
           </Select>
         </div>
-        <div>
-          <Label>{isRu ? 'Роль' : 'Role'}</Label>
-          <Select value={form.crm_role} onValueChange={v => setForm(f => ({ ...f, crm_role: v }))}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {CRM_ROLES.map(r => (
-                <SelectItem key={r} value={r}>{isRu ? CRM_ROLE_LABELS[r].ru : CRM_ROLE_LABELS[r].en}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Label>{isRu ? 'Источник' : 'Source'}</Label>
-          <Select value={form.source} onValueChange={v => setForm(f => ({ ...f, source: v }))}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>{leadSources.map(s => <SelectItem key={s.value} value={s.value}>{isRu ? s.label_ru : s.label_en}</SelectItem>)}</SelectContent>
-          </Select>
-        </div>
+        <LeadSourceField
+          companyId={contact.company_id}
+          isRu={isRu}
+          leadSources={leadSources}
+          value={form.source}
+          onValueChange={(v) => setForm((f) => ({ ...f, source: v }))}
+        />
         <div><Label>{isRu ? 'Нац.' : 'Nation.'}</Label><Input value={form.nationality} onChange={e => setForm(f => ({ ...f, nationality: e.target.value }))} /></div>
+      </div>
+      <div>
+        <Label className="mb-1.5 block">{isRu ? 'Роли CRM' : 'CRM roles'}</Label>
+        <p className="text-xs text-muted-foreground mb-2">{isRu ? 'Можно выбрать несколько' : 'Select one or more'}</p>
+        <div className="flex flex-wrap gap-1.5">
+          {CRM_ROLES.map((r) => (
+            <button
+              key={r}
+              type="button"
+              onClick={() =>
+                setForm((f) => ({
+                  ...f,
+                  crm_roles: f.crm_roles.includes(r) ? f.crm_roles.filter((x) => x !== r) : [...f.crm_roles, r],
+                }))
+              }
+              className={cn(
+                'px-2.5 py-1 rounded-full text-xs border transition-colors',
+                form.crm_roles.includes(r)
+                  ? 'bg-primary text-primary-foreground border-primary'
+                  : 'bg-card border-border text-muted-foreground hover:border-primary/50'
+              )}
+            >
+              {isRu ? CRM_ROLE_LABELS[r].ru : CRM_ROLE_LABELS[r].en}
+            </button>
+          ))}
+        </div>
       </div>
 
       <Separator />
@@ -286,9 +347,49 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
           <Input type="date" value={form.birthday} onChange={e => setForm(f => ({ ...f, birthday: e.target.value }))} />
         </div>
         <div>
-          <Label>{isRu ? 'Язык' : 'Language'}</Label>
-          <Input placeholder={isRu ? 'RU, EN, TH...' : 'EN, RU, TH...'} value={form.language} onChange={e => setForm(f => ({ ...f, language: e.target.value }))} />
+          <Label>{isRu ? 'Язык общения' : 'Language'}</Label>
+          <Select
+            value={form.langPreset}
+            onValueChange={(v) =>
+              setForm((f) => ({
+                ...f,
+                langPreset: v,
+                langCustom: v === CRM_LANG_CUSTOM_VALUE ? f.langCustom : '',
+              }))
+            }
+          >
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {CRM_COMMUNICATION_LANG_PRESETS.map((p) => (
+                <SelectItem key={p.code} value={p.code}>{isRu ? p.labelRu : p.labelEn}</SelectItem>
+              ))}
+              <SelectItem value={CRM_LANG_CUSTOM_VALUE}>{isRu ? 'Другое' : 'Other'}</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
+      </div>
+      {form.langPreset === CRM_LANG_CUSTOM_VALUE && (
+        <div>
+          <Label>{isRu ? 'Укажите язык' : 'Specify language'}</Label>
+          <Input
+            value={form.langCustom}
+            onChange={(e) => setForm((f) => ({ ...f, langCustom: e.target.value }))}
+            placeholder={isRu ? 'Например: японский' : 'e.g. Japanese'}
+          />
+        </div>
+      )}
+
+      <div>
+        <Label>{isRu ? 'Семейное положение' : 'Marital status'}</Label>
+        <Select value={form.marital_status || '__none__'} onValueChange={(v) => setForm((f) => ({ ...f, marital_status: v === '__none__' ? '' : v }))}>
+          <SelectTrigger><SelectValue placeholder={isRu ? 'Не указано' : 'Not set'} /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__none__">{isRu ? 'Не указано' : 'Not set'}</SelectItem>
+            {MARITAL_STATUS_VALUES.map((ms) => (
+              <SelectItem key={ms} value={ms}>{isRu ? MARITAL_STATUS_LABELS[ms].ru : MARITAL_STATUS_LABELS[ms].en}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div>
@@ -304,16 +405,16 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
       <div>
         <Label className="mb-1.5 block">{isRu ? 'Интересы' : 'Interests'}</Label>
         <div className="flex flex-wrap gap-1.5 mb-2">
-          {COMMON_INTERESTS.map(i => (
+          {COMMON_CONTACT_INTERESTS.map(i => (
             <button key={i} onClick={() => toggleArray('interests', i)}
               className={cn('px-2.5 py-1 rounded-full text-xs border transition-colors',
                 form.interests.includes(i) ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-muted-foreground'
               )}>{i}</button>
           ))}
         </div>
-        {form.interests.filter(i => !COMMON_INTERESTS.includes(i)).length > 0 && (
+        {form.interests.filter(i => !(COMMON_CONTACT_INTERESTS as readonly string[]).includes(i)).length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-2">
-            {form.interests.filter(i => !COMMON_INTERESTS.includes(i)).map(i => (
+            {form.interests.filter(i => !(COMMON_CONTACT_INTERESTS as readonly string[]).includes(i)).map(i => (
               <Badge key={i} variant="secondary" className="gap-1 text-xs">
                 {i}
                 <button onClick={() => toggleArray('interests', i)}><X className="h-3 w-3" /></button>
@@ -395,16 +496,36 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
         </div>
       </div>
 
+      <div className="flex items-center justify-between rounded-lg border p-3">
+        <div>
+          <p className="text-sm font-medium">VIP</p>
+          <p className="text-xs text-muted-foreground">{isRu ? 'Приоритетный клиент' : 'Priority client'}</p>
+        </div>
+        <Switch
+          checked={form.is_vip}
+          onCheckedChange={(checked) =>
+            setForm((f) => ({
+              ...f,
+              is_vip: checked,
+              tags: syncVipTags(f.tags, checked),
+            }))
+          }
+        />
+      </div>
+
       {/* Tags */}
       <div>
         <Label className="mb-1.5 block">{isRu ? 'Теги' : 'Tags'}</Label>
         <ContactTagPicker
           companyId={contact.company_id}
           selectedTags={form.tags}
-          onToggle={(tag) => setForm(f => ({
-            ...f,
-            tags: f.tags.includes(tag) ? f.tags.filter(t => t !== tag) : [...f.tags, tag],
-          }))}
+          onToggle={(tag) =>
+            setForm((f) => {
+              const nextTags = f.tags.includes(tag) ? f.tags.filter((t) => t !== tag) : [...f.tags, tag];
+              const isVip = nextTags.some((t) => t.toUpperCase() === 'VIP');
+              return { ...f, tags: nextTags, is_vip: isVip };
+            })
+          }
         />
       </div>
 

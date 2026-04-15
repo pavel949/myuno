@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,11 +29,24 @@ export function CloseDealDialog({ open, onOpenChange, dealId, currentStage, mode
   const addActivity = useAddDealActivity();
   const { data: membership } = useMyCompanyId();
   const { data: lostReasons = [] } = useCrmOptions(membership?.company_id, 'lost_reason');
+  const { data: winReasons = [] } = useCrmOptions(membership?.company_id, 'win_reason');
 
   const [dealValue, setDealValue] = useState('');
   const [commissionPercent, setCommissionPercent] = useState('');
   const [selectedReason, setSelectedReason] = useState('');
   const [lostReasonText, setLostReasonText] = useState('');
+  const [selectedWinReason, setSelectedWinReason] = useState('');
+  const [winReasonText, setWinReasonText] = useState('');
+
+  useEffect(() => {
+    if (!open) return;
+    setDealValue('');
+    setCommissionPercent('');
+    setSelectedReason('');
+    setLostReasonText('');
+    setSelectedWinReason('');
+    setWinReasonText('');
+  }, [open, mode, dealId]);
 
   const reasonLabel = selectedReason
     ? (isRu
@@ -41,10 +54,20 @@ export function CloseDealDialog({ open, onOpenChange, dealId, currentStage, mode
       : lostReasons.find(r => r.value === selectedReason)?.label_en) || selectedReason
     : lostReasonText;
 
+  const winLabel = selectedWinReason
+    ? (isRu
+      ? winReasons.find(r => r.value === selectedWinReason)?.label_ru
+      : winReasons.find(r => r.value === selectedWinReason)?.label_en) || selectedWinReason
+    : winReasonText;
+
   const handleSubmit = async () => {
-    const finalReason = selectedReason === 'other'
+    const finalLostReason = selectedReason === 'other'
       ? lostReasonText || (isRu ? 'Другое' : 'Other')
       : reasonLabel || lostReasonText;
+
+    const finalWinReason = selectedWinReason === 'other'
+      ? winReasonText || (isRu ? 'Другое' : 'Other')
+      : winLabel || winReasonText;
 
     try {
       if (mode === 'won') {
@@ -55,13 +78,16 @@ export function CloseDealDialog({ open, onOpenChange, dealId, currentStage, mode
           deal_value: dealValue ? Number(dealValue) : null,
           commission_percent: commissionPercent ? Number(commissionPercent) : null,
           commission_amount: dealValue && commissionPercent ? Number(dealValue) * Number(commissionPercent) / 100 : null,
+          won_reason: finalWinReason.trim() || null,
+          lost_reason: null,
         });
       } else {
         await updateDeal.mutateAsync({
           id: dealId,
           stage: 'closed_lost',
           closed_at: new Date().toISOString(),
-          lost_reason: finalReason || null,
+          lost_reason: finalLostReason || null,
+          won_reason: null,
         });
       }
       await addActivity.mutateAsync({
@@ -69,8 +95,10 @@ export function CloseDealDialog({ open, onOpenChange, dealId, currentStage, mode
         user_id: user!.id,
         activity_type: 'stage_change',
         description: mode === 'won'
-          ? (isRu ? 'Сделка закрыта — успех' : 'Deal closed — won')
-          : (isRu ? `Сделка проиграна: ${finalReason}` : `Deal lost: ${finalReason}`),
+          ? (isRu
+            ? `Сделка закрыта — успех${finalWinReason.trim() ? ` (${finalWinReason.trim()})` : ''}`
+            : `Deal closed — won${finalWinReason.trim() ? ` (${finalWinReason.trim()})` : ''}`)
+          : (isRu ? `Сделка проиграна: ${finalLostReason}` : `Deal lost: ${finalLostReason}`),
         stage_from: currentStage,
         stage_to: mode === 'won' ? 'closed_won' : 'closed_lost',
       });
@@ -107,6 +135,34 @@ export function CloseDealDialog({ open, onOpenChange, dealId, currentStage, mode
                   {isRu ? 'Комиссия' : 'Commission'}: {(Number(dealValue) * Number(commissionPercent) / 100).toLocaleString()} THB
                 </p>
               )}
+              <div className="space-y-3">
+                <Label>{isRu ? 'Причина успеха (опционально)' : 'Win reason (optional)'}</Label>
+                <div className="flex flex-wrap gap-1.5">
+                  {winReasons.filter(r => r.is_active).map(r => (
+                    <button
+                      key={r.value}
+                      type="button"
+                      onClick={() => setSelectedWinReason(r.value)}
+                      className={cn(
+                        'px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
+                        selectedWinReason === r.value
+                          ? 'border-primary bg-primary/10 text-primary'
+                          : 'border-border bg-card text-muted-foreground hover:border-foreground/30',
+                      )}
+                    >
+                      {isRu ? r.label_ru : r.label_en}
+                    </button>
+                  ))}
+                </div>
+                {(selectedWinReason === 'other' || !winReasons.length) && (
+                  <Textarea
+                    value={winReasonText}
+                    onChange={e => setWinReasonText(e.target.value)}
+                    rows={2}
+                    placeholder={isRu ? 'Комментарий...' : 'Comment...'}
+                  />
+                )}
+              </div>
             </>
           ) : (
             <div className="space-y-3">
@@ -115,6 +171,7 @@ export function CloseDealDialog({ open, onOpenChange, dealId, currentStage, mode
                 {lostReasons.filter(r => r.is_active).map(r => (
                   <button
                     key={r.value}
+                    type="button"
                     onClick={() => setSelectedReason(r.value)}
                     className={cn(
                       'px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',

@@ -26,6 +26,7 @@ export const ACTIVITY_TYPES = [
   'call', 'email_sent', 'email_received', 'meeting', 'note', 'whatsapp',
   'sms', 'document_shared', 'task_completed', 'stage_changed',
   'property_viewed', 'quote_sent', 'form_submitted',
+  'service_request', 'visa_consultation',
 ] as const;
 
 export const ACTIVITY_OUTCOMES = [
@@ -46,6 +47,8 @@ export const ACTIVITY_TYPE_CONFIG: Record<string, { labelEn: string; labelRu: st
   property_viewed: { labelEn: 'Property Viewed', labelRu: 'Просмотр', icon: 'Eye', color: 'text-warning' },
   quote_sent: { labelEn: 'Quote Sent', labelRu: 'КП отправлено', icon: 'Send', color: 'text-info' },
   form_submitted: { labelEn: 'Form Submitted', labelRu: 'Форма', icon: 'ClipboardList', color: 'text-primary' },
+  service_request: { labelEn: 'Service', labelRu: 'Услуга', icon: 'Briefcase', color: 'text-primary' },
+  visa_consultation: { labelEn: 'Visa', labelRu: 'Виза', icon: 'Plane', color: 'text-info' },
 };
 
 export function useCrmActivities(contactId?: string, dealId?: string, limit = 30) {

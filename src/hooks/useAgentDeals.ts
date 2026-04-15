@@ -68,6 +68,8 @@ export interface AgentDeal {
   company_id: string;
   agent_id: string;
   property_id: string | null;
+  /** Offplan / newbuild project (developer catalog), optional */
+  property_project_id: string | null;
   contact_id: string | null;
   client_name: string;
   client_phone: string | null;
@@ -90,6 +92,8 @@ export interface AgentDeal {
   commission_amount: number | null;
   closed_at: string | null;
   lost_reason: string | null;
+  /** Set when closing won; mirrors crm_custom_options win_reason labels or free text */
+  won_reason: string | null;
   tags: string[];
   priority: number;
   is_vip: boolean;

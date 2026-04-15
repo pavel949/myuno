@@ -19,7 +19,8 @@ const DialogOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      "fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      /* Below DialogContent (z-50) so content stays interactive when overlay is rendered after content in the portal (DOM order). */
+      "fixed inset-0 z-40 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
       className,
     )}
     {...props}
@@ -30,14 +31,15 @@ DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 interface DialogContentProps extends React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> {
   hideCloseButton?: boolean;
   hideOverlay?: boolean;
+  /** Merged into DialogOverlay — use for z-index / stacking with maps, drawers, or nav at z-[100]. */
+  overlayClassName?: string;
 }
 
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   DialogContentProps
->(({ className, children, hideCloseButton, hideOverlay, ...props }, ref) => (
+>(({ className, children, hideCloseButton, hideOverlay, overlayClassName, ...props }, ref) => (
   <DialogPortal>
-    {!hideOverlay && <DialogOverlay />}
     <DialogPrimitive.Content
       ref={ref}
       aria-describedby={props['aria-describedby'] ?? undefined}
@@ -55,6 +57,7 @@ const DialogContent = React.forwardRef<
         </DialogPrimitive.Close>
       )}
     </DialogPrimitive.Content>
+    {!hideOverlay && <DialogOverlay className={overlayClassName} />}
   </DialogPortal>
 ));
 DialogContent.displayName = DialogPrimitive.Content.displayName;

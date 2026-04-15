@@ -1,5 +1,5 @@
-import { useCallback, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useCallback, useEffect, useRef } from 'react';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePropertyWizard } from '@/hooks/usePropertyWizard';
 import { PageContainer } from '@/components/uno/PageContainer';
@@ -21,14 +21,21 @@ import { Button } from '@/components/ui/button';
 import { Copy, MapPin, Plus, Save } from 'lucide-react';
 import { toast } from 'sonner';
 import { GOOGLE_MAPS_API_KEY } from '@/lib/googleMaps';
+import { useCrmContact } from '@/hooks/useCrmContacts';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 export default function AddProperty() {
   const { language } = useLanguage();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const isRu = language === 'ru';
 
   // All form logic from the hook
   const wizard = usePropertyWizard();
+
+  const ownerContactId = searchParams.get('owner_contact_id');
+  const { data: ownerContact } = useCrmContact(ownerContactId ?? undefined);
+  const ownerPrefillApplied = useRef<string | null>(null);
 
   // Apply prefill data from AI Intake or OTA import
   const prefillData = (location.state as any)?.prefillData;
@@ -37,6 +44,18 @@ export default function AddProperty() {
       wizard.applyPrefillData(prefillData);
     }
   }, [prefillData, wizard.isCloneDataApplied, wizard.applyPrefillData]);
+
+  useEffect(() => {
+    if (!ownerContactId || !ownerContact) return;
+    if (ownerPrefillApplied.current === ownerContactId) return;
+    ownerPrefillApplied.current = ownerContactId;
+    wizard.updateOwnershipData({
+      ownership_type: 'verbal',
+      actual_owner_name: `${ownerContact.first_name} ${ownerContact.last_name}`.trim(),
+      actual_owner_phone: ownerContact.phone || ownerContact.mobile || ownerContact.whatsapp || '',
+      actual_owner_email: ownerContact.email || '',
+    });
+  }, [ownerContactId, ownerContact, wizard.updateOwnershipData]);
 
   const handleNewObject = useCallback(() => {
     wizard.resetForm();
@@ -166,6 +185,25 @@ export default function AddProperty() {
             {isRu 
               ? `Создание копии объекта "${wizard.sourceProperty.title || wizard.sourceProperty.title_ru}". Измените этаж и номер квартиры.`
               : `Creating a copy of "${wizard.sourceProperty.title || wizard.sourceProperty.title_ru}". Update floor and unit number.`}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {ownerContactId && (
+        <Alert className="bg-muted/50 border-border">
+          <AlertDescription className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm">
+            <span>
+              {ownerContact
+                ? (isRu
+                  ? `Владелец предзаполнен из CRM: ${ownerContact.first_name} ${ownerContact.last_name}. После сохранения объекта свяжите его с контактом на карточке.`
+                  : `Owner prefilled from CRM: ${ownerContact.first_name} ${ownerContact.last_name}. After saving, link the property from the contact card.`)
+                : (isRu ? 'Загрузка данных контакта…' : 'Loading contact…')}
+            </span>
+            <Button variant="outline" size="sm" asChild className="shrink-0 w-full sm:w-auto">
+              <Link to={APP_ROUTES.MC_CONTACT_DETAIL(ownerContactId)}>
+                {isRu ? 'К карточке контакта' : 'Open contact'}
+              </Link>
+            </Button>
           </AlertDescription>
         </Alert>
       )}

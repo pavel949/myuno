@@ -10,6 +10,7 @@ import { AlertCircle, Crown, Handshake } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCreateDeal, useDuplicateCheck, CLIENT_SOURCES, PHUKET_DISTRICTS, PROPERTY_TYPES, CURRENCIES, DEAL_TYPES, DEAL_TYPE_LABELS } from '@/hooks/useAgentDeals';
+import { usePropertyProjects } from '@/hooks/usePropertyProjects';
 import { useCreateContact, CrmContact } from '@/hooks/useCrmContacts';
 import { ContactSearchInput } from '@/components/owner/contacts/ContactSearchInput';
 import { useToast } from '@/hooks/use-toast';
@@ -41,6 +42,7 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
   const navigate = useNavigate();
   const createDeal = useCreateDeal();
   const createContact = useCreateContact();
+  const { data: catalogProjects = [] } = usePropertyProjects();
   const [selectedContact, setSelectedContact] = useState<CrmContact | null>(prefilledContact || null);
 
   useEffect(() => {
@@ -77,6 +79,7 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
     preferred_types: [] as string[],
     preferred_districts: [] as string[],
     is_vip: false,
+    property_project_id: '' as string,
   });
   const [errors, setErrors] = useState<{
     client_name?: string;
@@ -169,6 +172,7 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
         company_id: companyId,
         agent_id: user!.id,
         property_id: null,
+        property_project_id: form.property_project_id || null,
         client_name: clientName,
         client_phone: clientPhone,
         client_email: clientEmail,
@@ -186,7 +190,7 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
         is_vip: form.is_vip,
         next_action: null, next_action_date: null, deal_value: null,
         commission_percent: null, commission_amount: null,
-        closed_at: null, lost_reason: null,
+        closed_at: null, lost_reason: null, won_reason: null,
         ...(contactId ? { contact_id: contactId } : {}),
       } as any);
       toast({
@@ -196,7 +200,7 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
       onOpenChange(false);
       setSelectedContact(null);
       setErrors({});
-      setForm({ client_name: '', client_phone: '', client_email: '', client_source: 'website', deal_type: 'sale', notes: '', budget_min: '', budget_max: '', currency: 'THB', bedrooms_min: '', preferred_types: [], preferred_districts: [], is_vip: false });
+      setForm({ client_name: '', client_phone: '', client_email: '', client_source: 'website', deal_type: 'sale', notes: '', budget_min: '', budget_max: '', currency: 'THB', bedrooms_min: '', preferred_types: [], preferred_districts: [], is_vip: false, property_project_id: '' });
       if (createdDeal?.id) {
         navigate(`${APP_ROUTES.MC_SALES}/${createdDeal.id}`);
       }
@@ -306,6 +310,31 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
             </button>
           ))}
         </div>
+      </div>
+
+      <div>
+        <Label>{isRu ? 'Проект (offplan / новостройка)' : 'Project (offplan / newbuild)'}</Label>
+        <Select
+          value={form.property_project_id || '__none__'}
+          onValueChange={(v) => setForm((f) => ({ ...f, property_project_id: v === '__none__' ? '' : v }))}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder={isRu ? 'Не выбран' : 'None'} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__none__">{isRu ? '— Без проекта —' : '— No project —'}</SelectItem>
+            {catalogProjects.map((p) => (
+              <SelectItem key={p.id} value={p.id}>
+                {isRu ? p.name_ru || p.name_en : p.name_en || p.name_ru}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <p className="text-xs text-muted-foreground mt-1">
+          {isRu
+            ? 'Для целевых продаж по конкретному ЖК / проекту. Волны и отчёты по проекту — в разработке.'
+            : 'Link this deal to a catalog project. Campaign waves / project rollups are planned.'}
+        </p>
       </div>
 
       <div>

@@ -3,7 +3,7 @@
  * Aligns with crm_contacts, contact_properties, contact_relationships, crm_reminders
  */
 
-/** Role badge for contact card — Owner, Tenant, Investor, etc. */
+/** CRM persona roles (multi-select on crm_contacts.crm_roles) */
 export const CRM_ROLES = [
   'owner',
   'tenant',
@@ -11,6 +11,10 @@ export const CRM_ROLES = [
   'prospect',
   'partner',
   'agent',
+  'tourist',
+  'resident',
+  'developer',
+  'buyer',
   'other',
 ] as const;
 export type CrmRole = (typeof CRM_ROLES)[number];
@@ -22,8 +26,16 @@ export const CRM_ROLE_LABELS: Record<CrmRole, { en: string; ru: string }> = {
   prospect: { en: 'Prospect', ru: 'Потенциальный клиент' },
   partner: { en: 'Partner', ru: 'Партнёр' },
   agent: { en: 'Agent', ru: 'Агент' },
+  tourist: { en: 'Tourist', ru: 'Турист' },
+  resident: { en: 'Resident', ru: 'Резидент' },
+  developer: { en: 'Developer', ru: 'Застройщик' },
+  buyer: { en: 'Buyer', ru: 'Покупатель' },
   other: { en: 'Other', ru: 'Другое' },
 };
+
+export function isCrmRole(value: string): value is CrmRole {
+  return (CRM_ROLES as readonly string[]).includes(value);
+}
 
 /** Contact ↔ Contact relationship types */
 export const CONTACT_RELATIONSHIP_TYPES = [
@@ -88,13 +100,13 @@ export interface ContactRelationship {
   };
 }
 
-/** Extended contact with new fields (crm_role, key_dates) */
+/** Extended contact with new fields (crm_roles, key_dates) */
 export interface CrmContactExtended {
   id: string;
   company_id: string;
   first_name: string;
   last_name: string;
-  crm_role?: CrmRole | null;
+  crm_roles?: CrmRole[] | null;
   contact_type: string | null;
   phone: string | null;
   email: string | null;

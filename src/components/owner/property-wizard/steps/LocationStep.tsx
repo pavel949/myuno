@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -23,6 +23,14 @@ export function LocationStep({ formData, updateFormData }: LocationStepProps) {
 
   const hasLocationFromSearch = !!(formData.address && formData.lat != null && formData.lng != null);
   const showCompactLocation = hasLocationFromSearch && !showEditAddress;
+
+  const projectLocationValue = useMemo(
+    () =>
+      formData.lat != null && formData.lng != null
+        ? { lat: formData.lat, lng: formData.lng, address: formData.address }
+        : undefined,
+    [formData.lat, formData.lng, formData.address],
+  );
 
   return (
     <div className="space-y-6">
@@ -103,11 +111,7 @@ export function LocationStep({ formData, updateFormData }: LocationStepProps) {
           )}
 
           <ProjectLocationPicker
-            value={formData.lat && formData.lng ? { 
-              lat: formData.lat, 
-              lng: formData.lng, 
-              address: formData.address 
-            } : undefined}
+            value={projectLocationValue}
             onChange={(location) => {
               updateFormData({
                 lat: location.lat,
