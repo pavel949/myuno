@@ -1,44 +1,41 @@
 
 
-## Build Quality Audit Results
+## Problem
 
-### Build Status: PASSES (no errors)
-- TypeScript: 0 errors
-- Vite production build: succeeds in ~45s
-- Service worker: compiles, 2155 precache entries
+When clicking "Sign in", the login button shows a spinner indefinitely. There are **two separate loading states**:
 
-### Issues Found
+1. **`authLoading`** (from AuthContext) — has a 5-second timeout fallback, works fine
+2. **`isLoading`** (local state in Auth.tsx, line 210) — set to `true` on form submit, only cleared when `signIn()` resolves or rejects. If the Supabase connection is slow or failing (as seen in the network logs — all requests returning "Failed to fetch"), `signInWithPassword` hangs without a timeout, leaving the spinner forever.
 
-**1. Two oversized chunks (warning, not blocking)**
-- `index-CwnI29N6.js` — **1,333 KB** (main app bundle, too much non-lazy code)
-- `vendor-pdf-C7BBX2hM.js` — **1,363 KB** (jspdf + exceljs, used by only 4 files)
+The network logs confirm all Supabase REST calls are failing with "Failed to fetch" — a transient sandbox connectivity issue. But even in production, a slow network would cause the same infinite spinner.
 
-These exceed the 800 KB limit but don't break the build. They can be safely lazy-imported to reduce initial load.
+## Plan
 
-**2. Database linter: 13 warnings, 0 critical**
-- 2x "RLS Policy Always True" — on closer inspection, no INSERT/UPDATE/DELETE policies have `qual = 'true'`, so these are likely SELECT-only (intentional public read access)
-- 11x "Public Bucket Allows Listing" — storage buckets allow file listing. This is a minor exposure risk (users can enumerate filenames) but typical for apps with public media
+1. **Add a timeout to login and signup operations in `Auth.tsx`** — wrap `signIn()` and `signUp()` calls with a `Promise.race` against a 15-second timeout. If the timeout fires, show a toast error ("Connection timed out, please try again") and reset `isLoading` to `false`.
 
-**3. 526 migrations** — large but not a merge blocker
+2. **Add a timeout helper** — a small `withTimeout(promise, ms)` utility at the top of Auth.tsx that rejects after the specified duration.
 
-### What's Safe to Merge
+### Technical detail
 
-Everything in the current state is **safe to merge**:
-- Build compiles cleanly (zero TS errors, zero build errors)
-- No critical security issues in DB linter
-- The `guest_referral_codes` RLS fix from the last session is applied
-- All 391 tables have RLS enabled
+```typescript
+// In Auth.tsx
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('TIMEOUT')), ms)
+    ),
+  ]);
+}
 
-### Recommended Improvements (post-merge, non-blocking)
+// In handleLogin:
+const { error } = await withTimeout(signIn(email, password), 15000);
 
-1. **Lazy-import jspdf/exceljs** in the 4 files that use them (`DocumentTemplatesPage`, `CatalogExportButton`, `PipelinePivotTable`, `PropertyPdfBrochure`) — this will drop `vendor-pdf` from initial load and save ~1.3 MB
-2. **Code-split the main `index` chunk** — identify large components pulled into the entry bundle and convert to `React.lazy()`
-3. **Restrict storage bucket listing** — add path-scoped SELECT policies on `storage.objects` for public buckets to prevent full enumeration
+// In catch block, detect timeout:
+if (err.message === 'TIMEOUT') {
+  toast.error('Connection timed out. Please check your internet and try again.');
+}
+```
 
-### Plan (if approved)
-
-1. **Lazy-import PDF/Excel libraries** in 4 consumer files using dynamic `import()` — reduces initial bundle by ~1.3 MB
-2. **Verify build** passes after changes
-
-No database changes needed. No breaking changes.
+No database changes needed. Single file edit (`src/pages/Auth.tsx`).
 
