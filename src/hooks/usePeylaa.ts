@@ -172,24 +172,25 @@ export function useSubmitPeylaaLead() {
       const bedroomPref = lead.preferred_bedrooms?.length
         ? `${lead.preferred_bedrooms.join(',')} BR`
         : null;
-      supabase
-        .from('nb_leads' as any)
-        .insert({
-          full_name: lead.full_name,
-          phone: lead.phone,
-          email: lead.email || null,
-          whatsapp: lead.phone,
-          source: `peylaa_${lead.source_channel || 'landing'}`,
-          score: 0,
-          status: 'new',
-          unit_preference: bedroomPref,
-          message: [
-            lead.purchase_purpose && `Цель: ${lead.purchase_purpose}`,
-            lead.purchase_timeline && `Сроки: ${lead.purchase_timeline}`,
-            lead.notes,
-          ].filter(Boolean).join('. ') || null,
-          budget_min: 7100000, // PEYLAA min price
-        } as any);
+      try {
+        await supabase
+          .from('nb_leads' as any)
+          .insert({
+            full_name: lead.full_name,
+            phone: lead.phone,
+            email: lead.email || null,
+            whatsapp: lead.phone,
+            source: `peylaa_${lead.source_channel || 'landing'}`,
+            score: 0,
+            status: 'new',
+            unit_preference: bedroomPref,
+            message: [
+              lead.purchase_purpose && `Цель: ${lead.purchase_purpose}`,
+              lead.purchase_timeline && `Сроки: ${lead.purchase_timeline}`,
+              lead.notes,
+            ].filter(Boolean).join('. ') || null,
+            budget_min: 7100000,
+          } as any);
       } catch { /* non-blocking */ }
 
       // 3. Also create consultation_request for universal CRM pipeline
