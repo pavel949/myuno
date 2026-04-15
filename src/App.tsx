@@ -67,7 +67,7 @@ const QueryProviders = composeProviders([
 function ComingSoonGate({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
   const location = useLocation();
-  const bypassComingSoon = import.meta.env.VITE_BYPASS_COMING_SOON === 'true';
+  const bypassComingSoon = true; // temporarily bypass Coming Soon gate
 
   // Allow auth and public marketing routes through
   const isPublicRoute = location.pathname.startsWith('/auth')
