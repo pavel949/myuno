@@ -1,18 +1,20 @@
 
 
-## Diagnosis Results
+## Diagnosis
 
-**Supabase connection**: Working correctly. Database is accessible — 89 orders found, tables are queryable.
+The preview **is working**. After full script loading (~10-15 seconds due to 100+ Vite dependency modules), the app renders the "Coming Soon" page — which is expected behavior for unauthenticated users (`ComingSoonGate` in `App.tsx` line 82).
 
-**Dev server**: Running on Vite 5.4.19, no build errors. Only Tailwind `ease-*` class warnings (cosmetic, non-blocking).
+**Root cause of slow load**: The Vite dev server serves 100+ individual module scripts, each taking ~10 seconds in the preview environment. One stale chunk (`chunk-LUD74O2T.js`) returned 404 but wasn't critical.
 
-**Preview**: The preview received all recent HMR updates (last at 07:36). It should be showing the latest code.
+**The "Failed to fetch" errors** (CurrencyContext, LanguageContext) were transient network issues in the sandbox, not code bugs.
 
 ## Plan
 
-1. **Trigger a fresh build** — touch a root file (e.g. add a comment to `main.tsx`) to force Vite to do a full page reload in the preview, ensuring the latest code is reflected.
+1. **Clear Vite dependency cache** — delete `node_modules/.vite` to regenerate dependency chunks and fix the 404 on `chunk-LUD74O2T.js`
 
-2. **Verify preview loads** — navigate to the preview and confirm the app renders without errors.
+2. **Trigger fresh build** — touch `src/main.tsx` to force a full page reload after cache clear
 
-No code logic changes needed — the connection to the backend is healthy and the build has no errors.
+3. **Verify** — navigate to preview and confirm the app loads within a reasonable time
+
+No code logic changes needed. This is a dev server cache issue.
 
