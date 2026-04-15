@@ -140,7 +140,7 @@ export default function Profile() {
         <ReferralCard variant="compact" />
 
         {/* Account Menu items */}
-        <SectionCard noPadding className="overflow-hidden divide-y divide-border" role="navigation" aria-label={language === 'ru' ? 'Аккаунт' : 'Account'}>
+        <SectionCard noPadding className="overflow-hidden divide-y divide-border">
           {menuItems.map((item, index) => (
             <button
               key={index}

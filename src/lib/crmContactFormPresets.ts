@@ -24,7 +24,7 @@ export function languageForDb(preset: string, custom: string): string | null {
 export function parseLanguageFields(stored: string | null | undefined): { preset: string; custom: string } {
   if (!stored || !stored.trim()) return { preset: 'en', custom: '' };
   const s = stored.trim();
-  if (PRESET_CODES.has(s)) return { preset: s, custom: '' };
+  if (PRESET_CODES.has(s as any)) return { preset: s, custom: '' };
   return { preset: CRM_LANG_CUSTOM_VALUE, custom: s };
 }
 

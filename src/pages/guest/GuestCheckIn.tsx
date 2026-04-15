@@ -48,6 +48,7 @@ interface CheckInFormData {
   arrival_flight?: string;
   needs_transfer: boolean;
   rules_accepted: boolean;
+  data_consent: boolean;
   signature_url?: string;
 }
 

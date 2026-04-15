@@ -120,7 +120,7 @@ async function flushErrorQueue() {
       },
     }));
 
-    await supabase.from('analytics_events').insert(rows);
+    await supabase.from('analytics_events').insert(rows as any);
   } catch {
     // Silent fail - don't create error loops
   }

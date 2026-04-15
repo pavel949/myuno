@@ -38,7 +38,7 @@ export function VendorRevenueWidget() {
 
       // Orders this month + previous month
       const [currentRes, prevRes, totalOrdersRes] = await Promise.all([
-        supabase.from('orders')
+        (supabase as any).from('orders')
           .select('total_amount')
           .eq('provider_id', provider.id)
           .eq('status', 'completed')

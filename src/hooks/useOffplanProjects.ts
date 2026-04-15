@@ -202,7 +202,7 @@ export function useOffplanProjects(filters?: OffplanFilters) {
 
       if (!rich.error && rich.data && rich.data.length > 0) {
         const ids = rich.data.map((row: { id: string }) => row.id);
-        const catRes = await supabase.from('property_projects').select('id, offplan_catalog').in('id', ids);
+        const catRes = await (supabase as any).from('property_projects').select('id, offplan_catalog').in('id', ids);
         const byId = new Map<string, unknown>();
         if (!catRes.error && catRes.data) {
           for (const row of catRes.data as Array<{ id: string; offplan_catalog?: unknown }>) {

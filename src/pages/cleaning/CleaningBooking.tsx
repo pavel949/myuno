@@ -128,7 +128,7 @@ export default function CleaningBooking() {
     }
 
     // Map UI payment method to useOrders payment method
-    const orderPaymentMethod = paymentMethod === 'card' || paymentMethod === 'online' ? 'stripe' :
+    const orderPaymentMethod = paymentMethod === 'card' || (paymentMethod as string) === 'online' ? 'stripe' :
                                paymentMethod === 'promptpay' ? 'stripe' :
                                paymentMethod === 'concierge_advance' ? 'wallet' : 
                                paymentMethod as 'cash' | 'wallet';

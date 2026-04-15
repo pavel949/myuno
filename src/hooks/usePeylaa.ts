@@ -190,8 +190,8 @@ export function useSubmitPeylaaLead() {
           ].filter(Boolean).join('. ') || null,
           budget_min: 7100000, // PEYLAA min price
         } as any)
-        .then(() => {}) // non-blocking
-        .catch(() => {});
+        .then(() => {})
+        .catch?.(() => {});
 
       // 3. Also create consultation_request for universal CRM pipeline
       supabase
@@ -221,7 +221,7 @@ export function useSubmitPeylaaLead() {
           },
         } as any)
         .then(() => {})
-        .catch(() => {});
+        .catch?.(() => {});
 
       // 4. Fire-and-forget: WhatsApp notification
       fetch('https://kakkwibljrjsawxgnupk.supabase.co/functions/v1/peylaa-lead-notify', {
