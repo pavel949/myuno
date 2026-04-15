@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
+import { PUBLIC_CATALOG_APPROVAL_STATUS } from '@/lib/real-estate/canonicalModel';
 
 export interface SearchResult {
   id: string;
@@ -274,7 +275,7 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
             .limit(3);
 
           if (config.hasApprovalStatus) {
-            queryBuilder = queryBuilder.eq('approval_status', 'approved');
+            queryBuilder = queryBuilder.eq('approval_status', PUBLIC_CATALOG_APPROVAL_STATUS);
           }
 
           const { data, error } = await queryBuilder;

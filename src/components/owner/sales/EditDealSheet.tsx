@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUpdateDeal, CLIENT_SOURCES, PHUKET_DISTRICTS, PROPERTY_TYPES, CURRENCIES, DEAL_TYPES, DEAL_TYPE_LABELS, AgentDeal, DealType } from '@/hooks/useAgentDeals';
+import { usePropertyProjects } from '@/hooks/usePropertyProjects';
 import { useLogDealChanges, diffDealFields, TRACKED_DEAL_FIELDS } from '@/hooks/useDealFieldChanges';
 import { DealPriorityStars } from '@/components/owner/sales/DealPriorityStars';
 import { DealTagsInput } from '@/components/owner/sales/DealTagsInput';
@@ -26,6 +27,7 @@ export function EditDealSheet({ open, onOpenChange, deal }: Props) {
   const isRu = language === 'ru';
 const updateDeal = useUpdateDeal();
   const logChanges = useLogDealChanges();
+  const { data: catalogProjects = [] } = usePropertyProjects();
 
   const [form, setForm] = useState({
     client_name: '',
@@ -45,6 +47,7 @@ const updateDeal = useUpdateDeal();
     priority: 0,
     tags: [] as string[],
     is_vip: false,
+    property_project_id: '' as string,
   });
   const [errors, setErrors] = useState<{
     client_name?: string;
@@ -72,6 +75,7 @@ const updateDeal = useUpdateDeal();
         priority: (deal as any).priority || 0,
         tags: (deal as any).tags || [],
         is_vip: (deal as any).is_vip || false,
+        property_project_id: deal.property_project_id || '',
       });
     }
   }, [deal, open]);
@@ -131,6 +135,7 @@ const updateDeal = useUpdateDeal();
         priority: form.priority,
         tags: form.tags,
         is_vip: form.is_vip,
+        property_project_id: form.property_project_id || null,
       };
 
       const changes = diffDealFields(deal as any, updates, TRACKED_DEAL_FIELDS);
@@ -183,6 +188,26 @@ const updateDeal = useUpdateDeal();
             </button>
           ))}
         </div>
+      </div>
+
+      <div>
+        <Label>{isRu ? 'Проект (offplan)' : 'Project (offplan)'}</Label>
+        <Select
+          value={form.property_project_id || '__none__'}
+          onValueChange={(v) => setForm((f) => ({ ...f, property_project_id: v === '__none__' ? '' : v }))}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder={isRu ? 'Не выбран' : 'None'} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__none__">{isRu ? '— Без проекта —' : '— No project —'}</SelectItem>
+            {catalogProjects.map((p) => (
+              <SelectItem key={p.id} value={p.id}>
+                {isRu ? p.name_ru || p.name_en : p.name_en || p.name_ru}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div>

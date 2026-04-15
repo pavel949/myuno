@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="en" class="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5, viewport-fit=cover" />
@@ -161,16 +161,23 @@
   </head>
 
   <body>
-    <!-- Inline critical CSS for fast FCP -->
+    <!-- Inline critical CSS for fast FCP — supports light & dark -->
     <style>
       *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
       html{-webkit-text-size-adjust:100%;font-family:'DM Sans',system-ui,-apple-system,sans-serif}
-      body{min-height:100vh;background:#08101E;color:#EDF2FF;-webkit-font-smoothing:antialiased}
+      body{min-height:100vh;background:#fafaf9;color:#1a1a19;-webkit-font-smoothing:antialiased}
+      html.dark body{background:#08101E;color:#EDF2FF}
       #root{min-height:100vh;display:flex;flex-direction:column}
-      .uno-splash{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#08101E}
-      .uno-splash svg{width:48px;height:48px;animation:uno-spin 1s linear infinite}
+      .uno-splash{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#fafaf9}
+      html.dark .uno-splash{background:#08101E}
+      .uno-splash svg{width:48px;height:48px;animation:uno-spin 1s linear infinite;stroke:#0d6e4f}
+      html.dark .uno-splash svg{stroke:#00D68F}
       @keyframes uno-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
     </style>
+    <!-- Apply stored theme before paint to prevent flash -->
+    <script>
+      (function(){try{var t=localStorage.getItem('myuno-theme');if(t!=='light'&&t!=='dark'&&t!=='system')t='light';var r='dark';if(t==='light')r='light';else if(t==='system')r=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';else r='dark';var d=document.documentElement;d.classList.remove('light','dark');d.classList.add(r);}catch(e){}})();
+    </script>
     <div id="root">
       <div class="uno-splash" aria-label="Loading myUNO">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#00D68F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>

@@ -22,6 +22,7 @@ export function EmailVerificationBanner() {
     try {
       return sessionStorage.getItem(SESSION_KEY) === '1';
     } catch {
+      // ignored — sessionStorage may be unavailable (private browsing)
       return false;
     }
   });

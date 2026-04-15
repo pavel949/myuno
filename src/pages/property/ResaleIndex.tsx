@@ -3,7 +3,6 @@
  * /property/resale
  */
 import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Building2, MapPin, ArrowRightLeft, SlidersHorizontal, X, TrendingUp, Home } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
@@ -32,7 +31,6 @@ const PROPERTY_TYPES = [
 ];
 
 export default function ResaleIndex() {
-  const navigate = useNavigate();
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
@@ -173,11 +171,7 @@ export default function ResaleIndex() {
         ) : properties && properties.length > 0 ? (
           <div className="space-y-4">
             {properties.map(property => (
-              <ResalePropertyCard
-                key={property.id}
-                property={property}
-                onClick={() => navigate(`/property/resale/${property.id}`)}
-              />
+              <ResalePropertyCard key={property.id} property={property} />
             ))}
           </div>
         ) : (

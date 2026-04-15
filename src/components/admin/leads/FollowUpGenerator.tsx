@@ -14,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useLeadsFactory } from '@/hooks/useLeadsFactory';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 
 interface FollowUpGeneratorProps {
@@ -32,6 +33,8 @@ export function FollowUpGenerator({
   trigger,
 }: FollowUpGeneratorProps) {
   const { generateFollowUp } = useLeadsFactory();
+  const { language } = useLanguage();
+  const isRu = language === 'ru';
   const [open, setOpen] = useState(false);
   const [whatsappMessage, setWhatsappMessage] = useState('');
   const [emailSubject, setEmailSubject] = useState('');
@@ -53,7 +56,7 @@ export function FollowUpGenerator({
     const text = type === 'whatsapp' ? whatsappMessage : `Subject: ${emailSubject}\n\n${emailBody}`;
     navigator.clipboard.writeText(text);
     setCopied(type);
-    toast.success('Скопировано');
+    toast.success(isRu ? 'Скопировано' : 'Copied');
     setTimeout(() => setCopied(null), 2000);
   };
 
@@ -75,15 +78,15 @@ export function FollowUpGenerator({
         {trigger || (
           <Button variant="outline" size="sm">
             <MessageCircle className="h-4 w-4 mr-2" />
-            Написать
+            {isRu ? 'Написать' : 'Message'}
           </Button>
         )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Follow-up для {leadName}</DialogTitle>
+          <DialogTitle>{isRu ? `Follow-up для ${leadName}` : `Follow-up for ${leadName}`}</DialogTitle>
           <DialogDescription>
-            Сгенерируйте персонализированное сообщение с помощью AI
+            {isRu ? 'Сгенерируйте персонализированное сообщение с помощью AI' : 'Generate a personalized message with AI'}
           </DialogDescription>
         </DialogHeader>
 
@@ -109,14 +112,14 @@ export function FollowUpGenerator({
                 {generateFollowUp.isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
                 ) : null}
-                Сгенерировать сообщение
+                {isRu ? 'Сгенерировать сообщение' : 'Generate message'}
               </Button>
             </div>
 
             <Textarea
               value={whatsappMessage}
               onChange={(e) => setWhatsappMessage(e.target.value)}
-              placeholder="Сообщение появится здесь..."
+              placeholder={isRu ? 'Сообщение появится здесь...' : 'Message will appear here...'}
               className="min-h-[150px]"
             />
 
@@ -131,7 +134,7 @@ export function FollowUpGenerator({
                 ) : (
                   <Copy className="h-4 w-4 mr-2" />
                 )}
-                Копировать
+                {isRu ? 'Копировать' : 'Copy'}
               </Button>
               <Button
                 onClick={handleOpenWhatsApp}
@@ -139,7 +142,7 @@ export function FollowUpGenerator({
                 className="bg-success hover:bg-success/90"
               >
                 <ExternalLink className="h-4 w-4 mr-2" />
-                Открыть в WhatsApp
+                {isRu ? 'Открыть в WhatsApp' : 'Open in WhatsApp'}
               </Button>
             </div>
           </TabsContent>
@@ -154,27 +157,27 @@ export function FollowUpGenerator({
                 {generateFollowUp.isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
                 ) : null}
-                Сгенерировать письмо
+                {isRu ? 'Сгенерировать письмо' : 'Generate email'}
               </Button>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="subject">Тема</Label>
+              <Label htmlFor="subject">{isRu ? 'Тема' : 'Subject'}</Label>
               <Input
                 id="subject"
                 value={emailSubject}
                 onChange={(e) => setEmailSubject(e.target.value)}
-                placeholder="Тема письма..."
+                placeholder={isRu ? 'Тема письма...' : 'Email subject...'}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="body">Текст письма</Label>
+              <Label htmlFor="body">{isRu ? 'Текст письма' : 'Email body'}</Label>
               <Textarea
                 id="body"
                 value={emailBody}
                 onChange={(e) => setEmailBody(e.target.value)}
-                placeholder="Текст письма появится здесь..."
+                placeholder={isRu ? 'Текст письма появится здесь...' : 'Email body will appear here...'}
                 className="min-h-[200px]"
               />
             </div>
@@ -190,12 +193,12 @@ export function FollowUpGenerator({
                 ) : (
                   <Copy className="h-4 w-4 mr-2" />
                 )}
-                Копировать
+                {isRu ? 'Копировать' : 'Copy'}
               </Button>
               {leadEmail && (
                 <Button onClick={handleOpenEmail} disabled={!emailBody}>
                   <ExternalLink className="h-4 w-4 mr-2" />
-                  Открыть почтовый клиент
+                  {isRu ? 'Открыть почтовый клиент' : 'Open email client'}
                 </Button>
               )}
             </div>

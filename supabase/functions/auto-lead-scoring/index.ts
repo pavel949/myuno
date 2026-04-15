@@ -1,5 +1,6 @@
 import { createServiceClient } from "../_shared/supabase.ts";
 import { requireInternalSecret } from '../_shared/internal-secret.ts';
+import { getAdminEmails } from '../_shared/admin-config.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "https://myuno.app",
@@ -83,7 +84,7 @@ Deno.serve(async (req) => {
           try {
             await supabase.functions.invoke("send-email", {
               body: {
-                to: "pavel@ignatevestate.com",
+                to: (await getAdminEmails())[0],
                 subject: `🔥 ${hotLeads.length} горячих лидов требуют внимания`,
                 template: "admin_notification",
                 data: {

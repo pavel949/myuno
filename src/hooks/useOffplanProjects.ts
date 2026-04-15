@@ -4,8 +4,11 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { OffplanCatalogFacet } from '@/lib/offplan/types';
+import type { ProjectLifecycleStatus } from '@/lib/real-estate/canonicalModel';
+import { applyProjectCatalogFilters, applyProjectCatalogSort, createProjectCatalogQuery } from './projectCatalogQuery';
 
-export type ProjectStatus = 'offplan' | 'under_construction' | 'completed';
+export type ProjectStatus = ProjectLifecycleStatus;
 
 export interface OffplanProject {
   id: string;
@@ -40,6 +43,30 @@ export interface OffplanProject {
   unitsAvailable: number;
   unitsSold: number;
   amenities: string[] | null;
+  /** OFFPLAN catalogue facets (property_projects.offplan_catalog) */
+  offplanCatalog: OffplanCatalogFacet | null;
+}
+
+function parseOffplanCatalog(raw: unknown): OffplanCatalogFacet | null {
+  if (raw == null || typeof raw !== 'object') return null;
+  const o = raw as Record<string, unknown>;
+  return {
+    legacy_id: typeof o.legacy_id === 'number' ? o.legacy_id : undefined,
+    rec: o.rec === 'BUY' || o.rec === 'WATCH' || o.rec === 'AVOID' ? o.rec : undefined,
+    seg: typeof o.seg === 'string' ? o.seg : undefined,
+    zone: typeof o.zone === 'string' ? o.zone : undefined,
+    type: typeof o.type === 'string' ? o.type : undefined,
+    beach: typeof o.beach === 'string' ? o.beach : undefined,
+    own: typeof o.own === 'string' ? o.own : undefined,
+    mgmt: typeof o.mgmt === 'string' ? o.mgmt : undefined,
+    focus: typeof o.focus === 'string' ? o.focus : undefined,
+    st_k: typeof o.st_k === 'string' ? o.st_k : undefined,
+    tags: Array.isArray(o.tags) ? (o.tags.filter((t) => typeof t === 'string') as string[]) : undefined,
+    rating: typeof o.rating === 'number' ? o.rating : undefined,
+    comp_y: typeof o.comp_y === 'number' ? o.comp_y : undefined,
+    comp_q: typeof o.comp_q === 'string' ? o.comp_q : undefined,
+    min_br: typeof o.min_br === 'number' ? o.min_br : undefined,
+  };
 }
 
 export interface OffplanFilters {
@@ -56,10 +83,72 @@ export function useOffplanProjects(filters?: OffplanFilters) {
   return useQuery({
     queryKey: ['offplan-projects', filters],
     queryFn: async (): Promise<OffplanProject[]> => {
-      // Fetch projects with developer info
-      let query = supabase
-        .from('property_projects')
-        .select(`
+      const commonFilters = {
+        isActive: true,
+        statuses: filters?.status,
+        district: filters?.district,
+        minPrice: filters?.minPrice,
+        maxPrice: filters?.maxPrice,
+        minScore: filters?.minScore,
+        developerId: filters?.developerId,
+        investmentOnly: filters?.investmentOnly,
+      };
+
+      const mapMinimal = (p: any): OffplanProject => ({
+        id: p.id,
+        nameEn: p.name_en,
+        nameRu: p.name_ru,
+        coverImage: null,
+        district: p.district,
+        isFeatured: false,
+        isActive: p.is_active || false,
+        developerId: null,
+        developerName: p.developer_name,
+        developerLogo: null,
+        developerScore: null,
+        developerVerified: false,
+        projectStatus: (p.project_status as ProjectStatus) || 'offplan',
+        completionDate: p.completion_date,
+        constructionProgress: p.construction_progress || 0,
+        priceFrom: p.price_from,
+        priceTo: null,
+        investmentEnabled: false,
+        fundingGoal: null,
+        amountRaised: null,
+        minInvestment: null,
+        roiProjected: p.roi_projected,
+        muunoScore: p.muuno_score,
+        riskLevel: p.risk_level,
+        unitsAvailable: 0,
+        unitsSold: 0,
+        amenities: p.amenities,
+        offplanCatalog: parseOffplanCatalog((p as { offplan_catalog?: unknown }).offplan_catalog),
+      });
+
+      const mapRich = (p: any): OffplanProject => {
+        const developer = p.developers as any;
+        return {
+          ...mapMinimal(p),
+          coverImage: p.cover_image ?? null,
+          isFeatured: Boolean(p.is_featured),
+          developerId: p.developer_id ?? null,
+          developerName: (developer?.name_en as string | undefined) || p.developer_name,
+          developerLogo: (developer?.logo_url as string | null | undefined) || null,
+          developerScore: (developer?.muuno_score as number | null | undefined) ?? null,
+          developerVerified: Boolean(developer?.is_verified),
+          priceTo: p.price_to ?? null,
+          investmentEnabled: Boolean(p.investment_enabled),
+          fundingGoal: p.funding_goal ?? null,
+          minInvestment: p.min_investment ?? null,
+          unitsAvailable: p.units_available || 0,
+          unitsSold: p.units_sold || 0,
+        };
+      };
+
+      // 1) Rich read (main app DB). Do NOT select offplan_catalog in the primary query:
+      // some production DBs have not applied the offplan_catalog migration yet; selecting a missing
+      // column makes the whole PostgREST request fail → empty UI.
+      const richSelect = `
           id,
           name_en,
           name_ru,
@@ -90,86 +179,74 @@ export function useOffplanProjects(filters?: OffplanFilters) {
             muuno_score,
             is_verified
           )
-        `)
-        .eq('is_active', true);
+        `;
 
-      // Apply filters
-      if (filters?.status && filters.status.length > 0) {
-        query = query.in('project_status', filters.status);
+      const richSelectNoEmbed = richSelect.replace(/\s*developers\s*\([^)]*\)\s*/is, '').trim();
+
+      const runRich = async (selectStr: string) => {
+        let q = createProjectCatalogQuery(selectStr);
+        q = applyProjectCatalogFilters(q, commonFilters);
+        q = applyProjectCatalogSort(q, 'featured_score');
+        return q;
+      };
+
+      let rich = await runRich(richSelect);
+
+      // If FK/embed to developers is missing on a snapshot DB, retry without embed.
+      if (
+        rich.error &&
+        /relationship|schema cache/i.test(String(rich.error.message || ''))
+      ) {
+        rich = await runRich(richSelectNoEmbed);
       }
 
-      if (filters?.district) {
-        query = query.eq('district', filters.district);
+      if (!rich.error && rich.data && rich.data.length > 0) {
+        const ids = rich.data.map((row: { id: string }) => row.id);
+        const catRes = await supabase.from('property_projects').select('id, offplan_catalog').in('id', ids);
+        const byId = new Map<string, unknown>();
+        if (!catRes.error && catRes.data) {
+          for (const row of catRes.data as Array<{ id: string; offplan_catalog?: unknown }>) {
+            byId.set(row.id, row.offplan_catalog ?? null);
+          }
+        }
+        return rich.data.map((p: any) =>
+          mapRich({
+            ...p,
+            offplan_catalog: byId.get(p.id) ?? p.offplan_catalog ?? null,
+          }),
+        );
       }
 
-      if (filters?.developerId) {
-        query = query.eq('developer_id', filters.developerId);
+      if (!rich.error && rich.data) {
+        return [];
       }
 
-      if (filters?.minPrice) {
-        query = query.gte('price_from', filters.minPrice);
-      }
+      // 2) Fallback schema (minimal columns; no offplan_catalog — may not exist)
+      let fallbackQuery = supabase
+        .from('property_projects')
+        .select(`
+          id,
+          name_en,
+          name_ru,
+          district,
+          is_active,
+          developer_name,
+          project_status,
+          completion_date,
+          construction_progress,
+          price_from,
+          roi_projected,
+          muuno_score,
+          risk_level,
+          amenities
+        `);
 
-      if (filters?.maxPrice) {
-        query = query.lte('price_from', filters.maxPrice);
-      }
-
-      if (filters?.minScore) {
-        query = query.gte('muuno_score', filters.minScore);
-      }
-
-      if (filters?.investmentOnly) {
-        query = query.eq('investment_enabled', true);
-      }
-
-      // Order by featured first, then by muuno score
-      query = query
-        .order('is_featured', { ascending: false })
-        .order('muuno_score', { ascending: false, nullsFirst: false });
-
-      const { data, error } = await query;
-
-      if (error) throw error;
-      if (!data) return [];
-
-      return data.map((p): OffplanProject => {
-        const developer = p.developers as any;
-        
-        return {
-          id: p.id,
-          nameEn: p.name_en,
-          nameRu: p.name_ru,
-          coverImage: p.cover_image,
-          district: p.district,
-          isFeatured: p.is_featured || false,
-          isActive: p.is_active || false,
-          // Developer
-          developerId: p.developer_id,
-          developerName: developer?.name_en || p.developer_name,
-          developerLogo: developer?.logo_url || null,
-          developerScore: developer?.muuno_score || null,
-          developerVerified: developer?.is_verified || false,
-          // Status
-          projectStatus: (p.project_status as ProjectStatus) || 'offplan',
-          completionDate: p.completion_date,
-          constructionProgress: p.construction_progress || 0,
-          // Pricing
-          priceFrom: p.price_from,
-          priceTo: p.price_to,
-          // Investment
-          investmentEnabled: p.investment_enabled || false,
-          fundingGoal: p.funding_goal,
-          amountRaised: null, // amount_raised is stored in investment_projects table
-          minInvestment: p.min_investment,
-          roiProjected: p.roi_projected,
-          muunoScore: p.muuno_score,
-          riskLevel: p.risk_level,
-          // Units
-          unitsAvailable: p.units_available || 0,
-          unitsSold: p.units_sold || 0,
-          amenities: p.amenities,
-        };
-      });
+      fallbackQuery = applyProjectCatalogFilters(fallbackQuery, commonFilters);
+      fallbackQuery = applyProjectCatalogSort(fallbackQuery, 'featured_score');
+      const fallback = await fallbackQuery;
+      if (fallback.error) throw fallback.error;
+      if (!fallback.data) return [];
+      return fallback.data.map(mapMinimal);
     },
     staleTime: 5 * 60 * 1000,
   });

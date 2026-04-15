@@ -56,6 +56,9 @@ export function useCreateQuote() {
       return data as CrmQuote;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['crm-quotes'] }),
+    onError: (err: Error) => {
+      import('sonner').then(({ toast }) => toast.error(err.message || 'Failed to create quote'));
+    },
   });
 }
 
@@ -67,6 +70,9 @@ export function useUpdateQuote() {
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['crm-quotes'] }),
+    onError: (err: Error) => {
+      import('sonner').then(({ toast }) => toast.error(err.message || 'Failed to update quote'));
+    },
   });
 }
 
@@ -78,5 +84,8 @@ export function useDeleteQuote() {
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['crm-quotes'] }),
+    onError: (err: Error) => {
+      import('sonner').then(({ toast }) => toast.error(err.message || 'Failed to delete quote'));
+    },
   });
 }

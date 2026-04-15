@@ -388,17 +388,18 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
       <button
         onClick={() => setIsOpen(true)}
         className={cn(
-          'fixed bottom-20 right-4 z-50 w-14 h-14 rounded-full shadow-lg',
+          'fixed bottom-[5.5rem] right-4 z-40 w-12 h-12 rounded-full',
           'bg-gradient-to-br from-primary to-primary/80 text-primary-foreground',
           'flex items-center justify-center',
-          'hover:scale-105 active:scale-95 transition-transform',
-          'md:bottom-6',
+          'hover:scale-105 active:scale-95 transition-all duration-200',
+          'shadow-[var(--shadow-elevation-2)]',
+          'md:bottom-6 md:w-14 md:h-14',
           className
         )}
         aria-label={isRu ? 'Открыть чат' : 'Open chat'}
       >
-        <MessageCircle className="w-6 h-6" />
-        <span className="absolute -top-1 -right-1 w-4 h-4 bg-success rounded-full border-2 border-background" />
+        <MessageCircle className="w-5 h-5 md:w-6 md:h-6" />
+        <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-success rounded-full border-2 border-background" />
       </button>
     </>
   );

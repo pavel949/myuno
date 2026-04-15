@@ -12,7 +12,6 @@ import {
   INCOME_CATEGORIES,
   EXPENSE_CATEGORIES,
 } from '@/hooks/usePropertyFinancials';
-import { exportBudgetExcel } from '@/utils/exportFinancialsExcel';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { BackButton } from '@/components/uno/BackButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -103,8 +102,9 @@ export default function BudgetPage() {
     );
   };
 
-  const handleExport = () => {
+  const handleExport = async () => {
     if (comparison.length === 0) return;
+    const { exportBudgetExcel } = await import('@/utils/exportFinancialsExcel');
     exportBudgetExcel(comparison, propTitle, selectedMonth, language as 'ru' | 'en');
   };
 

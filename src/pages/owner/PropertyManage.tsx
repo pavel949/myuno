@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { createErrorHandler } from '@/lib/errorHandler';
 import { cn } from '@/lib/utils';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { 
   Home, Image, Calendar, DollarSign, FileText, 
   Users, MapPin, Zap, Bed, Settings, Save,
@@ -298,7 +299,7 @@ export default function PropertyManage() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => navigate(`/property/${property.marketplace_property_id || id}`)}
+              onClick={() => navigate(APP_ROUTES.PROPERTY_DETAIL(property.marketplace_property_id || id))}
               disabled={!property.marketplace_property_id}
             >
               <Eye className="h-4 w-4 mr-1" />

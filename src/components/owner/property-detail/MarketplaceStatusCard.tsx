@@ -10,6 +10,7 @@ import {
 import { Globe, Clock, AlertTriangle, ExternalLink, Settings, Eye, EyeOff, Loader2, Rocket } from 'lucide-react';
 import { useUpdateOwnerProperty } from '@/hooks/usePropertyCare';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 interface MarketplaceStatusCardProps {
   propertyId: string;
@@ -59,7 +60,7 @@ export function MarketplaceStatusCard({ propertyId, approvalStatus, rejectionRea
                 </div>
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
-                <Button variant="outline" size="sm" onClick={() => navigate(`/property/${propertyId}`)}>
+                <Button variant="outline" size="sm" onClick={() => navigate(APP_ROUTES.PROPERTY_DETAIL(propertyId))}>
                   <ExternalLink className="h-4 w-4 mr-1" />
                   {isRu ? 'Открыть' : 'View'}
                 </Button>

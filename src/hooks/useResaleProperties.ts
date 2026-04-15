@@ -91,6 +91,9 @@ export function useResaleProperties(filters?: ResaleFilters) {
       if (filters?.min_area) {
         query = query.gte('area_sqm', filters.min_area);
       }
+      if (filters?.max_area) {
+        query = query.lte('area_sqm', filters.max_area);
+      }
       if (filters?.bedrooms) {
         query = query.gte('bedrooms', filters.bedrooms);
       }
@@ -102,6 +105,9 @@ export function useResaleProperties(filters?: ResaleFilters) {
       }
       if (filters?.tab === 'assignment') {
         query = query.eq('is_assignment', true);
+      }
+      if (filters?.tab === 'ready') {
+        query = query.eq('is_assignment', false);
       }
 
       const { data, error } = await query;

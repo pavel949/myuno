@@ -8,6 +8,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
+import { CrossSellRecommendations } from '@/components/orders/CrossSellRecommendations';
 
 interface OrderData {
   id: string;
@@ -180,10 +181,12 @@ export default function ServiceOrderSuccess() {
               </ul>
             </div>
             
+            <CrossSellRecommendations orderType="service" className="mt-4" />
+
             {/* Actions */}
             <div className="space-y-3">
-              <Button 
-                onClick={() => navigate('/services')} 
+              <Button
+                onClick={() => navigate('/services')}
                 className="w-full"
               >
                 {isRu ? 'Заказать ещё' : 'Order More'}

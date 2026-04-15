@@ -1,6 +1,7 @@
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import type { SalonMarker } from '@/components/map/SalonMap';
 import { supabase } from '@/integrations/supabase/client';
+import { PUBLIC_CATALOG_APPROVAL_STATUS } from '@/lib/real-estate/canonicalModel';
 import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
 
 export interface Property {
@@ -12,6 +13,8 @@ export interface Property {
   property_type: string;
   listing_type: string;
   price?: number;
+  /** Sale / total asking when listing is for purchase */
+  sale_price?: number;
   price_period?: string;
   currency?: string;
   bedrooms?: number;
@@ -184,12 +187,14 @@ const PROPERTY_LIST_COLUMNS = `
 export function usePropertiesInfinite(filters: PropertyFilters = {}) {
   return useInfiniteQuery({
     queryKey: ['properties-infinite', filters],
+    staleTime: 5 * 60 * 1000,   // 5 min — avoid refetch on every visit
+    gcTime: 10 * 60 * 1000,     // 10 min cache
     queryFn: async ({ pageParam = 0 }) => {
       let query = supabase
         .from('properties')
         .select(PROPERTY_LIST_COLUMNS)
         .eq('is_active', true)
-        .eq('approval_status', 'approved')
+        .eq('approval_status', PUBLIC_CATALOG_APPROVAL_STATUS)
         .order('is_featured', { ascending: false })
         .order('created_at', { ascending: false })
         .range(pageParam * PAGE_SIZE, (pageParam + 1) * PAGE_SIZE - 1);
@@ -244,12 +249,14 @@ export function usePropertiesInfinite(filters: PropertyFilters = {}) {
 export function useProperties(filters: PropertyFilters = {}, limit = 50) {
   return useQuery({
     queryKey: ['properties', filters, limit],
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
     queryFn: async () => {
       let query = supabase
         .from('properties')
         .select(PROPERTY_LIST_COLUMNS)
         .eq('is_active', true)
-        .eq('approval_status', 'approved')
+        .eq('approval_status', PUBLIC_CATALOG_APPROVAL_STATUS)
         .order('is_featured', { ascending: false })
         .order('created_at', { ascending: false })
         .limit(limit);
@@ -385,6 +392,8 @@ export function usePropertyWithRentalTerms(marketplacePropertyId?: string) {
 export function useFeaturedProperties(limit = 6) {
   return useQuery({
     queryKey: ['featured-properties', limit],
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('properties')

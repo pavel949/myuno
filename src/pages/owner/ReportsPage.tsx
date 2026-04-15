@@ -52,7 +52,6 @@ import { ru, enUS } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
-import { exportReportExcel } from '@/utils/exportFinancialsExcel';
 
 type ReportScope = 'property' | 'complex' | 'owner' | 'portfolio';
 
@@ -405,7 +404,7 @@ export default function ReportsPage() {
               <FileDown className="h-3.5 w-3.5 mr-1" />
               PDF
             </Button>
-            <Button variant="ghost" size="sm" className="h-8" onClick={() => exportReportExcel(report, isRu ? 'ru' : 'en')}>
+            <Button variant="ghost" size="sm" className="h-8" onClick={async () => { const { exportReportExcel } = await import('@/utils/exportFinancialsExcel'); exportReportExcel(report, isRu ? 'ru' : 'en'); }}>
               <FileSpreadsheet className="h-3.5 w-3.5 mr-1" />
               Excel
             </Button>

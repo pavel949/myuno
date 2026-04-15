@@ -17,9 +17,8 @@ import { SEOHead, createOrganizationSchema } from '@/components/seo';
 import { PullToRefresh } from '@/components/ui/pull-to-refresh';
 import { HeroBlock } from '@/components/home/HeroBlock';
 import { QuickActionsGrid } from '@/components/home/QuickActionsGrid';
-import { PersonaSmartFeed } from '@/components/home/PersonaSmartFeed';
 import { ActiveSituationBanner } from '@/components/life-os/ActiveSituationBanner';
-import { ClusterHub } from '@/components/home/ClusterHub';
+import { InstallBanner } from '@/components/pwa/InstallBanner';
 import { FeaturedPropertiesCarousel } from '@/components/home/FeaturedPropertiesCarousel';
 import { WhatsAppCTA } from '@/components/home/WhatsAppCTA';
 import { TrustStats } from '@/components/home/TrustStats';
@@ -30,19 +29,15 @@ import { DocumentExpiryNotifier } from '@/components/notifications/DocumentExpir
 import { useIsDesktop } from '@/hooks/use-desktop';
 import { useAuth } from '@/contexts/AuthContext';
 import { RevealOnScroll } from '@/components/ui/RevealOnScroll';
-import { PopularServicesStrip } from '@/components/home/PopularServicesStrip';
 import { OfflineEmergencyCard } from '@/components/home/OfflineEmergencyCard';
 import { useOfflineStatus } from '@/hooks/useOfflineStatus';
-import { ProgressIndicator } from '@/components/home/ProgressIndicator';
+import { useUserPersonas } from '@/hooks/useUserPersonas';
+import { WelcomeHero } from '@/components/home/WelcomeHero';
+import { InlinePersonaSelector } from '@/components/home/InlinePersonaSelector';
+import { ValuePropositionStrip } from '@/components/home/ValuePropositionStrip';
 
 // Lazy load secondary components
-const LifeOSStatusBlock = lazy(() => import('@/components/home/LifeOSStatusBlock'));
-const ConciergeBanner = lazy(() => import('@/components/home/ConciergeBanner').then(m => ({ default: m.ConciergeBanner })));
-const TrustBanner = lazy(() => import('@/components/home/TrustBanner').then(m => ({ default: m.TrustBanner })));
-const OnboardingModal = lazy(() => import('@/components/onboarding/OnboardingModal').then(m => ({ default: m.OnboardingModal })));
 const YourDayFeed = lazy(() => import('@/components/shared/YourDayFeed').then(m => ({ default: m.YourDayFeed })));
-const LifecycleSmartTip = lazy(() => import('@/components/home/LifecycleSmartTip').then(m => ({ default: m.LifecycleSmartTip })));
-const ProactiveConcierge = lazy(() => import('@/components/home/ProactiveConcierge').then(m => ({ default: m.ProactiveConcierge })));
 const TodayEventsFeed = lazy(() => import('@/components/home/TodayEventsFeed').then(m => ({ default: m.TodayEventsFeed })));
 
 const Index = () => {
@@ -51,10 +46,8 @@ const Index = () => {
   const { isOffline } = useOfflineStatus();
   const isDesktop = useIsDesktop();
   const [refreshKey, setRefreshKey] = useState(0);
-  const [showOnboarding, setShowOnboarding] = useState(() => {
-    return !localStorage.getItem('myuno-onboarding-complete') &&
-           !sessionStorage.getItem('myuno-onboarding-complete');
-  });
+  const isFirstVisit = !localStorage.getItem('myuno-onboarding-complete') &&
+                       !sessionStorage.getItem('myuno-onboarding-complete');
   const { pendingReview, isOpen: reviewOpen, setIsOpen: setReviewOpen, dismiss: dismissReview } = usePostOrderReview();
 
   const handleRefresh = useCallback(async () => {
@@ -62,8 +55,13 @@ const Index = () => {
     setRefreshKey(prev => prev + 1);
   }, []);
 
+  const { personas } = useUserPersonas();
   const hasContext = !!activeCode;
   const isLoggedIn = !!user;
+
+  // Show property sections only for relevant personas
+  const PROPERTY_PERSONAS = new Set(['investor', 'property_owner', 'resident', 'relocation', 'real_estate_developer']);
+  const showPropertySections = personas.length === 0 || personas.some(p => PROPERTY_PERSONAS.has(p));
 
   return (
     <AppLayout showFooter>
@@ -71,47 +69,51 @@ const Index = () => {
       
       <DocumentExpiryNotifier />
       
-      {showOnboarding && (
-        <Suspense fallback={null}>
-          <OnboardingModal 
-            open={showOnboarding} 
-            onComplete={() => setShowOnboarding(false)} 
-          />
-        </Suspense>
-      )}
-
       <ActiveSituationBanner />
+
+      {/* PWA Install Banner */}
+      <div className="px-4 md:px-6 lg:px-8 xl:px-10 pt-3 w-full max-w-[1536px] mx-auto">
+        <InstallBanner />
+      </div>
 
       <PullToRefresh onRefresh={handleRefresh} key={refreshKey}>
         <div className="px-4 md:px-6 lg:px-8 xl:px-10 py-5 pb-20 md:pb-8 w-full max-w-[1536px] mx-auto space-y-6 lg:space-y-10">
           
           {/* ── HERO ── */}
-          <HeroBlock />
+          {isFirstVisit ? (
+            <>
+              <WelcomeHero />
+              <InlinePersonaSelector isFirstVisit />
+            </>
+          ) : (
+            <HeroBlock />
+          )}
 
-          {/* ── PROGRESS INDICATOR ── */}
-          <RevealOnScroll>
-            <ProgressIndicator />
-          </RevealOnScroll>
-
-          {/* ── PERSONA SMART FEED ── */}
-          <RevealOnScroll>
-            <PersonaSmartFeed />
-          </RevealOnScroll>
-
-          {/* ── QUICK ACTIONS ── */}
+          {/* ── QUICK ACTIONS (primary CTA grid) ── */}
           <RevealOnScroll>
             <QuickActionsGrid />
           </RevealOnScroll>
 
-          {/* ── FEATURED PROPERTIES (new — with real prices) ── */}
-          <RevealOnScroll>
-            <FeaturedPropertiesCarousel />
-          </RevealOnScroll>
+          {/* ── VALUE PROPOSITION (first visit only — concrete services with prices) ── */}
+          {isFirstVisit && (
+            <RevealOnScroll>
+              <ValuePropositionStrip />
+            </RevealOnScroll>
+          )}
 
-          {/* ── PROPERTY TOUR BANNER ── */}
-          <RevealOnScroll>
-            <PropertyTourBanner />
-          </RevealOnScroll>
+          {/* ── FEATURED PROPERTIES (only for relevant personas) ── */}
+          {showPropertySections && (
+            <RevealOnScroll>
+              <FeaturedPropertiesCarousel />
+            </RevealOnScroll>
+          )}
+
+          {/* ── PROPERTY TOUR BANNER (only for investors/residents/owners) ── */}
+          {showPropertySections && (
+            <RevealOnScroll>
+              <PropertyTourBanner />
+            </RevealOnScroll>
+          )}
 
           {/* ── PERSONALIZED CONTENT (logged-in users) ── */}
           {isLoggedIn && (
@@ -120,31 +122,13 @@ const Index = () => {
             </Suspense>
           )}
 
-          {/* ── POPULAR SERVICES ── */}
-          <RevealOnScroll>
-            <PopularServicesStrip />
-          </RevealOnScroll>
-
-          {/* ── CLUSTER HUB ── */}
-          <RevealOnScroll>
-            <ClusterHub />
-          </RevealOnScroll>
-
           {/* ── WHATSAPP CTA ── */}
           <RevealOnScroll>
             <WhatsAppCTA />
           </RevealOnScroll>
 
-          {/* ── EVENTS (public) or Smart Tips (logged in) ── */}
-          {isLoggedIn ? (
-            <Suspense fallback={null}>
-              {hasContext ? (
-                <LifeOSStatusBlock />
-              ) : (
-                <ConciergeBanner />
-              )}
-            </Suspense>
-          ) : (
+          {/* ── EVENTS FEED (public, not logged in) ── */}
+          {!isLoggedIn && (
             <Suspense fallback={null}>
               <TodayEventsFeed compact />
             </Suspense>
@@ -160,13 +144,6 @@ const Index = () => {
           {/* ── TRUST STATS ── */}
           <RevealOnScroll>
             <TrustStats />
-          </RevealOnScroll>
-
-          {/* ── TRUST BANNER + SOS ── */}
-          <RevealOnScroll>
-            <Suspense fallback={null}>
-              <TrustBanner showEmergency />
-            </Suspense>
           </RevealOnScroll>
 
         </div>

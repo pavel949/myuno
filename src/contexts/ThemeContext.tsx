@@ -13,13 +13,13 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 const STORAGE_KEY = 'myuno-theme';
 
 const getStoredTheme = (): Theme => {
-  if (typeof window === 'undefined') return 'dark';
+  if (typeof window === 'undefined') return 'light';
   try {
     const stored = localStorage.getItem(STORAGE_KEY) as Theme;
     if (stored === 'light' || stored === 'dark' || stored === 'system') return stored;
-    return 'dark';
+    return 'light';
   } catch {
-    return 'dark';
+    return 'light';
   }
 };
 

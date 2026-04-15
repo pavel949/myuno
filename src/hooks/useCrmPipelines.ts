@@ -59,8 +59,9 @@ export function useCreatePipeline() {
       if (error) throw error;
       return data as CrmPipeline;
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['crm-pipelines'] });
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['crm-pipelines'] }),
+    onError: (err: Error) => {
+      import('sonner').then(({ toast }) => toast.error(err.message || 'Failed to create pipeline'));
     },
   });
 }
@@ -72,8 +73,9 @@ export function useUpdatePipeline() {
       const { error } = await pipelinesTable().update(updates).eq('id', id);
       if (error) throw error;
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['crm-pipelines'] });
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['crm-pipelines'] }),
+    onError: (err: Error) => {
+      import('sonner').then(({ toast }) => toast.error(err.message || 'Failed to update pipeline'));
     },
   });
 }
@@ -86,8 +88,9 @@ export function useCreatePipelineStage() {
       if (error) throw error;
       return data as CrmPipelineStage;
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['crm-pipelines'] });
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['crm-pipelines'] }),
+    onError: (err: Error) => {
+      import('sonner').then(({ toast }) => toast.error(err.message || 'Failed to create stage'));
     },
   });
 }
@@ -99,8 +102,9 @@ export function useUpdatePipelineStage() {
       const { error } = await stagesTable().update(updates).eq('id', id);
       if (error) throw error;
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['crm-pipelines'] });
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['crm-pipelines'] }),
+    onError: (err: Error) => {
+      import('sonner').then(({ toast }) => toast.error(err.message || 'Failed to update stage'));
     },
   });
 }
@@ -112,8 +116,9 @@ export function useDeletePipelineStage() {
       const { error } = await stagesTable().delete().eq('id', id);
       if (error) throw error;
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['crm-pipelines'] });
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['crm-pipelines'] }),
+    onError: (err: Error) => {
+      import('sonner').then(({ toast }) => toast.error(err.message || 'Failed to delete stage'));
     },
   });
 }

@@ -13,6 +13,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useDevelopers } from '@/hooks/useDevelopers';
 import { MuunoScoreWidget } from '@/components/invest/MuunoScoreWidget';
 import { cn } from '@/lib/utils';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 export default function DevelopersIndex() {
   const navigate = useNavigate();
@@ -55,7 +56,7 @@ export default function DevelopersIndex() {
             {developers.map(dev => (
               <div
                 key={dev.id}
-                onClick={() => navigate(`/property/developers/${dev.id}`)}
+                onClick={() => navigate(APP_ROUTES.DEVELOPER_DETAIL(dev.id))}
                 className={cn(
                   "rounded-xl border bg-card p-4 cursor-pointer",
                   "hover:border-primary/50 hover:shadow-md transition-all"

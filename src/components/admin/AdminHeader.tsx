@@ -17,6 +17,7 @@ import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { AdminNotificationsDropdown } from './AdminNotificationsDropdown';
+import { StripeModeIndicator } from './StripeModeIndicator';
 
 interface AdminHeaderProps {
   onOpenCommandPalette?: () => void;
@@ -218,6 +219,7 @@ export function AdminHeader({ onOpenCommandPalette }: AdminHeaderProps) {
 
       {/* Actions */}
       <div className="flex items-center gap-2">
+        <StripeModeIndicator />
         <ThemeSwitcher />
         <LanguageSwitcher />
         <AdminNotificationsDropdown />

@@ -49,6 +49,9 @@ export function useCreateCrmEmail() {
       return data as CrmEmail;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['crm-emails'] }),
+    onError: (err: Error) => {
+      import('sonner').then(({ toast }) => toast.error(err.message || 'Failed to create email'));
+    },
   });
 }
 
@@ -60,6 +63,9 @@ export function useUpdateCrmEmail() {
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['crm-emails'] }),
+    onError: (err: Error) => {
+      import('sonner').then(({ toast }) => toast.error(err.message || 'Failed to update email'));
+    },
   });
 }
 
@@ -73,6 +79,12 @@ export function useSendCrmEmail() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['crm-emails'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['crm-emails'] });
+      import('sonner').then(({ toast }) => toast.success('Email sent'));
+    },
+    onError: (err: Error) => {
+      import('sonner').then(({ toast }) => toast.error(err.message || 'Failed to send email'));
+    },
   });
 }

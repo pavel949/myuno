@@ -240,21 +240,29 @@ const LegalProviderDetail = () => {
         <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur border-t border-border safe-area-bottom">
           <div className="flex gap-3 max-w-lg mx-auto">
             {service.phone && (
-              <Button 
-                variant="outline" 
-                className="flex-1 min-h-[44px]" 
+              <Button
+                variant="outline"
+                className="flex-shrink-0 min-h-[44px] px-4"
                 onClick={() => window.open(`tel:${service.phone}`)}
               >
                 <Phone className="w-4 h-4 mr-2" />
                 {isRu ? "Позвонить" : "Call"}
               </Button>
             )}
-            <Button 
-              className="flex-1 min-h-[44px]" 
+            <Button
+              className="flex-1 min-h-[44px] font-semibold"
+              size="lg"
               onClick={() => navigate(`/legal/booking/${id}`)}
             >
               <Calendar className="w-4 h-4 mr-2" />
-              {isRu ? "Записаться" : "Book"}
+              {service.price_consultation
+                ? isRu
+                  ? `Забронировать — ${service.currency} ${service.price_consultation.toLocaleString()}`
+                  : `Book Consultation — ${service.currency} ${service.price_consultation.toLocaleString()}`
+                : isRu
+                  ? "Забронировать консультацию"
+                  : "Book Consultation"
+              }
             </Button>
           </div>
         </div>

@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMyCompanyId } from '@/hooks/useAgentDeals';
-import { useCrmContacts, CrmContact, CONTACT_TYPES, CONTACT_SOURCES } from '@/hooks/useCrmContacts';
+import { useCrmContacts, CrmContact } from '@/hooks/useCrmContacts';
+import { useCrmOptions, type CrmCustomOption } from '@/hooks/useCrmSettings';
+import { resolveCrmOptionLabel, findCrmOption } from '@/lib/crmOptionLabels';
 import { useContactTags } from '@/hooks/useContactTags';
 import { ContactTagsDisplay } from '@/components/owner/contacts/ContactTagPicker';
 import { useUserRoles } from '@/hooks/useUserRoles';
@@ -20,6 +22,7 @@ import { useDuplicatesQuery } from '@/hooks/useCrmDuplicates';
 import { CreateContactSheet } from '@/components/owner/contacts/CreateContactSheet';
 import { ContactExportButton } from '@/components/owner/contacts/ContactExportButton';
 import { cn } from '@/lib/utils';
+import { CRM_ROLES, CRM_ROLE_LABELS, type CrmRole } from '@/types/contact';
 
 const PAGE_SIZE = 24;
 
@@ -46,14 +49,11 @@ const typeBadgeColors: Record<string, string> = {
   agent: 'bg-muted text-muted-foreground border-border',
 };
 
-const CONTACT_TYPE_LABELS: Record<string, { en: string; ru: string }> = {
-  buyer: { en: 'Buyer', ru: 'Покупатель' },
-  seller: { en: 'Seller', ru: 'Продавец' },
-  investor: { en: 'Investor', ru: 'Инвестор' },
-  tenant: { en: 'Tenant', ru: 'Арендатор' },
-  landlord: { en: 'Landlord', ru: 'Арендодатель' },
-  agent: { en: 'Agent', ru: 'Агент' },
-};
+const LEAD_TEMPERATURE_OPTIONS = [
+  { value: 'hot', labelEn: 'Hot', labelRu: 'Горячий' },
+  { value: 'warm', labelEn: 'Warm', labelRu: 'Тёплый' },
+  { value: 'cold', labelEn: 'Cold', labelRu: 'Холодный' },
+] as const;
 
 const SORT_OPTIONS = [
   { value: 'updated_at', labelEn: 'Last Updated', labelRu: 'Обновлён' },
@@ -62,7 +62,19 @@ const SORT_OPTIONS = [
   { value: 'scoring', labelEn: 'Scoring', labelRu: 'Скоринг' },
 ] as const;
 
-function ContactCard({ contact, isOwnerOrAdmin, onClick }: { contact: CrmContact; isOwnerOrAdmin: boolean; onClick: () => void }) {
+function ContactCard({
+  contact,
+  isOwnerOrAdmin,
+  onClick,
+  contactTypeOptions,
+  leadSourceOptions,
+}: {
+  contact: CrmContact;
+  isOwnerOrAdmin: boolean;
+  onClick: () => void;
+  contactTypeOptions: CrmCustomOption[];
+  leadSourceOptions: CrmCustomOption[];
+}) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const firstName = contact.first_name ?? '';
@@ -103,14 +115,22 @@ function ContactCard({ contact, isOwnerOrAdmin, onClick }: { contact: CrmContact
 
         {/* Tags row */}
         <div className="flex flex-wrap gap-1 mt-2">
-          {contact.contact_type && (
-            <Badge variant="outline" className={cn('text-[9px] h-4 px-1.5 border font-semibold uppercase', typeBadgeColors[contact.contact_type] || '')}>
-              {contact.contact_type}
-            </Badge>
-          )}
+          {contact.contact_type && (() => {
+            const opt = findCrmOption(contact.contact_type, contactTypeOptions);
+            const label = resolveCrmOptionLabel(contact.contact_type, contactTypeOptions, isRu) || contact.contact_type;
+            return (
+              <Badge
+                variant="outline"
+                className={cn('text-[9px] h-4 px-1.5 border font-semibold uppercase', !opt?.color && typeBadgeColors[contact.contact_type])}
+                style={opt?.color ? { borderColor: opt.color, color: opt.color } : undefined}
+              >
+                {label}
+              </Badge>
+            );
+          })()}
           {contact.source && (
-            <Badge variant="outline" className="text-[9px] h-4 px-1.5">
-              {contact.source}
+            <Badge variant="outline" className="text-[9px] h-4 px-1.5 border" title={contact.source}>
+              {resolveCrmOptionLabel(contact.source, leadSourceOptions, isRu) || contact.source}
             </Badge>
           )}
           <ContactTagsDisplay tags={contact.tags || []} companyId={contact.company_id} max={2} />
@@ -161,14 +181,27 @@ function ContactCard({ contact, isOwnerOrAdmin, onClick }: { contact: CrmContact
   );
 }
 
-function ContactListRow({ contact, isOwnerOrAdmin, onClick }: { contact: CrmContact; isOwnerOrAdmin: boolean; onClick: () => void }) {
+function ContactListRow({
+  contact,
+  isOwnerOrAdmin,
+  onClick,
+  contactTypeOptions,
+}: {
+  contact: CrmContact;
+  isOwnerOrAdmin: boolean;
+  onClick: () => void;
+  contactTypeOptions: CrmCustomOption[];
+}) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const firstName = contact.first_name ?? '';
   const lastName = contact.last_name ?? '';
   const fullName = `${firstName} ${lastName}`.trim();
   const typeKey = contact.contact_type ?? '';
-  const typeLabel = CONTACT_TYPE_LABELS[typeKey] ? (isRu ? CONTACT_TYPE_LABELS[typeKey].ru : CONTACT_TYPE_LABELS[typeKey].en) : (typeKey || '—');
+  const typeOpt = findCrmOption(typeKey || undefined, contactTypeOptions);
+  const typeLabel = typeKey
+    ? (resolveCrmOptionLabel(typeKey, contactTypeOptions, isRu) || typeKey)
+    : '—';
   const avatarColor = getAvatarColor(firstName + lastName);
 
   return (
@@ -194,7 +227,11 @@ function ContactListRow({ contact, isOwnerOrAdmin, onClick }: { contact: CrmCont
           </div>
         </div>
         <div className="hidden sm:block">
-          <Badge variant="outline" className={cn('text-[10px] h-5', typeBadgeColors[contact.contact_type ?? ''] || '')}>
+          <Badge
+            variant="outline"
+            className={cn('text-[10px] h-5', !typeOpt?.color && typeBadgeColors[contact.contact_type ?? ''])}
+            style={typeOpt?.color ? { borderColor: typeOpt.color, color: typeOpt.color } : undefined}
+          >
             {typeLabel}
           </Badge>
         </div>
@@ -249,6 +286,9 @@ export default function ContactsList() {
   const [sourceFilter, setSourceFilter] = useState<string | null>(null);
   const [tagFilter, setTagFilter] = useState<string | null>(null);
   const [lifecycleFilter, setLifecycleFilter] = useState<string | null>(null);
+  const [vipFilter, setVipFilter] = useState<'all' | 'vip' | 'standard'>('all');
+  const [leadTempFilter, setLeadTempFilter] = useState<string | null>(null);
+  const [crmRoleFilter, setCrmRoleFilter] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState<string>('updated_at');
@@ -259,6 +299,14 @@ export default function ContactsList() {
   const handleSourceChange = (v: string | null) => { setSourceFilter(v); setPage(0); };
   const handleTagChange = (v: string | null) => { setTagFilter(v); setPage(0); };
   const handleLifecycleChange = (v: string | null) => { setLifecycleFilter(v); setPage(0); };
+  const handleVipChange = (v: 'all' | 'vip' | 'standard') => { setVipFilter(v); setPage(0); };
+  const handleLeadTempChange = (v: string | null) => { setLeadTempFilter(v); setPage(0); };
+  const handleCrmRoleChange = (v: string | null) => { setCrmRoleFilter(v); setPage(0); };
+
+  const { data: contactTypeOptions = [] } = useCrmOptions(companyId, 'contact_type');
+  const { data: leadSourceOptions = [] } = useCrmOptions(companyId, 'lead_source');
+  const activeContactTypeOptions = contactTypeOptions.filter((o) => o.is_active !== false);
+  const activeLeadSourceOptions = leadSourceOptions.filter((o) => o.is_active !== false);
 
   const { data: duplicatesData } = useDuplicatesQuery(companyId, !!companyId);
   const duplicatePairsCount = duplicatesData?.total ?? 0;
@@ -270,12 +318,17 @@ export default function ContactsList() {
     source: sourceFilter || undefined,
     lifecycleStage: lifecycleFilter || undefined,
     sortBy,
+    vip: vipFilter === 'all' ? undefined : vipFilter,
+    leadTemperature: leadTempFilter || undefined,
+    crmRole: crmRoleFilter || undefined,
   });
   const contacts = result?.data ?? [];
   const totalCount = result?.count ?? 0;
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
-  const activeFiltersCount = [typeFilter, sourceFilter, tagFilter, lifecycleFilter].filter(Boolean).length;
+  const activeFiltersCount =
+    [typeFilter, sourceFilter, tagFilter, lifecycleFilter, leadTempFilter, crmRoleFilter].filter(Boolean).length +
+    (vipFilter !== 'all' ? 1 : 0);
 
   if (!companyId) {
     return (
@@ -336,7 +389,7 @@ export default function ContactsList() {
         </div>
       </div>
 
-      {/* Type chips — быстрый выбор типа контактов */}
+      {/* Type chips — из crm_custom_options (как в формах), включая кастомные типы */}
       <div className="flex flex-wrap items-center gap-1.5">
         <span className="text-xs text-muted-foreground mr-1">{isRu ? 'Тип:' : 'Type:'}</span>
         <button
@@ -348,16 +401,19 @@ export default function ContactsList() {
         >
           {isRu ? 'Все' : 'All'}
         </button>
-        {CONTACT_TYPES.map(t => (
+        {activeContactTypeOptions.map((o) => (
           <button
-            key={t}
-            onClick={() => handleTypeChange(typeFilter === t ? null : t)}
+            key={o.value}
+            type="button"
+            onClick={() => handleTypeChange(typeFilter === o.value ? null : o.value)}
             className={cn(
-              'px-2.5 py-1 text-xs rounded-full border transition-colors',
-              typeFilter === t ? typeBadgeColors[t] || 'bg-muted' : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+              'px-2.5 py-1 text-xs rounded-full border transition-colors max-w-[160px] truncate',
+              typeFilter === o.value ? typeBadgeColors[o.value] || 'bg-primary text-primary-foreground border-primary' : 'bg-muted/50 text-muted-foreground hover:bg-muted'
             )}
+            style={typeFilter === o.value && o.color ? { borderColor: o.color } : undefined}
+            title={isRu ? o.label_ru : o.label_en}
           >
-            {isRu ? CONTACT_TYPE_LABELS[t]?.ru ?? t : CONTACT_TYPE_LABELS[t]?.en ?? t}
+            {isRu ? o.label_ru : o.label_en}
           </button>
         ))}
       </div>
@@ -422,21 +478,92 @@ export default function ContactsList() {
           <div>
             <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-1.5">{isRu ? 'Тип' : 'Type'}</p>
             <div className="flex flex-wrap gap-1">
-              <button onClick={() => handleTypeChange(null)} className={cn('px-2 py-0.5 text-xs rounded-full border', !typeFilter ? 'bg-primary text-primary-foreground' : 'text-muted-foreground')}>{isRu ? 'Все' : 'All'}</button>
-              {CONTACT_TYPES.map(t => (
-                <button key={t} onClick={() => handleTypeChange(typeFilter === t ? null : t)} className={cn('px-2 py-0.5 text-xs rounded-full border', typeFilter === t ? 'bg-primary text-primary-foreground' : 'text-muted-foreground')}>{t}</button>
+              <button type="button" onClick={() => handleTypeChange(null)} className={cn('px-2 py-0.5 text-xs rounded-full border', !typeFilter ? 'bg-primary text-primary-foreground' : 'text-muted-foreground')}>{isRu ? 'Все' : 'All'}</button>
+              {activeContactTypeOptions.map((o) => (
+                <button
+                  key={o.value}
+                  type="button"
+                  onClick={() => handleTypeChange(typeFilter === o.value ? null : o.value)}
+                  className={cn('px-2 py-0.5 text-xs rounded-full border max-w-[140px] truncate', typeFilter === o.value ? 'bg-primary text-primary-foreground' : 'text-muted-foreground')}
+                  title={isRu ? o.label_ru : o.label_en}
+                >
+                  {isRu ? o.label_ru : o.label_en}
+                </button>
               ))}
             </div>
           </div>
 
-          {/* Source filter */}
+          {/* Source filter — lead_source из CRM (включая кастомные) */}
           <div>
             <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-1.5">{isRu ? 'Источник' : 'Source'}</p>
             <div className="flex flex-wrap gap-1">
-              <button onClick={() => handleSourceChange(null)} className={cn('px-2 py-0.5 text-xs rounded-full border', !sourceFilter ? 'bg-primary text-primary-foreground' : 'text-muted-foreground')}>{isRu ? 'Все' : 'All'}</button>
-              {CONTACT_SOURCES.map(s => (
-                <button key={s} onClick={() => handleSourceChange(sourceFilter === s ? null : s)} className={cn('px-2 py-0.5 text-xs rounded-full border', sourceFilter === s ? 'bg-primary text-primary-foreground' : 'text-muted-foreground')}>{s}</button>
+              <button type="button" onClick={() => handleSourceChange(null)} className={cn('px-2 py-0.5 text-xs rounded-full border', !sourceFilter ? 'bg-primary text-primary-foreground' : 'text-muted-foreground')}>{isRu ? 'Все' : 'All'}</button>
+              {activeLeadSourceOptions.map((o) => (
+                <button
+                  key={o.value}
+                  type="button"
+                  onClick={() => handleSourceChange(sourceFilter === o.value ? null : o.value)}
+                  className={cn('px-2 py-0.5 text-xs rounded-full border max-w-[140px] truncate', sourceFilter === o.value ? 'bg-primary text-primary-foreground' : 'text-muted-foreground')}
+                  title={`${isRu ? o.label_ru : o.label_en} (${o.value})`}
+                >
+                  {isRu ? o.label_ru : o.label_en}
+                </button>
               ))}
+            </div>
+          </div>
+
+          {/* VIP + lead temperature + CRM role (маркетинг / продажи) */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-1.5">VIP</p>
+              <div className="flex flex-wrap gap-1">
+                {(['all', 'vip', 'standard'] as const).map((k) => (
+                  <button
+                    key={k}
+                    type="button"
+                    onClick={() => handleVipChange(k)}
+                    className={cn(
+                      'px-2 py-0.5 text-xs rounded-full border',
+                      vipFilter === k ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'
+                    )}
+                  >
+                    {k === 'all' ? (isRu ? 'Все' : 'All') : k === 'vip' ? 'VIP' : (isRu ? 'Не VIP' : 'Non-VIP')}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-1.5">{isRu ? 'Темп. лида' : 'Lead temp.'}</p>
+              <div className="flex flex-wrap gap-1">
+                <button type="button" onClick={() => handleLeadTempChange(null)} className={cn('px-2 py-0.5 text-xs rounded-full border', !leadTempFilter ? 'bg-primary text-primary-foreground' : 'text-muted-foreground')}>{isRu ? 'Все' : 'All'}</button>
+                {LEAD_TEMPERATURE_OPTIONS.map((o) => (
+                  <button
+                    key={o.value}
+                    type="button"
+                    onClick={() => handleLeadTempChange(leadTempFilter === o.value ? null : o.value)}
+                    className={cn('px-2 py-0.5 text-xs rounded-full border', leadTempFilter === o.value ? 'bg-primary text-primary-foreground' : 'text-muted-foreground')}
+                  >
+                    {isRu ? o.labelRu : o.labelEn}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-1.5">{isRu ? 'Роль CRM' : 'CRM role'}</p>
+              <div className="flex flex-wrap gap-1">
+                <button type="button" onClick={() => handleCrmRoleChange(null)} className={cn('px-2 py-0.5 text-xs rounded-full border', !crmRoleFilter ? 'bg-primary text-primary-foreground' : 'text-muted-foreground')}>{isRu ? 'Все' : 'All'}</button>
+                {CRM_ROLES.map((r) => (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => handleCrmRoleChange(crmRoleFilter === r ? null : r)}
+                    className={cn('px-2 py-0.5 text-xs rounded-full border max-w-[120px] truncate', crmRoleFilter === r ? 'bg-primary text-primary-foreground' : 'text-muted-foreground')}
+                    title={isRu ? CRM_ROLE_LABELS[r as CrmRole].ru : CRM_ROLE_LABELS[r as CrmRole].en}
+                  >
+                    {isRu ? CRM_ROLE_LABELS[r as CrmRole].ru : CRM_ROLE_LABELS[r as CrmRole].en}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -499,6 +626,7 @@ export default function ContactsList() {
               key={contact.id}
               contact={contact}
               isOwnerOrAdmin={isOwnerOrAdmin}
+              contactTypeOptions={activeContactTypeOptions}
               onClick={() => navigate(APP_ROUTES.MC_CONTACT_DETAIL(contact.id))}
             />
           ))}
@@ -510,6 +638,8 @@ export default function ContactsList() {
               key={contact.id}
               contact={contact}
               isOwnerOrAdmin={isOwnerOrAdmin}
+              contactTypeOptions={activeContactTypeOptions}
+              leadSourceOptions={activeLeadSourceOptions}
               onClick={() => navigate(APP_ROUTES.MC_CONTACT_DETAIL(contact.id))}
             />
           ))}

@@ -28,9 +28,10 @@ import { ChecklistHistory } from '@/components/owner/checklists/ChecklistHistory
 import {
   Home, Calendar, CheckCircle, Clock, AlertTriangle, FileText, Building2,
   Sparkles, Shield, Settings, Bed, Bath, SquareStack, Rocket, EyeOff,
-  StickyNote, Users, Wrench, Eye, MapPin, DollarSign, Wifi, KeyRound,
+  StickyNote, Users, Wrench, Eye, MapPin, Coins, Wifi, KeyRound,
   Handshake
 } from 'lucide-react';
+import { formatCurrencyAmount } from '@/lib/config/currencies';
 
 export default function OwnerPropertyDetail() {
   const { id } = useParams<{ id: string }>();
@@ -94,6 +95,9 @@ export default function OwnerPropertyDetail() {
     house: { en: 'House', ru: 'Дом' },
   };
 
+  const listingCurrency = (property.currency?.trim() || 'THB');
+  const depositCurrency = (property.deposit_currency?.trim() || listingCurrency);
+
   return (
     <PageContainer>
       <BackButton />
@@ -112,15 +116,16 @@ export default function OwnerPropertyDetail() {
             {property.area_sqm && <span className="flex items-center gap-1"><SquareStack className="h-4 w-4" />{property.area_sqm}{isRu ? 'м²' : ' sqm'}</span>}
             {property.floor && <span className="text-muted-foreground">{isRu ? `Этаж ${property.floor}` : `Floor ${property.floor}`}</span>}
             {property.unit_number && <span className="text-muted-foreground">#{property.unit_number}</span>}
-            {property.price_per_night && (
+            {property.price_per_night != null && Number(property.price_per_night) > 0 && (
               <span className="flex items-center gap-1 font-medium text-success">
-                <DollarSign className="h-3.5 w-3.5" />
-                ฿{Number(property.price_per_night).toLocaleString()}/{isRu ? 'ночь' : 'night'}
+                <Coins className="h-3.5 w-3.5 shrink-0" />
+                {formatCurrencyAmount(Number(property.price_per_night), listingCurrency, true)}/{isRu ? 'ночь' : 'night'}
               </span>
             )}
-            {property.deposit_amount && Number(property.deposit_amount) > 0 && (
+            {property.deposit_amount != null && Number(property.deposit_amount) > 0 && (
               <span className="text-muted-foreground">
-                {isRu ? 'Депозит:' : 'Deposit:'} {Number(property.deposit_amount).toLocaleString()} {(property as any).deposit_currency || 'USD'}
+                {isRu ? 'Депозит:' : 'Deposit:'}{' '}
+                {formatCurrencyAmount(Number(property.deposit_amount), depositCurrency, true)}
               </span>
             )}
             {(property as any).seasonal_pricing?.length > 0 && (

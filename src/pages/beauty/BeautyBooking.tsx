@@ -23,6 +23,7 @@ import {
 import { StaffPickerInline } from "@/components/beauty/StaffPicker";
 import { addDays, format } from "date-fns";
 import { ru } from "date-fns/locale";
+import { toast } from "sonner";
 
 export default function BeautyBooking() {
   const { id } = useParams<{ id: string }>();
@@ -103,57 +104,66 @@ export default function BeautyBooking() {
       ? (language === 'ru' ? selectedStaff.name_ru : selectedStaff.name_en) 
       : undefined;
 
-    // Online card payment → Stripe checkout
-    if (paymentMethod === 'card') {
-      await createWellnessCheckout({
-        vertical: 'beauty',
+    try {
+      // Online card payment → Stripe checkout
+      if (paymentMethod === 'card') {
+        const success = await createWellnessCheckout({
+          vertical: 'beauty',
+          items: selectedServiceDetails.map((service: any) => ({
+            id: service.id,
+            name: language === 'ru' ? service.nameRu : service.name,
+            price: service.price,
+            duration_minutes: service.duration,
+          })),
+          totalAmount: totalPrice,
+          scheduledAt: scheduledAt.toISOString(),
+          contactName: contactData.name,
+          contactPhone: contactData.phone,
+          contactEmail: contactData.email,
+          providerName: salon?.name,
+          notes: `Duration: ${totalDuration} min${staffName ? `. Staff: ${staffName}` : ''}`,
+        });
+        if (!success) {
+          toast.error(language === 'ru' ? 'Ошибка оплаты. Попробуйте ещё раз.' : 'Payment error. Please try again.');
+        }
+        return;
+      }
+
+      // Cash / wallet → existing booking flow
+      const result = await createBooking({
+        booking_type: 'service',
+        scheduled_at: scheduledAt,
+        total_amount: totalPrice,
+        currency: 'THB',
+        staff_id: selectedStaffId,
+        notes: `Salon: ${salon?.name || 'Beauty Salon'}. Duration: ${totalDuration} min${staffName ? `. Staff: ${staffName}` : ''}`,
         items: selectedServiceDetails.map((service: any) => ({
-          id: service.id,
-          name: language === 'ru' ? service.nameRu : service.name,
-          price: service.price,
-          duration_minutes: service.duration,
+          item_type: 'service',
+          item_id: service.id,
+          item_name: language === 'ru' ? service.nameRu : service.name,
+          quantity: 1,
+          unit_price: service.price,
+          subtotal: service.price,
         })),
-        totalAmount: totalPrice,
-        scheduledAt: scheduledAt.toISOString(),
-        contactName: contactData.name,
-        contactPhone: contactData.phone,
-        contactEmail: contactData.email,
-        providerName: salon?.name,
-        notes: `Duration: ${totalDuration} min${staffName ? `. Staff: ${staffName}` : ''}`,
+        participants: [{
+          name: contactData.name,
+          phone: contactData.phone,
+          email: contactData.email,
+          is_primary: true,
+        }],
+        payment: {
+          amount: totalPrice,
+          payment_method: paymentMethod,
+        },
       });
-      return;
-    }
 
-    // Cash / wallet → existing booking flow
-    const result = await createBooking({
-      booking_type: 'service',
-      scheduled_at: scheduledAt,
-      total_amount: totalPrice,
-      currency: 'THB',
-      staff_id: selectedStaffId,
-      notes: `Salon: ${salon?.name || 'Beauty Salon'}. Duration: ${totalDuration} min${staffName ? `. Staff: ${staffName}` : ''}`,
-      items: selectedServiceDetails.map((service: any) => ({
-        item_type: 'service',
-        item_id: service.id,
-        item_name: language === 'ru' ? service.nameRu : service.name,
-        quantity: 1,
-        unit_price: service.price,
-        subtotal: service.price,
-      })),
-      participants: [{
-        name: contactData.name,
-        phone: contactData.phone,
-        email: contactData.email,
-        is_primary: true,
-      }],
-      payment: {
-        amount: totalPrice,
-        payment_method: paymentMethod,
-      },
-    });
-
-    if (result.success) {
-      setBookingResult({ success: true, bookingId: result.booking_id });
+      if (result.success) {
+        setBookingResult({ success: true, bookingId: result.booking_id });
+      } else {
+        toast.error(language === 'ru' ? 'Не удалось создать бронирование' : 'Failed to create booking');
+      }
+    } catch {
+      toast.error(language === 'ru' ? 'Ошибка при бронировании. Попробуйте ещё раз.' : 'Booking error. Please try again.');
     }
   };
 

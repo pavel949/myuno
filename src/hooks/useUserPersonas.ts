@@ -3,9 +3,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
-export type UserPersona = 
+export type UserPersona =
   | 'tourist' | 'resident' | 'property_owner' | 'investor'
-  | 'family' | 'couple' | 'nightlife' | 'active' | 'business' | 'nomad' | 'pet_owner' | 'relocation';
+  | 'family' | 'couple' | 'nightlife' | 'active' | 'business' | 'nomad' | 'pet_owner' | 'relocation'
+  | 'real_estate_developer' | 'local_services_provider';
 
 /** All DB-stored persona values (matches user_persona enum) */
 export type DbPersona = UserPersona;
@@ -242,10 +243,21 @@ export function hasPersona(personas: UserPersona[], persona: UserPersona): boole
   return personas.includes(persona);
 }
 
-/** All persona options in display order */
+/** Core roles + B2B — shown first in hero (less scroll, clearer mental model) */
+export const PERSONA_OPTIONS_PRIMARY: UserPersona[] = [
+  'tourist', 'resident', 'relocation', 'property_owner', 'investor',
+  'real_estate_developer', 'local_services_provider',
+];
+
+/** Lifestyle / trip style — stacked below primary in hero */
+export const PERSONA_OPTIONS_LIFESTYLE: UserPersona[] = [
+  'pet_owner', 'family', 'couple', 'nightlife', 'active', 'business', 'nomad',
+];
+
+/** Full persona order (settings, analytics, migrations) */
 export const PERSONA_OPTIONS: UserPersona[] = [
-  'tourist', 'resident', 'relocation', 'property_owner', 'investor', 'pet_owner',
-  'family', 'couple', 'nightlife', 'active', 'business', 'nomad',
+  ...PERSONA_OPTIONS_PRIMARY,
+  ...PERSONA_OPTIONS_LIFESTYLE,
 ];
 
 export const PERSONA_INFO: Record<UserPersona, {
@@ -264,7 +276,7 @@ export const PERSONA_INFO: Record<UserPersona, {
   },
   resident: {
     labelEn: 'Resident', labelRu: 'Резидент',
-    descEn: 'Daily life & services', descRu: 'Быт и сервисы',
+    descEn: 'Already living here: home, health, routine', descRu: 'Уже живу: быт, здоровье, регулярные сервисы',
     icon: 'Home', color: 'text-emerald-600', bgColor: 'bg-emerald-500/10',
   },
   property_owner: {
@@ -299,12 +311,12 @@ export const PERSONA_INFO: Record<UserPersona, {
   },
   business: {
     labelEn: 'Business', labelRu: 'Бизнес',
-    descEn: 'Coworking, legal, banking', descRu: 'Коворкинг, юрист, банк',
+    descEn: 'Company setup, contracts, banking', descRu: 'Компания, договоры, банк, офис',
     icon: 'Briefcase', color: 'text-slate-600', bgColor: 'bg-slate-500/10',
   },
   nomad: {
     labelEn: 'Nomad', labelRu: 'Номад',
-    descEn: 'Coworking, SIM, visa', descRu: 'Коворкинг, SIM, виза',
+    descEn: 'Connectivity, long stay, work-friendly cafés', descRu: 'Связь, долгий визит, кафе для работы',
     icon: 'Laptop', color: 'text-teal-600', bgColor: 'bg-teal-500/10',
   },
   pet_owner: {
@@ -314,7 +326,17 @@ export const PERSONA_INFO: Record<UserPersona, {
   },
   relocation: {
     labelEn: 'Relocating', labelRu: 'Переезд',
-    descEn: 'Visa, housing, schools, legal', descRu: 'Виза, жильё, школы, юрист',
+    descEn: 'Moving checklist: visa, home, schools from day one', descRu: 'Переезд с нуля: виза, жильё, школы, дорожная карта',
     icon: 'Globe', color: 'text-indigo-600', bgColor: 'bg-indigo-500/10',
+  },
+  real_estate_developer: {
+    labelEn: 'Developer', labelRu: 'Застройщик',
+    descEn: 'Projects, leads, newbuilds', descRu: 'Проекты, лиды, новостройки',
+    icon: 'HardHat', color: 'text-sky-600', bgColor: 'bg-sky-500/10',
+  },
+  local_services_provider: {
+    labelEn: 'Service provider', labelRu: 'Поставщик услуг',
+    descEn: 'Join marketplace & payouts', descRu: 'Маркетплейс и выплаты',
+    icon: 'Store', color: 'text-emerald-600', bgColor: 'bg-emerald-500/10',
   },
 };

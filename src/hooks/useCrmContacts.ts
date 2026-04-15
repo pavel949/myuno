@@ -2,6 +2,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
+import { fireCrmWorkflowTrigger } from '@/lib/crmWorkflowTrigger';
+import { formatPostgrestError } from '@/lib/postgrestError';
+import { toast } from 'sonner';
 
 export interface CrmContact {
   id: string;
@@ -52,7 +55,7 @@ export interface CrmContact {
   updated_at: string;
   deal_count?: number;
   // Contact card redesign
-  crm_role?: string | null;
+  crm_roles?: string[] | null;
   key_dates?: Array<{ label: string; date: string }> | null;
   // Odoo-style fields
   address_street: string | null;
@@ -63,9 +66,11 @@ export interface CrmContact {
   address_country: string | null;
   tax_id: string | null;
   website: string | null;
+  is_vip: boolean;
+  marital_status: string | null;
 }
 
-export type CrmContactInsert = Omit<CrmContact, 'id' | 'created_at' | 'updated_at' | 'job_title' | 'birthday' | 'family_info' | 'interests' | 'scoring' | 'deal_count' | 'mobile' | 'is_company' | 'address_street' | 'address_street2' | 'address_city' | 'address_state' | 'address_zip' | 'address_country' | 'tax_id' | 'website' | 'lead_score' | 'lead_temperature' | 'lifecycle_stage' | 'linked_user_id' | 'special_notes' | 'emergency_contact_name' | 'emergency_contact_phone' | 'emergency_contact_relation' | 'instagram' | 'facebook' | 'linkedin'> & {
+export type CrmContactInsert = Omit<CrmContact, 'id' | 'created_at' | 'updated_at' | 'job_title' | 'birthday' | 'family_info' | 'interests' | 'scoring' | 'deal_count' | 'mobile' | 'is_company' | 'address_street' | 'address_street2' | 'address_city' | 'address_state' | 'address_zip' | 'address_country' | 'tax_id' | 'website' | 'lead_score' | 'lead_temperature' | 'lifecycle_stage' | 'linked_user_id' | 'special_notes' | 'emergency_contact_name' | 'emergency_contact_phone' | 'emergency_contact_relation' | 'instagram' | 'facebook' | 'linkedin' | 'is_vip' | 'marital_status'> & {
   job_title?: string | null;
   birthday?: string | null;
   family_info?: string | null;
@@ -92,13 +97,23 @@ export type CrmContactInsert = Omit<CrmContact, 'id' | 'created_at' | 'updated_a
   emergency_contact_name?: string | null;
   emergency_contact_phone?: string | null;
   emergency_contact_relation?: string | null;
+  is_vip?: boolean;
+  marital_status?: string | null;
 };
 export type CrmContactUpdate = Partial<CrmContactInsert>;
 
-export const CONTACT_TYPES = ['buyer', 'seller', 'investor', 'tenant', 'landlord', 'agent'] as const;
+/** Legacy union — prefer `crm_custom_options` (contact_type / lead_source) for UI labels. */
+export const CONTACT_TYPES = [
+  'buyer', 'seller', 'investor', 'tenant', 'landlord', 'agent',
+  'developer', 'broker', 'tourist', 'resident', 'corporate', 'services',
+] as const;
 
 // Use select('*') for robustness — avoids failures when schema has extra/missing columns
-export const CONTACT_SOURCES = ['website', 'referral', 'walk-in', 'social_media', 'agent_network', 'other'] as const;
+export const CONTACT_SOURCES = [
+  'website', 'referral', 'walk-in', 'social', 'social_media', 'agent_network', 'other',
+  'instagram', 'facebook', 'telegram', 'youtube', 'google_ads', 'meta_ads', 'email_campaign',
+  'event_expo', 'cold_outreach', 'chat_widget', 'partner', 'repeat_client',
+] as const;
 export const CONTACT_TAGS = ['VIP', 'hot', 'warm', 'cold', 'follow-up', 'priority'] as const;
 
 const RU_TO_EN_MAP: Record<string, string> = {
@@ -189,7 +204,20 @@ export function useCrmContacts(
   companyId: string | undefined,
   page = 0,
   pageSize = 20,
-  filters?: { search?: string; contactType?: string; tag?: string; showArchived?: boolean; source?: string; lifecycleStage?: string; sortBy?: string }
+  filters?: {
+    search?: string;
+    contactType?: string;
+    tag?: string;
+    showArchived?: boolean;
+    source?: string;
+    lifecycleStage?: string;
+    sortBy?: string;
+    /** 'all' | 'vip' | 'standard' — maps to is_vip */
+    vip?: 'all' | 'vip' | 'standard';
+    leadTemperature?: string;
+    /** Any role from CRM_ROLES; filters contacts where crm_roles contains this value */
+    crmRole?: string;
+  }
 ) {
   return useQuery({
     queryKey: ['crm-contacts', companyId, page, pageSize, filters],
@@ -239,6 +267,20 @@ export function useCrmContacts(
         q = q.contains('tags', [filters.tag]);
       }
 
+      if (filters?.vip === 'vip') {
+        q = q.eq('is_vip', true);
+      } else if (filters?.vip === 'standard') {
+        q = q.eq('is_vip', false);
+      }
+
+      if (filters?.leadTemperature) {
+        q = q.eq('lead_temperature', filters.leadTemperature);
+      }
+
+      if (filters?.crmRole) {
+        q = q.contains('crm_roles', [filters.crmRole]);
+      }
+
       const { data, error, count } = await q;
       if (error) throw error;
       const rows = (data || []) as Record<string, unknown>[];
@@ -284,8 +326,21 @@ export function useCreateContact() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ['crm-contacts'] });
+      const d = data as Record<string, unknown>;
+      if (d.company_id && d.id) {
+        fireCrmWorkflowTrigger({
+          trigger_type: 'contact_created',
+          company_id: d.company_id as string,
+          entity_id: d.id as string,
+          entity_type: 'contact',
+          metadata: { contact_type: d.contact_type, source: d.source },
+        });
+      }
+    },
+    onError: (err: unknown) => {
+      toast.error(formatPostgrestError(err));
     },
   });
 }
@@ -303,9 +358,21 @@ export function useUpdateContact() {
       if (error) throw error;
       return data;
     },
-    onSuccess: (_, vars) => {
+    onSuccess: (data, vars) => {
       qc.invalidateQueries({ queryKey: ['crm-contacts'] });
       qc.invalidateQueries({ queryKey: ['crm-contact', vars.id] });
+      const d = data as Record<string, unknown>;
+      if (d.company_id) {
+        fireCrmWorkflowTrigger({
+          trigger_type: 'contact_updated',
+          company_id: d.company_id as string,
+          entity_id: vars.id,
+          entity_type: 'contact',
+        });
+      }
+    },
+    onError: (err: unknown) => {
+      toast.error(formatPostgrestError(err));
     },
   });
 }

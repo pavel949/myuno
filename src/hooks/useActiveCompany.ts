@@ -55,7 +55,7 @@ export function ActiveCompanyProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [selectedId, setSelectedId] = useState<string | null>(() => {
-    try { return localStorage.getItem(STORAGE_KEY); } catch { return null; }
+    try { return localStorage.getItem(STORAGE_KEY); } catch { /* ignored */ return null; }
   });
 
   const { data: companies = [], isLoading } = useQuery({

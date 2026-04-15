@@ -82,11 +82,24 @@ const { data: links = [], isLoading } = useContactProperties(contactId);
 
   return (
     <div className="rounded-xl border bg-card p-4 space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
         <p className="text-sm font-semibold flex items-center gap-2">
           <Home className="h-4 w-4 text-muted-foreground" />
           {isRu ? 'Объекты' : 'Properties'}
         </p>
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="default"
+            size="sm"
+            className="gap-1.5"
+            onClick={() =>
+              navigate(`${APP_ROUTES.MC_PROPERTY_NEW}?owner_contact_id=${encodeURIComponent(contactId)}`)
+            }
+          >
+            <Plus className="h-3.5 w-3.5" />
+            {isRu ? 'Создать объект' : 'Create property'}
+          </Button>
         <Dialog open={linkDialogOpen} onOpenChange={setLinkDialogOpen}>
           <DialogTrigger asChild>
             <Button variant="outline" size="sm" className="gap-1.5"
@@ -141,6 +154,7 @@ const { data: links = [], isLoading } = useContactProperties(contactId);
             </div>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {isLoading ? (

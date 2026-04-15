@@ -21,7 +21,7 @@ import { addDays, format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 
 // ─── Validation ───
-const LATIN_REGEX = /^[a-zA-Z\s\-'.]+$/;
+const LATIN_REGEX = /^[a-zA-Z\s-'.]+$/;
 const FLIGHT_REGEX = /^[A-Z0-9]{2,3}\s?\d{1,4}$/i;
 
 const passengerSchema = z.object({

@@ -1,12 +1,14 @@
 /**
  * ResalePropertyCard — card for secondary market listings
  */
-import React from 'react';
+import React, { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowRightLeft, MapPin, Maximize2, BedDouble, TrendingUp } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import type { ResaleProperty } from '@/hooks/useResaleProperties';
+import { surfaceFromResale } from '@/lib/real-estate/listingViewModel';
 import { cn } from '@/lib/utils';
 
 interface ResalePropertyCardProps {
@@ -29,22 +31,29 @@ const TITLE_TYPE_LABELS: Record<string, { en: string; ru: string }> = {
 };
 
 export function ResalePropertyCard({ property, onClick, className }: ResalePropertyCardProps) {
+  const navigate = useNavigate();
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
 
-  const title = (isRu && property.title_ru) ? property.title_ru : property.title;
+  const surface = useMemo(() => surfaceFromResale(property), [property]);
+  const title = isRu ? surface.titleRu : surface.titleEn;
   const premiumPercent = property.original_purchase_price && property.original_purchase_price > 0
     ? Math.round(((property.asking_price - property.original_purchase_price) / property.original_purchase_price) * 100)
     : null;
 
-  const coverUrl = property.cover_image
-    || (property.media?.[0] as any)?.url
-    || '/placeholder.svg';
+  const coverUrl = surface.coverImageUrl || '/placeholder.svg';
+
+  const handleClick = () => {
+    if (onClick) onClick();
+    else navigate(surface.href);
+  };
 
   return (
     <div
-      onClick={onClick}
+      data-catalog-kind={surface.kind}
+      data-listing-id={surface.id}
+      onClick={handleClick}
       className={cn(
         "bg-card rounded-xl border border-border/50 overflow-hidden cursor-pointer",
         "hover:shadow-md transition-shadow",

@@ -6,6 +6,7 @@
 import { QueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { CACHE_PROFILES } from '@/lib/queryConfig';
+import { PUBLIC_CATALOG_APPROVAL_STATUS } from '@/lib/real-estate/canonicalModel';
 
 // Route to module mapping for code prefetching
 const routeModules: Record<string, () => Promise<unknown>> = {
@@ -38,7 +39,7 @@ const prefetchListings = (qc: QueryClient, vertical: string, queryKey: string[],
         .select('*')
         .eq('vertical', vertical)
         .eq('is_active', true)
-        .eq('approval_status', 'approved')
+        .eq('approval_status', PUBLIC_CATALOG_APPROVAL_STATUS)
         .order('rating', { ascending: false })
         .limit(limit);
       return data || [];
@@ -61,6 +62,7 @@ const routeDataQueries: Record<string, (queryClient: QueryClient) => void> = {
           .from('properties')
           .select('id, title_en, title_ru, cover_image, rating, price, district')
           .eq('is_active', true)
+          .eq('approval_status', PUBLIC_CATALOG_APPROVAL_STATUS)
           .order('rating', { ascending: false })
           .limit(12);
         return data || [];

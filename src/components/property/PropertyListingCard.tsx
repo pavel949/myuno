@@ -4,7 +4,7 @@
  * NOT for admin/owner dashboards (use PropertyCard instead)
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Star, Zap } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -14,7 +14,9 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { getDistrictLabel, getPropertyTypeLabel } from '@/lib/taxonomies';
 import { cn } from '@/lib/utils';
+import { surfaceFromProperty } from '@/lib/real-estate/listingViewModel';
 import type { Property } from '@/hooks/useProperties';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 
 interface PropertyListingCardProps {
   property: Property;
@@ -27,8 +29,6 @@ interface PropertyListingCardProps {
   /** Number of nights selected (to show total price) */
   nights?: number;
 }
-
-import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 
 const FALLBACK_IMAGE = PLACEHOLDER_IMAGES.property;
 
@@ -58,7 +58,8 @@ export function PropertyListingCard({
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
 
-  const title = isRu ? property.title_ru : property.title_en;
+  const surface = useMemo(() => surfaceFromProperty(property, mode), [property, mode]);
+  const title = isRu ? surface.titleRu : surface.titleEn;
   const images = property.images?.length ? property.images : [property.cover_image || FALLBACK_IMAGE];
 
   // Format district using taxonomy for proper capitalization & localization
@@ -74,8 +75,10 @@ export function PropertyListingCard({
 
   return (
     <div
+      data-catalog-kind={surface.kind}
+      data-listing-id={surface.id}
       className={cn("group cursor-pointer", className)}
-      onClick={() => navigate(`/property/${property.id}`)}
+      onClick={() => navigate(surface.href)}
       onMouseEnter={() => onHover?.(property.id)}
       onMouseLeave={() => onHover?.(null)}
     >
@@ -159,7 +162,7 @@ export function PropertyListingCard({
           <p className="text-xs sm:text-[15px] text-foreground">
             {mode === 'buy' ? (
               <span className="font-semibold">
-                {formatPrice((property as any).sale_price || property.price || 0)}
+                {formatPrice(property.sale_price ?? property.price ?? 0)}
               </span>
             ) : (
               <>

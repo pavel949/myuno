@@ -3,7 +3,7 @@ import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBooking } from "@/hooks/useBooking";
-import { useWellnessCheckout } from "@/hooks/useWellnessCheckout";
+import { useStripeUnifiedCheckout } from "@/hooks/useStripeUnifiedCheckout";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageContainer } from "@/components/uno/PageContainer";
 import { PageHeader } from "@/components/uno/PageHeader";
@@ -34,7 +34,7 @@ export default function LegalBooking() {
   const { language } = useLanguage();
   const { user, isLoading: authLoading } = useAuth();
   const { createBooking, isSubmitting } = useBooking();
-  const { createWellnessCheckout, isProcessing: isStripeProcessing } = useWellnessCheckout();
+  const { createCheckout, isProcessing: isStripeProcessing } = useStripeUnifiedCheckout();
 
   // Form state
   const [step, setStep] = useState(1);
@@ -97,30 +97,23 @@ export default function LegalBooking() {
     const [hours, minutes] = time.split(':').map(Number);
     scheduledAt.setHours(hours, minutes, 0, 0);
 
-    // Stripe card payment flow
-    if (paymentMethod === 'card') {
-      await createWellnessCheckout({
-        vertical: 'medical', // legal falls under professional services
-        items: [{
-          id: id || 'legal-consultation',
-          name: selectedService || (language === 'ru' ? 'Юридическая консультация' : 'Legal Consultation'),
-          price: consultationPrice,
-          duration_minutes: 60,
-        }],
-        totalAmount: consultationPrice,
-        scheduledAt: scheduledAt.toISOString(),
-        contactName: contactData.name,
-        contactPhone: contactData.phone,
-        contactEmail: contactData.email,
-        providerName: language === 'ru' ? 'Юридическая консультация' : 'Legal Consultation',
-        notes: JSON.stringify({
-          provider_id: id,
-          service: selectedService,
-          consultation_type: consultationType,
-          description,
-          company,
-          visa_type: searchParams.get('visa_type'),
-        }),
+    // Stripe online payment flow
+    if (paymentMethod === 'online') {
+      await createCheckout('create-legal-checkout', {
+        provider_id: id,
+        provider_name: language === 'ru' ? 'Юридическая консультация' : 'Legal Consultation',
+        service_type: selectedService,
+        consultation_type: consultationType,
+        consultation_price: consultationPrice,
+        service_fee: 0,
+        total_amount: consultationPrice,
+        currency: 'THB',
+        scheduled_at: scheduledAt.toISOString(),
+        description,
+        company,
+        contact_name: contactData.name,
+        contact_phone: contactData.phone,
+        contact_email: contactData.email,
       });
       return;
     }

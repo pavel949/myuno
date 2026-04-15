@@ -1,13 +1,11 @@
 import { Resend } from 'npm:resend@2.0.0';
 import { createServiceClient } from '../_shared/supabase.ts';
+import { getAdminEmails, getAdminWhatsApp } from '../_shared/admin-config.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'https://myuno.app',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
-
-const ADMIN_EMAIL = 'pavel@ignatevestate.com';
-const ADMIN_WHATSAPP = '66922407355';
 
 interface FastTrackBookingPayload {
   user_id: string;
@@ -94,6 +92,9 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
+
+  const ADMIN_EMAIL = (await getAdminEmails())[0];
+  const ADMIN_WHATSAPP = await getAdminWhatsApp();
 
   try {
     const supabase = createServiceClient();

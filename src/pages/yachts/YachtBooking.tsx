@@ -8,6 +8,7 @@ import { PageContainer } from '@/components/uno/PageContainer';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useOrders } from '@/hooks/useOrders';
+import { useStripeUnifiedCheckout } from '@/hooks/useStripeUnifiedCheckout';
 import { useYacht } from '@/hooks/useYachts';
 import { useAvailabilityCheck } from '@/hooks/useAvailabilityCheck';
 import { useSystemSettings } from '@/hooks/useSystemSettings';
@@ -55,6 +56,7 @@ export default function YachtBooking() {
   const { language } = useLanguage();
   const { user, isLoading: authLoading } = useAuth();
   const { createOrder, isCreating } = useOrders();
+  const { createCheckout, isProcessing: isStripeProcessing } = useStripeUnifiedCheckout();
   const { yacht, isLoading } = useYacht(id || '');
   const { checkYachtAvailability, isChecking, lastResult } = useAvailabilityCheck();
   const { data: yachtExperiences = [] } = useYachtExperiences();
@@ -199,6 +201,40 @@ export default function YachtBooking() {
 
     const bookingCharterType = charterType;
 
+    // Stripe checkout for online payments
+    if (isInstant && paymentMethod === 'online') {
+      const experiences = selectedExperiences.map(expId => {
+        const exp = yachtExperiences.find(e => e.id === expId)!;
+        return {
+          id: expId,
+          name: language === 'ru' ? exp.labelRu : exp.labelEn,
+          price: exp.price,
+        };
+      });
+
+      await createCheckout('create-yacht-checkout', {
+        yacht_id: yacht.id,
+        yacht_name: yachtName,
+        charter_type: bookingCharterType,
+        base_price: basePrice,
+        guests,
+        experiences,
+        service_fee: serviceFee,
+        deposit_amount: depositAmount,
+        total_amount: total,
+        currency: yacht.currency || 'THB',
+        scheduled_at: scheduledAt.toISOString(),
+        end_at: endAt.toISOString(),
+        contact_name: contactData.name,
+        contact_phone: contactData.phone,
+        contact_email: contactData.email,
+        notes: contactData.notes,
+        provider_id: yacht.provider_id,
+      });
+      return;
+    }
+
+    // Cash/wallet/request flow — create order locally
     const result = await createOrder({
       order_type: 'yacht',
       start_at: scheduledAt.toISOString(),
@@ -492,7 +528,7 @@ export default function YachtBooking() {
       <BookingBottomBar
         total={isInstant ? depositAmount : total}
         onSubmit={handleSubmit}
-        isSubmitting={isCreating || isChecking}
+        isSubmitting={isCreating || isChecking || isStripeProcessing}
         disabled={!canSubmit}
         submitLabel={
           isInstant

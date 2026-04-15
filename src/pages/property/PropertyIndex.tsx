@@ -4,7 +4,7 @@
  */
 import React, { useState, useMemo, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Heart, Star, ArrowRight, MapPin, Loader2, SlidersHorizontal, Map } from 'lucide-react';
+import { Heart, Star, ArrowRight, MapPin, SlidersHorizontal, Map } from 'lucide-react';
 import { SEOHead } from '@/components/seo';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
@@ -16,9 +16,11 @@ import { PropertyListingCard } from '@/components/property/PropertyListingCard';
 import { PropertyMode } from '@/components/property/PropertyCategoryRibbon';
 import { matchesCategory } from '@/components/property/PropertyCategoryIcons';
 import { AirbnbSearchBar, SearchParams } from '@/components/property/AirbnbSearchBar';
+import { PropertyHubTabs } from './PropertyHub';
 import { AirbnbCategoryRibbon } from '@/components/property/PropertyCategoryIcons.ribbon';
 import { CrossSellSection } from '@/components/crosssell';
 import { cn } from '@/lib/utils';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { UniversalFilter, FilterValues } from '@/components/filters/UniversalFilter';
@@ -140,7 +142,7 @@ export default function PropertyIndex() {
   }, [allProperties, selectedCategories, filterValues]);
 
   const handlePropertyClick = useCallback((id: string) => {
-    navigate(`/property/${id}`);
+    navigate(APP_ROUTES.PROPERTY_DETAIL(id));
   }, [navigate]);
 
   const handleSearch = useCallback((params: SearchParams) => {
@@ -154,7 +156,7 @@ export default function PropertyIndex() {
     if (params.amenities.length > 0) qp.set('amenities', params.amenities.join(','));
     if (params.instantBooking) qp.set('instant', '1');
     qp.set('mode', propertyMode);
-    navigate(`/property/search?${qp.toString()}`);
+    navigate(`${APP_ROUTES.PROPERTY_SEARCH}?${qp.toString()}`);
   }, [navigate, propertyMode]);
 
   return (
@@ -166,8 +168,10 @@ export default function PropertyIndex() {
           : 'Find villas, condos, and apartments in Phuket. Daily and long-term rentals, property for sale.'}
       />
       <div className="min-h-screen bg-background pb-24">
-        {/* Sticky header: search + categories */}
+        {/* Sticky header: tabs + search + categories */}
         <div className="sticky top-0 z-40 bg-background">
+          {/* Property type tabs (Аренда / Купить / Новостройки …) */}
+          <PropertyHubTabs />
           {/* Search pill + mode toggle */}
           <div className="px-4 pt-3 pb-2">
             <div className="flex items-center gap-2">
@@ -245,9 +249,18 @@ export default function PropertyIndex() {
           )}
 
           {isLoading && (
-            <div className="flex justify-center py-16">
-              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-            </div>
+            <section className="px-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 gap-y-6 sm:gap-x-6 sm:gap-y-10">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <div key={i} className="space-y-2">
+                    <div className="aspect-[4/5] sm:aspect-square rounded-lg sm:rounded-xl bg-muted animate-pulse" />
+                    <div className="h-3 bg-muted rounded animate-pulse w-2/3" />
+                    <div className="h-3 bg-muted rounded animate-pulse w-1/2" />
+                    <div className="h-3 bg-muted rounded animate-pulse w-1/3" />
+                  </div>
+                ))}
+              </div>
+            </section>
           )}
 
           {/* Main grid — Airbnb-style 2-col cards */}
@@ -271,7 +284,7 @@ export default function PropertyIndex() {
               </div>
               {filteredProperties.length > 20 && (
                 <div className="mt-6 text-center">
-                  <Button variant="outline" className="gap-2" onClick={() => navigate('/property/search')}>
+                  <Button variant="outline" className="gap-2" onClick={() => navigate(APP_ROUTES.PROPERTY_SEARCH)}>
                     {isRu ? `Показать все ${filteredProperties.length}` : `Show all ${filteredProperties.length}`}
                     <ArrowRight className="w-4 h-4" />
                   </Button>

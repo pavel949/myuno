@@ -1,4 +1,5 @@
 import { Resend } from 'npm:resend@2.0.0';
+import { getAdminEmails, getAdminWhatsApp } from '../_shared/admin-config.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'https://myuno.app',
@@ -32,8 +33,9 @@ interface OrderNotificationPayload {
   manager_phone?: string | null;
 }
 
-const ADMIN_EMAILS = ['pavel@ignatevestate.com', 'pi@myuno.app']; // Admin emails
-const ADMIN_WHATSAPP = '66922407355'; // Admin WhatsApp number
+// Loaded from system_settings at runtime
+let ADMIN_EMAILS: string[] = [];
+let ADMIN_WHATSAPP = '';
 
 // Send WhatsApp notification via URL API
 async function sendWhatsAppNotification(payload: OrderNotificationPayload, phoneOverride?: string): Promise<void> {
@@ -137,6 +139,10 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
+
+  // Load admin contacts from DB
+  ADMIN_EMAILS = await getAdminEmails();
+  ADMIN_WHATSAPP = await getAdminWhatsApp();
 
   try {
     const resendKey = Deno.env.get('RESEND_API_KEY');

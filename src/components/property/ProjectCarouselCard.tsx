@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { cn } from '@/lib/utils';
+import { APP_ROUTES } from '@/lib/config/routes';
 import type { ProjectWithStats } from '@/hooks/usePropertyProjectsWithStats';
 
 interface ProjectCarouselCardProps {
@@ -32,7 +33,7 @@ export function ProjectCarouselCard({ project, className, onSelect, isSelected }
     if (onSelect) {
       onSelect(project.id);
     } else {
-      navigate(`/property/projects?highlight=${project.id}`);
+      navigate(`${APP_ROUTES.COMPLEXES}?highlight=${project.id}`);
     }
   };
 

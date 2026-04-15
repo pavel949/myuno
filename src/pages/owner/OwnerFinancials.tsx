@@ -12,7 +12,6 @@ import {
   INCOME_CATEGORIES,
   EXPENSE_CATEGORIES,
 } from '@/hooks/usePropertyFinancials';
-import { exportTransactionsExcel } from '@/utils/exportFinancialsExcel';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { BackButton } from '@/components/uno/BackButton';
 import { Card, CardContent } from '@/components/ui/card';
@@ -37,6 +36,10 @@ import { FinancialStatsCards } from '@/components/owner/financials/FinancialStat
 import { TransactionCard } from '@/components/owner/financials/TransactionCard';
 import { ExpenseTemplates } from '@/components/owner/expense/ExpenseTemplates';
 import { CashFlowForecast } from '@/components/owner/financials/CashFlowForecast';
+import { useOwnerBookingRevenue } from '@/hooks/useOwnerBookingRevenue';
+import { useCurrency } from '@/contexts/CurrencyContext';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function OwnerFinancials() {
   const { language } = useLanguage();
@@ -46,7 +49,7 @@ export default function OwnerFinancials() {
 
   const [selectedProperty, setSelectedProperty] = useState<string>('all');
   const [activeTab, setActiveTab] = useState<'all' | 'income' | 'expense'>('all');
-  const [viewMode, setViewMode] = useState<'list' | 'charts' | 'forecast'>('list');
+  const [viewMode, setViewMode] = useState<'list' | 'charts' | 'forecast' | 'bookings'>('list');
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [viewReceiptUrl, setViewReceiptUrl] = useState<string | null>(null);
   const [datePreset, setDatePreset] = useState<DatePreset>('all_time');
@@ -74,6 +77,8 @@ export default function OwnerFinancials() {
   const { data: totalCount } = usePropertyFinancialsCount(selectedProperty === 'all' ? undefined : selectedProperty);
   const { data: stats } = useFinancialStats(selectedProperty === 'all' ? undefined : selectedProperty);
   const deleteFinancial = useDeleteFinancial();
+  const { items: bookingItems, summary: bookingSummary, isLoading: bookingsLoading } = useOwnerBookingRevenue(selectedProperty === 'all' ? undefined : selectedProperty);
+  const { formatPrice } = useCurrency();
 
   const financials = useMemo(() => {
     if (!financialsData?.pages) return [];
@@ -182,6 +187,9 @@ export default function OwnerFinancials() {
         <Button variant={viewMode === 'forecast' ? 'default' : 'outline'} size="sm" onClick={() => setViewMode('forecast')}>
           <CalendarClock className="h-4 w-4 mr-2" />{isRu ? 'Прогноз' : 'Forecast'}
         </Button>
+        <Button variant={viewMode === 'bookings' ? 'default' : 'outline'} size="sm" onClick={() => setViewMode('bookings')}>
+          <TrendingUp className="h-4 w-4 mr-2" />{isRu ? 'Бронирования' : 'Bookings'}
+        </Button>
       </div>
 
       {viewMode !== 'forecast' && <FinancialStatsCards stats={stats} isRu={isRu} />}
@@ -210,7 +218,7 @@ export default function OwnerFinancials() {
         <Button
           variant="outline"
           size="icon"
-          onClick={() => exportTransactionsExcel(filteredFinancials, language as 'ru' | 'en')}
+          onClick={async () => { const { exportTransactionsExcel } = await import('@/utils/exportFinancialsExcel'); exportTransactionsExcel(filteredFinancials, language as 'ru' | 'en'); }}
           disabled={!filteredFinancials.length}
           title={isRu ? 'Экспорт Excel' : 'Export Excel'}
         >
@@ -224,6 +232,65 @@ export default function OwnerFinancials() {
 
       {viewMode === 'charts' && financials && (
         <FinancialCharts financials={financials} dateRange={dateRange.from && dateRange.to ? { from: dateRange.from, to: dateRange.to } : undefined} />
+      )}
+
+      {viewMode === 'bookings' && (
+        <div className="space-y-4">
+          {/* Booking Revenue Summary */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <Card><CardContent className="p-3">
+              <p className="text-xs text-muted-foreground">{isRu ? 'Выручка' : 'Revenue'}</p>
+              <p className="text-lg font-bold">{formatPrice(bookingSummary.totalRevenue)}</p>
+            </CardContent></Card>
+            <Card><CardContent className="p-3">
+              <p className="text-xs text-muted-foreground">{isRu ? 'Комиссия' : 'Commission'}</p>
+              <p className="text-lg font-bold text-orange-600">{formatPrice(bookingSummary.totalCommission)}</p>
+            </CardContent></Card>
+            <Card><CardContent className="p-3">
+              <p className="text-xs text-muted-foreground">{isRu ? 'К выплате' : 'Net Payout'}</p>
+              <p className="text-lg font-bold text-success">{formatPrice(bookingSummary.totalNetPayout)}</p>
+            </CardContent></Card>
+            <Card><CardContent className="p-3">
+              <p className="text-xs text-muted-foreground">{isRu ? 'Бронирований' : 'Bookings'}</p>
+              <p className="text-lg font-bold">{bookingSummary.bookingCount}</p>
+            </CardContent></Card>
+          </div>
+
+          {/* Booking List */}
+          {bookingsLoading ? (
+            <div className="space-y-3">{[1,2,3].map(i => <Card key={i}><CardContent className="p-4"><Skeleton className="h-16" /></CardContent></Card>)}</div>
+          ) : bookingItems.length === 0 ? (
+            <Card><CardContent className="py-12 text-center text-muted-foreground">
+              {isRu ? 'Нет подтверждённых бронирований' : 'No confirmed bookings'}
+            </CardContent></Card>
+          ) : (
+            <div className="space-y-2">
+              {bookingItems.map(b => (
+                <Card key={b.id}>
+                  <CardContent className="p-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span className="text-sm font-medium truncate">{b.propertyTitle || b.propertyId.slice(0, 8)}</span>
+                          {b.source && <Badge variant="outline" className="text-[10px] shrink-0">{b.source}</Badge>}
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {b.guestName || (isRu ? 'Гость' : 'Guest')} · {b.checkIn} → {b.checkOut}
+                        </p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="text-sm font-bold">{formatPrice(b.totalAmount)}</p>
+                        <p className="text-[10px] text-muted-foreground">
+                          {isRu ? 'Нетто' : 'Net'}: {formatPrice(b.netPayout)}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
       )}
 
       {viewMode === 'list' && (

@@ -54,7 +54,11 @@ export function PropertyLocationMap({ lat, lng, district, address }: PropertyLoc
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted/30 gap-3 p-4">
             <MapPin className="w-8 h-8 text-muted-foreground" />
             <p className="text-sm text-muted-foreground text-center">
-              {isRu ? 'Задайте VITE_GOOGLE_MAPS_API_KEY в .env' : 'Set VITE_GOOGLE_MAPS_API_KEY in .env'}
+              {loadError?.message?.includes('auth')
+                ? (isRu
+                  ? 'Ошибка авторизации Google Maps. Проверьте ограничения API-ключа.'
+                  : 'Google Maps auth error. Check API key restrictions.')
+                : (isRu ? 'Карта недоступна' : 'Map unavailable')}
             </p>
             {googleMapsUrl && (
               <a

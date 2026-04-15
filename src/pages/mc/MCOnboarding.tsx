@@ -91,7 +91,7 @@ const MCOnboarding: React.FC = () => {
       toast.error(isRu ? 'Некорректный email' : 'Invalid email address');
       return;
     }
-    if (form.phone.trim() && !/^\+?[\d\s\-()]{7,20}$/.test(form.phone.trim())) {
+    if (form.phone.trim() && !/^\+?[\d\s-()]{7,20}$/.test(form.phone.trim())) {
       toast.error(isRu ? 'Некорректный телефон' : 'Invalid phone number');
       return;
     }

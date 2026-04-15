@@ -80,6 +80,8 @@ export interface OwnerProperty extends BaseProperty {
   
   // Rental terms - Basic
   price_per_night?: number;
+  /** Listing currency for nightly rate (matches `properties.currency` in DB) */
+  currency?: string;
   min_stay_nights?: number;
   max_guests?: number;
   deposit_amount?: number;

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useMyCompanyId, DEAL_TYPES, DEAL_TYPE_LABELS, DealType } from '@/hooks/useAgentDeals';
-import { useAllPipelineStages, useCreatePipelineStage, useUpdatePipelineStage, useDeletePipelineStage, PipelineStage, DEFAULT_STAGES } from '@/hooks/useDealPipelineStages';
+import { useAllPipelineStages, useCreatePipelineStage, useUpdatePipelineStage, useDeletePipelineStage, PipelineStage, getDefaultStagesForDealType } from '@/hooks/useDealPipelineStages';
 import { useCrmOptions, useCreateCrmOption, useUpdateCrmOption, useDeleteCrmOption, CrmCustomOption, CrmOptionCategory } from '@/hooks/useCrmSettings';
 import { OdooCrmSettingsImportModal } from '@/components/owner/crm/OdooCrmSettingsImportModal';
 import { Button } from '@/components/ui/button';
@@ -235,7 +235,7 @@ const [selectedType, setSelectedType] = useState<DealType>('sale');
 
   const handleSeedForType = async (dealType: DealType) => {
     try {
-      for (const s of DEFAULT_STAGES.map(s => ({ ...s, deal_type: dealType, company_id: companyId }))) {
+      for (const s of getDefaultStagesForDealType(dealType).map((row) => ({ ...row, company_id: companyId }))) {
         await createStage.mutateAsync(s);
       }
       toast(isRu ? 'Стандартные этапы созданы' : 'Default stages created');
@@ -353,6 +353,7 @@ export default function PipelineSettingsPage() {
     { value: 'deal_type', label: isRu ? 'Типы сделок' : 'Deal Types' },
     { value: 'task_type', label: isRu ? 'Типы задач' : 'Task Types' },
     { value: 'lost_reason', label: isRu ? 'Причины проигрыша' : 'Lost Reasons' },
+    { value: 'win_reason', label: isRu ? 'Причины успеха' : 'Win Reasons' },
   ];
 
   return (
@@ -412,6 +413,10 @@ export default function PipelineSettingsPage() {
 
         <TabsContent value="lost_reason" className="mt-4">
           <OptionListEditor companyId={membership.company_id} category="lost_reason" isRu={isRu} />
+        </TabsContent>
+
+        <TabsContent value="win_reason" className="mt-4">
+          <OptionListEditor companyId={membership.company_id} category="win_reason" isRu={isRu} />
         </TabsContent>
       </Tabs>
 

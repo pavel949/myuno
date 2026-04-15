@@ -78,6 +78,9 @@ export function useCreateCrmCompany() {
       return data as CrmCompanyEntity;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['crm-companies'] }),
+    onError: (err: Error) => {
+      import('sonner').then(({ toast }) => toast.error(err.message || 'Failed to create company'));
+    },
   });
 }
 
@@ -92,6 +95,9 @@ export function useUpdateCrmCompany() {
       qc.invalidateQueries({ queryKey: ['crm-companies'] });
       qc.invalidateQueries({ queryKey: ['crm-company', vars.id] });
     },
+    onError: (err: Error) => {
+      import('sonner').then(({ toast }) => toast.error(err.message || 'Failed to update company'));
+    },
   });
 }
 
@@ -103,6 +109,9 @@ export function useDeleteCrmCompany() {
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['crm-companies'] }),
+    onError: (err: Error) => {
+      import('sonner').then(({ toast }) => toast.error(err.message || 'Failed to delete company'));
+    },
   });
 }
 

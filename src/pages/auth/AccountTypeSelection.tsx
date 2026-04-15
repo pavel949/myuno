@@ -81,7 +81,7 @@ export default function AccountTypeSelection() {
         // Create organization
         await createOrg({
           name: companyName,
-          org_type: 'owner',
+          org_type: 'management_company',
         });
 
         toast.success(isRu ? 'Компания создана!' : 'Company created!');

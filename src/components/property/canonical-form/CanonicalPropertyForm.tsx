@@ -514,15 +514,9 @@ export function CanonicalPropertyForm({
                 >
                   <tab.icon className={cn("h-4 w-4", isActive ? "text-primary" : "text-muted-foreground")} />
                   <span>{isRu ? tab.labelRu : tab.labelEn}</span>
-                  {/* Completion dot */}
+                  {/* Completion indicator — only show when complete */}
                   {status === 'complete' && (
-                    <span className="h-2 w-2 rounded-full bg-primary" />
-                  )}
-                  {status === 'partial' && (
-                    <span className="h-2 w-2 rounded-full bg-accent-foreground/50" />
-                  )}
-                  {status === 'empty' && (
-                    <span className="h-2 w-2 rounded-full bg-muted-foreground/20" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
                   )}
                 </button>
               );

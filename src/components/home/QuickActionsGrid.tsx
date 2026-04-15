@@ -11,8 +11,8 @@ import {
   Stethoscope, ShoppingBag, MoreHorizontal, Scale, Shield,
   Sparkles, Car, GraduationCap, Briefcase, Banknote,
   Calendar, Wrench, Building2, Building, Key, Droplets, TrendingUp,
-  Users, BarChart3, ClipboardList, Lock, ChevronRight,
-  Baby, Heart, Music, Dumbbell, Laptop, Wifi, PawPrint
+  Users, BarChart3, ClipboardList, Lock, ChevronRight, LayoutGrid,
+  Baby, Heart, Music, Dumbbell, Laptop, Wifi, PawPrint, Calculator, HardHat, Store,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserPersonas, UserPersona } from '@/hooks/useUserPersonas';
@@ -26,6 +26,7 @@ import { playSound } from '@/hooks/useSoundEffects';
 import { getFeedbackSettings } from '@/hooks/useFeedbackSettings';
 import { prefetchRoute } from '@/lib/routePrefetch';
 import { toast } from 'sonner';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 interface QuickAction {
   id: string;
@@ -71,11 +72,13 @@ const OWNER_ACTIONS: QuickAction[] = [
 
 const INVESTOR_ACTIONS: QuickAction[] = [
   { id: 'invest', icon: TrendingUp, label: 'Investment', labelRu: 'Инвестиции', path: '/invest', accentColor: '#00D68F' },
-  { id: 'offplan', icon: Building2, label: 'Off-Plan', labelRu: 'Новостройки', path: '/offplan', accentColor: '#06B6D4' },
+  { id: 'offplan', icon: Building2, label: 'Off-Plan', labelRu: 'Новостройки', path: APP_ROUTES.OFFPLAN, accentColor: '#06B6D4' },
   { id: 'property-buy', icon: Building, label: 'Buy Property', labelRu: 'Купить', path: '/property?mode=buy', accentColor: '#A855F7' },
-  { id: 'legal', icon: Scale, label: 'Legal', labelRu: 'Юрист', path: '/legal', accentColor: '#F59E0B' },
+  { id: 'legal', icon: Scale, label: 'Legal', labelRu: 'Право', path: '/legal', accentColor: '#F59E0B' },
   { id: 'banking', icon: Briefcase, label: 'Banking', labelRu: 'Банкинг', path: '/banking', accentColor: '#4E7BFF' },
   { id: 'insurance', icon: Shield, label: 'Insurance', labelRu: 'Страховка', path: '/insurance', accentColor: '#06B6D4' },
+  { id: 'market-data', icon: BarChart3, label: 'Market Data', labelRu: 'Рынок', path: '/invest', accentColor: '#F43F5E' },
+  { id: 'roi-calc', icon: Calculator, label: 'ROI Calc', labelRu: 'ROI', path: '/property?tab=roi', accentColor: '#00D68F' },
 ];
 
 const FAMILY_ACTIONS: QuickAction[] = [
@@ -116,20 +119,20 @@ const ACTIVE_ACTIONS: QuickAction[] = [
 ];
 
 const BUSINESS_ACTIONS: QuickAction[] = [
-  { id: 'coworking', icon: Laptop, label: 'Coworking', labelRu: 'Коворкинг', path: '/services?category=coworking', accentColor: '#4E7BFF' },
   { id: 'legal', icon: Scale, label: 'Legal', labelRu: 'Юрист', path: '/legal', accentColor: '#A855F7' },
   { id: 'banking', icon: Banknote, label: 'Banking', labelRu: 'Банки', path: '/banking', accentColor: '#00D68F' },
+  { id: 'coworking', icon: Laptop, label: 'Coworking', labelRu: 'Коворкинг', path: '/services?category=coworking', accentColor: '#4E7BFF' },
   { id: 'visa', icon: Briefcase, label: 'Work Permit', labelRu: 'Разрешения', path: '/visa', accentColor: '#F59E0B' },
   { id: 'insurance', icon: Shield, label: 'Insurance', labelRu: 'Страховка', path: '/insurance', accentColor: '#06B6D4' },
   { id: 'property', icon: Building, label: 'Office', labelRu: 'Офис', path: '/property?type=office', accentColor: '#F43F5E' },
 ];
 
 const NOMAD_ACTIONS: QuickAction[] = [
-  { id: 'coworking', icon: Laptop, label: 'Coworking', labelRu: 'Коворкинг', path: '/services?category=coworking', accentColor: '#4E7BFF' },
   { id: 'wifi', icon: Wifi, label: 'SIM & WiFi', labelRu: 'SIM и WiFi', path: '/services?category=connectivity', accentColor: '#06B6D4' },
-  { id: 'visa', icon: Briefcase, label: 'Visa', labelRu: 'Виза', path: '/visa', accentColor: '#F59E0B' },
   { id: 'property', icon: Home, label: 'Long-term', labelRu: 'Долгосрок', path: '/property?mode=long-term', accentColor: '#00D68F' },
   { id: 'restaurants', icon: Utensils, label: 'Cafés', labelRu: 'Кафе', path: '/restaurants?tag=cafe', accentColor: '#F59E0B' },
+  { id: 'coworking', icon: Laptop, label: 'Coworking', labelRu: 'Коворкинг', path: '/services?category=coworking', accentColor: '#4E7BFF' },
+  { id: 'visa', icon: Briefcase, label: 'Visa', labelRu: 'Виза', path: '/visa', accentColor: '#F59E0B' },
   { id: 'fitness', icon: Dumbbell, label: 'Fitness', labelRu: 'Фитнес', path: '/fitness', accentColor: '#F43F5E' },
   { id: 'banking', icon: Banknote, label: 'Banking', labelRu: 'Банки', path: '/banking', accentColor: '#00D68F' },
 ];
@@ -142,6 +145,24 @@ const PET_OWNER_ACTIONS: QuickAction[] = [
   { id: 'pet-transport', icon: Car, label: 'Transport', labelRu: 'Перевозка', path: '/pets?category=transport', accentColor: '#4E7BFF' },
   { id: 'pet-shop', icon: ShoppingBag, label: 'Pet Shop', labelRu: 'Зоомагазин', path: '/market?category=pets', accentColor: '#00D68F' },
   { id: 'insurance', icon: Shield, label: 'Pet Insurance', labelRu: 'Страховка', path: '/insurance?type=pet', accentColor: '#F59E0B' },
+];
+
+const REAL_ESTATE_DEVELOPER_ACTIONS: QuickAction[] = [
+  { id: 'dev-landing', icon: HardHat, label: 'For developers', labelRu: 'Застройщикам', path: APP_ROUTES.FOR_REAL_ESTATE_DEVELOPERS, accentColor: '#0EA5E9' },
+  { id: 'newbuilds', icon: Building2, label: 'Newbuilds', labelRu: 'Новостройки', path: APP_ROUTES.NEWBUILDS, accentColor: '#06B6D4' },
+  { id: 'dev-portal', icon: LayoutGrid, label: 'Dev portal', labelRu: 'Портал', path: `${APP_ROUTES.AUTH}?redirect=${encodeURIComponent(APP_ROUTES.DEVELOPER_PORTAL)}`, accentColor: '#4E7BFF' },
+  { id: 'developers-dir', icon: Users, label: 'Developers', labelRu: 'Девелоперы', path: APP_ROUTES.DEVELOPERS, accentColor: '#A855F7' },
+  { id: 'offplan', icon: TrendingUp, label: 'Off-plan', labelRu: 'Off-plan', path: APP_ROUTES.OFFPLAN, accentColor: '#00D68F' },
+  { id: 'consultation', icon: Calendar, label: 'Consult', labelRu: 'Консультация', path: APP_ROUTES.PROPERTY_CONSULTATION, accentColor: '#F59E0B' },
+];
+
+const LOCAL_SERVICES_PROVIDER_ACTIONS: QuickAction[] = [
+  { id: 'provider-landing', icon: Store, label: 'For providers', labelRu: 'Партнёрам', path: APP_ROUTES.FOR_LOCAL_SERVICE_PROVIDERS, accentColor: '#22C55E' },
+  { id: 'vendor-join', icon: Wrench, label: 'Join', labelRu: 'Подключиться', path: APP_ROUTES.VENDOR_JOIN, accentColor: '#00D68F' },
+  { id: 'become-partner', icon: Shield, label: 'Partner', labelRu: 'Партнёрство', path: APP_ROUTES.BECOME_PARTNER, accentColor: '#4E7BFF' },
+  { id: 'list-with-us', icon: ClipboardList, label: 'List', labelRu: 'Разместить', path: APP_ROUTES.LIST_WITH_US, accentColor: '#F59E0B' },
+  { id: 'services-cat', icon: Sparkles, label: 'Services', labelRu: 'Услуги', path: APP_ROUTES.SERVICES, accentColor: '#F43F5E' },
+  { id: 'discover', icon: Compass, label: 'Discover', labelRu: 'Каталог', path: APP_ROUTES.DISCOVER, accentColor: '#A855F7' },
 ];
 
 const RELOCATION_ACTIONS: QuickAction[] = [
@@ -201,6 +222,8 @@ function getActionsForPersonas(personas: UserPersona[]): QuickAction[] {
     nightlife: NIGHTLIFE_ACTIONS, active: ACTIVE_ACTIONS,
     business: BUSINESS_ACTIONS, nomad: NOMAD_ACTIONS,
     pet_owner: PET_OWNER_ACTIONS,
+    real_estate_developer: REAL_ESTATE_DEVELOPER_ACTIONS,
+    local_services_provider: LOCAL_SERVICES_PROVIDER_ACTIONS,
   };
   for (const persona of personas) {
     const actions = personaToActions[persona] || [];
@@ -325,7 +348,7 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
                   </div>
                 )}
               </div>
-              <span className="text-[13px] font-semibold text-center leading-tight text-foreground">{label}</span>
+              <span className="text-[11px] font-semibold text-center leading-tight text-foreground line-clamp-2 w-full">{label}</span>
             </motion.button>
           ) : (
             <button

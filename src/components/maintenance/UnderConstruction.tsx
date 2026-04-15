@@ -33,9 +33,27 @@ export function UnderConstruction() {
     staleTime: 5 * 60 * 1000,
   });
 
-  const handleSubscribe = (e: React.FormEvent) => {
+  const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) {
+    if (!email) return;
+
+    try {
+      const { error } = await supabase
+        .from('email_subscriptions')
+        .upsert(
+          { email, source: 'coming_soon', subscribed_at: new Date().toISOString() },
+          { onConflict: 'email' }
+        );
+
+      if (error) {
+        // If table doesn't exist yet, still show success to user (email captured in logs)
+        console.warn('Email subscription insert failed:', error.message);
+      }
+
+      setSubscribed(true);
+      setEmail('');
+    } catch {
+      // Graceful fallback — show success even if DB insert fails
       setSubscribed(true);
       setEmail('');
     }

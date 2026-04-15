@@ -2,10 +2,13 @@ import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SectionHeader } from '@/components/ds';
-import { DollarSign, BarChart3, Rocket } from 'lucide-react';
+import { DollarSign, BarChart3, Rocket, Wallet } from 'lucide-react';
 import { ControlFinanceTab } from '@/components/admin/control/ControlFinanceTab';
 import { ControlAnalyticsTab } from '@/components/admin/control/ControlAnalyticsTab';
 import { AdminPromotionsTab } from '@/components/admin/finance/AdminPromotionsTab';
+import { ReconciliationStatus } from '@/components/admin/finance/ReconciliationStatus';
+import { ManualPaymentForm } from '@/components/admin/finance/ManualPaymentForm';
+import { PayoutManager } from '@/components/admin/PayoutManager';
 
 export default function AdminFinance() {
   const { language } = useLanguage();
@@ -13,12 +16,18 @@ export default function AdminFinance() {
 
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-4 max-w-[1536px] mx-auto w-full">
-      <SectionHeader
-        title={isRu ? 'Финансы' : 'Finance'}
-        subtitle={isRu ? 'Транзакции, комиссии и аналитика доходов' : 'Transactions, commissions and revenue analytics'}
-        icon={DollarSign}
-        size="lg"
-      />
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <SectionHeader
+          title={isRu ? 'Финансы' : 'Finance'}
+          subtitle={isRu ? 'Транзакции, комиссии и аналитика доходов' : 'Transactions, commissions and revenue analytics'}
+          icon={DollarSign}
+          size="lg"
+        />
+        <div className="flex items-center gap-2">
+          <ReconciliationStatus compact />
+          <ManualPaymentForm />
+        </div>
+      </div>
 
       <Tabs defaultValue="finance" className="w-full">
         <TabsList>
@@ -34,6 +43,10 @@ export default function AdminFinance() {
             <Rocket className="h-4 w-4" />
             {isRu ? 'Промо' : 'Promotions'}
           </TabsTrigger>
+          <TabsTrigger value="payouts" className="gap-1.5">
+            <Wallet className="h-4 w-4" />
+            {isRu ? 'Выплаты' : 'Payouts'}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="finance" className="mt-4">
@@ -44,6 +57,9 @@ export default function AdminFinance() {
         </TabsContent>
         <TabsContent value="promotions" className="mt-4">
           <AdminPromotionsTab />
+        </TabsContent>
+        <TabsContent value="payouts" className="mt-4">
+          <PayoutManager />
         </TabsContent>
       </Tabs>
     </div>

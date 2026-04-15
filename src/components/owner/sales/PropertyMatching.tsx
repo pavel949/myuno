@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { AgentDeal } from '@/hooks/useAgentDeals';
 import { Badge } from '@/components/ui/badge';
 import { Bed, MapPin } from 'lucide-react';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 interface Props {
   deal: AgentDeal;
@@ -66,7 +67,7 @@ export function PropertyMatching({ deal }: Props) {
       {scored.slice(0, 5).map(p => (
         <button
           key={p.id}
-          onClick={() => navigate(`/property/${p.id}`)}
+          onClick={() => navigate(APP_ROUTES.PROPERTY_DETAIL(p.id))}
           className="w-full text-left flex gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
         >
           {p.images?.[0] && (

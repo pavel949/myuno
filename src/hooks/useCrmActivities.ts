@@ -4,6 +4,7 @@
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { typedFrom } from '@/lib/untypedTables';
+import { fireCrmWorkflowTrigger } from '@/lib/crmWorkflowTrigger';
 
 export interface CrmActivity {
   id: string;
@@ -25,6 +26,7 @@ export const ACTIVITY_TYPES = [
   'call', 'email_sent', 'email_received', 'meeting', 'note', 'whatsapp',
   'sms', 'document_shared', 'task_completed', 'stage_changed',
   'property_viewed', 'quote_sent', 'form_submitted',
+  'service_request', 'visa_consultation',
 ] as const;
 
 export const ACTIVITY_OUTCOMES = [
@@ -45,6 +47,8 @@ export const ACTIVITY_TYPE_CONFIG: Record<string, { labelEn: string; labelRu: st
   property_viewed: { labelEn: 'Property Viewed', labelRu: 'Просмотр', icon: 'Eye', color: 'text-warning' },
   quote_sent: { labelEn: 'Quote Sent', labelRu: 'КП отправлено', icon: 'Send', color: 'text-info' },
   form_submitted: { labelEn: 'Form Submitted', labelRu: 'Форма', icon: 'ClipboardList', color: 'text-primary' },
+  service_request: { labelEn: 'Service', labelRu: 'Услуга', icon: 'Briefcase', color: 'text-primary' },
+  visa_consultation: { labelEn: 'Visa', labelRu: 'Виза', icon: 'Plane', color: 'text-info' },
 };
 
 export function useCrmActivities(contactId?: string, dealId?: string, limit = 30) {
@@ -73,8 +77,21 @@ export function useLogActivity() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ['crm-activities'] });
+      const d = data as Record<string, unknown>;
+      if (d?.company_id && d?.id) {
+        fireCrmWorkflowTrigger({
+          trigger_type: 'activity_logged',
+          company_id: d.company_id as string,
+          entity_id: d.id as string,
+          entity_type: 'activity',
+          metadata: { activity_type: d.activity_type, contact_id: d.contact_id, deal_id: d.deal_id },
+        });
+      }
+    },
+    onError: (err: Error) => {
+      import('sonner').then(({ toast }) => toast.error(err.message || 'Failed to log activity'));
     },
   });
 }

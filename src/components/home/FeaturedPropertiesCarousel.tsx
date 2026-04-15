@@ -12,7 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { getDistrictLabel } from '@/lib/taxonomies';
 import { cn } from '@/lib/utils';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
-import { useSectionReveal } from '@/hooks/useScrollBehavior';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 interface FeaturedProperty {
   id: string;
@@ -37,7 +37,6 @@ export function FeaturedPropertiesCarousel() {
   const { formatPrice } = useCurrency();
   const navigate = useNavigate();
   const isRu = language === 'ru';
-  const sectionRef = useSectionReveal<HTMLElement>();
 
   const { data: properties = [], isLoading } = useQuery({
     queryKey: ['featured-properties-home'],
@@ -46,8 +45,7 @@ export function FeaturedPropertiesCarousel() {
         .from('properties')
         .select('id, title_en, title_ru, cover_image, images, price, price_per_night, price_period, district, bedrooms, max_guests, rating, is_featured, instant_booking, property_type')
         .eq('is_active', true)
-        .eq('approval_status', 'approved')
-        .eq('listing_type', 'rent')
+        .in('listing_type', ['rent', 'short_term', 'rental'])
         .order('is_featured', { ascending: false })
         .order('rating', { ascending: false })
         .limit(10);
@@ -73,10 +71,39 @@ export function FeaturedPropertiesCarousel() {
     );
   }
 
-  if (properties.length === 0) return null;
+  if (properties.length === 0) {
+    return (
+      <section>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-display font-bold text-foreground">
+            {isRu ? 'Аренда на Пхукете' : 'Rent in Phuket'}
+          </h2>
+          <button
+            onClick={() => navigate('/property?mode=rent')}
+            className="flex items-center gap-1 text-xs text-primary font-semibold hover:text-primary/80 transition-colors min-h-[44px]"
+          >
+            {isRu ? 'Все объекты' : 'View all'}
+            <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+        <div className="flex gap-3 -mx-4 px-4 overflow-hidden">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="w-[220px] h-[280px] md:w-[260px] md:h-[320px] rounded-[var(--radius-lg)] shrink-0 flex flex-col items-center justify-center gap-2"
+              style={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }}
+            >
+              <span className="text-3xl">🏠</span>
+              <span className="text-xs text-muted-foreground text-center px-4">
+                {isRu ? 'Скоро здесь появятся объекты' : 'Listings coming soon'}
+              </span>
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  }
 
   return (
-    <section ref={sectionRef} className="section-reveal">
+    <section>
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-lg font-display font-bold text-foreground">
           {isRu ? 'Аренда на Пхукете' : 'Rent in Phuket'}
@@ -101,7 +128,7 @@ export function FeaturedPropertiesCarousel() {
           return (
             <button
               key={property.id}
-              onClick={() => navigate(`/property/${property.id}`)}
+              onClick={() => navigate(APP_ROUTES.PROPERTY_DETAIL(property.id))}
               className="w-[220px] h-[280px] md:w-[260px] md:h-[320px] rounded-[var(--radius-lg)] overflow-hidden text-left group transition-all duration-200 hover:-translate-y-1 active:scale-[0.97]"
               style={{
                 background: 'hsl(var(--card))',

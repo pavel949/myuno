@@ -9,16 +9,33 @@ import { IconBadge } from '@/components/ui/IconBadge';
 import { Surface } from '@/components/ui/surface';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
 import { cn } from '@/lib/utils';
+import { type AudienceFilter, AUDIENCE_CATEGORIES } from '@/components/discover/AudienceFilterTabs';
 
 const INITIAL_GROUPS_VISIBLE = 3;
 
-export const AllServicesGrid = memo(function AllServicesGrid() {
+interface AllServicesGridProps {
+  audienceFilter?: AudienceFilter;
+}
+
+export const AllServicesGrid = memo(function AllServicesGrid({ audienceFilter = 'all' }: AllServicesGridProps) {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const [expanded, setExpanded] = useState(false);
 
-  const visibleGroups = expanded ? VERTICAL_GROUPS : VERTICAL_GROUPS.slice(0, INITIAL_GROUPS_VISIBLE);
+  const audienceSet = AUDIENCE_CATEGORIES[audienceFilter];
+  const hasFilter = audienceFilter !== 'all' && audienceSet.size > 0;
+
+  // Filter groups: keep only items matching audience, hide empty groups
+  const filteredGroups = VERTICAL_GROUPS.map(group => {
+    if (!hasFilter) return group;
+    const filteredItems = group.items.filter(item =>
+      item.verticalId ? audienceSet.has(item.verticalId) : true
+    );
+    return filteredItems.length > 0 ? { ...group, items: filteredItems } : null;
+  }).filter(Boolean) as typeof VERTICAL_GROUPS;
+
+  const visibleGroups = expanded ? filteredGroups : filteredGroups.slice(0, INITIAL_GROUPS_VISIBLE);
 
   const handleNav = useCallback((path: string) => {
     triggerHaptic('light');
@@ -89,7 +106,7 @@ export const AllServicesGrid = memo(function AllServicesGrid() {
           );
         })}
 
-        {VERTICAL_GROUPS.length > INITIAL_GROUPS_VISIBLE && (
+        {filteredGroups.length > INITIAL_GROUPS_VISIBLE && (
           <button
             onClick={() => { setExpanded(!expanded); triggerHaptic('light'); }}
             className="flex items-center gap-1.5 mx-auto py-2 px-4 rounded-full text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all"

@@ -469,7 +469,7 @@ function FormFieldRenderer({
               <PopoverTrigger asChild>
                 <Button variant="outline" className="justify-start text-left font-normal">
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {dateRange.from 
+                  {dateRange.from
                     ? format(dateRange.from, 'd MMM', { locale: isRu ? ru : enUS })
                     : (isRu ? 'Заезд' : 'Check-in')
                   }
@@ -490,7 +490,7 @@ function FormFieldRenderer({
               <PopoverTrigger asChild>
                 <Button variant="outline" className="justify-start text-left font-normal">
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {dateRange.to 
+                  {dateRange.to
                     ? format(dateRange.to, 'd MMM', { locale: isRu ? ru : enUS })
                     : (isRu ? 'Выезд' : 'Check-out')
                   }

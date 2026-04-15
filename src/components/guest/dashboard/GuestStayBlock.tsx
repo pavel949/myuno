@@ -7,6 +7,7 @@ import { Home, Calendar, MapPin, ChevronRight, BookOpen } from 'lucide-react';
 import { format, differenceInDays, isToday, isTomorrow } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 interface GuestStayBlockProps {
   booking: {
@@ -96,7 +97,7 @@ export function GuestStayBlock({ booking, loading }: GuestStayBlockProps) {
         "p-3 cursor-pointer transition-colors hover:bg-muted/50",
         daysRemaining <= 1 && "border-warning/30"
       )}
-      onClick={() => navigate(`/property/${booking.property_id}`)}
+      onClick={() => navigate(APP_ROUTES.PROPERTY_DETAIL(booking.property_id))}
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-2">

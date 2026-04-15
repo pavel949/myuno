@@ -1,3 +1,4 @@
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LandingLayout } from '@/components/miniapp/LandingLayout';
@@ -5,17 +6,42 @@ import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Globe, FileText, Home, GraduationCap, Stethoscope, Landmark, Car, Scale, Users, Check, ArrowRight, MessageCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 const STEPS = [
-  { icon: FileText, labelEn: 'Visas & Documents', labelRu: 'Визы и документы', descEn: 'Work permits, retirement visa, education visa — we handle paperwork', descRu: 'Рабочие разрешения, пенсионная виза, учебная виза — мы берём на себя документы', path: '/visa', color: '#4E7BFF' },
-  { icon: Home, labelEn: 'Housing', labelRu: 'Жильё', descEn: 'Long-term rentals, condos, villas — vetted by our team', descRu: 'Долгосрочная аренда, кондо, виллы — проверены нашей командой', path: '/property?mode=long-term', color: '#00D68F' },
-  { icon: GraduationCap, labelEn: 'Schools & Kindergartens', labelRu: 'Школы и сады', descEn: 'International schools, Russian schools, kindergartens', descRu: 'Международные школы, русские школы, детские сады', path: '/education', color: '#F59E0B' },
-  { icon: Stethoscope, labelEn: 'Medical & Insurance', labelRu: 'Медицина и страховка', descEn: 'Health insurance, clinics, dentists, pediatricians', descRu: 'Медстраховка, клиники, стоматологи, педиатры', path: '/medical', color: '#F43F5E' },
-  { icon: Landmark, labelEn: 'Banking & Finance', labelRu: 'Банки и финансы', descEn: 'Thai bank account, tax planning, crypto-friendly banks', descRu: 'Счёт в тайском банке, налоговое планирование', path: '/banking', color: '#06B6D4' },
-  { icon: Car, labelEn: 'Transport', labelRu: 'Транспорт', descEn: 'Car rental, driver license, scooter purchase', descRu: 'Аренда авто, водительские права, покупка скутера', path: '/transport', color: '#F97316' },
-  { icon: Scale, labelEn: 'Legal & Accounting', labelRu: 'Юрист и бухгалтер', descEn: 'Company setup, contracts, tax filing', descRu: 'Регистрация компании, договоры, налоговая отчётность', path: '/legal', color: '#A855F7' },
-  { icon: Users, labelEn: 'Community & Lifestyle', labelRu: 'Досуг и комьюнити', descEn: 'Expat groups, sports, restaurants, events', descRu: 'Экспат-группы, спорт, рестораны, события', path: '/experiences', color: '#EC4899' },
+  { id: 'visa', icon: FileText, labelEn: 'Visas & Documents', labelRu: 'Визы и документы', descEn: 'Work permits, retirement visa, education visa — we handle paperwork', descRu: 'Рабочие разрешения, пенсионная виза, учебная виза — мы берём на себя документы', path: APP_ROUTES.VISA_IMMIGRATION, color: '#4E7BFF' },
+  { id: 'housing', icon: Home, labelEn: 'Housing', labelRu: 'Жильё', descEn: 'Long-term rentals, condos, villas — vetted by our team', descRu: 'Долгосрочная аренда, кондо, виллы — проверены нашей командой', path: `${APP_ROUTES.PROPERTY}?mode=long-term`, color: '#00D68F' },
+  { id: 'school', icon: GraduationCap, labelEn: 'Schools & Kindergartens', labelRu: 'Школы и сады', descEn: 'International schools, Russian schools, kindergartens', descRu: 'Международные школы, русские школы, детские сады', path: APP_ROUTES.EDUCATION, color: '#F59E0B' },
+  { id: 'medical', icon: Stethoscope, labelEn: 'Medical & Insurance', labelRu: 'Медицина и страховка', descEn: 'Health insurance, clinics, dentists, pediatricians', descRu: 'Медстраховка, клиники, стоматологи, педиатры', path: APP_ROUTES.MEDICAL, color: '#F43F5E' },
+  { id: 'banking', icon: Landmark, labelEn: 'Banking & Finance', labelRu: 'Банки и финансы', descEn: 'Thai bank account, tax planning, crypto-friendly banks', descRu: 'Счёт в тайском банке, налоговое планирование', path: APP_ROUTES.BANKING, color: '#06B6D4' },
+  { id: 'transport', icon: Car, labelEn: 'Transport', labelRu: 'Транспорт', descEn: 'Car rental, driver license, scooter purchase', descRu: 'Аренда авто, водительские права, покупка скутера', path: APP_ROUTES.TRANSPORT, color: '#F97316' },
+  { id: 'legal', icon: Scale, labelEn: 'Legal & Accounting', labelRu: 'Юрист и бухгалтер', descEn: 'Company setup, contracts, tax filing', descRu: 'Регистрация компании, договоры, налоговая отчётность', path: APP_ROUTES.LEGAL, color: '#A855F7' },
+  { id: 'lifestyle', icon: Users, labelEn: 'Community & Lifestyle', labelRu: 'Досуг и комьюнити', descEn: 'Expat groups, sports, restaurants, events', descRu: 'Экспат-группы, спорт, рестораны, события', path: APP_ROUTES.EXPERIENCES, color: '#EC4899' },
 ];
+
+type StepId = typeof STEPS[number]['id'];
+
+const PRIORITY_TO_STEP: Record<string, StepId[]> = {
+  visa: ['visa', 'legal', 'banking'],
+  housing: ['housing', 'visa', 'transport'],
+  school: ['school', 'housing', 'medical'],
+  medical: ['medical', 'visa'],
+  banking: ['banking', 'legal'],
+  legal: ['legal', 'visa', 'banking'],
+  transport: ['transport', 'housing'],
+  community: ['lifestyle', 'housing'],
+};
+
+const QUIZ_PRIORITIES = [
+  { id: 'visa', en: 'Visa & documents', ru: 'Виза и документы' },
+  { id: 'housing', en: 'Housing search', ru: 'Поиск жилья' },
+  { id: 'school', en: 'School / kindergarten', ru: 'Школа / детсад' },
+  { id: 'medical', en: 'Medical & insurance', ru: 'Медицина и страховка' },
+  { id: 'banking', en: 'Bank account', ru: 'Открытие счёта' },
+  { id: 'legal', en: 'Legal / company setup', ru: 'Юридические вопросы / компания' },
+  { id: 'transport', en: 'Transport & license', ru: 'Транспорт и права' },
+  { id: 'community', en: 'Community & lifestyle', ru: 'Комьюнити и лайфстайл' },
+] as const;
 
 const PLANS = [
   { nameEn: 'DIY', nameRu: 'Самостоятельно', priceEn: 'Free', priceRu: 'Бесплатно', featuresEn: ['Access to all guides', 'Service directory', 'Community forum'], featuresRu: ['Доступ ко всем гайдам', 'Каталог сервисов', 'Форум комьюнити'], highlight: false },
@@ -34,7 +60,60 @@ export default function RelocateLandingPage() {
   const { language } = useLanguage();
   const t = language === 'ru';
   const navigate = useNavigate();
-  const whatsappUrl = 'https://wa.me/66800000000?text=' + encodeURIComponent(t ? 'Здравствуйте! Интересует переезд на Пхукет' : 'Hello! I am interested in relocating to Phuket');
+  const [timeline, setTimeline] = useState<'urgent' | 'soon' | 'planned' | 'exploring'>('soon');
+  const [household, setHousehold] = useState<'solo' | 'couple' | 'family'>('solo');
+  const [budget, setBudget] = useState<'low' | 'mid' | 'high' | 'premium'>('mid');
+  const [housingGoal, setHousingGoal] = useState<'rent' | 'buy' | 'undecided'>('rent');
+  const [priorities, setPriorities] = useState<string[]>(['visa', 'housing']);
+
+  const togglePriority = (id: string) => {
+    setPriorities(prev => {
+      if (prev.includes(id)) return prev.filter(p => p !== id);
+      if (prev.length >= 4) return prev;
+      return [...prev, id];
+    });
+  };
+
+  const selectedSteps = useMemo(() => {
+    const order: StepId[] = [];
+    priorities.forEach(priorityId => {
+      (PRIORITY_TO_STEP[priorityId] ?? []).forEach(stepId => {
+        if (!order.includes(stepId)) order.push(stepId);
+      });
+    });
+    if (order.length === 0) order.push('visa', 'housing');
+    return order.slice(0, 5).map(stepId => STEPS.find(step => step.id === stepId)).filter(Boolean) as typeof STEPS;
+  }, [priorities]);
+
+  const requestSummary = useMemo(() => {
+    const timelineLabel = t
+      ? ({ urgent: 'в течение 1 месяца', soon: 'в течение 1-3 месяцев', planned: 'через 3-6 месяцев', exploring: 'пока изучаю' }[timeline])
+      : ({ urgent: 'within 1 month', soon: 'in 1-3 months', planned: 'in 3-6 months', exploring: 'just exploring' }[timeline]);
+
+    const householdLabel = t
+      ? ({ solo: '1 человек', couple: 'пара', family: 'семья с детьми' }[household])
+      : ({ solo: 'solo', couple: 'couple', family: 'family with kids' }[household]);
+
+    const budgetLabel = t
+      ? ({ low: 'до ฿50k/мес', mid: '฿50k-120k/мес', high: '฿120k-250k/мес', premium: '฿250k+/мес' }[budget])
+      : ({ low: 'up to ฿50k/mo', mid: '฿50k-120k/mo', high: '฿120k-250k/mo', premium: '฿250k+/mo' }[budget]);
+
+    const housingLabel = t
+      ? ({ rent: 'аренда', buy: 'покупка', undecided: 'пока не решил' }[housingGoal])
+      : ({ rent: 'rent', buy: 'buy', undecided: 'undecided' }[housingGoal]);
+
+    const prioritiesLabel = priorities
+      .map(priorityId => QUIZ_PRIORITIES.find(p => p.id === priorityId))
+      .filter(Boolean)
+      .map(item => (t ? item!.ru : item!.en))
+      .join(', ');
+
+    return t
+      ? `Нужен персональный relocation roadmap. Срок: ${timelineLabel}. Формат: ${householdLabel}. Бюджет: ${budgetLabel}. Цель по жилью: ${housingLabel}. Приоритеты: ${prioritiesLabel || 'базовая адаптация'}.`
+      : `Need a personalized relocation roadmap. Timeline: ${timelineLabel}. Household: ${householdLabel}. Budget: ${budgetLabel}. Housing goal: ${housingLabel}. Priorities: ${prioritiesLabel || 'basic setup'}.`;
+  }, [budget, household, housingGoal, priorities, t, timeline]);
+
+  const whatsappUrl = 'https://wa.me/66800000000?text=' + encodeURIComponent(requestSummary);
 
   return (
     <LandingLayout
@@ -46,6 +125,156 @@ export default function RelocateLandingPage() {
       whatsappUrl={whatsappUrl}
       whatsappLabel={t ? 'Написать в WhatsApp' : 'Chat on WhatsApp'}
     >
+      {/* Quiz */}
+      <div className="px-4 py-8">
+        <div className="max-w-3xl mx-auto rounded-2xl border border-border bg-card p-5 md:p-6">
+          <h2 className="text-xl font-bold font-display text-foreground">
+            {t ? 'Relocation Quiz: персональный roadmap' : 'Relocation Quiz: personalized roadmap'}
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            {t
+              ? 'Ответьте на 5 вопросов, чтобы сузить запросы и получить точный план действий.'
+              : 'Answer 5 quick questions to narrow requests and generate a focused action plan.'}
+          </p>
+
+          <div className="grid gap-5 mt-5 md:grid-cols-2">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t ? 'Когда переезд?' : 'When do you move?'}</p>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {[
+                  { id: 'urgent', en: '0-1 month', ru: '0-1 месяц' },
+                  { id: 'soon', en: '1-3 months', ru: '1-3 месяца' },
+                  { id: 'planned', en: '3-6 months', ru: '3-6 месяцев' },
+                  { id: 'exploring', en: 'Exploring', ru: 'Изучаю' },
+                ].map(item => (
+                  <button key={item.id} type="button" onClick={() => setTimeline(item.id as typeof timeline)} className={cn('px-3 py-2 rounded-full text-xs border transition-colors', timeline === item.id ? 'bg-primary text-primary-foreground border-primary' : 'bg-background border-border text-muted-foreground hover:text-foreground')}>
+                    {t ? item.ru : item.en}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t ? 'Кто переезжает?' : 'Who is relocating?'}</p>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {[
+                  { id: 'solo', en: 'Solo', ru: 'Один' },
+                  { id: 'couple', en: 'Couple', ru: 'Пара' },
+                  { id: 'family', en: 'Family', ru: 'Семья' },
+                ].map(item => (
+                  <button key={item.id} type="button" onClick={() => setHousehold(item.id as typeof household)} className={cn('px-3 py-2 rounded-full text-xs border transition-colors', household === item.id ? 'bg-primary text-primary-foreground border-primary' : 'bg-background border-border text-muted-foreground hover:text-foreground')}>
+                    {t ? item.ru : item.en}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t ? 'Бюджет в месяц' : 'Monthly budget'}</p>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {[
+                  { id: 'low', en: 'up to ฿50k', ru: 'до ฿50k' },
+                  { id: 'mid', en: '฿50k-120k', ru: '฿50k-120k' },
+                  { id: 'high', en: '฿120k-250k', ru: '฿120k-250k' },
+                  { id: 'premium', en: '฿250k+', ru: '฿250k+' },
+                ].map(item => (
+                  <button key={item.id} type="button" onClick={() => setBudget(item.id as typeof budget)} className={cn('px-3 py-2 rounded-full text-xs border transition-colors', budget === item.id ? 'bg-primary text-primary-foreground border-primary' : 'bg-background border-border text-muted-foreground hover:text-foreground')}>
+                    {t ? item.ru : item.en}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t ? 'Цель по жилью' : 'Housing goal'}</p>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {[
+                  { id: 'rent', en: 'Rent', ru: 'Аренда' },
+                  { id: 'buy', en: 'Buy', ru: 'Покупка' },
+                  { id: 'undecided', en: 'Undecided', ru: 'Не решил' },
+                ].map(item => (
+                  <button key={item.id} type="button" onClick={() => setHousingGoal(item.id as typeof housingGoal)} className={cn('px-3 py-2 rounded-full text-xs border transition-colors', housingGoal === item.id ? 'bg-primary text-primary-foreground border-primary' : 'bg-background border-border text-muted-foreground hover:text-foreground')}>
+                    {t ? item.ru : item.en}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-5">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              {t ? 'Главные приоритеты (до 4)' : 'Top priorities (up to 4)'}
+            </p>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {QUIZ_PRIORITIES.map(priority => {
+                const active = priorities.includes(priority.id);
+                return (
+                  <button
+                    key={priority.id}
+                    type="button"
+                    onClick={() => togglePriority(priority.id)}
+                    className={cn(
+                      'px-3 py-2 rounded-full text-xs border transition-colors',
+                      active
+                        ? 'bg-primary text-primary-foreground border-primary'
+                        : 'bg-background border-border text-muted-foreground hover:text-foreground'
+                    )}
+                  >
+                    {t ? priority.ru : priority.en}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="mt-6 rounded-xl border border-border bg-muted/30 p-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              {t ? 'Сформированный запрос' : 'Generated request'}
+            </p>
+            <p className="text-sm text-foreground mt-2">{requestSummary}</p>
+            <div className="flex flex-wrap gap-2 mt-4">
+              <Button onClick={() => window.open(whatsappUrl, '_blank')} className="gap-2">
+                <MessageCircle className="w-4 h-4" />
+                {t ? 'Отправить в WhatsApp' : 'Send to WhatsApp'}
+              </Button>
+              <Button variant="outline" onClick={() => navigate(APP_ROUTES.LIST_WITH_US)}>
+                {t ? 'Оставить заявку в app' : 'Create in-app request'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Personalized Roadmap */}
+      <div className="px-4 py-2">
+        <h2 className="text-xl font-bold font-display text-foreground mb-6 text-center">
+          {t ? 'Ваш персональный roadmap' : 'Your personalized roadmap'}
+        </h2>
+        <div className="space-y-4 max-w-lg mx-auto">
+          {selectedSteps.map((step, i) => {
+            const Icon = step.icon;
+            return (
+              <button key={`${step.id}-${i}`} onClick={() => navigate(step.path)} className="w-full flex items-start gap-4 p-4 rounded-xl border border-border bg-card text-left transition-all hover:[box-shadow:var(--shadow-elevation-2)] active:scale-[0.98]">
+                <div className="relative flex flex-col items-center">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: step.color + '15' }}>
+                    <Icon className="w-5 h-5" style={{ color: step.color }} />
+                  </div>
+                  {i < selectedSteps.length - 1 && <div className="w-px h-6 mt-1" style={{ background: step.color + '30' }} />}
+                </div>
+                <div className="flex-1 min-w-0 pt-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold text-muted-foreground">{String(i + 1).padStart(2, '0')}</span>
+                    <h3 className="font-semibold text-sm text-foreground">{t ? step.labelRu : step.labelEn}</h3>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-0.5">{t ? step.descRu : step.descEn}</p>
+                </div>
+                <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0 mt-2" />
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Roadmap */}
       <div className="px-4 py-8">
         <h2 className="text-xl font-bold font-display text-foreground mb-6 text-center">

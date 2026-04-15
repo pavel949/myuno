@@ -19,15 +19,19 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { ArrowLeft, Phone, Mail, MessageCircle, Clock, User, FileText, Pencil, Trophy, X, Trash2, ContactRound, Pause, Archive, Play, History, MoreHorizontal, SendHorizonal, Crown } from 'lucide-react';
+import { ArrowLeft, Phone, Mail, MessageCircle, Clock, User, FileText, Pencil, Trophy, X, Trash2, ContactRound, Pause, Archive, Play, History, MoreHorizontal, SendHorizonal, Crown, Sparkles, Building2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import { format, formatDistanceToNow } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { cn } from '@/lib/utils';
 import { getDealTypeEmptyNote, getDealTypeEyebrow, getDealTypeFacts } from '@/components/owner/sales/dealTypePresentation';
+import { DealClosingChecklist } from '@/components/owner/sales/DealClosingChecklist';
+import { CommissionSummary } from '@/components/owner/sales/CommissionSummary';
+import { OfferGeneratorModal } from '@/components/owner/sales/OfferGeneratorModal';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { usePropertyProject } from '@/hooks/usePropertyProjects';
 
-import { toast } from 'sonner';
 const activityIcons: Record<string, React.ElementType> = {
   call: Phone,
   meeting: User,
@@ -53,7 +57,10 @@ export default function SalesDealDetail() {
   const isRu = language === 'ru';
   const locale = isRu ? ru : enUS;
   const { user } = useAuth();
-const { data: deal, isLoading, isError: dealError, refetch: refetchDeal } = useAgentDeal(id);
+  const { toast } = useToast();
+
+  const { data: deal, isLoading, isError: dealError, refetch: refetchDeal } = useAgentDeal(id);
+  const { data: linkedProject } = usePropertyProject(deal?.property_project_id ?? undefined);
   const { data: activities = [] } = useDealActivities(id);
   const { data: fieldChanges = [] } = useDealFieldChanges(id);
   const updateDeal = useUpdateDeal();
@@ -65,6 +72,7 @@ const { data: deal, isLoading, isError: dealError, refetch: refetchDeal } = useA
   const [activityText, setActivityText] = useState('');
   const [showEdit, setShowEdit] = useState(false);
   const [closeMode, setCloseMode] = useState<'won' | 'lost' | null>(null);
+  const [showOfferGenerator, setShowOfferGenerator] = useState(false);
 
   if (isLoading) {
     return (
@@ -111,9 +119,9 @@ const { data: deal, isLoading, isError: dealError, refetch: refetchDeal } = useA
         description: `${DEAL_STAGE_LABELS[deal.stage].en} → ${DEAL_STAGE_LABELS[newStage].en}`,
         stage_from: deal.stage, stage_to: newStage,
       });
-      toast(isRu ? 'Этап обновлён' : 'Stage updated');
+      toast({ title: isRu ? 'Этап обновлён' : 'Stage updated' });
     } catch {
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
     }
   };
 
@@ -128,9 +136,9 @@ const { data: deal, isLoading, isError: dealError, refetch: refetchDeal } = useA
         description: `${DEAL_STATUS_LABELS[oldStatus as DealStatus]?.en || oldStatus} → ${DEAL_STATUS_LABELS[newStatus].en}`,
         stage_from: null, stage_to: null,
       });
-      toast(isRu ? 'Статус обновлён' : 'Status updated');
+      toast({ title: isRu ? 'Статус обновлён' : 'Status updated' });
     } catch {
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
     }
   };
 
@@ -142,19 +150,19 @@ const { data: deal, isLoading, isError: dealError, refetch: refetchDeal } = useA
         description: activityText.trim(), stage_from: null, stage_to: null,
       });
       setActivityText('');
-      toast(isRu ? 'Добавлено' : 'Added');
+      toast({ title: isRu ? 'Добавлено' : 'Added' });
     } catch {
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
     }
   };
 
   const handleDelete = async () => {
     try {
       await deleteDeal.mutateAsync(deal.id);
-      toast(isRu ? 'Сделка удалена' : 'Deal deleted');
+      toast({ title: isRu ? 'Сделка удалена' : 'Deal deleted' });
       navigate(APP_ROUTES.MC_SALES);
     } catch {
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
     }
   };
 
@@ -175,6 +183,10 @@ const { data: deal, isLoading, isError: dealError, refetch: refetchDeal } = useA
           {isRu ? 'Назад' : 'Back'}
         </button>
         <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => setShowOfferGenerator(true)} className="text-primary border-primary/30 hover:bg-primary/10">
+            <Sparkles className="h-3.5 w-3.5 mr-1" />
+            {isRu ? 'Оффер' : 'Offer'}
+          </Button>
           <Button variant="outline" size="sm" onClick={() => setShowEdit(true)}>
             <Pencil className="h-3.5 w-3.5 mr-1" />
             {isRu ? 'Ред.' : 'Edit'}
@@ -225,6 +237,18 @@ const { data: deal, isLoading, isError: dealError, refetch: refetchDeal } = useA
             {dealAge}d {isRu ? 'всего' : 'total'} · {stageAge}d {isRu ? 'в этапе' : 'in stage'}
           </span>
         </div>
+
+        {deal.property_project_id && linkedProject && (
+          <div className="flex items-start gap-2 mt-2 rounded-lg border bg-muted/40 px-3 py-2 text-sm">
+            <Building2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+            <div>
+              <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                {isRu ? 'Проект' : 'Project'}
+              </p>
+              <p className="font-medium">{isRu ? linkedProject.name_ru || linkedProject.name_en : linkedProject.name_en || linkedProject.name_ru}</p>
+            </div>
+          </div>
+        )}
 
         {deal.contact_id && (
           <button
@@ -299,6 +323,9 @@ const { data: deal, isLoading, isError: dealError, refetch: refetchDeal } = useA
       <div className="border rounded-xl p-4 bg-card">
         <p className="text-xs font-medium text-muted-foreground mb-2">{isRu ? 'Этап сделки' : 'Deal Stage'}</p>
         <DealStageBar currentStage={deal.stage} onStageClick={!isClosed ? handleStageChange : undefined} />
+        {deal.stage === 'closed_won' && deal.won_reason && (
+          <p className="text-xs text-success mt-1">{isRu ? 'Успех' : 'Won'}: {deal.won_reason}</p>
+        )}
         {deal.stage === 'closed_lost' && (
           <p className="text-xs text-destructive mt-1">{isRu ? 'Проигрыш' : 'Lost'}{deal.lost_reason ? `: ${deal.lost_reason}` : ''}</p>
         )}
@@ -376,6 +403,10 @@ const { data: deal, isLoading, isError: dealError, refetch: refetchDeal } = useA
         </div>
       </div>
 
+      {/* Commission + Checklist */}
+      <CommissionSummary deal={deal} />
+      <DealClosingChecklist dealId={deal.id} dealType={dealType} companyId={deal.company_id} />
+
       {/* Activity feed & Change history tabs */}
       <Tabs defaultValue="activities" className="w-full">
         <TabsList className="w-full">
@@ -452,6 +483,7 @@ const { data: deal, isLoading, isError: dealError, refetch: refetchDeal } = useA
 
       {/* Sheets & Dialogs */}
       <EditDealSheet open={showEdit} onOpenChange={setShowEdit} deal={deal} />
+      <OfferGeneratorModal open={showOfferGenerator} onOpenChange={setShowOfferGenerator} deal={deal} />
       {closeMode && (
         <CloseDealDialog
           open={!!closeMode}

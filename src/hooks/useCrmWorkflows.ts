@@ -93,6 +93,9 @@ export function useCreateWorkflow() {
       return data as CrmWorkflow;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['crm-workflows'] }),
+    onError: (err: Error) => {
+      import('sonner').then(({ toast }) => toast.error(err.message || 'Failed to create workflow'));
+    },
   });
 }
 
@@ -104,6 +107,9 @@ export function useUpdateWorkflow() {
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['crm-workflows'] }),
+    onError: (err: Error) => {
+      import('sonner').then(({ toast }) => toast.error(err.message || 'Failed to update workflow'));
+    },
   });
 }
 
@@ -115,6 +121,9 @@ export function useDeleteWorkflow() {
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['crm-workflows'] }),
+    onError: (err: Error) => {
+      import('sonner').then(({ toast }) => toast.error(err.message || 'Failed to delete workflow'));
+    },
   });
 }
 
@@ -122,12 +131,20 @@ export function useUpsertWorkflowActions() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ workflowId, actions }: { workflowId: string; actions: Omit<CrmWorkflowAction, 'id'>[] }) => {
-      await typedFrom('crm_workflow_actions').delete().eq('workflow_id', workflowId);
+      // Safer upsert: verify delete succeeded before inserting
+      const { error: delErr } = await typedFrom('crm_workflow_actions')
+        .delete()
+        .eq('workflow_id', workflowId);
+      if (delErr) throw new Error(`Failed to clear old actions: ${delErr.message}`);
+
       if (actions.length > 0) {
-        const { error } = await typedFrom('crm_workflow_actions').insert(actions);
-        if (error) throw error;
+        const { error: insertErr } = await typedFrom('crm_workflow_actions').insert(actions);
+        if (insertErr) throw new Error(`Failed to save new actions: ${insertErr.message}`);
       }
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['crm-workflows'] }),
+    onError: (err: Error) => {
+      import('sonner').then(({ toast }) => toast.error(err.message || 'Failed to update workflow actions'));
+    },
   });
 }

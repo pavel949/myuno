@@ -53,6 +53,10 @@ export const APP_ROUTES = {
   LIST_WITH_US: '/list-with-us',
   BECOME_PARTNER: '/become-partner',
 
+  // ── B2B landing pages (public marketing) ──
+  FOR_REAL_ESTATE_DEVELOPERS: '/for-developers',
+  FOR_LOCAL_SERVICE_PROVIDERS: '/for-local-services',
+
   // ── Beauty & Spa ──
   BEAUTY: '/beauty',
   BEAUTY_SALON: (id: string) => `/beauty/salon/${id}`,
@@ -62,6 +66,8 @@ export const APP_ROUTES = {
 
   // ── Property Hub ──
   PROPERTY: '/property',
+  /** Filtered listing search (query string) */
+  PROPERTY_SEARCH: '/property/search',
   PROPERTY_DETAIL: (id: string) => `/property/${id}`,
   PROPERTY_INQUIRY: (id: string) => `/property/${id}/inquiry`,
   PROPERTY_MAP: '/property/map',
@@ -77,7 +83,12 @@ export const APP_ROUTES = {
   DEVELOPERS: '/property/developers',
   DEVELOPER_DETAIL: (id: string) => `/property/developers/${id}`,
 
-  // ── Newbuilds (Premium New Developments Section) ──
+  // ── PEYLAA (Dedicated Sales Page) ──
+  PEYLAA: '/peylaa',
+  PEYLAA_UNIT: (unitNo: string) => `/peylaa/unit/${unitNo}`,
+
+  // ── Newbuilds (premium marketing landing). Catalog + detail live under Property Hub (OFFPLAN_*).
+  // Legacy paths below still work via redirects in AnimatedRoutes.tsx.
   NEWBUILDS: '/newbuilds',
   NEWBUILDS_PROJECTS: '/newbuilds/projects',
   NEWBUILDS_PROJECT: (slug: string) => `/newbuilds/projects/${slug}`,
@@ -274,6 +285,7 @@ export const APP_ROUTES = {
 
   // ── Vendor Portal ──
   VENDOR: '/vendor',
+  VENDOR_JOIN: '/vendor/join',
   VENDOR_ONBOARDING: '/vendor/onboarding',
   VENDOR_BOOKINGS: '/vendor/bookings',
   VENDOR_SERVICES: '/vendor/services',
@@ -425,6 +437,8 @@ export const LEGACY_REDIRECTS: Record<string, string> = {
   '/invest/dashboard': '/property/invest/dashboard',
   '/invest/raise': '/property/invest/raise',
   '/new-developments': '/newbuilds',
+  '/newbuilds/projects': '/property/offplan',
+  '/newbuilds/developers': '/property/developers',
 } as const;
 
 /**

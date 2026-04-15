@@ -81,7 +81,7 @@ export function diffDealFields(
 export const TRACKED_DEAL_FIELDS = [
   'stage', 'deal_type', 'deal_status', 'client_name', 'client_phone', 'client_email',
   'client_source', 'budget_min', 'budget_max', 'currency', 'deal_value',
-  'commission_percent', 'commission_amount', 'agent_id', 'property_id',
+  'commission_percent', 'commission_amount', 'agent_id', 'property_id', 'property_project_id',
   'preferred_types', 'preferred_districts', 'bedrooms_min', 'next_action',
-  'next_action_date', 'notes', 'lost_reason',
+  'next_action_date', 'notes', 'lost_reason', 'won_reason',
 ];

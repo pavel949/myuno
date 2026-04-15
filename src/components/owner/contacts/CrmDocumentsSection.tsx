@@ -63,7 +63,9 @@ export function CrmDocumentsSection({ companyId, contactId, propertyId, dealId, 
       setTitle('');
       setSelectedFile(null);
       setDocType('other');
-    } catch { /* ignored */ }
+    } catch {
+      // ignored — mutation error is handled by react-query and displayed by toast
+    }
   };
 
   const handleDownload = async (fileUrl: string, fileName: string) => {

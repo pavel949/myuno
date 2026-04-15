@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { format, eachDayOfInterval, subDays } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
+import { PUBLIC_CATALOG_APPROVAL_STATUS } from '@/lib/real-estate/canonicalModel';
 
 export const STAYS_ZONE_OPTIONS = [
   'Bang Tao',
@@ -86,7 +87,7 @@ async function fetchCandidateProperties(
       'id, title_ru, title_en, district, cover_image, images, bedrooms, max_guests, property_type, price_per_night, price, currency, min_stay_nights, listing_modes, amenities',
     )
     .eq('is_active', true)
-    .eq('approval_status', 'approved');
+    .eq('approval_status', PUBLIC_CATALOG_APPROVAL_STATUS);
 
   if (filters.zones.length > 0) {
     q = q.or(buildDistrictOrFilter(filters.zones));

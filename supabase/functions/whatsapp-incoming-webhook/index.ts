@@ -9,15 +9,13 @@
 
 import { createServiceClient } from "../_shared/supabase.ts";
 import { sendWhatsApp } from "../_shared/whatsapp.ts";
+import { getAdminWhatsApp } from "../_shared/admin-config.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "https://myuno.app",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
-
-// Pavel's admin phone (Thailand)
-const ADMIN_PHONE = "66922407355";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -28,6 +26,8 @@ Deno.serve(async (req) => {
   if (req.method === "GET") {
     return new Response("OK", { status: 200, headers: corsHeaders });
   }
+
+  const ADMIN_PHONE = await getAdminWhatsApp();
 
   try {
     const body = await req.json();
