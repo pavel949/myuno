@@ -15,6 +15,16 @@ import { PasswordStrengthIndicator } from '@/components/auth/PasswordStrengthInd
 import { UnderlineInput } from '@/components/auth/UnderlineInput';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// Timeout helper — prevents infinite spinner when Supabase is unreachable
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('TIMEOUT')), ms)
+    ),
+  ]);
+}
+
 // Validation schemas
 const emailSchema = z.string().email();
 const passwordSchema = z.string().min(6);
@@ -135,10 +145,10 @@ export default function Auth() {
     const fullName = `${firstName.trim()} ${lastName.trim()}`;
 
     try {
-      const { error, data } = await signUp({
+      const { error, data } = await withTimeout(signUp({
         email, password, fullName,
         phone: phone.replace(/\D/g, '')
-      });
+      }), 15000);
 
       if (error) {
         let description = error.message;
@@ -191,14 +201,25 @@ export default function Auth() {
 
         navigate(redirectPath, { replace: true });
       }
-    } catch {
-      toast.error(isTh ? 'ข้อผิดพลาด' : isRu ? 'Ошибка' : 'Error', {
-        description: isTh
-          ? 'เกิดข้อผิดพลาดที่ไม่คาดคิด'
-          : isRu
-            ? 'Произошла непредвиденная ошибка'
-            : 'An unexpected error occurred',
-      });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : '';
+      if (msg === 'TIMEOUT') {
+        toast.error(isTh ? 'หมดเวลาการเชื่อมต่อ' : isRu ? 'Время ожидания истекло' : 'Connection timed out', {
+          description: isTh
+            ? 'กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองอีกครั้ง'
+            : isRu
+              ? 'Проверьте интернет-соединение и попробуйте снова'
+              : 'Please check your internet and try again',
+        });
+      } else {
+        toast.error(isTh ? 'ข้อผิดพลาด' : isRu ? 'Ошибка' : 'Error', {
+          description: isTh
+            ? 'เกิดข้อผิดพลาดที่ไม่คาดคิด'
+            : isRu
+              ? 'Произошла непредвиденная ошибка'
+              : 'An unexpected error occurred',
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -210,7 +231,7 @@ export default function Auth() {
     setIsLoading(true);
 
     try {
-      const { error } = await signIn(email, password);
+      const { error } = await withTimeout(signIn(email, password), 15000);
       if (error) {
         const newAttempts = loginAttempts + 1;
         setLoginAttempts(newAttempts);
@@ -239,15 +260,26 @@ export default function Auth() {
           description: isTh ? 'เข้าสู่ระบบสำเร็จ' : isRu ? 'Вход выполнен успешно' : 'Successfully logged in',
         });
       }
-    } catch {
+    } catch (err: unknown) {
       setLoginAttempts(prev => prev + 1);
-      toast.error(isTh ? 'ข้อผิดพลาด' : isRu ? 'Ошибка' : 'Error', {
-        description: isTh
-          ? 'เกิดข้อผิดพลาดที่ไม่คาดคิด'
-          : isRu
-            ? 'Произошла непредвиденная ошибка'
-            : 'An unexpected error occurred',
-      });
+      const msg = err instanceof Error ? err.message : '';
+      if (msg === 'TIMEOUT') {
+        toast.error(isTh ? 'หมดเวลาการเชื่อมต่อ' : isRu ? 'Время ожидания истекло' : 'Connection timed out', {
+          description: isTh
+            ? 'กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองอีกครั้ง'
+            : isRu
+              ? 'Проверьте интернет-соединение и попробуйте снова'
+              : 'Please check your internet and try again',
+        });
+      } else {
+        toast.error(isTh ? 'ข้อผิดพลาด' : isRu ? 'Ошибка' : 'Error', {
+          description: isTh
+            ? 'เกิดข้อผิดพลาดที่ไม่คาดคิด'
+            : isRu
+              ? 'Произошла непредвиденная ошибка'
+              : 'An unexpected error occurred',
+        });
+      }
     } finally {
       setIsLoading(false);
     }
