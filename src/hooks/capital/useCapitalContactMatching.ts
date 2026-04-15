@@ -11,17 +11,14 @@ export function useCapitalContactMatching(project: CapitalProject | null) {
     queryFn: async () => {
       if (!project) return [];
 
-      let query = supabase
-        .from('capital_contacts')
+      let query = typedFrom('capital_contacts')
         .select('*')
         .order('warmth', { ascending: false });
 
-      // Filter by buyer type overlap
       if (project.target_buyer_types.length > 0) {
         query = query.in('buyer_type', project.target_buyer_types);
       }
 
-      // Filter by budget overlap with project price range
       if (project.price_from != null) {
         query = query.or(`budget_max.is.null,budget_max.gte.${project.price_from}`);
       }
