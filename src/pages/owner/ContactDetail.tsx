@@ -126,7 +126,7 @@ const { data: contact, isLoading, isError } = useCrmContact(id);
 
   const handleLogCrmActivity = useCallback(async () => {
     if (!user || !contact || !logActSubject.trim()) {
-      toast({ title: isRu ? 'Укажите тему' : 'Enter a subject', variant: 'destructive' });
+      toast.error(isRu ? 'Укажите тему' : 'Enter a subject');
       return;
     }
     const metadata: Record<string, unknown> = {};
@@ -149,9 +149,9 @@ const { data: contact, isLoading, isError } = useCrmContact(id);
       });
       setLogActSubject('');
       setLogActDescription('');
-      toast({ title: isRu ? 'Записано' : 'Logged' });
+      toast.success(isRu ? 'Записано' : 'Logged');
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   }, [user, contact, logActType, logActSubject, logActDescription, visaServiceKey, logActivity, isRu, toast]);
 

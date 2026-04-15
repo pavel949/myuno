@@ -268,7 +268,7 @@ export function useCrmContacts(
       }
 
       if (filters?.vip === 'vip') {
-        q = q.eq('is_vip', true);
+        q = (q as any).eq('is_vip', true);
       } else if (filters?.vip === 'standard') {
         q = q.eq('is_vip', false);
       }

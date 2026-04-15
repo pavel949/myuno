@@ -22,6 +22,6 @@ export { useVendorProducts } from '../useVendorProducts';
 export { useVendorProperties } from '../useVendorProperties';
 export { useVendorRestaurants } from '../useVendorRestaurants';
 export { useVendorSalons } from '../useVendorSalons';
-export { useVendorSubscription } from '../useVendorSubscription';
+// useVendorSubscription removed — module not found
 export { useVendorVehicles } from '../useVendorVehicles';
 export { useVendorYachts } from '../useVendorYachts';
