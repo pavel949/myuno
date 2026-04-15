@@ -29,11 +29,11 @@ function GoogleMapsLoader({ apiKey, children }: { apiKey: string; children: Reac
 
   useEffect(() => {
     // Google Maps calls window.gm_authFailure when the API key is rejected
-    (window as Record<string, unknown>).gm_authFailure = () => {
+    (window as unknown as Record<string, unknown>).gm_authFailure = () => {
       setAuthError(new Error('Google Maps auth failed: check API key restrictions (HTTP referrers) in Google Cloud Console'));
     };
     return () => {
-      delete (window as Record<string, unknown>).gm_authFailure;
+      delete (window as unknown as Record<string, unknown>).gm_authFailure;
     };
   }, []);
 

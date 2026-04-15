@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 interface InstallData {
   platform: 'ios' | 'android' | 'desktop';
-  source: 'banner' | 'install_page' | 'browser_prompt';
+  source: string;
 }
 
 export function usePWATracking() {

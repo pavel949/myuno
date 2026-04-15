@@ -64,7 +64,7 @@ const checks: CheckItem[] = [
     labelRu: 'Сверка без ошибок (30 дней)',
     labelEn: 'Reconciliation clean (30 days)',
     check: async () => {
-      const { count } = await supabase
+      const { count } = await (supabase as any)
         .from('reconciliation_alerts')
         .select('id', { count: 'exact', head: true })
         .eq('resolved', false);

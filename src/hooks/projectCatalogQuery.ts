@@ -1,5 +1,4 @@
-import { supabase } from '@/integrations/supabase/client';
-import type { PostgrestFilterBuilder } from '@supabase/postgrest-js';
+import { typedFrom } from '@/lib/untypedTables';
 
 export type ProjectCatalogSort =
   | 'featured_score'
@@ -23,7 +22,8 @@ export interface ProjectCatalogFilters {
   createdBy?: string;
 }
 
-type ProjectCatalogQuery = PostgrestFilterBuilder<any, any, any[], 'property_projects', unknown>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ProjectCatalogQuery = any;
 
 export function applyProjectCatalogFilters(
   query: ProjectCatalogQuery,
@@ -69,5 +69,5 @@ export function applyProjectCatalogSort(
 }
 
 export function createProjectCatalogQuery(select: string): ProjectCatalogQuery {
-  return supabase.from('property_projects').select(select);
+  return typedFrom('property_projects').select(select);
 }
