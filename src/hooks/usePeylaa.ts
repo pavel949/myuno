@@ -224,7 +224,7 @@ export function useSubmitPeylaaLead() {
       } catch { /* non-blocking */ }
 
       // 4. Fire-and-forget: WhatsApp notification
-      fetch('https://kakkwibljrjsawxgnupk.supabase.co/functions/v1/peylaa-lead-notify', {
+      fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/peylaa-lead-notify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
