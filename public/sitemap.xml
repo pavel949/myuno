@@ -8,25 +8,25 @@
 
   <!-- Dynamic: property listings from database -->
   <sitemap>
-    <loc>https://erfwtoavipwjqmylpizt.supabase.co/functions/v1/generate-sitemap?type=properties</loc>
+    <loc>https://kakkwibljrjsawxgnupk.supabase.co/functions/v1/generate-sitemap?type=properties</loc>
     <lastmod>2026-04-08</lastmod>
   </sitemap>
 
   <!-- Dynamic: experience listings from database -->
   <sitemap>
-    <loc>https://erfwtoavipwjqmylpizt.supabase.co/functions/v1/generate-sitemap?type=experiences</loc>
+    <loc>https://kakkwibljrjsawxgnupk.supabase.co/functions/v1/generate-sitemap?type=experiences</loc>
     <lastmod>2026-04-08</lastmod>
   </sitemap>
 
   <!-- Dynamic: yacht listings from database -->
   <sitemap>
-    <loc>https://erfwtoavipwjqmylpizt.supabase.co/functions/v1/generate-sitemap?type=yachts</loc>
+    <loc>https://kakkwibljrjsawxgnupk.supabase.co/functions/v1/generate-sitemap?type=yachts</loc>
     <lastmod>2026-04-08</lastmod>
   </sitemap>
 
   <!-- Dynamic: restaurant listings from database -->
   <sitemap>
-    <loc>https://erfwtoavipwjqmylpizt.supabase.co/functions/v1/generate-sitemap?type=restaurants</loc>
+    <loc>https://kakkwibljrjsawxgnupk.supabase.co/functions/v1/generate-sitemap?type=restaurants</loc>
     <lastmod>2026-04-08</lastmod>
   </sitemap>
 </sitemapindex>
