@@ -270,7 +270,7 @@ export function useCrmContacts(
       if (filters?.vip === 'vip') {
         q = (q as any).eq('is_vip', true);
       } else if (filters?.vip === 'standard') {
-        q = q.eq('is_vip', false);
+        q = (q as any).eq('is_vip', false);
       }
 
       if (filters?.leadTemperature) {
