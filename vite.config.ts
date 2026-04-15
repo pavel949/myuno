@@ -171,7 +171,7 @@ export default defineConfig(({ mode }) => {
             'vendor-query': ['@tanstack/react-query'],
             'vendor-charts': ['recharts'],
             'vendor-map': ['@react-google-maps/api'],
-            'vendor-pdf': ['jspdf', 'jspdf-autotable', 'exceljs'],
+            // jspdf, jspdf-autotable, exceljs are lazy-imported — no manual chunk needed
             'vendor-form': ['react-hook-form', '@hookform/resolvers', 'zod'],
 
           },
