@@ -193,32 +193,33 @@ export function useSubmitPeylaaLead() {
       } catch { /* non-blocking */ }
 
       // 3. Also create consultation_request for universal CRM pipeline
-      supabase
-        .from('consultation_requests')
-        .insert({
-          name: lead.full_name,
-          phone: lead.phone,
-          email: lead.email || '',
-          request_type: 'property_purchase',
-          vertical_id: 'real_estate',
-          entry_point: 'peylaa_landing',
-          lead_source: lead.source_channel || 'peylaa_landing',
-          preferred_language: 'ru',
-          preferred_contact_method: 'whatsapp',
-          purpose: lead.purchase_purpose || 'investment',
-          status: 'pending',
-          priority: lead.purchase_timeline === 'immediate' ? 'high' : 'medium',
-          notes: `PEYLAA Phuket | ${bedroomPref || 'не указано'} | ${lead.purchase_timeline || 'не указано'}`,
-          vertical_metadata: {
-            project: 'PEYLAA Phuket — Autograph Collection',
-            bedrooms: lead.preferred_bedrooms,
-            timeline: lead.purchase_timeline,
-            purpose: lead.purchase_purpose,
-            utm_source: lead.utm_source,
-            utm_medium: lead.utm_medium,
-            utm_campaign: lead.utm_campaign,
-          },
-        } as any);
+      try {
+        await supabase
+          .from('consultation_requests')
+          .insert({
+            name: lead.full_name,
+            phone: lead.phone,
+            email: lead.email || '',
+            request_type: 'property_purchase',
+            vertical_id: 'real_estate',
+            entry_point: 'peylaa_landing',
+            lead_source: lead.source_channel || 'peylaa_landing',
+            preferred_language: 'ru',
+            preferred_contact_method: 'whatsapp',
+            purpose: lead.purchase_purpose || 'investment',
+            status: 'pending',
+            priority: lead.purchase_timeline === 'immediate' ? 'high' : 'medium',
+            notes: `PEYLAA Phuket | ${bedroomPref || 'не указано'} | ${lead.purchase_timeline || 'не указано'}`,
+            vertical_metadata: {
+              project: 'PEYLAA Phuket — Autograph Collection',
+              bedrooms: lead.preferred_bedrooms,
+              timeline: lead.purchase_timeline,
+              purpose: lead.purchase_purpose,
+              utm_source: lead.utm_source,
+              utm_medium: lead.utm_medium,
+              utm_campaign: lead.utm_campaign,
+            },
+          } as any);
       } catch { /* non-blocking */ }
 
       // 4. Fire-and-forget: WhatsApp notification
