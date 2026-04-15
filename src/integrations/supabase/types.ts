@@ -162,7 +162,6 @@ export type Database = {
           id: string
           is_vip: boolean
           lost_reason: string | null
-          won_reason: string | null
           next_action: string | null
           next_action_date: string | null
           notes: string | null
@@ -197,7 +196,6 @@ export type Database = {
           id?: string
           is_vip?: boolean
           lost_reason?: string | null
-          won_reason?: string | null
           next_action?: string | null
           next_action_date?: string | null
           notes?: string | null
@@ -232,7 +230,6 @@ export type Database = {
           id?: string
           is_vip?: boolean
           lost_reason?: string | null
-          won_reason?: string | null
           next_action?: string | null
           next_action_date?: string | null
           notes?: string | null
@@ -3762,7 +3759,6 @@ export type Database = {
           contact_type: string | null
           created_at: string
           created_by: string | null
-          crm_roles: string[]
           currency: string | null
           email: string | null
           emergency_contact_name: string | null
@@ -3776,11 +3772,9 @@ export type Database = {
           interests: string[] | null
           is_archived: boolean
           is_company: boolean
-          is_vip: boolean
           job_title: string | null
           language: string | null
           last_name: string
-          marital_status: string | null
           lead_score: number | null
           lead_temperature: string | null
           lifecycle_stage: string | null
@@ -3829,7 +3823,6 @@ export type Database = {
           contact_type?: string | null
           created_at?: string
           created_by?: string | null
-          crm_roles?: string[]
           currency?: string | null
           email?: string | null
           emergency_contact_name?: string | null
@@ -3843,11 +3836,9 @@ export type Database = {
           interests?: string[] | null
           is_archived?: boolean
           is_company?: boolean
-          is_vip?: boolean
           job_title?: string | null
           language?: string | null
           last_name?: string
-          marital_status?: string | null
           lead_score?: number | null
           lead_temperature?: string | null
           lifecycle_stage?: string | null
@@ -3896,7 +3887,6 @@ export type Database = {
           contact_type?: string | null
           created_at?: string
           created_by?: string | null
-          crm_roles?: string[]
           currency?: string | null
           email?: string | null
           emergency_contact_name?: string | null
@@ -3910,11 +3900,9 @@ export type Database = {
           interests?: string[] | null
           is_archived?: boolean
           is_company?: boolean
-          is_vip?: boolean
           job_title?: string | null
           language?: string | null
           last_name?: string
-          marital_status?: string | null
           lead_score?: number | null
           lead_temperature?: string | null
           lifecycle_stage?: string | null

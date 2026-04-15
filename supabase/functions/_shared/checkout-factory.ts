@@ -42,10 +42,10 @@ export interface CheckoutSpec {
   /** Optional order description for simple single-item checkouts */
   description?: string;
   /** DB operations to run BEFORE Stripe session creation (e.g. create order row) */
-  beforeStripe?: (supabaseAdmin: ReturnType<typeof createClient>) => Promise<void>;
+  beforeStripe?: (supabaseAdmin: any) => Promise<void>;
   /** DB operations to run AFTER Stripe session creation (e.g. store session ID) */
   afterStripe?: (
-    supabaseAdmin: ReturnType<typeof createClient>,
+    supabaseAdmin: any,
     sessionId: string,
   ) => Promise<void>;
 }
