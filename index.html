@@ -11,7 +11,51 @@
     
     <!-- Content Security Policy -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://maps.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https: blob:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' %VITE_SUPABASE_URL% wss://%VITE_SUPABASE_PROJECT_ID%.supabase.co https://maps.googleapis.com https://*.googleapis.com https://fonts.googleapis.com; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" />
-...
+
+    <title>myUNO - All Services in One</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="description" content="myUNO - Home is where myUNO is. Your life abroad, simplified." />
+    <meta name="author" content="myUNO" />
+    <meta name="theme-color" content="#00D68F" />
+    <meta name="version" content="3.40.0" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="myUNO" />
+
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/icons/icon-180x180.png" />
+    <link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120x120.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180x180.png" />
+
+    <!-- iOS Splash Screens -->
+    <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)" href="/icons/splash-1125x2436.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)" href="/icons/splash-828x1792.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)" href="/icons/splash-1242x2688.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)" href="/icons/splash-1170x2532.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)" href="/icons/splash-1284x2778.png" />
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
+    <link rel="canonical" href="https://myuno.app" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://myuno.app/" />
+    <meta property="og:title" content="myUNO - All Services in One" />
+    <meta property="og:description" content="myUNO - Home is where myUNO is. Your life abroad, simplified." />
+    <meta property="og:image" content="https://myuno.app/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:site_name" content="myUNO" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="ru_RU" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@myUNOapp" />
+    <meta name="twitter:url" content="https://myuno.app/" />
+    <meta name="twitter:title" content="myUNO - All Services in One" />
+    <meta name="twitter:description" content="myUNO - Home is where myUNO is. Your life abroad, simplified." />
+    <meta name="twitter:image" content="https://myuno.app/og-image.png" />
+
     <!-- Preconnect for performance -->
     <link rel="preconnect" href="%VITE_SUPABASE_URL%" />
     <link rel="dns-prefetch" href="//%VITE_SUPABASE_PROJECT_ID%.supabase.co" />
