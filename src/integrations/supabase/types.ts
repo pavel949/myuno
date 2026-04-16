@@ -17219,6 +17219,8 @@ export type Database = {
           developer_name: string | null
           district: string | null
           exclusive: boolean | null
+          featured_label: string | null
+          featured_rank: number | null
           funding_goal: number | null
           gallery_urls: string[] | null
           id: string
@@ -17253,6 +17255,7 @@ export type Database = {
           muuno_score: number | null
           name_en: string
           name_ru: string
+          offplan_catalog: Json | null
           ownership_types: string[] | null
           payment_plan: Json | null
           price_from: number | null
@@ -17295,6 +17298,8 @@ export type Database = {
           developer_name?: string | null
           district?: string | null
           exclusive?: boolean | null
+          featured_label?: string | null
+          featured_rank?: number | null
           funding_goal?: number | null
           gallery_urls?: string[] | null
           id?: string
@@ -17329,6 +17334,7 @@ export type Database = {
           muuno_score?: number | null
           name_en: string
           name_ru: string
+          offplan_catalog?: Json | null
           ownership_types?: string[] | null
           payment_plan?: Json | null
           price_from?: number | null
@@ -17371,6 +17377,8 @@ export type Database = {
           developer_name?: string | null
           district?: string | null
           exclusive?: boolean | null
+          featured_label?: string | null
+          featured_rank?: number | null
           funding_goal?: number | null
           gallery_urls?: string[] | null
           id?: string
@@ -17405,6 +17413,7 @@ export type Database = {
           muuno_score?: number | null
           name_en?: string
           name_ru?: string
+          offplan_catalog?: Json | null
           ownership_types?: string[] | null
           payment_plan?: Json | null
           price_from?: number | null

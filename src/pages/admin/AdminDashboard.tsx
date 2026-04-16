@@ -17,10 +17,11 @@ export default function AdminDashboard() {
   const { language } = useLanguage();
   const isRussian = language === 'ru';
   const { roles } = useUserRoles();
-  const isAdmin = roles.some(r => r.role === 'admin');
+  const safeRoles = roles || [];
+  const isAdmin = safeRoles.some(r => r.role === 'admin');
 
   // Staff users see simplified dashboard
-  if (!isAdmin && roles.some(r => r.role === 'staff' || r.role === 'uno_team')) {
+  if (!isAdmin && safeRoles.some(r => r.role === 'staff' || r.role === 'uno_team')) {
     return <StaffDashboard />;
   }
 
