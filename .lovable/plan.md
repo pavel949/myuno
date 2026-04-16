@@ -1,120 +1,152 @@
 
 
-# CRM ↔ Properties Hub Integration
+# Аудит блока недвижимости — Результаты и план улучшений
 
-## Current Gap Analysis
+## Текущая архитектура
 
-**Critical finding:** `property_id` in `agent_deals` is **always set to null** (hardcoded on line 175 of CreateDealSheet). The deal form has a project selector but NO property selector. There is no way to link a deal to a specific property.
+```text
+developers (39)
+    └── property_projects (157) ← "Проекты/Новостройки"
+            ├── offplan (49), completed (107), under_construction (1)
+            └── [НЕТ FK на properties]
 
-**Existing assets we leverage (no new tables needed):**
-- `properties` table (100+ cols) — the SSOT for all real estate
-- `property_projects` table — serves as "developments" 
-- `agent_deals.property_id` + `agent_deals.property_project_id` — columns exist in DB, just unused in UI
-- `deal_viewings` table — already created (property_id, contact_id, feedback, rating)
+properties (32) ← "Объекты/Юниты" (PMS)
+    ├── owner_id → auth.users
+    ├── management_company_id → management_companies
+    ├── project_id → property_projects [ЕСТЬ, но 0 записей привязаны]
+    └── listing_type = всегда 'rent', listing_modes = ['rent']
 
-**What's missing from the spec vs reality:**
-| Spec Table | Reality | Action |
-|---|---|---|
-| `property_owners` | `properties.owner_id` (single owner) | Create table for multi-owner tracking |
-| `developments` | `property_projects` already covers this | No new table, reuse existing |
-| `inventory_listings` | `properties.listing_type` + `listing_modes` | Create table for multi-listing per property |
+property_owners (0 записей) ← создана, но пуста, НЕТ FK constraint в DB
+inventory_listings (0 записей) ← создана, но пуста
+agent_deals (1 запись) ← property_id всегда NULL
 
-## Implementation Plan
-
-### Phase 1 — Property Picker Component + Deal Linking
-
-**New: `PropertySearchInput.tsx`** (mirrors existing `ContactSearchInput`)
-- Combobox searching `properties` by title_en/title_ru/address/district
-- Shows: cover thumbnail, title, type badge, district, bedrooms, price
-- Scoped to company via `management_company_id` or `owner_id` in team
-
-**Update: `CreateDealSheet.tsx`**
-- Add PropertySearchInput field below contact selector
-- When property selected: auto-fill `preferred_districts`, `preferred_types`, `budget_min`/`budget_max` from property data
-- Pass selected `property_id` to `createDeal` (replace hardcoded `null`)
-- Show property card preview when linked
-
-**Update: Deal detail view** (wherever deal is displayed)
-- Show linked property card with photo, title, price — clickable to property detail
-
-### Phase 2 — Database: `property_owners` + `inventory_listings`
-
-**Migration 1: `property_owners` table**
-```sql
-CREATE TABLE public.property_owners (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  property_id UUID NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
-  contact_id UUID NOT NULL REFERENCES crm_contacts(id) ON DELETE CASCADE,
-  role TEXT NOT NULL DEFAULT 'owner' CHECK (role IN ('owner','co_owner','beneficial_owner','nominee','tenant','investor')),
-  ownership_pct NUMERIC CHECK (ownership_pct > 0 AND ownership_pct <= 100),
-  since DATE,
-  until DATE,
-  notes TEXT,
-  company_id UUID NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT now()
-);
+nb_leads (отдельная таблица) ← лиды новостроек, не связаны с CRM
 ```
-RLS: company team members can CRUD.
 
-**Migration 2: `inventory_listings` table**
+---
+
+## Критические проблемы
+
+### 1. Разрыв между Проектами и Объектами
+- **property_projects (157)** и **properties (32)** живут в изоляции
+- `properties.project_id` существует, но **ни один объект не привязан к проекту**
+- Невозможно: посмотреть юниты проекта, трекать продажи по проекту, видеть inventory grid
+
+### 2. properties = только аренда
+- Все 32 объекта: `listing_type = 'rent'`, `listing_modes = ['rent']`
+- `sale_price` = NULL у всех. Нет ни одного объекта на продажу
+- Таблица заточена под PMS (аренда), но не используется для продаж/resale
+
+### 3. property_projects не имеет данных для CRM-продаж
+Отсутствуют колонки:
+- `commission_pct` — нет комиссии застройщика
+- `payment_plan` (JSONB) — нет планов рассрочки
+- `marketing_materials` (text[]) — нет маркетинговых материалов
+- `exclusive` — эксклюзивность мандата
+- `management_company_id` — кто продаёт
+
+### 4. nb_leads не связана с CRM
+- `nb_leads` — отдельная таблица лидов, не интегрирована с `crm_contacts` и `agent_deals`
+- Невозможно: трекать лид от новостройки через пайплайн до сделки
+
+### 5. Нет unit inventory для проектов
+- `property_projects` имеет `total_units`, `units_available`, `units_sold` — но это просто числа
+- Нет таблицы unit-level inventory (тип, площадь, цена, статус, этаж, план) для offplan
+
+### 6. inventory_listings — не подключена к UI
+- Таблица создана, хук написан, компонент есть, но **нигде не встроена в property detail page**
+- 0 записей = никто не пользовался
+
+---
+
+## План улучшений
+
+### Phase 1 — Schema: property_projects enrichment + project_units
+
+**Миграция 1: Расширение property_projects**
 ```sql
-CREATE TABLE public.inventory_listings (
+ALTER TABLE property_projects
+  ADD COLUMN IF NOT EXISTS commission_pct NUMERIC,
+  ADD COLUMN IF NOT EXISTS payment_plan JSONB DEFAULT '[]',
+  ADD COLUMN IF NOT EXISTS marketing_materials TEXT[] DEFAULT '{}',
+  ADD COLUMN IF NOT EXISTS exclusive BOOLEAN DEFAULT false,
+  ADD COLUMN IF NOT EXISTS management_company_id UUID,
+  ADD COLUMN IF NOT EXISTS contact_id UUID,  -- FK to crm_contacts (developer contact)
+  ADD COLUMN IF NOT EXISTS min_price_per_sqm NUMERIC,
+  ADD COLUMN IF NOT EXISTS ownership_types TEXT[] DEFAULT '{}'; -- freehold, leasehold
+```
+
+**Миграция 2: project_units — inventory grid**
+```sql
+CREATE TABLE public.project_units (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  property_id UUID NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
-  listing_type TEXT NOT NULL CHECK (listing_type IN ('sale','rent_ltr','rent_str','club_deal','wholesale')),
+  project_id UUID NOT NULL REFERENCES property_projects(id) ON DELETE CASCADE,
+  unit_code TEXT,          -- e.g. "A-301"
+  unit_type TEXT NOT NULL,  -- studio, 1br, 2br, 3br, penthouse, villa
+  floor INT,
+  area_sqm NUMERIC,
+  bedrooms INT,
+  bathrooms INT,
   price NUMERIC,
   currency TEXT DEFAULT 'THB',
-  availability_status TEXT DEFAULT 'available' CHECK (availability_status IN ('available','reserved','sold','rented','withdrawn')),
-  exclusive BOOLEAN DEFAULT false,
-  commission_structure JSONB DEFAULT '{}',
-  published_on_channels TEXT[] DEFAULT '{}',
-  viewing_count INT DEFAULT 0,
-  inquiry_count INT DEFAULT 0,
-  company_id UUID NOT NULL,
-  created_by UUID,
+  price_per_sqm NUMERIC,
+  status TEXT DEFAULT 'available' CHECK (status IN ('available','reserved','sold','held')),
+  view_type TEXT,
+  floor_plan_url TEXT,
+  property_id UUID REFERENCES properties(id),  -- links to PMS property after handover
+  buyer_contact_id UUID REFERENCES crm_contacts(id),
+  deal_id UUID REFERENCES agent_deals(id),
+  notes TEXT,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
 ```
+RLS: authenticated users can read; company members can write.
 
-### Phase 3 — Property Dossier Tabs (Owners, Listings, Deals)
+### Phase 2 — nb_leads → CRM integration
 
-**Property detail page** — add 3 new tabs:
+- Add `crm_contact_id UUID` to `nb_leads` — link to CRM contact
+- On lead creation: auto-create `crm_contacts` record (source = 'newbuild_lead')
+- On lead qualification: auto-create `agent_deals` (deal_type = 'offplan_sale', property_project_id set)
 
-1. **Owners tab**: List from `property_owners` joined with `crm_contacts`. Add/remove owners with role + ownership percentage. Clickable to contact detail.
+### Phase 3 — Property detail: integrate tabs
 
-2. **Listings tab**: CRUD for `inventory_listings`. Quick "Add Listing" button (sale/rent_ltr/rent_str/club_deal). Shows status badges, price, channel distribution, viewing/inquiry counts.
+Wire the existing `PropertyOwnersTab`, `PropertyListingsTab`, `PropertyDealsTab` into the property detail page. Currently created but not mounted.
 
-3. **Deals tab**: Query `agent_deals WHERE property_id = X`. Show linked deals with stage badges, client name, deal value. Quick-create deal from property context (pre-fills property_id + property data into the deal form).
+### Phase 4 — Project detail: units grid + deals tab
 
-### Phase 4 — Contact Detail: Properties Connection
+- **Units grid**: visual table (unit_code, type, floor, area, price, status badge) with inline status change
+- **Deals tab**: `agent_deals WHERE property_project_id = X`
+- **Quick actions**: "Create Deal from Project" (pre-fills project, pipeline = offplan)
+- **Marketing tab**: upload/view marketing materials, payment plan display
 
-**ContactDetail.tsx — Properties tab enhancement:**
-- Query `property_owners WHERE contact_id = X` to show owned properties
-- Query `agent_deals WHERE contact_id = X` to show property preferences across deals
-- Show "Property Interest Map": aggregate preferred_districts + preferred_types from all deals into a visual summary
+### Phase 5 — Unified property search for CRM
 
-### Phase 5 — Deal Viewings Integration
+Enhance `PropertySearchInput` to also search `property_projects` (not just `properties`), so deals can be linked to either a specific unit OR a project.
 
-**Use existing `deal_viewings` table** to track property showings:
-- On deal detail: "Log Viewing" action → select property from company inventory → add feedback/rating
-- On property detail → Viewings sub-tab: all viewings for this property across all deals
-- On contact detail → Timeline: viewings appear as activity items
+### Phase 6 — agent_deals: project ↔ unit linking
+
+- When deal links to a project + unit: `property_project_id` + `property_id` (unit's linked property)
+- On deal Won: auto-update `project_units.status = 'sold'`, set `buyer_contact_id`
+- Cascade: update `property_projects.units_sold` / `units_available` via trigger
+
+---
 
 ## Files to Create/Edit
 
+**Migrations**: 2 SQL (project enrichment + project_units table)
+
 **New files:**
-- `src/components/owner/sales/PropertySearchInput.tsx` — reusable property combobox
-- `src/hooks/usePropertyOwners.ts` — CRUD for property_owners table
-- `src/hooks/useInventoryListings.ts` — CRUD for inventory_listings table
-- `src/components/owner/property/PropertyOwnersTab.tsx`
-- `src/components/owner/property/PropertyListingsTab.tsx`
-- `src/components/owner/property/PropertyDealsTab.tsx`
+- `src/hooks/useProjectUnits.ts` — CRUD for project_units
+- `src/components/newbuilds/ProjectUnitsGrid.tsx` — inventory grid UI
+- `src/components/newbuilds/ProjectDealsTab.tsx` — deals linked to project
+- `src/components/newbuilds/ProjectMarketingTab.tsx` — materials + payment plan
 
 **Edit files:**
-- `src/components/owner/sales/CreateDealSheet.tsx` — add PropertySearchInput, pass property_id
-- Property detail page — add Owners/Listings/Deals tabs
-- `src/pages/owner/ContactDetail.tsx` — enhance Properties tab with ownership data
-
-**Migrations:** 2 SQL (property_owners + inventory_listings with RLS)
+- `src/hooks/useNewbuildProjects.ts` — add new columns to interface
+- `src/hooks/useNewbuildLeads.ts` — add crm_contact_id, auto-creation logic
+- `src/components/owner/sales/PropertySearchInput.tsx` — search projects too
+- `src/components/owner/sales/CreateDealSheet.tsx` — project unit selector
+- Property detail page — mount Owners/Listings/Deals tabs
+- Newbuild project detail page — mount Units/Deals/Marketing tabs
 
