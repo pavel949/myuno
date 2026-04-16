@@ -1,126 +1,120 @@
 
 
-# Ignatev CRM — Contacts Module Enhancement
+# CRM ↔ Properties Hub Integration
 
-## Current State
+## Current Gap Analysis
 
-**What exists and works well:**
-- `crm_contacts` table with 60+ columns (name, phone, email, social, budget, preferences, tags, scoring, lifecycle, address, VIP, etc.)
-- `crm_roles` and `key_dates` columns already added
-- ContactsList page with grid/list view, filters (type, source, tag, lifecycle, VIP, lead temp, CRM role), search, pagination, export, import
-- ContactDetail page with Odoo-style smart buttons, tabbed layout (Timeline, Deals, Properties, Tasks, Documents), AI assistant panel
-- CSV/XLSX import with column mapping
-- Duplicate detection via Edge Function
-- Create/Edit contact sheets with tabbed forms
+**Critical finding:** `property_id` in `agent_deals` is **always set to null** (hardcoded on line 175 of CreateDealSheet). The deal form has a project selector but NO property selector. There is no way to link a deal to a specific property.
 
-**What's missing (per spec):**
-- DB: `contact_type` is text (buyer/seller/etc) but spec wants `type` = person|company|household (current `is_company` boolean is partial)
-- DB: Missing columns: `passport_country`, `tax_residency`, `segment[]` (investor|buyer|seller|owner|tenant|guest|broker|developer|vendor), `hnw_tier`, `aml_kyc_status`, `aml_kyc_date`, `pep_flag`, `sanctions_flag`, `preferences` JSONB, `ai_summary`, `last_activity_at`, `owner_user_id`
-- DB: `contact_relationships` table doesn't exist in DB (only in TypeScript)
-- UI: No KYC tab in contact forms
-- UI: No segment multi-select (current `contact_type` is single-select)
-- UI: No HNW tier filter in list
-- UI: No saved views
-- UI: No "Communications" tab on ContactDetail
-- Seed: No realistic Phuket market contacts
+**Existing assets we leverage (no new tables needed):**
+- `properties` table (100+ cols) — the SSOT for all real estate
+- `property_projects` table — serves as "developments" 
+- `agent_deals.property_id` + `agent_deals.property_project_id` — columns exist in DB, just unused in UI
+- `deal_viewings` table — already created (property_id, contact_id, feedback, rating)
 
-## Plan
+**What's missing from the spec vs reality:**
+| Spec Table | Reality | Action |
+|---|---|---|
+| `property_owners` | `properties.owner_id` (single owner) | Create table for multi-owner tracking |
+| `developments` | `property_projects` already covers this | No new table, reuse existing |
+| `inventory_listings` | `properties.listing_type` + `listing_modes` | Create table for multi-listing per property |
 
-### Phase 1 — Database Migration
+## Implementation Plan
 
-Add missing columns to `crm_contacts`:
+### Phase 1 — Property Picker Component + Deal Linking
+
+**New: `PropertySearchInput.tsx`** (mirrors existing `ContactSearchInput`)
+- Combobox searching `properties` by title_en/title_ru/address/district
+- Shows: cover thumbnail, title, type badge, district, bedrooms, price
+- Scoped to company via `management_company_id` or `owner_id` in team
+
+**Update: `CreateDealSheet.tsx`**
+- Add PropertySearchInput field below contact selector
+- When property selected: auto-fill `preferred_districts`, `preferred_types`, `budget_min`/`budget_max` from property data
+- Pass selected `property_id` to `createDeal` (replace hardcoded `null`)
+- Show property card preview when linked
+
+**Update: Deal detail view** (wherever deal is displayed)
+- Show linked property card with photo, title, price — clickable to property detail
+
+### Phase 2 — Database: `property_owners` + `inventory_listings`
+
+**Migration 1: `property_owners` table**
 ```sql
-ALTER TABLE public.crm_contacts
-  ADD COLUMN IF NOT EXISTS contact_category TEXT DEFAULT 'person' CHECK (contact_category IN ('person','company','household')),
-  ADD COLUMN IF NOT EXISTS passport_country TEXT,
-  ADD COLUMN IF NOT EXISTS tax_residency TEXT,
-  ADD COLUMN IF NOT EXISTS segment TEXT[] DEFAULT '{}',
-  ADD COLUMN IF NOT EXISTS hnw_tier TEXT CHECK (hnw_tier IN ('standard','hnw','uhnw')),
-  ADD COLUMN IF NOT EXISTS aml_kyc_status TEXT DEFAULT 'not_started' CHECK (aml_kyc_status IN ('not_started','pending','approved','rejected','expired')),
-  ADD COLUMN IF NOT EXISTS aml_kyc_date DATE,
-  ADD COLUMN IF NOT EXISTS pep_flag BOOLEAN DEFAULT false,
-  ADD COLUMN IF NOT EXISTS sanctions_flag BOOLEAN DEFAULT false,
-  ADD COLUMN IF NOT EXISTS preferences JSONB DEFAULT '{}',
-  ADD COLUMN IF NOT EXISTS ai_summary TEXT,
-  ADD COLUMN IF NOT EXISTS last_activity_at TIMESTAMPTZ,
-  ADD COLUMN IF NOT EXISTS owner_user_id UUID;
-```
-
-Create `contact_relationships` table:
-```sql
-CREATE TABLE public.contact_relationships (
+CREATE TABLE public.property_owners (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  contact_a_id UUID NOT NULL REFERENCES crm_contacts(id) ON DELETE CASCADE,
-  contact_b_id UUID NOT NULL REFERENCES crm_contacts(id) ON DELETE CASCADE,
-  relation_type TEXT NOT NULL,
+  property_id UUID NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
+  contact_id UUID NOT NULL REFERENCES crm_contacts(id) ON DELETE CASCADE,
+  role TEXT NOT NULL DEFAULT 'owner' CHECK (role IN ('owner','co_owner','beneficial_owner','nominee','tenant','investor')),
+  ownership_pct NUMERIC CHECK (ownership_pct > 0 AND ownership_pct <= 100),
+  since DATE,
+  until DATE,
   notes TEXT,
   company_id UUID NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+```
+RLS: company team members can CRUD.
+
+**Migration 2: `inventory_listings` table**
+```sql
+CREATE TABLE public.inventory_listings (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  property_id UUID NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
+  listing_type TEXT NOT NULL CHECK (listing_type IN ('sale','rent_ltr','rent_str','club_deal','wholesale')),
+  price NUMERIC,
+  currency TEXT DEFAULT 'THB',
+  availability_status TEXT DEFAULT 'available' CHECK (availability_status IN ('available','reserved','sold','rented','withdrawn')),
+  exclusive BOOLEAN DEFAULT false,
+  commission_structure JSONB DEFAULT '{}',
+  published_on_channels TEXT[] DEFAULT '{}',
+  viewing_count INT DEFAULT 0,
+  inquiry_count INT DEFAULT 0,
+  company_id UUID NOT NULL,
+  created_by UUID,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
 ```
-With RLS: team members of the company can read/write.
 
-### Phase 2 — TypeScript & Hook Updates
+### Phase 3 — Property Dossier Tabs (Owners, Listings, Deals)
 
-**`src/hooks/useCrmContacts.ts`:**
-- Add new fields to `CrmContact` interface: `contact_category`, `passport_country`, `tax_residency`, `segment`, `hnw_tier`, `aml_kyc_status`, `aml_kyc_date`, `pep_flag`, `sanctions_flag`, `preferences`, `ai_summary`, `last_activity_at`, `owner_user_id`
-- Add `hnwTier` and `segment` filter params to `useCrmContacts` query
+**Property detail page** — add 3 new tabs:
 
-**`src/hooks/useContactRelationships.ts`:**
-- Update to use actual DB table (currently may reference non-existent table)
+1. **Owners tab**: List from `property_owners` joined with `crm_contacts`. Add/remove owners with role + ownership percentage. Clickable to contact detail.
 
-### Phase 3 — ContactsList Enhancements
+2. **Listings tab**: CRUD for `inventory_listings`. Quick "Add Listing" button (sale/rent_ltr/rent_str/club_deal). Shows status badges, price, channel distribution, viewing/inquiry counts.
 
-**`src/pages/owner/ContactsList.tsx`:**
-- Add HNW tier filter chips (Standard / HNW / UHNW)
-- Add segment filter (multi-select dropdown)
-- Add saved views system (save current filter state to localStorage, show as tabs)
-- Show segment badges and HNW tier indicator on contact cards
+3. **Deals tab**: Query `agent_deals WHERE property_id = X`. Show linked deals with stage badges, client name, deal value. Quick-create deal from property context (pre-fills property_id + property data into the deal form).
 
-### Phase 4 — Contact Forms (Create + Edit)
+### Phase 4 — Contact Detail: Properties Connection
 
-**`src/components/owner/contacts/CreateContactSheet.tsx` & `EditContactSheet.tsx`:**
-- Add "KYC" tab with: AML/KYC status, date, PEP flag, sanctions flag, passport country, tax residency
-- Add "Segments" section with multi-select chips for segment array
-- Add HNW tier selector
-- Add `contact_category` radio (Person / Company / Household) replacing `is_company` boolean
-- Add preferences JSONB editor (budget range, location prefs, property type prefs — structured)
+**ContactDetail.tsx — Properties tab enhancement:**
+- Query `property_owners WHERE contact_id = X` to show owned properties
+- Query `agent_deals WHERE contact_id = X` to show property preferences across deals
+- Show "Property Interest Map": aggregate preferred_districts + preferred_types from all deals into a visual summary
 
-### Phase 5 — ContactDetail KYC & Communications Tabs
+### Phase 5 — Deal Viewings Integration
 
-**`src/pages/owner/ContactDetail.tsx`:**
-- Add "KYC" tab showing AML status badge, PEP/sanctions flags, passport country, tax residency, KYC date
-- Add "Communications" tab aggregating activities filtered to comm types (call, email, whatsapp, telegram)
-- Show HNW tier badge prominently in header
-- Show segment badges below name
-- Display `ai_summary` in overview if present
+**Use existing `deal_viewings` table** to track property showings:
+- On deal detail: "Log Viewing" action → select property from company inventory → add feedback/rating
+- On property detail → Viewings sub-tab: all viewings for this property across all deals
+- On contact detail → Timeline: viewings appear as activity items
 
-### Phase 6 — Seed Data
+## Files to Create/Edit
 
-Insert 10 realistic Phuket-market contacts via migration:
-- 4 RU HNW investors (UHNW club deal, HNW off-plan, standard buyer-mandate, cold lead)
-- 2 Expat buyers (UK family, Australian retiree)
-- 2 Local Thai owners (landlord villa, condo)
-- 1 Broker/agent partner
-- 1 Developer contact
-- With varied segments, lifecycle stages, HNW tiers, budgets in THB
+**New files:**
+- `src/components/owner/sales/PropertySearchInput.tsx` — reusable property combobox
+- `src/hooks/usePropertyOwners.ts` — CRUD for property_owners table
+- `src/hooks/useInventoryListings.ts` — CRUD for inventory_listings table
+- `src/components/owner/property/PropertyOwnersTab.tsx`
+- `src/components/owner/property/PropertyListingsTab.tsx`
+- `src/components/owner/property/PropertyDealsTab.tsx`
 
-### Phase 7 — Import Dedup Enhancement
+**Edit files:**
+- `src/components/owner/sales/CreateDealSheet.tsx` — add PropertySearchInput, pass property_id
+- Property detail page — add Owners/Listings/Deals tabs
+- `src/pages/owner/ContactDetail.tsx` — enhance Properties tab with ownership data
 
-**`src/pages/owner/ContactImportPage.tsx`:**
-- Add dedup check by email+phone before insert (query existing contacts, show matches, let user skip/merge)
-
-## Files to Change
-
-**Migrations:** 1 SQL migration (new columns + contact_relationships table + seed)
-**Code:**
-- `src/hooks/useCrmContacts.ts` — extend interface + filters
-- `src/hooks/useContactRelationships.ts` — verify DB alignment
-- `src/pages/owner/ContactsList.tsx` — HNW/segment filters, saved views
-- `src/pages/owner/ContactDetail.tsx` — KYC tab, Communications tab, HNW/segment display
-- `src/components/owner/contacts/CreateContactSheet.tsx` — KYC tab, segments, category
-- `src/components/owner/contacts/EditContactSheet.tsx` — KYC tab, segments, category
-- `src/pages/owner/ContactImportPage.tsx` — dedup enhancement
-- `src/types/contact.ts` — segment/HNW type definitions
+**Migrations:** 2 SQL (property_owners + inventory_listings with RLS)
 
