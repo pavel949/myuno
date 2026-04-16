@@ -37,6 +37,15 @@ export interface NewbuildProject {
   amenities: string[] | null;
   muuno_score: number | null;
   created_at: string;
+  // New sales/CRM fields
+  commission_pct: number | null;
+  payment_plan: any[] | null;
+  marketing_materials: string[] | null;
+  exclusive: boolean;
+  management_company_id: string | null;
+  contact_id: string | null;
+  min_price_per_sqm: number | null;
+  ownership_types: string[] | null;
 }
 
 export interface NewbuildFilters {
@@ -116,6 +125,14 @@ export function useNewbuildProjects(filters?: NewbuildFilters) {
         amenities: p.amenities,
         muuno_score: p.muuno_score,
         created_at: p.created_at,
+        commission_pct: p.commission_pct ?? null,
+        payment_plan: p.payment_plan ?? null,
+        marketing_materials: p.marketing_materials ?? [],
+        exclusive: p.exclusive ?? false,
+        management_company_id: p.management_company_id ?? null,
+        contact_id: p.contact_id ?? null,
+        min_price_per_sqm: p.min_price_per_sqm ?? null,
+        ownership_types: p.ownership_types ?? [],
       }));
     },
     staleTime: 5 * 60 * 1000,
@@ -180,6 +197,14 @@ export function useNewbuildProject(slugOrId?: string) {
         amenities: p.amenities,
         muuno_score: p.muuno_score,
         created_at: p.created_at,
+        commission_pct: p.commission_pct ?? null,
+        payment_plan: p.payment_plan ?? null,
+        marketing_materials: p.marketing_materials ?? [],
+        exclusive: p.exclusive ?? false,
+        management_company_id: p.management_company_id ?? null,
+        contact_id: p.contact_id ?? null,
+        min_price_per_sqm: p.min_price_per_sqm ?? null,
+        ownership_types: p.ownership_types ?? [],
       };
     },
     enabled: !!slugOrId,
