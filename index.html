@@ -10,7 +10,7 @@
     <meta http-equiv="Expires" content="0" />
     
     <!-- Content Security Policy -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://maps.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https: blob:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://erfwtoavipwjqmylpizt.supabase.co wss://erfwtoavipwjqmylpizt.supabase.co https://maps.googleapis.com https://*.googleapis.com https://fonts.googleapis.com; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://maps.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https: blob:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' %VITE_SUPABASE_URL% wss://%VITE_SUPABASE_PROJECT_ID%.supabase.co https://maps.googleapis.com https://*.googleapis.com https://fonts.googleapis.com; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" />
 
     <title>myUNO - All Services in One</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
@@ -38,22 +38,27 @@
     <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
     <link rel="canonical" href="https://myuno.app" />
 
-    <meta property="og:title" content="myUNO - Home is where myUNO is" />
-    <meta property="og:description" content="Your life abroad, simplified" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://myuno.app" />
+    <meta property="og:url" content="https://myuno.app/" />
+    <meta property="og:title" content="myUNO - All Services in One" />
+    <meta property="og:description" content="myUNO - Home is where myUNO is. Your life abroad, simplified." />
     <meta property="og:image" content="https://myuno.app/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta property="og:site_name" content="myUNO" />
     <meta property="og:locale" content="en_US" />
     <meta property="og:locale:alternate" content="ru_RU" />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@myUNOapp" />
+    <meta name="twitter:url" content="https://myuno.app/" />
+    <meta name="twitter:title" content="myUNO - All Services in One" />
+    <meta name="twitter:description" content="myUNO - Home is where myUNO is. Your life abroad, simplified." />
     <meta name="twitter:image" content="https://myuno.app/og-image.png" />
-    
+
     <!-- Preconnect for performance -->
-    <link rel="preconnect" href="https://erfwtoavipwjqmylpizt.supabase.co" />
-    <link rel="dns-prefetch" href="https://erfwtoavipwjqmylpizt.supabase.co" />
+    <link rel="preconnect" href="%VITE_SUPABASE_URL%" />
+    <link rel="dns-prefetch" href="//%VITE_SUPABASE_PROJECT_ID%.supabase.co" />
     <link rel="dns-prefetch" href="https://maps.googleapis.com" />
     
     <!-- Google Fonts: Syne (display) + DM Sans (body) + JetBrains Mono -->
