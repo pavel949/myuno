@@ -1,19 +1,13 @@
-import ExcelJS from 'exceljs';
 import type { PropertyFinancialFull } from '@/hooks/usePropertyFinancials';
 import type { BudgetVsActual } from '@/hooks/usePropertyBudgets';
 import type { PropertyReport } from '@/hooks/usePropertyReports';
 
-const HEADER_FILL: ExcelJS.Fill = {
-  type: 'pattern',
-  pattern: 'solid',
-  fgColor: { argb: 'FF1A73E8' },
-};
-const HEADER_FONT: Partial<ExcelJS.Font> = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
+// ExcelJS is loaded lazily to avoid 918KB in the main bundle
 
-function autoWidth(ws: ExcelJS.Worksheet) {
-  ws.columns.forEach(col => {
+function autoWidth(ws: any) {
+  ws.columns.forEach((col: any) => {
     let max = 12;
-    col.eachCell?.({ includeEmpty: false }, cell => {
+    col.eachCell?.({ includeEmpty: false }, (cell: any) => {
       const len = String(cell.value ?? '').length + 2;
       if (len > max) max = len;
     });
@@ -21,9 +15,11 @@ function autoWidth(ws: ExcelJS.Worksheet) {
   });
 }
 
-function styledHeader(ws: ExcelJS.Worksheet) {
+function styledHeader(ws: any) {
+  const HEADER_FILL = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1A73E8' } };
+  const HEADER_FONT = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
   const row = ws.getRow(1);
-  row.eachCell(cell => {
+  row.eachCell((cell: any) => {
     cell.fill = HEADER_FILL;
     cell.font = HEADER_FONT;
     cell.alignment = { vertical: 'middle', horizontal: 'center' };
@@ -37,6 +33,7 @@ export async function exportTransactionsExcel(
   language: 'ru' | 'en' = 'ru',
   filename?: string
 ) {
+  const ExcelJS = await import('exceljs');
   const wb = new ExcelJS.Workbook();
   wb.creator = 'myUNO';
   wb.created = new Date();
@@ -72,10 +69,8 @@ export async function exportTransactionsExcel(
     });
   });
 
-  // Number format for amounts
   ws.getColumn('amount').numFmt = '#,##0.00';
 
-  // Summary row
   const totalIncome = transactions
     .filter(t => t.transaction_type === 'income')
     .reduce((s, t) => s + Number(t.amount), 0);
@@ -102,12 +97,12 @@ export async function exportBudgetExcel(
   language: 'ru' | 'en' = 'ru',
   filename?: string
 ) {
+  const ExcelJS = await import('exceljs');
   const wb = new ExcelJS.Workbook();
   wb.creator = 'myUNO';
   const isRu = language === 'ru';
   const ws = wb.addWorksheet(isRu ? 'Бюджет План/Факт' : 'Budget Plan/Actual');
 
-  // Title rows
   ws.mergeCells('A1:E1');
   ws.getCell('A1').value = `${isRu ? 'Бюджет' : 'Budget'}: ${propertyTitle}`;
   ws.getCell('A1').font = { bold: true, size: 14 };
@@ -115,7 +110,9 @@ export async function exportBudgetExcel(
   ws.getCell('A2').value = `${isRu ? 'Месяц' : 'Month'}: ${month}`;
   ws.getCell('A2').font = { size: 11, color: { argb: 'FF666666' } };
 
-  // Data starts at row 4
+  const HEADER_FILL = { type: 'pattern' as const, pattern: 'solid' as const, fgColor: { argb: 'FF1A73E8' } };
+  const HEADER_FONT = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
+
   ws.getRow(4).values = [
     isRu ? 'Категория' : 'Category',
     isRu ? 'Тип' : 'Type',
@@ -124,7 +121,7 @@ export async function exportBudgetExcel(
     isRu ? 'Отклонение' : 'Variance',
     '%',
   ];
-  ws.getRow(4).eachCell(cell => {
+  ws.getRow(4).eachCell((cell: any) => {
     cell.fill = HEADER_FILL;
     cell.font = HEADER_FONT;
     cell.alignment = { vertical: 'middle', horizontal: 'center' };
@@ -140,7 +137,6 @@ export async function exportBudgetExcel(
       row.variancePercent,
     ]);
 
-    // Color variance
     const varianceCell = r.getCell(5);
     if (row.variance < 0) {
       varianceCell.font = { color: { argb: 'FFDC2626' } };
@@ -149,7 +145,6 @@ export async function exportBudgetExcel(
     }
   });
 
-  // Totals
   const totalPlanned = data.reduce((s, r) => s + (r.transaction_type === 'expense' ? -r.planned : r.planned), 0);
   const totalActual = data.reduce((s, r) => s + (r.transaction_type === 'expense' ? -r.actual : r.actual), 0);
   ws.addRow([]);
@@ -179,12 +174,12 @@ export async function exportReportExcel(
   language: 'ru' | 'en' = 'ru',
   filename?: string
 ) {
+  const ExcelJS = await import('exceljs');
   const wb = new ExcelJS.Workbook();
   wb.creator = 'myUNO';
   const isRu = language === 'ru';
   const d = report.data;
 
-  // Summary sheet
   const ws1 = wb.addWorksheet(isRu ? 'Сводка' : 'Summary');
   ws1.getCell('A1').value = isRu ? 'Отчёт по объекту' : 'Property Report';
   ws1.getCell('A1').font = { bold: true, size: 14 };
@@ -192,10 +187,13 @@ export async function exportReportExcel(
   ws1.getCell('A3').value = `${report.period_start} — ${report.period_end}`;
   ws1.getCell('A3').font = { color: { argb: 'FF666666' } };
 
-  ws1.getRow(5).values = [isRu ? 'Показатель' : 'Metric', isRu ? 'Значение' : 'Value'];
-  ws1.getRow(5).eachCell(c => { c.fill = HEADER_FILL; c.font = HEADER_FONT; });
+  const HEADER_FILL = { type: 'pattern' as const, pattern: 'solid' as const, fgColor: { argb: 'FF1A73E8' } };
+  const HEADER_FONT = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
 
-  const summaryRows = [
+  ws1.getRow(5).values = [isRu ? 'Показатель' : 'Metric', isRu ? 'Значение' : 'Value'];
+  ws1.getRow(5).eachCell((c: any) => { c.fill = HEADER_FILL; c.font = HEADER_FONT; });
+
+  const summaryRows: any[][] = [
     [isRu ? 'Доход' : 'Income', d.income.total],
     [isRu ? 'Расходы' : 'Expenses', d.expenses.total],
     [isRu ? 'Чистый доход' : 'Net Income', d.net_income],
@@ -209,7 +207,6 @@ export async function exportReportExcel(
   ws1.getColumn('B').numFmt = '#,##0';
   autoWidth(ws1);
 
-  // Income sheet
   if (d.income.transactions.length > 0) {
     const ws2 = wb.addWorksheet(isRu ? 'Доходы' : 'Income');
     ws2.columns = [
@@ -218,13 +215,12 @@ export async function exportReportExcel(
       { header: isRu ? 'Сумма' : 'Amount', key: 'amount' },
       { header: isRu ? 'Описание' : 'Description', key: 'description' },
     ];
-    d.income.transactions.forEach(t => ws2.addRow(t));
+    d.income.transactions.forEach((t: any) => ws2.addRow(t));
     ws2.getColumn('amount').numFmt = '#,##0';
     styledHeader(ws2);
     autoWidth(ws2);
   }
 
-  // Expenses sheet
   if (d.expenses.transactions.length > 0) {
     const ws3 = wb.addWorksheet(isRu ? 'Расходы' : 'Expenses');
     ws3.columns = [
@@ -234,7 +230,7 @@ export async function exportReportExcel(
       { header: isRu ? 'Описание' : 'Description', key: 'description' },
       { header: isRu ? 'Поставщик' : 'Vendor', key: 'vendor' },
     ];
-    d.expenses.transactions.forEach(t => ws3.addRow(t));
+    d.expenses.transactions.forEach((t: any) => ws3.addRow(t));
     ws3.getColumn('amount').numFmt = '#,##0';
     styledHeader(ws3);
     autoWidth(ws3);
@@ -244,7 +240,7 @@ export async function exportReportExcel(
 }
 
 // ========== Helper: download workbook ==========
-async function downloadWorkbook(wb: ExcelJS.Workbook, filename: string) {
+async function downloadWorkbook(wb: any, filename: string) {
   const buffer = await wb.xlsx.writeBuffer();
   const blob = new Blob([buffer], {
     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',

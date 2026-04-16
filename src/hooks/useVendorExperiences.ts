@@ -49,9 +49,7 @@ export interface VendorExperience {
 }
 
 export function useVendorExperiences(providerId?: string, experienceType?: ExperienceType | 'all') {
-  const { items, isLoading, create, update, remove, refetch } = useVerticalCRUD<VendorExperience>('experience', providerId, {
-    select: 'id,provider_id,experience_type,title_en,title_ru,description_en,description_ru,category,difficulty,duration_minutes,price,price_per,currency,min_participants,max_participants,meeting_point,meeting_point_lat,meeting_point_lng,location_name,includes,excludes,highlights,requirements,itinerary,cover_image,images,available_days,start_times,tags,equipment_included,is_certified,certification_details,safety_briefing_required,age_restriction,is_active,is_featured,rating,review_count,approval_status,external_link,created_at,updated_at',
-  });
+  const { items, isLoading, create, update, remove, refetch } = useVerticalCRUD<VendorExperience>('experience', providerId);
 
   const filteredItems = experienceType && experienceType !== 'all'
     ? items.filter(item => item.experience_type === experienceType)
@@ -66,8 +64,8 @@ export function useVendorExperiences(providerId?: string, experienceType?: Exper
       is_active: data.is_active ?? true,
       approval_status: 'pending',
     }),
-    updateExperience: async (id: string, updates: Partial<VendorExperience>) => update(id, updates),
-    deleteExperience: async (id: string) => remove(id),
+    updateExperience: update,
+    deleteExperience: remove,
     refetch,
   };
 }
