@@ -6,7 +6,7 @@ import {
   ContactRound, Home, ChevronDown, TrendingUp, PackageOpen,
   Receipt, Settings, Tag, Star, ShieldCheck, MessageSquare, Radio,
   BookOpen, FileText, Megaphone, Truck, ClipboardList, Shuffle,
-  ArrowLeftRight, Target,
+  ArrowLeftRight, Target, Layers,
 } from 'lucide-react';
 import {
   Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent,
@@ -110,6 +110,7 @@ export const navigationGroups: NavGroup[] = [
     items: [
       { title: 'CRM Dashboard', titleRu: 'CRM Обзор', path: APP_ROUTES.MC_CRM_DASHBOARD, icon: BarChart3 },
       { title: 'Contacts', titleRu: 'Контакты', path: APP_ROUTES.MC_CONTACTS, icon: ContactRound },
+      { title: 'Pipelines', titleRu: 'Воронки', path: APP_ROUTES.MC_PIPELINES, icon: Layers },
       { title: 'Sales Pipeline', titleRu: 'Воронка продаж', path: APP_ROUTES.MC_SALES, icon: TrendingUp },
       { title: 'Owners', titleRu: 'Собственники', path: APP_ROUTES.MC_OWNERS, icon: Crown },
       { title: 'Vendor Acquisition', titleRu: 'Привлечение вендоров', path: APP_ROUTES.MC_VENDOR_ACQUISITION, icon: Target },

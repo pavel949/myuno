@@ -310,6 +310,7 @@ export const APP_ROUTES = {
   MC_CONTACTS_IMPORT: '/mc/contacts/import',
   MC_CONTACTS_IMPORT_ODOO: '/mc/contacts/import-odoo',
   MC_CONTACTS_DUPLICATES: '/mc/duplicates',
+  MC_PIPELINES: '/mc/pipelines',
   MC_SALES: '/mc/sales',
   MC_SALES_NEW: '/mc/sales/new',
   MC_SALES_DEAL: (id: string) => `/mc/sales/${id}`,
