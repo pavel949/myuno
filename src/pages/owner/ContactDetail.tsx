@@ -539,6 +539,7 @@ const { data: contact, isLoading, isError } = useCrmContact(id);
                 { value: 'deals', label: `${isRu ? 'Сделки' : 'Deals'}${deals.length > 0 ? ` (${deals.length})` : ''}`, icon: DollarSign },
                 { value: 'tasks', label: `${isRu ? 'Задачи' : 'Tasks'}${contactTasks.length > 0 ? ` (${contactTasks.length})` : ''}`, icon: ListTodo },
                 { value: 'documents', label: isRu ? 'Документы' : 'Documents', icon: FileText },
+                { value: 'kyc', label: 'KYC', icon: User },
                 { value: 'ai', label: 'AI', icon: Sparkles },
               ].map(tab => (
                 <TabsTrigger key={tab.value} value={tab.value} className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-2.5 text-sm">
