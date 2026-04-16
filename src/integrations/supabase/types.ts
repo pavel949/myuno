@@ -10829,6 +10829,7 @@ export type Database = {
           budget_max: number | null
           budget_min: number | null
           created_at: string | null
+          crm_contact_id: string | null
           developer_id: string | null
           email: string | null
           full_name: string | null
@@ -10849,6 +10850,7 @@ export type Database = {
           budget_max?: number | null
           budget_min?: number | null
           created_at?: string | null
+          crm_contact_id?: string | null
           developer_id?: string | null
           email?: string | null
           full_name?: string | null
@@ -10869,6 +10871,7 @@ export type Database = {
           budget_max?: number | null
           budget_min?: number | null
           created_at?: string | null
+          crm_contact_id?: string | null
           developer_id?: string | null
           email?: string | null
           full_name?: string | null
@@ -13471,6 +13474,135 @@ export type Database = {
           user_type?: Database["public"]["Enums"]["user_type"] | null
         }
         Relationships: []
+      }
+      project_units: {
+        Row: {
+          area_sqm: number | null
+          bathrooms: number | null
+          bedrooms: number | null
+          buyer_contact_id: string | null
+          created_at: string | null
+          created_by: string | null
+          currency: string | null
+          deal_id: string | null
+          floor: number | null
+          floor_plan_url: string | null
+          id: string
+          notes: string | null
+          price: number | null
+          price_per_sqm: number | null
+          project_id: string
+          property_id: string | null
+          status: string | null
+          unit_code: string | null
+          unit_type: string
+          updated_at: string | null
+          view_type: string | null
+        }
+        Insert: {
+          area_sqm?: number | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          buyer_contact_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          deal_id?: string | null
+          floor?: number | null
+          floor_plan_url?: string | null
+          id?: string
+          notes?: string | null
+          price?: number | null
+          price_per_sqm?: number | null
+          project_id: string
+          property_id?: string | null
+          status?: string | null
+          unit_code?: string | null
+          unit_type: string
+          updated_at?: string | null
+          view_type?: string | null
+        }
+        Update: {
+          area_sqm?: number | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          buyer_contact_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          deal_id?: string | null
+          floor?: number | null
+          floor_plan_url?: string | null
+          id?: string
+          notes?: string | null
+          price?: number | null
+          price_per_sqm?: number | null
+          project_id?: string
+          property_id?: string | null
+          status?: string | null
+          unit_code?: string | null
+          unit_type?: string
+          updated_at?: string | null
+          view_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_units_buyer_contact_id_fkey"
+            columns: ["buyer_contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_units_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "agent_deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_units_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "property_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_units_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_units_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_units_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_units_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_units_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_properties_public"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       promoted_listings: {
         Row: {
@@ -17073,8 +17205,10 @@ export type Database = {
           cam_fee_per_sqm: number | null
           cam_includes: string[] | null
           cam_payment_day: number | null
+          commission_pct: number | null
           completion_date: string | null
           construction_progress: number | null
+          contact_id: string | null
           cover_image: string | null
           created_at: string | null
           created_by: string | null
@@ -17083,6 +17217,7 @@ export type Database = {
           developer_id: string | null
           developer_name: string | null
           district: string | null
+          exclusive: boolean | null
           funding_goal: number | null
           gallery_urls: string[] | null
           id: string
@@ -17109,10 +17244,15 @@ export type Database = {
           lat: number | null
           lng: number | null
           location_area: string | null
+          management_company_id: string | null
+          marketing_materials: string[] | null
           min_investment: number | null
+          min_price_per_sqm: number | null
           muuno_score: number | null
           name_en: string
           name_ru: string
+          ownership_types: string[] | null
+          payment_plan: Json | null
           price_from: number | null
           price_to: number | null
           project_status: string | null
@@ -17135,8 +17275,10 @@ export type Database = {
           cam_fee_per_sqm?: number | null
           cam_includes?: string[] | null
           cam_payment_day?: number | null
+          commission_pct?: number | null
           completion_date?: string | null
           construction_progress?: number | null
+          contact_id?: string | null
           cover_image?: string | null
           created_at?: string | null
           created_by?: string | null
@@ -17145,6 +17287,7 @@ export type Database = {
           developer_id?: string | null
           developer_name?: string | null
           district?: string | null
+          exclusive?: boolean | null
           funding_goal?: number | null
           gallery_urls?: string[] | null
           id?: string
@@ -17171,10 +17314,15 @@ export type Database = {
           lat?: number | null
           lng?: number | null
           location_area?: string | null
+          management_company_id?: string | null
+          marketing_materials?: string[] | null
           min_investment?: number | null
+          min_price_per_sqm?: number | null
           muuno_score?: number | null
           name_en: string
           name_ru: string
+          ownership_types?: string[] | null
+          payment_plan?: Json | null
           price_from?: number | null
           price_to?: number | null
           project_status?: string | null
@@ -17197,8 +17345,10 @@ export type Database = {
           cam_fee_per_sqm?: number | null
           cam_includes?: string[] | null
           cam_payment_day?: number | null
+          commission_pct?: number | null
           completion_date?: string | null
           construction_progress?: number | null
+          contact_id?: string | null
           cover_image?: string | null
           created_at?: string | null
           created_by?: string | null
@@ -17207,6 +17357,7 @@ export type Database = {
           developer_id?: string | null
           developer_name?: string | null
           district?: string | null
+          exclusive?: boolean | null
           funding_goal?: number | null
           gallery_urls?: string[] | null
           id?: string
@@ -17233,10 +17384,15 @@ export type Database = {
           lat?: number | null
           lng?: number | null
           location_area?: string | null
+          management_company_id?: string | null
+          marketing_materials?: string[] | null
           min_investment?: number | null
+          min_price_per_sqm?: number | null
           muuno_score?: number | null
           name_en?: string
           name_ru?: string
+          ownership_types?: string[] | null
+          payment_plan?: Json | null
           price_from?: number | null
           price_to?: number | null
           project_status?: string | null
