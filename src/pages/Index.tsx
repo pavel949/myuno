@@ -59,9 +59,8 @@ const Index = () => {
   const hasContext = !!activeCode;
   const isLoggedIn = !!user;
 
-  // Show property sections only for relevant personas
-  const PROPERTY_PERSONAS = new Set(['investor', 'property_owner', 'resident', 'relocation', 'real_estate_developer']);
-  const showPropertySections = personas.length === 0 || personas.some(p => PROPERTY_PERSONAS.has(p));
+  // Always show property sections — rentals are relevant to all personas
+  const showPropertySections = true;
 
   return (
     <AppLayout showFooter>
