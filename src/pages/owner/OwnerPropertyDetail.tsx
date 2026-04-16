@@ -11,6 +11,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { format, differenceInHours } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { PropertyDocumentsTab } from '@/components/owner/PropertyDocumentsTab';
+import { PropertyOwnersTab } from '@/components/owner/property/PropertyOwnersTab';
+import { PropertyListingsTab } from '@/components/owner/property/PropertyListingsTab';
+import { PropertyDealsTab } from '@/components/owner/property/PropertyDealsTab';
 import { JuristicContactsCard } from '@/components/owner/JuristicContactsCard';
 import { usePropertyDocuments } from '@/hooks/usePropertyDocuments';
 import { PropertyDetailHeader } from '@/components/owner/property-detail/PropertyDetailHeader';
@@ -29,7 +32,7 @@ import {
   Home, Calendar, CheckCircle, Clock, AlertTriangle, FileText, Building2,
   Sparkles, Shield, Settings, Bed, Bath, SquareStack, Rocket, EyeOff,
   StickyNote, Users, Wrench, Eye, MapPin, Coins, Wifi, KeyRound,
-  Handshake
+  Handshake, Tag, Briefcase
 } from 'lucide-react';
 import { formatCurrencyAmount } from '@/lib/config/currencies';
 
@@ -203,6 +206,14 @@ export default function OwnerPropertyDetail() {
           <TabsTrigger value="owners" className="text-xs">
             <Users className="h-3.5 w-3.5 mr-1 hidden sm:inline" />
             {isRu ? 'Собственник' : 'Owner'}
+          </TabsTrigger>
+          <TabsTrigger value="listings" className="text-xs">
+            <Tag className="h-3.5 w-3.5 mr-1 hidden sm:inline" />
+            {isRu ? 'Листинги' : 'Listings'}
+          </TabsTrigger>
+          <TabsTrigger value="deals" className="text-xs">
+            <Briefcase className="h-3.5 w-3.5 mr-1 hidden sm:inline" />
+            {isRu ? 'Сделки' : 'Deals'}
           </TabsTrigger>
         </TabsList>
 
@@ -393,6 +404,16 @@ export default function OwnerPropertyDetail() {
               }}
             />
           )}
+        </TabsContent>
+
+        {/* LISTINGS TAB */}
+        <TabsContent value="listings" className="mt-4">
+          {id && <PropertyListingsTab propertyId={id} companyId={(property as any).management_company_id || ''} />}
+        </TabsContent>
+
+        {/* DEALS TAB */}
+        <TabsContent value="deals" className="mt-4">
+          {id && <PropertyDealsTab propertyId={id} />}
         </TabsContent>
       </Tabs>
     </PageContainer>
