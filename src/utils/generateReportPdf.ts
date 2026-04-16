@@ -227,7 +227,7 @@ export async function generateReportPdf(options: GeneratePdfOptions): Promise<js
   
   yPosition += 8;
   doc.setFontSize(11);
-  doc.text(`${t.period}: ${formatDate(periodStart)} — ${formatDate(periodEnd)}`, 20, yPosition);
+  doc.text(`${t.period}: ${formatDate(periodStart, language)} — ${formatDate(periodEnd, language)}`, 20, yPosition);
   
   yPosition += 15;
 
@@ -332,8 +332,8 @@ export async function generateReportPdf(options: GeneratePdfOptions): Promise<js
     
     const bookingsData = data.bookings.map(b => [
       b.guest_name,
-      formatDate(b.check_in),
-      formatDate(b.check_out),
+      formatDate(b.check_in, language),
+      formatDate(b.check_out, language),
       formatCurrency(b.total_amount, currency),
       b.source,
     ]);
@@ -493,7 +493,7 @@ export async function generateReportPdf(options: GeneratePdfOptions): Promise<js
       yPosition += 5;
 
       const maintData = data.maintenance.map(m => [
-        formatDate(m.date),
+        formatDate(m.date, language),
         catLabels[m.type] || m.type,
         m.description.substring(0, 40),
         formatCurrency(m.cost, currency),
@@ -662,8 +662,8 @@ export async function generateReportPdf(options: GeneratePdfOptions): Promise<js
       return [
         b.guest_name,
         b.source || '-',
-        formatDate(b.check_in),
-        formatDate(b.check_out),
+        formatDate(b.check_in, language),
+        formatDate(b.check_out, language),
         formatCurrency(b.total_amount, currency),
         formatCurrency(bookingExpenses, currency),
         formatCurrency(net, currency),
