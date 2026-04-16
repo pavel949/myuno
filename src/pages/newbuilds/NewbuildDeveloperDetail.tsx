@@ -55,6 +55,10 @@ function useDeveloperProjects(devId?: string) {
         is_featured: p.is_featured || false, is_approved: p.is_approved ?? true,
         developer_id: p.developer_id, developer_name: p.developer_name,
         amenities: p.amenities, muuno_score: p.muuno_score, created_at: p.created_at,
+        commission_pct: p.commission_pct ?? null, payment_plan: p.payment_plan ?? null,
+        marketing_materials: p.marketing_materials ?? [], exclusive: p.exclusive ?? false,
+        management_company_id: p.management_company_id ?? null, contact_id: p.contact_id ?? null,
+        min_price_per_sqm: p.min_price_per_sqm ?? null, ownership_types: p.ownership_types ?? [],
       }));
     },
     enabled: !!devId,
