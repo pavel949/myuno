@@ -7139,6 +7139,96 @@ export type Database = {
           },
         ]
       }
+      inventory_listings: {
+        Row: {
+          availability_status: string | null
+          commission_structure: Json | null
+          company_id: string
+          created_at: string | null
+          created_by: string | null
+          currency: string | null
+          exclusive: boolean | null
+          id: string
+          inquiry_count: number | null
+          listing_type: string
+          price: number | null
+          property_id: string
+          published_on_channels: string[] | null
+          updated_at: string | null
+          viewing_count: number | null
+        }
+        Insert: {
+          availability_status?: string | null
+          commission_structure?: Json | null
+          company_id: string
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          exclusive?: boolean | null
+          id?: string
+          inquiry_count?: number | null
+          listing_type: string
+          price?: number | null
+          property_id: string
+          published_on_channels?: string[] | null
+          updated_at?: string | null
+          viewing_count?: number | null
+        }
+        Update: {
+          availability_status?: string | null
+          commission_structure?: Json | null
+          company_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          exclusive?: boolean | null
+          id?: string
+          inquiry_count?: number | null
+          listing_type?: string
+          price?: number | null
+          property_id?: string
+          published_on_channels?: string[] | null
+          updated_at?: string | null
+          viewing_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_listings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_listings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_listings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_listings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_listings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_properties_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       investment_interests: {
         Row: {
           admin_notes: string | null
@@ -16524,6 +16614,88 @@ export type Database = {
           },
           {
             foreignKeyName: "property_operational_tasks_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_properties_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_owners: {
+        Row: {
+          company_id: string
+          contact_id: string
+          created_at: string | null
+          id: string
+          notes: string | null
+          ownership_pct: number | null
+          property_id: string
+          role: string
+          since: string | null
+          until: string | null
+        }
+        Insert: {
+          company_id: string
+          contact_id: string
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          ownership_pct?: number | null
+          property_id: string
+          role?: string
+          since?: string | null
+          until?: string | null
+        }
+        Update: {
+          company_id?: string
+          contact_id?: string
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          ownership_pct?: number | null
+          property_id?: string
+          role?: string
+          since?: string | null
+          until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_owners_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_owners_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_owners_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_owners_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_owners_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_owners_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "v_properties_public"
