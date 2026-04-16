@@ -35,13 +35,20 @@ export const STAGE_PROBABILITIES: Record<DealStage, number> = {
 };
 
 /** Deal types */
-export const DEAL_TYPES = ['sale', 'rent', 'investment', 'management'] as const;
+export const DEAL_TYPES = [
+  'sale', 'rent_short', 'rent_long', 'investment', 'management',
+  'club_deal', 'resale', 'offplan',
+] as const;
 export type DealType = typeof DEAL_TYPES[number];
 export const DEAL_TYPE_LABELS: Record<DealType, { en: string; ru: string }> = {
   sale: { en: 'Sale', ru: 'Продажа' },
-  rent: { en: 'Rent', ru: 'Аренда' },
+  rent_short: { en: 'Short-Term Rent', ru: 'Краткосрочная аренда' },
+  rent_long: { en: 'Long-Term Rent', ru: 'Долгосрочная аренда' },
   investment: { en: 'Investment', ru: 'Инвестиция' },
   management: { en: 'Management', ru: 'Управление' },
+  club_deal: { en: 'Club Deal', ru: 'Клубная сделка' },
+  resale: { en: 'Resale', ru: 'Вторичка' },
+  offplan: { en: 'Off-Plan', ru: 'Off-Plan' },
 };
 
 /** Deal statuses (active / on_hold / archived) */
@@ -94,6 +101,12 @@ export interface AgentDeal {
   lost_reason: string | null;
   /** Set when closing won; mirrors crm_custom_options win_reason labels or free text */
   won_reason: string | null;
+  co_agent_id: string | null;
+  co_agent_commission_pct: number | null;
+  campaign_id: string | null;
+  service_line: string | null;
+  expected_close_date: string | null;
+  deal_source_detail: string | null;
   tags: string[];
   priority: number;
   is_vip: boolean;

@@ -27,12 +27,16 @@ interface Props {
   prefilledStage?: string;
 }
 
-const CONTACT_TYPE_BY_DEAL_TYPE = {
+const CONTACT_TYPE_BY_DEAL_TYPE: Record<string, string> = {
   sale: 'buyer',
-  rent: 'tenant',
+  rent_short: 'tenant',
+  rent_long: 'tenant',
   investment: 'investor',
   management: 'landlord',
-} as const;
+  club_deal: 'investor',
+  resale: 'buyer',
+  offplan: 'buyer',
+};
 
 export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContact, prefilledStage = 'new' }: Props) {
   const { language } = useLanguage();

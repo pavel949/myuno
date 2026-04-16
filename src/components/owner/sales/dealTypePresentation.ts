@@ -25,13 +25,22 @@ const TYPE_PRESENTATION: Record<DealType, DealTypePresentation> = {
       ru: 'Бюджет и параметры объекта формируют основу заявки на покупку.',
     },
   },
-  rent: {
+  rent_short: {
     badgeClassName: 'bg-sky-500/10 text-sky-700 border-sky-500/30',
     accentClassName: 'border-l-sky-500',
-    eyebrow: { en: 'Rental request', ru: 'Запрос на аренду' },
+    eyebrow: { en: 'Short-term rental', ru: 'Краткосрочная аренда' },
     emptyNote: {
-      en: 'Bedrooms, area and timing matter most for rental requests.',
-      ru: 'Для аренды важнее всего спальни, район и срок следующего шага.',
+      en: 'Dates, area and bedrooms matter most for short-term rentals.',
+      ru: 'Для краткосрочной аренды важны даты, район и спальни.',
+    },
+  },
+  rent_long: {
+    badgeClassName: 'bg-cyan-500/10 text-cyan-700 border-cyan-500/30',
+    accentClassName: 'border-l-cyan-500',
+    eyebrow: { en: 'Long-term rental', ru: 'Долгосрочная аренда' },
+    emptyNote: {
+      en: 'Bedrooms, area and timing matter most for long-term rentals.',
+      ru: 'Для долгосрочной аренды важнее всего спальни, район и срок.',
     },
   },
   investment: {
@@ -50,6 +59,33 @@ const TYPE_PRESENTATION: Record<DealType, DealTypePresentation> = {
     emptyNote: {
       en: 'Management leads need clear status, next steps and ops notes.',
       ru: 'Для управления важны статус, следующий шаг и операционные заметки.',
+    },
+  },
+  club_deal: {
+    badgeClassName: 'bg-indigo-500/10 text-indigo-700 border-indigo-500/30',
+    accentClassName: 'border-l-indigo-500',
+    eyebrow: { en: 'Club deal', ru: 'Клубная сделка' },
+    emptyNote: {
+      en: 'Club deals involve multiple investors pooling capital.',
+      ru: 'Клубные сделки объединяют нескольких инвесторов.',
+    },
+  },
+  resale: {
+    badgeClassName: 'bg-orange-500/10 text-orange-700 border-orange-500/30',
+    accentClassName: 'border-l-orange-500',
+    eyebrow: { en: 'Resale', ru: 'Вторичка' },
+    emptyNote: {
+      en: 'Resale deals focus on current market value and condition.',
+      ru: 'Сделки вторички ориентированы на рыночную стоимость.',
+    },
+  },
+  offplan: {
+    badgeClassName: 'bg-teal-500/10 text-teal-700 border-teal-500/30',
+    accentClassName: 'border-l-teal-500',
+    eyebrow: { en: 'Off-Plan sale', ru: 'Продажа Off-Plan' },
+    emptyNote: {
+      en: 'Off-plan deals track project, reservation and payment plan.',
+      ru: 'Off-plan сделки привязаны к проекту, брони и графику оплат.',
     },
   },
 };
@@ -97,7 +133,8 @@ export function getDealTypeFacts(deal: AgentDeal, isRu: boolean): DealDisplayFac
   const notesLabel = isRu ? 'Заметки' : 'Notes';
 
   switch (deal.deal_type) {
-    case 'rent':
+    case 'rent_short':
+    case 'rent_long':
       return [
         { key: 'budget', label: budgetLabel, value: formatBudgetRange(deal) || '—' },
         { key: 'beds', label: bedsLabel, value: deal.bedrooms_min ? `${deal.bedrooms_min}+` : '—' },
