@@ -17,7 +17,15 @@ interface PropertyDetailHeaderProps {
 }
 
 export function PropertyDetailHeader({ property, isRu }: PropertyDetailHeaderProps) {
-  const getStatusBadge = (status: string, approvalStatus?: string | null) => {
+  const getStatusBadge = (approvalStatus?: string | null, isActive?: boolean) => {
+    // Derive display state from approval_status + is_active (single source of truth)
+    if (approvalStatus === 'rejected') {
+      return (
+        <Badge variant="destructive" className="gap-1">
+          {isRu ? 'Требует доработки' : 'Needs Revision'}
+        </Badge>
+      );
+    }
     if (approvalStatus === 'pending') {
       return (
         <Badge variant="secondary" className="bg-warning/10 text-warning gap-1">
@@ -26,21 +34,14 @@ export function PropertyDetailHeader({ property, isRu }: PropertyDetailHeaderPro
         </Badge>
       );
     }
-    if (approvalStatus === 'rejected') {
-      return (
-        <Badge variant="destructive" className="gap-1">
-          {isRu ? 'Требует доработки' : 'Needs Revision'}
-        </Badge>
-      );
+    if (approvalStatus === 'approved' && isActive) {
+      return <Badge className="bg-success">{isRu ? 'Активен' : 'Active'}</Badge>;
     }
-    switch (status) {
-      case 'active':
-        return <Badge className="bg-success">{isRu ? 'Активен' : 'Active'}</Badge>;
-      case 'pending':
-        return <Badge variant="secondary">{isRu ? 'На проверке' : 'Pending'}</Badge>;
-      default:
-        return <Badge variant="outline">{isRu ? 'Неактивен' : 'Inactive'}</Badge>;
+    if (approvalStatus === 'approved' && !isActive) {
+      return <Badge variant="outline">{isRu ? 'Скрыт' : 'Hidden'}</Badge>;
     }
+    // Draft / no approval status
+    return <Badge variant="outline">{isRu ? 'Черновик' : 'Draft'}</Badge>;
   };
 
   return (
