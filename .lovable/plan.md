@@ -1,41 +1,35 @@
 
 
-## Problem
+## Diagnosis
 
-When clicking "Sign in", the login button shows a spinner indefinitely. There are **two separate loading states**:
+### 1. Properties not displaying in preview
+All Supabase requests in the sandbox are returning "Failed to fetch" — this is a **sandbox network connectivity issue**, not a code bug. The database has 5+ active rental properties with images and prices. The published site (myuno.app) should display them correctly.
 
-1. **`authLoading`** (from AuthContext) — has a 5-second timeout fallback, works fine
-2. **`isLoading`** (local state in Auth.tsx, line 210) — set to `true` on form submit, only cleared when `signIn()` resolves or rejects. If the Supabase connection is slow or failing (as seen in the network logs — all requests returning "Failed to fetch"), `signInWithPassword` hangs without a timeout, leaving the spinner forever.
+### 2. Font contrast: "Black on blue not visible"
+The app defaults to **light theme** (ThemeContext returns `'light'`), but `:root` in `tokens.css` defines dark theme tokens. When the theme class isn't applied fast enough or certain components use hardcoded/inline dark colors, text can appear dark on a dark background.
 
-The network logs confirm all Supabase REST calls are failing with "Failed to fetch" — a transient sandbox connectivity issue. But even in production, a slow network would cause the same infinite spinner.
+Specific contrast risks found:
+- `HeroBlock` search input uses `hsl(var(--bg-elevated))` background with hardcoded `border: '1px solid hsl(0 0% 100% / 0.07)'` — this is dark-mode-only styling baked into inline styles
+- `FeaturedPropertiesCarousel` cards use inline `style={{ background: 'hsl(var(--card))', border: '1px solid hsl(0 0% 100% / 0.07)' }}` — hardcoded white-alpha borders assume dark mode
+- `WelcomeHero` hero block uses CSS classes `hero-bg` and `hero-dots` which have proper light/dark variants, but the search bar inside also has inline dark-theme borders
 
 ## Plan
 
-1. **Add a timeout to login and signup operations in `Auth.tsx`** — wrap `signIn()` and `signUp()` calls with a `Promise.race` against a 15-second timeout. If the timeout fires, show a toast error ("Connection timed out, please try again") and reset `isLoading` to `false`.
+### Step 1: Fix hardcoded dark-mode inline styles
+Replace all hardcoded `hsl(0 0% 100% / 0.07)` border colors in these components with the semantic `hsl(var(--border))` token, which adapts to light/dark mode:
+- `src/components/home/HeroBlock.tsx` — search input border
+- `src/components/home/WelcomeHero.tsx` — search bar border
+- `src/components/home/FeaturedPropertiesCarousel.tsx` — property card borders
 
-2. **Add a timeout helper** — a small `withTimeout(promise, ms)` utility at the top of Auth.tsx that rejects after the specified duration.
+### Step 2: Verify text color classes
+Ensure all text in these components uses semantic Tailwind classes (`text-foreground`, `text-muted-foreground`) rather than any hardcoded color values. Current code mostly does this correctly.
 
-### Technical detail
+### Step 3: Verify on published site
+Recommend testing on the published myuno.app where Supabase connectivity works, to confirm properties load and contrast is correct.
 
-```typescript
-// In Auth.tsx
-function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
-  return Promise.race([
-    promise,
-    new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error('TIMEOUT')), ms)
-    ),
-  ]);
-}
-
-// In handleLogin:
-const { error } = await withTimeout(signIn(email, password), 15000);
-
-// In catch block, detect timeout:
-if (err.message === 'TIMEOUT') {
-  toast.error('Connection timed out. Please check your internet and try again.');
-}
-```
-
-No database changes needed. Single file edit (`src/pages/Auth.tsx`).
+## Technical Details
+- **Files to edit**: `HeroBlock.tsx`, `WelcomeHero.tsx`, `FeaturedPropertiesCarousel.tsx`
+- **Change type**: Replace ~5 inline `hsl(0 0% 100% / 0.07)` values with `hsl(var(--border))`
+- **Risk**: Minimal — purely swapping hardcoded values for semantic tokens
+- **No DB changes needed**
 
