@@ -16,7 +16,14 @@ export const DEAL_STAGE_TASK_PLAYBOOK: Record<
     negotiation: ['negotiation', 'contract', 'payment', 'document'],
     contract: ['contract', 'payment', 'document', 'follow_up'],
   },
-  rent: {
+  rent_short: {
+    new: ['call', 'email', 'follow_up'],
+    contacted: ['call', 'meeting', 'viewing'],
+    showing: ['viewing', 'follow_up'],
+    negotiation: ['reservation', 'payment', 'document'],
+    contract: ['contract', 'check_in', 'payment'],
+  },
+  rent_long: {
     new: ['call', 'email', 'follow_up'],
     contacted: ['kyc_docs', 'call', 'meeting'],
     showing: ['viewing', 'follow_up'],
@@ -36,6 +43,27 @@ export const DEAL_STAGE_TASK_PLAYBOOK: Record<
     showing: ['onboarding', 'document', 'send'],
     negotiation: ['negotiation', 'contract', 'renewal_call'],
     contract: ['renewal_call', 'payment', 'contract'],
+  },
+  club_deal: {
+    new: ['call', 'research', 'follow_up'],
+    contacted: ['meeting', 'presentation', 'send'],
+    showing: ['viewing', 'follow_up', 'document'],
+    negotiation: ['negotiation', 'payment', 'document'],
+    contract: ['contract', 'payment', 'installment_reminder'],
+  },
+  resale: {
+    new: ['call', 'follow_up', 'email'],
+    contacted: ['call', 'meeting', 'viewing'],
+    showing: ['viewing', 'follow_up', 'negotiation'],
+    negotiation: ['negotiation', 'contract', 'document'],
+    contract: ['contract', 'payment', 'document'],
+  },
+  offplan: {
+    new: ['call', 'research', 'follow_up'],
+    contacted: ['meeting', 'presentation', 'viewing'],
+    showing: ['viewing', 'follow_up', 'reservation'],
+    negotiation: ['reservation', 'negotiation', 'payment', 'document'],
+    contract: ['contract', 'installment_reminder', 'payment'],
   },
 };
 

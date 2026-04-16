@@ -78,13 +78,18 @@ function mapDealType(raw: string, fallback: DealType): DealType {
   const dict: Record<string, DealType> = {
     sale: 'sale',
     продажа: 'sale',
-    rent: 'rent',
-    rental: 'rent',
-    аренда: 'rent',
+    rent: 'rent_long',
+    rental: 'rent_long',
+    аренда: 'rent_long',
+    rent_short: 'rent_short',
+    rent_long: 'rent_long',
     investment: 'investment',
     инвестиция: 'investment',
     management: 'management',
     управление: 'management',
+    club_deal: 'club_deal',
+    resale: 'resale',
+    offplan: 'offplan',
   };
   return dict[key] || fallback;
 }
