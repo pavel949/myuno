@@ -13,7 +13,6 @@ export type {
   VendorSalon,
   VendorVehicle,
   VendorProduct,
-  VendorProperty,
 } from '@/types/verticals';
 
 // Re-export hooks that have extra types
