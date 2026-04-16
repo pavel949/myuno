@@ -1,4 +1,5 @@
-// jsPDF is loaded lazily at function call sites
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { loadCyrillicFont } from './pdfFonts';
 import type { ReportData } from '@/hooks/usePropertyReports';
 
