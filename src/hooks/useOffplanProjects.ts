@@ -145,9 +145,6 @@ export function useOffplanProjects(filters?: OffplanFilters) {
         };
       };
 
-      // 1) Rich read (main app DB). Do NOT select offplan_catalog in the primary query:
-      // some production DBs have not applied the offplan_catalog migration yet; selecting a missing
-      // column makes the whole PostgREST request fail → empty UI.
       const richSelect = `
           id,
           name_en,
@@ -172,6 +169,12 @@ export function useOffplanProjects(filters?: OffplanFilters) {
           units_available,
           units_sold,
           amenities,
+          offplan_catalog,
+          featured_rank,
+          featured_label,
+          description_summary,
+          yield_estimate,
+          source_url,
           developers (
             id,
             name_en,
