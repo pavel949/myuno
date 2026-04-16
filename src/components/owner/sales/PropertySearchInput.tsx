@@ -68,8 +68,8 @@ export function PropertySearchInput({ companyId, onSelect, onClear, selectedProp
   if (selectedProperty) {
     return (
       <div className="flex items-center gap-2 p-2 rounded-lg border bg-primary/5">
-        {selectedProperty.cover_image_url ? (
-          <img src={selectedProperty.cover_image_url} alt="" className="w-8 h-8 rounded object-cover shrink-0" />
+        {selectedProperty.cover_image ? (
+          <img src={selectedProperty.cover_image} alt="" className="w-8 h-8 rounded object-cover shrink-0" />
         ) : (
           <Building2 className="h-4 w-4 text-primary shrink-0" />
         )}
@@ -104,8 +104,8 @@ export function PropertySearchInput({ companyId, onSelect, onClear, selectedProp
               onClick={() => { onSelect(p); setQuery(''); setOpen(false); }}
               className="w-full text-left px-3 py-2 hover:bg-accent text-sm flex items-center gap-2"
             >
-              {p.cover_image_url ? (
-                <img src={p.cover_image_url} alt="" className="w-8 h-8 rounded object-cover shrink-0" />
+              {p.cover_image ? (
+                <img src={p.cover_image} alt="" className="w-8 h-8 rounded object-cover shrink-0" />
               ) : (
                 <div className="w-8 h-8 rounded bg-muted flex items-center justify-center shrink-0">
                   <Building2 className="h-4 w-4 text-muted-foreground" />
