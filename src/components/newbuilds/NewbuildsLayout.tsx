@@ -15,8 +15,7 @@ interface NewbuildsLayoutProps {
 }
 
 const NAV_ITEMS = [
-  { path: '/newbuilds', label: 'Главная', icon: TrendingUp, exact: true },
-  { path: '/newbuilds/projects', label: 'Проекты', icon: Building2 },
+  { path: '/newbuilds', label: 'Каталог', icon: Building2, exact: true },
   { path: '/newbuilds/map', label: 'Карта', icon: Map },
   { path: '/newbuilds/areas', label: 'Районы', icon: Compass },
   { path: '/newbuilds/developers', label: 'Девелоперы', icon: Users },
