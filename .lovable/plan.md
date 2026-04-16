@@ -1,128 +1,78 @@
 
 
-# Переработка /newbuilds — Каталог по референсу OFFPLAN
+# Реализация каталога + импорт 122 проектов + Featured система
 
-## Что делаем
+## Что нужно сделать
 
-Полная замена `/newbuilds` на каталог в стиле referenceного сайта offplan-mu.vercel.app: sidebar с 11 фильтрами, rich-карточки с рейтингом/рекомендацией/yield/tags/Inquiry+WhatsApp, stats header, sub-navigation.
+### 1. Применить миграцию `offplan_catalog`
+Колонка `offplan_catalog JSONB` не существует в production DB. Без неё фильтры, BUY/WATCH/AVOID, beach, ownership, segment — всё пустое.
 
-## Текущие проблемы
-- Landing page с огромным hero вместо каталога
-- Карточки бедные (фото + название + цена + прогресс)
-- 3 фильтра вместо 11
-- Нет Inquiry/WhatsApp на карточках
-- `offplan_catalog` JSONB (122 проекта с rich данными) не используется на `/newbuilds`
-- Нет мини-лендингов для проектов
+**SQL:**
+```sql
+ALTER TABLE public.property_projects
+ADD COLUMN IF NOT EXISTS offplan_catalog jsonb;
 
----
+CREATE INDEX IF NOT EXISTS idx_property_projects_offplan_rec
+  ON public.property_projects ((offplan_catalog->>'rec'))
+  WHERE offplan_catalog IS NOT NULL;
 
-## Phase 1 — Единый каталог `/newbuilds`
-
-**Полная замена `NewbuildsLanding.tsx`** на каталог со структурой:
-
-```text
-┌──────────────────────────────────────────────────────────┐
-│ HEADER: Logo · 122 PROJECTS · ฿71B · ~6.42% AVG YIELD  │
-├──────────────────────────────────────────────────────────┤
-│ Tabs: ALL PROJECTS | CALCULATOR | DEVELOPERS | MAP | ...│
-├──────────┬───────────────────────────────────────────────┤
-│ SIDEBAR  │  Stats: 122 verified · 87 BUY · 6 AVOID     │
-│ Sort     │  ⚠ Disclaimer                                │
-│ Search   │                                              │
-│ Risk Tier│  CARD GRID (4 columns desktop)               │
-│ Segment  │  ┌─────────┐ ┌─────────┐ ┌─────────┐        │
-│ Type     │  │9.5 #4   │ │8.2 #16  │ │9.1 #1   │        │
-│ Zone     │  │Title    │ │Title    │ │Title    │        │
-│ Status   │  │Dev name │ │Dev name │ │Dev name │        │
-│ Year     │  │Tier·Date│ │Tier·Date│ │Tier·Date│        │
-│ Beach    │  │฿ · $ · %│ │฿ · $ · %│ │฿ · $ · %│        │
-│ Ownership│  │Tags row │ │Tags row │ │Tags row │        │
-│ Mgmt     │  │Zone·Unit│ │Zone·Unit│ │Zone·Unit│        │
-│ Focus    │  │Descript │ │Descript │ │Descript │        │
-│ Developer│  │Source   │ │Source   │ │Source   │        │
-│          │  │Segment  │ │Segment  │ │Segment  │        │
-│          │  │[Inq][WA]│ │[Inq][WA]│ │[Inq][WA]│        │
-│          │  └─────────┘ └─────────┘ └─────────┘        │
-└──────────┴───────────────────────────────────────────────┘
+CREATE INDEX IF NOT EXISTS idx_property_projects_offplan_legacy
+  ON public.property_projects ((offplan_catalog->>'legacy_id'))
+  WHERE offplan_catalog ? 'legacy_id';
 ```
 
-**Данные**: Переиспользуем `useOffplanProjects` (уже загружает `offplan_catalog` JSONB) + фильтры из `src/lib/offplan/filters.ts` (`applyOffplanUiFilters`, `collectFacetOptions`, `countByRec`).
+### 2. Импорт 122 проектов из `projects.json`
+Файл `data/offplan-seed/projects.json` уже содержит 122 проекта с rich данными (rec, seg, zone, beach, own, mgmt, yield, rating, risk, desc, tags).
 
-### Новый файл: `CatalogProjectCard.tsx`
-Rich-карточка по образцу референса:
-- Rating badge (top-right) + Rank (#1, #4)
-- BUY/WATCH/AVOID цветной индикатор + Risk Tier (Tier 1 Low / Tier 2 Medium)
-- NEW / HOT / SET/SGX badges
-- Price THB + USD (rate ~35) + Yield estimate
-- Tags row: beach distance, ownership type, management, focus, bedrooms
-- Zone + Units + ฿/sqm + Status
-- Description excerpt (2-3 строки из `description_en` или offplan_catalog)
-- Source link
-- Segment badge (ULTRA-LUX & BRANDED / INVESTMENT CONDO / etc.)
-- **Inquiry** + **WhatsApp** кнопки
+**Подход:** Написать скрипт-миграцию (Edge Function или exec script), который:
+- Читает `projects.json`
+- Для каждого проекта: ищет по `name_en` совпадение в существующих 157 проектах
+- Если совпадение — UPDATE с `offplan_catalog` JSONB + обновление `price_from`, `roi_projected`, `muuno_score`, `risk_level`, `description_en`, `description_summary`, `yield_estimate`, `source_url`
+- Если нет — INSERT новый проект
+- Использует логику из `scripts/import-offplan-catalog.mjs` (buildRow, mapStkToProjectStatus, etc.)
 
-### Новый файл: `CatalogSidebar.tsx`
-11 dropdown-фильтров, использующих `OffplanUiFilterState`:
-- Sort by (Rating, Price ↑↓, Completion, Yield, Risk, Beach)
-- Search (text input)
-- Risk Tier, Segment, Type, Zone, Status, Completion year, Beach, Ownership, Management, Focus, Developer
+Я запущу импорт через `code--exec` с Supabase service role key (или через insert tool для batch upsert).
 
-### Новый файл: `CatalogInquirySheet.tsx`
-Sheet с компактной лид-формой (имя + телефон + email). Сохранение в `nb_leads` с `source = 'catalog_card'`.
+### 3. Featured система — выделение лучших проектов
+Колонка `is_featured` уже существует. Улучшения:
 
----
+**DB:**
+- Добавить `featured_rank INTEGER` — позиция в Featured (1, 2, 3...)  
+- Добавить `featured_label TEXT` — кастомный текст ("Editor's Pick", "Best ROI", "Top Scarcity")
 
-## Phase 2 — DB migration
+**UI на каталоге:**
+- Featured-проекты отображаются первыми (уже сортируются через `featured_score`)
+- Добавить визуальный бейдж "⭐ FEATURED" на карточке + золотой border
+- Отдельная секция "Featured Projects" над основным гридом (горизонтальный скролл, крупные карточки)
 
-Добавление 6 колонок в `property_projects`:
-- `description_summary TEXT` — excerpt для карточки
-- `yield_estimate TEXT` — "5-7%"
-- `price_usd NUMERIC` — цена в USD
-- `price_per_sqm NUMERIC`
-- `source_url TEXT` — ссылка на источник
-- `landing_enabled BOOLEAN DEFAULT false`
+**Admin UI:**
+- На странице `/admin` или в деталях проекта — toggle `is_featured` + input для `featured_rank` и `featured_label`
+- Quick action: кнопка "Feature" прямо в списке проектов
 
----
+### 4. Обновить `useOffplanProjects` — убрать workaround
+Сейчас хук делает 2 запроса (основной + отдельный для `offplan_catalog`) из-за того что колонка могла не существовать. После миграции — включить `offplan_catalog` в основной select.
 
-## Phase 3 — Mini Landing `/project/:slug`
-
-Новый файл: `ProjectMiniLanding.tsx` — параметрический лендинг (Peylaa-style):
-- Fixed header с "← Back to catalogue" + Inquiry CTA
-- Gallery (из `gallery_urls`)
-- Summary + Location cards
-- Units & Pricing section (из `project_units`)
-- Lead form
-- Маршрут: `/project/:slug`
-
----
-
-## Phase 4 — Routes & Navigation
-
-- `/newbuilds` → новый каталог (замена Landing)
-- `/newbuilds/projects` → redirect на `/newbuilds`
-- `/project/:slug` → mini landing (новый route)
-- Обновить `NewbuildsLayout` nav: убрать "Главная"/"Проекты", добавить "Market Analytics", "Shortlist", "Services"
-- Добавить `APP_ROUTES.PROJECT_LANDING`
-- Обновить `AnimatedRoutes.tsx`
+### 5. Обновить карточку `CatalogProjectCard`
+- Добавить Featured badge (золотой border + "⭐ FEATURED" / custom label)
+- Показывать `description_summary` или первые 2 строки `description_en`
+- Показывать `source_url` как ссылку
 
 ---
 
 ## Файлы
 
-**Новые (4):**
-- `src/components/newbuilds/CatalogProjectCard.tsx`
-- `src/components/newbuilds/CatalogSidebar.tsx`
-- `src/components/newbuilds/CatalogInquirySheet.tsx`
-- `src/pages/newbuilds/ProjectMiniLanding.tsx`
+**Миграция (1 SQL):**
+- Добавить `offplan_catalog JSONB` + индексы
+- Добавить `featured_rank INTEGER`, `featured_label TEXT`
 
-**Переписать (1):**
-- `src/pages/newbuilds/NewbuildsLanding.tsx` → полная замена на каталог
+**Скрипт импорта (exec):**
+- Чтение `projects.json`, batch upsert в `property_projects` через Supabase API
 
-**Редактировать (4):**
-- `src/components/newbuilds/NewbuildsLayout.tsx` — обновить nav items
-- `src/components/layout/AnimatedRoutes.tsx` — добавить `/project/:slug`
-- `src/lib/config/routes.ts` — добавить `PROJECT_LANDING`
-- `src/hooks/useOffplanProjects.ts` — добавить новые колонки в select/mapping
+**Редактировать:**
+- `src/hooks/useOffplanProjects.ts` — включить `offplan_catalog` в основной select, убрать двойной запрос
+- `src/components/newbuilds/CatalogProjectCard.tsx` — Featured badge, description excerpt, source link
+- `src/pages/newbuilds/NewbuildsLanding.tsx` — Featured секция сверху
 
-**Миграция:** 1 SQL (6 колонок в property_projects)
+**Новые:**
+- Нет новых файлов — всё в существующих компонентах
 
