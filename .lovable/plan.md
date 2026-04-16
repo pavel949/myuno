@@ -1,64 +1,118 @@
 
 
-# Fix: Trust Stats Showing "0" and Contrast Issues
+# Аудит: Оптимизация размера и сложности приложения
 
-## Problem
+## Текущее состояние
 
-The "ПОЧЕМУ MYUNO" section shows "0+" for all stats because:
+| Метрика | Значение |
+|---------|----------|
+| Исходные файлы | 1,939 (.ts/.tsx) |
+| Строк кода | 425,106 |
+| Страницы | 431 |
+| Компоненты | 930 |
+| Хуки | 356 |
+| Контексты | 12 |
+| Lazy-импорты (pageRegistry) | 416 |
+| Маршруты (AnimatedRoutes) | ~518 |
+| Main bundle (gzip) | 364 KB |
+| Dist total | 30 MB |
+| Precache entries (SW) | 2,157 (14 MB) |
 
-1. **Properties & Providers**: The `head: true` count query works for anon users (public RLS policies exist), BUT the query for properties uses `.eq('is_active', true)` without filtering by `approval_status = 'approved'` — this shouldn't cause 0 though, since the RLS policy adds that filter. The real issue is likely **the sandbox network failure** returning null counts.
+---
 
-2. **Bookings** (`property_bookings`): All SELECT policies require `auth.uid()`. Anonymous visitors **always get 0** — this is a real RLS issue. The count of 585 bookings is invisible to unauthenticated users.
+## Категория 1: Тяжёлые зависимости в бандле (~25% экономии бандла)
 
-3. **Hardcoded dark borders**: Lines 44-45, 57, 79 still use `hsl(0 0% 100% / 0.07)`.
+### 1A. ExcelJS (918 KB / 270 KB gzip) — в main bundle
+Используется в 10 файлах (admin import, export, AI insights). Не нужна при загрузке приложения.
+**Действие:** Вынести все `import exceljs` в `await import('exceljs')` внутри обработчиков кнопок. Экономия ~270 KB gzip из начальной загрузки.
 
-## Plan
+### 1B. jsPDF (380 KB) + html2canvas (198 KB)
+Используются в 7 файлах (PDF brochures, invoices, reports). Уже частично вынесены.
+**Действие:** Убедиться, что все импорты динамические. Если нет — перевести на `await import()`.
 
-### Step 1: Fix booking count for anonymous users
+### 1C. Recharts/charts vendor chunk (424 KB)
+Графики нужны только в Dashboard и Admin.
+**Действие:** Проверить, не попадает ли в eager chunk. Если да — изолировать.
 
-Create a **database function** (security definer) that returns aggregate counts without exposing row data. This avoids granting anon SELECT on `property_bookings`:
+---
 
-```sql
-CREATE OR REPLACE FUNCTION public.get_trust_stats()
-RETURNS JSON
-LANGUAGE sql
-STABLE
-SECURITY DEFINER
-SET search_path = public
-AS $$
-  SELECT json_build_object(
-    'properties', (SELECT count(*) FROM properties WHERE is_active = true AND approval_status = 'approved'),
-    'bookings', (SELECT count(*) FROM property_bookings),
-    'providers', (SELECT count(*) FROM providers WHERE is_active = true)
-  );
-$$;
-```
+## Категория 2: Дублирование кода (~1,200 строк vendor hooks)
 
-### Step 2: Update TrustStats component
+### 2A. 19 vendor hooks-обёрток
+`useVendorFlowers`, `useVendorSalons`, `useVendorYachts`... — все делают одно и то же: вызывают `useVerticalCRUD` с типом + переименовывают `items → shops/salons/yachts`. 1,209 строк.
 
-Replace the 3 separate Supabase queries with a single RPC call:
+Уже есть **`useVerticalCRUD`** — универсальный хук. Обёртки добавляют только интерфейс типа.
 
-```typescript
-const { data: stats } = useQuery({
-  queryKey: ['trust-stats-home'],
-  queryFn: async () => {
-    const { data, error } = await supabase.rpc('get_trust_stats');
-    if (error) throw error;
-    return data as { properties: number; bookings: number; providers: number };
-  },
-  staleTime: 10 * 60 * 1000,
-});
-```
+**Действие:** Перенести интерфейсы в `src/types/verticals/`, удалить 19 обёрток, использовать `useVerticalCRUD<VendorSalon>('beauty')` напрямую. Экономия: 19 файлов, ~1,000 строк.
 
-### Step 3: Fix hardcoded border colors
+### 2B. Дублирование Notification-компонентов
+7 хуков уведомлений + 2 страницы настроек (`NotificationSettings` + `NotificationSettingsEnhanced`) — вероятно одна из них устарела.
 
-Replace all `hsl(0 0% 100% / 0.07)` in TrustStats.tsx with `hsl(var(--border))`.
+**Действие:** Проверить, используется ли `NotificationSettings.tsx` (не Enhanced). Если нет — удалить.
 
-## Files Changed
-- **Migration**: New `get_trust_stats()` RPC function
-- **`src/components/home/TrustStats.tsx`**: Switch to RPC + fix border tokens
+---
 
-## Risk
-- Zero risk — security definer function only returns aggregate counts, no row data exposed
-- Border fix is purely cosmetic token swap
+## Категория 3: Раздутые конфиг-файлы (~3,000 строк)
+
+### 3A. filterRegistry.ts (1,760 строк)
+Начинается с пустых массивов (`propertyTypeOptions: FilterOption[] = []`) — legacy заглушки для 20 фильтров, которые теперь грузятся динамически.
+
+**Действие:** Удалить пустые legacy-экспорты, оставить только `getXxxFilterConfig()` функции. Экономия: ~800 строк.
+
+### 3B. verticalCategorySchemas.ts (1,319 строк)
+Большая статическая схема категорий. Возможно частично дублирует `taxonomies/`.
+
+**Действие:** Проверить пересечение с taxonomy hub. Если данные одинаковые — консолидировать.
+
+### 3C. homeServiceFunctions.ts (827 строк)
+Статический конфиг функций домашних услуг.
+
+**Действие:** Проверить, используется ли напрямую или через taxonomy. Если через taxonomy — удалить.
+
+---
+
+## Категория 4: Структурная сложность
+
+### 4A. 72 admin-страницы + 83 owner-страницы
+Многие — тонкие обёртки вокруг одного CRUD-паттерна (таблица + фильтры + модал создания). Например: `AdminBabysitters`, `AdminCleaning`, `AdminClinics`, `AdminEducation`, `AdminEvents`, `AdminExperiences`, `AdminFlowers`, `AdminGyms` — все делают одно и то же для разных вертикалей.
+
+**Действие (фаза 2):** Создать `AdminVerticalPage` — generic страницу, которая принимает `verticalId` и рендерит таблицу + CRUD. Заменит ~15-20 admin-страниц. Это крупная задача, но самая большая экономия (~5,000-8,000 строк).
+
+### 4B. 12 контекстов в корне
+`LifeSituationContext`, `StorefrontContext`, `PWAInstallContext` — используются в узких сценариях, но загружаются для всех.
+
+**Действие:** Перенести редко используемые провайдеры (`StorefrontContext`, `LifeSituationContext`) внутрь маршрутов, где они нужны.
+
+### 4C. Service Worker precache: 2,157 записей (14 MB)
+Огромный precache замедляет первую установку PWA.
+
+**Действие:** Добавить `globIgnores` в workbox config для admin/owner/vendor chunks — они не нужны офлайн.
+
+---
+
+## Категория 5: Мёртвый/устаревший код
+
+### 5A. Redirect-хелперы в AnimatedRoutes
+6 компонентов-редиректов (`TransportIdRedirect`, `TourRedirect`, etc.) — legacy маршруты. Если миграция завершена, можно удалить.
+
+### 5B. Двойные страницы настроек
+`NotificationSettings` vs `NotificationSettingsEnhanced`, `OwnerAccountSettings` vs `OwnerPortalSettingsPage` — возможное дублирование.
+
+---
+
+## Приоритизированный план действий
+
+| # | Действие | Экономия | Риск | Сложность |
+|---|----------|----------|------|-----------|
+| 1 | Динамический import ExcelJS | 270 KB gzip | Нулевой | Низкая |
+| 2 | Удалить 19 vendor hook-обёрток | 19 файлов, 1,200 строк | Низкий | Средняя |
+| 3 | Очистить filterRegistry legacy | ~800 строк | Низкий | Низкая |
+| 4 | Сократить SW precache (globIgnores) | 8+ MB precache | Нулевой | Низкая |
+| 5 | Удалить дубли Settings/Notifications | 2-3 файла | Низкий | Низкая |
+| 6 | Lazy-загрузка StorefrontContext | Меньше JS на старте | Низкий | Средняя |
+| 7 | Generic AdminVerticalPage (фаза 2) | 15-20 страниц, ~6,000 строк | Средний | Высокая |
+
+**Рекомендация:** Начать с пунктов 1-5 (безопасные, быстрые, ~30% снижения нагрузки на бандл и кодовую базу). Пункты 6-7 — второй этап.
+
+Подтвердите, и я начну с пунктов 1-5.
 
