@@ -38,7 +38,7 @@ export function FeaturedPropertiesCarousel() {
   const navigate = useNavigate();
   const isRu = language === 'ru';
 
-  const { data: properties = [], isLoading } = useQuery({
+  const { data: properties = [], isLoading, isError, refetch } = useQuery({
     queryKey: ['featured-properties-home'],
     queryFn: async () => {
       const { data, error } = await supabase
