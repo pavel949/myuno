@@ -315,7 +315,7 @@ const navigate = useNavigate();
 
       {/* Property search */}
       <div>
-        <Label>{isRu ? 'Привязать объект' : 'Link Property'}</Label>
+        <Label>{isRu ? 'Привязать объект / проект' : 'Link Property / Project'}</Label>
         <PropertySearchInput
           companyId={companyId}
           selectedProperty={selectedProperty}
@@ -333,6 +333,7 @@ const navigate = useNavigate();
           }}
           onClear={() => setSelectedProperty(null)}
           isRu={isRu}
+          includeProjects
         />
       </div>
 
