@@ -16,13 +16,13 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, Phone, Mail, ChevronRight, Filter, UserCircle, ChevronLeft, Upload, Lock, Star, MessageSquare, DollarSign, Briefcase, Clock, ArrowUpDown, LayoutGrid, List, Users } from 'lucide-react';
+import { Plus, Search, Phone, Mail, ChevronRight, Filter, UserCircle, ChevronLeft, Upload, Lock, Star, MessageSquare, DollarSign, Briefcase, Clock, ArrowUpDown, LayoutGrid, List, Users, Shield } from 'lucide-react';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { useDuplicatesQuery } from '@/hooks/useCrmDuplicates';
 import { CreateContactSheet } from '@/components/owner/contacts/CreateContactSheet';
 import { ContactExportButton } from '@/components/owner/contacts/ContactExportButton';
 import { cn } from '@/lib/utils';
-import { CRM_ROLES, CRM_ROLE_LABELS, type CrmRole } from '@/types/contact';
+import { CRM_ROLES, CRM_ROLE_LABELS, type CrmRole, CONTACT_SEGMENTS, CONTACT_SEGMENT_LABELS, type ContactSegment, HNW_TIERS, HNW_TIER_LABELS, type HnwTier } from '@/types/contact';
 
 const PAGE_SIZE = 24;
 
@@ -134,10 +134,21 @@ function ContactCard({
             </Badge>
           )}
           <ContactTagsDisplay tags={contact.tags || []} companyId={contact.company_id} max={2} />
+          {/* Segment badges */}
+          {(contact.segment ?? []).slice(0, 2).map(seg => (
+            <Badge key={seg} variant="outline" className="text-[9px] h-4 px-1.5 border bg-info/10 text-info border-info/30">
+              {isRu ? CONTACT_SEGMENT_LABELS[seg as ContactSegment]?.ru : CONTACT_SEGMENT_LABELS[seg as ContactSegment]?.en || seg}
+            </Badge>
+          ))}
         </div>
 
-        {/* Contact info */}
+        {/* HNW tier + Contact info */}
         <div className="mt-2 space-y-1">
+          {contact.hnw_tier && contact.hnw_tier !== 'standard' && (
+            <Badge className={cn('text-[9px] h-4 px-1.5', HNW_TIER_LABELS[contact.hnw_tier as HnwTier]?.color || '')}>
+              {HNW_TIER_LABELS[contact.hnw_tier as HnwTier]?.en || contact.hnw_tier}
+            </Badge>
+          )}
           {contact.email && (
             <p className="text-xs text-muted-foreground truncate flex items-center gap-1.5">
               <Mail className="h-3 w-3 shrink-0" />
