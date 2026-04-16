@@ -114,6 +114,15 @@ export default defineConfig(({ mode }) => {
         injectManifest: {
           // Precache ONLY hashed assets — NO html
           globPatterns: ['**/*.{js,css,ico,png,svg,woff2}'],
+          // Exclude admin/owner/vendor chunks from precache — not needed offline
+          globIgnores: [
+            '**/Admin*.js',
+            '**/Owner*.js',
+            '**/Vendor*.js',
+            '**/MC*.js',
+            '**/CRM*.js',
+            '**/agent*.js',
+          ],
           // Maximum file size for precache (2MB)
           maximumFileSizeToCacheInBytes: 2 * 1024 * 1024,
         },
