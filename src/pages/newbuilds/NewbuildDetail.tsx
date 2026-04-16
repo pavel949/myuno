@@ -18,15 +18,21 @@ import { NbTermsTab } from '@/components/newbuilds/tabs/NbTermsTab';
 import { NbUpdatesTab } from '@/components/newbuilds/tabs/NbUpdatesTab';
 import { NbReportsTab } from '@/components/newbuilds/tabs/NbReportsTab';
 import { NbDeveloperTab } from '@/components/newbuilds/tabs/NbDeveloperTab';
+import { ProjectUnitsGrid } from '@/components/newbuilds/ProjectUnitsGrid';
+import { ProjectDealsTab } from '@/components/newbuilds/ProjectDealsTab';
+import { ProjectMarketingTab } from '@/components/newbuilds/ProjectMarketingTab';
 import { useNewbuildProject } from '@/hooks/useNewbuildProjects';
 import { Skeleton } from '@/components/ui/skeleton';
 import { APP_ROUTES } from '@/lib/config/routes';
 
 const TABS = [
   { key: 'overview', label: 'Обзор' },
+  { key: 'units', label: 'Юниты' },
   { key: 'inventory', label: 'Инвентарь' },
   { key: 'plans', label: 'Планировки' },
   { key: 'terms', label: 'Условия' },
+  { key: 'marketing', label: 'Маркетинг' },
+  { key: 'deals', label: 'Сделки' },
   { key: 'updates', label: 'Обновления' },
   { key: 'reports', label: 'Отчёты' },
   { key: 'developer', label: 'О девелопере' },
@@ -235,8 +241,26 @@ export default function NewbuildDetail() {
               </div>
             )}
 
+            {activeTab === 'units' && (
+              <ProjectUnitsGrid projectId={project.id} />
+            )}
+
             {activeTab === 'inventory' && (
               <NbInventoryTab projectId={project.id} developerId={project.developer_id || undefined} />
+            )}
+
+            {activeTab === 'marketing' && (
+              <ProjectMarketingTab
+                commissionPct={project.commission_pct}
+                paymentPlan={project.payment_plan}
+                marketingMaterials={project.marketing_materials}
+                ownershipTypes={project.ownership_types}
+                exclusive={project.exclusive}
+              />
+            )}
+
+            {activeTab === 'deals' && (
+              <ProjectDealsTab projectId={project.id} />
             )}
 
             {activeTab === 'plans' && (
