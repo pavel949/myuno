@@ -92,7 +92,7 @@ function PersonaSwitcher({ isRu }: { isRu: boolean }) {
               style={{
                 background: isActive
                   ? PERSONA_GRADIENTS[p]
-                  : 'hsl(0 0% 100% / 0.06)',
+                  : 'hsl(var(--muted))',
                 backdropFilter: isActive ? 'none' : 'blur(8px)',
               }}
             >

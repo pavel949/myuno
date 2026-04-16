@@ -132,7 +132,7 @@ export function FeaturedPropertiesCarousel() {
               className="w-[220px] h-[280px] md:w-[260px] md:h-[320px] rounded-[var(--radius-lg)] overflow-hidden text-left group transition-all duration-200 hover:-translate-y-1 active:scale-[0.97]"
               style={{
                 background: 'hsl(var(--card))',
-                border: '1px solid hsl(0 0% 100% / 0.07)',
+                border: '1px solid hsl(var(--border))',
                 boxShadow: 'var(--shadow-card)',
                 animationDelay: `${0.25 + i * 0.05}s`,
               }}
