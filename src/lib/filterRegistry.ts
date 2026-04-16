@@ -12,74 +12,8 @@ export { usePropertyFilterOptions, useTransportFilterOptions, useHomeServiceFilt
 
 
 // ═══════════════ PropertyFilters ═══════════════
-/**
- * Property Filters - Database-Driven
- * Uses useDynamicFilterOptions for all taxonomy data
- */
-
-
-// Re-export the dynamic hook for backwards compatibility
-
-// Legacy exports for components still using static imports
-// These now proxy to the dynamic hook
-export const propertyTypeOptions: FilterOption[] = [];
-export const bedroomOptions: FilterOption[] = [];
-export const propertyAmenityOptions: FilterOption[] = [];
-export const phuketDistrictOptions: FilterOption[] = [];
-export const listingTypeOptions: FilterOption[] = [];
-
-// Export a function to get the filter config (for components that need static config)
-export function getPropertyFilterConfig(): FilterConfig {
-  return {
-    sections: [
-      {
-        id: 'priceLevel',
-        titleEn: 'Price Level',
-        titleRu: 'Уровень цен',
-        type: 'price-level',
-        options: [],
-      },
-      {
-        id: 'listingType',
-        titleEn: 'Listing Type',
-        titleRu: 'Тип объявления',
-        type: 'single',
-        options: [],
-      },
-      {
-        id: 'propertyType',
-        titleEn: 'Property Type',
-        titleRu: 'Тип недвижимости',
-        type: 'multi',
-        options: [],
-      },
-      {
-        id: 'bedrooms',
-        titleEn: 'Bedrooms',
-        titleRu: 'Спальни',
-        type: 'multi',
-        options: [],
-      },
-      {
-        id: 'district',
-        titleEn: 'District',
-        titleRu: 'Район',
-        type: 'multi',
-        options: [],
-      },
-      {
-        id: 'amenities',
-        titleEn: 'Amenities',
-        titleRu: 'Удобства',
-        type: 'multi',
-        options: [],
-      },
-    ],
-  };
-}
-
-// For backwards compatibility - use the hook instead
-export const propertyFilterConfig = getPropertyFilterConfig();
+// Property filters are fully database-driven via usePropertyFilterOptions hook.
+// No static config needed — use the hook directly.
 
 // ═══════════════ RestaurantFilters ═══════════════
 // Restaurant-specific filter configuration
@@ -302,13 +236,6 @@ export const beautyAvailabilityOptions: FilterOption[] = [
   { id: 'open-now', labelEn: 'Open Now', labelRu: 'Открыто сейчас', icon: '🟢' },
 ];
 
-// ====== PRICE RANGE ======
-export const beautyPriceOptions: FilterOption[] = [
-  { id: 'budget', labelEn: 'Budget', labelRu: 'Бюджетно', icon: '💰' },
-  { id: 'mid-range', labelEn: 'Mid-Range', labelRu: 'Средний', icon: '💵' },
-  { id: 'premium', labelEn: 'Premium', labelRu: 'Премиум', icon: '💎' },
-  { id: 'luxury', labelEn: 'Luxury', labelRu: 'Люкс', icon: '👑' },
-];
 
 // ====== COMPLETE BEAUTY FILTER CONFIG ======
 export const beautyFilterConfig: FilterConfig = {
@@ -772,12 +699,6 @@ export const experienceFilterConfig: FilterConfig = {
   ],
 };
 
-// Backward compat aliases for experiences
-export const typeOptions = experienceTypeOptions;
-export const categoryOptions = experienceCategoryOptions;
-export const durationOptions = experienceDurationOptions;
-export const difficultyOptions = experienceDifficultyOptions;
-export const groupOptions = experienceGroupOptions;
 
 // ═══════════════ EventsFilters ═══════════════
 
@@ -1589,18 +1510,7 @@ export const babysitterFilterConfig: FilterConfig = {
 };
 
 // ═══════════════ ServicesFilters ═══════════════
-/**
- * Services Filters - Database-Driven
- * Uses useDynamicFilterOptions for all taxonomy data
- */
-
-
-// Re-export the dynamic hook
-
-// Legacy static exports (empty, use hook instead)
-export const serviceCategoryOptions: FilterOption[] = [];
-export const serviceDomainOptions: FilterOption[] = [];
-export const providerTypeOptions: FilterOption[] = [];
+// Services filters are database-driven via useHomeServiceFilterOptions hook.
 
 // Service features - static as they're platform-wide
 export const serviceFeatureOptions: FilterOption[] = [
@@ -1619,65 +1529,8 @@ export const bookingTypeOptions: FilterOption[] = [
   { id: 'subscription', labelEn: 'Subscription', labelRu: 'Подписка', icon: '🔄' },
 ];
 
-// Export a function to get the filter config
-export function getServicesFilterConfig(): FilterConfig {
-  return {
-    sections: [
-      {
-        id: 'providerType',
-        titleEn: 'Provider Type',
-        titleRu: 'Тип исполнителя',
-        type: 'single',
-        options: [],
-      },
-      {
-        id: 'priceLevel',
-        titleEn: 'Price Level',
-        titleRu: 'Уровень цен',
-        type: 'price-level',
-        options: [],
-      },
-      {
-        id: 'category',
-        titleEn: 'Service Type',
-        titleRu: 'Тип услуги',
-        type: 'multi',
-        options: [],
-      },
-      {
-        id: 'bookingType',
-        titleEn: 'Pricing',
-        titleRu: 'Оплата',
-        type: 'single',
-        options: bookingTypeOptions,
-      },
-      {
-        id: 'features',
-        titleEn: 'Features',
-        titleRu: 'Особенности',
-        type: 'multi',
-        options: serviceFeatureOptions,
-      },
-    ],
-  };
-}
-
-// For backwards compatibility
-export const servicesFilterConfig = getServicesFilterConfig();
-
 // ═══════════════ TransportFilters ═══════════════
-/**
- * Transport Filters - Database-Driven
- * Uses useDynamicFilterOptions for all taxonomy data
- */
-
-
-// Re-export the dynamic hook
-
-// Legacy static exports (empty, use hook instead)
-export const vehicleTypeOptions: FilterOption[] = [];
-export const transmissionOptions: FilterOption[] = [];
-export const fuelTypeOptions: FilterOption[] = [];
+// Transport filters are database-driven via useTransportFilterOptions hook.
 
 // Transfer types - static as they're specific to booking flow
 export const transferTypeOptions: FilterOption[] = [
@@ -1705,56 +1558,3 @@ export const vehicleFeatureOptions: FilterOption[] = [
   { id: 'driver', labelEn: 'With Driver', labelRu: 'С водителем', icon: '👨‍✈️' },
   { id: 'unlimited-km', labelEn: 'Unlimited KM', labelRu: 'Без лимита км', icon: '∞' },
 ];
-
-// Export a function to get the filter config
-export function getTransportFilterConfig(): FilterConfig {
-  return {
-    sections: [
-      {
-        id: 'priceLevel',
-        titleEn: 'Price Level',
-        titleRu: 'Уровень цен',
-        type: 'price-level',
-        options: [],
-      },
-      {
-        id: 'vehicleType',
-        titleEn: 'Vehicle Type',
-        titleRu: 'Тип транспорта',
-        type: 'multi',
-        options: [],
-      },
-      {
-        id: 'transmission',
-        titleEn: 'Transmission',
-        titleRu: 'Трансмиссия',
-        type: 'single',
-        options: [],
-      },
-      {
-        id: 'fuelType',
-        titleEn: 'Fuel Type',
-        titleRu: 'Тип топлива',
-        type: 'multi',
-        options: [],
-      },
-      {
-        id: 'passengers',
-        titleEn: 'Passengers',
-        titleRu: 'Пассажиры',
-        type: 'single',
-        options: passengerOptions,
-      },
-      {
-        id: 'features',
-        titleEn: 'Features',
-        titleRu: 'Особенности',
-        type: 'multi',
-        options: vehicleFeatureOptions,
-      },
-    ],
-  };
-}
-
-// For backwards compatibility
-export const transportFilterConfig = getTransportFilterConfig();
