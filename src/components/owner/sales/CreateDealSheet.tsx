@@ -174,8 +174,8 @@ const navigate = useNavigate();
       const createdDeal = await createDeal.mutateAsync({
         company_id: companyId,
         agent_id: user!.id,
-        property_id: selectedProperty?.id || null,
-        property_project_id: form.property_project_id || null,
+        property_id: selectedProperty && !selectedProperty.is_project ? selectedProperty.id : null,
+        property_project_id: selectedProperty?.is_project ? selectedProperty.id : (form.property_project_id || null),
         client_name: clientName,
         client_phone: clientPhone,
         client_email: clientEmail,
