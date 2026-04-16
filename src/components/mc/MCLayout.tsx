@@ -4,6 +4,7 @@ import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import { MCSidebar } from './MCSidebar';
 import { MCHeader } from './MCHeader';
 import { MCMobileNav } from './MCMobileNav';
+import { MCCommandPalette } from './MCCommandPalette';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface MCLayoutProps {
@@ -43,6 +44,7 @@ export function MCLayout({ children }: MCLayoutProps) {
           </main>
         </SidebarInset>
         <MCMobileNav />
+        <MCCommandPalette />
       </div>
     </SidebarProvider>
   );
