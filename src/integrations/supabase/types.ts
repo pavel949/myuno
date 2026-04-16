@@ -3390,6 +3390,54 @@ export type Database = {
           },
         ]
       }
+      contact_relationships: {
+        Row: {
+          company_id: string
+          contact_a_id: string
+          contact_b_id: string
+          created_at: string | null
+          id: string
+          notes: string | null
+          relation_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          company_id: string
+          contact_a_id: string
+          contact_b_id: string
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          relation_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string
+          contact_a_id?: string
+          contact_b_id?: string
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          relation_type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_relationships_contact_a_id_fkey"
+            columns: ["contact_a_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_relationships_contact_b_id_fkey"
+            columns: ["contact_b_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contact_tags: {
         Row: {
           color: string
@@ -3754,6 +3802,9 @@ export type Database = {
           address_street: string | null
           address_street2: string | null
           address_zip: string | null
+          ai_summary: string | null
+          aml_kyc_date: string | null
+          aml_kyc_status: string | null
           avatar_url: string | null
           bedrooms_min: number | null
           birthday: string | null
@@ -3762,6 +3813,7 @@ export type Database = {
           company_entity_id: string | null
           company_id: string
           company_name: string | null
+          contact_category: string | null
           contact_type: string | null
           created_at: string
           created_by: string | null
@@ -3774,6 +3826,7 @@ export type Database = {
           facebook: string | null
           family_info: string | null
           first_name: string
+          hnw_tier: string | null
           id: string
           instagram: string | null
           interests: string[] | null
@@ -3782,6 +3835,7 @@ export type Database = {
           job_title: string | null
           key_dates: Json | null
           language: string | null
+          last_activity_at: string | null
           last_name: string
           lead_score: number | null
           lead_temperature: string | null
@@ -3795,19 +3849,26 @@ export type Database = {
           outreach_channel: string | null
           outreach_sent_at: string | null
           outreach_status: string | null
+          owner_user_id: string | null
+          passport_country: string | null
+          pep_flag: boolean | null
           phone: string | null
           phone2: string | null
           pipeline_stage: string | null
           pipeline_type: string | null
+          preferences: Json | null
           preferred_districts: string[] | null
           preferred_types: string[] | null
+          sanctions_flag: boolean | null
           scoring: number | null
+          segment: string[] | null
           source: string | null
           source_entity_id: string | null
           source_entity_type: string | null
           special_notes: string | null
           tags: string[] | null
           tax_id: string | null
+          tax_residency: string | null
           telegram: string | null
           updated_at: string
           website: string | null
@@ -3820,6 +3881,9 @@ export type Database = {
           address_street?: string | null
           address_street2?: string | null
           address_zip?: string | null
+          ai_summary?: string | null
+          aml_kyc_date?: string | null
+          aml_kyc_status?: string | null
           avatar_url?: string | null
           bedrooms_min?: number | null
           birthday?: string | null
@@ -3828,6 +3892,7 @@ export type Database = {
           company_entity_id?: string | null
           company_id: string
           company_name?: string | null
+          contact_category?: string | null
           contact_type?: string | null
           created_at?: string
           created_by?: string | null
@@ -3840,6 +3905,7 @@ export type Database = {
           facebook?: string | null
           family_info?: string | null
           first_name?: string
+          hnw_tier?: string | null
           id?: string
           instagram?: string | null
           interests?: string[] | null
@@ -3848,6 +3914,7 @@ export type Database = {
           job_title?: string | null
           key_dates?: Json | null
           language?: string | null
+          last_activity_at?: string | null
           last_name?: string
           lead_score?: number | null
           lead_temperature?: string | null
@@ -3861,19 +3928,26 @@ export type Database = {
           outreach_channel?: string | null
           outreach_sent_at?: string | null
           outreach_status?: string | null
+          owner_user_id?: string | null
+          passport_country?: string | null
+          pep_flag?: boolean | null
           phone?: string | null
           phone2?: string | null
           pipeline_stage?: string | null
           pipeline_type?: string | null
+          preferences?: Json | null
           preferred_districts?: string[] | null
           preferred_types?: string[] | null
+          sanctions_flag?: boolean | null
           scoring?: number | null
+          segment?: string[] | null
           source?: string | null
           source_entity_id?: string | null
           source_entity_type?: string | null
           special_notes?: string | null
           tags?: string[] | null
           tax_id?: string | null
+          tax_residency?: string | null
           telegram?: string | null
           updated_at?: string
           website?: string | null
@@ -3886,6 +3960,9 @@ export type Database = {
           address_street?: string | null
           address_street2?: string | null
           address_zip?: string | null
+          ai_summary?: string | null
+          aml_kyc_date?: string | null
+          aml_kyc_status?: string | null
           avatar_url?: string | null
           bedrooms_min?: number | null
           birthday?: string | null
@@ -3894,6 +3971,7 @@ export type Database = {
           company_entity_id?: string | null
           company_id?: string
           company_name?: string | null
+          contact_category?: string | null
           contact_type?: string | null
           created_at?: string
           created_by?: string | null
@@ -3906,6 +3984,7 @@ export type Database = {
           facebook?: string | null
           family_info?: string | null
           first_name?: string
+          hnw_tier?: string | null
           id?: string
           instagram?: string | null
           interests?: string[] | null
@@ -3914,6 +3993,7 @@ export type Database = {
           job_title?: string | null
           key_dates?: Json | null
           language?: string | null
+          last_activity_at?: string | null
           last_name?: string
           lead_score?: number | null
           lead_temperature?: string | null
@@ -3927,19 +4007,26 @@ export type Database = {
           outreach_channel?: string | null
           outreach_sent_at?: string | null
           outreach_status?: string | null
+          owner_user_id?: string | null
+          passport_country?: string | null
+          pep_flag?: boolean | null
           phone?: string | null
           phone2?: string | null
           pipeline_stage?: string | null
           pipeline_type?: string | null
+          preferences?: Json | null
           preferred_districts?: string[] | null
           preferred_types?: string[] | null
+          sanctions_flag?: boolean | null
           scoring?: number | null
+          segment?: string[] | null
           source?: string | null
           source_entity_id?: string | null
           source_entity_type?: string | null
           special_notes?: string | null
           tags?: string[] | null
           tax_id?: string | null
+          tax_residency?: string | null
           telegram?: string | null
           updated_at?: string
           website?: string | null

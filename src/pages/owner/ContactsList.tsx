@@ -16,13 +16,13 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, Phone, Mail, ChevronRight, Filter, UserCircle, ChevronLeft, Upload, Lock, Star, MessageSquare, DollarSign, Briefcase, Clock, ArrowUpDown, LayoutGrid, List, Users } from 'lucide-react';
+import { Plus, Search, Phone, Mail, ChevronRight, Filter, UserCircle, ChevronLeft, Upload, Lock, Star, MessageSquare, DollarSign, Briefcase, Clock, ArrowUpDown, LayoutGrid, List, Users, Shield } from 'lucide-react';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { useDuplicatesQuery } from '@/hooks/useCrmDuplicates';
 import { CreateContactSheet } from '@/components/owner/contacts/CreateContactSheet';
 import { ContactExportButton } from '@/components/owner/contacts/ContactExportButton';
 import { cn } from '@/lib/utils';
-import { CRM_ROLES, CRM_ROLE_LABELS, type CrmRole } from '@/types/contact';
+import { CRM_ROLES, CRM_ROLE_LABELS, type CrmRole, CONTACT_SEGMENTS, CONTACT_SEGMENT_LABELS, type ContactSegment, HNW_TIERS, HNW_TIER_LABELS, type HnwTier } from '@/types/contact';
 
 const PAGE_SIZE = 24;
 
@@ -134,10 +134,21 @@ function ContactCard({
             </Badge>
           )}
           <ContactTagsDisplay tags={contact.tags || []} companyId={contact.company_id} max={2} />
+          {/* Segment badges */}
+          {(contact.segment ?? []).slice(0, 2).map(seg => (
+            <Badge key={seg} variant="outline" className="text-[9px] h-4 px-1.5 border bg-info/10 text-info border-info/30">
+              {isRu ? CONTACT_SEGMENT_LABELS[seg as ContactSegment]?.ru : CONTACT_SEGMENT_LABELS[seg as ContactSegment]?.en || seg}
+            </Badge>
+          ))}
         </div>
 
-        {/* Contact info */}
+        {/* HNW tier + Contact info */}
         <div className="mt-2 space-y-1">
+          {contact.hnw_tier && contact.hnw_tier !== 'standard' && (
+            <Badge className={cn('text-[9px] h-4 px-1.5', HNW_TIER_LABELS[contact.hnw_tier as HnwTier]?.color || '')}>
+              {HNW_TIER_LABELS[contact.hnw_tier as HnwTier]?.en || contact.hnw_tier}
+            </Badge>
+          )}
           {contact.email && (
             <p className="text-xs text-muted-foreground truncate flex items-center gap-1.5">
               <Mail className="h-3 w-3 shrink-0" />
@@ -289,6 +300,8 @@ export default function ContactsList() {
   const [vipFilter, setVipFilter] = useState<'all' | 'vip' | 'standard'>('all');
   const [leadTempFilter, setLeadTempFilter] = useState<string | null>(null);
   const [crmRoleFilter, setCrmRoleFilter] = useState<string | null>(null);
+  const [hnwTierFilter, setHnwTierFilter] = useState<string | null>(null);
+  const [segmentFilter, setSegmentFilter] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState<string>('updated_at');
@@ -302,6 +315,8 @@ export default function ContactsList() {
   const handleVipChange = (v: 'all' | 'vip' | 'standard') => { setVipFilter(v); setPage(0); };
   const handleLeadTempChange = (v: string | null) => { setLeadTempFilter(v); setPage(0); };
   const handleCrmRoleChange = (v: string | null) => { setCrmRoleFilter(v); setPage(0); };
+  const handleHnwTierChange = (v: string | null) => { setHnwTierFilter(v); setPage(0); };
+  const handleSegmentChange = (v: string | null) => { setSegmentFilter(v); setPage(0); };
 
   const { data: contactTypeOptions = [] } = useCrmOptions(companyId, 'contact_type');
   const { data: leadSourceOptions = [] } = useCrmOptions(companyId, 'lead_source');
@@ -321,13 +336,15 @@ export default function ContactsList() {
     vip: vipFilter === 'all' ? undefined : vipFilter,
     leadTemperature: leadTempFilter || undefined,
     crmRole: crmRoleFilter || undefined,
+    hnwTier: hnwTierFilter || undefined,
+    segment: segmentFilter || undefined,
   });
   const contacts = result?.data ?? [];
   const totalCount = result?.count ?? 0;
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   const activeFiltersCount =
-    [typeFilter, sourceFilter, tagFilter, lifecycleFilter, leadTempFilter, crmRoleFilter].filter(Boolean).length +
+    [typeFilter, sourceFilter, tagFilter, lifecycleFilter, leadTempFilter, crmRoleFilter, hnwTierFilter, segmentFilter].filter(Boolean).length +
     (vipFilter !== 'all' ? 1 : 0);
 
   if (!companyId) {
@@ -567,7 +584,43 @@ export default function ContactsList() {
             </div>
           </div>
 
-          {/* Lifecycle filter */}
+          {/* HNW Tier + Segment */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-1.5">{isRu ? 'Уровень HNW' : 'HNW Tier'}</p>
+              <div className="flex flex-wrap gap-1">
+                <button type="button" onClick={() => handleHnwTierChange(null)} className={cn('px-2 py-0.5 text-xs rounded-full border', !hnwTierFilter ? 'bg-primary text-primary-foreground' : 'text-muted-foreground')}>{isRu ? 'Все' : 'All'}</button>
+                {HNW_TIERS.map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => handleHnwTierChange(hnwTierFilter === t ? null : t)}
+                    className={cn('px-2 py-0.5 text-xs rounded-full border', hnwTierFilter === t ? HNW_TIER_LABELS[t].color : 'text-muted-foreground')}
+                  >
+                    {isRu ? HNW_TIER_LABELS[t].ru : HNW_TIER_LABELS[t].en}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-1.5">{isRu ? 'Сегмент' : 'Segment'}</p>
+              <div className="flex flex-wrap gap-1">
+                <button type="button" onClick={() => handleSegmentChange(null)} className={cn('px-2 py-0.5 text-xs rounded-full border', !segmentFilter ? 'bg-primary text-primary-foreground' : 'text-muted-foreground')}>{isRu ? 'Все' : 'All'}</button>
+                {CONTACT_SEGMENTS.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => handleSegmentChange(segmentFilter === s ? null : s)}
+                    className={cn('px-2 py-0.5 text-xs rounded-full border max-w-[120px] truncate', segmentFilter === s ? 'bg-primary text-primary-foreground' : 'text-muted-foreground')}
+                  >
+                    {isRu ? CONTACT_SEGMENT_LABELS[s].ru : CONTACT_SEGMENT_LABELS[s].en}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+
           <div>
             <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-1.5">{isRu ? 'Стадия' : 'Lifecycle'}</p>
             <div className="flex flex-wrap gap-1">

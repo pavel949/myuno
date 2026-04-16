@@ -45,7 +45,7 @@ import { ContactPropertiesSection } from '@/components/owner/contacts/ContactPro
 import { ContactRelationshipsCard } from '@/components/owner/contacts/ContactRelationshipsCard';
 import { KeyDatesCard } from '@/components/owner/contacts/KeyDatesCard';
 import { RemindersList } from '@/components/owner/contacts/RemindersList';
-import { CRM_ROLE_LABELS, isCrmRole } from '@/types/contact';
+import { CRM_ROLE_LABELS, isCrmRole, HNW_TIER_LABELS, type HnwTier, CONTACT_SEGMENT_LABELS, type ContactSegment, KYC_STATUS_LABELS, type KycStatus } from '@/types/contact';
 import { isMaritalStatus, MARITAL_STATUS_LABELS } from '@/lib/crmContactFormPresets';
 
 import { toast } from 'sonner';
@@ -366,7 +366,22 @@ const { data: contact, isLoading, isError } = useCrmContact(id);
                     {(contact.is_vip || (contact.tags || []).some((t) => t.toUpperCase() === 'VIP')) && (
                       <Badge className="shrink-0 bg-amber-500/15 text-amber-900 border-amber-500/30">VIP</Badge>
                     )}
+                    {contact.hnw_tier && contact.hnw_tier !== 'standard' && (
+                      <Badge className={cn('shrink-0', HNW_TIER_LABELS[contact.hnw_tier as HnwTier]?.color || '')}>
+                        {HNW_TIER_LABELS[contact.hnw_tier as HnwTier]?.en || contact.hnw_tier}
+                      </Badge>
+                    )}
                   </div>
+                  {/* Segment badges */}
+                  {(contact.segment ?? []).length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {(contact.segment ?? []).map(seg => (
+                        <Badge key={seg} variant="outline" className="text-[10px] bg-info/10 text-info border-info/30">
+                          {CONTACT_SEGMENT_LABELS[seg as ContactSegment]?.en || seg}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
                   {contact.is_company && contact.first_name && (
                     <p className="text-sm text-muted-foreground mt-0.5">
                       {contact.first_name} {contact.last_name}
@@ -524,6 +539,7 @@ const { data: contact, isLoading, isError } = useCrmContact(id);
                 { value: 'deals', label: `${isRu ? 'Сделки' : 'Deals'}${deals.length > 0 ? ` (${deals.length})` : ''}`, icon: DollarSign },
                 { value: 'tasks', label: `${isRu ? 'Задачи' : 'Tasks'}${contactTasks.length > 0 ? ` (${contactTasks.length})` : ''}`, icon: ListTodo },
                 { value: 'documents', label: isRu ? 'Документы' : 'Documents', icon: FileText },
+                { value: 'kyc', label: 'KYC', icon: User },
                 { value: 'ai', label: 'AI', icon: Sparkles },
               ].map(tab => (
                 <TabsTrigger key={tab.value} value={tab.value} className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-2.5 text-sm">
@@ -603,6 +619,39 @@ const { data: contact, isLoading, isError } = useCrmContact(id);
                     <p className="text-sm text-muted-foreground whitespace-pre-wrap">{contact.notes}</p>
                   </div>
                 )}
+              </div>
+            </TabsContent>
+
+            {/* KYC */}
+            <TabsContent value="kyc" className="mt-4">
+              <div className="rounded-xl border bg-card p-5 space-y-4">
+                <h3 className="text-sm font-semibold">{isRu ? 'KYC / Compliance' : 'KYC / Compliance'}</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <FieldRow label={isRu ? 'Статус KYC' : 'KYC Status'}>
+                    <Badge className={cn('text-xs', KYC_STATUS_LABELS[(contact.aml_kyc_status || 'not_started') as KycStatus]?.color || '')}>
+                      {isRu ? KYC_STATUS_LABELS[(contact.aml_kyc_status || 'not_started') as KycStatus]?.ru : KYC_STATUS_LABELS[(contact.aml_kyc_status || 'not_started') as KycStatus]?.en}
+                    </Badge>
+                  </FieldRow>
+                  <FieldRow label={isRu ? 'Дата KYC' : 'KYC Date'}>
+                    {contact.aml_kyc_date || <span className="text-muted-foreground/50">—</span>}
+                  </FieldRow>
+                  <FieldRow label={isRu ? 'Паспорт' : 'Passport'}>
+                    {contact.passport_country || <span className="text-muted-foreground/50">—</span>}
+                  </FieldRow>
+                  <FieldRow label={isRu ? 'Налог. рез.' : 'Tax Residency'}>
+                    {contact.tax_residency || <span className="text-muted-foreground/50">—</span>}
+                  </FieldRow>
+                  <FieldRow label="PEP">
+                    <Badge variant={contact.pep_flag ? 'destructive' : 'secondary'} className="text-xs">
+                      {contact.pep_flag ? (isRu ? 'Да' : 'Yes') : (isRu ? 'Нет' : 'No')}
+                    </Badge>
+                  </FieldRow>
+                  <FieldRow label={isRu ? 'Санкции' : 'Sanctions'}>
+                    <Badge variant={contact.sanctions_flag ? 'destructive' : 'secondary'} className="text-xs">
+                      {contact.sanctions_flag ? (isRu ? 'Да' : 'Yes') : (isRu ? 'Нет' : 'No')}
+                    </Badge>
+                  </FieldRow>
+                </div>
               </div>
             </TabsContent>
 

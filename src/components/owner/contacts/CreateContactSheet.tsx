@@ -11,7 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCreateContact } from '@/hooks/useCrmContacts';
 import { useCrmOptions } from '@/hooks/useCrmSettings';
 import { PHUKET_DISTRICTS, PROPERTY_TYPES, CURRENCIES } from '@/hooks/useAgentDeals';
-import { CRM_ROLES, CRM_ROLE_LABELS } from '@/types/contact';
+import { CRM_ROLES, CRM_ROLE_LABELS, CONTACT_SEGMENTS, CONTACT_SEGMENT_LABELS, type ContactSegment, HNW_TIERS, HNW_TIER_LABELS, type HnwTier, KYC_STATUSES, KYC_STATUS_LABELS, type KycStatus, CONTACT_CATEGORIES, CONTACT_CATEGORY_LABELS, type ContactCategory } from '@/types/contact';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { ContactTagPicker } from '@/components/owner/contacts/ContactTagPicker';
@@ -24,7 +24,7 @@ import {
   MARITAL_STATUS_LABELS,
   MARITAL_STATUS_VALUES,
 } from '@/lib/crmContactFormPresets';
-import { UserPlus, X } from 'lucide-react';
+import { UserPlus, X, Shield } from 'lucide-react';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
 
 interface Props {
@@ -59,6 +59,15 @@ const initialForm = () => ({
   langCustom: '',
   marital_status: '' as string,
   is_vip: false,
+  // New fields
+  contact_category: 'person' as string,
+  segment: [] as string[],
+  hnw_tier: '' as string,
+  passport_country: '',
+  tax_residency: '',
+  aml_kyc_status: 'not_started' as string,
+  pep_flag: false,
+  sanctions_flag: false,
 });
 
 export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
@@ -135,6 +144,15 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
         interests: form.interests.length ? form.interests : null,
         is_vip: form.is_vip,
         marital_status: form.marital_status || null,
+        // New fields
+        contact_category: form.contact_category || 'person',
+        segment: form.segment.length ? form.segment : null,
+        hnw_tier: form.hnw_tier || null,
+        passport_country: form.passport_country || null,
+        tax_residency: form.tax_residency || null,
+        aml_kyc_status: form.aml_kyc_status || 'not_started',
+        pep_flag: form.pep_flag,
+        sanctions_flag: form.sanctions_flag,
       });
       toast({ title: isRu ? 'Контакт создан' : 'Contact created' });
       onOpenChange(false);
@@ -167,6 +185,13 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
     setCustomInterest('');
   };
 
+  const toggleSegment = (seg: string) => {
+    setForm((f) => ({
+      ...f,
+      segment: f.segment.includes(seg) ? f.segment.filter((x) => x !== seg) : [...f.segment, seg],
+    }));
+  };
+
   return (
     <ResponsiveModal
       open={open}
@@ -183,6 +208,16 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div><Label>{isRu ? 'Имя *' : 'First Name *'}</Label><Input value={form.first_name} onChange={e => setForm(f => ({ ...f, first_name: e.target.value }))} /></div>
         <div><Label>{isRu ? 'Фамилия' : 'Last Name'}</Label><Input value={form.last_name} onChange={e => setForm(f => ({ ...f, last_name: e.target.value }))} /></div>
+      </div>
+
+      {/* Contact Category */}
+      <div className="flex items-center gap-3">
+        {CONTACT_CATEGORIES.map(cat => (
+          <label key={cat} className="flex items-center gap-1.5 cursor-pointer text-sm">
+            <input type="radio" checked={form.contact_category === cat} onChange={() => setForm(f => ({ ...f, contact_category: cat }))} className="accent-primary" />
+            {isRu ? CONTACT_CATEGORY_LABELS[cat].ru : CONTACT_CATEGORY_LABELS[cat].en}
+          </label>
+        ))}
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div><Label>{isRu ? 'Телефон' : 'Phone'}</Label><Input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} /></div>
@@ -380,6 +415,72 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
           }
         />
       </div>
+      {/* Segments */}
+      <div>
+        <Label className="mb-1.5 block">{isRu ? 'Сегменты' : 'Segments'}</Label>
+        <div className="flex flex-wrap gap-1.5">
+          {CONTACT_SEGMENTS.map((s) => (
+            <button key={s} type="button" onClick={() => toggleSegment(s)}
+              className={cn('px-2.5 py-1 rounded-full text-xs border transition-colors',
+                form.segment.includes(s) ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-muted-foreground hover:border-primary/50'
+              )}>{isRu ? CONTACT_SEGMENT_LABELS[s].ru : CONTACT_SEGMENT_LABELS[s].en}</button>
+          ))}
+        </div>
+      </div>
+
+      {/* HNW Tier */}
+      <div>
+        <Label>{isRu ? 'Уровень HNW' : 'HNW Tier'}</Label>
+        <Select value={form.hnw_tier || '__none__'} onValueChange={(v) => setForm((f) => ({ ...f, hnw_tier: v === '__none__' ? '' : v }))}>
+          <SelectTrigger><SelectValue placeholder={isRu ? 'Не указан' : 'Not set'} /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__none__">{isRu ? 'Не указан' : 'Not set'}</SelectItem>
+            {HNW_TIERS.map((t) => (
+              <SelectItem key={t} value={t}>{isRu ? HNW_TIER_LABELS[t].ru : HNW_TIER_LABELS[t].en}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* KYC Section */}
+      <div className="rounded-lg border p-3 space-y-3">
+        <p className="text-sm font-semibold flex items-center gap-2">
+          <Shield className="h-4 w-4 text-muted-foreground" />
+          {isRu ? 'KYC / Compliance' : 'KYC / Compliance'}
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <Label>{isRu ? 'Страна паспорта' : 'Passport Country'}</Label>
+            <Input value={form.passport_country} onChange={e => setForm(f => ({ ...f, passport_country: e.target.value }))} placeholder="RU" />
+          </div>
+          <div>
+            <Label>{isRu ? 'Налоговое резидентство' : 'Tax Residency'}</Label>
+            <Input value={form.tax_residency} onChange={e => setForm(f => ({ ...f, tax_residency: e.target.value }))} placeholder="TH" />
+          </div>
+        </div>
+        <div>
+          <Label>{isRu ? 'Статус KYC' : 'KYC Status'}</Label>
+          <Select value={form.aml_kyc_status} onValueChange={(v) => setForm((f) => ({ ...f, aml_kyc_status: v }))}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {KYC_STATUSES.map((s) => (
+                <SelectItem key={s} value={s}>{isRu ? KYC_STATUS_LABELS[s].ru : KYC_STATUS_LABELS[s].en}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex items-center gap-6">
+          <label className="flex items-center gap-2 text-sm cursor-pointer">
+            <Switch checked={form.pep_flag} onCheckedChange={(c) => setForm(f => ({ ...f, pep_flag: c }))} />
+            PEP
+          </label>
+          <label className="flex items-center gap-2 text-sm cursor-pointer">
+            <Switch checked={form.sanctions_flag} onCheckedChange={(c) => setForm(f => ({ ...f, sanctions_flag: c }))} />
+            {isRu ? 'Санкции' : 'Sanctions'}
+          </label>
+        </div>
+      </div>
+
       <div><Label>{isRu ? 'Заметки' : 'Notes'}</Label><Textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} rows={2} /></div>
     </ResponsiveModal>
   );
