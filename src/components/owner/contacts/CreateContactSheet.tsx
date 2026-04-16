@@ -185,6 +185,13 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
     setCustomInterest('');
   };
 
+  const toggleSegment = (seg: string) => {
+    setForm((f) => ({
+      ...f,
+      segment: f.segment.includes(seg) ? f.segment.filter((x) => x !== seg) : [...f.segment, seg],
+    }));
+  };
+
   return (
     <ResponsiveModal
       open={open}
@@ -201,6 +208,16 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div><Label>{isRu ? 'Имя *' : 'First Name *'}</Label><Input value={form.first_name} onChange={e => setForm(f => ({ ...f, first_name: e.target.value }))} /></div>
         <div><Label>{isRu ? 'Фамилия' : 'Last Name'}</Label><Input value={form.last_name} onChange={e => setForm(f => ({ ...f, last_name: e.target.value }))} /></div>
+      </div>
+
+      {/* Contact Category */}
+      <div className="flex items-center gap-3">
+        {CONTACT_CATEGORIES.map(cat => (
+          <label key={cat} className="flex items-center gap-1.5 cursor-pointer text-sm">
+            <input type="radio" checked={form.contact_category === cat} onChange={() => setForm(f => ({ ...f, contact_category: cat }))} className="accent-primary" />
+            {isRu ? CONTACT_CATEGORY_LABELS[cat].ru : CONTACT_CATEGORY_LABELS[cat].en}
+          </label>
+        ))}
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div><Label>{isRu ? 'Телефон' : 'Phone'}</Label><Input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} /></div>
