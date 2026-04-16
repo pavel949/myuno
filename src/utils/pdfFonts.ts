@@ -1,4 +1,4 @@
-import jsPDF from 'jspdf';
+// jsPDF type is imported lazily — this module accepts any jsPDF instance
 
 const fontCache: Record<string, string> = {};
 
@@ -20,7 +20,7 @@ async function loadFontAsBase64(url: string): Promise<string> {
  * Load Roboto font (Latin + Cyrillic) into jsPDF instance.
  * Registers both Regular and Bold weights.
  */
-export async function loadCyrillicFont(doc: jsPDF): Promise<void> {
+export async function loadCyrillicFont(doc: any): Promise<void> {
   const [regularB64, boldB64] = await Promise.all([
     loadFontAsBase64('/fonts/Roboto-Regular.ttf'),
     loadFontAsBase64('/fonts/Roboto-Bold.ttf'),

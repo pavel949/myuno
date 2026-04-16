@@ -1,5 +1,4 @@
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+// jsPDF is loaded lazily to avoid 380KB in the main bundle
 
 interface InvoiceData {
   invoice_number: string;
@@ -17,7 +16,9 @@ interface InvoiceData {
   status: string;
 }
 
-export function generateInvoicePdf(invoice: InvoiceData): jsPDF {
+export async function generateInvoicePdf(invoice: InvoiceData) {
+  const { default: jsPDF } = await import('jspdf');
+  await import('jspdf-autotable');
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
 
@@ -29,87 +30,74 @@ export function generateInvoicePdf(invoice: InvoiceData): jsPDF {
   doc.setFontSize(10);
   doc.setTextColor(100, 100, 100);
   doc.text(`#${invoice.invoice_number}`, 20, 38);
-
-  // Status badge
-  doc.setFontSize(11);
-  doc.setTextColor(
-    invoice.status === 'paid' ? 34 : invoice.status === 'overdue' ? 220 : 66,
-    invoice.status === 'paid' ? 139 : invoice.status === 'overdue' ? 53 : 66,
-    invoice.status === 'paid' ? 34 : invoice.status === 'overdue' ? 69 : 66
-  );
-  doc.text(invoice.status.toUpperCase(), pageWidth - 20, 30, { align: 'right' });
+  doc.text(`Status: ${invoice.status.toUpperCase()}`, pageWidth - 20, 30, { align: 'right' });
 
   // Dates
   doc.setFontSize(9);
-  doc.setTextColor(100, 100, 100);
-  doc.text(`Issued: ${invoice.issued_date}`, pageWidth - 20, 40, { align: 'right' });
+  doc.text(`Issued: ${invoice.issued_date}`, 20, 50);
   if (invoice.due_date) {
-    doc.text(`Due: ${invoice.due_date}`, pageWidth - 20, 46, { align: 'right' });
+    doc.text(`Due: ${invoice.due_date}`, 20, 56);
   }
 
-  // Bill To
-  doc.setFontSize(9);
-  doc.setTextColor(100, 100, 100);
-  doc.text('Bill To:', 20, 55);
-  doc.setFontSize(12);
+  // Recipient
+  doc.setFontSize(10);
   doc.setTextColor(33, 33, 33);
-  doc.text(invoice.recipient_name, 20, 62);
+  doc.text('Bill To:', 20, 68);
+  doc.setFontSize(11);
+  doc.text(invoice.recipient_name, 20, 74);
   if (invoice.recipient_email) {
     doc.setFontSize(9);
     doc.setTextColor(100, 100, 100);
-    doc.text(invoice.recipient_email, 20, 68);
+    doc.text(invoice.recipient_email, 20, 80);
   }
 
   // Items table
   const tableData = invoice.items.map(item => [
     item.description,
     item.quantity.toString(),
-    `${item.unit_price.toLocaleString()} ${invoice.currency}`,
-    `${item.amount.toLocaleString()} ${invoice.currency}`,
+    `${invoice.currency} ${item.unit_price.toLocaleString()}`,
+    `${invoice.currency} ${item.amount.toLocaleString()}`,
   ]);
 
-  autoTable(doc, {
-    startY: 78,
+  (doc as any).autoTable({
+    startY: 90,
     head: [['Description', 'Qty', 'Unit Price', 'Amount']],
     body: tableData,
     theme: 'striped',
-    headStyles: { fillColor: [50, 50, 50], textColor: [255, 255, 255], fontSize: 9 },
-    bodyStyles: { fontSize: 9 },
+    headStyles: { fillColor: [26, 115, 232], textColor: 255, fontStyle: 'bold' },
+    styles: { fontSize: 9, cellPadding: 4 },
     columnStyles: {
-      0: { cellWidth: 'auto' },
+      0: { cellWidth: 80 },
       1: { halign: 'center', cellWidth: 25 },
-      2: { halign: 'right', cellWidth: 40 },
-      3: { halign: 'right', cellWidth: 40 },
+      2: { halign: 'right', cellWidth: 35 },
+      3: { halign: 'right', cellWidth: 35 },
     },
   });
 
+  const finalY = (doc as any).lastAutoTable?.finalY || 150;
+
   // Totals
-  const finalY = (doc as any).lastAutoTable?.finalY || 120;
-  const totalsY = finalY + 10;
-
   doc.setFontSize(10);
-  doc.setTextColor(100, 100, 100);
-  doc.text('Subtotal:', pageWidth - 70, totalsY);
-  doc.text(`${invoice.subtotal.toLocaleString()} ${invoice.currency}`, pageWidth - 20, totalsY, { align: 'right' });
-
-  if (invoice.tax_amount > 0) {
-    doc.text(`Tax (${invoice.tax_rate}%):`, pageWidth - 70, totalsY + 7);
-    doc.text(`${invoice.tax_amount.toLocaleString()} ${invoice.currency}`, pageWidth - 20, totalsY + 7, { align: 'right' });
-  }
-
-  doc.setFontSize(13);
   doc.setTextColor(33, 33, 33);
-  const totalLineY = invoice.tax_amount > 0 ? totalsY + 17 : totalsY + 10;
-  doc.line(pageWidth - 80, totalLineY - 3, pageWidth - 20, totalLineY - 3);
-  doc.text('Total:', pageWidth - 70, totalLineY + 3);
-  doc.text(`${invoice.total.toLocaleString()} ${invoice.currency}`, pageWidth - 20, totalLineY + 3, { align: 'right' });
+  const totalsX = pageWidth - 70;
+  doc.text('Subtotal:', totalsX, finalY + 15);
+  doc.text(`${invoice.currency} ${invoice.subtotal.toLocaleString()}`, pageWidth - 20, finalY + 15, { align: 'right' });
+
+  doc.text(`Tax (${invoice.tax_rate}%):`, totalsX, finalY + 22);
+  doc.text(`${invoice.currency} ${invoice.tax_amount.toLocaleString()}`, pageWidth - 20, finalY + 22, { align: 'right' });
+
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Total:', totalsX, finalY + 32);
+  doc.text(`${invoice.currency} ${invoice.total.toLocaleString()}`, pageWidth - 20, finalY + 32, { align: 'right' });
 
   // Notes
   if (invoice.notes) {
+    doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
     doc.setTextColor(100, 100, 100);
-    doc.text('Notes:', 20, totalLineY + 20);
-    doc.text(invoice.notes, 20, totalLineY + 26, { maxWidth: pageWidth - 40 });
+    doc.text('Notes:', 20, finalY + 50);
+    doc.text(invoice.notes, 20, finalY + 56, { maxWidth: pageWidth - 40 });
   }
 
   // Footer
