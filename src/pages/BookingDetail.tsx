@@ -50,6 +50,7 @@ interface BookingData {
     address_type: string;
     address: string;
   }>;
+
 }
 
 const getStatusColor = (status: string) => {
