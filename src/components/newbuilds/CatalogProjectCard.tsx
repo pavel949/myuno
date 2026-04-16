@@ -59,12 +59,15 @@ export function CatalogProjectCard({ project, rank, onInquiry }: Props) {
     `Hello! I am interested in: ${project.nameEn}${zone ? ` (${zone})` : ''}`
   );
 
+  const isFeatured = project.isFeatured;
+
   return (
     <div
       className="rounded-xl overflow-hidden transition-all duration-200 hover:-translate-y-0.5"
       style={{
         background: 'hsl(var(--nb-surface))',
-        border: '1px solid hsl(var(--nb-gold) / 0.12)',
+        border: isFeatured ? '2px solid hsl(var(--nb-gold))' : '1px solid hsl(var(--nb-gold) / 0.12)',
+        boxShadow: isFeatured ? '0 0 20px hsl(var(--nb-gold) / 0.15)' : undefined,
       }}
     >
       {/* Image */}
