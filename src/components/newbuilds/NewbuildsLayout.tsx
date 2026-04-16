@@ -4,7 +4,7 @@
  */
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Building2, Map, Compass, Users, Calculator, Shield, TrendingUp } from 'lucide-react';
+import { Building2, Map, Compass, Users, Calculator, Shield } from 'lucide-react';
 import { NbCompareProvider } from './NbCompareProvider';
 import '@/styles/newbuilds-theme.css';
 
@@ -15,8 +15,7 @@ interface NewbuildsLayoutProps {
 }
 
 const NAV_ITEMS = [
-  { path: '/newbuilds', label: 'Главная', icon: TrendingUp, exact: true },
-  { path: '/newbuilds/projects', label: 'Проекты', icon: Building2 },
+  { path: '/newbuilds', label: 'Каталог', icon: Building2, exact: true },
   { path: '/newbuilds/map', label: 'Карта', icon: Map },
   { path: '/newbuilds/areas', label: 'Районы', icon: Compass },
   { path: '/newbuilds/developers', label: 'Девелоперы', icon: Users },

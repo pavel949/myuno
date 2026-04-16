@@ -17214,6 +17214,7 @@ export type Database = {
           created_by: string | null
           description_en: string | null
           description_ru: string | null
+          description_summary: string | null
           developer_id: string | null
           developer_name: string | null
           district: string | null
@@ -17241,6 +17242,7 @@ export type Database = {
           juristic_phone: string | null
           juristic_promptpay_id: string | null
           juristic_whatsapp: string | null
+          landing_enabled: boolean | null
           lat: number | null
           lng: number | null
           location_area: string | null
@@ -17254,11 +17256,14 @@ export type Database = {
           ownership_types: string[] | null
           payment_plan: Json | null
           price_from: number | null
+          price_per_sqm: number | null
           price_to: number | null
+          price_usd: number | null
           project_status: string | null
           risk_level: string | null
           roi_projected: number | null
           slug: string | null
+          source_url: string | null
           tagline: string | null
           tagline_ru: string | null
           total_units: number | null
@@ -17268,6 +17273,7 @@ export type Database = {
           updated_at: string | null
           video_url: string | null
           year_built: number | null
+          yield_estimate: string | null
         }
         Insert: {
           address?: string | null
@@ -17284,6 +17290,7 @@ export type Database = {
           created_by?: string | null
           description_en?: string | null
           description_ru?: string | null
+          description_summary?: string | null
           developer_id?: string | null
           developer_name?: string | null
           district?: string | null
@@ -17311,6 +17318,7 @@ export type Database = {
           juristic_phone?: string | null
           juristic_promptpay_id?: string | null
           juristic_whatsapp?: string | null
+          landing_enabled?: boolean | null
           lat?: number | null
           lng?: number | null
           location_area?: string | null
@@ -17324,11 +17332,14 @@ export type Database = {
           ownership_types?: string[] | null
           payment_plan?: Json | null
           price_from?: number | null
+          price_per_sqm?: number | null
           price_to?: number | null
+          price_usd?: number | null
           project_status?: string | null
           risk_level?: string | null
           roi_projected?: number | null
           slug?: string | null
+          source_url?: string | null
           tagline?: string | null
           tagline_ru?: string | null
           total_units?: number | null
@@ -17338,6 +17349,7 @@ export type Database = {
           updated_at?: string | null
           video_url?: string | null
           year_built?: number | null
+          yield_estimate?: string | null
         }
         Update: {
           address?: string | null
@@ -17354,6 +17366,7 @@ export type Database = {
           created_by?: string | null
           description_en?: string | null
           description_ru?: string | null
+          description_summary?: string | null
           developer_id?: string | null
           developer_name?: string | null
           district?: string | null
@@ -17381,6 +17394,7 @@ export type Database = {
           juristic_phone?: string | null
           juristic_promptpay_id?: string | null
           juristic_whatsapp?: string | null
+          landing_enabled?: boolean | null
           lat?: number | null
           lng?: number | null
           location_area?: string | null
@@ -17394,11 +17408,14 @@ export type Database = {
           ownership_types?: string[] | null
           payment_plan?: Json | null
           price_from?: number | null
+          price_per_sqm?: number | null
           price_to?: number | null
+          price_usd?: number | null
           project_status?: string | null
           risk_level?: string | null
           roi_projected?: number | null
           slug?: string | null
+          source_url?: string | null
           tagline?: string | null
           tagline_ru?: string | null
           total_units?: number | null
@@ -17408,6 +17425,7 @@ export type Database = {
           updated_at?: string | null
           video_url?: string | null
           year_built?: number | null
+          yield_estimate?: string | null
         }
         Relationships: [
           {
