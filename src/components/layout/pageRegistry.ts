@@ -452,6 +452,7 @@ export const ReportsPage = lazy(() => import('@/pages/owner/ReportsPage'));
 export const ManagementPortfolio = lazy(() => import('@/pages/owner/ManagementPortfolio'));
 export const StaffPage = lazy(() => import('@/pages/owner/StaffPage'));
 export const MCSubscriptionPage = lazy(() => import('@/pages/owner/MCSubscriptionPage'));
+export const PipelinesIndex = lazy(() => import('@/pages/owner/PipelinesIndex'));
 export const SalesPipeline = lazy(() => import('@/pages/owner/SalesPipeline'));
 export const SalesDealDetail = lazy(() => import('@/pages/owner/SalesDealDetail'));
 export const SalesAnalytics = lazy(() => import('@/pages/owner/SalesAnalytics'));
