@@ -145,20 +145,25 @@ export type Database = {
           bedrooms_min: number | null
           budget_max: number | null
           budget_min: number | null
+          campaign_id: string | null
           client_email: string | null
           client_name: string
           client_phone: string | null
           client_source: string | null
           closed_at: string | null
+          co_agent_commission_pct: number | null
+          co_agent_id: string | null
           commission_amount: number | null
           commission_percent: number | null
           company_id: string
           contact_id: string | null
           created_at: string
           currency: string | null
+          deal_source_detail: string | null
           deal_status: string
           deal_type: string
           deal_value: number | null
+          expected_close_date: string | null
           id: string
           is_vip: boolean
           lost_reason: string | null
@@ -170,29 +175,37 @@ export type Database = {
           preferred_types: string[] | null
           priority: number | null
           property_id: string | null
+          property_project_id: string | null
+          service_line: string | null
           stage: string
           tags: string[] | null
           updated_at: string
+          won_reason: string | null
         }
         Insert: {
           agent_id: string
           bedrooms_min?: number | null
           budget_max?: number | null
           budget_min?: number | null
+          campaign_id?: string | null
           client_email?: string | null
           client_name: string
           client_phone?: string | null
           client_source?: string | null
           closed_at?: string | null
+          co_agent_commission_pct?: number | null
+          co_agent_id?: string | null
           commission_amount?: number | null
           commission_percent?: number | null
           company_id: string
           contact_id?: string | null
           created_at?: string
           currency?: string | null
+          deal_source_detail?: string | null
           deal_status?: string
           deal_type?: string
           deal_value?: number | null
+          expected_close_date?: string | null
           id?: string
           is_vip?: boolean
           lost_reason?: string | null
@@ -204,29 +217,37 @@ export type Database = {
           preferred_types?: string[] | null
           priority?: number | null
           property_id?: string | null
+          property_project_id?: string | null
+          service_line?: string | null
           stage?: string
           tags?: string[] | null
           updated_at?: string
+          won_reason?: string | null
         }
         Update: {
           agent_id?: string
           bedrooms_min?: number | null
           budget_max?: number | null
           budget_min?: number | null
+          campaign_id?: string | null
           client_email?: string | null
           client_name?: string
           client_phone?: string | null
           client_source?: string | null
           closed_at?: string | null
+          co_agent_commission_pct?: number | null
+          co_agent_id?: string | null
           commission_amount?: number | null
           commission_percent?: number | null
           company_id?: string
           contact_id?: string | null
           created_at?: string
           currency?: string | null
+          deal_source_detail?: string | null
           deal_status?: string
           deal_type?: string
           deal_value?: number | null
+          expected_close_date?: string | null
           id?: string
           is_vip?: boolean
           lost_reason?: string | null
@@ -238,9 +259,12 @@ export type Database = {
           preferred_types?: string[] | null
           priority?: number | null
           property_id?: string | null
+          property_project_id?: string | null
+          service_line?: string | null
           stage?: string
           tags?: string[] | null
           updated_at?: string
+          won_reason?: string | null
         }
         Relationships: [
           {
@@ -297,6 +321,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "v_properties_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_deals_property_project_id_fkey"
+            columns: ["property_project_id"]
+            isOneToOne: false
+            referencedRelation: "property_projects"
             referencedColumns: ["id"]
           },
         ]
@@ -1991,6 +2022,350 @@ export type Database = {
         }
         Relationships: []
       }
+      capital_campaigns: {
+        Row: {
+          created_at: string
+          description: string | null
+          end_date: string | null
+          id: string
+          name: string
+          project_id: string | null
+          start_date: string | null
+          status: string | null
+          target_amount: number | null
+          type: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          name: string
+          project_id?: string | null
+          start_date?: string | null
+          status?: string | null
+          target_amount?: number | null
+          type?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          name?: string
+          project_id?: string | null
+          start_date?: string | null
+          status?: string | null
+          target_amount?: number | null
+          type?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "capital_campaigns_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "capital_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      capital_contacts: {
+        Row: {
+          company_name: string | null
+          contact_type: string | null
+          created_at: string
+          email: string | null
+          first_name: string
+          id: string
+          investor_profile: Json | null
+          last_name: string
+          notes: string | null
+          phone: string | null
+          source: string | null
+          status: string | null
+          tags: string[] | null
+          updated_at: string
+          user_id: string
+          whatsapp: string | null
+        }
+        Insert: {
+          company_name?: string | null
+          contact_type?: string | null
+          created_at?: string
+          email?: string | null
+          first_name: string
+          id?: string
+          investor_profile?: Json | null
+          last_name?: string
+          notes?: string | null
+          phone?: string | null
+          source?: string | null
+          status?: string | null
+          tags?: string[] | null
+          updated_at?: string
+          user_id: string
+          whatsapp?: string | null
+        }
+        Update: {
+          company_name?: string | null
+          contact_type?: string | null
+          created_at?: string
+          email?: string | null
+          first_name?: string
+          id?: string
+          investor_profile?: Json | null
+          last_name?: string
+          notes?: string | null
+          phone?: string | null
+          source?: string | null
+          status?: string | null
+          tags?: string[] | null
+          updated_at?: string
+          user_id?: string
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
+      capital_outreach: {
+        Row: {
+          body: string | null
+          campaign_id: string | null
+          channel: string | null
+          contact_id: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          opened_at: string | null
+          replied_at: string | null
+          scheduled_at: string | null
+          sent_at: string | null
+          status: string | null
+          subject: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          campaign_id?: string | null
+          channel?: string | null
+          contact_id?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          opened_at?: string | null
+          replied_at?: string | null
+          scheduled_at?: string | null
+          sent_at?: string | null
+          status?: string | null
+          subject?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          campaign_id?: string | null
+          channel?: string | null
+          contact_id?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          opened_at?: string | null
+          replied_at?: string | null
+          scheduled_at?: string | null
+          sent_at?: string | null
+          status?: string | null
+          subject?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "capital_outreach_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "capital_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "capital_outreach_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "capital_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      capital_pipeline: {
+        Row: {
+          amount: number | null
+          closed_at: string | null
+          contact_id: string | null
+          created_at: string
+          currency: string | null
+          expected_close_date: string | null
+          id: string
+          notes: string | null
+          probability: number | null
+          project_id: string | null
+          stage: string | null
+          updated_at: string
+          user_id: string
+          won: boolean | null
+        }
+        Insert: {
+          amount?: number | null
+          closed_at?: string | null
+          contact_id?: string | null
+          created_at?: string
+          currency?: string | null
+          expected_close_date?: string | null
+          id?: string
+          notes?: string | null
+          probability?: number | null
+          project_id?: string | null
+          stage?: string | null
+          updated_at?: string
+          user_id: string
+          won?: boolean | null
+        }
+        Update: {
+          amount?: number | null
+          closed_at?: string | null
+          contact_id?: string | null
+          created_at?: string
+          currency?: string | null
+          expected_close_date?: string | null
+          id?: string
+          notes?: string | null
+          probability?: number | null
+          project_id?: string | null
+          stage?: string | null
+          updated_at?: string
+          user_id?: string
+          won?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "capital_pipeline_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "capital_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "capital_pipeline_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "capital_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      capital_projects: {
+        Row: {
+          asset_class: string | null
+          created_at: string
+          currency: string | null
+          description: string | null
+          documents: Json | null
+          expected_roi: number | null
+          id: string
+          is_active: boolean | null
+          location: string | null
+          min_investment: number | null
+          name: string
+          raised_amount: number | null
+          status: string | null
+          target_amount: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          asset_class?: string | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          documents?: Json | null
+          expected_roi?: number | null
+          id?: string
+          is_active?: boolean | null
+          location?: string | null
+          min_investment?: number | null
+          name: string
+          raised_amount?: number | null
+          status?: string | null
+          target_amount?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          asset_class?: string | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          documents?: Json | null
+          expected_roi?: number | null
+          id?: string
+          is_active?: boolean | null
+          location?: string | null
+          min_investment?: number | null
+          name?: string
+          raised_amount?: number | null
+          status?: string | null
+          target_amount?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      capital_templates: {
+        Row: {
+          body: string
+          channel: string | null
+          created_at: string
+          id: string
+          is_active: boolean | null
+          name: string
+          subject: string | null
+          type: string | null
+          updated_at: string
+          user_id: string
+          variables: Json | null
+        }
+        Insert: {
+          body?: string
+          channel?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          subject?: string | null
+          type?: string | null
+          updated_at?: string
+          user_id: string
+          variables?: Json | null
+        }
+        Update: {
+          body?: string
+          channel?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          subject?: string | null
+          type?: string | null
+          updated_at?: string
+          user_id?: string
+          variables?: Json | null
+        }
+        Relationships: []
+      }
       cart_items: {
         Row: {
           created_at: string
@@ -3378,6 +3753,7 @@ export type Database = {
           contact_type: string | null
           created_at: string
           created_by: string | null
+          crm_roles: string[] | null
           currency: string | null
           email: string | null
           emergency_contact_name: string | null
@@ -3392,6 +3768,7 @@ export type Database = {
           is_archived: boolean
           is_company: boolean
           job_title: string | null
+          key_dates: Json | null
           language: string | null
           last_name: string
           lead_score: number | null
@@ -3442,6 +3819,7 @@ export type Database = {
           contact_type?: string | null
           created_at?: string
           created_by?: string | null
+          crm_roles?: string[] | null
           currency?: string | null
           email?: string | null
           emergency_contact_name?: string | null
@@ -3456,6 +3834,7 @@ export type Database = {
           is_archived?: boolean
           is_company?: boolean
           job_title?: string | null
+          key_dates?: Json | null
           language?: string | null
           last_name?: string
           lead_score?: number | null
@@ -3506,6 +3885,7 @@ export type Database = {
           contact_type?: string | null
           created_at?: string
           created_by?: string | null
+          crm_roles?: string[] | null
           currency?: string | null
           email?: string | null
           emergency_contact_name?: string | null
@@ -3520,6 +3900,7 @@ export type Database = {
           is_archived?: boolean
           is_company?: boolean
           job_title?: string | null
+          key_dates?: Json | null
           language?: string | null
           last_name?: string
           lead_score?: number | null
@@ -4818,6 +5199,70 @@ export type Database = {
           },
         ]
       }
+      deal_participants: {
+        Row: {
+          committed_amount: number | null
+          company_id: string
+          contact_id: string | null
+          created_at: string
+          currency: string | null
+          deal_id: string
+          id: string
+          notes: string | null
+          role: string
+          share_pct: number | null
+          updated_at: string
+        }
+        Insert: {
+          committed_amount?: number | null
+          company_id: string
+          contact_id?: string | null
+          created_at?: string
+          currency?: string | null
+          deal_id: string
+          id?: string
+          notes?: string | null
+          role?: string
+          share_pct?: number | null
+          updated_at?: string
+        }
+        Update: {
+          committed_amount?: number | null
+          company_id?: string
+          contact_id?: string | null
+          created_at?: string
+          currency?: string | null
+          deal_id?: string
+          id?: string
+          notes?: string | null
+          role?: string
+          share_pct?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_participants_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_participants_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_participants_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "agent_deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deal_pipeline_stages: {
         Row: {
           color: string
@@ -4949,6 +5394,111 @@ export type Database = {
             columns: ["deal_id"]
             isOneToOne: false
             referencedRelation: "agent_deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deal_viewings: {
+        Row: {
+          agent_notes: string | null
+          company_id: string
+          contact_id: string | null
+          created_at: string
+          deal_id: string
+          duration_minutes: number | null
+          feedback: string | null
+          id: string
+          interested: boolean | null
+          property_id: string | null
+          rating: number | null
+          updated_at: string
+          viewing_date: string
+        }
+        Insert: {
+          agent_notes?: string | null
+          company_id: string
+          contact_id?: string | null
+          created_at?: string
+          deal_id: string
+          duration_minutes?: number | null
+          feedback?: string | null
+          id?: string
+          interested?: boolean | null
+          property_id?: string | null
+          rating?: number | null
+          updated_at?: string
+          viewing_date?: string
+        }
+        Update: {
+          agent_notes?: string | null
+          company_id?: string
+          contact_id?: string | null
+          created_at?: string
+          deal_id?: string
+          duration_minutes?: number | null
+          feedback?: string | null
+          id?: string
+          interested?: boolean | null
+          property_id?: string | null
+          rating?: number | null
+          updated_at?: string
+          viewing_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_viewings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_viewings_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_viewings_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "agent_deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_viewings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_viewings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_viewings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_viewings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_viewings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_properties_public"
             referencedColumns: ["id"]
           },
         ]
