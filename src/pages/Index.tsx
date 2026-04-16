@@ -18,7 +18,7 @@ import { PullToRefresh } from '@/components/ui/pull-to-refresh';
 import { HeroBlock } from '@/components/home/HeroBlock';
 import { QuickActionsGrid } from '@/components/home/QuickActionsGrid';
 import { ActiveSituationBanner } from '@/components/life-os/ActiveSituationBanner';
-import { InstallBanner } from '@/components/pwa/InstallBanner';
+
 import { FeaturedPropertiesCarousel } from '@/components/home/FeaturedPropertiesCarousel';
 import { WhatsAppCTA } from '@/components/home/WhatsAppCTA';
 import { TrustStats } from '@/components/home/TrustStats';
@@ -70,10 +70,6 @@ const Index = () => {
       
       <ActiveSituationBanner />
 
-      {/* PWA Install Banner */}
-      <div className="px-4 md:px-6 lg:px-8 xl:px-10 pt-3 w-full max-w-[1536px] mx-auto">
-        <InstallBanner />
-      </div>
 
       <PullToRefresh onRefresh={handleRefresh} key={refreshKey}>
         <div className="px-4 md:px-6 lg:px-8 xl:px-10 py-5 pb-20 md:pb-8 w-full max-w-[1536px] mx-auto space-y-6 lg:space-y-10">
