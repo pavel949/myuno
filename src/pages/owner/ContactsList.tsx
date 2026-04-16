@@ -584,7 +584,43 @@ export default function ContactsList() {
             </div>
           </div>
 
-          {/* Lifecycle filter */}
+          {/* HNW Tier + Segment */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-1.5">{isRu ? 'Уровень HNW' : 'HNW Tier'}</p>
+              <div className="flex flex-wrap gap-1">
+                <button type="button" onClick={() => handleHnwTierChange(null)} className={cn('px-2 py-0.5 text-xs rounded-full border', !hnwTierFilter ? 'bg-primary text-primary-foreground' : 'text-muted-foreground')}>{isRu ? 'Все' : 'All'}</button>
+                {HNW_TIERS.map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => handleHnwTierChange(hnwTierFilter === t ? null : t)}
+                    className={cn('px-2 py-0.5 text-xs rounded-full border', hnwTierFilter === t ? HNW_TIER_LABELS[t].color : 'text-muted-foreground')}
+                  >
+                    {isRu ? HNW_TIER_LABELS[t].ru : HNW_TIER_LABELS[t].en}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-1.5">{isRu ? 'Сегмент' : 'Segment'}</p>
+              <div className="flex flex-wrap gap-1">
+                <button type="button" onClick={() => handleSegmentChange(null)} className={cn('px-2 py-0.5 text-xs rounded-full border', !segmentFilter ? 'bg-primary text-primary-foreground' : 'text-muted-foreground')}>{isRu ? 'Все' : 'All'}</button>
+                {CONTACT_SEGMENTS.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => handleSegmentChange(segmentFilter === s ? null : s)}
+                    className={cn('px-2 py-0.5 text-xs rounded-full border max-w-[120px] truncate', segmentFilter === s ? 'bg-primary text-primary-foreground' : 'text-muted-foreground')}
+                  >
+                    {isRu ? CONTACT_SEGMENT_LABELS[s].ru : CONTACT_SEGMENT_LABELS[s].en}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+
           <div>
             <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-1.5">{isRu ? 'Стадия' : 'Lifecycle'}</p>
             <div className="flex flex-wrap gap-1">
