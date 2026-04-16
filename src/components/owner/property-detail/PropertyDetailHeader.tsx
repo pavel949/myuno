@@ -68,7 +68,7 @@ export function PropertyDetailHeader({ property, isRu }: PropertyDetailHeaderPro
               {property.district || property.address}
             </p>
           </div>
-          {getStatusBadge(property.status, property.approval_status)}
+          {getStatusBadge(property.approval_status, property.is_active)}
         </div>
       </div>
     </div>
