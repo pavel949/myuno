@@ -140,7 +140,7 @@ export const HeroBlock = memo(function HeroBlock() {
 
   if (!isDesktop) {
     return (
-      <div className="relative rounded-[var(--radius-lg)] overflow-hidden" style={{ boxShadow: 'var(--shadow-card)' }}>
+      <div className="relative rounded-[var(--radius-lg)] overflow-hidden hero-dark-surface" style={{ boxShadow: 'var(--shadow-card)' }}>
         <div className="absolute inset-0" style={{
           background: 'linear-gradient(135deg, hsl(216 60% 7%) 0%, hsl(214 50% 14%) 100%)'
         }} />
@@ -217,7 +217,7 @@ export const HeroBlock = memo(function HeroBlock() {
 
   // Desktop
   return (
-    <div className="relative rounded-[var(--radius-lg)] overflow-hidden p-8 xl:p-10" style={{ boxShadow: 'var(--shadow-card)' }}>
+    <div className="relative rounded-[var(--radius-lg)] overflow-hidden p-8 xl:p-10 hero-dark-surface" style={{ boxShadow: 'var(--shadow-card)' }}>
       <div className="absolute inset-0" style={{
         background: 'linear-gradient(135deg, hsl(216 60% 7%) 0%, hsl(214 50% 14%) 100%)'
       }} />
