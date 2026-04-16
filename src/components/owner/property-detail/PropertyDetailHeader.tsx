@@ -11,6 +11,7 @@ interface PropertyDetailHeaderProps {
     address?: string | null;
     status: string;
     approval_status?: string | null;
+    is_active?: boolean;
   };
   isRu: boolean;
 }
