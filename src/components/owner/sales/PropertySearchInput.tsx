@@ -15,7 +15,7 @@ export interface PropertySearchResult {
   bedrooms: number | null;
   price: number | null;
   plot_size_sqm: number | null;
-  cover_image_url: string | null;
+  cover_image: string | null;
 }
 
 function usePropertySearch(companyId: string, query: string) {

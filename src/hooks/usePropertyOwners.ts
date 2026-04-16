@@ -46,7 +46,7 @@ export function useContactOwnedProperties(contactId: string | undefined) {
       if (!contactId) return [];
       const { data, error } = await supabase
         .from('property_owners')
-        .select('*, property:properties(id, title_en, title_ru, property_type, district, bedrooms, price_thb, cover_image_url)')
+        .select('*, property:properties(id, title_en, title_ru, property_type, district, bedrooms, price_thb, cover_image)')
         .eq('contact_id', contactId)
         .order('created_at', { ascending: true });
       if (error) throw error;
