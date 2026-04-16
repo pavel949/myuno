@@ -18,20 +18,16 @@ export interface OffplanProject {
   district: string | null;
   isFeatured: boolean;
   isActive: boolean;
-  // Developer info
   developerId: string | null;
   developerName: string | null;
   developerLogo: string | null;
   developerScore: number | null;
   developerVerified: boolean;
-  // Project status
   projectStatus: ProjectStatus;
   completionDate: string | null;
   constructionProgress: number;
-  // Pricing
   priceFrom: number | null;
   priceTo: number | null;
-  // Investment metrics
   investmentEnabled: boolean;
   fundingGoal: number | null;
   amountRaised: number | null;
@@ -39,12 +35,15 @@ export interface OffplanProject {
   roiProjected: number | null;
   muunoScore: number | null;
   riskLevel: string | null;
-  // Units
   unitsAvailable: number;
   unitsSold: number;
   amenities: string[] | null;
-  /** OFFPLAN catalogue facets (property_projects.offplan_catalog) */
   offplanCatalog: OffplanCatalogFacet | null;
+  featuredRank: number | null;
+  featuredLabel: string | null;
+  descriptionSummary: string | null;
+  yieldEstimate: string | null;
+  sourceUrl: string | null;
 }
 
 function parseOffplanCatalog(raw: unknown): OffplanCatalogFacet | null {
@@ -123,6 +122,11 @@ export function useOffplanProjects(filters?: OffplanFilters) {
         unitsSold: 0,
         amenities: p.amenities,
         offplanCatalog: parseOffplanCatalog((p as { offplan_catalog?: unknown }).offplan_catalog),
+        featuredRank: p.featured_rank ?? null,
+        featuredLabel: p.featured_label ?? null,
+        descriptionSummary: p.description_summary ?? null,
+        yieldEstimate: p.yield_estimate ?? null,
+        sourceUrl: p.source_url ?? null,
       });
 
       const mapRich = (p: any): OffplanProject => {
@@ -145,9 +149,6 @@ export function useOffplanProjects(filters?: OffplanFilters) {
         };
       };
 
-      // 1) Rich read (main app DB). Do NOT select offplan_catalog in the primary query:
-      // some production DBs have not applied the offplan_catalog migration yet; selecting a missing
-      // column makes the whole PostgREST request fail → empty UI.
       const richSelect = `
           id,
           name_en,
@@ -172,6 +173,12 @@ export function useOffplanProjects(filters?: OffplanFilters) {
           units_available,
           units_sold,
           amenities,
+          offplan_catalog,
+          featured_rank,
+          featured_label,
+          description_summary,
+          yield_estimate,
+          source_url,
           developers (
             id,
             name_en,
@@ -201,20 +208,7 @@ export function useOffplanProjects(filters?: OffplanFilters) {
       }
 
       if (!rich.error && rich.data && rich.data.length > 0) {
-        const ids = rich.data.map((row: { id: string }) => row.id);
-        const catRes = await (supabase as any).from('property_projects').select('id, offplan_catalog').in('id', ids);
-        const byId = new Map<string, unknown>();
-        if (!catRes.error && catRes.data) {
-          for (const row of catRes.data as Array<{ id: string; offplan_catalog?: unknown }>) {
-            byId.set(row.id, row.offplan_catalog ?? null);
-          }
-        }
-        return rich.data.map((p: any) =>
-          mapRich({
-            ...p,
-            offplan_catalog: byId.get(p.id) ?? p.offplan_catalog ?? null,
-          }),
-        );
+        return rich.data.map((p: any) => mapRich(p));
       }
 
       if (!rich.error && rich.data) {

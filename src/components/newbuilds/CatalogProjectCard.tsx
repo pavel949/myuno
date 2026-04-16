@@ -59,12 +59,15 @@ export function CatalogProjectCard({ project, rank, onInquiry }: Props) {
     `Hello! I am interested in: ${project.nameEn}${zone ? ` (${zone})` : ''}`
   );
 
+  const isFeatured = project.isFeatured;
+
   return (
     <div
       className="rounded-xl overflow-hidden transition-all duration-200 hover:-translate-y-0.5"
       style={{
         background: 'hsl(var(--nb-surface))',
-        border: '1px solid hsl(var(--nb-gold) / 0.12)',
+        border: isFeatured ? '2px solid hsl(var(--nb-gold))' : '1px solid hsl(var(--nb-gold) / 0.12)',
+        boxShadow: isFeatured ? '0 0 20px hsl(var(--nb-gold) / 0.15)' : undefined,
       }}
     >
       {/* Image */}
@@ -79,6 +82,16 @@ export function CatalogProjectCard({ project, rank, onInquiry }: Props) {
         ) : (
           <div className="w-full h-full flex items-center justify-center" style={{ background: 'hsl(var(--nb-bg))' }}>
             <Building className="w-10 h-10 opacity-30" style={{ color: 'hsl(var(--nb-muted))' }} />
+          </div>
+        )}
+
+        {/* Featured badge */}
+        {isFeatured && (
+          <div
+            className="absolute top-2 left-2 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider"
+            style={{ background: 'hsl(var(--nb-gold))', color: 'hsl(var(--nb-bg))' }}
+          >
+            ⭐ {project.featuredLabel || 'FEATURED'}
           </div>
         )}
 
