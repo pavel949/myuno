@@ -18,7 +18,7 @@ import { PullToRefresh } from '@/components/ui/pull-to-refresh';
 import { HeroBlock } from '@/components/home/HeroBlock';
 import { QuickActionsGrid } from '@/components/home/QuickActionsGrid';
 import { ActiveSituationBanner } from '@/components/life-os/ActiveSituationBanner';
-import { InstallBanner } from '@/components/pwa/InstallBanner';
+
 import { FeaturedPropertiesCarousel } from '@/components/home/FeaturedPropertiesCarousel';
 import { WhatsAppCTA } from '@/components/home/WhatsAppCTA';
 import { TrustStats } from '@/components/home/TrustStats';
