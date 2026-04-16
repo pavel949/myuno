@@ -37,6 +37,56 @@ export function isCrmRole(value: string): value is CrmRole {
   return (CRM_ROLES as readonly string[]).includes(value);
 }
 
+/** Contact segments */
+export const CONTACT_SEGMENTS = [
+  'investor', 'buyer', 'seller', 'owner', 'tenant', 'guest', 'broker', 'developer', 'vendor',
+] as const;
+export type ContactSegment = (typeof CONTACT_SEGMENTS)[number];
+
+export const CONTACT_SEGMENT_LABELS: Record<ContactSegment, { en: string; ru: string }> = {
+  investor: { en: 'Investor', ru: 'Инвестор' },
+  buyer: { en: 'Buyer', ru: 'Покупатель' },
+  seller: { en: 'Seller', ru: 'Продавец' },
+  owner: { en: 'Owner', ru: 'Собственник' },
+  tenant: { en: 'Tenant', ru: 'Арендатор' },
+  guest: { en: 'Guest', ru: 'Гость' },
+  broker: { en: 'Broker', ru: 'Брокер' },
+  developer: { en: 'Developer', ru: 'Застройщик' },
+  vendor: { en: 'Vendor', ru: 'Поставщик' },
+};
+
+/** HNW (High Net Worth) tier */
+export const HNW_TIERS = ['standard', 'hnw', 'uhnw'] as const;
+export type HnwTier = (typeof HNW_TIERS)[number];
+
+export const HNW_TIER_LABELS: Record<HnwTier, { en: string; ru: string; color: string }> = {
+  standard: { en: 'Standard', ru: 'Стандарт', color: 'bg-muted text-muted-foreground border-border' },
+  hnw: { en: 'HNW', ru: 'HNW', color: 'bg-warning/15 text-warning border-warning/30' },
+  uhnw: { en: 'UHNW', ru: 'UHNW', color: 'bg-amber-500/15 text-amber-700 border-amber-500/30' },
+};
+
+/** AML/KYC status */
+export const KYC_STATUSES = ['not_started', 'pending', 'approved', 'rejected', 'expired'] as const;
+export type KycStatus = (typeof KYC_STATUSES)[number];
+
+export const KYC_STATUS_LABELS: Record<KycStatus, { en: string; ru: string; color: string }> = {
+  not_started: { en: 'Not Started', ru: 'Не начат', color: 'bg-muted text-muted-foreground' },
+  pending: { en: 'Pending', ru: 'В процессе', color: 'bg-warning/15 text-warning' },
+  approved: { en: 'Approved', ru: 'Одобрен', color: 'bg-success/15 text-success' },
+  rejected: { en: 'Rejected', ru: 'Отклонён', color: 'bg-destructive/15 text-destructive' },
+  expired: { en: 'Expired', ru: 'Истёк', color: 'bg-muted text-muted-foreground' },
+};
+
+/** Contact categories */
+export const CONTACT_CATEGORIES = ['person', 'company', 'household'] as const;
+export type ContactCategory = (typeof CONTACT_CATEGORIES)[number];
+
+export const CONTACT_CATEGORY_LABELS: Record<ContactCategory, { en: string; ru: string }> = {
+  person: { en: 'Person', ru: 'Физлицо' },
+  company: { en: 'Company', ru: 'Компания' },
+  household: { en: 'Household', ru: 'Домохозяйство' },
+};
+
 /** Contact ↔ Contact relationship types */
 export const CONTACT_RELATIONSHIP_TYPES = [
   'spouse',

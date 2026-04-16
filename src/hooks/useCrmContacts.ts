@@ -68,6 +68,20 @@ export interface CrmContact {
   website: string | null;
   is_vip: boolean;
   marital_status: string | null;
+  // New fields from contacts enhancement
+  contact_category: string | null;
+  passport_country: string | null;
+  tax_residency: string | null;
+  segment: string[] | null;
+  hnw_tier: string | null;
+  aml_kyc_status: string | null;
+  aml_kyc_date: string | null;
+  pep_flag: boolean;
+  sanctions_flag: boolean;
+  preferences: Record<string, unknown> | null;
+  ai_summary: string | null;
+  last_activity_at: string | null;
+  owner_user_id: string | null;
 }
 
 export type CrmContactInsert = Omit<CrmContact, 'id' | 'created_at' | 'updated_at' | 'job_title' | 'birthday' | 'family_info' | 'interests' | 'scoring' | 'deal_count' | 'mobile' | 'is_company' | 'address_street' | 'address_street2' | 'address_city' | 'address_state' | 'address_zip' | 'address_country' | 'tax_id' | 'website' | 'lead_score' | 'lead_temperature' | 'lifecycle_stage' | 'linked_user_id' | 'special_notes' | 'emergency_contact_name' | 'emergency_contact_phone' | 'emergency_contact_relation' | 'instagram' | 'facebook' | 'linkedin' | 'is_vip' | 'marital_status'> & {
