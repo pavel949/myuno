@@ -4,7 +4,7 @@
  */
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Building2, Map, Compass, Users, Calculator, Shield, TrendingUp } from 'lucide-react';
+import { Building2, Map, Compass, Users, Calculator, Shield } from 'lucide-react';
 import { NbCompareProvider } from './NbCompareProvider';
 import '@/styles/newbuilds-theme.css';
 
