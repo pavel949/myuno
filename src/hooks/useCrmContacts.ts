@@ -245,6 +245,10 @@ export function useCrmContacts(
     leadTemperature?: string;
     /** Any role from CRM_ROLES; filters contacts where crm_roles contains this value */
     crmRole?: string;
+    /** HNW tier filter */
+    hnwTier?: string;
+    /** Segment filter */
+    segment?: string;
   }
 ) {
   return useQuery({
@@ -307,6 +311,14 @@ export function useCrmContacts(
 
       if (filters?.crmRole) {
         q = q.contains('crm_roles', [filters.crmRole]);
+      }
+
+      if (filters?.hnwTier) {
+        q = (q as any).eq('hnw_tier', filters.hnwTier);
+      }
+
+      if (filters?.segment) {
+        q = (q as any).contains('segment', [filters.segment]);
       }
 
       const { data, error, count } = await q;
