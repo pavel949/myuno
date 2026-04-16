@@ -109,6 +109,7 @@ export interface AgentDeal {
   deal_source_detail: string | null;
   tags: string[];
   priority: number;
+  pipeline_id: string | null;
   is_vip: boolean;
   created_at: string;
   updated_at: string;

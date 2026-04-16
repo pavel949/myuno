@@ -4,6 +4,7 @@ import { AgentDeal, DEAL_STAGE_LABELS, DealStage, DEAL_TYPE_LABELS, DealType, us
 import { DynamicPipelineResult, DynamicStage } from '@/hooks/useDynamicPipelineStages';
 import { useAddDealActivity } from '@/hooks/useAgentDealActivities';
 import { useLogDealChanges } from '@/hooks/useDealFieldChanges';
+import { useLogStageChange } from '@/hooks/useDealStageHistory';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
@@ -265,6 +266,7 @@ export function KanbanBoard({ deals, members = [], pipelineData, onQuickCreate }
   const updateDeal = useUpdateDeal();
   const addActivity = useAddDealActivity();
   const logChanges = useLogDealChanges();
+  const logStageChange = useLogStageChange();
   const [activeDeal, setActiveDeal] = useState<AgentDeal | null>(null);
 
   const sensors = useSensors(
@@ -336,15 +338,15 @@ export function KanbanBoard({ deals, members = [], pipelineData, onQuickCreate }
         stage_from: deal.stage,
         stage_to: newStage,
       });
-      // Non-blocking: log stage change to deal_field_changes (audit trail)
-      const changeRow = {
+      // Non-blocking: log to deal_stage_history + deal_field_changes
+      logStageChange.mutate({ dealId, fromStageId: previousStageId, toStageId: newStage });
+      supabase.from('deal_field_changes').insert({
         deal_id: dealId,
         field_name: 'stage',
         old_value: previousStageId,
         new_value: newStage,
         user_id: user!.id,
-      };
-      supabase.from('deal_field_changes').insert(changeRow).then(({ error }) => {
+      }).then(({ error }) => {
         if (error) toast.error(isRu ? 'Не удалось записать историю изменений' : 'Audit log failed to save');
       });
     } catch {
