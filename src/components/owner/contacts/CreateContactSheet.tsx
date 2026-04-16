@@ -24,7 +24,7 @@ import {
   MARITAL_STATUS_LABELS,
   MARITAL_STATUS_VALUES,
 } from '@/lib/crmContactFormPresets';
-import { UserPlus, X } from 'lucide-react';
+import { UserPlus, X, Shield } from 'lucide-react';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
 
 interface Props {
