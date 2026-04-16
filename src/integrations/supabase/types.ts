@@ -142,6 +142,7 @@ export type Database = {
       agent_deals: {
         Row: {
           agent_id: string
+          ai_next_best_action: string | null
           bedrooms_min: number | null
           budget_max: number | null
           budget_min: number | null
@@ -154,7 +155,10 @@ export type Database = {
           co_agent_commission_pct: number | null
           co_agent_id: string | null
           commission_amount: number | null
+          commission_gross: number | null
+          commission_net: number | null
           commission_percent: number | null
+          commission_splits: Json | null
           company_id: string
           contact_id: string | null
           created_at: string
@@ -184,6 +188,7 @@ export type Database = {
         }
         Insert: {
           agent_id: string
+          ai_next_best_action?: string | null
           bedrooms_min?: number | null
           budget_max?: number | null
           budget_min?: number | null
@@ -196,7 +201,10 @@ export type Database = {
           co_agent_commission_pct?: number | null
           co_agent_id?: string | null
           commission_amount?: number | null
+          commission_gross?: number | null
+          commission_net?: number | null
           commission_percent?: number | null
+          commission_splits?: Json | null
           company_id: string
           contact_id?: string | null
           created_at?: string
@@ -226,6 +234,7 @@ export type Database = {
         }
         Update: {
           agent_id?: string
+          ai_next_best_action?: string | null
           bedrooms_min?: number | null
           budget_max?: number | null
           budget_min?: number | null
@@ -238,7 +247,10 @@ export type Database = {
           co_agent_commission_pct?: number | null
           co_agent_id?: string | null
           commission_amount?: number | null
+          commission_gross?: number | null
+          commission_net?: number | null
           commission_percent?: number | null
+          commission_splits?: Json | null
           company_id?: string
           contact_id?: string | null
           created_at?: string
@@ -4362,6 +4374,8 @@ export type Database = {
       }
       crm_pipeline_stages: {
         Row: {
+          automation: Json | null
+          code: string | null
           color: string | null
           id: string
           is_lost: boolean | null
@@ -4370,9 +4384,13 @@ export type Database = {
           name_ru: string
           pipeline_id: string
           probability: number | null
+          required_fields: string[] | null
+          sla_days: number | null
           sort_order: number | null
         }
         Insert: {
+          automation?: Json | null
+          code?: string | null
           color?: string | null
           id?: string
           is_lost?: boolean | null
@@ -4381,9 +4399,13 @@ export type Database = {
           name_ru: string
           pipeline_id: string
           probability?: number | null
+          required_fields?: string[] | null
+          sla_days?: number | null
           sort_order?: number | null
         }
         Update: {
+          automation?: Json | null
+          code?: string | null
           color?: string | null
           id?: string
           is_lost?: boolean | null
@@ -4392,6 +4414,8 @@ export type Database = {
           name_ru?: string
           pipeline_id?: string
           probability?: number | null
+          required_fields?: string[] | null
+          sla_days?: number | null
           sort_order?: number | null
         }
         Relationships: [
@@ -4406,8 +4430,11 @@ export type Database = {
       }
       crm_pipelines: {
         Row: {
+          code: string | null
           company_id: string
+          config: Json | null
           created_at: string | null
+          division: string | null
           id: string
           is_active: boolean | null
           is_default: boolean | null
@@ -4417,8 +4444,11 @@ export type Database = {
           sort_order: number | null
         }
         Insert: {
+          code?: string | null
           company_id: string
+          config?: Json | null
           created_at?: string | null
+          division?: string | null
           id?: string
           is_active?: boolean | null
           is_default?: boolean | null
@@ -4428,8 +4458,11 @@ export type Database = {
           sort_order?: number | null
         }
         Update: {
+          code?: string | null
           company_id?: string
+          config?: Json | null
           created_at?: string | null
+          division?: string | null
           id?: string
           is_active?: boolean | null
           is_default?: boolean | null
@@ -5263,6 +5296,60 @@ export type Database = {
           },
         ]
       }
+      deal_parties: {
+        Row: {
+          commission_amount: number | null
+          commission_pct: number | null
+          contact_id: string | null
+          created_at: string | null
+          deal_id: string
+          id: string
+          notes: string | null
+          role: string
+          signed_agreement_url: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          commission_amount?: number | null
+          commission_pct?: number | null
+          contact_id?: string | null
+          created_at?: string | null
+          deal_id: string
+          id?: string
+          notes?: string | null
+          role?: string
+          signed_agreement_url?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          commission_amount?: number | null
+          commission_pct?: number | null
+          contact_id?: string | null
+          created_at?: string | null
+          deal_id?: string
+          id?: string
+          notes?: string | null
+          role?: string
+          signed_agreement_url?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_parties_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_parties_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "agent_deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deal_pipeline_stages: {
         Row: {
           color: string
@@ -5391,6 +5478,47 @@ export type Database = {
           },
           {
             foreignKeyName: "deal_scheduled_activities_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "agent_deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deal_stage_history: {
+        Row: {
+          changed_at: string | null
+          changed_by: string | null
+          deal_id: string
+          duration_in_previous_stage: string | null
+          from_stage_id: string | null
+          id: string
+          notes: string | null
+          to_stage_id: string
+        }
+        Insert: {
+          changed_at?: string | null
+          changed_by?: string | null
+          deal_id: string
+          duration_in_previous_stage?: string | null
+          from_stage_id?: string | null
+          id?: string
+          notes?: string | null
+          to_stage_id: string
+        }
+        Update: {
+          changed_at?: string | null
+          changed_by?: string | null
+          deal_id?: string
+          duration_in_previous_stage?: string | null
+          from_stage_id?: string | null
+          id?: string
+          notes?: string | null
+          to_stage_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_stage_history_deal_id_fkey"
             columns: ["deal_id"]
             isOneToOne: false
             referencedRelation: "agent_deals"
