@@ -622,6 +622,39 @@ const { data: contact, isLoading, isError } = useCrmContact(id);
               </div>
             </TabsContent>
 
+            {/* KYC */}
+            <TabsContent value="kyc" className="mt-4">
+              <div className="rounded-xl border bg-card p-5 space-y-4">
+                <h3 className="text-sm font-semibold">{isRu ? 'KYC / Compliance' : 'KYC / Compliance'}</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <FieldRow label={isRu ? 'Статус KYC' : 'KYC Status'}>
+                    <Badge className={cn('text-xs', KYC_STATUS_LABELS[(contact.aml_kyc_status || 'not_started') as KycStatus]?.color || '')}>
+                      {isRu ? KYC_STATUS_LABELS[(contact.aml_kyc_status || 'not_started') as KycStatus]?.ru : KYC_STATUS_LABELS[(contact.aml_kyc_status || 'not_started') as KycStatus]?.en}
+                    </Badge>
+                  </FieldRow>
+                  <FieldRow label={isRu ? 'Дата KYC' : 'KYC Date'}>
+                    {contact.aml_kyc_date || <span className="text-muted-foreground/50">—</span>}
+                  </FieldRow>
+                  <FieldRow label={isRu ? 'Паспорт' : 'Passport'}>
+                    {contact.passport_country || <span className="text-muted-foreground/50">—</span>}
+                  </FieldRow>
+                  <FieldRow label={isRu ? 'Налог. рез.' : 'Tax Residency'}>
+                    {contact.tax_residency || <span className="text-muted-foreground/50">—</span>}
+                  </FieldRow>
+                  <FieldRow label="PEP">
+                    <Badge variant={contact.pep_flag ? 'destructive' : 'secondary'} className="text-xs">
+                      {contact.pep_flag ? (isRu ? 'Да' : 'Yes') : (isRu ? 'Нет' : 'No')}
+                    </Badge>
+                  </FieldRow>
+                  <FieldRow label={isRu ? 'Санкции' : 'Sanctions'}>
+                    <Badge variant={contact.sanctions_flag ? 'destructive' : 'secondary'} className="text-xs">
+                      {contact.sanctions_flag ? (isRu ? 'Да' : 'Yes') : (isRu ? 'Нет' : 'No')}
+                    </Badge>
+                  </FieldRow>
+                </div>
+              </div>
+            </TabsContent>
+
             {/* Properties */}
             <TabsContent value="properties" className="mt-4">
               <ContactPropertiesSection contactId={contact.id} companyId={contact.company_id} />
