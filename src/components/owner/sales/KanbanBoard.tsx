@@ -4,6 +4,7 @@ import { AgentDeal, DEAL_STAGE_LABELS, DealStage, DEAL_TYPE_LABELS, DealType, us
 import { DynamicPipelineResult, DynamicStage } from '@/hooks/useDynamicPipelineStages';
 import { useAddDealActivity } from '@/hooks/useAgentDealActivities';
 import { useLogDealChanges } from '@/hooks/useDealFieldChanges';
+import { useLogStageChange } from '@/hooks/useDealStageHistory';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
@@ -265,6 +266,7 @@ export function KanbanBoard({ deals, members = [], pipelineData, onQuickCreate }
   const updateDeal = useUpdateDeal();
   const addActivity = useAddDealActivity();
   const logChanges = useLogDealChanges();
+  const logStageChange = useLogStageChange();
   const [activeDeal, setActiveDeal] = useState<AgentDeal | null>(null);
 
   const sensors = useSensors(
