@@ -24,7 +24,7 @@ function HeroSearchInput({ isRu }: { isRu: boolean }) {
     <div className="flex items-center gap-2 rounded-[var(--radius-md)] px-4 py-3"
       style={{
         background: 'hsl(var(--bg-elevated))',
-        border: '1px solid hsl(0 0% 100% / 0.07)',
+        border: '1px solid hsl(var(--border))',
       }}
     >
       <Search className="w-4 h-4 text-muted-foreground shrink-0" />
@@ -92,7 +92,7 @@ function PersonaSwitcher({ isRu }: { isRu: boolean }) {
               style={{
                 background: isActive
                   ? PERSONA_GRADIENTS[p]
-                  : 'hsl(0 0% 100% / 0.06)',
+                  : 'hsl(var(--muted))',
                 backdropFilter: isActive ? 'none' : 'blur(8px)',
               }}
             >
@@ -187,7 +187,7 @@ export const HeroBlock = memo(function HeroBlock() {
               <div className="flex items-center gap-2 mt-3 flex-wrap">
                 {loyaltyTier && (
                   <Link to="/wallet" className="flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-full)] text-xs min-h-[44px]"
-                    style={{ background: 'hsl(0 0% 100% / 0.07)', border: '1px solid hsl(0 0% 100% / 0.1)' }}
+                    style={{ background: 'hsl(var(--muted))', border: '1px solid hsl(var(--border))' }}
                   >
                     <Trophy className="w-3 h-3 text-primary" />
                     <span className="font-medium text-foreground">{loyaltyTier.name}</span>
@@ -196,7 +196,7 @@ export const HeroBlock = memo(function HeroBlock() {
                 )}
                 {activityStreak && activityStreak > 0 ? (
                   <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-full)] text-xs min-h-[44px]"
-                    style={{ background: 'hsl(0 0% 100% / 0.07)', border: '1px solid hsl(0 0% 100% / 0.1)' }}
+                    style={{ background: 'hsl(var(--muted))', border: '1px solid hsl(var(--border))' }}
                   >
                     <Flame className="w-3 h-3 text-warning" />
                     <span className="font-medium text-foreground">
