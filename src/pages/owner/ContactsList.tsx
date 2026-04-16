@@ -300,6 +300,8 @@ export default function ContactsList() {
   const [vipFilter, setVipFilter] = useState<'all' | 'vip' | 'standard'>('all');
   const [leadTempFilter, setLeadTempFilter] = useState<string | null>(null);
   const [crmRoleFilter, setCrmRoleFilter] = useState<string | null>(null);
+  const [hnwTierFilter, setHnwTierFilter] = useState<string | null>(null);
+  const [segmentFilter, setSegmentFilter] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState<string>('updated_at');
@@ -313,6 +315,8 @@ export default function ContactsList() {
   const handleVipChange = (v: 'all' | 'vip' | 'standard') => { setVipFilter(v); setPage(0); };
   const handleLeadTempChange = (v: string | null) => { setLeadTempFilter(v); setPage(0); };
   const handleCrmRoleChange = (v: string | null) => { setCrmRoleFilter(v); setPage(0); };
+  const handleHnwTierChange = (v: string | null) => { setHnwTierFilter(v); setPage(0); };
+  const handleSegmentChange = (v: string | null) => { setSegmentFilter(v); setPage(0); };
 
   const { data: contactTypeOptions = [] } = useCrmOptions(companyId, 'contact_type');
   const { data: leadSourceOptions = [] } = useCrmOptions(companyId, 'lead_source');
@@ -332,13 +336,15 @@ export default function ContactsList() {
     vip: vipFilter === 'all' ? undefined : vipFilter,
     leadTemperature: leadTempFilter || undefined,
     crmRole: crmRoleFilter || undefined,
+    hnwTier: hnwTierFilter || undefined,
+    segment: segmentFilter || undefined,
   });
   const contacts = result?.data ?? [];
   const totalCount = result?.count ?? 0;
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   const activeFiltersCount =
-    [typeFilter, sourceFilter, tagFilter, lifecycleFilter, leadTempFilter, crmRoleFilter].filter(Boolean).length +
+    [typeFilter, sourceFilter, tagFilter, lifecycleFilter, leadTempFilter, crmRoleFilter, hnwTierFilter, segmentFilter].filter(Boolean).length +
     (vipFilter !== 'all' ? 1 : 0);
 
   if (!companyId) {
