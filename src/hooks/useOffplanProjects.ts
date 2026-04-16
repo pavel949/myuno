@@ -18,20 +18,16 @@ export interface OffplanProject {
   district: string | null;
   isFeatured: boolean;
   isActive: boolean;
-  // Developer info
   developerId: string | null;
   developerName: string | null;
   developerLogo: string | null;
   developerScore: number | null;
   developerVerified: boolean;
-  // Project status
   projectStatus: ProjectStatus;
   completionDate: string | null;
   constructionProgress: number;
-  // Pricing
   priceFrom: number | null;
   priceTo: number | null;
-  // Investment metrics
   investmentEnabled: boolean;
   fundingGoal: number | null;
   amountRaised: number | null;
@@ -39,12 +35,15 @@ export interface OffplanProject {
   roiProjected: number | null;
   muunoScore: number | null;
   riskLevel: string | null;
-  // Units
   unitsAvailable: number;
   unitsSold: number;
   amenities: string[] | null;
-  /** OFFPLAN catalogue facets (property_projects.offplan_catalog) */
   offplanCatalog: OffplanCatalogFacet | null;
+  featuredRank: number | null;
+  featuredLabel: string | null;
+  descriptionSummary: string | null;
+  yieldEstimate: string | null;
+  sourceUrl: string | null;
 }
 
 function parseOffplanCatalog(raw: unknown): OffplanCatalogFacet | null {
