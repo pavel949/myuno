@@ -201,6 +201,7 @@ const navigate = useNavigate();
       });
       onOpenChange(false);
       setSelectedContact(null);
+      setSelectedProperty(null);
       setErrors({});
       setForm({ client_name: '', client_phone: '', client_email: '', client_source: 'website', deal_type: 'sale', notes: '', budget_min: '', budget_max: '', currency: 'THB', bedrooms_min: '', preferred_types: [], preferred_districts: [], is_vip: false, property_project_id: '' });
       if (createdDeal?.id) {
