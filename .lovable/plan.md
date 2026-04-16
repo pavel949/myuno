@@ -1,170 +1,126 @@
 
 
-# Глубокий аудит CRM системы MC — Результаты и план доработок
+# Ignatev CRM — Contacts Module Enhancement
 
-## Текущее состояние: что уже есть
+## Current State
 
-### Сильные стороны
-- **Контакты** (crm_contacts): 50+ полей, теги, lifecycle stage, scoring, lead temperature, contact types, multiple pipelines
-- **Сделки** (agent_deals): 4 типа (sale/rent/investment/management), 7 стадий, VIP-флаг, приоритет, теги, привязка к контакту и объекту
-- **Динамические воронки** (crm_pipelines + crm_pipeline_stages): настраиваемые стадии, вероятности, цвета, множественные пайплайны
-- **Активности** (crm_activities): 15 типов (call, email, meeting, WhatsApp, showing, quote, etc.)
-- **Задачи** (crm_tasks): привязка к контакту/сделке/объекту, assignee, due date, reminders
-- **Аналитика** (SalesAnalytics): воронка, конверсия по стадиям, pie charts по источникам, leaderboard агентов
-- **Автоматизация** (crm_workflows): trigger-based (deal_created, stage_changed, won/lost, contact_created)
-- **Последовательности** (crm_sequences): multi-step drip с enrollment tracking
-- **КП** (crm_quotes): items, tax, currency, PDF
-- **Кастомные поля** (crm_custom_fields): per-entity расширения
-- **Шаблоны, email, meetings, web-forms, documents** — всё есть
-- **Настройки** (PipelineSettingsPage): contact_type, lead_source, deal_type, task_type, lost_reason, win_reason — полностью кастомизируемые
-- **Co-agent комиссии** (usePayoutRules): coagent/staff/partner/broker split
+**What exists and works well:**
+- `crm_contacts` table with 60+ columns (name, phone, email, social, budget, preferences, tags, scoring, lifecycle, address, VIP, etc.)
+- `crm_roles` and `key_dates` columns already added
+- ContactsList page with grid/list view, filters (type, source, tag, lifecycle, VIP, lead temp, CRM role), search, pagination, export, import
+- ContactDetail page with Odoo-style smart buttons, tabbed layout (Timeline, Deals, Properties, Tasks, Documents), AI assistant panel
+- CSV/XLSX import with column mapping
+- Duplicate detection via Edge Function
+- Create/Edit contact sheets with tabbed forms
 
-### Capital CRM (отдельный модуль /capital)
-- Отдельная UI: dashboard, contacts, projects, campaigns, outreach, pipeline, templates
-- Но: **таблицы capital_* НЕ существуют в production DB** — модуль неработоспособен
+**What's missing (per spec):**
+- DB: `contact_type` is text (buyer/seller/etc) but spec wants `type` = person|company|household (current `is_company` boolean is partial)
+- DB: Missing columns: `passport_country`, `tax_residency`, `segment[]` (investor|buyer|seller|owner|tenant|guest|broker|developer|vendor), `hnw_tier`, `aml_kyc_status`, `aml_kyc_date`, `pep_flag`, `sanctions_flag`, `preferences` JSONB, `ai_summary`, `last_activity_at`, `owner_user_id`
+- DB: `contact_relationships` table doesn't exist in DB (only in TypeScript)
+- UI: No KYC tab in contact forms
+- UI: No segment multi-select (current `contact_type` is single-select)
+- UI: No HNW tier filter in list
+- UI: No saved views
+- UI: No "Communications" tab on ContactDetail
+- Seed: No realistic Phuket market contacts
 
----
+## Plan
 
-## Выявленные проблемы
+### Phase 1 — Database Migration
 
-### A. Критические баги (Schema Drift)
-
-| # | Проблема | Влияние |
-|---|----------|---------|
-| A1 | `agent_deals` не имеет колонок `won_reason`, `property_project_id` в DB, но код (TypeScript) их использует | Данные не сохраняются, молчаливо теряются |
-| A2 | `crm_contacts` не имеет `crm_roles`, `key_dates` в DB | Ролевой маппинг контактов не работает |
-| A3 | Capital module (`/capital/*`) ссылается на 6 таблиц, которых нет в DB | Весь модуль Capital нерабочий |
-
-### B. Функциональные пробелы (для вашего бизнес-кейса)
-
-| # | Отсутствует | Что нужно |
-|---|-------------|-----------|
-| B1 | **Нет deal_type для клубных/оптовых сделок** | Добавить: `club_deal`, `bulk_purchase`, `resale`, `long_term_rent`, `short_term_rent` |
-| B2 | **Аренда не разделена** на краткосрочную/долгосрочную | Сейчас один тип `rent` — нужны два с разными pipeline stages |
-| B3 | **Нет привязки сделки к off-plan проекту** в DB | `property_project_id` есть в TypeScript, но не в DB |
-| B4 | **Нет кампаний продаж off-plan** | Нужна связь deal → campaign для трекинга целевых продаж проектов |
-| B5 | **Нет co-agent tracking на уровне сделки** | Payout rules привязаны к property, не к deal |
-| B6 | **Нет client preference tracking** | Предпочтения по district/type есть в deal, но нет истории просмотров и реакций |
-| B7 | **Capital CRM полностью отключен** | Таблицы не созданы |
-
-### C. UX проблемы
-
-| # | Проблема |
-|---|----------|
-| C1 | CRM Dashboard и SalesPipeline — два отдельных экрана с дублирующимися данными и фильтрами |
-| C2 | Нет единого timeline/activity feed по контакту (задачи, активности, сделки, показы — разрозненно) |
-| C3 | Нет быстрого action bar: "Позвонил → Назначил показ → Отправил КП" в 1 клик |
-| C4 | Pivot table и Analytics на разных страницах — нет drill-down из KPI в список сделок |
-| C5 | Нет dashboard виджета "Мой день" — overdue tasks, today's tasks, follow-ups |
-
-### D. Автоматизация
-
-| # | Проблема |
-|---|----------|
-| D1 | Workflows определены, но **нет execution engine** — триггеры пишутся в DB, но не выполняются |
-| D2 | Sequences enrollment есть, но **нет cron для продвижения шагов** |
-| D3 | Нет автоматического создания задач при смене стадии |
-| D4 | Нет автоматических напоминаний о follow-up |
-
----
-
-## План реализации (приоритизированный)
-
-### Фаза 1 — Schema Fixes (критично)
-
-**1.1 Добавить недостающие колонки в `agent_deals`:**
-- `won_reason TEXT`
-- `property_project_id UUID REFERENCES property_projects(id)`
-
-**1.2 Добавить недостающие колонки в `crm_contacts`:**
-- `crm_roles TEXT[] DEFAULT '{}'`
-- `key_dates JSONB DEFAULT '[]'`
-
-**1.3 Расширить `deal_type` enum в коде:**
+Add missing columns to `crm_contacts`:
+```sql
+ALTER TABLE public.crm_contacts
+  ADD COLUMN IF NOT EXISTS contact_category TEXT DEFAULT 'person' CHECK (contact_category IN ('person','company','household')),
+  ADD COLUMN IF NOT EXISTS passport_country TEXT,
+  ADD COLUMN IF NOT EXISTS tax_residency TEXT,
+  ADD COLUMN IF NOT EXISTS segment TEXT[] DEFAULT '{}',
+  ADD COLUMN IF NOT EXISTS hnw_tier TEXT CHECK (hnw_tier IN ('standard','hnw','uhnw')),
+  ADD COLUMN IF NOT EXISTS aml_kyc_status TEXT DEFAULT 'not_started' CHECK (aml_kyc_status IN ('not_started','pending','approved','rejected','expired')),
+  ADD COLUMN IF NOT EXISTS aml_kyc_date DATE,
+  ADD COLUMN IF NOT EXISTS pep_flag BOOLEAN DEFAULT false,
+  ADD COLUMN IF NOT EXISTS sanctions_flag BOOLEAN DEFAULT false,
+  ADD COLUMN IF NOT EXISTS preferences JSONB DEFAULT '{}',
+  ADD COLUMN IF NOT EXISTS ai_summary TEXT,
+  ADD COLUMN IF NOT EXISTS last_activity_at TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS owner_user_id UUID;
 ```
-sale | rent_short | rent_long | investment | management | club_deal | resale
+
+Create `contact_relationships` table:
+```sql
+CREATE TABLE public.contact_relationships (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  contact_a_id UUID NOT NULL REFERENCES crm_contacts(id) ON DELETE CASCADE,
+  contact_b_id UUID NOT NULL REFERENCES crm_contacts(id) ON DELETE CASCADE,
+  relation_type TEXT NOT NULL,
+  notes TEXT,
+  company_id UUID NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
 ```
-(DB уже хранит как text, поэтому только код)
+With RLS: team members of the company can read/write.
 
-### Фаза 2 — Deal Model Enhancement
+### Phase 2 — TypeScript & Hook Updates
 
-**2.1 Добавить в `agent_deals`:**
-- `co_agent_id UUID` — со-агент по сделке
-- `co_agent_commission_pct NUMERIC` — его процент
-- `campaign_id UUID` — привязка к MCC кампании
-- `service_line TEXT` — для фильтрации по линии бизнеса
-- `expected_close_date DATE` — прогноз закрытия
-- `deal_source_detail TEXT` — детализация источника (конкретная выставка, конкретный объект)
+**`src/hooks/useCrmContacts.ts`:**
+- Add new fields to `CrmContact` interface: `contact_category`, `passport_country`, `tax_residency`, `segment`, `hnw_tier`, `aml_kyc_status`, `aml_kyc_date`, `pep_flag`, `sanctions_flag`, `preferences`, `ai_summary`, `last_activity_at`, `owner_user_id`
+- Add `hnwTier` and `segment` filter params to `useCrmContacts` query
 
-**2.2 Создать таблицу `deal_participants`:**
-- Для клубных сделок — множественные покупатели/инвесторы на одну сделку
+**`src/hooks/useContactRelationships.ts`:**
+- Update to use actual DB table (currently may reference non-existent table)
 
-**2.3 Создать таблицу `deal_viewings`:**
-- property_id, deal_id, contact_id, viewing_date, feedback, rating
-- Для трекинга предпочтений клиента
+### Phase 3 — ContactsList Enhancements
 
-### Фаза 3 — Pipeline Customization
+**`src/pages/owner/ContactsList.tsx`:**
+- Add HNW tier filter chips (Standard / HNW / UHNW)
+- Add segment filter (multi-select dropdown)
+- Add saved views system (save current filter state to localStorage, show as tabs)
+- Show segment badges and HNW tier indicator on contact cards
 
-**3.1 Предустановленные pipelines по service lines:**
-- Off-plan Sales: Lead → Qualified → Reservation → Contract → Transfer → Won
-- Resale: Lead → Viewing → Offer → Negotiation → Contract → Won
-- Short-term Rent: Inquiry → Dates Check → Confirmed → Check-in → Won
-- Long-term Rent: Lead → Viewing → Application → Contract → Move-in → Won
-- Club Deal: Lead → Qualification → Commitment → Funding → Acquisition → Won
-- Investment: Lead → Presentation → Due Diligence → Term Sheet → Funding → Won
+### Phase 4 — Contact Forms (Create + Edit)
 
-### Фаза 4 — UX Improvements
+**`src/components/owner/contacts/CreateContactSheet.tsx` & `EditContactSheet.tsx`:**
+- Add "KYC" tab with: AML/KYC status, date, PEP flag, sanctions flag, passport country, tax residency
+- Add "Segments" section with multi-select chips for segment array
+- Add HNW tier selector
+- Add `contact_category` radio (Person / Company / Household) replacing `is_company` boolean
+- Add preferences JSONB editor (budget range, location prefs, property type prefs — structured)
 
-**4.1 Объединить CRM Dashboard:**
-- "Мой день" виджет: overdue + today tasks + follow-ups
-- Quick actions: Позвонил / Показ назначен / КП отправлено
-- Drill-down KPI → отфильтрованный список
+### Phase 5 — ContactDetail KYC & Communications Tabs
 
-**4.2 Unified Contact Timeline:**
-- Единый feed: activities + tasks + deals + notes + documents — хронологически
+**`src/pages/owner/ContactDetail.tsx`:**
+- Add "KYC" tab showing AML status badge, PEP/sanctions flags, passport country, tax residency, KYC date
+- Add "Communications" tab aggregating activities filtered to comm types (call, email, whatsapp, telegram)
+- Show HNW tier badge prominently in header
+- Show segment badges below name
+- Display `ai_summary` in overview if present
 
-**4.3 Client Preference Dashboard:**
-- Автоматическое отображение паттернов: "Клиент смотрел 5 вилл в Rawai, бюджет 8-12M THB"
+### Phase 6 — Seed Data
 
-### Фаза 5 — Capital Module (создать таблицы)
+Insert 10 realistic Phuket-market contacts via migration:
+- 4 RU HNW investors (UHNW club deal, HNW off-plan, standard buyer-mandate, cold lead)
+- 2 Expat buyers (UK family, Australian retiree)
+- 2 Local Thai owners (landlord villa, condo)
+- 1 Broker/agent partner
+- 1 Developer contact
+- With varied segments, lifecycle stages, HNW tiers, budgets in THB
 
-**5.1 Миграция для 6 capital_* таблиц:**
-- `capital_contacts`, `capital_projects`, `capital_pipeline`, `capital_campaigns`, `capital_outreach`, `capital_templates`
-- С RLS по user_id
+### Phase 7 — Import Dedup Enhancement
 
-### Фаза 6 — Automation Engine
+**`src/pages/owner/ContactImportPage.tsx`:**
+- Add dedup check by email+phone before insert (query existing contacts, show matches, let user skip/merge)
 
-**6.1 Workflow Execution:**
-- Edge Function `crm-workflow-executor` по cron (каждые 5 мин)
-- Обрабатывает pending triggers → выполняет actions (create task, send email, change stage)
+## Files to Change
 
-**6.2 Sequence Advancement:**
-- Edge Function `crm-sequence-runner` по cron
-- Проверяет enrollments с `next_action_at <= now()` → выполняет шаг
-
-**6.3 Auto-task на stage change:**
-- DB trigger на `agent_deals.stage` → создаёт задачи из playbook (`crmTaskPlaybooks.ts`)
-
----
-
-## Итоговая оценка
-
-| Аспект | Оценка | Комментарий |
-|--------|--------|-------------|
-| **Техническая база** | 7/10 | Архитектура solid, но schema drift критичен |
-| **Функциональность** | 6/10 | Хорошо для простых sale/rent, недостаточно для club deals и multi-line |
-| **Бизнес-fit** | 5/10 | Нет разделения аренды, нет co-agent на сделке, Capital нерабочий |
-| **UX** | 6/10 | Все элементы есть, но разрозненны, нет фокуса "мой день" |
-| **Автоматизация** | 3/10 | Инфраструктура есть (tables), но execution engine отсутствует |
-
-## Файлы для изменения
-
-**Миграции:** 3 SQL миграции (schema fixes, new tables, pipeline presets)
-**Код:**
-- `src/hooks/useAgentDeals.ts` — расширить DEAL_TYPES
-- `src/lib/crmTaskPlaybooks.ts` — playbooks для новых deal types
-- `src/components/owner/sales/CreateDealSheet.tsx` — co-agent field, campaign link
-- `src/pages/owner/CrmDashboardPage.tsx` — "Мой день" виджет, unified KPIs
-- `src/pages/owner/ContactDetail.tsx` — unified timeline
-- Новые: `deal_viewings` hook, `deal_participants` hook
+**Migrations:** 1 SQL migration (new columns + contact_relationships table + seed)
+**Code:**
+- `src/hooks/useCrmContacts.ts` — extend interface + filters
+- `src/hooks/useContactRelationships.ts` — verify DB alignment
+- `src/pages/owner/ContactsList.tsx` — HNW/segment filters, saved views
+- `src/pages/owner/ContactDetail.tsx` — KYC tab, Communications tab, HNW/segment display
+- `src/components/owner/contacts/CreateContactSheet.tsx` — KYC tab, segments, category
+- `src/components/owner/contacts/EditContactSheet.tsx` — KYC tab, segments, category
+- `src/pages/owner/ContactImportPage.tsx` — dedup enhancement
+- `src/types/contact.ts` — segment/HNW type definitions
 
