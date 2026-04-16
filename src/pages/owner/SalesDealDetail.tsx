@@ -121,6 +121,7 @@ export default function SalesDealDetail() {
         description: `${DEAL_STAGE_LABELS[deal.stage].en} → ${DEAL_STAGE_LABELS[newStage].en}`,
         stage_from: deal.stage, stage_to: newStage,
       });
+      logStageChange.mutate({ dealId: deal.id, fromStageId: deal.stage, toStageId: newStage });
       toast({ title: isRu ? 'Этап обновлён' : 'Stage updated' });
     } catch {
       toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
