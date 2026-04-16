@@ -11,7 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCreateContact } from '@/hooks/useCrmContacts';
 import { useCrmOptions } from '@/hooks/useCrmSettings';
 import { PHUKET_DISTRICTS, PROPERTY_TYPES, CURRENCIES } from '@/hooks/useAgentDeals';
-import { CRM_ROLES, CRM_ROLE_LABELS } from '@/types/contact';
+import { CRM_ROLES, CRM_ROLE_LABELS, CONTACT_SEGMENTS, CONTACT_SEGMENT_LABELS, type ContactSegment, HNW_TIERS, HNW_TIER_LABELS, type HnwTier, KYC_STATUSES, KYC_STATUS_LABELS, type KycStatus, CONTACT_CATEGORIES, CONTACT_CATEGORY_LABELS, type ContactCategory } from '@/types/contact';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { ContactTagPicker } from '@/components/owner/contacts/ContactTagPicker';
@@ -59,6 +59,15 @@ const initialForm = () => ({
   langCustom: '',
   marital_status: '' as string,
   is_vip: false,
+  // New fields
+  contact_category: 'person' as string,
+  segment: [] as string[],
+  hnw_tier: '' as string,
+  passport_country: '',
+  tax_residency: '',
+  aml_kyc_status: 'not_started' as string,
+  pep_flag: false,
+  sanctions_flag: false,
 });
 
 export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
@@ -135,6 +144,15 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
         interests: form.interests.length ? form.interests : null,
         is_vip: form.is_vip,
         marital_status: form.marital_status || null,
+        // New fields
+        contact_category: form.contact_category || 'person',
+        segment: form.segment.length ? form.segment : null,
+        hnw_tier: form.hnw_tier || null,
+        passport_country: form.passport_country || null,
+        tax_residency: form.tax_residency || null,
+        aml_kyc_status: form.aml_kyc_status || 'not_started',
+        pep_flag: form.pep_flag,
+        sanctions_flag: form.sanctions_flag,
       });
       toast({ title: isRu ? 'Контакт создан' : 'Contact created' });
       onOpenChange(false);
