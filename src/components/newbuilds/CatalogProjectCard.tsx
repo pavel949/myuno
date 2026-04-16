@@ -85,6 +85,16 @@ export function CatalogProjectCard({ project, rank, onInquiry }: Props) {
           </div>
         )}
 
+        {/* Featured badge */}
+        {isFeatured && (
+          <div
+            className="absolute top-2 left-2 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider"
+            style={{ background: 'hsl(var(--nb-gold))', color: 'hsl(var(--nb-bg))' }}
+          >
+            ⭐ {project.featuredLabel || 'FEATURED'}
+          </div>
+        )}
+
         {/* Rating badge */}
         {rating != null && rating > 0 && (
           <div
