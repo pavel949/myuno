@@ -12,10 +12,6 @@ export {
   useTransportFilterOptions,
   useHomeServiceFilterOptions,
 
-  // Property
-  propertyFilterConfig, getPropertyFilterConfig,
-  propertyTypeOptions, bedroomOptions, propertyAmenityOptions, phuketDistrictOptions, listingTypeOptions,
-
   // Restaurant
   restaurantFilterConfig, deliveryFilterConfig, reservationFilterConfig,
   cuisineOptions, featureOptions, occasionOptions, dietaryOptions, deliveryOptions, sortOptions,
@@ -69,11 +65,9 @@ export {
   // Babysitter
   babysitterFilterConfig, babysitterAgeGroupOptions, babysitterLanguageOptions, babysitterCertOptions, babysitterFeatureOptions,
 
-  // Services
-  servicesFilterConfig, getServicesFilterConfig,
-  serviceCategoryOptions, serviceFeatureOptions, bookingTypeOptions,
+  // Services (static options only — use useHomeServiceFilterOptions hook for full config)
+  serviceFeatureOptions, bookingTypeOptions,
 
-  // Transport
-  transportFilterConfig, getTransportFilterConfig,
-  vehicleTypeOptions, transferTypeOptions, vehicleFeatureOptions, passengerOptions,
+  // Transport (static options only — use useTransportFilterOptions hook for full config)
+  transferTypeOptions, vehicleFeatureOptions, passengerOptions,
 } from '@/lib/filterRegistry';
