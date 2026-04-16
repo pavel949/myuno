@@ -190,8 +190,10 @@ export const defaultQueryClientOptions = {
   queries: {
     staleTime: TIME.MINUTES(1),
     gcTime: TIME.MINUTES(5),
-    retry: 1,
+    retry: 3,
+    retryDelay: (attemptIndex: number) => Math.min(1000 * 2 ** attemptIndex, 15000),
     refetchOnWindowFocus: false,
+    networkMode: 'online' as const,
   },
   mutations: {
     retry: 1,

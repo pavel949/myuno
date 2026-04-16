@@ -38,7 +38,7 @@ export function FeaturedPropertiesCarousel() {
   const navigate = useNavigate();
   const isRu = language === 'ru';
 
-  const { data: properties = [], isLoading } = useQuery({
+  const { data: properties = [], isLoading, isError, refetch } = useQuery({
     queryKey: ['featured-properties-home'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -71,7 +71,7 @@ export function FeaturedPropertiesCarousel() {
     );
   }
 
-  if (properties.length === 0) {
+  if (isError || properties.length === 0) {
     return (
       <section>
         <div className="flex items-center justify-between mb-3">
@@ -91,10 +91,20 @@ export function FeaturedPropertiesCarousel() {
             <div key={i} className="w-[220px] h-[280px] md:w-[260px] md:h-[320px] rounded-[var(--radius-lg)] shrink-0 flex flex-col items-center justify-center gap-2"
               style={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }}
             >
-              <span className="text-3xl">🏠</span>
+              <span className="text-3xl">{isError ? '⚠️' : '🏠'}</span>
               <span className="text-xs text-muted-foreground text-center px-4">
-                {isRu ? 'Скоро здесь появятся объекты' : 'Listings coming soon'}
+                {isError
+                  ? (isRu ? 'Ошибка загрузки' : 'Failed to load')
+                  : (isRu ? 'Скоро здесь появятся объекты' : 'Listings coming soon')}
               </span>
+              {isError && (
+                <button
+                  onClick={() => refetch()}
+                  className="text-xs text-primary font-semibold hover:underline min-h-[44px] px-3"
+                >
+                  {isRu ? 'Повторить' : 'Retry'}
+                </button>
+              )}
             </div>
           ))}
         </div>
