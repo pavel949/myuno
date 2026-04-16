@@ -25,7 +25,7 @@ function usePropertySearch(companyId: string, query: string) {
       if (!query || query.length < 2) return [];
       const { data, error } = await supabase
         .from('properties')
-        .select('id, title_en, title_ru, property_type, district, bedrooms, price, plot_size_sqm, cover_image_url')
+        .select('id, title_en, title_ru, property_type, district, bedrooms, price, plot_size_sqm, cover_image')
         .eq('management_company_id', companyId)
         .or(`title_en.ilike.%${query}%,title_ru.ilike.%${query}%,district.ilike.%${query}%,address_line1.ilike.%${query}%`)
         .limit(8);
