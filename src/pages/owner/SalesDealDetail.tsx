@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useAgentDeal, useUpdateDeal, useDeleteDeal, DEAL_STAGE_LABELS, DealStage, daysSince, DEAL_TYPE_LABELS, DealType, DEAL_STATUS_LABELS, DealStatus } from '@/hooks/useAgentDeals';
 import { useDealActivities, useAddDealActivity } from '@/hooks/useAgentDealActivities';
 import { useDealFieldChanges, useLogDealChanges, diffDealFields, TRACKED_DEAL_FIELDS } from '@/hooks/useDealFieldChanges';
+import { useLogStageChange } from '@/hooks/useDealStageHistory';
 import { DealStageBar } from '@/components/owner/sales/DealStageBar';
 import { EditDealSheet } from '@/components/owner/sales/EditDealSheet';
 import { CloseDealDialog } from '@/components/owner/sales/CloseDealDialog';
@@ -67,6 +68,7 @@ export default function SalesDealDetail() {
   const deleteDeal = useDeleteDeal();
   const addActivity = useAddDealActivity();
   const logChanges = useLogDealChanges();
+  const logStageChange = useLogStageChange();
 
   const [activityType, setActivityType] = useState('note');
   const [activityText, setActivityText] = useState('');
