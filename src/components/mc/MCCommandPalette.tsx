@@ -86,8 +86,8 @@ export function MCCommandPalette() {
         items.push({
           id: c.id,
           type: 'contact',
-          title: `${c.first_name || ''} ${c.last_name || ''}`.trim() || c.primary_email || 'Contact',
-          subtitle: c.primary_phone || c.primary_email || '',
+          title: `${c.first_name || ''} ${c.last_name || ''}`.trim() || c.email || 'Contact',
+          subtitle: c.phone || c.email || '',
         });
       }
       for (const d of dealsRes.data || []) {
