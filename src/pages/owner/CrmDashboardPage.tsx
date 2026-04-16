@@ -1,6 +1,5 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { isPast, isToday } from 'date-fns';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAgentDeals, useMyCompanyId, useCompanyMembers, DEAL_TYPES, DEAL_TYPE_LABELS, DealType, DEAL_STATUS_LABELS, DealStatus, formatValue } from '@/hooks/useAgentDeals';
 import { useDynamicPipelineStages } from '@/hooks/useDynamicPipelineStages';
@@ -9,17 +8,21 @@ import { useTodayTasksCount } from '@/hooks/useCrmTasks';
 import { KanbanBoard } from '@/components/owner/sales/KanbanBoard';
 import { CreateDealSheet } from '@/components/owner/sales/CreateDealSheet';
 import { DealSearchBar } from '@/components/owner/sales/DealSearchBar';
+import { MyDayWidget } from '@/components/owner/crm/MyDayWidget';
+import { CrmQuickActions } from '@/components/owner/crm/CrmQuickActions';
+import { CommissionForecast } from '@/components/owner/crm/CommissionForecast';
+import { WonLostSummary } from '@/components/owner/crm/WonLostSummary';
+import { HotLeadsWidget } from '@/components/owner/crm/HotLeadsWidget';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
-  Plus, Settings, Search, TrendingUp, Target, Users,
-  ListTodo, DollarSign, Percent, Filter, BarChart3,
-  Mail, Zap, FileText, Globe, Calendar, Building2, Copy, UserCog,
+  Plus, Settings, Target, Users, ListTodo, DollarSign,
+  Percent, BarChart3, Mail, Zap, FileText, Globe,
+  Calendar, Building2, Copy, UserCog, TrendingUp,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { HotLeadsWidget } from '@/components/owner/crm/HotLeadsWidget';
 import { APP_ROUTES } from '@/lib/config/routes';
 
 export default function CrmDashboardPage() {
@@ -58,12 +61,19 @@ export default function CrmDashboardPage() {
     const closedCount = wonDeals.length + lostDeals.length;
     const winRate = closedCount > 0 ? Math.round((wonDeals.length / closedCount) * 100) : 0;
     const totalPipeline = activeDeals.reduce((s, d) => s + Number(d.deal_value || d.budget_max || 0), 0);
-    const wonRevenue = wonDeals.reduce((s, d) => s + Number(d.deal_value || 0), 0);
     const weighted = activeDeals.reduce((s, d) => {
       const val = Number(d.deal_value || d.budget_max || 0);
       return s + val * pipelineData.getProbability(d.stage);
     }, 0);
-    return { activeCount: activeDeals.length, totalPipeline, weighted, wonRevenue, wonCount: wonDeals.length, winRate, totalContacts: contactsResult?.count || 0, todayTasks: todayCount };
+    return {
+      activeCount: activeDeals.length,
+      totalPipeline,
+      weighted,
+      wonCount: wonDeals.length,
+      winRate,
+      totalContacts: contactsResult?.count || 0,
+      todayTasks: todayCount,
+    };
   }, [deals, wonLostKeys, pipelineData, contactsResult, todayCount]);
 
   // Filtered deals
@@ -94,8 +104,8 @@ export default function CrmDashboardPage() {
     return (
       <div className="p-4 md:p-6 space-y-4">
         <Skeleton className="h-8 w-48" />
-        <div className="grid grid-cols-4 gap-3">
-          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-16" />)}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-20 rounded-xl" />)}
         </div>
         <Skeleton className="h-[400px] w-full rounded-xl" />
       </div>
@@ -169,6 +179,9 @@ export default function CrmDashboardPage() {
         </div>
       </div>
 
+      {/* Quick Actions */}
+      <CrmQuickActions />
+
       {/* Compact KPI Strip */}
       <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
         {kpiItems.map(k => (
@@ -190,12 +203,20 @@ export default function CrmDashboardPage() {
         ))}
       </div>
 
-      {/* Hot Leads - Repeat Guests */}
+      {/* Commission Forecast */}
+      <CommissionForecast deals={deals} pipelineData={pipelineData} wonLostKeys={wonLostKeys} />
+
+      {/* My Day + Won/Lost row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <MyDayWidget deals={deals.filter(d => !wonLostKeys.closed.includes(d.stage))} />
+        <WonLostSummary deals={deals} wonLostKeys={wonLostKeys} />
+      </div>
+
+      {/* Hot Leads */}
       <HotLeadsWidget />
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-2">
-        {/* Status tabs */}
         {(['active', 'on_hold', 'archived', 'all'] as const).map(s => (
           <button
             key={s}
