@@ -24,6 +24,7 @@ export interface NewbuildLead {
   transferred_to_developer: boolean;
   transferred_at: string | null;
   created_at: string;
+  crm_contact_id: string | null;
   // joined
   project_name?: string;
 }
