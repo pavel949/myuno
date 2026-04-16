@@ -26180,6 +26180,7 @@ export type Database = {
         }[]
       }
       get_system_setting: { Args: { p_key: string }; Returns: Json }
+      get_trust_stats: { Args: never; Returns: Json }
       get_user_analytics_summary: { Args: { p_days?: number }; Returns: Json }
       get_user_company_ids: { Args: { _user_id?: string }; Returns: string[] }
       get_yacht_availability: {
