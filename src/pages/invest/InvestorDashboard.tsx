@@ -12,6 +12,7 @@ import {
 } from '@/components/investor/dashboard';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 import { YourDayFeed } from '@/components/shared/YourDayFeed';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 export default function InvestorDashboard() {
   const { user, isLoading } = useAuth();
@@ -25,7 +26,7 @@ export default function InvestorDashboard() {
 
   // Redirect to auth if not logged in
   if (!user) {
-    return <Navigate to="/auth?redirect=/property/invest/dashboard" replace />;
+    return <Navigate to={`/auth?redirect=${APP_ROUTES.INVEST_DASHBOARD}`} replace />;
   }
 
   return (
@@ -44,7 +45,7 @@ export default function InvestorDashboard() {
       <MiniAppLayout
         title={isRu ? 'Мои инвестиции' : 'My Investments'}
         showSearch={false}
-        fallbackPath="/invest"
+        fallbackPath={APP_ROUTES.INVEST}
       >
         <div className="space-y-6">
           {/* Your Day Feed */}

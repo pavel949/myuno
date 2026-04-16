@@ -3,8 +3,10 @@
  */
 import { useDeveloperLeads, useUpdateLeadStatus } from '@/hooks/useNewbuildLeads';
 import { useState } from 'react';
-import { Download, Filter } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 const STATUS_OPTIONS = ['new', 'contacted', 'qualified', 'deal', 'lost'];
 const STATUS_LABELS: Record<string, string> = {
@@ -19,6 +21,7 @@ function ScoreBadge({ score }: { score: number }) {
 export default function DeveloperLeads() {
   const { data: leads = [], isLoading } = useDeveloperLeads();
   const updateStatus = useUpdateLeadStatus();
+  const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState<string>('');
 
   const filtered = statusFilter ? leads.filter(l => l.status === statusFilter) : leads;
@@ -72,7 +75,11 @@ export default function DeveloperLeads() {
           </thead>
           <tbody>
             {filtered.map(lead => (
-              <tr key={lead.id} className="border-b border-[hsl(var(--nb-glass-border))] last:border-0 hover:bg-[hsl(var(--nb-glass-bg))]">
+              <tr
+                key={lead.id}
+                onClick={() => navigate(APP_ROUTES.DEVELOPER_PORTAL_LEAD_DETAIL(lead.id))}
+                className="border-b border-[hsl(var(--nb-glass-border))] last:border-0 hover:bg-[hsl(var(--nb-gold)/0.05)] cursor-pointer"
+              >
                 <td className="p-4 nb-mono text-xs text-[hsl(var(--nb-muted))]">
                   {new Date(lead.created_at).toLocaleDateString('ru-RU')}
                 </td>
@@ -85,7 +92,7 @@ export default function DeveloperLeads() {
                 </td>
                 <td className="p-4 text-[hsl(var(--nb-muted))] text-xs hidden sm:table-cell">{lead.source}</td>
                 <td className="p-4"><ScoreBadge score={lead.score} /></td>
-                <td className="p-4">
+                <td className="p-4" onClick={e => e.stopPropagation()}>
                   <select
                     value={lead.status}
                     onChange={e => updateStatus.mutate({ id: lead.id, status: e.target.value })}

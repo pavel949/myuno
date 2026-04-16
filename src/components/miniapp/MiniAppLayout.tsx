@@ -23,6 +23,8 @@ import { UniversalFilter, type FilterConfig, type FilterValues } from '@/compone
 import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
 import { UnifiedFilterRibbon, type FilterRibbonItem } from '@/components/shared/UnifiedFilterRibbon';
 import { FilterChip, FilterChipGroup } from '@/components/uno/FilterChip';
+import { APP_ROUTES } from '@/lib/config/routes';
+import { ECOSYSTEM_MAIN_SPACING, ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
 
 export interface MiniAppCategory {
   id: string;
@@ -94,6 +96,7 @@ export interface MiniAppLayoutProps {
   // Sub-header customization
   stickySubHeader?: ReactNode;
   showQuickFiltersInSubHeader?: boolean;
+  showEcosystemHint?: boolean;
 }
 
 export function MiniAppLayout({
@@ -164,6 +167,7 @@ export function MiniAppLayout({
   // Sub-header customization
   stickySubHeader,
   showQuickFiltersInSubHeader = true,
+  showEcosystemHint = true,
 }: MiniAppLayoutProps) {
   const navigate = useNavigate();
   const { language, t } = useLanguage();
@@ -209,7 +213,7 @@ export function MiniAppLayout({
           key="cart"
           variant="ghost"
           size="icon"
-          onClick={() => navigate('/cart')}
+          onClick={() => navigate(APP_ROUTES.CART)}
           className="relative shrink-0 h-9 w-9 rounded-xl"
         >
           <ShoppingCart className="w-5 h-5" />
@@ -325,7 +329,7 @@ export function MiniAppLayout({
         )}
       </div>
 
-      <div className={cn("px-4 md:px-6 lg:px-8 pb-4 md:pb-8 space-y-4 md:space-y-6 w-full max-w-[1536px] mx-auto", showBottomNav && "pb-24 md:pb-8", contentClassName)}>
+      <div className={cn(ECOSYSTEM_PAGE_CONTAINER, "pb-4 md:pb-8", ECOSYSTEM_MAIN_SPACING, showBottomNav && "pb-24 md:pb-8", contentClassName)}>
         {/* Hero Section */}
         {showHero && heroIcon && heroTitle && (
           <MiniAppHero
@@ -364,6 +368,24 @@ export function MiniAppLayout({
 
         {/* Quick Actions */}
         {quickActions}
+
+        {showEcosystemHint && (
+          <div className="rounded-2xl border border-border/60 bg-card/70 px-4 py-3 flex items-center justify-between gap-3">
+            <p className="text-xs md:text-sm text-muted-foreground">
+              {language === 'ru'
+                ? 'myUNO: экосистема сервисов и решений — изучайте рынок и бронируйте в одном контуре.'
+                : 'myUNO ecosystem: research the market and book services in one trusted flow.'}
+            </p>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => navigate(APP_ROUTES.DISCOVER)}
+              className="shrink-0"
+            >
+              {language === 'ru' ? 'Навигатор' : 'Explore'}
+            </Button>
+          </div>
+        )}
 
         {/* Results Count */}
         {resultsCount !== undefined && (

@@ -56,7 +56,7 @@ export function LanguageSwitcher({
           {languages.map((lang) => (
             <DropdownMenuItem
               key={lang.code}
-              onClick={() => setLanguage(lang.code)}
+              onSelect={() => setLanguage(lang.code)}
               className="flex items-center justify-between cursor-pointer"
             >
               <div className="flex items-center gap-2">

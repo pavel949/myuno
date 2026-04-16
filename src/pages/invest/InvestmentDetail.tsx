@@ -31,6 +31,7 @@ import {
   Share2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 export default function InvestmentDetail() {
   const { id } = useParams<{ id: string }>();
@@ -60,7 +61,7 @@ export default function InvestmentDetail() {
           <p className="text-muted-foreground">
             {isRu ? 'Проект не найден' : 'Project not found'}
           </p>
-          <Button variant="outline" onClick={() => navigate('/property/invest')}>
+          <Button variant="outline" onClick={() => navigate(APP_ROUTES.INVEST)}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             {isRu ? 'Назад к каталогу' : 'Back to catalog'}
           </Button>
@@ -89,7 +90,7 @@ export default function InvestmentDetail() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => navigate('/property/invest')}
+              onClick={() => navigate(APP_ROUTES.INVEST)}
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>

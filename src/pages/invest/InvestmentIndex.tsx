@@ -24,6 +24,7 @@ import {
   User
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 export default function InvestmentIndex() {
   const navigate = useNavigate();
@@ -143,7 +144,7 @@ export default function InvestmentIndex() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => navigate('/property/invest/dashboard')}
+              onClick={() => navigate(APP_ROUTES.INVEST_DASHBOARD)}
               className="gap-1.5"
             >
               <User className="h-4 w-4" />
@@ -181,6 +182,20 @@ export default function InvestmentIndex() {
                   <FileText className="h-3 w-3 mr-1" />
                   Due Diligence
                 </Badge>
+              </div>
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                <Button size="sm" variant="secondary" onClick={() => navigate(APP_ROUTES.INVEST_MARKET)}>
+                  Market
+                </Button>
+                <Button size="sm" variant="secondary" onClick={() => navigate(APP_ROUTES.INVEST_DEALS)}>
+                  Deals
+                </Button>
+                <Button size="sm" variant="secondary" onClick={() => navigate(APP_ROUTES.INVEST_NETWORK)}>
+                  Network
+                </Button>
+                <Button size="sm" variant="secondary" onClick={() => navigate(APP_ROUTES.INVEST_EXECUTION)}>
+                  Execution
+                </Button>
               </div>
             </div>
           </div>
@@ -276,7 +291,7 @@ export default function InvestmentIndex() {
               </div>
             </div>
             <Button 
-              onClick={() => navigate('/property/invest/raise')}
+              onClick={() => navigate(APP_ROUTES.INVEST_RAISE)}
               className="w-full gap-2"
             >
               {isRu ? 'Подать заявку' : 'Submit Application'}

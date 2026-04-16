@@ -14,6 +14,7 @@ import { CrossSellSection } from '@/components/crosssell';
 import { useYachts } from '@/hooks/useYachts';
 import { mapYachtToCatalogCard } from '@/lib/adapters/catalogCardAdapters';
 import { cn } from '@/lib/utils';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 type YachtTypeFilter = 'all' | 'motor_yacht' | 'catamaran' | 'speedboat' | 'superyacht';
 type SortKey = 'featured' | 'price_asc' | 'price_desc' | 'rating' | 'capacity';
@@ -86,7 +87,7 @@ export default function YachtsIndex() {
     <MiniAppLayout
       title={isRu ? 'Чартер яхт' : 'Boat Charters'}
       subtitle={`${filtered.length} ${isRu ? 'судов' : 'vessels'}`}
-      fallbackPath="/"
+      fallbackPath={APP_ROUTES.HOME}
       showSearch={false}
       showHero={false}
       categories={YACHT_TYPES}

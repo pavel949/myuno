@@ -50,7 +50,9 @@ const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined
 export function CurrencyProvider({ children }: { children: ReactNode }) {
   const [currency, setCurrencyState] = useState<Currency>(() => {
     const saved = localStorage.getItem('myuno-currency');
-    return (saved as Currency) || 'THB';
+    return saved === 'THB' || saved === 'USD' || saved === 'EUR' || saved === 'RUB'
+      ? saved
+      : 'THB';
   });
   
   const [rates, setRates] = useState<Record<Currency, number>>(fallbackRates);
@@ -106,6 +108,19 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     localStorage.setItem('myuno-currency', currency);
   }, [currency]);
+
+  useEffect(() => {
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key !== 'myuno-currency') return;
+      const next = event.newValue;
+      if (next === 'THB' || next === 'USD' || next === 'EUR' || next === 'RUB') {
+        setCurrencyState(next);
+      }
+    };
+
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
 
   const setCurrency = useCallback((newCurrency: Currency) => {
     setCurrencyState(newCurrency);

@@ -233,6 +233,14 @@ function StatusBadge({ status, isRu }: { status: ClusterService['status']; isRu:
 
 const TOTAL_NAVIGATOR_SERVICES = CLUSTERS.reduce((n, c) => n + c.services.length, 0);
 
+function ruServicesLabel(count: number): string {
+  const mod10 = count % 10;
+  const mod100 = count % 100;
+  if (mod10 === 1 && mod100 !== 11) return 'сервис';
+  if (mod10 >= 2 && mod10 <= 4 && !(mod100 >= 12 && mod100 <= 14)) return 'сервиса';
+  return 'сервисов';
+}
+
 export default function NavigatorPage() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -313,7 +321,7 @@ export default function NavigatorPage() {
                       {isRu ? cluster.valueRu : cluster.valueEn}
                     </p>
                     <p className="text-[10px] text-muted-foreground/80 mt-1">
-                      {serviceCount} {isRu ? 'сервисов' : 'services'}
+                      {serviceCount} {isRu ? ruServicesLabel(serviceCount) : 'services'}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
@@ -338,7 +346,7 @@ export default function NavigatorPage() {
                           const SIcon = service.icon;
                           return (
                             <button
-                              key={`${cluster.id}-${service.path}`}
+                              key={`${cluster.id}-${service.path}-${service.labelEn}`}
                               onClick={() => service.status !== 'soon' && navigate(service.path)}
                               className={cn(
                                 "flex flex-col gap-2 p-3 rounded-[var(--radius-md)] text-left transition-all min-h-[44px]",

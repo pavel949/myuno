@@ -26,6 +26,7 @@ import { Badge } from '@/components/ui/badge';
 import { UniversalFilter, FilterValues } from '@/components/filters/UniversalFilter';
 import { usePropertyFilterOptions } from '@/hooks/usePropertyFilterOptions';
 import { matchesFilter, matchesSingleFilter, matchesPriceLevel } from '@/lib/filterUtils';
+import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
 
 // ── Recently Viewed Property Shape ──
 interface RecentProperty {
@@ -167,15 +168,15 @@ export default function PropertyIndex() {
           ? 'Найдите виллы, кондо и апартаменты на Пхукете. Аренда посуточно и долгосрочно, покупка недвижимости.'
           : 'Find villas, condos, and apartments in Phuket. Daily and long-term rentals, property for sale.'}
       />
-      <div className="min-h-screen bg-background pb-24">
+      <div className="pb-24">
         {/* Sticky header: tabs + search + categories */}
         <div className="sticky top-0 z-40 bg-background">
           {/* Property type tabs (Аренда / Купить / Новостройки …) */}
           <PropertyHubTabs />
           {/* Search pill + mode toggle */}
-          <div className="px-4 pt-3 pb-2">
+          <div className={cn(ECOSYSTEM_PAGE_CONTAINER, "pt-3 pb-2")}>
             <div className="flex items-center gap-2">
-              <BackButton fallbackPath="/" variant="ghost" size="sm" className="shrink-0 -ml-1" />
+              <BackButton fallbackPath={APP_ROUTES.HOME} variant="ghost" size="sm" className="shrink-0 -ml-1" />
               <div className="flex-1">
                 <AirbnbSearchBar onSearch={handleSearch} />
               </div>
@@ -185,7 +186,7 @@ export default function PropertyIndex() {
 
           {/* Category icons ribbon — Airbnb-style with underline */}
           <div className="border-b">
-            <div className="px-4 flex items-center gap-2">
+            <div className={cn(ECOSYSTEM_PAGE_CONTAINER, "flex items-center gap-2")}>
               <AirbnbCategoryRibbon 
                 selected={selectedCategories} 
                 onChange={setSelectedCategories}
@@ -216,7 +217,7 @@ export default function PropertyIndex() {
 
         {/* Active filter badges */}
         {(selectedCategories.length > 0 || activeFilterCount > 0) && (
-          <div className="px-4 pt-2 flex items-center gap-2">
+          <div className={cn(ECOSYSTEM_PAGE_CONTAINER, "pt-2 flex items-center gap-2")}>
             <p className="text-xs text-muted-foreground">
               {filteredProperties.length} {isRu ? 'объектов' : 'places'}
             </p>
@@ -236,11 +237,11 @@ export default function PropertyIndex() {
         <div className="pt-4">
           {/* Recently Viewed — only when no category filters */}
           {recentItems.length > 0 && selectedCategories.length === 0 && (
-            <section className="mb-6">
-              <h2 className="text-base font-bold px-4 mb-3">
+            <section className={cn(ECOSYSTEM_PAGE_CONTAINER, "mb-6 px-0")}>
+              <h2 className="text-base font-bold mb-3">
                 {isRu ? 'Вы недавно смотрели' : 'Recently viewed'}
               </h2>
-              <div className="flex gap-3 overflow-x-auto px-4 pb-1 scrollbar-hide">
+              <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
                 {recentItems.slice(0, 8).map((item) => (
                   <RecentCard key={item.id} item={item} onClick={() => handlePropertyClick(item.id)} />
                 ))}
@@ -249,7 +250,7 @@ export default function PropertyIndex() {
           )}
 
           {isLoading && (
-            <section className="px-4">
+            <section className={cn(ECOSYSTEM_PAGE_CONTAINER, "px-0")}>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 gap-y-6 sm:gap-x-6 sm:gap-y-10">
                 {Array.from({ length: 8 }).map((_, i) => (
                   <div key={i} className="space-y-2">
@@ -265,14 +266,14 @@ export default function PropertyIndex() {
 
           {/* Main grid — Airbnb-style 2-col cards */}
           {!isLoading && filteredProperties.length > 0 && (
-            <section className="px-4">
+            <section className={cn(ECOSYSTEM_PAGE_CONTAINER, "px-0")}>
               <div className="flex items-center justify-between mb-3">
                 {selectedCategories.length === 0 && (
                   <h2 className="text-base font-bold">
                     {isRu ? 'Все объекты' : 'All listings'}
                   </h2>
                 )}
-                <Button variant="outline" size="sm" className="gap-1.5 ml-auto" onClick={() => navigate('/property/map')}>
+                <Button variant="outline" size="sm" className="gap-1.5 ml-auto" onClick={() => navigate(APP_ROUTES.PROPERTY_MAP)}>
                   <Map className="w-4 h-4" />
                   {isRu ? 'Карта' : 'Map'}
                 </Button>
@@ -294,7 +295,7 @@ export default function PropertyIndex() {
           )}
 
           {!isLoading && filteredProperties.length === 0 && allProperties.length > 0 && (
-            <div className="text-center py-16 px-4">
+            <div className={cn(ECOSYSTEM_PAGE_CONTAINER, "text-center py-16")}>
               <p className="text-muted-foreground mb-3">
                 {isRu ? 'Нет объектов с выбранными фильтрами' : 'No properties match selected filters'}
               </p>
@@ -304,7 +305,7 @@ export default function PropertyIndex() {
             </div>
           )}
 
-          <CrossSellSection currentVertical="property" className="px-4 mt-8" title={{ en: 'You may also need', ru: 'Может пригодиться' }} />
+          <CrossSellSection currentVertical="property" className={cn(ECOSYSTEM_PAGE_CONTAINER, "px-0 mt-8")} title={{ en: 'You may also need', ru: 'Может пригодиться' }} />
         </div>
       </div>
     </AppLayout>

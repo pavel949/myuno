@@ -101,10 +101,18 @@ export const APP_ROUTES = {
   NEWBUILDS_AREA: (slug: string) => `/newbuilds/areas/${slug}`,
   NEWBUILDS_DUE_DILIGENCE: '/newbuilds/due-diligence',
   DEVELOPER_PORTAL: '/developer-portal',
+  DEVELOPER_PORTAL_APPLY: '/developer-portal/apply',
+  DEVELOPER_PORTAL_COMPANY: '/developer-portal/company',
+  DEVELOPER_PORTAL_LEADS: '/developer-portal/leads',
+  DEVELOPER_PORTAL_LEAD_DETAIL: (id: string) => `/developer-portal/leads/${id}`,
   ADMIN_NEWBUILDS: '/admin/newbuilds',
 
   // ── Investment (under Property Hub) ──
   INVEST: '/property/invest',
+  INVEST_MARKET: '/property/invest/market',
+  INVEST_DEALS: '/property/invest/deals',
+  INVEST_NETWORK: '/property/invest/network',
+  INVEST_EXECUTION: '/property/invest/execution',
   INVEST_DASHBOARD: '/property/invest/dashboard',
   INVEST_RAISE: '/property/invest/raise',
   INVEST_DETAIL: (id: string) => `/property/invest/${id}`,

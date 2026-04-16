@@ -29,20 +29,24 @@ interface CachedTranslations {
   [key: string]: { ru: string; en: string; th: string | null };
 }
 
+const normalizeLanguage = (value: string | null): Language => {
+  if (value === 'ru' || value === 'en' || value === 'th') return value;
+  return 'ru';
+};
+
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>(() => {
     const saved = localStorage.getItem('myuno-language');
-    return (saved as Language) || 'ru';
+    return normalizeLanguage(saved);
   });
   const [customTranslations, setCustomTranslations] = useState<CachedTranslations>({});
   const [isLoadingTranslations, setIsLoadingTranslations] = useState(true);
 
   const setLanguage = useCallback((lang: Language) => {
-    // Preload static translations for the new language before switching
-    loadI18n(lang).then(() => {
-      setLanguageState(lang);
-      localStorage.setItem('myuno-language', lang);
-    });
+    // Persist and update state immediately to avoid language flicker on fast navigation.
+    setLanguageState(lang);
+    localStorage.setItem('myuno-language', lang);
+    void loadI18n(lang);
   }, []);
 
   // Eagerly load static translations for current language
@@ -132,6 +136,16 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     document.documentElement.lang = language;
   }, [language]);
+
+  useEffect(() => {
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key !== 'myuno-language') return;
+      setLanguageState(normalizeLanguage(event.newValue));
+    };
+
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
 
   const t = useCallback((key: string): string => {
     // Priority: DB translations -> static translations -> fallback to English -> key

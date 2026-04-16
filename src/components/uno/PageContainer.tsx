@@ -1,5 +1,6 @@
 import React, { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
+import { ECOSYSTEM_MAIN_SPACING, ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
 
 interface PageContainerProps {
   children: ReactNode;
@@ -9,8 +10,9 @@ interface PageContainerProps {
 export function PageContainer({ children, className }: PageContainerProps) {
   return (
     <div className={cn(
-      "p-4 md:p-6 lg:p-8 xl:p-10 2xl:p-12 pb-24 md:pb-8 space-y-5 md:space-y-6 lg:space-y-8 overflow-x-hidden max-w-full",
-      "max-w-[1536px] mx-auto w-full min-w-0",
+      ECOSYSTEM_PAGE_CONTAINER,
+      "py-4 md:py-6 lg:py-8 2xl:py-10 pb-24 md:pb-8 overflow-x-hidden max-w-full min-w-0",
+      ECOSYSTEM_MAIN_SPACING,
       className
     )}>
       {children}

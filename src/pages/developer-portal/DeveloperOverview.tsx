@@ -3,50 +3,29 @@
  */
 import { useDeveloperProfile, useDeveloperProjects } from '@/hooks/useDeveloperPortal';
 import { useDeveloperLeads } from '@/hooks/useNewbuildLeads';
-import { useApplyAsDeveloper } from '@/hooks/useDeveloperPortal';
-import { Link } from 'react-router-dom';
-import { Building2, Users, Eye, TrendingUp, Plus, ArrowRight } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Building2, Users, TrendingUp, Plus, ArrowRight, AlertTriangle, PenLine } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { useState } from 'react';
-
-function ApplyForm() {
-  const apply = useApplyAsDeveloper();
-  const [form, setForm] = useState({ name_en: '', name_ru: '', email: '', phone: '' });
-
-  return (
-    <div className="max-w-lg mx-auto p-8">
-      <h1 className="nb-display text-3xl text-[hsl(var(--nb-gold))] mb-4">Стать девелопером</h1>
-      <p className="text-[hsl(var(--nb-text-secondary))] mb-8">
-        Разместите свои проекты на лучшей платформе Пхукета. Получайте лиды напрямую.
-      </p>
-      <div className="space-y-4">
-        <Input placeholder="Company name (EN)" value={form.name_en} onChange={e => setForm(p => ({ ...p, name_en: e.target.value }))} className="bg-[hsl(var(--nb-surface))] border-[hsl(var(--nb-glass-border))]" />
-        <Input placeholder="Название компании (RU)" value={form.name_ru} onChange={e => setForm(p => ({ ...p, name_ru: e.target.value }))} className="bg-[hsl(var(--nb-surface))] border-[hsl(var(--nb-glass-border))]" />
-        <Input placeholder="Email" type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} className="bg-[hsl(var(--nb-surface))] border-[hsl(var(--nb-glass-border))]" />
-        <Input placeholder="Телефон" value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} className="bg-[hsl(var(--nb-surface))] border-[hsl(var(--nb-glass-border))]" />
-        <button
-          className="nb-btn-gold w-full"
-          disabled={!form.name_en || !form.name_ru || apply.isPending}
-          onClick={() => apply.mutate(form)}
-        >
-          {apply.isPending ? 'Отправка...' : 'Отправить заявку'}
-        </button>
-      </div>
-    </div>
-  );
-}
+import { APP_ROUTES } from '@/lib/config/routes';
 
 export default function DeveloperOverview() {
   const { data: developer, isLoading } = useDeveloperProfile();
   const { data: projects = [] } = useDeveloperProjects(developer?.id);
   const { data: leads = [] } = useDeveloperLeads();
+  const navigate = useNavigate();
 
   if (isLoading) return null;
-  if (!developer) return <ApplyForm />;
 
   const newLeads = leads.filter(l => l.status === 'new').length;
   const activeProjects = projects.filter((p: any) => p.is_active).length;
+
+  // Projects waiting approval
+  const pendingApproval = projects.filter((p: any) => p.is_approved === false && p.is_active === true);
+
+  // Projects needing attention (no cover or short description)
+  const attentionProjects = projects.filter((p: any) =>
+    !p.cover_image || !p.description_en || (p.description_en as string).length < 50
+  );
 
   const kpis = [
     { label: 'Проекты', value: activeProjects, icon: Building2 },
@@ -58,9 +37,9 @@ export default function DeveloperOverview() {
     <div className="p-6 lg:p-10 space-y-8">
       <div>
         <h1 className="nb-display text-3xl text-[hsl(var(--nb-text))]">
-          Добрый день, <span className="text-[hsl(var(--nb-gold))]">{developer.name_en}</span>
+          Добрый день, <span className="text-[hsl(var(--nb-gold))]">{developer!.name_en}</span>
         </h1>
-        {!developer.is_verified && (
+        {!developer!.is_verified && (
           <p className="text-sm text-amber-400 mt-2">⏳ Аккаунт на проверке</p>
         )}
       </div>
@@ -78,6 +57,46 @@ export default function DeveloperOverview() {
         ))}
       </div>
 
+      {/* Pending approval banner */}
+      {pendingApproval.length > 0 && (
+        <div className="border-l-4 border-amber-400 bg-amber-500/10 p-4 rounded-r-lg">
+          <p className="text-sm text-amber-300">
+            <span className="font-semibold">{pendingApproval.length} проект{pendingApproval.length > 1 ? 'а' : ''}</span> ожидает проверки.
+            Страница появится в каталоге после одобрения.
+          </p>
+        </div>
+      )}
+
+      {/* Attention items */}
+      {attentionProjects.length > 0 && (
+        <div>
+          <div className="flex items-center gap-2 mb-3">
+            <AlertTriangle className="w-4 h-4 text-amber-400" />
+            <h2 className="text-sm font-semibold text-[hsl(var(--nb-text))]">Требуют внимания</h2>
+          </div>
+          <div className="space-y-2">
+            {attentionProjects.map((p: any) => {
+              const issues: string[] = [];
+              if (!p.cover_image) issues.push('нет обложки');
+              if (!p.description_en || (p.description_en as string).length < 50) issues.push('описание слишком короткое');
+              return (
+                <div key={p.id} className="nb-glass p-4 flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-sm text-[hsl(var(--nb-text))]">{p.name_en || p.name_ru}</p>
+                    <p className="text-xs text-amber-400 mt-0.5">{issues.join(', ')}</p>
+                  </div>
+                  <Link to={`/developer-portal/projects/${p.id}`}>
+                    <Button size="sm" variant="outline" className="border-[hsl(var(--nb-glass-border))] text-[hsl(var(--nb-text-secondary))] shrink-0">
+                      Редактировать
+                    </Button>
+                  </Link>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Quick Actions */}
       <div className="flex flex-wrap gap-3">
         <Link to="/developer-portal/projects/new">
@@ -85,9 +104,14 @@ export default function DeveloperOverview() {
             <Plus className="w-4 h-4 mr-2" /> Новый проект
           </Button>
         </Link>
-        <Link to="/developer-portal/leads">
+        <Link to={APP_ROUTES.DEVELOPER_PORTAL_LEADS}>
           <Button variant="outline" className="border-[hsl(var(--nb-glass-border))] text-[hsl(var(--nb-text-secondary))] hover:text-[hsl(var(--nb-text))]">
             <Users className="w-4 h-4 mr-2" /> Просмотреть лиды
+          </Button>
+        </Link>
+        <Link to={APP_ROUTES.DEVELOPER_PORTAL_COMPANY}>
+          <Button variant="outline" className="border-[hsl(var(--nb-glass-border))] text-[hsl(var(--nb-text-secondary))] hover:text-[hsl(var(--nb-text))]">
+            <PenLine className="w-4 h-4 mr-2" /> Профиль компании
           </Button>
         </Link>
       </div>
@@ -97,7 +121,7 @@ export default function DeveloperOverview() {
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-[hsl(var(--nb-text))]">Последние лиды</h2>
-            <Link to="/developer-portal/leads" className="text-sm text-[hsl(var(--nb-gold))] flex items-center gap-1 hover:underline">
+            <Link to={APP_ROUTES.DEVELOPER_PORTAL_LEADS} className="text-sm text-[hsl(var(--nb-gold))] flex items-center gap-1 hover:underline">
               Все <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
@@ -113,7 +137,11 @@ export default function DeveloperOverview() {
               </thead>
               <tbody>
                 {leads.slice(0, 5).map(lead => (
-                  <tr key={lead.id} className="border-b border-[hsl(var(--nb-glass-border))] last:border-0">
+                  <tr
+                    key={lead.id}
+                    onClick={() => navigate(APP_ROUTES.DEVELOPER_PORTAL_LEAD_DETAIL(lead.id))}
+                    className="border-b border-[hsl(var(--nb-glass-border))] last:border-0 hover:bg-[hsl(var(--nb-gold)/0.05)] cursor-pointer"
+                  >
                     <td className="p-4 text-[hsl(var(--nb-text))]">{lead.full_name || '—'}</td>
                     <td className="p-4 text-[hsl(var(--nb-text-secondary))] hidden sm:table-cell">{lead.phone || lead.email || '—'}</td>
                     <td className="p-4">

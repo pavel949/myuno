@@ -1,14 +1,16 @@
 import React, { memo, useMemo, useCallback, useState } from 'react';
-import { MapPin, Sun, Cloud, CloudRain, Calendar, Trophy, Flame, Search, ArrowRight,
-  Plane, Home, Building2, TrendingUp, Baby, Heart, Music, Dumbbell, Briefcase, Laptop, PawPrint, Globe
-} from 'lucide-react';
+import { MapPin, Sun, Cloud, CloudRain, Calendar, Trophy, Flame, Search, ArrowRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useWeather } from '@/hooks/useWeather';
 import { useIsDesktop } from '@/hooks/use-desktop';
 import { useAuth } from '@/contexts/AuthContext';
 import { useHeroData } from '@/hooks/useHeroData';
-import { useUserPersonas, UserPersona, PERSONA_OPTIONS, PERSONA_INFO } from '@/hooks/useUserPersonas';
+import {
+  useUserPersonas, UserPersona,
+  PERSONA_OPTIONS, PERSONA_INFO, PERSONA_ICONS, PERSONA_GRADIENTS,
+} from '@/hooks/useUserPersonas';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { cn } from '@/lib/utils';
 
 function HeroSearchInput({ isRu }: { isRu: boolean }) {
@@ -17,7 +19,7 @@ function HeroSearchInput({ isRu }: { isRu: boolean }) {
 
   const handleSubmit = useCallback(() => {
     const q = query.trim();
-    navigate(q ? `/search?q=${encodeURIComponent(q)}` : '/search');
+    navigate(q ? `${APP_ROUTES.SEARCH}?q=${encodeURIComponent(q)}` : APP_ROUTES.SEARCH);
   }, [query, navigate]);
 
   return (
@@ -46,34 +48,13 @@ function HeroSearchInput({ isRu }: { isRu: boolean }) {
   );
 }
 
-const PERSONA_ICONS: Record<string, React.ElementType> = {
-  Plane, Home, Building2, TrendingUp, Baby, Heart, Music, Dumbbell, Briefcase, Laptop, PawPrint, Globe,
-};
-
-const PERSONA_GRADIENTS: Partial<Record<UserPersona, string>> = {
-  tourist: 'linear-gradient(135deg, #06b6d4, #0891b2)',
-  resident: 'linear-gradient(135deg, #10b981, #059669)',
-  relocation: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-  property_owner: 'linear-gradient(135deg, #f59e0b, #d97706)',
-  investor: 'linear-gradient(135deg, #a855f7, #7c3aed)',
-  pet_owner: 'linear-gradient(135deg, #f59e0b, #ea580c)',
-  family: 'linear-gradient(135deg, #ec4899, #db2777)',
-  couple: 'linear-gradient(135deg, #f43f5e, #e11d48)',
-  nightlife: 'linear-gradient(135deg, #d946ef, #a855f7)',
-  active: 'linear-gradient(135deg, #f97316, #ea580c)',
-  business: 'linear-gradient(135deg, #64748b, #475569)',
-  nomad: 'linear-gradient(135deg, #14b8a6, #0d9488)',
-  real_estate_developer: 'linear-gradient(135deg, #78716c, #57534e)',
-  local_services_provider: 'linear-gradient(135deg, #22d3ee, #06b6d4)',
-};
-
 function PersonaSwitcher({ isRu }: { isRu: boolean }) {
   const { personas, setPersonas, isSetting } = useUserPersonas();
   const activePersona = useMemo(() => personas[0] ?? ('tourist' as UserPersona), [personas]);
 
   return (
-    <div className="w-full overflow-x-auto scrollbar-hide -mx-1 px-1">
-      <div className="flex gap-1.5 flex-wrap md:flex-wrap w-max md:w-auto py-1">
+    <div className="w-full overflow-x-auto scrollbar-hide -mx-1 px-1 pb-1">
+      <div className="flex gap-2 flex-nowrap py-1">
         {PERSONA_OPTIONS.map((p) => {
           const info = PERSONA_INFO[p];
           const Icon = PERSONA_ICONS[info.icon] || Plane;
@@ -84,21 +65,21 @@ function PersonaSwitcher({ isRu }: { isRu: boolean }) {
               onClick={() => setPersonas([p])}
               disabled={isSetting}
               className={cn(
-                "flex items-center gap-1.5 px-3 py-2 rounded-[var(--radius-full)] shrink-0 transition-all duration-200",
+                "flex items-center gap-1.5 px-3.5 py-2.5 rounded-[var(--radius-full)] shrink-0 transition-all duration-200 border",
                 isActive
-                  ? "shadow-lg ring-1 ring-white/20 text-white"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "shadow-lg ring-1 ring-white/20 text-white border-white/30"
+                  : "text-foreground/90 hover:text-foreground border-white/15"
               )}
               style={{
                 background: isActive
                   ? PERSONA_GRADIENTS[p]
-                  : 'hsl(var(--muted))',
+                  : 'hsl(var(--muted) / 0.92)',
                 backdropFilter: isActive ? 'none' : 'blur(8px)',
               }}
             >
               <Icon className="w-4 h-4 shrink-0" strokeWidth={2} />
               <span className={cn(
-                "text-[11px] font-semibold whitespace-nowrap leading-none",
+                "text-xs font-semibold whitespace-nowrap leading-none",
                 isActive ? "text-white" : ""
               )}>
                 {isRu ? info.labelRu : info.labelEn}
@@ -162,7 +143,7 @@ export const HeroBlock = memo(function HeroBlock() {
               <span className="capitalize">{dayName}, {dateStr}</span>
             </div>
             <Link 
-              to="/sos" 
+              to={APP_ROUTES.SOS}
               className="sos-pulse flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-full)] shrink-0 min-w-[44px] min-h-[44px] justify-center"
               style={{
                 background: 'rgba(239,68,68,0.15)',
@@ -277,7 +258,7 @@ export const HeroBlock = memo(function HeroBlock() {
         </div>
 
         <Link 
-          to="/sos" 
+          to={APP_ROUTES.SOS}
           className="sos-pulse flex items-center gap-2 px-4 py-2 rounded-[var(--radius-full)] transition-all hover:scale-105"
           style={{
             background: 'rgba(239,68,68,0.15)',

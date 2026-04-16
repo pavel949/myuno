@@ -23,6 +23,9 @@ const getStoredTheme = (): Theme => {
   }
 };
 
+const isTheme = (value: string | null): value is Theme =>
+  value === 'light' || value === 'dark' || value === 'system';
+
 const resolveTheme = (theme: Theme): 'light' | 'dark' => {
   if (theme === 'system') {
     return typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
@@ -60,7 +63,23 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const setTheme = useCallback((newTheme: Theme) => {
     setThemeState(newTheme);
-    localStorage.setItem(STORAGE_KEY, newTheme);
+    try {
+      localStorage.setItem(STORAGE_KEY, newTheme);
+    } catch {
+      // Ignore storage write errors (private mode, quota, etc.)
+    }
+  }, []);
+
+  useEffect(() => {
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key !== STORAGE_KEY) return;
+      if (isTheme(event.newValue)) {
+        setThemeState(event.newValue);
+      }
+    };
+
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
   }, []);
 
   const value = useMemo(() => ({ theme, resolvedTheme, setTheme }), [theme, resolvedTheme, setTheme]);

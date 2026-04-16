@@ -15,6 +15,7 @@ import { useBouquets } from '@/hooks/useBouquets';
 import { useFlowerFilterOptions } from '@/hooks/useDynamicFilterOptions';
 import { ActiveFilters, FilterValues } from '@/components/filters/UniversalFilter';
 import { mapBouquetToCatalogCard } from '@/lib/adapters/catalogCardAdapters';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 export default function FlowersIndex() {
   const navigate = useNavigate();
@@ -92,7 +93,7 @@ export default function FlowersIndex() {
     <MiniAppLayout
       title={isRu ? 'Доставка цветов' : 'Flower Delivery'}
       subtitle={`${filteredBouquets.length} ${isRu ? 'букетов' : 'bouquets'}`}
-      fallbackPath="/discover"
+      fallbackPath={APP_ROUTES.DISCOVER}
       showSearch={false}
       showHero={false}
       categories={categories}

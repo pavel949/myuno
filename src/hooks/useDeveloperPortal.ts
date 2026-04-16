@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { ProjectUpdate } from './useProjectUpdates';
 
 export interface DeveloperProfile {
   id: string;
@@ -12,13 +13,47 @@ export interface DeveloperProfile {
   name_ru: string;
   slug: string | null;
   logo_url: string | null;
+  cover_image: string | null;
   description_en: string | null;
+  description_ru: string | null;
   website: string | null;
   phone: string | null;
   email: string | null;
+  founded_year: number | null;
   is_verified: boolean;
   subscription_tier: string;
   user_id: string | null;
+}
+
+export interface DeveloperProjectUnit {
+  id: string;
+  project_id: string;
+  unit_type: string;
+  unit_code: string | null;
+  bedrooms: number | null;
+  bathrooms: number | null;
+  area_sqm: number | null;
+  floor: number | null;
+  view_type: string | null;
+  floor_plan_url: string | null;
+  price: number | null;
+  price_per_sqm: number | null;
+  currency: string | null;
+  status: string | null;
+  notes: string | null;
+}
+
+export interface DeveloperProjectDocument {
+  id: string;
+  property_id: string;
+  title: string;
+  title_ru: string | null;
+  document_type: string;
+  file_url: string | null;
+  file_name: string | null;
+  is_sensitive: boolean | null;
+  description: string | null;
+  uploaded_by: string | null;
 }
 
 export function useDeveloperProfile() {
@@ -40,16 +75,184 @@ export function useDeveloperProfile() {
         name_ru: data.name_ru,
         slug: data.slug,
         logo_url: data.logo_url,
+        cover_image: data.cover_image ?? null,
         description_en: data.description_en,
+        description_ru: (data as Record<string, unknown>).description_ru as string | null ?? null,
         website: data.website,
         phone: data.phone,
         email: data.email,
-        is_verified: data.is_verified,
-        subscription_tier: (data as any).subscription_tier || 'free',
-        user_id: (data as any).user_id,
+        founded_year: (data as Record<string, unknown>).founded_year as number | null ?? null,
+        is_verified: data.is_verified ?? false,
+        subscription_tier: (data as Record<string, unknown>).subscription_tier as string || 'free',
+        user_id: (data as Record<string, unknown>).user_id as string | null,
       };
     },
     enabled: !!user,
+  });
+}
+
+export function useUpdateDeveloperProfile() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: Partial<DeveloperProfile> & { id: string }) => {
+      const { id, ...fields } = data;
+      const { error } = await supabase.from('developers').update(fields).eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['developer-profile'] });
+      toast.success('Профиль компании обновлён');
+    },
+    onError: (e: Error) => toast.error(e.message || 'Ошибка сохранения'),
+  });
+}
+
+// ── Project Units (operational CRUD, not public development_units) ──
+
+export function useProjectUnitsForEditor(projectId?: string) {
+  return useQuery({
+    queryKey: ['project-units-editor', projectId],
+    queryFn: async (): Promise<DeveloperProjectUnit[]> => {
+      if (!projectId) return [];
+      const { data, error } = await supabase
+        .from('project_units')
+        .select('*')
+        .eq('project_id', projectId)
+        .order('unit_code', { ascending: true });
+      if (error) throw error;
+      return (data || []) as DeveloperProjectUnit[];
+    },
+    enabled: !!projectId,
+  });
+}
+
+export function useUpsertProjectUnit() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (unit: Partial<DeveloperProjectUnit> & { project_id: string }) => {
+      if (unit.id) {
+        const { id, project_id, ...fields } = unit;
+        const { error } = await supabase.from('project_units').update(fields).eq('id', id);
+        if (error) throw error;
+      } else {
+        const { id: _id, ...insertFields } = unit;
+        const { error } = await supabase.from('project_units').insert(insertFields);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['project-units-editor'] });
+      toast.success('Юнит сохранён');
+    },
+    onError: (e: Error) => toast.error(e.message || 'Ошибка сохранения'),
+  });
+}
+
+export function useDeleteProjectUnit() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('project_units').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['project-units-editor'] });
+      toast.success('Юнит удалён');
+    },
+    onError: (e: Error) => toast.error(e.message || 'Ошибка удаления'),
+  });
+}
+
+// ── Project Documents ──
+
+export function useProjectDocuments(projectId?: string) {
+  return useQuery({
+    queryKey: ['project-documents', projectId],
+    queryFn: async (): Promise<DeveloperProjectDocument[]> => {
+      if (!projectId) return [];
+      const { data, error } = await supabase
+        .from('property_documents')
+        .select('*')
+        .eq('property_id', projectId)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return (data || []) as unknown as DeveloperProjectDocument[];
+    },
+    enabled: !!projectId,
+  });
+}
+
+export function useAddProjectDocument() {
+  const { user } = useAuth();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (doc: Omit<DeveloperProjectDocument, 'id' | 'uploaded_by'>) => {
+      const { error } = await supabase.from('property_documents').insert({
+        ...doc,
+        uploaded_by: user?.id,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['project-documents'] });
+      toast.success('Документ загружен');
+    },
+    onError: (e: Error) => toast.error(e.message || 'Ошибка загрузки'),
+  });
+}
+
+export function useDeleteProjectDocument() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('property_documents').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['project-documents'] });
+      toast.success('Документ удалён');
+    },
+    onError: (e: Error) => toast.error(e.message || 'Ошибка удаления'),
+  });
+}
+
+// ── Construction Progress Updates ──
+
+export function useUpsertProjectUpdate() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (update: Partial<ProjectUpdate> & { project_id: string }) => {
+      if (update.id) {
+        const { id, project_id, ...fields } = update;
+        const { error } = await (supabase.from('nb_project_updates' as never) as ReturnType<typeof supabase.from>).update(fields).eq('id', id);
+        if (error) throw error;
+      } else {
+        const { id: _id, ...insertFields } = update;
+        const { error } = await (supabase.from('nb_project_updates' as never) as ReturnType<typeof supabase.from>).insert(insertFields);
+        if (error) throw error;
+      }
+    },
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ['project-updates', vars.project_id] });
+      toast.success('Обновление сохранено');
+    },
+    onError: (e: Error) => toast.error(e.message || 'Ошибка сохранения'),
+  });
+}
+
+export function useDeleteProjectUpdate() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, project_id }: { id: string; project_id: string }) => {
+      const { error } = await (supabase.from('nb_project_updates' as never) as ReturnType<typeof supabase.from>).delete().eq('id', id);
+      if (error) throw error;
+      return project_id;
+    },
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ['project-updates', vars.project_id] });
+      toast.success('Обновление удалено');
+    },
+    onError: (e: Error) => toast.error(e.message || 'Ошибка удаления'),
   });
 }
 

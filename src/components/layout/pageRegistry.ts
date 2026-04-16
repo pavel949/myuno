@@ -13,6 +13,8 @@ export const ResetPassword = lazy(() => import('@/pages/auth/ResetPassword'));
 
 // ── Core ──
 export const ForManagementCompanies = lazy(() => import('@/pages/ForManagementCompanies'));
+export const ForDevelopers = lazy(() => import('@/pages/ForDevelopers'));
+export const ForLocalServiceProviders = lazy(() => import('@/pages/ForLocalServices'));
 export const Discover = lazy(() => import('@/components/navigation/NavigatorPage'));
 export const PlatformCatalog = lazy(() => import('@/pages/PlatformCatalog'));
 export const MapView = lazy(() => import('@/pages/MapView'));
@@ -67,10 +69,13 @@ export const NewbuildsDueDiligence = lazy(() => import('@/pages/newbuilds/Newbui
 
 // ── Developer Portal ──
 export const DeveloperPortalLayout = lazy(() => import('@/components/newbuilds/DeveloperPortalLayout'));
+export const DeveloperApply = lazy(() => import('@/pages/developer-portal/DeveloperApply'));
 export const DeveloperOverview = lazy(() => import('@/pages/developer-portal/DeveloperOverview'));
 export const DeveloperProjects = lazy(() => import('@/pages/developer-portal/DeveloperProjects'));
 export const DeveloperProjectEditor = lazy(() => import('@/pages/developer-portal/DeveloperProjectEditor'));
+export const DeveloperCompany = lazy(() => import('@/pages/developer-portal/DeveloperCompany'));
 export const DeveloperLeads = lazy(() => import('@/pages/developer-portal/DeveloperLeads'));
+export const DeveloperLeadDetail = lazy(() => import('@/pages/developer-portal/DeveloperLeadDetail'));
 export const DeveloperAnalytics = lazy(() => import('@/pages/developer-portal/DeveloperAnalytics'));
 
 // ── Admin Newbuilds ──
@@ -78,6 +83,7 @@ export const AdminNewbuilds = lazy(() => import('@/pages/admin/AdminNewbuilds'))
 
 // ── Investment ──
 export const InvestmentIndex = lazy(() => import('@/pages/invest/InvestmentIndex'));
+export const InvestmentHubShell = lazy(() => import('@/pages/invest/InvestmentHubShell'));
 export const InvestmentDetail = lazy(() => import('@/pages/invest/InvestmentDetail'));
 export const InvestorDashboard = lazy(() => import('@/pages/invest/InvestorDashboard'));
 export const RaiseFunding = lazy(() => import('@/pages/invest/RaiseFunding'));

@@ -70,7 +70,7 @@ export function ThemeSwitcher({ variant = 'dropdown', size = 'default', classNam
           {themes.map((t) => (
             <DropdownMenuItem
               key={t.value}
-              onClick={() => setTheme(t.value)}
+              onSelect={() => setTheme(t.value)}
               className="flex items-center justify-between cursor-pointer"
             >
               <div className="flex items-center gap-2">

@@ -45,7 +45,7 @@ export function CurrencySwitcher({ size = 'default', className }: CurrencySwitch
         {currencyList.map((curr) => (
           <DropdownMenuItem
             key={curr.code}
-            onClick={() => setCurrency(curr.code)}
+            onSelect={() => setCurrency(curr.code)}
             className="flex items-center justify-between cursor-pointer"
           >
             <div className="flex items-center gap-2">

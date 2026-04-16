@@ -9,6 +9,7 @@ import { useUserTracking } from '@/hooks/useUserTracking';
 import { InstallBanner } from '@/components/pwa/InstallBanner';
 import { MobileInstallSheet } from '@/components/pwa/MobileInstallSheet';
 import { FloatingInstallButton } from '@/components/pwa/FloatingInstallButton';
+import { ECOSYSTEM_PAGE_CONTAINER, ECOSYSTEM_SHELL } from '@/design-system/ecosystemLayout';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -44,13 +45,13 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
     const finalShowFooter = isDesktop ? true : showFooter;
 
     return (
-      <div ref={ref} className={cn("min-h-screen bg-background flex flex-col max-w-full min-w-0 overflow-x-clip overflow-y-auto", className)}>
+      <div ref={ref} className={cn(ECOSYSTEM_SHELL, className)}>
         {finalShowHeader && <AppHeader title={title} />}
         <EmailVerificationBanner />
         {showSituationBanner && <ActiveSituationBanner />}
 
         {/* PWA Install Banner — visible on all pages for mobile users */}
-        <div className="px-4 md:px-6 lg:px-8 xl:px-10 pt-2 w-full max-w-[1536px] mx-auto">
+        <div className={cn(ECOSYSTEM_PAGE_CONTAINER, "pt-2")}>
           <InstallBanner />
         </div>
         
@@ -61,7 +62,7 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
             contentClassName
           )}
         >
-          <div className="max-w-[1536px] mx-auto w-full">
+          <div className={cn(ECOSYSTEM_PAGE_CONTAINER, "px-0")}>
             {children}
           </div>
         </main>

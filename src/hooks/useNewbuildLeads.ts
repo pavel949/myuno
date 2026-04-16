@@ -49,6 +49,22 @@ export function useNewbuildLeads(filters?: { project_id?: string; status?: strin
   });
 }
 
+export function useNewbuildLead(id?: string) {
+  return useQuery({
+    queryKey: ['nb-lead', id],
+    queryFn: async (): Promise<NewbuildLead | null> => {
+      if (!id) return null;
+      const { data, error } = await (supabase.from('nb_leads' as any) as any)
+        .select('*')
+        .eq('id', id)
+        .maybeSingle();
+      if (error) throw error;
+      return data as NewbuildLead | null;
+    },
+    enabled: !!id,
+  });
+}
+
 export function useUpdateLeadStatus() {
   const qc = useQueryClient();
   return useMutation({

@@ -26,6 +26,7 @@ import {
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 type ProjectType = 'real_estate' | 'business';
 
@@ -87,7 +88,6 @@ ${description}
       setSubmitted(true);
       toast.success(isRu ? 'Заявка отправлена!' : 'Application submitted!');
     } catch (error) {
-      console.error('Failed to submit:', error);
       toast.error(isRu ? 'Ошибка отправки' : 'Failed to submit');
     } finally {
       setIsSubmitting(false);
@@ -113,7 +113,7 @@ ${description}
               : 'Our investment expert will contact you within 24 hours to discuss details.'
             }
           </p>
-          <Button onClick={() => navigate('/property/invest')} className="mt-4">
+          <Button onClick={() => navigate(APP_ROUTES.INVEST)} className="mt-4">
             {isRu ? 'Вернуться к каталогу' : 'Back to Catalog'}
           </Button>
         </div>

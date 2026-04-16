@@ -6,15 +6,16 @@ import { Outlet, useLocation, Link, Navigate } from 'react-router-dom';
 import NewbuildsLayout from './NewbuildsLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDeveloperProfile } from '@/hooks/useDeveloperPortal';
-import { LayoutDashboard, FolderKanban, Users, BarChart3, Megaphone, Settings, ArrowLeft } from 'lucide-react';
+import { LayoutDashboard, FolderKanban, Users, BarChart3, Building2, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 
 const navItems = [
-  { label: 'Обзор', path: '/developer-portal', icon: LayoutDashboard, exact: true },
+  { label: 'Обзор', path: APP_ROUTES.DEVELOPER_PORTAL, icon: LayoutDashboard, exact: true },
   { label: 'Мои проекты', path: '/developer-portal/projects', icon: FolderKanban },
-  { label: 'Лиды', path: '/developer-portal/leads', icon: Users },
+  { label: 'Компания', path: APP_ROUTES.DEVELOPER_PORTAL_COMPANY, icon: Building2 },
+  { label: 'Лиды', path: APP_ROUTES.DEVELOPER_PORTAL_LEADS, icon: Users },
   { label: 'Аналитика', path: '/developer-portal/analytics', icon: BarChart3 },
 ];
 
@@ -25,7 +26,7 @@ export default function DeveloperPortalLayout() {
 
   if (authLoading || devLoading) return <NewbuildsLayout><LoadingState /></NewbuildsLayout>;
   if (!user) return <Navigate to={`/auth?redirect=${encodeURIComponent(location.pathname)}`} replace />;
-  if (!developer) return <Navigate to={APP_ROUTES.NEWBUILDS} replace />;
+  if (!developer) return <Navigate to={APP_ROUTES.DEVELOPER_PORTAL_APPLY} replace />;
 
   return (
     <NewbuildsLayout>

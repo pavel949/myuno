@@ -158,6 +158,9 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.BOOKING_ADVANCE_REQUESTED} element={<LazyPage><Pages.AdvanceRequested /></LazyPage>} />
         <Route path="/ref/:code" element={<LazyPage><Pages.ReferralLanding /></LazyPage>} />
         <Route path="/for-management-companies" element={<LazyPage><Pages.ForManagementCompanies /></LazyPage>} />
+        <Route path={APP_ROUTES.FOR_REAL_ESTATE_DEVELOPERS} element={<LazyPage><Pages.ForDevelopers /></LazyPage>} />
+        <Route path={APP_ROUTES.FOR_LOCAL_SERVICE_PROVIDERS} element={<LazyPage><Pages.ForLocalServiceProviders /></LazyPage>} />
+        <Route path={APP_ROUTES.DEVELOPER_PORTAL_APPLY} element={<LazyPage><Pages.DeveloperApply /></LazyPage>} />
         <Route path="/b/:slug" element={<LazyPage><Pages.StorefrontPage /></LazyPage>} />
         
         {/* ── LifeOS ── */}
@@ -203,6 +206,10 @@ export const AnimatedRoutes: React.FC = () => {
           
           {/* Investment (moved from /invest) */}
           <Route path="invest" element={<LazyPage><Pages.InvestmentIndex /></LazyPage>} />
+          <Route path="invest/market" element={<LazyPage><Pages.InvestmentHubShell /></LazyPage>} />
+          <Route path="invest/deals" element={<LazyPage><Pages.InvestmentHubShell /></LazyPage>} />
+          <Route path="invest/network" element={<LazyPage><Pages.InvestmentHubShell /></LazyPage>} />
+          <Route path="invest/execution" element={<LazyPage><Pages.InvestmentHubShell /></LazyPage>} />
           <Route path="invest/dashboard" element={<LazyPage><Pages.InvestorDashboard /></LazyPage>} />
           <Route path="invest/raise" element={<LazyPage><Pages.RaiseFunding /></LazyPage>} />
           <Route path="invest/:id" element={<LazyPage><Pages.InvestmentDetail /></LazyPage>} />
@@ -223,6 +230,10 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/developers/:id" element={<DeveloperIdRedirect />} />
         <Route path="/complexes" element={<Navigate to={APP_ROUTES.COMPLEXES} replace />} />
         <Route path="/invest" element={<Navigate to={APP_ROUTES.INVEST} replace />} />
+        <Route path="/invest/market" element={<Navigate to={APP_ROUTES.INVEST_MARKET} replace />} />
+        <Route path="/invest/deals" element={<Navigate to={APP_ROUTES.INVEST_DEALS} replace />} />
+        <Route path="/invest/network" element={<Navigate to={APP_ROUTES.INVEST_NETWORK} replace />} />
+        <Route path="/invest/execution" element={<Navigate to={APP_ROUTES.INVEST_EXECUTION} replace />} />
         <Route path="/invest/dashboard" element={<Navigate to={APP_ROUTES.INVEST_DASHBOARD} replace />} />
         <Route path="/invest/raise" element={<Navigate to={APP_ROUTES.INVEST_RAISE} replace />} />
         <Route path="/invest/:id" element={<InvestIdRedirect />} />
@@ -254,7 +265,7 @@ export const AnimatedRoutes: React.FC = () => {
         
         {/* ── Newbuilds (Premium New Developments) ── */}
         <Route path={APP_ROUTES.NEWBUILDS} element={<LazyPage><Pages.NewbuildsLanding /></LazyPage>} />
-        <Route path={APP_ROUTES.NEWBUILDS_PROJECTS} element={<Navigate to={APP_ROUTES.NEWBUILDS} replace />} />
+        <Route path={APP_ROUTES.NEWBUILDS_PROJECTS} element={<LazyPage><Pages.NewbuildsCatalog /></LazyPage>} />
         <Route path="/newbuilds/projects/:slug" element={<LazyPage><Pages.NewbuildDetail /></LazyPage>} />
         <Route path={APP_ROUTES.NEWBUILDS_DEVELOPERS} element={<LazyPage><Pages.NewbuildsDevelopers /></LazyPage>} />
         <Route path="/newbuilds/developers/:slug" element={<LazyPage><Pages.NewbuildDeveloperDetail /></LazyPage>} />
@@ -271,7 +282,9 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="projects" element={<LazyPage><Pages.DeveloperProjects /></LazyPage>} />
           <Route path="projects/new" element={<LazyPage><Pages.DeveloperProjectEditor /></LazyPage>} />
           <Route path="projects/:id" element={<LazyPage><Pages.DeveloperProjectEditor /></LazyPage>} />
+          <Route path="company" element={<LazyPage><Pages.DeveloperCompany /></LazyPage>} />
           <Route path="leads" element={<LazyPage><Pages.DeveloperLeads /></LazyPage>} />
+          <Route path="leads/:id" element={<LazyPage><Pages.DeveloperLeadDetail /></LazyPage>} />
           <Route path="analytics" element={<LazyPage><Pages.DeveloperAnalytics /></LazyPage>} />
         </Route>
         <Route path={APP_ROUTES.TAXI} element={<LazyPage><Pages.TaxiBooking /></LazyPage>} />
