@@ -65,7 +65,7 @@ export function AdminSidebar() {
   const { state, isMobile, setOpenMobile } = useSidebar();
   const { data: stats } = useAdminDashboardStats();
   const { roles } = useUserRoles();
-  const isAdmin = roles.some(r => r.role === 'admin');
+  const isAdmin = (roles || []).some(r => r.role === 'admin');
   const visibleItems = navigationItems.filter(item => !item.adminOnly || isAdmin);
   
   const isCollapsed = isMobile ? false : state === 'collapsed';
