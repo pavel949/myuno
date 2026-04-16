@@ -109,9 +109,7 @@ export default function BookingDetail() {
         .from('bookings')
         .select(`
           *,
-          booking_items(*),
-          booking_participants(*),
-          booking_addresses(*)
+          booking_participants(*)
         `)
         .eq('id', id)
         .eq('user_id', user.id)
@@ -128,9 +126,9 @@ export default function BookingDetail() {
         currency: data.currency,
         notes: data.notes,
         created_at: data.created_at,
-        items: data.booking_items || [],
+        items: [],
         participants: data.booking_participants || [],
-        addresses: data.booking_addresses || [],
+        addresses: [],
       });
     } catch (error) {
       console.error('Error loading booking:', error);
