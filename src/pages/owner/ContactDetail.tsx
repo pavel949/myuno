@@ -45,7 +45,7 @@ import { ContactPropertiesSection } from '@/components/owner/contacts/ContactPro
 import { ContactRelationshipsCard } from '@/components/owner/contacts/ContactRelationshipsCard';
 import { KeyDatesCard } from '@/components/owner/contacts/KeyDatesCard';
 import { RemindersList } from '@/components/owner/contacts/RemindersList';
-import { CRM_ROLE_LABELS, isCrmRole } from '@/types/contact';
+import { CRM_ROLE_LABELS, isCrmRole, HNW_TIER_LABELS, type HnwTier, CONTACT_SEGMENT_LABELS, type ContactSegment, KYC_STATUS_LABELS, type KycStatus } from '@/types/contact';
 import { isMaritalStatus, MARITAL_STATUS_LABELS } from '@/lib/crmContactFormPresets';
 
 import { toast } from 'sonner';
@@ -366,7 +366,22 @@ const { data: contact, isLoading, isError } = useCrmContact(id);
                     {(contact.is_vip || (contact.tags || []).some((t) => t.toUpperCase() === 'VIP')) && (
                       <Badge className="shrink-0 bg-amber-500/15 text-amber-900 border-amber-500/30">VIP</Badge>
                     )}
+                    {contact.hnw_tier && contact.hnw_tier !== 'standard' && (
+                      <Badge className={cn('shrink-0', HNW_TIER_LABELS[contact.hnw_tier as HnwTier]?.color || '')}>
+                        {HNW_TIER_LABELS[contact.hnw_tier as HnwTier]?.en || contact.hnw_tier}
+                      </Badge>
+                    )}
                   </div>
+                  {/* Segment badges */}
+                  {(contact.segment ?? []).length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {(contact.segment ?? []).map(seg => (
+                        <Badge key={seg} variant="outline" className="text-[10px] bg-info/10 text-info border-info/30">
+                          {CONTACT_SEGMENT_LABELS[seg as ContactSegment]?.en || seg}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
                   {contact.is_company && contact.first_name && (
                     <p className="text-sm text-muted-foreground mt-0.5">
                       {contact.first_name} {contact.last_name}
