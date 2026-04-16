@@ -122,6 +122,11 @@ export function useOffplanProjects(filters?: OffplanFilters) {
         unitsSold: 0,
         amenities: p.amenities,
         offplanCatalog: parseOffplanCatalog((p as { offplan_catalog?: unknown }).offplan_catalog),
+        featuredRank: p.featured_rank ?? null,
+        featuredLabel: p.featured_label ?? null,
+        descriptionSummary: p.description_summary ?? null,
+        yieldEstimate: p.yield_estimate ?? null,
+        sourceUrl: p.source_url ?? null,
       });
 
       const mapRich = (p: any): OffplanProject => {
