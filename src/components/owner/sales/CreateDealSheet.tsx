@@ -13,6 +13,7 @@ import { useCreateDeal, useDuplicateCheck, CLIENT_SOURCES, PHUKET_DISTRICTS, PRO
 import { usePropertyProjects } from '@/hooks/usePropertyProjects';
 import { useCreateContact, CrmContact } from '@/hooks/useCrmContacts';
 import { ContactSearchInput } from '@/components/owner/contacts/ContactSearchInput';
+import { PropertySearchInput, PropertySearchResult } from '@/components/owner/sales/PropertySearchInput';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
@@ -47,6 +48,7 @@ const navigate = useNavigate();
   const createContact = useCreateContact();
   const { data: catalogProjects = [] } = usePropertyProjects();
   const [selectedContact, setSelectedContact] = useState<CrmContact | null>(prefilledContact || null);
+  const [selectedProperty, setSelectedProperty] = useState<PropertySearchResult | null>(null);
 
   useEffect(() => {
     if (prefilledContact && open) {
@@ -172,7 +174,7 @@ const navigate = useNavigate();
       const createdDeal = await createDeal.mutateAsync({
         company_id: companyId,
         agent_id: user!.id,
-        property_id: null,
+        property_id: selectedProperty?.id || null,
         property_project_id: form.property_project_id || null,
         client_name: clientName,
         client_phone: clientPhone,
@@ -308,6 +310,29 @@ const navigate = useNavigate();
             </button>
           ))}
         </div>
+      </div>
+
+      {/* Property search */}
+      <div>
+        <Label>{isRu ? 'Привязать объект' : 'Link Property'}</Label>
+        <PropertySearchInput
+          companyId={companyId}
+          selectedProperty={selectedProperty}
+          onSelect={(p) => {
+            setSelectedProperty(p);
+            // Auto-fill from property
+            setForm(f => ({
+              ...f,
+              preferred_districts: p.district ? [p.district] : f.preferred_districts,
+              preferred_types: p.property_type ? [p.property_type] : f.preferred_types,
+              budget_min: p.price ? String(p.price) : f.budget_min,
+              budget_max: p.price ? String(p.price) : f.budget_max,
+              bedrooms_min: p.bedrooms ? String(p.bedrooms) : f.bedrooms_min,
+            }));
+          }}
+          onClear={() => setSelectedProperty(null)}
+          isRu={isRu}
+        />
       </div>
 
       <div>

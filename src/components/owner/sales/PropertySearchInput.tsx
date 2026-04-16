@@ -13,7 +13,7 @@ export interface PropertySearchResult {
   property_type: string | null;
   district: string | null;
   bedrooms: number | null;
-  price_thb: number | null;
+  price: number | null;
   size_sqm: number | null;
   cover_image_url: string | null;
 }
@@ -25,7 +25,7 @@ function usePropertySearch(companyId: string, query: string) {
       if (!query || query.length < 2) return [];
       const { data, error } = await supabase
         .from('properties')
-        .select('id, title_en, title_ru, property_type, district, bedrooms, price_thb, size_sqm, cover_image_url')
+        .select('id, title_en, title_ru, property_type, district, bedrooms, price, size_sqm, cover_image_url')
         .eq('management_company_id', companyId)
         .or(`title_en.ilike.%${query}%,title_ru.ilike.%${query}%,district.ilike.%${query}%,address_line1.ilike.%${query}%`)
         .limit(8);
@@ -80,7 +80,7 @@ export function PropertySearchInput({ companyId, onSelect, onClear, selectedProp
           <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
             {selectedProperty.district && <span>{selectedProperty.district}</span>}
             {selectedProperty.bedrooms && <span>{selectedProperty.bedrooms} BD</span>}
-            {selectedProperty.price_thb && <span>฿{formatPrice(selectedProperty.price_thb)}</span>}
+            {selectedProperty.price && <span>฿{formatPrice(selectedProperty.price)}</span>}
           </div>
         </div>
         <button onClick={onClear} className="p-0.5 rounded hover:bg-muted"><X className="h-3.5 w-3.5" /></button>
@@ -119,7 +119,7 @@ export function PropertySearchInput({ companyId, onSelect, onClear, selectedProp
                   {p.property_type && <Badge variant="outline" className="text-[9px] h-4 px-1">{p.property_type}</Badge>}
                   {p.district && <span className="flex items-center gap-0.5"><MapPin className="h-2.5 w-2.5" />{p.district}</span>}
                   {p.bedrooms && <span className="flex items-center gap-0.5"><Bed className="h-2.5 w-2.5" />{p.bedrooms}</span>}
-                  {p.price_thb && <span>฿{formatPrice(p.price_thb)}</span>}
+                  {p.price && <span>฿{formatPrice(p.price)}</span>}
                 </div>
               </div>
             </button>
