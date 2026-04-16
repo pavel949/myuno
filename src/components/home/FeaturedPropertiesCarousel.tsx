@@ -45,7 +45,7 @@ export function FeaturedPropertiesCarousel() {
         .from('properties')
         .select('id, title_en, title_ru, cover_image, images, price, price_per_night, price_period, district, bedrooms, max_guests, rating, is_featured, instant_booking, property_type')
         .eq('is_active', true)
-        .in('listing_type', ['rent', 'short_term', 'rental'])
+        .eq('approval_status', 'approved')
         .order('is_featured', { ascending: false })
         .order('rating', { ascending: false })
         .limit(10);
