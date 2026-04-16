@@ -415,6 +415,72 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
           }
         />
       </div>
+      {/* Segments */}
+      <div>
+        <Label className="mb-1.5 block">{isRu ? 'Сегменты' : 'Segments'}</Label>
+        <div className="flex flex-wrap gap-1.5">
+          {CONTACT_SEGMENTS.map((s) => (
+            <button key={s} type="button" onClick={() => toggleSegment(s)}
+              className={cn('px-2.5 py-1 rounded-full text-xs border transition-colors',
+                form.segment.includes(s) ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-muted-foreground hover:border-primary/50'
+              )}>{isRu ? CONTACT_SEGMENT_LABELS[s].ru : CONTACT_SEGMENT_LABELS[s].en}</button>
+          ))}
+        </div>
+      </div>
+
+      {/* HNW Tier */}
+      <div>
+        <Label>{isRu ? 'Уровень HNW' : 'HNW Tier'}</Label>
+        <Select value={form.hnw_tier || '__none__'} onValueChange={(v) => setForm((f) => ({ ...f, hnw_tier: v === '__none__' ? '' : v }))}>
+          <SelectTrigger><SelectValue placeholder={isRu ? 'Не указан' : 'Not set'} /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__none__">{isRu ? 'Не указан' : 'Not set'}</SelectItem>
+            {HNW_TIERS.map((t) => (
+              <SelectItem key={t} value={t}>{isRu ? HNW_TIER_LABELS[t].ru : HNW_TIER_LABELS[t].en}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* KYC Section */}
+      <div className="rounded-lg border p-3 space-y-3">
+        <p className="text-sm font-semibold flex items-center gap-2">
+          <Shield className="h-4 w-4 text-muted-foreground" />
+          {isRu ? 'KYC / Compliance' : 'KYC / Compliance'}
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <Label>{isRu ? 'Страна паспорта' : 'Passport Country'}</Label>
+            <Input value={form.passport_country} onChange={e => setForm(f => ({ ...f, passport_country: e.target.value }))} placeholder="RU" />
+          </div>
+          <div>
+            <Label>{isRu ? 'Налоговое резидентство' : 'Tax Residency'}</Label>
+            <Input value={form.tax_residency} onChange={e => setForm(f => ({ ...f, tax_residency: e.target.value }))} placeholder="TH" />
+          </div>
+        </div>
+        <div>
+          <Label>{isRu ? 'Статус KYC' : 'KYC Status'}</Label>
+          <Select value={form.aml_kyc_status} onValueChange={(v) => setForm((f) => ({ ...f, aml_kyc_status: v }))}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {KYC_STATUSES.map((s) => (
+                <SelectItem key={s} value={s}>{isRu ? KYC_STATUS_LABELS[s].ru : KYC_STATUS_LABELS[s].en}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex items-center gap-6">
+          <label className="flex items-center gap-2 text-sm cursor-pointer">
+            <Switch checked={form.pep_flag} onCheckedChange={(c) => setForm(f => ({ ...f, pep_flag: c }))} />
+            PEP
+          </label>
+          <label className="flex items-center gap-2 text-sm cursor-pointer">
+            <Switch checked={form.sanctions_flag} onCheckedChange={(c) => setForm(f => ({ ...f, sanctions_flag: c }))} />
+            {isRu ? 'Санкции' : 'Sanctions'}
+          </label>
+        </div>
+      </div>
+
       <div><Label>{isRu ? 'Заметки' : 'Notes'}</Label><Textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} rows={2} /></div>
     </ResponsiveModal>
   );
