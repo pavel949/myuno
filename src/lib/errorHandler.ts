@@ -22,6 +22,16 @@ interface ErrorHandlerOptions {
   silent?: boolean;
 }
 
+// Suppress harmless ResizeObserver loop errors globally
+if (typeof window !== 'undefined') {
+  window.addEventListener('error', (e) => {
+    if (e.message?.includes('ResizeObserver loop')) {
+      e.stopImmediatePropagation();
+      e.preventDefault();
+    }
+  });
+}
+
 function isAbortError(error: unknown): boolean {
   if (error instanceof DOMException && error.name === 'AbortError') return true;
   if (error instanceof Error) {

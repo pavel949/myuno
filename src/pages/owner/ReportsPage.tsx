@@ -249,13 +249,20 @@ export default function ReportsPage() {
     } else {
       setIsBatchGenerating(true);
       try {
-        for (const propId of ids) {
-          await generateReport.mutateAsync({
-            property_id: propId,
-            report_type: result.reportType,
-            period_start: result.periodStart,
-            period_end: result.periodEnd,
-          });
+        // Parallel batch generation (chunks of 5)
+        const chunkSize = 5;
+        for (let i = 0; i < ids.length; i += chunkSize) {
+          const chunk = ids.slice(i, i + chunkSize);
+          await Promise.allSettled(
+            chunk.map(propId =>
+              generateReport.mutateAsync({
+                property_id: propId,
+                report_type: result.reportType,
+                period_start: result.periodStart,
+                period_end: result.periodEnd,
+              })
+            )
+          );
         }
         setShowWizard(false);
       } finally {

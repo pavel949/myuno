@@ -187,8 +187,8 @@ function formatCurrency(amount: number, currency = 'THB'): string {
   }).format(amount);
 }
 
-function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString('ru-RU', {
+function formatDate(dateString: string, language: string = 'ru'): string {
+  return new Date(dateString).toLocaleDateString(language === 'ru' ? 'ru-RU' : 'en-GB', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -227,7 +227,7 @@ export async function generateReportPdf(options: GeneratePdfOptions): Promise<js
   
   yPosition += 8;
   doc.setFontSize(11);
-  doc.text(`${t.period}: ${formatDate(periodStart)} — ${formatDate(periodEnd)}`, 20, yPosition);
+  doc.text(`${t.period}: ${formatDate(periodStart, language)} — ${formatDate(periodEnd, language)}`, 20, yPosition);
   
   yPosition += 15;
 
@@ -332,8 +332,8 @@ export async function generateReportPdf(options: GeneratePdfOptions): Promise<js
     
     const bookingsData = data.bookings.map(b => [
       b.guest_name,
-      formatDate(b.check_in),
-      formatDate(b.check_out),
+      formatDate(b.check_in, language),
+      formatDate(b.check_out, language),
       formatCurrency(b.total_amount, currency),
       b.source,
     ]);
@@ -460,8 +460,8 @@ export async function generateReportPdf(options: GeneratePdfOptions): Promise<js
     doc.text(`${t.expenses} — ${t.transactions}`, 20, yPosition);
     yPosition += 5;
 
-    const transData = data.expenses.transactions.slice(0, 20).map(tr => [
-      formatDate(tr.date),
+    const transData = data.expenses.transactions.map(tr => [
+      formatDate(tr.date, language),
       catLabels[tr.category] || tr.category,
       tr.vendor || '-',
       tr.description.substring(0, 30),
@@ -493,7 +493,7 @@ export async function generateReportPdf(options: GeneratePdfOptions): Promise<js
       yPosition += 5;
 
       const maintData = data.maintenance.map(m => [
-        formatDate(m.date),
+        formatDate(m.date, language),
         catLabels[m.type] || m.type,
         m.description.substring(0, 40),
         formatCurrency(m.cost, currency),
@@ -662,8 +662,8 @@ export async function generateReportPdf(options: GeneratePdfOptions): Promise<js
       return [
         b.guest_name,
         b.source || '-',
-        formatDate(b.check_in),
-        formatDate(b.check_out),
+        formatDate(b.check_in, language),
+        formatDate(b.check_out, language),
         formatCurrency(b.total_amount, currency),
         formatCurrency(bookingExpenses, currency),
         formatCurrency(net, currency),
@@ -712,7 +712,7 @@ export async function generateReportPdf(options: GeneratePdfOptions): Promise<js
     doc.setFontSize(8);
     doc.setTextColor(150, 150, 150);
     doc.text(
-      `${t.generatedOn} ${new Date().toLocaleDateString('ru-RU')} | ${t.page} ${i}/${pageCount}`,
+      `${t.generatedOn} ${new Date().toLocaleDateString(language === 'ru' ? 'ru-RU' : 'en-GB')} | ${t.page} ${i}/${pageCount}`,
       20,
       285
     );
