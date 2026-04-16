@@ -66,9 +66,9 @@ export function MCCommandPalette() {
       const pattern = `%${q}%`;
       const [contactsRes, dealsRes, propertiesRes] = await Promise.all([
         supabase.from('crm_contacts')
-          .select('id, first_name, last_name, primary_phone, primary_email')
+          .select('id, first_name, last_name, phone, email')
           .eq('company_id', membership.company_id)
-          .or(`first_name.ilike.${pattern},last_name.ilike.${pattern},primary_email.ilike.${pattern},primary_phone.ilike.${pattern}`)
+          .or(`first_name.ilike.${pattern},last_name.ilike.${pattern},email.ilike.${pattern},phone.ilike.${pattern}`)
           .limit(5),
         supabase.from('agent_deals')
           .select('id, client_name, deal_value, stage')
