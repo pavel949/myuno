@@ -187,8 +187,8 @@ function formatCurrency(amount: number, currency = 'THB'): string {
   }).format(amount);
 }
 
-function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString('ru-RU', {
+function formatDate(dateString: string, language: string = 'ru'): string {
+  return new Date(dateString).toLocaleDateString(language === 'ru' ? 'ru-RU' : 'en-GB', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -460,8 +460,8 @@ export async function generateReportPdf(options: GeneratePdfOptions): Promise<js
     doc.text(`${t.expenses} — ${t.transactions}`, 20, yPosition);
     yPosition += 5;
 
-    const transData = data.expenses.transactions.slice(0, 20).map(tr => [
-      formatDate(tr.date),
+    const transData = data.expenses.transactions.map(tr => [
+      formatDate(tr.date, language),
       catLabels[tr.category] || tr.category,
       tr.vendor || '-',
       tr.description.substring(0, 30),
@@ -712,7 +712,7 @@ export async function generateReportPdf(options: GeneratePdfOptions): Promise<js
     doc.setFontSize(8);
     doc.setTextColor(150, 150, 150);
     doc.text(
-      `${t.generatedOn} ${new Date().toLocaleDateString('ru-RU')} | ${t.page} ${i}/${pageCount}`,
+      `${t.generatedOn} ${new Date().toLocaleDateString(language === 'ru' ? 'ru-RU' : 'en-GB')} | ${t.page} ${i}/${pageCount}`,
       20,
       285
     );

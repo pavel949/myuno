@@ -394,7 +394,7 @@ export function useGenerateReport() {
           })),
         net_income: income.total - expenses.total,
         management_commission: mgmtCommission,
-        owner_net_income: income.total - expenses.total,
+        owner_net_income: income.total - expenses.total - mgmtCommission,
         // P&L fields
         gross_profit: income.total - expenses.transactions
           .filter(t => ['cleaning', 'supplies', 'cleaning_fee'].includes(t.category))
