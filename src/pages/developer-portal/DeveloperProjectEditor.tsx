@@ -5,10 +5,13 @@
  */
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useDeveloperProfile, useProjectUnitsForEditor, useUpsertProjectUnit, useDeleteProjectUnit, useProjectDocuments, useAddProjectDocument, useDeleteProjectDocument, useUpsertProjectUpdate, useDeleteProjectUpdate, DeveloperProjectUnit } from '@/hooks/useDeveloperPortal';
+import { useProjectUnitsForEditor, useUpsertProjectUnit, useDeleteProjectUnit, useProjectDocuments, useAddProjectDocument, useDeleteProjectDocument, useUpsertProjectUpdate, useDeleteProjectUpdate, DeveloperProjectUnit } from '@/hooks/useDeveloperPortal';
+import { useEffectiveDeveloperProfile } from '@/hooks/useEffectiveDeveloperProfile';
 import { useNewbuildProject } from '@/hooks/useNewbuildProjects';
 import { useProjectUpdates, ProjectUpdate } from '@/hooks/useProjectUpdates';
 import { FloorPlanEditor } from '@/components/newbuilds/FloorPlanEditor';
+import { MicrositeTab } from '@/components/developer-portal/MicrositeTab';
+import { ImpersonationBanner } from '@/components/admin/ImpersonationBanner';
 import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -17,7 +20,7 @@ import { ImageUpload } from '@/components/upload/ImageUpload';
 import { AirbnbStyleImageUpload } from '@/components/upload/AirbnbStyleImageUpload';
 import { DeveloperDocumentUpload } from '@/components/developer-portal/DeveloperDocumentUpload';
 import { toast } from 'sonner';
-import { ExternalLink, Plus, Pencil, Trash2, Lock, Unlock, Image as ImageIcon, FileText, TrendingUp, Map } from 'lucide-react';
+import { ExternalLink, Plus, Pencil, Trash2, Lock, Unlock, Image as ImageIcon, FileText, TrendingUp, Map, Globe } from 'lucide-react';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { cn } from '@/lib/utils';
 
@@ -218,7 +221,7 @@ function DocRow({ doc, onDelete }: { doc: { id: string; title: string; document_
 export default function DeveloperProjectEditor() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { data: developer } = useDeveloperProfile();
+  const { data: developer } = useEffectiveDeveloperProfile();
   const { data: existing } = useNewbuildProject(id);
 
   // project_units for inventory tab
@@ -358,7 +361,9 @@ export default function DeveloperProjectEditor() {
   const isNewProject = !id;
 
   return (
-    <div className="p-6 lg:p-10 max-w-4xl">
+    <>
+      <ImpersonationBanner />
+      <div className="p-6 lg:p-10 max-w-4xl">
       {/* Header */}
       <div className="flex items-center justify-between mb-6 gap-4">
         <h1 className="nb-display text-2xl text-[hsl(var(--nb-text))]">
@@ -375,18 +380,18 @@ export default function DeveloperProjectEditor() {
 
       <Tabs defaultValue="основное">
         <TabsList className="flex flex-wrap gap-1 mb-6 bg-[hsl(var(--nb-surface))] border border-[hsl(var(--nb-glass-border))] p-1 rounded-xl h-auto">
-          {(['основное', 'медиа', 'описание', 'инвентарь', 'мастер-план', 'документы', 'прогресс', 'превью'] as const).map(tab => (
+          {(['основное', 'медиа', 'описание', 'инвентарь', 'мастер-план', 'документы', 'прогресс', 'микросайт', 'превью'] as const).map(tab => (
             <TabsTrigger
               key={tab}
               value={tab}
-              disabled={isNewProject && ['инвентарь', 'мастер-план', 'документы', 'прогресс', 'превью'].includes(tab)}
+              disabled={isNewProject && ['инвентарь', 'мастер-план', 'документы', 'прогресс', 'микросайт', 'превью'].includes(tab)}
               className={cn(
                 'capitalize text-sm px-3 py-1.5 rounded-lg transition-all',
                 'data-[state=active]:bg-[hsl(var(--nb-gold)/0.15)] data-[state=active]:text-[hsl(var(--nb-gold))]',
                 'text-[hsl(var(--nb-muted))] disabled:opacity-40 disabled:cursor-not-allowed'
               )}
             >
-              {tab}
+              {tab === 'микросайт' ? <span className="inline-flex items-center gap-1"><Globe className="w-3 h-3" />микросайт</span> : tab}
             </TabsTrigger>
           ))}
         </TabsList>
