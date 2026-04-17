@@ -17,10 +17,10 @@
 
 import { supabase } from '@/integrations/supabase/client';
 
-// Typed helper for untyped tables
-type SupabaseFrom = ReturnType<typeof supabase.from>;
-function from(table: string): SupabaseFrom {
-  return (supabase.from as (t: string) => SupabaseFrom)(table);
+// Typed helper for untyped tables — return `any` to bypass deep generic inference
+// (these tables are not present in the auto-generated Database type yet).
+function from(table: string): any {
+  return (supabase.from as unknown as (t: string) => any)(table);
 }
 
 // ─── Cookie helpers ──────────────────────────────────────────────────────────

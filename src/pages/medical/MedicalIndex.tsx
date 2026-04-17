@@ -73,7 +73,7 @@ export default function MedicalIndex() {
     const specialtyFilter = filterValues.specialty as string[] | undefined;
     if (specialtyFilter?.length) {
       result = result.filter(c => {
-        const specs = (c as Record<string, unknown>).specialties as string[] | null;
+        const specs = (c as unknown as Record<string, unknown>).specialties as string[] | null;
         return specs?.some(s => specialtyFilter.includes(s));
       });
     }

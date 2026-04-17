@@ -79,7 +79,7 @@ export default function RestaurantsIndex() {
     const cuisineFilter = filterValues.cuisine as string[] | undefined;
     if (cuisineFilter?.length) {
       result = result.filter(r => {
-        const tags = (r as Record<string, unknown>).cuisine_tags as string[] | null;
+        const tags = (r as unknown as Record<string, unknown>).cuisine_tags as string[] | null;
         return tags?.some(t => cuisineFilter.includes(t));
       });
     }
@@ -87,7 +87,7 @@ export default function RestaurantsIndex() {
     const dietaryFilter = filterValues.dietary as string[] | undefined;
     if (dietaryFilter?.length) {
       result = result.filter(r => {
-        const tags = (r as Record<string, unknown>).dietary_options as string[] | null;
+        const tags = (r as unknown as Record<string, unknown>).dietary_options as string[] | null;
         return tags?.some(t => dietaryFilter.includes(t));
       });
     }
@@ -98,15 +98,15 @@ export default function RestaurantsIndex() {
         break;
       case 'price_low':
         result.sort((a, b) => {
-          const pa = (a as Record<string, unknown>).avg_price as number ?? 999999;
-          const pb = (b as Record<string, unknown>).avg_price as number ?? 999999;
+          const pa = (a as unknown as Record<string, unknown>).avg_price as number ?? 999999;
+          const pb = (b as unknown as Record<string, unknown>).avg_price as number ?? 999999;
           return pa - pb;
         });
         break;
       case 'price_high':
         result.sort((a, b) => {
-          const pa = (a as Record<string, unknown>).avg_price as number ?? 0;
-          const pb = (b as Record<string, unknown>).avg_price as number ?? 0;
+          const pa = (a as unknown as Record<string, unknown>).avg_price as number ?? 0;
+          const pb = (b as unknown as Record<string, unknown>).avg_price as number ?? 0;
           return pb - pa;
         });
         break;

@@ -62,10 +62,10 @@ interface UnitHold {
 }
 
 // ── Supabase helper for untyped tables ────────────────────────────────────────
-
-type SupabaseFrom = ReturnType<typeof supabase.from>;
-function from(table: string): SupabaseFrom {
-  return (supabase.from as (t: string) => SupabaseFrom)(table);
+// Returns `any` to bypass TS deep-instantiation explosion on tables not present
+// in the auto-generated Database type.
+function from(table: string): any {
+  return (supabase.from as unknown as (t: string) => any)(table);
 }
 
 // ── Hooks ─────────────────────────────────────────────────────────────────────
@@ -126,13 +126,12 @@ function useAttributionLeads() {
       const attrIds = rows.map(r => r.id);
       if (attrIds.length === 0) return rows;
 
-      const { data: leads } = await supabase
-        .from('nb_leads')
+      const { data: leads } = await (supabase.from('nb_leads' as any) as any)
         .select('attribution_id, email, phone, name')
-        .in('attribution_id' as never, attrIds);
+        .in('attribution_id', attrIds);
 
       const leadMap: Record<string, Array<{ email: string | null; phone: string | null; name: string | null }>> = {};
-      (leads ?? []).forEach((l: Record<string, string | null>) => {
+      ((leads ?? []) as Array<Record<string, string | null>>).forEach((l) => {
         const aid = l.attribution_id as string;
         if (!leadMap[aid]) leadMap[aid] = [];
         leadMap[aid].push({ email: l.email, phone: l.phone, name: l.name });
