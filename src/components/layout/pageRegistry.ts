@@ -81,6 +81,7 @@ export const DeveloperOnboarding = lazy(() => import('@/pages/developer-portal/D
 export const DeveloperPending = lazy(() => import('@/pages/developer-portal/DeveloperPending'));
 export const DeveloperTeam = lazy(() => import('@/pages/developer-portal/DeveloperTeam'));
 export const DeveloperAcceptInvite = lazy(() => import('@/pages/developer-portal/DeveloperAcceptInvite'));
+export const DeveloperAcceptClaim = lazy(() => import('@/pages/developer-portal/DeveloperAcceptClaim'));
 export const DeveloperStripeReturn = lazy(() => import('@/pages/developer-portal/DeveloperStripeReturn'));
 
 // ── Admin Newbuilds ──
