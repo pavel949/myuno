@@ -1,12 +1,17 @@
 /**
- * CapitalDevelopersPending — broker/admin review queue + all-developers claim management.
+ * CapitalDevelopersPending — Admin Hub for managing developers.
  *
- * Tabs:
- *   • Pending — new applications (devmod_status='pending') with approve/reject
- *   • All — every developer profile with a "Send claim invite" CTA when user_id is null
+ * Three pillars:
+ *   1) KPI strip      — counts (total / unclaimed / pending / active)
+ *   2) Pending queue  — new applications waiting for approve/reject
+ *   3) Directory      — every developer with claim status, search, filters,
+ *                       send-invite, copy magic link
  */
 import React, { useMemo, useState } from 'react';
-import { CheckCircle, XCircle, Clock, Building2, Globe, Mail, Phone, User, Send, Link2 } from 'lucide-react';
+import {
+  CheckCircle, XCircle, Clock, Building2, Globe, Mail, Phone, User,
+  Send, Link2, Search, Copy, ExternalLink, Filter, Users, Sparkles,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,22 +19,14 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/components/ui/select';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
 import {
   usePendingDevelopers,
@@ -42,10 +39,48 @@ import {
 } from '@/hooks/useDeveloperOnboarding';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
+
+type DirectoryFilter = 'all' | 'unclaimed' | 'claimed' | 'active' | 'pending';
+
+// ── KPI tile ─────────────────────────────────────────────────────────
+
+function KpiTile({
+  icon: Icon, label, value, tone,
+}: {
+  icon: React.ElementType;
+  label: string;
+  value: number | string;
+  tone?: 'primary' | 'warning' | 'success' | 'muted';
+}) {
+  const toneClass = {
+    primary: 'bg-primary/10 text-primary',
+    warning: 'bg-warning/10 text-warning',
+    success: 'bg-success/10 text-success',
+    muted: 'bg-muted text-muted-foreground',
+  }[tone ?? 'primary'];
+
+  return (
+    <Card className="border-border">
+      <CardContent className="p-4 flex items-center gap-3">
+        <div className={cn('w-10 h-10 rounded-lg flex items-center justify-center shrink-0', toneClass)}>
+          <Icon className="w-5 h-5" />
+        </div>
+        <div className="min-w-0">
+          <div className="text-xs text-muted-foreground truncate">{label}</div>
+          <div className="text-xl font-semibold leading-tight">{value}</div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 // ── Pending application card ─────────────────────────────────────────
 
-function DeveloperCard({ developer, onApprove, onReject, isApproving, isRejecting }: {
+function PendingCard({
+  developer, onApprove, onReject, isApproving, isRejecting,
+}: {
   developer: PendingDeveloper;
   onApprove: () => void;
   onReject: () => void;
@@ -53,23 +88,22 @@ function DeveloperCard({ developer, onApprove, onReject, isApproving, isRejectin
   isRejecting: boolean;
 }) {
   return (
-    <Card className="border border-border">
+    <Card className="border border-border hover:border-primary/30 transition-colors">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
               <Building2 className="w-5 h-5 text-primary" />
             </div>
-            <div>
-              <CardTitle className="text-base">{developer.name_en}</CardTitle>
+            <div className="min-w-0">
+              <CardTitle className="text-base truncate">{developer.name_en}</CardTitle>
               {developer.name_ru && (
-                <p className="text-sm text-muted-foreground">{developer.name_ru}</p>
+                <p className="text-sm text-muted-foreground truncate">{developer.name_ru}</p>
               )}
             </div>
           </div>
           <Badge variant="secondary" className="bg-warning/10 text-warning border-warning/20 shrink-0">
-            <Clock className="w-3 h-3 mr-1" />
-            На проверке
+            <Clock className="w-3 h-3 mr-1" />На проверке
           </Badge>
         </div>
       </CardHeader>
@@ -83,34 +117,30 @@ function DeveloperCard({ developer, onApprove, onReject, isApproving, isRejectin
           )}
           {developer.country && (
             <div className="flex items-center gap-2 text-muted-foreground">
-              <Globe className="w-3.5 h-3.5 shrink-0" />
-              <span>{developer.country}</span>
+              <Globe className="w-3.5 h-3.5 shrink-0" /><span>{developer.country}</span>
             </div>
           )}
           {developer.email && (
             <div className="flex items-center gap-2 text-muted-foreground">
-              <Mail className="w-3.5 h-3.5 shrink-0" />
-              <span className="truncate">{developer.email}</span>
+              <Mail className="w-3.5 h-3.5 shrink-0" /><span className="truncate">{developer.email}</span>
             </div>
           )}
           {developer.phone && (
             <div className="flex items-center gap-2 text-muted-foreground">
-              <Phone className="w-3.5 h-3.5 shrink-0" />
-              <span>{developer.phone}</span>
+              <Phone className="w-3.5 h-3.5 shrink-0" /><span>{developer.phone}</span>
             </div>
           )}
           {developer.website && (
-            <div className="flex items-center gap-2 text-muted-foreground col-span-2">
+            <a
+              href={developer.website}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-primary hover:underline col-span-2 truncate"
+            >
               <Globe className="w-3.5 h-3.5 shrink-0" />
-              <a
-                href={developer.website}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="truncate text-primary hover:underline"
-              >
-                {developer.website}
-              </a>
-            </div>
+              <span className="truncate">{developer.website}</span>
+              <ExternalLink className="w-3 h-3 shrink-0 opacity-60" />
+            </a>
           )}
         </div>
 
@@ -121,23 +151,19 @@ function DeveloperCard({ developer, onApprove, onReject, isApproving, isRejectin
 
         <div className="flex gap-2 pt-1">
           <Button
-            variant="outline"
-            size="sm"
+            variant="outline" size="sm"
             className="flex-1 text-destructive border-destructive/30 hover:bg-destructive/5"
-            onClick={onReject}
-            disabled={isRejecting || isApproving}
+            onClick={onReject} disabled={isRejecting || isApproving}
           >
             <XCircle className="w-4 h-4 mr-1.5" />
-            {isRejecting ? 'Отклоняем...' : 'Отклонить'}
+            {isRejecting ? 'Отклоняем…' : 'Отклонить'}
           </Button>
           <Button
-            size="sm"
-            className="flex-1 bg-primary hover:bg-primary/90"
-            onClick={onApprove}
-            disabled={isApproving || isRejecting}
+            size="sm" className="flex-1"
+            onClick={onApprove} disabled={isApproving || isRejecting}
           >
             <CheckCircle className="w-4 h-4 mr-1.5" />
-            {isApproving ? 'Одобряем...' : 'Одобрить'}
+            {isApproving ? 'Одобряем…' : 'Одобрить'}
           </Button>
         </div>
       </CardContent>
@@ -145,36 +171,53 @@ function DeveloperCard({ developer, onApprove, onReject, isApproving, isRejectin
   );
 }
 
-// ── All developers row (claim flow) ──────────────────────────────────
+// ── Directory row ─────────────────────────────────────────────────────
 
-function AllDeveloperRow({ dev, onClaim }: { dev: DeveloperForClaim; onClaim: (d: DeveloperForClaim) => void }) {
+function DirectoryRow({
+  dev, onClaim,
+}: {
+  dev: DeveloperForClaim;
+  onClaim: (d: DeveloperForClaim) => void;
+}) {
   const claimed = !!dev.user_id;
+
+  const statusBadge = (() => {
+    if (dev.devmod_status === 'active') return { label: 'Активен', tone: 'bg-success/10 text-success border-success/20' };
+    if (dev.devmod_status === 'pending') return { label: 'На проверке', tone: 'bg-warning/10 text-warning border-warning/20' };
+    if (dev.devmod_status === 'suspended') return { label: 'Приостановлен', tone: 'bg-destructive/10 text-destructive border-destructive/20' };
+    return { label: dev.devmod_status ?? 'нет', tone: 'bg-muted text-muted-foreground' };
+  })();
+
   return (
-    <Card className="border border-border">
-      <CardContent className="p-4 flex items-center justify-between gap-4">
+    <Card className="border border-border hover:border-primary/30 transition-colors">
+      <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
             <Building2 className="w-4 h-4 text-primary" />
           </div>
           <div className="min-w-0">
             <div className="font-medium truncate">{dev.name_en}</div>
-            <div className="text-xs text-muted-foreground truncate">
-              {dev.email ?? '—'} · {dev.devmod_status ?? 'no_status'}
+            <div className="text-xs text-muted-foreground truncate flex items-center gap-1.5">
+              <Mail className="w-3 h-3 shrink-0" />
+              <span className="truncate">{dev.email ?? '— нет email —'}</span>
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
+
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <Badge variant="outline" className={cn('text-xs', statusBadge.tone)}>
+            {statusBadge.label}
+          </Badge>
           {claimed ? (
             <Badge variant="secondary" className="bg-success/10 text-success border-success/20">
-              <Link2 className="w-3 h-3 mr-1" />
-              Claimed
+              <Link2 className="w-3 h-3 mr-1" />Привязан
             </Badge>
           ) : (
             <>
-              <Badge variant="outline" className="text-muted-foreground">Unclaimed</Badge>
-              <Button size="sm" variant="outline" onClick={() => onClaim(dev)}>
+              <Badge variant="outline" className="text-muted-foreground">Нет аккаунта</Badge>
+              <Button size="sm" onClick={() => onClaim(dev)}>
                 <Send className="w-3.5 h-3.5 mr-1.5" />
-                Send claim invite
+                Отправить инвайт
               </Button>
             </>
           )}
@@ -184,10 +227,10 @@ function AllDeveloperRow({ dev, onClaim }: { dev: DeveloperForClaim; onClaim: (d
   );
 }
 
-// ── Page ─────────────────────────────────────────────────────────────
+// ── Page ──────────────────────────────────────────────────────────────
 
 export default function CapitalDevelopersPending() {
-  const { data: developers, isLoading } = usePendingDevelopers();
+  const { data: pending, isLoading: loadingPending } = usePendingDevelopers();
   const { data: allDevelopers, isLoading: loadingAll } = useAllDevelopersForClaim();
   const approveMutation = useApproveDeveloper();
   const rejectMutation = useRejectDeveloper();
@@ -199,83 +242,127 @@ export default function CapitalDevelopersPending() {
 
   const [claimTarget, setClaimTarget] = useState<DeveloperForClaim | null>(null);
   const [claimEmail, setClaimEmail] = useState('');
+  const [claimResult, setClaimResult] = useState<{ link: string; expires_at: string } | null>(null);
 
-  const unclaimedCount = useMemo(
-    () => (allDevelopers ?? []).filter((d) => !d.user_id).length,
-    [allDevelopers]
-  );
+  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState<DirectoryFilter>('all');
 
-  const handleApprove = async (developerId: string) => {
-    setApprovingId(developerId);
-    try {
-      await approveMutation.mutateAsync(developerId);
-    } finally {
-      setApprovingId(null);
+  // ── KPIs ──
+  const kpis = useMemo(() => {
+    const list = allDevelopers ?? [];
+    return {
+      total: list.length,
+      unclaimed: list.filter((d) => !d.user_id).length,
+      pending: pending?.length ?? 0,
+      active: list.filter((d) => d.devmod_status === 'active').length,
+    };
+  }, [allDevelopers, pending]);
+
+  // ── Filtered + searched directory ──
+  const directory = useMemo(() => {
+    let list = allDevelopers ?? [];
+    if (filter === 'unclaimed') list = list.filter((d) => !d.user_id);
+    if (filter === 'claimed') list = list.filter((d) => !!d.user_id);
+    if (filter === 'active') list = list.filter((d) => d.devmod_status === 'active');
+    if (filter === 'pending') list = list.filter((d) => d.devmod_status === 'pending');
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      list = list.filter(
+        (d) =>
+          d.name_en.toLowerCase().includes(q) ||
+          d.name_ru?.toLowerCase().includes(q) ||
+          d.email?.toLowerCase().includes(q),
+      );
     }
+    return list;
+  }, [allDevelopers, filter, search]);
+
+  // ── Actions ──
+  const handleApprove = async (id: string) => {
+    setApprovingId(id);
+    try { await approveMutation.mutateAsync(id); }
+    finally { setApprovingId(null); }
   };
 
   const handleConfirmReject = async () => {
     if (!rejectTarget) return;
     setRejectingId(rejectTarget);
     setRejectTarget(null);
-    try {
-      await rejectMutation.mutateAsync({ developerId: rejectTarget });
-    } finally {
-      setRejectingId(null);
-    }
+    try { await rejectMutation.mutateAsync({ developerId: rejectingId! }); }
+    finally { setRejectingId(null); }
   };
 
   const openClaim = (d: DeveloperForClaim) => {
     setClaimTarget(d);
     setClaimEmail(d.email ?? '');
+    setClaimResult(null);
   };
 
   const handleSendClaim = async () => {
     if (!claimTarget || !claimEmail) return;
     try {
-      await claimMutation.mutateAsync({ developer_id: claimTarget.id, email: claimEmail.trim() });
-      setClaimTarget(null);
-      setClaimEmail('');
+      const res = await claimMutation.mutateAsync({
+        developer_id: claimTarget.id,
+        email: claimEmail.trim(),
+      });
+      setClaimResult({ link: res.link, expires_at: res.expires_at });
     } catch {
       // toast handled in hook
     }
   };
 
+  const copyLink = async () => {
+    if (!claimResult) return;
+    await navigator.clipboard.writeText(claimResult.link);
+    toast.success('Ссылка скопирована');
+  };
+
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Застройщики</h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          Управление заявками и привязка существующих профилей к аккаунтам
-        </p>
+    <div className="p-6 max-w-6xl mx-auto space-y-6">
+      {/* Header */}
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-semibold">Управление застройщиками</h1>
+          <p className="text-muted-foreground text-sm mt-1">
+            Заявки, привязка профилей к аккаунтам, отправка приглашений
+          </p>
+        </div>
+      </div>
+
+      {/* KPI strip */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <KpiTile icon={Building2} label="Всего застройщиков" value={kpis.total} tone="primary" />
+        <KpiTile icon={Users} label="Без аккаунта" value={kpis.unclaimed} tone="muted" />
+        <KpiTile icon={Clock} label="На проверке" value={kpis.pending} tone="warning" />
+        <KpiTile icon={Sparkles} label="Активные" value={kpis.active} tone="success" />
       </div>
 
       <Tabs defaultValue="pending" className="space-y-4">
         <TabsList>
           <TabsTrigger value="pending" className="gap-2">
-            На проверке
-            {developers && developers.length > 0 && (
+            Заявки
+            {pending && pending.length > 0 && (
               <Badge variant="secondary" className="bg-warning/10 text-warning border-warning/20">
-                {developers.length}
+                {pending.length}
               </Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="all" className="gap-2">
+          <TabsTrigger value="directory" className="gap-2">
             Все застройщики
-            {unclaimedCount > 0 && (
+            {kpis.unclaimed > 0 && (
               <Badge variant="outline" className="text-muted-foreground">
-                {unclaimedCount} unclaimed
+                {kpis.unclaimed} без аккаунта
               </Badge>
             )}
           </TabsTrigger>
         </TabsList>
 
-        {/* Pending tab */}
+        {/* ── Pending ── */}
         <TabsContent value="pending" className="space-y-4">
-          {isLoading ? (
+          {loadingPending ? (
             <div className="grid gap-4 sm:grid-cols-2">
               {Array.from({ length: 3 }).map((_, i) => (
-                <Card key={i} className="border border-border">
+                <Card key={i} className="border-border">
                   <CardContent className="p-6 space-y-3">
                     <Skeleton className="h-5 w-40" />
                     <Skeleton className="h-4 w-32" />
@@ -287,8 +374,8 @@ export default function CapitalDevelopersPending() {
                 </Card>
               ))}
             </div>
-          ) : !developers || developers.length === 0 ? (
-            <Card className="border border-border">
+          ) : !pending || pending.length === 0 ? (
+            <Card className="border-border">
               <CardContent className="p-12 text-center">
                 <CheckCircle className="w-12 h-12 text-success mx-auto mb-4 opacity-50" />
                 <h3 className="font-medium text-lg mb-1">Нет новых заявок</h3>
@@ -297,8 +384,8 @@ export default function CapitalDevelopersPending() {
             </Card>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2">
-              {developers.map((dev) => (
-                <DeveloperCard
+              {pending.map((dev) => (
+                <PendingCard
                   key={dev.id}
                   developer={dev}
                   onApprove={() => handleApprove(dev.id)}
@@ -311,33 +398,76 @@ export default function CapitalDevelopersPending() {
           )}
         </TabsContent>
 
-        {/* All developers tab */}
-        <TabsContent value="all" className="space-y-3">
+        {/* ── Directory ── */}
+        <TabsContent value="directory" className="space-y-4">
+          {/* Toolbar */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Поиск по названию или email…"
+                className="pl-9"
+              />
+            </div>
+            <Select value={filter} onValueChange={(v) => setFilter(v as DirectoryFilter)}>
+              <SelectTrigger className="sm:w-56">
+                <Filter className="w-4 h-4 mr-2" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Все</SelectItem>
+                <SelectItem value="unclaimed">Без аккаунта</SelectItem>
+                <SelectItem value="claimed">С аккаунтом</SelectItem>
+                <SelectItem value="active">Активные</SelectItem>
+                <SelectItem value="pending">На проверке</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* List */}
           {loadingAll ? (
-            Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton key={i} className="h-16 w-full" />
-            ))
-          ) : !allDevelopers || allDevelopers.length === 0 ? (
-            <Card className="border border-border">
+            <div className="space-y-3">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-16 w-full" />
+              ))}
+            </div>
+          ) : directory.length === 0 ? (
+            <Card className="border-border">
               <CardContent className="p-12 text-center text-muted-foreground">
-                Застройщиков нет
+                {search ? 'Ничего не найдено' : 'Застройщиков нет'}
               </CardContent>
             </Card>
           ) : (
-            allDevelopers.map((dev) => (
-              <AllDeveloperRow key={dev.id} dev={dev} onClaim={openClaim} />
-            ))
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground">
+                Показано {directory.length} из {allDevelopers?.length ?? 0}
+              </p>
+              {directory.map((dev) => (
+                <DirectoryRow key={dev.id} dev={dev} onClaim={openClaim} />
+              ))}
+            </div>
           )}
         </TabsContent>
       </Tabs>
 
       {/* Reject confirmation */}
-      <AlertDialog open={!!rejectTarget} onOpenChange={(open) => !open && setRejectTarget(null)}>
+      <AlertDialog
+        open={!!rejectTarget}
+        onOpenChange={(open) => {
+          if (!open) {
+            setRejectingId(rejectTarget);
+            setRejectTarget(null);
+          }
+        }}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Отклонить заявку?</AlertDialogTitle>
             <AlertDialogDescription>
-              Застройщик будет переведён в статус «Приостановлен». Это действие можно отменить вручную в базе данных.
+              Застройщик будет переведён в статус «Приостановлен».
+              Это можно отменить вручную в базе данных.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -353,35 +483,73 @@ export default function CapitalDevelopersPending() {
       </AlertDialog>
 
       {/* Claim invite dialog */}
-      <Dialog open={!!claimTarget} onOpenChange={(open) => !open && setClaimTarget(null)}>
+      <Dialog
+        open={!!claimTarget}
+        onOpenChange={(open) => {
+          if (!open) {
+            setClaimTarget(null);
+            setClaimEmail('');
+            setClaimResult(null);
+          }
+        }}
+      >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Отправить claim invite</DialogTitle>
+            <DialogTitle>Привязка профиля к аккаунту</DialogTitle>
             <DialogDescription>
-              Застройщик «{claimTarget?.name_en}» получит magic link на указанный email.
-              После клика и входа профиль будет привязан к его аккаунту.
+              «{claimTarget?.name_en}» получит magic-link на указанный email.
+              После клика и входа профиль будет автоматически привязан.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-2 py-2">
-            <label className="text-sm font-medium">Email получателя</label>
-            <Input
-              type="email"
-              placeholder="owner@developer.com"
-              value={claimEmail}
-              onChange={(e) => setClaimEmail(e.target.value)}
-              autoFocus
-            />
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setClaimTarget(null)}>Отмена</Button>
-            <Button
-              onClick={handleSendClaim}
-              disabled={!claimEmail || claimMutation.isPending}
-            >
-              <Send className="w-4 h-4 mr-1.5" />
-              {claimMutation.isPending ? 'Отправка…' : 'Отправить'}
-            </Button>
-          </DialogFooter>
+
+          {!claimResult ? (
+            <>
+              <div className="space-y-2 py-2">
+                <label className="text-sm font-medium">Email получателя</label>
+                <Input
+                  type="email"
+                  placeholder="owner@developer.com"
+                  value={claimEmail}
+                  onChange={(e) => setClaimEmail(e.target.value)}
+                  autoFocus
+                />
+                <p className="text-xs text-muted-foreground">
+                  Ссылка действует 24 часа. Можно также скопировать её и переслать вручную.
+                </p>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setClaimTarget(null)}>Отмена</Button>
+                <Button onClick={handleSendClaim} disabled={!claimEmail || claimMutation.isPending}>
+                  <Send className="w-4 h-4 mr-1.5" />
+                  {claimMutation.isPending ? 'Отправка…' : 'Отправить инвайт'}
+                </Button>
+              </DialogFooter>
+            </>
+          ) : (
+            <div className="space-y-3 py-2">
+              <div className="rounded-lg border border-success/20 bg-success/5 p-3 text-sm">
+                <CheckCircle className="w-4 h-4 inline mr-1.5 text-success" />
+                Email отправлен. Срок действия:{' '}
+                <strong>{new Date(claimResult.expires_at).toLocaleString('ru-RU')}</strong>
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground mb-1 block">
+                  Magic-link для пересылки вручную
+                </label>
+                <div className="flex gap-2">
+                  <Input value={claimResult.link} readOnly className="font-mono text-xs" />
+                  <Button variant="outline" size="icon" onClick={copyLink}>
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button onClick={() => { setClaimTarget(null); setClaimResult(null); }}>
+                  Готово
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
