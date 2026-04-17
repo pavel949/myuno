@@ -29037,6 +29037,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      normalize_developer_name: { Args: { input: string }; Returns: string }
       pay_from_wallet_atomic: {
         Args: {
           p_amount: number
