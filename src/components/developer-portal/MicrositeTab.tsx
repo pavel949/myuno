@@ -167,7 +167,7 @@ export function MicrositeTab({ projectId, slug, initial }: MicrositeTabProps) {
         </div>
 
         <div>
-          <label className "nb-label mb-1.5 block">OG-изображение (1200x630)</label>
+          <label className="nb-label mb-1.5 block">OG-изображение (1200x630)</label>
           <ImageUpload
             value={form.og_image_url}
             onChange={url => update('og_image_url', url)}
