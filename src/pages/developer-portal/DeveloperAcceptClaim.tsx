@@ -80,14 +80,17 @@ export default function DeveloperAcceptClaim() {
       // Upsert owner membership
       const { error: memErr } = await supabase
         .from('developer_users')
-        .upsert({
-          developer_id: developerId,
-          auth_user_id: user.id,
-          email: user.email ?? '',
-          role: 'owner',
-          status: 'active',
-          last_login_at: new Date().toISOString(),
-        } as Record<string, unknown>, { onConflict: 'developer_id,email' });
+        .upsert(
+          [{
+            developer_id: developerId,
+            auth_user_id: user.id,
+            email: user.email ?? '',
+            role: 'owner',
+            status: 'active',
+            last_login_at: new Date().toISOString(),
+          }],
+          { onConflict: 'developer_id,email' }
+        );
       if (memErr) throw memErr;
 
       qc.invalidateQueries({ queryKey: ['developer-profile'] });
