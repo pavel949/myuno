@@ -270,6 +270,8 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.LANDING_NEW_DEVELOPMENTS} element={<Navigate to={APP_ROUTES.NEWBUILDS} replace />} />
         
         {/* ── Newbuilds (Premium New Developments) ── */}
+        {/* Project microsite — standalone, no app shell, custom SEO */}
+        <Route path="/p/:slug" element={<LazyPage><Pages.ProjectMicrosite /></LazyPage>} />
         <Route path={APP_ROUTES.NEWBUILDS} element={<LazyPage><Pages.NewbuildsLanding /></LazyPage>} />
         <Route path={APP_ROUTES.NEWBUILDS_PROJECTS} element={<LazyPage><Pages.NewbuildsCatalog /></LazyPage>} />
         <Route path="/newbuilds/projects/:slug" element={<LazyPage><Pages.NewbuildDetail /></LazyPage>} />
