@@ -1,90 +1,67 @@
 
 
-User says "Реализуй аккуратно" — implement carefully. This refers to the remaining deferred tasks from previous audit:
-- P1-1: Decompose PropertyDetail.tsx (1035 lines)
-- P1-5: Drag & Drop bulk logo upload for developers
-- P0-2: Semantic mapping developer_id for 214 projects
-- P1-3: E2E smoke-test Developer Portal
+User wants me to verify which database receives writes from CRM, leads (заявки), clients, bookings, and other frontend data flows. Context: previously discussed mirroring Lovable Cloud DB (`kakkwibljrjsawxgnupk`) to user's own Supabase (`erfwtoavipwjqmylpizt`). User wants confirmation that writes go to the correct DB.
 
-Let me check current state of these to plan properly.
+Let me investigate the codebase to verify.
 
-Actually plan should be concise. I know enough from prior context. Let me design the implementation.
+## План проверки: куда пишутся данные с фронтенда
 
-## Plan: Завершение P0/P1 фиксов блока «Недвижимость»
+### Что проверю (read-only аудит)
 
-### 1. P0-2 — Backfill `developer_id` (SQL миграция)
-- SQL: для всех `property_projects` где `developer_id IS NULL` и `developer_name IS NOT NULL`:
-  - LEFT JOIN на `developers` по нормализованному имени (lower + trim)
-  - UPDATE проставляет `developer_id`
-- Логирование: report сколько обновлено, сколько не найдено
-- Без удаления `developer_name` — оставляем как fallback
+**1. Supabase clients** — найду все экземпляры `createClient` в коде, чтобы убедиться что используется только один основной клиент:
+- `src/integrations/supabase/client.ts` — основной (Lovable Cloud `kakkwibljrjsawxgnupk`)
+- `src/lib/peylaa/supabaseClient.ts` — отдельный PEYLAA проект (read-only, sales)
+- Поиск других `createClient(...)` через codebase
 
-### 2. P1-1 — Декомпозиция `PropertyDetail.tsx` (1035 → ~250 строк)
-Разбиваю на 6 sub-компонентов в `src/components/property/detail/`:
-- `PropertyGallery.tsx` — фото/лайтбокс
-- `PropertyHeader.tsx` — название, рейтинг, локация, share/save
-- `PropertyAmenities.tsx` — сетка удобств
-- `PropertyDescription.tsx` — описание + highlights
-- `PropertyHostCard.tsx` — карточка хоста + chat button
-- `PropertyLocationMap.tsx` — карта + район
-Главный `PropertyDetail.tsx` оставляет только: data fetching, layout, sticky booking card.
+**2. CRM записи** — куда идут `INSERT` для:
+- `crm_contacts`, `crm_deals`, `crm_activities`, `crm_tasks`
+- `mcc_leads` (Marketing Command Center)
+- `consultation_requests` (заявки на консультации)
+- `vendor_prospects`, `owner_prospects`
 
-### 3. P1-5 — Bulk logo upload для застройщиков
-В `/admin/developers`:
-- Кнопка "Bulk Upload Logos" → открывает `ResponsiveModal`
-- Drag&drop зона (через существующий `UnifiedMediaUploader` mode='gallery')
-- После загрузки: матчинг по filename → developer name (fuzzy)
-- Превью таблицы "Файл → Застройщик" с возможностью корректировки
-- Кнопка "Apply" → batch UPDATE `developers.logo_url`
+**3. Заявки/Лиды** — проверю:
+- `nb_leads` (newbuilds лиды)
+- `viewing_requests` (показы недвижимости)
+- `consultation_requests` (юристы, визы)
+- Формы из лендингов (relocate, wedding, kids)
 
-### 4. P1-3 — Smoke-test Developer Portal
-- Создаю `docs/DEVELOPER_PORTAL_QA.md` — чек-лист из 15 шагов:
-  1. Регистрация на `/developer-portal/register`
-  2. Email verify → login
-  3. Создание проекта (минимум: название RU/EN, локация, статус, обложка)
-  4. Добавление 3 unit types (1BR/2BR/3BR)
-  5. Загрузка floor plans
-  6. Публикация → проверка в `/newbuilds`
-  7. Submit for moderation → проверка в `/admin/newbuilds` (Pending tab)
-  8. Approve как admin → проверка публичной видимости
-  9. Edit проекта → проверка что не сбрасывается approval
-  10. Impersonation flow от админа
-  - И т.д.
-- Добавляю автоматический `dev_portal_smoke_test` SQL view, который проверяет integrity
+**4. Клиенты/Брони** — проверю:
+- `bookings`, `orders`, `order_items`
+- `payment_intents` (Stripe webhook target)
+- `guest_inquiries`
 
-### Что НЕ трогаю
-- Storage migration / auth.users (отложено пользователем)
-- DB mirror workflow (уже сделан)
-- Существующие таблицы (только UPDATE через миграцию)
+**5. .env проверка** — какой URL прописан в `VITE_SUPABASE_URL`:
+- Подтвержу что = `https://kakkwibljrjsawxgnupk.supabase.co` (Lovable Cloud)
 
-### Файлы (новые)
-- `src/components/property/detail/PropertyGallery.tsx`
-- `src/components/property/detail/PropertyHeader.tsx`
-- `src/components/property/detail/PropertyAmenities.tsx`
-- `src/components/property/detail/PropertyDescription.tsx`
-- `src/components/property/detail/PropertyHostCard.tsx`
-- `src/components/property/detail/PropertyLocationMap.tsx`
-- `src/components/property/detail/index.ts`
-- `src/components/admin/developers/BulkLogoUploadModal.tsx`
-- `docs/DEVELOPER_PORTAL_QA.md`
+**6. Свежие записи в БД** — через `supabase--read_query` посмотрю последние 5-10 записей в каждой таблице с `created_at DESC` чтобы убедиться что данные реально приходят (timestamp ≤ 24h).
 
-### Файлы (изменения)
-- `src/pages/property/PropertyDetail.tsx` — рефакторинг, импорт sub-компонентов
-- `src/pages/admin/AdminDevelopers.tsx` — кнопка Bulk Upload + интеграция модалки
-- SQL migration: backfill developer_id
+**7. Mirror workflow check** — напомню что GitHub Actions cron (если включён) копирует данные из Lovable Cloud → `erfwtoavipwjqmylpizt` односторонне; сам фронт всегда пишет в Lovable Cloud.
 
-### Acceptance criteria
-1. `PropertyDetail.tsx` < 300 строк, sub-компоненты < 200 строк каждый
-2. Visual parity — на /property/:id всё выглядит идентично
-3. SQL backfill отчитывается: "Updated X projects with developer_id, Y unmapped"
-4. Bulk logo upload: можно загрузить 10 файлов разом и применить одним кликом
-5. QA checklist доступен по ссылке из `/admin/developers`
+### Что выдам в результате
 
-### Порядок исполнения
-1. SQL миграция (developer_id backfill) — самое критичное, 0 риск UI
-2. Декомпозиция PropertyDetail (по одному компоненту, проверяем после каждого)
-3. Bulk logo upload modal
-4. QA документ
+Краткий отчёт-таблица в чате:
 
-Время: ~12-15 минут.
+| Категория | Таблица | Куда пишет фронт | Свежесть данных | Статус |
+|---|---|---|---|---|
+| CRM Contacts | `crm_contacts` | Lovable Cloud (kakk...) | last write: ... | ✅/⚠️ |
+| CRM Deals | `crm_deals` | ... | ... | ... |
+| Лиды newbuilds | `nb_leads` | ... | ... | ... |
+| Консультации | `consultation_requests` | ... | ... | ... |
+| Бронирования | `bookings` | ... | ... | ... |
+| Заказы | `orders` | ... | ... | ... |
+| Платежи | `payment_intents` | ... | ... | ... |
+| PEYLAA данные | (внешняя БД) | ... | ... | ℹ️ |
+
+Плюс:
+- Список всех `createClient` инстансов с пояснением назначения каждого
+- Подтверждение/опровержение, что `erfwtoavipwjqmylpizt` НЕ получает прямые записи с фронта (только через mirror workflow если активирован)
+- Если найду аномалии (например запись в неправильную БД) — отдельный блок "⚠️ Найдено"
+
+### Что НЕ делаю
+- Никаких правок кода
+- Никаких миграций
+- Не трогаю mirror workflow
+
+### Время
+~3-5 минут (несколько SQL запросов + поиск по коду + чтение 3-4 файлов).
 
