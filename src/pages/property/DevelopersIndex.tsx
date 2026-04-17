@@ -29,7 +29,7 @@ export default function DevelopersIndex() {
       <div className="px-4 py-4 pb-24 space-y-4">
         {/* Hero */}
         <div className="rounded-2xl bg-gradient-to-br from-primary/10 via-background to-accent/5 p-4 border border-border/50">
-          <div className="flex items-center gap-3 mb-2">
+          <div className="flex items-center gap-3 mb-3">
             <div className="p-2.5 rounded-xl bg-primary/10">
               <Building2 className="w-6 h-6 text-primary" />
             </div>
@@ -42,6 +42,14 @@ export default function DevelopersIndex() {
               </p>
             </div>
           </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full border-primary/30 text-primary hover:bg-primary/10"
+            onClick={() => navigate(APP_ROUTES.DEVELOPER_PORTAL_APPLY)}
+          >
+            {isRu ? 'Я застройщик — добавить компанию' : "I'm a developer — list my company"}
+          </Button>
         </div>
 
         {/* List */}
