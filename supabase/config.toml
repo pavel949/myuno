@@ -157,3 +157,5 @@ project_id = "erfwtoavipwjqmylpizt"
     verify_jwt = false
   [functions.scheduled-mc-backup]
     verify_jwt = false
+  [functions.external-data-api]
+    verify_jwt = false
