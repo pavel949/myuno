@@ -6,7 +6,7 @@ import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Check, X, Star, StarOff, Shield, ShieldOff, Search, Edit2, Save, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react';
+import { Check, X, Star, StarOff, Shield, ShieldOff, Search, Edit2, Save, ExternalLink, ChevronDown, ChevronUp, CheckSquare, Square } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -17,12 +17,24 @@ import { Textarea } from '@/components/ui/textarea';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
 
 export default function AdminNewbuilds() {
   const qc = useQueryClient();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+  const clearSelection = () => setSelectedIds(new Set());
 
   // All projects
   const { data: projects = [] } = useQuery({
@@ -64,6 +76,19 @@ export default function AdminNewbuilds() {
       qc.invalidateQueries({ queryKey: ['admin-nb-developers'] });
       toast.success('Обновлено');
     },
+  });
+
+  const bulkUpdateProjects = useMutation({
+    mutationFn: async ({ ids, updates }: { ids: string[]; updates: any }) => {
+      const { error } = await supabase.from('property_projects').update(updates).in('id', ids);
+      if (error) throw error;
+    },
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ['admin-nb-projects'] });
+      clearSelection();
+      toast.success(`Обновлено ${vars.ids.length} проектов`);
+    },
+    onError: (e: any) => toast.error(e?.message || 'Ошибка'),
   });
 
   const filtered = useMemo(() => {
