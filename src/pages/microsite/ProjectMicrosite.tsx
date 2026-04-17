@@ -145,7 +145,7 @@ export default function ProjectMicrosite() {
             </div>
             <div className="p-5 rounded-xl border" style={{ background: 'hsl(222 47% 8%)', borderColor: 'hsl(38 50% 55% / 0.15)' }}>
               <p className="text-xs uppercase tracking-wider opacity-60 mb-2">Прогресс</p>
-              <NbConstructionProgress progress={project.construction_progress} compact />
+              <NbConstructionProgress progress={project.construction_progress} />
             </div>
           </div>
 
