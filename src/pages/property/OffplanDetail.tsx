@@ -33,12 +33,8 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { ResponsiveModal } from '@/components/ui/responsive-modal';
+import { SEOHead, createRealEstateListingSchema, createBreadcrumbSchema } from '@/components/seo';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useOffplanProjects, type ProjectStatus } from '@/hooks/useOffplanProjects';
@@ -116,6 +112,27 @@ export default function OffplanDetail() {
   const status = STATUS_CONFIG[project.projectStatus];
   const StatusIcon = status.icon;
 
+  const seoTitle = `${name}${project.district ? ` · ${project.district}` : ''}, Phuket`;
+  const seoDescription = isRu
+    ? `${name} — ${project.district || 'Пхукет'}. ${status.label.ru}. ${project.priceFrom ? `Цена от ${formatPrice(project.priceFrom)}.` : ''} ${project.roiProjected ? `ROI ${project.roiProjected}%.` : ''} muUNO Score, due diligence, инвестиционная аналитика.`.trim()
+    : `${name} — ${project.district || 'Phuket'}. ${status.label.en}. ${project.priceFrom ? `From ${formatPrice(project.priceFrom)}.` : ''} ${project.roiProjected ? `${project.roiProjected}% projected ROI.` : ''} muUNO Score, due diligence, investment analytics.`.trim();
+  const seoImage = project.coverImage || 'https://myuno.app/og-image.png';
+  const canonicalUrl = `https://myuno.app${APP_ROUTES.OFFPLAN_DETAIL(project.id)}`;
+  const listingSchema = createRealEstateListingSchema({
+    name,
+    description: seoDescription,
+    price: project.priceFrom ?? undefined,
+    currency: 'THB',
+    image: seoImage,
+    url: canonicalUrl,
+    address: project.district ?? undefined,
+  });
+  const breadcrumbSchema = createBreadcrumbSchema([
+    { name: 'Property', url: 'https://myuno.app/property' },
+    { name: isRu ? 'Новостройки' : 'Off-Plan', url: 'https://myuno.app/property/offplan' },
+    { name, url: canonicalUrl },
+  ]);
+
   const formatCompletionDate = (date: string | null) => {
     if (!date) return null;
     const d = new Date(date);
@@ -125,6 +142,14 @@ export default function OffplanDetail() {
 
   return (
     <AppLayout>
+      <SEOHead
+        title={seoTitle}
+        description={seoDescription}
+        image={seoImage}
+        url={canonicalUrl}
+        type="product"
+        jsonLd={{ '@context': 'https://schema.org', '@graph': [listingSchema, breadcrumbSchema] }}
+      />
       {/* Hero Image */}
       <div className="relative aspect-[16/10] bg-muted">
         {project.coverImage ? (
@@ -432,22 +457,20 @@ export default function OffplanDetail() {
         </div>
       </div>
 
-      {/* Lead Form Dialog */}
-      <Dialog open={showLeadForm} onOpenChange={setShowLeadForm}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>
-              {isRu ? 'Оценка рисков и консультация' : 'Risk Assessment & Consultation'}
-            </DialogTitle>
-          </DialogHeader>
-          <UniversalLeadForm
-            verticalId="property"
-            entryPoint={`offplan_risk_assessment_${project.id}`}
-            leadSource="risk_assessment"
-            onSuccess={() => setShowLeadForm(false)}
-          />
-        </DialogContent>
-      </Dialog>
+      {/* Lead Form — Sheet on mobile, Dialog on desktop */}
+      <ResponsiveModal
+        open={showLeadForm}
+        onOpenChange={setShowLeadForm}
+        title={isRu ? 'Оценка рисков и консультация' : 'Risk Assessment & Consultation'}
+        size="md"
+      >
+        <UniversalLeadForm
+          verticalId="property"
+          entryPoint={`offplan_risk_assessment_${project.id}`}
+          leadSource="risk_assessment"
+          onSuccess={() => setShowLeadForm(false)}
+        />
+      </ResponsiveModal>
     </AppLayout>
   );
 }

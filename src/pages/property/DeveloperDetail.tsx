@@ -26,6 +26,7 @@ import { useDeveloper } from '@/hooks/useDevelopers';
 import { useOffplanProjects } from '@/hooks/useOffplanProjects';
 import { MuunoScoreWidget } from '@/components/invest/MuunoScoreWidget';
 import { OffplanProjectCard } from '@/components/property/OffplanProjectCard';
+import { SEOHead, createBreadcrumbSchema } from '@/components/seo';
 
 export default function DeveloperDetail() {
   const { id } = useParams<{ id: string }>();
@@ -66,9 +67,37 @@ export default function DeveloperDetail() {
 
   const name = isRu ? developer.nameRu : developer.nameEn;
   const description = isRu ? developer.descriptionRu : developer.descriptionEn;
+  const seoTitle = `${name} · ${isRu ? 'Застройщик' : 'Developer'} · Phuket`;
+  const seoDescription = description
+    || (isRu
+      ? `${name} — застройщик Пхукета. ${developer.projectsCompleted} проектов, ${developer.totalUnitsSold} юнитов продано.${developer.foundedYear ? ` Основано в ${developer.foundedYear}.` : ''}`
+      : `${name} — Phuket developer. ${developer.projectsCompleted} projects, ${developer.totalUnitsSold} units sold.${developer.foundedYear ? ` Founded ${developer.foundedYear}.` : ''}`);
+  const canonicalUrl = `https://myuno.app${APP_ROUTES.DEVELOPER_DETAIL(developer.id)}`;
+  const orgSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name,
+    description: seoDescription,
+    url: canonicalUrl,
+    ...(developer.logoUrl && { logo: developer.logoUrl }),
+    ...(developer.foundedYear && { foundingDate: String(developer.foundedYear) }),
+    ...(developer.website && { sameAs: [developer.website] }),
+  };
+  const breadcrumbSchema = createBreadcrumbSchema([
+    { name: 'Property', url: 'https://myuno.app/property' },
+    { name: isRu ? 'Застройщики' : 'Developers', url: 'https://myuno.app/property/developers' },
+    { name, url: canonicalUrl },
+  ]);
 
   return (
     <AppLayout>
+      <SEOHead
+        title={seoTitle}
+        description={seoDescription}
+        image={developer.logoUrl || 'https://myuno.app/og-image.png'}
+        url={canonicalUrl}
+        jsonLd={{ '@context': 'https://schema.org', '@graph': [orgSchema, breadcrumbSchema] }}
+      />
       {/* Cover */}
       <div className="relative h-32 bg-gradient-to-br from-primary/20 to-primary/5">
         <BackButton fallbackPath={APP_ROUTES.DEVELOPERS} className="absolute top-4 left-4" />

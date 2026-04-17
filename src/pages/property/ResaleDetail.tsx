@@ -12,7 +12,9 @@ import { BackButton } from '@/components/uno/BackButton';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ResponsiveModal } from '@/components/ui/responsive-modal';
+import { SEOHead, createRealEstateListingSchema } from '@/components/seo';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useResaleProperty } from '@/hooks/useResaleProperties';
@@ -67,8 +69,35 @@ export default function ResaleDetail() {
     company_structure: isRu ? 'Через компанию' : 'Company structure',
   };
 
+  const seoTitle = `${title}${property.zone ? ` · ${property.zone}` : ''}${property.is_assignment ? ` · ${isRu ? 'Переуступка' : 'Assignment'}` : ''}`;
+  const seoDescription = isRu
+    ? `${title} в ${property.zone || 'Пхукет'}. Цена ${formatPrice(property.asking_price)}. ${property.estimated_roi ? `ROI ${property.estimated_roi}%.` : ''} ${property.is_assignment ? 'Переуступка прав.' : 'Вторичный рынок.'}`.trim()
+    : `${title} in ${property.zone || 'Phuket'}. Asking ${formatPrice(property.asking_price)}. ${property.estimated_roi ? `${property.estimated_roi}% ROI.` : ''} ${property.is_assignment ? 'Assignment.' : 'Secondary market.'}`.trim();
+  const seoImage = (typeof images[0] === 'string' && images[0]) || 'https://myuno.app/og-image.png';
+  const canonicalUrl = `https://myuno.app${APP_ROUTES.RESALE_DETAIL(property.id)}`;
+  const jsonLd = createRealEstateListingSchema({
+    name: title,
+    description: seoDescription,
+    price: property.asking_price ?? undefined,
+    currency: 'THB',
+    image: seoImage as string,
+    url: canonicalUrl,
+    bedrooms: property.bedrooms ?? undefined,
+    bathrooms: property.bathrooms ?? undefined,
+    area: property.area_sqm ?? undefined,
+    address: property.zone ?? undefined,
+  });
+
   return (
     <div className="min-h-screen bg-background pb-24">
+      <SEOHead
+        title={seoTitle}
+        description={seoDescription}
+        image={seoImage as string}
+        url={canonicalUrl}
+        type="product"
+        jsonLd={jsonLd}
+      />
       {/* Gallery */}
       <div className="relative aspect-[16/10] bg-muted">
         <img
@@ -209,24 +238,22 @@ export default function ResaleDetail() {
         </Button>
       </div>
 
-      {/* Lead Form Dialog */}
-      <Dialog open={showLeadForm} onOpenChange={setShowLeadForm}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              {isRu ? 'Запросить показ' : 'Request Viewing'}
-            </DialogTitle>
-          </DialogHeader>
-          <UniversalLeadForm
-            verticalId="property"
-            leadSource="cta"
-            entryPoint={`resale_${property.id}`}
-            preselectedRequestType="property_viewing"
-            onSuccess={() => setShowLeadForm(false)}
-            onCancel={() => setShowLeadForm(false)}
-          />
-        </DialogContent>
-      </Dialog>
+      {/* Lead Form — Sheet on mobile, Dialog on desktop */}
+      <ResponsiveModal
+        open={showLeadForm}
+        onOpenChange={setShowLeadForm}
+        title={isRu ? 'Запросить показ' : 'Request Viewing'}
+        size="md"
+      >
+        <UniversalLeadForm
+          verticalId="property"
+          leadSource="cta"
+          entryPoint={`resale_${property.id}`}
+          preselectedRequestType="property_viewing"
+          onSuccess={() => setShowLeadForm(false)}
+          onCancel={() => setShowLeadForm(false)}
+        />
+      </ResponsiveModal>
     </div>
   );
 }
