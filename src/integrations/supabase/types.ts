@@ -1841,6 +1841,92 @@ export type Database = {
           },
         ]
       }
+      buyers: {
+        Row: {
+          created_at: string | null
+          created_by_user_id: string | null
+          date_of_birth: string | null
+          email: string
+          first_name: string
+          funds_source_declared: string | null
+          funds_source_docs: string[] | null
+          id: string
+          kyc_status: string | null
+          kyc_verified_at: string | null
+          kyc_verified_by: string | null
+          last_name: string
+          lead_id: string | null
+          nationality: string
+          passport_expiry: string | null
+          passport_number: string | null
+          passport_scan_url: string | null
+          pep_flag: boolean | null
+          phone: string
+          preferred_language: string | null
+          sanctions_flag: boolean | null
+          tax_residency: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by_user_id?: string | null
+          date_of_birth?: string | null
+          email: string
+          first_name: string
+          funds_source_declared?: string | null
+          funds_source_docs?: string[] | null
+          id?: string
+          kyc_status?: string | null
+          kyc_verified_at?: string | null
+          kyc_verified_by?: string | null
+          last_name: string
+          lead_id?: string | null
+          nationality: string
+          passport_expiry?: string | null
+          passport_number?: string | null
+          passport_scan_url?: string | null
+          pep_flag?: boolean | null
+          phone: string
+          preferred_language?: string | null
+          sanctions_flag?: boolean | null
+          tax_residency?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by_user_id?: string | null
+          date_of_birth?: string | null
+          email?: string
+          first_name?: string
+          funds_source_declared?: string | null
+          funds_source_docs?: string[] | null
+          id?: string
+          kyc_status?: string | null
+          kyc_verified_at?: string | null
+          kyc_verified_by?: string | null
+          last_name?: string
+          lead_id?: string | null
+          nationality?: string
+          passport_expiry?: string | null
+          passport_number?: string | null
+          passport_scan_url?: string | null
+          pep_flag?: boolean | null
+          phone?: string
+          preferred_language?: string | null
+          sanctions_flag?: boolean | null
+          tax_residency?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "buyers_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "nb_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       calendar_sync_logs: {
         Row: {
           calendar_id: string | null
@@ -3106,6 +3192,153 @@ export type Database = {
         }
         Relationships: []
       }
+      commission_agreements: {
+        Row: {
+          created_at: string | null
+          developer_id: string
+          developer_stated_rate: number
+          effective_from: string
+          effective_to: string | null
+          exclusive_russian_channel: boolean | null
+          id: string
+          lead_ownership_days: number | null
+          minimum_commission_thb: number | null
+          mou_document_url: string | null
+          myuno_retained_rate: number
+          payment_trigger: string | null
+          price_parity_enforced: boolean | null
+          project_id: string | null
+          signed_by_broker_at: string | null
+          signed_by_developer_at: string | null
+          status: string | null
+          sub_agent_split: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          developer_id: string
+          developer_stated_rate: number
+          effective_from: string
+          effective_to?: string | null
+          exclusive_russian_channel?: boolean | null
+          id?: string
+          lead_ownership_days?: number | null
+          minimum_commission_thb?: number | null
+          mou_document_url?: string | null
+          myuno_retained_rate: number
+          payment_trigger?: string | null
+          price_parity_enforced?: boolean | null
+          project_id?: string | null
+          signed_by_broker_at?: string | null
+          signed_by_developer_at?: string | null
+          status?: string | null
+          sub_agent_split?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          developer_id?: string
+          developer_stated_rate?: number
+          effective_from?: string
+          effective_to?: string | null
+          exclusive_russian_channel?: boolean | null
+          id?: string
+          lead_ownership_days?: number | null
+          minimum_commission_thb?: number | null
+          mou_document_url?: string | null
+          myuno_retained_rate?: number
+          payment_trigger?: string | null
+          price_parity_enforced?: boolean | null
+          project_id?: string | null
+          signed_by_broker_at?: string | null
+          signed_by_developer_at?: string | null
+          status?: string | null
+          sub_agent_split?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commission_agreements_developer_id_fkey"
+            columns: ["developer_id"]
+            isOneToOne: false
+            referencedRelation: "developers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commission_agreements_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "property_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commission_events: {
+        Row: {
+          agreement_id: string
+          commission_amount_thb: number
+          commission_rate: number
+          created_at: string | null
+          dispute_evidence: Json | null
+          dispute_reason: string | null
+          event_type: string
+          gross_sale_price_thb: number
+          id: string
+          invoice_number: string | null
+          invoice_url: string | null
+          notes: string | null
+          paid_amount_thb: number | null
+          paid_at: string | null
+          reservation_id: string
+        }
+        Insert: {
+          agreement_id: string
+          commission_amount_thb: number
+          commission_rate: number
+          created_at?: string | null
+          dispute_evidence?: Json | null
+          dispute_reason?: string | null
+          event_type: string
+          gross_sale_price_thb: number
+          id?: string
+          invoice_number?: string | null
+          invoice_url?: string | null
+          notes?: string | null
+          paid_amount_thb?: number | null
+          paid_at?: string | null
+          reservation_id: string
+        }
+        Update: {
+          agreement_id?: string
+          commission_amount_thb?: number
+          commission_rate?: number
+          created_at?: string | null
+          dispute_evidence?: Json | null
+          dispute_reason?: string | null
+          event_type?: string
+          gross_sale_price_thb?: number
+          id?: string
+          invoice_number?: string | null
+          invoice_url?: string | null
+          notes?: string | null
+          paid_amount_thb?: number | null
+          paid_at?: string | null
+          reservation_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commission_events_agreement_id_fkey"
+            columns: ["agreement_id"]
+            isOneToOne: false
+            referencedRelation: "commission_agreements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commission_events_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "reservations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_category_settings: {
         Row: {
           affects_net_profit: boolean | null
@@ -3386,6 +3619,67 @@ export type Database = {
             columns: ["resale_property_id"]
             isOneToOne: false
             referencedRelation: "resale_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contact_disclosure_events: {
+        Row: {
+          buyer_id: string | null
+          disclosed_at: string | null
+          disclosed_by_user_id: string | null
+          disclosed_to_id: string | null
+          disclosed_to_type: string
+          fields_disclosed: string[]
+          id: string
+          lead_id: string | null
+          reservation_id: string | null
+          stage: string
+        }
+        Insert: {
+          buyer_id?: string | null
+          disclosed_at?: string | null
+          disclosed_by_user_id?: string | null
+          disclosed_to_id?: string | null
+          disclosed_to_type: string
+          fields_disclosed: string[]
+          id?: string
+          lead_id?: string | null
+          reservation_id?: string | null
+          stage: string
+        }
+        Update: {
+          buyer_id?: string | null
+          disclosed_at?: string | null
+          disclosed_by_user_id?: string | null
+          disclosed_to_id?: string | null
+          disclosed_to_type?: string
+          fields_disclosed?: string[]
+          id?: string
+          lead_id?: string | null
+          reservation_id?: string | null
+          stage?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_disclosure_events_buyer_id_fkey"
+            columns: ["buyer_id"]
+            isOneToOne: false
+            referencedRelation: "buyers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_disclosure_events_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "nb_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_disclosure_events_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "reservations"
             referencedColumns: ["id"]
           },
         ]
@@ -5718,83 +6012,166 @@ export type Database = {
           },
         ]
       }
+      developer_users: {
+        Row: {
+          auth_user_id: string | null
+          created_at: string | null
+          developer_id: string
+          email: string
+          full_name: string | null
+          id: string
+          invite_expires_at: string | null
+          invite_token: string | null
+          invited_by: string | null
+          last_login_at: string | null
+          phone: string | null
+          project_access: string[] | null
+          role: string
+          status: string | null
+        }
+        Insert: {
+          auth_user_id?: string | null
+          created_at?: string | null
+          developer_id: string
+          email: string
+          full_name?: string | null
+          id?: string
+          invite_expires_at?: string | null
+          invite_token?: string | null
+          invited_by?: string | null
+          last_login_at?: string | null
+          phone?: string | null
+          project_access?: string[] | null
+          role: string
+          status?: string | null
+        }
+        Update: {
+          auth_user_id?: string | null
+          created_at?: string | null
+          developer_id?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          invite_expires_at?: string | null
+          invite_token?: string | null
+          invited_by?: string | null
+          last_login_at?: string | null
+          phone?: string | null
+          project_access?: string[] | null
+          role?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "developer_users_developer_id_fkey"
+            columns: ["developer_id"]
+            isOneToOne: false
+            referencedRelation: "developers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       developers: {
         Row: {
           address: string | null
           average_rating: number | null
+          country: string | null
           cover_image: string | null
           created_at: string | null
           description_en: string | null
           description_ru: string | null
+          devmod_status: string | null
+          display_name: string | null
           email: string | null
           founded_year: number | null
           id: string
           is_active: boolean | null
           is_featured: boolean | null
           is_verified: boolean | null
+          legal_name: string | null
           logo_url: string | null
           muuno_score: number | null
           name_en: string
           name_ru: string
           phone: string | null
           projects_completed: number | null
+          registration_number: string | null
           slug: string | null
+          stripe_connect_id: string | null
           subscription_tier: string | null
           total_units_sold: number | null
           updated_at: string | null
           user_id: string | null
+          verified_at: string | null
+          verified_by: string | null
           website: string | null
         }
         Insert: {
           address?: string | null
           average_rating?: number | null
+          country?: string | null
           cover_image?: string | null
           created_at?: string | null
           description_en?: string | null
           description_ru?: string | null
+          devmod_status?: string | null
+          display_name?: string | null
           email?: string | null
           founded_year?: number | null
           id?: string
           is_active?: boolean | null
           is_featured?: boolean | null
           is_verified?: boolean | null
+          legal_name?: string | null
           logo_url?: string | null
           muuno_score?: number | null
           name_en: string
           name_ru: string
           phone?: string | null
           projects_completed?: number | null
+          registration_number?: string | null
           slug?: string | null
+          stripe_connect_id?: string | null
           subscription_tier?: string | null
           total_units_sold?: number | null
           updated_at?: string | null
           user_id?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
           website?: string | null
         }
         Update: {
           address?: string | null
           average_rating?: number | null
+          country?: string | null
           cover_image?: string | null
           created_at?: string | null
           description_en?: string | null
           description_ru?: string | null
+          devmod_status?: string | null
+          display_name?: string | null
           email?: string | null
           founded_year?: number | null
           id?: string
           is_active?: boolean | null
           is_featured?: boolean | null
           is_verified?: boolean | null
+          legal_name?: string | null
           logo_url?: string | null
           muuno_score?: number | null
           name_en?: string
           name_ru?: string
           phone?: string | null
           projects_completed?: number | null
+          registration_number?: string | null
           slug?: string | null
+          stripe_connect_id?: string | null
           subscription_tier?: string | null
           total_units_sold?: number | null
           updated_at?: string | null
           user_id?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
           website?: string | null
         }
         Relationships: []
@@ -6462,6 +6839,56 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      floor_plans: {
+        Row: {
+          created_at: string | null
+          display_order: number | null
+          id: string
+          image_height_px: number
+          image_url: string
+          image_width_px: number
+          name: string
+          project_id: string
+          scale_reference: Json | null
+          updated_at: string | null
+          version: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          image_height_px: number
+          image_url: string
+          image_width_px: number
+          name: string
+          project_id: string
+          scale_reference?: Json | null
+          updated_at?: string | null
+          version?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          image_height_px?: number
+          image_url?: string
+          image_width_px?: number
+          name?: string
+          project_id?: string
+          scale_reference?: Json | null
+          updated_at?: string | null
+          version?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "floor_plans_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "property_projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       flower_addons: {
         Row: {
@@ -7749,6 +8176,103 @@ export type Database = {
             columns: ["lead_id"]
             isOneToOne: false
             referencedRelation: "consultation_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_attributions: {
+        Row: {
+          attribution_cookie_id: string
+          attribution_days: number | null
+          claimed_by_broker: boolean | null
+          contact_fingerprint: string | null
+          created_at: string | null
+          dispute_evidence: Json | null
+          disputed: boolean | null
+          email_hash: string | null
+          expires_at: string | null
+          first_touch_at: string | null
+          id: string
+          last_touch_at: string | null
+          linked_buyer_id: string | null
+          linked_lead_id: string | null
+          passport_hash: string | null
+          phone_hash: string | null
+          project_id: string | null
+          referrer: string | null
+          touchpoints: Json | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          attribution_cookie_id: string
+          attribution_days?: number | null
+          claimed_by_broker?: boolean | null
+          contact_fingerprint?: string | null
+          created_at?: string | null
+          dispute_evidence?: Json | null
+          disputed?: boolean | null
+          email_hash?: string | null
+          expires_at?: string | null
+          first_touch_at?: string | null
+          id?: string
+          last_touch_at?: string | null
+          linked_buyer_id?: string | null
+          linked_lead_id?: string | null
+          passport_hash?: string | null
+          phone_hash?: string | null
+          project_id?: string | null
+          referrer?: string | null
+          touchpoints?: Json | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          attribution_cookie_id?: string
+          attribution_days?: number | null
+          claimed_by_broker?: boolean | null
+          contact_fingerprint?: string | null
+          created_at?: string | null
+          dispute_evidence?: Json | null
+          disputed?: boolean | null
+          email_hash?: string | null
+          expires_at?: string | null
+          first_touch_at?: string | null
+          id?: string
+          last_touch_at?: string | null
+          linked_buyer_id?: string | null
+          linked_lead_id?: string | null
+          passport_hash?: string | null
+          phone_hash?: string | null
+          project_id?: string | null
+          referrer?: string | null
+          touchpoints?: Json | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_lead_attributions_buyer"
+            columns: ["linked_buyer_id"]
+            isOneToOne: false
+            referencedRelation: "buyers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_attributions_linked_lead_id_fkey"
+            columns: ["linked_lead_id"]
+            isOneToOne: false
+            referencedRelation: "nb_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_attributions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "property_projects"
             referencedColumns: ["id"]
           },
         ]
@@ -9821,6 +10345,86 @@ export type Database = {
         }
         Relationships: []
       }
+      masked_channels: {
+        Row: {
+          active: boolean | null
+          buyer_id: string | null
+          created_at: string | null
+          developer_user_id: string | null
+          expires_at: string | null
+          id: string
+          lead_id: string | null
+          masked_email: string | null
+          masked_phone_twilio_sid: string | null
+          real_email_buyer: string | null
+          real_email_developer: string | null
+          real_phone_buyer: string | null
+          real_phone_developer: string | null
+          reservation_id: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          buyer_id?: string | null
+          created_at?: string | null
+          developer_user_id?: string | null
+          expires_at?: string | null
+          id?: string
+          lead_id?: string | null
+          masked_email?: string | null
+          masked_phone_twilio_sid?: string | null
+          real_email_buyer?: string | null
+          real_email_developer?: string | null
+          real_phone_buyer?: string | null
+          real_phone_developer?: string | null
+          reservation_id?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          buyer_id?: string | null
+          created_at?: string | null
+          developer_user_id?: string | null
+          expires_at?: string | null
+          id?: string
+          lead_id?: string | null
+          masked_email?: string | null
+          masked_phone_twilio_sid?: string | null
+          real_email_buyer?: string | null
+          real_email_developer?: string | null
+          real_phone_buyer?: string | null
+          real_phone_developer?: string | null
+          reservation_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "masked_channels_buyer_id_fkey"
+            columns: ["buyer_id"]
+            isOneToOne: false
+            referencedRelation: "buyers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "masked_channels_developer_user_id_fkey"
+            columns: ["developer_user_id"]
+            isOneToOne: false
+            referencedRelation: "developer_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "masked_channels_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "nb_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "masked_channels_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "reservations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mc_property_slots: {
         Row: {
           activated_at: string
@@ -10826,6 +11430,7 @@ export type Database = {
       }
       nb_leads: {
         Row: {
+          attribution_id: string | null
           budget_max: number | null
           budget_min: number | null
           created_at: string | null
@@ -10847,6 +11452,7 @@ export type Database = {
           whatsapp: string | null
         }
         Insert: {
+          attribution_id?: string | null
           budget_max?: number | null
           budget_min?: number | null
           created_at?: string | null
@@ -10868,6 +11474,7 @@ export type Database = {
           whatsapp?: string | null
         }
         Update: {
+          attribution_id?: string | null
           budget_max?: number | null
           budget_min?: number | null
           created_at?: string | null
@@ -12563,6 +13170,62 @@ export type Database = {
           },
         ]
       }
+      payment_schedules: {
+        Row: {
+          amount_pct: number | null
+          amount_thb: number
+          created_at: string | null
+          due_date: string | null
+          id: string
+          milestone: string
+          milestone_order: number
+          notes: string | null
+          paid_amount_thb: number | null
+          paid_date: string | null
+          receipt_url: string | null
+          reservation_id: string
+          status: string | null
+        }
+        Insert: {
+          amount_pct?: number | null
+          amount_thb: number
+          created_at?: string | null
+          due_date?: string | null
+          id?: string
+          milestone: string
+          milestone_order: number
+          notes?: string | null
+          paid_amount_thb?: number | null
+          paid_date?: string | null
+          receipt_url?: string | null
+          reservation_id: string
+          status?: string | null
+        }
+        Update: {
+          amount_pct?: number | null
+          amount_thb?: number
+          created_at?: string | null
+          due_date?: string | null
+          id?: string
+          milestone?: string
+          milestone_order?: number
+          notes?: string | null
+          paid_amount_thb?: number | null
+          paid_date?: string | null
+          receipt_url?: string | null
+          reservation_id?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_schedules_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "reservations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       personal_reminders: {
         Row: {
           completed_at: string | null
@@ -13486,15 +14149,29 @@ export type Database = {
           currency: string | null
           deal_id: string | null
           floor: number | null
+          floor_number: number | null
+          floor_plan_id: string | null
+          floor_plan_image_url: string | null
           floor_plan_url: string | null
           id: string
           notes: string | null
+          ownership_type: string | null
+          pin_logical_m: Json | null
+          pin_x_pct: number | null
+          pin_y_pct: number | null
           price: number | null
           price_per_sqm: number | null
+          price_thb: number | null
           project_id: string
           property_id: string | null
+          size_sqm: number | null
+          sold_at: string | null
+          sold_to_buyer_id: string | null
+          sold_via_myuno: boolean | null
           status: string | null
+          status_version: number | null
           unit_code: string | null
+          unit_status: string | null
           unit_type: string
           updated_at: string | null
           view_type: string | null
@@ -13509,15 +14186,29 @@ export type Database = {
           currency?: string | null
           deal_id?: string | null
           floor?: number | null
+          floor_number?: number | null
+          floor_plan_id?: string | null
+          floor_plan_image_url?: string | null
           floor_plan_url?: string | null
           id?: string
           notes?: string | null
+          ownership_type?: string | null
+          pin_logical_m?: Json | null
+          pin_x_pct?: number | null
+          pin_y_pct?: number | null
           price?: number | null
           price_per_sqm?: number | null
+          price_thb?: number | null
           project_id: string
           property_id?: string | null
+          size_sqm?: number | null
+          sold_at?: string | null
+          sold_to_buyer_id?: string | null
+          sold_via_myuno?: boolean | null
           status?: string | null
+          status_version?: number | null
           unit_code?: string | null
+          unit_status?: string | null
           unit_type: string
           updated_at?: string | null
           view_type?: string | null
@@ -13532,15 +14223,29 @@ export type Database = {
           currency?: string | null
           deal_id?: string | null
           floor?: number | null
+          floor_number?: number | null
+          floor_plan_id?: string | null
+          floor_plan_image_url?: string | null
           floor_plan_url?: string | null
           id?: string
           notes?: string | null
+          ownership_type?: string | null
+          pin_logical_m?: Json | null
+          pin_x_pct?: number | null
+          pin_y_pct?: number | null
           price?: number | null
           price_per_sqm?: number | null
+          price_thb?: number | null
           project_id?: string
           property_id?: string | null
+          size_sqm?: number | null
+          sold_at?: string | null
+          sold_to_buyer_id?: string | null
+          sold_via_myuno?: boolean | null
           status?: string | null
+          status_version?: number | null
           unit_code?: string | null
+          unit_status?: string | null
           unit_type?: string
           updated_at?: string | null
           view_type?: string | null
@@ -13558,6 +14263,13 @@ export type Database = {
             columns: ["deal_id"]
             isOneToOne: false
             referencedRelation: "agent_deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_units_floor_plan_id_fkey"
+            columns: ["floor_plan_id"]
+            isOneToOne: false
+            referencedRelation: "floor_plans"
             referencedColumns: ["id"]
           },
           {
@@ -17202,14 +17914,18 @@ export type Database = {
         Row: {
           address: string | null
           amenities: string[] | null
+          amenities_meta: Json | null
+          available_units: number | null
           cam_fee_per_sqm: number | null
           cam_includes: string[] | null
           cam_payment_day: number | null
           commission_pct: number | null
           completion_date: string | null
+          construction_phase: string | null
           construction_progress: number | null
           contact_id: string | null
           cover_image: string | null
+          cover_image_url: string | null
           created_at: string | null
           created_by: string | null
           description_en: string | null
@@ -17218,9 +17934,12 @@ export type Database = {
           developer_id: string | null
           developer_name: string | null
           district: string | null
+          documents_urls: Json | null
           exclusive: boolean | null
           featured_label: string | null
           featured_rank: number | null
+          foreign_quota_used_pct: number | null
+          foreign_units_sold: number | null
           funding_goal: number | null
           gallery_urls: string[] | null
           id: string
@@ -17248,6 +17967,8 @@ export type Database = {
           lat: number | null
           lng: number | null
           location_area: string | null
+          location_lat: number | null
+          location_lng: number | null
           management_company_id: string | null
           marketing_materials: string[] | null
           min_investment: number | null
@@ -17258,37 +17979,47 @@ export type Database = {
           offplan_catalog: Json | null
           ownership_types: string[] | null
           payment_plan: Json | null
+          payment_plan_template: Json | null
           price_from: number | null
+          price_from_thb: number | null
           price_per_sqm: number | null
           price_to: number | null
+          price_to_thb: number | null
           price_usd: number | null
           project_status: string | null
+          public_listing_enabled: boolean | null
           risk_level: string | null
           roi_projected: number | null
           slug: string | null
           source_url: string | null
           tagline: string | null
           tagline_ru: string | null
+          thai_units_sold: number | null
           total_units: number | null
           unit_types: string[] | null
           units_available: number | null
           units_sold: number | null
           updated_at: string | null
           video_url: string | null
+          virtual_tour_url: string | null
           year_built: number | null
           yield_estimate: string | null
         }
         Insert: {
           address?: string | null
           amenities?: string[] | null
+          amenities_meta?: Json | null
+          available_units?: number | null
           cam_fee_per_sqm?: number | null
           cam_includes?: string[] | null
           cam_payment_day?: number | null
           commission_pct?: number | null
           completion_date?: string | null
+          construction_phase?: string | null
           construction_progress?: number | null
           contact_id?: string | null
           cover_image?: string | null
+          cover_image_url?: string | null
           created_at?: string | null
           created_by?: string | null
           description_en?: string | null
@@ -17297,9 +18028,12 @@ export type Database = {
           developer_id?: string | null
           developer_name?: string | null
           district?: string | null
+          documents_urls?: Json | null
           exclusive?: boolean | null
           featured_label?: string | null
           featured_rank?: number | null
+          foreign_quota_used_pct?: number | null
+          foreign_units_sold?: number | null
           funding_goal?: number | null
           gallery_urls?: string[] | null
           id?: string
@@ -17327,6 +18061,8 @@ export type Database = {
           lat?: number | null
           lng?: number | null
           location_area?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
           management_company_id?: string | null
           marketing_materials?: string[] | null
           min_investment?: number | null
@@ -17337,37 +18073,47 @@ export type Database = {
           offplan_catalog?: Json | null
           ownership_types?: string[] | null
           payment_plan?: Json | null
+          payment_plan_template?: Json | null
           price_from?: number | null
+          price_from_thb?: number | null
           price_per_sqm?: number | null
           price_to?: number | null
+          price_to_thb?: number | null
           price_usd?: number | null
           project_status?: string | null
+          public_listing_enabled?: boolean | null
           risk_level?: string | null
           roi_projected?: number | null
           slug?: string | null
           source_url?: string | null
           tagline?: string | null
           tagline_ru?: string | null
+          thai_units_sold?: number | null
           total_units?: number | null
           unit_types?: string[] | null
           units_available?: number | null
           units_sold?: number | null
           updated_at?: string | null
           video_url?: string | null
+          virtual_tour_url?: string | null
           year_built?: number | null
           yield_estimate?: string | null
         }
         Update: {
           address?: string | null
           amenities?: string[] | null
+          amenities_meta?: Json | null
+          available_units?: number | null
           cam_fee_per_sqm?: number | null
           cam_includes?: string[] | null
           cam_payment_day?: number | null
           commission_pct?: number | null
           completion_date?: string | null
+          construction_phase?: string | null
           construction_progress?: number | null
           contact_id?: string | null
           cover_image?: string | null
+          cover_image_url?: string | null
           created_at?: string | null
           created_by?: string | null
           description_en?: string | null
@@ -17376,9 +18122,12 @@ export type Database = {
           developer_id?: string | null
           developer_name?: string | null
           district?: string | null
+          documents_urls?: Json | null
           exclusive?: boolean | null
           featured_label?: string | null
           featured_rank?: number | null
+          foreign_quota_used_pct?: number | null
+          foreign_units_sold?: number | null
           funding_goal?: number | null
           gallery_urls?: string[] | null
           id?: string
@@ -17406,6 +18155,8 @@ export type Database = {
           lat?: number | null
           lng?: number | null
           location_area?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
           management_company_id?: string | null
           marketing_materials?: string[] | null
           min_investment?: number | null
@@ -17416,23 +18167,29 @@ export type Database = {
           offplan_catalog?: Json | null
           ownership_types?: string[] | null
           payment_plan?: Json | null
+          payment_plan_template?: Json | null
           price_from?: number | null
+          price_from_thb?: number | null
           price_per_sqm?: number | null
           price_to?: number | null
+          price_to_thb?: number | null
           price_usd?: number | null
           project_status?: string | null
+          public_listing_enabled?: boolean | null
           risk_level?: string | null
           roi_projected?: number | null
           slug?: string | null
           source_url?: string | null
           tagline?: string | null
           tagline_ru?: string | null
+          thai_units_sold?: number | null
           total_units?: number | null
           unit_types?: string[] | null
           units_available?: number | null
           units_sold?: number | null
           updated_at?: string | null
           video_url?: string | null
+          virtual_tour_url?: string | null
           year_built?: number | null
           yield_estimate?: string | null
         }
@@ -18913,6 +19670,123 @@ export type Database = {
           },
         ]
       }
+      reservations: {
+        Row: {
+          agreed_price_thb: number
+          buyer_id: string
+          cancellation_reason: string | null
+          created_at: string | null
+          created_by_user_id: string | null
+          deposit_amount_thb: number
+          deposit_paid_at: string | null
+          deposit_stripe_pi_id: string | null
+          developer_id: string
+          discount_approved_by: string | null
+          discount_pct: number | null
+          handover_actual_date: string | null
+          handover_target_date: string | null
+          hold_id: string | null
+          id: string
+          project_id: string
+          reservation_fee_status: string | null
+          reservation_number: string
+          spa_document_url: string | null
+          spa_signed_at: string | null
+          status: string | null
+          transfer_completed_at: string | null
+          unit_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          agreed_price_thb: number
+          buyer_id: string
+          cancellation_reason?: string | null
+          created_at?: string | null
+          created_by_user_id?: string | null
+          deposit_amount_thb: number
+          deposit_paid_at?: string | null
+          deposit_stripe_pi_id?: string | null
+          developer_id: string
+          discount_approved_by?: string | null
+          discount_pct?: number | null
+          handover_actual_date?: string | null
+          handover_target_date?: string | null
+          hold_id?: string | null
+          id?: string
+          project_id: string
+          reservation_fee_status?: string | null
+          reservation_number: string
+          spa_document_url?: string | null
+          spa_signed_at?: string | null
+          status?: string | null
+          transfer_completed_at?: string | null
+          unit_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          agreed_price_thb?: number
+          buyer_id?: string
+          cancellation_reason?: string | null
+          created_at?: string | null
+          created_by_user_id?: string | null
+          deposit_amount_thb?: number
+          deposit_paid_at?: string | null
+          deposit_stripe_pi_id?: string | null
+          developer_id?: string
+          discount_approved_by?: string | null
+          discount_pct?: number | null
+          handover_actual_date?: string | null
+          handover_target_date?: string | null
+          hold_id?: string | null
+          id?: string
+          project_id?: string
+          reservation_fee_status?: string | null
+          reservation_number?: string
+          spa_document_url?: string | null
+          spa_signed_at?: string | null
+          status?: string | null
+          transfer_completed_at?: string | null
+          unit_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reservations_buyer_id_fkey"
+            columns: ["buyer_id"]
+            isOneToOne: false
+            referencedRelation: "buyers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservations_developer_id_fkey"
+            columns: ["developer_id"]
+            isOneToOne: false
+            referencedRelation: "developers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservations_hold_id_fkey"
+            columns: ["hold_id"]
+            isOneToOne: false
+            referencedRelation: "unit_holds"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "property_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservations_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "project_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       resources: {
         Row: {
           capacity: number | null
@@ -19343,6 +20217,70 @@ export type Database = {
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rln_events: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          delivery_status: string | null
+          developer_id: string | null
+          evidence_url: string | null
+          id: string
+          lead_attribution_id: string | null
+          project_id: string | null
+          rln_number: string
+          sent_at: string | null
+          sent_to_email: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          delivery_status?: string | null
+          developer_id?: string | null
+          evidence_url?: string | null
+          id?: string
+          lead_attribution_id?: string | null
+          project_id?: string | null
+          rln_number: string
+          sent_at?: string | null
+          sent_to_email: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          delivery_status?: string | null
+          developer_id?: string | null
+          evidence_url?: string | null
+          id?: string
+          lead_attribution_id?: string | null
+          project_id?: string | null
+          rln_number?: string
+          sent_at?: string | null
+          sent_to_email?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rln_events_developer_id_fkey"
+            columns: ["developer_id"]
+            isOneToOne: false
+            referencedRelation: "developers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rln_events_lead_attribution_id_fkey"
+            columns: ["lead_attribution_id"]
+            isOneToOne: false
+            referencedRelation: "lead_attributions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rln_events_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "property_projects"
             referencedColumns: ["id"]
           },
         ]
@@ -21899,6 +22837,86 @@ export type Database = {
           sort_order?: number | null
         }
         Relationships: []
+      }
+      unit_holds: {
+        Row: {
+          buyer_id: string | null
+          created_at: string | null
+          created_by_user_id: string | null
+          expires_at: string | null
+          fee_amount_thb: number | null
+          fee_status: string | null
+          hold_type: string
+          id: string
+          lead_id: string | null
+          notes: string | null
+          released_at: string | null
+          released_reason: string | null
+          stripe_payment_intent_id: string | null
+          unit_id: string
+        }
+        Insert: {
+          buyer_id?: string | null
+          created_at?: string | null
+          created_by_user_id?: string | null
+          expires_at?: string | null
+          fee_amount_thb?: number | null
+          fee_status?: string | null
+          hold_type: string
+          id?: string
+          lead_id?: string | null
+          notes?: string | null
+          released_at?: string | null
+          released_reason?: string | null
+          stripe_payment_intent_id?: string | null
+          unit_id: string
+        }
+        Update: {
+          buyer_id?: string | null
+          created_at?: string | null
+          created_by_user_id?: string | null
+          expires_at?: string | null
+          fee_amount_thb?: number | null
+          fee_status?: string | null
+          hold_type?: string
+          id?: string
+          lead_id?: string | null
+          notes?: string | null
+          released_at?: string | null
+          released_reason?: string | null
+          stripe_payment_intent_id?: string | null
+          unit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_unit_holds_buyer"
+            columns: ["buyer_id"]
+            isOneToOne: false
+            referencedRelation: "buyers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "unit_holds_buyer_id_fkey"
+            columns: ["buyer_id"]
+            isOneToOne: false
+            referencedRelation: "buyers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "unit_holds_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "nb_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "unit_holds_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "project_units"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       uno_team_permissions: {
         Row: {
@@ -27644,6 +28662,28 @@ export type Database = {
           source_2: string
         }[]
       }
+      devmod_attempt_unit_transition: {
+        Args: {
+          p_expected_version: number
+          p_from_status: string
+          p_to_status: string
+          p_unit_id: string
+        }
+        Returns: boolean
+      }
+      devmod_compute_fingerprint: {
+        Args: { p_email: string; p_passport?: string; p_phone: string }
+        Returns: string
+      }
+      devmod_is_broker_or_admin: { Args: never; Returns: boolean }
+      devmod_my_developer_id: { Args: never; Returns: string }
+      devmod_next_reservation_number: { Args: never; Returns: string }
+      devmod_next_rln_number: { Args: never; Returns: string }
+      devmod_release_expired_holds: { Args: never; Returns: number }
+      devmod_update_foreign_quota: {
+        Args: { p_project_id: string }
+        Returns: undefined
+      }
       find_nearby_clinics: {
         Args: { radius_km?: number; user_lat: number; user_lng: number }
         Returns: {
@@ -28128,6 +29168,7 @@ export type Database = {
         | "support"
         | "sales"
         | "investor"
+        | "broker"
       booking_status:
         | "draft"
         | "submitted"
@@ -28382,6 +29423,7 @@ export const Constants = {
         "support",
         "sales",
         "investor",
+        "broker",
       ],
       booking_status: [
         "draft",
