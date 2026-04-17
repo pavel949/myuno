@@ -17,6 +17,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { CurrencyProvider } from "@/contexts/CurrencyContext";
 import { LocationProvider } from "@/contexts/LocationContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ImpersonationProvider } from "@/contexts/ImpersonationContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { MaintenanceProvider, useMaintenance } from "@/contexts/MaintenanceContext";
@@ -53,6 +54,7 @@ const QueryProviders = composeProviders([
   LocationProvider,
   CurrencyProvider,
   AuthProvider,
+  ImpersonationProvider,
   CartProvider,
   PWAInstallProvider,
   LifeSituationProvider,
