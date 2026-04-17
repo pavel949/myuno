@@ -11,6 +11,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { SEOHead, createBreadcrumbSchema } from '@/components/seo';
 import type { NewbuildProject } from '@/hooks/useNewbuildProjects';
 
 function useDeveloperBySlug(slug?: string) {
@@ -94,8 +95,33 @@ export default function NewbuildDeveloperDetail() {
     );
   }
 
+  const seoTitle = `${dev.name_en} · Phuket Developer`;
+  const seoDescription = (dev.description_en || dev.description_ru || `${dev.name_en} — застройщик Пхукета. ${projects?.length || 0} активных проектов.`).slice(0, 280);
+  const canonicalUrl = `https://myuno.app${APP_ROUTES.NEWBUILDS_DEVELOPER(dev.slug || dev.id)}`;
+  const orgSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: dev.name_en,
+    description: seoDescription,
+    url: canonicalUrl,
+    ...(dev.logo_url && { logo: dev.logo_url }),
+    ...(dev.website && { sameAs: [dev.website] }),
+  };
+  const breadcrumbSchema = createBreadcrumbSchema([
+    { name: 'New Builds', url: 'https://myuno.app/newbuilds' },
+    { name: 'Developers', url: 'https://myuno.app/newbuilds/developers' },
+    { name: dev.name_en, url: canonicalUrl },
+  ]);
+
   return (
     <NewbuildsLayout>
+      <SEOHead
+        title={seoTitle}
+        description={seoDescription}
+        image={dev.logo_url || 'https://myuno.app/og-image.png'}
+        url={canonicalUrl}
+        jsonLd={{ '@context': 'https://schema.org', '@graph': [orgSchema, breadcrumbSchema] }}
+      />
       <div className="max-w-7xl mx-auto px-4 py-10">
         <Link to={APP_ROUTES.NEWBUILDS_DEVELOPERS} className="inline-flex items-center gap-1.5 text-sm mb-6" style={{ color: 'hsl(var(--nb-muted))' }}>
           <ChevronLeft className="w-4 h-4" /> Девелоперы

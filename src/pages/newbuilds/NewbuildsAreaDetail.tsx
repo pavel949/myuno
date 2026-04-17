@@ -10,6 +10,11 @@ import { NbLeadForm } from '@/components/newbuilds/NbLeadForm';
 import { getAreaBySlug, PHUKET_AREAS } from '@/lib/config/phuketAreas';
 import { useNewbuildProjects } from '@/hooks/useNewbuildProjects';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { SEOHead, createBreadcrumbSchema } from '@/components/seo';
+
+function isRuAreaTitle() {
+  return 'Phuket Investment Guide';
+}
 
 export default function NewbuildsAreaDetail() {
   const { slug } = useParams<{ slug: string }>();
@@ -47,8 +52,32 @@ export default function NewbuildsAreaDetail() {
     .sort((a, b) => a.distance - b.distance)
     .slice(0, 3);
 
+  const seoTitle = `${area.name_ru} (${area.name_en}) · ${isRuAreaTitle()}`;
+  const seoDescription = `${area.name_ru} — район Пхукета. Средняя цена ฿${(area.avg_price_sqm / 1000).toFixed(0)}K/м², доходность ${area.avg_yield}%, ${areaProjects.length} проектов. ${area.description_ru.slice(0, 120)}`;
+  const canonicalUrl = `https://myuno.app${APP_ROUTES.NEWBUILDS_AREA(area.slug)}`;
+  const placeSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Place',
+    name: `${area.name_en}, Phuket`,
+    description: seoDescription,
+    url: canonicalUrl,
+    geo: { '@type': 'GeoCoordinates', latitude: area.lat, longitude: area.lng },
+  };
+  const breadcrumbSchema = createBreadcrumbSchema([
+    { name: 'New Builds', url: 'https://myuno.app/newbuilds' },
+    { name: 'Areas', url: 'https://myuno.app/newbuilds/areas' },
+    { name: area.name_en, url: canonicalUrl },
+  ]);
+
   return (
     <NewbuildsLayout>
+      <SEOHead
+        title={seoTitle}
+        description={seoDescription}
+        image={'https://myuno.app/og-image.png'}
+        url={canonicalUrl}
+        jsonLd={{ '@context': 'https://schema.org', '@graph': [placeSchema, breadcrumbSchema] }}
+      />
       {/* Hero */}
       <section className="relative px-4 pt-20 pb-16 nb-blueprint nb-grain overflow-hidden">
         <div className="relative z-10 max-w-7xl mx-auto">

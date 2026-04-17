@@ -25,6 +25,7 @@ import { ProjectMarketingTab } from '@/components/newbuilds/ProjectMarketingTab'
 import { useNewbuildProject } from '@/hooks/useNewbuildProjects';
 import { Skeleton } from '@/components/ui/skeleton';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { SEOHead, createRealEstateListingSchema, createBreadcrumbSchema } from '@/components/seo';
 
 const TABS = [
   { key: 'overview', label: 'Обзор' },
@@ -83,8 +84,35 @@ export default function NewbuildDetail() {
     );
   }
 
+  const projectName = project.name_ru || project.name_en;
+  const seoTitle = `${projectName}${project.location_area || project.district ? ` · ${project.location_area || project.district}` : ''} · Phuket New Builds`;
+  const seoDescription = (project.description_ru || project.description_en || `${projectName} — новый проект в ${project.location_area || project.district || 'Пхукет'}.${project.price_from ? ` Цена от ฿${(project.price_from / 1_000_000).toFixed(1)}М.` : ''}${project.completion_date ? ` Сдача ${new Date(project.completion_date).getFullYear()}.` : ''}`).slice(0, 280);
+  const canonicalUrl = `https://myuno.app${APP_ROUTES.NEWBUILDS_PROJECT(project.slug || project.id)}`;
+  const listingSchema = createRealEstateListingSchema({
+    name: projectName,
+    description: seoDescription,
+    price: project.price_from ?? undefined,
+    currency: 'THB',
+    image: heroImage,
+    url: canonicalUrl,
+    address: project.location_area || project.district || undefined,
+  });
+  const breadcrumbSchema = createBreadcrumbSchema([
+    { name: 'New Builds', url: 'https://myuno.app/newbuilds' },
+    { name: 'Projects', url: 'https://myuno.app/newbuilds/projects' },
+    { name: projectName, url: canonicalUrl },
+  ]);
+
   return (
     <NewbuildsLayout>
+      <SEOHead
+        title={seoTitle}
+        description={seoDescription}
+        image={heroImage}
+        url={canonicalUrl}
+        type="product"
+        jsonLd={{ '@context': 'https://schema.org', '@graph': [listingSchema, breadcrumbSchema] }}
+      />
       {/* Sticky header */}
       {showStickyHeader && (
         <div className="fixed top-0 left-0 right-0 z-50 px-4 py-3 flex items-center justify-between" style={{ background: 'hsl(var(--nb-bg) / 0.95)', backdropFilter: 'blur(12px)', borderBottom: '1px solid hsl(var(--nb-gold) / 0.15)' }}>
