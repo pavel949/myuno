@@ -751,11 +751,11 @@ export default function DeveloperProjectEditor() {
               projectId={id!}
               slug={existing.slug ?? null}
               initial={{
-                landing_enabled: (existing as Record<string, unknown>).landing_enabled as boolean | null ?? false,
-                meta_title: (existing as Record<string, unknown>).meta_title as string | null ?? null,
-                meta_description: (existing as Record<string, unknown>).meta_description as string | null ?? null,
-                og_image_url: (existing as Record<string, unknown>).og_image_url as string | null ?? null,
-                social_share_text: (existing as Record<string, unknown>).social_share_text as string | null ?? null,
+                landing_enabled: (existing as unknown as Record<string, unknown>).landing_enabled as boolean | null ?? false,
+                meta_title: (existing as unknown as Record<string, unknown>).meta_title as string | null ?? null,
+                meta_description: (existing as unknown as Record<string, unknown>).meta_description as string | null ?? null,
+                og_image_url: (existing as unknown as Record<string, unknown>).og_image_url as string | null ?? null,
+                social_share_text: (existing as unknown as Record<string, unknown>).social_share_text as string | null ?? null,
                 tagline: existing.tagline ?? null,
                 name_en: existing.name_en,
                 cover_image: existing.cover_image ?? null,
