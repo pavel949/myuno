@@ -237,6 +237,8 @@ function DirectoryRow({
 // ── Page ──────────────────────────────────────────────────────────────
 
 export default function CapitalDevelopersPending() {
+  const navigate = useNavigate();
+  const { enter: enterImpersonation } = useImpersonation();
   const { data: pending, isLoading: loadingPending } = usePendingDevelopers();
   const { data: allDevelopers, isLoading: loadingAll } = useAllDevelopersForClaim();
   const approveMutation = useApproveDeveloper();
