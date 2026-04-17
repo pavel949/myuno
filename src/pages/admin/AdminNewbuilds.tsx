@@ -190,27 +190,60 @@ export default function AdminNewbuilds() {
           )}
         </TabsContent>
 
-        {/* PENDING */}
+        {/* PENDING — with bulk actions */}
         <TabsContent value="pending" className="space-y-3 mt-4">
           {pending.length === 0 ? (
             <p className="text-muted-foreground">Нет проектов на проверке</p>
-          ) : pending.map((p: any) => (
-            <div key={p.id} className="border rounded-lg p-4 flex items-center gap-4">
-              {p.cover_image && <img src={p.cover_image} className="w-16 h-16 rounded object-cover" />}
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold truncate">{p.name_en}</h3>
-                <p className="text-sm text-muted-foreground">{p.developer_name} · {p.district || p.location_area}</p>
+          ) : (
+            <>
+              <div className="sticky top-0 z-10 flex items-center justify-between gap-2 p-3 mb-3 rounded-lg border bg-card shadow-sm">
+                <div className="flex items-center gap-3">
+                  <Checkbox
+                    checked={selectedIds.size > 0 && pending.every((p: any) => selectedIds.has(p.id))}
+                    onCheckedChange={(v) => {
+                      if (v) setSelectedIds(new Set(pending.map((p: any) => p.id)));
+                      else clearSelection();
+                    }}
+                    aria-label="Выбрать все"
+                  />
+                  <span className="text-sm text-muted-foreground">
+                    {selectedIds.size > 0
+                      ? `Выбрано: ${selectedIds.size} из ${pending.length}`
+                      : `На проверке: ${pending.length}`}
+                  </span>
+                </div>
+                {selectedIds.size > 0 && (
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={() => bulkUpdateProjects.mutate({ ids: Array.from(selectedIds), updates: { is_approved: true } })} disabled={bulkUpdateProjects.isPending}>
+                      <Check className="w-4 h-4 mr-1" /> Одобрить ({selectedIds.size})
+                    </Button>
+                    <Button size="sm" variant="destructive" onClick={() => bulkUpdateProjects.mutate({ ids: Array.from(selectedIds), updates: { is_active: false } })} disabled={bulkUpdateProjects.isPending}>
+                      <X className="w-4 h-4 mr-1" /> Отклонить ({selectedIds.size})
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={clearSelection}>Сбросить</Button>
+                  </div>
+                )}
               </div>
-              <div className="flex gap-2">
-                <Button size="sm" onClick={() => updateProject.mutate({ id: p.id, updates: { is_approved: true } })} className="bg-green-600 hover:bg-green-700">
-                  <Check className="w-4 h-4 mr-1" /> Одобрить
-                </Button>
-                <Button size="sm" variant="destructive" onClick={() => updateProject.mutate({ id: p.id, updates: { is_active: false } })}>
-                  <X className="w-4 h-4 mr-1" /> Отклонить
-                </Button>
-              </div>
-            </div>
-          ))}
+              {pending.map((p: any) => (
+                <div key={p.id} className="border rounded-lg p-4 flex items-center gap-4">
+                  <Checkbox checked={selectedIds.has(p.id)} onCheckedChange={() => toggleSelect(p.id)} aria-label={`Выбрать ${p.name_en}`} />
+                  {p.cover_image && <img src={p.cover_image} className="w-16 h-16 rounded object-cover" alt={p.name_en} />}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold truncate">{p.name_en}</h3>
+                    <p className="text-sm text-muted-foreground">{p.developer_name} · {p.district || p.location_area}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={() => updateProject.mutate({ id: p.id, updates: { is_approved: true } })}>
+                      <Check className="w-4 h-4 mr-1" /> Одобрить
+                    </Button>
+                    <Button size="sm" variant="destructive" onClick={() => updateProject.mutate({ id: p.id, updates: { is_active: false } })}>
+                      <X className="w-4 h-4 mr-1" /> Отклонить
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
         </TabsContent>
 
         {/* FEATURED */}
