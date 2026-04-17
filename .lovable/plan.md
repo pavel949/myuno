@@ -1,78 +1,60 @@
 
+## Проблема
 
-# Реализация каталога + импорт 122 проектов + Featured система
+Превью не работает — спиннер крутится. Из session_replay вижу реальную причину:
 
-## Что нужно сделать
-
-### 1. Применить миграцию `offplan_catalog`
-Колонка `offplan_catalog JSONB` не существует в production DB. Без неё фильтры, BUY/WATCH/AVOID, beach, ownership, segment — всё пустое.
-
-**SQL:**
-```sql
-ALTER TABLE public.property_projects
-ADD COLUMN IF NOT EXISTS offplan_catalog jsonb;
-
-CREATE INDEX IF NOT EXISTS idx_property_projects_offplan_rec
-  ON public.property_projects ((offplan_catalog->>'rec'))
-  WHERE offplan_catalog IS NOT NULL;
-
-CREATE INDEX IF NOT EXISTS idx_property_projects_offplan_legacy
-  ON public.property_projects ((offplan_catalog->>'legacy_id'))
-  WHERE offplan_catalog ? 'legacy_id';
+```
+Failed to load application: Failed to fetch dynamically imported module: 
+.../src/App.tsx
 ```
 
-### 2. Импорт 122 проектов из `projects.json`
-Файл `data/offplan-seed/projects.json` уже содержит 122 проекта с rich данными (rec, seg, zone, beach, own, mgmt, yield, rating, risk, desc, tags).
+Из build-errors вижу 30+ TypeScript ошибок, которые ломают сборку Vite. Главные:
 
-**Подход:** Написать скрипт-миграцию (Edge Function или exec script), который:
-- Читает `projects.json`
-- Для каждого проекта: ищет по `name_en` совпадение в существующих 157 проектах
-- Если совпадение — UPDATE с `offplan_catalog` JSONB + обновление `price_from`, `roi_projected`, `muuno_score`, `risk_level`, `description_en`, `description_summary`, `yield_estimate`, `source_url`
-- Если нет — INSERT новый проект
-- Использует логику из `scripts/import-offplan-catalog.mjs` (buildRow, mapStkToProjectStatus, etc.)
+### Корень проблемы
+В прошлом сообщении я (или система) **отредактировал `src/integrations/supabase/types.ts`** — а это auto-generated файл, который НЕЛЬЗЯ трогать (есть явное правило в CLAUDE.md и в инструкциях). Скорее всего этот файл оказался повреждён/обрезан, из-за чего:
 
-Я запущу импорт через `code--exec` с Supabase service role key (или через insert tool для batch upsert).
+1. `investment_opportunities` и `intro_requests` пропали из типов → TS2769 "not assignable to parameter"
+2. `nb_leads` table тоже пропала → TS2769 в NbLeadForm
+3. `development_units` ломается аналогично
+4. Глубокая рекурсия типов (TS2589) в `useDeveloperPortal.ts` и `useInvestmentHub.ts`
+5. `DeveloperProfile` потерял индексную сигнатуру
 
-### 3. Featured система — выделение лучших проектов
-Колонка `is_featured` уже существует. Улучшения:
+Vite не может собрать `App.tsx` → preview зависает на спиннере.
 
-**DB:**
-- Добавить `featured_rank INTEGER` — позиция в Featured (1, 2, 3...)  
-- Добавить `featured_label TEXT` — кастомный текст ("Editor's Pick", "Best ROI", "Top Scarcity")
+### План исправления
 
-**UI на каталоге:**
-- Featured-проекты отображаются первыми (уже сортируются через `featured_score`)
-- Добавить визуальный бейдж "⭐ FEATURED" на карточке + золотой border
-- Отдельная секция "Featured Projects" над основным гридом (горизонтальный скролл, крупные карточки)
+**Шаг 1. Восстановить `src/integrations/supabase/types.ts`**
+- Не редактировать вручную. Запустить регенерацию из реальной схемы БД через внутренний механизм (types.ts регенерируется автоматически при следующей миграции/обращении к схеме). Если не подхватится — выполнить пустую миграцию-touch чтобы триггернуть regen.
 
-**Admin UI:**
-- На странице `/admin` или в деталях проекта — toggle `is_featured` + input для `featured_rank` и `featured_label`
-- Quick action: кнопка "Feature" прямо в списке проектов
+**Шаг 2. Обойти отсутствующие в types таблицы через `as any` каст** (там, где они уже так делаются по паттерну проекта):
+- `useInvestmentHub.ts` — обернуть `.from('investment_opportunities' as any)` и `.from('intro_requests' as any)`, типизировать результат вручную (как уже делается в `useNewbuildLeads.ts`)
+- Привести к единому паттерну с `useDevelopmentUnits.ts`
 
-### 4. Обновить `useOffplanProjects` — убрать workaround
-Сейчас хук делает 2 запроса (основной + отдельный для `offplan_catalog`) из-за того что колонка могла не существовать. После миграции — включить `offplan_catalog` в основной select.
+**Шаг 3. `useDeveloperPortal.ts`** (строки 146, 234, 238)
+- Передаётся объект вместо массива в `.insert()` — нужен массив или одиночный объект (проверить сигнатуру)
+- TS2589 (excessive depth) — добавить явный generic или `as any` каст для разрыва inference loop
 
-### 5. Обновить карточку `CatalogProjectCard`
-- Добавить Featured badge (золотой border + "⭐ FEATURED" / custom label)
-- Показывать `description_summary` или первые 2 строки `description_en`
-- Показывать `source_url` как ссылку
+**Шаг 4. `DeveloperPortalLayout.tsx:31`** 
+- Заменить `as Record<string, unknown>` на `as unknown as Record<string, unknown>` (двухступенчатый каст)
 
----
+**Шаг 5. `NbLeadForm.tsx:49`**
+- Тот же паттерн — `.insert()` ожидает массив, передаётся объект; обернуть в массив или каст `as any`
 
-## Файлы
+**Шаг 6. Verify**
+- После правок дождаться пересборки Vite, убедиться что `dev-server.log` чистый, спиннер уходит, рендерится `/index`
 
-**Миграция (1 SQL):**
-- Добавить `offplan_catalog JSONB` + индексы
-- Добавить `featured_rank INTEGER`, `featured_label TEXT`
+### Файлы к изменению
 
-**Скрипт импорта (exec):**
-- Чтение `projects.json`, batch upsert в `property_projects` через Supabase API
+| Файл | Изменение |
+|---|---|
+| `src/integrations/supabase/types.ts` | Триггернуть регенерацию (НЕ ручная правка) |
+| `src/hooks/investment-hub/useInvestmentHub.ts` | `as any` касты + ручная типизация результата |
+| `src/hooks/useDeveloperPortal.ts` | Исправить insert + разорвать deep inference |
+| `src/components/newbuilds/DeveloperPortalLayout.tsx` | Двухступенчатый каст |
+| `src/components/newbuilds/NbLeadForm.tsx` | Insert как массив |
 
-**Редактировать:**
-- `src/hooks/useOffplanProjects.ts` — включить `offplan_catalog` в основной select, убрать двойной запрос
-- `src/components/newbuilds/CatalogProjectCard.tsx` — Featured badge, description excerpt, source link
-- `src/pages/newbuilds/NewbuildsLanding.tsx` — Featured секция сверху
-
-**Новые:**
-- Нет новых файлов — всё в существующих компонентах
-
+### Что НЕ делаю
+- Не трогаю `types.ts` вручную (запрещено правилом)
+- Не меняю `client.ts`
+- Не меняю прокси edge function `external-data-api` — он работает
+- Не трогаю несвязанный с ошибками код
