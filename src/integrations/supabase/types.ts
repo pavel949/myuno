@@ -6095,10 +6095,12 @@ export type Database = {
           name_ru: string
           phone: string | null
           projects_completed: number | null
+          projects_ongoing: number | null
           registration_number: string | null
           slug: string | null
           stripe_connect_id: string | null
           subscription_tier: string | null
+          total_units_delivered: number | null
           total_units_sold: number | null
           updated_at: string | null
           user_id: string | null
@@ -6129,10 +6131,12 @@ export type Database = {
           name_ru: string
           phone?: string | null
           projects_completed?: number | null
+          projects_ongoing?: number | null
           registration_number?: string | null
           slug?: string | null
           stripe_connect_id?: string | null
           subscription_tier?: string | null
+          total_units_delivered?: number | null
           total_units_sold?: number | null
           updated_at?: string | null
           user_id?: string | null
@@ -6163,10 +6167,12 @@ export type Database = {
           name_ru?: string
           phone?: string | null
           projects_completed?: number | null
+          projects_ongoing?: number | null
           registration_number?: string | null
           slug?: string | null
           stripe_connect_id?: string | null
           subscription_tier?: string | null
+          total_units_delivered?: number | null
           total_units_sold?: number | null
           updated_at?: string | null
           user_id?: string | null
@@ -11505,6 +11511,53 @@ export type Database = {
           },
           {
             foreignKeyName: "nb_leads_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "property_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nb_project_updates: {
+        Row: {
+          content: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          photo_urls: string[] | null
+          progress_at_time: number | null
+          project_id: string
+          published_at: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          photo_urls?: string[] | null
+          progress_at_time?: number | null
+          project_id: string
+          published_at?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          photo_urls?: string[] | null
+          progress_at_time?: number | null
+          project_id?: string
+          published_at?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nb_project_updates_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "property_projects"
@@ -28961,6 +29014,10 @@ export type Database = {
         Returns: string
       }
       purge_simulation_run: { Args: { p_run_id: string }; Returns: Json }
+      recalc_developer_project_counters: {
+        Args: { _developer_id: string }
+        Returns: undefined
+      }
       recalculate_contact_score: {
         Args: { p_contact_id: string }
         Returns: number
