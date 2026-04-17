@@ -47,6 +47,7 @@ export interface DeveloperProjectUnit {
   pin_x_pct: number | null;
   pin_y_pct: number | null;
   unit_status: string | null;
+  status_version: number | null;
 }
 
 export interface DeveloperProjectDocument {
@@ -368,6 +369,55 @@ export function useRemoveUnitPin() {
       qc.invalidateQueries({ queryKey: ['project-units-editor', vars.projectId] });
     },
     onError: (e: Error) => toast.error(e.message || 'Ошибка'),
+  });
+}
+
+// ── Soft Hold ──
+
+export interface SoftHoldResult {
+  success: true;
+  hold_id: string | null;
+  expires_at: string;
+  warning?: string;
+}
+
+interface SoftHoldFailure {
+  success: false;
+  reason: 'conflict' | 'bad_request' | 'internal' | 'method_not_allowed';
+  message: string;
+}
+
+export function useSoftHold() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (opts: {
+      unitId: string;
+      expectedVersion: number;
+      leadId?: string;
+      projectId: string;
+    }): Promise<SoftHoldResult> => {
+      const { data, error } = await supabase.functions.invoke('devmod-unit-hold', {
+        body: {
+          unit_id: opts.unitId,
+          expected_version: opts.expectedVersion,
+          lead_id: opts.leadId ?? null,
+        },
+      });
+      if (error) throw new Error(String(error));
+      const result = data as SoftHoldResult | SoftHoldFailure;
+      if (!result.success) {
+        const msg = (result as SoftHoldFailure).reason === 'conflict'
+          ? 'Юнит уже занят. Попробуйте другой.'
+          : ((result as SoftHoldFailure).message ?? 'Ошибка удержания');
+        throw new Error(msg);
+      }
+      return result as SoftHoldResult;
+    },
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ['project-units-editor', vars.projectId] });
+      toast.success('Юнит удержан на 30 минут');
+    },
+    onError: (e: Error) => toast.error(e.message || 'Не удалось создать удержание'),
   });
 }
 

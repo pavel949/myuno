@@ -12,8 +12,8 @@
  */
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { X, Maximize, Bed, Bath, Layers, Eye, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
-import { useFloorPlans, FloorPlan } from '@/hooks/useDeveloperPortal';
+import { X, Maximize, Bed, Bath, Layers, Eye, ZoomIn, ZoomOut, RotateCcw, Clock, Lock } from 'lucide-react';
+import { useFloorPlans, FloorPlan, useSoftHold } from '@/hooks/useDeveloperPortal';
 import { useProjectUnitsForEditor, DeveloperProjectUnit } from '@/hooks/useDeveloperPortal';
 import { NbLeadForm } from './NbLeadForm';
 import { NbPriceDisplay } from './NbPriceDisplay';
@@ -55,6 +55,31 @@ function statusMatchesFilter(status: string, filter: Filter): boolean {
 
 const PIN_SIZE = 26;
 
+// ── Countdown timer hook ────────────────────────────────────────────────────
+
+function useCountdown(expiresAt: string | null): string | null {
+  const [display, setDisplay] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!expiresAt) { setDisplay(null); return; }
+
+    function tick() {
+      const ms = new Date(expiresAt!).getTime() - Date.now();
+      if (ms <= 0) { setDisplay('00:00'); return; }
+      const totalSec = Math.ceil(ms / 1000);
+      const m = Math.floor(totalSec / 60).toString().padStart(2, '0');
+      const s = (totalSec % 60).toString().padStart(2, '0');
+      setDisplay(`${m}:${s}`);
+    }
+
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [expiresAt]);
+
+  return display;
+}
+
 // ── Unit Detail Sheet ────────────────────────────────────────────────────────
 
 function UnitSheet({
@@ -70,6 +95,26 @@ function UnitSheet({
 }) {
   const cfg = STATUS_CONFIG[unit.unit_status ?? 'available'] ?? STATUS_CONFIG.available;
   const [showLead, setShowLead] = useState(false);
+  const [holdExpiresAt, setHoldExpiresAt] = useState<string | null>(null);
+  const softHold = useSoftHold();
+  const countdown = useCountdown(holdExpiresAt);
+
+  const isAvailable = (unit.unit_status ?? 'available') === 'available';
+
+  function handleSoftHold() {
+    softHold.mutate(
+      {
+        unitId: unit.id,
+        expectedVersion: unit.status_version ?? 0,
+        projectId,
+      },
+      {
+        onSuccess: (data) => {
+          setHoldExpiresAt(data.expires_at);
+        },
+      },
+    );
+  }
 
   return (
     <>
@@ -170,9 +215,47 @@ function UnitSheet({
             <p className="text-sm text-[hsl(var(--nb-text-secondary))]">{unit.notes}</p>
           )}
 
-          {/* CTA */}
-          {(unit.unit_status ?? 'available') === 'available' ? (
-            showLead ? (
+          {/* CTA block */}
+          {isAvailable ? (
+            holdExpiresAt ? (
+              /* ── Active soft hold countdown ── */
+              <div
+                className="rounded-xl p-4 space-y-3 border"
+                style={{
+                  background: 'rgba(184,150,46,0.08)',
+                  borderColor: 'rgba(184,150,46,0.3)',
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <Lock className="w-4 h-4" style={{ color: '#B8962E' }} />
+                  <span className="text-sm font-medium" style={{ color: '#B8962E' }}>
+                    Юнит удержан для вас
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-[hsl(var(--nb-muted))]" />
+                  <span className="nb-mono text-2xl font-bold text-[hsl(var(--nb-text))]">
+                    {countdown ?? '30:00'}
+                  </span>
+                  <span className="text-xs text-[hsl(var(--nb-muted))]">осталось</span>
+                </div>
+                <p className="text-xs text-[hsl(var(--nb-muted))]">
+                  Оставьте заявку, чтобы перейти к бронированию
+                </p>
+                {showLead ? (
+                  <NbLeadForm
+                    projectId={projectId}
+                    developerId={developerId}
+                    source={`soft_hold_unit_${unit.unit_code ?? unit.id}`}
+                    compact={false}
+                  />
+                ) : (
+                  <button className="nb-btn-gold w-full" onClick={() => setShowLead(true)}>
+                    Оставить заявку
+                  </button>
+                )}
+              </div>
+            ) : showLead ? (
               <NbLeadForm
                 projectId={projectId}
                 developerId={developerId}
@@ -180,9 +263,25 @@ function UnitSheet({
                 compact={false}
               />
             ) : (
-              <button className="nb-btn-gold w-full" onClick={() => setShowLead(true)}>
-                Запросить этот юнит
-              </button>
+              /* ── Available unit CTAs ── */
+              <div className="space-y-2">
+                <button
+                  className="w-full flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold transition-all"
+                  style={{
+                    background: 'rgba(184,150,46,0.12)',
+                    color: '#B8962E',
+                    border: '1px solid rgba(184,150,46,0.3)',
+                  }}
+                  disabled={softHold.isPending}
+                  onClick={handleSoftHold}
+                >
+                  <Lock className="w-4 h-4" />
+                  {softHold.isPending ? 'Удержание...' : 'Удержать на 30 мин'}
+                </button>
+                <button className="nb-btn-gold w-full" onClick={() => setShowLead(true)}>
+                  Запросить этот юнит
+                </button>
+              </div>
             )
           ) : (
             <p className="text-center text-sm text-[hsl(var(--nb-muted))] py-2">{cfg.label}</p>
