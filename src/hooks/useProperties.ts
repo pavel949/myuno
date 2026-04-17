@@ -392,7 +392,7 @@ export function useProperty(id?: string) {
 
       if (error) throw error;
       if (!data) return null;
-      return normalizePropertyTaxonomyArrays(data as Property) as Property;
+      return normalizePropertyTaxonomyArrays(data as unknown as Property) as Property;
     },
     enabled: !!id,
   });
@@ -464,7 +464,7 @@ export function usePropertyWithRentalTerms(marketplacePropertyId?: string) {
         linen_change_frequency: property.linen_change_frequency,
       };
 
-      const base = normalizePropertyTaxonomyArrays(property as Property);
+      const base = normalizePropertyTaxonomyArrays(property as unknown as Property);
       return {
         ...base,
         rentalTerms,
