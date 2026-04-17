@@ -100,13 +100,37 @@ Deno.serve(async (req) => {
 
     const { data: project } = await sb
       .from("property_projects")
-      .select("id, name_en, developer_id, developer_name")
+      .select("id, name_en, developer_id, developer_name, foreign_quota_used_pct, total_units")
       .eq("id", project_id)
       .maybeSingle();
 
     if (!project) return err("Project not found", 404);
 
-    // ── 3. Get developer's Stripe account ─────────────────────────────────
+    // ── 3. Foreign quota check (R7: 49% hard block for foreign buyers) ────
+    const proj = project as Record<string, unknown>;
+    const quotaUsedPct = (proj.foreign_quota_used_pct as number | null) ?? 0;
+
+    // Check buyer's nationality via KYC record
+    const { data: buyerRecord } = await sb
+      .from("buyers" as never)
+      .select("nationality, kyc_status")
+      .eq("created_by_user_id" as never, user.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    const nationality = (buyerRecord as { nationality: string } | null)?.nationality ?? null;
+    const isForeign = nationality !== "TH" && nationality !== null;
+
+    if (isForeign && quotaUsedPct >= 49) {
+      return err("Foreign quota (49%) is exhausted for this project", 409);
+    }
+    if (isForeign && quotaUsedPct >= 45) {
+      // Warning only — still allow (will be logged)
+      console.warn(`[devmod-create-booking-checkout] Foreign quota warning: ${quotaUsedPct}% for project ${project_id}`);
+    }
+
+    // ── 5. Get developer's Stripe account ─────────────────────────────────
     let developerStripeId: string | null = null;
     if ((project as Record<string, unknown>).developer_id) {
       const { data: dev } = await sb
@@ -117,7 +141,7 @@ Deno.serve(async (req) => {
       developerStripeId = (dev as Record<string, string> | null)?.stripe_connect_id ?? null;
     }
 
-    // ── 4. Commission rate lookup ─────────────────────────────────────────
+    // ── 6. Commission rate lookup ─────────────────────────────────────────
     let brokerRate = DEFAULT_BROKER_RATE;
     if ((project as Record<string, unknown>).developer_id) {
       const { data: agreement } = await sb
@@ -134,7 +158,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    // ── 5. Fee calculation ────────────────────────────────────────────────
+    // ── 7. Fee calculation ────────────────────────────────────────────────
     const bookingFeeTHB = DEFAULT_BOOKING_FEE_THB;
     const appFeeSatang = Math.round(bookingFeeTHB * brokerRate * 100);   // broker's cut
     const totalSatang = bookingFeeTHB * 100;
@@ -143,7 +167,7 @@ Deno.serve(async (req) => {
       ? `Юнит ${(unit as Record<string, string | null>).unit_code}`
       : (unit as Record<string, string | null>).unit_type ?? "Юнит";
 
-    // ── 6. Create Stripe Checkout Session ─────────────────────────────────
+    // ── 8. Create Stripe Checkout Session ─────────────────────────────────
     const stripe = createStripeClient();
 
     const sessionParams: Record<string, unknown> = {
@@ -196,7 +220,7 @@ Deno.serve(async (req) => {
       sessionParams as Parameters<typeof stripe.checkout.sessions.create>[0]
     );
 
-    // ── 7. Mark hold as pending payment ──────────────────────────────────
+    // ── 9. Mark hold as pending payment ──────────────────────────────────
     await sb
       .from("unit_holds")
       .update({

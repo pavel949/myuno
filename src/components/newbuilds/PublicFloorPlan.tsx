@@ -13,9 +13,10 @@
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { X, Maximize, Bed, Bath, Layers, Eye, ZoomIn, ZoomOut, RotateCcw, Clock, Lock } from 'lucide-react';
-import { useFloorPlans, FloorPlan, useSoftHold, useCreateBookingCheckout } from '@/hooks/useDeveloperPortal';
+import { useFloorPlans, FloorPlan, useSoftHold, useCreateBookingCheckout, useBuyerStatus } from '@/hooks/useDeveloperPortal';
 import { useProjectUnitsForEditor, DeveloperProjectUnit } from '@/hooks/useDeveloperPortal';
 import { NbLeadForm } from './NbLeadForm';
+import { KycLiteForm } from './KycLiteForm';
 import { NbPriceDisplay } from './NbPriceDisplay';
 import { cn } from '@/lib/utils';
 
@@ -95,12 +96,15 @@ function UnitSheet({
 }) {
   const cfg = STATUS_CONFIG[unit.unit_status ?? 'available'] ?? STATUS_CONFIG.available;
   const [showLead, setShowLead] = useState(false);
+  const [showKyc, setShowKyc] = useState(false);
   const [holdExpiresAt, setHoldExpiresAt] = useState<string | null>(null);
   const [holdId, setHoldId] = useState<string | null>(null);
   const softHold = useSoftHold();
   const bookingCheckout = useCreateBookingCheckout();
   const countdown = useCountdown(holdExpiresAt);
+  const { data: buyer } = useBuyerStatus();
 
+  const kycOk = buyer && ['submitted', 'verified'].includes(buyer.kyc_status);
   const isAvailable = (unit.unit_status ?? 'available') === 'available';
 
   function handleSoftHold() {
@@ -237,8 +241,20 @@ function UnitSheet({
             <p className="text-sm text-[hsl(var(--nb-text-secondary))]">{unit.notes}</p>
           )}
 
+          {/* KYC-lite gate */}
+          {showKyc && (
+            <div className="border-t border-[hsl(var(--nb-glass-border))] pt-4">
+              <KycLiteForm
+                onComplete={() => {
+                  setShowKyc(false);
+                  handleSoftHold();
+                }}
+              />
+            </div>
+          )}
+
           {/* CTA block */}
-          {isAvailable ? (
+          {!showKyc && (isAvailable ? (
             holdExpiresAt ? (
               /* ── Active soft hold countdown ── */
               <div
@@ -314,7 +330,13 @@ function UnitSheet({
                     border: '1px solid rgba(184,150,46,0.3)',
                   }}
                   disabled={softHold.isPending}
-                  onClick={handleSoftHold}
+                  onClick={() => {
+                    if (kycOk) {
+                      handleSoftHold();
+                    } else {
+                      setShowKyc(true);
+                    }
+                  }}
                 >
                   <Lock className="w-4 h-4" />
                   {softHold.isPending ? 'Удержание...' : 'Удержать на 30 мин'}
@@ -326,7 +348,7 @@ function UnitSheet({
             )
           ) : (
             <p className="text-center text-sm text-[hsl(var(--nb-muted))] py-2">{cfg.label}</p>
-          )}
+          ))}
         </div>
       </div>
     </>

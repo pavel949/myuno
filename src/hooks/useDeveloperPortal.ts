@@ -451,6 +451,73 @@ export function useCreateBookingCheckout() {
   });
 }
 
+// ── KYC / Buyer ──
+
+export interface BuyerRecord {
+  id: string;
+  kyc_status: 'pending' | 'submitted' | 'verified' | 'rejected';
+  first_name: string;
+  last_name: string;
+  nationality: string;
+  passport_number: string | null;
+  passport_expiry: string | null;
+}
+
+export function useBuyerStatus() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ['buyer-kyc-status', user?.id],
+    queryFn: async (): Promise<BuyerRecord | null> => {
+      if (!user) return null;
+      const { data, error } = await supabase.functions.invoke('devmod-buyer-kyc', {
+        body: { action: 'status' },
+      });
+      if (error) return null;
+      const result = data as { buyer: BuyerRecord | null };
+      return result.buyer ?? null;
+    },
+    enabled: !!user,
+    staleTime: 30_000,
+  });
+}
+
+export function useSubmitKycLite() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (opts: {
+      firstName: string;
+      lastName: string;
+      nationality: string;
+      dateOfBirth?: string;
+      phone?: string;
+      email?: string;
+      leadId?: string;
+    }): Promise<{ buyer_id: string; kyc_status: string }> => {
+      const { data, error } = await supabase.functions.invoke('devmod-buyer-kyc', {
+        body: {
+          action: 'lite',
+          first_name: opts.firstName,
+          last_name: opts.lastName,
+          nationality: opts.nationality,
+          date_of_birth: opts.dateOfBirth ?? null,
+          phone: opts.phone ?? null,
+          email: opts.email ?? null,
+          lead_id: opts.leadId ?? null,
+        },
+      });
+      if (error) throw new Error(String(error));
+      const result = data as { error?: string; buyer_id?: string; kyc_status?: string };
+      if (result.error) throw new Error(result.error);
+      return result as { buyer_id: string; kyc_status: string };
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['buyer-kyc-status'] });
+      toast.success('Данные сохранены');
+    },
+    onError: (e: Error) => toast.error(e.message || 'Ошибка сохранения KYC'),
+  });
+}
+
 export function useDeveloperProjects(developerId?: string) {
   return useQuery({
     queryKey: ['developer-projects', developerId],
