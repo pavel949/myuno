@@ -13,7 +13,7 @@
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { X, Maximize, Bed, Bath, Layers, Eye, ZoomIn, ZoomOut, RotateCcw, Clock, Lock } from 'lucide-react';
-import { useFloorPlans, FloorPlan, useSoftHold } from '@/hooks/useDeveloperPortal';
+import { useFloorPlans, FloorPlan, useSoftHold, useCreateBookingCheckout } from '@/hooks/useDeveloperPortal';
 import { useProjectUnitsForEditor, DeveloperProjectUnit } from '@/hooks/useDeveloperPortal';
 import { NbLeadForm } from './NbLeadForm';
 import { NbPriceDisplay } from './NbPriceDisplay';
@@ -96,7 +96,9 @@ function UnitSheet({
   const cfg = STATUS_CONFIG[unit.unit_status ?? 'available'] ?? STATUS_CONFIG.available;
   const [showLead, setShowLead] = useState(false);
   const [holdExpiresAt, setHoldExpiresAt] = useState<string | null>(null);
+  const [holdId, setHoldId] = useState<string | null>(null);
   const softHold = useSoftHold();
+  const bookingCheckout = useCreateBookingCheckout();
   const countdown = useCountdown(holdExpiresAt);
 
   const isAvailable = (unit.unit_status ?? 'available') === 'available';
@@ -111,6 +113,26 @@ function UnitSheet({
       {
         onSuccess: (data) => {
           setHoldExpiresAt(data.expires_at);
+          setHoldId(data.hold_id);
+        },
+      },
+    );
+  }
+
+  function handleBookingFee() {
+    if (!holdId) return;
+    const base = window.location.origin;
+    bookingCheckout.mutate(
+      {
+        unitId: unit.id,
+        holdId,
+        projectId,
+        successUrl: `${base}/newbuilds/${projectId}?booking=success&session_id={CHECKOUT_SESSION_ID}`,
+        cancelUrl: `${base}/newbuilds/${projectId}?booking=cancelled`,
+      },
+      {
+        onSuccess: ({ checkout_url }) => {
+          window.location.href = checkout_url;
         },
       },
     );
@@ -240,8 +262,19 @@ function UnitSheet({
                   <span className="text-xs text-[hsl(var(--nb-muted))]">осталось</span>
                 </div>
                 <p className="text-xs text-[hsl(var(--nb-muted))]">
-                  Оставьте заявку, чтобы перейти к бронированию
+                  Оплатите бронирование сейчас или оставьте заявку
                 </p>
+                {holdId && (
+                  <button
+                    className="w-full flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold"
+                    style={{ background: '#B8962E', color: '#fff' }}
+                    disabled={bookingCheckout.isPending}
+                    onClick={handleBookingFee}
+                  >
+                    <Lock className="w-4 h-4" />
+                    {bookingCheckout.isPending ? 'Переход к оплате...' : 'Забронировать — ฿25,000'}
+                  </button>
+                )}
                 {showLead ? (
                   <NbLeadForm
                     projectId={projectId}
@@ -250,8 +283,16 @@ function UnitSheet({
                     compact={false}
                   />
                 ) : (
-                  <button className="nb-btn-gold w-full" onClick={() => setShowLead(true)}>
-                    Оставить заявку
+                  <button
+                    className="w-full rounded-xl py-3 text-sm font-medium border"
+                    style={{
+                      borderColor: 'rgba(184,150,46,0.3)',
+                      color: '#B8962E',
+                      background: 'transparent',
+                    }}
+                    onClick={() => setShowLead(true)}
+                  >
+                    Сохранить заявку на консультацию
                   </button>
                 )}
               </div>

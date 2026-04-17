@@ -421,6 +421,36 @@ export function useSoftHold() {
   });
 }
 
+// ── Booking Fee Checkout ──
+
+export function useCreateBookingCheckout() {
+  return useMutation({
+    mutationFn: async (opts: {
+      unitId: string;
+      holdId: string;
+      projectId: string;
+      successUrl: string;
+      cancelUrl: string;
+    }): Promise<{ checkout_url: string; session_id: string }> => {
+      const { data, error } = await supabase.functions.invoke('devmod-create-booking-checkout', {
+        body: {
+          unit_id: opts.unitId,
+          hold_id: opts.holdId,
+          project_id: opts.projectId,
+          success_url: opts.successUrl,
+          cancel_url: opts.cancelUrl,
+        },
+      });
+      if (error) throw new Error(String(error));
+      const result = data as { error?: string; checkout_url?: string; session_id?: string };
+      if (result.error) throw new Error(result.error);
+      if (!result.checkout_url) throw new Error('No checkout URL returned');
+      return result as { checkout_url: string; session_id: string };
+    },
+    onError: (e: Error) => toast.error(e.message || 'Ошибка создания платежа'),
+  });
+}
+
 export function useDeveloperProjects(developerId?: string) {
   return useQuery({
     queryKey: ['developer-projects', developerId],
