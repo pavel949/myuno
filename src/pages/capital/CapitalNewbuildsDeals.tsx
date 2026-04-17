@@ -62,10 +62,10 @@ interface UnitHold {
 }
 
 // ── Supabase helper for untyped tables ────────────────────────────────────────
-
-type SupabaseFrom = ReturnType<typeof supabase.from>;
-function from(table: string): SupabaseFrom {
-  return (supabase.from as (t: string) => SupabaseFrom)(table);
+// Returns `any` to bypass TS deep-instantiation explosion on tables not present
+// in the auto-generated Database type.
+function from(table: string): any {
+  return (supabase.from as unknown as (t: string) => any)(table);
 }
 
 // ── Hooks ─────────────────────────────────────────────────────────────────────
