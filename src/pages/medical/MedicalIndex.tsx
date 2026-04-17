@@ -1,7 +1,8 @@
 /**
- * MedicalIndex — MiniAppLayout + CatalogCard
+ * MedicalIndex — Canonical consumer app: MiniAppLayout + CatalogCard
+ * Search, filters, sort, results count all wired. Emergency banner preserved.
  */
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Stethoscope, Phone, ShieldAlert } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -11,7 +12,10 @@ import { CatalogCard } from '@/components/miniapp/CatalogCard';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/uno/EmptyState';
+import { CrossSellSection } from '@/components/crosssell';
 import { mapClinicToCatalogCard } from '@/lib/adapters/catalogCardAdapters';
+import { medicalFilterConfig } from '@/lib/filterRegistry';
+import type { FilterValues } from '@/components/filters/UniversalFilter';
 
 const SPECIALTIES = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -20,6 +24,12 @@ const SPECIALTIES = [
   { id: 'cardio', labelEn: 'Cardio', labelRu: 'Кардиолог' },
   { id: 'pediatric', labelEn: 'Pediatric', labelRu: 'Педиатр' },
   { id: 'eye', labelEn: 'Eye', labelRu: 'Офтальмолог' },
+];
+
+const SORT_OPTIONS = [
+  { id: 'recommended', labelEn: 'Recommended', labelRu: 'Рекомендуемые' },
+  { id: 'rating', labelEn: 'Top Rated', labelRu: 'По рейтингу' },
+  { id: 'open_first', labelEn: 'Open Now', labelRu: 'Открыто сейчас' },
 ];
 
 function isClinicOpen(workingHours: Record<string, string>, is24h: boolean): boolean {
@@ -41,12 +51,52 @@ export default function MedicalIndex() {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const [selectedSpecialty, setSelectedSpecialty] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterValues, setFilterValues] = useState<FilterValues>({});
+  const [sortBy, setSortBy] = useState('recommended');
   const isRu = language === 'ru';
 
   const { clinics, isLoading } = useClinics({
-    specialty: selectedSpecialty,
-    searchQuery: '',
+    specialty: selectedSpecialty === 'all' ? undefined : selectedSpecialty,
+    searchQuery: searchQuery || undefined,
   });
+
+  const filterActiveCount = useMemo(() => {
+    return Object.values(filterValues).filter(v =>
+      Array.isArray(v) ? v.length > 0 : v != null
+    ).length;
+  }, [filterValues]);
+
+  const filteredAndSorted = useMemo(() => {
+    let result = [...clinics];
+
+    const specialtyFilter = filterValues.specialty as string[] | undefined;
+    if (specialtyFilter?.length) {
+      result = result.filter(c => {
+        const specs = (c as Record<string, unknown>).specialties as string[] | null;
+        return specs?.some(s => specialtyFilter.includes(s));
+      });
+    }
+
+    switch (sortBy) {
+      case 'rating':
+        result.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+        break;
+      case 'open_first':
+        result.sort((a, b) => {
+          const aOpen = isClinicOpen((a.working_hours as Record<string, string>) || {}, a.is_24h ?? false);
+          const bOpen = isClinicOpen((b.working_hours as Record<string, string>) || {}, b.is_24h ?? false);
+          return (bOpen ? 1 : 0) - (aOpen ? 1 : 0);
+        });
+        break;
+    }
+
+    return result;
+  }, [clinics, filterValues, sortBy]);
+
+  const handleFilterChange = useCallback((values: FilterValues) => {
+    setFilterValues(values);
+  }, []);
 
   const emergencyBanner = (
     <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/30">
@@ -72,15 +122,38 @@ export default function MedicalIndex() {
   return (
     <MiniAppLayout
       title={isRu ? 'Медицина' : 'Healthcare'}
-      subtitle={`${clinics.length} ${isRu ? 'клиник' : 'clinics'}`}
+      subtitle={`${filteredAndSorted.length} ${isRu ? 'клиник' : 'clinics'}`}
       fallbackPath="/discover"
+      showSearch
+      searchValue={searchQuery}
+      onSearchChange={setSearchQuery}
+      searchPlaceholder={isRu ? 'Поиск клиник...' : 'Search clinics...'}
+      showHero={false}
       categories={SPECIALTIES}
       selectedCategory={selectedSpecialty}
       onCategoryChange={setSelectedSpecialty}
-      showHero={false}
-      showSearch={false}
-      showFilter={false}
+      filterConfig={medicalFilterConfig}
+      filterValues={filterValues}
+      onFilterChange={handleFilterChange}
+      filterActiveCount={filterActiveCount}
+      resultsCount={filteredAndSorted.length}
+      resultsLabel={isRu ? 'Клиники' : 'Clinics'}
       quickActions={emergencyBanner}
+      stickySubHeader={
+        <div className="px-4 py-2 flex items-center justify-end">
+          <select
+            value={sortBy}
+            onChange={e => setSortBy(e.target.value)}
+            className="text-[11px] font-medium bg-secondary border border-border rounded-full px-2.5 py-1.5 outline-none cursor-pointer"
+          >
+            {SORT_OPTIONS.map(opt => (
+              <option key={opt.id} value={opt.id}>
+                {isRu ? opt.labelRu : opt.labelEn}
+              </option>
+            ))}
+          </select>
+        </div>
+      }
     >
       {isLoading ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -92,7 +165,7 @@ export default function MedicalIndex() {
             </div>
           ))}
         </div>
-      ) : clinics.length === 0 ? (
+      ) : filteredAndSorted.length === 0 ? (
         <EmptyState
           icon={Stethoscope}
           title={isRu ? 'Клиники не найдены' : 'No clinics found'}
@@ -100,7 +173,7 @@ export default function MedicalIndex() {
         />
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          {clinics.map(clinic => {
+          {filteredAndSorted.map(clinic => {
             const openNow = isClinicOpen(
               (clinic.working_hours as Record<string, string>) || {},
               clinic.is_24h ?? false
@@ -111,6 +184,8 @@ export default function MedicalIndex() {
           })}
         </div>
       )}
+
+      <CrossSellSection currentVertical="medical" className="mt-8" />
     </MiniAppLayout>
   );
 }

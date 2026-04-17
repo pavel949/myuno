@@ -6,8 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { MapPin, AlertTriangle, Lock, EyeOff, Pencil } from 'lucide-react';
+import { MapPin, AlertTriangle, Lock, EyeOff, Pencil, LocateFixed, Loader2 } from 'lucide-react';
 import { ProjectLocationPicker } from '@/components/property/ProjectLocationPicker';
+import { GooglePlacesAutocomplete } from '@/components/shared/GooglePlacesAutocomplete';
 import { PropertyFormData } from '@/hooks/usePropertyWizard';
 import { PHUKET_DISTRICTS } from '@/lib/taxonomies';
 
@@ -20,6 +21,20 @@ export function LocationStep({ formData, updateFormData }: LocationStepProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const [showEditAddress, setShowEditAddress] = useState(false);
+  const [gpsLoading, setGpsLoading] = useState(false);
+
+  const handleGpsLocate = () => {
+    if (!navigator.geolocation) return;
+    setGpsLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        updateFormData({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setGpsLoading(false);
+      },
+      () => setGpsLoading(false),
+      { timeout: 8000 }
+    );
+  };
 
   const hasLocationFromSearch = !!(formData.address && formData.lat != null && formData.lng != null);
   const showCompactLocation = hasLocationFromSearch && !showEditAddress;
@@ -63,10 +78,39 @@ export function LocationStep({ formData, updateFormData }: LocationStepProps) {
           ) : (
             <>
               <div className="space-y-2">
-                <Label>{isRu ? 'Адрес' : 'Address'} *</Label>
-                <Input
+                <div className="flex items-center justify-between">
+                  <Label>{isRu ? 'Адрес' : 'Address'} *</Label>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-xs gap-1 text-muted-foreground"
+                    onClick={handleGpsLocate}
+                    disabled={gpsLoading}
+                  >
+                    {gpsLoading
+                      ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      : <LocateFixed className="h-3.5 w-3.5" />
+                    }
+                    {isRu ? 'По GPS' : 'Use GPS'}
+                  </Button>
+                </div>
+                <GooglePlacesAutocomplete
                   value={formData.address}
-                  onChange={(e) => updateFormData({ address: e.target.value })}
+                  onChange={(val) => updateFormData({ address: val })}
+                  onPlaceSelect={(place) => {
+                    const districtMatch = PHUKET_DISTRICTS.find(
+                      (d) => place.address.toLowerCase().includes(d.labelEn.toLowerCase()) ||
+                             place.address.toLowerCase().includes(d.labelRu?.toLowerCase() ?? '')
+                    );
+                    updateFormData({
+                      address: place.address,
+                      lat: place.lat,
+                      lng: place.lng,
+                      ...(place.district ? { district: place.district } : {}),
+                      ...(districtMatch ? { district: districtMatch.id } : {}),
+                    });
+                  }}
                   placeholder="123 Beach Road, Patong"
                 />
               </div>

@@ -535,6 +535,27 @@ const isRu = language === 'ru';
         }
       />
 
+      {/* Autosave status bar */}
+      {saveState !== 'idle' && (
+        <div className={`flex items-center gap-2 text-xs px-1 py-1.5 rounded-lg mb-2 ${
+          saveState === 'saving' ? 'text-muted-foreground' :
+          saveState === 'unsaved' ? 'text-warning' :
+          saveState === 'saved' ? 'text-success' :
+          'text-destructive'
+        }`}>
+          {saveState === 'saving' && <Loader2 className="h-3 w-3 animate-spin" />}
+          {saveState === 'saved' && <Check className="h-3 w-3" />}
+          {saveState === 'saving' && (isRu ? 'Автосохранение...' : 'Autosaving...')}
+          {saveState === 'unsaved' && (isRu ? '● Есть несохранённые изменения' : '● Unsaved changes')}
+          {saveState === 'saved' && lastSaved && (
+            isRu
+              ? `Сохранено в ${lastSaved.toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' })}`
+              : `Saved at ${lastSaved.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' })}`
+          )}
+          {saveState === 'error' && (isRu ? 'Ошибка сохранения' : 'Save error')}
+        </div>
+      )}
+
       {/* AI Intake - merge mode for existing property */}
       <AIIntakePanel onDataExtracted={handleAIMerge} />
 

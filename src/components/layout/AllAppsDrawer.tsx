@@ -5,6 +5,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useCategories } from '@/hooks/useCategories';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { APP_ROUTES } from '@/lib/config/routes';
+import { Compass } from 'lucide-react';
 
 interface AllAppsDrawerProps {
   open: boolean;
@@ -17,7 +19,6 @@ export function AllAppsDrawer({ open, onOpenChange }: AllAppsDrawerProps) {
   const navigate = useNavigate();
   const { flatCategories } = useCategories();
 
-  // Get all mini-app categories
   const miniApps = flatCategories
     .filter(c => c.hasMiniApp && c.isActive)
     .sort((a, b) => a.sortOrder - b.sortOrder);
@@ -27,16 +28,30 @@ export function AllAppsDrawer({ open, onOpenChange }: AllAppsDrawerProps) {
     navigate(path);
   };
 
+  const handleNavigatorClick = () => {
+    onOpenChange(false);
+    navigate(APP_ROUTES.DISCOVER);
+  };
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="bottom" className="rounded-t-3xl max-h-[70vh] pb-safe">
-        <SheetHeader className="pb-4">
-          <SheetTitle className="text-lg font-bold">
-            {isRu ? 'Все сервисы' : 'All Services'}
-          </SheetTitle>
+        <SheetHeader className="pb-2">
+          <div className="flex items-center justify-between">
+            <SheetTitle className="text-lg font-bold">
+              {isRu ? 'Все сервисы' : 'All Services'}
+            </SheetTitle>
+            <button
+              onClick={handleNavigatorClick}
+              className="flex items-center gap-1 text-[12px] text-primary font-medium hover:underline"
+            >
+              <Compass className="w-3.5 h-3.5" />
+              {isRu ? 'По сценариям →' : 'Browse by situation →'}
+            </button>
+          </div>
         </SheetHeader>
         <ScrollArea className="h-full max-h-[calc(70vh-80px)]">
-          <div className="grid grid-cols-4 gap-3 pb-6">
+          <div className="grid grid-cols-4 gap-3 pb-6 pt-2">
             {miniApps.map((app) => {
               const Icon = app.icon;
               return (

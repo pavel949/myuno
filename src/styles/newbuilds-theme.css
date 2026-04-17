@@ -3,7 +3,7 @@
  * Scoped under .nb-theme class
  */
 
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+/* Newbuilds fonts are loaded globally in index.html (Playfair Display + DM Sans + JetBrains Mono) */
 
 .nb-theme {
   /* ─ Core palette (HSL) ─ */
@@ -30,9 +30,10 @@
   --border: var(--nb-glass-border);
 
   /* ─ Typography ─ */
-  --font-display-nb: 'Cormorant Garamond', Georgia, serif;
+  --font-display-nb: 'Playfair Display', Georgia, serif;
+  --font-heading-nb: 'Playfair Display', Georgia, serif;
   --font-body-nb: 'DM Sans', system-ui, sans-serif;
-  --font-mono-nb: 'DM Mono', 'Fira Code', monospace;
+  --font-mono-nb: 'JetBrains Mono', monospace;
 
   font-family: var(--font-body-nb);
   color: hsl(var(--nb-text));

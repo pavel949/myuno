@@ -25,7 +25,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { UniversalFilter, FilterValues } from '@/components/filters/UniversalFilter';
 import { usePropertyFilterOptions } from '@/hooks/usePropertyFilterOptions';
-import { matchesFilter, matchesSingleFilter, matchesPriceLevel } from '@/lib/filterUtils';
+import { filterValuesToPropertyFilters } from '@/lib/propertyCatalogServerFilters';
 import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
 
 // ── Recently Viewed Property Shape ──
@@ -86,61 +86,32 @@ export default function PropertyIndex() {
 
   const { items: recentItems } = useRecentlyViewed<RecentProperty>('myuno_recently_viewed_properties');
 
-  const { data: infiniteData, isLoading } = usePropertiesInfinite({
-    listingType: propertyMode === 'buy' ? 'sale' : 'rent',
-  });
+  const serverFilters = useMemo(
+    () =>
+      filterValuesToPropertyFilters(filterValues, {
+        listingType: propertyMode === 'buy' ? 'sale' : 'rent',
+      }),
+    [filterValues, propertyMode]
+  );
+
+  const { data: infiniteData, isLoading } = usePropertiesInfinite(serverFilters);
 
   const allProperties = useMemo(() => {
     return infiniteData?.pages.flatMap(p => p.properties) || [];
   }, [infiniteData]);
 
-  // Filter by selected categories + UniversalFilter values
+  // Category ribbon only — DB filters handled server-side
   const filteredProperties = useMemo(() => {
     let result = allProperties;
-    
-    // Category ribbon filter
+
     if (selectedCategories.length > 0) {
-      result = result.filter(p =>
-        selectedCategories.every(cat => matchesCategory(p, cat))
+      result = result.filter((p) =>
+        selectedCategories.every((cat) => matchesCategory(p, cat))
       );
     }
 
-    // UniversalFilter values
-    const districts = (filterValues.district as string[]) || [];
-    const amenities = (filterValues.amenities as string[]) || [];
-    const bedrooms = (filterValues.bedrooms as string[]) || [];
-    const propertyTypes = (filterValues.propertyType as string[]) || [];
-    const listingType = filterValues.listingType as string | null;
-    const priceLevel = filterValues.priceLevel as string | null;
-
-    if (districts.length > 0) {
-      result = result.filter(p => matchesSingleFilter(p.district, districts));
-    }
-    if (amenities.length > 0) {
-      result = result.filter(p => matchesFilter(p.amenities, amenities));
-    }
-    if (bedrooms.length > 0) {
-      result = result.filter(p => {
-        const beds = p.bedrooms ?? 0;
-        return bedrooms.some(b => {
-          if (b === 'studio') return beds === 0;
-          const num = parseInt(b);
-          return beds >= num;
-        });
-      });
-    }
-    if (propertyTypes.length > 0) {
-      result = result.filter(p => matchesSingleFilter(p.property_type, propertyTypes));
-    }
-    if (listingType) {
-      result = result.filter(p => matchesSingleFilter(p.listing_type, [listingType]));
-    }
-    if (priceLevel) {
-      result = result.filter(p => matchesPriceLevel(p.price, priceLevel));
-    }
-
     return result;
-  }, [allProperties, selectedCategories, filterValues]);
+  }, [allProperties, selectedCategories]);
 
   const handlePropertyClick = useCallback((id: string) => {
     navigate(APP_ROUTES.PROPERTY_DETAIL(id));

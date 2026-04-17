@@ -39,8 +39,10 @@ const RELATED_ENTITY_MAP: Record<string, RelatedConfig[]> = {
     { vertical: 'flowers', listingVertical: 'bouquet', pathPrefix: '/flowers', ctaEn: 'Order', ctaRu: 'Заказать', limit: 1 },
   ],
   property: [
-    { vertical: 'transport', listingVertical: 'vehicle', pathPrefix: '/transport', ctaEn: 'Rent', ctaRu: 'Арендовать', limit: 2 },
-    { vertical: 'restaurants', listingVertical: 'restaurant', pathPrefix: '/restaurants', ctaEn: 'Reserve', ctaRu: 'Забронировать', limit: 2 },
+    { vertical: 'transport', listingVertical: 'vehicle', pathPrefix: '/transport', ctaEn: 'Rent', ctaRu: 'Арендовать', limit: 3 },
+    { vertical: 'restaurants', listingVertical: 'restaurant', pathPrefix: '/restaurants', ctaEn: 'Reserve', ctaRu: 'Забронировать', limit: 3 },
+    { vertical: 'flowers', listingVertical: 'bouquet', pathPrefix: '/flowers', ctaEn: 'Order', ctaRu: 'Заказать', limit: 2 },
+    { vertical: 'experiences', listingVertical: 'experience', pathPrefix: '/experiences', ctaEn: 'Book', ctaRu: 'Заказать', limit: 2 },
   ],
   restaurants: [
     { vertical: 'transport', listingVertical: 'vehicle', pathPrefix: '/transport', ctaEn: 'Rent', ctaRu: 'Арендовать', limit: 2 },

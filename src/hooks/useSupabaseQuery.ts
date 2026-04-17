@@ -124,9 +124,9 @@ export function useSupabaseQuery<T>({
         setError(null);
       }
     } catch (err) {
-      console.error(`Error fetching from ${table}:`, err);
       if (isMountedRef.current) {
-        setError(err instanceof Error ? err : new Error(String(err)));
+        const errMsg = err instanceof Error ? err.message : JSON.stringify(err);
+        setError(err instanceof Error ? err : new Error(errMsg));
         setData([]);
       }
     } finally {

@@ -72,14 +72,7 @@ interface UseRestaurantsOptions {
   limit?: number;
 }
 
-const RESTAURANT_LIST_COLUMNS = `
-  id, provider_id, name_en, name_ru, description_en, description_ru,
-  cuisine, address, district, lat, lng, phone, email, website,
-  cover_image, images, price_range, delivery_available, delivery_fee,
-  delivery_time, min_order_amount, working_hours, features,
-  rating, review_count, is_active, is_featured, is_verified,
-  created_at, updated_at
-`;
+const RESTAURANT_LIST_COLUMNS = '*';
 
 const MENU_CATEGORY_COLUMNS = 'id, restaurant_id, name_en, name_ru, sort_order, is_active';
 const MENU_ITEM_COLUMNS = `

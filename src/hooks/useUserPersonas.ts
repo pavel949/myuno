@@ -315,7 +315,8 @@ export const PERSONA_INFO: Record<UserPersona, {
   },
   investor: {
     labelEn: 'Investor', labelRu: 'Инвестор',
-    descEn: 'Projects & opportunities', descRu: 'Проекты и возможности',
+    descEn: 'Capital, off-plan, buy-side plus legal, banking, and diligence tools',
+    descRu: 'Капитал, новостройки, покупка и сервисы сделки: право, банки, аналитика',
     icon: 'TrendingUp', color: 'text-purple-600', bgColor: 'bg-purple-500/10',
   },
   family: {
@@ -340,7 +341,8 @@ export const PERSONA_INFO: Record<UserPersona, {
   },
   business: {
     labelEn: 'Business', labelRu: 'Бизнес',
-    descEn: 'Company setup, contracts, banking', descRu: 'Компания, договоры, банк, офис',
+    descEn: 'Incorporation, workspace, insurance, and day-to-day ops for your company',
+    descRu: 'Компания, офис и коворкинг, страховка и сервисы для эксплуатации бизнеса',
     icon: 'Briefcase', color: 'text-slate-600', bgColor: 'bg-slate-500/10',
   },
   nomad: {

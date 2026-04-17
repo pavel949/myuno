@@ -34,18 +34,19 @@ const categories = [
 ];
 
 const distanceOptions = [
+  { value: 0, labelEn: 'All', labelRu: 'Все' },
   { value: 2, labelEn: '2 km', labelRu: '2 км' },
   { value: 5, labelEn: '5 km', labelRu: '5 км' },
   { value: 10, labelEn: '10 km', labelRu: '10 км' },
   { value: 25, labelEn: '25 km', labelRu: '25 км' },
-  { value: 50, labelEn: 'All', labelRu: 'Все' },
+  { value: 50, labelEn: '50 km', labelRu: '50 км' },
 ];
 
 export default function ServicesMap() {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [distanceFilter, setDistanceFilter] = useState<number>(50);
+  const [distanceFilter, setDistanceFilter] = useState<number>(0);
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
@@ -138,7 +139,7 @@ export default function ServicesMap() {
           })}
         </div>
 
-        <SalonMap salons={salonMarkers} onSalonSelect={(id) => navigate(`/services/provider/${id}`)} userLocation={userLocation} distanceFilter={distanceFilter} className="flex-1" icon="🔧" />
+        <SalonMap salons={salonMarkers} onSalonSelect={(id) => navigate(`/services/provider/${id}`)} userLocation={userLocation} distanceFilter={distanceFilter} className="flex-1 min-h-0 w-full" icon="🔧" />
       </div>
     </AppLayout>
   );

@@ -1,9 +1,8 @@
 /**
  * Comprehensive Property Features Taxonomy
- * 
+ *
  * Grouped by category for the property editor / wizard.
- * The search ribbon (PROPERTY_CATEGORIES) stays compact — this is the full catalog.
- * IDs are stable slugs stored in properties.highlights (string[]).
+ * Feature IDs use snake_case and align with `propertyAttributeRegistry` / highlights.
  */
 
 import {

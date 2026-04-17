@@ -4,6 +4,9 @@ import { Send, Instagram, MessageCircle, Download, Smartphone, Shield, Clock, Ch
 import { COMPANY_CONTACTS } from '@/lib/config';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
 import { useIsDesktop } from '@/hooks/use-desktop';
+import { VERTICAL_GROUPS } from '@/lib/verticalGroups';
+import { getVerticalById } from '@/lib/verticals';
+import { APP_REGISTRY } from '@/lib/appRegistry';
 
 export function CompactFooter() {
   const { language } = useLanguage();
@@ -35,14 +38,32 @@ export function CompactFooter() {
     window.location.href = '/install';
   };
 
-  const serviceLinks = [
-    { to: '/property', label: isRu ? 'Недвижимость' : 'Real Estate' },
-    { to: '/transport', label: isRu ? 'Транспорт' : 'Transport' },
-    { to: '/experiences', label: isRu ? 'Впечатления' : 'Experiences' },
-    { to: '/beauty', label: isRu ? 'Красота' : 'Beauty' },
-    { to: '/medical', label: isRu ? 'Медицина' : 'Medical' },
-    { to: '/yachts', label: isRu ? 'Яхты' : 'Yachts' },
-  ];
+  const resolveVerticalLink = (verticalId: string): { to: string; label: string } | null => {
+    const registryEntry = Object.values(APP_REGISTRY).find((e) => e.verticalId === verticalId);
+    if (registryEntry) {
+      return { to: registryEntry.route, label: isRu ? registryEntry.labelRu : registryEntry.labelEn };
+    }
+    const v = getVerticalById(verticalId);
+    if (v) return { to: `/${v.plural}`, label: isRu ? v.labelRu : v.labelEn };
+    return null;
+  };
+
+  const footerGroups = VERTICAL_GROUPS
+    .filter((g) => g.id !== 'maintenance' && g.id !== 'help')
+    .map((group) => {
+      const items = group.items.slice(0, 3).map((item) => {
+        if (item.verticalId) return resolveVerticalLink(item.verticalId);
+        if (item.route) {
+          return { to: item.route, label: isRu ? (item.labelRu ?? '') : (item.labelEn ?? '') };
+        }
+        return null;
+      }).filter(Boolean) as { to: string; label: string }[];
+
+      return {
+        title: isRu ? group.labelRu : group.labelEn,
+        items,
+      };
+    });
 
   const companyLinks = [
     { to: '/about', label: isRu ? 'О нас' : 'About' },
@@ -68,11 +89,14 @@ export function CompactFooter() {
 
   // Desktop: professional multi-column footer
   if (isDesktop) {
+    const leftGroups = footerGroups.slice(0, Math.ceil(footerGroups.length / 2));
+    const rightGroups = footerGroups.slice(Math.ceil(footerGroups.length / 2));
+
     return (
       <footer className="border-t border-border/40 bg-muted/10 mt-auto">
         <div className="max-w-[1536px] mx-auto px-8 py-10 lg:py-12">
           {/* Main grid */}
-          <div className="grid grid-cols-4 gap-8 mb-8">
+          <div className="grid grid-cols-5 gap-8 mb-8">
             {/* Brand column */}
             <div className="space-y-3">
               <div className="flex items-center gap-1">
@@ -101,16 +125,44 @@ export function CompactFooter() {
               </div>
             </div>
 
-            {/* Services column */}
-            <div className="space-y-3">
+            {/* Services column — left half */}
+            <div className="space-y-4">
               <h4 className="text-base font-semibold text-foreground">
                 {isRu ? 'Сервисы' : 'Services'}
               </h4>
-              <nav className="flex flex-col gap-2.5">
-                {serviceLinks.map((link) => (
-                  <Link key={link.to} to={link.to} className="text-[15px] text-muted-foreground hover:text-foreground transition-colors">
-                    {link.label}
-                  </Link>
+              <nav className="flex flex-col gap-4">
+                {leftGroups.map((group) => (
+                  <div key={group.title} className="space-y-1.5">
+                    <span className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wider">
+                      {group.title}
+                    </span>
+                    {group.items.map((link) => (
+                      <Link key={link.to} to={link.to} className="block text-[14px] text-muted-foreground hover:text-foreground transition-colors">
+                        {link.label}
+                      </Link>
+                    ))}
+                  </div>
+                ))}
+              </nav>
+            </div>
+
+            {/* Services column — right half */}
+            <div className="space-y-4">
+              <h4 className="text-base font-semibold text-foreground invisible">
+                &nbsp;
+              </h4>
+              <nav className="flex flex-col gap-4">
+                {rightGroups.map((group) => (
+                  <div key={group.title} className="space-y-1.5">
+                    <span className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wider">
+                      {group.title}
+                    </span>
+                    {group.items.map((link) => (
+                      <Link key={link.to} to={link.to} className="block text-[14px] text-muted-foreground hover:text-foreground transition-colors">
+                        {link.label}
+                      </Link>
+                    ))}
+                  </div>
                 ))}
               </nav>
             </div>

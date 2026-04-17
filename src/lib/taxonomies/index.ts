@@ -56,6 +56,25 @@ export * as RestaurantTaxonomy from './restaurantTaxonomy';
 export * as MedicalTaxonomy from './medicalTaxonomy';
 export * as EducationTaxonomy from './educationTaxonomy';
 
+// ============= PROPERTY ATTRIBUTE REGISTRY (canonical IDs / normalization) =============
+export {
+  normalizeListingAmenityId,
+  normalizeHighlightId,
+  normalizeEquipmentId,
+  normalizeProjectFacilityId,
+  normalizeProjectFacilityIds,
+  normalizeListingAmenities,
+  normalizeHighlightIds,
+  normalizeEquipmentIds,
+  normalizePropertyTaxonomyArrays,
+  getProjectFacilityLabel,
+  isKnownListingAmenity,
+  PROJECT_FACILITY_LABELS,
+  LISTING_AMENITY_UI_GROUPS,
+  ALL_LISTING_AMENITY_UI_ITEMS,
+  HIGHLIGHT_UI_ITEMS,
+} from '../propertyAttributeRegistry';
+
 // ============= PROPERTY TAXONOMY =============
 export {
   PROPERTY_TYPES,

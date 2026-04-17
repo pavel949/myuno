@@ -52,11 +52,13 @@ export const PLACEHOLDER_IMAGES = {
     'surin': 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=300',
   } as Record<string, string>,
 
-  // Amenity images
+  // Amenity images (canonical snake_case keys; legacy hyphen kept for older callers)
   amenities: {
-    'pool': 'https://images.unsplash.com/photo-1572331165267-854da2b021aa?w=300',
+    pool: 'https://images.unsplash.com/photo-1572331165267-854da2b021aa?w=300',
+    sea_view: 'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=300',
     'sea-view': 'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=300',
-    'beachfront': 'https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?w=300',
+    beachfront: 'https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?w=300',
+    pet_friendly: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=300',
     'pet-friendly': 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=300',
   } as Record<string, string>,
 

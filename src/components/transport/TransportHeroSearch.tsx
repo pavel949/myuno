@@ -3,7 +3,7 @@
  * Calm premium aesthetic, above-the-fold search
  */
 
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Search, MapPin, Calendar as CalendarIcon, ChevronDown, Truck } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
@@ -52,7 +52,7 @@ export function TransportHeroSearch({ onSearch }: TransportHeroSearchProps) {
           <h1 className="text-2xl md:text-3xl lg:text-4xl font-display font-bold text-white leading-tight">
             {isRu ? 'Аренда транспорта' : 'Vehicle Rental'}
           </h1>
-          <p className="text-white/70 text-sm md:text-base mt-1.5">
+          <p className="text-white/85 text-base md:text-lg mt-2 leading-snug max-w-2xl">
             {isRu ? 'Проверенные автомобили и мотоциклы на Пхукете' : 'Verified cars & bikes in Phuket'}
           </p>
         </div>
@@ -60,15 +60,15 @@ export function TransportHeroSearch({ onSearch }: TransportHeroSearchProps) {
         {/* Search Card */}
         <div className="bg-white rounded-2xl p-4 md:p-6 shadow-2xl shadow-black/20">
           {/* Main search row */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {/* Location */}
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 border border-border/50">
-              <MapPin className="w-5 h-5 text-primary shrink-0" />
+            <div className="flex items-center gap-3 min-h-11 p-3.5 rounded-xl bg-muted/50 border border-border/50">
+              <MapPin className="w-6 h-6 text-primary shrink-0" aria-hidden />
               <div className="flex-1 min-w-0">
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
                   {isRu ? 'Местоположение' : 'Location'}
                 </p>
-                <p className="text-sm font-semibold text-foreground truncate">
+                <p className="text-base font-semibold text-foreground truncate mt-0.5">
                   {isRu ? 'Пхукет' : 'Phuket'}
                 </p>
               </div>
@@ -77,13 +77,16 @@ export function TransportHeroSearch({ onSearch }: TransportHeroSearchProps) {
             {/* Pickup Date */}
             <Popover>
               <PopoverTrigger asChild>
-                <button className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 border border-border/50 text-left hover:border-primary/50 transition-colors w-full">
-                  <CalendarIcon className="w-5 h-5 text-primary shrink-0" />
+                <button
+                  type="button"
+                  className="flex items-center gap-3 min-h-11 p-3.5 rounded-xl bg-muted/50 border border-border/50 text-left hover:border-primary/50 transition-colors w-full"
+                >
+                  <CalendarIcon className="w-6 h-6 text-primary shrink-0" aria-hidden />
                   <div className="flex-1 min-w-0">
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
                       {isRu ? 'Получение' : 'Pick-up'}
                     </p>
-                    <p className={cn("text-sm font-semibold truncate", pickupDate ? "text-foreground" : "text-muted-foreground")}>
+                    <p className={cn('text-base font-semibold truncate mt-0.5', pickupDate ? 'text-foreground' : 'text-muted-foreground')}>
                       {pickupDate
                         ? format(pickupDate, 'dd MMM yyyy', { locale: isRu ? ruLocale : undefined })
                         : (isRu ? 'Выберите дату' : 'Select date')}
@@ -103,7 +106,7 @@ export function TransportHeroSearch({ onSearch }: TransportHeroSearchProps) {
                   }}
                   disabled={(date) => date < today}
                   initialFocus
-                  className={cn("p-3 pointer-events-auto")}
+                  className={cn('p-3 pointer-events-auto')}
                 />
               </PopoverContent>
             </Popover>
@@ -111,13 +114,16 @@ export function TransportHeroSearch({ onSearch }: TransportHeroSearchProps) {
             {/* Return Date */}
             <Popover>
               <PopoverTrigger asChild>
-                <button className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 border border-border/50 text-left hover:border-primary/50 transition-colors w-full">
-                  <CalendarIcon className="w-5 h-5 text-primary shrink-0" />
+                <button
+                  type="button"
+                  className="flex items-center gap-3 min-h-11 p-3.5 rounded-xl bg-muted/50 border border-border/50 text-left hover:border-primary/50 transition-colors w-full"
+                >
+                  <CalendarIcon className="w-6 h-6 text-primary shrink-0" aria-hidden />
                   <div className="flex-1 min-w-0">
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
                       {isRu ? 'Возврат' : 'Return'}
                     </p>
-                    <p className={cn("text-sm font-semibold truncate", returnDate ? "text-foreground" : "text-muted-foreground")}>
+                    <p className={cn('text-base font-semibold truncate mt-0.5', returnDate ? 'text-foreground' : 'text-muted-foreground')}>
                       {returnDate
                         ? format(returnDate, 'dd MMM yyyy', { locale: isRu ? ruLocale : undefined })
                         : (isRu ? 'Выберите дату' : 'Select date')}
@@ -132,14 +138,24 @@ export function TransportHeroSearch({ onSearch }: TransportHeroSearchProps) {
                   onSelect={setReturnDate}
                   disabled={(date) => date < (pickupDate ? addDays(pickupDate, 1) : today)}
                   initialFocus
-                  className={cn("p-3 pointer-events-auto")}
+                  className={cn('p-3 pointer-events-auto')}
                 />
               </PopoverContent>
             </Popover>
 
             {/* Search button */}
-            <Button className="h-auto py-3 rounded-xl text-sm font-semibold gap-2">
-              <Search className="w-4 h-4" />
+            <Button
+              className="h-11 min-h-11 py-3 rounded-xl text-sm font-semibold gap-2 sm:col-span-2 lg:col-span-1"
+              onClick={() => onSearch?.({
+                location: 'Phuket',
+                pickupDate: pickupDate ? pickupDate.toISOString() : '',
+                returnDate: returnDate ? returnDate.toISOString() : '',
+                delivery,
+                withDriver,
+                monthly,
+              })}
+            >
+              <Search className="w-5 h-5 shrink-0" aria-hidden />
               {isRu ? 'Найти' : 'Search'}
             </Button>
           </div>
@@ -147,10 +163,11 @@ export function TransportHeroSearch({ onSearch }: TransportHeroSearchProps) {
           {/* Advanced toggle */}
           <div className="mt-3 pt-3 border-t border-border/30">
             <button
+              type="button"
               onClick={() => setShowAdvanced(!showAdvanced)}
-              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors min-h-11 py-1"
             >
-              <ChevronDown className={cn("w-3.5 h-3.5 transition-transform", showAdvanced && "rotate-180")} />
+              <ChevronDown className={cn('w-4 h-4 shrink-0 transition-transform', showAdvanced && 'rotate-180')} aria-hidden />
               {isRu ? 'Дополнительные опции' : 'More options'}
             </button>
 
@@ -159,7 +176,7 @@ export function TransportHeroSearch({ onSearch }: TransportHeroSearchProps) {
                 <ToggleChip
                   active={delivery}
                   onClick={() => setDelivery(!delivery)}
-                  icon={<Truck className="w-3.5 h-3.5" />}
+                  icon={<Truck className="w-4 h-4 shrink-0" aria-hidden />}
                   label={isRu ? 'Доставка' : 'Delivery'}
                 />
                 <ToggleChip
@@ -181,17 +198,21 @@ export function TransportHeroSearch({ onSearch }: TransportHeroSearchProps) {
   );
 }
 
-function ToggleChip({ active, onClick, icon, label }: { 
-  active: boolean; onClick: () => void; icon?: React.ReactNode; label: string 
+function ToggleChip({ active, onClick, icon, label }: {
+  active: boolean;
+  onClick: () => void;
+  icon?: ReactNode;
+  label: string;
 }) {
   return (
     <button
+      type="button"
       onClick={onClick}
       className={cn(
-        "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all",
+        'flex items-center gap-2 px-4 py-2.5 min-h-11 rounded-full text-sm font-semibold border transition-all',
         active
-          ? "bg-primary text-primary-foreground border-primary"
-          : "bg-background text-muted-foreground border-border hover:border-foreground/30"
+          ? 'bg-primary text-primary-foreground border-primary'
+          : 'bg-background text-muted-foreground border-border hover:border-foreground/30'
       )}
     >
       {icon}

@@ -174,9 +174,10 @@ export function PropertyBookingCard({
     signals.push({ icon: <Award className="w-3.5 h-3.5 text-primary" />, text: isRu ? 'Гарантия лучшей цены' : 'Best price guarantee' });
     return signals;
   }, [rentalTerms, isRu]);
-  
+
+  // Sticky positioning is on PropertyDetail aside; do not nest sticky on this Card.
   return (
-    <Card variant="elevated" className={cn("sticky top-20", className)}>
+    <Card variant="elevated" className={cn(className)}>
       <CardContent className="p-6 space-y-5">
         {/* Price Header — prominent and clear */}
         <div>

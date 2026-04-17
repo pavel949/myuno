@@ -3,6 +3,11 @@ import type { SalonMarker } from '@/components/map/SalonMap';
 import { supabase } from '@/integrations/supabase/client';
 import { PUBLIC_CATALOG_APPROVAL_STATUS } from '@/lib/real-estate/canonicalModel';
 import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
+import {
+  normalizePropertyTaxonomyArrays,
+  normalizeListingAmenities,
+  normalizeHighlightIds,
+} from '@/lib/propertyAttributeRegistry';
 
 export interface Property {
   id: string;
@@ -62,6 +67,11 @@ export interface Property {
   negotiation_enabled?: boolean;
   price_per_night?: number;
   seasonal_pricing?: Record<string, unknown>;
+  /** Legal ownership — important for sale listings */
+  ownership_form?: string;
+  pool_type?: string;
+  parking_type?: string;
+  is_for_sale?: boolean;
 }
 
 export interface PropertyProject {
@@ -157,12 +167,33 @@ export interface PropertyRentalTerms {
 export interface PropertyFilters {
   search?: string;
   propertyType?: string;
+  /** Multiple property types (IN query) */
+  propertyTypes?: string[];
   listingType?: string;
   district?: string;
+  /** Multiple districts (IN query) */
+  districts?: string[];
   minPrice?: number;
   maxPrice?: number;
   bedrooms?: string;
+  /** Minimum bedrooms (gte) */
+  minBedrooms?: number;
   amenities?: string[];
+  /** Highlight IDs — overlaps on `highlights` */
+  highlights?: string[];
+  minAreaSqm?: number;
+  maxAreaSqm?: number;
+  minGuests?: number;
+  instantBooking?: boolean;
+  viewTypes?: string[];
+  furnishingLevel?: string;
+  furnishingLevels?: string[];
+  poolType?: string;
+  poolTypes?: string[];
+  parkingType?: string;
+  parkingTypes?: string[];
+  ownershipForm?: string;
+  ownershipForms?: string[];
   managementCompanyId?: string;
 }
 
@@ -175,13 +206,118 @@ const PAGE_SIZE = 20;
 const PROPERTY_LIST_COLUMNS = `
   id, title_en, title_ru, property_type, listing_type,
   price, price_per_night, price_period, currency, bedrooms, bathrooms, area_sqm,
-  max_guests, amenities, images, cover_image, address, district,
+  max_guests, amenities, equipment, images, cover_image, address, district,
   lat, lng, is_active, is_featured, is_verified, instant_booking,
   available_from, min_stay_nights, rating, review_count,
   created_at, updated_at, project_id, floor, unit_number,
   view_type, furnishing_level, highlights, monthly_discount,
-  weekly_discount, management_company_id, sale_price
+  weekly_discount, management_company_id, sale_price,
+  ownership_form, pool_type, parking_type, is_for_sale
 `;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function applyPropertyFiltersToQuery(query: any, filters: PropertyFilters) {
+  if (filters.search) {
+    const s = sanitizeSearchTerm(filters.search);
+    if (s) query = query.or(`title_en.ilike.%${s}%,title_ru.ilike.%${s}%`);
+  }
+
+  const types =
+    filters.propertyTypes?.length ? filters.propertyTypes : filters.propertyType && filters.propertyType !== 'all' ? [filters.propertyType] : [];
+  if (types.length === 1) {
+    query = query.eq('property_type', types[0]);
+  } else if (types.length > 1) {
+    query = query.in('property_type', types);
+  }
+
+  if (filters.listingType && filters.listingType !== 'all') {
+    query = query.eq('listing_type', filters.listingType);
+  }
+
+  const dists = filters.districts?.length ? filters.districts : filters.district ? [filters.district] : [];
+  if (dists.length === 1) {
+    query = query.eq('district', dists[0]);
+  } else if (dists.length > 1) {
+    query = query.in('district', dists);
+  }
+
+  const isSaleListing = filters.listingType === 'sale';
+  if (isSaleListing) {
+    if (filters.minPrice != null) query = query.gte('sale_price', filters.minPrice);
+    if (filters.maxPrice != null) query = query.lte('sale_price', filters.maxPrice);
+  } else {
+    if (filters.minPrice != null) query = query.gte('price_per_night', filters.minPrice);
+    if (filters.maxPrice != null) query = query.lte('price_per_night', filters.maxPrice);
+  }
+
+  if (filters.minBedrooms != null) {
+    query = query.gte('bedrooms', filters.minBedrooms);
+  } else if (filters.bedrooms) {
+    if (filters.bedrooms === '4+') {
+      query = query.gte('bedrooms', 4);
+    } else if (filters.bedrooms === 'studio') {
+      query = query.eq('bedrooms', 0);
+    } else {
+      const n = parseInt(filters.bedrooms, 10);
+      if (!Number.isNaN(n)) query = query.eq('bedrooms', n);
+    }
+  }
+
+  if (filters.amenities?.length) {
+    query = query.contains('amenities', normalizeListingAmenities(filters.amenities));
+  }
+
+  if (filters.highlights?.length) {
+    query = query.overlaps('highlights', normalizeHighlightIds(filters.highlights));
+  }
+
+  if (filters.minAreaSqm != null) query = query.gte('area_sqm', filters.minAreaSqm);
+  if (filters.maxAreaSqm != null) query = query.lte('area_sqm', filters.maxAreaSqm);
+
+  if (filters.minGuests != null) query = query.gte('max_guests', filters.minGuests);
+
+  if (filters.instantBooking) {
+    query = query.eq('instant_booking', true);
+  }
+
+  /** view_type may be text or text[] in DB — ilike matches CSV / single tokens */
+  if (filters.viewTypes?.length) {
+    query = query.or(filters.viewTypes.map((v) => `view_type.ilike.%${v}%`).join(','));
+  }
+
+  const furn = filters.furnishingLevels?.length
+    ? filters.furnishingLevels
+    : filters.furnishingLevel
+      ? [filters.furnishingLevel]
+      : [];
+  if (furn.length === 1) {
+    query = query.eq('furnishing_level', furn[0]);
+  } else if (furn.length > 1) {
+    query = query.in('furnishing_level', furn);
+  }
+
+  const pools = filters.poolTypes?.length ? filters.poolTypes : filters.poolType ? [filters.poolType] : [];
+  if (pools.length === 1) query = query.eq('pool_type', pools[0]);
+  else if (pools.length > 1) query = query.in('pool_type', pools);
+
+  const parks = filters.parkingTypes?.length ? filters.parkingTypes : filters.parkingType ? [filters.parkingType] : [];
+  if (parks.length === 1) query = query.eq('parking_type', parks[0]);
+  else if (parks.length > 1) query = query.in('parking_type', parks);
+
+  const owns = filters.ownershipForms?.length
+    ? filters.ownershipForms
+    : filters.ownershipForm
+      ? [filters.ownershipForm]
+      : [];
+  if (owns.length === 1) query = query.eq('ownership_form', owns[0]);
+  else if (owns.length > 1) query = query.in('ownership_form', owns);
+
+  if (filters.managementCompanyId) {
+    query = query.eq('management_company_id', filters.managementCompanyId);
+  }
+
+  return query;
+}
 
 // Fetch properties with pagination for infinite scroll
 export function usePropertiesInfinite(filters: PropertyFilters = {}) {
@@ -199,44 +335,14 @@ export function usePropertiesInfinite(filters: PropertyFilters = {}) {
         .order('created_at', { ascending: false })
         .range(pageParam * PAGE_SIZE, (pageParam + 1) * PAGE_SIZE - 1);
 
-      // Apply filters
-      if (filters.search) {
-        const s = sanitizeSearchTerm(filters.search);
-        if (s) query = query.or(`title_en.ilike.%${s}%,title_ru.ilike.%${s}%`);
-      }
-      if (filters.propertyType && filters.propertyType !== 'all') {
-        query = query.eq('property_type', filters.propertyType);
-      }
-      if (filters.listingType && filters.listingType !== 'all') {
-        query = query.eq('listing_type', filters.listingType);
-      }
-      if (filters.district) {
-        query = query.eq('district', filters.district);
-      }
-      if (filters.minPrice) {
-        query = query.gte('price', filters.minPrice);
-      }
-      if (filters.maxPrice) {
-        query = query.lte('price', filters.maxPrice);
-      }
-      if (filters.bedrooms) {
-        if (filters.bedrooms === '4+') {
-          query = query.gte('bedrooms', 4);
-        } else if (filters.bedrooms === 'studio') {
-          query = query.eq('bedrooms', 0);
-        } else {
-          query = query.eq('bedrooms', parseInt(filters.bedrooms));
-        }
-      }
-      if (filters.managementCompanyId) {
-        query = query.eq('management_company_id', filters.managementCompanyId);
-      }
+      query = applyPropertyFiltersToQuery(query, filters);
 
       const { data, error } = await query;
       if (error) throw error;
-      
+
+      const rows = (data || []) as unknown as Property[];
       return {
-        properties: (data || []) as unknown as Property[],
+        properties: rows.map((p) => normalizePropertyTaxonomyArrays(p)),
         nextPage: data && data.length === PAGE_SIZE ? pageParam + 1 : undefined,
       };
     },
@@ -261,33 +367,12 @@ export function useProperties(filters: PropertyFilters = {}, limit = 50) {
         .order('created_at', { ascending: false })
         .limit(limit);
 
-      // Apply filters
-      if (filters.search) {
-        const s = sanitizeSearchTerm(filters.search);
-        if (s) query = query.or(`title_en.ilike.%${s}%,title_ru.ilike.%${s}%`);
-      }
-      if (filters.propertyType && filters.propertyType !== 'all') {
-        query = query.eq('property_type', filters.propertyType);
-      }
-      if (filters.listingType && filters.listingType !== 'all') {
-        query = query.eq('listing_type', filters.listingType);
-      }
-      if (filters.district) {
-        query = query.eq('district', filters.district);
-      }
-      if (filters.bedrooms) {
-        if (filters.bedrooms === '4+') {
-          query = query.gte('bedrooms', 4);
-        } else if (filters.bedrooms === 'studio') {
-          query = query.eq('bedrooms', 0);
-        } else {
-          query = query.eq('bedrooms', parseInt(filters.bedrooms));
-        }
-      }
+      query = applyPropertyFiltersToQuery(query, filters);
 
       const { data, error } = await query;
       if (error) throw error;
-      return (data || []) as unknown as Property[];
+      const rows = (data || []) as unknown as Property[];
+      return rows.map((p) => normalizePropertyTaxonomyArrays(p));
     },
   });
 }
@@ -306,7 +391,8 @@ export function useProperty(id?: string) {
         .maybeSingle();
 
       if (error) throw error;
-      return data as unknown as Property | null;
+      if (!data) return null;
+      return normalizePropertyTaxonomyArrays(data as Property) as Property;
     },
     enabled: !!id,
   });
@@ -378,8 +464,9 @@ export function usePropertyWithRentalTerms(marketplacePropertyId?: string) {
         linen_change_frequency: property.linen_change_frequency,
       };
 
+      const base = normalizePropertyTaxonomyArrays(property as Property);
       return {
-        ...property,
+        ...base,
         rentalTerms,
         project: projectData,
       } as unknown as Property & { rentalTerms: PropertyRentalTerms | null; project: PropertyProject | null };
@@ -404,7 +491,8 @@ export function useFeaturedProperties(limit = 6) {
         .limit(limit);
 
       if (error) throw error;
-      return (data || []) as unknown as Property[];
+      const rows = (data || []) as unknown as Property[];
+      return rows.map((p) => normalizePropertyTaxonomyArrays(p));
     },
   });
 }
@@ -424,7 +512,8 @@ export function useInstantBookingProperties(limit = 10) {
         .limit(limit);
 
       if (error) throw error;
-      return (data || []) as unknown as Property[];
+      const rows = (data || []) as unknown as Property[];
+      return rows.map((p) => normalizePropertyTaxonomyArrays(p));
     },
   });
 }
@@ -470,7 +559,8 @@ export function usePropertiesByProject(projectId?: string, limit = 20) {
         .limit(limit);
 
       if (error) throw error;
-      return (data || []) as unknown as Property[];
+      const rows = (data || []) as unknown as Property[];
+      return rows.map((p) => normalizePropertyTaxonomyArrays(p));
     },
     enabled: !!projectId,
   });
@@ -564,17 +654,11 @@ export function usePropertiesForMap(filters: PropertyFilters = {}) {
           district
         `)
         .eq('is_active', true)
+        .eq('approval_status', PUBLIC_CATALOG_APPROVAL_STATUS)
         .not('lat', 'is', null)
         .not('lng', 'is', null);
 
-      // Apply type filter
-      if (filters.propertyType && filters.propertyType !== 'all') {
-        query = query.eq('property_type', filters.propertyType);
-      }
-      // Apply district filter
-      if (filters.district) {
-        query = query.eq('district', filters.district);
-      }
+      query = applyPropertyFiltersToQuery(query, filters);
 
       const { data, error } = await query;
       if (error) throw error;
@@ -587,14 +671,22 @@ export function usePropertiesForMap(filters: PropertyFilters = {}) {
  * Transform PropertyMapItem[] to SalonMarker[] for use in SalonMap component
  */
 export function transformPropertiesToMarkers(properties: PropertyMapItem[]): SalonMarker[] {
-  return properties.map(p => ({
-    id: p.id,
-    name: p.title_en || 'Property',
-    nameRu: p.title_ru || 'Объект',
-    lat: p.lat,
-    lng: p.lng,
-    rating: p.rating || 0,
-    priceFrom: p.price || 0,
-    image: p.cover_image || undefined,
-  }));
+  const out: SalonMarker[] = [];
+  for (const p of properties) {
+    const lat = typeof p.lat === 'number' && !Number.isNaN(p.lat) ? p.lat : Number(p.lat);
+    const lng = typeof p.lng === 'number' && !Number.isNaN(p.lng) ? p.lng : Number(p.lng);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
+    if (Math.abs(lat) < 1e-5 && Math.abs(lng) < 1e-5) continue;
+    out.push({
+      id: p.id,
+      name: p.title_en || 'Property',
+      nameRu: p.title_ru || 'Объект',
+      lat,
+      lng,
+      rating: p.rating || 0,
+      priceFrom: p.price || 0,
+      image: p.cover_image || undefined,
+    });
+  }
+  return out;
 }

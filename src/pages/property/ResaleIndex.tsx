@@ -15,13 +15,9 @@ import { useCurrency } from '@/contexts/CurrencyContext';
 import { useResaleProperties, type ResaleFilters } from '@/hooks/useResaleProperties';
 import { ResalePropertyCard } from '@/components/property/ResalePropertyCard';
 import { cn } from '@/lib/utils';
+import { PHUKET_DISTRICTS } from '@/lib/taxonomies';
 
 type TabFilter = 'all' | 'assignment' | 'ready';
-
-const ZONES = [
-  'Bang Tao', 'Layan', 'Cherng Talay', 'Kamala', 'Patong',
-  'Kata', 'Rawai', 'Nai Harn', 'Chalong', 'Laguna',
-];
 
 const PROPERTY_TYPES = [
   { value: 'condo', labelEn: 'Condo', labelRu: 'Кондо' },
@@ -114,8 +110,10 @@ export default function ResaleIndex() {
                   <Select value={zone} onValueChange={setZone}>
                     <SelectTrigger><SelectValue placeholder={isRu ? 'Все районы' : 'All zones'} /></SelectTrigger>
                     <SelectContent>
-                      {ZONES.map(z => (
-                        <SelectItem key={z} value={z}>{z}</SelectItem>
+                      {PHUKET_DISTRICTS.map((d) => (
+                        <SelectItem key={d.id} value={d.labelEn}>
+                          {isRu ? d.labelRu : d.labelEn}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>

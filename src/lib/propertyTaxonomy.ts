@@ -5,6 +5,15 @@
  * @description Static property taxonomy data for Phuket real estate
  */
 
+import {
+  normalizeListingAmenityId,
+  normalizeListingAmenities,
+  normalizeHighlightId,
+  LISTING_AMENITY_UI_GROUPS,
+  HIGHLIGHT_UI_ITEMS,
+  ALL_LISTING_AMENITY_UI_ITEMS,
+} from '@/lib/propertyAttributeRegistry';
+
 // ============= PROPERTY TYPES =============
 export const PROPERTY_TYPES = [
   { id: 'villa', labelEn: 'Villa', labelRu: 'Вилла', icon: '🏡', popular: true },
@@ -65,76 +74,10 @@ export const LISTING_TYPES = [
 ] as const;
 
 // ============= AMENITIES =============
-export const PROPERTY_AMENITIES = {
-  // Essential - самые популярные
-  essentials: [
-    { id: 'wifi', labelEn: 'WiFi', labelRu: 'WiFi', icon: '📶' },
-    { id: 'ac', labelEn: 'Air Conditioning', labelRu: 'Кондиционер', icon: '❄️' },
-    { id: 'pool', labelEn: 'Pool', labelRu: 'Бассейн', icon: '🏊' },
-    { id: 'parking', labelEn: 'Parking', labelRu: 'Парковка', icon: '🅿️' },
-    { id: 'kitchen', labelEn: 'Full Kitchen', labelRu: 'Полная кухня', icon: '🍳' },
-  ],
-  // Views - важно для Пхукета
-  views: [
-    { id: 'sea-view', labelEn: 'Sea View', labelRu: 'Вид на море', icon: '🌊' },
-    { id: 'ocean-view', labelEn: 'Ocean View', labelRu: 'Вид на океан', icon: '🌅' },
-    { id: 'mountain-view', labelEn: 'Mountain View', labelRu: 'Вид на горы', icon: '⛰️' },
-    { id: 'pool-view', labelEn: 'Pool View', labelRu: 'Вид на бассейн', icon: '🏊' },
-    { id: 'garden-view', labelEn: 'Garden View', labelRu: 'Вид на сад', icon: '🌳' },
-  ],
-  // Location features
-  location: [
-    { id: 'beachfront', labelEn: 'Beachfront', labelRu: 'На пляже', icon: '🏖️' },
-    { id: 'beach-access', labelEn: 'Beach Access', labelRu: 'Доступ к пляжу', icon: '🌴' },
-    { id: 'city-center', labelEn: 'City Center', labelRu: 'Центр города', icon: '🏙️' },
-    { id: 'quiet-area', labelEn: 'Quiet Area', labelRu: 'Тихий район', icon: '🌿' },
-  ],
-  // Comfort
-  comfort: [
-    { id: 'furnished', labelEn: 'Fully Furnished', labelRu: 'С мебелью', icon: '🛋️' },
-    { id: 'washer', labelEn: 'Washer', labelRu: 'Стиральная машина', icon: '🧺' },
-    { id: 'dryer', labelEn: 'Dryer', labelRu: 'Сушилка', icon: '🌀' },
-    { id: 'smart-home', labelEn: 'Smart Home', labelRu: 'Умный дом', icon: '🏠' },
-    { id: 'bathtub', labelEn: 'Bathtub', labelRu: 'Ванна', icon: '🛁' },
-    { id: 'balcony', labelEn: 'Balcony', labelRu: 'Балкон', icon: '🌅' },
-    { id: 'terrace', labelEn: 'Terrace', labelRu: 'Терраса', icon: '🏡' },
-  ],
-  // Recreation
-  recreation: [
-    { id: 'gym', labelEn: 'Gym', labelRu: 'Тренажёрный зал', icon: '🏋️' },
-    { id: 'jacuzzi', labelEn: 'Jacuzzi', labelRu: 'Джакузи', icon: '🛁' },
-    { id: 'sauna', labelEn: 'Sauna', labelRu: 'Сауна', icon: '🧖' },
-    { id: 'garden', labelEn: 'Garden', labelRu: 'Сад', icon: '🌳' },
-    { id: 'rooftop', labelEn: 'Rooftop', labelRu: 'Терраса на крыше', icon: '🌅' },
-    { id: 'bbq', labelEn: 'BBQ Area', labelRu: 'Зона барбекю', icon: '🍖' },
-  ],
-  // Security
-  security: [
-    { id: 'security-24h', labelEn: '24h Security', labelRu: 'Охрана 24ч', icon: '🔒' },
-    { id: 'cctv', labelEn: 'CCTV', labelRu: 'Видеонаблюдение', icon: '📹' },
-    { id: 'gated', labelEn: 'Gated Community', labelRu: 'Закрытый посёлок', icon: '🚧' },
-    { id: 'safe', labelEn: 'Safe Box', labelRu: 'Сейф', icon: '🔐' },
-  ],
-  // Family
-  family: [
-    { id: 'pet-friendly', labelEn: 'Pet Friendly', labelRu: 'Можно с питомцами', icon: '🐕' },
-    { id: 'kids-pool', labelEn: 'Kids Pool', labelRu: 'Детский бассейн', icon: '👶' },
-    { id: 'playground', labelEn: 'Playground', labelRu: 'Детская площадка', icon: '🎠' },
-    { id: 'crib', labelEn: 'Crib', labelRu: 'Детская кроватка', icon: '🛏️' },
-    { id: 'high-chair', labelEn: 'High Chair', labelRu: 'Детский стульчик', icon: '🪑' },
-  ],
-} as const;
+/** Canonical IDs are snake_case — source: propertyAttributeRegistry (LISTING_AMENITY_UI_GROUPS) */
+export const PROPERTY_AMENITIES = LISTING_AMENITY_UI_GROUPS;
 
-// Flat list of all amenities for filters
-export const ALL_AMENITIES = [
-  ...PROPERTY_AMENITIES.essentials,
-  ...PROPERTY_AMENITIES.views,
-  ...PROPERTY_AMENITIES.location,
-  ...PROPERTY_AMENITIES.comfort,
-  ...PROPERTY_AMENITIES.recreation,
-  ...PROPERTY_AMENITIES.security,
-  ...PROPERTY_AMENITIES.family,
-];
+export const ALL_AMENITIES = [...ALL_LISTING_AMENITY_UI_ITEMS];
 
 // ============= INCLUDED SERVICES (что входит в стоимость) =============
 export const INCLUDED_SERVICES = [
@@ -175,25 +118,7 @@ export const EXTRA_SERVICES = [
 ] as const;
 
 // ============= PROPERTY HIGHLIGHTS (USP для карточек) =============
-export const PROPERTY_HIGHLIGHTS = [
-  // Location
-  { id: 'beach_close', labelEn: 'Near Beach', labelRu: 'У пляжа', icon: '🏖️', category: 'location' },
-  { id: 'beachfront', labelEn: 'Beachfront', labelRu: 'На пляже', icon: '🌊', category: 'location' },
-  { id: 'city_center', labelEn: 'City Center', labelRu: 'Центр города', icon: '🏙️', category: 'location' },
-  // Views
-  { id: 'sea_view', labelEn: 'Sea View', labelRu: 'Вид на море', icon: '🌊', category: 'view' },
-  { id: 'ocean_view', labelEn: 'Ocean View', labelRu: 'Вид на океан', icon: '🌅', category: 'view' },
-  { id: 'amazing_view', labelEn: 'Amazing View', labelRu: 'Отличный вид', icon: '👀', category: 'view' },
-  // Amenities
-  { id: 'private_pool', labelEn: 'Private Pool', labelRu: 'Частный бассейн', icon: '🏊', category: 'amenity' },
-  { id: 'infinity_pool', labelEn: 'Infinity Pool', labelRu: 'Инфинити бассейн', icon: '♾️', category: 'amenity' },
-  { id: 'fast_wifi', labelEn: 'Fast WiFi', labelRu: 'Быстрый WiFi', icon: '📶', category: 'amenity' },
-  { id: 'luxury', labelEn: 'Luxury', labelRu: 'Люкс', icon: '✨', category: 'amenity' },
-  // Trust
-  { id: 'superhost', labelEn: 'Superhost', labelRu: 'Суперхост', icon: '🏆', category: 'trust' },
-  { id: 'verified', labelEn: 'Verified', labelRu: 'Проверено', icon: '✅', category: 'trust' },
-  { id: 'instant_book', labelEn: 'Instant Book', labelRu: 'Мгновенное бронирование', icon: '⚡', category: 'trust' },
-] as const;
+export const PROPERTY_HIGHLIGHTS = HIGHLIGHT_UI_ITEMS;
 
 // ============= VIEW TYPES =============
 export const VIEW_TYPES = [
@@ -286,86 +211,6 @@ export const HOUSE_RULES_PRESETS = [
   { id: 'trash_rules', labelEn: 'Take out trash before checkout', labelRu: 'Вынести мусор перед выездом', icon: '🗑️', default: false },
 ] as const;
 
-// ============= NORMALIZATION ALIASES =============
-// Map legacy/variant keys to canonical keys
-
-const AMENITY_ALIASES: Record<string, string> = {
-  // Air conditioning variants
-  'ac': 'air-conditioning',
-  'air_conditioning': 'air-conditioning',
-  'aircon': 'air-conditioning',
-  'a/c': 'air-conditioning',
-  'Air Conditioning': 'air-conditioning',
-  'AC': 'air-conditioning',
-  // View variants
-  'sea_view': 'sea-view',
-  'seaview': 'sea-view',
-  'Sea View': 'sea-view',
-  'ocean_view': 'ocean-view',
-  'oceanview': 'ocean-view',
-  'Ocean View': 'ocean-view',
-  'mountain_view': 'mountain-view',
-  'Mountain View': 'mountain-view',
-  'pool_view': 'pool-view',
-  'Pool View': 'pool-view',
-  'garden_view': 'garden-view',
-  'Garden View': 'garden-view',
-  // Pet variants
-  'pets': 'pet-friendly',
-  'pets_allowed': 'pet-friendly',
-  'Pets Allowed': 'pet-friendly',
-  // Beach variants
-  'beach': 'beach-access',
-  'beach_access': 'beach-access',
-  'Beach Access': 'beach-access',
-  // Security variants
-  'security': 'security-24h',
-  '24h_security': 'security-24h',
-  '24/7 Security': 'security-24h',
-  // Other common variants
-  'Pool': 'pool',
-  'WiFi': 'wifi',
-  'Wifi': 'wifi',
-  'WIFI': 'wifi',
-  'Gym': 'gym',
-  'Parking': 'parking',
-  'Kitchen': 'kitchen',
-  'Balcony': 'balcony',
-  'Garden': 'garden',
-  'Sauna': 'sauna',
-  'Jacuzzi': 'jacuzzi',
-  'Washer': 'washer',
-  'Dryer': 'dryer',
-  'Smart Home': 'smart-home',
-  'smart_home': 'smart-home',
-  'Bathtub': 'bathtub',
-  'Terrace': 'terrace',
-  'BBQ': 'bbq',
-  'bbq_area': 'bbq',
-  'Rooftop': 'rooftop',
-  'CCTV': 'cctv',
-  'Safe': 'safe',
-  'safe_box': 'safe',
-  'Kids Pool': 'kids-pool',
-  'kids_pool': 'kids-pool',
-  'Playground': 'playground',
-  'Crib': 'crib',
-  'High Chair': 'high-chair',
-  'high_chair': 'high-chair',
-  // Furnished variants
-  'Fully Furnished': 'furnished',
-  'fully_furnished': 'furnished',
-  // Location variants
-  'Beachfront': 'beachfront',
-  'City Center': 'city-center',
-  'city_center': 'city-center',
-  'Quiet Area': 'quiet-area',
-  'quiet_area': 'quiet-area',
-  // Gated community
-  'Gated Community': 'gated',
-  'gated_community': 'gated',
-};
-
 const DISTRICT_ALIASES: Record<string, string> = {
   // Case normalization
   'Patong': 'patong',
@@ -444,14 +289,10 @@ const PROPERTY_TYPE_ALIASES: Record<string, string> = {
 // ============= NORMALIZATION FUNCTIONS =============
 
 /**
- * Normalize amenity ID to canonical format
- * @example normalizeAmenityId('ac') => 'air-conditioning'
- * @example normalizeAmenityId('sea_view') => 'sea-view'
+ * Normalize amenity ID to canonical snake_case (see propertyAttributeRegistry)
  */
 export function normalizeAmenityId(id: string): string {
-  if (!id) return '';
-  const trimmed = id.trim();
-  return AMENITY_ALIASES[trimmed] || trimmed.toLowerCase().replace(/_/g, '-');
+  return normalizeListingAmenityId(id);
 }
 
 /**
@@ -459,7 +300,7 @@ export function normalizeAmenityId(id: string): string {
  */
 export function normalizeAmenities(amenities: string[]): string[] {
   if (!amenities || !Array.isArray(amenities)) return [];
-  return [...new Set(amenities.map(normalizeAmenityId).filter(Boolean))];
+  return normalizeListingAmenities(amenities);
 }
 
 /**
@@ -552,7 +393,8 @@ export function getExtraServiceLabel(id: string, lang: 'en' | 'ru' = 'en'): stri
 }
 
 export function getHighlightLabel(id: string, lang: 'en' | 'ru' = 'en'): string {
-  const highlight = PROPERTY_HIGHLIGHTS.find(h => h.id === id);
+  const normalized = normalizeHighlightId(id);
+  const highlight = PROPERTY_HIGHLIGHTS.find(h => h.id === normalized);
   return highlight ? (lang === 'ru' ? highlight.labelRu : highlight.labelEn) : id;
 }
 

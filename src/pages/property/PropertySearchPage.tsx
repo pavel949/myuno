@@ -23,7 +23,9 @@ import { PropertyMode } from '@/components/property/PropertyCategoryRibbon';
 import { matchesCategory } from '@/components/property/PropertyCategoryIcons';
 import { applyQuickFilters } from '@/hooks/usePropertyQuickFilters';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { normalizeForFilter } from '@/lib/filterUtils';
+import { filterValuesToPropertyFilters, mergeSearchBarIntoFilterValues } from '@/lib/propertyCatalogServerFilters';
+import { comparePropertiesForSort } from '@/lib/propertySortPrice';
+import type { PropertyFilters } from '@/hooks/useProperties';
 import { CrossSellSection } from '@/components/crosssell';
 import { PropertySortSelect, PropertySortKey } from '@/components/property/PropertySortSelect';
 import { VerticalCTA } from '@/components/leads/VerticalCTA';
@@ -93,17 +95,38 @@ export default function PropertySearchPage() {
   const { filterConfig, propertyTypes } = usePropertyFilterOptions();
   const { data: companies = [] } = useManagementCompanies();
 
+  const listingCatalogType = propertyMode === 'buy' ? 'sale' : 'rent';
+
+  const mergedFilterValues = useMemo(
+    () => mergeSearchBarIntoFilterValues(filterValues, searchParams),
+    [filterValues, searchParams]
+  );
+
+  const serverFilters = useMemo((): PropertyFilters => {
+    const base = filterValuesToPropertyFilters(mergedFilterValues, {
+      listingType: listingCatalogType,
+      minGuestsFromSearch: searchParams.guests,
+      instantBookingFromSearch: searchParams.instantBooking,
+    });
+    return {
+      ...base,
+      managementCompanyId: selectedCompanyId || undefined,
+    };
+  }, [
+    mergedFilterValues,
+    listingCatalogType,
+    searchParams.guests,
+    searchParams.instantBooking,
+    selectedCompanyId,
+  ]);
+
   const {
     data: infiniteData,
     isLoading,
     isFetchingNextPage,
     hasNextPage,
     fetchNextPage,
-  } = usePropertiesInfinite({
-    listingType: propertyMode === 'buy' ? 'sale' : 'rent',
-    propertyType: searchParams.propertyTypes.length === 1 ? searchParams.propertyTypes[0] : undefined,
-    managementCompanyId: selectedCompanyId || undefined,
-  });
+  } = usePropertiesInfinite(serverFilters);
 
   const companyMap = useMemo(() => {
     const map = new Map<string, { name: string; slug: string }>();
@@ -127,85 +150,29 @@ export default function PropertySearchPage() {
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const properties = useMemo(() => {
-    const allItems = infiniteData?.pages.flatMap(p => p.properties) || [];
+    const allItems = infiniteData?.pages.flatMap((p) => p.properties) || [];
 
-    const filtered = allItems.filter(prop => {
-      // Category icons filter (Airbnb-style ribbon)
+    const filtered = allItems.filter((prop) => {
       if (categoryFilters.length > 0) {
-        if (!categoryFilters.every(cat => matchesCategory(prop, cat))) return false;
+        if (!categoryFilters.every((cat) => matchesCategory(prop, cat))) return false;
       }
 
-      // Amenities from search bar (category-style AND-logic)
+      // Search-bar detail chips — taxonomy/category matching (not always DB amenity keys)
       if (searchParams.amenities.length > 0) {
-        if (!searchParams.amenities.every(cat => matchesCategory(prop, cat))) return false;
+        if (!searchParams.amenities.every((cat) => matchesCategory(prop, cat))) return false;
       }
 
-      // Instant book
-      if (searchParams.instantBooking && !prop.instant_booking) return false;
-
-      // Multi-type filter
-      if (searchParams.propertyTypes.length > 0) {
-        const propType = (prop.property_type || '').toLowerCase();
-        if (!searchParams.propertyTypes.some(t => propType.includes(t.toLowerCase()))) return false;
-      }
-
-      // Location
-      const matchesLocation = searchParams.locations.length === 0 ||
-        searchParams.locations.some(loc => prop.district?.toLowerCase().includes(loc.toLowerCase()));
-
-      // Guests
-      const matchesGuests = !searchParams.guests || (prop.max_guests || 0) >= searchParams.guests;
-
-      // Bedrooms
-      const bedroomsToCheck = searchParams.bedrooms.length > 0
-        ? searchParams.bedrooms
-        : (filterValues.bedrooms
-            ? (Array.isArray(filterValues.bedrooms) ? filterValues.bedrooms as string[] : [filterValues.bedrooms as string])
-            : []);
-
-      if (bedroomsToCheck.length > 0) {
-        const propBedrooms = prop.bedrooms ?? 0;
-        const minBedrooms = Math.max(...bedroomsToCheck.map(f => parseInt(f) || 0));
-        if (propBedrooms < minBedrooms) return false;
-      }
-
-      // Districts from universal filter
-      const districtsFromFilter = filterValues.district
-        ? (Array.isArray(filterValues.district) ? filterValues.district as string[] : [filterValues.district as string])
-        : [];
-
-      if (districtsFromFilter.length > 0) {
-        const normalizedDistricts = districtsFromFilter.map(d => normalizeForFilter(d));
-        const propDistrict = normalizeForFilter(prop.district || '');
-        const matchesDistrict = normalizedDistricts.some(d => propDistrict.includes(d) || d.includes(propDistrict));
-        if (!matchesDistrict) return false;
-      }
-
-      // Amenities from universal filter
-      const amenitiesFromFilter = filterValues.amenities
-        ? (Array.isArray(filterValues.amenities) ? filterValues.amenities as string[] : [filterValues.amenities as string])
-        : [];
-      if (amenitiesFromFilter.length > 0) {
-        const propAmenities = (prop.amenities || []).map(a => a.toLowerCase());
-        if (!amenitiesFromFilter.every(f => propAmenities.some(a => a.includes(f.toLowerCase())))) return false;
-      }
-
-      return matchesLocation && matchesGuests;
+      return true;
     }) as unknown as Property[];
 
     const quickFiltered = applyQuickFilters(filtered, quickFilters, null);
 
+    const sortMode = propertyMode === 'buy' ? 'buy' : 'rent';
     const sorted = [...quickFiltered];
-    switch (sortKey) {
-      case 'price_asc': sorted.sort((a, b) => (a.price || 0) - (b.price || 0)); break;
-      case 'price_desc': sorted.sort((a, b) => (b.price || 0) - (a.price || 0)); break;
-      case 'rating': sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0)); break;
-      case 'newest': sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()); break;
-      default: break;
-    }
+    sorted.sort((a, b) => comparePropertiesForSort(a, b, sortKey, sortMode));
 
     return sorted;
-  }, [infiniteData, searchParams, filterValues, quickFilters, sortKey, categoryFilters]);
+  }, [infiniteData, searchParams, quickFilters, sortKey, categoryFilters, propertyMode]);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;

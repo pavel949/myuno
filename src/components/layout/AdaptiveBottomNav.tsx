@@ -1,7 +1,7 @@
-import React, { forwardRef, useCallback, useState } from 'react';
+import React, { forwardRef, useCallback, useEffect, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { APP_ROUTES } from '@/lib/config/routes';
-import { 
+import {
   Home, Compass, ShoppingBag, User, LayoutDashboard, Building2,
   CalendarDays, Calendar, Package, Wallet, UserCheck, MessageSquare,
   FileCheck, Plus, Users, MessageCircle, LayoutGrid
@@ -24,7 +24,7 @@ type NavItem = {
 
 const guestNavItems: NavItem[] = [
   { path: APP_ROUTES.HOME, icon: Home, labelEn: 'Home', labelRu: 'Главная' },
-  { path: APP_ROUTES.DISCOVER, icon: Compass, labelEn: 'Discover', labelRu: 'Навигатор' },
+  { path: APP_ROUTES.DISCOVER, icon: Compass, labelEn: 'Navigator', labelRu: 'Навигатор' },
   { path: APP_ROUTES.MARKET, icon: ShoppingBag, labelEn: 'Market', labelRu: 'Маркет' },
   { path: APP_ROUTES.ACCOUNT, icon: User, labelEn: 'Me', labelRu: 'Профиль' },
 ];
@@ -72,7 +72,6 @@ const detailPrefixes = [
 
 function shouldHideBottomNav(pathname: string): boolean {
   if (layoutsWithOwnNav.some(prefix => pathname.startsWith(prefix))) return true;
-  // /property exact → show nav; /property/* sub-pages → hide
   if (pathname.startsWith('/property/')) return true;
   return detailPrefixes.some(prefix => pathname.startsWith(prefix));
 }
@@ -99,6 +98,13 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
     const handlePrefetch = useCallback((path: string) => {
       prefetchRoute(path);
     }, [prefetchRoute]);
+
+    // Listen for the Navigator page "All services →" button event
+    useEffect(() => {
+      const handler = () => setAppsOpen(true);
+      window.addEventListener('navigator:open-apps-drawer', handler);
+      return () => window.removeEventListener('navigator:open-apps-drawer', handler);
+    }, []);
 
     if (shouldHideBottomNav(location.pathname)) return null;
 
@@ -141,9 +147,10 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
             }}
           />
 
-          <div className={cn("relative grid gap-0 h-16 px-2 max-w-[420px] mx-auto", gridCols)}>
+          <div className={cn("relative grid gap-0 h-[60px] px-2 max-w-[420px] mx-auto", gridCols)}>
             {leftItems.map(({ path, icon: Icon, labelEn, labelRu }) => {
               const active = isActive(path);
+              const label = language === 'ru' ? labelRu : labelEn;
               return (
                 <NavLink
                   key={path}
@@ -151,25 +158,23 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
                   onClick={handleNavClick}
                   onMouseEnter={() => handlePrefetch(path)}
                   onTouchStart={() => handlePrefetch(path)}
-                  className="flex flex-col items-center justify-center relative"
+                  className="flex flex-col items-center justify-center gap-[3px] relative pt-1"
                 >
-                  {/* Pill indicator */}
                   {active && (
-                    <div
-                      className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-[3px] rounded-full bg-primary"
-                    />
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-[3px] rounded-full bg-primary" />
                   )}
                   <div className={cn(
-                    "transition-all duration-200 mb-0.5",
-                    active ? "text-primary scale-110" : "text-muted-foreground"
+                    'transition-all duration-200',
+                    active ? 'text-primary scale-110' : 'text-muted-foreground',
                   )}>
-                    <Icon className="w-[22px] h-[22px]" />
+                    <Icon className="w-[20px] h-[20px]" />
                   </div>
-                  {active && (
-                    <span className="text-[10px] font-semibold text-primary">
-                      {language === 'ru' ? labelRu : labelEn}
-                    </span>
-                  )}
+                  <span className={cn(
+                    'text-[10px] leading-none',
+                    active ? 'font-semibold text-primary' : 'font-medium text-muted-foreground/60',
+                  )}>
+                    {label}
+                  </span>
                 </NavLink>
               );
             })}
@@ -177,10 +182,10 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
             {showAppsButton && (
               <button
                 onClick={(e) => { handleNavClick(e); setAppsOpen(true); }}
-                className="flex flex-col items-center justify-center"
+                className="flex flex-col items-center justify-center gap-[3px] pt-1"
               >
                 <div
-                  className="w-11 h-11 rounded-2xl flex items-center justify-center -mt-1"
+                  className="w-10 h-10 rounded-2xl flex items-center justify-center"
                   style={{
                     background: 'hsl(var(--primary) / 0.12)',
                     border: '1px solid hsl(var(--primary) / 0.25)',
@@ -188,7 +193,7 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
                 >
                   <LayoutGrid className="w-5 h-5 text-primary" />
                 </div>
-                <span className="text-[10px] font-medium text-muted-foreground whitespace-nowrap -mt-0.5">
+                <span className="text-[10px] font-medium text-muted-foreground/60 leading-none">
                   {language === 'ru' ? 'Сервисы' : 'Apps'}
                 </span>
               </button>
@@ -196,6 +201,7 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
 
             {rightItems.map(({ path, icon: Icon, labelEn, labelRu }) => {
               const active = isActive(path);
+              const label = language === 'ru' ? labelRu : labelEn;
               return (
                 <NavLink
                   key={path}
@@ -203,24 +209,23 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
                   onClick={handleNavClick}
                   onMouseEnter={() => handlePrefetch(path)}
                   onTouchStart={() => handlePrefetch(path)}
-                  className="flex flex-col items-center justify-center relative"
+                  className="flex flex-col items-center justify-center gap-[3px] relative pt-1"
                 >
                   {active && (
-                    <div
-                      className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-[3px] rounded-full bg-primary"
-                    />
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-[3px] rounded-full bg-primary" />
                   )}
                   <div className={cn(
-                    "transition-all duration-200 mb-0.5",
-                    active ? "text-primary scale-110" : "text-muted-foreground"
+                    'transition-all duration-200',
+                    active ? 'text-primary scale-110' : 'text-muted-foreground',
                   )}>
-                    <Icon className="w-[22px] h-[22px]" />
+                    <Icon className="w-[20px] h-[20px]" />
                   </div>
-                  {active && (
-                    <span className="text-[10px] font-semibold text-primary">
-                      {language === 'ru' ? labelRu : labelEn}
-                    </span>
-                  )}
+                  <span className={cn(
+                    'text-[10px] leading-none',
+                    active ? 'font-semibold text-primary' : 'font-medium text-muted-foreground/60',
+                  )}>
+                    {label}
+                  </span>
                 </NavLink>
               );
             })}

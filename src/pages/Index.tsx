@@ -25,6 +25,7 @@ import { TrustStats } from '@/components/home/TrustStats';
 import { PostOrderReviewPrompt } from '@/components/reviews/PostOrderReviewPrompt';
 import { usePostOrderReview } from '@/hooks/usePostOrderReview';
 import { PropertyTourBanner } from '@/components/home/PropertyTourBanner';
+import { HomeDiscoveryCarousel } from '@/components/home/HomeDiscoveryCarousel';
 import { DocumentExpiryNotifier } from '@/components/notifications/DocumentExpiryNotifier';
 import { useIsDesktop } from '@/hooks/use-desktop';
 import { useAuth } from '@/contexts/AuthContext';
@@ -107,6 +108,13 @@ const Index = () => {
           {showPropertySections && (
             <RevealOnScroll>
               <PropertyTourBanner />
+            </RevealOnScroll>
+          )}
+
+          {/* ── DISCOVERY: restaurants, events, home services (all users) ── */}
+          {showPropertySections && (
+            <RevealOnScroll>
+              <HomeDiscoveryCarousel />
             </RevealOnScroll>
           )}
 

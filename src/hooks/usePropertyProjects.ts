@@ -4,6 +4,14 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import type { ProjectLifecycleStatus } from '@/lib/real-estate/canonicalModel';
 import { applyProjectCatalogFilters, applyProjectCatalogSort, createProjectCatalogQuery } from './projectCatalogQuery';
+import { normalizeProjectFacilityIds } from '@/lib/propertyAttributeRegistry';
+
+function withNormalizedProjectAmenities<T extends { amenities?: string[] | null }>(row: T): T {
+  if (!row) return row;
+  const amenities = row.amenities;
+  if (!Array.isArray(amenities) || amenities.length === 0) return row;
+  return { ...row, amenities: normalizeProjectFacilityIds(amenities) };
+}
 
 export type ProjectStatus = ProjectLifecycleStatus;
 
@@ -76,7 +84,7 @@ export function usePropertyProjects() {
       const { data, error } = await query;
 
       if (error) throw error;
-      return data as PropertyProject[];
+      return (data as PropertyProject[]).map((p) => withNormalizedProjectAmenities(p));
     },
   });
 }
@@ -92,7 +100,7 @@ export function useAdminPropertyProjects() {
       );
 
       if (error) throw error;
-      return data as PropertyProject[];
+      return (data as PropertyProject[]).map((p) => withNormalizedProjectAmenities(p));
     },
   });
 }
@@ -110,7 +118,7 @@ export function usePropertyProject(id?: string) {
         .single();
 
       if (error) throw error;
-      return data as PropertyProject;
+      return withNormalizedProjectAmenities(data as PropertyProject);
     },
     enabled: !!id,
   });

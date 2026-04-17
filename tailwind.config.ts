@@ -23,9 +23,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['DM Sans', 'sans-serif'],
-        display: ['Syne', 'sans-serif'],
-        serif: ['Syne', 'sans-serif'],
+        sans: ['DM Sans', 'Sarabun', 'sans-serif'],
+        display: ['Golos Text', 'sans-serif'],
+        serif: ['Playfair Display', 'Georgia', 'serif'],
         mono: ['JetBrains Mono', 'monospace'],
       },
       colors: {

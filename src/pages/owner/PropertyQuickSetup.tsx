@@ -36,6 +36,7 @@ const CANCELLATION_POLICIES = [
   { value: 'flexible', labelEn: 'Flexible (24h)', labelRu: 'Гибкая (24ч)' },
   { value: 'moderate', labelEn: 'Moderate (5 days)', labelRu: 'Умеренная (5 дней)' },
   { value: 'strict', labelEn: 'Strict (1 week)', labelRu: 'Строгая (1 неделя)' },
+  { value: 'super_strict', labelEn: 'Super Strict (30 days)', labelRu: 'Очень строгая (30 дней)' },
   { value: 'non_refundable', labelEn: 'Non-refundable', labelRu: 'Без возврата' },
 ];
 

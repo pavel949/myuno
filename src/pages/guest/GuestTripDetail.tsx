@@ -360,6 +360,8 @@ export default function GuestTripDetail() {
             <MessageHostButton
               propertyId={property?.id || ''}
               propertyTitle={isRu ? property?.title_ru : property?.title}
+              labelRu="Написать хозяину"
+              labelEn="Message host"
               variant="outline"
               fullWidth
             />

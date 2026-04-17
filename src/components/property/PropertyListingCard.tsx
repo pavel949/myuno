@@ -12,7 +12,8 @@ import { FavoriteButton } from '@/components/uno/FavoriteButton';
 import { PropertyImageCarousel } from './PropertyImageCarousel';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
-import { getDistrictLabel, getPropertyTypeLabel } from '@/lib/taxonomies';
+import { getDistrictLabel, getPropertyTypeLabel, getHighlightLabel, getViewTypeLabel } from '@/lib/taxonomies';
+import { normalizeViewTypes } from '@/lib/propertyFormNormalizers';
 import { cn } from '@/lib/utils';
 import { surfaceFromProperty } from '@/lib/real-estate/listingViewModel';
 import type { Property } from '@/hooks/useProperties';
@@ -61,6 +62,18 @@ export function PropertyListingCard({
   const surface = useMemo(() => surfaceFromProperty(property, mode), [property, mode]);
   const title = isRu ? surface.titleRu : surface.titleEn;
   const images = property.images?.length ? property.images : [property.cover_image || FALLBACK_IMAGE];
+
+  const viewIds = useMemo(() => normalizeViewTypes(property.view_type), [property.view_type]);
+  const primaryViewLabel =
+    viewIds.length > 0 ? getViewTypeLabel(viewIds[0], isRu ? 'ru' : 'en') : null;
+
+  const highlightChips = useMemo(() => {
+    const ids = (property.highlights || []).filter(Boolean).slice(0, 3);
+    return ids.map((id) => ({
+      id,
+      label: getHighlightLabel(id, isRu ? 'ru' : 'en'),
+    }));
+  }, [property.highlights, isRu]);
 
   // Format district using taxonomy for proper capitalization & localization
   const districtDisplay = property.district
@@ -115,6 +128,11 @@ export function PropertyListingCard({
               {isRu ? 'Популярное' : 'Guest favorite'}
             </Badge>
           )}
+          {primaryViewLabel && (
+            <Badge className="bg-background/90 text-foreground border-0 shadow-sm text-[10px] font-medium px-2 py-0.5 rounded-full max-w-[140px] truncate">
+              {primaryViewLabel}
+            </Badge>
+          )}
           {property.instant_booking && (
             <Badge className="bg-accent-amber text-white border-0 text-[11px] gap-1 rounded-full px-2 py-0.5">
               <Zap className="w-3 h-3" />
@@ -152,10 +170,26 @@ export function PropertyListingCard({
           {property.bathrooms != null && property.bathrooms > 0 && (
             <span className="hidden sm:inline"> · {property.bathrooms} {isRu ? (property.bathrooms === 1 ? 'ванная' : 'ванных') : (property.bathrooms === 1 ? 'bath' : 'baths')}</span>
           )}
+          {property.area_sqm != null && property.area_sqm > 0 && (
+            <span> · {Math.round(property.area_sqm)} m²</span>
+          )}
           {property.max_guests != null && property.max_guests > 0 && (
             <span className="hidden sm:inline"> · {isRu ? `до ${property.max_guests} гостей` : `up to ${property.max_guests} guests`}</span>
           )}
         </p>
+
+        {highlightChips.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-1">
+            {highlightChips.map((h) => (
+              <span
+                key={h.id}
+                className="text-[10px] sm:text-[11px] px-1.5 py-0.5 rounded-md bg-muted/80 text-muted-foreground line-clamp-1 max-w-full"
+              >
+                {h.label}
+              </span>
+            ))}
+          </div>
+        )}
 
         {/* Row 3: Price */}
         <div className="pt-0.5 sm:pt-1">

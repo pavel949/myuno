@@ -34,6 +34,8 @@ export const ReviewsSection = ({
   showStats = true,
 }: ReviewsSectionProps) => {
   const { language } = useLanguage();
+  /** Sort/filter labels are RU/EN only; fall back to EN for Thai and other locales */
+  const labelLang = language === 'ru' ? 'ru' : 'en';
   const { user } = useAuth();
   const { reviews, isLoading, stats, refetch } = useReviews({ itemType, itemId });
   
@@ -182,7 +184,7 @@ export const ReviewsSection = ({
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="gap-1">
                 <TrendingUp className="w-4 h-4" />
-                {sortLabels[sortBy][language]}
+                {sortLabels[sortBy][labelLang]}
                 <ChevronDown className="w-3 h-3" />
               </Button>
             </DropdownMenuTrigger>
@@ -193,7 +195,7 @@ export const ReviewsSection = ({
                   onClick={() => setSortBy(option)}
                   className={sortBy === option ? 'bg-accent' : ''}
                 >
-                  {sortLabels[option][language]}
+                  {sortLabels[option][labelLang]}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
@@ -204,7 +206,7 @@ export const ReviewsSection = ({
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="gap-1">
                 <Filter className="w-4 h-4" />
-                {filterLabels[filterBy][language]}
+                {filterLabels[filterBy][labelLang]}
                 <ChevronDown className="w-3 h-3" />
               </Button>
             </DropdownMenuTrigger>
@@ -215,7 +217,7 @@ export const ReviewsSection = ({
                   onClick={() => setFilterBy(option)}
                   className={filterBy === option ? 'bg-accent' : ''}
                 >
-                  {filterLabels[option][language]}
+                  {filterLabels[option][labelLang]}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>

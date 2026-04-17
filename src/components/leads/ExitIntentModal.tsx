@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, memo } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Sparkles, Shield, Clock, Gift } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -134,21 +135,28 @@ export const ExitIntentModal = memo(function ExitIntentModal({
 
   const c = content[vertical];
 
-  return (
+  /** Portal to body: ancestors with transform/will-change break `position:fixed` (overlay was sized to page, not viewport). */
+  if (typeof document === 'undefined') {
+    return null;
+  }
+
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
         <>
           {/* Backdrop */}
           <motion.div
+            key="exit-intent-backdrop"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={handleClose}
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
           />
-          
+
           {/* Modal */}
           <motion.div
+            key="exit-intent-modal"
             initial={{ opacity: 0, scale: 0.9, y: -20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: -20 }}
@@ -250,6 +258,7 @@ export const ExitIntentModal = memo(function ExitIntentModal({
           </motion.div>
         </>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 });

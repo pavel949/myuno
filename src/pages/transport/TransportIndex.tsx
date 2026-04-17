@@ -2,7 +2,7 @@
  * TransportIndex — Premium vehicle rental catalog
  * Sixt/Hertz-level UX with myUNO trust architecture
  */
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Car, SlidersHorizontal, Plane, ArrowUpDown } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -15,7 +15,7 @@ import { useVehicles } from '@/hooks/useVehicles';
 import { normalizeVehicleType } from '@/lib/taxonomies';
 import { cn } from '@/lib/utils';
 import { TransportHeroSearch } from '@/components/transport/TransportHeroSearch';
-import { VehicleClassNav, VEHICLE_CLASSES } from '@/components/transport/VehicleClassNav';
+import { VehicleClassNav } from '@/components/transport/VehicleClassNav';
 import { VehicleCard } from '@/components/transport/VehicleCard';
 import {
   TransportFilterSidebar,
@@ -56,6 +56,7 @@ export default function TransportIndex() {
   const [sortKey, setSortKey] = useState<SortKey>('recommended');
   const [filters, setFilters] = useState<TransportFilters>(DEFAULT_FILTERS);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   // Count vehicles per class
   const classCounts = useMemo(() => {
@@ -111,7 +112,14 @@ export default function TransportIndex() {
     <AppLayout showHeader={false} showBottomNav>
       <div className="min-h-screen bg-background">
         {/* Hero Search */}
-        <TransportHeroSearch />
+        <TransportHeroSearch onSearch={(params) => {
+          setFilters(prev => ({
+            ...prev,
+            deliveryOnly: params.delivery,
+            withDriverOnly: params.withDriver,
+          }));
+          resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }} />
 
         {/* Quick Links */}
         <div className="max-w-[1536px] mx-auto px-4 py-3 flex gap-2">
@@ -135,7 +143,7 @@ export default function TransportIndex() {
         />
 
         {/* Results bar */}
-        <div className="max-w-[1536px] mx-auto px-4 py-3">
+        <div ref={resultsRef} className="max-w-[1536px] mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <p className="text-sm text-muted-foreground">

@@ -35,17 +35,13 @@ export function TaskSummaryKPIs({ crmTasks, opsTasks }: TaskSummaryKPIsProps) {
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
       {kpis.map(({ label, value, icon: Icon, color }) => (
         <Card key={label}>
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-muted">
-              <Icon className={`h-5 w-5 ${color}`} />
-            </div>
-            <div>
-              <p className={`text-2xl font-bold ${color}`}>{value}</p>
-              <p className="text-xs text-muted-foreground">{label}</p>
-            </div>
+          <CardContent className="p-3 flex flex-col items-center text-center gap-1 min-h-[90px] justify-center">
+            <p className={`text-2xl font-bold leading-none ${color}`}>{value}</p>
+            <Icon className={`h-4 w-4 ${color}`} />
+            <p className="text-xs text-muted-foreground leading-tight">{label}</p>
           </CardContent>
         </Card>
       ))}

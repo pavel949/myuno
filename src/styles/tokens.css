@@ -150,8 +150,8 @@
   --brand-dropbox: 217 100% 50%;
 
   /* Typography */
-  --font-display: 'Syne', sans-serif;
-  --font-body: 'DM Sans', sans-serif;
+  --font-display: 'Golos Text', sans-serif;
+  --font-body: 'DM Sans', 'Sarabun', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 }
 

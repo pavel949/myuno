@@ -69,7 +69,7 @@ export const useReviews = ({ itemType, itemId }: UseReviewsOptions) => {
       
       setReviews(formatted);
 
-      // Calculate stats
+      // Calculate stats (always reset — empty result must clear prior item's stats)
       if (formatted.length > 0) {
         const total = formatted.length;
         const sum = formatted.reduce((acc, r) => acc + r.rating, 0);
@@ -79,6 +79,8 @@ export const useReviews = ({ itemType, itemId }: UseReviewsOptions) => {
           distribution[r.rating - 1]++;
         });
         setStats({ average, total, distribution });
+      } else {
+        setStats({ average: 0, total: 0, distribution: [0, 0, 0, 0, 0] });
       }
     } catch { /* ignored */ } finally {
       if (checkMounted()) setIsLoading(false);

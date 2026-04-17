@@ -12,6 +12,9 @@ interface MessageHostButtonProps {
   propertyTitle?: string;
   propertyTitleRu?: string;
   ownerName?: string;
+  /** Override button + modal title (defaults: booking request copy) */
+  labelRu?: string;
+  labelEn?: string;
   variant?: 'default' | 'outline' | 'ghost' | 'secondary';
   size?: 'default' | 'sm' | 'lg' | 'icon';
   fullWidth?: boolean;
@@ -25,6 +28,8 @@ export const MessageHostButton = forwardRef<HTMLButtonElement, MessageHostButton
     propertyTitle,
     propertyTitleRu,
     ownerName,
+    labelRu,
+    labelEn,
     variant = 'outline',
     size = 'default',
     fullWidth = false,
@@ -38,7 +43,9 @@ export const MessageHostButton = forwardRef<HTMLButtonElement, MessageHostButton
   const isRu = language === 'ru';
 
   const title = isRu ? propertyTitleRu || propertyTitle : propertyTitle;
-  const buttonLabel = isRu ? 'Написать хозяину' : 'Message host';
+  const buttonLabel = isRu
+    ? (labelRu ?? 'Запросить бронь')
+    : (labelEn ?? 'Request booking');
 
   const handleClick = () => {
     if (!user) {

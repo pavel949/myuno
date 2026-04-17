@@ -13,13 +13,19 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
+import {
+  getProjectFacilityLabel,
+  normalizeProjectFacilityId,
+} from '@/lib/propertyAttributeRegistry';
+import { PropertyAttributeChip } from '@/components/property/PropertyAttributeChip';
 
 interface ProjectInfoCardProps {
   project: PropertyProject;
   className?: string;
 }
 
-const amenityIcons: Record<string, React.ReactNode> = {
+/** Lucide icons by canonical project_facility id (see propertyAttributeRegistry) */
+const projectFacilityIcons: Record<string, React.ReactNode> = {
   pool: <Waves className="h-4 w-4" />,
   gym: <Dumbbell className="h-4 w-4" />,
   security: <Shield className="h-4 w-4" />,
@@ -32,21 +38,6 @@ const amenityIcons: Record<string, React.ReactNode> = {
   beach_access: <Umbrella className="h-4 w-4" />,
   concierge: <Headphones className="h-4 w-4" />,
   shuttle: <Bus className="h-4 w-4" />,
-};
-
-const amenityLabels: Record<string, { en: string; ru: string }> = {
-  pool: { en: 'Pool', ru: 'Бассейн' },
-  gym: { en: 'Gym', ru: 'Спортзал' },
-  security: { en: '24h Security', ru: 'Охрана 24ч' },
-  parking: { en: 'Parking', ru: 'Парковка' },
-  garden: { en: 'Garden', ru: 'Сад' },
-  playground: { en: 'Playground', ru: 'Детская площадка' },
-  restaurant: { en: 'Restaurant', ru: 'Ресторан' },
-  spa: { en: 'Spa', ru: 'Спа' },
-  tennis: { en: 'Tennis Court', ru: 'Теннисный корт' },
-  beach_access: { en: 'Beach Access', ru: 'Доступ к пляжу' },
-  concierge: { en: 'Concierge', ru: 'Консьерж' },
-  shuttle: { en: 'Shuttle Service', ru: 'Трансфер' },
 };
 
 export function ProjectInfoCard({ project, className }: ProjectInfoCardProps) {
@@ -122,19 +113,17 @@ export function ProjectInfoCard({ project, className }: ProjectInfoCardProps) {
               {isRu ? 'Удобства территории' : 'Project Amenities'}
             </p>
             <div className="flex flex-wrap gap-2">
-              {amenities.slice(0, expanded ? undefined : 6).map((amenity) => (
-                <div
-                  key={amenity}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-muted text-sm"
-                >
-                  {amenityIcons[amenity] || <Building2 className="h-4 w-4" />}
-                  <span>
-                    {amenityLabels[amenity]
-                      ? (isRu ? amenityLabels[amenity].ru : amenityLabels[amenity].en)
-                      : amenity}
-                  </span>
-                </div>
-              ))}
+              {amenities.slice(0, expanded ? undefined : 6).map((amenity) => {
+                const id = normalizeProjectFacilityId(amenity);
+                return (
+                  <PropertyAttributeChip
+                    key={id}
+                    icon={projectFacilityIcons[id] || <Building2 className="h-4 w-4" />}
+                  >
+                    <span>{getProjectFacilityLabel(id, isRu ? 'ru' : 'en')}</span>
+                  </PropertyAttributeChip>
+                );
+              })}
               {amenities.length > 6 && !expanded && (
                 <Badge 
                   variant="secondary" 

@@ -11,9 +11,14 @@ import {
 } from 'lucide-react';
 import { 
   VIEW_TYPES, 
-  FURNISHING_LEVELS, 
+  FURNISHING_LEVELS,
+  getAmenityById,
+  getAmenityIcon,
 } from '@/lib/taxonomies';
+import { normalizeEquipmentId } from '@/lib/propertyAttributeRegistry';
 import { normalizeFurnishingLevel } from '@/lib/propertyFormNormalizers';
+import { resolveIcon } from '@/lib/iconMap';
+import { PropertyAttributeChip } from '@/components/property/PropertyAttributeChip';
 
 interface UnitSpecsProps {
   floor?: number;
@@ -224,13 +229,14 @@ export function UnitSpecs({
   
   if (!hasAnyData) return null;
 
-  // Group equipment by category
+  // Group equipment by category (canonical snake_case keys)
   const grouped: Record<string, string[]> = {};
-  safeEquipment.forEach(item => {
-    const meta = EQUIPMENT_META[item];
+  safeEquipment.forEach((item) => {
+    const key = normalizeEquipmentId(item);
+    const meta = EQUIPMENT_META[key] ?? EQUIPMENT_META[item];
     const group = meta?.group || 'other';
     if (!grouped[group]) grouped[group] = [];
-    grouped[group].push(item);
+    if (!grouped[group].includes(key)) grouped[group].push(key);
   });
 
   const orderedGroups = GROUP_ORDER.filter(g => grouped[g]?.length);
@@ -316,17 +322,34 @@ export function UnitSpecs({
                 {isRu ? GROUP_LABELS[groupKey].ru : GROUP_LABELS[groupKey].en}
               </h4>
               <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-                {grouped[groupKey].map(item => {
+                {grouped[groupKey].map((item) => {
                   const meta = EQUIPMENT_META[item];
-                  const label = meta
-                    ? (isRu ? meta.ru : meta.en)
-                    : item.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-                  const icon = meta?.icon || <Sofa className={ICON_SIZE} />;
+                  if (meta) {
+                    return (
+                      <PropertyAttributeChip
+                        key={item}
+                        icon={<span className="text-muted-foreground shrink-0">{meta.icon}</span>}
+                      >
+                        <span>{isRu ? meta.ru : meta.en}</span>
+                      </PropertyAttributeChip>
+                    );
+                  }
+                  const fromTaxonomy = getAmenityById(item);
+                  const label = fromTaxonomy
+                    ? (isRu ? fromTaxonomy.labelRu : fromTaxonomy.labelEn)
+                    : item.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+                  const IconComponent = resolveIcon(getAmenityIcon(item));
                   return (
-                    <div key={item} className="flex items-center gap-2.5 py-1 text-sm">
-                      <span className="text-muted-foreground shrink-0">{icon}</span>
+                    <PropertyAttributeChip
+                      key={item}
+                      icon={
+                        <span className="text-muted-foreground shrink-0">
+                          <IconComponent className={ICON_SIZE} />
+                        </span>
+                      }
+                    >
                       <span>{label}</span>
-                    </div>
+                    </PropertyAttributeChip>
                   );
                 })}
               </div>

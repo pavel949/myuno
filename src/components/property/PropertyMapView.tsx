@@ -47,10 +47,13 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
   const { language } = useLanguage();
   const { hasKey, isLoaded, loadError } = useGoogleMaps();
 
-  const validProps = useMemo(
-    () => properties.filter((p) => p.lat && p.lng),
-    [properties]
-  );
+  const validProps = useMemo(() => {
+    return properties.filter((p) => {
+      const lat = typeof p.lat === 'number' ? p.lat : Number(p.lat);
+      const lng = typeof p.lng === 'number' ? p.lng : Number(p.lng);
+      return Number.isFinite(lat) && Number.isFinite(lng) && !(Math.abs(lat) < 1e-5 && Math.abs(lng) < 1e-5);
+    });
+  }, [properties]);
 
   const onMapLoad = useCallback((map: google.maps.Map) => {
     mapRef.current = map;

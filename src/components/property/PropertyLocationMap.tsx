@@ -4,17 +4,26 @@ import { GoogleMap, Marker } from '@react-google-maps/api';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useGoogleMaps } from '@/contexts/GoogleMapsContext';
 import { DEFAULT_MAP_CENTER } from '@/lib/googleMaps';
+import { cn } from '@/lib/utils';
 
 interface PropertyLocationMapProps {
   lat?: number | null;
   lng?: number | null;
   district?: string;
   address?: string;
+  /** When false, hides the default H2 (use parent section title instead). */
+  showHeading?: boolean;
 }
 
 const mapContainerStyle: React.CSSProperties = { width: '100%', height: '100%' };
 
-export function PropertyLocationMap({ lat, lng, district, address }: PropertyLocationMapProps) {
+export function PropertyLocationMap({
+  lat,
+  lng,
+  district,
+  address,
+  showHeading = true,
+}: PropertyLocationMapProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { hasKey, isLoaded, loadError } = useGoogleMaps();
@@ -45,11 +54,13 @@ export function PropertyLocationMap({ lat, lng, district, address }: PropertyLoc
 
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-3">
-        {isRu ? 'Где вы будете' : "Where you'll be"}
-      </h2>
+      {showHeading && (
+        <h2 className="text-xl font-semibold mb-3">
+          {isRu ? 'Где вы будете' : "Where you'll be"}
+        </h2>
+      )}
 
-      <div className="rounded-2xl overflow-hidden border border-border h-[300px] mb-3 relative">
+      <div className={cn('rounded-2xl overflow-hidden border border-border h-[300px] relative', showHeading && 'mb-3')}>
         {noKey && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted/30 gap-3 p-4">
             <MapPin className="w-8 h-8 text-muted-foreground" />

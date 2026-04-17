@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
   MapPin, Star, BedDouble, Bath, Users, Maximize, 
   Share2, Calendar as CalendarIcon, Phone, MessageCircle, Shield,
@@ -9,10 +9,11 @@ import {
 import { PropertyShareSheet } from '@/components/property/PropertyShareSheet';
 import { CompareButton, type CompareProperty } from '@/components/property/PropertyCompare';
 import { PropertyPdfButton } from '@/components/property/PropertyPdfBrochure';
-import { resolveIcon } from '@/lib/iconMap';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
@@ -25,7 +26,8 @@ import {
   IncludedServices, 
   ExtraServices, 
   UtilitiesInfo, 
-  CheckInDetails, 
+  CheckInDetails,
+  GuestAssuranceCard,
   HouseRules,
   PropertyPriceBreakdown,
   PropertyBookingCard,
@@ -52,9 +54,6 @@ import { normalizeViewTypes } from '@/lib/propertyFormNormalizers';
 
 // Demo fallback removed — only real DB data is used
 
-// Import centralized taxonomy for amenities
-import { getAmenityIcon, getAmenityLabel, normalizeAmenityId } from '@/lib/taxonomies';
-
 // View type labels
 const viewTypeLabels: Record<string, { en: string; ru: string }> = {
   'sea': { en: 'Sea View', ru: 'Вид на море' },
@@ -79,6 +78,14 @@ export default function PropertyDetail() {
   const [guestCount, setGuestCount] = useState(2);
   const isMobile = useIsMobile();
   const isRu = language === 'ru';
+  const { formatPrice } = useCurrency();
+
+  const OWNERSHIP_LABELS: Record<string, { en: string; ru: string }> = {
+    freehold: { en: 'Freehold', ru: 'Фрихолд' },
+    leasehold: { en: 'Leasehold', ru: 'Лизхолд' },
+    company: { en: 'Thai company', ru: 'Тайская компания' },
+    foreign_company: { en: 'Foreign LLC', ru: 'Иностранная компания' },
+  };
 
   // Fetch availability for calendar
   const { availability } = usePropertyAvailabilityManagement(id);
@@ -152,6 +159,9 @@ export default function PropertyDetail() {
   // Duplicate loading check removed (already handled above)
 
   const pricePerNight = rentalTerms?.price_per_night || property.price || 0;
+  const isSaleListing =
+    property.listing_type === 'sale' || Boolean(property.is_for_sale);
+  const salePrice = property.sale_price ?? (isSaleListing ? property.price : undefined) ?? 0;
   const viewTypes = normalizeViewTypes(property.view_type);
   const viewLabels = viewTypes
     .map((viewType) => viewTypeLabels[viewType])
@@ -182,7 +192,7 @@ export default function PropertyDetail() {
       />
       <div className="pb-28">
         {/* Sticky Header */}
-        <div className="sticky top-0 z-50 flex items-center justify-between p-4 bg-background/95 backdrop-blur-md border-b border-border/30">
+        <div className="sticky top-0 z-50 flex items-center justify-between px-4 md:px-0 py-3 bg-background/95 backdrop-blur-md border-b border-border/30">
           <BackButton fallbackPath="/property" variant="default" size="md" />
           
           <div className="flex items-center gap-1">
@@ -315,10 +325,10 @@ export default function PropertyDetail() {
         </div>
 
         {/* Main Content with Sidebar Layout for Desktop */}
-        <div className="px-4 lg:px-8 xl:px-12 py-6 lg:py-10">
-          <div className="grid lg:grid-cols-[1fr,420px] xl:grid-cols-[1fr,460px] gap-8 lg:gap-12">
+        <div className="px-4 md:px-0 py-6 lg:py-10">
+          <div className="grid lg:grid-cols-[1fr,minmax(320px,420px)] xl:grid-cols-[1fr,minmax(360px,460px)] gap-8 lg:gap-10 xl:gap-12 items-start">
             {/* Main Content Column */}
-            <div className="space-y-6">
+            <article className="space-y-6 min-w-0">
           {/* Title Section - Airbnb Style */}
           <div>
             <h1 className="text-2xl md:text-3xl lg:text-4xl font-display font-bold text-foreground leading-tight">
@@ -350,6 +360,30 @@ export default function PropertyDetail() {
             </div>
           </div>
 
+          {isSaleListing && (
+            <>
+              <Separator />
+              <div className="rounded-xl border border-border/60 bg-muted/30 p-4 space-y-2">
+                <h2 className="text-lg font-semibold">
+                  {isRu ? 'Продажа' : 'For sale'}
+                </h2>
+                <p className="text-2xl font-bold tracking-tight">{formatPrice(salePrice)}</p>
+                {property.ownership_form && (
+                  <p className="text-sm text-muted-foreground">
+                    {(OWNERSHIP_LABELS[property.ownership_form] ?? { en: property.ownership_form, ru: property.ownership_form })[
+                      isRu ? 'ru' : 'en'
+                    ]}
+                  </p>
+                )}
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  {isRu
+                    ? 'Запросите детали сделки, Due Diligence и варианты оплаты у менеджера.'
+                    : 'Ask the manager for transaction details, due diligence, and payment options.'}
+                </p>
+              </div>
+            </>
+          )}
+
           <Separator />
 
           {/* Quick Highlights - Airbnb style */}
@@ -364,14 +398,6 @@ export default function PropertyDetail() {
                   {property.property_type === 'villa' ? (isRu ? 'Вилла целиком' : 'Entire villa') : 
                    property.property_type === 'condo' ? (isRu ? 'Апартаменты целиком' : 'Entire apartment') :
                    (isRu ? 'Жильё целиком' : 'Entire place')}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {[
-                    property.bedrooms ? `${property.bedrooms} ${isRu ? 'спал.' : 'bed'}` : null,
-                    property.bathrooms ? `${property.bathrooms} ${isRu ? 'ванн.' : 'bath'}` : null,
-                    property.area_sqm ? `${property.area_sqm} м²` : null,
-                    (property.max_guests || rentalTerms?.max_guests) ? `${property.max_guests || rentalTerms?.max_guests} ${isRu ? 'гостей' : 'guests'}` : null,
-                  ].filter(Boolean).join(' · ')}
                 </p>
               </div>
             </div>
@@ -499,8 +525,8 @@ export default function PropertyDetail() {
           </div>
 
           {/* Price Breakdown */}
-          {rentalTerms && (
-            <>
+          {rentalTerms && !isSaleListing && (
+            <div id="property-pricing">
               <Separator />
               <PropertyPriceBreakdown
                 pricePerNight={rentalTerms.price_per_night}
@@ -515,7 +541,7 @@ export default function PropertyDetail() {
                 seasonalPricing={rentalTerms.seasonal_pricing as any}
                 currency="THB"
               />
-            </>
+            </div>
           )}
 
           {/* Included Services */}
@@ -587,41 +613,11 @@ export default function PropertyDetail() {
                   languages: rentalTerms.host_languages,
                 }}
                 currency="THB"
-              />
-            </>
-          )}
-
-          {/* Amenities — only show if equipment is empty and amenities exist */}
-          {amenities.length > 0 && (!property.equipment || property.equipment.length === 0) && (
-            <>
-              <Separator />
-              <div>
-                <h2 className="text-xl lg:text-2xl font-semibold mb-4">
-                  {isRu ? 'Что есть в жилье' : 'What this place offers'}
-                </h2>
-                <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4">
-                  {amenities.slice(0, 8).map((amenity, i) => {
-                    const amenityId = typeof amenity === 'string' ? amenity : amenity;
-                    const normalizedId = normalizeAmenityId(amenityId);
-                    const icon = getAmenityIcon(normalizedId);
-                    const label = getAmenityLabel(normalizedId, isRu ? 'ru' : 'en');
-                    return (
-                      <div
-                        key={i}
-                        className="flex items-center gap-3 py-2"
-                      >
-                        {(() => { const AmenityIcon = resolveIcon(icon); return <AmenityIcon className="w-5 h-5 text-primary" />; })()}
-                        <span className="text-sm">{label}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-                {amenities.length > 8 && (
-                  <Button variant="outline" className="mt-4 w-full">
-                    {isRu ? `Показать все ${amenities.length} удобств` : `Show all ${amenities.length} amenities`}
-                  </Button>
+                showPricingDeposit={Boolean(
+                  rentalTerms.deposit_amount != null && rentalTerms.deposit_amount > 0
                 )}
-              </div>
+              />
+              <GuestAssuranceCard compact className="lg:hidden mt-2" />
             </>
           )}
 
@@ -690,124 +686,215 @@ export default function PropertyDetail() {
             propertyType={property.property_type}
             bedrooms={property.bedrooms}
           />
-            </div>
+            </article>
 
-            {/* Sidebar - Booking Card (Desktop Only) */}
-            <div className="hidden lg:block space-y-4">
-              <PropertyBookingCard
-                propertyId={id || 'prop-1'}
-                pricePerNight={pricePerNight}
-                rentalTerms={rentalTerms}
-                currency="THB"
-                earlyBookingDiscount={property?.early_booking_discount ?? undefined}
-                earlyBookingDays={property?.early_booking_days ?? undefined}
-                lastMinuteDiscount={property?.last_minute_discount ?? undefined}
-                lastMinuteDays={property?.last_minute_days ?? undefined}
-                paymentPolicy={property?.payment_policy ?? undefined}
-                prepayPercent={property?.prepay_percent ?? undefined}
-                depositAmount={property?.deposit_amount ?? undefined}
-                depositCurrency={property?.deposit_currency ?? undefined}
-                customLengthDiscounts={property?.custom_length_discounts as any ?? undefined}
-                negotiationEnabled={property?.negotiation_enabled ?? false}
-                seasonalPricing={rentalTerms?.seasonal_pricing as any ?? undefined}
-              />
-              {/* Message Host Button for Desktop */}
-              <MessageHostButton
-                propertyId={id || 'prop-1'}
-                propertyTitle={property.title_en}
-                propertyTitleRu={property.title_ru}
-                ownerName={rentalTerms?.manager_name}
-                variant="outline"
-                fullWidth
-              />
-            </div>
+            {/* Sidebar — sticky on desktop so primary CTA stays in view while reading (conversion) */}
+            <aside
+              className={cn(
+                'hidden lg:flex lg:flex-col gap-4 w-full',
+                'lg:sticky lg:top-[4.75rem] xl:top-[5.25rem] lg:self-start lg:z-10',
+                'lg:max-h-[calc(100vh-5.5rem)] lg:overflow-y-auto lg:overscroll-contain lg:pr-1'
+              )}
+            >
+              {isSaleListing ? (
+                <Card>
+                  <CardContent className="p-4 space-y-3">
+                    <p className="text-sm text-muted-foreground">{isRu ? 'Цена' : 'Asking price'}</p>
+                    <p className="text-2xl font-bold">{formatPrice(salePrice)}</p>
+                    {property.ownership_form && (
+                      <p className="text-sm">
+                        {(OWNERSHIP_LABELS[property.ownership_form] ?? {
+                          en: property.ownership_form,
+                          ru: property.ownership_form,
+                        })[isRu ? 'ru' : 'en']}
+                      </p>
+                    )}
+                    <MessageHostButton
+                      propertyId={id || 'prop-1'}
+                      propertyTitle={property.title_en}
+                      propertyTitleRu={property.title_ru}
+                      ownerName={rentalTerms?.manager_name}
+                      variant="default"
+                      fullWidth
+                      labelRu="Запросить консультацию"
+                      labelEn="Request consultation"
+                    />
+                    <div className="rounded-lg border border-border/60 bg-muted/20 px-3 py-2.5 text-xs text-muted-foreground leading-snug">
+                      <p>
+                        {isRu
+                          ? 'Консьерж myUNO поможет с трансфером, визой и вопросами по бронированию.'
+                          : 'myUNO concierge can help with transfers, visas, and booking questions.'}
+                      </p>
+                      <Link
+                        to={APP_ROUTES.SUPPORT}
+                        className="mt-1.5 inline-flex font-medium text-primary hover:underline"
+                      >
+                        {isRu ? 'Связаться с поддержкой' : 'Contact myUNO support'}
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="flex flex-col gap-3 w-full min-w-0">
+                  <PropertyBookingCard
+                    propertyId={id || 'prop-1'}
+                    pricePerNight={pricePerNight}
+                    rentalTerms={rentalTerms}
+                    currency="THB"
+                    earlyBookingDiscount={property?.early_booking_discount ?? undefined}
+                    earlyBookingDays={property?.early_booking_days ?? undefined}
+                    lastMinuteDiscount={property?.last_minute_discount ?? undefined}
+                    lastMinuteDays={property?.last_minute_days ?? undefined}
+                    paymentPolicy={property?.payment_policy ?? undefined}
+                    prepayPercent={property?.prepay_percent ?? undefined}
+                    depositAmount={property?.deposit_amount ?? undefined}
+                    depositCurrency={property?.deposit_currency ?? undefined}
+                    customLengthDiscounts={property?.custom_length_discounts as any ?? undefined}
+                    negotiationEnabled={property?.negotiation_enabled ?? false}
+                    seasonalPricing={rentalTerms?.seasonal_pricing as any ?? undefined}
+                  />
+                  <MessageHostButton
+                    propertyId={id || 'prop-1'}
+                    propertyTitle={property.title_en}
+                    propertyTitleRu={property.title_ru}
+                    ownerName={rentalTerms?.manager_name}
+                    variant="ghost"
+                    size="sm"
+                    fullWidth
+                    labelRu="Написать менеджеру"
+                    labelEn="Message manager"
+                  />
+                  <div className="rounded-lg border border-border/60 bg-muted/20 px-3 py-2.5 text-xs text-muted-foreground leading-snug">
+                    <p>
+                      {isRu
+                        ? 'Консьерж myUNO поможет с трансфером, визой и вопросами по бронированию.'
+                        : 'myUNO concierge can help with transfers, visas, and booking questions.'}
+                    </p>
+                    <Link
+                      to={APP_ROUTES.SUPPORT}
+                      className="mt-1.5 inline-flex font-medium text-primary hover:underline"
+                    >
+                      {isRu ? 'Связаться с поддержкой' : 'Contact myUNO support'}
+                    </Link>
+                  </div>
+                  <GuestAssuranceCard />
+                </div>
+              )}
+            </aside>
           </div>
         </div>
 
         {/* Fixed Bottom CTA - Mobile Only */}
         <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-md border-t border-border shadow-lg lg:hidden">
           <div className="max-w-[1536px] mx-auto flex items-center gap-3">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-baseline gap-1">
-                <span className="text-xl font-bold text-foreground">
-                  ฿{pricePerNight.toLocaleString()}
-                </span>
-                <span className="text-sm text-muted-foreground">
-                  /{isRu ? 'ночь' : 'night'}
-                </span>
-              </div>
-              {dateRange?.from && dateRange?.to && (
-                <p className="text-xs text-muted-foreground">
-                  {format(dateRange.from, 'd MMM', { locale: isRu ? ru : undefined })} – {format(dateRange.to, 'd MMM', { locale: isRu ? ru : undefined })}
-                </p>
-              )}
-              {!dateRange?.from && rentalTerms?.instant_booking && (
-                <div className="flex items-center gap-1 text-xs text-primary mt-0.5">
-                  <Zap className="w-3 h-3" />
-                  <span>{isRu ? 'Мгновенное бронирование' : 'Instant booking'}</span>
+            {isSaleListing ? (
+              <>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-muted-foreground">{isRu ? 'Цена' : 'Price'}</p>
+                  <span className="text-xl font-bold text-foreground">{formatPrice(salePrice)}</span>
+                  {property.ownership_form && (
+                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                      {(OWNERSHIP_LABELS[property.ownership_form] ?? {
+                        en: property.ownership_form,
+                        ru: property.ownership_form,
+                      })[isRu ? 'ru' : 'en']}
+                    </p>
+                  )}
                 </div>
-              )}
-            </div>
-            <Button
-              variant="outline"
-              size="icon"
-              className="flex-shrink-0"
-              onClick={() => {
-                if (rentalTerms?.manager_phone) {
-                  window.open(`tel:${rentalTerms.manager_phone}`);
-                } else {
-                  toast.info(isRu ? 'Телефон не указан' : 'Phone not available');
-                }
-              }}
-            >
-              <Phone className="w-5 h-5" />
-            </Button>
-            <MessageHostButton
-              propertyId={id || 'prop-1'}
-              propertyTitle={property.title_en}
-              propertyTitleRu={property.title_ru}
-              variant="outline"
-              size="icon"
-              showLabel={false}
-            />
-            <Button
-              size="lg"
-              className={cn(
-                "flex-shrink-0 px-6",
-                rentalTerms?.instant_booking && !dateRange?.from && "bg-accent-amber hover:bg-accent-amber/90"
-              )}
-              onClick={() => {
-                if (dateRange?.from && dateRange?.to) {
-                  // Dates selected — navigate to inquiry
-                  const params = new URLSearchParams({
-                    checkIn: format(dateRange.from, 'yyyy-MM-dd'),
-                    checkOut: format(dateRange.to, 'yyyy-MM-dd'),
-                    guests: guestCount.toString(),
-                  });
-                  navigate(`${APP_ROUTES.PROPERTY_INQUIRY(id)}?${params.toString()}`);
-                } else {
-                  // No dates — open date picker sheet
-                  setDateSheetOpen(true);
-                }
-              }}
-            >
-              {dateRange?.from && dateRange?.to ? (
-                <>
-                  <CalendarIcon className="w-4 h-4 mr-2" />
-                  {isRu ? 'Забронировать' : 'Reserve'}
-                </>
-              ) : rentalTerms?.instant_booking ? (
-                <>
-                  <Zap className="w-4 h-4 mr-2" />
-                  {isRu ? 'Забронировать' : 'Book Now'}
-                </>
-              ) : (
-                <>
-                  <CalendarIcon className="w-4 h-4 mr-2" />
-                  {isRu ? 'Выбрать даты' : 'Select Dates'}
-                </>
-              )}
-            </Button>
+                <MessageHostButton
+                  propertyId={id || 'prop-1'}
+                  propertyTitle={property.title_en}
+                  propertyTitleRu={property.title_ru}
+                  variant="default"
+                  className="flex-shrink-0"
+                  labelRu="Запросить консультацию"
+                  labelEn="Request consultation"
+                />
+              </>
+            ) : (
+              <>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-xl font-bold text-foreground">
+                      ฿{pricePerNight.toLocaleString()}
+                    </span>
+                    <span className="text-sm text-muted-foreground">
+                      /{isRu ? 'ночь' : 'night'}
+                    </span>
+                  </div>
+                  {dateRange?.from && dateRange?.to && (
+                    <p className="text-xs text-muted-foreground">
+                      {format(dateRange.from, 'd MMM', { locale: isRu ? ru : undefined })} –{' '}
+                      {format(dateRange.to, 'd MMM', { locale: isRu ? ru : undefined })}
+                    </p>
+                  )}
+                  {!dateRange?.from && rentalTerms?.instant_booking && (
+                    <div className="flex items-center gap-1 text-xs text-primary mt-0.5">
+                      <Zap className="w-3 h-3" />
+                      <span>{isRu ? 'Мгновенное бронирование' : 'Instant booking'}</span>
+                    </div>
+                  )}
+                </div>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="flex-shrink-0"
+                  onClick={() => {
+                    if (rentalTerms?.manager_phone) {
+                      window.open(`tel:${rentalTerms.manager_phone}`);
+                    } else {
+                      toast.info(isRu ? 'Телефон не указан' : 'Phone not available');
+                    }
+                  }}
+                >
+                  <Phone className="w-5 h-5" />
+                </Button>
+                <MessageHostButton
+                  propertyId={id || 'prop-1'}
+                  propertyTitle={property.title_en}
+                  propertyTitleRu={property.title_ru}
+                  variant="outline"
+                  size="icon"
+                  showLabel={false}
+                />
+                <Button
+                  size="lg"
+                  className={cn(
+                    'flex-shrink-0 px-6',
+                    rentalTerms?.instant_booking && !dateRange?.from && 'bg-accent-amber hover:bg-accent-amber/90'
+                  )}
+                  onClick={() => {
+                    if (dateRange?.from && dateRange?.to) {
+                      const params = new URLSearchParams({
+                        checkIn: format(dateRange.from, 'yyyy-MM-dd'),
+                        checkOut: format(dateRange.to, 'yyyy-MM-dd'),
+                        guests: guestCount.toString(),
+                      });
+                      navigate(`${APP_ROUTES.PROPERTY_INQUIRY(id)}?${params.toString()}`);
+                    } else {
+                      setDateSheetOpen(true);
+                    }
+                  }}
+                >
+                  {dateRange?.from && dateRange?.to ? (
+                    <>
+                      <CalendarIcon className="w-4 h-4 mr-2" />
+                      {isRu ? 'Забронировать' : 'Reserve'}
+                    </>
+                  ) : rentalTerms?.instant_booking ? (
+                    <>
+                      <Zap className="w-4 h-4 mr-2" />
+                      {isRu ? 'Забронировать' : 'Book Now'}
+                    </>
+                  ) : (
+                    <>
+                      <CalendarIcon className="w-4 h-4 mr-2" />
+                      {isRu ? 'Выбрать даты' : 'Select Dates'}
+                    </>
+                  )}
+                </Button>
+              </>
+            )}
           </div>
         </div>
 
@@ -925,7 +1012,7 @@ export default function PropertyDetail() {
       </div>
 
       {/* Cross-sell */}
-      <div className="px-4 lg:px-8 xl:px-12">
+      <div className="px-4 md:px-0">
         <RelatedServicesSection currentVertical="property" />
       </div>
 

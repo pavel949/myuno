@@ -494,8 +494,8 @@ export function CanonicalPropertyForm({
       )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 min-h-0">
-        {/* Prominent tab bar — full width, bold labels */}
-        <div className="border-b border-border mb-6">
+        {/* Sticky tab bar — full width, bold labels */}
+        <div className="sticky top-0 z-20 bg-background border-b border-border mb-6">
           <div className="flex gap-0 overflow-x-auto scrollbar-none -mb-px">
             {tabs.map((tab) => {
               const status = getTabStatus(tab.id);
@@ -506,17 +506,20 @@ export function CanonicalPropertyForm({
                   type="button"
                   onClick={() => setActiveTab(tab.id)}
                   className={cn(
-                    "relative flex items-center gap-2.5 px-5 py-3.5 text-sm font-medium whitespace-nowrap transition-colors border-b-2 -mb-px",
+                    "relative flex items-center gap-2 px-4 py-3.5 text-sm font-medium whitespace-nowrap transition-colors border-b-2 -mb-px",
                     isActive
                       ? "border-primary text-primary"
                       : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
                   )}
                 >
-                  <tab.icon className={cn("h-4 w-4", isActive ? "text-primary" : "text-muted-foreground")} />
-                  <span>{isRu ? tab.labelRu : tab.labelEn}</span>
-                  {/* Completion indicator — only show when complete */}
-                  {status === 'complete' && (
-                    <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
+                  <tab.icon className={cn("h-4 w-4 shrink-0", isActive ? "text-primary" : "text-muted-foreground")} />
+                  <span className="hidden sm:inline">{isRu ? tab.labelRu : tab.labelEn}</span>
+                  {/* Completion indicator */}
+                  {status === 'complete' && !isActive && (
+                    <Check className="h-3 w-3 text-success shrink-0" />
+                  )}
+                  {status === 'partial' && !isActive && (
+                    <span className="h-2 w-2 rounded-full bg-warning shrink-0" />
                   )}
                 </button>
               );

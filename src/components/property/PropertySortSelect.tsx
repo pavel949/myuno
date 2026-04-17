@@ -12,8 +12,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import type { PropertySortKey } from '@/lib/propertySortPrice';
 
-export type PropertySortKey = 'recommended' | 'price_asc' | 'price_desc' | 'rating' | 'newest';
+export type { PropertySortKey } from '@/lib/propertySortPrice';
 
 interface PropertySortSelectProps {
   value: PropertySortKey;

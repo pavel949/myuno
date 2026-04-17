@@ -4,8 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Home, Bed, Bath, SquareStack, FileSignature, MessageCircle, Shield, Phone, Upload, UserPlus, X, Info, Building2, Video, ChevronDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Home, Bed, Bath, SquareStack, FileSignature, MessageCircle, Shield, Upload, UserPlus, X, Building2, Video, ChevronDown, Minus, Plus, Building, Briefcase, Landmark } from 'lucide-react';
 import { UnifiedMediaUploader } from '@/components/upload/UnifiedMediaUploader';
 import { TranslatableInput } from '@/components/forms/TranslatableInput';
 import { TranslatableTextarea } from '@/components/forms/TranslatableTextarea';
@@ -13,13 +13,69 @@ import { LocationProjectSearch } from '@/components/property/LocationProjectSear
 import { UnitFields } from '@/components/property/UnitFields';
 import { PropertyFormData, OwnershipData, OwnershipType } from '@/hooks/usePropertyWizard';
 import { PropertyFeaturesSelector } from '../PropertyFeaturesSelector';
-import { toast } from 'sonner';
 import { PropertyProject } from '@/hooks/usePropertyProjects';
-import { useTaxonomy } from '@/hooks/useTaxonomy';
 import { getTypeAwareLabels } from '@/lib/propertyTypeConfig';
 
 
 const DISMISS_KEY = 'owner_contact_auto_create_hint_dismissed';
+
+// --- Property Type Visual Picker ---
+interface PropertyTypeOption {
+  value: string;
+  labelEn: string;
+  labelRu: string;
+  icon: React.ElementType;
+}
+const PROPERTY_TYPE_OPTIONS: PropertyTypeOption[] = [
+  { value: 'villa', labelEn: 'Villa', labelRu: 'Вилла', icon: Home },
+  { value: 'condo', labelEn: 'Condo', labelRu: 'Кондо', icon: Building2 },
+  { value: 'apartment', labelEn: 'Apartment', labelRu: 'Квартира', icon: Building },
+  { value: 'house', labelEn: 'House', labelRu: 'Дом', icon: Home },
+  { value: 'townhouse', labelEn: 'Townhouse', labelRu: 'Таунхаус', icon: Building },
+  { value: 'studio', labelEn: 'Studio', labelRu: 'Студия', icon: Building2 },
+  { value: 'penthouse', labelEn: 'Penthouse', labelRu: 'Пентхаус', icon: Building2 },
+  { value: 'land', labelEn: 'Land', labelRu: 'Участок', icon: Landmark },
+  { value: 'commercial', labelEn: 'Commercial', labelRu: 'Коммерческая', icon: Briefcase },
+];
+
+// --- Room Stepper ---
+interface RoomStepperProps {
+  label: React.ReactNode;
+  value: number;
+  onChange: (v: number) => void;
+  min?: number;
+  max?: number;
+}
+function RoomStepper({ label, value, onChange, min = 0, max = 20 }: RoomStepperProps) {
+  return (
+    <div className="space-y-1.5">
+      <Label className="flex items-center gap-1 text-xs">{label}</Label>
+      <div className="flex items-center gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          className="h-9 w-9 shrink-0"
+          onClick={() => onChange(Math.max(min, value - 1))}
+          disabled={value <= min}
+        >
+          <Minus className="h-3.5 w-3.5" />
+        </Button>
+        <span className="flex-1 text-center text-base font-semibold tabular-nums">{value}</span>
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          className="h-9 w-9 shrink-0"
+          onClick={() => onChange(Math.min(max, value + 1))}
+          disabled={value >= max}
+        >
+          <Plus className="h-3.5 w-3.5" />
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 interface BasicInfoStepProps {
   formData: PropertyFormData;
@@ -77,7 +133,6 @@ function BasicInfoStepInner({
 }: BasicInfoStepProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const { options: propertyTypes } = useTaxonomy('property_type');
   const typeLabels = getTypeAwareLabels(formData.property_type);
   
   // Hint about auto-creating CRM contact
@@ -104,7 +159,46 @@ function BasicInfoStepInner({
   }, []);
   return (
     <div className="space-y-6">
-      {/* Airbnb-style: Where is your listing? Type → projects & addresses appear → select fills address + map */}
+      {/* 1. Property Type — visual picker, placed first */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Building2 className="h-4 w-4" />
+            {isRu ? 'Тип недвижимости' : 'Property Type'}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+            {PROPERTY_TYPE_OPTIONS.map((opt) => {
+              const Icon = opt.icon;
+              const isSelected = formData.property_type === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => updateFormData({ property_type: opt.value })}
+                  className={`flex flex-col items-center gap-1.5 p-2.5 rounded-xl border-2 transition-all text-center ${
+                    isSelected
+                      ? 'border-primary bg-primary/5 text-primary'
+                      : 'border-transparent bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${
+                    isSelected ? 'bg-primary text-primary-foreground' : 'bg-muted'
+                  }`}>
+                    <Icon className="h-4 w-4" />
+                  </div>
+                  <span className="text-[11px] font-medium leading-tight">
+                    {isRu ? opt.labelRu : opt.labelEn}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 2. Location search — Airbnb-style: project/address lookup fills map */}
       <LocationProjectSearch
         formData={formData}
         updateFormData={updateFormData}
@@ -152,32 +246,18 @@ function BasicInfoStepInner({
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label className="flex items-center gap-1">
-                <Bed className="h-3 w-3" />
-                {isRu ? 'Спальни' : 'Bedrooms'}
-              </Label>
-              <Input
-                type="number"
-                min={0}
-                value={formData.bedrooms}
-                onChange={(e) => updateFormData({ bedrooms: Number(e.target.value) })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="flex items-center gap-1">
-                <Bath className="h-3 w-3" />
-                {isRu ? 'Ванные' : 'Bathrooms'}
-              </Label>
-              <Input
-                type="number"
-                min={0}
-                value={formData.bathrooms}
-                onChange={(e) => updateFormData({ bathrooms: Number(e.target.value) })}
-              />
-            </div>
-            <div className="space-y-2 col-span-2 sm:col-span-1">
-              <Label className="flex items-center gap-1">
+            <RoomStepper
+              label={<><Bed className="h-3 w-3" />{isRu ? 'Спальни' : 'Bedrooms'}</>}
+              value={formData.bedrooms ?? 0}
+              onChange={(v) => updateFormData({ bedrooms: v })}
+            />
+            <RoomStepper
+              label={<><Bath className="h-3 w-3" />{isRu ? 'Ванные' : 'Bathrooms'}</>}
+              value={formData.bathrooms ?? 0}
+              onChange={(v) => updateFormData({ bathrooms: v })}
+            />
+            <div className="space-y-1.5 col-span-2 sm:col-span-1">
+              <Label className="flex items-center gap-1 text-xs">
                 <SquareStack className="h-3 w-3" />
                 {isRu ? typeLabels.areaLabelRu : typeLabels.areaLabel}
               </Label>
@@ -186,6 +266,7 @@ function BasicInfoStepInner({
                 min={0}
                 value={formData.area_sqm}
                 onChange={(e) => updateFormData({ area_sqm: e.target.value })}
+                placeholder="m²"
               />
             </div>
           </div>
@@ -330,33 +411,6 @@ function BasicInfoStepInner({
           </Card>
         </Collapsible>
       )}
-
-      {/* Property Type — FIRST like Airbnb */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Home className="h-4 w-4" />
-            {isRu ? 'Тип недвижимости' : 'Property Type'}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Select 
-            value={formData.property_type}
-            onValueChange={(value) => updateFormData({ property_type: value })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder={isRu ? 'Выберите тип' : 'Select type'} />
-            </SelectTrigger>
-            <SelectContent>
-              {propertyTypes.map((type) => (
-                <SelectItem key={type.value} value={type.value}>
-                  {isRu ? type.labelRu : type.labelEn}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </CardContent>
-      </Card>
 
       {/* Unit Fields — always shown after type is selected */}
       <UnitFields

@@ -225,7 +225,7 @@ export function mapSalonToCatalogCard(
   return {
     image: salon.cover_image || PLACEHOLDER_IMAGES.salon,
     title: name,
-    onClick: () => navigate(`/beauty/${salon.id}`),
+    onClick: () => navigate(`/beauty/salon/${salon.id}`),
     badges,
     rating: (salon.rating ?? 0) > 0 ? salon.rating : undefined,
     location: salon.address || undefined,
@@ -255,7 +255,7 @@ export function mapGymToCatalogCard(
   return {
     image: gym.cover_image || PLACEHOLDER_IMAGES.gym,
     title: name,
-    onClick: () => navigate(`/fitness/${gym.id}`),
+    onClick: () => navigate(`/fitness/gym/${gym.id}`),
     badges,
     rating: (gym.rating ?? 0) > 0 ? gym.rating : undefined,
     location: gym.address || undefined,
@@ -376,7 +376,7 @@ export function mapClinicToCatalogCard(
   return {
     image: clinic.cover_image || PLACEHOLDER_IMAGES.medical,
     title: name,
-    onClick: () => navigate(`/medical/${clinic.id}`),
+    onClick: () => navigate(`/medical/clinic/${clinic.id}`),
     badges,
     rating: (clinic.rating ?? 0) > 0 ? clinic.rating : undefined,
     location: clinic.address || undefined,

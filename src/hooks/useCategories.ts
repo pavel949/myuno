@@ -122,7 +122,7 @@ function getPath(category: RawCategory): string {
     'pets': '/pets',
     'babysitter': '/babysitter',
     'delivery': '/delivery',
-    'food-delivery': '/food-delivery',
+    'food-delivery': '/market?category=food',
     'legal': '/legal',
     'education-expat': '/education',
     'visa': '/visa',

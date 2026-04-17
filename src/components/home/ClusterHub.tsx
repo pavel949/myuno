@@ -58,7 +58,7 @@ const CLUSTERS: Cluster[] = [
     label: 'INVEST', labelRu: 'КУПИТЬ',
     description: 'Buy & invest in Phuket', descriptionRu: 'Покупка и инвестиции',
     accentColor: '#A855F7',
-    path: APP_ROUTES.INVEST_CLUSTER,
+    path: APP_ROUTES.INVEST,
     apps: ['Property Search', 'Off-Plan', 'ROI Calculator', 'Due Diligence'],
     appsRu: ['Поиск недвижимости', 'Off-Plan', 'ROI калькулятор', 'Проверка'],
   },

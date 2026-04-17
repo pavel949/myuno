@@ -3,6 +3,7 @@
  */
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { normalizeProjectFacilityIds } from '@/lib/propertyAttributeRegistry';
 
 export interface NewbuildProject {
   id: string;
@@ -122,7 +123,7 @@ export function useNewbuildProjects(filters?: NewbuildFilters) {
         is_approved: p.is_approved ?? true,
         developer_id: p.developer_id,
         developer_name: p.developer_name,
-        amenities: p.amenities,
+        amenities: Array.isArray(p.amenities) ? normalizeProjectFacilityIds(p.amenities) : p.amenities,
         muuno_score: p.muuno_score,
         created_at: p.created_at,
         commission_pct: p.commission_pct ?? null,
@@ -194,7 +195,7 @@ export function useNewbuildProject(slugOrId?: string) {
         is_approved: p.is_approved ?? true,
         developer_id: p.developer_id,
         developer_name: p.developer_name,
-        amenities: p.amenities,
+        amenities: Array.isArray(p.amenities) ? normalizeProjectFacilityIds(p.amenities) : p.amenities,
         muuno_score: p.muuno_score,
         created_at: p.created_at,
         commission_pct: p.commission_pct ?? null,

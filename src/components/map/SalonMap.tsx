@@ -6,6 +6,7 @@ import { useGoogleMaps } from '@/contexts/GoogleMapsContext';
 import { Loader2 } from 'lucide-react';
 import { createMapPopupHtml, escapeHtml } from '@/lib/sanitize';
 import { getMapCenter, DEFAULT_CITY } from '@/lib/config';
+import { cn } from '@/lib/utils';
 
 export interface SalonMarker {
   id: string;
@@ -67,7 +68,9 @@ const SalonMap: React.FC<SalonMapProps> = ({
   }, [getCityConfig]);
 
   const filteredSalons = useMemo(() => {
-    if (!distanceFilter || !userLocation) return salons;
+    if (!userLocation) return salons;
+    // 0 / null / negative = "All" — do not hide listings by distance (50 km was wrongly used as "All" before)
+    if (distanceFilter == null || distanceFilter <= 0) return salons;
     return salons.filter((salon) => {
       const d = calculateDistance(userLocation.lat, userLocation.lng, salon.lat, salon.lng);
       return d <= distanceFilter;
@@ -106,8 +109,11 @@ const SalonMap: React.FC<SalonMapProps> = ({
     );
   }
 
+  const markerTitle = (salon: SalonMarker) =>
+    language === 'ru' ? salon.nameRu : salon.name;
+
   return (
-    <div className={`relative ${className}`}>
+    <div className={cn('relative min-h-0', className)}>
       <GoogleMap
         mapContainerStyle={mapContainerStyle}
         center={defaultCenter}
@@ -125,7 +131,12 @@ const SalonMap: React.FC<SalonMapProps> = ({
           <Marker
             key={salon.id}
             position={{ lat: salon.lat, lng: salon.lng }}
-            label={{ text: icon, color: 'white', fontWeight: 'bold', fontSize: '14px' }}
+            title={markerTitle(salon)}
+            label={
+              icon.length === 1 && icon.charCodeAt(0) < 128
+                ? { text: icon, color: 'white', fontWeight: 'bold', fontSize: '14px' }
+                : undefined
+            }
             onClick={() => {
               setSelectedId(salon.id);
               onSalonSelect?.(salon.id);

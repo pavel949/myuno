@@ -4,11 +4,11 @@
  */
 
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { 
   Building2, MapPin, Calendar, Users, 
-  Phone, Mail, Globe, Info
+  Info
 } from 'lucide-react';
 import { BackButton } from '@/components/uno/BackButton';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -22,6 +22,8 @@ import { ProjectHeroMedia } from '@/components/property/ProjectHeroMedia';
 import { ProjectAmenitiesGrid } from '@/components/property/ProjectAmenitiesGrid';
 import { ProjectUnitsSection } from '@/components/property/ProjectUnitsSection';
 import { ProjectGalleryModal } from '@/components/property/ProjectGalleryModal';
+import { PropertyLocationMap } from '@/components/property/PropertyLocationMap';
+import { cn } from '@/lib/utils';
 
 export default function ProjectDetail() {
   const { id } = useParams<{ id: string }>();
@@ -88,7 +90,9 @@ export default function ProjectDetail() {
           </div>
         </header>
 
-        <main className="max-w-4xl mx-auto">
+        <main className="max-w-6xl mx-auto">
+          <div className="lg:grid lg:grid-cols-[1fr,minmax(260px,300px)] xl:grid-cols-[1fr,minmax(280px,320px)] lg:gap-10 xl:gap-12 lg:items-start">
+            <div className="min-w-0">
           {/* Hero Media */}
           <section className="px-4 pt-4">
             <ProjectHeroMedia
@@ -195,30 +199,64 @@ export default function ProjectDetail() {
                   <MapPin className="h-5 w-5 text-primary" />
                   {isRu ? 'Расположение' : 'Location'}
                 </h3>
-                {project.address && (
-                  <p className="text-sm text-muted-foreground mb-4">
-                    {project.address}
-                  </p>
-                )}
-                <div className="h-64 rounded-2xl bg-muted flex items-center justify-center text-muted-foreground">
-                  <p className="text-sm">
-                    {isRu ? 'Карта загружается...' : 'Map loading...'}
-                  </p>
-                </div>
+                <PropertyLocationMap
+                  lat={project.lat}
+                  lng={project.lng}
+                  district={project.district}
+                  address={project.address ?? undefined}
+                  showHeading={false}
+                />
               </section>
             </>
           )}
 
-          {/* CTA */}
-          <section className="px-4 py-6">
+          {/* CTA — mobile only; desktop uses sticky aside */}
+          <section className="px-4 py-6 lg:hidden">
             <Button 
               className="w-full" 
               size="lg"
-              onClick={() => navigate(`/property?project=${project.id}`)}
+              onClick={() => navigate(`${APP_ROUTES.PROPERTY}?project=${encodeURIComponent(project.id)}`)}
             >
               {isRu ? 'Смотреть все объекты в комплексе' : 'View all units in complex'}
             </Button>
+            <Button variant="outline" className="w-full mt-3" asChild>
+              <Link to={APP_ROUTES.SUPPORT}>
+                {isRu ? 'Связаться с myUNO' : 'Contact myUNO'}
+              </Link>
+            </Button>
           </section>
+            </div>
+
+            {/* Sticky conversion column (desktop) */}
+            <aside
+              className={cn(
+                'hidden lg:flex flex-col gap-3 w-full',
+                'lg:sticky lg:top-20 xl:top-24 lg:self-start lg:z-10',
+                'lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto lg:overscroll-contain lg:pr-1',
+                'xl:pr-0'
+              )}
+            >
+              <div className="rounded-xl border border-border/60 bg-card p-4 space-y-3 shadow-sm">
+                <Button
+                  className="w-full"
+                  size="lg"
+                  onClick={() => navigate(`${APP_ROUTES.PROPERTY}?project=${encodeURIComponent(project.id)}`)}
+                >
+                  {isRu ? 'Объекты в комплексе' : 'Units in this complex'}
+                </Button>
+                <Button variant="outline" className="w-full" asChild>
+                  <Link to={APP_ROUTES.SUPPORT}>
+                    {isRu ? 'Связаться с myUNO' : 'Contact myUNO'}
+                  </Link>
+                </Button>
+                <p className="text-xs text-muted-foreground leading-snug">
+                  {isRu
+                    ? 'Консьерж myUNO поможет с подбором, бронированием и вопросами по комплексу.'
+                    : 'myUNO concierge can help with selection, booking, and questions about this complex.'}
+                </p>
+              </div>
+            </aside>
+          </div>
         </main>
 
         {/* Gallery Modal */}

@@ -7,6 +7,10 @@ import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { subDays, isAfter } from 'date-fns';
 import type { Property } from '@/hooks/useProperties';
+import {
+  normalizeHighlightId,
+  normalizeListingAmenityId,
+} from '@/lib/propertyAttributeRegistry';
 
 export interface QuickFilter {
   id: string;
@@ -209,14 +213,12 @@ export function matchesQuickFilter(property: Property, filterId: string): boolea
     case 'walking_to_beach':
     case 'full_service':
     case 'designer_interior':
-      return (property.highlights || []).includes(filterId) ||
-             (property.amenities || []).includes(filterId.replace('_', '-'));
+      return (property.highlights || []).some((h) => normalizeHighlightId(h) === filterId) ||
+        (property.amenities || []).some((a) => normalizeListingAmenityId(a) === filterId);
 
     // Amenity-based
     case 'pet_friendly':
-      return (property.amenities || []).some(a => 
-        a.toLowerCase().includes('pet') || a === 'pet-friendly'
-      );
+      return (property.amenities || []).some((a) => normalizeListingAmenityId(a) === 'pet_friendly');
     case 'pool':
       return (property.amenities || []).some(a => 
         a.toLowerCase().includes('pool')
@@ -227,7 +229,6 @@ export function matchesQuickFilter(property: Property, filterId: string): boolea
       );
 
     default:
-      // Check in highlights array as fallback
-      return (property.highlights || []).includes(filterId);
+      return (property.highlights || []).some((h) => normalizeHighlightId(h) === filterId);
   }
 }

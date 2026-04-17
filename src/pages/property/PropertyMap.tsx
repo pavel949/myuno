@@ -18,12 +18,14 @@ import {
 import { CITY_GEOGRAPHY } from '@/lib/config/geography';
 import { usePropertiesForMap, transformPropertiesToMarkers } from '@/hooks/useProperties';
 
+/** 0 = no distance filter (show all markers). Do not use a km radius for "All" — users far from Phuket would see an empty map. */
 const distanceOptions = [
+  { value: 0, labelEn: 'All', labelRu: 'Все' },
   { value: 2, labelEn: '2 km', labelRu: '2 км' },
   { value: 5, labelEn: '5 km', labelRu: '5 км' },
   { value: 10, labelEn: '10 km', labelRu: '10 км' },
   { value: 25, labelEn: '25 km', labelRu: '25 км' },
-  { value: 50, labelEn: 'All', labelRu: 'Все' },
+  { value: 50, labelEn: '50 km', labelRu: '50 км' },
 ];
 
 const propertyTypes = [
@@ -39,7 +41,7 @@ export default function PropertyMap() {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [distanceFilter, setDistanceFilter] = useState<number>(50);
+  const [distanceFilter, setDistanceFilter] = useState<number>(0);
   const [selectedType, setSelectedType] = useState('all');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
@@ -213,7 +215,7 @@ export default function PropertyMap() {
             onSalonSelect={handlePropertySelect}
             userLocation={userLocation}
             distanceFilter={distanceFilter}
-            className="flex-1"
+            className="flex-1 min-h-0 w-full"
             icon="🏠"
             iconBgColor="bg-emerald-600"
           />

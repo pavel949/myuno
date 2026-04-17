@@ -16,20 +16,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 import { ProjectCard } from '@/components/property/ProjectCard';
 import { cn } from '@/lib/utils';
+import { PHUKET_DISTRICTS } from '@/lib/taxonomies';
 
-// Phuket districts for filtering
 const districts = [
   { id: 'all', en: 'All Areas', ru: 'Все районы' },
-  { id: 'Patong', en: 'Patong', ru: 'Патонг' },
-  { id: 'Rawai', en: 'Rawai', ru: 'Равай' },
-  { id: 'Kamala', en: 'Kamala', ru: 'Камала' },
-  { id: 'Kata', en: 'Kata', ru: 'Ката' },
-  { id: 'Karon', en: 'Karon', ru: 'Карон' },
-  { id: 'Surin', en: 'Surin', ru: 'Сурин' },
-  { id: 'Bang Tao', en: 'Bang Tao', ru: 'Банг Тао' },
-  { id: 'Nai Harn', en: 'Nai Harn', ru: 'Най Харн' },
-  { id: 'Chalong', en: 'Chalong', ru: 'Чалонг' },
-  { id: 'Phuket Town', en: 'Phuket Town', ru: 'Пхукет Таун' },
+  ...PHUKET_DISTRICTS.map((d) => ({ id: d.id, en: d.labelEn, ru: d.labelRu })),
 ];
 
 export default function ProjectsIndex() {

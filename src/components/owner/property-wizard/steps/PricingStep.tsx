@@ -1,4 +1,4 @@
-import { memo, useState } from 'react';
+import React, { memo, useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -87,9 +87,41 @@ function CollapsibleSection({
   );
 }
 
+// Pricing template definitions
+const PRICING_TEMPLATES = [
+  {
+    id: 'short_term',
+    labelEn: 'Short-term',
+    labelRu: 'Посуточно',
+    descEn: 'Tourists, ≤30 nights',
+    descRu: 'Туристы, ≤30 ночей',
+    icon: <Rocket className="h-4 w-4" />,
+    defaults: { min_stay_nights: 1, check_in_time: '14:00', check_out_time: '12:00' },
+  },
+  {
+    id: 'long_term',
+    labelEn: 'Long-term',
+    labelRu: 'Долгосрочно',
+    descEn: 'Expats, 30+ nights',
+    descRu: 'Экспаты, 30+ ночей',
+    icon: <Briefcase className="h-4 w-4" />,
+    defaults: { min_stay_nights: 30, check_in_time: '12:00', check_out_time: '12:00' },
+  },
+  {
+    id: 'sale',
+    labelEn: 'For sale',
+    labelRu: 'Продажа',
+    descEn: 'Investment / resale',
+    descRu: 'Инвестиция / перепродажа',
+    icon: <BadgeDollarSign className="h-4 w-4" />,
+    defaults: { min_stay_nights: 0, instant_booking: false },
+  },
+] as const;
+
 function PricingStepInner({ formData, updateFormData, selectedProject }: PricingStepProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const [pricingMode, setPricingMode] = useState<'short_term' | 'long_term' | 'sale' | null>(null);
 
   const handleUseProjectDescription = () => {
     updateFormData({
@@ -99,14 +131,68 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
     toast.success(isRu ? 'Описание проекта загружено' : 'Project description loaded');
   };
 
+  const handleSelectTemplate = (templateId: typeof PRICING_TEMPLATES[number]['id']) => {
+    const template = PRICING_TEMPLATES.find(t => t.id === templateId);
+    if (!template) return;
+    setPricingMode(templateId);
+    updateFormData(template.defaults as Partial<PropertyFormData>);
+    toast.success(isRu ? 'Шаблон применён' : 'Template applied');
+  };
+
   const projectAmenities = selectedProject?.amenities || [];
   const hasProjectDescription = selectedProject?.description_en || selectedProject?.description_ru;
   const isDescriptionEmpty = !formData.description && !formData.description_ru;
   const basePrice = Number(formData.price_per_night) || 0;
   const seasonCount = formData.seasonal_pricing?.length || 0;
 
+  // Live income preview (short-term, 70% occupancy)
+  const occupancyRate = 0.7;
+  const daysInMonth = 30;
+  const estimatedMonthly = pricingMode !== 'sale' && basePrice > 0
+    ? Math.round(basePrice * daysInMonth * occupancyRate)
+    : 0;
+
   return (
     <div className="space-y-3">
+      {/* ─── Pricing Templates — always first ─── */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Sparkles className="h-4 w-4" />
+            {isRu ? 'Шаблон ценообразования' : 'Pricing Template'}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-xs text-muted-foreground mb-3">
+            {isRu ? 'Быстрое заполнение условий по типу сдачи' : 'Quickly pre-fill terms based on rental type'}
+          </p>
+          <div className="grid grid-cols-3 gap-2">
+            {PRICING_TEMPLATES.map((tpl) => {
+              const isActive = pricingMode === tpl.id;
+              return (
+                <button
+                  key={tpl.id}
+                  type="button"
+                  onClick={() => handleSelectTemplate(tpl.id)}
+                  className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 text-center transition-all ${
+                    isActive
+                      ? 'border-primary bg-primary/5 text-primary'
+                      : 'border-transparent bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${
+                    isActive ? 'bg-primary text-primary-foreground' : 'bg-muted'
+                  }`}>
+                    {tpl.icon}
+                  </div>
+                  <p className="text-xs font-medium leading-tight">{isRu ? tpl.labelRu : tpl.labelEn}</p>
+                  <p className="text-[10px] text-muted-foreground leading-tight">{isRu ? tpl.descRu : tpl.descEn}</p>
+                </button>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
       {/* ─── Ownership structure (legal form for reporting) — distinct from "Management rights" on step 1 ─── */}
       <CollapsibleSection
         icon={<Landmark className="h-4 w-4" />}
@@ -148,14 +234,28 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>{isRu ? 'Цена за ночь (THB)' : 'Price per night (THB)'}</Label>
-              <Input
-                type="number"
-                min={0}
-                value={formData.price_per_night}
-                onChange={(e) => updateFormData({ price_per_night: e.target.value })}
-                placeholder="2500"
-              />
+              <Label>{isRu ? 'Цена за ночь' : 'Price per night'}</Label>
+              <div className="relative">
+                <Input
+                  type="number"
+                  min={0}
+                  value={formData.price_per_night}
+                  onChange={(e) => updateFormData({ price_per_night: e.target.value })}
+                  placeholder="2500"
+                  className="pr-14"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none font-medium">
+                  THB
+                </span>
+              </div>
+              {estimatedMonthly > 0 && (
+                <p className="text-xs text-success flex items-center gap-1">
+                  <BadgeDollarSign className="h-3 w-3" />
+                  {isRu
+                    ? `≈ ${estimatedMonthly.toLocaleString('ru')} THB/мес при загрузке 70%`
+                    : `≈ ${estimatedMonthly.toLocaleString()} THB/mo at 70% occupancy`}
+                </p>
+              )}
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div className="space-y-2">

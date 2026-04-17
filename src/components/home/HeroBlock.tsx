@@ -1,5 +1,5 @@
 import React, { memo, useMemo, useCallback, useState } from 'react';
-import { MapPin, Sun, Cloud, CloudRain, Calendar, Trophy, Flame, Search, ArrowRight } from 'lucide-react';
+import { MapPin, Sun, Cloud, CloudRain, Calendar, Trophy, Flame, Search, ArrowRight, Plane } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useWeather } from '@/hooks/useWeather';
@@ -48,13 +48,26 @@ function HeroSearchInput({ isRu }: { isRu: boolean }) {
   );
 }
 
-function PersonaSwitcher({ isRu }: { isRu: boolean }) {
+function PersonaSwitcher({ isRu, layout }: { isRu: boolean; layout: 'scroll' | 'wrap' }) {
   const { personas, setPersonas, isSetting } = useUserPersonas();
   const activePersona = useMemo(() => personas[0] ?? ('tourist' as UserPersona), [personas]);
 
+  const isWrap = layout === 'wrap';
+
   return (
-    <div className="w-full overflow-x-auto scrollbar-hide -mx-1 px-1 pb-1">
-      <div className="flex gap-2 flex-nowrap py-1">
+    <div
+      className={cn(
+        'w-full min-w-0',
+        !isWrap &&
+          'overflow-x-auto overflow-y-hidden scrollbar-hide snap-x snap-mandatory scroll-pl-3 scroll-pr-3 -mx-1 px-1 pb-1'
+      )}
+    >
+      <div
+        className={cn(
+          'flex gap-2 py-1',
+          isWrap ? 'flex-wrap' : 'flex-nowrap w-max'
+        )}
+      >
         {PERSONA_OPTIONS.map((p) => {
           const info = PERSONA_INFO[p];
           const Icon = PERSONA_ICONS[info.icon] || Plane;
@@ -62,13 +75,15 @@ function PersonaSwitcher({ isRu }: { isRu: boolean }) {
           return (
             <button
               key={p}
+              type="button"
               onClick={() => setPersonas([p])}
               disabled={isSetting}
               className={cn(
-                "flex items-center gap-1.5 px-3.5 py-2.5 rounded-[var(--radius-full)] shrink-0 transition-all duration-200 border",
+                'flex items-center gap-1.5 px-3 py-2 sm:px-3.5 sm:py-2.5 min-h-10 rounded-[var(--radius-full)] shrink-0 transition-all duration-200 border',
+                !isWrap && 'snap-start',
                 isActive
-                  ? "shadow-lg ring-1 ring-white/20 text-white border-white/30"
-                  : "text-foreground/90 hover:text-foreground border-white/15"
+                  ? 'shadow-lg ring-1 ring-white/20 text-white border-white/30'
+                  : 'text-foreground/90 hover:text-foreground border-white/15'
               )}
               style={{
                 background: isActive
@@ -77,11 +92,13 @@ function PersonaSwitcher({ isRu }: { isRu: boolean }) {
                 backdropFilter: isActive ? 'none' : 'blur(8px)',
               }}
             >
-              <Icon className="w-4 h-4 shrink-0" strokeWidth={2} />
-              <span className={cn(
-                "text-xs font-semibold whitespace-nowrap leading-none",
-                isActive ? "text-white" : ""
-              )}>
+              <Icon className="w-4 h-4 shrink-0" strokeWidth={2} aria-hidden />
+              <span
+                className={cn(
+                  'text-[11px] sm:text-xs font-semibold leading-none whitespace-nowrap',
+                  isActive ? 'text-white' : ''
+                )}
+              >
                 {isRu ? info.labelRu : info.labelEn}
               </span>
             </button>
@@ -189,7 +206,7 @@ export const HeroBlock = memo(function HeroBlock() {
             )}
           </div>
           
-          <PersonaSwitcher isRu={isRu} />
+          <PersonaSwitcher isRu={isRu} layout="scroll" />
           <HeroSearchInput isRu={isRu} />
         </div>
       </div>
@@ -207,8 +224,8 @@ export const HeroBlock = memo(function HeroBlock() {
         backgroundSize: '24px 24px',
       }} />
       
-      <div className="relative flex items-start justify-between">
-        <div className="space-y-3 flex-1">
+      <div className="relative flex items-start justify-between gap-6">
+        <div className="space-y-3 flex-1 min-w-0 pr-2">
           <p className="text-[15px] text-muted-foreground font-medium">
             {isRu ? 'Всё для жизни за рубежом — в одном месте' : 'One place for everything abroad'}
           </p>
@@ -252,8 +269,8 @@ export const HeroBlock = memo(function HeroBlock() {
               </>
             ) : null}
           </div>
-          <div className="pt-3 max-w-4xl">
-            <PersonaSwitcher isRu={isRu} />
+          <div className="pt-3 w-full min-w-0">
+            <PersonaSwitcher isRu={isRu} layout="wrap" />
           </div>
         </div>
 
