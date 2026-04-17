@@ -17,15 +17,20 @@ export interface Developer {
   website?: string;
   phone?: string;
   email?: string;
+  address?: string;
+  founded_year?: number;
   established_year?: number;
   headquarters?: string;
   projects_completed?: number;
   projects_ongoing?: number;
+  total_units_sold?: number;
   total_units_delivered?: number;
+  average_rating?: number | string;
   muuno_score?: number;
   is_verified: boolean;
   is_featured: boolean;
   is_active: boolean;
+  user_id?: string | null;
   created_at: string;
   updated_at: string;
 }

@@ -112,6 +112,7 @@ export const APP_ROUTES = {
   DEVELOPER_PORTAL_LEAD_DETAIL: (id: string) => `/developer-portal/leads/${id}`,
   DEVELOPER_PORTAL_TEAM: '/developer-portal/team',
   DEVELOPER_PORTAL_ACCEPT_INVITE: '/developer-portal/accept-invite',
+  DEVELOPER_PORTAL_ACCEPT_CLAIM: '/developer-portal/accept-claim',
   DEVELOPER_PORTAL_PROJECTS: '/developer-portal/projects',
   DEVELOPER_PORTAL_PROJECT_NEW: '/developer-portal/projects/new',
   DEVELOPER_PORTAL_PROJECT_EDIT: (id: string) => `/developer-portal/projects/${id}`,

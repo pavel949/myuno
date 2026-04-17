@@ -148,3 +148,48 @@ export function useRejectDeveloper() {
     onError: (e: Error) => toast.error(e.message || 'Ошибка'),
   });
 }
+
+// ── Claim invite (admin links existing developer profile to a user) ──
+
+export interface DeveloperForClaim {
+  id: string;
+  name_en: string;
+  name_ru: string;
+  email: string | null;
+  user_id: string | null;
+  devmod_status: string | null;
+  is_active: boolean | null;
+  created_at: string;
+}
+
+/** All developers + claim status — for the admin "All developers" tab. */
+export function useAllDevelopersForClaim() {
+  return useQuery({
+    queryKey: ['all-developers-claim'],
+    queryFn: async (): Promise<DeveloperForClaim[]> => {
+      const { data, error } = await supabase
+        .from('developers')
+        .select('id, name_en, name_ru, email, user_id, devmod_status, is_active, created_at')
+        .order('name_en', { ascending: true });
+      if (error) throw error;
+      return (data || []) as unknown as DeveloperForClaim[];
+    },
+  });
+}
+
+export function useSendClaimInvite() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (params: { developer_id: string; email: string }) => {
+      const res = await supabase.functions.invoke('devmod-claim-invite', { body: params });
+      if (res.error) throw new Error(res.error.message);
+      if (!res.data?.success) throw new Error(res.data?.error ?? 'Ошибка отправки приглашения');
+      return res.data as { success: true; link: string; expires_at: string };
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['all-developers-claim'] });
+      toast.success('Приглашение отправлено застройщику');
+    },
+    onError: (e: Error) => toast.error(e.message || 'Ошибка отправки'),
+  });
+}

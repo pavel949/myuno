@@ -1,78 +1,15 @@
 /**
- * Hook for fetching developers data
+ * Hook for fetching developers (public catalog).
+ * Returns DeveloperUI which keeps both snake_case (DB) and camelCase fields,
+ * so legacy callers continue to work.
  */
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { toDeveloperUI, type DeveloperRow, type DeveloperUI } from '@/lib/adapters/developerAdapter';
 
-export interface Developer {
-  id: string;
-  nameEn: string;
-  nameRu: string;
-  slug: string | null;
-  logoUrl: string | null;
-  coverImage: string | null;
-  descriptionEn: string | null;
-  descriptionRu: string | null;
-  foundedYear: number | null;
-  projectsCompleted: number;
-  totalUnitsSold: number;
-  averageRating: number;
-  website: string | null;
-  phone: string | null;
-  email: string | null;
-  address: string | null;
-  isVerified: boolean;
-  isFeatured: boolean;
-  muunoScore: number | null;
-}
-
-/** Raw row from `developers` table */
-type DeveloperRow = {
-  id: string;
-  name_en: string;
-  name_ru: string;
-  slug: string | null;
-  logo_url: string | null;
-  cover_image: string | null;
-  description_en: string | null;
-  description_ru: string | null;
-  founded_year: number | null;
-  projects_completed: number | null;
-  total_units_sold: number | null;
-  average_rating: number | string | null;
-  website: string | null;
-  phone: string | null;
-  email: string | null;
-  address: string | null;
-  is_verified: boolean | null;
-  is_featured: boolean | null;
-  muuno_score: number | null;
-};
-
-function mapDeveloperRow(data: DeveloperRow): Developer {
-  return {
-    id: data.id,
-    nameEn: data.name_en,
-    nameRu: data.name_ru,
-    slug: data.slug,
-    logoUrl: data.logo_url,
-    coverImage: data.cover_image,
-    descriptionEn: data.description_en,
-    descriptionRu: data.description_ru,
-    foundedYear: data.founded_year,
-    projectsCompleted: data.projects_completed || 0,
-    totalUnitsSold: data.total_units_sold || 0,
-    averageRating: Number(data.average_rating) || 0,
-    website: data.website,
-    phone: data.phone,
-    email: data.email,
-    address: data.address,
-    isVerified: data.is_verified || false,
-    isFeatured: data.is_featured || false,
-    muunoScore: data.muuno_score,
-  };
-}
+/** Public alias kept for backward compatibility. */
+export type Developer = DeveloperUI;
 
 export function useDevelopers() {
   return useQuery({
@@ -88,7 +25,7 @@ export function useDevelopers() {
       if (error) throw error;
       if (!data) return [];
 
-      return data.map((d) => mapDeveloperRow(d as DeveloperRow));
+      return data.map((d) => toDeveloperUI(d as DeveloperRow));
     },
     staleTime: 5 * 60 * 1000,
   });
@@ -108,7 +45,7 @@ export function useDeveloper(id: string) {
       if (error) throw error;
       if (!data) return null;
 
-      return mapDeveloperRow(data as DeveloperRow);
+      return toDeveloperUI(data as DeveloperRow);
     },
     enabled: !!id,
     staleTime: 5 * 60 * 1000,
@@ -141,7 +78,7 @@ export function useDeveloperSlugOrId(slugOrId?: string) {
       if (error) throw error;
       if (!data) return null;
 
-      return mapDeveloperRow(data as DeveloperRow);
+      return toDeveloperUI(data as DeveloperRow);
     },
     enabled: !!slugOrId,
     staleTime: 5 * 60 * 1000,
