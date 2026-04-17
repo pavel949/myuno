@@ -518,6 +518,40 @@ export function useSubmitKycLite() {
   });
 }
 
+// ── Masked Communications (Phase 3) ──
+
+export interface MaskedChannelResult {
+  channel_id: string;
+  masked_email: string;
+  expires_at: string;
+  reused: boolean;
+}
+
+export function useCreateMaskedChannel() {
+  return useMutation({
+    mutationFn: async (opts: {
+      leadId: string;
+      buyerId?: string;
+      reservationId?: string;
+      stage?: string;
+    }): Promise<MaskedChannelResult> => {
+      const { data, error } = await supabase.functions.invoke('devmod-masked-channel-create', {
+        body: {
+          lead_id: opts.leadId,
+          buyer_id: opts.buyerId ?? null,
+          reservation_id: opts.reservationId ?? null,
+          stage: opts.stage ?? 'inquiry',
+        },
+      });
+      if (error) throw new Error(String(error));
+      const result = data as { error?: string } & MaskedChannelResult;
+      if (result.error) throw new Error(result.error);
+      return result as MaskedChannelResult;
+    },
+    onError: (e: Error) => toast.error(e.message || 'Ошибка создания канала'),
+  });
+}
+
 export function useDeveloperProjects(developerId?: string) {
   return useQuery({
     queryKey: ['developer-projects', developerId],

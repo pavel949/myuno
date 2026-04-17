@@ -201,6 +201,26 @@ Deno.serve(async (req) => {
         }
       }
 
+      // 5. Stage-gated disclosure event: booking_fee stage — broker now has full buyer contact
+      //    (developer still sees masked channel per R4 — full disclosure only at SPA signed)
+      const { data: holdForDisclosure } = await sb
+        .from("unit_holds")
+        .select("lead_id")
+        .eq("id", hold_id)
+        .maybeSingle();
+
+      const leadIdForDisc = (holdForDisclosure as { lead_id: string | null } | null)?.lead_id;
+      if (leadIdForDisc) {
+        await sb.from("contact_disclosure_events" as never).insert({
+          lead_id: leadIdForDisc,
+          stage: "booking_fee",
+          disclosed_to_type: "agent",  // broker/agent — not developer
+          disclosed_to_id: null,
+          fields_disclosed: ["email", "phone", "full_name"],
+          disclosed_at: new Date().toISOString(),
+        } as never);
+      }
+
       console.log(`[devmod-stripe-webhook] Booking fee paid for unit ${unit_id}, hold ${hold_id}, session ${session.id}`);
     }
 
