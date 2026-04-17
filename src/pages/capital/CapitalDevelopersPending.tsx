@@ -8,10 +8,12 @@
  *                       send-invite, copy magic link
  */
 import React, { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   CheckCircle, XCircle, Clock, Building2, Globe, Mail, Phone, User,
-  Send, Link2, Search, Copy, ExternalLink, Filter, Users, Sparkles,
+  Send, Link2, Search, Copy, ExternalLink, Filter, Users, Sparkles, Eye,
 } from 'lucide-react';
+import { useImpersonation } from '@/contexts/ImpersonationContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -174,10 +176,11 @@ function PendingCard({
 // ── Directory row ─────────────────────────────────────────────────────
 
 function DirectoryRow({
-  dev, onClaim,
+  dev, onClaim, onImpersonate,
 }: {
   dev: DeveloperForClaim;
   onClaim: (d: DeveloperForClaim) => void;
+  onImpersonate: (d: DeveloperForClaim) => void;
 }) {
   const claimed = !!dev.user_id;
 
@@ -215,12 +218,16 @@ function DirectoryRow({
           ) : (
             <>
               <Badge variant="outline" className="text-muted-foreground">Нет аккаунта</Badge>
-              <Button size="sm" onClick={() => onClaim(dev)}>
+              <Button size="sm" variant="outline" onClick={() => onClaim(dev)}>
                 <Send className="w-3.5 h-3.5 mr-1.5" />
-                Отправить инвайт
+                Инвайт
               </Button>
             </>
           )}
+          <Button size="sm" onClick={() => onImpersonate(dev)} title="Войти как этот застройщик">
+            <Eye className="w-3.5 h-3.5 mr-1.5" />
+            Войти как
+          </Button>
         </div>
       </CardContent>
     </Card>
