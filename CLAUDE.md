@@ -63,9 +63,23 @@
 
 ## 4. DATABASE
 
-**Supabase project** — all tables in **public** schema. No v2 schema exists in production.
+> 📖 **Canonical source of truth:** [`docs/DATABASES.md`](docs/DATABASES.md). If anything below conflicts with that file, the `docs/DATABASES.md` file wins.
 
-**Key tables:**
+### Topology (three projects)
+
+| Project | Ref | Role | Status |
+|---|---|---|---|
+| **Main (Lovable Cloud)** | `kakkwibljrjsawxgnupk` | Active production DB. All runtime writes from the frontend land here. Hosts all Edge Functions. | ✅ Active |
+| **Self-managed target** | `erfwtoavipwjqmylpizt` | Planned migration destination. Not connected at runtime today. | 🔄 Planned — **migration ON HOLD** |
+| **PEYLAA** | from `VITE_PEYLAA_SUPABASE_URL` | Separate project for peylaa.com landing. Primary writes for PEYLAA leads (+ mirror write into Main). | ✅ Active |
+
+**We are working on Lovable Cloud (`kakkwibljrjsawxgnupk`). Do not treat `erfwtoavipwjqmylpizt` as active.**
+
+> ⚠️ `supabase/config.toml:1` points at `erfwtoavipwjqmylpizt` — that's a **CLI config** for `supabase link` / `supabase functions deploy`, **not** the runtime URL. Runtime DB is determined by `VITE_SUPABASE_URL` (= Main). Before running Supabase CLI, pass `--project-ref` explicitly.
+
+All tables in **public** schema. No v2 schema exists in production.
+
+**Key tables (Main DB):**
 - `orders` — all transactions (Stripe + cash + bank). Fields: `order_type`, `total_amount`, `platform_fee_amount`, `vendor_payout_amount`, `status`
 - `order_items`, `order_addresses`, `order_participants`, `order_status_history` — order details
 - `payment_intents` — Stripe payment tracking per order
@@ -77,7 +91,9 @@
 
 **Financial flow:** Stripe checkout → webhook (`stripe-webhook`) → order confirmed → `record_ledger_entries` RPC → ledger entries created (platform fee + vendor payout + optional MC commission)
 
-**Supabase client:** Always use `src/integrations/supabase/client.ts`. Never create new instances.
+**Supabase clients (exactly two in code — do not create more):**
+- `src/integrations/supabase/client.ts` — Main (`kakkwibljrjsawxgnupk`). Default import: `import { supabase } from '@/integrations/supabase/client'`.
+- `src/lib/peylaa/supabaseClient.ts` — PEYLAA (separate project). Used only in `src/hooks/usePeylaa.ts` for PEYLAA leads. Note: `persistSession: false` here controls auth session storage — it does **not** mean read-only; the PEYLAA client performs real `insert`s into `leads`.
 
 **Auto-generated types:** `src/integrations/supabase/types.ts` (900KB, не редактируем вручную).
 

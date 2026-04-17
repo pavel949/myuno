@@ -1,5 +1,7 @@
 # Double-Booking Mitigation Setup
 
+> ⚠️ **Project ref note.** The CLI commands below use `--project-ref erfwtoavipwjqmylpizt`, which is the **self-managed migration target** (currently **not active** — migration is ON HOLD). The **live** DB is **Lovable Cloud `kakkwibljrjsawxgnupk`**, managed through the Lovable UI; these CLI steps don't apply directly there. See [`DATABASES.md`](DATABASES.md). Before running, swap the `--project-ref` to match the project you actually intend to target.
+
 Steps to complete the double-booking risk reduction setup.
 
 ## 1. Apply migrations

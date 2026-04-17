@@ -1,5 +1,8 @@
 # Миграция myUNO: Lovable → свой Supabase
 
+> ⚠️ **STATUS: ON HOLD (2026-04-17).**
+> Сейчас работаем на **Lovable Cloud (`kakkwibljrjsawxgnupk`)**. Миграция на self-managed (`erfwtoavipwjqmylpizt`) **не запланирована к исполнению**. Эти команды — для будущего запуска миграции, не инструкция к действию сегодня. См. [`../docs/DATABASES.md`](../docs/DATABASES.md) для актуальной топологии.
+
 ## Что нужно
 
 - Node.js 18+

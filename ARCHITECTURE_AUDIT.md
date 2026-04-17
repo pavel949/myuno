@@ -195,15 +195,29 @@ Cart operations (add/update/remove) catch Supabase errors but only log them — 
 
 ---
 
-### 19. Hardcoded Supabase Project ID in Source Code
+### 19. Hardcoded Supabase Project ID in Source Code — ✅ RESOLVED
 
-**File:** `src/components/ui/optimized-image.tsx:27`
+**File:** `src/components/ui/optimized-image.tsx:27-35`
 
+Previously hardcoded:
 ```ts
 const SUPABASE_PROJECT_ID = 'erfwtoavipwjqmylpizt';
 ```
 
-Hardcoded in compiled JS bundles. Should derive from `VITE_SUPABASE_URL` env var.
+Now derives the project ID from `VITE_SUPABASE_URL` via regex:
+```ts
+const SUPABASE_PROJECT_ID = (() => {
+  try {
+    const url = import.meta.env.VITE_SUPABASE_URL || '';
+    const match = url.match(/https:\/\/([^.]+)\.supabase\.co/);
+    return match?.[1] || '';
+  } catch {
+    return '';
+  }
+})();
+```
+
+Also note: the previously-hardcoded value was the self-managed migration target, not the live Lovable Cloud project. The current runtime project is `kakkwibljrjsawxgnupk` — see [`docs/DATABASES.md`](docs/DATABASES.md).
 
 ---
 

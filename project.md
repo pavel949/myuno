@@ -92,7 +92,19 @@ Dashboard, contacts, projects, campaigns, outreach, pipeline, templates. Accessi
 
 ## 5. DATABASE
 
-**Supabase project:** `erfwtoavipwjqmylpizt` (Lovable-hosted, **migration to self-managed in progress** — see `MIGRATION_PLAN.md`)
+> 📖 **Canonical source of truth:** [`docs/DATABASES.md`](docs/DATABASES.md).
+
+### Topology (three projects)
+
+| Project | Ref | Role | Status |
+|---|---|---|---|
+| **Main (Lovable Cloud)** | `kakkwibljrjsawxgnupk` | Active production DB — all runtime writes land here | ✅ Active |
+| **Self-managed target** | `erfwtoavipwjqmylpizt` | Planned migration destination (see `MIGRATION_PLAN.md`) | 🔄 **ON HOLD** |
+| **PEYLAA** | from `VITE_PEYLAA_SUPABASE_URL` | Separate project for peylaa.com landing | ✅ Active |
+
+**We are working on Lovable Cloud. `erfwtoavipwjqmylpizt` is NOT active — it's a future migration target.**
+
+Runtime DB is determined by `VITE_SUPABASE_URL` (= Main). `supabase/config.toml` is a CLI config, not a runtime URL.
 
 **417 tables**, all in `public` schema. No `v2` schema.
 

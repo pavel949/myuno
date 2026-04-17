@@ -1,8 +1,15 @@
 # myUNO Database Migration Plan
 ## Lovable Hosted DB → Own Supabase Instance
 
-**Date:** 2026-04-07
-**Current state:** 417 tables, 514 migrations, Lovable-hosted Supabase project `erfwtoavipwjqmylpizt`
+> ⚠️ **STATUS: ON HOLD (as of 2026-04-17).**
+>
+> Migration is **not scheduled for execution**. We are working on **Lovable Cloud (`kakkwibljrjsawxgnupk`)**. This file is a plan for the future, **not** an action list. Do not run any of the commands below without explicit go-ahead.
+>
+> See [`docs/DATABASES.md`](docs/DATABASES.md) for the current canonical topology.
+
+**Plan date:** 2026-04-07
+**Current live DB:** `kakkwibljrjsawxgnupk` (Lovable Cloud) — 417 tables, 514 migrations.
+**Migration target (planned, not active):** `erfwtoavipwjqmylpizt` (Own Supabase Instance).
 
 ---
 
