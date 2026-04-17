@@ -17,8 +17,7 @@ export function useHubOpportunities(zone: InvestmentHubZone) {
   const opportunitiesQuery = useQuery({
     queryKey: ['investment-hub-opportunities', zone],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('investment_opportunities')
+      const { data, error } = await (supabase.from('investment_opportunities' as any) as any)
         .select('id,title,asset_class,stage,fit_score,reliability_score,execution_score,target_raise_usd,min_ticket_usd,zone,metadata')
         .eq('zone', zone)
         .order('fit_score', { ascending: false, nullsFirst: false })
@@ -26,7 +25,7 @@ export function useHubOpportunities(zone: InvestmentHubZone) {
 
       if (error) throw error;
 
-      return (data ?? []).map((item) => ({
+      return ((data ?? []) as any[]).map((item) => ({
         id: item.id,
         title: item.title,
         metadata: item.metadata,
@@ -82,15 +81,14 @@ export function useHubIntroRequests() {
   return useQuery({
     queryKey: ['investment-hub-intro-requests'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('intro_requests')
+      const { data, error } = await (supabase.from('intro_requests' as any) as any)
         .select('id,opportunity_id,investor_entity_id,project_entity_id,intro_status,fee_type,created_at')
         .order('created_at', { ascending: false })
         .limit(20);
 
       if (error) throw error;
 
-      return (data ?? []).map((item) => ({
+      return ((data ?? []) as any[]).map((item) => ({
         id: item.id,
         opportunityId: item.opportunity_id,
         investorEntityId: item.investor_entity_id,

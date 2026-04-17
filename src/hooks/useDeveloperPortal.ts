@@ -139,11 +139,11 @@ export function useUpsertProjectUnit() {
     mutationFn: async (unit: Partial<DeveloperProjectUnit> & { project_id: string }) => {
       if (unit.id) {
         const { id, project_id, ...fields } = unit;
-        const { error } = await supabase.from('project_units').update(fields).eq('id', id);
+        const { error } = await (supabase.from('project_units') as any).update(fields).eq('id', id);
         if (error) throw error;
       } else {
         const { id: _id, ...insertFields } = unit;
-        const { error } = await supabase.from('project_units').insert(insertFields);
+        const { error } = await (supabase.from('project_units') as any).insert(insertFields);
         if (error) throw error;
       }
     },
@@ -231,11 +231,11 @@ export function useUpsertProjectUpdate() {
     mutationFn: async (update: Partial<ProjectUpdate> & { project_id: string }) => {
       if (update.id) {
         const { id, project_id, ...fields } = update;
-        const { error } = await (supabase.from('nb_project_updates' as never) as ReturnType<typeof supabase.from>).update(fields).eq('id', id);
+        const { error } = await (supabase.from('nb_project_updates' as any) as any).update(fields).eq('id', id);
         if (error) throw error;
       } else {
         const { id: _id, ...insertFields } = update;
-        const { error } = await (supabase.from('nb_project_updates' as never) as ReturnType<typeof supabase.from>).insert(insertFields);
+        const { error } = await (supabase.from('nb_project_updates' as any) as any).insert(insertFields);
         if (error) throw error;
       }
     },

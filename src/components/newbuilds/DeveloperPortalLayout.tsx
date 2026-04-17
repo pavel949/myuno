@@ -28,7 +28,7 @@ export default function DeveloperPortalLayout() {
   if (authLoading || devLoading) return <NewbuildsLayout><LoadingState /></NewbuildsLayout>;
   if (!user) return <Navigate to={`/auth?redirect=${encodeURIComponent(location.pathname)}`} replace />;
   if (!developer) return <Navigate to={APP_ROUTES.DEVELOPER_PORTAL_APPLY} replace />;
-  if ((developer as Record<string, unknown>).devmod_status === 'pending') {
+  if ((developer as unknown as Record<string, unknown>).devmod_status === 'pending') {
     return <Navigate to={APP_ROUTES.DEVELOPER_PORTAL_PENDING} replace />;
   }
 

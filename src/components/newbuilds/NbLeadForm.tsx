@@ -45,7 +45,7 @@ export function NbLeadForm({ projectId, developerId, source = 'project_page', co
       }
 
       // 2. Insert nb_lead
-      const { error } = await supabase.from('nb_leads' as never).insert({
+      const { error } = await (supabase.from('nb_leads' as any) as any).insert({
         full_name: form.full_name,
         phone: form.phone,
         email: form.email || null,
