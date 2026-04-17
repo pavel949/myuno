@@ -14,6 +14,7 @@ import {
   Send, Link2, Search, Copy, ExternalLink, Filter, Users, Sparkles, Eye,
 } from 'lucide-react';
 import { useImpersonation } from '@/contexts/ImpersonationContext';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -237,6 +238,8 @@ function DirectoryRow({
 // ── Page ──────────────────────────────────────────────────────────────
 
 export default function CapitalDevelopersPending() {
+  const navigate = useNavigate();
+  const { enter: enterImpersonation } = useImpersonation();
   const { data: pending, isLoading: loadingPending } = usePendingDevelopers();
   const { data: allDevelopers, isLoading: loadingAll } = useAllDevelopersForClaim();
   const approveMutation = useApproveDeveloper();
@@ -304,6 +307,11 @@ export default function CapitalDevelopersPending() {
     setClaimTarget(d);
     setClaimEmail(d.email ?? '');
     setClaimResult(null);
+  };
+
+  const openImpersonate = async (d: DeveloperForClaim) => {
+    await enterImpersonation(d.id, d.name_en || d.name_ru || 'Developer');
+    navigate(APP_ROUTES.DEVELOPER_PORTAL);
   };
 
   const handleSendClaim = async () => {
@@ -453,7 +461,7 @@ export default function CapitalDevelopersPending() {
                 Показано {directory.length} из {allDevelopers?.length ?? 0}
               </p>
               {directory.map((dev) => (
-                <DirectoryRow key={dev.id} dev={dev} onClaim={openClaim} />
+                <DirectoryRow key={dev.id} dev={dev} onClaim={openClaim} onImpersonate={openImpersonate} />
               ))}
             </div>
           )}
