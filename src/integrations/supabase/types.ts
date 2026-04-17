@@ -6012,6 +6012,41 @@ export type Database = {
           },
         ]
       }
+      developer_impersonation_log: {
+        Row: {
+          action: string
+          admin_id: string
+          context: Json | null
+          created_at: string
+          developer_id: string
+          id: string
+        }
+        Insert: {
+          action?: string
+          admin_id: string
+          context?: Json | null
+          created_at?: string
+          developer_id: string
+          id?: string
+        }
+        Update: {
+          action?: string
+          admin_id?: string
+          context?: Json | null
+          created_at?: string
+          developer_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "developer_impersonation_log_developer_id_fkey"
+            columns: ["developer_id"]
+            isOneToOne: false
+            referencedRelation: "developers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       developer_users: {
         Row: {
           auth_user_id: string | null
@@ -18024,12 +18059,15 @@ export type Database = {
           location_lng: number | null
           management_company_id: string | null
           marketing_materials: string[] | null
+          meta_description: string | null
+          meta_title: string | null
           min_investment: number | null
           min_price_per_sqm: number | null
           muuno_score: number | null
           name_en: string
           name_ru: string
           offplan_catalog: Json | null
+          og_image_url: string | null
           ownership_types: string[] | null
           payment_plan: Json | null
           payment_plan_template: Json | null
@@ -18044,6 +18082,7 @@ export type Database = {
           risk_level: string | null
           roi_projected: number | null
           slug: string | null
+          social_share_text: string | null
           source_url: string | null
           tagline: string | null
           tagline_ru: string | null
@@ -18118,12 +18157,15 @@ export type Database = {
           location_lng?: number | null
           management_company_id?: string | null
           marketing_materials?: string[] | null
+          meta_description?: string | null
+          meta_title?: string | null
           min_investment?: number | null
           min_price_per_sqm?: number | null
           muuno_score?: number | null
           name_en: string
           name_ru: string
           offplan_catalog?: Json | null
+          og_image_url?: string | null
           ownership_types?: string[] | null
           payment_plan?: Json | null
           payment_plan_template?: Json | null
@@ -18138,6 +18180,7 @@ export type Database = {
           risk_level?: string | null
           roi_projected?: number | null
           slug?: string | null
+          social_share_text?: string | null
           source_url?: string | null
           tagline?: string | null
           tagline_ru?: string | null
@@ -18212,12 +18255,15 @@ export type Database = {
           location_lng?: number | null
           management_company_id?: string | null
           marketing_materials?: string[] | null
+          meta_description?: string | null
+          meta_title?: string | null
           min_investment?: number | null
           min_price_per_sqm?: number | null
           muuno_score?: number | null
           name_en?: string
           name_ru?: string
           offplan_catalog?: Json | null
+          og_image_url?: string | null
           ownership_types?: string[] | null
           payment_plan?: Json | null
           payment_plan_template?: Json | null
@@ -18232,6 +18278,7 @@ export type Database = {
           risk_level?: string | null
           roi_projected?: number | null
           slug?: string | null
+          social_share_text?: string | null
           source_url?: string | null
           tagline?: string | null
           tagline_ru?: string | null
