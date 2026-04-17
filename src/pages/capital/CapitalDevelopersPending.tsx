@@ -308,6 +308,11 @@ export default function CapitalDevelopersPending() {
     setClaimResult(null);
   };
 
+  const openImpersonate = async (d: DeveloperForClaim) => {
+    await enterImpersonation(d.id, d.name_en || d.name_ru || 'Developer');
+    navigate(APP_ROUTES.DEVELOPER_PORTAL);
+  };
+
   const handleSendClaim = async () => {
     if (!claimTarget || !claimEmail) return;
     try {
