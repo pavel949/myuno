@@ -461,7 +461,7 @@ export default function CapitalDevelopersPending() {
                 Показано {directory.length} из {allDevelopers?.length ?? 0}
               </p>
               {directory.map((dev) => (
-                <DirectoryRow key={dev.id} dev={dev} onClaim={openClaim} />
+                <DirectoryRow key={dev.id} dev={dev} onClaim={openClaim} onImpersonate={openImpersonate} />
               ))}
             </div>
           )}
