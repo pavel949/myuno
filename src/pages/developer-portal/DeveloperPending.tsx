@@ -25,7 +25,7 @@ export default function DeveloperPending() {
 
   // Redirect when approved
   useEffect(() => {
-    const status = (developer as Record<string, unknown> | null)?.devmod_status as string | undefined;
+    const status = (developer as unknown as Record<string, unknown> | null)?.devmod_status as string | undefined;
     if (status === 'active') {
       navigate(APP_ROUTES.DEVELOPER_PORTAL, { replace: true });
     }
@@ -72,7 +72,7 @@ export default function DeveloperPending() {
             <p className="text-xs text-[hsl(var(--nb-muted))]">
               Вы получите email на адрес{' '}
               <span className="text-[hsl(var(--nb-text))]">
-                {(developer as Record<string, unknown> | null)?.email as string ?? ''}
+                {(developer as unknown as Record<string, unknown> | null)?.email as string ?? ''}
               </span>{' '}
               когда аккаунт будет активирован.
             </p>
