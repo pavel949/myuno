@@ -286,9 +286,10 @@ export default function CapitalDevelopersPending() {
 
   const handleConfirmReject = async () => {
     if (!rejectTarget) return;
-    setRejectingId(rejectTarget);
+    const id = rejectTarget;
+    setRejectingId(id);
     setRejectTarget(null);
-    try { await rejectMutation.mutateAsync({ developerId: rejectingId! }); }
+    try { await rejectMutation.mutateAsync({ developerId: id }); }
     finally { setRejectingId(null); }
   };
 
@@ -455,12 +456,7 @@ export default function CapitalDevelopersPending() {
       {/* Reject confirmation */}
       <AlertDialog
         open={!!rejectTarget}
-        onOpenChange={(open) => {
-          if (!open) {
-            setRejectingId(rejectTarget);
-            setRejectTarget(null);
-          }
-        }}
+        onOpenChange={(open) => { if (!open) setRejectTarget(null); }}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
