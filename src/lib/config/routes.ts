@@ -87,6 +87,9 @@ export const APP_ROUTES = {
   PEYLAA: '/peylaa',
   PEYLAA_UNIT: (unitNo: string) => `/peylaa/unit/${unitNo}`,
 
+  // ── Project Microsite (standalone, custom SEO per project) ──
+  PROJECT_MICROSITE: (slug: string) => `/p/${slug}`,
+
   // ── Newbuilds (premium marketing landing with dedicated design theme).
   // Catalog + detail canonical routes live under Property Hub (OFFPLAN_*, DEVELOPERS_*).
   // Newbuilds paths below are a themed marketing view of the same data.

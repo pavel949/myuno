@@ -36,6 +36,17 @@ export {
   type YachtCardProps,
 } from './yachtAdapters';
 
+// Project adapter — canonical mapping for property_projects rows
+export {
+  toProjectUI,
+  toProjectUIList,
+  type PropertyProjectRow,
+  type PropertyProjectUI,
+} from './projectAdapter';
+
+// Developer adapter — canonical mapping for developers rows
+export { toDeveloperUI, type DeveloperRow, type DeveloperUI } from './developerAdapter';
+
 // Catalog Card adapters (unified grid cards)
 export {
   mapYachtToCatalogCard,
