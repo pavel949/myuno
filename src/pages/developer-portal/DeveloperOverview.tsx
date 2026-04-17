@@ -85,7 +85,7 @@ export default function DeveloperOverview() {
                     <p className="text-sm text-[hsl(var(--nb-text))]">{p.name_en || p.name_ru}</p>
                     <p className="text-xs text-amber-400 mt-0.5">{issues.join(', ')}</p>
                   </div>
-                  <Link to={`/developer-portal/projects/${p.id}`}>
+                  <Link to={APP_ROUTES.DEVELOPER_PORTAL_PROJECT_EDIT(p.id)}>
                     <Button size="sm" variant="outline" className="border-[hsl(var(--nb-glass-border))] text-[hsl(var(--nb-text-secondary))] shrink-0">
                       Редактировать
                     </Button>
@@ -99,7 +99,7 @@ export default function DeveloperOverview() {
 
       {/* Quick Actions */}
       <div className="flex flex-wrap gap-3">
-        <Link to="/developer-portal/projects/new">
+        <Link to={APP_ROUTES.DEVELOPER_PORTAL_PROJECT_NEW}>
           <Button variant="outline" className="border-[hsl(var(--nb-gold)/0.3)] text-[hsl(var(--nb-gold))] hover:bg-[hsl(var(--nb-gold)/0.1)]">
             <Plus className="w-4 h-4 mr-2" /> Новый проект
           </Button>

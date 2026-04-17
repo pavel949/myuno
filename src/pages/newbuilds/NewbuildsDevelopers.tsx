@@ -72,14 +72,14 @@ export default function NewbuildsDevelopers() {
           <ChevronLeft className="w-4 h-4" /> Новостройки
         </Link>
 
-        <div className="flex items-end justify-between mb-8">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
           <div>
             <h1 className="nb-display text-3xl md:text-4xl" style={{ color: 'hsl(var(--nb-gold))' }}>Девелоперы</h1>
             <p className="mt-2 text-sm" style={{ color: 'hsl(var(--nb-muted))' }}>
               {developers?.length || 0} компаний на платформе
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {(['all', 'verified'] as const).map(f => (
               <button
                 key={f}
@@ -94,6 +94,17 @@ export default function NewbuildsDevelopers() {
                 {f === 'all' ? 'Все' : 'Проверенные'}
               </button>
             ))}
+            <Link
+              to={APP_ROUTES.DEVELOPER_PORTAL_APPLY}
+              className="px-4 py-1.5 rounded-full text-sm transition-all border"
+              style={{
+                background: 'transparent',
+                color: 'hsl(var(--nb-gold))',
+                borderColor: 'hsl(var(--nb-gold) / 0.4)',
+              }}
+            >
+              Я застройщик →
+            </Link>
           </div>
         </div>
 

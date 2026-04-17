@@ -19,12 +19,13 @@ export function useProjectUpdates(projectId?: string) {
     queryKey: ['project-updates', projectId],
     queryFn: async (): Promise<ProjectUpdate[]> => {
       if (!projectId) return [];
-      const { data, error } = await (supabase.from('nb_project_updates' as any) as any)
+      const { data, error } = await supabase
+        .from('nb_project_updates')
         .select('*')
         .eq('project_id', projectId)
         .order('published_at', { ascending: false });
       if (error) throw error;
-      return (data || []) as ProjectUpdate[];
+      return (data || []) as unknown as ProjectUpdate[];
     },
     enabled: !!projectId,
     staleTime: 5 * 60 * 1000,
