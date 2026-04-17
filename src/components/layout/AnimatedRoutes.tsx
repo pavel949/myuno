@@ -165,6 +165,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/developer-portal/onboarding/:step" element={<LazyPage><Pages.DeveloperOnboarding /></LazyPage>} />
         <Route path={APP_ROUTES.DEVELOPER_PORTAL_PENDING} element={<LazyPage><Pages.DeveloperPending /></LazyPage>} />
         <Route path={APP_ROUTES.DEVELOPER_PORTAL_ACCEPT_INVITE} element={<LazyPage><Pages.DeveloperAcceptInvite /></LazyPage>} />
+        <Route path={APP_ROUTES.DEVELOPER_PORTAL_STRIPE_RETURN} element={<LazyPage><Pages.DeveloperStripeReturn /></LazyPage>} />
         <Route path="/b/:slug" element={<LazyPage><Pages.StorefrontPage /></LazyPage>} />
         
         {/* ── LifeOS ── */}
