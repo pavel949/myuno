@@ -8,6 +8,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useDeveloperProfile, useProjectUnitsForEditor, useUpsertProjectUnit, useDeleteProjectUnit, useProjectDocuments, useAddProjectDocument, useDeleteProjectDocument, useUpsertProjectUpdate, useDeleteProjectUpdate, DeveloperProjectUnit } from '@/hooks/useDeveloperPortal';
 import { useNewbuildProject } from '@/hooks/useNewbuildProjects';
 import { useProjectUpdates, ProjectUpdate } from '@/hooks/useProjectUpdates';
+import { FloorPlanEditor } from '@/components/newbuilds/FloorPlanEditor';
 import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -16,7 +17,7 @@ import { ImageUpload } from '@/components/upload/ImageUpload';
 import { AirbnbStyleImageUpload } from '@/components/upload/AirbnbStyleImageUpload';
 import { DocumentUpload } from '@/components/upload/DocumentUpload';
 import { toast } from 'sonner';
-import { ExternalLink, Plus, Pencil, Trash2, Lock, Unlock, Image as ImageIcon, FileText, TrendingUp } from 'lucide-react';
+import { ExternalLink, Plus, Pencil, Trash2, Lock, Unlock, Image as ImageIcon, FileText, TrendingUp, Map } from 'lucide-react';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { cn } from '@/lib/utils';
 
@@ -374,11 +375,11 @@ export default function DeveloperProjectEditor() {
 
       <Tabs defaultValue="основное">
         <TabsList className="flex flex-wrap gap-1 mb-6 bg-[hsl(var(--nb-surface))] border border-[hsl(var(--nb-glass-border))] p-1 rounded-xl h-auto">
-          {(['основное', 'медиа', 'описание', 'инвентарь', 'документы', 'прогресс', 'превью'] as const).map(tab => (
+          {(['основное', 'медиа', 'описание', 'инвентарь', 'мастер-план', 'документы', 'прогресс', 'превью'] as const).map(tab => (
             <TabsTrigger
               key={tab}
               value={tab}
-              disabled={isNewProject && ['инвентарь', 'документы', 'прогресс', 'превью'].includes(tab)}
+              disabled={isNewProject && ['инвентарь', 'мастер-план', 'документы', 'прогресс', 'превью'].includes(tab)}
               className={cn(
                 'capitalize text-sm px-3 py-1.5 rounded-lg transition-all',
                 'data-[state=active]:bg-[hsl(var(--nb-gold)/0.15)] data-[state=active]:text-[hsl(var(--nb-gold))]',
@@ -554,6 +555,26 @@ export default function DeveloperProjectEditor() {
                   </table>
                 </div>
               )}
+            </div>
+          )}
+        </TabsContent>
+
+        {/* ── Мастер-план ── */}
+        <TabsContent value="мастер-план">
+          {isNewProject ? (
+            <div className="nb-glass p-8 text-center text-[hsl(var(--nb-muted))]">
+              <Map className="w-10 h-10 mx-auto mb-3 opacity-40" />
+              <p>Сохраните проект, чтобы добавить интерактивный план</p>
+            </div>
+          ) : (
+            <div className="nb-glass p-6 space-y-4">
+              <div>
+                <h2 className="text-lg font-semibold text-[hsl(var(--nb-text))]">Digital Master Plan</h2>
+                <p className="text-sm text-[hsl(var(--nb-muted))] mt-0.5">
+                  Загрузите план этажа и разместите юниты. Покупатели увидят интерактивную карту доступности.
+                </p>
+              </div>
+              <FloorPlanEditor projectId={id!} />
             </div>
           )}
         </TabsContent>

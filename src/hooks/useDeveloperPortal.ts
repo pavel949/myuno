@@ -36,11 +36,17 @@ export interface DeveloperProjectUnit {
   floor: number | null;
   view_type: string | null;
   floor_plan_url: string | null;
+  floor_plan_image_url: string | null;
   price: number | null;
   price_per_sqm: number | null;
   currency: string | null;
   status: string | null;
   notes: string | null;
+  // Developer Module fields (added by devmod_03 migration)
+  floor_plan_id: string | null;
+  pin_x_pct: number | null;
+  pin_y_pct: number | null;
+  unit_status: string | null;
 }
 
 export interface DeveloperProjectDocument {
@@ -253,6 +259,115 @@ export function useDeleteProjectUpdate() {
       toast.success('Обновление удалено');
     },
     onError: (e: Error) => toast.error(e.message || 'Ошибка удаления'),
+  });
+}
+
+// ── Floor Plans ──
+
+export interface FloorPlan {
+  id: string;
+  project_id: string;
+  name: string;
+  display_order: number;
+  image_url: string;
+  image_width_px: number;
+  image_height_px: number;
+}
+
+export function useFloorPlans(projectId?: string) {
+  return useQuery({
+    queryKey: ['floor-plans', projectId],
+    queryFn: async (): Promise<FloorPlan[]> => {
+      if (!projectId) return [];
+      const { data, error } = await (supabase.from('floor_plans' as never) as ReturnType<typeof supabase.from>)
+        .select('*')
+        .eq('project_id', projectId)
+        .order('display_order', { ascending: true });
+      if (error) throw error;
+      return (data || []) as FloorPlan[];
+    },
+    enabled: !!projectId,
+  });
+}
+
+export function useUpsertFloorPlan() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (plan: Partial<FloorPlan> & { project_id: string; name: string; image_url: string; image_width_px: number; image_height_px: number }) => {
+      if (plan.id) {
+        const { id, project_id, ...fields } = plan;
+        const { error } = await (supabase.from('floor_plans' as never) as ReturnType<typeof supabase.from>).update(fields).eq('id', id);
+        if (error) throw error;
+      } else {
+        const { id: _id, ...insertFields } = plan;
+        const { data, error } = await (supabase.from('floor_plans' as never) as ReturnType<typeof supabase.from>).insert(insertFields).select('id').single();
+        if (error) throw error;
+        return (data as { id: string }).id;
+      }
+    },
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ['floor-plans', vars.project_id] });
+      toast.success('Флорплан сохранён');
+    },
+    onError: (e: Error) => toast.error(e.message || 'Ошибка сохранения'),
+  });
+}
+
+export function useDeleteFloorPlan() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, project_id }: { id: string; project_id: string }) => {
+      const { error } = await (supabase.from('floor_plans' as never) as ReturnType<typeof supabase.from>).delete().eq('id', id);
+      if (error) throw error;
+      return project_id;
+    },
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ['floor-plans', vars.project_id] });
+      toast.success('Флорплан удалён');
+    },
+    onError: (e: Error) => toast.error(e.message || 'Ошибка удаления'),
+  });
+}
+
+export function useUpdateUnitPin() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ unitId, floorPlanId, pinXPct, pinYPct, projectId }: {
+      unitId: string;
+      floorPlanId: string;
+      pinXPct: number;
+      pinYPct: number;
+      projectId: string;
+    }) => {
+      const { error } = await supabase
+        .from('project_units')
+        .update({ floor_plan_id: floorPlanId, pin_x_pct: pinXPct, pin_y_pct: pinYPct } as never)
+        .eq('id', unitId);
+      if (error) throw error;
+      return projectId;
+    },
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ['project-units-editor', vars.projectId] });
+    },
+    onError: (e: Error) => toast.error(e.message || 'Ошибка сохранения пина'),
+  });
+}
+
+export function useRemoveUnitPin() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ unitId, projectId }: { unitId: string; projectId: string }) => {
+      const { error } = await supabase
+        .from('project_units')
+        .update({ floor_plan_id: null, pin_x_pct: null, pin_y_pct: null } as never)
+        .eq('id', unitId);
+      if (error) throw error;
+      return projectId;
+    },
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ['project-units-editor', vars.projectId] });
+    },
+    onError: (e: Error) => toast.error(e.message || 'Ошибка'),
   });
 }
 

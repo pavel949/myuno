@@ -2,10 +2,11 @@
  * NewbuildsLayout — Dark editorial wrapper for /newbuilds section
  * Includes sticky section navigation bar
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Building2, Map, Compass, Users, Calculator, Shield } from 'lucide-react';
 import { NbCompareProvider } from './NbCompareProvider';
+import { getAttributionCookieId } from '@/lib/newbuilds/attribution';
 import '@/styles/newbuilds-theme.css';
 
 interface NewbuildsLayoutProps {
@@ -25,6 +26,11 @@ const NAV_ITEMS = [
 
 export default function NewbuildsLayout({ children, className = '', hideNav }: NewbuildsLayoutProps) {
   const location = useLocation();
+
+  // Ensure attribution cookie is set on first visit to any /newbuilds page
+  useEffect(() => {
+    getAttributionCookieId();
+  }, []);
 
   const isActive = (item: typeof NAV_ITEMS[0]) => {
     if (item.exact) return location.pathname === item.path;

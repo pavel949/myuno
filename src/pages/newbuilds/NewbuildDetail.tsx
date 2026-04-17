@@ -14,6 +14,7 @@ import { NbROICalculator } from '@/components/newbuilds/NbROICalculator';
 import { NbServicesSection } from '@/components/newbuilds/NbServicesSection';
 import { NbInventoryTab } from '@/components/newbuilds/tabs/NbInventoryTab';
 import { NbPlansTab } from '@/components/newbuilds/tabs/NbPlansTab';
+import { PublicFloorPlan } from '@/components/newbuilds/PublicFloorPlan';
 import { NbTermsTab } from '@/components/newbuilds/tabs/NbTermsTab';
 import { NbUpdatesTab } from '@/components/newbuilds/tabs/NbUpdatesTab';
 import { NbReportsTab } from '@/components/newbuilds/tabs/NbReportsTab';
@@ -27,6 +28,7 @@ import { APP_ROUTES } from '@/lib/config/routes';
 
 const TABS = [
   { key: 'overview', label: 'Обзор' },
+  { key: 'availability', label: 'Доступность' },
   { key: 'units', label: 'Юниты' },
   { key: 'inventory', label: 'Инвентарь' },
   { key: 'plans', label: 'Планировки' },
@@ -195,6 +197,10 @@ export default function NewbuildDetail() {
         <div className="flex gap-8">
           {/* Main content */}
           <div className="flex-1 min-w-0">
+            {activeTab === 'availability' && (
+              <PublicFloorPlan projectId={project.id} developerId={project.developer_id} />
+            )}
+
             {activeTab === 'overview' && (
               <div className="space-y-8">
                 {/* Description */}

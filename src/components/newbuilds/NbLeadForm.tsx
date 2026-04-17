@@ -1,6 +1,14 @@
+/**
+ * NbLeadForm — lead capture with full attribution tracking
+ * - Sets/reads myuno_attr_id cookie
+ * - Computes contact fingerprint (sha256)
+ * - Creates/updates lead_attributions record
+ * - Triggers RLN on first qualified project touchpoint
+ */
 import React, { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { recordAttribution } from '@/lib/newbuilds/attribution';
 
 interface Props {
   projectId?: string;
@@ -22,13 +30,34 @@ export function NbLeadForm({ projectId, developerId, source = 'project_page', co
     }
     setLoading(true);
     try {
-      const { error } = await supabase.from('nb_leads' as any).insert({
-        ...form,
-        project_id: projectId,
-        developer_id: developerId,
+      // 1. Record attribution (cookie + fingerprint + RLN)
+      let attributionId: string | null = null;
+      try {
+        const result = await recordAttribution({
+          email: form.email || undefined,
+          phone: form.phone,
+          projectId,
+          touchpoint: { type: 'form_submit', source, projectId },
+        });
+        attributionId = result.attributionId;
+      } catch {
+        // Attribution failure must not block lead capture
+      }
+
+      // 2. Insert nb_lead
+      const { error } = await supabase.from('nb_leads' as never).insert({
+        full_name: form.full_name,
+        phone: form.phone,
+        email: form.email || null,
+        message: form.message || null,
+        unit_preference: form.unit_preference || null,
+        project_id: projectId ?? null,
+        developer_id: developerId ?? null,
         source,
+        attribution_id: attributionId,
       });
       if (error) throw error;
+
       setSubmitted(true);
       toast.success('Запрос отправлен! Мы свяжемся с вами в течение 2 часов.');
     } catch {
@@ -53,7 +82,7 @@ export function NbLeadForm({ projectId, developerId, source = 'project_page', co
       <h4 className="nb-display text-lg" style={{ color: 'hsl(var(--nb-text))' }}>
         Запросить информацию
       </h4>
-      
+
       <input
         type="text"
         placeholder="Ваше имя *"
@@ -90,7 +119,7 @@ export function NbLeadForm({ projectId, developerId, source = 'project_page', co
           />
         </>
       )}
-      
+
       <button type="submit" disabled={loading} className="nb-btn-gold w-full disabled:opacity-50">
         {loading ? 'Отправляем...' : 'Отправить запрос'}
       </button>
