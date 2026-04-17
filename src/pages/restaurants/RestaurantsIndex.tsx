@@ -98,15 +98,15 @@ export default function RestaurantsIndex() {
         break;
       case 'price_low':
         result.sort((a, b) => {
-          const pa = (a as Record<string, unknown>).avg_price as number ?? 999999;
-          const pb = (b as Record<string, unknown>).avg_price as number ?? 999999;
+          const pa = (a as unknown as Record<string, unknown>).avg_price as number ?? 999999;
+          const pb = (b as unknown as Record<string, unknown>).avg_price as number ?? 999999;
           return pa - pb;
         });
         break;
       case 'price_high':
         result.sort((a, b) => {
-          const pa = (a as Record<string, unknown>).avg_price as number ?? 0;
-          const pb = (b as Record<string, unknown>).avg_price as number ?? 0;
+          const pa = (a as unknown as Record<string, unknown>).avg_price as number ?? 0;
+          const pb = (b as unknown as Record<string, unknown>).avg_price as number ?? 0;
           return pb - pa;
         });
         break;

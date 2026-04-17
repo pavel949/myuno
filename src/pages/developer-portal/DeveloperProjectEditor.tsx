@@ -593,9 +593,12 @@ export default function DeveloperProjectEditor() {
               {/* Upload */}
               {!pendingDoc ? (
                 <DocumentUpload
-                  onUpload={handleDocumentUploaded}
+                  onChange={(url) => {
+                    const fileName = url.split('/').pop() ?? 'document';
+                    handleDocumentUploaded(url, fileName);
+                  }}
                   folder="developer-uploads/documents"
-                  label="Загрузить документ"
+                  placeholder="Загрузить документ"
                 />
               ) : (
                 <div className="border border-[hsl(var(--nb-gold)/0.3)] rounded-xl p-4 space-y-3 bg-[hsl(var(--nb-gold)/0.05)]">
