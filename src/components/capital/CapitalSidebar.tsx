@@ -22,6 +22,7 @@ import {
 const NAV_ITEMS = [
   { path: '/capital', label: 'Дашборд', icon: LayoutDashboard, end: true },
   { path: '/capital/contacts', label: 'Контакты', icon: Users },
+  { path: '/capital/deals/newbuilds', label: 'Newbuilds Deals', icon: Building2 },
   { path: '/capital/projects', label: 'Проекты', icon: Building2 },
   { path: '/capital/campaigns', label: 'Кампании', icon: Megaphone },
   { path: '/capital/outreach', label: 'Касания', icon: MessageCircle },

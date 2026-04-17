@@ -161,6 +161,10 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.FOR_REAL_ESTATE_DEVELOPERS} element={<LazyPage><Pages.ForDevelopers /></LazyPage>} />
         <Route path={APP_ROUTES.FOR_LOCAL_SERVICE_PROVIDERS} element={<LazyPage><Pages.ForLocalServiceProviders /></LazyPage>} />
         <Route path={APP_ROUTES.DEVELOPER_PORTAL_APPLY} element={<LazyPage><Pages.DeveloperApply /></LazyPage>} />
+        <Route path={APP_ROUTES.DEVELOPER_PORTAL_ONBOARDING} element={<LazyPage><Pages.DeveloperOnboarding /></LazyPage>} />
+        <Route path="/developer-portal/onboarding/:step" element={<LazyPage><Pages.DeveloperOnboarding /></LazyPage>} />
+        <Route path={APP_ROUTES.DEVELOPER_PORTAL_PENDING} element={<LazyPage><Pages.DeveloperPending /></LazyPage>} />
+        <Route path={APP_ROUTES.DEVELOPER_PORTAL_ACCEPT_INVITE} element={<LazyPage><Pages.DeveloperAcceptInvite /></LazyPage>} />
         <Route path="/b/:slug" element={<LazyPage><Pages.StorefrontPage /></LazyPage>} />
         
         {/* ── LifeOS ── */}
@@ -286,6 +290,7 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="leads" element={<LazyPage><Pages.DeveloperLeads /></LazyPage>} />
           <Route path="leads/:id" element={<LazyPage><Pages.DeveloperLeadDetail /></LazyPage>} />
           <Route path="analytics" element={<LazyPage><Pages.DeveloperAnalytics /></LazyPage>} />
+          <Route path="team" element={<LazyPage><Pages.DeveloperTeam /></LazyPage>} />
         </Route>
         <Route path={APP_ROUTES.TAXI} element={<LazyPage><Pages.TaxiBooking /></LazyPage>} />
         <Route path="/taxi-booking" element={<Navigate to={APP_ROUTES.TAXI} replace />} />
@@ -369,8 +374,8 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.CONTRACT_ANALYSIS} element={<LazyPage><Pages.ContractAnalysisPage /></LazyPage>} />
         <Route path={APP_ROUTES.TAX_NAV} element={<LazyPage><Pages.TaxNavPage /></LazyPage>} />
         
-        {/* ── INVEST Cluster ── */}
-        <Route path={APP_ROUTES.INVEST_CLUSTER} element={<LazyPage><Pages.InvestClusterPage /></LazyPage>} />
+        {/* ── INVEST Cluster (legacy; canonical route is /property/invest) ── */}
+        <Route path={APP_ROUTES.INVEST_CLUSTER} element={<Navigate to={APP_ROUTES.INVEST} replace />} />
         
         {/* ── Knowledge ── */}
         <Route path={APP_ROUTES.KNOWLEDGE} element={<LazyPage><Pages.KnowledgeHub /></LazyPage>} />
@@ -731,6 +736,9 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="outreach" element={<LazyPage><Pages.CapitalOutreach /></LazyPage>} />
           <Route path="pipeline" element={<LazyPage><Pages.CapitalPipeline /></LazyPage>} />
           <Route path="templates" element={<LazyPage><Pages.CapitalTemplates /></LazyPage>} />
+          <Route path="deals/newbuilds" element={<LazyPage><Pages.CapitalNewbuildsDeals /></LazyPage>} />
+          <Route path="developers" element={<LazyPage><Pages.CapitalDevelopersPending /></LazyPage>} />
+          <Route path="developers/pending" element={<LazyPage><Pages.CapitalDevelopersPending /></LazyPage>} />
         </Route>
 
         {/* ── Owner → MC Redirects (legacy backward compat) ── */}

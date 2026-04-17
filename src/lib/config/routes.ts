@@ -87,8 +87,9 @@ export const APP_ROUTES = {
   PEYLAA: '/peylaa',
   PEYLAA_UNIT: (unitNo: string) => `/peylaa/unit/${unitNo}`,
 
-  // ── Newbuilds (premium marketing landing). Catalog + detail live under Property Hub (OFFPLAN_*).
-  // Legacy paths below still work via redirects in AnimatedRoutes.tsx.
+  // ── Newbuilds (premium marketing landing with dedicated design theme).
+  // Catalog + detail canonical routes live under Property Hub (OFFPLAN_*, DEVELOPERS_*).
+  // Newbuilds paths below are a themed marketing view of the same data.
   NEWBUILDS: '/newbuilds',
   NEWBUILDS_PROJECTS: '/newbuilds/projects',
   NEWBUILDS_PROJECT: (slug: string) => `/newbuilds/projects/${slug}`,
@@ -102,9 +103,17 @@ export const APP_ROUTES = {
   NEWBUILDS_DUE_DILIGENCE: '/newbuilds/due-diligence',
   DEVELOPER_PORTAL: '/developer-portal',
   DEVELOPER_PORTAL_APPLY: '/developer-portal/apply',
+  DEVELOPER_PORTAL_ONBOARDING: '/developer-portal/onboarding',
+  DEVELOPER_PORTAL_ONBOARDING_STEP: (step: number) => `/developer-portal/onboarding/${step}`,
+  DEVELOPER_PORTAL_STRIPE_RETURN: '/developer-portal/onboarding/stripe-return',
+  DEVELOPER_PORTAL_PENDING: '/developer-portal/pending',
   DEVELOPER_PORTAL_COMPANY: '/developer-portal/company',
   DEVELOPER_PORTAL_LEADS: '/developer-portal/leads',
   DEVELOPER_PORTAL_LEAD_DETAIL: (id: string) => `/developer-portal/leads/${id}`,
+  DEVELOPER_PORTAL_TEAM: '/developer-portal/team',
+  DEVELOPER_PORTAL_ACCEPT_INVITE: '/developer-portal/accept-invite',
+  CAPITAL_DEVELOPERS: '/capital/developers',
+  CAPITAL_DEVELOPERS_PENDING: '/capital/developers/pending',
   ADMIN_NEWBUILDS: '/admin/newbuilds',
 
   // ── Investment (under Property Hub) ──
@@ -367,6 +376,7 @@ export const APP_ROUTES = {
   CAPITAL_OUTREACH: '/capital/outreach',
   CAPITAL_PIPELINE: '/capital/pipeline',
   CAPITAL_TEMPLATES: '/capital/templates',
+  CAPITAL_NEWBUILDS_DEALS: '/capital/deals/newbuilds',
 
   // ── Owner Portal (individual owners) ──
   OWNER: '/owner',
@@ -448,6 +458,7 @@ export const LEGACY_REDIRECTS: Record<string, string> = {
   '/new-developments': '/newbuilds',
   '/newbuilds/projects': '/property/offplan',
   '/newbuilds/developers': '/property/developers',
+  '/invest-hub': '/property/invest',
 } as const;
 
 /**

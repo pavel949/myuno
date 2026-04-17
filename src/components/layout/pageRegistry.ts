@@ -77,6 +77,10 @@ export const DeveloperCompany = lazy(() => import('@/pages/developer-portal/Deve
 export const DeveloperLeads = lazy(() => import('@/pages/developer-portal/DeveloperLeads'));
 export const DeveloperLeadDetail = lazy(() => import('@/pages/developer-portal/DeveloperLeadDetail'));
 export const DeveloperAnalytics = lazy(() => import('@/pages/developer-portal/DeveloperAnalytics'));
+export const DeveloperOnboarding = lazy(() => import('@/pages/developer-portal/DeveloperOnboarding'));
+export const DeveloperPending = lazy(() => import('@/pages/developer-portal/DeveloperPending'));
+export const DeveloperTeam = lazy(() => import('@/pages/developer-portal/DeveloperTeam'));
+export const DeveloperAcceptInvite = lazy(() => import('@/pages/developer-portal/DeveloperAcceptInvite'));
 
 // ── Admin Newbuilds ──
 export const AdminNewbuilds = lazy(() => import('@/pages/admin/AdminNewbuilds'));
@@ -532,6 +536,8 @@ export const KidsLandingPage = lazy(() => import('@/pages/kids/KidsLandingPage')
 export const NomadGuidePage = lazy(() => import('@/pages/nomad/NomadGuidePage'));
 
 // ── Capital CRM ──
+export const CapitalNewbuildsDeals = lazy(() => import('@/pages/capital/CapitalNewbuildsDeals'));
+export const CapitalDevelopersPending = lazy(() => import('@/pages/capital/CapitalDevelopersPending'));
 export const CapitalDashboard = lazy(() => import('@/pages/capital/CapitalDashboard'));
 export const CapitalContacts = lazy(() => import('@/pages/capital/CapitalContacts'));
 export const CapitalContactDetail = lazy(() => import('@/pages/capital/CapitalContactDetail'));
