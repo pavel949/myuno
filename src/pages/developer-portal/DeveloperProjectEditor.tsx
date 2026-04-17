@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { ImageUpload } from '@/components/upload/ImageUpload';
 import { AirbnbStyleImageUpload } from '@/components/upload/AirbnbStyleImageUpload';
-import { DocumentUpload } from '@/components/upload/DocumentUpload';
+import { DeveloperDocumentUpload } from '@/components/developer-portal/DeveloperDocumentUpload';
 import { toast } from 'sonner';
 import { ExternalLink, Plus, Pencil, Trash2, Lock, Unlock, Image as ImageIcon, FileText, TrendingUp, Map } from 'lucide-react';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -591,16 +591,13 @@ export default function DeveloperProjectEditor() {
               <h2 className="text-lg font-semibold text-[hsl(var(--nb-text))]">Документы проекта</h2>
 
               {/* Upload */}
-              {!pendingDoc ? (
-                <DocumentUpload
-                  onChange={(url) => {
-                    const fileName = url.split('/').pop() ?? 'document';
-                    handleDocumentUploaded(url, fileName);
-                  }}
-                  folder="developer-uploads/documents"
-                  placeholder="Загрузить документ"
+              {!pendingDoc && developer && id ? (
+                <DeveloperDocumentUpload
+                  developerId={developer.id}
+                  projectId={id}
+                  onUploaded={(signedUrl, fileName) => handleDocumentUploaded(signedUrl, fileName)}
                 />
-              ) : (
+              ) : !pendingDoc ? null : (
                 <div className="border border-[hsl(var(--nb-gold)/0.3)] rounded-xl p-4 space-y-3 bg-[hsl(var(--nb-gold)/0.05)]">
                   <p className="text-sm text-[hsl(var(--nb-text-secondary))]">Загружен: <span className="text-[hsl(var(--nb-text))]">{pendingDoc.name}</span></p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

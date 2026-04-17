@@ -160,7 +160,9 @@ export default function DeveloperOnboarding() {
   async function handleSubmit() {
     setSubmitting(true);
     try {
-      // 1. Update developers row with all onboarding data
+      // 1. Update developers row with onboarding data.
+      // NOTE: devmod_status is set by the `devmod-apply` edge function below
+      // to keep status transitions in one place (avoids race conditions).
       const { error: updateErr } = await supabase
         .from('developers')
         .update({
@@ -171,12 +173,11 @@ export default function DeveloperOnboarding() {
           description_en: step2Data.description_en,
           description_ru: step2Data.description_ru,
           logo_url: logoUrl || developer.logo_url,
-          devmod_status: 'pending',
         } as Record<string, unknown>)
         .eq('id', developer.id);
       if (updateErr) throw updateErr;
 
-      // 2. Notify admin (Telegram + email) via edge function
+      // 2. Edge function: sets devmod_status='pending', notifies admin (Telegram + email).
       await supabase.functions.invoke('devmod-apply', {
         body: { developer_id: developer.id },
       });
