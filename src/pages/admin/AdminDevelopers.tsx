@@ -57,6 +57,8 @@ import {
 } from 'lucide-react';
 import { TranslatableInput } from '@/components/forms/TranslatableInput';
 import { AirbnbStyleImageUpload } from '@/components/upload/AirbnbStyleImageUpload';
+import { BulkLogoUploadModal } from '@/components/admin/developers/BulkLogoUploadModal';
+import { Upload } from 'lucide-react';
 
 const getEmptyForm = (): DeveloperFormData => ({
   name_en: '',
@@ -80,6 +82,7 @@ export default function AdminDevelopers() {
   const [editingDeveloper, setEditingDeveloper] = useState<Developer | null>(null);
   const [formData, setFormData] = useState<DeveloperFormData>(getEmptyForm());
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [bulkLogoOpen, setBulkLogoOpen] = useState(false);
 
   // Filter developers
   const filteredDevelopers = useMemo(() => {
@@ -175,11 +178,22 @@ export default function AdminDevelopers() {
         title={isRu ? 'Застройщики' : 'Developers'}
         subtitle={isRu ? 'Управление реестром застройщиков' : 'Manage developer registry'}
         actions={
-          <Button onClick={handleOpenCreate}>
-            <Plus className="h-4 w-4 mr-2" />
-            {isRu ? 'Новый застройщик' : 'New Developer'}
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setBulkLogoOpen(true)}>
+              <Upload className="h-4 w-4 mr-2" />
+              {isRu ? 'Логотипы' : 'Bulk Logos'}
+            </Button>
+            <Button onClick={handleOpenCreate}>
+              <Plus className="h-4 w-4 mr-2" />
+              {isRu ? 'Новый застройщик' : 'New Developer'}
+            </Button>
+          </div>
         }
+      />
+      <BulkLogoUploadModal
+        open={bulkLogoOpen}
+        onOpenChange={setBulkLogoOpen}
+        developers={developers || []}
       />
 
       {/* Stats */}
