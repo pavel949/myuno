@@ -23,6 +23,7 @@ export interface DeveloperProfile {
   is_verified: boolean;
   subscription_tier: string;
   user_id: string | null;
+  devmod_status: string | null;
 }
 
 export interface DeveloperProjectUnit {
@@ -92,6 +93,7 @@ export function useDeveloperProfile() {
         is_verified: data.is_verified ?? false,
         subscription_tier: (data as Record<string, unknown>).subscription_tier as string || 'free',
         user_id: (data as Record<string, unknown>).user_id as string | null,
+        devmod_status: (data as Record<string, unknown>).devmod_status as string | null ?? null,
       };
     },
     enabled: !!user,
