@@ -1,0 +1,85 @@
+name: DB Mirror Snapshot (Lovable Cloud → Own Supabase)
+
+# Snapshots all data from Lovable Cloud Supabase (kakkwibljrjsawxgnupk)
+# into the user's own Supabase project (erfwtoavipwjqmylpizt) every 6 hours.
+#
+# Strategy: REST-based dump via @supabase/supabase-js (bypasses need for direct
+# Postgres replication access, which Lovable Cloud does not provide).
+#
+# IMPORTANT: This is a snapshot mirror — the target DB is overwritten on each
+# run. Do NOT write directly to the target DB; treat it as read-only replica.
+
+on:
+  schedule:
+    # Every 6 hours at minute 17 (off-peak to avoid contention)
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+    # Allow manual trigger from Actions tab
+    inputs:
+      reason:
+        description: 'Reason for manual run (optional)'
+        required: false
+        default: 'manual snapshot'
+
+concurrency:
+  # Prevent overlapping runs (a long export must finish before next starts)
+  group: db-mirror-snapshot
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    name: Export → Import snapshot
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund --prefer-offline
+
+      - name: Export data from Lovable Cloud (source)
+        run: node scripts/export-data.mjs
+        env:
+          # Source credentials are hardcoded in the script (Lovable anon key
+          # is a publishable token), no env required here.
+          NODE_OPTIONS: '--max-old-space-size=4096'
+
+      - name: Upload export artifact (audit trail, 7-day retention)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-snapshot-${{ github.run_id }}
+          path: tmp/export/
+          retention-days: 7
+          if-no-files-found: warn
+
+      - name: Import data into target Supabase (erfwtoavipwjqmylpizt)
+        run: node scripts/import-data.mjs
+        env:
+          SERVICE_ROLE_KEY: ${{ secrets.TARGET_SUPABASE_SERVICE_ROLE_KEY }}
+          NODE_OPTIONS: '--max-old-space-size=4096'
+
+      - name: Report summary
+        if: always()
+        run: |
+          echo "### DB Mirror Snapshot Result" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Run:** ${{ github.run_id }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Trigger:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Source:** kakkwibljrjsawxgnupk (Lovable Cloud)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Target:** erfwtoavipwjqmylpizt (own Supabase)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -f tmp/export/_summary.json ]; then
+            echo "**Export summary:**" >> $GITHUB_STEP_SUMMARY
+            echo '```json' >> $GITHUB_STEP_SUMMARY
+            cat tmp/export/_summary.json >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
