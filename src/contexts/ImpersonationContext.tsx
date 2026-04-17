@@ -52,12 +52,16 @@ export function ImpersonationProvider({ children }: { children: ReactNode }) {
     } catch { /* ignore */ }
     // Best-effort audit log; don't block UX if it fails
     if (user?.id) {
-      await supabase.from('developer_impersonation_log').insert({
-        admin_id: user.id,
-        developer_id: developerId,
-        action: 'enter',
-        context: { url: typeof window !== 'undefined' ? window.location.pathname : null },
-      }).then(() => undefined).catch(() => undefined);
+      try {
+        await supabase.from('developer_impersonation_log').insert({
+          admin_id: user.id,
+          developer_id: developerId,
+          action: 'enter',
+          context: { url: typeof window !== 'undefined' ? window.location.pathname : null },
+        });
+      } catch {
+        // ignore audit failure
+      }
     }
   }, [user?.id]);
 
