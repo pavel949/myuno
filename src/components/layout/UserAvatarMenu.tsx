@@ -7,8 +7,9 @@ import { useNavigate } from 'react-router-dom';
 import {
   Heart, ShoppingBag, MessageSquare, User, Settings, Globe,
   HelpCircle, Gift, LogOut, Store, Building2, Shield, Headphones,
-  Menu, Bell, CreditCard, UserCog, Briefcase, Construction,
+  Menu, Bell, CreditCard, UserCog, Briefcase, Construction, Crown,
 } from 'lucide-react';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -89,6 +90,7 @@ export function UserAvatarMenu() {
   const { user, signOut } = useAuth();
   const { availableRoles, activeRole, switchContext } = useUserContext();
   const { unreadCount } = useNotifications();
+  const { isAdmin } = useIsAdmin();
   const isRu = language === 'ru';
 
   if (!user) return null;
@@ -185,6 +187,23 @@ export function UserAvatarMenu() {
                 </DropdownMenuItem>
               );
             })}
+            {/* Newbuilds Console — admin-only shortcut (Ignatev Estate director) */}
+            {isAdmin && (
+              <DropdownMenuItem
+                onClick={() => navigate('/admin/newbuilds')}
+                className="flex items-center gap-3 px-4 py-3 cursor-pointer focus:bg-muted/50 bg-primary/5"
+              >
+                <Crown className="w-5 h-5 text-primary flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-foreground">
+                    {isRu ? 'Newbuilds Console' : 'Newbuilds Console'}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {isRu ? 'Ignatev Estate — застройщики, проекты, документы' : 'Ignatev Estate — developers, projects, docs'}
+                  </p>
+                </div>
+              </DropdownMenuItem>
+            )}
             {/* Developer portal — not an AppRole; direct link (no profile → apply flow) */}
             <DropdownMenuItem
               onClick={() => navigate(APP_ROUTES.DEVELOPER_PORTAL)}
