@@ -18433,6 +18433,7 @@ export type Database = {
           investment_enabled: boolean | null
           is_active: boolean | null
           is_approved: boolean | null
+          is_clearview_rated: boolean
           is_featured: boolean | null
           juristic_address: string | null
           juristic_bank_account_name: string | null
@@ -18532,6 +18533,7 @@ export type Database = {
           investment_enabled?: boolean | null
           is_active?: boolean | null
           is_approved?: boolean | null
+          is_clearview_rated?: boolean
           is_featured?: boolean | null
           juristic_address?: string | null
           juristic_bank_account_name?: string | null
@@ -18631,6 +18633,7 @@ export type Database = {
           investment_enabled?: boolean | null
           is_active?: boolean | null
           is_approved?: boolean | null
+          is_clearview_rated?: boolean
           is_featured?: boolean | null
           juristic_address?: string | null
           juristic_bank_account_name?: string | null
