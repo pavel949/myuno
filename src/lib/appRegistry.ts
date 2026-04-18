@@ -773,31 +773,7 @@ export const APP_REGISTRY: Record<string, AppEntry> = {
     bookable: false,
   },
 
-  // ──────── Previously uncataloged — now in journey groups ────────
-  tax: {
-    id: 'tax',
-    route: APP_ROUTES.TAX_NAV,
-    groupId: 'settle',
-    clusterIds: ['legal'],
-    labelEn: 'Taxes',
-    labelRu: 'Налоги',
-    icon: '📑',
-    status: 'active',
-    personaTags: ['nomad', 'business', 'resident'],
-    bookable: false,
-  },
-  knowledge: {
-    id: 'knowledge',
-    route: APP_ROUTES.KNOWLEDGE,
-    groupId: 'settle',
-    clusterIds: ['live'],
-    labelEn: 'Knowledge Hub',
-    labelRu: 'База знаний',
-    icon: '📚',
-    status: 'active',
-    personaTags: ['resident', 'nomad', 'relocation'],
-    bookable: false,
-  },
+  // ──────── Previously uncataloged — now in journey groups (deduped — primary defs above) ────────
   wedding: {
     id: 'wedding',
     route: APP_ROUTES.WEDDING,

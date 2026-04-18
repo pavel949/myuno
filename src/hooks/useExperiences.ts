@@ -5,7 +5,8 @@ import { CACHE_PROFILES } from '@/lib/queryConfig';
 import type { Json } from '@/integrations/supabase/types';
 
 // ====== TYPES ======
-export type { ExperienceType } from '@/types/verticals';
+import type { ExperienceType, BookingModel } from '@/types/verticals';
+export type { ExperienceType, BookingModel } from '@/types/verticals';
 
 export interface ItineraryItem {
   time?: string;
@@ -20,8 +21,6 @@ export interface IncludeItem {
   text_ru?: string;
   icon?: string;
 }
-
-export type { BookingModel } from '@/types/verticals';
 
 export interface Experience {
   id: string;

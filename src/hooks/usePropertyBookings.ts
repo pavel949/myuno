@@ -68,34 +68,51 @@ interface OrderWithJoins {
 }
 
 /**
- * Maps an order row to PropertyBooking interface for backward compatibility
+ * Maps an order row to PropertyBooking interface for backward compatibility.
+ * Accepts unknown shape and extracts fields defensively to tolerate Supabase
+ * generated-type drift (e.g. metadata being typed as Json).
  */
-function mapOrderToBooking(order: OrderWithJoins, propertyId: string): PropertyBooking {
-  const guestParticipant = order.order_participants?.find((p: { role: string }) => p.role === 'guest');
-  const propertyItem = order.order_items?.find((i: { item_type: string }) => i.item_type === 'property');
-  
-  // Property ID is stored in order_items.metadata.property_id (not resource_id due to FK constraint)
-  const itemPropertyId = propertyItem?.metadata?.property_id || propertyItem?.resource_id;
-  
+function mapOrderToBooking(orderInput: unknown, propertyId: string): PropertyBooking {
+  const order = (orderInput || {}) as {
+    id?: string;
+    start_at?: string | null;
+    end_at?: string | null;
+    total_amount?: number | null;
+    currency?: string | null;
+    status?: string;
+    notes?: string | null;
+    created_at?: string;
+    updated_at?: string;
+    provider_org_id?: string | null;
+    metadata?: Record<string, unknown> | null | string;
+    order_participants?: Array<{ role: string; name: string | null; phone: string | null; email: string | null }> | null;
+    order_items?: Array<{ item_type: string; resource_id: string | null; metadata: Record<string, unknown> | null }> | null;
+  };
+  const meta = (typeof order.metadata === 'object' && order.metadata !== null ? order.metadata : {}) as Record<string, unknown>;
+  const guestParticipant = order.order_participants?.find((p) => p.role === 'guest');
+  const propertyItem = order.order_items?.find((i) => i.item_type === 'property');
+  const itemMeta = (propertyItem?.metadata && typeof propertyItem.metadata === 'object' ? propertyItem.metadata : {}) as Record<string, unknown>;
+  const itemPropertyId = (itemMeta.property_id as string | undefined) || propertyItem?.resource_id;
+
   return {
-    id: order.id,
+    id: order.id || '',
     order_id: order.id,
     property_id: itemPropertyId || propertyId,
     owner_id: order.provider_org_id || '',
-    guest_name: guestParticipant?.name,
-    guest_phone: guestParticipant?.phone,
-    guest_email: guestParticipant?.email,
+    guest_name: guestParticipant?.name || undefined,
+    guest_phone: guestParticipant?.phone || undefined,
+    guest_email: guestParticipant?.email || undefined,
     check_in: order.start_at?.split('T')[0] || '',
     check_out: order.end_at?.split('T')[0] || '',
-    guests_count: order.metadata?.guests_count,
-    total_amount: order.total_amount,
-    currency: order.currency,
-    source: order.metadata?.source,
-    external_id: order.metadata?.external_id,
+    guests_count: meta.guests_count as number | undefined,
+    total_amount: order.total_amount ?? undefined,
+    currency: order.currency ?? undefined,
+    source: meta.source as string | undefined,
+    external_id: meta.external_id as string | undefined,
     status: order.status,
-    notes: order.notes,
-    created_at: order.created_at,
-    updated_at: order.updated_at,
+    notes: order.notes ?? undefined,
+    created_at: order.created_at || '',
+    updated_at: order.updated_at || '',
   };
 }
 

@@ -413,7 +413,8 @@ export interface VendorProduct {
   updated_at: string;
 }
 
-export interface VendorProperty {
+/** @deprecated Use VendorProperty from '@/types/property' — this legacy shape uses `title` instead of `title_en/title_ru`. */
+export interface VendorPropertyLegacy {
   id: string;
   provider_id?: string;
   title: string;

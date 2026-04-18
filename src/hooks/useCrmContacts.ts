@@ -141,9 +141,11 @@ export function useCrmContacts(
       const sortField = filters?.sortBy || 'updated_at';
       const ascending = sortField === 'first_name'; // name ascending, rest descending
 
-      let q = supabase
+      // Cast builder to a loose shape — full Supabase type inference is too deep here (TS2589).
+      type AnyQ = { eq: (...a: unknown[]) => AnyQ; or: (...a: unknown[]) => AnyQ; contains: (...a: unknown[]) => AnyQ; range: (...a: unknown[]) => AnyQ; order: (...a: unknown[]) => AnyQ };
+      let q = (supabase
         .from('crm_contacts')
-        .select('*, agent_deals!contact_id(id)', { count: 'exact' })
+        .select('*, agent_deals!contact_id(id)', { count: 'exact' }) as unknown as AnyQ)
         .eq('company_id', companyId!)
         .order(sortField, { ascending })
         .range(from, to);
@@ -201,7 +203,7 @@ export function useCrmContacts(
         q = q.contains('segment', [filters.segment]);
       }
 
-      const { data, error, count } = await q;
+      const { data, error, count } = await (q as unknown as Promise<{ data: unknown[] | null; error: { message: string } | null; count: number | null }>);
       if (error) throw error;
       const rows = (data || []) as Record<string, unknown>[];
       const enriched = rows.map((c) => {
@@ -226,7 +228,7 @@ export function useCrmContact(contactId: string | undefined) {
         .eq('id', contactId)
         .maybeSingle();
       if (error) throw error;
-      return data as CrmContact | null;
+      return data as unknown as CrmContact | null;
     },
     enabled: !!contactId,
   });
@@ -238,8 +240,9 @@ export function useCreateContact() {
     mutationFn: async (contact: CrmContactInsert) => {
       // Strip legacy/virtual fields that exist in the TS type but not in the DB schema
       const { crm_role: _crm_role, key_dates: _key_dates, ...cleanContact } = contact as CrmContactInsert & Record<string, unknown>;
-      const { data, error } = await supabase
-        .from('crm_contacts')
+      const { data, error } = await (supabase.from('crm_contacts') as unknown as {
+        insert: (v: unknown) => { select: () => { single: () => Promise<{ data: unknown; error: { message: string } | null }> } }
+      })
         .insert(cleanContact)
         .select()
         .single();
@@ -343,7 +346,7 @@ export function useContactSearch(companyId: string | undefined, query: string) {
       if (error) throw error;
 
       // Fallback: translit/fuzzy matching needs local candidate set if SQL ILIKE missed results.
-      let candidates = (data || []) as CrmContact[];
+      let candidates = (data || []) as unknown as CrmContact[];
       if (candidates.length === 0) {
         const { data: fallback, error: fallbackError } = await supabase
           .from('crm_contacts')
@@ -353,7 +356,7 @@ export function useContactSearch(companyId: string | undefined, query: string) {
           .order('updated_at', { ascending: false })
           .limit(250);
         if (fallbackError) throw fallbackError;
-        candidates = (fallback || []) as CrmContact[];
+        candidates = (fallback || []) as unknown as CrmContact[];
       }
 
       return candidates
