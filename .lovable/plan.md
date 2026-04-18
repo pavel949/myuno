@@ -1,67 +1,85 @@
 
 
-User wants me to verify which database receives writes from CRM, leads (заявки), clients, bookings, and other frontend data flows. Context: previously discussed mirroring Lovable Cloud DB (`kakkwibljrjsawxgnupk`) to user's own Supabase (`erfwtoavipwjqmylpizt`). User wants confirmation that writes go to the correct DB.
+User wants comprehensive check of Real Estate block — what works, what doesn't, what's good, what's bad. Different from prior audit (which gave scores) — now wants concrete operational status: какие страницы открываются, какие формы шлют данные, какие показывают ошибки.
 
-Let me investigate the codebase to verify.
+Plan: live operational check, not theoretical scoring.
 
-## План проверки: куда пишутся данные с фронтенда
+## План: Операционная проверка блока «Недвижимость»
 
-### Что проверю (read-only аудит)
+### Что сделаю
 
-**1. Supabase clients** — найду все экземпляры `createClient` в коде, чтобы убедиться что используется только один основной клиент:
-- `src/integrations/supabase/client.ts` — основной (Lovable Cloud `kakkwibljrjsawxgnupk`)
-- `src/lib/peylaa/supabaseClient.ts` — отдельный PEYLAA проект (read-only, sales)
-- Поиск других `createClient(...)` через codebase
+**1. Проверка маршрутов (живая)**
+Через preview пройду по всем ключевым URL real-estate блока и зафиксирую:
+- HTTP статус (200 / 404 / blank)
+- Console errors (если есть)
+- Загружаются ли данные
 
-**2. CRM записи** — куда идут `INSERT` для:
-- `crm_contacts`, `crm_deals`, `crm_activities`, `crm_tasks`
-- `mcc_leads` (Marketing Command Center)
-- `consultation_requests` (заявки на консультации)
-- `vendor_prospects`, `owner_prospects`
+Список (≈18 страниц):
+- `/property` — главный хаб
+- `/property/rent`, `/property/buy`, `/property/resale`, `/property/my`
+- `/property/:id` — карточка объекта
+- `/newbuilds` — новостройки
+- `/newbuilds/:slug` — карточка ЖК
+- `/newbuilds/area/:slug` — район
+- `/newbuilds/developer/:slug` — застройщик
+- `/p/:slug` — микросайт
+- `/property/offplan/:id` → редирект
+- `/developer-portal` — портал застройщика
+- `/developer-portal/register`, `/login`, `/dashboard`, `/projects`
+- `/admin/properties`, `/admin/newbuilds`, `/admin/developers`
 
-**3. Заявки/Лиды** — проверю:
-- `nb_leads` (newbuilds лиды)
-- `viewing_requests` (показы недвижимости)
-- `consultation_requests` (юристы, визы)
-- Формы из лендингов (relocate, wedding, kids)
+**2. Проверка функционала (через БД + код)**
+- **Формы лидов:** свежесть записей в `nb_leads`, `viewing_requests`, `consultation_requests`, `property_viewings` за 7 дней
+- **CRM связка:** идут ли лиды в `crm_contacts` (UTM, source)
+- **Бронирования:** последние записи в `property_bookings` + статус
+- **Платежи:** `payment_intents` для real-estate сценариев
+- **Микросайты:** сколько проектов имеют `landing_enabled = true`, какие slugs работают
+- **Модерация:** очередь `approval_status = 'pending'` в `property_projects`
+- **Developer Portal:** есть ли реальные регистрации в `developer_users` (на прошлой проверке было 0)
 
-**4. Клиенты/Брони** — проверю:
-- `bookings`, `orders`, `order_items`
-- `payment_intents` (Stripe webhook target)
-- `guest_inquiries`
+**3. Проверка качества данных**
+- `property_projects` — сколько без `cover_image`, без `developer_id`, без `slug`, без `lat/lng`
+- `developers` — сколько без `logo_url`, без `description_ru`
+- `properties` — сколько `is_active=true` но без фото
+- Битые ссылки (cover_image указывает на 404)
 
-**5. .env проверка** — какой URL прописан в `VITE_SUPABASE_URL`:
-- Подтвержу что = `https://kakkwibljrjsawxgnupk.supabase.co` (Lovable Cloud)
+**4. Edge Functions health**
+Логи за 24h по функциям:
+- `newbuilds-search`, `newbuilds-lead-create`
+- `property-viewing-request`, `property-inquiry`
+- `developer-portal-*`
+Считаем error rate.
 
-**6. Свежие записи в БД** — через `supabase--read_query` посмотрю последние 5-10 записей в каждой таблице с `created_at DESC` чтобы убедиться что данные реально приходят (timestamp ≤ 24h).
+**5. Mobile UX spot-check**
+На viewport 375px проверю:
+- `/property` — фильтры (sheet vs dialog)
+- `/newbuilds` — карточки
+- `/p/:slug` — микросайт
+- Sticky CTA на детальных страницах
 
-**7. Mirror workflow check** — напомню что GitHub Actions cron (если включён) копирует данные из Lovable Cloud → `erfwtoavipwjqmylpizt` односторонне; сам фронт всегда пишет в Lovable Cloud.
+### Формат отчёта
 
-### Что выдам в результате
+Markdown в чате (~40 строк), 4 секции:
 
-Краткий отчёт-таблица в чате:
+**✅ Работает хорошо**
+- Список 5-10 пунктов с доказательствами
 
-| Категория | Таблица | Куда пишет фронт | Свежесть данных | Статус |
-|---|---|---|---|---|
-| CRM Contacts | `crm_contacts` | Lovable Cloud (kakk...) | last write: ... | ✅/⚠️ |
-| CRM Deals | `crm_deals` | ... | ... | ... |
-| Лиды newbuilds | `nb_leads` | ... | ... | ... |
-| Консультации | `consultation_requests` | ... | ... | ... |
-| Бронирования | `bookings` | ... | ... | ... |
-| Заказы | `orders` | ... | ... | ... |
-| Платежи | `payment_intents` | ... | ... | ... |
-| PEYLAA данные | (внешняя БД) | ... | ... | ℹ️ |
+**⚠️ Работает, но с проблемами**
+- 5-8 пунктов: что именно ломается, какой сценарий
 
-Плюс:
-- Список всех `createClient` инстансов с пояснением назначения каждого
-- Подтверждение/опровержение, что `erfwtoavipwjqmylpizt` НЕ получает прямые записи с фронта (только через mirror workflow если активирован)
-- Если найду аномалии (например запись в неправильную БД) — отдельный блок "⚠️ Найдено"
+**❌ Не работает**
+- Конкретные баги с reproduction steps
+
+**📊 Качество данных**
+- Таблица: метрика → значение → норма → статус
+
+Плюс **Top-5 quick wins** — что починить за 30 минут.
 
 ### Что НЕ делаю
 - Никаких правок кода
-- Никаких миграций
-- Не трогаю mirror workflow
+- Не запускаю смоук-тест Developer Portal через регистрацию (только смотрю текущее состояние)
+- Не правлю битые данные
 
 ### Время
-~3-5 минут (несколько SQL запросов + поиск по коду + чтение 3-4 файлов).
+~5-7 минут.
 
