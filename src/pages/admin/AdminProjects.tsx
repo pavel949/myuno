@@ -563,31 +563,58 @@ export default function AdminProjects() {
           </Card>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {filteredProjects.map((project) => (
+            {filteredProjects.map((project) => {
+              const isOrphan = project.developer_id === UNASSIGNED_DEV_ID;
+              const isSelected = selectedIds.has(project.id);
+              return (
               <Card 
                 key={project.id} 
-                className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
-                onClick={() => handleOpenEdit(project)}
+                className={`overflow-hidden hover:shadow-md transition-shadow ${isSelected ? 'ring-2 ring-primary' : ''}`}
               >
                 {/* Cover Image */}
                 <div className="aspect-video bg-muted relative">
-                  {project.cover_image ? (
-                    <img
-                      src={project.cover_image}
-                      alt={project.name_en}
-                      className="w-full h-full object-cover"
+                  {/* Selection checkbox */}
+                  <div className="absolute top-2 left-2 z-10" onClick={(e) => e.stopPropagation()}>
+                    <Checkbox
+                      checked={isSelected}
+                      onCheckedChange={() => toggleSelect(project.id)}
+                      className="bg-background/80 backdrop-blur"
                     />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Building2 className="h-12 w-12 text-muted-foreground" />
-                    </div>
-                  )}
-                  {project.is_featured && (
-                    <Badge className="absolute top-2 right-2">Featured</Badge>
-                  )}
+                  </div>
+                  <div className="cursor-pointer w-full h-full" onClick={() => handleOpenEdit(project)}>
+                    {project.cover_image ? (
+                      <img
+                        src={project.cover_image}
+                        alt={project.name_en}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Building2 className="h-12 w-12 text-muted-foreground" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="absolute top-2 right-2 flex flex-col gap-1 items-end">
+                    {project.is_featured && <Badge>Featured</Badge>}
+                    {isOrphan && (
+                      <Badge variant="destructive" className="text-[10px]">
+                        <AlertTriangle className="h-3 w-3 mr-1" />Orphan
+                      </Badge>
+                    )}
+                    {project.needs_review && (
+                      <Badge className="text-[10px] bg-amber-500/90 text-white border-0">
+                        Review
+                      </Badge>
+                    )}
+                    {project.is_approved === false && (
+                      <Badge variant="outline" className="text-[10px] bg-background">
+                        Pending
+                      </Badge>
+                    )}
+                  </div>
                 </div>
                 
-                <CardContent className="p-4">
+                <CardContent className="p-4 cursor-pointer" onClick={() => handleOpenEdit(project)}>
                   <h3 className="font-semibold truncate">
                     {isRu ? project.name_ru : project.name_en}
                   </h3>
@@ -623,8 +650,20 @@ export default function AdminProjects() {
                     )}
                   </div>
                 </CardContent>
+                <div className="px-4 pb-3 flex gap-2 border-t pt-2">
+                  <Button asChild size="sm" variant="ghost" className="flex-1" onClick={(e) => e.stopPropagation()}>
+                    <Link to={`/admin/newbuilds/projects/${project.id}/documents`}>
+                      <FileText className="h-3.5 w-3.5 mr-1" />
+                      {isRu ? 'Документы' : 'Documents'}
+                    </Link>
+                  </Button>
+                  <Button size="sm" variant="ghost" className="flex-1" onClick={(e) => { e.stopPropagation(); handleOpenEdit(project); }}>
+                    <Edit className="h-3.5 w-3.5 mr-1" />
+                    {isRu ? 'Изменить' : 'Edit'}
+                  </Button>
+                </div>
               </Card>
-            ))}
+            );})}
           </div>
         )}
 
