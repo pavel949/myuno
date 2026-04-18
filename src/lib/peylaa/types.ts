@@ -1,5 +1,9 @@
 /**
- * PEYLAA Types — matching the peylaa Supabase schema
+ * PEYLAA Types — public contract for /peylaa pages.
+ *
+ * Originally mapped 1:1 to a separate Supabase project. Now PEYLAA lives in the
+ * PRIMARY DB (`property_projects` slug `peylaa-phuket-marriott`) and these
+ * types are produced by the mapping layer in `src/hooks/usePeylaa.ts`.
  */
 
 export interface PeylaaUnit {
@@ -101,7 +105,6 @@ export interface UnitStats {
   max_area: number;
 }
 
-// Filter types for the unit catalog
 export interface UnitFilters {
   bedrooms?: number[];
   buildings?: string[];

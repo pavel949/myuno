@@ -70,7 +70,7 @@
 |---|---|---|---|
 | **PRIMARY (prod)** | `kakkwibljrjsawxgnupk` | `https://kakkwibljrjsawxgnupk.supabase.co` | Frontend + Edge Functions |
 | **MIRROR (опц.)** | `erfwtoavipwjqmylpizt` | standalone | Только ручной экспорт через `scripts/` |
-| **PEYLAA (read-only)** | отдельный | — | Read-only через `src/lib/peylaa/supabaseClient.ts` |
+| ~~PEYLAA~~ | мигрирована в PRIMARY | `slug=peylaa-phuket-marriott` | Frontend через стандартный supabase client |
 
 ⚠️ **Все записи (CRM, лиды, бронирования, юзеры, платежи) идут в `kakkwibljrjsawxgnupk`.** Локальная разработка использует **ту же** production-БД — отдельного staging нет. Тестовые данные помечайте маркерами.
 
@@ -84,7 +84,7 @@
 ### Lovable project
 - ID: `dcc2b024-7627-4ad9-a915-a3df3dd839f0`
 
-**Supabase client:** Always use `src/integrations/supabase/client.ts`. Never create new instances for the primary DB. PEYLAA — отдельный клиент в `src/lib/peylaa/supabaseClient.ts`.
+**Supabase client:** Always use `src/integrations/supabase/client.ts`. Never create new instances. PEYLAA was migrated into PRIMARY DB — `src/lib/peylaa/supabaseClient.ts` removed.
 
 **Auto-generated types:** `src/integrations/supabase/types.ts` (~900KB, не редактируем вручную).
 

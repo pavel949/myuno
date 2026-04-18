@@ -27,7 +27,7 @@ Current stage: Pre-PMF. 7 users, 0 transactions. Validation is the priority.
 ## DATABASES & ENVIRONMENT (canonical source: docs/ENVIRONMENT.md)
 - **PRIMARY DB (production, all reads/writes):** Supabase project `kakkwibljrjsawxgnupk` (`https://kakkwibljrjsawxgnupk.supabase.co`)
 - **MIRROR DB (optional standalone backup):** Supabase project `erfwtoavipwjqmylpizt` — never written from frontend, only via `scripts/export-data.mjs` + `scripts/import-data.mjs`
-- **PEYLAA DB (read-only sales system):** separate Supabase project, accessed only via `src/lib/peylaa/supabaseClient.ts`
+- **PEYLAA:** migrated into PRIMARY DB (`slug=peylaa-phuket-marriott`). Use the standard `supabase` client; do not recreate `peylaaDb`.
 - **Lovable project ID:** `dcc2b024-7627-4ad9-a915-a3df3dd839f0`
 - **Production URLs:** myuno.app, www.myuno.app | **Preview:** uno-connect-hub.lovable.app
 - ⚠️ Local dev + preview + production all hit the **same PRIMARY DB**. No staging environment. Mark test data with `[TEST]` / `source='smoke_test'` / `*@myuno.test`.
