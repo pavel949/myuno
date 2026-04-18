@@ -40,7 +40,12 @@ export interface UpdateProfileDetailsData {
   country?: string | null;
   emergency_contact_name?: string | null;
   emergency_contact_phone?: string | null;
-  /** Canonical field — maps to emergency_contact_relationship in profiles */
+  /**
+   * Canonical DB column name — use this in new code.
+   * Alias emergency_contact_relation is accepted for backwards-compat (mapped before write).
+   */
+  emergency_contact_relationship?: string | null;
+  /** @deprecated Use emergency_contact_relationship */
   emergency_contact_relation?: string | null;
   dietary_restrictions?: string[] | null;
   medical_conditions?: string | null;
@@ -82,21 +87,23 @@ export function useProfileDetails() {
       if (!data) return null;
 
       return {
-        ...data,
-        date_of_birth: (data as any).date_of_birth ?? null,
-        gender: (data as any).gender ?? null,
-        nationality: (data as any).nationality ?? null,
-        address_line1: (data as any).address_line1 ?? null,
-        address_line2: (data as any).address_line2 ?? null,
-        city: (data as any).city ?? null,
-        state_province: (data as any).state_province ?? null,
-        postal_code: (data as any).postal_code ?? null,
-        country: (data as any).country ?? null,
-        dietary_restrictions: (data as any).dietary_restrictions ?? null,
-        medical_conditions: (data as any).medical_conditions ?? null,
-        travel_preferences: (data as any).travel_preferences ?? null,
+        id: data.id,
+        date_of_birth: data.date_of_birth ?? null,
+        gender: data.gender ?? null,
+        nationality: data.nationality ?? null,
+        address_line1: data.address_line1 ?? null,
+        address_line2: data.address_line2 ?? null,
+        city: data.city ?? null,
+        state_province: data.state_province ?? null,
+        postal_code: data.postal_code ?? null,
+        country: data.country ?? null,
+        dietary_restrictions: data.dietary_restrictions ?? null,
+        medical_conditions: data.medical_conditions ?? null,
+        travel_preferences: data.travel_preferences as Record<string, unknown> | null ?? null,
+        emergency_contact_name: data.emergency_contact_name ?? null,
+        emergency_contact_phone: data.emergency_contact_phone ?? null,
         emergency_contact_relationship: data.emergency_contact_relationship ?? null,
-      } as ProfileDetails;
+      };
     },
     enabled: !!user?.id,
   });
@@ -105,10 +112,13 @@ export function useProfileDetails() {
     mutationFn: async (updates: UpdateProfileDetailsData) => {
       if (!user?.id) throw new Error('Not authenticated');
 
-      // Map emergency_contact_relation → emergency_contact_relationship (canonical name in profiles)
-      const { emergency_contact_relation, ...rest } = updates;
+      // Normalise both field name variants → canonical DB column name
+      const { emergency_contact_relation, emergency_contact_relationship, ...rest } = updates;
       const mapped: Record<string, unknown> = { ...rest };
-      if (emergency_contact_relation !== undefined) {
+      // Canonical wins; legacy alias is a fallback
+      if (emergency_contact_relationship !== undefined) {
+        mapped.emergency_contact_relationship = emergency_contact_relationship;
+      } else if (emergency_contact_relation !== undefined) {
         mapped.emergency_contact_relationship = emergency_contact_relation;
       }
 

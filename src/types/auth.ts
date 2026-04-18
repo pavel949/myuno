@@ -18,7 +18,7 @@
   * - admin/ombudsman: Administrative roles
   * - finance/support/sales/investor: Specialized platform roles
   */
-export type AppRole = 
+export type AppRole =
   // Base roles
   | 'guest'
   | 'user'
@@ -28,7 +28,9 @@ export type AppRole =
   // Business roles
   | 'partner'
   | 'owner'
-  | 'property_manager'
+  | 'property_owner'  // DB: app_role enum — full property owner with portal access
+  | 'property_manager' // NOTE: not yet in DB app_role enum (property_manager_assignments table used instead)
+  | 'broker'          // DB: app_role enum — RE broker role
   | 'vendor'
   // Platform operators
   | 'staff'
@@ -125,6 +127,24 @@ export type AppRole =
        descriptionEn: 'Professional property management for owners',
        descriptionRu: 'Профессиональное управление объектами собственников',
     },
+   property_owner: {
+     labelEn: 'Property Owner',
+     labelRu: 'Владелец недвижимости',
+     icon: 'Building2',
+     color: 'from-teal-400 to-teal-500',
+     defaultPath: '/owner',
+     descriptionEn: 'Manage owned properties and track income',
+     descriptionRu: 'Управление объектами и доходами собственника',
+   },
+   broker: {
+     labelEn: 'Broker',
+     labelRu: 'Брокер',
+     icon: 'Briefcase',
+     color: 'from-indigo-500 to-blue-600',
+     defaultPath: '/admin/sales',
+     descriptionEn: 'Real estate broker with deal pipeline access',
+     descriptionRu: 'Брокер по недвижимости с доступом к сделкам',
+   },
     vendor: {
      labelEn: 'Service Provider',
      labelRu: 'Поставщик услуг',

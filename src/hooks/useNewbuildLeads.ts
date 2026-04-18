@@ -34,7 +34,7 @@ export function useNewbuildLeads(filters?: { project_id?: string; status?: strin
     queryKey: ['nb-leads', filters],
     queryFn: async (): Promise<NewbuildLead[]> => {
       let query = supabase
-        .from('nb_leads' as any)
+        .from('nb_leads')
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -44,7 +44,7 @@ export function useNewbuildLeads(filters?: { project_id?: string; status?: strin
 
       const { data, error } = await query;
       if (error) throw error;
-      return (data || []) as unknown as NewbuildLead[];
+      return (data || []) as NewbuildLead[];
     },
   });
 }
@@ -54,7 +54,8 @@ export function useNewbuildLead(id?: string) {
     queryKey: ['nb-lead', id],
     queryFn: async (): Promise<NewbuildLead | null> => {
       if (!id) return null;
-      const { data, error } = await (supabase.from('nb_leads' as any) as any)
+      const { data, error } = await supabase
+        .from('nb_leads')
         .select('*')
         .eq('id', id)
         .maybeSingle();
@@ -69,7 +70,7 @@ export function useUpdateLeadStatus() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      const { error } = await (supabase.from('nb_leads' as any) as any).update({ status }).eq('id', id);
+      const { error } = await supabase.from('nb_leads').update({ status }).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -84,7 +85,7 @@ export function useCreateNewbuildLead() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (data: Partial<NewbuildLead>) => {
-      const { error } = await (supabase.from('nb_leads' as any) as any).insert(data);
+      const { error } = await supabase.from('nb_leads').insert(data);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -110,7 +111,8 @@ export function useDeveloperLeads() {
       
       if (!dev) return [];
 
-      const { data, error } = await (supabase.from('nb_leads' as any) as any)
+      const { data, error } = await supabase
+        .from('nb_leads')
         .select('*')
         .eq('developer_id', dev.id)
         .order('created_at', { ascending: false });

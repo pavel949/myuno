@@ -47,7 +47,7 @@ export interface Property {
   project_id?: string;
   floor?: number;
   unit_number?: string;
-  view_type?: string[];
+  view_type?: string | null;
   furnishing_level?: string;
   equipment?: string[];
   // Quick filter fields
@@ -63,7 +63,7 @@ export interface Property {
   prepay_percent?: number;
   deposit_amount?: number;
   deposit_currency?: string;
-  custom_length_discounts?: any;
+  custom_length_discounts?: import('@/integrations/supabase/types').Json | null;
   negotiation_enabled?: boolean;
   price_per_night?: number;
   seasonal_pricing?: Record<string, unknown>;

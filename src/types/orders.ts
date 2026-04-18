@@ -52,19 +52,21 @@ export type OrderType =
  * Transitions are tracked in `order_status_history` table.
  */
 export type OrderStatus =
-  | 'draft'           // Order started but not submitted
-  | 'pending'         // Awaiting confirmation
-  | 'pending_deposit' // Awaiting deposit payment (property)
-  | 'deposit_paid'    // Deposit received, awaiting full payment
-  | 'confirmed'       // Confirmed by provider
-  | 'in_progress'     // Service is being delivered
-  | 'checked_in'      // Guest has checked in (property)
-  | 'checked_out'     // Guest has checked out (property)
-  | 'completed'       // Successfully completed
-  | 'cancelled'       // Cancelled by user or provider
-  | 'refunded'        // Payment refunded
-  | 'disputed'        // Under dispute resolution
-  | 'no_show';        // Guest did not show up
+  | 'draft'                    // Order started but not submitted
+  | 'pending'                  // Awaiting confirmation
+  | 'pending_advance'          // Awaiting advance payment
+  | 'awaiting_client_payment'  // Awaiting client payment action
+  | 'pending_deposit'          // Awaiting deposit payment (property)
+  | 'deposit_paid'             // Deposit received, awaiting full payment
+  | 'confirmed'                // Confirmed by provider
+  | 'in_progress'              // Service is being delivered
+  | 'checked_in'               // Guest has checked in (property)
+  | 'checked_out'              // Guest has checked out (property)
+  | 'completed'                // Successfully completed
+  | 'cancelled'                // Cancelled by user or provider
+  | 'refunded'                 // Payment refunded
+  | 'disputed'                 // Under dispute resolution
+  | 'no_show';                 // Guest did not show up
 
 /**
  * Supported payment methods
@@ -231,6 +233,8 @@ export interface StatusConfig {
 export const ORDER_STATUS_CONFIG: Record<OrderStatus, StatusConfig> = {
   draft: { labelEn: 'Draft', labelRu: 'Черновик', color: 'text-muted-foreground', bgColor: 'bg-muted' },
   pending: { labelEn: 'Pending', labelRu: 'Ожидание', color: 'text-yellow-600', bgColor: 'bg-yellow-500/20' },
+  pending_advance: { labelEn: 'Awaiting Advance', labelRu: 'Ожидание аванса', color: 'text-amber-600', bgColor: 'bg-amber-500/20' },
+  awaiting_client_payment: { labelEn: 'Awaiting Payment', labelRu: 'Ожидание оплаты', color: 'text-orange-600', bgColor: 'bg-orange-500/20' },
   pending_deposit: { labelEn: 'Awaiting Deposit', labelRu: 'Ожидание депозита', color: 'text-amber-600', bgColor: 'bg-amber-500/20' },
   deposit_paid: { labelEn: 'Deposit Paid', labelRu: 'Депозит оплачен', color: 'text-blue-500', bgColor: 'bg-blue-400/20' },
   confirmed: { labelEn: 'Confirmed', labelRu: 'Подтверждён', color: 'text-blue-600', bgColor: 'bg-blue-500/20' },

@@ -21,10 +21,10 @@ export function useActivePropertyRental() {
     const check = async () => {
       setIsLoading(true);
       try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const query = supabase.from('orders').select('id') as any;
-        const { data: propertyOrders } = await query
-          .eq('user_id', user.id)
+        const { data: propertyOrders } = await supabase
+          .from('orders')
+          .select('id')
+          .eq('customer_user_id', user.id)
           .eq('order_type', 'property')
           .in('status', ['confirmed', 'in_progress', 'checked_in', 'completed'])
           .limit(1);
@@ -35,9 +35,9 @@ export function useActivePropertyRental() {
           return;
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const pbQuery = supabase.from('property_bookings').select('id', { count: 'exact', head: true }) as any;
-        const { count } = await pbQuery
+        const { count } = await supabase
+          .from('property_bookings')
+          .select('id', { count: 'exact', head: true })
           .eq('guest_id', user.id)
           .neq('status', 'cancelled');
 

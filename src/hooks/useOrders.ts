@@ -12,133 +12,20 @@ import type { Database } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
 const errorLog = createErrorHandler('useOrders');
 
-// Type definitions
-export type OrderType = 
-  | 'service' | 'tour' | 'property' | 'yacht' | 'vehicle' 
-  | 'event' | 'activity' | 'beauty' | 'cleaning' | 'babysitter'
-  | 'education' | 'medical' | 'legal' | 'pet_service' | 'flowers' | 'food' | 'mixed';
-
-export type OrderStatus = 
-  | 'draft' | 'pending' | 'confirmed' | 'in_progress' 
-  | 'completed' | 'cancelled' | 'refunded' | 'disputed';
-
-export type PaymentMethod = 'cash' | 'wallet' | 'stripe' | 'bank_transfer';
-
-export interface Order {
-  id: string;
-  order_number: string;
-  order_type: OrderType;
-  customer_user_id: string;
-  provider_org_id: string | null;
-  status: OrderStatus;
-  start_at: string | null;
-  end_at: string | null;
-  subtotal: number;
-  discount_amount: number;
-  tax_amount: number;
-  total_amount: number;
-  currency: string;
-  notes: string | null;
-  metadata: Record<string, unknown>;
-  created_at: string;
-  updated_at: string;
-  // Relations
-  order_items?: OrderItem[];
-  order_participants?: OrderParticipant[];
-  order_addresses?: OrderAddress[];
-}
-
-export interface OrderItem {
-  id: string;
-  order_id: string;
-  product_id: string | null;
-  resource_id: string | null;
-  provider_org_id: string | null;
-  item_name: string;
-  item_type: string;
-  qty: number;
-  unit_price: number;
-  amount: number;
-  status: string;
-  start_at: string | null;
-  end_at: string | null;
-  metadata: Record<string, unknown>;
-  created_at: string;
-}
-
-export interface OrderParticipant {
-  id: string;
-  order_id: string;
-  role: 'primary' | 'guest' | 'attendee' | 'driver' | 'guide';
-  name: string;
-  phone: string | null;
-  email: string | null;
-  metadata: Record<string, unknown>;
-  created_at: string;
-}
-
-export interface OrderAddress {
-  id: string;
-  order_id: string;
-  address_type: 'pickup' | 'service' | 'dropoff' | 'billing';
-  address_text: string;
-  lat: number | null;
-  lng: number | null;
-  notes: string | null;
-  created_at: string;
-}
-
-export interface CreateOrderInput {
-  order_type: OrderType;
-  provider_org_id?: string;
-  start_at?: Date | string;
-  end_at?: Date | string;
-  total_amount: number;
-  currency?: string;
-  notes?: string;
-  metadata?: Record<string, unknown>;
-  items: {
-    product_id?: string;
-    resource_id?: string;
-    provider_org_id?: string;
-    item_name: string;
-    item_type: string;
-    qty?: number;
-    unit_price: number;
-    amount: number;
-    start_at?: Date | string;
-    end_at?: Date | string;
-    metadata?: Record<string, unknown>;
-  }[];
-  participants?: {
-    role?: 'primary' | 'guest' | 'attendee';
-    name: string;
-    phone?: string;
-    email?: string;
-  }[];
-  addresses?: {
-    address_type: 'pickup' | 'service' | 'dropoff';
-    address_text: string;
-    lat?: number;
-    lng?: number;
-    notes?: string;
-  }[];
-  payment?: {
-    method: PaymentMethod;
-    amount: number;
-  };
-  // For WhatsApp notification
-  serviceName?: string;
-  providerName?: string;
-  openWhatsAppOnCash?: boolean;
-}
-
-export interface CreateOrderResult {
-  success: boolean;
-  order_id?: string;
-  order_number?: string;
-  error?: string;
-}
+// Re-export all types from canonical source — src/types/orders.ts
+// Do NOT declare types here. Import consumers should use @/types/orders directly,
+// or these re-exports for backwards-compat.
+export type {
+  OrderType,
+  OrderStatus,
+  PaymentMethod,
+  Order,
+  OrderItem,
+  OrderParticipant,
+  OrderAddress,
+  CreateOrderInput,
+  CreateOrderResult,
+} from '@/types/orders';
 
 /**
  * Canonical order hook - replaces all *_booking specific hooks
