@@ -217,14 +217,16 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="consultation" element={<LazyPage><Pages.PropertyConsultation /></LazyPage>} />
           <Route path="deposit-success" element={<LazyPage><Pages.PropertyDepositSuccess /></LazyPage>} />
           <Route path="map" element={<LazyPage><Pages.PropertyMap /></LazyPage>} />
-          <Route path="project/:id" element={<LazyPage><Pages.ProjectDetail /></LazyPage>} />
+          {/* Legacy /property/project/:id → canonical /property/offplan/:id */}
+          <Route path="project/:id" element={<Navigate to="../offplan/:id" replace />} />
           
           {/* Off-Plan & Developers (moved from /offplan, /developers, /complexes) */}
           <Route path="offplan" element={<LazyPage><Pages.OffplanIndex /></LazyPage>} />
           <Route path="offplan/:id" element={<LazyPage><Pages.OffplanDetail /></LazyPage>} />
           <Route path="developers" element={<LazyPage><Pages.DevelopersIndex /></LazyPage>} />
           <Route path="developers/:id" element={<LazyPage><Pages.DeveloperDetail /></LazyPage>} />
-          <Route path="projects" element={<LazyPage><Pages.ProjectsIndex /></LazyPage>} />
+          {/* Legacy /property/projects → canonical /property/offplan */}
+          <Route path="projects" element={<Navigate to="/property/offplan" replace />} />
           
           {/* Resale / Secondary Market */}
           <Route path="resale" element={<LazyPage><Pages.ResaleIndex /></LazyPage>} />
