@@ -282,6 +282,9 @@ export function usePeylaaGallery(category?: string) {
         url,
         category: category ?? 'general',
         sort_order: i,
+        is_hero: i === 0,
+        title: 'PEYLAA Phuket',
+        title_ru: 'PEYLAA Пхукет',
       }));
     },
     staleTime: 1000 * 60 * 30,

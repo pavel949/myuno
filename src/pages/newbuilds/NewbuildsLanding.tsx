@@ -18,7 +18,15 @@ import { Button } from '@/components/ui/button';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { useOffplanProjects } from '@/hooks/useOffplanProjects';
 
-const TOOL_CARDS = [
+type ToolCard = {
+  to: string;
+  title: string;
+  subtitle: string;
+  icon: typeof Building2;
+  primary?: boolean;
+};
+
+const TOOL_CARDS: ToolCard[] = [
   {
     to: APP_ROUTES.OFFPLAN,
     title: 'Каталог',
@@ -32,7 +40,7 @@ const TOOL_CARDS = [
   { to: APP_ROUTES.NEWBUILDS_AREAS, title: 'Районы', subtitle: 'Гайды по локациям', icon: Compass },
   { to: APP_ROUTES.NEWBUILDS_CALCULATOR, title: 'Калькулятор', subtitle: 'ROI и платежи', icon: Calculator },
   { to: APP_ROUTES.NEWBUILDS_DUE_DILIGENCE, title: 'Due Diligence', subtitle: 'Проверка проектов', icon: Shield },
-] as const;
+];
 
 export default function NewbuildsLanding() {
   const { data: allProjects, isLoading } = useOffplanProjects();
