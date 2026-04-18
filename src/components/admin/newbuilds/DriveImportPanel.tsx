@@ -93,7 +93,7 @@ export function DriveImportPanel({ projectId }: Props) {
           </Button>
         </div>
         {accessMode === 'connector' && (
-          <p className="text-xs text-amber-600 dark:text-amber-400 flex items-start gap-1.5">
+          <p className="text-xs text-warning flex items-start gap-1.5">
             <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
             Connector-режим в разработке. Пока используй публичные ссылки (Anyone with the link).
           </p>
@@ -181,9 +181,9 @@ export function DriveImportPanel({ projectId }: Props) {
           <div className="space-y-1">
             {jobs.slice(0, 3).map((job) => (
               <div key={job.id} className="flex items-center gap-2 text-xs text-muted-foreground py-1">
-                {job.status === 'completed' && <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />}
+                {job.status === 'completed' && <CheckCircle2 className="w-3.5 h-3.5 text-success" />}
                 {job.status === 'failed' && <AlertCircle className="w-3.5 h-3.5 text-destructive" />}
-                {job.status === 'partial' && <AlertCircle className="w-3.5 h-3.5 text-amber-500" />}
+                {job.status === 'partial' && <AlertCircle className="w-3.5 h-3.5 text-warning" />}
                 {(job.status === 'running' || job.status === 'queued') && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 <span>
                   {formatDistanceToNow(new Date(job.created_at), { addSuffix: true, locale: ru })} ·

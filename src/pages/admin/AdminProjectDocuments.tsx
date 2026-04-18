@@ -4,6 +4,7 @@
  */
 import { useParams, Link } from 'react-router-dom';
 import { ProjectDocumentsVault } from '@/components/admin/newbuilds/ProjectDocumentsVault';
+import { DriveImportPanel } from '@/components/admin/newbuilds/DriveImportPanel';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
@@ -32,6 +33,7 @@ export default function AdminProjectDocuments() {
         <h1 className="text-2xl font-bold">{project?.name_en || 'Проект'}</h1>
         <p className="text-sm text-muted-foreground">Документы проекта</p>
       </div>
+      <DriveImportPanel projectId={id} />
       <ProjectDocumentsVault projectId={id} />
     </div>
   );
