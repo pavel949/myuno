@@ -1,85 +1,73 @@
 
 
-User wants comprehensive check of Real Estate block — what works, what doesn't, what's good, what's bad. Different from prior audit (which gave scores) — now wants concrete operational status: какие страницы открываются, какие формы шлют данные, какие показывают ошибки.
+User wants a smoke test simulating 10 users on the real-estate block. Need to clarify approach since "10 users smoke test" can mean different things.
 
-Plan: live operational check, not theoretical scoring.
+## План: Smoke-тест на 10 виртуальных пользователей
 
-## План: Операционная проверка блока «Недвижимость»
+### Что я предлагаю
 
-### Что сделаю
+Скрипт-симулятор (Node/TS), который через Supabase JS client от имени **10 разных юзеров** прогоняет реалистичные сценарии блока «Недвижимость» и измеряет:
+- HTTP/RPC статус каждого шага
+- Время отклика
+- Создаются ли реально записи в БД
+- Где падают ошибки
 
-**1. Проверка маршрутов (живая)**
-Через preview пройду по всем ключевым URL real-estate блока и зафиксирую:
-- HTTP статус (200 / 404 / blank)
-- Console errors (если есть)
-- Загружаются ли данные
+### 10 пользовательских сценариев (по одному на юзера)
 
-Список (≈18 страниц):
-- `/property` — главный хаб
-- `/property/rent`, `/property/buy`, `/property/resale`, `/property/my`
-- `/property/:id` — карточка объекта
-- `/newbuilds` — новостройки
-- `/newbuilds/:slug` — карточка ЖК
-- `/newbuilds/area/:slug` — район
-- `/newbuilds/developer/:slug` — застройщик
-- `/p/:slug` — микросайт
-- `/property/offplan/:id` → редирект
-- `/developer-portal` — портал застройщика
-- `/developer-portal/register`, `/login`, `/dashboard`, `/projects`
-- `/admin/properties`, `/admin/newbuilds`, `/admin/developers`
+| # | Persona | Сценарий | Что проверяем |
+|---|---------|----------|---------------|
+| 1 | Гость-турист | Открыть `/property/rent` → загрузить листинг 12 объектов | properties query, RLS public read |
+| 2 | Гость-инвестор | `/newbuilds` → фильтр по району → открыть карточку проекта | property_projects query, фильтрация |
+| 3 | Гость-покупатель | `/property/buy` → открыть property_id → отправить inquiry | property_inquiries INSERT |
+| 4 | Лид новостройки | `/newbuilds/:slug` → отправить NbLeadForm | nb_leads INSERT + attribution |
+| 5 | Холодный лид | `/p/:slug` микросайт → форма консультации | consultation_requests INSERT |
+| 6 | Зарегистрированный гость | Sign up → запросить просмотр объекта | auth.signUp + deal_viewings INSERT |
+| 7 | Авторизованный | Sign in → открыть `/property/my` → создать favorite | property_favorites INSERT |
+| 8 | Owner candidate | Открыть `/owner-portal` → нажать «Стать владельцем» | profile update path |
+| 9 | Developer candidate | `/developer-portal/register` → submit | developer_users INSERT |
+| 10 | Read-only crawler | Запросить 5 случайных `/p/:slug` микросайтов | landing_enabled gate, 404 rate |
 
-**2. Проверка функционала (через БД + код)**
-- **Формы лидов:** свежесть записей в `nb_leads`, `viewing_requests`, `consultation_requests`, `property_viewings` за 7 дней
-- **CRM связка:** идут ли лиды в `crm_contacts` (UTM, source)
-- **Бронирования:** последние записи в `property_bookings` + статус
-- **Платежи:** `payment_intents` для real-estate сценариев
-- **Микросайты:** сколько проектов имеют `landing_enabled = true`, какие slugs работают
-- **Модерация:** очередь `approval_status = 'pending'` в `property_projects`
-- **Developer Portal:** есть ли реальные регистрации в `developer_users` (на прошлой проверке было 0)
+### Реализация
 
-**3. Проверка качества данных**
-- `property_projects` — сколько без `cover_image`, без `developer_id`, без `slug`, без `lat/lng`
-- `developers` — сколько без `logo_url`, без `description_ru`
-- `properties` — сколько `is_active=true` но без фото
-- Битые ссылки (cover_image указывает на 404)
+**Файл:** `scripts/smoke-test-real-estate.ts` (запускается через `tsx`)
 
-**4. Edge Functions health**
-Логи за 24h по функциям:
-- `newbuilds-search`, `newbuilds-lead-create`
-- `property-viewing-request`, `property-inquiry`
-- `developer-portal-*`
-Считаем error rate.
+**Что делает:**
+1. Создаёт 10 ephemeral test users (email: `smoke-{i}-{ts}@myuno.test`) через `supabase.auth.signUp` — или использует anon-сессию для гостевых сценариев
+2. Для каждого юзера выполняет 1 сценарий из таблицы выше
+3. Логирует timeline в консоль + JSON-отчёт в `/mnt/documents/smoke-test-{ts}.json`
+4. В конце — cleanup: помечает все созданные записи `source='smoke_test'` чтобы потом легко удалить (или удаляет сразу для тестовых юзеров)
 
-**5. Mobile UX spot-check**
-На viewport 375px проверю:
-- `/property` — фильтры (sheet vs dialog)
-- `/newbuilds` — карточки
-- `/p/:slug` — микросайт
-- Sticky CTA на детальных страницах
+**Что НЕ делает:**
+- Не имитирует реальный браузер (это не E2E через Playwright — это API-уровень)
+- Не вызывает Stripe / платежи
+- Не отправляет настоящие WhatsApp/email — формы полей `phone='+66 99 SMOKE TEST'`
 
 ### Формат отчёта
 
-Markdown в чате (~40 строк), 4 секции:
+Markdown-таблица в чате:
 
-**✅ Работает хорошо**
-- Список 5-10 пунктов с доказательствами
+| # | Сценарий | Шагов OK / Total | Avg latency | Записи созданы | Статус |
+|---|---|---|---|---|---|
+| 1 | Tourist rent browse | 3/3 | 142ms | — | ✅ |
+| 4 | Newbuild lead | 2/3 | 380ms | nb_leads:1, attr:0 | ⚠️ attribution failed |
+| 9 | Developer register | 0/2 | — | — | ❌ RLS denied |
 
-**⚠️ Работает, но с проблемами**
-- 5-8 пунктов: что именно ломается, какой сценарий
+Плюс **раздел «Найденные баги»** — конкретные RLS/валидационные ошибки с reproduction steps.
 
-**❌ Не работает**
-- Конкретные баги с reproduction steps
+### Очистка тестовых данных
 
-**📊 Качество данных**
-- Таблица: метрика → значение → норма → статус
-
-Плюс **Top-5 quick wins** — что починить за 30 минут.
-
-### Что НЕ делаю
-- Никаких правок кода
-- Не запускаю смоук-тест Developer Portal через регистрацию (только смотрю текущее состояние)
-- Не правлю битые данные
+В конце скрипта SQL DELETE по маркеру:
+```sql
+DELETE FROM nb_leads WHERE source = 'smoke_test';
+DELETE FROM property_inquiries WHERE message LIKE '[SMOKE TEST]%';
+-- + auth.admin.deleteUser для всех smoke-{i}-{ts}@myuno.test
+```
 
 ### Время
-~5-7 минут.
+~8-10 минут (скрипт + прогон + отчёт + cleanup).
+
+### Что НЕ трогаю
+- Production-данные (только INSERT с маркером + удаление в конце)
+- Настоящие email/WhatsApp нотификации (использую `dry_run` где возможно)
+- Stripe/payments
 
