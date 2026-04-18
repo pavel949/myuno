@@ -288,8 +288,8 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.NEWBUILDS} element={<LazyPage><Pages.NewbuildsLanding /></LazyPage>} />
         <Route path={APP_ROUTES.NEWBUILDS_PROJECTS} element={<Navigate to={APP_ROUTES.OFFPLAN} replace />} />
         <Route path="/newbuilds/projects/:slug" element={<NewbuildProjectToOffplanRedirect />} />
-        <Route path={APP_ROUTES.NEWBUILDS_DEVELOPERS} element={<LazyPage><Pages.NewbuildsDevelopers /></LazyPage>} />
-        <Route path="/newbuilds/developers/:slug" element={<LazyPage><Pages.NewbuildDeveloperDetail /></LazyPage>} />
+        <Route path={APP_ROUTES.NEWBUILDS_DEVELOPERS} element={<Navigate to={APP_ROUTES.DEVELOPERS} replace />} />
+        <Route path="/newbuilds/developers/:slug" element={<Navigate to={APP_ROUTES.DEVELOPERS} replace />} />
         <Route path={APP_ROUTES.NEWBUILDS_MAP} element={<LazyPage><Pages.NewbuildsMap /></LazyPage>} />
         <Route path={APP_ROUTES.NEWBUILDS_CALCULATOR} element={<LazyPage><Pages.NewbuildsCalculator /></LazyPage>} />
         <Route path={APP_ROUTES.NEWBUILDS_COMPARE} element={<LazyPage><Pages.NewbuildsCompare /></LazyPage>} />
@@ -574,7 +574,6 @@ export const AnimatedRoutes: React.FC = () => {
            <Route path="/admin/legal-documents" element={<Pages.AdminLegalDocuments />} />
            <Route path="/admin/qa-test-runner" element={<Pages.AdminQATestRunner />} />
            <Route path="/admin/api-keys" element={<Pages.AdminApiKeys />} />
-           <Route path="/admin/newbuilds" element={<Pages.AdminNewbuilds />} />
         </Route>
         
         {/* ── Staff ── */}
