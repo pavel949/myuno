@@ -16,6 +16,8 @@ import { CrossSellSection } from '@/components/crosssell';
 import { mapClinicToCatalogCard } from '@/lib/adapters/catalogCardAdapters';
 import { medicalFilterConfig } from '@/lib/filterRegistry';
 import type { FilterValues } from '@/components/filters/UniversalFilter';
+import { VerticalContextBanner } from '@/components/vertical/VerticalContextBanner';
+import { VerticalInsightPanel } from '@/components/vertical/VerticalInsightPanel';
 
 const SPECIALTIES = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -155,6 +157,8 @@ export default function MedicalIndex() {
         </div>
       }
     >
+      <VerticalContextBanner verticalId="medical" />
+
       {isLoading ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {Array.from({ length: 8 }).map((_, i) => (
@@ -185,6 +189,7 @@ export default function MedicalIndex() {
         </div>
       )}
 
+      <VerticalInsightPanel verticalId="medical" />
       <CrossSellSection currentVertical="medical" className="mt-8" />
     </MiniAppLayout>
   );

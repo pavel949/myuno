@@ -3,7 +3,7 @@
  */
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Compass, SlidersHorizontal, Waves, MapPin } from 'lucide-react';
+import { Compass, SlidersHorizontal, Waves, MapPin, Droplets } from 'lucide-react';
 import { SEOHead } from '@/components/seo';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { MiniAppLayout, CatalogCard } from '@/components/miniapp';
@@ -16,6 +16,8 @@ import { useExperiences, ExperienceType } from '@/hooks/useExperiences';
 import { useExperienceCategories } from '@/hooks/useExperienceCategories';
 import { mapExperienceToCatalogCard } from '@/lib/adapters/catalogCardAdapters';
 import { cn } from '@/lib/utils';
+import { VerticalContextBanner } from '@/components/vertical/VerticalContextBanner';
+import { VerticalInsightPanel } from '@/components/vertical/VerticalInsightPanel';
 
 type ViewType = 'all' | 'tour' | 'activity';
 type SortKey = 'recommended' | 'price_asc' | 'price_desc' | 'rating';
@@ -130,6 +132,19 @@ export default function ExperiencesIndex() {
             ))}
           </div>
 
+          <button
+            onClick={() => handleCategoryChange(selectedCategory === 'water-sports' ? 'all' : 'water-sports')}
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors shrink-0",
+              selectedCategory === 'water-sports'
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-secondary text-foreground border-border hover:border-foreground/30"
+            )}
+          >
+            <Droplets className="w-3 h-3" />
+            {isRu ? 'Водный спорт' : 'Water Sports'}
+          </button>
+
           <div className="ml-auto relative" ref={sortRef}>
             <Button variant="outline" size="sm" className="text-xs gap-1.5" onClick={() => setShowSort(!showSort)}>
               <SlidersHorizontal className="w-3.5 h-3.5" />
@@ -162,6 +177,8 @@ export default function ExperiencesIndex() {
           : 'Best tours, excursions, and activities in Phuket.'}
       />
 
+      <VerticalContextBanner verticalId="experience" />
+
       {isLoading ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
           {[1,2,3,4,5,6].map(i => (
@@ -187,6 +204,7 @@ export default function ExperiencesIndex() {
       )}
 
       <div className="mt-6"><PropertyTourPromo /></div>
+      <VerticalInsightPanel verticalId="experience" />
       <CrossSellSection currentVertical="experiences" className="mt-8" />
     </MiniAppLayout>
   );

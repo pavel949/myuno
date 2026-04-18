@@ -19,6 +19,8 @@ import { AirbnbSearchBar, SearchParams } from '@/components/property/AirbnbSearc
 import { PropertyHubTabs } from './PropertyHub';
 import { AirbnbCategoryRibbon } from '@/components/property/PropertyCategoryIcons.ribbon';
 import { CrossSellSection } from '@/components/crosssell';
+import { VerticalContextBanner } from '@/components/vertical/VerticalContextBanner';
+import { VerticalInsightPanel } from '@/components/vertical/VerticalInsightPanel';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { Button } from '@/components/ui/button';
@@ -239,6 +241,9 @@ export default function PropertyIndex() {
 
         {/* Content */}
         <div className="pt-4">
+          <div className={ECOSYSTEM_PAGE_CONTAINER}>
+            <VerticalContextBanner verticalId="property" />
+          </div>
           {/* Recently Viewed — only when no category filters */}
           {recentItems.length > 0 && selectedCategories.length === 0 && (
             <section className={cn(ECOSYSTEM_PAGE_CONTAINER, "mb-6 px-0")}>
@@ -309,6 +314,7 @@ export default function PropertyIndex() {
             </div>
           )}
 
+          <VerticalInsightPanel verticalId="property" className={ECOSYSTEM_PAGE_CONTAINER} />
           <CrossSellSection currentVertical="property" className={cn(ECOSYSTEM_PAGE_CONTAINER, "px-0 mt-8")} title={{ en: 'You may also need', ru: 'Может пригодиться' }} />
         </div>
       </div>

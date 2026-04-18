@@ -14,6 +14,8 @@ import { VisaServicesSection } from "./VisaServicesSection";
 import { matchesFilter, matchesPriceLevel } from '@/lib/filterUtils';
 import { VerticalCTA } from '@/components/leads/VerticalCTA';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
+import { VerticalContextBanner } from '@/components/vertical/VerticalContextBanner';
+import { VerticalInsightPanel } from '@/components/vertical/VerticalInsightPanel';
 
 const categories = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -84,6 +86,8 @@ export default function LegalServicesIndex() {
         />
 
         <main className="container max-w-[1536px] mx-auto px-4 py-4 pb-24">
+          <VerticalContextBanner verticalId="legal" />
+
           {isLoading ? (
             <div className="grid gap-4">
               {[1,2,3].map(i => (
@@ -144,6 +148,7 @@ export default function LegalServicesIndex() {
                 </>
               )}
 
+              <VerticalInsightPanel verticalId="legal" />
               <VerticalCTA vertical="legal" className="my-6" />
             </>
           )}

@@ -74,7 +74,6 @@ export const VERTICAL_GROUPS: VerticalGroup[] = [
       { verticalId: 'restaurant' },
       { verticalId: 'yacht' },
       { verticalId: 'experience' },
-      { verticalId: 'water_activity' },
       { verticalId: 'fitness' },
       { verticalId: 'event' },
       { route: '/market', icon: '🛒', labelEn: 'Market', labelRu: 'Маркет' },

@@ -15,6 +15,8 @@ import { useYachts } from '@/hooks/useYachts';
 import { mapYachtToCatalogCard } from '@/lib/adapters/catalogCardAdapters';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { VerticalContextBanner } from '@/components/vertical/VerticalContextBanner';
+import { VerticalInsightPanel } from '@/components/vertical/VerticalInsightPanel';
 
 type YachtTypeFilter = 'all' | 'motor_yacht' | 'catamaran' | 'speedboat' | 'superyacht';
 type SortKey = 'featured' | 'price_asc' | 'price_desc' | 'rating' | 'capacity';
@@ -141,6 +143,8 @@ export default function YachtsIndex() {
           : 'Rent yachts, catamarans, and speedboats in Phuket. Best prices and instant booking.'}
       />
 
+      <VerticalContextBanner verticalId="yacht" />
+
       {isLoading ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
           {[1,2,3,4].map(i => (
@@ -165,6 +169,7 @@ export default function YachtsIndex() {
         </div>
       )}
 
+      <VerticalInsightPanel verticalId="yacht" />
       <CrossSellSection currentVertical="yachts" className="mt-8" />
     </MiniAppLayout>
   );
