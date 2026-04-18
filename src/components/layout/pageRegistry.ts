@@ -61,8 +61,6 @@ export const ProjectMicrosite = lazy(() => import('@/pages/microsite/ProjectMicr
 
 // ── Newbuilds (Premium Section) ──
 export const NewbuildsLanding = lazy(() => import('@/pages/newbuilds/NewbuildsLanding'));
-export const NewbuildsDevelopers = lazy(() => import('@/pages/newbuilds/NewbuildsDevelopers'));
-export const NewbuildDeveloperDetail = lazy(() => import('@/pages/newbuilds/NewbuildDeveloperDetail'));
 export const NewbuildsMap = lazy(() => import('@/pages/newbuilds/NewbuildsMap'));
 export const NewbuildsCalculator = lazy(() => import('@/pages/newbuilds/NewbuildsCalculator'));
 export const NewbuildsCompare = lazy(() => import('@/pages/newbuilds/NewbuildsCompare'));
