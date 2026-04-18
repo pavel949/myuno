@@ -319,6 +319,8 @@ export const AdminProperties = lazy(() => import('@/pages/admin/AdminProperties'
 export const AdminProjects = lazy(() => import('@/pages/admin/AdminProjects'));
 export const AdminInvestments = lazy(() => import('@/pages/admin/AdminInvestments'));
 export const AdminDevelopers = lazy(() => import('@/pages/admin/AdminDevelopers'));
+export const AdminNewbuildsConsole = lazy(() => import('@/pages/admin/AdminNewbuildsConsole'));
+export const AdminProjectDocuments = lazy(() => import('@/pages/admin/AdminProjectDocuments'));
 export const AdminRestaurants = lazy(() => import('@/pages/admin/AdminRestaurants'));
 export const AdminRestaurantDataQuality = lazy(() => import('@/pages/admin/AdminRestaurantDataQuality'));
 export const AdminSalons = lazy(() => import('@/pages/admin/AdminSalons'));

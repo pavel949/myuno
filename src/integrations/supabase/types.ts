@@ -14414,6 +14414,78 @@ export type Database = {
         }
         Relationships: []
       }
+      project_documents: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          file_size_bytes: number | null
+          file_url: string
+          id: string
+          is_current: boolean
+          mime_type: string | null
+          parent_document_id: string | null
+          project_id: string
+          title: string
+          updated_at: string
+          uploaded_at: string
+          uploaded_by: string | null
+          version: number
+          visibility: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          file_size_bytes?: number | null
+          file_url: string
+          id?: string
+          is_current?: boolean
+          mime_type?: string | null
+          parent_document_id?: string | null
+          project_id: string
+          title: string
+          updated_at?: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+          version?: number
+          visibility?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          file_size_bytes?: number | null
+          file_url?: string
+          id?: string
+          is_current?: boolean
+          mime_type?: string | null
+          parent_document_id?: string | null
+          project_id?: string
+          title?: string
+          updated_at?: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+          version?: number
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_documents_parent_document_id_fkey"
+            columns: ["parent_document_id"]
+            isOneToOne: false
+            referencedRelation: "project_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_documents_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "property_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_units: {
         Row: {
           area_sqm: number | null
@@ -18254,6 +18326,7 @@ export type Database = {
           muuno_score: number | null
           name_en: string
           name_ru: string
+          needs_review: boolean
           offplan_catalog: Json | null
           og_image_url: string | null
           ownership_types: string[] | null
@@ -18352,6 +18425,7 @@ export type Database = {
           muuno_score?: number | null
           name_en: string
           name_ru: string
+          needs_review?: boolean
           offplan_catalog?: Json | null
           og_image_url?: string | null
           ownership_types?: string[] | null
@@ -18450,6 +18524,7 @@ export type Database = {
           muuno_score?: number | null
           name_en?: string
           name_ru?: string
+          needs_review?: boolean
           offplan_catalog?: Json | null
           og_image_url?: string | null
           ownership_types?: string[] | null
