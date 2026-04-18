@@ -1,74 +1,80 @@
 
-План: реализовать полный E2E застройщика + дать тебе как админу/директору Ignatev Estate удобный UX для управления всеми застройщиками, проектами, юнитами и документами.
 
-## Этап 1. Backfill + защита данных
-- Backfill `developer_id` для 54 orphan-проектов: матчим по `name_en`/`developer_name` к существующим записям `developers`. Несматченные → создаём "Unassigned Developer" заглушку, помечаем `needs_review=true`.
-- Добавить колонку `needs_review boolean default false` в `property_projects` для админ-фильтра.
-- Унифицировать дублирующиеся поля: `project_units.status` ← `unit_status` (DROP старого), `property_projects.cover_image` ← консолидация.
+## Архитектура блока Offplan — аудит
 
-## Этап 2. Notification engine
-**Edge Function `nb-lead-notify`** (триггер на INSERT в `nb_leads`):
-- Developer: WhatsApp (UltraMSG) + Email (Resend) с данными лида и ссылкой на `/developer-portal/leads/:id`.
-- Admin (Pavel): Telegram + Email — все лиды дублируются в общий канал.
-- Шаблоны RU/EN, fallback если канал недоступен.
+### Что сейчас есть (карта)
 
-**pg_cron daily digest** (`admin-pending-digest`, 09:00 ICT):
-- Project pending >24ч → Telegram alert админу.
-- Developer application pending >48ч → email + Telegram.
-- Project без `nb_project_updates` >45 дней → "stale data" флаг + alert девелоперу.
+**Маршруты (`AnimatedRoutes.tsx`):**
+- `/property/offplan` → `OffplanIndex` (каталог)
+- `/property/offplan/:id` → `OffplanDetail` (страница проекта)
+- Редиректы: `/offplan*` → `/property/offplan*`, `/newbuilds/projects*` → `/property/offplan*`, `/newbuilds/projects` → `/property/offplan`
 
-## Этап 3. Admin UX — Ignatev Estate Director Console
-Новый раздел `/admin/newbuilds` (только для admin role):
+**Страницы (`src/pages/property/`):**
+- `OffplanIndex.tsx` (487 строк) — каталог с фильтрами OFFPLAN-стиля + БД фильтры
+- `OffplanDetail.tsx` (488 строк) — деталь проекта
+- Параллельно: `ProjectsIndex.tsx` + `ProjectDetail.tsx` — другой каталог тех же `property_projects`
+- `DevelopersIndex.tsx`, `DeveloperDetail.tsx` — рендерят `OffplanProjectCard`
 
-**3.1 Dashboard `/admin/newbuilds`**
-- KPI: pending projects, pending developers, orphan projects, stale projects, leads (today/week).
-- Quick actions: "Create developer", "Create project", "Bulk import".
+**Компоненты (`src/components/property/`):**
+- `OffplanProjectCard` — карточка
+- `OffplanPromoSection` — карусель для главной
+- `OffplanCTASection` — CTA в `PropertySearchPage`
+- Параллельно: `ProjectCard`, `ProjectCarouselCard`, `ProjectPromoSection` — те же `property_projects` под другим типом
 
-**3.2 Developers manager `/admin/newbuilds/developers`**
-- Таблица всех `developers` с inline-редактированием (DataTable + modal-edit).
-- Колонки: logo, name, license, projects count, reliability_score, status, actions.
-- Фильтры: pending/approved/needs_review, has_projects.
-- Sheet для full edit: контакты, лицензии, track record, документы компании.
+**Данные/хуки:**
+- `useOffplanProjects` (returns `OffplanProject` camelCase)
+- `usePropertyProjects` (returns `PropertyProject` snake_case) — оба читают `property_projects`
+- `src/lib/offplan/{types,filters}.ts` — клиентская фильтрация по `offplan_catalog` JSON
 
-**3.3 Projects manager `/admin/newbuilds/projects`**
-- Полный CRUD по `property_projects` без ограничений RLS (admin policy).
-- Inline edit ключевых полей (price, status, handover_date), full edit через `DeveloperProjectEditor` (переиспользуем).
-- Bulk actions: assign developer, approve, archive.
-- Фильтр "Orphan / Pending / Needs review".
+**БД (актуально):** 266 проектов, 159 активных, 118 с `offplan_catalog`, все 266 имеют `developer_id`. Юниты: 55 строк только у 3 проектов.
 
-**3.4 Units manager (внутри проекта)**
-- Уже есть `useProjectUnitsGrid` — добавить admin-режим с массовым импортом из CSV (paste-table).
-- Inline-редактирование цены/статуса юнита прямо в таблице.
+### Найденные проблемы
 
-**3.5 Documents vault `/admin/newbuilds/projects/:id/documents`**
-- Загрузка через `UnifiedMediaUploader` (mode=document).
-- Категории по ClearView checklist: Land Title, Permits, Corporate, Financial, Construction, Marketing.
-- Visibility toggle: public / kyc / buyer_only.
-- Версионирование (v1, v2 при перезагрузке).
+| # | Проблема | Где | Влияние |
+|---|---|---|---|
+| 1 | **Дублирующая модель проекта**: `OffplanProject` (camelCase) + `PropertyProject` (snake_case) на одну таблицу | `useOffplanProjects` vs `usePropertyProjects` | Два пути данных, расходящиеся типы, двойные кэш-ключи |
+| 2 | **Дублирующие каталоги**: `OffplanIndex` + `ProjectsIndex` оба показывают `property_projects` | `pages/property/` | Юзер не понимает разницы, SEO-каннибализация |
+| 3 | **OffplanDetail грузит весь список** (`useOffplanProjects()` без фильтра) и потом `find(id)` | `OffplanDetail.tsx:80-81` | 266 строк ради одной — медленно, лишний трафик |
+| 4 | **Нет хука `useOffplanProject(id)`** — single-row fetch отсутствует | — | Деталь не может работать standalone |
+| 5 | **Нет режима "Список юнитов" на детали проекта** (есть `DevelopmentUnitsSection`, но не используется в `OffplanDetail`) | `OffplanDetail` импортирован, но не отрисован | 55 юнитов в БД не видны юзеру |
+| 6 | **Нет связи с `project_documents`** на публичной деталь-странице (ClearView требование) | `OffplanDetail` | ClearView-disclosure отсутствует |
+| 7 | **`OffplanIndex` не использует `MiniAppLayout` + `CatalogCard`** (нарушение `canonical-catalog-and-card-standard`) | — | Расхождение со стандартом каталогов |
+| 8 | **3 параллельные карточки** для одной сущности: `OffplanProjectCard`, `ProjectCard`, `ProjectCarouselCard` | `components/property/` | Изменения дизайна нужно делать в трёх местах |
+| 9 | **Нет ClearView-баджа на карточке** (BUY/WATCH/AVOID есть в фильтрах, но не показано визуально) | `OffplanProjectCard` | Нарушает методологию ClearView V3 |
+| 10 | **No SEO/JSON-LD на `OffplanIndex`** — есть только на детали | — | Потеря органики |
 
-## Этап 4. Director shortcut
-- Добавить кнопку "Ignatev Estate Console" в `UserAvatarMenu` для admin role.
-- Pre-filled context: company=Ignatev Estate в фильтрах по умолчанию.
+### Предлагаемые исправления
 
-## Этап 5. Технические детали
-- **Таблицы новые:** `project_documents` (project_id, category, url, visibility, version, uploaded_by, uploaded_at).
-- **RLS:** admin → full access; developer → only own projects; public → only `visibility=public` published docs.
-- **Edge Functions:** `nb-lead-notify`, `admin-pending-digest`, `cron-stale-projects-check`.
-- **Cron:** через `pg_cron` + `pg_net` POST на edge functions.
-- **Routes:** `/admin/newbuilds/*` под `AdminGuard`.
+**Фаза 1. Cleanup дублирования (без визуальных изменений)**
+- Удалить orphan `ProjectsIndex.tsx` + `ProjectDetail.tsx` (или сделать редиректы на `/property/offplan*`).
+- Удалить `ProjectCard` + `ProjectCarouselCard` + `ProjectPromoSection`. Везде использовать `OffplanProjectCard` + `OffplanPromoSection`.
+- Свести `usePropertyProjects` и `useOffplanProjects` к одному источнику: `useOffplanProjects` остаётся публичным каталогом, `usePropertyProject(id)` добавляется для одиночного fetch. `usePropertyProjects` оставить только для админа (`useAdminPropertyProjects`).
 
-## Этап 6. Что не делаем сейчас
-- DepositSafe escrow → Phase C.
-- 3D/BIM viewer → Phase C.
-- Investor post-purchase dashboard → отдельный заход (требует buyer_contracts).
-- Pantip parsing → Phase B.
+**Фаза 2. Performance + Detail полнота**
+- Добавить `useOffplanProject(id)` (single-row, with developers embed) и заменить `find()` в `OffplanDetail`.
+- Подключить `DevelopmentUnitsSection` в `OffplanDetail` (показ `project_units`).
+- Подключить публичные `project_documents` (фильтр по `is_public=true`) в новую вкладку "Документы" + ClearView disclosure для брокерских проектов.
 
-## Порядок имплементации
-1. Миграция: backfill + new columns + project_documents table + RLS.
-2. Edge Function `nb-lead-notify` + триггер.
-3. Edge Function `admin-pending-digest` + pg_cron.
-4. Frontend: `/admin/newbuilds/*` console (dashboard, developers, projects, documents).
-5. UserAvatarMenu shortcut.
-6. E2E проверка: создать проект → загрузить документы → симулировать лид → проверить нотификации.
+**Фаза 3. ClearView UI**
+- Показать BUY/WATCH/AVOID badge на карточке (берём из `offplan_catalog.rec` или fallback на `risk_level`).
+- Показать "Not ClearView rated" для брокерских (PEYLAA, Siamese Bangtao, Nunyan) согласно core memory.
+- Добавить колонку `is_clearview_rated` в `property_projects` если её нет (миграция).
 
-Готов реализовать всё последовательно. Начнём с миграции и notification engine, затем admin console.
+**Фаза 4. Стандартизация**
+- Опционально: перевести `OffplanIndex` на `MiniAppLayout + CatalogCard` (большая правка — отдельным шагом).
+- SEO: добавить `SEOHead` + breadcrumb schema на `OffplanIndex`.
+
+### Технический порядок имплементации
+
+1. Миграция: `is_clearview_rated boolean` + флаги для брокерских проектов.
+2. Хуки: `useOffplanProject(id)`, рефакторинг `usePropertyProjects` (admin-only).
+3. `OffplanDetail`: переход на `useOffplanProject`, +`DevelopmentUnitsSection`, +вкладка Documents, +ClearView disclosure.
+4. `OffplanProjectCard`: BUY/WATCH/AVOID badge + "Not ClearView rated".
+5. Удалить `ProjectsIndex/ProjectDetail/ProjectCard/ProjectCarouselCard/ProjectPromoSection`, заменить usages.
+6. SEO на `OffplanIndex`.
+7. E2E проверка: каталог → детали → юниты → документы → лид.
+
+### Уточняющий вопрос
+
+Что делаем сейчас — все 4 фазы последовательно или начнём с критичных (Фазы 1–3, без MiniAppLayout-рефакторинга)?
+
