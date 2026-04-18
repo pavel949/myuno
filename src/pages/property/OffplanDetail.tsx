@@ -205,6 +205,23 @@ export default function OffplanDetail() {
       </div>
 
       <div className="px-4 py-4 pb-32 space-y-6">
+        {/* ClearView Disclosure — for brokered/curated projects */}
+        {!project.isClearviewRated && (
+          <div className="rounded-xl border border-warning/30 bg-warning/5 p-4 flex items-start gap-3">
+            <Info className="w-5 h-5 text-warning flex-shrink-0 mt-0.5" />
+            <div className="flex-1 text-sm">
+              <p className="font-semibold text-warning">
+                {isRu ? 'Не оценён по ClearView™' : 'Not ClearView™ rated'}
+              </p>
+              <p className="text-muted-foreground mt-1">
+                {isRu
+                  ? 'Этот проект представлен брокером и не проходил независимую методологическую оценку ClearView V3. Цифры и описание предоставлены застройщиком/партнёром.'
+                  : 'This project is brokered/curated and has not been independently scored under the ClearView V3 methodology. Figures and content are provided by the developer/partner.'}
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Key metrics cards */}
         <div className="grid grid-cols-2 gap-3">
           {/* muUNO Score */}
