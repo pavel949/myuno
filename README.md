@@ -34,17 +34,28 @@ npm run dev
 
 The app will be available at `http://localhost:5173`.
 
-## Environment Variables
+## Environment Variables, Databases & Keys
 
-See [`.env.example`](.env.example) for the complete list. Key variables:
+> 📖 **Single source of truth:** [`docs/ENVIRONMENT.md`](docs/ENVIRONMENT.md) — read this first if you're unsure where data goes or which key to use.
+
+**Databases (TL;DR):**
+- **PRIMARY (production):** Supabase `kakkwibljrjsawxgnupk` — all reads & writes go here (frontend + edge functions).
+- **MIRROR (optional):** Supabase `erfwtoavipwjqmylpizt` — standalone backup, only via manual `scripts/` migration.
+- **PEYLAA (read-only):** separate Supabase project for sales system, accessed via `src/lib/peylaa/supabaseClient.ts`.
+
+⚠️ Local dev, preview and production all hit the **same PRIMARY DB**. There is no separate staging — mark test data with `[TEST]` / `source='smoke_test'` / `*@myuno.test`.
+
+See [`.env.example`](.env.example) for the full variable list. Frontend keys (publishable, OK in code):
 
 | Variable | Description |
 |----------|-------------|
-| `VITE_SUPABASE_URL` | Supabase project URL |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase anon/public key |
-| `VITE_SUPABASE_PROJECT_ID` | Supabase project ID |
+| `VITE_SUPABASE_URL` | Primary DB URL |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Primary DB anon key |
+| `VITE_SUPABASE_PROJECT_ID` | `kakkwibljrjsawxgnupk` |
+| `VITE_PEYLAA_SUPABASE_URL` / `_KEY` | PEYLAA read-only DB |
+| `VITE_GOOGLE_MAPS_API_KEY` | Google Maps JS + Places + Geocoding |
 
-Edge functions also require secrets configured in the backend: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `MAPBOX_PUBLIC_TOKEN`, `RESEND_API_KEY`, `FIRECRAWL_API_KEY`, `LOVABLE_API_KEY`.
+**Backend secrets** (managed in Lovable Cloud, never in `.env`): `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY`, `FIRECRAWL_API_KEY`, `LOVABLE_API_KEY`, `RENTALS_UNITED_*`, `ANTHROPIC_API_KEY`, `TELEGRAM_BOT_TOKEN`, etc. Full list in [`docs/ENVIRONMENT.md`](docs/ENVIRONMENT.md#42-backend-secrets-lovable-cloud--edge-functions).
 
 ## Project Structure
 

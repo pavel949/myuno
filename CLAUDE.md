@@ -61,9 +61,34 @@
 
 ---
 
-## 4. DATABASE
+## 4. DATABASE & ENVIRONMENT
 
-**Supabase project** — all tables in **public** schema. No v2 schema exists in production.
+> **Канонический источник:** [`docs/ENVIRONMENT.md`](docs/ENVIRONMENT.md). При расхождении — он главный.
+
+### Базы данных
+| Роль | Supabase project ref | URL | Кто пишет |
+|---|---|---|---|
+| **PRIMARY (prod)** | `kakkwibljrjsawxgnupk` | `https://kakkwibljrjsawxgnupk.supabase.co` | Frontend + Edge Functions |
+| **MIRROR (опц.)** | `erfwtoavipwjqmylpizt` | standalone | Только ручной экспорт через `scripts/` |
+| **PEYLAA (read-only)** | отдельный | — | Read-only через `src/lib/peylaa/supabaseClient.ts` |
+
+⚠️ **Все записи (CRM, лиды, бронирования, юзеры, платежи) идут в `kakkwibljrjsawxgnupk`.** Локальная разработка использует **ту же** production-БД — отдельного staging нет. Тестовые данные помечайте маркерами.
+
+### Окружения
+- **Production:** myuno.app, www.myuno.app
+- **Preview:** uno-connect-hub.lovable.app, id-preview--…lovable.app
+- **Local:** localhost:8080
+
+Все три окружения используют **одну** PRIMARY DB.
+
+### Lovable project
+- ID: `dcc2b024-7627-4ad9-a915-a3df3dd839f0`
+
+**Supabase client:** Always use `src/integrations/supabase/client.ts`. Never create new instances for the primary DB. PEYLAA — отдельный клиент в `src/lib/peylaa/supabaseClient.ts`.
+
+**Auto-generated types:** `src/integrations/supabase/types.ts` (~900KB, не редактируем вручную).
+
+**Schema:** all tables in `public` schema. No v2 schema exists. Не использовать `supabase.schema('v2')`.
 
 **Key tables:**
 - `orders` — all transactions (Stripe + cash + bank). Fields: `order_type`, `total_amount`, `platform_fee_amount`, `vendor_payout_amount`, `status`
