@@ -1,5 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const chromiumPath = process.env.CHROMIUM_PATH || '/bin/chromium';
+
 export default defineConfig({
   testDir: './e2e/tests',
   fullyParallel: true,
@@ -15,5 +17,13 @@ export default defineConfig({
     trace: 'off',
     video: 'off',
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  projects: [
+    {
+      name: 'chromium',
+      use: {
+        ...devices['Desktop Chrome'],
+        launchOptions: { executablePath: chromiumPath },
+      },
+    },
+  ],
 });
