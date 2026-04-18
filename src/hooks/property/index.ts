@@ -25,7 +25,6 @@ export { usePropertyNotes } from '../usePropertyNotes';
 export { usePropertyOwnershipInvites, useSendOwnershipInvite } from '../usePropertyOwnership';
 export { usePropertyPriceOffers } from '../usePropertyPriceOffers';
 export { usePropertyProjects } from '../usePropertyProjects';
-export { usePropertyProjectsWithStats } from '../usePropertyProjectsWithStats';
 export { usePropertyQuickFilters } from '../usePropertyQuickFilters';
 export { usePropertyRateSeasons } from '../usePropertyRateSeasons';
 export { usePropertyReports } from '../usePropertyReports';

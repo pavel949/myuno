@@ -31,6 +31,15 @@ const NewbuildsContextOutlet = () => (
   </NbCompareProvider>
 );
 
+// Property Hub index: legacy `/property?…` query bookmarks → /property/browse?…
+const PropertyHubIndex = () => {
+  const search = typeof window !== 'undefined' ? window.location.search : '';
+  if (search && search.length > 1) {
+    return <Navigate to={`${APP_ROUTES.PROPERTY_BROWSE}${search}`} replace />;
+  }
+  return <Pages.PropertyLanding />;
+};
+
 // Core pages - eagerly loaded for fast initial navigation
 import Index from '@/pages/Index';
 import Auth from '@/pages/Auth';
@@ -204,7 +213,7 @@ export const AnimatedRoutes: React.FC = () => {
         {/* ── Property Hub ── */}
         <Route path="/properties" element={<Navigate to={APP_ROUTES.PROPERTY} replace />} />
         <Route path={APP_ROUTES.PROPERTY} element={<Suspense fallback={<LoadingState />}><PropertyHub /></Suspense>}>
-          <Route index element={<LazyPage><Pages.PropertyHubIndexRoute /></LazyPage>} />
+          <Route index element={<LazyPage><PropertyHubIndex /></LazyPage>} />
           <Route path="browse" element={<LazyPage><Pages.PropertyIndex /></LazyPage>} />
           <Route
             path="rent/short-term"
