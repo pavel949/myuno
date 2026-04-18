@@ -23,6 +23,13 @@ import { StaffLayout } from '@/components/staff/StaffLayout';
 import { useNavigationDirection } from '@/hooks/useNavigationDirection';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { NewbuildProjectToOffplanRedirect } from '@/components/routing/NewbuildLegacyRedirects';
+import { NbCompareProvider } from '@/components/newbuilds/NbCompareProvider';
+
+const NewbuildsContextOutlet = () => (
+  <NbCompareProvider>
+    <Outlet />
+  </NbCompareProvider>
+);
 
 // Core pages - eagerly loaded for fast initial navigation
 import Index from '@/pages/Index';
