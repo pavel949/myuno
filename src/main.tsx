@@ -52,26 +52,21 @@ if (sentryDsn) {
   });
 }
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabasePublishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-
-if (!supabaseUrl || !supabasePublishableKey) {
-  renderBootstrapError(
-    "Missing required env vars: VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY."
-  );
-} else {
-  reportWebVitals(undefined, { debug: import.meta.env.DEV });
-  void import("./App.tsx")
-    .then(({ default: App }) => {
-      createRoot(document.getElementById("root")!).render(
-        <StrictMode>
-          <App />
-        </StrictMode>
-      );
-    })
-    .catch((err: unknown) => {
-      renderBootstrapError(
-        `Failed to load application: ${err instanceof Error ? err.message : String(err)}`
-      );
-    });
-}
+// Supabase URL/key are public (anon). Hardcoded fallback ensures the app boots
+// on external hosts (e.g. myuno.app, Capacitor) where build-time env vars
+// might not be injected. The Lovable preview/published builds still receive
+// VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY through the platform.
+reportWebVitals(undefined, { debug: import.meta.env.DEV });
+void import("./App.tsx")
+  .then(({ default: App }) => {
+    createRoot(document.getElementById("root")!).render(
+      <StrictMode>
+        <App />
+      </StrictMode>
+    );
+  })
+  .catch((err: unknown) => {
+    renderBootstrapError(
+      `Failed to load application: ${err instanceof Error ? err.message : String(err)}`
+    );
+  });
