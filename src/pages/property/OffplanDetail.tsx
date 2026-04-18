@@ -23,7 +23,10 @@ import {
   ShieldCheck,
   ShieldAlert,
   AlertTriangle,
-  FileSearch
+  FileSearch,
+  FileText,
+  Download,
+  Info
 } from 'lucide-react';
 import { BackButton } from '@/components/uno/BackButton';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -37,7 +40,8 @@ import { ResponsiveModal } from '@/components/ui/responsive-modal';
 import { SEOHead, createRealEstateListingSchema, createBreadcrumbSchema } from '@/components/seo';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
-import { useOffplanProjects, type ProjectStatus } from '@/hooks/useOffplanProjects';
+import { useOffplanProject, type ProjectStatus } from '@/hooks/useOffplanProjects';
+import { useProjectDocuments, DOCUMENT_CATEGORIES } from '@/hooks/useProjectDocuments';
 import { useNewbuildProject } from '@/hooks/useNewbuildProjects';
 import { useDeveloper } from '@/hooks/useDevelopers';
 import { NewbuildProjectDeepTabs } from '@/components/newbuilds/NewbuildProjectDeepTabs';
@@ -77,10 +81,11 @@ export default function OffplanDetail() {
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
   const [showLeadForm, setShowLeadForm] = useState(false);
-  const { data: projects, isLoading } = useOffplanProjects();
-  const project = projects?.find(p => p.id === id);
+  const { data: project, isLoading } = useOffplanProject(id);
   const { data: developer } = useDeveloper(project?.developerId || '');
   const { data: nbProject } = useNewbuildProject(id);
+  const { data: allDocs = [] } = useProjectDocuments(id);
+  const publicDocs = allDocs.filter((d) => d.visibility === 'public');
 
   if (isLoading) {
     return (
