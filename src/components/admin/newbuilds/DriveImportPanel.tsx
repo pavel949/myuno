@@ -16,11 +16,13 @@ import { Badge } from '@/components/ui/badge';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
-import { CloudDownload, Loader2, RefreshCw, Trash2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { CloudDownload, Loader2, RefreshCw, Trash2, AlertCircle, CheckCircle2, Sparkles } from 'lucide-react';
 import {
   useDriveSources, useDriveJobs, useStartDriveImport,
   useToggleDriveWatch, useDeleteDriveSource,
+  type DriveJob,
 } from '@/hooks/useDriveImport';
+import { DriveImportReview } from './DriveImportReview';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 
@@ -31,6 +33,7 @@ interface Props {
 export function DriveImportPanel({ projectId }: Props) {
   const [url, setUrl] = useState('');
   const [accessMode, setAccessMode] = useState<'public' | 'connector'>('public');
+  const [reviewJob, setReviewJob] = useState<DriveJob | null>(null);
 
   const { data: sources = [] } = useDriveSources(projectId);
   const { data: jobs = [] } = useDriveJobs(projectId, 5);
@@ -39,6 +42,11 @@ export function DriveImportPanel({ projectId }: Props) {
   const deleteSource = useDeleteDriveSource();
 
   const activeJob = jobs.find(j => j.status === 'running' || j.status === 'queued');
+  const pendingReviewJob = jobs.find(j =>
+    (j.status === 'completed' || j.status === 'partial')
+    && j.review_status === 'pending'
+    && ((j.ai_project_patch && Object.keys(j.ai_project_patch).length > 0) || (j.ai_extracted_units && j.ai_extracted_units.length > 0))
+  );
 
   const handleStart = () => {
     if (!url.trim()) return;
@@ -174,6 +182,24 @@ export function DriveImportPanel({ projectId }: Props) {
         </div>
       )}
 
+      {/* AI extraction review banner */}
+      {pendingReviewJob && (
+        <div className="p-3 bg-primary/10 border border-primary/30 rounded-lg flex items-center gap-3">
+          <Sparkles className="w-5 h-5 text-primary shrink-0" />
+          <div className="flex-1 text-sm">
+            <p className="font-medium">AI извлёк данные из документов</p>
+            <p className="text-xs text-muted-foreground">
+              {pendingReviewJob.ai_extracted_units?.length || 0} юнитов
+              {pendingReviewJob.ai_project_patch && Object.keys(pendingReviewJob.ai_project_patch).length > 0
+                ? ` · поля проекта` : ''}
+            </p>
+          </div>
+          <Button size="sm" onClick={() => setReviewJob(pendingReviewJob)}>
+            Ревью
+          </Button>
+        </div>
+      )}
+
       {/* Recent jobs (history) */}
       {jobs.length > 0 && (
         <div className="space-y-1.5">
@@ -195,6 +221,15 @@ export function DriveImportPanel({ projectId }: Props) {
             ))}
           </div>
         </div>
+      )}
+
+      {reviewJob && (
+        <DriveImportReview
+          job={reviewJob}
+          projectId={projectId}
+          open={!!reviewJob}
+          onClose={() => setReviewJob(null)}
+        />
       )}
     </Card>
   );

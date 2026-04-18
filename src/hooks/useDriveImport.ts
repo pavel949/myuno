@@ -28,6 +28,10 @@ export interface DriveJob {
   files_processed: number;
   files_failed: number;
   files_skipped: number;
+  ai_extracted_units: any[] | null;
+  ai_project_patch: Record<string, any> | null;
+  review_status: 'pending' | 'approved' | 'partially_applied' | 'discarded';
+  reviewed_at: string | null;
   error_log: any;
   started_at: string | null;
   completed_at: string | null;
