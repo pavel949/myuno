@@ -148,7 +148,7 @@ export function ProjectUnitsBulkImport({ projectId, open, onOpenChange }: Props)
         {parsed.length > 0 && (
           <div className="flex items-center gap-2 flex-wrap text-sm">
             <Badge variant="outline" className="gap-1">
-              <CheckCircle2 className="h-3 w-3 text-emerald-500" />
+              <CheckCircle2 className="h-3 w-3 text-primary" />
               {validRows.length} {isRu ? 'валидных' : 'valid'}
             </Badge>
             {errorRows.length > 0 && (

@@ -215,6 +215,9 @@ export function ProjectUnitsGrid({ projectId }: Props) {
           </Button>
         </div>
       </ResponsiveModal>
+
+      {/* Bulk CSV import (admin only) */}
+      <ProjectUnitsBulkImport projectId={projectId} open={showImport} onOpenChange={setShowImport} />
     </div>
   );
 }
