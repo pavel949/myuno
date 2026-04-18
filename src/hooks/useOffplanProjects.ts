@@ -268,3 +268,110 @@ export function useProjectDistricts() {
     staleTime: 10 * 60 * 1000,
   });
 }
+
+/**
+ * Single-row fetch for an off-plan project, with developer embed.
+ * Replaces the legacy pattern of loading the full list and `.find(id)`.
+ */
+export function useOffplanProject(id?: string) {
+  return useQuery({
+    queryKey: ['offplan-project', id],
+    queryFn: async (): Promise<OffplanProject | null> => {
+      if (!id) return null;
+
+      const richSelect = `
+          id,
+          name_en,
+          name_ru,
+          cover_image,
+          district,
+          is_featured,
+          is_active,
+          developer_id,
+          developer_name,
+          project_status,
+          completion_date,
+          construction_progress,
+          price_from,
+          price_to,
+          investment_enabled,
+          funding_goal,
+          min_investment,
+          roi_projected,
+          muuno_score,
+          risk_level,
+          units_available,
+          units_sold,
+          amenities,
+          offplan_catalog,
+          featured_rank,
+          featured_label,
+          description_summary,
+          yield_estimate,
+          source_url,
+          is_clearview_rated,
+          developers (
+            id,
+            name_en,
+            logo_url,
+            muuno_score,
+            is_verified
+          )
+        `;
+
+      const tryFetch = async (selectStr: string) =>
+        supabase.from('property_projects').select(selectStr).eq('id', id).maybeSingle();
+
+      let { data, error } = await tryFetch(richSelect);
+
+      if (error && /relationship|schema cache/i.test(String(error.message || ''))) {
+        const noEmbed = richSelect.replace(/\s*developers\s*\([^)]*\)\s*/is, '').trim();
+        ({ data, error } = await tryFetch(noEmbed));
+      }
+
+      if (error) throw error;
+      if (!data) return null;
+
+      const p = data as any;
+      const developer = p.developers as any;
+      return {
+        id: p.id,
+        nameEn: p.name_en,
+        nameRu: p.name_ru,
+        coverImage: p.cover_image ?? null,
+        district: p.district,
+        isFeatured: Boolean(p.is_featured),
+        isActive: Boolean(p.is_active),
+        developerId: p.developer_id ?? null,
+        developerName: (developer?.name_en as string | undefined) || p.developer_name,
+        developerLogo: (developer?.logo_url as string | null | undefined) || null,
+        developerScore: (developer?.muuno_score as number | null | undefined) ?? null,
+        developerVerified: Boolean(developer?.is_verified),
+        projectStatus: (p.project_status as ProjectStatus) || 'offplan',
+        completionDate: p.completion_date,
+        constructionProgress: p.construction_progress || 0,
+        priceFrom: p.price_from,
+        priceTo: p.price_to ?? null,
+        investmentEnabled: Boolean(p.investment_enabled),
+        fundingGoal: p.funding_goal ?? null,
+        amountRaised: null,
+        minInvestment: p.min_investment ?? null,
+        roiProjected: p.roi_projected,
+        muunoScore: p.muuno_score,
+        riskLevel: p.risk_level,
+        unitsAvailable: p.units_available || 0,
+        unitsSold: p.units_sold || 0,
+        amenities: p.amenities,
+        offplanCatalog: parseOffplanCatalog(p.offplan_catalog),
+        featuredRank: p.featured_rank ?? null,
+        featuredLabel: p.featured_label ?? null,
+        descriptionSummary: p.description_summary ?? null,
+        yieldEstimate: p.yield_estimate ?? null,
+        sourceUrl: p.source_url ?? null,
+        isClearviewRated: p.is_clearview_rated !== false,
+      };
+    },
+    enabled: !!id,
+    staleTime: 5 * 60 * 1000,
+  });
+}
