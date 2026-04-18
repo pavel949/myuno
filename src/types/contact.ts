@@ -150,27 +150,144 @@ export interface ContactRelationship {
   };
 }
 
-/** Extended contact with new fields (crm_roles, key_dates) */
-export interface CrmContactExtended {
+/** Canonical CRM contact interface — mirrors crm_contacts DB schema */
+export interface CrmContact {
   id: string;
   company_id: string;
   first_name: string;
   last_name: string;
-  crm_roles?: CrmRole[] | null;
-  contact_type: string | null;
   phone: string | null;
+  phone2: string | null;
+  mobile: string | null;
   email: string | null;
   whatsapp: string | null;
   telegram: string | null;
+  line_id: string | null;
+  instagram: string | null;
+  facebook: string | null;
+  linkedin: string | null;
+  nationality: string | null;
   language: string | null;
   source: string | null;
-  linked_user_id: string | null;
-  birthday: string | null;
-  key_dates?: KeyDateEntry[];
+  contact_type: string | null;
+  company_name: string | null;
+  job_title: string | null;
+  budget_min: number | null;
+  budget_max: number | null;
+  currency: string | null;
+  preferred_districts: string[] | null;
+  preferred_types: string[] | null;
+  bedrooms_min: number | null;
+  notes: string | null;
   tags: string[] | null;
   avatar_url: string | null;
+  is_archived: boolean;
+  is_company: boolean;
+  created_by: string | null;
+  birthday: string | null;
+  family_info: string | null;
+  interests: string[] | null;
+  scoring: number | null;
+  lead_score: number | null;
+  lead_temperature: string | null;
   lifecycle_stage: string | null;
+  linked_user_id: string | null;
+  special_notes: string | null;
+  emergency_contact_name: string | null;
+  emergency_contact_phone: string | null;
+  emergency_contact_relation: string | null;
   created_at: string;
   updated_at: string;
-  [key: string]: unknown;
+  deal_count?: number;
+  crm_roles?: string[] | null;
+  key_dates?: Array<{ label: string; date: string }> | null;
+  // Odoo-style address fields
+  address_street: string | null;
+  address_street2: string | null;
+  address_city: string | null;
+  address_state: string | null;
+  address_zip: string | null;
+  address_country: string | null;
+  tax_id: string | null;
+  website: string | null;
+  is_vip: boolean;
+  marital_status: string | null;
+  // Extended classification
+  contact_category: string | null;
+  passport_country: string | null;
+  tax_residency: string | null;
+  segment: string[] | null;
+  hnw_tier: string | null;
+  aml_kyc_status: string | null;
+  aml_kyc_date: string | null;
+  pep_flag: boolean;
+  sanctions_flag: boolean;
+  preferences: Record<string, unknown> | null;
+  ai_summary: string | null;
+  last_activity_at: string | null;
+  owner_user_id: string | null;
 }
+
+export type CrmContactInsert = Omit<
+  CrmContact,
+  'id' | 'created_at' | 'updated_at' | 'deal_count' |
+  'job_title' | 'birthday' | 'family_info' | 'interests' | 'scoring' | 'mobile' | 'is_company' |
+  'address_street' | 'address_street2' | 'address_city' | 'address_state' | 'address_zip' | 'address_country' |
+  'tax_id' | 'website' | 'lead_score' | 'lead_temperature' | 'lifecycle_stage' | 'linked_user_id' |
+  'special_notes' | 'emergency_contact_name' | 'emergency_contact_phone' | 'emergency_contact_relation' |
+  'instagram' | 'facebook' | 'linkedin' | 'is_vip' | 'marital_status' | 'contact_category' |
+  'passport_country' | 'tax_residency' | 'segment' | 'hnw_tier' | 'aml_kyc_status' | 'aml_kyc_date' |
+  'pep_flag' | 'sanctions_flag' | 'preferences' | 'ai_summary' | 'last_activity_at' | 'owner_user_id'
+> & {
+  job_title?: string | null;
+  birthday?: string | null;
+  family_info?: string | null;
+  interests?: string[] | null;
+  scoring?: number | null;
+  mobile?: string | null;
+  is_company?: boolean;
+  address_street?: string | null;
+  address_street2?: string | null;
+  address_city?: string | null;
+  address_state?: string | null;
+  address_zip?: string | null;
+  address_country?: string | null;
+  tax_id?: string | null;
+  website?: string | null;
+  instagram?: string | null;
+  facebook?: string | null;
+  linkedin?: string | null;
+  lead_score?: number | null;
+  lead_temperature?: string | null;
+  lifecycle_stage?: string | null;
+  linked_user_id?: string | null;
+  special_notes?: string | null;
+  emergency_contact_name?: string | null;
+  emergency_contact_phone?: string | null;
+  emergency_contact_relation?: string | null;
+  is_vip?: boolean;
+  marital_status?: string | null;
+  contact_category?: string | null;
+  passport_country?: string | null;
+  tax_residency?: string | null;
+  segment?: string[] | null;
+  hnw_tier?: string | null;
+  aml_kyc_status?: string | null;
+  aml_kyc_date?: string | null;
+  pep_flag?: boolean;
+  sanctions_flag?: boolean;
+  preferences?: Record<string, unknown> | null;
+  ai_summary?: string | null;
+  last_activity_at?: string | null;
+  owner_user_id?: string | null;
+};
+
+export type CrmContactUpdate = Partial<CrmContactInsert>;
+
+/** @deprecated Use CrmContact — CrmContactExtended is a subset and will be removed */
+export type CrmContactExtended = Pick<
+  CrmContact,
+  'id' | 'company_id' | 'first_name' | 'last_name' | 'crm_roles' | 'contact_type' |
+  'phone' | 'email' | 'whatsapp' | 'telegram' | 'language' | 'source' | 'linked_user_id' |
+  'birthday' | 'key_dates' | 'tags' | 'avatar_url' | 'lifecycle_stage' | 'created_at' | 'updated_at'
+> & Record<string, unknown>;

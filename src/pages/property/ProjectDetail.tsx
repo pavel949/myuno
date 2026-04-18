@@ -215,7 +215,7 @@ export default function ProjectDetail() {
             <Button 
               className="w-full" 
               size="lg"
-              onClick={() => navigate(`${APP_ROUTES.PROPERTY}?project=${encodeURIComponent(project.id)}`)}
+              onClick={() => navigate(`${APP_ROUTES.PROPERTY_BROWSE}?project=${encodeURIComponent(project.id)}`)}
             >
               {isRu ? 'Смотреть все объекты в комплексе' : 'View all units in complex'}
             </Button>
@@ -240,7 +240,7 @@ export default function ProjectDetail() {
                 <Button
                   className="w-full"
                   size="lg"
-                  onClick={() => navigate(`${APP_ROUTES.PROPERTY}?project=${encodeURIComponent(project.id)}`)}
+                  onClick={() => navigate(`${APP_ROUTES.PROPERTY_BROWSE}?project=${encodeURIComponent(project.id)}`)}
                 >
                   {isRu ? 'Объекты в комплексе' : 'Units in this complex'}
                 </Button>

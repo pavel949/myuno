@@ -37,7 +37,7 @@ export default function MaintenancePlan() {
     ? Math.round(((schedules.length - overdue.length) / schedules.length) * 100)
     : 100;
 
-  const propList = (properties as any[]).map((p: any) => ({ id: p.id, title: p.title }));
+  const propList = (properties as any[]).map((p: any) => ({ id: p.id, title: p.title_en || p.title_ru || p.title || '' }));
 
   const cardProps = (s: MaintenanceSchedule) => ({
     key: s.id,

@@ -19387,6 +19387,30 @@ export type Database = {
         }
         Relationships: []
       }
+      qa_multi_role_auto_config: {
+        Row: {
+          id: number
+          is_enabled: boolean
+          email_domain_suffixes: string[]
+          extra_user_ids: string[]
+          updated_at: string
+        }
+        Insert: {
+          id?: number
+          is_enabled?: boolean
+          email_domain_suffixes?: string[]
+          extra_user_ids?: string[]
+          updated_at?: string
+        }
+        Update: {
+          id?: number
+          is_enabled?: boolean
+          email_domain_suffixes?: string[]
+          extra_user_ids?: string[]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       quick_listings: {
         Row: {
           admin_notes: string | null
@@ -28784,6 +28808,7 @@ export type Database = {
         Args: { p_project_id: string }
         Returns: undefined
       }
+      ensure_multi_role_qa_bundle: { Args: never; Returns: Json }
       find_nearby_clinics: {
         Args: { radius_km?: number; user_lat: number; user_lng: number }
         Returns: {

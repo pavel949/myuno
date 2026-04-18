@@ -63,10 +63,7 @@ export function useGuestPropertyChat(options: { propertyId?: string; bookingId?:
       }
 
       const { data, error } = await query;
-      if (error) {
-        console.error('Error fetching guest chat messages:', error);
-        return [];
-      }
+      if (error) throw error;
       return (data || []) as GuestChatMessage[];
     },
     enabled: !!user && (!!propertyId || !!bookingId),
@@ -105,7 +102,7 @@ export function useGuestPropertyChat(options: { propertyId?: string; bookingId?:
               messagePreview: params.message,
             },
           })
-          .catch((err) => console.warn('[Chat Notify] Error:', err));
+          .catch(() => { /* fire-and-forget */ });
       }
 
       // AI chat moderation (fire-and-forget)
@@ -120,7 +117,7 @@ export function useGuestPropertyChat(options: { propertyId?: string; bookingId?:
               senderId: user.id,
             },
           })
-          .catch((err) => console.warn('[AI Moderation] Error:', err));
+          .catch(() => { /* fire-and-forget */ });
       }
 
       // Trigger AI auto-reply asynchronously (fire-and-forget)
@@ -148,12 +145,8 @@ export function useGuestPropertyChat(options: { propertyId?: string; bookingId?:
             language: language,
           },
         })
-        .then(({ error }) => {
-          if (error) console.warn('[AI AutoReply] Skipped or failed:', error.message);
-        })
-        .catch((err) => {
-          console.warn('[AI AutoReply] Network error:', err);
-        });
+        .then(() => { /* fire-and-forget */ })
+        .catch(() => { /* fire-and-forget */ });
     },
     [language]
   );
@@ -245,10 +238,7 @@ export function useGuestChatList() {
         .eq('sender_type', 'guest')
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching guest conversations:', error);
-        return [];
-      }
+      if (error) throw error;
 
       if (!myMessages || myMessages.length === 0) return [];
 

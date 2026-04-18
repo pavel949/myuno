@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { normalizeFurnishingLevel, normalizeViewTypes, primaryViewType } from '@/lib/propertyFormNormalizers';
 import { typedFrom } from '@/lib/untypedTables';
 import { PropertyProject } from '@/hooks/usePropertyProjects';
+import { validateBasicInfo, validateLocation, validatePricing } from '@/components/owner/property-wizard/propertyValidation';
 
 const errorLog = createErrorHandler('usePropertyWizard');
 
@@ -486,9 +487,19 @@ export function usePropertyWizard() {
   // Validate step
   const validateStep = useCallback((stepId: string): boolean => {
     switch (stepId) {
-      case 'basic':
-        if (!formData.title.trim()) {
-          toast.error(isRu ? 'Введите название объекта' : 'Enter property title');
+      case 'basic': {
+        const errors = validateBasicInfo({
+          title: formData.title,
+          title_ru: formData.title_ru,
+          property_type: formData.property_type,
+          bedrooms: formData.bedrooms,
+          bathrooms: formData.bathrooms,
+          area_sqm: formData.area_sqm,
+        });
+        if (errors.length > 0) {
+          toast.error(isRu ? 'Проверьте данные' : 'Check required fields', {
+            description: errors[0],
+          });
           return false;
         }
         // Ownership validation (embedded in basic step)
@@ -509,12 +520,30 @@ export function usePropertyWizard() {
           }
         }
         return true;
-      case 'location':
-        if (!formData.address.trim()) {
+      }
+      case 'location': {
+        const errors = validateLocation({ address: formData.address });
+        if (errors.length > 0) {
           toast.error(isRu ? 'Введите адрес' : 'Enter address');
           return false;
         }
         return true;
+      }
+      case 'pricing': {
+        const errors = validatePricing({
+          price_per_night: formData.price_per_night,
+          min_stay_nights: formData.min_stay_nights,
+          max_guests: formData.max_guests,
+          deposit_amount: formData.deposit_amount,
+        });
+        if (errors.length > 0) {
+          toast.error(isRu ? 'Проверьте данные' : 'Check pricing fields', {
+            description: errors[0],
+          });
+          return false;
+        }
+        return true;
+      }
       default:
         return true;
     }
@@ -550,9 +579,10 @@ export function usePropertyWizard() {
       is_for_sale,
       smoking_policy: smoking_allowed ? 'allowed' : 'not_allowed',
       seasonal_pricing: seasonal_pricing && seasonal_pricing.length > 0 ? seasonal_pricing : null,
+      title_en: title,
       title,
       title_ru,
-      description,
+      description_en: description,
       description_ru,
       approval_status: approvalStatus,
       is_active: approvalStatus === 'draft' ? false : undefined,

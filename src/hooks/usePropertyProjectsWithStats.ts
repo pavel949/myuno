@@ -40,7 +40,7 @@ export function usePropertyProjectsWithStats() {
       // (Since we can't use RPC without migration, this is efficient for small datasets)
       const { data: properties, error: propsError } = await supabase
         .from('properties')
-        .select('id, project_id, listing_type, price')
+        .select('id, project_id, listing_type, price_per_night, sale_price')
         .eq('is_active', true)
         .not('project_id', 'is', null);
 
@@ -70,13 +70,15 @@ export function usePropertyProjectsWithStats() {
 
         if (prop.listing_type === 'rent') {
           stats.rentCount++;
-          if (prop.price && (stats.minRentPrice === null || prop.price < stats.minRentPrice)) {
-            stats.minRentPrice = prop.price;
+          const rentPrice = prop.price_per_night;
+          if (rentPrice && (stats.minRentPrice === null || rentPrice < stats.minRentPrice)) {
+            stats.minRentPrice = rentPrice;
           }
         } else if (prop.listing_type === 'sale') {
           stats.saleCount++;
-          if (prop.price && (stats.minSalePrice === null || prop.price < stats.minSalePrice)) {
-            stats.minSalePrice = prop.price;
+          const salePrice = prop.sale_price;
+          if (salePrice && (stats.minSalePrice === null || salePrice < stats.minSalePrice)) {
+            stats.minSalePrice = salePrice;
           }
         }
       }

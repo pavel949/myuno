@@ -191,7 +191,7 @@ export function useCreateOwnerProperty() {
         .single();
       
       if (error) {
-        console.error('[useCreateOwnerProperty] Insert error:', error);
+        errorLog.silent(error, 'create_owner_property');
         throw error;
       }
       
@@ -323,18 +323,19 @@ export function usePublishToMarketplace() {
       const updateData: Record<string, unknown> = {
         is_active: true,
         listing_type: data.listingType,
-        price: data.price,
         price_period: data.listingType === 'rent' ? data.pricePeriod : 'total',
       };
-      
+
       const currentModes = (currentProperty?.listing_modes as string[]) || [];
       if (!currentModes.includes(data.listingType)) {
         updateData.listing_modes = [...currentModes, data.listingType];
       }
-      
+
       if (data.listingType === 'sale') {
         updateData.sale_price = data.price;
         updateData.ownership_form = data.ownershipForm;
+      } else if (data.listingType === 'rent') {
+        updateData.price_per_night = data.price;
       }
 
       const { data: result, error: updateError } = await supabase

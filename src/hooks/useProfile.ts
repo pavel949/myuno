@@ -39,7 +39,7 @@ export function useProfile() {
   const errorLog = createErrorHandler('useProfile');
 
   const { data: profile, isLoading, error } = useQuery({
-    queryKey: ['profile', user?.id],
+    queryKey: ['profile', 'core', user?.id],
     queryFn: async (): Promise<UserProfile | null> => {
       if (!user?.id) return null;
 
@@ -78,7 +78,7 @@ export function useProfile() {
       return data;
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['profile', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['profile', 'core', user?.id] });
       
       // Sync language with context if it was updated
       if (data?.preferred_language) {

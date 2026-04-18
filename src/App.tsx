@@ -39,6 +39,7 @@ import { PWAUpdatePrompt } from "@/components/pwa/PWAUpdatePrompt";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "react-router-dom";
 import { composeProviders } from "@/lib/composeProviders";
+import { useEnsureMultiRoleQaBundle } from "@/hooks/useEnsureMultiRoleQaBundle";
 
 const queryClient = new QueryClient({
   defaultOptions: defaultQueryClientOptions,
@@ -88,6 +89,7 @@ function ComingSoonGate({ children }: { children: React.ReactNode }) {
 // Inner component to use hooks
 function AppContent() {
   useGlobalErrorHandler();
+  useEnsureMultiRoleQaBundle();
   const { isMaintenanceMode, canBypass } = useMaintenance();
   
   // Show maintenance page if enabled and user can't bypass
@@ -96,20 +98,25 @@ function AppContent() {
   }
   
     return (
-      <>
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <SkipToContent />
         <Sonner />
         <PWAUpdatePrompt />
         <LegalComplianceModal />
         <BrowserRouter>
           <ComingSoonGate>
-            <AnimatedRoutes />
+            <main
+              id="main-content"
+              tabIndex={-1}
+              className="flex min-h-0 min-w-0 flex-1 flex-col outline-none focus:outline-none"
+            >
+              <AnimatedRoutes />
+            </main>
             <UnifiedChatFAB />
-            
             <CookieConsentBanner />
           </ComingSoonGate>
         </BrowserRouter>
-      </>
+      </div>
     );
 }
 

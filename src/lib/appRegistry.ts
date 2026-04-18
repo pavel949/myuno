@@ -17,14 +17,22 @@
 import { APP_ROUTES } from '@/lib/config/routes';
 
 export type AppGroupId =
+  // Journey-based groups (current canonical)
+  | 'arrive'
+  | 'live'
+  | 'enjoy'
+  | 'health'
+  | 'settle'
+  | 'invest'
+  | 'maintain'
+  | 'help'
+  // Legacy / internal groups (kept for backward compat)
   | 'home'
   | 'transport'
   | 'leisure'
   | 'wellness'
   | 'admin_docs'
   | 'maintenance'
-  | 'help'
-  | 'invest'
   | 'manage'
   | 'build'
   | 'lifestyle'
@@ -760,6 +768,56 @@ export const APP_REGISTRY: Record<string, AppEntry> = {
     labelEn: 'School Finder',
     labelRu: 'Поиск школы',
     icon: '🎓',
+    status: 'active',
+    personaTags: ['family'],
+    bookable: false,
+  },
+
+  // ──────── Previously uncataloged — now in journey groups ────────
+  tax: {
+    id: 'tax',
+    route: APP_ROUTES.TAX_NAV,
+    groupId: 'settle',
+    clusterIds: ['legal'],
+    labelEn: 'Taxes',
+    labelRu: 'Налоги',
+    icon: '📑',
+    status: 'active',
+    personaTags: ['nomad', 'business', 'resident'],
+    bookable: false,
+  },
+  knowledge: {
+    id: 'knowledge',
+    route: APP_ROUTES.KNOWLEDGE,
+    groupId: 'settle',
+    clusterIds: ['live'],
+    labelEn: 'Knowledge Hub',
+    labelRu: 'База знаний',
+    icon: '📚',
+    status: 'active',
+    personaTags: ['resident', 'nomad', 'relocation'],
+    bookable: false,
+  },
+  wedding: {
+    id: 'wedding',
+    route: APP_ROUTES.WEDDING,
+    groupId: 'enjoy',
+    clusterIds: ['enjoy'],
+    labelEn: 'Weddings',
+    labelRu: 'Свадьбы',
+    icon: '💍',
+    status: 'active',
+    personaTags: ['couple'],
+    bookable: false,
+  },
+  kids: {
+    id: 'kids',
+    route: APP_ROUTES.KIDS,
+    groupId: 'enjoy',
+    clusterIds: ['family', 'enjoy'],
+    labelEn: 'Kids Activities',
+    labelRu: 'Детям',
+    icon: '🎈',
     status: 'active',
     personaTags: ['family'],
     bookable: false,

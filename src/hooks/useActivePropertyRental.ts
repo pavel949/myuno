@@ -42,8 +42,6 @@ export function useActivePropertyRental() {
           .neq('status', 'cancelled');
 
         setHasActiveRental((count ?? 0) > 0);
-
-        setHasActiveRental((propertyOrders && propertyOrders.length > 0) || false);
       } catch {
         setHasActiveRental(false);
       } finally {

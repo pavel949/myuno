@@ -195,6 +195,8 @@ export interface PropertyFilters {
   ownershipForm?: string;
   ownershipForms?: string[];
   managementCompanyId?: string;
+  /** Rent listings: nightly/vacation vs monthly/yearly (price_period) */
+  rentTenancy?: 'short' | 'long';
 }
 
 const PAGE_SIZE = 20;
@@ -234,6 +236,12 @@ function applyPropertyFiltersToQuery(query: any, filters: PropertyFilters) {
     query = query.eq('listing_type', filters.listingType);
   }
 
+  if (filters.listingType === 'rent' && filters.rentTenancy === 'short') {
+    query = query.or('price_period.eq.night,price_period.eq.week,price_period.is.null');
+  } else if (filters.listingType === 'rent' && filters.rentTenancy === 'long') {
+    query = query.in('price_period', ['month', 'year']);
+  }
+
   const dists = filters.districts?.length ? filters.districts : filters.district ? [filters.district] : [];
   if (dists.length === 1) {
     query = query.eq('district', dists[0]);
@@ -242,9 +250,14 @@ function applyPropertyFiltersToQuery(query: any, filters: PropertyFilters) {
   }
 
   const isSaleListing = filters.listingType === 'sale';
+  const isLongTermRent =
+    filters.listingType === 'rent' && filters.rentTenancy === 'long';
   if (isSaleListing) {
     if (filters.minPrice != null) query = query.gte('sale_price', filters.minPrice);
     if (filters.maxPrice != null) query = query.lte('sale_price', filters.maxPrice);
+  } else if (isLongTermRent) {
+    if (filters.minPrice != null) query = query.gte('price', filters.minPrice);
+    if (filters.maxPrice != null) query = query.lte('price', filters.maxPrice);
   } else {
     if (filters.minPrice != null) query = query.gte('price_per_night', filters.minPrice);
     if (filters.maxPrice != null) query = query.lte('price_per_night', filters.maxPrice);
@@ -555,7 +568,7 @@ export function usePropertiesByProject(projectId?: string, limit = 20) {
         .eq('project_id', projectId)
         .eq('is_active', true)
         .order('is_featured', { ascending: false })
-        .order('price', { ascending: true })
+        .order('sale_price', { ascending: true })
         .limit(limit);
 
       if (error) throw error;
@@ -575,14 +588,14 @@ export function useProjectStats(projectId?: string) {
 
       const { data, error } = await supabase
         .from('properties')
-        .select('id, bedrooms, price')
+        .select('id, bedrooms, sale_price, price_per_night')
         .eq('project_id', projectId)
         .eq('is_active', true);
 
       if (error) throw error;
 
       const properties = data || [];
-      
+
       const stats = {
         total: properties.length,
         byBedrooms: {} as Record<string, { count: number; minPrice: number | null; maxPrice: number | null }>,
@@ -594,12 +607,13 @@ export function useProjectStats(projectId?: string) {
           stats.byBedrooms[key] = { count: 0, minPrice: null, maxPrice: null };
         }
         stats.byBedrooms[key].count++;
-        if (p.price) {
-          if (!stats.byBedrooms[key].minPrice || p.price < stats.byBedrooms[key].minPrice!) {
-            stats.byBedrooms[key].minPrice = p.price;
+        const price = p.sale_price ?? p.price_per_night ?? null;
+        if (price) {
+          if (!stats.byBedrooms[key].minPrice || price < stats.byBedrooms[key].minPrice!) {
+            stats.byBedrooms[key].minPrice = price;
           }
-          if (!stats.byBedrooms[key].maxPrice || p.price > stats.byBedrooms[key].maxPrice!) {
-            stats.byBedrooms[key].maxPrice = p.price;
+          if (!stats.byBedrooms[key].maxPrice || price > stats.byBedrooms[key].maxPrice!) {
+            stats.byBedrooms[key].maxPrice = price;
           }
         }
       });
@@ -618,7 +632,8 @@ export interface PropertyMapItem {
   title_ru: string | null;
   lat: number;
   lng: number;
-  price: number | null;
+  price_per_night: number | null;
+  sale_price: number | null;
   price_period: string | null;
   currency: string | null;
   property_type: string | null;
@@ -644,7 +659,8 @@ export function usePropertiesForMap(filters: PropertyFilters = {}) {
           title_ru,
           lat,
           lng,
-          price,
+          price_per_night,
+          sale_price,
           price_period,
           currency,
           property_type,
@@ -684,7 +700,7 @@ export function transformPropertiesToMarkers(properties: PropertyMapItem[]): Sal
       lat,
       lng,
       rating: p.rating || 0,
-      priceFrom: p.price || 0,
+      priceFrom: p.price_per_night ?? p.sale_price ?? 0,
       image: p.cover_image || undefined,
     });
   }

@@ -35,8 +35,8 @@ export const PageHeader = memo(forwardRef<HTMLDivElement, PageHeaderProps>(
     };
 
     const variantClasses = {
-      default: 'bg-gradient-to-r from-[hsl(var(--icon-dark))] via-[hsl(var(--primary))] to-[hsl(var(--icon-dark))] rounded-2xl px-4 py-3',
-      sticky: 'sticky top-0 z-40 bg-gradient-to-r from-[hsl(var(--icon-dark))] via-[hsl(var(--primary))] to-[hsl(var(--icon-dark))] backdrop-blur-sm border-b py-3 -mx-4 px-4',
+      default: 'bg-card border border-border/40 rounded-2xl px-4 py-3',
+      sticky: 'sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border/50 py-3 -mx-4 px-4',
       transparent: 'absolute top-0 left-0 right-0 z-10 bg-transparent',
     };
 
@@ -61,13 +61,13 @@ export const PageHeader = memo(forwardRef<HTMLDivElement, PageHeaderProps>(
           )}
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h1 className={cn("text-xl font-bold tracking-tight truncate", variant !== 'transparent' && "text-white")}>{title}</h1>
+              <h1 className={cn("text-xl font-display font-bold tracking-tight truncate text-foreground")}>{title}</h1>
               {badge !== undefined && badge !== 0 && (
                 <Badge variant="secondary" className="flex-shrink-0">{badge}</Badge>
               )}
             </div>
             {subtitle && (
-              <p className={cn("text-sm truncate", variant !== 'transparent' ? "text-white/70" : "text-muted-foreground")}>{subtitle}</p>
+              <p className="text-sm truncate text-muted-foreground">{subtitle}</p>
             )}
           </div>
         </div>

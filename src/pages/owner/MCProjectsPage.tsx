@@ -7,6 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useMyPropertyProjects, type PropertyProject } from '@/hooks/usePropertyProjects';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 export default function MCProjectsPage() {
   const { language } = useLanguage();
@@ -49,7 +50,7 @@ export default function MCProjectsPage() {
             {isRu ? 'Управление вашими проектами и новостройками' : 'Manage your development projects'}
           </p>
         </div>
-        <Button onClick={() => navigate('/newbuilds/projects/new')} className="gap-2">
+        <Button onClick={() => navigate(APP_ROUTES.DEVELOPER_PORTAL_PROJECT_NEW)} className="gap-2">
           <Plus className="h-4 w-4" />
           {isRu ? 'Добавить' : 'Add Project'}
         </Button>
@@ -105,7 +106,7 @@ function ProjectCard({
 
   return (
     <button
-      onClick={() => navigate(`/newbuilds/projects/${project.id}`)}
+      onClick={() => navigate(APP_ROUTES.OFFPLAN_DETAIL(project.id))}
       className="text-left rounded-xl border bg-card overflow-hidden shadow-sm hover:shadow-md transition-shadow"
     >
       {project.cover_image ? (

@@ -3,11 +3,14 @@ import { NavLink } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 const navItems = [
   { path: '/', labelEn: 'Home', labelRu: 'Главная', exact: true },
   { path: '/discover', labelEn: 'Discover', labelRu: 'Навигатор' },
   { path: '/market', labelEn: 'Market', labelRu: 'Маркет' },
+  /** B2C property hub — developer B2B portal lives under Account → Property */
+  { path: APP_ROUTES.PROPERTY, labelEn: 'Property', labelRu: 'Недвижимость' },
   { path: '/account', labelEn: 'Me', labelRu: 'Профиль' },
 ];
 

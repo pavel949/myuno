@@ -61,8 +61,8 @@ export default function BudgetPage() {
 
   const selectedProp = properties?.find((p: any) => p.id === selectedProperty);
   const propTitle = isRu
-    ? (selectedProp as any)?.title_ru || (selectedProp as any)?.title || ''
-    : (selectedProp as any)?.title || '';
+    ? (selectedProp as any)?.title_ru || (selectedProp as any)?.title_en || (selectedProp as any)?.title || ''
+    : (selectedProp as any)?.title_en || (selectedProp as any)?.title || '';
 
   // Month navigation
   const months = useMemo(() => {

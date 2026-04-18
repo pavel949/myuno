@@ -1,5 +1,5 @@
 import React, { forwardRef } from 'react';
-import { motion, Variants } from 'framer-motion';
+import { motion, useReducedMotion, Variants } from 'framer-motion';
 import { getNavigationDirection, NavigationDirection } from '@/hooks/useNavigationDirection';
 
 interface PageTransitionProps {
@@ -51,13 +51,15 @@ const pageTransition = {
 
 export const PageTransition = forwardRef<HTMLDivElement, PageTransitionProps>(
   function PageTransition({ children }, ref) {
+    const reduceMotion = useReducedMotion();
     const direction = getNavigationDirection();
     const variants = getVariants(direction);
-    
+
+    // Avoid stuck invisible first paint (opacity: 0) when reduced motion is on or animation glitches
     return (
       <motion.div
         ref={ref}
-        initial="initial"
+        initial={reduceMotion ? false : 'initial'}
         animate="animate"
         exit="exit"
         variants={variants}

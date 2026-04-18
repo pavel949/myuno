@@ -248,7 +248,6 @@ export function useCleaningServicesSimple() {
          .order('price');
  
        if (error || !data?.length) {
-         console.warn('Using fallback cleaning services');
          return FALLBACK_SERVICES;
        }
  
@@ -291,7 +290,6 @@ export function useCleaningServices(serviceType?: string) {
       const { data, error } = await queryBuilder;
 
       if (error) {
-        console.error('Error fetching cleaning services:', error);
         return [];
       }
 

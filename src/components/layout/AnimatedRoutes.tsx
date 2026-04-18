@@ -22,6 +22,7 @@ import { GuestLayout } from '@/components/guest/GuestLayout';
 import { StaffLayout } from '@/components/staff/StaffLayout';
 import { useNavigationDirection } from '@/hooks/useNavigationDirection';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { NewbuildProjectToOffplanRedirect } from '@/components/routing/NewbuildLegacyRedirects';
 
 // Core pages - eagerly loaded for fast initial navigation
 import Index from '@/pages/Index';
@@ -187,12 +188,24 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/clinics" element={<Navigate to={APP_ROUTES.MEDICAL} replace />} />
         <Route path="/water_activities" element={<Navigate to={`${APP_ROUTES.EXPERIENCES}?type=activity`} replace />} />
         
-        <Route path={APP_ROUTES.STAYS_SEARCH} element={<LazyPage><Pages.StaysSearchPage /></LazyPage>} />
+        <Route
+          path={APP_ROUTES.STAYS_SEARCH}
+          element={<Navigate to={`${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=short`} replace />}
+        />
 
         {/* ── Property Hub ── */}
         <Route path="/properties" element={<Navigate to={APP_ROUTES.PROPERTY} replace />} />
         <Route path={APP_ROUTES.PROPERTY} element={<Suspense fallback={<LoadingState />}><PropertyHub /></Suspense>}>
-          <Route index element={<LazyPage><Pages.PropertyIndex /></LazyPage>} />
+          <Route index element={<LazyPage><Pages.PropertyHubIndexRoute /></LazyPage>} />
+          <Route path="browse" element={<LazyPage><Pages.PropertyIndex /></LazyPage>} />
+          <Route
+            path="rent/short-term"
+            element={<Navigate to={`${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=short`} replace />}
+          />
+          <Route
+            path="rent/long-term"
+            element={<Navigate to={`${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=long`} replace />}
+          />
           <Route path="search" element={<LazyPage><Pages.PropertySearchPage /></LazyPage>} />
           <Route path="consultation" element={<LazyPage><Pages.PropertyConsultation /></LazyPage>} />
           <Route path="deposit-success" element={<LazyPage><Pages.PropertyDepositSuccess /></LazyPage>} />
@@ -273,8 +286,8 @@ export const AnimatedRoutes: React.FC = () => {
         {/* Project microsite — standalone, no app shell, custom SEO */}
         <Route path="/p/:slug" element={<LazyPage><Pages.ProjectMicrosite /></LazyPage>} />
         <Route path={APP_ROUTES.NEWBUILDS} element={<LazyPage><Pages.NewbuildsLanding /></LazyPage>} />
-        <Route path={APP_ROUTES.NEWBUILDS_PROJECTS} element={<LazyPage><Pages.NewbuildsCatalog /></LazyPage>} />
-        <Route path="/newbuilds/projects/:slug" element={<LazyPage><Pages.NewbuildDetail /></LazyPage>} />
+        <Route path={APP_ROUTES.NEWBUILDS_PROJECTS} element={<Navigate to={APP_ROUTES.OFFPLAN} replace />} />
+        <Route path="/newbuilds/projects/:slug" element={<NewbuildProjectToOffplanRedirect />} />
         <Route path={APP_ROUTES.NEWBUILDS_DEVELOPERS} element={<LazyPage><Pages.NewbuildsDevelopers /></LazyPage>} />
         <Route path="/newbuilds/developers/:slug" element={<LazyPage><Pages.NewbuildDeveloperDetail /></LazyPage>} />
         <Route path={APP_ROUTES.NEWBUILDS_MAP} element={<LazyPage><Pages.NewbuildsMap /></LazyPage>} />

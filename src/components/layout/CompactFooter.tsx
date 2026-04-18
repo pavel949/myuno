@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Send, Instagram, MessageCircle, Download, Smartphone, Shield, Clock, CheckCircle } from 'lucide-react';
 import { COMPANY_CONTACTS } from '@/lib/config';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
 import { useIsDesktop } from '@/hooks/use-desktop';
 import { VERTICAL_GROUPS } from '@/lib/verticalGroups';
@@ -19,7 +20,6 @@ export function CompactFooter() {
       const success = await install();
       if (success) return;
     } else if (!isIOS) {
-      // Android: wait up to 3s for beforeinstallprompt
       const installed = await new Promise<boolean>((resolve) => {
         const handler = async (e: Event) => {
           e.preventDefault();
@@ -48,10 +48,12 @@ export function CompactFooter() {
     return null;
   };
 
+  // Service groups for footer: arrive, live, enjoy, health, settle
+  // invest → dedicated Real Estate column; maintain + help → excluded from services
   const footerGroups = VERTICAL_GROUPS
-    .filter((g) => g.id !== 'maintenance' && g.id !== 'help')
+    .filter((g) => g.id !== 'invest' && g.id !== 'maintain' && g.id !== 'help')
     .map((group) => {
-      const items = group.items.slice(0, 3).map((item) => {
+      const items = group.items.slice(0, 5).map((item) => {
         if (item.verticalId) return resolveVerticalLink(item.verticalId);
         if (item.route) {
           return { to: item.route, label: isRu ? (item.labelRu ?? '') : (item.labelEn ?? '') };
@@ -65,14 +67,24 @@ export function CompactFooter() {
       };
     });
 
+  const realEstateLinks = [
+    { to: APP_ROUTES.PROPERTY_RENT_SHORT, label: isRu ? 'Аренда краткосрочная' : 'Short-term Rent' },
+    { to: APP_ROUTES.PROPERTY_RENT_LONG, label: isRu ? 'Аренда долгосрочная' : 'Long-term Rent' },
+    { to: APP_ROUTES.RESALE, label: isRu ? 'Покупка недвижимости' : 'Buy Property' },
+    { to: APP_ROUTES.OFFPLAN, label: isRu ? 'Офплан / Новостройки' : 'Offplan & New Builds' },
+    { to: APP_ROUTES.INVEST, label: isRu ? 'Инвестиции' : 'Investments' },
+    { to: APP_ROUTES.DEVELOPERS, label: isRu ? 'Застройщики' : 'Developers' },
+  ];
+
   const companyLinks = [
-    { to: '/about', label: isRu ? 'О нас' : 'About' },
-    { to: '/faq', label: 'FAQ' },
-    { to: '/support', label: isRu ? 'Помощь' : 'Help' },
-    { to: '/terms', label: isRu ? 'Условия' : 'Terms' },
-    { to: '/privacy', label: isRu ? 'Конфиденциальность' : 'Privacy' },
-    { to: '/cookies', label: 'Cookie' },
-    { to: '/refund-policy', label: isRu ? 'Возвраты' : 'Refunds' },
+    { to: APP_ROUTES.ABOUT, label: isRu ? 'О нас' : 'About' },
+    { to: APP_ROUTES.FAQ, label: 'FAQ' },
+    { to: APP_ROUTES.SUPPORT, label: isRu ? 'Помощь' : 'Help' },
+    { to: APP_ROUTES.VIP_CONCIERGE, label: isRu ? 'VIP Консьерж' : 'Concierge' },
+    { to: APP_ROUTES.TERMS, label: isRu ? 'Условия' : 'Terms' },
+    { to: APP_ROUTES.PRIVACY, label: isRu ? 'Конфиденциальность' : 'Privacy' },
+    { to: APP_ROUTES.COOKIES, label: 'Cookie' },
+    { to: APP_ROUTES.REFUND_POLICY, label: isRu ? 'Возвраты' : 'Refunds' },
   ];
 
   const socialLinks = [
@@ -89,26 +101,28 @@ export function CompactFooter() {
 
   // Desktop: professional multi-column footer
   if (isDesktop) {
-    const leftGroups = footerGroups.slice(0, Math.ceil(footerGroups.length / 2));
-    const rightGroups = footerGroups.slice(Math.ceil(footerGroups.length / 2));
+    // Left: arrive, live, enjoy (first 3 journey groups)
+    // Right: health, settle (remaining groups)
+    const leftGroups = footerGroups.slice(0, 3);
+    const rightGroups = footerGroups.slice(3);
 
     return (
       <footer className="border-t border-border/40 bg-muted/10 mt-auto">
         <div className="max-w-[1536px] mx-auto px-8 py-10 lg:py-12">
-          {/* Main grid */}
-          <div className="grid grid-cols-5 gap-8 mb-8">
+          {/* Main grid — 6 columns */}
+          <div className="grid grid-cols-6 gap-6 xl:gap-8 mb-8">
+
             {/* Brand column */}
             <div className="space-y-3">
               <div className="flex items-center gap-1">
                 <span className="text-base text-muted-foreground font-light">my</span>
                 <span className="text-lg font-semibold text-foreground font-display">UNO</span>
               </div>
-              <p className="text-[15px] text-muted-foreground leading-7">
-                {isRu 
-                  ? 'Ваш дом на Пхукете. Сервисы, недвижимость и жизнь на острове — в одном приложении.' 
+              <p className="text-[13px] text-muted-foreground leading-6">
+                {isRu
+                  ? 'Ваш дом на Пхукете. Сервисы, недвижимость и жизнь на острове — в одном приложении.'
                   : 'Your home in Phuket. Services, real estate, and island life — all in one app.'}
               </p>
-              {/* Social */}
               <div className="flex gap-3 pt-1">
                 {socialLinks.map((social) => (
                   <a
@@ -125,19 +139,19 @@ export function CompactFooter() {
               </div>
             </div>
 
-            {/* Services column — left half */}
+            {/* Services — left (Home, Transport, Leisure) */}
             <div className="space-y-4">
-              <h4 className="text-base font-semibold text-foreground">
+              <h4 className="text-sm font-semibold text-foreground">
                 {isRu ? 'Сервисы' : 'Services'}
               </h4>
               <nav className="flex flex-col gap-4">
                 {leftGroups.map((group) => (
                   <div key={group.title} className="space-y-1.5">
-                    <span className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wider">
+                    <span className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-wider">
                       {group.title}
                     </span>
                     {group.items.map((link) => (
-                      <Link key={link.to} to={link.to} className="block text-[14px] text-muted-foreground hover:text-foreground transition-colors">
+                      <Link key={link.to} to={link.to} className="block text-[13px] text-muted-foreground hover:text-foreground transition-colors">
                         {link.label}
                       </Link>
                     ))}
@@ -146,35 +160,47 @@ export function CompactFooter() {
               </nav>
             </div>
 
-            {/* Services column — right half */}
+            {/* Services — right (Wellness, Docs & Finance) */}
             <div className="space-y-4">
-              <h4 className="text-base font-semibold text-foreground invisible">
-                &nbsp;
-              </h4>
+              <h4 className="text-sm font-semibold text-foreground invisible">&nbsp;</h4>
               <nav className="flex flex-col gap-4">
                 {rightGroups.map((group) => (
                   <div key={group.title} className="space-y-1.5">
-                    <span className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wider">
+                    <span className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-wider">
                       {group.title}
                     </span>
                     {group.items.map((link) => (
-                      <Link key={link.to} to={link.to} className="block text-[14px] text-muted-foreground hover:text-foreground transition-colors">
+                      <Link key={link.to} to={link.to} className="block text-[13px] text-muted-foreground hover:text-foreground transition-colors">
                         {link.label}
                       </Link>
                     ))}
                   </div>
+                ))}
+              </nav>
+            </div>
+
+            {/* Real Estate column */}
+            <div className="space-y-3">
+              <h4 className="text-sm font-semibold text-foreground">
+                {isRu ? 'Недвижимость' : 'Real Estate'}
+              </h4>
+              <nav className="flex flex-col gap-2.5">
+                {realEstateLinks.map((link) => (
+                  <Link key={link.to} to={link.to} className="text-[13px] text-muted-foreground hover:text-foreground transition-colors">
+                    {link.label}
+                  </Link>
                 ))}
               </nav>
             </div>
 
             {/* Company column */}
             <div className="space-y-3">
-              <h4 className="text-base font-semibold text-foreground">
+              <h4 className="text-sm font-semibold text-foreground">
                 {isRu ? 'Компания' : 'Company'}
               </h4>
               <nav className="flex flex-col gap-2.5">
                 {companyLinks.map((link) => (
-                  <Link key={link.to} to={link.to} className="text-[15px] text-muted-foreground hover:text-foreground transition-colors">
+                  <Link key={link.to} to={link.to} className="text-[13px] text-muted-foreground hover:text-foreground transition-colors">
                     {link.label}
                   </Link>
                 ))}
@@ -183,14 +209,14 @@ export function CompactFooter() {
 
             {/* Trust column */}
             <div className="space-y-3">
-              <h4 className="text-base font-semibold text-foreground">
+              <h4 className="text-sm font-semibold text-foreground">
                 {isRu ? 'Гарантии' : 'Trust & Safety'}
               </h4>
               <div className="flex flex-col gap-3">
                 {trustBadges.map((badge) => (
                   <div key={badge.labelEn} className="flex items-center gap-2">
                     <badge.icon className="w-4 h-4 text-primary shrink-0" />
-                    <span className="text-[15px] text-muted-foreground">
+                    <span className="text-[13px] text-muted-foreground">
                       {isRu ? badge.labelRu : badge.labelEn}
                     </span>
                   </div>
@@ -213,7 +239,7 @@ export function CompactFooter() {
     );
   }
 
-  // Mobile: compact footer (unchanged)
+  // Mobile: compact footer
   return (
     <footer className="border-t border-border/50 bg-muted/30 mt-auto pb-20 md:pb-0">
       <div className="max-w-[1536px] mx-auto px-4 py-6 space-y-4">

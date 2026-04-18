@@ -44,7 +44,7 @@ export function SectionHeader({
           </div>
         )}
         <div className="min-w-0">
-          <h2 className={cn(s.title, 'text-foreground truncate')}>{title}</h2>
+          <h2 className={cn(s.title, 'font-display text-foreground truncate')}>{title}</h2>
           {subtitle && (
             <p className={cn(s.subtitle, 'text-muted-foreground')}>{subtitle}</p>
           )}

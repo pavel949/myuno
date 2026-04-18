@@ -4,9 +4,10 @@
  */
 import React, { useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Building2, Map, Compass, Users, Calculator, Shield } from 'lucide-react';
+import { Building2, Map, Compass, Users, Calculator, Shield, GitCompare } from 'lucide-react';
 import { NbCompareProvider } from './NbCompareProvider';
 import { getAttributionCookieId } from '@/lib/newbuilds/attribution';
+import { APP_ROUTES } from '@/lib/config/routes';
 import '@/styles/newbuilds-theme.css';
 
 interface NewbuildsLayoutProps {
@@ -16,12 +17,13 @@ interface NewbuildsLayoutProps {
 }
 
 const NAV_ITEMS = [
-  { path: '/newbuilds', label: 'Каталог', icon: Building2, exact: true },
-  { path: '/newbuilds/map', label: 'Карта', icon: Map },
-  { path: '/newbuilds/areas', label: 'Районы', icon: Compass },
-  { path: '/newbuilds/developers', label: 'Девелоперы', icon: Users },
-  { path: '/newbuilds/calculator', label: 'Калькулятор', icon: Calculator },
-  { path: '/newbuilds/due-diligence', label: 'Due Diligence', icon: Shield },
+  { path: APP_ROUTES.OFFPLAN, label: 'Каталог', icon: Building2, exact: true },
+  { path: APP_ROUTES.NEWBUILDS_MAP, label: 'Карта', icon: Map },
+  { path: APP_ROUTES.NEWBUILDS_COMPARE, label: 'Сравнение', icon: GitCompare },
+  { path: APP_ROUTES.NEWBUILDS_AREAS, label: 'Районы', icon: Compass },
+  { path: APP_ROUTES.NEWBUILDS_DEVELOPERS, label: 'Девелоперы', icon: Users },
+  { path: APP_ROUTES.NEWBUILDS_CALCULATOR, label: 'Калькулятор', icon: Calculator },
+  { path: APP_ROUTES.NEWBUILDS_DUE_DILIGENCE, label: 'Due Diligence', icon: Shield },
 ];
 
 export default function NewbuildsLayout({ children, className = '', hideNav }: NewbuildsLayoutProps) {
@@ -33,7 +35,12 @@ export default function NewbuildsLayout({ children, className = '', hideNav }: N
   }, []);
 
   const isActive = (item: typeof NAV_ITEMS[0]) => {
-    if (item.exact) return location.pathname === item.path;
+    if (item.exact) {
+      return (
+        location.pathname === item.path ||
+        (item.path === APP_ROUTES.OFFPLAN && location.pathname.startsWith(`${APP_ROUTES.OFFPLAN}/`))
+      );
+    }
     return location.pathname.startsWith(item.path);
   };
 

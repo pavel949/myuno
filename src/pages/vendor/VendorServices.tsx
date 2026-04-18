@@ -407,16 +407,18 @@ const VendorServices = () => {
             </DialogHeader>
 
             <div className="grid md:grid-cols-[1fr,280px] gap-6 flex-1 min-h-0 overflow-hidden py-4">
-              {/* Form Wizard */}
-              <VendorFormWizard
-                steps={steps}
-                currentStep={currentStep}
-                onStepChange={setCurrentStep}
-                onSubmit={handleSubmit}
-                isSubmitting={isSubmitting}
-                submitLabel="Save Service"
-                submitLabelRu="Сохранить услугу"
-              >
+              {/* Form Wizard: min-h-0 keeps footer nav visible inside max-h dialog */}
+              <div className="min-h-0 flex flex-col overflow-hidden">
+                <VendorFormWizard
+                  className="min-h-0 flex-1 flex flex-col overflow-hidden"
+                  steps={steps}
+                  currentStep={currentStep}
+                  onStepChange={setCurrentStep}
+                  onSubmit={handleSubmit}
+                  isSubmitting={isSubmitting}
+                  submitLabel="Save Service"
+                  submitLabelRu="Сохранить услугу"
+                >
                 {/* Step 1: Basic Info */}
                 <WizardStepContent stepId="basic" currentStepId={steps[currentStep].id}>
                   <VendorFormSection
@@ -612,9 +614,10 @@ const VendorServices = () => {
                   </VendorFormSection>
                 </WizardStepContent>
               </VendorFormWizard>
+              </div>
 
               {/* Preview */}
-              <CardPreviewSection className="hidden md:block">
+              <CardPreviewSection className="hidden md:block min-h-0">
                 <CardPreview
                   type="service"
                   image={formData.image}

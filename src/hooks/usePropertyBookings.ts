@@ -5,6 +5,7 @@ import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { useStorefront } from '@/contexts/StorefrontContext';
 import { getAccessiblePropertyIds } from '@/lib/getAccessiblePropertyIds';
 import { createErrorHandler } from '@/lib/errorHandler';
+import type { Database } from '@/integrations/supabase/types';
 
 const errorLog = createErrorHandler('usePropertyBookings');
 
@@ -50,11 +51,26 @@ export interface CreateBookingInput {
   documents?: string[]; // URLs to attached documents
 }
 
+interface OrderWithJoins {
+  id: string;
+  start_at: string | null;
+  end_at: string | null;
+  total_amount: number | null;
+  currency: string | null;
+  status: string;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+  provider_org_id: string | null;
+  metadata: Record<string, unknown> | null;
+  order_participants?: Array<{ role: string; name: string | null; phone: string | null; email: string | null }> | null;
+  order_items?: Array<{ item_type: string; resource_id: string | null; metadata: Record<string, unknown> | null }> | null;
+}
+
 /**
  * Maps an order row to PropertyBooking interface for backward compatibility
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function mapOrderToBooking(order: Record<string, any>, propertyId: string): PropertyBooking {
+function mapOrderToBooking(order: OrderWithJoins, propertyId: string): PropertyBooking {
   const guestParticipant = order.order_participants?.find((p: { role: string }) => p.role === 'guest');
   const propertyItem = order.order_items?.find((i: { item_type: string }) => i.item_type === 'property');
   
@@ -197,7 +213,7 @@ export function usePropertyBookings(propertyId?: string) {
           end_at: `${input.check_out}T${input.check_out_time || '12:00'}:00Z`,
           total_amount: input.total_amount || 0,
           currency: input.currency || 'THB',
-          status: (input.status === 'confirmed' ? 'confirmed' : 'pending') as any,
+          status: (input.status === 'confirmed' ? 'confirmed' : 'pending') as Database['public']['Enums']['order_status'],
           notes: input.notes,
           // Storefront attribution
           source_storefront_id: storefront?.id || null,
@@ -456,7 +472,7 @@ export function usePropertyBookings(propertyId?: string) {
       // bookings are stored in the orders table; ids are order IDs
       const { error } = await supabase
         .from('orders')
-        .update({ status } as any)
+        .update({ status: status as Database['public']['Enums']['order_status'] })
         .in('id', ids);
       if (error) {
         errorLog.silent(error, 'bulk_update_bookings');

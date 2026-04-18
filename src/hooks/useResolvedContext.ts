@@ -12,7 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { CACHE_PROFILES } from '@/lib/queryConfig';
 
-export type ContextMode = 'user' | 'owner' | 'mc' | 'investor' | 'vendor' | 'admin' | 'team';
+export type ContextMode = 'user' | 'owner' | 'mc' | 'investor' | 'vendor' | 'admin' | 'team' | 'staff';
 
 export interface ResolvedContext {
   mode: ContextMode;

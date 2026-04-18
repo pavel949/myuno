@@ -28,7 +28,7 @@ export default function NewbuildsCompare() {
             <p className="text-sm" style={{ color: 'hsl(var(--nb-muted))' }}>
               Добавьте проекты к сравнению из каталога
             </p>
-            <Link to={APP_ROUTES.NEWBUILDS_PROJECTS} className="nb-btn-gold inline-block">
+            <Link to={APP_ROUTES.OFFPLAN} className="nb-btn-gold inline-block">
               К каталогу
             </Link>
           </div>
@@ -133,7 +133,7 @@ export default function NewbuildsCompare() {
       <div className="max-w-7xl mx-auto px-4 py-10">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <Link to={APP_ROUTES.NEWBUILDS_PROJECTS} className="inline-flex items-center gap-1 text-sm mb-2" style={{ color: 'hsl(var(--nb-muted))' }}>
+            <Link to={APP_ROUTES.OFFPLAN} className="inline-flex items-center gap-1 text-sm mb-2" style={{ color: 'hsl(var(--nb-muted))' }}>
               <ChevronLeft className="w-4 h-4" /> Каталог
             </Link>
             <h1 className="nb-display text-3xl" style={{ color: 'hsl(var(--nb-gold))' }}>Сравнение проектов</h1>
@@ -153,7 +153,7 @@ export default function NewbuildsCompare() {
                 {items.map(item => (
                   <th key={item.id} className="text-left py-3 px-3 min-w-[220px]">
                     <div className="flex items-start justify-between">
-                      <Link to={`/newbuilds/projects/${item.id}`} className="nb-display text-base hover:opacity-80 transition-opacity" style={{ color: 'hsl(var(--nb-text))' }}>
+                      <Link to={APP_ROUTES.OFFPLAN_DETAIL(item.id)} className="nb-display text-base hover:opacity-80 transition-opacity" style={{ color: 'hsl(var(--nb-text))' }}>
                         {item.name_ru || item.name_en}
                       </Link>
                       <button onClick={() => remove(item.id)} className="p-1 flex-shrink-0" style={{ color: 'hsl(var(--nb-muted))' }}>

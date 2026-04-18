@@ -7,12 +7,13 @@ import { useNavigate } from 'react-router-dom';
 import {
   Heart, ShoppingBag, MessageSquare, User, Settings, Globe,
   HelpCircle, Gift, LogOut, Store, Building2, Shield, Headphones,
-  Menu, Bell, CreditCard,
+  Menu, Bell, CreditCard, UserCog, Briefcase, Construction,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -22,6 +23,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useUserContext, type AppRole } from '@/hooks/useUserContext';
 import { useNotifications } from '@/hooks/useNotifications';
 import { cn } from '@/lib/utils';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 const ROLE_SWITCH_CONFIG: Partial<Record<AppRole, {
   labelEn: string;
@@ -40,10 +42,10 @@ const ROLE_SWITCH_CONFIG: Partial<Record<AppRole, {
     path: '/vendor',
   },
   owner: {
-    labelEn: 'Switch to Management',
-    labelRu: 'Управление объектами',
-    descEn: 'Manage your properties',
-    descRu: 'Управление недвижимостью',
+    labelEn: 'Property owner',
+    labelRu: 'Кабинет собственника',
+    descEn: 'Your own properties & bookings',
+    descRu: 'Личные объекты: брони и сервисы',
     icon: Building2,
     path: '/owner',
   },
@@ -63,6 +65,22 @@ const ROLE_SWITCH_CONFIG: Partial<Record<AppRole, {
     icon: Headphones,
     path: '/team',
   },
+  staff: {
+    labelEn: 'Staff workspace',
+    labelRu: 'Сотрудник',
+    descEn: 'Internal staff tools',
+    descRu: 'Внутренние инструменты',
+    icon: UserCog,
+    path: '/staff',
+  },
+  property_manager: {
+    labelEn: 'Management company (MC)',
+    labelRu: 'Управляющая компания (УК)',
+    descEn: 'MC dashboard for client properties',
+    descRu: 'Панель компании — объекты клиентов',
+    icon: Briefcase,
+    path: '/mc',
+  },
 };
 
 export function UserAvatarMenu() {
@@ -81,7 +99,7 @@ export function UserAvatarMenu() {
 
   // Roles that can be switched to (exclude 'user'/'guest')
   const switchableRoles = availableRoles.filter(
-    (r) => r !== 'user' && r !== 'guest' && r !== 'staff' && r !== 'partner' && ROLE_SWITCH_CONFIG[r]
+    (r) => r !== 'user' && r !== 'guest' && r !== 'partner' && ROLE_SWITCH_CONFIG[r]
   );
 
   const handleRoleSwitch = async (role: AppRole) => {
@@ -140,10 +158,12 @@ export function UserAvatarMenu() {
         </button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" className="w-72 p-0 rounded-2xl shadow-xl border border-border/50 overflow-hidden">
-        {/* Role switch section — top, prominent */}
-        {switchableRoles.length > 0 && (
-          <>
+      <DropdownMenuContent
+        align="end"
+        className="w-72 p-0 rounded-2xl shadow-xl border border-border/50 max-h-[min(85vh,560px)] overflow-y-auto overflow-x-hidden"
+      >
+        {/* Role switch + developer portal — top, prominent (portal is not an AppRole) */}
+        <DropdownMenuGroup>
             {switchableRoles.map((role) => {
               const config = ROLE_SWITCH_CONFIG[role]!;
               const Icon = config.icon;
@@ -165,9 +185,25 @@ export function UserAvatarMenu() {
                 </DropdownMenuItem>
               );
             })}
+            {/* Developer portal — not an AppRole; direct link (no profile → apply flow) */}
+            <DropdownMenuItem
+              onClick={() => navigate(APP_ROUTES.DEVELOPER_PORTAL)}
+              className="flex items-center gap-3 px-4 py-3 cursor-pointer focus:bg-muted/50"
+            >
+              <Construction className="w-5 h-5 text-foreground/70 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-foreground">
+                  {isRu ? 'Портал застройщика' : 'Developer portal'}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {isRu
+                    ? 'Кабинет застройщика: проекты, лиды, аналитика'
+                    : 'Developer workspace: projects, leads, analytics'}
+                </p>
+              </div>
+            </DropdownMenuItem>
             <DropdownMenuSeparator className="my-0" />
-          </>
-        )}
+        </DropdownMenuGroup>
 
         {/* Primary navigation */}
         {primaryItems.map((item) => {

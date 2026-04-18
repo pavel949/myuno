@@ -102,17 +102,10 @@ function generateCorrelationId(): string {
   return crypto.randomUUID();
 }
 
-const isDev = import.meta.env.DEV;
-
-function logRequest(endpoint: string, correlationId: string): void {
-  if (isDev) {
-    console.log(`[AI] ${endpoint} | ${correlationId.slice(0, 8)}...`);
-  }
-}
-
-function logError(error: AIError): void {
-  console.error(`[AI ERROR] ${error.code}: ${error.message}`, error.correlationId);
-}
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function logRequest(_endpoint: string, _correlationId: string): void { /* no-op */ }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function logError(_error: AIError): void { /* structured errors returned to callers */ }
 
 function authHeaders(): Record<string, string> {
   return {

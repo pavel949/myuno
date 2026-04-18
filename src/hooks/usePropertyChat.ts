@@ -47,7 +47,6 @@ export function usePropertyChat(options: { propertyId?: string; bookingId?: stri
           .single();
         
         if (bookingError || !booking) {
-          console.warn('Chat access denied: booking not found or not owned');
           return [];
         }
       } else if (propertyId) {
@@ -59,7 +58,6 @@ export function usePropertyChat(options: { propertyId?: string; bookingId?: stri
           .single();
         
         if (propError || !property) {
-          console.warn('Chat access denied: property not found or not owned');
           return [];
         }
       }

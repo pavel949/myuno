@@ -1,19 +1,19 @@
 /**
  * @module untypedTables
- * @description Type-safe wrappers for tables not yet in generated Supabase types.
- * 
- * These tables exist in the database but are missing from types.ts
- * (likely added via migrations after last type generation).
- * This wrapper isolates all type casts to one place and provides
- * typed query builders via generics.
- * 
- * USAGE:
+ * @description Typed accessors for tables that were missing from generated Supabase types.
+ *
+ * Most tables here are now present in types.ts — their named accessors call
+ * supabase.from() directly and return a properly-typed query builder.
+ * Only a handful of tables remain truly untyped (crm_reminders, social_posts,
+ * owner_prospects) and still use the typedFrom() escape hatch.
+ *
+ * USAGE for remaining untyped tables:
  *   import { typedFrom } from '@/lib/untypedTables';
- *   const { data } = await typedFrom<MyRow>('my_table').select('*');
- * 
- * For pre-defined tables, use the named accessors:
+ *   const { data } = await typedFrom('my_table').select('*');
+ *
+ * For pre-defined tables:
  *   import { untypedTables } from '@/lib/untypedTables';
- *   const { data } = await untypedTables.analyticsEvents().select('*');
+ *   const { data } = await untypedTables.crmPipelines().select('*');
  */
 import { supabase } from '@/integrations/supabase/client';
 // ============= Generic typed accessor =============
@@ -217,43 +217,45 @@ export interface CrmReminderRow {
 // ============= Named accessors =============
 
 export const untypedTables = {
+  // --- Tables NOT yet in generated types (truly untyped) ---
   aiDecisionsLog: () => typedFrom('ai_decisions_log'),
   socialPosts: () => typedFrom('social_posts'),
   socialContentCalendar: () => typedFrom('social_content_calendar'),
   ownerProspects: () => typedFrom('owner_prospects'),
-  promotedListings: () => typedFrom('promoted_listings'),
-  disputes: () => typedFrom('disputes'),
-  analyticsEvents: () => typedFrom('analytics_events'),
-  contactProperties: () => typedFrom('contact_properties'),
-  teamMemberPermissions: () => typedFrom('team_member_permissions'),
-  ownerPortalSettings: () => typedFrom('owner_portal_settings'),
-  propertyDelegates: () => typedFrom('property_delegates'),
-  propertyPayoutRules: () => typedFrom('property_payout_rules'),
-  propertyPriceOffers: () => typedFrom('property_price_offers'),
-  crmPipelines: () => typedFrom('crm_pipelines'),
-  crmPipelineStages: () => typedFrom('crm_pipeline_stages'),
-  propertyAccountingPolicies: () => typedFrom('property_accounting_policies'),
-  crmContactNotes: () => typedFrom('crm_contact_notes'),
-  contactRelationships: () => typedFrom('contact_relationships'),
   crmReminders: () => typedFrom('crm_reminders'),
-  // CRM module tables
-  crmEmails: () => typedFrom('crm_emails'),
-  crmCommTemplates: () => typedFrom('crm_comm_templates'),
-  crmSequences: () => typedFrom('crm_sequences'),
-  crmSequenceSteps: () => typedFrom('crm_sequence_steps'),
-  crmSequenceEnrollments: () => typedFrom('crm_sequence_enrollments'),
-  crmWorkflows: () => typedFrom('crm_workflows'),
-  crmWorkflowActions: () => typedFrom('crm_workflow_actions'),
-  crmMeetings: () => typedFrom('crm_meetings'),
-  crmWebForms: () => typedFrom('crm_web_forms'),
-  crmQuotes: () => typedFrom('crm_quotes'),
-  crmCustomFields: () => typedFrom('crm_custom_fields'),
-  crmCustomFieldValues: () => typedFrom('crm_custom_field_values'),
-  crmScoringRules: () => typedFrom('crm_scoring_rules'),
-  crmScoreLog: () => typedFrom('crm_score_log'),
-  crmCompanies: () => typedFrom('crm_companies'),
-  crmAssignmentRules: () => typedFrom('crm_assignment_rules'),
-  crmActivities: () => typedFrom('crm_activities'),
-  mccLeads: () => typedFrom('mcc_leads'),
-  vendorOutreachLog: () => typedFrom('vendor_outreach_log'),
+  contactProperties: () => typedFrom('contact_properties'),
+
+  // --- Tables now in generated types — supabase.from() returns typed builder ---
+  analyticsEvents: () => supabase.from('analytics_events'),
+  contactRelationships: () => supabase.from('contact_relationships'),
+  teamMemberPermissions: () => supabase.from('team_member_permissions'),
+  ownerPortalSettings: () => supabase.from('owner_portal_settings'),
+  propertyDelegates: () => supabase.from('property_delegates'),
+  propertyPayoutRules: () => supabase.from('property_payout_rules'),
+  propertyPriceOffers: () => supabase.from('property_price_offers'),
+  propertyAccountingPolicies: () => supabase.from('property_accounting_policies'),
+  promotedListings: () => supabase.from('promoted_listings'),
+  disputes: () => supabase.from('disputes'),
+  crmPipelines: () => supabase.from('crm_pipelines'),
+  crmPipelineStages: () => supabase.from('crm_pipeline_stages'),
+  crmContactNotes: () => supabase.from('crm_contact_notes'),
+  crmEmails: () => supabase.from('crm_emails'),
+  crmCommTemplates: () => supabase.from('crm_comm_templates'),
+  crmSequences: () => supabase.from('crm_sequences'),
+  crmSequenceSteps: () => supabase.from('crm_sequence_steps'),
+  crmSequenceEnrollments: () => supabase.from('crm_sequence_enrollments'),
+  crmWorkflows: () => supabase.from('crm_workflows'),
+  crmWorkflowActions: () => supabase.from('crm_workflow_actions'),
+  crmMeetings: () => supabase.from('crm_meetings'),
+  crmWebForms: () => supabase.from('crm_web_forms'),
+  crmQuotes: () => supabase.from('crm_quotes'),
+  crmCustomFields: () => supabase.from('crm_custom_fields'),
+  crmCustomFieldValues: () => supabase.from('crm_custom_field_values'),
+  crmScoringRules: () => supabase.from('crm_scoring_rules'),
+  crmScoreLog: () => supabase.from('crm_score_log'),
+  crmCompanies: () => supabase.from('crm_companies'),
+  crmAssignmentRules: () => supabase.from('crm_assignment_rules'),
+  crmActivities: () => supabase.from('crm_activities'),
+  mccLeads: () => supabase.from('mcc_leads'),
+  vendorOutreachLog: () => supabase.from('vendor_outreach_log'),
 } as const;

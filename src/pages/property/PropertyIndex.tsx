@@ -2,7 +2,7 @@
  * PropertyIndex — Airbnb-style Discovery Page
  * Clean search pill + category icons ribbon + card grid
  */
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Heart, Star, ArrowRight, MapPin, SlidersHorizontal, Map } from 'lucide-react';
 import { SEOHead } from '@/components/seo';
@@ -78,9 +78,16 @@ export default function PropertyIndex() {
     return count;
   }, [filterValues]);
 
-  const [propertyMode, setPropertyMode] = useState<PropertyMode>(
-    (searchParamsUrl.get('mode') as PropertyMode) || 'rent'
+  const [propertyMode, setPropertyMode] = useState<PropertyMode>(() =>
+    searchParamsUrl.get('mode') === 'buy' ? 'buy' : 'rent'
   );
+
+  const rentTenancy = searchParamsUrl.get('tenancy') === 'long' ? 'long' : 'short';
+
+  useEffect(() => {
+    const m = searchParamsUrl.get('mode');
+    setPropertyMode(m === 'buy' ? 'buy' : 'rent');
+  }, [searchParamsUrl]);
 
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
@@ -90,8 +97,9 @@ export default function PropertyIndex() {
     () =>
       filterValuesToPropertyFilters(filterValues, {
         listingType: propertyMode === 'buy' ? 'sale' : 'rent',
+        rentTenancy: propertyMode === 'rent' ? rentTenancy : undefined,
       }),
-    [filterValues, propertyMode]
+    [filterValues, propertyMode, rentTenancy]
   );
 
   const { data: infiniteData, isLoading } = usePropertiesInfinite(serverFilters);
@@ -128,16 +136,41 @@ export default function PropertyIndex() {
     if (params.amenities.length > 0) qp.set('amenities', params.amenities.join(','));
     if (params.instantBooking) qp.set('instant', '1');
     qp.set('mode', propertyMode);
+    if (propertyMode === 'rent') {
+      qp.set('tenancy', rentTenancy);
+    }
     navigate(`${APP_ROUTES.PROPERTY_SEARCH}?${qp.toString()}`);
-  }, [navigate, propertyMode]);
+  }, [navigate, propertyMode, rentTenancy]);
 
   return (
     <AppLayout showHeader={false} showBottomNav showFooter>
       <SEOHead
-        title={isRu ? 'Аренда и покупка недвижимости на Пхукете' : 'Property Rentals & Sales in Phuket'}
-        description={isRu
-          ? 'Найдите виллы, кондо и апартаменты на Пхукете. Аренда посуточно и долгосрочно, покупка недвижимости.'
-          : 'Find villas, condos, and apartments in Phuket. Daily and long-term rentals, property for sale.'}
+        title={
+          propertyMode === 'buy'
+            ? isRu
+              ? 'Покупка недвижимости на Пхукете'
+              : 'Property for sale in Phuket'
+            : isRu
+              ? rentTenancy === 'long'
+                ? 'Долгосрочная аренда на Пхукете'
+                : 'Посуточная аренда на Пхукете'
+              : rentTenancy === 'long'
+                ? 'Long-term rent in Phuket'
+                : 'Nightly rentals in Phuket'
+        }
+        description={
+          propertyMode === 'buy'
+            ? isRu
+              ? 'Вторичка и новостройки — виллы, кондо и апартаменты на Пхукете.'
+              : 'Resale and new builds — villas, condos, and apartments in Phuket.'
+            : isRu
+              ? rentTenancy === 'long'
+                ? 'Долгосрочная аренда на Пхукете — месячные ставки, виллы и кондо.'
+                : 'Посуточная аренда на Пхукете — виллы, кондо и апартаменты.'
+              : rentTenancy === 'long'
+                ? 'Long-term rentals in Phuket — monthly rates, villas and condos.'
+                : 'Nightly stays in Phuket — villas, condos, and apartments.'
+        }
       />
       <div className="pb-24">
         {/* Sticky header: tabs + search + categories */}
@@ -147,7 +180,7 @@ export default function PropertyIndex() {
           {/* Search pill + mode toggle */}
           <div className={cn(ECOSYSTEM_PAGE_CONTAINER, "pt-3 pb-2")}>
             <div className="flex items-center gap-2">
-              <BackButton fallbackPath={APP_ROUTES.HOME} variant="ghost" size="sm" className="shrink-0 -ml-1" />
+              <BackButton fallbackPath={APP_ROUTES.PROPERTY} variant="ghost" size="sm" className="shrink-0 -ml-1" />
               <div className="flex-1">
                 <AirbnbSearchBar onSearch={handleSearch} />
               </div>

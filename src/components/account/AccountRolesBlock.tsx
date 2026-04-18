@@ -16,6 +16,7 @@ import {
   ChevronRight,
   Check,
   Plus,
+  Briefcase,
 } from 'lucide-react';
 
 interface RoleCardConfig {
@@ -85,6 +86,28 @@ const ROLE_CARDS: RoleCardConfig[] = [
     color: 'text-success',
     bgColor: 'bg-success/10',
     path: '/team',
+  },
+  {
+    key: 'staff',
+    labelEn: 'Staff',
+    labelRu: 'Сотрудник',
+    descEn: 'Internal staff workspace',
+    descRu: 'Рабочее место сотрудника',
+    icon: UserCog,
+    color: 'text-orange-500',
+    bgColor: 'bg-orange-500/10',
+    path: '/staff',
+  },
+  {
+    key: 'property_manager',
+    labelEn: 'Management company',
+    labelRu: 'Управляющая компания',
+    descEn: 'MC dashboard & properties',
+    descRu: 'Панель УК и объекты',
+    icon: Briefcase,
+    color: 'text-cyan-600',
+    bgColor: 'bg-cyan-500/10',
+    path: '/mc',
   },
 ];
 

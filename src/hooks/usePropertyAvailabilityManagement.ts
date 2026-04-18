@@ -35,10 +35,7 @@ export function usePropertyAvailabilityManagement(propertyId?: string) {
         .eq('property_id', propertyId)
         .order('date', { ascending: true });
 
-      if (error) {
-        console.error('Error fetching availability:', error);
-        throw error;
-      }
+      if (error) throw error;
 
       return (data as PropertyAvailabilityRow[]).map(row => ({
         date: new Date(row.date),
@@ -79,8 +76,7 @@ export function usePropertyAvailabilityManagement(propertyId?: string) {
       queryClient.invalidateQueries({ queryKey: ['property-availability-management', propertyId] });
       toast(isRu ? 'Сохранено' : 'Saved', { description: isRu ? 'Доступность обновлена' : 'Availability updated successfully' });
     },
-    onError: (error) => {
-      console.error('Error updating availability:', error);
+    onError: () => {
       toast.error(isRu ? 'Ошибка' : 'Error', { description: isRu ? 'Не удалось обновить доступность' : 'Failed to update availability' });
     },
   });
@@ -103,8 +99,7 @@ export function usePropertyAvailabilityManagement(propertyId?: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['property-availability-management', propertyId] });
     },
-    onError: (error) => {
-      console.error('Error deleting availability:', error);
+    onError: () => {
       toast.error(isRu ? 'Ошибка' : 'Error', { description: isRu ? 'Не удалось удалить записи' : 'Failed to delete availability entries' });
     },
   });

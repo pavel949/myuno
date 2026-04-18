@@ -38,7 +38,9 @@ import { SEOHead, createRealEstateListingSchema, createBreadcrumbSchema } from '
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useOffplanProjects, type ProjectStatus } from '@/hooks/useOffplanProjects';
+import { useNewbuildProject } from '@/hooks/useNewbuildProjects';
 import { useDeveloper } from '@/hooks/useDevelopers';
+import { NewbuildProjectDeepTabs } from '@/components/newbuilds/NewbuildProjectDeepTabs';
 import { MuunoScoreWidget, ScoreBreakdown } from '@/components/invest';
 import { FundingProgress } from '@/components/invest/FundingProgress';
 import { DeveloperBadge } from '@/components/property/DeveloperBadge';
@@ -78,6 +80,7 @@ export default function OffplanDetail() {
   const { data: projects, isLoading } = useOffplanProjects();
   const project = projects?.find(p => p.id === id);
   const { data: developer } = useDeveloper(project?.developerId || '');
+  const { data: nbProject } = useNewbuildProject(id);
 
   if (isLoading) {
     return (
@@ -441,6 +444,15 @@ export default function OffplanDetail() {
             )}
           </TabsContent>
         </Tabs>
+
+        {nbProject && (
+          <section
+            className="rounded-2xl border overflow-hidden bg-card"
+            aria-label={isRu ? 'Расширенные данные проекта' : 'Extended project data'}
+          >
+            <NewbuildProjectDeepTabs project={nbProject} variant="embedded" />
+          </section>
+        )}
       </div>
 
       {/* Fixed CTA */}

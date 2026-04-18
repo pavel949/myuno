@@ -20,31 +20,20 @@ export function ControlRolesTab() {
   const { language } = useLanguage();
   const isRussian = language === 'ru';
 
-  // Fetch actual role counts from database
+  // Single query — fetch all role assignments, count in JS (1 DB call instead of 6)
   const { data: roleCounts, isLoading } = useQuery({
     queryKey: ['admin-role-counts'],
     queryFn: async () => {
-      const counts: Record<string, number> = {};
-      
-      // Fetch all role counts in parallel
-      const roleKeys = roleConfigs.map(r => r.key);
-      
-      const results = await Promise.all(
-        roleKeys.map(async (roleKey) => {
-          const { count, error } = await supabase
-            .from('user_roles')
-            .select('*', { count: 'exact', head: true })
-            .eq('role', roleKey as 'admin' | 'uno_team' | 'staff' | 'vendor' | 'property_owner' | 'user');
-          
-          return { roleKey, count: error ? 0 : (count || 0) };
-        })
-      );
-      
-      results.forEach(({ roleKey, count }) => {
-        counts[roleKey] = count;
-      });
-      
-      return counts;
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role');
+
+      if (error) throw error;
+
+      return (data || []).reduce<Record<string, number>>((acc, row) => {
+        acc[row.role] = (acc[row.role] ?? 0) + 1;
+        return acc;
+      }, {});
     },
   });
 

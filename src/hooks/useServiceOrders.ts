@@ -96,7 +96,7 @@ export function useGuestServiceOrders() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['guest-service-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['guest-service-orders', user?.id] });
       toast('Заказ создан', { description: 'Ваш заказ успешно создан и ожидает обработки' });
     },
     onError: (error) => {
@@ -116,7 +116,7 @@ export function useGuestServiceOrders() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['guest-service-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['guest-service-orders', user?.id] });
       toast('Заказ отменён');
     },
   });
@@ -133,7 +133,7 @@ export function useGuestServiceOrders() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['guest-service-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['guest-service-orders', user?.id] });
       toast('Спасибо за отзыв!');
     },
   });

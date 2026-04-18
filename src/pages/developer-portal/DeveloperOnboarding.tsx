@@ -6,11 +6,12 @@
  * Step 3: Stripe Connect Express redirect
  * Step 4: Review + submit
  *
- * Accessible to authenticated users who have a developers row (user_id match)
- * but devmod_status = 'pending'. After submit → /developer-portal/pending.
+ * Authenticated users: if no developers row yet, step 1 creates it (user_id).
+ * Draft rows use devmod_status = suspended and is_active = false until final submit
+ * (then devmod_status = pending and devmod-apply runs). After submit → /developer-portal/pending.
  */
 import { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -67,10 +68,14 @@ const COUNTRIES = [
 // ── Main component ───────────────────────────────────────────────────────
 
 export default function DeveloperOnboarding() {
-  const { user } = useAuth();
-  const { data: developer, isLoading } = useDeveloperProfile();
+  const { user, isLoading: authLoading } = useAuth();
+  const { data: developer, isLoading: profileLoading } = useDeveloperProfile();
   const navigate = useNavigate();
   const qc = useQueryClient();
+
+  /** Set after INSERT on step 1 when React Query has not refetched yet */
+  const [pendingDeveloperId, setPendingDeveloperId] = useState<string | null>(null);
+  const [creatingDeveloperRow, setCreatingDeveloperRow] = useState(false);
 
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
@@ -101,8 +106,25 @@ export default function DeveloperOnboarding() {
     defaultValues: step2Data,
   });
 
-  if (isLoading) return <NewbuildsLayout hideNav><LoadingState /></NewbuildsLayout>;
-  if (!user || !developer) return null;
+  const developerId = developer?.id ?? pendingDeveloperId;
+
+  if (authLoading || profileLoading) {
+    return <NewbuildsLayout hideNav><LoadingState /></NewbuildsLayout>;
+  }
+  if (!user) {
+    return (
+      <Navigate
+        to={`${APP_ROUTES.AUTH}?redirect=${encodeURIComponent(APP_ROUTES.DEVELOPER_PORTAL_ONBOARDING)}`}
+        replace
+      />
+    );
+  }
+  if (developer?.devmod_status === 'active') {
+    return <Navigate to={APP_ROUTES.DEVELOPER_PORTAL} replace />;
+  }
+  if (developer?.devmod_status === 'pending') {
+    return <Navigate to={APP_ROUTES.DEVELOPER_PORTAL_PENDING} replace />;
+  }
 
   // ── Logo upload ──────────────────────────────────────────────────────
 
@@ -113,10 +135,14 @@ export default function DeveloperOnboarding() {
       toast.error('Файл слишком большой (макс 5 МБ)');
       return;
     }
+    if (!developerId) {
+      toast.error('Сначала заполните шаг 1');
+      return;
+    }
     setLogoUploading(true);
     try {
       const ext = file.name.split('.').pop();
-      const path = `logos/${developer.id}.${ext}`;
+      const path = `logos/${developerId}.${ext}`;
       const { error } = await supabase.storage
         .from('developer-assets')
         .upload(path, file, { upsert: true });
@@ -136,12 +162,15 @@ export default function DeveloperOnboarding() {
   // ── Stripe Connect ───────────────────────────────────────────────────
 
   async function startStripeConnect() {
+    if (!developerId) {
+      toast.error('Профиль не найден');
+      return;
+    }
     setStripeStarted(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
       const res = await supabase.functions.invoke('devmod-stripe-onboard', {
         body: {
-          developer_id: developer.id,
+          developer_id: developerId,
           return_url: `${window.location.origin}${APP_ROUTES.DEVELOPER_PORTAL_STRIPE_RETURN}`,
           refresh_url: `${window.location.origin}${APP_ROUTES.DEVELOPER_PORTAL_ONBOARDING_STEP(3)}`,
         },
@@ -158,11 +187,13 @@ export default function DeveloperOnboarding() {
   // ── Final submit ─────────────────────────────────────────────────────
 
   async function handleSubmit() {
+    if (!developerId) {
+      toast.error('Профиль не найден');
+      return;
+    }
     setSubmitting(true);
     try {
-      // 1. Update developers row with onboarding data.
-      // NOTE: devmod_status is set by the `devmod-apply` edge function below
-      // to keep status transitions in one place (avoids race conditions).
+      // 1. Update developers row with onboarding data; move to pending review queue.
       const { error: updateErr } = await supabase
         .from('developers')
         .update({
@@ -172,14 +203,15 @@ export default function DeveloperOnboarding() {
           website: step1Data.website || null,
           description_en: step2Data.description_en,
           description_ru: step2Data.description_ru,
-          logo_url: logoUrl || developer.logo_url,
+          logo_url: logoUrl || developer?.logo_url || null,
+          devmod_status: 'pending',
         } as Record<string, unknown>)
-        .eq('id', developer.id);
+        .eq('id', developerId);
       if (updateErr) throw updateErr;
 
-      // 2. Edge function: sets devmod_status='pending', notifies admin (Telegram + email).
+      // 2. Edge function: developer_users owner row, notifies admin (Telegram + email).
       await supabase.functions.invoke('devmod-apply', {
-        body: { developer_id: developer.id },
+        body: { developer_id: developerId },
       });
 
       qc.invalidateQueries({ queryKey: ['developer-profile'] });
@@ -193,8 +225,55 @@ export default function DeveloperOnboarding() {
 
   // ── Step handlers ────────────────────────────────────────────────────
 
-  function goNext1(data: Step1Data) {
+  async function goNext1(data: Step1Data) {
     setStep1Data(data);
+    if (!user) return;
+
+    let id = developerId;
+    if (!id) {
+      setCreatingDeveloperRow(true);
+      try {
+        const slugBase =
+          data.legal_name
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/(^-|-$)/g, '') || 'developer';
+        const slug = `${slugBase}-${user.id.slice(0, 8)}`;
+        const { data: row, error } = await supabase
+          .from('developers')
+          .insert({
+            user_id: user.id,
+            name_en: data.legal_name,
+            name_ru: data.legal_name,
+            legal_name: data.legal_name,
+            registration_number: data.registration_number || null,
+            country: data.country,
+            website: data.website || null,
+            slug,
+            is_active: false,
+            is_verified: false,
+            is_featured: false,
+            devmod_status: 'suspended',
+          })
+          .select('id')
+          .single();
+        if (error) throw error;
+        if (row?.id) {
+          setPendingDeveloperId(row.id);
+          id = row.id;
+        }
+        await qc.invalidateQueries({ queryKey: ['developer-profile'] });
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : 'Не удалось создать профиль застройщика');
+        return;
+      } finally {
+        setCreatingDeveloperRow(false);
+      }
+    }
+    if (!id) {
+      toast.error('Не удалось создать профиль');
+      return;
+    }
     setStep(2);
   }
 
@@ -285,8 +364,10 @@ export default function DeveloperOnboarding() {
                   )}
                 </div>
 
-                <Button type="submit" className="nb-btn-gold w-full mt-2">
-                  Далее <ChevronRight className="w-4 h-4 ml-1" />
+                <Button type="submit" className="nb-btn-gold w-full mt-2" disabled={creatingDeveloperRow}>
+                  {creatingDeveloperRow ? 'Создание профиля…' : (
+                    <>Далее <ChevronRight className="w-4 h-4 ml-1" /></>
+                  )}
                 </Button>
               </form>
             )}

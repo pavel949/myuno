@@ -35,6 +35,8 @@ export const BeautyServices = lazy(() => import('@/pages/beauty/BeautyServices')
 export const BeautyMap = lazy(() => import('@/pages/beauty/BeautyMap'));
 
 // ── Property ──
+export const PropertyLanding = lazy(() => import('@/pages/property/PropertyLanding'));
+export const PropertyHubIndexRoute = lazy(() => import('@/pages/property/PropertyHubIndexRoute'));
 export const PropertyIndex = lazy(() => import('@/pages/property/PropertyIndex'));
 export const PropertySearchPage = lazy(() => import('@/pages/property/PropertySearchPage'));
 export const StaysSearchPage = lazy(() => import('@/pages/stays/StaysSearchPage'));
@@ -59,8 +61,6 @@ export const ProjectMicrosite = lazy(() => import('@/pages/microsite/ProjectMicr
 
 // ── Newbuilds (Premium Section) ──
 export const NewbuildsLanding = lazy(() => import('@/pages/newbuilds/NewbuildsLanding'));
-export const NewbuildsCatalog = lazy(() => import('@/pages/newbuilds/NewbuildsCatalog'));
-export const NewbuildDetail = lazy(() => import('@/pages/newbuilds/NewbuildDetail'));
 export const NewbuildsDevelopers = lazy(() => import('@/pages/newbuilds/NewbuildsDevelopers'));
 export const NewbuildDeveloperDetail = lazy(() => import('@/pages/newbuilds/NewbuildDeveloperDetail'));
 export const NewbuildsMap = lazy(() => import('@/pages/newbuilds/NewbuildsMap'));

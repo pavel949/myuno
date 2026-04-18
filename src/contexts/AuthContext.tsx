@@ -47,6 +47,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const clearStoredAuthSession = useCallback(() => {
     const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
 
+    if (typeof window !== 'undefined') {
+      Object.keys(window.sessionStorage)
+        .filter((key) => key.startsWith('qa_multi_role_bundle_checked:'))
+        .forEach((key) => window.sessionStorage.removeItem(key));
+    }
+
     if (typeof window !== 'undefined' && projectId) {
       const authStoragePrefix = `sb-${projectId}-auth-token`;
 

@@ -552,7 +552,7 @@ const VendorProducts = () => {
               isSubmitting={isSubmitting}
               submitLabel="Save Product"
               submitLabelRu="Сохранить товар"
-              className="flex-1 overflow-hidden"
+              className="min-h-0 flex-1 flex flex-col overflow-hidden"
             >
               {/* Step 1: Basic Info */}
               <WizardStepContent stepId="basic" currentStepId={wizardSteps[currentStep].id}>

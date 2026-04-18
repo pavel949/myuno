@@ -57,6 +57,9 @@ body {
 #root {
   max-width: 100vw;
   overflow-x: hidden;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ═══ PAGE ENTRY ANIMATIONS ═══ */
@@ -135,8 +138,8 @@ body {
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-size: 14px;
-    line-height: 1.5;
+    font-size: 15px;
+    line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-wrap: break-word;
@@ -156,7 +159,7 @@ body {
     }
   }
 
-  /* Typography — Syne for headings, DM Sans for body */
+  /* Typography — Golos Text (display), DM Sans (body) — myuno-design-preview */
   h1 {
     @apply font-display font-bold tracking-tight leading-[1.15];
     font-size: 1.75rem;
@@ -385,14 +388,14 @@ body {
   
   .card-content {
     background: hsl(var(--card));
-    border: 1px solid hsl(0 0% 100% / 0.07);
+    border: 1px solid hsl(var(--border));
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-card);
   }
-  
+
   .card-interactive {
     background: hsl(var(--card));
-    border: 1px solid hsl(0 0% 100% / 0.07);
+    border: 1px solid hsl(var(--border));
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-card);
     transition: all 0.2s ease;
@@ -401,14 +404,18 @@ body {
   .card-interactive:hover {
     box-shadow: var(--shadow-elevation-3);
     transform: translateY(-2px);
-    border-color: hsl(0 0% 100% / 0.12);
+    border-color: hsl(var(--border-strong));
   }
-  
+
   .card-elevated {
     background: hsl(var(--card));
-    border: 1px solid hsl(0 0% 100% / 0.07);
+    border: 1px solid hsl(var(--border));
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-elevation-4);
+  }
+
+  .price-value {
+    @apply font-mono font-medium tabular-nums text-primary;
   }
 
   /* Scroll fade indicators */

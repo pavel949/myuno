@@ -69,7 +69,7 @@ export default function NewbuildsMap() {
       {/* Header */}
       <div className="relative z-20 px-4 py-3 flex items-center justify-between" style={{ background: 'hsl(var(--nb-bg))', borderBottom: '1px solid hsl(var(--nb-gold) / 0.15)' }}>
         <div className="flex items-center gap-3">
-          <Link to={APP_ROUTES.NEWBUILDS_PROJECTS} className="p-1.5 rounded-lg transition-colors" style={{ color: 'hsl(var(--nb-gold))' }}>
+          <Link to={APP_ROUTES.OFFPLAN} className="p-1.5 rounded-lg transition-colors" style={{ color: 'hsl(var(--nb-gold))' }}>
             <ChevronLeft className="w-5 h-5" />
           </Link>
           <h1 className="nb-display text-lg" style={{ color: 'hsl(var(--nb-text))' }}>Карта проектов</h1>
@@ -229,7 +229,7 @@ export default function NewbuildsMap() {
                 <div className="flex items-center justify-between">
                   <NbPriceDisplay price={selectedProject.price_from} priceTo={selectedProject.price_to} size="md" />
                   <button
-                    onClick={() => navigate(`/newbuilds/projects/${selectedProject.slug || selectedProject.id}`)}
+                    onClick={() => navigate(APP_ROUTES.OFFPLAN_DETAIL(selectedProject.id))}
                     className="text-xs font-medium px-3 py-1.5 rounded-lg transition-all"
                     style={{ background: 'hsl(var(--nb-gold))', color: 'hsl(var(--nb-bg))' }}
                   >

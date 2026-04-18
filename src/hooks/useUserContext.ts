@@ -152,21 +152,35 @@ export function useUserContext() {
     mutationFn: async ({ role, orgId }: { role: AppRole; orgId?: string }) => {
       if (!user?.id) throw new Error('Not authenticated');
 
-      // Derive mode from role
+      // Derive mode from role (platform staff uses mode "staff", not MC)
       const modeMap: Record<string, string> = {
         admin: 'admin', uno_team: 'team', vendor: 'vendor',
         owner: 'owner', property_owner: 'owner', property_manager: 'mc',
-        staff: 'mc', investor: 'investor',
+        staff: 'staff', investor: 'investor',
       };
+
+      let resolvedOrgId = orgId;
+      if (role === 'property_manager' && !resolvedOrgId) {
+        const { data: mcRow } = await supabase
+          .from('management_company_members')
+          .select('company_id')
+          .eq('user_id', user.id)
+          .eq('is_active', true)
+          .limit(1)
+          .maybeSingle();
+        resolvedOrgId = mcRow?.company_id ?? undefined;
+      }
+
+      const mode = modeMap[role] || 'user';
 
       const { data, error } = await supabase
         .from('user_active_context')
         .upsert({
           user_id: user.id,
           active_role: role,
-          active_org_id: orgId || null,
-          mode: modeMap[role] || 'user',
-          entity_id: orgId || null,
+          active_org_id: resolvedOrgId || null,
+          mode,
+          entity_id: resolvedOrgId || null,
           updated_at: new Date().toISOString(),
         }, { onConflict: 'user_id' })
         .select()
@@ -184,7 +198,7 @@ export function useUserContext() {
         const modeMap: Record<string, string> = {
           admin: 'admin', uno_team: 'team', vendor: 'vendor',
           owner: 'owner', property_owner: 'owner', property_manager: 'mc',
-          staff: 'mc', investor: 'investor',
+          staff: 'staff', investor: 'investor',
         };
         return {
           id: old?.id ?? `temp-${user?.id ?? 'user'}`,
@@ -209,6 +223,7 @@ export function useUserContext() {
       const contextKey = ['user-active-context', user?.id] as const;
       queryClient.setQueryData(contextKey, data);
       queryClient.invalidateQueries({ queryKey: contextKey });
+      queryClient.invalidateQueries({ queryKey: ['resolved-context', user?.id] });
     },
   });
 
@@ -242,14 +257,14 @@ export function useUserContext() {
       roles.push('vendor');
     }
     
-    // From org_members OR management_company_members OR user_roles
-    if (
-      ownerOrgs.length > 0 || 
-      hasMCMembership || 
-      normalizedRoles.includes('property_owner') || 
-      normalizedRoles.includes('owner')
-    ) {
+    // Building / property owner (orgs typed owner or property_owner in user_roles)
+    if (ownerOrgs.length > 0 || normalizedRoles.includes('property_owner')) {
       roles.push('owner');
+    }
+
+    // Management company (УК) — distinct from building owner
+    if (hasMCMembership || normalizedRoles.includes('property_manager')) {
+      roles.push('property_manager');
     }
     
     if (normalizedRoles.includes('admin')) {

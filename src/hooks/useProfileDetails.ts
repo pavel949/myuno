@@ -56,7 +56,7 @@ export function useProfileDetails() {
   const queryClient = useQueryClient();
 
   const { data: details, isLoading, error } = useQuery({
-    queryKey: ['profile-details', user?.id],
+    queryKey: ['profile', 'details', user?.id],
     queryFn: async (): Promise<ProfileDetails | null> => {
       if (!user?.id) return null;
 
@@ -133,8 +133,7 @@ export function useProfileDetails() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['profile-details', user?.id] });
-      queryClient.invalidateQueries({ queryKey: ['profile', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
       toast.success('Данные сохранены');
     },
     onError: () => {

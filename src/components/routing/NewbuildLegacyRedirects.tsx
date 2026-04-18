@@ -1,5 +1,6 @@
 /**
- * Legacy /newbuilds/projects and /newbuilds/developers/* → Property Hub canonical URLs.
+ * /newbuilds/projects/:slug → canonical /property/offplan/:id (UUID).
+ * Developer variant: /newbuilds/developers/:slug → /property/developers/:id.
  */
 import React from 'react';
 import { Navigate, useParams } from 'react-router-dom';

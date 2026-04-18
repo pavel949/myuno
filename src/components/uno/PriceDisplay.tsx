@@ -76,13 +76,13 @@ export function PriceDisplay({
 
       {/* Original price (if discounted) */}
       {hasDiscount && (
-        <span className={cn("text-muted-foreground line-through", sizes.original)}>
+        <span className={cn("line-through text-muted-foreground font-mono tabular-nums", sizes.original)}>
           {symbol}{formatPriceValue(displayOriginalPrice!)}
         </span>
       )}
 
       {/* Main price */}
-      <span className={cn("font-bold text-foreground", sizes.price)}>
+      <span className={cn("font-mono font-medium text-primary tabular-nums", sizes.price)}>
         {symbol}{formatPriceValue(displayPrice)}
       </span>
 

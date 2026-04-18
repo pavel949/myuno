@@ -166,7 +166,7 @@ html.light {
   --bg-base: 40 10% 97%;           /* #fafaf9 */
   --bg-surface: 0 0% 100%;         /* #ffffff */
   --bg-card: 0 0% 100%;            /* #ffffff */
-  --bg-elevated: 0 0% 100%;        /* #ffffff */
+  --bg-elevated: 40 9% 96%;        /* #f5f5f4 — elevated surfaces (design preview) */
 
   /* Accent colors */
   --color-primary-raw: 160 79% 24%;    /* #0d6e4f — emerald */
@@ -197,7 +197,7 @@ html.light {
   --primary-foreground: 0 0% 100%;   /* white text on primary */
   --card: 0 0% 100%;                 /* #ffffff */
   --card-foreground: 60 3% 10%;
-  --card-elevated: 0 0% 100%;
+  --card-elevated: 40 9% 96%;
   --card-hover: 40 10% 96%;
   --secondary: 40 10% 95%;           /* #f5f5f4 */
   --secondary-foreground: 60 3% 10%;

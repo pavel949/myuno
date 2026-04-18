@@ -66,6 +66,12 @@ export const APP_ROUTES = {
 
   // ── Property Hub ──
   PROPERTY: '/property',
+  /** Catalog grid (Airbnb-style); landing lives at PROPERTY */
+  PROPERTY_BROWSE: '/property/browse',
+  /** Canonical short-term rent path (redirects to PROPERTY_BROWSE with tenancy=short) */
+  PROPERTY_RENT_SHORT: '/property/rent/short-term',
+  /** Canonical long-term rent path (redirects to PROPERTY_BROWSE with tenancy=long) */
+  PROPERTY_RENT_LONG: '/property/rent/long-term',
   /** Filtered listing search (query string) */
   PROPERTY_SEARCH: '/property/search',
   PROPERTY_DETAIL: (id: string) => `/property/${id}`,
@@ -90,11 +96,12 @@ export const APP_ROUTES = {
   // ── Project Microsite (standalone, custom SEO per project) ──
   PROJECT_MICROSITE: (slug: string) => `/p/${slug}`,
 
-  // ── Newbuilds (premium marketing landing with dedicated design theme).
-  // Catalog + detail canonical routes live under Property Hub (OFFPLAN_*, DEVELOPERS_*).
-  // Newbuilds paths below are a themed marketing view of the same data.
+  // ── Newbuilds (themed tools: map, compare, areas, calculator). Hub landing: NEWBUILDS.
+  // Canonical catalog + project detail: OFFPLAN / OFFPLAN_DETAIL(id). Legacy /newbuilds/projects* redirects there.
   NEWBUILDS: '/newbuilds',
+  /** @deprecated Prefer OFFPLAN. Route redirects to OFFPLAN. Kept for old links. */
   NEWBUILDS_PROJECTS: '/newbuilds/projects',
+  /** Slug URL; use OFFPLAN_DETAIL(id) for new code. Redirects resolve slug → canonical detail. */
   NEWBUILDS_PROJECT: (slug: string) => `/newbuilds/projects/${slug}`,
   NEWBUILDS_DEVELOPERS: '/newbuilds/developers',
   NEWBUILDS_DEVELOPER: (slug: string) => `/newbuilds/developers/${slug}`,
@@ -463,8 +470,8 @@ export const LEGACY_REDIRECTS: Record<string, string> = {
   '/invest/dashboard': '/property/invest/dashboard',
   '/invest/raise': '/property/invest/raise',
   '/new-developments': '/newbuilds',
+  /** Catalog moved to Property Hub; themed /newbuilds/tools remain separate routes. */
   '/newbuilds/projects': '/property/offplan',
-  '/newbuilds/developers': '/property/developers',
   '/invest-hub': '/property/invest',
 } as const;
 

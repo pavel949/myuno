@@ -35,13 +35,13 @@ export default function ProjectMicrosite() {
   }, [project?.id, slug]);
 
   if (isLoading) return <LoadingState />;
-  if (!project) return <Navigate to={APP_ROUTES.NEWBUILDS_PROJECTS} replace />;
+  if (!project) return <Navigate to={APP_ROUTES.OFFPLAN} replace />;
 
   // Microsite must be explicitly enabled
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const landingEnabled = (project as any).landing_enabled !== false; // default true if column missing
   if (!landingEnabled) {
-    return <Navigate to={APP_ROUTES.NEWBUILDS_PROJECT(slug || project.id)} replace />;
+    return <Navigate to={APP_ROUTES.OFFPLAN_DETAIL(project.id)} replace />;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

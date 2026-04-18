@@ -96,6 +96,7 @@ export default function PropertySearchPage() {
   const { data: companies = [] } = useManagementCompanies();
 
   const listingCatalogType = propertyMode === 'buy' ? 'sale' : 'rent';
+  const rentTenancy = searchParamsUrl.get('tenancy') === 'long' ? 'long' : 'short';
 
   const mergedFilterValues = useMemo(
     () => mergeSearchBarIntoFilterValues(filterValues, searchParams),
@@ -107,6 +108,7 @@ export default function PropertySearchPage() {
       listingType: listingCatalogType,
       minGuestsFromSearch: searchParams.guests,
       instantBookingFromSearch: searchParams.instantBooking,
+      rentTenancy: listingCatalogType === 'rent' ? rentTenancy : undefined,
     });
     return {
       ...base,
@@ -118,6 +120,7 @@ export default function PropertySearchPage() {
     searchParams.guests,
     searchParams.instantBooking,
     selectedCompanyId,
+    rentTenancy,
   ]);
 
   const {

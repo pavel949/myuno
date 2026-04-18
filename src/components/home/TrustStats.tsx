@@ -23,10 +23,10 @@ export const TrustStats = memo(function TrustStats() {
   });
 
   const items = [
-    { icon: Home, value: stats ? `${stats.properties}+` : '…', label: isRu ? 'объектов' : 'properties', color: '#00D68F' },
-    { icon: CalendarCheck, value: stats ? `${stats.bookings}+` : '…', label: isRu ? 'бронирований' : 'bookings', color: '#4E7BFF' },
-    { icon: Shield, value: stats ? `${stats.providers}+` : '…', label: isRu ? 'партнёров' : 'partners', color: '#06B6D4' },
-    { icon: Clock, value: '24/7', label: isRu ? 'поддержка' : 'support', color: '#F59E0B' },
+    { icon: Home, value: stats ? `${stats.properties}+` : '…', label: isRu ? 'объектов' : 'properties', colorClass: 'text-primary' },
+    { icon: CalendarCheck, value: stats ? `${stats.bookings}+` : '…', label: isRu ? 'бронирований' : 'bookings', colorClass: 'text-accent' },
+    { icon: Shield, value: stats ? `${stats.providers}+` : '…', label: isRu ? 'партнёров' : 'partners', colorClass: 'text-[#06B6D4]' },
+    { icon: Clock, value: '24/7', label: isRu ? 'поддержка' : 'support', colorClass: 'text-warning' },
   ];
 
   return (
@@ -48,7 +48,7 @@ export const TrustStats = memo(function TrustStats() {
               {i > 0 && (
                 <div className="hidden md:block absolute left-0 top-1/2 -translate-y-1/2 w-px h-8 bg-border" />
               )}
-              <span className="text-2xl md:text-3xl font-bold font-display" style={{ color: item.color }}>
+              <span className={cn("text-2xl md:text-3xl font-bold font-display", item.colorClass)}>
                 {item.value}
               </span>
               <span className="text-xs text-muted-foreground font-medium text-center leading-tight">

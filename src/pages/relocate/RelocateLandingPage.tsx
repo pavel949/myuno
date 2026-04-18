@@ -10,7 +10,7 @@ import { APP_ROUTES } from '@/lib/config/routes';
 
 const STEPS = [
   { id: 'visa', icon: FileText, labelEn: 'Visas & Documents', labelRu: 'Визы и документы', descEn: 'Work permits, retirement visa, education visa — we handle paperwork', descRu: 'Рабочие разрешения, пенсионная виза, учебная виза — мы берём на себя документы', path: APP_ROUTES.VISA_IMMIGRATION, color: '#4E7BFF' },
-  { id: 'housing', icon: Home, labelEn: 'Housing', labelRu: 'Жильё', descEn: 'Long-term rentals, condos, villas — vetted by our team', descRu: 'Долгосрочная аренда, кондо, виллы — проверены нашей командой', path: `${APP_ROUTES.PROPERTY}?mode=long-term`, color: '#00D68F' },
+  { id: 'housing', icon: Home, labelEn: 'Housing', labelRu: 'Жильё', descEn: 'Long-term rentals, condos, villas — vetted by our team', descRu: 'Долгосрочная аренда, кондо, виллы — проверены нашей командой', path: `${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=long`, color: '#00D68F' },
   { id: 'school', icon: GraduationCap, labelEn: 'Schools & Kindergartens', labelRu: 'Школы и сады', descEn: 'International schools, Russian schools, kindergartens', descRu: 'Международные школы, русские школы, детские сады', path: APP_ROUTES.EDUCATION, color: '#F59E0B' },
   { id: 'medical', icon: Stethoscope, labelEn: 'Medical & Insurance', labelRu: 'Медицина и страховка', descEn: 'Health insurance, clinics, dentists, pediatricians', descRu: 'Медстраховка, клиники, стоматологи, педиатры', path: APP_ROUTES.MEDICAL, color: '#F43F5E' },
   { id: 'banking', icon: Landmark, labelEn: 'Banking & Finance', labelRu: 'Банки и финансы', descEn: 'Thai bank account, tax planning, crypto-friendly banks', descRu: 'Счёт в тайском банке, налоговое планирование', path: APP_ROUTES.BANKING, color: '#06B6D4' },

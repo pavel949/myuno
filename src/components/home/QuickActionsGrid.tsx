@@ -174,7 +174,7 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
         )}
         style={{
           background: 'hsl(var(--card))',
-          border: '1px solid hsl(0 0% 100% / 0.07)',
+          border: '1px solid hsl(var(--border))',
           boxShadow: 'var(--shadow-card)',
         }}
       >

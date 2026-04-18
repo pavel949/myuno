@@ -91,6 +91,8 @@ export interface CatalogFilterSourceOptions {
   /** From AirbnbSearchBar / URL */
   minGuestsFromSearch?: number;
   instantBookingFromSearch?: boolean;
+  /** Nightly STR vs monthly/yearly rent */
+  rentTenancy?: 'short' | 'long';
 }
 
 /**
@@ -193,6 +195,9 @@ export function filterValuesToPropertyFilters(
 
   const result: PropertyFilters = {
     listingType: effectiveListing,
+    ...(effectiveListing === 'rent' && options.rentTenancy
+      ? { rentTenancy: options.rentTenancy }
+      : {}),
     ...(districts.length === 1 ? { district: districts[0] } : {}),
     ...(districts.length > 1 ? { districts } : {}),
     ...(amenities.length ? { amenities } : {}),

@@ -6,129 +6,9 @@ import { fireCrmWorkflowTrigger } from '@/lib/crmWorkflowTrigger';
 import { formatPostgrestError } from '@/lib/postgrestError';
 import { toast } from 'sonner';
 
-export interface CrmContact {
-  id: string;
-  company_id: string;
-  first_name: string;
-  last_name: string;
-  phone: string | null;
-  phone2: string | null;
-  mobile: string | null;
-  email: string | null;
-  whatsapp: string | null;
-  telegram: string | null;
-  line_id: string | null;
-  instagram: string | null;
-  facebook: string | null;
-  linkedin: string | null;
-  nationality: string | null;
-  language: string | null;
-  source: string | null;
-  contact_type: string | null;
-  company_name: string | null;
-  job_title: string | null;
-  budget_min: number | null;
-  budget_max: number | null;
-  currency: string | null;
-  preferred_districts: string[] | null;
-  preferred_types: string[] | null;
-  bedrooms_min: number | null;
-  notes: string | null;
-  tags: string[] | null;
-  avatar_url: string | null;
-  is_archived: boolean;
-  is_company: boolean;
-  created_by: string | null;
-  birthday: string | null;
-  family_info: string | null;
-  interests: string[] | null;
-  scoring: number | null;
-  lead_score: number | null;
-  lead_temperature: string | null;
-  lifecycle_stage: string | null;
-  linked_user_id: string | null;
-  special_notes: string | null;
-  emergency_contact_name: string | null;
-  emergency_contact_phone: string | null;
-  emergency_contact_relation: string | null;
-  created_at: string;
-  updated_at: string;
-  deal_count?: number;
-  // Contact card redesign
-  crm_roles?: string[] | null;
-  key_dates?: Array<{ label: string; date: string }> | null;
-  // Odoo-style fields
-  address_street: string | null;
-  address_street2: string | null;
-  address_city: string | null;
-  address_state: string | null;
-  address_zip: string | null;
-  address_country: string | null;
-  tax_id: string | null;
-  website: string | null;
-  is_vip: boolean;
-  marital_status: string | null;
-  // New fields from contacts enhancement
-  contact_category: string | null;
-  passport_country: string | null;
-  tax_residency: string | null;
-  segment: string[] | null;
-  hnw_tier: string | null;
-  aml_kyc_status: string | null;
-  aml_kyc_date: string | null;
-  pep_flag: boolean;
-  sanctions_flag: boolean;
-  preferences: Record<string, unknown> | null;
-  ai_summary: string | null;
-  last_activity_at: string | null;
-  owner_user_id: string | null;
-}
-
-export type CrmContactInsert = Omit<CrmContact, 'id' | 'created_at' | 'updated_at' | 'job_title' | 'birthday' | 'family_info' | 'interests' | 'scoring' | 'deal_count' | 'mobile' | 'is_company' | 'address_street' | 'address_street2' | 'address_city' | 'address_state' | 'address_zip' | 'address_country' | 'tax_id' | 'website' | 'lead_score' | 'lead_temperature' | 'lifecycle_stage' | 'linked_user_id' | 'special_notes' | 'emergency_contact_name' | 'emergency_contact_phone' | 'emergency_contact_relation' | 'instagram' | 'facebook' | 'linkedin' | 'is_vip' | 'marital_status' | 'contact_category' | 'passport_country' | 'tax_residency' | 'segment' | 'hnw_tier' | 'aml_kyc_status' | 'aml_kyc_date' | 'pep_flag' | 'sanctions_flag' | 'preferences' | 'ai_summary' | 'last_activity_at' | 'owner_user_id'> & {
-  job_title?: string | null;
-  birthday?: string | null;
-  family_info?: string | null;
-  interests?: string[] | null;
-  scoring?: number | null;
-  mobile?: string | null;
-  is_company?: boolean;
-  address_street?: string | null;
-  address_street2?: string | null;
-  address_city?: string | null;
-  address_state?: string | null;
-  address_zip?: string | null;
-  address_country?: string | null;
-  tax_id?: string | null;
-  website?: string | null;
-  instagram?: string | null;
-  facebook?: string | null;
-  linkedin?: string | null;
-  lead_score?: number | null;
-  lead_temperature?: string | null;
-  lifecycle_stage?: string | null;
-  linked_user_id?: string | null;
-  special_notes?: string | null;
-  emergency_contact_name?: string | null;
-  emergency_contact_phone?: string | null;
-  emergency_contact_relation?: string | null;
-  is_vip?: boolean;
-  marital_status?: string | null;
-  // New optional fields
-  contact_category?: string | null;
-  passport_country?: string | null;
-  tax_residency?: string | null;
-  segment?: string[] | null;
-  hnw_tier?: string | null;
-  aml_kyc_status?: string | null;
-  aml_kyc_date?: string | null;
-  pep_flag?: boolean;
-  sanctions_flag?: boolean;
-  preferences?: Record<string, unknown> | null;
-  ai_summary?: string | null;
-  last_activity_at?: string | null;
-  owner_user_id?: string | null;
-};
-export type CrmContactUpdate = Partial<CrmContactInsert>;
+// Canonical CRM contact types live in @/types/contact — import for local use + re-export for backward compat
+import type { CrmContact, CrmContactInsert, CrmContactUpdate } from '@/types/contact';
+export type { CrmContact, CrmContactInsert, CrmContactUpdate };
 
 /** Legacy union — prefer `crm_custom_options` (contact_type / lead_source) for UI labels. */
 export const CONTACT_TYPES = [
@@ -300,9 +180,9 @@ export function useCrmContacts(
       }
 
       if (filters?.vip === 'vip') {
-        q = (q as any).eq('is_vip', true);
+        q = q.eq('is_vip', true);
       } else if (filters?.vip === 'standard') {
-        q = (q as any).eq('is_vip', false);
+        q = q.eq('is_vip', false);
       }
 
       if (filters?.leadTemperature) {
@@ -314,11 +194,11 @@ export function useCrmContacts(
       }
 
       if (filters?.hnwTier) {
-        q = (q as any).eq('hnw_tier', filters.hnwTier);
+        q = q.eq('hnw_tier', filters.hnwTier);
       }
 
       if (filters?.segment) {
-        q = (q as any).contains('segment', [filters.segment]);
+        q = q.contains('segment', [filters.segment]);
       }
 
       const { data, error, count } = await q;
@@ -346,7 +226,7 @@ export function useCrmContact(contactId: string | undefined) {
         .eq('id', contactId)
         .maybeSingle();
       if (error) throw error;
-      return data as unknown as CrmContact | null;
+      return data as CrmContact | null;
     },
     enabled: !!contactId,
   });
@@ -356,8 +236,8 @@ export function useCreateContact() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (contact: CrmContactInsert) => {
-      // Strip fields that exist in the TS type but not in the DB schema
-      const { crm_role, key_dates, ...cleanContact } = contact as any;
+      // Strip legacy/virtual fields that exist in the TS type but not in the DB schema
+      const { crm_role: _crm_role, key_dates: _key_dates, ...cleanContact } = contact as CrmContactInsert & Record<string, unknown>;
       const { data, error } = await supabase
         .from('crm_contacts')
         .insert(cleanContact)
@@ -463,7 +343,7 @@ export function useContactSearch(companyId: string | undefined, query: string) {
       if (error) throw error;
 
       // Fallback: translit/fuzzy matching needs local candidate set if SQL ILIKE missed results.
-      let candidates = (data || []) as unknown as CrmContact[];
+      let candidates = (data || []) as CrmContact[];
       if (candidates.length === 0) {
         const { data: fallback, error: fallbackError } = await supabase
           .from('crm_contacts')
@@ -473,7 +353,7 @@ export function useContactSearch(companyId: string | undefined, query: string) {
           .order('updated_at', { ascending: false })
           .limit(250);
         if (fallbackError) throw fallbackError;
-        candidates = (fallback || []) as unknown as CrmContact[];
+        candidates = (fallback || []) as CrmContact[];
       }
 
       return candidates
@@ -498,7 +378,7 @@ export function useContactDeals(contactId: string | undefined) {
         .eq('contact_id', contactId!)
         .order('created_at', { ascending: false });
       if (error) throw error;
-      return (data || []) as unknown as import('@/hooks/useAgentDeals').AgentDeal[];
+      return (data || []) as import('@/hooks/useAgentDeals').AgentDeal[];
     },
     enabled: !!contactId,
   });

@@ -15,10 +15,8 @@ export type {
   VendorProduct,
 } from '@/types/verticals';
 
-// Re-export hooks that have extra types
-export type { VendorEducationProvider } from '@/hooks/useVendorEducation';
-export type { VendorEvent } from '@/hooks/useVendorEvents';
-export type { VendorExperience } from '@/hooks/useVendorExperiences';
+// Vertical-specific types — canonical source is verticals.ts
+export type { VendorEducationProvider, VendorEvent, VendorExperience } from '@/types/verticals';
 
 // Common vendor entity base interface
 export interface VendorEntityBase {
