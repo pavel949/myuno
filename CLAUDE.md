@@ -110,21 +110,15 @@
 
 ## 6. DESIGN SYSTEM
 
-```css
---primary: #0d6e4f;       /* Emerald — CTA, links, active */
---background: #fafaf9;    /* Warm White */
---surface: #ffffff;        /* White — cards, modals */
---text-primary: #1a1a19;  /* Headings, body */
---text-secondary: #57534e;
---border: #e5e5e4;
---success: #16a34a;
---error: #dc2626;
---warning: #d97706;
-```
+> **See `DESIGN.md`** for the full, canonical design system. Always read it before making visual/UI decisions.
 
-- **Fonts:** Syne (headings/display), DM Sans (body), JetBrains Mono (prices/data)
+**Dark mode (default):** bg `#08101E`, primary `#00D68F` (mint), accent `#4E7BFF` (blue)
+**Light mode (`html.light`):** bg `#fafaf9`, primary `#0d6e4f` (emerald), accent navy
+
+- **Fonts:** Golos Text (headings/display), DM Sans (body), JetBrains Mono (prices/data), Playfair Display (luxury RE only)
 - **Components:** shadcn/ui + Radix UI. Mobile = Sheet (bottom), не Dialog
 - **Min touch target:** 44px
+- **Runtime tokens:** `src/styles/tokens.css` (source of truth). `src/design-system/tokens.json` is a deprecated DS2.0 spec.
 
 ---
 
