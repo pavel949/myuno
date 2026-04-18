@@ -63,7 +63,11 @@ import {
   HardHat,
   CheckCircle,
   TrendingUp,
+  AlertTriangle,
+  ShieldCheck,
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Checkbox } from '@/components/ui/checkbox';
 import { TranslatableInput } from '@/components/forms/TranslatableInput';
 import { TranslatableTextarea } from '@/components/forms/TranslatableTextarea';
 import { AirbnbStyleImageUpload } from '@/components/upload/AirbnbStyleImageUpload';
@@ -129,21 +133,31 @@ export default function AdminProjects() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [moderationFilter, setModerationFilter] = useState<'all' | 'orphan' | 'needs_review' | 'pending' | 'approved'>('all');
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeveloperId, setBulkDeveloperId] = useState<string>('');
+  const [isBulkProcessing, setIsBulkProcessing] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<PropertyProject | null>(null);
   const [formData, setFormData] = useState<Partial<CreatePropertyProjectData>>(getEmptyProject());
   const [isAIIntakeOpen, setIsAIIntakeOpen] = useState(false);
   const [isEnriching, setIsEnriching] = useState(false);
-  
-  // Filter projects by status and search
+
+  const UNASSIGNED_DEV_ID = '00000000-0000-0000-0000-000000000001';
+
+  // Filter projects by status, moderation and search
   const filteredProjects = useMemo(() => {
     if (!projects) return [];
     
     return projects.filter(p => {
-      // Status filter
       if (statusFilter !== 'all' && p.project_status !== statusFilter) return false;
-      
-      // Search filter
+
+      // Moderation filter
+      if (moderationFilter === 'orphan' && p.developer_id !== UNASSIGNED_DEV_ID) return false;
+      if (moderationFilter === 'needs_review' && !p.needs_review) return false;
+      if (moderationFilter === 'pending' && p.is_approved !== false) return false;
+      if (moderationFilter === 'approved' && p.is_approved !== true) return false;
+
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         return (
@@ -157,7 +171,65 @@ export default function AdminProjects() {
       
       return true;
     });
-  }, [projects, searchQuery, statusFilter]);
+  }, [projects, searchQuery, statusFilter, moderationFilter]);
+
+  const moderationCounts = useMemo(() => {
+    const list = projects || [];
+    return {
+      orphan: list.filter(p => p.developer_id === UNASSIGNED_DEV_ID).length,
+      needs_review: list.filter(p => p.needs_review).length,
+      pending: list.filter(p => p.is_approved === false).length,
+    };
+  }, [projects]);
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const clearSelection = () => setSelectedIds(new Set());
+
+  const handleBulkAssignDeveloper = async () => {
+    if (!bulkDeveloperId || selectedIds.size === 0) return;
+    setIsBulkProcessing(true);
+    try {
+      const { error } = await supabase
+        .from('property_projects')
+        .update({ developer_id: bulkDeveloperId, needs_review: false } as any)
+        .in('id', Array.from(selectedIds));
+      if (error) throw error;
+      toast.success(isRu ? `Назначен застройщик: ${selectedIds.size}` : `Developer assigned: ${selectedIds.size}`);
+      queryClient.invalidateQueries({ queryKey: ['admin-property-projects'] });
+      clearSelection();
+      setBulkDeveloperId('');
+    } catch (e: any) {
+      toast.error(e.message || 'Bulk assign failed');
+    } finally {
+      setIsBulkProcessing(false);
+    }
+  };
+
+  const handleBulkApprove = async () => {
+    if (selectedIds.size === 0) return;
+    setIsBulkProcessing(true);
+    try {
+      const { error } = await supabase
+        .from('property_projects')
+        .update({ is_approved: true, needs_review: false } as any)
+        .in('id', Array.from(selectedIds));
+      if (error) throw error;
+      toast.success(isRu ? `Одобрено: ${selectedIds.size}` : `Approved: ${selectedIds.size}`);
+      queryClient.invalidateQueries({ queryKey: ['admin-property-projects'] });
+      clearSelection();
+    } catch (e: any) {
+      toast.error(e.message || 'Bulk approve failed');
+    } finally {
+      setIsBulkProcessing(false);
+    }
+  };
 
   // Stats by status
   const stats = useMemo(() => {
