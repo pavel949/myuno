@@ -19,10 +19,21 @@ Current stage: Pre-PMF. 7 users, 0 transactions. Validation is the priority.
 ## TECH STACK
 - Frontend: React + TypeScript + Vite
 - Styling: Tailwind CSS
-- Backend/DB: Supabase (PostgreSQL + Auth + Storage + Realtime)
-- Hosting: Vercel (auto-deploy from GitHub main branch)
+- Backend/DB: Supabase (PostgreSQL + Auth + Storage + Realtime) — managed by Lovable Cloud
+- Hosting: Lovable (auto-deploy)
 - Testing: Vitest + Playwright (e2e)
 - Routing: React Router with APP_ROUTES constants (never hardcode route strings)
+
+## DATABASES & ENVIRONMENT (canonical source: docs/ENVIRONMENT.md)
+- **PRIMARY DB (production, all reads/writes):** Supabase project `kakkwibljrjsawxgnupk` (`https://kakkwibljrjsawxgnupk.supabase.co`)
+- **MIRROR DB (optional standalone backup):** Supabase project `erfwtoavipwjqmylpizt` — never written from frontend, only via `scripts/export-data.mjs` + `scripts/import-data.mjs`
+- **PEYLAA DB (read-only sales system):** separate Supabase project, accessed only via `src/lib/peylaa/supabaseClient.ts`
+- **Lovable project ID:** `dcc2b024-7627-4ad9-a915-a3df3dd839f0`
+- **Production URLs:** myuno.app, www.myuno.app | **Preview:** uno-connect-hub.lovable.app
+- ⚠️ Local dev + preview + production all hit the **same PRIMARY DB**. No staging environment. Mark test data with `[TEST]` / `source='smoke_test'` / `*@myuno.test`.
+- ⚠️ Never create new Supabase clients for the primary DB. Always import from `@/integrations/supabase/client`.
+- ⚠️ Never reference the MIRROR DB from frontend code.
+- Backend secrets (STRIPE_SECRET_KEY, RESEND_API_KEY, LOVABLE_API_KEY, etc.) live in Lovable Cloud, NOT in `.env`. Full list in `docs/ENVIRONMENT.md`.
 
 ## USER ROLES (4 personas — always code with these in mind)
 1. **Турист** — short stay, needs tours, transfers, experiences
