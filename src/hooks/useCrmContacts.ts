@@ -141,9 +141,11 @@ export function useCrmContacts(
       const sortField = filters?.sortBy || 'updated_at';
       const ascending = sortField === 'first_name'; // name ascending, rest descending
 
-      let q = supabase
+      // Cast builder to a loose shape — full Supabase type inference is too deep here (TS2589).
+      type AnyQ = { eq: (...a: unknown[]) => AnyQ; or: (...a: unknown[]) => AnyQ; contains: (...a: unknown[]) => AnyQ; range: (...a: unknown[]) => AnyQ; order: (...a: unknown[]) => AnyQ };
+      let q = (supabase
         .from('crm_contacts')
-        .select('*, agent_deals!contact_id(id)', { count: 'exact' })
+        .select('*, agent_deals!contact_id(id)', { count: 'exact' }) as unknown as AnyQ)
         .eq('company_id', companyId!)
         .order(sortField, { ascending })
         .range(from, to);
@@ -201,7 +203,7 @@ export function useCrmContacts(
         q = q.contains('segment', [filters.segment]);
       }
 
-      const { data, error, count } = await q;
+      const { data, error, count } = await (q as unknown as Promise<{ data: unknown[] | null; error: { message: string } | null; count: number | null }>);
       if (error) throw error;
       const rows = (data || []) as Record<string, unknown>[];
       const enriched = rows.map((c) => {
