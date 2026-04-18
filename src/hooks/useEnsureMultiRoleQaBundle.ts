@@ -21,7 +21,9 @@ export function useEnsureMultiRoleQaBundle() {
     sessionStorage.setItem(storageKey, '1');
 
     void (async () => {
-      const { data, error } = await supabase.rpc('ensure_multi_role_qa_bundle');
+      // RPC name not yet in generated types — cast to bypass strict union.
+      const rpc = supabase.rpc as unknown as (name: string) => Promise<{ data: unknown; error: { message: string } | null }>;
+      const { data, error } = await rpc('ensure_multi_role_qa_bundle');
       if (error) {
         console.warn('ensure_multi_role_qa_bundle', error.message);
         return;

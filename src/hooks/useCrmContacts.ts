@@ -226,7 +226,7 @@ export function useCrmContact(contactId: string | undefined) {
         .eq('id', contactId)
         .maybeSingle();
       if (error) throw error;
-      return data as CrmContact | null;
+      return data as unknown as CrmContact | null;
     },
     enabled: !!contactId,
   });
@@ -238,8 +238,9 @@ export function useCreateContact() {
     mutationFn: async (contact: CrmContactInsert) => {
       // Strip legacy/virtual fields that exist in the TS type but not in the DB schema
       const { crm_role: _crm_role, key_dates: _key_dates, ...cleanContact } = contact as CrmContactInsert & Record<string, unknown>;
-      const { data, error } = await supabase
-        .from('crm_contacts')
+      const { data, error } = await (supabase.from('crm_contacts') as unknown as {
+        insert: (v: unknown) => { select: () => { single: () => Promise<{ data: unknown; error: { message: string } | null }> } }
+      })
         .insert(cleanContact)
         .select()
         .single();
@@ -343,7 +344,7 @@ export function useContactSearch(companyId: string | undefined, query: string) {
       if (error) throw error;
 
       // Fallback: translit/fuzzy matching needs local candidate set if SQL ILIKE missed results.
-      let candidates = (data || []) as CrmContact[];
+      let candidates = (data || []) as unknown as CrmContact[];
       if (candidates.length === 0) {
         const { data: fallback, error: fallbackError } = await supabase
           .from('crm_contacts')
@@ -353,7 +354,7 @@ export function useContactSearch(companyId: string | undefined, query: string) {
           .order('updated_at', { ascending: false })
           .limit(250);
         if (fallbackError) throw fallbackError;
-        candidates = (fallback || []) as CrmContact[];
+        candidates = (fallback || []) as unknown as CrmContact[];
       }
 
       return candidates
