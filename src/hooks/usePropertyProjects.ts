@@ -53,6 +53,9 @@ export interface PropertyProject {
   created_by?: string;
   created_at?: string;
   updated_at?: string;
+  // Admin moderation fields
+  needs_review?: boolean;
+  is_approved?: boolean;
 }
 
 export interface CreatePropertyProjectData {

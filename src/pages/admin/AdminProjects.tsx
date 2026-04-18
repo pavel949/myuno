@@ -63,7 +63,11 @@ import {
   HardHat,
   CheckCircle,
   TrendingUp,
+  AlertTriangle,
+  ShieldCheck,
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Checkbox } from '@/components/ui/checkbox';
 import { TranslatableInput } from '@/components/forms/TranslatableInput';
 import { TranslatableTextarea } from '@/components/forms/TranslatableTextarea';
 import { AirbnbStyleImageUpload } from '@/components/upload/AirbnbStyleImageUpload';
@@ -129,21 +133,31 @@ export default function AdminProjects() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [moderationFilter, setModerationFilter] = useState<'all' | 'orphan' | 'needs_review' | 'pending' | 'approved'>('all');
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeveloperId, setBulkDeveloperId] = useState<string>('');
+  const [isBulkProcessing, setIsBulkProcessing] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<PropertyProject | null>(null);
   const [formData, setFormData] = useState<Partial<CreatePropertyProjectData>>(getEmptyProject());
   const [isAIIntakeOpen, setIsAIIntakeOpen] = useState(false);
   const [isEnriching, setIsEnriching] = useState(false);
-  
-  // Filter projects by status and search
+
+  const UNASSIGNED_DEV_ID = '00000000-0000-0000-0000-000000000001';
+
+  // Filter projects by status, moderation and search
   const filteredProjects = useMemo(() => {
     if (!projects) return [];
     
     return projects.filter(p => {
-      // Status filter
       if (statusFilter !== 'all' && p.project_status !== statusFilter) return false;
-      
-      // Search filter
+
+      // Moderation filter
+      if (moderationFilter === 'orphan' && p.developer_id !== UNASSIGNED_DEV_ID) return false;
+      if (moderationFilter === 'needs_review' && !p.needs_review) return false;
+      if (moderationFilter === 'pending' && p.is_approved !== false) return false;
+      if (moderationFilter === 'approved' && p.is_approved !== true) return false;
+
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         return (
@@ -157,7 +171,65 @@ export default function AdminProjects() {
       
       return true;
     });
-  }, [projects, searchQuery, statusFilter]);
+  }, [projects, searchQuery, statusFilter, moderationFilter]);
+
+  const moderationCounts = useMemo(() => {
+    const list = projects || [];
+    return {
+      orphan: list.filter(p => p.developer_id === UNASSIGNED_DEV_ID).length,
+      needs_review: list.filter(p => p.needs_review).length,
+      pending: list.filter(p => p.is_approved === false).length,
+    };
+  }, [projects]);
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const clearSelection = () => setSelectedIds(new Set());
+
+  const handleBulkAssignDeveloper = async () => {
+    if (!bulkDeveloperId || selectedIds.size === 0) return;
+    setIsBulkProcessing(true);
+    try {
+      const { error } = await supabase
+        .from('property_projects')
+        .update({ developer_id: bulkDeveloperId, needs_review: false } as any)
+        .in('id', Array.from(selectedIds));
+      if (error) throw error;
+      toast.success(isRu ? `Назначен застройщик: ${selectedIds.size}` : `Developer assigned: ${selectedIds.size}`);
+      queryClient.invalidateQueries({ queryKey: ['admin-property-projects'] });
+      clearSelection();
+      setBulkDeveloperId('');
+    } catch (e: any) {
+      toast.error(e.message || 'Bulk assign failed');
+    } finally {
+      setIsBulkProcessing(false);
+    }
+  };
+
+  const handleBulkApprove = async () => {
+    if (selectedIds.size === 0) return;
+    setIsBulkProcessing(true);
+    try {
+      const { error } = await supabase
+        .from('property_projects')
+        .update({ is_approved: true, needs_review: false } as any)
+        .in('id', Array.from(selectedIds));
+      if (error) throw error;
+      toast.success(isRu ? `Одобрено: ${selectedIds.size}` : `Approved: ${selectedIds.size}`);
+      queryClient.invalidateQueries({ queryKey: ['admin-property-projects'] });
+      clearSelection();
+    } catch (e: any) {
+      toast.error(e.message || 'Bulk approve failed');
+    } finally {
+      setIsBulkProcessing(false);
+    }
+  };
 
   // Stats by status
   const stats = useMemo(() => {
@@ -361,8 +433,8 @@ export default function AdminProjects() {
           }
         />
 
-        {/* Search */}
-        <div className="mb-6">
+        {/* Search + Moderation filter */}
+        <div className="mb-4 space-y-3">
           <div className="relative max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -372,7 +444,61 @@ export default function AdminProjects() {
               className="pl-10"
             />
           </div>
+          <div className="flex gap-2 flex-wrap">
+            {([
+              { id: 'all', label: isRu ? 'Все' : 'All', count: projects?.length || 0 },
+              { id: 'orphan', label: isRu ? 'Orphan' : 'Orphan', count: moderationCounts.orphan },
+              { id: 'needs_review', label: isRu ? 'Нужна ревизия' : 'Needs review', count: moderationCounts.needs_review },
+              { id: 'pending', label: isRu ? 'На модерации' : 'Pending', count: moderationCounts.pending },
+              { id: 'approved', label: isRu ? 'Одобрено' : 'Approved' },
+            ] as const).map(f => (
+              <Button
+                key={f.id}
+                size="sm"
+                variant={moderationFilter === f.id ? 'default' : 'outline'}
+                onClick={() => setModerationFilter(f.id as any)}
+              >
+                {f.label}
+                {'count' in f && f.count !== undefined && (
+                  <Badge variant="secondary" className="ml-2 h-5 px-1.5 text-[10px]">{f.count}</Badge>
+                )}
+              </Button>
+            ))}
+          </div>
         </div>
+
+        {/* Bulk actions toolbar */}
+        {selectedIds.size > 0 && (
+          <Card className="mb-4 border-primary/40">
+            <CardContent className="p-3 flex items-center gap-3 flex-wrap">
+              <span className="text-sm font-medium">
+                {isRu ? `Выбрано: ${selectedIds.size}` : `Selected: ${selectedIds.size}`}
+              </span>
+              <div className="flex items-center gap-2 flex-1 min-w-[260px]">
+                <Select value={bulkDeveloperId} onValueChange={setBulkDeveloperId}>
+                  <SelectTrigger className="h-9 w-[260px]">
+                    <SelectValue placeholder={isRu ? 'Назначить застройщика…' : 'Assign developer…'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {developers?.map(d => (
+                      <SelectItem key={d.id} value={d.id}>{d.name_en}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button size="sm" disabled={!bulkDeveloperId || isBulkProcessing} onClick={handleBulkAssignDeveloper}>
+                  {isRu ? 'Применить' : 'Apply'}
+                </Button>
+              </div>
+              <Button size="sm" variant="outline" disabled={isBulkProcessing} onClick={handleBulkApprove}>
+                <ShieldCheck className="h-4 w-4 mr-1" />
+                {isRu ? 'Одобрить' : 'Approve'}
+              </Button>
+              <Button size="sm" variant="ghost" onClick={clearSelection}>
+                {isRu ? 'Очистить' : 'Clear'}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -437,31 +563,58 @@ export default function AdminProjects() {
           </Card>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {filteredProjects.map((project) => (
+            {filteredProjects.map((project) => {
+              const isOrphan = project.developer_id === UNASSIGNED_DEV_ID;
+              const isSelected = selectedIds.has(project.id);
+              return (
               <Card 
                 key={project.id} 
-                className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
-                onClick={() => handleOpenEdit(project)}
+                className={`overflow-hidden hover:shadow-md transition-shadow ${isSelected ? 'ring-2 ring-primary' : ''}`}
               >
                 {/* Cover Image */}
                 <div className="aspect-video bg-muted relative">
-                  {project.cover_image ? (
-                    <img
-                      src={project.cover_image}
-                      alt={project.name_en}
-                      className="w-full h-full object-cover"
+                  {/* Selection checkbox */}
+                  <div className="absolute top-2 left-2 z-10" onClick={(e) => e.stopPropagation()}>
+                    <Checkbox
+                      checked={isSelected}
+                      onCheckedChange={() => toggleSelect(project.id)}
+                      className="bg-background/80 backdrop-blur"
                     />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Building2 className="h-12 w-12 text-muted-foreground" />
-                    </div>
-                  )}
-                  {project.is_featured && (
-                    <Badge className="absolute top-2 right-2">Featured</Badge>
-                  )}
+                  </div>
+                  <div className="cursor-pointer w-full h-full" onClick={() => handleOpenEdit(project)}>
+                    {project.cover_image ? (
+                      <img
+                        src={project.cover_image}
+                        alt={project.name_en}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Building2 className="h-12 w-12 text-muted-foreground" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="absolute top-2 right-2 flex flex-col gap-1 items-end">
+                    {project.is_featured && <Badge>Featured</Badge>}
+                    {isOrphan && (
+                      <Badge variant="destructive" className="text-[10px]">
+                        <AlertTriangle className="h-3 w-3 mr-1" />Orphan
+                      </Badge>
+                    )}
+                    {project.needs_review && (
+                      <Badge className="text-[10px] bg-warning text-warning-foreground border-0">
+                        Review
+                      </Badge>
+                    )}
+                    {project.is_approved === false && (
+                      <Badge variant="outline" className="text-[10px] bg-background">
+                        Pending
+                      </Badge>
+                    )}
+                  </div>
                 </div>
                 
-                <CardContent className="p-4">
+                <CardContent className="p-4 cursor-pointer" onClick={() => handleOpenEdit(project)}>
                   <h3 className="font-semibold truncate">
                     {isRu ? project.name_ru : project.name_en}
                   </h3>
@@ -497,8 +650,20 @@ export default function AdminProjects() {
                     )}
                   </div>
                 </CardContent>
+                <div className="px-4 pb-3 flex gap-2 border-t pt-2">
+                  <Button asChild size="sm" variant="ghost" className="flex-1" onClick={(e) => e.stopPropagation()}>
+                    <Link to={`/admin/newbuilds/projects/${project.id}/documents`}>
+                      <FileText className="h-3.5 w-3.5 mr-1" />
+                      {isRu ? 'Документы' : 'Documents'}
+                    </Link>
+                  </Button>
+                  <Button size="sm" variant="ghost" className="flex-1" onClick={(e) => { e.stopPropagation(); handleOpenEdit(project); }}>
+                    <Edit className="h-3.5 w-3.5 mr-1" />
+                    {isRu ? 'Изменить' : 'Edit'}
+                  </Button>
+                </div>
               </Card>
-            ))}
+            );})}
           </div>
         )}
 
