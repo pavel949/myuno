@@ -29618,6 +29618,7 @@ export type Database = {
         Args: { p_device_id?: string; p_pin: string; p_user_id: string }
         Returns: boolean
       }
+      slugify_text: { Args: { input: string }; Returns: string }
       soft_delete_order: { Args: { p_order_id: string }; Returns: boolean }
       staff_can_access_property: {
         Args: { p_property_id: string; p_user_id: string }
