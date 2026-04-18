@@ -44,6 +44,7 @@ export interface OffplanProject {
   descriptionSummary: string | null;
   yieldEstimate: string | null;
   sourceUrl: string | null;
+  isClearviewRated: boolean;
 }
 
 function parseOffplanCatalog(raw: unknown): OffplanCatalogFacet | null {
@@ -127,6 +128,7 @@ export function useOffplanProjects(filters?: OffplanFilters) {
         descriptionSummary: p.description_summary ?? null,
         yieldEstimate: p.yield_estimate ?? null,
         sourceUrl: p.source_url ?? null,
+        isClearviewRated: p.is_clearview_rated !== false, // default true when column missing
       });
 
       const mapRich = (p: any): OffplanProject => {
@@ -179,6 +181,7 @@ export function useOffplanProjects(filters?: OffplanFilters) {
           description_summary,
           yield_estimate,
           source_url,
+          is_clearview_rated,
           developers (
             id,
             name_en,
