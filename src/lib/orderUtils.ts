@@ -104,6 +104,8 @@ export function getStatusColorClasses(status: OrderStatus): {
   const colors: Record<OrderStatus, { bg: string; text: string; border: string }> = {
     draft: { bg: 'bg-muted', text: 'text-muted-foreground', border: 'border-muted' },
     pending: { bg: 'bg-warning/20', text: 'text-warning', border: 'border-warning/30' },
+    pending_advance: { bg: 'bg-warning/20', text: 'text-warning', border: 'border-warning/30' },
+    awaiting_client_payment: { bg: 'bg-warning/20', text: 'text-warning', border: 'border-warning/30' },
     pending_deposit: { bg: 'bg-warning/20', text: 'text-warning', border: 'border-warning/30' },
     deposit_paid: { bg: 'bg-info/20', text: 'text-info', border: 'border-info/30' },
     confirmed: { bg: 'bg-info/20', text: 'text-info', border: 'border-info/30' },

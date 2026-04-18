@@ -24,54 +24,21 @@ const statusConfig: Record<OrderStatus, {
   labelEn: string; 
   labelRu: string 
 }> = {
-  draft: { 
-    icon: Clock, 
-    color: 'bg-muted text-muted-foreground', 
-    labelEn: 'Draft', 
-    labelRu: 'Черновик' 
-  },
-  pending: { 
-    icon: Clock, 
-    color: 'bg-warning/20 text-warning', 
-    labelEn: 'Pending', 
-    labelRu: 'Ожидание' 
-  },
-  confirmed: { 
-    icon: CheckCircle2, 
-    color: 'bg-info/20 text-info', 
-    labelEn: 'Confirmed', 
-    labelRu: 'Подтверждён' 
-  },
-  in_progress: { 
-    icon: Truck, 
-    color: 'bg-accent-purple/20 text-accent-purple', 
-    labelEn: 'In Progress', 
-    labelRu: 'В процессе' 
-  },
-  completed: { 
-    icon: Package, 
-    color: 'bg-success/20 text-success', 
-    labelEn: 'Completed', 
-    labelRu: 'Завершён' 
-  },
-  cancelled: { 
-    icon: XCircle, 
-    color: 'bg-destructive/20 text-destructive', 
-    labelEn: 'Cancelled', 
-    labelRu: 'Отменён' 
-  },
-  refunded: { 
-    icon: RefreshCw, 
-    color: 'bg-warning/20 text-warning', 
-    labelEn: 'Refunded', 
-    labelRu: 'Возврат' 
-  },
-  disputed: { 
-    icon: AlertCircle, 
-    color: 'bg-destructive/20 text-destructive', 
-    labelEn: 'Disputed', 
-    labelRu: 'Спор' 
-  },
+  draft: { icon: Clock, color: 'bg-muted text-muted-foreground', labelEn: 'Draft', labelRu: 'Черновик' },
+  pending: { icon: Clock, color: 'bg-warning/20 text-warning', labelEn: 'Pending', labelRu: 'Ожидание' },
+  pending_advance: { icon: Clock, color: 'bg-warning/20 text-warning', labelEn: 'Awaiting Advance', labelRu: 'Ожидание аванса' },
+  awaiting_client_payment: { icon: Clock, color: 'bg-warning/20 text-warning', labelEn: 'Awaiting Payment', labelRu: 'Ожидание оплаты' },
+  pending_deposit: { icon: Clock, color: 'bg-warning/20 text-warning', labelEn: 'Awaiting Deposit', labelRu: 'Ожидание депозита' },
+  deposit_paid: { icon: CheckCircle2, color: 'bg-info/20 text-info', labelEn: 'Deposit Paid', labelRu: 'Депозит оплачен' },
+  confirmed: { icon: CheckCircle2, color: 'bg-info/20 text-info', labelEn: 'Confirmed', labelRu: 'Подтверждён' },
+  in_progress: { icon: Truck, color: 'bg-accent-purple/20 text-accent-purple', labelEn: 'In Progress', labelRu: 'В процессе' },
+  checked_in: { icon: CheckCircle2, color: 'bg-accent-cyan/20 text-accent-cyan', labelEn: 'Checked In', labelRu: 'Заехал' },
+  checked_out: { icon: Package, color: 'bg-muted text-muted-foreground', labelEn: 'Checked Out', labelRu: 'Выехал' },
+  completed: { icon: Package, color: 'bg-success/20 text-success', labelEn: 'Completed', labelRu: 'Завершён' },
+  cancelled: { icon: XCircle, color: 'bg-destructive/20 text-destructive', labelEn: 'Cancelled', labelRu: 'Отменён' },
+  refunded: { icon: RefreshCw, color: 'bg-warning/20 text-warning', labelEn: 'Refunded', labelRu: 'Возврат' },
+  disputed: { icon: AlertCircle, color: 'bg-destructive/20 text-destructive', labelEn: 'Disputed', labelRu: 'Спор' },
+  no_show: { icon: XCircle, color: 'bg-muted text-muted-foreground', labelEn: 'No Show', labelRu: 'Неявка' },
 };
 
 const sizeClasses = {

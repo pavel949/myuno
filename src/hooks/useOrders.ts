@@ -8,6 +8,17 @@ import { format } from 'date-fns';
 import { createErrorHandler } from '@/lib/errorHandler';
 import { getLocalizedRpcError, isRpcError } from '@/lib/rpcErrorMessages';
 import type { Database } from '@/integrations/supabase/types';
+import type {
+  OrderType,
+  OrderStatus,
+  PaymentMethod,
+  Order,
+  OrderItem,
+  OrderParticipant,
+  OrderAddress,
+  CreateOrderInput,
+  CreateOrderResult,
+} from '@/types/orders';
 
 import { toast } from 'sonner';
 const errorLog = createErrorHandler('useOrders');
@@ -25,7 +36,7 @@ export type {
   OrderAddress,
   CreateOrderInput,
   CreateOrderResult,
-} from '@/types/orders';
+};
 
 /**
  * Canonical order hook - replaces all *_booking specific hooks
