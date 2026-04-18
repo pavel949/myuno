@@ -421,6 +421,57 @@ export default function OffplanDetail() {
             )}
           </TabsContent>
 
+          <TabsContent value="documents" className="pt-4 space-y-4">
+            {publicDocs.length > 0 ? (
+              <>
+                <p className="text-xs text-muted-foreground">
+                  {isRu
+                    ? 'Публичные документы проекта. Полный пакет (KYC/закрытые) — после запроса консультации.'
+                    : 'Publicly disclosed project documents. Full package (KYC/restricted) is available after consultation request.'}
+                </p>
+                <div className="space-y-2">
+                  {publicDocs.map((doc) => {
+                    const cat = DOCUMENT_CATEGORIES.find((c) => c.value === doc.category);
+                    return (
+                      <a
+                        key={doc.id}
+                        href={doc.file_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 rounded-xl border bg-card p-3 hover:bg-accent/40 transition-colors"
+                      >
+                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                          <FileText className="w-5 h-5 text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm truncate">{doc.title}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {cat ? (isRu ? cat.label_ru : cat.label_en) : doc.category}
+                            {doc.version > 1 && <span className="ml-2">v{doc.version}</span>}
+                          </p>
+                        </div>
+                        <Download className="w-4 h-4 text-muted-foreground" />
+                      </a>
+                    );
+                  })}
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-8 space-y-3">
+                <FileText className="w-10 h-10 text-muted-foreground/40 mx-auto" />
+                <p className="text-muted-foreground text-sm">
+                  {isRu
+                    ? 'Публичные документы пока не опубликованы.'
+                    : 'No public documents have been published yet.'}
+                </p>
+                <Button variant="outline" size="sm" onClick={() => setShowLeadForm(true)} className="gap-2">
+                  <FileSearch className="w-4 h-4" />
+                  {isRu ? 'Запросить пакет документов' : 'Request document package'}
+                </Button>
+              </div>
+            )}
+          </TabsContent>
+
           <TabsContent value="developer" className="pt-4">
             {developer ? (
               <div className="space-y-4">
