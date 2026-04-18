@@ -13,6 +13,7 @@ import {
   Search,
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { SEOHead, createBreadcrumbSchema } from '@/components/seo';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -133,8 +134,27 @@ export default function OffplanIndex() {
     setUi((prev) => ({ ...prev, fRec: prev.fRec === rec ? '' : rec }));
   };
 
+  const seoTitle = isRu
+    ? 'Новостройки Пхукета — каталог off-plan проектов с ClearView рейтингом'
+    : 'Phuket New Developments — off-plan catalog with ClearView ratings';
+  const seoDescription = isRu
+    ? 'Каталог новостроек Пхукета: BUY/WATCH/AVOID рейтинг ClearView V3, due diligence, ROI, фильтры по району и застройщику. Независимая аналитика myUNO.'
+    : 'Phuket off-plan property catalog with ClearView V3 BUY/WATCH/AVOID ratings, due diligence, ROI, filters by district and developer. Independent myUNO analytics.';
+  const canonicalUrl = 'https://myuno.app/property/offplan';
+  const breadcrumbSchema = createBreadcrumbSchema([
+    { name: 'Property', url: 'https://myuno.app/property' },
+    { name: isRu ? 'Новостройки' : 'Off-Plan', url: canonicalUrl },
+  ]);
+
   return (
     <AppLayout title={isRu ? 'Новостройки Пхукета' : 'Phuket New Developments'}>
+      <SEOHead
+        title={seoTitle}
+        description={seoDescription}
+        url={canonicalUrl}
+        type="website"
+        jsonLd={breadcrumbSchema}
+      />
       <div className="px-4 py-4 pb-24 space-y-4">
         <div className="rounded-2xl bg-gradient-to-br from-primary/10 via-background to-accent/5 p-4 border border-border/50">
           <div className="flex items-center gap-3 mb-2">

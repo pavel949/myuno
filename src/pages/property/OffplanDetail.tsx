@@ -23,7 +23,10 @@ import {
   ShieldCheck,
   ShieldAlert,
   AlertTriangle,
-  FileSearch
+  FileSearch,
+  FileText,
+  Download,
+  Info
 } from 'lucide-react';
 import { BackButton } from '@/components/uno/BackButton';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -37,7 +40,8 @@ import { ResponsiveModal } from '@/components/ui/responsive-modal';
 import { SEOHead, createRealEstateListingSchema, createBreadcrumbSchema } from '@/components/seo';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
-import { useOffplanProjects, type ProjectStatus } from '@/hooks/useOffplanProjects';
+import { useOffplanProject, type ProjectStatus } from '@/hooks/useOffplanProjects';
+import { useProjectDocuments, DOCUMENT_CATEGORIES } from '@/hooks/useProjectDocuments';
 import { useNewbuildProject } from '@/hooks/useNewbuildProjects';
 import { useDeveloper } from '@/hooks/useDevelopers';
 import { NewbuildProjectDeepTabs } from '@/components/newbuilds/NewbuildProjectDeepTabs';
@@ -77,10 +81,11 @@ export default function OffplanDetail() {
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
   const [showLeadForm, setShowLeadForm] = useState(false);
-  const { data: projects, isLoading } = useOffplanProjects();
-  const project = projects?.find(p => p.id === id);
+  const { data: project, isLoading } = useOffplanProject(id);
   const { data: developer } = useDeveloper(project?.developerId || '');
   const { data: nbProject } = useNewbuildProject(id);
+  const { data: allDocs = [] } = useProjectDocuments(id);
+  const publicDocs = allDocs.filter((d) => d.visibility === 'public');
 
   if (isLoading) {
     return (
@@ -200,6 +205,23 @@ export default function OffplanDetail() {
       </div>
 
       <div className="px-4 py-4 pb-32 space-y-6">
+        {/* ClearView Disclosure — for brokered/curated projects */}
+        {!project.isClearviewRated && (
+          <div className="rounded-xl border border-warning/30 bg-warning/5 p-4 flex items-start gap-3">
+            <Info className="w-5 h-5 text-warning flex-shrink-0 mt-0.5" />
+            <div className="flex-1 text-sm">
+              <p className="font-semibold text-warning">
+                {isRu ? 'Не оценён по ClearView™' : 'Not ClearView™ rated'}
+              </p>
+              <p className="text-muted-foreground mt-1">
+                {isRu
+                  ? 'Этот проект представлен брокером и не проходил независимую методологическую оценку ClearView V3. Цифры и описание предоставлены застройщиком/партнёром.'
+                  : 'This project is brokered/curated and has not been independently scored under the ClearView V3 methodology. Figures and content are provided by the developer/partner.'}
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Key metrics cards */}
         <div className="grid grid-cols-2 gap-3">
           {/* muUNO Score */}
@@ -290,9 +312,15 @@ export default function OffplanDetail() {
 
         {/* Tabs */}
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="w-full grid grid-cols-3">
+          <TabsList className="w-full grid grid-cols-4">
             <TabsTrigger value="overview">{isRu ? 'Обзор' : 'Overview'}</TabsTrigger>
             <TabsTrigger value="scoring">{isRu ? 'Скоринг' : 'Scoring'}</TabsTrigger>
+            <TabsTrigger value="documents">
+              {isRu ? 'Документы' : 'Docs'}
+              {publicDocs.length > 0 && (
+                <span className="ml-1 text-[10px] opacity-70">({publicDocs.length})</span>
+              )}
+            </TabsTrigger>
             <TabsTrigger value="developer">{isRu ? 'Застройщик' : 'Developer'}</TabsTrigger>
           </TabsList>
 
@@ -388,6 +416,57 @@ export default function OffplanDetail() {
                 <Button onClick={() => setShowLeadForm(true)} className="gap-2">
                   <FileSearch className="w-4 h-4" />
                   {isRu ? 'Запросить оценку' : 'Request Assessment'}
+                </Button>
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="documents" className="pt-4 space-y-4">
+            {publicDocs.length > 0 ? (
+              <>
+                <p className="text-xs text-muted-foreground">
+                  {isRu
+                    ? 'Публичные документы проекта. Полный пакет (KYC/закрытые) — после запроса консультации.'
+                    : 'Publicly disclosed project documents. Full package (KYC/restricted) is available after consultation request.'}
+                </p>
+                <div className="space-y-2">
+                  {publicDocs.map((doc) => {
+                    const cat = DOCUMENT_CATEGORIES.find((c) => c.value === doc.category);
+                    return (
+                      <a
+                        key={doc.id}
+                        href={doc.file_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 rounded-xl border bg-card p-3 hover:bg-accent/40 transition-colors"
+                      >
+                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                          <FileText className="w-5 h-5 text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm truncate">{doc.title}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {cat ? (isRu ? cat.label_ru : cat.label_en) : doc.category}
+                            {doc.version > 1 && <span className="ml-2">v{doc.version}</span>}
+                          </p>
+                        </div>
+                        <Download className="w-4 h-4 text-muted-foreground" />
+                      </a>
+                    );
+                  })}
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-8 space-y-3">
+                <FileText className="w-10 h-10 text-muted-foreground/40 mx-auto" />
+                <p className="text-muted-foreground text-sm">
+                  {isRu
+                    ? 'Публичные документы пока не опубликованы.'
+                    : 'No public documents have been published yet.'}
+                </p>
+                <Button variant="outline" size="sm" onClick={() => setShowLeadForm(true)} className="gap-2">
+                  <FileSearch className="w-4 h-4" />
+                  {isRu ? 'Запросить пакет документов' : 'Request document package'}
                 </Button>
               </div>
             )}

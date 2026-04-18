@@ -114,12 +114,34 @@ export function OffplanProjectCard({
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
         {/* Status badge */}
-        <div className="absolute top-3 left-3 flex items-center gap-2">
+        <div className="absolute top-3 left-3 flex flex-wrap items-center gap-1.5 max-w-[70%]">
           <Badge className={cn("gap-1 text-xs border", status.color)}>
             <StatusIcon className="w-3 h-3" />
             {isRu ? status.label.ru : status.label.en}
           </Badge>
-          
+
+          {/* ClearView recommendation badge (BUY / WATCH / AVOID) */}
+          {project.isClearviewRated && project.offplanCatalog?.rec && (
+            <Badge
+              className={cn(
+                "text-[11px] font-bold border-0 tracking-wide",
+                project.offplanCatalog.rec === 'BUY' && 'bg-success text-success-foreground',
+                project.offplanCatalog.rec === 'WATCH' && 'bg-warning text-warning-foreground',
+                project.offplanCatalog.rec === 'AVOID' && 'bg-destructive text-destructive-foreground',
+              )}
+              title={isRu ? 'Рекомендация ClearView V3' : 'ClearView V3 recommendation'}
+            >
+              {project.offplanCatalog.rec}
+            </Badge>
+          )}
+
+          {/* Brokered / not ClearView-rated */}
+          {!project.isClearviewRated && (
+            <Badge variant="outline" className="text-[10px] bg-background/80 backdrop-blur-sm border-warning/40 text-warning">
+              {isRu ? 'Не оценён ClearView' : 'Not ClearView rated'}
+            </Badge>
+          )}
+
           {project.isFeatured && (
             <Badge className="bg-primary text-primary-foreground border-0 gap-1">
               <Sparkles className="w-3 h-3" />
@@ -129,7 +151,7 @@ export function OffplanProjectCard({
         </div>
 
         {/* muUNO Score badge — show only score dots, no risk label or numeric value on public cards */}
-        {project.muunoScore && (
+        {project.isClearviewRated && project.muunoScore && (
           <div className="absolute top-3 right-3">
             <MuunoScoreWidget score={project.muunoScore} size="sm" showRisk={false} showLabel={false} showScore={false} />
           </div>
