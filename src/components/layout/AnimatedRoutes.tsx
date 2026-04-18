@@ -28,6 +28,15 @@ import { NbCompareProvider } from '@/components/newbuilds/NbCompareProvider';
 const NewbuildsContextOutlet = () => (
   <NbCompareProvider>
     <Outlet />
+
+// Property Hub index: legacy `/property?…` query bookmarks → /property/browse?…
+const PropertyHubIndex = () => {
+  const search = typeof window !== 'undefined' ? window.location.search : '';
+  if (search && search.length > 1) {
+    return <Navigate to={`${APP_ROUTES.PROPERTY_BROWSE}${search}`} replace />;
+  }
+  return <Pages.PropertyLanding />;
+};
   </NbCompareProvider>
 );
 
