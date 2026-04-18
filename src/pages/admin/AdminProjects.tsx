@@ -602,7 +602,7 @@ export default function AdminProjects() {
                       </Badge>
                     )}
                     {project.needs_review && (
-                      <Badge className="text-[10px] bg-amber-500/90 text-white border-0">
+                      <Badge className="text-[10px] bg-warning text-warning-foreground border-0">
                         Review
                       </Badge>
                     )}
