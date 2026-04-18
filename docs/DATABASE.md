@@ -1,5 +1,9 @@
 # Database Schema
 
+> 📖 **For environment, project refs, URLs and keys, see [`ENVIRONMENT.md`](ENVIRONMENT.md) — single source of truth.**
+>
+> **PRIMARY DB:** Supabase project `kakkwibljrjsawxgnupk` (`https://kakkwibljrjsawxgnupk.supabase.co`). All frontend and edge function reads/writes go here. There is **no v2 schema** — all tables in `public`.
+
 The database is PostgreSQL managed by Lovable Cloud (Supabase). All tables are in the `public` schema.
 
 ## Auto-Generated Files (DO NOT EDIT)
