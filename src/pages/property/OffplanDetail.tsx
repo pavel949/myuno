@@ -312,9 +312,15 @@ export default function OffplanDetail() {
 
         {/* Tabs */}
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="w-full grid grid-cols-3">
+          <TabsList className="w-full grid grid-cols-4">
             <TabsTrigger value="overview">{isRu ? 'Обзор' : 'Overview'}</TabsTrigger>
             <TabsTrigger value="scoring">{isRu ? 'Скоринг' : 'Scoring'}</TabsTrigger>
+            <TabsTrigger value="documents">
+              {isRu ? 'Документы' : 'Docs'}
+              {publicDocs.length > 0 && (
+                <span className="ml-1 text-[10px] opacity-70">({publicDocs.length})</span>
+              )}
+            </TabsTrigger>
             <TabsTrigger value="developer">{isRu ? 'Застройщик' : 'Developer'}</TabsTrigger>
           </TabsList>
 
