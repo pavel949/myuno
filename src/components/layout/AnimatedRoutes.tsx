@@ -204,7 +204,7 @@ export const AnimatedRoutes: React.FC = () => {
         {/* ── Property Hub ── */}
         <Route path="/properties" element={<Navigate to={APP_ROUTES.PROPERTY} replace />} />
         <Route path={APP_ROUTES.PROPERTY} element={<Suspense fallback={<LoadingState />}><PropertyHub /></Suspense>}>
-          <Route index element={<LazyPage><Pages.PropertyHubIndexRoute /></LazyPage>} />
+          <Route index element={<LazyPage><Pages.PropertyLanding /></LazyPage>} />
           <Route path="browse" element={<LazyPage><Pages.PropertyIndex /></LazyPage>} />
           <Route
             path="rent/short-term"
