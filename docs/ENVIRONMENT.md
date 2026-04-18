@@ -17,7 +17,7 @@
 | **PRIMARY DB (production)** | Supabase project `kakkwibljrjsawxgnupk` | Lovable Cloud (managed Supabase) |
 | **PRIMARY DB URL** | `https://kakkwibljrjsawxgnupk.supabase.co` | `.env` → `VITE_SUPABASE_URL` |
 | **MIRROR DB (optional)** | Supabase project `erfwtoavipwjqmylpizt` | Standalone Supabase (внешний) |
-| **PEYLAA DB (read-only)** | отдельный Supabase проект продаж | `.env` → `VITE_PEYLAA_*` |
+| ~~PEYLAA DB~~ | **МИГРИРОВАНА** в PRIMARY DB (slug `peylaa-phuket-marriott`) | — |
 
 ---
 
@@ -43,12 +43,13 @@
 - Frontend код **не должен** ссылаться на этот проект.
 - Используется только если решено мигрировать с Lovable Cloud полностью.
 
-### 2.3 PEYLAA: внешняя БД продаж (read-only)
+### 2.3 PEYLAA: мигрирована в PRIMARY DB ✅
 
-- Отдельный Supabase-проект для системы продаж PEYLAA.
-- Клиент: `src/lib/peylaa/supabaseClient.ts` (`peylaaDb`).
-- Только чтение, без auth-сессии (`persistSession: false`).
-- **Не путать с PRIMARY DB.** Использовать только в коде PEYLAA-фич.
+- Ранее жила в отдельном Supabase-проекте, **сейчас полностью в PRIMARY DB**.
+- Каноничная запись: `property_projects.id = 07652f9c-5bf5-4a7d-89e7-1c0ccf86fcd4`, `slug = peylaa-phuket-marriott`.
+- 50 юнитов в `project_units`, лиды → `nb_leads` через стандартный `recordAttribution()` pipeline.
+- Хуки `usePeylaa*` (в `src/hooks/usePeylaa.ts`) теперь читают из PRIMARY DB и сохраняют тот же публичный shape.
+- Микросайт доступен по `/p/peylaa-phuket-marriott` + legacy `/peylaa` лендинг.
 
 ---
 
@@ -73,8 +74,7 @@
 | `VITE_SUPABASE_URL` | Lovable Cloud | URL primary DB |
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | Lovable Cloud | Anon key primary DB |
 | `VITE_SUPABASE_PROJECT_ID` | Lovable Cloud | `kakkwibljrjsawxgnupk` |
-| `VITE_PEYLAA_SUPABASE_URL` | PEYLAA проект | URL PEYLAA DB |
-| `VITE_PEYLAA_SUPABASE_KEY` | PEYLAA проект | Anon key PEYLAA DB |
+| ~~`VITE_PEYLAA_SUPABASE_URL` / `_KEY`~~ | — | **Удалены**: PEYLAA мигрирована в PRIMARY DB |
 | `VITE_GOOGLE_MAPS_API_KEY` | Google Cloud Console | Maps JS + Places + Geocoding |
 | `VITE_BYPASS_COMING_SOON` | — | `"true"` чтобы пропустить gate в dev |
 | `VITE_SENTRY_DSN` | Sentry | Error monitoring (только prod) |

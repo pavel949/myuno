@@ -41,7 +41,7 @@ The app will be available at `http://localhost:5173`.
 **Databases (TL;DR):**
 - **PRIMARY (production):** Supabase `kakkwibljrjsawxgnupk` — all reads & writes go here (frontend + edge functions).
 - **MIRROR (optional):** Supabase `erfwtoavipwjqmylpizt` — standalone backup, only via manual `scripts/` migration.
-- **PEYLAA (read-only):** separate Supabase project for sales system, accessed via `src/lib/peylaa/supabaseClient.ts`.
+- **PEYLAA:** migrated into PRIMARY DB (`slug=peylaa-phuket-marriott`). The legacy separate Supabase project is no longer used.
 
 ⚠️ Local dev, preview and production all hit the **same PRIMARY DB**. There is no separate staging — mark test data with `[TEST]` / `source='smoke_test'` / `*@myuno.test`.
 
@@ -52,7 +52,7 @@ See [`.env.example`](.env.example) for the full variable list. Frontend keys (pu
 | `VITE_SUPABASE_URL` | Primary DB URL |
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | Primary DB anon key |
 | `VITE_SUPABASE_PROJECT_ID` | `kakkwibljrjsawxgnupk` |
-| `VITE_PEYLAA_SUPABASE_URL` / `_KEY` | PEYLAA read-only DB |
+| ~~`VITE_PEYLAA_SUPABASE_URL` / `_KEY`~~ | Removed — PEYLAA is now in PRIMARY DB |
 | `VITE_GOOGLE_MAPS_API_KEY` | Google Maps JS + Places + Geocoding |
 
 **Backend secrets** (managed in Lovable Cloud, never in `.env`): `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY`, `FIRECRAWL_API_KEY`, `LOVABLE_API_KEY`, `RENTALS_UNITED_*`, `ANTHROPIC_API_KEY`, `TELEGRAM_BOT_TOKEN`, etc. Full list in [`docs/ENVIRONMENT.md`](docs/ENVIRONMENT.md#42-backend-secrets-lovable-cloud--edge-functions).
