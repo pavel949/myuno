@@ -8,8 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
 import { Label } from '@/components/ui/label';
-import { Plus, Trash2, Pencil, Building2, Eye } from 'lucide-react';
+import { Plus, Trash2, Pencil, Building2, Eye, Upload } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
+import { ProjectUnitsBulkImport } from './ProjectUnitsBulkImport';
 
 interface Props {
   projectId: string;
@@ -35,11 +37,13 @@ export function ProjectUnitsGrid({ projectId }: Props) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { user } = useAuth();
+  const { isAdmin } = useIsAdmin();
   const { data: units = [], isLoading } = useProjectUnitsGrid(projectId);
   const createUnit = useCreateProjectUnit();
   const updateUnit = useUpdateProjectUnit();
   const deleteUnit = useDeleteProjectUnit();
   const [showAdd, setShowAdd] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [form, setForm] = useState({ unit_code: '', unit_type: 'studio', floor: '', area_sqm: '', bedrooms: '', bathrooms: '', price: '', view_type: '' });
 
   const handleCreate = () => {
@@ -87,9 +91,16 @@ export function ProjectUnitsGrid({ projectId }: Props) {
         <Badge className={STATUS_COLORS.available + ' text-xs'}>{stats.available} {isRu ? 'свободно' : 'available'}</Badge>
         <Badge className={STATUS_COLORS.reserved + ' text-xs'}>{stats.reserved} {isRu ? 'бронь' : 'reserved'}</Badge>
         <Badge className={STATUS_COLORS.sold + ' text-xs'}>{stats.sold} {isRu ? 'продано' : 'sold'}</Badge>
-        <Button size="sm" variant="outline" className="ml-auto" onClick={() => setShowAdd(true)}>
-          <Plus className="h-3.5 w-3.5 mr-1" />{isRu ? 'Добавить юнит' : 'Add Unit'}
-        </Button>
+        <div className="ml-auto flex gap-2">
+          {isAdmin && (
+            <Button size="sm" variant="outline" onClick={() => setShowImport(true)}>
+              <Upload className="h-3.5 w-3.5 mr-1" />{isRu ? 'CSV-импорт' : 'CSV Import'}
+            </Button>
+          )}
+          <Button size="sm" variant="outline" onClick={() => setShowAdd(true)}>
+            <Plus className="h-3.5 w-3.5 mr-1" />{isRu ? 'Добавить юнит' : 'Add Unit'}
+          </Button>
+        </div>
       </div>
 
       {/* Units grid */}
