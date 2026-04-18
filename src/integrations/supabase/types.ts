@@ -6429,6 +6429,90 @@ export type Database = {
         }
         Relationships: []
       }
+      drive_import_jobs: {
+        Row: {
+          ai_extracted_data: Json | null
+          ai_extracted_units: Json | null
+          ai_project_patch: Json | null
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          error_log: Json | null
+          files_failed: number
+          files_processed: number
+          files_skipped: number
+          files_total: number
+          id: string
+          project_id: string
+          review_status: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          source_id: string
+          started_at: string | null
+          status: string
+          trigger_mode: string
+        }
+        Insert: {
+          ai_extracted_data?: Json | null
+          ai_extracted_units?: Json | null
+          ai_project_patch?: Json | null
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          error_log?: Json | null
+          files_failed?: number
+          files_processed?: number
+          files_skipped?: number
+          files_total?: number
+          id?: string
+          project_id: string
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source_id: string
+          started_at?: string | null
+          status?: string
+          trigger_mode?: string
+        }
+        Update: {
+          ai_extracted_data?: Json | null
+          ai_extracted_units?: Json | null
+          ai_project_patch?: Json | null
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          error_log?: Json | null
+          files_failed?: number
+          files_processed?: number
+          files_skipped?: number
+          files_total?: number
+          id?: string
+          project_id?: string
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source_id?: string
+          started_at?: string | null
+          status?: string
+          trigger_mode?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "drive_import_jobs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "property_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "drive_import_jobs_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "project_drive_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       due_diligence_reports: {
         Row: {
           ai_correlation_id: string | null
@@ -14479,6 +14563,59 @@ export type Database = {
           },
           {
             foreignKeyName: "project_documents_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "property_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_drive_sources: {
+        Row: {
+          access_mode: string
+          created_at: string
+          created_by: string | null
+          drive_url: string
+          file_count: number
+          folder_id: string
+          id: string
+          last_sync_at: string | null
+          last_sync_status: string | null
+          project_id: string
+          updated_at: string
+          watch_enabled: boolean
+        }
+        Insert: {
+          access_mode?: string
+          created_at?: string
+          created_by?: string | null
+          drive_url: string
+          file_count?: number
+          folder_id: string
+          id?: string
+          last_sync_at?: string | null
+          last_sync_status?: string | null
+          project_id: string
+          updated_at?: string
+          watch_enabled?: boolean
+        }
+        Update: {
+          access_mode?: string
+          created_at?: string
+          created_by?: string | null
+          drive_url?: string
+          file_count?: number
+          folder_id?: string
+          id?: string
+          last_sync_at?: string | null
+          last_sync_status?: string | null
+          project_id?: string
+          updated_at?: string
+          watch_enabled?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_drive_sources_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "property_projects"
