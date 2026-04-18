@@ -8,6 +8,18 @@ import { VitePWA } from "vite-plugin-pwa";
 export default defineConfig(({ mode }) => {
   const buildTimestamp = new Date().toISOString();
 
+  // Public Supabase config — safe to ship in client bundle (anon key + URL).
+  // Hardcoded fallback ensures the app boots on every host (myuno.app,
+  // Capacitor native shells, custom deployments) even when build-time env
+  // vars aren't injected by the hosting platform.
+  const SUPABASE_URL_FALLBACK = "https://kakkwibljrjsawxgnupk.supabase.co";
+  const SUPABASE_ANON_KEY_FALLBACK = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtha2t3aWJsanJqc2F3eGdudXBrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5MDM3MDAsImV4cCI6MjA4MzQ3OTcwMH0.0UOwpxLxDdxh_hpS_KXf_xnArkJjKCMmMXh_s5y5Cmk";
+  const SUPABASE_PROJECT_ID_FALLBACK = "kakkwibljrjsawxgnupk";
+
+  const supabaseUrl = process.env.VITE_SUPABASE_URL || SUPABASE_URL_FALLBACK;
+  const supabaseKey = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || SUPABASE_ANON_KEY_FALLBACK;
+  const supabaseProjectId = process.env.VITE_SUPABASE_PROJECT_ID || SUPABASE_PROJECT_ID_FALLBACK;
+
   return {
     server: {
       // `true` is more reliable than `::` on Windows / embedded browser previews (Cursor Simple Browser).
@@ -25,6 +37,9 @@ export default defineConfig(({ mode }) => {
     },
     define: {
       __BUILD_TIMESTAMP__: JSON.stringify(buildTimestamp),
+      "import.meta.env.VITE_SUPABASE_URL": JSON.stringify(supabaseUrl),
+      "import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY": JSON.stringify(supabaseKey),
+      "import.meta.env.VITE_SUPABASE_PROJECT_ID": JSON.stringify(supabaseProjectId),
     },
     plugins: [
       react(),
