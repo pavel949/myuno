@@ -6429,6 +6429,122 @@ export type Database = {
         }
         Relationships: []
       }
+      due_diligence_reports: {
+        Row: {
+          ai_correlation_id: string | null
+          ai_model: string | null
+          analysis: Json
+          created_at: string | null
+          executive_summary: string | null
+          generated_at: string | null
+          generated_by: string | null
+          generated_by_ai: boolean | null
+          grade: string | null
+          green_flags: string[] | null
+          id: string
+          is_brokered_project: boolean | null
+          is_published: boolean | null
+          modifiers: Json | null
+          paid_tier: string | null
+          project_id: string
+          recommendations: string[] | null
+          red_flags: string[] | null
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          risk_level: string | null
+          score_construction: number | null
+          score_developer: number | null
+          score_financial: number | null
+          score_legal: number | null
+          score_liquidity: number | null
+          score_location: number | null
+          score_marketing: number | null
+          score_returns: number | null
+          total_score: number | null
+          updated_at: string | null
+          version: number
+        }
+        Insert: {
+          ai_correlation_id?: string | null
+          ai_model?: string | null
+          analysis?: Json
+          created_at?: string | null
+          executive_summary?: string | null
+          generated_at?: string | null
+          generated_by?: string | null
+          generated_by_ai?: boolean | null
+          grade?: string | null
+          green_flags?: string[] | null
+          id?: string
+          is_brokered_project?: boolean | null
+          is_published?: boolean | null
+          modifiers?: Json | null
+          paid_tier?: string | null
+          project_id: string
+          recommendations?: string[] | null
+          red_flags?: string[] | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          risk_level?: string | null
+          score_construction?: number | null
+          score_developer?: number | null
+          score_financial?: number | null
+          score_legal?: number | null
+          score_liquidity?: number | null
+          score_location?: number | null
+          score_marketing?: number | null
+          score_returns?: number | null
+          total_score?: number | null
+          updated_at?: string | null
+          version?: number
+        }
+        Update: {
+          ai_correlation_id?: string | null
+          ai_model?: string | null
+          analysis?: Json
+          created_at?: string | null
+          executive_summary?: string | null
+          generated_at?: string | null
+          generated_by?: string | null
+          generated_by_ai?: boolean | null
+          grade?: string | null
+          green_flags?: string[] | null
+          id?: string
+          is_brokered_project?: boolean | null
+          is_published?: boolean | null
+          modifiers?: Json | null
+          paid_tier?: string | null
+          project_id?: string
+          recommendations?: string[] | null
+          red_flags?: string[] | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          risk_level?: string | null
+          score_construction?: number | null
+          score_developer?: number | null
+          score_financial?: number | null
+          score_legal?: number | null
+          score_liquidity?: number | null
+          score_location?: number | null
+          score_marketing?: number | null
+          score_returns?: number | null
+          total_score?: number | null
+          updated_at?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "due_diligence_reports_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "property_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       education_providers: {
         Row: {
           address: string | null
@@ -9737,6 +9853,78 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      market_comparables: {
+        Row: {
+          absorption_rate_pct: number | null
+          area_name: string
+          area_slug: string | null
+          avg_appreciation_pct_yr: number | null
+          avg_gross_yield_pct: number | null
+          avg_net_yield_pct: number | null
+          avg_occupancy_pct: number | null
+          avg_price_sqm_thb: number | null
+          avg_time_to_sell_months: number | null
+          bedrooms: number | null
+          created_at: string | null
+          data_date: string
+          id: string
+          max_price_sqm_thb: number | null
+          median_price_sqm_thb: number | null
+          min_price_sqm_thb: number | null
+          notes: string | null
+          sample_size: number | null
+          source: string | null
+          unit_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          absorption_rate_pct?: number | null
+          area_name: string
+          area_slug?: string | null
+          avg_appreciation_pct_yr?: number | null
+          avg_gross_yield_pct?: number | null
+          avg_net_yield_pct?: number | null
+          avg_occupancy_pct?: number | null
+          avg_price_sqm_thb?: number | null
+          avg_time_to_sell_months?: number | null
+          bedrooms?: number | null
+          created_at?: string | null
+          data_date?: string
+          id?: string
+          max_price_sqm_thb?: number | null
+          median_price_sqm_thb?: number | null
+          min_price_sqm_thb?: number | null
+          notes?: string | null
+          sample_size?: number | null
+          source?: string | null
+          unit_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          absorption_rate_pct?: number | null
+          area_name?: string
+          area_slug?: string | null
+          avg_appreciation_pct_yr?: number | null
+          avg_gross_yield_pct?: number | null
+          avg_net_yield_pct?: number | null
+          avg_occupancy_pct?: number | null
+          avg_price_sqm_thb?: number | null
+          avg_time_to_sell_months?: number | null
+          bedrooms?: number | null
+          created_at?: string | null
+          data_date?: string
+          id?: string
+          max_price_sqm_thb?: number | null
+          median_price_sqm_thb?: number | null
+          min_price_sqm_thb?: number | null
+          notes?: string | null
+          sample_size?: number | null
+          source?: string | null
+          unit_type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       marketplace_categories: {
         Row: {

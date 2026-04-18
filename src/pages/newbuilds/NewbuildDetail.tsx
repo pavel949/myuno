@@ -22,6 +22,7 @@ import { NbDeveloperTab } from '@/components/newbuilds/tabs/NbDeveloperTab';
 import { ProjectUnitsGrid } from '@/components/newbuilds/ProjectUnitsGrid';
 import { ProjectDealsTab } from '@/components/newbuilds/ProjectDealsTab';
 import { ProjectMarketingTab } from '@/components/newbuilds/ProjectMarketingTab';
+import { ClearViewReport } from '@/components/newbuilds/ClearViewReport';
 import { useNewbuildProject } from '@/hooks/useNewbuildProjects';
 import { Skeleton } from '@/components/ui/skeleton';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -38,6 +39,7 @@ const TABS = [
   { key: 'deals', label: 'Сделки' },
   { key: 'updates', label: 'Обновления' },
   { key: 'reports', label: 'Отчёты' },
+  { key: 'clearview', label: 'ClearView™' },
   { key: 'developer', label: 'О девелопере' },
 ];
 
@@ -315,6 +317,10 @@ export default function NewbuildDetail() {
 
             {activeTab === 'reports' && (
               <NbReportsTab projectId={project.id} />
+            )}
+
+            {activeTab === 'clearview' && (
+              <ClearViewReport projectId={project.id} />
             )}
 
             {activeTab === 'developer' && project.developer_id && (
