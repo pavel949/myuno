@@ -144,49 +144,27 @@ export default defineConfig(({ mode }) => {
     build: {
       rollupOptions: {
         output: {
-          manualChunks: {
-            // ── Core React stack ──────────────────────────────────────────
-            'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          // Group large, commonly-shared vendor libs into stable chunks.
+          // Libraries that must preserve tree-shaking (lucide-react) or are
+          // already lazy-loaded from specific pages (exceljs, jspdf, html2canvas)
+          // are intentionally NOT listed here — Vite will auto-split them.
+          manualChunks(id) {
+            if (!id.includes('node_modules')) return;
 
-            // ── All Radix UI primitives in one shared chunk ───────────────
-            'vendor-radix': [
-              '@radix-ui/react-accordion',
-              '@radix-ui/react-alert-dialog',
-              '@radix-ui/react-aspect-ratio',
-              '@radix-ui/react-avatar',
-              '@radix-ui/react-checkbox',
-              '@radix-ui/react-collapsible',
-              '@radix-ui/react-dialog',
-              '@radix-ui/react-dropdown-menu',
-              '@radix-ui/react-label',
-              '@radix-ui/react-popover',
-              '@radix-ui/react-progress',
-              '@radix-ui/react-radio-group',
-              '@radix-ui/react-scroll-area',
-              '@radix-ui/react-select',
-              '@radix-ui/react-separator',
-              '@radix-ui/react-slider',
-              '@radix-ui/react-slot',
-              '@radix-ui/react-switch',
-              '@radix-ui/react-tabs',
-              '@radix-ui/react-toast',
-              '@radix-ui/react-toggle',
-              '@radix-ui/react-toggle-group',
-              '@radix-ui/react-tooltip',
-            ],
-
-            // ── Heavy third-party libs ────────────────────────────────────
-            'vendor-motion': ['framer-motion'],
-            'vendor-query': ['@tanstack/react-query'],
-            'vendor-charts': ['recharts'],
-            'vendor-map': ['@react-google-maps/api'],
-            // jspdf, jspdf-autotable, exceljs are lazy-imported — no manual chunk needed
-            'vendor-form': ['react-hook-form', '@hookform/resolvers', 'zod'],
-
+            if (id.match(/node_modules\/(react|react-dom|react-router|react-router-dom|scheduler|use-sync-external-store)\//)) {
+              return 'vendor-react';
+            }
+            if (id.includes('@radix-ui/')) return 'vendor-radix';
+            if (id.includes('@tanstack/react-query')) return 'vendor-query';
+            if (id.includes('framer-motion')) return 'vendor-motion';
+            if (id.includes('recharts') || id.includes('d3-')) return 'vendor-charts';
+            if (id.includes('@react-google-maps')) return 'vendor-map';
+            if (id.match(/(react-hook-form|@hookform|zod)\//)) return 'vendor-form';
+            if (id.match(/(date-fns|papaparse|dompurify)/)) return 'vendor-utils';
+            if (id.includes('@supabase')) return 'vendor-supabase';
           },
         },
       },
-      // Real warning limit — chunks above 800KB deserve attention
       chunkSizeWarningLimit: 800,
     },
   };
