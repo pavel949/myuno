@@ -543,7 +543,15 @@ export default function PropertyInquiry() {
                       status: 'pending',
                     });
                   if (inquiryError) {
+                    // Surface to user — silent failure was hiding RLS / validation issues
                     console.error('[PropertyInquiry] inquiry insert error:', inquiryError);
+                    toast.error(
+                      isRu
+                        ? `Не удалось сохранить запрос: ${inquiryError.message}`
+                        : `Failed to save inquiry: ${inquiryError.message}`,
+                    );
+                    setIsSubmitting(false);
+                    return;
                   }
 
                   // 2. Create order for booking tracking

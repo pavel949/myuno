@@ -19925,6 +19925,75 @@ export type Database = {
         }
         Relationships: []
       }
+      reconciliation_alerts: {
+        Row: {
+          actual_amount: number | null
+          alert_type: string
+          created_at: string
+          currency: string | null
+          description: string
+          details: Json | null
+          expected_amount: number | null
+          id: string
+          order_id: string | null
+          payment_intent_id: string | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          updated_at: string
+        }
+        Insert: {
+          actual_amount?: number | null
+          alert_type: string
+          created_at?: string
+          currency?: string | null
+          description: string
+          details?: Json | null
+          expected_amount?: number | null
+          id?: string
+          order_id?: string | null
+          payment_intent_id?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          updated_at?: string
+        }
+        Update: {
+          actual_amount?: number | null
+          alert_type?: string
+          created_at?: string
+          currency?: string | null
+          description?: string
+          details?: Json | null
+          expected_amount?: number | null
+          id?: string
+          order_id?: string | null
+          payment_intent_id?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reconciliation_alerts_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reconciliation_alerts_payment_intent_id_fkey"
+            columns: ["payment_intent_id"]
+            isOneToOne: false
+            referencedRelation: "payment_intents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       referral_codes: {
         Row: {
           code: string
@@ -29754,6 +29823,7 @@ export type Database = {
         | "no_show"
         | "pending_deposit"
         | "deposit_paid"
+        | "expired"
       payment_method: "cash" | "wallet" | "stripe" | "bank_transfer"
       payment_status:
         | "pending"
@@ -30016,6 +30086,7 @@ export const Constants = {
         "no_show",
         "pending_deposit",
         "deposit_paid",
+        "expired",
       ],
       payment_method: ["cash", "wallet", "stripe", "bank_transfer"],
       payment_status: [
