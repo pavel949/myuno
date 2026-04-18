@@ -29754,6 +29754,7 @@ export type Database = {
         | "no_show"
         | "pending_deposit"
         | "deposit_paid"
+        | "expired"
       payment_method: "cash" | "wallet" | "stripe" | "bank_transfer"
       payment_status:
         | "pending"
@@ -30016,6 +30017,7 @@ export const Constants = {
         "no_show",
         "pending_deposit",
         "deposit_paid",
+        "expired",
       ],
       payment_method: ["cash", "wallet", "stripe", "bank_transfer"],
       payment_status: [
