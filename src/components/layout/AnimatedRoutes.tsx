@@ -23,6 +23,13 @@ import { StaffLayout } from '@/components/staff/StaffLayout';
 import { useNavigationDirection } from '@/hooks/useNavigationDirection';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { NewbuildProjectToOffplanRedirect } from '@/components/routing/NewbuildLegacyRedirects';
+import { NbCompareProvider } from '@/components/newbuilds/NbCompareProvider';
+
+const NewbuildsContextOutlet = () => (
+  <NbCompareProvider>
+    <Outlet />
+  </NbCompareProvider>
+);
 
 // Core pages - eagerly loaded for fast initial navigation
 import Index from '@/pages/Index';
@@ -288,14 +295,16 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.NEWBUILDS} element={<LazyPage><Pages.NewbuildsLanding /></LazyPage>} />
         <Route path={APP_ROUTES.NEWBUILDS_PROJECTS} element={<Navigate to={APP_ROUTES.OFFPLAN} replace />} />
         <Route path="/newbuilds/projects/:slug" element={<NewbuildProjectToOffplanRedirect />} />
-        <Route path={APP_ROUTES.NEWBUILDS_DEVELOPERS} element={<LazyPage><Pages.NewbuildsDevelopers /></LazyPage>} />
-        <Route path="/newbuilds/developers/:slug" element={<LazyPage><Pages.NewbuildDeveloperDetail /></LazyPage>} />
-        <Route path={APP_ROUTES.NEWBUILDS_MAP} element={<LazyPage><Pages.NewbuildsMap /></LazyPage>} />
-        <Route path={APP_ROUTES.NEWBUILDS_CALCULATOR} element={<LazyPage><Pages.NewbuildsCalculator /></LazyPage>} />
-        <Route path={APP_ROUTES.NEWBUILDS_COMPARE} element={<LazyPage><Pages.NewbuildsCompare /></LazyPage>} />
-        <Route path={APP_ROUTES.NEWBUILDS_AREAS} element={<LazyPage><Pages.NewbuildsAreaGuides /></LazyPage>} />
-        <Route path="/newbuilds/areas/:slug" element={<LazyPage><Pages.NewbuildsAreaDetail /></LazyPage>} />
-        <Route path={APP_ROUTES.NEWBUILDS_DUE_DILIGENCE} element={<LazyPage><Pages.NewbuildsDueDiligence /></LazyPage>} />
+        <Route path={APP_ROUTES.NEWBUILDS_DEVELOPERS} element={<Navigate to={APP_ROUTES.DEVELOPERS} replace />} />
+        <Route path="/newbuilds/developers/:slug" element={<Navigate to={APP_ROUTES.DEVELOPERS} replace />} />
+        <Route element={<NewbuildsContextOutlet />}>
+          <Route path={APP_ROUTES.NEWBUILDS_MAP} element={<LazyPage><Pages.NewbuildsMap /></LazyPage>} />
+          <Route path={APP_ROUTES.NEWBUILDS_CALCULATOR} element={<LazyPage><Pages.NewbuildsCalculator /></LazyPage>} />
+          <Route path={APP_ROUTES.NEWBUILDS_COMPARE} element={<LazyPage><Pages.NewbuildsCompare /></LazyPage>} />
+          <Route path={APP_ROUTES.NEWBUILDS_AREAS} element={<LazyPage><Pages.NewbuildsAreaGuides /></LazyPage>} />
+          <Route path="/newbuilds/areas/:slug" element={<LazyPage><Pages.NewbuildsAreaDetail /></LazyPage>} />
+          <Route path={APP_ROUTES.NEWBUILDS_DUE_DILIGENCE} element={<LazyPage><Pages.NewbuildsDueDiligence /></LazyPage>} />
+        </Route>
 
         {/* ── Developer Portal ── */}
         <Route path="/developer-portal" element={<Suspense fallback={<LoadingState />}><Pages.DeveloperPortalLayout /></Suspense>}>
@@ -574,7 +583,6 @@ export const AnimatedRoutes: React.FC = () => {
            <Route path="/admin/legal-documents" element={<Pages.AdminLegalDocuments />} />
            <Route path="/admin/qa-test-runner" element={<Pages.AdminQATestRunner />} />
            <Route path="/admin/api-keys" element={<Pages.AdminApiKeys />} />
-           <Route path="/admin/newbuilds" element={<Pages.AdminNewbuilds />} />
         </Route>
         
         {/* ── Staff ── */}

@@ -40,6 +40,30 @@
   background-color: hsl(var(--nb-bg));
 }
 
+/* ─ Light variant — overrides dark palette for unified Property Hub theme ─ */
+.nb-theme--light {
+  --nb-bg: 0 0% 99%;               /* near-white */
+  --nb-surface: 36 30% 96%;        /* warm cream */
+  --nb-card: 0 0% 100%;            /* pure white */
+  --nb-gold: 38 65% 42%;           /* darker gold for AA contrast on light */
+  --nb-gold-dim: 38 55% 35%;
+  --nb-gold-bright: 43 70% 50%;
+  --nb-muted: 30 8% 45%;           /* warm grey */
+  --nb-text: 30 15% 12%;           /* near-black */
+  --nb-text-secondary: 30 8% 35%;
+  --nb-border: 38 35% 80%;
+  --nb-glass-bg: 0 0% 100% / 0.7;
+  --nb-glass-border: 38 35% 75% / 0.4;
+
+  color: hsl(var(--nb-text));
+  background-color: hsl(var(--nb-bg));
+}
+
+.nb-theme--light .nb-glass:hover {
+  border-color: hsl(var(--nb-gold) / 0.6);
+  box-shadow: 0 4px 16px hsl(var(--nb-gold) / 0.08);
+}
+
 /* ─ Grain texture overlay ─ */
 .nb-grain::before {
   content: '';
