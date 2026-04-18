@@ -433,8 +433,8 @@ export default function AdminProjects() {
           }
         />
 
-        {/* Search */}
-        <div className="mb-6">
+        {/* Search + Moderation filter */}
+        <div className="mb-4 space-y-3">
           <div className="relative max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -444,7 +444,61 @@ export default function AdminProjects() {
               className="pl-10"
             />
           </div>
+          <div className="flex gap-2 flex-wrap">
+            {([
+              { id: 'all', label: isRu ? 'Все' : 'All', count: projects?.length || 0 },
+              { id: 'orphan', label: isRu ? 'Orphan' : 'Orphan', count: moderationCounts.orphan },
+              { id: 'needs_review', label: isRu ? 'Нужна ревизия' : 'Needs review', count: moderationCounts.needs_review },
+              { id: 'pending', label: isRu ? 'На модерации' : 'Pending', count: moderationCounts.pending },
+              { id: 'approved', label: isRu ? 'Одобрено' : 'Approved' },
+            ] as const).map(f => (
+              <Button
+                key={f.id}
+                size="sm"
+                variant={moderationFilter === f.id ? 'default' : 'outline'}
+                onClick={() => setModerationFilter(f.id as any)}
+              >
+                {f.label}
+                {'count' in f && f.count !== undefined && (
+                  <Badge variant="secondary" className="ml-2 h-5 px-1.5 text-[10px]">{f.count}</Badge>
+                )}
+              </Button>
+            ))}
+          </div>
         </div>
+
+        {/* Bulk actions toolbar */}
+        {selectedIds.size > 0 && (
+          <Card className="mb-4 border-primary/40">
+            <CardContent className="p-3 flex items-center gap-3 flex-wrap">
+              <span className="text-sm font-medium">
+                {isRu ? `Выбрано: ${selectedIds.size}` : `Selected: ${selectedIds.size}`}
+              </span>
+              <div className="flex items-center gap-2 flex-1 min-w-[260px]">
+                <Select value={bulkDeveloperId} onValueChange={setBulkDeveloperId}>
+                  <SelectTrigger className="h-9 w-[260px]">
+                    <SelectValue placeholder={isRu ? 'Назначить застройщика…' : 'Assign developer…'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {developers?.map(d => (
+                      <SelectItem key={d.id} value={d.id}>{d.name_en}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button size="sm" disabled={!bulkDeveloperId || isBulkProcessing} onClick={handleBulkAssignDeveloper}>
+                  {isRu ? 'Применить' : 'Apply'}
+                </Button>
+              </div>
+              <Button size="sm" variant="outline" disabled={isBulkProcessing} onClick={handleBulkApprove}>
+                <ShieldCheck className="h-4 w-4 mr-1" />
+                {isRu ? 'Одобрить' : 'Approve'}
+              </Button>
+              <Button size="sm" variant="ghost" onClick={clearSelection}>
+                {isRu ? 'Очистить' : 'Clear'}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
