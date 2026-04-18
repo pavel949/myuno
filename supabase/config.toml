@@ -159,3 +159,7 @@ project_id = "erfwtoavipwjqmylpizt"
     verify_jwt = false
   [functions.external-data-api]
     verify_jwt = false
+  [functions.drive-import-folder]
+    verify_jwt = false
+  [functions.drive-watch-cron]
+    verify_jwt = false
