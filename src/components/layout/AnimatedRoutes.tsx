@@ -55,6 +55,7 @@ const TransportIdRedirect = () => {
 const TourRedirect = () => { const { id } = useParams(); return <Navigate to={`/experiences/${id}`} replace />; };
 const TourBookRedirect = () => { const { id } = useParams(); return <Navigate to={`/experiences/${id}/book`} replace />; };
 const WaterDetailRedirect = () => { const { id } = useParams(); return <Navigate to={`/experiences/${id}`} replace />; };
+const PropertyProjectRedirect = () => { const { id } = useParams(); return <Navigate to={`/property/offplan/${id}`} replace />; };
 const WaterBookRedirect = () => { const { id } = useParams(); return <Navigate to={`/experiences/${id}/book`} replace />; };
 
 // Legacy redirect helpers for Property Hub migration
@@ -218,7 +219,7 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="deposit-success" element={<LazyPage><Pages.PropertyDepositSuccess /></LazyPage>} />
           <Route path="map" element={<LazyPage><Pages.PropertyMap /></LazyPage>} />
           {/* Legacy /property/project/:id → canonical /property/offplan/:id */}
-          <Route path="project/:id" element={<Navigate to="../offplan/:id" replace />} />
+          <Route path="project/:id" element={<PropertyProjectRedirect />} />
           
           {/* Off-Plan & Developers (moved from /offplan, /developers, /complexes) */}
           <Route path="offplan" element={<LazyPage><Pages.OffplanIndex /></LazyPage>} />
