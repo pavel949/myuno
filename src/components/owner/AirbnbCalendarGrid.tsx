@@ -15,6 +15,7 @@ import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, en
 import { ru, enUS } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Sparkles, Wrench, Lock, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { PropertyReference } from '@/types/property';
 
 interface AirbnbCalendarGridProps {
@@ -310,38 +311,70 @@ export function AirbnbCalendarGrid({ propertyId, properties = [] }: AirbnbCalend
                   const guestInitials = span.booking.guest_name
                     ? span.booking.guest_name.split(' ').map(w => w[0]).join('').slice(0, 2)
                     : '?';
+                  const sourceLabel = span.booking.source
+                    ? span.booking.source.charAt(0).toUpperCase() + span.booking.source.slice(1)
+                    : (isRu ? 'Вручную' : 'Manual');
+                  const totalAmount = (span.booking as PropertyBooking & { total_amount?: number }).total_amount;
+                  const currencyCode = (span.booking as PropertyBooking & { currency?: string }).currency || 'THB';
 
                   return (
-                    <div
-                      key={`${span.booking.id}-${weekIdx}-${i}`}
-                      className={cn(
-                        "absolute h-5 flex items-center px-1.5 text-[10px] font-medium cursor-pointer z-10",
-                        "bg-primary/80 text-primary-foreground hover:bg-primary/90 transition-colors",
-                        span.isStart && "rounded-l-md ml-0.5",
-                        span.isEnd && "rounded-r-md mr-0.5",
-                        !span.isStart && !span.isEnd && "",
-                      )}
-                      style={{
-                        left: `${leftPercent}%`,
-                        width: `calc(${widthPercent}% - ${(span.isStart ? 2 : 0) + (span.isEnd ? 2 : 0)}px)`,
-                        top: '28px', // below date number
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const checkInDate = new Date(span.booking.check_in);
-                        setSelectedDate(checkInDate);
-                        setShowEventsSheet(true);
-                      }}
-                    >
-                      {span.isStart && (
-                        <span className="truncate">
-                          {span.spanCols >= 2 ? span.booking.guest_name || guestInitials : guestInitials}
-                        </span>
-                      )}
-                      {!span.isStart && span.spanCols >= 3 && (
-                        <span className="truncate opacity-70">{span.booking.guest_name || ''}</span>
-                      )}
-                    </div>
+                    <TooltipProvider key={`${span.booking.id}-${weekIdx}-${i}`} delayDuration={150}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div
+                            className={cn(
+                              "absolute h-5 flex items-center px-1.5 text-[10px] font-medium cursor-pointer z-10",
+                              "bg-primary/80 text-primary-foreground hover:bg-primary/90 transition-colors",
+                              span.isStart && "rounded-l-md ml-0.5",
+                              span.isEnd && "rounded-r-md mr-0.5",
+                              !span.isStart && !span.isEnd && "",
+                            )}
+                            style={{
+                              left: `${leftPercent}%`,
+                              width: `calc(${widthPercent}% - ${(span.isStart ? 2 : 0) + (span.isEnd ? 2 : 0)}px)`,
+                              top: '28px', // below date number
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const checkInDate = new Date(span.booking.check_in);
+                              setSelectedDate(checkInDate);
+                              setShowEventsSheet(true);
+                            }}
+                          >
+                            {span.isStart && (
+                              <span className="truncate">
+                                {span.spanCols >= 2 ? span.booking.guest_name || guestInitials : guestInitials}
+                              </span>
+                            )}
+                            {!span.isStart && span.spanCols >= 3 && (
+                              <span className="truncate opacity-70">{span.booking.guest_name || ''}</span>
+                            )}
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="text-xs space-y-1 max-w-[260px]">
+                          <div className="font-semibold">
+                            {span.booking.guest_name || (isRu ? 'Гость' : 'Guest')}
+                          </div>
+                          <div className="text-muted-foreground">
+                            {format(new Date(span.booking.check_in), 'd MMM', { locale })}
+                            {' → '}
+                            {format(new Date(span.booking.check_out), 'd MMM', { locale })}
+                          </div>
+                          <div className="flex items-center justify-between gap-3">
+                            <span className="text-muted-foreground">{isRu ? 'Канал:' : 'Channel:'}</span>
+                            <span className="font-medium">{sourceLabel}</span>
+                          </div>
+                          {totalAmount != null && totalAmount > 0 && (
+                            <div className="flex items-center justify-between gap-3">
+                              <span className="text-muted-foreground">{isRu ? 'Сумма:' : 'Total:'}</span>
+                              <span className="font-medium">
+                                {totalAmount.toLocaleString()} {currencyCode}
+                              </span>
+                            </div>
+                          )}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   );
                 })}
               </div>
