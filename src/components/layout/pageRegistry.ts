@@ -92,6 +92,15 @@ export const InvestmentHubShell = lazy(() => import('@/pages/invest/InvestmentHu
 export const InvestmentDetail = lazy(() => import('@/pages/invest/InvestmentDetail'));
 export const InvestorDashboard = lazy(() => import('@/pages/invest/InvestorDashboard'));
 export const RaiseFunding = lazy(() => import('@/pages/invest/RaiseFunding'));
+export const InvestmentHubLanding = lazy(() => import('@/pages/invest/InvestmentHubLanding'));
+export const InvestmentRealEstateZone = lazy(() => import('@/pages/invest/InvestmentRealEstateZone'));
+export const InvestmentBusinessZone = lazy(() => import('@/pages/invest/InvestmentBusinessZone'));
+export const InvestmentKnowledgeZone = lazy(() => import('@/pages/invest/InvestmentKnowledgeZone'));
+export const InvestmentServicesZone = lazy(() => import('@/pages/invest/InvestmentServicesZone'));
+export const InvestmentOpsConsole = lazy(() => import('@/pages/invest/InvestmentOpsConsole'));
+export const InvestmentBusinessDetail = lazy(() => import('@/pages/invest/InvestmentBusinessDetail'));
+export const InvestmentPitch = lazy(() => import('@/pages/invest/InvestmentPitch'));
+export const InvestInThailand = lazy(() => import('@/pages/invest/InvestInThailand'));
 
 // ── Guest ──
 export const GuestMessages = lazy(() => import('@/pages/guest/GuestMessages'));
