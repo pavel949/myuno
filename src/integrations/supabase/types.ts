@@ -5045,48 +5045,6 @@ export type Database = {
           },
         ]
       }
-      crm_score_log: {
-        Row: {
-          contact_id: string
-          id: string
-          points: number
-          reason: string
-          rule_id: string | null
-          scored_at: string | null
-        }
-        Insert: {
-          contact_id: string
-          id?: string
-          points: number
-          reason: string
-          rule_id?: string | null
-          scored_at?: string | null
-        }
-        Update: {
-          contact_id?: string
-          id?: string
-          points?: number
-          reason?: string
-          rule_id?: string | null
-          scored_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "crm_score_log_contact_id_fkey"
-            columns: ["contact_id"]
-            isOneToOne: false
-            referencedRelation: "crm_contacts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "crm_score_log_rule_id_fkey"
-            columns: ["rule_id"]
-            isOneToOne: false
-            referencedRelation: "crm_scoring_rules"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       crm_scoring_rules: {
         Row: {
           company_id: string
@@ -8371,39 +8329,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      juristic_documents: {
-        Row: {
-          created_at: string
-          document_type: string | null
-          file_url: string | null
-          id: string
-          property_id: string | null
-          title: string | null
-          updated_at: string
-          uploaded_by: string | null
-        }
-        Insert: {
-          created_at?: string
-          document_type?: string | null
-          file_url?: string | null
-          id?: string
-          property_id?: string | null
-          title?: string | null
-          updated_at?: string
-          uploaded_by?: string | null
-        }
-        Update: {
-          created_at?: string
-          document_type?: string | null
-          file_url?: string | null
-          id?: string
-          property_id?: string | null
-          title?: string | null
-          updated_at?: string
-          uploaded_by?: string | null
-        }
-        Relationships: []
       }
       juristic_requests: {
         Row: {
