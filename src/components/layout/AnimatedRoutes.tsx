@@ -71,7 +71,7 @@ const WaterBookRedirect = () => { const { id } = useParams(); return <Navigate t
 const FoodRestaurantIdRedirect = () => { const { id } = useParams(); return <Navigate to={`/restaurants/${id}`} replace />; };
 const OffplanIdRedirect = () => { const { id } = useParams(); return <Navigate to={`/property/offplan/${id}`} replace />; };
 const DeveloperIdRedirect = () => { const { id } = useParams(); return <Navigate to={`/property/developers/${id}`} replace />; };
-const InvestIdRedirect = () => { const { id } = useParams(); return <Navigate to={`/property/invest/${id}`} replace />; };
+const InvestIdRedirect = () => { const { id } = useParams(); return <Navigate to={`/invest/${id}`} replace />; };
 
 // ── Layout Wrappers ──
 
@@ -242,15 +242,15 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="resale" element={<LazyPage><Pages.ResaleIndex /></LazyPage>} />
           <Route path="resale/:id" element={<LazyPage><Pages.ResaleDetail /></LazyPage>} />
           
-          {/* Investment (moved from /invest) */}
-          <Route path="invest" element={<LazyPage><Pages.InvestmentIndex /></LazyPage>} />
-          <Route path="invest/market" element={<LazyPage><Pages.InvestmentHubShell /></LazyPage>} />
-          <Route path="invest/deals" element={<LazyPage><Pages.InvestmentHubShell /></LazyPage>} />
-          <Route path="invest/network" element={<LazyPage><Pages.InvestmentHubShell /></LazyPage>} />
-          <Route path="invest/execution" element={<LazyPage><Pages.InvestmentHubShell /></LazyPage>} />
-          <Route path="invest/dashboard" element={<LazyPage><Pages.InvestorDashboard /></LazyPage>} />
-          <Route path="invest/raise" element={<LazyPage><Pages.RaiseFunding /></LazyPage>} />
-          <Route path="invest/:id" element={<LazyPage><Pages.InvestmentDetail /></LazyPage>} />
+          {/* Legacy /property/invest/* → top-level /invest/* */}
+          <Route path="invest" element={<Navigate to={APP_ROUTES.INVEST} replace />} />
+          <Route path="invest/dashboard" element={<Navigate to={APP_ROUTES.INVEST_DASHBOARD} replace />} />
+          <Route path="invest/raise" element={<Navigate to={APP_ROUTES.INVEST_RAISE} replace />} />
+          <Route path="invest/market" element={<Navigate to={APP_ROUTES.INVEST_MARKET} replace />} />
+          <Route path="invest/deals" element={<Navigate to={APP_ROUTES.INVEST_DEALS} replace />} />
+          <Route path="invest/network" element={<Navigate to={APP_ROUTES.INVEST_NETWORK} replace />} />
+          <Route path="invest/execution" element={<Navigate to={APP_ROUTES.INVEST_EXECUTION} replace />} />
+          <Route path="invest/:id" element={<InvestIdRedirect />} />
           
           {/* My Property */}
           <Route path="my" element={<LazyPage><Pages.PropertyMySection /></LazyPage>} />
@@ -412,8 +412,25 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.CONTRACT_ANALYSIS} element={<LazyPage><Pages.ContractAnalysisPage /></LazyPage>} />
         <Route path={APP_ROUTES.TAX_NAV} element={<LazyPage><Pages.TaxNavPage /></LazyPage>} />
         
-        {/* ── INVEST Cluster (legacy; canonical route is /property/invest) ── */}
+        {/* ── Investment Hub (top-level, multi-asset) ── */}
+        <Route path={APP_ROUTES.INVEST} element={<LazyPage><Pages.InvestmentHubLanding /></LazyPage>} />
+        <Route path={APP_ROUTES.INVEST_REAL_ESTATE} element={<LazyPage><Pages.InvestmentRealEstateZone /></LazyPage>} />
+        <Route path={APP_ROUTES.INVEST_BUSINESS} element={<LazyPage><Pages.InvestmentBusinessZone /></LazyPage>} />
+        <Route path={APP_ROUTES.INVEST_KNOWLEDGE} element={<LazyPage><Pages.InvestmentKnowledgeZone /></LazyPage>} />
+        <Route path={APP_ROUTES.INVEST_SERVICES} element={<LazyPage><Pages.InvestmentServicesZone /></LazyPage>} />
+        <Route path={APP_ROUTES.INVEST_QUIZ} element={<Navigate to={APP_ROUTES.INVEST} replace />} />
+        <Route path={APP_ROUTES.INVEST_DASHBOARD} element={<LazyPage><Pages.InvestorDashboard /></LazyPage>} />
+        <Route path={APP_ROUTES.INVEST_RAISE} element={<LazyPage><Pages.RaiseFunding /></LazyPage>} />
+        {/* Admin-only ops console (Market/Deals/Network/Execution shell) */}
+        <Route path={APP_ROUTES.INVEST_OPS} element={<Navigate to={APP_ROUTES.INVEST_MARKET} replace />} />
+        <Route path={APP_ROUTES.INVEST_MARKET} element={<AdminGuard><LazyPage><Pages.InvestmentOpsConsole /></LazyPage></AdminGuard>} />
+        <Route path={APP_ROUTES.INVEST_DEALS} element={<AdminGuard><LazyPage><Pages.InvestmentOpsConsole /></LazyPage></AdminGuard>} />
+        <Route path={APP_ROUTES.INVEST_NETWORK} element={<AdminGuard><LazyPage><Pages.InvestmentOpsConsole /></LazyPage></AdminGuard>} />
+        <Route path={APP_ROUTES.INVEST_EXECUTION} element={<AdminGuard><LazyPage><Pages.InvestmentOpsConsole /></LazyPage></AdminGuard>} />
+        <Route path={APP_ROUTES.INVEST_DETAIL(':id')} element={<LazyPage><Pages.InvestmentDetail /></LazyPage>} />
+        {/* Legacy aliases */}
         <Route path={APP_ROUTES.INVEST_CLUSTER} element={<Navigate to={APP_ROUTES.INVEST} replace />} />
+        <Route path="/invest-hub" element={<Navigate to={APP_ROUTES.INVEST} replace />} />
         
         {/* ── Knowledge ── */}
         <Route path={APP_ROUTES.KNOWLEDGE} element={<LazyPage><Pages.KnowledgeHub /></LazyPage>} />

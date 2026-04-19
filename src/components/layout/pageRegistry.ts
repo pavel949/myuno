@@ -200,8 +200,8 @@ export const LegalClusterPage = lazy(() => import('@/pages/legal/LegalClusterPag
 export const ContractAnalysisPage = lazy(() => import('@/pages/legal/ContractAnalysisPage'));
 export const TaxNavPage = lazy(() => import('@/pages/legal/TaxNavPage'));
 
-// ── INVEST Cluster ──
-export const InvestClusterPage = lazy(() => import('@/pages/invest/InvestClusterPage'));
+// ── INVEST Cluster (legacy alias → InvestmentHubLanding) ──
+export const InvestClusterPage = InvestmentHubLanding;
 
 // ── Experiences ──
 export const ExperiencesIndex = lazy(() => import('@/pages/experiences/ExperiencesIndex'));
