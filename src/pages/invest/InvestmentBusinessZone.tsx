@@ -74,6 +74,27 @@ export default function InvestmentBusinessZone() {
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
 
+          {/* Anonymized business listings (new in Phase 2) */}
+          {(loadingListings || (listings && listings.length > 0)) && (
+            <section className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Lock className="h-4 w-4 text-primary" />
+                <h2 className="font-bold">
+                  {isRu ? 'Анонимные предложения' : 'Anonymous deal flow'}
+                </h2>
+              </div>
+              {loadingListings ? (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {[1, 2].map((i) => <Skeleton key={i} className="h-[300px] rounded-xl" />)}
+                </div>
+              ) : (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {listings!.map((l) => <AnonymizedListingCard key={l.id} listing={l} />)}
+                </div>
+              )}
+            </section>
+          )}
+
           {isLoading ? (
             <div className="grid gap-4">
               {[1, 2, 3].map((i) => (
