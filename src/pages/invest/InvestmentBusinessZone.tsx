@@ -34,10 +34,10 @@ export default function InvestmentBusinessZone() {
       </Helmet>
       <MiniAppLayout title={isRu ? 'Бизнес' : 'Business'} showSearch={false}>
         <div className="space-y-5 pb-10">
-          <Card className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 border-amber-500/20">
+          <Card className="bg-gradient-to-br from-primary/10 to-accent/10 border-primary/20">
             <CardContent className="p-5 space-y-2">
               <div className="flex items-center gap-2">
-                <Briefcase className="h-5 w-5 text-amber-600" />
+                <Briefcase className="h-5 w-5 text-primary" />
                 <h1 className="font-bold text-lg">
                   {isRu ? 'Готовый бизнес и франшизы' : 'Operating business & franchises'}
                 </h1>
