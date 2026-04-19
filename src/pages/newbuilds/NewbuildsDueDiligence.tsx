@@ -3,10 +3,12 @@
  */
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, CheckCircle, Circle, ArrowRight, Shield, Scale, Banknote, HardHat, Building2, Key } from 'lucide-react';
+import { CheckCircle, Circle, ArrowRight, Shield, Scale, Banknote, HardHat, Building2, Key } from 'lucide-react';
 import NewbuildsLayout from '@/components/newbuilds/NewbuildsLayout';
-import { CHECKLIST_ITEMS, CHECKLIST_CATEGORIES, type ChecklistItem } from '@/lib/config/dueDiligenceChecklist';
+import { NewbuildsHero } from '@/components/newbuilds/NewbuildsHero';
+import { CHECKLIST_ITEMS, CHECKLIST_CATEGORIES } from '@/lib/config/dueDiligenceChecklist';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { cn } from '@/lib/utils';
 
 const STORAGE_KEY = 'myuno_dd_checklist';
 
@@ -18,10 +20,10 @@ const categoryIcons: Record<string, React.ElementType> = {
   post_purchase: Key,
 };
 
-const importanceColors: Record<string, { bg: string; color: string; border: string; label: string }> = {
-  critical: { bg: 'hsl(0 70% 50% / 0.12)', color: 'hsl(0 70% 60%)', border: 'hsl(0 70% 50% / 0.3)', label: 'Критично' },
-  high: { bg: 'hsl(38 92% 50% / 0.12)', color: 'hsl(38 92% 60%)', border: 'hsl(38 92% 50% / 0.3)', label: 'Важно' },
-  medium: { bg: 'hsl(var(--nb-gold) / 0.12)', color: 'hsl(var(--nb-gold))', border: 'hsl(var(--nb-gold) / 0.3)', label: 'Рекомендуется' },
+const importanceClass: Record<string, { wrap: string; label: string }> = {
+  critical: { wrap: 'bg-destructive/15 text-destructive border-destructive/30', label: 'Критично' },
+  high:     { wrap: 'bg-warning/15 text-warning border-warning/30',           label: 'Важно' },
+  medium:   { wrap: 'bg-primary/15 text-primary border-primary/30',           label: 'Рекомендуется' },
 };
 
 export default function NewbuildsDueDiligence() {
@@ -66,39 +68,30 @@ export default function NewbuildsDueDiligence() {
 
   return (
     <NewbuildsLayout>
-      <section className="relative px-4 pt-20 pb-12 nb-blueprint nb-grain overflow-hidden">
-        <div className="relative z-10 max-w-4xl mx-auto">
-          <Link to={APP_ROUTES.NEWBUILDS} className="inline-flex items-center gap-1 text-sm mb-4 transition-colors hover:opacity-80" style={{ color: 'hsl(var(--nb-gold))' }}>
-            <ChevronLeft className="w-4 h-4" /> Новостройки
-          </Link>
-          <div className="flex items-center gap-3 mb-2">
-            <Shield className="w-8 h-8" style={{ color: 'hsl(var(--nb-gold))' }} />
-            <h1 className="nb-display text-3xl md:text-5xl" style={{ color: 'hsl(var(--nb-gold))' }}>
-              Due Diligence
-            </h1>
-          </div>
-          <p className="mt-2" style={{ color: 'hsl(var(--nb-muted))' }}>
-            Интерактивный чек-лист для безопасной покупки новостройки на Пхукете
-          </p>
-        </div>
-      </section>
+      <NewbuildsHero
+        icon={Shield}
+        title="Due Diligence"
+        subtitle="Интерактивный чек-лист для безопасной покупки новостройки на Пхукете"
+        backTo={APP_ROUTES.NEWBUILDS}
+        backLabel="Новостройки"
+      />
 
-      <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
+      <div className="max-w-4xl mx-auto px-4 py-6 md:py-8 space-y-8">
         {/* Progress bar */}
         <div className="nb-glass p-5">
           <div className="flex items-center justify-between mb-3">
             <span className="nb-label">ОБЩИЙ ПРОГРЕСС</span>
-            <span className="nb-mono text-sm font-bold" style={{ color: 'hsl(var(--nb-gold))' }}>
+            <span className="nb-mono text-sm font-bold text-primary">
               {progress.done}/{progress.total} ({progress.percent}%)
             </span>
           </div>
-          <div className="nb-progress-track h-2">
+          <div className="nb-progress-track h-2" role="progressbar" aria-valuenow={progress.percent} aria-valuemin={0} aria-valuemax={100}>
             <div className="nb-progress-fill transition-all duration-500" style={{ width: `${progress.percent}%` }} />
           </div>
         </div>
 
         {/* Category tabs */}
-        <div className="flex gap-2 overflow-x-auto pb-2">
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide" role="tablist">
           {CHECKLIST_CATEGORIES.map(cat => {
             const Icon = categoryIcons[cat.id] || Shield;
             const counts = categoryCounts[cat.id];
@@ -108,20 +101,23 @@ export default function NewbuildsDueDiligence() {
             return (
               <button
                 key={cat.id}
+                role="tab"
+                aria-selected={isActive}
                 onClick={() => setActiveCategory(cat.id)}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm whitespace-nowrap transition-all flex-shrink-0"
-                style={{
-                  background: isActive ? 'hsl(var(--nb-gold) / 0.15)' : 'hsl(var(--nb-surface))',
-                  color: isActive ? 'hsl(var(--nb-gold))' : 'hsl(var(--nb-text-secondary))',
-                  border: `1px solid ${isActive ? 'hsl(var(--nb-gold) / 0.3)' : 'hsl(var(--nb-gold) / 0.1)'}`,
-                }}
+                className={cn(
+                  'flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm whitespace-nowrap transition-all flex-shrink-0 border',
+                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                  isActive
+                    ? 'bg-primary/15 text-primary border-primary/30'
+                    : 'bg-card text-muted-foreground border-border hover:text-foreground'
+                )}
               >
-                <Icon className="w-4 h-4" />
+                <Icon className="w-4 h-4" aria-hidden />
                 <span>{cat.label_ru}</span>
-                <span className="nb-mono text-[10px] px-1.5 py-0.5 rounded" style={{
-                  background: isDone ? 'hsl(142 70% 45% / 0.15)' : 'hsl(var(--nb-gold) / 0.1)',
-                  color: isDone ? 'hsl(142 70% 55%)' : 'hsl(var(--nb-muted))',
-                }}>
+                <span className={cn(
+                  'nb-mono text-[10px] px-1.5 py-0.5 rounded',
+                  isDone ? 'bg-success/15 text-success' : 'bg-primary/10 text-muted-foreground'
+                )}>
                   {counts.done}/{counts.total}
                 </span>
               </button>
@@ -133,49 +129,49 @@ export default function NewbuildsDueDiligence() {
         <div className="space-y-3">
           {categoryItems.map(item => {
             const isDone = checked.has(item.id);
-            const imp = importanceColors[item.importance];
+            const imp = importanceClass[item.importance] || importanceClass.medium;
 
             return (
               <div
                 key={item.id}
-                className="nb-glass p-5 transition-all"
-                style={{ opacity: isDone ? 0.6 : 1 }}
+                className={cn('nb-glass p-5 transition-opacity', isDone && 'opacity-60')}
               >
                 <div className="flex items-start gap-3">
-                  <button onClick={() => toggle(item.id)} className="mt-0.5 flex-shrink-0">
+                  <button
+                    onClick={() => toggle(item.id)}
+                    className="mt-0.5 flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-full"
+                    aria-pressed={isDone}
+                    aria-label={isDone ? `Отменить: ${item.title_ru}` : `Отметить выполненным: ${item.title_ru}`}
+                  >
                     {isDone ? (
-                      <CheckCircle className="w-5 h-5" style={{ color: 'hsl(142 70% 55%)' }} />
+                      <CheckCircle className="w-5 h-5 text-success" aria-hidden />
                     ) : (
-                      <Circle className="w-5 h-5" style={{ color: 'hsl(var(--nb-muted))' }} />
+                      <Circle className="w-5 h-5 text-muted-foreground" aria-hidden />
                     )}
                   </button>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <h4
-                        className="text-sm font-medium"
-                        style={{
-                          color: isDone ? 'hsl(var(--nb-muted))' : 'hsl(var(--nb-text))',
-                          textDecoration: isDone ? 'line-through' : 'none',
-                        }}
-                      >
+                      <h4 className={cn(
+                        'text-sm font-medium',
+                        isDone ? 'text-muted-foreground line-through' : 'text-foreground'
+                      )}>
                         {item.title_ru}
                       </h4>
-                      <span className="nb-badge text-[9px]" style={{ background: imp.bg, color: imp.color, border: `1px solid ${imp.border}` }}>
+                      <span className={cn('nb-badge text-[9px] border', imp.wrap)}>
                         {imp.label}
                       </span>
                     </div>
-                    <p className="text-xs leading-relaxed" style={{ color: 'hsl(var(--nb-text-secondary))' }}>
+                    <p className="text-xs leading-relaxed text-muted-foreground">
                       {item.description_ru}
                     </p>
 
                     {item.service_link && (
                       <Link
                         to={item.service_link}
-                        className="inline-flex items-center gap-1 text-xs mt-2 transition-colors hover:opacity-80"
-                        style={{ color: 'hsl(var(--nb-gold))' }}
+                        className="inline-flex items-center gap-1 text-xs mt-2 text-primary hover:underline"
                       >
-                        {item.service_label_ru || 'Помощь myUNO'} <ArrowRight className="w-3 h-3" />
+                        {item.service_label_ru || 'Помощь myUNO'} <ArrowRight className="w-3 h-3" aria-hidden />
                       </Link>
                     )}
                   </div>

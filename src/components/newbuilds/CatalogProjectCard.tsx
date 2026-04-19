@@ -4,7 +4,7 @@
  */
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { MessageCircle, Phone, ExternalLink, Bed, Waves, Building, Users, Target } from 'lucide-react';
+import { MessageCircle, Phone, ExternalLink, Bed, Waves, Building, Users, Target, Star, MapPin } from 'lucide-react';
 import type { OffplanProject } from '@/hooks/useOffplanProjects';
 import type { OffplanCatalogFacet, RecLabel } from '@/lib/offplan/types';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -91,7 +91,7 @@ export function CatalogProjectCard({ project, rank, onInquiry }: Props) {
             className="absolute top-2 left-2 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider"
             style={{ background: 'hsl(var(--nb-gold))', color: 'hsl(var(--nb-bg))' }}
           >
-            ⭐ {project.featuredLabel || 'FEATURED'}
+            <span className="inline-flex items-center gap-1"><Star className="w-3 h-3 fill-current" aria-hidden />{project.featuredLabel || 'FEATURED'}</span>
           </div>
         )}
 
@@ -201,7 +201,7 @@ export function CatalogProjectCard({ project, rank, onInquiry }: Props) {
 
         {/* Zone + Units */}
         <div className="flex items-center justify-between text-[11px]" style={{ color: 'hsl(var(--nb-muted))' }}>
-          {zone && <span>📍 {zone}</span>}
+          {zone && <span className="inline-flex items-center gap-1"><MapPin className="w-3 h-3" aria-hidden />{zone}</span>}
           {project.unitsAvailable > 0 && (
             <span>{project.unitsAvailable} units</span>
           )}

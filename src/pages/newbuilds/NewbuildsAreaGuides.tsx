@@ -3,8 +3,9 @@
  */
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, MapPin, TrendingUp, Star } from 'lucide-react';
+import { MapPin, TrendingUp, Star, Compass } from 'lucide-react';
 import NewbuildsLayout from '@/components/newbuilds/NewbuildsLayout';
+import { NewbuildsHero } from '@/components/newbuilds/NewbuildsHero';
 import { PHUKET_AREAS } from '@/lib/config/phuketAreas';
 import { useNewbuildProjects } from '@/hooks/useNewbuildProjects';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -25,21 +26,15 @@ export default function NewbuildsAreaGuides() {
 
   return (
     <NewbuildsLayout>
-      <section className="relative px-4 pt-20 pb-12 nb-blueprint nb-grain overflow-hidden">
-        <div className="relative z-10 max-w-7xl mx-auto">
-          <Link to={APP_ROUTES.NEWBUILDS} className="inline-flex items-center gap-1 text-sm mb-4 transition-colors hover:opacity-80" style={{ color: 'hsl(var(--nb-gold))' }}>
-            <ChevronLeft className="w-4 h-4" /> Новостройки
-          </Link>
-          <h1 className="nb-display text-3xl md:text-5xl" style={{ color: 'hsl(var(--nb-gold))' }}>
-            Районы Пхукета
-          </h1>
-          <p className="mt-2 max-w-2xl" style={{ color: 'hsl(var(--nb-muted))' }}>
-            Инвестиционные профили районов острова. Средние цены, доходность, инфраструктура и перспективы роста.
-          </p>
-        </div>
-      </section>
+      <NewbuildsHero
+        icon={Compass}
+        title="Районы Пхукета"
+        subtitle="Инвестиционные профили районов острова. Средние цены, доходность, инфраструктура и перспективы роста."
+        backTo={APP_ROUTES.NEWBUILDS}
+        backLabel="Новостройки"
+      />
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-6 md:py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {PHUKET_AREAS.map(area => {
             const projectCount = areaCounts[area.slug] || 0;
@@ -48,26 +43,30 @@ export default function NewbuildsAreaGuides() {
               <Link
                 key={area.slug}
                 to={`/newbuilds/areas/${area.slug}`}
-                className="nb-glass overflow-hidden group"
+                className="nb-glass overflow-hidden group focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                aria-label={`Профиль района ${area.name_ru}`}
               >
                 {/* Header gradient */}
-                <div className="h-32 relative" style={{ background: `linear-gradient(135deg, hsl(var(--nb-surface)), hsl(var(--nb-card)))` }}>
+                <div className="h-32 relative bg-gradient-to-br from-primary/10 via-card to-primary/5">
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <MapPin className="w-8 h-8" style={{ color: 'hsl(var(--nb-gold) / 0.3)' }} />
+                    <MapPin className="w-8 h-8 text-primary/30" aria-hidden />
                   </div>
                   {/* Rating stars */}
-                  <div className="absolute top-3 right-3 flex gap-0.5">
+                  <div className="absolute top-3 right-3 flex gap-0.5" aria-label={`Рейтинг ${area.investment_rating} из 5`}>
                     {Array.from({ length: 5 }).map((_, i) => (
                       <Star
                         key={i}
-                        className="w-3.5 h-3.5"
-                        fill={i < area.investment_rating ? 'hsl(var(--nb-gold))' : 'none'}
-                        style={{ color: i < area.investment_rating ? 'hsl(var(--nb-gold))' : 'hsl(var(--nb-muted) / 0.3)' }}
+                        className={
+                          i < area.investment_rating
+                            ? 'w-3.5 h-3.5 fill-primary text-primary'
+                            : 'w-3.5 h-3.5 text-muted-foreground/40'
+                        }
+                        aria-hidden
                       />
                     ))}
                   </div>
                   {projectCount > 0 && (
-                    <span className="absolute top-3 left-3 nb-badge text-[10px]" style={{ background: 'hsl(var(--nb-gold) / 0.15)', color: 'hsl(var(--nb-gold))', border: '1px solid hsl(var(--nb-gold) / 0.3)' }}>
+                    <span className="absolute top-3 left-3 nb-badge text-[10px] bg-primary/15 text-primary border border-primary/30">
                       {projectCount} проектов
                     </span>
                   )}
@@ -75,12 +74,12 @@ export default function NewbuildsAreaGuides() {
 
                 {/* Content */}
                 <div className="p-5 space-y-3">
-                  <h3 className="nb-display text-xl" style={{ color: 'hsl(var(--nb-text))' }}>
+                  <h3 className="nb-display text-xl text-foreground">
                     {area.name_ru}
                   </h3>
-                  <p className="text-xs" style={{ color: 'hsl(var(--nb-muted))' }}>{area.name_en}</p>
+                  <p className="text-xs text-muted-foreground">{area.name_en}</p>
 
-                  <p className="text-sm line-clamp-2" style={{ color: 'hsl(var(--nb-text-secondary))' }}>
+                  <p className="text-sm line-clamp-2 text-muted-foreground">
                     {area.description_ru}
                   </p>
 
@@ -88,26 +87,26 @@ export default function NewbuildsAreaGuides() {
 
                   <div className="grid grid-cols-3 gap-3">
                     <div className="text-center">
-                      <p className="nb-mono text-sm font-bold" style={{ color: 'hsl(var(--nb-gold))' }}>
+                      <p className="nb-mono text-sm font-bold text-primary">
                         ฿{(area.avg_price_sqm / 1000).toFixed(0)}K
                       </p>
-                      <p className="text-[10px]" style={{ color: 'hsl(var(--nb-muted))' }}>за м²</p>
+                      <p className="text-[10px] text-muted-foreground">за м²</p>
                     </div>
-                    <div className="text-center border-x" style={{ borderColor: 'hsl(var(--nb-gold) / 0.15)' }}>
-                      <p className="nb-mono text-sm font-bold flex items-center justify-center gap-1" style={{ color: 'hsl(142 70% 55%)' }}>
-                        <TrendingUp className="w-3 h-3" /> {area.avg_yield}%
+                    <div className="text-center border-x border-border">
+                      <p className="nb-mono text-sm font-bold flex items-center justify-center gap-1 text-success">
+                        <TrendingUp className="w-3 h-3" aria-hidden /> {area.avg_yield}%
                       </p>
-                      <p className="text-[10px]" style={{ color: 'hsl(var(--nb-muted))' }}>доходность</p>
+                      <p className="text-[10px] text-muted-foreground">доходность</p>
                     </div>
                     <div className="text-center">
-                      <p className="nb-mono text-sm font-bold" style={{ color: 'hsl(var(--nb-text))' }}>
+                      <p className="nb-mono text-sm font-bold text-foreground">
                         {area.distance_beach_km < 1 ? `${(area.distance_beach_km * 1000).toFixed(0)}м` : `${area.distance_beach_km}км`}
                       </p>
-                      <p className="text-[10px]" style={{ color: 'hsl(var(--nb-muted))' }}>до пляжа</p>
+                      <p className="text-[10px] text-muted-foreground">до пляжа</p>
                     </div>
                   </div>
 
-                  <span className="text-xs font-medium group-hover:text-[hsl(var(--nb-gold))] transition-colors block" style={{ color: 'hsl(var(--nb-text-secondary))' }}>
+                  <span className="text-xs font-medium text-muted-foreground group-hover:text-primary transition-colors block">
                     Подробнее о районе →
                   </span>
                 </div>
