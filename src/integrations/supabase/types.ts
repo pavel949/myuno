@@ -1841,6 +1841,123 @@ export type Database = {
           },
         ]
       }
+      business_listings: {
+        Row: {
+          ask_amount: number | null
+          asset_class: string
+          asset_value: number | null
+          cover_image_url: string | null
+          created_at: string
+          currency: string | null
+          deal_stage: string | null
+          ebitda: number | null
+          equity_offered_pct: number | null
+          expected_close_date: string | null
+          full_description_en: string | null
+          full_description_ru: string | null
+          gallery_urls: string[] | null
+          id: string
+          intro_count: number | null
+          is_anonymized: boolean
+          lease_remaining_months: number | null
+          license_status: string | null
+          listing_type: string
+          location_district: string | null
+          min_ticket: number | null
+          monthly_revenue: number | null
+          owner_user_id: string | null
+          published_at: string | null
+          reason_for_sale: string | null
+          slug: string
+          staff_count: number | null
+          success_probability: number | null
+          teaser_en: string | null
+          teaser_ru: string | null
+          title_en: string
+          title_ru: string
+          updated_at: string
+          use_of_funds: string | null
+          view_count: number | null
+          visibility: string
+        }
+        Insert: {
+          ask_amount?: number | null
+          asset_class: string
+          asset_value?: number | null
+          cover_image_url?: string | null
+          created_at?: string
+          currency?: string | null
+          deal_stage?: string | null
+          ebitda?: number | null
+          equity_offered_pct?: number | null
+          expected_close_date?: string | null
+          full_description_en?: string | null
+          full_description_ru?: string | null
+          gallery_urls?: string[] | null
+          id?: string
+          intro_count?: number | null
+          is_anonymized?: boolean
+          lease_remaining_months?: number | null
+          license_status?: string | null
+          listing_type: string
+          location_district?: string | null
+          min_ticket?: number | null
+          monthly_revenue?: number | null
+          owner_user_id?: string | null
+          published_at?: string | null
+          reason_for_sale?: string | null
+          slug: string
+          staff_count?: number | null
+          success_probability?: number | null
+          teaser_en?: string | null
+          teaser_ru?: string | null
+          title_en: string
+          title_ru: string
+          updated_at?: string
+          use_of_funds?: string | null
+          view_count?: number | null
+          visibility?: string
+        }
+        Update: {
+          ask_amount?: number | null
+          asset_class?: string
+          asset_value?: number | null
+          cover_image_url?: string | null
+          created_at?: string
+          currency?: string | null
+          deal_stage?: string | null
+          ebitda?: number | null
+          equity_offered_pct?: number | null
+          expected_close_date?: string | null
+          full_description_en?: string | null
+          full_description_ru?: string | null
+          gallery_urls?: string[] | null
+          id?: string
+          intro_count?: number | null
+          is_anonymized?: boolean
+          lease_remaining_months?: number | null
+          license_status?: string | null
+          listing_type?: string
+          location_district?: string | null
+          min_ticket?: number | null
+          monthly_revenue?: number | null
+          owner_user_id?: string | null
+          published_at?: string | null
+          reason_for_sale?: string | null
+          slug?: string
+          staff_count?: number | null
+          success_probability?: number | null
+          teaser_en?: string | null
+          teaser_ru?: string | null
+          title_en?: string
+          title_ru?: string
+          updated_at?: string
+          use_of_funds?: string | null
+          view_count?: number | null
+          visibility?: string
+        }
+        Relationships: []
+      }
       buyers: {
         Row: {
           created_at: string | null
@@ -2229,6 +2346,101 @@ export type Database = {
           whatsapp?: string | null
         }
         Relationships: []
+      }
+      capital_intro_requests: {
+        Row: {
+          admin_notes: string | null
+          asset_class: string | null
+          background: string | null
+          capital_range_thb: string | null
+          created_at: string
+          crm_contact_id: string | null
+          crm_deal_id: string | null
+          estimated_deal_size_thb: number | null
+          guest_email: string | null
+          guest_name: string | null
+          guest_phone: string | null
+          id: string
+          listing_id: string | null
+          message: string | null
+          preferred_language: string | null
+          project_id: string | null
+          request_type: string
+          source_route: string | null
+          status: string
+          success_probability_pct: number | null
+          timeline: string | null
+          updated_at: string
+          user_id: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          asset_class?: string | null
+          background?: string | null
+          capital_range_thb?: string | null
+          created_at?: string
+          crm_contact_id?: string | null
+          crm_deal_id?: string | null
+          estimated_deal_size_thb?: number | null
+          guest_email?: string | null
+          guest_name?: string | null
+          guest_phone?: string | null
+          id?: string
+          listing_id?: string | null
+          message?: string | null
+          preferred_language?: string | null
+          project_id?: string | null
+          request_type: string
+          source_route?: string | null
+          status?: string
+          success_probability_pct?: number | null
+          timeline?: string | null
+          updated_at?: string
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          asset_class?: string | null
+          background?: string | null
+          capital_range_thb?: string | null
+          created_at?: string
+          crm_contact_id?: string | null
+          crm_deal_id?: string | null
+          estimated_deal_size_thb?: number | null
+          guest_email?: string | null
+          guest_name?: string | null
+          guest_phone?: string | null
+          id?: string
+          listing_id?: string | null
+          message?: string | null
+          preferred_language?: string | null
+          project_id?: string | null
+          request_type?: string
+          source_route?: string | null
+          status?: string
+          success_probability_pct?: number | null
+          timeline?: string | null
+          updated_at?: string
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "capital_intro_requests_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "business_listings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       capital_outreach: {
         Row: {
@@ -7896,6 +8108,81 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      investment_articles: {
+        Row: {
+          asset_class: string | null
+          author_name: string | null
+          avg_ticket_thb: number | null
+          body_en: string | null
+          body_ru: string | null
+          category: string
+          cover_image_url: string | null
+          created_at: string
+          excerpt_en: string | null
+          excerpt_ru: string | null
+          id: string
+          is_published: boolean
+          published_at: string | null
+          read_time_min: number | null
+          risks_summary: string | null
+          slug: string
+          sort_order: number | null
+          title_en: string
+          title_ru: string
+          typical_roi_pct: number | null
+          updated_at: string
+          view_count: number | null
+        }
+        Insert: {
+          asset_class?: string | null
+          author_name?: string | null
+          avg_ticket_thb?: number | null
+          body_en?: string | null
+          body_ru?: string | null
+          category: string
+          cover_image_url?: string | null
+          created_at?: string
+          excerpt_en?: string | null
+          excerpt_ru?: string | null
+          id?: string
+          is_published?: boolean
+          published_at?: string | null
+          read_time_min?: number | null
+          risks_summary?: string | null
+          slug: string
+          sort_order?: number | null
+          title_en: string
+          title_ru: string
+          typical_roi_pct?: number | null
+          updated_at?: string
+          view_count?: number | null
+        }
+        Update: {
+          asset_class?: string | null
+          author_name?: string | null
+          avg_ticket_thb?: number | null
+          body_en?: string | null
+          body_ru?: string | null
+          category?: string
+          cover_image_url?: string | null
+          created_at?: string
+          excerpt_en?: string | null
+          excerpt_ru?: string | null
+          id?: string
+          is_published?: boolean
+          published_at?: string | null
+          read_time_min?: number | null
+          risks_summary?: string | null
+          slug?: string
+          sort_order?: number | null
+          title_en?: string
+          title_ru?: string
+          typical_roi_pct?: number | null
+          updated_at?: string
+          view_count?: number | null
+        }
+        Relationships: []
       }
       investment_interests: {
         Row: {
