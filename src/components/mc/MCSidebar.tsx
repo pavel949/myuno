@@ -7,6 +7,7 @@ import {
   Receipt, Settings, Tag, Star, ShieldCheck, MessageSquare, Radio,
   BookOpen, FileText, Megaphone, Truck, ClipboardList, Shuffle,
   ArrowLeftRight, Target, Layers, LineChart, CalendarClock,
+  Key, Webhook, Rocket,
 } from 'lucide-react';
 import {
   Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent,
@@ -137,6 +138,16 @@ export const navigationGroups: NavGroup[] = [
       { title: 'Procurement', titleRu: 'Закупки', path: APP_ROUTES.MC_PROCUREMENT, icon: PackageOpen },
       { title: 'Subscription', titleRu: 'Подписка', path: APP_ROUTES.MC_SUBSCRIPTION, icon: CreditCard },
       { title: 'Help Center', titleRu: 'Справочник', path: APP_ROUTES.MC_HELP, icon: BookOpen },
+    ],
+  },
+  {
+    label: 'Developer',
+    labelRu: 'Разработчику',
+    defaultOpen: false,
+    items: [
+      { title: 'Setup Wizard', titleRu: 'Мастер настройки', path: APP_ROUTES.MC_ONBOARDING_WIZARD, icon: Rocket },
+      { title: 'API Keys', titleRu: 'API ключи', path: APP_ROUTES.MC_API_KEYS, icon: Key },
+      { title: 'Webhooks', titleRu: 'Webhooks', path: APP_ROUTES.MC_WEBHOOKS, icon: Webhook },
     ],
   },
 ];
