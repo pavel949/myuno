@@ -10,6 +10,7 @@ import { ChevronLeft, ChevronRight, Lock, Unlock, DollarSign, X, Calendar as Cal
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday, isBefore, startOfDay } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 import { getEffectiveNightlyRate, buildPricingRulesFromSeasons, type SeasonalPricingRule, type RateSeasonRecord } from '@/lib/pricingEngine';
 import type { UnifiedDayMeta } from '@/hooks/useStaysUnifiedCalendar';
 import { getStaysChannelColor, STAYS_CHANNEL_COLORS } from '@/lib/staysCalendarChannelColors';
@@ -148,6 +149,32 @@ export function PropertyCalendar({
 
   const handleMouseUp = () => {
     if (isDragging && selectionStart && selectionEnd) {
+      // Guard: prevent drag-select that overlaps booked nights from OTA/manual orders.
+      // (We still allow `available` and `blocked` cells — owner can re-block or re-price those.)
+      if (unifiedDayMeta) {
+        const dates = (() => {
+          const s = selectionStart < selectionEnd ? selectionStart : selectionEnd;
+          const e = selectionStart < selectionEnd ? selectionEnd : selectionStart;
+          return eachDayOfInterval({ start: s, end: e });
+        })();
+        const overlap = dates.find((d) => {
+          const meta = unifiedDayMeta.get(format(d, 'yyyy-MM-dd'));
+          return meta && meta.channelKeys.length > 0;
+        });
+        if (overlap) {
+          toast.error(
+            isRu ? 'Нельзя редактировать занятые ночи' : 'Cannot edit booked nights',
+            {
+              description: isRu
+                ? `Дата ${format(overlap, 'd MMM', { locale: ru })} занята бронью. Снимите бронь или выберите другой диапазон.`
+                : `${format(overlap, 'MMM d')} is booked. Cancel the reservation or pick another range.`,
+            },
+          );
+          setIsDragging(false);
+          clearSelection();
+          return;
+        }
+      }
       const isSingleClick = isSameDay(selectionStart, selectionEnd) && !hasDragged;
       if (isSingleClick) {
         // Pre-fill edit data from existing entry for single date

@@ -30188,8 +30188,7 @@ export type Database = {
         Args: { p_from: string; p_property_id: string; p_to: string }
         Returns: {
           date: string
-          order_id: string
-          reason: string
+          kind: string
         }[]
       }
       get_property_user_role: {

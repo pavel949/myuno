@@ -1,4 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { format, parseISO, eachDayOfInterval, subDays } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import {
@@ -94,6 +95,37 @@ function buildUnifiedDayMeta(
  * are still produced by the iCal importer until full migration to orders).
  */
 export function useStaysUnifiedCalendar(propertyId: string | undefined) {
+  const queryClient = useQueryClient();
+
+  // Realtime: invalidate when orders or property_bookings change for this property
+  useEffect(() => {
+    if (!propertyId) return;
+
+    const channel = supabase
+      .channel(`stays-calendar-${propertyId}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'orders', filter: 'vertical=eq.property' },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['stays-unified-calendar', propertyId] });
+          queryClient.invalidateQueries({ queryKey: ['property-unavailable-dates', propertyId] });
+        },
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'property_bookings', filter: `property_id=eq.${propertyId}` },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['stays-unified-calendar', propertyId] });
+          queryClient.invalidateQueries({ queryKey: ['property-unavailable-dates', propertyId] });
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [propertyId, queryClient]);
+
   return useQuery({
     queryKey: ['stays-unified-calendar', propertyId],
     queryFn: async (): Promise<{

@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { usePropertyBlockedDates } from '@/hooks/usePropertyAvailability';
+import { usePropertyUnavailableDates } from '@/hooks/usePropertyUnavailableDates';
 import { PropertyRentalTerms } from '@/hooks/useProperties';
 import { calculatePricing, buildPricingRulesFromSeasons, type PricingRules } from '@/lib/pricingEngine';
 import { usePropertyRateSeasons } from '@/hooks/usePropertyRateSeasons';
@@ -72,6 +73,21 @@ export function PropertyBookingCard({
   
   const { data: blockedDates } = usePropertyBlockedDates(propertyId);
   const { data: rateSeasons } = usePropertyRateSeasons(propertyId);
+  const { data: unavailableDates } = usePropertyUnavailableDates(propertyId);
+
+  // Index unavailable dates by yyyy-MM-dd for O(1) lookup
+  const unavailableMap = useMemo(() => {
+    const map = new Map<string, 'booked' | 'blocked' | 'checkout_only'>();
+    unavailableDates?.forEach((u) => {
+      map.set(format(u.date, 'yyyy-MM-dd'), u.kind);
+    });
+    return map;
+  }, [unavailableDates]);
+
+  const checkoutOnlyDates = useMemo(
+    () => unavailableDates?.filter((u) => u.kind === 'checkout_only').map((u) => u.date) ?? [],
+    [unavailableDates],
+  );
 
   const nights = useMemo(() => {
     if (!dateRange?.from || !dateRange?.to) return 0;
@@ -248,6 +264,14 @@ export function PropertyBookingCard({
                 disabled={(date) => {
                   if (isBefore(date, startOfDay(new Date()))) return true;
                   if (isDateBlocked(date)) return true;
+                  const dateKey = format(date, 'yyyy-MM-dd');
+                  const kind = unavailableMap.get(dateKey);
+                  // Booked / manually blocked nights are fully unavailable.
+                  if (kind === 'booked' || kind === 'blocked') return true;
+                  // checkout_only: allowed as check-in (from), forbidden as check-out (to)
+                  if (kind === 'checkout_only' && dateRange?.from && !dateRange?.to) {
+                    return true;
+                  }
                   // Min-stay enforcement: when picking the check-out, forbid
                   // dates closer than min_stay_nights to the selected check-in.
                   const minNights = rentalTerms?.min_stay_nights ?? 0;
@@ -257,7 +281,10 @@ export function PropertyBookingCard({
                   }
                   return false;
                 }}
-                modifiers={{ booked: blockedDates?.map(b => b.date) || [] }}
+                modifiers={{
+                  booked: blockedDates?.map((b) => b.date) || [],
+                  checkoutOnly: checkoutOnlyDates,
+                }}
                 modifiersClassNames={{ booked: 'bg-destructive/20 text-destructive line-through' }}
                 locale={isRu ? ru : undefined}
                 className="p-3 pointer-events-auto"

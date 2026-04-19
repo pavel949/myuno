@@ -113,6 +113,8 @@ export function useExternalCalendars(propertyId?: string) {
       queryClient.invalidateQueries({ queryKey: ['external-calendars', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['property-bookings', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['stays-unified-calendar'] });
+      queryClient.invalidateQueries({ queryKey: ['property-availability-management'] });
+      queryClient.invalidateQueries({ queryKey: ['property-unavailable-dates'] });
     },
   });
 
@@ -139,6 +141,8 @@ export function useExternalCalendars(propertyId?: string) {
       queryClient.invalidateQueries({ queryKey: ['external-calendars', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['property-bookings', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['stays-unified-calendar'] });
+      queryClient.invalidateQueries({ queryKey: ['property-availability-management'] });
+      queryClient.invalidateQueries({ queryKey: ['property-unavailable-dates'] });
     },
   });
 
