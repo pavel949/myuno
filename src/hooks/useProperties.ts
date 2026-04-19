@@ -641,6 +641,7 @@ export interface PropertyMapItem {
   cover_image: string | null;
   rating: number | null;
   district: string | null;
+  asset_class: 'residential' | 'commercial' | 'land' | null;
 }
 
 /**
@@ -667,7 +668,8 @@ export function usePropertiesForMap(filters: PropertyFilters = {}) {
           bedrooms,
           cover_image,
           rating,
-          district
+          district,
+          asset_class
         `)
         .eq('is_active', true)
         .eq('approval_status', PUBLIC_CATALOG_APPROVAL_STATUS)
