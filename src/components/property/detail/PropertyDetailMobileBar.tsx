@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
+import { pluralizeNights } from '@/lib/i18n/pluralize';
 import { APP_ROUTES } from '@/lib/config/routes';
 
 interface PropertyDetailMobileBarProps {
@@ -89,10 +90,10 @@ export function PropertyDetailMobileBar({
             <div className="flex-1 min-w-0">
               <div className="flex items-baseline gap-1">
                 <span className="text-xl font-bold text-foreground">
-                  ฿{pricePerNight.toLocaleString()}
+                  {formatPrice(pricePerNight)}
                 </span>
                 <span className="text-sm text-muted-foreground">
-                  /{isRu ? 'ночь' : 'night'}
+                  /{pluralizeNights(1, language)}
                 </span>
               </div>
               {dateRange?.from && dateRange?.to && (
