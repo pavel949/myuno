@@ -242,7 +242,7 @@ export default function PropertyInquiry() {
                   {' → '}
                   {format(checkOut, 'd MMM', { locale: isRu ? ru : undefined })}
                   {' · '}
-                  {nights} {pluralizeNights(nights, isRu)}
+                  {nights} {pluralizeNights(nights, language)}
                 </p>
                 {(rentalTerms?.check_in_time || rentalTerms?.check_out_time) && (
                   <p className="text-xs text-muted-foreground">
@@ -265,7 +265,7 @@ export default function PropertyInquiry() {
               <div>
                 <p className="text-sm font-medium">{isRu ? 'Гости' : 'Guests'}</p>
                 <p className="text-sm text-muted-foreground">
-                  {guests} {isRu ? (guests === 1 ? 'гость' : (guests >= 2 && guests <= 4 ? 'гостя' : 'гостей')) : (guests === 1 ? 'guest' : 'guests')}
+                  {guests} {pluralizeGuests(guests, language)}
                 </p>
               </div>
               <Button variant="ghost" size="sm" onClick={() => navigate(editUrl)} className="text-primary shrink-0">
@@ -284,21 +284,36 @@ export default function PropertyInquiry() {
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">
-                  {formatPrice(pricePerNight)} × {nights} {isRu ? 'ночей' : 'nights'}
+                  {formatPrice(pricing.nightlyRate || pricePerNight)} × {nights} {pluralizeNights(nights, language)}
                 </span>
                 <span>{formatPrice(pricing.subtotal)}</span>
               </div>
 
-              {pricing.discount > 0 && (
-                <div className="flex items-center justify-between text-sm text-green-600">
-                  <span>
-                    {pricing.discountPercent}% {isRu ? 'скидка' : 'discount'}
-                    {pricing.discountPercent === rentalTerms?.monthly_discount
-                      ? ` (${isRu ? 'месяц' : 'monthly'})`
-                      : ` (${isRu ? 'неделя' : 'weekly'})`
-                    }
-                  </span>
-                  <span>-{formatPrice(pricing.discount)}</span>
+              {pricing.seasonalAdjustment !== 0 && (
+                <div className={cn("flex items-center justify-between text-sm", pricing.seasonalAdjustment > 0 ? "text-warning" : "text-success")}>
+                  <span>{isRu ? 'Сезонная корректировка' : 'Seasonal adjustment'}</span>
+                  <span>{pricing.seasonalAdjustment > 0 ? '+' : ''}{formatPrice(pricing.seasonalAdjustment)}</span>
+                </div>
+              )}
+
+              {pricing.lengthDiscount > 0 && (
+                <div className="flex items-center justify-between text-sm text-success">
+                  <span>{pricing.lengthDiscountPercent}% {isRu ? 'скидка за срок' : 'length discount'}</span>
+                  <span>-{formatPrice(pricing.lengthDiscount)}</span>
+                </div>
+              )}
+
+              {pricing.earlyBirdDiscount > 0 && (
+                <div className="flex items-center justify-between text-sm text-success">
+                  <span>{pricing.earlyBirdPercent}% {isRu ? 'раннее бронирование' : 'early booking'}</span>
+                  <span>-{formatPrice(pricing.earlyBirdDiscount)}</span>
+                </div>
+              )}
+
+              {pricing.lastMinuteDiscount > 0 && (
+                <div className="flex items-center justify-between text-sm text-success">
+                  <span>{pricing.lastMinutePercent}% {isRu ? 'горящее предложение' : 'last-minute deal'}</span>
+                  <span>-{formatPrice(pricing.lastMinuteDiscount)}</span>
                 </div>
               )}
 
