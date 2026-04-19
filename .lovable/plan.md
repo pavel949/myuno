@@ -1,177 +1,105 @@
 
 
-## Plan: Commercial Real Estate & Land Plots — Persona-Gated Section
+## План: полная интеграция Commercial RE & Land в блок Недвижимость
 
-### Goal
-Add a new section "Коммерческая недвижимость и земельные участки" inside the Property Hub (`/property`) that becomes visible only when the user has selected the **Business** (`business`) or **Investor** (`investor`) persona. It supports both rent and sale, with card structures purpose-built for commercial assets (offices, warehouses, retail/F&B units, hotels, land plots, etc.).
+### Цель
+Сделать коммерческую недвижимость и земельные участки **полноценной частью** Property Hub: видимыми на лендинге, в навигации, в публикации, в поиске — для ролей **Business** и **Investor**.
 
-### Why a separate section (not just new property_type values)
-Today `properties.property_type` only contains residential values (apartment / studio / condo / villa) and the Property Hub tabs (Nightly / Long-term / Buy / New Build / Resale / My) are residential-centric. Commercial buyers care about completely different fields (yield, NOI, lease term remaining, cap rate, zoning, frontage, Chanote, FAR, road access, electricity load). A dedicated zone with its own card and detail layout is the right architectural choice — and it cleanly mirrors the existing pattern of `InvestmentBusinessZone` under the Investment Hub.
+### Текущее состояние (что уже есть после Phase 1–2)
+- Таблица `properties` расширена `asset_class` + 15 полей.
+- Карточки `CommercialPropertyCard`, `LandPlotCard`, фильтры, hooks.
+- Страницы `/property/commercial`, `/property/land` + детальные.
+- Гейтинг табов в `PropertyHub` по personas (business/investor).
+
+### Что не доделано (gap)
+1. **PropertyLanding** — нет карточек Commercial/Land в seeker-секции (видны только Rent/Buy/Offplan/Resale/Invest).
+2. **Property creation wizard** (`/mc/properties/new`, owner flow) — нельзя выбрать `asset_class = commercial | land`, поля не публикуются.
+3. **Глобальный `/search` и `/map`** — не индексируют commercial/land (отдельные пины + фильтр по asset_class).
+4. **Bottom nav / quick actions** — для роли Investor/Business нет shortcut'а.
+5. **i18n** — ключи `propertyHub.landing.commercial.*` и `.land.*` отсутствуют.
+6. **Cross-links** в `PropertyHubTabs` визуально не выделяют новые табы (нужен бейдж "Pro").
 
 ---
 
-### 1. Data model (new migration)
+### Phase 3 — Полная интеграция (этот PR)
 
-Add to `public.properties` (no schema split — keep SSOT per memory `architecture/property/unified-pms-and-discovery-standard`):
+#### 1. Лендинг `/property` (`PropertyLanding.tsx`)
+Добавить **третью секцию** между Seekers и Pros — `sectionCapital` ("Для бизнеса и инвесторов"), persona-gated (видна если `business`/`investor` активны, иначе — collapsed teaser "Включить роль Бизнес/Инвестор → откроются разделы"):
+- Карточка **Commercial** → `/property/commercial` (icon `Building2`, "Офисы, ритейл, склады, F&B")
+- Карточка **Land** → `/property/land` (icon `Trees`, "Земельные участки — rai/ngan/wah, Chanote")
+- Карточка **Investment-grade** → `/property/commercial?intent=sale&minCap=6` (icon `TrendingUp`)
 
-- `asset_class text` — new high-level discriminator: `'residential' | 'commercial' | 'land'` (default `'residential'` for all existing rows).
-- Extend `property_type` allowed values via app code only (DB stays text):
-  - Commercial: `office`, `retail`, `warehouse`, `restaurant_space`, `hotel_building`, `mixed_use`, `medical_clinic`, `coworking`, `showroom`.
-  - Land: `land_residential`, `land_commercial`, `land_agricultural`, `land_beachfront`.
-- New nullable commercial/land columns (all optional, JSON-friendly):
-  - `floor_area_sqm numeric`, `land_size_rai numeric`, `land_size_sqm numeric`
-  - `frontage_m numeric`, `road_access text`
-  - `zoning text`, `title_deed_type text` (Chanote / Nor Sor 3 Gor / etc.)
-  - `electricity_load_kw numeric`, `water_supply text`
-  - `current_lease_term_months int`, `lease_remaining_months int`, `monthly_rent_thb numeric`
-  - `noi_annual_thb numeric`, `cap_rate_pct numeric`, `yield_pct numeric`
-  - `existing_tenant_anonymized boolean default false`
-  - `permitted_uses text[]` (e.g. `{F&B, retail, office}`)
-  - `building_condition text`, `year_built int` (already exists if present — reuse)
-- Indexes: `(asset_class)`, `(asset_class, listing_type)`, GIN on `permitted_uses`.
-- RLS: inherit existing properties policies (no change).
+Если persona не активна — показываем 1 inline-карту-приглашение с CTA `togglePersona('investor')`.
 
-### 2. Routes (extend `APP_ROUTES`)
+#### 2. Property creation wizard
+Файлы: `src/pages/owner/PropertyCreatePage.tsx` (или эквивалент) + `src/components/owner/property-wizard/*`.
 
-```
-COMMERCIAL:        '/property/commercial'
-COMMERCIAL_BROWSE: '/property/commercial/browse'   // ?intent=rent|sale&type=office|warehouse|...
-COMMERCIAL_DETAIL: (id) => `/property/commercial/${id}`
-LAND:              '/property/land'
-LAND_BROWSE:       '/property/land/browse'         // ?intent=rent|sale&type=residential|commercial|...
-LAND_DETAIL:       (id) => `/property/land/${id}`
-```
+Добавить **Step 0: Asset Class** (3 крупные карточки: Residential / Commercial / Land). Выбор управляет:
+- Какие property_type показывать (residential | COMMERCIAL_TYPES | LAND_TYPES из `commercialTaxonomy.ts`).
+- Какие шаги wizard'а отображать: для commercial/land скрыть bedrooms/bathrooms, показать `floor_area_sqm`, `cap_rate_pct`, `noi_annual_thb`, `title_deed_type`, `permitted_uses`, `electricity_load_kw`, `zoning`.
+- Для land: `land_size_sqm` с автопересчётом в rai/ngan/wah (используя `formatLandSize`).
+- При сохранении: пишем `asset_class` в БД.
 
-Both routes reuse `PropertyHub` shell (Outlet) so navigation stays consistent.
+#### 3. MC Properties list
+`src/pages/mc/MCPropertiesPage.tsx` — добавить фильтр-таб **Все / Жилая / Коммерческая / Земля** (по `asset_class`). Карточки в списке используют существующую `CommercialPropertyCard`/`LandPlotCard` для соответствующих asset_class.
 
-### 3. Persona-aware tab visibility
+#### 4. Global Search & Map
+- `useGlobalSearch.ts` — расширить запрос `properties`: убрать неявный фильтр на residential, добавить поле `asset_class` в результат, иконка/цвет пина зависит от него.
+- `/map` (`UniversalMapPage.tsx`) — добавить toggle "Коммерческая" / "Земля" в legend; pin colors:
+  - residential: emerald (как сейчас)
+  - commercial: gold (`hsl(var(--warning))`)
+  - land: brown (`hsl(35 40% 45%)`)
+- Search filter chip `asset_class` доступен всем (без persona-gating — поиск открыт).
 
-Extend `PropertyHubTabs` (`src/pages/property/PropertyHub.tsx`):
-- Add two new tab configs: `commercial` (icon `Briefcase`) and `land` (icon `Trees`/`Map`).
-- Add `personaGated?: UserPersona[]` to `TabConfig`.
-- In `PropertyHub`, read `personas` from `useUserPersonas()` and filter:
-  ```ts
-  const showCapitalTabs = personas.some(p => p === 'business' || p === 'investor');
-  const visibleTabs = TABS.filter(t =>
-    (!t.authOnly || user) &&
-    (!t.personaGated || t.personaGated.some(p => personas.includes(p)))
-  );
-  ```
-- Tabs render in horizontal scroll strip (no layout break on mobile).
-- When persona is **not** business/investor, the tabs are simply hidden (URL still works for shared links).
+#### 5. Bottom nav / Quick actions для Investor
+`AdaptiveBottomNav.tsx` — для активной роли Investor/Business добавить shortcut "Commercial" в "Property" submenu (без увеличения видимых пунктов).
 
-Reflect the same gating on the `/property` landing page (`PropertyIndex` / `PropertyLanding`) by adding a "Commercial & Land" hero card that appears only for those personas, plus an inline hint: "Видно, потому что выбрана роль Бизнес / Инвестор".
+#### 6. PropertyHubTabs — визуальные бейджи
+Добавить маленький бейдж `Pro` рядом с табами Commercial/Land (используя существующий Badge компонент из shadcn).
 
-### 4. Card structure (`CommercialPropertyCard`)
+#### 7. i18n keys (RU/EN)
+Добавить в `src/i18n/{en,ru}/propertyHub.ts`:
+- `landing.sectionCapital`, `landing.commercial.{title,desc}`, `landing.land.{title,desc}`, `landing.investmentGrade.{title,desc}`
+- `landing.personaPrompt.{title,enableBusiness,enableInvestor}`
+- `wizard.assetClass.{title,residential,commercial,land}`
 
-A new card component in `src/components/property/commercial/`:
+#### 8. Версия
+`appVersion.ts` → `3.41.2`.
 
-```text
-┌─ cover image (16:9, badge top-left: "Office" / "Аренда" / "Sale") ─┐
-│  Verified ✓ chip (top-right if developer_verified)                  │
-├──────────────────────────────────────────────────────────────────────┤
-│ Title (RU/EN) · District                                             │
-│ ฿ 180,000 / month  ·  $5,200 USD                                     │
-│ — or —                                                               │
-│ ฿ 45,000,000  ·  Cap rate 6.8%  ·  NOI ฿3.06M/yr                    │
-├──────────────────────────────────────────────────────────────────────┤
-│ 🏢 320 m² · 🏬 Floor 2 · 🚗 12 parking · ⚡ 60 kW                    │
-│ Permitted: F&B · Retail   ·   Lease left: 3 yrs                      │
-│ Title: Chanote                                                       │
-└──────────────────────────────────────────────────────────────────────┘
-```
+---
 
-Mode-aware spec rendering (reuses `propertyTypeConfig.ts` pattern):
-- **Office / Coworking:** floor, total floors, ceiling height, AC type, fiber.
-- **Warehouse / Logistics:** clear height, dock doors, floor load (kg/m²), truck access.
-- **Retail / Restaurant:** frontage, foot-traffic zone, exhaust hood ready, grease trap, prior tenant type.
-- **Hotel / Mixed-use:** rooms count, F&B units, license status.
-
-`LandPlotCard` (separate component): cover, **rai/ngan/wah** breakdown, zoning, title type, road frontage, utilities reachable (Yes/No chips), aerial map preview.
-
-All cards expose 3 primary CTAs: **View details · Request viewing · Save**.
-
-### 5. Browse page (`CommercialBrowsePage`, `LandBrowsePage`)
-
-Reuse `PropertySearchPage` skeleton but with commercial-specific filters:
-- Intent toggle: Rent ↔ Sale (mirrors residential)
-- Type chips: Office / Retail / Warehouse / Restaurant / Hotel / Mixed-use
-- Sliders: area (m²), price, cap rate, lease term remaining
-- Toggles: chanote only, with current tenant, ready-to-operate
-- Land page swaps these for: rai range, zoning multi-select, title type, sea/road frontage, utilities present.
-
-Sort: relevance, price asc/desc, cap rate desc, area desc, newest.
-
-### 6. Detail page (`CommercialPropertyDetail`)
-
-Sections:
-1. Hero gallery + intent badge + key numbers strip (Price / Cap rate / NOI / Area).
-2. Investment Snapshot (yield, payback, current rent, lease term left, anonymized tenant info if `existing_tenant_anonymized`).
-3. Specs (type-aware, see card section).
-4. Title & Compliance (deed type, zoning, permitted uses, building license).
-5. Location map + nearby (Google Maps standard).
-6. Documents (lease abstract, title deed teaser — gated for verified investors via existing `commercial_terms_redacted` flag already on properties table).
-7. CTAs: Request viewing → creates lead in CRM (source `commercial_inquiry`), Request financials → ships NDA via existing AI Legal Agent flow (memory `features/crm/legal-and-financial-terms`).
-
-### 7. Hooks & adapters
-
-- `src/hooks/useCommercialProperties.ts` — `asset_class IN ('commercial')`.
-- `src/hooks/useLandPlots.ts` — `asset_class = 'land'`.
-- `src/hooks/useCommercialProperty.ts` (single).
-- Extend `src/lib/real-estate/listingViewModel.ts` with `surfaceFromCommercial()` returning `kind: 'commercial_listing'` or `'land_listing'`, intent `'sale' | 'rent'`.
-- Add taxonomy entries to `src/lib/taxonomies/index.ts` (canonical SSOT).
-
-### 8. Cross-linking with Investment Hub
-
-In `InvestmentBusinessZone` add a banner: "Looking for a venue / land for your business? → Browse commercial RE", deep-linking to `/property/commercial?intent=rent`.
-In `InvestmentRealEstateZone` add a card: "High-yield commercial assets" → `/property/commercial?intent=sale`.
-
-### 9. Persona discovery flow (UX)
-
-If a user lands directly on `/property/commercial` without business/investor persona:
-- Show inline persona prompt: "Включить роль 'Бизнес' или 'Инвестор', чтобы видеть эти разделы в навигации?" with one-click toggle (uses existing `useUserPersonas().togglePersona`).
-- Content still renders — gating only affects tab visibility, not URL access (good for SEO and shared links).
-
-### 10. Files to create / modify
-
-**Create:**
-- `supabase/migrations/<ts>_property_commercial_land.sql`
-- `src/components/property/commercial/CommercialPropertyCard.tsx`
-- `src/components/property/commercial/LandPlotCard.tsx`
-- `src/components/property/commercial/CommercialFilters.tsx`
-- `src/components/property/commercial/LandFilters.tsx`
-- `src/pages/property/CommercialIndex.tsx`
-- `src/pages/property/CommercialBrowsePage.tsx`
-- `src/pages/property/CommercialDetail.tsx`
-- `src/pages/property/LandIndex.tsx`
-- `src/pages/property/LandBrowsePage.tsx`
-- `src/pages/property/LandDetail.tsx`
-- `src/hooks/useCommercialProperties.ts`
-- `src/hooks/useLandPlots.ts`
+### Файлы
 
 **Modify:**
-- `src/lib/config/routes.ts` — add `COMMERCIAL*` and `LAND*` routes.
-- `src/pages/property/PropertyHub.tsx` — add 2 persona-gated tabs + `useUserPersonas` filter.
-- `src/pages/property/PropertyIndex.tsx` / `PropertyLanding.tsx` — persona-gated promo card.
-- `src/AnimatedRoutes.tsx` (or wherever routes are wired) — register new routes.
-- `src/lib/real-estate/listingViewModel.ts` — extend kinds.
-- `src/lib/taxonomies/index.ts` — add commercial/land taxonomies.
-- `src/lib/propertyTypeConfig.ts` — add type-aware labels for commercial/land.
-- `src/i18n/*` — RU/EN strings.
-- `src/lib/appVersion.ts` → `3.41.0`.
+- `src/pages/property/PropertyLanding.tsx` — третья секция Capital + persona prompt
+- `src/pages/owner/PropertyCreatePage.tsx` (+ wizard steps) — asset_class step + conditional fields
+- `src/pages/mc/MCPropertiesPage.tsx` — asset_class filter + card switching
+- `src/components/layout/AdaptiveBottomNav.tsx` — investor shortcut
+- `src/hooks/useGlobalSearch.ts` — return asset_class
+- `src/pages/UniversalMapPage.tsx` (или `/map`) — pin colors + legend toggle
+- `src/pages/property/PropertyHub.tsx` — Pro badges
+- `src/i18n/en/propertyHub.ts`, `src/i18n/ru/propertyHub.ts`
+- `src/lib/appVersion.ts`
 
-### 11. Phasing
+**Create (если нужно):**
+- `src/components/property/commercial/PersonaPromptCard.tsx` (extract из PersonaGatePrompt для landing)
+- `src/components/owner/property-wizard/AssetClassStep.tsx`
+- `src/components/owner/property-wizard/CommercialFieldsStep.tsx`
+- `src/components/owner/property-wizard/LandFieldsStep.tsx`
 
-- **Phase 1 (this PR):** Migration + routes + tab gating + Commercial browse list + card + minimal detail page (read-only). Land scaffolded with empty state.
-- **Phase 2:** Land browse + detail, advanced filters, financial gating with NDA flow.
-- **Phase 3:** Lead → CRM → Capital advisory pipeline integration, anonymized tenant disclosure rules, document vault.
+---
 
-### 12. Open questions (please confirm before Phase 1)
+### Приоритеты внутри PR
+1. **Лендинг** (критично — пользователь это видит первым) ← блокирующее
+2. **i18n** ← блокирующее
+3. **MC list filter + wizard asset_class step** ← high
+4. **Global search/map** ← medium (можно отдельным PR если объём большой)
+5. **Bottom nav + Pro badges** ← polish
 
-| # | Question | Default if no answer |
-|---|----------|----------------------|
-| 1 | Should commercial listings appear in the global `/map` and `/search`? | Yes, with new pin colors (gold for commercial, brown for land). |
-| 2 | Anonymous browsing OK or auth-gated for sale prices > ฿20M? | Open browsing; only **financials/lease docs** gated. |
-| 3 | Allow MC owners to publish commercial properties in `/mc/properties/new`? | Yes — extend the property-create wizard with `asset_class` step. |
-| 4 | Pricing display currency? | THB primary, USD secondary (matches existing `useCurrency`). |
+### Открытые вопросы
+| # | Вопрос | Default |
+|---|--------|---------|
+| 1 | Делать ли persona prompt **collapsible card** или сразу **выпадающую** секцию при переключении роли? | Collapsible card с кнопкой "Включить роль" |
+| 2 | Wizard для Commercial/Land — оставить тот же `/mc/properties/new` или отдельный `/mc/properties/new?type=commercial`? | Тот же URL, Step 0 решает |
+| 3 | Map: нужен ли визуальный кластер commercial vs residential или один общий? | Раздельные toggleable layers |
 
