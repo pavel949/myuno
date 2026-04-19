@@ -241,6 +241,16 @@ export const AnimatedRoutes: React.FC = () => {
           {/* Resale / Secondary Market */}
           <Route path="resale" element={<LazyPage><Pages.ResaleIndex /></LazyPage>} />
           <Route path="resale/:id" element={<LazyPage><Pages.ResaleDetail /></LazyPage>} />
+
+          {/* Commercial RE — persona-gated in nav, open via URL */}
+          <Route path="commercial" element={<LazyPage><Pages.CommercialIndex /></LazyPage>} />
+          <Route path="commercial/browse" element={<LazyPage><Pages.CommercialIndex /></LazyPage>} />
+          <Route path="commercial/:id" element={<LazyPage><Pages.CommercialDetail /></LazyPage>} />
+
+          {/* Land Plots — persona-gated in nav, open via URL */}
+          <Route path="land" element={<LazyPage><Pages.LandIndex /></LazyPage>} />
+          <Route path="land/browse" element={<LazyPage><Pages.LandIndex /></LazyPage>} />
+          <Route path="land/:id" element={<LazyPage><Pages.LandDetail /></LazyPage>} />
           
           {/* Legacy /property/invest/* → top-level /invest/* */}
           <Route path="invest" element={<Navigate to={APP_ROUTES.INVEST} replace />} />
