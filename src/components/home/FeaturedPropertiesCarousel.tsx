@@ -139,7 +139,7 @@ export function FeaturedPropertiesCarousel() {
             <button
               key={property.id}
               onClick={() => navigate(APP_ROUTES.PROPERTY_DETAIL(property.id))}
-              className="w-[220px] h-[280px] md:w-[260px] md:h-[320px] rounded-[var(--radius-lg)] overflow-hidden text-left group transition-all duration-200 hover:-translate-y-1 active:scale-[0.97]"
+              className="w-[280px] h-[320px] md:w-[260px] md:h-[320px] rounded-[var(--radius-lg)] overflow-hidden text-left group transition-all duration-200 hover:-translate-y-1 active:scale-[0.97] shrink-0"
               style={{
                 background: 'hsl(var(--card))',
                 border: '1px solid hsl(var(--border))',

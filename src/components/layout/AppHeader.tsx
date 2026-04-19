@@ -56,11 +56,11 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
           boxShadow: scrolled ? '0 1px 0 rgba(255,255,255,0.07)' : 'none',
         }}
       >
-        <div className="flex items-center justify-between h-14 lg:h-16 px-4 lg:px-8 xl:px-10 max-w-[1536px] mx-auto gap-2">
+        <div className="flex items-center h-14 lg:h-16 px-3 lg:px-8 xl:px-10 max-w-[1536px] mx-auto gap-1.5 lg:gap-2">
           {/* Logo */}
           <Link
             to={APP_ROUTES.HOME}
-            className="flex items-center gap-0.5 flex-shrink-0 whitespace-nowrap group"
+            className="flex items-center gap-0.5 flex-shrink-0 whitespace-nowrap group mr-1"
           >
             <span className="text-sm lg:text-base text-primary font-bold transition-all duration-200 group-hover:tracking-wider">
               my
@@ -97,21 +97,23 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
             </kbd>
           </button>
 
-          {/* Mobile search icon */}
-          <button
-            onClick={() => setSearchOpen(true)}
-            className="lg:hidden flex items-center justify-center w-9 h-9 rounded-[var(--radius-sm)] hover:bg-muted/40 transition-colors"
-            aria-label={isRu ? 'Поиск' : 'Search'}
-          >
-            <Search className="w-[18px] h-[18px] text-muted-foreground" />
-          </button>
-
           {title && (
-            <h1 className="text-sm font-medium truncate flex-1 text-center mx-4 text-foreground lg:hidden">{title}</h1>
+            <h1 className="text-sm font-medium truncate flex-1 text-center mx-2 text-foreground lg:hidden">{title}</h1>
           )}
 
-          {/* Right — utilities */}
-          <div className="flex items-center gap-1 lg:gap-1.5 ml-auto shrink-0">
+          {/* Spacer (mobile) — keeps right group aligned to edge when no title */}
+          {!title && <div className="flex-1 lg:hidden" />}
+
+          {/* Right — utilities. Compact mobile spacing keeps all 5 controls visible at 360px+ */}
+          <div className="flex items-center gap-0.5 lg:gap-1.5 ml-auto shrink-0">
+            {/* Search (mobile only) */}
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="lg:hidden flex items-center justify-center w-9 h-9 rounded-[var(--radius-sm)] hover:bg-muted/40 transition-colors"
+              aria-label={isRu ? 'Поиск' : 'Search'}
+            >
+              <Search className="w-[18px] h-[18px] text-muted-foreground" />
+            </button>
             <LanguageSwitcher size="sm" />
             <CurrencySwitcher size="sm" />
             <MiniCart className="rounded-[var(--radius-sm)] hover:bg-muted/40 transition-colors" />
@@ -119,7 +121,7 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
               <UserAvatarMenu />
             ) : (
               <Link to={APP_ROUTES.AUTH}>
-                <Button size="sm" className="h-8 text-xs px-4 ml-1 rounded-[var(--radius-full)] font-semibold bg-primary text-primary-foreground hover:bg-primary-hover">
+                <Button size="sm" className="h-8 text-xs px-3 lg:px-4 ml-0.5 lg:ml-1 rounded-[var(--radius-full)] font-semibold bg-primary text-primary-foreground hover:bg-primary-hover">
                   {t('auth.login')}
                 </Button>
               </Link>
