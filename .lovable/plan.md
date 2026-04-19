@@ -1,145 +1,160 @@
 
-## Аудит инвестиционной платформы myUNO
 
-### Что уже есть (карта)
-**Routes (`/property/invest/*`)** — Hub под Property Hub'ом:
-- `InvestClusterPage` (`/invest`) — лендинг кластера: Property Search, Off-Plan, ROI, Developers, Consultation. **Полностью про недвижимость.**
-- `InvestmentIndex` (`/property/invest`) — главная Hub'а: Hero, чипсы категорий (11 шт.), карусели Hot/RealEstate/Business, CTA "Привлечь инвестиции".
-- `InvestmentHubShell` (`/market`, `/deals`, `/network`, `/execution`) — 4 зоны с табами, JTBD/scope/monetization/KPI карточки.
-- `InvestmentDetail` — карточка проекта, `InterestForm`, `InvestorLeadForm`.
-- `RaiseFunding` — 3-step wizard → пишет в `consultation_requests` (request_type='investment_raise').
-- `InvestorDashboard` — личный кабинет инвестора.
+## План: Fix TS errors + Phase 2 (Capital Flywheel)
 
-**Data:** таблица `investment_projects` (RE-centric поля + `project_type` enum), `investment_opportunities` + `intro_requests` (multi-asset Hub schema), 11 категорий в `INVESTMENT_CATEGORIES` (RE off-plan/rental, hospitality, restaurant, retail, yacht, marine, wellness, tech, franchise, agriculture).
-
----
-
-### Что хорошо
-1. **Multi-asset schema уже заложена** — `INVESTMENT_CATEGORIES` покрывает не только RE, есть `investment_opportunities` с `asset_class` и `zone`.
-2. **Hub Shell с зонами** (Market/Deals/Network/Execution) — правильный концептуальный каркас buy-side/sell-side/advisory/execution.
-3. **JTBD по ролям** (investor/owner/advisor/operator) уже описаны.
-4. **Monetization rules + KPI** задокументированы (intro fee, success fee, premium DD room).
-5. **Bilingual RU/EN/TH**, muUNO Score, due diligence framing.
-6. **Raise Funding flow** работает end-to-end (через consultation_requests).
-
----
-
-### Что плохо (gaps vs. цель пользователя)
-1. **Дисконнект между уровнями**: `InvestClusterPage` показывает только RE-сервисы, `InvestmentIndex` показывает multi-asset. Пользователь, заходящий через "КУПИТЬ" кластер, **не увидит** F&B/restaurants/import-export.
-2. **Нет import/export, trading, manufacturing** — отсутствуют в `INVESTMENT_CATEGORIES` (а это типичные ниши для русскоязычного капитала в Таиланде).
-3. **Нет "Business for Sale" listings** — действующий бизнес на продажу (готовый ресторан, отель, барбершоп) отсутствует как отдельная сущность. Это ключевой запрос ЦА "хочу купить готовый бизнес в нише, где работал".
-4. **Нет образовательного слоя** — нет статей/гайдов "Как открыть ресторан в Таиланде", "Структуры собственности для иностранцев", "BOI", "Work permit", "Налоги". ЦА приехала и не понимает как.
-5. **Нет "Представитель интересов"** — нельзя оставить заявку "найди мне local nominee/lawyer/accountant/operator" как отдельный продукт. Только generic InterestForm.
-6. **Нет industry discovery** — пользователь не знает с чего начать. Нужен квиз "Чем заняться" по бэкграунду + капиталу.
-7. **Нет market intelligence по нишам** — средние тикеты, ROI, time-to-payback, риски по индустриям (а не по проектам).
-8. **HubShell перегружен метой** — JTBD/Rollout/KPI карточки публично показываются user'у; это внутренние артефакты.
-9. **Дублирование** — `InvestClusterPage` и `InvestmentIndex` решают похожие задачи без четкого разделения.
-10. **Score breakdown только для RE** — `muuno_score` calibrated для девелопмента, не для F&B/retail/import.
-11. **Нет deal flow для бизнес-сделок** — `intro_requests` есть, но UI/wizard заточены под RE.
-
----
-
-### Целевая структура (предложение)
-
-**Концепция:** Investment Hub = "Я приехал в Пхукет с капиталом X — что мне делать?". RE доминирует (~60% real estate в featured/hero), но платформа покрывает весь спектр "перемещения капитала + открытия бизнеса".
-
-```text
-/invest  (rebrand из InvestClusterPage в полноценный Investment Hub entry)
-├─ HERO: "Капитал в Таиланде" + персональный квиз CTA
-├─ DISCOVERY QUIZ: бэкграунд → капитал → ниши → персональная подборка
-│
-├─ ZONE 1: REAL ESTATE (доминирует, ~50% поверхности)
-│   ├─ Off-Plan / Newbuilds (existing)
-│   ├─ Rental Business / готовая сдача
-│   ├─ Resale / Assignment
-│   └─ ROI Calculator + Developers (existing)
-│
-├─ ZONE 2: BUSINESS OPPORTUNITIES (новая сильная зона)
-│   ├─ Готовый бизнес на продажу (Business for Sale) ← НОВОЕ
-│   │   └─ Restaurants / Hotels / Spa / Retail / Marine / Tech
-│   ├─ Investment Projects (existing investment_projects)
-│   ├─ Franchise Catalog (existing, расширить)
-│   └─ Industry Briefs: F&B, Hospitality, Retail, Marine, Wellness,
-│       Tech, Import/Export, Manufacturing, Agriculture ← ДОБАВИТЬ 2 категории
-│
-├─ ZONE 3: KNOWLEDGE BASE (новая зона — обязательно)
-│   ├─ "Бизнес в Таиланде 101": структуры (Thai Ltd, BOI, Treaty of Amity)
-│   ├─ Налоги, виза, work permit для собственника
-│   ├─ Импорт/экспорт: customs, лицензии
-│   ├─ Industry guides: как открыть ресторан/отель/spa/retail
-│   ├─ Кейсы успешных сделок (с цифрами)
-│   └─ FAQ / глоссарий
-│
-├─ ZONE 4: SERVICES (Capital advisory marketplace)
-│   ├─ "Представляйте мои интересы" — найти Operating Partner / Nominee
-│   ├─ Юристы / accountants / BOI consultants
-│   ├─ Due Diligence as a service
-│   ├─ Property Management для инвесторов
-│   └─ M&A / Business Brokerage
-│
-└─ ZONE 5: I AM RAISING (sell-side, existing RaiseFunding расширить)
-    ├─ Проект недвижимости
-    ├─ Действующий бизнес (продажа доли / exit)
-    └─ Стартап / новый бизнес
+### A) Fix build errors (5 min)
+`pageRegistry.ts` не экспортирует новые Investment-страницы. Добавить lazy-exports:
+```ts
+export const InvestmentHubLanding = lazy(() => import('@/pages/invest/InvestmentHubLanding'));
+export const InvestmentRealEstateZone = lazy(() => import('@/pages/invest/InvestmentRealEstateZone'));
+export const InvestmentBusinessZone = lazy(() => import('@/pages/invest/InvestmentBusinessZone'));
+export const InvestmentKnowledgeZone = lazy(() => import('@/pages/invest/InvestmentKnowledgeZone'));
+export const InvestmentServicesZone = lazy(() => import('@/pages/invest/InvestmentServicesZone'));
+export const InvestmentOpsConsole = lazy(() => import('@/pages/invest/InvestmentOpsConsole'));
 ```
 
-**Внутренние сущности (Market/Deals/Network/Execution Hub Shell)** — оставить, но **скрыть от обычного user'а** (это admin/operator view), вынести под `/invest/ops` или разрешения.
+---
+
+### B) Phase 2: Capital Flywheel (объединение Phase 2 + запросов из прошлого сообщения)
+
+**Концепция (из прошлого сообщения юзера):**
+- Investment Hub связан с Property Hub и Developer Hub
+- Девелоперы могут привлекать капитал на проекты + продавать остатки
+- Бизнес-собственники и идеологи могут "Pitch your project"
+- Блок "Invest in Thailand" (макроэкономика, индустрии, why Thailand)
+- Проекты **анонимизированы** в публичной выдаче → монетизация через intro fee
+- Все заявки → CRM с классификацией + финансовый объём + вероятность реализации
 
 ---
 
-### Конкретные изменения
+### Data Model
 
-**Routes & Navigation**
-- `/invest` (cluster page) → новый **Investment Hub Landing** с 5 зонами выше; старый InvestClusterPage удалить.
-- `/property/invest` → редирект на `/invest` (или оставить как Real Estate sub-zone).
-- `/invest/quiz` — discovery quiz.
-- `/invest/business-for-sale` — каталог готовых бизнесов.
-- `/invest/knowledge` — knowledge base hub.
-- `/invest/services` — capital services marketplace.
-- `/invest/raise` — sell-side (расширить).
-- `/invest/ops` — гейт под admin для HubShell (Market/Deals/Network/Execution).
+**1. `business_listings`** — действующий бизнес/проекты на продажу/привлечение
+```sql
+- id, slug, owner_user_id (NOT exposed)
+- listing_type: 'business_for_sale' | 'developer_raise' | 'developer_inventory' | 'startup_pitch' | 'operating_partner_wanted'
+- asset_class: enum (restaurant, hotel, retail, marine, import_export, manufacturing, medical, education, tech, franchise, other)
+- title_ru/en, teaser_ru/en (anonymized public copy)
+- full_description_ru/en (gated — viewable after intro request approved)
+- ask_amount, currency, equity_offered_pct, min_ticket
+- monthly_revenue, ebitda, asset_value (financial sizing)
+- location_district (район, не точный адрес для анонимности)
+- staff_count, lease_remaining_months, license_status
+- reason_for_sale, use_of_funds (for raises)
+- is_anonymized: boolean (default true)
+- visibility: 'draft' | 'pending_review' | 'published' | 'archived'
+- success_probability: int 0-100 (admin-set after review)
+- expected_close_date, deal_stage
+- created_at, updated_at, published_at
+```
+RLS: public SELECT teaser fields where `visibility='published'`; full row only owner+admin.
 
-**Data model**
-- Новая таблица `business_listings` (asset_class, monthly_revenue, ebitda, ask_price, lease_terms, staff_count, license_status, reason_for_sale).
-- Новая таблица `industry_briefs` (asset_class, content_ru/en, avg_ticket, typical_roi, risks, regulations).
-- Новая таблица `investment_articles` (knowledge base, slug, category, body, author).
-- Новая таблица `capital_service_requests` (service_type: nominee/legal/operator/dd, brief, budget) → CRM.
-- Расширить `INVESTMENT_CATEGORIES`: добавить `import_export`, `manufacturing`, `education`, `medical`.
+**2. `investment_articles`** — Knowledge base + "Invest in Thailand"
+```sql
+- id, slug, category ('overview' | 'industry_brief' | 'how_to' | 'legal' | 'tax' | 'case_study' | 'macro')
+- asset_class (nullable)
+- title_ru/en, body_ru/en (markdown), excerpt_ru/en
+- cover_image_url, author_name, read_time_min
+- avg_ticket_thb, typical_roi_pct, risks_summary (для industry_brief)
+- is_published, view_count, published_at
+```
+RLS: public read где published; admin write.
 
-**UI компоненты (новые)**
-- `InvestmentDiscoveryQuiz` (5 шагов: background → capital → involvement → industries → timeline).
-- `BusinessForSaleCard` + `BusinessForSaleDetail`.
-- `IndustryBriefCard` (avg ticket / ROI / risk badges).
-- `KnowledgeArticleCard` + reader view.
-- `CapitalServiceRequestForm` ("Представляйте мои интересы").
-- `InvestmentHubLanding` — новая главная.
+**3. `capital_intro_requests`** — единая воронка заявок (объединяет существующий `intro_requests` + новые типы)
+```sql
+- id, user_id (nullable for guests), guest_email, guest_phone, guest_name
+- request_type: 'intro_to_listing' | 'pitch_submission' | 'capital_advisory' | 'represent_interests' | 'industry_consultation'
+- listing_id (FK business_listings, nullable)
+- project_id (FK investment_projects, nullable)
+- asset_class, capital_range_thb (enum: '<5M', '5-20M', '20-100M', '100M+')
+- timeline ('now', '1-3m', '3-6m', '6-12m')
+- background, message
+- estimated_deal_size_thb (admin-filled, для pipeline value)
+- success_probability_pct (admin 0-100)
+- crm_contact_id, crm_deal_id (FK after CRM sync)
+- status: 'new' | 'qualified' | 'in_intro' | 'closed_won' | 'closed_lost'
+- source_route, utm_*
+- created_at
+```
+RLS: insert public (incl. guests), select own + admin.
 
-**Cleanup**
-- HubShell упростить: убрать JTBD/Monetization/KPI карточки из публичного view.
-- Объединить `InvestClusterPage` + `InvestmentIndex` в одну landing.
-- `RaiseFunding` расширить: типы — Real Estate Project / Operating Business / Startup / Looking for Co-Investor.
-- `InterestForm` разделить на: "Запросить детали", "Запросить интро", "Запросить advisory".
+**Trigger:** on insert → create/update `crm_contacts` + `crm_deals` with:
+- pipeline = 'capital_advisory'
+- expected_value = estimated_deal_size_thb * 0.05 (5% intro fee assumption)
+- probability = success_probability_pct
+- source = `capital_intro:${request_type}`
 
 ---
 
-### Phasing (рекомендация порядка работ)
+### UI/Routes
 
-1. **Phase 1 — Information Architecture rework** (1 PR): новая `/invest` landing с 5 зонами, скрыть HubShell-мету, объединить cluster+index, expand categories (+import/export, manufacturing).
-2. **Phase 2 — Business for Sale**: таблица + админка + публичный каталог + детали + lead form.
-3. **Phase 3 — Knowledge Base**: industry_briefs + articles, MD/MDX контент, SEO-friendly страницы.
-4. **Phase 4 — Capital Services Marketplace**: nominee/legal/operator request flow → CRM pipeline.
-5. **Phase 5 — Discovery Quiz** + персонализированный feed.
-6. **Phase 6 — Business raise flow**: расширение RaiseFunding под operating business/M&A.
+**New routes:**
+- `/invest/business/:slug` — anonymized listing detail (teaser + "Request intro" CTA)
+- `/invest/pitch` — "Pitch your project" wizard (devs/owners/founders submit)
+- `/invest/thailand` — "Invest in Thailand" landing (macro, industries, why now)
+- `/invest/knowledge/:slug` — article reader
+
+**Updated:**
+- `InvestmentHubLanding` → добавить:
+  - Блок "Invest in Thailand" (3 карточки: macro brief, industries grid, success cases)
+  - Блок "Pitch your project" CTA для девелоперов/собственников
+  - Cross-link в Property Hub: "Browse new developments" / "Property Investment"
+  - Cross-link из Developer Portal в `/invest/pitch?type=developer_raise`
+- `InvestmentBusinessZone` → выводить `business_listings` с анонимизированными карточками
+- Property `/newbuilds/dashboard` (Developer Portal) → добавить "Raise capital for project" + "Sell remaining inventory" CTA → `/invest/pitch`
+- `RaiseFunding` → расширить с 3 типами на 5: `developer_raise`, `business_for_sale`, `startup_pitch`, `operating_partner`, `inventory_sale`
+
+**Components:**
+- `AnonymizedListingCard` — показывает asset_class, district, ticket range, teaser, blurred details, "Request intro" button
+- `PitchYourProjectWizard` (4 шага: type → financials → use of funds → contact)
+- `InvestInThailandHero` + `IndustryBriefGrid`
+- `CapitalIntroForm` — единая форма с auto-routing в CRM по `request_type`
 
 ---
 
-### Технические детали (для разработчика)
-- Все новые таблицы — RLS: public read для published, owner/admin write.
-- Новые категории добавить в `INVESTMENT_CATEGORIES` + миграция существующих `project_type` enum.
-- `/invest` маршрут вынести из `/property/*`, чтобы Investment Hub был **первым уровнем** (он не подмножество property).
-- Knowledge base — статичный контент в DB + react-markdown renderer; индексировать в Super Search.
-- Discovery Quiz state — localStorage + опционально сохранение в `user_investment_profile`.
-- Capital service requests — переиспользовать CRM pipeline (`crm_contacts` + новый `source='capital_services'`).
-- Скрыть HubShell от non-admin: обернуть `<AdminGuard>` или фича-флаг `feature_flag:invest_ops_console`.
+### CRM Integration
 
-После одобрения плана — начну с **Phase 1** (IA rework) как самого высокоимпактного и наименее рискованного шага.
+Создать **новый pipeline** `capital_advisory` в CRM:
+- stages: `new` → `qualified` → `dd_in_progress` → `intro_made` → `negotiation` → `closed_won` / `closed_lost`
+- expected_value = `estimated_deal_size_thb * 0.05`
+- probability = `success_probability_pct`
+- contact source tagging: `capital_intro:business_for_sale`, `capital_intro:developer_raise`, etc.
+
+**DB trigger** `sync_capital_request_to_crm()`:
+- on `capital_intro_requests` insert → upsert `crm_contacts` (by email/phone) → create `crm_deals` linked
+- pipeline volume aggregations available via existing CRM dashboard
+
+---
+
+### Phase 2 Deliverables (this PR)
+
+1. ✅ Fix TS build errors (pageRegistry exports)
+2. ✅ Migrations: `business_listings`, `investment_articles`, `capital_intro_requests` + RLS + CRM sync trigger
+3. ✅ `/invest/pitch` wizard (5 listing types)
+4. ✅ `/invest/business/:slug` anonymized detail page
+5. ✅ `/invest/thailand` landing
+6. ✅ `AnonymizedListingCard` + wire into `InvestmentBusinessZone`
+7. ✅ `CapitalIntroForm` → CRM pipeline
+8. ✅ Cross-links Property Hub ↔ Investment Hub ↔ Developer Portal
+9. ✅ Admin moderation: `business_listings.visibility` + `success_probability` controls в admin
+10. ✅ Update `INVESTMENT_CATEGORIES` icons/grouping if needed
+
+**Phasing inside this PR:** start with #1 (TS fix) + #2 (migrations) → then UI screens → then CRM trigger.
+
+**Out of scope for Phase 2** (will go to Phase 3+):
+- Knowledge article CMS (только schema + minimal reader)
+- Discovery quiz
+- Ops Console redesign
+- Financial KPI dashboard для admin (deal pipeline value)
+
+---
+
+### Why this addresses prior request
+- ✅ Связь Property/Developer/Invest hubs — cross-CTA + same `business_listings` для developer raises
+- ✅ Девелоперы привлекают капитал + продают остатки — `developer_raise` + `inventory_sale` types
+- ✅ Pitch your project — `/invest/pitch` универсальный wizard
+- ✅ Invest in Thailand — `/invest/thailand` + `investment_articles` macro
+- ✅ Анонимизация — `is_anonymized` + RLS на full_description, teaser fields публичны
+- ✅ Заявки в CRM — `capital_intro_requests` + sync trigger → `crm_deals`
+- ✅ Финансовый объём + вероятность — `estimated_deal_size_thb` + `success_probability_pct` поля
+
