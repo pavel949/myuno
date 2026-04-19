@@ -21,18 +21,24 @@ export function useEnsureMultiRoleQaBundle() {
     sessionStorage.setItem(storageKey, '1');
 
     void (async () => {
-      // RPC name not yet in generated types — cast to bypass strict union.
-      const rpc = supabase.rpc as unknown as (name: string) => Promise<{ data: unknown; error: { message: string } | null }>;
-      const { data, error } = await rpc('ensure_multi_role_qa_bundle');
-      if (error) {
-        console.warn('ensure_multi_role_qa_bundle', error.message);
-        return;
-      }
-      const row = data as { applied?: boolean } | null;
-      if (row?.applied) {
-        await queryClient.invalidateQueries({ queryKey: ['resolved-context', user.id] });
-        await queryClient.invalidateQueries({ queryKey: ['user-roles'] });
-        await queryClient.invalidateQueries({ queryKey: ['user-active-context'] });
+      try {
+        // Guard against undefined supabase.rpc (can happen if client init races).
+        if (!supabase || typeof supabase.rpc !== 'function') return;
+        // RPC name not yet in generated types — cast to bypass strict union.
+        const rpc = supabase.rpc.bind(supabase) as unknown as (name: string) => Promise<{ data: unknown; error: { message: string } | null }>;
+        const { data, error } = await rpc('ensure_multi_role_qa_bundle');
+        if (error) {
+          console.warn('ensure_multi_role_qa_bundle', error.message);
+          return;
+        }
+        const row = data as { applied?: boolean } | null;
+        if (row?.applied) {
+          await queryClient.invalidateQueries({ queryKey: ['resolved-context', user.id] });
+          await queryClient.invalidateQueries({ queryKey: ['user-roles'] });
+          await queryClient.invalidateQueries({ queryKey: ['user-active-context'] });
+        }
+      } catch (err) {
+        console.warn('ensure_multi_role_qa_bundle threw', err);
       }
     })();
   }, [session, user?.id, queryClient]);
