@@ -6,3 +6,5 @@ export { InterestForm } from './InterestForm';
 export { InvestorLeadForm } from './InvestorLeadForm';
 export { InvestmentAuthGate } from './InvestmentAuthGate';
 export { InvestmentAuthForm } from './InvestmentAuthForm';
+export { AnonymizedListingCard } from './AnonymizedListingCard';
+export { CapitalIntroForm } from './CapitalIntroForm';
