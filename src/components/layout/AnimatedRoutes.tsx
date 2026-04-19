@@ -765,6 +765,10 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="contacts/import" element={<LazyPage><Pages.ContactImportPage /></LazyPage>} />
           <Route path="contacts/import-odoo" element={<LazyPage><Pages.ImportOdooContactsPage /></LazyPage>} />
           <Route path="invoices" element={<LazyPage><Pages.InvoicesPage /></LazyPage>} />
+          <Route path="finance/owner-payouts" element={<LazyPage><Pages.OwnerPayoutsPage /></LazyPage>} />
+          <Route path="finance/ar-aging" element={<LazyPage><Pages.ArAgingPage /></LazyPage>} />
+          <Route path="finance/trust-accounts" element={<LazyPage><Pages.TrustAccountsPage /></LazyPage>} />
+          <Route path="finance/tax-center" element={<LazyPage><Pages.TaxCenterPage /></LazyPage>} />
           <Route path="tasks" element={<LazyPage><Pages.CrmTasksPage /></LazyPage>} />
           <Route path="crm-dashboard" element={<LazyPage><Pages.CrmDashboardPage /></LazyPage>} />
           <Route path="sequences" element={<LazyPage><Pages.CrmSequencesPage /></LazyPage>} />

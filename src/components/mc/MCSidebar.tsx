@@ -96,12 +96,16 @@ export const navigationGroups: NavGroup[] = [
     defaultOpen: false,
     items: [
       { title: 'Overview', titleRu: 'Обзор', path: APP_ROUTES.MC_FINANCE, icon: DollarSign },
-      { title: 'Payouts', titleRu: 'Выплаты', path: APP_ROUTES.MC_MANAGEMENT_TERMS, icon: Shuffle },
+      { title: 'Owner Payouts', titleRu: 'Выплаты собственникам', path: APP_ROUTES.MC_OWNER_PAYOUTS, icon: Shuffle },
+      { title: 'AR Aging', titleRu: 'Дебиторка', path: APP_ROUTES.MC_AR_AGING, icon: Receipt },
+      { title: 'Trust Accounts', titleRu: 'Эскроу-счета', path: APP_ROUTES.MC_TRUST_ACCOUNTS, icon: ShieldCheck },
+      { title: 'Tax Center', titleRu: 'Налоги (Thai)', path: APP_ROUTES.MC_TAX_CENTER, icon: Target },
       { title: 'Transactions', titleRu: 'Транзакции', path: APP_ROUTES.MC_FINANCIALS, icon: ArrowLeftRight },
       { title: 'Reports', titleRu: 'Отчёты', path: APP_ROUTES.MC_REPORTS, icon: BarChart3 },
       { title: 'Budget', titleRu: 'Бюджет', path: APP_ROUTES.MC_BUDGET, icon: Target },
       { title: 'Financial Planning', titleRu: 'Финансовое планирование', path: APP_ROUTES.MC_FINANCE_PLANNING, icon: LineChart },
       { title: 'Invoices', titleRu: 'Инвойсы', path: APP_ROUTES.MC_INVOICES, icon: Receipt },
+      { title: 'Management Terms', titleRu: 'Условия управления', path: APP_ROUTES.MC_MANAGEMENT_TERMS, icon: Layers },
     ],
   },
   {
