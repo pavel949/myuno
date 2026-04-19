@@ -164,15 +164,15 @@ export function ListingHealthScore({ score, className }: ListingHealthScoreProps
                 key={index} 
                 className={cn(
                   "flex items-start gap-2 p-2 rounded-lg text-sm",
-                  tip.priority === 'high' ? "bg-orange-50 dark:bg-orange-950/30" :
-                  tip.priority === 'medium' ? "bg-yellow-50 dark:bg-yellow-950/30" :
+                  tip.priority === 'high' ? "bg-destructive/10" :
+                  tip.priority === 'medium' ? "bg-warning/10" :
                   "bg-muted"
                 )}
               >
                 <CheckCircle2 className={cn(
                   "h-4 w-4 shrink-0 mt-0.5",
-                  tip.priority === 'high' ? "text-orange-500" :
-                  tip.priority === 'medium' ? "text-yellow-600" :
+                  tip.priority === 'high' ? "text-destructive" :
+                  tip.priority === 'medium' ? "text-warning" :
                   "text-muted-foreground"
                 )} />
                 <span className="text-muted-foreground">
