@@ -18,32 +18,38 @@ const SERVICES: ServiceProof[] = [
   {
     icon: Plane, labelRu: 'Трансфер из аэропорта', labelEn: 'Airport transfer',
     priceRu: 'от 800 \u0E3F', priceEn: 'from 800 \u0E3F',
-    path: '/transport/airport-transfer', gradient: 'linear-gradient(135deg, #06b6d4, #0891b2)',
+    path: '/transport/airport-transfer',
+    gradient: 'linear-gradient(135deg, hsl(var(--cluster-arrive)), hsl(var(--cluster-arrive) / 0.7))',
   },
   {
     icon: Flower2, labelRu: 'Букет за 2 часа', labelEn: 'Flowers in 2 hours',
     priceRu: 'от 590 \u0E3F', priceEn: 'from 590 \u0E3F',
-    path: '/flowers', gradient: 'linear-gradient(135deg, #ec4899, #db2777)',
+    path: '/flowers',
+    gradient: 'linear-gradient(135deg, hsl(var(--accent-coral)), hsl(var(--accent-coral) / 0.7))',
   },
   {
     icon: FileText, labelRu: 'Продление визы', labelEn: 'Visa extension',
     priceRu: 'от 5,000 \u0E3F', priceEn: 'from 5,000 \u0E3F',
-    path: '/visa', gradient: 'linear-gradient(135deg, #f59e0b, #d97706)',
+    path: '/visa',
+    gradient: 'linear-gradient(135deg, hsl(var(--cluster-legal)), hsl(var(--cluster-legal) / 0.7))',
   },
   {
     icon: Home, labelRu: 'Аренда на месяц', labelEn: 'Monthly rental',
     priceRu: 'от 15,000 \u0E3F', priceEn: 'from 15,000 \u0E3F',
-    path: '/property/rent', gradient: 'linear-gradient(135deg, #10b981, #059669)',
+    path: '/property/rent',
+    gradient: 'linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.7))',
   },
   {
     icon: SprayCan, labelRu: 'Уборка квартиры', labelEn: 'Apartment cleaning',
     priceRu: 'от 1,500 \u0E3F', priceEn: 'from 1,500 \u0E3F',
-    path: '/cleaning', gradient: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+    path: '/cleaning',
+    gradient: 'linear-gradient(135deg, hsl(var(--cluster-manage)), hsl(var(--cluster-manage) / 0.7))',
   },
   {
     icon: Bike, labelRu: 'Аренда байка', labelEn: 'Scooter rental',
     priceRu: 'от 200 \u0E3F/\u0434\u0435\u043D\u044C', priceEn: 'from 200 \u0E3F/day',
-    path: '/transport/bike-rental', gradient: 'linear-gradient(135deg, #f97316, #ea580c)',
+    path: '/transport/bike-rental',
+    gradient: 'linear-gradient(135deg, hsl(var(--accent-amber)), hsl(var(--accent-amber) / 0.7))',
   },
 ];
 
@@ -71,10 +77,10 @@ export const ValuePropositionStrip = memo(function ValuePropositionStrip() {
                 to={svc.path}
                 className={cn(
                   "flex flex-col gap-3 p-4 rounded-[var(--radius-lg)] shrink-0 transition-all duration-200",
-                  "w-[160px] md:w-auto",
-                  "ring-1 ring-border hover:ring-primary/40 hover:shadow-sm active:scale-[0.98]"
+                  "w-[160px] md:w-auto bg-card",
+                  "ring-1 ring-border hover:ring-primary/40 hover:shadow-sm active:scale-[0.98]",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 )}
-                style={{ background: 'hsl(var(--card))' }}
               >
                 <div
                   className="flex items-center justify-center w-10 h-10 rounded-[var(--radius-md)]"
