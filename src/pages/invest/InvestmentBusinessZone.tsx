@@ -23,6 +23,7 @@ export default function InvestmentBusinessZone() {
   const { data: projects, isLoading } = useInvestmentProjects(
     selectedType ? { projectType: selectedType } : undefined,
   );
+  const { data: listings, isLoading: loadingListings } = useBusinessListings();
 
   const businessProjects = (projects ?? []).filter((p) => !p.project_type.startsWith('real_estate'));
 
