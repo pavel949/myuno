@@ -220,7 +220,8 @@ export function HomeDiscoveryCarousel() {
                 key={`${item.kind}-${item.id}`}
                 type="button"
                 onClick={() => navigate(item.href)}
-                className="w-[148px] h-[168px] rounded-[var(--radius-lg)] overflow-hidden text-left group transition-all duration-200 hover:-translate-y-1 active:scale-[0.97]"
+                aria-label={`${badge}: ${title}${meta ? `, ${meta}` : ''}`}
+                className="w-[148px] h-[168px] rounded-[var(--radius-lg)] overflow-hidden text-left group transition-all duration-200 hover:-translate-y-1 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 style={{
                   background: 'hsl(var(--card))',
                   border: '1px solid hsl(var(--border))',
