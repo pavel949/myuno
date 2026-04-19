@@ -160,7 +160,20 @@ export default function CommercialIndex() {
               >
                 {isRu ? 'Все' : 'All'}
               </button>
-              {COMMERCIAL_TYPES.map((t) => (
+              {/* Hotels — dedicated sub-vertical, navigates to /property/hotels for SEO */}
+              <button
+                type="button"
+                onClick={() => navigate(APP_ROUTES.HOTELS)}
+                className={cn(
+                  'px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap border transition-colors',
+                  'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/40 hover:bg-amber-500/20',
+                )}
+              >
+                <Hotel className="inline w-3 h-3 mr-1" />
+                {isRu ? 'Отели' : 'Hotels'}
+                <span className="ml-1.5 text-[10px] opacity-70">PRO</span>
+              </button>
+              {COMMERCIAL_TYPES.filter((t) => !(HOTEL_PROPERTY_TYPES as string[]).includes(t.id)).map((t) => (
                 <button
                   key={t.id}
                   type="button"
