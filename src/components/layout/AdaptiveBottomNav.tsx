@@ -144,16 +144,14 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
         >
           {/* Glass backdrop */}
           <div
-            className="absolute inset-0"
+            className="absolute inset-0 border-t border-border bg-[hsl(var(--bg-surface)/0.85)]"
             style={{
-              background: 'rgba(15,28,46,0.85)',
               backdropFilter: 'blur(20px) saturate(180%)',
               WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-              borderTop: '1px solid rgba(255,255,255,0.07)',
             }}
           />
 
-          <div className={cn("relative grid gap-0 h-[60px] px-2 max-w-[480px] mx-auto", gridCols)}>
+          <div className={cn("relative grid gap-0 h-[60px] px-2 max-w-screen-sm mx-auto", gridCols)}>
             {leftItems.map(({ path, icon: Icon, labelEn, labelRu }) => {
               const active = isActive(path);
               const label = language === 'ru' ? labelRu : labelEn;
@@ -164,20 +162,21 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
                   onClick={handleNavClick}
                   onMouseEnter={() => handlePrefetch(path)}
                   onTouchStart={() => handlePrefetch(path)}
-                  className="flex flex-col items-center justify-center gap-[3px] relative pt-1"
+                  aria-label={label}
+                  className="flex flex-col items-center justify-center gap-[3px] relative pt-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-md"
                 >
                   {active && (
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-[3px] rounded-full bg-primary" />
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-[3px] rounded-full bg-primary" aria-hidden />
                   )}
                   <div className={cn(
                     'transition-all duration-200',
                     active ? 'text-primary scale-110' : 'text-muted-foreground',
                   )}>
-                    <Icon className="w-[20px] h-[20px]" />
+                    <Icon className="w-[20px] h-[20px]" aria-hidden />
                   </div>
                   <span className={cn(
                     'text-[10px] leading-none',
-                    active ? 'font-semibold text-primary' : 'font-medium text-muted-foreground/60',
+                    active ? 'font-semibold text-primary' : 'font-medium text-muted-foreground/80',
                   )}>
                     {label}
                   </span>
@@ -188,18 +187,13 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
             {showAppsButton && (
               <button
                 onClick={(e) => { handleNavClick(e); setAppsOpen(true); }}
-                className="flex flex-col items-center justify-center gap-[3px] pt-1"
+                aria-label={language === 'ru' ? 'Все сервисы' : 'All apps'}
+                className="flex flex-col items-center justify-center gap-[3px] pt-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-md"
               >
-                <div
-                  className="w-10 h-10 rounded-2xl flex items-center justify-center"
-                  style={{
-                    background: 'hsl(var(--primary) / 0.12)',
-                    border: '1px solid hsl(var(--primary) / 0.25)',
-                  }}
-                >
-                  <LayoutGrid className="w-5 h-5 text-primary" />
+                <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-primary/10 border border-primary/25">
+                  <LayoutGrid className="w-5 h-5 text-primary" aria-hidden />
                 </div>
-                <span className="text-[10px] font-medium text-muted-foreground/60 leading-none">
+                <span className="text-[10px] font-medium text-muted-foreground/80 leading-none">
                   {language === 'ru' ? 'Сервисы' : 'Apps'}
                 </span>
               </button>
@@ -215,20 +209,21 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
                   onClick={handleNavClick}
                   onMouseEnter={() => handlePrefetch(path)}
                   onTouchStart={() => handlePrefetch(path)}
-                  className="flex flex-col items-center justify-center gap-[3px] relative pt-1"
+                  aria-label={label}
+                  className="flex flex-col items-center justify-center gap-[3px] relative pt-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-md"
                 >
                   {active && (
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-[3px] rounded-full bg-primary" />
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-[3px] rounded-full bg-primary" aria-hidden />
                   )}
                   <div className={cn(
                     'transition-all duration-200',
                     active ? 'text-primary scale-110' : 'text-muted-foreground',
                   )}>
-                    <Icon className="w-[20px] h-[20px]" />
+                    <Icon className="w-[20px] h-[20px]" aria-hidden />
                   </div>
                   <span className={cn(
                     'text-[10px] leading-none',
-                    active ? 'font-semibold text-primary' : 'font-medium text-muted-foreground/60',
+                    active ? 'font-semibold text-primary' : 'font-medium text-muted-foreground/80',
                   )}>
                     {label}
                   </span>
