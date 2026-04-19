@@ -143,6 +143,10 @@ export const APP_ROUTES = {
   INVEST_THAILAND: '/invest/thailand',
   INVEST_BUSINESS_DETAIL: (slug: string) => `/invest/business/${slug}`,
   INVEST_DETAIL: (id: string) => `/invest/project/${id}`,
+  // Public investor board (Phase 3 — universal capital marketplace)
+  INVEST_SUBMIT: '/invest/submit',
+  INVEST_DEALS_BOARD: '/invest/deals',
+  INVEST_DEAL_DETAIL: (id: string) => `/invest/deal/${id}`,
   // Internal ops console (admin-only Market/Deals/Network/Execution shell)
   INVEST_OPS: '/invest/ops',
   INVEST_MARKET: '/invest/ops/market',
@@ -401,6 +405,9 @@ export const APP_ROUTES = {
   CAPITAL_PIPELINE: '/capital/pipeline',
   CAPITAL_TEMPLATES: '/capital/templates',
   CAPITAL_NEWBUILDS_DEALS: '/capital/deals/newbuilds',
+  // Investment Hub deals inside Capital CRM (Phase 3 unification)
+  CAPITAL_INVESTMENT_DEALS: '/capital/investment-deals',
+  CAPITAL_INVESTMENT_DEAL_DETAIL: (id: string) => `/capital/investment-deals/${id}`,
 
   // ── Owner Portal (individual owners) ──
   OWNER: '/owner',
