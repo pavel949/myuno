@@ -6,7 +6,7 @@ import {
   ContactRound, Home, ChevronDown, TrendingUp, PackageOpen,
   Receipt, Settings, Tag, Star, ShieldCheck, MessageSquare, Radio,
   BookOpen, FileText, Megaphone, Truck, ClipboardList, Shuffle,
-  ArrowLeftRight, Target, Layers,
+  ArrowLeftRight, Target, Layers, LineChart,
 } from 'lucide-react';
 import {
   Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent,
@@ -100,7 +100,7 @@ export const navigationGroups: NavGroup[] = [
       { title: 'Transactions', titleRu: 'Транзакции', path: APP_ROUTES.MC_FINANCIALS, icon: ArrowLeftRight },
       { title: 'Reports', titleRu: 'Отчёты', path: APP_ROUTES.MC_REPORTS, icon: BarChart3 },
       { title: 'Budget', titleRu: 'Бюджет', path: APP_ROUTES.MC_BUDGET, icon: Target },
-      { title: 'Financial Planning', titleRu: 'Финансовое планирование', path: APP_ROUTES.MC_FINANCE_PLANNING, icon: LineChart, badge: 'Pro' },
+      { title: 'Financial Planning', titleRu: 'Финансовое планирование', path: APP_ROUTES.MC_FINANCE_PLANNING, icon: LineChart },
       { title: 'Invoices', titleRu: 'Инвойсы', path: APP_ROUTES.MC_INVOICES, icon: Receipt },
     ],
   },
