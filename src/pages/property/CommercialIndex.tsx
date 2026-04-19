@@ -4,8 +4,8 @@
  * Persona-gated visibility lives in PropertyHubTabs; URL access stays open.
  */
 import { useState, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { Briefcase, Building2 } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Briefcase, Building2, Hotel } from 'lucide-react';
 import { SEOHead } from '@/components/seo';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -17,8 +17,9 @@ import { useCommercialProperties } from '@/hooks/useCommercialProperties';
 import { CommercialPropertyCard } from '@/components/property/commercial/CommercialPropertyCard';
 import { PersonaGatePrompt } from '@/components/property/commercial/PersonaGatePrompt';
 import { CommercialFilters, type CommercialFiltersValue } from '@/components/property/commercial/CommercialFilters';
-import { COMMERCIAL_TYPES } from '@/lib/real-estate/commercialTaxonomy';
+import { COMMERCIAL_TYPES, HOTEL_PROPERTY_TYPES } from '@/lib/real-estate/commercialTaxonomy';
 import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 type Intent = 'rent' | 'sale';
 
@@ -26,6 +27,7 @@ export default function CommercialIndex() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   const intent = (searchParams.get('intent') as Intent) || 'sale';
   const type = searchParams.get('type') || 'all';
@@ -40,6 +42,9 @@ export default function CommercialIndex() {
     withTenant: searchParams.get('tenant') === '1' || undefined,
   };
 
+  // Exclude hotels from generic Commercial feed unless a hotel sub-type is explicitly chosen.
+  const isHotelTypeSelected = (HOTEL_PROPERTY_TYPES as string[]).includes(type);
+
   const { data, isLoading, error } = useCommercialProperties({
     intent,
     propertyType: type,
@@ -47,6 +52,7 @@ export default function CommercialIndex() {
     maxPrice: filterValues.maxPrice ? Number(filterValues.maxPrice) : undefined,
     minAreaSqm: filterValues.minAreaSqm ? Number(filterValues.minAreaSqm) : undefined,
     maxAreaSqm: filterValues.maxAreaSqm ? Number(filterValues.maxAreaSqm) : undefined,
+    excludeHotels: type === 'all' && !isHotelTypeSelected,
   });
 
   const items = useMemo(() => {
@@ -154,7 +160,20 @@ export default function CommercialIndex() {
               >
                 {isRu ? 'Все' : 'All'}
               </button>
-              {COMMERCIAL_TYPES.map((t) => (
+              {/* Hotels — dedicated sub-vertical, navigates to /property/hotels for SEO */}
+              <button
+                type="button"
+                onClick={() => navigate(APP_ROUTES.HOTELS)}
+                className={cn(
+                  'px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap border transition-colors',
+                  'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/40 hover:bg-amber-500/20',
+                )}
+              >
+                <Hotel className="inline w-3 h-3 mr-1" />
+                {isRu ? 'Отели' : 'Hotels'}
+                <span className="ml-1.5 text-[10px] opacity-70">PRO</span>
+              </button>
+              {COMMERCIAL_TYPES.filter((t) => !(HOTEL_PROPERTY_TYPES as string[]).includes(t.id)).map((t) => (
                 <button
                   key={t.id}
                   type="button"

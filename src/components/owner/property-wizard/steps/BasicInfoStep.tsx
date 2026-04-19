@@ -15,7 +15,8 @@ import { PropertyFormData, OwnershipData, OwnershipType, AssetClass } from '@/ho
 import { PropertyFeaturesSelector } from '../PropertyFeaturesSelector';
 import { PropertyProject } from '@/hooks/usePropertyProjects';
 import { getTypeAwareLabels } from '@/lib/propertyTypeConfig';
-import { COMMERCIAL_TYPES, LAND_TYPES, TITLE_DEED_TYPES, formatLandSize } from '@/lib/real-estate/commercialTaxonomy';
+import { COMMERCIAL_TYPES, LAND_TYPES, TITLE_DEED_TYPES, HOTEL_LICENSE_TYPES, HOTEL_MANAGEMENT_STATUSES, formatLandSize, isHotelType } from '@/lib/real-estate/commercialTaxonomy';
+import { Hotel, Star } from 'lucide-react';
 
 
 const DISMISS_KEY = 'owner_contact_auto_create_hint_dismissed';
@@ -411,7 +412,169 @@ function BasicInfoStepInner({
         </Card>
       )}
 
-      {/* 2. Location search — Airbnb-style: project/address lookup fills map */}
+      {/* Hotel-specific block — operational hospitality data */}
+      {isCommercial && isHotelType(formData.property_type) && (
+        <Card className="border-amber-500/30 bg-gradient-to-br from-amber-500/5 to-transparent">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Hotel className="h-4 w-4 text-amber-500" />
+              {isRu ? 'Параметры отеля' : 'Hotel details'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="flex items-center gap-1 text-xs">
+                  <Hotel className="h-3 w-3" />{isRu ? 'Кол-во номеров (keys)' : 'Number of keys'}
+                </Label>
+                <Input
+                  type="number" min={0}
+                  value={formData.hotel_keys ?? ''}
+                  onChange={(e) => updateFormData({ hotel_keys: e.target.value ? Number(e.target.value) : undefined })}
+                  placeholder="42"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="flex items-center gap-1 text-xs">
+                  <Star className="h-3 w-3" />{isRu ? 'Звёздность (1–5)' : 'Star rating (1–5)'}
+                </Label>
+                <Input
+                  type="number" min={0} max={5} step="0.5"
+                  value={formData.hotel_star_rating ?? ''}
+                  onChange={(e) => updateFormData({ hotel_star_rating: e.target.value ? Number(e.target.value) : undefined })}
+                  placeholder="4.5"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs">{isRu ? 'Бренд / флаг' : 'Brand / flag'}</Label>
+              <Input
+                value={formData.hotel_brand ?? ''}
+                onChange={(e) => updateFormData({ hotel_brand: e.target.value || undefined })}
+                placeholder={isRu ? 'Marriott, Hilton, Independent…' : 'Marriott, Hilton, Independent…'}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="flex items-center gap-1 text-xs">
+                  <ShieldCheck className="h-3 w-3" />{isRu ? 'Лицензия' : 'License'}
+                </Label>
+                <select
+                  value={formData.hotel_license_type ?? ''}
+                  onChange={(e) => updateFormData({ hotel_license_type: e.target.value || undefined })}
+                  className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
+                >
+                  <option value="">{isRu ? 'Не выбрано' : 'Not specified'}</option>
+                  {HOTEL_LICENSE_TYPES.map((d) => (
+                    <option key={d.id} value={d.id}>{isRu ? d.labelRu : d.labelEn}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">{isRu ? 'Год реновации' : 'Year renovated'}</Label>
+                <Input
+                  type="number" min={1950} max={new Date().getFullYear()}
+                  value={formData.hotel_year_renovated ?? ''}
+                  onChange={(e) => updateFormData({ hotel_year_renovated: e.target.value ? Number(e.target.value) : undefined })}
+                  placeholder="2023"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs">{isRu ? 'Статус управления' : 'Management status'}</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {HOTEL_MANAGEMENT_STATUSES.map((s) => {
+                  const isSelected = formData.hotel_management_status === s.id;
+                  return (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => updateFormData({ hotel_management_status: s.id })}
+                      className={`flex items-center gap-2 p-2.5 rounded-lg border-2 text-left transition-all ${
+                        isSelected
+                          ? 'border-amber-500 bg-amber-500/10'
+                          : 'border-muted hover:border-muted-foreground/30 bg-muted/30'
+                      }`}
+                    >
+                      <span className="text-base">{s.icon}</span>
+                      <span className="text-xs font-medium leading-tight">
+                        {isRu ? s.labelRu : s.labelEn}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {(formData.hotel_management_status === 'under_hma' || formData.hotel_management_status === 'owner_operated') && (
+              <div className="space-y-1.5">
+                <Label className="text-xs">{isRu ? 'Текущий оператор' : 'Current operator'}</Label>
+                <Input
+                  value={formData.hotel_operator_name ?? ''}
+                  onChange={(e) => updateFormData({ hotel_operator_name: e.target.value || undefined })}
+                  placeholder={isRu ? 'Marriott International / Self' : 'Marriott International / Self'}
+                />
+              </div>
+            )}
+
+            {/* Financial KPIs */}
+            <div className="pt-2 border-t border-border/40 space-y-3">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                {isRu ? 'Финансовые метрики (опционально)' : 'Financial metrics (optional)'}
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs">ADR, ฿</Label>
+                  <Input
+                    type="number" min={0}
+                    value={formData.hotel_adr_thb ?? ''}
+                    onChange={(e) => updateFormData({ hotel_adr_thb: e.target.value ? Number(e.target.value) : undefined })}
+                    placeholder="3500"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">RevPAR, ฿</Label>
+                  <Input
+                    type="number" min={0}
+                    value={formData.hotel_revpar_thb ?? ''}
+                    onChange={(e) => updateFormData({ hotel_revpar_thb: e.target.value ? Number(e.target.value) : undefined })}
+                    placeholder="2450"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">{isRu ? 'Загрузка, %' : 'Occupancy, %'}</Label>
+                  <Input
+                    type="number" min={0} max={100} step="0.1"
+                    value={formData.hotel_occupancy_pct ?? ''}
+                    onChange={(e) => updateFormData({ hotel_occupancy_pct: e.target.value ? Number(e.target.value) : undefined })}
+                    placeholder="70"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">GOP %</Label>
+                  <Input
+                    type="number" min={0} max={100} step="0.1"
+                    value={formData.hotel_gop_margin_pct ?? ''}
+                    onChange={(e) => updateFormData({ hotel_gop_margin_pct: e.target.value ? Number(e.target.value) : undefined })}
+                    placeholder="38"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {formData.hotel_management_status === 'seeking_operator' && (
+              <div className="rounded-lg p-3 bg-amber-500/10 border border-amber-500/30 text-xs text-foreground">
+                {isRu
+                  ? '✨ Этот объект будет помечен как «Ищет оператора» в разделе HMA opportunities — управляющие компании увидят его в специальной выдаче.'
+                  : '✨ This listing will be flagged as "Seeking Operator" in the HMA opportunities section — hotel management companies will see it in a dedicated feed.'}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
       <LocationProjectSearch
         formData={formData}
         updateFormData={updateFormData}

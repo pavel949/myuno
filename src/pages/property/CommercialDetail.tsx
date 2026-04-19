@@ -4,10 +4,11 @@
  * until Phase 3 wires the CRM `commercial_inquiry` source.
  */
 import { useParams } from 'react-router-dom';
-import { Building2, Zap, Car, ShieldCheck, Calendar, Mail, BadgeCheck } from 'lucide-react';
+import { Building2, Zap, Car, ShieldCheck, Calendar, Mail, BadgeCheck, Hotel, Star, TrendingUp, Lock } from 'lucide-react';
 import { SEOHead } from '@/components/seo';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { BackButton } from '@/components/uno/BackButton';
 import { Button } from '@/components/ui/button';
@@ -17,6 +18,9 @@ import { useCommercialProperty } from '@/hooks/useCommercialProperties';
 import {
   getCommercialTypeLabel,
   getTitleDeedLabel,
+  getHotelLicenseLabel,
+  getHotelManagementStatusLabel,
+  isHotelType,
 } from '@/lib/real-estate/commercialTaxonomy';
 import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
 
@@ -24,9 +28,11 @@ export default function CommercialDetail() {
   const { id } = useParams<{ id: string }>();
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
+  const { user } = useAuth();
   const isRu = language === 'ru';
 
   const { data: property, isLoading, error } = useCommercialProperty(id);
+  const isHotel = isHotelType(property?.property_type);
 
   if (isLoading) {
     return (
@@ -124,6 +130,94 @@ export default function CommercialDetail() {
               <Metric label={isRu ? 'Площадь' : 'Area'} value={`${property.floor_area_sqm} m²`} />
             )}
           </div>
+
+          {/* Hotel-specific KPI section */}
+          {isHotel && (
+            <section className="rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/5 to-transparent p-4 space-y-4">
+              <div className="flex items-center gap-2">
+                <Hotel className="w-4 h-4 text-amber-500" />
+                <h2 className="text-base font-semibold">{isRu ? 'Параметры отеля' : 'Hotel performance'}</h2>
+                {property.hotel_star_rating != null && (
+                  <div className="flex items-center gap-0.5 ml-auto">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`w-3.5 h-3.5 ${
+                          i < Math.round(property.hotel_star_rating!)
+                            ? 'fill-amber-500 text-amber-500'
+                            : 'text-muted-foreground/30'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {property.hotel_keys != null && (
+                  <Metric label={isRu ? 'Номеров' : 'Keys'} value={String(property.hotel_keys)} />
+                )}
+                {property.hotel_brand && (
+                  <Metric label={isRu ? 'Бренд' : 'Brand'} value={property.hotel_brand} />
+                )}
+                {property.hotel_occupancy_pct != null && (
+                  <Metric label={isRu ? 'Загрузка' : 'Occupancy'} value={`${property.hotel_occupancy_pct.toFixed(0)}%`} />
+                )}
+                {property.hotel_year_renovated != null && (
+                  <Metric label={isRu ? 'Реновация' : 'Renovated'} value={String(property.hotel_year_renovated)} />
+                )}
+              </div>
+
+              {(property.hotel_adr_thb != null || property.hotel_revpar_thb != null || property.hotel_gop_margin_pct != null) && (
+                <div className="pt-3 border-t border-amber-500/20">
+                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-2 flex items-center gap-1.5">
+                    <TrendingUp className="w-3 h-3" />
+                    {isRu ? 'Финансовые метрики' : 'Financial metrics'}
+                    {!user && <Lock className="w-3 h-3 ml-1" />}
+                  </p>
+                  {user ? (
+                    <div className="grid grid-cols-3 gap-3">
+                      {property.hotel_adr_thb != null && (
+                        <Metric label="ADR" value={formatPrice(property.hotel_adr_thb)} />
+                      )}
+                      {property.hotel_revpar_thb != null && (
+                        <Metric label="RevPAR" value={formatPrice(property.hotel_revpar_thb)} />
+                      )}
+                      {property.hotel_gop_margin_pct != null && (
+                        <Metric label="GOP" value={`${property.hotel_gop_margin_pct.toFixed(1)}%`} />
+                      )}
+                    </div>
+                  ) : (
+                    <div className="rounded-lg border border-dashed border-amber-500/40 bg-background/50 p-3 text-xs text-muted-foreground text-center">
+                      {isRu ? 'Войдите, чтобы увидеть ADR, RevPAR и GOP%' : 'Sign in to view ADR, RevPAR and GOP%'}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="flex flex-wrap gap-2">
+                {property.hotel_management_status && (
+                  <Badge variant="secondary" className="bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30">
+                    {getHotelManagementStatusLabel(property.hotel_management_status, isRu)}
+                    {property.hotel_operator_name && ` · ${property.hotel_operator_name}`}
+                  </Badge>
+                )}
+                {property.hotel_license_type && (
+                  <Badge
+                    variant="secondary"
+                    className={
+                      property.hotel_license_type === 'full_hotel_license'
+                        ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
+                        : 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30'
+                    }
+                  >
+                    <ShieldCheck className="w-3 h-3 mr-1" />
+                    {getHotelLicenseLabel(property.hotel_license_type, isRu)}
+                  </Badge>
+                )}
+              </div>
+            </section>
+          )}
 
           {description && (
             <div className="prose prose-sm dark:prose-invert max-w-none">
