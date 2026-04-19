@@ -12928,6 +12928,149 @@ export type Database = {
           },
         ]
       }
+      owner_payouts: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          bank_account_last4: string | null
+          bank_reference: string | null
+          company_id: string
+          created_at: string
+          created_by: string
+          currency: string
+          expenses: number
+          gross_revenue: number
+          id: string
+          mgmt_commission: number
+          net_payout: number
+          notes: string | null
+          other_deductions: number
+          owner_id: string
+          paid_at: string | null
+          payment_method: string | null
+          payout_number: string
+          period_end: string
+          period_start: string
+          property_id: string | null
+          run_id: string | null
+          statement_url: string | null
+          status: Database["public"]["Enums"]["owner_payout_status"]
+          updated_at: string
+          vat_amount: number
+          wht_amount: number
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          bank_account_last4?: string | null
+          bank_reference?: string | null
+          company_id: string
+          created_at?: string
+          created_by: string
+          currency?: string
+          expenses?: number
+          gross_revenue?: number
+          id?: string
+          mgmt_commission?: number
+          net_payout?: number
+          notes?: string | null
+          other_deductions?: number
+          owner_id: string
+          paid_at?: string | null
+          payment_method?: string | null
+          payout_number: string
+          period_end: string
+          period_start: string
+          property_id?: string | null
+          run_id?: string | null
+          statement_url?: string | null
+          status?: Database["public"]["Enums"]["owner_payout_status"]
+          updated_at?: string
+          vat_amount?: number
+          wht_amount?: number
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          bank_account_last4?: string | null
+          bank_reference?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          currency?: string
+          expenses?: number
+          gross_revenue?: number
+          id?: string
+          mgmt_commission?: number
+          net_payout?: number
+          notes?: string | null
+          other_deductions?: number
+          owner_id?: string
+          paid_at?: string | null
+          payment_method?: string | null
+          payout_number?: string
+          period_end?: string
+          period_start?: string
+          property_id?: string | null
+          run_id?: string | null
+          statement_url?: string | null
+          status?: Database["public"]["Enums"]["owner_payout_status"]
+          updated_at?: string
+          vat_amount?: number
+          wht_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "owner_payouts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_payouts_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_payouts_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_payouts_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_payouts_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_payouts_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_properties_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_payouts_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "payout_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       owner_performance_metrics: {
         Row: {
           avg_rating: number | null
@@ -13518,6 +13661,65 @@ export type Database = {
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payout_runs: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string
+          currency: string
+          id: string
+          notes: string | null
+          payouts_count: number
+          period_end: string
+          period_start: string
+          processed_at: string | null
+          run_name: string | null
+          status: Database["public"]["Enums"]["payout_run_status"]
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by: string
+          currency?: string
+          id?: string
+          notes?: string | null
+          payouts_count?: number
+          period_end: string
+          period_start: string
+          processed_at?: string | null
+          run_name?: string | null
+          status?: Database["public"]["Enums"]["payout_run_status"]
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          currency?: string
+          id?: string
+          notes?: string | null
+          payouts_count?: number
+          period_end?: string
+          period_start?: string
+          processed_at?: string | null
+          run_name?: string | null
+          status?: Database["public"]["Enums"]["payout_run_status"]
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payout_runs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
             referencedColumns: ["id"]
           },
         ]
@@ -22234,6 +22436,80 @@ export type Database = {
           },
         ]
       }
+      tax_filings: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string
+          currency: string
+          document_url: string | null
+          filed_at: string | null
+          filing_type: Database["public"]["Enums"]["tax_filing_type"]
+          id: string
+          metadata: Json | null
+          notes: string | null
+          paid_at: string | null
+          period_end: string
+          period_start: string
+          reference_number: string | null
+          status: Database["public"]["Enums"]["tax_filing_status"]
+          tax_amount: number
+          tax_rate: number
+          taxable_base: number
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by: string
+          currency?: string
+          document_url?: string | null
+          filed_at?: string | null
+          filing_type: Database["public"]["Enums"]["tax_filing_type"]
+          id?: string
+          metadata?: Json | null
+          notes?: string | null
+          paid_at?: string | null
+          period_end: string
+          period_start: string
+          reference_number?: string | null
+          status?: Database["public"]["Enums"]["tax_filing_status"]
+          tax_amount?: number
+          tax_rate?: number
+          taxable_base?: number
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          currency?: string
+          document_url?: string | null
+          filed_at?: string | null
+          filing_type?: Database["public"]["Enums"]["tax_filing_type"]
+          id?: string
+          metadata?: Json | null
+          notes?: string | null
+          paid_at?: string | null
+          period_end?: string
+          period_start?: string
+          reference_number?: string | null
+          status?: Database["public"]["Enums"]["tax_filing_status"]
+          tax_amount?: number
+          tax_rate?: number
+          taxable_base?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tax_filings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       taxonomy_definitions: {
         Row: {
           created_at: string | null
@@ -23032,6 +23308,128 @@ export type Database = {
           type?: string
         }
         Relationships: []
+      }
+      trust_account_movements: {
+        Row: {
+          amount: number
+          company_id: string
+          created_at: string
+          created_by: string
+          currency: string
+          description: string | null
+          direction: string
+          id: string
+          movement_date: string
+          reference_id: string | null
+          reference_type: string | null
+          trust_account_id: string
+        }
+        Insert: {
+          amount: number
+          company_id: string
+          created_at?: string
+          created_by: string
+          currency?: string
+          description?: string | null
+          direction: string
+          id?: string
+          movement_date?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          trust_account_id: string
+        }
+        Update: {
+          amount?: number
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          currency?: string
+          description?: string | null
+          direction?: string
+          id?: string
+          movement_date?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          trust_account_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trust_account_movements_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trust_account_movements_trust_account_id_fkey"
+            columns: ["trust_account_id"]
+            isOneToOne: false
+            referencedRelation: "trust_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trust_accounts: {
+        Row: {
+          account_name: string
+          account_name_ru: string | null
+          account_type: Database["public"]["Enums"]["trust_account_type"]
+          available_balance: number | null
+          bank_account_last4: string | null
+          bank_name: string | null
+          company_id: string
+          created_at: string
+          currency: string
+          current_balance: number
+          id: string
+          is_active: boolean
+          notes: string | null
+          reserved_balance: number
+          updated_at: string
+        }
+        Insert: {
+          account_name: string
+          account_name_ru?: string | null
+          account_type: Database["public"]["Enums"]["trust_account_type"]
+          available_balance?: number | null
+          bank_account_last4?: string | null
+          bank_name?: string | null
+          company_id: string
+          created_at?: string
+          currency?: string
+          current_balance?: number
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          reserved_balance?: number
+          updated_at?: string
+        }
+        Update: {
+          account_name?: string
+          account_name_ru?: string | null
+          account_type?: Database["public"]["Enums"]["trust_account_type"]
+          available_balance?: number | null
+          bank_account_last4?: string | null
+          bank_name?: string | null
+          company_id?: string
+          created_at?: string
+          currency?: string
+          current_balance?: number
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          reserved_balance?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trust_accounts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       trust_badges: {
         Row: {
@@ -27027,6 +27425,29 @@ export type Database = {
           },
         ]
       }
+      v_ar_aging: {
+        Row: {
+          bucket_0_30: number | null
+          bucket_31_60: number | null
+          bucket_61_90: number | null
+          bucket_90_plus: number | null
+          company_id: string | null
+          currency: string | null
+          open_invoices: number | null
+          recipient_email: string | null
+          recipient_name: string | null
+          total_outstanding: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "owner_invoices_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_founder_inbox: {
         Row: {
           company_id: string | null
@@ -28898,6 +29319,8 @@ export type Database = {
         Args: { _company_id: string; _user_id: string }
         Returns: boolean
       }
+      is_mc_director: { Args: { _company_id: string }; Returns: boolean }
+      is_mc_member: { Args: { _company_id: string }; Returns: boolean }
       is_mc_member_for_property: {
         Args: { p_property_id: string; p_user_id: string }
         Returns: boolean
@@ -29319,6 +29742,14 @@ export type Database = {
         | "pending_deposit"
         | "deposit_paid"
         | "expired"
+      owner_payout_status:
+        | "draft"
+        | "pending"
+        | "approved"
+        | "processing"
+        | "paid"
+        | "failed"
+        | "cancelled"
       payment_method: "cash" | "wallet" | "stripe" | "bank_transfer"
       payment_status:
         | "pending"
@@ -29327,12 +29758,25 @@ export type Database = {
         | "failed"
         | "refunded"
         | "cancelled"
+      payout_run_status:
+        | "draft"
+        | "processing"
+        | "completed"
+        | "failed"
+        | "cancelled"
+      tax_filing_status: "draft" | "calculated" | "filed" | "paid" | "overdue"
+      tax_filing_type: "wht_3" | "vat_7" | "pnd_1" | "pnd_3" | "pnd_53" | "sbt"
       team_specialization:
         | "content_manager"
         | "support_operator"
         | "sales_manager"
         | "moderation_officer"
         | "team_lead"
+      trust_account_type:
+        | "guest_deposit"
+        | "owner_funds"
+        | "reserve"
+        | "operating"
       user_persona:
         | "tourist"
         | "resident"
@@ -29612,6 +30056,15 @@ export const Constants = {
         "deposit_paid",
         "expired",
       ],
+      owner_payout_status: [
+        "draft",
+        "pending",
+        "approved",
+        "processing",
+        "paid",
+        "failed",
+        "cancelled",
+      ],
       payment_method: ["cash", "wallet", "stripe", "bank_transfer"],
       payment_status: [
         "pending",
@@ -29621,12 +30074,27 @@ export const Constants = {
         "refunded",
         "cancelled",
       ],
+      payout_run_status: [
+        "draft",
+        "processing",
+        "completed",
+        "failed",
+        "cancelled",
+      ],
+      tax_filing_status: ["draft", "calculated", "filed", "paid", "overdue"],
+      tax_filing_type: ["wht_3", "vat_7", "pnd_1", "pnd_3", "pnd_53", "sbt"],
       team_specialization: [
         "content_manager",
         "support_operator",
         "sales_manager",
         "moderation_officer",
         "team_lead",
+      ],
+      trust_account_type: [
+        "guest_deposit",
+        "owner_funds",
+        "reserve",
+        "operating",
       ],
       user_persona: [
         "tourist",
