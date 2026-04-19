@@ -146,14 +146,14 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
           <div
             className="absolute inset-0"
             style={{
-              background: 'rgba(15,28,46,0.85)',
-              backdropFilter: 'blur(20px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-              borderTop: '1px solid rgba(255,255,255,0.07)',
+              background: 'rgba(8,16,30,0.96)',
+              backdropFilter: 'blur(24px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+              borderTop: '1px solid rgba(255,255,255,0.12)',
             }}
           />
 
-          <div className={cn("relative grid gap-0 h-[60px] px-2 max-w-[480px] mx-auto", gridCols)}>
+          <div className={cn("relative grid gap-0 h-[68px] px-2 max-w-[480px] mx-auto", gridCols)}>
             {leftItems.map(({ path, icon: Icon, labelEn, labelRu }) => {
               const active = isActive(path);
               const label = language === 'ru' ? labelRu : labelEn;
