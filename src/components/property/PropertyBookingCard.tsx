@@ -264,6 +264,14 @@ export function PropertyBookingCard({
                 disabled={(date) => {
                   if (isBefore(date, startOfDay(new Date()))) return true;
                   if (isDateBlocked(date)) return true;
+                  const dateKey = format(date, 'yyyy-MM-dd');
+                  const kind = unavailableMap.get(dateKey);
+                  // Booked / manually blocked nights are fully unavailable.
+                  if (kind === 'booked' || kind === 'blocked') return true;
+                  // checkout_only: allowed as check-in (from), forbidden as check-out (to)
+                  if (kind === 'checkout_only' && dateRange?.from && !dateRange?.to) {
+                    return true;
+                  }
                   // Min-stay enforcement: when picking the check-out, forbid
                   // dates closer than min_stay_nights to the selected check-in.
                   const minNights = rentalTerms?.min_stay_nights ?? 0;
@@ -273,7 +281,10 @@ export function PropertyBookingCard({
                   }
                   return false;
                 }}
-                modifiers={{ booked: blockedDates?.map(b => b.date) || [] }}
+                modifiers={{
+                  booked: blockedDates?.map((b) => b.date) || [],
+                  checkoutOnly: checkoutOnlyDates,
+                }}
                 modifiersClassNames={{ booked: 'bg-destructive/20 text-destructive line-through' }}
                 locale={isRu ? ru : undefined}
                 className="p-3 pointer-events-auto"
