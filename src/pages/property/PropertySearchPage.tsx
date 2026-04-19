@@ -247,7 +247,7 @@ export default function PropertySearchPage() {
                 <Popover>
                   <PopoverTrigger asChild>
                     <button className={cn(
-                      "inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-medium border transition-all shrink-0",
+                      "inline-flex items-center gap-1.5 min-h-[44px] px-3 rounded-full text-xs font-medium border transition-all shrink-0",
                       selectedCompanyId
                         ? "bg-primary text-primary-foreground border-primary"
                         : "bg-card text-foreground border-border hover:border-primary/40 hover:shadow-sm"
@@ -295,7 +295,7 @@ export default function PropertySearchPage() {
                 activeCount={activeFilterCount}
               >
                 <button className={cn(
-                  "inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-medium border transition-all shrink-0",
+                  "inline-flex items-center gap-1.5 min-h-[44px] px-3 rounded-full text-xs font-medium border transition-all shrink-0",
                   Object.keys(filterValues).length > 0
                     ? "bg-primary text-primary-foreground border-primary"
                     : "bg-card text-foreground border-border hover:border-primary/40 hover:shadow-sm"
