@@ -24,6 +24,10 @@ interface DepositPaymentOptionsProps {
   guestPhone: string;
   guestEmail: string;
   providerOrgId?: string;
+  /** Prepayment amount calculated by the central pricing engine. Defaults to 10% if omitted. */
+  prepayAmount?: number;
+  /** Prepay percent (for display). Defaults to 10. */
+  prepayPercent?: number;
   onSuccess?: () => void;
 }
 
@@ -40,6 +44,8 @@ export function DepositPaymentOptions({
   guestPhone,
   guestEmail,
   providerOrgId,
+  prepayAmount,
+  prepayPercent,
   onSuccess,
 }: DepositPaymentOptionsProps) {
   const { language } = useLanguage();
@@ -47,8 +53,10 @@ export function DepositPaymentOptions({
   const isRu = language === 'ru';
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const depositAmount = Math.round(totalAmount * 0.1);
-  const remainingAmount = totalAmount - depositAmount;
+  // Use the engine-calculated prepay; fall back to 10% only if not provided.
+  const effectivePercent = prepayPercent ?? 10;
+  const depositAmount = prepayAmount ?? Math.round(totalAmount * (effectivePercent / 100));
+  const remainingAmount = Math.max(totalAmount - depositAmount, 0);
 
   const handleOnlinePayment = async () => {
     setIsProcessing(true);
