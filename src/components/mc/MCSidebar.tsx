@@ -100,6 +100,7 @@ export const navigationGroups: NavGroup[] = [
       { title: 'Transactions', titleRu: 'Транзакции', path: APP_ROUTES.MC_FINANCIALS, icon: ArrowLeftRight },
       { title: 'Reports', titleRu: 'Отчёты', path: APP_ROUTES.MC_REPORTS, icon: BarChart3 },
       { title: 'Budget', titleRu: 'Бюджет', path: APP_ROUTES.MC_BUDGET, icon: Target },
+      { title: 'Financial Planning', titleRu: 'Финансовое планирование', path: APP_ROUTES.MC_FINANCE_PLANNING, icon: LineChart, badge: 'Pro' },
       { title: 'Invoices', titleRu: 'Инвойсы', path: APP_ROUTES.MC_INVOICES, icon: Receipt },
     ],
   },

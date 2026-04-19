@@ -379,6 +379,7 @@ export const APP_ROUTES = {
   MC_STAFF: '/mc/staff',
   MC_REPORTS: '/mc/reports',
   MC_BUDGET: '/mc/budget',
+  MC_FINANCE_PLANNING: '/mc/finance/planning',
   MC_INVOICES: '/mc/invoices',
   MC_OWNERS: '/mc/owners',
   MC_CRM_DASHBOARD: '/mc/crm-dashboard',
