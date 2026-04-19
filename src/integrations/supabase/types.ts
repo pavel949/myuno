@@ -30184,6 +30184,14 @@ export type Database = {
         Args: { p_product_id: string; p_vertical: string }
         Returns: number
       }
+      get_property_unavailable_dates: {
+        Args: { p_from: string; p_property_id: string; p_to: string }
+        Returns: {
+          date: string
+          order_id: string
+          reason: string
+        }[]
+      }
       get_property_user_role: {
         Args: { p_property_id: string; p_user_id: string }
         Returns: string
