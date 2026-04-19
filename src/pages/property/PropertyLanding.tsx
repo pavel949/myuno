@@ -18,6 +18,7 @@ import {
   CirclePlus,
   Trees,
   Sparkles,
+  Hotel,
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { SEOHead } from '@/components/seo';
@@ -82,6 +83,13 @@ const CAPITAL_CARDS: HubCardDef[] = [
     icon: Briefcase,
     titleKey: 'propertyHub.landing.commercial.title',
     descKey: 'propertyHub.landing.commercial.desc',
+    highlight: true,
+  },
+  {
+    to: APP_ROUTES.HOTELS,
+    icon: Hotel,
+    titleKey: 'propertyHub.landing.hotels.title',
+    descKey: 'propertyHub.landing.hotels.desc',
     highlight: true,
   },
   {

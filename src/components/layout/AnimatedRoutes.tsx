@@ -251,6 +251,10 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="land" element={<LazyPage><Pages.LandIndex /></LazyPage>} />
           <Route path="land/browse" element={<LazyPage><Pages.LandIndex /></LazyPage>} />
           <Route path="land/:id" element={<LazyPage><Pages.LandDetail /></LazyPage>} />
+
+          {/* Hotels — operational hospitality (uses CommercialDetail for individual listings) */}
+          <Route path="hotels" element={<LazyPage><Pages.HotelsIndex /></LazyPage>} />
+          <Route path="hotels/:id" element={<LazyPage><Pages.CommercialDetail /></LazyPage>} />
           
           {/* Legacy /property/invest/* → top-level /invest/* */}
           <Route path="invest" element={<Navigate to={APP_ROUTES.INVEST} replace />} />

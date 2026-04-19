@@ -14863,6 +14863,17 @@ export type Database = {
           has_high_chair: boolean | null
           highlights: string[] | null
           host_languages: string[] | null
+          hotel_adr_thb: number | null
+          hotel_brand: string | null
+          hotel_gop_margin_pct: number | null
+          hotel_keys: number | null
+          hotel_license_type: string | null
+          hotel_management_status: string | null
+          hotel_occupancy_pct: number | null
+          hotel_operator_name: string | null
+          hotel_revpar_thb: number | null
+          hotel_star_rating: number | null
+          hotel_year_renovated: number | null
           house_rules: string | null
           house_rules_ru: string | null
           ical_export_enabled: boolean | null
@@ -15100,6 +15111,17 @@ export type Database = {
           has_high_chair?: boolean | null
           highlights?: string[] | null
           host_languages?: string[] | null
+          hotel_adr_thb?: number | null
+          hotel_brand?: string | null
+          hotel_gop_margin_pct?: number | null
+          hotel_keys?: number | null
+          hotel_license_type?: string | null
+          hotel_management_status?: string | null
+          hotel_occupancy_pct?: number | null
+          hotel_operator_name?: string | null
+          hotel_revpar_thb?: number | null
+          hotel_star_rating?: number | null
+          hotel_year_renovated?: number | null
           house_rules?: string | null
           house_rules_ru?: string | null
           ical_export_enabled?: boolean | null
@@ -15337,6 +15359,17 @@ export type Database = {
           has_high_chair?: boolean | null
           highlights?: string[] | null
           host_languages?: string[] | null
+          hotel_adr_thb?: number | null
+          hotel_brand?: string | null
+          hotel_gop_margin_pct?: number | null
+          hotel_keys?: number | null
+          hotel_license_type?: string | null
+          hotel_management_status?: string | null
+          hotel_occupancy_pct?: number | null
+          hotel_operator_name?: string | null
+          hotel_revpar_thb?: number | null
+          hotel_star_rating?: number | null
+          hotel_year_renovated?: number | null
           house_rules?: string | null
           house_rules_ru?: string | null
           ical_export_enabled?: boolean | null

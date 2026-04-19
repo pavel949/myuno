@@ -5,6 +5,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { PUBLIC_CATALOG_APPROVAL_STATUS } from '@/lib/real-estate/canonicalModel';
+import { HOTEL_PROPERTY_TYPES } from '@/lib/real-estate/commercialTaxonomy';
 
 export interface CommercialProperty {
   id: string;
@@ -47,6 +48,18 @@ export interface CommercialProperty {
   is_featured?: boolean | null;
   is_verified?: boolean | null;
   created_at: string;
+  // Hotel-specific (only populated when property_type ∈ HOTEL_PROPERTY_TYPES)
+  hotel_keys?: number | null;
+  hotel_star_rating?: number | null;
+  hotel_brand?: string | null;
+  hotel_license_type?: string | null;
+  hotel_adr_thb?: number | null;
+  hotel_revpar_thb?: number | null;
+  hotel_occupancy_pct?: number | null;
+  hotel_gop_margin_pct?: number | null;
+  hotel_management_status?: string | null;
+  hotel_operator_name?: string | null;
+  hotel_year_renovated?: number | null;
 }
 
 const COMMERCIAL_COLUMNS = `
@@ -61,7 +74,10 @@ const COMMERCIAL_COLUMNS = `
   noi_annual_thb, cap_rate_pct, yield_pct,
   existing_tenant_anonymized, permitted_uses, building_condition,
   floor, parking_type,
-  is_featured, is_verified, created_at
+  is_featured, is_verified, created_at,
+  hotel_keys, hotel_star_rating, hotel_brand, hotel_license_type,
+  hotel_adr_thb, hotel_revpar_thb, hotel_occupancy_pct, hotel_gop_margin_pct,
+  hotel_management_status, hotel_operator_name, hotel_year_renovated
 `;
 
 export interface CommercialFilters {
@@ -72,6 +88,8 @@ export interface CommercialFilters {
   maxPrice?: number;
   minAreaSqm?: number;
   maxAreaSqm?: number;
+  /** When true, filters out hotel-class property types (used by generic Commercial page). */
+  excludeHotels?: boolean;
 }
 
 export function useCommercialProperties(filters: CommercialFilters = {}) {
@@ -98,6 +116,9 @@ export function useCommercialProperties(filters: CommercialFilters = {}) {
       }
       if (filters.minAreaSqm !== undefined) query = query.gte('floor_area_sqm', filters.minAreaSqm);
       if (filters.maxAreaSqm !== undefined) query = query.lte('floor_area_sqm', filters.maxAreaSqm);
+      if (filters.excludeHotels) {
+        query = query.not('property_type', 'in', `(${HOTEL_PROPERTY_TYPES.join(',')})`);
+      }
 
       const { data, error } = await query;
       if (error) throw error;
