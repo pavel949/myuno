@@ -3,6 +3,7 @@ import { Calculator, Percent, Calendar, Users, Sun, Snowflake, Sparkles } from '
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Badge } from '@/components/ui/badge';
 import { getCurrencySymbol } from '@/lib/config/currencies';
+import { pluralizeNights } from '@/lib/i18n/pluralize';
 
 interface SeasonalPriceEntry {
   id: string;
@@ -81,7 +82,7 @@ export function PropertyPriceBreakdown({
               {minStayNights && minStayNights > 1 && (
                 <Badge variant="secondary" className="gap-1">
                   <Calendar className="w-3 h-3" />
-                  {isRu ? `Мин. ${minStayNights} ночей` : `Min ${minStayNights} nights`}
+                  {isRu ? 'Мин.' : 'Min'} {minStayNights} {pluralizeNights(minStayNights, language)}
                 </Badge>
               )}
             </div>
