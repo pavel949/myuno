@@ -447,6 +447,7 @@ export const OwnerCalendar = lazy(() => import('@/pages/owner/OwnerCalendar'));
 export const OwnerFinancials = lazy(() => import('@/pages/owner/OwnerFinancials'));
 export const OwnerFinancialForm = lazy(() => import('@/pages/owner/OwnerFinancialForm'));
 export const BudgetPage = lazy(() => import('@/pages/owner/BudgetPage'));
+export const FinancialPlanning = lazy(() => import('@/pages/owner/FinancialPlanning'));
 export const OwnerMessages = lazy(() => import('@/pages/owner/OwnerMessages'));
 export const OwnerChatRoom = lazy(() => import('@/pages/owner/OwnerChatRoom'));
 export const OwnerSupportChat = lazy(() => import('@/pages/owner/OwnerSupportChat'));
