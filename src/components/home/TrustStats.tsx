@@ -6,13 +6,14 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Shield, Home, CalendarCheck, Clock } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
 export const TrustStats = memo(function TrustStats() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
-  const { data: stats } = useQuery({
+  const { data: stats, isLoading } = useQuery({
     queryKey: ['trust-stats-home'],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_trust_stats');
@@ -23,9 +24,9 @@ export const TrustStats = memo(function TrustStats() {
   });
 
   const items = [
-    { icon: Home, value: stats ? `${stats.properties}+` : '…', label: isRu ? 'объектов' : 'properties', colorClass: 'text-primary' },
-    { icon: CalendarCheck, value: stats ? `${stats.bookings}+` : '…', label: isRu ? 'бронирований' : 'bookings', colorClass: 'text-accent' },
-    { icon: Shield, value: stats ? `${stats.providers}+` : '…', label: isRu ? 'партнёров' : 'partners', colorClass: 'text-[#06B6D4]' },
+    { icon: Home, value: stats ? `${stats.properties}+` : null, label: isRu ? 'объектов' : 'properties', colorClass: 'text-primary' },
+    { icon: CalendarCheck, value: stats ? `${stats.bookings}+` : null, label: isRu ? 'бронирований' : 'bookings', colorClass: 'text-accent' },
+    { icon: Shield, value: stats ? `${stats.providers}+` : null, label: isRu ? 'партнёров' : 'partners', colorClass: 'text-[hsl(var(--accent-cyan))]' },
     { icon: Clock, value: '24/7', label: isRu ? 'поддержка' : 'support', colorClass: 'text-warning' },
   ];
 
@@ -46,11 +47,15 @@ export const TrustStats = memo(function TrustStats() {
           {items.map((item, i) => (
             <div key={i} className="flex flex-col items-center gap-2 py-3 relative">
               {i > 0 && (
-                <div className="hidden md:block absolute left-0 top-1/2 -translate-y-1/2 w-px h-8 bg-border" />
+                <div className="hidden md:block absolute left-0 top-1/2 -translate-y-1/2 w-px h-8 bg-border" aria-hidden />
               )}
-              <span className={cn("text-2xl md:text-3xl font-bold font-display", item.colorClass)}>
-                {item.value}
-              </span>
+              {item.value === null && isLoading ? (
+                <Skeleton className="h-8 w-14 md:h-9 md:w-16" />
+              ) : (
+                <span className={cn('text-2xl md:text-3xl font-bold font-display', item.colorClass)}>
+                  {item.value ?? '—'}
+                </span>
+              )}
               <span className="text-xs text-muted-foreground font-medium text-center leading-tight">
                 {item.label}
               </span>

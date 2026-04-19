@@ -7,7 +7,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Star, Bed, Users, ChevronRight, Zap } from 'lucide-react';
+import { Star, Bed, Users, ChevronRight, Zap, Home, AlertCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getDistrictLabel } from '@/lib/taxonomies';
 import { cn } from '@/lib/utils';
@@ -88,10 +88,14 @@ export function FeaturedPropertiesCarousel() {
         </div>
         <div className="flex gap-3 -mx-4 px-4 overflow-hidden">
           {[1, 2, 3].map(i => (
-            <div key={i} className="w-[220px] h-[280px] md:w-[260px] md:h-[320px] rounded-[var(--radius-lg)] shrink-0 flex flex-col items-center justify-center gap-2"
+            <div key={i} className="w-[220px] h-[280px] md:w-[260px] md:h-[320px] rounded-[var(--radius-lg)] shrink-0 flex flex-col items-center justify-center gap-3"
               style={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }}
             >
-              <span className="text-3xl">{isError ? '⚠️' : '🏠'}</span>
+              {isError ? (
+                <AlertCircle className="w-7 h-7 text-warning" aria-hidden />
+              ) : (
+                <Home className="w-7 h-7 text-muted-foreground" aria-hidden />
+              )}
               <span className="text-xs text-muted-foreground text-center px-4">
                 {isError
                   ? (isRu ? 'Ошибка загрузки' : 'Failed to load')
@@ -139,7 +143,8 @@ export function FeaturedPropertiesCarousel() {
             <button
               key={property.id}
               onClick={() => navigate(APP_ROUTES.PROPERTY_DETAIL(property.id))}
-              className="w-[280px] h-[320px] md:w-[260px] md:h-[320px] rounded-[var(--radius-lg)] overflow-hidden text-left group transition-all duration-200 hover:-translate-y-1 active:scale-[0.97] shrink-0"
+              aria-label={`${isRu ? property.title_ru : property.title_en}, ${district}, ${formatPrice(unitPrice)} ${isRu ? 'за ночь' : 'per night'}`}
+              className="w-[280px] h-[320px] md:w-[260px] md:h-[320px] rounded-[var(--radius-lg)] overflow-hidden text-left group transition-all duration-200 hover:-translate-y-1 active:scale-[0.97] shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               style={{
                 background: 'hsl(var(--card))',
                 border: '1px solid hsl(var(--border))',
@@ -157,10 +162,11 @@ export function FeaturedPropertiesCarousel() {
                 />
                 <div className="absolute top-2 left-2 flex flex-col gap-1">
                   {property.is_featured && (
-                    <span className="px-2 py-0.5 text-[10px] font-semibold rounded-[var(--radius-full)] backdrop-blur-sm"
-                      style={{ background: 'rgba(0,0,0,0.5)', color: '#fff' }}
+                    <span className="px-2 py-0.5 text-[10px] font-semibold rounded-[var(--radius-full)] backdrop-blur-sm flex items-center gap-1 text-white"
+                      style={{ background: 'rgba(0,0,0,0.55)' }}
                     >
-                      {isRu ? '⭐ Популярное' : '⭐ Popular'}
+                      <Star className="w-2.5 h-2.5 fill-warning text-warning" aria-hidden />
+                      {isRu ? 'Популярное' : 'Popular'}
                     </span>
                   )}
                   {property.instant_booking && (
