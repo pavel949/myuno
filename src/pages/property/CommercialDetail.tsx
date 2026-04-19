@@ -4,10 +4,11 @@
  * until Phase 3 wires the CRM `commercial_inquiry` source.
  */
 import { useParams } from 'react-router-dom';
-import { Building2, Zap, Car, ShieldCheck, Calendar, Mail, BadgeCheck } from 'lucide-react';
+import { Building2, Zap, Car, ShieldCheck, Calendar, Mail, BadgeCheck, Hotel, Star, TrendingUp, Lock } from 'lucide-react';
 import { SEOHead } from '@/components/seo';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { BackButton } from '@/components/uno/BackButton';
 import { Button } from '@/components/ui/button';
@@ -17,6 +18,9 @@ import { useCommercialProperty } from '@/hooks/useCommercialProperties';
 import {
   getCommercialTypeLabel,
   getTitleDeedLabel,
+  getHotelLicenseLabel,
+  getHotelManagementStatusLabel,
+  isHotelType,
 } from '@/lib/real-estate/commercialTaxonomy';
 import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
 

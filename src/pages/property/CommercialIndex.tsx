@@ -4,8 +4,8 @@
  * Persona-gated visibility lives in PropertyHubTabs; URL access stays open.
  */
 import { useState, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { Briefcase, Building2 } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Briefcase, Building2, Hotel } from 'lucide-react';
 import { SEOHead } from '@/components/seo';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -17,8 +17,9 @@ import { useCommercialProperties } from '@/hooks/useCommercialProperties';
 import { CommercialPropertyCard } from '@/components/property/commercial/CommercialPropertyCard';
 import { PersonaGatePrompt } from '@/components/property/commercial/PersonaGatePrompt';
 import { CommercialFilters, type CommercialFiltersValue } from '@/components/property/commercial/CommercialFilters';
-import { COMMERCIAL_TYPES } from '@/lib/real-estate/commercialTaxonomy';
+import { COMMERCIAL_TYPES, HOTEL_PROPERTY_TYPES } from '@/lib/real-estate/commercialTaxonomy';
 import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 type Intent = 'rent' | 'sale';
 
