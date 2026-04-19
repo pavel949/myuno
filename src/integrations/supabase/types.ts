@@ -3059,40 +3059,61 @@ export type Database = {
       }
       chat_message_flags: {
         Row: {
+          auto_detected: boolean | null
+          booking_id: string | null
+          confidence_score: number | null
           created_at: string
+          detected_pattern: string | null
           flag_type: string | null
           id: string
           is_restricted: boolean | null
           message_id: string | null
+          property_id: string | null
           reason: string | null
           reviewed_at: string | null
           reviewed_by: string | null
+          severity: string | null
+          status: string | null
           updated_at: string
           user_id: string | null
           warning_level: number | null
         }
         Insert: {
+          auto_detected?: boolean | null
+          booking_id?: string | null
+          confidence_score?: number | null
           created_at?: string
+          detected_pattern?: string | null
           flag_type?: string | null
           id?: string
           is_restricted?: boolean | null
           message_id?: string | null
+          property_id?: string | null
           reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          severity?: string | null
+          status?: string | null
           updated_at?: string
           user_id?: string | null
           warning_level?: number | null
         }
         Update: {
+          auto_detected?: boolean | null
+          booking_id?: string | null
+          confidence_score?: number | null
           created_at?: string
+          detected_pattern?: string | null
           flag_type?: string | null
           id?: string
           is_restricted?: boolean | null
           message_id?: string | null
+          property_id?: string | null
           reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          severity?: string | null
+          status?: string | null
           updated_at?: string
           user_id?: string | null
           warning_level?: number | null
@@ -5953,14 +5974,17 @@ export type Database = {
       developer_users: {
         Row: {
           accepted_at: string | null
+          auth_user_id: string | null
           created_at: string
           developer_id: string
           email: string | null
+          full_name: string | null
           id: string
           invite_expires_at: string | null
           invite_token: string | null
           invited_at: string
           invited_by: string | null
+          last_login_at: string | null
           role: string | null
           status: string | null
           updated_at: string
@@ -5968,14 +5992,17 @@ export type Database = {
         }
         Insert: {
           accepted_at?: string | null
+          auth_user_id?: string | null
           created_at?: string
           developer_id: string
           email?: string | null
+          full_name?: string | null
           id?: string
           invite_expires_at?: string | null
           invite_token?: string | null
           invited_at?: string
           invited_by?: string | null
+          last_login_at?: string | null
           role?: string | null
           status?: string | null
           updated_at?: string
@@ -5983,14 +6010,17 @@ export type Database = {
         }
         Update: {
           accepted_at?: string | null
+          auth_user_id?: string | null
           created_at?: string
           developer_id?: string
           email?: string | null
+          full_name?: string | null
           id?: string
           invite_expires_at?: string | null
           invite_token?: string | null
           invited_at?: string
           invited_by?: string | null
+          last_login_at?: string | null
           role?: string | null
           status?: string | null
           updated_at?: string
@@ -6185,49 +6215,64 @@ export type Database = {
       }
       disputes: {
         Row: {
+          admin_notes: string | null
           against_user_id: string | null
           booking_id: string | null
           category: string | null
           created_at: string
           description: string | null
+          dispute_type: string | null
+          evidence_urls: string[] | null
           id: string
           order_id: string | null
+          provider_id: string | null
           raised_by: string | null
           resolution: string | null
           resolved_at: string | null
           resolved_by: string | null
           status: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
+          admin_notes?: string | null
           against_user_id?: string | null
           booking_id?: string | null
           category?: string | null
           created_at?: string
           description?: string | null
+          dispute_type?: string | null
+          evidence_urls?: string[] | null
           id?: string
           order_id?: string | null
+          provider_id?: string | null
           raised_by?: string | null
           resolution?: string | null
           resolved_at?: string | null
           resolved_by?: string | null
           status?: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
+          admin_notes?: string | null
           against_user_id?: string | null
           booking_id?: string | null
           category?: string | null
           created_at?: string
           description?: string | null
+          dispute_type?: string | null
+          evidence_urls?: string[] | null
           id?: string
           order_id?: string | null
+          provider_id?: string | null
           raised_by?: string | null
           resolution?: string | null
           resolved_at?: string | null
           resolved_by?: string | null
           status?: string
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -11694,42 +11739,63 @@ export type Database = {
       }
       moderation_queue: {
         Row: {
+          category: string | null
+          content: string | null
           created_at: string
           entity_id: string
           entity_type: string
           flagged_reason: string | null
           id: string
+          item_type: string | null
           payload: Json | null
+          photo_count: number | null
           priority: number | null
+          rating: number | null
           reviewed_at: string | null
           reviewed_by: string | null
           status: string
+          submitted_by_name: string | null
+          title: string | null
           updated_at: string
         }
         Insert: {
+          category?: string | null
+          content?: string | null
           created_at?: string
           entity_id: string
           entity_type: string
           flagged_reason?: string | null
           id?: string
+          item_type?: string | null
           payload?: Json | null
+          photo_count?: number | null
           priority?: number | null
+          rating?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
+          submitted_by_name?: string | null
+          title?: string | null
           updated_at?: string
         }
         Update: {
+          category?: string | null
+          content?: string | null
           created_at?: string
           entity_id?: string
           entity_type?: string
           flagged_reason?: string | null
           id?: string
+          item_type?: string | null
           payload?: Json | null
+          photo_count?: number | null
           priority?: number | null
+          rating?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
+          submitted_by_name?: string | null
+          title?: string | null
           updated_at?: string
         }
         Relationships: []
