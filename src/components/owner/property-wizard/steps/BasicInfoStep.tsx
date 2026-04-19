@@ -190,9 +190,71 @@ function BasicInfoStepInner({
     setHintDismissed(true);
     setShowHint(false);
   }, []);
+  const assetClass = formData.asset_class || 'residential';
+  const typeOptions = getTypeOptionsForAssetClass(assetClass);
+  const isResidential = assetClass === 'residential';
+  const isCommercial = assetClass === 'commercial';
+  const isLand = assetClass === 'land';
+  const landSqm = formData.land_size_sqm ?? (formData.land_size_rai ? formData.land_size_rai * 1600 : undefined);
+  const landBreakdown = landSqm ? formatLandSize(landSqm, isRu) : '';
+
+  const handleAssetClassChange = useCallback((next: AssetClass) => {
+    const nextOptions = getTypeOptionsForAssetClass(next);
+    const stillValid = nextOptions.some((o) => o.value === formData.property_type);
+    updateFormData({
+      asset_class: next,
+      property_type: stillValid ? formData.property_type : nextOptions[0]?.value || '',
+      ...(next !== 'residential' ? { bedrooms: 0, bathrooms: 0 } : {}),
+    });
+  }, [formData.property_type, updateFormData]);
+
   return (
     <div className="space-y-6">
-      {/* 1. Property Type — visual picker, placed first */}
+      {/* 0. Asset Class — high-level discriminator */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Landmark className="h-4 w-4" />
+            {isRu ? 'Класс объекта' : 'Asset Class'}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            {ASSET_CLASS_OPTIONS.map((opt) => {
+              const Icon = opt.icon;
+              const isSelected = assetClass === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => handleAssetClassChange(opt.value)}
+                  className={`flex items-start gap-3 p-3 rounded-xl border-2 transition-all text-left ${
+                    isSelected
+                      ? 'border-primary bg-primary/5'
+                      : 'border-muted hover:border-muted-foreground/30 bg-muted/30'
+                  }`}
+                >
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
+                    isSelected ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+                  }`}>
+                    <Icon className="h-4 w-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className={`text-sm font-semibold leading-tight ${isSelected ? 'text-primary' : 'text-foreground'}`}>
+                      {isRu ? opt.labelRu : opt.labelEn}
+                    </div>
+                    <div className="text-[11px] text-muted-foreground mt-0.5 leading-tight">
+                      {isRu ? opt.descRu : opt.descEn}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 1. Property Type — visual picker, depends on asset_class */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
@@ -202,7 +264,7 @@ function BasicInfoStepInner({
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
-            {PROPERTY_TYPE_OPTIONS.map((opt) => {
+            {typeOptions.map((opt) => {
               const Icon = opt.icon;
               const isSelected = formData.property_type === opt.value;
               return (
@@ -230,6 +292,124 @@ function BasicInfoStepInner({
           </div>
         </CardContent>
       </Card>
+
+      {/* Commercial / Land specifics — conditional */}
+      {(isCommercial || isLand) && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              {isLand ? <Trees className="h-4 w-4" /> : <Briefcase className="h-4 w-4" />}
+              {isLand ? (isRu ? 'Параметры участка' : 'Land specifics') : (isRu ? 'Коммерческие параметры' : 'Commercial specifics')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {isLand ? (
+              <>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label className="flex items-center gap-1 text-xs"><Ruler className="h-3 w-3" />{isRu ? 'Площадь, m²' : 'Area, m²'}</Label>
+                    <Input
+                      type="number" min={0}
+                      value={formData.land_size_sqm ?? ''}
+                      onChange={(e) => updateFormData({ land_size_sqm: e.target.value ? Number(e.target.value) : undefined })}
+                      placeholder="1600"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="flex items-center gap-1 text-xs">{isRu ? 'Фасад, м' : 'Frontage, m'}</Label>
+                    <Input
+                      type="number" min={0}
+                      value={formData.frontage_m ?? ''}
+                      onChange={(e) => updateFormData({ frontage_m: e.target.value ? Number(e.target.value) : undefined })}
+                      placeholder="20"
+                    />
+                  </div>
+                </div>
+                {landBreakdown && (
+                  <p className="text-xs text-muted-foreground">≈ {landBreakdown}</p>
+                )}
+                <div className="space-y-1.5">
+                  <Label className="flex items-center gap-1 text-xs"><ShieldCheck className="h-3 w-3" />{isRu ? 'Тип документа' : 'Title deed'}</Label>
+                  <select
+                    value={formData.title_deed_type ?? ''}
+                    onChange={(e) => updateFormData({ title_deed_type: e.target.value || undefined })}
+                    className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
+                  >
+                    <option value="">{isRu ? 'Не выбрано' : 'Not specified'}</option>
+                    {TITLE_DEED_TYPES.map((d) => (
+                      <option key={d.id} value={d.id}>{isRu ? d.labelRu : d.labelEn}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">{isRu ? 'Зонирование' : 'Zoning'}</Label>
+                  <Input
+                    value={formData.zoning ?? ''}
+                    onChange={(e) => updateFormData({ zoning: e.target.value || undefined })}
+                    placeholder={isRu ? 'Жёлтая зона / E-1-A' : 'Yellow zone / E-1-A'}
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label className="flex items-center gap-1 text-xs"><Ruler className="h-3 w-3" />{isRu ? 'Площадь, m²' : 'Floor area, m²'}</Label>
+                    <Input
+                      type="number" min={0}
+                      value={formData.floor_area_sqm ?? ''}
+                      onChange={(e) => updateFormData({ floor_area_sqm: e.target.value ? Number(e.target.value) : undefined })}
+                      placeholder="320"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="flex items-center gap-1 text-xs"><Zap className="h-3 w-3" />{isRu ? 'Эл. мощность, кВт' : 'Power load, kW'}</Label>
+                    <Input
+                      type="number" min={0}
+                      value={formData.electricity_load_kw ?? ''}
+                      onChange={(e) => updateFormData({ electricity_load_kw: e.target.value ? Number(e.target.value) : undefined })}
+                      placeholder="60"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label className="flex items-center gap-1 text-xs"><TrendingUp className="h-3 w-3" />Cap rate, %</Label>
+                    <Input
+                      type="number" min={0} step="0.1"
+                      value={formData.cap_rate_pct ?? ''}
+                      onChange={(e) => updateFormData({ cap_rate_pct: e.target.value ? Number(e.target.value) : undefined })}
+                      placeholder="6.8"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">{isRu ? 'NOI, ฿/год' : 'NOI, ฿/yr'}</Label>
+                    <Input
+                      type="number" min={0}
+                      value={formData.noi_annual_thb ?? ''}
+                      onChange={(e) => updateFormData({ noi_annual_thb: e.target.value ? Number(e.target.value) : undefined })}
+                      placeholder="3060000"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="flex items-center gap-1 text-xs"><ShieldCheck className="h-3 w-3" />{isRu ? 'Тип документа' : 'Title deed'}</Label>
+                  <select
+                    value={formData.title_deed_type ?? ''}
+                    onChange={(e) => updateFormData({ title_deed_type: e.target.value || undefined })}
+                    className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
+                  >
+                    <option value="">{isRu ? 'Не выбрано' : 'Not specified'}</option>
+                    {TITLE_DEED_TYPES.map((d) => (
+                      <option key={d.id} value={d.id}>{isRu ? d.labelRu : d.labelEn}</option>
+                    ))}
+                  </select>
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* 2. Location search — Airbnb-style: project/address lookup fills map */}
       <LocationProjectSearch
