@@ -45,16 +45,12 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
     <>
       <header
         className={cn(
-          "sticky top-0 z-50 w-full border-b transition-all duration-300",
+          "sticky top-0 z-50 w-full border-b border-border transition-all duration-300",
+          scrolled
+            ? "bg-[hsl(var(--bg-surface)/0.95)] backdrop-blur-xl shadow-[0_1px_0_hsl(var(--border))]"
+            : "bg-[hsl(var(--bg-surface))]",
           className
         )}
-        style={{
-          background: scrolled ? 'rgba(15,28,46,0.95)' : 'hsl(var(--bg-surface))',
-          borderColor: 'hsl(0 0% 100% / 0.07)',
-          backdropFilter: scrolled ? 'blur(20px)' : 'none',
-          WebkitBackdropFilter: scrolled ? 'blur(20px)' : 'none',
-          boxShadow: scrolled ? '0 1px 0 rgba(255,255,255,0.07)' : 'none',
-        }}
       >
         <div className="flex items-center h-14 lg:h-16 px-3 lg:px-8 xl:px-10 max-w-[1536px] mx-auto gap-1.5 lg:gap-2">
           {/* Logo */}
@@ -79,20 +75,16 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
             className={cn(
               "hidden lg:flex items-center gap-3 mx-4 flex-1 max-w-sm",
               "px-4 py-2 rounded-[var(--radius-md)]",
-              "transition-all duration-200 cursor-pointer group/search"
+              "bg-[hsl(var(--bg-elevated))] border border-border",
+              "transition-all duration-200 cursor-pointer group/search",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             )}
-            style={{
-              background: 'hsl(var(--bg-elevated))',
-              border: '1px solid hsl(0 0% 100% / 0.07)',
-            }}
           >
             <Search className="w-4 h-4 text-muted-foreground group-hover/search:text-foreground transition-colors shrink-0" />
             <span className="text-[13px] text-muted-foreground flex-1 text-left truncate">
               {isRu ? 'Поиск сервисов...' : 'Search services...'}
             </span>
-            <kbd className="hidden xl:inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-mono text-muted-foreground"
-              style={{ background: 'hsl(0 0% 100% / 0.04)', border: '1px solid hsl(0 0% 100% / 0.07)' }}
-            >
+            <kbd className="hidden xl:inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-mono text-muted-foreground bg-[hsl(var(--bg-base)/0.6)] border border-border">
               ⌘K
             </kbd>
           </button>
@@ -109,7 +101,7 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
             {/* Search (mobile only) */}
             <button
               onClick={() => setSearchOpen(true)}
-              className="lg:hidden flex items-center justify-center w-9 h-9 rounded-[var(--radius-sm)] hover:bg-muted/40 transition-colors"
+              className="lg:hidden flex items-center justify-center w-11 h-11 rounded-[var(--radius-sm)] hover:bg-muted/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               aria-label={isRu ? 'Поиск' : 'Search'}
             >
               <Search className="w-[18px] h-[18px] text-muted-foreground" />

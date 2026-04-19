@@ -13,20 +13,20 @@ const ICON_MAP: Record<string, React.ElementType> = {
 };
 
 const PERSONA_GRADIENTS: Record<UserPersona, string> = {
-  tourist: 'linear-gradient(135deg, #06b6d4, #0891b2)',
-  resident: 'linear-gradient(135deg, #10b981, #059669)',
-  relocation: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-  property_owner: 'linear-gradient(135deg, #f59e0b, #d97706)',
-  investor: 'linear-gradient(135deg, #a855f7, #7c3aed)',
-  pet_owner: 'linear-gradient(135deg, #f59e0b, #ea580c)',
-  family: 'linear-gradient(135deg, #ec4899, #db2777)',
-  couple: 'linear-gradient(135deg, #f43f5e, #e11d48)',
-  nightlife: 'linear-gradient(135deg, #d946ef, #a855f7)',
-  active: 'linear-gradient(135deg, #f97316, #ea580c)',
-  business: 'linear-gradient(135deg, #64748b, #475569)',
-  nomad: 'linear-gradient(135deg, #14b8a6, #0d9488)',
-  real_estate_developer: 'linear-gradient(135deg, #0ea5e9, #0369a1)',
-  local_services_provider: 'linear-gradient(135deg, #22c55e, #15803d)',
+  tourist: 'linear-gradient(135deg, hsl(var(--cluster-arrive)), hsl(var(--cluster-arrive) / 0.7))',
+  resident: 'linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.7))',
+  relocation: 'linear-gradient(135deg, hsl(var(--cluster-manage)), hsl(var(--cluster-manage) / 0.7))',
+  property_owner: 'linear-gradient(135deg, hsl(var(--accent-amber)), hsl(var(--accent-amber) / 0.7))',
+  investor: 'linear-gradient(135deg, hsl(var(--accent-purple)), hsl(var(--cluster-invest)))',
+  pet_owner: 'linear-gradient(135deg, hsl(var(--accent-amber)), hsl(var(--accent-coral)))',
+  family: 'linear-gradient(135deg, hsl(var(--accent-coral)), hsl(var(--accent-coral) / 0.7))',
+  couple: 'linear-gradient(135deg, hsl(var(--destructive)), hsl(var(--accent-coral)))',
+  nightlife: 'linear-gradient(135deg, hsl(var(--accent-purple)), hsl(var(--cluster-invest)))',
+  active: 'linear-gradient(135deg, hsl(var(--accent-amber)), hsl(var(--accent-coral)))',
+  business: 'linear-gradient(135deg, hsl(var(--accent) / 0.9), hsl(var(--accent) / 0.6))',
+  nomad: 'linear-gradient(135deg, hsl(var(--accent-teal)), hsl(var(--accent-teal) / 0.7))',
+  real_estate_developer: 'linear-gradient(135deg, hsl(var(--accent-cyan)), hsl(var(--accent)))',
+  local_services_provider: 'linear-gradient(135deg, hsl(var(--success)), hsl(var(--primary)))',
 };
 
 /** Primary personas shown on first visit (4 main use cases) */
@@ -91,18 +91,15 @@ export const InlinePersonaSelector = memo(function InlinePersonaSelector({
                 key={p}
                 onClick={() => handleSelect(p)}
                 disabled={isSetting}
+                aria-pressed={isActive}
                 className={cn(
                   "relative flex flex-col items-start gap-2 p-4 rounded-[var(--radius-lg)] shrink-0 transition-all duration-200 text-left",
                   "w-[140px] md:w-auto min-h-[120px]",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                   isActive
-                    ? "ring-2 ring-primary shadow-md"
-                    : "ring-1 ring-border hover:ring-primary/40 hover:shadow-sm"
+                    ? "ring-2 ring-primary shadow-md bg-primary/5"
+                    : "ring-1 ring-border hover:ring-primary/40 hover:shadow-sm bg-card"
                 )}
-                style={{
-                  background: isActive
-                    ? 'hsl(var(--primary) / 0.06)'
-                    : 'hsl(var(--card))',
-                }}
               >
                 {/* Icon */}
                 <div

@@ -50,10 +50,8 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
         <EmailVerificationBanner />
         {showSituationBanner && <ActiveSituationBanner />}
 
-        {/* PWA Install Banner — visible on all pages for mobile users */}
-        <div className={cn(ECOSYSTEM_PAGE_CONTAINER, "pt-2")}>
-          <InstallBanner />
-        </div>
+        {/* PWA Install Banner — only renders DOM when visible */}
+        <InstallBanner />
         
         <main
            className={cn(
