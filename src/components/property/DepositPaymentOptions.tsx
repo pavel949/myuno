@@ -72,6 +72,7 @@ export function DepositPaymentOptions({
           nights,
           total_amount: totalAmount,
           deposit_amount: depositAmount,
+          deposit_percent: effectivePercent,
           cleaning_fee: cleaningFee || 0,
           guest_name: guestName,
           guest_phone: guestPhone,
@@ -139,7 +140,7 @@ export function DepositPaymentOptions({
       <Card className="border-success/30 bg-success/5">
         <CardContent className="p-4 space-y-2">
           <div className="flex items-center justify-between">
-            <span className="font-medium">{isRu ? 'Предоплата 10%' : '10% Deposit'}</span>
+            <span className="font-medium">{isRu ? `Предоплата ${effectivePercent}%` : `${effectivePercent}% Deposit`}</span>
             <span className="text-xl font-bold text-success">{formatPrice(depositAmount)}</span>
           </div>
           <p className="text-xs text-muted-foreground">
@@ -157,7 +158,7 @@ export function DepositPaymentOptions({
       {/* Payment Options */}
       <div className="space-y-3">
         <h3 className="font-semibold text-sm">
-          {isRu ? 'Выберите способ оплаты предоплаты' : 'Choose deposit payment method'}
+          {isRu ? `Выберите способ оплаты ${effectivePercent}%` : `Choose ${effectivePercent}% deposit payment method`}
         </h3>
         
         {/* Online Payment */}
