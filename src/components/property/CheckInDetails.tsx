@@ -192,8 +192,8 @@ export function CheckInDetails({
         </div>
 
         {showPricingDeposit && (
-          <div className="flex items-start gap-2 rounded-lg bg-amber-500/5 border border-amber-500/15 px-3 py-2">
-            <Info className="w-4 h-4 text-amber-700 dark:text-amber-500 shrink-0 mt-0.5" />
+          <div className="flex items-start gap-2 rounded-lg bg-warning/5 border border-warning/15 px-3 py-2">
+            <Info className="w-4 h-4 text-warning shrink-0 mt-0.5" />
             <div className="min-w-0 text-sm">
               <p className="font-medium text-foreground">{isRu ? 'Залог / депозит' : 'Security deposit'}</p>
               <p className="text-xs text-muted-foreground mt-0.5 leading-snug">
