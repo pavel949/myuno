@@ -224,24 +224,64 @@ export default function InvestmentHubLanding() {
                 <Button
                   size="sm"
                   variant="secondary"
-                  onClick={() => navigate(APP_ROUTES.INVEST_QUIZ)}
+                  onClick={() => navigate(APP_ROUTES.INVEST_DEALS_BOARD)}
                   className="gap-1.5"
                 >
                   <Sparkles className="h-4 w-4" />
-                  {isRu ? 'Подобрать нишу' : 'Find your niche'}
+                  {isRu ? 'Все сделки' : 'Browse deals'}
                 </Button>
                 <Button
                   size="sm"
                   variant="secondary"
-                  onClick={() => navigate(APP_ROUTES.INVEST_RAISE)}
+                  onClick={() => navigate(APP_ROUTES.INVEST_SUBMIT)}
                   className="gap-1.5"
                 >
                   <Megaphone className="h-4 w-4" />
-                  {isRu ? 'Привлечь капитал' : 'Raise capital'}
+                  {isRu ? 'Подать сделку' : 'Submit deal'}
                 </Button>
               </div>
             </div>
           </div>
+
+          {/* Universal capital marketplace banner */}
+          <Card className="border-emerald-500/30 bg-gradient-to-r from-emerald-500/5 to-blue-500/5">
+            <CardContent className="p-5 space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-lg bg-emerald-500/10">
+                  <TrendingUp className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold">
+                    {isRu ? 'Универсальный капитал-маркетплейс' : 'Universal Capital Marketplace'}
+                  </h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {isRu
+                      ? 'Недвижимость, бизнес, стартапы, франшизы — любые сделки в Таиланде. Все проекты анонимизированы.'
+                      : 'Real estate, business, startups, franchises — any deal in Thailand. All projects are anonymized.'}
+                  </p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => navigate(APP_ROUTES.INVEST_DEALS_BOARD)}
+                  className="gap-1.5"
+                >
+                  {isRu ? 'Смотреть сделки' : 'Browse'}
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => navigate(APP_ROUTES.INVEST_SUBMIT)}
+                  className="gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white"
+                >
+                  {isRu ? 'Привлечь капитал' : 'Raise capital'}
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* 5 Zones */}
           <section className="space-y-3">
