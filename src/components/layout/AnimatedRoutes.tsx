@@ -430,6 +430,10 @@ export const AnimatedRoutes: React.FC = () => {
         {/* Specific invest sub-routes BEFORE catch-all :id */}
         <Route path="/invest/thailand" element={<LazyPage><Pages.InvestInThailand /></LazyPage>} />
         <Route path="/invest/pitch" element={<LazyPage><Pages.InvestmentPitch /></LazyPage>} />
+        {/* Phase 3 — universal capital marketplace public routes */}
+        <Route path={APP_ROUTES.INVEST_SUBMIT} element={<LazyPage><Pages.InvestmentSubmit /></LazyPage>} />
+        <Route path={APP_ROUTES.INVEST_DEALS_BOARD} element={<LazyPage><Pages.InvestmentDeals /></LazyPage>} />
+        <Route path="/invest/deal/:id" element={<LazyPage><Pages.InvestmentDealPublicDetail /></LazyPage>} />
         <Route path="/invest/business/:slug" element={<LazyPage><Pages.InvestmentBusinessDetail /></LazyPage>} />
         <Route path={APP_ROUTES.INVEST_DETAIL(':id')} element={<LazyPage><Pages.InvestmentDetail /></LazyPage>} />
         {/* Legacy: /invest/:id → /invest/project/:id */}
