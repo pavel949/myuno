@@ -80,6 +80,7 @@ export const navigationGroups: NavGroup[] = [
       { title: 'Rate Seasons', titleRu: 'Тарифы', path: APP_ROUTES.MC_RATES, icon: Tag },
       { title: 'Insurance & Docs', titleRu: 'Страховки и документы', path: APP_ROUTES.MC_INSURANCE, icon: ShieldCheck },
       { title: 'Templates', titleRu: 'Шаблоны', path: APP_ROUTES.MC_DOCUMENTS, icon: FileText },
+      { title: 'E-Signatures', titleRu: 'Электронные подписи', path: APP_ROUTES.MC_SIGNATURES, icon: FileText },
     ],
   },
   {
@@ -100,6 +101,7 @@ export const navigationGroups: NavGroup[] = [
       { title: 'AR Aging', titleRu: 'Дебиторка', path: APP_ROUTES.MC_AR_AGING, icon: Receipt },
       { title: 'Trust Accounts', titleRu: 'Эскроу-счета', path: APP_ROUTES.MC_TRUST_ACCOUNTS, icon: ShieldCheck },
       { title: 'Tax Center', titleRu: 'Налоги (Thai)', path: APP_ROUTES.MC_TAX_CENTER, icon: Target },
+      { title: 'Statement Approvals', titleRu: 'Одобрения отчётов', path: APP_ROUTES.MC_STATEMENT_APPROVALS, icon: FileText },
       { title: 'Transactions', titleRu: 'Транзакции', path: APP_ROUTES.MC_FINANCIALS, icon: ArrowLeftRight },
       { title: 'Reports', titleRu: 'Отчёты', path: APP_ROUTES.MC_REPORTS, icon: BarChart3 },
       { title: 'Budget', titleRu: 'Бюджет', path: APP_ROUTES.MC_BUDGET, icon: Target },

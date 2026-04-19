@@ -517,6 +517,10 @@ export const OwnerPayoutsPage = lazy(() => import('@/pages/mc/finance/OwnerPayou
 export const ArAgingPage = lazy(() => import('@/pages/mc/finance/ArAgingPage'));
 export const TrustAccountsPage = lazy(() => import('@/pages/mc/finance/TrustAccountsPage'));
 export const TaxCenterPage = lazy(() => import('@/pages/mc/finance/TaxCenterPage'));
+export const StatementApprovalsPage = lazy(() => import('@/pages/mc/finance/StatementApprovalsPage'));
+export const SignatureRequestsPage = lazy(() => import('@/pages/mc/documents/SignatureRequestsPage'));
+export const OwnerStatementsInbox = lazy(() => import('@/pages/owner-portal/OwnerStatementsInbox'));
+export const OwnerSignaturesInbox = lazy(() => import('@/pages/owner-portal/OwnerSignaturesInbox'));
 export const OwnerOwnersPage = lazy(() => import('@/pages/owner/OwnerOwnersPage'));
 export const OwnerDetailPage = lazy(() => import('@/pages/owner/OwnerDetailPage'));
 export const CrmDashboardPage = lazy(() => import('@/pages/owner/CrmDashboardPage'));

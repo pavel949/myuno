@@ -9,7 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useMyPortalSettings } from '@/hooks/useOwnerPortalSettings';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Building2, ArrowRight, Eye, MessageSquare, Shield } from 'lucide-react';
+import { Building2, ArrowRight, Eye, MessageSquare, Shield, FileCheck, FileSignature } from 'lucide-react';
 import { LoadingSpinner } from '@/components/uno/LoadingSpinner';
 
 export default function OwnerPortalDashboard() {
@@ -61,6 +61,36 @@ export default function OwnerPortalDashboard() {
         <p className="text-sm text-muted-foreground">
           {isRu ? 'Портал владельца — отслеживайте ваши объекты' : 'Owner Portal — track your properties'}
         </p>
+      </div>
+
+      {/* Quick actions for owner */}
+      <div className="grid grid-cols-2 gap-3">
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/my-property/statements')}>
+          <CardContent className="p-3 flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+              <FileCheck className="w-4 h-4 text-primary" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold truncate">{isRu ? 'Отчёты' : 'Statements'}</p>
+              <p className="text-[11px] text-muted-foreground truncate">
+                {isRu ? 'На одобрение' : 'For approval'}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/my-property/signatures')}>
+          <CardContent className="p-3 flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+              <FileSignature className="w-4 h-4 text-primary" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold truncate">{isRu ? 'Документы' : 'Documents'}</p>
+              <p className="text-[11px] text-muted-foreground truncate">
+                {isRu ? 'На подпись' : 'To sign'}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Property cards */}

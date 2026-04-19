@@ -769,6 +769,8 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="finance/ar-aging" element={<LazyPage><Pages.ArAgingPage /></LazyPage>} />
           <Route path="finance/trust-accounts" element={<LazyPage><Pages.TrustAccountsPage /></LazyPage>} />
           <Route path="finance/tax-center" element={<LazyPage><Pages.TaxCenterPage /></LazyPage>} />
+          <Route path="finance/statement-approvals" element={<LazyPage><Pages.StatementApprovalsPage /></LazyPage>} />
+          <Route path="documents/signatures" element={<LazyPage><Pages.SignatureRequestsPage /></LazyPage>} />
           <Route path="tasks" element={<LazyPage><Pages.CrmTasksPage /></LazyPage>} />
           <Route path="crm-dashboard" element={<LazyPage><Pages.CrmDashboardPage /></LazyPage>} />
           <Route path="sequences" element={<LazyPage><Pages.CrmSequencesPage /></LazyPage>} />
@@ -839,6 +841,8 @@ export const AnimatedRoutes: React.FC = () => {
         
         {/* ── Owner Portal (property owner read-only) ── */}
         <Route path="/my-property" element={<AuthGuard><LazyPage><Pages.OwnerPortalDashboard /></LazyPage></AuthGuard>} />
+        <Route path="/my-property/statements" element={<AuthGuard><LazyPage><Pages.OwnerStatementsInbox /></LazyPage></AuthGuard>} />
+        <Route path="/my-property/signatures" element={<AuthGuard><LazyPage><Pages.OwnerSignaturesInbox /></LazyPage></AuthGuard>} />
         <Route path="/my-property/:propertyId" element={<AuthGuard><LazyPage><Pages.OwnerPortalPropertyView /></LazyPage></AuthGuard>} />
         
         {/* ── Catch-all ── */}
