@@ -92,21 +92,50 @@ export default function PropertyInquiry() {
 
   const pricePerNight = rentalTerms?.price_per_night || property?.price || 0;
 
+  // Pull rate seasons (per-property pricing overrides) for the central engine.
+  const { data: rateSeasons } = usePropertyRateSeasons(id);
+
+  // Single source of truth for ALL pricing — same engine PropertyBookingCard uses.
   const pricing = useMemo(() => {
-    if (!pricePerNight || nights <= 0) {
-      return { subtotal: 0, discount: 0, total: 0, discountPercent: 0 };
+    const baseRules: PricingRules = rateSeasons && rateSeasons.length > 0
+      ? buildPricingRulesFromSeasons(
+          {
+            price_per_night: pricePerNight,
+            weekly_discount: rentalTerms?.weekly_discount,
+            monthly_discount: rentalTerms?.monthly_discount,
+            early_booking_discount: (rentalTerms as any)?.early_booking_discount,
+            early_booking_days: (rentalTerms as any)?.early_booking_days,
+            last_minute_discount: (rentalTerms as any)?.last_minute_discount,
+            last_minute_days: (rentalTerms as any)?.last_minute_days,
+            custom_length_discounts: (rentalTerms as any)?.custom_length_discounts,
+            deposit_amount: rentalTerms?.deposit_amount,
+            deposit_currency: rentalTerms?.deposit_currency || 'THB',
+            payment_policy: (rentalTerms as any)?.payment_policy || 'prepay_10',
+            prepay_percent: (rentalTerms as any)?.prepay_percent,
+          },
+          rateSeasons,
+        )
+      : {
+          pricePerNight,
+          weeklyDiscount: rentalTerms?.weekly_discount,
+          monthlyDiscount: rentalTerms?.monthly_discount,
+          earlyBookingDiscount: (rentalTerms as any)?.early_booking_discount,
+          earlyBookingDays: (rentalTerms as any)?.early_booking_days,
+          lastMinuteDiscount: (rentalTerms as any)?.last_minute_discount,
+          lastMinuteDays: (rentalTerms as any)?.last_minute_days,
+          customLengthDiscounts: (rentalTerms as any)?.custom_length_discounts,
+          seasonalPricing: (property as any)?.seasonal_pricing,
+          depositAmount: rentalTerms?.deposit_amount,
+          depositCurrency: rentalTerms?.deposit_currency || 'THB',
+          paymentPolicy: (rentalTerms as any)?.payment_policy || 'prepay_10',
+          prepayPercent: (rentalTerms as any)?.prepay_percent,
+        };
+
+    if (!checkIn || !checkOut || nights <= 0 || !pricePerNight) {
+      return calculatePricing(baseRules, new Date(), new Date()); // empty breakdown
     }
-    const subtotal = pricePerNight * nights;
-    let discountPercent = 0;
-    if (nights >= 30 && rentalTerms?.monthly_discount) {
-      discountPercent = rentalTerms.monthly_discount;
-    } else if (nights >= 7 && rentalTerms?.weekly_discount) {
-      discountPercent = rentalTerms.weekly_discount;
-    }
-    const discount = Math.round(subtotal * (discountPercent / 100));
-    const total = subtotal - discount;
-    return { subtotal, discount, total, discountPercent };
-  }, [pricePerNight, nights, rentalTerms]);
+    return calculatePricing(baseRules, checkIn, checkOut);
+  }, [pricePerNight, nights, checkIn, checkOut, rentalTerms, rateSeasons, property]);
 
   const validationErrors = useMemo(() => {
     const errors: string[] = [];
