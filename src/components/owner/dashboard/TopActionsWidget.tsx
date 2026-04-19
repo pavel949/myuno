@@ -107,7 +107,7 @@ export function TopActionsWidget() {
 
   const priorityDot = {
     high: 'bg-destructive',
-    medium: 'bg-amber-500',
+    medium: 'bg-warning',
     low: 'bg-muted-foreground',
   };
 

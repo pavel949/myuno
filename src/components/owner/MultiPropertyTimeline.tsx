@@ -439,7 +439,7 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
                           ? 'bg-success/80 text-success-foreground'
                           : booking.status === 'cancelled'
                           ? 'bg-muted text-muted-foreground line-through'
-                          : 'bg-amber-500/80 text-white'; // pending
+                          : 'bg-warning/80 text-warning-foreground'; // pending
 
                         return (
                           <div
@@ -486,7 +486,7 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
             <span>{isRu ? 'Подтверждено' : 'Confirmed'}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-5 h-3 rounded bg-amber-500/80" />
+            <div className="w-5 h-3 rounded bg-warning/80" />
             <span>{isRu ? 'Ожидает подтверждения' : 'Awaiting confirmation'}</span>
           </div>
           <div className="flex items-center gap-1.5">
