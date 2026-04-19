@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Card, CardContent } from '@/components/ui/card';
-import { Briefcase, Megaphone, ArrowRight, Construction, Lock } from 'lucide-react';
+import { Briefcase, Megaphone, ArrowRight, Construction, Lock, Building2 } from 'lucide-react';
 import { APP_ROUTES } from '@/lib/config/routes';
 
 export default function InvestmentBusinessZone() {
@@ -49,6 +49,28 @@ export default function InvestmentBusinessZone() {
               </p>
             </CardContent>
           </Card>
+
+          {/* Cross-link to commercial RE */}
+          <button
+            type="button"
+            onClick={() => navigate(`${APP_ROUTES.COMMERCIAL}?intent=rent`)}
+            className="w-full text-left rounded-xl border border-border bg-card hover:bg-muted/40 transition-colors p-4 flex items-center gap-3"
+          >
+            <div className="p-2 rounded-lg bg-amber-500/15 text-amber-600 dark:text-amber-400">
+              <Building2 className="h-5 w-5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-sm">
+                {isRu ? 'Ищете площадь / землю под бизнес?' : 'Looking for a venue / land for your business?'}
+              </p>
+              <p className="text-xs text-muted-foreground line-clamp-1">
+                {isRu
+                  ? 'Офисы, рестораны, склады, ритейл — аренда и продажа.'
+                  : 'Offices, restaurants, warehouses, retail — rent and sale.'}
+              </p>
+            </div>
+            <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
+          </button>
 
           <ScrollArea className="w-full whitespace-nowrap">
             <div className="flex gap-2 pb-2">

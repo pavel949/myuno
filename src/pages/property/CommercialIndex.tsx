@@ -16,6 +16,7 @@ import { cn } from '@/lib/utils';
 import { useCommercialProperties } from '@/hooks/useCommercialProperties';
 import { CommercialPropertyCard } from '@/components/property/commercial/CommercialPropertyCard';
 import { PersonaGatePrompt } from '@/components/property/commercial/PersonaGatePrompt';
+import { CommercialFilters, type CommercialFiltersValue } from '@/components/property/commercial/CommercialFilters';
 import { COMMERCIAL_TYPES } from '@/lib/real-estate/commercialTaxonomy';
 import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
 
@@ -29,18 +30,61 @@ export default function CommercialIndex() {
   const intent = (searchParams.get('intent') as Intent) || 'sale';
   const type = searchParams.get('type') || 'all';
 
+  const filterValues: CommercialFiltersValue = {
+    minPrice: searchParams.get('minPrice') ?? undefined,
+    maxPrice: searchParams.get('maxPrice') ?? undefined,
+    minAreaSqm: searchParams.get('minArea') ?? undefined,
+    maxAreaSqm: searchParams.get('maxArea') ?? undefined,
+    minCapRate: searchParams.get('minCap') ?? undefined,
+    chanoteOnly: searchParams.get('chanote') === '1' || undefined,
+    withTenant: searchParams.get('tenant') === '1' || undefined,
+  };
+
   const { data, isLoading, error } = useCommercialProperties({
     intent,
     propertyType: type,
+    minPrice: filterValues.minPrice ? Number(filterValues.minPrice) : undefined,
+    maxPrice: filterValues.maxPrice ? Number(filterValues.maxPrice) : undefined,
+    minAreaSqm: filterValues.minAreaSqm ? Number(filterValues.minAreaSqm) : undefined,
+    maxAreaSqm: filterValues.maxAreaSqm ? Number(filterValues.maxAreaSqm) : undefined,
   });
 
-  const items = useMemo(() => data ?? [], [data]);
+  const items = useMemo(() => {
+    let list = data ?? [];
+    if (filterValues.minCapRate) {
+      const min = Number(filterValues.minCapRate);
+      list = list.filter((p) => (p.cap_rate_pct ?? 0) >= min);
+    }
+    if (filterValues.chanoteOnly) {
+      list = list.filter((p) => p.title_deed_type === 'chanote');
+    }
+    if (filterValues.withTenant) {
+      list = list.filter((p) => (p.lease_remaining_months ?? 0) > 0);
+    }
+    return list;
+  }, [data, filterValues.minCapRate, filterValues.chanoteOnly, filterValues.withTenant]);
 
   const setParam = (key: string, value: string) => {
     const next = new URLSearchParams(searchParams);
     if (value === 'all' || !value) next.delete(key);
     else next.set(key, value);
     setSearchParams(next, { replace: true });
+  };
+
+  const updateFilters = (next: CommercialFiltersValue) => {
+    const sp = new URLSearchParams(searchParams);
+    const setOrDel = (k: string, v?: string | boolean) => {
+      if (v === undefined || v === '' || v === false) sp.delete(k);
+      else sp.set(k, v === true ? '1' : String(v));
+    };
+    setOrDel('minPrice', next.minPrice);
+    setOrDel('maxPrice', next.maxPrice);
+    setOrDel('minArea', next.minAreaSqm);
+    setOrDel('maxArea', next.maxAreaSqm);
+    setOrDel('minCap', next.minCapRate);
+    setOrDel('chanote', next.chanoteOnly);
+    setOrDel('tenant', next.withTenant);
+    setSearchParams(sp, { replace: true });
   };
 
   return (
@@ -95,36 +139,39 @@ export default function CommercialIndex() {
             ))}
           </div>
 
-          {/* Type chips */}
-          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-            <button
-              type="button"
-              onClick={() => setParam('type', 'all')}
-              className={cn(
-                'px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap border transition-colors',
-                type === 'all'
-                  ? 'bg-foreground text-background border-foreground'
-                  : 'bg-background text-muted-foreground border-border hover:text-foreground',
-              )}
-            >
-              {isRu ? 'Все' : 'All'}
-            </button>
-            {COMMERCIAL_TYPES.map((t) => (
+          {/* Type chips + filters drawer */}
+          <div className="flex items-center gap-2">
+            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide flex-1">
               <button
-                key={t.id}
                 type="button"
-                onClick={() => setParam('type', t.id)}
+                onClick={() => setParam('type', 'all')}
                 className={cn(
                   'px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap border transition-colors',
-                  type === t.id
+                  type === 'all'
                     ? 'bg-foreground text-background border-foreground'
                     : 'bg-background text-muted-foreground border-border hover:text-foreground',
                 )}
               >
-                <span className="mr-1">{t.icon}</span>
-                {isRu ? t.labelRu : t.labelEn}
+                {isRu ? 'Все' : 'All'}
               </button>
-            ))}
+              {COMMERCIAL_TYPES.map((t) => (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => setParam('type', t.id)}
+                  className={cn(
+                    'px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap border transition-colors',
+                    type === t.id
+                      ? 'bg-foreground text-background border-foreground'
+                      : 'bg-background text-muted-foreground border-border hover:text-foreground',
+                  )}
+                >
+                  <span className="mr-1">{t.icon}</span>
+                  {isRu ? t.labelRu : t.labelEn}
+                </button>
+              ))}
+            </div>
+            <CommercialFilters value={filterValues} onChange={updateFilters} />
           </div>
 
           {/* Grid */}
