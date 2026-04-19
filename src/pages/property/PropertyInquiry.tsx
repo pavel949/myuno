@@ -484,7 +484,7 @@ export default function PropertyInquiry() {
                         </p>
                       )}
                       {rentalTerms?.late_checkout_penalty && (
-                        <p className="text-xs text-amber-600">
+                        <p className="text-xs text-warning">
                           {isRu ? `Поздний выезд: ${formatPrice(rentalTerms.late_checkout_penalty)}` : `Late checkout: ${formatPrice(rentalTerms.late_checkout_penalty)}`}
                         </p>
                       )}
