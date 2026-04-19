@@ -5,19 +5,36 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Home, Bed, Bath, SquareStack, FileSignature, MessageCircle, Shield, Upload, UserPlus, X, Building2, Video, ChevronDown, Minus, Plus, Building, Briefcase, Landmark } from 'lucide-react';
+import { Home, Bed, Bath, SquareStack, FileSignature, MessageCircle, Shield, Upload, UserPlus, X, Building2, Video, ChevronDown, Minus, Plus, Building, Briefcase, Landmark, Trees, TrendingUp, Ruler, ShieldCheck, Zap } from 'lucide-react';
 import { UnifiedMediaUploader } from '@/components/upload/UnifiedMediaUploader';
 import { TranslatableInput } from '@/components/forms/TranslatableInput';
 import { TranslatableTextarea } from '@/components/forms/TranslatableTextarea';
 import { LocationProjectSearch } from '@/components/property/LocationProjectSearch';
 import { UnitFields } from '@/components/property/UnitFields';
-import { PropertyFormData, OwnershipData, OwnershipType } from '@/hooks/usePropertyWizard';
+import { PropertyFormData, OwnershipData, OwnershipType, AssetClass } from '@/hooks/usePropertyWizard';
 import { PropertyFeaturesSelector } from '../PropertyFeaturesSelector';
 import { PropertyProject } from '@/hooks/usePropertyProjects';
 import { getTypeAwareLabels } from '@/lib/propertyTypeConfig';
+import { COMMERCIAL_TYPES, LAND_TYPES, TITLE_DEED_TYPES, formatLandSize } from '@/lib/real-estate/commercialTaxonomy';
 
 
 const DISMISS_KEY = 'owner_contact_auto_create_hint_dismissed';
+
+// --- Asset Class Picker ---
+interface AssetClassOption {
+  value: AssetClass;
+  labelEn: string;
+  labelRu: string;
+  descEn: string;
+  descRu: string;
+  icon: React.ElementType;
+}
+
+const ASSET_CLASS_OPTIONS: AssetClassOption[] = [
+  { value: 'residential', labelEn: 'Residential', labelRu: 'Жилая', descEn: 'Villa, condo, apartment, house', descRu: 'Виллы, кондо, квартиры, дома', icon: Home },
+  { value: 'commercial', labelEn: 'Commercial', labelRu: 'Коммерческая', descEn: 'Office, retail, warehouse, F&B', descRu: 'Офис, ритейл, склад, F&B', icon: Briefcase },
+  { value: 'land', labelEn: 'Land plot', labelRu: 'Земельный участок', descEn: 'Land for residential / commercial use', descRu: 'Земля под жильё / коммерцию', icon: Trees },
+];
 
 // --- Property Type Visual Picker ---
 interface PropertyTypeOption {
@@ -26,7 +43,7 @@ interface PropertyTypeOption {
   labelRu: string;
   icon: React.ElementType;
 }
-const PROPERTY_TYPE_OPTIONS: PropertyTypeOption[] = [
+const RESIDENTIAL_TYPE_OPTIONS: PropertyTypeOption[] = [
   { value: 'villa', labelEn: 'Villa', labelRu: 'Вилла', icon: Home },
   { value: 'condo', labelEn: 'Condo', labelRu: 'Кондо', icon: Building2 },
   { value: 'apartment', labelEn: 'Apartment', labelRu: 'Квартира', icon: Building },
@@ -34,9 +51,25 @@ const PROPERTY_TYPE_OPTIONS: PropertyTypeOption[] = [
   { value: 'townhouse', labelEn: 'Townhouse', labelRu: 'Таунхаус', icon: Building },
   { value: 'studio', labelEn: 'Studio', labelRu: 'Студия', icon: Building2 },
   { value: 'penthouse', labelEn: 'Penthouse', labelRu: 'Пентхаус', icon: Building2 },
-  { value: 'land', labelEn: 'Land', labelRu: 'Участок', icon: Landmark },
-  { value: 'commercial', labelEn: 'Commercial', labelRu: 'Коммерческая', icon: Briefcase },
 ];
+const COMMERCIAL_TYPE_OPTIONS: PropertyTypeOption[] = COMMERCIAL_TYPES.map((t) => ({
+  value: t.id,
+  labelEn: t.labelEn,
+  labelRu: t.labelRu,
+  icon: Briefcase,
+}));
+const LAND_TYPE_OPTIONS: PropertyTypeOption[] = LAND_TYPES.map((t) => ({
+  value: t.id,
+  labelEn: t.labelEn,
+  labelRu: t.labelRu,
+  icon: Landmark,
+}));
+
+function getTypeOptionsForAssetClass(ac: AssetClass): PropertyTypeOption[] {
+  if (ac === 'commercial') return COMMERCIAL_TYPE_OPTIONS;
+  if (ac === 'land') return LAND_TYPE_OPTIONS;
+  return RESIDENTIAL_TYPE_OPTIONS;
+}
 
 // --- Room Stepper ---
 interface RoomStepperProps {
