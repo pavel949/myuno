@@ -18,21 +18,14 @@ import { toast } from 'sonner';
 import { useProfile } from '@/hooks/useProfile';
 import { usePropertyWithRentalTerms } from '@/hooks/useProperties';
 import { usePropertyBlockedDates } from '@/hooks/usePropertyAvailability';
+import { usePropertyRateSeasons } from '@/hooks/usePropertyRateSeasons';
 import { DepositPaymentOptions } from '@/components/property/DepositPaymentOptions';
 import { useOrders } from '@/hooks/useOrders';
+import { calculatePricing, buildPricingRulesFromSeasons, type PricingRules } from '@/lib/pricingEngine';
+import { pluralizeNights, pluralizeGuests } from '@/lib/i18n/pluralize';
 import { differenceInDays, format, parseISO } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-
-// Russian pluralization helper for nights
-function pluralizeNights(n: number, isRu: boolean): string {
-  if (!isRu) return n === 1 ? 'night' : 'nights';
-  const mod10 = n % 10;
-  const mod100 = n % 100;
-  if (mod10 === 1 && mod100 !== 11) return 'ночь';
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return 'ночи';
-  return 'ночей';
-}
 
 export default function PropertyInquiry() {
   const { id } = useParams();
