@@ -3057,6 +3057,78 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_message_flags: {
+        Row: {
+          created_at: string
+          flag_type: string | null
+          id: string
+          is_restricted: boolean | null
+          message_id: string | null
+          reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          updated_at: string
+          user_id: string | null
+          warning_level: number | null
+        }
+        Insert: {
+          created_at?: string
+          flag_type?: string | null
+          id?: string
+          is_restricted?: boolean | null
+          message_id?: string | null
+          reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          updated_at?: string
+          user_id?: string | null
+          warning_level?: number | null
+        }
+        Update: {
+          created_at?: string
+          flag_type?: string | null
+          id?: string
+          is_restricted?: boolean | null
+          message_id?: string | null
+          reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          updated_at?: string
+          user_id?: string | null
+          warning_level?: number | null
+        }
+        Relationships: []
+      }
+      chat_violation_history: {
+        Row: {
+          created_at: string
+          details: Json | null
+          id: string
+          is_restricted: boolean | null
+          user_id: string | null
+          violation_type: string | null
+          warning_level: number | null
+        }
+        Insert: {
+          created_at?: string
+          details?: Json | null
+          id?: string
+          is_restricted?: boolean | null
+          user_id?: string | null
+          violation_type?: string | null
+          warning_level?: number | null
+        }
+        Update: {
+          created_at?: string
+          details?: Json | null
+          id?: string
+          is_restricted?: boolean | null
+          user_id?: string | null
+          violation_type?: string | null
+          warning_level?: number | null
+        }
+        Relationships: []
+      }
       cities: {
         Row: {
           country_code: string
@@ -5851,6 +5923,81 @@ export type Database = {
           },
         ]
       }
+      developer_impersonation_log: {
+        Row: {
+          admin_id: string
+          developer_id: string
+          ended_at: string | null
+          id: string
+          reason: string | null
+          started_at: string
+        }
+        Insert: {
+          admin_id: string
+          developer_id: string
+          ended_at?: string | null
+          id?: string
+          reason?: string | null
+          started_at?: string
+        }
+        Update: {
+          admin_id?: string
+          developer_id?: string
+          ended_at?: string | null
+          id?: string
+          reason?: string | null
+          started_at?: string
+        }
+        Relationships: []
+      }
+      developer_users: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          developer_id: string
+          email: string | null
+          id: string
+          invite_expires_at: string | null
+          invite_token: string | null
+          invited_at: string
+          invited_by: string | null
+          role: string | null
+          status: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          developer_id: string
+          email?: string | null
+          id?: string
+          invite_expires_at?: string | null
+          invite_token?: string | null
+          invited_at?: string
+          invited_by?: string | null
+          role?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          developer_id?: string
+          email?: string | null
+          id?: string
+          invite_expires_at?: string | null
+          invite_token?: string | null
+          invited_at?: string
+          invited_by?: string | null
+          role?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       developers: {
         Row: {
           address: string | null
@@ -6035,6 +6182,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      disputes: {
+        Row: {
+          against_user_id: string | null
+          booking_id: string | null
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          order_id: string | null
+          raised_by: string | null
+          resolution: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          against_user_id?: string | null
+          booking_id?: string | null
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_id?: string | null
+          raised_by?: string | null
+          resolution?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          against_user_id?: string | null
+          booking_id?: string | null
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_id?: string | null
+          raised_by?: string | null
+          resolution?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       doctors: {
         Row: {
@@ -7420,6 +7615,45 @@ export type Database = {
           },
         ]
       }
+      inventory_inspections: {
+        Row: {
+          created_at: string
+          id: string
+          inspection_type: string | null
+          inspector_id: string | null
+          items: Json | null
+          notes: string | null
+          photos: string[] | null
+          property_id: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          inspection_type?: string | null
+          inspector_id?: string | null
+          items?: Json | null
+          notes?: string | null
+          photos?: string[] | null
+          property_id?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          inspection_type?: string | null
+          inspector_id?: string | null
+          items?: Json | null
+          notes?: string | null
+          photos?: string[] | null
+          property_id?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       inventory_listings: {
         Row: {
           availability_status: string | null
@@ -8084,6 +8318,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      juristic_documents: {
+        Row: {
+          created_at: string
+          document_type: string | null
+          file_url: string | null
+          id: string
+          property_id: string | null
+          title: string | null
+          updated_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          document_type?: string | null
+          file_url?: string | null
+          id?: string
+          property_id?: string | null
+          title?: string | null
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          document_type?: string | null
+          file_url?: string | null
+          id?: string
+          property_id?: string | null
+          title?: string | null
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: []
       }
       juristic_requests: {
         Row: {
@@ -11422,6 +11689,48 @@ export type Database = {
           subject?: string | null
           subject_ru?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      moderation_queue: {
+        Row: {
+          created_at: string
+          entity_id: string
+          entity_type: string
+          flagged_reason: string | null
+          id: string
+          payload: Json | null
+          priority: number | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          flagged_reason?: string | null
+          id?: string
+          payload?: Json | null
+          priority?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          flagged_reason?: string | null
+          id?: string
+          payload?: Json | null
+          priority?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
         }
         Relationships: []
       }
