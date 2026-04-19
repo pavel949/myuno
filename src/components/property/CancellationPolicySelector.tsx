@@ -243,7 +243,7 @@ export function CancellationPolicySelector({
 
       {/* Recommendation hint */}
       <div className="flex items-start gap-2 p-3 bg-muted/50 rounded-lg">
-        <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
+        <AlertTriangle className="w-4 h-4 text-warning flex-shrink-0 mt-0.5" />
         <p className="text-xs text-muted-foreground">
           {isRu 
             ? 'Гибкая политика привлекает больше гостей, но строгая защищает от отмен в последний момент.'

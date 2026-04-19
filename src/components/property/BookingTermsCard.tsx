@@ -182,7 +182,7 @@ export function BookingTermsCard({
                   </div>
                   {policy.partialRefundPercent > 0 && (
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <AlertTriangle className="w-3.5 h-3.5 text-yellow-500" />
+                      <AlertTriangle className="w-3.5 h-3.5 text-warning" />
                       <span>
                         {isRu 
                           ? `${policy.partialRefundPercent}% возврат в течение окна`
@@ -191,7 +191,7 @@ export function BookingTermsCard({
                     </div>
                   )}
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <XCircle className="w-3.5 h-3.5 text-red-500" />
+                    <XCircle className="w-3.5 h-3.5 text-destructive" />
                     <span>
                       {isRu 
                         ? '10% предоплата невозвратная'
