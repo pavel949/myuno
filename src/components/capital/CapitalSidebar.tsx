@@ -17,11 +17,13 @@ import {
   MessageCircle,
   KanbanSquare,
   FileText,
+  Briefcase,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
   { path: '/capital', label: 'Дашборд', icon: LayoutDashboard, end: true },
   { path: '/capital/contacts', label: 'Контакты', icon: Users },
+  { path: '/capital/investment-deals', label: 'Investment Deals', icon: Briefcase },
   { path: '/capital/deals/newbuilds', label: 'Newbuilds Deals', icon: Building2 },
   { path: '/capital/projects', label: 'Проекты', icon: Building2 },
   { path: '/capital/campaigns', label: 'Кампании', icon: Megaphone },
