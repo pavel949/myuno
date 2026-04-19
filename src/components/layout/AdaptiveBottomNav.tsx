@@ -126,7 +126,13 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
 
     const leftItems = showAppsButton ? navItems.slice(0, 2) : navItems;
     const rightItems = showAppsButton ? navItems.slice(2) : [];
-    const gridCols = showAppsButton ? 'grid-cols-5' : `grid-cols-${navItems.length}`;
+    // Static map — Tailwind JIT can't see dynamic `grid-cols-${n}` strings.
+    const totalCols = leftItems.length + rightItems.length + (showAppsButton ? 1 : 0);
+    const gridCols =
+      totalCols === 5 ? 'grid-cols-5'
+      : totalCols === 4 ? 'grid-cols-4'
+      : totalCols === 3 ? 'grid-cols-3'
+      : 'grid-cols-5';
 
     return (
       <>
