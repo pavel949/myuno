@@ -428,6 +428,8 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.INVEST_SUBMIT} element={<LazyPage><Pages.InvestmentSubmit /></LazyPage>} />
         <Route path={APP_ROUTES.INVEST_DEALS_BOARD} element={<LazyPage><Pages.InvestmentDeals /></LazyPage>} />
         <Route path="/invest/deal/:id" element={<LazyPage><Pages.InvestmentDealPublicDetail /></LazyPage>} />
+        <Route path="/invest/articles" element={<LazyPage><Pages.InvestmentArticles /></LazyPage>} />
+        <Route path="/invest/articles/:slug" element={<LazyPage><Pages.InvestmentArticleDetail /></LazyPage>} />
         <Route path="/invest/business/:slug" element={<LazyPage><Pages.InvestmentBusinessDetail /></LazyPage>} />
         <Route path={APP_ROUTES.INVEST_DETAIL(':id')} element={<LazyPage><Pages.InvestmentDetail /></LazyPage>} />
         {/* Legacy: /invest/:id → /invest/project/:id */}

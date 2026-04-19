@@ -104,6 +104,8 @@ export const InvestInThailand = lazy(() => import('@/pages/invest/InvestInThaila
 export const InvestmentSubmit = lazy(() => import('@/pages/invest/InvestmentSubmit'));
 export const InvestmentDeals = lazy(() => import('@/pages/invest/InvestmentDeals'));
 export const InvestmentDealPublicDetail = lazy(() => import('@/pages/invest/InvestmentDealPublicDetail'));
+export const InvestmentArticles = lazy(() => import('@/pages/invest/InvestmentArticles'));
+export const InvestmentArticleDetail = lazy(() => import('@/pages/invest/InvestmentArticleDetail'));
 export const CapitalInvestmentDeals = lazy(() => import('@/pages/capital/CapitalInvestmentDeals'));
 export const CapitalInvestmentDealDetail = lazy(() => import('@/pages/capital/CapitalInvestmentDealDetail'));
 

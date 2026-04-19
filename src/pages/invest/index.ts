@@ -14,3 +14,5 @@ export { default as InvestInThailand } from './InvestInThailand';
 export { default as InvestmentSubmit } from './InvestmentSubmit';
 export { default as InvestmentDeals } from './InvestmentDeals';
 export { default as InvestmentDealPublicDetail } from './InvestmentDealPublicDetail';
+export { default as InvestmentArticles } from './InvestmentArticles';
+export { default as InvestmentArticleDetail } from './InvestmentArticleDetail';
