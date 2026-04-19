@@ -161,6 +161,16 @@ export const APP_ROUTES = {
   RESALE: '/property/resale',
   RESALE_DETAIL: (id: string) => `/property/resale/${id}`,
 
+  // ── Commercial Real Estate (under Property Hub) — persona-gated (business / investor) ──
+  COMMERCIAL: '/property/commercial',
+  COMMERCIAL_BROWSE: '/property/commercial/browse',
+  COMMERCIAL_DETAIL: (id: string) => `/property/commercial/${id}`,
+
+  // ── Land Plots (under Property Hub) — persona-gated (business / investor) ──
+  LAND: '/property/land',
+  LAND_BROWSE: '/property/land/browse',
+  LAND_DETAIL: (id: string) => `/property/land/${id}`,
+
   // ── Restaurants ──
   RESTAURANTS: '/restaurants',
   RESTAURANT_DETAIL: (id: string) => `/restaurants/${id}`,
