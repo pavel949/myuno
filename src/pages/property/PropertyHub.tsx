@@ -205,6 +205,7 @@ export function PropertyHubTabs() {
       {visibleTabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = activeTab === tab.id;
+        const isPro = !!tab.personaGated;
         return (
           <button
             key={tab.id}
@@ -219,6 +220,18 @@ export function PropertyHubTabs() {
           >
             <Icon className="w-4 h-4 shrink-0" />
             {isRu ? tab.labelRu : tab.labelEn}
+            {isPro && (
+              <span
+                className={cn(
+                  'ml-0.5 inline-flex items-center rounded-full px-1.5 py-0 text-[9px] font-semibold tracking-wide uppercase leading-tight',
+                  isActive
+                    ? 'bg-primary-foreground/20 text-primary-foreground'
+                    : 'bg-amber-500/15 text-amber-600 dark:text-amber-400'
+                )}
+              >
+                Pro
+              </span>
+            )}
           </button>
         );
       })}
