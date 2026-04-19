@@ -171,13 +171,13 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
                   )}
                   <div className={cn(
                     'transition-all duration-200',
-                    active ? 'text-primary scale-110' : 'text-muted-foreground',
+                    active ? 'text-primary scale-110' : 'text-white/75',
                   )}>
-                    <Icon className="w-[20px] h-[20px]" />
+                    <Icon className="w-[22px] h-[22px]" />
                   </div>
                   <span className={cn(
                     'text-[10px] leading-none',
-                    active ? 'font-semibold text-primary' : 'font-medium text-muted-foreground/60',
+                    active ? 'font-semibold text-primary' : 'font-medium text-white/85',
                   )}>
                     {label}
                   </span>
