@@ -245,11 +245,30 @@ export function PropertyBookingCard({
                   }
                 }}
                 numberOfMonths={isDesktop ? 2 : 1}
-                disabled={(date) => isBefore(date, startOfDay(new Date())) || isDateBlocked(date)}
+                disabled={(date) => {
+                  if (isBefore(date, startOfDay(new Date()))) return true;
+                  if (isDateBlocked(date)) return true;
+                  // Min-stay enforcement: when picking the check-out, forbid
+                  // dates closer than min_stay_nights to the selected check-in.
+                  const minNights = rentalTerms?.min_stay_nights ?? 0;
+                  if (minNights > 1 && dateRange?.from && !dateRange?.to) {
+                    const diff = differenceInDays(date, dateRange.from);
+                    if (diff > 0 && diff < minNights) return true;
+                  }
+                  return false;
+                }}
                 modifiers={{ booked: blockedDates?.map(b => b.date) || [] }}
                 modifiersClassNames={{ booked: 'bg-destructive/20 text-destructive line-through' }}
                 locale={isRu ? ru : undefined}
+                className="p-3 pointer-events-auto"
               />
+              {rentalTerms?.min_stay_nights && rentalTerms.min_stay_nights > 1 && dateRange?.from && !dateRange?.to && (
+                <div className="px-3 pt-2 text-[11px] text-muted-foreground">
+                  {isRu
+                    ? `Минимум ${rentalTerms.min_stay_nights} ночей с выбранной даты заезда`
+                    : `Minimum ${rentalTerms.min_stay_nights} nights from selected check-in`}
+                </div>
+              )}
               {/* Footer */}
               <div className="flex items-center justify-between px-3 py-2.5 border-t border-border/60">
                 <div>
