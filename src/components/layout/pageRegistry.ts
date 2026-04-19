@@ -57,6 +57,7 @@ export const CommercialIndex = lazy(() => import('@/pages/property/CommercialInd
 export const CommercialDetail = lazy(() => import('@/pages/property/CommercialDetail'));
 export const LandIndex = lazy(() => import('@/pages/property/LandIndex'));
 export const LandDetail = lazy(() => import('@/pages/property/LandDetail'));
+export const HotelsIndex = lazy(() => import('@/pages/property/HotelsIndex'));
 
 // ── Project Microsite (standalone, no app shell) ──
 export const ProjectMicrosite = lazy(() => import('@/pages/microsite/ProjectMicrosite'));

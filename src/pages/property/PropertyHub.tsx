@@ -17,6 +17,7 @@ import {
   Users,
   Briefcase,
   Trees,
+  Hotel,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -78,6 +79,14 @@ const TABS: TabConfig[] = [
     labelRu: 'Коммерческая',
     icon: Briefcase,
     path: APP_ROUTES.COMMERCIAL,
+    personaGated: ['business', 'investor'],
+  },
+  {
+    id: 'hotels',
+    labelEn: 'Hotels',
+    labelRu: 'Отели',
+    icon: Hotel,
+    path: APP_ROUTES.HOTELS,
     personaGated: ['business', 'investor'],
   },
   {
