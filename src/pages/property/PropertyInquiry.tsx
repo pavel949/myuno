@@ -332,15 +332,17 @@ export default function PropertyInquiry() {
               <span>{formatPrice(pricing.total)}</span>
             </div>
 
-            {/* 10% deposit callout — only for instant booking */}
-            {isInstantBooking && (
+            {/* Prepayment callout — only for instant booking. Uses real prepay_percent. */}
+            {isInstantBooking && pricing.prepayAmount > 0 && (
               <div className="p-3 rounded-lg bg-primary/5 border border-primary/10">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">
-                    {isRu ? 'Предоплата 10% сейчас' : '10% deposit due now'}
+                    {isRu
+                      ? `Предоплата ${pricing.prepayPercent}% сейчас`
+                      : `${pricing.prepayPercent}% deposit due now`}
                   </span>
                   <span className="font-semibold text-primary">
-                    {formatPrice(Math.round(pricing.total * 0.1))}
+                    {formatPrice(pricing.prepayAmount)}
                   </span>
                 </div>
                 <p className="text-[10px] text-muted-foreground mt-1">
@@ -526,6 +528,8 @@ export default function PropertyInquiry() {
                 guests={guests}
                 nights={nights}
                 totalAmount={pricing.total}
+                prepayAmount={pricing.prepayAmount}
+                prepayPercent={pricing.prepayPercent}
                 cleaningFee={rentalTerms?.extra_cleaning_price || (property as any)?.cleaning_fee || 0}
                 guestName={formData.name}
                 guestPhone={formData.phone}
@@ -553,7 +557,7 @@ export default function PropertyInquiry() {
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium">{formatPrice(pricing.total)}</span>
               <span className="text-xs text-muted-foreground">
-                {nights} {pluralizeNights(nights, isRu)}
+                {nights} {pluralizeNights(nights, language)}
               </span>
             </div>
             <Button
@@ -564,6 +568,36 @@ export default function PropertyInquiry() {
                 if (isSubmitting) return;
                 setIsSubmitting(true);
                 try {
+                  // 0. Atomic availability check — prevents race conditions
+                  // when multiple guests try to book the same dates simultaneously.
+                  const { data: isAvailable, error: availErr } = await supabase.rpc(
+                    'check_property_dates_available',
+                    {
+                      p_property_id: id!,
+                      p_check_in: format(checkIn!, 'yyyy-MM-dd'),
+                      p_check_out: format(checkOut!, 'yyyy-MM-dd'),
+                    },
+                  );
+                  if (availErr) {
+                    console.error('[PropertyInquiry] availability check error:', availErr);
+                    toast.error(
+                      isRu
+                        ? 'Не удалось проверить доступность дат. Попробуйте ещё раз.'
+                        : 'Could not verify date availability. Please try again.',
+                    );
+                    setIsSubmitting(false);
+                    return;
+                  }
+                  if (isAvailable === false) {
+                    toast.error(
+                      isRu
+                        ? 'Эти даты только что были забронированы. Выберите другие.'
+                        : 'These dates were just booked. Please pick different dates.',
+                    );
+                    setIsSubmitting(false);
+                    return;
+                  }
+
                   // 1. Save to property_inquiries for owner dashboard visibility
                   const { error: inquiryError } = await supabase
                     .from('property_inquiries')
@@ -607,7 +641,13 @@ export default function PropertyInquiry() {
                       nights,
                       price_per_night: pricePerNight,
                       deposit_amount: rentalTerms?.deposit_amount || 0,
-                      discount_percent: pricing.discountPercent,
+                      discount_percent: pricing.lengthDiscountPercent,
+                      length_discount: pricing.lengthDiscount,
+                      early_bird_discount: pricing.earlyBirdDiscount,
+                      last_minute_discount: pricing.lastMinuteDiscount,
+                      seasonal_adjustment: pricing.seasonalAdjustment,
+                      prepay_amount: pricing.prepayAmount,
+                      prepay_percent: pricing.prepayPercent,
                       booking_mode: 'request',
                       ...((rentalTerms as any)?.manager_email ? { manager_email: (rentalTerms as any).manager_email } : {}),
                       ...((rentalTerms as any)?.manager_phone ? { manager_phone: (rentalTerms as any).manager_phone } : {}),
