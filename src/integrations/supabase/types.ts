@@ -2301,6 +2301,8 @@ export type Database = {
           investor_profile: Json | null
           last_name: string
           notes: string | null
+          origin_investment_deal_id: string | null
+          origin_investor_inquiry_id: string | null
           phone: string | null
           source: string | null
           status: string | null
@@ -2319,6 +2321,8 @@ export type Database = {
           investor_profile?: Json | null
           last_name?: string
           notes?: string | null
+          origin_investment_deal_id?: string | null
+          origin_investor_inquiry_id?: string | null
           phone?: string | null
           source?: string | null
           status?: string | null
@@ -2337,6 +2341,8 @@ export type Database = {
           investor_profile?: Json | null
           last_name?: string
           notes?: string | null
+          origin_investment_deal_id?: string | null
+          origin_investor_inquiry_id?: string | null
           phone?: string | null
           source?: string | null
           status?: string | null
@@ -2345,7 +2351,29 @@ export type Database = {
           user_id?: string
           whatsapp?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "capital_contacts_origin_investment_deal_id_fkey"
+            columns: ["origin_investment_deal_id"]
+            isOneToOne: false
+            referencedRelation: "investment_deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "capital_contacts_origin_investment_deal_id_fkey"
+            columns: ["origin_investment_deal_id"]
+            isOneToOne: false
+            referencedRelation: "v_investment_deals_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "capital_contacts_origin_investor_inquiry_id_fkey"
+            columns: ["origin_investor_inquiry_id"]
+            isOneToOne: false
+            referencedRelation: "investor_inquiries"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       capital_intro_requests: {
         Row: {
@@ -2518,11 +2546,16 @@ export type Database = {
           contact_id: string | null
           created_at: string
           currency: string | null
+          deal_category: string | null
+          deal_intent: string | null
           expected_close_date: string | null
           id: string
+          investment_deal_id: string | null
+          investor_inquiry_id: string | null
           notes: string | null
           probability: number | null
           project_id: string | null
+          source_kind: string | null
           stage: string | null
           updated_at: string
           user_id: string
@@ -2534,11 +2567,16 @@ export type Database = {
           contact_id?: string | null
           created_at?: string
           currency?: string | null
+          deal_category?: string | null
+          deal_intent?: string | null
           expected_close_date?: string | null
           id?: string
+          investment_deal_id?: string | null
+          investor_inquiry_id?: string | null
           notes?: string | null
           probability?: number | null
           project_id?: string | null
+          source_kind?: string | null
           stage?: string | null
           updated_at?: string
           user_id: string
@@ -2550,11 +2588,16 @@ export type Database = {
           contact_id?: string | null
           created_at?: string
           currency?: string | null
+          deal_category?: string | null
+          deal_intent?: string | null
           expected_close_date?: string | null
           id?: string
+          investment_deal_id?: string | null
+          investor_inquiry_id?: string | null
           notes?: string | null
           probability?: number | null
           project_id?: string | null
+          source_kind?: string | null
           stage?: string | null
           updated_at?: string
           user_id?: string
@@ -2566,6 +2609,27 @@ export type Database = {
             columns: ["contact_id"]
             isOneToOne: false
             referencedRelation: "capital_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "capital_pipeline_investment_deal_id_fkey"
+            columns: ["investment_deal_id"]
+            isOneToOne: false
+            referencedRelation: "investment_deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "capital_pipeline_investment_deal_id_fkey"
+            columns: ["investment_deal_id"]
+            isOneToOne: false
+            referencedRelation: "v_investment_deals_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "capital_pipeline_investor_inquiry_id_fkey"
+            columns: ["investor_inquiry_id"]
+            isOneToOne: false
+            referencedRelation: "investor_inquiries"
             referencedColumns: ["id"]
           },
           {
@@ -29843,6 +29907,7 @@ export type Database = {
       }
       generate_referral_code: { Args: { p_user_id: string }; Returns: string }
       get_all_currency_rates: { Args: never; Returns: Json }
+      get_capital_crm_owner: { Args: never; Returns: string }
       get_company_member_role: {
         Args: { _company_id: string; _user_id: string }
         Returns: string
