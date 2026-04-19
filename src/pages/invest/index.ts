@@ -1,4 +1,10 @@
+export { default as InvestmentHubLanding } from './InvestmentHubLanding';
 export { default as InvestmentIndex } from './InvestmentIndex';
+export { default as InvestmentRealEstateZone } from './InvestmentRealEstateZone';
+export { default as InvestmentBusinessZone } from './InvestmentBusinessZone';
+export { default as InvestmentKnowledgeZone } from './InvestmentKnowledgeZone';
+export { default as InvestmentServicesZone } from './InvestmentServicesZone';
+export { default as InvestmentOpsConsole } from './InvestmentOpsConsole';
 export { default as InvestmentDetail } from './InvestmentDetail';
 export { default as InvestorDashboard } from './InvestorDashboard';
 export { default as RaiseFunding } from './RaiseFunding';
