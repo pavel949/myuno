@@ -6,7 +6,8 @@ import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format, isToday, isTomorrow, parseISO } from 'date-fns';
 import { ru as ruLocale } from 'date-fns/locale';
-import { CalendarDays, ChevronRight, Star, MapPin, Sparkles } from 'lucide-react';
+import { CalendarDays, Star, MapPin, Sparkles, Compass } from 'lucide-react';
+import { SectionHeader } from '@/components/ds/SectionHeader';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useRestaurants } from '@/hooks/useRestaurants';
 import { useEvents } from '@/hooks/useEvents';
@@ -182,26 +183,14 @@ export function HomeDiscoveryCarousel() {
       className="space-y-3"
       aria-label={isRu ? 'Сейчас в топе на myUNO' : 'Trending on myUNO'}
     >
-      <div className="flex items-start justify-between gap-3 px-1">
-        <div className="min-w-0">
-          <h2 className="text-lg font-display font-bold text-foreground">
-            {isRu ? 'Сейчас в топе' : 'Trending on myUNO'}
-          </h2>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            {isRu
-              ? 'События, еда, сервисы и приключения — в одной ленте'
-              : 'Events, dining, services, and experiences in one place'}
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => navigate(APP_ROUTES.DISCOVER)}
-          className="flex items-center gap-1 text-xs text-primary font-semibold hover:text-primary/80 transition-colors shrink-0 min-h-[44px] px-1"
-        >
-          {isRu ? 'Всё в Discover' : 'Open Discover'}
-          <ChevronRight className="w-3.5 h-3.5 shrink-0" aria-hidden />
-        </button>
-      </div>
+      <SectionHeader
+        icon={Compass}
+        title={isRu ? 'Сейчас в топе' : 'Trending on myUNO'}
+        subtitle={isRu
+          ? 'События, еда, сервисы и приключения — в одной ленте'
+          : 'Events, dining, services, and experiences in one place'}
+        action={{ label: isRu ? 'Discover' : 'Discover', onClick: () => navigate(APP_ROUTES.DISCOVER) }}
+      />
 
       {sectionLoading && rail.length === 0 ? (
         <div className="flex gap-3 -mx-4 px-4 overflow-hidden">

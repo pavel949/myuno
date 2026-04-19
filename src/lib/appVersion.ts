@@ -2,7 +2,7 @@
 // Increment this when deploying significant changes
 import { logger } from '@/lib/logger';
 
-export const APP_VERSION = '3.40.3';
+export const APP_VERSION = '3.40.4';
 
 // Injected by vite `define` at build-time — always reflects the actual build moment,
 // not the runtime moment (which would be wrong after caching).
