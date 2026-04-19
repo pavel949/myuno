@@ -160,19 +160,31 @@ export function useInvestmentsByCategory(category: string) {
   });
 }
 
-// Categories helper
+// Categories helper — multi-asset, RE-dominant
 export const INVESTMENT_CATEGORIES = [
-  { key: 'real_estate_offplan', en: 'Off-Plan Property', ru: 'Новостройки', icon: '🏗️' },
-  { key: 'real_estate_rental', en: 'Rental Business', ru: 'Арендный бизнес', icon: '🏠' },
-  { key: 'hospitality', en: 'Hospitality', ru: 'Гостиничный бизнес', icon: '🏨' },
-  { key: 'restaurant', en: 'Restaurant & F&B', ru: 'Рестораны', icon: '🍽️' },
-  { key: 'retail', en: 'Retail', ru: 'Ритейл', icon: '🛍️' },
-  { key: 'yacht_charter', en: 'Yacht Charter', ru: 'Яхтенный чартер', icon: '⛵' },
-  { key: 'marine_tourism', en: 'Marine Tourism', ru: 'Морской туризм', icon: '🌊' },
-  { key: 'wellness', en: 'Wellness & Spa', ru: 'Велнес', icon: '💆' },
-  { key: 'tech_startup', en: 'Tech Startup', ru: 'Технологии', icon: '💻' },
-  { key: 'franchise', en: 'Franchise', ru: 'Франшиза', icon: '🏪' },
-  { key: 'agriculture', en: 'Agriculture', ru: 'Агро', icon: '🌴' },
+  // Real Estate (dominates)
+  { key: 'real_estate_offplan', en: 'Off-Plan Property', ru: 'Новостройки', icon: '🏗️', group: 'real_estate' },
+  { key: 'real_estate_rental', en: 'Rental Business', ru: 'Арендный бизнес', icon: '🏠', group: 'real_estate' },
+  // Hospitality / F&B / Retail
+  { key: 'hospitality', en: 'Hospitality', ru: 'Гостиничный бизнес', icon: '🏨', group: 'business' },
+  { key: 'restaurant', en: 'Restaurant & F&B', ru: 'Рестораны / F&B', icon: '🍽️', group: 'business' },
+  { key: 'retail', en: 'Retail', ru: 'Ритейл', icon: '🛍️', group: 'business' },
+  { key: 'wellness', en: 'Wellness & Spa', ru: 'Велнес / Spa', icon: '💆', group: 'business' },
+  // Marine
+  { key: 'yacht_charter', en: 'Yacht Charter', ru: 'Яхтенный чартер', icon: '⛵', group: 'business' },
+  { key: 'marine_tourism', en: 'Marine Tourism', ru: 'Морской туризм', icon: '🌊', group: 'business' },
+  // Trade & production
+  { key: 'import_export', en: 'Import / Export', ru: 'Импорт / Экспорт', icon: '🚢', group: 'business' },
+  { key: 'manufacturing', en: 'Manufacturing', ru: 'Производство', icon: '🏭', group: 'business' },
+  { key: 'agriculture', en: 'Agriculture', ru: 'Агро', icon: '🌴', group: 'business' },
+  // Services & professional
+  { key: 'education', en: 'Education', ru: 'Образование', icon: '🎓', group: 'business' },
+  { key: 'medical', en: 'Medical & Clinics', ru: 'Медицина', icon: '🏥', group: 'business' },
+  { key: 'franchise', en: 'Franchise', ru: 'Франшиза', icon: '🏪', group: 'business' },
+  { key: 'tech_startup', en: 'Tech Startup', ru: 'Технологии', icon: '💻', group: 'business' },
 ] as const;
 
 export type InvestmentCategoryKey = typeof INVESTMENT_CATEGORIES[number]['key'];
+
+export const REAL_ESTATE_CATEGORIES = INVESTMENT_CATEGORIES.filter((c) => c.group === 'real_estate');
+export const BUSINESS_CATEGORIES = INVESTMENT_CATEGORIES.filter((c) => c.group === 'business');
