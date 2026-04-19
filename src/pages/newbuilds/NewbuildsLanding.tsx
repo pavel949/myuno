@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import NewbuildsLayout from '@/components/newbuilds/NewbuildsLayout';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { useOffplanProjects } from '@/hooks/useOffplanProjects';
 
@@ -54,33 +55,34 @@ export default function NewbuildsLanding() {
 
   return (
     <NewbuildsLayout>
-      <div className="min-h-screen" style={{ background: 'hsl(var(--nb-bg))' }}>
-        <header
-          className="border-b px-4 py-10 md:py-14"
-          style={{ borderColor: 'hsl(var(--nb-gold) / 0.12)', background: 'linear-gradient(180deg, hsl(var(--nb-surface)) 0%, hsl(var(--nb-bg)) 100%)' }}
-        >
-          <div className="max-w-4xl mx-auto text-center space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-semibold tracking-wide" style={{ background: 'hsl(var(--nb-gold) / 0.12)', color: 'hsl(var(--nb-gold))' }}>
-              <Building2 className="w-3.5 h-3.5" />
+      <div className="min-h-screen bg-background">
+        <header className="relative border-b border-border px-4 py-8 md:py-14 nb-blueprint overflow-hidden">
+          <div className="relative z-10 max-w-4xl mx-auto text-center space-y-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-semibold tracking-wide bg-primary/10 text-primary">
+              <Building2 className="w-3.5 h-3.5" aria-hidden />
               PHUKET NEW BUILDS
             </div>
-            <h1 className="text-2xl md:text-3xl font-bold" style={{ color: 'hsl(var(--nb-text))', fontFamily: 'var(--font-heading-nb)' }}>
+            <h1 className="nb-display text-2xl md:text-4xl font-semibold text-foreground">
               Новостройки Пхукета
             </h1>
-            <p className="text-sm md:text-base max-w-xl mx-auto" style={{ color: 'hsl(var(--nb-muted))' }}>
-              Единый каталог с фильтрами и аналитикой — в разделе Property Hub. Здесь — карта, сравнение, калькулятор и гайды в фирменной тёмной теме.
+            <p className="text-sm md:text-base max-w-xl mx-auto text-muted-foreground">
+              Единый каталог с фильтрами и аналитикой — в разделе Property Hub. Здесь — карта,
+              сравнение, калькулятор и гайды в фирменной тёмной теме.
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-3 text-[11px] md:text-xs" style={{ color: 'hsl(var(--nb-muted))' }}>
+            <div className="flex flex-wrap items-center justify-center gap-3 text-[11px] md:text-xs text-muted-foreground">
               {isLoading ? (
-                <span>…</span>
+                <>
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-28" />
+                </>
               ) : (
                 <>
                   <span>
-                    <strong style={{ color: 'hsl(var(--nb-text))' }}>{projects.length}</strong> проектов в каталоге
+                    <strong className="text-foreground">{projects.length}</strong> проектов в каталоге
                   </span>
                   {avgYield > 0 && (
                     <span>
-                      ~<strong style={{ color: '#22c55e' }}>{avgYield.toFixed(1)}%</strong> средний ROI
+                      ~<strong className="text-success">{avgYield.toFixed(1)}%</strong> средний ROI
                     </span>
                   )}
                 </>
@@ -90,18 +92,17 @@ export default function NewbuildsLanding() {
               asChild
               size="lg"
               className="mt-2 gap-2 rounded-xl font-semibold"
-              style={{ background: 'hsl(var(--nb-gold))', color: 'hsl(var(--nb-bg))' }}
             >
               <Link to={APP_ROUTES.OFFPLAN}>
                 Открыть каталог
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4" aria-hidden />
               </Link>
             </Button>
           </div>
         </header>
 
         <section className="max-w-5xl mx-auto px-4 py-8 md:py-10">
-          <h2 className="text-sm font-semibold mb-4" style={{ color: 'hsl(var(--nb-text))' }}>
+          <h2 className="text-sm font-semibold mb-4 text-foreground">
             Инструменты и разделы
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -109,25 +110,19 @@ export default function NewbuildsLanding() {
               <Link
                 key={to}
                 to={to}
-                className="flex items-start gap-3 p-4 rounded-2xl border transition-all hover:opacity-95"
-                style={{
-                  borderColor: primary ? 'hsl(var(--nb-gold) / 0.35)' : 'hsl(var(--nb-gold) / 0.12)',
-                  background: primary ? 'hsl(var(--nb-gold) / 0.08)' : 'hsl(var(--nb-surface))',
-                }}
+                className={
+                  'flex items-start gap-3 p-4 rounded-2xl border transition-all hover:shadow-card-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ' +
+                  (primary
+                    ? 'border-primary/35 bg-primary/5'
+                    : 'border-border bg-card hover:border-primary/30')
+                }
               >
-                <div
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
-                  style={{ background: 'hsl(var(--nb-gold) / 0.12)', color: 'hsl(var(--nb-gold))' }}
-                >
-                  <Icon className="w-5 h-5" />
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <Icon className="w-5 h-5" aria-hidden />
                 </div>
                 <div>
-                  <div className="font-semibold text-sm" style={{ color: 'hsl(var(--nb-text))' }}>
-                    {title}
-                  </div>
-                  <div className="text-xs mt-0.5" style={{ color: 'hsl(var(--nb-muted))' }}>
-                    {subtitle}
-                  </div>
+                  <div className="font-semibold text-sm text-foreground">{title}</div>
+                  <div className="text-xs mt-0.5 text-muted-foreground">{subtitle}</div>
                 </div>
               </Link>
             ))}
