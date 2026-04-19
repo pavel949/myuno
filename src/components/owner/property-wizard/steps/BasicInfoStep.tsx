@@ -459,17 +459,21 @@ function BasicInfoStepInner({
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            <RoomStepper
-              label={<><Bed className="h-3 w-3" />{isRu ? 'Спальни' : 'Bedrooms'}</>}
-              value={formData.bedrooms ?? 0}
-              onChange={(v) => updateFormData({ bedrooms: v })}
-            />
-            <RoomStepper
-              label={<><Bath className="h-3 w-3" />{isRu ? 'Ванные' : 'Bathrooms'}</>}
-              value={formData.bathrooms ?? 0}
-              onChange={(v) => updateFormData({ bathrooms: v })}
-            />
-            <div className="space-y-1.5 col-span-2 sm:col-span-1">
+            {isResidential && (
+              <>
+                <RoomStepper
+                  label={<><Bed className="h-3 w-3" />{isRu ? 'Спальни' : 'Bedrooms'}</>}
+                  value={formData.bedrooms ?? 0}
+                  onChange={(v) => updateFormData({ bedrooms: v })}
+                />
+                <RoomStepper
+                  label={<><Bath className="h-3 w-3" />{isRu ? 'Ванные' : 'Bathrooms'}</>}
+                  value={formData.bathrooms ?? 0}
+                  onChange={(v) => updateFormData({ bathrooms: v })}
+                />
+              </>
+            )}
+            <div className={`space-y-1.5 ${isResidential ? 'col-span-2 sm:col-span-1' : 'col-span-2 sm:col-span-3'}`}>
               <Label className="flex items-center gap-1 text-xs">
                 <SquareStack className="h-3 w-3" />
                 {isRu ? typeLabels.areaLabelRu : typeLabels.areaLabel}

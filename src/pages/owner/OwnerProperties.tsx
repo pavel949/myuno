@@ -116,6 +116,7 @@ const queryClient = useQueryClient();
   const [selectedComplex, setSelectedComplex] = useState<string | null>(null);
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<string | null>(null);
+  const [selectedAssetClass, setSelectedAssetClass] = useState<'all' | 'residential' | 'commercial' | 'land'>('all');
   const [showFilters, setShowFilters] = useState(true);
 
   // Bulk selection
@@ -164,15 +165,19 @@ const queryClient = useQueryClient();
       if (selectedComplex && p.complex_id !== selectedComplex) return false;
       if (selectedProject && p.project_id !== selectedProject) return false;
       if (selectedType && p.property_type !== selectedType) return false;
+      if (selectedAssetClass !== 'all') {
+        const ac = (p as { asset_class?: string }).asset_class || 'residential';
+        if (ac !== selectedAssetClass) return false;
+      }
       return true;
     });
-  }, [allProperties, searchId, selectedDistrict, selectedComplex, selectedProject, selectedType]);
+  }, [allProperties, searchId, selectedDistrict, selectedComplex, selectedProject, selectedType, selectedAssetClass]);
 
   // Split: active (main list) and inactive (separate "archived" section)
   const activeProperties = useMemo(() => filteredProperties.filter(p => p.is_active), [filteredProperties]);
   const inactiveProperties = useMemo(() => filteredProperties.filter(p => !p.is_active), [filteredProperties]);
 
-  const hasActiveFilters = !!(searchId || selectedDistrict || selectedComplex || selectedProject || selectedType);
+  const hasActiveFilters = !!(searchId || selectedDistrict || selectedComplex || selectedProject || selectedType || selectedAssetClass !== 'all');
 
   const clearFilters = () => {
     setSearchId('');
@@ -180,6 +185,7 @@ const queryClient = useQueryClient();
     setSelectedComplex(null);
     setSelectedProject(null);
     setSelectedType(null);
+    setSelectedAssetClass('all');
   };
 
   // --- Selection helpers ---
@@ -417,6 +423,21 @@ const queryClient = useQueryClient();
 
           {showFilters && (
             <div className="space-y-2">
+              <FilterRow label={isRu ? 'Класс объекта' : 'Asset Class'}>
+                {([
+                  { id: 'all', en: 'All', ru: 'Все' },
+                  { id: 'residential', en: 'Residential', ru: 'Жилая' },
+                  { id: 'commercial', en: 'Commercial', ru: 'Коммерческая' },
+                  { id: 'land', en: 'Land', ru: 'Земля' },
+                ] as const).map((ac) => (
+                  <FilterChip
+                    key={ac.id}
+                    label={isRu ? ac.ru : ac.en}
+                    active={selectedAssetClass === ac.id}
+                    onClick={() => setSelectedAssetClass(ac.id)}
+                  />
+                ))}
+              </FilterRow>
               {districts.length > 0 && (
                 <FilterRow label={isRu ? 'Район' : 'District'}>
                   {districts.map(d => (
