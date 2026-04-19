@@ -47,8 +47,8 @@ const TABS: TabConfig[] = [
   },
   {
     id: 'rent_long',
-    labelEn: 'Long-term',
-    labelRu: 'Долгосрок',
+    labelEn: 'Monthly',
+    labelRu: 'На месяц',
     icon: CalendarRange,
     path: `${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=long`,
   },
@@ -61,7 +61,7 @@ const TABS: TabConfig[] = [
   },
   {
     id: 'newbuild',
-    labelEn: 'New Build',
+    labelEn: 'New',
     labelRu: 'Новостройки',
     icon: Building2,
     path: APP_ROUTES.OFFPLAN,
@@ -76,7 +76,7 @@ const TABS: TabConfig[] = [
   {
     id: 'commercial',
     labelEn: 'Commercial',
-    labelRu: 'Коммерческая',
+    labelRu: 'Коммерция',
     icon: Briefcase,
     path: APP_ROUTES.COMMERCIAL,
     personaGated: ['business', 'investor'],
@@ -99,8 +99,8 @@ const TABS: TabConfig[] = [
   },
   {
     id: 'my',
-    labelEn: 'My Property',
-    labelRu: 'Мои объекты',
+    labelEn: 'My',
+    labelRu: 'Мои',
     icon: User,
     path: '/property/my',
     authOnly: true,
@@ -210,7 +210,7 @@ export function PropertyHubTabs() {
   );
 
   return (
-    <div className="flex gap-1 overflow-x-auto scrollbar-hide px-4 py-2 bg-background border-b border-border/50">
+    <div className="flex gap-1.5 overflow-x-auto scrollbar-hide px-3 py-2 bg-background border-b border-border/50 snap-x snap-mandatory">
       {visibleTabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = activeTab === tab.id;
@@ -221,14 +221,14 @@ export function PropertyHubTabs() {
             type="button"
             onClick={() => navigate(tab.path)}
             className={cn(
-              'flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all',
+              'shrink-0 snap-start inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] sm:text-sm font-medium whitespace-nowrap transition-all leading-none',
               isActive
                 ? 'bg-primary text-primary-foreground shadow-sm'
                 : 'text-muted-foreground hover:bg-muted hover:text-foreground'
             )}
           >
-            <Icon className="w-4 h-4 shrink-0" />
-            {isRu ? tab.labelRu : tab.labelEn}
+            <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+            <span className="truncate">{isRu ? tab.labelRu : tab.labelEn}</span>
             {isPro && (
               <span
                 className={cn(
