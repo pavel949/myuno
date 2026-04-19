@@ -13409,6 +13409,93 @@ export type Database = {
         }
         Relationships: []
       }
+      owner_statement_approvals: {
+        Row: {
+          comment: string | null
+          company_id: string
+          created_at: string
+          currency: string | null
+          expires_at: string | null
+          id: string
+          net_amount: number | null
+          owner_user_id: string
+          payout_id: string | null
+          period_end: string
+          period_start: string
+          property_id: string
+          rejected_at: string | null
+          rejection_reason: string | null
+          signature_image_url: string | null
+          signed_at: string | null
+          signer_ip: string | null
+          signer_user_agent: string | null
+          statement_url: string | null
+          status: Database["public"]["Enums"]["statement_approval_status"]
+          updated_at: string
+        }
+        Insert: {
+          comment?: string | null
+          company_id: string
+          created_at?: string
+          currency?: string | null
+          expires_at?: string | null
+          id?: string
+          net_amount?: number | null
+          owner_user_id: string
+          payout_id?: string | null
+          period_end: string
+          period_start: string
+          property_id: string
+          rejected_at?: string | null
+          rejection_reason?: string | null
+          signature_image_url?: string | null
+          signed_at?: string | null
+          signer_ip?: string | null
+          signer_user_agent?: string | null
+          statement_url?: string | null
+          status?: Database["public"]["Enums"]["statement_approval_status"]
+          updated_at?: string
+        }
+        Update: {
+          comment?: string | null
+          company_id?: string
+          created_at?: string
+          currency?: string | null
+          expires_at?: string | null
+          id?: string
+          net_amount?: number | null
+          owner_user_id?: string
+          payout_id?: string | null
+          period_end?: string
+          period_start?: string
+          property_id?: string
+          rejected_at?: string | null
+          rejection_reason?: string | null
+          signature_image_url?: string | null
+          signed_at?: string | null
+          signer_ip?: string | null
+          signer_user_agent?: string | null
+          statement_url?: string | null
+          status?: Database["public"]["Enums"]["statement_approval_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "owner_statement_approvals_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_statement_approvals_payout_id_fkey"
+            columns: ["payout_id"]
+            isOneToOne: false
+            referencedRelation: "owner_payouts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       owner_vault_files: {
         Row: {
           created_at: string
@@ -21513,6 +21600,157 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      signature_request_signers: {
+        Row: {
+          access_token: string | null
+          created_at: string
+          decline_reason: string | null
+          declined_at: string | null
+          id: string
+          notified_at: string | null
+          reminder_count: number | null
+          request_id: string
+          sign_order: number | null
+          signature_image_url: string | null
+          signed_at: string | null
+          signer_email: string | null
+          signer_ip: string | null
+          signer_name: string
+          signer_role: string | null
+          signer_user_agent: string | null
+          signer_user_id: string | null
+          status: Database["public"]["Enums"]["signer_status"]
+          updated_at: string
+        }
+        Insert: {
+          access_token?: string | null
+          created_at?: string
+          decline_reason?: string | null
+          declined_at?: string | null
+          id?: string
+          notified_at?: string | null
+          reminder_count?: number | null
+          request_id: string
+          sign_order?: number | null
+          signature_image_url?: string | null
+          signed_at?: string | null
+          signer_email?: string | null
+          signer_ip?: string | null
+          signer_name: string
+          signer_role?: string | null
+          signer_user_agent?: string | null
+          signer_user_id?: string | null
+          status?: Database["public"]["Enums"]["signer_status"]
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string | null
+          created_at?: string
+          decline_reason?: string | null
+          declined_at?: string | null
+          id?: string
+          notified_at?: string | null
+          reminder_count?: number | null
+          request_id?: string
+          sign_order?: number | null
+          signature_image_url?: string | null
+          signed_at?: string | null
+          signer_email?: string | null
+          signer_ip?: string | null
+          signer_name?: string
+          signer_role?: string | null
+          signer_user_agent?: string | null
+          signer_user_id?: string | null
+          status?: Database["public"]["Enums"]["signer_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signature_request_signers_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "signature_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      signature_requests: {
+        Row: {
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          company_id: string
+          completed_at: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          document_type: string | null
+          document_url: string
+          expires_at: string | null
+          id: string
+          metadata: Json | null
+          related_entity_id: string | null
+          related_entity_type: string | null
+          related_property_id: string | null
+          sent_at: string | null
+          signed_document_url: string | null
+          status: Database["public"]["Enums"]["signature_request_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          company_id: string
+          completed_at?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          document_type?: string | null
+          document_url: string
+          expires_at?: string | null
+          id?: string
+          metadata?: Json | null
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          related_property_id?: string | null
+          sent_at?: string | null
+          signed_document_url?: string | null
+          status?: Database["public"]["Enums"]["signature_request_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          company_id?: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          document_type?: string | null
+          document_url?: string
+          expires_at?: string | null
+          id?: string
+          metadata?: Json | null
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          related_property_id?: string | null
+          sent_at?: string | null
+          signed_document_url?: string | null
+          status?: Database["public"]["Enums"]["signature_request_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signature_requests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
             referencedColumns: ["id"]
           },
         ]
@@ -29764,6 +30002,16 @@ export type Database = {
         | "completed"
         | "failed"
         | "cancelled"
+      signature_request_status:
+        | "draft"
+        | "sent"
+        | "partially_signed"
+        | "completed"
+        | "declined"
+        | "expired"
+        | "cancelled"
+      signer_status: "pending" | "signed" | "declined"
+      statement_approval_status: "pending" | "approved" | "rejected" | "expired"
       tax_filing_status: "draft" | "calculated" | "filed" | "paid" | "overdue"
       tax_filing_type: "wht_3" | "vat_7" | "pnd_1" | "pnd_3" | "pnd_53" | "sbt"
       team_specialization:
@@ -30081,6 +30329,17 @@ export const Constants = {
         "failed",
         "cancelled",
       ],
+      signature_request_status: [
+        "draft",
+        "sent",
+        "partially_signed",
+        "completed",
+        "declined",
+        "expired",
+        "cancelled",
+      ],
+      signer_status: ["pending", "signed", "declined"],
+      statement_approval_status: ["pending", "approved", "rejected", "expired"],
       tax_filing_status: ["draft", "calculated", "filed", "paid", "overdue"],
       tax_filing_type: ["wht_3", "vat_7", "pnd_1", "pnd_3", "pnd_53", "sbt"],
       team_specialization: [
