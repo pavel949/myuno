@@ -513,6 +513,10 @@ export const DocumentsInsurancePage = lazy(() => import('@/pages/owner/Documents
 // OwnerReportsPage removed — functionality merged into ReportsPage
 export const AnalyticsPage = lazy(() => import('@/pages/owner/AnalyticsPage'));
 export const FinanceOverview = lazy(() => import('@/pages/owner/FinanceOverview'));
+export const OwnerPayoutsPage = lazy(() => import('@/pages/mc/finance/OwnerPayoutsPage'));
+export const ArAgingPage = lazy(() => import('@/pages/mc/finance/ArAgingPage'));
+export const TrustAccountsPage = lazy(() => import('@/pages/mc/finance/TrustAccountsPage'));
+export const TaxCenterPage = lazy(() => import('@/pages/mc/finance/TaxCenterPage'));
 export const OwnerOwnersPage = lazy(() => import('@/pages/owner/OwnerOwnersPage'));
 export const OwnerDetailPage = lazy(() => import('@/pages/owner/OwnerDetailPage'));
 export const CrmDashboardPage = lazy(() => import('@/pages/owner/CrmDashboardPage'));
