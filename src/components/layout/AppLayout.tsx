@@ -51,8 +51,10 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
         {showSituationBanner && <ActiveSituationBanner />}
 
         {/* PWA Install Banner — visible on all pages for mobile users */}
-        <div className={cn(ECOSYSTEM_PAGE_CONTAINER, "pt-2")}>
-          <InstallBanner />
+        <div className={cn(ECOSYSTEM_PAGE_CONTAINER, "empty:hidden [&>*:empty]:hidden has-[>*:empty]:hidden")} style={{ display: 'contents' }}>
+          <div className={cn(ECOSYSTEM_PAGE_CONTAINER)}>
+            <InstallBanner />
+          </div>
         </div>
         
         <main
