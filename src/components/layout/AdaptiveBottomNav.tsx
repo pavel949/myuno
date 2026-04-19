@@ -146,14 +146,14 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
           <div
             className="absolute inset-0"
             style={{
-              background: 'rgba(15,28,46,0.85)',
-              backdropFilter: 'blur(20px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-              borderTop: '1px solid rgba(255,255,255,0.07)',
+              background: 'rgba(8,16,30,0.96)',
+              backdropFilter: 'blur(24px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+              borderTop: '1px solid rgba(255,255,255,0.12)',
             }}
           />
 
-          <div className={cn("relative grid gap-0 h-[60px] px-2 max-w-[480px] mx-auto", gridCols)}>
+          <div className={cn("relative grid gap-0 h-[68px] px-2 max-w-[480px] mx-auto", gridCols)}>
             {leftItems.map(({ path, icon: Icon, labelEn, labelRu }) => {
               const active = isActive(path);
               const label = language === 'ru' ? labelRu : labelEn;
@@ -171,13 +171,13 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
                   )}
                   <div className={cn(
                     'transition-all duration-200',
-                    active ? 'text-primary scale-110' : 'text-muted-foreground',
+                    active ? 'text-primary scale-110' : 'text-white/75',
                   )}>
-                    <Icon className="w-[20px] h-[20px]" />
+                    <Icon className="w-[22px] h-[22px]" />
                   </div>
                   <span className={cn(
                     'text-[10px] leading-none',
-                    active ? 'font-semibold text-primary' : 'font-medium text-muted-foreground/60',
+                    active ? 'font-semibold text-primary' : 'font-medium text-white/85',
                   )}>
                     {label}
                   </span>
@@ -199,7 +199,7 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
                 >
                   <LayoutGrid className="w-5 h-5 text-primary" />
                 </div>
-                <span className="text-[10px] font-medium text-muted-foreground/60 leading-none">
+                <span className="text-[10px] font-medium text-white/85 leading-none">
                   {language === 'ru' ? 'Сервисы' : 'Apps'}
                 </span>
               </button>
@@ -222,13 +222,13 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
                   )}
                   <div className={cn(
                     'transition-all duration-200',
-                    active ? 'text-primary scale-110' : 'text-muted-foreground',
+                    active ? 'text-primary scale-110' : 'text-white/75',
                   )}>
-                    <Icon className="w-[20px] h-[20px]" />
+                    <Icon className="w-[22px] h-[22px]" />
                   </div>
                   <span className={cn(
                     'text-[10px] leading-none',
-                    active ? 'font-semibold text-primary' : 'font-medium text-muted-foreground/60',
+                    active ? 'font-semibold text-primary' : 'font-medium text-white/85',
                   )}>
                     {label}
                   </span>
