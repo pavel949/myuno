@@ -47,8 +47,8 @@ const TABS: TabConfig[] = [
   },
   {
     id: 'rent_long',
-    labelEn: 'Long-term',
-    labelRu: 'Долгосрок',
+    labelEn: 'Monthly',
+    labelRu: 'На месяц',
     icon: CalendarRange,
     path: `${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=long`,
   },
@@ -61,7 +61,7 @@ const TABS: TabConfig[] = [
   },
   {
     id: 'newbuild',
-    labelEn: 'New Build',
+    labelEn: 'New',
     labelRu: 'Новостройки',
     icon: Building2,
     path: APP_ROUTES.OFFPLAN,
@@ -76,7 +76,7 @@ const TABS: TabConfig[] = [
   {
     id: 'commercial',
     labelEn: 'Commercial',
-    labelRu: 'Коммерческая',
+    labelRu: 'Коммерция',
     icon: Briefcase,
     path: APP_ROUTES.COMMERCIAL,
     personaGated: ['business', 'investor'],
@@ -99,8 +99,8 @@ const TABS: TabConfig[] = [
   },
   {
     id: 'my',
-    labelEn: 'My Property',
-    labelRu: 'Мои объекты',
+    labelEn: 'My',
+    labelRu: 'Мои',
     icon: User,
     path: '/property/my',
     authOnly: true,
