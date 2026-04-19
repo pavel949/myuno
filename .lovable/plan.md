@@ -1,174 +1,142 @@
 
 
-## План: Финансовое планирование (Financial Planning) в MC → Финансы
+# Детальный аудит блока Управляющей компании (`/mc`) как мини-ERP для агентства недвижимости на Пхукете
 
-### Что уже есть
-- **Finance Overview** (`/owner/finance`) — обзор Net/Income/Expenses + KPI + bar-chart 6 мес
-- **Transactions** (`/owner/financials`) — реестр доходов/расходов
-- **Reports** (`/owner/reports`) — P&L, Owner Statement, Quarterly, Annual + Excel/PDF экспорт + email
-- **Budget** (`/owner/budget`) — план/факт по категориям, помесячно, **только 1 объект, 1 месяц**
-- **22+ категорий** (доходы 5 + расходы 17+) в `INCOME/EXPENSE_CATEGORIES`
-- **`property_budgets`** таблица: property_id, budget_month, category, transaction_type, planned_amount
-- **Excel экспорт** уже работает (ExcelJS lazy-loaded)
+## Методология оценки
 
-### Чего не хватает (для профессиональной финмодели)
-1. **Многомесячное планирование** (12 мес forward) — сейчас только 1 месяц
-2. **Драйверы аренды**: ADR, occupancy %, ночей доступно → автоматический расчёт revenue
-3. **Сценарии** (Base / Optimistic / Pessimistic) — для стресс-тестов
-4. **Уровень портфеля** — план для всего портфеля + drill-down
-5. **CapEx & амортизация** — планирование крупных расходов вне обычной OpEx
-6. **Cash flow** — отдельно от P&L (когда деньги придут/уйдут)
-7. **NOI / GOP / Cap Rate / Cash-on-Cash / DSCR / Break-even** — профессиональные метрики
-8. **Загрузка из шаблона / копирование с прошлого года** — для быстрого ввода
-9. **Multi-sheet Excel модель** — Inputs / Drivers / Monthly P&L / Cash Flow / KPI Dashboard
-10. **Tracking план vs факт по портфелю на дашборде**
+Система оценена по **12 критическим срезам ERP** для small-mid PM/RE агентства, со сравнением с лидерами (Guesty, Hostfully, Yardi, AppFolio, Argus, Pipedrive, Odoo Real Estate). Шкала 100 баллов в каждом срезе. Итоговая оценка = средневзвешенная.
 
 ---
 
-### Новый раздел: `/mc/finance/planning` — "Финансовое планирование"
+## Что уже работает хорошо (сильные стороны)
 
-**Точка входа:** добавить в Finance группу sidebar после "Budget":
-- `Financial Planning` / `Финансовое планирование` (icon `LineChart`, badge "Pro")
-
-#### Структура страницы — 5 вкладок
-
-**1. Обзор (Overview)**
-- Селекторы: Объект (или весь портфель) + Год (default — текущий)
-- 6 KPI карточек: Planned Revenue / Planned Expenses / Planned NOI / Cap Rate / Occupancy target / DSCR (если есть кредит)
-- Линейный график: План vs Факт по 12 месяцам (revenue + NOI)
-- Heatmap: занятость по месяцам (план vs факт)
-- Кнопки: "Создать модель", "Скопировать с прошлого года", "Загрузить шаблон", "Скачать Excel"
-
-**2. Драйверы (Drivers)** — основа модели
-Для каждого объекта/месяца:
-- ADR (средняя ставка) с месячной сезонностью
-- Occupancy % (целевая загрузка)
-- Available nights (по умолчанию = дни месяца)
-- → автоматический расчёт **Revenue = ADR × Occupancy × Nights**
-- Дополнительные доходы: cleaning fee per booking, доп. доходы (%)
-- Drag-handle для копирования значения по всем месяцам
-
-**3. P&L по месяцам (12-month P&L)** — Excel-like grid
-- Строки: категории доходов + категории расходов (использовать существующие `INCOME/EXPENSE_CATEGORIES`)
-- Колонки: 12 месяцев + Total + Avg/mo
-- Footer строки (вычисляемые): **Gross Revenue, Total OpEx, NOI, GOP %, EBITDA, Net Income**
-- Inline edit ячеек, автосохранение с debounce
-- Цветовая подсветка: расходы > плана (красный), revenue ниже плана (янтарный)
-
-**4. CapEx & Cash Flow**
-- Список крупных вложений (мебель, ремонт, оборудование) с месяцем платежа и амортизацией (lifespan лет)
-- Cash flow план: Operating CF + Investing CF + Financing CF (взносы по кредиту)
-- Опциональные поля: loan principal, interest rate, monthly payment → автоподтяжка в P&L
-- Метрики: **Cash-on-Cash Return, DSCR, Payback period**
-
-**5. Сценарии (Scenarios)**
-- 3 сценария: Base / Optimistic (+15% revenue, –5% costs) / Pessimistic (–20% revenue, +10% costs)
-- Side-by-side: NOI / Net Income / Cap Rate в каждом
-- Stress test: при какой загрузке выходим в 0 (break-even occupancy)
-- Sensitivity table: NOI vs ADR/Occupancy
+| Срез | Что есть | Оценка |
+|---|---|---|
+| **Архитектура и каркас** | Sidebar 9 групп, 50+ маршрутов, MCGuard, ActiveCompanyProvider с invalidate cache при смене MC, RBAC через `useTeamPermissions`, мобильная навигация + FAB + Command Palette (⌘K) | **88** |
+| **Multi-company изоляция** | Жёсткая изоляция через `activeCompanyId` на уровне хуков, переключатель компаний в header, server-resolved roles | **90** |
+| **Объекты (Properties)** | 920 LOC OwnerProperties + PropertyManage + Wizard + Editor + Setup + Guidebook + Portal Settings + Inventory + Juristic + Documents | **85** |
+| **Календарь & бронирования** | OwnerCalendar 259 LOC + MultiPropertyTimeline + AirbnbCalendarGrid + MCBookingsPage 461 LOC + BookingDetailSheet + iCal+OTA sync + ChannelHealth | **82** |
+| **CRM** | 9 модулей: Contacts (722) + ContactDetail (1152) + Sales Pipeline + Pipelines (kanban) + Deals + Tasks + Sequences + Quotes + Meetings + Workflows + Web Forms + Duplicates + Templates + Assignment Rules | **84** |
+| **Финансы (учёт)** | FinanceOverview + Transactions + Reports (5-step wizard, P&L, Owner Statement, Excel/PDF) + Budget + Invoices + Management Terms (revenue split, expense responsibility) | **78** |
+| **Финансовое планирование** | DCF, IRR/NPV, Monte Carlo, Sensitivity, Portfolio Rollup, AI Advisor (Gemini), Investor Deck PDF | **82** |
+| **Команда и доступы** | StaffPage 1008 LOC + permissions per module + activity log + onboarding sheet + role templates | **80** |
+| **Дистрибуция / каналы** | Rentals United стратегия + iCal sync + OTA (Booking.com/Airbnb/VRBO/Agoda) + Sync Timeline + ConflictResolver + ChannelHealth | **76** |
+| **Тарифы и pricing** | RateManagement 785 LOC: сезоны, multi-property, AI Pricing Suggestions, history через `property_activity_log` | **80** |
 
 ---
 
-### Технические компоненты
+## Где критические пробелы и боль (требует доработки)
 
-**База данных** (новая миграция):
-```sql
--- Расширить property_budgets для multi-month + сценариев
-ALTER TABLE property_budgets ADD COLUMN scenario text DEFAULT 'base'; -- base|optimistic|pessimistic
-ALTER TABLE property_budgets ADD COLUMN year int;
+### 🔴 Критические (блокируют операции агентства)
 
--- Новая таблица: финансовые модели (хранилище + driver inputs)
-CREATE TABLE property_financial_models (
-  id uuid PK,
-  property_id uuid (nullable — для портфельной модели),
-  company_id uuid,
-  owner_id uuid,
-  model_year int,
-  scenario text DEFAULT 'base',
-  drivers jsonb,        -- { months: [{ adr, occupancy, nights, ... }] }
-  capex jsonb,          -- [{ name, amount, month, lifespan_years, category }]
-  loans jsonb,          -- [{ principal, rate, term_months, monthly_payment }]
-  assumptions jsonb,    -- { tax_rate, mgmt_fee_pct, ... }
-  created_at, updated_at
-);
+| # | Пробел | Текущее | Лидер рынка | Приоритет |
+|---|---|---|---|---|
+| 1 | **Нет таблицы `owner_payouts`** — выплаты собственникам считаются в отчётах, но нет регистра выплат, статуса (pending/processed/paid), bank reference, batch payout runs | Только `vendor_payouts` для маркетплейса; `ManagementPortfolio` показывает только условия | Guesty/Hostfully: автогенерация owner statement → одной кнопкой batch payout через банк/Wise | **P0** |
+| 2 | **Нет AR/AP (дебиторка/кредиторка)** — нет агрегированного балансового отчёта по контрагентам, нет aging report (30/60/90 дней), invoices не агрегируются по получателю | InvoicesPage — плоский список без contact rollup | Odoo/QuickBooks: AR Aging обязателен для PM-агентства | **P0** |
+| 3 | **Отсутствует Trust Account / Escrow ledger** — депозиты гостей и owner funds должны храниться отдельно (требование Thai DBD для PM-агентств с >10 объектами) | `ledger_accounts` есть, но нет UI для escrow/trust segregation | AppFolio Trust Accounting — обязательная сертификация | **P0** |
+| 4 | **Нет Owner Portal с pull-механизмом** для собственников: отчёты есть в `/my-property`, но нет approval flow по statement, нет e-sign договоров, нет messaging owner ↔ MC | Portal есть, но read-only | Guesty: owner просматривает отчёт → одобряет → подпись → выплата | **P0** |
+| 5 | **Нет интеграции с Thai налоговой/withholding tax** (3% WHT, VAT 7%, PND 1/3/53) — нет генерации налоговых форм, нет автоматического расчёта в invoices | Поле currency/notes только | Региональная критика для Пхукета | **P0** |
 
--- RLS: owner_id или company member через has_company_membership()
-```
+### 🟡 Серьёзные (тормозят масштабирование)
 
-**Хуки** (`src/hooks/useFinancialPlanning.ts`):
-- `useFinancialModel(propertyId, year, scenario)` — fetch model
-- `useSaveFinancialModel()` — upsert + debounced autosave
-- `useFinancialModelComputed(model)` — derive monthly P&L, NOI, CF, KPIs
-- `usePlanVsActual(propertyId, year)` — сравнить с `property_financials`
+| # | Пробел | Приоритет |
+|---|---|---|
+| 6 | **Нет Document Vault с e-sign**: договоры с собственниками, гостями, вендорами хранятся, но нет workflow подписания (DocuSign/PandaDoc) | P1 |
+| 7 | **Нет workflow-движка для одобрений** (approval chains: расход >$X → апрув директора → бухгалтер → выплата) — есть Automation Rules, но без многоступенчатых approvals | P1 |
+| 8 | **Слабая аналитика владения**: нет cohort report по собственникам (LTV, churn, NPS), нет owner profitability ranking, нет automated owner anniversaries/risk alerts | P1 |
+| 9 | **Нет Resource Planning для команды**: нет shift schedule для уборщиц/maintenance, нет capacity planning, нет timesheet/payroll integration | P1 |
+| 10 | **Procurement / supply chain**: Inventory есть, но нет purchase orders, нет re-order automation от vendor, нет 3-way match (PO ↔ delivery ↔ invoice) | P1 |
+| 11 | **Slack/Teams/Telegram для команды**: уведомления в систему есть, но нет двусторонней интеграции с мессенджерами для оперативной работы | P1 |
+| 12 | **Mobile-first для линейного персонала**: уборщицы/maintenance не имеют упрощённого PWA-режима с QR-входом на объект, чек-листами и фото-отчётом | P1 |
 
-**Компоненты** (`src/components/owner/financial-planning/`):
-- `FinancialPlanningPage.tsx` — обёртка с табами
-- `PlanningOverview.tsx` — KPI cards + графики
-- `DriversGrid.tsx` — редактируемая таблица драйверов (12 мес)
-- `MonthlyPnLGrid.tsx` — Excel-like grid с inline edit
-- `CapExCashFlow.tsx` — CapEx список + cash flow waterfall
-- `ScenariosPanel.tsx` — side-by-side сравнение
-- `FinancialModelExportButton.tsx` — multi-sheet Excel
+### 🟢 Желательные (UX/scale)
 
-**Excel экспорт** (расширить `exportFinancialsExcel.ts`):
-Multi-sheet workbook:
-1. **Cover** — название объекта, период, версия модели, дата
-2. **Inputs & Drivers** — все драйверы (ADR, Occ, Nights, fees) — синие ячейки (input)
-3. **Monthly P&L** — формулы с ссылками на Drivers (`=Drivers!B5*Drivers!B6*Drivers!B7`)
-4. **Cash Flow** — operating/investing/financing
-5. **CapEx Schedule** — амортизация по годам
-6. **KPI Dashboard** — NOI, Cap Rate, Cash-on-Cash, DSCR, Break-even
-7. **Scenarios** — Base/Opt/Pess в трёх колонках
-- Цветовая схема: blue для inputs, black для формул, green для cross-sheet links
-- Числа: `#,##0` (THB), проценты `0.0%`, multiples `0.0x`
-
-**Routes** (`src/lib/config/routes.ts`):
-```ts
-MC_FINANCE_PLANNING: '/owner/finance/planning',
-```
-
-**Sidebar** (`MCSidebar.tsx`): добавить пункт после "Budget".
-
-**Адаптивность:**
-- Mobile (<640px): таблицы в "card view" (1 месяц = 1 свёрнутая карточка), горизонтальный скролл с sticky первой колонки
-- Tablet (640–1024): grid 6 месяцев + scroll
-- Desktop: вся 12-month grid + правая панель KPI
-
-**i18n**: `propertyHub.planning.*` keys (RU/EN).
-
-**Версия:** `appVersion.ts` → `3.42.0`.
+| # | Пробел | Приоритет |
+|---|---|---|
+| 13 | **Global search ⌘K** уже есть — но не покрывает финансовые транзакции, инвойсы, документы | P2 |
+| 14 | **Saved views/filters** в списках бронирований, контактов, сделок, задач (как в Notion/Linear) | P2 |
+| 15 | **Bulk actions** есть в SalesPipeline, но отсутствуют в Bookings/Contacts/Invoices/Tasks (массовые статусы, экспорт, теги) | P2 |
+| 16 | **API / Zapier / Webhooks для UC** — нет публичного API для интеграций с банками, бухгалтерией, BI | P2 |
+| 17 | **White-label storefront `/b/:slug`** существует, но нет full white-label настроек MC (свой домен, email-from, логотип в email/PDF) | P2 |
+| 18 | **Onboarding в первый день** для новой MC: нет 7-step wizard "соберём вашу компанию за 30 минут" | P2 |
+| 19 | **Sitemap/Information Architecture**: 9 групп с 50+ ссылками — нужен поиск по меню и "рекомендованные действия" в каждой группе | P2 |
+| 20 | **Performance**: 233 компонента в `src/components/owner/`, 100+ страниц — нет page-level метрик (TTI, LCP) для MC, нет route-level chunking аудита | P2 |
 
 ---
 
-### Файлы
+## Итоговая оценка
 
-**Create:**
-- `src/pages/owner/FinancialPlanning.tsx` (route page с табами)
-- `src/components/owner/financial-planning/PlanningOverview.tsx`
-- `src/components/owner/financial-planning/DriversGrid.tsx`
-- `src/components/owner/financial-planning/MonthlyPnLGrid.tsx`
-- `src/components/owner/financial-planning/CapExCashFlow.tsx`
-- `src/components/owner/financial-planning/ScenariosPanel.tsx`
-- `src/hooks/useFinancialPlanning.ts`
-- `src/lib/finance/financialModelMath.ts` — чистые функции расчётов (NOI, DSCR, Cap Rate, break-even)
-- `src/utils/exportFinancialModelExcel.ts` — multi-sheet модель
+| Срез ERP-системы | Балл (из 100) |
+|---|---|
+| 1. Архитектура и навигация | 86 |
+| 2. RBAC и multi-tenancy | 88 |
+| 3. Property management (объекты) | 84 |
+| 4. Booking & calendar | 80 |
+| 5. CRM & sales pipeline | 84 |
+| 6. Financial accounting (учёт) | **62** ← AR/AP, owner payouts |
+| 7. Financial planning (DCF/IRR) | 82 |
+| 8. Reporting & BI | 75 |
+| 9. Channel manager / distribution | 76 |
+| 10. Team / HR / payroll | **55** ← нет shifts/timesheets |
+| 11. Document & e-sign | **35** ← нет workflow подписания |
+| 12. Compliance (Thai WHT/VAT/Trust) | **30** ← критично |
 
-**Modify:**
-- `src/components/mc/MCSidebar.tsx` — пункт Financial Planning
-- `src/lib/config/routes.ts` — `MC_FINANCE_PLANNING`
-- `src/components/layout/AnimatedRoutes.tsx` + `pageRegistry.ts` — регистрация route
-- `src/pages/owner/FinanceOverview.tsx` — карточка "Financial Planning" в quick links
-- `src/i18n/en.ts`, `src/i18n/ru.ts` — keys
-- `src/lib/appVersion.ts` → 3.42.0
+### **Итоговая взвешенная оценка: 71 / 100**
 
-**Migration:**
-- ALTER `property_budgets` (scenario, year)
-- CREATE `property_financial_models` + RLS
+**Вердикт:** **сильный operational MVP** уровня Hostfully Lite — закрывает ~70% потребностей небольшого агентства Пхукета (5–30 объектов), но **5 критических P0-блоков** мешают позиционироваться как "полноценная мини-ERP с устойчивым масштабированием":
+- Нет owner payouts регистра
+- Нет AR/AP aging
+- Нет Trust Account для соответствия Thai DBD
+- Нет full 2-way Owner Portal с approvals
+- Нет Thai tax compliance (WHT/VAT/PND)
 
-### Подход к реализации (фазы)
-1. **Фаза А — Каркас + Drivers + P&L Grid + Excel export** (минимально жизнеспособная финмодель)
-2. **Фаза Б — Scenarios + CapEx + Cash Flow** (профессиональный уровень)
-3. **Фаза В — Plan vs Actual tracking + Portfolio rollup** (отслеживание исполнения)
+---
 
-Начну с Фазы А — она уже даёт работающую модель с экспортом. После твоего ОК продолжу Б и В в той же сессии.
+## Roadmap → 90/100 (предлагаемый план поэтапной реализации)
+
+**Фаза 1 — Финансовая полноценность (P0)** — выводит до **82/100**
+1. Создать `owner_payouts` (миграция + UI + batch run + Wise/bank ref)
+2. AR/AP Aging Dashboard (30/60/90 по контрагентам, цветовая шкала, drill-down)
+3. Trust Account UI (escrow segregation в `ledger_accounts` + сводка балансов)
+4. Thai Tax Engine: автоматический WHT 3%, VAT 7%, PND 1/3/53 в invoices/payouts + квартальные отчёты
+
+**Фаза 2 — Owner Portal v2 (P0)** — выводит до **86/100**
+5. Owner statement approval flow + signature (HTML drawing)
+6. 2-way messaging owner ↔ MC внутри `/my-property`
+7. e-Sign workflow для договоров (drawing signature → PDF lock → audit trail)
+
+**Фаза 3 — Operational excellence (P1)** — выводит до **90/100**
+8. Approval chains (workflow для расходов/закупок/контрактов)
+9. Team shifts + timesheets + simplified mobile PWA для cleaners/maintenance с QR-входом
+10. Procurement: PO → Delivery → Invoice (3-way match)
+11. Owner cohort analytics (LTV, churn, satisfaction, profitability)
+
+---
+
+## Технические детали реализации
+
+**База данных:**
+- `owner_payouts` (id, owner_id, mc_id, period_start/end, gross, commission, expenses, net, status enum, bank_ref, paid_at, statement_url)
+- `payout_runs` (batch processing)
+- `ar_aging_view` (computed view: 0-30/31-60/61-90/90+)
+- `trust_accounts` (segregated balances)
+- `tax_filings` (WHT/VAT/PND records)
+- `signature_requests` (e-sign workflow)
+- `approval_workflows` + `approval_steps`
+
+**Edge functions (новые):**
+- `process-owner-payout-batch` (Wise API integration)
+- `generate-thai-tax-report`
+- `request-signature` (drawing-based, без DocuSign)
+
+**UI (новые страницы):**
+- `/mc/finance/owner-payouts`
+- `/mc/finance/ar-aging`
+- `/mc/finance/trust-accounts`
+- `/mc/finance/tax-center`
+- `/mc/team/shifts`
+- `/mc/documents/signatures`
+- `/mc/approvals`
+
+**Подход:** реализовать поэтапно, каждая фаза = 1–2 сессии. Начать с Фазы 1 (финансы P0) как наибольший gap-to-leaders.
 
