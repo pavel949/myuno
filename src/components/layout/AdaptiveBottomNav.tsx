@@ -199,7 +199,7 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
                 >
                   <LayoutGrid className="w-5 h-5 text-primary" />
                 </div>
-                <span className="text-[10px] font-medium text-muted-foreground/60 leading-none">
+                <span className="text-[10px] font-medium text-white/85 leading-none">
                   {language === 'ru' ? 'Сервисы' : 'Apps'}
                 </span>
               </button>
