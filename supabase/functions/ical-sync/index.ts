@@ -148,33 +148,62 @@ async function upsertBookingForEvent(
       .update(bookingData)
       .eq('id', existingBookingId);
     if (error) {
+      // Exclusion violation: overlap with another active booking
+      if (error.code === '23P01') {
+        console.warn(`Overlap on update for ${event.uid}; logging conflict`);
+        await supabase.from('booking_conflicts').insert({
+          property_id: calendar.property_id,
+          conflict_date: event.dtstart,
+          channel_a: channel,
+          channel_b: 'unknown',
+          order_id_a: null,
+          order_id_b: null,
+          resolved: false,
+        });
+        return null;
+      }
       console.error('Update booking error:', error.message);
       return null;
     }
     return existingBookingId;
   }
 
-  const { data: inserted, error } = await supabase
+  // Upsert by (property_id, external_id) — matches the unique index for ical source
+  const { data: upserted, error } = await supabase
     .from('property_bookings')
-    .insert(bookingData)
+    .upsert(bookingData, { onConflict: 'property_id,external_id', ignoreDuplicates: false })
     .select('id')
     .single();
 
   if (error) {
-    // Race-safe: if external_id already exists, fetch it
+    // Exclusion violation: this event overlaps another active booking
+    if (error.code === '23P01') {
+      console.warn(`Overlap detected for event ${event.uid} on property ${calendar.property_id}; logging conflict`);
+      await supabase.from('booking_conflicts').insert({
+        property_id: calendar.property_id,
+        conflict_date: event.dtstart,
+        channel_a: channel,
+        channel_b: 'unknown',
+        order_id_a: null,
+        order_id_b: null,
+        resolved: false,
+      });
+      return null;
+    }
+    // Race-safe fallback for unique constraint
     if (error.code === '23505') {
       const { data: existing } = await supabase
         .from('property_bookings')
         .select('id')
+        .eq('property_id', calendar.property_id)
         .eq('external_id', event.uid)
-        .eq('source_calendar_id', calendar.id)
         .maybeSingle();
       return existing?.id ?? null;
     }
-    console.error('Insert booking error:', error.message);
+    console.error('Upsert booking error:', error.message);
     return null;
   }
-  return inserted.id;
+  return upserted.id;
 }
 
 Deno.serve(async (req) => {
