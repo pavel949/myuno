@@ -8184,6 +8184,132 @@ export type Database = {
         }
         Relationships: []
       }
+      investment_deals: {
+        Row: {
+          admin_notes: string | null
+          capital_range: Database["public"]["Enums"]["capital_range"]
+          capital_sought_usd_max: number | null
+          capital_sought_usd_min: number | null
+          category: string
+          created_at: string
+          deal_intent: Database["public"]["Enums"]["deal_intent"]
+          deal_size_midpoint_usd: number | null
+          deal_stage: Database["public"]["Enums"]["deal_stage"] | null
+          deal_structure: string | null
+          description_private: string | null
+          description_public: string | null
+          documents_urls: Json
+          expected_irr: number | null
+          expected_value_usd: number | null
+          id: string
+          is_published: boolean
+          linked_business_id: string | null
+          linked_developer_id: string | null
+          linked_property_id: string | null
+          location_display: string | null
+          location_full: string | null
+          platform_fee_estimate_usd: number | null
+          platform_fee_rate: number
+          probability_score: number
+          published_at: string | null
+          source: string | null
+          status: Database["public"]["Enums"]["deal_pipeline_status"]
+          submitter_company: string | null
+          submitter_email: string
+          submitter_name: string
+          submitter_role: string | null
+          submitter_telegram: string | null
+          submitter_user_id: string | null
+          submitter_whatsapp: string | null
+          target_timeline_months: number | null
+          teaser_public: string | null
+          title_private: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          capital_range: Database["public"]["Enums"]["capital_range"]
+          capital_sought_usd_max?: number | null
+          capital_sought_usd_min?: number | null
+          category: string
+          created_at?: string
+          deal_intent: Database["public"]["Enums"]["deal_intent"]
+          deal_size_midpoint_usd?: number | null
+          deal_stage?: Database["public"]["Enums"]["deal_stage"] | null
+          deal_structure?: string | null
+          description_private?: string | null
+          description_public?: string | null
+          documents_urls?: Json
+          expected_irr?: number | null
+          expected_value_usd?: number | null
+          id?: string
+          is_published?: boolean
+          linked_business_id?: string | null
+          linked_developer_id?: string | null
+          linked_property_id?: string | null
+          location_display?: string | null
+          location_full?: string | null
+          platform_fee_estimate_usd?: number | null
+          platform_fee_rate?: number
+          probability_score?: number
+          published_at?: string | null
+          source?: string | null
+          status?: Database["public"]["Enums"]["deal_pipeline_status"]
+          submitter_company?: string | null
+          submitter_email: string
+          submitter_name: string
+          submitter_role?: string | null
+          submitter_telegram?: string | null
+          submitter_user_id?: string | null
+          submitter_whatsapp?: string | null
+          target_timeline_months?: number | null
+          teaser_public?: string | null
+          title_private: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          capital_range?: Database["public"]["Enums"]["capital_range"]
+          capital_sought_usd_max?: number | null
+          capital_sought_usd_min?: number | null
+          category?: string
+          created_at?: string
+          deal_intent?: Database["public"]["Enums"]["deal_intent"]
+          deal_size_midpoint_usd?: number | null
+          deal_stage?: Database["public"]["Enums"]["deal_stage"] | null
+          deal_structure?: string | null
+          description_private?: string | null
+          description_public?: string | null
+          documents_urls?: Json
+          expected_irr?: number | null
+          expected_value_usd?: number | null
+          id?: string
+          is_published?: boolean
+          linked_business_id?: string | null
+          linked_developer_id?: string | null
+          linked_property_id?: string | null
+          location_display?: string | null
+          location_full?: string | null
+          platform_fee_estimate_usd?: number | null
+          platform_fee_rate?: number
+          probability_score?: number
+          published_at?: string | null
+          source?: string | null
+          status?: Database["public"]["Enums"]["deal_pipeline_status"]
+          submitter_company?: string | null
+          submitter_email?: string
+          submitter_name?: string
+          submitter_role?: string | null
+          submitter_telegram?: string | null
+          submitter_user_id?: string | null
+          submitter_whatsapp?: string | null
+          target_timeline_months?: number | null
+          teaser_public?: string | null
+          title_private?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       investment_interests: {
         Row: {
           admin_notes: string | null
@@ -8394,6 +8520,66 @@ export type Database = {
             columns: ["property_project_id"]
             isOneToOne: false
             referencedRelation: "property_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      investor_inquiries: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          deal_id: string
+          id: string
+          inquirer_user_id: string | null
+          investment_capacity_usd: number | null
+          investor_email: string
+          investor_name: string
+          investor_type: Database["public"]["Enums"]["investor_type"]
+          investor_whatsapp: string | null
+          message: string | null
+          status: Database["public"]["Enums"]["inquiry_status"]
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          deal_id: string
+          id?: string
+          inquirer_user_id?: string | null
+          investment_capacity_usd?: number | null
+          investor_email: string
+          investor_name: string
+          investor_type?: Database["public"]["Enums"]["investor_type"]
+          investor_whatsapp?: string | null
+          message?: string | null
+          status?: Database["public"]["Enums"]["inquiry_status"]
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          deal_id?: string
+          id?: string
+          inquirer_user_id?: string | null
+          investment_capacity_usd?: number | null
+          investor_email?: string
+          investor_name?: string
+          investor_type?: Database["public"]["Enums"]["investor_type"]
+          investor_whatsapp?: string | null
+          message?: string | null
+          status?: Database["public"]["Enums"]["inquiry_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "investor_inquiries_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "investment_deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "investor_inquiries_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "v_investment_deals_public"
             referencedColumns: ["id"]
           },
         ]
@@ -27986,6 +28172,63 @@ export type Database = {
         }
         Relationships: []
       }
+      v_investment_deals_public: {
+        Row: {
+          capital_range: Database["public"]["Enums"]["capital_range"] | null
+          category: string | null
+          created_at: string | null
+          deal_intent: Database["public"]["Enums"]["deal_intent"] | null
+          deal_size_midpoint_usd: number | null
+          deal_stage: Database["public"]["Enums"]["deal_stage"] | null
+          deal_structure: string | null
+          description_public: string | null
+          expected_irr: number | null
+          id: string | null
+          linked_developer_id: string | null
+          linked_property_id: string | null
+          location_display: string | null
+          published_at: string | null
+          target_timeline_months: number | null
+          teaser_public: string | null
+        }
+        Insert: {
+          capital_range?: Database["public"]["Enums"]["capital_range"] | null
+          category?: string | null
+          created_at?: string | null
+          deal_intent?: Database["public"]["Enums"]["deal_intent"] | null
+          deal_size_midpoint_usd?: number | null
+          deal_stage?: Database["public"]["Enums"]["deal_stage"] | null
+          deal_structure?: string | null
+          description_public?: string | null
+          expected_irr?: number | null
+          id?: string | null
+          linked_developer_id?: string | null
+          linked_property_id?: string | null
+          location_display?: string | null
+          published_at?: string | null
+          target_timeline_months?: number | null
+          teaser_public?: string | null
+        }
+        Update: {
+          capital_range?: Database["public"]["Enums"]["capital_range"] | null
+          category?: string | null
+          created_at?: string | null
+          deal_intent?: Database["public"]["Enums"]["deal_intent"] | null
+          deal_size_midpoint_usd?: number | null
+          deal_stage?: Database["public"]["Enums"]["deal_stage"] | null
+          deal_structure?: string | null
+          description_public?: string | null
+          expected_irr?: number | null
+          id?: string | null
+          linked_developer_id?: string | null
+          linked_property_id?: string | null
+          location_display?: string | null
+          published_at?: string | null
+          target_timeline_months?: number | null
+          teaser_public?: string | null
+        }
+        Relationships: []
+      }
       v_marketplace_listings: {
         Row: {
           amenities: string[] | null
@@ -30052,6 +30295,12 @@ export type Database = {
         | "food"
         | "tour"
         | "medical"
+      capital_range:
+        | "sub_100k"
+        | "100k_500k"
+        | "500k_2m"
+        | "2m_10m"
+        | "10m_plus"
       crm_document_type:
         | "passport"
         | "id_card"
@@ -30068,7 +30317,31 @@ export type Database = {
         | "photo"
         | "screenshot"
         | "other"
+      deal_intent:
+        | "raise_capital"
+        | "find_buyer"
+        | "find_partner"
+        | "pitch_idea"
+        | "business_sale"
+        | "other"
+      deal_pipeline_status:
+        | "submitted"
+        | "under_review"
+        | "anonymized"
+        | "published"
+        | "interest_received"
+        | "matched"
+        | "term_sheet"
+        | "closed"
+        | "dead"
+      deal_stage:
+        | "idea"
+        | "pre_revenue"
+        | "operating"
+        | "profitable"
+        | "exiting"
       education_entity_type: "institution" | "individual"
+      inquiry_status: "new" | "contacted" | "qualified" | "matched" | "declined"
       intent_status:
         | "pending"
         | "processing"
@@ -30076,6 +30349,12 @@ export type Database = {
         | "failed"
         | "cancelled"
         | "refunded"
+      investor_type:
+        | "individual"
+        | "family_office"
+        | "fund"
+        | "corporate"
+        | "other"
       invoice_status: "draft" | "sent" | "paid" | "overdue" | "cancelled"
       invoice_type: "tenant_billing" | "owner_report" | "service_fee"
       item_condition: "new" | "like_new" | "good" | "fair" | "for_parts"
@@ -30311,6 +30590,7 @@ export const Constants = {
         "tour",
         "medical",
       ],
+      capital_range: ["sub_100k", "100k_500k", "500k_2m", "2m_10m", "10m_plus"],
       crm_document_type: [
         "passport",
         "id_card",
@@ -30328,7 +30608,28 @@ export const Constants = {
         "screenshot",
         "other",
       ],
+      deal_intent: [
+        "raise_capital",
+        "find_buyer",
+        "find_partner",
+        "pitch_idea",
+        "business_sale",
+        "other",
+      ],
+      deal_pipeline_status: [
+        "submitted",
+        "under_review",
+        "anonymized",
+        "published",
+        "interest_received",
+        "matched",
+        "term_sheet",
+        "closed",
+        "dead",
+      ],
+      deal_stage: ["idea", "pre_revenue", "operating", "profitable", "exiting"],
       education_entity_type: ["institution", "individual"],
+      inquiry_status: ["new", "contacted", "qualified", "matched", "declined"],
       intent_status: [
         "pending",
         "processing",
@@ -30336,6 +30637,13 @@ export const Constants = {
         "failed",
         "cancelled",
         "refunded",
+      ],
+      investor_type: [
+        "individual",
+        "family_office",
+        "fund",
+        "corporate",
+        "other",
       ],
       invoice_status: ["draft", "sent", "paid", "overdue", "cancelled"],
       invoice_type: ["tenant_billing", "owner_report", "service_fee"],
