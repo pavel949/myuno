@@ -3,6 +3,9 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { usePropertyBookings, PropertyBooking } from '@/hooks/usePropertyBookings';
 import { useOperationalTasks, OperationalTask } from '@/hooks/useOperationalTasks';
 import { usePropertyAvailabilityManagement } from '@/hooks/usePropertyAvailabilityManagement';
+import { usePropertyRentalTerms } from '@/hooks/usePropertyAvailability';
+import { usePropertyRateSeasons } from '@/hooks/usePropertyRateSeasons';
+import { buildPricingRulesFromSeasons, getEffectiveNightlyRate } from '@/lib/pricingEngine';
 import { CalendarDayEventsSheet } from './CalendarDayEventsSheet';
 import { CreateServiceTaskDialog } from './CreateServiceTaskDialog';
 import { AddBookingFromCalendarDialog } from './AddBookingFromCalendarDialog';
@@ -43,6 +46,25 @@ export function AirbnbCalendarGrid({ propertyId, properties = [] }: AirbnbCalend
   const { bookings, getBookingForDate } = usePropertyBookings(propertyId);
   const { tasks, completeTask } = useOperationalTasks({ propertyId });
   const { availability } = usePropertyAvailabilityManagement(propertyId);
+  const { data: rentalTerms } = usePropertyRentalTerms(propertyId);
+  const { data: rateSeasons } = usePropertyRateSeasons(propertyId);
+
+  const basePrice = rentalTerms?.price_per_night ?? 0;
+  const seasonalPricing = useMemo(() => {
+    if (!rateSeasons?.length || !basePrice) return undefined;
+    const rules = buildPricingRulesFromSeasons(
+      { price_per_night: basePrice },
+      rateSeasons,
+    );
+    return rules.seasonalPricing;
+  }, [rateSeasons, basePrice]);
+
+  const formatPriceShort = useCallback((price: number) => {
+    if (!price) return '';
+    return price >= 1000
+      ? `${(price / 1000).toFixed(price % 1000 === 0 ? 0 : 1)}k`
+      : String(price);
+  }, []);
 
   // Build weeks for the grid
   const weeks = useMemo(() => {
