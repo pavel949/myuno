@@ -1,121 +1,107 @@
 
-# План D: максимальная безопасная чистка БД (359 → ~300)
 
-## Цель
-Уменьшить количество таблиц с **359 до ~300** в три фазы. Каждая фаза независимо безопасна, имеет откат, и не требует переписывания работающих фич.
+# План: индексы + materialized views + Telegram-алерты сверки
 
-## Фаза 1 — Удалить полностью мёртвые таблицы (12 шт., 0 риска)
+## 1. Индексы на горячие колонки (миграция)
 
-Таблицы с **нулевыми ссылками в коде** (даже в Edge Functions):
-- `juristic_documents` — 0 ref
-- `crm_score_log` — 0 ref
-- `cohort_analytics`, `marketplace_product_attributes` (упоминаются только в типах)
-- `experience_media`, `category_suggestions` — 1 ref каждая, в неиспользуемом коде
+Анализ существующих показал что **большинство hot-колонок уже индексированы**, но есть пробелы. Добавлю только реально отсутствующие/полезные:
 
-**Действие:** `DROP TABLE IF EXISTS ... CASCADE` в одной миграции.
+```sql
+-- orders: нет составного индекса по статусу+дате (используется в дашбордах + reconciliation)
+CREATE INDEX IF NOT EXISTS idx_orders_status_created
+  ON public.orders(status, created_at DESC);
 
----
+-- ledger_entries: нет индекса по order_id (критично для reconciliation IN-запроса)
+CREATE INDEX IF NOT EXISTS idx_ledger_entries_order_id
+  ON public.ledger_entries(order_id) WHERE order_id IS NOT NULL;
 
-## Фаза 2 — Удалить мёртвый код + связанные таблицы (~30 таблиц)
+-- ledger_entries: по дате для P&L отчётов
+CREATE INDEX IF NOT EXISTS idx_ledger_entries_account_date
+  ON public.ledger_entries(account_id, entry_date DESC);
 
-Найдено **~17 хуков**, которые **никогда не импортируются** из остального приложения:
-- `useCrmSequences`, `useCrmQuotes`, `useCrmMeetings`, `useCrmEmails`, `useCrmDocuments`, `useCrmCompanies`, `useCrmCustomFields`, `useCrmWebForms`, `useCrmWorkflows`, `useCrmTemplates` — 10 enterprise-CRM хуков
-- `useMCCAutomation`, `useMCCAnalytics`, `useMCCControlTower`, `useABVariants`, `useLandingRegistry`, `useCampaignFactory` — 6 marketing-cloud хуков
+-- payment_intents: по статусу+дате
+CREATE INDEX IF NOT EXISTS idx_payment_intents_status_created
+  ON public.payment_intents(status, created_at DESC);
 
-**Edge Functions для удаления** (нет триггеров, нет webhook-ссылок):
-- `execute-campaign-rules`, `execute-crm-workflow`, `submit-web-form`, `send-crm-email`
+-- property_bookings: по property_id + датам (calendar queries)
+CREATE INDEX IF NOT EXISTS idx_property_bookings_property_dates
+  ON public.property_bookings(property_id, check_in, check_out);
 
-**Связанные таблицы для DROP (после удаления кода):**
+-- property_financials: по property_id + дата (P&L)
+CREATE INDEX IF NOT EXISTS idx_property_financials_property_date
+  ON public.property_financials(property_id, entry_date DESC);
+
+-- property_operational_tasks: по статусу + дюдейту
+CREATE INDEX IF NOT EXISTS idx_prop_ops_tasks_status_due
+  ON public.property_operational_tasks(status, due_date)
+  WHERE status IN ('pending','in_progress');
+
+-- analytics_events: партиальный для горячих событий
+CREATE INDEX IF NOT EXISTS idx_analytics_events_user_created
+  ON public.analytics_events(user_id, created_at DESC) WHERE user_id IS NOT NULL;
+
+-- crm_contacts: по company_id + updated_at для пайплайна
+CREATE INDEX IF NOT EXISTS idx_crm_contacts_company_updated
+  ON public.crm_contacts(company_id, updated_at DESC);
 ```
-crm_workflows, crm_workflow_actions, crm_sequences, crm_sequence_steps,
-crm_sequence_enrollments, crm_quotes, crm_meetings, crm_emails, crm_documents,
-crm_companies, crm_custom_fields, crm_custom_field_values, crm_comm_templates,
-crm_scoring_rules, crm_web_forms, crm_web_form_submissions, crm_access_log,
 
-mcc_ab_tests, mcc_automation_rules, mcc_landing_events, mcc_user_states,
-mcc_state_history, mcc_creatives, mcc_channel_metrics, mcc_ai_recommendations,
-mcc_campaigns, mcc_campaign_rules
-```
+**Пропускаю** (уже есть): `agent_deals.*`, `crm_activities.contact_id+date`, `listings.vertical+active`, `bookings.user_id`.
 
-**Порядок работы:**
-1. Удалить хуки + Edge Functions
-2. Удалить пункты из `src/lib/untypedTables.ts` (строки 240-260)
-3. Удалить компоненты-сироты: `MCCContentLabTab.tsx` (если не подключён)
-4. Verify build → migration с `DROP TABLE`
+## 2. Materialized views для дашбордов
 
-**Риск:** низкий. Если что-то всё-таки используется — компиляция упадёт до миграции БД, легко откатить.
+Создам 3 MV для самых тяжёлых агрегаций:
 
----
+**`mv_finance_summary_daily`** — daily KPI для admin/finance:
+- orders_count, total_revenue, platform_fees, vendor_payouts по дням
+- Источник: `orders` + `ledger_entries`
 
-## Фаза 3 — Compat views для capital_*/deal_* (~13 таблиц)
+**`mv_portfolio_health_summary`** — для MC dashboard:
+- properties_count, active_listings, occupied_today, pending_tasks per company
+- Источник: `properties` + `property_bookings` + `property_operational_tasks`
 
-Таблицы `capital_*` (8 шт.) и `deal_*` (4 шт.) полностью **дублируют** `crm_contacts` + `crm_pipeline_stages` + `crm_activities`. Все данные пустые. Frontend ссылается через `untypedFrom` → можно безболезненно подменить на VIEW.
+**`mv_crm_pipeline_summary`** — funnel-метрики:
+- contacts_count, deals_by_stage, conversion_rate per company
+- Источник: `crm_contacts` + `agent_deals`
 
-**Маппинг:**
-| Старая таблица | Новый источник | Дискриминатор |
-|---|---|---|
-| `capital_contacts` | `crm_contacts` | `pipeline_kind='capital'` |
-| `capital_pipeline` | `crm_pipeline_stages` | `pipeline_id` ссылается на capital pipeline |
-| `capital_campaigns` | (drop, нет UI) | — |
-| `capital_intro_requests` | `crm_activities` | `activity_type='intro_request'` |
-| `capital_projects` | `listings` | `vertical='investment'` |
-| `deal_parties` | `order_participants` | — |
-| `deal_stage_history` | `crm_activities` | `activity_type='stage_change'` |
-| `deal_pipeline_stages` | `crm_pipeline_stages` | — |
-| `deal_scheduled_activities` | `crm_activities` | `scheduled_for IS NOT NULL` |
+Каждая MV:
+- Уникальный индекс для `REFRESH CONCURRENTLY`
+- RLS не нужен (дашборды у админов/MC через has_role)
+- Refresh function `refresh_dashboard_materialized_views()`
+- Cron `*/5 * * * *` (каждые 5 минут)
 
-**Действие:**
-1. ALTER `crm_contacts` ADD COLUMN `pipeline_kind TEXT DEFAULT 'sales'` (если ещё нет)
-2. CREATE OR REPLACE VIEW для каждой старой таблицы
-3. CREATE TRIGGER ... INSTEAD OF INSERT/UPDATE/DELETE — маршрут в новую таблицу
-4. DROP TABLE для старых (после смены типа на VIEW PostgREST продолжит работать)
+## 3. Telegram-алерты сверки
 
-**Риск:** средний. Триггеры INSTEAD OF требуют тестирования Capital Hub и Deal flow. Все эти таблицы пусты, поэтому миграция данных не нужна.
+Расширю существующий `daily-reconciliation` Edge Function:
 
----
+1. После Resend-email **добавить отправку в Telegram** (через `TELEGRAM_BOT_TOKEN` + `TELEGRAM_ADMIN_CHAT_ID` — уже сконфигурированы)
+2. **Шаблон сообщения** (HTML):
+   ```
+   ⚠️ <b>myUNO Reconciliation Alert</b>
+   Дата: {today}
+   Проверено заказов: {orders.length}
+   ❌ Без леджера: {missingCount}
+   ⚖️ Несоответствие сумм: {mismatchCount}
+   🔗 https://myuno.app/admin/finance
+   ```
+3. **Отправлять только если есть alerts** (без спама при чистой сверке) — кроме раз в неделю отправлять "✅ All clean" в понедельник
+4. **Добавить cron** для `daily-reconciliation` (его нет в списке активных): `0 23 * * *` (06:00 ICT)
 
-## Что НЕ трогаем
+## Файлы
 
-- 21 `property_*` таблица (`property_documents`, `property_inventory_items`, `property_guidebook` и т.д.) — **активно используются** в PMS компонентах, даже если пустые. Это работающие фичи без данных, не мусор.
-- `mcc_leads` (5 ref) — реальный поток лидов в `useLeadHub`.
-- `service_orders`, `juristic_requests`, `business_listings`, `investment_*` — рабочий фронтенд.
-- Booking-таблицы (`airport_*`, `booking_*`) — используются в Edge Functions для чекаута.
-
----
-
-## Итоговый эффект
-
-| Фаза | Удалено таблиц | Хуков | Edge Functions | Остаток |
-|---|---:|---:|---:|---:|
-| Старт | — | — | — | 359 |
-| Фаза 1 | -6 | 0 | 0 | 353 |
-| Фаза 2 | -27 | -16 | -4 | 326 |
-| Фаза 3 | -13 (DROP) +13 (VIEW) | 0 | 0 | **313 tables + 13 views** |
-
-Реальное число **физических таблиц = ~313**. Views не считаются за таблицы.
+- `supabase/migrations/<ts>_indexes_and_dashboard_mvs.sql` — индексы + MV + cron MV refresh
+- `supabase/functions/daily-reconciliation/index.ts` — добавить Telegram block
+- Insert SQL (через insert tool, не migration) — cron jobs для `daily-reconciliation` и `refresh_dashboard_mvs` с anon key
 
 ## Откат
 
-Каждая фаза = **одна миграция**. Откат через `git revert` миграции + восстановление из backup mirror DB (`erfwtoavipwjqmylpizt`). Все удаляемые таблицы пусты, поэтому потери данных невозможны.
+- DROP INDEX CONCURRENTLY для каждого индекса
+- DROP MATERIALIZED VIEW
+- `cron.unschedule(...)`
+- Telegram-блок — простой git revert функции
 
-## Тест-план после каждой фазы
+## Риски
 
-1. `npm run build` — TypeScript компилируется
-2. Открыть `/admin/marketing` — не должно быть 500
-3. Открыть `/mc/crm` — список контактов работает
-4. Открыть `/capital` — Capital Hub отображается
-5. Создать тестовый CRM-контакт через UI
-6. Supabase linter: 0 новых WARNING
+- **Индексы:** создаются `IF NOT EXISTS`, без `CONCURRENTLY` (миграция в транзакции). На таблицах <5000 строк это <1 сек, безопасно.
+- **MV:** первая `REFRESH` может быть медленной (5-10 сек), но запускается из cron, не блокирует.
+- **Telegram:** если токен не настроен — fail silent, не ломает основную логику.
 
-## Файлы которые будут изменены (примерно)
-
-- 3 миграции (по одной на фазу) в `supabase/migrations/`
-- ~17 удалённых хуков в `src/hooks/`
-- 4 удалённых Edge Function в `supabase/functions/`
-- 1 правка `src/lib/untypedTables.ts` (удалить ~25 строк)
-- 1 правка `src/integrations/supabase/types.ts` (auto-regen)
-- Обновить `/mnt/documents/SCHEMA_AUDIT.md` с финальной картой
-
-## Поэтапная доставка
-
-Я буду коммитить **по одной фазе за раз** и ждать твоего "ок" перед следующей. Это даст возможность тестировать в проде между шагами.
