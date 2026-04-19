@@ -2,14 +2,15 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useInvestmentProjects, BUSINESS_CATEGORIES } from '@/hooks/useInvestmentProjects';
-import { InvestmentCard } from '@/components/invest';
+import { useBusinessListings } from '@/hooks/useBusinessListings';
+import { InvestmentCard, AnonymizedListingCard } from '@/components/invest';
 import { MiniAppLayout } from '@/components/miniapp';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Card, CardContent } from '@/components/ui/card';
-import { Briefcase, Megaphone, ArrowRight, Construction } from 'lucide-react';
+import { Briefcase, Megaphone, ArrowRight, Construction, Lock } from 'lucide-react';
 import { APP_ROUTES } from '@/lib/config/routes';
 
 export default function InvestmentBusinessZone() {
@@ -22,6 +23,7 @@ export default function InvestmentBusinessZone() {
   const { data: projects, isLoading } = useInvestmentProjects(
     selectedType ? { projectType: selectedType } : undefined,
   );
+  const { data: listings, isLoading: loadingListings } = useBusinessListings();
 
   const businessProjects = (projects ?? []).filter((p) => !p.project_type.startsWith('real_estate'));
 
@@ -71,6 +73,27 @@ export default function InvestmentBusinessZone() {
             </div>
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
+
+          {/* Anonymized business listings (new in Phase 2) */}
+          {(loadingListings || (listings && listings.length > 0)) && (
+            <section className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Lock className="h-4 w-4 text-primary" />
+                <h2 className="font-bold">
+                  {isRu ? 'Анонимные предложения' : 'Anonymous deal flow'}
+                </h2>
+              </div>
+              {loadingListings ? (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {[1, 2].map((i) => <Skeleton key={i} className="h-[300px] rounded-xl" />)}
+                </div>
+              ) : (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {listings!.map((l) => <AnonymizedListingCard key={l.id} listing={l} />)}
+                </div>
+              )}
+            </section>
+          )}
 
           {isLoading ? (
             <div className="grid gap-4">

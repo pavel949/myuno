@@ -139,7 +139,10 @@ export const APP_ROUTES = {
   INVEST_SERVICES: '/invest/services',
   INVEST_DASHBOARD: '/invest/dashboard',
   INVEST_RAISE: '/invest/raise',
-  INVEST_DETAIL: (id: string) => `/invest/${id}`,
+  INVEST_PITCH: '/invest/pitch',
+  INVEST_THAILAND: '/invest/thailand',
+  INVEST_BUSINESS_DETAIL: (slug: string) => `/invest/business/${slug}`,
+  INVEST_DETAIL: (id: string) => `/invest/project/${id}`,
   // Internal ops console (admin-only Market/Deals/Network/Execution shell)
   INVEST_OPS: '/invest/ops',
   INVEST_MARKET: '/invest/ops/market',

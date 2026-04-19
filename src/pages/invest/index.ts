@@ -8,3 +8,6 @@ export { default as InvestmentOpsConsole } from './InvestmentOpsConsole';
 export { default as InvestmentDetail } from './InvestmentDetail';
 export { default as InvestorDashboard } from './InvestorDashboard';
 export { default as RaiseFunding } from './RaiseFunding';
+export { default as InvestmentBusinessDetail } from './InvestmentBusinessDetail';
+export { default as InvestmentPitch } from './InvestmentPitch';
+export { default as InvestInThailand } from './InvestInThailand';

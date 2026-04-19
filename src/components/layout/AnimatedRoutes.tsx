@@ -427,7 +427,13 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.INVEST_DEALS} element={<AdminGuard><LazyPage><Pages.InvestmentOpsConsole /></LazyPage></AdminGuard>} />
         <Route path={APP_ROUTES.INVEST_NETWORK} element={<AdminGuard><LazyPage><Pages.InvestmentOpsConsole /></LazyPage></AdminGuard>} />
         <Route path={APP_ROUTES.INVEST_EXECUTION} element={<AdminGuard><LazyPage><Pages.InvestmentOpsConsole /></LazyPage></AdminGuard>} />
+        {/* Specific invest sub-routes BEFORE catch-all :id */}
+        <Route path="/invest/thailand" element={<LazyPage><Pages.InvestInThailand /></LazyPage>} />
+        <Route path="/invest/pitch" element={<LazyPage><Pages.InvestmentPitch /></LazyPage>} />
+        <Route path="/invest/business/:slug" element={<LazyPage><Pages.InvestmentBusinessDetail /></LazyPage>} />
         <Route path={APP_ROUTES.INVEST_DETAIL(':id')} element={<LazyPage><Pages.InvestmentDetail /></LazyPage>} />
+        {/* Legacy: /invest/:id → /invest/project/:id */}
+        <Route path="/invest/:id" element={<LazyPage><Pages.InvestmentDetail /></LazyPage>} />
         {/* Legacy aliases */}
         <Route path={APP_ROUTES.INVEST_CLUSTER} element={<Navigate to={APP_ROUTES.INVEST} replace />} />
         <Route path="/invest-hub" element={<Navigate to={APP_ROUTES.INVEST} replace />} />
