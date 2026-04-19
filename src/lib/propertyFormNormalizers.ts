@@ -12,16 +12,32 @@ const FURNISHING_LEVEL_ALIAS_MAP: Record<string, string> = {
 };
 
 export function normalizeViewTypes(value: unknown): string[] {
-  const values = Array.isArray(value)
-    ? value
-    : typeof value === 'string'
-      ? value.split(',').map((item) => item.trim())
+  // Handle JSON-encoded strings stored in DB (e.g. '["city","sea"]')
+  let raw: unknown = value;
+  if (typeof raw === 'string') {
+    const trimmed = raw.trim();
+    if (
+      (trimmed.startsWith('[') && trimmed.endsWith(']')) ||
+      (trimmed.startsWith('{') && trimmed.endsWith('}'))
+    ) {
+      try {
+        raw = JSON.parse(trimmed);
+      } catch {
+        // fall through — treat as comma-separated string
+      }
+    }
+  }
+
+  const values = Array.isArray(raw)
+    ? raw
+    : typeof raw === 'string'
+      ? raw.split(',').map((item) => item.trim())
       : [];
 
   return Array.from(
     new Set(
       values
-        .map((item) => (typeof item === 'string' ? item.trim() : ''))
+        .map((item) => (typeof item === 'string' ? item.trim().replace(/^["']|["']$/g, '') : ''))
         .filter(Boolean)
     )
   );
