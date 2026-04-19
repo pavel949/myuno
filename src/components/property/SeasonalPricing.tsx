@@ -34,10 +34,10 @@ interface SeasonalPricingProps {
 }
 
 const seasonTypes = [
-  { value: 'high', labelEn: 'High Season', labelRu: 'Высокий сезон', icon: Sun, color: 'text-orange-500' },
-  { value: 'low', labelEn: 'Low Season', labelRu: 'Низкий сезон', icon: Snowflake, color: 'text-blue-500' },
-  { value: 'holiday', labelEn: 'Holiday', labelRu: 'Праздник', icon: Sparkles, color: 'text-purple-500' },
-  { value: 'custom', labelEn: 'Custom', labelRu: 'Особый', icon: Calendar, color: 'text-green-500' },
+  { value: 'high', labelEn: 'High Season', labelRu: 'Высокий сезон', icon: Sun, color: 'text-warning' },
+  { value: 'low', labelEn: 'Low Season', labelRu: 'Низкий сезон', icon: Snowflake, color: 'text-primary' },
+  { value: 'holiday', labelEn: 'Holiday', labelRu: 'Праздник', icon: Sparkles, color: 'text-accent' },
+  { value: 'custom', labelEn: 'Custom', labelRu: 'Особый', icon: Calendar, color: 'text-success' },
 ];
 
 const months = [

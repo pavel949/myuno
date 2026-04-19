@@ -144,7 +144,7 @@ function getOperationalStatus(
     return { 
       icon: AlertTriangle, 
       label: `${stats.pendingTasks} ${isRu ? 'задач' : 'tasks'}`,
-      color: 'bg-orange-500/10 text-orange-600 border-orange-500/20'
+      color: 'bg-warning/10 text-warning border-warning/20'
     };
   }
   return { 
@@ -341,12 +341,12 @@ function ListVariant({
                 </h3>
                 <div className="flex items-center gap-1 flex-shrink-0">
                   {showInstantBadge && cardProps.instantBooking && (
-                    <Badge className="bg-amber-500 text-white text-xs h-5 px-1">
+                    <Badge className="bg-warning text-warning-foreground text-xs h-5 px-1">
                       <Zap className="h-3 w-3" />
                     </Badge>
                   )}
                   {showProtectionBadge && (property as any).instant_booking_enabled_at && (
-                    <Badge variant="outline" className="text-xs h-5 px-1 border-blue-300 text-blue-700">
+                    <Badge variant="outline" className="text-xs h-5 px-1 border-primary/30 text-primary">
                       <Shield className="h-3 w-3" />
                     </Badge>
                   )}
@@ -356,7 +356,7 @@ function ListVariant({
                     </Badge>
                   )}
                   {(property as any).listing_modes?.includes('platform') && (
-                    <Badge variant="outline" className="text-xs h-5 px-1.5 border-emerald-400 text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30">
+                    <Badge variant="outline" className="text-xs h-5 px-1.5 border-success/40 text-success bg-success/10">
                       <Globe className="h-3 w-3 mr-0.5" />
                       {isRu ? 'Платформа' : 'Platform'}
                     </Badge>

@@ -124,7 +124,7 @@ const PRIMARY_TYPE_IDS = ['condo', 'villa', 'apartment'];
                className={cn(
                  "flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all",
                  mode === 'buy'
-                   ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-sm"
+                   ? "bg-gradient-to-r from-warning to-warning/80 text-warning-foreground shadow-sm"
                    : "text-muted-foreground hover:text-foreground"
                )}
              >

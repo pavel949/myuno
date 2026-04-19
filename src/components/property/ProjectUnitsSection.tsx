@@ -266,7 +266,7 @@ function SimplePropertyCard({ property, isRu, formatPrice }: SimplePropertyCardP
           </div>
         )}
         {property.is_featured && (
-          <Badge className="absolute top-2 left-2 bg-amber-500 text-white border-none text-xs">
+          <Badge className="absolute top-2 left-2 bg-warning text-warning-foreground border-none text-xs">
             Featured
           </Badge>
         )}
