@@ -387,6 +387,20 @@ export const ru: Record<string, string> = {
   'propertyHub.landing.listWithUs.title': 'Разместить с myUNO',
   'propertyHub.landing.listWithUs.desc': 'Охват арендаторов и покупателей, проверенный спрос и сопровождение.',
 
+  // Раздел «Капитал» — для ролей Бизнес / Инвестор
+  'propertyHub.landing.sectionCapital': 'Для бизнеса и инвесторов',
+  'propertyHub.landing.commercial.title': 'Коммерческая недвижимость',
+  'propertyHub.landing.commercial.desc': 'Офисы, ритейл, склады, помещения под кафе и рестораны — аренда и продажа.',
+  'propertyHub.landing.land.title': 'Земельные участки',
+  'propertyHub.landing.land.desc': 'Rai · ngan · wah, Chanote, зонирование и дорожный фасад.',
+  'propertyHub.landing.investmentGrade.title': 'Инвестиционные объекты',
+  'propertyHub.landing.investmentGrade.desc': 'Cap rate от 6%, проверенный NOI, остаток срока аренды.',
+  'propertyHub.landing.personaPrompt.title': 'Откройте коммерческую и земельную недвижимость',
+  'propertyHub.landing.personaPrompt.desc': 'Включите роль «Бизнес» или «Инвестор», чтобы увидеть коммерцию, земельные участки и доходные объекты в навигации.',
+  'propertyHub.landing.personaPrompt.enableBusiness': 'Я Бизнес',
+  'propertyHub.landing.personaPrompt.enableInvestor': 'Я Инвестор',
+  'propertyHub.landing.proBadge': 'Pro',
+
   'account.property.section': 'Недвижимость',
   'account.property.hub': 'Обзор и сценарии',
   'account.property.rentShort': 'Посуточно / краткий срок',

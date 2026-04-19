@@ -387,6 +387,20 @@ export const en: Record<string, string> = {
   'propertyHub.landing.listWithUs.title': 'List with myUNO',
   'propertyHub.landing.listWithUs.desc': 'Reach renters and buyers with verified demand and onboarding support.',
 
+  // Capital section — persona-gated (business / investor)
+  'propertyHub.landing.sectionCapital': 'For business & investors',
+  'propertyHub.landing.commercial.title': 'Commercial real estate',
+  'propertyHub.landing.commercial.desc': 'Offices, retail, warehouses, F&B venues — for rent or sale.',
+  'propertyHub.landing.land.title': 'Land plots',
+  'propertyHub.landing.land.desc': 'Rai · ngan · wah, Chanote, zoning and road frontage.',
+  'propertyHub.landing.investmentGrade.title': 'Investment-grade assets',
+  'propertyHub.landing.investmentGrade.desc': 'Cap rate ≥ 6%, NOI verified, lease term remaining.',
+  'propertyHub.landing.personaPrompt.title': 'Unlock commercial & land sections',
+  'propertyHub.landing.personaPrompt.desc': 'Enable Business or Investor role to see commercial real estate, land plots, and yield-grade assets in your navigation.',
+  'propertyHub.landing.personaPrompt.enableBusiness': 'I am Business',
+  'propertyHub.landing.personaPrompt.enableInvestor': 'I am Investor',
+  'propertyHub.landing.proBadge': 'Pro',
+
   'account.property.section': 'Property',
   'account.property.hub': 'Overview & scenarios',
   'account.property.rentShort': 'Nightly / short-term',
