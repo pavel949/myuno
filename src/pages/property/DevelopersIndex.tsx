@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building2, CheckCircle2, TrendingUp, ExternalLink } from 'lucide-react';
+import { Building2, CheckCircle2, ExternalLink, Star } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -61,13 +61,23 @@ export default function DevelopersIndex() {
           </div>
         ) : developers && developers.length > 0 ? (
           <div className="space-y-4">
-            {developers.map(dev => (
+            {developers.map(dev => {
+              const goToDetail = () => navigate(APP_ROUTES.DEVELOPER_DETAIL(dev.id));
+              const devName = isRu ? dev.nameRu : dev.nameEn;
+              return (
               <div
                 key={dev.id}
-                onClick={() => navigate(APP_ROUTES.DEVELOPER_DETAIL(dev.id))}
+                role="button"
+                tabIndex={0}
+                aria-label={isRu ? `Открыть профиль ${devName}` : `Open profile of ${devName}`}
+                onClick={goToDetail}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); goToDetail(); }
+                }}
                 className={cn(
                   "rounded-xl border bg-card p-4 cursor-pointer",
-                  "hover:border-primary/50 hover:shadow-md transition-all"
+                  "hover:border-primary/50 hover:shadow-md transition-all",
+                  "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 )}
               >
                 <div className="flex items-start gap-4">
@@ -103,7 +113,10 @@ export default function DevelopersIndex() {
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
                       <span>{dev.projectsCompleted} {isRu ? 'проектов' : 'projects'}</span>
                       {dev.averageRating > 0 && (
-                        <span>⭐ {dev.averageRating.toFixed(1)}</span>
+                        <span className="inline-flex items-center gap-1">
+                          <Star className="w-3.5 h-3.5 fill-primary text-primary" aria-hidden />
+                          {dev.averageRating.toFixed(1)}
+                        </span>
                       )}
                     </div>
                   </div>
@@ -124,7 +137,8 @@ export default function DevelopersIndex() {
                   </Button>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <div className="text-center py-12">
