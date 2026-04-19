@@ -110,7 +110,7 @@ export function OperationsSection() {
               className={cn(
                 "p-3 cursor-pointer hover:shadow-md transition-all operations-card touch-target-44",
                 "border-l-4",
-                type === 'maintenance' ? 'border-l-orange-500' :
+                type === 'maintenance' ? 'border-l-warning' :
                 type === 'check_in' ? 'border-l-success' :
                 type === 'check_out' ? 'border-l-warning' :
                 'border-l-info'

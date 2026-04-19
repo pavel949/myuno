@@ -39,7 +39,7 @@ const STATUS_CONFIG: Record<string, { label: string; labelRu: string; variant: '
   pending: { label: 'Pending', labelRu: 'Ожидает', variant: 'secondary' },
   cancelled: { label: 'Cancelled', labelRu: 'Отменено', variant: 'destructive' },
   completed: { label: 'Completed', labelRu: 'Завершено', variant: 'outline' },
-  checked_in: { label: 'Checked In', labelRu: 'Заселён', variant: 'default', color: 'bg-green-500 hover:bg-green-600' },
+  checked_in: { label: 'Checked In', labelRu: 'Заселён', variant: 'default', color: 'bg-success hover:bg-success/90 text-success-foreground' },
 };
 
 function getBookingTimeStatus(booking: PropertyBooking): 'upcoming' | 'active' | 'past' {
@@ -227,9 +227,9 @@ export default function MCBookingsPage() {
         </button>
         <button
           onClick={() => setStatusFilter('active')}
-          className={cn('text-center p-2 rounded-lg transition-colors', statusFilter === 'active' ? 'bg-green-500/10 ring-1 ring-green-500' : 'bg-muted/50')}
+          className={cn('text-center p-2 rounded-lg transition-colors', statusFilter === 'active' ? 'bg-success/10 ring-1 ring-success' : 'bg-muted/50')}
         >
-          <div className="text-lg font-bold text-green-600">{stats.active}</div>
+          <div className="text-lg font-bold text-success">{stats.active}</div>
           <div className="text-xs text-muted-foreground">{isRu ? 'Сейчас' : 'Active'}</div>
         </button>
         <button

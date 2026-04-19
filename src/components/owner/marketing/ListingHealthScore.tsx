@@ -25,9 +25,9 @@ export function ListingHealthScore({ score, className }: ListingHealthScoreProps
   const isRu = language === 'ru';
   
   const getScoreColor = (value: number) => {
-    if (value >= 80) return 'text-green-600';
-    if (value >= 60) return 'text-yellow-600';
-    return 'text-red-500';
+    if (value >= 80) return 'text-success';
+    if (value >= 60) return 'text-warning';
+    return 'text-destructive';
   };
   
   const getScoreLabel = (value: number) => {
@@ -38,9 +38,9 @@ export function ListingHealthScore({ score, className }: ListingHealthScoreProps
   };
   
   const getProgressColor = (value: number) => {
-    if (value >= 80) return 'bg-green-500';
-    if (value >= 60) return 'bg-yellow-500';
-    return 'bg-red-500';
+    if (value >= 80) return 'bg-success';
+    if (value >= 60) return 'bg-warning';
+    return 'bg-destructive';
   };
   
   const categories = [
@@ -117,9 +117,9 @@ export function ListingHealthScore({ score, className }: ListingHealthScoreProps
             <div key={cat.key} className="flex items-center gap-2">
               <div className={cn(
                 "w-8 h-8 rounded-lg flex items-center justify-center",
-                cat.score >= 80 ? "bg-green-100 text-green-600" :
-                cat.score >= 60 ? "bg-yellow-100 text-yellow-600" :
-                "bg-red-100 text-red-500"
+                cat.score >= 80 ? "bg-success/15 text-success" :
+                cat.score >= 60 ? "bg-warning/15 text-warning" :
+                "bg-destructive/15 text-destructive"
               )}>
                 <cat.icon className="h-4 w-4" />
               </div>
