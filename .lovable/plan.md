@@ -1,137 +1,128 @@
 
 
-## Design Audit — Developer & Newbuilds Client-Facing Pages
+## Audit дизайна — myUNO главная и базовый shell
 
-### Scope (10 public pages + 1 layout + 3 cards)
-
-**A. Property Hub catalog (Light theme, AppLayout):**
-- `/property/offplan` — `OffplanIndex.tsx`
-- `/property/offplan/:id` — `OffplanDetail.tsx`
-- `/property/developers` — `DevelopersIndex.tsx`
-- `/property/developers/:id` — `DeveloperDetail.tsx`
-
-**B. Newbuilds tools (Dark Luxury Editorial, NewbuildsLayout):**
-- `/newbuilds` — `NewbuildsLanding.tsx`
-- `/newbuilds/map` — `NewbuildsMap.tsx`
-- `/newbuilds/compare` — `NewbuildsCompare.tsx`
-- `/newbuilds/areas`, `/newbuilds/areas/:slug`
-- `/newbuilds/calculator`
-- `/newbuilds/due-diligence`
-
-**C. Cards/components:** `CatalogProjectCard`, `NbProjectCard`, `NewbuildProjectDeepTabs`, `ClearViewReport`
+Аудит покрывает: `AppLayout` → `AppHeader` → `InstallBanner` → `Index.tsx` (Hero + 7 секций) → `AdaptiveBottomNav` → `Footer`. Брал референсом `/styles/tokens.css`, brand book и `ecosystemLayout.ts`.
 
 ---
 
-### Critical findings
+### Архитектурные проблемы (HIGH)
 
-**1. Two parallel design systems for the same product (HIGH)**
-- `/property/offplan` uses **myUNO Light** (DM Sans, mint primary, AppLayout, BottomNav).
-- `/newbuilds/*` uses **Dark Luxury Editorial** (Playfair, gold #C9A84C, dark bg).
-- `NewbuildsLayout` defaults to `nb-theme--light` (per memory: "unified Property Hub theme") — but every child page (`NewbuildsLanding`, `Calculator`, `Areas`, `DueDiligence`, `Compare`) hardcodes **dark gold colors** via inline `style={{ color: 'hsl(var(--nb-gold))' }}` and `nb-blueprint nb-grain` backgrounds. Result: gold text on near-white cream → **WCAG AA contrast fails** in many spots.
-- The shared "Catalog" tab in NewbuildsLayout sends users to `/property/offplan` (Light theme) — visual whiplash.
+**1. Двойное оборачивание контейнера на главной**
+`AppLayout` уже оборачивает `children` в `ECOSYSTEM_PAGE_CONTAINER` (`max-w-[1536px] mx-auto px-4 md:px-6 lg:px-8 xl:px-10`) с модификатором `px-0`. Затем `Index.tsx` (стр. 76) внутри добавляет ещё один `max-w-[1536px] mx-auto px-4 md:px-6 lg:px-8 xl:px-10 py-5`. Получается двойной wrapper и `px-0` не имеет смысла. Это ломает carousel-rails которые делают `-mx-4 px-4` (FeaturedProperties, HomeDiscovery, ValueProp): они "выезжают" не до края экрана, а до внутреннего паддинга.
 
-**2. Hardcoded colors everywhere (HIGH — brand book violation)**
-Brand book mandates semantic tokens only. Found 80+ `style={{ color: 'hsl(var(--nb-...))' }}` and raw hex/rgba (`#22c55e`, `rgba(22,163,74,0.15)`, `#eab308`, `#ef4444`) in:
-- `CatalogProjectCard.tsx` (REC_COLORS, formatPrice block)
-- `NewbuildsLanding.tsx` (hero, tool cards — every color inline)
-- `NewbuildsCalculator/Areas/DueDiligence/Compare` (every heading + label)
-- `OffplanIndex.tsx` (`text-success`, `bg-accent-amber`)
+**Фикс**: Index.tsx должен использовать `<PageContainer>` или просто `space-y-6 lg:space-y-10 py-5 pb-20`, без повторного `max-w` и `px-*`. Carousel `-mx-4 px-4` тогда корректно дотянется до края.
 
-These should map to `--primary`, `--success`, `--warning`, `--destructive`, `--muted-foreground` tokens.
+**2. InstallBanner создаёт лишнюю вертикальную дыру**
+`AppLayout` всегда рендерит `<div className="ECOSYSTEM_PAGE_CONTAINER pt-2"><InstallBanner /></div>` — даже когда баннер скрыт (`return null`), остаётся `pt-2` пустого контейнера. На мобильных: между header и hero лишние ~12px.
 
-**3. Typography mismatch with brand book (MEDIUM)**
-- Brand book: **DM Sans (body) + Space Grotesk (display)**; Newbuilds memory: **Cormorant Garamond / Playfair Display**.
-- `newbuilds-theme.css` declares `Playfair Display` for `--font-display-nb`, but `index.html` is unverified to load it. Falls back to Georgia serif.
-- `OffplanIndex` and `DevelopersIndex` use `font-bold text-xl` headings without `font-display` class → renders in DM Sans, breaking display hierarchy.
+**Фикс**: оборачивающий `<div>` рендерим только если `InstallBanner` действительно отдаёт контент (через провайдер видимости или `display: contents`).
 
-**4. Emojis & exclamation in UI text (brand book violation)**
-- ⭐ used as a star indicator in `DevelopersIndex` line 106, `DeveloperDetail` line 157, `OffplanIndex` filter buttons. Brand book: "Никаких эмодзи в UI". Should be `<Star fill />` from Lucide (already imported elsewhere).
-- `DevelopersIndex` "I'm a developer — list my company" uses em-dash, OK; no exclamation issues found here.
+**3. Хардкод цветов в JSX вместо токенов** (брендбук-нарушение)
+Несмотря на унифицированные токены, остаются inline стили:
+- `AppHeader`: `background: 'rgba(15,28,46,0.95)'`, `borderColor: 'hsl(0 0% 100% / 0.07)'` — должно быть `hsl(var(--bg-surface))`/`hsl(var(--border))` через Tailwind.
+- `HeroBlock`: `linear-gradient(...hsl(216 60% 7%)...hsl(214 50% 14%))` дважды (mobile + desktop) — захардкожен dark theme в light режиме (см. ниже).
+- `PropertyTourBanner`: `bg-gradient-to-r from-[hsl(var(--primary))]/90...` — OK по токену, но `bg-white/20` для оверлеев.
+- `AdaptiveBottomNav`: `background: 'rgba(15,28,46,0.85)'` — захардкожено dark.
+- `ValuePropositionStrip`: `linear-gradient(135deg, #06b6d4, #0891b2)` × 6 — raw hex.
 
-**5. Navigation & layout inconsistency (MEDIUM)**
-- `OffplanIndex` / `DevelopersIndex` / `OffplanDetail` / `DeveloperDetail` use `AppLayout` (gets BottomNav, global header, ecosystem container).
-- `NewbuildsLanding` and tool pages use `NewbuildsLayout` only — **no BottomNav, no global nav, no Back button** on top-level. Users get lost.
-- `NewbuildsLayout` sticky tab bar duplicates "Каталог" → links out to AppLayout page → user loses the newbuilds nav. No "back to /newbuilds" affordance once they leave.
-- `OffplanDetail` uses `BackButton` (good); `DeveloperDetail` uses `BackButton` (good); `NewbuildsCalculator/Areas/DueDiligence` use a custom inline `<Link><ChevronLeft/></Link>` — three different back patterns.
+**4. Hero ломается в light theme**
+`HeroBlock` принудительно использует тёмный градиент (`hsl(216 60% 7%)`) на mobile и desktop через inline style, игнорируя `html.light`. На светлой теме hero остаётся тёмно-синий, остальная страница белая → визуальный shock.
 
-**6. Hero patterns are 3 different designs**
-- `OffplanIndex` hero: `bg-gradient-to-br from-primary/10 via-background to-accent/5 rounded-2xl border` (Light, soft).
-- `DevelopersIndex` hero: same gradient pattern (consistent with OffplanIndex ✓).
-- `NewbuildsLanding` hero: gold pill + centered text + gold CTA on dark surface.
-- `NewbuildsCalculator/Areas/DueDiligence`: `nb-blueprint nb-grain` blueprint pattern with giant `nb-display text-5xl` gold title.
-
-No single hero pattern.
-
-**7. CatalogProjectCard vs OffplanProjectCard fork (MEDIUM)**
-Two cards rendering nearly the same data:
-- `CatalogProjectCard` (newbuilds-themed, dark gold borders, used in `NewbuildsLanding`/featured strips).
-- `OffplanProjectCard` (used in `OffplanIndex`, `DeveloperDetail`).
-Different price formatting (`฿2.5M` vs full formatPrice from currency context), different badges, different tag systems.
-
-**8. Loading & empty states inconsistent**
-- `OffplanIndex`/`DevelopersIndex`/`OffplanDetail`/`DeveloperDetail`: `<Skeleton>` ✓
-- `NewbuildsLanding`: literal "…" placeholder for stats (same anti-pattern fixed earlier on home).
-- Empty states: `DevelopersIndex` has Building2 icon + text ✓; `NewbuildsCompare` shows "Нет проектов для сравнения" with serif heading. Different visual language.
-
-**9. Accessibility gaps**
-- `DevelopersIndex` row uses `<div onClick>` with no `role="button"`, no `tabIndex`, no `onKeyDown` — non-keyboard accessible (same issue we fixed on PropertyTourBanner).
-- `NewbuildsLanding` tool cards: `<Link>` ✓ (OK).
-- Colored tag pills (REC BUY/WATCH/AVOID) rely on color alone — add icon or text prefix.
-- Missing `aria-label` on icon-only contact links in `DeveloperDetail` (Phone, Mail, Globe).
-
-**10. Mobile-first issues at 339px viewport**
-- `NewbuildsLayout` sticky nav has 7 tabs in horizontal scroll — usable but no scroll hint.
-- `OffplanIndex` filter rows: 2 horizontal scrollers stacked + Filters Sheet trigger = visually noisy.
-- `DeveloperDetail` cover height `h-32` + logo `-mt-12` overlap works but logo can clip at smallest sizes.
-- `NewbuildsLanding` hero `text-2xl md:text-3xl` is fine, but `pt-20` on tool pages wastes vertical space on mobile.
+**Фикс**: использовать `var(--bg-base)` / `var(--bg-card)` или CSS class `hero-dark-surface` (она уже есть, но всё равно перекрывается inline style).
 
 ---
 
-### Recommendations (priority order)
+### Layout / spacing inconsistencies (MEDIUM)
 
-**P0 — Decide theme strategy (1 decision blocks everything else)**
-Pick one:
-- (a) **Unify on Light Property Hub theme** — kill the dark luxury surfaces in `/newbuilds/*`, keep gold as an accent token only. Aligns with brand book ("Caregiver × Architect", warm cream).
-- (b) **Keep dark luxury for `/newbuilds`** — but then `NewbuildsLayout` must NOT default to `nb-theme--light`, and "Каталог" tab must stay inside the dark theme (build a dark variant of OffplanIndex or reroute).
+**5. Разнобой вертикальных ритмов**
+- `Index.tsx`: `space-y-6 lg:space-y-10` (24/40px)
+- `ECOSYSTEM_MAIN_SPACING`: `space-y-4 md:space-y-6` (16/24px)
+- `PageContainer` (uno): `py-4 md:py-6 lg:py-8 2xl:py-10`
+Главная, Discover, Property — все имеют разные ритмы. Должен быть один токен (например, `--section-gap`).
 
-**P0 — Replace all hardcoded colors with semantic tokens**
-- Map gold accents to `--primary` (or new `--accent-luxury` token).
-- Replace REC colors with `--success / --warning / --destructive`.
-- Remove inline `style={{ color: 'hsl(var(--nb-...))' }}` everywhere; use Tailwind utility classes bound to tokens.
+**6. Hero `px-4 py-6` (mobile) vs остальные секции `px-4` parent → визуально hero "ровно с краем", а content рядом — нет, потому что у hero есть `rounded-[var(--radius-lg)] overflow-hidden`. Но из-за двойного wrapper'а (см. п.1) hero не дотягивает до края экрана. Нужно: hero получает ширину viewport через `-mx-4 px-4` либо родитель не имеет padding.
 
-**P0 — Replace ⭐ emojis with `<Star />` Lucide icons** (3 files).
+**7. Touch targets местами < 44px**
+- `AppHeader` Search (mobile): `w-9 h-9` = 36px (надо 44).
+- `LanguageSwitcher`/`CurrencySwitcher` size="sm" — судя по паттерну, тоже 32–36px.
+- `AdaptiveBottomNav` иконки 20×20 в кнопке `flex-col` — высота total 60px ✓, но активная hit area по факту меньше (внутренний `pt-1`).
+- `WhatsAppCTA` CTA имеет `min-h-[44px]` ✓, hero SOS на desktop — `px-4 py-2` без min-h (~36px).
 
-**P1 — Unify card component** — Promote `OffplanProjectCard` as the single card, support a `variant="luxury"` for newbuilds context if needed.
-
-**P1 — Single hero template** — Build `<NewbuildsHero title icon stat actions />` shared between Landing, Calculator, Areas, Due Diligence, Compare, OffplanIndex, DevelopersIndex.
-
-**P1 — Single back-nav pattern** — `<BackButton />` everywhere; remove ad-hoc ChevronLeft links.
-
-**P1 — Add BottomNav to /newbuilds tool pages** — or make NewbuildsLayout wrap an AppLayout shell (children-first composition).
-
-**P2 — A11y pass**
-- `DevelopersIndex` rows → `role="button" tabIndex={0} onKeyDown` + `focus-visible:ring`.
-- Add `aria-label` to icon-only contact links.
-- Add text prefix to REC pills (already there ✓ — keep).
-
-**P2 — Loading state cleanup** — Replace "…" placeholders in `NewbuildsLanding` stats with `<Skeleton className="h-4 w-12 inline-block" />`.
-
-**P2 — Mobile polish**
-- Reduce hero `pt-20 pb-12` to `pt-8 pb-6 md:pt-20 md:pb-12` on tool pages.
-- Add fade-mask at the right edge of NewbuildsLayout sticky tab scroller.
+**8. AdaptiveBottomNav: max-w-[480px] mx-auto**
+На широких мобилках (393–414px) всё ок, но на планшетах <768 — навигация прижата к центру, а тело страницы — full width. Лучше `max-w-screen-sm` или просто width:100%.
 
 ---
 
-### Suggested implementation order (if approved)
+### Доступность (MEDIUM)
 
-1. **Token consolidation** — add `--accent-luxury` (gold) and `--accent-luxury-foreground` to `tokens.css`; rewrite `newbuilds-theme.css` to reference shared tokens, not duplicate `--nb-*`.
-2. **Theme decision applied** — assume (a) unify light, with luxury accent — repaint NewbuildsLanding/Calculator/Areas/DueDiligence/Compare using `bg-card`, `text-foreground`, `text-muted-foreground`, `text-primary`, removing inline gold styles.
-3. **Star emojis → Lucide** in 3 files.
-4. **Shared `<NewbuildsHero />` + `<NewbuildsBack />`** — replace 5 ad-hoc heroes and 5 back links.
-5. **Promote OffplanProjectCard** as canonical; deprecate CatalogProjectCard or reduce to thin wrapper.
-6. **A11y: DevelopersIndex rows + DeveloperDetail contact links.**
-7. **Loading polish in NewbuildsLanding.**
-8. **Visual QA at 339px and 1280px.**
+**9. PersonaSwitcher: текст белого на градиентах низкого контраста**
+`PERSONA_GRADIENTS.business: '#64748b → #475569'` + белый текст 11px = WCAG fail. Проверить все 14 градиентов.
 
-Estimated scope: ~12 files edited, ~600 lines changed, no DB or routing changes.
+**10. Hero SOS на desktop**: `text-foreground` на `rgba(239,68,68,0.15)` — серый на светло-красном (light theme), низкий контраст. На mobile есть `text-warning` — лучше унифицировать на `text-destructive` или белый.
+
+**11. `aria-label` на иконках только частично**:
+- `AppHeader` Search кнопка ✓
+- `MiniCart`, `LanguageSwitcher`, `CurrencySwitcher` — надо проверить (вне аудита, но вероятно — есть).
+- HeroBlock `WeatherIcon`, `MapPin`, `Calendar` — декоративные, нужен `aria-hidden` (часть стоит, часть — нет).
+
+**12. `motion.button` без `aria-label`** в `QuickActionsGrid` desktop tile: иконка + текст, текст уже есть → OK. Но `requiresFullAccess + isLocked` визуально показывается только Lock-иконкой, без `aria-pressed`/`aria-disabled`.
+
+**13. Focus visible**:
+- `FeaturedPropertiesCarousel` ✓ (`focus-visible:ring-2 ring-primary ring-offset-2`)
+- `HomeDiscoveryCarousel` ✓
+- `QuickActionsGrid` mobile cards — НЕТ `focus-visible:ring`.
+- `AdaptiveBottomNav` NavLink — НЕТ.
+- `HeroSearchInput` — input без focus-ring.
+
+---
+
+### Семантика и компоненты (LOW)
+
+**14. Заголовки секций — три разных стиля**:
+- FeaturedProperties: `text-lg font-display font-bold text-foreground`
+- HomeDiscovery: то же ✓
+- TrustStats: `text-xs uppercase tracking-widest text-muted-foreground` (eyebrow вместо h2)
+- ValueProp: `text-lg font-bold font-display` ✓
+- HeroBlock: `text-2xl font-bold font-display` (h1) ✓
+
+Нужен shared `<SectionHeader>` (он уже есть в `@/components/ds`, но Index его не использует).
+
+**15. Footer и BottomNav на мобиле дублируют контакты**
+Footer (mobile) показывает 3 социалки + company links + install кнопку. Сразу под ним BottomNav с 5 пунктами. На главной снизу: padding `pb-20 md:pb-8` (Index) + `pb-24 md:pb-4` (AppLayout main) + `pb-20 md:pb-0` (footer) — переусложнение; нижний whitespace ~120px.
+
+**16. Hero pills (loyalty, streak)** имеют `min-h-[44px]` но `px-2.5 py-1` визуально создают высоту ~28px → есть white-space из-за min-h, выглядит "пустоватой кнопкой".
+
+---
+
+### План фиксов (приоритет)
+
+**P0 — структурные (3 файла)**
+1. `Index.tsx` — убрать дублирующий `max-w-[1536px] mx-auto px-* py-5`. Оставить только `space-y-6 lg:space-y-10 py-5 pb-20 md:pb-8`. Carousel rails `-mx-4 px-4` тогда дотянутся до края.
+2. `AppLayout.tsx` — обёртка `InstallBanner` рендерится условно (пробросить через ref/state из самого баннера или `display: contents`).
+3. `HeroBlock.tsx` — заменить inline `linear-gradient(...hsl(216...))` на CSS class через `--bg-base`/`--bg-card`, чтобы light theme работала.
+
+**P1 — токены и контраст (5 файлов)**
+4. `AppHeader.tsx` — `rgba(15,28,46,0.95)` → `hsl(var(--bg-surface) / 0.95)`.
+5. `AdaptiveBottomNav.tsx` — то же, плюс `max-w-[480px]` → убрать или на `max-w-screen-sm`.
+6. `ValuePropositionStrip` — 6 hex-градиентов → 6 token gradients (`--cluster-arrive`, `--cluster-live`, etc.).
+7. `InlinePersonaSelector` `PERSONA_GRADIENTS` — те же hex, перевести на токены. Оверлапается с `useUserPersonas.ts` — общий источник.
+8. Hero SOS — унифицировать desktop+mobile на `text-destructive font-semibold`.
+
+**P2 — a11y & touch (4 файла)**
+9. `AppHeader` mobile search/lang/currency — все min `w-11 h-11`.
+10. `QuickActionsGrid` mobile cards + `AdaptiveBottomNav` — добавить `focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2`.
+11. `HeroSearchInput` — focus-ring на контейнере.
+12. PersonaSwitcher — проверить контраст 14 градиентов; для `business`/`couple`/`nightlife` поднять lightness конечной точки или добавить `text-shadow`.
+
+**P3 — консистентность (2 файла)**
+13. Index.tsx использует `<SectionHeader>` из `@/components/ds` для всех секций (FeaturedProperties, HomeDiscovery, TrustStats — внутри них или снаружи).
+14. Уменьшить нижний whitespace на mobile: `pb-20` (Index) убрать, оставить только `pb-24` в AppLayout main (BottomNav уже учитывает `env(safe-area-inset-bottom)`).
+
+---
+
+### Файлы к редактированию (~12)
+`src/pages/Index.tsx`, `src/components/layout/AppLayout.tsx`, `src/components/layout/AppHeader.tsx`, `src/components/layout/AdaptiveBottomNav.tsx`, `src/components/home/HeroBlock.tsx`, `src/components/home/QuickActionsGrid.tsx`, `src/components/home/ValuePropositionStrip.tsx`, `src/components/home/InlinePersonaSelector.tsx`, `src/components/home/TrustStats.tsx`, `src/components/pwa/InstallBanner.tsx`, и опционально `src/styles/tokens.css` (добавить `--section-gap-y` token).
+
+Никаких миграций БД, маршрутов или edge functions — только UI.
 
