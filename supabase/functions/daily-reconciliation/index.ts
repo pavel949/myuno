@@ -164,15 +164,19 @@ Deno.serve(async (req) => {
       }
     }
 
-    // 6. Notify admin if discrepancies found
-    if (alerts.length > 0) {
-      const missingCount = alerts.filter((a) => a.alert_type === "missing_ledger").length;
-      const mismatchCount = alerts.filter((a) => a.alert_type === "amount_mismatch").length;
+    const missingCount = alerts.filter((a) => a.alert_type === "missing_ledger").length;
+    const mismatchCount = alerts.filter((a) => a.alert_type === "amount_mismatch").length;
+    const dayOfWeek = new Date().getUTCDay(); // 0 = Sun, 1 = Mon
 
+    // 6. Notify admin if discrepancies found (or weekly "all clean" on Mondays)
+    const shouldNotify = alerts.length > 0 || dayOfWeek === 1;
+
+    if (shouldNotify) {
       const adminEmails = await getAdminEmails();
       const resendKey = Deno.env.get("RESEND_API_KEY");
 
-      if (resendKey && adminEmails.length > 0) {
+      // ---- Email notification (only on alerts) ----
+      if (alerts.length > 0 && resendKey && adminEmails.length > 0) {
         const subject = `⚠️ myUNO Reconciliation: ${alerts.length} issue${alerts.length > 1 ? "s" : ""} found`;
         const body = [
           `Daily reconciliation for ${today} found ${alerts.length} discrepancies:`,
@@ -200,10 +204,76 @@ Deno.serve(async (req) => {
               text: body,
             }),
           });
-          console.log("[daily-reconciliation] Admin notification sent");
+          console.log("[daily-reconciliation] Admin email sent");
         } catch (emailError) {
-          console.error("[daily-reconciliation] Failed to send notification:", emailError);
+          console.error("[daily-reconciliation] Failed to send email:", emailError);
         }
+      }
+
+      // ---- Telegram notification ----
+      const telegramToken = Deno.env.get("TELEGRAM_BOT_TOKEN");
+      let telegramChatId: string | null = null;
+      try {
+        const { data: chatSetting } = await supabase
+          .from("system_settings")
+          .select("value")
+          .eq("key", "admin_telegram_chat_id")
+          .maybeSingle();
+        // value is jsonb — could be a JSON string "12345" or a number
+        const raw = chatSetting?.value as unknown;
+        if (typeof raw === "string" && raw.trim().length > 0) {
+          telegramChatId = raw.trim();
+        } else if (typeof raw === "number") {
+          telegramChatId = String(raw);
+        }
+      } catch (e) {
+        console.warn("[daily-reconciliation] Could not load admin_telegram_chat_id");
+      }
+
+      if (telegramToken && telegramChatId) {
+        const isClean = alerts.length === 0;
+        const text = isClean
+          ? [
+            `✅ <b>myUNO Reconciliation — All clean</b>`,
+            `Дата: ${today}`,
+            `Проверено заказов: ${orders.length}`,
+            `Расхождений: 0`,
+          ].join("\n")
+          : [
+            `⚠️ <b>myUNO Reconciliation Alert</b>`,
+            `Дата: ${today}`,
+            `Проверено заказов: ${orders.length}`,
+            `❌ Без леджера: ${missingCount}`,
+            `⚖️ Несоответствие сумм: ${mismatchCount}`,
+            ``,
+            `🔗 https://myuno.app/admin/finance`,
+          ].join("\n");
+
+        try {
+          const tgRes = await fetch(
+            `https://api.telegram.org/bot${telegramToken}/sendMessage`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                chat_id: telegramChatId,
+                text,
+                parse_mode: "HTML",
+                disable_web_page_preview: true,
+              }),
+            },
+          );
+          if (!tgRes.ok) {
+            const errText = await tgRes.text();
+            console.error("[daily-reconciliation] Telegram error:", tgRes.status, errText);
+          } else {
+            console.log("[daily-reconciliation] Telegram alert sent");
+          }
+        } catch (tgError) {
+          console.error("[daily-reconciliation] Telegram send failed:", tgError);
+        }
+      } else if (alerts.length > 0) {
+        console.warn("[daily-reconciliation] Telegram not configured (TELEGRAM_BOT_TOKEN or admin_telegram_chat_id missing)");
       }
     }
 

@@ -26075,6 +26075,55 @@ export type Database = {
         }
         Relationships: []
       }
+      mv_crm_pipeline_summary: {
+        Row: {
+          company_id: string | null
+          computed_at: string | null
+          contacts_count: number | null
+          conversion_rate_pct: number | null
+          deals_lost: number | null
+          deals_open: number | null
+          deals_total: number | null
+          deals_won: number | null
+          pipeline_value: number | null
+          stage_breakdown: Json | null
+          won_value: number | null
+        }
+        Relationships: []
+      }
+      mv_finance_summary_daily: {
+        Row: {
+          cancelled_count: number | null
+          completed_count: number | null
+          confirmed_count: number | null
+          currency: string | null
+          day: string | null
+          orders_count: number | null
+          platform_fees: number | null
+          total_revenue: number | null
+          vendor_payouts: number | null
+        }
+        Relationships: []
+      }
+      mv_portfolio_health_summary: {
+        Row: {
+          active_listings: number | null
+          company_id: string | null
+          computed_at: string | null
+          occupied_today: number | null
+          pending_tasks: number | null
+          properties_count: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "properties_management_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       owner_properties: {
         Row: {
           accessibility_features: string[] | null
@@ -28523,9 +28572,51 @@ export type Database = {
         Args: { _company_id: string; _user_id: string }
         Returns: string
       }
+      get_crm_pipeline_summary: {
+        Args: { _company_id?: string }
+        Returns: {
+          company_id: string | null
+          computed_at: string | null
+          contacts_count: number | null
+          conversion_rate_pct: number | null
+          deals_lost: number | null
+          deals_open: number | null
+          deals_total: number | null
+          deals_won: number | null
+          pipeline_value: number | null
+          stage_breakdown: Json | null
+          won_value: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "mv_crm_pipeline_summary"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_currency_rate: {
         Args: { p_base?: string; p_target?: string }
         Returns: number
+      }
+      get_finance_summary_daily: {
+        Args: { _days?: number }
+        Returns: {
+          cancelled_count: number | null
+          completed_count: number | null
+          confirmed_count: number | null
+          currency: string | null
+          day: string | null
+          orders_count: number | null
+          platform_fees: number | null
+          total_revenue: number | null
+          vendor_payouts: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "mv_finance_summary_daily"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       get_gmv_summary: {
         Args: { p_period_end?: string; p_period_start?: string }
@@ -28574,6 +28665,23 @@ export type Database = {
         Returns: string
       }
       get_platform_fee_percent: { Args: never; Returns: number }
+      get_portfolio_health_summary: {
+        Args: { _company_id?: string }
+        Returns: {
+          active_listings: number | null
+          company_id: string | null
+          computed_at: string | null
+          occupied_today: number | null
+          pending_tasks: number | null
+          properties_count: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "mv_portfolio_health_summary"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_product_commission: {
         Args: { p_product_id: string; p_vertical: string }
         Returns: number
@@ -28767,6 +28875,7 @@ export type Database = {
         Args: { p_order_id: string }
         Returns: undefined
       }
+      refresh_dashboard_materialized_views: { Args: never; Returns: undefined }
       refund_wallet_booking: {
         Args: { p_booking_id: string; p_user_id: string }
         Returns: boolean
