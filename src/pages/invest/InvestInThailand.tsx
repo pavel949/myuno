@@ -5,7 +5,7 @@ import { MiniAppLayout } from '@/components/miniapp';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { TrendingUp, Globe2, Building2, Plane, Banknote, ShieldCheck, ArrowRight, Briefcase } from 'lucide-react';
+import { TrendingUp, Globe2, Building2, Plane, Banknote, ShieldCheck, ArrowRight, Briefcase, BookOpen } from 'lucide-react';
 import { APP_ROUTES } from '@/lib/config/routes';
 
 const MACRO = [
