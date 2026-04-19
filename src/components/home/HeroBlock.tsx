@@ -23,24 +23,22 @@ function HeroSearchInput({ isRu }: { isRu: boolean }) {
   }, [query, navigate]);
 
   return (
-    <div className="flex items-center gap-2 rounded-[var(--radius-md)] px-4 py-3"
-      style={{
-        background: 'hsl(var(--bg-elevated))',
-        border: '1px solid hsl(var(--border))',
-      }}
+    <div
+      className="flex items-center gap-2 rounded-[var(--radius-md)] px-4 py-3 bg-[hsl(var(--bg-elevated))] border border-border focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background transition-shadow"
     >
-      <Search className="w-4 h-4 text-muted-foreground shrink-0" />
+      <Search className="w-4 h-4 text-muted-foreground shrink-0" aria-hidden />
       <input
         className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
         placeholder={isRu ? 'Поиск сервисов...' : 'Search services...'}
         value={query}
         onChange={e => setQuery(e.target.value)}
         onKeyDown={e => e.key === 'Enter' && handleSubmit()}
+        aria-label={isRu ? 'Поиск сервисов' : 'Search services'}
       />
       <button
         onClick={handleSubmit}
         aria-label={isRu ? 'Искать' : 'Search'}
-        className="flex items-center justify-center w-8 h-8 rounded-[var(--radius-sm)] bg-primary text-primary-foreground shrink-0 hover:bg-primary-hover active:scale-95 transition-all"
+        className="flex items-center justify-center w-9 h-9 rounded-[var(--radius-sm)] bg-primary text-primary-foreground shrink-0 hover:bg-primary-hover active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       >
         <ArrowRight className="w-4 h-4" />
       </button>
@@ -147,37 +145,31 @@ export const HeroBlock = memo(function HeroBlock() {
 
   if (!isDesktop) {
     return (
-      <div className="relative rounded-[var(--radius-lg)] overflow-hidden hero-dark-surface" style={{ boxShadow: 'var(--shadow-card)' }}>
-        <div className="absolute inset-0" style={{
-          background: 'linear-gradient(135deg, hsl(216 60% 7%) 0%, hsl(214 50% 14%) 100%)'
-        }} />
+      <div className="relative rounded-[var(--radius-lg)] overflow-hidden hero-dark-surface bg-gradient-to-br from-[hsl(var(--bg-base))] to-[hsl(var(--bg-card))]" style={{ boxShadow: 'var(--shadow-card)' }}>
         <div className="absolute inset-0 opacity-[0.04]" style={{
-          backgroundImage: 'radial-gradient(circle at 2px 2px, hsl(0 0% 100%) 1px, transparent 1px)',
+          backgroundImage: 'radial-gradient(circle at 2px 2px, hsl(var(--foreground)) 1px, transparent 1px)',
           backgroundSize: '24px 24px',
-        }} />
+        }} aria-hidden />
         
         <div className="relative px-4 py-6 space-y-4">
           {/* Location + SOS */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
-              <MapPin className="w-3.5 h-3.5 shrink-0" />
+              <MapPin className="w-3.5 h-3.5 shrink-0" aria-hidden />
               <span className="font-medium text-foreground">{isRu ? 'Пхукет' : 'Phuket'}</span>
-              <span className="text-muted-foreground/40">·</span>
-              <WeatherIcon className="w-3.5 h-3.5 shrink-0" />
+              <span className="text-muted-foreground/40" aria-hidden>·</span>
+              <WeatherIcon className="w-3.5 h-3.5 shrink-0" aria-hidden />
               <span>{weather?.temp || 31}°</span>
-              <span className="text-muted-foreground/40">·</span>
+              <span className="text-muted-foreground/40" aria-hidden>·</span>
               <span className="capitalize">{dayName}, {dateStr}</span>
             </div>
             <Link 
               to={APP_ROUTES.SOS}
-              className="sos-pulse flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-full)] shrink-0 min-w-[44px] min-h-[44px] justify-center"
-              style={{
-                background: 'rgba(239,68,68,0.15)',
-                border: '1px solid rgba(239,68,68,0.4)',
-              }}
+              aria-label="SOS"
+              className="sos-pulse flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-full)] shrink-0 min-w-[44px] min-h-[44px] justify-center bg-destructive/15 border border-destructive/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive focus-visible:ring-offset-2"
             >
-              <div className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
-              <span className="text-[11px] font-semibold text-warning">SOS</span>
+              <div className="w-2 h-2 rounded-full bg-destructive animate-pulse" aria-hidden />
+              <span className="text-[11px] font-semibold text-destructive">SOS</span>
             </Link>
           </div>
           
@@ -193,19 +185,17 @@ export const HeroBlock = memo(function HeroBlock() {
             {user && (loyaltyTier || (activityStreak && activityStreak > 0)) && (
               <div className="flex items-center gap-2 mt-3 flex-wrap">
                 {loyaltyTier && (
-                  <Link to="/wallet" className="flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-full)] text-xs min-h-[44px]"
-                    style={{ background: 'hsl(var(--muted))', border: '1px solid hsl(var(--border))' }}
+                  <Link to="/wallet" className="flex items-center gap-1.5 px-3 py-2 rounded-[var(--radius-full)] text-xs min-h-[36px] bg-muted border border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   >
-                    <Trophy className="w-3 h-3 text-primary" />
+                    <Trophy className="w-3 h-3 text-primary" aria-hidden />
                     <span className="font-medium text-foreground">{loyaltyTier.name}</span>
                     <span className="text-muted-foreground">{loyaltyTier.cashback}%</span>
                   </Link>
                 )}
                 {activityStreak && activityStreak > 0 ? (
-                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-full)] text-xs min-h-[44px]"
-                    style={{ background: 'hsl(var(--muted))', border: '1px solid hsl(var(--border))' }}
+                  <div className="flex items-center gap-1.5 px-3 py-2 rounded-[var(--radius-full)] text-xs min-h-[36px] bg-muted border border-border"
                   >
-                    <Flame className="w-3 h-3 text-warning" />
+                    <Flame className="w-3 h-3 text-warning" aria-hidden />
                     <span className="font-medium text-foreground">
                       {activityStreak} {isRu ? 'заказов' : 'orders'}
                     </span>
@@ -224,14 +214,11 @@ export const HeroBlock = memo(function HeroBlock() {
 
   // Desktop
   return (
-    <div className="relative rounded-[var(--radius-lg)] overflow-hidden p-8 xl:p-10 hero-dark-surface" style={{ boxShadow: 'var(--shadow-card)' }}>
-      <div className="absolute inset-0" style={{
-        background: 'linear-gradient(135deg, hsl(216 60% 7%) 0%, hsl(214 50% 14%) 100%)'
-      }} />
+    <div className="relative rounded-[var(--radius-lg)] overflow-hidden p-8 xl:p-10 hero-dark-surface bg-gradient-to-br from-[hsl(var(--bg-base))] to-[hsl(var(--bg-card))]" style={{ boxShadow: 'var(--shadow-card)' }}>
       <div className="absolute inset-0 opacity-[0.04]" style={{
-        backgroundImage: 'radial-gradient(circle at 2px 2px, hsl(0 0% 100%) 1px, transparent 1px)',
+        backgroundImage: 'radial-gradient(circle at 2px 2px, hsl(var(--foreground)) 1px, transparent 1px)',
         backgroundSize: '24px 24px',
-      }} />
+      }} aria-hidden />
       
       <div className="relative flex items-start justify-between gap-6">
         <div className="space-y-3 flex-1 min-w-0 pr-2">
@@ -243,36 +230,35 @@ export const HeroBlock = memo(function HeroBlock() {
           </h1>
           <div className="flex items-center gap-5 text-muted-foreground text-[15px] pt-1">
             <div className="flex items-center gap-1.5">
-              <MapPin className="w-4 h-4" />
+              <MapPin className="w-4 h-4" aria-hidden />
               <span className="font-medium text-foreground">{isRu ? 'Пхукет' : 'Phuket'}</span>
             </div>
-            <span className="text-muted-foreground/30">·</span>
+            <span className="text-muted-foreground/30" aria-hidden>·</span>
             <div className="flex items-center gap-1.5">
-              <WeatherIcon className="w-4 h-4" />
+              <WeatherIcon className="w-4 h-4" aria-hidden />
               <span>{weather?.temp || 31}°C</span>
             </div>
-            <span className="text-muted-foreground/30">·</span>
+            <span className="text-muted-foreground/30" aria-hidden>·</span>
             <div className="flex items-center gap-1.5">
-              <Calendar className="w-4 h-4" />
+              <Calendar className="w-4 h-4" aria-hidden />
               <span className="capitalize">{dayName}, {dateStr}</span>
             </div>
             {loyaltyTier && (
               <>
-                <span className="text-muted-foreground/30">·</span>
+                <span className="text-muted-foreground/30" aria-hidden>·</span>
                 <Link to="/wallet" className="flex items-center gap-1.5 hover:text-foreground transition-colors">
-                  <Trophy className="w-4 h-4 text-primary" />
+                  <Trophy className="w-4 h-4 text-primary" aria-hidden />
                   <span className="font-medium text-foreground">{loyaltyTier.name}</span>
-                  <span className="text-xs px-1.5 py-0.5 rounded-[var(--radius-full)]"
-                    style={{ background: 'hsl(var(--primary) / 0.12)' }}
+                  <span className="text-xs px-1.5 py-0.5 rounded-[var(--radius-full)] bg-primary/10"
                   >{loyaltyTier.cashback}% cashback</span>
                 </Link>
               </>
             )}
             {activityStreak && activityStreak > 0 ? (
               <>
-                <span className="text-muted-foreground/30">·</span>
+                <span className="text-muted-foreground/30" aria-hidden>·</span>
                 <div className="flex items-center gap-1.5">
-                  <Flame className="w-4 h-4 text-warning" />
+                  <Flame className="w-4 h-4 text-warning" aria-hidden />
                   <span>{activityStreak} {isRu ? 'заказов за 30д' : 'orders in 30d'}</span>
                 </div>
               </>
@@ -285,14 +271,11 @@ export const HeroBlock = memo(function HeroBlock() {
 
         <Link 
           to={APP_ROUTES.SOS}
-          className="sos-pulse flex items-center gap-2 px-4 py-2 rounded-[var(--radius-full)] transition-all hover:scale-105"
-          style={{
-            background: 'rgba(239,68,68,0.15)',
-            border: '1px solid rgba(239,68,68,0.4)',
-          }}
+          aria-label="SOS"
+          className="sos-pulse flex items-center gap-2 px-4 py-2 min-h-[44px] rounded-[var(--radius-full)] transition-all hover:scale-105 bg-destructive/15 border border-destructive/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive focus-visible:ring-offset-2"
         >
-          <div className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
-          <span className="text-sm font-semibold text-foreground">SOS</span>
+          <div className="w-2 h-2 rounded-full bg-destructive animate-pulse" aria-hidden />
+          <span className="text-sm font-semibold text-destructive">SOS</span>
         </Link>
       </div>
     </div>
