@@ -54,7 +54,7 @@ function buildUnifiedDayMeta(
 
   for (const b of bookings) {
     const st = (b.status || '').toLowerCase();
-    if (st === 'cancelled' || st === 'canceled') continue;
+    if (st === 'cancelled' || st === 'canceled' || st === 'refunded' || st === 'expired') continue;
 
     const nights = nightsInterval(b.check_in, b.check_out);
     const ch = resolveChannelKey(b, calendarChannelById);
@@ -88,6 +88,11 @@ function buildUnifiedDayMeta(
   return result;
 }
 
+/**
+ * Unified calendar hook — reads SSOT (orders vertical='property') + iCal-imported
+ * legacy property_bookings (only those carrying source_calendar_id, since those
+ * are still produced by the iCal importer until full migration to orders).
+ */
 export function useStaysUnifiedCalendar(propertyId: string | undefined) {
   return useQuery({
     queryKey: ['stays-unified-calendar', propertyId],
@@ -99,23 +104,53 @@ export function useStaysUnifiedCalendar(propertyId: string | undefined) {
         return { unifiedDayMeta: new Map(), bookings: [] };
       }
 
-      const [bookingsRes, calsRes] = await Promise.all([
+      const [ordersRes, icalBookingsRes, calsRes] = await Promise.all([
+        // SSOT: orders table (vertical='property')
+        supabase
+          .from('orders')
+          .select(`
+            id, start_at, end_at, status, metadata,
+            order_items!inner (resource_id, item_type, metadata)
+          `)
+          .eq('vertical', 'property')
+          .eq('order_items.item_type', 'property')
+          .eq('order_items.resource_id', propertyId)
+          .is('deleted_at', null),
+        // iCal-imported bookings (legacy table, still source for external channels)
         supabase
           .from('property_bookings')
           .select(
             'id, check_in, check_out, source, source_calendar_id, conflict_with_booking_id, status',
           )
-          .eq('property_id', propertyId),
+          .eq('property_id', propertyId)
+          .not('source_calendar_id', 'is', null),
         supabase
           .from('property_external_calendars')
           .select('id, channel_type')
           .eq('property_id', propertyId),
       ]);
 
-      if (bookingsRes.error) throw bookingsRes.error;
+      if (ordersRes.error) throw ordersRes.error;
+      if (icalBookingsRes.error) throw icalBookingsRes.error;
       if (calsRes.error) throw calsRes.error;
 
-      const bookings = (bookingsRes.data ?? []) as PropertyBookingRow[];
+      // Normalize orders → PropertyBookingRow shape
+      const orderBookings: PropertyBookingRow[] = (ordersRes.data ?? []).map((o) => {
+        const meta = (o.metadata && typeof o.metadata === 'object' ? o.metadata : {}) as Record<string, unknown>;
+        return {
+          id: o.id,
+          check_in: (o.start_at || '').slice(0, 10),
+          check_out: (o.end_at || '').slice(0, 10),
+          source: (meta.source as string) || 'manual',
+          source_calendar_id: null,
+          conflict_with_booking_id: null,
+          status: o.status,
+        };
+      }).filter((b) => b.check_in && b.check_out);
+
+      const icalBookings = (icalBookingsRes.data ?? []) as PropertyBookingRow[];
+      const bookings = [...orderBookings, ...icalBookings];
+
       const calendarChannelById = new Map<string, string | null>();
       for (const c of calsRes.data ?? []) {
         calendarChannelById.set(c.id, c.channel_type);
