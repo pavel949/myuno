@@ -153,7 +153,7 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
             }}
           />
 
-          <div className={cn("relative grid gap-0 h-[60px] px-2 max-w-[420px] mx-auto", gridCols)}>
+          <div className={cn("relative grid gap-0 h-[60px] px-2 max-w-[480px] mx-auto", gridCols)}>
             {leftItems.map(({ path, icon: Icon, labelEn, labelRu }) => {
               const active = isActive(path);
               const label = language === 'ru' ? labelRu : labelEn;
