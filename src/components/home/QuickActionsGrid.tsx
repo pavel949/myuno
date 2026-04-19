@@ -168,7 +168,7 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
         onTouchStart={() => handlePrefetch(action.path)}
         className={cn(
           animClass,
-          'relative flex items-start gap-3 p-4 rounded-[var(--radius-md)] h-[100px] text-left',
+          'relative flex items-center gap-3 p-3 rounded-[var(--radius-md)] min-h-[64px] text-left',
           'transition-all duration-150 active:scale-[0.97]',
           isLocked && 'opacity-50',
         )}
@@ -178,16 +178,19 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
           boxShadow: 'var(--shadow-card)',
         }}
       >
-        <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: `${color}1A` }}>
-          <Icon style={{ width: 18, height: 18, color }} strokeWidth={2} />
+        <div
+          className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+          style={{ background: `${color}1A` }}
+        >
+          <Icon style={{ width: 20, height: 20, color }} strokeWidth={2} />
         </div>
-        <div className="flex-1 min-w-0">
-          <span className="text-[13px] font-semibold text-foreground leading-tight line-clamp-2">{label}</span>
-        </div>
+        <span className="flex-1 min-w-0 text-[13px] font-semibold text-foreground leading-tight line-clamp-2">
+          {label}
+        </span>
         {isLocked ? (
-          <Lock className="w-3.5 h-3.5 text-muted-foreground absolute bottom-3 right-3" />
+          <Lock className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
         ) : (
-          <ChevronRight className="w-4 h-4 text-muted-foreground absolute bottom-3 right-3" />
+          <ChevronRight className="w-4 h-4 text-muted-foreground/60 shrink-0" />
         )}
       </button>
     );
