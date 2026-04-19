@@ -519,6 +519,10 @@ export const TrustAccountsPage = lazy(() => import('@/pages/mc/finance/TrustAcco
 export const TaxCenterPage = lazy(() => import('@/pages/mc/finance/TaxCenterPage'));
 export const StatementApprovalsPage = lazy(() => import('@/pages/mc/finance/StatementApprovalsPage'));
 export const SignatureRequestsPage = lazy(() => import('@/pages/mc/documents/SignatureRequestsPage'));
+export const ApprovalsPage = lazy(() => import('@/pages/mc/operations/ApprovalsPage'));
+export const TeamShiftsPage = lazy(() => import('@/pages/mc/team/TeamShiftsPage'));
+export const ProcurementPage = lazy(() => import('@/pages/mc/operations/ProcurementPage'));
+export const OwnerAnalyticsPage = lazy(() => import('@/pages/mc/insights/OwnerAnalyticsPage'));
 export const OwnerStatementsInbox = lazy(() => import('@/pages/owner-portal/OwnerStatementsInbox'));
 export const OwnerSignaturesInbox = lazy(() => import('@/pages/owner-portal/OwnerSignaturesInbox'));
 export const OwnerOwnersPage = lazy(() => import('@/pages/owner/OwnerOwnersPage'));
