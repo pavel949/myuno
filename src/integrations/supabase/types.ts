@@ -3059,150 +3059,94 @@ export type Database = {
       }
       chat_message_flags: {
         Row: {
-          action_taken: string | null
           auto_detected: boolean | null
           booking_id: string | null
           confidence_score: number | null
           created_at: string
           detected_pattern: string | null
-          flag_type: string
+          flag_type: string | null
           id: string
+          is_restricted: boolean | null
           message_id: string | null
           property_id: string | null
+          reason: string | null
           reviewed_at: string | null
           reviewed_by: string | null
-          severity: string
-          status: string
-          warning_acknowledged_at: string | null
-          warning_shown_to_sender: boolean | null
+          severity: string | null
+          status: string | null
+          updated_at: string
+          user_id: string | null
+          warning_level: number | null
         }
         Insert: {
-          action_taken?: string | null
           auto_detected?: boolean | null
           booking_id?: string | null
           confidence_score?: number | null
           created_at?: string
           detected_pattern?: string | null
-          flag_type: string
+          flag_type?: string | null
           id?: string
+          is_restricted?: boolean | null
           message_id?: string | null
           property_id?: string | null
+          reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
-          severity?: string
-          status?: string
-          warning_acknowledged_at?: string | null
-          warning_shown_to_sender?: boolean | null
+          severity?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id?: string | null
+          warning_level?: number | null
         }
         Update: {
-          action_taken?: string | null
           auto_detected?: boolean | null
           booking_id?: string | null
           confidence_score?: number | null
           created_at?: string
           detected_pattern?: string | null
-          flag_type?: string
+          flag_type?: string | null
           id?: string
+          is_restricted?: boolean | null
           message_id?: string | null
           property_id?: string | null
+          reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
-          severity?: string
-          status?: string
-          warning_acknowledged_at?: string | null
-          warning_shown_to_sender?: boolean | null
+          severity?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id?: string | null
+          warning_level?: number | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "chat_message_flags_booking_id_fkey"
-            columns: ["booking_id"]
-            isOneToOne: false
-            referencedRelation: "property_bookings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "chat_message_flags_message_id_fkey"
-            columns: ["message_id"]
-            isOneToOne: false
-            referencedRelation: "property_chat_messages"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "chat_message_flags_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "owner_properties"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "chat_message_flags_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "chat_message_flags_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "v_marketplace_listings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "chat_message_flags_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "v_owner_properties"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "chat_message_flags_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "v_properties_public"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       chat_violation_history: {
         Row: {
           created_at: string
+          details: Json | null
           id: string
           is_restricted: boolean | null
-          last_violation_at: string
-          notes: string | null
-          restricted_until: string | null
-          updated_at: string
-          user_id: string
-          violation_count: number
-          violation_type: string
-          warning_level: number
+          user_id: string | null
+          violation_type: string | null
+          warning_level: number | null
         }
         Insert: {
           created_at?: string
+          details?: Json | null
           id?: string
           is_restricted?: boolean | null
-          last_violation_at?: string
-          notes?: string | null
-          restricted_until?: string | null
-          updated_at?: string
-          user_id: string
-          violation_count?: number
-          violation_type: string
-          warning_level?: number
+          user_id?: string | null
+          violation_type?: string | null
+          warning_level?: number | null
         }
         Update: {
           created_at?: string
+          details?: Json | null
           id?: string
           is_restricted?: boolean | null
-          last_violation_at?: string
-          notes?: string | null
-          restricted_until?: string | null
-          updated_at?: string
-          user_id?: string
-          violation_count?: number
-          violation_type?: string
-          warning_level?: number
+          user_id?: string | null
+          violation_type?: string | null
+          warning_level?: number | null
         }
         Relationships: []
       }
@@ -6002,87 +5946,85 @@ export type Database = {
       }
       developer_impersonation_log: {
         Row: {
-          action: string
           admin_id: string
-          context: Json | null
-          created_at: string
           developer_id: string
+          ended_at: string | null
           id: string
+          reason: string | null
+          started_at: string
         }
         Insert: {
-          action?: string
           admin_id: string
-          context?: Json | null
-          created_at?: string
           developer_id: string
+          ended_at?: string | null
           id?: string
+          reason?: string | null
+          started_at?: string
         }
         Update: {
-          action?: string
           admin_id?: string
-          context?: Json | null
-          created_at?: string
           developer_id?: string
+          ended_at?: string | null
           id?: string
+          reason?: string | null
+          started_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "developer_impersonation_log_developer_id_fkey"
-            columns: ["developer_id"]
-            isOneToOne: false
-            referencedRelation: "developers"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       developer_users: {
         Row: {
+          accepted_at: string | null
           auth_user_id: string | null
-          created_at: string | null
+          created_at: string
           developer_id: string
-          email: string
+          email: string | null
           full_name: string | null
           id: string
           invite_expires_at: string | null
           invite_token: string | null
+          invited_at: string
           invited_by: string | null
           last_login_at: string | null
-          phone: string | null
-          project_access: string[] | null
-          role: string
+          role: string | null
           status: string | null
+          updated_at: string
+          user_id: string | null
         }
         Insert: {
+          accepted_at?: string | null
           auth_user_id?: string | null
-          created_at?: string | null
+          created_at?: string
           developer_id: string
-          email: string
+          email?: string | null
           full_name?: string | null
           id?: string
           invite_expires_at?: string | null
           invite_token?: string | null
+          invited_at?: string
           invited_by?: string | null
           last_login_at?: string | null
-          phone?: string | null
-          project_access?: string[] | null
-          role: string
+          role?: string | null
           status?: string | null
+          updated_at?: string
+          user_id?: string | null
         }
         Update: {
+          accepted_at?: string | null
           auth_user_id?: string | null
-          created_at?: string | null
+          created_at?: string
           developer_id?: string
-          email?: string
+          email?: string | null
           full_name?: string | null
           id?: string
           invite_expires_at?: string | null
           invite_token?: string | null
+          invited_at?: string
           invited_by?: string | null
           last_login_at?: string | null
-          phone?: string | null
-          project_access?: string[] | null
-          role?: string
+          role?: string | null
           status?: string | null
+          updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -6282,68 +6224,65 @@ export type Database = {
       disputes: {
         Row: {
           admin_notes: string | null
+          against_user_id: string | null
+          booking_id: string | null
+          category: string | null
           created_at: string
-          description: string
-          dispute_type: string
+          description: string | null
+          dispute_type: string | null
           evidence_urls: string[] | null
           id: string
           order_id: string | null
           provider_id: string | null
+          raised_by: string | null
           resolution: string | null
           resolved_at: string | null
           resolved_by: string | null
           status: string
           updated_at: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           admin_notes?: string | null
+          against_user_id?: string | null
+          booking_id?: string | null
+          category?: string | null
           created_at?: string
-          description: string
-          dispute_type?: string
+          description?: string | null
+          dispute_type?: string | null
           evidence_urls?: string[] | null
           id?: string
           order_id?: string | null
           provider_id?: string | null
+          raised_by?: string | null
           resolution?: string | null
           resolved_at?: string | null
           resolved_by?: string | null
           status?: string
           updated_at?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           admin_notes?: string | null
+          against_user_id?: string | null
+          booking_id?: string | null
+          category?: string | null
           created_at?: string
-          description?: string
-          dispute_type?: string
+          description?: string | null
+          dispute_type?: string | null
           evidence_urls?: string[] | null
           id?: string
           order_id?: string | null
           provider_id?: string | null
+          raised_by?: string | null
           resolution?: string | null
           resolved_at?: string | null
           resolved_by?: string | null
           status?: string
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "disputes_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "disputes_provider_id_fkey"
-            columns: ["provider_id"]
-            isOneToOne: false
-            referencedRelation: "providers"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       doctors: {
         Row: {
@@ -7733,67 +7672,40 @@ export type Database = {
         Row: {
           created_at: string
           id: string
-          inspection_type: string
-          inspector_id: string
-          items: Json
+          inspection_type: string | null
+          inspector_id: string | null
+          items: Json | null
           notes: string | null
-          property_id: string
+          photos: string[] | null
+          property_id: string | null
+          status: string | null
+          updated_at: string
         }
         Insert: {
           created_at?: string
           id?: string
-          inspection_type: string
-          inspector_id: string
-          items?: Json
+          inspection_type?: string | null
+          inspector_id?: string | null
+          items?: Json | null
           notes?: string | null
-          property_id: string
+          photos?: string[] | null
+          property_id?: string | null
+          status?: string | null
+          updated_at?: string
         }
         Update: {
           created_at?: string
           id?: string
-          inspection_type?: string
-          inspector_id?: string
-          items?: Json
+          inspection_type?: string | null
+          inspector_id?: string | null
+          items?: Json | null
           notes?: string | null
-          property_id?: string
+          photos?: string[] | null
+          property_id?: string | null
+          status?: string | null
+          updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "inventory_inspections_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "owner_properties"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "inventory_inspections_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "inventory_inspections_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "v_marketplace_listings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "inventory_inspections_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "v_owner_properties"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "inventory_inspections_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "v_properties_public"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       inventory_listings: {
         Row: {
@@ -8459,6 +8371,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      juristic_documents: {
+        Row: {
+          created_at: string
+          document_type: string | null
+          file_url: string | null
+          id: string
+          property_id: string | null
+          title: string | null
+          updated_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          document_type?: string | null
+          file_url?: string | null
+          id?: string
+          property_id?: string | null
+          title?: string | null
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          document_type?: string | null
+          file_url?: string | null
+          id?: string
+          property_id?: string | null
+          title?: string | null
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: []
       }
       juristic_requests: {
         Row: {
@@ -10893,13 +10838,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "masked_channels_developer_user_id_fkey"
-            columns: ["developer_user_id"]
-            isOneToOne: false
-            referencedRelation: "developer_users"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "masked_channels_lead_id_fkey"
             columns: ["lead_id"]
             isOneToOne: false
@@ -11812,60 +11750,60 @@ export type Database = {
           category: string | null
           content: string | null
           created_at: string
-          entity_id: string | null
-          entity_type: string | null
+          entity_id: string
+          entity_type: string
+          flagged_reason: string | null
           id: string
-          item_type: string
-          metadata: Json | null
+          item_type: string | null
+          payload: Json | null
           photo_count: number | null
+          priority: number | null
           rating: number | null
-          rejection_reason: string | null
           reviewed_at: string | null
           reviewed_by: string | null
           status: string
-          submitted_by: string
           submitted_by_name: string | null
-          title: string
+          title: string | null
           updated_at: string
         }
         Insert: {
           category?: string | null
           content?: string | null
           created_at?: string
-          entity_id?: string | null
-          entity_type?: string | null
+          entity_id: string
+          entity_type: string
+          flagged_reason?: string | null
           id?: string
-          item_type: string
-          metadata?: Json | null
+          item_type?: string | null
+          payload?: Json | null
           photo_count?: number | null
+          priority?: number | null
           rating?: number | null
-          rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
-          submitted_by: string
           submitted_by_name?: string | null
-          title: string
+          title?: string | null
           updated_at?: string
         }
         Update: {
           category?: string | null
           content?: string | null
           created_at?: string
-          entity_id?: string | null
-          entity_type?: string | null
+          entity_id?: string
+          entity_type?: string
+          flagged_reason?: string | null
           id?: string
-          item_type?: string
-          metadata?: Json | null
+          item_type?: string | null
+          payload?: Json | null
           photo_count?: number | null
+          priority?: number | null
           rating?: number | null
-          rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
-          submitted_by?: string
           submitted_by_name?: string | null
-          title?: string
+          title?: string | null
           updated_at?: string
         }
         Relationships: []
