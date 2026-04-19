@@ -10,10 +10,28 @@ export type CommercialPropertyType =
   | 'warehouse'
   | 'restaurant_space'
   | 'hotel_building'
+  | 'boutique_hotel'
+  | 'resort'
+  | 'serviced_apartment_building'
+  | 'hostel'
   | 'mixed_use'
   | 'medical_clinic'
   | 'coworking'
   | 'showroom';
+
+/** All hotel-class commercial property types — operational hospitality assets. */
+export const HOTEL_PROPERTY_TYPES: CommercialPropertyType[] = [
+  'hotel_building',
+  'boutique_hotel',
+  'resort',
+  'serviced_apartment_building',
+  'hostel',
+];
+
+export function isHotelType(type: string | null | undefined): boolean {
+  if (!type) return false;
+  return (HOTEL_PROPERTY_TYPES as string[]).includes(type);
+}
 
 export type LandPlotType =
   | 'land_residential'
@@ -33,12 +51,47 @@ export const COMMERCIAL_TYPES: TaxonomyLabel[] = [
   { id: 'retail', labelEn: 'Retail', labelRu: 'Ритейл', icon: '🛍️' },
   { id: 'warehouse', labelEn: 'Warehouse', labelRu: 'Склад', icon: '🏬' },
   { id: 'restaurant_space', labelEn: 'Restaurant / Café', labelRu: 'Ресторан / Кафе', icon: '🍽️' },
-  { id: 'hotel_building', labelEn: 'Hotel Building', labelRu: 'Отель', icon: '🏨' },
+  { id: 'hotel_building', labelEn: 'Hotel', labelRu: 'Отель', icon: '🏨' },
+  { id: 'boutique_hotel', labelEn: 'Boutique Hotel', labelRu: 'Бутик-отель', icon: '🏨' },
+  { id: 'resort', labelEn: 'Resort', labelRu: 'Курорт', icon: '🌴' },
+  { id: 'serviced_apartment_building', labelEn: 'Serviced Apartments', labelRu: 'Сервисные апарты', icon: '🏨' },
+  { id: 'hostel', labelEn: 'Hostel', labelRu: 'Хостел', icon: '🛏️' },
   { id: 'mixed_use', labelEn: 'Mixed-use', labelRu: 'Смешанного назначения', icon: '🏙️' },
   { id: 'medical_clinic', labelEn: 'Medical / Clinic', labelRu: 'Клиника', icon: '⚕️' },
   { id: 'coworking', labelEn: 'Coworking', labelRu: 'Коворкинг', icon: '💼' },
   { id: 'showroom', labelEn: 'Showroom', labelRu: 'Шоу-рум', icon: '🪑' },
 ];
+
+export const HOTEL_TYPES: TaxonomyLabel[] = COMMERCIAL_TYPES.filter((t) =>
+  (HOTEL_PROPERTY_TYPES as string[]).includes(t.id),
+);
+
+export const HOTEL_LICENSE_TYPES: TaxonomyLabel[] = [
+  { id: 'full_hotel_license', labelEn: 'Full Hotel License', labelRu: 'Полная лицензия отеля' },
+  { id: 'non_hotel_license', labelEn: 'Non-Hotel License', labelRu: 'Без лицензии отеля' },
+  { id: 'pending', labelEn: 'License Pending', labelRu: 'В процессе получения' },
+];
+
+export const HOTEL_MANAGEMENT_STATUSES: TaxonomyLabel[] = [
+  { id: 'owner_operated', labelEn: 'Owner-operated', labelRu: 'Управляется собственником', icon: '👤' },
+  { id: 'under_hma', labelEn: 'Under HMA', labelRu: 'Под управлением оператора', icon: '🤝' },
+  { id: 'seeking_operator', labelEn: 'Seeking Operator', labelRu: 'Ищет оператора', icon: '🔎' },
+  { id: 'for_lease', labelEn: 'Building for Lease', labelRu: 'Здание в аренду', icon: '🔑' },
+];
+
+export function getHotelLicenseLabel(id: string | null | undefined, isRu: boolean): string | null {
+  if (!id) return null;
+  const t = HOTEL_LICENSE_TYPES.find((x) => x.id === id);
+  if (!t) return id;
+  return isRu ? t.labelRu : t.labelEn;
+}
+
+export function getHotelManagementStatusLabel(id: string | null | undefined, isRu: boolean): string | null {
+  if (!id) return null;
+  const t = HOTEL_MANAGEMENT_STATUSES.find((x) => x.id === id);
+  if (!t) return id;
+  return isRu ? t.labelRu : t.labelEn;
+}
 
 export const LAND_TYPES: TaxonomyLabel[] = [
   { id: 'land_residential', labelEn: 'Residential land', labelRu: 'Жилое назначение', icon: '🏘️' },

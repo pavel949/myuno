@@ -171,6 +171,10 @@ export const APP_ROUTES = {
   LAND_BROWSE: '/property/land/browse',
   LAND_DETAIL: (id: string) => `/property/land/${id}`,
 
+  // ── Hotels (under Property Hub / Commercial) — persona-gated (business / investor) ──
+  HOTELS: '/property/hotels',
+  HOTEL_DETAIL: (id: string) => `/property/hotels/${id}`,
+
   // ── Restaurants ──
   RESTAURANTS: '/restaurants',
   RESTAURANT_DETAIL: (id: string) => `/restaurants/${id}`,
