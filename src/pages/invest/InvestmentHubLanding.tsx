@@ -523,8 +523,8 @@ export default function InvestmentHubLanding() {
                 </p>
               </div>
             </div>
-            <Button onClick={() => navigate(APP_ROUTES.INVEST_RAISE)} className="w-full gap-2">
-              {isRu ? 'Подать заявку' : 'Submit application'}
+            <Button onClick={() => navigate(APP_ROUTES.INVEST_SUBMIT)} className="w-full gap-2">
+              {isRu ? 'Подать сделку' : 'Submit your opportunity'}
               <ArrowRight className="h-4 w-4" />
             </Button>
           </section>
