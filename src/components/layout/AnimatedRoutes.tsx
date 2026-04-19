@@ -247,7 +247,6 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="invest/dashboard" element={<Navigate to={APP_ROUTES.INVEST_DASHBOARD} replace />} />
           <Route path="invest/raise" element={<Navigate to={APP_ROUTES.INVEST_RAISE} replace />} />
           <Route path="invest/market" element={<Navigate to={APP_ROUTES.INVEST_MARKET} replace />} />
-          <Route path="invest/deals" element={<Navigate to={APP_ROUTES.INVEST_DEALS} replace />} />
           <Route path="invest/network" element={<Navigate to={APP_ROUTES.INVEST_NETWORK} replace />} />
           <Route path="invest/execution" element={<Navigate to={APP_ROUTES.INVEST_EXECUTION} replace />} />
           <Route path="invest/:id" element={<InvestIdRedirect />} />
@@ -267,14 +266,9 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/developers" element={<Navigate to={APP_ROUTES.DEVELOPERS} replace />} />
         <Route path="/developers/:id" element={<DeveloperIdRedirect />} />
         <Route path="/complexes" element={<Navigate to={APP_ROUTES.COMPLEXES} replace />} />
-        <Route path="/invest" element={<Navigate to={APP_ROUTES.INVEST} replace />} />
         <Route path="/invest/market" element={<Navigate to={APP_ROUTES.INVEST_MARKET} replace />} />
-        <Route path="/invest/deals" element={<Navigate to={APP_ROUTES.INVEST_DEALS} replace />} />
         <Route path="/invest/network" element={<Navigate to={APP_ROUTES.INVEST_NETWORK} replace />} />
         <Route path="/invest/execution" element={<Navigate to={APP_ROUTES.INVEST_EXECUTION} replace />} />
-        <Route path="/invest/dashboard" element={<Navigate to={APP_ROUTES.INVEST_DASHBOARD} replace />} />
-        <Route path="/invest/raise" element={<Navigate to={APP_ROUTES.INVEST_RAISE} replace />} />
-        <Route path="/invest/:id" element={<InvestIdRedirect />} />
         
         {/* ── Restaurants ── */}
         <Route path="/food" element={<Navigate to={APP_ROUTES.RESTAURANTS} replace />} />
@@ -430,6 +424,10 @@ export const AnimatedRoutes: React.FC = () => {
         {/* Specific invest sub-routes BEFORE catch-all :id */}
         <Route path="/invest/thailand" element={<LazyPage><Pages.InvestInThailand /></LazyPage>} />
         <Route path="/invest/pitch" element={<LazyPage><Pages.InvestmentPitch /></LazyPage>} />
+        {/* Phase 3 — universal capital marketplace public routes */}
+        <Route path={APP_ROUTES.INVEST_SUBMIT} element={<LazyPage><Pages.InvestmentSubmit /></LazyPage>} />
+        <Route path={APP_ROUTES.INVEST_DEALS_BOARD} element={<LazyPage><Pages.InvestmentDeals /></LazyPage>} />
+        <Route path="/invest/deal/:id" element={<LazyPage><Pages.InvestmentDealPublicDetail /></LazyPage>} />
         <Route path="/invest/business/:slug" element={<LazyPage><Pages.InvestmentBusinessDetail /></LazyPage>} />
         <Route path={APP_ROUTES.INVEST_DETAIL(':id')} element={<LazyPage><Pages.InvestmentDetail /></LazyPage>} />
         {/* Legacy: /invest/:id → /invest/project/:id */}

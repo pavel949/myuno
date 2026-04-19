@@ -11,3 +11,6 @@ export { default as RaiseFunding } from './RaiseFunding';
 export { default as InvestmentBusinessDetail } from './InvestmentBusinessDetail';
 export { default as InvestmentPitch } from './InvestmentPitch';
 export { default as InvestInThailand } from './InvestInThailand';
+export { default as InvestmentSubmit } from './InvestmentSubmit';
+export { default as InvestmentDeals } from './InvestmentDeals';
+export { default as InvestmentDealPublicDetail } from './InvestmentDealPublicDetail';
