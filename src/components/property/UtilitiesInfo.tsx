@@ -46,10 +46,10 @@ export function UtilitiesInfo({ electricity, water, internet, className }: Utili
       <div className="space-y-3">
         {/* Electricity */}
         {electricity && (
-          <div className="p-3 rounded-lg bg-yellow-500/5 border border-yellow-500/20">
+          <div className="p-3 rounded-lg bg-warning/5 border border-warning/20">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <Zap className="w-5 h-5 text-yellow-500" />
+                <Zap className="w-5 h-5 text-warning" />
                 <span className="font-medium">{isRu ? 'Электричество' : 'Electricity'}</span>
               </div>
               <Badge variant={electricity.included ? 'default' : 'secondary'}>
@@ -75,10 +75,10 @@ export function UtilitiesInfo({ electricity, water, internet, className }: Utili
 
         {/* Water */}
         {water && (
-          <div className="p-3 rounded-lg bg-blue-500/5 border border-blue-500/20">
+          <div className="p-3 rounded-lg bg-info/5 border border-info/20">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <Droplets className="w-5 h-5 text-blue-500" />
+                <Droplets className="w-5 h-5 text-info" />
                 <span className="font-medium">{isRu ? 'Вода' : 'Water'}</span>
               </div>
               <Badge variant={water.included ? 'default' : 'secondary'}>
