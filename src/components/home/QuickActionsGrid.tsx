@@ -166,17 +166,15 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
         key={action.id}
         onClick={(e) => handleClick(action, e)}
         onTouchStart={() => handlePrefetch(action.path)}
+        aria-label={label}
+        aria-disabled={isLocked || undefined}
         className={cn(
           animClass,
-          'relative flex items-center gap-3 p-3 rounded-[var(--radius-md)] min-h-[64px] text-left',
+          'relative flex items-center gap-3 p-3 rounded-[var(--radius-md)] min-h-[64px] text-left bg-card border border-border shadow-[var(--shadow-card)]',
           'transition-all duration-150 active:scale-[0.97]',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
           isLocked && 'opacity-50',
         )}
-        style={{
-          background: 'hsl(var(--card))',
-          border: '1px solid hsl(var(--border))',
-          boxShadow: 'var(--shadow-card)',
-        }}
       >
         <div
           className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
@@ -204,10 +202,10 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
         key={action.id}
         onClick={(e) => handleClick(action, e)}
         onTouchStart={() => handlePrefetch(action.path)}
-        className="flex items-center gap-2 h-10 px-3.5 rounded-[var(--radius-full)] shrink-0 snap-start whitespace-nowrap transition-all active:scale-[0.95]"
-        style={{ background: 'hsl(var(--bg-elevated))' }}
+        aria-label={isRu ? action.labelRu : action.label}
+        className="flex items-center gap-2 h-11 px-3.5 rounded-[var(--radius-full)] shrink-0 snap-start whitespace-nowrap transition-all active:scale-[0.95] bg-[hsl(var(--bg-elevated))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       >
-        <Icon style={{ width: 16, height: 16, color }} strokeWidth={2} />
+        <Icon style={{ width: 16, height: 16, color }} strokeWidth={2} aria-hidden />
         <span className="text-[11px] font-medium text-muted-foreground">{isRu ? action.labelRu : action.label}</span>
       </button>
     );
