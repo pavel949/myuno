@@ -2292,6 +2292,10 @@ export type Database = {
       }
       capital_contacts: {
         Row: {
+          budget_currency: string | null
+          budget_max: number | null
+          budget_min: number | null
+          buyer_type: string | null
           company_name: string | null
           contact_type: string | null
           created_at: string
@@ -2299,19 +2303,29 @@ export type Database = {
           first_name: string
           id: string
           investor_profile: Json | null
+          last_contact_at: string | null
           last_name: string
+          name: string | null
           notes: string | null
           origin_investment_deal_id: string | null
           origin_investor_inquiry_id: string | null
           phone: string | null
+          preferred_channel: string | null
           source: string | null
           status: string | null
           tags: string[] | null
+          telegram_id: string | null
           updated_at: string
           user_id: string
+          warmth: string | null
           whatsapp: string | null
+          whatsapp_phone: string | null
         }
         Insert: {
+          budget_currency?: string | null
+          budget_max?: number | null
+          budget_min?: number | null
+          buyer_type?: string | null
           company_name?: string | null
           contact_type?: string | null
           created_at?: string
@@ -2319,19 +2333,29 @@ export type Database = {
           first_name: string
           id?: string
           investor_profile?: Json | null
+          last_contact_at?: string | null
           last_name?: string
+          name?: string | null
           notes?: string | null
           origin_investment_deal_id?: string | null
           origin_investor_inquiry_id?: string | null
           phone?: string | null
+          preferred_channel?: string | null
           source?: string | null
           status?: string | null
           tags?: string[] | null
+          telegram_id?: string | null
           updated_at?: string
           user_id: string
+          warmth?: string | null
           whatsapp?: string | null
+          whatsapp_phone?: string | null
         }
         Update: {
+          budget_currency?: string | null
+          budget_max?: number | null
+          budget_min?: number | null
+          buyer_type?: string | null
           company_name?: string | null
           contact_type?: string | null
           created_at?: string
@@ -2339,17 +2363,23 @@ export type Database = {
           first_name?: string
           id?: string
           investor_profile?: Json | null
+          last_contact_at?: string | null
           last_name?: string
+          name?: string | null
           notes?: string | null
           origin_investment_deal_id?: string | null
           origin_investor_inquiry_id?: string | null
           phone?: string | null
+          preferred_channel?: string | null
           source?: string | null
           status?: string | null
           tags?: string[] | null
+          telegram_id?: string | null
           updated_at?: string
           user_id?: string
+          warmth?: string | null
           whatsapp?: string | null
+          whatsapp_phone?: string | null
         }
         Relationships: [
           {
@@ -2477,10 +2507,18 @@ export type Database = {
           channel: string | null
           contact_id: string | null
           created_at: string
+          delivered: boolean | null
+          follow_up_date: string | null
+          follow_up_done: boolean | null
           id: string
+          message_text: string | null
           notes: string | null
           opened_at: string | null
+          project_id: string | null
+          read: boolean | null
+          replied: boolean | null
           replied_at: string | null
+          response_type: string | null
           scheduled_at: string | null
           sent_at: string | null
           status: string | null
@@ -2494,10 +2532,18 @@ export type Database = {
           channel?: string | null
           contact_id?: string | null
           created_at?: string
+          delivered?: boolean | null
+          follow_up_date?: string | null
+          follow_up_done?: boolean | null
           id?: string
+          message_text?: string | null
           notes?: string | null
           opened_at?: string | null
+          project_id?: string | null
+          read?: boolean | null
+          replied?: boolean | null
           replied_at?: string | null
+          response_type?: string | null
           scheduled_at?: string | null
           sent_at?: string | null
           status?: string | null
@@ -2511,10 +2557,18 @@ export type Database = {
           channel?: string | null
           contact_id?: string | null
           created_at?: string
+          delivered?: boolean | null
+          follow_up_date?: string | null
+          follow_up_done?: boolean | null
           id?: string
+          message_text?: string | null
           notes?: string | null
           opened_at?: string | null
+          project_id?: string | null
+          read?: boolean | null
+          replied?: boolean | null
           replied_at?: string | null
+          response_type?: string | null
           scheduled_at?: string | null
           sent_at?: string | null
           status?: string | null
@@ -2537,12 +2591,22 @@ export type Database = {
             referencedRelation: "capital_contacts"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "capital_outreach_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "capital_projects"
+            referencedColumns: ["id"]
+          },
         ]
       }
       capital_pipeline: {
         Row: {
           amount: number | null
+          campaign_id: string | null
           closed_at: string | null
+          commission_expected: number | null
+          commission_received: number | null
           contact_id: string | null
           created_at: string
           currency: string | null
@@ -2552,18 +2616,26 @@ export type Database = {
           id: string
           investment_deal_id: string | null
           investor_inquiry_id: string | null
+          lost_reason: string | null
           notes: string | null
+          price_agreed: number | null
+          price_currency: string | null
           probability: number | null
           project_id: string | null
           source_kind: string | null
           stage: string | null
+          stage_changed_at: string | null
+          unit_number: string | null
           updated_at: string
           user_id: string
           won: boolean | null
         }
         Insert: {
           amount?: number | null
+          campaign_id?: string | null
           closed_at?: string | null
+          commission_expected?: number | null
+          commission_received?: number | null
           contact_id?: string | null
           created_at?: string
           currency?: string | null
@@ -2573,18 +2645,26 @@ export type Database = {
           id?: string
           investment_deal_id?: string | null
           investor_inquiry_id?: string | null
+          lost_reason?: string | null
           notes?: string | null
+          price_agreed?: number | null
+          price_currency?: string | null
           probability?: number | null
           project_id?: string | null
           source_kind?: string | null
           stage?: string | null
+          stage_changed_at?: string | null
+          unit_number?: string | null
           updated_at?: string
           user_id: string
           won?: boolean | null
         }
         Update: {
           amount?: number | null
+          campaign_id?: string | null
           closed_at?: string | null
+          commission_expected?: number | null
+          commission_received?: number | null
           contact_id?: string | null
           created_at?: string
           currency?: string | null
@@ -2594,16 +2674,28 @@ export type Database = {
           id?: string
           investment_deal_id?: string | null
           investor_inquiry_id?: string | null
+          lost_reason?: string | null
           notes?: string | null
+          price_agreed?: number | null
+          price_currency?: string | null
           probability?: number | null
           project_id?: string | null
           source_kind?: string | null
           stage?: string | null
+          stage_changed_at?: string | null
+          unit_number?: string | null
           updated_at?: string
           user_id?: string
           won?: boolean | null
         }
         Relationships: [
+          {
+            foreignKeyName: "capital_pipeline_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "capital_campaigns"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "capital_pipeline_contact_id_fkey"
             columns: ["contact_id"]
@@ -2701,10 +2793,12 @@ export type Database = {
       capital_templates: {
         Row: {
           body: string
+          buyer_type: string | null
           channel: string | null
           created_at: string
           id: string
           is_active: boolean | null
+          language: string | null
           name: string
           subject: string | null
           type: string | null
@@ -2714,10 +2808,12 @@ export type Database = {
         }
         Insert: {
           body?: string
+          buyer_type?: string | null
           channel?: string | null
           created_at?: string
           id?: string
           is_active?: boolean | null
+          language?: string | null
           name: string
           subject?: string | null
           type?: string | null
@@ -2727,10 +2823,12 @@ export type Database = {
         }
         Update: {
           body?: string
+          buyer_type?: string | null
           channel?: string | null
           created_at?: string
           id?: string
           is_active?: boolean | null
+          language?: string | null
           name?: string
           subject?: string | null
           type?: string | null
