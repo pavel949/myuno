@@ -74,7 +74,7 @@ export interface ComputedPnL {
   };
   kpis: {
     capRate: number | null;       // NOI / propertyValue
-    cashOnCash: number | null;    // (Net + interest add-back) / cashInvested -> simplified to NOI / cashInvested
+    cashOnCash: number | null;    // Net Income / cashInvested (after debt service & depreciation)
     dscr: number | null;          // NOI / annual debt service
     grossMarginPct: number;       // NOI / GrossRevenue
     breakEvenOccupancy: number | null; // occupancy needed to cover OpEx
@@ -190,11 +190,16 @@ export function computePnL(opts: {
 
   const ds = annualDebtService(loans);
 
-  const fixedAnnualOpex = totOpex; // simplification; in v2 split fixed/variable
+  // Break-even occupancy: solve gross_revenue * (1 - variable_fee%) = fixed_opex
+  // Variable fees (mgmt + channel) scale with revenue, so they shrink the effective margin.
+  // fixed_opex excludes those auto fees; budgeted OpEx is treated as fixed.
+  const variableFeePct = ((assumptions.mgmtFeePct ?? 0) + (assumptions.channelFeePct ?? 0)) / 100;
+  const fixedAnnualOpex = sumRows(mergedExpenses.filter(r => r.category !== 'management_fee' && r.category !== 'platform_fee')).reduce((s, x) => s + x, 0) * costMult;
   const annualNightCapacity = drivers.months.reduce((s, m) => s + (m.nights || 0), 0);
   const avgRevPerNight = (drivers.months.reduce((s, m) => s + (m.adr || 0) * (m.nights || 0), 0) / Math.max(annualNightCapacity, 1)) || 0;
-  const breakEvenOcc = avgRevPerNight > 0
-    ? Math.min(1, fixedAnnualOpex / (avgRevPerNight * annualNightCapacity))
+  const annualRevenueAtFullOcc = avgRevPerNight * annualNightCapacity * (1 - variableFeePct) * revMult;
+  const breakEvenOcc = annualRevenueAtFullOcc > 0
+    ? Math.min(1, fixedAnnualOpex / annualRevenueAtFullOcc)
     : null;
 
   return {
