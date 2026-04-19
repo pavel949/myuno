@@ -252,7 +252,6 @@ export const untypedTables = {
   crmCustomFields: () => supabase.from('crm_custom_fields'),
   crmCustomFieldValues: () => supabase.from('crm_custom_field_values'),
   crmScoringRules: () => supabase.from('crm_scoring_rules'),
-  crmScoreLog: () => supabase.from('crm_score_log'),
   crmCompanies: () => supabase.from('crm_companies'),
   crmAssignmentRules: () => supabase.from('crm_assignment_rules'),
   crmActivities: () => supabase.from('crm_activities'),
