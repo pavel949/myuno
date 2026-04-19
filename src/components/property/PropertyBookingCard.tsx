@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { usePropertyBlockedDates } from '@/hooks/usePropertyAvailability';
+import { usePropertyUnavailableDates } from '@/hooks/usePropertyUnavailableDates';
 import { PropertyRentalTerms } from '@/hooks/useProperties';
 import { calculatePricing, buildPricingRulesFromSeasons, type PricingRules } from '@/lib/pricingEngine';
 import { usePropertyRateSeasons } from '@/hooks/usePropertyRateSeasons';
@@ -72,6 +73,21 @@ export function PropertyBookingCard({
   
   const { data: blockedDates } = usePropertyBlockedDates(propertyId);
   const { data: rateSeasons } = usePropertyRateSeasons(propertyId);
+  const { data: unavailableDates } = usePropertyUnavailableDates(propertyId);
+
+  // Index unavailable dates by yyyy-MM-dd for O(1) lookup
+  const unavailableMap = useMemo(() => {
+    const map = new Map<string, 'booked' | 'blocked' | 'checkout_only'>();
+    unavailableDates?.forEach((u) => {
+      map.set(format(u.date, 'yyyy-MM-dd'), u.kind);
+    });
+    return map;
+  }, [unavailableDates]);
+
+  const checkoutOnlyDates = useMemo(
+    () => unavailableDates?.filter((u) => u.kind === 'checkout_only').map((u) => u.date) ?? [],
+    [unavailableDates],
+  );
 
   const nights = useMemo(() => {
     if (!dateRange?.from || !dateRange?.to) return 0;
