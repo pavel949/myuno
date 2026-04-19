@@ -42,7 +42,7 @@ export default function InvestmentDealPublicDetail() {
 
   const intentLabel = getIntentLabel(deal.deal_intent, 'en');
   const categoryLabel = getCategoryLabel(deal.category, 'en');
-  const rangeLabel = getCapitalRangeLabel(deal.capital_range, 'en');
+  const rangeLabel = getCapitalRangeLabel(deal.capital_range);
 
   return (
     <>
