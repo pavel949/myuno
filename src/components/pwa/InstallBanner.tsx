@@ -72,19 +72,19 @@ export const InstallBanner = forwardRef<HTMLDivElement>(function InstallBanner(_
           animate={{ opacity: 1, height: 'auto' }}
           exit={{ opacity: 0, height: 0 }}
           transition={{ duration: 0.2 }}
-          className="overflow-hidden"
+          className="overflow-hidden w-full max-w-[1536px] mx-auto px-4 md:px-6 lg:px-8 xl:px-10 pt-2"
         >
           <div className="rounded-xl border border-border/60 bg-card p-3">
             {!showInstructions ? (
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 shrink-0 rounded-lg bg-primary/8 flex items-center justify-center">
+                <div className="w-9 h-9 shrink-0 rounded-lg bg-primary/10 flex items-center justify-center">
                   <Download className="h-4 w-4 text-primary" />
                 </div>
                 <p className="flex-1 text-xs text-muted-foreground">{t.install}</p>
                 <Button onClick={handleInstall} size="sm" variant="outline" disabled={isLoading} className="shrink-0 h-8 px-3 text-xs">
                   {isLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : t.download}
                 </Button>
-                <button onClick={handleDismiss} className="p-1 text-muted-foreground hover:text-foreground" aria-label={t.close}>
+                <button onClick={handleDismiss} className="p-1 text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded" aria-label={t.close}>
                   <X className="h-3.5 w-3.5" />
                 </button>
               </div>
@@ -92,7 +92,7 @@ export const InstallBanner = forwardRef<HTMLDivElement>(function InstallBanner(_
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <p className="text-xs font-medium text-foreground">{isIOS ? t.iosTitle : t.androidTitle}</p>
-                  <button onClick={handleDismiss} className="p-1 text-muted-foreground hover:text-foreground">
+                  <button onClick={handleDismiss} className="p-1 text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded" aria-label={t.close}>
                     <X className="h-3.5 w-3.5" />
                   </button>
                 </div>
