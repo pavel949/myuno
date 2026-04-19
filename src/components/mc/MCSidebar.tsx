@@ -59,6 +59,7 @@ export const navigationGroups: NavGroup[] = [
     defaultOpen: false,
     items: [
       { title: 'Performance', titleRu: 'Показатели', path: APP_ROUTES.MC_PERFORMANCE, icon: BarChart3 },
+      { title: 'Owner Analytics', titleRu: 'Аналитика собственников', path: APP_ROUTES.MC_OWNER_ANALYTICS, icon: Crown },
       { title: 'Reviews', titleRu: 'Отзывы', path: APP_ROUTES.MC_REVIEWS, icon: Star },
     ],
   },
@@ -131,6 +132,9 @@ export const navigationGroups: NavGroup[] = [
     defaultOpen: false,
     items: [
       { title: 'Staff & Access', titleRu: 'Сотрудники', path: APP_ROUTES.MC_STAFF, icon: Users },
+      { title: 'Shifts & Timesheets', titleRu: 'Смены и табель', path: APP_ROUTES.MC_TEAM_SHIFTS, icon: CalendarClock },
+      { title: 'Approvals', titleRu: 'Согласования', path: APP_ROUTES.MC_APPROVALS, icon: ShieldCheck },
+      { title: 'Procurement', titleRu: 'Закупки', path: APP_ROUTES.MC_PROCUREMENT, icon: PackageOpen },
       { title: 'Subscription', titleRu: 'Подписка', path: APP_ROUTES.MC_SUBSCRIPTION, icon: CreditCard },
       { title: 'Help Center', titleRu: 'Справочник', path: APP_ROUTES.MC_HELP, icon: BookOpen },
     ],
