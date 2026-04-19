@@ -28,9 +28,11 @@ export default function CommercialDetail() {
   const { id } = useParams<{ id: string }>();
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
+  const { user } = useAuth();
   const isRu = language === 'ru';
 
   const { data: property, isLoading, error } = useCommercialProperty(id);
+  const isHotel = isHotelType(property?.property_type);
 
   if (isLoading) {
     return (
