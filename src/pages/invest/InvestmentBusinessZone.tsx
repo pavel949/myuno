@@ -2,14 +2,15 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useInvestmentProjects, BUSINESS_CATEGORIES } from '@/hooks/useInvestmentProjects';
-import { InvestmentCard } from '@/components/invest';
+import { useBusinessListings } from '@/hooks/useBusinessListings';
+import { InvestmentCard, AnonymizedListingCard } from '@/components/invest';
 import { MiniAppLayout } from '@/components/miniapp';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Card, CardContent } from '@/components/ui/card';
-import { Briefcase, Megaphone, ArrowRight, Construction } from 'lucide-react';
+import { Briefcase, Megaphone, ArrowRight, Construction, Lock } from 'lucide-react';
 import { APP_ROUTES } from '@/lib/config/routes';
 
 export default function InvestmentBusinessZone() {
