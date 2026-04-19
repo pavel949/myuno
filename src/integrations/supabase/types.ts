@@ -16090,8 +16090,10 @@ export type Database = {
           owner_id: string
           planned_amount: number
           property_id: string
+          scenario: string
           transaction_type: string
           updated_at: string
+          year: number | null
         }
         Insert: {
           budget_month: string
@@ -16103,8 +16105,10 @@ export type Database = {
           owner_id: string
           planned_amount?: number
           property_id: string
+          scenario?: string
           transaction_type?: string
           updated_at?: string
+          year?: number | null
         }
         Update: {
           budget_month?: string
@@ -16116,8 +16120,10 @@ export type Database = {
           owner_id?: string
           planned_amount?: number
           property_id?: string
+          scenario?: string
           transaction_type?: string
           updated_at?: string
+          year?: number | null
         }
         Relationships: [
           {
@@ -16707,6 +16713,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      property_financial_models: {
+        Row: {
+          assumptions: Json
+          capex: Json
+          company_id: string | null
+          created_at: string
+          drivers: Json
+          id: string
+          loans: Json
+          model_year: number
+          notes: string | null
+          owner_id: string
+          property_id: string | null
+          scenario: string
+          updated_at: string
+        }
+        Insert: {
+          assumptions?: Json
+          capex?: Json
+          company_id?: string | null
+          created_at?: string
+          drivers?: Json
+          id?: string
+          loans?: Json
+          model_year: number
+          notes?: string | null
+          owner_id: string
+          property_id?: string | null
+          scenario?: string
+          updated_at?: string
+        }
+        Update: {
+          assumptions?: Json
+          capex?: Json
+          company_id?: string | null
+          created_at?: string
+          drivers?: Json
+          id?: string
+          loans?: Json
+          model_year?: number
+          notes?: string | null
+          owner_id?: string
+          property_id?: string | null
+          scenario?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       property_financials: {
         Row: {
