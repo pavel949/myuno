@@ -70,10 +70,10 @@ export default function InvestmentKnowledgeZone() {
       </Helmet>
       <MiniAppLayout title={isRu ? 'Знания' : 'Knowledge'} showSearch={false}>
         <div className="space-y-5 pb-10">
-          <Card className="bg-gradient-to-br from-blue-500/10 to-violet-500/10 border-blue-500/20">
-            <CardContent className="p-5 space-y-2">
+          <Card className="bg-gradient-to-br from-primary/10 to-accent/10 border-primary/20">
+            <CardContent className="p-5 space-y-3">
               <div className="flex items-center gap-2">
-                <BookOpen className="h-5 w-5 text-blue-600" />
+                <BookOpen className="h-5 w-5 text-primary" />
                 <h1 className="font-bold text-lg">
                   {isRu ? 'Бизнес в Таиланде 101' : 'Doing Business in Thailand 101'}
                 </h1>
@@ -83,6 +83,11 @@ export default function InvestmentKnowledgeZone() {
                   ? 'Гайды и кейсы по структурам, налогам, визам и индустриям. Контент пополняется.'
                   : 'Guides and case studies on structures, taxes, visas and industries. Content is growing.'}
               </p>
+              <Button asChild size="sm" className="gap-1.5">
+                <Link to="/invest/articles">
+                  {isRu ? 'Открыть базу знаний' : 'Open knowledge base'} <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </Button>
             </CardContent>
           </Card>
 
@@ -93,7 +98,7 @@ export default function InvestmentKnowledgeZone() {
                 <Card key={idx} className="hover:border-primary/30 transition-colors">
                   <CardContent className="p-4 space-y-3">
                     <div className="flex items-center gap-2">
-                      <div className={`w-9 h-9 rounded-lg flex items-center justify-center bg-${topic.color}-500/10 text-${topic.color}-600 dark:text-${topic.color}-400`}>
+                      <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-primary/10 text-primary">
                         <Icon className="h-4 w-4" />
                       </div>
                       <h3 className="font-semibold text-sm">
@@ -115,17 +120,21 @@ export default function InvestmentKnowledgeZone() {
           </div>
 
           <Card className="border-dashed">
-            <CardContent className="p-6 text-center space-y-2">
+            <CardContent className="p-6 text-center space-y-3">
               <Construction className="h-8 w-8 text-muted-foreground mx-auto" />
               <h3 className="font-semibold">
-                {isRu ? 'Полный база знаний скоро' : 'Full knowledge base coming soon'}
+                {isRu ? 'Больше материалов скоро' : 'More content coming soon'}
               </h3>
               <p className="text-sm text-muted-foreground">
                 {isRu
-                  ? 'Готовим подробные статьи и интерактивные калькуляторы. Подпишитесь на обновления.'
-                  : 'Detailed articles and interactive calculators are in the works. Stay tuned.'}
+                  ? 'Готовим подробные статьи и интерактивные калькуляторы.'
+                  : 'Detailed articles and interactive calculators are in the works.'}
               </p>
-              <Badge variant="outline">Phase 3</Badge>
+              <Button asChild variant="outline" size="sm">
+                <Link to="/invest/articles">
+                  {isRu ? 'Все статьи' : 'All articles'} <ArrowRight className="h-3.5 w-3.5 ml-1" />
+                </Link>
+              </Button>
             </CardContent>
           </Card>
         </div>
