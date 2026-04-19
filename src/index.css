@@ -543,12 +543,15 @@ html.light .hero-dots {
   background-image: radial-gradient(circle at 2px 2px, hsl(160 79% 24%) 1px, transparent 1px);
 }
 
-/* Hero dark surface — forces light text on always-dark hero background */
+/* Hero dark surface — forces light text on always-dark hero background.
+   Also overrides --bg-base/--bg-card so the gradient stays dark in light mode. */
 .hero-dark-surface {
   --foreground: 0 0% 98%;
   --muted-foreground: 220 10% 70%;
   --border: 220 15% 25%;
   --muted: 220 20% 18%;
+  --bg-base: 220 25% 10%;
+  --bg-card: 220 22% 14%;
   --bg-elevated: 220 20% 15%;
   --card: 220 20% 12%;
   --primary-foreground: 0 0% 100%;
