@@ -85,10 +85,10 @@ export default function InvestmentServicesZone() {
       </Helmet>
       <MiniAppLayout title={isRu ? 'Услуги' : 'Services'} showSearch={false}>
         <div className="space-y-5 pb-10">
-          <Card className="bg-gradient-to-br from-violet-500/10 to-rose-500/10 border-violet-500/20">
+          <Card className="bg-gradient-to-br from-primary/10 to-accent/10 border-primary/20">
             <CardContent className="p-5 space-y-2">
               <div className="flex items-center gap-2">
-                <ShieldCheck className="h-5 w-5 text-violet-600" />
+                <ShieldCheck className="h-5 w-5 text-primary" />
                 <h1 className="font-bold text-lg">
                   {isRu ? 'Capital Advisory Marketplace' : 'Capital Advisory Marketplace'}
                 </h1>
@@ -108,7 +108,7 @@ export default function InvestmentServicesZone() {
                 <Card key={idx} className="hover:border-primary/30 transition-colors">
                   <CardContent className="p-4 space-y-2">
                     <div className="flex items-start justify-between">
-                      <div className="w-9 h-9 rounded-lg bg-violet-500/10 text-violet-600 dark:text-violet-400 flex items-center justify-center">
+                      <div className="w-9 h-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
                         <Icon className="h-4 w-4" />
                       </div>
                       {svc.badgeRu && (

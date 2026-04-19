@@ -113,7 +113,7 @@ export default function InvestmentSubmit() {
           <h1 className="text-3xl md:text-4xl font-bold mb-2">Submit your opportunity</h1>
           <p className="text-muted-foreground">Шаг {step} из {totalSteps}</p>
           <div className="mt-3 h-1 bg-muted rounded-full overflow-hidden">
-            <motion.div className="h-full bg-emerald-500" initial={{ width: 0 }} animate={{ width: `${pct}%` }} />
+            <motion.div className="h-full bg-primary" initial={{ width: 0 }} animate={{ width: `${pct}%` }} />
           </div>
         </div>
 
@@ -123,7 +123,7 @@ export default function InvestmentSubmit() {
               <h2 className="text-xl font-semibold mb-2">What are you looking for?</h2>
               <RadioGroup value={form.deal_intent} onValueChange={(v) => set('deal_intent', v as DealIntent)}>
                 {DEAL_INTENTS.map((opt) => (
-                  <Label key={opt.key} htmlFor={opt.key} className="flex items-start gap-3 p-4 rounded-lg border border-border cursor-pointer hover:border-emerald-500/50 has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-500/5">
+                  <Label key={opt.key} htmlFor={opt.key} className="flex items-start gap-3 p-4 rounded-lg border border-border cursor-pointer hover:border-primary/50 has-[:checked]:border-primary has-[:checked]:bg-primary/5">
                     <RadioGroupItem id={opt.key} value={opt.key} className="mt-1" />
                     <div className="flex-1">
                       <div className="font-medium flex items-center gap-2">
@@ -282,11 +282,11 @@ export default function InvestmentSubmit() {
               <ArrowLeft className="w-4 h-4 mr-1" /> Back
             </Button>
             {step < totalSteps ? (
-              <Button disabled={!canNext()} onClick={() => setStep((s) => (s + 1) as Step)} className="bg-emerald-500 hover:bg-emerald-600">
+              <Button disabled={!canNext()} onClick={() => setStep((s) => (s + 1) as Step)}>
                 Next <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
             ) : (
-              <Button disabled={!canNext() || submitMutation.isPending} onClick={handleSubmit} className="bg-emerald-500 hover:bg-emerald-600">
+              <Button disabled={!canNext() || submitMutation.isPending} onClick={handleSubmit}>
                 {submitMutation.isPending ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Check className="w-4 h-4 mr-1" />}
                 Submit opportunity
               </Button>
