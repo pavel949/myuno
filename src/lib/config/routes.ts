@@ -130,15 +130,22 @@ export const APP_ROUTES = {
   CAPITAL_DEVELOPERS_PENDING: '/capital/developers/pending',
   ADMIN_NEWBUILDS: '/admin/newbuilds',
 
-  // ── Investment (under Property Hub) ──
-  INVEST: '/property/invest',
-  INVEST_MARKET: '/property/invest/market',
-  INVEST_DEALS: '/property/invest/deals',
-  INVEST_NETWORK: '/property/invest/network',
-  INVEST_EXECUTION: '/property/invest/execution',
-  INVEST_DASHBOARD: '/property/invest/dashboard',
-  INVEST_RAISE: '/property/invest/raise',
-  INVEST_DETAIL: (id: string) => `/property/invest/${id}`,
+  // ── Investment Hub (top-level — multi-asset capital + business) ──
+  INVEST: '/invest',
+  INVEST_QUIZ: '/invest/quiz',
+  INVEST_REAL_ESTATE: '/invest/real-estate',
+  INVEST_BUSINESS: '/invest/business',
+  INVEST_KNOWLEDGE: '/invest/knowledge',
+  INVEST_SERVICES: '/invest/services',
+  INVEST_DASHBOARD: '/invest/dashboard',
+  INVEST_RAISE: '/invest/raise',
+  INVEST_DETAIL: (id: string) => `/invest/${id}`,
+  // Internal ops console (admin-only Market/Deals/Network/Execution shell)
+  INVEST_OPS: '/invest/ops',
+  INVEST_MARKET: '/invest/ops/market',
+  INVEST_DEALS: '/invest/ops/deals',
+  INVEST_NETWORK: '/invest/ops/network',
+  INVEST_EXECUTION: '/invest/ops/execution',
 
   // ── STAYS (guest short-term search, Russian UI) ──
   STAYS_SEARCH: '/stays/search',
@@ -237,8 +244,8 @@ export const APP_ROUTES = {
   TAX_NAV: '/tax',
   CONTRACT_ANALYSIS: '/legal/contract-analysis',
 
-  // ── INVEST Cluster ──
-  INVEST_CLUSTER: '/invest-hub',
+  // ── INVEST Cluster (legacy alias → INVEST) ──
+  INVEST_CLUSTER: '/invest',
 
   // ── Experiences (tours + activities) ──
   EXPERIENCES: '/experiences',
@@ -472,7 +479,14 @@ export const LEGACY_REDIRECTS: Record<string, string> = {
   '/new-developments': '/newbuilds',
   /** Catalog moved to Property Hub; themed /newbuilds/tools remain separate routes. */
   '/newbuilds/projects': '/property/offplan',
-  '/invest-hub': '/property/invest',
+  '/invest-hub': '/invest',
+  '/property/invest': '/invest',
+  '/property/invest/dashboard': '/invest/dashboard',
+  '/property/invest/raise': '/invest/raise',
+  '/property/invest/market': '/invest/ops/market',
+  '/property/invest/deals': '/invest/ops/deals',
+  '/property/invest/network': '/invest/ops/network',
+  '/property/invest/execution': '/invest/ops/execution',
 } as const;
 
 /**
@@ -518,6 +532,8 @@ export function isValidRoute(path: string): boolean {
     /^\/property\/offplan\/[^/]+$/,
     /^\/property\/developers\/[^/]+$/,
     /^\/property\/invest\/[^/]+$/,
+    /^\/invest\/[^/]+$/,
+    /^\/invest\/ops\/[^/]+$/,
     /^\/market\/category\/[^/]+$/,
     /^\/market\/product\/[^/]+$/,
     /^\/yachts\/[^/]+$/,
