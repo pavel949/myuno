@@ -116,6 +116,9 @@ export function useCommercialProperties(filters: CommercialFilters = {}) {
       }
       if (filters.minAreaSqm !== undefined) query = query.gte('floor_area_sqm', filters.minAreaSqm);
       if (filters.maxAreaSqm !== undefined) query = query.lte('floor_area_sqm', filters.maxAreaSqm);
+      if (filters.excludeHotels) {
+        query = query.not('property_type', 'in', `(${HOTEL_PROPERTY_TYPES.join(',')})`);
+      }
 
       const { data, error } = await query;
       if (error) throw error;
