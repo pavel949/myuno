@@ -138,6 +138,7 @@ export interface PropertyFormData {
 
 const initialFormData: PropertyFormData = {
   asset_class: 'residential',
+  title: '',
   title_ru: '',
   internal_name: '',
   address: '',

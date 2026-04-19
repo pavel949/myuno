@@ -125,6 +125,7 @@ interface CanonicalPropertyFormProps {
 // Map Admin/Vendor fields to Owner format
 function mapToOwnerFormat(data: CanonicalPropertyFormData): PropertyFormData {
   return {
+    asset_class: ((data as { asset_class?: 'residential' | 'commercial' | 'land' }).asset_class) || 'residential',
     title: data.title_en || data.title || '',
     title_ru: data.title_ru || '',
     internal_name: data.internal_name || '',
