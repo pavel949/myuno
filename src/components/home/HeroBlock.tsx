@@ -121,20 +121,29 @@ export const HeroBlock = memo(function HeroBlock() {
     firstName: null, loyaltyTier: null, activityStreak: 0,
   };
 
-  const greeting = useMemo(() => {
-    const hour = new Date().getHours();
-    const name = firstName ? `, ${firstName}` : '';
-    if (hour < 12) return (isRu ? 'Доброе утро' : 'Good morning') + name;
-    if (hour < 18) return (isRu ? 'Добрый день' : 'Good afternoon') + name;
-    return (isRu ? 'Добрый вечер' : 'Good evening') + name;
-  }, [isRu, firstName]);
+  // Force Phuket timezone (UTC+7) so greeting/date match the user's actual location
+  const phuketNow = useMemo(() => {
+    const fmt = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Asia/Bangkok',
+      hour: 'numeric',
+      hour12: false,
+    });
+    const hour = parseInt(fmt.format(new Date()), 10);
+    return { hour, date: new Date() };
+  }, []);
 
-  const WeatherIcon = weather?.condition === 'rainy' ? CloudRain 
+  const greeting = useMemo(() => {
+    const name = firstName ? `, ${firstName}` : '';
+    if (phuketNow.hour < 12) return (isRu ? 'Доброе утро' : 'Good morning') + name;
+    if (phuketNow.hour < 18) return (isRu ? 'Добрый день' : 'Good afternoon') + name;
+    return (isRu ? 'Добрый вечер' : 'Good evening') + name;
+  }, [isRu, firstName, phuketNow.hour]);
+
+  const WeatherIcon = weather?.condition === 'rainy' ? CloudRain
     : weather?.condition === 'cloudy' ? Cloud : Sun;
 
-  const now = new Date();
-  const dayName = now.toLocaleDateString(isRu ? 'ru-RU' : 'en-US', { weekday: 'short' });
-  const dateStr = now.toLocaleDateString(isRu ? 'ru-RU' : 'en-US', { day: 'numeric', month: 'short' });
+  const dayName = phuketNow.date.toLocaleDateString(isRu ? 'ru-RU' : 'en-US', { weekday: 'short', timeZone: 'Asia/Bangkok' });
+  const dateStr = phuketNow.date.toLocaleDateString(isRu ? 'ru-RU' : 'en-US', { day: 'numeric', month: 'short', timeZone: 'Asia/Bangkok' });
 
   if (!isDesktop) {
     return (

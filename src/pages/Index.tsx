@@ -74,7 +74,7 @@ const Index = () => {
 
       <PullToRefresh onRefresh={handleRefresh} key={refreshKey}>
         <div className="px-4 md:px-6 lg:px-8 xl:px-10 py-5 pb-20 md:pb-8 w-full max-w-[1536px] mx-auto space-y-6 lg:space-y-10">
-          
+
           {/* ── HERO ── */}
           {isFirstVisit ? (
             <>
@@ -97,21 +97,14 @@ const Index = () => {
             </RevealOnScroll>
           )}
 
-          {/* ── FEATURED PROPERTIES (only for relevant personas) ── */}
+          {/* ── FEATURED PROPERTIES (rentals are the #1 reason foreigners visit) ── */}
           {showPropertySections && (
             <RevealOnScroll>
               <FeaturedPropertiesCarousel />
             </RevealOnScroll>
           )}
 
-          {/* ── PROPERTY TOUR BANNER (only for investors/residents/owners) ── */}
-          {showPropertySections && (
-            <RevealOnScroll>
-              <PropertyTourBanner />
-            </RevealOnScroll>
-          )}
-
-          {/* ── DISCOVERY: restaurants, events, home services (all users) ── */}
+          {/* ── DISCOVERY: restaurants, events, home services (broad appeal) ── */}
           {showPropertySections && (
             <RevealOnScroll>
               <HomeDiscoveryCarousel />
@@ -125,11 +118,6 @@ const Index = () => {
             </Suspense>
           )}
 
-          {/* ── WHATSAPP CTA ── */}
-          <RevealOnScroll>
-            <WhatsAppCTA />
-          </RevealOnScroll>
-
           {/* ── EVENTS FEED (public, not logged in) ── */}
           {!isLoggedIn && (
             <Suspense fallback={null}>
@@ -137,17 +125,29 @@ const Index = () => {
             </Suspense>
           )}
 
+          {/* ── TRUST STATS (social proof before final CTAs) ── */}
+          <RevealOnScroll>
+            <TrustStats />
+          </RevealOnScroll>
+
+          {/* ── PROPERTY TOUR BANNER (high-intent secondary CTA) ── */}
+          {showPropertySections && (
+            <RevealOnScroll>
+              <PropertyTourBanner />
+            </RevealOnScroll>
+          )}
+
+          {/* ── WHATSAPP CTA (final concierge offer) ── */}
+          <RevealOnScroll>
+            <WhatsAppCTA />
+          </RevealOnScroll>
+
           {/* ── OFFLINE EMERGENCY ── */}
           {isOffline && (
             <RevealOnScroll>
               <OfflineEmergencyCard compact />
             </RevealOnScroll>
           )}
-
-          {/* ── TRUST STATS ── */}
-          <RevealOnScroll>
-            <TrustStats />
-          </RevealOnScroll>
 
         </div>
       </PullToRefresh>
