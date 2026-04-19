@@ -1,126 +1,121 @@
 
+# План D: максимальная безопасная чистка БД (359 → ~300)
 
-# Database Audit Plan — myUNO
+## Цель
+Уменьшить количество таблиц с **359 до ~300** в три фазы. Каждая фаза независимо безопасна, имеет откат, и не требует переписывания работающих фич.
 
-## Diagnosis (factual)
+## Фаза 1 — Удалить полностью мёртвые таблицы (12 шт., 0 риска)
 
-**Current state:** 381 `public` tables · 22 views · 28 RPCs.
+Таблицы с **нулевыми ссылками в коде** (даже в Edge Functions):
+- `juristic_documents` — 0 ref
+- `crm_score_log` — 0 ref
+- `cohort_analytics`, `marketplace_product_attributes` (упоминаются только в типах)
+- `experience_media`, `category_suggestions` — 1 ref каждая, в неиспользуемом коде
 
-| Status | Count | % |
-|---|---:|---:|
-| **Empty (0 rows)** | 198 | **52%** |
-| Tiny (1–10 rows) | 101 | 27% |
-| Active (>10 rows) | 82 | 21% |
-| Frontend hits (`.from()`) | ~165 unique | 43% |
-| **Defined but never queried** | ~216 | **57%** |
+**Действие:** `DROP TABLE IF EXISTS ... CASCADE` в одной миграции.
 
-**Top 10 by data volume:** `property_activity_log` (4382), `calendar_sync_logs` (1481), `property_operational_tasks` (1030), `property_financials` (669), `task_entity_map` (662), `property_bookings` (648), `listings` (500), `lookup_values` (406), `crm_contacts` (386), `analytics_events` (348).
+---
 
-## Root causes of bloat
+## Фаза 2 — Удалить мёртвый код + связанные таблицы (~30 таблиц)
 
-1. **Three parallel CRMs** running cold next to a working one:
-   - ✅ `crm_contacts` (386), `crm_pipelines` (7), `crm_pipeline_stages` (58) — **the only one with data**
-   - ❌ `capital_*` (8 tables, all 0 rows) — built last week, duplicates `crm_*`
-   - ❌ `deal_*` (7 tables, all 0 rows) — generic deal pipeline, never wired
-   - ❌ `crm_workflows / sequences / scoring / web_forms / quotes / emails / meetings / documents / companies / custom_fields` — 18 empty enterprise-CRM tables
+Найдено **~17 хуков**, которые **никогда не импортируются** из остального приложения:
+- `useCrmSequences`, `useCrmQuotes`, `useCrmMeetings`, `useCrmEmails`, `useCrmDocuments`, `useCrmCompanies`, `useCrmCustomFields`, `useCrmWebForms`, `useCrmWorkflows`, `useCrmTemplates` — 10 enterprise-CRM хуков
+- `useMCCAutomation`, `useMCCAnalytics`, `useMCCControlTower`, `useABVariants`, `useLandingRegistry`, `useCampaignFactory` — 6 marketing-cloud хуков
 
-2. **Three parallel Booking systems:**
-   - ✅ `property_bookings` (648) — STR, in production
-   - ⚠️ `orders` + `order_items` + `order_participants` (94/73/73) — universal layer, used for marketplace
-   - ❌ `bookings` (1), `booking_payments` (0), `booking_vouchers` (0), `booking_operations` (0), `airport_bookings` (0), `tour_bookings` (0), `vendor_bookings` (0), `service_orders` (0), `water_activity_bookings` (0) — abandoned
+**Edge Functions для удаления** (нет триггеров, нет webhook-ссылок):
+- `execute-campaign-rules`, `execute-crm-workflow`, `submit-web-form`, `send-crm-email`
 
-3. **Vertical sprawl** — 11 vertical entity tables (`yachts`, `vehicles`, `clinics`, `salons`, `gyms`, `flower_shops`, `bouquets`, `restaurants`, `cleaning_services`, `babysitters`, `pet_services`, `legal_services`, `events`, `experiences`, `water_activities`, `education_providers`, `insurance_providers`, `pharmacies`) — **already partially consolidated to `listings`** (500 rows) but old tables retained as views or live data.
-
-4. **Marketing automation graveyard** — `mcc_*` (12 tables, all 0), `lifecycle_*` (3 tables, mostly 0), `chat_violation_*`, `moderation_queue`, `pricing_recommendations`, `platform_*` — built speculatively, never used.
-
-5. **Investment Hub duplicates** — `investment_deals/projects/interests` + `investor_inquiries` + `capital_projects/intro_requests` + `agent_deals` + `business_listings` — **6 different "deal" tables**, all empty or near-zero.
-
-6. **Property over-decomposition** — 50+ `property_*` tables; many empty (`property_inspections`, `property_meters`, `property_inventory_items`, `property_key_assignments`, `property_passport_events`, `property_guidebook`...) — built for future PMS features.
-
-## How many tables do we actually need?
-
-**Answer: ~80 active tables across one DB.** Frontend touches ~165 today, but ~85 of those are aliases/duplicates that collapse cleanly. **One Supabase project is correct** — the mirror DB (`erfwtoavipwjqmylpizt`) should remain only as offline backup, never as a second runtime.
-
-## Target architecture (12 domains, ~80 tables)
-
+**Связанные таблицы для DROP (после удаления кода):**
 ```
-Identity (5)         profiles, user_roles, providers, management_companies, mc_members
-CRM (6)              crm_contacts, crm_pipelines, crm_pipeline_stages, crm_activities,
-                     crm_tasks, crm_contact_notes
-Real Estate (8)      developers, property_projects, project_units, properties,
-                     property_complexes, listings, listing_applications, resale_properties
-PMS Ops (10)         property_bookings, property_financials, property_operational_tasks,
-                     property_activity_log, property_analytics, property_external_calendars,
-                     property_rate_seasons, property_management_terms, property_documents,
-                     property_promotions
-Marketplace (4)      listings (SSOT, replaces 17 vertical tables via JSONB attributes),
-                     marketplace_products, marketplace_vendors, categories
-Orders/Money (8)     orders, order_items, order_participants, order_addresses,
-                     order_status_history, payment_intents, ledger_entries, vendor_payouts
-Investment Hub (3)   investment_deals, investment_articles, investor_inquiries
-                     (sync into crm_contacts via existing trigger — no separate CRM)
-Bookings extras (3)  bookings (generic non-property), booking_messages, booking_status_history
-Comms/Notif (4)      notifications, booking_notifications_log, booking_message_rules,
-                     lifecycle_templates
-AI (4)               ai_agents, ai_agent_logs, ai_agent_knowledge, ai_intake_sessions
-Platform (8)         lookup_values, taxonomy_definitions, system_settings, categories,
-                     cities, currencies, currency_rates, analytics_events
-Reviews/Social (4)   reviews, favorites, view_history, support_tickets
+crm_workflows, crm_workflow_actions, crm_sequences, crm_sequence_steps,
+crm_sequence_enrollments, crm_quotes, crm_meetings, crm_emails, crm_documents,
+crm_companies, crm_custom_fields, crm_custom_field_values, crm_comm_templates,
+crm_scoring_rules, crm_web_forms, crm_web_form_submissions, crm_access_log,
 
-──────────────────── ~67 core + ~13 utility = ~80 tables
+mcc_ab_tests, mcc_automation_rules, mcc_landing_events, mcc_user_states,
+mcc_state_history, mcc_creatives, mcc_channel_metrics, mcc_ai_recommendations,
+mcc_campaigns, mcc_campaign_rules
 ```
 
-## Deletion candidates (immediate, ~110 tables)
+**Порядок работы:**
+1. Удалить хуки + Edge Functions
+2. Удалить пункты из `src/lib/untypedTables.ts` (строки 240-260)
+3. Удалить компоненты-сироты: `MCCContentLabTab.tsx` (если не подключён)
+4. Verify build → migration с `DROP TABLE`
 
-- All 12 `mcc_*` (marketing-cloud, never used)
-- All 8 `capital_*` (replace with `crm_contacts` + filter on `pipeline_id='capital'`)
-- All 7 `deal_*` (replace with `orders` + `order_type='real_estate_deal'`)
-- 18 unused `crm_*` enterprise tables (workflows, sequences, scoring, quotes, web_forms, emails, meetings, documents, companies, custom_fields × 3)
-- All 7 `airport_*` and `tour_bookings`, `water_activity_bookings`, `vendor_bookings`, `service_orders`, `service_order_status_history` → replaced by `orders`
-- `business_listings`, `inventory_listings`, `inventory_inspections`, `juristic_*`, `nb_project_updates`, `partner_applications`, `quick_listings` (all 0 rows)
-- `chat_violation_*`, `chat_message_flags`, `moderation_queue` (0 rows)
-- ~25 empty `property_*` future-PMS tables (keep schema in a separate migration file, recreate when feature is built)
-- `mc_property_slots`, `developer_users`, `developer_impersonation_log`, `disputes`, `drive_import_jobs`, `due_diligence_reports`, `payment_schedules`, `personal_reminders`, `platform_*` × 4, `portal_messages`, `pricing_recommendations` (all 0 rows)
+**Риск:** низкий. Если что-то всё-таки используется — компиляция упадёт до миграции БД, легко откатить.
 
-**Result: 381 → ~270 after deletion → ~80 after consolidation.**
+---
 
-## Consolidation plan (5 phases)
+## Фаза 3 — Compat views для capital_*/deal_* (~13 таблиц)
 
-**Phase 1 — Drop dead tables (no risk, all 0 rows, no frontend refs)**
-- ~80 tables, single migration. Audit script: scan `src/**/*.{ts,tsx}` for `.from('X')` first; only drop if no hits.
+Таблицы `capital_*` (8 шт.) и `deal_*` (4 шт.) полностью **дублируют** `crm_contacts` + `crm_pipeline_stages` + `crm_activities`. Все данные пустые. Frontend ссылается через `untypedFrom` → можно безболезненно подменить на VIEW.
 
-**Phase 2 — Merge CRMs into `crm_contacts`**
-- Add `pipeline_kind` column (`'capital'|'sales'|'support'`).
-- Drop `capital_*` (already synced via trigger to `crm_*`).
-- Drop unused `crm_workflows/sequences/scoring/...` (no UI uses them).
-- Keep `crm_documents`, `crm_emails`, `crm_meetings` only if Inbox UI ships in next sprint — otherwise drop.
+**Маппинг:**
+| Старая таблица | Новый источник | Дискриминатор |
+|---|---|---|
+| `capital_contacts` | `crm_contacts` | `pipeline_kind='capital'` |
+| `capital_pipeline` | `crm_pipeline_stages` | `pipeline_id` ссылается на capital pipeline |
+| `capital_campaigns` | (drop, нет UI) | — |
+| `capital_intro_requests` | `crm_activities` | `activity_type='intro_request'` |
+| `capital_projects` | `listings` | `vertical='investment'` |
+| `deal_parties` | `order_participants` | — |
+| `deal_stage_history` | `crm_activities` | `activity_type='stage_change'` |
+| `deal_pipeline_stages` | `crm_pipeline_stages` | — |
+| `deal_scheduled_activities` | `crm_activities` | `scheduled_for IS NOT NULL` |
 
-**Phase 3 — Unify Bookings under `orders`**
-- Migrate `property_bookings` (648 rows) → keep as-is (PMS-specific, justified separation).
-- Drop all empty `*_bookings` siblings; route every new vertical through `orders` + `order_items.product_kind`.
-- Replace `bookings` (1 row) with `orders`.
+**Действие:**
+1. ALTER `crm_contacts` ADD COLUMN `pipeline_kind TEXT DEFAULT 'sales'` (если ещё нет)
+2. CREATE OR REPLACE VIEW для каждой старой таблицы
+3. CREATE TRIGGER ... INSTEAD OF INSERT/UPDATE/DELETE — маршрут в новую таблицу
+4. DROP TABLE для старых (после смены типа на VIEW PostgREST продолжит работать)
 
-**Phase 4 — Vertical tables → `listings` JSONB attributes**
-- 11 vertical tables already mostly views over `listings`. Confirm the views are writable (or replace with `INSTEAD OF` triggers) and drop underlying tables that are no longer the source.
-- Investment-Hub trio (`investment_deals/projects/interests`) → merge into `listings` with `category='investment'` + JSONB `deal_attributes`.
+**Риск:** средний. Триггеры INSTEAD OF требуют тестирования Capital Hub и Deal flow. Все эти таблицы пусты, поэтому миграция данных не нужна.
 
-**Phase 5 — Compatibility views**
-- For every renamed/dropped table that the frontend still queries, create `CREATE VIEW old_name AS SELECT … FROM new_name` with `INSTEAD OF` triggers for writes.
-- Lets us deploy backend changes without touching ~165 frontend `.from()` call sites in one PR.
+---
 
-## Do we need more than one database?
+## Что НЕ трогаем
 
-**No.** Single Supabase project (`kakkwibljrjsawxgnupk`) is correct for the current scale (~32 properties, 386 contacts, 94 orders, 7 active users). PostgreSQL handles 10⁴× this load on one instance. The mirror DB stays as a passive backup only.
+- 21 `property_*` таблица (`property_documents`, `property_inventory_items`, `property_guidebook` и т.д.) — **активно используются** в PMS компонентах, даже если пустые. Это работающие фичи без данных, не мусор.
+- `mcc_leads` (5 ref) — реальный поток лидов в `useLeadHub`.
+- `service_orders`, `juristic_requests`, `business_listings`, `investment_*` — рабочий фронтенд.
+- Booking-таблицы (`airport_*`, `booking_*`) — используются в Edge Functions для чекаута.
 
-## Deliverables (when you approve)
+---
 
-Written to `/mnt/documents/`:
+## Итоговый эффект
 
-1. **`SCHEMA_AUDIT.md`** — full inventory, per-domain ER sketches, deletion candidates with frontend-reference proofs, RLS audit table.
-2. **`schema_new.sql`** — proposed normalized DDL for the ~80-table target with RLS skeletons.
-3. **`compat_views.sql`** — `CREATE VIEW old → new` mappings + `INSTEAD OF` triggers for writable legacy paths.
-4. **`drop_candidates.sql`** — guarded `DROP TABLE IF EXISTS` for the ~110 dead tables, grouped by phase, each with a `-- frontend-refs: 0` comment proving safety.
-5. **Migration runbook** in `SCHEMA_AUDIT.md` — phase order, rollback steps, smoke tests after each phase.
+| Фаза | Удалено таблиц | Хуков | Edge Functions | Остаток |
+|---|---:|---:|---:|---:|
+| Старт | — | — | — | 359 |
+| Фаза 1 | -6 | 0 | 0 | 353 |
+| Фаза 2 | -27 | -16 | -4 | 326 |
+| Фаза 3 | -13 (DROP) +13 (VIEW) | 0 | 0 | **313 tables + 13 views** |
 
-I will **not** run any DROPs — all destructive SQL ships as reviewable files for you to apply manually in batches.
+Реальное число **физических таблиц = ~313**. Views не считаются за таблицы.
 
+## Откат
+
+Каждая фаза = **одна миграция**. Откат через `git revert` миграции + восстановление из backup mirror DB (`erfwtoavipwjqmylpizt`). Все удаляемые таблицы пусты, поэтому потери данных невозможны.
+
+## Тест-план после каждой фазы
+
+1. `npm run build` — TypeScript компилируется
+2. Открыть `/admin/marketing` — не должно быть 500
+3. Открыть `/mc/crm` — список контактов работает
+4. Открыть `/capital` — Capital Hub отображается
+5. Создать тестовый CRM-контакт через UI
+6. Supabase linter: 0 новых WARNING
+
+## Файлы которые будут изменены (примерно)
+
+- 3 миграции (по одной на фазу) в `supabase/migrations/`
+- ~17 удалённых хуков в `src/hooks/`
+- 4 удалённых Edge Function в `supabase/functions/`
+- 1 правка `src/lib/untypedTables.ts` (удалить ~25 строк)
+- 1 правка `src/integrations/supabase/types.ts` (auto-regen)
+- Обновить `/mnt/documents/SCHEMA_AUDIT.md` с финальной картой
+
+## Поэтапная доставка
+
+Я буду коммитить **по одной фазе за раз** и ждать твоего "ок" перед следующей. Это даст возможность тестировать в проде между шагами.
