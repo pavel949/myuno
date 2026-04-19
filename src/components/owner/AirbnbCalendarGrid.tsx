@@ -228,6 +228,12 @@ export function AirbnbCalendarGrid({ propertyId, properties = [] }: AirbnbCalend
                     const priceOverride = avail?.priceOverride;
                     const dayTasks = taskMap.get(dateKey) || [];
 
+                    // Effective nightly price: override > seasonal > base
+                    const effectivePrice = priceOverride
+                      ?? (basePrice ? getEffectiveNightlyRate(day, basePrice, seasonalPricing) : 0);
+                    const isOverride = priceOverride !== undefined && priceOverride !== null;
+                    const isSeasonalDelta = !isOverride && basePrice > 0 && effectivePrice !== basePrice;
+
                     return (
                       <button
                         key={dayIdx}
@@ -249,9 +255,14 @@ export function AirbnbCalendarGrid({ propertyId, properties = [] }: AirbnbCalend
                         </span>
 
                         {/* Price */}
-                        {priceOverride && inMonth && (
-                          <span className="text-[9px] text-muted-foreground mt-0.5 leading-none">
-                            {priceOverride >= 1000 ? `${(priceOverride / 1000).toFixed(priceOverride % 1000 === 0 ? 0 : 1)}k` : priceOverride}
+                        {effectivePrice > 0 && inMonth && !isBlocked && (
+                          <span className={cn(
+                            "text-[9px] mt-0.5 leading-none font-medium",
+                            isOverride && "text-primary",
+                            isSeasonalDelta && !isOverride && "text-accent-foreground",
+                            !isOverride && !isSeasonalDelta && "text-muted-foreground",
+                          )}>
+                            {formatPriceShort(effectivePrice)}
                           </span>
                         )}
 
