@@ -187,7 +187,7 @@ export function PropertyPriceBreakdown({
 
         {/* Deposit */}
         {depositAmount && depositAmount > 0 && (
-          <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+          <div className="p-3 rounded-lg bg-warning/10 border border-warning/20">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium">{isRu ? 'Залог' : 'Security Deposit'}</p>
