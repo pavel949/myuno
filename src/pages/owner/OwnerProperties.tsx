@@ -185,6 +185,7 @@ const queryClient = useQueryClient();
     setSelectedComplex(null);
     setSelectedProject(null);
     setSelectedType(null);
+    setSelectedAssetClass('all');
   };
 
   // --- Selection helpers ---
@@ -422,6 +423,21 @@ const queryClient = useQueryClient();
 
           {showFilters && (
             <div className="space-y-2">
+              <FilterRow label={isRu ? 'Класс объекта' : 'Asset Class'}>
+                {([
+                  { id: 'all', en: 'All', ru: 'Все' },
+                  { id: 'residential', en: 'Residential', ru: 'Жилая' },
+                  { id: 'commercial', en: 'Commercial', ru: 'Коммерческая' },
+                  { id: 'land', en: 'Land', ru: 'Земля' },
+                ] as const).map((ac) => (
+                  <FilterChip
+                    key={ac.id}
+                    label={isRu ? ac.ru : ac.en}
+                    active={selectedAssetClass === ac.id}
+                    onClick={() => setSelectedAssetClass(ac.id)}
+                  />
+                ))}
+              </FilterRow>
               {districts.length > 0 && (
                 <FilterRow label={isRu ? 'Район' : 'District'}>
                   {districts.map(d => (
