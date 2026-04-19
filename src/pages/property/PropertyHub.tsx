@@ -101,6 +101,8 @@ const TABS: TabConfig[] = [
 function getActiveTab(pathname: string, search: string): string {
   if (pathname.startsWith('/property/my')) return 'my';
   if (pathname.startsWith(APP_ROUTES.INVEST)) return 'my';
+  if (pathname.startsWith(APP_ROUTES.COMMERCIAL)) return 'commercial';
+  if (pathname.startsWith(APP_ROUTES.LAND)) return 'land';
   if (pathname.startsWith(APP_ROUTES.RESALE)) return 'resale';
   if (pathname.startsWith(APP_ROUTES.OFFPLAN) || pathname.startsWith(APP_ROUTES.DEVELOPERS) || pathname.startsWith(APP_ROUTES.COMPLEXES)) {
     return 'newbuild';
@@ -180,18 +182,23 @@ export function PropertyHubTabs() {
   const location = useLocation();
   const { language } = useLanguage();
   const { user } = useAuth();
+  const { personas } = useUserPersonas();
   const isRu = language === 'ru';
   const activeTab = getActiveTab(location.pathname, location.search);
 
   const isDetailPage =
     /^\/property\/[a-f0-9-]{36}/.test(location.pathname) ||
-    /^\/property\/(offplan|developers|invest)\/[a-f0-9-]/.test(location.pathname) ||
+    /^\/property\/(offplan|developers|invest|commercial|land)\/[a-f0-9-]/.test(location.pathname) ||
     /^\/property\/project\//.test(location.pathname) ||
     /^\/property\/deposit-success/.test(location.pathname);
 
   if (isDetailPage) return null;
 
-  const visibleTabs = TABS.filter((tab) => !tab.authOnly || user);
+  const visibleTabs = TABS.filter(
+    (tab) =>
+      (!tab.authOnly || user) &&
+      (!tab.personaGated || tab.personaGated.some((p) => personas.includes(p))),
+  );
 
   return (
     <div className="flex gap-1 overflow-x-auto scrollbar-hide px-4 py-2 bg-background border-b border-border/50">
