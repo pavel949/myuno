@@ -33,9 +33,9 @@ export function LandPlotCard({ property, className }: Props) {
   const titleDeed = getTitleDeedLabel(property.title_deed_type ?? null, isRu);
 
   const priceMain = property.sale_price
-    ? formatPrice(property.sale_price, 'THB')
+    ? formatPrice(property.sale_price)
     : property.price
-    ? formatPrice(property.price, 'THB')
+    ? formatPrice(property.price)
     : null;
 
   const sqm = property.land_size_sqm ?? (property.land_size_rai ? property.land_size_rai * 1600 : null);

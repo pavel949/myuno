@@ -34,11 +34,11 @@ export function CommercialPropertyCard({ property, className }: Props) {
 
   const priceMain =
     isRent && property.monthly_rent_thb
-      ? `${formatPrice(property.monthly_rent_thb, 'THB')} / ${isRu ? 'мес' : 'mo'}`
+      ? `${formatPrice(property.monthly_rent_thb)} / ${isRu ? 'мес' : 'mo'}`
       : property.sale_price
-      ? formatPrice(property.sale_price, 'THB')
+      ? formatPrice(property.sale_price)
       : property.price
-      ? formatPrice(property.price, 'THB')
+      ? formatPrice(property.price)
       : null;
 
   return (
@@ -111,7 +111,7 @@ export function CommercialPropertyCard({ property, className }: Props) {
 
         {property.noi_annual_thb != null && (
           <p className="text-xs text-muted-foreground">
-            NOI {formatPrice(property.noi_annual_thb, 'THB')} / {isRu ? 'год' : 'yr'}
+            NOI {formatPrice(property.noi_annual_thb)} / {isRu ? 'год' : 'yr'}
           </p>
         )}
 

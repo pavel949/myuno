@@ -67,11 +67,11 @@ export default function CommercialDetail() {
 
   const priceMain =
     isRent && property.monthly_rent_thb
-      ? `${formatPrice(property.monthly_rent_thb, 'THB')} / ${isRu ? 'мес' : 'mo'}`
+      ? `${formatPrice(property.monthly_rent_thb)} / ${isRu ? 'мес' : 'mo'}`
       : property.sale_price
-      ? formatPrice(property.sale_price, 'THB')
+      ? formatPrice(property.sale_price)
       : property.price
-      ? formatPrice(property.price, 'THB')
+      ? formatPrice(property.price)
       : null;
 
   return (
@@ -118,7 +118,7 @@ export default function CommercialDetail() {
               <Metric label="Cap rate" value={`${property.cap_rate_pct.toFixed(1)}%`} />
             )}
             {property.noi_annual_thb != null && (
-              <Metric label="NOI / yr" value={formatPrice(property.noi_annual_thb, 'THB')} />
+              <Metric label="NOI / yr" value={formatPrice(property.noi_annual_thb)} />
             )}
             {property.floor_area_sqm != null && (
               <Metric label={isRu ? 'Площадь' : 'Area'} value={`${property.floor_area_sqm} m²`} />

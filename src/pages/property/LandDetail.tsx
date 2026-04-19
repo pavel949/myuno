@@ -63,9 +63,9 @@ export default function LandDetail() {
   const sizeLabel = sqm ? formatLandSize(sqm, isRu) : null;
 
   const priceMain = property.sale_price
-    ? formatPrice(property.sale_price, 'THB')
+    ? formatPrice(property.sale_price)
     : property.price
-    ? formatPrice(property.price, 'THB')
+    ? formatPrice(property.price)
     : null;
 
   return (

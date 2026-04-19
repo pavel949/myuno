@@ -41,7 +41,7 @@ export interface CommercialProperty {
   existing_tenant_anonymized?: boolean | null;
   permitted_uses?: string[] | null;
   building_condition?: string | null;
-  year_built?: number | null;
+  
   floor?: number | null;
   parking_type?: string | null;
   is_featured?: boolean | null;
@@ -60,7 +60,7 @@ const COMMERCIAL_COLUMNS = `
   current_lease_term_months, lease_remaining_months,
   noi_annual_thb, cap_rate_pct, yield_pct,
   existing_tenant_anonymized, permitted_uses, building_condition,
-  year_built, floor, parking_type,
+  floor, parking_type,
   is_featured, is_verified, created_at
 `;
 
