@@ -4,7 +4,7 @@
 import { useDeveloperProfile, useDeveloperProjects } from '@/hooks/useDeveloperPortal';
 import { useDeveloperLeads } from '@/hooks/useNewbuildLeads';
 import { Link, useNavigate } from 'react-router-dom';
-import { Building2, Users, TrendingUp, Plus, ArrowRight, AlertTriangle, PenLine } from 'lucide-react';
+import { Building2, Users, TrendingUp, Plus, ArrowRight, AlertTriangle, PenLine, Banknote, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { APP_ROUTES } from '@/lib/config/routes';
 
@@ -96,6 +96,40 @@ export default function DeveloperOverview() {
           </div>
         </div>
       )}
+
+      {/* Capital Marketplace CTAs — anonymized listings + raise funding */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <Link
+          to="/invest/submit?intent=raise_capital&category=residential_development"
+          className="nb-glass p-5 hover:border-[hsl(var(--nb-gold)/0.4)] transition-colors group"
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <Banknote className="w-4 h-4 text-[hsl(var(--nb-gold))]" />
+            <h3 className="font-semibold text-[hsl(var(--nb-text))]">Привлечь капитал</h3>
+          </div>
+          <p className="text-xs text-[hsl(var(--nb-text-secondary))] mb-3">
+            Подайте проект в анонимизированный investor board. Заявки попадают в Ignatev Capital CRM.
+          </p>
+          <span className="text-xs text-[hsl(var(--nb-gold))] flex items-center gap-1 group-hover:gap-2 transition-all">
+            Подать сделку <ArrowRight className="w-3 h-3" />
+          </span>
+        </Link>
+        <Link
+          to="/invest/submit?intent=find_buyer&category=residential_development"
+          className="nb-glass p-5 hover:border-[hsl(var(--nb-gold)/0.4)] transition-colors group"
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <Tag className="w-4 h-4 text-[hsl(var(--nb-gold))]" />
+            <h3 className="font-semibold text-[hsl(var(--nb-text))]">Продать остатки / inventory</h3>
+          </div>
+          <p className="text-xs text-[hsl(var(--nb-text-secondary))] mb-3">
+            Распродайте непроданные юниты через сеть инвесторов myUNO. Анонимизация по умолчанию.
+          </p>
+          <span className="text-xs text-[hsl(var(--nb-gold))] flex items-center gap-1 group-hover:gap-2 transition-all">
+            Подать листинг <ArrowRight className="w-3 h-3" />
+          </span>
+        </Link>
+      </div>
 
       {/* Quick Actions */}
       <div className="flex flex-wrap gap-3">

@@ -3,7 +3,9 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { MiniAppLayout } from '@/components/miniapp';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { BookOpen, Building, FileText, Globe2, Briefcase, Calculator, Construction } from 'lucide-react';
+import { BookOpen, Building, FileText, Globe2, Briefcase, Calculator, Construction, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
 interface Topic {
   icon: React.ElementType;
