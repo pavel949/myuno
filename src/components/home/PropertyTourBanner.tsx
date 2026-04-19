@@ -27,22 +27,25 @@ export function PropertyTourBanner() {
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             loading="lazy"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-[hsl(var(--primary))]/90 via-[hsl(var(--primary))]/70 to-transparent" />
+          {/* Strong primary overlay on left fading to image on right — ensures text contrast */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[hsl(var(--primary))] from-30% via-[hsl(var(--primary))]/85 via-65% to-[hsl(var(--primary))]/40" />
+          {/* Bottom darken for additional safety on small viewports */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
         </div>
 
         {/* Content */}
         <div className="relative px-5 py-5 md:py-6 flex items-center gap-4">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <span className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-primary-foreground/80 bg-white/20 px-2 py-0.5 rounded-full">
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-primary-foreground bg-white/25 px-2 py-0.5 rounded-full backdrop-blur-sm">
                 <Gift className="w-3 h-3" />
                 {isRu ? 'Бесплатно' : 'Free'}
               </span>
             </div>
-            <h3 className="text-lg md:text-xl font-bold text-primary-foreground leading-tight">
+            <h3 className="text-lg md:text-xl font-bold text-primary-foreground leading-tight [text-shadow:0_1px_2px_rgb(0_0_0_/_0.25)]">
               {isRu ? 'Тур по недвижимости или консультация' : 'Phuket Property Tour or Advice'}
             </h3>
-            <p className="text-sm text-primary-foreground/80 mt-1 line-clamp-2">
+            <p className="text-sm text-primary-foreground/90 mt-1 line-clamp-2 [text-shadow:0_1px_2px_rgb(0_0_0_/_0.2)]">
               {isRu
                 ? 'Покажем виллы и кондо или ответим на вопросы — без обязательств'
                 : 'See villas & condos, or get expert advice — no commitment'}
