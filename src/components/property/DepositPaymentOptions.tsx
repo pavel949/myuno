@@ -24,6 +24,10 @@ interface DepositPaymentOptionsProps {
   guestPhone: string;
   guestEmail: string;
   providerOrgId?: string;
+  /** Prepayment amount calculated by the central pricing engine. Defaults to 10% if omitted. */
+  prepayAmount?: number;
+  /** Prepay percent (for display). Defaults to 10. */
+  prepayPercent?: number;
   onSuccess?: () => void;
 }
 
@@ -40,6 +44,8 @@ export function DepositPaymentOptions({
   guestPhone,
   guestEmail,
   providerOrgId,
+  prepayAmount,
+  prepayPercent,
   onSuccess,
 }: DepositPaymentOptionsProps) {
   const { language } = useLanguage();
@@ -47,8 +53,10 @@ export function DepositPaymentOptions({
   const isRu = language === 'ru';
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const depositAmount = Math.round(totalAmount * 0.1);
-  const remainingAmount = totalAmount - depositAmount;
+  // Use the engine-calculated prepay; fall back to 10% only if not provided.
+  const effectivePercent = prepayPercent ?? 10;
+  const depositAmount = prepayAmount ?? Math.round(totalAmount * (effectivePercent / 100));
+  const remainingAmount = Math.max(totalAmount - depositAmount, 0);
 
   const handleOnlinePayment = async () => {
     setIsProcessing(true);
@@ -64,6 +72,7 @@ export function DepositPaymentOptions({
           nights,
           total_amount: totalAmount,
           deposit_amount: depositAmount,
+          deposit_percent: effectivePercent,
           cleaning_fee: cleaningFee || 0,
           guest_name: guestName,
           guest_phone: guestPhone,
@@ -131,7 +140,7 @@ export function DepositPaymentOptions({
       <Card className="border-success/30 bg-success/5">
         <CardContent className="p-4 space-y-2">
           <div className="flex items-center justify-between">
-            <span className="font-medium">{isRu ? 'Предоплата 10%' : '10% Deposit'}</span>
+            <span className="font-medium">{isRu ? `Предоплата ${effectivePercent}%` : `${effectivePercent}% Deposit`}</span>
             <span className="text-xl font-bold text-success">{formatPrice(depositAmount)}</span>
           </div>
           <p className="text-xs text-muted-foreground">
@@ -149,7 +158,7 @@ export function DepositPaymentOptions({
       {/* Payment Options */}
       <div className="space-y-3">
         <h3 className="font-semibold text-sm">
-          {isRu ? 'Выберите способ оплаты предоплаты' : 'Choose deposit payment method'}
+          {isRu ? `Выберите способ оплаты ${effectivePercent}%` : `Choose ${effectivePercent}% deposit payment method`}
         </h3>
         
         {/* Online Payment */}

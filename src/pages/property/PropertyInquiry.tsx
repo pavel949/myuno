@@ -18,21 +18,14 @@ import { toast } from 'sonner';
 import { useProfile } from '@/hooks/useProfile';
 import { usePropertyWithRentalTerms } from '@/hooks/useProperties';
 import { usePropertyBlockedDates } from '@/hooks/usePropertyAvailability';
+import { usePropertyRateSeasons } from '@/hooks/usePropertyRateSeasons';
 import { DepositPaymentOptions } from '@/components/property/DepositPaymentOptions';
 import { useOrders } from '@/hooks/useOrders';
+import { calculatePricing, buildPricingRulesFromSeasons, type PricingRules } from '@/lib/pricingEngine';
+import { pluralizeNights, pluralizeGuests } from '@/lib/i18n/pluralize';
 import { differenceInDays, format, parseISO } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-
-// Russian pluralization helper for nights
-function pluralizeNights(n: number, isRu: boolean): string {
-  if (!isRu) return n === 1 ? 'night' : 'nights';
-  const mod10 = n % 10;
-  const mod100 = n % 100;
-  if (mod10 === 1 && mod100 !== 11) return 'ночь';
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return 'ночи';
-  return 'ночей';
-}
 
 export default function PropertyInquiry() {
   const { id } = useParams();
@@ -99,21 +92,50 @@ export default function PropertyInquiry() {
 
   const pricePerNight = rentalTerms?.price_per_night || property?.price || 0;
 
+  // Pull rate seasons (per-property pricing overrides) for the central engine.
+  const { data: rateSeasons } = usePropertyRateSeasons(id);
+
+  // Single source of truth for ALL pricing — same engine PropertyBookingCard uses.
   const pricing = useMemo(() => {
-    if (!pricePerNight || nights <= 0) {
-      return { subtotal: 0, discount: 0, total: 0, discountPercent: 0 };
+    const baseRules: PricingRules = rateSeasons && rateSeasons.length > 0
+      ? buildPricingRulesFromSeasons(
+          {
+            price_per_night: pricePerNight,
+            weekly_discount: rentalTerms?.weekly_discount,
+            monthly_discount: rentalTerms?.monthly_discount,
+            early_booking_discount: (rentalTerms as any)?.early_booking_discount,
+            early_booking_days: (rentalTerms as any)?.early_booking_days,
+            last_minute_discount: (rentalTerms as any)?.last_minute_discount,
+            last_minute_days: (rentalTerms as any)?.last_minute_days,
+            custom_length_discounts: (rentalTerms as any)?.custom_length_discounts,
+            deposit_amount: rentalTerms?.deposit_amount,
+            deposit_currency: rentalTerms?.deposit_currency || 'THB',
+            payment_policy: (rentalTerms as any)?.payment_policy || 'prepay_10',
+            prepay_percent: (rentalTerms as any)?.prepay_percent,
+          },
+          rateSeasons,
+        )
+      : {
+          pricePerNight,
+          weeklyDiscount: rentalTerms?.weekly_discount,
+          monthlyDiscount: rentalTerms?.monthly_discount,
+          earlyBookingDiscount: (rentalTerms as any)?.early_booking_discount,
+          earlyBookingDays: (rentalTerms as any)?.early_booking_days,
+          lastMinuteDiscount: (rentalTerms as any)?.last_minute_discount,
+          lastMinuteDays: (rentalTerms as any)?.last_minute_days,
+          customLengthDiscounts: (rentalTerms as any)?.custom_length_discounts,
+          seasonalPricing: (property as any)?.seasonal_pricing,
+          depositAmount: rentalTerms?.deposit_amount,
+          depositCurrency: rentalTerms?.deposit_currency || 'THB',
+          paymentPolicy: (rentalTerms as any)?.payment_policy || 'prepay_10',
+          prepayPercent: (rentalTerms as any)?.prepay_percent,
+        };
+
+    if (!checkIn || !checkOut || nights <= 0 || !pricePerNight) {
+      return calculatePricing(baseRules, new Date(), new Date()); // empty breakdown
     }
-    const subtotal = pricePerNight * nights;
-    let discountPercent = 0;
-    if (nights >= 30 && rentalTerms?.monthly_discount) {
-      discountPercent = rentalTerms.monthly_discount;
-    } else if (nights >= 7 && rentalTerms?.weekly_discount) {
-      discountPercent = rentalTerms.weekly_discount;
-    }
-    const discount = Math.round(subtotal * (discountPercent / 100));
-    const total = subtotal - discount;
-    return { subtotal, discount, total, discountPercent };
-  }, [pricePerNight, nights, rentalTerms]);
+    return calculatePricing(baseRules, checkIn, checkOut);
+  }, [pricePerNight, nights, checkIn, checkOut, rentalTerms, rateSeasons, property]);
 
   const validationErrors = useMemo(() => {
     const errors: string[] = [];
@@ -220,7 +242,7 @@ export default function PropertyInquiry() {
                   {' → '}
                   {format(checkOut, 'd MMM', { locale: isRu ? ru : undefined })}
                   {' · '}
-                  {nights} {pluralizeNights(nights, isRu)}
+                  {nights} {pluralizeNights(nights, language)}
                 </p>
                 {(rentalTerms?.check_in_time || rentalTerms?.check_out_time) && (
                   <p className="text-xs text-muted-foreground">
@@ -243,7 +265,7 @@ export default function PropertyInquiry() {
               <div>
                 <p className="text-sm font-medium">{isRu ? 'Гости' : 'Guests'}</p>
                 <p className="text-sm text-muted-foreground">
-                  {guests} {isRu ? (guests === 1 ? 'гость' : (guests >= 2 && guests <= 4 ? 'гостя' : 'гостей')) : (guests === 1 ? 'guest' : 'guests')}
+                  {guests} {pluralizeGuests(guests, language)}
                 </p>
               </div>
               <Button variant="ghost" size="sm" onClick={() => navigate(editUrl)} className="text-primary shrink-0">
@@ -262,21 +284,36 @@ export default function PropertyInquiry() {
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">
-                  {formatPrice(pricePerNight)} × {nights} {isRu ? 'ночей' : 'nights'}
+                  {formatPrice(pricing.nightlyRate || pricePerNight)} × {nights} {pluralizeNights(nights, language)}
                 </span>
                 <span>{formatPrice(pricing.subtotal)}</span>
               </div>
 
-              {pricing.discount > 0 && (
-                <div className="flex items-center justify-between text-sm text-green-600">
-                  <span>
-                    {pricing.discountPercent}% {isRu ? 'скидка' : 'discount'}
-                    {pricing.discountPercent === rentalTerms?.monthly_discount
-                      ? ` (${isRu ? 'месяц' : 'monthly'})`
-                      : ` (${isRu ? 'неделя' : 'weekly'})`
-                    }
-                  </span>
-                  <span>-{formatPrice(pricing.discount)}</span>
+              {pricing.seasonalAdjustment !== 0 && (
+                <div className={cn("flex items-center justify-between text-sm", pricing.seasonalAdjustment > 0 ? "text-warning" : "text-success")}>
+                  <span>{isRu ? 'Сезонная корректировка' : 'Seasonal adjustment'}</span>
+                  <span>{pricing.seasonalAdjustment > 0 ? '+' : ''}{formatPrice(pricing.seasonalAdjustment)}</span>
+                </div>
+              )}
+
+              {pricing.lengthDiscount > 0 && (
+                <div className="flex items-center justify-between text-sm text-success">
+                  <span>{pricing.lengthDiscountPercent}% {isRu ? 'скидка за срок' : 'length discount'}</span>
+                  <span>-{formatPrice(pricing.lengthDiscount)}</span>
+                </div>
+              )}
+
+              {pricing.earlyBirdDiscount > 0 && (
+                <div className="flex items-center justify-between text-sm text-success">
+                  <span>{pricing.earlyBirdPercent}% {isRu ? 'раннее бронирование' : 'early booking'}</span>
+                  <span>-{formatPrice(pricing.earlyBirdDiscount)}</span>
+                </div>
+              )}
+
+              {pricing.lastMinuteDiscount > 0 && (
+                <div className="flex items-center justify-between text-sm text-success">
+                  <span>{pricing.lastMinutePercent}% {isRu ? 'горящее предложение' : 'last-minute deal'}</span>
+                  <span>-{formatPrice(pricing.lastMinuteDiscount)}</span>
                 </div>
               )}
 
@@ -295,15 +332,17 @@ export default function PropertyInquiry() {
               <span>{formatPrice(pricing.total)}</span>
             </div>
 
-            {/* 10% deposit callout — only for instant booking */}
-            {isInstantBooking && (
+            {/* Prepayment callout — only for instant booking. Uses real prepay_percent. */}
+            {isInstantBooking && pricing.prepayAmount > 0 && (
               <div className="p-3 rounded-lg bg-primary/5 border border-primary/10">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">
-                    {isRu ? 'Предоплата 10% сейчас' : '10% deposit due now'}
+                    {isRu
+                      ? `Предоплата ${pricing.prepayPercent}% сейчас`
+                      : `${pricing.prepayPercent}% deposit due now`}
                   </span>
                   <span className="font-semibold text-primary">
-                    {formatPrice(Math.round(pricing.total * 0.1))}
+                    {formatPrice(pricing.prepayAmount)}
                   </span>
                 </div>
                 <p className="text-[10px] text-muted-foreground mt-1">
@@ -445,7 +484,7 @@ export default function PropertyInquiry() {
                         </p>
                       )}
                       {rentalTerms?.late_checkout_penalty && (
-                        <p className="text-xs text-amber-600">
+                        <p className="text-xs text-warning">
                           {isRu ? `Поздний выезд: ${formatPrice(rentalTerms.late_checkout_penalty)}` : `Late checkout: ${formatPrice(rentalTerms.late_checkout_penalty)}`}
                         </p>
                       )}
@@ -489,6 +528,8 @@ export default function PropertyInquiry() {
                 guests={guests}
                 nights={nights}
                 totalAmount={pricing.total}
+                prepayAmount={pricing.prepayAmount}
+                prepayPercent={pricing.prepayPercent}
                 cleaningFee={rentalTerms?.extra_cleaning_price || (property as any)?.cleaning_fee || 0}
                 guestName={formData.name}
                 guestPhone={formData.phone}
@@ -516,7 +557,7 @@ export default function PropertyInquiry() {
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium">{formatPrice(pricing.total)}</span>
               <span className="text-xs text-muted-foreground">
-                {nights} {pluralizeNights(nights, isRu)}
+                {nights} {pluralizeNights(nights, language)}
               </span>
             </div>
             <Button
@@ -527,6 +568,36 @@ export default function PropertyInquiry() {
                 if (isSubmitting) return;
                 setIsSubmitting(true);
                 try {
+                  // 0. Atomic availability check — prevents race conditions
+                  // when multiple guests try to book the same dates simultaneously.
+                  const { data: isAvailable, error: availErr } = await supabase.rpc(
+                    'check_property_dates_available',
+                    {
+                      p_property_id: id!,
+                      p_check_in: format(checkIn!, 'yyyy-MM-dd'),
+                      p_check_out: format(checkOut!, 'yyyy-MM-dd'),
+                    },
+                  );
+                  if (availErr) {
+                    console.error('[PropertyInquiry] availability check error:', availErr);
+                    toast.error(
+                      isRu
+                        ? 'Не удалось проверить доступность дат. Попробуйте ещё раз.'
+                        : 'Could not verify date availability. Please try again.',
+                    );
+                    setIsSubmitting(false);
+                    return;
+                  }
+                  if (isAvailable === false) {
+                    toast.error(
+                      isRu
+                        ? 'Эти даты только что были забронированы. Выберите другие.'
+                        : 'These dates were just booked. Please pick different dates.',
+                    );
+                    setIsSubmitting(false);
+                    return;
+                  }
+
                   // 1. Save to property_inquiries for owner dashboard visibility
                   const { error: inquiryError } = await supabase
                     .from('property_inquiries')
@@ -570,7 +641,13 @@ export default function PropertyInquiry() {
                       nights,
                       price_per_night: pricePerNight,
                       deposit_amount: rentalTerms?.deposit_amount || 0,
-                      discount_percent: pricing.discountPercent,
+                      discount_percent: pricing.lengthDiscountPercent,
+                      length_discount: pricing.lengthDiscount,
+                      early_bird_discount: pricing.earlyBirdDiscount,
+                      last_minute_discount: pricing.lastMinuteDiscount,
+                      seasonal_adjustment: pricing.seasonalAdjustment,
+                      prepay_amount: pricing.prepayAmount,
+                      prepay_percent: pricing.prepayPercent,
                       booking_mode: 'request',
                       ...((rentalTerms as any)?.manager_email ? { manager_email: (rentalTerms as any).manager_email } : {}),
                       ...((rentalTerms as any)?.manager_phone ? { manager_phone: (rentalTerms as any).manager_phone } : {}),
