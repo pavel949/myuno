@@ -47,7 +47,7 @@ export default function InvestInThailand() {
       <MiniAppLayout title={isRu ? 'Invest in Thailand' : 'Invest in Thailand'} showSearch={false}>
         <div className="space-y-5 pb-10">
           {/* Hero */}
-          <Card className="bg-gradient-to-br from-primary/15 via-accent/10 to-amber-500/10 border-primary/20">
+          <Card className="bg-gradient-to-br from-primary/15 via-accent/10 to-primary/5 border-primary/20">
             <CardContent className="p-6 space-y-3">
               <Badge variant="secondary" className="gap-1">
                 <Globe2 className="h-3 w-3" /> {isRu ? 'Юго-Восточная Азия' : 'Southeast Asia'}
