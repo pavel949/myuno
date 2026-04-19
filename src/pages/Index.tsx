@@ -73,7 +73,7 @@ const Index = () => {
 
 
       <PullToRefresh onRefresh={handleRefresh} key={refreshKey}>
-        <div className="px-4 md:px-0 py-5 space-y-6 lg:space-y-10">
+        <div className="py-5 space-y-6 lg:space-y-10">
 
           {/* ── HERO ── */}
           {isFirstVisit ? (

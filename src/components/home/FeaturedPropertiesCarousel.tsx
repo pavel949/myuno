@@ -7,12 +7,13 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Star, Bed, Users, ChevronRight, Zap, Home, AlertCircle } from 'lucide-react';
+import { Star, Bed, Users, Zap, Home, AlertCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getDistrictLabel } from '@/lib/taxonomies';
 import { cn } from '@/lib/utils';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { SectionHeader } from '@/components/ds/SectionHeader';
 
 interface FeaturedProperty {
   id: string;
@@ -73,19 +74,12 @@ export function FeaturedPropertiesCarousel() {
 
   if (isError || properties.length === 0) {
     return (
-      <section>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-display font-bold text-foreground">
-            {isRu ? 'Аренда на Пхукете' : 'Rent in Phuket'}
-          </h2>
-          <button
-            onClick={() => navigate('/property?mode=rent')}
-            className="flex items-center gap-1 text-xs text-primary font-semibold hover:text-primary/80 transition-colors min-h-[44px]"
-          >
-            {isRu ? 'Все объекты' : 'View all'}
-            <ChevronRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
+      <section className="space-y-3">
+        <SectionHeader
+          icon={Home}
+          title={isRu ? 'Аренда на Пхукете' : 'Rent in Phuket'}
+          action={{ label: isRu ? 'Все' : 'All', onClick: () => navigate('/property?mode=rent') }}
+        />
         <div className="flex gap-3 -mx-4 px-4 overflow-hidden">
           {[1, 2, 3].map(i => (
             <div key={i} className="w-[220px] h-[280px] md:w-[260px] md:h-[320px] rounded-[var(--radius-lg)] shrink-0 flex flex-col items-center justify-center gap-3"
@@ -117,19 +111,12 @@ export function FeaturedPropertiesCarousel() {
   }
 
   return (
-    <section>
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-lg font-display font-bold text-foreground">
-          {isRu ? 'Аренда на Пхукете' : 'Rent in Phuket'}
-        </h2>
-        <button
-          onClick={() => navigate('/property?mode=rent')}
-          className="flex items-center gap-1 text-xs text-primary font-semibold hover:text-primary/80 transition-colors min-h-[44px]"
-        >
-          {isRu ? 'Все объекты' : 'View all'}
-          <ChevronRight className="w-3.5 h-3.5" />
-        </button>
-      </div>
+    <section className="space-y-3">
+      <SectionHeader
+        icon={Home}
+        title={isRu ? 'Аренда на Пхукете' : 'Rent in Phuket'}
+        action={{ label: isRu ? 'Все' : 'All', onClick: () => navigate('/property?mode=rent') }}
+      />
 
       <div className="carousel-scroll gap-3 -mx-4 px-4">
         {properties.map((property, i) => {

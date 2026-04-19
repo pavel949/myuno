@@ -60,7 +60,7 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
             contentClassName
           )}
         >
-          <div className={cn(ECOSYSTEM_PAGE_CONTAINER, "px-0")}>
+          <div className={ECOSYSTEM_PAGE_CONTAINER}>
             {children}
           </div>
         </main>
