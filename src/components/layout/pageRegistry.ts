@@ -523,6 +523,9 @@ export const ApprovalsPage = lazy(() => import('@/pages/mc/operations/ApprovalsP
 export const TeamShiftsPage = lazy(() => import('@/pages/mc/team/TeamShiftsPage'));
 export const ProcurementPage = lazy(() => import('@/pages/mc/operations/ProcurementPage'));
 export const OwnerAnalyticsPage = lazy(() => import('@/pages/mc/insights/OwnerAnalyticsPage'));
+export const ApiKeysPage = lazy(() => import('@/pages/mc/developer/ApiKeysPage'));
+export const WebhooksPage = lazy(() => import('@/pages/mc/developer/WebhooksPage'));
+export const McOnboardingWizardPage = lazy(() => import('@/pages/mc/onboarding/McOnboardingWizardPage'));
 export const OwnerStatementsInbox = lazy(() => import('@/pages/owner-portal/OwnerStatementsInbox'));
 export const OwnerSignaturesInbox = lazy(() => import('@/pages/owner-portal/OwnerSignaturesInbox'));
 export const OwnerOwnersPage = lazy(() => import('@/pages/owner/OwnerOwnersPage'));
