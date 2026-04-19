@@ -134,6 +134,18 @@ export interface PropertyFormData {
   land_size_sqm?: number;
   land_size_rai?: number;
   frontage_m?: number;
+  // Hotel-specific (only when property_type ∈ HOTEL_PROPERTY_TYPES)
+  hotel_keys?: number;
+  hotel_star_rating?: number;
+  hotel_brand?: string;
+  hotel_license_type?: string;
+  hotel_adr_thb?: number;
+  hotel_revpar_thb?: number;
+  hotel_occupancy_pct?: number;
+  hotel_gop_margin_pct?: number;
+  hotel_management_status?: string;
+  hotel_operator_name?: string;
+  hotel_year_renovated?: number;
 }
 
 const initialFormData: PropertyFormData = {
