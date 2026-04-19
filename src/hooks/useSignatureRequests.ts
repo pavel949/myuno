@@ -57,13 +57,13 @@ export interface SignatureSigner {
 export function useCompanySignatureRequests() {
   const { activeCompany } = useActiveCompany();
   return useQuery({
-    queryKey: ['company-signature-requests', activeCompany?.id],
+    queryKey: ['company-signature-requests', activeCompany?.company_id],
     queryFn: async () => {
       if (!activeCompany) return [];
       const { data, error } = await (supabase as any)
         .from('signature_requests')
         .select('*, signature_request_signers(*)')
-        .eq('company_id', activeCompany.id)
+        .eq('company_id', activeCompany.company_id)
         .order('created_at', { ascending: false });
       if (error) throw error;
       return (data || []) as (SignatureRequest & { signature_request_signers: SignatureSigner[] })[];
@@ -181,7 +181,7 @@ export function useCreateSignatureRequest() {
       const { data: req, error } = await (supabase as any)
         .from('signature_requests')
         .insert({
-          company_id: activeCompany.id,
+          company_id: activeCompany.company_id,
           created_by: user.id,
           title: args.title,
           description: args.description ?? null,

@@ -54,13 +54,13 @@ export function useMyStatementApprovals() {
 export function useCompanyStatementApprovals() {
   const { activeCompany } = useActiveCompany();
   return useQuery({
-    queryKey: ['company-statement-approvals', activeCompany?.id],
+    queryKey: ['company-statement-approvals', activeCompany?.company_id],
     queryFn: async (): Promise<StatementApproval[]> => {
       if (!activeCompany) return [];
       const { data, error } = await (supabase as any)
         .from('owner_statement_approvals')
         .select('*')
-        .eq('company_id', activeCompany.id)
+        .eq('company_id', activeCompany.company_id)
         .order('created_at', { ascending: false });
       if (error) throw error;
       return (data || []) as StatementApproval[];
@@ -154,7 +154,7 @@ export function useCreateStatementApproval() {
       const { data, error } = await (supabase as any)
         .from('owner_statement_approvals')
         .insert({
-          company_id: activeCompany.id,
+          company_id: activeCompany.company_id,
           property_id: args.property_id,
           owner_user_id: args.owner_user_id,
           payout_id: args.payout_id ?? null,
