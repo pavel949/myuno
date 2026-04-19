@@ -1,128 +1,177 @@
 
 
-## Audit дизайна — myUNO главная и базовый shell
+## Plan: Commercial Real Estate & Land Plots — Persona-Gated Section
 
-Аудит покрывает: `AppLayout` → `AppHeader` → `InstallBanner` → `Index.tsx` (Hero + 7 секций) → `AdaptiveBottomNav` → `Footer`. Брал референсом `/styles/tokens.css`, brand book и `ecosystemLayout.ts`.
+### Goal
+Add a new section "Коммерческая недвижимость и земельные участки" inside the Property Hub (`/property`) that becomes visible only when the user has selected the **Business** (`business`) or **Investor** (`investor`) persona. It supports both rent and sale, with card structures purpose-built for commercial assets (offices, warehouses, retail/F&B units, hotels, land plots, etc.).
 
----
-
-### Архитектурные проблемы (HIGH)
-
-**1. Двойное оборачивание контейнера на главной**
-`AppLayout` уже оборачивает `children` в `ECOSYSTEM_PAGE_CONTAINER` (`max-w-[1536px] mx-auto px-4 md:px-6 lg:px-8 xl:px-10`) с модификатором `px-0`. Затем `Index.tsx` (стр. 76) внутри добавляет ещё один `max-w-[1536px] mx-auto px-4 md:px-6 lg:px-8 xl:px-10 py-5`. Получается двойной wrapper и `px-0` не имеет смысла. Это ломает carousel-rails которые делают `-mx-4 px-4` (FeaturedProperties, HomeDiscovery, ValueProp): они "выезжают" не до края экрана, а до внутреннего паддинга.
-
-**Фикс**: Index.tsx должен использовать `<PageContainer>` или просто `space-y-6 lg:space-y-10 py-5 pb-20`, без повторного `max-w` и `px-*`. Carousel `-mx-4 px-4` тогда корректно дотянется до края.
-
-**2. InstallBanner создаёт лишнюю вертикальную дыру**
-`AppLayout` всегда рендерит `<div className="ECOSYSTEM_PAGE_CONTAINER pt-2"><InstallBanner /></div>` — даже когда баннер скрыт (`return null`), остаётся `pt-2` пустого контейнера. На мобильных: между header и hero лишние ~12px.
-
-**Фикс**: оборачивающий `<div>` рендерим только если `InstallBanner` действительно отдаёт контент (через провайдер видимости или `display: contents`).
-
-**3. Хардкод цветов в JSX вместо токенов** (брендбук-нарушение)
-Несмотря на унифицированные токены, остаются inline стили:
-- `AppHeader`: `background: 'rgba(15,28,46,0.95)'`, `borderColor: 'hsl(0 0% 100% / 0.07)'` — должно быть `hsl(var(--bg-surface))`/`hsl(var(--border))` через Tailwind.
-- `HeroBlock`: `linear-gradient(...hsl(216 60% 7%)...hsl(214 50% 14%))` дважды (mobile + desktop) — захардкожен dark theme в light режиме (см. ниже).
-- `PropertyTourBanner`: `bg-gradient-to-r from-[hsl(var(--primary))]/90...` — OK по токену, но `bg-white/20` для оверлеев.
-- `AdaptiveBottomNav`: `background: 'rgba(15,28,46,0.85)'` — захардкожено dark.
-- `ValuePropositionStrip`: `linear-gradient(135deg, #06b6d4, #0891b2)` × 6 — raw hex.
-
-**4. Hero ломается в light theme**
-`HeroBlock` принудительно использует тёмный градиент (`hsl(216 60% 7%)`) на mobile и desktop через inline style, игнорируя `html.light`. На светлой теме hero остаётся тёмно-синий, остальная страница белая → визуальный shock.
-
-**Фикс**: использовать `var(--bg-base)` / `var(--bg-card)` или CSS class `hero-dark-surface` (она уже есть, но всё равно перекрывается inline style).
+### Why a separate section (not just new property_type values)
+Today `properties.property_type` only contains residential values (apartment / studio / condo / villa) and the Property Hub tabs (Nightly / Long-term / Buy / New Build / Resale / My) are residential-centric. Commercial buyers care about completely different fields (yield, NOI, lease term remaining, cap rate, zoning, frontage, Chanote, FAR, road access, electricity load). A dedicated zone with its own card and detail layout is the right architectural choice — and it cleanly mirrors the existing pattern of `InvestmentBusinessZone` under the Investment Hub.
 
 ---
 
-### Layout / spacing inconsistencies (MEDIUM)
+### 1. Data model (new migration)
 
-**5. Разнобой вертикальных ритмов**
-- `Index.tsx`: `space-y-6 lg:space-y-10` (24/40px)
-- `ECOSYSTEM_MAIN_SPACING`: `space-y-4 md:space-y-6` (16/24px)
-- `PageContainer` (uno): `py-4 md:py-6 lg:py-8 2xl:py-10`
-Главная, Discover, Property — все имеют разные ритмы. Должен быть один токен (например, `--section-gap`).
+Add to `public.properties` (no schema split — keep SSOT per memory `architecture/property/unified-pms-and-discovery-standard`):
 
-**6. Hero `px-4 py-6` (mobile) vs остальные секции `px-4` parent → визуально hero "ровно с краем", а content рядом — нет, потому что у hero есть `rounded-[var(--radius-lg)] overflow-hidden`. Но из-за двойного wrapper'а (см. п.1) hero не дотягивает до края экрана. Нужно: hero получает ширину viewport через `-mx-4 px-4` либо родитель не имеет padding.
+- `asset_class text` — new high-level discriminator: `'residential' | 'commercial' | 'land'` (default `'residential'` for all existing rows).
+- Extend `property_type` allowed values via app code only (DB stays text):
+  - Commercial: `office`, `retail`, `warehouse`, `restaurant_space`, `hotel_building`, `mixed_use`, `medical_clinic`, `coworking`, `showroom`.
+  - Land: `land_residential`, `land_commercial`, `land_agricultural`, `land_beachfront`.
+- New nullable commercial/land columns (all optional, JSON-friendly):
+  - `floor_area_sqm numeric`, `land_size_rai numeric`, `land_size_sqm numeric`
+  - `frontage_m numeric`, `road_access text`
+  - `zoning text`, `title_deed_type text` (Chanote / Nor Sor 3 Gor / etc.)
+  - `electricity_load_kw numeric`, `water_supply text`
+  - `current_lease_term_months int`, `lease_remaining_months int`, `monthly_rent_thb numeric`
+  - `noi_annual_thb numeric`, `cap_rate_pct numeric`, `yield_pct numeric`
+  - `existing_tenant_anonymized boolean default false`
+  - `permitted_uses text[]` (e.g. `{F&B, retail, office}`)
+  - `building_condition text`, `year_built int` (already exists if present — reuse)
+- Indexes: `(asset_class)`, `(asset_class, listing_type)`, GIN on `permitted_uses`.
+- RLS: inherit existing properties policies (no change).
 
-**7. Touch targets местами < 44px**
-- `AppHeader` Search (mobile): `w-9 h-9` = 36px (надо 44).
-- `LanguageSwitcher`/`CurrencySwitcher` size="sm" — судя по паттерну, тоже 32–36px.
-- `AdaptiveBottomNav` иконки 20×20 в кнопке `flex-col` — высота total 60px ✓, но активная hit area по факту меньше (внутренний `pt-1`).
-- `WhatsAppCTA` CTA имеет `min-h-[44px]` ✓, hero SOS на desktop — `px-4 py-2` без min-h (~36px).
+### 2. Routes (extend `APP_ROUTES`)
 
-**8. AdaptiveBottomNav: max-w-[480px] mx-auto**
-На широких мобилках (393–414px) всё ок, но на планшетах <768 — навигация прижата к центру, а тело страницы — full width. Лучше `max-w-screen-sm` или просто width:100%.
+```
+COMMERCIAL:        '/property/commercial'
+COMMERCIAL_BROWSE: '/property/commercial/browse'   // ?intent=rent|sale&type=office|warehouse|...
+COMMERCIAL_DETAIL: (id) => `/property/commercial/${id}`
+LAND:              '/property/land'
+LAND_BROWSE:       '/property/land/browse'         // ?intent=rent|sale&type=residential|commercial|...
+LAND_DETAIL:       (id) => `/property/land/${id}`
+```
 
----
+Both routes reuse `PropertyHub` shell (Outlet) so navigation stays consistent.
 
-### Доступность (MEDIUM)
+### 3. Persona-aware tab visibility
 
-**9. PersonaSwitcher: текст белого на градиентах низкого контраста**
-`PERSONA_GRADIENTS.business: '#64748b → #475569'` + белый текст 11px = WCAG fail. Проверить все 14 градиентов.
+Extend `PropertyHubTabs` (`src/pages/property/PropertyHub.tsx`):
+- Add two new tab configs: `commercial` (icon `Briefcase`) and `land` (icon `Trees`/`Map`).
+- Add `personaGated?: UserPersona[]` to `TabConfig`.
+- In `PropertyHub`, read `personas` from `useUserPersonas()` and filter:
+  ```ts
+  const showCapitalTabs = personas.some(p => p === 'business' || p === 'investor');
+  const visibleTabs = TABS.filter(t =>
+    (!t.authOnly || user) &&
+    (!t.personaGated || t.personaGated.some(p => personas.includes(p)))
+  );
+  ```
+- Tabs render in horizontal scroll strip (no layout break on mobile).
+- When persona is **not** business/investor, the tabs are simply hidden (URL still works for shared links).
 
-**10. Hero SOS на desktop**: `text-foreground` на `rgba(239,68,68,0.15)` — серый на светло-красном (light theme), низкий контраст. На mobile есть `text-warning` — лучше унифицировать на `text-destructive` или белый.
+Reflect the same gating on the `/property` landing page (`PropertyIndex` / `PropertyLanding`) by adding a "Commercial & Land" hero card that appears only for those personas, plus an inline hint: "Видно, потому что выбрана роль Бизнес / Инвестор".
 
-**11. `aria-label` на иконках только частично**:
-- `AppHeader` Search кнопка ✓
-- `MiniCart`, `LanguageSwitcher`, `CurrencySwitcher` — надо проверить (вне аудита, но вероятно — есть).
-- HeroBlock `WeatherIcon`, `MapPin`, `Calendar` — декоративные, нужен `aria-hidden` (часть стоит, часть — нет).
+### 4. Card structure (`CommercialPropertyCard`)
 
-**12. `motion.button` без `aria-label`** в `QuickActionsGrid` desktop tile: иконка + текст, текст уже есть → OK. Но `requiresFullAccess + isLocked` визуально показывается только Lock-иконкой, без `aria-pressed`/`aria-disabled`.
+A new card component in `src/components/property/commercial/`:
 
-**13. Focus visible**:
-- `FeaturedPropertiesCarousel` ✓ (`focus-visible:ring-2 ring-primary ring-offset-2`)
-- `HomeDiscoveryCarousel` ✓
-- `QuickActionsGrid` mobile cards — НЕТ `focus-visible:ring`.
-- `AdaptiveBottomNav` NavLink — НЕТ.
-- `HeroSearchInput` — input без focus-ring.
+```text
+┌─ cover image (16:9, badge top-left: "Office" / "Аренда" / "Sale") ─┐
+│  Verified ✓ chip (top-right if developer_verified)                  │
+├──────────────────────────────────────────────────────────────────────┤
+│ Title (RU/EN) · District                                             │
+│ ฿ 180,000 / month  ·  $5,200 USD                                     │
+│ — or —                                                               │
+│ ฿ 45,000,000  ·  Cap rate 6.8%  ·  NOI ฿3.06M/yr                    │
+├──────────────────────────────────────────────────────────────────────┤
+│ 🏢 320 m² · 🏬 Floor 2 · 🚗 12 parking · ⚡ 60 kW                    │
+│ Permitted: F&B · Retail   ·   Lease left: 3 yrs                      │
+│ Title: Chanote                                                       │
+└──────────────────────────────────────────────────────────────────────┘
+```
 
----
+Mode-aware spec rendering (reuses `propertyTypeConfig.ts` pattern):
+- **Office / Coworking:** floor, total floors, ceiling height, AC type, fiber.
+- **Warehouse / Logistics:** clear height, dock doors, floor load (kg/m²), truck access.
+- **Retail / Restaurant:** frontage, foot-traffic zone, exhaust hood ready, grease trap, prior tenant type.
+- **Hotel / Mixed-use:** rooms count, F&B units, license status.
 
-### Семантика и компоненты (LOW)
+`LandPlotCard` (separate component): cover, **rai/ngan/wah** breakdown, zoning, title type, road frontage, utilities reachable (Yes/No chips), aerial map preview.
 
-**14. Заголовки секций — три разных стиля**:
-- FeaturedProperties: `text-lg font-display font-bold text-foreground`
-- HomeDiscovery: то же ✓
-- TrustStats: `text-xs uppercase tracking-widest text-muted-foreground` (eyebrow вместо h2)
-- ValueProp: `text-lg font-bold font-display` ✓
-- HeroBlock: `text-2xl font-bold font-display` (h1) ✓
+All cards expose 3 primary CTAs: **View details · Request viewing · Save**.
 
-Нужен shared `<SectionHeader>` (он уже есть в `@/components/ds`, но Index его не использует).
+### 5. Browse page (`CommercialBrowsePage`, `LandBrowsePage`)
 
-**15. Footer и BottomNav на мобиле дублируют контакты**
-Footer (mobile) показывает 3 социалки + company links + install кнопку. Сразу под ним BottomNav с 5 пунктами. На главной снизу: padding `pb-20 md:pb-8` (Index) + `pb-24 md:pb-4` (AppLayout main) + `pb-20 md:pb-0` (footer) — переусложнение; нижний whitespace ~120px.
+Reuse `PropertySearchPage` skeleton but with commercial-specific filters:
+- Intent toggle: Rent ↔ Sale (mirrors residential)
+- Type chips: Office / Retail / Warehouse / Restaurant / Hotel / Mixed-use
+- Sliders: area (m²), price, cap rate, lease term remaining
+- Toggles: chanote only, with current tenant, ready-to-operate
+- Land page swaps these for: rai range, zoning multi-select, title type, sea/road frontage, utilities present.
 
-**16. Hero pills (loyalty, streak)** имеют `min-h-[44px]` но `px-2.5 py-1` визуально создают высоту ~28px → есть white-space из-за min-h, выглядит "пустоватой кнопкой".
+Sort: relevance, price asc/desc, cap rate desc, area desc, newest.
 
----
+### 6. Detail page (`CommercialPropertyDetail`)
 
-### План фиксов (приоритет)
+Sections:
+1. Hero gallery + intent badge + key numbers strip (Price / Cap rate / NOI / Area).
+2. Investment Snapshot (yield, payback, current rent, lease term left, anonymized tenant info if `existing_tenant_anonymized`).
+3. Specs (type-aware, see card section).
+4. Title & Compliance (deed type, zoning, permitted uses, building license).
+5. Location map + nearby (Google Maps standard).
+6. Documents (lease abstract, title deed teaser — gated for verified investors via existing `commercial_terms_redacted` flag already on properties table).
+7. CTAs: Request viewing → creates lead in CRM (source `commercial_inquiry`), Request financials → ships NDA via existing AI Legal Agent flow (memory `features/crm/legal-and-financial-terms`).
 
-**P0 — структурные (3 файла)**
-1. `Index.tsx` — убрать дублирующий `max-w-[1536px] mx-auto px-* py-5`. Оставить только `space-y-6 lg:space-y-10 py-5 pb-20 md:pb-8`. Carousel rails `-mx-4 px-4` тогда дотянутся до края.
-2. `AppLayout.tsx` — обёртка `InstallBanner` рендерится условно (пробросить через ref/state из самого баннера или `display: contents`).
-3. `HeroBlock.tsx` — заменить inline `linear-gradient(...hsl(216...))` на CSS class через `--bg-base`/`--bg-card`, чтобы light theme работала.
+### 7. Hooks & adapters
 
-**P1 — токены и контраст (5 файлов)**
-4. `AppHeader.tsx` — `rgba(15,28,46,0.95)` → `hsl(var(--bg-surface) / 0.95)`.
-5. `AdaptiveBottomNav.tsx` — то же, плюс `max-w-[480px]` → убрать или на `max-w-screen-sm`.
-6. `ValuePropositionStrip` — 6 hex-градиентов → 6 token gradients (`--cluster-arrive`, `--cluster-live`, etc.).
-7. `InlinePersonaSelector` `PERSONA_GRADIENTS` — те же hex, перевести на токены. Оверлапается с `useUserPersonas.ts` — общий источник.
-8. Hero SOS — унифицировать desktop+mobile на `text-destructive font-semibold`.
+- `src/hooks/useCommercialProperties.ts` — `asset_class IN ('commercial')`.
+- `src/hooks/useLandPlots.ts` — `asset_class = 'land'`.
+- `src/hooks/useCommercialProperty.ts` (single).
+- Extend `src/lib/real-estate/listingViewModel.ts` with `surfaceFromCommercial()` returning `kind: 'commercial_listing'` or `'land_listing'`, intent `'sale' | 'rent'`.
+- Add taxonomy entries to `src/lib/taxonomies/index.ts` (canonical SSOT).
 
-**P2 — a11y & touch (4 файла)**
-9. `AppHeader` mobile search/lang/currency — все min `w-11 h-11`.
-10. `QuickActionsGrid` mobile cards + `AdaptiveBottomNav` — добавить `focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2`.
-11. `HeroSearchInput` — focus-ring на контейнере.
-12. PersonaSwitcher — проверить контраст 14 градиентов; для `business`/`couple`/`nightlife` поднять lightness конечной точки или добавить `text-shadow`.
+### 8. Cross-linking with Investment Hub
 
-**P3 — консистентность (2 файла)**
-13. Index.tsx использует `<SectionHeader>` из `@/components/ds` для всех секций (FeaturedProperties, HomeDiscovery, TrustStats — внутри них или снаружи).
-14. Уменьшить нижний whitespace на mobile: `pb-20` (Index) убрать, оставить только `pb-24` в AppLayout main (BottomNav уже учитывает `env(safe-area-inset-bottom)`).
+In `InvestmentBusinessZone` add a banner: "Looking for a venue / land for your business? → Browse commercial RE", deep-linking to `/property/commercial?intent=rent`.
+In `InvestmentRealEstateZone` add a card: "High-yield commercial assets" → `/property/commercial?intent=sale`.
 
----
+### 9. Persona discovery flow (UX)
 
-### Файлы к редактированию (~12)
-`src/pages/Index.tsx`, `src/components/layout/AppLayout.tsx`, `src/components/layout/AppHeader.tsx`, `src/components/layout/AdaptiveBottomNav.tsx`, `src/components/home/HeroBlock.tsx`, `src/components/home/QuickActionsGrid.tsx`, `src/components/home/ValuePropositionStrip.tsx`, `src/components/home/InlinePersonaSelector.tsx`, `src/components/home/TrustStats.tsx`, `src/components/pwa/InstallBanner.tsx`, и опционально `src/styles/tokens.css` (добавить `--section-gap-y` token).
+If a user lands directly on `/property/commercial` without business/investor persona:
+- Show inline persona prompt: "Включить роль 'Бизнес' или 'Инвестор', чтобы видеть эти разделы в навигации?" with one-click toggle (uses existing `useUserPersonas().togglePersona`).
+- Content still renders — gating only affects tab visibility, not URL access (good for SEO and shared links).
 
-Никаких миграций БД, маршрутов или edge functions — только UI.
+### 10. Files to create / modify
+
+**Create:**
+- `supabase/migrations/<ts>_property_commercial_land.sql`
+- `src/components/property/commercial/CommercialPropertyCard.tsx`
+- `src/components/property/commercial/LandPlotCard.tsx`
+- `src/components/property/commercial/CommercialFilters.tsx`
+- `src/components/property/commercial/LandFilters.tsx`
+- `src/pages/property/CommercialIndex.tsx`
+- `src/pages/property/CommercialBrowsePage.tsx`
+- `src/pages/property/CommercialDetail.tsx`
+- `src/pages/property/LandIndex.tsx`
+- `src/pages/property/LandBrowsePage.tsx`
+- `src/pages/property/LandDetail.tsx`
+- `src/hooks/useCommercialProperties.ts`
+- `src/hooks/useLandPlots.ts`
+
+**Modify:**
+- `src/lib/config/routes.ts` — add `COMMERCIAL*` and `LAND*` routes.
+- `src/pages/property/PropertyHub.tsx` — add 2 persona-gated tabs + `useUserPersonas` filter.
+- `src/pages/property/PropertyIndex.tsx` / `PropertyLanding.tsx` — persona-gated promo card.
+- `src/AnimatedRoutes.tsx` (or wherever routes are wired) — register new routes.
+- `src/lib/real-estate/listingViewModel.ts` — extend kinds.
+- `src/lib/taxonomies/index.ts` — add commercial/land taxonomies.
+- `src/lib/propertyTypeConfig.ts` — add type-aware labels for commercial/land.
+- `src/i18n/*` — RU/EN strings.
+- `src/lib/appVersion.ts` → `3.41.0`.
+
+### 11. Phasing
+
+- **Phase 1 (this PR):** Migration + routes + tab gating + Commercial browse list + card + minimal detail page (read-only). Land scaffolded with empty state.
+- **Phase 2:** Land browse + detail, advanced filters, financial gating with NDA flow.
+- **Phase 3:** Lead → CRM → Capital advisory pipeline integration, anonymized tenant disclosure rules, document vault.
+
+### 12. Open questions (please confirm before Phase 1)
+
+| # | Question | Default if no answer |
+|---|----------|----------------------|
+| 1 | Should commercial listings appear in the global `/map` and `/search`? | Yes, with new pin colors (gold for commercial, brown for land). |
+| 2 | Anonymous browsing OK or auth-gated for sale prices > ฿20M? | Open browsing; only **financials/lease docs** gated. |
+| 3 | Allow MC owners to publish commercial properties in `/mc/properties/new`? | Yes — extend the property-create wizard with `asset_class` step. |
+| 4 | Pricing display currency? | THB primary, USD secondary (matches existing `useCurrency`). |
 
