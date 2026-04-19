@@ -16,7 +16,7 @@ import { createMapPopupHtml } from '@/lib/sanitize';
 import { getMapCenter, DEFAULT_CITY } from '@/lib/config';
 import { APP_ROUTES } from '@/lib/config/routes';
 
-type VerticalFilter = 'all' | 'property' | 'beauty' | 'restaurant';
+type VerticalFilter = 'all' | 'property' | 'commercial' | 'land' | 'beauty' | 'restaurant';
 
 interface UniversalMarker {
   id: string;
@@ -35,6 +35,8 @@ const VERTICAL_CONFIG: Record<
   { icon: string; color: string; labelEn: string; labelRu: string; route: (id: string) => string }
 > = {
   property: { icon: '🏠', color: '#059669', labelEn: 'Real Estate', labelRu: 'Жильё', route: (id) => APP_ROUTES.PROPERTY_DETAIL(id) },
+  commercial: { icon: '🏢', color: '#C9A84C', labelEn: 'Commercial', labelRu: 'Коммерческая', route: (id) => `/property/commercial/${id}` },
+  land: { icon: '🌾', color: '#A0784A', labelEn: 'Land', labelRu: 'Земля', route: (id) => `/property/land/${id}` },
   beauty: { icon: '💇', color: '#6366f1', labelEn: 'Beauty', labelRu: 'Красота', route: (id) => `/beauty/salon/${id}` },
   restaurant: { icon: '🍽️', color: '#ea580c', labelEn: 'Restaurants', labelRu: 'Рестораны', route: (id) => `/restaurants/${id}` },
 };
@@ -42,6 +44,8 @@ const VERTICAL_CONFIG: Record<
 const FILTER_OPTIONS: { value: VerticalFilter; labelEn: string; labelRu: string; icon: string }[] = [
   { value: 'all', labelEn: 'All', labelRu: 'Все', icon: '🗺️' },
   { value: 'property', labelEn: 'Housing', labelRu: 'Жильё', icon: '🏠' },
+  { value: 'commercial', labelEn: 'Commercial', labelRu: 'Коммерч.', icon: '🏢' },
+  { value: 'land', labelEn: 'Land', labelRu: 'Земля', icon: '🌾' },
   { value: 'beauty', labelEn: 'Beauty', labelRu: 'Красота', icon: '💇' },
   { value: 'restaurant', labelEn: 'Food', labelRu: 'Еда', icon: '🍽️' },
 ];
@@ -85,7 +89,13 @@ export default function MapView() {
   const allMarkers = useMemo<UniversalMarker[]>(() => {
     const markers: UniversalMarker[] = [];
     const propMarkers = transformPropertiesToMarkers(properties || []);
-    propMarkers.forEach((m) => markers.push({ ...m, vertical: 'property' }));
+    const acById = new Map<string, 'residential' | 'commercial' | 'land' | null>();
+    (properties || []).forEach((p) => acById.set(p.id, p.asset_class ?? 'residential'));
+    propMarkers.forEach((m) => {
+      const ac = acById.get(m.id);
+      const vertical: VerticalFilter = ac === 'commercial' ? 'commercial' : ac === 'land' ? 'land' : 'property';
+      markers.push({ ...m, vertical });
+    });
     (salons || []).forEach((s) => {
       if (s.lat != null && s.lng != null) {
         markers.push({
