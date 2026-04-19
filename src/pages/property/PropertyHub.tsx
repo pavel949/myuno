@@ -15,9 +15,12 @@ import {
   Map,
   GitCompare,
   Users,
+  Briefcase,
+  Trees,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserPersonas, type UserPersona } from '@/hooks/useUserPersonas';
 import { CompareProvider } from '@/components/property/PropertyCompare';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -29,6 +32,8 @@ interface TabConfig {
   icon: React.ElementType;
   path: string;
   authOnly?: boolean;
+  /** When set, tab visible only if user has at least one of these personas */
+  personaGated?: UserPersona[];
 }
 
 const TABS: TabConfig[] = [
@@ -66,6 +71,22 @@ const TABS: TabConfig[] = [
     labelRu: 'Вторичка',
     icon: ArrowRightLeft,
     path: APP_ROUTES.RESALE,
+  },
+  {
+    id: 'commercial',
+    labelEn: 'Commercial',
+    labelRu: 'Коммерческая',
+    icon: Briefcase,
+    path: APP_ROUTES.COMMERCIAL,
+    personaGated: ['business', 'investor'],
+  },
+  {
+    id: 'land',
+    labelEn: 'Land',
+    labelRu: 'Земля',
+    icon: Trees,
+    path: APP_ROUTES.LAND,
+    personaGated: ['business', 'investor'],
   },
   {
     id: 'my',
