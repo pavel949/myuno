@@ -30,7 +30,10 @@ export interface OwnershipData {
   ownership_document_name: string;
 }
 
+export type AssetClass = 'residential' | 'commercial' | 'land';
+
 export interface PropertyFormData {
+  asset_class: AssetClass;
   title: string;
   title_ru: string;
   internal_name: string;
@@ -120,10 +123,21 @@ export interface PropertyFormData {
   negotiation_enabled?: boolean;
   custom_length_discounts?: Array<{ min_nights: number; discount_percent: number }>;
   lock_code?: string;
+  // Commercial / Land specifics
+  floor_area_sqm?: number;
+  cap_rate_pct?: number;
+  noi_annual_thb?: number;
+  zoning?: string;
+  title_deed_type?: string;
+  permitted_uses?: string[];
+  electricity_load_kw?: number;
+  land_size_sqm?: number;
+  land_size_rai?: number;
+  frontage_m?: number;
 }
 
 const initialFormData: PropertyFormData = {
-  title: '',
+  asset_class: 'residential',
   title_ru: '',
   internal_name: '',
   address: '',
@@ -200,6 +214,7 @@ const initialOwnershipData: OwnershipData = {
 
 function mapPropertyToFormData(property: any): PropertyFormData {
   return {
+    asset_class: (property.asset_class as AssetClass) || 'residential',
     title: property.title_en || property.title || '',
     title_ru: property.title_ru || '',
     internal_name: property.internal_name || '',
@@ -273,6 +288,17 @@ function mapPropertyToFormData(property: any): PropertyFormData {
     negotiation_enabled: property.negotiation_enabled || false,
     custom_length_discounts: property.custom_length_discounts || [],
     lock_code: property.lock_code || '',
+    // Commercial / Land
+    floor_area_sqm: property.floor_area_sqm ?? undefined,
+    cap_rate_pct: property.cap_rate_pct ?? undefined,
+    noi_annual_thb: property.noi_annual_thb ?? undefined,
+    zoning: property.zoning || undefined,
+    title_deed_type: property.title_deed_type || undefined,
+    permitted_uses: property.permitted_uses || undefined,
+    electricity_load_kw: property.electricity_load_kw ?? undefined,
+    land_size_sqm: property.land_size_sqm ?? undefined,
+    land_size_rai: property.land_size_rai ?? undefined,
+    frontage_m: property.frontage_m ?? undefined,
   };
 }
 
