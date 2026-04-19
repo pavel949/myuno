@@ -1,105 +1,143 @@
 
 
-## План: полная интеграция Commercial RE & Land в блок Недвижимость
+## План: Hotels как часть Commercial RE — для инвесторов/бизнесменов
+
+### Контекст
+В `commercialTaxonomy.ts` уже есть тип `hotel_building` (🏨), но он подан как обычный коммерческий объект. Отель — это **операционный бизнес**, а не просто здание: ключи (rooms), ADR, RevPAR, occupancy, brand/flag, лицензия (Hotel License), management contract. Нужно дать ему отдельную "под-вертикаль" внутри Commercial с собственной карточкой, фильтрами и сценариями: **Buy / Sell / Rent (lease) / Hand over to management**.
 
 ### Цель
-Сделать коммерческую недвижимость и земельные участки **полноценной частью** Property Hub: видимыми на лендинге, в навигации, в публикации, в поиске — для ролей **Business** и **Investor**.
-
-### Текущее состояние (что уже есть после Phase 1–2)
-- Таблица `properties` расширена `asset_class` + 15 полей.
-- Карточки `CommercialPropertyCard`, `LandPlotCard`, фильтры, hooks.
-- Страницы `/property/commercial`, `/property/land` + детальные.
-- Гейтинг табов в `PropertyHub` по personas (business/investor).
-
-### Что не доделано (gap)
-1. **PropertyLanding** — нет карточек Commercial/Land в seeker-секции (видны только Rent/Buy/Offplan/Resale/Invest).
-2. **Property creation wizard** (`/mc/properties/new`, owner flow) — нельзя выбрать `asset_class = commercial | land`, поля не публикуются.
-3. **Глобальный `/search` и `/map`** — не индексируют commercial/land (отдельные пины + фильтр по asset_class).
-4. **Bottom nav / quick actions** — для роли Investor/Business нет shortcut'а.
-5. **i18n** — ключи `propertyHub.landing.commercial.*` и `.land.*` отсутствуют.
-6. **Cross-links** в `PropertyHubTabs` визуально не выделяют новые табы (нужен бейдж "Pro").
+Сделать Hotels полноценным разделом внутри Commercial Hub — видимым для personas `investor` и `business`, с покупкой/продажей/арендой и опцией передать в управление (HMA — Hotel Management Agreement).
 
 ---
 
-### Phase 3 — Полная интеграция (этот PR)
+### Архитектура
 
-#### 1. Лендинг `/property` (`PropertyLanding.tsx`)
-Добавить **третью секцию** между Seekers и Pros — `sectionCapital` ("Для бизнеса и инвесторов"), persona-gated (видна если `business`/`investor` активны, иначе — collapsed teaser "Включить роль Бизнес/Инвестор → откроются разделы"):
-- Карточка **Commercial** → `/property/commercial` (icon `Building2`, "Офисы, ритейл, склады, F&B")
-- Карточка **Land** → `/property/land` (icon `Trees`, "Земельные участки — rai/ngan/wah, Chanote")
-- Карточка **Investment-grade** → `/property/commercial?intent=sale&minCap=6` (icon `TrendingUp`)
+#### 1. Данные (DB)
+Новые поля в `properties` (только для `asset_class='commercial' AND property_type='hotel_building'`):
+- `hotel_keys` int — количество номеров
+- `hotel_star_rating` numeric(2,1) — 1.0–5.0
+- `hotel_brand` text — бренд/флаг (Marriott, Hilton, independent…)
+- `hotel_license_type` text enum-like — `full_hotel_license` | `non_hotel_license` | `pending`
+- `hotel_adr_thb` numeric — Average Daily Rate
+- `hotel_revpar_thb` numeric — Revenue per Available Room
+- `hotel_occupancy_pct` numeric — текущая загрузка
+- `hotel_gop_margin_pct` numeric — GOP%
+- `hotel_management_status` text — `owner_operated` | `under_hma` | `seeking_operator` | `for_lease`
+- `hotel_operator_name` text — текущий оператор (если under_hma)
+- `hotel_year_renovated` int
 
-Если persona не активна — показываем 1 inline-карту-приглашение с CTA `togglePersona('investor')`.
+Новый sub-intent в URL: `?hotelMode=buy | sell | lease | management`.
 
-#### 2. Property creation wizard
-Файлы: `src/pages/owner/PropertyCreatePage.tsx` (или эквивалент) + `src/components/owner/property-wizard/*`.
+#### 2. Таксономия
+- Расширить `commercialTaxonomy.ts`: добавить `HOTEL_LICENSE_TYPES`, `HOTEL_MANAGEMENT_STATUSES` (bilingual labels) + хелперы `getHotelLicenseLabel`, `getHotelManagementStatusLabel`.
+- Добавить в `CommercialPropertyType` подтипы: `boutique_hotel`, `resort`, `serviced_apartment_building`, `hostel` — рядом с `hotel_building`. Все они группируются в Hotels-секцию через хелпер `isHotelType()`.
 
-Добавить **Step 0: Asset Class** (3 крупные карточки: Residential / Commercial / Land). Выбор управляет:
-- Какие property_type показывать (residential | COMMERCIAL_TYPES | LAND_TYPES из `commercialTaxonomy.ts`).
-- Какие шаги wizard'а отображать: для commercial/land скрыть bedrooms/bathrooms, показать `floor_area_sqm`, `cap_rate_pct`, `noi_annual_thb`, `title_deed_type`, `permitted_uses`, `electricity_load_kw`, `zoning`.
-- Для land: `land_size_sqm` с автопересчётом в rai/ngan/wah (используя `formatLandSize`).
-- При сохранении: пишем `asset_class` в БД.
+#### 3. Hooks
+- `useHotelProperties(filters)` — обёртка над `useCommercialProperties` с predicate `property_type IN (hotel_building, resort, boutique_hotel, serviced_apartment_building, hostel)`.
+- Поля Hotel добавить в `COMMERCIAL_COLUMNS` и интерфейс `CommercialProperty`.
+- `HotelFilters` extends `CommercialFilters`: `minKeys`, `maxKeys`, `licenseType`, `managementStatus`, `minOccupancy`, `minStars`.
 
-#### 3. MC Properties list
-`src/pages/mc/MCPropertiesPage.tsx` — добавить фильтр-таб **Все / Жилая / Коммерческая / Земля** (по `asset_class`). Карточки в списке используют существующую `CommercialPropertyCard`/`LandPlotCard` для соответствующих asset_class.
+#### 4. UI компоненты (новые)
 
-#### 4. Global Search & Map
-- `useGlobalSearch.ts` — расширить запрос `properties`: убрать неявный фильтр на residential, добавить поле `asset_class` в результат, иконка/цвет пина зависит от него.
-- `/map` (`UniversalMapPage.tsx`) — добавить toggle "Коммерческая" / "Земля" в legend; pin colors:
-  - residential: emerald (как сейчас)
-  - commercial: gold (`hsl(var(--warning))`)
-  - land: brown (`hsl(35 40% 45%)`)
-- Search filter chip `asset_class` доступен всем (без persona-gating — поиск открыт).
+**`HotelPropertyCard.tsx`** — карточка отеля. Отличия от `CommercialPropertyCard`:
+- Hero: aspect 16/10, бейджи: `тип` + `звёздность` (звёздочки) + intent (Buy/Lease/Management) + verified
+- Тело:
+  - Заголовок + локация
+  - **KPI strip**: Keys / ADR / RevPAR / Occupancy% (4 метрики в grid)
+  - Цена: для buy — sale_price; для lease — monthly_rent; для management — "Operator wanted" CTA
+  - Cap rate + GOP% (если есть) рядом с ценой
+  - Badge management_status: "Под управлением Marriott" / "Owner-operated" / "Seeking operator"
+  - License badge (Full Hotel License — зелёный, Non-hotel — янтарный)
 
-#### 5. Bottom nav / Quick actions для Investor
-`AdaptiveBottomNav.tsx` — для активной роли Investor/Business добавить shortcut "Commercial" в "Property" submenu (без увеличения видимых пунктов).
+**`HotelFilters.tsx`** — bottom sheet: keys range, stars min, license, management_status, intent (buy/sell/lease/management).
 
-#### 6. PropertyHubTabs — визуальные бейджи
-Добавить маленький бейдж `Pro` рядом с табами Commercial/Land (используя существующий Badge компонент из shadcn).
+**`HotelHeroBanner.tsx`** — на лендинге `/property/commercial?tab=hotels`: 4 use-case карточки:
+1. **Купить отель** — investor flow
+2. **Продать отель** — owner flow → `/mc/properties/new?asset=commercial&type=hotel_building`
+3. **Арендовать здание** — lease flow
+4. **Передать в управление** — HMA lead form → CRM
 
-#### 7. i18n keys (RU/EN)
-Добавить в `src/i18n/{en,ru}/propertyHub.ts`:
-- `landing.sectionCapital`, `landing.commercial.{title,desc}`, `landing.land.{title,desc}`, `landing.investmentGrade.{title,desc}`
-- `landing.personaPrompt.{title,enableBusiness,enableInvestor}`
-- `wizard.assetClass.{title,residential,commercial,land}`
+**`HotelManagementLeadSheet.tsx`** — форма "Передать в управление": owner inputs (keys, location, current state) → создаёт `crm_contacts` запись с `source='hotel_hma_inquiry'`, отправляет уведомление в Telegram.
 
-#### 8. Версия
-`appVersion.ts` → `3.41.2`.
+#### 5. Страницы
+
+**Новая:** `src/pages/property/HotelsIndex.tsx` (route: `/property/hotels`)
+- Tabs: Buy / Lease / Management opportunities
+- Hero banner (4 use-cases)
+- Filters bar
+- Grid of `HotelPropertyCard`
+- Empty state с CTA "Опубликовать отель"
+
+**Обновить:** `CommercialIndex.tsx`:
+- Добавить sub-tab "Hotels" рядом с All/Office/Retail/Warehouse — но клик ведёт на `/property/hotels` (отдельный URL для SEO).
+- В `useCommercialProperties` добавить флаг `excludeHotels` (по умолчанию false на All, true когда выбрана не-hotel категория).
+
+**Обновить:** `PropertyLanding.tsx`:
+- В Capital section (видна для investor/business) добавить 4-ю карточку **Hotels** (icon `Hotel` из lucide) → `/property/hotels`.
+
+**Обновить:** `PropertyHub.tsx`:
+- В табах под Commercial добавить sub-link "Hotels" с бейджем "Pro".
+
+#### 6. Wizard (создание)
+В `BasicInfoStep.tsx`:
+- При выборе `asset_class=commercial` + `property_type=hotel_building/resort/boutique_hotel/...` показать дополнительный блок "Hotel details": keys, stars, brand, license, management_status, ADR, occupancy.
+- Если `management_status=seeking_operator` — показать чекбокс "Опубликовать в разделе HMA opportunities".
+
+#### 7. CRM интеграция
+- Source `hotel_hma_inquiry` для лидов от owners, ищущих оператора.
+- Source `hotel_acquisition_inquiry` для investor leads.
+- Pipeline: Hotels (новая Kanban доска или подтип в existing).
+
+#### 8. Routes
+В `APP_ROUTES`:
+- `HOTELS_INDEX = '/property/hotels'`
+- `HOTEL_DETAIL = (id) => '/property/hotels/${id}'` (использует тот же `CommercialDetail` с conditional Hotel KPI section)
+
+#### 9. i18n
+Добавить `propertyHub.hotels.*` keys (RU/EN): tabs, KPI labels, license types, management statuses, HMA form copy.
+
+#### 10. Map
+В `MapView.tsx` добавить sub-toggle для отелей внутри Commercial layer (icon 🏨, цвет золото с тёмной обводкой).
+
+#### 11. Версия
+`appVersion.ts` → `3.41.6`.
 
 ---
 
 ### Файлы
 
-**Modify:**
-- `src/pages/property/PropertyLanding.tsx` — третья секция Capital + persona prompt
-- `src/pages/owner/PropertyCreatePage.tsx` (+ wizard steps) — asset_class step + conditional fields
-- `src/pages/mc/MCPropertiesPage.tsx` — asset_class filter + card switching
-- `src/components/layout/AdaptiveBottomNav.tsx` — investor shortcut
-- `src/hooks/useGlobalSearch.ts` — return asset_class
-- `src/pages/UniversalMapPage.tsx` (или `/map`) — pin colors + legend toggle
-- `src/pages/property/PropertyHub.tsx` — Pro badges
-- `src/i18n/en/propertyHub.ts`, `src/i18n/ru/propertyHub.ts`
-- `src/lib/appVersion.ts`
+**Create:**
+- `src/components/property/commercial/HotelPropertyCard.tsx`
+- `src/components/property/commercial/HotelFilters.tsx`
+- `src/components/property/commercial/HotelHeroBanner.tsx`
+- `src/components/property/commercial/HotelManagementLeadSheet.tsx`
+- `src/hooks/useHotelProperties.ts`
+- `src/pages/property/HotelsIndex.tsx`
 
-**Create (если нужно):**
-- `src/components/property/commercial/PersonaPromptCard.tsx` (extract из PersonaGatePrompt для landing)
-- `src/components/owner/property-wizard/AssetClassStep.tsx`
-- `src/components/owner/property-wizard/CommercialFieldsStep.tsx`
-- `src/components/owner/property-wizard/LandFieldsStep.tsx`
+**Modify:**
+- `src/lib/real-estate/commercialTaxonomy.ts` — Hotel taxonomies + helpers
+- `src/hooks/useCommercialProperties.ts` — Hotel fields в `COMMERCIAL_COLUMNS`, `excludeHotels` filter
+- `src/pages/property/CommercialIndex.tsx` — Hotels sub-tab
+- `src/pages/property/PropertyLanding.tsx` — Hotels card в Capital section
+- `src/pages/property/PropertyHub.tsx` — Hotels sub-link
+- `src/pages/property/CommercialDetail.tsx` — Hotel KPI section (conditional)
+- `src/components/owner/property-wizard/steps/BasicInfoStep.tsx` — Hotel details block
+- `src/pages/MapView.tsx` — Hotel sub-toggle
+- `src/lib/config/routes.ts` — `HOTELS_INDEX`, `HOTEL_DETAIL`
+- `src/i18n/en.ts`, `src/i18n/ru.ts` — hotels keys
+- `src/lib/appVersion.ts` → 3.41.6
+
+**Migration:**
+- ALTER TABLE properties ADD COLUMN hotel_keys, hotel_star_rating, hotel_brand, hotel_license_type, hotel_adr_thb, hotel_revpar_thb, hotel_occupancy_pct, hotel_gop_margin_pct, hotel_management_status, hotel_operator_name, hotel_year_renovated.
 
 ---
 
-### Приоритеты внутри PR
-1. **Лендинг** (критично — пользователь это видит первым) ← блокирующее
-2. **i18n** ← блокирующее
-3. **MC list filter + wizard asset_class step** ← high
-4. **Global search/map** ← medium (можно отдельным PR если объём большой)
-5. **Bottom nav + Pro badges** ← polish
+### Открытые вопросы (default отвечу сам)
 
-### Открытые вопросы
 | # | Вопрос | Default |
 |---|--------|---------|
-| 1 | Делать ли persona prompt **collapsible card** или сразу **выпадающую** секцию при переключении роли? | Collapsible card с кнопкой "Включить роль" |
-| 2 | Wizard для Commercial/Land — оставить тот же `/mc/properties/new` или отдельный `/mc/properties/new?type=commercial`? | Тот же URL, Step 0 решает |
-| 3 | Map: нужен ли визуальный кластер commercial vs residential или один общий? | Раздельные toggleable layers |
+| 1 | Делать Hotels отдельный URL `/property/hotels` или sub-tab в `/property/commercial`? | Отдельный URL для SEO + sub-link в Commercial |
+| 2 | HMA-лиды — куда писать? | `crm_contacts` с source `hotel_hma_inquiry` + Telegram alert |
+| 3 | Звёздность как pip (5 звёздочек) или текст? | Pip-звёздочки в карточке, text в фильтре |
+| 4 | Финансовые KPI (ADR/RevPAR/GOP) — публично или auth-gated? | Публично базовые (keys/stars/occupancy), ADR/RevPAR/GOP — auth-gated tooltip "Sign in to view" |
 
