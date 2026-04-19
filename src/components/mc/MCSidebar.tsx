@@ -6,7 +6,7 @@ import {
   ContactRound, Home, ChevronDown, TrendingUp, PackageOpen,
   Receipt, Settings, Tag, Star, ShieldCheck, MessageSquare, Radio,
   BookOpen, FileText, Megaphone, Truck, ClipboardList, Shuffle,
-  ArrowLeftRight, Target, Layers, LineChart,
+  ArrowLeftRight, Target, Layers, LineChart, CalendarClock,
 } from 'lucide-react';
 import {
   Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent,
