@@ -89,9 +89,10 @@ export default function MapView() {
   const allMarkers = useMemo<UniversalMarker[]>(() => {
     const markers: UniversalMarker[] = [];
     const propMarkers = transformPropertiesToMarkers(properties || []);
-    propMarkers.forEach((m, idx) => {
-      const src = (properties || [])[idx];
-      const ac = src?.asset_class;
+    const acById = new Map<string, 'residential' | 'commercial' | 'land' | null>();
+    (properties || []).forEach((p) => acById.set(p.id, p.asset_class ?? 'residential'));
+    propMarkers.forEach((m) => {
+      const ac = acById.get(m.id);
       const vertical: VerticalFilter = ac === 'commercial' ? 'commercial' : ac === 'land' ? 'land' : 'property';
       markers.push({ ...m, vertical });
     });
