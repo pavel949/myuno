@@ -116,10 +116,10 @@ export default function InvestInThailand() {
           </section>
 
           {/* CTA: Real Estate dominates */}
-          <Card className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border-emerald-500/20">
+          <Card className="bg-gradient-to-br from-primary/10 to-accent/10 border-primary/20">
             <CardContent className="p-5 space-y-3">
               <div className="flex items-center gap-2">
-                <Building2 className="h-5 w-5 text-emerald-600" />
+                <Building2 className="h-5 w-5 text-primary" />
                 <h3 className="font-bold">
                   {isRu ? 'Недвижимость — основа портфеля' : 'Real Estate — portfolio anchor'}
                 </h3>
@@ -140,11 +140,31 @@ export default function InvestInThailand() {
             </CardContent>
           </Card>
 
-          {/* CTA: Pitch */}
-          <Card className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 border-amber-500/20">
+          {/* CTA: Knowledge Base */}
+          <Card className="bg-gradient-to-br from-accent/10 to-primary/5 border-accent/20">
             <CardContent className="p-5 space-y-3">
               <div className="flex items-center gap-2">
-                <Briefcase className="h-5 w-5 text-amber-600" />
+                <BookOpen className="h-5 w-5 text-primary" />
+                <h3 className="font-bold">
+                  {isRu ? 'База знаний инвестора' : 'Investor knowledge base'}
+                </h3>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {isRu
+                  ? 'Гайды по структурам, налогам, визам, due diligence и индустриям Таиланда.'
+                  : 'Guides on structures, taxes, visas, due diligence and Thai industries.'}
+              </p>
+              <Button variant="outline" onClick={() => navigate('/invest/articles')} className="w-full gap-1.5">
+                {isRu ? 'Открыть базу знаний' : 'Open knowledge base'} <ArrowRight className="h-4 w-4" />
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* CTA: Pitch */}
+          <Card className="bg-gradient-to-br from-primary/10 to-accent/5 border-primary/20">
+            <CardContent className="p-5 space-y-3">
+              <div className="flex items-center gap-2">
+                <Briefcase className="h-5 w-5 text-primary" />
                 <h3 className="font-bold">
                   {isRu ? 'У вас проект или бизнес?' : 'Have a project or business?'}
                 </h3>
@@ -154,11 +174,7 @@ export default function InvestInThailand() {
                   ? 'Девелоперы, операторы, основатели: подайте проект — мы покажем его релевантным инвесторам анонимно.'
                   : 'Developers, operators, founders: pitch your project — we match anonymously to relevant investors.'}
               </p>
-              <Button
-                variant="outline"
-                onClick={() => navigate('/invest/pitch')}
-                className="w-full gap-1.5"
-              >
+              <Button onClick={() => navigate('/invest/submit')} className="w-full gap-1.5">
                 {isRu ? 'Подать проект' : 'Pitch your project'} <ArrowRight className="h-4 w-4" />
               </Button>
             </CardContent>
