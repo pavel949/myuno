@@ -170,7 +170,7 @@ export function BookingTermsCard({
               {!fullRefundDeadline && (
                 <>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-success" />
                     <span>
                       {policy.fullRefundHours > 0 
                         ? (isRu 
