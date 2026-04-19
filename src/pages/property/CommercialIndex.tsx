@@ -27,6 +27,7 @@ export default function CommercialIndex() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   const intent = (searchParams.get('intent') as Intent) || 'sale';
   const type = searchParams.get('type') || 'all';
@@ -41,6 +42,9 @@ export default function CommercialIndex() {
     withTenant: searchParams.get('tenant') === '1' || undefined,
   };
 
+  // Exclude hotels from generic Commercial feed unless a hotel sub-type is explicitly chosen.
+  const isHotelTypeSelected = (HOTEL_PROPERTY_TYPES as string[]).includes(type);
+
   const { data, isLoading, error } = useCommercialProperties({
     intent,
     propertyType: type,
@@ -48,6 +52,7 @@ export default function CommercialIndex() {
     maxPrice: filterValues.maxPrice ? Number(filterValues.maxPrice) : undefined,
     minAreaSqm: filterValues.minAreaSqm ? Number(filterValues.minAreaSqm) : undefined,
     maxAreaSqm: filterValues.maxAreaSqm ? Number(filterValues.maxAreaSqm) : undefined,
+    excludeHotels: type === 'all' && !isHotelTypeSelected,
   });
 
   const items = useMemo(() => {
