@@ -219,7 +219,13 @@ Deno.serve(async (req) => {
           .select("value")
           .eq("key", "admin_telegram_chat_id")
           .maybeSingle();
-        telegramChatId = (chatSetting?.value as string) ?? null;
+        // value is jsonb — could be a JSON string "12345" or a number
+        const raw = chatSetting?.value as unknown;
+        if (typeof raw === "string" && raw.trim().length > 0) {
+          telegramChatId = raw.trim();
+        } else if (typeof raw === "number") {
+          telegramChatId = String(raw);
+        }
       } catch (e) {
         console.warn("[daily-reconciliation] Could not load admin_telegram_chat_id");
       }
