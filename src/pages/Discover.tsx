@@ -5,7 +5,7 @@
  * Airbnb Experiences + Klook + Apple TV inspired.
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { COMPANY_CONTACTS, getWhatsAppUrl, getTelLink } from '@/lib/config/contacts';
 import { useNavigate } from 'react-router-dom';
 import { ChevronRight, Phone, MessageCircle, Headphones } from 'lucide-react';
@@ -24,6 +24,7 @@ import { LifeSituationsGrid } from '@/components/discover/LifeSituationsGrid';
 import { AllServicesGrid } from '@/components/discover/AllServicesGrid';
 import { ContextualRecommendations } from '@/components/discover/ContextualRecommendations';
 import { AudienceFilterTabs, type AudienceFilter } from '@/components/discover/AudienceFilterTabs';
+import { useUserPersonas } from '@/hooks/useUserPersonas';
 
 // ── Search data ───────────────────────────────────
 const LIFE_CONTEXTS_SEARCH = [
@@ -52,7 +53,13 @@ export default function Discover() {
   const navigate = useNavigate();
   const isRu = language === 'ru';
   const [searchQuery, setSearchQuery] = useState('');
-  const [audienceFilter, setAudienceFilter] = useState<AudienceFilter>('all');
+  const { personas } = useUserPersonas();
+
+  const defaultAudience: AudienceFilter = personas.includes('resident') ? 'resident'
+    : personas.includes('tourist') ? 'tourist'
+    : 'all';
+
+  const [audienceFilter, setAudienceFilter] = useState<AudienceFilter>(defaultAudience);
 
   const handleNav = useCallback((path: string) => {
     triggerHaptic('light');

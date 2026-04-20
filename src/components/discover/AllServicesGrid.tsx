@@ -9,7 +9,7 @@ import { IconBadge } from '@/components/ui/IconBadge';
 import { Surface } from '@/components/ui/surface';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
 import { cn } from '@/lib/utils';
-import { type AudienceFilter, AUDIENCE_CATEGORIES } from '@/components/discover/AudienceFilterTabs';
+import { type AudienceFilter, AUDIENCE_VERTICAL_MAP } from '@/components/discover/AudienceFilterTabs';
 
 const INITIAL_GROUPS_VISIBLE = 3;
 
@@ -23,14 +23,15 @@ export const AllServicesGrid = memo(function AllServicesGrid({ audienceFilter = 
   const isRu = language === 'ru';
   const [expanded, setExpanded] = useState(false);
 
-  const audienceSet = AUDIENCE_CATEGORIES[audienceFilter];
-  const hasFilter = audienceFilter !== 'all' && audienceSet.size > 0;
+  const allowedVerticals = AUDIENCE_VERTICAL_MAP[audienceFilter] ?? [];
+  const hasFilter = audienceFilter !== 'all' && allowedVerticals.length > 0;
+  const allowedSet = hasFilter ? new Set(allowedVerticals) : null;
 
   // Filter groups: keep only items matching audience, hide empty groups
   const filteredGroups = VERTICAL_GROUPS.map(group => {
-    if (!hasFilter) return group;
+    if (!allowedSet) return group;
     const filteredItems = group.items.filter(item =>
-      item.verticalId ? audienceSet.has(item.verticalId) : true
+      item.verticalId ? allowedSet.has(item.verticalId) : false
     );
     return filteredItems.length > 0 ? { ...group, items: filteredItems } : null;
   }).filter(Boolean) as typeof VERTICAL_GROUPS;

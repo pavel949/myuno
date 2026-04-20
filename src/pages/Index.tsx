@@ -11,6 +11,7 @@
  * 7. Emergency
  */
 import React, { useState, useCallback, lazy, Suspense } from 'react';
+import { Navigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLifeSituationContext } from '@/contexts/LifeSituationContext';
 import { SEOHead, createOrganizationSchema } from '@/components/seo';
@@ -33,9 +34,13 @@ import { RevealOnScroll } from '@/components/ui/RevealOnScroll';
 import { OfflineEmergencyCard } from '@/components/home/OfflineEmergencyCard';
 import { useOfflineStatus } from '@/hooks/useOfflineStatus';
 import { useUserPersonas } from '@/hooks/useUserPersonas';
+import { useUserContext } from '@/hooks/useUserContext';
+import { useOwnerType } from '@/hooks/useOwnerType';
 import { WelcomeHero } from '@/components/home/WelcomeHero';
 import { InlinePersonaSelector } from '@/components/home/InlinePersonaSelector';
 import { ValuePropositionStrip } from '@/components/home/ValuePropositionStrip';
+import { InvestmentHighlightStrip } from '@/components/home/InvestmentHighlightStrip';
+import { ResidentServicesStrip } from '@/components/home/ResidentServicesStrip';
 
 // Lazy load secondary components
 const YourDayFeed = lazy(() => import('@/components/shared/YourDayFeed').then(m => ({ default: m.YourDayFeed })));
@@ -57,11 +62,26 @@ const Index = () => {
   }, []);
 
   const { personas } = useUserPersonas();
+  const { activeRole } = useUserContext();
+  const { isMCPortal } = useOwnerType();
   const hasContext = !!activeCode;
   const isLoggedIn = !!user;
 
-  // Always show property sections — rentals are relevant to all personas
-  const showPropertySections = true;
+  // Redirect role-specific users who landed on home to their dashboard
+  if (activeRole === 'owner' || activeRole === 'property_manager') {
+    return <Navigate to="/mc" replace />;
+  }
+  if (activeRole === 'vendor') {
+    return <Navigate to="/vendor" replace />;
+  }
+  if (isMCPortal) {
+    return <Navigate to="/my-property" replace />;
+  }
+
+  const isInvestor = activeRole === 'investor' || personas.includes('investor');
+  const isResident = personas.includes('resident');
+  // Property carousel is relevant to all except investor (who has dedicated sections)
+  const showPropertySections = !isInvestor;
 
   return (
     <AppLayout showFooter>
@@ -94,6 +114,20 @@ const Index = () => {
           {isFirstVisit && (
             <RevealOnScroll>
               <ValuePropositionStrip />
+            </RevealOnScroll>
+          )}
+
+          {/* ── INVESTOR STRIP (replaces generic property carousel for investors) ── */}
+          {isInvestor && (
+            <RevealOnScroll>
+              <InvestmentHighlightStrip />
+            </RevealOnScroll>
+          )}
+
+          {/* ── RESIDENT SERVICES (recurring services prominent for residents) ── */}
+          {isResident && (
+            <RevealOnScroll>
+              <ResidentServicesStrip />
             </RevealOnScroll>
           )}
 

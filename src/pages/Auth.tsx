@@ -5,6 +5,8 @@ import { Mail, Lock, Eye, EyeOff, ArrowRight, ArrowLeft, Gift, Phone, ChevronLef
 import { z } from 'zod';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useOwnerType } from '@/hooks/useOwnerType';
+import { useUserContext } from '@/hooks/useUserContext';
 import { PremiumButton } from '@/components/uno/PremiumButton';
 import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { cn } from '@/lib/utils';
@@ -51,6 +53,8 @@ export default function Auth() {
 
   const { user, signIn, signUp, isLoading: authLoading } = useAuth();
   const { t, language } = useLanguage();
+  const { isMCPortal, isLoading: ownerTypeLoading } = useOwnerType();
+  const { activeRole } = useUserContext();
   const navigate = useNavigate();
   const location = useLocation();
   const isRu = language === 'ru';
@@ -61,10 +65,27 @@ export default function Auth() {
     APP_ROUTES.HOME;
 
   useEffect(() => {
-    if (user && !authLoading) {
+    if (!user || authLoading) return;
+
+    // Explicit redirect (protected route bounce, OAuth callback) — honour it immediately
+    if (redirectPath !== APP_ROUTES.HOME) {
       navigate(redirectPath, { replace: true });
+      return;
     }
-  }, [user, authLoading, navigate, redirectPath]);
+
+    // Wait for owner_type to resolve before picking role-specific home
+    if (ownerTypeLoading) return;
+
+    const dest =
+      activeRole === 'vendor' ? '/vendor'
+      : activeRole === 'investor' ? '/invest'
+      : (activeRole === 'owner' || activeRole === 'property_manager')
+        ? (isMCPortal ? '/my-property' : '/mc')
+      : isMCPortal ? '/my-property'
+      : '/';
+
+    navigate(dest, { replace: true });
+  }, [user, authLoading, ownerTypeLoading, navigate, redirectPath, activeRole, isMCPortal]);
 
   const validatePhoneStep = () => {
     const newErrors: Record<string, string> = {};
