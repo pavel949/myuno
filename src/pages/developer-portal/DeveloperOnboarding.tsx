@@ -32,7 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Progress } from '@/components/ui/progress';
+
 import { APP_ROUTES } from '@/lib/config/routes';
 import { Building2, ChevronRight, ChevronLeft, Upload, ExternalLink, CheckCircle } from 'lucide-react';
 
