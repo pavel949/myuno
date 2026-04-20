@@ -52,10 +52,10 @@ function SignalHero({ persona, isRu }: { persona: UserPersona; isRu: boolean }) 
       {/* 2px left spine */}
       <div className="absolute top-4 bottom-4 left-0 w-0.5 rounded-r-sm" style={{ background: meta.color }} />
 
-      <div className="flex items-center justify-between mb-1.5">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between gap-2 mb-1.5 min-w-0">
+        <div className="flex items-center gap-2 min-w-0">
           <RoleChip persona={persona} meta={meta} />
-          <span className="text-[11px] tracking-[0.1em] uppercase text-muted-foreground/50 font-semibold">
+          <span className="text-[11px] tracking-[0.1em] uppercase text-muted-foreground/50 font-semibold truncate">
             {isRu ? sig.leadRu : sig.lead}
           </span>
         </div>
@@ -102,7 +102,7 @@ function RoleChip({ meta }: {
 }) {
   return (
     <div
-      className="inline-flex items-center gap-1.5 h-[22px] px-1 pr-[7px] rounded-full"
+      className="inline-flex items-center gap-1.5 h-[22px] px-1 pr-[7px] rounded-full flex-shrink-0 whitespace-nowrap"
       style={{ background: `${meta.color}18`, border: `1px solid ${meta.color}33` }}
     >
       <div
@@ -121,7 +121,7 @@ function RoleChip({ meta }: {
 function StateChip({ label, color }: { label: string; color: string }) {
   return (
     <div
-      className="inline-flex items-center gap-1.5 px-[9px] py-1 rounded-full"
+      className="inline-flex items-center gap-1.5 px-[9px] py-1 rounded-full flex-shrink-0 whitespace-nowrap"
       style={{ background: `${color}18`, border: `1px solid ${color}33` }}
     >
       <span
