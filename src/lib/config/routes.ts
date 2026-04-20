@@ -22,6 +22,7 @@ export const APP_ROUTES = {
   PROFILE: '/profile',
   PROFILE_EDIT: '/profile/edit',
   PROFILE_SETTINGS: '/profile/settings',
+  PROFILE_PERSONAL_DETAILS: '/profile/personal-details',
   ACCOUNT: '/account',
   BOOKINGS: '/bookings',
   BOOKING_DETAIL: (id: string) => `/bookings/${id}`,

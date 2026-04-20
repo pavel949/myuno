@@ -173,7 +173,11 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.PROFILE} element={<LazyPage><Pages.Profile /></LazyPage>} />
         <Route path={APP_ROUTES.PROFILE_EDIT} element={<LazyPage><Pages.EditProfile /></LazyPage>} />
         <Route path={APP_ROUTES.PROFILE_SETTINGS} element={<LazyPage><Pages.ProfileSettings /></LazyPage>} />
+        <Route path={APP_ROUTES.PROFILE_PERSONAL_DETAILS} element={<LazyPage><Pages.PersonalDetails /></LazyPage>} />
         <Route path="/profile/referral" element={<LazyPage><Pages.ReferralPage /></LazyPage>} />
+        {/* ── PEYLAA premium sales funnel ── */}
+        <Route path={APP_ROUTES.PEYLAA} element={<LazyPage><Pages.PeylaaLanding /></LazyPage>} />
+        <Route path="/peylaa/unit/:unitNo" element={<Navigate to={APP_ROUTES.PEYLAA} replace />} />
         <Route path={APP_ROUTES.ACCOUNT} element={<LazyPage><Pages.UserAccountDashboard /></LazyPage>} />
         <Route path={APP_ROUTES.FAVORITES} element={<LazyPage><Pages.Favorites /></LazyPage>} />
         <Route path={APP_ROUTES.SEARCH} element={<LazyPage><Pages.Search /></LazyPage>} />
