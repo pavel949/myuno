@@ -57,6 +57,36 @@ if (sentryDsn) {
 // might not be injected. The Lovable preview/published builds still receive
 // VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY through the platform.
 reportWebVitals(undefined, { debug: import.meta.env.DEV });
+
+// ── Service Worker cleanup on non-production hosts ──
+// Only myuno.app / www.myuno.app should keep a registered SW. On preview,
+// sandbox, localhost, or any iframe we proactively unregister stale SWs
+// (left by previous PWA builds) and clear their caches. This eliminates
+// the recurring "Failed to update a ServiceWorker ... Not found" errors.
+(() => {
+  if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
+
+  const host = window.location.hostname;
+  const isProductionHost = host === "myuno.app" || host === "www.myuno.app";
+  let isInIframe = false;
+  try {
+    isInIframe = window.self !== window.top;
+  } catch {
+    isInIframe = true;
+  }
+
+  if (isProductionHost && !isInIframe) return;
+
+  navigator.serviceWorker.getRegistrations().then((regs) => {
+    regs.forEach((r) => r.unregister().catch(() => {}));
+  }).catch(() => {});
+
+  if ("caches" in window) {
+    caches.keys().then((keys) => {
+      keys.forEach((k) => caches.delete(k).catch(() => {}));
+    }).catch(() => {});
+  }
+})();
 void import("./App.tsx")
   .then(({ default: App }) => {
     createRoot(document.getElementById("root")!).render(
