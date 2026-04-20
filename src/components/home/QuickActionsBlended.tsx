@@ -50,7 +50,7 @@ export function QuickActionsBlended({ personas }: QuickActionsBlendedProps) {
             <div className="w-8 h-8 rounded-[10px] bg-white/[0.04] border border-border/40 flex items-center justify-center">
               <action.icon className="w-[15px] h-[15px] text-foreground/70" />
             </div>
-            <span className="text-[10.5px] font-medium text-foreground text-center leading-tight">
+            <span className="text-[10.5px] font-medium text-foreground text-center leading-tight w-full truncate">
               {isRu ? action.labelRu : action.label}
             </span>
           </button>
