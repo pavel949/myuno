@@ -6,12 +6,10 @@ import {
   AdminActivityBlock,
 } from '@/components/admin/dashboard';
 import { LaunchSwitch } from '@/components/maintenance/LaunchSwitch';
-import { SectionHeader } from '@/components/ds';
-import { PageContainer } from '@/components/uno/PageContainer';
-import { LayoutDashboard } from 'lucide-react';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import { StaffDashboard } from '@/components/admin/StaffDashboard';
 import { GoLiveChecklist } from '@/components/admin/GoLiveChecklist';
+import { PageShell, PageHeader, PageSection } from '@/components/page';
 
 export default function AdminDashboard() {
   const { language } = useLanguage();
@@ -26,29 +24,26 @@ export default function AdminDashboard() {
   }
 
   return (
-    <PageContainer className="space-y-4 lg:space-y-3">
-      {/* Header + Launch Switch inline */}
-      <div className="flex items-center justify-between">
-        <SectionHeader
-          title={isRussian ? 'Панель управления' : 'Dashboard'}
-          subtitle={isRussian ? 'Обзор платформы UNO' : 'UNO platform overview'}
-          icon={LayoutDashboard}
-          size="lg"
-        />
-        <LaunchSwitch variant="compact" />
-      </div>
+    <PageShell width="wide">
+      <PageHeader
+        title={isRussian ? 'Панель управления' : 'Dashboard'}
+        subtitle={isRussian ? 'Обзор платформы UNO' : 'UNO platform overview'}
+        actions={<LaunchSwitch variant="compact" />}
+      />
 
-      {/* Go-Live Checklist — hidden when all green */}
       <GoLiveChecklist />
 
-      {/* Row 1: KPI Metrics — 6 cards */}
-      <AdminKPIGrid />
+      <PageSection>
+        <AdminKPIGrid />
+      </PageSection>
 
-      {/* Row 2: Alerts */}
-      <AdminOperationalAlerts />
+      <PageSection title={isRussian ? 'Операционные алерты' : 'Operational alerts'}>
+        <AdminOperationalAlerts />
+      </PageSection>
 
-      {/* Row 3: Activity Feed */}
-      <AdminActivityBlock />
-    </PageContainer>
+      <PageSection title={isRussian ? 'Лента активности' : 'Activity feed'}>
+        <AdminActivityBlock />
+      </PageSection>
+    </PageShell>
   );
 }
