@@ -35,7 +35,7 @@ export function PropertyTourBanner() {
                 {isRu ? 'Бесплатно' : 'Free'}
               </span>
             </div>
-            <h3 className="text-lg md:text-xl font-bold text-primary-foreground leading-tight">
+            <h3 className="text-base md:text-lg font-bold text-primary-foreground leading-tight">
               {isRu ? 'Тур по недвижимости или консультация' : 'Phuket Property Tour or Advice'}
             </h3>
             <p className="text-sm text-primary-foreground/80 mt-1 line-clamp-2">
