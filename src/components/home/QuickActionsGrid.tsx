@@ -228,7 +228,10 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
               <div key={section.groupId} className="space-y-1.5">
                 <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground px-0.5">{label}</p>
                 <motion.div
-                  className={cn('grid gap-3', isDesktop ? 'grid-cols-4' : 'grid-cols-2')}
+                  className={cn(
+                    'grid gap-3',
+                    isDesktop ? 'grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12' : 'grid-cols-2',
+                  )}
                   variants={staggerContainerVariants}
                   initial="initial"
                   animate="animate"
@@ -245,7 +248,7 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
         {isDesktop ? (
           <motion.div
             key={`more-${moreAction.id}`}
-            className="grid gap-3 grid-cols-4 lg:grid-cols-8 pt-1 border-t border-border/40"
+            className="grid gap-3 grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 pt-1 border-t border-border/40"
             variants={staggerContainerVariants}
             initial="initial"
             animate="animate"
