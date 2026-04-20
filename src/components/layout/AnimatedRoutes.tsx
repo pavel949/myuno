@@ -45,12 +45,30 @@ const PropertyHubIndex = () => {
 import Index from '@/pages/Index';
 import Auth from '@/pages/Auth';
 import NotFound from '@/pages/NotFound';
+import { useAuth } from '@/contexts/AuthContext';
 
 // All lazy page imports from centralized registry
 import * as Pages from './pageRegistry';
 
+// Welcome landing for unauthenticated visitors (lazy — only rendered for guests)
+const WelcomeLanding = React.lazy(() => import('@/pages/WelcomeLanding'));
+
 // Property Hub wrapper
 const PropertyHub = React.lazy(() => import('@/pages/property/PropertyHub'));
+
+// Home router: guests see marketing landing, authed users see Index
+const HomeRouter = () => {
+  const { user, isLoading } = useAuth();
+  if (isLoading) return <LoadingState />;
+  if (!user) {
+    return (
+      <Suspense fallback={<LoadingState />}>
+        <WelcomeLanding />
+      </Suspense>
+    );
+  }
+  return <Index />;
+};
 
 // ── Redirect Helpers ──
 
@@ -137,7 +155,8 @@ export const AnimatedRoutes: React.FC = () => {
       <AnimatePresence mode="wait" initial={false}>
         <Routes location={location} key={location.pathname}>
         {/* ── Core ── */}
-        <Route path={APP_ROUTES.HOME} element={<PageTransition><Index /></PageTransition>} />
+        <Route path={APP_ROUTES.HOME} element={<PageTransition><HomeRouter /></PageTransition>} />
+        <Route path="/welcome-landing" element={<LazyPage><WelcomeLanding /></LazyPage>} />
         <Route path={APP_ROUTES.AUTH} element={<PageTransition><Auth /></PageTransition>} />
         <Route path={APP_ROUTES.AUTH_ACCOUNT_TYPE} element={<LazyPage><Pages.AccountTypeSelection /></LazyPage>} />
         <Route path={APP_ROUTES.AUTH_FORGOT_PASSWORD} element={<LazyPage><Pages.ForgotPassword /></LazyPage>} />
