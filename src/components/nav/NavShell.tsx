@@ -17,6 +17,7 @@ import { TopBar } from './TopBar';
 import { SideRail } from './SideRail';
 import { BottomBar } from './BottomBar';
 import { ContextualFAB } from './ContextualFAB';
+import { NavShellContext } from './NavShellContext';
 import {
   hasSidebar,
   hasFab,
