@@ -30003,6 +30003,7 @@ export type Database = {
         Args: { p_project_id: string }
         Returns: undefined
       }
+      ensure_multi_role_qa_bundle: { Args: never; Returns: Json }
       find_nearby_clinics: {
         Args: { radius_km?: number; user_lat: number; user_lng: number }
         Returns: {
