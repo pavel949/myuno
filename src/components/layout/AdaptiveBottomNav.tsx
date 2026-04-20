@@ -17,6 +17,7 @@ import {
   shouldShowAppsLauncher,
   type NavItem,
 } from '@/lib/navConfig';
+import { useNavShellActive } from '@/components/nav/NavShellContext';
 
 // Routes that render their own bottom shell — never overlay AdaptiveBottomNav.
 const layoutsWithOwnNav = ['/staff', '/my-stay', '/guest', '/developer-portal'];
