@@ -1,3 +1,4 @@
+import { forwardRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Send, Instagram, MessageCircle, Download, Smartphone, Shield, Clock, CheckCircle } from 'lucide-react';
@@ -11,7 +12,7 @@ import { APP_REGISTRY } from '@/lib/appRegistry';
 import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
 import { cn } from '@/lib/utils';
 
-export function CompactFooter() {
+export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
   const { language } = useLanguage();
   const { isInstalled, canInstall, isIOS, install } = usePWAInstall();
   const isDesktop = useIsDesktop();
