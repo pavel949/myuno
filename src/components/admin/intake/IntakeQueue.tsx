@@ -8,8 +8,21 @@ import { IntakeBulkActions } from './IntakeBulkActions';
 import { PersistentPanelLayout } from '@/components/uno/PersistentPanelLayout';
 import { useIsDesktop } from '@/hooks/use-desktop';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Clock, CheckCircle, XCircle, List } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Clock, CheckCircle, XCircle, List, Keyboard } from 'lucide-react';
 import { calculateHealthScore } from '@/lib/intake/healthScore';
+import { useIntakeQueueHotkeys } from '@/hooks/useIntakeQueueHotkeys';
+import { cn } from '@/lib/utils';
 
 interface IntakeQueueProps {
   session: IntakeSession;
