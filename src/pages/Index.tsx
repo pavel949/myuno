@@ -12,6 +12,7 @@ import { useUserPersonas } from '@/hooks/useUserPersonas';
 import { HomeTopBar } from '@/components/home/HomeTopBar';
 import { WorkspaceHomeBanner } from '@/components/home/WorkspaceHomeBanner';
 import { SignalStack } from '@/components/home/SignalStack';
+import { RoleValueMap } from '@/components/home/RoleValueMap';
 import { NowInPhuket } from '@/components/home/NowInPhuket';
 import { QuickActionsBlended } from '@/components/home/QuickActionsBlended';
 import { ConciergeCard } from '@/components/home/ConciergeCard';
@@ -38,6 +39,10 @@ const Index = () => {
         <SignalStack
           personas={[...activePersonas]}
           onRoleSheetOpen={() => setRoleSheetOpen(true)}
+        />
+        <RoleValueMap
+          personas={[...activePersonas]}
+          onMore={() => setRoleSheetOpen(true)}
         />
         <NowInPhuket />
         <QuickActionsBlended personas={[...activePersonas]} />

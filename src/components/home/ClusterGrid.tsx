@@ -16,12 +16,17 @@ export function ClusterGrid({ personas }: ClusterGridProps) {
 
   return (
     <div className="px-4 pb-5">
-      <div className="flex items-baseline justify-between mb-2.5">
-        <div className="text-[11px] tracking-[0.12em] uppercase text-muted-foreground/60 font-semibold">
-          {isRu ? 'Шесть направлений' : 'Six clusters'}
+      <div className="mb-2.5">
+        <div className="flex items-baseline justify-between">
+          <div className="text-[11px] tracking-[0.12em] uppercase text-muted-foreground/60 font-semibold">
+            {isRu ? 'Шесть направлений' : 'Six clusters'}
+          </div>
+          <div className="text-[11px] text-muted-foreground/50">
+            {isRu ? '45 сервисов' : '45 services'}
+          </div>
         </div>
-        <div className="text-[11px] text-muted-foreground/50">
-          {isRu ? '45 сервисов · по вашему профилю' : '45 services · ordered by profile'}
+        <div className="text-[11px] text-muted-foreground/55 mt-1 leading-snug">
+          {isRu ? 'Все направления — отсортированы под ваш профиль.' : 'All directions — sorted by your profile.'}
         </div>
       </div>
       <div className="grid grid-cols-2 gap-2">
