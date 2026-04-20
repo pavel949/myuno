@@ -343,6 +343,13 @@ export const APP_ROUTES = {
   PARTNER_AGREEMENT: '/partner-agreement',
   DISPUTE_RESOLUTION: '/dispute-resolution',
 
+  // ── Monetization & Trust services (RE-first revenue engine) ──
+  PRICING: '/pricing',
+  WHY_MYUNO: '/property/why-myuno',
+  /** ClearView product landing — kept under Property Hub to comply with rule §13.1. */
+  CLEARVIEW: '/property/clearview',
+  CLEARVIEW_APPLY: '/property/clearview/apply',
+
   // ── Vendor Portal ──
   VENDOR: '/vendor',
   VENDOR_JOIN: '/vendor/join',

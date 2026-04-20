@@ -18,6 +18,8 @@ import { AllSectionsAccordion } from '@/components/home/AllSectionsAccordion';
 import { FloatingConcierge } from '@/components/home/FloatingConcierge';
 import { TrustFooter } from '@/components/home/TrustFooter';
 import { RoleSheet } from '@/components/home/RoleSheet';
+import { RealEstateEntry } from '@/components/home/RealEstateEntry';
+import { TrustAsAService } from '@/components/home/TrustAsAService';
 
 const Index = () => {
   const { personas, togglePersona, setPersonas } = useUserPersonas();
@@ -37,6 +39,8 @@ const Index = () => {
         </div>
         <WorkspaceHomeBanner />
         <HeroIntro />
+        <RealEstateEntry />
+        <TrustAsAService />
         <PrimaryActions />
         <ActiveSituation
           personas={[...activePersonas]}
