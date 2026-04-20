@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>myUNO — Architecture Blueprint</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #08101E;
+    --surface: #0F1C2E;
+    --card: #162236;
+    --card-e: #1E2D45;
+    --fg: #EDF2FF;
+    --muted: #8FA3B8;
+    --muted-2: #5E7389;
+    --border: rgba(255,255,255,0.08);
+    --hairline: rgba(255,255,255,0.06);
+    --border-strong: rgba(255,255,255,0.16);
+    --primary: #00D68F;
+    --navy: #4E7BFF;
+    --teal: #16BDCA;
+    --gold: #F59E0B;
+    --purple: #A78BFA;
+    --coral: #EF4444;
+
+    --tourist: #4E7BFF;
+    --resident: #00D68F;
+    --owner: #16BDCA;
+    --agent: #A78BFA;
+    --developer: #EF4444;
+    --provider: #F59E0B;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; background:#05090F; color:var(--fg); font-family:'DM Sans', system-ui, sans-serif; -webkit-font-smoothing:antialiased; }
+  body { padding: 48px 24px 120px; font-feature-settings: "ss01", "cv11"; }
+  .display { font-family:'Golos Text'; letter-spacing:-0.02em; }
+  .mono { font-family:'JetBrains Mono'; font-feature-settings:"tnum"; }
+  .page { max-width: 1200px; margin: 0 auto; }
+
+  /* ── header */
+  .masthead { display:grid; grid-template-columns: 1fr auto; gap: 24px; align-items:end; padding-bottom: 32px; border-bottom: 1px solid var(--border); margin-bottom: 48px; }
+  .crumb { font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted-2); font-weight:600; margin-bottom: 14px; }
+  h1 { font-family:'Golos Text'; font-size: 52px; font-weight: 800; letter-spacing: -0.035em; margin: 0; line-height: 1.02; }
+  .lede { font-size: 17px; line-height: 1.55; color: var(--muted); max-width: 680px; margin-top: 18px; text-wrap: pretty; }
+  .meta { text-align: right; font-size: 11px; color: var(--muted-2); letter-spacing: 0.05em; }
+  .meta .mono { color: var(--fg); font-size: 12px; display:block; margin-top:2px; }
+
+  /* ── section */
+  section { margin-bottom: 72px; scroll-margin-top: 24px; }
+  .s-head { display:grid; grid-template-columns: 60px 1fr; gap: 20px; align-items: baseline; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--hairline); }
+  .s-num { font-family:'JetBrains Mono'; font-size: 13px; color: var(--muted-2); letter-spacing: 0.05em; padding-top: 6px; }
+  h2 { font-family:'Golos Text'; font-size: 30px; font-weight: 700; letter-spacing: -0.025em; margin: 0; line-height: 1.1; }
+  .s-sub { font-size: 13px; color: var(--muted); margin-top: 6px; }
+
+  h3 { font-family:'Golos Text'; font-size: 17px; font-weight:600; letter-spacing: -0.01em; margin: 0 0 10px; }
+  p { font-size: 14px; line-height: 1.65; color: var(--muted); margin: 0 0 12px; text-wrap: pretty; }
+  p strong { color: var(--fg); font-weight: 500; }
+
+  /* ── layers diagram */
+  .layers { display:flex; flex-direction:column; gap: 10px; margin-top: 8px; }
+  .layer { padding: 20px 24px; border-radius: 16px; background: var(--card); border: 1px solid var(--border); position:relative; overflow:hidden; }
+  .layer::before { content:''; position:absolute; top:20px; bottom:20px; left:0; width:3px; background: var(--c, var(--primary)); border-radius: 0 3px 3px 0; }
+  .layer-head { display:flex; justify-content:space-between; align-items:baseline; margin-bottom: 6px; }
+  .layer-name { font-family:'Golos Text'; font-size: 15px; font-weight:600; color: var(--fg); }
+  .layer-role { font-size: 10px; letter-spacing:0.1em; text-transform:uppercase; color: var(--muted-2); font-weight:600; }
+  .layer-desc { font-size: 12.5px; color: var(--muted); line-height:1.5; margin-bottom: 10px; }
+  .layer-tags { display:flex; gap:6px; flex-wrap:wrap; }
+  .tag { font-size: 10.5px; color: var(--muted); padding: 3px 9px; border-radius: 99px; background: rgba(255,255,255,0.04); border: 1px solid var(--hairline); font-family: 'JetBrains Mono'; }
+
+  /* ── role matrix */
+  .matrix { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+  .matrix table { width: 100%; border-collapse: collapse; }
+  .matrix th, .matrix td { padding: 12px 14px; text-align: left; font-size: 12.5px; border-bottom: 1px solid var(--hairline); }
+  .matrix th { font-family: 'DM Sans'; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted-2); font-weight: 600; background: var(--surface); }
+  .matrix td:first-child { font-weight: 500; color: var(--fg); }
+  .matrix tr:last-child td { border-bottom: none; }
+  .matrix td.role { padding: 12px 10px; text-align: center; }
+  .dot { display:inline-block; width:8px; height:8px; border-radius:99px; }
+  .dot.primary { box-shadow: 0 0 0 3px var(--c, var(--primary)); background: var(--c, var(--primary)); }
+  .dot.secondary { background: var(--c, var(--primary)); opacity: 0.4; }
+
+  /* ── cluster grid */
+  .clusters { display:grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .cluster { border-radius: 16px; background: var(--card); border: 1px solid var(--border); padding: 18px 18px 16px; position: relative; overflow: hidden; }
+  .cluster::before { content: ''; position:absolute; top:18px; bottom:18px; left:0; width:3px; background: var(--c); border-radius: 0 3px 3px 0; }
+  .cluster-title { display:flex; justify-content:space-between; align-items: baseline; margin-bottom: 8px; }
+  .cluster-name { font-family:'Golos Text'; font-size: 17px; font-weight: 600; color: var(--fg); letter-spacing: -0.01em; }
+  .cluster-count { font-family:'JetBrains Mono'; font-size: 11px; color: var(--c); font-weight:500; }
+  .cluster-sub { font-size: 11.5px; color: var(--muted-2); letter-spacing: 0.04em; text-transform: uppercase; font-weight:600; margin-bottom: 10px; }
+  .cluster ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+  .cluster li { font-size: 12px; color: var(--muted); padding: 4px 0; border-top: 1px dashed var(--hairline); padding-top: 6px; }
+  .cluster li:first-child { border-top: none; padding-top: 4px; }
+
+  /* ── flow nodes */
+  .flow { display:grid; grid-template-columns: repeat(5, 1fr); gap: 8px; align-items:center; }
+  .flow-arrow { display:flex; justify-content:center; color: var(--muted-2); font-size: 14px; }
+  .flow-node { padding: 14px 12px; border-radius:12px; background: var(--card); border:1px solid var(--border); text-align:center; }
+  .flow-node .label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted-2); font-weight:600; margin-bottom: 4px; }
+  .flow-node .val { font-family:'Golos Text'; font-size: 13px; font-weight:600; color: var(--fg); }
+
+  /* ── structure tree */
+  .tree { font-family: 'JetBrains Mono'; font-size: 12.5px; line-height: 1.8; color: var(--muted); background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; overflow-x: auto; white-space: pre; }
+  .tree b { color: var(--fg); font-weight: 500; }
+  .tree .c { color: var(--primary); }
+  .tree .n { color: var(--navy); }
+  .tree .g { color: var(--gold); }
+  .tree .p { color: var(--purple); }
+  .tree .r { color: var(--coral); }
+  .tree .t { color: var(--teal); }
+  .tree .mute { color: var(--muted-2); }
+
+  /* ── callout */
+  .call { padding: 18px 20px; border-radius: 14px; border: 1px dashed var(--border-strong); background: transparent; }
+  .call .l { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted-2); font-weight:600; margin-bottom: 6px; }
+  .call h4 { font-family:'Golos Text'; font-size: 15px; margin: 0 0 6px; color: var(--fg); font-weight: 600; }
+  .call p { font-size: 13px; margin: 0; color: var(--muted); }
+
+  .two-col { display:grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .three-col { display:grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+
+  /* ── role swatch row */
+  .role-legend { display:flex; gap:16px; flex-wrap:wrap; margin-top: 14px; padding: 14px 16px; border: 1px solid var(--hairline); border-radius: 12px; }
+  .role-legend .item { display:flex; align-items:center; gap: 8px; font-size: 12px; color: var(--muted); }
+  .role-legend .g { width: 18px; height: 18px; border-radius: 99px; display:flex; align-items:center; justify-content:center; font-family:'Golos Text'; font-weight: 700; font-size: 10px; color: #08101E; }
+
+  /* ── big architecture diagram */
+  .arch { display:grid; grid-template-rows: auto auto auto auto auto; gap: 10px; }
+  .arch-row { display:grid; grid-template-columns: 120px 1fr; gap:14px; align-items:stretch; }
+  .arch-lbl { display:flex; flex-direction:column; justify-content:center; padding: 16px 14px; border-right: 1px dashed var(--border); }
+  .arch-lbl .n { font-family:'JetBrains Mono'; font-size: 10px; color:var(--muted-2); letter-spacing:.08em; }
+  .arch-lbl .t { font-family:'Golos Text'; font-weight:600; font-size:13px; color:var(--fg); margin-top:4px; letter-spacing:-0.01em; }
+  .arch-body { display:grid; gap: 8px; }
+  .arch-chip-row { display:flex; gap:6px; flex-wrap:wrap; }
+  .arch-chip { padding: 10px 14px; border-radius: 10px; background: var(--card); border: 1px solid var(--border); font-size: 12px; color: var(--fg); }
+  .arch-chip .s { color: var(--muted); font-size: 11px; margin-left: 6px; }
+  .arch-chip.strong { background: var(--card-e); border-color: var(--border-strong); }
+  .arch-chip.ghost { background: transparent; border-style: dashed; color: var(--muted); }
+  .arch-chip.role::before { content:''; display:inline-block; width:8px; height:8px; border-radius:99px; margin-right:8px; vertical-align: 1px; background: var(--c); }
+
+  /* ── before/after */
+  .ba { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .ba-card { border-radius: 14px; padding: 18px 20px; border: 1px solid var(--border); background: var(--card); }
+  .ba-card.now { border-color: rgba(239,68,68,0.35); }
+  .ba-card.next { border-color: rgba(0,214,143,0.35); }
+  .ba-card .l { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; margin-bottom: 10px; }
+  .ba-card.now .l { color: #EF4444; }
+  .ba-card.next .l { color: var(--primary); }
+  .ba-card ul { margin: 0; padding-left: 16px; font-size: 13px; line-height: 1.6; color: var(--muted); }
+  .ba-card ul li { margin-bottom: 6px; }
+  .ba-card ul li::marker { color: var(--muted-2); }
+
+  /* ── TOC */
+  .toc { display:grid; grid-template-columns: repeat(4,1fr); gap: 8px; padding: 18px 20px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; margin-bottom: 40px; }
+  .toc a { font-size: 12.5px; color: var(--muted); text-decoration:none; padding: 8px 10px; border-radius: 8px; border: 1px solid transparent; display:flex; gap: 8px; align-items:baseline; }
+  .toc a:hover { border-color: var(--border); color: var(--fg); }
+  .toc a .mono { font-size: 10px; color: var(--muted-2); }
+
+  footer { margin-top: 80px; padding-top: 24px; border-top: 1px solid var(--border); font-size: 11px; color: var(--muted-2); letter-spacing: 0.04em; display: flex; justify-content: space-between; }
+
+  a.deep { color: var(--navy); text-decoration: none; border-bottom: 1px dashed var(--border-strong); }
+  a.deep:hover { color: var(--fg); }
+
+  ::selection { background: var(--primary); color: #000; }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="masthead">
+  <div>
+    <div class="crumb">myUNO · Architecture Blueprint · v1</div>
+    <h1 class="display">One account,<br/>many lives in Phuket.</h1>
+    <p class="lede">A restructuring blueprint for myUNO — how to organise a 45-app superapp around people who wear multiple hats (tourist today, resident tomorrow, owner always) without becoming a directory. This document replaces the ad-hoc growth from Lovable and Claude Code with one coherent system: <strong>Roles · Clusters · Surfaces · Agents</strong>.</p>
+  </div>
+  <div class="meta">
+    <span>April 2026</span>
+    <span class="mono">v1.0 · IA + arch</span>
+  </div>
+</header>
+
+<nav class="toc">
+  <a href="#principles"><span class="mono">01</span> Principles</a>
+  <a href="#roles"><span class="mono">02</span> Role model</a>
+  <a href="#surfaces"><span class="mono">03</span> Surfaces</a>
+  <a href="#clusters"><span class="mono">04</span> Cluster IA</a>
+  <a href="#shell"><span class="mono">05</span> Nav shell</a>
+  <a href="#routes"><span class="mono">06</span> Route tree</a>
+  <a href="#matrix"><span class="mono">07</span> Role × Surface</a>
+  <a href="#stack"><span class="mono">08</span> Stack</a>
+  <a href="#agents"><span class="mono">09</span> AI & events</a>
+  <a href="#data"><span class="mono">10</span> Data model</a>
+  <a href="#cleanup"><span class="mono">11</span> Cleanup</a>
+  <a href="#roadmap"><span class="mono">12</span> Roadmap</a>
+</nav>
+
+<!-- 01 Principles -->
+<section id="principles">
+  <div class="s-head">
+    <div class="s-num">01</div>
+    <div>
+      <h2>Principles</h2>
+      <div class="s-sub">The rules every structural decision defers to.</div>
+    </div>
+  </div>
+
+  <div class="three-col">
+    <div class="call">
+      <div class="l">Principle 01</div>
+      <h4>One person, many roles</h4>
+      <p>Role is not an onboarding choice. It's a stack the user edits over time. The home blends signals across roles; no role-switching modals.</p>
+    </div>
+    <div class="call">
+      <div class="l">Principle 02</div>
+      <h4>Cluster over catalog</h4>
+      <p>45 apps live in 6 colour-locked clusters. Users learn spatial meaning (Legal is always amber) so new apps don't create new mental load.</p>
+    </div>
+    <div class="call">
+      <div class="l">Principle 03</div>
+      <h4>Concierge is an agent, not a bot</h4>
+      <p>The AI layer isn't a chat window — it's a silent router that schedules, drafts, and confirms. Users see intents, not prompts.</p>
+    </div>
+    <div class="call">
+      <div class="l">Principle 04</div>
+      <h4>Surfaces, not screens</h4>
+      <p>Home, Wallet, Me, Discover, Operate, Admin are <em>surfaces</em> — long-lived canvases the cluster modules mount into. No route explosion.</p>
+    </div>
+    <div class="call">
+      <div class="l">Principle 05</div>
+      <h4>Events over direct calls</h4>
+      <p>Every state change fires a typed event. UI, notifications, and AI all subscribe. One bus replaces the cross-import spaghetti.</p>
+    </div>
+    <div class="call">
+      <div class="l">Principle 06</div>
+      <h4>Trust is UI, not a footer</h4>
+      <p>License, audit trail, and regulatory markers live on every money-moving screen — not on a /legal page nobody visits.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 02 Role model -->
+<section id="roles">
+  <div class="s-head">
+    <div class="s-num">02</div>
+    <div>
+      <h2>The role model</h2>
+      <div class="s-sub">Six roles, multi-select, weighted. One primary. The foundation for everything that ranks.</div>
+    </div>
+  </div>
+
+  <p>A role isn't a persona — it's a <strong>current-state claim</strong>. "I'm a Resident" means today I'm paying rent and renewing a visa. Tomorrow I may also be Owner (my villa is rented out) and next week a Tourist (visiting friends in Krabi). The role stack is always editable from the home.</p>
+
+  <div class="role-legend">
+    <div class="item"><div class="g" style="background:var(--tourist)">T</div>Tourist · visiting Phuket</div>
+    <div class="item"><div class="g" style="background:var(--resident)">R</div>Resident · living in Phuket</div>
+    <div class="item"><div class="g" style="background:var(--owner)">O</div>Owner · property owner</div>
+    <div class="item"><div class="g" style="background:var(--agent)">A</div>Agent · real-estate</div>
+    <div class="item"><div class="g" style="background:var(--developer)">D</div>Developer · off-plan</div>
+    <div class="item"><div class="g" style="background:var(--provider)">P</div>Provider · local business</div>
+  </div>
+
+  <h3 style="margin-top:28px">Weighting</h3>
+  <p>Home ranking uses <span class="mono" style="color:var(--fg)">weight = primary·3 + secondary·2 + tertiary·1</span> against a per-role cluster affinity matrix. This is the single ranking equation used everywhere — Quick Actions, Activity feed, Cluster order, Notification priority.</p>
+
+  <div class="flow" style="margin-top:16px">
+    <div class="flow-node"><div class="label">Input</div><div class="val">Role stack</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><div class="label">Scorer</div><div class="val">Weighted blend</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><div class="label">Output</div><div class="val">Ranked surfaces</div></div>
+  </div>
+</section>
+
+<!-- 03 Surfaces -->
+<section id="surfaces">
+  <div class="s-head">
+    <div class="s-num">03</div>
+    <div>
+      <h2>Six surfaces</h2>
+      <div class="s-sub">Not screens — canvases. Every user touches 1–3 of these daily. Every cluster module lives inside one or more.</div>
+    </div>
+  </div>
+
+  <div class="layers">
+    <div class="layer" style="--c:var(--primary)">
+      <div class="layer-head"><div class="layer-name">Home</div><div class="layer-role">All roles · always on</div></div>
+      <div class="layer-desc">Signal stack · blended quick actions · concierge · activity feed · cluster grid. The persistent entry point.</div>
+      <div class="layer-tags"><span class="tag">/home</span><span class="tag">signal-stack</span><span class="tag">feed</span><span class="tag">concierge</span></div>
+    </div>
+    <div class="layer" style="--c:var(--navy)">
+      <div class="layer-head"><div class="layer-name">Discover</div><div class="layer-role">Tourist, Resident primary</div></div>
+      <div class="layer-desc">Cluster explorer, life-situation index, provider storefronts, search, map. This is the catalog surface — designed for browsing, not daily ops.</div>
+      <div class="layer-tags"><span class="tag">/discover</span><span class="tag">/search</span><span class="tag">/map</span><span class="tag">/life/:situation</span></div>
+    </div>
+    <div class="layer" style="--c:var(--teal)">
+      <div class="layer-head"><div class="layer-name">Operate</div><div class="layer-role">Owner, Agent, Developer, Provider</div></div>
+      <div class="layer-desc">The professional surface. Property dashboards, pipeline, inventory, reservations, staff. Replaces today's fragmented <span class="mono">/mc</span>, <span class="mono">/owner-portal</span>, <span class="mono">/developer-portal</span>, <span class="mono">/vendor</span> routes under one shell.</div>
+      <div class="layer-tags"><span class="tag">/operate</span><span class="tag">/operate/mc</span><span class="tag">/operate/dev</span><span class="tag">/operate/provider</span></div>
+    </div>
+    <div class="layer" style="--c:var(--gold)">
+      <div class="layer-head"><div class="layer-name">Wallet</div><div class="layer-role">All roles</div></div>
+      <div class="layer-desc">Money in, money out, statements, invoices, payouts, tax docs. Role-aware views: tourist sees trip expenses; owner sees payouts + tax; agent sees commission ledger.</div>
+      <div class="layer-tags"><span class="tag">/wallet</span><span class="tag">/wallet/statements</span><span class="tag">/wallet/tax</span></div>
+    </div>
+    <div class="layer" style="--c:var(--purple)">
+      <div class="layer-head"><div class="layer-name">Me</div><div class="layer-role">All roles</div></div>
+      <div class="layer-desc">Identity, roles, documents, KYC, consents, notifications, language. The only place roles are edited (plus the home sheet). One canonical profile.</div>
+      <div class="layer-tags"><span class="tag">/me</span><span class="tag">/me/roles</span><span class="tag">/me/docs</span><span class="tag">/me/consents</span></div>
+    </div>
+    <div class="layer" style="--c:var(--coral)">
+      <div class="layer-head"><div class="layer-name">Admin</div><div class="layer-role">Platform staff only</div></div>
+      <div class="layer-desc">Operator tooling: KYC review, dispute, content moderation, AI agent observability, feature flags. Explicitly not user-facing. Lives behind a separate auth boundary.</div>
+      <div class="layer-tags"><span class="tag">/admin</span><span class="tag">role:staff</span></div>
+    </div>
+  </div>
+
+  <div class="call" style="margin-top:18px">
+    <div class="l">Collapse target</div>
+    <p>Audit shows today's app has <strong style="color:var(--coral)">11+ shell variants</strong> (<span class="mono">AppLayout</span>, <span class="mono">MiniAppLayout</span>, <span class="mono">mc/*</span>, <span class="mono">owner-portal/*</span>, <span class="mono">developer-portal/*</span>, <span class="mono">guest</span>, <span class="mono">nomad</span>, <span class="mono">expat</span>, <span class="mono">peylaa</span>, <span class="mono">landing/*</span>). Target: <strong style="color:var(--primary)">six surfaces · one shell</strong>. Everything else becomes a cluster module that mounts into a surface.</p>
+  </div>
+</section>
+
+<!-- 04 Clusters -->
+<section id="clusters">
+  <div class="s-head">
+    <div class="s-num">04</div>
+    <div>
+      <h2>Cluster IA</h2>
+      <div class="s-sub">45 apps → 6 colour-locked clusters. The grid users learn once.</div>
+    </div>
+  </div>
+
+  <p>Every vertical in myUNO belongs to exactly one cluster. Colour is immutable. A new vertical joins an existing cluster or forces a deliberate 7th — never an ad-hoc tab.</p>
+
+  <div class="clusters">
+    <div class="cluster" style="--c:var(--primary)">
+      <div class="cluster-title"><div class="cluster-name">Arrive</div><div class="cluster-count">5 apps</div></div>
+      <div class="cluster-sub">Relocation · first 30 days</div>
+      <ul>
+        <li>Transfer &amp; airport</li>
+        <li>Short-term stays</li>
+        <li>SIM, bank, address</li>
+        <li>Relocation concierge</li>
+        <li>Schools &amp; onboarding</li>
+      </ul>
+    </div>
+
+    <div class="cluster" style="--c:var(--navy)">
+      <div class="cluster-title"><div class="cluster-name">Live</div><div class="cluster-count">14 apps</div></div>
+      <div class="cluster-sub">Daily services</div>
+      <ul>
+        <li>Cleaning, laundry, delivery</li>
+        <li>Beauty, fitness, wellness</li>
+        <li>Medical, pharmacy, pets</li>
+        <li>Babysitter, kids, flowers</li>
+        <li>Restaurants, experiences, events</li>
+      </ul>
+    </div>
+
+    <div class="cluster" style="--c:var(--teal)">
+      <div class="cluster-title"><div class="cluster-name">Manage</div><div class="cluster-count">9 apps</div></div>
+      <div class="cluster-sub">Property &amp; business ops</div>
+      <ul>
+        <li>Property management (STAYS)</li>
+        <li>Maintenance &amp; staff</li>
+        <li>Bills, utilities, internet</li>
+        <li>Owner statements</li>
+        <li>Guest ops &amp; reviews</li>
+      </ul>
+    </div>
+
+    <div class="cluster" style="--c:var(--purple)">
+      <div class="cluster-title"><div class="cluster-name">Invest</div><div class="cluster-count">7 apps</div></div>
+      <div class="cluster-sub">Capital &amp; yield</div>
+      <ul>
+        <li>Property search (resale)</li>
+        <li>Off-plan catalog (DEALS)</li>
+        <li>Yield calc &amp; models</li>
+        <li>Viewings &amp; pipeline</li>
+        <li>Classifieds</li>
+      </ul>
+    </div>
+
+    <div class="cluster" style="--c:var(--gold)">
+      <div class="cluster-title"><div class="cluster-name">Legal</div><div class="cluster-count">6 apps</div></div>
+      <div class="cluster-sub">Visa, contracts, tax</div>
+      <ul>
+        <li>Visa &amp; extensions</li>
+        <li>Company setup</li>
+        <li>Contracts &amp; due diligence</li>
+        <li>Tax &amp; accounting</li>
+        <li>Insurance</li>
+      </ul>
+    </div>
+
+    <div class="cluster" style="--c:var(--coral)">
+      <div class="cluster-title"><div class="cluster-name">Build</div><div class="cluster-count">4 apps</div></div>
+      <div class="cluster-sub">Developer tools</div>
+      <ul>
+        <li>Inventory &amp; unit mix</li>
+        <li>Reservations &amp; deposits</li>
+        <li>Campaign &amp; leads</li>
+        <li>Construction milestones</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 05 Nav shell -->
+<section id="shell">
+  <div class="s-head">
+    <div class="s-num">05</div>
+    <div>
+      <h2>Navigation shell</h2>
+      <div class="s-sub">One shell, two variants (mobile / desktop). Tabs stay stable; role changes never move them.</div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div>
+      <h3>Mobile · 4 tabs</h3>
+      <p>Home · Discover · Wallet · Me. <strong>Operate</strong> appears only when the user has a professional role (Owner, Agent, Developer, Provider) — replacing Discover for those sessions, not adding a 5th tab. The tab count never exceeds 4.</p>
+      <div class="arch-chip-row">
+        <div class="arch-chip strong">Home</div>
+        <div class="arch-chip">Discover <span class="s">/ Operate*</span></div>
+        <div class="arch-chip">Wallet</div>
+        <div class="arch-chip">Me</div>
+      </div>
+    </div>
+    <div>
+      <h3>Desktop · sidebar</h3>
+      <p>Left rail is the same surfaces, expanded. Professional roles pin Operate above the surfaces. Cluster modules open in a right-side sheet or full-canvas depending on depth. No nested sidebars.</p>
+      <div class="arch-chip-row">
+        <div class="arch-chip strong">Home</div>
+        <div class="arch-chip">Discover</div>
+        <div class="arch-chip">Operate</div>
+        <div class="arch-chip">Wallet</div>
+        <div class="arch-chip">Me</div>
+        <div class="arch-chip ghost">Admin</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="call" style="margin-top:18px">
+    <div class="l">Why not a 5th tab</div>
+    <p>Mobile hit-target math: a 402px phone with comfortable spacing accommodates 4 tabs at 44px each with 8px gutters. A 5th tab either shrinks targets below accessibility floor or forces a "More" drawer — which is where apps go to die. <strong>Operate</strong> takes Discover's slot because the two audiences rarely overlap in a session (nobody shops for a spa appointment while reviewing their pipeline).</p>
+  </div>
+</section>
+
+<!-- 06 Routes -->
+<section id="routes">
+  <div class="s-head">
+    <div class="s-num">06</div>
+    <div>
+      <h2>Route tree</h2>
+      <div class="s-sub">The target. Flat, predictable, cluster-scoped.</div>
+    </div>
+  </div>
+
+  <div class="tree">
+<b>/</b>                              <span class="mute">// Home — universal landing</span>
+├─ <b>/discover</b>                    <span class="mute">// Catalog, life situations, search, map</span>
+│  ├─ /discover/<span class="n">cluster</span>/:id     <span class="mute">// e.g. /discover/cluster/live</span>
+│  ├─ /discover/<span class="n">life</span>/:situation <span class="mute">// e.g. /discover/life/visa-run</span>
+│  ├─ /discover/<span class="n">search</span>
+│  └─ /discover/<span class="n">map</span>
+├─ <b>/app</b>/:<span class="c">cluster</span>/:<span class="c">vertical</span>   <span class="mute">// Every vertical: /app/live/cleaning, /app/legal/visa</span>
+│  ├─ .../search
+│  ├─ .../item/:id
+│  ├─ .../booking/new
+│  └─ .../order/:id
+├─ <b>/operate</b>                     <span class="mute">// Professional shell — role-gated</span>
+│  ├─ /operate/<span class="t">mc</span>                <span class="mute">// Management co. dashboards</span>
+│  ├─ /operate/<span class="t">owner</span>             <span class="mute">// Absent-owner portal</span>
+│  ├─ /operate/<span class="p">agent</span>             <span class="mute">// Pipeline, listings</span>
+│  ├─ /operate/<span class="r">dev</span>               <span class="mute">// Developer / off-plan</span>
+│  └─ /operate/<span class="g">provider</span>          <span class="mute">// Restaurants, spas, vendors</span>
+├─ <b>/wallet</b>
+│  ├─ /wallet/statements
+│  ├─ /wallet/tax
+│  └─ /wallet/tx/:id
+├─ <b>/me</b>
+│  ├─ /me/<span class="c">roles</span>               <span class="mute">// Edit role stack + primary</span>
+│  ├─ /me/<span class="c">docs</span>                <span class="mute">// KYC, contracts, visas</span>
+│  ├─ /me/<span class="c">consents</span>
+│  ├─ /me/<span class="c">language</span>
+│  └─ /me/<span class="c">notifications</span>
+├─ <b>/sos</b>                         <span class="mute">// Modal-only, never a page</span>
+└─ <b>/admin</b>                       <span class="mute">// Separate auth boundary</span>
+   ├─ /admin/kyc
+   ├─ /admin/disputes
+   ├─ /admin/agents
+   └─ /admin/flags
+  </div>
+
+  <div class="call" style="margin-top:18px">
+    <div class="l">What collapses</div>
+    <p>Today's routes <span class="mono" style="color:var(--muted)">/stays /peylaa /nomad /guest /expat /relocate /mc /owner-portal /developer-portal /vendor /platform-catalog</span> and cousins either merge into <span class="mono" style="color:var(--fg)">/app/:cluster/:vertical</span> (as content) or into <span class="mono" style="color:var(--fg)">/operate/*</span> (as professional shells). Marketing landings move to subdomain or become <span class="mono">/discover/life/:situation</span> entries.</p>
+  </div>
+</section>
+
+<!-- 07 Matrix -->
+<section id="matrix">
+  <div class="s-head">
+    <div class="s-num">07</div>
+    <div>
+      <h2>Role × Surface matrix</h2>
+      <div class="s-sub">Which surfaces each role unlocks, and which is primary for that role.</div>
+    </div>
+  </div>
+
+  <div class="matrix">
+    <table>
+      <thead>
+        <tr>
+          <th>Role</th>
+          <th class="role" style="--c:var(--primary)">Home</th>
+          <th class="role" style="--c:var(--navy)">Discover</th>
+          <th class="role" style="--c:var(--teal)">Operate</th>
+          <th class="role" style="--c:var(--gold)">Wallet</th>
+          <th class="role" style="--c:var(--purple)">Me</th>
+          <th>Default primary cluster</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span style="color:var(--tourist)">● </span>Tourist</td>
+          <td class="role" style="--c:var(--tourist)"><span class="dot primary"></span></td>
+          <td class="role" style="--c:var(--tourist)"><span class="dot primary"></span></td>
+          <td class="role">—</td>
+          <td class="role" style="--c:var(--tourist)"><span class="dot secondary"></span></td>
+          <td class="role" style="--c:var(--tourist)"><span class="dot secondary"></span></td>
+          <td>Arrive · Live</td>
+        </tr>
+        <tr>
+          <td><span style="color:var(--resident)">● </span>Resident</td>
+          <td class="role" style="--c:var(--resident)"><span class="dot primary"></span></td>
+          <td class="role" style="--c:var(--resident)"><span class="dot secondary"></span></td>
+          <td class="role">—</td>
+          <td class="role" style="--c:var(--resident)"><span class="dot primary"></span></td>
+          <td class="role" style="--c:var(--resident)"><span class="dot primary"></span></td>
+          <td>Live · Legal</td>
+        </tr>
+        <tr>
+          <td><span style="color:var(--owner)">● </span>Owner</td>
+          <td class="role" style="--c:var(--owner)"><span class="dot primary"></span></td>
+          <td class="role" style="--c:var(--owner)"><span class="dot secondary"></span></td>
+          <td class="role" style="--c:var(--owner)"><span class="dot primary"></span></td>
+          <td class="role" style="--c:var(--owner)"><span class="dot primary"></span></td>
+          <td class="role" style="--c:var(--owner)"><span class="dot primary"></span></td>
+          <td>Manage · Invest</td>
+        </tr>
+        <tr>
+          <td><span style="color:var(--agent)">● </span>Agent</td>
+          <td class="role" style="--c:var(--agent)"><span class="dot primary"></span></td>
+          <td class="role" style="--c:var(--agent)"><span class="dot secondary"></span></td>
+          <td class="role" style="--c:var(--agent)"><span class="dot primary"></span></td>
+          <td class="role" style="--c:var(--agent)"><span class="dot primary"></span></td>
+          <td class="role" style="--c:var(--agent)"><span class="dot primary"></span></td>
+          <td>Invest · Manage</td>
+        </tr>
+        <tr>
+          <td><span style="color:var(--developer)">● </span>Developer</td>
+          <td class="role" style="--c:var(--developer)"><span class="dot primary"></span></td>
+          <td class="role">—</td>
+          <td class="role" style="--c:var(--developer)"><span class="dot primary"></span></td>
+          <td class="role" style="--c:var(--developer)"><span class="dot primary"></span></td>
+          <td class="role" style="--c:var(--developer)"><span class="dot primary"></span></td>
+          <td>Build · Invest</td>
+        </tr>
+        <tr>
+          <td><span style="color:var(--provider)">● </span>Provider</td>
+          <td class="role" style="--c:var(--provider)"><span class="dot primary"></span></td>
+          <td class="role" style="--c:var(--provider)"><span class="dot secondary"></span></td>
+          <td class="role" style="--c:var(--provider)"><span class="dot primary"></span></td>
+          <td class="role" style="--c:var(--provider)"><span class="dot primary"></span></td>
+          <td class="role" style="--c:var(--provider)"><span class="dot primary"></span></td>
+          <td>Live · Manage</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="margin-top:10px; font-size: 12px;"><span class="dot primary" style="--c:var(--muted-2)"></span> primary · <span class="dot secondary" style="--c:var(--muted-2); margin-left: 10px;"></span> secondary / browse-only</p>
+</section>
+
+<!-- 08 Stack -->
+<section id="stack">
+  <div class="s-head">
+    <div class="s-num">08</div>
+    <div>
+      <h2>System layers</h2>
+      <div class="s-sub">Top-down — every module belongs to exactly one layer. Cross-layer calls go through contracts, never direct imports.</div>
+    </div>
+  </div>
+
+  <div class="arch">
+
+    <div class="arch-row">
+      <div class="arch-lbl"><div class="n">L6</div><div class="t">Surfaces</div></div>
+      <div class="arch-body">
+        <div class="arch-chip-row">
+          <div class="arch-chip role" style="--c:var(--primary)">Home</div>
+          <div class="arch-chip role" style="--c:var(--navy)">Discover</div>
+          <div class="arch-chip role" style="--c:var(--teal)">Operate</div>
+          <div class="arch-chip role" style="--c:var(--gold)">Wallet</div>
+          <div class="arch-chip role" style="--c:var(--purple)">Me</div>
+          <div class="arch-chip role" style="--c:var(--coral)">Admin</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arch-row">
+      <div class="arch-lbl"><div class="n">L5</div><div class="t">Cluster modules</div></div>
+      <div class="arch-body">
+        <div class="arch-chip-row">
+          <div class="arch-chip">Arrive <span class="s">5</span></div>
+          <div class="arch-chip">Live <span class="s">14</span></div>
+          <div class="arch-chip">Manage <span class="s">9</span></div>
+          <div class="arch-chip">Invest <span class="s">7</span></div>
+          <div class="arch-chip">Legal <span class="s">6</span></div>
+          <div class="arch-chip">Build <span class="s">4</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arch-row">
+      <div class="arch-lbl"><div class="n">L4</div><div class="t">Domain primitives</div></div>
+      <div class="arch-body">
+        <div class="arch-chip-row">
+          <div class="arch-chip">Booking</div>
+          <div class="arch-chip">Listing</div>
+          <div class="arch-chip">Order</div>
+          <div class="arch-chip">Contract</div>
+          <div class="arch-chip">Payment</div>
+          <div class="arch-chip">Document</div>
+          <div class="arch-chip">Message</div>
+          <div class="arch-chip">Ticket</div>
+          <div class="arch-chip">Property</div>
+          <div class="arch-chip">Person</div>
+          <div class="arch-chip">Company</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arch-row">
+      <div class="arch-lbl"><div class="n">L3</div><div class="t">Platform services</div></div>
+      <div class="arch-body">
+        <div class="arch-chip-row">
+          <div class="arch-chip strong">Auth &amp; RBAC</div>
+          <div class="arch-chip strong">Event bus</div>
+          <div class="arch-chip strong">AI agents</div>
+          <div class="arch-chip strong">Search</div>
+          <div class="arch-chip strong">Notifications</div>
+          <div class="arch-chip strong">Payments</div>
+          <div class="arch-chip strong">KYC</div>
+          <div class="arch-chip strong">i18n</div>
+          <div class="arch-chip strong">Feature flags</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arch-row">
+      <div class="arch-lbl"><div class="n">L2</div><div class="t">Integrations</div></div>
+      <div class="arch-body">
+        <div class="arch-chip-row">
+          <div class="arch-chip ghost">Supabase (DB / RLS)</div>
+          <div class="arch-chip ghost">Odoo CRM</div>
+          <div class="arch-chip ghost">Stripe / Omise</div>
+          <div class="arch-chip ghost">Google Maps</div>
+          <div class="arch-chip ghost">Siam Legal</div>
+          <div class="arch-chip ghost">Booking / Agoda / Airbnb</div>
+          <div class="arch-chip ghost">Tokio Marine</div>
+          <div class="arch-chip ghost">Thai gov APIs</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arch-row">
+      <div class="arch-lbl"><div class="n">L1</div><div class="t">Runtime</div></div>
+      <div class="arch-body">
+        <div class="arch-chip-row">
+          <div class="arch-chip ghost">React 18 / Vite</div>
+          <div class="arch-chip ghost">Capacitor · PWA · native</div>
+          <div class="arch-chip ghost">Supabase edge fns</div>
+          <div class="arch-chip ghost">Vercel</div>
+          <div class="arch-chip ghost">Service worker · offline</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="call" style="margin-top:18px">
+    <div class="l">Hard rule</div>
+    <p>L5 cluster modules may only depend on L4 domain primitives &amp; L3 services. They never import from other L5 clusters. This is how the 45-app problem stops being 45×45 = 2,025 possible interactions and becomes 45×6 = 270.</p>
+  </div>
+</section>
+
+<!-- 09 Agents -->
+<section id="agents">
+  <div class="s-head">
+    <div class="s-num">09</div>
+    <div>
+      <h2>AI agents &amp; event bus</h2>
+      <div class="s-sub">How the concierge is wired without becoming a chat blob.</div>
+    </div>
+  </div>
+
+  <p>Every L4 domain primitive emits typed events (<span class="mono" style="color:var(--fg)">booking.confirmed</span>, <span class="mono" style="color:var(--fg)">visa.expiring</span>, <span class="mono" style="color:var(--fg)">payment.failed</span>). Three things subscribe:</p>
+
+  <div class="three-col">
+    <div class="layer" style="--c:var(--primary)">
+      <div class="layer-head"><div class="layer-name">UI</div><div class="layer-role">Home feed · Surfaces</div></div>
+      <div class="layer-desc">Events render as activity rows, signal cards, and badge counts. UI never polls — it reacts.</div>
+    </div>
+    <div class="layer" style="--c:var(--navy)">
+      <div class="layer-head"><div class="layer-name">Notifications</div><div class="layer-role">Push · email · SMS</div></div>
+      <div class="layer-desc">A single router reads the event, applies user preferences, and fans out. No per-vertical notification code.</div>
+    </div>
+    <div class="layer" style="--c:var(--gold)">
+      <div class="layer-head"><div class="layer-name">AI agents</div><div class="layer-role">Scheduler · Drafter · Advisor</div></div>
+      <div class="layer-desc">Subscribe to events, produce <em>intents</em> — "offer to schedule extension", "propose uplift rate" — that surface in the home concierge card. Never chat. Always one-tap yes/later.</div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:28px">Agent roster</h3>
+  <div class="matrix" style="margin-top:10px">
+    <table>
+      <thead><tr><th>Agent</th><th>Listens to</th><th>Produces intent</th><th>Surfaces</th></tr></thead>
+      <tbody>
+        <tr><td>Visa guardian</td><td>visa.*, document.uploaded</td><td>"Start extension with Siam Legal"</td><td>Home, Me</td></tr>
+        <tr><td>Yield optimiser</td><td>booking.*, property.*, rate.*</td><td>"Queue rate uplift for high season"</td><td>Operate / owner</td></tr>
+        <tr><td>Concierge (table, transfer)</td><td>trip.*, calendar.*</td><td>"Hold table at Suay Thursday"</td><td>Home, Discover</td></tr>
+        <tr><td>Pipeline nudger</td><td>lead.*, viewing.*</td><td>"3 viewings overlap — re-slot?"</td><td>Operate / agent</td></tr>
+        <tr><td>Maintenance triage</td><td>ticket.*, property.*</td><td>"Approve AC service ฿1,800"</td><td>Operate / mc</td></tr>
+        <tr><td>Payout reconciler</td><td>payment.*, invoice.*</td><td>"Statement ready to sign"</td><td>Wallet</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 10 Data -->
+<section id="data">
+  <div class="s-head">
+    <div class="s-num">10</div>
+    <div>
+      <h2>Canonical data model</h2>
+      <div class="s-sub">The nouns. Everything in the app is a view over these.</div>
+    </div>
+  </div>
+
+  <div class="tree">
+<b class="c">Person</b>                <span class="mute">// one row per human</span>
+├─ roles: [<span class="n">tourist</span>, <span class="n">resident</span>, <span class="n">owner</span>, ...]
+├─ primary_role
+├─ kyc_level
+├─ consents[]
+├─ documents[] → <b class="c">Document</b>
+├─ persons_of[] → <b class="c">Company</b>
+└─ memberships[] → <b class="c">Household</b>
+
+<b class="c">Company</b>               <span class="mute">// legal entity — agent firm, developer, provider, MC</span>
+├─ company_type: agent | developer | provider | mc
+├─ members[] → Person
+└─ properties[] → Property
+
+<b class="c">Property</b>              <span class="mute">// single unit OR development</span>
+├─ owner → Person | Company
+├─ managed_by → Company (MC)
+├─ listings[] → <b class="c">Listing</b>
+├─ bookings[] → <b class="c">Booking</b>
+└─ documents[] → Document
+
+<b class="c">Listing</b>               <span class="mute">// offer — stay, service, product, property-for-sale</span>
+├─ cluster · vertical
+├─ provider → Person | Company
+└─ items[] → item-type-specific
+
+<b class="c">Booking</b> · <b class="c">Order</b> · <b class="c">Contract</b> · <b class="c">Ticket</b>
+<span class="mute">// all inherit: id, actor, counterparty, state, payments[], messages[], events[]</span>
+
+<b class="c">Payment</b>               <span class="mute">// money movement, attached to any domain object</span>
+<b class="c">Document</b>              <span class="mute">// pdf/image + signed events</span>
+<b class="c">Message</b>               <span class="mute">// threaded, attached to any domain object</span>
+  </div>
+
+  <div class="call" style="margin-top:16px">
+    <div class="l">Row-level security</div>
+    <p>Every table carries <span class="mono">person_id</span> and/or <span class="mono">company_id</span>. Supabase RLS policies read the session role stack and enforce: a person sees their own rows + rows of companies they belong to + public listings. No bespoke per-vertical auth logic.</p>
+  </div>
+</section>
+
+<!-- 11 Cleanup -->
+<section id="cleanup">
+  <div class="s-head">
+    <div class="s-num">11</div>
+    <div>
+      <h2>Cleanup plan</h2>
+      <div class="s-sub">What to collapse to get from the current state to this blueprint.</div>
+    </div>
+  </div>
+
+  <div class="ba">
+    <div class="ba-card now">
+      <div class="l">Today — messy</div>
+      <ul>
+        <li>11+ shell layouts (<span class="mono">AppLayout</span>, <span class="mono">MiniAppLayout</span>, <span class="mono">mc/*</span>, portals, landings)</li>
+        <li>40+ page folders with duplicated patterns — <span class="mono">guest</span>, <span class="mono">nomad</span>, <span class="mono">expat</span>, <span class="mono">peylaa</span>, <span class="mono">relocate</span>, <span class="mono">stays</span> all solve overlapping jobs</li>
+        <li>Two parallel docs: <span class="mono">tokens.json</span> (Navy Premium, never shipped) vs <span class="mono">tokens.css</span> (shipped)</li>
+        <li>Ad-hoc AI entry points; no single agent registry</li>
+        <li>Persona = onboarding choice, not editable state</li>
+        <li>Owner, developer, provider each have their own portal URL &amp; chrome</li>
+        <li>Notifications wired per-feature; no central router</li>
+      </ul>
+    </div>
+    <div class="ba-card next">
+      <div class="l">Target — blueprint</div>
+      <ul>
+        <li>One shell, one nav component, surface variant via prop</li>
+        <li>Every vertical at <span class="mono">/app/:cluster/:vertical</span> — identical file template</li>
+        <li><span class="mono">tokens.json</span> deprecated; <span class="mono">tokens.css</span> is truth; DS docs match</li>
+        <li>Agent registry in <span class="mono">L3</span>, events typed, observability in <span class="mono">/admin/agents</span></li>
+        <li>Role stack in <span class="mono">Person</span> table, editable from home &amp; <span class="mono">/me/roles</span></li>
+        <li>One <span class="mono">/operate</span> shell with nested <span class="mono">/mc</span>, <span class="mono">/owner</span>, <span class="mono">/agent</span>, <span class="mono">/dev</span>, <span class="mono">/provider</span></li>
+        <li>Single notification router subscribed to the event bus</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 12 Roadmap -->
+<section id="roadmap">
+  <div class="s-head">
+    <div class="s-num">12</div>
+    <div>
+      <h2>Migration roadmap</h2>
+      <div class="s-sub">Six phases, each independently shippable. No long freeze.</div>
+    </div>
+  </div>
+
+  <div class="layers">
+    <div class="layer" style="--c:var(--primary)">
+      <div class="layer-head"><div class="layer-name">Phase 1 · Role stack</div><div class="layer-role">~ 1 sprint</div></div>
+      <div class="layer-desc">Add <span class="mono">roles[]</span> + <span class="mono">primary_role</span> to <span class="mono">Person</span>. Migrate single-persona users. Ship role sheet on Home. Zero new features — just the data model.</div>
+    </div>
+    <div class="layer" style="--c:var(--navy)">
+      <div class="layer-head"><div class="layer-name">Phase 2 · Surface consolidation</div><div class="layer-role">~ 2 sprints</div></div>
+      <div class="layer-desc">Collapse shells. Reroute <span class="mono">/mc</span>, <span class="mono">/owner-portal</span>, <span class="mono">/developer-portal</span>, <span class="mono">/vendor</span> under <span class="mono">/operate/*</span>. Preserve old URLs via redirects for 90 days.</div>
+    </div>
+    <div class="layer" style="--c:var(--teal)">
+      <div class="layer-head"><div class="layer-name">Phase 3 · Cluster routing</div><div class="layer-role">~ 2 sprints</div></div>
+      <div class="layer-desc">Every vertical moves to <span class="mono">/app/:cluster/:vertical</span>. Standard template. Discover landing pages become <span class="mono">/discover/life/:situation</span>.</div>
+    </div>
+    <div class="layer" style="--c:var(--gold)">
+      <div class="layer-head"><div class="layer-name">Phase 4 · Event bus + agent registry</div><div class="layer-role">~ 2 sprints</div></div>
+      <div class="layer-desc">Typed events from L4. Agent registry in L3. <span class="mono">/admin/agents</span> observability. Migrate existing AI calls to intents.</div>
+    </div>
+    <div class="layer" style="--c:var(--purple)">
+      <div class="layer-head"><div class="layer-name">Phase 5 · Design tokens single source</div><div class="layer-role">~ 1 sprint</div></div>
+      <div class="layer-desc">Deprecate <span class="mono">tokens.json</span>. ESLint rule to block hardcoded colours. Update DS docs so every component example compiles.</div>
+    </div>
+    <div class="layer" style="--c:var(--coral)">
+      <div class="layer-head"><div class="layer-name">Phase 6 · Trust &amp; compliance pass</div><div class="layer-role">~ 1 sprint</div></div>
+      <div class="layer-desc">Inline licence + audit-trail markers on every money-moving screen. Consent ledger unified. PDPA &amp; SEC evidence surfaces in <span class="mono">/me/consents</span>.</div>
+    </div>
+  </div>
+
+  <div class="call" style="margin-top:22px">
+    <div class="l">Shipping order rationale</div>
+    <p>Role stack first because every downstream phase assumes it exists. Surfaces before routes so UI collapse happens before URL churn. Agents after routes so the event taxonomy is stable. Tokens &amp; trust last — they're polish, and touching them mid-restructure creates merge hell.</p>
+  </div>
+</section>
+
+<footer>
+  <span>myUNO · architecture blueprint · v1.0</span>
+  <span class="mono">6 surfaces · 6 clusters · 45 apps · 1 shell</span>
+</footer>
+
+</div>
+</body>
+</html>

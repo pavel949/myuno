@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>myUNO — Feasibility Assessment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #05090F;
+    --surface: #0F1C2E;
+    --card: #121E31;
+    --card-e: #1A2840;
+    --fg: #EDF2FF;
+    --muted: #8FA3B8;
+    --muted-2: #5E7389;
+    --border: rgba(255,255,255,0.08);
+    --hairline: rgba(255,255,255,0.06);
+    --border-strong: rgba(255,255,255,0.18);
+    --primary: #00D68F;
+    --navy: #4E7BFF;
+    --teal: #16BDCA;
+    --gold: #F59E0B;
+    --purple: #A78BFA;
+    --coral: #EF4444;
+
+    --tourist: #4E7BFF;
+    --resident: #00D68F;
+    --owner: #16BDCA;
+    --agent: #A78BFA;
+    --developer: #EF4444;
+    --provider: #F59E0B;
+    --investor: #EAB308;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; background:var(--bg); color:var(--fg); font-family:'DM Sans', system-ui, sans-serif; -webkit-font-smoothing:antialiased; }
+  body { padding: 48px 24px 120px; font-feature-settings: "ss01", "cv11"; }
+  .display { font-family:'Golos Text'; letter-spacing:-0.02em; }
+  .mono { font-family:'JetBrains Mono'; font-feature-settings:"tnum"; }
+  .page { max-width: 1180px; margin: 0 auto; }
+
+  .masthead { display:grid; grid-template-columns: 1fr auto; gap: 24px; align-items:end; padding-bottom: 32px; border-bottom: 1px solid var(--border); margin-bottom: 44px; }
+  .crumb { font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted-2); font-weight:600; margin-bottom: 14px; }
+  h1 { font-family:'Golos Text'; font-size: 48px; font-weight: 800; letter-spacing: -0.035em; margin: 0; line-height: 1.04; }
+  .lede { font-size: 16px; line-height: 1.6; color: var(--muted); max-width: 720px; margin-top: 18px; text-wrap: pretty; }
+  .meta { text-align: right; font-size: 11px; color: var(--muted-2); letter-spacing: 0.05em; }
+  .meta .mono { color: var(--fg); font-size: 12px; display:block; margin-top:2px; }
+
+  section { margin-bottom: 64px; scroll-margin-top: 24px; }
+  .s-head { display:grid; grid-template-columns: 60px 1fr; gap: 20px; align-items: baseline; margin-bottom: 24px; padding-bottom: 14px; border-bottom: 1px solid var(--hairline); }
+  .s-num { font-family:'JetBrains Mono'; font-size: 13px; color: var(--muted-2); letter-spacing: 0.05em; padding-top: 6px; }
+  h2 { font-family:'Golos Text'; font-size: 28px; font-weight: 700; letter-spacing: -0.025em; margin: 0; line-height: 1.1; }
+  .s-sub { font-size: 13px; color: var(--muted); margin-top: 6px; }
+
+  h3 { font-family:'Golos Text'; font-size: 16px; font-weight:600; letter-spacing: -0.01em; margin: 0 0 10px; }
+  p { font-size: 14px; line-height: 1.65; color: var(--muted); margin: 0 0 12px; text-wrap: pretty; }
+  p strong, td strong, li strong { color: var(--fg); font-weight: 500; }
+
+  .verdict { border-radius: 16px; padding: 22px 24px; border: 1px solid var(--border); background: var(--card); margin-bottom: 48px; display: grid; grid-template-columns: auto 1fr; gap: 22px; align-items:center; }
+  .verdict-badge { font-family:'Golos Text'; font-weight:800; font-size: 28px; letter-spacing:-0.02em; color: var(--primary); padding: 18px 22px; border: 1px solid rgba(0,214,143,0.3); border-radius: 14px; background: rgba(0,214,143,0.06); }
+  .verdict h3 { color: var(--fg); font-size: 18px; margin-bottom: 4px; }
+  .verdict p { margin: 0; font-size: 13.5px; }
+
+  .three-col { display:grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+  .two-col { display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  .card { padding: 18px 20px; border-radius: 14px; background: var(--card); border: 1px solid var(--border); }
+  .card.spine { position:relative; overflow:hidden; padding-left: 22px; }
+  .card.spine::before { content:''; position:absolute; left:0; top:20px; bottom:20px; width:3px; background: var(--c); border-radius: 0 3px 3px 0; }
+  .card .l { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted-2); font-weight:600; margin-bottom: 6px; }
+  .card h4 { font-family:'Golos Text'; font-size: 15px; margin: 0 0 6px; color: var(--fg); font-weight: 600; }
+  .card p { font-size: 13px; margin: 0; color: var(--muted); line-height: 1.55; }
+
+  .tag { font-size: 10.5px; color: var(--muted); padding: 3px 9px; border-radius: 99px; background: rgba(255,255,255,0.04); border: 1px solid var(--hairline); font-family: 'JetBrains Mono'; display: inline-block; margin: 2px 3px 2px 0;}
+  .tag.ok { color: var(--primary); border-color: rgba(0,214,143,0.25); background: rgba(0,214,143,0.06); }
+  .tag.warn { color: var(--gold); border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.06); }
+  .tag.bad { color: var(--coral); border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.06); }
+
+  .matrix { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: var(--card); }
+  .matrix table { width: 100%; border-collapse: collapse; }
+  .matrix th, .matrix td { padding: 13px 14px; text-align: left; font-size: 12.5px; border-bottom: 1px solid var(--hairline); vertical-align: top; }
+  .matrix th { font-family: 'DM Sans'; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted-2); font-weight: 600; background: var(--surface); }
+  .matrix tr:last-child td { border-bottom: none; }
+  .matrix td.name { font-weight: 500; color: var(--fg); width: 190px; }
+  .matrix td.center { text-align: center; }
+  .matrix .role-chip { display:inline-flex; align-items:center; gap:7px; }
+  .matrix .role-dot { width: 9px; height: 9px; border-radius: 99px; }
+
+  /* Fit score */
+  .fit { display:flex; align-items:center; gap:6px; font-family:'JetBrains Mono'; font-size: 11px; }
+  .fit-bar { width: 60px; height: 6px; background: var(--hairline); border-radius: 99px; overflow:hidden; }
+  .fit-bar span { display:block; height:100%; background: var(--primary); }
+
+  .tree { font-family: 'JetBrains Mono'; font-size: 12.5px; line-height: 1.75; color: var(--muted); background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; overflow-x:auto; white-space: pre; }
+  .tree b { color: var(--fg); font-weight: 500; }
+  .tree .c { color: var(--primary); }
+  .tree .n { color: var(--navy); }
+  .tree .g { color: var(--gold); }
+  .tree .r { color: var(--coral); }
+  .tree .mute { color: var(--muted-2); }
+
+  .callout { padding: 18px 20px; border-radius: 14px; border: 1px dashed var(--border-strong); }
+  .callout .l { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted-2); font-weight:600; margin-bottom: 6px; }
+  .callout h4 { font-family:'Golos Text'; font-size: 15px; margin: 0 0 6px; color: var(--fg); }
+  .callout p { font-size: 13px; margin: 0; color: var(--muted); }
+
+  .phase { display:grid; grid-template-columns: 96px 1fr auto; gap: 16px; padding: 18px 20px; border-radius: 14px; background: var(--card); border: 1px solid var(--border); position:relative; overflow:hidden; margin-bottom: 10px; }
+  .phase::before { content:''; position:absolute; left:0; top: 18px; bottom: 18px; width:3px; background: var(--c); border-radius: 0 3px 3px 0;}
+  .phase .ph-num { font-family:'JetBrains Mono'; font-size: 11px; color: var(--muted-2); letter-spacing: 0.08em; padding-top:4px;}
+  .phase .ph-num b { color: var(--fg); display:block; font-size: 20px; font-family:'Golos Text'; margin-top: 2px; letter-spacing:-0.02em; }
+  .phase h4 { font-family:'Golos Text'; font-size: 15px; margin: 0 0 6px; color: var(--fg); }
+  .phase p { font-size: 13px; margin: 0; color: var(--muted); }
+  .phase .eta { font-family:'JetBrains Mono'; font-size:11px; color: var(--muted); white-space: nowrap; padding-top:4px; }
+
+  /* Gap list */
+  .gap { padding: 14px 18px; border-left: 3px solid var(--c); background: rgba(255,255,255,0.02); border-radius: 0 10px 10px 0; margin-bottom: 8px; }
+  .gap .lbl { font-size: 10px; letter-spacing:0.1em; text-transform:uppercase; color: var(--muted-2); font-weight:600; margin-bottom: 4px; }
+  .gap h5 { font-family:'Golos Text'; font-size: 14px; margin: 0 0 4px; color: var(--fg); font-weight:600; }
+  .gap p { font-size: 12.5px; margin: 0; color: var(--muted); line-height:1.55; }
+  .gap .tag { margin-top: 6px; }
+
+  .toc { display:grid; grid-template-columns: repeat(4,1fr); gap: 8px; padding: 18px 20px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; margin-bottom: 40px; }
+  .toc a { font-size: 12.5px; color: var(--muted); text-decoration:none; padding: 8px 10px; border-radius: 8px; border: 1px solid transparent; display:flex; gap: 8px; align-items:baseline; }
+  .toc a:hover { border-color: var(--border); color: var(--fg); }
+  .toc a .mono { font-size: 10px; color: var(--muted-2); }
+
+  footer { margin-top: 80px; padding-top: 24px; border-top: 1px solid var(--border); font-size: 11px; color: var(--muted-2); letter-spacing: 0.04em; display: flex; justify-content: space-between; }
+
+  ::selection { background: var(--primary); color: #000; }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="masthead">
+  <div>
+    <div class="crumb">myUNO · Feasibility Assessment · v1</div>
+    <h1 class="display">Can the blueprint be<br/>shipped from here?</h1>
+    <p class="lede">Ground-truth assessment of the <strong>architecture blueprint</strong> against your current codebase (v3.40.0, Lovable + Claude Code, ~80 page folders, Supabase + edge functions). Verdict, 7-role fit, code-level gap list, and a sequenced migration that keeps production green.</p>
+  </div>
+  <div class="meta">
+    <span>April 2026</span>
+    <span class="mono">v1.0 · feasibility</span>
+  </div>
+</header>
+
+<div class="verdict">
+  <div class="verdict-badge">Feasible</div>
+  <div>
+    <h3>Yes — the foundations already exist. This is a consolidation, not a rebuild.</h3>
+    <p>Your repo has a canonical <span class="mono" style="color:var(--fg)">app_role</span> ENUM, a <span class="mono" style="color:var(--fg)">VERTICALS</span> registry as SoT, a centralised <span class="mono" style="color:var(--fg)">APP_ROUTES</span> config, 60+ edge functions, RLS-backed tables, and an existing <span class="mono" style="color:var(--fg)">MiniAppLayout</span> pattern. What's missing is <strong>role-stack semantics</strong>, <strong>surface consolidation</strong>, and <strong>cluster-based routing</strong>. All incremental. All shippable in parallel with live traffic.</p>
+  </div>
+</div>
+
+<nav class="toc">
+  <a href="#what-exists"><span class="mono">01</span> What exists today</a>
+  <a href="#roles"><span class="mono">02</span> 7-role mapping</a>
+  <a href="#role-matrix"><span class="mono">03</span> Role × Surface</a>
+  <a href="#fit"><span class="mono">04</span> Blueprint fit</a>
+  <a href="#gaps"><span class="mono">05</span> Gaps &amp; risks</a>
+  <a href="#migration"><span class="mono">06</span> Migration path</a>
+  <a href="#handoff"><span class="mono">07</span> Claude Code handoff</a>
+  <a href="#risks"><span class="mono">08</span> Risks &amp; guardrails</a>
+</nav>
+
+<!-- 01 What exists -->
+<section id="what-exists">
+  <div class="s-head"><div class="s-num">01</div><div><h2>What exists today</h2><div class="s-sub">Read from your repo, not invented.</div></div></div>
+
+  <div class="three-col">
+    <div class="card spine" style="--c:var(--primary)">
+      <div class="l">Foundation ✓</div>
+      <h4>Role system</h4>
+      <p><span class="mono">app_role</span> ENUM with 16 roles, <span class="mono">ROLE_METADATA</span> with EN/RU labels, <span class="mono">SWITCHABLE_ROLES</span> list, self-activation flags. Already close to a stack.</p>
+    </div>
+    <div class="card spine" style="--c:var(--primary)">
+      <div class="l">Foundation ✓</div>
+      <h4>Vertical registry</h4>
+      <p><span class="mono">src/lib/verticals.ts</span> — 40+ verticals with id/table/labels/bookable flag. One SoT. Cluster-tagging just needs 1 extra field.</p>
+    </div>
+    <div class="card spine" style="--c:var(--primary)">
+      <div class="l">Foundation ✓</div>
+      <h4>Route registry</h4>
+      <p><span class="mono">APP_ROUTES</span> centralised, legacy redirects, lazy loading via <span class="mono">pageRegistry</span>. Ownership classified PUBLIC/AUTH/ROLE.</p>
+    </div>
+    <div class="card spine" style="--c:var(--primary)">
+      <div class="l">Foundation ✓</div>
+      <h4>Supabase + RLS</h4>
+      <p>Public schema, RPC functions (<span class="mono">record_ledger_entries</span>, <span class="mono">process_payout</span>), 60+ edge functions, Deno 2.0 migration underway.</p>
+    </div>
+    <div class="card spine" style="--c:var(--primary)">
+      <div class="l">Foundation ✓</div>
+      <h4>MiniAppLayout</h4>
+      <p>Every vertical already uses one shell wrapper. Blueprint's "one shell" goal is 70% achieved — we just need to fold the portals into it.</p>
+    </div>
+    <div class="card spine" style="--c:var(--primary)">
+      <div class="l">Foundation ✓</div>
+      <h4>Design tokens</h4>
+      <p><span class="mono">src/styles/tokens.css</span> is SoT; DM Sans / Golos / JetBrains Mono in place; dark+light modes; shadcn/ui primitives.</p>
+    </div>
+    <div class="card spine" style="--c:var(--gold)">
+      <div class="l">Partial ⚠</div>
+      <h4>AI agents</h4>
+      <p>Rich <span class="mono">.lovable/ai_agent_registry_v1.json</span> + contracts + observability spec exist on paper. No unified runtime registry yet. Blueprint L3 layer ≈ 40% implemented.</p>
+    </div>
+    <div class="card spine" style="--c:var(--gold)">
+      <div class="l">Partial ⚠</div>
+      <h4>Event bus</h4>
+      <p><span class="mono">event_surface.md</span> specs event types. DB ledger emits events. No typed app-level bus subscribed by UI/notifications/AI together yet.</p>
+    </div>
+    <div class="card spine" style="--c:var(--coral)">
+      <div class="l">Missing ✗</div>
+      <h4>Role-stack semantics</h4>
+      <p>Roles are flat array + context-switch. <strong>Primary + weighted secondaries</strong> doesn't exist. Home is single-role. No blended feed.</p>
+    </div>
+    <div class="card spine" style="--c:var(--coral)">
+      <div class="l">Missing ✗</div>
+      <h4>Cluster IA</h4>
+      <p>Verticals exist; clusters don't. No <span class="mono">cluster</span> field on VerticalDefinition, no <span class="mono">/discover/cluster/:id</span>, no cluster colour-lock.</p>
+    </div>
+    <div class="card spine" style="--c:var(--coral)">
+      <div class="l">Missing ✗</div>
+      <h4>Operate surface</h4>
+      <p>Pro surfaces live as <span class="mono">mc/</span>, <span class="mono">owner-portal/</span>, <span class="mono">developer-portal/</span>, <span class="mono">vendor/</span>, <span class="mono">provider/</span>. 5 separate shells. Not yet one <span class="mono">/operate/*</span>.</p>
+    </div>
+    <div class="card spine" style="--c:var(--coral)">
+      <div class="l">Missing ✗</div>
+      <h4>Investor role</h4>
+      <p><span class="mono">investor</span> exists in ENUM but not wired. No dedicated surface, no non-RE asset flow, no partner-matching primitive.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 02 Roles -->
+<section id="roles">
+  <div class="s-head"><div class="s-num">02</div><div><h2>Your 7 roles · mapped</h2><div class="s-sub">Each of the roles you named, mapped to existing <span class="mono">app_role</span> values and blueprint clusters.</div></div></div>
+
+  <div class="matrix">
+    <table>
+      <thead><tr>
+        <th>Your role</th><th>Maps to app_role</th><th>Primary clusters</th><th>Primary surfaces</th><th>Jobs-to-be-done</th><th>Status</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td class="name"><span class="role-chip"><span class="role-dot" style="background:var(--tourist)"></span>Tourist</span></td>
+          <td><span class="mono">user</span> + <span class="mono">tourist</span></td>
+          <td>Arrive · Live</td>
+          <td>Home · Discover · Wallet</td>
+          <td>Rentals, experiences, transport, restaurants, concierge</td>
+          <td><span class="tag ok">ready</span></td>
+        </tr>
+        <tr>
+          <td class="name"><span class="role-chip"><span class="role-dot" style="background:var(--owner)"></span>Property owner</span></td>
+          <td><span class="mono">owner</span> + <span class="mono">property_manager</span></td>
+          <td>Manage · Invest</td>
+          <td>Home · Operate / owner · Wallet</td>
+          <td>PM dashboards, rental mgmt, maintenance, statements, tax</td>
+          <td><span class="tag ok">80%</span></td>
+        </tr>
+        <tr>
+          <td class="name"><span class="role-chip"><span class="role-dot" style="background:var(--resident)"></span>Resident</span></td>
+          <td><span class="mono">user</span> + <span class="mono">resident</span></td>
+          <td>Live · Legal</td>
+          <td>Home · Wallet · Me</td>
+          <td>Visa, home services, bills, medical, schools, daily life</td>
+          <td><span class="tag ok">ready</span></td>
+        </tr>
+        <tr>
+          <td class="name"><span class="role-chip"><span class="role-dot" style="background:var(--agent)"></span>Real-estate company</span></td>
+          <td><span class="mono">partner</span> (new <span class="mono">company_type=agent</span>)</td>
+          <td>Invest · Manage</td>
+          <td>Operate / agent · Wallet</td>
+          <td>Listings, leads, viewings, pipeline, rentals, management mandates</td>
+          <td><span class="tag warn">needs shell</span></td>
+        </tr>
+        <tr>
+          <td class="name"><span class="role-chip"><span class="role-dot" style="background:var(--provider)"></span>Local business</span></td>
+          <td><span class="mono">vendor</span> + <span class="mono">partner</span></td>
+          <td>Live · Manage</td>
+          <td>Operate / provider · Wallet</td>
+          <td>Storefront, inventory, bookings, payouts, reviews</td>
+          <td><span class="tag ok">70%</span></td>
+        </tr>
+        <tr>
+          <td class="name"><span class="role-chip"><span class="role-dot" style="background:var(--investor)"></span>Investor</span></td>
+          <td><span class="mono">investor</span> <em>(exists, unwired)</em></td>
+          <td>Invest</td>
+          <td>Operate / invest · Discover</td>
+          <td>Deal flow, non-RE assets, partners, capital syndication</td>
+          <td><span class="tag bad">greenfield</span></td>
+        </tr>
+        <tr>
+          <td class="name"><span class="role-chip"><span class="role-dot" style="background:var(--developer)"></span>RE developer</span></td>
+          <td><span class="mono">partner</span> (new <span class="mono">company_type=developer</span>)</td>
+          <td>Build · Invest</td>
+          <td>Operate / dev</td>
+          <td>Unit inventory, reservations, deposits, campaigns, milestones</td>
+          <td><span class="tag warn">portal exists</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout" style="margin-top:16px">
+    <div class="l">Key observation</div>
+    <h4>Six of seven already have a home. Investor is the only true greenfield.</h4>
+    <p>Every other role has code, tables, and screens. The work is <strong>consolidating shells</strong>, adding the <strong>role stack</strong> concept to <span class="mono">Person</span>, and promoting <span class="mono">company_type</span> from informal to formal so Agent and Developer stop being ad-hoc <span class="mono">partner</span> rows.</p>
+  </div>
+</section>
+
+<!-- 03 Role × Surface -->
+<section id="role-matrix">
+  <div class="s-head"><div class="s-num">03</div><div><h2>Role × surface · concrete</h2><div class="s-sub">Which surfaces each role actually uses. ● primary · ○ secondary · — none</div></div></div>
+
+  <div class="matrix">
+    <table>
+      <thead><tr>
+        <th>Role</th>
+        <th class="center">Home</th>
+        <th class="center">Discover</th>
+        <th class="center">Operate</th>
+        <th class="center">Wallet</th>
+        <th class="center">Me</th>
+        <th>Default landing path</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="name"><span style="color:var(--tourist)">●</span> Tourist</td>
+          <td class="center" style="color:var(--tourist)">●</td><td class="center" style="color:var(--tourist)">●</td><td class="center">—</td><td class="center" style="color:var(--tourist)">○</td><td class="center" style="color:var(--tourist)">○</td>
+          <td><span class="mono">/</span> · Arrive + Live feed</td></tr>
+        <tr><td class="name"><span style="color:var(--owner)">●</span> Owner</td>
+          <td class="center" style="color:var(--owner)">●</td><td class="center" style="color:var(--owner)">○</td><td class="center" style="color:var(--owner)">●</td><td class="center" style="color:var(--owner)">●</td><td class="center" style="color:var(--owner)">●</td>
+          <td><span class="mono">/operate/owner</span></td></tr>
+        <tr><td class="name"><span style="color:var(--resident)">●</span> Resident</td>
+          <td class="center" style="color:var(--resident)">●</td><td class="center" style="color:var(--resident)">○</td><td class="center">—</td><td class="center" style="color:var(--resident)">●</td><td class="center" style="color:var(--resident)">●</td>
+          <td><span class="mono">/</span> · Live + Legal feed</td></tr>
+        <tr><td class="name"><span style="color:var(--agent)">●</span> RE company</td>
+          <td class="center" style="color:var(--agent)">●</td><td class="center" style="color:var(--agent)">○</td><td class="center" style="color:var(--agent)">●</td><td class="center" style="color:var(--agent)">●</td><td class="center" style="color:var(--agent)">●</td>
+          <td><span class="mono">/operate/agent</span></td></tr>
+        <tr><td class="name"><span style="color:var(--provider)">●</span> Local business</td>
+          <td class="center" style="color:var(--provider)">●</td><td class="center" style="color:var(--provider)">○</td><td class="center" style="color:var(--provider)">●</td><td class="center" style="color:var(--provider)">●</td><td class="center" style="color:var(--provider)">●</td>
+          <td><span class="mono">/operate/provider</span></td></tr>
+        <tr><td class="name"><span style="color:var(--investor)">●</span> Investor</td>
+          <td class="center" style="color:var(--investor)">●</td><td class="center" style="color:var(--investor)">●</td><td class="center" style="color:var(--investor)">●</td><td class="center" style="color:var(--investor)">●</td><td class="center" style="color:var(--investor)">●</td>
+          <td><span class="mono">/operate/invest</span></td></tr>
+        <tr><td class="name"><span style="color:var(--developer)">●</span> RE developer</td>
+          <td class="center" style="color:var(--developer)">●</td><td class="center">—</td><td class="center" style="color:var(--developer)">●</td><td class="center" style="color:var(--developer)">●</td><td class="center" style="color:var(--developer)">●</td>
+          <td><span class="mono">/operate/dev</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p style="margin-top:14px">A Phuket villa owner who visits for a week becomes <strong>Owner + Tourist</strong>. A RE company founder who also buys investment units is <strong>Agent + Investor + Owner</strong>. The role stack must accept all three active at once, with weighted ranking — which is exactly what the home.html mockup demonstrates and the blueprint formalises.</p>
+</section>
+
+<!-- 04 Blueprint fit -->
+<section id="fit">
+  <div class="s-head"><div class="s-num">04</div><div><h2>Blueprint fit · section by section</h2><div class="s-sub">How close each blueprint pillar is to today's code.</div></div></div>
+
+  <div class="matrix">
+    <table>
+      <thead><tr><th>Blueprint pillar</th><th>Today</th><th>Fit</th><th>Work to close</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="name">6 surfaces</td>
+          <td>~11 shells (<span class="mono">AppLayout</span>, <span class="mono">MiniAppLayout</span>, <span class="mono">mc/*</span>, <span class="mono">owner-portal/*</span>, <span class="mono">developer-portal/*</span>, <span class="mono">vendor/*</span>, landing variants)</td>
+          <td><div class="fit"><div class="fit-bar"><span style="width:55%"></span></div> 55%</div></td>
+          <td>Collapse 5 portal shells into one <span class="mono">/operate</span> with sub-routes. Keep <span class="mono">MiniAppLayout</span> for <span class="mono">/app/*</span>.</td>
+        </tr>
+        <tr>
+          <td class="name">6 clusters</td>
+          <td>Verticals exist; no cluster field</td>
+          <td><div class="fit"><div class="fit-bar"><span style="width:30%"></span></div> 30%</div></td>
+          <td>Add <span class="mono">cluster: 'arrive'|'live'|'manage'|'invest'|'legal'|'build'</span> to <span class="mono">VerticalDefinition</span>. Tag all 40+ entries. Lock cluster colours in <span class="mono">tokens.css</span>.</td>
+        </tr>
+        <tr>
+          <td class="name">Role stack · multi + primary</td>
+          <td>Flat array + single "active role" switcher</td>
+          <td><div class="fit"><div class="fit-bar"><span style="width:40%"></span></div> 40%</div></td>
+          <td>Add <span class="mono">roles_stack jsonb</span> + <span class="mono">primary_role</span> to <span class="mono">profiles</span>. Migrate. Update <span class="mono">AuthContext</span>. Replace role-switch modal with role-sheet.</td>
+        </tr>
+        <tr>
+          <td class="name">Route tree <span class="mono">/app/:cluster/:vertical</span></td>
+          <td>Flat <span class="mono">/property</span>, <span class="mono">/yachts</span>, <span class="mono">/beauty</span>…</td>
+          <td><div class="fit"><div class="fit-bar"><span style="width:45%"></span></div> 45%</div></td>
+          <td>Add nested routes alongside. 90-day redirect window via existing <span class="mono">LEGACY_REDIRECTS</span>. Page registry can stay flat.</td>
+        </tr>
+        <tr>
+          <td class="name">Event bus typed</td>
+          <td>DB ledger events + some per-feature hooks; no app-level bus</td>
+          <td><div class="fit"><div class="fit-bar"><span style="width:35%"></span></div> 35%</div></td>
+          <td>Thin wrapper over Supabase realtime + client-side emitter. Typed event registry in <span class="mono">src/lib/events/</span>.</td>
+        </tr>
+        <tr>
+          <td class="name">Agent registry</td>
+          <td>Specs in <span class="mono">.lovable/</span>, no unified runtime</td>
+          <td><div class="fit"><div class="fit-bar"><span style="width:40%"></span></div> 40%</div></td>
+          <td>Move <span class="mono">ai_agent_registry_v1.json</span> into runtime. Each agent = subscriber with <span class="mono">listensTo</span> / <span class="mono">produces</span> intents.</td>
+        </tr>
+        <tr>
+          <td class="name">Canonical data model</td>
+          <td>Close — Person ≈ <span class="mono">profiles</span>, Property ✓, Order ✓, Payment ✓</td>
+          <td><div class="fit"><div class="fit-bar"><span style="width:75%"></span></div> 75%</div></td>
+          <td>Add <span class="mono">Company</span> entity with <span class="mono">company_type</span> enum (agent, developer, provider, mc). Unify vendor/partner rows under it.</td>
+        </tr>
+        <tr>
+          <td class="name">Trust-in-UI</td>
+          <td><span class="mono">docs/</span> pages, footer links</td>
+          <td><div class="fit"><div class="fit-bar"><span style="width:25%"></span></div> 25%</div></td>
+          <td>Inline licence + audit-trail markers on money surfaces. Reuse <span class="mono">ledger_entries</span> for proof.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 05 Gaps -->
+<section id="gaps">
+  <div class="s-head"><div class="s-num">05</div><div><h2>Concrete gaps</h2><div class="s-sub">Code-level deltas, not abstractions.</div></div></div>
+
+  <div class="gap" style="--c:var(--coral)">
+    <div class="lbl">Gap 01 · DB</div>
+    <h5>Role stack &amp; primary role</h5>
+    <p>Add <span class="mono">profiles.roles_stack jsonb default '[]'::jsonb</span> and <span class="mono">profiles.primary_role app_role</span>. Migrate from existing <span class="mono">user_roles</span> join. RLS policies must read the stack, not just a single active role.</p>
+    <span class="tag">supabase/migrations</span><span class="tag">src/types/auth.ts</span><span class="tag">AuthContext</span>
+  </div>
+
+  <div class="gap" style="--c:var(--coral)">
+    <div class="lbl">Gap 02 · DB</div>
+    <h5>Company entity + company_type enum</h5>
+    <p>Promote Agency, Developer, Provider, MC from ad-hoc rows to formal <span class="mono">companies</span> table with <span class="mono">company_type</span> enum. Add <span class="mono">company_members</span> join so one Person can be "agent at A + owner of B". Required for multi-hat role stack to work at the ops level.</p>
+    <span class="tag">new table</span><span class="tag">RLS rewrite</span><span class="tag">odoo CRM sync</span>
+  </div>
+
+  <div class="gap" style="--c:var(--coral)">
+    <div class="lbl">Gap 03 · Routing</div>
+    <h5>Cluster on every vertical</h5>
+    <p>Add <span class="mono">cluster</span> to <span class="mono">VerticalDefinition</span>. Generate a <span class="mono">clusters.ts</span> reverse index. Optional: replace emoji icons on cluster-coloured backgrounds with 2-letter monograms.</p>
+    <span class="tag">src/lib/verticals.ts</span><span class="tag">tokens.css</span>
+  </div>
+
+  <div class="gap" style="--c:var(--coral)">
+    <div class="lbl">Gap 04 · Routing</div>
+    <h5>/operate consolidation</h5>
+    <p>New <span class="mono">src/pages/operate/</span>. Sub-routes <span class="mono">/operate/{owner, agent, dev, provider, mc, invest}</span>. Existing <span class="mono">owner-portal/*</span>, <span class="mono">developer-portal/*</span>, <span class="mono">mc/*</span>, <span class="mono">vendor/*</span> folders re-exported under operate. Zero behaviour change in phase 2 — only path rewrite + single shell.</p>
+    <span class="tag">src/pages/operate</span><span class="tag">LEGACY_REDIRECTS</span>
+  </div>
+
+  <div class="gap" style="--c:var(--gold)">
+    <div class="lbl">Gap 05 · UX</div>
+    <h5>Home hub — blended role feed</h5>
+    <p>Today's <span class="mono">Index.tsx</span> is single-role. Replace with the <span class="mono">home.html</span> mockup: primary signal card + secondary slim cards + weighted Quick Actions + role sheet. Everything else in this delivery hangs off this screen.</p>
+    <span class="tag">src/pages/Index.tsx</span><span class="tag">role-sheet</span>
+  </div>
+
+  <div class="gap" style="--c:var(--gold)">
+    <div class="lbl">Gap 06 · Platform</div>
+    <h5>Typed event bus + agent subscribers</h5>
+    <p>Client emitter in <span class="mono">src/lib/events/</span> listens to Supabase realtime and local state changes. Agent registry subscribes. Notification router subscribes. UI subscribes. Ship with 2–3 agents (Visa Guardian, Yield Optimiser, Payout Reconciler) — not all 6.</p>
+    <span class="tag">src/lib/events</span><span class="tag">agents.ts</span>
+  </div>
+
+  <div class="gap" style="--c:var(--gold)">
+    <div class="lbl">Gap 07 · Investor</div>
+    <h5>Investor surface — greenfield</h5>
+    <p>Currently <span class="mono">/invest</span> exists but is thin. Needs: deal pipeline (RE + non-RE), partner-matching (data room + accredited status), capital advisory workflow (routes to Pavel/Whatsapp today — formalise). Out-of-scope for phase 1–4; park as phase 5.</p>
+    <span class="tag">phase 5</span><span class="tag">new flows</span>
+  </div>
+
+  <div class="gap" style="--c:var(--gold)">
+    <div class="lbl">Gap 08 · Design tokens</div>
+    <h5>Kill tokens.json, lock cluster colours</h5>
+    <p>Deprecate <span class="mono">src/design-system/tokens.json</span>. Lint rule against hardcoded hex. Declare cluster colours as CSS variables. Update DESIGN.md to match.</p>
+    <span class="tag">eslint rule</span><span class="tag">DESIGN.md</span>
+  </div>
+</section>
+
+<!-- 06 Migration -->
+<section id="migration">
+  <div class="s-head"><div class="s-num">06</div><div><h2>Migration · 6 phases</h2><div class="s-sub">Each independently shippable. Production stays green throughout.</div></div></div>
+
+  <div class="phase" style="--c:var(--primary)">
+    <div class="ph-num">P1<b>01</b></div>
+    <div>
+      <h4>Role stack in DB + AuthContext</h4>
+      <p>Add <span class="mono">roles_stack</span> + <span class="mono">primary_role</span> to <span class="mono">profiles</span>. Backfill from existing <span class="mono">user_roles</span>. Update RLS. Refactor <span class="mono">AuthContext</span> to expose <span class="mono">roles</span> array + <span class="mono">primary</span>. No UI change yet.</p>
+    </div>
+    <div class="eta">~1 sprint</div>
+  </div>
+
+  <div class="phase" style="--c:var(--primary)">
+    <div class="ph-num">P1<b>02</b></div>
+    <div>
+      <h4>Home hub — blended signal stack</h4>
+      <p>Ship the <span class="mono">home.html</span> mockup as <span class="mono">Index.tsx</span>. Role sheet for stack editing. Primary signal card per primary role + slim secondary cards. Weighted Quick Actions. Activity feed interleaved with role tags.</p>
+    </div>
+    <div class="eta">~1 sprint</div>
+  </div>
+
+  <div class="phase" style="--c:var(--navy)">
+    <div class="ph-num">P2<b>03</b></div>
+    <div>
+      <h4>Cluster taxonomy</h4>
+      <p>Add <span class="mono">cluster</span> to VerticalDefinition. Tag all verticals. Publish cluster tokens in CSS. Add <span class="mono">/discover/cluster/:id</span>. Existing flat vertical URLs untouched.</p>
+    </div>
+    <div class="eta">~1 sprint</div>
+  </div>
+
+  <div class="phase" style="--c:var(--navy)">
+    <div class="ph-num">P2<b>04</b></div>
+    <div>
+      <h4>/operate consolidation + Company entity</h4>
+      <p>New <span class="mono">companies</span> table + <span class="mono">company_members</span>. Migrate existing vendors/partners/MCs into rows. New <span class="mono">/operate/*</span> shell. Re-export existing portals under new paths via 301.</p>
+    </div>
+    <div class="eta">~2 sprints</div>
+  </div>
+
+  <div class="phase" style="--c:var(--teal)">
+    <div class="ph-num">P3<b>05</b></div>
+    <div>
+      <h4>Event bus + 3 agents</h4>
+      <p>Typed event emitter. Ship Visa Guardian, Yield Optimiser, Payout Reconciler as subscribers. Intents surface in Home concierge card. Notification router unified.</p>
+    </div>
+    <div class="eta">~2 sprints</div>
+  </div>
+
+  <div class="phase" style="--c:var(--gold)">
+    <div class="ph-num">P4<b>06</b></div>
+    <div>
+      <h4>Cluster-based routes + legacy redirects</h4>
+      <p>Add <span class="mono">/app/:cluster/:vertical</span> template. Migrate vertical pages. <span class="mono">LEGACY_REDIRECTS</span> for old paths, 90 days. Deprecate the <span class="mono">guest/</span>, <span class="mono">nomad/</span>, <span class="mono">expat/</span>, <span class="mono">peylaa/</span> folders — their entries become <span class="mono">/discover/life/:situation</span> pages.</p>
+    </div>
+    <div class="eta">~2 sprints</div>
+  </div>
+
+  <div class="phase" style="--c:var(--purple)">
+    <div class="ph-num">P5<b>07</b></div>
+    <div>
+      <h4>Investor surface (greenfield)</h4>
+      <p>Deal flow table, non-RE asset types, partner-matching primitive, accredited-status gate, data room. Introduces one new cluster-adjacent surface inside <span class="mono">/operate/invest</span>.</p>
+    </div>
+    <div class="eta">~3 sprints</div>
+  </div>
+
+  <div class="phase" style="--c:var(--coral)">
+    <div class="ph-num">P6<b>08</b></div>
+    <div>
+      <h4>Trust, tokens, cleanup</h4>
+      <p>Inline licence markers on money surfaces. Lint rule + token unification. Delete <span class="mono">tokens.json</span>. Remove legacy shells and dead portal folders. DESIGN.md rewrite.</p>
+    </div>
+    <div class="eta">~1 sprint</div>
+  </div>
+
+  <div class="callout" style="margin-top:20px">
+    <div class="l">Total</div>
+    <h4>~13 sprints — roughly 6 months at one-squad cadence</h4>
+    <p>Phases 1–4 (8 sprints · ~4 months) deliver the user-visible transformation. Phase 5 (investor) is bonus. Phase 6 is cleanup that can be interleaved.</p>
+  </div>
+</section>
+
+<!-- 07 Handoff -->
+<section id="handoff">
+  <div class="s-head"><div class="s-num">07</div><div><h2>Claude Code handoff</h2><div class="s-sub">What to put in the repo. What to prompt.</div></div></div>
+
+  <div class="two-col">
+    <div class="card spine" style="--c:var(--primary)">
+      <div class="l">Step 1 · Add to repo</div>
+      <h4>docs/ARCHITECTURE_V2.md + docs/FEASIBILITY.md</h4>
+      <p>Markdown versions of the blueprint and this doc. Both referenceable, diffable, tracked in git.</p>
+    </div>
+    <div class="card spine" style="--c:var(--primary)">
+      <div class="l">Step 2 · Update</div>
+      <h4>CLAUDE.md → load ARCHITECTURE_V2</h4>
+      <p>Add a top-of-file pointer: "Before structural changes, read <span class="mono">docs/ARCHITECTURE_V2.md</span>." Works with both Claude Code and Cursor.</p>
+    </div>
+    <div class="card spine" style="--c:var(--primary)">
+      <div class="l">Step 3 · Phase 1 PR</div>
+      <h4>Role stack migration</h4>
+      <p>One PR: migration SQL + auth.ts types + AuthContext. No UI. Ship small. Claude Code handles this comfortably.</p>
+    </div>
+    <div class="card spine" style="--c:var(--primary)">
+      <div class="l">Step 4 · Phase 2 PR</div>
+      <h4>Home hub from mockup</h4>
+      <p>Give Claude Code the <span class="mono">home.html</span> file + <span class="mono">docs/ARCHITECTURE_V2.md §02–05</span>. Prompt it to port the mockup to React using existing shadcn/ui + tokens.</p>
+    </div>
+  </div>
+
+  <h3 style="margin-top:28px">Starter prompts for Claude Code</h3>
+  <div class="tree">
+<b class="c">Prompt · Audit</b>
+<span class="mute">"Audit src/pages against docs/ARCHITECTURE_V2.md §06 Route tree.</span>
+<span class="mute">List every route that doesn't fit /app/:cluster/:vertical or one of the</span>
+<span class="mute">6 surfaces. Output a redirect table as Markdown."</span>
+
+<b class="c">Prompt · Phase 1 migration</b>
+<span class="mute">"Implement Phase 1 per docs/FEASIBILITY.md §06 Phase 01:</span>
+<span class="mute">- Supabase migration adding roles_stack and primary_role to profiles</span>
+<span class="mute">- Backfill from user_roles</span>
+<span class="mute">- Update RLS policies</span>
+<span class="mute">- Update src/types/auth.ts</span>
+<span class="mute">- Refactor AuthContext to expose roles[] + primary</span>
+<span class="mute">No UI changes in this PR. Add tests for RLS."</span>
+
+<b class="c">Prompt · Home port</b>
+<span class="mute">"Port /scraps/home.html to src/pages/Index.tsx using our shadcn/ui</span>
+<span class="mute">primitives and src/styles/tokens.css. Preserve the role sheet,</span>
+<span class="mute">blended signal stack, and weighted quick actions. Use the new</span>
+<span class="mute">AuthContext from Phase 1. Keep visual fidelity ±5px."</span>
+
+<b class="c">Prompt · Cluster tagging</b>
+<span class="mute">"Add 'cluster' field to VerticalDefinition per docs/ARCHITECTURE_V2.md §04.</span>
+<span class="mute">Tag every vertical in src/lib/verticals.ts.</span>
+<span class="mute">Generate src/lib/clusters.ts as reverse index.</span>
+<span class="mute">Add cluster-color CSS vars to tokens.css.</span>
+<span class="mute">Open PR with no route changes."</span>
+  </div>
+
+  <div class="callout" style="margin-top:18px">
+    <div class="l">Working together</div>
+    <h4>Split of labour</h4>
+    <p>I produce design + architecture artifacts here. You export them to your repo as MD. Claude Code picks up from <span class="mono">CLAUDE.md</span> + the blueprint and does the refactor. You bring screenshots and questions back here for design iteration. I cannot commit to your GitHub or run <span class="mono">git push</span> — that's Claude Code's job.</p>
+  </div>
+</section>
+
+<!-- 08 Risks -->
+<section id="risks">
+  <div class="s-head"><div class="s-num">08</div><div><h2>Risks &amp; guardrails</h2><div class="s-sub">What breaks if you skip a step.</div></div></div>
+
+  <div class="three-col">
+    <div class="card spine" style="--c:var(--coral)">
+      <div class="l">Risk 01</div>
+      <h4>RLS during role-stack migration</h4>
+      <p>Policies today read single active role. Switching to a stack needs every policy reviewed. Mitigate: ship behind a feature flag, run parallel policies, compare for 1 week.</p>
+    </div>
+    <div class="card spine" style="--c:var(--coral)">
+      <div class="l">Risk 02</div>
+      <h4>Legacy URL fallout</h4>
+      <p>40+ routes rename. SEO + PWA install shortcuts + deep links in messaging break if redirects miss. Mitigate: generate redirects programmatically from the route registry, audit with existing <span class="mono">LEGACY_REDIRECTS</span> tooling.</p>
+    </div>
+    <div class="card spine" style="--c:var(--coral)">
+      <div class="l">Risk 03</div>
+      <h4>Company entity RBAC complexity</h4>
+      <p>Introducing <span class="mono">companies</span> + <span class="mono">company_members</span> with roles-per-company adds a second dimension to permissions. Mitigate: keep it behind a feature flag; migrate one vendor type at a time (providers first, then MCs, then agents, then developers).</p>
+    </div>
+    <div class="card spine" style="--c:var(--gold)">
+      <div class="l">Risk 04</div>
+      <h4>Agent drift &amp; hallucination</h4>
+      <p>More agents = more surface for wrong intents. Mitigate: central registry, every intent logged to <span class="mono">/admin/agents</span>, kill-switch flag, user always sees "accept / decline" — never auto-executes money moves.</p>
+    </div>
+    <div class="card spine" style="--c:var(--gold)">
+      <div class="l">Risk 05</div>
+      <h4>Design-token split (json vs css)</h4>
+      <p>Two sources of truth is already causing friction. Keep <span class="mono">tokens.css</span>, delete <span class="mono">tokens.json</span> with a lint rule. Don't try to merge — the DS2.0 Navy spec never shipped; cutting it is fine.</p>
+    </div>
+    <div class="card spine" style="--c:var(--gold)">
+      <div class="l">Risk 06</div>
+      <h4>Feature freeze fatigue</h4>
+      <p>13 sprints feels long. Mitigate: every phase ships value end-to-end. Phases 1–2 alone deliver the new home — visible, marketable. Don't let the restructure become an invisible tax.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>myUNO · feasibility assessment · v1.0</span>
+  <span class="mono">7 roles · 6 surfaces · 6 clusters · 13 sprints</span>
+</footer>
+
+</div>
+</body>
+</html>

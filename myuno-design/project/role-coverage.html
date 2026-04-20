@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>myUNO — Role Coverage &amp; Gap Analysis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #05090F; --surface: #0F1C2E; --card: #121E31; --card-e: #1A2840;
+    --fg: #EDF2FF; --muted: #8FA3B8; --muted-2: #5E7389;
+    --border: rgba(255,255,255,0.08); --hairline: rgba(255,255,255,0.06); --border-strong: rgba(255,255,255,0.18);
+    --primary: #00D68F; --navy: #4E7BFF; --teal: #16BDCA; --gold: #F59E0B; --purple: #A78BFA; --coral: #EF4444; --amber:#EAB308;
+    /* role accents */
+    --tourist:#4E7BFF; --resident:#00D68F; --owner:#16BDCA; --agent:#A78BFA; --developer:#EF4444; --provider:#F59E0B; --investor:#EAB308;
+    /* severity */
+    --p0:#EF4444; --p1:#F59E0B; --p2:#4E7BFF; --p5:#A78BFA;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; background:var(--bg); color:var(--fg); font-family:'DM Sans', system-ui, sans-serif; -webkit-font-smoothing:antialiased; }
+  body { padding: 48px 24px 120px; font-feature-settings: "ss01"; }
+  .display { font-family:'Golos Text'; letter-spacing:-0.02em; }
+  .mono { font-family:'JetBrains Mono'; font-feature-settings:"tnum"; }
+  .page { max-width: 1180px; margin: 0 auto; }
+
+  /* masthead */
+  .masthead { display:grid; grid-template-columns: 1fr auto; gap: 24px; align-items:end; padding-bottom: 32px; border-bottom: 1px solid var(--border); margin-bottom: 44px; }
+  .crumb { font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted-2); font-weight:600; margin-bottom: 14px; }
+  h1 { font-family:'Golos Text'; font-size: 48px; font-weight: 800; letter-spacing: -0.035em; margin: 0; line-height: 1.04; }
+  .lede { font-size: 16px; line-height: 1.6; color: var(--muted); max-width: 720px; margin-top: 18px; text-wrap: pretty; }
+  .meta { text-align: right; font-size: 11px; color: var(--muted-2); letter-spacing: 0.05em; }
+  .meta .mono { color: var(--fg); font-size: 12px; display:block; margin-top:2px; }
+
+  section { margin-bottom: 64px; scroll-margin-top: 24px; }
+  .s-head { display:grid; grid-template-columns: 60px 1fr; gap: 20px; align-items: baseline; margin-bottom: 24px; padding-bottom: 14px; border-bottom: 1px solid var(--hairline); }
+  .s-num { font-family:'JetBrains Mono'; font-size: 13px; color: var(--muted-2); letter-spacing: 0.05em; padding-top: 6px; }
+  h2 { font-family:'Golos Text'; font-size: 28px; font-weight: 700; letter-spacing: -0.025em; margin: 0; line-height: 1.1; }
+  .s-sub { font-size: 13px; color: var(--muted); margin-top: 6px; }
+  h3 { font-family:'Golos Text'; font-size: 17px; font-weight:600; letter-spacing: -0.01em; margin: 24px 0 10px; }
+  h4 { font-family:'Golos Text'; font-size: 14px; font-weight:600; letter-spacing: -0.005em; margin: 0 0 8px; color: var(--fg);}
+  p { font-size: 14px; line-height: 1.65; color: var(--muted); margin: 0 0 12px; text-wrap: pretty; }
+  p strong, li strong, td strong { color: var(--fg); font-weight: 500; }
+
+  /* TOC */
+  .toc { display:grid; grid-template-columns: repeat(4,1fr); gap: 8px; padding: 18px 20px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; margin-bottom: 40px; }
+  .toc a { font-size: 12.5px; color: var(--muted); text-decoration:none; padding: 8px 10px; border-radius: 8px; border: 1px solid transparent; display:flex; gap: 8px; align-items:baseline; }
+  .toc a:hover { border-color: var(--border); color: var(--fg); }
+  .toc a .mono { font-size: 10px; color: var(--muted-2); }
+
+  .three-col { display:grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+  .two-col { display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .four-col { display:grid; grid-template-columns: repeat(4,1fr); gap: 10px; }
+  .card { padding: 18px 20px; border-radius: 14px; background: var(--card); border: 1px solid var(--border); }
+
+  /* severity chips */
+  .chip { display:inline-flex; align-items:center; gap:6px; font-family:'JetBrains Mono'; font-size:10.5px; padding: 3px 9px; border-radius: 99px; background:rgba(255,255,255,0.04); border:1px solid var(--hairline); color: var(--muted); letter-spacing:0.04em;}
+  .chip .dot { width:6px; height:6px; border-radius:99px; background:var(--muted); display:inline-block;}
+  .chip.p0 { color: var(--p0); border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.08);} .chip.p0 .dot { background: var(--p0); box-shadow: 0 0 0 3px rgba(239,68,68,0.15);}
+  .chip.p1 { color: var(--p1); border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.07);} .chip.p1 .dot { background: var(--p1);}
+  .chip.p2 { color: var(--p2); border-color: rgba(78,123,255,0.3); background: rgba(78,123,255,0.07);} .chip.p2 .dot { background: var(--p2);}
+  .chip.p5 { color: var(--p5); border-color: rgba(167,139,250,0.3); background: rgba(167,139,250,0.07);} .chip.p5 .dot { background: var(--p5);}
+  .chip.ok { color: var(--primary); border-color: rgba(0,214,143,0.3); background: rgba(0,214,143,0.07);} .chip.ok .dot { background: var(--primary);}
+  .chip.bug { color: var(--p0); border-color: rgba(239,68,68,0.35); background: rgba(239,68,68,0.1);} .chip.bug .dot { background: var(--p0);}
+  .chip.role { color: var(--c); border-color: rgba(255,255,255,0.12); background: rgba(255,255,255,0.02);} .chip.role .dot { background: var(--c);}
+
+  /* coverage bar */
+  .cov { display:grid; grid-template-columns: 160px 1fr 64px; gap: 14px; align-items:center; margin: 10px 0; }
+  .cov .name { font-family:'Golos Text'; font-weight:600; font-size: 14px; display:flex; align-items:center; gap:10px; }
+  .cov .name .tag-dot { width:10px; height:10px; border-radius:99px; background:var(--c);}
+  .cov .track { height: 10px; border-radius: 99px; background: rgba(255,255,255,0.05); overflow:hidden; border: 1px solid var(--hairline);}
+  .cov .fill { height: 100%; border-radius: 99px; background: var(--c); transition: width 0.6s ease;}
+  .cov .val { font-family:'JetBrains Mono'; font-size: 13px; color: var(--fg); text-align:right; font-weight:500;}
+
+  /* priority banner */
+  .pri-row { display:grid; grid-template-columns: auto 1fr auto; gap: 18px; padding: 14px 18px; border-radius:12px; border: 1px solid var(--border); background: var(--card); margin-bottom: 8px; align-items:center;}
+  .pri-row.p0 { border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.04);}
+  .pri-row .num { font-family:'JetBrains Mono'; font-size: 11px; color: var(--muted-2); width: 32px;}
+  .pri-row .title { font-family:'Golos Text'; font-weight:600; font-size: 14px; color: var(--fg);}
+  .pri-row .sub { font-size: 12px; color: var(--muted); margin-top: 2px;}
+  .pri-row .meta-right { display:flex; gap:6px; align-items:center; flex-wrap:wrap; justify-content:flex-end;}
+
+  /* role block */
+  .role-block { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 22px 24px; margin-bottom: 14px; position:relative; overflow:hidden; padding-left: 28px;}
+  .role-block::before { content:''; position:absolute; left:0; top:22px; bottom:22px; width:4px; background: var(--c); border-radius: 0 4px 4px 0;}
+  .role-head { display:grid; grid-template-columns: 1fr auto; gap: 14px; align-items:baseline; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--hairline);}
+  .role-head h3 { font-size: 22px; margin: 0; font-family:'Golos Text'; font-weight: 700; letter-spacing: -0.02em;}
+  .role-head .who { font-size: 12px; color: var(--muted-2); margin-top: 4px;}
+  .role-head .right { display:flex; gap: 8px; align-items:center; flex-wrap:wrap; justify-content:flex-end;}
+  .role-head .cov-num { font-family:'Golos Text'; font-size: 28px; font-weight: 700; letter-spacing:-0.02em; color: var(--c);}
+  .role-head .cov-lbl { font-size: 10px; letter-spacing:0.12em; text-transform: uppercase; color: var(--muted-2); font-weight:600;}
+  .role-body { display:grid; grid-template-columns: 1fr 1fr; gap: 18px;}
+  .role-body h4 { font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted-2); font-weight:600; margin-bottom: 10px;}
+  .role-body ul { margin: 0; padding: 0; list-style: none;}
+  .role-body li { font-size: 13px; color: var(--muted); line-height: 1.5; padding: 5px 0 5px 0; display:grid; grid-template-columns: auto 1fr; gap: 8px; align-items:flex-start;}
+  .role-body li .b { font-size: 9px; margin-top: 6px; color: var(--muted-2);}
+  .role-body li .gap-chip { font-size:9.5px; font-family:'JetBrains Mono'; padding: 1px 6px; border-radius: 4px; background: rgba(255,255,255,0.04); border:1px solid var(--hairline); color: var(--muted-2); letter-spacing:0.04em; white-space: nowrap;}
+  .role-body li.bug .gap-chip { color: var(--p0); border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.08);}
+  .role-body li.p1 .gap-chip { color: var(--p1); border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.07);}
+  .role-body li.p2 .gap-chip { color: var(--p2); border-color: rgba(78,123,255,0.3); background: rgba(78,123,255,0.07);}
+  .role-body li.p5 .gap-chip { color: var(--p5); border-color: rgba(167,139,250,0.3); background: rgba(167,139,250,0.07);}
+  .role-body li.ok .gap-chip { color: var(--primary); border-color: rgba(0,214,143,0.25); background: rgba(0,214,143,0.06);}
+  .role-body li strong { color: var(--fg); font-weight: 500;}
+
+  /* matrix table */
+  .matrix { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: var(--card); }
+  .matrix table { width: 100%; border-collapse: collapse; }
+  .matrix th, .matrix td { padding: 11px 13px; text-align: left; font-size: 12.5px; border-bottom: 1px solid var(--hairline); vertical-align: top; }
+  .matrix th { font-family: 'DM Sans'; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted-2); font-weight: 600; background: var(--surface); }
+  .matrix tr:last-child td { border-bottom: none; }
+  .matrix td.n { font-weight: 500; color: var(--fg); }
+  .matrix td.c { text-align: center; color: var(--muted-2);}
+  .matrix td.c.on { color: var(--fg); font-weight: 500;}
+  .matrix .x { color: var(--muted-2);}
+  .matrix .y { color: var(--primary); font-weight:600;}
+
+  .callout { padding: 18px 20px; border-radius: 14px; border: 1px dashed var(--border-strong); margin: 14px 0; }
+  .callout .l { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted-2); font-weight:600; margin-bottom: 6px; }
+  .callout h4 { font-family:'Golos Text'; font-size: 15px; margin: 0 0 6px; color: var(--fg); }
+  .callout p { font-size: 13px; margin: 0; color: var(--muted); }
+
+  .phase-row { display:grid; grid-template-columns: 120px 1fr; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--hairline);}
+  .phase-row:last-child { border-bottom:none;}
+  .phase-row .tag-big { font-family:'Golos Text'; font-weight:700; font-size: 14px; color: var(--c); letter-spacing: -0.005em; }
+  .phase-row .tag-big .sub { font-family:'DM Sans'; font-size:11px; color: var(--muted-2); font-weight:500; letter-spacing:0.04em; text-transform: uppercase; display:block; margin-top:2px;}
+  .phase-row .items { display:flex; gap:6px; flex-wrap:wrap;}
+
+  footer { margin-top: 80px; padding-top: 24px; border-top: 1px solid var(--border); font-size: 11px; color: var(--muted-2); letter-spacing: 0.04em; display: flex; justify-content: space-between; }
+  ::selection { background: var(--primary); color: #000; }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="masthead">
+  <div>
+    <div class="crumb">myUNO · Role coverage · Gap analysis · v1</div>
+    <h1 class="display">What's built.<br/>What's missing.<br/>Which role pays for it.</h1>
+    <p class="lede">Assessment of the current build across the 7 canonical roles from <span class="mono" style="color:var(--fg)">ARCHITECTURE_V2</span>. Read priorities first, then roles, then phase plan. Every gap is tagged <span class="chip bug" style="vertical-align:middle"><span class="dot"></span>P0 BUG</span> · <span class="chip p1" style="vertical-align:middle"><span class="dot"></span>P1 GAP</span> · <span class="chip p2" style="vertical-align:middle"><span class="dot"></span>P2 CONSOLIDATE</span> · <span class="chip p5" style="vertical-align:middle"><span class="dot"></span>P5 GREENFIELD</span>.</p>
+  </div>
+  <div class="meta"><span>April 2026</span><span class="mono">v1.0 · coverage audit</span></div>
+</header>
+
+<nav class="toc">
+  <a href="#summary"><span class="mono">01</span> Summary</a>
+  <a href="#priority"><span class="mono">02</span> Priority queue</a>
+  <a href="#roles"><span class="mono">03</span> Role-by-role</a>
+  <a href="#matrix"><span class="mono">04</span> Capability matrix</a>
+  <a href="#phases"><span class="mono">05</span> Phase plan</a>
+</nav>
+
+<!-- 01 Summary -->
+<section id="summary">
+  <div class="s-head"><div class="s-num">01</div><div><h2>Coverage at a glance</h2><div class="s-sub">Scores from Claude Code session audit. Higher = more of the role's daily work is already shipping.</div></div></div>
+
+  <div class="cov" style="--c:var(--tourist)"><div class="name"><span class="tag-dot"></span>Tourist</div><div class="track"><div class="fill" style="width:80%"></div></div><div class="val">80%</div></div>
+  <div class="cov" style="--c:var(--owner)"><div class="name"><span class="tag-dot"></span>Property owner</div><div class="track"><div class="fill" style="width:80%"></div></div><div class="val">80%</div></div>
+  <div class="cov" style="--c:var(--resident)"><div class="name"><span class="tag-dot"></span>Resident</div><div class="track"><div class="fill" style="width:75%"></div></div><div class="val">75%</div></div>
+  <div class="cov" style="--c:var(--developer)"><div class="name"><span class="tag-dot"></span>RE developer</div><div class="track"><div class="fill" style="width:70%"></div></div><div class="val">70%</div></div>
+  <div class="cov" style="--c:var(--provider)"><div class="name"><span class="tag-dot"></span>Provider (local biz)</div><div class="track"><div class="fill" style="width:70%"></div></div><div class="val">70%</div></div>
+  <div class="cov" style="--c:var(--agent)"><div class="name"><span class="tag-dot"></span>RE agent</div><div class="track"><div class="fill" style="width:50%"></div></div><div class="val">50%</div></div>
+  <div class="cov" style="--c:var(--investor)"><div class="name"><span class="tag-dot"></span>Investor</div><div class="track"><div class="fill" style="width:25%"></div></div><div class="val">25%</div></div>
+
+  <div class="callout" style="margin-top:20px">
+    <div class="l">Read-out</div>
+    <h4>Strong on consumer + owner. Weak on pro workspaces + investor.</h4>
+    <p>Tourist and Owner were clearly built first and they show it. Resident is close behind but missing daily-frequency verticals (grocery, home maintenance, coworking). Agent and Provider have the core but lack the pro workspace shell. Developer is mid-build. Investor is the only role needing a full greenfield surface — today it's mostly calculator + advisory pages.</p>
+  </div>
+</section>
+
+<!-- 02 Priority queue -->
+<section id="priority">
+  <div class="s-head"><div class="s-num">02</div><div><h2>Priority queue · do in this order</h2><div class="s-sub">P0 bugs block revenue today. Everything else is sequenced against the phase plan.</div></div></div>
+
+  <h3>P0 — ship-stoppers, fix this week</h3>
+  <div class="pri-row p0"><div class="num">01</div><div><div class="title">Stripe checkout does not create orders in DB after payment</div><div class="sub">Audit §3. Owner &amp; provider revenue invisible. Blocks reconciliation everywhere.</div></div><div class="meta-right"><span class="chip bug"><span class="dot"></span>BUG</span><span class="chip role" style="--c:var(--owner)"><span class="dot"></span>owner</span><span class="chip role" style="--c:var(--provider)"><span class="dot"></span>provider</span></div></div>
+  <div class="pri-row p0"><div class="num">02</div><div><div class="title">Flower / bloom cart checkout doesn't create orders</div><div class="sub">Same shape of bug, smaller blast radius. Fix alongside.</div></div><div class="meta-right"><span class="chip bug"><span class="dot"></span>BUG</span><span class="chip role" style="--c:var(--provider)"><span class="dot"></span>provider</span></div></div>
+  <div class="pri-row p0"><div class="num">03</div><div><div class="title">Owner financials — income / expense inconsistencies</div><div class="sub">Breaks trust in the owner dashboard; blocks statement sign-off.</div></div><div class="meta-right"><span class="chip bug"><span class="dot"></span>BUG</span><span class="chip role" style="--c:var(--owner)"><span class="dot"></span>owner</span></div></div>
+
+  <h3>P1 — high-frequency gaps with clear revenue</h3>
+  <div class="pri-row"><div class="num">04</div><div><div class="title">Grocery &amp; convenience delivery</div><div class="sub">Highest-daily-frequency need for residents; strong tourist cross-over. Today: absent.</div></div><div class="meta-right"><span class="chip p1"><span class="dot"></span>P1</span><span class="chip role" style="--c:var(--resident)"><span class="dot"></span>resident</span><span class="chip role" style="--c:var(--tourist)"><span class="dot"></span>tourist</span></div></div>
+  <div class="pri-row"><div class="num">05</div><div><div class="title">Home maintenance verticals (AC, plumbing, electrical, handyman)</div><div class="sub">Only accessible via <span class="mono">/services?category=*</span>. No booking flow, no vertical pages.</div></div><div class="meta-right"><span class="chip p1"><span class="dot"></span>P1</span><span class="chip role" style="--c:var(--resident)"><span class="dot"></span>resident</span><span class="chip role" style="--c:var(--owner)"><span class="dot"></span>owner</span></div></div>
+  <div class="pri-row"><div class="num">06</div><div><div class="title">Ride-hailing integration (Grab / Bolt)</div><div class="sub">#1 tourist friction after airport transfer.</div></div><div class="meta-right"><span class="chip p1"><span class="dot"></span>P1</span><span class="chip role" style="--c:var(--tourist)"><span class="dot"></span>tourist</span></div></div>
+  <div class="pri-row"><div class="num">07</div><div><div class="title">Hotel / resort booking (budget + mid-market)</div><div class="sub">Only villas and apartments today. Missing tourist segment.</div></div><div class="meta-right"><span class="chip p1"><span class="dot"></span>P1</span><span class="chip role" style="--c:var(--tourist)"><span class="dot"></span>tourist</span></div></div>
+  <div class="pri-row"><div class="num">08</div><div><div class="title">OTA channel manager (Airbnb / Booking / Agoda sync)</div><div class="sub">Owners manage myUNO separately from existing OTA presence. Blocks "one inbox" promise.</div></div><div class="meta-right"><span class="chip p1"><span class="dot"></span>P1</span><span class="chip role" style="--c:var(--owner)"><span class="dot"></span>owner</span></div></div>
+
+  <h3>P2 — consolidation &amp; pro workspaces</h3>
+  <div class="pri-row"><div class="num">09</div><div><div class="title">Agent workspace <span class="mono" style="color:var(--muted)">/operate/agent</span> shell</div><div class="sub">Agents use patchwork of CRM pages. No unified workspace, no resale pipeline, no commissions.</div></div><div class="meta-right"><span class="chip p2"><span class="dot"></span>P2</span><span class="chip role" style="--c:var(--agent)"><span class="dot"></span>agent</span></div></div>
+  <div class="pri-row"><div class="num">10</div><div><div class="title">Coworking / digital nomad vertical</div><div class="sub">Fastest-growing resident segment. Not covered.</div></div><div class="meta-right"><span class="chip p2"><span class="dot"></span>P2</span><span class="chip role" style="--c:var(--resident)"><span class="dot"></span>resident</span></div></div>
+  <div class="pri-row"><div class="num">11</div><div><div class="title">Provider promotions, analytics, reviews, subscriptions</div><div class="sub">Today: order list + payouts. Missing the growth &amp; retention layer.</div></div><div class="meta-right"><span class="chip p2"><span class="dot"></span>P2</span><span class="chip role" style="--c:var(--provider)"><span class="dot"></span>provider</span></div></div>
+  <div class="pri-row"><div class="num">12</div><div><div class="title">Utility setup · vehicle registration · licence conversion</div><div class="sub">Resident admin flows — today absent as guided flows.</div></div><div class="meta-right"><span class="chip p2"><span class="dot"></span>P2</span><span class="chip role" style="--c:var(--resident)"><span class="dot"></span>resident</span></div></div>
+
+  <h3>P3 — developer module + AI</h3>
+  <div class="pri-row"><div class="num">13</div><div><div class="title">Construction milestones + payment plan management</div><div class="sub">Off-plan buyers have no visibility; developers manage instalments manually.</div></div><div class="meta-right"><span class="chip p2"><span class="dot"></span>P3</span><span class="chip role" style="--c:var(--developer)"><span class="dot"></span>developer</span></div></div>
+  <div class="pri-row"><div class="num">14</div><div><div class="title">AI yield optimiser · smart pricing</div><div class="sub">Designed in agent roster, not wired. Dynamic rate suggestions for owners.</div></div><div class="meta-right"><span class="chip p2"><span class="dot"></span>P3</span><span class="chip role" style="--c:var(--owner)"><span class="dot"></span>owner</span></div></div>
+  <div class="pri-row"><div class="num">15</div><div><div class="title">Snag list / defect management post-handover</div><div class="sub">Developer + buyer + MC touchpoint.</div></div><div class="meta-right"><span class="chip p2"><span class="dot"></span>P3</span><span class="chip role" style="--c:var(--developer)"><span class="dot"></span>developer</span></div></div>
+
+  <h3>P5 — greenfield · investor surface</h3>
+  <div class="pri-row"><div class="num">16</div><div><div class="title">Investor workspace <span class="mono" style="color:var(--muted)">/operate/invest</span></div><div class="sub">Portfolio tracking · deal pipeline · accredited KYC · exit modelling · legal structures · digital closing. The whole surface.</div></div><div class="meta-right"><span class="chip p5"><span class="dot"></span>P5</span><span class="chip role" style="--c:var(--investor)"><span class="dot"></span>investor</span></div></div>
+</section>
+
+<!-- 03 Role-by-role -->
+<section id="roles">
+  <div class="s-head"><div class="s-num">03</div><div><h2>Role-by-role</h2><div class="s-sub">Covered (what ships today) vs Gaps (what's missing, tagged by severity).</div></div></div>
+
+  <!-- TOURIST -->
+  <div class="role-block" style="--c:var(--tourist)">
+    <div class="role-head">
+      <div><h3>Tourist</h3><div class="who">Short stay. Day-1 logistics + discovery. 1–21 days.</div></div>
+      <div class="right"><div style="text-align:right"><div class="cov-num">80%</div><div class="cov-lbl">coverage</div></div></div>
+    </div>
+    <div class="role-body">
+      <div>
+        <h4>Covered</h4>
+        <ul>
+          <li class="ok"><span class="gap-chip">OK</span><span><strong>Day-1 logistics</strong> — airport transfer, fast track, SIM, currency exchange</span></li>
+          <li class="ok"><span class="gap-chip">OK</span><span><strong>Stay</strong> — short-term rentals, villas</span></li>
+          <li class="ok"><span class="gap-chip">OK</span><span><strong>Discover</strong> — restaurants, yacht charter, tours &amp; experiences, events, water sports</span></li>
+          <li class="ok"><span class="gap-chip">OK</span><span><strong>Wellness</strong> — beauty, fitness, wellness, massage</span></li>
+          <li class="ok"><span class="gap-chip">OK</span><span><strong>Medical</strong> — emergency clinics, Bangkok Hospital contact</span></li>
+          <li class="ok"><span class="gap-chip">OK</span><span><strong>Retail</strong> — market / shopping</span></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Gaps</h4>
+        <ul>
+          <li class="p1"><span class="gap-chip">P1</span><span><strong>Hotel / resort booking</strong> — budget + mid-market segment</span></li>
+          <li class="p1"><span class="gap-chip">P1</span><span><strong>Ride-hailing</strong> — Grab / Bolt integration. #1 friction after transfer</span></li>
+          <li class="p1"><span class="gap-chip">P1</span><span><strong>Grocery / convenience delivery</strong> — highest daily need, absent</span></li>
+          <li class="p2"><span class="gap-chip">P2</span><span><strong>Nightlife / beach clubs</strong> — discovery vertical missing</span></li>
+          <li class="p2"><span class="gap-chip">P2</span><span><strong>Diving</strong> — buried in experiences, weak filtering</span></li>
+          <li class="p2"><span class="gap-chip">P2</span><span><strong>Live beach / sea conditions</strong> — banner is static, not API-driven</span></li>
+          <li class="p2"><span class="gap-chip">P2</span><span><strong>Travel insurance</strong> — no quick-buy on arrival</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESIDENT -->
+  <div class="role-block" style="--c:var(--resident)">
+    <div class="role-head">
+      <div><h3>Resident</h3><div class="who">6m+ on the island. Daily life + admin. Expat, remote worker, family.</div></div>
+      <div class="right"><div style="text-align:right"><div class="cov-num">75%</div><div class="cov-lbl">coverage</div></div></div>
+    </div>
+    <div class="role-body">
+      <div>
+        <h4>Covered</h4>
+        <ul>
+          <li class="ok"><span class="gap-chip">OK</span><span><strong>Housing</strong> — long-term rental, property search</span></li>
+          <li class="ok"><span class="gap-chip">OK</span><span><strong>Home services</strong> — cleaning, laundry (via <span class="mono">?category=</span>), flowers, babysitter, pet</span></li>
+          <li class="ok"><span class="gap-chip">OK</span><span><strong>Medical</strong> — specialists, dental, pediatric, pharmacy</span></li>
+          <li class="ok"><span class="gap-chip">OK</span><span><strong>Wellness</strong> — fitness, beauty</span></li>
+          <li class="ok"><span class="gap-chip">OK</span><span><strong>Admin</strong> — visa extension, banking guide, tax, legal, insurance</span></li>
+          <li class="ok"><span class="gap-chip">OK</span><span><strong>Family</strong> — school finder, relocation guide, education</span></li>
+          <li class="ok"><span class="gap-chip">OK</span><span><strong>Lifestyle</strong> — restaurants, events, experiences</span></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Gaps</h4>
+        <ul>
+          <li class="p1"><span class="gap-chip">P1</span><span><strong>Grocery delivery</strong> — highest daily-frequency need. Absent.</span></li>
+          <li class="p1"><span class="gap-chip">P1</span><span><strong>Home maintenance</strong> — AC, plumbing, electrical, handyman have no vertical pages or booking flow</span></li>
+          <li class="p2"><span class="gap-chip">P2</span><span><strong>Coworking spaces</strong> — fastest-growing resident segment, not covered</span></li>
+          <li class="p2"><span class="gap-chip">P2</span><span><strong>Utility setup</strong> — electricity, water, internet (TRUE / AIS). No guided flow</span></li>
+          <li class="p2"><span class="gap-chip">P2</span><span><strong>Vehicle registration, insurance, licence conversion</strong> — no flows</span></li>
+          <li class="p2"><span class="gap-chip">P2</span><span><strong>Community layer</strong> — no expat network, forums, classifieds</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- OWNER -->
+  <div class="role-block" style="--c:var(--owner)">
+    <div class="role-head">
+      <div><h3>Property owner</h3><div class="who">1–50 units. Wants income + control. Delegates ops to MC.</div></div>
+      <div class="right"><div style="text-align:right"><div class="cov-num">80%</div><div class="cov-lbl">coverage</div></div></div>
+    </div>
+    <div class="role-body">
+      <div>
+        <h4>Covered</h4>
+        <ul>
+          <li class="ok"><span class="gap-chip">OK</span><span><strong>Dashboard</strong> — bookings, financial statements, income / expense, maintenance tickets</span></li>
+          <li class="ok"><span class="gap-chip">OK</span><span><strong>Guest ops</strong> — check-in, guidebook, communications</span></li>
+          <li class="ok"><span class="gap-chip">OK</span><span><strong>Staff</strong> — cleaning coordination, staff management</span></li>
+          <li class="ok"><span class="gap-chip">OK</span><span><strong>PM subscription</strong> — via Stays</span></li>
+          <li class="ok"><span class="gap-chip">OK</span><span><strong>Owner portal</strong> — 84 pages of functionality</span></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Gaps</h4>
+        <ul>
+          <li class="bug"><span class="gap-chip">P0 BUG</span><span><strong>Stripe checkout doesn't create orders</strong> in DB post-payment (audit §3)</span></li>
+          <li class="bug"><span class="gap-chip">P0 BUG</span><span><strong>Income / expense inconsistencies</strong> on financials</span></li>
+          <li class="p1"><span class="gap-chip">P1</span><span><strong>Channel manager</strong> — no Airbnb / Booking / Agoda sync</span></li>
+          <li class="p2"><span class="gap-chip">P3</span><span><strong>AI yield optimiser</strong> — designed not built</span></li>
+          <li class="p2"><span class="gap-chip">P3</span><span><strong>Smart pricing / dynamic rates</strong> — missing</span></li>
+          <li class="p2"><span class="gap-chip">P2</span><span><strong>Owner ↔ MC comms</strong> — implicit, no formal channel</span></li>
+          <li class="p2"><span class="gap-chip">P2</span><span><strong>Mobile</strong> — owner dashboard desktop-first, PWA not optimised</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- AGENT -->
+  <div class="role-block" style="--c:var(--agent)">
+    <div class="role-head">
+      <div><h3>Real estate agent</h3><div class="who">Solo broker to boutique agency. Matches demand to supply; earns commission.</div></div>
+      <div class="right"><div style="text-align:right"><div class="cov-num">50%</div><div class="cov-lbl">coverage</div></div></div>
+    </div>
+    <div class="role-body">
+      <div>
+        <h4>Covered</h4>
+        <ul>
+          <li class="ok"><span class="gap-chip">OK</span><span><strong>CRM</strong> — leads, contacts, deals (Odoo integration)</span></li>
+          <li class="ok"><span class="gap-chip">OK</span><span><strong>Listings &amp; viewings</strong> — requests supported</span></li>
+          <li class="ok"><span class="gap-chip">OK</span><span><strong>Lead alerts</strong> — WhatsApp wired</span></li>
+          <li class="ok"><span class="gap-chip">OK</span><span><strong>Masked comms</strong> — shipped (task 12)</span></li>
+          <li class="ok"><span class="gap-chip">OK</span><span><strong>Broker console</strong> — newbuilds pipeline (task 11)</span></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Gaps</h4>
+        <ul>
+          <li class="p2"><span class="gap-chip">P2</span><span><strong>No <span class="mono">/operate/agent</span> shell</strong> — patchwork of CRM pages</span></li>
+          <li class="p2"><span class="gap-chip">P2</span><span><strong>No resale deal pipeline UI</strong> — <span class="mono">capital/</span> folder is crude</span></li>
+          <li class="p2"><span class="gap-chip">P2</span><span><strong>No commission tracking / split management</strong></span></li>
+          <li class="p2"><span class="gap-chip">P2</span><span><strong>No client-facing portal</strong> — buyers can't see curated shortlist</span></li>
+          <li class="p2"><span class="gap-chip">P2</span><span><strong>No e-signature flow</strong></span></li>
+          <li class="p2"><span class="gap-chip">P2</span><span><strong>No co-brokerage</strong> — shared listings between agents</span></li>
+          <li class="p2"><span class="gap-chip">P2</span><span><strong>No performance analytics</strong> — conversion, velocity</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEVELOPER -->
+  <div class="role-block" style="--c:var(--developer)">
+    <div class="role-head">
+      <div><h3>RE developer</h3><div class="who">Building &amp; selling new projects. Off-plan through handover.</div></div>
+      <div class="right"><div style="text-align:right"><div class="cov-num">70%</div><div class="cov-lbl">coverage</div></div></div>
+    </div>
+    <div class="role-body">
+      <div>
+        <h4>Covered</h4>
+        <ul>
+          <li class="ok"><span class="gap-chip">OK</span><span><strong>Developer portal</strong> — project + unit inventory</span></li>
+          <li class="ok"><span class="gap-chip">OK</span><span><strong>Newbuilds catalog</strong> — consumer-facing</span></li>
+          <li class="ok"><span class="gap-chip">OK</span><span><strong>KYC + foreign quota</strong> — enforced</span></li>
+          <li class="ok"><span class="gap-chip">OK</span><span><strong>Buyer mgmt</strong> — booking deposits</span></li>
+          <li class="ok"><span class="gap-chip">OK</span><span><strong>Broker console + masked comms</strong></span></li>
+          <li class="ok"><span class="gap-chip">OK</span><span><strong>AI client matching</strong> — developer module WIP</span></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Gaps</h4>
+        <ul>
+          <li class="p2"><span class="gap-chip">P3</span><span><strong>Construction milestone tracking</strong> — public + internal</span></li>
+          <li class="p2"><span class="gap-chip">P3</span><span><strong>Payment plan mgmt</strong> — instalments, completion payments</span></li>
+          <li class="p2"><span class="gap-chip">P3</span><span><strong>Stripe Connect</strong> for developer → buyer flows at scale</span></li>
+          <li class="p2"><span class="gap-chip">P2</span><span><strong>Partner / broker network</strong> — manual over WhatsApp</span></li>
+          <li class="p2"><span class="gap-chip">P2</span><span><strong>Marketing campaign tools</strong> — landing builder, per-project lead capture</span></li>
+          <li class="p2"><span class="gap-chip">P3</span><span><strong>Snag list / defect mgmt</strong> — post-handover</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROVIDER -->
+  <div class="role-block" style="--c:var(--provider)">
+    <div class="role-head">
+      <div><h3>Provider (local business)</h3><div class="who">Restaurant, clinic, cleaning, yacht, spa. Takes orders via myUNO.</div></div>
+      <div class="right"><div style="text-align:right"><div class="cov-num">70%</div><div class="cov-lbl">coverage</div></div></div>
+    </div>
+    <div class="role-body">
+      <div>
+        <h4>Covered</h4>
+        <ul>
+          <li class="ok"><span class="gap-chip">OK</span><span><strong>Vendor dashboard</strong> — orders, bookings, payouts</span></li>
+          <li class="ok"><span class="gap-chip">OK</span><span><strong>Profile + listings</strong></span></li>
+          <li class="ok"><span class="gap-chip">OK</span><span><strong>WhatsApp notifications</strong></span></li>
+          <li class="ok"><span class="gap-chip">OK</span><span><strong>KYC / verification</strong></span></li>
+          <li class="ok"><span class="gap-chip">OK</span><span><strong>Payout mgmt</strong> — <span class="mono">process_payout</span> RPC</span></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Gaps</h4>
+        <ul>
+          <li class="bug"><span class="gap-chip">P0 BUG</span><span><strong>Flower / bloom cart checkout</strong> — doesn't create orders</span></li>
+          <li class="p2"><span class="gap-chip">P2</span><span><strong>Subscriptions / recurring bookings</strong> — weekly cleaning, monthly fitness</span></li>
+          <li class="p2"><span class="gap-chip">P2</span><span><strong>Promotions / discounts</strong> — no campaign tools</span></li>
+          <li class="p2"><span class="gap-chip">P2</span><span><strong>Analytics</strong> — thin; no revenue trend, retention</span></li>
+          <li class="p2"><span class="gap-chip">P2</span><span><strong>Review management</strong> — no responses, no reputation view</span></li>
+          <li class="p2"><span class="gap-chip">P2</span><span><strong>Team / staff</strong> — only on MC side, not solo providers</span></li>
+          <li class="p2"><span class="gap-chip">P2</span><span><strong>Onboarding funnel</strong> — new providers added manually</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- INVESTOR -->
+  <div class="role-block" style="--c:var(--investor)">
+    <div class="role-head">
+      <div><h3>Investor</h3><div class="who">Deploys capital into RE, syndications, joint ventures. Portfolio mindset.</div></div>
+      <div class="right"><div style="text-align:right"><div class="cov-num">25%</div><div class="cov-lbl">coverage</div></div></div>
+    </div>
+    <div class="role-body">
+      <div>
+        <h4>Covered</h4>
+        <ul>
+          <li class="ok"><span class="gap-chip">OK</span><span><strong>Yield calculator</strong></span></li>
+          <li class="ok"><span class="gap-chip">OK</span><span><strong>ROI projections</strong> — on off-plan listings</span></li>
+          <li class="ok"><span class="gap-chip">OK</span><span><strong>Capital advisory pages</strong> — 11 files in <span class="mono">/capital/</span></span></li>
+          <li class="ok"><span class="gap-chip">OK</span><span><strong>Investment dashboard</strong> — <span class="mono">/invest/</span></span></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Gaps <span class="chip p5" style="margin-left:6px"><span class="dot"></span>ENTIRE SURFACE</span></h4>
+        <ul>
+          <li class="p5"><span class="gap-chip">P5</span><span><strong>No <span class="mono">/operate/invest</span> shell</strong> — no unified portfolio view</span></li>
+          <li class="p5"><span class="gap-chip">P5</span><span><strong>No non-RE deal pipeline</strong> — syndications, JVs</span></li>
+          <li class="p5"><span class="gap-chip">P5</span><span><strong>No accredited-investor KYC tier</strong></span></li>
+          <li class="p5"><span class="gap-chip">P5</span><span><strong>No portfolio tracking</strong> — total value, yield, occupancy across units</span></li>
+          <li class="p5"><span class="gap-chip">P5</span><span><strong>No exit modelling</strong> — timing, capital gains, repatriation</span></li>
+          <li class="p5"><span class="gap-chip">P5</span><span><strong>No partner / co-investor matching</strong> beyond manual concierge</span></li>
+          <li class="p5"><span class="gap-chip">P5</span><span><strong>No legal structure guidance</strong> — Thai co for land, BOI, LTR visa</span></li>
+          <li class="p5"><span class="gap-chip">P5</span><span><strong>Capital advisory</strong> all manual — no structured intake, term sheets, digital closing</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 04 Matrix -->
+<section id="matrix">
+  <div class="s-head"><div class="s-num">04</div><div><h2>Capability × role matrix</h2><div class="s-sub">Which roles each missing capability serves. Helps stack-rank by blast radius.</div></div></div>
+  <div class="matrix"><table>
+    <thead><tr>
+      <th>Capability</th>
+      <th style="width:70px">Priority</th>
+      <th class="c">Tour</th>
+      <th class="c">Res</th>
+      <th class="c">Own</th>
+      <th class="c">Agent</th>
+      <th class="c">Dev</th>
+      <th class="c">Prov</th>
+      <th class="c">Invest</th>
+    </tr></thead>
+    <tbody>
+      <tr><td class="n">Stripe orders (bug)</td><td><span class="chip bug"><span class="dot"></span>P0</span></td><td class="c">—</td><td class="c">—</td><td class="c y">●</td><td class="c">—</td><td class="c">—</td><td class="c y">●</td><td class="c">—</td></tr>
+      <tr><td class="n">Flower checkout (bug)</td><td><span class="chip bug"><span class="dot"></span>P0</span></td><td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c y">●</td><td class="c">—</td></tr>
+      <tr><td class="n">Owner financials (bug)</td><td><span class="chip bug"><span class="dot"></span>P0</span></td><td class="c">—</td><td class="c">—</td><td class="c y">●</td><td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c">—</td></tr>
+      <tr><td class="n">Grocery delivery</td><td><span class="chip p1"><span class="dot"></span>P1</span></td><td class="c y">●</td><td class="c y">●</td><td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c y">●</td><td class="c">—</td></tr>
+      <tr><td class="n">Home maintenance verticals</td><td><span class="chip p1"><span class="dot"></span>P1</span></td><td class="c">—</td><td class="c y">●</td><td class="c y">●</td><td class="c">—</td><td class="c">—</td><td class="c y">●</td><td class="c">—</td></tr>
+      <tr><td class="n">Ride-hailing</td><td><span class="chip p1"><span class="dot"></span>P1</span></td><td class="c y">●</td><td class="c y">●</td><td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c">—</td></tr>
+      <tr><td class="n">Hotel / resort booking</td><td><span class="chip p1"><span class="dot"></span>P1</span></td><td class="c y">●</td><td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c y">●</td><td class="c">—</td></tr>
+      <tr><td class="n">OTA channel manager</td><td><span class="chip p1"><span class="dot"></span>P1</span></td><td class="c">—</td><td class="c">—</td><td class="c y">●</td><td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c">—</td></tr>
+      <tr><td class="n">Agent workspace shell</td><td><span class="chip p2"><span class="dot"></span>P2</span></td><td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c y">●</td><td class="c">—</td><td class="c">—</td><td class="c">—</td></tr>
+      <tr><td class="n">Commission + e-sign</td><td><span class="chip p2"><span class="dot"></span>P2</span></td><td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c y">●</td><td class="c y">●</td><td class="c">—</td><td class="c y">●</td></tr>
+      <tr><td class="n">Coworking</td><td><span class="chip p2"><span class="dot"></span>P2</span></td><td class="c y">●</td><td class="c y">●</td><td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c y">●</td><td class="c">—</td></tr>
+      <tr><td class="n">Utility · vehicle · licence flows</td><td><span class="chip p2"><span class="dot"></span>P2</span></td><td class="c">—</td><td class="c y">●</td><td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c">—</td></tr>
+      <tr><td class="n">Provider growth layer (promos, analytics, reviews, subs)</td><td><span class="chip p2"><span class="dot"></span>P2</span></td><td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c y">●</td><td class="c">—</td></tr>
+      <tr><td class="n">Construction milestones · payment plans</td><td><span class="chip p2"><span class="dot"></span>P3</span></td><td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c y">●</td><td class="c">—</td><td class="c y">●</td></tr>
+      <tr><td class="n">AI yield optimiser + smart pricing</td><td><span class="chip p2"><span class="dot"></span>P3</span></td><td class="c">—</td><td class="c">—</td><td class="c y">●</td><td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c y">●</td></tr>
+      <tr><td class="n">Snag list / defect mgmt</td><td><span class="chip p2"><span class="dot"></span>P3</span></td><td class="c">—</td><td class="c">—</td><td class="c y">●</td><td class="c">—</td><td class="c y">●</td><td class="c">—</td><td class="c">—</td></tr>
+      <tr><td class="n">Investor workspace (full)</td><td><span class="chip p5"><span class="dot"></span>P5</span></td><td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c y">●</td><td class="c y">●</td><td class="c">—</td><td class="c y">●</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 05 Phase plan -->
+<section id="phases">
+  <div class="s-head"><div class="s-num">05</div><div><h2>Phase plan</h2><div class="s-sub">Sequenced against ARCHITECTURE_V2 phases. One track per priority.</div></div></div>
+
+  <div class="phase-row" style="--c:var(--p0)">
+    <div class="tag-big">P0 · now<span class="sub">Bugs — this week</span></div>
+    <div class="items">
+      <span class="chip"><span class="dot" style="background:var(--p0)"></span>Stripe orders</span>
+      <span class="chip"><span class="dot" style="background:var(--p0)"></span>Flower checkout</span>
+      <span class="chip"><span class="dot" style="background:var(--p0)"></span>Owner financials</span>
+    </div>
+  </div>
+  <div class="phase-row" style="--c:var(--p1)">
+    <div class="tag-big">P1 · next<span class="sub">High-frequency gaps</span></div>
+    <div class="items">
+      <span class="chip"><span class="dot" style="background:var(--p1)"></span>Grocery &amp; convenience</span>
+      <span class="chip"><span class="dot" style="background:var(--p1)"></span>Home maintenance verticals</span>
+      <span class="chip"><span class="dot" style="background:var(--p1)"></span>Ride-hailing</span>
+      <span class="chip"><span class="dot" style="background:var(--p1)"></span>Hotel / resort booking</span>
+      <span class="chip"><span class="dot" style="background:var(--p1)"></span>OTA channel manager</span>
+    </div>
+  </div>
+  <div class="phase-row" style="--c:var(--p2)">
+    <div class="tag-big">P2 · consolidate<span class="sub">Operate cluster + pro shells</span></div>
+    <div class="items">
+      <span class="chip"><span class="dot" style="background:var(--p2)"></span>/operate/agent shell</span>
+      <span class="chip"><span class="dot" style="background:var(--p2)"></span>Commission + e-sign</span>
+      <span class="chip"><span class="dot" style="background:var(--p2)"></span>Coworking</span>
+      <span class="chip"><span class="dot" style="background:var(--p2)"></span>Resident admin flows</span>
+      <span class="chip"><span class="dot" style="background:var(--p2)"></span>Provider growth layer</span>
+      <span class="chip"><span class="dot" style="background:var(--p2)"></span>Community layer</span>
+    </div>
+  </div>
+  <div class="phase-row" style="--c:var(--p2)">
+    <div class="tag-big">P3 · developer + AI<span class="sub">Ongoing</span></div>
+    <div class="items">
+      <span class="chip"><span class="dot" style="background:var(--p2)"></span>Construction milestones</span>
+      <span class="chip"><span class="dot" style="background:var(--p2)"></span>Payment plans</span>
+      <span class="chip"><span class="dot" style="background:var(--p2)"></span>AI yield optimiser</span>
+      <span class="chip"><span class="dot" style="background:var(--p2)"></span>Smart pricing</span>
+      <span class="chip"><span class="dot" style="background:var(--p2)"></span>Snag / defect</span>
+      <span class="chip"><span class="dot" style="background:var(--p2)"></span>Stripe Connect</span>
+    </div>
+  </div>
+  <div class="phase-row" style="--c:var(--p5)">
+    <div class="tag-big">P5 · greenfield<span class="sub">Investor surface</span></div>
+    <div class="items">
+      <span class="chip"><span class="dot" style="background:var(--p5)"></span>/operate/invest</span>
+      <span class="chip"><span class="dot" style="background:var(--p5)"></span>Portfolio tracking</span>
+      <span class="chip"><span class="dot" style="background:var(--p5)"></span>Deal pipeline</span>
+      <span class="chip"><span class="dot" style="background:var(--p5)"></span>Accredited KYC</span>
+      <span class="chip"><span class="dot" style="background:var(--p5)"></span>Exit modelling</span>
+      <span class="chip"><span class="dot" style="background:var(--p5)"></span>Legal structures</span>
+      <span class="chip"><span class="dot" style="background:var(--p5)"></span>Digital closing</span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>myUNO · role coverage v1.0</span>
+  <span class="mono">7 roles · 3 P0 bugs · 5 P1 gaps · 16 priority items</span>
+</footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>myUNO — Real Estate Block · Canonical Spec</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #05090F; --surface: #0F1C2E; --card: #121E31; --card-e: #1A2840;
+    --fg: #EDF2FF; --muted: #8FA3B8; --muted-2: #5E7389;
+    --border: rgba(255,255,255,0.08); --hairline: rgba(255,255,255,0.06); --border-strong: rgba(255,255,255,0.18);
+    --primary: #00D68F; --navy: #4E7BFF; --teal: #16BDCA; --gold: #F59E0B; --purple: #A78BFA; --coral: #EF4444;
+    --tourist:#4E7BFF; --resident:#00D68F; --owner:#16BDCA; --agent:#A78BFA; --developer:#EF4444; --provider:#F59E0B; --investor:#EAB308;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; background:var(--bg); color:var(--fg); font-family:'DM Sans', system-ui, sans-serif; -webkit-font-smoothing:antialiased; }
+  body { padding: 48px 24px 120px; font-feature-settings: "ss01"; }
+  .display { font-family:'Golos Text'; letter-spacing:-0.02em; }
+  .mono { font-family:'JetBrains Mono'; font-feature-settings:"tnum"; }
+  .page { max-width: 1180px; margin: 0 auto; }
+  .masthead { display:grid; grid-template-columns: 1fr auto; gap: 24px; align-items:end; padding-bottom: 32px; border-bottom: 1px solid var(--border); margin-bottom: 44px; }
+  .crumb { font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted-2); font-weight:600; margin-bottom: 14px; }
+  h1 { font-family:'Golos Text'; font-size: 48px; font-weight: 800; letter-spacing: -0.035em; margin: 0; line-height: 1.04; }
+  .lede { font-size: 16px; line-height: 1.6; color: var(--muted); max-width: 720px; margin-top: 18px; text-wrap: pretty; }
+  .meta { text-align: right; font-size: 11px; color: var(--muted-2); letter-spacing: 0.05em; }
+  .meta .mono { color: var(--fg); font-size: 12px; display:block; margin-top:2px; }
+  section { margin-bottom: 64px; scroll-margin-top: 24px; }
+  .s-head { display:grid; grid-template-columns: 60px 1fr; gap: 20px; align-items: baseline; margin-bottom: 24px; padding-bottom: 14px; border-bottom: 1px solid var(--hairline); }
+  .s-num { font-family:'JetBrains Mono'; font-size: 13px; color: var(--muted-2); letter-spacing: 0.05em; padding-top: 6px; }
+  h2 { font-family:'Golos Text'; font-size: 28px; font-weight: 700; letter-spacing: -0.025em; margin: 0; line-height: 1.1; }
+  .s-sub { font-size: 13px; color: var(--muted); margin-top: 6px; }
+  h3 { font-family:'Golos Text'; font-size: 17px; font-weight:600; letter-spacing: -0.01em; margin: 24px 0 10px; }
+  h4 { font-family:'Golos Text'; font-size: 14px; font-weight:600; letter-spacing: -0.005em; margin: 0 0 8px; color: var(--fg);}
+  p { font-size: 14px; line-height: 1.65; color: var(--muted); margin: 0 0 12px; text-wrap: pretty; }
+  p strong, li strong, td strong { color: var(--fg); font-weight: 500; }
+  .three-col { display:grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+  .two-col { display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .four-col { display:grid; grid-template-columns: repeat(4,1fr); gap: 10px; }
+  .card { padding: 18px 20px; border-radius: 14px; background: var(--card); border: 1px solid var(--border); }
+  .card.spine { position:relative; overflow:hidden; padding-left: 22px; }
+  .card.spine::before { content:''; position:absolute; left:0; top:20px; bottom:20px; width:3px; background: var(--c); border-radius: 0 3px 3px 0; }
+  .card .l { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted-2); font-weight:600; margin-bottom: 6px; }
+  .card h4 { font-size: 15px; }
+  .card p { font-size: 13px; margin: 0; color: var(--muted); line-height: 1.55; }
+  .tag { font-size: 10.5px; color: var(--muted); padding: 3px 9px; border-radius: 99px; background: rgba(255,255,255,0.04); border: 1px solid var(--hairline); font-family: 'JetBrains Mono'; display: inline-block; margin: 2px 3px 2px 0;}
+  .tag.p { color: var(--primary); border-color: rgba(0,214,143,0.25); background: rgba(0,214,143,0.06);}
+  .tag.n { color: var(--navy); border-color: rgba(78,123,255,0.25); background: rgba(78,123,255,0.06);}
+  .tag.g { color: var(--gold); border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.06);}
+  .tag.r { color: var(--coral); border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.06);}
+  .tag.u { color: var(--purple); border-color: rgba(167,139,250,0.3); background: rgba(167,139,250,0.06);}
+  .matrix { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: var(--card); }
+  .matrix table { width: 100%; border-collapse: collapse; }
+  .matrix th, .matrix td { padding: 11px 13px; text-align: left; font-size: 12.5px; border-bottom: 1px solid var(--hairline); vertical-align: top; }
+  .matrix th { font-family: 'DM Sans'; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted-2); font-weight: 600; background: var(--surface); }
+  .matrix tr:last-child td { border-bottom: none; }
+  .matrix td.n { font-weight: 500; color: var(--fg); }
+  .matrix td.c { text-align: center; }
+  .tree { font-family: 'JetBrains Mono'; font-size: 12.5px; line-height: 1.75; color: var(--muted); background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; overflow-x:auto; white-space: pre; }
+  .tree b { color: var(--fg); font-weight: 500; }
+  .tree .c { color: var(--primary); }
+  .tree .n { color: var(--navy); }
+  .tree .g { color: var(--gold); }
+  .tree .r { color: var(--coral); }
+  .tree .u { color: var(--purple); }
+  .tree .t { color: var(--teal); }
+  .tree .mute { color: var(--muted-2); }
+  .callout { padding: 18px 20px; border-radius: 14px; border: 1px dashed var(--border-strong); }
+  .callout .l { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted-2); font-weight:600; margin-bottom: 6px; }
+  .callout h4 { font-family:'Golos Text'; font-size: 15px; margin: 0 0 6px; color: var(--fg); }
+  .callout p { font-size: 13px; margin: 0; color: var(--muted); }
+  .toc { display:grid; grid-template-columns: repeat(4,1fr); gap: 8px; padding: 18px 20px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; margin-bottom: 40px; }
+  .toc a { font-size: 12.5px; color: var(--muted); text-decoration:none; padding: 8px 10px; border-radius: 8px; border: 1px solid transparent; display:flex; gap: 8px; align-items:baseline; }
+  .toc a:hover { border-color: var(--border); color: var(--fg); }
+  .toc a .mono { font-size: 10px; color: var(--muted-2); }
+  .flow { display:grid; grid-template-columns: repeat(7, 1fr); gap: 6px; align-items:center; margin: 10px 0 4px; }
+  .flow-arrow { display:flex; justify-content:center; color: var(--muted-2); font-size: 12px; }
+  .flow-node { padding: 12px 8px; border-radius:10px; background: var(--card); border:1px solid var(--border); text-align:center; }
+  .flow-node .label { font-size: 9.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted-2); font-weight:600; margin-bottom: 4px; }
+  .flow-node .val { font-family:'Golos Text'; font-size: 12px; font-weight:600; color: var(--fg); letter-spacing:-0.005em; }
+  /* screen card */
+  .screen { background: var(--card); border: 1px solid var(--border); border-radius:14px; padding: 18px 20px; margin-bottom: 10px; position: relative; overflow: hidden; padding-left: 22px;}
+  .screen::before { content:''; position:absolute; left:0; top:18px; bottom:18px; width:3px; background: var(--c); border-radius:0 3px 3px 0;}
+  .screen-head { display:flex; justify-content:space-between; align-items:baseline; margin-bottom: 8px; gap: 12px;}
+  .screen-head h4 { margin:0; font-size: 15px;}
+  .screen-head .path { font-family:'JetBrains Mono'; font-size: 11px; color: var(--muted); }
+  .screen p { font-size: 12.5px; margin: 0 0 8px; }
+  .screen ul { margin: 0; padding-left: 16px; font-size: 12.5px; color: var(--muted); line-height:1.55; }
+  .screen ul li { margin-bottom: 3px; }
+  .screen ul li strong { color: var(--fg); }
+  footer { margin-top: 80px; padding-top: 24px; border-top: 1px solid var(--border); font-size: 11px; color: var(--muted-2); letter-spacing: 0.04em; display: flex; justify-content: space-between; }
+  ::selection { background: var(--primary); color: #000; }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="masthead">
+  <div>
+    <div class="crumb">myUNO · Real Estate block · Canonical spec · v1</div>
+    <h1 class="display">Real estate,<br/>one model, three audiences.</h1>
+    <p class="lede">Canonical structure, taxonomy, flows, screens and forms for the myUNO RE block. Serves <strong>buyers / investors</strong>, <strong>owners / landlords</strong>, and <strong>agents / developers</strong> from one data model. Replaces today's sprawl across <span class="mono" style="color:var(--fg)">/property</span>, <span class="mono" style="color:var(--fg)">/invest</span>, <span class="mono" style="color:var(--fg)">/owner-portal</span>, <span class="mono" style="color:var(--fg)">/developer-portal</span>, <span class="mono" style="color:var(--fg)">/mc</span>.</p>
+  </div>
+  <div class="meta"><span>April 2026</span><span class="mono">v1.0 · RE canonical</span></div>
+</header>
+
+<nav class="toc">
+  <a href="#overview"><span class="mono">01</span> Overview</a>
+  <a href="#taxonomy"><span class="mono">02</span> Taxonomy</a>
+  <a href="#data"><span class="mono">03</span> Data model</a>
+  <a href="#surfaces"><span class="mono">04</span> Surfaces</a>
+  <a href="#flows"><span class="mono">05</span> Flows</a>
+  <a href="#screens-buy"><span class="mono">06</span> Buyer screens</a>
+  <a href="#screens-own"><span class="mono">07</span> Owner screens</a>
+  <a href="#screens-agent"><span class="mono">08</span> Agent screens</a>
+  <a href="#screens-dev"><span class="mono">09</span> Developer screens</a>
+  <a href="#forms"><span class="mono">10</span> Forms &amp; wizards</a>
+  <a href="#states"><span class="mono">11</span> State machine</a>
+  <a href="#events"><span class="mono">12</span> Events &amp; agents</a>
+  <a href="#trust"><span class="mono">13</span> Trust &amp; compliance</a>
+  <a href="#routes"><span class="mono">14</span> Route tree</a>
+</nav>
+
+<!-- 01 Overview -->
+<section id="overview">
+  <div class="s-head"><div class="s-num">01</div><div><h2>What this document covers</h2><div class="s-sub">One RE model that serves every RE audience in myUNO.</div></div></div>
+  <div class="three-col">
+    <div class="card spine" style="--c:var(--navy)">
+      <div class="l">Audience 1 — demand</div>
+      <h4>Buyer · Investor · Tenant</h4>
+      <p>Searches, compares, requests viewings, places deposits, signs contracts, moves in / takes ownership.</p>
+    </div>
+    <div class="card spine" style="--c:var(--teal)">
+      <div class="l">Audience 2 — supply</div>
+      <h4>Owner · Landlord</h4>
+      <p>Lists, prices, onboards MC, tracks income, approves maintenance, signs statements, manages tax.</p>
+    </div>
+    <div class="card spine" style="--c:var(--purple)">
+      <div class="l">Audience 3 — operator</div>
+      <h4>Agent · Developer · MC</h4>
+      <p>Imports inventory, qualifies leads, schedules viewings, reserves units, runs pipelines, manages staff.</p>
+    </div>
+  </div>
+  <div class="callout" style="margin-top:16px">
+    <div class="l">Principle</div>
+    <h4>One property · many contexts.</h4>
+    <p>The same <span class="mono">property</span> row can simultaneously be a resale listing, a rental listing, and a managed unit with an owner statement — with three different call-to-actions on the same detail screen, gated by viewer's role stack.</p>
+  </div>
+</section>
+
+<!-- 02 Taxonomy -->
+<section id="taxonomy">
+  <div class="s-head"><div class="s-num">02</div><div><h2>Canonical taxonomy</h2><div class="s-sub">Every RE entity classified along 4 axes. Code must reference these constants, never strings.</div></div></div>
+
+  <h3>Axis 1 · Property class</h3>
+  <div class="four-col">
+    <div class="card"><h4>Residential</h4><p>Condo · villa · townhouse · apartment · penthouse · studio</p></div>
+    <div class="card"><h4>Commercial</h4><p>Retail · office · hotel/hostel · F&amp;B · mixed-use</p></div>
+    <div class="card"><h4>Land</h4><p>Chanote · Nor Sor 3 · leasehold plot · agricultural</p></div>
+    <div class="card"><h4>Special</h4><p>Branded residence · serviced apartment · co-living · fractional</p></div>
+  </div>
+
+  <h3>Axis 2 · Listing intent</h3>
+  <div class="four-col">
+    <div class="card spine" style="--c:var(--navy)"><h4>Sale · resale</h4><p>Secondary market. Freehold / leasehold / foreign quota tracking.</p></div>
+    <div class="card spine" style="--c:var(--coral)"><h4>Sale · off-plan</h4><p>Developer inventory. Phase &amp; construction progress. Payment plan.</p></div>
+    <div class="card spine" style="--c:var(--primary)"><h4>Rent · long-term</h4><p>6m+ lease. Tenant screening. Yearly.</p></div>
+    <div class="card spine" style="--c:var(--gold)"><h4>Rent · short-term</h4><p>STR — daily/weekly. OTA sync. Yield mode.</p></div>
+  </div>
+
+  <h3>Axis 3 · Tenure &amp; ownership</h3>
+  <div class="three-col">
+    <div class="card"><h4>Freehold (foreign quota)</h4><p>Condo ≤ 49% quota. Chanote title. Foreign remittance letter (TT3).</p></div>
+    <div class="card"><h4>Leasehold 30+30+30</h4><p>Villa / land. Registered at Land Dept. Protected structure docs.</p></div>
+    <div class="card"><h4>Company (Thai Co Ltd)</h4><p>Thai nominee-free structure. Licensed counsel required.</p></div>
+  </div>
+
+  <h3>Axis 4 · Management mode</h3>
+  <div class="three-col">
+    <div class="card"><h4>Self-managed</h4><p>Owner runs it. Owner is the responder for leads &amp; maintenance.</p></div>
+    <div class="card"><h4>MC-managed</h4><p>Assigned to a Management Company. MC fee schedule active. Owner sees statements.</p></div>
+    <div class="card"><h4>Developer-pool</h4><p>Part of a developer rental pool guarantee. Fixed return or shared revenue.</p></div>
+  </div>
+</section>
+
+<!-- 03 Data -->
+<section id="data">
+  <div class="s-head"><div class="s-num">03</div><div><h2>Data model</h2><div class="s-sub">Supabase tables. Nouns. Everything else is a view.</div></div></div>
+
+<div class="tree">
+<b class="c">properties</b>                     <span class="mute">// canonical unit or project unit</span>
+├─ id · slug
+├─ class: <span class="n">residential</span> | commercial | land | special
+├─ subtype: condo | villa | townhouse | ...
+├─ tenure: <span class="n">freehold_foreign</span> | leasehold_30_30_30 | thai_company
+├─ status: draft | active | under_offer | sold | rented | off_market
+├─ management_mode: self | mc | developer_pool
+├─ owner_id → <b class="c">persons</b> | <b class="c">companies</b>
+├─ managed_by → <b class="c">companies</b> (MC)
+├─ project_id → <b class="c">projects</b>  <span class="mute">// null for resale standalone</span>
+├─ address · geo(lat,lng) · district
+├─ attrs jsonb <span class="mute">// bedrooms, area_sqm, floor, view, pool, etc.</span>
+├─ media[] → <b class="c">property_media</b>
+├─ documents[] → <b class="c">documents</b>   <span class="mute">// chanote, floorplan, building permit</span>
+└─ events[] → <b class="c">property_events</b>
+
+<b class="c">projects</b>                       <span class="mute">// developer project / scheme</span>
+├─ developer_id → companies(developer)
+├─ phase · total_units · completion_date
+├─ construction_progress_pct
+└─ amenities[] · nearby[] · renderings[]
+
+<b class="c">listings</b>                       <span class="mute">// an offer on a property</span>
+├─ property_id → properties
+├─ intent: <span class="n">sale_resale</span> | sale_offplan | rent_long | rent_short
+├─ price · currency · price_per_sqm (computed)
+├─ price_plan jsonb  <span class="mute">// off-plan installments</span>
+├─ commission jsonb  <span class="mute">// split agent/subagent/platform</span>
+├─ published_at · expires_at
+├─ visibility: public | private | brokers_only
+└─ source · external_ref
+
+<b class="c">leads</b>                          <span class="mute">// demand</span>
+├─ actor_id → persons
+├─ listing_id → listings
+├─ intent: buy | invest | rent_long | rent_short
+├─ stage: <span class="n">new</span> | qualified | viewing | offer | deposit | signed | closed_won | closed_lost
+├─ budget_min · budget_max · timeline
+├─ assigned_agent_id → persons
+└─ messages[] → messages
+
+<b class="c">viewings</b>                       <span class="mute">// calendar events on listings</span>
+├─ lead_id · listing_id · agent_id
+├─ scheduled_at · mode: onsite | video
+└─ outcome: scheduled | attended | no_show | rescheduled | cancelled
+
+<b class="c">offers</b>                         <span class="mute">// buyer's formal offer</span>
+├─ lead_id · listing_id
+├─ amount · payment_plan · conditions[]
+├─ expires_at
+└─ state: draft | submitted | countered | accepted | rejected | withdrawn
+
+<b class="c">reservations</b>                   <span class="mute">// off-plan deposits</span>
+├─ lead_id · unit_id (property)
+├─ deposit_amount · due_at
+├─ spa_due_date  <span class="mute">// Sale &amp; Purchase Agreement</span>
+└─ state: holding | confirmed | converted_to_sale | expired
+
+<b class="c">rentals</b>                        <span class="mute">// active rental contracts</span>
+├─ listing_id · tenant_id → persons
+├─ start · end · rent · deposit · utilities
+├─ renewal_option
+└─ state: draft | active | ending_soon | ended | terminated
+
+<b class="c">statements</b>                     <span class="mute">// owner statement per period</span>
+├─ property_id · owner_id · period(month)
+├─ gross_revenue · mc_fee · platform_fee · net_payout
+├─ bookings[] · expenses[]
+└─ state: draft | issued | signed | paid
+
+<b class="c">maintenance_tickets</b>            <span class="mute">// attached to properties</span>
+├─ property_id · reporter · assignee · priority
+├─ cost_estimate · cost_actual
+└─ state: new | triaged | scheduled | in_progress | done | invoiced
+</div>
+
+  <div class="callout" style="margin-top:16px">
+    <div class="l">Why one properties table</div>
+    <p>A single row is a villa that is simultaneously managed by an MC, listed for short-term rental, and flagged by its owner as "considering sale 2027". Separate tables per intent duplicate the same building.</p>
+  </div>
+</section>
+
+<!-- 04 Surfaces -->
+<section id="surfaces">
+  <div class="s-head"><div class="s-num">04</div><div><h2>Which surfaces the RE block touches</h2><div class="s-sub">Maps to the 6 surfaces defined in ARCHITECTURE_V2.md.</div></div></div>
+  <div class="matrix">
+    <table>
+      <thead><tr><th>Surface</th><th>RE role</th><th>What's here</th></tr></thead>
+      <tbody>
+        <tr><td class="n">Home</td><td>All</td><td>Active lead · upcoming viewing · statement-ready · expiring visa tied to property</td></tr>
+        <tr><td class="n">Discover</td><td>Buyer · Tenant</td><td><span class="mono">/discover/cluster/invest</span> · <span class="mono">/app/invest/property</span> search &amp; map · saved searches</td></tr>
+        <tr><td class="n">Operate · owner</td><td>Owner</td><td>Properties · statements · rentals · maintenance · MC relationship · tax</td></tr>
+        <tr><td class="n">Operate · agent</td><td>RE company</td><td>Inventory · leads · pipeline · viewings · offers · commissions</td></tr>
+        <tr><td class="n">Operate · dev</td><td>Developer</td><td>Projects · units grid · reservations · campaigns · construction · payouts</td></tr>
+        <tr><td class="n">Operate · mc</td><td>Management Co</td><td>Portfolio · check-ins · housekeeping · OTAs · owner relations</td></tr>
+        <tr><td class="n">Wallet</td><td>All</td><td>Deposits · commissions · rent · statements · tax docs</td></tr>
+        <tr><td class="n">Me</td><td>All</td><td>KYC · foreign remittance docs · power of attorney · tax ID</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 05 Flows -->
+<section id="flows">
+  <div class="s-head"><div class="s-num">05</div><div><h2>Core flows</h2><div class="s-sub">End-to-end. Each step is a screen or a form.</div></div></div>
+
+  <h3>Flow A — Buy resale</h3>
+  <div class="flow">
+    <div class="flow-node"><div class="label">01</div><div class="val">Search</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><div class="label">02</div><div class="val">Shortlist</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><div class="label">03</div><div class="val">Viewing</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><div class="label">04</div><div class="val">Offer</div></div>
+  </div>
+  <div class="flow" style="grid-template-columns: repeat(7,1fr); margin-top: 4px">
+    <div class="flow-node"><div class="label">05</div><div class="val">Due diligence</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><div class="label">06</div><div class="val">SPA + TT3</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><div class="label">07</div><div class="val">Land Dept</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><div class="label">08</div><div class="val">Handover</div></div>
+  </div>
+
+  <h3>Flow B — Buy off-plan</h3>
+  <div class="flow">
+    <div class="flow-node"><div class="label">01</div><div class="val">Discover project</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><div class="label">02</div><div class="val">Unit picker</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><div class="label">03</div><div class="val">Reserve + deposit</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><div class="label">04</div><div class="val">SPA · installments</div></div>
+  </div>
+  <div class="flow" style="margin-top: 4px">
+    <div class="flow-node"><div class="label">05</div><div class="val">Milestones</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><div class="label">06</div><div class="val">Final payment</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><div class="label">07</div><div class="val">Transfer</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><div class="label">08</div><div class="val">Rental-pool opt-in</div></div>
+  </div>
+
+  <h3>Flow C — List for rent (owner)</h3>
+  <div class="flow">
+    <div class="flow-node"><div class="label">01</div><div class="val">Add property</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><div class="label">02</div><div class="val">Title verify</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><div class="label">03</div><div class="val">Management mode</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><div class="label">04</div><div class="val">Pricing</div></div>
+  </div>
+  <div class="flow" style="margin-top:4px">
+    <div class="flow-node"><div class="label">05</div><div class="val">Media &amp; specs</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><div class="label">06</div><div class="val">Publish</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><div class="label">07</div><div class="val">Lead triage</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><div class="label">08</div><div class="val">Contract · move-in</div></div>
+  </div>
+
+  <h3>Flow D — Agent lead → deal</h3>
+  <div class="flow">
+    <div class="flow-node"><div class="label">01</div><div class="val">Lead inbox</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><div class="label">02</div><div class="val">Qualify</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><div class="label">03</div><div class="val">Shortlist for client</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><div class="label">04</div><div class="val">Schedule viewings</div></div>
+  </div>
+  <div class="flow" style="margin-top:4px">
+    <div class="flow-node"><div class="label">05</div><div class="val">Offer coord.</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><div class="label">06</div><div class="val">Close</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><div class="label">07</div><div class="val">Commission ledger</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><div class="label">08</div><div class="val">Payout</div></div>
+  </div>
+</section>
+
+<!-- 06 Buyer screens -->
+<section id="screens-buy">
+  <div class="s-head"><div class="s-num">06</div><div><h2>Buyer / Investor / Tenant screens</h2><div class="s-sub">Lives under <span class="mono">/app/invest/property</span>, <span class="mono">/app/invest/offplan</span>, <span class="mono">/app/live/rental</span>.</div></div></div>
+
+  <div class="screen" style="--c:var(--navy)"><div class="screen-head"><h4>01 · RE Hub</h4><span class="path">/app/invest</span></div>
+    <p>Cluster-coloured entry. Three tiles: <strong>Resale</strong>, <strong>Off-plan</strong>, <strong>Rent</strong>. Below: Saved searches · Recent viewings · Your offers. For investors: Portfolio summary.</p></div>
+
+  <div class="screen" style="--c:var(--navy)"><div class="screen-head"><h4>02 · Property search</h4><span class="path">/app/invest/property/search</span></div>
+    <ul>
+      <li><strong>Controls:</strong> intent toggle · district · class · subtype · price range · area · bedrooms · keyword · tenure</li>
+      <li><strong>Secondary:</strong> developer · completion date · pool/sea view · furnished · pet friendly</li>
+      <li><strong>Views:</strong> list · grid · map (clustered) · split</li>
+      <li><strong>Save search</strong> — name + alert frequency</li>
+      <li><strong>Compare tray</strong> — up to 4 properties</li>
+    </ul>
+  </div>
+
+  <div class="screen" style="--c:var(--navy)"><div class="screen-head"><h4>03 · Property detail</h4><span class="path">/app/invest/property/:id</span></div>
+    <ul>
+      <li><strong>Hero:</strong> media gallery · price · key specs (beds · area · tenure) · status badge</li>
+      <li><strong>Tabs:</strong> Overview · Layout · Location · Financial (yield · mortgage sim) · Legal · Similar</li>
+      <li><strong>CTA stack</strong> (role-aware): Book viewing · Request info · Make offer · Save · Compare · Share</li>
+      <li><strong>Trust panel:</strong> title type · developer licence · agent licence · last verified</li>
+      <li><strong>Agent card:</strong> one assigned agent · response time · languages · book slot</li>
+    </ul>
+  </div>
+
+  <div class="screen" style="--c:var(--coral)"><div class="screen-head"><h4>04 · Off-plan project</h4><span class="path">/app/invest/offplan/:id</span></div>
+    <ul>
+      <li><strong>Hero:</strong> rendering · completion % · phase · delivery date</li>
+      <li><strong>Unit picker:</strong> interactive floor plan / stacking plan · available vs reserved · price per sqm</li>
+      <li><strong>Payment plan:</strong> installment timeline with due dates</li>
+      <li><strong>Developer tab:</strong> track record · past projects · financials (if public)</li>
+      <li><strong>Rental pool:</strong> guarantee terms · projected yield</li>
+      <li><strong>CTA:</strong> Reserve unit (deposit) · Request call · Download brochure</li>
+    </ul>
+  </div>
+
+  <div class="screen" style="--c:var(--navy)"><div class="screen-head"><h4>05 · Map view</h4><span class="path">/app/invest/property/map</span></div>
+    <p>Full-screen map · clustered markers · price chips · filter sheet · drawer with selected property preview. District boundaries overlay. "Search this area" on pan.</p></div>
+
+  <div class="screen" style="--c:var(--navy)"><div class="screen-head"><h4>06 · My shortlist · Compare</h4><span class="path">/app/invest/my/shortlist</span></div>
+    <p>Saved properties · comparison matrix (price/sqm, yield, tenure, timeline) · notes · share with agent.</p></div>
+
+  <div class="screen" style="--c:var(--navy)"><div class="screen-head"><h4>07 · Viewings</h4><span class="path">/app/invest/my/viewings</span></div>
+    <p>Upcoming (calendar) · Past (with notes + agent rating). One-tap reschedule. Video-viewing toggle.</p></div>
+
+  <div class="screen" style="--c:var(--navy)"><div class="screen-head"><h4>08 · Offers &amp; reservations</h4><span class="path">/app/invest/my/offers</span></div>
+    <p>State pipeline per offer: Draft · Submitted · Countered · Accepted · Expired. For off-plan: Reservation state + SPA due date + installment schedule.</p></div>
+
+  <div class="screen" style="--c:var(--navy)"><div class="screen-head"><h4>09 · Transaction room</h4><span class="path">/app/invest/tx/:id</span></div>
+    <ul>
+      <li><strong>Checklist:</strong> KYC · foreign remittance · due diligence report · SPA · TT3 · Land Dept appointment</li>
+      <li><strong>Documents vault</strong> with version history &amp; signatures</li>
+      <li><strong>Counter-party card:</strong> agent · lawyer · counter-party</li>
+      <li><strong>Messages</strong> thread</li>
+      <li><strong>Audit trail:</strong> every step timestamped &amp; anchored to ledger</li>
+    </ul>
+  </div>
+
+  <div class="screen" style="--c:var(--primary)"><div class="screen-head"><h4>10 · Rental search &amp; application</h4><span class="path">/app/live/rental</span></div>
+    <p>Long-term rental search · application form · screening docs · lease template preview.</p></div>
+</section>
+
+<!-- 07 Owner screens -->
+<section id="screens-own">
+  <div class="s-head"><div class="s-num">07</div><div><h2>Owner / Landlord screens</h2><div class="s-sub">Lives under <span class="mono">/operate/owner</span>. Primary job: control + income.</div></div></div>
+
+  <div class="screen" style="--c:var(--teal)"><div class="screen-head"><h4>01 · Owner home</h4><span class="path">/operate/owner</span></div>
+    <ul>
+      <li><strong>Portfolio strip:</strong> N properties · total value · MTD income · occupancy</li>
+      <li><strong>Today:</strong> arrivals · departures · pending approvals · statement ready</li>
+      <li><strong>Attention:</strong> lease ending · tax due · maintenance exceeding threshold</li>
+      <li><strong>Yield optimiser intent</strong> (AI): suggest rate uplift</li>
+    </ul>
+  </div>
+
+  <div class="screen" style="--c:var(--teal)"><div class="screen-head"><h4>02 · Properties</h4><span class="path">/operate/owner/properties</span></div>
+    <p>Grid of owner's properties. Per card: address · management mode · status chips · MTD revenue · quick actions. Add property CTA.</p></div>
+
+  <div class="screen" style="--c:var(--teal)"><div class="screen-head"><h4>03 · Property workspace</h4><span class="path">/operate/owner/property/:id</span></div>
+    <ul>
+      <li><strong>Tabs:</strong> Overview · Listings · Calendar · Rentals · Maintenance · Finances · Documents · Team</li>
+      <li><strong>Overview:</strong> health score (doc completeness, pricing freshness, occupancy)</li>
+      <li><strong>Calendar:</strong> unified bookings across OTA + direct</li>
+      <li><strong>Team:</strong> MC + assigned agent + cleaner + maintenance vendors</li>
+    </ul>
+  </div>
+
+  <div class="screen" style="--c:var(--teal)"><div class="screen-head"><h4>04 · Statements</h4><span class="path">/operate/owner/statements</span></div>
+    <p>Monthly statement per property. Gross revenue · MC fee · platform fee · net payout. Download PDF · sign. Links to ledger entries.</p></div>
+
+  <div class="screen" style="--c:var(--teal)"><div class="screen-head"><h4>05 · Maintenance</h4><span class="path">/operate/owner/maintenance</span></div>
+    <p>Ticket list across properties. Priority · estimate · approval CTAs · vendor ratings. Approval thresholds configurable.</p></div>
+
+  <div class="screen" style="--c:var(--teal)"><div class="screen-head"><h4>06 · Rentals</h4><span class="path">/operate/owner/rentals</span></div>
+    <p>Long-term leases list. Tenant card · rent schedule · renewal alert · arrears. Short-term: occupancy calendar + top OTAs.</p></div>
+
+  <div class="screen" style="--c:var(--teal)"><div class="screen-head"><h4>07 · Sell flow</h4><span class="path">/operate/owner/property/:id/sell</span></div>
+    <p>Put unit on market. Pricing calc · assign agent · commission structure · visibility (public / brokers only).</p></div>
+
+  <div class="screen" style="--c:var(--teal)"><div class="screen-head"><h4>08 · Tax</h4><span class="path">/operate/owner/tax</span></div>
+    <p>Annual statement · withholding · rental income · capital gains · foreign owner reporting. Export for accountant.</p></div>
+</section>
+
+<!-- 08 Agent screens -->
+<section id="screens-agent">
+  <div class="s-head"><div class="s-num">08</div><div><h2>Agent / RE Company screens</h2><div class="s-sub">Lives under <span class="mono">/operate/agent</span>. Primary job: move pipeline.</div></div></div>
+
+  <div class="screen" style="--c:var(--purple)"><div class="screen-head"><h4>01 · Agent home</h4><span class="path">/operate/agent</span></div>
+    <p>Today's viewings · hot leads · stale leads · MTD commission pipeline · close rate. Pipeline nudger agent intents.</p></div>
+
+  <div class="screen" style="--c:var(--purple)"><div class="screen-head"><h4>02 · Inventory</h4><span class="path">/operate/agent/inventory</span></div>
+    <p>Listings the company owns + mandates + MLS/shared. Bulk edit pricing. Visibility controls. Duplicate checker.</p></div>
+
+  <div class="screen" style="--c:var(--purple)"><div class="screen-head"><h4>03 · Leads (pipeline)</h4><span class="path">/operate/agent/leads</span></div>
+    <ul>
+      <li><strong>Kanban:</strong> New · Qualified · Viewing · Offer · Deposit · Signed · Lost</li>
+      <li><strong>Lead card:</strong> budget · timeline · shortlisted properties · last contact · assigned agent</li>
+      <li><strong>Bulk assign · re-route · archive</strong></li>
+    </ul>
+  </div>
+
+  <div class="screen" style="--c:var(--purple)"><div class="screen-head"><h4>04 · Lead detail</h4><span class="path">/operate/agent/lead/:id</span></div>
+    <p>Timeline · property matches · shortlist sent · viewings scheduled · messages · offer docs · commission split simulator.</p></div>
+
+  <div class="screen" style="--c:var(--purple)"><div class="screen-head"><h4>05 · Viewings calendar</h4><span class="path">/operate/agent/viewings</span></div>
+    <p>Week view · conflict detector · auto-route · drive-time between viewings · no-show flagging.</p></div>
+
+  <div class="screen" style="--c:var(--purple)"><div class="screen-head"><h4>06 · Offers room</h4><span class="path">/operate/agent/offers</span></div>
+    <p>All offers by state. Counter-offer templates. Buyer ↔ seller thread. Legal assistant link.</p></div>
+
+  <div class="screen" style="--c:var(--purple)"><div class="screen-head"><h4>07 · Commissions</h4><span class="path">/operate/agent/commissions</span></div>
+    <p>Per-deal split · sub-agent referrals · platform fee · pending payouts · statement signing.</p></div>
+
+  <div class="screen" style="--c:var(--purple)"><div class="screen-head"><h4>08 · Team &amp; performance</h4><span class="path">/operate/agent/team</span></div>
+    <p>Agents · roles · territories · pipeline per agent · close rate · average deal size · leaderboard.</p></div>
+</section>
+
+<!-- 09 Developer screens -->
+<section id="screens-dev">
+  <div class="s-head"><div class="s-num">09</div><div><h2>Developer screens</h2><div class="s-sub">Lives under <span class="mono">/operate/dev</span>. Primary job: sell units on timeline.</div></div></div>
+
+  <div class="screen" style="--c:var(--coral)"><div class="screen-head"><h4>01 · Developer home</h4><span class="path">/operate/dev</span></div>
+    <p>Active projects · units reserved / sold / available · revenue vs target · construction status.</p></div>
+
+  <div class="screen" style="--c:var(--coral)"><div class="screen-head"><h4>02 · Projects</h4><span class="path">/operate/dev/projects</span></div>
+    <p>Project list · phase · delivery date · unit count · campaign performance. New project CTA.</p></div>
+
+  <div class="screen" style="--c:var(--coral)"><div class="screen-head"><h4>03 · Project workspace</h4><span class="path">/operate/dev/project/:id</span></div>
+    <ul>
+      <li><strong>Tabs:</strong> Overview · Units · Reservations · Campaigns · Construction · Partners · Documents</li>
+      <li><strong>Units grid:</strong> stacking plan · state per unit · price · reserved-by · notes</li>
+      <li><strong>Construction tab:</strong> milestones · photos · overall %</li>
+    </ul>
+  </div>
+
+  <div class="screen" style="--c:var(--coral)"><div class="screen-head"><h4>04 · Reservations</h4><span class="path">/operate/dev/reservations</span></div>
+    <p>Deposit list · holding period countdown · SPA due · conversion rate.</p></div>
+
+  <div class="screen" style="--c:var(--coral)"><div class="screen-head"><h4>05 · Campaigns &amp; leads</h4><span class="path">/operate/dev/campaigns</span></div>
+    <p>Channels (paid · organic · partners · agents) · cost per lead · conversion. Partner agent leaderboard.</p></div>
+
+  <div class="screen" style="--c:var(--coral)"><div class="screen-head"><h4>06 · Payouts to partners</h4><span class="path">/operate/dev/payouts</span></div>
+    <p>Agent commissions · sub-agent splits · statements · approvals. Integrates with Wallet.</p></div>
+</section>
+
+<!-- 10 Forms -->
+<section id="forms">
+  <div class="s-head"><div class="s-num">10</div><div><h2>Forms &amp; wizards</h2><div class="s-sub">Schema-driven per the existing Canonical Listing Wizard pattern. Every form is versioned in <span class="mono">/schemas/re/*.json</span>.</div></div></div>
+
+  <h3>F1 · Add property (owner)</h3>
+  <div class="matrix"><table>
+    <thead><tr><th>Step</th><th>Fields</th><th>Validation</th></tr></thead>
+    <tbody>
+    <tr><td class="n">1 · Class</td><td>class · subtype · tenure</td><td>required · tenure ↔ class compatibility</td></tr>
+    <tr><td class="n">2 · Title</td><td>address · district · lat/lng · plot/unit number · title type (chanote/NS3/leasehold) · title upload</td><td>geo required · title file ≤ 10 MB</td></tr>
+    <tr><td class="n">3 · Specs</td><td>bedrooms · bathrooms · area_sqm · floor · view · pool · furnished · year built</td><td>area &gt; 0 · floor ≥ 0</td></tr>
+    <tr><td class="n">4 · Media</td><td>cover · gallery (min 6) · floor plan · 3D tour URL</td><td>min 6 photos · max 40 · cover required</td></tr>
+    <tr><td class="n">5 · Management</td><td>mode (self / mc / dev-pool) · MC selector · fee schedule preview</td><td>MC required if mode=mc</td></tr>
+    <tr><td class="n">6 · Intent</td><td>sale · rent-long · rent-short · multi-select</td><td>at least 1</td></tr>
+    <tr><td class="n">7 · Pricing</td><td>price · currency · price plan · commission split</td><td>price &gt; 0</td></tr>
+    <tr><td class="n">8 · Review</td><td>checklist · publish or save draft</td><td>all required steps complete</td></tr>
+    </tbody></table></div>
+
+  <h3>F2 · Viewing request</h3>
+  <p>Slot picker (agent availability) · mode (onsite / video) · attendees · optional preferred language · contact preference (chat / call / WhatsApp). Produces <span class="mono">viewings</span> row + <span class="mono">leads</span> row in <em>viewing</em> stage.</p>
+
+  <h3>F3 · Make offer</h3>
+  <p>Amount · financing (cash / mortgage / staged) · conditions (inspection · subject-to · closing date) · expiry. Generates draft <span class="mono">offers</span> row + notifies seller-side agent. Legal assistant AI offers template language.</p>
+
+  <h3>F4 · Off-plan reservation + deposit</h3>
+  <p>Select unit → KYC check → deposit amount (fixed by project) → payment method → electronic signature of reservation form. Holds unit. Timer to SPA signing. Refund policy inline.</p>
+
+  <h3>F5 · Long-term rental application</h3>
+  <p>Tenant screening: ID · employment / business · references · pets · duration · preferred start. Owner approval CTA. Lease drafted auto when approved.</p>
+
+  <h3>F6 · Lead intake (buyer)</h3>
+  <p>Budget · timeline · purpose (self-use / investment / rental yield target) · preferred districts · must-haves vs nice-to-haves. AI-suggests saved search.</p>
+
+  <h3>F7 · Add project (developer)</h3>
+  <p>Project meta → phases → unit mix generator (types × count) → renderings → amenities → payment plan template → rental pool terms → publish.</p>
+
+  <h3>F8 · Maintenance ticket (owner · guest · MC)</h3>
+  <p>Property auto-selected · category · priority · photos · video · access window. Cost estimate thread. Owner approval above threshold.</p>
+
+  <h3>F9 · Commission split configurator (agent)</h3>
+  <p>Deal size → platform fee → agency → lead agent → sub-agent referral → overrides. Saved as commission template.</p>
+</section>
+
+<!-- 11 States -->
+<section id="states">
+  <div class="s-head"><div class="s-num">11</div><div><h2>State machines</h2><div class="s-sub">Canonical transitions. UI must never allow invalid jumps.</div></div></div>
+
+  <h3>Listing lifecycle</h3>
+<div class="tree">
+<b>draft</b> ─ publish ─→ <b class="c">active</b> ─ archive ─→ <b>off_market</b>
+         └─ deal-in-progress ─→ <b class="g">under_offer</b>
+                                    ├─ close ─→ <b class="t">sold</b> | <b class="t">rented</b>
+                                    └─ fall-through ─→ <b class="c">active</b>
+</div>
+
+  <h3>Lead stages</h3>
+<div class="tree">
+<b>new</b> → <b class="c">qualified</b> → <b class="c">viewing</b> → <b class="g">offer</b> → <b class="g">deposit</b> → <b class="g">signed</b> → <b class="t">closed_won</b>
+                                                          └──→ <b class="r">closed_lost</b> (at any stage)
+</div>
+
+  <h3>Reservation (off-plan)</h3>
+<div class="tree">
+<b>holding</b> → <b class="c">confirmed</b> → <b class="t">converted_to_sale</b>
+     └─ expired (timeout) → <b class="r">expired</b>
+</div>
+
+  <h3>Offer</h3>
+<div class="tree">
+<b>draft</b> → <b class="c">submitted</b> → <b class="g">countered</b> ⇄ <b class="c">submitted</b>
+                                 ├─ accept → <b class="t">accepted</b>
+                                 ├─ reject → <b class="r">rejected</b>
+                                 └─ withdraw → <b class="r">withdrawn</b>
+</div>
+
+  <h3>Rental contract</h3>
+<div class="tree">
+<b>draft</b> → <b class="c">active</b> → <b class="g">ending_soon</b> → <b>ended</b>
+                      └─ terminate → <b class="r">terminated</b>
+</div>
+</section>
+
+<!-- 12 Events -->
+<section id="events">
+  <div class="s-head"><div class="s-num">12</div><div><h2>Events &amp; AI agents</h2><div class="s-sub">Every state transition emits a typed event. AI subscribes and produces intents.</div></div></div>
+  <div class="matrix"><table>
+    <thead><tr><th>Event</th><th>Emitter</th><th>Consumers</th><th>AI intent produced</th></tr></thead>
+    <tbody>
+      <tr><td class="n">listing.published</td><td>listings</td><td>search index · alerts</td><td>"Price feels 12% above similar — reduce?"</td></tr>
+      <tr><td class="n">viewing.scheduled</td><td>viewings</td><td>calendar · notifications</td><td>Auto-adds to agent route; reminders</td></tr>
+      <tr><td class="n">offer.submitted</td><td>offers</td><td>seller agent · notifications</td><td>Drafts counter-offer template</td></tr>
+      <tr><td class="n">reservation.holding</td><td>reservations</td><td>finance · notifications</td><td>Schedules SPA reminder · KYC nudge</td></tr>
+      <tr><td class="n">statement.issued</td><td>statements</td><td>owner home · wallet</td><td>"Sign &amp; schedule payout"</td></tr>
+      <tr><td class="n">ticket.opened</td><td>maintenance</td><td>MC · owner (if over threshold)</td><td>"Approve AC service ฿1,800"</td></tr>
+      <tr><td class="n">lead.idle_7d</td><td>leads</td><td>agent</td><td>"Reconnect with Alex — 8 viewings stalled"</td></tr>
+      <tr><td class="n">milestone.completed</td><td>projects</td><td>buyers of units</td><td>"Pay next installment" + photos</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 13 Trust -->
+<section id="trust">
+  <div class="s-head"><div class="s-num">13</div><div><h2>Trust, compliance, inline markers</h2><div class="s-sub">Trust is UI, not a footer. Every screen earns its markers.</div></div></div>
+  <div class="three-col">
+    <div class="card spine" style="--c:var(--primary)"><div class="l">Identity</div><h4>KYC levels</h4><p>L0 browse · L1 enquire · L2 reserve/offer · L3 sign/transfer. Level displayed on Me.</p></div>
+    <div class="card spine" style="--c:var(--primary)"><div class="l">Title</div><h4>Title type badge</h4><p>Freehold (foreign quota X/Y) · Leasehold (years remaining) · Thai Co — always on listing card &amp; detail.</p></div>
+    <div class="card spine" style="--c:var(--primary)"><div class="l">Licence</div><h4>Agent &amp; developer licence</h4><p>Broker-licence ref shown on every listing + agent profile. Developer permit + construction licence on project page.</p></div>
+    <div class="card spine" style="--c:var(--primary)"><div class="l">Money</div><h4>Escrow markers</h4><p>Deposits held via named escrow counterparty — inline on the pay screen with tx id.</p></div>
+    <div class="card spine" style="--c:var(--primary)"><div class="l">Audit</div><h4>Ledger anchor</h4><p>Every money movement links to a <span class="mono">ledger_entries</span> row. "View audit" from any tx/statement.</p></div>
+    <div class="card spine" style="--c:var(--primary)"><div class="l">Privacy</div><h4>PDPA consents</h4><p>Explicit per-purpose consents. Revocation in <span class="mono">/me/consents</span> affects downstream AI &amp; agent access live.</p></div>
+  </div>
+</section>
+
+<!-- 14 Routes -->
+<section id="routes">
+  <div class="s-head"><div class="s-num">14</div><div><h2>Route tree</h2><div class="s-sub">Complete. Maps to ARCHITECTURE_V2.md §06.</div></div></div>
+<div class="tree">
+<b class="n">/app/invest</b>                                <span class="mute">// RE demand hub</span>
+├─ /app/invest/property
+│  ├─ /search · /map
+│  └─ /:id                                   <span class="mute">// resale detail</span>
+├─ /app/invest/offplan
+│  └─ /:id                                   <span class="mute">// project + unit picker</span>
+├─ /app/invest/my
+│  ├─ /shortlist · /viewings · /offers · /reservations
+│  └─ /tx/:id                                <span class="mute">// transaction room</span>
+└─ /app/live/rental
+   ├─ /search
+   └─ /:id
+
+<b class="t">/operate/owner</b>
+├─ /properties · /property/:id
+│   ├─ /listings · /calendar · /rentals
+│   ├─ /maintenance · /finances · /documents · /team
+│   └─ /sell
+├─ /statements · /maintenance · /rentals · /tax
+└─ /settings/mc
+
+<b class="u">/operate/agent</b>
+├─ /inventory · /leads · /lead/:id
+├─ /viewings · /offers
+├─ /commissions · /team
+└─ /import                                   <span class="mute">// CSV, CRM sync</span>
+
+<b class="r">/operate/dev</b>
+├─ /projects · /project/:id
+├─ /reservations · /campaigns · /partners
+└─ /payouts
+
+<b>/operate/mc</b>
+├─ /portfolio · /units · /unit/:id
+├─ /housekeeping · /check-ins · /ota-sync
+└─ /owner-relations
+</div>
+</section>
+
+<footer>
+  <span>myUNO · RE canonical spec · v1.0</span>
+  <span class="mono">1 data model · 4 audiences · 40 screens · 9 forms</span>
+</footer>
+
+</div>
+</body>
+</html>
