@@ -17,6 +17,7 @@ import {
   shouldShowAppsLauncher,
   type NavItem,
 } from '@/lib/navConfig';
+import { useNavShellActive } from '@/components/nav/NavShellContext';
 
 // Routes that render their own bottom shell — never overlay AdaptiveBottomNav.
 const layoutsWithOwnNav = ['/staff', '/my-stay', '/guest', '/developer-portal'];
@@ -38,6 +39,7 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
     const { activeRole } = useUserContext();
     const { isMCPortal } = useOwnerType();
     const { prefetchRoute } = usePrefetchRoute();
+    const navShellActive = useNavShellActive();
     const [appsOpen, setAppsOpen] = useState(false);
 
     const handlePrefetch = useCallback((path: string) => {
@@ -50,6 +52,8 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
       return () => window.removeEventListener('navigator:open-apps-drawer', handler);
     }, []);
 
+    // NavShell already renders BottomBar — step aside to avoid duplicates.
+    if (navShellActive) return null;
     if (shouldHideBottomNav(location.pathname)) return null;
 
     // P0 — single source of truth for role → nav resolution.

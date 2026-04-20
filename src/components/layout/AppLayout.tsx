@@ -1,6 +1,5 @@
 import React, { ReactNode, forwardRef } from 'react';
 import { cn } from '@/lib/utils';
-import { AppHeader } from './AppHeader';
 import { Footer } from './Footer';
 import { ActiveSituationBanner } from '@/components/life-os/ActiveSituationBanner';
 import { useIsDesktop } from '@/hooks/use-desktop';
@@ -9,7 +8,10 @@ import { useUserTracking } from '@/hooks/useUserTracking';
 import { InstallBanner } from '@/components/pwa/InstallBanner';
 import { MobileInstallSheet } from '@/components/pwa/MobileInstallSheet';
 import { FloatingInstallButton } from '@/components/pwa/FloatingInstallButton';
-import { ECOSYSTEM_PAGE_CONTAINER, ECOSYSTEM_SHELL } from '@/design-system/ecosystemLayout';
+import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
+import { NavShell } from '@/components/nav/NavShell';
+import { useUserContext } from '@/hooks/useUserContext';
+import { useOwnerType } from '@/hooks/useOwnerType';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -23,6 +25,14 @@ interface AppLayoutProps {
   contentClassName?: string;
 }
 
+/**
+ * AppLayout — consumer-surface layout (guest / investor / mc_portal).
+ *
+ * Migrated to NavShell (Stage 2 of nav refactor). NavShell handles header,
+ * bottom-bar, and safe-area insets uniformly. AppLayout remains responsible
+ * only for consumer-specific banners (PWA install, email verification,
+ * situation banner) and the optional desktop footer.
+ */
 export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
   (
     {
@@ -38,6 +48,8 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
     ref
   ) => {
     const isDesktop = useIsDesktop();
+    const { activeRole } = useUserContext();
+    const { isMCPortal } = useOwnerType();
     // Activate global behavioral tracking
     useUserTracking();
     // Header: respect `showHeader` on all breakpoints (immersive hubs avoid double chrome with HomeTopBar etc.).
@@ -46,34 +58,27 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
     const finalShowFooter = isDesktop ? true : showFooter;
 
     return (
-      <div ref={ref} className={cn(ECOSYSTEM_SHELL, className)}>
-        {finalShowHeader && <AppHeader title={title} />}
-        <EmailVerificationBanner />
-        {showSituationBanner && <ActiveSituationBanner />}
+      <NavShell
+        activeRole={activeRole}
+        isMCPortal={isMCPortal}
+        title={title}
+        showHeader={showHeader}
+        showBottomNav={showBottomNav}
+        className={className}
+        contentClassName={contentClassName}
+      >
+        <div ref={ref} className="contents">
+          <EmailVerificationBanner />
+          {showSituationBanner && <ActiveSituationBanner />}
+          <InstallBanner />
 
-        {/* PWA Install Banner — only renders DOM when visible */}
-        <InstallBanner />
-        
-        <main
-           className={cn(
-            "flex-1 w-full",
-            showBottomNav && "pb-24 md:pb-4",
-            contentClassName
-          )}
-        >
-          <div className={ECOSYSTEM_PAGE_CONTAINER}>
-            {children}
-          </div>
-        </main>
-        
-        {finalShowFooter && <Footer />}
+          <div className={cn(ECOSYSTEM_PAGE_CONTAINER)}>{children}</div>
 
-        {/* One-time prominent install prompt for mobile visitors */}
-        <MobileInstallSheet />
-
-        {/* Floating install button when user scrolls past the banner */}
-        <FloatingInstallButton />
-      </div>
+          {finalShowFooter && <Footer />}
+          <MobileInstallSheet />
+          <FloatingInstallButton />
+        </div>
+      </NavShell>
     );
   }
 );
