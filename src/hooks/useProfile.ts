@@ -8,6 +8,8 @@ import { createErrorHandler } from '@/lib/errorHandler';
 /** @deprecated Use AppRole from user_roles table instead. Kept for backward compat only. */
 export type UserType = 'tourist' | 'resident' | 'owner' | 'vendor' | 'admin' | 'uno_team';
 
+export type OwnerType = 'self_managed' | 'mc_portal';
+
 export interface UserProfile {
   id: string;
   full_name: string | null;
@@ -17,6 +19,8 @@ export interface UserProfile {
   email: string | null;
   /** @deprecated Stored in user_roles table. This field is kept for UI fallback only. */
   user_type: UserType | null;
+  /** Discriminates self-managing owners from MC-portal owners. Null = not an owner. */
+  owner_type: OwnerType | null;
   emergency_contact_name: string | null;
   emergency_contact_phone: string | null;
   emergency_contact_relationship: string | null;
@@ -45,7 +49,7 @@ export function useProfile() {
 
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, full_name, phone, avatar_url, preferred_language, email, user_type, emergency_contact_name, emergency_contact_phone, emergency_contact_relationship')
+        .select('id, full_name, phone, avatar_url, preferred_language, email, user_type, owner_type, emergency_contact_name, emergency_contact_phone, emergency_contact_relationship')
         .eq('id', user.id)
         .maybeSingle();
 
