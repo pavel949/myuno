@@ -1,3 +1,4 @@
+import { forwardRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Send, Instagram, MessageCircle, Download, Smartphone, Shield, Clock, CheckCircle } from 'lucide-react';
@@ -11,7 +12,7 @@ import { APP_REGISTRY } from '@/lib/appRegistry';
 import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
 import { cn } from '@/lib/utils';
 
-export function CompactFooter() {
+export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
   const { language } = useLanguage();
   const { isInstalled, canInstall, isIOS, install } = usePWAInstall();
   const isDesktop = useIsDesktop();
@@ -109,7 +110,7 @@ export function CompactFooter() {
     const rightGroups = footerGroups.slice(3);
 
     return (
-      <footer className="border-t border-border/40 bg-muted/10 mt-auto">
+      <footer ref={ref} className="border-t border-border/40 bg-muted/10 mt-auto">
         <div className={cn(ECOSYSTEM_PAGE_CONTAINER, 'py-10 lg:py-12')}>
           {/* Main grid — 6 columns */}
           <div className="grid grid-cols-6 gap-6 xl:gap-8 mb-8">
@@ -243,7 +244,7 @@ export function CompactFooter() {
 
   // Mobile: compact footer
   return (
-    <footer className="border-t border-border/50 bg-muted/30 mt-auto pb-20 md:pb-0">
+    <footer ref={ref} className="border-t border-border/50 bg-muted/30 mt-auto pb-20 md:pb-0">
       <div className={cn(ECOSYSTEM_PAGE_CONTAINER, 'py-6 space-y-4')}>
         {!isInstalled && (
           <div className="flex justify-center">
@@ -292,4 +293,6 @@ export function CompactFooter() {
       </div>
     </footer>
   );
-}
+});
+
+CompactFooter.displayName = 'CompactFooter';
