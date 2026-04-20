@@ -41,7 +41,7 @@ const Index = () => {
   const activePersonas = personas.length > 0 ? personas : (['tourist'] as const);
 
   return (
-    <AppLayout showFooter={false}>
+    <AppLayout showHeader={false} showFooter={false}>
       <div className="pb-24">
         <HomeTopBar
           personas={[...activePersonas]}
