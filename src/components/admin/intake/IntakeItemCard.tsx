@@ -60,13 +60,82 @@ export function IntakeItemCard({
   const hasMissingFields = !validation.valid;
   const hasWarnings = validation.warnings.length > 0;
 
+  // ─── Touch-swipe state (mobile only, when swipeable + actionable) ───
+  const enableSwipe = swipeable && !isCompleted;
+  const startRef = useRef<{ x: number; y: number; locked: 'h' | 'v' | null } | null>(null);
+  const [dragX, setDragX] = useState(0);
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    if (!enableSwipe) return;
+    const t = e.touches[0];
+    startRef.current = { x: t.clientX, y: t.clientY, locked: null };
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (!enableSwipe || !startRef.current) return;
+    const t = e.touches[0];
+    const dx = t.clientX - startRef.current.x;
+    const dy = t.clientY - startRef.current.y;
+
+    // Lock direction once a clear axis is detected — avoids hijacking page scroll.
+    if (startRef.current.locked === null) {
+      if (Math.abs(dx) > SWIPE_LOCK_PX || Math.abs(dy) > SWIPE_LOCK_PX) {
+        startRef.current.locked = Math.abs(dx) > Math.abs(dy) ? 'h' : 'v';
+      }
+    }
+    if (startRef.current.locked !== 'h') return;
+
+    setDragX(dx);
+  };
+
+  const onTouchEnd = () => {
+    if (!enableSwipe) return;
+    const dx = dragX;
+    setDragX(0);
+    startRef.current = null;
+    if (dx > SWIPE_TRIGGER_PX && !hasMissingFields) {
+      onApprove();
+    } else if (dx < -SWIPE_TRIGGER_PX) {
+      onDiscard();
+    }
+  };
+
+  const swipeBgTone =
+    dragX > 30
+      ? 'bg-success/15'
+      : dragX < -30
+      ? 'bg-destructive/15'
+      : 'bg-transparent';
+
   return (
-    <Card className={cn(
-      "transition-all group",
-      "lg:hover:shadow-md lg:hover:border-primary/20",
-      item.status === 'created' && "border-success/50 bg-success/5",
-      item.status === 'discarded' && "border-muted bg-muted/30 opacity-60"
-    )}>
+    <div
+      className={cn('relative rounded-lg transition-colors', enableSwipe && swipeBgTone)}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
+      {/* Swipe hint icons revealed under the card */}
+      {enableSwipe && Math.abs(dragX) > 30 && (
+        <div className="pointer-events-none absolute inset-y-0 inset-x-4 flex items-center justify-between text-xs font-medium">
+          <span className={cn('flex items-center gap-1 text-success', dragX > 0 ? 'opacity-100' : 'opacity-0')}>
+            <Check className="h-4 w-4" />
+            {isRu ? 'Создать' : 'Approve'}
+          </span>
+          <span className={cn('flex items-center gap-1 text-destructive', dragX < 0 ? 'opacity-100' : 'opacity-0')}>
+            {isRu ? 'Удалить' : 'Discard'}
+            <X className="h-4 w-4" />
+          </span>
+        </div>
+      )}
+      <Card
+        style={enableSwipe ? { transform: `translateX(${dragX}px)`, transition: dragX === 0 ? 'transform 0.2s ease-out' : 'none' } : undefined}
+        className={cn(
+          "transition-all group",
+          "lg:hover:shadow-md lg:hover:border-primary/20",
+          item.status === 'created' && "border-success/50 bg-success/5",
+          item.status === 'discarded' && "border-muted bg-muted/30 opacity-60"
+        )}
+      >
       <CardHeader className="pb-2 lg:pb-1.5 lg:pt-3 lg:px-3">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
