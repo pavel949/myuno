@@ -44,11 +44,11 @@ export function ClusterGrid({ personas }: ClusterGridProps) {
                 {isRu ? c.labelRu : c.labelEn}
               </div>
             </div>
-            <div className="flex items-end justify-between mt-2">
-              <div className="text-[11px] text-muted-foreground leading-snug max-w-[80%]">
+            <div className="flex items-end justify-between mt-2 gap-2">
+              <div className="text-[11px] text-muted-foreground leading-snug line-clamp-2 flex-1">
                 {isRu ? c.subRu : c.sub}
               </div>
-              <div className="font-mono text-[10.5px] font-medium" style={{ color: c.accent }}>{c.items}</div>
+              <div className="font-mono text-[10.5px] font-medium shrink-0" style={{ color: c.accent }}>{c.items}</div>
             </div>
           </button>
         ))}
