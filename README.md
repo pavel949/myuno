@@ -78,14 +78,25 @@ docs/            — Developer documentation
 
 ## Documentation
 
+### Canonical references (always up to date)
+
 | Document | Description |
 |----------|-------------|
-| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Project structure, patterns, and key abstractions |
+| [`CLAUDE.md`](CLAUDE.md) | AI assistant instructions — start here for any AI-assisted work |
+| [`DESIGN.md`](DESIGN.md) | Design system DS 2.1 — colors, fonts, spacing, motion (source of truth) |
+| [`project.md`](project.md) | Comprehensive system spec — verticals, CRM, flows, known gaps |
+| [`docs/ENVIRONMENT.md`](docs/ENVIRONMENT.md) | Environments, databases, credentials reference |
 | [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md) | Coding standards and naming conventions |
-| [`docs/EDGE_FUNCTIONS.md`](docs/EDGE_FUNCTIONS.md) | Reference for all 60+ backend functions |
-| [`docs/DATABASE.md`](docs/DATABASE.md) | Database schema, tables, and RLS policies |
-| [`docs/MCC_ARCHITECTURE.md`](docs/MCC_ARCHITECTURE.md) | Management company business logic |
-| [`docs/UX_CONTRACT.md`](docs/UX_CONTRACT.md) | UX patterns and contracts |
+| [`docs/UX_CONTRACT.md`](docs/UX_CONTRACT.md) | UX patterns v2.0 — DS 2.1 aligned (dark-first, cluster accents, fonts) |
+| [`docs/EDGE_FUNCTIONS.md`](docs/EDGE_FUNCTIONS.md) | Edge Functions overview |
+| [`docs/DATABASE.md`](docs/DATABASE.md) | Database schema, tables, RLS policies |
+| [`supabase/functions/_docs/API_REFERENCE.md`](supabase/functions/_docs/API_REFERENCE.md) | Full API reference for all Edge Functions |
+| [`handoff/ARCHITECTURE_V2.md`](handoff/ARCHITECTURE_V2.md) | Architecture v2 blueprint — roles, clusters, surfaces, hard rules |
+| [`handoff/FEASIBILITY.md`](handoff/FEASIBILITY.md) | Architecture v2 migration path and per-role implementation status |
+
+### Archive
+
+Stale and superseded documents are in [`archive/`](archive/). Each file has an `ARCHIVED:` header with the reason and superseding document. Do not reference archived files in new code — follow the superseding document instead.
 
 ## Key Concepts
 
