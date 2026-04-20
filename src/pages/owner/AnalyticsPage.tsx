@@ -20,7 +20,7 @@ export default function AnalyticsPage() {
         fallbackPath="/owner"
       />
 
-      <PageTabs
+      <PageTabs<typeof tab>
         tabs={[
           { value: 'overview', label: isRu ? 'Обзор' : 'Overview' },
           { value: 'reports', label: isRu ? 'Отчёты' : 'Reports' },
