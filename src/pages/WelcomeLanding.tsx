@@ -32,7 +32,7 @@ import { cn } from '@/lib/utils';
 
 type Cluster = {
   id: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
   labelEn: string;
   labelRu: string;
   hintEn: string;
