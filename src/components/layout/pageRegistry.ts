@@ -23,7 +23,10 @@ export const BookingDetail = lazy(() => import('@/pages/BookingDetail'));
 export const Profile = lazy(() => import('@/pages/Profile'));
 export const EditProfile = lazy(() => import('@/pages/profile/EditProfile'));
 export const ProfileSettings = lazy(() => import('@/pages/profile/ProfileSettings'));
+export const PersonalDetails = lazy(() => import('@/pages/profile/PersonalDetails'));
 export const UserAccountDashboard = lazy(() => import('@/pages/account/UserAccountDashboard'));
+// PEYLAA premium sales landing
+export const PeylaaLanding = lazy(() => import('@/pages/peylaa/PeylaaLanding'));
 export const ReferralPage = lazy(() => import('@/pages/profile/ReferralPage'));
 export const ReferralLanding = lazy(() => import('@/pages/ReferralLanding'));
 
