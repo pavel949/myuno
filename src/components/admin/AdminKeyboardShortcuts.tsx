@@ -54,6 +54,17 @@ export function AdminKeyboardShortcuts({ onNewItem }: AdminKeyboardShortcutsProp
       ],
     },
     {
+      title: 'Intake Queue',
+      titleRu: 'Очередь Intake',
+      shortcuts: [
+        { keys: ['↑', '↓'], description: 'Navigate items', descriptionRu: 'Навигация по карточкам' },
+        { keys: ['A'], description: 'Approve active item', descriptionRu: 'Создать активный листинг' },
+        { keys: ['D'], description: 'Discard active item', descriptionRu: 'Удалить активную карточку' },
+        { keys: ['E'], description: 'Edit active item', descriptionRu: 'Редактировать активную карточку' },
+        { keys: ['Shift', 'A'], description: 'Approve all valid', descriptionRu: 'Создать все валидные' },
+      ],
+    },
+    {
       title: 'Help',
       titleRu: 'Помощь',
       shortcuts: [

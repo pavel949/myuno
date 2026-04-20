@@ -276,11 +276,13 @@ export function useIntakeAgent() {
       if (fnError) throw fnError;
 
       if (data.inserted > 0) {
-        updateItem(itemId, { 
+        const insertedId = data.inserted_ids?.[0] ?? null;
+        updateItem(itemId, {
           status: 'created',
-          createdListingTable: targetTable
+          createdListingTable: targetTable,
+          ...(insertedId ? { createdListingId: insertedId } : {}),
         });
-        
+
         setSession(prev => prev ? {
           ...prev,
           approvedCount: prev.approvedCount + 1
@@ -289,10 +291,31 @@ export function useIntakeAgent() {
         // Auto-create CRM contact from extracted contact info
         await createCrmContactFromItem(item);
 
+        // Audit log — non-blocking; we don't fail the approve if logging fails.
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            await supabase.from('admin_audit_logs').insert({
+              admin_id: user.id,
+              action: 'intake_approve',
+              entity_type: targetTable,
+              entity_id: insertedId,
+              new_data: {
+                vertical: item.detectedVertical,
+                source: item.sourceUrl ? 'url' : item.sourceImages?.length ? 'files' : 'text',
+                title: item.suggestedTitle?.en || item.suggestedTitle?.ru,
+                health: item.overallConfidence,
+              },
+            } as any);
+          }
+        } catch (auditErr) {
+          logger.log('[INTAKE] audit log skipped:', auditErr);
+        }
+
         if (!opts?.silent) {
           toast.success(
-            language === 'ru' 
-              ? 'Листинг создан и отправлен на модерацию' 
+            language === 'ru'
+              ? 'Листинг создан и отправлен на модерацию'
               : 'Listing created and sent to moderation'
           );
         }
