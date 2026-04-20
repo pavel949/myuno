@@ -487,29 +487,31 @@ export default function InvestmentHubLanding() {
           </Card>
 
           {/* Raise CTA */}
-          <section className="rounded-xl bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 p-5 space-y-3">
+          <section className="rounded-2xl border border-border bg-card p-5 space-y-3">
             <div className="flex items-start gap-3">
-              <div className="p-2 rounded-lg bg-primary/20">
-                <Megaphone className="h-5 w-5 text-primary" />
+              <div className="p-2 rounded-lg bg-muted">
+                <Megaphone className="h-5 w-5 text-foreground" />
               </div>
               <div className="flex-1">
-                <h3 className="font-bold">
-                  {isRu ? 'Привлекаете инвестиции?' : 'Raising capital?'}
+                <h3 className="font-semibold text-foreground">
+                  {isRu ? 'Подача проекта' : 'Project submission'}
                 </h3>
                 <p className="text-sm text-muted-foreground mt-1">
                   {isRu
-                    ? 'Разместите проект недвижимости, действующий бизнес или стартап на платформе muUNO.'
-                    : 'List a property project, operating business or startup on the muUNO platform.'}
+                    ? 'Размещение проекта недвижимости, действующего бизнеса или стартапа в каталоге.'
+                    : 'List a property project, operating business or startup in the catalog.'}
                 </p>
               </div>
             </div>
-            <Button onClick={() => navigate(APP_ROUTES.INVEST_SUBMIT)} className="w-full gap-2">
-              {isRu ? 'Подать сделку' : 'Submit your opportunity'}
+            <Button
+              variant="outline"
+              onClick={() => navigate(APP_ROUTES.INVEST_SUBMIT)}
+              className="w-full gap-2"
+            >
+              {isRu ? 'Подача проекта' : 'Project submission'}
               <ArrowRight className="h-4 w-4" />
             </Button>
           </section>
-
-          {showStickyCTA && <VerticalCTA vertical="investment" variant="sticky" context="list" />}
         </div>
       </MiniAppLayout>
     </>
