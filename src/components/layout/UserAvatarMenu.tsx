@@ -62,7 +62,8 @@ const ROLE_SWITCH_CONFIG: Partial<Record<AppRole, {
     descEn: 'Your own properties & bookings',
     descRu: 'Личные объекты: брони и сервисы',
     icon: Building2,
-    path: '/owner',
+    // /owner redirects to /mc — point directly to avoid an extra hop.
+    path: '/mc',
   },
   admin: {
     labelEn: 'Admin Panel',
