@@ -301,7 +301,19 @@ supabase/
 
 ---
 
-## 14. GIT & DEPLOYMENT
+## 14. KNOWN GAPS & INCOMPLETE AREAS
+
+<!-- updated: 2026-04-20 — extracted from docs/MYUNO_COMPLETE_SYSTEM_SNAPSHOT.md PART 7 -->
+
+- **Tables without UI:** `analytics`, `cohort`, `cross_sell_metrics`, `data_provenance`, `catalog_hygiene_log` — no or minimal UI. Run project-wide TODO/FIXME grep for full picture.
+- **Deprecated integrations:** Mapbox references remain in some edge functions (`get-mapbox-token`, `geocode-address`); frontend uses Google Maps. Capacitor present but no native build scripts — PWA is primary install path.
+- **Partner → Vendor flow:** Implemented via RPC `create_vendor_from_partner_application` (migration `20260304130000`). Creates provider, org, org_members, user_roles.vendor on approval.
+- **Property moderation:** `approval_status` field on properties; public lists filter by `approval_status = 'approved'`.
+- **Integrations status:** Stripe, Resend, UltraMSG confirmed active. Firecrawl and Lovable active in code; production usage depends on env vars.
+
+---
+
+## 15. GIT & DEPLOYMENT
 
 - **Branch:** `main` → auto-deploy to Vercel
 - **Build:** `NODE_OPTIONS='--max-old-space-size=4096' npm run build`
