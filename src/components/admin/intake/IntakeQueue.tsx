@@ -8,8 +8,21 @@ import { IntakeBulkActions } from './IntakeBulkActions';
 import { PersistentPanelLayout } from '@/components/uno/PersistentPanelLayout';
 import { useIsDesktop } from '@/hooks/use-desktop';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Clock, CheckCircle, XCircle, List } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Clock, CheckCircle, XCircle, List, Keyboard } from 'lucide-react';
 import { calculateHealthScore } from '@/lib/intake/healthScore';
+import { useIntakeQueueHotkeys } from '@/hooks/useIntakeQueueHotkeys';
+import { cn } from '@/lib/utils';
 
 interface IntakeQueueProps {
   session: IntakeSession;
@@ -40,6 +53,8 @@ export function IntakeQueue({
   const [editingItem, setEditingItem] = useState<IntakeItem | null>(null);
   const [selectedItem, setSelectedItem] = useState<IntakeItem | null>(null);
   const [approvingItemId, setApprovingItemId] = useState<string | null>(null);
+  const [confirmDiscardId, setConfirmDiscardId] = useState<string | null>(null);
+  const [confirmApproveAll, setConfirmApproveAll] = useState(false);
 
   // Pending sorted worst-first by health-score so operator fixes the broken ones first.
   const pendingItems = useMemo(() => {
@@ -69,25 +84,60 @@ export function IntakeQueue({
     }
   };
 
+  // ─── Bulk approve confirmation: trigger AlertDialog when >5 pending items ───
+  const requestApproveAll = () => {
+    if (pendingItems.length > 5) {
+      setConfirmApproveAll(true);
+    } else {
+      onApproveAll();
+    }
+  };
+
+  // ─── Hotkeys (only active on the "pending" tab — others are read-only) ───
+  const { activeId, setActiveId } = useIntakeQueueHotkeys({
+    items: activeTab === 'pending' ? pendingItems : [],
+    enabled: activeTab === 'pending' && !editingItem,
+    onApprove: (id) => handleApprove(id),
+    onDiscard: (id) => setConfirmDiscardId(id),
+    onEdit: (id) => {
+      const target = pendingItems.find(i => i.id === id);
+      if (target) setEditingItem(target);
+    },
+    onApproveAll: requestApproveAll,
+  });
+
   const gridClass = "grid gap-4 lg:gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
 
   const renderItems = (items: IntakeItem[], showActions: boolean) => (
     <div className={gridClass}>
-      {items.map(item => (
-        <div 
-          key={item.id}
-          onClick={() => handleCardClick(item)}
-          className={selectedItem?.id === item.id ? 'ring-2 ring-primary rounded-lg' : ''}
-        >
-          <IntakeItemCard
-            item={item}
-            onApprove={showActions ? () => handleApprove(item.id) : () => {}}
-            onDiscard={showActions ? () => onDiscard(item.id) : () => {}}
-            onEdit={showActions ? () => setEditingItem(item) : () => {}}
-            isApproving={approvingItemId === item.id}
-          />
-        </div>
-      ))}
+      {items.map(item => {
+        const isActive = activeTab === 'pending' && activeId === item.id;
+        const isPanelSelected = selectedItem?.id === item.id;
+        return (
+          <div
+            key={item.id}
+            data-intake-card-id={item.id}
+            onClick={() => {
+              handleCardClick(item);
+              if (showActions) setActiveId(item.id);
+            }}
+            className={cn(
+              'rounded-lg transition-all',
+              isPanelSelected && 'ring-2 ring-primary',
+              !isPanelSelected && isActive && 'ring-2 ring-accent'
+            )}
+          >
+            <IntakeItemCard
+              item={item}
+              onApprove={showActions ? () => handleApprove(item.id) : () => {}}
+              onDiscard={showActions ? () => setConfirmDiscardId(item.id) : () => {}}
+              onEdit={showActions ? () => setEditingItem(item) : () => {}}
+              isApproving={approvingItemId === item.id}
+              swipeable={showActions}
+            />
+          </div>
+        );
+      })}
     </div>
   );
 
@@ -103,7 +153,7 @@ export function IntakeQueue({
       {/* Bulk actions bar */}
       <IntakeBulkActions
         summary={summary}
-        onApproveAll={onApproveAll}
+        onApproveAll={requestApproveAll}
         onReset={onReset}
         isApproving={isApproving}
         approvedCount={session.approvedCount}
@@ -160,8 +210,32 @@ export function IntakeQueue({
           }
         </TabsContent>
       </Tabs>
+
+      {/* Keyboard hint bar — shown on the pending tab on desktop only */}
+      {activeTab === 'pending' && pendingItems.length > 0 && isDesktop && (
+        <div className="hidden md:flex items-center gap-2 text-xs text-muted-foreground border-t pt-3 mt-2 flex-wrap">
+          <Keyboard className="h-3.5 w-3.5" />
+          <span className="font-medium">{isRu ? 'Клавиши:' : 'Hotkeys:'}</span>
+          <Badge variant="outline" className="font-mono px-1.5 py-0">↑ ↓</Badge>
+          <span>{isRu ? 'навигация' : 'navigate'}</span>
+          <Badge variant="outline" className="font-mono px-1.5 py-0">A</Badge>
+          <span>{isRu ? 'создать' : 'approve'}</span>
+          <Badge variant="outline" className="font-mono px-1.5 py-0">D</Badge>
+          <span>{isRu ? 'удалить' : 'discard'}</span>
+          <Badge variant="outline" className="font-mono px-1.5 py-0">E</Badge>
+          <span>{isRu ? 'редактировать' : 'edit'}</span>
+          <Badge variant="outline" className="font-mono px-1.5 py-0">Shift+A</Badge>
+          <span>{isRu ? 'создать всё' : 'approve all'}</span>
+        </div>
+      )}
     </div>
   );
+
+  const itemToDiscard = confirmDiscardId ? session.items.find(i => i.id === confirmDiscardId) : null;
+  const discardTitle = itemToDiscard
+    ? (isRu ? itemToDiscard.suggestedTitle?.ru : itemToDiscard.suggestedTitle?.en) ||
+      itemToDiscard.suggestedTitle?.en || itemToDiscard.suggestedTitle?.ru || ''
+    : '';
 
   return (
     <>
@@ -170,7 +244,7 @@ export function IntakeQueue({
           <IntakeItemPanel
             item={selectedItem}
             onApprove={() => handleApprove(selectedItem.id)}
-            onDiscard={() => { onDiscard(selectedItem.id); setSelectedItem(null); }}
+            onDiscard={() => { setConfirmDiscardId(selectedItem.id); }}
             onEdit={() => setEditingItem(selectedItem)}
             isApproving={approvingItemId === selectedItem.id}
           />
@@ -188,6 +262,65 @@ export function IntakeQueue({
         onOpenChange={(open) => !open && setEditingItem(null)}
         onSave={handleEditSave}
       />
+
+      {/* Discard confirmation */}
+      <AlertDialog open={!!confirmDiscardId} onOpenChange={(open) => !open && setConfirmDiscardId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {isRu ? 'Удалить черновик?' : 'Discard draft?'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {isRu
+                ? `«${discardTitle}» будет помечен как отклонённый. Это действие нельзя отменить.`
+                : `"${discardTitle}" will be marked as discarded. This action cannot be undone.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{isRu ? 'Отмена' : 'Cancel'}</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (confirmDiscardId) {
+                  onDiscard(confirmDiscardId);
+                  if (selectedItem?.id === confirmDiscardId) setSelectedItem(null);
+                }
+                setConfirmDiscardId(null);
+              }}
+            >
+              {isRu ? 'Удалить' : 'Discard'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Bulk approve confirmation (>5 items) */}
+      <AlertDialog open={confirmApproveAll} onOpenChange={setConfirmApproveAll}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {isRu ? 'Создать все листинги?' : 'Create all listings?'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {isRu
+                ? `Будет создано до ${summary.readyToApprove} листингов из ${pendingItems.length} в очереди. Невалидные пропустим.`
+                : `Up to ${summary.readyToApprove} listings will be created from ${pendingItems.length} in the queue. Invalid items will be skipped.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{isRu ? 'Отмена' : 'Cancel'}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setConfirmApproveAll(false);
+                onApproveAll();
+              }}
+            >
+              {isRu ? 'Создать всё' : 'Create all'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
+

@@ -166,6 +166,7 @@ const ADMIN_SIDEBAR: SidebarNavGroup[] = [
   {
     labelEn: 'Platform', labelRu: 'Платформа', defaultOpen: true,
     items: [
+      { path: '/admin/add',             labelEn: 'Add',                labelRu: 'Добавить',      icon: Plus },
       { path: '/admin',                 labelEn: 'Dashboard',          labelRu: 'Обзор',         icon: LayoutDashboard },
       { path: '/admin/catalog',         labelEn: 'Catalog & Content',  labelRu: 'Каталог',       icon: Package, badgeKey: 'pendingContent' },
       { path: '/admin/operations',      labelEn: 'Operations',         labelRu: 'Операции',      icon: CalendarCheck },
