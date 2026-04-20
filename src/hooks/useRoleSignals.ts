@@ -180,24 +180,26 @@ async function resolveInvestor(userId: string): Promise<RoleSignal | null> {
 }
 
 async function resolveDeveloper(userId: string): Promise<RoleSignal | null> {
-  // Closest project handover
+  // Closest project completion (developer_id may be a user id or org id)
   const { data } = await supabase
     .from('property_projects')
-    .select('name, handover_date, total_units, sold_units, status')
+    .select('name_en, name_ru, completion_date, total_units, units_sold, project_status')
     .eq('developer_id', userId)
-    .not('handover_date', 'is', null)
-    .order('handover_date', { ascending: true })
+    .not('completion_date', 'is', null)
+    .order('completion_date', { ascending: true })
     .limit(1);
 
   const p = data?.[0];
   if (!p) return null;
-  const days = p.handover_date ? daysUntil(p.handover_date) : null;
+  const days = p.completion_date ? daysUntil(p.completion_date) : null;
+  const nameEn = (p.name_en ?? p.name_ru ?? 'Project').slice(0, 24);
+  const nameRu = (p.name_ru ?? p.name_en ?? 'Проект').slice(0, 24);
   return {
-    lead: p.name?.slice(0, 24) ?? 'Project',
-    leadRu: p.name?.slice(0, 24) ?? 'Проект',
-    value: p.total_units ? `${p.sold_units ?? 0} / ${p.total_units}` : (p.status ?? 'active'),
-    tail: days !== null ? `Handover in ${days} days` : (p.status ?? ''),
-    tailRu: days !== null ? `Сдача через ${days} дн.` : (p.status ?? ''),
+    lead: nameEn,
+    leadRu: nameRu,
+    value: p.total_units ? `${p.units_sold ?? 0} / ${p.total_units}` : (p.project_status ?? 'active'),
+    tail: days !== null ? `Handover in ${days} days` : (p.project_status ?? ''),
+    tailRu: days !== null ? `Сдача через ${days} дн.` : (p.project_status ?? ''),
     state: days !== null && days <= 90 ? 'warn' : 'active',
     isLive: true,
   };
