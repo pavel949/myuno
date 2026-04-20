@@ -32,7 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Progress } from '@/components/ui/progress';
+
 import { APP_ROUTES } from '@/lib/config/routes';
 import { Building2, ChevronRight, ChevronLeft, Upload, ExternalLink, CheckCircle } from 'lucide-react';
 
@@ -284,49 +284,84 @@ export default function DeveloperOnboarding() {
 
   const progress = ((step - 1) / (TOTAL_STEPS - 1)) * 100;
 
+  const STEP_LABELS = [
+    { n: 1, label: 'Компания' },
+    { n: 2, label: 'Медиа' },
+    { n: 3, label: 'Stripe' },
+    { n: 4, label: 'Проверка' },
+  ];
+
   // ── Render ───────────────────────────────────────────────────────────
 
   return (
     <NewbuildsLayout hideNav>
-      <div className="min-h-screen flex items-start justify-center px-4 py-16">
-        <div className="w-full max-w-xl">
+      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 md:py-16">
+        <div className="w-full max-w-2xl mx-auto">
           {/* Header */}
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 rounded-xl bg-[hsl(var(--nb-gold)/0.15)] flex items-center justify-center">
+          <div className="flex items-center gap-3 mb-6 md:mb-8">
+            <div className="w-11 h-11 rounded-xl bg-[hsl(var(--nb-gold)/0.15)] border border-[hsl(var(--nb-gold)/0.25)] flex items-center justify-center shrink-0">
               <Building2 className="w-5 h-5 text-[hsl(var(--nb-gold))]" />
             </div>
-            <div>
-              <h1 className="nb-display text-2xl text-[hsl(var(--nb-text))]">Настройка профиля</h1>
-              <p className="text-sm text-[hsl(var(--nb-text-secondary))]">Шаг {step} из {TOTAL_STEPS}</p>
+            <div className="min-w-0">
+              <h1 className="nb-display text-xl md:text-2xl text-[hsl(var(--nb-text))] leading-tight">Настройка профиля застройщика</h1>
+              <p className="text-sm text-[hsl(var(--nb-text-secondary))]">Шаг {step} из {TOTAL_STEPS} · {STEP_LABELS[step - 1]?.label}</p>
             </div>
           </div>
 
-          <Progress value={progress} className="mb-8 h-1.5 bg-[hsl(var(--nb-glass-border))]" />
+          {/* Step indicator dots */}
+          <div className="flex items-center gap-2 mb-4">
+            {STEP_LABELS.map(({ n, label }) => {
+              const isDone = n < step;
+              const isCurrent = n === step;
+              return (
+                <div key={n} className="flex-1 flex flex-col items-center gap-2 min-w-0">
+                  <div
+                    className={`h-1 w-full rounded-full transition-colors ${
+                      isDone || isCurrent
+                        ? 'bg-[hsl(var(--nb-gold))]'
+                        : 'bg-[hsl(var(--nb-text)/0.1)]'
+                    }`}
+                  />
+                  <span
+                    className={`text-[10px] uppercase tracking-wider truncate w-full text-center ${
+                      isCurrent
+                        ? 'text-[hsl(var(--nb-gold))] font-medium'
+                        : isDone
+                        ? 'text-[hsl(var(--nb-text-secondary))]'
+                        : 'text-[hsl(var(--nb-muted))]'
+                    }`}
+                  >
+                    {label}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
 
-          <div className="nb-glass p-8 rounded-2xl">
+          <div className="nb-glass p-6 md:p-8 rounded-2xl mt-4">
 
             {/* ── Step 1: Company details ── */}
             {step === 1 && (
               <form onSubmit={form1.handleSubmit(goNext1)} className="space-y-5">
                 <div>
-                  <h2 className="text-lg font-semibold text-[hsl(var(--nb-text))] mb-1">Данные компании</h2>
+                  <h2 className="nb-display text-lg text-[hsl(var(--nb-text))] mb-1">Данные компании</h2>
                   <p className="text-sm text-[hsl(var(--nb-text-secondary))]">Юридическая информация для MOU и счетов</p>
                 </div>
 
                 <div>
-                  <label className="text-xs text-[hsl(var(--nb-muted))] mb-1.5 block">Юридическое название *</label>
+                  <label className="nb-label mb-2 block">Юридическое название *</label>
                   <Input
                     placeholder="Peylaa Development Co., Ltd."
                     {...form1.register('legal_name')}
                     className="nb-input"
                   />
                   {form1.formState.errors.legal_name && (
-                    <p className="text-xs text-red-400 mt-1">{form1.formState.errors.legal_name.message}</p>
+                    <p className="text-xs text-destructive mt-1.5">{form1.formState.errors.legal_name.message}</p>
                   )}
                 </div>
 
                 <div>
-                  <label className="text-xs text-[hsl(var(--nb-muted))] mb-1.5 block">Регистрационный номер</label>
+                  <label className="nb-label mb-2 block">Регистрационный номер</label>
                   <Input
                     placeholder="0105563xxxxx"
                     {...form1.register('registration_number')}
@@ -335,7 +370,7 @@ export default function DeveloperOnboarding() {
                 </div>
 
                 <div>
-                  <label className="text-xs text-[hsl(var(--nb-muted))] mb-1.5 block">Страна регистрации *</label>
+                  <label className="nb-label mb-2 block">Страна регистрации *</label>
                   <Select
                     defaultValue="TH"
                     onValueChange={(v) => form1.setValue('country', v)}
@@ -352,7 +387,7 @@ export default function DeveloperOnboarding() {
                 </div>
 
                 <div>
-                  <label className="text-xs text-[hsl(var(--nb-muted))] mb-1.5 block">Сайт компании</label>
+                  <label className="nb-label mb-2 block">Сайт компании</label>
                   <Input
                     placeholder="https://peylaa.com"
                     type="url"
@@ -360,7 +395,7 @@ export default function DeveloperOnboarding() {
                     className="nb-input"
                   />
                   {form1.formState.errors.website && (
-                    <p className="text-xs text-red-400 mt-1">{form1.formState.errors.website.message}</p>
+                    <p className="text-xs text-destructive mt-1.5">{form1.formState.errors.website.message}</p>
                   )}
                 </div>
 
@@ -376,13 +411,13 @@ export default function DeveloperOnboarding() {
             {step === 2 && (
               <form onSubmit={form2.handleSubmit(goNext2)} className="space-y-5">
                 <div>
-                  <h2 className="text-lg font-semibold text-[hsl(var(--nb-text))] mb-1">Медиа и описание</h2>
+                  <h2 className="nb-display text-lg text-[hsl(var(--nb-text))] mb-1">Медиа и описание</h2>
                   <p className="text-sm text-[hsl(var(--nb-text-secondary))]">Покупатели увидят эту информацию на странице вашей компании</p>
                 </div>
 
                 {/* Logo upload */}
                 <div>
-                  <label className="text-xs text-[hsl(var(--nb-muted))] mb-1.5 block">Логотип компании</label>
+                  <label className="nb-label mb-2 block">Логотип компании</label>
                   <div
                     className="border-2 border-dashed border-[hsl(var(--nb-glass-border))] rounded-xl p-6 text-center cursor-pointer hover:border-[hsl(var(--nb-gold)/0.5)] transition-colors"
                     onClick={() => fileInputRef.current?.click()}
@@ -411,7 +446,7 @@ export default function DeveloperOnboarding() {
                 </div>
 
                 <div>
-                  <label className="text-xs text-[hsl(var(--nb-muted))] mb-1.5 block">Описание (English) *</label>
+                  <label className="nb-label mb-2 block">Описание (English) *</label>
                   <Textarea
                     placeholder="Award-winning Phuket developer specializing in luxury condominiums..."
                     rows={4}
@@ -419,12 +454,12 @@ export default function DeveloperOnboarding() {
                     className="nb-input resize-none"
                   />
                   {form2.formState.errors.description_en && (
-                    <p className="text-xs text-red-400 mt-1">{form2.formState.errors.description_en.message}</p>
+                    <p className="text-xs text-destructive mt-1.5">{form2.formState.errors.description_en.message}</p>
                   )}
                 </div>
 
                 <div>
-                  <label className="text-xs text-[hsl(var(--nb-muted))] mb-1.5 block">Описание (Русский) *</label>
+                  <label className="nb-label mb-2 block">Описание (Русский) *</label>
                   <Textarea
                     placeholder="Застройщик премиум-жилья на Пхукете с 10-летней историей..."
                     rows={4}
@@ -432,7 +467,7 @@ export default function DeveloperOnboarding() {
                     className="nb-input resize-none"
                   />
                   {form2.formState.errors.description_ru && (
-                    <p className="text-xs text-red-400 mt-1">{form2.formState.errors.description_ru.message}</p>
+                    <p className="text-xs text-destructive mt-1.5">{form2.formState.errors.description_ru.message}</p>
                   )}
                 </div>
 
@@ -451,7 +486,7 @@ export default function DeveloperOnboarding() {
             {step === 3 && (
               <div className="space-y-5">
                 <div>
-                  <h2 className="text-lg font-semibold text-[hsl(var(--nb-text))] mb-1">Stripe Connect</h2>
+                  <h2 className="nb-display text-lg text-[hsl(var(--nb-text))] mb-1">Stripe Connect</h2>
                   <p className="text-sm text-[hsl(var(--nb-text-secondary))]">
                     Для получения комиссионных выплат подключите аккаунт Stripe.
                     Это займёт 5–10 минут.
@@ -503,7 +538,7 @@ export default function DeveloperOnboarding() {
             {step === 4 && (
               <div className="space-y-5">
                 <div>
-                  <h2 className="text-lg font-semibold text-[hsl(var(--nb-text))] mb-1">Проверьте данные</h2>
+                  <h2 className="nb-display text-lg text-[hsl(var(--nb-text))] mb-1">Проверьте данные</h2>
                   <p className="text-sm text-[hsl(var(--nb-text-secondary))]">После отправки заявка уйдёт на проверку (1–2 рабочих дня)</p>
                 </div>
 
