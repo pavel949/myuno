@@ -2,7 +2,8 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { UserPersona } from '@/hooks/useUserPersonas';
-import { ROLE_META, SIGNAL_SEED, SIGNAL_ROUTE } from '@/lib/roleBlend';
+import { ROLE_META, SIGNAL_ROUTE } from '@/lib/roleBlend';
+import { useRoleSignals, type RoleSignal } from '@/hooks/useRoleSignals';
 
 interface SignalStackProps {
   personas: UserPersona[];
@@ -12,17 +13,22 @@ interface SignalStackProps {
 export function SignalStack({ personas, onRoleSheetOpen }: SignalStackProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const { signals } = useRoleSignals(personas);
   const primary = personas[0];
   const secondaries = personas.slice(1, 4);
 
   if (!primary) return null;
+  const primarySig = signals[primary];
 
   return (
     <div className="px-4 pb-5">
-      <SignalHero persona={primary} isRu={isRu} />
+      {primarySig && <SignalHero persona={primary} sig={primarySig} isRu={isRu} />}
       {secondaries.length > 0 && (
         <div className="mt-2 flex flex-col gap-1.5">
-          {secondaries.map(p => <SignalSlim key={p} persona={p} isRu={isRu} />)}
+          {secondaries.map(p => {
+            const s = signals[p];
+            return s ? <SignalSlim key={p} persona={p} sig={s} isRu={isRu} /> : null;
+          })}
         </div>
       )}
       <button
@@ -38,11 +44,10 @@ export function SignalStack({ personas, onRoleSheetOpen }: SignalStackProps) {
   );
 }
 
-function SignalHero({ persona, isRu }: { persona: UserPersona; isRu: boolean }) {
+function SignalHero({ persona, sig, isRu }: { persona: UserPersona; sig: RoleSignal; isRu: boolean }) {
   const navigate = useNavigate();
   const meta = ROLE_META[persona];
-  const sig = SIGNAL_SEED[persona];
-  if (!meta || !sig) return null;
+  if (!meta) return null;
   const stateLabel = {
     live: isRu ? 'Активно' : 'Live',
     warn: isRu ? 'Действуй' : 'Act now',
@@ -63,6 +68,7 @@ function SignalHero({ persona, isRu }: { persona: UserPersona; isRu: boolean }) 
           <span className="text-[11px] tracking-[0.1em] uppercase text-muted-foreground/50 font-semibold truncate">
             {isRu ? sig.leadRu : sig.lead}
           </span>
+          {!sig.isLive && <DemoBadge isRu={isRu} />}
         </div>
         <StateChip label={stateLabel} color={meta.color} />
       </div>
@@ -76,11 +82,10 @@ function SignalHero({ persona, isRu }: { persona: UserPersona; isRu: boolean }) 
   );
 }
 
-function SignalSlim({ persona, isRu }: { persona: UserPersona; isRu: boolean }) {
+function SignalSlim({ persona, sig, isRu }: { persona: UserPersona; sig: RoleSignal; isRu: boolean }) {
   const navigate = useNavigate();
   const meta = ROLE_META[persona];
-  const sig = SIGNAL_SEED[persona];
-  if (!meta || !sig) return null;
+  if (!meta) return null;
 
   return (
     <button
@@ -92,6 +97,7 @@ function SignalSlim({ persona, isRu }: { persona: UserPersona; isRu: boolean }) 
       <div className="overflow-hidden">
         <div className="text-[12.5px] font-medium text-foreground whitespace-nowrap overflow-hidden text-ellipsis">
           <span className="text-muted-foreground">{isRu ? sig.leadRu : sig.lead} · </span>{sig.value}
+          {!sig.isLive && <span className="ml-1.5 text-[9px] text-muted-foreground/60 uppercase tracking-wider">demo</span>}
         </div>
         <div className="text-[11px] text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis mt-0.5">
           {isRu ? sig.tailRu : sig.tail}
@@ -101,6 +107,14 @@ function SignalSlim({ persona, isRu }: { persona: UserPersona; isRu: boolean }) 
         <path d="M4 2l4 4-4 4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
       </svg>
     </button>
+  );
+}
+
+function DemoBadge({ isRu }: { isRu: boolean }) {
+  return (
+    <span className="text-[9px] font-semibold tracking-[0.1em] uppercase text-muted-foreground/60 px-1.5 py-0.5 rounded border border-border/60">
+      {isRu ? 'демо' : 'demo'}
+    </span>
   );
 }
 
