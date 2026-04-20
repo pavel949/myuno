@@ -80,7 +80,7 @@ export function useIntakeAgent() {
 
   // Analyze input (single or bulk)
   const analyze = useCallback(async (options: {
-    mode: 'single' | 'bulk_text' | 'bulk_urls' | 'files' | 'agent_message';
+    mode: 'single' | 'bulk_text' | 'bulk_urls' | 'files' | 'agent_message' | 'csv';
     rawText?: string;
     urls?: string[];
     files?: Array<{ id: string; file: File; type: string }>;
@@ -129,9 +129,12 @@ export function useIntakeAgent() {
         );
       }
       
-      // Prepare body for edge function
+      // Map UI mode to edge-function mode. CSV is sent as bulk_text (records joined with ---).
+      const edgeMode: 'single' | 'bulk_text' | 'bulk_urls' | 'files' | 'agent_message' =
+        options.mode === 'csv' ? 'bulk_text' : options.mode;
+
       const body = {
-        mode: options.mode,
+        mode: edgeMode,
         rawText: options.rawText,
         urls: options.urls,
         uploadedImages: uploadedFileUrls.length > 0 ? uploadedFileUrls : undefined,
