@@ -74,13 +74,13 @@ export function ProfileCompletionCard() {
       key: 'emergency',
       label: t.items.emergency,
       completed: !!(details?.emergency_contact_name && details?.emergency_contact_phone),
-      path: '/profile/settings',
+      path: '/profile/personal-details',
     },
     {
       key: 'address',
       label: t.items.address,
       completed: !!(details?.address_line1 && details?.city && details?.country),
-      path: '/profile/settings',
+      path: '/profile/personal-details',
     },
   ], [profile, details, t.items]);
 
