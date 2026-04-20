@@ -40,14 +40,6 @@ type Cluster = {
   hintRu: string;
 };
 
-type Cluster = {
-  id: string;
-  icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
-  labelEn: string;
-  labelRu: string;
-  hintEn: string;
-  hintRu: string;
-};
 
 const CLUSTERS: Cluster[] = [
   { id: 'arrive', icon: Plane, labelEn: 'Arrive', labelRu: 'Прилёт', hintEn: 'SIM · Transfer · eSIM', hintRu: 'SIM · Трансфер · eSIM' },
