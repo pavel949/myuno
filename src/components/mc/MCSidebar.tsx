@@ -236,18 +236,20 @@ export function MCSidebar() {
           isActive={active}
           tooltip={isRussian ? item.titleRu : item.title}
           className={cn(
-            "transition-all duration-200 gap-3",
-            active && "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+            // min-h + override ui/sidebar [&>span:last-child]:truncate so long RU labels wrap (line-clamp)
+            "transition-all duration-200 gap-3 !items-start min-h-8 h-auto py-1.5",
+            "[&>span:last-child]:!whitespace-normal [&>span:last-child]:!line-clamp-3 [&>span:last-child]:!overflow-hidden",
+            active && "bg-sidebar-accent text-sidebar-accent-foreground font-medium",
           )}
         >
           <div className={cn(
-            "w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors",
+            "w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors mt-0.5",
             active ? "bg-primary/15 text-primary" : "bg-muted/60 text-muted-foreground"
           )}>
             <item.icon className="h-4 w-4" strokeWidth={active ? 2.2 : 1.8} />
           </div>
           <span
-            className="min-w-0 flex-1 truncate"
+            className="min-w-0 flex-1 text-left leading-snug line-clamp-3 [overflow-wrap:anywhere]"
             title={isRussian ? item.titleRu : item.title}
           >
             {isRussian ? item.titleRu : item.title}
@@ -289,15 +291,15 @@ export function MCSidebar() {
           <Collapsible key={group.label} defaultOpen={getGroupDefaultOpen(group)} className="group/collapsible">
             <SidebarGroup>
               <CollapsibleTrigger asChild>
-                <SidebarGroupLabel className="cursor-pointer hover:bg-sidebar-accent rounded-md px-2 py-1.5 flex w-full min-w-0 items-center gap-2 text-xs font-medium text-sidebar-foreground/70 uppercase tracking-wider">
+                <SidebarGroupLabel className="cursor-pointer hover:bg-sidebar-accent rounded-md px-2 py-1.5 flex w-full min-w-0 items-start gap-2 text-xs font-medium text-sidebar-foreground/70 uppercase tracking-wider">
                   <span
-                    className="min-w-0 flex-1 truncate text-left"
+                    className="min-w-0 flex-1 text-left break-words leading-snug [overflow-wrap:anywhere]"
                     title={isRussian ? group.labelRu : group.label}
                   >
                     {isRussian ? group.labelRu : group.label}
                   </span>
                   {!isCollapsed && (
-                    <ChevronDown className="h-3.5 w-3.5 shrink-0 transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                    <ChevronDown className="h-3.5 w-3.5 shrink-0 mt-0.5 transition-transform group-data-[state=open]/collapsible:rotate-180" />
                   )}
                 </SidebarGroupLabel>
               </CollapsibleTrigger>

@@ -8,6 +8,8 @@ import { useIsDesktop } from '@/hooks/use-desktop';
 import { VERTICAL_GROUPS } from '@/lib/verticalGroups';
 import { getVerticalById } from '@/lib/verticals';
 import { APP_REGISTRY } from '@/lib/appRegistry';
+import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
+import { cn } from '@/lib/utils';
 
 export function CompactFooter() {
   const { language } = useLanguage();
@@ -108,7 +110,7 @@ export function CompactFooter() {
 
     return (
       <footer className="border-t border-border/40 bg-muted/10 mt-auto">
-        <div className="max-w-[1536px] mx-auto px-8 py-10 lg:py-12">
+        <div className={cn(ECOSYSTEM_PAGE_CONTAINER, 'py-10 lg:py-12')}>
           {/* Main grid — 6 columns */}
           <div className="grid grid-cols-6 gap-6 xl:gap-8 mb-8">
 
@@ -242,7 +244,7 @@ export function CompactFooter() {
   // Mobile: compact footer
   return (
     <footer className="border-t border-border/50 bg-muted/30 mt-auto pb-20 md:pb-0">
-      <div className="max-w-[1536px] mx-auto px-4 py-6 space-y-4">
+      <div className={cn(ECOSYSTEM_PAGE_CONTAINER, 'py-6 space-y-4')}>
         {!isInstalled && (
           <div className="flex justify-center">
             <button

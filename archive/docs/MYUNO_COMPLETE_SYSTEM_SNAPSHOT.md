@@ -1,3 +1,7 @@
+> ARCHIVED: 2026-04-20
+> Superseded by: project.md (§14 known gaps extracted), docs/DATABASE.md, docs/ENVIRONMENT.md
+> Reason: April 2026 snapshot superseded by project.md + targeted canonical docs; PART 7 extracted
+
 # MyUNO — Complete System Snapshot
 
 Factual snapshot of the platform as it exists today. No recommendations or audit — what is here and how it works.

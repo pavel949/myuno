@@ -57,7 +57,16 @@ export type AppRole =
  export const ADMIN_ONLY_ROLES: AppRole[] = ['admin', 'ombudsman', 'staff', 'uno_team', 'finance', 'support', 'sales'];
  
  /** Roles available for context switching in UI */
- export const SWITCHABLE_ROLES: AppRole[] = ['user', 'vendor', 'owner', 'property_manager', 'admin', 'staff', 'uno_team'];
+ export const SWITCHABLE_ROLES: AppRole[] = [
+   'user',
+   'vendor',
+   'owner',
+   'property_manager',
+   'admin',
+   'staff',
+   'uno_team',
+   'investor',
+ ];
  
  /** Role metadata for UI display */
  export interface RoleMetadata {

@@ -64,7 +64,7 @@ export const PageTransition = forwardRef<HTMLDivElement, PageTransitionProps>(
         exit="exit"
         variants={variants}
         transition={pageTransition}
-        className="min-h-full will-change-transform"
+        className="min-h-full w-full min-w-0 will-change-transform"
       >
         {children}
       </motion.div>

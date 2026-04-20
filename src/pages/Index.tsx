@@ -3,17 +3,14 @@
  *
  * Role-blended home screen: signal stack, conditions strip, quick actions,
  * concierge nudge, activity feed, cluster grid, trust footer.
- * Role redirects (owner/vendor/mc) are preserved from the previous implementation.
+ * Business users stay on the marketplace; optional workspace banner links to /mc, /vendor, /my-property.
  */
 import React, { useState } from 'react';
-import { Navigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useUserPersonas } from '@/hooks/useUserPersonas';
-import { useUserContext } from '@/hooks/useUserContext';
-import { useOwnerType } from '@/hooks/useOwnerType';
-import { useAuth } from '@/contexts/AuthContext';
 
 import { HomeTopBar } from '@/components/home/HomeTopBar';
+import { WorkspaceHomeBanner } from '@/components/home/WorkspaceHomeBanner';
 import { SignalStack } from '@/components/home/SignalStack';
 import { NowInPhuket } from '@/components/home/NowInPhuket';
 import { QuickActionsBlended } from '@/components/home/QuickActionsBlended';
@@ -25,17 +22,7 @@ import { RoleSheet } from '@/components/home/RoleSheet';
 
 const Index = () => {
   const { personas, togglePersona, setPersonas } = useUserPersonas();
-  const { activeRole, isLoading: contextLoading } = useUserContext();
-  const { isMCPortal, isLoading: ownerTypeLoading } = useOwnerType();
-  const { isLoading: authLoading } = useAuth();
   const [roleSheetOpen, setRoleSheetOpen] = useState(false);
-
-  // Role redirects — owners, vendors, mc_portal users should not see the generic home
-  if (!authLoading && !ownerTypeLoading && !contextLoading) {
-    if (activeRole === 'owner' || activeRole === 'property_manager') return <Navigate to="/mc" replace />;
-    if (activeRole === 'vendor') return <Navigate to="/vendor" replace />;
-    if (isMCPortal) return <Navigate to="/my-property" replace />;
-  }
 
   // Default persona for unauthenticated or no-persona users
   const activePersonas = personas.length > 0 ? personas : (['tourist'] as const);
@@ -47,6 +34,7 @@ const Index = () => {
           personas={[...activePersonas]}
           onRoleSheetOpen={() => setRoleSheetOpen(true)}
         />
+        <WorkspaceHomeBanner />
         <SignalStack
           personas={[...activePersonas]}
           onRoleSheetOpen={() => setRoleSheetOpen(true)}

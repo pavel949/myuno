@@ -27,7 +27,25 @@ export function CalendarTodayTasks({ propertyId }: CalendarTodayTasksProps) {
   const allTasks = [...pendingTasks, ...completedTasks];
 
   if (isLoading) return null;
-  if (allTasks.length === 0) return null;
+  if (!propertyId) return null;
+
+  if (allTasks.length === 0) {
+    return (
+      <Card className="border-dashed bg-muted/20">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base flex items-center gap-2 text-muted-foreground">
+            <Clock className="h-4 w-4" />
+            {isRu ? 'Задачи на сегодня' : "Today's Tasks"}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            {isRu ? 'На сегодня задач нет' : 'No tasks scheduled for today'}
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>

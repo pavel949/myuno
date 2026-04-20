@@ -18,6 +18,7 @@ import { CurrencyProvider } from "@/contexts/CurrencyContext";
 import { LocationProvider } from "@/contexts/LocationContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ImpersonationProvider } from "@/contexts/ImpersonationContext";
+import { PlatformViewAsProvider } from "@/contexts/PlatformViewAsContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { MaintenanceProvider, useMaintenance } from "@/contexts/MaintenanceContext";
@@ -40,6 +41,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "react-router-dom";
 import { composeProviders } from "@/lib/composeProviders";
 import { useEnsureMultiRoleQaBundle } from "@/hooks/useEnsureMultiRoleQaBundle";
+import { PlatformViewAsBanner } from "@/components/layout/PlatformViewAsBanner";
 
 const queryClient = new QueryClient({
   defaultOptions: defaultQueryClientOptions,
@@ -56,6 +58,7 @@ const QueryProviders = composeProviders([
   CurrencyProvider,
   AuthProvider,
   ImpersonationProvider,
+  PlatformViewAsProvider,
   CartProvider,
   PWAInstallProvider,
   LifeSituationProvider,
@@ -100,6 +103,7 @@ function AppContent() {
     return (
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <SkipToContent />
+        <PlatformViewAsBanner />
         <Sonner />
         <PWAUpdatePrompt />
         <LegalComplianceModal />

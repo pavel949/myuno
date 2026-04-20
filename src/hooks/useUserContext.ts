@@ -276,7 +276,10 @@ export function useUserContext() {
     if (normalizedRoles.includes('uno_team')) {
       roles.push('uno_team');
     }
-    
+    if (normalizedRoles.includes('investor')) {
+      roles.push('investor');
+    }
+
     return roles;
   }, [vendorOrgs.length, ownerOrgs.length, hasMCMembership, normalizedRoles]);
 

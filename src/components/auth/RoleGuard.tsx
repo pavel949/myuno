@@ -19,9 +19,10 @@ interface RoleGuardProps {
 
 /**
  * Route guard component that checks authentication and role permissions.
- * Uses Airbnb-style "soft" navigation - checks if user HAS the role, not active role.
- * This allows users with multiple roles to freely navigate between dashboards.
- * 
+ * Uses Airbnb-style "soft" navigation — allows navigation when the **server-resolved**
+ * role/permissions (`useResolvedContext`) match `allowedRoles`, not merely the last
+ * client-switched `active_role`. Wildcard `*` permission also grants access.
+ *
  * When showAccessDenied is true, displays an informative access denied page
  * instead of silently redirecting, helping users understand why they can't access.
  */

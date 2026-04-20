@@ -40,8 +40,9 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
     const isDesktop = useIsDesktop();
     // Activate global behavioral tracking
     useUserTracking();
-    // Desktop: always show header and footer for consistent navigation
-    const finalShowHeader = isDesktop ? true : showHeader;
+    // Header: respect `showHeader` on all breakpoints (immersive hubs avoid double chrome with HomeTopBar etc.).
+    const finalShowHeader = showHeader;
+    // Footer: keep desktop default on — many pages omit showFooter on mobile only.
     const finalShowFooter = isDesktop ? true : showFooter;
 
     return (

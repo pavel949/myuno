@@ -190,7 +190,7 @@ export function AirbnbCalendarGrid({ propertyId, properties = [] }: AirbnbCalend
 
   return (
     <>
-      <div className="space-y-2">
+      <div className="space-y-2 w-full min-w-0">
         {/* Month navigation */}
         <div className="flex items-center justify-between px-1">
           <Button variant="ghost" size="icon" onClick={() => setCurrentMonth(m => subMonths(m, 1))}>

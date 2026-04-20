@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { Search, ShoppingCart } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ECOSYSTEM_HEADER_INNER } from '@/design-system/ecosystemLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
@@ -52,7 +53,12 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
           className
         )}
       >
-        <div className="flex items-center h-14 lg:h-16 px-3 lg:px-8 xl:px-10 max-w-[1536px] mx-auto gap-1.5 lg:gap-2">
+        <div
+          className={cn(
+            ECOSYSTEM_HEADER_INNER,
+            'flex h-14 items-center gap-1.5 lg:h-16 lg:gap-2'
+          )}
+        >
           {/* Logo */}
           <Link
             to={APP_ROUTES.HOME}

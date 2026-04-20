@@ -11,6 +11,7 @@ import {
   CalendarCheck, ClipboardList, DollarSign, Users, FileText, Settings,
 } from 'lucide-react';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { cn } from '@/lib/utils';
 
 interface SearchResult {
   id: string;
@@ -33,8 +34,44 @@ const quickLinks = [
   { id: 'settings', icon: Settings, path: '/mc/settings', labelEn: 'Settings', labelRu: 'Настройки' },
 ];
 
-export function MCCommandPalette() {
-  const [open, setOpen] = useState(false);
+export interface MCCommandSearchTriggerProps {
+  onOpen: () => void;
+  className?: string;
+}
+
+/** Desktop search chip — sits in the header fill area; grows up to max width. */
+export function MCCommandSearchTrigger({ onOpen, className }: MCCommandSearchTriggerProps) {
+  const { language } = useLanguage();
+  const isRu = language === 'ru';
+
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      className={cn(
+        'flex h-9 w-full min-w-0 max-w-2xl items-center gap-2 rounded-md bg-muted/50 px-3 text-left text-sm text-muted-foreground transition-colors hover:bg-muted',
+        className
+      )}
+    >
+      <Search className="h-4 w-4 shrink-0" />
+      <span className="min-w-0 flex-1 truncate">{isRu ? 'Поиск...' : 'Search...'}</span>
+      <kbd className="pointer-events-none hidden h-5 shrink-0 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium sm:flex">
+        ⌘K
+      </kbd>
+    </button>
+  );
+}
+
+interface MCCommandPaletteProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+/**
+ * Command palette dialog (contacts / deals / properties + quick links).
+ * State lives in the parent (e.g. MCHeader) so the trigger can live in the header bar.
+ */
+export function MCCommandPalette({ open, onOpenChange }: MCCommandPaletteProps) {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -43,19 +80,17 @@ export function MCCommandPalette() {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [searching, setSearching] = useState(false);
 
-  // Keyboard shortcut
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
-        setOpen(prev => !prev);
+        onOpenChange(!open);
       }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, []);
+  }, [open, onOpenChange]);
 
-  // Search across contacts, deals, properties
   const doSearch = useCallback(async (q: string) => {
     if (!q || q.length < 2 || !membership?.company_id) {
       setResults([]);
@@ -120,7 +155,7 @@ export function MCCommandPalette() {
   }, [query, doSearch]);
 
   const handleSelect = (type: string, id: string) => {
-    setOpen(false);
+    onOpenChange(false);
     setQuery('');
     if (type === 'contact') navigate(APP_ROUTES.MC_CONTACT_DETAIL(id));
     else if (type === 'deal') navigate(`/mc/sales/${id}`);
@@ -135,66 +170,51 @@ export function MCCommandPalette() {
   };
 
   return (
-    <>
-      <button
-        onClick={() => setOpen(true)}
-        className="hidden md:flex items-center gap-2 w-64 h-9 px-3 rounded-md bg-muted/50 text-muted-foreground text-sm hover:bg-muted transition-colors"
-      >
-        <Search className="h-4 w-4" />
-        <span className="flex-1 text-left">{isRu ? 'Поиск...' : 'Search...'}</span>
-        <kbd className="pointer-events-none h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium flex">
-          ⌘K
-        </kbd>
-      </button>
+    <CommandDialog open={open} onOpenChange={onOpenChange}>
+      <CommandInput
+        placeholder={isRu ? 'Контакты, сделки, объекты...' : 'Contacts, deals, properties...'}
+        value={query}
+        onValueChange={setQuery}
+      />
+      <CommandList>
+        <CommandEmpty>
+          {searching
+            ? (isRu ? 'Поиск...' : 'Searching...')
+            : (isRu ? 'Ничего не найдено' : 'No results found')
+          }
+        </CommandEmpty>
 
-      <CommandDialog open={open} onOpenChange={setOpen}>
-        <CommandInput
-          placeholder={isRu ? 'Контакты, сделки, объекты...' : 'Contacts, deals, properties...'}
-          value={query}
-          onValueChange={setQuery}
-        />
-        <CommandList>
-          <CommandEmpty>
-            {searching
-              ? (isRu ? 'Поиск...' : 'Searching...')
-              : (isRu ? 'Ничего не найдено' : 'No results found')
-            }
-          </CommandEmpty>
-
-          {/* Search results */}
-          {results.length > 0 && (
-            <CommandGroup heading={isRu ? 'Результаты' : 'Results'}>
-              {results.map(r => {
-                const Icon = typeIcons[r.type];
-                return (
-                  <CommandItem key={`${r.type}-${r.id}`} onSelect={() => handleSelect(r.type, r.id)}>
-                    <Icon className="mr-2 h-4 w-4 text-muted-foreground" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{r.title}</p>
-                      <p className="text-xs text-muted-foreground truncate">{typeLabels[r.type]} · {r.subtitle}</p>
-                    </div>
-                  </CommandItem>
-                );
-              })}
-            </CommandGroup>
-          )}
-
-          {/* Quick navigation */}
-          {!query && (
-            <CommandGroup heading={isRu ? 'Навигация' : 'Navigation'}>
-              {quickLinks.map(link => (
-                <CommandItem
-                  key={link.id}
-                  onSelect={() => { setOpen(false); navigate(link.path); }}
-                >
-                  <link.icon className="mr-2 h-4 w-4 text-muted-foreground" />
-                  {isRu ? link.labelRu : link.labelEn}
+        {results.length > 0 && (
+          <CommandGroup heading={isRu ? 'Результаты' : 'Results'}>
+            {results.map(r => {
+              const Icon = typeIcons[r.type];
+              return (
+                <CommandItem key={`${r.type}-${r.id}`} onSelect={() => handleSelect(r.type, r.id)}>
+                  <Icon className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{r.title}</p>
+                    <p className="text-xs text-muted-foreground truncate">{typeLabels[r.type]} · {r.subtitle}</p>
+                  </div>
                 </CommandItem>
-              ))}
-            </CommandGroup>
-          )}
-        </CommandList>
-      </CommandDialog>
-    </>
+              );
+            })}
+          </CommandGroup>
+        )}
+
+        {!query && (
+          <CommandGroup heading={isRu ? 'Навигация' : 'Navigation'}>
+            {quickLinks.map(link => (
+              <CommandItem
+                key={link.id}
+                onSelect={() => { onOpenChange(false); navigate(link.path); }}
+              >
+                <link.icon className="mr-2 h-4 w-4 text-muted-foreground" />
+                {isRu ? link.labelRu : link.labelEn}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        )}
+      </CommandList>
+    </CommandDialog>
   );
 }

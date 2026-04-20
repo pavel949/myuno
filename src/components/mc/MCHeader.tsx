@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Bell, ChevronRight, HelpCircle } from 'lucide-react';
+import { Bell, ChevronRight, HelpCircle, Search } from 'lucide-react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import {
@@ -17,6 +17,7 @@ import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { navigationGroups } from './MCSidebar';
 import { WorkspaceHeader } from '@/components/layout/WorkspaceHeader';
+import { MCCommandPalette, MCCommandSearchTrigger } from './MCCommandPalette';
 
 const companyRoleLabels: Record<string, { en: string; ru: string }> = {
   director: { en: 'Director', ru: 'Директор' },
@@ -53,6 +54,7 @@ function buildRouteLabels(): Record<string, { en: string; ru: string }> {
 const routeLabels = buildRouteLabels();
 
 export function MCHeader() {
+  const [commandOpen, setCommandOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { language } = useLanguage();
@@ -89,6 +91,7 @@ export function MCHeader() {
     : null;
 
   return (
+    <>
     <WorkspaceHeader
       leftSlot={<SidebarTrigger data-sidebar="trigger" className="-ml-1" />}
       centerSlot={
@@ -138,8 +141,26 @@ export function MCHeader() {
           {roleLabel && <span className="text-[10px] text-muted-foreground">{roleLabel}</span>}
         </div>
       }
+      fillSlot={
+        <div className="flex min-w-0 flex-1 items-center justify-center px-1">
+          <MCCommandSearchTrigger
+            onOpen={() => setCommandOpen(true)}
+            className="hidden w-full max-w-2xl md:flex"
+          />
+        </div>
+      }
       rightSlot={
         <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden"
+            onClick={() => setCommandOpen(true)}
+            title={isRussian ? 'Поиск (⌘K)' : 'Search (⌘K)'}
+            type="button"
+          >
+            <Search className="h-4 w-4" />
+          </Button>
           <Button variant="ghost" size="icon" onClick={() => navigate(APP_ROUTES.MC_SUPPORT_CHAT)} title={isRussian ? 'Поддержка' : 'Support'}>
             <HelpCircle className="h-4 w-4" />
           </Button>
@@ -159,5 +180,7 @@ export function MCHeader() {
         </div>
       }
     />
+    <MCCommandPalette open={commandOpen} onOpenChange={setCommandOpen} />
+    </>
   );
 }

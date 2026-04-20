@@ -101,7 +101,7 @@ export default function OwnerCalendar() {
   const isMulti = viewMode === 'multi';
 
   return (
-    <div className="p-4 pb-24 space-y-4">
+    <div className="p-4 pb-24 space-y-4 w-full min-w-0 max-w-full">
       {/* View Mode Toggle */}
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -208,14 +208,18 @@ export default function OwnerCalendar() {
             </Button>
           </div>
 
-          {/* Airbnb-style Calendar Grid */}
-          <AirbnbCalendarGrid
-            propertyId={selectedPropertyId || undefined}
-            properties={propertyRefs}
-          />
-
-          {/* Today's Tasks */}
-          <CalendarTodayTasks propertyId={selectedPropertyId || undefined} />
+          {/* Calendar + today’s tasks: full-width grid on large screens */}
+          <div className="xl:grid xl:grid-cols-[minmax(0,1fr)_minmax(280px,360px)] xl:gap-6 xl:items-start">
+            <div className="min-w-0 w-full space-y-4">
+              <AirbnbCalendarGrid
+                propertyId={selectedPropertyId || undefined}
+                properties={propertyRefs}
+              />
+            </div>
+            <aside className="min-w-0 w-full space-y-4 xl:sticky xl:top-4 xl:self-start">
+              <CalendarTodayTasks propertyId={selectedPropertyId || undefined} />
+            </aside>
+          </div>
 
           {/* iCal Sync - Collapsible */}
           {selectedPropertyId && (

@@ -2,12 +2,13 @@
  * UserAvatarMenu — Airbnb-style dropdown from avatar + hamburger button
  * Consolidates: navigation, role switch, settings, logout
  */
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Heart, ShoppingBag, MessageSquare, User, Settings, Globe,
+  Heart, ShoppingBag, User, Settings,
   HelpCircle, Gift, LogOut, Store, Building2, Shield, Headphones,
   Menu, Bell, CreditCard, UserCog, Briefcase, Construction, Crown,
+  LineChart, Eye,
 } from 'lucide-react';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -16,13 +17,26 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePlatformViewAs } from '@/contexts/PlatformViewAsContext';
 import { useUserContext, type AppRole } from '@/hooks/useUserContext';
 import { useNotifications } from '@/hooks/useNotifications';
+import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
 
@@ -82,27 +96,65 @@ const ROLE_SWITCH_CONFIG: Partial<Record<AppRole, {
     icon: Briefcase,
     path: '/mc',
   },
+  investor: {
+    labelEn: 'Investor workspace',
+    labelRu: 'Кабинет инвестора',
+    descEn: 'Capital & portfolio tools',
+    descRu: 'Капитал и портфель',
+    icon: LineChart,
+    path: '/investor',
+  },
 };
+
+/** Platform / staff roles shown first in the switcher */
+const PLATFORM_ROLE_ORDER: AppRole[] = ['admin', 'uno_team', 'staff', 'investor'];
+/** Business / workspace roles */
+const WORKSPACE_ROLE_ORDER: AppRole[] = ['vendor', 'owner', 'property_manager'];
+
+function orderSwitchable(roles: AppRole[], order: AppRole[]): AppRole[] {
+  return order.filter((r) => roles.includes(r));
+}
+
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export function UserAvatarMenu() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { user, signOut } = useAuth();
-  const { availableRoles, activeRole, switchContext } = useUserContext();
+  const { availableRoles, switchContext } = useUserContext();
   const { unreadCount } = useNotifications();
   const { isAdmin } = useIsAdmin();
+  const { enter: enterViewAs } = usePlatformViewAs();
   const isRu = language === 'ru';
+
+  const [viewAsOpen, setViewAsOpen] = useState(false);
+  const [viewAsQuery, setViewAsQuery] = useState('');
+  const [viewAsBusy, setViewAsBusy] = useState(false);
+  const [viewAsError, setViewAsError] = useState<string | null>(null);
+
+  const switchableRoles = useMemo(
+    () =>
+      availableRoles.filter(
+        (r) => r !== 'user' && r !== 'guest' && r !== 'partner' && ROLE_SWITCH_CONFIG[r]
+      ),
+    [availableRoles]
+  );
+
+  const platformRoles = useMemo(
+    () => orderSwitchable(switchableRoles, PLATFORM_ROLE_ORDER),
+    [switchableRoles]
+  );
+  const workspaceRoles = useMemo(
+    () => orderSwitchable(switchableRoles, WORKSPACE_ROLE_ORDER),
+    [switchableRoles]
+  );
 
   if (!user) return null;
 
   const userName = user.user_metadata?.name || user.email?.split('@')[0] || 'User';
   const avatarUrl = user.user_metadata?.avatar_url;
   const initials = userName.charAt(0).toUpperCase();
-
-  // Roles that can be switched to (exclude 'user'/'guest')
-  const switchableRoles = availableRoles.filter(
-    (r) => r !== 'user' && r !== 'guest' && r !== 'partner' && ROLE_SWITCH_CONFIG[r]
-  );
 
   const handleRoleSwitch = async (role: AppRole) => {
     const config = ROLE_SWITCH_CONFIG[role];
@@ -115,6 +167,84 @@ export function UserAvatarMenu() {
     await signOut();
     navigate('/');
   };
+
+  const handleViewAsSubmit = async () => {
+    setViewAsError(null);
+    const q = viewAsQuery.trim();
+    if (!q) {
+      setViewAsError(isRu ? 'Введите email или ID пользователя' : 'Enter user email or UUID');
+      return;
+    }
+    setViewAsBusy(true);
+    try {
+      let targetId: string | null = null;
+      let targetEmail: string | null = null;
+
+      if (UUID_RE.test(q)) {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('id,email')
+          .eq('id', q)
+          .maybeSingle();
+        if (error) throw error;
+        if (!data?.id) {
+          setViewAsError(isRu ? 'Пользователь не найден' : 'User not found');
+          return;
+        }
+        targetId = data.id;
+        targetEmail = data.email ?? null;
+      } else {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('id,email')
+          .ilike('email', q)
+          .maybeSingle();
+        if (error) throw error;
+        if (!data?.id) {
+          setViewAsError(isRu ? 'Пользователь не найден' : 'User not found');
+          return;
+        }
+        targetId = data.id;
+        targetEmail = data.email ?? null;
+      }
+
+      if (targetId === user.id) {
+        setViewAsError(isRu ? 'Это ваш аккаунт' : 'That is your own account');
+        return;
+      }
+
+      await enterViewAs(targetId, targetEmail, isRu ? 'View-as из меню' : 'View-as from menu');
+      setViewAsOpen(false);
+      setViewAsQuery('');
+    } catch (e) {
+      setViewAsError(e instanceof Error ? e.message : 'Error');
+    } finally {
+      setViewAsBusy(false);
+    }
+  };
+
+  const renderRoleItems = (roles: AppRole[]) =>
+    roles.map((role) => {
+      const config = ROLE_SWITCH_CONFIG[role]!;
+      const Icon = config.icon;
+      return (
+        <DropdownMenuItem
+          key={role}
+          onClick={() => handleRoleSwitch(role)}
+          className="flex items-center gap-3 px-4 py-3 cursor-pointer focus:bg-muted/50"
+        >
+          <Icon className="w-5 h-5 text-foreground/70 flex-shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-foreground">
+              {isRu ? config.labelRu : config.labelEn}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {isRu ? config.descRu : config.descEn}
+            </p>
+          </div>
+        </DropdownMenuItem>
+      );
+    });
 
   // Primary nav items
   const primaryItems = [
@@ -135,6 +265,7 @@ export function UserAvatarMenu() {
   ];
 
   return (
+    <>
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
@@ -166,27 +297,43 @@ export function UserAvatarMenu() {
       >
         {/* Role switch + developer portal — top, prominent (portal is not an AppRole) */}
         <DropdownMenuGroup>
-            {switchableRoles.map((role) => {
-              const config = ROLE_SWITCH_CONFIG[role]!;
-              const Icon = config.icon;
-              return (
-                <DropdownMenuItem
-                  key={role}
-                  onClick={() => handleRoleSwitch(role)}
-                  className="flex items-center gap-3 px-4 py-3 cursor-pointer focus:bg-muted/50"
-                >
-                  <Icon className="w-5 h-5 text-foreground/70 flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-foreground">
-                      {isRu ? config.labelRu : config.labelEn}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {isRu ? config.descRu : config.descEn}
-                    </p>
-                  </div>
-                </DropdownMenuItem>
-              );
-            })}
+            {platformRoles.length > 0 && (
+              <>
+                <DropdownMenuLabel className="px-4 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  {isRu ? 'Платформа' : 'Platform'}
+                </DropdownMenuLabel>
+                {renderRoleItems(platformRoles)}
+              </>
+            )}
+            {workspaceRoles.length > 0 && (
+              <>
+                <DropdownMenuLabel className="px-4 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  {isRu ? 'Рабочие пространства' : 'Workspaces'}
+                </DropdownMenuLabel>
+                {renderRoleItems(workspaceRoles)}
+              </>
+            )}
+            {isAdmin && (
+              <DropdownMenuItem
+                onClick={() => {
+                  setViewAsError(null);
+                  setViewAsOpen(true);
+                }}
+                className="flex items-center gap-3 px-4 py-3 cursor-pointer focus:bg-muted/50 bg-amber-500/5"
+              >
+                <Eye className="w-5 h-5 text-amber-700 dark:text-amber-400 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-foreground">
+                    {isRu ? 'Просмотр от имени пользователя' : 'View as user (audit)'}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {isRu
+                      ? 'Запись в журнале; права не меняются'
+                      : 'Logged for audit; permissions stay yours'}
+                  </p>
+                </div>
+              </DropdownMenuItem>
+            )}
             {/* Newbuilds Console — admin-only shortcut (Ignatev Estate director) */}
             {isAdmin && (
               <DropdownMenuItem
@@ -295,5 +442,45 @@ export function UserAvatarMenu() {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+
+    <Dialog open={viewAsOpen} onOpenChange={setViewAsOpen}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>{isRu ? 'Просмотр от имени пользователя' : 'View as user'}</DialogTitle>
+          <DialogDescription>
+            {isRu
+              ? 'Введите email или UUID профиля. Действие записывается в журнал; RLS и ваши права не меняются.'
+              : 'Enter profile email or UUID. This is audited; RLS still applies to your admin session.'}
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-2 py-2">
+          <Input
+            placeholder={isRu ? 'email или UUID' : 'email or user UUID'}
+            value={viewAsQuery}
+            onChange={(e) => {
+              setViewAsQuery(e.target.value);
+              setViewAsError(null);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') void handleViewAsSubmit();
+            }}
+            disabled={viewAsBusy}
+            autoComplete="off"
+          />
+          {viewAsError && (
+            <p className="text-sm text-destructive">{viewAsError}</p>
+          )}
+        </div>
+        <DialogFooter className="gap-2 sm:gap-0">
+          <Button variant="outline" type="button" onClick={() => setViewAsOpen(false)} disabled={viewAsBusy}>
+            {isRu ? 'Отмена' : 'Cancel'}
+          </Button>
+          <Button type="button" onClick={() => void handleViewAsSubmit()} disabled={viewAsBusy}>
+            {viewAsBusy ? '…' : isRu ? 'Начать' : 'Start'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }

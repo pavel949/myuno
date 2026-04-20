@@ -20,7 +20,7 @@ export function HomeTopBar({ personas, onRoleSheetOpen }: HomeTopBarProps) {
   const displayPersonas = personas.slice(0, 3);
 
   return (
-    <div className="flex items-center justify-between px-5 pt-3 pb-4">
+    <div className="flex items-center justify-between pt-3 pb-4">
       {/* Logo */}
       <div className="flex items-baseline gap-0">
         <span className="font-display text-[22px] font-normal text-muted-foreground tracking-[-0.02em]">my</span>

@@ -35,7 +35,10 @@ export function useEnsureMultiRoleQaBundle() {
         if (row?.applied) {
           await queryClient.invalidateQueries({ queryKey: ['resolved-context', user.id] });
           await queryClient.invalidateQueries({ queryKey: ['user-roles'] });
-          await queryClient.invalidateQueries({ queryKey: ['user-active-context'] });
+          await queryClient.invalidateQueries({ queryKey: ['user-active-context', user.id] });
+          await queryClient.invalidateQueries({ queryKey: ['org-memberships', user.id] });
+          await queryClient.invalidateQueries({ queryKey: ['user-mc-membership-roles', user.id] });
+          await queryClient.invalidateQueries({ queryKey: ['user-companies', user.id] });
         }
       } catch (err) {
         console.warn('ensure_multi_role_qa_bundle threw', err);
