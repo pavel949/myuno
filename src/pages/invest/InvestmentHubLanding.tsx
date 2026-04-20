@@ -98,7 +98,7 @@ function ZoneCard({
           ))}
         </ul>
         <div className="flex items-center text-xs text-primary font-medium pt-1">
-          {isRu ? 'Открыть' : 'Open'}
+          {isRu ? 'Перейти к разделу' : 'Go to section'}
           <ChevronRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-1 transition-transform" />
         </div>
       </CardContent>
@@ -111,13 +111,6 @@ export default function InvestmentHubLanding() {
   const { language } = useLanguage();
   const { user } = useAuth();
   const isRu = language === 'ru';
-  const [showStickyCTA, setShowStickyCTA] = useState(false);
-
-  useEffect(() => {
-    const handler = () => setShowStickyCTA(window.scrollY > 600);
-    window.addEventListener('scroll', handler, { passive: true });
-    return () => window.removeEventListener('scroll', handler);
-  }, []);
 
   const { data: featured, isLoading: loadingFeatured } = useFeaturedInvestments();
   const { data: allProjects, isLoading: loadingAll } = useInvestmentProjects();
@@ -182,82 +175,73 @@ export default function InvestmentHubLanding() {
               className="gap-1.5"
             >
               <User className="h-4 w-4" />
-              {isRu ? 'Кабинет' : 'Dashboard'}
+              {isRu ? 'Личный кабинет' : 'Cabinet'}
             </Button>
           ) : null
         }
       >
         <div className="space-y-6 pb-10">
-          {/* Hero */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-700 via-teal-700 to-blue-800 p-6 text-white">
-            <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-            <div className="absolute bottom-0 left-0 w-28 h-28 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2" />
-            <div className="relative z-10 space-y-3">
-              <div className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5" />
-                <span className="text-xs font-medium opacity-90 uppercase tracking-wide">
-                  {isRu ? 'Капитал в Таиланде' : 'Capital in Thailand'}
-                </span>
+          {/* Hero — calm, gov-style */}
+          <div className="rounded-2xl border border-border bg-card p-5 space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl bg-cluster-invest/10 flex items-center justify-center flex-shrink-0">
+                <TrendingUp className="h-5 w-5 text-cluster-invest" />
               </div>
-              <h1 className="text-2xl font-bold leading-tight">
-                {isRu
-                  ? 'Куда вложить и какой бизнес открыть в Пхукете'
-                  : 'Where to invest and what business to open in Phuket'}
-              </h1>
-              <p className="text-white/85 text-sm">
-                {isRu
-                  ? 'Недвижимость, готовый бизнес, франшизы, советы юристов — всё в одном хабе.'
-                  : 'Real estate, ready businesses, franchises, advisory — all in one hub.'}
-              </p>
-              <div className="flex flex-wrap gap-1.5 pt-1">
-                <Badge className="bg-white/20 text-white border-0 text-[10px]">
-                  <Shield className="h-3 w-3 mr-1" /> muUNO Score
-                </Badge>
-                <Badge className="bg-white/20 text-white border-0 text-[10px]">
-                  <FileText className="h-3 w-3 mr-1" /> Due Diligence
-                </Badge>
-                <Badge className="bg-white/20 text-white border-0 text-[10px]">
-                  <Handshake className="h-3 w-3 mr-1" /> Advisory
-                </Badge>
+              <div className="min-w-0 flex-1">
+                <h1 className="text-lg font-semibold text-foreground leading-tight">
+                  {isRu ? 'Инвестиции в Таиланде' : 'Investments in Thailand'}
+                </h1>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {isRu
+                    ? 'Недвижимость, готовый бизнес, франшизы, юридическое сопровождение'
+                    : 'Real estate, businesses, franchises, legal advisory'}
+                </p>
               </div>
-              <div className="grid grid-cols-2 gap-2 pt-2">
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  onClick={() => navigate(APP_ROUTES.INVEST_DEALS_BOARD)}
-                  className="gap-1.5"
-                >
-                  <Sparkles className="h-4 w-4" />
-                  {isRu ? 'Все сделки' : 'Browse deals'}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  onClick={() => navigate(APP_ROUTES.INVEST_SUBMIT)}
-                  className="gap-1.5"
-                >
-                  <Megaphone className="h-4 w-4" />
-                  {isRu ? 'Подать сделку' : 'Submit deal'}
-                </Button>
-              </div>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              <Badge variant="secondary" className="text-[10px]">
+                <Shield className="h-3 w-3 mr-1" /> muUNO Score
+              </Badge>
+              <Badge variant="secondary" className="text-[10px]">
+                <FileText className="h-3 w-3 mr-1" /> Due Diligence
+              </Badge>
+              <Badge variant="secondary" className="text-[10px]">
+                <Handshake className="h-3 w-3 mr-1" /> Advisory
+              </Badge>
+            </div>
+            <div className="grid grid-cols-2 gap-2 pt-1">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => navigate(APP_ROUTES.INVEST_DEALS_BOARD)}
+              >
+                {isRu ? 'Список сделок' : 'Deal list'}
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => navigate(APP_ROUTES.INVEST_SUBMIT)}
+              >
+                {isRu ? 'Подача проекта' : 'Project submission'}
+              </Button>
             </div>
           </div>
 
-          {/* Universal capital marketplace banner */}
-          <Card className="border-emerald-500/30 bg-gradient-to-r from-emerald-500/5 to-blue-500/5">
+          {/* Capital marketplace — neutral surface */}
+          <Card>
             <CardContent className="p-5 space-y-3">
               <div className="flex items-start gap-3">
-                <div className="p-2 rounded-lg bg-emerald-500/10">
-                  <TrendingUp className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                  <TrendingUp className="h-5 w-5 text-foreground" />
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-bold">
-                    {isRu ? 'Универсальный капитал-маркетплейс' : 'Universal Capital Marketplace'}
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-sm">
+                    {isRu ? 'Капитал-маркетплейс' : 'Capital marketplace'}
                   </h3>
-                  <p className="text-sm text-muted-foreground mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     {isRu
-                      ? 'Недвижимость, бизнес, стартапы, франшизы — любые сделки в Таиланде. Все проекты анонимизированы.'
-                      : 'Real estate, business, startups, franchises — any deal in Thailand. All projects are anonymized.'}
+                      ? 'Недвижимость, бизнес, стартапы, франшизы. Все проекты анонимизированы.'
+                      : 'Real estate, business, startups, franchises. All projects anonymized.'}
                   </p>
                 </div>
               </div>
@@ -266,18 +250,14 @@ export default function InvestmentHubLanding() {
                   size="sm"
                   variant="outline"
                   onClick={() => navigate(APP_ROUTES.INVEST_DEALS_BOARD)}
-                  className="gap-1.5"
                 >
-                  {isRu ? 'Смотреть сделки' : 'Browse'}
-                  <ArrowRight className="h-3.5 w-3.5" />
+                  {isRu ? 'Список сделок' : 'Deal list'}
                 </Button>
                 <Button
                   size="sm"
                   onClick={() => navigate(APP_ROUTES.INVEST_SUBMIT)}
-                  className="gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white"
                 >
-                  {isRu ? 'Привлечь капитал' : 'Raise capital'}
-                  <ArrowRight className="h-3.5 w-3.5" />
+                  {isRu ? 'Подача проекта' : 'Project submission'}
                 </Button>
               </div>
             </CardContent>
