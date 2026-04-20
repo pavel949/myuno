@@ -1,97 +1,42 @@
 import React, { forwardRef, useCallback, useEffect, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { APP_ROUTES } from '@/lib/config/routes';
-import {
-  Home, Compass, ShoppingBag, User, LayoutDashboard, Building2,
-  CalendarDays, Calendar, Package, Wallet, UserCheck, MessageSquare,
-  FileCheck, Plus, Users, MessageCircle, LayoutGrid
-} from 'lucide-react';
+import { LayoutGrid } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useUserContext } from '@/hooks/useUserContext';
+import { useOwnerType } from '@/hooks/useOwnerType';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
 import { triggerRipple } from '@/hooks/useRipple';
 import { playSound } from '@/hooks/useSoundEffects';
 import { getFeedbackSettings } from '@/hooks/useFeedbackSettings';
 import { usePrefetchRoute } from '@/hooks/usePrefetch';
 import { AllAppsDrawer } from './AllAppsDrawer';
+import {
+  NAV_BY_ROLE,
+  resolveNavRole,
+  shouldShowAppsLauncher,
+  type NavItem,
+} from '@/lib/navConfig';
 
-type NavItem = {
-  path: string;
-  icon: React.ComponentType<{ className?: string }>;
-  labelEn: string;
-  labelRu: string;
-};
+// Routes that render their own bottom shell — never overlay AdaptiveBottomNav.
+const layoutsWithOwnNav = ['/staff', '/my-stay', '/guest', '/developer-portal'];
 
-const guestNavItems: NavItem[] = [
-  { path: APP_ROUTES.HOME, icon: Home, labelEn: 'Home', labelRu: 'Главная' },
-  { path: APP_ROUTES.DISCOVER, icon: Compass, labelEn: 'Navigator', labelRu: 'Навигатор' },
-  { path: APP_ROUTES.MARKET, icon: ShoppingBag, labelEn: 'Market', labelRu: 'Маркет' },
-  { path: APP_ROUTES.ACCOUNT, icon: User, labelEn: 'Me', labelRu: 'Профиль' },
-];
-
-const ownerNavItems: NavItem[] = [
-  { path: APP_ROUTES.MC, icon: LayoutDashboard, labelEn: 'Dashboard', labelRu: 'Обзор' },
-  { path: APP_ROUTES.MC_PROPERTIES, icon: Building2, labelEn: 'Properties', labelRu: 'Объекты' },
-  { path: APP_ROUTES.MC_CALENDAR, icon: CalendarDays, labelEn: 'Calendar', labelRu: 'Календарь' },
-  { path: APP_ROUTES.MC_MESSAGES, icon: MessageCircle, labelEn: 'Messages', labelRu: 'Чаты' },
-];
-
-const vendorNavItems: NavItem[] = [
-  { path: APP_ROUTES.VENDOR, icon: LayoutDashboard, labelEn: 'Dashboard', labelRu: 'Обзор' },
-  { path: APP_ROUTES.VENDOR_SERVICES, icon: Package, labelEn: 'Services', labelRu: 'Услуги' },
-  { path: APP_ROUTES.VENDOR_BOOKINGS, icon: Calendar, labelEn: 'Bookings', labelRu: 'Заказы' },
-  { path: APP_ROUTES.VENDOR_PAYOUTS, icon: Wallet, labelEn: 'Payouts', labelRu: 'Выплаты' },
-  { path: APP_ROUTES.PROFILE, icon: User, labelEn: 'Profile', labelRu: 'Профиль' },
-];
-
-const adminNavItems: NavItem[] = [
-  { path: APP_ROUTES.ADMIN, icon: LayoutDashboard, labelEn: 'Dashboard', labelRu: 'Обзор' },
-  { path: APP_ROUTES.ADMIN_CRM, icon: UserCheck, labelEn: 'CRM', labelRu: 'CRM' },
-  { path: APP_ROUTES.ADMIN_TICKETS, icon: MessageSquare, labelEn: 'Tickets', labelRu: 'Тикеты' },
-  { path: APP_ROUTES.ADMIN_MODERATION, icon: FileCheck, labelEn: 'Moderation', labelRu: 'Модерация' },
-  { path: APP_ROUTES.PROFILE, icon: User, labelEn: 'Profile', labelRu: 'Профиль' },
-];
-
-const teamNavItems: NavItem[] = [
-  { path: APP_ROUTES.TEAM, icon: LayoutDashboard, labelEn: 'Dashboard', labelRu: 'Обзор' },
-  { path: APP_ROUTES.TEAM_CONTENT, icon: Plus, labelEn: 'Content', labelRu: 'Создать' },
-  { path: APP_ROUTES.ADMIN_MODERATION, icon: FileCheck, labelEn: 'Review', labelRu: 'Проверка' },
-  { path: APP_ROUTES.ADMIN_CRM, icon: Users, labelEn: 'CRM', labelRu: 'CRM' },
-  { path: APP_ROUTES.PROFILE, icon: User, labelEn: 'Profile', labelRu: 'Профиль' },
-];
-
-const layoutsWithOwnNav = ['/mc', '/admin', '/staff', '/my-stay', '/guest', '/team', '/developer-portal'];
-
-const detailPrefixes = [
-  '/flowers/', '/yachts/', '/tours/', '/beauty/', '/cleaning/',
-  '/fitness/booking', '/medical/appointment', '/restaurants/',
-  '/pets/', '/cart', '/checkout', '/auth', '/market/product/',
-  '/market/category/', '/experience/', '/babysitter/',
-  '/transfer/', '/transport/', '/service/', '/newbuilds/projects/',
-];
+// Pure full-screen flows (auth, checkout). Detail pages keep the nav so users
+// don't lose context after a deep-link.
+const fullScreenPrefixes = ['/auth', '/checkout', '/cart'];
 
 function shouldHideBottomNav(pathname: string): boolean {
   if (layoutsWithOwnNav.some(prefix => pathname.startsWith(prefix))) return true;
-  if (pathname.startsWith('/property/')) return true;
-  return detailPrefixes.some(prefix => pathname.startsWith(prefix));
-}
-
-type NavConfig = { items: NavItem[]; showAppsButton: boolean };
-
-function getNavConfigForPath(pathname: string): NavConfig {
-  if (pathname.includes('/onboarding')) return { items: guestNavItems, showAppsButton: true };
-  if (pathname.startsWith('/admin')) return { items: adminNavItems, showAppsButton: false };
-  if (pathname.startsWith('/mc')) return { items: ownerNavItems, showAppsButton: false };
-  if (pathname.startsWith('/owner')) return { items: ownerNavItems, showAppsButton: false };
-  if (pathname.startsWith('/vendor')) return { items: vendorNavItems, showAppsButton: false };
-  if (pathname.startsWith('/team')) return { items: teamNavItems, showAppsButton: false };
-  return { items: guestNavItems, showAppsButton: true };
+  if (fullScreenPrefixes.some(prefix => pathname.startsWith(prefix))) return true;
+  return false;
 }
 
 export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   (props, ref) => {
     const { language } = useLanguage();
     const location = useLocation();
+    const { activeRole } = useUserContext();
+    const { isMCPortal } = useOwnerType();
     const { prefetchRoute } = usePrefetchRoute();
     const [appsOpen, setAppsOpen] = useState(false);
 
@@ -99,7 +44,6 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
       prefetchRoute(path);
     }, [prefetchRoute]);
 
-    // Listen for the Navigator page "All services →" button event
     useEffect(() => {
       const handler = () => setAppsOpen(true);
       window.addEventListener('navigator:open-apps-drawer', handler);
@@ -108,7 +52,14 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
 
     if (shouldHideBottomNav(location.pathname)) return null;
 
-    const { items: navItems, showAppsButton } = getNavConfigForPath(location.pathname);
+    // P0 — single source of truth for role → nav resolution.
+    const navRole = resolveNavRole({
+      activeRole,
+      isMCPortal,
+      pathname: location.pathname,
+    });
+    const navItems: NavItem[] = NAV_BY_ROLE[navRole];
+    const showAppsButton = shouldShowAppsLauncher(navRole);
 
     const handleNavClick = (e: React.MouseEvent<HTMLElement>) => {
       triggerRipple(e);
@@ -117,22 +68,59 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
       if (settings.soundEnabled) playSound('click');
     };
 
-    const isActive = (itemPath: string) => {
-      if (itemPath === '/') return location.pathname === '/';
-      if (itemPath === '/account') return location.pathname.startsWith('/account') || location.pathname.startsWith('/profile');
-      if (itemPath === '/market') return location.pathname.startsWith('/market');
-      return location.pathname.startsWith(itemPath);
+    const isActive = (item: NavItem) => {
+      if (item.exact) return location.pathname === item.path;
+      if (item.path === '/account') {
+        return location.pathname.startsWith('/account') || location.pathname.startsWith('/profile');
+      }
+      if (item.path === '/market') return location.pathname.startsWith('/market');
+      return location.pathname.startsWith(item.path);
     };
 
-    const leftItems = showAppsButton ? navItems.slice(0, 2) : navItems;
-    const rightItems = showAppsButton ? navItems.slice(2) : [];
-    // Static map — Tailwind JIT can't see dynamic `grid-cols-${n}` strings.
+    // When the apps launcher is shown we drop the last nav item (usually "Me")
+    // so total slots stay at 5 (4 nav + apps). Otherwise show all nav items.
+    const visibleItems = showAppsButton ? navItems.slice(0, 4) : navItems;
+    const leftItems = showAppsButton ? visibleItems.slice(0, 2) : visibleItems;
+    const rightItems = showAppsButton ? visibleItems.slice(2) : [];
+
     const totalCols = leftItems.length + rightItems.length + (showAppsButton ? 1 : 0);
     const gridCols =
       totalCols === 5 ? 'grid-cols-5'
       : totalCols === 4 ? 'grid-cols-4'
       : totalCols === 3 ? 'grid-cols-3'
       : 'grid-cols-5';
+
+    const renderItem = ({ path, icon: Icon, labelEn, labelRu, exact }: NavItem) => {
+      const active = isActive({ path, icon: Icon, labelEn, labelRu, exact });
+      const label = language === 'ru' ? labelRu : labelEn;
+      return (
+        <NavLink
+          key={path}
+          to={path}
+          onClick={handleNavClick}
+          onMouseEnter={() => handlePrefetch(path)}
+          onTouchStart={() => handlePrefetch(path)}
+          aria-label={label}
+          className="flex flex-col items-center justify-center gap-[3px] relative pt-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-md"
+        >
+          {active && (
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-[3px] rounded-full bg-primary" aria-hidden />
+          )}
+          <div className={cn(
+            'transition-all duration-200',
+            active ? 'text-primary scale-110' : 'text-muted-foreground',
+          )}>
+            <Icon className="w-[20px] h-[20px]" aria-hidden />
+          </div>
+          <span className={cn(
+            'text-[10px] leading-none',
+            active ? 'font-semibold text-primary' : 'font-medium text-muted-foreground/80',
+          )}>
+            {label}
+          </span>
+        </NavLink>
+      );
+    };
 
     return (
       <>
@@ -142,7 +130,6 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
           style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
           {...props}
         >
-          {/* Glass backdrop */}
           <div
             className="absolute inset-0 border-t border-border bg-[hsl(var(--bg-surface)/0.85)]"
             style={{
@@ -152,37 +139,7 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
           />
 
           <div className={cn("relative grid gap-0 h-[60px] px-2 max-w-screen-sm mx-auto", gridCols)}>
-            {leftItems.map(({ path, icon: Icon, labelEn, labelRu }) => {
-              const active = isActive(path);
-              const label = language === 'ru' ? labelRu : labelEn;
-              return (
-                <NavLink
-                  key={path}
-                  to={path}
-                  onClick={handleNavClick}
-                  onMouseEnter={() => handlePrefetch(path)}
-                  onTouchStart={() => handlePrefetch(path)}
-                  aria-label={label}
-                  className="flex flex-col items-center justify-center gap-[3px] relative pt-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-md"
-                >
-                  {active && (
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-[3px] rounded-full bg-primary" aria-hidden />
-                  )}
-                  <div className={cn(
-                    'transition-all duration-200',
-                    active ? 'text-primary scale-110' : 'text-muted-foreground',
-                  )}>
-                    <Icon className="w-[20px] h-[20px]" aria-hidden />
-                  </div>
-                  <span className={cn(
-                    'text-[10px] leading-none',
-                    active ? 'font-semibold text-primary' : 'font-medium text-muted-foreground/80',
-                  )}>
-                    {label}
-                  </span>
-                </NavLink>
-              );
-            })}
+            {leftItems.map(renderItem)}
 
             {showAppsButton && (
               <button
@@ -199,37 +156,7 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
               </button>
             )}
 
-            {rightItems.map(({ path, icon: Icon, labelEn, labelRu }) => {
-              const active = isActive(path);
-              const label = language === 'ru' ? labelRu : labelEn;
-              return (
-                <NavLink
-                  key={path}
-                  to={path}
-                  onClick={handleNavClick}
-                  onMouseEnter={() => handlePrefetch(path)}
-                  onTouchStart={() => handlePrefetch(path)}
-                  aria-label={label}
-                  className="flex flex-col items-center justify-center gap-[3px] relative pt-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-md"
-                >
-                  {active && (
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-[3px] rounded-full bg-primary" aria-hidden />
-                  )}
-                  <div className={cn(
-                    'transition-all duration-200',
-                    active ? 'text-primary scale-110' : 'text-muted-foreground',
-                  )}>
-                    <Icon className="w-[20px] h-[20px]" aria-hidden />
-                  </div>
-                  <span className={cn(
-                    'text-[10px] leading-none',
-                    active ? 'font-semibold text-primary' : 'font-medium text-muted-foreground/80',
-                  )}>
-                    {label}
-                  </span>
-                </NavLink>
-              );
-            })}
+            {rightItems.map(renderItem)}
           </div>
         </nav>
 
