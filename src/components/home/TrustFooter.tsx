@@ -11,10 +11,10 @@ export function TrustFooter() {
         <div className="font-mono text-[20px] font-medium text-foreground">03</div>
         <div>
           <div className="text-[12.5px] font-medium text-foreground">
-            {isRu ? 'Лицензии и регулирование' : 'Licensed & regulated'}
+            {isRu ? 'Работаем по тайскому законодательству' : 'Operating under Thai law'}
           </div>
           <div className="text-[11px] text-muted-foreground mt-0.5">
-            {isRu ? 'SEC Thailand · DBD 0105567890123 · PDPA' : 'SEC Thailand · DBD 0105567890123 · PDPA compliant'}
+            {isRu ? 'SEC Thailand · DBD 0105567890123 · соответствие PDPA' : 'SEC Thailand · DBD 0105567890123 · PDPA compliant'}
           </div>
         </div>
       </div>

@@ -20,15 +20,14 @@ export const ROLE_META: Record<UserPersona, { short: string; glyph: string; colo
 export type ClusterId = 'live' | 'manage' | 'invest' | 'legal' | 'arrive' | 'build';
 
 export const CLUSTERS = [
-  // Each cluster: 1 clear benefit + concrete examples. No overlaps between clusters.
-  // Arrive = first 7 days. Live = daily life. Manage = your property. Invest = capital.
-  // Legal = paperwork only. Build = for developers.
-  { id: 'arrive' as ClusterId, labelEn: 'Arrive', labelRu: 'Прибытие',   sub: 'Land smoothly: transfer, SIM, eSIM, first-week setup',  subRu: 'Трансфер, SIM-карта, обмен валюты, заселение',           accent: '#00D68F', route: '/life/arrival',    items: '5' },
-  { id: 'live'   as ClusterId, labelEn: 'Live',   labelRu: 'Жизнь',      sub: 'Daily essentials: cleaning, food, beauty, kids, pets',  subRu: 'Уборка, доставка еды, салоны, школы, ветеринар',         accent: '#4E7BFF', route: '/discover',        items: '14' },
-  { id: 'manage' as ClusterId, labelEn: 'Manage', labelRu: 'Управление', sub: 'Earn from your villa: PMS, calendar, cleaning, payouts',subRu: 'Доход с виллы: бронирования, уход, отчёты, выплаты',     accent: '#16BDCA', route: '/mc',              items: '9' },
-  { id: 'invest' as ClusterId, labelEn: 'Invest', labelRu: 'Инвестиции', sub: 'Buy off-plan with verified ROI, yield and exit data',   subRu: 'Новостройки с проверенной доходностью и сроком выхода',  accent: '#A78BFA', route: '/invest',          items: '7' },
-  { id: 'legal'  as ClusterId, labelEn: 'Legal',  labelRu: 'Документы',  sub: 'Stay legal: visa renewal, TM30, contracts, tax filing', subRu: 'Продление визы, регистрация TM30, договоры, налоги',     accent: '#F59E0B', route: '/life/relocation', items: '6' },
-  { id: 'build'  as ClusterId, labelEn: 'Build',  labelRu: 'Стройка',    sub: 'For developers: launch projects, leads, sales analytics',subRu: 'Застройщикам: запуск проектов, заявки, аналитика продаж',accent: '#EF4444', route: '/property/offplan', items: '4' },
+  // Calm infrastructure tone: each cluster names its domain, then lists what's inside.
+  // No verbs of promise ("earn", "grow"), no superlatives, no exclamations.
+  { id: 'arrive' as ClusterId, labelEn: 'Arrive', labelRu: 'Прибытие',   sub: 'Transfer, SIM, currency exchange, check-in',          subRu: 'Трансфер, SIM-карта, обмен валюты, заселение',           accent: '#00D68F', route: '/life/arrival',    items: '5'  },
+  { id: 'live'   as ClusterId, labelEn: 'Live',   labelRu: 'Повседневное', sub: 'Cleaning, delivery, salons, schools, vet care',     subRu: 'Уборка, доставка, салоны, школы, ветеринария',           accent: '#4E7BFF', route: '/discover',        items: '14' },
+  { id: 'manage' as ClusterId, labelEn: 'Manage', labelRu: 'Управление', sub: 'Bookings, housekeeping, statements, payouts',         subRu: 'Бронирования, уход, отчёты, выплаты собственнику',       accent: '#16BDCA', route: '/mc',              items: '9'  },
+  { id: 'invest' as ClusterId, labelEn: 'Invest', labelRu: 'Инвестиции', sub: 'New developments, yield models, exit horizons',       subRu: 'Новостройки, модели доходности, сроки выхода',           accent: '#A78BFA', route: '/invest',          items: '7'  },
+  { id: 'legal'  as ClusterId, labelEn: 'Legal',  labelRu: 'Документы',  sub: 'Visa, TM30, contracts, annual filings',               subRu: 'Виза, TM30, договоры, годовая отчётность',               accent: '#F59E0B', route: '/life/relocation', items: '6'  },
+  { id: 'build'  as ClusterId, labelEn: 'Build',  labelRu: 'Девелопмент', sub: 'Project listings, applications, sales pipeline',     subRu: 'Размещение проектов, заявки, воронка продаж',            accent: '#EF4444', route: '/property/offplan', items: '4' },
 ];
 
 const CLUSTER_SCORES: Record<UserPersona, Record<ClusterId, number>> = {
@@ -78,18 +77,18 @@ export function blendClusters(personas: UserPersona[]) {
 
 // Signal seed data per role — shown when real DB data is loading
 export const SIGNAL_SEED: Record<UserPersona, { lead: string; leadRu: string; value: string; tail: string; tailRu: string; state: 'live' | 'warn' | 'active' }> = {
-  tourist:                 { lead: 'Transfer tomorrow',  leadRu: 'Трансфер завтра',    value: '08:40',        tail: 'HKT → Kata · Confirmed',            tailRu: 'HKT → Ката · Подтверждён',       state: 'live' },
-  resident:                { lead: 'Visa',               leadRu: 'Виза',               value: '48 days left', tail: 'Non-Imm O · Extension available',   tailRu: 'Non-Imm O · Доступно продление', state: 'warn' },
-  property_owner:          { lead: 'Your property',      leadRu: 'Ваш объект',         value: 'Occupied',     tail: 'Guest check-out at 14:00',           tailRu: 'Гость выезжает в 14:00',          state: 'live' },
-  investor:                { lead: 'Portfolio',          leadRu: 'Портфель',           value: '฿ 24.8M',      tail: 'Active deals · 2 pending',           tailRu: 'Активные сделки · 2 в ожидании', state: 'active' },
-  real_estate_developer:   { lead: 'Project',            leadRu: 'Проект',             value: '42 / 120',     tail: 'Phase I closes Friday',              tailRu: 'Фаза I — срок в пятницу',        state: 'live' },
-  local_services_provider: { lead: 'Today',              leadRu: 'Сегодня',            value: '6 bookings',   tail: '฿ 18,900 · 3 awaiting response',     tailRu: '฿ 18 900 · 3 ожидают ответа',   state: 'active' },
-  family:                  { lead: 'School',             leadRu: 'Школа',              value: 'Term 2',       tail: 'Next event Thursday',                tailRu: 'Следующее мероприятие — четверг', state: 'active' },
-  couple:                  { lead: 'Booking',            leadRu: 'Бронь',              value: 'Tonight',      tail: 'Suay Restaurant · 19:00 · Party of 2', tailRu: 'Suay · 19:00 · 2 персоны',      state: 'live' },
-  nightlife:               { lead: 'Tonight',            leadRu: 'Сегодня вечером',    value: 'Illuzion',     tail: 'Patong · Doors open 22:00',          tailRu: 'Патонг · Вход с 22:00',          state: 'live' },
-  active:                  { lead: 'Training',           leadRu: 'Тренировка',         value: '07:00',        tail: 'Muay Thai · Tiger Gym',              tailRu: 'Муай-тай · Tiger Gym',           state: 'live' },
-  business:                { lead: 'Company',            leadRu: 'Компания',           value: 'Active',       tail: 'Renewal due in 45 days',             tailRu: 'Продление через 45 дней',        state: 'warn' },
-  nomad:                   { lead: 'SIM',                leadRu: 'SIM',                value: '12 GB left',   tail: 'AIS · Top-up available',             tailRu: 'AIS · Доступно пополнение',      state: 'active' },
-  pet_owner:               { lead: 'Vet appointment',   leadRu: 'Визит к ветеринару', value: 'Friday 15:00', tail: 'Dr. Amara · Phuket Animal Hospital', tailRu: 'Д-р Амара · Животная больница', state: 'active' },
-  relocation:              { lead: 'Visa',               leadRu: 'Виза',               value: 'In review',    tail: 'Siam Legal · Submit docs in 3 days', tailRu: 'Siam Legal · Документы через 3 дня', state: 'warn' },
+  tourist:                 { lead: 'Transfer',           leadRu: 'Трансфер',           value: '08:40',        tail: 'HKT → Kata · confirmed',              tailRu: 'HKT → Ката · подтверждён',           state: 'live'   },
+  resident:                { lead: 'Visa',               leadRu: 'Виза',               value: '48 days',      tail: 'Non-Imm O · extension available',     tailRu: 'Non-Imm O · доступно продление',     state: 'warn'   },
+  property_owner:          { lead: 'Property',           leadRu: 'Объект',             value: 'Occupied',     tail: 'Guest check-out 14:00',               tailRu: 'Гость выезжает в 14:00',             state: 'live'   },
+  investor:                { lead: 'Portfolio',          leadRu: 'Портфель',           value: '฿ 24.8M',      tail: '2 deals in progress',                 tailRu: '2 сделки в работе',                  state: 'active' },
+  real_estate_developer:   { lead: 'Project',            leadRu: 'Проект',             value: '42 / 120',     tail: 'Phase I closes Friday',               tailRu: 'Фаза I закрывается в пятницу',       state: 'live'   },
+  local_services_provider: { lead: 'Today',              leadRu: 'Сегодня',            value: '6 bookings',   tail: '฿ 18,900 · 3 awaiting reply',         tailRu: '฿ 18 900 · 3 ждут ответа',           state: 'active' },
+  family:                  { lead: 'School',             leadRu: 'Школа',              value: 'Term 2',       tail: 'Next event Thursday',                 tailRu: 'Ближайшее событие — четверг',        state: 'active' },
+  couple:                  { lead: 'Booking',            leadRu: 'Бронь',              value: 'Tonight',      tail: 'Suay · 19:00 · 2 guests',             tailRu: 'Suay · 19:00 · 2 гостя',             state: 'live'   },
+  nightlife:               { lead: 'Tonight',            leadRu: 'Сегодня вечером',    value: 'Illuzion',     tail: 'Patong · doors 22:00',                tailRu: 'Патонг · вход с 22:00',              state: 'live'   },
+  active:                  { lead: 'Session',            leadRu: 'Тренировка',         value: '07:00',        tail: 'Muay Thai · Tiger Gym',               tailRu: 'Муай-тай · Tiger Gym',               state: 'live'   },
+  business:                { lead: 'Company',            leadRu: 'Компания',           value: 'Active',       tail: 'Annual renewal in 45 days',           tailRu: 'Ежегодное продление через 45 дней',  state: 'warn'   },
+  nomad:                   { lead: 'Data plan',          leadRu: 'Тариф',              value: '12 GB',        tail: 'AIS · top-up available',              tailRu: 'AIS · доступно пополнение',          state: 'active' },
+  pet_owner:               { lead: 'Vet visit',          leadRu: 'Приём ветеринара',   value: 'Fri 15:00',    tail: 'Dr. Amara · Phuket Animal Hospital',  tailRu: 'Д-р Амара · Phuket Animal Hospital', state: 'active' },
+  relocation:              { lead: 'Visa',               leadRu: 'Виза',               value: 'In review',    tail: 'Siam Legal · documents in 3 days',    tailRu: 'Siam Legal · документы через 3 дня', state: 'warn'   },
 };
