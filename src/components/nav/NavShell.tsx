@@ -71,43 +71,47 @@ export function NavShell({
   // Workspace shell: SidebarProvider + SideRail + Inset main.
   if (sidebarVisible) {
     return (
-      <SidebarProvider>
-        <div className={cn('flex min-h-screen w-full bg-background', className)}>
-          <SideRail role={resolvedRole} badges={badges} />
-          <SidebarInset className="flex min-w-0 flex-1 flex-col">
-            {renderHeader && <TopBar role={resolvedRole} title={title} />}
-            <main
-              className={cn(
-                'flex-1 w-full',
-                renderBottomBar && 'pb-24 md:pb-4',
-                contentClassName,
-              )}
-            >
-              {children}
-            </main>
-            {renderBottomBar && <BottomBar role={resolvedRole} />}
-            {renderFab && <ContextualFAB role={resolvedRole} />}
-          </SidebarInset>
-        </div>
-      </SidebarProvider>
+      <NavShellContext.Provider value={{ active: true }}>
+        <SidebarProvider>
+          <div className={cn('flex min-h-screen w-full bg-background', className)}>
+            <SideRail role={resolvedRole} badges={badges} />
+            <SidebarInset className="flex min-w-0 flex-1 flex-col">
+              {renderHeader && <TopBar role={resolvedRole} title={title} />}
+              <main
+                className={cn(
+                  'flex-1 w-full',
+                  renderBottomBar && 'pb-24 md:pb-4',
+                  contentClassName,
+                )}
+              >
+                {children}
+              </main>
+              {renderBottomBar && <BottomBar role={resolvedRole} />}
+              {renderFab && <ContextualFAB role={resolvedRole} />}
+            </SidebarInset>
+          </div>
+        </SidebarProvider>
+      </NavShellContext.Provider>
     );
   }
 
   // Consumer shell: no sidebar, just header + content + bottom-bar.
   return (
-    <div className={cn('flex min-h-screen flex-col bg-background', className)}>
-      {renderHeader && <TopBar role={resolvedRole} title={title} />}
-      <main
-        className={cn(
-          'flex-1 w-full',
-          renderBottomBar && 'pb-24 md:pb-4',
-          contentClassName,
-        )}
-      >
-        {children}
-      </main>
-      {renderBottomBar && <BottomBar role={resolvedRole} />}
-      {renderFab && <ContextualFAB role={resolvedRole} />}
-    </div>
+    <NavShellContext.Provider value={{ active: true }}>
+      <div className={cn('flex min-h-screen flex-col bg-background', className)}>
+        {renderHeader && <TopBar role={resolvedRole} title={title} />}
+        <main
+          className={cn(
+            'flex-1 w-full',
+            renderBottomBar && 'pb-24 md:pb-4',
+            contentClassName,
+          )}
+        >
+          {children}
+        </main>
+        {renderBottomBar && <BottomBar role={resolvedRole} />}
+        {renderFab && <ContextualFAB role={resolvedRole} />}
+      </div>
+    </NavShellContext.Provider>
   );
 }
