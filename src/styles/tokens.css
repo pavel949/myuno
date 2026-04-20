@@ -176,6 +176,28 @@
   --font-display: 'Golos Text', sans-serif;
   --font-body: 'DM Sans', 'Sarabun', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
+
+  /* ═══ Page-template semantic tokens (DS Page SSOT) ═══ */
+  /* Horizontal page padding scales: mobile 16 → tablet 24 → desktop 32 */
+  --page-padding-x: 1rem;
+  /* Vertical rhythm between sections within a page */
+  --section-gap: 1.25rem;
+  /* Minimum touch target per WCAG / Apple HIG */
+  --touch-target: 2.75rem; /* 44px */
+}
+
+@media (min-width: 768px) {
+  :root {
+    --page-padding-x: 1.5rem;
+    --section-gap: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --page-padding-x: 2rem;
+    --section-gap: 2rem;
+  }
 }
 
 /* Dark class = same as :root (dark-first design) */
