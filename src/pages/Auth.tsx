@@ -752,6 +752,8 @@ export default function Auth() {
                 </motion.div>
               </AnimatePresence>
             )}
+
+            <AuthTrustFooter />
           </div>
         </div>
       </main>
