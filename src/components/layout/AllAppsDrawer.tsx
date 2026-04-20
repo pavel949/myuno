@@ -37,7 +37,7 @@ export function AllAppsDrawer({ open, onOpenChange }: AllAppsDrawerProps) {
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="rounded-t-3xl max-h-[70vh] pb-safe">
+      <SheetContent side="bottom" className="rounded-t-3xl h-[90vh] max-h-[90vh] flex flex-col pb-safe">
         <SheetHeader className="pb-2">
           <div className="flex items-center justify-between">
             <SheetTitle className="text-lg font-bold">
@@ -78,8 +78,8 @@ export function AllAppsDrawer({ open, onOpenChange }: AllAppsDrawerProps) {
             </div>
           </button>
         )}
-        <ScrollArea className="h-full max-h-[calc(70vh-80px)]">
-          <div className="grid grid-cols-4 gap-3 pb-6 pt-2">
+        <ScrollArea className="flex-1 min-h-0 -mx-6 px-6">
+          <div className="grid grid-cols-4 gap-3 pt-2 pb-[calc(env(safe-area-inset-bottom)+96px)]">
             {miniApps.map((app) => {
               const Icon = app.icon;
               return (
