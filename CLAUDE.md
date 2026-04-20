@@ -16,6 +16,33 @@
 
 ---
 
+## 1.5 · Architecture source of truth (v2)
+
+**Before any structural change, read:**
+1. `handoff/ARCHITECTURE_V2.md` — target architecture (roles · clusters · surfaces · agents)
+2. `handoff/FEASIBILITY.md` — migration path and current implementation status per role
+
+### Hard rules (from ARCHITECTURE_V2.md §13)
+
+1. **Never add a new top-level route.** Put it under the relevant cluster or `/operate/*`.
+2. **Never create a new shell.** Use `MiniAppLayout` or the existing Operate shell.
+3. **Never hardcode a hex colour.** Use `src/styles/tokens.css` variables.
+4. **Never import across cluster boundaries.** Use shared L4 primitives or L3 services.
+5. **Never auto-execute money moves from an agent.** Always user-confirmed intent.
+6. **Every money-moving screen must show audit marker** (tx id + ledger entry id + timestamp).
+7. **Every new feature gated behind `feature_flag:*`** in `system_settings` until GA.
+
+### Glossary
+
+- **Surface** — one of 6 long-lived canvases: Home · Discover · Operate · Wallet · Me · Admin
+- **Cluster** — one of 6 colour-locked groups: Arrive · Live · Manage · Invest · Legal · Build
+- **Role stack** — `profiles.roles_stack` jsonb + `primary_role`, weighted `primary·3 + secondary·2 + tertiary·1`
+- **Intent** — AI agent output, user-confirmed via one-tap accept/later
+
+<!-- updated: 2026-04-20 — added architecture v2 section from handoff/CLAUDE_PATCH.md -->
+
+---
+
 ## 2. ТЕКУЩИЙ СТАТУС
 
 **Версия:** 3.40.0

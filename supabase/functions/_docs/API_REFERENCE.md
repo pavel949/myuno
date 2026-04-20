@@ -4,7 +4,9 @@
 
 This document provides comprehensive documentation for all Edge Functions deployed on the myUNO platform. All functions are accessible via HTTPS and require proper authentication where noted.
 
-**Base URL**: `https://erfwtoavipwjqmylpizt.supabase.co/functions/v1`
+**Base URL**: `https://kakkwibljrjsawxgnupk.supabase.co/functions/v1`
+
+> ⚠️ **Note:** The old mirror project `erfwtoavipwjqmylpizt` is deprecated. All functions are deployed to PRIMARY project `kakkwibljrjsawxgnupk`. <!-- updated: 2026-04-20 -->
 
 ---
 
