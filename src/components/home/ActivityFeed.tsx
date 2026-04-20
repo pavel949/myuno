@@ -25,9 +25,9 @@ export function ActivityFeed({ personas }: ActivityFeedProps) {
       </div>
 
       {isLoading ? (
-        <div className="border-t border-border/10">
+        <div className="border-t border-border/[0.05]">
           {[1, 2, 3].map(i => (
-            <div key={i} className="py-3 border-b border-border/10 flex gap-3 items-start">
+            <div key={i} className="py-3 border-b border-border/[0.05] flex gap-3 items-start">
               <div className="w-[18px] h-[18px] rounded-full bg-muted/30 animate-pulse flex-shrink-0 mt-0.5" />
               <div className="flex-1 space-y-1.5">
                 <div className="h-3 bg-muted/30 animate-pulse rounded w-2/3" />
@@ -41,18 +41,18 @@ export function ActivityFeed({ personas }: ActivityFeedProps) {
           ))}
         </div>
       ) : feedItems.length === 0 ? (
-        <div className="border-t border-border/10 py-8 text-center text-[12px] text-muted-foreground/40">
+        <div className="border-t border-border/[0.05] py-8 text-center text-[12px] text-muted-foreground/40">
           {isRu ? 'Пока нет активности' : 'No activity yet'}
         </div>
       ) : (
-        <div className="border-t border-border/10">
+        <div className="border-t border-border/[0.05]">
           {feedItems.map((item) => {
             const roleMeta = item.role ? ROLE_META[item.role] : ROLE_META[personas[0]];
             const roleColor = roleMeta?.color || '#8FA3B8';
             const roleGlyph = roleMeta?.glyph || '·';
 
             return (
-              <div key={item.id} className="grid grid-cols-[auto_1fr_auto] gap-3 py-3 border-b border-border/10 last:border-0 items-start">
+              <div key={item.id} className="grid grid-cols-[auto_1fr_auto] gap-3 py-3 border-b border-border/[0.05] last:border-0 items-start">
                 {/* Role glyph */}
                 <div
                   className="w-[18px] h-[18px] rounded-full flex items-center justify-center font-display text-[9px] font-bold mt-0.5 flex-shrink-0"

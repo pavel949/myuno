@@ -1,13 +1,32 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bell } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import type { UserPersona } from '@/hooks/useUserPersonas';
 import { ROLE_META } from '@/lib/roleBlend';
 
 interface HomeTopBarProps {
   personas: UserPersona[];
   onRoleSheetOpen: () => void;
+}
+
+function useHasUnread(userId: string | undefined) {
+  return useQuery({
+    queryKey: ['home-unread', userId],
+    queryFn: async () => {
+      if (!userId) return false;
+      const { count } = await supabase
+        .from('orders')
+        .select('id', { count: 'exact', head: true })
+        .eq('customer_user_id', userId)
+        .in('status', ['pending', 'pending_review', 'action_required']);
+      return (count ?? 0) > 0;
+    },
+    enabled: !!userId,
+    staleTime: 60000,
+  });
 }
 
 export function HomeTopBar({ personas, onRoleSheetOpen }: HomeTopBarProps) {
@@ -17,10 +36,11 @@ export function HomeTopBar({ personas, onRoleSheetOpen }: HomeTopBarProps) {
     ? (user.user_metadata.full_name as string).split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()
     : 'U';
 
+  const { data: hasUnread = false } = useHasUnread(user?.id);
   const displayPersonas = personas.slice(0, 3);
 
   return (
-    <div className="flex items-center justify-between pt-3 pb-4">
+    <div className="flex items-center justify-between pt-2 pb-3">
       {/* Logo */}
       <div className="flex items-baseline gap-0">
         <span className="font-display text-[22px] font-normal text-muted-foreground tracking-[-0.02em]">my</span>
@@ -28,12 +48,13 @@ export function HomeTopBar({ personas, onRoleSheetOpen }: HomeTopBarProps) {
       </div>
 
       {/* Right cluster */}
-      <div className="flex items-center gap-2.5">
-        {/* Role stack pill */}
+      <div className="flex items-center gap-2">
+        {/* Role stack pill — min 44px touch target */}
         {displayPersonas.length > 0 && (
           <button
             onClick={onRoleSheetOpen}
-            className="flex items-center gap-0 h-9 pl-1 pr-2.5 rounded-full border border-border/50 hover:border-border transition-colors"
+            aria-label="Manage roles"
+            className="flex items-center gap-0 min-h-[44px] px-2.5 rounded-full border border-border hover:border-border-strong transition-colors"
           >
             <div className="flex">
               {displayPersonas.map((p, i) => {
@@ -53,25 +74,29 @@ export function HomeTopBar({ personas, onRoleSheetOpen }: HomeTopBarProps) {
             {personas.length > 3 && (
               <span className="font-mono text-[10px] text-muted-foreground ml-1.5">+{personas.length - 3}</span>
             )}
-            <svg className="ml-2 opacity-50" width="10" height="10" viewBox="0 0 10 10" fill="none">
+            <svg className="ml-2 opacity-40" width="10" height="10" viewBox="0 0 10 10" fill="none">
               <path d="M2 4l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
         )}
 
-        {/* Bell */}
+        {/* Bell — 44px tap target, badge only when there's something pending */}
         <button
           onClick={() => navigate('/account?tab=notifications')}
-          className="relative w-9 h-9 rounded-full border border-border/50 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+          aria-label="Notifications"
+          className="relative w-11 h-11 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
         >
           <Bell className="w-[17px] h-[17px]" />
-          <span className="absolute top-[7px] right-[9px] w-[6px] h-[6px] rounded-full bg-primary" />
+          {hasUnread && (
+            <span className="absolute top-[9px] right-[10px] w-[6px] h-[6px] rounded-full bg-primary" />
+          )}
         </button>
 
-        {/* Avatar */}
+        {/* Avatar — 44px tap target */}
         <button
           onClick={() => navigate('/account')}
-          className="w-9 h-9 rounded-full border border-border/60 flex items-center justify-center font-display text-[12px] font-semibold text-foreground"
+          aria-label="Account"
+          className="w-11 h-11 rounded-full border border-border flex items-center justify-center font-display text-[12px] font-semibold text-foreground"
           style={{ background: 'linear-gradient(135deg, #26314A 0%, #0F1C2E 100%)' }}
         >
           {initials}

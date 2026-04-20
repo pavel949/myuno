@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import type { UserPersona } from '@/hooks/useUserPersonas';
@@ -12,8 +12,11 @@ export function ConciergeCard({ personas }: ConciergeCardProps) {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const [dismissed, setDismissed] = useState(false);
   const primaryMeta = ROLE_META[personas[0]];
   const accentColor = primaryMeta?.color || '#00D68F';
+
+  if (dismissed) return null;
 
   let nudge: string;
   if (personas.length > 1) {
@@ -28,7 +31,7 @@ export function ConciergeCard({ personas }: ConciergeCardProps) {
 
   return (
     <div className="px-4 pb-5">
-      <div className="rounded-[16px] border border-dashed border-border/60 p-4 flex gap-3">
+      <div className="rounded-[16px] border border-dashed border-border p-4 flex gap-3">
         {/* U avatar */}
         <div
           className="w-[26px] h-[26px] rounded-full flex-shrink-0 mt-0.5 flex items-center justify-center font-display text-[11px] font-bold text-[#08101E]"
@@ -48,12 +51,15 @@ export function ConciergeCard({ personas }: ConciergeCardProps) {
             >
               {isRu ? 'Фокус' : 'Focus mode'}
             </button>
-            <button className="px-2.5 py-1.5 rounded-full text-[11px] font-medium text-muted-foreground border border-border/50">
+            <button
+              onClick={() => setDismissed(true)}
+              className="px-2.5 py-1.5 rounded-full text-[11px] font-medium text-muted-foreground border border-border"
+            >
               {isRu ? 'Позже' : 'Later'}
             </button>
             <button
-              onClick={() => navigate('/discover')}
-              className="px-2.5 py-1.5 rounded-full text-[11px] font-medium text-muted-foreground border border-border/50"
+              onClick={() => navigate('/discover?ai=1')}
+              className="px-2.5 py-1.5 rounded-full text-[11px] font-medium text-muted-foreground border border-border"
             >
               {isRu ? 'Спросить' : 'Ask'}
             </button>

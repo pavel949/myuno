@@ -45,7 +45,7 @@ const Index = () => {
         <ActivityFeed personas={[...activePersonas]} />
 
         {/* Hairline separator */}
-        <div className="mx-4 h-px bg-border/20 mb-5" />
+        <div className="mx-4 h-px bg-border/[0.05] mb-5" />
 
         <ClusterGrid personas={[...activePersonas]} />
         <TrustFooter />

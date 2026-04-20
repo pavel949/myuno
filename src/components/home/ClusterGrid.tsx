@@ -29,7 +29,7 @@ export function ClusterGrid({ personas }: ClusterGridProps) {
           <button
             key={c.id}
             onClick={() => navigate(c.route)}
-            className="relative text-left rounded-[14px] bg-card border border-border/50 p-[14px] pl-4 min-h-[86px] flex flex-col justify-between hover:border-border transition-colors active:scale-[0.98] overflow-hidden"
+            className="relative text-left rounded-[14px] bg-card border border-border p-[14px] pl-4 min-h-[86px] flex flex-col justify-between hover:border-border transition-colors active:scale-[0.98] overflow-hidden"
           >
             {/* 2px left spine */}
             <div

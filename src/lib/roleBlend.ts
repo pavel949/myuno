@@ -13,7 +13,7 @@ export const ROLE_META: Record<UserPersona, { short: string; glyph: string; colo
   active:                  { short: 'Active',    glyph: 'A', color: '#F97316', label: 'Active',             labelRu: 'Спорт' },
   business:                { short: 'Business',  glyph: 'B', color: '#64748B', label: 'Business',           labelRu: 'Бизнес' },
   nomad:                   { short: 'Nomad',     glyph: 'M', color: '#14B8A6', label: 'Nomad',              labelRu: 'Номад' },
-  pet_owner:               { short: 'Pets',      glyph: 'X', color: '#F59E0B', label: 'Pet owner',          labelRu: 'С питомцем' },
+  pet_owner:               { short: 'Pets',      glyph: 'X', color: '#FB923C', label: 'Pet owner',          labelRu: 'С питомцем' },
   relocation:              { short: 'Relocate',  glyph: 'L', color: '#6366F1', label: 'Relocating',         labelRu: 'Переезд' },
 };
 
@@ -43,6 +43,23 @@ const CLUSTER_SCORES: Record<UserPersona, Record<ClusterId, number>> = {
   nomad:                   { live: 4, legal: 3, arrive: 2, manage: 0, invest: 0, build: 0 },
   pet_owner:               { live: 5, manage: 2, legal: 1, arrive: 1, invest: 0, build: 0 },
   relocation:              { arrive: 5, legal: 4, live: 3, manage: 2, invest: 1, build: 0 },
+};
+
+export const SIGNAL_ROUTE: Record<UserPersona, string> = {
+  tourist:                 '/life/arrival',
+  resident:                '/life/relocation',
+  property_owner:          '/mc',
+  investor:                '/invest',
+  real_estate_developer:   '/property/offplan',
+  local_services_provider: '/vendor',
+  family:                  '/discover',
+  couple:                  '/discover',
+  nightlife:               '/discover',
+  active:                  '/discover',
+  business:                '/discover',
+  nomad:                   '/discover',
+  pet_owner:               '/discover',
+  relocation:              '/life/relocation',
 };
 
 export function blendClusters(personas: UserPersona[]) {

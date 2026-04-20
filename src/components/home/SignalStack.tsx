@@ -1,7 +1,8 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { UserPersona } from '@/hooks/useUserPersonas';
-import { ROLE_META, SIGNAL_SEED } from '@/lib/roleBlend';
+import { ROLE_META, SIGNAL_SEED, SIGNAL_ROUTE } from '@/lib/roleBlend';
 
 interface SignalStackProps {
   personas: UserPersona[];
@@ -26,7 +27,7 @@ export function SignalStack({ personas, onRoleSheetOpen }: SignalStackProps) {
       )}
       <button
         onClick={onRoleSheetOpen}
-        className="mt-2.5 w-full flex items-center justify-between px-3 py-2.5 rounded-[10px] border border-dashed border-border/60 text-left hover:border-border/80 transition-colors"
+        className="mt-2.5 w-full flex items-center justify-between px-3 py-2.5 rounded-[10px] border border-dashed border-border text-left hover:border-border-strong transition-colors"
       >
         <span className="text-[11.5px] text-muted-foreground">{isRu ? 'Управление ролями · порядок' : 'Manage roles · reorder'}</span>
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -38,6 +39,7 @@ export function SignalStack({ personas, onRoleSheetOpen }: SignalStackProps) {
 }
 
 function SignalHero({ persona, isRu }: { persona: UserPersona; isRu: boolean }) {
+  const navigate = useNavigate();
   const meta = ROLE_META[persona];
   const sig = SIGNAL_SEED[persona];
   if (!meta || !sig) return null;
@@ -48,7 +50,10 @@ function SignalHero({ persona, isRu }: { persona: UserPersona; isRu: boolean }) 
   }[sig.state];
 
   return (
-    <div className="relative overflow-hidden rounded-[20px] bg-card border border-border/50 p-[18px]">
+    <button
+      onClick={() => navigate(SIGNAL_ROUTE[persona])}
+      className="w-full text-left relative overflow-hidden rounded-[20px] bg-card border border-border p-[18px] active:scale-[0.99] transition-transform"
+    >
       {/* 2px left spine */}
       <div className="absolute top-4 bottom-4 left-0 w-0.5 rounded-r-sm" style={{ background: meta.color }} />
 
@@ -67,17 +72,21 @@ function SignalHero({ persona, isRu }: { persona: UserPersona; isRu: boolean }) 
       <div className="text-[13px] text-muted-foreground leading-snug">
         {isRu ? sig.tailRu : sig.tail}
       </div>
-    </div>
+    </button>
   );
 }
 
 function SignalSlim({ persona, isRu }: { persona: UserPersona; isRu: boolean }) {
+  const navigate = useNavigate();
   const meta = ROLE_META[persona];
   const sig = SIGNAL_SEED[persona];
   if (!meta || !sig) return null;
 
   return (
-    <div className="relative overflow-hidden rounded-[14px] bg-card/60 border border-border/40 grid grid-cols-[auto_1fr_auto] gap-2.5 items-center px-3.5 py-2.5">
+    <button
+      onClick={() => navigate(SIGNAL_ROUTE[persona])}
+      className="w-full text-left relative overflow-hidden rounded-[14px] bg-card/60 border border-border grid grid-cols-[auto_1fr_auto] gap-2.5 items-center px-3.5 py-2.5 active:scale-[0.99] transition-transform"
+    >
       <div className="absolute top-2.5 bottom-2.5 left-0 w-0.5 rounded-r-sm" style={{ background: meta.color }} />
       <RoleChip persona={persona} meta={meta} compact />
       <div className="overflow-hidden">
@@ -91,7 +100,7 @@ function SignalSlim({ persona, isRu }: { persona: UserPersona; isRu: boolean }) 
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="opacity-30">
         <path d="M4 2l4 4-4 4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
       </svg>
-    </div>
+    </button>
   );
 }
 
