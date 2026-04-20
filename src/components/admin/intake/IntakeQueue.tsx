@@ -53,6 +53,8 @@ export function IntakeQueue({
   const [editingItem, setEditingItem] = useState<IntakeItem | null>(null);
   const [selectedItem, setSelectedItem] = useState<IntakeItem | null>(null);
   const [approvingItemId, setApprovingItemId] = useState<string | null>(null);
+  const [confirmDiscardId, setConfirmDiscardId] = useState<string | null>(null);
+  const [confirmApproveAll, setConfirmApproveAll] = useState(false);
 
   // Pending sorted worst-first by health-score so operator fixes the broken ones first.
   const pendingItems = useMemo(() => {
@@ -82,22 +84,55 @@ export function IntakeQueue({
     }
   };
 
+  // ─── Bulk approve confirmation: trigger AlertDialog when >5 pending items ───
+  const requestApproveAll = () => {
+    if (pendingItems.length > 5) {
+      setConfirmApproveAll(true);
+    } else {
+      onApproveAll();
+    }
+  };
+
+  // ─── Hotkeys (only active on the "pending" tab — others are read-only) ───
+  const { activeId, setActiveId } = useIntakeQueueHotkeys({
+    items: activeTab === 'pending' ? pendingItems : [],
+    enabled: activeTab === 'pending' && !editingItem,
+    onApprove: (id) => handleApprove(id),
+    onDiscard: (id) => setConfirmDiscardId(id),
+    onEdit: (id) => {
+      const target = pendingItems.find(i => i.id === id);
+      if (target) setEditingItem(target);
+    },
+    onApproveAll: requestApproveAll,
+  });
+
   const gridClass = "grid gap-4 lg:gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
 
   const renderItems = (items: IntakeItem[], showActions: boolean) => (
     <div className={gridClass}>
-      {items.map(item => (
-        <div 
-          key={item.id}
-          onClick={() => handleCardClick(item)}
-          className={selectedItem?.id === item.id ? 'ring-2 ring-primary rounded-lg' : ''}
-        >
-          <IntakeItemCard
-            item={item}
-            onApprove={showActions ? () => handleApprove(item.id) : () => {}}
-            onDiscard={showActions ? () => onDiscard(item.id) : () => {}}
-            onEdit={showActions ? () => setEditingItem(item) : () => {}}
-            isApproving={approvingItemId === item.id}
+      {items.map(item => {
+        const isActive = activeTab === 'pending' && activeId === item.id;
+        const isPanelSelected = selectedItem?.id === item.id;
+        return (
+          <div
+            key={item.id}
+            data-intake-card-id={item.id}
+            onClick={() => {
+              handleCardClick(item);
+              if (showActions) setActiveId(item.id);
+            }}
+            className={cn(
+              'rounded-lg transition-all',
+              isPanelSelected && 'ring-2 ring-primary',
+              !isPanelSelected && isActive && 'ring-2 ring-accent'
+            )}
+          >
+            <IntakeItemCard
+              item={item}
+              onApprove={showActions ? () => handleApprove(item.id) : () => {}}
+              onDiscard={showActions ? () => setConfirmDiscardId(item.id) : () => {}}
+              onEdit={showActions ? () => setEditingItem(item) : () => {}}
+              isApproving={approvingItemId === item.id}
           />
         </div>
       ))}
