@@ -345,31 +345,40 @@ export default function Auth() {
     </div>
   );
 
+  // Compact value panel when long signup form is shown
+  const isLongForm = !isLogin && signupStep === 'register';
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 pointer-events-none" />
 
       {/* Header */}
       <header className="relative z-10 p-4 flex justify-between items-center">
-        <Link to={APP_ROUTES.HOME} className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center shadow-gold hover:scale-105 transition-transform">
-          <span className="text-xl font-bold text-primary-foreground">U</span>
+        <Link to={APP_ROUTES.HOME} className="w-10 h-10 rounded-xl bg-primary/10 ring-1 ring-primary/30 flex items-center justify-center hover:scale-105 transition-transform">
+          <span className="font-display text-xl font-bold text-primary">U</span>
         </Link>
         <div className="flex items-center gap-2">
           <LanguageSwitcher size="sm" />
         </div>
       </header>
 
-      {/* Main content */}
-      <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 py-8">
-        <div className="w-full max-w-md">
+      {/* Main content — 2-column on md+, stacked on mobile */}
+      <main className="relative z-10 flex-1 grid md:grid-cols-2 md:gap-12 lg:gap-20 max-w-6xl mx-auto w-full px-4 py-6 md:py-12">
+        {/* Value panel — top on mobile, sticky left on desktop */}
+        <aside className="md:sticky md:top-12 md:self-start mb-8 md:mb-0">
+          <AuthValuePanel compact={isLongForm} />
+        </aside>
+
+        {/* Auth form column */}
+        <div className="w-full max-w-md mx-auto md:mx-0 self-center">
           <div className="space-y-6">
             {/* Login Form */}
             {isLogin ? (
               <div className="space-y-6">
-                <div className="text-center space-y-2">
-                  <h1 className="text-3xl font-display font-bold text-gradient-gold">
+                <div className="space-y-2">
+                  <h2 className="text-2xl md:text-3xl font-display font-semibold text-foreground">
                     {t('auth.welcomeBack')}
-                  </h1>
+                  </h2>
                   <p className="text-muted-foreground">
                     {isTh ? 'ใส่ข้อมูลเพื่อเข้าสู่ระบบ' : isRu ? 'Введите данные для входа' : 'Enter your credentials to continue'}
                   </p>
