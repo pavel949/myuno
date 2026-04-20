@@ -36,6 +36,26 @@ export const GOV_LABELS = {
     ru: `${n} сервисов`,
     en: `${n} services`,
   }),
+  /** Canonical results counter for MiniAppLayout.subtitle across all verticals. */
+  resultsCount: (n: number) => ({
+    ru: `Найдено: ${n}`,
+    en: `${n} results`,
+  }),
+} as const;
+
+/** Nominal-phrase button labels — never use imperatives in UI. */
+export const GOV_BUTTONS = {
+  open: { ru: 'Перейти к разделу', en: 'Go to section' },
+  openShort: { ru: 'Перейти', en: 'Open' },
+  all: { ru: 'Все записи', en: 'All entries' },
+  list: { ru: 'Список', en: 'List' },
+  browseDeals: { ru: 'Список сделок', en: 'Deal list' },
+  submitDeal: { ru: 'Подача проекта', en: 'Project submission' },
+  raiseCapital: { ru: 'Подача проекта', en: 'Project submission' },
+  dashboard: { ru: 'Личный кабинет', en: 'Cabinet' },
+  myOrders: { ru: 'Мои заказы', en: 'My orders' },
+  backToCatalog: { ru: 'Вернуться в каталог', en: 'Back to catalog' },
+  continue: { ru: 'Продолжить', en: 'Continue' },
 } as const;
 
 export const GOV_GLOSSARY = {
