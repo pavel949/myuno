@@ -22,11 +22,11 @@ const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 const HREFS: Record<string, string> = {
-  trust_clearview: '/property/clearview',
-  trust_fairprice: `${APP_ROUTES.PRICING ?? '/pricing'}#trust`,
-  trust_roi: `${APP_ROUTES.PRICING ?? '/pricing'}#trust`,
-  trust_duediligence: `${APP_ROUTES.PRICING ?? '/pricing'}#trust`,
-  trust_worldcheck: `${APP_ROUTES.PRICING ?? '/pricing'}#trust`,
+  trust_clearview: APP_ROUTES.CLEARVIEW,
+  trust_fairprice: `${APP_ROUTES.PRICING}#trust`,
+  trust_roi: `${APP_ROUTES.PRICING}#trust`,
+  trust_duediligence: `${APP_ROUTES.PRICING}#trust`,
+  trust_worldcheck: `${APP_ROUTES.PRICING}#trust`,
 };
 
 const VISIBLE_IDS = ['trust_clearview', 'trust_fairprice', 'trust_roi', 'trust_duediligence'];
