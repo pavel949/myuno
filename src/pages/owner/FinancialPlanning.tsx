@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -25,15 +26,22 @@ import { PortfolioRollupPanel } from '@/components/owner/financial-planning/Port
 import { AIAdvisorPanel } from '@/components/owner/financial-planning/AIAdvisorPanel';
 import { exportFinancialModelExcel, downloadBlob } from '@/utils/exportFinancialModelExcel';
 import { generateInvestorDeckPDF, downloadPdfBlob } from '@/utils/exportInvestorDeckPDF';
-import { Download, Save, LineChart, Sliders, Table, Wallet, Layers, Calculator, Dice5, Building2, FileText } from 'lucide-react';
+import { Download, Save, LineChart, Sliders, Table, Wallet, Layers, Calculator, Dice5, Building2, FileText, Building } from 'lucide-react';
 import { toast } from 'sonner';
+import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 export default function FinancialPlanning() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const currentYear = new Date().getFullYear();
+  const navigate = useNavigate();
+  const driversSectionRef = useRef<HTMLDivElement>(null);
+  const [activeTab, setActiveTab] = useState('overview');
 
-  const { data: properties } = useOwnerProperties();
+  const { data: properties, isLoading: propertiesLoading } = useOwnerProperties();
+  const noProperties = !propertiesLoading && Array.isArray(properties) && properties.length === 0;
   const [propertyId, setPropertyId] = useState<string | undefined>();
   const [year, setYear] = useState<number>(currentYear);
   const [scenario, setScenario] = useState<Scenario>('base');
@@ -146,6 +154,13 @@ export default function FinancialPlanning() {
 
   const years = [currentYear - 1, currentYear, currentYear + 1, currentYear + 2];
 
+  const handleGoToDrivers = () => {
+    setActiveTab('drivers');
+    setTimeout(() => {
+      driversSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+  };
+
   return (
     <PageContainer>
       <PageHeader
@@ -154,6 +169,67 @@ export default function FinancialPlanning() {
         showBack fallbackPath="/mc/finance"
       />
 
+      {!noProperties && (
+      <Card className="mb-4 border-dashed bg-muted/25">
+        <CardContent className="pt-4 pb-4 space-y-2">
+          <p className="text-sm text-foreground">
+            {isRu
+              ? 'Модель привязана к объекту, году и сценарию (базовый / оптимистичный / пессимистичный). Нажмите «Сохранить», чтобы записать её в базу. Черновик в интерфейсе есть сразу после выбора параметров.'
+              : 'The model is tied to a property, year, and scenario (base / optimistic / pessimistic). Click Save to persist it. A draft appears in the UI as soon as you pick these settings.'}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            {isRu
+              ? 'Вкладка «Портфель» — сводка по сохранённым моделям объектов и бюджетам за выбранный год и сценарий, а не отдельная запись «модели портфеля».'
+              : 'The Portfolio tab rolls up saved per-property models and budgets for the selected year and scenario—it is not a separate stored “portfolio model”.'}
+          </p>
+          <p className="text-sm text-muted-foreground flex flex-wrap items-center gap-x-1 gap-y-1">
+            <span>
+              {isRu
+                ? 'PDF/Excel отчёты по периодам и фактам — в разделе «Отчёты».'
+                : 'Formal PDF/Excel reports by period and actuals are under Reports.'}
+            </span>
+            <Button
+              type="button"
+              variant="link"
+              className="h-auto p-0 text-sm font-medium"
+              onClick={() => navigate(APP_ROUTES.MC_REPORTS)}
+            >
+              {isRu ? 'Открыть отчёты' : 'Open reports'}
+            </Button>
+          </p>
+          {propertyId ? (
+            <Button type="button" variant="secondary" size="sm" className="mt-1" onClick={handleGoToDrivers}>
+              {isRu ? 'Перейти к драйверам' : 'Go to drivers'}
+            </Button>
+          ) : null}
+        </CardContent>
+      </Card>
+      )}
+
+      {propertiesLoading ? (
+        <div className="space-y-3 mb-4">
+          <Skeleton className="h-9 w-full max-w-md" />
+          <Skeleton className="h-64 w-full rounded-xl" />
+        </div>
+      ) : noProperties ? (
+        <Card className="border-dashed">
+          <CardContent className="py-12 text-center space-y-4">
+            <Building className="h-12 w-12 mx-auto text-muted-foreground opacity-60" />
+            <div className="space-y-1">
+              <p className="font-medium">{isRu ? 'Нет объектов для модели' : 'No properties yet'}</p>
+              <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                {isRu
+                  ? 'Добавьте объект в каталоге, чтобы строить финансовую модель, сохранять сценарии и видеть сводку портфеля.'
+                  : 'Add a property in the catalog to build a financial model, save scenarios, and use portfolio rollup.'}
+              </p>
+            </div>
+            <Button type="button" onClick={() => navigate(APP_ROUTES.MC_PROPERTIES)}>
+              {isRu ? 'Перейти к объектам' : 'Go to properties'}
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+      <>
       <div className="flex flex-wrap gap-2 mb-4">
         <Select value={propertyId} onValueChange={setPropertyId}>
           <SelectTrigger className="w-full sm:w-[220px] h-9"><SelectValue placeholder={isRu ? 'Объект' : 'Property'} /></SelectTrigger>
@@ -181,7 +257,7 @@ export default function FinancialPlanning() {
       {!propertyId ? (
         <div className="text-center py-12 text-muted-foreground">{isRu ? 'Выберите объект' : 'Select a property'}</div>
       ) : (
-        <Tabs defaultValue="overview" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
             <TabsList className="inline-flex w-auto sm:grid sm:grid-cols-9 mb-4 sm:w-full">
               <TabsTrigger value="overview" className="text-xs gap-1"><LineChart className="h-3.5 w-3.5" /><span className="hidden sm:inline">{isRu ? 'Обзор' : 'Overview'}</span></TabsTrigger>
@@ -198,7 +274,7 @@ export default function FinancialPlanning() {
 
           <TabsContent value="overview"><PlanningOverview computed={computed} actuals={actuals ?? null} /></TabsContent>
 
-          <TabsContent value="drivers">
+          <TabsContent value="drivers" ref={driversSectionRef}>
             <div className="mb-2 flex items-center gap-2">
               <Badge variant="secondary" className="text-[10px]">{isRu ? 'Сценарий' : 'Scenario'}: {scenario}</Badge>
               <p className="text-xs text-muted-foreground">{isRu ? 'Нажмите «Сохранить» после изменений' : 'Click Save after changes'}</p>
@@ -249,6 +325,8 @@ export default function FinancialPlanning() {
             />
           </TabsContent>
         </Tabs>
+      )}
+      </>
       )}
     </PageContainer>
   );

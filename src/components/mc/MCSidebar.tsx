@@ -176,6 +176,7 @@ const PATH_TO_MODULE: Record<string, ModuleKey> = {
   [APP_ROUTES.MC_INVOICES]: 'finance',
   [APP_ROUTES.MC_REPORTS]: 'reports',
   [APP_ROUTES.MC_BUDGET]: 'finance',
+  [APP_ROUTES.MC_FINANCE_PLANNING]: 'finance',
   [APP_ROUTES.MC_STAFF]: 'staff',
 };
 
@@ -245,7 +246,12 @@ export function MCSidebar() {
           )}>
             <item.icon className="h-4 w-4" strokeWidth={active ? 2.2 : 1.8} />
           </div>
-          <span>{isRussian ? item.titleRu : item.title}</span>
+          <span
+            className="min-w-0 flex-1 truncate"
+            title={isRussian ? item.titleRu : item.title}
+          >
+            {isRussian ? item.titleRu : item.title}
+          </span>
           {badgeCount > 0 && (
             <span className="ml-auto flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground px-1">
               {badgeCount > 99 ? '99+' : badgeCount}
@@ -283,9 +289,16 @@ export function MCSidebar() {
           <Collapsible key={group.label} defaultOpen={getGroupDefaultOpen(group)} className="group/collapsible">
             <SidebarGroup>
               <CollapsibleTrigger asChild>
-                <SidebarGroupLabel className="cursor-pointer hover:bg-sidebar-accent rounded-md px-2 py-1.5 flex items-center justify-between text-xs font-medium text-sidebar-foreground/70 uppercase tracking-wider">
-                  {isRussian ? group.labelRu : group.label}
-                  {!isCollapsed && <ChevronDown className="h-3.5 w-3.5 transition-transform group-data-[state=open]/collapsible:rotate-180" />}
+                <SidebarGroupLabel className="cursor-pointer hover:bg-sidebar-accent rounded-md px-2 py-1.5 flex w-full min-w-0 items-center gap-2 text-xs font-medium text-sidebar-foreground/70 uppercase tracking-wider">
+                  <span
+                    className="min-w-0 flex-1 truncate text-left"
+                    title={isRussian ? group.labelRu : group.label}
+                  >
+                    {isRussian ? group.labelRu : group.label}
+                  </span>
+                  {!isCollapsed && (
+                    <ChevronDown className="h-3.5 w-3.5 shrink-0 transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                  )}
                 </SidebarGroupLabel>
               </CollapsibleTrigger>
               <CollapsibleContent>

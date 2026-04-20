@@ -1,5 +1,9 @@
 /**
- * QuickActionsGrid — mobile 2x2 compact + secondary pills row; grouped rows for investor/business primary persona.
+ * QuickActionsGrid — mobile 2×2 + pills; desktop tiles.
+ *
+ * Options come from `selectActionsForPersonas(personas)` in `quickActionsCatalog`:
+ * primary persona is `personas[0]` (sorted). Catalog actions merge with score boost for primary;
+ * investor / business / real_estate_developer use grouped picker + section labels; others use flat grid by score.
  */
 import React, { useCallback, memo, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -43,6 +47,15 @@ function getActionsForRole(role: AppRole): CatalogQuickAction[] {
     default:
       return DEFAULT_ACTIONS;
   }
+}
+
+/** Desktop: avoid empty columns when a group has few tiles (was always `grid-cols-4`). */
+function groupedSectionGridClass(actionCount: number, isDesktop: boolean): string {
+  if (!isDesktop) return 'grid-cols-2';
+  if (actionCount <= 1) return 'grid-cols-1 w-full max-w-[220px]';
+  if (actionCount === 2) return 'grid-cols-2';
+  if (actionCount === 3) return 'grid-cols-3';
+  return 'grid-cols-4';
 }
 
 interface QuickActionsGridProps {
@@ -228,7 +241,7 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
               <div key={section.groupId} className="space-y-1.5">
                 <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground px-0.5">{label}</p>
                 <motion.div
-                  className={cn('grid gap-3', isDesktop ? 'grid-cols-4' : 'grid-cols-2')}
+                  className={cn('grid gap-3', groupedSectionGridClass(section.actions.length, isDesktop))}
                   variants={staggerContainerVariants}
                   initial="initial"
                   animate="animate"
@@ -245,7 +258,7 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
         {isDesktop ? (
           <motion.div
             key={`more-${moreAction.id}`}
-            className="grid gap-3 grid-cols-4 lg:grid-cols-8 pt-1 border-t border-border/40"
+            className="grid gap-3 grid-cols-1 w-fit max-w-full pt-1 border-t border-border/40"
             variants={staggerContainerVariants}
             initial="initial"
             animate="animate"

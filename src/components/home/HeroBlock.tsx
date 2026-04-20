@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useCallback, useState } from 'react';
+import React, { memo, useMemo, useCallback, useState, useEffect } from 'react';
 import { MapPin, Sun, Cloud, CloudRain, Calendar, Trophy, Flame, Search, ArrowRight, Plane } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -48,7 +48,16 @@ function HeroSearchInput({ isRu }: { isRu: boolean }) {
 
 function PersonaSwitcher({ isRu, layout }: { isRu: boolean; layout: 'scroll' | 'wrap' }) {
   const { personas, setPersonas, isSetting } = useUserPersonas();
-  const activePersona = useMemo(() => personas[0] ?? ('tourist' as UserPersona), [personas]);
+  const [pendingPersona, setPendingPersona] = useState<UserPersona | null>(null);
+
+  useEffect(() => {
+    if (!isSetting) setPendingPersona(null);
+  }, [isSetting]);
+
+  const activePersona = useMemo(() => {
+    if (isSetting && pendingPersona) return pendingPersona;
+    return personas[0] ?? ('tourist' as UserPersona);
+  }, [isSetting, pendingPersona, personas]);
 
   const isWrap = layout === 'wrap';
 
@@ -74,7 +83,10 @@ function PersonaSwitcher({ isRu, layout }: { isRu: boolean; layout: 'scroll' | '
             <button
               key={p}
               type="button"
-              onClick={() => setPersonas([p])}
+              onClick={() => {
+                setPendingPersona(p);
+                setPersonas([p]);
+              }}
               disabled={isSetting}
               className={cn(
                 'flex items-center gap-1.5 px-3 py-2 sm:px-3.5 sm:py-2.5 min-h-10 rounded-[var(--radius-full)] shrink-0 transition-all duration-200 border',

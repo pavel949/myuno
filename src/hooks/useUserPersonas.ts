@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -41,12 +42,25 @@ function persistGuestPersonas(next: UserPersona[]) {
   window.dispatchEvent(new Event(GUEST_PERSONAS_CHANGED_EVENT));
 }
 
+/** Stable order so `personas[0]` matches product order (hero + quick actions primary). */
+export function sortPersonasStable(list: UserPersona[]): UserPersona[] {
+  return [...list].sort((a, b) => {
+    const ia = PERSONA_OPTIONS.indexOf(a);
+    const ib = PERSONA_OPTIONS.indexOf(b);
+    const sa = ia === -1 ? 999 : ia;
+    const sb = ib === -1 ? 999 : ib;
+    return sa - sb;
+  });
+}
+
 // Guest personas hook (localStorage-based)
 function useGuestPersonas() {
-  const [personas, setPersonas] = useState<UserPersona[]>(() => readGuestPersonas());
+  const [personas, setPersonas] = useState<UserPersona[]>(() =>
+    sortPersonasStable(readGuestPersonas()),
+  );
 
   useEffect(() => {
-    const syncFromStorage = () => setPersonas(readGuestPersonas());
+    const syncFromStorage = () => setPersonas(sortPersonasStable(readGuestPersonas()));
 
     const handleStorage = (event: StorageEvent) => {
       if (event.key === GUEST_PERSONAS_KEY) syncFromStorage();
@@ -65,17 +79,18 @@ function useGuestPersonas() {
 
   const togglePersona = useCallback((persona: UserPersona) => {
     setPersonas(prev => {
-      const newPersonas = prev.includes(persona)
-        ? prev.filter(p => p !== persona)
-        : [...prev, persona];
+      const newPersonas = sortPersonasStable(
+        prev.includes(persona) ? prev.filter(p => p !== persona) : [...prev, persona],
+      );
       persistGuestPersonas(newPersonas);
       return newPersonas;
     });
   }, []);
 
   const setPersonasAll = useCallback((newPersonas: UserPersona[]) => {
-    setPersonas(newPersonas);
-    persistGuestPersonas(newPersonas);
+    const sorted = sortPersonasStable(newPersonas);
+    setPersonas(sorted);
+    persistGuestPersonas(sorted);
   }, []);
 
   return {
@@ -106,7 +121,8 @@ export function useUserPersonas() {
         .eq('is_active', true);
       
       if (error) throw error;
-      return (data || []).map(r => r.persona as UserPersona);
+      const raw = (data || []).map(r => r.persona as UserPersona);
+      return sortPersonasStable(raw);
     },
     enabled: !!user?.id,
     staleTime: 60000,
@@ -144,10 +160,10 @@ export function useUserPersonas() {
       const previousPersonas = queryClient.getQueryData<UserPersona[]>(queryKey);
       
       queryClient.setQueryData<UserPersona[]>(queryKey, (old = []) => {
-        if (old.includes(persona)) {
-          return old.filter(p => p !== persona);
-        }
-        return [...old, persona];
+        const next = old.includes(persona)
+          ? old.filter(p => p !== persona)
+          : [...old, persona];
+        return sortPersonasStable(next);
       });
       
       return { previousPersonas };
@@ -156,6 +172,8 @@ export function useUserPersonas() {
       if (context?.previousPersonas) {
         queryClient.setQueryData(queryKey, context.previousPersonas);
       }
+      console.error('togglePersona', err);
+      toast.error('Не удалось обновить роль. Попробуйте ещё раз.');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
@@ -188,16 +206,17 @@ export function useUserPersonas() {
     onMutate: async (newPersonas) => {
       await queryClient.cancelQueries({ queryKey });
       const previousPersonas = queryClient.getQueryData<UserPersona[]>(queryKey);
-      queryClient.setQueryData<UserPersona[]>(queryKey, newPersonas);
+      queryClient.setQueryData<UserPersona[]>(queryKey, sortPersonasStable(newPersonas));
       return { previousPersonas };
     },
     onError: (_err, _newPersonas, context) => {
       if (context?.previousPersonas) {
         queryClient.setQueryData(queryKey, context.previousPersonas);
       }
+      toast.error('Не удалось сохранить роль. Попробуйте ещё раз.');
     },
     onSuccess: (newPersonas) => {
-      queryClient.setQueryData(queryKey, newPersonas);
+      queryClient.setQueryData(queryKey, sortPersonasStable(newPersonas));
     },
   });
 

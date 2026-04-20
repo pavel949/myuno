@@ -361,23 +361,27 @@ const queryClient = useQueryClient();
         </div>
       </div>
 
-      {/* Action buttons */}
-      <div className="flex gap-2 mb-4 flex-wrap">
-        <Button className="flex-1 min-w-0" onClick={() => navigate('/mc/properties/new')}>
-          <Plus className="h-4 w-4 mr-2" />
+      {/* Action buttons: full-width primary on small screens — avoids flex-1 + nowrap clipping (see Button base styles) */}
+      <div className="flex flex-wrap gap-2 mb-4">
+        <Button
+          className="w-full sm:flex-1 sm:min-w-[12rem] whitespace-normal min-h-10 h-auto py-2.5 overflow-visible text-center leading-snug"
+          onClick={() => navigate('/mc/properties/new')}
+        >
+          <Plus className="h-4 w-4 mr-2 shrink-0" />
           {isRu ? 'Добавить объект' : 'Add Property'}
         </Button>
-        <Button variant="outline" onClick={() => navigate('/mc/properties/import')}>
-          <Download className="h-4 w-4 mr-2" />
+        <Button variant="outline" className="flex-1 min-w-0 sm:flex-initial" onClick={() => navigate('/mc/properties/import')}>
+          <Download className="h-4 w-4 mr-2 shrink-0" />
           {isRu ? 'Импорт' : 'Import'}
         </Button>
         {allProperties && allProperties.length > 0 && (
           <>
             <Button
               variant={selectionMode ? 'default' : 'outline'}
+              className="flex-1 min-w-0 sm:flex-initial"
               onClick={() => selectionMode ? exitSelectionMode() : setSelectionMode(true)}
             >
-              <CheckSquare className="h-4 w-4 mr-2" />
+              <CheckSquare className="h-4 w-4 mr-2 shrink-0" />
               {selectionMode ? (isRu ? 'Отмена' : 'Cancel') : (isRu ? 'Выбрать' : 'Select')}
             </Button>
             <Button

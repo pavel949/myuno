@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useOwnerProperties } from '@/hooks/usePropertyCare';
@@ -29,13 +30,15 @@ import {
 } from '@/components/ui/dialog';
 import {
   Target, Plus, Save, Download, TrendingUp, TrendingDown,
-  ArrowUpRight, ArrowDownRight, Loader2, CalendarDays,
+  ArrowUpRight, ArrowDownRight, Loader2, CalendarDays, LineChart,
 } from 'lucide-react';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { format, startOfMonth, addMonths, subMonths } from 'date-fns';
 import { ru as ruLocale, enUS } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function BudgetPage() {
+  const navigate = useNavigate();
   const { language } = useLanguage();
   const { user } = useAuth();
   const isRu = language === 'ru';
@@ -152,7 +155,7 @@ export default function BudgetPage() {
 
   return (
     <PageContainer>
-      <BackButton fallbackPath="/owner/finances" />
+      <BackButton fallbackPath="/mc/finance" />
 
       <div className="flex items-center justify-between mb-4">
         <div>
@@ -163,6 +166,18 @@ export default function BudgetPage() {
           <p className="text-sm text-muted-foreground">
             {isRu ? 'План vs Факт по категориям' : 'Plan vs Actual by category'}
           </p>
+          <button
+            type="button"
+            onClick={() => navigate(APP_ROUTES.MC_FINANCE_PLANNING)}
+            className="mt-2 inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors text-left"
+          >
+            <LineChart className="h-3.5 w-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+            <span>
+              {isRu
+                ? 'Плановые статьи попадают в P&L финансовой модели — открыть планирование'
+                : 'Planned lines feed the financial model P&L — open planning'}
+            </span>
+          </button>
         </div>
         <div className="flex gap-2">
           {comparison.length > 0 && (

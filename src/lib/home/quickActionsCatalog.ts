@@ -219,9 +219,9 @@ export const PET_OWNER_ACTIONS: CatalogQuickAction[] = [
 ];
 
 export const REAL_ESTATE_DEVELOPER_ACTIONS: CatalogQuickAction[] = [
-  { id: 'dev-landing', icon: PenLine, label: 'List a project', labelRu: 'Разместить проект', path: APP_ROUTES.FOR_REAL_ESTATE_DEVELOPERS, accentColor: '#0EA5E9', groupId: 'general' },
-  { id: 'dev-portal', icon: LayoutDashboard, label: 'My cabinet', labelRu: 'Мой кабинет', path: APP_ROUTES.DEVELOPER_PORTAL, accentColor: '#4E7BFF', groupId: 'general' },
-  { id: 'dev-leads', icon: Users, label: 'My leads', labelRu: 'Мои лиды', path: APP_ROUTES.DEVELOPER_PORTAL_LEADS, accentColor: '#A855F7', groupId: 'general' },
+  { id: 'dev-landing', icon: PenLine, label: 'List a project', labelRu: 'Разместить проект', path: APP_ROUTES.FOR_REAL_ESTATE_DEVELOPERS, accentColor: '#0EA5E9', groupId: 'growth' },
+  { id: 'dev-portal', icon: LayoutDashboard, label: 'My cabinet', labelRu: 'Мой кабинет', path: APP_ROUTES.DEVELOPER_PORTAL, accentColor: '#4E7BFF', groupId: 'growth' },
+  { id: 'dev-leads', icon: Users, label: 'My leads', labelRu: 'Мои лиды', path: APP_ROUTES.DEVELOPER_PORTAL_LEADS, accentColor: '#A855F7', groupId: 'growth' },
   { id: 'dev-projects', icon: Building2, label: 'My projects', labelRu: 'Мои проекты', path: `${APP_ROUTES.DEVELOPER_PORTAL}/projects`, accentColor: '#06B6D4', groupId: 'general' },
   { id: 'developers-dir', icon: BookOpen, label: 'All developers', labelRu: 'Все застройщики', path: APP_ROUTES.DEVELOPERS, accentColor: '#78716C', groupId: 'general' },
   { id: 'consultation', icon: PhoneCall, label: 'Book a call', labelRu: 'Записаться на звонок', path: APP_ROUTES.PROPERTY_CONSULTATION, accentColor: '#F59E0B', groupId: 'general' },
@@ -409,7 +409,8 @@ export function selectActionsForPersonas(personas: UserPersona[]): QuickActionSe
 
   const scored = scoreMergedActions(personas);
   const primary = personas[0];
-  const useGroupedPicker = primary === 'investor' || primary === 'business';
+  const useGroupedPicker =
+    primary === 'investor' || primary === 'business' || primary === 'real_estate_developer';
 
   const actions = useGroupedPicker ? pickGroupedInvestorBusiness(scored) : pickFlatByScore(scored);
 
