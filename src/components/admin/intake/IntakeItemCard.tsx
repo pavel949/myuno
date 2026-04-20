@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,14 +9,14 @@ import { IntakeConfidenceBar } from './IntakeConfidenceBar';
 import { IntakeHealthBadge } from './IntakeHealthBadge';
 import { INTAKE_VERTICALS } from '@/lib/intakeVerticals';
 import { validateIntakeItem, describeValidation } from '@/lib/intake/validateItem';
-import { 
-  Check, 
-  X, 
-  Pencil, 
-  AlertTriangle, 
+import {
+  Check,
+  X,
+  Pencil,
+  AlertTriangle,
   ExternalLink,
   CheckCircle,
-  XCircle
+  XCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -26,21 +26,27 @@ interface IntakeItemCardProps {
   onDiscard: () => void;
   onEdit: () => void;
   isApproving?: boolean;
+  /** Enable touch-swipe gestures: → approve, ← discard. Mobile only. */
+  swipeable?: boolean;
 }
 
-export function IntakeItemCard({ 
-  item, 
-  onApprove, 
-  onDiscard, 
+const SWIPE_TRIGGER_PX = 90;
+const SWIPE_LOCK_PX = 12;
+
+export function IntakeItemCard({
+  item,
+  onApprove,
+  onDiscard,
   onEdit,
-  isApproving 
+  isApproving,
+  swipeable = false,
 }: IntakeItemCardProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  
+
   const vertical = INTAKE_VERTICALS.find(v => v.id === item.detectedVertical);
-  const title = isRu 
-    ? item.suggestedTitle?.ru || item.suggestedTitle?.en 
+  const title = isRu
+    ? item.suggestedTitle?.ru || item.suggestedTitle?.en
     : item.suggestedTitle?.en || item.suggestedTitle?.ru;
 
   // Get display fields (top 4 most important)
