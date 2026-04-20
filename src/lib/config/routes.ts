@@ -415,7 +415,9 @@ export const APP_ROUTES = {
   MC_MANAGEMENT_TERMS: '/mc/management-terms',
   MC_VENDOR_ACQUISITION: '/mc/vendor-acquisition',
   MC_SUPPORT_CHAT: '/mc/support-chat',
-  MC_BOOKINGS: '/mc/bookings',
+  /** @deprecated Use MC_BOOKINGS_LIST. Kept for backward compatibility — the
+   *  /mc/bookings route only redirects to /mc/bookings-list. */
+  MC_BOOKINGS: '/mc/bookings-list',
 
   // ── MC Performance & Settings ──
   MC_BOOKINGS_LIST: '/mc/bookings-list',

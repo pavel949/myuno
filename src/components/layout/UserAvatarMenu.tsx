@@ -62,7 +62,8 @@ const ROLE_SWITCH_CONFIG: Partial<Record<AppRole, {
     descEn: 'Your own properties & bookings',
     descRu: 'Личные объекты: брони и сервисы',
     icon: Building2,
-    path: '/owner',
+    // /owner redirects to /mc — point directly to avoid an extra hop.
+    path: '/mc',
   },
   admin: {
     labelEn: 'Admin Panel',
@@ -102,7 +103,8 @@ const ROLE_SWITCH_CONFIG: Partial<Record<AppRole, {
     descEn: 'Capital & portfolio tools',
     descRu: 'Капитал и портфель',
     icon: LineChart,
-    path: '/investor',
+    // /investor route does not exist — investor dashboard lives under /invest/dashboard.
+    path: APP_ROUTES.INVEST_DASHBOARD,
   },
 };
 
