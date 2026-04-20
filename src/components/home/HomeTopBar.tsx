@@ -63,7 +63,7 @@ export function HomeTopBar({ personas, onRoleSheetOpen }: HomeTopBarProps) {
                 return (
                   <div
                     key={p}
-                    className="w-[26px] h-[26px] rounded-full flex items-center justify-center font-display text-[11px] font-bold text-[#08101E] border-2 border-background"
+                    className="w-[26px] h-[26px] rounded-full flex items-center justify-center font-display text-[11px] font-bold text-background border-2 border-background"
                     style={{ background: meta.color, marginLeft: i === 0 ? 0 : -9, zIndex: 10 - i }}
                   >
                     {meta.glyph}

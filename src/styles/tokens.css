@@ -83,13 +83,36 @@
   --accent-amber: 38 92% 50%;
   --icon-dark: 216 60% 7%;
 
-  /* ═══ Cluster Accents ═══ */
-  --cluster-arrive: 157 100% 42%;
-  --cluster-live: 224 100% 65%;
-  --cluster-legal: 38 92% 50%;
-  --cluster-invest: 270 60% 60%;
-  --cluster-manage: 190 80% 55%;
-  --cluster-build: 0 80% 60%;
+  /* ═══ Cluster Accents — locked per DESIGN_BIBLE §7.4 ═══ */
+  --cluster-arrive: 157 100% 42%;   /* #00D68F mint */
+  --cluster-live: 224 100% 65%;     /* #4E7BFF blue */
+  --cluster-legal: 38 92% 50%;      /* #F59E0B amber */
+  --cluster-invest: 258 90% 76%;    /* #A78BFA violet */
+  --cluster-manage: 184 80% 44%;    /* #16BDCA cyan-teal */
+  --cluster-build: 0 84% 60%;       /* #EF4444 red */
+
+  /* ═══ Bible §7.2 — extended semantic tokens ═══ */
+  --foreground-secondary: 214 33% 82%;   /* #C4D0E0 */
+  --disabled-foreground: 215 17% 43%;    /* #5A6A80 */
+  --inset: 213 53% 10%;                  /* #0C1827 — inset sections */
+
+  /* Muted accent tints (rgba 0.15 over base) */
+  --primary-muted: 157 100% 42% / 0.15;
+  --accent-muted: 224 100% 65% / 0.15;
+  --success-muted: 152 58% 42% / 0.15;
+  --warning-muted: 38 92% 50% / 0.15;
+  --destructive-muted: 0 72% 51% / 0.15;
+
+  --border-accent: 157 100% 42% / 0.4;
+
+  /* Glass surfaces */
+  --glass-light: 0 0% 100% / 0.04;
+  --glass-medium: 0 0% 100% / 0.07;
+  --glass-strong: 0 0% 100% / 0.12;
+
+  /* Overlays */
+  --overlay-dark: 0 0% 0% / 0.5;
+  --overlay-darker: 0 0% 0% / 0.75;
 
   /* State tokens */
   --color-disabled: 213 38% 25%;
@@ -110,8 +133,8 @@
   --sidebar-border: 0 0% 100% / 0.07;
   --sidebar-ring: var(--ring);
 
-  /* Popover */
-  --popover: 213 38% 15%;
+  /* Popover — Bible §7.2 #1A2941 */
+  --popover: 219 47% 19%;
   --popover-foreground: 222 73% 96%;
 
   /* Chart palette */
@@ -227,13 +250,29 @@ html.light {
   --accent-amber: 38 85% 45%;
   --icon-dark: 60 3% 10%;
 
-  /* Cluster Accents — richer for light bg */
-  --cluster-arrive: 168 80% 30%;
-  --cluster-live: 38 92% 44%;
-  --cluster-legal: 201 90% 40%;
-  --cluster-invest: 221 83% 53%;
-  --cluster-manage: 263 70% 50%;
-  --cluster-build: 347 77% 50%;
+  /* Cluster Accents — locked per Bible §7.4 (same hues, light-mode-tuned L) */
+  --cluster-arrive: 157 100% 32%;   /* #00D68F darkened for white bg */
+  --cluster-live: 224 80% 55%;      /* #4E7BFF darkened */
+  --cluster-legal: 38 92% 44%;      /* #F59E0B darkened */
+  --cluster-invest: 258 70% 58%;    /* #A78BFA darkened */
+  --cluster-manage: 184 80% 36%;    /* #16BDCA darkened */
+  --cluster-build: 0 84% 50%;       /* #EF4444 darkened */
+
+  /* Bible §7.2 light extended */
+  --foreground-secondary: 25 7% 25%;
+  --disabled-foreground: 25 5% 55%;
+  --inset: 40 8% 94%;
+  --primary-muted: 160 79% 24% / 0.12;
+  --accent-muted: 224 55% 32% / 0.12;
+  --success-muted: 142 72% 36% / 0.12;
+  --warning-muted: 38 92% 44% / 0.12;
+  --destructive-muted: 0 84% 51% / 0.12;
+  --border-accent: 160 79% 24% / 0.35;
+  --glass-light: 0 0% 0% / 0.03;
+  --glass-medium: 0 0% 0% / 0.06;
+  --glass-strong: 0 0% 0% / 0.1;
+  --overlay-dark: 0 0% 0% / 0.4;
+  --overlay-darker: 0 0% 0% / 0.6;
 
   /* State tokens */
   --color-disabled: 40 10% 85%;
