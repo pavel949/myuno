@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { BackButton } from '@/components/uno/BackButton';
+import { CalmClusterHero } from '@/components/uno/CalmClusterHero';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { Scale, Plane, Calculator, FileSearch, Shield, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -34,16 +34,13 @@ export default function LegalClusterPage() {
   return (
     <AppLayout>
       <div className="pb-24">
-        <div className="relative bg-gradient-to-br from-sky-600 via-sky-500 to-blue-600 p-6 pt-16 pb-10">
-          <BackButton fallbackPath="/" variant="overlay" className="absolute top-4 left-4" />
-          <div className="text-white text-center">
-            <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-3">
-              <Scale className="w-7 h-7" />
-            </div>
-            <h1 className="text-2xl font-bold mb-1">{t ? 'ЛЕГАЛЬНО' : 'STAY LEGAL'}</h1>
-            <p className="text-white/80 text-sm">{t ? 'Визы, налоги и юридическая поддержка' : 'Visas, taxes & legal support'}</p>
-          </div>
-        </div>
+        <CalmClusterHero
+          clusterId="legal"
+          icon={Scale}
+          title={t ? 'Юридические сервисы' : 'Legal services'}
+          subtitle={t ? 'Визы, налоги, договоры, страхование, юристы' : 'Visas, taxes, contracts, insurance, lawyers'}
+          fallbackPath="/"
+        />
 
         <div className="px-4 py-3">
           <ClusterBreadcrumb clusterId="legal" serviceLabelRu="Все сервисы" serviceLabelEn="All services" />
