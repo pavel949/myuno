@@ -21,7 +21,7 @@ function useHasUnread(userId: string | undefined) {
         .from('orders')
         .select('id', { count: 'exact', head: true })
         .eq('customer_user_id', userId)
-        .in('status', ['pending', 'pending_review', 'action_required']);
+        .in('status', ['pending', 'awaiting_client_payment', 'pending_deposit']);
       return (count ?? 0) > 0;
     },
     enabled: !!userId,
