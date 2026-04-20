@@ -11,6 +11,29 @@ import { createStripeClient } from "./stripe.ts";
 import { createClient } from "./supabase.ts";
 import { withRateLimit, RATE_LIMITS } from "./rate-limit.ts";
 
+const ALLOWED_CHECKOUT_ORIGINS = new Set([
+  "https://myuno.app",
+  "https://www.myuno.app",
+  "https://uno-connect-hub.lovable.app",
+  "https://id-preview--dcc2b024-7627-4ad9-a915-a3df3dd839f0.lovable.app",
+  "https://dcc2b024-7627-4ad9-a915-a3df3dd839f0.lovableproject.com",
+  "http://localhost:8080",
+  "http://localhost:5173",
+  "http://localhost:3000",
+]);
+
+function buildCheckoutCors(req: Request): Record<string, string> {
+  const origin = req.headers.get("Origin") ?? "";
+  const allowed = ALLOWED_CHECKOUT_ORIGINS.has(origin) ? origin : "https://myuno.app";
+  return {
+    "Access-Control-Allow-Origin": allowed,
+    "Access-Control-Allow-Headers":
+      "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+    "Vary": "Origin",
+  };
+}
+
+/** @deprecated Kept for backward compat — prefer dynamic per-request headers. */
 export const CHECKOUT_CORS = {
   "Access-Control-Allow-Origin": "https://myuno.app",
   "Access-Control-Allow-Headers":
@@ -71,8 +94,10 @@ export function createCheckoutHandler(
   handler: CheckoutHandler,
 ) {
   return async (req: Request): Promise<Response> => {
+    const cors = buildCheckoutCors(req);
+
     if (req.method === "OPTIONS") {
-      return new Response(null, { headers: CHECKOUT_CORS });
+      return new Response(null, { headers: cors });
     }
 
     const supabaseClient = createClient(
@@ -103,7 +128,7 @@ export function createCheckoutHandler(
         req,
         functionName,
         RATE_LIMITS.payment,
-        CHECKOUT_CORS,
+        cors,
         user.id,
       );
       if (rateLimitResponse) return rateLimitResponse;
@@ -175,7 +200,7 @@ export function createCheckoutHandler(
       return new Response(
         JSON.stringify({ url: session.url, sessionId: session.id }),
         {
-          headers: { ...CHECKOUT_CORS, "Content-Type": "application/json" },
+          headers: { ...cors, "Content-Type": "application/json" },
           status: 200,
         },
       );
@@ -183,7 +208,7 @@ export function createCheckoutHandler(
       const msg = error instanceof Error ? error.message : "Unknown error";
       console.error(`[${functionName}] Error:`, msg);
       return new Response(JSON.stringify({ error: msg }), {
-        headers: { ...CHECKOUT_CORS, "Content-Type": "application/json" },
+        headers: { ...cors, "Content-Type": "application/json" },
         status: 400,
       });
     }
