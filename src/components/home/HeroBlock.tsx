@@ -47,8 +47,9 @@ function HeroSearchInput({ isRu }: { isRu: boolean }) {
 }
 
 function PersonaSwitcher({ isRu, layout }: { isRu: boolean; layout: 'scroll' | 'wrap' }) {
-  const { personas, setPersonas, isSetting } = useUserPersonas();
-  const activePersona = useMemo(() => personas[0] ?? ('tourist' as UserPersona), [personas]);
+  const { personas, togglePersona, isToggling } = useUserPersonas();
+  // A persona is active if it's in the selected list. Multiple may be active at once.
+  const activeSet = useMemo(() => new Set(personas), [personas]);
 
   const isWrap = layout === 'wrap';
 
@@ -69,13 +70,14 @@ function PersonaSwitcher({ isRu, layout }: { isRu: boolean; layout: 'scroll' | '
         {PERSONA_OPTIONS.map((p) => {
           const info = PERSONA_INFO[p];
           const Icon = PERSONA_ICONS[info.icon] || Plane;
-          const isActive = activePersona === p;
+          const isActive = activeSet.has(p);
           return (
             <button
               key={p}
               type="button"
-              onClick={() => setPersonas([p])}
-              disabled={isSetting}
+              onClick={() => togglePersona(p)}
+              disabled={isToggling}
+              aria-pressed={isActive}
               className={cn(
                 'flex items-center gap-1.5 px-3 py-2 sm:px-3.5 sm:py-2.5 min-h-10 rounded-[var(--radius-full)] shrink-0 transition-all duration-200 border',
                 !isWrap && 'snap-start',
