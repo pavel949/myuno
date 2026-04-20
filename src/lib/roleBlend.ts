@@ -23,12 +23,12 @@ export const CLUSTERS = [
   // Each cluster: 1 clear benefit + concrete examples. No overlaps between clusters.
   // Arrive = first 7 days. Live = daily life. Manage = your property. Invest = capital.
   // Legal = paperwork only. Build = for developers.
-  { id: 'arrive' as ClusterId, labelEn: 'Arrive', labelRu: 'Прибытие',   sub: 'Land smoothly: transfer, SIM, eSIM, first-week setup',  subRu: 'Мягкая посадка: трансфер, SIM, eSIM, первая неделя',     accent: '#00D68F', route: '/life/arrival',    items: '5' },
-  { id: 'live'   as ClusterId, labelEn: 'Live',   labelRu: 'Жизнь',      sub: 'Daily essentials: cleaning, food, beauty, kids, pets',  subRu: 'Каждый день: уборка, доставка, красота, дети, питомцы',  accent: '#4E7BFF', route: '/discover',        items: '14' },
-  { id: 'manage' as ClusterId, labelEn: 'Manage', labelRu: 'Аренда',     sub: 'Earn from your villa: PMS, calendar, cleaning, payouts',subRu: 'Доход с виллы: PMS, календарь, клининг, выплаты',        accent: '#16BDCA', route: '/mc',              items: '9' },
-  { id: 'invest' as ClusterId, labelEn: 'Invest', labelRu: 'Инвестиции', sub: 'Buy off-plan with verified ROI, yield and exit data',   subRu: 'Покупка off-plan с проверенным ROI и доходностью',       accent: '#A78BFA', route: '/invest',          items: '7' },
-  { id: 'legal'  as ClusterId, labelEn: 'Legal',  labelRu: 'Документы',  sub: 'Stay legal: visa renewal, TM30, contracts, tax filing', subRu: 'Без проблем: продление визы, TM30, контракты, налоги',   accent: '#F59E0B', route: '/life/relocation', items: '6' },
-  { id: 'build'  as ClusterId, labelEn: 'Build',  labelRu: 'Стройка',    sub: 'For developers: launch projects, leads, sales analytics',subRu: 'Для застройщиков: проекты, лиды, аналитика продаж',     accent: '#EF4444', route: '/property/offplan', items: '4' },
+  { id: 'arrive' as ClusterId, labelEn: 'Arrive', labelRu: 'Прибытие',   sub: 'Land smoothly: transfer, SIM, eSIM, first-week setup',  subRu: 'Трансфер, SIM-карта, обмен валюты, заселение',           accent: '#00D68F', route: '/life/arrival',    items: '5' },
+  { id: 'live'   as ClusterId, labelEn: 'Live',   labelRu: 'Жизнь',      sub: 'Daily essentials: cleaning, food, beauty, kids, pets',  subRu: 'Уборка, доставка еды, салоны, школы, ветеринар',         accent: '#4E7BFF', route: '/discover',        items: '14' },
+  { id: 'manage' as ClusterId, labelEn: 'Manage', labelRu: 'Управление', sub: 'Earn from your villa: PMS, calendar, cleaning, payouts',subRu: 'Доход с виллы: бронирования, уход, отчёты, выплаты',     accent: '#16BDCA', route: '/mc',              items: '9' },
+  { id: 'invest' as ClusterId, labelEn: 'Invest', labelRu: 'Инвестиции', sub: 'Buy off-plan with verified ROI, yield and exit data',   subRu: 'Новостройки с проверенной доходностью и сроком выхода',  accent: '#A78BFA', route: '/invest',          items: '7' },
+  { id: 'legal'  as ClusterId, labelEn: 'Legal',  labelRu: 'Документы',  sub: 'Stay legal: visa renewal, TM30, contracts, tax filing', subRu: 'Продление визы, регистрация TM30, договоры, налоги',     accent: '#F59E0B', route: '/life/relocation', items: '6' },
+  { id: 'build'  as ClusterId, labelEn: 'Build',  labelRu: 'Стройка',    sub: 'For developers: launch projects, leads, sales analytics',subRu: 'Застройщикам: запуск проектов, заявки, аналитика продаж',accent: '#EF4444', route: '/property/offplan', items: '4' },
 ];
 
 const CLUSTER_SCORES: Record<UserPersona, Record<ClusterId, number>> = {
