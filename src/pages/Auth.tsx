@@ -358,6 +358,9 @@ export default function Auth() {
                   </p>
                 </div>
 
+                <GoogleSignInButton redirectTo={`${window.location.origin}${redirectPath}`} />
+                <OAuthDivider />
+
                 <form onSubmit={handleLogin} name="login" className="space-y-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium">{t('auth.email')}</label>
