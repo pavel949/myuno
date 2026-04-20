@@ -265,5 +265,7 @@ export function IntakeItemCard({
         )}
       </CardContent>
     </Card>
+    </div>
   );
 }
+
