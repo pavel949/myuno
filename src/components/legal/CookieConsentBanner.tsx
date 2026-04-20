@@ -45,8 +45,9 @@ export const CookieConsentBanner = forwardRef<HTMLDivElement>(function CookieCon
       const timer = setTimeout(() => {
         const hasBlockingModal = document.querySelector('[data-radix-dialog-overlay]');
         if (hasBlockingModal) {
+          const pollStart = Date.now();
           intervalId = setInterval(() => {
-            if (!document.querySelector('[data-radix-dialog-overlay]')) {
+            if (!document.querySelector('[data-radix-dialog-overlay]') || Date.now() - pollStart > 10000) {
               setVisible(true);
               if (intervalId) clearInterval(intervalId);
               intervalId = null;
