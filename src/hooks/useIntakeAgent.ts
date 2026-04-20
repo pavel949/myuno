@@ -195,11 +195,24 @@ export function useIntakeAgent() {
   }, []);
 
   // Approve single item - creates listing
-  const approveItem = useCallback(async (itemId: string) => {
+  const approveItem = useCallback(async (itemId: string, opts?: { silent?: boolean }) => {
     if (!session) return false;
     
     const item = session.items.find(i => i.id === itemId);
     if (!item) return false;
+
+    // P0: Validation gate — block invalid items
+    const validation = validateIntakeItem(item);
+    if (!validation.valid) {
+      if (!opts?.silent) {
+        toast.error(
+          language === 'ru'
+            ? `Не хватает обязательных полей: ${validation.missing.join(', ')}`
+            : `Missing required fields: ${validation.missing.join(', ')}`
+        );
+      }
+      return false;
+    }
 
     setIsApproving(true);
     
@@ -220,30 +233,39 @@ export function useIntakeAgent() {
       if (!fields.description_en && item.suggestedDescription?.en) {
         fields.description_en = item.suggestedDescription.en;
       }
+      if (!fields.description_ru && item.suggestedDescription?.ru) {
+        fields.description_ru = item.suggestedDescription.ru;
+      }
       // Attach resolved cloud images to listing
       if (!fields.images && item.sourceImages && item.sourceImages.length > 0) {
         fields.images = item.sourceImages;
       }
-      // Set first image as main image if not already set
+      // Set first image as cover/main image if not already set
+      if (!fields.cover_image && item.sourceImages && item.sourceImages.length > 0) {
+        fields.cover_image = item.sourceImages[0];
+      }
       if (!fields.image && item.sourceImages && item.sourceImages.length > 0) {
         fields.image = item.sourceImages[0];
       }
 
-      if (!fields.description_ru && item.suggestedDescription?.ru) {
-        fields.description_ru = item.suggestedDescription.ru;
-      }
+      // P0 FIX: Resolve target table from vertical config (not the vertical id itself!)
+      // Edge function returns detectedVertical=vertical.id (e.g. "cleaning_services"),
+      // but bulk-import expects the actual table name (e.g. "cleaning_providers").
+      const verticalConfig = getVerticalById(item.detectedVertical);
+      const targetTable = verticalConfig?.table ?? item.detectedVertical;
 
-      // P0 FIX: Validate table before calling bulk-import
-      if (!isValidIntakeTable(item.detectedVertical)) {
-        const errorMsg = `Unknown vertical table: ${item.detectedVertical}. Valid tables: ${VALID_INTAKE_TABLES.slice(0, 5).join(', ')}...`;
-        toast.error(errorMsg);
+      if (!isValidIntakeTable(targetTable)) {
+        const errorMsg = language === 'ru'
+          ? `Неизвестная таблица: ${targetTable} (вертикаль ${item.detectedVertical}). Доступно: ${VALID_INTAKE_TABLES.slice(0, 5).join(', ')}...`
+          : `Unknown table: ${targetTable} (vertical ${item.detectedVertical}). Valid: ${VALID_INTAKE_TABLES.slice(0, 5).join(', ')}...`;
+        if (!opts?.silent) toast.error(errorMsg);
         return false;
       }
 
       // Call bulk-import to create the listing
       const { data, error: fnError } = await supabase.functions.invoke('bulk-import', {
         body: {
-          table: item.detectedVertical,
+          table: targetTable,
           records: [fields]
         }
       });
@@ -253,7 +275,7 @@ export function useIntakeAgent() {
       if (data.inserted > 0) {
         updateItem(itemId, { 
           status: 'created',
-          createdListingTable: item.detectedVertical
+          createdListingTable: targetTable
         });
         
         setSession(prev => prev ? {
@@ -264,18 +286,20 @@ export function useIntakeAgent() {
         // Auto-create CRM contact from extracted contact info
         await createCrmContactFromItem(item);
 
-        toast.success(
-          language === 'ru' 
-            ? 'Листинг создан и отправлен на модерацию' 
-            : 'Listing created and sent to moderation'
-        );
+        if (!opts?.silent) {
+          toast.success(
+            language === 'ru' 
+              ? 'Листинг создан и отправлен на модерацию' 
+              : 'Listing created and sent to moderation'
+          );
+        }
         return true;
       } else {
         throw new Error(data.errors?.[0] || 'Failed to create listing');
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to approve';
-      toast.error(message);
+      if (!opts?.silent) toast.error(message);
       return false;
     } finally {
       setIsApproving(false);
