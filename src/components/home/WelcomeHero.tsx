@@ -62,7 +62,7 @@ export const WelcomeHero = memo(function WelcomeHero() {
 
         {/* Headline */}
         <div className="max-w-lg">
-          <h1 className="text-2xl md:text-4xl font-bold text-foreground leading-tight font-display">
+          <h1 className="text-3xl md:text-[2.5rem] font-bold text-foreground leading-tight font-display">
             {isRu ? 'Одна платформа для жизни на Пхукете' : 'One platform for life in Phuket'}
           </h1>
           <p className="text-sm md:text-base text-muted-foreground mt-2 leading-relaxed">

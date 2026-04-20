@@ -112,11 +112,9 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
             {user ? (
               <UserAvatarMenu />
             ) : (
-              <Link to={APP_ROUTES.AUTH}>
-                <Button size="sm" className="h-8 text-xs px-3 lg:px-4 ml-0.5 lg:ml-1 rounded-[var(--radius-full)] font-semibold bg-primary text-primary-foreground hover:bg-primary-hover">
-                  {t('auth.login')}
-                </Button>
-              </Link>
+              <Button asChild size="sm" className="h-11 text-xs px-3 lg:px-4 ml-0.5 lg:ml-1 rounded-[var(--radius-full)] font-semibold bg-primary text-primary-foreground hover:bg-primary-hover">
+                <Link to={APP_ROUTES.AUTH}>{t('auth.login')}</Link>
+              </Button>
             )}
           </div>
         </div>

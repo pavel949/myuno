@@ -55,7 +55,7 @@ export const CookieConsentBanner = forwardRef<HTMLDivElement>(function CookieCon
           return;
         }
         setVisible(true);
-      }, 1500);
+      }, 5000);
       return () => {
         clearTimeout(timer);
         if (intervalId) clearInterval(intervalId);
