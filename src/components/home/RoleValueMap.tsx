@@ -33,7 +33,7 @@ export function RoleValueMap({ personas, onMore }: RoleValueMapProps) {
       <div className="rounded-[16px] bg-card border border-border p-4">
         <div className="flex items-baseline justify-between mb-3">
           <div className="text-[11px] tracking-[0.12em] uppercase text-muted-foreground/60 font-semibold">
-            {isRu ? 'Что это закрывает для вас' : 'What this closes for you'}
+            {isRu ? 'Услуги по вашему профилю' : 'Services for your profile'}
           </div>
           <div className="text-[11px] text-muted-foreground/50 truncate ml-2 min-w-0">
             {headerRoles}
@@ -87,7 +87,7 @@ export function RoleValueMap({ personas, onMore }: RoleValueMapProps) {
             onClick={onMore}
             className="mt-3 w-full text-[11px] text-muted-foreground hover:text-foreground transition-colors text-left"
           >
-            {isRu ? `Ещё ${remaining} ${remaining === 1 ? 'роль' : 'ролей'} →` : `+${remaining} more role${remaining === 1 ? '' : 's'} →`}
+            {isRu ? `Ещё категорий: ${remaining} →` : `More categories: ${remaining} →`}
           </button>
         )}
       </div>

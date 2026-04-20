@@ -87,8 +87,8 @@ export function WorkspaceHomeBanner() {
     >
       <p className="text-sm text-muted-foreground">
         {isRu
-          ? 'Переход в рабочий кабинет. Главная остаётся доступной.'
-          : 'Open your workspace. The main view stays available.'}
+          ? 'Доступен переход в служебный кабинет. Главная остаётся открытой.'
+          : 'Service cabinet is available. The main view remains open.'}
       </p>
       <div className="flex flex-wrap items-center gap-2">
         {links.map(({ to, labelEn, labelRu, icon: Icon }) => (
