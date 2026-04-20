@@ -700,4 +700,22 @@ export const th: Record<string, string> = {
   'account.menu.listWithUno': 'ลงประกาศกับ UNO',
 
   'developerPortal.backToProperty': 'ศูนย์อสังหาริมทรัพย์',
+
+  // Auth value panel — quiet trust onboarding
+  'auth.value.title': 'ทุกสิ่งสำหรับการใช้ชีวิตในภูเก็ต ในแอปเดียว',
+  'auth.value.subtitle': 'เช่า บริการ กฎหมาย และการลงทุน — ในบัญชีเดียว',
+  'auth.value.bullets.1': 'มากกว่า 40 บริการในบัญชีเดียว',
+  'auth.value.bullets.2': 'การสนับสนุนทางกฎหมายและการชำระเงินที่ปลอดภัย',
+  'auth.value.bullets.3': 'ฝ่ายสนับสนุน 24/7',
+  'auth.value.cluster.arrive': 'มาถึง',
+  'auth.value.cluster.live': 'ที่พัก',
+  'auth.value.cluster.manage': 'จัดการ',
+  'auth.value.cluster.invest': 'ลงทุน',
+  'auth.value.cluster.legal': 'กฎหมาย',
+  'auth.value.cluster.build': 'ก่อสร้าง',
+  'auth.trust.secure': 'เข้ารหัส',
+  'auth.trust.noSpam': 'ไม่มีสแปม',
+  'auth.trust.free': 'บัญชีฟรี',
+  'auth.social.users': 'หลายพันครอบครัว',
+  'auth.social.location': 'ภูเก็ต ประเทศไทย · ตั้งแต่ปี 2024',
 };
