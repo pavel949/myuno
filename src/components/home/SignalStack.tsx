@@ -35,7 +35,7 @@ export function SignalStack({ personas, onRoleSheetOpen }: SignalStackProps) {
         onClick={onRoleSheetOpen}
         className="mt-2.5 w-full flex items-center justify-between px-3 py-2.5 rounded-[10px] border border-dashed border-border text-left hover:border-border-strong transition-colors"
       >
-        <span className="text-[11.5px] text-muted-foreground">{isRu ? 'Роли и порядок отображения' : 'Roles and display order'}</span>
+        <span className="text-[11.5px] text-muted-foreground">{isRu ? 'Категории и порядок отображения' : 'Categories and display order'}</span>
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
           <path d="M5 3l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.4"/>
         </svg>
@@ -49,9 +49,9 @@ function SignalHero({ persona, sig, isRu }: { persona: UserPersona; sig: RoleSig
   const meta = ROLE_META[persona];
   if (!meta) return null;
   const stateLabel = {
-    live: isRu ? 'В работе' : 'Live',
-    warn: isRu ? 'Внимание' : 'Attention',
-    active: isRu ? 'В норме' : 'Stable',
+    live: isRu ? 'В работе' : 'In progress',
+    warn: isRu ? 'Требуется внимание' : 'Attention required',
+    active: isRu ? 'В норме' : 'Normal',
   }[sig.state];
 
   return (

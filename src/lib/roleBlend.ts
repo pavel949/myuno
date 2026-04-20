@@ -20,14 +20,14 @@ export const ROLE_META: Record<UserPersona, { short: string; glyph: string; colo
 export type ClusterId = 'live' | 'manage' | 'invest' | 'legal' | 'arrive' | 'build';
 
 export const CLUSTERS = [
-  // Calm infrastructure tone: each cluster names its domain, then lists what's inside.
-  // No verbs of promise ("earn", "grow"), no superlatives, no exclamations.
-  { id: 'arrive' as ClusterId, labelEn: 'Arrive', labelRu: 'Прибытие',   sub: 'Transfer, SIM, currency exchange, check-in',          subRu: 'Трансфер, SIM-карта, обмен валюты, заселение',           accent: '#00D68F', route: '/life/arrival',    items: '5'  },
-  { id: 'live'   as ClusterId, labelEn: 'Live',   labelRu: 'Повседневное', sub: 'Cleaning, delivery, salons, schools, vet care',     subRu: 'Уборка, доставка, салоны, школы, ветеринария',           accent: '#4E7BFF', route: '/discover',        items: '14' },
-  { id: 'manage' as ClusterId, labelEn: 'Manage', labelRu: 'Управление', sub: 'Bookings, housekeeping, statements, payouts',         subRu: 'Бронирования, уход, отчёты, выплаты собственнику',       accent: '#16BDCA', route: '/mc',              items: '9'  },
-  { id: 'invest' as ClusterId, labelEn: 'Invest', labelRu: 'Инвестиции', sub: 'New developments, yield models, exit horizons',       subRu: 'Новостройки, модели доходности, сроки выхода',           accent: '#A78BFA', route: '/invest',          items: '7'  },
-  { id: 'legal'  as ClusterId, labelEn: 'Legal',  labelRu: 'Документы',  sub: 'Visa, TM30, contracts, annual filings',               subRu: 'Виза, TM30, договоры, годовая отчётность',               accent: '#F59E0B', route: '/life/relocation', items: '6'  },
-  { id: 'build'  as ClusterId, labelEn: 'Build',  labelRu: 'Девелопмент', sub: 'Project listings, applications, sales pipeline',     subRu: 'Размещение проектов, заявки, воронка продаж',            accent: '#EF4444', route: '/property/offplan', items: '4' },
+  // Service-cabinet tone (см. mem://style/gov-tone-standard).
+  // Имя раздела + перечисление сервисов внутри. Без обещаний, без жаргона, аббревиатуры расшифрованы.
+  { id: 'arrive' as ClusterId, labelEn: 'Arrival',     labelRu: 'Прибытие',     sub: 'Transfer, SIM card, currency exchange, check-in',                       subRu: 'Трансфер, SIM-карта, обмен валюты, заселение',                                  accent: '#00D68F', route: '/life/arrival',     items: '5'  },
+  { id: 'live'   as ClusterId, labelEn: 'Daily life',  labelRu: 'Повседневные сервисы', sub: 'Cleaning, delivery, schools, clinics, vet care',                subRu: 'Уборка, доставка, школы, клиники, ветеринария',                                 accent: '#4E7BFF', route: '/discover',         items: '14' },
+  { id: 'manage' as ClusterId, labelEn: 'Property management', labelRu: 'Управление объектом', sub: 'Bookings, housekeeping, owner statements, payouts',     subRu: 'Бронирования, обслуживание, отчёты собственнику, выплаты',                      accent: '#16BDCA', route: '/mc',               items: '9'  },
+  { id: 'invest' as ClusterId, labelEn: 'Investments', labelRu: 'Инвестиции',   sub: 'Properties under construction, yield models, exit timelines',           subRu: 'Объекты на стадии строительства, модели доходности, сроки выхода',              accent: '#A78BFA', route: '/invest',           items: '7'  },
+  { id: 'legal'  as ClusterId, labelEn: 'Documents',   labelRu: 'Документы',    sub: 'Visa, place-of-stay notice (TM30), contracts, annual filings',         subRu: 'Виза, уведомление о месте пребывания (TM30), договоры, годовая отчётность',     accent: '#F59E0B', route: '/life/relocation',  items: '6'  },
+  { id: 'build'  as ClusterId, labelEn: 'Development', labelRu: 'Размещение проектов', sub: 'Project listing, inbound applications, applicant analytics',    subRu: 'Размещение проекта, входящие заявки, аналитика по заявкам',                     accent: '#EF4444', route: '/property/offplan', items: '4' },
 ];
 
 const CLUSTER_SCORES: Record<UserPersona, Record<ClusterId, number>> = {

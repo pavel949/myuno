@@ -1,195 +1,199 @@
 import type { UserPersona } from '@/hooks/useUserPersonas';
 
 /**
- * What myUNO closes for each role — facts + concrete mechanism.
- * Tone: calm infrastructure. No promises, no superlatives.
- * 4 points per role; component shows 3 when two roles are visible.
+ * Available services per profile category.
+ *
+ * Tone: service cabinet (Госуслуги / ГосТех). See mem://style/gov-tone-standard.
+ * - Impersonal phrasing. No "you receive / you get".
+ * - Every abbreviation is decoded on first mention.
+ * - No marketing metaphors.
+ * 4 entries per category; the component renders 3 when two categories are visible.
  */
 export const ROLE_VALUE_POINTS: Record<UserPersona, { ru: string[]; en: string[] }> = {
   tourist: {
     ru: [
-      'Трансфер и SIM при прилёте',
-      'Аренда транспорта и жильё на короткий срок',
-      'Рестораны, экскурсии, яхты с RU-поддержкой',
-      'SOS и страховка 24/7',
+      'Трансфер и SIM-карта при прилёте',
+      'Аренда транспорта и краткосрочное жильё',
+      'Рестораны, экскурсии, яхты — каталог с поддержкой на русском',
+      'Экстренная помощь и страхование, круглосуточно',
     ],
     en: [
-      'Transfer and SIM on arrival',
-      'Vehicle rental and short-term stays',
-      'Restaurants, tours, yachts with RU support',
-      'SOS and insurance, 24/7',
+      'Transfer and SIM card on arrival',
+      'Vehicle rental and short-term accommodation',
+      'Restaurants, tours, yachts — catalog with Russian-language support',
+      'Emergency assistance and insurance, around the clock',
     ],
   },
   resident: {
     ru: [
-      'Виза, TM30, налоги — напоминания и юрист',
-      'Быт: уборка, доставка, ветеринар',
-      'Школы, клиники, банки в каталоге RU',
-      'Долгосрочная аренда без посредников',
+      'Виза, уведомление о месте пребывания (TM30), налоги — напоминания и подача через юриста',
+      'Бытовые сервисы: уборка, доставка, ветеринарная помощь',
+      'Школы, клиники, банки — каталог на русском',
+      'Долгосрочная аренда — подбор без посредников',
     ],
     en: [
-      'Visa, TM30, taxes — reminders and lawyer',
-      'Daily essentials: cleaning, delivery, vet',
-      'Schools, clinics, banks in RU catalog',
-      'Long-term rent without intermediaries',
+      'Visa, place-of-stay notice (TM30), taxes — reminders and lawyer-assisted filing',
+      'Household services: cleaning, delivery, veterinary care',
+      'Schools, clinics, banks — Russian-language catalog',
+      'Long-term housing — direct selection without intermediaries',
     ],
   },
   property_owner: {
     ru: [
-      'Календарь и каналы продаж в одном месте',
-      'Уборки и ТО по расписанию',
+      'Календарь бронирований и размещение в одном кабинете',
+      'Уборка и техническое обслуживание по графику',
       'Отчёт собственнику и выплаты ежемесячно',
-      'Команда и доступы по ролям',
+      'Управление командой и доступами по ролям',
     ],
     en: [
-      'Calendar and sales channels in one place',
-      'Cleaning and maintenance on schedule',
+      'Booking calendar and listing distribution in one cabinet',
+      'Cleaning and technical maintenance on schedule',
       'Owner statement and monthly payouts',
-      'Team and role-based access',
+      'Team management and role-based access',
     ],
   },
   investor: {
     ru: [
-      'Каталог новостроек с проверенной доходностью',
-      'Юридическая чистота сделки и налоги',
-      'Управление объектом после покупки',
+      'Каталог объектов на стадии строительства с проверенной доходностью',
+      'Юридическое сопровождение сделки и расчёт налогов',
+      'Управление объектом после приобретения',
       'Вторичный рынок и переуступки',
     ],
     en: [
-      'New developments with verified yield',
-      'Clean legal title and tax handling',
-      'Property management after purchase',
+      'Catalog of properties under construction with verified yield',
+      'Legal support of the transaction and tax calculation',
+      'Property management after acquisition',
       'Secondary market and assignments',
     ],
   },
   real_estate_developer: {
     ru: [
       'Размещение проекта в каталоге',
-      'Заявки и воронка продаж',
-      'Аналитика просмотров и конверсии',
-      'Доступ к команде агентов платформы',
+      'Приём входящих заявок и обработка',
+      'Аналитика просмотров и заявок',
+      'Доступ к агентской сети сервиса',
     ],
     en: [
       'Project listing in the catalog',
-      'Inbound leads and sales pipeline',
-      'Views and conversion analytics',
+      'Inbound applications and processing',
+      'Views and applications analytics',
       'Access to the platform agent network',
     ],
   },
   local_services_provider: {
     ru: [
-      'Профиль и заявки от клиентов',
-      'Платежи и выплаты прозрачно',
-      'Подписка вместо комиссии за лид',
-      'Календарь занятости и команда',
+      'Профиль исполнителя и приём заявок от клиентов',
+      'Платежи и выплаты по прозрачному регламенту',
+      'Подписка на сервис вместо комиссии за заявку',
+      'Календарь занятости и управление командой',
     ],
     en: [
-      'Public profile and inbound requests',
-      'Payments and payouts, transparent',
-      'Subscription instead of per-lead commission',
-      'Availability calendar and team',
+      'Provider profile and inbound client requests',
+      'Payments and payouts under transparent rules',
+      'Subscription to the service instead of per-lead commission',
+      'Availability calendar and team management',
     ],
   },
   family: {
     ru: [
-      'Школы и детские активности',
-      'Медицина и страховка для детей',
-      'Семейное жильё на длительно',
-      'Няни и доставка проверенные',
+      'Школы и детские образовательные программы',
+      'Педиатрическая помощь и медицинское страхование',
+      'Семейное жильё на длительный срок',
+      'Проверенные няни и службы доставки',
     ],
     en: [
-      'Schools and kids activities',
-      'Pediatric care and insurance',
-      'Family housing for long stays',
-      'Vetted nannies and delivery',
+      'Schools and educational programs for children',
+      'Pediatric care and medical insurance',
+      'Family housing for long-term stays',
+      'Verified nannies and delivery services',
     ],
   },
   business: {
     ru: [
-      'Регистрация компании и бухучёт',
-      'Виза и WP для команды',
+      'Регистрация компании и бухгалтерское сопровождение',
+      'Виза и разрешение на работу для сотрудников',
       'Офис, склад, юридический адрес',
-      'Платёжные рельсы и комплаенс',
+      'Платёжная инфраструктура и комплаенс',
     ],
     en: [
-      'Company setup and accounting',
-      'Visa and work permits for the team',
-      'Office, warehouse, legal address',
-      'Payment rails and compliance',
+      'Company registration and accounting support',
+      'Visa and work permits for employees',
+      'Office, warehouse, registered legal address',
+      'Payment infrastructure and compliance',
     ],
   },
   nomad: {
     ru: [
-      'Коворкинги и быстрый интернет',
-      'Виза LTR / DTV — статус и продление',
-      'Жильё помесячно с гибким выездом',
-      'Налоговое резидентство — консультация',
+      'Рабочие пространства и проверенный интернет-доступ',
+      'Долгосрочная виза LTR и виза цифрового кочевника DTV — статус и продление',
+      'Жильё помесячно с гибкими сроками выезда',
+      'Налоговое резидентство — консультация специалиста',
     ],
     en: [
-      'Coworking and fast internet',
-      'LTR / DTV visa — status and renewal',
-      'Monthly stays with flexible checkout',
-      'Tax residency — advisory',
+      'Workspaces and verified internet access',
+      'Long-term visa (LTR) and digital nomad visa (DTV) — status and renewal',
+      'Monthly accommodation with flexible checkout',
+      'Tax residency — specialist consultation',
     ],
   },
   relocation: {
     ru: [
       'Виза и легализация документов',
-      'Жильё, школа, медицина первой недели',
-      'Перевозка вещей и питомцев',
+      'Жильё, школа, медицинская помощь в первую неделю',
+      'Перевозка имущества и сопровождение питомцев',
       'Открытие банковского счёта',
     ],
     en: [
       'Visa and document legalization',
-      'Housing, school, clinic in week one',
-      'Belongings and pet relocation',
+      'Housing, school, medical care during the first week',
+      'Belongings transport and pet relocation support',
       'Bank account opening',
     ],
   },
   couple: {
     ru: [
-      'Рестораны и спа на двоих',
-      'Виллы и романтические маршруты',
-      'Бронирование сюрпризов и трансфера',
+      'Рестораны и спа-программы для двоих',
+      'Виллы и подбор маршрутов на двоих',
+      'Бронирование сюрпризов и трансфер',
     ],
     en: [
-      'Restaurants and spa for two',
-      'Villas and romantic itineraries',
+      'Restaurants and spa programs for two',
+      'Villas and curated itineraries for two',
       'Surprise booking and transfer',
     ],
   },
   active: {
     ru: [
-      'Серфинг, MMA, фитнес — расписание',
-      'Аренда снаряжения и тренеры',
-      'Маршруты и экскурсии активного отдыха',
+      'Сёрфинг, единоборства, фитнес — расписание занятий',
+      'Аренда снаряжения и подбор тренеров',
+      'Маршруты активного отдыха и экскурсии',
     ],
     en: [
-      'Surf, MMA, gym — schedules',
-      'Gear rental and trainers',
+      'Surfing, martial arts, fitness — training schedule',
+      'Equipment rental and trainer selection',
       'Active outdoor routes and tours',
     ],
   },
   nightlife: {
     ru: [
-      'Клубы, бары, VIP-резервы',
-      'Трансфер ночью и обратно',
+      'Клубы, бары, бронирование VIP-зон',
+      'Ночной трансфер в обе стороны',
       'События и афиша на неделю',
     ],
     en: [
-      'Clubs, bars, VIP reservations',
-      'Late-night transfer both ways',
+      'Clubs, bars, VIP area reservations',
+      'Late-night transfer in both directions',
       'Weekly events and lineup',
     ],
   },
   pet_owner: {
     ru: [
-      'Ветеринар и груминг рядом',
-      'Жильё и отели pet-friendly',
+      'Ветеринарная помощь и груминг рядом',
+      'Жильё и отели, принимающие питомцев',
       'Перевозка и сопровождение питомца',
     ],
     en: [
-      'Vet and grooming nearby',
+      'Veterinary care and grooming nearby',
       'Pet-friendly housing and hotels',
       'Pet transport and travel support',
     ],
