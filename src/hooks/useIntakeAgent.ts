@@ -388,23 +388,55 @@ export function useIntakeAgent() {
     } : prev);
   }, [updateItem]);
 
-  // Approve all pending items
+  // Approve all pending items — skips invalid, tracks progress
   const approveAll = useCallback(async () => {
     if (!session) return;
-    
+
     const pendingItems = session.items.filter(i => i.status === 'pending');
+
+    // Pre-split: valid vs invalid
+    const validItems = pendingItems.filter(i => validateIntakeItem(i).valid);
+    const skippedCount = pendingItems.length - validItems.length;
+
+    setProgress({
+      total: validItems.length,
+      processed: 0,
+      failed: 0,
+      currentTitle: null,
+    });
+
     let successCount = 0;
-    
-    for (const item of pendingItems) {
-      const success = await approveItem(item.id);
+    let failedCount = 0;
+
+    for (let i = 0; i < validItems.length; i++) {
+      const item = validItems[i];
+      setProgress({
+        total: validItems.length,
+        processed: i,
+        failed: failedCount,
+        currentTitle: item.suggestedTitle?.en || item.suggestedTitle?.ru || null,
+      });
+
+      const success = await approveItem(item.id, { silent: true });
       if (success) successCount++;
+      else failedCount++;
     }
-    
+
+    setProgress({
+      total: validItems.length,
+      processed: validItems.length,
+      failed: failedCount,
+      currentTitle: null,
+    });
+
     toast.success(
       language === 'ru'
-        ? `Создано ${successCount} из ${pendingItems.length} листингов`
-        : `Created ${successCount} of ${pendingItems.length} listings`
+        ? `Создано ${successCount} из ${pendingItems.length}${skippedCount > 0 ? ` (${skippedCount} пропущено)` : ''}`
+        : `Created ${successCount} of ${pendingItems.length}${skippedCount > 0 ? ` (${skippedCount} skipped)` : ''}`
     );
+
+    // Auto-clear progress after 3s
+    setTimeout(() => setProgress(null), 3000);
   }, [session, approveItem, language]);
 
   // Calculate summary
@@ -418,10 +450,10 @@ export function useIntakeAgent() {
       ? session.items.reduce((sum, item) => sum + item.overallConfidence, 0) / session.items.length
       : 0,
     readyToApprove: session.items.filter(i => 
-      i.status === 'pending' && i.missingRequiredFields.length === 0
+      i.status === 'pending' && validateIntakeItem(i).valid
     ).length,
     needsReview: session.items.filter(i => 
-      i.status === 'pending' && (i.missingRequiredFields.length > 0 || i.overallConfidence < 0.7)
+      i.status === 'pending' && (!validateIntakeItem(i).valid || i.overallConfidence < 0.7)
     ).length,
   } : null;
 
@@ -429,6 +461,7 @@ export function useIntakeAgent() {
   const reset = useCallback(() => {
     setSession(null);
     setError(null);
+    setProgress(null);
   }, []);
 
   return {
@@ -436,6 +469,7 @@ export function useIntakeAgent() {
     summary,
     isProcessing,
     isApproving,
+    progress,
     error,
     analyze,
     updateItem,
