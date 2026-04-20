@@ -43,7 +43,7 @@ export default function PetsIndex() {
   return (
     <MiniAppLayout
       title={isRu ? 'Питомцы' : 'Pets'}
-      subtitle={`${filteredServices.length} ${isRu ? 'услуг' : 'services'}`}
+      subtitle={isRu ? `Найдено: ${filteredServices.length}` : `${filteredServices.length} results`}
       fallbackPath="/discover"
       showSearch={false}
       showHero={false}

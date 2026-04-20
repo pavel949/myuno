@@ -84,7 +84,7 @@ export default function BeautySpaIndex() {
   return (
     <MiniAppLayout
       title={isRu ? 'Красота и СПА' : 'Beauty & Spa'}
-      subtitle={`${filteredAndSorted.length} ${isRu ? 'салонов' : 'salons'}`}
+      subtitle={isRu ? `Найдено: ${filteredAndSorted.length}` : `${filteredAndSorted.length} results`}
       fallbackPath="/discover"
       showSearch
       searchValue={searchQuery}

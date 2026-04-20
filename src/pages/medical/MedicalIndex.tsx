@@ -124,7 +124,7 @@ export default function MedicalIndex() {
   return (
     <MiniAppLayout
       title={isRu ? 'Медицина' : 'Healthcare'}
-      subtitle={`${filteredAndSorted.length} ${isRu ? 'клиник' : 'clinics'}`}
+      subtitle={isRu ? `Найдено: ${filteredAndSorted.length}` : `${filteredAndSorted.length} results`}
       fallbackPath="/discover"
       showSearch
       searchValue={searchQuery}

@@ -118,7 +118,7 @@ export default function EventsIndex() {
   return (
     <MiniAppLayout
       title={isRu ? 'Афиша' : 'Events'}
-      subtitle={`${filteredAndSorted.length} ${isRu ? 'событий' : 'events'}`}
+      subtitle={isRu ? `Найдено: ${filteredAndSorted.length}` : `${filteredAndSorted.length} results`}
       fallbackPath="/discover"
       showSearch
       searchValue={searchQuery}

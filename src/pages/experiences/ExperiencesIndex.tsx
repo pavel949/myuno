@@ -94,7 +94,7 @@ export default function ExperiencesIndex() {
   return (
     <MiniAppLayout
       title={isRu ? 'Туры и активности' : 'Tours & Activities'}
-      subtitle={`${sorted.length} ${isRu ? 'впечатлений' : 'experiences'}`}
+      subtitle={isRu ? `Найдено: ${sorted.length}` : `${sorted.length} results`}
       fallbackPath="/"
       showSearch={false}
       showHero={false}

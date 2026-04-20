@@ -88,7 +88,7 @@ export default function YachtsIndex() {
   return (
     <MiniAppLayout
       title={isRu ? 'Чартер яхт' : 'Boat Charters'}
-      subtitle={`${filtered.length} ${isRu ? 'судов' : 'vessels'}`}
+      subtitle={isRu ? `Найдено: ${filtered.length}` : `${filtered.length} results`}
       fallbackPath={APP_ROUTES.HOME}
       showSearch={false}
       showHero={false}
