@@ -25,7 +25,7 @@ import {
   Handshake,
   Megaphone,
   ArrowRight,
-  Flame,
+  
   ChevronRight,
   Shield,
   FileText,
