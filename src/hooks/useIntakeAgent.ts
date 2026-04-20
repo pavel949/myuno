@@ -5,6 +5,15 @@ import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { isValidIntakeTable, VALID_INTAKE_TABLES } from '@/lib/providerIdMapping';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
+import { getVerticalById } from '@/lib/intakeVerticals';
+import { validateIntakeItem } from '@/lib/intake/validateItem';
+
+export interface IntakeProgress {
+  total: number;
+  processed: number;
+  failed: number;
+  currentTitle: string | null;
+}
 
 export interface ExtractedField {
   value: unknown;
@@ -67,6 +76,7 @@ export function useIntakeAgent() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [progress, setProgress] = useState<IntakeProgress | null>(null);
 
   // Analyze input (single or bulk)
   const analyze = useCallback(async (options: {
@@ -185,11 +195,24 @@ export function useIntakeAgent() {
   }, []);
 
   // Approve single item - creates listing
-  const approveItem = useCallback(async (itemId: string) => {
+  const approveItem = useCallback(async (itemId: string, opts?: { silent?: boolean }) => {
     if (!session) return false;
     
     const item = session.items.find(i => i.id === itemId);
     if (!item) return false;
+
+    // P0: Validation gate — block invalid items
+    const validation = validateIntakeItem(item);
+    if (!validation.valid) {
+      if (!opts?.silent) {
+        toast.error(
+          language === 'ru'
+            ? `Не хватает обязательных полей: ${validation.missing.join(', ')}`
+            : `Missing required fields: ${validation.missing.join(', ')}`
+        );
+      }
+      return false;
+    }
 
     setIsApproving(true);
     
@@ -210,30 +233,39 @@ export function useIntakeAgent() {
       if (!fields.description_en && item.suggestedDescription?.en) {
         fields.description_en = item.suggestedDescription.en;
       }
+      if (!fields.description_ru && item.suggestedDescription?.ru) {
+        fields.description_ru = item.suggestedDescription.ru;
+      }
       // Attach resolved cloud images to listing
       if (!fields.images && item.sourceImages && item.sourceImages.length > 0) {
         fields.images = item.sourceImages;
       }
-      // Set first image as main image if not already set
+      // Set first image as cover/main image if not already set
+      if (!fields.cover_image && item.sourceImages && item.sourceImages.length > 0) {
+        fields.cover_image = item.sourceImages[0];
+      }
       if (!fields.image && item.sourceImages && item.sourceImages.length > 0) {
         fields.image = item.sourceImages[0];
       }
 
-      if (!fields.description_ru && item.suggestedDescription?.ru) {
-        fields.description_ru = item.suggestedDescription.ru;
-      }
+      // P0 FIX: Resolve target table from vertical config (not the vertical id itself!)
+      // Edge function returns detectedVertical=vertical.id (e.g. "cleaning_services"),
+      // but bulk-import expects the actual table name (e.g. "cleaning_providers").
+      const verticalConfig = getVerticalById(item.detectedVertical);
+      const targetTable = verticalConfig?.table ?? item.detectedVertical;
 
-      // P0 FIX: Validate table before calling bulk-import
-      if (!isValidIntakeTable(item.detectedVertical)) {
-        const errorMsg = `Unknown vertical table: ${item.detectedVertical}. Valid tables: ${VALID_INTAKE_TABLES.slice(0, 5).join(', ')}...`;
-        toast.error(errorMsg);
+      if (!isValidIntakeTable(targetTable)) {
+        const errorMsg = language === 'ru'
+          ? `Неизвестная таблица: ${targetTable} (вертикаль ${item.detectedVertical}). Доступно: ${VALID_INTAKE_TABLES.slice(0, 5).join(', ')}...`
+          : `Unknown table: ${targetTable} (vertical ${item.detectedVertical}). Valid: ${VALID_INTAKE_TABLES.slice(0, 5).join(', ')}...`;
+        if (!opts?.silent) toast.error(errorMsg);
         return false;
       }
 
       // Call bulk-import to create the listing
       const { data, error: fnError } = await supabase.functions.invoke('bulk-import', {
         body: {
-          table: item.detectedVertical,
+          table: targetTable,
           records: [fields]
         }
       });
@@ -243,7 +275,7 @@ export function useIntakeAgent() {
       if (data.inserted > 0) {
         updateItem(itemId, { 
           status: 'created',
-          createdListingTable: item.detectedVertical
+          createdListingTable: targetTable
         });
         
         setSession(prev => prev ? {
@@ -254,18 +286,20 @@ export function useIntakeAgent() {
         // Auto-create CRM contact from extracted contact info
         await createCrmContactFromItem(item);
 
-        toast.success(
-          language === 'ru' 
-            ? 'Листинг создан и отправлен на модерацию' 
-            : 'Listing created and sent to moderation'
-        );
+        if (!opts?.silent) {
+          toast.success(
+            language === 'ru' 
+              ? 'Листинг создан и отправлен на модерацию' 
+              : 'Listing created and sent to moderation'
+          );
+        }
         return true;
       } else {
         throw new Error(data.errors?.[0] || 'Failed to create listing');
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to approve';
-      toast.error(message);
+      if (!opts?.silent) toast.error(message);
       return false;
     } finally {
       setIsApproving(false);
@@ -354,23 +388,55 @@ export function useIntakeAgent() {
     } : prev);
   }, [updateItem]);
 
-  // Approve all pending items
+  // Approve all pending items — skips invalid, tracks progress
   const approveAll = useCallback(async () => {
     if (!session) return;
-    
+
     const pendingItems = session.items.filter(i => i.status === 'pending');
+
+    // Pre-split: valid vs invalid
+    const validItems = pendingItems.filter(i => validateIntakeItem(i).valid);
+    const skippedCount = pendingItems.length - validItems.length;
+
+    setProgress({
+      total: validItems.length,
+      processed: 0,
+      failed: 0,
+      currentTitle: null,
+    });
+
     let successCount = 0;
-    
-    for (const item of pendingItems) {
-      const success = await approveItem(item.id);
+    let failedCount = 0;
+
+    for (let i = 0; i < validItems.length; i++) {
+      const item = validItems[i];
+      setProgress({
+        total: validItems.length,
+        processed: i,
+        failed: failedCount,
+        currentTitle: item.suggestedTitle?.en || item.suggestedTitle?.ru || null,
+      });
+
+      const success = await approveItem(item.id, { silent: true });
       if (success) successCount++;
+      else failedCount++;
     }
-    
+
+    setProgress({
+      total: validItems.length,
+      processed: validItems.length,
+      failed: failedCount,
+      currentTitle: null,
+    });
+
     toast.success(
       language === 'ru'
-        ? `Создано ${successCount} из ${pendingItems.length} листингов`
-        : `Created ${successCount} of ${pendingItems.length} listings`
+        ? `Создано ${successCount} из ${pendingItems.length}${skippedCount > 0 ? ` (${skippedCount} пропущено)` : ''}`
+        : `Created ${successCount} of ${pendingItems.length}${skippedCount > 0 ? ` (${skippedCount} skipped)` : ''}`
     );
+
+    // Auto-clear progress after 3s
+    setTimeout(() => setProgress(null), 3000);
   }, [session, approveItem, language]);
 
   // Calculate summary
@@ -384,10 +450,10 @@ export function useIntakeAgent() {
       ? session.items.reduce((sum, item) => sum + item.overallConfidence, 0) / session.items.length
       : 0,
     readyToApprove: session.items.filter(i => 
-      i.status === 'pending' && i.missingRequiredFields.length === 0
+      i.status === 'pending' && validateIntakeItem(i).valid
     ).length,
     needsReview: session.items.filter(i => 
-      i.status === 'pending' && (i.missingRequiredFields.length > 0 || i.overallConfidence < 0.7)
+      i.status === 'pending' && (!validateIntakeItem(i).valid || i.overallConfidence < 0.7)
     ).length,
   } : null;
 
@@ -395,6 +461,7 @@ export function useIntakeAgent() {
   const reset = useCallback(() => {
     setSession(null);
     setError(null);
+    setProgress(null);
   }, []);
 
   return {
@@ -402,6 +469,7 @@ export function useIntakeAgent() {
     summary,
     isProcessing,
     isApproving,
+    progress,
     error,
     analyze,
     updateItem,

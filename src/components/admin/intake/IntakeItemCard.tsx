@@ -7,6 +7,7 @@ import { IntakeItem } from '@/hooks/useIntakeAgent';
 import { IntakeVerticalBadge } from './IntakeVerticalBadge';
 import { IntakeConfidenceBar } from './IntakeConfidenceBar';
 import { INTAKE_VERTICALS } from '@/lib/intakeVerticals';
+import { validateIntakeItem, describeValidation } from '@/lib/intake/validateItem';
 import { 
   Check, 
   X, 
@@ -47,8 +48,10 @@ export function IntakeItemCard({
     .slice(0, 4);
 
   const isCompleted = item.status === 'created' || item.status === 'discarded';
-  const hasMissingFields = item.missingRequiredFields.length > 0;
-  const hasWarnings = item.warnings.length > 0;
+  const validation = validateIntakeItem(item);
+  const { missingText, warningText } = describeValidation(validation, isRu, vertical?.fieldLabels);
+  const hasMissingFields = !validation.valid;
+  const hasWarnings = validation.warnings.length > 0;
 
   return (
     <Card className={cn(
@@ -132,20 +135,20 @@ export function IntakeItemCard({
         {(hasMissingFields || hasWarnings) && (
           <div className="space-y-1">
             {hasMissingFields && (
-              <div className="flex items-start gap-2 text-xs text-warning bg-warning/10 p-2 rounded">
+              <div className="flex items-start gap-2 text-xs text-destructive bg-destructive/10 p-2 rounded">
                 <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
                 <span>
-                  {isRu ? 'Отсутствуют: ' : 'Missing: '}
-                  {item.missingRequiredFields.join(', ')}
+                  {isRu ? 'Не хватает: ' : 'Missing: '}
+                  {missingText}
                 </span>
               </div>
             )}
-            {hasWarnings && item.warnings.map((warning, i) => (
-              <div key={i} className="flex items-start gap-2 text-xs text-muted-foreground bg-muted/50 p-2 rounded">
+            {hasWarnings && (
+              <div className="flex items-start gap-2 text-xs text-warning bg-warning/10 p-2 rounded">
                 <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
-                <span>{warning}</span>
+                <span>{warningText}</span>
               </div>
-            ))}
+            )}
           </div>
         )}
 
@@ -172,8 +175,9 @@ export function IntakeItemCard({
             <Button
               size="sm"
               onClick={onApprove}
-              disabled={isApproving}
+              disabled={isApproving || hasMissingFields}
               className="flex-1"
+              title={hasMissingFields ? (isRu ? `Не хватает: ${missingText}` : `Missing: ${missingText}`) : undefined}
             >
               <Check className="h-3.5 w-3.5 mr-1" />
               {isRu ? 'Создать' : 'Create'}

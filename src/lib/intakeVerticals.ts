@@ -26,7 +26,7 @@ export const INTAKE_VERTICALS: VerticalConfig[] = [
   // 🚤 Yachts
   {
     id: 'yachts',
-    table: 'listings',
+    table: 'yachts',
     nameEn: 'Yachts',
     nameRu: 'Яхты',
     icon: '🚤',
@@ -87,7 +87,7 @@ export const INTAKE_VERTICALS: VerticalConfig[] = [
   // 🏡 Owner Properties
   {
     id: 'owner_properties',
-    table: 'properties',
+    table: 'owner_properties',
     nameEn: 'Owner Properties',
     nameRu: 'Объекты собственников',
     icon: '🏡',
@@ -169,7 +169,7 @@ export const INTAKE_VERTICALS: VerticalConfig[] = [
   // 🍽️ Restaurants
   {
     id: 'restaurants',
-    table: 'listings',
+    table: 'restaurants',
     nameEn: 'Restaurants',
     nameRu: 'Рестораны',
     icon: '🍽️',
@@ -228,7 +228,7 @@ export const INTAKE_VERTICALS: VerticalConfig[] = [
   // 🏥 Clinics
   {
     id: 'clinics',
-    table: 'listings',
+    table: 'clinics',
     nameEn: 'Clinics',
     nameRu: 'Клиники',
     icon: '🏥',
@@ -291,7 +291,7 @@ export const INTAKE_VERTICALS: VerticalConfig[] = [
   // 🚗 Vehicles
   {
     id: 'vehicles',
-    table: 'listings',
+    table: 'vehicles',
     nameEn: 'Transport',
     nameRu: 'Транспорт',
     icon: '🚗',
@@ -347,7 +347,7 @@ export const INTAKE_VERTICALS: VerticalConfig[] = [
   // 👶 Babysitters
   {
     id: 'babysitters',
-    table: 'listings',
+    table: 'babysitters',
     nameEn: 'Babysitters',
     nameRu: 'Няни',
     icon: '👶',
@@ -376,7 +376,7 @@ export const INTAKE_VERTICALS: VerticalConfig[] = [
   // 🧹 Cleaning Services
   {
     id: 'cleaning_services',
-    table: 'listings',
+    table: 'cleaning_providers',
     nameEn: 'Cleaning',
     nameRu: 'Уборка',
     icon: '🧹',
@@ -402,7 +402,7 @@ export const INTAKE_VERTICALS: VerticalConfig[] = [
   // ⚖️ Legal Services
   {
     id: 'legal_services',
-    table: 'legal_services',
+    table: 'lawyers',
     nameEn: 'Legal Services',
     nameRu: 'Юридические услуги',
     icon: '⚖️',
@@ -430,7 +430,7 @@ export const INTAKE_VERTICALS: VerticalConfig[] = [
   // 🐕 Pet Services
   {
     id: 'pet_services',
-    table: 'listings',
+    table: 'pet_services',
     nameEn: 'Pet Services',
     nameRu: 'Услуги для питомцев',
     icon: '🐕',
@@ -456,7 +456,7 @@ export const INTAKE_VERTICALS: VerticalConfig[] = [
   // 🎓 Education
   {
     id: 'education_providers',
-    table: 'listings',
+    table: 'education_centers',
     nameEn: 'Education',
     nameRu: 'Образование',
     icon: '🎓',
