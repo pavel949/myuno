@@ -156,6 +156,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Routes location={location} key={location.pathname}>
         {/* ── Core ── */}
         <Route path={APP_ROUTES.HOME} element={<PageTransition><HomeRouter /></PageTransition>} />
+        <Route path={APP_ROUTES.PRICING} element={<LazyPage><Pages.PricingPage /></LazyPage>} />
         <Route path="/welcome-landing" element={<LazyPage><WelcomeLanding /></LazyPage>} />
         <Route path={APP_ROUTES.AUTH} element={<PageTransition><Auth /></PageTransition>} />
         <Route path={APP_ROUTES.AUTH_ACCOUNT_TYPE} element={<LazyPage><Pages.AccountTypeSelection /></LazyPage>} />
@@ -265,6 +266,11 @@ export const AnimatedRoutes: React.FC = () => {
           {/* Resale / Secondary Market */}
           <Route path="resale" element={<LazyPage><Pages.ResaleIndex /></LazyPage>} />
           <Route path="resale/:id" element={<LazyPage><Pages.ResaleDetail /></LazyPage>} />
+
+          {/* RE-first revenue engine — explainer + ClearView product landing */}
+          <Route path="why-myuno" element={<LazyPage><Pages.WhyMyUno /></LazyPage>} />
+          <Route path="clearview" element={<LazyPage><Pages.ClearViewLanding /></LazyPage>} />
+          <Route path="clearview/apply" element={<LazyPage><Pages.ClearViewLanding /></LazyPage>} />
 
           {/* Commercial RE — persona-gated in nav, open via URL */}
           <Route path="commercial" element={<LazyPage><Pages.CommercialIndex /></LazyPage>} />
