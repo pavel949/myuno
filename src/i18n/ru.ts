@@ -425,4 +425,22 @@ export const ru: Record<string, string> = {
   'account.menu.listWithUno': 'Разместить объявление',
 
   'developerPortal.backToProperty': 'Хаб недвижимости',
+
+  // Auth value panel — quiet trust onboarding
+  'auth.value.title': 'Всё для жизни на Пхукете в одном приложении',
+  'auth.value.subtitle': 'Аренда, услуги, юридическое сопровождение и инвестиции — под одним аккаунтом.',
+  'auth.value.bullets.1': '40+ сервисов под одним аккаунтом',
+  'auth.value.bullets.2': 'Юридическое сопровождение и безопасные платежи',
+  'auth.value.bullets.3': 'Поддержка 24/7 на русском и английском',
+  'auth.value.cluster.arrive': 'Прилёт',
+  'auth.value.cluster.live': 'Жильё',
+  'auth.value.cluster.manage': 'Управление',
+  'auth.value.cluster.invest': 'Инвестиции',
+  'auth.value.cluster.legal': 'Право',
+  'auth.value.cluster.build': 'Строительство',
+  'auth.trust.secure': 'Шифрование данных',
+  'auth.trust.noSpam': 'Без спама',
+  'auth.trust.free': 'Аккаунт бесплатно',
+  'auth.social.users': 'Тысячи семей',
+  'auth.social.location': 'Phuket, Thailand · с 2024',
 };

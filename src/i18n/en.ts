@@ -425,4 +425,22 @@ export const en: Record<string, string> = {
   'account.menu.listWithUno': 'List with UNO',
 
   'developerPortal.backToProperty': 'Property hub',
+
+  // Auth value panel — quiet trust onboarding
+  'auth.value.title': 'Everything for life in Phuket, in one app',
+  'auth.value.subtitle': 'Rentals, services, legal support and investments — under one account.',
+  'auth.value.bullets.1': '40+ services under one account',
+  'auth.value.bullets.2': 'Legal support and secure payments',
+  'auth.value.bullets.3': '24/7 support in English and Russian',
+  'auth.value.cluster.arrive': 'Arrive',
+  'auth.value.cluster.live': 'Live',
+  'auth.value.cluster.manage': 'Manage',
+  'auth.value.cluster.invest': 'Invest',
+  'auth.value.cluster.legal': 'Legal',
+  'auth.value.cluster.build': 'Build',
+  'auth.trust.secure': 'Encrypted',
+  'auth.trust.noSpam': 'No spam',
+  'auth.trust.free': 'Free account',
+  'auth.social.users': 'Thousands of families',
+  'auth.social.location': 'Phuket, Thailand · since 2024',
 };
