@@ -18,16 +18,9 @@ export function ConciergeCard({ personas }: ConciergeCardProps) {
 
   if (dismissed) return null;
 
-  let nudge: string;
-  if (personas.length > 1) {
-    nudge = isRu
-      ? `Активно ${personas.length} ролей. Приоритет — «${primaryMeta?.labelRu || ''}», остальные ниже по порядку.`
-      : `${personas.length} roles active. Priority — ${primaryMeta?.label || ''}; the rest are stacked below.`;
-  } else {
-    nudge = isRu
-      ? `Текущий приоритет — «${primaryMeta?.labelRu || ''}». Порядок можно изменить в любой момент.`
-      : `Current priority — ${primaryMeta?.label || ''}. Reorder any time.`;
-  }
+  const nudge = isRu
+    ? 'Откройте каталог под вашу роль или задайте вопрос — отвечу по сервисам, ценам и срокам.'
+    : 'Open the catalog tuned to your role, or ask a question — I cover services, pricing and timing.';
 
   return (
     <div className="px-4 pb-5">
@@ -41,7 +34,7 @@ export function ConciergeCard({ personas }: ConciergeCardProps) {
         </div>
         <div className="flex-1">
           <div className="text-[10.5px] tracking-[0.08em] uppercase text-muted-foreground/50 font-semibold mb-1">
-            {isRu ? 'Помощник' : 'Assistant'}
+            {isRu ? 'Подсказка' : 'Hint'}
           </div>
           <div className="text-[13.5px] text-foreground leading-relaxed">{nudge}</div>
           <div className="flex gap-1.5 mt-2.5">
