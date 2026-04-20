@@ -5,6 +5,15 @@ import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { isValidIntakeTable, VALID_INTAKE_TABLES } from '@/lib/providerIdMapping';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
+import { getVerticalById } from '@/lib/intakeVerticals';
+import { validateIntakeItem } from '@/lib/intake/validateItem';
+
+export interface IntakeProgress {
+  total: number;
+  processed: number;
+  failed: number;
+  currentTitle: string | null;
+}
 
 export interface ExtractedField {
   value: unknown;
