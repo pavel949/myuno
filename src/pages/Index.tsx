@@ -1,9 +1,9 @@
 /**
- * Index — myUNO Home
+ * Index — myUNO Home (simplified)
  *
- * Role-blended home screen: signal stack, conditions strip, quick actions,
- * concierge nudge, activity feed, cluster grid, trust footer.
- * Business users stay on the marketplace; optional workspace banner links to /mc, /vendor, /my-property.
+ * Five blocks total: TopBar → HeroIntro → PrimaryActions → ActiveSituation → AllSections.
+ * One question per screen, the rule of three, progressive disclosure.
+ * Concierge is a floating button; legacy blocks moved to /discover and /account.
  */
 import React, { useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -11,13 +11,11 @@ import { useUserPersonas } from '@/hooks/useUserPersonas';
 
 import { HomeTopBar } from '@/components/home/HomeTopBar';
 import { WorkspaceHomeBanner } from '@/components/home/WorkspaceHomeBanner';
-import { SignalStack } from '@/components/home/SignalStack';
-import { RoleValueMap } from '@/components/home/RoleValueMap';
-import { NowInPhuket } from '@/components/home/NowInPhuket';
-import { QuickActionsBlended } from '@/components/home/QuickActionsBlended';
-import { ConciergeCard } from '@/components/home/ConciergeCard';
-import { ActivityFeed } from '@/components/home/ActivityFeed';
-import { ClusterGrid } from '@/components/home/ClusterGrid';
+import { HeroIntro } from '@/components/home/HeroIntro';
+import { PrimaryActions } from '@/components/home/PrimaryActions';
+import { ActiveSituation } from '@/components/home/ActiveSituation';
+import { AllSectionsAccordion } from '@/components/home/AllSectionsAccordion';
+import { FloatingConcierge } from '@/components/home/FloatingConcierge';
 import { TrustFooter } from '@/components/home/TrustFooter';
 import { RoleSheet } from '@/components/home/RoleSheet';
 
@@ -31,30 +29,24 @@ const Index = () => {
   return (
     <AppLayout showHeader={false} showFooter={false}>
       <div className="pb-24">
-        <HomeTopBar
-          personas={[...activePersonas]}
-          onRoleSheetOpen={() => setRoleSheetOpen(true)}
-        />
+        <div className="px-4">
+          <HomeTopBar
+            personas={[...activePersonas]}
+            onRoleSheetOpen={() => setRoleSheetOpen(true)}
+          />
+        </div>
         <WorkspaceHomeBanner />
-        <SignalStack
+        <HeroIntro />
+        <PrimaryActions />
+        <ActiveSituation
           personas={[...activePersonas]}
           onRoleSheetOpen={() => setRoleSheetOpen(true)}
         />
-        <RoleValueMap
-          personas={[...activePersonas]}
-          onMore={() => setRoleSheetOpen(true)}
-        />
-        <NowInPhuket />
-        <QuickActionsBlended personas={[...activePersonas]} />
-        <ConciergeCard personas={[...activePersonas]} />
-        <ActivityFeed personas={[...activePersonas]} />
-
-        {/* Hairline separator */}
-        <div className="mx-4 h-px bg-border/[0.05] mb-5" />
-
-        <ClusterGrid personas={[...activePersonas]} />
+        <AllSectionsAccordion personas={[...activePersonas]} />
         <TrustFooter />
       </div>
+
+      <FloatingConcierge />
 
       <RoleSheet
         open={roleSheetOpen}
