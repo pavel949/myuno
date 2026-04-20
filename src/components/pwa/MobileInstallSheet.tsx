@@ -31,8 +31,8 @@ export function MobileInstallSheet() {
     const shownAt = localStorage.getItem(SHEET_SHOWN_KEY);
     if (shownAt && Date.now() - parseInt(shownAt, 10) < SHEET_COOLDOWN) return;
 
-    // Small delay so the page loads first
-    const timer = setTimeout(() => setOpen(true), 2500);
+    // Wait for user to engage with the app before prompting install
+    const timer = setTimeout(() => setOpen(true), 45000);
     return () => clearTimeout(timer);
   }, [isInstalled, isMobile, isIOS, isAndroid, isMobileViewport]);
 
