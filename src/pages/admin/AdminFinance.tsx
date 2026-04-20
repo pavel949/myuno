@@ -1,7 +1,6 @@
 import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { SectionHeader } from '@/components/ds';
 import { DollarSign, BarChart3, Rocket, Wallet } from 'lucide-react';
 import { ControlFinanceTab } from '@/components/admin/control/ControlFinanceTab';
 import { ControlAnalyticsTab } from '@/components/admin/control/ControlAnalyticsTab';
@@ -9,25 +8,24 @@ import { AdminPromotionsTab } from '@/components/admin/finance/AdminPromotionsTa
 import { ReconciliationStatus } from '@/components/admin/finance/ReconciliationStatus';
 import { ManualPaymentForm } from '@/components/admin/finance/ManualPaymentForm';
 import { PayoutManager } from '@/components/admin/PayoutManager';
+import { PageShell, PageHeader } from '@/components/page';
 
 export default function AdminFinance() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 space-y-4 max-w-[1536px] mx-auto w-full">
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <SectionHeader
-          title={isRu ? 'Финансы' : 'Finance'}
-          subtitle={isRu ? 'Транзакции, комиссии и аналитика доходов' : 'Transactions, commissions and revenue analytics'}
-          icon={DollarSign}
-          size="lg"
-        />
-        <div className="flex items-center gap-2">
-          <ReconciliationStatus compact />
-          <ManualPaymentForm />
-        </div>
-      </div>
+    <PageShell width="wide">
+      <PageHeader
+        title={isRu ? 'Финансы' : 'Finance'}
+        subtitle={isRu ? 'Транзакции, комиссии и аналитика доходов' : 'Transactions, commissions and revenue analytics'}
+        actions={
+          <div className="flex items-center gap-2">
+            <ReconciliationStatus compact />
+            <ManualPaymentForm />
+          </div>
+        }
+      />
 
       <Tabs defaultValue="finance" className="w-full">
         <TabsList>
@@ -62,6 +60,6 @@ export default function AdminFinance() {
           <PayoutManager />
         </TabsContent>
       </Tabs>
-    </div>
+    </PageShell>
   );
 }

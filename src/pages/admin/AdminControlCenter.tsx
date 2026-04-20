@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { SectionHeader } from '@/components/ds';
 import { Users, Shield, BarChart3, DollarSign, Settings, FileText, History } from 'lucide-react';
 import { ControlUsersTab } from '@/components/admin/control/ControlUsersTab';
 import { ControlRolesTab } from '@/components/admin/control/ControlRolesTab';
@@ -10,6 +9,7 @@ import { ControlFinanceTab } from '@/components/admin/control/ControlFinanceTab'
 import { ControlSystemTab } from '@/components/admin/control/ControlSystemTab';
 import { ControlLogsTab } from '@/components/admin/control/ControlLogsTab';
 import { ControlAuditTab } from '@/components/admin/control/ControlAuditTab';
+import { PageShell, PageHeader } from '@/components/page';
 
 export default function AdminControlCenter() {
   const { language } = useLanguage();
@@ -27,16 +27,12 @@ export default function AdminControlCenter() {
   ];
 
   return (
-    <div className="p-4 md:p-6 space-y-4">
-      {/* Header */}
-      <SectionHeader
+    <PageShell width="wide">
+      <PageHeader
         title={isRussian ? 'Центр управления' : 'Control Center'}
         subtitle={isRussian ? 'Пользователи, аналитика, настройки системы' : 'Users, analytics, system settings'}
-        icon={Settings}
-        size="lg"
       />
 
-      {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="flex flex-wrap h-auto gap-1 bg-muted/50 p-1">
           {tabs.map((tab) => (
@@ -73,6 +69,6 @@ export default function AdminControlCenter() {
           <ControlLogsTab />
         </TabsContent>
       </Tabs>
-    </div>
+    </PageShell>
   );
 }
