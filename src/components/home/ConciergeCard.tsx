@@ -34,7 +34,7 @@ export function ConciergeCard({ personas }: ConciergeCardProps) {
       <div className="rounded-[16px] border border-dashed border-border p-4 flex gap-3">
         {/* U avatar */}
         <div
-          className="w-[26px] h-[26px] rounded-full flex-shrink-0 mt-0.5 flex items-center justify-center font-display text-[11px] font-bold text-[#08101E]"
+          className="w-[26px] h-[26px] rounded-full flex-shrink-0 mt-0.5 flex items-center justify-center font-display text-[11px] font-bold text-background"
           style={{ background: accentColor }}
         >
           U

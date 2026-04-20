@@ -115,7 +115,7 @@ function RoleChip({ meta }: {
       style={{ background: `${meta.color}18`, border: `1px solid ${meta.color}33` }}
     >
       <div
-        className="w-3.5 h-3.5 rounded-full flex items-center justify-center font-display text-[9px] font-bold text-[#08101E]"
+        className="w-3.5 h-3.5 rounded-full flex items-center justify-center font-display text-[9px] font-bold text-background"
         style={{ background: meta.color }}
       >
         {meta.glyph}

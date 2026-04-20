@@ -71,7 +71,7 @@ export function RoleSheet({ open, personas, onClose, onToggle, onReorder }: Role
                         : { borderColor: 'var(--border)' }}
                     >
                       <div
-                        className="w-[26px] h-[26px] rounded-full flex items-center justify-center font-display text-[11px] font-bold text-[#08101E] flex-shrink-0"
+                        className="w-[26px] h-[26px] rounded-full flex items-center justify-center font-display text-[11px] font-bold text-background flex-shrink-0"
                         style={{ background: meta.color }}
                       >
                         {meta.glyph}
@@ -129,7 +129,7 @@ export function RoleSheet({ open, personas, onClose, onToggle, onReorder }: Role
                       className="flex items-center gap-2.5 p-3 rounded-[12px] border border-border text-left hover:border-border/80 transition-colors"
                     >
                       <div
-                        className="w-[22px] h-[22px] rounded-full flex items-center justify-center font-display text-[10px] font-bold text-[#08101E] flex-shrink-0"
+                        className="w-[22px] h-[22px] rounded-full flex items-center justify-center font-display text-[10px] font-bold text-background flex-shrink-0"
                         style={{ background: meta.color }}
                       >
                         {meta.glyph}
