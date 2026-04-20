@@ -478,6 +478,11 @@ export default function Auth() {
                         </p>
                       </div>
 
+                      <div className="pt-2">
+                        <GoogleSignInButton redirectTo={`${window.location.origin}${redirectPath}`} />
+                        <OAuthDivider />
+                      </div>
+
                       <div className="pt-4">
                         <UnderlineInput
                           label={`${t('auth.phone')}/${isTh ? 'Mobile Phone' : isRu ? 'Mobile Phone' : 'Mobile Phone'}*`}
