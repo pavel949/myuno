@@ -76,6 +76,7 @@ export function useIntakeAgent() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [progress, setProgress] = useState<IntakeProgress | null>(null);
 
   // Analyze input (single or bulk)
   const analyze = useCallback(async (options: {
