@@ -15,6 +15,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { PasswordStrengthIndicator } from '@/components/auth/PasswordStrengthIndicator';
 import { UnderlineInput } from '@/components/auth/UnderlineInput';
 import { GoogleSignInButton, OAuthDivider } from '@/components/auth/GoogleSignInButton';
+import { AuthValuePanel } from '@/components/auth/AuthValuePanel';
+import { AuthTrustFooter } from '@/components/auth/AuthTrustFooter';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Timeout helper — prevents infinite spinner when Supabase is unreachable
@@ -326,11 +328,11 @@ export default function Auth() {
     </div>
   );
 
-  // Logo component used in signup steps
+  // Logo component used in signup steps — neutral mint badge (no gold gradient)
   const AppLogo = () => (
     <div className="flex justify-center mb-4">
-      <Link to={APP_ROUTES.HOME} className="w-16 h-16 rounded-2xl gradient-gold flex items-center justify-center shadow-gold hover:scale-105 transition-transform">
-        <span className="text-3xl font-bold text-primary-foreground">U</span>
+      <Link to={APP_ROUTES.HOME} className="w-16 h-16 rounded-2xl bg-primary/10 ring-1 ring-primary/30 flex items-center justify-center hover:scale-105 transition-transform">
+        <span className="font-display text-3xl font-bold text-primary">U</span>
       </Link>
     </div>
   );
