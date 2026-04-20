@@ -1,9 +1,10 @@
 # myUNO SuperApp — UX Design Contract
 
-> **Version**: 1.0.0  
-> **Last Updated**: 2026-02-02  
+> **Version**: 2.0.0  
+> **Last Updated**: 2026-04-20  
 > **Status**: Active  
-> **Maintainers**: Platform Architecture Team
+> **Maintainers**: Platform Architecture Team  
+> **Design System**: DS 2.1 (see `DESIGN.md` — canonical source for all visual decisions)
 
 ---
 
@@ -331,9 +332,11 @@ Icons are resolved through `iconMap.ts` (200+ mappings).
 
 ## 8. Color & Theming
 
+> Source of truth: `src/styles/tokens.css`. See `DESIGN.md` for full rationale.
+
 ### 8.1 Semantic Tokens (🔴 MUST)
 
-**NEVER** use raw color values. Always use semantic tokens.
+**NEVER** use raw hex/RGB values. Always use semantic CSS custom properties via Tailwind tokens.
 
 ```tsx
 // ✅ Correct - semantic tokens
@@ -341,62 +344,142 @@ Icons are resolved through `iconMap.ts` (200+ mappings).
 <div className="bg-primary text-primary-foreground">
 <div className="bg-muted text-muted-foreground">
 <div className="bg-accent text-accent-foreground">
+<div className="bg-card border border-border">
 
 // ❌ Incorrect - raw colors
 <div className="bg-white text-black">
 <div className="bg-blue-500 text-white">
 <div className="bg-[#1a1a2e]">
+<div style={{ background: '#08101E' }}>
 ```
 
-### 8.2 Status Colors
+### 8.2 Dark Theme (Default) — Key Tokens
+
+Dark is the **default** theme. No class needed on `<html>`. Tokens below apply at `:root`.
+
+| Token | Hex approx | Usage |
+|-------|-----------|-------|
+| `--background` | `#08101E` | Page background |
+| `--card` | `#162236` | Cards, modals |
+| `--primary` | `#00D68F` | CTAs, links, active states (mint) |
+| `--accent` | `#4E7BFF` | Secondary actions, info (blue) |
+| `--foreground` | `#EDF2FF` | Primary text |
+| `--muted-foreground` | `#8FA3B8` | Secondary text, placeholders |
+| `--border` | rgba white 7% | Default dividers |
+| `--border-strong` | rgba white 14% | Emphasized borders |
+| `--success` | `#2D9966` | Distinct from primary |
+| `--warning` | `#F59E0B` | Caution states |
+| `--destructive` | `#D93535` | Destructive actions |
+
+### 8.3 Light Theme (`html.light`)
+
+Light mode is activated by adding `class="light"` to `<html>`. Use for document views, legal contracts, print contexts. Do NOT use as the default.
+
+| Token | Hex | Usage |
+|-------|-----|-------|
+| `--background` | `#fafaf9` | Warm white |
+| `--card` | `#ffffff` | White cards |
+| `--primary` | `#0d6e4f` | Emerald CTA |
+| `--foreground` | `#1a1a19` | Near-black text |
+| `--muted-foreground` | `#57534e` | Warm gray secondary |
+| `--border` | `#e5e5e4` | Warm gray dividers |
+
+### 8.4 Cluster Accent System (🔴 MUST — never reassign)
+
+Each cluster has an immutable accent color used for 2px left-border spines on cluster cards, section headers, and role glyph pills.
+
+| Cluster | Token | Hex |
+|---------|-------|-----|
+| `arrive` | `--cluster-arrive` | `#00D68F` |
+| `live` | `--cluster-live` | `#4E7BFF` |
+| `legal` | `--cluster-legal` | `#F59E0B` |
+| `invest` | `--cluster-invest` | `#A78BFA` |
+| `manage` | `--cluster-manage` | `#16BDCA` |
+| `build` | `--cluster-build` | `#EF4444` |
+
+```tsx
+// Cluster spine pattern (🔴 MUST for cluster-grouped cards)
+<div className="rounded-md border border-border pl-4"
+     style={{ borderLeft: '2px solid var(--cluster-manage)' }}>
+```
+
+### 8.5 Status Colors
 
 | Status | Token | Usage |
 |--------|-------|-------|
-| Success | `bg-green-500/10 text-green-600` | Verified, Approved, Active |
-| Warning | `bg-amber-500/10 text-amber-600` | Pending, Review needed |
-| Error | `bg-red-500/10 text-red-600` | Rejected, Failed, Expired |
-| Info | `bg-blue-500/10 text-blue-600` | New, Featured, Highlighted |
+| Success | `text-success bg-success/10` | Verified, Approved, Active |
+| Warning | `text-warning bg-warning/10` | Pending, Review needed |
+| Error | `text-destructive bg-destructive/10` | Rejected, Failed, Expired |
+| Info | `text-accent bg-accent/10` | New, Featured, Highlighted |
 
-### 8.3 Dark Mode (🔴 MUST)
+### 8.6 Dark Mode Authoring Rules (🔴 MUST)
 
-All components **MUST** support dark mode.
+- Dark is the default — write styles for dark first; override with `html.light` context if needed
+- Use `[html.light_&]:` Tailwind variant (not `dark:`) because dark is the base
+- Never use Tailwind's `dark:` prefix — it only works with `class="dark"` strategy; myUNO uses the inverse (`light` class activates light mode)
 
 ```tsx
-// ✅ Correct - dark mode compatible
-<div className="bg-primary/10 dark:bg-primary/20">
-<span className="text-blue-600 dark:text-blue-400">
+// ✅ Correct — dark by default, light override
+<div className="bg-card [html.light_&]:bg-white">
 
-// ❌ Incorrect - no dark mode consideration
-<div className="bg-blue-100">
+// ❌ Incorrect — dark: prefix won't work with myUNO's theme strategy  
+<div className="bg-blue-100 dark:bg-card">
 ```
 
 ---
 
 ## 9. Typography
 
+> DS 2.1 font assignments. Tailwind utilities: `font-display` = Golos Text, `font-sans` = DM Sans, `font-mono` = JetBrains Mono, `font-serif` = Playfair Display (luxury RE only).
+
+### 9.0 Font Assignments (🔴 MUST)
+
+| Role | Font | Tailwind class | Use for |
+|------|------|---------------|---------|
+| Display/Headings | **Golos Text** | `font-display` | Page titles, section headers, card titles |
+| Body | **DM Sans** | `font-sans` | Body copy, labels, descriptions |
+| Prices/Data | **JetBrains Mono** | `font-mono` | All prices, numeric data, AQI, dates, coordinates |
+| Luxury RE only | **Playfair Display** | `font-serif` | Developer/offplan names and luxury property headlines — never UI chrome |
+
+```tsx
+// ✅ Correct
+<h1 className="font-display font-bold text-2xl">Управление недвижимостью</h1>
+<p className="font-sans text-sm text-muted-foreground">Monthly rental income</p>
+<span className="font-mono text-lg tabular-nums">฿ 45,000</span>
+
+// ❌ Incorrect — wrong font for data, default sans for heading
+<h1 className="font-sans font-bold text-2xl">Title</h1>
+<span className="font-sans">฿ 45,000</span>
+```
+
+**JetBrains Mono rule:** ALL prices, counts, percentages, and financial figures **MUST** use `font-mono` with `tabular-nums` (`font-feature-settings: "tnum"`). This applies globally — not just dashboards.
+
 ### 9.1 Heading Hierarchy (🔴 MUST)
 
 ```tsx
-// Page titles
-<h1 className="text-2xl font-bold">Page Title</h1>
+// Page titles — Golos Text
+<h1 className="font-display text-2xl font-bold">Page Title</h1>
 
-// Section headers
-<h2 className="text-xl font-semibold">Section Title</h2>
+// Section headers — Golos Text
+<h2 className="font-display text-xl font-semibold">Section Title</h2>
 
-// Subsection headers
-<h3 className="text-lg font-medium">Subsection Title</h3>
+// Subsection headers — Golos Text
+<h3 className="font-display text-lg font-medium">Subsection Title</h3>
 
-// Card titles
-<h4 className="text-base font-semibold">Card Title</h4>
+// Card titles — Golos Text
+<h4 className="font-display text-base font-semibold">Card Title</h4>
 
-// Labels
-<span className="text-sm font-medium">Label</span>
+// Labels — DM Sans
+<span className="font-sans text-sm font-medium">Label</span>
 
-// Body text
-<p className="text-sm text-muted-foreground">Description</p>
+// Body text — DM Sans
+<p className="font-sans text-sm text-muted-foreground">Description</p>
 
-// Small text / captions
-<span className="text-xs text-muted-foreground">Caption</span>
+// Small text / captions — DM Sans
+<span className="font-sans text-xs text-muted-foreground">Caption</span>
+
+// Overline labels (section category tags) — DM Sans uppercase
+<span className="font-sans text-[10px] font-semibold tracking-widest uppercase text-muted-foreground">Category</span>
 ```
 
 ### 9.2 Truncation (🟡 SHOULD)
@@ -465,8 +548,15 @@ Long text **SHOULD** use proper truncation.
 ### 11.2 Card Hover States (🟡 SHOULD)
 
 ```tsx
-<div className="rounded-xl border transition-all hover:shadow-lg hover:border-primary/20">
+// Standard card — border only, no box-shadow (DS 2.1 rule)
+<div className="rounded-md border border-border transition-colors hover:border-primary/40">
+
+// Cluster card — 2px spine, border only
+<div className="rounded-md border border-border transition-colors hover:border-primary/30"
+     style={{ borderLeft: '2px solid var(--cluster-manage)' }}>
 ```
+
+**DS 2.1 rule:** Do NOT use `hover:shadow-lg` or any `box-shadow` on standard cards. Use `border` transitions only. Box-shadow is reserved for elevated modals and drawers (elevation levels 4–5 in `DESIGN.md`).
 
 ---
 
@@ -623,8 +713,12 @@ Before submitting a PR for any vertical, verify:
 - [ ] Uses `UnifiedHeader` for navigation
 - [ ] Uses `UnifiedFiltersKlook` for filtering (if applicable)
 - [ ] Uses `IconBadge` for all icons
-- [ ] Uses semantic color tokens (no raw colors)
-- [ ] Supports dark mode
+- [ ] Uses semantic color tokens (no raw hex/RGB values)
+- [ ] Dark is default — no `dark:` prefixes, `html.light` pattern for overrides
+- [ ] Headings use `font-display` (Golos Text)
+- [ ] Prices/numbers use `font-mono tabular-nums` (JetBrains Mono)
+- [ ] Cluster-grouped cards use 2px `borderLeft` spine in cluster accent color
+- [ ] Cards use `border border-border` only — no `box-shadow` on standard cards
 - [ ] Includes bilingual text (en/ru)
 - [ ] Uses proper entity_type classification
 - [ ] Implements loading skeletons
@@ -638,6 +732,7 @@ Before submitting a PR for any vertical, verify:
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 2.0.0 | 2026-04-20 | DS 2.1 alignment: dark-first theme, Golos Text + DM Sans + JetBrains Mono fonts, cluster accent system, border-only cards, `html.light` pattern, deprecated `dark:` prefix guidance |
 | 1.0.0 | 2026-02-02 | Initial UX Contract established |
 
 ---
@@ -679,9 +774,13 @@ All pages with `showFooter={true}` **MUST** use the unified minimal footer (`Com
 ## 19. References
 
 - **Component Library**: `/src/components/shared/`
-- **Design Tokens**: `/src/index.css`, `/tailwind.config.ts`
+- **Design Tokens (runtime, canonical)**: `src/styles/tokens.css`
+- **Design System spec**: `DESIGN.md` (DS 2.1)
 - **Icon Map**: `/src/lib/iconMap.ts`
 - **Layout Components**: `/src/components/layout/`
+- **Tailwind config**: `tailwind.config.ts` — font families, cluster colors, radius scale
+
+> `src/design-system/tokens.json` (DS 2.0 "Navy Premium") is deprecated. Do NOT use it.
 
 ---
 
