@@ -543,7 +543,7 @@ export default function Auth() {
                       <div className="pt-4">
                         <button
                           onClick={handlePhoneNext}
-                          className="w-full h-14 rounded-full bg-[#5D3A4A] hover:bg-[#4A2D3A] text-white font-medium text-lg flex items-center justify-center gap-2 transition-colors"
+                          className="w-full h-14 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium text-lg flex items-center justify-center gap-2 transition-colors shadow-[var(--shadow-btn)] hover:shadow-[var(--shadow-btn-hover)]"
                         >
                           {t('auth.continue')}
                           <ArrowRight className="w-5 h-5" />
@@ -719,7 +719,7 @@ export default function Auth() {
                         <button
                           onClick={handleSignup}
                           disabled={isLoading}
-                          className="flex-1 h-14 rounded-full bg-[#5D3A4A] hover:bg-[#4A2D3A] disabled:opacity-50 text-white font-medium text-base flex items-center justify-center gap-2 transition-colors"
+                          className="flex-1 h-14 rounded-full bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground font-medium text-base flex items-center justify-center gap-2 transition-colors shadow-[var(--shadow-btn)] hover:shadow-[var(--shadow-btn-hover)]"
                           data-testid="signup-button"
                         >
                           {isLoading ? (
