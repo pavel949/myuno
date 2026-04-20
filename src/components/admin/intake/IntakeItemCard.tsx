@@ -7,6 +7,7 @@ import { IntakeItem } from '@/hooks/useIntakeAgent';
 import { IntakeVerticalBadge } from './IntakeVerticalBadge';
 import { IntakeConfidenceBar } from './IntakeConfidenceBar';
 import { INTAKE_VERTICALS } from '@/lib/intakeVerticals';
+import { validateIntakeItem, describeValidation } from '@/lib/intake/validateItem';
 import { 
   Check, 
   X, 
