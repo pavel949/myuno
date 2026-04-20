@@ -9,7 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useMyPortalSettings } from '@/hooks/useOwnerPortalSettings';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Building2, ArrowRight, Eye, MessageSquare, Shield, FileCheck, FileSignature } from 'lucide-react';
+import { Building2, ArrowRight, Eye, MessageSquare, Shield, FileCheck, FileSignature, Lock } from 'lucide-react';
 import { LoadingSpinner } from '@/components/uno/LoadingSpinner';
 
 export default function OwnerPortalDashboard() {
@@ -51,15 +51,20 @@ export default function OwnerPortalDashboard() {
   return (
     <div className="p-4 md:p-6 max-w-3xl mx-auto space-y-6 pb-24">
       {/* Header */}
-      <div className="space-y-1">
+      <div className="space-y-2">
         <div className="flex items-center gap-2">
-          <Eye className="w-5 h-5 text-primary" />
           <h1 className="text-xl font-bold">
             {isRu ? 'Мои объекты' : 'My Properties'}
           </h1>
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+            <Lock className="w-3 h-3" />
+            {isRu ? 'Портал УК' : 'MC Portal'}
+          </span>
         </div>
         <p className="text-sm text-muted-foreground">
-          {isRu ? 'Портал владельца — отслеживайте ваши объекты' : 'Owner Portal — track your properties'}
+          {isRu
+            ? 'Доступ предоставлен вашей управляющей компанией — только просмотр'
+            : 'Access granted by your management company — read only'}
         </p>
       </div>
 

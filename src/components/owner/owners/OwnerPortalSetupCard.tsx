@@ -103,10 +103,15 @@ export default function OwnerPortalSetupCard({ contactId, email, linkedUserId, p
         return;
       }
 
-      // 2. Link user to CRM contact
+      // 2. Link user to CRM contact + mark as MC-portal owner
       await typedFrom('crm_contacts')
         .update({ linked_user_id: profile.id })
         .eq('id', contactId);
+
+      await supabase
+        .from('profiles')
+        .update({ owner_type: 'mc_portal' })
+        .eq('id', profile.id);
 
       // 3. Create portal settings for each property
       for (const prop of properties) {

@@ -108,8 +108,8 @@ export default function OwnerPerformance() {
           </Button>
         </div>
 
-        {/* Horizontal scrollable tip card */}
-        {tips.length > 0 && (
+        {/* Horizontal scrollable tip cards — full text on hover (title); see all on /mc/trends */}
+        {tips.length > 0 ? (
           <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 snap-x snap-mandatory scrollbar-hide">
             {tips.slice(0, 3).map((tip, index) => (
               <Card
@@ -118,13 +118,19 @@ export default function OwnerPerformance() {
                 onClick={() => navigate('/mc/trends')}
               >
                 <CardContent className="p-4">
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-semibold text-sm leading-tight pr-2">
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <h3
+                      className="font-semibold text-sm leading-tight min-w-0 flex-1 line-clamp-3"
+                      title={isRu ? tip.titleRu : tip.titleEn}
+                    >
                       {isRu ? tip.titleRu : tip.titleEn}
                     </h3>
                     <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
                   </div>
-                  <p className="text-xs text-muted-foreground mb-3 line-clamp-2">
+                  <p
+                    className="text-xs text-muted-foreground mb-3 line-clamp-4"
+                    title={isRu ? tip.descriptionRu : tip.descriptionEn}
+                  >
                     {isRu ? tip.descriptionRu : tip.descriptionEn}
                   </p>
                   <div className="space-y-1.5">
@@ -141,6 +147,12 @@ export default function OwnerPerformance() {
               </Card>
             ))}
           </div>
+        ) : (
+          <p className="text-sm text-muted-foreground rounded-lg border border-dashed px-4 py-6 text-center">
+            {isRu
+              ? 'Персональные советы появятся, когда накопится достаточно данных. Откройте раздел целиком — там может быть больше материалов.'
+              : 'Personal tips will appear as we have more data. Open the full section for more.'}
+          </p>
         )}
       </section>
 

@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useOrgs } from '@/hooks/useUserContext';
+import { useOwnerType } from '@/hooks/useOwnerType';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -56,8 +57,9 @@ export default function AccountTypeSelection() {
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const { createOrg, isCreating } = useOrgs();
+  const { defaultPath: ownerDefaultPath } = useOwnerType();
   const isRu = language === 'ru';
-  const redirectTo = searchParams.get('redirect') || '/owner';
+  const redirectTo = searchParams.get('redirect') || ownerDefaultPath || '/owner';
 
   const [selectedType, setSelectedType] = useState<AccountType | null>(null);
   const [companyName, setCompanyName] = useState('');

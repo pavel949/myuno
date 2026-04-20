@@ -12,6 +12,15 @@ export const AUDIENCE_CATEGORIES: { value: AudienceFilter; labelEn: string; labe
   { value: 'business', labelEn: 'Business', labelRu: 'Бизнес' },
 ];
 
+/** Maps audience tab to the verticalIds that should be shown. Empty = show all. */
+export const AUDIENCE_VERTICAL_MAP: Record<AudienceFilter, string[]> = {
+  all: [],
+  tourist: ['transfer', 'vehicle', 'experience', 'yacht', 'restaurant', 'event', 'beauty', 'fitness'],
+  resident: ['cleaning', 'medical', 'legal', 'education', 'insurance', 'pet_service', 'property', 'transfer'],
+  family: ['education', 'babysitter', 'medical', 'cleaning', 'pet_service', 'experience'],
+  business: ['legal', 'insurance', 'education'],
+};
+
 import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';

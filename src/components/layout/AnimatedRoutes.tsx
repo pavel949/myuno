@@ -12,6 +12,7 @@ import { PageTransition } from './PageTransition';
 import { ScrollToTop } from './ScrollToTop';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 import { AdminGuard, VendorGuard, TeamGuard, AuthGuard, StaffGuard, MCGuard } from '@/components/auth';
+import { MCPortalGuard } from '@/components/auth/MCPortalGuard';
 import { CapitalGuard } from '@/components/capital/CapitalGuard';
 import { CapitalLayout } from '@/components/capital/CapitalLayout';
 import { AdminLayout } from '@/components/admin/AdminLayout';
@@ -847,10 +848,10 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/owner/*" element={<Navigate to="/mc" replace />} />
         
         {/* ── Owner Portal (property owner read-only) ── */}
-        <Route path="/my-property" element={<AuthGuard><LazyPage><Pages.OwnerPortalDashboard /></LazyPage></AuthGuard>} />
-        <Route path="/my-property/statements" element={<AuthGuard><LazyPage><Pages.OwnerStatementsInbox /></LazyPage></AuthGuard>} />
-        <Route path="/my-property/signatures" element={<AuthGuard><LazyPage><Pages.OwnerSignaturesInbox /></LazyPage></AuthGuard>} />
-        <Route path="/my-property/:propertyId" element={<AuthGuard><LazyPage><Pages.OwnerPortalPropertyView /></LazyPage></AuthGuard>} />
+        <Route path="/my-property" element={<AuthGuard><MCPortalGuard><LazyPage><Pages.OwnerPortalDashboard /></LazyPage></MCPortalGuard></AuthGuard>} />
+        <Route path="/my-property/statements" element={<AuthGuard><MCPortalGuard><LazyPage><Pages.OwnerStatementsInbox /></LazyPage></MCPortalGuard></AuthGuard>} />
+        <Route path="/my-property/signatures" element={<AuthGuard><MCPortalGuard><LazyPage><Pages.OwnerSignaturesInbox /></LazyPage></MCPortalGuard></AuthGuard>} />
+        <Route path="/my-property/:propertyId" element={<AuthGuard><MCPortalGuard><LazyPage><Pages.OwnerPortalPropertyView /></LazyPage></MCPortalGuard></AuthGuard>} />
         
         {/* ── Catch-all ── */}
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />

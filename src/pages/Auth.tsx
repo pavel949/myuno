@@ -5,6 +5,8 @@ import { Mail, Lock, Eye, EyeOff, ArrowRight, ArrowLeft, Gift, Phone, ChevronLef
 import { z } from 'zod';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useOwnerType } from '@/hooks/useOwnerType';
+import { useUserContext } from '@/hooks/useUserContext';
 import { PremiumButton } from '@/components/uno/PremiumButton';
 import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { cn } from '@/lib/utils';
@@ -56,16 +58,29 @@ export default function Auth() {
   const location = useLocation();
   const isRu = language === 'ru';
   const isTh = language === 'th';
+  const { activeRole } = useUserContext();
+  const { isMCPortal, isLoading: ownerTypeLoading } = useOwnerType();
 
   const redirectPath = (location.state as { from?: string })?.from ||
     searchParams.get('redirect') ||
     APP_ROUTES.HOME;
 
   useEffect(() => {
-    if (user && !authLoading) {
+    if (!user || authLoading) return;
+    if (redirectPath !== APP_ROUTES.HOME) {
       navigate(redirectPath, { replace: true });
+      return;
     }
-  }, [user, authLoading, navigate, redirectPath]);
+    if (ownerTypeLoading) return;
+    const dest =
+      activeRole === 'vendor' ? '/vendor'
+      : activeRole === 'investor' ? '/invest'
+      : (activeRole === 'owner' || activeRole === 'property_manager')
+        ? (isMCPortal ? '/my-property' : '/mc')
+      : isMCPortal ? '/my-property'
+      : '/';
+    navigate(dest, { replace: true });
+  }, [user, authLoading, ownerTypeLoading, navigate, redirectPath, activeRole, isMCPortal]);
 
   const validatePhoneStep = () => {
     const newErrors: Record<string, string> = {};

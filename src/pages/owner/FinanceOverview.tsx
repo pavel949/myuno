@@ -12,9 +12,10 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   DollarSign, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight,
-  Plus, Minus, Receipt, FileText, Target, BarChart3,
+  Plus, Minus, Receipt, FileText, Target, BarChart3, LineChart,
   ChevronRight, Wallet, PiggyBank, ArrowRightLeft,
 } from 'lucide-react';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { cn } from '@/lib/utils';
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
@@ -53,6 +54,7 @@ export default function FinanceOverview() {
     { icon: Receipt, label: isRu ? 'Транзакции' : 'Transactions', path: '/mc/financials', color: 'text-primary' },
     { icon: FileText, label: isRu ? 'Отчёты' : 'Reports', path: '/mc/reports', color: 'text-info' },
     { icon: Target, label: isRu ? 'Бюджет' : 'Budget', path: '/mc/budget', color: 'text-warning' },
+    { icon: LineChart, label: isRu ? 'Финансовое планирование' : 'Financial planning', path: APP_ROUTES.MC_FINANCE_PLANNING, color: 'text-emerald-600 dark:text-emerald-400' },
     { icon: Receipt, label: isRu ? 'Инвойсы' : 'Invoices', path: '/mc/invoices', color: 'text-muted-foreground' },
   ];
 

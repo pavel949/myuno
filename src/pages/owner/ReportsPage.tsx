@@ -22,8 +22,10 @@ import { ReportWizard, type WizardResult } from '@/components/owner/reports/Repo
 import { AccountingPolicyEditor } from '@/components/owner/reports/AccountingPolicyEditor';
 import { useAccountingPolicies } from '@/hooks/useAccountingPolicies';
 import { OwnerAccessInviteDialog } from '@/components/owner/reports/OwnerAccessInviteDialog';
+import { useNavigate } from 'react-router-dom';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { BackButton } from '@/components/uno/BackButton';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -41,7 +43,7 @@ import {
   FileText, Plus, Download, Trash2, Building2, Calendar,
   TrendingUp, TrendingDown, Eye, FileDown, Send, Loader2,
   LayoutGrid, Briefcase, FileSpreadsheet, UserPlus, Users,
-  Home, Layers,
+  Home, Layers, LineChart,
 } from 'lucide-react';
 import {
   format, subMonths, startOfMonth, endOfMonth,
@@ -113,6 +115,7 @@ function useManagedProperties() {
 }
 
 export default function ReportsPage() {
+  const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
@@ -465,6 +468,28 @@ export default function ReportsPage() {
             </Button>
           </div>
       </div>
+
+      <Card className="mb-4 border-dashed bg-muted/20">
+        <CardContent className="py-3 sm:py-3.5 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm">
+          <div className="flex items-start gap-2 min-w-0">
+            <LineChart className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+            <p className="text-muted-foreground">
+              {isRu
+                ? 'Отчёты строятся из фактов, периодов и политик учёта. Прогнозы, сценарии и DCF — в разделе финансового планирования.'
+                : 'Reports are built from actuals, periods, and accounting policies. Forecasts, scenarios, and DCF live in Financial planning.'}
+            </p>
+          </div>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            className="shrink-0 self-start sm:self-center"
+            onClick={() => navigate(APP_ROUTES.MC_FINANCE_PLANNING)}
+          >
+            {isRu ? 'Финансовое планирование' : 'Financial planning'}
+          </Button>
+        </CardContent>
+      </Card>
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'all' | 'portfolio')}>
