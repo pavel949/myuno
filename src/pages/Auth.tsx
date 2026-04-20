@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { PasswordStrengthIndicator } from '@/components/auth/PasswordStrengthIndicator';
 import { UnderlineInput } from '@/components/auth/UnderlineInput';
+import { GoogleSignInButton, OAuthDivider } from '@/components/auth/GoogleSignInButton';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Timeout helper — prevents infinite spinner when Supabase is unreachable
@@ -357,6 +358,9 @@ export default function Auth() {
                   </p>
                 </div>
 
+                <GoogleSignInButton redirectTo={`${window.location.origin}${redirectPath}`} />
+                <OAuthDivider />
+
                 <form onSubmit={handleLogin} name="login" className="space-y-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium">{t('auth.email')}</label>
@@ -472,6 +476,11 @@ export default function Auth() {
                         <p className="text-sm text-primary font-medium uppercase tracking-wide">
                           {isTh ? 'SIGN IN OR SIGN UP' : isTh ? '' : isRu ? '' : ''}
                         </p>
+                      </div>
+
+                      <div className="pt-2">
+                        <GoogleSignInButton redirectTo={`${window.location.origin}${redirectPath}`} />
+                        <OAuthDivider />
                       </div>
 
                       <div className="pt-4">
