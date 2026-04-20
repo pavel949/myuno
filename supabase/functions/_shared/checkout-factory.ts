@@ -94,8 +94,10 @@ export function createCheckoutHandler(
   handler: CheckoutHandler,
 ) {
   return async (req: Request): Promise<Response> => {
+    const cors = buildCheckoutCors(req);
+
     if (req.method === "OPTIONS") {
-      return new Response(null, { headers: CHECKOUT_CORS });
+      return new Response(null, { headers: cors });
     }
 
     const supabaseClient = createClient(
@@ -126,7 +128,7 @@ export function createCheckoutHandler(
         req,
         functionName,
         RATE_LIMITS.payment,
-        CHECKOUT_CORS,
+        cors,
         user.id,
       );
       if (rateLimitResponse) return rateLimitResponse;
@@ -198,7 +200,7 @@ export function createCheckoutHandler(
       return new Response(
         JSON.stringify({ url: session.url, sessionId: session.id }),
         {
-          headers: { ...CHECKOUT_CORS, "Content-Type": "application/json" },
+          headers: { ...cors, "Content-Type": "application/json" },
           status: 200,
         },
       );
@@ -206,7 +208,7 @@ export function createCheckoutHandler(
       const msg = error instanceof Error ? error.message : "Unknown error";
       console.error(`[${functionName}] Error:`, msg);
       return new Response(JSON.stringify({ error: msg }), {
-        headers: { ...CHECKOUT_CORS, "Content-Type": "application/json" },
+        headers: { ...cors, "Content-Type": "application/json" },
         status: 400,
       });
     }
