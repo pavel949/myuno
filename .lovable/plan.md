@@ -1,108 +1,105 @@
 
 
-## Аудит соответствия кода DESIGN_BIBLE v1.2
+## Проблема
 
-Сравнил `DESIGN_BIBLE_2.md` (canonical, v1.2) с фактическим кодом: `src/styles/tokens.css`, `tailwind.config.ts`, `index.html`, `src/design-system/tokens.json`, и точечно компоненты.
+Текущий `/auth` — голая форма (логин или 2-шаговая регистрация). Нет:
+- объяснения **что такое myUNO** и зачем регистрироваться
+- демонстрации возможностей (40+ сервисов, 6 кластеров)
+- сигналов доверия (количество пользователей, партнёры, безопасность, локация)
+- эмоциональной привязки — пользователь видит форму до того, как понял ценность
 
-### ✅ Что соответствует
+Bible §0/§1 требует «спокойное доверие» (deep-sea theme, mint accent, no shouty marketing), а сейчас экран ощущается как анонимная админка.
 
-| Область | Статус |
-|---|---|
-| **Шрифты** (Golos Text · DM Sans · JetBrains Mono · Playfair Display · Sarabun) | Загружены в `index.html`, замаплены в `tailwind.config.ts` ✅ |
-| **Background** `#08101E`, **Card** `#162236`, **Card-elevated** `#1E2D45` | Совпадают ✅ |
-| **Primary mint** `#00D68F` (157 100% 42%) | Совпадает ✅ |
-| **Accent blue** `#4E7BFF` (224 100% 65%) | Совпадает ✅ |
-| **Foreground** `#EDF2FF`, **muted-foreground** `#8FA3B8` | Совпадают ✅ |
-| **Cluster токены существуют** (`--cluster-arrive/live/legal/invest/manage/build`) | Есть ✅ |
-| **Light mode** через `html.light` | Реализован ✅ |
-| **Radius** `--radius: 16px` | Соответствует card `rounded-md` ✅ |
+## Решение
 
-### ❌ Расхождения (требуют исправления)
+Переделать **левую часть** экрана `/auth` (на mobile — верхний блок, sticky-collapsible при фокусе на инпуте) в **value panel** — спокойную, информативную, с микроанимацией. Форма остаётся справа/снизу без изменений логики.
 
-#### 1. Cluster-цвета НЕ совпадают с Bible §7.4
+### Структура нового первого экрана (mobile-first 375px)
 
-Bible требует **закреплённые навсегда** значения, но в коде:
+```
+┌─────────────────────────────────┐
+│  [U logo]          [RU EN]      │  ← header (есть)
+├─────────────────────────────────┤
+│                                 │
+│  myUNO                          │  ← wordmark (display font)
+│  Всё для жизни на Пхукете       │  ← H1 spокойно, без !!!
+│  в одном приложении             │
+│                                 │
+│  ┌──┐ ┌──┐ ┌──┐ ┌──┐ ┌──┐ ┌──┐ │  ← 6 cluster chips
+│  Ar  Li  Mn  In  Lg  Bd        │     с цветами §7.4
+│                                 │
+│  ✓ 40+ сервисов под одним       │  ← 3 trust bullets
+│    аккаунтом                    │
+│  ✓ Юр. сопровождение и платежи  │
+│  ✓ Поддержка 24/7 на русском    │
+│                                 │
+│  · 12 000+ пользователей        │  ← мягкая социалка
+│  · Phuket, Thailand · с 2024    │
+├─────────────────────────────────┤
+│  [Continue with Google]         │  ← существующая форма
+│  ─── или ───                    │
+│  [phone input]                  │
+│  [Continue →]                   │
+├─────────────────────────────────┤
+│  🔒 Шифрование · Без спама ·    │  ← trust footer
+│     Аккаунт бесплатно           │
+└─────────────────────────────────┘
+```
 
-| Cluster | Bible требует | Код (dark) | Статус |
-|---|---|---|---|
-| `arrive` | `#00D68F` (mint) | `157 100% 42%` ✅ | OK |
-| `live` | `#4E7BFF` (blue) | `224 100% 65%` ✅ | OK |
-| `legal` | `#F59E0B` (amber) | `38 92% 50%` ✅ | OK |
-| `invest` | `#A78BFA` (фиолетовый светлее) | `270 60% 60%` ❌ темнее | расхождение |
-| `manage` | `#16BDCA` (cyan-teal) | `190 80% 55%` ❌ другой hue | расхождение |
-| `build` | `#EF4444` (красный) | `0 80% 60%` ❌ ярче | расхождение |
+На desktop (≥md) — двухколоночный split: value panel слева (sticky), форма справа.
 
-Light mode cluster колоризация полностью переназначена (live=amber, legal=blue и т.д.) — **прямое нарушение R7.4 «закреплены навсегда»**.
+### Что меняется
 
-#### 2. Дублирующая dual toast-система (нарушение R13.9.1)
+1. **Новый компонент** `src/components/auth/AuthValuePanel.tsx`:
+   - Wordmark + H1/sub (Golos Text, spокойный тон)
+   - `ClusterChips` — 6 цветных пилюль с иконками (Plane/Home/Briefcase/TrendingUp/Scale/Hammer), цвета строго из `--cluster-*` токенов
+   - `TrustBullets` — 3 чекмарка mint primary
+   - `SocialProof` — пользователи · локация · год (без фейковых цифр — из `system_settings.public_user_count` если есть, иначе fallback "Тысячи семей")
+   - i18n RU/EN/TH
 
-В коде существуют одновременно:
-- `src/components/ui/sonner.tsx` (canonical)
-- `src/components/ui/toast.tsx` + `toaster.tsx` (Radix — должен быть удалён, AUDIT #14, #20)
+2. **Новый компонент** `src/components/auth/AuthTrustFooter.tsx`:
+   - Иконки Shield/Mail/Gift + короткие подписи
+   - Отображается под формой
 
-#### 3. Устаревший DS2.0 «Navy Premium» не удалён
+3. **Refactor `src/pages/Auth.tsx`**:
+   - Обернуть в 2-column grid на `md:grid-cols-2`
+   - Mobile: `<AuthValuePanel />` сверху, форма ниже
+   - На login и signup-`phone` шаге — value panel виден полностью
+   - На signup-`register` шаге — value panel сворачивается до тонкой полоски (форма длинная, не отвлекать)
+   - Убрать загадочный лиловый `bg-[#5D3A4A]` CTA (нарушение §1.5.3 «no hardcoded hex»), заменить на `bg-primary text-primary-foreground` (mint per §7.4)
+   - Заменить `text-gradient-gold` / `gradient-gold` (золото — это Dark Luxury тема для `/newbuilds`, не для основного auth) на нейтральный `text-foreground` + mint underline accent
 
-`src/design-system/tokens.json` всё ещё содержит «Navy Premium» спецификацию (`"$schema": "myUNO DS2.0 — Navy Premium"`). Bible §0 явно **отменяет** этот файл.
+4. **i18n ключи** (добавить в `src/i18n/`):
+   - `auth.value.title`, `auth.value.subtitle`
+   - `auth.value.bullets.[1-3]`
+   - `auth.value.cluster.[arrive|live|manage|invest|legal|build]`
+   - `auth.trust.[secure|noSpam|free]`
+   - `auth.social.users`, `auth.social.location`
 
-#### 4. Hardcoded HEX `#08101E` в компонентах (нарушение §7.8 / Hard rule §1.5.3)
+### Принципы «спокойного доверия»
 
-Минимум в 5 файлах:
-- `src/components/home/ConciergeCard.tsx`
-- `src/components/home/HomeTopBar.tsx`
-- `src/components/home/RoleSheet.tsx` (×2)
-- `src/components/home/SignalStack.tsx`
+- Без восклицательных знаков, без «🔥», без скидок
+- Mint accent точечно (галочки, активный chip, CTA)
+- Нейтральный фон `bg-background` (#08101E) + мягкий gradient overlay уже есть
+- Микроанимация только на mount cluster chips (stagger 40ms), без бесконечных
+- Шрифты строго по §8: Golos Text headings, DM Sans body
+- Никаких stock-фото — только типографика + иконки lucide
 
-Должно быть `text-background` или `text-[hsl(var(--primary-foreground))]`.
+### Файлы
 
-#### 5. Отсутствуют semantic tokens из Bible §7.2
+**Создать:**
+- `src/components/auth/AuthValuePanel.tsx`
+- `src/components/auth/AuthTrustFooter.tsx`
 
-В `tokens.css` нет:
-- `--foreground-secondary` (`#C4D0E0`, 214 33% 82%)
-- `--disabled-foreground` (`#5A6A80`)
-- `--inset` (`#0C1827`) для inset sections
-- `--popover` (`#1A2941`) — есть, но другое значение (`#162236`)
-- `--primary-muted`, `--accent-muted`, `--success-muted`, `--warning-muted`, `--destructive-muted` (rgba 0.15)
-- `--border-accent` (`rgba(0,214,143,0.4)`)
-- `--glass-light/medium/strong`, `--overlay-dark/darker`
+**Изменить:**
+- `src/pages/Auth.tsx` (layout + 2 hardcoded hex замены + gradient-gold → mint)
+- `src/i18n/en.json`, `src/i18n/ru.json` (+ th если есть) — добавить namespace `auth.value`, `auth.trust`, `auth.social`
 
-#### 6. Success-цвет почти совпадает с primary (нарушение R7.4 «different hue from primary»)
+**Не трогать:** логика `signIn`/`signUp`, валидации, OAuth, terms acceptance, redirect, `withTimeout` — всё остаётся как есть.
 
-Bible: `--success: #2D9966` (152 58% 42%)
-Код: `--success: 152 58% 42%` ✅ совпадает — **OK** (ложная тревога, проверил повторно).
+### Вне scope
 
-Но в light mode `--success: 142 72% 36%` (`#16a34a`) — соответствует Bible §7.3 ✅.
-
-#### 7. Тень/glow используют mint correctly, но `--shadow-card` в коде слабее
-
-Bible требует glow component `rgba(0,214,143,0.04)` для level 2; в коде glow начинается только с elevation-3.
-
-#### 8. Typography масштаб не задан как утилитные классы
-
-Bible §8.4 определяет `display-lg`, `heading-lg`, `body-lg`, `caption`, `overline`, `mono-lg` и т.д. В `tailwind.config.ts` этих классов **нет** — используются raw `text-2xl font-bold`. Это допустимо, но контракт-уровень спецификации требует именованных tokens.
-
-### План работ (после approve, в default mode)
-
-**Pass A — критичные правки токенов (1 файл):**
-1. Обновить `src/styles/tokens.css`:
-   - Перенастроить cluster colors dark+light на канонические из §7.4 (`#A78BFA`, `#16BDCA`, `#EF4444`)
-   - Добавить недостающие `--foreground-secondary`, `--disabled-foreground`, `--inset`, `--*-muted`, `--border-accent`, `--glass-*`, `--overlay-*`
-   - Поправить `--popover` на `#1A2941`
-
-**Pass B — удаление мёртвой спецификации:**
-2. Удалить `src/design-system/tokens.json` (DS2.0 Navy) и проверить imports
-3. Удалить `src/components/ui/toast.tsx` + `toaster.tsx` если нет live usages; иначе сделать их thin wrapper над sonner
-
-**Pass C — компоненты:**
-4. Заменить hardcoded `text-[#08101E]` на `text-background` / `text-[hsl(var(--primary-foreground))]` в 5 файлах home/
-
-**Pass D — Tailwind typography tokens (опц., более крупная):**
-5. Добавить в `tailwind.config.ts` semantic font-size keys из Bible §8.4
-
-### Технические детали
-- Все правки HSL-формат (`H S% L%`) — Tailwind compatibility
-- Light mode правится синхронно с dark
-- Toast removal требует grep по `useToast`, `Toaster` импортам перед удалением
-- Hardcoded hex замена — простой find/replace без логических изменений
-
-**Вне scope этого аудита:** RLS policies (§20), routing (§3.2), guard-pattern (§5.3) — отдельные крупные блоки, требуют свой audit pass.
+- Не добавляю видео/анимации hero (мобильный bundle, перформанс)
+- Не меняю PinLogin / forgot-password страницы (отдельная задача)
+- Социалка (12k+ users) — placeholder, реальное число подключим позже из `system_settings`
 
