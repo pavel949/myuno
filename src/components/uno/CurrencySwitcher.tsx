@@ -30,7 +30,7 @@ export function CurrencySwitcher({ size = 'default', className }: CurrencySwitch
             "bg-secondary/60 hover:bg-secondary text-foreground",
             "text-xs font-medium transition-colors",
             "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
-            size === 'sm' && "px-1.5 py-1 text-[11px]",
+            size === 'sm' && "px-1.5 py-1 text-[11px] min-h-[44px]",
             className
           )}
         >

@@ -25,7 +25,7 @@ export const DesktopNavTabs = React.memo(function DesktopNavTabs() {
           key={item.path}
           to={item.path}
           end={item.exact}
-          className="relative px-5 py-2 text-[14px] font-medium transition-colors duration-200 rounded-lg"
+          className="relative px-5 py-2 text-[14px] font-medium transition-colors duration-200 rounded-lg min-h-[44px] flex items-center"
         >
           {({ isActive }) => (
             <>
