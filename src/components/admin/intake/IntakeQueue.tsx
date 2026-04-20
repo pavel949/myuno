@@ -133,9 +133,11 @@ export function IntakeQueue({
               onDiscard={showActions ? () => setConfirmDiscardId(item.id) : () => {}}
               onEdit={showActions ? () => setEditingItem(item) : () => {}}
               isApproving={approvingItemId === item.id}
-          />
-        </div>
-      ))}
+              swipeable={showActions}
+            />
+          </div>
+        );
+      })}
     </div>
   );
 
