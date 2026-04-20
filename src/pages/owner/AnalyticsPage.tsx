@@ -1,9 +1,6 @@
 import { lazy, Suspense, useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { PageContainer } from '@/components/uno/PageContainer';
-import { PageHeader } from '@/components/uno/PageHeader';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Skeleton } from '@/components/ui/skeleton';
+import { PageShell, PageHeader, PageTabs, LoadingState } from '@/components/page';
 
 const OverviewTab = lazy(() => import('@/pages/owner/OwnerRevenueDashboard'));
 const ReportsTab = lazy(() => import('@/pages/owner/ReportsPage'));
@@ -15,7 +12,7 @@ export default function AnalyticsPage() {
   const [tab, setTab] = useState<'overview' | 'reports' | 'budget'>('overview');
 
   return (
-    <PageContainer>
+    <PageShell width="wide">
       <PageHeader
         title={isRu ? 'Аналитика и отчёты' : 'Analytics & Reports'}
         subtitle={isRu ? 'Метрики, отчёты и бюджетирование' : 'Metrics, reports and budgeting'}
@@ -23,19 +20,21 @@ export default function AnalyticsPage() {
         fallbackPath="/owner"
       />
 
-      <Tabs value={tab} onValueChange={v => setTab(v as typeof tab)} className="mb-5">
-        <TabsList>
-          <TabsTrigger value="overview">{isRu ? 'Обзор' : 'Overview'}</TabsTrigger>
-          <TabsTrigger value="reports">{isRu ? 'Отчёты' : 'Reports'}</TabsTrigger>
-          <TabsTrigger value="budget">{isRu ? 'Бюджет' : 'Budget'}</TabsTrigger>
-        </TabsList>
-      </Tabs>
+      <PageTabs<typeof tab>
+        tabs={[
+          { value: 'overview', label: isRu ? 'Обзор' : 'Overview' },
+          { value: 'reports', label: isRu ? 'Отчёты' : 'Reports' },
+          { value: 'budget', label: isRu ? 'Бюджет' : 'Budget' },
+        ]}
+        value={tab}
+        onChange={setTab}
+      />
 
-      <Suspense fallback={<Skeleton className="h-96 w-full rounded-xl" />}>
+      <Suspense fallback={<LoadingState variant="skeleton" layout="cards" rows={6} />}>
         {tab === 'overview' && <OverviewTab />}
         {tab === 'reports' && <ReportsTab />}
         {tab === 'budget' && <BudgetTab />}
       </Suspense>
-    </PageContainer>
+    </PageShell>
   );
 }
