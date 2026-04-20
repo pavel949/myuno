@@ -16,7 +16,7 @@ import { MCPortalGuard } from '@/components/auth/MCPortalGuard';
 import { CapitalGuard } from '@/components/capital/CapitalGuard';
 import { CapitalLayout } from '@/components/capital/CapitalLayout';
 import { AdminLayout } from '@/components/admin/AdminLayout';
-import { AdaptiveBottomNav } from './AdaptiveBottomNav';
+
 import { MCLayout } from '@/components/mc/MCLayout';
 import { VendorLayout } from '@/components/vendor/VendorLayout';
 import { GuestLayout } from '@/components/guest/GuestLayout';
@@ -876,8 +876,6 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
       </Routes>
     </AnimatePresence>
-    
-    <AdaptiveBottomNav />
     </>
   );
 };
