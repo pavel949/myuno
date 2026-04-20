@@ -29,7 +29,7 @@ export default function EducationIndex() {
   return (
     <MiniAppLayout
       title={isRu ? 'Образование' : 'Education'}
-      subtitle={`${providers.length} ${isRu ? 'провайдеров' : 'providers'}`}
+      subtitle={isRu ? `Найдено: ${providers.length}` : `${providers.length} results`}
       fallbackPath="/discover"
       categories={CATEGORIES}
       selectedCategory={selectedCategory}

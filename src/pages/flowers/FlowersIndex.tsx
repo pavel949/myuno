@@ -92,7 +92,7 @@ export default function FlowersIndex() {
   return (
     <MiniAppLayout
       title={isRu ? 'Доставка цветов' : 'Flower Delivery'}
-      subtitle={`${filteredBouquets.length} ${isRu ? 'букетов' : 'bouquets'}`}
+      subtitle={isRu ? `Найдено: ${filteredBouquets.length}` : `${filteredBouquets.length} results`}
       fallbackPath={APP_ROUTES.DISCOVER}
       showSearch={false}
       showHero={false}
@@ -124,7 +124,7 @@ export default function FlowersIndex() {
         {isBefore2PM && (
           <span className="flex items-center gap-1 shrink-0">
             <Clock className="w-3 h-3 text-primary shrink-0" />
-            {isRu ? 'До 14:00 — сегодня' : 'Before 2 PM — today'}
+            {isRu ? 'Доставка сегодня — заказ до 14:00' : 'Same-day delivery — order before 2 PM'}
           </span>
         )}
       </div>

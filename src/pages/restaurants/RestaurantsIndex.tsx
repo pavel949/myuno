@@ -122,7 +122,7 @@ export default function RestaurantsIndex() {
   return (
     <MiniAppLayout
       title={isRu ? 'Рестораны' : 'Restaurants'}
-      subtitle={`${filteredAndSorted.length} ${isRu ? 'ресторанов' : 'restaurants'}`}
+      subtitle={isRu ? `Найдено: ${filteredAndSorted.length}` : `${filteredAndSorted.length} results`}
       fallbackPath="/"
       showSearch
       searchValue={searchQuery}

@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { BackButton } from '@/components/uno/BackButton';
+import { CalmClusterHero } from '@/components/uno/CalmClusterHero';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { Plane, Smartphone, ArrowLeftRight, Car, Landmark, Zap, Globe } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -72,18 +72,13 @@ export default function ArriveClusterPage() {
   return (
     <AppLayout>
       <div className="pb-24">
-        <div className="relative bg-gradient-to-br from-teal-600 via-teal-500 to-emerald-600 p-6 pt-16 pb-10">
-          <BackButton fallbackPath="/" variant="overlay" className="absolute top-4 left-4" />
-          <div className="text-white text-center">
-            <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-3">
-              <Plane className="w-7 h-7" />
-            </div>
-            <h1 className="text-2xl font-bold mb-1">{t ? 'ПРИЕХАТЬ' : 'ARRIVE'}</h1>
-            <p className="text-white/80 text-sm">
-              {t ? 'Всё для планирования поездки и первого дня на острове' : 'Plan ahead & get set up on arrival'}
-            </p>
-          </div>
-        </div>
+        <CalmClusterHero
+          clusterId="arrive"
+          icon={Plane}
+          title={t ? 'Прибытие' : 'Arrive'}
+          subtitle={t ? 'Планирование поездки и сервисы первого дня' : 'Trip planning and day-one services'}
+          fallbackPath="/"
+        />
 
         <div className="px-4 py-3">
           <ClusterBreadcrumb clusterId="arrive" serviceLabelRu="Все сервисы" serviceLabelEn="All services" />
