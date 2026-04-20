@@ -4,9 +4,11 @@ import { useIntakeAgent } from '@/hooks/useIntakeAgent';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 import { IntakeModeSelector, IntakeMode } from '@/components/admin/intake/IntakeModeSelector';
 import { IntakeInputForm } from '@/components/admin/intake/IntakeInputForm';
 import { IntakeQueue } from '@/components/admin/intake/IntakeQueue';
+import { CSVImportWizard } from '@/components/admin/intake/CSVImportWizard';
 import { Bot, Sparkles, Zap, Globe } from 'lucide-react';
 
 export default function AdminIntake() {
@@ -20,6 +22,7 @@ export default function AdminIntake() {
     summary,
     isProcessing,
     isApproving,
+    progress,
     analyze,
     updateItem,
     approveItem,
@@ -99,13 +102,47 @@ export default function AdminIntake() {
         </Card>
       )}
 
-      {/* Input form - show only when no session */}
-      {!session && (
+      {/* Input form / CSV wizard — show only when no session */}
+      {!session && mode === 'csv' && (
+        <CSVImportWizard
+          isProcessing={isProcessing}
+          onAnalyze={handleAnalyze}
+        />
+      )}
+      {!session && mode !== 'csv' && (
         <IntakeInputForm
           mode={mode}
           onAnalyze={handleAnalyze}
           isProcessing={isProcessing}
         />
+      )}
+
+      {/* Bulk approve progress bar */}
+      {progress && progress.total > 0 && (
+        <Card className="mt-4 border-primary/30">
+          <CardContent className="pt-4 space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span className="font-medium">
+                {isRu ? 'Создание листингов...' : 'Creating listings...'}
+              </span>
+              <span className="text-muted-foreground">
+                {progress.processed} / {progress.total}
+                {progress.failed > 0 && (
+                  <span className="text-destructive ml-2">
+                    · {progress.failed} {isRu ? 'ошибок' : 'failed'}
+                  </span>
+                )}
+              </span>
+            </div>
+            <Progress value={(progress.processed / progress.total) * 100} />
+            {progress.currentTitle && (
+              <div className="text-xs text-muted-foreground truncate">
+                {isRu ? 'Сейчас: ' : 'Now: '}
+                {progress.currentTitle}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       )}
 
       {/* Queue - show when session exists */}

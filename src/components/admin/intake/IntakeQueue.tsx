@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { IntakeSession, IntakeSummary, IntakeItem } from '@/hooks/useIntakeAgent';
 import { IntakeItemCard } from './IntakeItemCard';
@@ -9,6 +9,7 @@ import { PersistentPanelLayout } from '@/components/uno/PersistentPanelLayout';
 import { useIsDesktop } from '@/hooks/use-desktop';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Clock, CheckCircle, XCircle, List } from 'lucide-react';
+import { calculateHealthScore } from '@/lib/intake/healthScore';
 
 interface IntakeQueueProps {
   session: IntakeSession;
@@ -40,7 +41,14 @@ export function IntakeQueue({
   const [selectedItem, setSelectedItem] = useState<IntakeItem | null>(null);
   const [approvingItemId, setApprovingItemId] = useState<string | null>(null);
 
-  const pendingItems = session.items.filter(i => i.status === 'pending');
+  // Pending sorted worst-first by health-score so operator fixes the broken ones first.
+  const pendingItems = useMemo(() => {
+    const arr = session.items.filter(i => i.status === 'pending');
+    return arr
+      .map(i => ({ i, score: calculateHealthScore(i).score }))
+      .sort((a, b) => a.score - b.score)
+      .map(x => x.i);
+  }, [session.items]);
   const createdItems = session.items.filter(i => i.status === 'created');
   const discardedItems = session.items.filter(i => i.status === 'discarded');
 

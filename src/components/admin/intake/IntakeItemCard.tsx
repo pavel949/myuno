@@ -6,6 +6,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { IntakeItem } from '@/hooks/useIntakeAgent';
 import { IntakeVerticalBadge } from './IntakeVerticalBadge';
 import { IntakeConfidenceBar } from './IntakeConfidenceBar';
+import { IntakeHealthBadge } from './IntakeHealthBadge';
 import { INTAKE_VERTICALS } from '@/lib/intakeVerticals';
 import { validateIntakeItem, describeValidation } from '@/lib/intake/validateItem';
 import { 
@@ -85,19 +86,22 @@ export function IntakeItemCard({
             </h3>
           </div>
           
-          {/* Status indicator */}
-          {item.status === 'created' && (
-            <Badge className="bg-success text-success-foreground shrink-0">
-              <CheckCircle className="h-3 w-3 mr-1" />
-              {isRu ? 'Создан' : 'Created'}
-            </Badge>
-          )}
-          {item.status === 'discarded' && (
-            <Badge variant="secondary" className="shrink-0">
-              <XCircle className="h-3 w-3 mr-1" />
-              {isRu ? 'Отклонён' : 'Discarded'}
-            </Badge>
-          )}
+          {/* Health score + status indicator */}
+          <div className="flex items-center gap-2 shrink-0">
+            {item.status === 'pending' && <IntakeHealthBadge item={item} />}
+            {item.status === 'created' && (
+              <Badge className="bg-success text-success-foreground">
+                <CheckCircle className="h-3 w-3 mr-1" />
+                {isRu ? 'Создан' : 'Created'}
+              </Badge>
+            )}
+            {item.status === 'discarded' && (
+              <Badge variant="secondary">
+                <XCircle className="h-3 w-3 mr-1" />
+                {isRu ? 'Отклонён' : 'Discarded'}
+              </Badge>
+            )}
+          </div>
         </div>
       </CardHeader>
       
