@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { PasswordStrengthIndicator } from '@/components/auth/PasswordStrengthIndicator';
 import { UnderlineInput } from '@/components/auth/UnderlineInput';
+import { GoogleSignInButton, OAuthDivider } from '@/components/auth/GoogleSignInButton';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Timeout helper — prevents infinite spinner when Supabase is unreachable
