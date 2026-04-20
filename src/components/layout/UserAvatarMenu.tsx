@@ -103,7 +103,8 @@ const ROLE_SWITCH_CONFIG: Partial<Record<AppRole, {
     descEn: 'Capital & portfolio tools',
     descRu: 'Капитал и портфель',
     icon: LineChart,
-    path: '/investor',
+    // /investor route does not exist — investor dashboard lives under /invest/dashboard.
+    path: APP_ROUTES.INVEST_DASHBOARD,
   },
 };
 
