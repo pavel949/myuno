@@ -57,7 +57,7 @@ Deno.serve(createCheckoutHandler("create-flowers-checkout", (body, userId) => {
       const { data: order, error: orderError } = await admin
         .from("orders")
         .insert({
-          order_type: "flower",
+          order_type: "flowers",
           customer_user_id: userId,
           provider_org_id: provider_id || null,
           status: "pending",
