@@ -349,21 +349,21 @@ export default function InvestmentHubLanding() {
             </div>
           </section>
 
-          {/* Hot Deals */}
+          {/* Featured selection */}
           {featured && featured.length > 0 && (
-            <section className="space-y-3">
+            <section className="space-y-3" aria-label={isRu ? 'Подборка' : 'Selection'}>
               <div className="flex items-center justify-between px-1">
                 <div className="flex items-center gap-2">
-                  <Flame className="h-5 w-5 text-amber-500" />
-                  <h2 className="font-bold text-lg">{isRu ? 'Горячие предложения' : 'Hot Deals'}</h2>
+                  <Sparkles className="h-5 w-5 text-muted-foreground" />
+                  <h2 className="font-semibold text-lg text-foreground">{isRu ? 'Подборка' : 'Selection'}</h2>
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => navigate(APP_ROUTES.INVEST_REAL_ESTATE)}
-                  className="text-primary"
+                  className="text-muted-foreground"
                 >
-                  {isRu ? 'Все' : 'All'}
+                  {isRu ? 'Все записи' : 'All entries'}
                   <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
               </div>
@@ -371,20 +371,20 @@ export default function InvestmentHubLanding() {
             </section>
           )}
 
-          {/* Real Estate dominant */}
+          {/* Real Estate */}
           <section className="space-y-3">
             <div className="flex items-center justify-between px-1">
               <div className="flex items-center gap-2">
-                <Building2 className="h-5 w-5 text-emerald-600" />
-                <h2 className="font-bold text-lg">{isRu ? 'Недвижимость' : 'Real Estate'}</h2>
+                <Building2 className="h-5 w-5 text-foreground" />
+                <h2 className="font-semibold text-lg text-foreground">{isRu ? 'Недвижимость' : 'Real Estate'}</h2>
               </div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate(APP_ROUTES.INVEST_REAL_ESTATE)}
-                className="text-primary"
+                className="text-muted-foreground"
               >
-                {isRu ? 'Открыть' : 'Open'}
+                {isRu ? 'Перейти к разделу' : 'Go to section'}
                 <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             </div>
@@ -394,7 +394,7 @@ export default function InvestmentHubLanding() {
                 <Badge
                   key={cat.key}
                   variant="outline"
-                  className="cursor-pointer hover:bg-primary/10"
+                  className="cursor-pointer hover:bg-muted"
                   onClick={() => navigate(`${APP_ROUTES.INVEST_REAL_ESTATE}?type=${cat.key}`)}
                 >
                   <span className="mr-1">{cat.icon}</span>
@@ -408,16 +408,16 @@ export default function InvestmentHubLanding() {
           <section className="space-y-3">
             <div className="flex items-center justify-between px-1">
               <div className="flex items-center gap-2">
-                <Briefcase className="h-5 w-5 text-amber-600" />
-                <h2 className="font-bold text-lg">{isRu ? 'Бизнес и франшизы' : 'Business & Franchises'}</h2>
+                <Briefcase className="h-5 w-5 text-foreground" />
+                <h2 className="font-semibold text-lg text-foreground">{isRu ? 'Бизнес и франшизы' : 'Business & Franchises'}</h2>
               </div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate(APP_ROUTES.INVEST_BUSINESS)}
-                className="text-primary"
+                className="text-muted-foreground"
               >
-                {isRu ? 'Открыть' : 'Open'}
+                {isRu ? 'Перейти к разделу' : 'Go to section'}
                 <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             </div>
@@ -428,7 +428,7 @@ export default function InvestmentHubLanding() {
                   <Badge
                     key={cat.key}
                     variant="outline"
-                    className="cursor-pointer flex-shrink-0 hover:bg-primary/10"
+                    className="cursor-pointer flex-shrink-0 hover:bg-muted"
                     onClick={() => navigate(`${APP_ROUTES.INVEST_BUSINESS}?type=${cat.key}`)}
                   >
                     <span className="mr-1">{cat.icon}</span>
@@ -442,20 +442,20 @@ export default function InvestmentHubLanding() {
 
           {/* Knowledge teaser */}
           <Card
-            className="bg-gradient-to-r from-blue-500/5 to-violet-500/5 border-blue-500/20 cursor-pointer hover:border-blue-500/40 transition-all"
+            className="border-border bg-card cursor-pointer hover:border-foreground/20 transition-all"
             onClick={() => navigate(APP_ROUTES.INVEST_KNOWLEDGE)}
           >
             <CardContent className="p-5 flex items-start gap-3">
-              <div className="p-2 rounded-lg bg-blue-500/10">
-                <BookOpen className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <div className="p-2 rounded-lg bg-muted">
+                <BookOpen className="h-5 w-5 text-foreground" />
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="font-bold text-base">
-                  {isRu ? 'Бизнес в Таиланде 101' : 'Doing Business in Thailand 101'}
+                <h3 className="font-semibold text-base text-foreground">
+                  {isRu ? 'Бизнес в Таиланде. Справочник' : 'Doing Business in Thailand. Handbook'}
                 </h3>
                 <p className="text-sm text-muted-foreground mt-1">
                   {isRu
-                    ? 'Структуры компаний, налоги, work permit, BOI, импорт-экспорт, кейсы.'
+                    ? 'Структуры компаний, налоги, разрешение на работу, BOI, импорт-экспорт, кейсы.'
                     : 'Company structures, taxes, work permit, BOI, import-export, case studies.'}
                 </p>
               </div>
@@ -465,21 +465,21 @@ export default function InvestmentHubLanding() {
 
           {/* Capital services teaser */}
           <Card
-            className="bg-gradient-to-r from-violet-500/5 to-rose-500/5 border-violet-500/20 cursor-pointer hover:border-violet-500/40 transition-all"
+            className="border-border bg-card cursor-pointer hover:border-foreground/20 transition-all"
             onClick={() => navigate(APP_ROUTES.INVEST_SERVICES)}
           >
             <CardContent className="p-5 flex items-start gap-3">
-              <div className="p-2 rounded-lg bg-violet-500/10">
-                <ShieldCheck className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+              <div className="p-2 rounded-lg bg-muted">
+                <ShieldCheck className="h-5 w-5 text-foreground" />
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="font-bold text-base">
-                  {isRu ? 'Представляйте мои интересы' : 'Represent my interests'}
+                <h3 className="font-semibold text-base text-foreground">
+                  {isRu ? 'Сопровождение проекта' : 'Project representation'}
                 </h3>
                 <p className="text-sm text-muted-foreground mt-1">
                   {isRu
-                    ? 'Найдём local partner, юриста, бухгалтера или operator, который ведёт ваш проект на месте.'
-                    : 'Find a local partner, lawyer, accountant or operator running your project on the ground.'}
+                    ? 'Подбор местного партнёра, юриста, бухгалтера или оператора для ведения проекта на месте.'
+                    : 'Local partner, lawyer, accountant or operator running the project on the ground.'}
                 </p>
               </div>
               <ChevronRight className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
