@@ -100,7 +100,7 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
           {/* Mobile search icon */}
           <button
             onClick={() => setSearchOpen(true)}
-            className="lg:hidden flex items-center justify-center w-9 h-9 rounded-[var(--radius-sm)] hover:bg-muted/40 transition-colors"
+            className="lg:hidden flex items-center justify-center w-11 h-11 rounded-[var(--radius-sm)] hover:bg-muted/40 transition-colors"
             aria-label={isRu ? 'Поиск' : 'Search'}
           >
             <Search className="w-[18px] h-[18px] text-muted-foreground" />
@@ -118,11 +118,9 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
             {user ? (
               <UserAvatarMenu />
             ) : (
-              <Link to={APP_ROUTES.AUTH}>
-                <Button size="sm" className="h-8 text-xs px-4 ml-1 rounded-[var(--radius-full)] font-semibold bg-primary text-primary-foreground hover:bg-primary-hover">
-                  {t('auth.login')}
-                </Button>
-              </Link>
+              <Button asChild size="sm" className="h-11 text-xs px-4 ml-1 rounded-[var(--radius-full)] font-semibold bg-primary text-primary-foreground hover:bg-primary-hover">
+                <Link to={APP_ROUTES.AUTH}>{t('auth.login')}</Link>
+              </Button>
             )}
           </div>
         </div>
