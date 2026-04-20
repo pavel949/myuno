@@ -52,6 +52,8 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
       return () => window.removeEventListener('navigator:open-apps-drawer', handler);
     }, []);
 
+    // NavShell already renders BottomBar — step aside to avoid duplicates.
+    if (navShellActive) return null;
     if (shouldHideBottomNav(location.pathname)) return null;
 
     // P0 — single source of truth for role → nav resolution.
