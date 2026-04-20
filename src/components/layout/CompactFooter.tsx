@@ -110,7 +110,7 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
     const rightGroups = footerGroups.slice(3);
 
     return (
-      <footer className="border-t border-border/40 bg-muted/10 mt-auto">
+      <footer ref={ref} className="border-t border-border/40 bg-muted/10 mt-auto">
         <div className={cn(ECOSYSTEM_PAGE_CONTAINER, 'py-10 lg:py-12')}>
           {/* Main grid — 6 columns */}
           <div className="grid grid-cols-6 gap-6 xl:gap-8 mb-8">
@@ -244,7 +244,7 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
 
   // Mobile: compact footer
   return (
-    <footer className="border-t border-border/50 bg-muted/30 mt-auto pb-20 md:pb-0">
+    <footer ref={ref} className="border-t border-border/50 bg-muted/30 mt-auto pb-20 md:pb-0">
       <div className={cn(ECOSYSTEM_PAGE_CONTAINER, 'py-6 space-y-4')}>
         {!isInstalled && (
           <div className="flex justify-center">
@@ -293,4 +293,6 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
       </div>
     </footer>
   );
-}
+});
+
+CompactFooter.displayName = 'CompactFooter';
