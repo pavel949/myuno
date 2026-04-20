@@ -25,10 +25,20 @@ import {
   Shield,
   Globe,
   Sparkles,
+  type LucideIcon,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { cn } from '@/lib/utils';
+
+type Cluster = {
+  id: string;
+  icon: LucideIcon;
+  labelEn: string;
+  labelRu: string;
+  hintEn: string;
+  hintRu: string;
+};
 
 type Cluster = {
   id: string;
