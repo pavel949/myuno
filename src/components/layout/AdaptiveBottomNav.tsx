@@ -39,6 +39,7 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
     const { activeRole } = useUserContext();
     const { isMCPortal } = useOwnerType();
     const { prefetchRoute } = usePrefetchRoute();
+    const navShellActive = useNavShellActive();
     const [appsOpen, setAppsOpen] = useState(false);
 
     const handlePrefetch = useCallback((path: string) => {
