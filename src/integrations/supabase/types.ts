@@ -14967,6 +14967,7 @@ export type Database = {
           id: string
           medical_conditions: string | null
           nationality: string | null
+          owner_type: string | null
           phone: string | null
           postal_code: string | null
           preferred_language: string | null
@@ -15000,6 +15001,7 @@ export type Database = {
           id: string
           medical_conditions?: string | null
           nationality?: string | null
+          owner_type?: string | null
           phone?: string | null
           postal_code?: string | null
           preferred_language?: string | null
@@ -15033,6 +15035,7 @@ export type Database = {
           id?: string
           medical_conditions?: string | null
           nationality?: string | null
+          owner_type?: string | null
           phone?: string | null
           postal_code?: string | null
           preferred_language?: string | null

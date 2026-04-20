@@ -58,7 +58,7 @@ export function useProfile() {
         throw error;
       }
 
-      return data;
+      return data as UserProfile | null;
     },
     enabled: !!user?.id,
   });
