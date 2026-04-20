@@ -48,24 +48,24 @@ export function WorkspaceHomeBanner() {
     if (hasMcWorkspaceAccess(availableRoles)) {
       out.push({
         to: '/mc',
-        labelEn: 'MC workspace',
-        labelRu: 'Панель УК',
+        labelEn: 'Management workspace',
+        labelRu: 'Кабинет управления',
         icon: Building2,
       });
     }
     if (availableRoles.includes('vendor')) {
       out.push({
         to: '/vendor',
-        labelEn: 'Vendor',
-        labelRu: 'Кабинет провайдера',
+        labelEn: 'Provider workspace',
+        labelRu: 'Кабинет поставщика',
         icon: Store,
       });
     }
     if (isMCPortal) {
       out.push({
         to: '/my-property',
-        labelEn: 'My property',
-        labelRu: 'Мой объект',
+        labelEn: 'Owner portal',
+        labelRu: 'Кабинет собственника',
         icon: Home,
       });
     }
@@ -87,8 +87,8 @@ export function WorkspaceHomeBanner() {
     >
       <p className="text-sm text-muted-foreground">
         {isRu
-          ? 'Быстрый переход в кабинет — маркетплейс остаётся здесь.'
-          : 'Jump to your workspace — you can stay on the marketplace here.'}
+          ? 'Переход в рабочий кабинет. Главная остаётся доступной.'
+          : 'Open your workspace. The main view stays available.'}
       </p>
       <div className="flex flex-wrap items-center gap-2">
         {links.map(({ to, labelEn, labelRu, icon: Icon }) => (

@@ -18,10 +18,10 @@ export function ClusterGrid({ personas }: ClusterGridProps) {
     <div className="px-4 pb-5">
       <div className="flex items-baseline justify-between mb-2.5">
         <div className="text-[11px] tracking-[0.12em] uppercase text-muted-foreground/60 font-semibold">
-          {isRu ? 'Все сервисы' : 'All services'}
+          {isRu ? 'Шесть направлений' : 'Six clusters'}
         </div>
         <div className="text-[11px] text-muted-foreground/50">
-          {isRu ? '45 приложений · для вас' : '45 apps · ranked for you'}
+          {isRu ? '45 сервисов · по вашему профилю' : '45 services · ordered by profile'}
         </div>
       </div>
       <div className="grid grid-cols-2 gap-2">
@@ -38,7 +38,7 @@ export function ClusterGrid({ personas }: ClusterGridProps) {
             />
             <div>
               <div className="text-[10px] tracking-[0.1em] uppercase text-muted-foreground/50 font-semibold">
-                {isRu ? 'Кластер' : 'Cluster'}
+                {isRu ? 'Направление' : 'Cluster'}
               </div>
               <div className="font-display text-[17px] font-semibold text-foreground mt-0.5 tracking-[-0.01em]">
                 {isRu ? c.labelRu : c.labelEn}

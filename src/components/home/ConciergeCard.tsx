@@ -21,12 +21,12 @@ export function ConciergeCard({ personas }: ConciergeCardProps) {
   let nudge: string;
   if (personas.length > 1) {
     nudge = isRu
-      ? `Вы сейчас в ${personas.length} ролях. Я поставил ваш приоритет "${primaryMeta?.labelRu || ''}" первым — остальное ниже.`
-      : `You're wearing ${personas.length} hats today. I lined up your ${primaryMeta?.label || ''} priority first, with the rest below.`;
+      ? `Активно ${personas.length} ролей. Приоритет — «${primaryMeta?.labelRu || ''}», остальные ниже по порядку.`
+      : `${personas.length} roles active. Priority — ${primaryMeta?.label || ''}; the rest are stacked below.`;
   } else {
     nudge = isRu
-      ? `Я поставил ваш приоритет "${primaryMeta?.labelRu || ''}" первым — скажите, если хотите сменить фокус.`
-      : `I lined up your ${primaryMeta?.label || ''} priority — ask me to switch focus anytime.`;
+      ? `Текущий приоритет — «${primaryMeta?.labelRu || ''}». Порядок можно изменить в любой момент.`
+      : `Current priority — ${primaryMeta?.label || ''}. Reorder any time.`;
   }
 
   return (
@@ -41,7 +41,7 @@ export function ConciergeCard({ personas }: ConciergeCardProps) {
         </div>
         <div className="flex-1">
           <div className="text-[10.5px] tracking-[0.08em] uppercase text-muted-foreground/50 font-semibold mb-1">
-            {isRu ? 'Консьерж' : 'Concierge'}
+            {isRu ? 'Помощник' : 'Assistant'}
           </div>
           <div className="text-[13.5px] text-foreground leading-relaxed">{nudge}</div>
           <div className="flex gap-1.5 mt-2.5">
@@ -49,7 +49,7 @@ export function ConciergeCard({ personas }: ConciergeCardProps) {
               onClick={() => navigate('/discover')}
               className="px-2.5 py-1.5 rounded-full text-[11px] font-medium bg-foreground text-background border border-foreground"
             >
-              {isRu ? 'Фокус' : 'Focus mode'}
+              {isRu ? 'Открыть' : 'Open'}
             </button>
             <button
               onClick={() => setDismissed(true)}
@@ -61,7 +61,7 @@ export function ConciergeCard({ personas }: ConciergeCardProps) {
               onClick={() => navigate('/discover?ai=1')}
               className="px-2.5 py-1.5 rounded-full text-[11px] font-medium text-muted-foreground border border-border"
             >
-              {isRu ? 'Спросить' : 'Ask'}
+              {isRu ? 'Задать вопрос' : 'Ask a question'}
             </button>
           </div>
         </div>

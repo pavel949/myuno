@@ -31,8 +31,8 @@ export function QuickActionsBlended({ personas }: QuickActionsBlendedProps) {
   return (
     <div className="px-4 pb-5">
       <SectionHead
-        title={isRu ? 'Для вас' : 'For you'}
-        meta={isRu ? 'Из ваших ролей' : 'Mixed from your roles'}
+        title={isRu ? 'Быстрый доступ' : 'Quick access'}
+        meta={isRu ? 'По вашим ролям' : 'Based on your roles'}
       />
       <div className="grid grid-cols-4 gap-2">
         {displayActions.map((action) => (

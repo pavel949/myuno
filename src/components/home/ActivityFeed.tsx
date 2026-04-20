@@ -17,10 +17,10 @@ export function ActivityFeed({ personas }: ActivityFeedProps) {
     <div className="px-4 pb-5">
       <div className="flex items-baseline justify-between mb-2.5">
         <div className="text-[11px] tracking-[0.12em] uppercase text-muted-foreground/60 font-semibold">
-          {isRu ? 'Активность' : 'Activity'}
+          {isRu ? 'История событий' : 'Activity log'}
         </div>
         <div className="text-[11px] text-muted-foreground/50">
-          {isRu ? 'Все роли' : 'All roles · this week'}
+          {isRu ? 'За неделю · все роли' : 'This week · all roles'}
         </div>
       </div>
 
@@ -42,7 +42,7 @@ export function ActivityFeed({ personas }: ActivityFeedProps) {
         </div>
       ) : feedItems.length === 0 ? (
         <div className="border-t border-border/[0.05] py-8 text-center text-[12px] text-muted-foreground/40">
-          {isRu ? 'Пока нет активности' : 'No activity yet'}
+          {isRu ? 'Записей пока нет' : 'No entries yet'}
         </div>
       ) : (
         <div className="border-t border-border/[0.05]">
