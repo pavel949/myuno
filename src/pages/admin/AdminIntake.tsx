@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useIntakeAgent } from '@/hooks/useIntakeAgent';
 import { PageContainer } from '@/components/uno/PageContainer';
@@ -15,7 +16,19 @@ export default function AdminIntake() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   
-  const [mode, setMode] = useState<IntakeMode>('single');
+  const [searchParams] = useSearchParams();
+  const validModes: IntakeMode[] = ['single', 'bulk_text', 'bulk_urls', 'files', 'agent_message', 'csv'];
+  const initialMode = (searchParams.get('mode') as IntakeMode) || 'single';
+  const [mode, setMode] = useState<IntakeMode>(
+    validModes.includes(initialMode) ? initialMode : 'single'
+  );
+
+  // React to URL changes (e.g. from /admin/add card clicks while page is mounted).
+  useEffect(() => {
+    const next = searchParams.get('mode') as IntakeMode | null;
+    if (next && validModes.includes(next)) setMode(next);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
   
   const {
     session,
