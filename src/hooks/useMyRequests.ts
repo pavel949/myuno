@@ -75,20 +75,22 @@ async function fetchRequests(userId: string): Promise<MyRequest[]> {
   try {
     const { data } = await supabase
       .from('concierge_sessions')
-      .select('id, primary_intent, status, created_at')
+      .select('id, goal, status, created_at')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
       .limit(20);
     for (const r of data ?? []) {
+      const s = (r.status as string) ?? 'open';
       const status: RequestStatus =
-        r.status === 'completed' ? 'done' :
-        r.status === 'in_progress' ? 'in_progress' :
+        s === 'completed' || s === 'closed' ? 'done' :
+        s === 'in_progress' ? 'in_progress' :
+        s === 'waiting' ? 'waiting' :
         'new';
       out.push({
         id: `concierge-${r.id}`,
         source: 'concierge',
         status,
-        title: (r.primary_intent as string) ?? 'Concierge request',
+        title: (r.goal as string) ?? 'Concierge request',
         createdAt: (r.created_at as string) ?? new Date().toISOString(),
         detailPath: '/me/services',
       });
