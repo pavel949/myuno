@@ -148,28 +148,76 @@ export default function MeDocuments() {
   const [uploadOpen, setUploadOpen] = useState(false);
   const [editingDoc, setEditingDoc] = useState<MyDocument | null>(null);
   const [deletingDoc, setDeletingDoc] = useState<MyDocument | null>(null);
+  // Documents pending delete are hidden optimistically until the undo window passes
+  const [pendingDeleteIds, setPendingDeleteIds] = useState<Set<string>>(new Set());
 
-  const deleteMutation = useMutation({
-    mutationFn: async (doc: MyDocument) => {
-      const dbId = doc.id.startsWith('vault-') ? doc.id.slice('vault-'.length) : null;
-      if (!dbId) throw new Error('Invalid document');
-      const { error } = await supabase
-        .from('user_documents_vault')
-        .update({ archived_at: new Date().toISOString() })
-        .eq('id', dbId);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['me-documents'] });
-      toast.success(isRu ? 'Документ удалён' : 'Document deleted');
-      setDeletingDoc(null);
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
+  /** Soft-delete the document in DB (used after the undo window expires). */
+  const archiveDoc = async (doc: MyDocument) => {
+    const dbId = doc.id.startsWith('vault-') ? doc.id.slice('vault-'.length) : null;
+    if (!dbId) throw new Error('Invalid document');
+    const { error } = await supabase
+      .from('user_documents_vault')
+      .update({ archived_at: new Date().toISOString() })
+      .eq('id', dbId);
+    if (error) throw error;
+  };
 
-  const passports = (docs ?? []).filter((d) => d.source === 'passport');
-  const visas     = (docs ?? []).filter((d) => d.source === 'visa');
-  const vault     = (docs ?? []).filter((d) => d.source === 'vault');
+  /** Confirm flow: hide locally + show 5s toast with Undo. */
+  const confirmDelete = (doc: MyDocument) => {
+    setDeletingDoc(null);
+    setPendingDeleteIds((prev) => new Set(prev).add(doc.id));
+
+    let undone = false;
+    const UNDO_MS = 5000;
+
+    const toastId = toast(
+      isRu ? `«${doc.title}» удалён` : `"${doc.title}" deleted`,
+      {
+        description: isRu ? 'Можно отменить в течение 5 секунд' : 'You can undo within 5 seconds',
+        duration: UNDO_MS,
+        action: {
+          label: isRu ? 'Отменить' : 'Undo',
+          onClick: () => {
+            undone = true;
+            setPendingDeleteIds((prev) => {
+              const next = new Set(prev);
+              next.delete(doc.id);
+              return next;
+            });
+            toast.dismiss(toastId);
+            toast.success(isRu ? 'Удаление отменено' : 'Delete cancelled');
+          },
+        },
+      },
+    );
+
+    setTimeout(async () => {
+      if (undone) return;
+      try {
+        await archiveDoc(doc);
+        qc.invalidateQueries({ queryKey: ['me-documents'] });
+      } catch (e) {
+        // Restore on failure so user doesn't silently lose the doc
+        setPendingDeleteIds((prev) => {
+          const next = new Set(prev);
+          next.delete(doc.id);
+          return next;
+        });
+        toast.error((e as Error).message);
+      } finally {
+        setPendingDeleteIds((prev) => {
+          const next = new Set(prev);
+          next.delete(doc.id);
+          return next;
+        });
+      }
+    }, UNDO_MS);
+  };
+
+  const visibleDocs = (docs ?? []).filter((d) => !pendingDeleteIds.has(d.id));
+  const passports = visibleDocs.filter((d) => d.source === 'passport');
+  const visas     = visibleDocs.filter((d) => d.source === 'visa');
+  const vault     = visibleDocs.filter((d) => d.source === 'vault');
 
   return (
     <MeShellLayout title={isRu ? 'Документы' : 'Documents'}>
