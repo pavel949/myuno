@@ -87,15 +87,59 @@ export default function NewbuildsMap() {
 
   const { isLoaded, loadError, hasKey } = useGoogleMaps();
   const mapRef = useRef<google.maps.Map | null>(null);
+  const [zoom, setZoom] = useState<number>(() => getDefaultZoom('phuket'));
 
   const defaultCenter = useMemo(() => getDefaultCenter('phuket'), []);
   const defaultZoom = useMemo(() => getDefaultZoom('phuket'), []);
 
   const onMapLoad = useCallback((map: google.maps.Map) => {
     mapRef.current = map;
-  }, []);
+    setZoom(map.getZoom() ?? defaultZoom);
+  }, [defaultZoom]);
   const onMapUnmount = useCallback(() => {
     mapRef.current = null;
+  }, []);
+  const onZoomChanged = useCallback(() => {
+    if (mapRef.current) {
+      const z = mapRef.current.getZoom();
+      if (typeof z === 'number') setZoom(z);
+    }
+  }, []);
+
+  // Build clusters by snapping coordinates to a zoom-dependent grid.
+  // Cells get coarser at lower zoom so distant points merge; finer when zoomed in.
+  type Cluster = {
+    id: string;
+    lat: number;
+    lng: number;
+    projects: NewbuildProject[];
+  };
+  const clusters = useMemo<Cluster[]>(() => {
+    if (projectsWithCoords.length === 0) return [];
+    // Cell size in degrees. At zoom 10 ≈ 0.04°, doubles per zoom-out, halves per zoom-in.
+    const cellSize = 0.04 * Math.pow(2, 10 - Math.max(1, Math.min(20, zoom)));
+    const map = new Map<string, Cluster>();
+    for (const p of projectsWithCoords) {
+      const cy = Math.floor(p.lat! / cellSize);
+      const cx = Math.floor(p.lng! / cellSize);
+      const key = `${cy}:${cx}`;
+      const existing = map.get(key);
+      if (existing) {
+        existing.projects.push(p);
+        existing.lat = (existing.lat * (existing.projects.length - 1) + p.lat!) / existing.projects.length;
+        existing.lng = (existing.lng * (existing.projects.length - 1) + p.lng!) / existing.projects.length;
+      } else {
+        map.set(key, { id: key, lat: p.lat!, lng: p.lng!, projects: [p] });
+      }
+    }
+    return Array.from(map.values());
+  }, [projectsWithCoords, zoom]);
+
+  const handleClusterClick = useCallback((cluster: Cluster) => {
+    if (!mapRef.current) return;
+    const bounds = new google.maps.LatLngBounds();
+    cluster.projects.forEach(p => bounds.extend({ lat: p.lat!, lng: p.lng! }));
+    mapRef.current.fitBounds(bounds, 80);
   }, []);
 
   // Auto-fit bounds when filtered projects change
