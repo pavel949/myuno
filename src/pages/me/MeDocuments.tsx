@@ -173,12 +173,7 @@ export default function MeDocuments() {
             )}
             <PageSection
               title={isRu ? 'Сейф документов' : 'Vault'}
-              action={
-                <Button size="sm" variant="ghost" onClick={() => setUploadOpen(true)}>
-                  <Plus className="h-4 w-4" />
-                  {isRu ? 'Добавить' : 'Add'}
-                </Button>
-              }
+              action={{ label: isRu ? 'Добавить' : 'Add', onClick: () => setUploadOpen(true) }}
             >
               {vault.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
