@@ -99,6 +99,68 @@ export function isBottomBarRoute(role: NavRoleKey, path: string): boolean {
 }
 
 // ─────────────────────────────────────────────────────────────
+// Active-tab matching
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * Routes that "absorb" certain sibling pathnames so the right tab stays
+ * highlighted across related screens (e.g. /profile is part of the /account
+ * tab on the guest bar).
+ */
+const PATH_ALIASES: Record<string, string[]> = {
+  '/account':     ['/account', '/profile', '/me'],
+  '/me':          ['/me', '/account', '/profile'],
+  '/profile':     ['/profile', '/account'],
+  '/market':      ['/market'],
+  '/property':    ['/property'],
+  '/discover':    ['/discover'],
+  '/my-property': ['/my-property'],
+};
+
+/**
+ * Decide if a bottom-bar item should render as active for the current
+ * pathname. Rules:
+ *  1. Items marked `exact` only match an exact pathname.
+ *  2. Items with a known alias group match any pathname starting with one
+ *     of the aliased prefixes.
+ *  3. Otherwise the item matches when the pathname equals or starts with
+ *     `${item.path}/`.
+ *
+ * The function is pure so it can be unit-tested without React Router.
+ */
+export function isBottomBarItemActive(item: NavItem, pathname: string): boolean {
+  if (item.exact) return pathname === item.path;
+
+  const aliases = PATH_ALIASES[item.path];
+  if (aliases) {
+    return aliases.some(
+      (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+    );
+  }
+
+  return pathname === item.path || pathname.startsWith(`${item.path}/`);
+}
+
+/**
+ * Return the active item from a role's bottom bar for the given pathname,
+ * or `null` if nothing matches. When several items would match, the most
+ * specific (longest path) wins so that e.g. `/my-property/statements`
+ * highlights "Statements", not "My Properties".
+ */
+export function getActiveBottomBarItem(
+  role: NavRoleKey,
+  pathname: string,
+): NavItem | null {
+  const matches = getBottomBarItems(role).filter((item) =>
+    isBottomBarItemActive(item, pathname),
+  );
+  if (matches.length === 0) return null;
+  return matches.reduce((best, candidate) =>
+    candidate.path.length > best.path.length ? candidate : best,
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
 // Sidebar (grouped) navigation — workspace roles only.
 // Consumer roles (guest/investor/mc_portal) get no sidebar; they use
 // the top-pills + bottom-bar pattern.

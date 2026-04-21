@@ -25,6 +25,7 @@ import { GUEST_NAV_ME_HUB } from '@/lib/navConfig';
 import {
   PRIMARY_NAV,
   shouldShowAppsLauncher,
+  getActiveBottomBarItem,
   type NavRoleKey,
   type NavItem,
 } from '@/lib/nav/navigationModel';
@@ -68,17 +69,9 @@ export const BottomBar = forwardRef<HTMLDivElement, BottomBarProps>(
       if (settings.soundEnabled) playSound('click');
     };
 
-    const isActive = (item: NavItem) => {
-      if (item.exact) return location.pathname === item.path;
-      if (item.path === '/account') {
-        return (
-          location.pathname.startsWith('/account') ||
-          location.pathname.startsWith('/profile')
-        );
-      }
-      if (item.path === '/market') return location.pathname.startsWith('/market');
-      return location.pathname.startsWith(item.path);
-    };
+    const activeItem = getActiveBottomBarItem(role, location.pathname);
+    const isActive = (item: NavItem) =>
+      activeItem !== null && activeItem.path === item.path;
 
     // 5-slot grid: 4 nav + apps launcher OR 5 nav.
     const visibleItems = showAppsButton ? navItems.slice(0, 4) : navItems;

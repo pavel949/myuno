@@ -13,6 +13,8 @@ import {
   BOTTOM_BAR_BY_ROLE,
   getBottomBarItems,
   isBottomBarRoute,
+  isBottomBarItemActive,
+  getActiveBottomBarItem,
   PRIMARY_NAV,
   NAV_BY_ROLE,
   resolveNavRole,
@@ -206,5 +208,98 @@ describe('resolveNavRole + bottom-bar integration', () => {
     const role = resolveNavRole({ pathname: '/' });
     expect(role).toBe('guest');
     expect(getBottomBarItems(role)).toBe(BOTTOM_BAR_BY_ROLE.guest);
+  });
+});
+
+describe('isBottomBarItemActive — exact-match items', () => {
+  const home = BOTTOM_BAR_BY_ROLE.guest[0]; // / (exact)
+  const ownerDash = BOTTOM_BAR_BY_ROLE.owner[0]; // /mc (exact)
+
+  it('matches only the exact pathname', () => {
+    expect(isBottomBarItemActive(home, '/')).toBe(true);
+    expect(isBottomBarItemActive(home, '/discover')).toBe(false);
+    expect(isBottomBarItemActive(ownerDash, '/mc')).toBe(true);
+    expect(isBottomBarItemActive(ownerDash, '/mc/properties')).toBe(false);
+  });
+});
+
+describe('isBottomBarItemActive — prefix items', () => {
+  const market = BOTTOM_BAR_BY_ROLE.guest[2]; // /market
+  const property = BOTTOM_BAR_BY_ROLE.guest[3]; // /property
+  const ownerProps = BOTTOM_BAR_BY_ROLE.owner[1]; // /mc/properties
+
+  it('matches the path itself and any nested route', () => {
+    expect(isBottomBarItemActive(market, '/market')).toBe(true);
+    expect(isBottomBarItemActive(market, '/market/store/123')).toBe(true);
+    expect(isBottomBarItemActive(property, '/property/browse')).toBe(true);
+    expect(isBottomBarItemActive(ownerProps, '/mc/properties/abc/edit')).toBe(true);
+  });
+
+  it('does not match unrelated routes (respects "/" boundary)', () => {
+    expect(isBottomBarItemActive(market, '/marketing')).toBe(false);
+    expect(isBottomBarItemActive(property, '/properties')).toBe(false);
+    expect(isBottomBarItemActive(ownerProps, '/mc/finance')).toBe(false);
+  });
+});
+
+describe('isBottomBarItemActive — alias groups', () => {
+  const account = BOTTOM_BAR_BY_ROLE.guest[4]; // /account
+
+  it('treats /profile and /me as part of the /account tab', () => {
+    expect(isBottomBarItemActive(account, '/account')).toBe(true);
+    expect(isBottomBarItemActive(account, '/account/settings')).toBe(true);
+    expect(isBottomBarItemActive(account, '/profile')).toBe(true);
+    expect(isBottomBarItemActive(account, '/profile/edit')).toBe(true);
+    expect(isBottomBarItemActive(account, '/me')).toBe(true);
+    expect(isBottomBarItemActive(account, '/me/services')).toBe(true);
+  });
+
+  it('does not over-match unrelated paths', () => {
+    expect(isBottomBarItemActive(account, '/messages')).toBe(false);
+    expect(isBottomBarItemActive(account, '/discover')).toBe(false);
+  });
+});
+
+describe('getActiveBottomBarItem — most-specific wins', () => {
+  it('returns null when no item matches', () => {
+    expect(getActiveBottomBarItem('owner', '/totally/unknown')).toBeNull();
+  });
+
+  it('guest on /market highlights Market', () => {
+    const item = getActiveBottomBarItem('guest', '/market');
+    expect(item?.path).toBe('/market');
+    expect(item?.labelEn).toBe('Market');
+  });
+
+  it('guest on / highlights Home (exact)', () => {
+    expect(getActiveBottomBarItem('guest', '/')?.labelEn).toBe('Home');
+  });
+
+  it('guest on /profile/edit highlights Me via alias', () => {
+    expect(getActiveBottomBarItem('guest', '/profile/edit')?.path).toBe('/account');
+  });
+
+  it('owner on /mc highlights Dashboard, on /mc/finance highlights Finance', () => {
+    expect(getActiveBottomBarItem('owner', '/mc')?.labelEn).toBe('Dashboard');
+    expect(getActiveBottomBarItem('owner', '/mc/finance/transactions')?.labelEn).toBe('Finance');
+  });
+
+  it('mc_portal on /my-property/statements highlights Statements (longest prefix)', () => {
+    const item = getActiveBottomBarItem('mc_portal', '/my-property/statements');
+    expect(item?.path).toBe('/my-property/statements');
+  });
+
+  it('admin on /admin/crm/123 highlights CRM', () => {
+    expect(getActiveBottomBarItem('admin', '/admin/crm/123')?.labelEn).toBe('CRM');
+  });
+
+  it('vendor on /vendor highlights Dashboard (exact match)', () => {
+    expect(getActiveBottomBarItem('vendor', '/vendor')?.labelEn).toBe('Dashboard');
+  });
+
+  it('investor on /invest/dashboard/projects highlights Invest', () => {
+    expect(
+      getActiveBottomBarItem('investor', '/invest/dashboard/projects')?.labelEn,
+    ).toBe('Invest');
   });
 });
