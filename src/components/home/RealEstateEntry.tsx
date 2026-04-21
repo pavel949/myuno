@@ -71,7 +71,7 @@ const TRACKS: Track[] = [
       ru: 'От 200 000 USD',
       en: 'From USD 200 000',
     },
-    href: APP_ROUTES.INVEST,
+    href: APP_ROUTES.CAPITAL_DEAL_INTAKE,
   },
 ];
 
