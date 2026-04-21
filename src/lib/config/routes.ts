@@ -8,6 +8,7 @@
 export const APP_ROUTES = {
   // ── Core ──
   HOME: '/',
+  START: '/start',
   AUTH: '/auth',
   AUTH_ACCOUNT_TYPE: '/auth/account-type',
   AUTH_FORGOT_PASSWORD: '/auth/forgot-password',

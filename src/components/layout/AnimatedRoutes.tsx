@@ -158,6 +158,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.HOME} element={<PageTransition><HomeRouter /></PageTransition>} />
         <Route path={APP_ROUTES.PRICING} element={<LazyPage><Pages.PricingPage /></LazyPage>} />
         <Route path="/welcome-landing" element={<LazyPage><WelcomeLanding /></LazyPage>} />
+        <Route path="/start" element={<LazyPage><Pages.StartOnboarding /></LazyPage>} />
         <Route path={APP_ROUTES.AUTH} element={<PageTransition><Auth /></PageTransition>} />
         <Route path={APP_ROUTES.AUTH_ACCOUNT_TYPE} element={<LazyPage><Pages.AccountTypeSelection /></LazyPage>} />
         <Route path={APP_ROUTES.AUTH_FORGOT_PASSWORD} element={<LazyPage><Pages.ForgotPassword /></LazyPage>} />
