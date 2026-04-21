@@ -243,7 +243,14 @@ export default function MeDocuments() {
             >
               {vault.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {vault.map((d) => <DocCard key={d.id} doc={d} onEdit={setEditingDoc} />)}
+                  {vault.map((d) => (
+                    <DocCard
+                      key={d.id}
+                      doc={d}
+                      onEdit={setEditingDoc}
+                      onDelete={setDeletingDoc}
+                    />
+                  ))}
                 </div>
               ) : (
                 <p className="text-sm text-muted-foreground">
