@@ -100,42 +100,31 @@ function DocCard({
           )}
           <div className="ml-auto flex items-center gap-0.5">
             {isVault && onEdit && (
-              <Button
-                size="sm"
-                variant="ghost"
-                className="h-7 px-2"
+              <ActionIconButton
+                icon={Pencil}
+                label={isRu ? 'Редактировать' : 'Edit'}
                 onClick={() => onEdit(doc)}
                 disabled={isDeleting}
-                aria-label={isRu ? 'Редактировать' : 'Edit'}
-              >
-                <Pencil className="h-3.5 w-3.5" />
-              </Button>
+              />
             )}
             {doc.fileUrl && onOpen && (
-              <Button
-                size="sm"
-                variant="ghost"
-                className="h-7 px-2"
+              <ActionIconButton
+                icon={ExternalLink}
+                label={isRu ? 'Открыть' : 'Open'}
                 onClick={() => onOpen(doc)}
-                disabled={isDeleting || isOpening}
-                aria-label={isRu ? 'Открыть' : 'Open'}
-              >
-                {isOpening
-                  ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  : <ExternalLink className="h-3.5 w-3.5" />}
-              </Button>
+                disabled={isDeleting}
+                isLoading={isOpening}
+              />
             )}
             {isVault && onDelete && (
-              <Button
-                size="sm"
-                variant="ghost"
-                className="h-7 px-2 text-destructive hover:text-destructive"
+              <ActionIconButton
+                icon={Trash2}
+                label={isRu ? 'Удалить' : 'Delete'}
                 onClick={() => onDelete(doc)}
                 disabled={isDeleting}
-                aria-label={isRu ? 'Удалить' : 'Delete'}
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </Button>
+                isLoading={isDeleting}
+                tone="destructive"
+              />
             )}
           </div>
         </div>
