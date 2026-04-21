@@ -265,14 +265,63 @@ export default function NewbuildsMap() {
                 ))}
               </div>
 
-              {/* Legend */}
-              <div className="nb-glass p-2 rounded-xl flex gap-3">
+            </div>
+          )}
+
+          {/* Map legend (bottom-right) */}
+          {showFilters && (
+            <div className="absolute bottom-3 right-3 z-20 nb-glass rounded-xl p-3 w-[180px] space-y-2.5">
+              <div
+                className="nb-display text-[11px] uppercase tracking-wider pb-1.5 border-b"
+                style={{ color: 'hsl(var(--nb-gold))', borderColor: 'hsl(var(--nb-gold) / 0.2)' }}
+              >
+                Легенда
+              </div>
+
+              {/* Status colors */}
+              <div className="space-y-1.5">
                 {STATUS_LAYERS.filter(s => s.key !== 'all').map(s => (
-                  <div key={s.key} className="flex items-center gap-1.5 text-[10px]" style={{ color: 'hsl(var(--nb-muted))' }}>
-                    <div className="w-2.5 h-2.5 rounded-full" style={{ background: s.color }} />
-                    {s.label}
+                  <div key={s.key} className="flex items-center gap-2 text-[11px]" style={{ color: 'hsl(var(--nb-text))' }}>
+                    <span
+                      className="inline-block w-3 h-3 rounded-full flex-shrink-0"
+                      style={{ background: s.color, boxShadow: `0 0 0 2px ${s.color}33` }}
+                    />
+                    <span>{s.label}</span>
                   </div>
                 ))}
+              </div>
+
+              {/* Marker / cluster meaning */}
+              <div className="pt-2 border-t space-y-2" style={{ borderColor: 'hsl(var(--nb-gold) / 0.15)' }}>
+                <div className="flex items-center gap-2 text-[11px]" style={{ color: 'hsl(var(--nb-text))' }}>
+                  <span
+                    className="inline-flex items-center justify-center px-1.5 py-0.5 rounded text-[9px] font-bold flex-shrink-0"
+                    style={{
+                      background: 'hsl(var(--nb-bg) / 0.92)',
+                      color: 'hsl(var(--nb-gold))',
+                      border: '1.5px solid hsl(var(--nb-gold))',
+                    }}
+                  >
+                    ฿X.XM
+                  </span>
+                  <span>Цена проекта</span>
+                </div>
+                <div className="flex items-center gap-2 text-[11px]" style={{ color: 'hsl(var(--nb-text))' }}>
+                  <span
+                    className="inline-flex items-center justify-center w-6 h-6 rounded-full flex-shrink-0"
+                    style={{
+                      background: 'hsl(var(--nb-card))',
+                      color: 'hsl(var(--nb-gold))',
+                      border: '1.5px solid hsl(var(--nb-gold) / 0.6)',
+                      fontFamily: '"Playfair Display", Georgia, serif',
+                      fontSize: 11,
+                      fontWeight: 600,
+                    }}
+                  >
+                    9
+                  </span>
+                  <span>Группа проектов</span>
+                </div>
               </div>
             </div>
           )}
