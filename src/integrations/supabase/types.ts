@@ -3900,6 +3900,119 @@ export type Database = {
         }
         Relationships: []
       }
+      concierge_journeys: {
+        Row: {
+          acted_on_at: string | null
+          acted_on_route: string | null
+          ai_model: string | null
+          ai_tokens: number | null
+          created_at: string
+          generator: string | null
+          id: string
+          primary_cta: string | null
+          reasoning: string | null
+          recommended_routes: Json
+          recommended_services: Json
+          session_id: string
+          user_id: string | null
+          viewed_at: string | null
+        }
+        Insert: {
+          acted_on_at?: string | null
+          acted_on_route?: string | null
+          ai_model?: string | null
+          ai_tokens?: number | null
+          created_at?: string
+          generator?: string | null
+          id?: string
+          primary_cta?: string | null
+          reasoning?: string | null
+          recommended_routes?: Json
+          recommended_services?: Json
+          session_id: string
+          user_id?: string | null
+          viewed_at?: string | null
+        }
+        Update: {
+          acted_on_at?: string | null
+          acted_on_route?: string | null
+          ai_model?: string | null
+          ai_tokens?: number | null
+          created_at?: string
+          generator?: string | null
+          id?: string
+          primary_cta?: string | null
+          reasoning?: string | null
+          recommended_routes?: Json
+          recommended_services?: Json
+          session_id?: string
+          user_id?: string | null
+          viewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "concierge_journeys_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "concierge_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      concierge_sessions: {
+        Row: {
+          anon_session_id: string | null
+          channel: string
+          completed_at: string | null
+          converted_to_user_id: string | null
+          created_at: string
+          goal: string | null
+          id: string
+          intensity: string | null
+          language: string | null
+          metadata: Json
+          raw_answers: Json
+          status: string
+          updated_at: string
+          user_id: string | null
+          who: string | null
+        }
+        Insert: {
+          anon_session_id?: string | null
+          channel?: string
+          completed_at?: string | null
+          converted_to_user_id?: string | null
+          created_at?: string
+          goal?: string | null
+          id?: string
+          intensity?: string | null
+          language?: string | null
+          metadata?: Json
+          raw_answers?: Json
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          who?: string | null
+        }
+        Update: {
+          anon_session_id?: string | null
+          channel?: string
+          completed_at?: string | null
+          converted_to_user_id?: string | null
+          created_at?: string
+          goal?: string | null
+          id?: string
+          intensity?: string | null
+          language?: string | null
+          metadata?: Json
+          raw_answers?: Json
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          who?: string | null
+        }
+        Relationships: []
+      }
       consultation_requests: {
         Row: {
           admin_notes: string | null
@@ -12325,6 +12438,89 @@ export type Database = {
           },
         ]
       }
+      notification_deliveries: {
+        Row: {
+          attempt_count: number
+          body: string | null
+          channel: string
+          created_at: string
+          delivered_at: string | null
+          external_message_id: string | null
+          failed_at: string | null
+          failure_reason: string | null
+          id: string
+          payload: Json
+          read_at: string | null
+          related_entity_id: string | null
+          related_entity_type: string | null
+          rule_code: string | null
+          rule_id: string | null
+          scheduled_for: string
+          sent_at: string | null
+          status: string
+          subject: string | null
+          trigger_event: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attempt_count?: number
+          body?: string | null
+          channel: string
+          created_at?: string
+          delivered_at?: string | null
+          external_message_id?: string | null
+          failed_at?: string | null
+          failure_reason?: string | null
+          id?: string
+          payload?: Json
+          read_at?: string | null
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          rule_code?: string | null
+          rule_id?: string | null
+          scheduled_for?: string
+          sent_at?: string | null
+          status?: string
+          subject?: string | null
+          trigger_event: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attempt_count?: number
+          body?: string | null
+          channel?: string
+          created_at?: string
+          delivered_at?: string | null
+          external_message_id?: string | null
+          failed_at?: string | null
+          failure_reason?: string | null
+          id?: string
+          payload?: Json
+          read_at?: string | null
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          rule_code?: string | null
+          rule_id?: string | null
+          scheduled_for?: string
+          sent_at?: string | null
+          status?: string
+          subject?: string | null
+          trigger_event?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_deliveries_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "notification_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_preferences: {
         Row: {
           booking_reminders: boolean
@@ -12352,6 +12548,57 @@ export type Database = {
           status_updates?: boolean
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      notification_rules: {
+        Row: {
+          channels: string[]
+          conditions: Json
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          priority: string
+          rule_code: string
+          scope: string
+          template_code: string | null
+          trigger_event: string
+          trigger_offset_days: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          channels?: string[]
+          conditions?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          priority?: string
+          rule_code: string
+          scope?: string
+          template_code?: string | null
+          trigger_event: string
+          trigger_offset_days?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          channels?: string[]
+          conditions?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          priority?: string
+          rule_code?: string
+          scope?: string
+          template_code?: string | null
+          trigger_event?: string
+          trigger_offset_days?: number
+          updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
