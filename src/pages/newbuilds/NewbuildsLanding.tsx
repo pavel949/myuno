@@ -45,6 +45,7 @@ const TOOL_CARDS: ToolCard[] = [
 ];
 
 export default function NewbuildsLanding() {
+  const navigate = useNavigate();
   const { data: allProjects, isLoading } = useOffplanProjects();
   const projects = allProjects || [];
 
@@ -53,6 +54,16 @@ export default function NewbuildsLanding() {
     if (withRoi.length === 0) return 0;
     return withRoi.reduce((s, p) => s + (p.roiProjected || 0), 0) / withRoi.length;
   }, [projects]);
+
+  const offplanSteps: Step[] = [
+    { id: 'budget', title: 'Определите бюджет', description: 'Цена + рассрочка + меблировка + налоги.', status: 'todo', duration: '30 мин' },
+    { id: 'area', title: 'Выберите район', description: 'Bang Tao, Layan, Rawai — у каждого своя экономика.', status: 'todo' },
+    { id: 'shortlist', title: 'Соберите шорт-лист', description: 'До 4 проектов в сравнении.', status: 'todo' },
+    { id: 'dd', title: 'Due diligence', description: 'Лицензия EIA, escrow, репутация застройщика.', status: 'todo', duration: '1–2 нед' },
+    { id: 'reserve', title: 'Резерв и контракт', description: 'Бронь, SPA, перевод первого транша.', status: 'todo', cost: 'от ฿100k' },
+    { id: 'payments', title: 'График платежей', description: 'Транши по строительной готовности.', status: 'todo' },
+    { id: 'handover', title: 'Приёмка и регистрация', description: 'Snagging, оформление чанот / leasehold.', status: 'todo' },
+  ];
 
   return (
     <NewbuildsLayout>
