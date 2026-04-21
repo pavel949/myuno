@@ -48,7 +48,9 @@ describe('BOTTOM_BAR_BY_ROLE — structural invariants', () => {
   it.each(ALL_ROLES)('role "%s" items have icon and bilingual labels', (role) => {
     BOTTOM_BAR_BY_ROLE[role].forEach((item) => {
       expect(item.path).toMatch(/^\//);
-      expect(item.icon).toBeTypeOf('function');
+      // Lucide icons are forwardRef components — either a function or an object.
+      expect(['function', 'object']).toContain(typeof item.icon);
+      expect(item.icon).toBeTruthy();
       expect(item.labelEn.length).toBeGreaterThan(0);
       expect(item.labelRu.length).toBeGreaterThan(0);
     });
