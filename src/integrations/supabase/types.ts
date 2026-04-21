@@ -3765,6 +3765,254 @@ export type Database = {
           },
         ]
       }
+      compliance_filings: {
+        Row: {
+          amount: number | null
+          created_at: string
+          currency: string | null
+          due_date: string | null
+          filed_at: string | null
+          filed_by_partner_id: string | null
+          filing_url: string | null
+          id: string
+          metadata: Json
+          obligation_code: string
+          obligation_id: string | null
+          period_end: string | null
+          period_start: string | null
+          property_id: string | null
+          receipt_number: string | null
+          receipt_url: string | null
+          rejection_reason: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string
+          currency?: string | null
+          due_date?: string | null
+          filed_at?: string | null
+          filed_by_partner_id?: string | null
+          filing_url?: string | null
+          id?: string
+          metadata?: Json
+          obligation_code: string
+          obligation_id?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          property_id?: string | null
+          receipt_number?: string | null
+          receipt_url?: string | null
+          rejection_reason?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string
+          currency?: string | null
+          due_date?: string | null
+          filed_at?: string | null
+          filed_by_partner_id?: string | null
+          filing_url?: string | null
+          id?: string
+          metadata?: Json
+          obligation_code?: string
+          obligation_id?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          property_id?: string | null
+          receipt_number?: string | null
+          receipt_url?: string | null
+          rejection_reason?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_filings_obligation_code_fkey"
+            columns: ["obligation_code"]
+            isOneToOne: false
+            referencedRelation: "compliance_obligation_types"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "compliance_filings_obligation_id_fkey"
+            columns: ["obligation_id"]
+            isOneToOne: false
+            referencedRelation: "user_compliance_obligations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      compliance_obligation_types: {
+        Row: {
+          applies_to: string
+          authority: string | null
+          category: string
+          code: string
+          created_at: string
+          default_lead_days: number
+          default_recurrence: string
+          description_en: string | null
+          description_ru: string | null
+          is_active: boolean
+          name_en: string
+          name_ru: string
+          partner_managed: boolean
+          sort_order: number | null
+        }
+        Insert: {
+          applies_to?: string
+          authority?: string | null
+          category: string
+          code: string
+          created_at?: string
+          default_lead_days?: number
+          default_recurrence?: string
+          description_en?: string | null
+          description_ru?: string | null
+          is_active?: boolean
+          name_en: string
+          name_ru: string
+          partner_managed?: boolean
+          sort_order?: number | null
+        }
+        Update: {
+          applies_to?: string
+          authority?: string | null
+          category?: string
+          code?: string
+          created_at?: string
+          default_lead_days?: number
+          default_recurrence?: string
+          description_en?: string | null
+          description_ru?: string | null
+          is_active?: boolean
+          name_en?: string
+          name_ru?: string
+          partner_managed?: boolean
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
+      concierge_journeys: {
+        Row: {
+          acted_on_at: string | null
+          acted_on_route: string | null
+          ai_model: string | null
+          ai_tokens: number | null
+          created_at: string
+          generator: string | null
+          id: string
+          primary_cta: string | null
+          reasoning: string | null
+          recommended_routes: Json
+          recommended_services: Json
+          session_id: string
+          user_id: string | null
+          viewed_at: string | null
+        }
+        Insert: {
+          acted_on_at?: string | null
+          acted_on_route?: string | null
+          ai_model?: string | null
+          ai_tokens?: number | null
+          created_at?: string
+          generator?: string | null
+          id?: string
+          primary_cta?: string | null
+          reasoning?: string | null
+          recommended_routes?: Json
+          recommended_services?: Json
+          session_id: string
+          user_id?: string | null
+          viewed_at?: string | null
+        }
+        Update: {
+          acted_on_at?: string | null
+          acted_on_route?: string | null
+          ai_model?: string | null
+          ai_tokens?: number | null
+          created_at?: string
+          generator?: string | null
+          id?: string
+          primary_cta?: string | null
+          reasoning?: string | null
+          recommended_routes?: Json
+          recommended_services?: Json
+          session_id?: string
+          user_id?: string | null
+          viewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "concierge_journeys_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "concierge_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      concierge_sessions: {
+        Row: {
+          anon_session_id: string | null
+          channel: string
+          completed_at: string | null
+          converted_to_user_id: string | null
+          created_at: string
+          goal: string | null
+          id: string
+          intensity: string | null
+          language: string | null
+          metadata: Json
+          raw_answers: Json
+          status: string
+          updated_at: string
+          user_id: string | null
+          who: string | null
+        }
+        Insert: {
+          anon_session_id?: string | null
+          channel?: string
+          completed_at?: string | null
+          converted_to_user_id?: string | null
+          created_at?: string
+          goal?: string | null
+          id?: string
+          intensity?: string | null
+          language?: string | null
+          metadata?: Json
+          raw_answers?: Json
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          who?: string | null
+        }
+        Update: {
+          anon_session_id?: string | null
+          channel?: string
+          completed_at?: string | null
+          converted_to_user_id?: string | null
+          created_at?: string
+          goal?: string | null
+          id?: string
+          intensity?: string | null
+          language?: string | null
+          metadata?: Json
+          raw_answers?: Json
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          who?: string | null
+        }
+        Relationships: []
+      }
       consultation_requests: {
         Row: {
           admin_notes: string | null
@@ -12190,6 +12438,89 @@ export type Database = {
           },
         ]
       }
+      notification_deliveries: {
+        Row: {
+          attempt_count: number
+          body: string | null
+          channel: string
+          created_at: string
+          delivered_at: string | null
+          external_message_id: string | null
+          failed_at: string | null
+          failure_reason: string | null
+          id: string
+          payload: Json
+          read_at: string | null
+          related_entity_id: string | null
+          related_entity_type: string | null
+          rule_code: string | null
+          rule_id: string | null
+          scheduled_for: string
+          sent_at: string | null
+          status: string
+          subject: string | null
+          trigger_event: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attempt_count?: number
+          body?: string | null
+          channel: string
+          created_at?: string
+          delivered_at?: string | null
+          external_message_id?: string | null
+          failed_at?: string | null
+          failure_reason?: string | null
+          id?: string
+          payload?: Json
+          read_at?: string | null
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          rule_code?: string | null
+          rule_id?: string | null
+          scheduled_for?: string
+          sent_at?: string | null
+          status?: string
+          subject?: string | null
+          trigger_event: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attempt_count?: number
+          body?: string | null
+          channel?: string
+          created_at?: string
+          delivered_at?: string | null
+          external_message_id?: string | null
+          failed_at?: string | null
+          failure_reason?: string | null
+          id?: string
+          payload?: Json
+          read_at?: string | null
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          rule_code?: string | null
+          rule_id?: string | null
+          scheduled_for?: string
+          sent_at?: string | null
+          status?: string
+          subject?: string | null
+          trigger_event?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_deliveries_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "notification_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_preferences: {
         Row: {
           booking_reminders: boolean
@@ -12217,6 +12548,57 @@ export type Database = {
           status_updates?: boolean
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      notification_rules: {
+        Row: {
+          channels: string[]
+          conditions: Json
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          priority: string
+          rule_code: string
+          scope: string
+          template_code: string | null
+          trigger_event: string
+          trigger_offset_days: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          channels?: string[]
+          conditions?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          priority?: string
+          rule_code: string
+          scope?: string
+          template_code?: string | null
+          trigger_event: string
+          trigger_offset_days?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          channels?: string[]
+          conditions?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          priority?: string
+          rule_code?: string
+          scope?: string
+          template_code?: string | null
+          trigger_event?: string
+          trigger_offset_days?: number
+          updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -14955,6 +15337,7 @@ export type Database = {
           city: string | null
           country: string | null
           created_at: string
+          current_visa_id: string | null
           date_of_birth: string | null
           deactivated_at: string | null
           dietary_restrictions: string[] | null
@@ -14962,15 +15345,19 @@ export type Database = {
           emergency_contact_name: string | null
           emergency_contact_phone: string | null
           emergency_contact_relationship: string | null
+          family_member_ids: string[] | null
           full_name: string | null
           gender: string | null
           id: string
+          languages_spoken: string[] | null
           medical_conditions: string | null
+          myuno_id_version: number
           nationality: string | null
           owner_type: string | null
           phone: string | null
           postal_code: string | null
           preferred_language: string | null
+          primary_passport_id: string | null
           referral_balance: number
           referral_code: string | null
           referred_by: string | null
@@ -14978,9 +15365,11 @@ export type Database = {
           status: string
           status_changed_by: string | null
           suspended_at: string | null
+          tax_residency: string | null
           travel_preferences: Json | null
           updated_at: string
           user_type: Database["public"]["Enums"]["user_type"] | null
+          vault_pin_set: boolean
         }
         Insert: {
           address_line1?: string | null
@@ -14989,6 +15378,7 @@ export type Database = {
           city?: string | null
           country?: string | null
           created_at?: string
+          current_visa_id?: string | null
           date_of_birth?: string | null
           deactivated_at?: string | null
           dietary_restrictions?: string[] | null
@@ -14996,15 +15386,19 @@ export type Database = {
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
           emergency_contact_relationship?: string | null
+          family_member_ids?: string[] | null
           full_name?: string | null
           gender?: string | null
           id: string
+          languages_spoken?: string[] | null
           medical_conditions?: string | null
+          myuno_id_version?: number
           nationality?: string | null
           owner_type?: string | null
           phone?: string | null
           postal_code?: string | null
           preferred_language?: string | null
+          primary_passport_id?: string | null
           referral_balance?: number
           referral_code?: string | null
           referred_by?: string | null
@@ -15012,9 +15406,11 @@ export type Database = {
           status?: string
           status_changed_by?: string | null
           suspended_at?: string | null
+          tax_residency?: string | null
           travel_preferences?: Json | null
           updated_at?: string
           user_type?: Database["public"]["Enums"]["user_type"] | null
+          vault_pin_set?: boolean
         }
         Update: {
           address_line1?: string | null
@@ -15023,6 +15419,7 @@ export type Database = {
           city?: string | null
           country?: string | null
           created_at?: string
+          current_visa_id?: string | null
           date_of_birth?: string | null
           deactivated_at?: string | null
           dietary_restrictions?: string[] | null
@@ -15030,15 +15427,19 @@ export type Database = {
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
           emergency_contact_relationship?: string | null
+          family_member_ids?: string[] | null
           full_name?: string | null
           gender?: string | null
           id?: string
+          languages_spoken?: string[] | null
           medical_conditions?: string | null
+          myuno_id_version?: number
           nationality?: string | null
           owner_type?: string | null
           phone?: string | null
           postal_code?: string | null
           preferred_language?: string | null
+          primary_passport_id?: string | null
           referral_balance?: number
           referral_code?: string | null
           referred_by?: string | null
@@ -15046,9 +15447,11 @@ export type Database = {
           status?: string
           status_changed_by?: string | null
           suspended_at?: string | null
+          tax_residency?: string | null
           travel_preferences?: Json | null
           updated_at?: string
           user_type?: Database["public"]["Enums"]["user_type"] | null
+          vault_pin_set?: boolean
         }
         Relationships: []
       }
@@ -24534,6 +24937,57 @@ export type Database = {
         }
         Relationships: []
       }
+      user_compliance_obligations: {
+        Row: {
+          created_at: string
+          id: string
+          last_filed_at: string | null
+          managed_by: string | null
+          metadata: Json
+          next_deadline: string | null
+          obligation_code: string
+          partner_id: string | null
+          property_id: string | null
+          recurrence: string | null
+          scope: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_filed_at?: string | null
+          managed_by?: string | null
+          metadata?: Json
+          next_deadline?: string | null
+          obligation_code: string
+          partner_id?: string | null
+          property_id?: string | null
+          recurrence?: string | null
+          scope?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_filed_at?: string | null
+          managed_by?: string | null
+          metadata?: Json
+          next_deadline?: string | null
+          obligation_code?: string
+          partner_id?: string | null
+          property_id?: string | null
+          recurrence?: string | null
+          scope?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_documents: {
         Row: {
           country: string | null
@@ -24588,6 +25042,69 @@ export type Database = {
           updated_at?: string
           user_id?: string
           verified_at?: string | null
+        }
+        Relationships: []
+      }
+      user_documents_vault: {
+        Row: {
+          archived_at: string | null
+          category: string
+          created_at: string
+          description: string | null
+          expiry_date: string | null
+          file_mime: string | null
+          file_size_bytes: number | null
+          file_url: string
+          id: string
+          is_encrypted: boolean
+          related_entity_id: string | null
+          related_entity_type: string | null
+          shared_with: string[] | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+          uploaded_at: string
+          user_id: string
+        }
+        Insert: {
+          archived_at?: string | null
+          category: string
+          created_at?: string
+          description?: string | null
+          expiry_date?: string | null
+          file_mime?: string | null
+          file_size_bytes?: number | null
+          file_url: string
+          id?: string
+          is_encrypted?: boolean
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          shared_with?: string[] | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          uploaded_at?: string
+          user_id: string
+        }
+        Update: {
+          archived_at?: string | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          expiry_date?: string | null
+          file_mime?: string | null
+          file_size_bytes?: number | null
+          file_url?: string
+          id?: string
+          is_encrypted?: boolean
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          shared_with?: string[] | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          uploaded_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -24777,6 +25294,66 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_passports: {
+        Row: {
+          created_at: string
+          expiry_date: string
+          holder_name: string
+          holder_type: string
+          id: string
+          is_primary: boolean
+          issue_country: string | null
+          issue_date: string | null
+          nationality: string
+          notes: string | null
+          passport_number: string
+          scan_back_url: string | null
+          scan_url: string | null
+          updated_at: string
+          user_id: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          expiry_date: string
+          holder_name: string
+          holder_type?: string
+          id?: string
+          is_primary?: boolean
+          issue_country?: string | null
+          issue_date?: string | null
+          nationality: string
+          notes?: string | null
+          passport_number: string
+          scan_back_url?: string | null
+          scan_url?: string | null
+          updated_at?: string
+          user_id: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          expiry_date?: string
+          holder_name?: string
+          holder_type?: string
+          id?: string
+          is_primary?: boolean
+          issue_country?: string | null
+          issue_date?: string | null
+          nationality?: string
+          notes?: string | null
+          passport_number?: string
+          scan_back_url?: string | null
+          scan_url?: string | null
+          updated_at?: string
+          user_id?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: []
       }
       user_payment_methods: {
         Row: {
@@ -25044,6 +25621,135 @@ export type Database = {
           utm_source?: string | null
         }
         Relationships: []
+      }
+      user_tax_profile: {
+        Row: {
+          cfc_jurisdictions: string[] | null
+          created_at: string
+          files_3ndfl: boolean
+          has_cfc: boolean
+          id: string
+          is_self_employed_ru: boolean
+          notes: string | null
+          primary_residency: string | null
+          reviewed_by_partner: string | null
+          reviewed_by_partner_at: string | null
+          secondary_residency: string | null
+          th_tax_resident_days_ytd: number | null
+          tin_other: Json | null
+          tin_ru: string | null
+          tin_th: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cfc_jurisdictions?: string[] | null
+          created_at?: string
+          files_3ndfl?: boolean
+          has_cfc?: boolean
+          id?: string
+          is_self_employed_ru?: boolean
+          notes?: string | null
+          primary_residency?: string | null
+          reviewed_by_partner?: string | null
+          reviewed_by_partner_at?: string | null
+          secondary_residency?: string | null
+          th_tax_resident_days_ytd?: number | null
+          tin_other?: Json | null
+          tin_ru?: string | null
+          tin_th?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cfc_jurisdictions?: string[] | null
+          created_at?: string
+          files_3ndfl?: boolean
+          has_cfc?: boolean
+          id?: string
+          is_self_employed_ru?: boolean
+          notes?: string | null
+          primary_residency?: string | null
+          reviewed_by_partner?: string | null
+          reviewed_by_partner_at?: string | null
+          secondary_residency?: string | null
+          th_tax_resident_days_ytd?: number | null
+          tin_other?: Json | null
+          tin_ru?: string | null
+          tin_th?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_visa_status: {
+        Row: {
+          created_at: string
+          document_url: string | null
+          expiry_date: string | null
+          id: string
+          is_current: boolean
+          issue_date: string | null
+          multiple_entry: boolean
+          notes: string | null
+          passport_id: string | null
+          source: string | null
+          source_ref: string | null
+          updated_at: string
+          user_id: string
+          visa_subtype: string | null
+          visa_type: string
+        }
+        Insert: {
+          created_at?: string
+          document_url?: string | null
+          expiry_date?: string | null
+          id?: string
+          is_current?: boolean
+          issue_date?: string | null
+          multiple_entry?: boolean
+          notes?: string | null
+          passport_id?: string | null
+          source?: string | null
+          source_ref?: string | null
+          updated_at?: string
+          user_id: string
+          visa_subtype?: string | null
+          visa_type: string
+        }
+        Update: {
+          created_at?: string
+          document_url?: string | null
+          expiry_date?: string | null
+          id?: string
+          is_current?: boolean
+          issue_date?: string | null
+          multiple_entry?: boolean
+          notes?: string | null
+          passport_id?: string | null
+          source?: string | null
+          source_ref?: string | null
+          updated_at?: string
+          user_id?: string
+          visa_subtype?: string | null
+          visa_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_visa_status_passport_id_fkey"
+            columns: ["passport_id"]
+            isOneToOne: false
+            referencedRelation: "user_passports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_visa_status_passport_id_fkey"
+            columns: ["passport_id"]
+            isOneToOne: false
+            referencedRelation: "v_myuno_id"
+            referencedColumns: ["primary_passport_id"]
+          },
+        ]
       }
       vendor_analytics: {
         Row: {
@@ -28576,6 +29282,32 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      v_myuno_id: {
+        Row: {
+          active_obligations_count: number | null
+          country: string | null
+          current_visa_expiry: string | null
+          current_visa_id: string | null
+          current_visa_type: string | null
+          email: string | null
+          files_3ndfl: boolean | null
+          full_name: string | null
+          has_cfc: boolean | null
+          languages_spoken: string[] | null
+          myuno_id_version: number | null
+          nationality: string | null
+          phone: string | null
+          preferred_language: string | null
+          primary_passport_expiry: string | null
+          primary_passport_id: string | null
+          primary_passport_number: string | null
+          tax_residency: string | null
+          user_id: string | null
+          vault_documents_count: number | null
+          vault_pin_set: boolean | null
+        }
+        Relationships: []
       }
       v_owner_profitability: {
         Row: {
