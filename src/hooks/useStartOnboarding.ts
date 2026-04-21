@@ -224,8 +224,31 @@ export function useStartOnboarding() {
 
     try {
       const filled = answers as Required<StartAnswers>;
-      const items = recommend(filled);
-      const reasoning = reasoningFor(filled);
+
+      // Try AI-driven routing first; fall back to deterministic rules on any failure.
+      let items: RecommendedItem[] = [];
+      let reasoning: { en: string; ru: string } = reasoningFor(filled);
+      let generator: 'ai_v1' | 'rules_v1_fallback' | 'rules_v1' = 'rules_v1';
+      let model: string | null = null;
+
+      try {
+        const { data: aiResp, error: aiError } = await supabase.functions.invoke('concierge-route', {
+          body: { who: filled.who, goal: filled.goal, intensity: filled.intensity, language },
+        });
+        if (!aiError && aiResp?.items?.length) {
+          items = aiResp.items as RecommendedItem[];
+          reasoning = aiResp.reasoning ?? reasoning;
+          generator = (aiResp.generator as typeof generator) ?? 'ai_v1';
+          model = aiResp.model ?? null;
+        }
+      } catch (aiErr) {
+        console.warn('AI routing unavailable, using deterministic fallback', aiErr);
+      }
+
+      if (items.length === 0) {
+        items = recommend(filled);
+        generator = 'rules_v1';
+      }
 
       const sessionPayload: Record<string, unknown> = {
         channel: 'web_start',
@@ -261,7 +284,8 @@ export function useStartOnboarding() {
         recommended_routes: items.map((i) => i.route),
         primary_cta: primary.route,
         reasoning: language === 'ru' ? reasoning.ru : reasoning.en,
-        generator: 'rules_v1',
+        generator,
+        ai_model: model,
       };
       if (user?.id) journeyPayload.user_id = user.id;
 
