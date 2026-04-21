@@ -428,6 +428,8 @@ export default function VisaQuizPage() {
           </div>
         ) : null}
       </div>
+        </>
+      )}
     </AppLayout>
   );
 }
