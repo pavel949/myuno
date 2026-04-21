@@ -109,55 +109,22 @@
           });
         }
         
+        // Passive version check — records latest version without forcing a reload.
+        // Real updates are driven by the service worker (controllerchange / SW_UPDATED),
+        // which correctly waits for an actual new build to take control. This avoids
+        // mid-session reload loops (e.g. when switching themes) caused by racing
+        // caches.delete() against the app bootstrap.
         fetch('/version.json?_=' + Date.now(), { cache: 'no-store' })
           .then(function(r) { return r.json(); })
           .then(function(data) {
             var serverVersion = data.version;
-            var storedVersion = localStorage.getItem('manifest_version');
             var metaTag = document.querySelector('meta[name="version"]');
             var htmlVersion = metaTag ? metaTag.getAttribute('content') : null;
-            
-            console.log('[myUNO] Server: ' + serverVersion + ', Stored: ' + storedVersion + ', HTML: ' + htmlVersion);
+            console.log('[myUNO] Server: ' + serverVersion + ', HTML: ' + htmlVersion);
             localStorage.setItem('manifest_version', serverVersion);
             localStorage.setItem('app_version', serverVersion);
-            
-            var needsReload = false;
-            if (storedVersion && storedVersion !== serverVersion) needsReload = true;
-            if (htmlVersion && htmlVersion !== serverVersion) needsReload = true;
-            
-            if (needsReload) {
-              if (hasUnsavedDrafts()) {
-                console.log('[myUNO] Version mismatch but unsaved drafts — deferring reload');
-                window.__swPendingReload = true;
-                return;
-              }
-              console.log('[myUNO] Version mismatch! Clearing all caches and reloading...');
-              
-              var reloadKey = 'uno_reloaded_for_' + serverVersion;
-              if (sessionStorage.getItem(reloadKey)) {
-                console.log('[myUNO] Already reloaded for ' + serverVersion + ', skipping');
-                return;
-              }
-              sessionStorage.setItem(reloadKey, '1');
-              
-              var swPromise = Promise.resolve();
-              if ('serviceWorker' in navigator) {
-                swPromise = navigator.serviceWorker.getRegistrations().then(function(regs) {
-                  return Promise.all(regs.map(function(reg) { return reg.unregister(); }));
-                });
-              }
-              
-              var cachePromise = Promise.resolve();
-              if ('caches' in window) {
-                cachePromise = caches.keys().then(function(keys) {
-                  return Promise.all(keys.map(function(key) { return caches.delete(key); }));
-                });
-              }
-              
-              Promise.all([swPromise, cachePromise]).then(function() {
-                console.log('[myUNO] Caches cleared, reloading...');
-                window.location.reload();
-              });
+            if (htmlVersion && htmlVersion !== serverVersion) {
+              console.log('[myUNO] New build available — will reload on next SW activation');
             }
           })
           .catch(function() {
