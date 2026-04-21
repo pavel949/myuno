@@ -10,7 +10,7 @@
 import {
   Home, Compass, ShoppingBag, User, LayoutDashboard, Building2,
   CalendarDays, Calendar, Package, Wallet, UserCheck, MessageSquare,
-  FileCheck, Users, MessageCircle, BarChart3, FileText, TrendingUp,
+  FileCheck, Users, MessageCircle, BarChart3, FileText, TrendingUp, Inbox,
 } from 'lucide-react';
 import { APP_ROUTES } from '@/lib/config/routes';
 
@@ -37,12 +37,29 @@ export type NavRoleKey =
 // 5 items max (mobile constraint). Desktop can render all 5.
 // ─────────────────────────────────────────────────────────────
 
+/**
+ * GUEST_NAV — legacy 5-tab (Home/Discover/Market/Property/Me).
+ * Kept as default until `feature_flag:me_shell_v1` is enabled, then
+ * `GUEST_NAV_ME_HUB` (Gosuslugi-style 5-tab) takes over via NavShell.
+ */
 export const GUEST_NAV: NavItem[] = [
   { path: APP_ROUTES.HOME,     icon: Home,        labelEn: 'Home',      labelRu: 'Главная', exact: true },
   { path: APP_ROUTES.DISCOVER, icon: Compass,     labelEn: 'Discover',  labelRu: 'Навигатор' },
   { path: APP_ROUTES.MARKET,   icon: ShoppingBag, labelEn: 'Market',    labelRu: 'Маркет' },
   { path: APP_ROUTES.PROPERTY, icon: Building2,   labelEn: 'Property',  labelRu: 'Недвижимость' },
   { path: APP_ROUTES.ACCOUNT,  icon: User,        labelEn: 'Me',        labelRu: 'Профиль' },
+];
+
+/**
+ * GUEST_NAV_ME_HUB — Phase A5 Gosuslugi-style nav. Replaces GUEST_NAV
+ * when `feature_flag:me_shell_v1` is enabled in system_settings.
+ */
+export const GUEST_NAV_ME_HUB: NavItem[] = [
+  { path: APP_ROUTES.HOME,         icon: Home,          labelEn: 'Home',      labelRu: 'Главная', exact: true },
+  { path: APP_ROUTES.ME_FEED,      icon: Inbox,         labelEn: 'Feed',      labelRu: 'Лента', exact: true },
+  { path: APP_ROUTES.ME_SERVICES,  icon: Compass,       labelEn: 'Services',  labelRu: 'Услуги' },
+  { path: APP_ROUTES.ME_DOCUMENTS, icon: FileText,      labelEn: 'Documents', labelRu: 'Документы' },
+  { path: APP_ROUTES.ME_PROFILE,   icon: User,          labelEn: 'Profile',   labelRu: 'Профиль' },
 ];
 
 export const OWNER_NAV: NavItem[] = [

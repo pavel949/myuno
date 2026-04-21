@@ -596,3 +596,11 @@ export const CapitalCampaignLaunch = lazy(() => import('@/pages/capital/CapitalC
 export const CapitalOutreach = lazy(() => import('@/pages/capital/CapitalOutreach'));
 export const CapitalPipeline = lazy(() => import('@/pages/capital/CapitalPipeline'));
 export const CapitalTemplates = lazy(() => import('@/pages/capital/CapitalTemplates'));
+
+// ── /me Universal Hub (Phase A5 — Gosuslugi-style B2C shell) ──
+export const MeFeed = lazy(() => import('@/pages/me/MeFeed'));
+export const MeServices = lazy(() => import('@/pages/me/MeServices'));
+export const MeDocuments = lazy(() => import('@/pages/me/MeDocuments'));
+export const MePayments = lazy(() => import('@/pages/me/MePayments'));
+export const MeRequests = lazy(() => import('@/pages/me/MeRequests'));
+export const MeProfile = lazy(() => import('@/pages/me/MeProfile'));
