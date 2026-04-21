@@ -10,14 +10,14 @@ import { APP_ROUTES } from '@/lib/config/routes';
 import { StartPageLayout, StepByStepNav, type Step } from '@/components/patterns';
 
 const STEPS = [
-  { id: 'visa', icon: FileText, labelEn: 'Visas & Documents', labelRu: 'Визы и документы', descEn: 'Work permits, retirement visa, education visa — we handle paperwork', descRu: 'Рабочие разрешения, пенсионная виза, учебная виза — мы берём на себя документы', path: APP_ROUTES.VISA_IMMIGRATION, color: '#4E7BFF' },
-  { id: 'housing', icon: Home, labelEn: 'Housing', labelRu: 'Жильё', descEn: 'Long-term rentals, condos, villas — vetted by our team', descRu: 'Долгосрочная аренда, кондо, виллы — проверены нашей командой', path: `${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=long`, color: '#00D68F' },
-  { id: 'school', icon: GraduationCap, labelEn: 'Schools & Kindergartens', labelRu: 'Школы и сады', descEn: 'International schools, Russian schools, kindergartens', descRu: 'Международные школы, русские школы, детские сады', path: APP_ROUTES.EDUCATION, color: '#F59E0B' },
-  { id: 'medical', icon: Stethoscope, labelEn: 'Medical & Insurance', labelRu: 'Медицина и страховка', descEn: 'Health insurance, clinics, dentists, pediatricians', descRu: 'Медстраховка, клиники, стоматологи, педиатры', path: APP_ROUTES.MEDICAL, color: '#F43F5E' },
-  { id: 'banking', icon: Landmark, labelEn: 'Banking & Finance', labelRu: 'Банки и финансы', descEn: 'Thai bank account, tax planning, crypto-friendly banks', descRu: 'Счёт в тайском банке, налоговое планирование', path: APP_ROUTES.BANKING, color: '#06B6D4' },
-  { id: 'transport', icon: Car, labelEn: 'Transport', labelRu: 'Транспорт', descEn: 'Car rental, driver license, scooter purchase', descRu: 'Аренда авто, водительские права, покупка скутера', path: APP_ROUTES.TRANSPORT, color: '#F97316' },
-  { id: 'legal', icon: Scale, labelEn: 'Legal & Accounting', labelRu: 'Юрист и бухгалтер', descEn: 'Company setup, contracts, tax filing', descRu: 'Регистрация компании, договоры, налоговая отчётность', path: APP_ROUTES.LEGAL, color: '#A855F7' },
-  { id: 'lifestyle', icon: Users, labelEn: 'Community & Lifestyle', labelRu: 'Досуг и комьюнити', descEn: 'Expat groups, sports, restaurants, events', descRu: 'Экспат-группы, спорт, рестораны, события', path: APP_ROUTES.EXPERIENCES, color: '#EC4899' },
+  { id: 'visa', icon: FileText, labelEn: 'Visas & Documents', labelRu: 'Визы и документы', descEn: 'Work permits, retirement visa, education visa — we handle paperwork', descRu: 'Рабочие разрешения, пенсионная виза, учебная виза — мы берём на себя документы', path: APP_ROUTES.VISA_IMMIGRATION, color: 'cluster-live' },
+  { id: 'housing', icon: Home, labelEn: 'Housing', labelRu: 'Жильё', descEn: 'Long-term rentals, condos, villas — vetted by our team', descRu: 'Долгосрочная аренда, кондо, виллы — проверены нашей командой', path: `${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=long`, color: 'cluster-arrive' },
+  { id: 'school', icon: GraduationCap, labelEn: 'Schools & Kindergartens', labelRu: 'Школы и сады', descEn: 'International schools, Russian schools, kindergartens', descRu: 'Международные школы, русские школы, детские сады', path: APP_ROUTES.EDUCATION, color: 'accent-amber' },
+  { id: 'medical', icon: Stethoscope, labelEn: 'Medical & Insurance', labelRu: 'Медицина и страховка', descEn: 'Health insurance, clinics, dentists, pediatricians', descRu: 'Медстраховка, клиники, стоматологи, педиатры', path: APP_ROUTES.MEDICAL, color: 'destructive' },
+  { id: 'banking', icon: Landmark, labelEn: 'Banking & Finance', labelRu: 'Банки и финансы', descEn: 'Thai bank account, tax planning, crypto-friendly banks', descRu: 'Счёт в тайском банке, налоговое планирование', path: APP_ROUTES.BANKING, color: 'accent-cyan' },
+  { id: 'transport', icon: Car, labelEn: 'Transport', labelRu: 'Транспорт', descEn: 'Car rental, driver license, scooter purchase', descRu: 'Аренда авто, водительские права, покупка скутера', path: APP_ROUTES.TRANSPORT, color: 'accent-coral' },
+  { id: 'legal', icon: Scale, labelEn: 'Legal & Accounting', labelRu: 'Юрист и бухгалтер', descEn: 'Company setup, contracts, tax filing', descRu: 'Регистрация компании, договоры, налоговая отчётность', path: APP_ROUTES.LEGAL, color: 'accent-purple' },
+  { id: 'lifestyle', icon: Users, labelEn: 'Community & Lifestyle', labelRu: 'Досуг и комьюнити', descEn: 'Expat groups, sports, restaurants, events', descRu: 'Экспат-группы, спорт, рестораны, события', path: APP_ROUTES.EXPERIENCES, color: 'accent-purple' },
 ];
 
 type StepId = typeof STEPS[number]['id'];

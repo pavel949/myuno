@@ -16,6 +16,8 @@ import { VerticalCTA } from '@/components/leads/VerticalCTA';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { VerticalContextBanner } from '@/components/vertical/VerticalContextBanner';
 import { VerticalInsightPanel } from '@/components/vertical/VerticalInsightPanel';
+import { ECOSYSTEM_PAGE_CONTAINER } from "@/design-system/ecosystemLayout";
+import { cn } from "@/lib/utils";
 
 const categories = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -85,7 +87,7 @@ export default function LegalServicesIndex() {
           onCategoryChange={setSelectedCategory}
         />
 
-        <main className="container max-w-[1536px] mx-auto px-4 py-4 pb-24">
+        <main className={cn(ECOSYSTEM_PAGE_CONTAINER, "py-4 pb-24")}>
           <VerticalContextBanner verticalId="legal" />
 
           {isLoading ? (

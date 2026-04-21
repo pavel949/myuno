@@ -12,6 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/uno/EmptyState';
 import { CrossSellSection } from '@/components/crosssell';
 import { useVehicles } from '@/hooks/useVehicles';
+import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
 import { normalizeVehicleType } from '@/lib/taxonomies';
 import { cn } from '@/lib/utils';
 import { TransportHeroSearch } from '@/components/transport/TransportHeroSearch';
@@ -122,7 +123,7 @@ export default function TransportIndex() {
         }} />
 
         {/* Quick Links */}
-        <div className="max-w-[1536px] mx-auto px-4 py-3 flex gap-2">
+        <div className={cn(ECOSYSTEM_PAGE_CONTAINER, "py-3 flex gap-2")}>
           {QUICK_LINKS.map(link => (
             <button
               key={link.id}
@@ -143,7 +144,7 @@ export default function TransportIndex() {
         />
 
         {/* Results bar */}
-        <div ref={resultsRef} className="max-w-[1536px] mx-auto px-4 py-3">
+        <div ref={resultsRef} className={cn(ECOSYSTEM_PAGE_CONTAINER, "py-3")}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <p className="text-sm text-muted-foreground">
@@ -186,7 +187,7 @@ export default function TransportIndex() {
         </div>
 
         {/* Main content with optional sidebar */}
-        <div className="max-w-[1536px] mx-auto px-4 pb-24">
+        <div className={cn(ECOSYSTEM_PAGE_CONTAINER, "pb-24")}>
           <div className={cn("flex gap-6", filtersOpen && "lg:flex")}>
             {/* Filter Sidebar */}
             <TransportFilterSidebar

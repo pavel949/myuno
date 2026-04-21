@@ -14,6 +14,7 @@ import { EmptyState } from '@/components/uno/EmptyState';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { cn } from '@/lib/utils';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
+import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
 
 const AGE_GROUPS = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -132,7 +133,7 @@ export default function BabysitterIndex() {
       />
 
       {/* Content */}
-      <div className="max-w-[1536px] mx-auto px-4 py-4 pb-24">
+      <div className={cn(ECOSYSTEM_PAGE_CONTAINER, "py-4 pb-24")}>
         {filteredBabysitters.length === 0 ? (
           <EmptyState
             icon={Baby}

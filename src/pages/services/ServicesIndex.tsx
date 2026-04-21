@@ -11,6 +11,8 @@ import { ServiceFunctionCard } from "@/components/services";
 import { CrossSellSection } from "@/components/crosssell";
 import { SERVICE_CATEGORIES, type ServiceCategory } from "@/lib/config/homeServiceFunctions";
 import { Badge } from "@/components/ui/badge";
+import { ECOSYSTEM_PAGE_CONTAINER } from "@/design-system/ecosystemLayout";
+import { cn } from "@/lib/utils";
 
 export default function ServicesIndex() {
   const { language } = useLanguage();
@@ -81,7 +83,7 @@ export default function ServicesIndex() {
           onCategoryChange={handleCategoryChange}
         />
 
-        <main className="container max-w-[1536px] mx-auto px-4 py-4 pb-24">
+        <main className={cn(ECOSYSTEM_PAGE_CONTAINER, "py-4 pb-24")}>
           {/* Popular Section */}
           {selectedCategory === 'all' && !searchQuery && (
             <div className="mb-6">
