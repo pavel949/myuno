@@ -49,6 +49,56 @@ export type { NavRoleKey, NavItem };
 export const PRIMARY_NAV = NAV_BY_ROLE;
 
 // ─────────────────────────────────────────────────────────────
+// Bottom-bar relevance mapping (mobile <768px).
+//
+// Each role gets exactly 5 slots. The slot composition encodes
+// product-level "what matters most" for that role:
+//
+//  guest      → Home · Discover · Market · Property · Me
+//                  (consumer browsing + monetization entry points)
+//  investor   → Home · Invest · Discover · Property · Me
+//                  (capital workflow first, browse second)
+//  mc_portal  → My Properties · Statements · Documents · Messages · Me
+//                  (read-only owner portal — finance + comms)
+//  owner      → Dashboard · Properties · Calendar · Finance · Messages
+//                  (operator workflow — daily PMS loop)
+//  vendor     → Dashboard · Services · Bookings · Payouts · Profile
+//                  (service-provider workflow — fulfilment + payouts)
+//  admin      → Dashboard · CRM · Tickets · Moderation · Profile
+//                  (platform operator — support + governance)
+//  team       → Dashboard · Content · Review · CRM · Profile
+//                  (uno_team — content & moderation workflow)
+//
+// When `feature_flag:me_shell_v1` is on, guest swaps to GUEST_NAV_ME_HUB
+// (Home · Feed · Services · Documents · Profile) — handled in BottomBar.
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * Canonical mapping of role → 5 mobile bottom-bar slots.
+ * All items resolve to existing routes in `APP_ROUTES`.
+ */
+export const BOTTOM_BAR_BY_ROLE: Record<NavRoleKey, NavItem[]> = NAV_BY_ROLE;
+
+/**
+ * Get the 5 bottom-bar items relevant to a role.
+ * Falls back to `guest` when the role is unknown so the bar never empties.
+ */
+export function getBottomBarItems(role: NavRoleKey | string | null | undefined): NavItem[] {
+  const key = (role && (role as NavRoleKey) in BOTTOM_BAR_BY_ROLE
+    ? (role as NavRoleKey)
+    : 'guest') as NavRoleKey;
+  return BOTTOM_BAR_BY_ROLE[key];
+}
+
+/**
+ * Whether a given route path is part of the bottom-bar set for a role.
+ * Useful for highlight logic and tests.
+ */
+export function isBottomBarRoute(role: NavRoleKey, path: string): boolean {
+  return getBottomBarItems(role).some((item) => item.path === path);
+}
+
+// ─────────────────────────────────────────────────────────────
 // Sidebar (grouped) navigation — workspace roles only.
 // Consumer roles (guest/investor/mc_portal) get no sidebar; they use
 // the top-pills + bottom-bar pattern.
