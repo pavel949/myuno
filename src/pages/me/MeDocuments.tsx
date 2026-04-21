@@ -57,7 +57,15 @@ async function openDoc(doc: MyDocument) {
   window.open(data.signedUrl, '_blank', 'noopener');
 }
 
-function DocCard({ doc, onEdit }: { doc: MyDocument; onEdit?: (d: MyDocument) => void }) {
+function DocCard({
+  doc,
+  onEdit,
+  onDelete,
+}: {
+  doc: MyDocument;
+  onEdit?: (d: MyDocument) => void;
+  onDelete?: (d: MyDocument) => void;
+}) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const Icon = SOURCE_ICON[doc.source];
@@ -112,6 +120,17 @@ function DocCard({ doc, onEdit }: { doc: MyDocument; onEdit?: (d: MyDocument) =>
                 aria-label={isRu ? 'Открыть' : 'Open'}
               >
                 <ExternalLink className="h-3.5 w-3.5" />
+              </Button>
+            )}
+            {isVault && onDelete && (
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-7 px-2 text-destructive hover:text-destructive"
+                onClick={() => onDelete(doc)}
+                aria-label={isRu ? 'Удалить' : 'Delete'}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
               </Button>
             )}
           </div>
