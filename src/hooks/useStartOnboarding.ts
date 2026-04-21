@@ -197,8 +197,14 @@ export function useStartOnboarding() {
   const setGoal = useCallback((v: GoalAnswer) => setAnswers((a) => ({ ...a, goal: v })), []);
   const setIntensity = useCallback((v: IntensityAnswer) => setAnswers((a) => ({ ...a, intensity: v })), []);
 
-  const next = useCallback(() => setStep((s) => Math.min(3, (s + 1) as 0 | 1 | 2 | 3)), []);
-  const back = useCallback(() => setStep((s) => Math.max(0, (s - 1) as 0 | 1 | 2 | 3)), []);
+  const next = useCallback(
+    () => setStep((s) => (s >= 3 ? 3 : ((s + 1) as 0 | 1 | 2 | 3))),
+    [],
+  );
+  const back = useCallback(
+    () => setStep((s) => (s <= 0 ? 0 : ((s - 1) as 0 | 1 | 2 | 3))),
+    [],
+  );
   const reset = useCallback(() => {
     setAnswers({ who: null, goal: null, intensity: null });
     setStep(0);
