@@ -80,10 +80,43 @@ export default function NewbuildsMap() {
     });
   }, [projects, statusFilter, typeFilter]);
 
-  const projectsWithCoords = filtered.filter(p => p.lat && p.lng);
+  const projectsWithCoords = useMemo(
+    () => filtered.filter(p => p.lat && p.lng),
+    [filtered]
+  );
+
+  const { isLoaded, loadError, hasKey } = useGoogleMaps();
+  const mapRef = useRef<google.maps.Map | null>(null);
+
+  const defaultCenter = useMemo(() => getDefaultCenter('phuket'), []);
+  const defaultZoom = useMemo(() => getDefaultZoom('phuket'), []);
+
+  const onMapLoad = useCallback((map: google.maps.Map) => {
+    mapRef.current = map;
+  }, []);
+  const onMapUnmount = useCallback(() => {
+    mapRef.current = null;
+  }, []);
+
+  // Auto-fit bounds when filtered projects change
+  useEffect(() => {
+    if (!mapRef.current || projectsWithCoords.length === 0) return;
+    if (projectsWithCoords.length === 1) {
+      const p = projectsWithCoords[0];
+      mapRef.current.setCenter({ lat: p.lat!, lng: p.lng! });
+      mapRef.current.setZoom(14);
+      return;
+    }
+    const bounds = new google.maps.LatLngBounds();
+    projectsWithCoords.forEach(p => bounds.extend({ lat: p.lat!, lng: p.lng! }));
+    mapRef.current.fitBounds(bounds, 60);
+  }, [projectsWithCoords]);
 
   const handleMarkerClick = useCallback((project: NewbuildProject) => {
     setSelectedProject(project);
+    if (mapRef.current && project.lat && project.lng) {
+      mapRef.current.panTo({ lat: project.lat, lng: project.lng });
+    }
   }, []);
 
   return (
