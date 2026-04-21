@@ -14,6 +14,7 @@ import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { AppLayout } from '@/components/layout/AppLayout';
 import {
   useStartOnboarding,
   type WhoAnswer,
@@ -195,21 +196,23 @@ export default function StartOnboarding() {
   // Feature flag gating — show a polite placeholder so the route is always discoverable
   if (!flagOn) {
     return (
-      <main className="min-h-screen bg-background flex items-center justify-center p-6">
-        <Helmet>
-          <title>{T(COPY.flagOffTitle, lang)} · myUNO</title>
-        </Helmet>
-        <Card className="max-w-md w-full p-6 text-center space-y-4">
-          <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-            <Sparkles className="w-6 h-6 text-primary" />
-          </div>
-          <h1 className="text-xl font-bold">{T(COPY.flagOffTitle, lang)}</h1>
-          <p className="text-sm text-muted-foreground">{T(COPY.flagOffBody, lang)}</p>
-          <Button onClick={() => navigate('/')} className="w-full">
-            {T(COPY.goHome, lang)}
-          </Button>
-        </Card>
-      </main>
+      <AppLayout showHeader={false}>
+        <main className="min-h-[80vh] bg-background flex items-center justify-center p-6">
+          <Helmet>
+            <title>{T(COPY.flagOffTitle, lang)} · myUNO</title>
+          </Helmet>
+          <Card className="max-w-md w-full p-6 text-center space-y-4">
+            <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <Sparkles className="w-6 h-6 text-primary" />
+            </div>
+            <h1 className="text-xl font-bold">{T(COPY.flagOffTitle, lang)}</h1>
+            <p className="text-sm text-muted-foreground">{T(COPY.flagOffBody, lang)}</p>
+            <Button onClick={() => navigate('/')} className="w-full">
+              {T(COPY.goHome, lang)}
+            </Button>
+          </Card>
+        </main>
+      </AppLayout>
     );
   }
 
