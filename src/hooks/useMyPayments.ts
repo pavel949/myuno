@@ -62,7 +62,7 @@ async function fetchPayments(userId: string): Promise<MyPaymentsResult> {
         .from('orders')
         .select('id, order_number, order_type, vertical, total_amount, currency, status, created_at, paid_at')
         .eq('customer_user_id', userId)
-        .in('status', ['paid', 'completed', 'refunded', 'cancelled'])
+        .in('status', ['completed', 'refunded', 'cancelled'] as const)
         .order('created_at', { ascending: false })
         .limit(20),
     ]);
