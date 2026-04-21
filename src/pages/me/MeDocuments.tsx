@@ -320,14 +320,28 @@ export default function MeDocuments() {
             {passports.length > 0 && (
               <PageSection title={isRu ? 'Паспорта' : 'Passports'}>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {passports.map((d) => <DocCard key={d.id} doc={d} />)}
+                  {passports.map((d) => (
+                    <DocCard
+                      key={d.id}
+                      doc={d}
+                      onOpen={handleOpen}
+                      isOpening={actionLock.isLocked(openKey(d.id))}
+                    />
+                  ))}
                 </div>
               </PageSection>
             )}
             {visas.length > 0 && (
               <PageSection title={isRu ? 'Визы' : 'Visas'}>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {visas.map((d) => <DocCard key={d.id} doc={d} />)}
+                  {visas.map((d) => (
+                    <DocCard
+                      key={d.id}
+                      doc={d}
+                      onOpen={handleOpen}
+                      isOpening={actionLock.isLocked(openKey(d.id))}
+                    />
+                  ))}
                 </div>
               </PageSection>
             )}
@@ -343,7 +357,9 @@ export default function MeDocuments() {
                       doc={d}
                       onEdit={setEditingDoc}
                       onDelete={setDeletingDoc}
-                      isDeleting={pendingDeleteIds.has(d.id)}
+                      onOpen={handleOpen}
+                      isDeleting={actionLock.isLocked(deleteKey(d.id))}
+                      isOpening={actionLock.isLocked(openKey(d.id))}
                     />
                   ))}
                 </div>
