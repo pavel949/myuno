@@ -19,6 +19,7 @@ import { DynamicIcon } from '@/components/ui/dynamic-icon';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { AppLayout } from '@/components/layout/AppLayout';
 
 // Map situation codes to relevant category slugs
 const SITUATION_CATEGORY_MAP: Record<string, string[]> = {
@@ -74,6 +75,7 @@ export default memo(function PlatformCatalog() {
   const isLoading = sitLoading || catLoading;
 
   return (
+    <AppLayout showHeader={false}>
     <div className="min-h-screen bg-background">
       <CatalogHeader
         title={isRu ? 'Каталог платформы' : 'Platform Catalog'}
@@ -249,5 +251,6 @@ export default memo(function PlatformCatalog() {
         </div>
       </div>
     </div>
+    </AppLayout>
   );
 });

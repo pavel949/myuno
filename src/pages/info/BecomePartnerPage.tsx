@@ -18,6 +18,7 @@ import {
   Clock,
   Send
 } from 'lucide-react';
+import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { SectionCard, SectionTitle } from '@/components/uno/SectionCard';
@@ -120,6 +121,7 @@ const navigate = useNavigate();
 
   if (isSubmitted) {
     return (
+      <AppLayout showHeader={false}>
       <PageContainer>
         <div className="min-h-[60vh] flex items-center justify-center">
           <motion.div 
@@ -144,10 +146,12 @@ const navigate = useNavigate();
           </motion.div>
         </div>
       </PageContainer>
+      </AppLayout>
     );
   }
 
   return (
+    <AppLayout showHeader={false}>
     <PageContainer>
       <PageHeader 
         title={language === 'ru' ? 'Станьте партнёром UNO' : 'Become a UNO Partner'}
@@ -348,5 +352,6 @@ const navigate = useNavigate();
         </PremiumButton>
       </form>
     </PageContainer>
+    </AppLayout>
   );
 }

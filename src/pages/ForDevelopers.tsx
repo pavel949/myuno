@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { AppLayout } from '@/components/layout/AppLayout';
 import {
   Building2, LineChart, Users, Megaphone, ArrowRight, HardHat, LayoutGrid, PenLine,
   CheckCircle2,
@@ -52,7 +53,7 @@ export default function ForDevelopers() {
   const isRu = language === 'ru';
 
   return (
-    <>
+    <AppLayout showHeader={false}>
       <Helmet>
         <title>
           {isRu
@@ -222,6 +223,6 @@ export default function ForDevelopers() {
           </p>
         </section>
       </div>
-    </>
+    </AppLayout>
   );
 }

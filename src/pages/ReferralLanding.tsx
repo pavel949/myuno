@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { AppLayout } from '@/components/layout/AppLayout';
 
 /**
  * Referral Landing: /ref/:code
@@ -17,8 +18,10 @@ export default function ReferralLanding() {
   }, [code, navigate]);
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background">
-      <p className="text-muted-foreground">Redirecting...</p>
-    </div>
+    <AppLayout showHeader={false}>
+      <div className="flex items-center justify-center min-h-[60vh] bg-background">
+        <p className="text-muted-foreground">Redirecting...</p>
+      </div>
+    </AppLayout>
   );
 }

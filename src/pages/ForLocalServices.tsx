@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { AppLayout } from '@/components/layout/AppLayout';
 import {
   Store, CalendarDays, Banknote, ShieldCheck, ArrowRight, Wrench,
 } from 'lucide-react';
@@ -51,7 +52,7 @@ export default function ForLocalServices() {
   const isRu = language === 'ru';
 
   return (
-    <>
+    <AppLayout showHeader={false}>
       <Helmet>
         <title>
           {isRu
@@ -136,6 +137,6 @@ export default function ForLocalServices() {
           </p>
         </section>
       </div>
-    </>
+    </AppLayout>
   );
 }

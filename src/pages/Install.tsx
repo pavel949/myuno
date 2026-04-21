@@ -21,6 +21,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { PageContainer } from "@/components/uno/PageContainer";
 import { PageHeader } from "@/components/uno/PageHeader";
+import { AppLayout } from "@/components/layout/AppLayout";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { IOSInstallGuide } from "@/components/pwa/IOSInstallGuide";
@@ -238,6 +239,7 @@ const Install = () => {
   // Success screen
   if (installState === 'success') {
     return (
+      <AppLayout showHeader={false}>
       <PageContainer>
         <PageHeader title={t.title} showBack />
         <motion.div 
@@ -300,11 +302,13 @@ const Install = () => {
           </motion.div>
         </motion.div>
       </PageContainer>
+      </AppLayout>
     );
   }
 
   if (installState === 'already-installed') {
     return (
+      <AppLayout showHeader={false}>
       <PageContainer>
         <PageHeader title={t.title} showBack />
         <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -346,6 +350,7 @@ const Install = () => {
           </div>
         </div>
       </PageContainer>
+      </AppLayout>
     );
   }
 
@@ -355,7 +360,7 @@ const Install = () => {
   const stepsTitle = isIOS ? t.iosTitle : t.androidTitle;
 
   return (
-    <>
+    <AppLayout showHeader={false}>
       {/* iOS Interactive Guide Modal */}
       <AnimatePresence>
         {showIOSGuide && (
@@ -511,7 +516,7 @@ const Install = () => {
           )}
         </motion.div>
       </PageContainer>
-    </>
+    </AppLayout>
   );
 };
 

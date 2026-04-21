@@ -25,6 +25,7 @@ import { useUserPersonas, type UserPersona } from '@/hooks/useUserPersonas';
 import { CompareProvider } from '@/components/property/PropertyCompare';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { AppLayout } from '@/components/layout/AppLayout';
 
 interface TabConfig {
   id: string;
@@ -258,10 +259,12 @@ export default function PropertyHub() {
     location.pathname === `${APP_ROUTES.PROPERTY_BROWSE}/`;
 
   return (
-    <CompareProvider>
-      {!hideOuterTabs && <PropertyHubTabs />}
-      <OffplanHubToolsStrip />
-      <Outlet />
-    </CompareProvider>
+    <AppLayout showHeader={false}>
+      <CompareProvider>
+        {!hideOuterTabs && <PropertyHubTabs />}
+        <OffplanHubToolsStrip />
+        <Outlet />
+      </CompareProvider>
+    </AppLayout>
   );
 }

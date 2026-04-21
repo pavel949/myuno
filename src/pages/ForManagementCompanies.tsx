@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Helmet } from 'react-helmet-async';
+import { AppLayout } from '@/components/layout/AppLayout';
 import {
   Building2, BarChart3, Users, Calendar, FileText,
   MessageSquare, Shield, Zap, Check, ArrowRight,
@@ -60,7 +61,7 @@ const ForManagementCompanies: React.FC = () => {
   const isRu = language === 'ru';
 
   return (
-    <>
+    <AppLayout showHeader={false}>
       <Helmet>
         <title>{isRu ? 'myUNO для управляющих компаний | PMS SaaS' : 'myUNO for Management Companies | PMS SaaS'}</title>
         <meta name="description" content={isRu
@@ -246,7 +247,7 @@ const ForManagementCompanies: React.FC = () => {
           © 2025–2026 myUNO · Phuket, Thailand · <a href="mailto:support@myuno.app" className="underline">support@myuno.app</a>
         </footer>
       </div>
-    </>
+    </AppLayout>
   );
 };
 
