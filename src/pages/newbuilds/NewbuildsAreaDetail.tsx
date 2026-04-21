@@ -12,9 +12,7 @@ import { useNewbuildProjects } from '@/hooks/useNewbuildProjects';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { SEOHead, createBreadcrumbSchema } from '@/components/seo';
 
-function isRuAreaTitle() {
-  return 'Phuket Investment Guide';
-}
+const AREA_TITLE_SUFFIX = 'Phuket Investment Guide';
 
 export default function NewbuildsAreaDetail() {
   const { slug } = useParams<{ slug: string }>();
@@ -52,7 +50,7 @@ export default function NewbuildsAreaDetail() {
     .sort((a, b) => a.distance - b.distance)
     .slice(0, 3);
 
-  const seoTitle = `${area.name_ru} (${area.name_en}) · ${isRuAreaTitle()}`;
+  const seoTitle = `${area.name_ru} (${area.name_en}) · ${AREA_TITLE_SUFFIX}`;
   const seoDescription = `${area.name_ru} — район Пхукета. Средняя цена ฿${(area.avg_price_sqm / 1000).toFixed(0)}K/м², доходность ${area.avg_yield}%, ${areaProjects.length} проектов. ${area.description_ru.slice(0, 120)}`;
   const canonicalUrl = `https://myuno.app${APP_ROUTES.NEWBUILDS_AREA(area.slug)}`;
   const placeSchema = {

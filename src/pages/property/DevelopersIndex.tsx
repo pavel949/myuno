@@ -104,7 +104,7 @@ export default function DevelopersIndex() {
                         <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />
                       )}
                       {dev.isFeatured && (
-                        <Badge className="bg-accent-amber text-white text-xs">
+                        <Badge className="bg-accent-amber text-accent-amber-foreground text-xs">
                           {isRu ? 'Топ' : 'Top'}
                         </Badge>
                       )}

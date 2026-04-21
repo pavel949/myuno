@@ -48,10 +48,10 @@ export default function DeveloperProjects() {
               {/* Info */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <h3 className="text-[hsl(var(--nb-text))] font-semibold truncate">{project.name_en}</h3>
+                  <h3 className="text-[hsl(var(--nb-text))] font-semibold truncate">{project.name_ru || project.name_en || '—'}</h3>
                   <NbProjectStatusBadge status={project.project_status || 'under_construction'} />
                   {project.is_approved === false && (
-                    <span className="nb-badge bg-amber-500/15 text-amber-400 border-amber-500/30">На проверке</span>
+                    <span className="nb-badge nb-badge-construction">На проверке</span>
                   )}
                 </div>
                 <div className="flex items-center gap-4 text-sm text-[hsl(var(--nb-text-secondary))]">
