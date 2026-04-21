@@ -40,6 +40,29 @@ All tokens are HSL values exposed as CSS custom properties so Tailwind can consu
 | `--cluster-manage` | Manage (cyan-teal) |
 | `--cluster-build`  | Build (red) |
 
+## Vertical accents (extended palette)
+
+For storefront verticals that need a distinctive hue but do not map to a cluster, use these semantic tokens instead of raw Tailwind palette classes (`bg-rose-500`, `text-emerald-600`, …). All values are dark-tuned in `:root` and light-tuned in `html.light`.
+
+| Token | Tailwind utility | Typical use |
+|-------|------------------|-------------|
+| `--accent-coral` | `bg-coral`, `text-coral` | Restaurants, food |
+| `--accent-teal`  | `bg-teal`, `text-teal` | Wellness, spa |
+| `--accent-purple` | `bg-accent-purple` | Lifestyle, community |
+| `--accent-cyan` | `bg-accent-cyan` | Transport, mobility |
+| `--accent-amber` | `bg-accent-amber` | Legal, documents |
+| `--accent-emerald` | `bg-accent-emerald` | Investment, growth |
+| `--accent-rose` | `bg-accent-rose` | Flowers, beauty |
+| `--accent-sky` | `bg-accent-sky` | Yachts, travel |
+| `--accent-orange` | `bg-accent-orange` | Events, energy |
+| `--accent-pink` | `bg-accent-pink` | Kids, lifestyle |
+| `--accent-violet` | `bg-accent-violet` | Knowledge, premium |
+| `--accent-indigo` | `bg-accent-indigo` | Tech, nomad |
+| `--accent-lime` | `bg-accent-lime` | Sports, fresh |
+| `--accent-fuchsia` | `bg-accent-fuchsia` | Special promos |
+
+**Rule:** never use raw Tailwind palette classes (`*-{400|500|600|700}`) in app code — always pick the closest semantic token above (or a `--cluster-*` if the page belongs to a cluster).
+
 ## Page-template semantic tokens (new)
 
 | Token | Default | Tablet (≥768) | Desktop (≥1024) | Use |
