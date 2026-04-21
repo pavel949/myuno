@@ -1,11 +1,11 @@
 /**
  * /me/documents — MeDocuments
  * Single grid surface for myUNO ID vault: passports, visas, vault docs.
- * Uses useMyDocuments aggregator. Empty state CTA → existing myUNO ID flow.
+ * Uses useMyDocuments aggregator. Includes upload dialog for vault documents.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FileText, Shield, Plane, Plus, ExternalLink, ShieldCheck, AlertTriangle } from 'lucide-react';
+import { FileText, Shield, Plane, Plus, ExternalLink, ShieldCheck, AlertTriangle, Upload } from 'lucide-react';
 import { MeShellLayout } from '@/components/layout/MeShellLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,9 @@ import { Badge } from '@/components/ui/badge';
 import { EmptyState, LoadingState, PageSection } from '@/components/page';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useMyDocuments, type MyDocument } from '@/hooks/useMyDocuments';
+import { AddVaultDocumentDialog } from '@/components/me/AddVaultDocumentDialog';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 const SOURCE_ICON = { passport: Shield, visa: Plane, vault: FileText } as const;
@@ -22,6 +25,25 @@ const STATUS_TONE = {
   expired:  'bg-destructive/10 text-destructive',
   unknown:  'bg-muted text-muted-foreground',
 } as const;
+
+/** Open a vault file: vault entries store a storage path → signed URL.
+ *  Passport/visa rows already store full URLs → opened as-is. */
+async function openDoc(doc: MyDocument) {
+  if (!doc.fileUrl) return;
+  const isFullUrl = /^https?:\/\//i.test(doc.fileUrl);
+  if (isFullUrl) {
+    window.open(doc.fileUrl, '_blank', 'noopener');
+    return;
+  }
+  const { data, error } = await supabase.storage
+    .from('user-documents')
+    .createSignedUrl(doc.fileUrl, 3600);
+  if (error) {
+    toast.error(error.message);
+    return;
+  }
+  window.open(data.signedUrl, '_blank', 'noopener');
+}
 
 function DocCard({ doc }: { doc: MyDocument }) {
   const { language } = useLanguage();
@@ -57,10 +79,14 @@ function DocCard({ doc }: { doc: MyDocument }) {
             <span className="text-xs text-muted-foreground">{doc.expiryDate}</span>
           )}
           {doc.fileUrl && (
-            <Button asChild size="sm" variant="ghost" className="ml-auto h-7 px-2">
-              <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer">
-                <ExternalLink className="h-3.5 w-3.5" />
-              </a>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="ml-auto h-7 px-2"
+              onClick={() => openDoc(doc)}
+              aria-label={isRu ? 'Открыть' : 'Open'}
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
             </Button>
           )}
         </div>
@@ -73,6 +99,7 @@ export default function MeDocuments() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { data: docs, isLoading } = useMyDocuments();
+  const [uploadOpen, setUploadOpen] = useState(false);
 
   const passports = (docs ?? []).filter((d) => d.source === 'passport');
   const visas     = (docs ?? []).filter((d) => d.source === 'visa');
@@ -90,12 +117,18 @@ export default function MeDocuments() {
               {isRu ? 'Паспорта, визы и сейф документов.' : 'Passports, visas and document vault.'}
             </p>
           </div>
-          <Button asChild size="sm">
-            <Link to="/account?action=add-passport">
-              <Plus className="h-4 w-4" />
-              {isRu ? 'Добавить' : 'Add'}
-            </Link>
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-2 shrink-0">
+            <Button size="sm" variant="outline" onClick={() => setUploadOpen(true)}>
+              <Upload className="h-4 w-4" />
+              {isRu ? 'Загрузить' : 'Upload'}
+            </Button>
+            <Button asChild size="sm">
+              <Link to="/account?action=add-passport">
+                <Plus className="h-4 w-4" />
+                {isRu ? 'Паспорт' : 'Passport'}
+              </Link>
+            </Button>
+          </div>
         </header>
 
         {isLoading ? (
@@ -105,15 +138,21 @@ export default function MeDocuments() {
             icon={FileText}
             title={isRu ? 'Документов пока нет' : 'No documents yet'}
             description={isRu
-              ? 'Добавьте паспорт, чтобы начать.'
-              : 'Add a passport to get started.'}
+              ? 'Добавьте паспорт или загрузите документ, чтобы начать.'
+              : 'Add a passport or upload a document to get started.'}
             action={
-              <Button asChild>
-                <Link to="/account?action=add-passport">
-                  <Plus className="h-4 w-4" />
-                  {isRu ? 'Добавить паспорт' : 'Add passport'}
-                </Link>
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setUploadOpen(true)}>
+                  <Upload className="h-4 w-4" />
+                  {isRu ? 'Загрузить файл' : 'Upload file'}
+                </Button>
+                <Button asChild>
+                  <Link to="/account?action=add-passport">
+                    <Plus className="h-4 w-4" />
+                    {isRu ? 'Добавить паспорт' : 'Add passport'}
+                  </Link>
+                </Button>
+              </div>
             }
           />
         ) : (
@@ -132,16 +171,30 @@ export default function MeDocuments() {
                 </div>
               </PageSection>
             )}
-            {vault.length > 0 && (
-              <PageSection title={isRu ? 'Сейф документов' : 'Vault'}>
+            <PageSection
+              title={isRu ? 'Сейф документов' : 'Vault'}
+              action={
+                <Button size="sm" variant="ghost" onClick={() => setUploadOpen(true)}>
+                  <Plus className="h-4 w-4" />
+                  {isRu ? 'Добавить' : 'Add'}
+                </Button>
+              }
+            >
+              {vault.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {vault.map((d) => <DocCard key={d.id} doc={d} />)}
                 </div>
-              </PageSection>
-            )}
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  {isRu ? 'В сейфе пока ничего нет.' : 'Vault is empty.'}
+                </p>
+              )}
+            </PageSection>
           </>
         )}
       </div>
+
+      <AddVaultDocumentDialog open={uploadOpen} onOpenChange={setUploadOpen} />
     </MeShellLayout>
   );
 }
