@@ -2,7 +2,7 @@
  * /newbuilds — Themed hub: tools & CTAs. Canonical catalog lives at /property/offplan.
  */
 import React, { useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Building2,
   Map,
@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { useOffplanProjects } from '@/hooks/useOffplanProjects';
+import { StartPageLayout, StepByStepNav, type Step } from '@/components/patterns';
 
 type ToolCard = {
   to: string;
