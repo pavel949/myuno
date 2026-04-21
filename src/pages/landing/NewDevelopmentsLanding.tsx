@@ -354,6 +354,6 @@ export default function NewDevelopmentsLanding() {
           </p>
         </section>
       </div>
-    </>
+    </AppLayout>
   );
 }
