@@ -181,6 +181,13 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.PEYLAA} element={<LazyPage><Pages.PeylaaLanding /></LazyPage>} />
         <Route path="/peylaa/unit/:unitNo" element={<Navigate to={APP_ROUTES.PEYLAA} replace />} />
         <Route path={APP_ROUTES.ACCOUNT} element={<LazyPage><Pages.UserAccountDashboard /></LazyPage>} />
+        {/* ── /me Universal Hub (Phase A5) ── */}
+        <Route path={APP_ROUTES.ME_FEED} element={<LazyPage><Pages.MeFeed /></LazyPage>} />
+        <Route path={APP_ROUTES.ME_SERVICES} element={<LazyPage><Pages.MeServices /></LazyPage>} />
+        <Route path={APP_ROUTES.ME_DOCUMENTS} element={<LazyPage><Pages.MeDocuments /></LazyPage>} />
+        <Route path={APP_ROUTES.ME_PAYMENTS} element={<LazyPage><Pages.MePayments /></LazyPage>} />
+        <Route path={APP_ROUTES.ME_REQUESTS} element={<LazyPage><Pages.MeRequests /></LazyPage>} />
+        <Route path={APP_ROUTES.ME_PROFILE} element={<LazyPage><Pages.MeProfile /></LazyPage>} />
         <Route path={APP_ROUTES.FAVORITES} element={<LazyPage><Pages.Favorites /></LazyPage>} />
         <Route path={APP_ROUTES.SEARCH} element={<LazyPage><Pages.Search /></LazyPage>} />
         <Route path={APP_ROUTES.NOTIFICATIONS} element={<LazyPage><Pages.Notifications /></LazyPage>} />
