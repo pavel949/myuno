@@ -239,6 +239,7 @@ const Install = () => {
   // Success screen
   if (installState === 'success') {
     return (
+      <AppLayout showHeader={false}>
       <PageContainer>
         <PageHeader title={t.title} showBack />
         <motion.div 
@@ -301,11 +302,13 @@ const Install = () => {
           </motion.div>
         </motion.div>
       </PageContainer>
+      </AppLayout>
     );
   }
 
   if (installState === 'already-installed') {
     return (
+      <AppLayout showHeader={false}>
       <PageContainer>
         <PageHeader title={t.title} showBack />
         <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -347,6 +350,7 @@ const Install = () => {
           </div>
         </div>
       </PageContainer>
+      </AppLayout>
     );
   }
 
@@ -356,7 +360,7 @@ const Install = () => {
   const stepsTitle = isIOS ? t.iosTitle : t.androidTitle;
 
   return (
-    <>
+    <AppLayout showHeader={false}>
       {/* iOS Interactive Guide Modal */}
       <AnimatePresence>
         {showIOSGuide && (
@@ -512,7 +516,7 @@ const Install = () => {
           )}
         </motion.div>
       </PageContainer>
-    </>
+    </AppLayout>
   );
 };
 
