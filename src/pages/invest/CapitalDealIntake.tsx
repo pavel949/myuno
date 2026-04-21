@@ -135,7 +135,7 @@ export default function CapitalDealIntake() {
           <div className="rounded-[14px] border border-border bg-card px-3.5 py-4">
             <CapitalIntroForm
               defaults={{
-                request_type: 'investment_deal',
+                request_type: 'capital_advisory',
                 asset_class: 'real_estate',
               }}
               showCapitalRange

@@ -349,6 +349,8 @@ export const APP_ROUTES = {
   /** ClearView product landing — kept under Property Hub to comply with rule §13.1. */
   CLEARVIEW: '/property/clearview',
   CLEARVIEW_APPLY: '/property/clearview/apply',
+  /** Investment-deal intake (USD 200K+) — under /invest, no new top-level. */
+  CAPITAL_DEAL_INTAKE: '/invest/capital-deal',
 
   // ── Vendor Portal ──
   VENDOR: '/vendor',
