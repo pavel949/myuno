@@ -5,11 +5,22 @@
  */
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FileText, Shield, Plane, Plus, ExternalLink, ShieldCheck, AlertTriangle, Upload, Pencil } from 'lucide-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { FileText, Shield, Plane, Plus, ExternalLink, ShieldCheck, AlertTriangle, Upload, Pencil, Trash2, Loader2 } from 'lucide-react';
 import { MeShellLayout } from '@/components/layout/MeShellLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { EmptyState, LoadingState, PageSection } from '@/components/page';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useMyDocuments, type MyDocument } from '@/hooks/useMyDocuments';
