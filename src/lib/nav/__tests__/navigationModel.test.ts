@@ -13,6 +13,8 @@ import {
   BOTTOM_BAR_BY_ROLE,
   getBottomBarItems,
   isBottomBarRoute,
+  isBottomBarItemActive,
+  getActiveBottomBarItem,
   PRIMARY_NAV,
   NAV_BY_ROLE,
   resolveNavRole,
