@@ -39,24 +39,8 @@ const STATUS_TONE = {
   unknown:  'bg-muted text-muted-foreground',
 } as const;
 
-/** Open a vault file: vault entries store a storage path → signed URL.
- *  Passport/visa rows already store full URLs → opened as-is. */
-async function openDoc(doc: MyDocument) {
-  if (!doc.fileUrl) return;
-  const isFullUrl = /^https?:\/\//i.test(doc.fileUrl);
-  if (isFullUrl) {
-    window.open(doc.fileUrl, '_blank', 'noopener');
-    return;
-  }
-  const { data, error } = await supabase.storage
-    .from('user-documents')
-    .createSignedUrl(doc.fileUrl, 3600);
-  if (error) {
-    toast.error(error.message);
-    return;
-  }
-  window.open(data.signedUrl, '_blank', 'noopener');
-}
+// Note: opening a vault file (sign URL → window.open) is handled inside the page
+// component via the shared `useActionLock` hook so re-clicks are debounced.
 
 function DocCard({
   doc,
