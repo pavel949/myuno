@@ -1,15 +1,37 @@
 /**
  * /newbuilds/map — Interactive map view with layer filters
  */
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ChevronLeft, MapPin, List, Filter, Building2, Home, Layers } from 'lucide-react';
+import { ChevronLeft, MapPin, List, Layers, Loader2 } from 'lucide-react';
+import { GoogleMap, OverlayView } from '@react-google-maps/api';
 import NewbuildsLayout from '@/components/newbuilds/NewbuildsLayout';
 import { NbProjectCard } from '@/components/newbuilds/NbProjectCard';
 import { NbPriceDisplay } from '@/components/newbuilds/NbPriceDisplay';
 import { NbProjectStatusBadge } from '@/components/newbuilds/NbProjectStatusBadge';
 import { useNewbuildProjects, type NewbuildProject } from '@/hooks/useNewbuildProjects';
+import { useGoogleMaps } from '@/contexts/GoogleMapsContext';
+import { getDefaultCenter, getDefaultZoom } from '@/lib/config/geography';
 import { APP_ROUTES } from '@/lib/config/routes';
+
+const MAP_CONTAINER_STYLE: React.CSSProperties = { width: '100%', height: '100%' };
+
+// Dark luxury map style matching newbuilds theme
+const MAP_STYLES: google.maps.MapTypeStyle[] = [
+  { elementType: 'geometry', stylers: [{ color: '#0f1620' }] },
+  { elementType: 'labels.text.stroke', stylers: [{ color: '#0f1620' }] },
+  { elementType: 'labels.text.fill', stylers: [{ color: '#8a7a55' }] },
+  { featureType: 'administrative.locality', elementType: 'labels.text.fill', stylers: [{ color: '#c9a961' }] },
+  { featureType: 'poi', elementType: 'labels.text.fill', stylers: [{ color: '#6b5e3f' }] },
+  { featureType: 'poi.park', elementType: 'geometry', stylers: [{ color: '#1a2820' }] },
+  { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#1a2330' }] },
+  { featureType: 'road', elementType: 'geometry.stroke', stylers: [{ color: '#0a0f17' }] },
+  { featureType: 'road', elementType: 'labels.text.fill', stylers: [{ color: '#7a6a45' }] },
+  { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: '#2a3445' }] },
+  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0a1018' }] },
+  { featureType: 'water', elementType: 'labels.text.fill', stylers: [{ color: '#4a5a7a' }] },
+  { featureType: 'transit', stylers: [{ visibility: 'off' }] },
+];
 
 const STATUS_LAYERS = [
   { key: 'all', label: 'Все', color: 'hsl(var(--nb-gold))' },
