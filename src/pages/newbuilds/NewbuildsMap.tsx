@@ -273,6 +273,7 @@ export default function NewbuildsMap() {
               zoom={defaultZoom}
               onLoad={onMapLoad}
               onUnmount={onMapUnmount}
+              onZoomChanged={onZoomChanged}
               options={{
                 styles: MAP_STYLES,
                 disableDefaultUI: false,
@@ -284,45 +285,77 @@ export default function NewbuildsMap() {
                 backgroundColor: '#0f1620',
               }}
             >
-              {projectsWithCoords.map(project => {
-                const isSelected = selectedProject?.id === project.id;
-                const markerColor = getStatusColor(project.project_status);
+              {clusters.map(cluster => {
+                if (cluster.projects.length === 1) {
+                  const project = cluster.projects[0];
+                  const isSelected = selectedProject?.id === project.id;
+                  const markerColor = getStatusColor(project.project_status);
+                  return (
+                    <OverlayView
+                      key={cluster.id}
+                      position={{ lat: project.lat!, lng: project.lng! }}
+                      mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+                      getPixelPositionOffset={(w, h) => ({ x: -(w / 2), y: -h })}
+                    >
+                      <button
+                        onClick={() => handleMarkerClick(project)}
+                        className="transition-all"
+                        style={{ zIndex: isSelected ? 1000 : 1 }}
+                      >
+                        <div
+                          className="px-2 py-1 rounded-lg text-[10px] font-bold whitespace-nowrap transition-all"
+                          style={{
+                            background: isSelected ? markerColor : 'hsl(var(--nb-bg) / 0.92)',
+                            color: isSelected ? 'hsl(var(--nb-bg))' : markerColor,
+                            border: `2px solid ${markerColor}`,
+                            transform: isSelected ? 'scale(1.15)' : 'scale(1)',
+                            boxShadow: isSelected
+                              ? `0 4px 12px ${markerColor}66`
+                              : '0 2px 6px rgba(0,0,0,0.4)',
+                          }}
+                        >
+                          {project.price_from
+                            ? `฿${(project.price_from / 1_000_000).toFixed(1)}M`
+                            : (project.name_ru || project.name_en || '').slice(0, 12)}
+                        </div>
+                        <div
+                          className="w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] mx-auto"
+                          style={{
+                            borderLeftColor: 'transparent',
+                            borderRightColor: 'transparent',
+                            borderTopColor: markerColor,
+                          }}
+                        />
+                      </button>
+                    </OverlayView>
+                  );
+                }
+
+                // Multi-project cluster bubble
+                const count = cluster.projects.length;
+                const size = count >= 50 ? 56 : count >= 20 ? 48 : count >= 10 ? 44 : 38;
                 return (
                   <OverlayView
-                    key={project.id}
-                    position={{ lat: project.lat!, lng: project.lng! }}
+                    key={cluster.id}
+                    position={{ lat: cluster.lat, lng: cluster.lng }}
                     mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-                    getPixelPositionOffset={(w, h) => ({ x: -(w / 2), y: -h })}
+                    getPixelPositionOffset={(w, h) => ({ x: -(w / 2), y: -(h / 2) })}
                   >
                     <button
-                      onClick={() => handleMarkerClick(project)}
-                      className="transition-all"
-                      style={{ zIndex: isSelected ? 1000 : 1 }}
+                      onClick={() => handleClusterClick(cluster)}
+                      className="rounded-full flex items-center justify-center font-bold transition-transform hover:scale-110"
+                      style={{
+                        width: size,
+                        height: size,
+                        background: 'hsl(var(--nb-gold))',
+                        color: 'hsl(var(--nb-bg))',
+                        border: '3px solid hsl(var(--nb-bg))',
+                        boxShadow: '0 0 0 4px hsl(var(--nb-gold) / 0.3), 0 4px 12px rgba(0,0,0,0.5)',
+                        fontSize: count >= 100 ? 12 : 14,
+                      }}
+                      aria-label={`${count} проектов в этой области`}
                     >
-                      <div
-                        className="px-2 py-1 rounded-lg text-[10px] font-bold whitespace-nowrap transition-all"
-                        style={{
-                          background: isSelected ? markerColor : 'hsl(var(--nb-bg) / 0.92)',
-                          color: isSelected ? 'hsl(var(--nb-bg))' : markerColor,
-                          border: `2px solid ${markerColor}`,
-                          transform: isSelected ? 'scale(1.15)' : 'scale(1)',
-                          boxShadow: isSelected
-                            ? `0 4px 12px ${markerColor}66`
-                            : '0 2px 6px rgba(0,0,0,0.4)',
-                        }}
-                      >
-                        {project.price_from
-                          ? `฿${(project.price_from / 1_000_000).toFixed(1)}M`
-                          : (project.name_ru || project.name_en || '').slice(0, 12)}
-                      </div>
-                      <div
-                        className="w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] mx-auto"
-                        style={{
-                          borderLeftColor: 'transparent',
-                          borderRightColor: 'transparent',
-                          borderTopColor: markerColor,
-                        }}
-                      />
+                      {count}
                     </button>
                   </OverlayView>
                 );
