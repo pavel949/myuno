@@ -160,6 +160,26 @@ export default function InvestInThailand() {
             </CardContent>
           </Card>
 
+          {/* CTA: Capital deal intake (USD 200K+) — RERE Investment track */}
+          <Card className="border-border bg-card">
+            <CardContent className="p-5 space-y-3">
+              <div className="flex items-center gap-2">
+                <Briefcase className="h-5 w-5 text-foreground" />
+                <h3 className="font-semibold">
+                  {isRu ? 'Инвестиционная сделка от 200 000 USD' : 'Investment deal from USD 200 000'}
+                </h3>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {isRu
+                  ? 'Сопровождение сделки: проверка контрагентов, эскроу, подписание. Комиссия — 2% сделки + 0,5% эскроу. Ставки публичны.'
+                  : 'Deal support: counterparty checks, escrow, signing. Fee — 2% deal + 0.5% escrow. Rates are public.'}
+              </p>
+              <Button onClick={() => navigate('/invest/capital-deal')} className="w-full gap-1.5">
+                {isRu ? 'Перейти к услуге' : 'Open service'} <ArrowRight className="h-4 w-4" />
+              </Button>
+            </CardContent>
+          </Card>
+
           {/* CTA: Pitch */}
           <Card className="bg-gradient-to-br from-primary/10 to-accent/5 border-primary/20">
             <CardContent className="p-5 space-y-3">

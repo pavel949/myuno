@@ -471,6 +471,7 @@ export const AnimatedRoutes: React.FC = () => {
         {/* Phase 3 — universal capital marketplace public routes */}
         <Route path={APP_ROUTES.INVEST_SUBMIT} element={<LazyPage><Pages.InvestmentSubmit /></LazyPage>} />
         <Route path={APP_ROUTES.INVEST_DEALS_BOARD} element={<LazyPage><Pages.InvestmentDeals /></LazyPage>} />
+        <Route path={APP_ROUTES.CAPITAL_DEAL_INTAKE} element={<LazyPage><Pages.CapitalDealIntake /></LazyPage>} />
         <Route path="/invest/deal/:id" element={<LazyPage><Pages.InvestmentDealPublicDetail /></LazyPage>} />
         <Route path="/invest/articles" element={<LazyPage><Pages.InvestmentArticles /></LazyPage>} />
         <Route path="/invest/articles/:slug" element={<LazyPage><Pages.InvestmentArticleDetail /></LazyPage>} />
