@@ -3765,6 +3765,141 @@ export type Database = {
           },
         ]
       }
+      compliance_filings: {
+        Row: {
+          amount: number | null
+          created_at: string
+          currency: string | null
+          due_date: string | null
+          filed_at: string | null
+          filed_by_partner_id: string | null
+          filing_url: string | null
+          id: string
+          metadata: Json
+          obligation_code: string
+          obligation_id: string | null
+          period_end: string | null
+          period_start: string | null
+          property_id: string | null
+          receipt_number: string | null
+          receipt_url: string | null
+          rejection_reason: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string
+          currency?: string | null
+          due_date?: string | null
+          filed_at?: string | null
+          filed_by_partner_id?: string | null
+          filing_url?: string | null
+          id?: string
+          metadata?: Json
+          obligation_code: string
+          obligation_id?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          property_id?: string | null
+          receipt_number?: string | null
+          receipt_url?: string | null
+          rejection_reason?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string
+          currency?: string | null
+          due_date?: string | null
+          filed_at?: string | null
+          filed_by_partner_id?: string | null
+          filing_url?: string | null
+          id?: string
+          metadata?: Json
+          obligation_code?: string
+          obligation_id?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          property_id?: string | null
+          receipt_number?: string | null
+          receipt_url?: string | null
+          rejection_reason?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_filings_obligation_code_fkey"
+            columns: ["obligation_code"]
+            isOneToOne: false
+            referencedRelation: "compliance_obligation_types"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "compliance_filings_obligation_id_fkey"
+            columns: ["obligation_id"]
+            isOneToOne: false
+            referencedRelation: "user_compliance_obligations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      compliance_obligation_types: {
+        Row: {
+          applies_to: string
+          authority: string | null
+          category: string
+          code: string
+          created_at: string
+          default_lead_days: number
+          default_recurrence: string
+          description_en: string | null
+          description_ru: string | null
+          is_active: boolean
+          name_en: string
+          name_ru: string
+          partner_managed: boolean
+          sort_order: number | null
+        }
+        Insert: {
+          applies_to?: string
+          authority?: string | null
+          category: string
+          code: string
+          created_at?: string
+          default_lead_days?: number
+          default_recurrence?: string
+          description_en?: string | null
+          description_ru?: string | null
+          is_active?: boolean
+          name_en: string
+          name_ru: string
+          partner_managed?: boolean
+          sort_order?: number | null
+        }
+        Update: {
+          applies_to?: string
+          authority?: string | null
+          category?: string
+          code?: string
+          created_at?: string
+          default_lead_days?: number
+          default_recurrence?: string
+          description_en?: string | null
+          description_ru?: string | null
+          is_active?: boolean
+          name_en?: string
+          name_ru?: string
+          partner_managed?: boolean
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
       consultation_requests: {
         Row: {
           admin_notes: string | null
