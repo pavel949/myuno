@@ -143,9 +143,29 @@ function DocCard({
 export default function MeDocuments() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const qc = useQueryClient();
   const { data: docs, isLoading } = useMyDocuments();
   const [uploadOpen, setUploadOpen] = useState(false);
   const [editingDoc, setEditingDoc] = useState<MyDocument | null>(null);
+  const [deletingDoc, setDeletingDoc] = useState<MyDocument | null>(null);
+
+  const deleteMutation = useMutation({
+    mutationFn: async (doc: MyDocument) => {
+      const dbId = doc.id.startsWith('vault-') ? doc.id.slice('vault-'.length) : null;
+      if (!dbId) throw new Error('Invalid document');
+      const { error } = await supabase
+        .from('user_documents_vault')
+        .update({ archived_at: new Date().toISOString() })
+        .eq('id', dbId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['me-documents'] });
+      toast.success(isRu ? 'Документ удалён' : 'Document deleted');
+      setDeletingDoc(null);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   const passports = (docs ?? []).filter((d) => d.source === 'passport');
   const visas     = (docs ?? []).filter((d) => d.source === 'visa');
