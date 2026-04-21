@@ -24,6 +24,7 @@ import {
 import { EmptyState, LoadingState, PageSection } from '@/components/page';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useMyDocuments, type MyDocument } from '@/hooks/useMyDocuments';
+import { useActionLock } from '@/hooks/useActionLock';
 import { AddVaultDocumentDialog } from '@/components/me/AddVaultDocumentDialog';
 import { EditVaultDocumentDialog } from '@/components/me/EditVaultDocumentDialog';
 import { supabase } from '@/integrations/supabase/client';
