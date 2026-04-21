@@ -5,11 +5,22 @@
  */
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FileText, Shield, Plane, Plus, ExternalLink, ShieldCheck, AlertTriangle, Upload, Pencil } from 'lucide-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { FileText, Shield, Plane, Plus, ExternalLink, ShieldCheck, AlertTriangle, Upload, Pencil, Trash2, Loader2 } from 'lucide-react';
 import { MeShellLayout } from '@/components/layout/MeShellLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { EmptyState, LoadingState, PageSection } from '@/components/page';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useMyDocuments, type MyDocument } from '@/hooks/useMyDocuments';
@@ -46,7 +57,15 @@ async function openDoc(doc: MyDocument) {
   window.open(data.signedUrl, '_blank', 'noopener');
 }
 
-function DocCard({ doc, onEdit }: { doc: MyDocument; onEdit?: (d: MyDocument) => void }) {
+function DocCard({
+  doc,
+  onEdit,
+  onDelete,
+}: {
+  doc: MyDocument;
+  onEdit?: (d: MyDocument) => void;
+  onDelete?: (d: MyDocument) => void;
+}) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const Icon = SOURCE_ICON[doc.source];
@@ -103,6 +122,17 @@ function DocCard({ doc, onEdit }: { doc: MyDocument; onEdit?: (d: MyDocument) =>
                 <ExternalLink className="h-3.5 w-3.5" />
               </Button>
             )}
+            {isVault && onDelete && (
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-7 px-2 text-destructive hover:text-destructive"
+                onClick={() => onDelete(doc)}
+                aria-label={isRu ? 'Удалить' : 'Delete'}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            )}
           </div>
         </div>
       </CardContent>
@@ -113,9 +143,29 @@ function DocCard({ doc, onEdit }: { doc: MyDocument; onEdit?: (d: MyDocument) =>
 export default function MeDocuments() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const qc = useQueryClient();
   const { data: docs, isLoading } = useMyDocuments();
   const [uploadOpen, setUploadOpen] = useState(false);
   const [editingDoc, setEditingDoc] = useState<MyDocument | null>(null);
+  const [deletingDoc, setDeletingDoc] = useState<MyDocument | null>(null);
+
+  const deleteMutation = useMutation({
+    mutationFn: async (doc: MyDocument) => {
+      const dbId = doc.id.startsWith('vault-') ? doc.id.slice('vault-'.length) : null;
+      if (!dbId) throw new Error('Invalid document');
+      const { error } = await supabase
+        .from('user_documents_vault')
+        .update({ archived_at: new Date().toISOString() })
+        .eq('id', dbId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['me-documents'] });
+      toast.success(isRu ? 'Документ удалён' : 'Document deleted');
+      setDeletingDoc(null);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   const passports = (docs ?? []).filter((d) => d.source === 'passport');
   const visas     = (docs ?? []).filter((d) => d.source === 'visa');
@@ -193,7 +243,14 @@ export default function MeDocuments() {
             >
               {vault.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {vault.map((d) => <DocCard key={d.id} doc={d} onEdit={setEditingDoc} />)}
+                  {vault.map((d) => (
+                    <DocCard
+                      key={d.id}
+                      doc={d}
+                      onEdit={setEditingDoc}
+                      onDelete={setDeletingDoc}
+                    />
+                  ))}
                 </div>
               ) : (
                 <p className="text-sm text-muted-foreground">
@@ -211,6 +268,39 @@ export default function MeDocuments() {
         onOpenChange={(v) => { if (!v) setEditingDoc(null); }}
         doc={editingDoc}
       />
+      <AlertDialog
+        open={!!deletingDoc}
+        onOpenChange={(v) => { if (!v && !deleteMutation.isPending) setDeletingDoc(null); }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {isRu ? 'Удалить документ?' : 'Delete document?'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {isRu
+                ? `«${deletingDoc?.title ?? ''}» будет удалён из вашего сейфа. Это действие нельзя отменить.`
+                : `"${deletingDoc?.title ?? ''}" will be removed from your vault. This action cannot be undone.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>
+              {isRu ? 'Отмена' : 'Cancel'}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                if (deletingDoc) deleteMutation.mutate(deletingDoc);
+              }}
+              disabled={deleteMutation.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteMutation.isPending && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
+              {isRu ? 'Удалить' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </MeShellLayout>
   );
 }
