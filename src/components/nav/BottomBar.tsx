@@ -25,6 +25,7 @@ import { GUEST_NAV_ME_HUB } from '@/lib/navConfig';
 import {
   PRIMARY_NAV,
   shouldShowAppsLauncher,
+  getActiveBottomBarItem,
   type NavRoleKey,
   type NavItem,
 } from '@/lib/nav/navigationModel';
