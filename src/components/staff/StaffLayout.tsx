@@ -3,21 +3,12 @@ import { Outlet } from 'react-router-dom';
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import { StaffSidebar } from './StaffSidebar';
 import { StaffHeader } from './StaffHeader';
-import { BottomBar } from '@/components/nav/BottomBar';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface StaffLayoutProps {
   children?: React.ReactNode;
 }
 
-/**
- * StaffLayout — workspace shell for /staff/*.
- *
- * Renders the existing StaffSidebar + StaffHeader (desktop chrome) and adds
- * the canonical mobile <BottomBar role="team" /> so /staff is consistent
- * with the rest of the platform navigation. The sidebar handles desktop
- * navigation; the bottom bar handles <md viewports.
- */
 export function StaffLayout({ children }: StaffLayoutProps) {
   const isMobile = useIsMobile();
 
@@ -50,7 +41,6 @@ export function StaffLayout({ children }: StaffLayoutProps) {
             {children || <Outlet />}
           </main>
         </SidebarInset>
-        <BottomBar role="team" />
       </div>
     </SidebarProvider>
   );

@@ -1,88 +1,78 @@
 
 
-## Bottom Bar Coverage Audit & Fix
+# Цветовая схема карты `/newbuilds/map` — выравнивание под канон
 
-**Цель:** На каждом экране (mobile <768px) должен быть нижний таб-бар с 5 кнопками, релевантными роли пользователя (guest / owner / vendor / admin / team / investor / mc_portal).
+## Контекст: какие у нас канонические палитры
 
-### Что я нашёл
+В проекте **две параллельные визуальные системы** (закреплены в `docs/DESIGN_TOKENS.md` и memory):
 
-Навигационная архитектура уже унифицирована (`NavShell` + `BottomBar` читают из `src/lib/nav/navigationModel.ts`). Но **бар отсутствует на ~30+ страницах** потому, что они рендерятся «голыми» — без `AppLayout`, `MiniAppLayout`, `MCLayout`, `AdminLayout`, `VendorLayout`, `GuestLayout`, `CapitalLayout` или `StaffLayout`.
+### 1. Super-app «Deep-sea dark» (95% приложения)
+Используется на всех дашбордах, маркетплейсе, операционных экранах.
+- `--background` `#08101E`
+- `--primary` `#00D68F` (mint) — главный CTA
+- `--accent` `#4E7BFF` (blue)
+- **Кластерные акценты** (locked, нельзя выдумывать новые):
+  - `--cluster-arrive` mint `#00D68F`
+  - `--cluster-live` blue `#4E7BFF`
+  - `--cluster-legal` amber `#F59E0B`
+  - `--cluster-invest` violet `#A78BFA`
+  - `--cluster-manage` cyan-teal `#16BDCA`
+  - `--cluster-build` red `#EF4444`
 
-**Подтверждённые страницы без бара (выборка из обхода роутов):**
+### 2. Editorial «Dark Luxury» (только спец-лендинги)
+Зарезервировано для `/newbuilds/*`, `/relocate`, `/wedding` — там, где сторителлинг важнее плотности UI.
+- `--nb-bg` `#0F0F0F`
+- `--nb-gold` `#C9A84C` — основной акцент
+- Playfair Display + DM Sans
 
-| Категория | Файлы |
-|---|---|
-| Маркетинг / лендинги | `PricingPage`, `WelcomeLanding`, `StartOnboarding`, `ReferralLanding`, `Install`, `PlatformCatalog`, `ListWithUsPage`, `ForDevelopers`, `ForLocalServices`, `ForManagementCompanies` |
-| Property explainers | `property/WhyMyUno`, `property/PropertyHub` (shell для табов), `property/PropertyMySection`, `clearview/ClearViewLanding` |
-| Vertical landings | `landing/AirportTransferLanding`, `landing/FlowerDeliveryLanding`, `landing/RentalLanding`, `landing/NewDevelopmentsLanding` |
-| Info / legal | `info/BecomePartnerPage` |
-| Capital funnels | `peylaa/PeylaaLanding`, `microsite/ProjectMicrosite` (по дизайну standalone — оставляем) |
-| Сервисные success | `transport/TransferSuccess`, `flowers/FlowersSuccess`, `services/ServiceOrderSuccess`, `market/MarketSuccess` (используют свой `UnifiedSuccessLayout` без NavShell) |
-| Storefront / hosted | `StorefrontPage` (по дизайну branded — оставляем) |
-| Guest welcome | `guest/WelcomeFlow`, `guest/PublicGuidebook` (public онбординг — оставляем) |
-| Developer Portal | `DeveloperPortalLayout` имеет свой кастомный мобильный nav в стилистике newbuilds — но **оторван от ролевой модели** (показывает только developer-portal таб-бар) |
-| Capital workspace | `CapitalLayout` имеет `CapitalMobileNav`, но он вне SSOT |
+**Золото на карте — это не баг, это намеренная тема `/newbuilds`.** Но текущая реализация смешивает золото с произвольными hex-цветами статусов (`#f59e0b`, `#3b82f6`, `#22c55e`), что и создаёт ощущение «почему золотой».
 
-### Правила (что должно быть с баром, а что нет)
+## Что не так сейчас в `NewbuildsMap.tsx`
 
-**Обязательно бар:** все авторизованные и публичные торговые/каталог/детальные страницы, включая лендинги монетизации, success-экраны (success-экраны это тоже точка возврата в магазин).
+1. **Hardcoded hex** для статусов (`#f59e0b`, `#3b82f6`, `#22c55e`) — нарушение правила «никаких хардкод-цветов».
+2. **Кластеры — золотые сплошняком** — визуально перетягивают внимание с самих маркеров проектов.
+3. **Стили карты** (`MAP_STYLES`) тоже на хардкод-hex (`#0f1620`, `#c9a961` и т.д.) вместо токенов.
 
-**Без бара (full-screen flow — уже корректно отфильтровано в `NavShell` через `FULLSCREEN_PREFIXES`):** `/auth`, `/checkout`, `/cart`, `/welcome`, `/p/:slug` (microsite), `/b/:slug` (storefront), `/guide/:token` (public guidebook).
+## Что меняем
 
-### План фиксов
+### A. Использовать токены вместо хардкод-hex
 
-**Шаг 1. Расширить SSOT отказа от бара.**
-В `NavShell.tsx` добавить в `FULLSCREEN_PREFIXES` маршруты, которые по продуктовому решению должны оставаться без хрома: `/welcome`, `/p/`, `/b/`, `/guide/`, `/start`, `/welcome-landing`. Это закрепляет «без бара» как осознанное решение, а не следствие забытого layout.
+**Файл:** `src/pages/newbuilds/NewbuildsMap.tsx`
 
-**Шаг 2. Обернуть лендинги/info-страницы в `AppLayout`.**
-Минимально-инвазивно: оборачиваю каждый файл из таблицы выше в `<AppLayout showHeader={false}>...</AppLayout>` (header у них уже свой sticky). Это даёт guest-bar (Home / Discover / Market / Property / Me) на всех:
-- `PricingPage`, `Install`, `PlatformCatalog`, `ListWithUsPage`, `ReferralLanding`, `ForDevelopers`, `ForLocalServices`, `ForManagementCompanies`
-- `property/WhyMyUno`, `clearview/ClearViewLanding`, `property/PropertyMySection`
-- `landing/AirportTransferLanding`, `landing/FlowerDeliveryLanding`, `landing/RentalLanding`, `landing/NewDevelopmentsLanding`
-- `info/BecomePartnerPage`
-- `relocate/RelocateLandingPage`, `wedding/WeddingLandingPage`, `kids/KidsLandingPage`, `peylaa/PeylaaLanding` (если их `LandingLayout`/обёртки не дают бар — проверю и оборачиваю)
+- `STATUS_LAYERS` и `getStatusColor()` → переписать на `hsl(var(--accent-amber))`, `hsl(var(--cluster-live))`, `hsl(var(--success))` для offplan/under_construction/completed соответственно. Это совпадает с уже существующей семантикой кластеров.
+- Цвет «все» (default) — оставить `hsl(var(--nb-gold))` как тематический акцент `/newbuilds`.
 
-**Шаг 3. Success-экраны.**
-В `UnifiedSuccessLayout` (используется `transport/TransferSuccess` и т. п.) оборачиваю содержимое в `AppLayout showHeader={false}`. Один правка → сразу 4+ страницы получают бар.
+### B. Кластеры — нейтральный «луковичный» стиль вместо доминирующего золота
 
-**Шаг 4. PropertyHub shell.**
-`pages/property/PropertyHub.tsx` — это `<Outlet/>`-родитель. Оборачиваю его контейнер в `AppLayout`, чтобы все вложенные `/property/*` роуты, которые сейчас не имеют собственного wrapper'а (`PropertyMap`, `PropertyConsultation`, `PropertyDepositSuccess`, `WhyMyUno`, `ClearViewLanding`, `Resale*`, `Commercial*`, `Land*`, `Hotels*`, `PropertyMySection`), наследовали бар.
+Сейчас кластер = золотой круг с тёмной цифрой. Меняем на:
+- Фон: `hsl(var(--nb-card))` с border `hsl(var(--nb-gold) / 0.6)` (1.5px)
+- Цифра: `hsl(var(--nb-gold))` Playfair Display
+- При hover — заполняется золотом
 
-**Шаг 5. Capital и Staff workspace — миграция на `NavShell`.**
-- `CapitalLayout`: заменяю кастомный `CapitalMobileNav` на `NavShell role="admin"` (capital — это admin-uno_team workflow). Сохраняю `CapitalSidebar` как desktop side-rail через расширение `SIDEBAR_NAV.admin` или, минимально, оставляю текущий sidebar, но рендерю поверх `NavShell` — главное, чтобы мобильный bar появился.
-- `StaffLayout` (у него только `/staff` index) — оборачиваю в `NavShell role="team"`.
+Так золото остаётся фирменным акцентом темы, но не «забивает» карту, когда кластеров много.
 
-Альтернативно — добавляю в SSOT `navigationModel.ts` две новые ролевые группы (`capital`, `developer_portal`) с собственными `PRIMARY_NAV`. Это чище, но скоупом больше.
+### C. `MAP_STYLES` — оставляем hex, но выносим в константы
 
-**Решение:** для скорости — Шаг 5 минимальный (переиспользую `team` для staff, `admin` для capital). Если продукт решит нужны отдельные 5-tab — добавим в следующей итерации.
+Google Maps API принимает только hex-строки в `stylers`, поэтому здесь токены через `hsl(var(...))` физически не сработают. Это **единственное допустимое исключение** — выносим палитру в локальный объект `NB_MAP_PALETTE` с комментарием «mirror of --nb-* tokens; keep in sync». Сами значения подгоним под `--nb-bg` / `--nb-card` / `--nb-gold` чтобы стиль карты идеально совпадал с темой.
 
-**Шаг 6. DeveloperPortalLayout.**
-Оставляю существующий dark-luxury мобильный nav (это намеренный тематический бар), но добавляю над ним маленькую кнопку «Назад в myUNO» — это уже есть в sidebar. Достаточно. Не трогаю.
+### D. Документация
 
-**Шаг 7. Заодно фикс runtime-ошибки.**
-`useTheme must be used within a ThemeProvider` — это HMR-артефакт после правок `ThemeContext`. Перепроверяю, что `ThemeProvider` остался первым в `composeProviders` и `useTheme` бросает только если контекст реально пуст. Скорее всего исчезнет после rebuild — проверю в превью; если останется, локализую и починю.
+В шапку файла добавляем JSDoc-комментарий:
+```
+/**
+ * Карта /newbuilds/map использует тему "Dark Luxury Editorial" (--nb-* tokens).
+ * Это намеренное исключение из super-app deep-sea палитры — см. docs/DESIGN_TOKENS.md §Themes.
+ * Hex-значения в MAP_STYLES — единственное допустимое исключение (Google Maps API limitation).
+ */
+```
 
-### Технические заметки
+## Что НЕ трогаем
 
-- `AppLayout` уже отдаёт правильный bar через `NavShell` (роль резолвится из `useUserContext` + URL). Гость на `/pricing` увидит guest-bar; владелец, попавший на `/pricing`, — owner-bar. Это корректно.
-- `BottomBar` уже обрабатывает `pb-[calc(env(safe-area-inset-bottom)+5rem)]` clearance внутри `NavShell` через `pb-24 md:pb-4` на `<main>`, поэтому не нужно вручную добавлять padding на новые обёртки.
-- Бар на mobile only (`md:hidden`) — на desktop работают TopBar pills + SideRail (для workspace ролей). Это корректное поведение по `docs/NAVIGATION.md`.
-- `ECOSYSTEM_PAGE_CONTAINER` и `PageShell` тоже совместимы с `AppLayout` — оборачивание не ломает существующий layout.
+- Саму тему `/newbuilds` (золото остаётся — это бренд лендинга недвижимости)
+- `NbProjectStatusBadge` (там уже корректные `nb-badge-*` классы)
+- Другие страницы `/newbuilds/*`
 
-### Что в результате
+## Итог
 
-После фикса **на каждом не-fullscreen экране** (включая лендинги, info, success, property tabs, capital, staff) будет 5-кнопочный нижний бар, кнопки которого зависят от активной роли. Список «без бара» сводится к явному `FULLSCREEN_PREFIXES` whitelist в `NavShell` (auth/checkout/cart/welcome/storefront/microsite/guidebook/start).
-
-### Файлы под правки
-
-- `src/components/nav/NavShell.tsx` — расширение `FULLSCREEN_PREFIXES`
-- `src/pages/PricingPage.tsx`, `src/pages/Install.tsx`, `src/pages/PlatformCatalog.tsx`, `src/pages/ListWithUsPage.tsx`, `src/pages/ReferralLanding.tsx`, `src/pages/ForDevelopers.tsx`, `src/pages/ForLocalServices.tsx`, `src/pages/ForManagementCompanies.tsx`, `src/pages/StartOnboarding.tsx`
-- `src/pages/property/WhyMyUno.tsx`, `src/pages/property/PropertyMySection.tsx`, `src/pages/property/PropertyHub.tsx`, `src/pages/clearview/ClearViewLanding.tsx`
-- `src/pages/landing/AirportTransferLanding.tsx`, `src/pages/landing/FlowerDeliveryLanding.tsx`, `src/pages/landing/RentalLanding.tsx`, `src/pages/landing/NewDevelopmentsLanding.tsx`
-- `src/pages/info/BecomePartnerPage.tsx`
-- `src/pages/relocate/RelocateLandingPage.tsx`, `src/pages/wedding/WeddingLandingPage.tsx`, `src/pages/kids/KidsLandingPage.tsx`, `src/pages/peylaa/PeylaaLanding.tsx` (если их `LandingLayout` не даёт NavShell — обёртывание)
-- `src/components/success/UnifiedSuccessLayout.tsx` (one-shot для всех `*Success` страниц)
-- `src/components/capital/CapitalLayout.tsx`, `src/components/staff/StaffLayout.tsx` — миграция на `NavShell`
-
-Объём: ~25 файлов, точечные правки (1–3 строки на файл, кроме `CapitalLayout`/`StaffLayout`/`UnifiedSuccessLayout`).
+Золото остаётся как фирменный акцент темы `/newbuilds`, но перестаёт «кричать» с карты: кластеры становятся нейтральными с золотой обводкой, статусы маркеров — через семантические токены платформы, hex-цвета зафиксированы только там, где Google Maps API не принимает CSS-переменные.
 

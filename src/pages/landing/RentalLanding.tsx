@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import { ShieldCheck, FileText, Home, CheckCircle, Search, Eye, Key, AlertTriangle, Users, Scale } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { AppLayout } from '@/components/layout/AppLayout';
 import type { Variants, Easing } from 'framer-motion';
 
 const fadeUp: Variants = {
@@ -24,7 +23,7 @@ export default function RentalLanding() {
   const handleCTA = () => navigate('/property?mode=rent');
 
   return (
-    <AppLayout showHeader={false}>
+    <>
       <Helmet>
         <title>{isRu ? 'Аренда жилья на Пхукете — Проверенные объекты' : 'Phuket Long-Term Rentals — Verified Listings'}</title>
         <meta name="description" content={isRu
@@ -315,6 +314,6 @@ export default function RentalLanding() {
           </p>
         </section>
       </div>
-    </AppLayout>
+    </>
   );
 }

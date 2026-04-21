@@ -42,23 +42,7 @@ interface NavShellProps {
   children: ReactNode;
 }
 
-/**
- * Routes that intentionally render without app chrome (no header, no bottom-bar).
- * Reserved for fullscreen flows: auth, checkout/cart, branded microsites,
- * standalone storefronts, public guidebooks, onboarding wizards and the
- * pre-login welcome landing.
- */
-const FULLSCREEN_PREFIXES = [
-  '/auth',
-  '/checkout',
-  '/cart',
-  '/welcome',
-  '/welcome-landing',
-  '/start',
-  '/p/',     // microsite (e.g. peylaa-phuket-marriott)
-  '/b/',     // branded storefront
-  '/guide/', // public guidebook by token
-];
+const FULLSCREEN_PREFIXES = ['/auth', '/checkout', '/cart'];
 
 export function NavShell({
   role,

@@ -10,7 +10,6 @@ import { TRUST_ITEMS, TRANSACTION_ITEMS, POST_TX_ITEMS, formatRevenueRate, forma
 import type { RevenueLineItem } from '@/lib/monetization/realEstateEngine';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { ArrowLeft } from 'lucide-react';
-import { AppLayout } from '@/components/layout/AppLayout';
 
 function Section({
   id,
@@ -77,54 +76,52 @@ export default function PricingPage() {
   const { withResolvedRate } = useRevenueRates();
 
   return (
-    <AppLayout showHeader={false}>
-      <div className="min-h-screen bg-background pb-16">
-        <header className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b border-border">
-          <div className="px-4 py-3 flex items-center gap-3">
-            <Link to={APP_ROUTES.HOME} aria-label={isRu ? 'Назад' : 'Back'}>
-              <ArrowLeft className="w-5 h-5 text-foreground" />
-            </Link>
-            <div className="min-w-0">
-              <h1 className="font-display text-[16px] font-semibold text-foreground truncate">
-                {isRu ? 'Тарифы и комиссии' : 'Pricing and fees'}
-              </h1>
-              <p className="text-[11.5px] text-muted-foreground">
-                {isRu ? 'Оператор: myUNO Pte. Ltd.' : 'Operator: myUNO Pte. Ltd.'}
-              </p>
-            </div>
+    <div className="min-h-screen bg-background pb-16">
+      <header className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b border-border">
+        <div className="px-4 py-3 flex items-center gap-3">
+          <Link to={APP_ROUTES.HOME} aria-label={isRu ? 'Назад' : 'Back'}>
+            <ArrowLeft className="w-5 h-5 text-foreground" />
+          </Link>
+          <div className="min-w-0">
+            <h1 className="font-display text-[16px] font-semibold text-foreground truncate">
+              {isRu ? 'Тарифы и комиссии' : 'Pricing and fees'}
+            </h1>
+            <p className="text-[11.5px] text-muted-foreground">
+              {isRu ? 'Оператор: myUNO Pte. Ltd.' : 'Operator: myUNO Pte. Ltd.'}
+            </p>
           </div>
-        </header>
+        </div>
+      </header>
 
-        <Section
-          id="trust"
-          title={{ ru: 'Покупателям и инвесторам', en: 'For buyers and investors' }}
-          subtitle={{
-            ru: 'Платная верификация: проект, цена, юридический статус, контрагент.',
-            en: 'Paid verification: project, price, legal status, counterparty.',
-          }}
-          items={TRUST_ITEMS.map(withResolvedRate)}
-        />
+      <Section
+        id="trust"
+        title={{ ru: 'Покупателям и инвесторам', en: 'For buyers and investors' }}
+        subtitle={{
+          ru: 'Платная верификация: проект, цена, юридический статус, контрагент.',
+          en: 'Paid verification: project, price, legal status, counterparty.',
+        }}
+        items={TRUST_ITEMS.map(withResolvedRate)}
+      />
 
-        <Section
-          id="transaction"
-          title={{ ru: 'Сделки', en: 'Transactions' }}
-          subtitle={{
-            ru: 'Комиссии при продаже, покупке и аренде недвижимости.',
-            en: 'Commissions on sale, purchase and rental.',
-          }}
-          items={TRANSACTION_ITEMS.map(withResolvedRate)}
-        />
+      <Section
+        id="transaction"
+        title={{ ru: 'Сделки', en: 'Transactions' }}
+        subtitle={{
+          ru: 'Комиссии при продаже, покупке и аренде недвижимости.',
+          en: 'Commissions on sale, purchase and rental.',
+        }}
+        items={TRANSACTION_ITEMS.map(withResolvedRate)}
+      />
 
-        <Section
-          id="post"
-          title={{ ru: 'Владельцам и управляющим компаниям', en: 'For owners and management companies' }}
-          subtitle={{
-            ru: 'Подписки и услуги после сделки.',
-            en: 'Subscriptions and services after the deal.',
-          }}
-          items={POST_TX_ITEMS.map(withResolvedRate)}
-        />
-      </div>
-    </AppLayout>
+      <Section
+        id="post"
+        title={{ ru: 'Владельцам и управляющим компаниям', en: 'For owners and management companies' }}
+        subtitle={{
+          ru: 'Подписки и услуги после сделки.',
+          en: 'Subscriptions and services after the deal.',
+        }}
+        items={POST_TX_ITEMS.map(withResolvedRate)}
+      />
+    </div>
   );
 }

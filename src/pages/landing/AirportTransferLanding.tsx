@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { SocialProofCounter } from '@/components/landing/SocialProofCounter';
-import { AppLayout } from '@/components/layout/AppLayout';
 import type { Variants, Easing } from 'framer-motion';
 
 const fadeUp: Variants = {
@@ -26,7 +25,7 @@ export default function AirportTransferLanding() {
   const handleBook = () => navigate('/transport/airport-transfer');
 
   return (
-    <AppLayout showHeader={false}>
+    <>
       <Helmet>
         <title>{isRu ? 'Трансфер из аэропорта Пхукета — Фиксированная цена' : 'Phuket Airport Transfer — Fixed Price, Verified Drivers'}</title>
         <meta name="description" content={isRu
@@ -337,6 +336,6 @@ export default function AirportTransferLanding() {
           </p>
         </section>
       </div>
-    </AppLayout>
+    </>
   );
 }
