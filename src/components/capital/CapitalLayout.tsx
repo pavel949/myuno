@@ -2,9 +2,19 @@ import { Outlet } from 'react-router-dom';
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import { CapitalSidebar } from './CapitalSidebar';
 import { CapitalHeader } from './CapitalHeader';
-import { CapitalMobileNav } from './CapitalMobileNav';
+import { BottomBar } from '@/components/nav/BottomBar';
 import { useIsMobile } from '@/hooks/use-mobile';
 
+/**
+ * CapitalLayout — workspace shell for /capital/*.
+ *
+ * Capital is an admin-uno_team workflow (sales/CRM/pipelines for the
+ * platform's own outbound). Desktop keeps the existing CapitalSidebar +
+ * CapitalHeader. Mobile uses the canonical role-aware <BottomBar role="admin" />
+ * instead of the legacy CapitalMobileNav so navigation matches the rest of
+ * the platform. To get capital-specific 5-tab nav, add a `capital` role to
+ * `src/lib/nav/navigationModel.ts` in a follow-up.
+ */
 export function CapitalLayout() {
   const isMobile = useIsMobile();
 
@@ -25,7 +35,7 @@ export function CapitalLayout() {
             <Outlet />
           </main>
         </SidebarInset>
-        <CapitalMobileNav />
+        <BottomBar role="admin" />
       </div>
     </SidebarProvider>
   );
