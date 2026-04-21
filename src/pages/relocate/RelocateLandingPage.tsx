@@ -8,6 +8,7 @@ import { Globe, FileText, Home, GraduationCap, Stethoscope, Landmark, Car, Scale
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { StartPageLayout, StepByStepNav, type Step } from '@/components/patterns';
+import { tokenColor } from '@/lib/utils/hslAlpha';
 
 const STEPS = [
   { id: 'visa', icon: FileText, labelEn: 'Visas & Documents', labelRu: 'Визы и документы', descEn: 'Work permits, retirement visa, education visa — we handle paperwork', descRu: 'Рабочие разрешения, пенсионная виза, учебная виза — мы берём на себя документы', path: APP_ROUTES.VISA_IMMIGRATION, color: 'cluster-live' },
@@ -304,10 +305,10 @@ export default function RelocateLandingPage() {
             return (
               <button key={`${step.id}-${i}`} onClick={() => navigate(step.path)} className="w-full flex items-start gap-4 p-4 rounded-xl border border-border bg-card text-left transition-all hover:[box-shadow:var(--shadow-elevation-2)] active:scale-[0.98]">
                 <div className="relative flex flex-col items-center">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: step.color + '15' }}>
-                    <Icon className="w-5 h-5" style={{ color: step.color }} />
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: tokenColor(step.color, 0.15) }}>
+                    <Icon className="w-5 h-5" style={{ color: tokenColor(step.color) }} />
                   </div>
-                  {i < selectedSteps.length - 1 && <div className="w-px h-6 mt-1" style={{ background: step.color + '30' }} />}
+                  {i < selectedSteps.length - 1 && <div className="w-px h-6 mt-1" style={{ background: tokenColor(step.color, 0.3) }} />}
                 </div>
                 <div className="flex-1 min-w-0 pt-1">
                   <div className="flex items-center gap-2">
@@ -334,10 +335,10 @@ export default function RelocateLandingPage() {
             return (
               <button key={i} onClick={() => navigate(step.path)} className="w-full flex items-start gap-4 p-4 rounded-xl border border-border bg-card text-left transition-all hover:[box-shadow:var(--shadow-elevation-2)] active:scale-[0.98]">
                 <div className="relative flex flex-col items-center">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: step.color + '15' }}>
-                    <Icon className="w-5 h-5" style={{ color: step.color }} />
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: tokenColor(step.color, 0.15) }}>
+                    <Icon className="w-5 h-5" style={{ color: tokenColor(step.color) }} />
                   </div>
-                  {i < STEPS.length - 1 && <div className="w-px h-6 mt-1" style={{ background: step.color + '30' }} />}
+                  {i < STEPS.length - 1 && <div className="w-px h-6 mt-1" style={{ background: tokenColor(step.color, 0.3) }} />}
                 </div>
                 <div className="flex-1 min-w-0 pt-1">
                   <div className="flex items-center gap-2">
