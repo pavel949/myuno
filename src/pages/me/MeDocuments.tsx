@@ -6,7 +6,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { FileText, Shield, Plane, Plus, ExternalLink, ShieldCheck, AlertTriangle, Upload, Pencil, Trash2 } from 'lucide-react';
+import { FileText, Shield, Plane, Plus, ExternalLink, ShieldCheck, AlertTriangle, Upload, Pencil, Trash2, Loader2 } from 'lucide-react';
 import { MeShellLayout } from '@/components/layout/MeShellLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -61,10 +61,13 @@ function DocCard({
   doc,
   onEdit,
   onDelete,
+  isDeleting = false,
 }: {
   doc: MyDocument;
   onEdit?: (d: MyDocument) => void;
   onDelete?: (d: MyDocument) => void;
+  /** Card is in the "pending delete" window — show spinner overlay + lock actions. */
+  isDeleting?: boolean;
 }) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -77,8 +80,14 @@ function DocCard({
                                        (isRu ? 'Без даты'      : 'No date');
 
   return (
-    <Card variant="content">
-      <CardContent className="p-4 flex flex-col gap-3 h-full">
+    <Card variant="content" className={cn('relative', isDeleting && 'pointer-events-none')}>
+      <CardContent
+        className={cn(
+          'p-4 flex flex-col gap-3 h-full transition-opacity',
+          isDeleting && 'opacity-50',
+        )}
+        aria-busy={isDeleting}
+      >
         <div className="flex items-start gap-3">
           <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
             <Icon className="h-5 w-5" />
@@ -106,6 +115,7 @@ function DocCard({
                 variant="ghost"
                 className="h-7 px-2"
                 onClick={() => onEdit(doc)}
+                disabled={isDeleting}
                 aria-label={isRu ? 'Редактировать' : 'Edit'}
               >
                 <Pencil className="h-3.5 w-3.5" />
@@ -117,6 +127,7 @@ function DocCard({
                 variant="ghost"
                 className="h-7 px-2"
                 onClick={() => openDoc(doc)}
+                disabled={isDeleting}
                 aria-label={isRu ? 'Открыть' : 'Open'}
               >
                 <ExternalLink className="h-3.5 w-3.5" />
@@ -128,6 +139,7 @@ function DocCard({
                 variant="ghost"
                 className="h-7 px-2 text-destructive hover:text-destructive"
                 onClick={() => onDelete(doc)}
+                disabled={isDeleting}
                 aria-label={isRu ? 'Удалить' : 'Delete'}
               >
                 <Trash2 className="h-3.5 w-3.5" />
@@ -136,6 +148,19 @@ function DocCard({
           </div>
         </div>
       </CardContent>
+
+      {isDeleting && (
+        <div
+          className="absolute inset-0 flex items-center justify-center gap-2 rounded-[inherit] bg-background/60 backdrop-blur-[1px] pointer-events-auto"
+          role="status"
+          aria-live="polite"
+        >
+          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+          <span className="text-xs font-medium text-muted-foreground">
+            {isRu ? 'Удаление…' : 'Deleting…'}
+          </span>
+        </div>
+      )}
     </Card>
   );
 }
@@ -214,10 +239,11 @@ export default function MeDocuments() {
     }, UNDO_MS);
   };
 
-  const visibleDocs = (docs ?? []).filter((d) => !pendingDeleteIds.has(d.id));
-  const passports = visibleDocs.filter((d) => d.source === 'passport');
-  const visas     = visibleDocs.filter((d) => d.source === 'visa');
-  const vault     = visibleDocs.filter((d) => d.source === 'vault');
+  // Keep pending-delete docs visible (with overlay) so user can clearly see what's being removed
+  const allDocs = docs ?? [];
+  const passports = allDocs.filter((d) => d.source === 'passport');
+  const visas     = allDocs.filter((d) => d.source === 'visa');
+  const vault     = allDocs.filter((d) => d.source === 'vault');
 
   return (
     <MeShellLayout title={isRu ? 'Документы' : 'Documents'}>
@@ -297,6 +323,7 @@ export default function MeDocuments() {
                       doc={d}
                       onEdit={setEditingDoc}
                       onDelete={setDeletingDoc}
+                      isDeleting={pendingDeleteIds.has(d.id)}
                     />
                   ))}
                 </div>
