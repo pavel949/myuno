@@ -23,6 +23,7 @@ import { SectionHeader } from '@/components/ds';
 import { LifeSituationsGrid } from '@/components/discover/LifeSituationsGrid';
 import { AllServicesGrid } from '@/components/discover/AllServicesGrid';
 import { ContextualRecommendations } from '@/components/discover/ContextualRecommendations';
+import { MyJourneyRecommendations } from '@/components/discover/MyJourneyRecommendations';
 import { AudienceFilterTabs, type AudienceFilter } from '@/components/discover/AudienceFilterTabs';
 import { useUserPersonas } from '@/hooks/useUserPersonas';
 
@@ -158,6 +159,9 @@ export default function Discover() {
         <div className="space-y-8">
           {/* Hero Banner */}
           <DiscoverHero />
+
+          {/* Personalised journey from /start onboarding */}
+          <MyJourneyRecommendations />
 
           {/* Contextual Recommendations (LifeOS-aware) */}
           <ContextualRecommendations />
