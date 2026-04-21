@@ -5,7 +5,7 @@
  */
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FileText, Shield, Plane, Plus, ExternalLink, ShieldCheck, AlertTriangle, Upload } from 'lucide-react';
+import { FileText, Shield, Plane, Plus, ExternalLink, ShieldCheck, AlertTriangle, Upload, Pencil } from 'lucide-react';
 import { MeShellLayout } from '@/components/layout/MeShellLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ import { EmptyState, LoadingState, PageSection } from '@/components/page';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useMyDocuments, type MyDocument } from '@/hooks/useMyDocuments';
 import { AddVaultDocumentDialog } from '@/components/me/AddVaultDocumentDialog';
+import { EditVaultDocumentDialog } from '@/components/me/EditVaultDocumentDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -45,10 +46,11 @@ async function openDoc(doc: MyDocument) {
   window.open(data.signedUrl, '_blank', 'noopener');
 }
 
-function DocCard({ doc }: { doc: MyDocument }) {
+function DocCard({ doc, onEdit }: { doc: MyDocument; onEdit?: (d: MyDocument) => void }) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const Icon = SOURCE_ICON[doc.source];
+  const isVault = doc.source === 'vault';
   const statusLabel =
     doc.expiryStatus === 'expired'  ? (isRu ? 'Истёк'        : 'Expired') :
     doc.expiryStatus === 'expiring' ? (isRu ? 'Скоро истечёт' : 'Expiring') :
@@ -78,17 +80,30 @@ function DocCard({ doc }: { doc: MyDocument }) {
           {doc.expiryDate && (
             <span className="text-xs text-muted-foreground">{doc.expiryDate}</span>
           )}
-          {doc.fileUrl && (
-            <Button
-              size="sm"
-              variant="ghost"
-              className="ml-auto h-7 px-2"
-              onClick={() => openDoc(doc)}
-              aria-label={isRu ? 'Открыть' : 'Open'}
-            >
-              <ExternalLink className="h-3.5 w-3.5" />
-            </Button>
-          )}
+          <div className="ml-auto flex items-center gap-0.5">
+            {isVault && onEdit && (
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-7 px-2"
+                onClick={() => onEdit(doc)}
+                aria-label={isRu ? 'Редактировать' : 'Edit'}
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </Button>
+            )}
+            {doc.fileUrl && (
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-7 px-2"
+                onClick={() => openDoc(doc)}
+                aria-label={isRu ? 'Открыть' : 'Open'}
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+              </Button>
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -100,6 +115,7 @@ export default function MeDocuments() {
   const isRu = language === 'ru';
   const { data: docs, isLoading } = useMyDocuments();
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [editingDoc, setEditingDoc] = useState<MyDocument | null>(null);
 
   const passports = (docs ?? []).filter((d) => d.source === 'passport');
   const visas     = (docs ?? []).filter((d) => d.source === 'visa');
@@ -177,7 +193,7 @@ export default function MeDocuments() {
             >
               {vault.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {vault.map((d) => <DocCard key={d.id} doc={d} />)}
+                  {vault.map((d) => <DocCard key={d.id} doc={d} onEdit={setEditingDoc} />)}
                 </div>
               ) : (
                 <p className="text-sm text-muted-foreground">
@@ -190,6 +206,11 @@ export default function MeDocuments() {
       </div>
 
       <AddVaultDocumentDialog open={uploadOpen} onOpenChange={setUploadOpen} />
+      <EditVaultDocumentDialog
+        open={!!editingDoc}
+        onOpenChange={(v) => { if (!v) setEditingDoc(null); }}
+        doc={editingDoc}
+      />
     </MeShellLayout>
   );
 }
