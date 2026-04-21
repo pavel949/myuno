@@ -239,10 +239,11 @@ export default function MeDocuments() {
     }, UNDO_MS);
   };
 
-  const visibleDocs = (docs ?? []).filter((d) => !pendingDeleteIds.has(d.id));
-  const passports = visibleDocs.filter((d) => d.source === 'passport');
-  const visas     = visibleDocs.filter((d) => d.source === 'visa');
-  const vault     = visibleDocs.filter((d) => d.source === 'vault');
+  // Keep pending-delete docs visible (with overlay) so user can clearly see what's being removed
+  const allDocs = docs ?? [];
+  const passports = allDocs.filter((d) => d.source === 'passport');
+  const visas     = allDocs.filter((d) => d.source === 'visa');
+  const vault     = allDocs.filter((d) => d.source === 'vault');
 
   return (
     <MeShellLayout title={isRu ? 'Документы' : 'Documents'}>
