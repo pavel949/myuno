@@ -30,6 +30,9 @@ import { EditVaultDocumentDialog } from '@/components/me/EditVaultDocumentDialog
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { createErrorHandler } from '@/lib/errorHandler';
+
+const errorLog = createErrorHandler('MeDocuments');
 
 const SOURCE_ICON = { passport: Shield, visa: Plane, vault: FileText } as const;
 const STATUS_TONE = {
@@ -273,6 +276,16 @@ export default function MeDocuments() {
         // Refetch ensures the card reappears even if any optimistic state lingers,
         // since `archived_at` was never written in DB.
         const message = (e as Error)?.message || (isRu ? 'Неизвестная ошибка' : 'Unknown error');
+        // Client-side diagnostics: log full context (doc id, source, category, action)
+        // to console + error reporting pipeline so we can trace failures by doc id.
+        console.error('[MeDocuments] archive failed', {
+          action: 'archive_document',
+          docId: doc.id,
+          source: doc.source,
+          category: doc.category,
+          error: message,
+        });
+        errorLog.error(e, `archive_document:${doc.id}`);
         toast.error(
           isRu ? `Не удалось удалить «${doc.title}»` : `Failed to delete "${doc.title}"`,
           {
