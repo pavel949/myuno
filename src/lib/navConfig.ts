@@ -10,7 +10,7 @@
 import {
   Home, Compass, ShoppingBag, User, LayoutDashboard, Building2,
   CalendarDays, Calendar, Package, Wallet, UserCheck, MessageSquare,
-  FileCheck, Users, MessageCircle, BarChart3, FileText, TrendingUp,
+  FileCheck, Users, MessageCircle, BarChart3, FileText, TrendingUp, Inbox,
 } from 'lucide-react';
 import { APP_ROUTES } from '@/lib/config/routes';
 
