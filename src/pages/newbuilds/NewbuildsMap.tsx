@@ -205,58 +205,86 @@ export default function NewbuildsMap() {
             </div>
           )}
 
-          {/* Static map placeholder - uses project markers */}
-          <div className="w-full h-full flex items-center justify-center relative overflow-hidden">
-            <div className="text-center space-y-4 relative z-10">
-              <MapPin className="w-12 h-12 mx-auto" style={{ color: 'hsl(var(--nb-gold))' }} />
-              <p className="nb-display text-xl" style={{ color: 'hsl(var(--nb-text))' }}>Карта проектов Пхукета</p>
-              <p className="text-sm max-w-md mx-auto" style={{ color: 'hsl(var(--nb-muted))' }}>
-                {projectsWithCoords.length} проектов с координатами
-              </p>
+          {/* Real Google Map */}
+          {!hasKey || loadError ? (
+            <div className="w-full h-full flex items-center justify-center text-center px-6">
+              <div className="space-y-3">
+                <MapPin className="w-12 h-12 mx-auto" style={{ color: 'hsl(var(--nb-gold))' }} />
+                <p className="nb-display text-lg" style={{ color: 'hsl(var(--nb-text))' }}>
+                  Карта недоступна
+                </p>
+                <p className="text-sm max-w-md" style={{ color: 'hsl(var(--nb-muted))' }}>
+                  {loadError?.message ?? 'Google Maps API ключ не настроен'}
+                </p>
+              </div>
             </div>
-
-            {/* Project markers */}
-            <div className="absolute inset-0">
+          ) : !isLoaded ? (
+            <div className="w-full h-full flex items-center justify-center">
+              <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'hsl(var(--nb-gold))' }} />
+            </div>
+          ) : (
+            <GoogleMap
+              mapContainerStyle={MAP_CONTAINER_STYLE}
+              center={defaultCenter}
+              zoom={defaultZoom}
+              onLoad={onMapLoad}
+              onUnmount={onMapUnmount}
+              options={{
+                styles: MAP_STYLES,
+                disableDefaultUI: false,
+                mapTypeControl: false,
+                streetViewControl: false,
+                fullscreenControl: true,
+                zoomControl: true,
+                clickableIcons: false,
+                backgroundColor: '#0f1620',
+              }}
+            >
               {projectsWithCoords.map(project => {
-                const x = ((project.lng! - 98.25) / 0.35) * 100;
-                const y = (1 - (project.lat! - 7.75) / 0.35) * 100;
                 const isSelected = selectedProject?.id === project.id;
                 const markerColor = getStatusColor(project.project_status);
-
                 return (
-                  <button
+                  <OverlayView
                     key={project.id}
-                    onClick={() => handleMarkerClick(project)}
-                    className="absolute transform -translate-x-1/2 -translate-y-full transition-all z-10"
-                    style={{
-                      left: `${Math.max(5, Math.min(95, x))}%`,
-                      top: `${Math.max(5, Math.min(90, y))}%`,
-                    }}
+                    position={{ lat: project.lat!, lng: project.lng! }}
+                    mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+                    getPixelPositionOffset={(w, h) => ({ x: -(w / 2), y: -h })}
                   >
-                    <div
-                      className="px-2 py-1 rounded-lg text-[10px] font-bold whitespace-nowrap transition-all"
-                      style={{
-                        background: isSelected ? markerColor : 'hsl(var(--nb-bg) / 0.9)',
-                        color: isSelected ? 'hsl(var(--nb-bg))' : markerColor,
-                        border: `2px solid ${markerColor}`,
-                        transform: isSelected ? 'scale(1.15)' : 'scale(1)',
-                        boxShadow: isSelected ? `0 4px 12px ${markerColor}44` : 'none',
-                      }}
+                    <button
+                      onClick={() => handleMarkerClick(project)}
+                      className="transition-all"
+                      style={{ zIndex: isSelected ? 1000 : 1 }}
                     >
-                      {project.price_from ? `฿${(project.price_from / 1_000_000).toFixed(1)}M` : project.name_en?.slice(0, 12)}
-                    </div>
-                    <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] mx-auto"
-                      style={{
-                        borderLeftColor: 'transparent',
-                        borderRightColor: 'transparent',
-                        borderTopColor: markerColor,
-                      }}
-                    />
-                  </button>
+                      <div
+                        className="px-2 py-1 rounded-lg text-[10px] font-bold whitespace-nowrap transition-all"
+                        style={{
+                          background: isSelected ? markerColor : 'hsl(var(--nb-bg) / 0.92)',
+                          color: isSelected ? 'hsl(var(--nb-bg))' : markerColor,
+                          border: `2px solid ${markerColor}`,
+                          transform: isSelected ? 'scale(1.15)' : 'scale(1)',
+                          boxShadow: isSelected
+                            ? `0 4px 12px ${markerColor}66`
+                            : '0 2px 6px rgba(0,0,0,0.4)',
+                        }}
+                      >
+                        {project.price_from
+                          ? `฿${(project.price_from / 1_000_000).toFixed(1)}M`
+                          : (project.name_ru || project.name_en || '').slice(0, 12)}
+                      </div>
+                      <div
+                        className="w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] mx-auto"
+                        style={{
+                          borderLeftColor: 'transparent',
+                          borderRightColor: 'transparent',
+                          borderTopColor: markerColor,
+                        }}
+                      />
+                    </button>
+                  </OverlayView>
                 );
               })}
-            </div>
-          </div>
+            </GoogleMap>
+          )}
 
           {/* Selected project popup */}
           {selectedProject && (
