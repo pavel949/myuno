@@ -297,7 +297,9 @@ describe('getActiveBottomBarItem — most-specific wins', () => {
     expect(getActiveBottomBarItem('vendor', '/vendor')?.labelEn).toBe('Dashboard');
   });
 
-  it('investor on /invest/projects highlights Invest', () => {
-    expect(getActiveBottomBarItem('investor', '/invest/projects')?.labelEn).toBe('Invest');
+  it('investor on /invest/dashboard/projects highlights Invest', () => {
+    expect(
+      getActiveBottomBarItem('investor', '/invest/dashboard/projects')?.labelEn,
+    ).toBe('Invest');
   });
 });
