@@ -24,6 +24,7 @@ import {
 import { EmptyState, LoadingState, PageSection } from '@/components/page';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useMyDocuments, type MyDocument } from '@/hooks/useMyDocuments';
+import { useActionLock } from '@/hooks/useActionLock';
 import { AddVaultDocumentDialog } from '@/components/me/AddVaultDocumentDialog';
 import { EditVaultDocumentDialog } from '@/components/me/EditVaultDocumentDialog';
 import { supabase } from '@/integrations/supabase/client';
@@ -38,36 +39,25 @@ const STATUS_TONE = {
   unknown:  'bg-muted text-muted-foreground',
 } as const;
 
-/** Open a vault file: vault entries store a storage path → signed URL.
- *  Passport/visa rows already store full URLs → opened as-is. */
-async function openDoc(doc: MyDocument) {
-  if (!doc.fileUrl) return;
-  const isFullUrl = /^https?:\/\//i.test(doc.fileUrl);
-  if (isFullUrl) {
-    window.open(doc.fileUrl, '_blank', 'noopener');
-    return;
-  }
-  const { data, error } = await supabase.storage
-    .from('user-documents')
-    .createSignedUrl(doc.fileUrl, 3600);
-  if (error) {
-    toast.error(error.message);
-    return;
-  }
-  window.open(data.signedUrl, '_blank', 'noopener');
-}
+// Note: opening a vault file (sign URL → window.open) is handled inside the page
+// component via the shared `useActionLock` hook so re-clicks are debounced.
 
 function DocCard({
   doc,
   onEdit,
   onDelete,
+  onOpen,
   isDeleting = false,
+  isOpening = false,
 }: {
   doc: MyDocument;
   onEdit?: (d: MyDocument) => void;
   onDelete?: (d: MyDocument) => void;
+  onOpen?: (d: MyDocument) => void;
   /** Card is in the "pending delete" window — show spinner overlay + lock actions. */
   isDeleting?: boolean;
+  /** Open action is in flight (signing URL etc.) — disable to prevent re-clicks. */
+  isOpening?: boolean;
 }) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -121,16 +111,18 @@ function DocCard({
                 <Pencil className="h-3.5 w-3.5" />
               </Button>
             )}
-            {doc.fileUrl && (
+            {doc.fileUrl && onOpen && (
               <Button
                 size="sm"
                 variant="ghost"
                 className="h-7 px-2"
-                onClick={() => openDoc(doc)}
-                disabled={isDeleting}
+                onClick={() => onOpen(doc)}
+                disabled={isDeleting || isOpening}
                 aria-label={isRu ? 'Открыть' : 'Open'}
               >
-                <ExternalLink className="h-3.5 w-3.5" />
+                {isOpening
+                  ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  : <ExternalLink className="h-3.5 w-3.5" />}
               </Button>
             )}
             {isVault && onDelete && (
@@ -173,8 +165,12 @@ export default function MeDocuments() {
   const [uploadOpen, setUploadOpen] = useState(false);
   const [editingDoc, setEditingDoc] = useState<MyDocument | null>(null);
   const [deletingDoc, setDeletingDoc] = useState<MyDocument | null>(null);
-  // Documents pending delete are hidden optimistically until the undo window passes
-  const [pendingDeleteIds, setPendingDeleteIds] = useState<Set<string>>(new Set());
+
+  // Centralized re-click guard for all card actions (delete + open).
+  // Keys are namespaced so the same doc can have independent locks per action.
+  const actionLock = useActionLock();
+  const deleteKey = (id: string) => `delete:${id}`;
+  const openKey   = (id: string) => `open:${id}`;
 
   /** Soft-delete the document in DB (used after the undo window expires). */
   const archiveDoc = async (doc: MyDocument) => {
@@ -187,10 +183,32 @@ export default function MeDocuments() {
     if (error) throw error;
   };
 
-  /** Confirm flow: hide locally + show 5s toast with Undo. */
+  /** Sign + open a vault file, or open the public URL directly. */
+  const handleOpen = (doc: MyDocument) => {
+    if (!doc.fileUrl) return;
+    void actionLock.withLock(openKey(doc.id), async () => {
+      const isFullUrl = /^https?:\/\//i.test(doc.fileUrl!);
+      if (isFullUrl) {
+        window.open(doc.fileUrl!, '_blank', 'noopener');
+        return;
+      }
+      const { data, error } = await supabase.storage
+        .from('user-documents')
+        .createSignedUrl(doc.fileUrl!, 3600);
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+      window.open(data.signedUrl, '_blank', 'noopener');
+    });
+  };
+
+  /** Confirm flow: lock card + show 5s toast with Undo. */
   const confirmDelete = (doc: MyDocument) => {
     setDeletingDoc(null);
-    setPendingDeleteIds((prev) => new Set(prev).add(doc.id));
+    const key = deleteKey(doc.id);
+    if (actionLock.isLocked(key)) return; // already pending — ignore re-trigger
+    actionLock.lock(key);
 
     let undone = false;
     const UNDO_MS = 5000;
@@ -204,11 +222,7 @@ export default function MeDocuments() {
           label: isRu ? 'Отменить' : 'Undo',
           onClick: () => {
             undone = true;
-            setPendingDeleteIds((prev) => {
-              const next = new Set(prev);
-              next.delete(doc.id);
-              return next;
-            });
+            actionLock.unlock(key);
             toast.dismiss(toastId);
             toast.success(isRu ? 'Удаление отменено' : 'Delete cancelled');
           },
@@ -222,19 +236,9 @@ export default function MeDocuments() {
         await archiveDoc(doc);
         qc.invalidateQueries({ queryKey: ['me-documents'] });
       } catch (e) {
-        // Restore on failure so user doesn't silently lose the doc
-        setPendingDeleteIds((prev) => {
-          const next = new Set(prev);
-          next.delete(doc.id);
-          return next;
-        });
         toast.error((e as Error).message);
       } finally {
-        setPendingDeleteIds((prev) => {
-          const next = new Set(prev);
-          next.delete(doc.id);
-          return next;
-        });
+        actionLock.unlock(key);
       }
     }, UNDO_MS);
   };
@@ -300,14 +304,28 @@ export default function MeDocuments() {
             {passports.length > 0 && (
               <PageSection title={isRu ? 'Паспорта' : 'Passports'}>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {passports.map((d) => <DocCard key={d.id} doc={d} />)}
+                  {passports.map((d) => (
+                    <DocCard
+                      key={d.id}
+                      doc={d}
+                      onOpen={handleOpen}
+                      isOpening={actionLock.isLocked(openKey(d.id))}
+                    />
+                  ))}
                 </div>
               </PageSection>
             )}
             {visas.length > 0 && (
               <PageSection title={isRu ? 'Визы' : 'Visas'}>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {visas.map((d) => <DocCard key={d.id} doc={d} />)}
+                  {visas.map((d) => (
+                    <DocCard
+                      key={d.id}
+                      doc={d}
+                      onOpen={handleOpen}
+                      isOpening={actionLock.isLocked(openKey(d.id))}
+                    />
+                  ))}
                 </div>
               </PageSection>
             )}
@@ -323,7 +341,9 @@ export default function MeDocuments() {
                       doc={d}
                       onEdit={setEditingDoc}
                       onDelete={setDeletingDoc}
-                      isDeleting={pendingDeleteIds.has(d.id)}
+                      onOpen={handleOpen}
+                      isDeleting={actionLock.isLocked(deleteKey(d.id))}
+                      isOpening={actionLock.isLocked(openKey(d.id))}
                     />
                   ))}
                 </div>
