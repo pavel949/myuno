@@ -62,13 +62,18 @@ function DocCard({
   doc,
   onEdit,
   onDelete,
+  onOpen,
   isDeleting = false,
+  isOpening = false,
 }: {
   doc: MyDocument;
   onEdit?: (d: MyDocument) => void;
   onDelete?: (d: MyDocument) => void;
+  onOpen?: (d: MyDocument) => void;
   /** Card is in the "pending delete" window — show spinner overlay + lock actions. */
   isDeleting?: boolean;
+  /** Open action is in flight (signing URL etc.) — disable to prevent re-clicks. */
+  isOpening?: boolean;
 }) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -122,16 +127,18 @@ function DocCard({
                 <Pencil className="h-3.5 w-3.5" />
               </Button>
             )}
-            {doc.fileUrl && (
+            {doc.fileUrl && onOpen && (
               <Button
                 size="sm"
                 variant="ghost"
                 className="h-7 px-2"
-                onClick={() => openDoc(doc)}
-                disabled={isDeleting}
+                onClick={() => onOpen(doc)}
+                disabled={isDeleting || isOpening}
                 aria-label={isRu ? 'Открыть' : 'Open'}
               >
-                <ExternalLink className="h-3.5 w-3.5" />
+                {isOpening
+                  ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  : <ExternalLink className="h-3.5 w-3.5" />}
               </Button>
             )}
             {isVault && onDelete && (
