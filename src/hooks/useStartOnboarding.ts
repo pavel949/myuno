@@ -285,7 +285,7 @@ export function useStartOnboarding() {
         primary_cta: primary.route,
         reasoning: language === 'ru' ? reasoning.ru : reasoning.en,
         generator,
-        model,
+        ai_model: model,
       };
       if (user?.id) journeyPayload.user_id = user.id;
 
