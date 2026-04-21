@@ -50,7 +50,7 @@ export function UnifiedSuccessLayout({
 
   if (isLoading) {
     return (
-      <AppLayout showBottomNav={false}>
+      <AppLayout showHeader={false}>
         <div className="min-h-[60vh] flex items-center justify-center">
           <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
         </div>
@@ -59,7 +59,7 @@ export function UnifiedSuccessLayout({
   }
 
   return (
-    <AppLayout showBottomNav={false}>
+    <AppLayout showHeader={false}>
       <div className="min-h-screen bg-background flex items-start justify-center p-4 pt-10">
         <div className="w-full max-w-md space-y-5">
           {/* Status block */}

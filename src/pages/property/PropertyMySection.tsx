@@ -13,6 +13,7 @@ import { useMyDelegations } from '@/hooks/usePropertyDelegates';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { AppLayout } from '@/components/layout/AppLayout';
 
 export default function PropertyMySection() {
   const { user } = useAuth();
@@ -22,6 +23,7 @@ export default function PropertyMySection() {
 
   if (!user) {
     return (
+      <AppLayout showHeader={false}>
       <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 text-center gap-4">
         <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
           <LogIn className="w-8 h-8 text-primary" />
@@ -38,10 +40,15 @@ export default function PropertyMySection() {
           {isRu ? 'Войти' : 'Sign In'}
         </Button>
       </div>
+      </AppLayout>
     );
   }
 
-  return <AuthenticatedMySection />;
+  return (
+    <AppLayout showHeader={false}>
+      <AuthenticatedMySection />
+    </AppLayout>
+  );
 }
 
 function AuthenticatedMySection() {
