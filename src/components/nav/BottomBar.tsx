@@ -20,6 +20,8 @@ import { playSound } from '@/hooks/useSoundEffects';
 import { getFeedbackSettings } from '@/hooks/useFeedbackSettings';
 import { usePrefetchRoute } from '@/hooks/usePrefetch';
 import { AllAppsDrawer } from '@/components/layout/AllAppsDrawer';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
+import { GUEST_NAV_ME_HUB } from '@/lib/navConfig';
 import {
   PRIMARY_NAV,
   shouldShowAppsLauncher,
