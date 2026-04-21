@@ -113,6 +113,35 @@ export default function NewbuildsLanding() {
           </div>
         </header>
 
+        {/* GOV.UK-style start page for the off-plan purchase journey */}
+        <StartPageLayout
+          cluster="ИНВЕСТ · 7 ШАГОВ"
+          title="Первая покупка off-plan за 7 шагов"
+          summary="Понятный путь от выбора района до получения ключей. Каждый шаг — с чек-листом, документами и контактами проверенных юристов."
+          meta={{
+            duration: '6–24 мес.',
+            cost: 'от ฿4,5M',
+            eligibility: 'Иностранцы и резиденты',
+            requirements: 'Паспорт, бюджет, цель',
+          }}
+          eligibility={[
+            'Иностранец-нерезидент или резидент Таиланда',
+            'Цель: жить, сдавать или комбинированная',
+            'Бюджет от ฿4,5M (≈ $130k)',
+          ]}
+          requirements={[
+            'Действующий заграничный паспорт',
+            'Подтверждение средств на первый взнос',
+            'Понимание долгосрочной цели (жить / доход / перепродажа)',
+          ]}
+          startLabel="Открыть каталог"
+          onStart={() => navigate(APP_ROUTES.OFFPLAN)}
+          secondaryLabel="Калькулятор ROI"
+          onSecondary={() => navigate(APP_ROUTES.NEWBUILDS_CALCULATOR)}
+        />
+
+        <StepByStepNav title="Что нужно сделать" steps={offplanSteps} />
+
         <section className="max-w-5xl mx-auto px-4 py-8 md:py-10">
           <h2 className="text-sm font-semibold mb-4 text-foreground">
             Инструменты и разделы
