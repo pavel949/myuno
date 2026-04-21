@@ -93,7 +93,7 @@ export function EditVaultDocumentDialog({ open, onOpenChange, doc }: Props) {
   });
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(o) => { if (!o) resetFields(); onOpenChange(o); }}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>{isRu ? 'Редактировать документ' : 'Edit document'}</DialogTitle>
@@ -133,7 +133,7 @@ export function EditVaultDocumentDialog({ open, onOpenChange, doc }: Props) {
         </div>
 
         <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={save.isPending}>
+          <Button variant="ghost" onClick={handleCancel} disabled={save.isPending}>
             {isRu ? 'Отмена' : 'Cancel'}
           </Button>
           <Button onClick={() => save.mutate()} disabled={save.isPending}>
