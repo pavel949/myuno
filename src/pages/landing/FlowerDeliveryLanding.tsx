@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { ShieldCheck, Camera, Clock, CreditCard, CheckCircle, Flower2, MessageCircle, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { AppLayout } from '@/components/layout/AppLayout';
 import type { Variants, Easing } from 'framer-motion';
 
 const fadeUp: Variants = {
@@ -23,7 +24,7 @@ export default function FlowerDeliveryLanding() {
   const handleOrder = () => navigate('/flowers');
 
   return (
-    <>
+    <AppLayout showHeader={false}>
       <Helmet>
         <title>{isRu ? 'Доставка цветов в Пхукете — Фиксированная цена, реальные фото' : 'Flower Delivery in Phuket — Fixed Price, Real Photos'}</title>
         <meta name="description" content={isRu
@@ -314,6 +315,6 @@ export default function FlowerDeliveryLanding() {
           </p>
         </section>
       </div>
-    </>
+    </AppLayout>
   );
 }
