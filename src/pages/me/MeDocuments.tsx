@@ -30,6 +30,9 @@ import { EditVaultDocumentDialog } from '@/components/me/EditVaultDocumentDialog
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { createErrorHandler } from '@/lib/errorHandler';
+
+const errorLog = createErrorHandler('MeDocuments');
 
 const SOURCE_ICON = { passport: Shield, visa: Plane, vault: FileText } as const;
 const STATUS_TONE = {
