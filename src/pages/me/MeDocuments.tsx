@@ -318,7 +318,7 @@ export default function MeDocuments() {
       />
       <AlertDialog
         open={!!deletingDoc}
-        onOpenChange={(v) => { if (!v && !deleteMutation.isPending) setDeletingDoc(null); }}
+        onOpenChange={(v) => { if (!v) setDeletingDoc(null); }}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -327,23 +327,21 @@ export default function MeDocuments() {
             </AlertDialogTitle>
             <AlertDialogDescription>
               {isRu
-                ? `«${deletingDoc?.title ?? ''}» будет удалён из вашего сейфа. Это действие нельзя отменить.`
-                : `"${deletingDoc?.title ?? ''}" will be removed from your vault. This action cannot be undone.`}
+                ? `«${deletingDoc?.title ?? ''}» будет удалён из вашего сейфа. У вас будет 5 секунд, чтобы отменить.`
+                : `"${deletingDoc?.title ?? ''}" will be removed from your vault. You'll have 5 seconds to undo.`}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteMutation.isPending}>
+            <AlertDialogCancel>
               {isRu ? 'Отмена' : 'Cancel'}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={(e) => {
                 e.preventDefault();
-                if (deletingDoc) deleteMutation.mutate(deletingDoc);
+                if (deletingDoc) confirmDelete(deletingDoc);
               }}
-              disabled={deleteMutation.isPending}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {deleteMutation.isPending && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
               {isRu ? 'Удалить' : 'Delete'}
             </AlertDialogAction>
           </AlertDialogFooter>
