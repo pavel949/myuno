@@ -236,7 +236,24 @@ export default function MeDocuments() {
         await archiveDoc(doc);
         qc.invalidateQueries({ queryKey: ['me-documents'] });
       } catch (e) {
-        toast.error((e as Error).message);
+        // Archive failed → restore card in UI and surface a clear, actionable error.
+        // Refetch ensures the card reappears even if any optimistic state lingers,
+        // since `archived_at` was never written in DB.
+        const message = (e as Error)?.message || (isRu ? 'Неизвестная ошибка' : 'Unknown error');
+        toast.error(
+          isRu ? `Не удалось удалить «${doc.title}»` : `Failed to delete "${doc.title}"`,
+          {
+            description: isRu
+              ? `Документ восстановлен. ${message}`
+              : `Document restored. ${message}`,
+            duration: 6000,
+            action: {
+              label: isRu ? 'Повторить' : 'Retry',
+              onClick: () => confirmDelete(doc),
+            },
+          },
+        );
+        qc.invalidateQueries({ queryKey: ['me-documents'] });
       } finally {
         actionLock.unlock(key);
       }
