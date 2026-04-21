@@ -39,12 +39,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>(() => resolveTheme(getStoredTheme()));
 
   useEffect(() => {
-    const root = window.document.documentElement;
-    
     const updateTheme = () => {
       const resolved = resolveTheme(theme);
-      root.classList.remove('light', 'dark');
-      root.classList.add(resolved);
+      // Delegate to the deterministic helper so `data-theme-ready` and the
+      // `myuno:theme-ready` event fire after styles + fonts settle.
+      void applyTheme(resolved);
       setResolvedTheme(resolved);
     };
 
@@ -57,7 +56,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         updateTheme();
       }
     };
-    
+
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, [theme]);
