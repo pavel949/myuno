@@ -1,5 +1,13 @@
 /**
- * /newbuilds/map — Interactive map view with layer filters
+ * /newbuilds/map — Interactive map view with layer filters.
+ *
+ * THEME EXCEPTION: This page uses the "Dark Luxury Editorial" theme (--nb-* tokens),
+ * a documented exception to the super-app deep-sea palette. See docs/DESIGN_TOKENS.md §Themes
+ * and mem://style/editorial-dark-luxury-theme.
+ *
+ * Hex values inside NB_MAP_PALETTE / MAP_STYLES are the only allowed hardcoded colors —
+ * Google Maps API `stylers` only accept hex strings, so CSS variables can't be used there.
+ * Keep NB_MAP_PALETTE in sync with --nb-bg / --nb-card / --nb-gold tokens in tokens.css.
  */
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -16,28 +24,48 @@ import { APP_ROUTES } from '@/lib/config/routes';
 
 const MAP_CONTAINER_STYLE: React.CSSProperties = { width: '100%', height: '100%' };
 
+/**
+ * Local hex palette mirroring --nb-* and platform cluster tokens.
+ * Google Maps `stylers` cannot consume CSS variables — keep these in sync with
+ * src/styles/tokens.css when tokens change.
+ */
+const NB_MAP_PALETTE = {
+  bg: '#0F0F0F',         // mirrors --nb-bg
+  card: '#1A1A1A',       // mirrors --nb-card
+  surface: '#141414',    // mirrors --nb-surface
+  gold: '#C9A84C',       // mirrors --nb-gold
+  goldMuted: '#8A7339',  // darker gold for secondary labels
+  text: '#E8E2D5',       // mirrors --nb-text
+  muted: '#6B5E3F',      // mirrors --nb-muted
+  // Status colors — hex mirror of platform cluster tokens
+  amber: '#F59E0B',      // mirrors --accent-amber / --cluster-legal
+  blue: '#4E7BFF',       // mirrors --cluster-live
+  mint: '#00D68F',       // mirrors --success / --cluster-arrive
+} as const;
+
 // Dark luxury map style matching newbuilds theme
 const MAP_STYLES: google.maps.MapTypeStyle[] = [
-  { elementType: 'geometry', stylers: [{ color: '#0f1620' }] },
-  { elementType: 'labels.text.stroke', stylers: [{ color: '#0f1620' }] },
-  { elementType: 'labels.text.fill', stylers: [{ color: '#8a7a55' }] },
-  { featureType: 'administrative.locality', elementType: 'labels.text.fill', stylers: [{ color: '#c9a961' }] },
-  { featureType: 'poi', elementType: 'labels.text.fill', stylers: [{ color: '#6b5e3f' }] },
-  { featureType: 'poi.park', elementType: 'geometry', stylers: [{ color: '#1a2820' }] },
-  { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#1a2330' }] },
-  { featureType: 'road', elementType: 'geometry.stroke', stylers: [{ color: '#0a0f17' }] },
-  { featureType: 'road', elementType: 'labels.text.fill', stylers: [{ color: '#7a6a45' }] },
-  { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: '#2a3445' }] },
-  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0a1018' }] },
-  { featureType: 'water', elementType: 'labels.text.fill', stylers: [{ color: '#4a5a7a' }] },
+  { elementType: 'geometry', stylers: [{ color: NB_MAP_PALETTE.bg }] },
+  { elementType: 'labels.text.stroke', stylers: [{ color: NB_MAP_PALETTE.bg }] },
+  { elementType: 'labels.text.fill', stylers: [{ color: NB_MAP_PALETTE.goldMuted }] },
+  { featureType: 'administrative.locality', elementType: 'labels.text.fill', stylers: [{ color: NB_MAP_PALETTE.gold }] },
+  { featureType: 'poi', elementType: 'labels.text.fill', stylers: [{ color: NB_MAP_PALETTE.muted }] },
+  { featureType: 'poi.park', elementType: 'geometry', stylers: [{ color: '#1A2018' }] },
+  { featureType: 'road', elementType: 'geometry', stylers: [{ color: NB_MAP_PALETTE.card }] },
+  { featureType: 'road', elementType: 'geometry.stroke', stylers: [{ color: NB_MAP_PALETTE.bg }] },
+  { featureType: 'road', elementType: 'labels.text.fill', stylers: [{ color: NB_MAP_PALETTE.muted }] },
+  { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: '#2A2418' }] },
+  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0A0A0A' }] },
+  { featureType: 'water', elementType: 'labels.text.fill', stylers: [{ color: NB_MAP_PALETTE.muted }] },
   { featureType: 'transit', stylers: [{ visibility: 'off' }] },
 ];
 
+// Status colors — semantic tokens (used in React/CSS context only, not in Google stylers)
 const STATUS_LAYERS = [
   { key: 'all', label: 'Все', color: 'hsl(var(--nb-gold))' },
-  { key: 'offplan', label: 'Off-plan', color: '#f59e0b' },
-  { key: 'under_construction', label: 'Строится', color: '#3b82f6' },
-  { key: 'completed', label: 'Готово', color: '#22c55e' },
+  { key: 'offplan', label: 'Off-plan', color: 'hsl(var(--accent-amber))' },
+  { key: 'under_construction', label: 'Строится', color: 'hsl(var(--cluster-live))' },
+  { key: 'completed', label: 'Готово', color: 'hsl(var(--success))' },
 ] as const;
 
 const TYPE_LAYERS = [
@@ -50,9 +78,9 @@ const TYPE_LAYERS = [
 
 function getStatusColor(status: string) {
   switch (status) {
-    case 'offplan': return '#f59e0b';
-    case 'under_construction': return '#3b82f6';
-    case 'completed': return '#22c55e';
+    case 'offplan': return 'hsl(var(--accent-amber))';
+    case 'under_construction': return 'hsl(var(--cluster-live))';
+    case 'completed': return 'hsl(var(--success))';
     default: return 'hsl(var(--nb-gold))';
   }
 }
@@ -282,7 +310,7 @@ export default function NewbuildsMap() {
                 fullscreenControl: true,
                 zoomControl: true,
                 clickableIcons: false,
-                backgroundColor: '#0f1620',
+                backgroundColor: NB_MAP_PALETTE.bg,
               }}
             >
               {clusters.map(cluster => {
@@ -343,15 +371,25 @@ export default function NewbuildsMap() {
                   >
                     <button
                       onClick={() => handleClusterClick(cluster)}
-                      className="rounded-full flex items-center justify-center font-bold transition-transform hover:scale-110"
+                      className="nb-cluster-bubble rounded-full flex items-center justify-center font-serif transition-all hover:scale-110"
                       style={{
                         width: size,
                         height: size,
-                        background: 'hsl(var(--nb-gold))',
-                        color: 'hsl(var(--nb-bg))',
-                        border: '3px solid hsl(var(--nb-bg))',
-                        boxShadow: '0 0 0 4px hsl(var(--nb-gold) / 0.3), 0 4px 12px rgba(0,0,0,0.5)',
-                        fontSize: count >= 100 ? 12 : 14,
+                        background: 'hsl(var(--nb-card))',
+                        color: 'hsl(var(--nb-gold))',
+                        border: '1.5px solid hsl(var(--nb-gold) / 0.6)',
+                        boxShadow: '0 4px 14px rgba(0,0,0,0.45)',
+                        fontFamily: '"Playfair Display", Georgia, serif',
+                        fontSize: count >= 100 ? 13 : 15,
+                        fontWeight: 600,
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'hsl(var(--nb-gold))';
+                        e.currentTarget.style.color = 'hsl(var(--nb-bg))';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'hsl(var(--nb-card))';
+                        e.currentTarget.style.color = 'hsl(var(--nb-gold))';
                       }}
                       aria-label={`${count} проектов в этой области`}
                     >
