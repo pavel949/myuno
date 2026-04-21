@@ -1,199 +1,114 @@
 
 
-## Монетизация v2: недвижимость как ядро, всё остальное — поддерживающая инфраструктура
+## Оценка готовности текущей архитектуры myUNO к модели «Comprehensive Product Document v2.0»
 
-### Что меняется в стратегии
+### TL;DR
 
-Предыдущий план распределял выручку по 5 равноправным потокам (R1–R5). Но реальность маховика: **70%+ дохода придёт из недвижимости** (resale + new-build + investment deals). Услуги, подписки, лиды — это **вспомогательные слои**, удерживающие пользователя в экосистеме до и после крупной сделки.
-
-Перепаковываю под три приоритета:
-
-```text
-ЯДРО (70-80% выручки):     Недвижимость — продажа и сделки
-АКСЕЛЕРАТОР (15-20%):      Trust-as-a-Service — ClearView, оценки, due diligence
-УДЕРЖАНИЕ (5-10%):         STR/Live/Operate/Partner — частые транзакции, LTV, лиды
-```
-
-Это синтез: **Дом.РФ** даёт инфраструктуру доверия, **Циан** — листинги и лиды, **Airbnb** — частоту и удержание. Деньги делает Дом.РФ-слой; Циан-слой генерирует пайплайн; Airbnb-слой удерживает аудиторию.
+**Готовность к целевой модели — ~55–65%.** Текущая платформа покрывает 4 из 5 слоёв документа на уровне «есть данные и UI», но **критически не хватает 4 архитектурных компонентов** для перехода в режим «Госуслуг дестинации»: единого `myUNO ID` (consolidated profile), интеграционного слоя (SSO+Notifications+AI-консьерж как фундамент), Compliance-слоя как самостоятельной MRR-вертикали и рублёвого платёжного контура. Структура данных в целом совместима, но нужны 8–12 новых таблиц + объединение/декомпозиция ~6 существующих.
 
 ---
 
-### Часть 1. Reframe: «Real Estate Revenue Engine» (RERE)
+### 1. Маппинг 5 слоёв документа на текущую архитектуру
 
-Заменяю модель «5 равных рентов» на **воронку RE с 4 этапами**, где каждый этап монетизируется явно:
-
-**Этап 1 · Discovery (бесплатно, аккумулирует аудиторию)**
-- Каталоги `/property/rent`, `/property/resale`, `/newbuilds`
-- Фильтры, сравнение, карта, AI-поиск
-- Цель: затащить 100% русскоязычного трафика по теме SEA real estate
-- Монетизация: 0₽. Это top-of-funnel.
-
-**Этап 2 · Trust (платная верификация, маржа 80%+)**
-- ClearView Project Rating — ฿120 000 (платит застройщик, отчёт публичен)
-- Fair-Price Assessment — ฿9 900 (платит покупатель)
-- Investment ROI Report — ฿14 900
-- Legal Due Diligence — ฿35 000
-- WorldCheck KYC для сделок $200K+ — ฿4 900
-- **Это ключевая отстройка от Циана.** Циан — это листинг, мы — листинг + проверка.
-
-**Этап 3 · Transaction (основные деньги)**
-| Поток | Ставка | Кто платит | Средний чек |
+| Слой документа | Текущее покрытие | Таблицы (есть) | Что отсутствует |
 |---|---|---|---|
-| **New-build / Off-plan** | 5–7% от застройщика | застройщик | ฿7M = ฿350–490K комиссия |
-| **Resale** | 3% (мин. ฿120 000) | продавец | ฿8M = ฿240K |
-| **Investment deal $200K+** | 2% + эскроу-фи 0.5% | покупатель | $300K = $7 500 |
-| **Long-term rent / зимовка 30+** | 50% первого мес. | арендодатель | ฿60K = ฿30K |
-| **STR booking** | 12% guest + 3% host | оба | ฿15K = ฿2 250 |
-
-**Главный фокус:** new-build commission — самые крупные чеки и есть рычаг через ClearView (отчёт → лиды → сделка).
-
-**Этап 4 · Post-transaction (LTV)**
-- Property Care 10% сервисов
-- Full Management 70/30
-- Owner Pro $19/мес или MC Studio $99/мес
-- Concierge / Operate / Lifestyle apps
-- Вторая сделка через 2–4 года (повторный resale цикл)
+| **REC · Real Estate Core** (6 продуктов: PropertySearch, DueDiligence AI, Transaction Suite, PM, Owner Portal, Liquidity L1–L5) | **75%** | `properties`, `property_projects`, `developers`, `resale_properties`, `quick_listings`, `property_*` (15+ таблиц), `agent_deals`, `capital_*` (4 таблицы), `unit_holds`, `nb_*` (newbuilds) | DueDiligence AI как продукт (только методика ClearView); Transaction Suite (FET wizard, ContractAI, POA, TorTor 3); Liquidity L3–L5 (First Look Network, Yield Floor, Buy-back); AVM-движок |
+| **Слой 1 · Compliance & Legal** (TM30, PND, FET, Hotel Act, DTT, КИК, Visa, BOI) | **20%** | `visa_records`, `visa_services`, `legal_services`, `tax_filings` (минимально) | Главный gap. Нет `compliance_obligations`, `compliance_deadlines`, `tm30_filings`, `hotel_act_track`, `pnd_filings`, `fet_documents`, `tax_returns`, `cfc_reports`. Нет MRR-подписки на compliance |
+| **Слой 2 · Financial Infrastructure** (escrow, рубли, FX, банки, переводы) | **45%** | `orders`, `payment_intents`, `ledger_entries`, `vendor_payouts`, `wallets`, `wallet_transactions`, `currency_rates`, `commission_agreements`, `trust_accounts`, `trust_account_movements` | Рублёвый контур (3 варианта A/B/C); FX-spread monetization; HNW mandate management; Insurance brokerage; BankPass/TransferRu/THB↔MNT/BDT |
+| **Слой 3 · Service Ecosystem** (16 вертикалей через партнёров, 3 уровня партнёрства) | **80%** | `providers`, `vendor_*` (15+ таблиц), `services`, `service_orders`, `bookings`, 22 vertical-таблиц (`yachts`, `restaurants`, `salons`, `clinics`, `gyms`, `cleaning_services`, `babysitters`, `pet_services`, `flower_shops`, `pharmacies`, `airport_*`, etc.) | Формальная 3-уровневая модель партнёрства (Listed/Verified/Ombudsman-endorsed) — есть `provider_badges`, но нет правил эскалации; SLA-мониторинг; partner self-service portal; единый escrow-routing для всех 16 вертикалей |
+| **Слой 4 · Data & AI** (AI-консьерж, AVM, агенты, индексы) | **40%** | `ai_agents`, `ai_agent_knowledge`, `ai_agent_logs`, `ai_artifacts`, `ai_intake_sessions`, `analytics_events`, `user_personas` | AI-консьерж как **точка входа** (3 вопроса → персонализированный путь из 5–7 сервисов) — текущий концирж проактивный, а не routing-first; AVM как продукт; Phuket Residential Price Index; DueDiligence AI продакшн-агент; ContractAI |
+| **Интеграционный слой** (SSO, myUNO ID, Notifications, Emergency, Analytics) | **55%** | `profiles`, `user_roles`, `user_addresses`, `user_documents`, `user_personas`, `push_subscriptions`, `analytics_events`, есть Hero SOS Button | **Главный архитектурный gap.** `profiles` плоский, без `passport_*`, `visa_status`, `tax_residency`, `tm30_status`, `documents_vault`. Нет единого Notification Center с правилами доставки (compliance deadlines → WhatsApp/Telegram/email). Нет «3-вопросного» AI-роутера |
 
 ---
 
-### Часть 2. Конкретные изменения в продукте
+### 2. Критические gaps по приоритету
 
-**2.1 Главная (`/`) — RE-first**
-Вместо равноправных 5 пакетов L1, главная фокусируется на недвижимости:
+**🔴 P0 · Блокирующие переход к модели «Госуслуг»:**
 
-```text
-HomeTopBar
-HeroIntro                    — «Недвижимость на Пхукете с проверкой ClearView»
-RealEstateEntry              — БОЛЬШОЙ блок: 3 трека (Аренда / Покупка / Инвестиции)
-                                с явными trust-плашками и средними чеками
-TrustAsAService              — 4 платные услуги (ClearView/FairPrice/ROI/DueDil)
-                                с ценами и сроками
-LifeCycleNavigator           — 5 этапов жизненного цикла (компактнее)
-AudienceServiceHub           — 9 хабов (компактные карточки, не доминируют)
-ProofAndOperator             — оператор, лицензии, цифры доверия
-TrustFooter
-```
+1. **`myUNO ID` (consolidated profile).** Текущий `profiles` — 32 поля плоских данных. Документ требует единый профиль с: passport (паспорта пользователя и членов семьи), visa_status (текущая виза + history), tax_residency (RU/TH/dual), tm30_status (последняя подача + дедлайн), property_ownership (FK на `properties`), tax_obligations (подписки на PND/3-НДФЛ/КИК), language, documents_vault (зашифрованное хранилище). **Решение:** новые таблицы `user_passports`, `user_visa_status`, `user_tax_profile`, `user_compliance_obligations`, `user_documents_vault` + расширение `profiles`.
 
-Всё остальное (Live, Operate, Partner, Concierge) — **под главным RE-блоком**, как контекст для удержания.
+2. **Compliance-слой как продукт.** Нет ни одной таблицы для трекинга периодических обязательств. **Решение:** `compliance_obligations` (тип, дедлайн, юзер, статус), `compliance_filings` (TM30/PND/FET/CFC), `hotel_act_tracks` (A/B/C), `visa_renewals_pipeline`. Подписочная MRR-модель через расширение `subscription_plans`.
 
-**2.2 Новая страница `/property/why-myuno` — продающая логика без продаж**
-Спокойное объяснение в gov-tone:
-- Чем мы отличаемся от Циана: проверка проектов
-- Чем от Airbnb: long-term, инвест-режим, ClearView
-- Чем от частных агентов: открытая методика, фиксированные ставки, эскроу
-- Сколько стоит и кто платит на каждом этапе
-- Кейсы (3 анонимизированных, без пафоса)
+3. **AI-консьерж как routing-first точка входа.** Сейчас концирж — proactive helper на главной. Документ требует: WhatsApp/Telegram/landing-бот → 3 вопроса (кто/зачем/насколько) → персонализированный путь. **Решение:** `concierge_sessions` (intake answers), `concierge_journeys` (рекомендованные сервисы), интеграция с существующими `ai_intake_sessions` + расширение flow на onboarding.
 
-**2.3 ClearView как продукт, а не как ярлык**
-Сейчас ClearView в памяти — методика. Превращаем в продаваемый сервис:
-- Лендинг `/clearview` для застройщиков (сейчас фрагментировано)
-- Pricing: ฿120 000 за проект
-- Sample Report (PDF, открытый)
-- Self-service заявка → CRM `clearview_application`
-- В каталоге new-builds — бейдж «Rated AAA / AA / A / BBB / BB» либо «Not ClearView rated» (правило из памяти: Y1 только non-brokered)
+4. **Notification Center с compliance-deadlines.** Сейчас уведомления распылены. **Решение:** `notification_rules` (триггер: дедлайн TM30 −7 дней), `notification_deliveries` (канал: WhatsApp/Telegram/email), единый dispatcher на базе существующего `lifecycle-processor`.
 
-**2.4 Investment Deal Flow `/invest/deal/:id`**
-Новая воронка для $200K+ сделок:
-- Страница с ROI-моделью, эскроу-схемой, WorldCheck-чекаут
-- Явная разбивка fee: 2% сделка + 0.5% эскроу + опц. ฿14 900 ROI report
-- Form → CRM `investment_lead` с тегом сегмента (Investor по `operating-model-v2`)
-- Москвичам — отдельная плашка: «Защита через омбудсмена Москвы» → существующая форма из v1 плана
+**🟡 P1 · Нужны для масштабирования модели:**
 
-**2.5 Lead Quality Engine (для застройщиков)**
-- Verified Lead = KYC прошёл + бюджет подтверждён + intent score ≥ 60
-- Цена: ฿1 500 за verified lead, ฿500 за raw lead
-- Self-service для застройщиков: личный кабинет `/developer/leads` с фильтрами
-- Это монетизирует discovery-трафик, который не дошёл до transaction
+5. **Liquidity Layer L1–L5.** Есть `resale_properties` и `agent_deals`, нет: First Look Network (HNW invitation-only access), Yield Floor Guarantee (insurance-style obligation), Developer Buy-back agreements. **Решение:** `liquidity_tier` enum в `properties`, новая таблица `first_look_invitations`, `yield_guarantees`, `buyback_agreements`.
 
-**2.6 Pricing Page `/pricing` — RE-first**
-Перепаковываю в 3 секции:
-- **Для покупателей и инвесторов** — Trust services (всё прозрачно: что входит, цена, срок)
-- **Для застройщиков** — ClearView, Lead Quality, Editorial slots, комиссии
-- **Для собственников и УК** — Owner Pro / MC Studio / Vendor SaaS / Property Care
+6. **Рублёвый платёжный контур.** Нет интеграций. **Решение:** `payment_rails` (RU юрлицо / партнёр-процессор / USDT), `ruble_transactions`, `fx_spreads`, расширение `commission_agreements` для FX-маржи. Edge functions: `ruble-payment-processor`, `ruble-payout-processor`.
+
+7. **Партнёрская 3-уровневая модель.** Есть `provider_badges`, нет автоматики эскалации Listed → Verified → Ombudsman-endorsed. **Решение:** `partner_tier` enum + `partner_tier_history` + `partner_sla_metrics` (SLA-мониторинг с автоматической конверсией).
+
+8. **AVM (Automated Valuation Model).** Нет. **Решение:** `property_avm_estimates` (цена + confidence + factors), edge function `avm-calculator` с квартальным cron, публичный API endpoint.
+
+**🟢 P2 · Доработки по существующему:**
+
+9. **Hotel Act tracks A/B/C** — расширение `properties` + новая `hotel_act_compliance`.
+10. **Insurance Marketplace** — `insurance_brokerage_partners`, `insurance_policies`.
+11. **HNW Financial Suite** — `hnw_mandates`, `mandate_performance`, `carry_calculations`.
+12. **Phuket Residential Price Index** — материализованное представление + публичный feed.
 
 ---
 
-### Часть 3. Что делаю в коде (на этой итерации)
+### 3. Что уже хорошо легло на модель
 
-**Новые (~10):**
-- `src/lib/monetization/realEstateEngine.ts` — каноническая модель RERE (4 этапа, ставки, чеки)
-- `src/lib/monetization/revenueStreams.ts` — обновлённая версия с RE-приоритетом
-- `src/components/home/RealEstateEntry.tsx` — главный блок главной (3 трека)
-- `src/components/home/TrustAsAService.tsx` — 4 платные верификации
-- `src/components/monetization/MonetizationDisclosure.tsx` — gov-tone плашка комиссий
-- `src/components/monetization/AuditMarker.tsx` — tx + ledger + поток (правило §13.6)
-- `src/pages/property/WhyMyUno.tsx` — `/property/why-myuno`
-- `src/pages/clearview/ClearViewLanding.tsx` — `/clearview` для застройщиков
-- `src/pages/PricingPage.tsx` — `/pricing` (3 секции, RE-first)
-- `src/hooks/useRevenueRates.ts` — чтение `system_settings` с дефолтами
-
-**Изменяемые (~7):**
-- `src/pages/Index.tsx` — RE-first компоновка
-- `src/lib/copy/govStyle.ts` — `MONETIZATION_LABELS`, `RE_TRUST_LABELS`, `CLEARVIEW_LABELS`
-- `src/lib/config/routes.ts` — ключи `PRICING`, `WHY_MYUNO`, `CLEARVIEW`, `INVEST_DEAL`
-- `src/components/layout/AnimatedRoutes.tsx` + `pageRegistry.ts` — новые роуты
-- `src/lib/services/servicePassports.ts` — добавить поля `revenueStream`, `takeRate`, `whoPays` на 22 вертикали
-- `src/components/services/ServicePassport.tsx` — рендер revenue-блока
-- `src/hooks/usePromotedListings.ts` — переименование «Спонсорское размещение», читать ставки из `useRevenueRates`
-
-**Опц. БД-миграция (спрошу отдельно перед применением):**
-- INSERT в `system_settings` 12 ключей `revenue:*` (resale_commission=3, newbuild_commission=6, longterm_commission=50, str_guest_fee=12, str_host_fee=3, investment_deal_fee=2, escrow_fee=0.5, trust_clearview=120000, trust_fairprice=9900, trust_roi=14900, trust_duediligence=35000, trust_worldcheck=4900)
-- INSERT 3 feature flags: `feature_flag:re_revenue_engine`, `feature_flag:trust_as_service`, `feature_flag:lead_quality_engine`
-
-**НЕ трогаю на этой итерации:**
-- Stripe / checkout / orders / webhooks (отдельная задача)
-- Self-service эскроу (большой проект)
-- Self-service developer dashboard `/developer/leads` (после валидации спроса)
-- 22 витрины (только подключение `ServicePassport` через `MiniAppLayout`-обвязку)
-- 60 админок и MC/Owner workspace
-- Существующие vendor SaaS контракты (только UI-переупаковка)
+- **Real Estate Core (75%)** — PropertySearch, PM Platform, Owner Portal в значительной мере реализованы. PMS/Channel Manager (Rentals United + iCal) уже работает.
+- **Service Ecosystem (80%)** — 22 вертикали + `providers` + `vendor_subscriptions` + escrow через `commission_agreements` уже есть. Нужна только переупаковка под 3 уровня партнёрства.
+- **CRM-инфраструктура** — мощная (`crm_*` 22 таблицы, pipelines, sequences, workflows). Это редкое преимущество — у конкурентов нет.
+- **Capital/Investment Hub** — `capital_contacts`, `capital_pipeline`, `capital_intro_requests`, `agent_deals` — фундамент для First Look Network готов.
+- **Newbuilds (`nb_*`)** — отдельный B2B2C lead magnet с Developer Portal — соответствует слою REC.
+- **ClearView v3** в памяти — методика готова, нужна только продуктизация в DueDiligence AI.
 
 ---
 
-### Часть 4. Тональная и архитектурная дисциплина
+### 4. План перехода (3 фазы, 6–9 месяцев)
 
-- Тон gov-tech: «комиссия 3%», «срок отчёта 5 рабочих дней», «оператор сделки — myUNO Pte. Ltd.»
-- Никаких «лучший», «премиум», «выгодно»
-- Все аббревиатуры расшифрованы (ClearView, ROI, WorldCheck, KYC, AML)
-- Цифры явные: проценты, чеки, сроки
-- RU + EN на каждой строке
-- Никаких новых top-level routes — всё под `/property/*`, `/invest/*`, `/clearview` (последнее — единичное исключение для бренд-сервиса, требует обсуждения)
-- `MiniAppLayout` везде, никаких новых shells
-- Только токены `tokens.css`
-- Аудит-маркер на каждом «денежном» экране
-- `feature_flag:*` до GA
+**Фаза A · Фундамент (2 мес.) — P0**
+- A1. Миграция `profiles` → `myUNO ID` (5 новых таблиц, RLS, compatibility-views для текущего кода).
+- A2. Compliance-слой v0: `compliance_obligations` + `compliance_filings` + Owner subscription tier «Compliance Pro».
+- A3. AI-консьерж как routing-first: расширение `ai_intake_sessions` + новый flow `/onboarding` с 3 вопросами.
+- A4. Notification Center: `notification_rules` + dispatcher.
 
----
+**Фаза B · Финансовая инфраструктура и Liquidity (2–3 мес.) — P1**
+- B1. Рублёвый контур (вариант B — партнёр-процессор) + edge functions.
+- B2. Liquidity L1–L3 (Базовый листинг + Verified history + First Look Network).
+- B3. AVM v0 (на базе `property_projects` + market data + Claude reasoning).
+- B4. Партнёрская 3-уровневая модель с автоматической эскалацией.
 
-### Часть 5. Smoke-test после реализации
-
-1. `/` 384px: вверху доминирует `RealEstateEntry` (3 трека), ниже `TrustAsAService` с ценами, ещё ниже — компактные хабы.
-2. `/property/why-myuno`: спокойная логика «чем отличаемся», без продаж.
-3. `/clearview`: лендинг для застройщика, цена ฿120 000, sample report, форма заявки.
-4. `/pricing`: 3 секции (покупатели/застройщики/УК), все цены явные.
-5. `/invest`: видна кнопка «Investment Deal $200K+» с разбивкой fee.
-6. На карточке resale — кнопка «Оценка справедливости цены — ฿9 900».
-7. На любой витрине вертикали — `ServicePassport` показывает revenue stream и take rate.
-8. На order-confirmation — `AuditMarker` с tx + ledger + поток.
-9. Тон: ни «лучший», ни «премиум», ни императивов; все ставки из `system_settings`.
+**Фаза C · Расширение (2–3 мес.) — P2**
+- C1. DueDiligence AI как продакшн-агент.
+- C2. Hotel Act tracks + Insurance Marketplace.
+- C3. HNW Financial Suite + Phuket Residential Price Index.
+- C4. Liquidity L4–L5 (Yield Floor + Buy-back) — пилот на 2–3 проектах Sansiri/Rhom Bho.
 
 ---
 
-### Часть 6. Риски и оговорки
+### 5. Архитектурные риски и оговорки
 
-- **Ставки 5–7% по new-build** — реалистичны для тайского рынка (стандарт 3–6%, верхний край за ClearView+маркетинг). Перед применением — подтверждение.
-- **`/clearview` как top-level** — нарушает правило §13.1. Альтернатива: `/property/clearview` или `/build/clearview` (cluster Build). Спрошу при реализации.
-- **Trust services как продукт** — требует back-office для генерации отчётов. На этой итерации — только UI-витрина + создание `support_request` с тегом. Ручная обработка первые 3 месяца — нормально для валидации спроса.
-- **Lead Quality Engine** — требует scoring логики и developer dashboard. На этой итерации — только концепт в `/pricing`, без реализации воронки.
-- **Объём:** ~17 файлов, 3–4 итерации. Иду фазами: (1) тон + датасеты + RE-engine модель, (2) главная + ClearView лендинг + Pricing, (3) Why-myUNO + investment deal flow, (4) ServicePassport + AuditMarker подключение + smoke-test.
+- **378 таблиц уже в проде.** Любая миграция профиля требует backward-compatible views и поэтапный rollout с feature flags (`feature_flag:myuno_id_v2`).
+- **Compliance-слой требует human-in-the-loop первые 6 месяцев.** Документ это признаёт. Не пытаемся автоматизировать TM30 на 100% сразу — ставим интерфейс + ручную обработку партнёром.
+- **Рублёвый контур = регуляторный риск.** Вариант B (партнёр-процессор) безопаснее всего на старте.
+- **AI-консьерж как точка входа = breaking UX change.** Текущая главная — RE-first блок (только что внедрён). Меняем не главную, а добавляем `/start` flow для новых пользователей. Существующие пользователи опционально проходят через «3 вопроса» при следующем визите.
+- **Объём:** 8–12 новых таблиц + 6 расширенных + ~30 RPC + ~8 edge functions. Это 3 крупные миграции, которые нужно планировать через `supabase--read_query` и согласование пользователя.
+- **Документ — стратегия, не спецификация.** На фазе A нужно превратить в детальные ER-диаграммы и user stories. Это часть работы фазы A1.
 
-### Что НЕ входит
+---
 
-- Эскроу-инфраструктура (отдельный большой проект)
-- Self-service developer dashboard и lead marketplace
-- Автоматическая генерация Trust-отчётов (ручная обработка Y1)
-- Fiscalization и тайская налоговая отчётность платформы
-- Перепрайсинг существующих vendor-договоров
-- A/B-тестирование тарифов
-- Полный пересмотр 366 страниц на тональность
+### 6. Что НЕ входит в план
+
+- Капитализация $150–280M, прогноз ARR — это бизнес-метрики, не для архитектуры.
+- Репликация на Самуи/Краби/Бали — только после валидации на Пхукете (год 2+).
+- Замена существующего стека (React/Supabase/Stripe) — документ полностью совместим с текущим стеком.
+- Найм CTO / реструктуризация команды — операционная задача, не код.
+- Полный rewrite — текущая архитектура не требует rewrite, только аккуратные расширения.
+
+---
+
+### Вердикт
+
+**Текущая структура данных подходит для эволюции в модель документа на 55–65%.** Главные блокеры — не технические, а архитектурные: нужно сделать `myUNO ID` единым профилем, добавить Compliance как продукт, превратить AI-консьерж в routing-first точку входа и достроить Liquidity L3–L5. Все четыре gap'а решаются аддитивно, без rewrite. Текущая инвестиция в `properties`, `providers`, `crm_*`, `capital_*`, `ai_*`, `commission_agreements`, `ledger_entries` — полностью переиспользуется.
+
+Если согласуешь — могу начать Фазу A: предложить детальную ER-схему для `myUNO ID` + 3 миграции с feature flags.
 
