@@ -13,6 +13,7 @@ import { HomeTopBar } from '@/components/home/HomeTopBar';
 import { WorkspaceHomeBanner } from '@/components/home/WorkspaceHomeBanner';
 import { HeroIntro } from '@/components/home/HeroIntro';
 import { PrimaryActions } from '@/components/home/PrimaryActions';
+import { PopularTasks } from '@/components/home/PopularTasks';
 import { ActiveSituation } from '@/components/home/ActiveSituation';
 import { AllSectionsAccordion } from '@/components/home/AllSectionsAccordion';
 import { FloatingConcierge } from '@/components/home/FloatingConcierge';
@@ -28,6 +29,7 @@ const Index = () => {
   // Feature flags from system_settings — default true to avoid blank UI on initial load.
   const reEngineOn = useFeatureFlag('re_revenue_engine', true);
   const trustOn = useFeatureFlag('trust_as_service', true);
+  const popularTasksOn = useFeatureFlag('popular_tasks_block', false);
 
   // Default persona for unauthenticated or no-persona users
   const activePersonas = personas.length > 0 ? personas : (['tourist'] as const);
@@ -45,7 +47,7 @@ const Index = () => {
         <HeroIntro />
         {reEngineOn && <RealEstateEntry />}
         {trustOn && <TrustAsAService />}
-        <PrimaryActions />
+        {popularTasksOn ? <PopularTasks /> : <PrimaryActions />}
         <ActiveSituation
           personas={[...activePersonas]}
           onRoleSheetOpen={() => setRoleSheetOpen(true)}

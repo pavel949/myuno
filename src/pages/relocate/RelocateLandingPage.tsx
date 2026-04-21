@@ -7,6 +7,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Globe, FileText, Home, GraduationCap, Stethoscope, Landmark, Car, Scale, Users, Check, ArrowRight, MessageCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { StartPageLayout, StepByStepNav, type Step } from '@/components/patterns';
 
 const STEPS = [
   { id: 'visa', icon: FileText, labelEn: 'Visas & Documents', labelRu: 'Визы и документы', descEn: 'Work permits, retirement visa, education visa — we handle paperwork', descRu: 'Рабочие разрешения, пенсионная виза, учебная виза — мы берём на себя документы', path: APP_ROUTES.VISA_IMMIGRATION, color: '#4E7BFF' },
@@ -115,6 +116,22 @@ export default function RelocateLandingPage() {
 
   const whatsappUrl = 'https://wa.me/66800000000?text=' + encodeURIComponent(requestSummary);
 
+  const scrollToQuiz = () => {
+    document.getElementById('relocation-quiz')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const relocationSteps: Step[] = [
+    { id: 'decide', title: t ? 'Определите цели и сроки' : 'Define goals & timeline', description: t ? 'Срок переезда, состав семьи, бюджет.' : 'Move date, household, budget.', status: 'todo', duration: t ? '15 мин' : '15 min' },
+    { id: 'visa', title: t ? 'Выберите визу' : 'Choose your visa', description: t ? 'DTV, Education, Retirement, Non-B — что подходит вам.' : 'DTV, Education, Retirement, Non-B — pick what fits.', status: 'todo', duration: t ? '1–4 нед' : '1–4 wk' },
+    { id: 'housing', title: t ? 'Найдите жильё' : 'Find housing', description: t ? 'Долгосрочная аренда, кондо или вилла.' : 'Long-term rental, condo or villa.', status: 'todo', cost: t ? 'от ฿25k/мес' : 'from ฿25k/mo' },
+    { id: 'school', title: t ? 'Выберите школу или сад' : 'Pick a school', description: t ? 'Если переезжаете с детьми.' : 'If moving with children.', status: 'todo' },
+    { id: 'arrive', title: t ? 'Прилёт и трансфер' : 'Arrive & transfer', description: t ? 'Встреча в аэропорту, первая SIM, заселение.' : 'Airport meet, first SIM, check-in.', status: 'todo', duration: t ? '1 день' : '1 day' },
+    { id: 'tm30', title: t ? 'Подайте TM30' : 'File TM30', description: t ? 'Регистрация адреса в течение 24 часов.' : 'Register your address within 24 hours.', status: 'todo' },
+    { id: 'bank', title: t ? 'Откройте счёт в банке' : 'Open a bank account', description: t ? 'Bangkok Bank, Kasikorn, SCB.' : 'Bangkok Bank, Kasikorn, SCB.', status: 'todo', duration: t ? '1–2 нед' : '1–2 wk' },
+    { id: 'medical', title: t ? 'Подключите медицину' : 'Set up healthcare', description: t ? 'Страховка, врач, аптека, педиатр.' : 'Insurance, doctor, pharmacy, paediatrician.', status: 'todo' },
+    { id: 'community', title: t ? 'Войдите в комьюнити' : 'Join the community', description: t ? 'Экспат-чаты, спорт, события.' : 'Expat groups, sports, events.', status: 'todo' },
+  ];
+
   return (
     <LandingLayout
       icon={Globe}
@@ -125,8 +142,39 @@ export default function RelocateLandingPage() {
       whatsappUrl={whatsappUrl}
       whatsappLabel={t ? 'Написать в WhatsApp' : 'Chat on WhatsApp'}
     >
+      {/* GOV.UK-style start page */}
+      <StartPageLayout
+        cluster={t ? 'РЕЛОКАЦИЯ · 9 ШАГОВ' : 'RELOCATION · 9 STEPS'}
+        title={t ? 'Переезд на Пхукет за 9 шагов' : 'Relocate to Phuket in 9 steps'}
+        summary={t
+          ? 'Понятный план для тех, кто планирует переехать на 6+ месяцев. От выбора визы до открытия счёта в банке.'
+          : 'A clear plan for anyone moving for 6+ months. From choosing a visa to opening a bank account.'}
+        meta={{
+          duration: t ? '4–8 недель' : '4–8 weeks',
+          cost: t ? 'от ฿15,000' : 'from ฿15,000',
+          eligibility: t ? 'Любая национальность' : 'Any nationality',
+          requirements: t ? 'Паспорт, бюджет' : 'Passport, budget',
+        }}
+        eligibility={t
+          ? ['Едете на срок от 6 месяцев', 'Любой состав семьи', 'Любой бюджет — есть DIY и VIP-варианты']
+          : ['Moving for 6+ months', 'Any household type', 'Any budget — DIY to VIP options available']}
+        requirements={t
+          ? ['Действующий паспорт (>6 мес.)', 'Подтверждение дохода / средств', 'Адрес проживания на первое время']
+          : ['Valid passport (>6 months)', 'Proof of income or funds', 'Initial accommodation address']}
+        startLabel={t ? 'Начать roadmap' : 'Start the roadmap'}
+        onStart={scrollToQuiz}
+        secondaryLabel={t ? 'Спросить в WhatsApp' : 'Ask on WhatsApp'}
+        onSecondary={() => window.open(whatsappUrl, '_blank')}
+      />
+
+      <StepByStepNav
+        title={t ? 'Что нужно сделать' : 'What you need to do'}
+        steps={relocationSteps}
+      />
+
       {/* Quiz */}
-      <div className="px-4 py-8">
+      <div id="relocation-quiz" className="px-4 py-8 scroll-mt-20">
+
         <div className="max-w-3xl mx-auto rounded-2xl border border-border bg-card p-5 md:p-6">
           <h2 className="text-xl font-bold font-display text-foreground">
             {t ? 'Relocation Quiz: персональный roadmap' : 'Relocation Quiz: personalized roadmap'}

@@ -14,6 +14,7 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { SEOHead } from '@/components/seo';
+import { StartPageLayout } from '@/components/patterns';
 
 interface QuizOption {
   id: string;
@@ -198,6 +199,7 @@ export default function VisaQuizPage() {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const isRu = language === 'ru';
+  const [started, setStarted] = useState(false);
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [showResult, setShowResult] = useState(false);
@@ -249,7 +251,34 @@ export default function VisaQuizPage() {
         description={isRu ? 'Пройдите квиз и узнайте какая виза подходит для вашей поездки в Таиланд' : 'Take a quick quiz to find the right visa for your Thailand trip'}
       />
 
-      {/* Header */}
+      {!started ? (
+        <StartPageLayout
+          cluster={isRu ? 'ВИЗЫ И ДОКУМЕНТЫ' : 'VISAS & DOCUMENTS'}
+          title={isRu ? 'Подберите подходящую визу за 4 шага' : 'Find the right visa in 4 steps'}
+          summary={isRu
+            ? 'Короткий квиз, который покажет, какая тайская виза подходит вашей цели поездки. В конце — стоимость, сроки и контакт юриста.'
+            : 'A short quiz that picks the right Thai visa for your trip. Ends with cost, timing, and a lawyer contact.'}
+          meta={{
+            duration: isRu ? '2 мин' : '2 min',
+            cost: isRu ? 'Бесплатно' : 'Free',
+            eligibility: isRu ? 'Любой паспорт' : 'Any passport',
+            requirements: isRu ? 'Цель и срок поездки' : 'Trip purpose & duration',
+          }}
+          eligibility={isRu
+            ? ['Едете в Таиланд впервые или повторно', 'Любой состав поездки: один, пара, семья', 'Любая цель: туризм, работа, учёба, пенсия']
+            : ['First trip or returning', 'Any party: solo, couple, family', 'Any purpose: tourism, work, study, retirement']}
+          requirements={isRu
+            ? ['Знаете цель поездки', 'Знаете планируемый срок', 'Знаете тип паспорта']
+            : ['You know your trip purpose', 'You know how long you plan to stay', 'You know your passport type']}
+          startLabel={isRu ? 'Начать квиз' : 'Start the quiz'}
+          onStart={() => setStarted(true)}
+          secondaryLabel={isRu ? 'Назад' : 'Back'}
+          onSecondary={() => navigate(-1)}
+          lastUpdated={isRu ? 'Апр 2026' : 'Apr 2026'}
+        />
+      ) : (
+        <>
+          {/* Header */}
       <div className="sticky top-0 z-40 bg-background border-b border-border/50">
         <div className="flex items-center gap-3 px-4 py-3">
           <Button variant="ghost" size="icon" className="shrink-0 h-9 w-9" onClick={step === 0 && !showResult ? () => navigate(-1) : handleBack}>
@@ -399,6 +428,8 @@ export default function VisaQuizPage() {
           </div>
         ) : null}
       </div>
+        </>
+      )}
     </AppLayout>
   );
 }

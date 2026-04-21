@@ -2,7 +2,7 @@
  * /newbuilds — Themed hub: tools & CTAs. Canonical catalog lives at /property/offplan.
  */
 import React, { useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Building2,
   Map,
@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { useOffplanProjects } from '@/hooks/useOffplanProjects';
+import { StartPageLayout, StepByStepNav, type Step } from '@/components/patterns';
 
 type ToolCard = {
   to: string;
@@ -44,6 +45,7 @@ const TOOL_CARDS: ToolCard[] = [
 ];
 
 export default function NewbuildsLanding() {
+  const navigate = useNavigate();
   const { data: allProjects, isLoading } = useOffplanProjects();
   const projects = allProjects || [];
 
@@ -52,6 +54,16 @@ export default function NewbuildsLanding() {
     if (withRoi.length === 0) return 0;
     return withRoi.reduce((s, p) => s + (p.roiProjected || 0), 0) / withRoi.length;
   }, [projects]);
+
+  const offplanSteps: Step[] = [
+    { id: 'budget', title: 'Определите бюджет', description: 'Цена + рассрочка + меблировка + налоги.', status: 'todo', duration: '30 мин' },
+    { id: 'area', title: 'Выберите район', description: 'Bang Tao, Layan, Rawai — у каждого своя экономика.', status: 'todo' },
+    { id: 'shortlist', title: 'Соберите шорт-лист', description: 'До 4 проектов в сравнении.', status: 'todo' },
+    { id: 'dd', title: 'Due diligence', description: 'Лицензия EIA, escrow, репутация застройщика.', status: 'todo', duration: '1–2 нед' },
+    { id: 'reserve', title: 'Резерв и контракт', description: 'Бронь, SPA, перевод первого транша.', status: 'todo', cost: 'от ฿100k' },
+    { id: 'payments', title: 'График платежей', description: 'Транши по строительной готовности.', status: 'todo' },
+    { id: 'handover', title: 'Приёмка и регистрация', description: 'Snagging, оформление чанот / leasehold.', status: 'todo' },
+  ];
 
   return (
     <NewbuildsLayout>
@@ -100,6 +112,35 @@ export default function NewbuildsLanding() {
             </Button>
           </div>
         </header>
+
+        {/* GOV.UK-style start page for the off-plan purchase journey */}
+        <StartPageLayout
+          cluster="ИНВЕСТ · 7 ШАГОВ"
+          title="Первая покупка off-plan за 7 шагов"
+          summary="Понятный путь от выбора района до получения ключей. Каждый шаг — с чек-листом, документами и контактами проверенных юристов."
+          meta={{
+            duration: '6–24 мес.',
+            cost: 'от ฿4,5M',
+            eligibility: 'Иностранцы и резиденты',
+            requirements: 'Паспорт, бюджет, цель',
+          }}
+          eligibility={[
+            'Иностранец-нерезидент или резидент Таиланда',
+            'Цель: жить, сдавать или комбинированная',
+            'Бюджет от ฿4,5M (≈ $130k)',
+          ]}
+          requirements={[
+            'Действующий заграничный паспорт',
+            'Подтверждение средств на первый взнос',
+            'Понимание долгосрочной цели (жить / доход / перепродажа)',
+          ]}
+          startLabel="Открыть каталог"
+          onStart={() => navigate(APP_ROUTES.OFFPLAN)}
+          secondaryLabel="Калькулятор ROI"
+          onSecondary={() => navigate(APP_ROUTES.NEWBUILDS_CALCULATOR)}
+        />
+
+        <StepByStepNav title="Что нужно сделать" steps={offplanSteps} />
 
         <section className="max-w-5xl mx-auto px-4 py-8 md:py-10">
           <h2 className="text-sm font-semibold mb-4 text-foreground">
