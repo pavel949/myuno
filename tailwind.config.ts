@@ -108,6 +108,7 @@ export default {
         },
         "accent-amber": {
           DEFAULT: "hsl(var(--accent-amber))",
+          foreground: "hsl(var(--accent-amber-foreground))",
         },
         "icon-dark": {
           DEFAULT: "hsl(var(--icon-dark))",

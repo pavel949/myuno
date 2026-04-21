@@ -81,6 +81,7 @@
   --accent-purple: 270 60% 60%;
   --accent-cyan: 190 65% 48%;
   --accent-amber: 38 92% 50%;
+  --accent-amber-foreground: 30 60% 10%;
   --icon-dark: 216 60% 7%;
 
   /* ═══ Cluster Accents — locked per DESIGN_BIBLE §7.4 ═══ */
@@ -270,6 +271,7 @@ html.light {
   --accent-purple: 270 55% 50%;
   --accent-cyan: 190 65% 40%;
   --accent-amber: 38 85% 45%;
+  --accent-amber-foreground: 30 60% 10%;
   --icon-dark: 60 3% 10%;
 
   /* Cluster Accents — locked per Bible §7.4 (same hues, light-mode-tuned L) */
