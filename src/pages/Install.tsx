@@ -21,6 +21,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { PageContainer } from "@/components/uno/PageContainer";
 import { PageHeader } from "@/components/uno/PageHeader";
+import { AppLayout } from "@/components/layout/AppLayout";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { IOSInstallGuide } from "@/components/pwa/IOSInstallGuide";
