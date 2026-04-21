@@ -181,8 +181,12 @@ export default function MeDocuments() {
   const [uploadOpen, setUploadOpen] = useState(false);
   const [editingDoc, setEditingDoc] = useState<MyDocument | null>(null);
   const [deletingDoc, setDeletingDoc] = useState<MyDocument | null>(null);
-  // Documents pending delete are hidden optimistically until the undo window passes
-  const [pendingDeleteIds, setPendingDeleteIds] = useState<Set<string>>(new Set());
+
+  // Centralized re-click guard for all card actions (delete + open).
+  // Keys are namespaced so the same doc can have independent locks per action.
+  const actionLock = useActionLock();
+  const deleteKey = (id: string) => `delete:${id}`;
+  const openKey   = (id: string) => `open:${id}`;
 
   /** Soft-delete the document in DB (used after the undo window expires). */
   const archiveDoc = async (doc: MyDocument) => {
@@ -195,10 +199,32 @@ export default function MeDocuments() {
     if (error) throw error;
   };
 
-  /** Confirm flow: hide locally + show 5s toast with Undo. */
+  /** Sign + open a vault file, or open the public URL directly. */
+  const handleOpen = (doc: MyDocument) => {
+    if (!doc.fileUrl) return;
+    void actionLock.withLock(openKey(doc.id), async () => {
+      const isFullUrl = /^https?:\/\//i.test(doc.fileUrl!);
+      if (isFullUrl) {
+        window.open(doc.fileUrl!, '_blank', 'noopener');
+        return;
+      }
+      const { data, error } = await supabase.storage
+        .from('user-documents')
+        .createSignedUrl(doc.fileUrl!, 3600);
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+      window.open(data.signedUrl, '_blank', 'noopener');
+    });
+  };
+
+  /** Confirm flow: lock card + show 5s toast with Undo. */
   const confirmDelete = (doc: MyDocument) => {
     setDeletingDoc(null);
-    setPendingDeleteIds((prev) => new Set(prev).add(doc.id));
+    const key = deleteKey(doc.id);
+    if (actionLock.isLocked(key)) return; // already pending — ignore re-trigger
+    actionLock.lock(key);
 
     let undone = false;
     const UNDO_MS = 5000;
@@ -212,11 +238,7 @@ export default function MeDocuments() {
           label: isRu ? 'Отменить' : 'Undo',
           onClick: () => {
             undone = true;
-            setPendingDeleteIds((prev) => {
-              const next = new Set(prev);
-              next.delete(doc.id);
-              return next;
-            });
+            actionLock.unlock(key);
             toast.dismiss(toastId);
             toast.success(isRu ? 'Удаление отменено' : 'Delete cancelled');
           },
@@ -230,19 +252,9 @@ export default function MeDocuments() {
         await archiveDoc(doc);
         qc.invalidateQueries({ queryKey: ['me-documents'] });
       } catch (e) {
-        // Restore on failure so user doesn't silently lose the doc
-        setPendingDeleteIds((prev) => {
-          const next = new Set(prev);
-          next.delete(doc.id);
-          return next;
-        });
         toast.error((e as Error).message);
       } finally {
-        setPendingDeleteIds((prev) => {
-          const next = new Set(prev);
-          next.delete(doc.id);
-          return next;
-        });
+        actionLock.unlock(key);
       }
     }, UNDO_MS);
   };
