@@ -1,15 +1,37 @@
 /**
  * /newbuilds/map — Interactive map view with layer filters
  */
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ChevronLeft, MapPin, List, Filter, Building2, Home, Layers } from 'lucide-react';
+import { ChevronLeft, MapPin, List, Layers, Loader2 } from 'lucide-react';
+import { GoogleMap, OverlayView } from '@react-google-maps/api';
 import NewbuildsLayout from '@/components/newbuilds/NewbuildsLayout';
 import { NbProjectCard } from '@/components/newbuilds/NbProjectCard';
 import { NbPriceDisplay } from '@/components/newbuilds/NbPriceDisplay';
 import { NbProjectStatusBadge } from '@/components/newbuilds/NbProjectStatusBadge';
 import { useNewbuildProjects, type NewbuildProject } from '@/hooks/useNewbuildProjects';
+import { useGoogleMaps } from '@/contexts/GoogleMapsContext';
+import { getDefaultCenter, getDefaultZoom } from '@/lib/config/geography';
 import { APP_ROUTES } from '@/lib/config/routes';
+
+const MAP_CONTAINER_STYLE: React.CSSProperties = { width: '100%', height: '100%' };
+
+// Dark luxury map style matching newbuilds theme
+const MAP_STYLES: google.maps.MapTypeStyle[] = [
+  { elementType: 'geometry', stylers: [{ color: '#0f1620' }] },
+  { elementType: 'labels.text.stroke', stylers: [{ color: '#0f1620' }] },
+  { elementType: 'labels.text.fill', stylers: [{ color: '#8a7a55' }] },
+  { featureType: 'administrative.locality', elementType: 'labels.text.fill', stylers: [{ color: '#c9a961' }] },
+  { featureType: 'poi', elementType: 'labels.text.fill', stylers: [{ color: '#6b5e3f' }] },
+  { featureType: 'poi.park', elementType: 'geometry', stylers: [{ color: '#1a2820' }] },
+  { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#1a2330' }] },
+  { featureType: 'road', elementType: 'geometry.stroke', stylers: [{ color: '#0a0f17' }] },
+  { featureType: 'road', elementType: 'labels.text.fill', stylers: [{ color: '#7a6a45' }] },
+  { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: '#2a3445' }] },
+  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0a1018' }] },
+  { featureType: 'water', elementType: 'labels.text.fill', stylers: [{ color: '#4a5a7a' }] },
+  { featureType: 'transit', stylers: [{ visibility: 'off' }] },
+];
 
 const STATUS_LAYERS = [
   { key: 'all', label: 'Все', color: 'hsl(var(--nb-gold))' },
@@ -58,10 +80,43 @@ export default function NewbuildsMap() {
     });
   }, [projects, statusFilter, typeFilter]);
 
-  const projectsWithCoords = filtered.filter(p => p.lat && p.lng);
+  const projectsWithCoords = useMemo(
+    () => filtered.filter(p => p.lat && p.lng),
+    [filtered]
+  );
+
+  const { isLoaded, loadError, hasKey } = useGoogleMaps();
+  const mapRef = useRef<google.maps.Map | null>(null);
+
+  const defaultCenter = useMemo(() => getDefaultCenter('phuket'), []);
+  const defaultZoom = useMemo(() => getDefaultZoom('phuket'), []);
+
+  const onMapLoad = useCallback((map: google.maps.Map) => {
+    mapRef.current = map;
+  }, []);
+  const onMapUnmount = useCallback(() => {
+    mapRef.current = null;
+  }, []);
+
+  // Auto-fit bounds when filtered projects change
+  useEffect(() => {
+    if (!mapRef.current || projectsWithCoords.length === 0) return;
+    if (projectsWithCoords.length === 1) {
+      const p = projectsWithCoords[0];
+      mapRef.current.setCenter({ lat: p.lat!, lng: p.lng! });
+      mapRef.current.setZoom(14);
+      return;
+    }
+    const bounds = new google.maps.LatLngBounds();
+    projectsWithCoords.forEach(p => bounds.extend({ lat: p.lat!, lng: p.lng! }));
+    mapRef.current.fitBounds(bounds, 60);
+  }, [projectsWithCoords]);
 
   const handleMarkerClick = useCallback((project: NewbuildProject) => {
     setSelectedProject(project);
+    if (mapRef.current && project.lat && project.lng) {
+      mapRef.current.panTo({ lat: project.lat, lng: project.lng });
+    }
   }, []);
 
   return (
@@ -150,58 +205,86 @@ export default function NewbuildsMap() {
             </div>
           )}
 
-          {/* Static map placeholder - uses project markers */}
-          <div className="w-full h-full flex items-center justify-center relative overflow-hidden">
-            <div className="text-center space-y-4 relative z-10">
-              <MapPin className="w-12 h-12 mx-auto" style={{ color: 'hsl(var(--nb-gold))' }} />
-              <p className="nb-display text-xl" style={{ color: 'hsl(var(--nb-text))' }}>Карта проектов Пхукета</p>
-              <p className="text-sm max-w-md mx-auto" style={{ color: 'hsl(var(--nb-muted))' }}>
-                {projectsWithCoords.length} проектов с координатами
-              </p>
+          {/* Real Google Map */}
+          {!hasKey || loadError ? (
+            <div className="w-full h-full flex items-center justify-center text-center px-6">
+              <div className="space-y-3">
+                <MapPin className="w-12 h-12 mx-auto" style={{ color: 'hsl(var(--nb-gold))' }} />
+                <p className="nb-display text-lg" style={{ color: 'hsl(var(--nb-text))' }}>
+                  Карта недоступна
+                </p>
+                <p className="text-sm max-w-md" style={{ color: 'hsl(var(--nb-muted))' }}>
+                  {loadError?.message ?? 'Google Maps API ключ не настроен'}
+                </p>
+              </div>
             </div>
-
-            {/* Project markers */}
-            <div className="absolute inset-0">
+          ) : !isLoaded ? (
+            <div className="w-full h-full flex items-center justify-center">
+              <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'hsl(var(--nb-gold))' }} />
+            </div>
+          ) : (
+            <GoogleMap
+              mapContainerStyle={MAP_CONTAINER_STYLE}
+              center={defaultCenter}
+              zoom={defaultZoom}
+              onLoad={onMapLoad}
+              onUnmount={onMapUnmount}
+              options={{
+                styles: MAP_STYLES,
+                disableDefaultUI: false,
+                mapTypeControl: false,
+                streetViewControl: false,
+                fullscreenControl: true,
+                zoomControl: true,
+                clickableIcons: false,
+                backgroundColor: '#0f1620',
+              }}
+            >
               {projectsWithCoords.map(project => {
-                const x = ((project.lng! - 98.25) / 0.35) * 100;
-                const y = (1 - (project.lat! - 7.75) / 0.35) * 100;
                 const isSelected = selectedProject?.id === project.id;
                 const markerColor = getStatusColor(project.project_status);
-
                 return (
-                  <button
+                  <OverlayView
                     key={project.id}
-                    onClick={() => handleMarkerClick(project)}
-                    className="absolute transform -translate-x-1/2 -translate-y-full transition-all z-10"
-                    style={{
-                      left: `${Math.max(5, Math.min(95, x))}%`,
-                      top: `${Math.max(5, Math.min(90, y))}%`,
-                    }}
+                    position={{ lat: project.lat!, lng: project.lng! }}
+                    mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+                    getPixelPositionOffset={(w, h) => ({ x: -(w / 2), y: -h })}
                   >
-                    <div
-                      className="px-2 py-1 rounded-lg text-[10px] font-bold whitespace-nowrap transition-all"
-                      style={{
-                        background: isSelected ? markerColor : 'hsl(var(--nb-bg) / 0.9)',
-                        color: isSelected ? 'hsl(var(--nb-bg))' : markerColor,
-                        border: `2px solid ${markerColor}`,
-                        transform: isSelected ? 'scale(1.15)' : 'scale(1)',
-                        boxShadow: isSelected ? `0 4px 12px ${markerColor}44` : 'none',
-                      }}
+                    <button
+                      onClick={() => handleMarkerClick(project)}
+                      className="transition-all"
+                      style={{ zIndex: isSelected ? 1000 : 1 }}
                     >
-                      {project.price_from ? `฿${(project.price_from / 1_000_000).toFixed(1)}M` : project.name_en?.slice(0, 12)}
-                    </div>
-                    <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] mx-auto"
-                      style={{
-                        borderLeftColor: 'transparent',
-                        borderRightColor: 'transparent',
-                        borderTopColor: markerColor,
-                      }}
-                    />
-                  </button>
+                      <div
+                        className="px-2 py-1 rounded-lg text-[10px] font-bold whitespace-nowrap transition-all"
+                        style={{
+                          background: isSelected ? markerColor : 'hsl(var(--nb-bg) / 0.92)',
+                          color: isSelected ? 'hsl(var(--nb-bg))' : markerColor,
+                          border: `2px solid ${markerColor}`,
+                          transform: isSelected ? 'scale(1.15)' : 'scale(1)',
+                          boxShadow: isSelected
+                            ? `0 4px 12px ${markerColor}66`
+                            : '0 2px 6px rgba(0,0,0,0.4)',
+                        }}
+                      >
+                        {project.price_from
+                          ? `฿${(project.price_from / 1_000_000).toFixed(1)}M`
+                          : (project.name_ru || project.name_en || '').slice(0, 12)}
+                      </div>
+                      <div
+                        className="w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] mx-auto"
+                        style={{
+                          borderLeftColor: 'transparent',
+                          borderRightColor: 'transparent',
+                          borderTopColor: markerColor,
+                        }}
+                      />
+                    </button>
+                  </OverlayView>
                 );
               })}
-            </div>
-          </div>
+            </GoogleMap>
+          )}
 
           {/* Selected project popup */}
           {selectedProject && (
