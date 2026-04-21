@@ -1,86 +1,64 @@
 
 
-# Анализ GOV.UK → что взять для myUNO
+# Полировка главной страницы myUNO — этап C+
 
-## Что делает GOV.UK эталоном госуслуг (и почему это важно для нас)
+Применяем 3 точечных улучшения по результатам аудита GOV.UK / Госуслуги. Цель — убрать «провисания» на мобильном и десктопе, не ломая DS 2.1 и существующую архитектуру.
 
-GOV.UK — это **единая инфраструктура доступа к государству**: 25+ ведомств, 700+ услуг, один аккаунт, один язык, одна навигация. Хотя мы коммерческая структура, ровно эта модель — то, чем myUNO должен стать для иностранцев на Пхукете: **«одна точка входа во всё, что нужно для жизни на острове»**.
+## Что меняем
 
-## 6 ключевых паттернов GOV.UK, применимых к myUNO
+### 1. Десктопный hero — двухколоночная сетка
+**Файл:** `src/components/home/HeroIntro.tsx`
 
-### 1. Task-based навигация вместо product-based
-GOV.UK сортирует не по «министерствам», а по **жизненным задачам**: «Visit the UK», «Work in the UK», «Births, deaths, marriages». У нас сейчас навигация частично ведомственная (Property/Stays/Deals/CRM). Применить: рефакторинг `AllSectionsAccordion` и `/discover` под задачи: *«Я только приехал»*, *«Я живу здесь»*, *«Я владею недвижимостью»*, *«Я инвестирую»* — это уже совпадает с personas, но не доведено до конца в навигации.
+Сейчас на `lg:` (≥1024px) hero занимает узкую центральную колонку, справа и слева — пустота. По образцу GOV.UK Start pages:
 
-### 2. «Popular on GOV.UK» — статистический shortcut-блок
-Топ-6 самых частых задач прямо на главной (HMRC sign-in, eVisa, Universal Credit). У нас на `Index.tsx` есть `PrimaryActions`, но без data-driven логики. Применить: блок «Чаще всего ищут на Пхукете» (виза-ран, OTP в банке, продление аренды, SIM-карта, врач) на основе реальной аналитики.
+- На `lg:` разбиваем секцию на 2 колонки (`lg:grid lg:grid-cols-[1.2fr_1fr] lg:gap-10`)
+- Слева — заголовок + подзаголовок + поиск (как сейчас)
+- Справа — компактный preview-блок «Популярное сегодня» (top-3 задачи из `PopularTasks` источника), визуально как карточка с border + лёгкий surface
+- На мобильном (`<lg`) — всё как сейчас, без изменений
 
-### 3. Start pages — единая точка входа в каждый сервис
-Каждая услуга на GOV.UK начинается со «Start page»: что это, кто может пользоваться, что понадобится, сколько стоит, сколько займёт времени, **зелёная кнопка Start**. У нас вертикали (визы, флористика, яхты) сразу бросают в каталог. Применить: для Legal/Visa/Stays/Newbuilds — добавить обязательную start-page по шаблону.
+Чтобы не дублировать запрос к `analytics_events`, выносим хук `usePopularTasks()` из `PopularTasks.tsx` в отдельный файл `src/hooks/home/usePopularTasks.ts`. Оба компонента (мобильный список и десктопный preview) используют один React Query кэш по `['popular-tasks-7d']`.
 
-### 4. Step-by-step navigation (визы, релокация)
-GOV.UK для сложных многошаговых процессов (получить визу, открыть бизнес) использует пронумерованный чек-лист с прогрессом. У нас есть `VisaQuiz` и `Newbuilds`, но нет универсального паттерна **«релокация в Пхукет: шаги 1–7»**, **«первая покупка кондо: шаги 1–9»**. Применить: компонент `StepByStepNav` + контент-страницы под 4 persona-сценария.
+### 2. Подпись под логотипом в `HomeTopBar` — institutional trust
+**Файл:** `src/components/home/HomeTopBar.tsx` (правка существующего)
 
-### 5. Plain English / Plain Russian — контент-стандарт
-GOV.UK имеет жёсткий contentguide: короткие предложения, активный залог, никакого жаргона, читабельность 9-летнего ребёнка. У нас контент в RU/EN неоднороден. Применить: добавить в `docs/` файл `CONTENT_STYLE.md` (правила тона, длины, стоп-слова) + чек-лист для admin при публикации листинга.
+Под надписью «myUNO» добавляем тонкую подпись:
+- RU: «Инфраструктура для жизни на Пхукете»
+- EN: «Infrastructure for life on Phuket»
 
-### 6. Радикальная доступность (a11y AAA)
-GOV.UK Design System — эталон WCAG 2.2 AA. У нас shadcn/ui даёт базу, но нет аудита. Применить: skip-link, focus rings по токену, обязательный `aria-label` на иконочных кнопках (мы это уже частично сделали в `ActionIconButton`), контраст ≥ 7:1 для критичного текста.
+Стиль: `text-[10px] text-muted-foreground/60 tracking-wide`, скрывается на очень узких экранах если конфликтует с правой группой кнопок (`hidden xs:block`). Это даёт «государственный» оттенок доверия без визуального шума.
 
-## Что НЕ копируем
+### 3. Упрощение порядка секций на главной для возвращающихся юзеров
+**Файл:** `src/pages/Index.tsx`
 
-- Монохромный govuk-blue + Transport-шрифт — у нас бренд deep-sea dark + Golos/Playfair, остаёмся в DS 2.1
-- Полное отсутствие коммерции/cart — мы маркетплейс
-- Отсутствие персонализации — у нас persona-driven UI и AI Concierge
+Сейчас порядок: TopBar → Hero → RealEstateEntry → TrustAsAService → PrimaryActions/PopularTasks → ActiveSituation → AllSections → TrustFooter. Это **8 секций до того, как юзер видит свою задачу**.
 
-## Сравнение: где GOV.UK впереди, где myUNO
+Меняем порядок на task-first:
+1. TopBar
+2. WorkspaceHomeBanner (если активен)
+3. HeroIntro (с десктоп-preview справа)
+4. **PopularTasks / PrimaryActions** ← поднимаем выше
+5. ActiveSituation
+6. RealEstateEntry (за флагом, без изменений)
+7. TrustAsAService (за флагом, без изменений)
+8. AllSectionsAccordion
+9. TrustFooter
 
-```text
-                       GOV.UK         myUNO (сейчас)
-Единый аккаунт         ✅ One Login   ✅ Supabase Auth
-Task-based нав.        ✅ glob.       🟡 частично (AllSections)
-Start-page паттерн     ✅ обяз.       ❌ нет шаблона
-Step-by-step           ✅ компонент   🟡 только Visa Quiz
-Контент-гайд           ✅ строгий     ❌ нет
-A11y аудит             ✅ WCAG AA     🟡 базовый
-Personalization        ❌ нулевая     ✅ personas + AI
-Commerce/Booking       ❌ нет         ✅ Stripe + Order-First
-Bilingual              ✅ Welsh       ✅ RU/EN
-Push-уведомления       ✅ email       ✅ WhatsApp + Resend
-```
-
-myUNO **впереди** по персонализации, commerce и каналам коммуникации; **отстаёт** по структуре навигации, start-pages и контент-стандарту.
-
-## Конкретный план изменений (если утвердите)
-
-### Этап A — Контент и структура (без БД)
-1. `docs/CONTENT_STYLE.md` — RU/EN content guide на основе GOV.UK style
-2. `docs/INFO_ARCHITECTURE.md` — карта «жизненных задач» иностранца на Пхукете (4 persona × 6 кластеров = 24 сценария)
-3. Новый компонент `src/components/patterns/StartPageLayout.tsx` — шаблон start-page (что, кому, сколько стоит, сколько занимает, кнопка Start)
-4. Новый компонент `src/components/patterns/StepByStepNav.tsx` — чек-лист с прогрессом
-
-### Этап B — Применение к флагманским сценариям
-5. `/relocate` — переписать как step-by-step «Релокация в Пхукет: 9 шагов»
-6. `/visa/quiz` — обернуть в start-page + step-by-step
-7. `/newbuilds` — добавить start-page «Первая покупка off-plan: 7 шагов»
-8. Главная `Index.tsx` — заменить `PrimaryActions` на data-driven блок «Топ-6 задач сегодня» (запрос к analytics)
-
-### Этап C — A11y и infrastructure-feel
-9. Skip-link в `AppLayout`
-10. Audit `ActionIconButton` и аналогичных — `aria-busy`, `aria-label` везде
-11. Footer в стиле GOV.UK: Help / Contact / Terms / Accessibility statement / Cookies / Open data — одна строка, серый, без графики
+Логика: «что мне нужно сделать» → «что у меня сейчас в работе» → «истории успеха / доверие» → «всё остальное».
 
 ## Технические заметки
 
-- Новые роуты — только под существующими кластерами, без top-level (правило ARCHITECTURE_V2 §13)
-- Все цвета — из `tokens.css`, никакого govuk-blue
-- Step-by-step и Start-page — переиспользовать `MiniAppLayout`, не создавать новый shell
-- Контент start-pages хранить в `system_settings` или новой таблице `content_pages` с RU/EN полями (решим на этапе B)
-- Без бэкенд-изменений на этапе A — только новые компоненты и docs
-- За фичей «Топ-6 задач» поставить `feature_flag:popular_tasks_block`
+- Никаких изменений БД, новых роутов, новых shells
+- Все цвета — через существующие токены (`--card`, `--border`, `--muted-foreground`)
+- `usePopularTasks` остаётся private к домену home (`src/hooks/home/`), не выносим в платформу
+- `PopularTasks.tsx` рефакторится под использование общего хука — поведение и аналитика (`task_open` event) сохраняются 1:1
+- Десктопный preview справа от hero рендерится только при `lg:` через CSS, без JS-ветвления — без флешей контента
+- A11y: `aria-labelledby` на двух блоках с разными id, чтобы не конфликтовать
+- Skip-link и cookie-bar (изначально предложенные) — **не делаем в этой итерации**, чтобы не раздувать diff. Skip-link уже есть в `src/components/a11y/SkipToContent.tsx`, нужно отдельно проверить, подключён ли он в `AppLayout` — это сделаем следующей задачей
 
-## Что не входит в этот план
+## Что НЕ входит
 
-- Замена дизайн-системы — DS 2.1 остаётся
-- Интеграция с реальными гос-API Таиланда — отдельная инициатива
-- Перевод существующих 366 страниц на новый content style — постепенно, по мере правок
+- Cookie-banner редизайн (отдельная задача — нужно посмотреть текущий компонент)
+- Skip-to-content интеграция в AppLayout (отдельная задача после аудита)
+- Редизайн `TrustFooter` под GOV.UK footer (отдельный заход — этап C original)
+- Изменения в `PrimaryActions` / `RealEstateEntry` / `TrustAsAService`
 
