@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { ShieldCheck, BarChart3, FileSearch, CheckCircle, Search, ClipboardCheck, BookOpen, AlertTriangle, Building2, Scale, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { AppLayout } from '@/components/layout/AppLayout';
 import type { Variants, Easing } from 'framer-motion';
 
 const fadeUp: Variants = {
@@ -24,7 +25,7 @@ export default function NewDevelopmentsLanding() {
   const handleDD = () => navigate('/property?mode=buy&type=offplan');
 
   return (
-    <>
+    <AppLayout showHeader={false}>
       <Helmet>
         <title>{isRu ? 'Новостройки Пхукета — Независимая оценка проектов' : 'Phuket New Developments — Independent Project Ratings'}</title>
         <meta name="description" content={isRu
