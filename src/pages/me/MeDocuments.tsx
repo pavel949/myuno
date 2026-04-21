@@ -323,6 +323,7 @@ export default function MeDocuments() {
                       doc={d}
                       onEdit={setEditingDoc}
                       onDelete={setDeletingDoc}
+                      isDeleting={pendingDeleteIds.has(d.id)}
                     />
                   ))}
                 </div>
