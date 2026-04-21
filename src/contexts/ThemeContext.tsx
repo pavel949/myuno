@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
+import { applyTheme } from '@/lib/themeSwitch';
 
 type Theme = 'light' | 'dark' | 'system';
 
