@@ -42,6 +42,50 @@ const STATUS_TONE = {
 // Note: opening a vault file (sign URL → window.open) is handled inside the page
 // component via the shared `useActionLock` hook so re-clicks are debounced.
 
+/**
+ * ActionIconButton — standardized icon-only action button for DocCard rows.
+ *
+ * Renders a single Lucide icon and, when `isLoading=true`, swaps it for a
+ * spinner in-place (icon hidden via opacity to keep button width stable).
+ * Reused for Edit / Open / Delete so users always get the same visual cue
+ * about which specific button is busy.
+ */
+function ActionIconButton({
+  icon: Icon,
+  label,
+  onClick,
+  disabled,
+  isLoading = false,
+  tone,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  onClick: () => void;
+  disabled?: boolean;
+  isLoading?: boolean;
+  tone?: 'destructive';
+}) {
+  return (
+    <Button
+      size="sm"
+      variant="ghost"
+      className={cn(
+        'h-7 px-2 relative',
+        tone === 'destructive' && 'text-destructive hover:text-destructive',
+      )}
+      onClick={onClick}
+      disabled={disabled || isLoading}
+      aria-busy={isLoading}
+      aria-label={label}
+    >
+      <Icon className={cn('h-3.5 w-3.5', isLoading && 'opacity-0')} />
+      {isLoading && (
+        <Loader2 className="absolute inset-0 m-auto h-3.5 w-3.5 animate-spin" />
+      )}
+    </Button>
+  );
+}
+
 function DocCard({
   doc,
   onEdit,
@@ -100,42 +144,31 @@ function DocCard({
           )}
           <div className="ml-auto flex items-center gap-0.5">
             {isVault && onEdit && (
-              <Button
-                size="sm"
-                variant="ghost"
-                className="h-7 px-2"
+              <ActionIconButton
+                icon={Pencil}
+                label={isRu ? 'Редактировать' : 'Edit'}
                 onClick={() => onEdit(doc)}
                 disabled={isDeleting}
-                aria-label={isRu ? 'Редактировать' : 'Edit'}
-              >
-                <Pencil className="h-3.5 w-3.5" />
-              </Button>
+              />
             )}
             {doc.fileUrl && onOpen && (
-              <Button
-                size="sm"
-                variant="ghost"
-                className="h-7 px-2"
+              <ActionIconButton
+                icon={ExternalLink}
+                label={isRu ? 'Открыть' : 'Open'}
                 onClick={() => onOpen(doc)}
-                disabled={isDeleting || isOpening}
-                aria-label={isRu ? 'Открыть' : 'Open'}
-              >
-                {isOpening
-                  ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  : <ExternalLink className="h-3.5 w-3.5" />}
-              </Button>
+                disabled={isDeleting}
+                isLoading={isOpening}
+              />
             )}
             {isVault && onDelete && (
-              <Button
-                size="sm"
-                variant="ghost"
-                className="h-7 px-2 text-destructive hover:text-destructive"
+              <ActionIconButton
+                icon={Trash2}
+                label={isRu ? 'Удалить' : 'Delete'}
                 onClick={() => onDelete(doc)}
                 disabled={isDeleting}
-                aria-label={isRu ? 'Удалить' : 'Delete'}
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </Button>
+                isLoading={isDeleting}
+                tone="destructive"
+              />
             )}
           </div>
         </div>
