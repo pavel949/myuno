@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Bell } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import type { UserPersona } from '@/hooks/useUserPersonas';
 import { ROLE_META } from '@/lib/roleBlend';
@@ -32,6 +33,8 @@ function useHasUnread(userId: string | undefined) {
 export function HomeTopBar({ personas, onRoleSheetOpen }: HomeTopBarProps) {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { language } = useLanguage();
+  const isRu = language === 'ru';
   const initials = user?.user_metadata?.full_name
     ? (user.user_metadata.full_name as string).split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()
     : 'U';
@@ -40,15 +43,20 @@ export function HomeTopBar({ personas, onRoleSheetOpen }: HomeTopBarProps) {
   const displayPersonas = personas.slice(0, 3);
 
   return (
-    <div className="flex items-center justify-between pt-2 pb-3">
-      {/* Logo */}
-      <div className="flex items-baseline gap-0">
-        <span className="font-display text-[22px] font-normal text-muted-foreground tracking-[-0.02em]">my</span>
-        <span className="font-display text-[22px] font-bold text-foreground tracking-[0.02em]">UNO</span>
+    <div className="flex items-center justify-between pt-2 pb-3 gap-3">
+      {/* Logo + institutional tagline */}
+      <div className="flex flex-col min-w-0">
+        <div className="flex items-baseline gap-0">
+          <span className="font-display text-[22px] font-normal text-muted-foreground tracking-[-0.02em]">my</span>
+          <span className="font-display text-[22px] font-bold text-foreground tracking-[0.02em]">UNO</span>
+        </div>
+        <span className="hidden sm:block text-[10px] leading-tight text-muted-foreground/60 tracking-wide -mt-0.5 truncate">
+          {isRu ? 'Инфраструктура для жизни на Пхукете' : 'Infrastructure for life on Phuket'}
+        </span>
       </div>
 
       {/* Right cluster */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 shrink-0">
         {/* Role stack pill — min 44px touch target */}
         {displayPersonas.length > 0 && (
           <button
