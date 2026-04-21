@@ -55,6 +55,20 @@ export function EditVaultDocumentDialog({ open, onOpenChange, doc }: Props) {
   // Real DB id is stored after the `vault-` prefix
   const dbId = doc?.id.startsWith('vault-') ? doc.id.slice('vault-'.length) : null;
 
+  // Reset fields back to the document's saved values (used by Cancel)
+  const resetFields = () => {
+    if (doc) {
+      setCategory(doc.category);
+      setTitle(doc.title);
+      setExpiry(doc.expiryDate ?? '');
+    }
+  };
+
+  const handleCancel = () => {
+    resetFields();
+    onOpenChange(false);
+  };
+
   const save = useMutation({
     mutationFn: async () => {
       if (!dbId) throw new Error('Invalid document');
