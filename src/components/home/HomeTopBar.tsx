@@ -41,10 +41,16 @@ export function HomeTopBar({ personas, onRoleSheetOpen }: HomeTopBarProps) {
 
   return (
     <div className="flex items-center justify-between pt-2 pb-3">
-      {/* Logo */}
-      <div className="flex items-baseline gap-0">
-        <span className="font-display text-[22px] font-normal text-muted-foreground tracking-[-0.02em]">my</span>
-        <span className="font-display text-[22px] font-bold text-foreground tracking-[0.02em]">UNO</span>
+      {/* Logo + institutional tagline */}
+      <div className="flex flex-col min-w-0">
+        <div className="flex items-baseline gap-0">
+          <span className="font-display text-[22px] font-normal text-muted-foreground tracking-[-0.02em]">my</span>
+          <span className="font-display text-[22px] font-bold text-foreground tracking-[0.02em]">UNO</span>
+        </div>
+        <span className="hidden sm:block text-[10px] leading-tight text-muted-foreground/60 tracking-wide -mt-0.5 truncate">
+          {/* Bilingual without context to avoid extra hook here — falls back to RU/EN bilingual hairline */}
+          <span className="lang-ru" aria-hidden="false">Инфраструктура для жизни на Пхукете</span>
+        </span>
       </div>
 
       {/* Right cluster */}
