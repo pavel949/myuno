@@ -152,7 +152,6 @@ describe('getBottomBarItems — helper', () => {
   });
 
   it('falls back to guest for an unknown role', () => {
-    // @ts-expect-error — testing runtime fallback for invalid input
     expect(getBottomBarItems('captain')).toBe(BOTTOM_BAR_BY_ROLE.guest);
   });
 
