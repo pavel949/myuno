@@ -55,7 +55,10 @@ export const BottomBar = forwardRef<HTMLDivElement, BottomBarProps>(
 
     if (FULLSCREEN_PREFIXES.some((p) => location.pathname.startsWith(p))) return null;
 
-    const navItems: NavItem[] = PRIMARY_NAV[role];
+    // Phase A5: feature-flagged swap of guest nav to Gosuslugi-style /me hub.
+    const meHubEnabled = useFeatureFlag('me_shell_v1', false);
+    const navItems: NavItem[] =
+      role === 'guest' && meHubEnabled ? GUEST_NAV_ME_HUB : PRIMARY_NAV[role];
     const showAppsButton = shouldShowAppsLauncher(role);
 
     const handleNavClick = (e: React.MouseEvent<HTMLElement>) => {
