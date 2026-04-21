@@ -82,6 +82,16 @@
   --accent-cyan: 190 65% 48%;
   --accent-amber: 38 92% 50%;
   --accent-amber-foreground: 30 60% 10%;
+  /* Extended accents — semantic equivalents of common Tailwind hues, dark-tuned */
+  --accent-emerald: 157 65% 50%;   /* slightly desat from primary */
+  --accent-rose: 350 80% 60%;
+  --accent-sky: 200 90% 60%;
+  --accent-orange: 25 90% 58%;
+  --accent-pink: 330 75% 65%;
+  --accent-violet: 258 80% 70%;
+  --accent-indigo: 235 75% 65%;
+  --accent-lime: 85 65% 55%;
+  --accent-fuchsia: 295 75% 65%;
   --icon-dark: 216 60% 7%;
 
   /* ═══ Cluster Accents — locked per DESIGN_BIBLE §7.4 ═══ */
@@ -272,6 +282,16 @@ html.light {
   --accent-cyan: 190 65% 40%;
   --accent-amber: 38 85% 45%;
   --accent-amber-foreground: 30 60% 10%;
+  /* Extended accents — light-tuned (lower L for white bg) */
+  --accent-emerald: 157 65% 38%;
+  --accent-rose: 350 70% 50%;
+  --accent-sky: 200 80% 45%;
+  --accent-orange: 25 85% 50%;
+  --accent-pink: 330 65% 55%;
+  --accent-violet: 258 65% 55%;
+  --accent-indigo: 235 60% 50%;
+  --accent-lime: 85 55% 42%;
+  --accent-fuchsia: 295 65% 50%;
   --icon-dark: 60 3% 10%;
 
   /* Cluster Accents — locked per Bible §7.4 (same hues, light-mode-tuned L) */
