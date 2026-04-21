@@ -268,6 +268,39 @@ export default function MeDocuments() {
         onOpenChange={(v) => { if (!v) setEditingDoc(null); }}
         doc={editingDoc}
       />
+      <AlertDialog
+        open={!!deletingDoc}
+        onOpenChange={(v) => { if (!v && !deleteMutation.isPending) setDeletingDoc(null); }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {isRu ? 'Удалить документ?' : 'Delete document?'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {isRu
+                ? `«${deletingDoc?.title ?? ''}» будет удалён из вашего сейфа. Это действие нельзя отменить.`
+                : `"${deletingDoc?.title ?? ''}" will be removed from your vault. This action cannot be undone.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>
+              {isRu ? 'Отмена' : 'Cancel'}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                if (deletingDoc) deleteMutation.mutate(deletingDoc);
+              }}
+              disabled={deleteMutation.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteMutation.isPending && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
+              {isRu ? 'Удалить' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </MeShellLayout>
   );
 }
