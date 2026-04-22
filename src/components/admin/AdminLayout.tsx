@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import { NavShell } from '@/components/nav/NavShell';
+import { AppLayout } from '@/components/layout/AppLayout';
 import { AdminCommandPalette, useAdminCommandPalette } from './AdminCommandPalette';
 import { AdminKeyboardShortcuts } from './AdminKeyboardShortcuts';
 
@@ -9,19 +9,16 @@ interface AdminLayoutProps {
 }
 
 /**
- * AdminLayout — platform admin workspace shell.
- *
- * Migrated to NavShell (Stage 4 of nav refactor). Admin-specific extras
- * (command palette + keyboard shortcuts) remain mounted alongside the shell.
+ * AdminLayout — platform admin workspace shell (`AppLayout` + admin command palette).
  */
 export function AdminLayout({ children }: AdminLayoutProps) {
   const { open: commandPaletteOpen, setOpen: setCommandPaletteOpen } = useAdminCommandPalette();
 
   return (
-    <NavShell role="admin">
+    <AppLayout variant="workspace" navRole="admin" usePageContainer={false} showFooter={false}>
       {children || <Outlet />}
       <AdminCommandPalette open={commandPaletteOpen} onOpenChange={setCommandPaletteOpen} />
       <AdminKeyboardShortcuts />
-    </NavShell>
+    </AppLayout>
   );
 }

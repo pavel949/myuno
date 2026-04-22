@@ -4,21 +4,17 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-
-interface ClusterInfo {
-  labelRu: string;
-  labelEn: string;
-  color: string;
-  path: string;
-}
-
-const CLUSTER_MAP: Record<string, ClusterInfo> = {
-  arrive: { labelRu: 'ПРИЕХАТЬ', labelEn: 'ARRIVE', color: '#00D68F', path: '/cluster/arrive' },
-  live: { labelRu: 'ЖИТЬ', labelEn: 'LIVE', color: '#4E7BFF', path: '/discover' },
-  legal: { labelRu: 'ЛЕГАЛЬНО', labelEn: 'STAY LEGAL', color: '#F59E0B', path: '/cluster/legal' },
-  invest: { labelRu: 'КУПИТЬ', labelEn: 'INVEST', color: '#A855F7', path: '/cluster/invest' },
-  manage: { labelRu: 'УПРАВЛЯТЬ', labelEn: 'MANAGE', color: '#06B6D4', path: '/mc' },
-  build: { labelRu: 'ДЕВЕЛОПЕРАМ', labelEn: 'BUILD', color: '#F43F5E', path: '/for-management-companies' },
+import { getClusterById } from '@/lib/nav/clusterCatalog';
+import { ECOSYSTEM_CLUSTER_HEADER_TRIPLET, pickTriplet } from '@/lib/ecosystemGlossary';
+const CLUSTER_PATHS: Record<string, string> = {
+  arrive: '/cluster/arrive',
+  live: '/discover',
+  legal: '/cluster/legal',
+  invest: '/cluster/invest',
+  manage: '/mc',
+  build: '/for-management-companies',
+  enjoy: '/discover',
+  family: '/discover',
 };
 
 interface ClusterBreadcrumbProps {
@@ -30,23 +26,37 @@ interface ClusterBreadcrumbProps {
 
 export function ClusterBreadcrumb({ clusterId, serviceLabelRu, serviceLabelEn, className }: ClusterBreadcrumbProps) {
   const { language } = useLanguage();
-  const isRu = language === 'ru';
-  const cluster = CLUSTER_MAP[clusterId];
+  const entry = getClusterById(clusterId);
+  const path = CLUSTER_PATHS[clusterId];
+  const trip = ECOSYSTEM_CLUSTER_HEADER_TRIPLET[clusterId];
+  const clusterTitle = entry
+    ? pickTriplet(
+        { ru: entry.labelRu, en: entry.labelEn, th: entry.labelTh ?? entry.labelEn },
+        language,
+      )
+    : trip
+      ? pickTriplet(trip, language)
+      : null;
 
-  if (!cluster) return null;
+  if (!clusterTitle || !path) return null;
+
+  const color = entry?.color ?? '#94a3b8';
 
   return (
     <nav className={`flex items-center gap-1.5 text-xs ${className || ''}`}>
-      <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: cluster.color }} />
+      <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: color }} />
       <Link
-        to={cluster.path}
+        to={path}
         className="text-muted-foreground hover:text-foreground transition-colors font-medium"
       >
-        {isRu ? cluster.labelRu : cluster.labelEn}
+        {clusterTitle}
       </Link>
       <span className="text-muted-foreground/40">›</span>
       <span className="text-muted-foreground">
-        {isRu ? serviceLabelRu : serviceLabelEn}
+        {pickTriplet(
+          { ru: serviceLabelRu, en: serviceLabelEn, th: serviceLabelEn },
+          language,
+        )}
       </span>
     </nav>
   );

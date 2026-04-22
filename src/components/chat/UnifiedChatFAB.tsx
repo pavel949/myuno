@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { FLOATING, FLOATING_OFFSET } from '@/lib/nav/floatingStack';
 import { MessageCircle, X, Sparkles, Send, Bot, User, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -388,7 +389,10 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
       <button
         onClick={() => setIsOpen(true)}
         className={cn(
-          'fixed bottom-[5.5rem] right-4 z-40 w-12 h-12 rounded-full',
+          'fixed w-12 h-12 rounded-full',
+          FLOATING_OFFSET.chatAboveStack,
+          'right-4',
+          FLOATING.chatFab,
           'bg-gradient-to-br from-primary to-primary/80 text-primary-foreground',
           'flex items-center justify-center',
           'hover:scale-105 active:scale-95 transition-all duration-200',

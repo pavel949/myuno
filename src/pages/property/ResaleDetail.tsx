@@ -7,7 +7,6 @@ import {
   MapPin, BedDouble, Bath, Maximize2, Calendar, ArrowRightLeft,
   TrendingUp, Shield, ChevronLeft, Share2, Phone
 } from 'lucide-react';
-import { AppLayout } from '@/components/layout/AppLayout';
 import { BackButton } from '@/components/uno/BackButton';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';

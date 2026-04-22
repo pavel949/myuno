@@ -7,7 +7,8 @@
  * Visibility:
  *  - Hidden on mobile (<768px) — bottom-bar handles primary nav.
  *  - Mini-collapse (icons only) on tablet (768–1023px).
- *  - Full-width by default on desktop (≥1024px); user can collapse via SidebarTrigger.
+ *  - Full-width by default on desktop (≥1024px); collapse/expand uses the `SidebarTrigger`
+ *    in `TopBar` only (avoids duplicating the toggle in this rail).
  *  - Returns null when role has no sidebar (consumer roles).
  */
 import React from 'react';
@@ -18,9 +19,11 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarRail,
   useSidebar,
 } from '@/components/ui/sidebar';
 import {
@@ -82,6 +85,15 @@ export function SideRail({ role, badges }: SideRailProps) {
 
   return (
     <Sidebar collapsible="icon" className="border-r border-border">
+      {!isCollapsed && (
+        <SidebarHeader className="border-b border-border/70 px-2 py-2">
+          <div className="flex items-center">
+            <span className="text-xs font-medium text-muted-foreground">
+              {isRussian ? 'Навигация' : 'Navigation'}
+            </span>
+          </div>
+        </SidebarHeader>
+      )}
       <SidebarContent>
         {groups.map((group) => {
           const open = groupHasActive(group) || group.defaultOpen || false;
@@ -117,7 +129,7 @@ export function SideRail({ role, badges }: SideRailProps) {
                                 active && 'bg-sidebar-accent text-sidebar-accent-foreground font-medium',
                               )}
                             >
-                              <Icon className="h-4 w-4 shrink-0" />
+                              <Icon className="size-5 shrink-0" />
                               <span className="truncate">{label}</span>
                               {badge && badge > 0 ? (
                                 <span className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-semibold text-primary-foreground">
@@ -136,6 +148,7 @@ export function SideRail({ role, badges }: SideRailProps) {
           );
         })}
       </SidebarContent>
+      <SidebarRail />
     </Sidebar>
   );
 }

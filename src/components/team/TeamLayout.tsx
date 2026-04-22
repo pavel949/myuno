@@ -1,7 +1,6 @@
 import React, { ReactNode } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { TeamSidebar } from './TeamSidebar';
-import { TeamBottomNav } from './TeamBottomNav';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 
@@ -14,8 +13,9 @@ interface TeamLayoutProps {
 }
 
 /**
- * Team dashboard layout with sidebar navigation
- * Responsive: sidebar on desktop, bottom nav on mobile
+ * Team dashboard layout with dedicated sidebar (not global `SideRail`).
+ * Mobile: primary nav is the app `BottomBar` from `NavShell` (see `TEAM_NAV`).
+ * Tablet/desktop: `TeamSidebar` from `md` (aligned with other workspace sidebars).
  */
 export function TeamLayout({ 
   children, 
@@ -28,13 +28,17 @@ export function TeamLayout({
   const isRu = language === 'ru';
 
   return (
-    <AppLayout 
+    <AppLayout
+      variant="workspace"
+      navRole="team"
+      usePageContainer={false}
+      showFooter={false}
       title={title || (isRu ? 'Управление недвижимостью — Команда' : 'Property Management — Team')}
     >
       <div className="flex h-[calc(100vh-64px)] overflow-x-hidden max-w-[100vw]">
         {/* Desktop Sidebar */}
         {showSidebar && (
-          <TeamSidebar className="hidden lg:flex" />
+          <TeamSidebar className="hidden md:flex" />
         )}
         
         {/* Main Content */}
@@ -53,9 +57,6 @@ export function TeamLayout({
           {children}
         </main>
       </div>
-      
-      {/* Mobile Bottom Nav */}
-      <TeamBottomNav />
     </AppLayout>
   );
 }

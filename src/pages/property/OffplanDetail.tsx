@@ -30,7 +30,6 @@ import {
 } from 'lucide-react';
 import { BackButton } from '@/components/uno/BackButton';
 import { APP_ROUTES } from '@/lib/config/routes';
-import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -89,30 +88,26 @@ export default function OffplanDetail() {
 
   if (isLoading) {
     return (
-      <AppLayout>
-        <div className="space-y-4 p-4">
-          <Skeleton className="aspect-[16/9] rounded-2xl" />
-          <Skeleton className="h-8 w-3/4" />
-          <Skeleton className="h-6 w-1/2" />
-          <Skeleton className="h-32 w-full" />
-        </div>
-      </AppLayout>
+      <div className="space-y-4 p-4">
+        <Skeleton className="aspect-[16/9] rounded-2xl" />
+        <Skeleton className="h-8 w-3/4" />
+        <Skeleton className="h-6 w-1/2" />
+        <Skeleton className="h-32 w-full" />
+      </div>
     );
   }
 
   if (!project) {
     return (
-      <AppLayout title={isRu ? 'Не найдено' : 'Not Found'}>
-        <div className="flex flex-col items-center justify-center py-20">
-          <Building2 className="w-16 h-16 text-muted-foreground/30 mb-4" />
-          <p className="text-muted-foreground">
-            {isRu ? 'Проект не найден' : 'Project not found'}
-          </p>
-          <Button variant="link" onClick={() => navigate('/property/offplan')}>
-            {isRu ? 'Вернуться к списку' : 'Back to list'}
-          </Button>
-        </div>
-      </AppLayout>
+      <div className="flex flex-col items-center justify-center py-20">
+        <Building2 className="w-16 h-16 text-muted-foreground/30 mb-4" />
+        <p className="text-muted-foreground">
+          {isRu ? 'Проект не найден' : 'Project not found'}
+        </p>
+        <Button variant="link" onClick={() => navigate('/property/offplan')}>
+          {isRu ? 'Вернуться к списку' : 'Back to list'}
+        </Button>
+      </div>
     );
   }
 
@@ -149,7 +144,7 @@ export default function OffplanDetail() {
   };
 
   return (
-    <AppLayout>
+    <>
       <SEOHead
         title={seoTitle}
         description={seoDescription}
@@ -562,6 +557,6 @@ export default function OffplanDetail() {
           onSuccess={() => setShowLeadForm(false)}
         />
       </ResponsiveModal>
-    </AppLayout>
+    </>
   );
 }

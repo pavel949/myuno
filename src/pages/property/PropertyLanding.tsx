@@ -20,7 +20,6 @@ import {
   Sparkles,
   Hotel,
 } from 'lucide-react';
-import { AppLayout } from '@/components/layout/AppLayout';
 import { SEOHead } from '@/components/seo';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserPersonas } from '@/hooks/useUserPersonas';
@@ -237,7 +236,7 @@ export default function PropertyLanding() {
   const hasCapitalPersona = personas.includes('business') || personas.includes('investor');
 
   return (
-    <AppLayout showHeader showBottomNav showFooter>
+    <>
       <SEOHead
         title={isRu ? 'Недвижимость — myUNO' : 'Property — myUNO'}
         description={isRu
@@ -302,6 +301,6 @@ export default function PropertyLanding() {
           {t('propertyHub.landing.myPropertyCta')}
         </Link>
       </div>
-    </AppLayout>
+    </>
   );
 }

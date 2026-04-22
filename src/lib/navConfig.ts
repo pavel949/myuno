@@ -89,7 +89,7 @@ export const ADMIN_NAV: NavItem[] = [
 export const TEAM_NAV: NavItem[] = [
   { path: APP_ROUTES.TEAM,             icon: LayoutDashboard, labelEn: 'Dashboard', labelRu: 'Обзор', exact: true },
   { path: APP_ROUTES.TEAM_CONTENT,     icon: FileText,        labelEn: 'Content',   labelRu: 'Контент' },
-  { path: APP_ROUTES.ADMIN_MODERATION, icon: FileCheck,       labelEn: 'Review',    labelRu: 'Проверка' },
+  { path: APP_ROUTES.ADMIN_MODERATION, icon: FileCheck,       labelEn: 'Moderation', labelRu: 'Модерация' },
   { path: APP_ROUTES.ADMIN_CRM,        icon: Users,           labelEn: 'CRM',       labelRu: 'CRM' },
   { path: APP_ROUTES.PROFILE,          icon: User,            labelEn: 'Profile',   labelRu: 'Профиль' },
 ];
@@ -103,9 +103,9 @@ export const INVESTOR_NAV: NavItem[] = [
 ];
 
 export const MC_PORTAL_NAV: NavItem[] = [
-  { path: '/my-property',            icon: Building2, labelEn: 'My Properties', labelRu: 'Мои объекты', exact: true },
-  { path: '/my-property/statements', icon: BarChart3, labelEn: 'Statements',    labelRu: 'Отчёты' },
-  { path: '/my-property/signatures', icon: FileText,  labelEn: 'Documents',     labelRu: 'Документы' },
+  { path: APP_ROUTES.OWNER_PORTAL,         icon: Building2, labelEn: 'My Properties', labelRu: 'Мои объекты', exact: true },
+  { path: APP_ROUTES.OWNER_PORTAL_STATEMENTS, icon: BarChart3, labelEn: 'Statements', labelRu: 'Отчёты' },
+  { path: APP_ROUTES.OWNER_PORTAL_SIGNATURES, icon: FileText,  labelEn: 'Documents',  labelRu: 'Документы' },
   { path: APP_ROUTES.MC_MESSAGES,    icon: MessageCircle, labelEn: 'Messages',  labelRu: 'Чаты' },
   { path: APP_ROUTES.ACCOUNT,        icon: User,      labelEn: 'Me',            labelRu: 'Профиль' },
 ];

@@ -8,7 +8,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Briefcase, Building2, Hotel } from 'lucide-react';
 import { SEOHead } from '@/components/seo';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { AppLayout } from '@/components/layout/AppLayout';
 import { BackButton } from '@/components/uno/BackButton';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -94,7 +93,7 @@ export default function CommercialIndex() {
   };
 
   return (
-    <AppLayout>
+    <>
       <SEOHead
         title={isRu ? 'Коммерческая недвижимость в Пхукете — myUNO' : 'Commercial Real Estate Phuket — myUNO'}
         description={
@@ -236,6 +235,6 @@ export default function CommercialIndex() {
           )}
         </div>
       </div>
-    </AppLayout>
+    </>
   );
 }

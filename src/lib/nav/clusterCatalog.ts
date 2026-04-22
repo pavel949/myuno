@@ -4,8 +4,8 @@
  *
  * **Rule:** Adding/moving/renaming any service in the public navigation map
  * MUST happen in this file. Both `NavigatorPage` (full /discover catalog)
- * and `AppDrawer` (left-side launcher) consume this same array — no other
- * place may declare cluster groupings.
+ * `AppDrawer`, `AllAppsDrawer`, and `NavigatorPage` consume this same array — no
+ * other place may declare cluster groupings.
  *
  * Why a separate file from `navigationModel.ts`?
  * `navigationModel.ts` describes ROLE-aware shells (top bar pills, side rail,
@@ -21,8 +21,16 @@ import {
   Calendar, BarChart3, Wrench, PenTool, DollarSign,
   Building, Search, LineChart, Palette,
   Compass, Anchor, Dumbbell, CalendarDays, GraduationCap, PawPrint,
+  Hammer, Wind, TreePine, Bug, KeyRound, Warehouse, Truck, Package, Route, Waves, Bandage,
 } from 'lucide-react';
 import { APP_ROUTES } from '@/lib/config/routes';
+import type { Language } from '@/i18n';
+import {
+  ECOSYSTEM_CLUSTER_HEADER_TRIPLET,
+  getAppEntryLabel,
+  pickTriplet,
+} from '@/lib/ecosystemGlossary';
+import { APP_REGISTRY } from '@/lib/appRegistry';
 
 export type ClusterServiceStatus = 'available' | 'soon' | 'pro';
 
@@ -31,6 +39,8 @@ export interface ClusterService {
   labelRu: string;
   /** Bilingual label — EN */
   labelEn: string;
+  /** TH — optional; often resolved via `getClusterServiceLocalizedLabel` + appRegistry */
+  labelTh?: string;
   /** Lucide icon component */
   icon: React.ElementType;
   /** Internal route (must come from APP_ROUTES) */
@@ -46,10 +56,13 @@ export interface ClusterCatalogEntry {
   labelRu: string;
   /** Cluster heading — EN */
   labelEn: string;
+  /** Cluster heading — TH (optional; see `getClusterHeaderLabel`) */
+  labelTh?: string;
   /** One-line value-prop — RU (used by NavigatorPage; AppDrawer ignores) */
   valueRu: string;
   /** One-line value-prop — EN */
   valueEn: string;
+  valueTh?: string;
   /** Hex accent color (matches DS cluster palette) */
   color: string;
   /** Cluster icon */
@@ -83,8 +96,9 @@ export interface ClusterCatalogEntry {
 export const CLUSTER_CATALOG: ClusterCatalogEntry[] = [
   {
     id: 'arrive',
-    labelRu: 'ПРИЕХАТЬ',
-    labelEn: 'ARRIVE',
+    labelRu: 'Прибытие и старт',
+    labelEn: 'Arrival',
+    labelTh: 'การเดินทาง',
     valueRu: 'Туристы и новые резиденты: дорога от аэропорта, связь, деньги, мобильность.',
     valueEn: 'Tourists & new residents: airport transfers, connectivity, money, getting around.',
     color: '#00D68F',
@@ -100,32 +114,45 @@ export const CLUSTER_CATALOG: ClusterCatalogEntry[] = [
   },
   {
     id: 'live',
-    labelRu: 'ЖИТЬ',
-    labelEn: 'LIVE',
+    labelRu: 'Дом и сервисы',
+    labelEn: 'Home & services',
+    labelTh: 'บ้านและบริการ',
     valueRu: 'Резиденты: быт, здоровье, еда, покупки — без хаоса.',
     valueEn: 'Residents: dining, wellness, home services, shopping — one place.',
     color: '#4E7BFF',
     icon: HomeIcon,
     services: [
       { labelRu: 'Рестораны', labelEn: 'Restaurants', icon: Utensils,    path: APP_ROUTES.RESTAURANTS, status: 'available' },
-      { labelRu: 'Афиша',     labelEn: 'Events',      icon: CalendarDays, path: APP_ROUTES.EVENTS,     status: 'available' },
       { labelRu: 'Красота',   labelEn: 'Beauty',      icon: Palette,     path: APP_ROUTES.BEAUTY,      status: 'available' },
       { labelRu: 'Медицина',  labelEn: 'Medical',     icon: Stethoscope, path: APP_ROUTES.MEDICAL,     status: 'available' },
       { labelRu: 'Маркет',    labelEn: 'Market',      icon: ShoppingBag, path: APP_ROUTES.MARKET,      status: 'available' },
+      { labelRu: 'Доставка',  labelEn: 'Delivery',     icon: Truck,       path: APP_ROUTES.DELIVERY,    status: 'available' },
       { labelRu: 'Уборка',    labelEn: 'Cleaning',    icon: Sparkles,    path: APP_ROUTES.CLEANING,    status: 'available' },
-      { labelRu: 'Услуги',    labelEn: 'Services',    icon: Wrench,      path: APP_ROUTES.SERVICES,    status: 'available' },
+      { labelRu: 'Услуги',    labelEn: 'Services hub', icon: Wrench,      path: APP_ROUTES.SERVICES,   status: 'available' },
+      { labelRu: 'Сантехника', labelEn: 'Plumbing',   icon: Wrench,      path: `${APP_ROUTES.SERVICES}?category=plumbing`, status: 'available' },
+      { labelRu: 'Электрика',  labelEn: 'Electrical', icon: Zap,         path: `${APP_ROUTES.SERVICES}?category=electrical`, status: 'available' },
+      { labelRu: 'Кондиционеры', labelEn: 'AC repair', icon: Wind, path: `${APP_ROUTES.SERVICES}?category=ac-repair`, status: 'available' },
+      { labelRu: 'Мелкий ремонт', labelEn: 'Handyman', icon: Hammer,     path: `${APP_ROUTES.SERVICES}?category=handyman`, status: 'available' },
+      { labelRu: 'Сад / участок', labelEn: 'Gardening', icon: TreePine,   path: `${APP_ROUTES.SERVICES}?category=gardening`, status: 'available' },
+      { labelRu: 'Вредители',   labelEn: 'Pest control', icon: Bug,       path: `${APP_ROUTES.SERVICES}?category=pest-control`, status: 'available' },
+      { labelRu: 'Сейф-мастер', labelEn: 'Locksmith',  icon: KeyRound,   path: `${APP_ROUTES.SERVICES}?category=locksmith`, status: 'available' },
+      { labelRu: 'Хранение',   labelEn: 'Storage',    icon: Warehouse,  path: `${APP_ROUTES.SERVICES}?category=storage`, status: 'available' },
+      { labelRu: 'Обслуживание', labelEn: 'Maintenance', icon: Package,  path: `${APP_ROUTES.SERVICES}?category=maintenance`, status: 'available' },
     ],
   },
   {
     id: 'enjoy',
-    labelRu: 'ОТДЫХАТЬ',
-    labelEn: 'ENJOY',
+    labelRu: 'Досуг',
+    labelEn: 'Leisure',
+    labelTh: 'กิจกรรม',
     valueRu: 'Впечатления, яхты, спорт, события — лучшее на Пхукете.',
     valueEn: 'Experiences, yachts, fitness, events — the best of Phuket.',
     color: '#EC4899',
     icon: Heart,
     services: [
       { labelRu: 'Впечатления', labelEn: 'Experiences', icon: Compass,     path: APP_ROUTES.EXPERIENCES, status: 'available' },
+      { labelRu: 'Туры',        labelEn: 'Tours',        icon: Route,        path: `${APP_ROUTES.EXPERIENCES}?type=tour`, status: 'available' },
+      { labelRu: 'Вода и активности', labelEn: 'Water & activities', icon: Waves, path: `${APP_ROUTES.EXPERIENCES}?type=activity`, status: 'available' },
       { labelRu: 'Яхты',        labelEn: 'Yachts',      icon: Anchor,      path: APP_ROUTES.YACHTS,      status: 'available' },
       { labelRu: 'События',     labelEn: 'Events',      icon: CalendarDays, path: APP_ROUTES.EVENTS,     status: 'available' },
       { labelRu: 'Фитнес',      labelEn: 'Fitness',     icon: Dumbbell,    path: APP_ROUTES.FITNESS,     status: 'available' },
@@ -134,8 +161,9 @@ export const CLUSTER_CATALOG: ClusterCatalogEntry[] = [
   },
   {
     id: 'legal',
-    labelRu: 'ЛЕГАЛЬНО',
-    labelEn: 'STAY LEGAL',
+    labelRu: 'Визы и право',
+    labelEn: 'Visa & legal',
+    labelTh: 'วีซ่าและกฎหมาย',
     valueRu: 'Статус, налоги, договоры и страховки.',
     valueEn: 'Visa status, taxes, contracts & insurance.',
     color: '#F59E0B',
@@ -149,8 +177,9 @@ export const CLUSTER_CATALOG: ClusterCatalogEntry[] = [
   },
   {
     id: 'invest',
-    labelRu: 'КУПИТЬ',
-    labelEn: 'INVEST',
+    labelRu: 'Недвижимость',
+    labelEn: 'Property',
+    labelTh: 'อสังหาริมทรัพย์',
     valueRu: 'Каталог, новостройки, вторичка, застройщики, ROI.',
     valueEn: 'Search, off-plan, resale, developers, ROI tools.',
     color: '#A855F7',
@@ -166,8 +195,9 @@ export const CLUSTER_CATALOG: ClusterCatalogEntry[] = [
   },
   {
     id: 'family',
-    labelRu: 'СЕМЬЯ',
-    labelEn: 'FAMILY & PETS',
+    labelRu: 'Семья и дети',
+    labelEn: 'Family & kids',
+    labelTh: 'ครอบครัว',
     valueRu: 'Школы, няни, ветеринары, питомцы.',
     valueEn: 'Schools, childcare, vets, pet services.',
     color: '#F59E0B',
@@ -176,14 +206,16 @@ export const CLUSTER_CATALOG: ClusterCatalogEntry[] = [
       { labelRu: 'Образование', labelEn: 'Education',   icon: GraduationCap, path: APP_ROUTES.EDUCATION,      status: 'available' },
       { labelRu: 'Няни',        labelEn: 'Babysitters', icon: Baby,          path: APP_ROUTES.BABYSITTER,     status: 'available' },
       { labelRu: 'Питомцы',     labelEn: 'Pets',        icon: PawPrint,      path: APP_ROUTES.PETS,           status: 'available' },
+      { labelRu: 'Ветклиники',  labelEn: 'Veterinary',  icon: Bandage,       path: APP_ROUTES.VETERINARY,     status: 'available' },
       { labelRu: 'Школы',       labelEn: 'Schools',     icon: Search,        path: APP_ROUTES.SCHOOL_FINDER,  status: 'available' },
       { labelRu: 'Аптеки',      labelEn: 'Pharmacy',    icon: Stethoscope,   path: APP_ROUTES.PHARMACY,       status: 'available' },
     ],
   },
   {
     id: 'manage',
-    labelRu: 'УПРАВЛЯТЬ',
-    labelEn: 'MANAGE',
+    labelRu: 'Операции',
+    labelEn: 'Operations',
+    labelTh: 'ปฏิบัติการ',
     valueRu: 'Собственники: брони, финансы, CRM — один кабинет.',
     valueEn: 'Hosts & managers: bookings, money, ops, CRM.',
     color: '#06B6D4',
@@ -193,7 +225,7 @@ export const CLUSTER_CATALOG: ClusterCatalogEntry[] = [
     personas: ['property_owner', 'local_services_provider'],
     roles: ['owner', 'admin', 'team', 'vendor'],
     services: [
-      { labelRu: 'Кабинет',   labelEn: 'Dashboard',  icon: Calendar,        path: '/mc',                       status: 'available' },
+      { labelRu: 'Кабинет',   labelEn: 'Dashboard',  icon: Calendar,        path: APP_ROUTES.MC,             status: 'available' },
       { labelRu: 'Календарь', labelEn: 'Calendar',   icon: Calendar,        path: APP_ROUTES.MC_CALENDAR,      status: 'available' },
       { labelRu: 'Финансы',   labelEn: 'Finances',   icon: DollarSign,      path: APP_ROUTES.MC_FINANCE,       status: 'available' },
       { labelRu: 'Задачи',    labelEn: 'Operations', icon: ClipboardList,   path: APP_ROUTES.MC_TASKS,         status: 'available' },
@@ -203,16 +235,14 @@ export const CLUSTER_CATALOG: ClusterCatalogEntry[] = [
   },
   {
     id: 'build',
-    labelRu: 'ДЕВЕЛОПЕРАМ',
-    labelEn: 'FOR DEVELOPERS',
+    labelRu: 'Застройщикам',
+    labelEn: 'Developers',
+    labelTh: 'ผู้พัฒนา',
     valueRu: 'Портал, лиды, витрина проектов, консультации.',
     valueEn: 'Portal, leads, project showcase & deal advisory.',
     color: '#F43F5E',
     icon: HardHat,
-    // Workspace cluster — gated to real-estate developers and platform admins.
-    audience: 'workspace',
-    personas: ['real_estate_developer'],
-    roles: ['admin', 'team'],
+    /** Public B2B map — same links are auth-gated on destination where needed. */
     services: [
       { labelRu: 'Портал',       labelEn: 'Portal',    icon: Building,   path: APP_ROUTES.DEVELOPER_PORTAL,            status: 'available' },
       { labelRu: 'Программа',    labelEn: 'Program',   icon: LineChart,  path: APP_ROUTES.FOR_REAL_ESTATE_DEVELOPERS,  status: 'available' },
@@ -302,4 +332,52 @@ export function filterCatalogForUser(
   ctx: ClusterAudienceContext,
 ): ClusterCatalogEntry[] {
   return CLUSTER_CATALOG.filter((c) => isClusterVisibleToUser(c, ctx));
+}
+
+function normalizeServicePath(p: string): string {
+  const q = p.indexOf('?');
+  return q >= 0 ? p.slice(0, q) : p;
+}
+
+function findAppEntryByServicePath(path: string) {
+  const base = normalizeServicePath(path);
+  return Object.values(APP_REGISTRY).find((e) => normalizeServicePath(e.route) === base);
+}
+
+/** Localized cluster section title — TH from SSOT headers + glossary. */
+export function getClusterHeaderLabel(entry: ClusterCatalogEntry, lang: Language): string {
+  const trip = ECOSYSTEM_CLUSTER_HEADER_TRIPLET[entry.id];
+  if (trip) return pickTriplet(trip, lang);
+  return pickTriplet(
+    { ru: entry.labelRu, en: entry.labelEn, th: entry.labelTh ?? entry.labelEn },
+    lang
+  );
+}
+
+/** Localized service line — prefers `APP_REGISTRY` when route matches. */
+export function getClusterServiceLocalizedLabel(
+  service: ClusterService,
+  lang: Language,
+): string {
+  const app = findAppEntryByServicePath(service.path);
+  if (app) return getAppEntryLabel(app, lang);
+  return pickTriplet(
+    {
+      ru: service.labelRu,
+      en: service.labelEn,
+      th: service.labelTh ?? service.labelEn,
+    },
+    lang
+  );
+}
+
+export function getClusterValueLine(entry: ClusterCatalogEntry, lang: Language): string {
+  return pickTriplet(
+    {
+      ru: entry.valueRu,
+      en: entry.valueEn,
+      th: entry.valueTh ?? entry.valueEn,
+    },
+    lang
+  );
 }

@@ -6,9 +6,16 @@ import { COMPANY_CONTACTS } from '@/lib/config';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
 import { useIsDesktop } from '@/hooks/use-desktop';
-import { VERTICAL_GROUPS } from '@/lib/verticalGroups';
+import { VERTICAL_GROUPS, getVerticalGroupTitle } from '@/lib/verticalGroups';
 import { getVerticalById } from '@/lib/verticals';
 import { APP_REGISTRY } from '@/lib/appRegistry';
+import {
+  ECOSYSTEM_APP_TRIPLET,
+  ECOSYSTEM_FOOTER_UI,
+  getAppEntryLabel,
+  getTripletForVerticalId,
+  pickTriplet,
+} from '@/lib/ecosystemGlossary';
 import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
 import { cn } from '@/lib/utils';
 
@@ -16,7 +23,7 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
   const { language } = useLanguage();
   const { isInstalled, canInstall, isIOS, install } = usePWAInstall();
   const isDesktop = useIsDesktop();
-  const isRu = language === 'ru';
+  const t = (trip: { ru: string; en: string; th: string }) => pickTriplet(trip, language);
 
   const handleInstallClick = async () => {
     if (canInstall) {
@@ -44,10 +51,16 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
   const resolveVerticalLink = (verticalId: string): { to: string; label: string } | null => {
     const registryEntry = Object.values(APP_REGISTRY).find((e) => e.verticalId === verticalId);
     if (registryEntry) {
-      return { to: registryEntry.route, label: isRu ? registryEntry.labelRu : registryEntry.labelEn };
+      return { to: registryEntry.route, label: getAppEntryLabel(registryEntry, language) };
     }
     const v = getVerticalById(verticalId);
-    if (v) return { to: `/${v.plural}`, label: isRu ? v.labelRu : v.labelEn };
+    if (v) {
+      const trip = getTripletForVerticalId(v.id);
+      const label = trip
+        ? pickTriplet(trip, language)
+        : pickTriplet({ ru: v.labelRu, en: v.labelEn, th: v.labelEn }, language);
+      return { to: `/${v.plural}`, label };
+    }
     return null;
   };
 
@@ -56,38 +69,48 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
   const footerGroups = VERTICAL_GROUPS
     .filter((g) => g.id !== 'invest' && g.id !== 'maintain' && g.id !== 'help')
     .map((group) => {
-      const items = group.items.slice(0, 5).map((item) => {
-        if (item.verticalId) return resolveVerticalLink(item.verticalId);
-        if (item.route) {
-          return { to: item.route, label: isRu ? (item.labelRu ?? '') : (item.labelEn ?? '') };
-        }
-        return null;
-      }).filter(Boolean) as { to: string; label: string }[];
+      const items = group.items
+        .slice(0, 5)
+        .map((item) => {
+          if (item.verticalId) return resolveVerticalLink(item.verticalId);
+          if (item.route && item.labelRu && item.labelEn) {
+            return {
+              to: item.route,
+              label: pickTriplet(
+                { ru: item.labelRu, en: item.labelEn, th: item.labelTh ?? item.labelEn },
+                language
+              ),
+            };
+          }
+          return null;
+        })
+        .filter(Boolean) as { to: string; label: string }[];
 
       return {
-        title: isRu ? group.labelRu : group.labelEn,
+        title: getVerticalGroupTitle(group, language),
         items,
       };
     });
 
+  const re = ECOSYSTEM_APP_TRIPLET;
   const realEstateLinks = [
-    { to: APP_ROUTES.PROPERTY_RENT_SHORT, label: isRu ? 'Аренда краткосрочная' : 'Short-term Rent' },
-    { to: APP_ROUTES.PROPERTY_RENT_LONG, label: isRu ? 'Аренда долгосрочная' : 'Long-term Rent' },
-    { to: APP_ROUTES.RESALE, label: isRu ? 'Покупка недвижимости' : 'Buy Property' },
-    { to: APP_ROUTES.OFFPLAN, label: isRu ? 'Офплан / Новостройки' : 'Offplan & New Builds' },
-    { to: APP_ROUTES.INVEST, label: isRu ? 'Инвестиции' : 'Investments' },
-    { to: APP_ROUTES.DEVELOPERS, label: isRu ? 'Застройщики' : 'Developers' },
+    { to: APP_ROUTES.PROPERTY_RENT_SHORT, label: t(re['property-rent-short']) },
+    { to: APP_ROUTES.PROPERTY_RENT_LONG, label: t(re['property-rent-long']) },
+    { to: APP_ROUTES.RESALE, label: t(re['property-purchase']) },
+    { to: APP_ROUTES.OFFPLAN, label: t(re['property-offplan-combo']) },
+    { to: APP_ROUTES.INVEST, label: t(re['property-invest-footer']) },
+    { to: APP_ROUTES.DEVELOPERS, label: t(re.developers) },
   ];
 
   const companyLinks = [
-    { to: APP_ROUTES.ABOUT, label: isRu ? 'О нас' : 'About' },
-    { to: APP_ROUTES.FAQ, label: 'FAQ' },
-    { to: APP_ROUTES.SUPPORT, label: isRu ? 'Помощь' : 'Help' },
-    { to: APP_ROUTES.VIP_CONCIERGE, label: isRu ? 'VIP Консьерж' : 'Concierge' },
-    { to: APP_ROUTES.TERMS, label: isRu ? 'Условия' : 'Terms' },
-    { to: APP_ROUTES.PRIVACY, label: isRu ? 'Конфиденциальность' : 'Privacy' },
-    { to: APP_ROUTES.COOKIES, label: 'Cookie' },
-    { to: APP_ROUTES.REFUND_POLICY, label: isRu ? 'Возвраты' : 'Refunds' },
+    { to: APP_ROUTES.ABOUT, label: t(ECOSYSTEM_FOOTER_UI.about) },
+    { to: APP_ROUTES.FAQ, label: t(ECOSYSTEM_FOOTER_UI.faq) },
+    { to: APP_ROUTES.SUPPORT, label: t(ECOSYSTEM_FOOTER_UI.support) },
+    { to: APP_ROUTES.VIP_CONCIERGE, label: t(re['vip-concierge']) },
+    { to: APP_ROUTES.TERMS, label: t(ECOSYSTEM_FOOTER_UI.terms) },
+    { to: APP_ROUTES.PRIVACY, label: t(ECOSYSTEM_FOOTER_UI.privacy) },
+    { to: APP_ROUTES.COOKIES, label: t(ECOSYSTEM_FOOTER_UI.cookies) },
+    { to: APP_ROUTES.REFUND_POLICY, label: t(ECOSYSTEM_FOOTER_UI.refunds) },
   ];
 
   const socialLinks = [
@@ -97,9 +120,9 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
   ];
 
   const trustBadges = [
-    { icon: CheckCircle, labelEn: 'Verified Providers', labelRu: 'Проверенные партнёры' },
-    { icon: Clock, labelEn: '24/7 Support', labelRu: 'Поддержка 24/7' },
-    { icon: Shield, labelEn: 'Data Protected', labelRu: 'Защита данных' },
+    { icon: CheckCircle, trip: ECOSYSTEM_FOOTER_UI.trustVerified },
+    { icon: Clock, trip: ECOSYSTEM_FOOTER_UI.trust247 },
+    { icon: Shield, trip: ECOSYSTEM_FOOTER_UI.trustData },
   ];
 
   // Desktop: professional multi-column footer
@@ -121,10 +144,8 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
                 <span className="text-base text-muted-foreground font-light">my</span>
                 <span className="text-lg font-semibold text-foreground font-display">UNO</span>
               </div>
-              <p className="text-[13px] text-muted-foreground leading-6">
-                {isRu
-                  ? 'Ваш дом на Пхукете. Сервисы, недвижимость и жизнь на острове — в одном приложении.'
-                  : 'Your home in Phuket. Services, real estate, and island life — all in one app.'}
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {t(ECOSYSTEM_FOOTER_UI.brandTagline)}
               </p>
               <div className="flex gap-3 pt-1">
                 {socialLinks.map((social) => (
@@ -145,16 +166,16 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
             {/* Services — left (Home, Transport, Leisure) */}
             <div className="space-y-4">
               <h4 className="text-sm font-semibold text-foreground">
-                {isRu ? 'Сервисы' : 'Services'}
+                {t(ECOSYSTEM_FOOTER_UI.servicesHeading)}
               </h4>
               <nav className="flex flex-col gap-4">
                 {leftGroups.map((group) => (
                   <div key={group.title} className="space-y-1.5">
-                    <span className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-wider">
+                    <span className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wider">
                       {group.title}
                     </span>
                     {group.items.map((link) => (
-                      <Link key={link.to} to={link.to} className="block text-[13px] text-muted-foreground hover:text-foreground transition-colors">
+                      <Link key={link.to} to={link.to} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
                         {link.label}
                       </Link>
                     ))}
@@ -169,11 +190,11 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
               <nav className="flex flex-col gap-4">
                 {rightGroups.map((group) => (
                   <div key={group.title} className="space-y-1.5">
-                    <span className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-wider">
+                    <span className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wider">
                       {group.title}
                     </span>
                     {group.items.map((link) => (
-                      <Link key={link.to} to={link.to} className="block text-[13px] text-muted-foreground hover:text-foreground transition-colors">
+                      <Link key={link.to} to={link.to} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
                         {link.label}
                       </Link>
                     ))}
@@ -185,11 +206,11 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
             {/* Real Estate column */}
             <div className="space-y-3">
               <h4 className="text-sm font-semibold text-foreground">
-                {isRu ? 'Недвижимость' : 'Real Estate'}
+                {t(ECOSYSTEM_FOOTER_UI.realEstateHeading)}
               </h4>
               <nav className="flex flex-col gap-2.5">
                 {realEstateLinks.map((link) => (
-                  <Link key={link.to} to={link.to} className="text-[13px] text-muted-foreground hover:text-foreground transition-colors">
+                  <Link key={link.to} to={link.to} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                     {link.label}
                   </Link>
                 ))}
@@ -199,11 +220,11 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
             {/* Company column */}
             <div className="space-y-3">
               <h4 className="text-sm font-semibold text-foreground">
-                {isRu ? 'Компания' : 'Company'}
+                {t(ECOSYSTEM_FOOTER_UI.companyHeading)}
               </h4>
               <nav className="flex flex-col gap-2.5">
                 {companyLinks.map((link) => (
-                  <Link key={link.to} to={link.to} className="text-[13px] text-muted-foreground hover:text-foreground transition-colors">
+                  <Link key={link.to} to={link.to} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                     {link.label}
                   </Link>
                 ))}
@@ -213,14 +234,14 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
             {/* Trust column */}
             <div className="space-y-3">
               <h4 className="text-sm font-semibold text-foreground">
-                {isRu ? 'Гарантии' : 'Trust & Safety'}
+                {t(ECOSYSTEM_FOOTER_UI.trustHeading)}
               </h4>
               <div className="flex flex-col gap-3">
                 {trustBadges.map((badge) => (
-                  <div key={badge.labelEn} className="flex items-center gap-2">
+                  <div key={badge.trip.en} className="flex items-center gap-2">
                     <badge.icon className="w-4 h-4 text-primary shrink-0" />
-                    <span className="text-[13px] text-muted-foreground">
-                      {isRu ? badge.labelRu : badge.labelEn}
+                    <span className="text-sm text-muted-foreground">
+                      {t(badge.trip)}
                     </span>
                   </div>
                 ))}
@@ -234,7 +255,7 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
               © {new Date().getFullYear()} myUNO · Phuket Edition
             </p>
             <p className="text-sm text-muted-foreground/70">
-              {isRu ? 'Сделано с заботой на Пхукете' : 'Made with care in Phuket'}
+              {t(ECOSYSTEM_FOOTER_UI.madeIn)}
             </p>
           </div>
         </div>
@@ -253,7 +274,7 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 hover:bg-primary/20 border border-primary/20 text-primary text-sm font-medium transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
               {isIOS ? <Smartphone className="w-4 h-4" /> : <Download className="w-4 h-4" />}
-              {isRu ? 'Скачать приложение' : 'Download App'}
+              {t(ECOSYSTEM_FOOTER_UI.downloadApp)}
             </button>
           </div>
         )}

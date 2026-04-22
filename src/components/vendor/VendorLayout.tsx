@@ -1,19 +1,16 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import { NavShell } from '@/components/nav/NavShell';
+import { AppLayout } from '@/components/layout/AppLayout';
 
 interface VendorLayoutProps {
   children?: React.ReactNode;
 }
 
-/**
- * VendorLayout — vendor workspace shell.
- * Migrated to NavShell (Stage 4 of nav refactor).
- */
+/** Vendor workspace shell — `AppLayout` + `navRole="vendor"`. */
 export function VendorLayout({ children }: VendorLayoutProps) {
   return (
-    <NavShell role="vendor">
+    <AppLayout variant="workspace" navRole="vendor" usePageContainer={false} showFooter={false}>
       {children || <Outlet />}
-    </NavShell>
+    </AppLayout>
   );
 }

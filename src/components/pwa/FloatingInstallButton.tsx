@@ -5,6 +5,8 @@ import { usePWAInstall } from '@/hooks/usePWAInstall';
 import { usePWATracking } from '@/hooks/usePWATracking';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { cn } from '@/lib/utils';
+import { FLOATING, FLOATING_OFFSET } from '@/lib/nav/floatingStack';
 
 const FAB_DISMISSED_KEY = 'pwa_fab_dismissed';
 const FAB_DISMISS_DURATION = 3 * 24 * 60 * 60 * 1000; // 3 days
@@ -71,16 +73,16 @@ export function FloatingInstallButton() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 20, scale: 0.8 }}
           transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-          className="fixed bottom-[calc(var(--bottom-nav-h)+1rem)] right-4 z-[90] md:hidden"
+          className={`fixed ${FLOATING_OFFSET.aboveBottomNav} right-4 ${FLOATING.pwaInstall} md:hidden`}
         >
           <button
+            type="button"
             onClick={handleClick}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-full shadow-lg text-sm font-medium transition-colors"
-            style={{
-              background: 'hsl(var(--primary))',
-              color: 'hsl(var(--primary-foreground))',
-              boxShadow: '0 4px 20px hsl(var(--primary) / 0.35)',
-            }}
+            className={cn(
+              'flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium font-sans transition-colors',
+              'bg-primary text-primary-foreground shadow-lg shadow-primary/35 ring-1 ring-primary/20',
+              'hover:bg-primary/90 active:scale-[0.98]',
+            )}
           >
             <Download className="w-4 h-4" />
             {label}

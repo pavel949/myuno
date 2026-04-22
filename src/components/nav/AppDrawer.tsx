@@ -13,7 +13,7 @@
  *  2. Quick actions — 3-5 contextual shortcuts based on persona stack
  *  3. Clusters      — Arrive · Live · Enjoy · Manage · Invest · Legal · Build
  *                     (collapsible accordion, each lists services)
- *  4. Workspace     — only when role has a sidebar (owner/vendor/admin/team)
+ *  4. Workspace     — `getWorkspaceDrawerGroups(role)` (SideRail groups, or team primary 5)
  *  5. Footer        — Settings · Language · Logout
  *
  * Trigger: hamburger icon in HomeTopBar (mobile + tablet). Hidden on
@@ -26,17 +26,16 @@ import {
   Home as HomeIcon, Compass, Building2, TrendingUp,
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import {
-  Accordion, AccordionContent, AccordionItem, AccordionTrigger,
-} from '@/components/ui/accordion';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { ServiceClusterAccordion } from '@/components/nav/ServiceClusterAccordion';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { pickTriplet } from '@/lib/ecosystemGlossary';
 import { APP_ROUTES } from '@/lib/config/routes';
 import {
-  resolveNavRole, hasSidebar, SIDEBAR_NAV, type NavRoleKey,
+  resolveNavRole, getWorkspaceDrawerGroups, type NavRoleKey,
 } from '@/lib/nav/navigationModel';
 import { filterCatalogForUser } from '@/lib/nav/clusterCatalog';
 import { ROLE_META } from '@/lib/roleBlend';
@@ -128,12 +127,16 @@ export function AppDrawer({
   const { user, signOut } = useAuth();
   const { language, setLanguage } = useLanguage();
   const isRu = language === 'ru';
+  const allServicesSectionTitle = pickTriplet(
+    { ru: 'Все сервисы', en: 'All services', th: 'บริการทั้งหมด' },
+    language
+  );
 
   const role: NavRoleKey = resolveNavRole({
     activeRole: (user?.user_metadata as { role?: string } | undefined)?.role ?? null,
     pathname: location.pathname,
   });
-  const workspaceGroups = hasSidebar(role) ? SIDEBAR_NAV[role] : [];
+  const workspaceGroups = getWorkspaceDrawerGroups(role);
   const quickActions = useMemo(
     () => getQuickActions(personas, role),
     [personas, role],
@@ -251,65 +254,13 @@ export function AppDrawer({
               </section>
             )}
 
-            {/* 3. Clusters — accordion */}
-            <section>
-              <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 mb-1.5">
-                {isRu ? 'Все сервисы' : 'All services'}
-              </h3>
-              <Accordion type="multiple" className="w-full">
-                {visibleClusters.map((cluster) => {
-                  const Icon = cluster.icon;
-                  // Drawer hides "soon" items — keep launcher purely actionable
-                  const links = cluster.services.filter((s) => s.status !== 'soon');
-                  if (links.length === 0) return null;
-                  return (
-                    <AccordionItem
-                      key={cluster.id}
-                      value={cluster.id}
-                      className="border-b border-border/40"
-                    >
-                      <AccordionTrigger className="py-3 hover:no-underline">
-                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                          <div
-                            className="w-8 h-8 rounded-[10px] flex items-center justify-center shrink-0"
-                            style={{ background: cluster.color + '1A' }}
-                          >
-                            <Icon className="w-4 h-4" style={{ color: cluster.color }} />
-                          </div>
-                          <span className="text-[13px] font-semibold text-foreground">
-                            {isRu ? cluster.labelRu : cluster.labelEn}
-                          </span>
-                          <span className="text-[10px] text-muted-foreground/60 ml-auto mr-2">
-                            {links.length}
-                          </span>
-                        </div>
-                      </AccordionTrigger>
-                      <AccordionContent className="pb-2 pl-11">
-                        <div className="flex flex-col gap-0.5">
-                          {links.map((link) => (
-                            <button
-                              key={`${cluster.id}-${link.path}-${link.labelEn}`}
-                              onClick={() => go(link.path)}
-                              className="text-left text-[13px] text-muted-foreground hover:text-foreground py-2 px-2 -mx-2 rounded-md hover:bg-muted/40 transition-colors flex items-center justify-between gap-2"
-                            >
-                              <span>{isRu ? link.labelRu : link.labelEn}</span>
-                              {link.status === 'pro' && (
-                                <span
-                                  className="text-[8px] font-bold px-1.5 py-px rounded-full"
-                                  style={{ background: 'hsl(var(--accent) / 0.15)', color: 'hsl(var(--accent))' }}
-                                >
-                                  PRO
-                                </span>
-                              )}
-                            </button>
-                          ))}
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>
-                  );
-                })}
-              </Accordion>
-            </section>
+            {/* 3. Clusters — accordion (shared with AllAppsDrawer) */}
+            <ServiceClusterAccordion
+              clusters={visibleClusters}
+              language={language}
+              onNavigate={go}
+              sectionTitle={allServicesSectionTitle}
+            />
 
             {/* 4. Workspace */}
             {workspaceGroups.length > 0 && (

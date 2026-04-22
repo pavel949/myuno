@@ -10,7 +10,6 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useRecentlyViewed } from '@/hooks/useRecentlyViewed';
 import { usePropertiesInfinite, Property } from '@/hooks/useProperties';
-import { AppLayout } from '@/components/layout/AppLayout';
 import { BackButton } from '@/components/uno/BackButton';
 import { PropertyListingCard } from '@/components/property/PropertyListingCard';
 import { PropertyMode } from '@/components/property/PropertyCategoryRibbon';
@@ -145,7 +144,7 @@ export default function PropertyIndex() {
   }, [navigate, propertyMode, rentTenancy]);
 
   return (
-    <AppLayout showHeader={false} showBottomNav showFooter>
+    <>
       <SEOHead
         title={
           propertyMode === 'buy'
@@ -318,6 +317,6 @@ export default function PropertyIndex() {
           <CrossSellSection currentVertical="property" className={cn(ECOSYSTEM_PAGE_CONTAINER, "px-0 mt-8")} title={{ en: 'You may also need', ru: 'Может пригодиться' }} />
         </div>
       </div>
-    </AppLayout>
+    </>
   );
 }

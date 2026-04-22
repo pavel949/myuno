@@ -251,15 +251,71 @@ export function PropertyHubTabs() {
 
 export default function PropertyHub() {
   const location = useLocation();
+  const { language } = useLanguage();
+  const isRu = language === 'ru';
+  const p = location.pathname;
+  const n = (en: string, ru: string) => (isRu ? ru : en);
+
   /** PropertyIndex embeds tabs; landing has its own layout */
   const hideOuterTabs =
-    location.pathname === APP_ROUTES.PROPERTY ||
-    location.pathname === `${APP_ROUTES.PROPERTY}/` ||
-    location.pathname === APP_ROUTES.PROPERTY_BROWSE ||
-    location.pathname === `${APP_ROUTES.PROPERTY_BROWSE}/`;
+    p === APP_ROUTES.PROPERTY ||
+    p === `${APP_ROUTES.PROPERTY}/` ||
+    p === APP_ROUTES.PROPERTY_BROWSE ||
+    p === `${APP_ROUTES.PROPERTY_BROWSE}/`;
+
+  /**
+   * Single AppLayout/NavShell for the whole /property/* tree. Nested AppLayout
+   * in child routes was rendering a second SideRail (duplicate left chrome).
+   * Immerse browse + search: custom sticky header; /property/my: no global top bar.
+   */
+  const isBrowseImmersive =
+    p === APP_ROUTES.PROPERTY_BROWSE || p === `${APP_ROUTES.PROPERTY_BROWSE}/`;
+  const hideGlobalTopBar =
+    isBrowseImmersive ||
+    p.startsWith('/property/my') ||
+    p === APP_ROUTES.PROPERTY_SEARCH;
+
+  let title: string | undefined;
+  if (!hideGlobalTopBar) {
+    if (p === APP_ROUTES.PROPERTY || p === `${APP_ROUTES.PROPERTY}/`) {
+      title = n('Property', 'Недвижимость');
+    } else if (p === APP_ROUTES.OFFPLAN || p === `${APP_ROUTES.OFFPLAN}/`) {
+      title = n('Phuket New Developments', 'Новостройки Пхукета');
+    } else if (p === APP_ROUTES.DEVELOPERS || p === `${APP_ROUTES.DEVELOPERS}/`) {
+      title = n('Developers', 'Застройщики');
+    } else if (p === APP_ROUTES.RESALE || p === `${APP_ROUTES.RESALE}/`) {
+      title = n('Resale', 'Вторичка');
+    } else if (
+      p === APP_ROUTES.COMMERCIAL ||
+      p === `${APP_ROUTES.COMMERCIAL}/` ||
+      p === APP_ROUTES.COMMERCIAL_BROWSE
+    ) {
+      title = n('Commercial', 'Коммерция');
+    } else if (p === APP_ROUTES.LAND || p === `${APP_ROUTES.LAND}/` || p === APP_ROUTES.LAND_BROWSE) {
+      title = n('Land', 'Земля');
+    } else if (p === APP_ROUTES.HOTELS || p === `${APP_ROUTES.HOTELS}/`) {
+      title = n('Hotels', 'Отели');
+    } else if (p === APP_ROUTES.PROPERTY_MAP) {
+      title = n('Map', 'Карта');
+    } else if (p === APP_ROUTES.PROPERTY_CONSULTATION) {
+      title = n('Consultation', 'Консультация');
+    } else if (p === APP_ROUTES.PROPERTY_DEPOSIT_SUCCESS) {
+      title = n('Booking', 'Бронирование');
+    }
+  }
+
+  const showBottomNav = !(
+    p === APP_ROUTES.PROPERTY_DEPOSIT_SUCCESS ||
+    p.includes('/inquiry') ||
+    p.includes('/manual-payment')
+  );
 
   return (
-    <AppLayout showHeader={false}>
+    <AppLayout
+      title={title}
+      showHeader={!hideGlobalTopBar}
+      showBottomNav={showBottomNav}
+    >
       <CompareProvider>
         {!hideOuterTabs && <PropertyHubTabs />}
         <OffplanHubToolsStrip />

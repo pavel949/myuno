@@ -5,7 +5,7 @@
  * тонкая типографика) + myUNO mint accent.
  *
  * Цели экрана:
- *  1) За 3 секунды объяснить ЧТО такое myUNO (40+ сервисов в одном)
+ *  1) За 3 секунды объяснить ЧТО такое myUNO (50+ сервисов в одном)
  *  2) Показать 6 кластеров и сигналы доверия
  *  3) Один первичный CTA → /auth (signup), вторичный → /auth (login)
  *
@@ -20,6 +20,8 @@ import {
   Briefcase,
   Plane,
   Heart,
+  Sparkles,
+  Baby,
   Scale,
   Hammer,
   Shield,
@@ -42,12 +44,14 @@ type Cluster = {
 
 
 const CLUSTERS: Cluster[] = [
-  { id: 'arrive', icon: Plane, labelEn: 'Arrive', labelRu: 'Прилёт', hintEn: 'SIM · Transfer · eSIM', hintRu: 'SIM · Трансфер · eSIM' },
-  { id: 'live', icon: Heart, labelEn: 'Live', labelRu: 'Жизнь', hintEn: 'Food · Beauty · Health', hintRu: 'Еда · Красота · Здоровье' },
-  { id: 'manage', icon: Briefcase, labelEn: 'Manage', labelRu: 'Управление', hintEn: 'Property · PMS · Staff', hintRu: 'Объекты · PMS · Команда' },
-  { id: 'invest', icon: Building2, labelEn: 'Invest', labelRu: 'Инвестиции', hintEn: 'Off-plan · Resale · Deals', hintRu: 'Новостройки · Resale · Сделки' },
-  { id: 'legal', icon: Scale, labelEn: 'Legal', labelRu: 'Юр.услуги', hintEn: 'Visa · Company · KYC', hintRu: 'Виза · Компания · KYC' },
-  { id: 'build', icon: Hammer, labelEn: 'Build', labelRu: 'Строительство', hintEn: 'Renovation · Design', hintRu: 'Ремонт · Дизайн' },
+  { id: 'arrive', icon: Plane, labelEn: 'Arrival & setup', labelRu: 'Приезд и адаптация', hintEn: 'Trip planning · Housing · Car · Experiences · Fast Track', hintRu: 'Планирование поездки · Жильё · Авто · Впечатления · Fast Track' },
+  { id: 'live', icon: Heart, labelEn: 'Daily life', labelRu: 'Жизнь и быт', hintEn: 'Healthcare · Education · Fitness · Entertainment · Community', hintRu: 'Медицина · Обучение · Тренировки · Развлечения · Сообщество' },
+  { id: 'enjoy', icon: Sparkles, labelEn: 'Leisure & experiences', labelRu: 'Досуг и впечатления', hintEn: 'Events · Yachts · Experiences', hintRu: 'События · Яхты · Впечатления' },
+  { id: 'family', icon: Baby, labelEn: 'Family & kids', labelRu: 'Семья и дети', hintEn: 'Education · Childcare · Pets', hintRu: 'Образование · Няни · Питомцы' },
+  { id: 'manage', icon: Briefcase, labelEn: 'Asset management', labelRu: 'Управление активами', hintEn: 'Property · PMS · Team', hintRu: 'Объекты · PMS · Команда' },
+  { id: 'invest', icon: Building2, labelEn: 'Investment', labelRu: 'Инвестиции и капитал', hintEn: 'Newbuilds · Resale · Deal support', hintRu: 'Новостройки · Resale · Сопровождение сделок' },
+  { id: 'legal', icon: Scale, labelEn: 'Legal & compliance', labelRu: 'Право и комплаенс', hintEn: 'Taxes · Compliance · Legal requirements', hintRu: 'Налоги · Compliance · Юридические требования властей' },
+  { id: 'build', icon: Hammer, labelEn: 'Construction & fit-out', labelRu: 'Строительство и ремонт', hintEn: 'Renovation · Design · Fit-out', hintRu: 'Ремонт · Дизайн · Комплектация' },
 ];
 
 const TRUST = [
@@ -116,10 +120,20 @@ export default function WelcomeLanding() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="inline-flex items-center gap-2 rounded-full border border-border bg-card/60 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground"
+            className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-foreground"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-            {isRu ? 'Phuket · Live now' : 'Phuket · Live now'}
+            {isRu ? (
+              <>
+                <span className="font-semibold text-primary">ПХУКЕТ</span>
+                <span className="text-muted-foreground">· LIVE</span>
+              </>
+            ) : (
+              <>
+                <span className="font-semibold text-primary">PHUKET</span>
+                <span className="text-muted-foreground">· LIVE NOW</span>
+              </>
+            )}
           </motion.div>
 
           {/* Headline */}
@@ -131,9 +145,7 @@ export default function WelcomeLanding() {
           >
             {isRu ? (
               <>
-                Жизнь иностранца{' '}
-                <span className="text-muted-foreground/60">на Пхукете —</span>{' '}
-                <span className="text-primary">в одном приложении.</span>
+                Жизнь за границей — в одном приложении
               </>
             ) : (
               <>
@@ -152,8 +164,8 @@ export default function WelcomeLanding() {
             className="mt-5 max-w-xl text-[15px] sm:text-[17px] leading-relaxed text-muted-foreground"
           >
             {isRu
-              ? '40+ сервисов: недвижимость, аренда, трансферы, виза, доставка, услуги для дома. Один аккаунт. Один кошелёк. AI-консьерж 24/7.'
-              : '40+ services: property, rentals, airport transfers, visa, delivery, home care. One account. One wallet. AI concierge 24/7.'}
+              ? '50+ сервисов в единой платформе: переезд и документы, жилье и управление недвижимостью, транспорт, медицина и страхование, lifestyle и family-сервисы, а также решения для бизнеса. Единая инфраструктура myUNO — один аккаунт, единый платежный контур, проверенные партнеры и поддержка 24/7.'
+              : '50+ services in one platform: relocation and documents, housing and property management, transport, healthcare and insurance, lifestyle and family services, plus business solutions. Unified myUNO infrastructure means one account, one payment layer, verified partners, and 24/7 support.'}
           </motion.p>
 
           {/* CTAs */}
@@ -187,18 +199,19 @@ export default function WelcomeLanding() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.25 }}
-            className="mt-12 grid grid-cols-3 gap-px overflow-hidden rounded-xl border border-border bg-border/50 max-w-2xl"
+            className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-px overflow-hidden rounded-xl border border-border bg-border/50 max-w-3xl"
           >
             {[
-              { num: '40+', en: 'micro-apps', ru: 'микро-приложений' },
-              { num: '6', en: 'life clusters', ru: 'кластеров жизни' },
+              { num: '50+', en: 'apps and systems for comfortable living', ru: 'приложений и систем для комфортной жизни' },
+              { num: '8', en: 'canonical life clusters', ru: 'канонических кластеров жизни' },
               { num: '24/7', en: 'AI concierge', ru: 'AI-консьерж' },
+              { num: 'SOS', en: 'emergency assistance', ru: 'помощь в экстренных ситуациях' },
             ].map((s) => (
               <div key={s.num} className="bg-background px-5 py-4">
                 <div className="font-mono text-[22px] font-semibold tracking-tight tabular-nums">
                   {s.num}
                 </div>
-                <div className="mt-0.5 text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
+                <div className="mt-0.5 text-[11px] tracking-[0.04em] text-muted-foreground">
                   {isRu ? s.ru : s.en}
                 </div>
               </div>
@@ -212,10 +225,10 @@ export default function WelcomeLanding() {
         <div className="mx-auto max-w-6xl px-5 py-14 sm:py-20">
           <div className="flex items-baseline justify-between mb-8">
             <h2 className="text-[22px] sm:text-[28px] font-semibold tracking-[-0.02em]">
-              {isRu ? 'Шесть кластеров жизни' : 'Six clusters of life'}
+              {isRu ? 'Восемь кластеров жизни' : 'Eight clusters of life'}
             </h2>
             <span className="hidden sm:inline text-[12px] font-mono uppercase tracking-[0.12em] text-muted-foreground">
-              {isRu ? '01 → 06' : '01 → 06'}
+              {isRu ? '01 → 08' : '01 → 08'}
             </span>
           </div>
 
@@ -278,7 +291,7 @@ export default function WelcomeLanding() {
         <div className="mx-auto max-w-3xl px-5 py-16 sm:py-24 text-center">
           <h2 className="text-[28px] sm:text-[40px] font-semibold tracking-[-0.025em] leading-[1.05]">
             {isRu
-              ? 'Один аккаунт. Вся жизнь на острове.'
+              ? 'Один аккаунт. Вся жизнь за рубежом.'
               : 'One account. Everything you need.'}
           </h2>
           <p className="mt-4 text-[14px] sm:text-[15px] text-muted-foreground">
@@ -300,7 +313,7 @@ export default function WelcomeLanding() {
             </button>
           </div>
 
-          <p className="mt-8 text-[11px] uppercase tracking-[0.14em] text-muted-foreground/60">
+          <p className="mt-8 text-[11px] tracking-[0.08em] text-muted-foreground/60">
             {isRu
               ? '© myUNO · Phuket · Made for foreigners'
               : '© myUNO · Phuket · Made for foreigners'}

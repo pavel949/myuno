@@ -4,6 +4,10 @@
 > **Audience.** Claude Code, Cursor, human engineers.
 > **Supersedes.** `docs/ARCHITECTURE.md` for structural decisions. The existing doc remains valid for current directory layout.
 
+## Current implementation in this repo (not the blueprint below)
+
+The live app uses **`NavRoleKey`** navigation with **`/mc`, `/owner`, `/vendor`, `/admin`, `/team`, `/my-property`, `/invest/...`** etc. — see [`docs/NAVIGATION.md`](../docs/NAVIGATION.md) and [`src/lib/nav/roleIA.ts`](../src/lib/nav/roleIA.ts). The **4-tab mobile** and **`/operate/*` tree** below are a *target* architecture, not what is mounted in the router today. When the blueprint and code diverge, **trust the navigation doc + `APP_ROUTES`** for day-to-day engineering.
+
 ---
 
 ## 01 · Principles

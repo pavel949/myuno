@@ -16,7 +16,7 @@
  */
 import {
   // primary
-  Home, Compass, ShoppingBag, User, LayoutDashboard, Building2,
+  Compass, ShoppingBag, User, LayoutDashboard, Building2,
   CalendarDays, Wallet, MessageCircle, TrendingUp, Package, Calendar,
   UserCheck, MessageSquare, FileCheck, Users, BarChart3, FileText,
   // sidebar extras (workspace)
@@ -24,7 +24,7 @@ import {
   PackageOpen, Receipt, Tag, Star, ShieldCheck, Radio,
   BookOpen, Megaphone, Truck, ClipboardList, Shuffle,
   ArrowLeftRight, Target, Layers, LineChart, CalendarClock,
-  Key, Webhook, Rocket, Settings, MapPin, Sparkles, Car,
+  Key, Webhook, Rocket, Settings, MapPin, Sparkles,
   Stethoscope, GraduationCap, PawPrint, Flower2, UtensilsCrossed,
   Scale, Baby, Ship, Store, Dumbbell,
   // fab
@@ -36,6 +36,10 @@ import {
   INVESTOR_NAV, MC_PORTAL_NAV, NAV_BY_ROLE, resolveNavRole,
   shouldShowAppsLauncher, type NavRoleKey, type NavItem,
 } from '@/lib/navConfig';
+
+export { GUEST_STAY_SIDEBAR_DRAFT } from './guestStayNavDraft';
+export { FLOATING, FLOATING_OFFSET } from './floatingStack';
+/** @see src/lib/nav/roleIA.ts — role, URL, and shell boundaries */
 
 // Re-export so consumers only need one import path going forward.
 export {
@@ -66,8 +70,8 @@ export const PRIMARY_NAV = NAV_BY_ROLE;
 //                  (service-provider workflow — fulfilment + payouts)
 //  admin      → Dashboard · CRM · Tickets · Moderation · Profile
 //                  (platform operator — support + governance)
-//  team       → Dashboard · Content · Review · CRM · Profile
-//                  (uno_team — content & moderation workflow)
+//  team       → Dashboard · Content · Moderation · CRM · Profile
+//                  (uno_team — content & moderation; SideRail N/A, see TeamLayout)
 //
 // When `feature_flag:me_shell_v1` is on, guest swaps to GUEST_NAV_ME_HUB
 // (Home · Feed · Services · Documents · Profile) — handled in BottomBar.
@@ -114,7 +118,11 @@ const PATH_ALIASES: Record<string, string[]> = {
   '/market':      ['/market'],
   '/property':    ['/property'],
   '/discover':    ['/discover'],
-  '/my-property': ['/my-property'],
+  '/my-property': [
+    '/my-property',
+    '/my-property/statements',
+    '/my-property/signatures',
+  ],
 };
 
 /**
@@ -353,45 +361,6 @@ const VENDOR_SIDEBAR: SidebarNavGroup[] = [
   },
 ];
 
-const GUEST_PORTAL_SIDEBAR: SidebarNavGroup[] = [
-  {
-    labelEn: 'My Stay', labelRu: 'Мой визит', defaultOpen: true,
-    items: [
-      { path: '/my-stay',         labelEn: 'Dashboard',    labelRu: 'Обзор',              icon: Home },
-      { path: '/bookings',        labelEn: 'My Bookings',  labelRu: 'Мои бронирования',   icon: CalendarCheck },
-      { path: '/guest/messages',  labelEn: 'Messages',     labelRu: 'Сообщения',          icon: MessageCircle },
-    ],
-  },
-  {
-    labelEn: 'Services', labelRu: 'Услуги', defaultOpen: true,
-    items: [
-      { path: '/cleaning',  labelEn: 'Cleaning',  labelRu: 'Уборка',    icon: Sparkles },
-      { path: '/transport', labelEn: 'Transport', labelRu: 'Транспорт', icon: Car },
-      { path: '/delivery',  labelEn: 'Delivery',  labelRu: 'Доставка',  icon: ShoppingBag },
-    ],
-  },
-  {
-    labelEn: 'Property', labelRu: 'Объект',
-    items: [
-      { path: '/guest/guidebook', labelEn: 'Guidebook',   labelRu: 'Гайдбук',  icon: BookOpen },
-      { path: '/guest/area',      labelEn: 'Area Guide',  labelRu: 'Район',    icon: MapPin },
-      { path: '/guest/rules',     labelEn: 'House Rules', labelRu: 'Правила',  icon: ClipboardList },
-    ],
-  },
-];
-
-const TEAM_SIDEBAR: SidebarNavGroup[] = [
-  {
-    labelEn: 'Team Hub', labelRu: 'Команда', defaultOpen: true,
-    items: [
-      { path: APP_ROUTES.TEAM,             labelEn: 'Dashboard', labelRu: 'Обзор',     icon: LayoutDashboard },
-      { path: APP_ROUTES.TEAM_CONTENT,     labelEn: 'Content',   labelRu: 'Контент',   icon: FileText },
-      { path: APP_ROUTES.ADMIN_MODERATION, labelEn: 'Review',    labelRu: 'Проверка',  icon: FileCheck },
-      { path: APP_ROUTES.ADMIN_CRM,        labelEn: 'CRM',       labelRu: 'CRM',       icon: Users },
-    ],
-  },
-];
-
 export const SIDEBAR_NAV: Record<NavRoleKey, SidebarNavGroup[]> = {
   guest:     [],   // consumer — no sidebar
   investor:  [],   // consumer — no sidebar
@@ -399,11 +368,36 @@ export const SIDEBAR_NAV: Record<NavRoleKey, SidebarNavGroup[]> = {
   owner:     OWNER_SIDEBAR,
   vendor:    VENDOR_SIDEBAR,
   admin:     ADMIN_SIDEBAR,
-  team:      TEAM_SIDEBAR,
+  /** `team` uses `TeamLayout` + `TeamSidebar` (not global `SideRail`). */
+  team:      [],
 };
 
 export function hasSidebar(role: NavRoleKey): boolean {
   return SIDEBAR_NAV[role].length > 0;
+}
+
+/**
+ * Workspace block for `AppDrawer`. Team has no `SIDEBAR_NAV` (custom sidebar in layout);
+ * we still expose the same 5 primary destinations here for quick access.
+ */
+export function getWorkspaceDrawerGroups(role: NavRoleKey): SidebarNavGroup[] {
+  if (role === 'team') {
+    return [
+      {
+        labelEn: 'Team workspace',
+        labelRu: 'Команда',
+        defaultOpen: true,
+        items: TEAM_NAV.map((item) => ({
+          path: item.path,
+          labelEn: item.labelEn,
+          labelRu: item.labelRu,
+          icon: item.icon,
+        })),
+      },
+    ];
+  }
+  if (hasSidebar(role)) return SIDEBAR_NAV[role];
+  return [];
 }
 
 // ─────────────────────────────────────────────────────────────

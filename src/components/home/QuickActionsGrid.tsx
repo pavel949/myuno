@@ -29,6 +29,18 @@ import {
   ADMIN_ACTIONS,
   type CatalogQuickAction,
 } from '@/lib/home/quickActionsCatalog';
+import { APP_REGISTRY } from '@/lib/appRegistry';
+import { getAppEntryLabel, pickTriplet } from '@/lib/ecosystemGlossary';
+import type { Language } from '@/i18n';
+
+function quickActionLabel(action: CatalogQuickAction, lang: Language): string {
+  const entry = APP_REGISTRY[action.id];
+  if (entry) return getAppEntryLabel(entry, lang);
+  return pickTriplet(
+    { ru: action.labelRu, en: action.label, th: action.labelTh ?? action.label },
+    lang
+  );
+}
 
 function getActionsForRole(role: AppRole): CatalogQuickAction[] {
   switch (role) {
@@ -54,7 +66,6 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
 }: QuickActionsGridProps) {
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const isRu = language === 'ru';
   const isDesktop = useIsDesktop();
 
   const { personas, isLoading: personasLoading } = useUserPersonas();
@@ -92,9 +103,14 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
 
       if (action.requiresFullAccess && !hasFullAccess) {
         toast.error(
-          isRu
-            ? 'Доступно после верификации УК и добавления объекта'
-            : 'Available after MC verification and adding a property',
+          pickTriplet(
+            {
+              ru: 'Доступно после верификации УК и добавления объекта',
+              en: 'Available after MC verification and adding a property',
+              th: 'ใช้ได้หลังยืนยัน MC และเพิ่มอสังหาฯ',
+            },
+            language
+          ),
           { duration: 4000 },
         );
         return;
@@ -102,7 +118,7 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
 
       navigate(action.path);
     },
-    [navigate, hasFullAccess, isRu],
+    [navigate, hasFullAccess, language],
   );
 
   const handlePrefetch = useCallback(
@@ -119,7 +135,7 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
 
   const renderDesktopTile = (action: CatalogQuickAction) => {
     const Icon = action.icon;
-    const label = isRu ? action.labelRu : action.label;
+    const label = quickActionLabel(action, language);
     const color = action.accentColor || '#00D68F';
     const isLocked = action.requiresFullAccess && !hasFullAccess;
     return (
@@ -157,7 +173,7 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
 
   const renderMobileCard = (action: CatalogQuickAction, i: number) => {
     const Icon = action.icon;
-    const label = isRu ? action.labelRu : action.label;
+    const label = quickActionLabel(action, language);
     const color = action.accentColor || '#00D68F';
     const isLocked = action.requiresFullAccess && !hasFullAccess;
     const animClass = `anim-qa-${i + 1}`;
@@ -202,11 +218,13 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
         key={action.id}
         onClick={(e) => handleClick(action, e)}
         onTouchStart={() => handlePrefetch(action.path)}
-        aria-label={isRu ? action.labelRu : action.label}
+        aria-label={quickActionLabel(action, language)}
         className="flex items-center gap-2 h-11 px-3.5 rounded-[var(--radius-full)] shrink-0 snap-start whitespace-nowrap transition-all active:scale-[0.95] bg-[hsl(var(--bg-elevated))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       >
         <Icon style={{ width: 16, height: 16, color }} strokeWidth={2} aria-hidden />
-        <span className="text-[11px] font-medium text-muted-foreground">{isRu ? action.labelRu : action.label}</span>
+        <span className="text-[11px] font-medium text-muted-foreground">
+          {quickActionLabel(action, language)}
+        </span>
       </button>
     );
   };
@@ -219,7 +237,7 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
       <div className="space-y-4">
         <div key={`${actionsKey}-${sectionKeys}`} className="space-y-4">
           {groupedSections.map((section, sectionIdx) => {
-            const label = isRu ? GROUP_LABELS[section.groupId].ru : GROUP_LABELS[section.groupId].en;
+            const label = pickTriplet(GROUP_LABELS[section.groupId], language);
             let offset = 0;
             for (let s = 0; s < sectionIdx; s += 1) {
               offset += groupedSections[s].actions.length;

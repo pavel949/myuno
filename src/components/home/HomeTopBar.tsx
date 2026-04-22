@@ -7,6 +7,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import type { UserPersona } from '@/hooks/useUserPersonas';
 import { ROLE_META } from '@/lib/roleBlend';
+import { BrandWordmark } from '@/components/uno/BrandWordmark';
 
 interface HomeTopBarProps {
   personas: UserPersona[];
@@ -59,11 +60,8 @@ export function HomeTopBar({ personas, onRoleSheetOpen, onAppDrawerOpen }: HomeT
           </button>
         )}
         <div className="flex flex-col min-w-0">
-          <div className="flex items-baseline gap-0">
-            <span className="font-display text-[22px] font-normal text-muted-foreground tracking-[-0.02em]">my</span>
-            <span className="font-display text-[22px] font-bold text-foreground tracking-[0.02em]">UNO</span>
-          </div>
-          <span className="hidden sm:block text-[10px] leading-tight text-muted-foreground/60 tracking-wide -mt-0.5 truncate">
+          <BrandWordmark as="static" className="min-w-0" />
+          <span className="hidden sm:block text-[10px] leading-tight text-muted-foreground/80 tracking-wide -mt-0.5 font-sans truncate">
             {isRu ? 'Инфраструктура для жизни на Пхукете' : 'Infrastructure for life on Phuket'}
           </span>
         </div>
@@ -76,7 +74,7 @@ export function HomeTopBar({ personas, onRoleSheetOpen, onAppDrawerOpen }: HomeT
           <button
             onClick={onRoleSheetOpen}
             aria-label="Manage roles"
-            className="flex items-center gap-0 min-h-[44px] px-2.5 rounded-full border border-border hover:border-border-strong transition-colors"
+            className="flex items-center gap-0 min-h-[44px] px-2.5 rounded-full border border-border bg-card/40 hover:border-border-strong hover:bg-card/60 transition-colors"
           >
             <div className="flex">
               {displayPersonas.map((p, i) => {
@@ -85,8 +83,8 @@ export function HomeTopBar({ personas, onRoleSheetOpen, onAppDrawerOpen }: HomeT
                 return (
                   <div
                     key={p}
-                    className="w-[26px] h-[26px] rounded-full flex items-center justify-center font-display text-[11px] font-bold text-background border-2 border-background"
-                    style={{ background: meta.color, marginLeft: i === 0 ? 0 : -9, zIndex: 10 - i }}
+                    className="w-[26px] h-[26px] rounded-full flex items-center justify-center font-display text-[11px] font-bold border-2 border-background bg-muted shadow-sm"
+                    style={{ color: meta.color, marginLeft: i === 0 ? 0 : -9, zIndex: 10 - i }}
                   >
                     {meta.glyph}
                   </div>
@@ -94,7 +92,7 @@ export function HomeTopBar({ personas, onRoleSheetOpen, onAppDrawerOpen }: HomeT
               })}
             </div>
             {personas.length > 3 && (
-              <span className="font-mono text-[10px] text-muted-foreground ml-1.5">+{personas.length - 3}</span>
+              <span className="text-[10px] tabular-nums text-muted-foreground ml-1.5 font-sans">+{personas.length - 3}</span>
             )}
             <svg className="ml-2 opacity-40" width="10" height="10" viewBox="0 0 10 10" fill="none">
               <path d="M2 4l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -118,8 +116,7 @@ export function HomeTopBar({ personas, onRoleSheetOpen, onAppDrawerOpen }: HomeT
         <button
           onClick={() => navigate('/account')}
           aria-label="Account"
-          className="w-11 h-11 rounded-full border border-border flex items-center justify-center font-display text-[12px] font-semibold text-foreground"
-          style={{ background: 'linear-gradient(135deg, #26314A 0%, #0F1C2E 100%)' }}
+          className="w-11 h-11 rounded-full border border-border flex items-center justify-center text-[12px] font-semibold text-foreground font-sans bg-gradient-to-br from-card to-secondary shadow-inner"
         >
           {initials}
         </button>

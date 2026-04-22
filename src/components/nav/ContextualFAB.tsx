@@ -15,6 +15,7 @@ import { Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { FAB_ACTIONS, hasFab, type NavRoleKey } from '@/lib/nav/navigationModel';
+import { FLOATING } from '@/lib/nav/floatingStack';
 
 interface ContextualFABProps {
   role: NavRoleKey;
@@ -38,7 +39,7 @@ export function ContextualFAB({ role }: ContextualFABProps) {
     <>
       {open && (
         <div
-          className="fixed inset-0 z-[60] bg-foreground/40 backdrop-blur-sm md:hidden"
+          className={`fixed inset-0 ${FLOATING.contextualOverlay} bg-foreground/40 backdrop-blur-sm md:hidden`}
           onClick={() => setOpen(false)}
         >
           <div className="absolute bottom-24 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3">
@@ -76,7 +77,8 @@ export function ContextualFAB({ role }: ContextualFABProps) {
         onClick={() => setOpen(!open)}
         aria-label={isRu ? 'Быстрые действия' : 'Quick actions'}
         className={cn(
-          'fixed z-[70] md:hidden bottom-[76px] left-1/2 -translate-x-1/2 w-14 h-14 rounded-full',
+          'fixed md:hidden bottom-[calc(var(--bottom-nav-h)+1rem)] left-1/2 -translate-x-1/2 w-14 h-14 rounded-full',
+          FLOATING.contextualFab,
           '[box-shadow:var(--shadow-elevation-4)] flex items-center justify-center transition-all duration-200',
           open ? 'bg-foreground text-background rotate-45' : 'bg-primary text-primary-foreground',
         )}

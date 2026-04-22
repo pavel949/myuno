@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowUpDown, TrendingUp, TrendingDown, MapPin, Clock, RefreshCw } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { getClusterById, getClusterHeaderLabel } from '@/lib/nav/clusterCatalog';
 
 interface ExchangeRate {
   pair: string;
@@ -55,6 +56,8 @@ const EXCHANGERS: Exchanger[] = [
 const ExchangeBotPage: React.FC = () => {
   const { language } = useLanguage();
   const t = language === 'ru';
+  const arriveCluster = getClusterById('arrive');
+  const arrivePill = arriveCluster ? getClusterHeaderLabel(arriveCluster, language) : 'Arrival';
   const [amount, setAmount] = useState('1000');
   const [selectedPair, setSelectedPair] = useState('RUB/THB');
   const [lastUpdated] = useState(new Date());
@@ -74,7 +77,7 @@ const ExchangeBotPage: React.FC = () => {
         <div className="text-center space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cluster-arrive/10 text-cluster-arrive text-sm font-medium">
             <ArrowUpDown className="w-4 h-4" />
-            {t ? 'ПРИЕХАТЬ' : 'ARRIVE'}
+            {arrivePill}
           </div>
           <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground">
             {t ? '💱 Курсы валют на Пхукете' : '💱 Phuket Exchange Rates'}

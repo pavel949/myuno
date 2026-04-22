@@ -110,7 +110,7 @@ export const BottomBar = forwardRef<HTMLDivElement, BottomBarProps>(
               active ? 'text-primary scale-110' : 'text-muted-foreground',
             )}
           >
-            <Icon className="w-[20px] h-[20px]" aria-hidden />
+            <Icon className="size-5" aria-hidden />
           </div>
           <span
             className={cn(

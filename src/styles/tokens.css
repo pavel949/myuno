@@ -195,6 +195,8 @@
   --section-gap: 1.25rem;
   /* Minimum touch target per WCAG / Apple HIG */
   --touch-target: 2.75rem; /* 44px */
+  /* Primary nav (TopBar pills, BottomBar, SideRail) — one icon size */
+  --nav-icon-size: 1.25rem; /* 20px; use with size-5 in Tailwind */
 
   /* ═══ Mobile bottom nav offset (BottomBar height + iOS safe area) ═══ */
   /* SSOT for any sticky bar / FAB that must sit above the mobile BottomBar.

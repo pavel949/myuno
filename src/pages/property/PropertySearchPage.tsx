@@ -14,7 +14,6 @@ import { usePropertyFilterOptions } from '@/hooks/usePropertyFilterOptions';
 import { usePropertiesInfinite, Property } from '@/hooks/useProperties';
 import { useManagementCompanies } from '@/hooks/useManagementCompanies';
 import { Skeleton } from '@/components/ui/skeleton';
-import { AppLayout } from '@/components/layout/AppLayout';
 import { BackButton } from '@/components/uno/BackButton';
 import { AirbnbSearchBar, SearchParams } from '@/components/property/AirbnbSearchBar';
 import { PropertyListingCard } from '@/components/property/PropertyListingCard';
@@ -226,8 +225,7 @@ export default function PropertySearchPage() {
   };
 
   return (
-    <AppLayout showHeader={false} showBottomNav>
-      <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background">
         {/* Sticky header */}
         <header className="sticky top-0 z-40 bg-background border-b">
           <div className="px-4 pt-3 pb-2">
@@ -422,6 +420,5 @@ export default function PropertySearchPage() {
           {showStickyCTA && <VerticalCTA vertical="property" variant="sticky" context="list" />}
         </main>
       </div>
-    </AppLayout>
   );
 }

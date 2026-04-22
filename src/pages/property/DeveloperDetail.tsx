@@ -18,7 +18,6 @@ import {
 } from 'lucide-react';
 import { BackButton } from '@/components/uno/BackButton';
 import { APP_ROUTES } from '@/lib/config/routes';
-import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -40,29 +39,25 @@ export default function DeveloperDetail() {
 
   if (isLoading) {
     return (
-      <AppLayout>
-        <div className="space-y-4 p-4">
-          <Skeleton className="h-24 rounded-xl" />
-          <Skeleton className="h-40 rounded-xl" />
-          <Skeleton className="h-60 rounded-xl" />
-        </div>
-      </AppLayout>
+      <div className="space-y-4 p-4">
+        <Skeleton className="h-24 rounded-xl" />
+        <Skeleton className="h-40 rounded-xl" />
+        <Skeleton className="h-60 rounded-xl" />
+      </div>
     );
   }
 
   if (!developer) {
     return (
-      <AppLayout title={isRu ? 'Не найдено' : 'Not Found'}>
-        <div className="flex flex-col items-center justify-center py-20">
-          <Building2 className="w-16 h-16 text-muted-foreground/30 mb-4" />
-          <p className="text-muted-foreground">
-            {isRu ? 'Застройщик не найден' : 'Developer not found'}
-          </p>
-          <Button variant="link" onClick={() => navigate('/property/developers')}>
-            {isRu ? 'Вернуться к списку' : 'Back to list'}
-          </Button>
-        </div>
-      </AppLayout>
+      <div className="flex flex-col items-center justify-center py-20">
+        <Building2 className="w-16 h-16 text-muted-foreground/30 mb-4" />
+        <p className="text-muted-foreground">
+          {isRu ? 'Застройщик не найден' : 'Developer not found'}
+        </p>
+        <Button variant="link" onClick={() => navigate('/property/developers')}>
+          {isRu ? 'Вернуться к списку' : 'Back to list'}
+        </Button>
+      </div>
     );
   }
 
@@ -91,7 +86,7 @@ export default function DeveloperDetail() {
   ]);
 
   return (
-    <AppLayout>
+    <>
       <SEOHead
         title={seoTitle}
         description={seoDescription}
@@ -229,6 +224,6 @@ export default function DeveloperDetail() {
           </div>
         )}
       </div>
-    </AppLayout>
+    </>
   );
 }

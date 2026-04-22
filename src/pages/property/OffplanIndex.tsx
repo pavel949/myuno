@@ -12,7 +12,6 @@ import {
   X,
   Search,
 } from 'lucide-react';
-import { AppLayout } from '@/components/layout/AppLayout';
 import { SEOHead, createBreadcrumbSchema } from '@/components/seo';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -147,7 +146,7 @@ export default function OffplanIndex() {
   ]);
 
   return (
-    <AppLayout title={isRu ? 'Новостройки Пхукета' : 'Phuket New Developments'}>
+    <>
       <SEOHead
         title={seoTitle}
         description={seoDescription}
@@ -502,6 +501,6 @@ export default function OffplanIndex() {
           </Button>
         </div>
       </div>
-    </AppLayout>
+    </>
   );
 }

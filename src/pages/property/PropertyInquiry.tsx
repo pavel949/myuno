@@ -2,7 +2,6 @@ import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import { supabase } from '@/integrations/supabase/client';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Users, AlertCircle, Zap, ChevronRight, ChevronDown, ChevronUp, CalendarIcon, Edit2, Shield, ScrollText, CreditCard, User, Loader2, Info, Sparkles } from 'lucide-react';
-import { AppLayout } from '@/components/layout/AppLayout';
 import { BackButton } from '@/components/uno/BackButton';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
@@ -279,29 +278,26 @@ export default function PropertyInquiry() {
   // If no dates, prompt the user to go back
   if (!hasDates) {
     return (
-      <AppLayout showBottomNav={false}>
-        <div className="flex flex-col items-center justify-center min-h-[60vh] p-6 text-center gap-4">
-          <CalendarIcon className="w-12 h-12 text-muted-foreground" />
-          <h1 className="text-xl font-display font-bold">
-            {isRu ? 'Выберите даты' : 'Select your dates'}
-          </h1>
-          <p className="text-muted-foreground max-w-sm">
-            {isRu
-              ? 'Чтобы забронировать, сначала выберите даты заезда и выезда на странице объекта.'
-              : 'To book, please select check-in and check-out dates on the property page first.'}
-          </p>
-          <Button onClick={() => navigate(editUrl)} size="lg">
-            <CalendarIcon className="w-4 h-4 mr-2" />
-            {isRu ? 'Выбрать даты' : 'Select dates'}
-          </Button>
-        </div>
-      </AppLayout>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] p-6 text-center gap-4">
+        <CalendarIcon className="w-12 h-12 text-muted-foreground" />
+        <h1 className="text-xl font-display font-bold">
+          {isRu ? 'Выберите даты' : 'Select your dates'}
+        </h1>
+        <p className="text-muted-foreground max-w-sm">
+          {isRu
+            ? 'Чтобы забронировать, сначала выберите даты заезда и выезда на странице объекта.'
+            : 'To book, please select check-in and check-out dates on the property page first.'}
+        </p>
+        <Button onClick={() => navigate(editUrl)} size="lg">
+          <CalendarIcon className="w-4 h-4 mr-2" />
+          {isRu ? 'Выбрать даты' : 'Select dates'}
+        </Button>
+      </div>
     );
   }
 
   return (
-    <AppLayout showBottomNav={false}>
-      <div className="pb-28">
+    <div className="pb-28">
         {/* Sticky Header */}
         <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-md border-b">
           <div className="flex items-center gap-4 p-4">
@@ -916,6 +912,5 @@ export default function PropertyInquiry() {
           </div>
         )}
       </div>
-    </AppLayout>
   );
 }

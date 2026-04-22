@@ -34,7 +34,7 @@ export function CapitalMobileNav() {
               onClick={() => navigate(item.path)}
               className={cn(
                 'flex flex-col items-center gap-0.5 px-2 py-1 text-xs transition-colors',
-                active ? 'text-emerald-500' : 'text-muted-foreground'
+                active ? 'text-primary' : 'text-muted-foreground'
               )}
             >
               <item.icon className="w-5 h-5" />

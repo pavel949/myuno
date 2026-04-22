@@ -413,6 +413,8 @@ export const APP_ROUTES = {
   MC_API_KEYS: '/mc/developer/api-keys',
   MC_WEBHOOKS: '/mc/developer/webhooks',
   MC_ONBOARDING_WIZARD: '/mc/onboarding/wizard',
+  /** Owner (MC-managed) portal hub — list of properties & hub entry */
+  OWNER_PORTAL: '/my-property',
   OWNER_PORTAL_STATEMENTS: '/my-property/statements',
   OWNER_PORTAL_SIGNATURES: '/my-property/signatures',
   MC_OWNERS: '/mc/owners',

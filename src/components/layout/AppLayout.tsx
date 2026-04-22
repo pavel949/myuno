@@ -12,8 +12,9 @@ import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
 import { NavShell } from '@/components/nav/NavShell';
 import { useUserContext } from '@/hooks/useUserContext';
 import { useOwnerType } from '@/hooks/useOwnerType';
+import type { NavRoleKey } from '@/lib/nav/navigationModel';
 
-interface AppLayoutProps {
+export interface AppLayoutProps {
   children: ReactNode;
   title?: string;
   showHeader?: boolean;
@@ -23,15 +24,28 @@ interface AppLayoutProps {
   showSituationBanner?: boolean;
   className?: string;
   contentClassName?: string;
+  /**
+   * `consumer` (default): auth-driven nav + consumer-only chrome (banners, install CTAs).
+   * `workspace`: fixed-role shell without consumer marketing surfaces; respects `showFooter` on all breakpoints.
+   */
+  variant?: 'consumer' | 'workspace';
+  /**
+   * When set, NavShell uses this role (MC/Admin/Vendor/Guest/Team/Owner, etc.) instead of inferring from auth + URL.
+   * Use for workspace route layouts.
+   */
+  navRole?: NavRoleKey;
+  /**
+   * Wrap main content in ecosystem max-width container. Default `true` for consumer, `false` for workspace
+   * (full-bleed dashboards).
+   */
+  usePageContainer?: boolean;
 }
 
 /**
- * AppLayout — consumer-surface layout (guest / investor / mc_portal).
+ * AppLayout — unified shell over `NavShell` for consumer browsing and workspace roles.
  *
- * Migrated to NavShell (Stage 2 of nav refactor). NavShell handles header,
- * bottom-bar, and safe-area insets uniformly. AppLayout remains responsible
- * only for consumer-specific banners (PWA install, email verification,
- * situation banner) and the optional desktop footer.
+ * - **Consumer**: PWA install / email verification / situation banners + optional `ECOSYSTEM_PAGE_CONTAINER`.
+ * - **Workspace**: same nav chrome as legacy `*Layout` wrappers (MCLayout, Admin, …) without consumer-only blocks.
  */
 export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
   (
@@ -44,23 +58,31 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
       showSituationBanner = false,
       className,
       contentClassName,
+      variant = 'consumer',
+      navRole,
+      usePageContainer: usePageContainerProp,
     },
     ref
   ) => {
     const isDesktop = useIsDesktop();
     const { activeRole } = useUserContext();
     const { isMCPortal } = useOwnerType();
-    // Activate global behavioral tracking
     useUserTracking();
-    // Header: respect `showHeader` on all breakpoints (immersive hubs avoid double chrome with HomeTopBar etc.).
-    const finalShowHeader = showHeader;
-    // Footer: keep desktop default on — many pages omit showFooter on mobile only.
-    const finalShowFooter = isDesktop ? true : showFooter;
+
+    const isWorkspace = variant === 'workspace';
+    const usePageContainer = usePageContainerProp ?? !isWorkspace;
+
+    // Consumer: legacy behavior — desktop shows footer unless mobile-only pages opt out via showFooter.
+    // Workspace: always respect `showFooter` on every breakpoint.
+    const finalShowFooter = isWorkspace ? showFooter : isDesktop ? true : showFooter;
+
+    const consumerChrome = !isWorkspace;
 
     return (
       <NavShell
-        activeRole={activeRole}
-        isMCPortal={isMCPortal}
+        role={navRole}
+        activeRole={navRole ? undefined : activeRole}
+        isMCPortal={navRole ? undefined : isMCPortal}
         title={title}
         showHeader={showHeader}
         showBottomNav={showBottomNav}
@@ -68,15 +90,19 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
         contentClassName={contentClassName}
       >
         <div ref={ref} className="contents">
-          <EmailVerificationBanner />
-          {showSituationBanner && <ActiveSituationBanner />}
-          <InstallBanner />
+          {consumerChrome && <EmailVerificationBanner />}
+          {consumerChrome && showSituationBanner && <ActiveSituationBanner />}
+          {consumerChrome && <InstallBanner />}
 
-          <div className={cn(ECOSYSTEM_PAGE_CONTAINER)}>{children}</div>
+          {usePageContainer ? (
+            <div className={cn(ECOSYSTEM_PAGE_CONTAINER)}>{children}</div>
+          ) : (
+            children
+          )}
 
           {finalShowFooter && <Footer />}
-          <MobileInstallSheet />
-          <FloatingInstallButton />
+          {consumerChrome && <MobileInstallSheet />}
+          {consumerChrome && <FloatingInstallButton />}
         </div>
       </NavShell>
     );
