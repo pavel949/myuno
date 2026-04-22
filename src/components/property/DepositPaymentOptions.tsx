@@ -194,19 +194,161 @@ export const DepositPaymentOptions = forwardRef<DepositPaymentOptionsHandle, Dep
       });
     };
 
+    /**
+     * Manual RUB payment flow:
+     *   1. Atomic re-check dates (same guard as Stripe path)
+     *   2. Create order with status='pending_manual_payment' + payment_channel='rub_manual'
+     *   3. Insert manual_payment_requests row (admin work card)
+     *   4. Fire-and-forget notify-manual-payment-request edge function (email + WA + in-app)
+     *   5. Redirect to /property/booking/manual-payment/:orderId
+     */
+    const handleManualRubPayment = async (): Promise<boolean> => {
+      setIsProcessing(true);
+      try {
+        const { data: isAvailable, error: availErr } = await supabase.rpc(
+          'check_property_dates_available',
+          {
+            p_property_id: propertyId,
+            p_check_in: format(checkIn, 'yyyy-MM-dd'),
+            p_check_out: format(checkOut, 'yyyy-MM-dd'),
+          },
+        );
+        if (availErr) {
+          console.error('[DepositPaymentOptions] RUB availability error:', availErr);
+          toast.error(isRu ? 'Не удалось проверить доступность дат.' : 'Could not verify availability.');
+          return false;
+        }
+        if (isAvailable === false) {
+          toast.error(
+            isRu
+              ? 'Эти даты только что были забронированы. Выберите другие.'
+              : 'These dates were just booked. Please pick different dates.',
+          );
+          return false;
+        }
+
+        // 1. Create order — Order-First, audit trail preserved.
+        const orderResult = await createOrder({
+          order_type: 'property',
+          provider_org_id: providerOrgId,
+          start_at: checkIn,
+          end_at: checkOut,
+          total_amount: totalAmount,
+          currency,
+          metadata: {
+            property_id: propertyId,
+            property_title: propertyTitle,
+            guests,
+            nights,
+            payment_channel: 'rub_manual',
+            guest_locale: isRu ? 'ru' : 'en',
+            booking_mode: 'manual_rub',
+          },
+          items: [{
+            item_name: propertyTitle,
+            item_type: 'property_rental',
+            qty: nights,
+            unit_price: nights > 0 ? Math.round(totalAmount / nights) : totalAmount,
+            amount: totalAmount,
+            start_at: checkIn,
+            end_at: checkOut,
+            metadata: { source_id: propertyId },
+          }],
+          participants: [{
+            role: 'primary',
+            name: guestName,
+            phone: guestPhone,
+            email: guestEmail || undefined,
+          }],
+          serviceName: propertyTitle,
+        });
+
+        if (!orderResult.success || !orderResult.order_id) {
+          toast.error(
+            isRu
+              ? 'Не удалось создать заявку. Попробуйте ещё раз.'
+              : 'Could not create the request. Please try again.',
+          );
+          return false;
+        }
+
+        // 2. Insert into manual_payment_requests (admin task card).
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+        const { error: reqError } = await supabase
+          .from('manual_payment_requests')
+          .insert({
+            order_id: orderResult.order_id,
+            property_id: propertyId,
+            user_id: authUser?.id ?? null,
+            manager_user_id: ownerUserId ?? null,
+            channel: 'rub_manual',
+            amount_listing: totalAmount,
+            currency_listing: currency,
+            amount_rub_estimate: amountRub,
+            fx_rate_used: rate,
+            guest_name: guestName,
+            guest_phone: guestPhone,
+            guest_email: guestEmail,
+            metadata: {
+              property_title: propertyTitle,
+              nights,
+              guests,
+              check_in: format(checkIn, 'yyyy-MM-dd'),
+              check_out: format(checkOut, 'yyyy-MM-dd'),
+              fx_source: rateSource,
+            },
+          });
+        if (reqError) {
+          console.error('[DepositPaymentOptions] manual_payment_requests insert:', reqError);
+          Sentry.captureException(reqError, { extra: { scope: 'rub_manual.insert', orderId: orderResult.order_id } });
+          // Order exists — keep going, admin will see the orphaned order; surface a soft warning.
+          toast.warning(
+            isRu
+              ? 'Заявка создана, но уведомление не ушло. Менеджер всё равно её увидит.'
+              : 'Request created, but notification failed. Manager will still see it.',
+          );
+        }
+
+        // 3. Fire-and-forget notification (don't block redirect).
+        supabase.functions.invoke('notify-manual-payment-request', {
+          body: { order_id: orderResult.order_id },
+        }).catch((err) => {
+          console.warn('[DepositPaymentOptions] notify-manual-payment-request failed:', err);
+        });
+
+        toast.success(
+          isRu ? 'Заявка отправлена! Менеджер свяжется в течение 30 минут.' : 'Request sent! Manager will reach out within 30 min.',
+        );
+        navigate(`/property/booking/manual-payment/${orderResult.order_id}`, { replace: true });
+        return true;
+      } catch (error) {
+        const err = error instanceof Error ? error : new Error(String(error));
+        console.error('[DepositPaymentOptions] RUB manual error:', err);
+        Sentry.captureException(err, { extra: { scope: 'DepositPaymentOptions.handleManualRubPayment', propertyId } });
+        toast.error(
+          isRu ? 'Не удалось отправить заявку' : 'Could not submit request',
+          { description: err.message },
+        );
+        return false;
+      } finally {
+        setIsProcessing(false);
+      }
+    };
+
     useImperativeHandle(
       ref,
       () => ({
         getMethod: () => method,
         submit: async () => {
           if (method === 'card') return handleOnlinePayment();
+          if (method === 'rub_manual') return handleManualRubPayment();
           // For offline methods we just deep-link out to WhatsApp.
           triggerWhatsApp();
           return true;
         },
       }),
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      [method, payInFull, totalAmount, chargeNow, propertyId],
+      [method, payInFull, totalAmount, chargeNow, propertyId, amountRub, rate],
     );
 
     return (
