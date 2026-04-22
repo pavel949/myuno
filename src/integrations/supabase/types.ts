@@ -30145,8 +30145,8 @@ export type Database = {
       v_profiles_canonical: {
         Row: {
           active_clusters: string[] | null
+          canonical_all_roles: string[] | null
           canonical_primary_role: string | null
-          canonical_secondary_roles: string[] | null
           created_at: string | null
           detected_persona: string | null
           detected_persona_confidence: number | null
@@ -30171,8 +30171,8 @@ export type Database = {
         }
         Insert: {
           active_clusters?: string[] | null
+          canonical_all_roles?: never
           canonical_primary_role?: never
-          canonical_secondary_roles?: never
           created_at?: string | null
           detected_persona?: string | null
           detected_persona_confidence?: number | null
@@ -30199,8 +30199,8 @@ export type Database = {
         }
         Update: {
           active_clusters?: string[] | null
+          canonical_all_roles?: never
           canonical_primary_role?: never
-          canonical_secondary_roles?: never
           created_at?: string | null
           detected_persona?: string | null
           detected_persona_confidence?: number | null
