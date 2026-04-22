@@ -42,9 +42,9 @@ export interface VerticalGroupItem {
 
 export interface VerticalGroup {
   id: string;
-  labelEn: string;
-  labelRu: string;
-  labelTh: string;
+  ru: string;
+  en: string;
+  th: string;
   icon: string;
   items: VerticalGroupItem[];
 }
@@ -341,7 +341,7 @@ export const VERTICAL_GROUPS: VerticalGroup[] = [
 /** Footer / marketing — localized section title. */
 export function getVerticalGroupTitle(group: VerticalGroup, lang: Language): string {
   return pickTriplet(
-    { ru: group.labelRu, en: group.labelEn, th: group.labelTh },
+    { ru: group.ru, en: group.en, th: group.th },
     lang
   );
 }
