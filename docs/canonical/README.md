@@ -18,6 +18,14 @@
 | 08 | [08-ai-prompts-library.md](./08-ai-prompts-library.md) | AI Prompts Library v1.0: канонические system prompts для всех AI-агентов (консьерж, ClearView draft, Tax Advisor, support и др.) |
 | 09 | [09-data-schema.md](./09-data-schema.md) | Canonical Data Schema v1.0: таблицы, enums, индексы, RLS-политики, FK, naming conventions Supabase. Источник истины по схеме данных |
 
+## Архитектура (architecture/)
+
+| Файл | Назначение |
+|------|------------|
+| [architecture/ARCHITECTURE_V2.md](./architecture/ARCHITECTURE_V2.md) | Architecture v2 blueprint — roles · clusters · surfaces · agents, hard rules |
+| [architecture/FEASIBILITY.md](./architecture/FEASIBILITY.md) | Architecture v2 migration path и per-role implementation status |
+| [architecture/CLAUDE_PATCH.md](./architecture/CLAUDE_PATCH.md) | Source patch для блока «1.5 · Architecture source of truth (v2)» в `CLAUDE.md` |
+
 ## Дополнительно (research)
 
 | Файл | Назначение |
@@ -37,7 +45,7 @@
 
 ## История изменений
 
-См. [CHANGELOG.md](./CHANGELOG.md). Текущая версия канонического набора: **v1.7.0**.
+См. [CHANGELOG.md](./CHANGELOG.md). Текущая версия канонического набора: **v1.8.0**.
 
 ## Язык документов
 
