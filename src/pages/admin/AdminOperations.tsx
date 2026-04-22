@@ -42,7 +42,7 @@ function useOperationsOverview() {
   });
 }
 
-const VALID_TABS = ['bookings', 'moderation', 'leads', 'inquiries', 'disputes'] as const;
+const VALID_TABS = ['bookings', 'moderation', 'leads', 'inquiries', 'disputes', 'manual-payments'] as const;
 
 export default function AdminOperations() {
   const navigate = useNavigate();
