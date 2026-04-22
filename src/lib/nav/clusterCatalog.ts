@@ -56,6 +56,21 @@ export interface ClusterCatalogEntry {
   icon: React.ElementType;
   /** Services inside this cluster (order = display order) */
   services: ClusterService[];
+  /**
+   * Visibility rules (drives AppDrawer filtering by role/persona).
+   *  - `audience: 'public'`   — always visible to everyone (default)
+   *  - `audience: 'workspace'`— hidden unless persona/role matches `personas`/`roles`
+   *
+   * `personas` are checked against the user's `useUserPersonas` stack.
+   * `roles` are checked against the resolved `NavRoleKey` from `navigationModel`.
+   * If both arrays are present, EITHER match makes the cluster visible.
+   *
+   * Public catalog (`/discover` NavigatorPage) ignores these filters and
+   * shows everything — it's the full ecosystem map.
+   */
+  audience?: 'public' | 'workspace';
+  personas?: string[];
+  roles?: string[];
 }
 
 /**
