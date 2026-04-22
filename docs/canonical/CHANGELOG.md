@@ -5,6 +5,21 @@
 
 ---
 
+## [1.6.0] — 2026-04-22
+
+### Added
+- **`08-ai-prompts-library.md`** — AI Prompts Library v1.0. Канонический документ системы промптов для всех AI-агентов платформы (консьерж, ClearView scoring draft, Tax Advisor, support и др.). Единая структура, общая база знаний, специфичные инструкции. Источник истины — промпты живут в markdown, не в коде.
+- **`audits/M8-clearview-integration-protocol.md`** — M8 ClearView Integration Protocol v1.0. Operational playbook для встраивания ClearView в работающий код платформы без breaking changes. Дополнение к `04-implementation-protocol.md` — может запускаться параллельно с M4–M6.
+
+### Changed
+- `docs/canonical/README.md` — индекс расширен до 8 канонических документов; M8 добавлен в раздел аудитов.
+
+### Notes
+- Документ 08 — контракт между AI-агентами в продакшене (Tax Advisor в ContractAI = Tax Advisor в TaxNav).
+- M8 — независим от M2-сегментации, использует свою схему ClearView; не блокирует и не блокируется M4–M6.
+
+---
+
 ## [1.5.0] — 2026-04-22 (M4 done)
 
 ### Added
