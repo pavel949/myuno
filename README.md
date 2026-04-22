@@ -78,7 +78,21 @@ docs/            — Developer documentation
 
 ## Documentation
 
-### Canonical references (always up to date)
+### Canonical Documentation (single source of truth)
+
+Перед любым продуктовым, UX-, контентным или архитектурным решением — **читай документы из [`docs/canonical/`](docs/canonical/)**. При расхождении кода/UI с этими документами правится код, а не документ.
+
+| # | Document | Description |
+|---|----------|-------------|
+| 01 | [`docs/canonical/01-segmentation-framework.md`](docs/canonical/01-segmentation-framework.md) | 3-осевая сегментация, 25 персон, 10 кластеров, CRM-поля |
+| 02 | [`docs/canonical/02-service-catalogue-v2.md`](docs/canonical/02-service-catalogue-v2.md) | 16 категорий × 230 услуг с тегами lifecycle/role/cluster |
+| 03 | [`docs/canonical/03-tone-of-voice.md`](docs/canonical/03-tone-of-voice.md) | Канонический голос бренда |
+| 04 | [`docs/canonical/04-implementation-protocol.md`](docs/canonical/04-implementation-protocol.md) | Operational playbook M1→M7 |
+| 05 | [`docs/canonical/05-visual-design-system.md`](docs/canonical/05-visual-design-system.md) | Визуальная дизайн-система v1.0 |
+
+См. также [`docs/canonical/CHANGELOG.md`](docs/canonical/CHANGELOG.md).
+
+### Other references
 
 | Document | Description |
 |----------|-------------|
