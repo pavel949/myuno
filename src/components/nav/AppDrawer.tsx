@@ -230,8 +230,11 @@ export function AppDrawer({
                 {isRu ? 'Все сервисы' : 'All services'}
               </h3>
               <Accordion type="multiple" className="w-full">
-                {DRAWER_CLUSTERS.map((cluster) => {
+                {CLUSTER_CATALOG.map((cluster) => {
                   const Icon = cluster.icon;
+                  // Drawer hides "soon" items — keep launcher purely actionable
+                  const links = cluster.services.filter((s) => s.status !== 'soon');
+                  if (links.length === 0) return null;
                   return (
                     <AccordionItem
                       key={cluster.id}
@@ -250,19 +253,24 @@ export function AppDrawer({
                             {isRu ? cluster.labelRu : cluster.labelEn}
                           </span>
                           <span className="text-[10px] text-muted-foreground/60 ml-auto mr-2">
-                            {cluster.links.length}
+                            {links.length}
                           </span>
                         </div>
                       </AccordionTrigger>
                       <AccordionContent className="pb-2 pl-11">
                         <div className="flex flex-col gap-0.5">
-                          {cluster.links.map((link) => (
+                          {links.map((link) => (
                             <button
-                              key={link.path}
+                              key={`${cluster.id}-${link.path}-${link.labelEn}`}
                               onClick={() => go(link.path)}
-                              className="text-left text-[13px] text-muted-foreground hover:text-foreground py-2 px-2 -mx-2 rounded-md hover:bg-muted/40 transition-colors"
+                              className="text-left text-[13px] text-muted-foreground hover:text-foreground py-2 px-2 -mx-2 rounded-md hover:bg-muted/40 transition-colors flex items-center justify-between gap-2"
                             >
-                              {isRu ? link.labelRu : link.labelEn}
+                              <span>{isRu ? link.labelRu : link.labelEn}</span>
+                              {link.status === 'pro' && (
+                                <span className="text-[8px] font-bold px-1.5 py-px rounded-full bg-amber-500/15 text-amber-500">
+                                  PRO
+                                </span>
+                              )}
                             </button>
                           ))}
                         </div>
