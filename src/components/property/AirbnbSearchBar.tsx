@@ -39,7 +39,7 @@ const flexibleDates = [
   { id: 'month', labelEn: 'Month', labelRu: 'Месяц', getDates: () => ({ from: new Date(), to: addMonths(new Date(), 1) }) },
 ];
 
-type MobileTab = 'type' | 'beach' | 'dates' | 'details';
+
 
 const BEDROOM_OPTIONS = [
   { id: 'studio', labelEn: 'Studio', labelRu: 'Студия' },
@@ -97,7 +97,7 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
 
   const [isOpen, setIsOpen] = useState(false);
   const [activeField, setActiveField] = useState<string | null>(null);
-  const [mobileTab, setMobileTab] = useState<MobileTab>('type');
+  
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
   const [checkIn, setCheckIn] = useState<Date | undefined>();
   const [checkOut, setCheckOut] = useState<Date | undefined>();
@@ -182,12 +182,6 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
     const dates = dateOption.getDates();
     setCheckIn(dates.from);
     setCheckOut(dates.to);
-  };
-
-  const goToNextTab = () => {
-    if (mobileTab === 'type') setMobileTab('beach');
-    else if (mobileTab === 'beach') setMobileTab('dates');
-    else if (mobileTab === 'dates') setMobileTab('details');
   };
 
   // Build smart summary for the collapsed pill
