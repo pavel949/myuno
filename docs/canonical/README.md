@@ -33,4 +33,5 @@
 - [x] 02 — Service Catalogue v2.0
 - [x] 03 — Tone of Voice
 - [x] 04 — Implementation Protocol
+- [x] 05 — Visual Design System v1.0
 - [ ] M1 — bilingual lint + i18n audit (см. протокол § 1) — **next**
