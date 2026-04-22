@@ -40,9 +40,12 @@ export default function PropertyInquiry() {
   const isRu = language === 'ru';
   const { createOrder } = useOrders();
 
-  // Draft persistence key — survives the AuthSheet round-trip so guests
-  // never lose contact info / message after signing in. URL already carries
-  // dates + guests, so we only need to stash the form fields.
+  // Draft persistence — survives the AuthSheet round-trip (including OAuth
+  // full-page redirects) so guests never lose contact info / message after
+  // signing in or after closing the sheet without signing in.
+  // We use localStorage (not sessionStorage) so Google/Apple OAuth redirects
+  // — which tear down the tab — don't wipe the draft.
+  const DRAFT_TTL_MS = 24 * 60 * 60 * 1000; // 24h
   const draftKey = id ? `uno_inquiry_draft_${id}` : null;
 
   // Determine booking mode from property data
@@ -61,20 +64,30 @@ export default function PropertyInquiry() {
   const hasDates = checkIn && checkOut;
 
   const [formData, setFormData] = useState(() => {
-    // Restore draft (e.g. after returning from AuthSheet sign-in).
+    // Restore draft on mount — covers AuthSheet close, OAuth redirect-back,
+    // accidental tab close, full reload.
     if (typeof window !== 'undefined' && draftKey) {
       try {
-        const raw = sessionStorage.getItem(draftKey);
+        const raw = localStorage.getItem(draftKey);
         if (raw) {
           const parsed = JSON.parse(raw);
-          // Expire after 1 hour to avoid stale leakage across sessions.
-          if (parsed?.ts && Date.now() - parsed.ts < 60 * 60 * 1000) {
+          const fresh = parsed?.ts && Date.now() - parsed.ts < DRAFT_TTL_MS;
+          // Only restore if URL params match — prevents bleeding a draft
+          // saved for one date range into a different one.
+          const urlMatches =
+            (!parsed?.checkIn || parsed.checkIn === checkInParam) &&
+            (!parsed?.checkOut || parsed.checkOut === checkOutParam) &&
+            (!parsed?.guests || String(parsed.guests) === String(guestsParam));
+          if (fresh && urlMatches) {
             return {
               name: parsed.name ?? '',
               email: parsed.email ?? '',
               phone: parsed.phone ?? '',
               message: parsed.message ?? '',
             };
+          }
+          if (!fresh) {
+            try { localStorage.removeItem(draftKey); } catch { /* ignore */ }
           }
         }
       } catch { /* ignore */ }
@@ -85,22 +98,60 @@ export default function PropertyInquiry() {
   const [rulesOpen, setRulesOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Persist form draft so signing in via AuthSheet doesn't wipe input.
+  // Persist form draft on every change, with current URL context attached
+  // so a stale draft for different dates can be detected on restore.
+  // Empty form → remove the key so we don't ressurect a cleared draft.
   useEffect(() => {
     if (!draftKey) return;
-    const hasContent = formData.name || formData.phone || formData.email || formData.message;
-    if (!hasContent) return;
+    const hasContent = !!(formData.name || formData.phone || formData.email || formData.message);
     try {
-      sessionStorage.setItem(
-        draftKey,
-        JSON.stringify({ ...formData, ts: Date.now() }),
-      );
+      if (hasContent) {
+        localStorage.setItem(
+          draftKey,
+          JSON.stringify({
+            ...formData,
+            checkIn: checkInParam,
+            checkOut: checkOutParam,
+            guests: guestsParam,
+            ts: Date.now(),
+          }),
+        );
+      } else {
+        localStorage.removeItem(draftKey);
+      }
     } catch { /* ignore quota errors */ }
-  }, [draftKey, formData]);
+  }, [draftKey, formData, checkInParam, checkOutParam, guestsParam]);
 
-  // Clear draft once user is signed in AND has a complete profile applied —
-  // also clear after successful submit (handled where navigate('/bookings/:id') runs).
-  // We intentionally keep the draft until submit so re-mount after sign-in restores it.
+  // Best-effort flush on tab hide / unload — in case the user closes the tab
+  // mid-typing before React's effect commits.
+  useEffect(() => {
+    if (!draftKey) return;
+    const flush = () => {
+      const hasContent = !!(formData.name || formData.phone || formData.email || formData.message);
+      if (!hasContent) return;
+      try {
+        localStorage.setItem(
+          draftKey,
+          JSON.stringify({
+            ...formData,
+            checkIn: checkInParam,
+            checkOut: checkOutParam,
+            guests: guestsParam,
+            ts: Date.now(),
+          }),
+        );
+      } catch { /* ignore */ }
+    };
+    window.addEventListener('pagehide', flush);
+    window.addEventListener('beforeunload', flush);
+    return () => {
+      window.removeEventListener('pagehide', flush);
+      window.removeEventListener('beforeunload', flush);
+    };
+  }, [draftKey, formData, checkInParam, checkOutParam, guestsParam]);
+
+  // Cleared on successful submit (see navigate(`/bookings/:id`) handler below).
+
 
   // rentalTerms already derived above from property
   // Autofill from profile
