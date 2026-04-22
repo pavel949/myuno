@@ -10,6 +10,7 @@ import { Star, Zap } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
 import { PropertyImageCarousel } from './PropertyImageCarousel';
+import { GuestFavoriteBadge, isGuestFavorite } from './GuestFavoriteBadge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { getDistrictLabel, getPropertyTypeLabel, getHighlightLabel, getViewTypeLabel } from '@/lib/taxonomies';
@@ -121,13 +122,20 @@ export function PropertyListingCard({
           />
         </div>
 
-        {/* Badges — top left */}
+        {/* Badges — top left.
+            "Guest favorite" supersedes the legacy `is_featured` badge when
+            the property meets the rating + review threshold (Airbnb pattern). */}
         <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
-          {property.is_featured && (
+          {isGuestFavorite(property.rating, property.review_count) ? (
+            <GuestFavoriteBadge
+              rating={property.rating}
+              reviewsCount={property.review_count}
+            />
+          ) : property.is_featured ? (
             <Badge className="bg-background text-foreground border-0 shadow-sm text-[11px] font-semibold px-2 py-0.5 rounded-full">
-              {isRu ? 'Популярное' : 'Guest favorite'}
+              {isRu ? 'Популярное' : 'Popular'}
             </Badge>
-          )}
+          ) : null}
           {primaryViewLabel && (
             <Badge className="bg-background/90 text-foreground border-0 shadow-sm text-[10px] font-medium px-2 py-0.5 rounded-full max-w-[140px] truncate">
               {primaryViewLabel}

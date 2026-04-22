@@ -6,3 +6,4 @@ export { PropertyDetailGallery } from './PropertyDetailGallery';
 export { PropertyDetailHighlights } from './PropertyDetailHighlights';
 export { PropertyDetailDateSheet } from './PropertyDetailDateSheet';
 export { PropertyDetailMobileBar } from './PropertyDetailMobileBar';
+export { PropertyHeroFacts } from './PropertyHeroFacts';

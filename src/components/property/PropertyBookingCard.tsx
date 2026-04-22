@@ -192,6 +192,12 @@ export function PropertyBookingCard({
   }, [rentalTerms, isRu]);
 
   // Sticky positioning is on PropertyDetail aside; do not nest sticky on this Card.
+  //
+  // A4 (Airbnb-style audit): the "Pay full / Split" toggle (PaymentStageSelector)
+  // intentionally lives in the checkout flow (PropertyInquiry.tsx), NOT here.
+  // The detail card only ever shows: Total + a passive "Pay now / Pay on arrival"
+  // breakdown derived from prepay_percent. Choice of payment model belongs to the
+  // last step before Stripe — keeps the detail page clean.
   return (
     <Card variant="elevated" className={cn(className)}>
       <CardContent className="p-6 space-y-5">
