@@ -15,7 +15,9 @@ import { clearAdminCache } from '@/hooks/useIsAdmin';
 
 interface SignUpResult {
   error: Error | null;
-  data?: { user: User | null };
+  // `session` is null when email confirmation is required so callers can
+  // detect that flow without falling through to a protected redirect.
+  data?: { user: User | null; session: Session | null };
 }
 
 interface SignUpData {
@@ -173,7 +175,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     return {
       error: error as Error | null,
-      data: data ? { user: data.user } : undefined,
+      data: data ? { user: data.user, session: data.session } : undefined,
     };
   }, []);
 
