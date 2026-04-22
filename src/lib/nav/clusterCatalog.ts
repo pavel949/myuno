@@ -260,3 +260,46 @@ export const CLUSTER_CATALOG_TOTAL_AVAILABLE: number = CLUSTER_CATALOG_AVAILABLE
 export function getClusterById(id: string): ClusterCatalogEntry | undefined {
   return CLUSTER_CATALOG.find((c) => c.id === id);
 }
+
+// ─────────────────────────────────────────────────────────────
+// Role/persona-aware filtering — drives the AppDrawer launcher
+// ─────────────────────────────────────────────────────────────
+
+export interface ClusterAudienceContext {
+  /** Active persona stack from `useUserPersonas()` (string[] for decoupling). */
+  personas?: string[];
+  /** Resolved nav role from `resolveNavRole()` (`navigationModel`). */
+  role?: string | null;
+}
+
+/**
+ * Decide whether a cluster should appear in the AppDrawer for a given user.
+ *
+ * Rules:
+ *  - `audience: 'public'` (default) → always visible.
+ *  - `audience: 'workspace'` → visible only when the user's persona stack
+ *    intersects `cluster.personas` OR their resolved `role` is in
+ *    `cluster.roles`. Empty/missing context hides the cluster (safer default
+ *    — consumer/guest doesn't see operator surfaces by accident).
+ */
+export function isClusterVisibleToUser(
+  cluster: ClusterCatalogEntry,
+  ctx: ClusterAudienceContext,
+): boolean {
+  if (cluster.audience !== 'workspace') return true;
+
+  const { personas = [], role } = ctx;
+  const personaMatch = (cluster.personas ?? []).some((p) => personas.includes(p));
+  const roleMatch = !!role && (cluster.roles ?? []).includes(role);
+  return personaMatch || roleMatch;
+}
+
+/**
+ * Filter the SSOT catalog down to clusters this user is allowed to launch
+ * from the AppDrawer. Pure / memoizable — does not touch React state.
+ */
+export function filterCatalogForUser(
+  ctx: ClusterAudienceContext,
+): ClusterCatalogEntry[] {
+  return CLUSTER_CATALOG.filter((c) => isClusterVisibleToUser(c, ctx));
+}
