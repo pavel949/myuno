@@ -626,13 +626,19 @@ export default function PropertyInquiry() {
                   }
 
                   // 2. Create order for booking tracking
+                  // Currency must come from the listing — defaulting to THB
+                  // would silently undercharge USD-priced properties.
+                  const listingCurrency =
+                    (property as any)?.currency?.trim() ||
+                    (rentalTerms as any)?.currency?.trim() ||
+                    'THB';
                   const result = await createOrder({
                     order_type: 'property',
                     provider_org_id: (property as any)?.provider_id || undefined,
                     start_at: checkIn!,
                     end_at: checkOut!,
                     total_amount: pricing.total,
-                    currency: 'THB',
+                    currency: listingCurrency,
                     notes: formData.message || undefined,
                     metadata: {
                       property_id: id,
