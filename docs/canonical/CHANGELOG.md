@@ -5,6 +5,29 @@
 
 ---
 
+## [1.8.0] — 2026-04-22
+
+### Added
+- **`docs/canonical/architecture/`** — новая подпапка канона. Содержит `ARCHITECTURE_V2.md`, `FEASIBILITY.md`, `CLAUDE_PATCH.md`, `README.md`. Перенесено из устаревшей корневой `/handoff` для централизации источника истины.
+
+### Changed
+- `CLAUDE.md` § 1.5 — пути обновлены на `docs/canonical/architecture/*`.
+- `README.md` — карта документации обновлена.
+- `docs/canonical/README.md` — добавлен раздел «Архитектура (architecture/)».
+
+### Removed (moved to `archive/2026-04-cleanup/`)
+- **`/handoff`** (папка целиком, 4 файла) → перенесена в `docs/canonical/architecture/`.
+- **`/myuno-design`** (HTML/JSX дизайн-сnapshot) → `archive/2026-04-cleanup/myuno-design-snapshot/`. Заменён `05-visual-design-system.md` + `DESIGN.md`.
+- **`/archive/{docs,lovable,myuno-design}`** (старый архив) → `archive/2026-04-cleanup/old-archive/`.
+- **12 устаревших audit/report MD из `/docs`** (ADMIN_PANEL_DEEP_AUDIT, AUDIT-MC-BLOCK, AUDIT_CYCLE_2, CONTACT_IMPORT_AUDIT, FIX_SPRINT_CYCLE2_REPORT, MC_DASHBOARD_CORE_AUDIT, MC_MODULE_DEEP_AUDIT, MC_SCOPING_FIXES_REPORT, PROPERTY_CARD_UX_AUDIT, TECHNICAL_AUDIT_REPORT, UNICORN_ANALYSIS, USER_PROCESS_AUDIT_REPORT) → `archive/2026-04-cleanup/docs-audits/`. Заменены живыми документами в `docs/canonical/audits/`.
+- **5 дубликатов в корне репо** (`_AUDIT.md`, `project.md` lowercase, `ARCHITECTURE_AUDIT.md`, `OS_system_prompt.md`, `DEVELOPER_MODULE_SPEC.md`) → `archive/2026-04-cleanup/root-duplicates/`. Заменены `PROJECT.md` + canonical 07/08 + architecture/ARCHITECTURE_V2.md.
+
+### Notes
+- Полный реестр перенесённого: см. [`archive/2026-04-cleanup/INDEX.md`](../../archive/2026-04-cleanup/INDEX.md).
+- Правило: файлы из `archive/2026-04-cleanup/` нельзя возвращать в активное дерево; полезный контент поднимается в канон, источник цитируется.
+
+---
+
 ## [1.7.1] — 2026-04-22
 
 ### Changed
