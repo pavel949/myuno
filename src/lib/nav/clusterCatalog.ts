@@ -196,7 +196,7 @@ export const CLUSTER_CATALOG: ClusterCatalogEntry[] = [
       { labelRu: 'Кабинет',   labelEn: 'Dashboard',  icon: Calendar,        path: '/mc',                       status: 'available' },
       { labelRu: 'Календарь', labelEn: 'Calendar',   icon: Calendar,        path: APP_ROUTES.MC_CALENDAR,      status: 'available' },
       { labelRu: 'Финансы',   labelEn: 'Finances',   icon: DollarSign,      path: APP_ROUTES.MC_FINANCE,       status: 'available' },
-      { labelRu: 'Операции',  labelEn: 'Operations', icon: ClipboardList,   path: '/mc/operations',            status: 'available' },
+      { labelRu: 'Задачи',    labelEn: 'Operations', icon: ClipboardList,   path: APP_ROUTES.MC_TASKS,         status: 'available' },
       { labelRu: 'Отчёты',    labelEn: 'Reports',    icon: BarChart3,       path: APP_ROUTES.MC_REPORTS,       status: 'pro' },
       { labelRu: 'CRM',       labelEn: 'CRM',        icon: Users,           path: APP_ROUTES.MC_CRM_DASHBOARD, status: 'pro' },
     ],
