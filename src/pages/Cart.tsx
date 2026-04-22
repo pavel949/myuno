@@ -313,6 +313,21 @@ const Cart = () => {
                   </div>
                 ))}
               </div>
+
+              {/* Per-group checkout — surfaced when the cart spans multiple
+                  verticals so each group can be paid via its own backend flow. */}
+              {hasMixedVerticals && (
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => checkoutForType(type as CartItem['type'], typeItems)}
+                >
+                  {language === 'ru'
+                    ? `Оформить «${label.ru}»`
+                    : `Checkout ${label.en}`}
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              )}
             </div>
           );
         })}
