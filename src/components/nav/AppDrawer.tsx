@@ -281,7 +281,7 @@ export function AppDrawer({
                     style={{ background: personaMeta.color }}
                   />
                   <span className="text-[11px] text-muted-foreground">
-                    {isRu ? personaMeta.labelRu : personaMeta.labelEn}
+                    {isRu ? personaMeta.labelRu : personaMeta.label}
                   </span>
                 </div>
               )}
@@ -402,7 +402,7 @@ export function AppDrawer({
                           onClick={() => go(item.path)}
                           className="w-full flex items-center gap-3 px-2 py-2 rounded-md hover:bg-muted/40 transition-colors text-left"
                         >
-                          <ItemIcon className="w-4 h-4 text-muted-foreground shrink-0" />
+                          <ItemIcon className="w-4 h-4 text-muted-foreground shrink-0" aria-hidden />
                           <span className="text-[13px] text-foreground truncate">
                             {isRu ? item.labelRu : item.labelEn}
                           </span>
