@@ -698,6 +698,7 @@ export default function PropertyInquiry() {
                 guests={guests}
                 nights={nights}
                 totalAmount={pricing.total}
+                currency={listingCurrency}
                 prepayAmount={pricing.prepayAmount}
                 prepayPercent={pricing.prepayPercent}
                 payInFull={!!rentalTerms?.allow_pay_later && payWhen === 'full'}
@@ -706,6 +707,7 @@ export default function PropertyInquiry() {
                 guestPhone={formData.phone}
                 guestEmail={formData.email}
                 providerOrgId={(property as any)?.provider_id || undefined}
+                ownerUserId={(property as any)?.owner_id || undefined}
                 onMethodChange={setPaymentMethod}
               />
             </section>
@@ -895,14 +897,18 @@ export default function PropertyInquiry() {
                     ? (isRu
                         ? `Подтвердить и оплатить ${formatPrice(payWhen === 'full' ? pricing.total : pricing.prepayAmount)}`
                         : `Confirm and pay ${formatPrice(payWhen === 'full' ? pricing.total : pricing.prepayAmount)}`)
-                    : (isRu ? 'Связаться с менеджером' : 'Contact manager'))
+                    : paymentMethod === 'rub_manual'
+                      ? (isRu ? 'Запросить оплату в рублях' : 'Request RUB payment')
+                      : (isRu ? 'Связаться с менеджером' : 'Contact manager'))
                 : (isRu ? 'Запросить бронирование' : 'Request to book')}
             </Button>
             <p className="text-[10px] text-center text-muted-foreground mt-2">
               {isInstantBooking
                 ? (paymentMethod === 'card'
                     ? (isRu ? 'Платёж защищён Stripe' : 'Payment secured by Stripe')
-                    : (isRu ? 'Менеджер свяжется в WhatsApp' : 'Manager will reach out on WhatsApp'))
+                    : paymentMethod === 'rub_manual'
+                      ? (isRu ? 'Менеджер свяжется в течение 30 минут (9:00–22:00 ICT)' : 'Manager replies within 30 min (9am–10pm ICT)')
+                      : (isRu ? 'Менеджер свяжется в WhatsApp' : 'Manager will reach out on WhatsApp'))
                 : (isRu
                     ? 'Оплата не списывается. Хозяин подтвердит бронирование.'
                     : "You won't be charged. The host will confirm your booking.")}

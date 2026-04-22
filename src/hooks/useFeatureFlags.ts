@@ -53,7 +53,7 @@ export function useFeatureFlags() {
 
   const context = useMemo(() => ({
     userId: user?.id,
-    userRoles: roles.map(r => r.role),
+    userRoles: (roles ?? []).map(r => r.role),
   }), [user?.id, roles]);
 
   const isEnabled = useMemo(() => {

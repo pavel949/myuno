@@ -44,6 +44,7 @@ export const PropertySearchPage = lazy(() => import('@/pages/property/PropertySe
 export const StaysSearchPage = lazy(() => import('@/pages/stays/StaysSearchPage'));
 export const PropertyDetail = lazy(() => import('@/pages/property/PropertyDetail'));
 export const PropertyInquiry = lazy(() => import('@/pages/property/PropertyInquiry'));
+export const ManualPaymentPending = lazy(() => import('@/pages/property/ManualPaymentPending'));
 export const PropertyMap = lazy(() => import('@/pages/property/PropertyMap'));
 export const PropertyDepositSuccess = lazy(() => import('@/pages/property/PropertyDepositSuccess'));
 // ProjectsIndex/ProjectDetail removed — canonical catalog is OffplanIndex/OffplanDetail at /property/offplan
