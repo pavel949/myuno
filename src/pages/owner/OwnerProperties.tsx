@@ -683,7 +683,7 @@ const queryClient = useQueryClient();
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 80, opacity: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 bg-card border border-border rounded-2xl shadow-lg px-4 py-3 flex items-center gap-2 max-w-[95vw] overflow-x-auto"
+            className="fixed bottom-[calc(var(--bottom-nav-h)+1rem)] left-1/2 -translate-x-1/2 z-50 bg-card border border-border rounded-2xl shadow-lg px-4 py-3 flex items-center gap-2 max-w-[95vw] overflow-x-auto"
           >
             <span className="text-sm font-medium text-foreground whitespace-nowrap mr-1">
               {selectedIds.size}

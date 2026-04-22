@@ -103,7 +103,7 @@ export function CompareProvider({ children }: { children: React.ReactNode }) {
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
-            className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50"
+            className="fixed bottom-[calc(var(--bottom-nav-h)+1rem)] left-1/2 -translate-x-1/2 z-50"
           >
             <Button
               onClick={() => setSheetOpen(true)}

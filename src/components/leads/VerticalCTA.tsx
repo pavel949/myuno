@@ -227,7 +227,7 @@ export function VerticalCTA({
   return (
     <>
       {variant === 'sticky' ? (
-        <div className="fixed bottom-20 left-4 right-4 z-40 animate-fade-in-up">
+        <div className="fixed bottom-[calc(var(--bottom-nav-h)+1rem)] left-4 right-4 z-40 animate-fade-in-up">
           {content}
         </div>
       ) : (
