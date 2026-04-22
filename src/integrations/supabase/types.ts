@@ -15810,6 +15810,7 @@ export type Database = {
           address: string | null
           ai_autoreply_enabled: boolean
           ai_autoreply_instructions: string | null
+          allow_pay_later: boolean
           amenities: string[] | null
           approval_status: string | null
           approved_at: string | null
@@ -16059,6 +16060,7 @@ export type Database = {
           address?: string | null
           ai_autoreply_enabled?: boolean
           ai_autoreply_instructions?: string | null
+          allow_pay_later?: boolean
           amenities?: string[] | null
           approval_status?: string | null
           approved_at?: string | null
@@ -16308,6 +16310,7 @@ export type Database = {
           address?: string | null
           ai_autoreply_enabled?: boolean
           ai_autoreply_instructions?: string | null
+          allow_pay_later?: boolean
           amenities?: string[] | null
           approval_status?: string | null
           approved_at?: string | null

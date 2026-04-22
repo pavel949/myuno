@@ -1,0 +1,2 @@
+ALTER TABLE public.properties ADD COLUMN IF NOT EXISTS allow_pay_later boolean NOT NULL DEFAULT false;
+COMMENT ON COLUMN public.properties.allow_pay_later IS 'When true, instant-booking guests can choose between paying full now vs. prepay X% now + balance later. Default false preserves legacy behavior (full prepay only).';

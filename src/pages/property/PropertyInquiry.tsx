@@ -1,7 +1,7 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { Users, AlertCircle, Zap, ChevronRight, ChevronDown, ChevronUp, CalendarIcon, Edit2, Shield, ScrollText, CreditCard, User, Loader2 } from 'lucide-react';
+import { Users, AlertCircle, Zap, ChevronRight, ChevronDown, ChevronUp, CalendarIcon, Edit2, Shield, ScrollText, CreditCard, User, Loader2, Info, Sparkles } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { BackButton } from '@/components/uno/BackButton';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -15,16 +15,20 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { toast } from 'sonner';
 import { useProfile } from '@/hooks/useProfile';
 import { usePropertyWithRentalTerms } from '@/hooks/useProperties';
 import { usePropertyBlockedDates } from '@/hooks/usePropertyAvailability';
 import { usePropertyRateSeasons } from '@/hooks/usePropertyRateSeasons';
-import { DepositPaymentOptions } from '@/components/property/DepositPaymentOptions';
+import { useRareFindBadge } from '@/hooks/useRareFindBadge';
+import { DepositPaymentOptions, type DepositPaymentOptionsHandle } from '@/components/property/DepositPaymentOptions';
+import { PayWhenSelector, type PayWhenChoice } from '@/components/property/PayWhenSelector';
+import type { PaymentMethodId } from '@/hooks/useLastPaymentMethod';
 import { useOrders } from '@/hooks/useOrders';
 import { calculatePricing, buildPricingRulesFromSeasons, type PricingRules } from '@/lib/pricingEngine';
 import { pluralizeNights, pluralizeGuests } from '@/lib/i18n/pluralize';
-import { differenceInDays, format, parseISO } from 'date-fns';
+import { differenceInDays, format, parseISO, subDays } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 
@@ -97,6 +101,24 @@ export default function PropertyInquiry() {
   const [contactOpen, setContactOpen] = useState(false);
   const [rulesOpen, setRulesOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // A1 — "Choose when to pay". Only used when rentalTerms.allow_pay_later is on.
+  // Default 'split' preserves the legacy behavior (charge prepay only).
+  const [payWhen, setPayWhen] = useState<PayWhenChoice>('split');
+  // A2 — current payment method, mirrored from DepositPaymentOptions so the
+  // sticky footer can re-label its CTA ("Confirm and pay" vs "Message manager").
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodId>('card');
+  const depositPaymentRef = useRef<DepositPaymentOptionsHandle>(null);
+  const paymentSectionRef = useRef<HTMLDivElement>(null);
+  // Listing currency — pulled out so we can also display it in the Total tooltip.
+  const listingCurrency = useMemo(
+    () =>
+      ((property as any)?.currency?.trim?.() ||
+        (rentalTerms as any)?.currency?.trim?.() ||
+        'THB') as string,
+    [property, rentalTerms],
+  );
+  const { data: isRareFind } = useRareFindBadge(id);
 
   // Persist form draft on every change, with current URL context attached
   // so a stale draft for different dates can be detected on restore.
@@ -313,12 +335,21 @@ export default function PropertyInquiry() {
                   <p className="text-xs text-muted-foreground mt-1">
                     {property.district || 'Phuket'}
                   </p>
-                  {rentalTerms?.instant_booking && (
-                    <Badge className="mt-1 gap-1 bg-primary/10 text-primary border-primary/20 text-[10px]">
-                      <Zap className="h-2.5 w-2.5" />
-                      {isRu ? 'Мгновенное бронирование' : 'Instant Book'}
-                    </Badge>
-                  )}
+                  <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                    {rentalTerms?.instant_booking && (
+                      <Badge className="gap-1 bg-primary/10 text-primary border-primary/20 text-[10px]">
+                        <Zap className="h-2.5 w-2.5" />
+                        {isRu ? 'Мгновенное бронирование' : 'Instant Book'}
+                      </Badge>
+                    )}
+                    {/* B1 — Rare find trust badge (>70% occupancy in last 30d) */}
+                    {isRareFind && (
+                      <Badge className="gap-1 bg-warning/10 text-warning border-warning/20 text-[10px]">
+                        <Sparkles className="h-2.5 w-2.5" />
+                        {isRu ? 'Редкая находка' : 'Rare find'}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
@@ -418,8 +449,36 @@ export default function PropertyInquiry() {
             <Separator />
 
             <div className="flex items-center justify-between font-semibold text-lg">
-              <span>{isRu ? 'Итого' : 'Total'}</span>
-              <span>{formatPrice(pricing.total)}</span>
+              <span className="flex items-center gap-1.5">
+                {isRu ? 'Итого' : 'Total'}
+                {/* B2 — Currency popover so guests on RUB/THB presets understand
+                    what bank actually charges. */}
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      aria-label={isRu ? 'Информация о валюте' : 'Currency info'}
+                      className="text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <Info className="w-4 h-4" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent side="top" className="w-64 text-xs">
+                    <p className="font-medium mb-1">
+                      {isRu ? `Списание в ${listingCurrency}` : `Charged in ${listingCurrency}`}
+                    </p>
+                    <p className="text-muted-foreground">
+                      {isRu
+                        ? 'Сумма показана в выбранной валюте, но списание идёт в валюте объекта. Банк может удержать комиссию за конвертацию.'
+                        : 'Shown in your selected currency, but billed in the property currency. Your bank may apply an FX fee.'}
+                    </p>
+                  </PopoverContent>
+                </Popover>
+              </span>
+              <span className="flex items-baseline gap-1">
+                {formatPrice(pricing.total)}
+                <sup className="text-[10px] text-muted-foreground font-medium">{listingCurrency}</sup>
+              </span>
             </div>
 
             {/* Prepayment callout — only for instant booking. Uses real prepay_percent. */}
@@ -611,14 +670,27 @@ export default function PropertyInquiry() {
             </div>
           )}
 
-          {/* ===== PAYMENT OPTIONS (only for instant booking) ===== */}
+          {/* ===== PAY-WHEN SELECTOR (A1) — instant booking with allow_pay_later only ===== */}
+          {user && isFormValid && isInstantBooking && rentalTerms?.allow_pay_later && pricing.prepayAmount > 0 && pricing.prepayAmount < pricing.total && (
+            <PayWhenSelector
+              value={payWhen}
+              onChange={setPayWhen}
+              totalAmount={pricing.total}
+              prepayAmount={pricing.prepayAmount}
+              prepayPercent={pricing.prepayPercent}
+              balanceDueDate={checkIn ? subDays(checkIn, 7) : null}
+            />
+          )}
+
+          {/* ===== PAYMENT OPTIONS (instant booking only) ===== */}
           {user && isFormValid && isInstantBooking && (
-            <section>
+            <section ref={paymentSectionRef}>
               <div className="flex items-center gap-2 mb-4">
                 <CreditCard className="w-5 h-5 text-primary" />
                 <h2 className="text-lg font-semibold">{isRu ? 'Оплата' : 'Pay with'}</h2>
               </div>
               <DepositPaymentOptions
+                ref={depositPaymentRef}
                 propertyId={id!}
                 propertyTitle={propertyTitle || 'Property'}
                 checkIn={checkIn}
@@ -628,11 +700,13 @@ export default function PropertyInquiry() {
                 totalAmount={pricing.total}
                 prepayAmount={pricing.prepayAmount}
                 prepayPercent={pricing.prepayPercent}
+                payInFull={!!rentalTerms?.allow_pay_later && payWhen === 'full'}
                 cleaningFee={rentalTerms?.extra_cleaning_price || (property as any)?.cleaning_fee || 0}
                 guestName={formData.name}
                 guestPhone={formData.phone}
                 guestEmail={formData.email}
                 providerOrgId={(property as any)?.provider_id || undefined}
+                onMethodChange={setPaymentMethod}
               />
             </section>
           )}
@@ -649,11 +723,14 @@ export default function PropertyInquiry() {
           )}
         </div>
 
-        {/* ===== STICKY CONFIRM / REQUEST BUTTON (only for non-instant / request mode) ===== */}
-        {user && isFormValid && !isInstantBooking && (
+        {/* ===== UNIFIED STICKY FOOTER (A3) — visible for both instant + request modes ===== */}
+        {user && isFormValid && (
           <div className="fixed bottom-0 left-0 right-0 z-30 bg-background/95 backdrop-blur-md border-t p-4 safe-area-bottom">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium">{formatPrice(pricing.total)}</span>
+              <div className="flex items-baseline gap-1">
+                <span className="text-sm font-medium">{formatPrice(pricing.total)}</span>
+                <sup className="text-[10px] text-muted-foreground">{listingCurrency}</sup>
+              </div>
               <span className="text-xs text-muted-foreground">
                 {nights} {pluralizeNights(nights, language)}
               </span>
@@ -664,6 +741,24 @@ export default function PropertyInquiry() {
               disabled={isSubmitting}
               onClick={async () => {
                 if (isSubmitting) return;
+
+                // === INSTANT BOOKING PATH ===
+                if (isInstantBooking) {
+                  // If payment options aren't visible yet, scroll into view first.
+                  if (!depositPaymentRef.current) {
+                    paymentSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    return;
+                  }
+                  setIsSubmitting(true);
+                  try {
+                    await depositPaymentRef.current.submit();
+                  } finally {
+                    setIsSubmitting(false);
+                  }
+                  return;
+                }
+
+                // === REQUEST BOOKING PATH ===
                 setIsSubmitting(true);
                 try {
                   // 0. Atomic availability check — prevents race conditions
@@ -712,7 +807,6 @@ export default function PropertyInquiry() {
                       status: 'pending',
                     });
                   if (inquiryError) {
-                    // Surface to user — silent failure was hiding RLS / validation issues
                     console.error('[PropertyInquiry] inquiry insert error:', inquiryError);
                     toast.error(
                       isRu
@@ -724,12 +818,6 @@ export default function PropertyInquiry() {
                   }
 
                   // 2. Create order for booking tracking
-                  // Currency must come from the listing — defaulting to THB
-                  // would silently undercharge USD-priced properties.
-                  const listingCurrency =
-                    (property as any)?.currency?.trim() ||
-                    (rentalTerms as any)?.currency?.trim() ||
-                    'THB';
                   const result = await createOrder({
                     order_type: 'property',
                     provider_org_id: (property as any)?.provider_id || undefined,
@@ -744,7 +832,10 @@ export default function PropertyInquiry() {
                       guests,
                       nights,
                       price_per_night: pricePerNight,
-                      deposit_amount: rentalTerms?.deposit_amount || 0,
+                      // Bug #4 fix: this field is the *security* deposit
+                      // (refundable on checkout), NOT the prepayment.
+                      // Renaming it stops it being confused in finance reports.
+                      security_deposit_amount: rentalTerms?.deposit_amount || 0,
                       discount_percent: pricing.lengthDiscountPercent,
                       length_discount: pricing.lengthDiscount,
                       early_bird_discount: pricing.earlyBirdDiscount,
@@ -775,14 +866,21 @@ export default function PropertyInquiry() {
                     serviceName: propertyTitle || 'Property',
                   });
                   if (result.success && result.order_id) {
-                    // Clear persisted draft — booking is now live in DB.
                     if (draftKey) {
                       try { localStorage.removeItem(draftKey); } catch { /* ignore */ }
                     }
-                    toast.success(isRu 
-                      ? 'Запрос отправлен! Хозяин ответит в течение 24 часов.' 
+                    toast.success(isRu
+                      ? 'Запрос отправлен! Хозяин ответит в течение 24 часов.'
                       : 'Request sent! The host will respond within 24 hours.');
                     navigate(`/bookings/${result.order_id}`, { replace: true });
+                  } else {
+                    // Bug #3 fix: surface failures from createOrder so the user
+                    // is never left staring at a silent footer.
+                    toast.error(
+                      isRu
+                        ? 'Не удалось создать запрос на бронирование. Попробуйте ещё раз.'
+                        : 'Could not create the booking request. Please try again.',
+                    );
                   }
                 } catch (err) {
                   // Error toast is handled by useOrders
@@ -792,12 +890,22 @@ export default function PropertyInquiry() {
               }}
             >
               {isSubmitting && <Loader2 className="w-5 h-5 animate-spin mr-2" />}
-              {isRu ? 'Запросить бронирование' : 'Request to book'}
+              {isInstantBooking
+                ? (paymentMethod === 'card'
+                    ? (isRu
+                        ? `Подтвердить и оплатить ${formatPrice(payWhen === 'full' ? pricing.total : pricing.prepayAmount)}`
+                        : `Confirm and pay ${formatPrice(payWhen === 'full' ? pricing.total : pricing.prepayAmount)}`)
+                    : (isRu ? 'Связаться с менеджером' : 'Contact manager'))
+                : (isRu ? 'Запросить бронирование' : 'Request to book')}
             </Button>
             <p className="text-[10px] text-center text-muted-foreground mt-2">
-              {isRu 
-                ? 'Оплата не списывается. Хозяин подтвердит бронирование.' 
-                : "You won't be charged. The host will confirm your booking."}
+              {isInstantBooking
+                ? (paymentMethod === 'card'
+                    ? (isRu ? 'Платёж защищён Stripe' : 'Payment secured by Stripe')
+                    : (isRu ? 'Менеджер свяжется в WhatsApp' : 'Manager will reach out on WhatsApp'))
+                : (isRu
+                    ? 'Оплата не списывается. Хозяин подтвердит бронирование.'
+                    : "You won't be charged. The host will confirm your booking.")}
             </p>
           </div>
         )}
