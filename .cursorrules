@@ -11,6 +11,16 @@ alwaysApply: true
 # myUNO — Cursor AI Rules
 # Project by Pavel Ignatev | Ignatev Group | Phuket, Thailand
 
+## CANONICAL DOCS — READ BEFORE ANY UX/COPY/CATALOGUE/CRM/AI CHANGE
+Source of truth lives in `/docs/canonical/`:
+- `01-segmentation-framework.md` — personas, lifecycle phases, roles, life situations, CRM fields
+- `02-service-catalogue-v2.md` — 16 categories × 230 services with lifecycle/role/cluster tags
+- `03-tone-of-voice.md` — brand voice (calm confidence, sell trust not transactions)
+- `04-implementation-protocol.md` — M1→M7 operational playbook
+- `05-visual-design-system.md` — visual design system (color, type, grid, components)
+
+If a change contradicts these documents — STOP and ask Pavel. The code gets fixed, not the docs.
+
 ## PROJECT IDENTITY
 myUNO is a super-app platform consolidating Phuket services into one ecosystem.
 It is part of a three-division flywheel:

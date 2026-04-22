@@ -19,6 +19,20 @@
 | [research/phuket-proptech-market.md](./research/phuket-proptech-market.md) | Анализ рынка proptech на Пхукете: $1.25B, 30k STR-листингов, конкурентный ландшафт |
 | [research/myuno-taxonomy-canonical.md](./research/myuno-taxonomy-canonical.md) | 6-уровневая таксономия: 12 ситуаций × 140 микроситуаций × 38 персон × 36 приложений |
 
+## Аудиты
+
+| Файл | Веха | Статус |
+|------|------|--------|
+| [audits/M1-i18n-audit.md](./audits/M1-i18n-audit.md) | M1 | ✅ done (read-only) |
+
+## История изменений
+
+См. [CHANGELOG.md](./CHANGELOG.md). Текущая версия канонического набора: **v1.1.0**.
+
+## Язык документов
+
+Канонические документы 01-05 — **внутренний инструментарий команды и AI-агентов**. Язык: русский. Bilingual-константа проекта применяется к **user-facing UI и контенту**, не к internal docs.
+
 ## Правила работы
 
 1. **Audit before change** — ни одно изменение не делается до прочтения текущего состояния и сравнения с целевым.
@@ -29,9 +43,12 @@
 
 ## Текущий статус
 
+## Текущий статус
+
 - [x] 01 — Segmentation Framework v1.0
 - [x] 02 — Service Catalogue v2.0
 - [x] 03 — Tone of Voice
 - [x] 04 — Implementation Protocol
 - [x] 05 — Visual Design System v1.0
-- [ ] M1 — bilingual lint + i18n audit (см. протокол § 1) — **next**
+- [x] **M1 — done.** Canonical-инфраструктура развёрнута + i18n audit (read-only). См. [audits/M1-i18n-audit.md](./audits/M1-i18n-audit.md). Открытые вопросы — в § 8 отчёта.
+- [ ] M2 — Расширение Supabase-схемы (lifecycle + role + modifiers) — **next** после ответа Павла на §8.
