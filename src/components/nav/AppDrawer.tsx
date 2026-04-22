@@ -59,7 +59,7 @@ interface DrawerCluster {
   labelEn: string;
   labelRu: string;
   color: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
   links: ClusterLink[];
 }
 
@@ -163,7 +163,7 @@ interface QuickAction {
   labelEn: string;
   labelRu: string;
   path: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
 }
 
 function getQuickActions(personas: UserPersona[]): QuickAction[] {
