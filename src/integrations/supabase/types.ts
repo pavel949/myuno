@@ -10575,6 +10575,107 @@ export type Database = {
           },
         ]
       }
+      manual_payment_requests: {
+        Row: {
+          amount_listing: number
+          amount_rub_actual: number | null
+          amount_rub_estimate: number | null
+          channel: string
+          confirmed_at: string | null
+          confirmed_by: string | null
+          contacted_at: string | null
+          contacted_by: string | null
+          created_at: string
+          currency_listing: string
+          fx_rate_used: number | null
+          guest_email: string
+          guest_name: string
+          guest_phone: string
+          hold_expires_at: string
+          id: string
+          manager_user_id: string | null
+          metadata: Json | null
+          order_id: string
+          payment_method_actual: string | null
+          proof_file_path: string | null
+          property_id: string
+          rejected_at: string | null
+          rejected_by: string | null
+          rejected_reason: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_listing: number
+          amount_rub_actual?: number | null
+          amount_rub_estimate?: number | null
+          channel?: string
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          contacted_at?: string | null
+          contacted_by?: string | null
+          created_at?: string
+          currency_listing: string
+          fx_rate_used?: number | null
+          guest_email: string
+          guest_name: string
+          guest_phone: string
+          hold_expires_at?: string
+          id?: string
+          manager_user_id?: string | null
+          metadata?: Json | null
+          order_id: string
+          payment_method_actual?: string | null
+          proof_file_path?: string | null
+          property_id: string
+          rejected_at?: string | null
+          rejected_by?: string | null
+          rejected_reason?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_listing?: number
+          amount_rub_actual?: number | null
+          amount_rub_estimate?: number | null
+          channel?: string
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          contacted_at?: string | null
+          contacted_by?: string | null
+          created_at?: string
+          currency_listing?: string
+          fx_rate_used?: number | null
+          guest_email?: string
+          guest_name?: string
+          guest_phone?: string
+          hold_expires_at?: string
+          id?: string
+          manager_user_id?: string | null
+          metadata?: Json | null
+          order_id?: string
+          payment_method_actual?: string | null
+          proof_file_path?: string | null
+          property_id?: string
+          rejected_at?: string | null
+          rejected_by?: string | null
+          rejected_reason?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manual_payment_requests_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       marketplace_categories: {
         Row: {
           category_group: string | null
