@@ -195,20 +195,35 @@ export function PropertyBookingCard({
   return (
     <Card variant="elevated" className={cn(className)}>
       <CardContent className="p-6 space-y-5">
-        {/* Price Header — prominent and clear */}
+        {/* Header — Airbnb pattern:
+            - Before dates: invite to pick dates (no nightly teaser, no operational pricing leak)
+            - After dates: show TOTAL prominently with "for N nights" subtitle */}
         <div>
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-[1.75rem] font-display font-bold tracking-tight text-foreground">
-              {formatPrice(pricePerNight)}
-            </span>
-            <span className="text-base text-muted-foreground font-medium">
-              /{isRu ? 'ночь' : 'night'}
-            </span>
-          </div>
-          {rentalTerms?.weekly_discount && rentalTerms.weekly_discount > 0 && (
-            <p className="text-xs text-success font-medium mt-1">
-              {isRu ? `Скидка ${rentalTerms.weekly_discount}% от 7 ночей` : `${rentalTerms.weekly_discount}% off for 7+ nights`}
-            </p>
+          {nights > 0 ? (
+            <>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-[1.75rem] font-display font-bold tracking-tight text-foreground">
+                  {formatPrice(pricing.total)}
+                </span>
+                <span className="text-sm text-muted-foreground font-medium">
+                  {isRu
+                    ? `за ${nights} ${nights === 1 ? 'ночь' : nights < 5 ? 'ночи' : 'ночей'}`
+                    : `for ${nights} ${nights === 1 ? 'night' : 'nights'}`}
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {isRu ? 'Налоги и сборы включены' : 'Taxes & fees included'}
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-base font-display font-semibold text-foreground">
+                {isRu ? 'Добавьте даты, чтобы увидеть цену' : 'Add dates to see the total price'}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {isRu ? 'Без скрытых платежей' : 'No hidden fees'}
+              </p>
+            </>
           )}
         </div>
         
