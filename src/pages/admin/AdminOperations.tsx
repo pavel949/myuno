@@ -220,6 +220,10 @@ export default function AdminOperations() {
         <TabsContent value="disputes" className="mt-4">
           <OperationsDisputesTab />
         </TabsContent>
+
+        <TabsContent value="manual-payments" className="mt-4">
+          <OperationsManualPaymentsTab />
+        </TabsContent>
       </Tabs>
     </div>
   );
