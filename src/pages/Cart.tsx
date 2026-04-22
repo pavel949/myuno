@@ -68,50 +68,43 @@ const Cart = () => {
     return acc;
   }, {} as Record<CartItem['type'], CartItem[]>);
 
-  const handleCheckout = () => {
-    if (items.length === 0) return;
-    
-    const firstItem = items[0];
-    const firstType = firstItem.type;
-    
-    switch (firstType) {
+  // Checkout routing per vertical. Each vertical has its own backend flow,
+  // so mixed carts are checked out one group at a time instead of silently
+  // dropping every item that does not match the first one.
+  const checkoutForType = (type: CartItem['type'], items: CartItem[]) => {
+    const first = items[0];
+    switch (type) {
       case 'food':
-        // Food checkout - always use restaurants flow
-        if (firstItem.providerId) {
-          navigate(`/restaurants/${firstItem.providerId}/delivery`);
+        if (first?.providerId) {
+          navigate(`/restaurants/${first.providerId}/delivery`);
         } else {
           navigate('/restaurants');
         }
         break;
       case 'flowers':
-        // Flowers order - always go to /flowers/order, cart is read from context
         navigate('/flowers/order');
         break;
       case 'service':
-        // Service booking - use provider ID if available
-        if (firstItem.providerId) {
-          navigate(`/services/booking/${firstItem.providerId}`);
+        if (first?.providerId) {
+          navigate(`/services/booking/${first.providerId}`);
         } else {
           navigate('/services');
         }
         break;
       case 'product':
-        // Product/Market checkout
         navigate('/market/checkout');
         break;
       case 'tour':
       case 'activity':
-        // Tour/Activity checkout - navigate to experience booking with item ID
-        if (firstItem.providerId) {
-          navigate(`/experiences/${firstItem.providerId}/book`);
+        if (first?.providerId) {
+          navigate(`/experiences/${first.providerId}/book`);
         } else {
           navigate('/experiences');
         }
         break;
       case 'yacht':
-        // Yacht checkout - navigate to yacht booking with item ID
-        if (firstItem.providerId) {
-          navigate(`/yachts/${firstItem.providerId}/booking`);
+        if (first?.providerId) {
+          navigate(`/yachts/${first.providerId}/booking`);
         } else {
           navigate('/yachts');
         }
@@ -119,6 +112,20 @@ const Cart = () => {
       default:
         navigate('/');
     }
+  };
+
+  const groupCount = Object.keys(groupedItems).length;
+  const hasMixedVerticals = groupCount > 1;
+
+  const handleCheckout = () => {
+    if (items.length === 0) return;
+    // For a single-vertical cart we keep the legacy one-tap flow.
+    // For mixed carts the per-group "Checkout" button below is the SSOT,
+    // so the bottom bar simply scrolls the user to the first group.
+    const firstEntry = Object.entries(groupedItems)[0];
+    if (!firstEntry) return;
+    const [type, typeItems] = firstEntry as [CartItem['type'], CartItem[]];
+    checkoutForType(type, typeItems);
   };
 
   if (items.length === 0) {
