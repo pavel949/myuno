@@ -46,6 +46,22 @@ export default function CrmDashboardPage() {
   const [filterStatus, setFilterStatus] = useState<DealStatus | 'all'>('active');
   const [search, setSearch] = useState('');
   const [agentFilter, setAgentFilter] = useState('all');
+  const [dealVipFilter, setDealVipFilter] = useState<'all' | 'yes' | 'no'>('all');
+  const [contactVipFilter, setContactVipFilter] = useState<'all' | 'yes' | 'no'>('all');
+  const [activePreset, setActivePreset] = useState<'none' | 'hot_vip' | 'no_contact' | 'high_budget' | 'follow_up_today'>('none');
+
+  const handleApplyPreset = (preset: typeof activePreset) => {
+    setActivePreset(preset);
+    if (preset === 'none') {
+      setDealVipFilter('all');
+      setContactVipFilter('all');
+      return;
+    }
+    if (preset === 'hot_vip') {
+      setDealVipFilter('yes');
+      setContactVipFilter('yes');
+    }
+  };
 
   const wonLostKeys = useMemo(() => {
     const won = stages.filter(s => s.isWon).map(s => s.key);
@@ -97,8 +113,20 @@ export default function CrmDashboardPage() {
         d.notes?.toLowerCase().includes(q)
       );
     }
+    if (dealVipFilter !== 'all') {
+      const wantVip = dealVipFilter === 'yes';
+      result = result.filter(d => Boolean((d as { is_vip?: boolean }).is_vip) === wantVip);
+    }
+    if (contactVipFilter !== 'all') {
+      const wantVip = contactVipFilter === 'yes';
+      result = result.filter(d => {
+        const tags = (d as { tags?: string[] }).tags || [];
+        const isVip = tags.some(t => t.toLowerCase() === 'vip');
+        return isVip === wantVip;
+      });
+    }
     return result;
-  }, [deals, filterType, filterStatus, search, agentFilter]);
+  }, [deals, filterType, filterStatus, search, agentFilter, dealVipFilter, contactVipFilter]);
 
   if (membershipLoading || isLoading) {
     return (
@@ -255,12 +283,12 @@ export default function CrmDashboardPage() {
         agentFilter={agentFilter}
         onAgentFilterChange={setAgentFilter}
         agents={members}
-        dealVipFilter="all"
-        onDealVipFilterChange={() => {}}
-        contactVipFilter="all"
-        onContactVipFilterChange={() => {}}
-        activePreset="none"
-        onApplyPreset={() => {}}
+        dealVipFilter={dealVipFilter}
+        onDealVipFilterChange={setDealVipFilter}
+        contactVipFilter={contactVipFilter}
+        onContactVipFilterChange={setContactVipFilter}
+        activePreset={activePreset}
+        onApplyPreset={handleApplyPreset}
       />
 
       {/* Kanban Board */}
@@ -278,14 +306,14 @@ export default function CrmDashboardPage() {
         </p>
         <div className="grid grid-cols-4 md:grid-cols-8 gap-2">
           {[
-            { icon: Mail, label: isRu ? 'Email' : 'Email', path: '/mc/crm-emails' },
-            { icon: Zap, label: isRu ? 'Автоматизации' : 'Automations', path: '/mc/automations' },
-            { icon: FileText, label: isRu ? 'Шаблоны' : 'Templates', path: '/mc/crm-templates' },
-            { icon: Globe, label: isRu ? 'Веб-формы' : 'Web Forms', path: '/mc/forms' },
-            { icon: Calendar, label: isRu ? 'Встречи' : 'Meetings', path: '/mc/meetings' },
-            { icon: Building2, label: isRu ? 'Компании' : 'Companies', path: '/mc/companies' },
-            { icon: Copy, label: isRu ? 'Дубликаты' : 'Duplicates', path: '/mc/duplicates' },
-            { icon: UserCog, label: isRu ? 'Назначение' : 'Assignment', path: '/mc/assignment' },
+            { icon: Mail, label: isRu ? 'Email' : 'Email', path: APP_ROUTES.MC_CRM_EMAILS },
+            { icon: Zap, label: isRu ? 'Автоматизации' : 'Automations', path: APP_ROUTES.MC_AUTOMATIONS },
+            { icon: FileText, label: isRu ? 'Шаблоны' : 'Templates', path: APP_ROUTES.MC_CRM_TEMPLATES },
+            { icon: Globe, label: isRu ? 'Веб-формы' : 'Web Forms', path: APP_ROUTES.MC_FORMS },
+            { icon: Calendar, label: isRu ? 'Встречи' : 'Meetings', path: APP_ROUTES.MC_MEETINGS },
+            { icon: Building2, label: isRu ? 'Компании' : 'Companies', path: APP_ROUTES.MC_COMPANIES },
+            { icon: Copy, label: isRu ? 'Дубликаты' : 'Duplicates', path: APP_ROUTES.MC_DUPLICATES },
+            { icon: UserCog, label: isRu ? 'Назначение' : 'Assignment', path: APP_ROUTES.MC_ASSIGNMENT },
           ].map(tool => (
             <button
               key={tool.path}

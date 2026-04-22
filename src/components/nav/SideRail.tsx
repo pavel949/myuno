@@ -31,9 +31,12 @@ import {
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useBusinessRole } from '@/hooks/useBusinessRole';
+import { useMyProperties } from '@/hooks/useMyProperties';
 import {
   SIDEBAR_NAV,
   hasSidebar,
+  getOwnerSidebarForRole,
   type NavRoleKey,
   type SidebarNavGroup,
 } from '@/lib/nav/navigationModel';
@@ -49,12 +52,16 @@ export function SideRail({ role, badges }: SideRailProps) {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { state, isMobile, setOpenMobile } = useSidebar();
+  const { role: businessRole } = useBusinessRole();
+  const { allProperties } = useMyProperties();
   const isRussian = language === 'ru';
   const isCollapsed = !isMobile && state === 'collapsed';
 
   if (!hasSidebar(role)) return null;
 
-  const groups = SIDEBAR_NAV[role];
+  const groups: SidebarNavGroup[] = role === 'owner'
+    ? getOwnerSidebarForRole(businessRole, { propertyCount: allProperties?.length ?? 0 })
+    : SIDEBAR_NAV[role];
 
   const isActive = (path: string) => {
     if (path === location.pathname) return true;
