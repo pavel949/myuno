@@ -46,6 +46,22 @@ export default function CrmDashboardPage() {
   const [filterStatus, setFilterStatus] = useState<DealStatus | 'all'>('active');
   const [search, setSearch] = useState('');
   const [agentFilter, setAgentFilter] = useState('all');
+  const [dealVipFilter, setDealVipFilter] = useState<'all' | 'yes' | 'no'>('all');
+  const [contactVipFilter, setContactVipFilter] = useState<'all' | 'yes' | 'no'>('all');
+  const [activePreset, setActivePreset] = useState<'none' | 'hot_vip' | 'no_contact' | 'high_budget' | 'follow_up_today'>('none');
+
+  const handleApplyPreset = (preset: typeof activePreset) => {
+    setActivePreset(preset);
+    if (preset === 'none') {
+      setDealVipFilter('all');
+      setContactVipFilter('all');
+      return;
+    }
+    if (preset === 'hot_vip') {
+      setDealVipFilter('yes');
+      setContactVipFilter('yes');
+    }
+  };
 
   const wonLostKeys = useMemo(() => {
     const won = stages.filter(s => s.isWon).map(s => s.key);
@@ -97,8 +113,20 @@ export default function CrmDashboardPage() {
         d.notes?.toLowerCase().includes(q)
       );
     }
+    if (dealVipFilter !== 'all') {
+      const wantVip = dealVipFilter === 'yes';
+      result = result.filter(d => Boolean((d as { is_vip?: boolean }).is_vip) === wantVip);
+    }
+    if (contactVipFilter !== 'all') {
+      const wantVip = contactVipFilter === 'yes';
+      result = result.filter(d => {
+        const tags = (d as { tags?: string[] }).tags || [];
+        const isVip = tags.some(t => t.toLowerCase() === 'vip');
+        return isVip === wantVip;
+      });
+    }
     return result;
-  }, [deals, filterType, filterStatus, search, agentFilter]);
+  }, [deals, filterType, filterStatus, search, agentFilter, dealVipFilter, contactVipFilter]);
 
   if (membershipLoading || isLoading) {
     return (
