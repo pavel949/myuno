@@ -88,6 +88,7 @@ export function OperationsManualPaymentsTab() {
   const [filter, setFilter] = useState<'all' | Status>('all');
   const [confirmTarget, setConfirmTarget] = useState<RequestRow | null>(null);
   const [rejectTarget, setRejectTarget] = useState<RequestRow | null>(null);
+  const [detailTarget, setDetailTarget] = useState<RequestRow | null>(null);
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['manual-payment-requests', filter],
@@ -146,6 +147,8 @@ export function OperationsManualPaymentsTab() {
     );
   };
 
+  const rows = data || [];
+
   return (
     <div className="space-y-4">
       <Tabs value={filter} onValueChange={(v) => setFilter(v as typeof filter)}>
@@ -170,7 +173,7 @@ export function OperationsManualPaymentsTab() {
         </div>
       )}
 
-      {!isLoading && (!data || data.length === 0) && (
+      {!isLoading && rows.length === 0 && (
         <Card>
           <CardContent className="p-12 text-center text-muted-foreground space-y-2">
             <Wallet className="w-10 h-10 mx-auto opacity-40" />
@@ -179,113 +182,161 @@ export function OperationsManualPaymentsTab() {
         </Card>
       )}
 
-      <div className="space-y-3">
-        {(data || []).map((row) => {
-          const expiresAt = parseISO(row.hold_expires_at);
-          const isExpiringSoon = row.status === 'awaiting_admin' && expiresAt.getTime() - Date.now() < 4 * 3600 * 1000;
-          const propertyTitle = row.orders?.metadata?.property_title || (isRu ? 'Объект' : 'Property');
-          const orderNumber = row.orders?.order_number || row.order_id.slice(0, 8);
-          const badge = STATUS_BADGE[row.status];
-          const isActionable = row.status === 'awaiting_admin' || row.status === 'contacted' || row.status === 'paid';
+      {/* Desktop / tablet — table view */}
+      {rows.length > 0 && (
+        <Card className="hidden md:block">
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[140px]">{isRu ? '№ заявки' : 'Request #'}</TableHead>
+                  <TableHead>{isRu ? 'Гость' : 'Guest'}</TableHead>
+                  <TableHead>{isRu ? 'Контакты' : 'Contacts'}</TableHead>
+                  <TableHead className="text-right">{isRu ? 'Сумма ₽' : 'Amount ₽'}</TableHead>
+                  <TableHead>{isRu ? 'Статус' : 'Status'}</TableHead>
+                  <TableHead>{isRu ? 'Hold' : 'Hold'}</TableHead>
+                  <TableHead className="w-[40px]"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {rows.map((row) => {
+                  const expiresAt = parseISO(row.hold_expires_at);
+                  const isExpiringSoon = row.status === 'awaiting_admin' && expiresAt.getTime() - Date.now() < 4 * 3600 * 1000;
+                  const orderNumber = row.orders?.order_number || row.order_id.slice(0, 8);
+                  const badge = STATUS_BADGE[row.status];
+                  const rubDisplay = row.amount_rub_actual ?? row.amount_rub_estimate;
 
-          return (
-            <Card key={row.id} className={cn(isExpiringSoon && 'border-warning/40')}>
-              <CardContent className="p-4 space-y-3">
-                {/* Header row */}
-                <div className="flex items-start justify-between gap-3 flex-wrap">
-                  <div className="space-y-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-mono font-semibold text-sm">#{orderNumber}</span>
-                      <Badge variant="outline" className={cn('text-[10px]', badge.cls)}>
-                        {isRu ? badge.ru : badge.en}
-                      </Badge>
-                      {isExpiringSoon && (
-                        <Badge variant="outline" className="text-[10px] bg-destructive/10 text-destructive border-destructive/20 gap-1">
-                          <AlertTriangle className="w-3 h-3" />
-                          {isRu ? 'Срочно' : 'Urgent'}
+                  return (
+                    <TableRow
+                      key={row.id}
+                      className={cn('cursor-pointer', isExpiringSoon && 'bg-warning/5')}
+                      onClick={() => setDetailTarget(row)}
+                    >
+                      <TableCell className="font-mono text-xs">
+                        <div className="flex items-center gap-1.5">
+                          #{orderNumber}
+                          {isExpiringSoon && <AlertTriangle className="w-3 h-3 text-destructive" />}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-sm font-medium">{row.guest_name}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <a
+                            href={`tel:${row.guest_phone}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="hover:text-primary inline-flex items-center gap-1"
+                            title={row.guest_phone}
+                          >
+                            <Phone className="w-3 h-3" />
+                          </a>
+                          <a
+                            href={`mailto:${row.guest_email}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="hover:text-primary inline-flex items-center gap-1 truncate max-w-[180px]"
+                            title={row.guest_email}
+                          >
+                            <Mail className="w-3 h-3 shrink-0" />
+                            <span className="truncate">{row.guest_email}</span>
+                          </a>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right text-sm">
+                        {rubDisplay != null ? (
+                          <div>
+                            <div className="font-semibold">
+                              {row.amount_rub_actual ? '' : '≈ '}
+                              {rubDisplay.toLocaleString('ru-RU')} ₽
+                            </div>
+                            <div className="text-[10px] text-muted-foreground">
+                              {row.currency_listing} {row.amount_listing.toLocaleString()}
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground text-xs">
+                            {row.currency_listing} {row.amount_listing.toLocaleString()}
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={cn('text-[10px]', badge.cls)}>
+                          {isRu ? badge.ru : badge.en}
                         </Badge>
-                      )}
-                    </div>
-                    <p className="text-sm text-muted-foreground truncate">{propertyTitle}</p>
-                  </div>
-                  <div className="text-right">
-                    {row.amount_rub_estimate != null && (
-                      <div className="font-semibold">
-                        ≈ {row.amount_rub_estimate.toLocaleString('ru-RU')} ₽
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                        {formatDistanceToNow(expiresAt, { addSuffix: true, locale: isRu ? ruLocale : undefined })}
+                      </TableCell>
+                      <TableCell>
+                        <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Mobile — compact list */}
+      {rows.length > 0 && (
+        <div className="md:hidden space-y-2">
+          {rows.map((row) => {
+            const expiresAt = parseISO(row.hold_expires_at);
+            const isExpiringSoon = row.status === 'awaiting_admin' && expiresAt.getTime() - Date.now() < 4 * 3600 * 1000;
+            const orderNumber = row.orders?.order_number || row.order_id.slice(0, 8);
+            const badge = STATUS_BADGE[row.status];
+            const rubDisplay = row.amount_rub_actual ?? row.amount_rub_estimate;
+
+            return (
+              <Card
+                key={row.id}
+                className={cn('cursor-pointer active:scale-[0.99] transition-transform', isExpiringSoon && 'border-warning/40')}
+                onClick={() => setDetailTarget(row)}
+              >
+                <CardContent className="p-3 space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="font-mono font-semibold text-xs">#{orderNumber}</span>
+                        <Badge variant="outline" className={cn('text-[10px]', badge.cls)}>
+                          {isRu ? badge.ru : badge.en}
+                        </Badge>
+                        {isExpiringSoon && <AlertTriangle className="w-3 h-3 text-destructive" />}
                       </div>
-                    )}
-                    <div className="text-xs text-muted-foreground">
-                      {row.currency_listing} {row.amount_listing.toLocaleString()}
+                      <p className="text-sm font-medium mt-1 truncate">{row.guest_name}</p>
+                      <p className="text-[11px] text-muted-foreground truncate">{row.guest_email}</p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      {rubDisplay != null && (
+                        <div className="font-semibold text-sm">
+                          {row.amount_rub_actual ? '' : '≈ '}
+                          {rubDisplay.toLocaleString('ru-RU')} ₽
+                        </div>
+                      )}
+                      <div className="text-[10px] text-muted-foreground">
+                        {formatDistanceToNow(expiresAt, { addSuffix: true, locale: isRu ? ruLocale : undefined })}
+                      </div>
                     </div>
                   </div>
-                </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
 
-                <Separator />
-
-                {/* Guest contact */}
-                <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-sm">
-                  <span className="font-medium">{row.guest_name}</span>
-                  <a href={`tel:${row.guest_phone}`} className="text-muted-foreground hover:text-primary inline-flex items-center gap-1">
-                    <Phone className="w-3 h-3" />{row.guest_phone}
-                  </a>
-                  <button onClick={() => copyEmail(row)} className="text-muted-foreground hover:text-primary inline-flex items-center gap-1">
-                    <Mail className="w-3 h-3" />{row.guest_email}
-                    <Copy className="w-3 h-3 opacity-50" />
-                  </button>
-                </div>
-
-                {/* Hold timer */}
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Clock className="w-3 h-3" />
-                  <span>
-                    {isRu ? 'Hold' : 'Hold'} {formatDistanceToNow(expiresAt, { addSuffix: true, locale: isRu ? ruLocale : undefined })}
-                  </span>
-                  <span>·</span>
-                  <span>
-                    {isRu ? 'Создано' : 'Created'} {format(parseISO(row.created_at), 'd MMM HH:mm', { locale: isRu ? ruLocale : undefined })}
-                  </span>
-                </div>
-
-                {row.rejected_reason && (
-                  <p className="text-xs p-2 rounded bg-destructive/5 text-destructive">{row.rejected_reason}</p>
-                )}
-
-                {/* Action buttons */}
-                {isActionable && (
-                  <div className="flex flex-wrap gap-2 pt-1">
-                    <Button size="sm" variant="outline" onClick={() => openWhatsApp(row)} className="gap-1.5">
-                      <MessageCircle className="w-3.5 h-3.5" />
-                      {isRu ? 'WhatsApp' : 'WhatsApp'}
-                    </Button>
-                    {row.status === 'awaiting_admin' && (
-                      <Button size="sm" variant="outline" onClick={() => markContacted(row)} className="gap-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        {isRu ? 'Связался' : 'Contacted'}
-                      </Button>
-                    )}
-                    <Button size="sm" onClick={() => setConfirmTarget(row)} className="gap-1.5 bg-success hover:bg-success/90 text-success-foreground">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      {isRu ? 'Подтвердить' : 'Confirm'}
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={() => setRejectTarget(row)} className="gap-1.5 text-destructive hover:text-destructive border-destructive/30">
-                      <XCircle className="w-3.5 h-3.5" />
-                      {isRu ? 'Отклонить' : 'Reject'}
-                    </Button>
-                  </div>
-                )}
-
-                {row.status === 'confirmed' && row.amount_rub_actual && (
-                  <div className="text-xs text-muted-foreground bg-success/5 p-2 rounded">
-                    {isRu ? 'Получено' : 'Received'}: {row.amount_rub_actual.toLocaleString('ru-RU')} ₽
-                    {row.payment_method_actual && ` · ${row.payment_method_actual}`}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-
+      {detailTarget && (
+        <DetailSheet
+          row={detailTarget}
+          isRu={isRu}
+          onClose={() => setDetailTarget(null)}
+          onConfirm={() => { setConfirmTarget(detailTarget); setDetailTarget(null); }}
+          onReject={() => { setRejectTarget(detailTarget); setDetailTarget(null); }}
+          onWhatsApp={() => openWhatsApp(detailTarget)}
+          onCopyEmail={() => copyEmail(detailTarget)}
+          onMarkContacted={() => { markContacted(detailTarget); setDetailTarget(null); }}
+        />
+      )}
       {confirmTarget && (
         <ConfirmPaymentDialog
           row={confirmTarget}
@@ -303,6 +354,244 @@ export function OperationsManualPaymentsTab() {
         />
       )}
     </div>
+  );
+}
+
+// ──────────────────────────────────────────────────────────
+// Detail sheet — read-only request card opened from the table.
+// Shows full info: order ref, property, amounts (estimate/actual), contacts,
+// timing, proof preview, status, and primary actions.
+// ──────────────────────────────────────────────────────────
+function DetailSheet({
+  row, isRu, onClose, onConfirm, onReject, onWhatsApp, onCopyEmail, onMarkContacted,
+}: {
+  row: RequestRow;
+  isRu: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  onReject: () => void;
+  onWhatsApp: () => void;
+  onCopyEmail: () => void;
+  onMarkContacted: () => void;
+}) {
+  const [proofUrl, setProofUrl] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    let cancelled = false;
+    if (!row.proof_file_path) return;
+    supabase.storage
+      .from('manual_payment_proofs')
+      .createSignedUrl(row.proof_file_path, 60 * 10)
+      .then(({ data }) => {
+        if (!cancelled && data?.signedUrl) setProofUrl(data.signedUrl);
+      });
+    return () => { cancelled = true; };
+  }, [row.proof_file_path]);
+
+  const orderNumber = row.orders?.order_number || row.order_id.slice(0, 8);
+  const propertyTitle = row.orders?.metadata?.property_title || (isRu ? 'Объект' : 'Property');
+  const expiresAt = parseISO(row.hold_expires_at);
+  const badge = STATUS_BADGE[row.status];
+  const isActionable = row.status === 'awaiting_admin' || row.status === 'contacted' || row.status === 'paid';
+
+  const copyOrderRef = () => {
+    navigator.clipboard.writeText(orderNumber).then(
+      () => toast.success(isRu ? 'Номер скопирован' : 'Number copied'),
+    );
+  };
+
+  const Field = ({ label, children }: { label: string; children: React.ReactNode }) => (
+    <div className="space-y-0.5">
+      <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</div>
+      <div className="text-sm">{children}</div>
+    </div>
+  );
+
+  return (
+    <Sheet open onOpenChange={(o) => !o && onClose()}>
+      <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
+        <SheetHeader className="space-y-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <SheetTitle className="font-mono">#{orderNumber}</SheetTitle>
+            <Badge variant="outline" className={cn('text-[10px]', badge.cls)}>
+              {isRu ? badge.ru : badge.en}
+            </Badge>
+            <button
+              onClick={copyOrderRef}
+              className="text-muted-foreground hover:text-primary"
+              title={isRu ? 'Скопировать' : 'Copy'}
+            >
+              <Copy className="w-3.5 h-3.5" />
+            </button>
+          </div>
+          <SheetDescription>{propertyTitle}</SheetDescription>
+        </SheetHeader>
+
+        <div className="space-y-5 py-5">
+          {/* Amounts */}
+          <div className="grid grid-cols-2 gap-3">
+            <Field label={isRu ? 'Сумма заказа' : 'Order amount'}>
+              <span className="font-semibold">
+                {row.currency_listing} {row.amount_listing.toLocaleString()}
+              </span>
+            </Field>
+            <Field label={isRu ? 'Оценка ₽' : 'RUB estimate'}>
+              {row.amount_rub_estimate != null ? (
+                <span className="font-semibold">≈ {row.amount_rub_estimate.toLocaleString('ru-RU')} ₽</span>
+              ) : (
+                <span className="text-muted-foreground">—</span>
+              )}
+            </Field>
+            {row.amount_rub_actual != null && (
+              <Field label={isRu ? 'Получено ₽' : 'Received ₽'}>
+                <span className="font-semibold text-success">
+                  {row.amount_rub_actual.toLocaleString('ru-RU')} ₽
+                </span>
+              </Field>
+            )}
+            {row.payment_method_actual && (
+              <Field label={isRu ? 'Способ' : 'Method'}>
+                <span>{row.payment_method_actual}</span>
+              </Field>
+            )}
+          </div>
+
+          <Separator />
+
+          {/* Contacts */}
+          <div className="space-y-3">
+            <Field label={isRu ? 'Гость' : 'Guest'}>
+              <span className="font-medium">{row.guest_name}</span>
+            </Field>
+            <div className="grid grid-cols-1 gap-2">
+              <a
+                href={`tel:${row.guest_phone}`}
+                className="flex items-center justify-between p-2.5 rounded-md border hover:bg-muted/50"
+              >
+                <span className="inline-flex items-center gap-2 text-sm">
+                  <Phone className="w-4 h-4 text-muted-foreground" />
+                  {row.guest_phone}
+                </span>
+                <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
+              </a>
+              <button
+                type="button"
+                onClick={onCopyEmail}
+                className="flex items-center justify-between p-2.5 rounded-md border hover:bg-muted/50 text-left"
+              >
+                <span className="inline-flex items-center gap-2 text-sm truncate">
+                  <Mail className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <span className="truncate">{row.guest_email}</span>
+                </span>
+                <Copy className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+              </button>
+              <button
+                type="button"
+                onClick={onWhatsApp}
+                className="flex items-center justify-between p-2.5 rounded-md border bg-success/5 border-success/20 hover:bg-success/10 text-left"
+              >
+                <span className="inline-flex items-center gap-2 text-sm">
+                  <MessageCircle className="w-4 h-4 text-success" />
+                  {isRu ? 'Открыть WhatsApp с гостем' : 'Open WhatsApp with guest'}
+                </span>
+                <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
+              </button>
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Timing */}
+          <div className="space-y-2">
+            <Field label={isRu ? 'Создано' : 'Created'}>
+              <span>{format(parseISO(row.created_at), 'd MMM yyyy, HH:mm', { locale: isRu ? ruLocale : undefined })}</span>
+            </Field>
+            <Field label={isRu ? 'Hold истекает' : 'Hold expires'}>
+              <span className="inline-flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-muted-foreground" />
+                {format(expiresAt, 'd MMM, HH:mm', { locale: isRu ? ruLocale : undefined })}
+                <span className="text-muted-foreground">
+                  ({formatDistanceToNow(expiresAt, { addSuffix: true, locale: isRu ? ruLocale : undefined })})
+                </span>
+              </span>
+            </Field>
+            {row.contacted_at && (
+              <Field label={isRu ? 'На связи с' : 'Contacted at'}>
+                <span>{format(parseISO(row.contacted_at), 'd MMM, HH:mm', { locale: isRu ? ruLocale : undefined })}</span>
+              </Field>
+            )}
+            {row.confirmed_at && (
+              <Field label={isRu ? 'Подтверждено' : 'Confirmed at'}>
+                <span>{format(parseISO(row.confirmed_at), 'd MMM, HH:mm', { locale: isRu ? ruLocale : undefined })}</span>
+              </Field>
+            )}
+          </div>
+
+          {row.rejected_reason && (
+            <>
+              <Separator />
+              <Field label={isRu ? 'Причина отклонения' : 'Rejection reason'}>
+                <p className="text-sm p-2.5 rounded bg-destructive/5 text-destructive">{row.rejected_reason}</p>
+              </Field>
+            </>
+          )}
+
+          {row.proof_file_path && (
+            <>
+              <Separator />
+              <Field label={isRu ? 'Чек / подтверждение' : 'Proof'}>
+                {proofUrl ? (
+                  <a
+                    href={proofUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
+                  >
+                    <FileText className="w-4 h-4" />
+                    {isRu ? 'Открыть файл' : 'Open file'}
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                ) : (
+                  <span className="text-xs text-muted-foreground inline-flex items-center gap-1">
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    {isRu ? 'Загрузка ссылки…' : 'Loading link…'}
+                  </span>
+                )}
+              </Field>
+            </>
+          )}
+        </div>
+
+        {/* Action footer */}
+        {isActionable && (
+          <div className="sticky bottom-0 -mx-6 px-6 py-3 bg-background border-t flex flex-wrap gap-2">
+            {row.status === 'awaiting_admin' && (
+              <Button size="sm" variant="outline" onClick={onMarkContacted} className="gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                {isRu ? 'Связался' : 'Contacted'}
+              </Button>
+            )}
+            <Button
+              size="sm"
+              onClick={onConfirm}
+              className="gap-1.5 bg-success hover:bg-success/90 text-success-foreground"
+            >
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              {isRu ? 'Подтвердить оплату' : 'Confirm payment'}
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={onReject}
+              className="gap-1.5 text-destructive hover:text-destructive border-destructive/30"
+            >
+              <XCircle className="w-3.5 h-3.5" />
+              {isRu ? 'Отклонить' : 'Reject'}
+            </Button>
+          </div>
+        )}
+      </SheetContent>
+    </Sheet>
   );
 }
 
