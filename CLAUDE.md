@@ -29,6 +29,8 @@
 5. `05-visual-design-system.md` — визуальная дизайн-система (цвет, типографика, сетка, компоненты)
 6. `06-clearview-methodology.md` — ClearView™ методология рейтингов off-plan (моат #8, AAA–BB, 8 категорий)
 7. `07-information-architecture.md` — URL-структура, субдомены, навигация, cross-domain SSO
+8. `08-ai-prompts-library.md` — канонические system prompts для всех AI-агентов (консьерж, ClearView draft, Tax Advisor, support и др.)
+9. `09-data-schema.md` — Canonical Data Schema: таблицы, enums, RLS, FK, naming conventions Supabase (источник истины по схеме данных)
 
 При расхождении кода/UI с PROJECT.md или каноном — правится **код**, а не документ.
 Если изменение противоречит — остановись и задай вопрос Павлу.
