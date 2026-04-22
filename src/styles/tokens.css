@@ -206,11 +206,6 @@
   :root {
     /* BottomBar is hidden ≥768px, so sticky bars sit flush with the viewport edge. */
     --bottom-nav-h: 0px;
-  }
-}
-
-@media (min-width: 768px) {
-  :root {
     --page-padding-x: 1.5rem;
     --section-gap: 1.5rem;
   }
