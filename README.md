@@ -111,8 +111,8 @@ docs/            — Developer documentation
 | [`docs/EDGE_FUNCTIONS.md`](docs/EDGE_FUNCTIONS.md) | Edge Functions overview |
 | [`docs/DATABASE.md`](docs/DATABASE.md) | Database schema, tables, RLS policies |
 | [`supabase/functions/_docs/API_REFERENCE.md`](supabase/functions/_docs/API_REFERENCE.md) | Full API reference for all Edge Functions |
-| [`handoff/ARCHITECTURE_V2.md`](handoff/ARCHITECTURE_V2.md) | Architecture v2 blueprint — roles, clusters, surfaces, hard rules |
-| [`handoff/FEASIBILITY.md`](handoff/FEASIBILITY.md) | Architecture v2 migration path and per-role implementation status |
+| [`docs/canonical/architecture/ARCHITECTURE_V2.md`](docs/canonical/architecture/ARCHITECTURE_V2.md) | Architecture v2 blueprint — roles, clusters, surfaces, hard rules |
+| [`docs/canonical/architecture/FEASIBILITY.md`](docs/canonical/architecture/FEASIBILITY.md) | Architecture v2 migration path and per-role implementation status |
 
 ### Archive
 

@@ -42,8 +42,8 @@
 ## 1.5 · Architecture source of truth (v2)
 
 **Before any structural change, read:**
-1. `handoff/ARCHITECTURE_V2.md` — target architecture (roles · clusters · surfaces · agents)
-2. `handoff/FEASIBILITY.md` — migration path and current implementation status per role
+1. `docs/canonical/architecture/ARCHITECTURE_V2.md` — target architecture (roles · clusters · surfaces · agents)
+2. `docs/canonical/architecture/FEASIBILITY.md` — migration path and current implementation status per role
 
 ### Hard rules (from ARCHITECTURE_V2.md §13)
 
@@ -62,7 +62,7 @@
 - **Role stack** — `profiles.roles_stack` jsonb + `primary_role`, weighted `primary·3 + secondary·2 + tertiary·1`
 - **Intent** — AI agent output, user-confirmed via one-tap accept/later
 
-<!-- updated: 2026-04-20 — added architecture v2 section from handoff/CLAUDE_PATCH.md -->
+<!-- updated: 2026-04-22 — handoff/ moved to docs/canonical/architecture/ during repo cleanup -->
 
 ---
 
