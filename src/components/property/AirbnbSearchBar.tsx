@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { differenceInDays } from 'date-fns';
-import { createPortal } from 'react-dom';
-import { Search, MapPin, Globe, X, Minus, Plus, Check, Bed, Home, Zap,
-  Waves, Footprints, Eye, Droplets, Lock, WashingMachine, PawPrint, Baby, Car, Wifi, Sparkles
+import { Search, MapPin, X, Minus, Plus, Check, Home, Zap,
+  Waves, Footprints, Eye, Droplets, Lock, WashingMachine, PawPrint, Baby, Car, Wifi
 } from 'lucide-react';
-import { NextStepNudge } from '@/components/hints/NextStepNudge';
-import { usePropertyQuickFilters, DistrictOption } from '@/hooks/usePropertyQuickFilters';
+import { usePropertyQuickFilters } from '@/hooks/usePropertyQuickFilters';
 import { usePropertyFilterOptions } from '@/hooks/usePropertyFilterOptions';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -41,7 +39,7 @@ const flexibleDates = [
   { id: 'month', labelEn: 'Month', labelRu: 'Месяц', getDates: () => ({ from: new Date(), to: addMonths(new Date(), 1) }) },
 ];
 
-type MobileTab = 'type' | 'beach' | 'dates' | 'details';
+
 
 const BEDROOM_OPTIONS = [
   { id: 'studio', labelEn: 'Studio', labelRu: 'Студия' },
@@ -99,7 +97,7 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
 
   const [isOpen, setIsOpen] = useState(false);
   const [activeField, setActiveField] = useState<string | null>(null);
-  const [mobileTab, setMobileTab] = useState<MobileTab>('type');
+  
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
   const [checkIn, setCheckIn] = useState<Date | undefined>();
   const [checkOut, setCheckOut] = useState<Date | undefined>();
@@ -184,12 +182,6 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
     const dates = dateOption.getDates();
     setCheckIn(dates.from);
     setCheckOut(dates.to);
-  };
-
-  const goToNextTab = () => {
-    if (mobileTab === 'type') setMobileTab('beach');
-    else if (mobileTab === 'beach') setMobileTab('dates');
-    else if (mobileTab === 'dates') setMobileTab('details');
   };
 
   // Build smart summary for the collapsed pill
@@ -332,6 +324,8 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
           className="flex items-center gap-3 px-4 py-3 bg-card rounded-full border shadow-sm cursor-pointer"
           onClick={() => setIsOpen(true)}
           whileTap={{ scale: 0.98 }}
+          role="button"
+          aria-label={isRu ? 'Открыть поиск' : 'Open search'}
         >
           <Search className="w-5 h-5 text-foreground shrink-0" />
           <div className="flex-1 min-w-0">
@@ -340,273 +334,26 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
           </div>
         </motion.div>
 
-        {/* ═══ Mobile Full Screen Modal ═══ */}
-        {createPortal(
-          <AnimatePresence>
-            {isOpen && (
-              <motion.div
-                key="search-modal"
-                className="fixed inset-0 z-[100] bg-background"
-                initial={{ y: '100%' }}
-                animate={{ y: 0 }}
-                exit={{ y: '100%' }}
-                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              >
-                <div className="flex flex-col h-full overflow-hidden">
-                  {/* Header */}
-                  <div className="border-b shrink-0">
-                    <div className="flex items-center justify-between px-4 py-3">
-                      <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
-                        <X className="w-5 h-5" />
-                      </Button>
-                      <span className="font-semibold">{isRu ? 'Поиск' : 'Search'}</span>
-                      <Button variant="ghost" size="sm" onClick={clearAll} className="text-primary">
-                        {isRu ? 'Сброс' : 'Clear'}
-                      </Button>
-                    </div>
-
-                    {/* Tab Navigation — Type | Beach | Dates | Details */}
-                    <div className="flex px-4 gap-1">
-                      {(['type', 'beach', 'dates', 'details'] as MobileTab[]).map((tab) => (
-                        <button
-                          key={tab}
-                          className={cn(
-                            "flex-1 py-3 text-xs font-medium text-center border-b-2 transition-colors",
-                            mobileTab === tab
-                              ? "border-primary text-primary"
-                              : "border-transparent text-muted-foreground"
-                          )}
-                          onClick={() => setMobileTab(tab)}
-                        >
-                          {tab === 'type' && (
-                            <span className="inline-flex items-center gap-1">
-                              {isRu ? 'Тип' : 'Type'}
-                              {selectedPropertyTypes.length > 0 && (
-                                <span className="w-4 h-4 rounded-full bg-primary text-primary-foreground text-[9px] inline-flex items-center justify-center">
-                                  {selectedPropertyTypes.length}
-                                </span>
-                              )}
-                            </span>
-                          )}
-                          {tab === 'beach' && (
-                            <span className="inline-flex items-center gap-1">
-                              {isRu ? 'Пляж' : 'Beach'}
-                              {selectedLocations.length > 0 && (
-                                <span className="w-4 h-4 rounded-full bg-primary text-primary-foreground text-[9px] inline-flex items-center justify-center">
-                                  {selectedLocations.length}
-                                </span>
-                              )}
-                            </span>
-                          )}
-                          {tab === 'dates' && (isRu ? 'Даты' : 'Dates')}
-                          {tab === 'details' && (
-                            <span className="inline-flex items-center gap-1">
-                              {isRu ? 'Детали' : 'Details'}
-                              {detailsFilterCount > 0 && (
-                                <span className="w-4 h-4 rounded-full bg-primary text-primary-foreground text-[9px] inline-flex items-center justify-center">
-                                  {detailsFilterCount}
-                                </span>
-                              )}
-                            </span>
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Tab Content */}
-                  <div className="flex-1 overflow-y-auto">
-                    {/* Type Tab */}
-                    {mobileTab === 'type' && (
-                      <div className="p-4 space-y-4">
-                        <h3 className="text-xl font-bold">{isRu ? 'Какой тип жилья?' : 'What type of place?'}</h3>
-                        <div className="grid grid-cols-2 gap-2">
-                          {propertyTypes.map(type => (
-                            <button
-                              key={type.id}
-                              onClick={() => togglePropertyType(type.id)}
-                              className={cn(
-                                "flex items-center gap-3 px-4 py-4 rounded-2xl text-left transition-all border-2",
-                                selectedPropertyTypes.includes(type.id)
-                                  ? "bg-primary/10 border-primary text-primary font-semibold"
-                                  : "border-border hover:bg-muted"
-                              )}
-                            >
-                              <Home className="w-5 h-5 shrink-0" />
-                              <span className="flex-1 text-sm truncate">{isRu ? type.labelRu : type.labelEn}</span>
-                              {selectedPropertyTypes.includes(type.id) && <Check className="w-4 h-4 text-primary shrink-0" />}
-                            </button>
-                          ))}
-                        </div>
-                        <NextStepNudge
-                          message={isRu ? 'Выберите пляж →' : 'Pick a beach →'}
-                          direction="right"
-                          visible={selectedPropertyTypes.length > 0 && mobileTab === 'type'}
-                          hintId="search-type-to-beach"
-                          className="mt-2 self-center w-fit mx-auto pointer-events-auto cursor-pointer"
-                        />
-                      </div>
-                    )}
-
-                    {/* Beach / Area Tab */}
-                    {mobileTab === 'beach' && (
-                      <div className="p-4 space-y-4">
-                        <h3 className="text-xl font-bold">{isRu ? 'Какой пляж / район?' : 'Which beach / area?'}</h3>
-                        
-                        {/* Popular beaches */}
-                        <div>
-                          <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">
-                            {isRu ? 'Популярные пляжи' : 'Popular beaches'}
-                          </p>
-                          <div className="grid grid-cols-2 gap-1.5">
-                            {popularBeaches.map((loc) => (
-                              <button
-                                key={loc.id}
-                                className={cn(
-                                  "flex items-center gap-2 px-3 py-2.5 rounded-xl text-left transition-colors border",
-                                  selectedLocations.includes(loc.id)
-                                    ? "bg-primary/10 border-primary/30 text-primary"
-                                    : "border-border hover:bg-muted"
-                                )}
-                                onClick={() => toggleLocation(loc.id)}
-                              >
-                                <Waves className="w-4 h-4 shrink-0" />
-                                <span className="flex-1 text-xs font-medium truncate">{isRu ? loc.labelRu : loc.labelEn}</span>
-                                {selectedLocations.includes(loc.id) && <Check className="w-3.5 h-3.5 text-primary shrink-0" />}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Other areas */}
-                        {otherAreas.length > 0 && (
-                          <div>
-                            <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">
-                              {isRu ? 'Другие районы' : 'Other areas'}
-                            </p>
-                            <div className="grid grid-cols-2 gap-1.5">
-                              {otherAreas.map((loc) => (
-                                <button
-                                  key={loc.id}
-                                  className={cn(
-                                    "flex items-center gap-2 px-3 py-2.5 rounded-xl text-left transition-colors border",
-                                    selectedLocations.includes(loc.id)
-                                      ? "bg-primary/10 border-primary/30 text-primary"
-                                      : "border-border hover:bg-muted"
-                                  )}
-                                  onClick={() => toggleLocation(loc.id)}
-                                >
-                                  <MapPin className="w-4 h-4 shrink-0" />
-                                  <span className="flex-1 text-xs font-medium truncate">{isRu ? loc.labelRu : loc.labelEn}</span>
-                                  {selectedLocations.includes(loc.id) && <Check className="w-3.5 h-3.5 text-primary shrink-0" />}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Selected summary chips */}
-                        {selectedLocations.length > 0 && (
-                          <div className="flex flex-wrap gap-2 pt-2 border-t">
-                            {selectedLocations.map(locId => {
-                              const loc = locations.find(l => l.id === locId);
-                              return loc ? (
-                                <span key={locId} className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/10 text-primary rounded-full text-xs">
-                                  <Waves className="w-3 h-3" /> {isRu ? loc.labelRu : loc.labelEn}
-                                  <button onClick={(e) => { e.stopPropagation(); toggleLocation(locId); }} className="ml-1 hover:text-primary/70">
-                                    <X className="w-3 h-3" />
-                                  </button>
-                                </span>
-                              ) : null;
-                            })}
-                          </div>
-                        )}
-                        <NextStepNudge
-                          message={isRu ? 'Теперь выберите даты →' : 'Now select dates →'}
-                          direction="right"
-                          visible={selectedLocations.length > 0 && mobileTab === 'beach'}
-                          hintId="search-beach-to-dates"
-                          className="mt-2 self-center w-fit mx-auto pointer-events-auto cursor-pointer"
-                        />
-                      </div>
-                    )}
-
-                    {/* Dates Tab */}
-                    {mobileTab === 'dates' && (
-                      <div className="p-4 space-y-4">
-                        <h3 className="text-xl font-bold">{isRu ? 'Когда поездка?' : 'When is your trip?'}</h3>
-                        <div className="flex gap-2 overflow-x-auto pb-2">
-                          {flexibleDates.map((option) => (
-                            <Button
-                              key={option.id}
-                              variant="outline"
-                              size="sm"
-                              className={cn("rounded-full whitespace-nowrap", checkIn && checkOut && "border-primary/50")}
-                              onClick={() => { handleFlexibleDate(option); goToNextTab(); }}
-                            >
-                              {isRu ? option.labelRu : option.labelEn}
-                            </Button>
-                          ))}
-                          <Button variant="outline" size="sm" className="rounded-full whitespace-nowrap" onClick={() => { setCheckIn(undefined); setCheckOut(undefined); }}>
-                            {isRu ? 'Гибкие даты' : 'Flexible'}
-                          </Button>
-                        </div>
-                        <div className="flex justify-center">
-                          <CalendarComponent
-                            mode="range"
-                            selected={{ from: checkIn, to: checkOut } as DateRange}
-                            onSelect={(range: DateRange | undefined) => {
-                              setCheckIn(range?.from);
-                              setCheckOut(range?.to);
-                              if (range?.to) goToNextTab();
-                            }}
-                            numberOfMonths={1}
-                            disabled={(date) => date < new Date()}
-                            className="rounded-xl border-0 p-0"
-                            locale={isRu ? ru : undefined}
-                          />
-                        </div>
-                        {checkIn && checkOut && (
-                          <div className="text-center p-3 bg-primary/5 rounded-xl">
-                            <p className="text-sm font-medium text-primary">
-                              {formatDateShort(checkIn)} – {formatDateShort(checkOut)}
-                              <span className="mx-1.5 text-primary/60">·</span>
-                              {nights} {isRu ? (nights === 1 ? 'ночь' : nights < 5 ? 'ночи' : 'ночей') : 'nights'}
-                            </p>
-                          </div>
-                        )}
-                        <NextStepNudge
-                          message={isRu ? 'Уточните детали →' : 'Add details →'}
-                          direction="down"
-                          visible={!!checkIn && !!checkOut && mobileTab === 'dates'}
-                          hintId="search-dates-to-details"
-                          className="self-center w-fit mx-auto"
-                        />
-                      </div>
-                    )}
-
-                    {/* Details Tab (bedrooms + guests + key amenities + instant) */}
-                    {mobileTab === 'details' && (
-                      <div className="p-4">
-                        <h3 className="text-xl font-bold mb-4">{isRu ? 'Детали поиска' : 'Search details'}</h3>
-                        <DetailsTabContent />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Footer */}
-                  <div className="p-4 border-t bg-background shrink-0">
-                    <Button className="w-full h-14 rounded-xl text-base gap-2 font-semibold" onClick={handleSearch}>
-                      <Search className="w-5 h-5" />
-                      {isRu ? 'Найти жильё' : 'Search'}
-                    </Button>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>,
-          document.body
-        )}
+        {/* ═══ Mobile Bottom Sheet — Airbnb-style 3-section flow ═══ */}
+        <PropertySearchSheet
+          open={isOpen}
+          onOpenChange={setIsOpen}
+          initial={{
+            locations: selectedLocations,
+            checkIn,
+            checkOut,
+            guests: totalGuests,
+          }}
+          onSearch={(params) => {
+            setSelectedLocations(params.locations);
+            setCheckIn(params.checkIn);
+            setCheckOut(params.checkOut);
+            setAdults(Math.max(1, params.guests));
+            setChildren(0);
+            onSearch(params);
+            setIsOpen(false);
+          }}
+        />
       </div>
 
       {/* ═══ Desktop Search Bar ═══ */}
@@ -708,6 +455,7 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
                 numberOfMonths={2}
                 disabled={(date) => date < new Date()}
                 locale={isRu ? ru : undefined}
+                className="p-3 pointer-events-auto"
               />
             </PopoverContent>
           </Popover>
@@ -732,6 +480,7 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
                 numberOfMonths={2}
                 disabled={(date) => date < new Date()}
                 locale={isRu ? ru : undefined}
+                className="p-3 pointer-events-auto"
               />
             </PopoverContent>
           </Popover>

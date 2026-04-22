@@ -1,29 +1,55 @@
 import React, { useState, useCallback } from 'react';
-import { Search, ArrowRight, ArrowUpRight } from 'lucide-react';
+import { Search, ArrowRight, ArrowUpRight, Home, Sparkles, Briefcase } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePopularTasks, trackTaskOpen } from '@/hooks/home/usePopularTasks';
+import { cn } from '@/lib/utils';
+
+type Vertical = 'all' | 'homes' | 'experiences' | 'services';
+
+const VERTICAL_ROUTES: Record<Vertical, string> = {
+  all: '/search',
+  homes: '/property',
+  experiences: '/experiences',
+  services: '/services',
+};
 
 /**
  * HeroIntro — clean entry point for new users.
- * One question: «what do you need now?». One field: search.
+ * One question: «what do you need now?». One field: search + vertical tabs.
  *
- * Desktop (lg+): two-column layout — hero + search on the left, top-3
- * popular tasks on the right (GOV.UK Start-page pattern). Mobile is
- * untouched — the full PopularTasks grid renders below.
+ * Vertical tabs (Homes / Experiences / Services) route the search query to the
+ * relevant catalog so users skip the universal `/search` step when they know
+ * what they want — same pattern Airbnb uses on its mobile home.
  */
 export function HeroIntro() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
+  const [vertical, setVertical] = useState<Vertical>('all');
   const { data: tasks } = usePopularTasks();
   const top3 = tasks.slice(0, 3);
 
   const handleSearch = useCallback(() => {
     const q = query.trim();
-    navigate(q ? `/search?q=${encodeURIComponent(q)}` : '/search');
-  }, [query, navigate]);
+    const base = VERTICAL_ROUTES[vertical];
+    navigate(q ? `${base}?q=${encodeURIComponent(q)}` : base);
+  }, [query, vertical, navigate]);
+
+  const verticals: Array<{ id: Vertical; labelRu: string; labelEn: string; icon: React.ComponentType<{ className?: string }> }> = [
+    { id: 'all', labelRu: 'Всё', labelEn: 'All', icon: Search },
+    { id: 'homes', labelRu: 'Жильё', labelEn: 'Homes', icon: Home },
+    { id: 'experiences', labelRu: 'Активности', labelEn: 'Experiences', icon: Sparkles },
+    { id: 'services', labelRu: 'Услуги', labelEn: 'Services', icon: Briefcase },
+  ];
+
+  const placeholderByVertical: Record<Vertical, { ru: string; en: string }> = {
+    all: { ru: 'Поиск сервиса или услуги', en: 'Search a service' },
+    homes: { ru: 'Куда поедем? Пляж, район…', en: 'Where to? Beach, area…' },
+    experiences: { ru: 'Что хотите попробовать?', en: 'What to try?' },
+    services: { ru: 'Какая услуга нужна?', en: 'What service?' },
+  };
 
   return (
     <section className="px-4 pt-2 pb-5 lg:grid lg:grid-cols-[1.2fr_1fr] lg:gap-10 lg:items-start">
@@ -44,7 +70,7 @@ export function HeroIntro() {
           <Search className="w-4 h-4 text-muted-foreground shrink-0" />
           <input
             className="flex-1 bg-transparent text-[14px] text-foreground placeholder:text-muted-foreground/70 outline-none min-w-0"
-            placeholder={isRu ? 'Поиск сервиса или услуги' : 'Search a service'}
+            placeholder={isRu ? placeholderByVertical[vertical].ru : placeholderByVertical[vertical].en}
             value={query}
             onChange={e => setQuery(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleSearch()}
@@ -57,6 +83,36 @@ export function HeroIntro() {
           >
             <ArrowRight className="w-4 h-4" />
           </button>
+        </div>
+
+        {/* Vertical tabs — Airbnb-style intent picker */}
+        <div
+          className="mt-3 flex items-center gap-1.5 overflow-x-auto scrollbar-none -mx-1 px-1 lg:max-w-[480px]"
+          role="tablist"
+          aria-label={isRu ? 'Категория поиска' : 'Search category'}
+        >
+          {verticals.map((v) => {
+            const Icon = v.icon;
+            const active = vertical === v.id;
+            return (
+              <button
+                key={v.id}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                onClick={() => setVertical(v.id)}
+                className={cn(
+                  'flex items-center gap-1.5 px-3 h-8 rounded-full text-[12.5px] font-medium whitespace-nowrap shrink-0 transition-all border',
+                  active
+                    ? 'bg-foreground text-background border-foreground'
+                    : 'bg-card text-muted-foreground border-border hover:text-foreground hover:border-border-strong',
+                )}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                {isRu ? v.labelRu : v.labelEn}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -100,3 +156,4 @@ export function HeroIntro() {
     </section>
   );
 }
+
