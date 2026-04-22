@@ -61,11 +61,13 @@ export const DepositPaymentOptions = forwardRef<DepositPaymentOptionsHandle, Dep
       guests,
       nights,
       totalAmount,
+      currency = 'THB',
       cleaningFee,
       guestName,
       guestPhone,
       guestEmail,
       providerOrgId,
+      ownerUserId,
       prepayAmount,
       prepayPercent,
       payInFull = false,
@@ -75,9 +77,12 @@ export const DepositPaymentOptions = forwardRef<DepositPaymentOptionsHandle, Dep
   ) {
     const { language } = useLanguage();
     const { formatPrice } = useCurrency();
+    const navigate = useNavigate();
     const isRu = language === 'ru';
     const [isProcessing, setIsProcessing] = useState(false);
     const { method, setMethod } = useLastPaymentMethod('card');
+    const { createOrder } = useOrders();
+    const { amountRub, rate, source: rateSource } = useRubEstimate(totalAmount, currency);
 
     // Notify parent of initial + future selection so the sticky footer can re-label.
     React.useEffect(() => {
