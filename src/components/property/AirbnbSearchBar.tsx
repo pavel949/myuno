@@ -17,6 +17,7 @@ import { ru } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { DateRange } from 'react-day-picker';
+import { PropertySearchSheet } from './PropertySearchSheet';
 
 interface AirbnbSearchBarProps {
   onSearch: (params: SearchParams) => void;
