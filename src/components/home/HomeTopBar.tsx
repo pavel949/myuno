@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell } from 'lucide-react';
+import { Bell, Menu } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -11,6 +11,8 @@ import { ROLE_META } from '@/lib/roleBlend';
 interface HomeTopBarProps {
   personas: UserPersona[];
   onRoleSheetOpen: () => void;
+  /** Open the global app drawer (left-side launcher). */
+  onAppDrawerOpen?: () => void;
 }
 
 function useHasUnread(userId: string | undefined) {
@@ -30,7 +32,7 @@ function useHasUnread(userId: string | undefined) {
   });
 }
 
-export function HomeTopBar({ personas, onRoleSheetOpen }: HomeTopBarProps) {
+export function HomeTopBar({ personas, onRoleSheetOpen, onAppDrawerOpen }: HomeTopBarProps) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { language } = useLanguage();
@@ -44,15 +46,27 @@ export function HomeTopBar({ personas, onRoleSheetOpen }: HomeTopBarProps) {
 
   return (
     <div className="flex items-center justify-between pt-2 pb-3 gap-3">
-      {/* Logo + institutional tagline */}
-      <div className="flex flex-col min-w-0">
-        <div className="flex items-baseline gap-0">
-          <span className="font-display text-[22px] font-normal text-muted-foreground tracking-[-0.02em]">my</span>
-          <span className="font-display text-[22px] font-bold text-foreground tracking-[0.02em]">UNO</span>
+      {/* Drawer trigger + logo cluster */}
+      <div className="flex items-center gap-2 min-w-0">
+        {onAppDrawerOpen && (
+          <button
+            type="button"
+            onClick={onAppDrawerOpen}
+            aria-label={isRu ? 'Открыть меню' : 'Open menu'}
+            className="w-11 h-11 -ml-2 rounded-full flex items-center justify-center text-foreground hover:bg-muted/40 transition-colors"
+          >
+            <Menu className="w-[19px] h-[19px]" />
+          </button>
+        )}
+        <div className="flex flex-col min-w-0">
+          <div className="flex items-baseline gap-0">
+            <span className="font-display text-[22px] font-normal text-muted-foreground tracking-[-0.02em]">my</span>
+            <span className="font-display text-[22px] font-bold text-foreground tracking-[0.02em]">UNO</span>
+          </div>
+          <span className="hidden sm:block text-[10px] leading-tight text-muted-foreground/60 tracking-wide -mt-0.5 truncate">
+            {isRu ? 'Инфраструктура для жизни на Пхукете' : 'Infrastructure for life on Phuket'}
+          </span>
         </div>
-        <span className="hidden sm:block text-[10px] leading-tight text-muted-foreground/60 tracking-wide -mt-0.5 truncate">
-          {isRu ? 'Инфраструктура для жизни на Пхукете' : 'Infrastructure for life on Phuket'}
-        </span>
       </div>
 
       {/* Right cluster */}

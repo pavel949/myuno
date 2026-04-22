@@ -19,6 +19,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { NavChips, type NavChipItem } from '@/components/nav/NavChips';
 
 interface ClusterService {
   labelRu: string;
@@ -289,6 +290,25 @@ export default function NavigatorPage() {
   const isRu = language === 'ru';
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
+  const [activeCluster, setActiveCluster] = useState<string>('all');
+
+  const clusterChips: NavChipItem[] = useMemo(
+    () => [
+      { id: 'all', label: isRu ? 'Все' : 'All', count: TOTAL_NAVIGATOR_SERVICES },
+      ...CLUSTERS.map((c) => ({
+        id: c.id,
+        label: isRu ? c.labelRu : c.labelEn,
+        accentColor: c.color,
+        count: c.services.filter((s) => s.status !== 'soon').length,
+      })),
+    ],
+    [isRu],
+  );
+
+  const visibleClusters = useMemo(
+    () => (activeCluster === 'all' ? CLUSTERS : CLUSTERS.filter((c) => c.id === activeCluster)),
+    [activeCluster],
+  );
 
   const { data: stats } = useQuery({
     queryKey: ['navigator-stats'],
@@ -363,6 +383,16 @@ export default function NavigatorPage() {
           )}
         </div>
 
+        {/* Cluster filter chips — only when not searching */}
+        {searchResults === null && (
+          <NavChips
+            items={clusterChips}
+            activeId={activeCluster}
+            onChange={setActiveCluster}
+            ariaLabel={isRu ? 'Фильтр по кластерам' : 'Filter by cluster'}
+          />
+        )}
+
         {/* Search results — grid of tiles */}
         {searchResults !== null && (
           <div className="space-y-2">
@@ -386,10 +416,10 @@ export default function NavigatorPage() {
           </div>
         )}
 
-        {/* Cluster tile rows — all visible */}
+        {/* Cluster tile rows — filtered by activeCluster */}
         {searchResults === null && (
           <div className="space-y-5">
-            {CLUSTERS.map(cluster => {
+            {visibleClusters.map(cluster => {
               const Icon = cluster.icon;
               const services = cluster.services;
               const availableCount = services.filter(s => s.status !== 'soon').length;
