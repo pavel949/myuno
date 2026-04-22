@@ -1,11 +1,7 @@
  // Deno.serve used (native edge runtime)
  import { createClient } from "../_shared/supabase.ts";
  import { getAdminWhatsApp } from "../_shared/admin-config.ts";
- 
- const corsHeaders = {
-   "Access-Control-Allow-Origin": "https://myuno.app",
-   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
- };
+ import { NOTIFY_CORS as corsHeaders } from "../_shared/notify-utils.ts";
  
  interface LeadNotificationRequest {
    leadId: string;
