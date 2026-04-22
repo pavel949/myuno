@@ -5,6 +5,17 @@
 
 ---
 
+## [1.7.1] — 2026-04-22
+
+### Changed
+- **`09-data-schema.md`** — обновлён до полноценной редакции v1.0 (21 раздел). Добавлены: три принципа схемы (§1), технологические ограничения (§2), полный enum reference (§4 — lifecycle, roles, ClearView, property/transaction, partner/KYB, service catalogue), детальные DDL для core tables `users`/`properties`/`partners`/`services` (§5), transaction tables (§6), lead intelligence с триггером scoring (§7), ClearView реестр (§8), content tables (§9), notifications/messages (§10), три RLS-паттерна (§11), helper triggers (§12), миграционные правила и rollback-шаблоны (§13), soft vs hard delete (§14), backup/DR (§15), indexing strategy (§16), чек-лист новой таблицы (§17), anti-patterns (§18), governance (§19), AI-prompt шаблон (§20), cross-references (§21).
+
+### Notes
+- Структура документа осталась обратно совместимой: все ссылки на разделы из PROJECT.md, M2, M8a продолжают работать.
+- Источник истины по схеме данных Supabase — этот файл; расхождение с реальной БД считается дефектом.
+
+---
+
 ## [1.7.0] — 2026-04-22
 
 ### Added
