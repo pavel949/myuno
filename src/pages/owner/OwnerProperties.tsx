@@ -34,6 +34,16 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { toast } from 'sonner';
+import { PROPERTY_TYPES } from '@/lib/propertyTaxonomy';
+
+/** Localize a raw property_type string from the DB into RU/EN labels. */
+function localizePropertyType(raw: string, isRu: boolean): string {
+  const normalized = raw.toLowerCase().trim();
+  const match = PROPERTY_TYPES.find(t => t.id === normalized);
+  if (match) return isRu ? match.labelRu : match.labelEn;
+  // Fallback: capitalize first letter
+  return raw.charAt(0).toUpperCase() + raw.slice(1);
+}
 /** Fetch complex & project names for filter labels */
 function usePropertyLookups(complexIds: string[], projectIds: string[]) {
   const complexQuery = useQuery({
