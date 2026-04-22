@@ -670,14 +670,27 @@ export default function PropertyInquiry() {
             </div>
           )}
 
-          {/* ===== PAYMENT OPTIONS (only for instant booking) ===== */}
+          {/* ===== PAY-WHEN SELECTOR (A1) — instant booking with allow_pay_later only ===== */}
+          {user && isFormValid && isInstantBooking && rentalTerms?.allow_pay_later && pricing.prepayAmount > 0 && pricing.prepayAmount < pricing.total && (
+            <PayWhenSelector
+              value={payWhen}
+              onChange={setPayWhen}
+              totalAmount={pricing.total}
+              prepayAmount={pricing.prepayAmount}
+              prepayPercent={pricing.prepayPercent}
+              balanceDueDate={checkIn ? subDays(checkIn, 7) : null}
+            />
+          )}
+
+          {/* ===== PAYMENT OPTIONS (instant booking only) ===== */}
           {user && isFormValid && isInstantBooking && (
-            <section>
+            <section ref={paymentSectionRef}>
               <div className="flex items-center gap-2 mb-4">
                 <CreditCard className="w-5 h-5 text-primary" />
                 <h2 className="text-lg font-semibold">{isRu ? 'Оплата' : 'Pay with'}</h2>
               </div>
               <DepositPaymentOptions
+                ref={depositPaymentRef}
                 propertyId={id!}
                 propertyTitle={propertyTitle || 'Property'}
                 checkIn={checkIn}
@@ -687,11 +700,13 @@ export default function PropertyInquiry() {
                 totalAmount={pricing.total}
                 prepayAmount={pricing.prepayAmount}
                 prepayPercent={pricing.prepayPercent}
+                payInFull={payWhen === 'full' || !rentalTerms?.allow_pay_later ? false : false}
                 cleaningFee={rentalTerms?.extra_cleaning_price || (property as any)?.cleaning_fee || 0}
                 guestName={formData.name}
                 guestPhone={formData.phone}
                 guestEmail={formData.email}
                 providerOrgId={(property as any)?.provider_id || undefined}
+                onMethodChange={setPaymentMethod}
               />
             </section>
           )}
@@ -708,11 +723,14 @@ export default function PropertyInquiry() {
           )}
         </div>
 
-        {/* ===== STICKY CONFIRM / REQUEST BUTTON (only for non-instant / request mode) ===== */}
-        {user && isFormValid && !isInstantBooking && (
+        {/* ===== UNIFIED STICKY FOOTER (A3) — visible for both instant + request modes ===== */}
+        {user && isFormValid && (
           <div className="fixed bottom-0 left-0 right-0 z-30 bg-background/95 backdrop-blur-md border-t p-4 safe-area-bottom">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium">{formatPrice(pricing.total)}</span>
+              <div className="flex items-baseline gap-1">
+                <span className="text-sm font-medium">{formatPrice(pricing.total)}</span>
+                <sup className="text-[10px] text-muted-foreground">{listingCurrency}</sup>
+              </div>
               <span className="text-xs text-muted-foreground">
                 {nights} {pluralizeNights(nights, language)}
               </span>
@@ -723,6 +741,24 @@ export default function PropertyInquiry() {
               disabled={isSubmitting}
               onClick={async () => {
                 if (isSubmitting) return;
+
+                // === INSTANT BOOKING PATH ===
+                if (isInstantBooking) {
+                  // If payment options aren't visible yet, scroll into view first.
+                  if (!depositPaymentRef.current) {
+                    paymentSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    return;
+                  }
+                  setIsSubmitting(true);
+                  try {
+                    await depositPaymentRef.current.submit();
+                  } finally {
+                    setIsSubmitting(false);
+                  }
+                  return;
+                }
+
+                // === REQUEST BOOKING PATH ===
                 setIsSubmitting(true);
                 try {
                   // 0. Atomic availability check — prevents race conditions
@@ -771,7 +807,6 @@ export default function PropertyInquiry() {
                       status: 'pending',
                     });
                   if (inquiryError) {
-                    // Surface to user — silent failure was hiding RLS / validation issues
                     console.error('[PropertyInquiry] inquiry insert error:', inquiryError);
                     toast.error(
                       isRu
@@ -783,12 +818,6 @@ export default function PropertyInquiry() {
                   }
 
                   // 2. Create order for booking tracking
-                  // Currency must come from the listing — defaulting to THB
-                  // would silently undercharge USD-priced properties.
-                  const listingCurrency =
-                    (property as any)?.currency?.trim() ||
-                    (rentalTerms as any)?.currency?.trim() ||
-                    'THB';
                   const result = await createOrder({
                     order_type: 'property',
                     provider_org_id: (property as any)?.provider_id || undefined,
@@ -803,7 +832,10 @@ export default function PropertyInquiry() {
                       guests,
                       nights,
                       price_per_night: pricePerNight,
-                      deposit_amount: rentalTerms?.deposit_amount || 0,
+                      // Bug #4 fix: this field is the *security* deposit
+                      // (refundable on checkout), NOT the prepayment.
+                      // Renaming it stops it being confused in finance reports.
+                      security_deposit_amount: rentalTerms?.deposit_amount || 0,
                       discount_percent: pricing.lengthDiscountPercent,
                       length_discount: pricing.lengthDiscount,
                       early_bird_discount: pricing.earlyBirdDiscount,
@@ -834,14 +866,21 @@ export default function PropertyInquiry() {
                     serviceName: propertyTitle || 'Property',
                   });
                   if (result.success && result.order_id) {
-                    // Clear persisted draft — booking is now live in DB.
                     if (draftKey) {
                       try { localStorage.removeItem(draftKey); } catch { /* ignore */ }
                     }
-                    toast.success(isRu 
-                      ? 'Запрос отправлен! Хозяин ответит в течение 24 часов.' 
+                    toast.success(isRu
+                      ? 'Запрос отправлен! Хозяин ответит в течение 24 часов.'
                       : 'Request sent! The host will respond within 24 hours.');
                     navigate(`/bookings/${result.order_id}`, { replace: true });
+                  } else {
+                    // Bug #3 fix: surface failures from createOrder so the user
+                    // is never left staring at a silent footer.
+                    toast.error(
+                      isRu
+                        ? 'Не удалось создать запрос на бронирование. Попробуйте ещё раз.'
+                        : 'Could not create the booking request. Please try again.',
+                    );
                   }
                 } catch (err) {
                   // Error toast is handled by useOrders
@@ -851,12 +890,22 @@ export default function PropertyInquiry() {
               }}
             >
               {isSubmitting && <Loader2 className="w-5 h-5 animate-spin mr-2" />}
-              {isRu ? 'Запросить бронирование' : 'Request to book'}
+              {isInstantBooking
+                ? (paymentMethod === 'card'
+                    ? (isRu
+                        ? `Подтвердить и оплатить ${formatPrice(payWhen === 'full' ? pricing.total : pricing.prepayAmount)}`
+                        : `Confirm and pay ${formatPrice(payWhen === 'full' ? pricing.total : pricing.prepayAmount)}`)
+                    : (isRu ? 'Связаться с менеджером' : 'Contact manager'))
+                : (isRu ? 'Запросить бронирование' : 'Request to book')}
             </Button>
             <p className="text-[10px] text-center text-muted-foreground mt-2">
-              {isRu 
-                ? 'Оплата не списывается. Хозяин подтвердит бронирование.' 
-                : "You won't be charged. The host will confirm your booking."}
+              {isInstantBooking
+                ? (paymentMethod === 'card'
+                    ? (isRu ? 'Платёж защищён Stripe' : 'Payment secured by Stripe')
+                    : (isRu ? 'Менеджер свяжется в WhatsApp' : 'Manager will reach out on WhatsApp'))
+                : (isRu
+                    ? 'Оплата не списывается. Хозяин подтвердит бронирование.'
+                    : "You won't be charged. The host will confirm your booking.")}
             </p>
           </div>
         )}
