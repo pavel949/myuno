@@ -463,6 +463,7 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
                 numberOfMonths={2}
                 disabled={(date) => date < new Date()}
                 locale={isRu ? ru : undefined}
+                className="p-3 pointer-events-auto"
               />
             </PopoverContent>
           </Popover>
@@ -487,6 +488,7 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
                 numberOfMonths={2}
                 disabled={(date) => date < new Date()}
                 locale={isRu ? ru : undefined}
+                className="p-3 pointer-events-auto"
               />
             </PopoverContent>
           </Popover>
