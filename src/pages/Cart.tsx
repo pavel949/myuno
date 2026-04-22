@@ -175,7 +175,14 @@ const Cart = () => {
           </div>
         </div>
 
-        {/* Grouped Items */}
+        {/* Mixed-vertical notice — each vertical has its own checkout flow */}
+        {hasMixedVerticals && (
+          <div className="bg-warning/10 border border-warning/20 rounded-xl p-3 text-sm text-foreground">
+            {language === 'ru'
+              ? `В корзине ${groupCount} разных категории. Их нужно оформить по отдельности — используйте кнопку «Оформить» в каждой группе.`
+              : `Your cart contains ${groupCount} different categories. Please check them out one group at a time using the "Checkout" button in each group.`}
+          </div>
+        )}
         {Object.entries(groupedItems).map(([type, typeItems]) => {
           const Icon = typeIcons[type as CartItem['type']];
           const label = typeLabels[type as CartItem['type']];
