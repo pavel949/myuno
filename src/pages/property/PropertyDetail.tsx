@@ -45,7 +45,9 @@ import {
   PropertyDetailHighlights,
   PropertyDetailDateSheet,
   PropertyDetailMobileBar,
+  PropertyHeroFacts,
 } from '@/components/property/detail';
+import { GuestFavoriteBadge } from '@/components/property/GuestFavoriteBadge';
 import { usePropertyAvailabilityManagement } from '@/hooks/usePropertyAvailabilityManagement';
 import { normalizeViewTypes } from '@/lib/propertyFormNormalizers';
 
@@ -260,6 +262,13 @@ export default function PropertyDetail() {
                 <h1 className="text-2xl md:text-3xl lg:text-4xl font-display font-bold text-foreground leading-tight">
                   {isRu ? property.title_ru : property.title_en}
                 </h1>
+                {/* Hero facts — Airbnb-style sub-title (e.g. "4 guests · 2 bedrooms · 1 bath") */}
+                <PropertyHeroFacts
+                  bedrooms={property.bedrooms}
+                  beds={(property as any).beds ?? null}
+                  bathrooms={property.bathrooms}
+                  maxGuests={property.max_guests || rentalTerms?.max_guests}
+                />
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-sm lg:text-base">
                   {property.rating && (
                     <>
@@ -272,6 +281,11 @@ export default function PropertyDetail() {
                       </span>
                     </>
                   )}
+                  <GuestFavoriteBadge
+                    rating={property.rating}
+                    reviewsCount={property.review_count}
+                    variant="inline"
+                  />
                   {property.is_verified && (
                     <span className="flex items-center gap-1 text-primary">
                       · <Shield className="w-3.5 h-3.5" />
