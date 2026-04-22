@@ -335,12 +335,21 @@ export default function PropertyInquiry() {
                   <p className="text-xs text-muted-foreground mt-1">
                     {property.district || 'Phuket'}
                   </p>
-                  {rentalTerms?.instant_booking && (
-                    <Badge className="mt-1 gap-1 bg-primary/10 text-primary border-primary/20 text-[10px]">
-                      <Zap className="h-2.5 w-2.5" />
-                      {isRu ? 'Мгновенное бронирование' : 'Instant Book'}
-                    </Badge>
-                  )}
+                  <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                    {rentalTerms?.instant_booking && (
+                      <Badge className="gap-1 bg-primary/10 text-primary border-primary/20 text-[10px]">
+                        <Zap className="h-2.5 w-2.5" />
+                        {isRu ? 'Мгновенное бронирование' : 'Instant Book'}
+                      </Badge>
+                    )}
+                    {/* B1 — Rare find trust badge (>70% occupancy in last 30d) */}
+                    {isRareFind && (
+                      <Badge className="gap-1 bg-warning/10 text-warning border-warning/20 text-[10px]">
+                        <Sparkles className="h-2.5 w-2.5" />
+                        {isRu ? 'Редкая находка' : 'Rare find'}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
