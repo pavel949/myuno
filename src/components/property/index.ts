@@ -20,8 +20,6 @@ export { PropertyBookingCard } from './PropertyBookingCard';
 export { PropertyRooms } from './PropertyRooms';
 export { PropertyCalendar } from './PropertyCalendar';
 export { SeasonalPricing } from './SeasonalPricing';
-export { PropertyHighlights } from './PropertyHighlights';
-export { PropertyHighlightsDisplay } from './PropertyHighlightsDisplay';
 export { PropertyPreviewCard } from './PropertyPreviewCard';
 export { GuestPropertyChat } from './GuestPropertyChat';
 export { MessageHostButton } from './MessageHostButton';
