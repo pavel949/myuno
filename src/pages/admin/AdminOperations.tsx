@@ -90,6 +90,11 @@ export default function AdminOperations() {
       label: isRu ? 'Споры' : 'Disputes', 
       icon: AlertTriangle,
     },
+    {
+      id: 'manual-payments',
+      label: isRu ? 'Оплаты ₽' : 'RUB payments',
+      icon: Wallet,
+    },
   ];
 
   const quickActions = [
