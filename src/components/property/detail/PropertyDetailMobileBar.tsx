@@ -88,38 +88,30 @@ export function PropertyDetailMobileBar({
         ) : (
           <>
             <div className="flex-1 min-w-0">
-              <div className="flex items-baseline gap-1">
-                <span className="text-xl font-bold text-foreground">
-                  {formatPrice(pricePerNight)}
-                </span>
-                <span className="text-sm text-muted-foreground">
-                  /{pluralizeNights(1, language)}
-                </span>
-              </div>
-              {dateRange?.from && dateRange?.to && (
-                <p className="text-xs text-muted-foreground">
-                  {format(dateRange.from, 'd MMM', { locale: isRu ? ru : undefined })} –{' '}
-                  {format(dateRange.to, 'd MMM', { locale: isRu ? ru : undefined })}
-                </p>
-              )}
-              {!dateRange?.from && instantBooking && (
-                <div className="flex items-center gap-1 text-xs text-primary mt-0.5">
-                  <Zap className="w-3 h-3" />
-                  <span>{isRu ? 'Мгновенное бронирование' : 'Instant booking'}</span>
-                </div>
+              {dateRange?.from && dateRange?.to ? (
+                <>
+                  <p className="text-xs text-muted-foreground">
+                    {format(dateRange.from, 'd MMM', { locale: isRu ? ru : undefined })} –{' '}
+                    {format(dateRange.to, 'd MMM', { locale: isRu ? ru : undefined })}
+                  </p>
+                  <button
+                    onClick={onOpenDatePicker}
+                    className="text-sm font-medium text-foreground underline decoration-dotted underline-offset-2"
+                  >
+                    {isRu ? 'Изменить даты' : 'Change dates'}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm font-semibold text-foreground">
+                    {isRu ? 'Добавьте даты' : 'Add dates'}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {isRu ? 'Чтобы увидеть итоговую цену' : 'To see the total price'}
+                  </p>
+                </>
               )}
             </div>
-            <Button
-              variant="outline"
-              size="icon"
-              className="flex-shrink-0"
-              onClick={() => {
-                if (managerPhone) window.open(`tel:${managerPhone}`);
-                else toast.info(isRu ? 'Телефон не указан' : 'Phone not available');
-              }}
-            >
-              <Phone className="w-5 h-5" />
-            </Button>
             <MessageHostButton
               propertyId={propertyId}
               propertyTitle={titleEn ?? undefined}
@@ -132,24 +124,26 @@ export function PropertyDetailMobileBar({
               size="lg"
               className={cn(
                 'flex-shrink-0 px-6',
-                instantBooking && !dateRange?.from && 'bg-accent-amber hover:bg-accent-amber/90',
+                instantBooking && dateRange?.from && dateRange?.to && 'bg-accent-amber hover:bg-accent-amber/90',
               )}
               onClick={handleReserve}
             >
               {dateRange?.from && dateRange?.to ? (
-                <>
-                  <CalendarIcon className="w-4 h-4 mr-2" />
-                  {isRu ? 'Забронировать' : 'Reserve'}
-                </>
-              ) : instantBooking ? (
-                <>
-                  <Zap className="w-4 h-4 mr-2" />
-                  {isRu ? 'Забронировать' : 'Book Now'}
-                </>
+                instantBooking ? (
+                  <>
+                    <Zap className="w-4 h-4 mr-2" />
+                    {isRu ? 'Забронировать' : 'Book Now'}
+                  </>
+                ) : (
+                  <>
+                    <CalendarIcon className="w-4 h-4 mr-2" />
+                    {isRu ? 'Забронировать' : 'Reserve'}
+                  </>
+                )
               ) : (
                 <>
                   <CalendarIcon className="w-4 h-4 mr-2" />
-                  {isRu ? 'Выбрать даты' : 'Select Dates'}
+                  {isRu ? 'Выбрать даты' : 'Select dates'}
                 </>
               )}
             </Button>
