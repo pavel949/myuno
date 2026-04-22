@@ -19,6 +19,20 @@
 | [research/phuket-proptech-market.md](./research/phuket-proptech-market.md) | Анализ рынка proptech на Пхукете: $1.25B, 30k STR-листингов, конкурентный ландшафт |
 | [research/myuno-taxonomy-canonical.md](./research/myuno-taxonomy-canonical.md) | 6-уровневая таксономия: 12 ситуаций × 140 микроситуаций × 38 персон × 36 приложений |
 
+## Аудиты
+
+| Файл | Веха | Статус |
+|------|------|--------|
+| [audits/M1-i18n-audit.md](./audits/M1-i18n-audit.md) | M1 | ✅ done (read-only) |
+
+## История изменений
+
+См. [CHANGELOG.md](./CHANGELOG.md). Текущая версия канонического набора: **v1.1.0**.
+
+## Язык документов
+
+Канонические документы 01-05 — **внутренний инструментарий команды и AI-агентов**. Язык: русский. Bilingual-константа проекта применяется к **user-facing UI и контенту**, не к internal docs.
+
 ## Правила работы
 
 1. **Audit before change** — ни одно изменение не делается до прочтения текущего состояния и сравнения с целевым.
