@@ -42,7 +42,7 @@ function useOperationsOverview() {
   });
 }
 
-const VALID_TABS = ['bookings', 'moderation', 'leads', 'inquiries', 'disputes'] as const;
+const VALID_TABS = ['bookings', 'moderation', 'leads', 'inquiries', 'disputes', 'manual-payments'] as const;
 
 export default function AdminOperations() {
   const navigate = useNavigate();
@@ -89,6 +89,11 @@ export default function AdminOperations() {
       id: 'disputes', 
       label: isRu ? 'Споры' : 'Disputes', 
       icon: AlertTriangle,
+    },
+    {
+      id: 'manual-payments',
+      label: isRu ? 'Оплаты ₽' : 'RUB payments',
+      icon: Wallet,
     },
   ];
 
@@ -214,6 +219,10 @@ export default function AdminOperations() {
 
         <TabsContent value="disputes" className="mt-4">
           <OperationsDisputesTab />
+        </TabsContent>
+
+        <TabsContent value="manual-payments" className="mt-4">
+          <OperationsManualPaymentsTab />
         </TabsContent>
       </Tabs>
     </div>
