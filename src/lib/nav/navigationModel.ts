@@ -181,6 +181,16 @@ export interface SidebarNavGroup {
   items: SidebarNavItem[];
 }
 
+/**
+ * OWNER sidebar — consolidated to ~20 items across 6 groups (down from 41/9).
+ *
+ * Decisions (audit «Управление недвижимостью» §2-3):
+ *  • Finance: 10 → 4 items (single hub + key sub-screens).
+ *  • CRM: 8 → 4 items (rest accessible via "CRM Tools" grid in dashboard).
+ *  • Distribution group folded into Operations (Rates & Channels).
+ *  • Developer hidden from main nav — accessible via Settings → Developer.
+ *  • Insights collapsed into Properties → Performance.
+ */
 const OWNER_SIDEBAR: SidebarNavGroup[] = [
   {
     labelEn: 'Control Tower', labelRu: 'Центр управления', defaultOpen: true,
@@ -193,86 +203,98 @@ const OWNER_SIDEBAR: SidebarNavGroup[] = [
     ],
   },
   {
-    labelEn: 'Insights', labelRu: 'Аналитика',
+    labelEn: 'Properties', labelRu: 'Объекты', defaultOpen: true,
     items: [
-      { path: APP_ROUTES.MC_PERFORMANCE,     labelEn: 'Performance',      labelRu: 'Показатели',                icon: BarChart3 },
-      { path: APP_ROUTES.MC_OWNER_ANALYTICS, labelEn: 'Owner Analytics',  labelRu: 'Аналитика собственников',   icon: Crown },
-      { path: APP_ROUTES.MC_REVIEWS,         labelEn: 'Reviews',          labelRu: 'Отзывы',                    icon: Star },
-    ],
-  },
-  {
-    labelEn: 'Properties', labelRu: 'Объекты',
-    items: [
-      { path: APP_ROUTES.MC_PROPERTIES, labelEn: 'Properties', labelRu: 'Объекты',     icon: Building2 },
-      { path: APP_ROUTES.MC_INVENTORY,  labelEn: 'Inventory',  labelRu: 'Инвентарь',   icon: PackageOpen },
-      { path: APP_ROUTES.MC_VENDORS,    labelEn: 'Vendors',    labelRu: 'Поставщики',  icon: Truck },
+      { path: APP_ROUTES.MC_PROPERTIES,  labelEn: 'Properties',  labelRu: 'Объекты',     icon: Building2 },
+      { path: APP_ROUTES.MC_PERFORMANCE, labelEn: 'Performance', labelRu: 'Показатели',  icon: BarChart3 },
+      { path: APP_ROUTES.MC_REVIEWS,     labelEn: 'Reviews',     labelRu: 'Отзывы',      icon: Star },
     ],
   },
   {
     labelEn: 'Operations', labelRu: 'Операции',
     items: [
-      { path: APP_ROUTES.MC_RATES,      labelEn: 'Rate Seasons',     labelRu: 'Тарифы',                    icon: Tag },
-      { path: APP_ROUTES.MC_INSURANCE,  labelEn: 'Insurance & Docs', labelRu: 'Страховки и документы',     icon: ShieldCheck },
-      { path: APP_ROUTES.MC_DOCUMENTS,  labelEn: 'Templates',        labelRu: 'Шаблоны',                   icon: FileText },
-      { path: APP_ROUTES.MC_SIGNATURES, labelEn: 'E-Signatures',     labelRu: 'Электронные подписи',       icon: FileText },
-    ],
-  },
-  {
-    labelEn: 'Distribution', labelRu: 'Дистрибуция',
-    items: [
-      { path: APP_ROUTES.MC_CHANNELS, labelEn: 'Channel Manager', labelRu: 'Channel Manager', icon: Radio },
+      { path: APP_ROUTES.MC_RATES,      labelEn: 'Rates & Channels', labelRu: 'Тарифы и каналы',       icon: Tag },
+      { path: APP_ROUTES.MC_INVENTORY,  labelEn: 'Inventory',        labelRu: 'Инвентарь',             icon: PackageOpen },
+      { path: APP_ROUTES.MC_INSURANCE,  labelEn: 'Insurance & Docs', labelRu: 'Страховки и документы', icon: ShieldCheck },
+      { path: APP_ROUTES.MC_DOCUMENTS,  labelEn: 'Templates',        labelRu: 'Шаблоны',               icon: FileText },
     ],
   },
   {
     labelEn: 'Finance', labelRu: 'Финансы',
     items: [
-      { path: APP_ROUTES.MC_FINANCE,             labelEn: 'Overview',             labelRu: 'Обзор',                       icon: DollarSign },
-      { path: APP_ROUTES.MC_OWNER_PAYOUTS,       labelEn: 'Owner Payouts',        labelRu: 'Выплаты собственникам',       icon: Shuffle },
-      { path: APP_ROUTES.MC_AR_AGING,            labelEn: 'AR Aging',             labelRu: 'Дебиторка',                   icon: Receipt },
-      { path: APP_ROUTES.MC_TRUST_ACCOUNTS,      labelEn: 'Trust Accounts',       labelRu: 'Эскроу-счета',                icon: ShieldCheck },
-      { path: APP_ROUTES.MC_TAX_CENTER,          labelEn: 'Tax Center',           labelRu: 'Налоги (Thai)',               icon: Target },
-      { path: APP_ROUTES.MC_STATEMENT_APPROVALS, labelEn: 'Statement Approvals',  labelRu: 'Одобрения отчётов',           icon: FileText },
-      { path: APP_ROUTES.MC_FINANCIALS,          labelEn: 'Transactions',         labelRu: 'Транзакции',                  icon: ArrowLeftRight },
-      { path: APP_ROUTES.MC_REPORTS,             labelEn: 'Reports',              labelRu: 'Отчёты',                      icon: BarChart3 },
-      { path: APP_ROUTES.MC_BUDGET,              labelEn: 'Budget',               labelRu: 'Бюджет',                      icon: Target },
-      { path: APP_ROUTES.MC_FINANCE_PLANNING,    labelEn: 'Financial Planning',   labelRu: 'Финансовое планирование',     icon: LineChart },
-      { path: APP_ROUTES.MC_INVOICES,            labelEn: 'Invoices',             labelRu: 'Инвойсы',                     icon: Receipt },
-      { path: APP_ROUTES.MC_MANAGEMENT_TERMS,    labelEn: 'Management Terms',     labelRu: 'Условия управления',          icon: Layers },
+      { path: APP_ROUTES.MC_FINANCE,          labelEn: 'Finance Hub',      labelRu: 'Финансы',                 icon: DollarSign },
+      { path: APP_ROUTES.MC_INVOICES,         labelEn: 'Invoices & AR',    labelRu: 'Инвойсы и дебиторка',     icon: Receipt },
+      { path: APP_ROUTES.MC_OWNER_PAYOUTS,    labelEn: 'Owner Payouts',    labelRu: 'Выплаты собственникам',   icon: Shuffle },
+      { path: APP_ROUTES.MC_MANAGEMENT_TERMS, labelEn: 'Management Terms', labelRu: 'Условия управления',      icon: Layers },
     ],
   },
   {
     labelEn: 'CRM & Sales', labelRu: 'CRM и продажи',
     items: [
-      { path: APP_ROUTES.MC_CRM_DASHBOARD,     labelEn: 'CRM Dashboard',       labelRu: 'CRM Обзор',           icon: BarChart3 },
-      { path: APP_ROUTES.MC_CONTACTS,          labelEn: 'Contacts',            labelRu: 'Контакты',            icon: ContactRound },
-      { path: APP_ROUTES.MC_PIPELINES,         labelEn: 'Pipelines',           labelRu: 'Воронки',             icon: Layers },
-      { path: APP_ROUTES.MC_SALES,             labelEn: 'Sales Pipeline',      labelRu: 'Воронка продаж',      icon: TrendingUp },
-      { path: APP_ROUTES.MC_OWNERS,            labelEn: 'Owners',              labelRu: 'Собственники',        icon: Crown },
-      { path: APP_ROUTES.MC_VENDOR_ACQUISITION,labelEn: 'Vendor Acquisition',  labelRu: 'Привлечение вендоров',icon: Target },
-      { path: APP_ROUTES.MC_SEQUENCES,         labelEn: 'Sequences',           labelRu: 'Цепочки',             icon: Zap },
-      { path: APP_ROUTES.MC_QUOTES,            labelEn: 'Quotes',              labelRu: 'КП',                  icon: FileText },
+      { path: APP_ROUTES.MC_CRM_DASHBOARD,      labelEn: 'CRM Dashboard',      labelRu: 'CRM Обзор',           icon: BarChart3 },
+      { path: APP_ROUTES.MC_CONTACTS,           labelEn: 'Contacts',           labelRu: 'Контакты',            icon: ContactRound },
+      { path: APP_ROUTES.MC_OWNERS,             labelEn: 'Owners',             labelRu: 'Собственники',        icon: Crown },
+      { path: APP_ROUTES.MC_VENDOR_ACQUISITION, labelEn: 'Vendor Acquisition', labelRu: 'Привлечение вендоров',icon: Target },
     ],
   },
   {
-    labelEn: 'Team', labelRu: 'Команда',
+    labelEn: 'Team & Settings', labelRu: 'Команда и настройки',
     items: [
-      { path: APP_ROUTES.MC_STAFF,        labelEn: 'Staff & Access',         labelRu: 'Сотрудники',     icon: Users },
-      { path: APP_ROUTES.MC_TEAM_SHIFTS,  labelEn: 'Shifts & Timesheets',    labelRu: 'Смены и табель', icon: CalendarClock },
-      { path: APP_ROUTES.MC_APPROVALS,    labelEn: 'Approvals',              labelRu: 'Согласования',   icon: ShieldCheck },
-      { path: APP_ROUTES.MC_PROCUREMENT,  labelEn: 'Procurement',            labelRu: 'Закупки',        icon: PackageOpen },
-      { path: APP_ROUTES.MC_SUBSCRIPTION, labelEn: 'Subscription',           labelRu: 'Подписка',       icon: CreditCard },
-      { path: APP_ROUTES.MC_HELP,         labelEn: 'Help Center',            labelRu: 'Справочник',     icon: BookOpen },
-    ],
-  },
-  {
-    labelEn: 'Developer', labelRu: 'Разработчику',
-    items: [
-      { path: APP_ROUTES.MC_ONBOARDING_WIZARD, labelEn: 'Setup Wizard', labelRu: 'Мастер настройки', icon: Rocket },
-      { path: APP_ROUTES.MC_API_KEYS,          labelEn: 'API Keys',     labelRu: 'API ключи',        icon: Key },
-      { path: APP_ROUTES.MC_WEBHOOKS,          labelEn: 'Webhooks',     labelRu: 'Webhooks',         icon: Webhook },
+      { path: APP_ROUTES.MC_STAFF,        labelEn: 'Staff & Access', labelRu: 'Сотрудники',       icon: Users },
+      { path: APP_ROUTES.MC_APPROVALS,    labelEn: 'Approvals',      labelRu: 'Согласования',     icon: ShieldCheck },
+      { path: APP_ROUTES.MC_SETTINGS,     labelEn: 'Settings',       labelRu: 'Настройки',        icon: Settings },
+      { path: APP_ROUTES.MC_HELP,         labelEn: 'Help Center',    labelRu: 'Справочник',       icon: BookOpen },
     ],
   },
 ];
+
+/**
+ * Persona-aware filter for the owner sidebar.
+ *
+ * Single-property owners (BusinessRole 'general' with ≤1 property) get a
+ * trimmed nav (no CRM, no Staff/Approvals). Sales agents drop Operations &
+ * Finance; service providers drop CRM & Finance. Directors see everything.
+ *
+ * Pure function — safe to call from render and from unit tests.
+ */
+export function getOwnerSidebarForRole(
+  businessRole: 'property_manager' | 'sales_agent' | 'service_provider' | 'general' | undefined | null,
+  options: { propertyCount?: number } = {},
+): SidebarNavGroup[] {
+  const propertyCount = options.propertyCount ?? 0;
+  const isSingleOwner = businessRole === 'general' && propertyCount <= 1;
+
+  const HIDE_GROUPS: Record<string, Set<string>> = {
+    sales_agent: new Set(['Operations', 'Finance']),
+    service_provider: new Set(['CRM & Sales', 'Finance']),
+  };
+
+  return OWNER_SIDEBAR
+    .map((group) => {
+      if (isSingleOwner) {
+        if (group.labelEn === 'CRM & Sales') return null;
+        if (group.labelEn === 'Operations') {
+          return {
+            ...group,
+            items: group.items.filter(i =>
+              i.path === APP_ROUTES.MC_RATES || i.path === APP_ROUTES.MC_DOCUMENTS,
+            ),
+          };
+        }
+        if (group.labelEn === 'Team & Settings') {
+          return {
+            ...group,
+            items: group.items.filter(i =>
+              i.path === APP_ROUTES.MC_SETTINGS || i.path === APP_ROUTES.MC_HELP,
+            ),
+          };
+        }
+      }
+      if (businessRole && HIDE_GROUPS[businessRole]?.has(group.labelEn)) return null;
+      return group;
+    })
+    .filter((g): g is SidebarNavGroup => g !== null);
+}
 
 const ADMIN_SIDEBAR: SidebarNavGroup[] = [
   {
