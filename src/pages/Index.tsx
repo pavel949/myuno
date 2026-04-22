@@ -44,6 +44,7 @@ const Index = () => {
             onAppDrawerOpen={() => setAppDrawerOpen(true)}
           />
         </div>
+        <HomeContextChips personas={[...activePersonas]} />
         <WorkspaceHomeBanner />
 
         {/* 1. Hero — search-first entry, with desktop popular preview */}
