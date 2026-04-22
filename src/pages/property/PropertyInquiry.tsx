@@ -777,7 +777,7 @@ export default function PropertyInquiry() {
                   if (result.success && result.order_id) {
                     // Clear persisted draft — booking is now live in DB.
                     if (draftKey) {
-                      try { sessionStorage.removeItem(draftKey); } catch { /* ignore */ }
+                      try { localStorage.removeItem(draftKey); } catch { /* ignore */ }
                     }
                     toast.success(isRu 
                       ? 'Запрос отправлен! Хозяин ответит в течение 24 часов.' 
