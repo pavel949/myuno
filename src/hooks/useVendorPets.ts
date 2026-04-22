@@ -1,8 +1,9 @@
-export type { VendorPetService } from '@/types/verticals';
 import { useVerticalCRUD } from './useVerticalCRUD';
 import type { VendorPetService } from '@/types/verticals';
 
-export function useVendorPets(providerId?: string) {
-  const { items, isLoading, create, update, remove, refetch } = useVerticalCRUD<VendorPetService>('pet_service', providerId);
-  return { services: items, isLoading, createService: create, updateService: update, deleteService: remove, refetch };
-}
+export type { VendorPetService };
+
+export const useVendorPets = (providerId?: string) => {
+  const { items, ...rest } = useVerticalCRUD<VendorPetService>('pet_service', providerId);
+  return { services: items, createService: rest.create, updateService: rest.update, deleteService: rest.remove, ...rest };
+};

@@ -1,8 +1,9 @@
-export type { VendorCleaningService } from '@/types/verticals';
 import { useVerticalCRUD } from './useVerticalCRUD';
 import type { VendorCleaningService } from '@/types/verticals';
 
-export function useVendorCleaning(providerId?: string) {
-  const { items, isLoading, create, update, remove, refetch } = useVerticalCRUD<VendorCleaningService>('cleaning', providerId);
-  return { services: items, isLoading, createService: create, updateService: update, deleteService: remove, refetch };
-}
+export type { VendorCleaningService };
+
+export const useVendorCleaning = (providerId?: string) => {
+  const { items, ...rest } = useVerticalCRUD<VendorCleaningService>('cleaning', providerId);
+  return { services: items, createService: rest.create, updateService: rest.update, deleteService: rest.remove, ...rest };
+};
