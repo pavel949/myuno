@@ -5,6 +5,23 @@
 
 ---
 
+## [1.3.0] — 2026-04-22 (M3 done)
+
+### Added
+- **TypeScript canonical layer (M3)**:
+  - `src/types/canonical.ts` — `CanonicalRole`, `LifecycleStage`, `HouseholdType`, `ClusterId`, `PersonaCode`, `CanonicalProfile`, метаданные ролей/стадий/кластеров.
+  - `src/lib/canonical/profileApi.ts` — типизированный API над `v_profiles_canonical` + RPC канонических ролей. snake_case ↔ camelCase маппинг.
+  - `src/hooks/useCanonicalProfile.ts` — React Query хуки: read, update, append-array, has-role.
+- `src/types/index.ts` — barrel-экспорт канонических типов.
+- `audits/M3-types-and-api-contracts.md` — отчёт по M3 + контракт для будущих миграций.
+
+### Notes
+- Запрещено читать M2-колонки `profiles` напрямую — только через `useCanonicalProfile`.
+- Lifecycle/household enums приведены к фактическим значениям из БД (`scout/tourist/snowbird/nomad/settler/resident/absentee/returnee` и `solo/couple/family_with_kids/family_extended/group_friends`), а не к ранним черновым вариантам.
+- TypeScript-сборка чистая.
+
+---
+
 ## [1.2.0] — 2026-04-22 (M2 done)
 
 ### Added
