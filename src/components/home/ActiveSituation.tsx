@@ -14,9 +14,11 @@ interface ActiveSituationProps {
  */
 export function ActiveSituation({ personas, onRoleSheetOpen }: ActiveSituationProps) {
   const { signals } = useRoleSignals(personas);
+  // Only surface signals backed by real DB data — never render seed/demo
+  // fallbacks on the home screen, so users don't see fake times like "08:40".
   const hasLiveSignal = personas.some(p => {
     const s = signals[p];
-    return s && (s.state === 'live' || s.state === 'warn');
+    return s?.isLive && (s.state === 'live' || s.state === 'warn');
   });
 
   if (!hasLiveSignal) return null;
