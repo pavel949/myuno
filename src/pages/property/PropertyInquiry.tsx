@@ -60,13 +60,47 @@ export default function PropertyInquiry() {
 
   const hasDates = checkIn && checkOut;
 
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    message: '',
+  const [formData, setFormData] = useState(() => {
+    // Restore draft (e.g. after returning from AuthSheet sign-in).
+    if (typeof window !== 'undefined' && draftKey) {
+      try {
+        const raw = sessionStorage.getItem(draftKey);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          // Expire after 1 hour to avoid stale leakage across sessions.
+          if (parsed?.ts && Date.now() - parsed.ts < 60 * 60 * 1000) {
+            return {
+              name: parsed.name ?? '',
+              email: parsed.email ?? '',
+              phone: parsed.phone ?? '',
+              message: parsed.message ?? '',
+            };
+          }
+        }
+      } catch { /* ignore */ }
+    }
+    return { name: '', email: '', phone: '', message: '' };
   });
   const [contactOpen, setContactOpen] = useState(false);
+  const [rulesOpen, setRulesOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Persist form draft so signing in via AuthSheet doesn't wipe input.
+  useEffect(() => {
+    if (!draftKey) return;
+    const hasContent = formData.name || formData.phone || formData.email || formData.message;
+    if (!hasContent) return;
+    try {
+      sessionStorage.setItem(
+        draftKey,
+        JSON.stringify({ ...formData, ts: Date.now() }),
+      );
+    } catch { /* ignore quota errors */ }
+  }, [draftKey, formData]);
+
+  // Clear draft once user is signed in AND has a complete profile applied —
+  // also clear after successful submit (handled where navigate('/bookings/:id') runs).
+  // We intentionally keep the draft until submit so re-mount after sign-in restores it.
   const [rulesOpen, setRulesOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
