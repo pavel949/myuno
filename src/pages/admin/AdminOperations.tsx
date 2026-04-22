@@ -8,13 +8,14 @@ import { Badge } from '@/components/ui/badge';
 import { 
   ClipboardList, ShieldCheck, MessageSquare, Users, 
   Plus, Building2, Home, Package, FileText, ArrowRight,
-  RefreshCw, AlertTriangle
+  RefreshCw, AlertTriangle, Wallet
 } from 'lucide-react';
 import { OperationsBookingsTab } from '@/components/admin/operations/OperationsBookingsTab';
 import { OperationsModerationTab } from '@/components/admin/operations/OperationsModerationTab';
 import { OperationsLeadsTab } from '@/components/admin/operations/OperationsLeadsTab';
 import { OperationsInquiriesTab } from '@/components/admin/operations/OperationsInquiriesTab';
 import { OperationsDisputesTab } from '@/components/admin/operations/OperationsDisputesTab';
+import { OperationsManualPaymentsTab } from '@/components/admin/operations/OperationsManualPaymentsTab';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
