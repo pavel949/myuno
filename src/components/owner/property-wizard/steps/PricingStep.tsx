@@ -364,6 +364,19 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
         <PaymentPolicySection formData={formData} updateFormData={updateFormData} />
       </CollapsibleSection>
 
+      {/* ─── Guest Extra Fees — metered utilities, cleaning, internet, etc. ─── */}
+      <CollapsibleSection
+        icon={<DollarSign className="h-4 w-4" />}
+        title={isRu ? 'Доп. оплаты гостя' : 'Guest extra fees'}
+        badge={
+          Array.isArray(formData.guest_extra_fees) && formData.guest_extra_fees.length > 0
+            ? `${formData.guest_extra_fees.length}`
+            : undefined
+        }
+      >
+        <GuestExtraFeesSection formData={formData} updateFormData={updateFormData} />
+      </CollapsibleSection>
+
       {/* ─── Cancellation — collapsed ─── */}
       <CollapsibleSection
         icon={<DollarSign className="h-4 w-4" />}

@@ -29,6 +29,7 @@ import {
   HouseRules,
   PropertyBookingCard,
   MessageHostButton,
+  GuestExtraFeesDisplay,
 } from '@/components/property';
 import { ProjectInfoCard } from '@/components/property/ProjectInfoCard';
 import { RelatedServicesSection } from '@/components/crosssell';
