@@ -449,8 +449,36 @@ export default function PropertyInquiry() {
             <Separator />
 
             <div className="flex items-center justify-between font-semibold text-lg">
-              <span>{isRu ? 'Итого' : 'Total'}</span>
-              <span>{formatPrice(pricing.total)}</span>
+              <span className="flex items-center gap-1.5">
+                {isRu ? 'Итого' : 'Total'}
+                {/* B2 — Currency popover so guests on RUB/THB presets understand
+                    what bank actually charges. */}
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      aria-label={isRu ? 'Информация о валюте' : 'Currency info'}
+                      className="text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <Info className="w-4 h-4" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent side="top" className="w-64 text-xs">
+                    <p className="font-medium mb-1">
+                      {isRu ? `Списание в ${listingCurrency}` : `Charged in ${listingCurrency}`}
+                    </p>
+                    <p className="text-muted-foreground">
+                      {isRu
+                        ? 'Сумма показана в выбранной валюте, но списание идёт в валюте объекта. Банк может удержать комиссию за конвертацию.'
+                        : 'Shown in your selected currency, but billed in the property currency. Your bank may apply an FX fee.'}
+                    </p>
+                  </PopoverContent>
+                </Popover>
+              </span>
+              <span className="flex items-baseline gap-1">
+                {formatPrice(pricing.total)}
+                <sup className="text-[10px] text-muted-foreground font-medium">{listingCurrency}</sup>
+              </span>
             </div>
 
             {/* Prepayment callout — only for instant booking. Uses real prepay_percent. */}
