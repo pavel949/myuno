@@ -11,15 +11,19 @@ alwaysApply: true
 # myUNO — Cursor AI Rules
 # Project by Pavel Ignatev | Ignatev Group | Phuket, Thailand
 
-## CANONICAL DOCS — READ BEFORE ANY UX/COPY/CATALOGUE/CRM/AI CHANGE
-Source of truth lives in `/docs/canonical/`:
+## MANDATORY READING ORDER — BEFORE ANY TASK
+**1. STRATEGIC SOURCE OF TRUTH:** Read `/PROJECT.md` in the repo root FIRST. This document supersedes all previous versions, drafts, and roadmaps. It defines what the platform is, monetisation, audience, design standards, and 5-test gate for new features.
+
+**2. OPERATIONAL CANONICAL DOCS:** After PROJECT.md, read the relevant document in `/docs/canonical/` by number:
 - `01-segmentation-framework.md` — personas, lifecycle phases, roles, life situations, CRM fields
 - `02-service-catalogue-v2.md` — 16 categories × 230 services with lifecycle/role/cluster tags
 - `03-tone-of-voice.md` — brand voice (calm confidence, sell trust not transactions)
 - `04-implementation-protocol.md` — M1→M7 operational playbook
 - `05-visual-design-system.md` — visual design system (color, type, grid, components)
+- `06-clearview-methodology.md` — ClearView™ off-plan rating system (8 categories, AAA–BB, moat #8)
+- `07-information-architecture.md` — URL structure, subdomains, navigation, cross-domain SSO
 
-If a change contradicts these documents — STOP and ask Pavel. The code gets fixed, not the docs.
+If a change contradicts PROJECT.md or canonical docs — STOP and ask Pavel. The code gets fixed, not the docs.
 
 ## PROJECT IDENTITY
 myUNO is a super-app platform consolidating Phuket services into one ecosystem.

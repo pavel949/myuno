@@ -78,9 +78,13 @@ docs/            — Developer documentation
 
 ## Documentation
 
-### Canonical Documentation (single source of truth)
+### Strategic source of truth
 
-Перед любым продуктовым, UX-, контентным или архитектурным решением — **читай документы из [`docs/canonical/`](docs/canonical/)**. При расхождении кода/UI с этими документами правится код, а не документ.
+**Перед любой задачей читай [`/PROJECT.md`](PROJECT.md)** — стратегический документ верхнего уровня (v2.3). Отменяет все предыдущие версии, драфты и роадмапы. Описывает позиционирование, монетизацию, 8 моатов (включая ClearView), 13-строчную таблицу сделок, Y1 target $1M, дизайн-стандарты и 5-тест для новых фич.
+
+### Canonical Documentation (operational source of truth)
+
+После PROJECT.md — **читай документы из [`docs/canonical/`](docs/canonical/) по номерам** для конкретных решений. При расхождении кода/UI с этими документами правится код, а не документ.
 
 | # | Document | Description |
 |---|----------|-------------|
@@ -89,6 +93,8 @@ docs/            — Developer documentation
 | 03 | [`docs/canonical/03-tone-of-voice.md`](docs/canonical/03-tone-of-voice.md) | Канонический голос бренда |
 | 04 | [`docs/canonical/04-implementation-protocol.md`](docs/canonical/04-implementation-protocol.md) | Operational playbook M1→M7 |
 | 05 | [`docs/canonical/05-visual-design-system.md`](docs/canonical/05-visual-design-system.md) | Визуальная дизайн-система v1.0 |
+| 06 | [`docs/canonical/06-clearview-methodology.md`](docs/canonical/06-clearview-methodology.md) | ClearView™ методология рейтингов off-plan (моат #8) |
+| 07 | [`docs/canonical/07-information-architecture.md`](docs/canonical/07-information-architecture.md) | Информационная архитектура: URL, субдомены, SSO |
 
 См. также [`docs/canonical/CHANGELOG.md`](docs/canonical/CHANGELOG.md).
 
