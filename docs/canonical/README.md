@@ -43,9 +43,12 @@
 
 ## Текущий статус
 
+## Текущий статус
+
 - [x] 01 — Segmentation Framework v1.0
 - [x] 02 — Service Catalogue v2.0
 - [x] 03 — Tone of Voice
 - [x] 04 — Implementation Protocol
 - [x] 05 — Visual Design System v1.0
-- [ ] M1 — bilingual lint + i18n audit (см. протокол § 1) — **next**
+- [x] **M1 — done.** Canonical-инфраструктура развёрнута + i18n audit (read-only). См. [audits/M1-i18n-audit.md](./audits/M1-i18n-audit.md). Открытые вопросы — в § 8 отчёта.
+- [ ] M2 — Расширение Supabase-схемы (lifecycle + role + modifiers) — **next** после ответа Павла на §8.
