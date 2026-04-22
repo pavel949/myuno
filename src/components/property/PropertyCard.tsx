@@ -47,6 +47,7 @@ import {
 } from 'lucide-react';
 import { getPropertyTypeLabel } from '@/lib/taxonomies';
 import { getCurrencySymbol } from '@/lib/config/currencies';
+import { GuestFavoriteBadge } from '@/components/property/GuestFavoriteBadge';
 
 // ============= TYPES =============
 
@@ -212,16 +213,21 @@ function HeroVariant({ cardProps, stats, isRu, onClick }: HeroVariantProps) {
           {status.label}
         </Badge>
 
-        {/* Rating if available */}
+        {/* Rating + Guest favorite badge */}
         {cardProps.rating && cardProps.rating > 0 && (
-          <Badge 
-            variant="secondary" 
+          <Badge
+            variant="secondary"
             className="absolute top-3 right-3 gap-1 backdrop-blur-sm bg-background/80"
           >
             <Star className="h-3 w-3 fill-primary text-primary" />
             {cardProps.rating.toFixed(1)}
           </Badge>
         )}
+        <GuestFavoriteBadge
+          rating={cardProps.rating}
+          reviewsCount={(cardProps as any).reviewCount}
+          className="absolute bottom-3 left-3"
+        />
       </div>
 
       {/* Content */}
