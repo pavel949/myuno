@@ -114,7 +114,7 @@ export function PropertySearchSheet({ open, onOpenChange, initial, onSearch }: P
 
   // ── Handlers ──
   const handleNearby = () => {
-    geo.getCurrentPosition?.();
+    geo.getPosition?.();
     // We just signal "nearby" via a dedicated id — the catalog can handle it
     // (or fall back to first popular beach if geo not granted).
     setSelectedLocations(['nearby']);
