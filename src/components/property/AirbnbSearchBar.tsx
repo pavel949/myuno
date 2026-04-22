@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { differenceInDays } from 'date-fns';
-import { createPortal } from 'react-dom';
-import { Search, MapPin, Globe, X, Minus, Plus, Check, Bed, Home, Zap,
-  Waves, Footprints, Eye, Droplets, Lock, WashingMachine, PawPrint, Baby, Car, Wifi, Sparkles
+import { Search, MapPin, X, Minus, Plus, Check, Home, Zap,
+  Waves, Footprints, Eye, Droplets, Lock, WashingMachine, PawPrint, Baby, Car, Wifi
 } from 'lucide-react';
-import { NextStepNudge } from '@/components/hints/NextStepNudge';
-import { usePropertyQuickFilters, DistrictOption } from '@/hooks/usePropertyQuickFilters';
+import { usePropertyQuickFilters } from '@/hooks/usePropertyQuickFilters';
 import { usePropertyFilterOptions } from '@/hooks/usePropertyFilterOptions';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
