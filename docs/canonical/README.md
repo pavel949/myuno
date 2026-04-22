@@ -6,8 +6,8 @@
 
 | # | Файл | Назначение |
 |---|------|------------|
-| 01 | _segmentation framework — to be added_ | 3-осевая сегментация, 25 персон, 10 кластеров, CRM-схема |
-| 02 | _service catalogue v2 — to be added_ | 16 категорий × 230 услуг с тегами lifecycle/role/cluster |
+| 01 | [segmentation-framework.md](./01-segmentation-framework.md) | 3-осевая сегментация (lifecycle × role × modifier), 25 персон, 10 кластеров жизненных ситуаций, CRM-схема |
+| 02 | [service-catalogue-v2.md](./02-service-catalogue-v2.md) | 16 категорий × 230 услуг с тегами lifecycle/role/cluster и моделями монетизации |
 | 03 | [tone-of-voice.md](./03-tone-of-voice.md) | Канонический голос бренда: интерфейс, WhatsApp, email, лендинги, AI-консьерж |
 | 04 | [implementation-protocol.md](./04-implementation-protocol.md) | Operational playbook M1→M7 для встраивания канонических документов в стек |
 
@@ -26,8 +26,10 @@
 
 См. `04-implementation-protocol.md` § 0 для полного описания философии.
 
-## TODO
+## Текущий статус
 
-- [ ] Добавить `01-segmentation-framework.md` (когда будет передан)
-- [ ] Добавить `02-service-catalogue-v2.md` (когда будет передан)
-- [ ] M1 — bilingual lint + i18n audit (см. протокол § 1)
+- [x] 01 — Segmentation Framework v1.0
+- [x] 02 — Service Catalogue v2.0
+- [x] 03 — Tone of Voice
+- [x] 04 — Implementation Protocol
+- [ ] M1 — bilingual lint + i18n audit (см. протокол § 1) — **next**
