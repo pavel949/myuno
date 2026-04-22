@@ -22,6 +22,8 @@ alwaysApply: true
 - `05-visual-design-system.md` — visual design system (color, type, grid, components)
 - `06-clearview-methodology.md` — ClearView™ off-plan rating system (8 categories, AAA–BB, moat #8)
 - `07-information-architecture.md` — URL structure, subdomains, navigation, cross-domain SSO
+- `08-ai-prompts-library.md` — canonical system prompts for all AI agents (concierge, ClearView draft, Tax Advisor, support, etc.)
+- `09-data-schema.md` — Canonical Data Schema: Supabase tables, enums, RLS, FK, naming conventions (source of truth for data schema)
 
 If a change contradicts PROJECT.md or canonical docs — STOP and ask Pavel. The code gets fixed, not the docs.
 

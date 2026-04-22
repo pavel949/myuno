@@ -8,7 +8,7 @@ alwaysApply: true
 
 ## MANDATORY READING ORDER — BEFORE ANY TASK
 **1. Strategic source of truth:** Read `/PROJECT.md` in the repo root FIRST. It supersedes all previous versions, drafts, and roadmaps.
-**2. Operational canon:** Then read `/docs/canonical/` (01–07 by number) for specific UX/copy/catalogue/CRM/AI/visual decisions.
+**2. Operational canon:** Then read `/docs/canonical/` (01–09 by number) for specific UX/copy/catalogue/CRM/AI/visual/schema decisions.
 
 If code contradicts PROJECT.md or canonical docs — fix the code, not the docs. If a request contradicts canon — STOP and ask Pavel.
 

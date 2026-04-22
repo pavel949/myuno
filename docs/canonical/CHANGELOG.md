@@ -5,6 +5,20 @@
 
 ---
 
+## [1.7.0] — 2026-04-22
+
+### Added
+- **`09-data-schema.md`** — Canonical Data Schema v1.0. Единый источник истины по схеме данных Supabase: таблицы, enums, индексы, RLS-политики, FK, naming conventions. Любое расхождение между документом и реальной БД считается дефектом и устраняется PR в документ или миграцией. Связан с `PROJECT.md` §14, M2 (lifecycle/role columns), M8a (ClearView schema), `07-information-architecture.md` §2.1.
+
+### Changed
+- `docs/canonical/README.md` — индекс расширен до 9 канонических документов.
+
+### Notes
+- Принципы документа: один пользователь — одна БД — все домены; additive over destructive; RLS by default.
+- Документ дополняет M2 (фактическая схема `profiles` после миграций) и служит контрактом для будущих миграций (M5+).
+
+---
+
 ## [1.6.0] — 2026-04-22
 
 ### Added

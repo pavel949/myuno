@@ -16,6 +16,7 @@
 | 06 | [clearview-methodology.md](./06-clearview-methodology.md) | ClearView™ методология рейтингов off-plan (моат #8): 8 категорий, AAA–BB, 5-step maturity, audited modifiers |
 | 07 | [information-architecture.md](./07-information-architecture.md) | Информационная архитектура: URL-структура, субдомены, навигация, cross-domain SSO |
 | 08 | [08-ai-prompts-library.md](./08-ai-prompts-library.md) | AI Prompts Library v1.0: канонические system prompts для всех AI-агентов (консьерж, ClearView draft, Tax Advisor, support и др.) |
+| 09 | [09-data-schema.md](./09-data-schema.md) | Canonical Data Schema v1.0: таблицы, enums, индексы, RLS-политики, FK, naming conventions Supabase. Источник истины по схеме данных |
 
 ## Дополнительно (research)
 
@@ -36,7 +37,7 @@
 
 ## История изменений
 
-См. [CHANGELOG.md](./CHANGELOG.md). Текущая версия канонического набора: **v1.6.0**.
+См. [CHANGELOG.md](./CHANGELOG.md). Текущая версия канонического набора: **v1.7.0**.
 
 ## Язык документов
 
@@ -60,6 +61,7 @@
 - [x] 06 — ClearView™ Methodology v1.0
 - [x] 07 — Information Architecture v1.0
 - [x] 08 — AI Prompts Library v1.0
+- [x] 09 — Data Schema v1.0
 - [x] **M1 — done.** Canonical-инфраструктура + i18n audit (read-only). См. [audits/M1-i18n-audit.md](./audits/M1-i18n-audit.md).
 - [x] **M2 — done.** Schema extension: 13 колонок, 3 enum, 3 функции маппинга, view `v_profiles_canonical`. См. [audits/M2-schema-extension.md](./audits/M2-schema-extension.md).
 - [x] **M3 — done.** TypeScript types + API contracts + React Query хуки. См. [audits/M3-types-and-api-contracts.md](./audits/M3-types-and-api-contracts.md).
