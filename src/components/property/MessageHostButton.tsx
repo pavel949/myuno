@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { GuestPropertyChat } from './GuestPropertyChat';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useAuthSheet } from '@/contexts/AuthSheetContext';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
 
 interface MessageHostButtonProps {
@@ -39,7 +39,7 @@ export const MessageHostButton = forwardRef<HTMLButtonElement, MessageHostButton
   const [isOpen, setIsOpen] = useState(false);
   const { language } = useLanguage();
   const { user } = useAuth();
-  const navigate = useNavigate();
+  const { openAuthSheet } = useAuthSheet();
   const isRu = language === 'ru';
 
   const title = isRu ? propertyTitleRu || propertyTitle : propertyTitle;
@@ -49,7 +49,10 @@ export const MessageHostButton = forwardRef<HTMLButtonElement, MessageHostButton
 
   const handleClick = () => {
     if (!user) {
-      navigate(`/auth?redirect=/property/${propertyId}`);
+      openAuthSheet({
+        intent: 'message-host',
+        onSuccess: () => setIsOpen(true),
+      });
       return;
     }
     setIsOpen(true);
