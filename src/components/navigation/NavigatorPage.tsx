@@ -383,6 +383,16 @@ export default function NavigatorPage() {
           )}
         </div>
 
+        {/* Cluster filter chips — only when not searching */}
+        {searchResults === null && (
+          <NavChips
+            items={clusterChips}
+            activeId={activeCluster}
+            onChange={setActiveCluster}
+            ariaLabel={isRu ? 'Фильтр по кластерам' : 'Filter by cluster'}
+          />
+        )}
+
         {/* Search results — grid of tiles */}
         {searchResults !== null && (
           <div className="space-y-2">
@@ -406,10 +416,10 @@ export default function NavigatorPage() {
           </div>
         )}
 
-        {/* Cluster tile rows — all visible */}
+        {/* Cluster tile rows — filtered by activeCluster */}
         {searchResults === null && (
           <div className="space-y-5">
-            {CLUSTERS.map(cluster => {
+            {visibleClusters.map(cluster => {
               const Icon = cluster.icon;
               const services = cluster.services;
               const availableCount = services.filter(s => s.status !== 'soon').length;
