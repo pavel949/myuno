@@ -38,12 +38,14 @@ import { APP_ROUTES } from '@/lib/config/routes';
 import {
   resolveNavRole, hasSidebar, SIDEBAR_NAV, type NavRoleKey,
 } from '@/lib/nav/navigationModel';
-import { CLUSTER_CATALOG } from '@/lib/nav/clusterCatalog';
+import { filterCatalogForUser } from '@/lib/nav/clusterCatalog';
 import { ROLE_META } from '@/lib/roleBlend';
 import type { UserPersona } from '@/hooks/useUserPersonas';
 
 // ─────────────────────────────────────────────────────────────
-// Quick actions — contextual based on persona stack
+// Quick actions — contextual based on persona stack + nav role.
+// All entries are gated through `isQuickActionVisible` so a guest never
+// sees a workspace shortcut and vice versa.
 // ─────────────────────────────────────────────────────────────
 
 interface QuickAction {
@@ -51,39 +53,55 @@ interface QuickAction {
   labelRu: string;
   path: string;
   icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
+  /** Persona stack must include at least one of these (OR with `roles`). */
+  personas?: UserPersona[];
+  /** Resolved nav role must be one of these (OR with `personas`). */
+  roles?: NavRoleKey[];
 }
 
-function getQuickActions(personas: UserPersona[]): QuickAction[] {
-  const actions: QuickAction[] = [];
-  const has = (p: UserPersona) => personas.includes(p);
+const QUICK_ACTION_CATALOG: QuickAction[] = [
+  // Workspace — owner / vendor
+  {
+    labelEn: 'My property', labelRu: 'Мой объект',
+    path: '/my-property', icon: Building2,
+    personas: ['property_owner'], roles: ['owner', 'mc_portal'],
+  },
+  // Workspace — investor / capital
+  {
+    labelEn: 'New developments', labelRu: 'Новостройки',
+    path: '/newbuilds', icon: TrendingUp,
+    personas: ['investor'], roles: ['investor'],
+  },
+  // Consumer — discovery (always relevant for non-workspace roles)
+  {
+    labelEn: 'Find a service', labelRu: 'Найти услугу',
+    path: APP_ROUTES.DISCOVER, icon: Compass,
+    personas: ['tourist', 'resident', 'family', 'couple', 'nightlife', 'active', 'business', 'nomad', 'pet_owner', 'relocation'],
+    roles: ['guest'],
+  },
+  // Universal fallback — every signed-in user has bookings
+  {
+    labelEn: 'My bookings', labelRu: 'Мои бронирования',
+    path: '/bookings', icon: HomeIcon,
+  },
+];
 
-  if (has('owner' as UserPersona)) {
-    actions.push({
-      labelEn: 'My property',  labelRu: 'Мой объект',
-      path: '/my-property', icon: Building2,
-    });
-  }
-  if (has('investor' as UserPersona)) {
-    actions.push({
-      labelEn: 'New developments', labelRu: 'Новостройки',
-      path: '/newbuilds', icon: TrendingUp,
-    });
-  }
-  if (has('tourist' as UserPersona) || has('resident' as UserPersona) || personas.length === 0) {
-    actions.push({
-      labelEn: 'Find a service', labelRu: 'Найти услугу',
-      path: APP_ROUTES.DISCOVER, icon: Compass,
-    });
-  }
+function isQuickActionVisible(
+  action: QuickAction,
+  personas: UserPersona[],
+  role: NavRoleKey,
+): boolean {
+  // No gating → universal action
+  if (!action.personas && !action.roles) return true;
+  const personaMatch = (action.personas ?? []).some((p) => personas.includes(p));
+  const roleMatch = (action.roles ?? []).includes(role);
+  return personaMatch || roleMatch;
+}
 
-  // Always-on fallbacks (cap at 4)
-  if (actions.length < 4) {
-    actions.push({
-      labelEn: 'My bookings', labelRu: 'Мои бронирования',
-      path: '/bookings', icon: HomeIcon,
-    });
-  }
-  return actions.slice(0, 4);
+function getQuickActions(personas: UserPersona[], role: NavRoleKey): QuickAction[] {
+  return QUICK_ACTION_CATALOG
+    .filter((a) => isQuickActionVisible(a, personas, role))
+    .slice(0, 4);
 }
 
 // ─────────────────────────────────────────────────────────────
