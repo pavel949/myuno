@@ -471,6 +471,30 @@ export const DepositPaymentOptions = forwardRef<DepositPaymentOptionsHandle, Dep
             </Button>
           )}
 
+          {method === 'rub_manual' && (
+            <div className="space-y-2">
+              <Button
+                variant="default"
+                className="w-full h-12 text-base gap-2"
+                onClick={handleManualRubPayment}
+                disabled={isProcessing}
+              >
+                {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wallet className="w-4 h-4" />}
+                {isRu ? 'Запросить оплату в рублях' : 'Request RUB payment'}
+              </Button>
+              {amountRub != null && (
+                <p className="text-xs text-center text-muted-foreground">
+                  ≈ {amountRub.toLocaleString('ru-RU')} ₽ ·{' '}
+                  <span className="italic">
+                    {isRu
+                      ? 'финальная сумма уточняется по курсу на момент оплаты'
+                      : 'exact amount confirmed at the time of payment'}
+                  </span>
+                </p>
+              )}
+            </div>
+          )}
+
           <p className="text-xs text-center text-muted-foreground flex items-center justify-center gap-1">
             {method === 'card' ? (
               <>
@@ -481,6 +505,11 @@ export const DepositPaymentOptions = forwardRef<DepositPaymentOptionsHandle, Dep
               <>
                 <Building2 className="w-3 h-3" />
                 {isRu ? 'Менеджер пришлёт реквизиты' : 'Manager will send bank details'}
+              </>
+            ) : method === 'rub_manual' ? (
+              <>
+                <Wallet className="w-3 h-3" />
+                {isRu ? 'Менеджер свяжется в течение 30 минут (9:00–22:00 ICT)' : 'Manager replies within 30 min (9am–10pm ICT)'}
               </>
             ) : (
               <>
