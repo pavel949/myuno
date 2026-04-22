@@ -17,6 +17,7 @@ import { CancellationPolicySection } from './CancellationPolicySection';
 import { SeasonalPricing } from '@/components/property/SeasonalPricing';
 import { PricingRulesSection } from '@/components/property/PricingRulesSection';
 import { PaymentPolicySection } from '@/components/property/PaymentPolicySection';
+import { GuestExtraFeesSection } from '@/components/property/GuestExtraFeesSection';
 import { cn } from '@/lib/utils';
 
 interface PricingStepProps {

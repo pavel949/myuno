@@ -38,6 +38,8 @@ export { OffplanPromoSection } from './OffplanPromoSection';
 export { DeveloperBadge } from './DeveloperBadge';
 export { PricingRulesSection } from './PricingRulesSection';
 export { PaymentPolicySection } from './PaymentPolicySection';
+export { GuestExtraFeesSection } from './GuestExtraFeesSection';
+export { GuestExtraFeesDisplay } from './GuestExtraFeesDisplay';
 export { NegotiationPanel } from './NegotiationPanel';
 export { GuestPriceProposal } from './GuestPriceProposal';
 
