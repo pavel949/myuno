@@ -122,26 +122,26 @@ export const CANONICAL_ROLE_META: Record<CanonicalRole, CanonicalRoleMeta> = {
 export type LifecycleStage = Database['public']['Enums']['lifecycle_stage'];
 
 export const LIFECYCLE_STAGE_LABELS: Record<LifecycleStage, { en: string; ru: string }> = {
-  dreaming:    { en: 'Dreaming',    ru: 'Мечтает' },
-  researching: { en: 'Researching', ru: 'Изучает' },
-  planning:    { en: 'Planning',    ru: 'Планирует' },
-  arriving:    { en: 'Arriving',    ru: 'Прилетает' },
-  settling:    { en: 'Settling',    ru: 'Обустраивается' },
-  living:      { en: 'Living',      ru: 'Живёт' },
-  scaling:     { en: 'Scaling',     ru: 'Масштабируется' },
-  exiting:     { en: 'Exiting',     ru: 'Выходит' },
+  scout:    { en: 'Scout',    ru: 'Разведчик' },
+  tourist:  { en: 'Tourist',  ru: 'Турист' },
+  snowbird: { en: 'Snowbird', ru: 'Сезонник' },
+  nomad:    { en: 'Nomad',    ru: 'Номад' },
+  settler:  { en: 'Settler',  ru: 'Переселенец' },
+  resident: { en: 'Resident', ru: 'Резидент' },
+  absentee: { en: 'Absentee', ru: 'Заочный собственник' },
+  returnee: { en: 'Returnee', ru: 'Возвращенец' },
 };
 
 /** Ordered linear progression for funnel/UX visualisation. */
 export const LIFECYCLE_PROGRESSION: readonly LifecycleStage[] = [
-  'dreaming',
-  'researching',
-  'planning',
-  'arriving',
-  'settling',
-  'living',
-  'scaling',
-  'exiting',
+  'scout',
+  'tourist',
+  'snowbird',
+  'nomad',
+  'settler',
+  'resident',
+  'absentee',
+  'returnee',
 ] as const;
 
 /* ------------------------------------------------------------------ */
@@ -151,12 +151,11 @@ export const LIFECYCLE_PROGRESSION: readonly LifecycleStage[] = [
 export type HouseholdType = Database['public']['Enums']['household_type_enum'];
 
 export const HOUSEHOLD_TYPE_LABELS: Record<HouseholdType, { en: string; ru: string }> = {
-  solo:           { en: 'Solo',           ru: 'Один' },
-  couple:         { en: 'Couple',         ru: 'Пара' },
-  family_kids:    { en: 'Family + kids',  ru: 'Семья с детьми' },
-  family_no_kids: { en: 'Family no kids', ru: 'Семья без детей' },
-  group:          { en: 'Group',          ru: 'Группа' },
-  business:       { en: 'Business',       ru: 'Корпоратив' },
+  solo:             { en: 'Solo',             ru: 'Один' },
+  couple:           { en: 'Couple',           ru: 'Пара' },
+  family_with_kids: { en: 'Family + kids',    ru: 'Семья с детьми' },
+  family_extended:  { en: 'Extended family',  ru: 'Большая семья' },
+  group_friends:    { en: 'Group of friends', ru: 'Группа друзей' },
 };
 
 /* ------------------------------------------------------------------ */
