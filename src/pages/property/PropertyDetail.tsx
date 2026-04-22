@@ -27,7 +27,6 @@ import {
   CheckInDetails,
   GuestAssuranceCard,
   HouseRules,
-  PropertyPriceBreakdown,
   PropertyBookingCard,
   MessageHostButton,
 } from '@/components/property';
