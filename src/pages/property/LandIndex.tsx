@@ -6,7 +6,6 @@ import { useSearchParams } from 'react-router-dom';
 import { Trees } from 'lucide-react';
 import { SEOHead } from '@/components/seo';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { AppLayout } from '@/components/layout/AppLayout';
 import { BackButton } from '@/components/uno/BackButton';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -38,7 +37,7 @@ export default function LandIndex() {
   };
 
   return (
-    <AppLayout>
+    <>
       <SEOHead
         title={isRu ? 'Земельные участки в Пхукете — myUNO' : 'Land Plots Phuket — myUNO'}
         description={
@@ -164,6 +163,6 @@ export default function LandIndex() {
           )}
         </div>
       </div>
-    </AppLayout>
+    </>
   );
 }

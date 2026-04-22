@@ -6,7 +6,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useUserPersonas } from '@/hooks/useUserPersonas';
 import { useConsultationRequests } from '@/hooks/useConsultationRequests';
 import { APP_ROUTES } from '@/lib/config/routes';
-import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
@@ -423,7 +422,6 @@ export default function PropertyConsultation() {
 
   if (isSuccess) {
     return (
-      <AppLayout>
         <PageContainer>
           <PageHeader 
             title={isRu ? 'Заявка отправлена' : 'Request Sent'}
@@ -480,12 +478,10 @@ export default function PropertyConsultation() {
             </div>
           </div>
         </PageContainer>
-      </AppLayout>
     );
   }
 
   return (
-    <AppLayout>
       <PageContainer>
         <PageHeader
           title={
@@ -1282,6 +1278,5 @@ export default function PropertyConsultation() {
         </div>
       )}
       </PageContainer>
-    </AppLayout>
   );
 }

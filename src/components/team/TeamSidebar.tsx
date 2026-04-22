@@ -125,7 +125,7 @@ export function TeamSidebar({ className }: TeamSidebarProps) {
                   active && "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
                 )}
               >
-                <Icon className="h-4 w-4 shrink-0" />
+                <Icon className="size-5 shrink-0" />
                 <span className="flex-1 text-sm">
                   {isRu ? link.labelRu : link.labelEn}
                 </span>
@@ -149,7 +149,7 @@ export function TeamSidebar({ className }: TeamSidebarProps) {
             "hover:bg-muted/50 text-sm text-muted-foreground"
           )}
         >
-          <Settings className="h-4 w-4" />
+          <Settings className="size-5" />
           {isRu ? 'Настройки' : 'Settings'}
         </NavLink>
       </div>

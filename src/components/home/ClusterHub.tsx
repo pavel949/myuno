@@ -11,76 +11,81 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useIsDesktop } from '@/hooks/use-desktop';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { getClusterById, getClusterHeaderLabel, getClusterValueLine } from '@/lib/nav/clusterCatalog';
+import type { Language } from '@/i18n';
 
-interface Cluster {
-  id: string;
+interface HubCluster {
+  id: 'arrive' | 'live' | 'legal' | 'invest' | 'manage' | 'build';
   icon: React.ElementType;
-  label: string;
-  labelRu: string;
-  description: string;
-  descriptionRu: string;
   accentColor: string;
   path: string;
   apps: string[];
   appsRu: string[];
+  appsTh: string[];
 }
 
-const CLUSTERS: Cluster[] = [
+const CLUSTERS: HubCluster[] = [
   {
-    id: 'arrive', icon: Plane,
-    label: 'ARRIVE', labelRu: 'ПРИЕХАТЬ',
-    description: 'First day on the island', descriptionRu: 'Первый день на острове',
+    id: 'arrive',
+    icon: Plane,
     accentColor: '#00D68F',
     path: APP_ROUTES.ARRIVE_CLUSTER,
     apps: ['Transfers', 'SIM Cards', 'Exchange', 'Car Rental'],
     appsRu: ['Трансферы', 'SIM-карты', 'Обмен валют', 'Аренда авто'],
+    appsTh: ['รับส่ง', 'SIM', 'แลกเงิน', 'เช่ารถ'],
   },
   {
-    id: 'live', icon: Home,
-    label: 'LIVE', labelRu: 'ЖИТЬ',
-    description: 'Daily life services', descriptionRu: 'Сервисы на каждый день',
+    id: 'live',
+    icon: Home,
     accentColor: '#4E7BFF',
     path: APP_ROUTES.DISCOVER,
     apps: ['Restaurants', 'Cleaning', 'Medical', 'Flowers'],
     appsRu: ['Рестораны', 'Уборка', 'Медицина', 'Цветы'],
+    appsTh: ['ร้านอาหาร', 'ทำความสะอาด', 'การแพทย์', 'ดอกไม้'],
   },
   {
-    id: 'legal', icon: Scale,
-    label: 'STAY LEGAL', labelRu: 'ЛЕГАЛЬНО',
-    description: 'Visas, taxes & contracts', descriptionRu: 'Визы, налоги и документы',
+    id: 'legal',
+    icon: Scale,
     accentColor: '#F59E0B',
     path: APP_ROUTES.LEGAL_CLUSTER,
-    apps: ['VisaTrack', 'TaxNav', 'ContractAI', 'Insurance'],
+    apps: ['Visas', 'Taxes', 'Contracts', 'Insurance'],
     appsRu: ['Визы', 'Налоги', 'Договоры', 'Страховка'],
+    appsTh: ['วีซ่า', 'ภาษี', 'สัญญา', 'ประกัน'],
   },
   {
-    id: 'invest', icon: TrendingUp,
-    label: 'INVEST', labelRu: 'КУПИТЬ',
-    description: 'Buy & invest in Phuket', descriptionRu: 'Покупка и инвестиции',
+    id: 'invest',
+    icon: TrendingUp,
     accentColor: '#A855F7',
     path: APP_ROUTES.INVEST,
-    apps: ['Property Search', 'Off-Plan', 'ROI Calculator', 'Due Diligence'],
-    appsRu: ['Поиск недвижимости', 'Off-Plan', 'ROI калькулятор', 'Проверка'],
+    apps: ['Property search', 'Off-plan', 'ROI', 'Due diligence'],
+    appsRu: ['Поиск', 'Off-plan', 'ROI', 'Проверка'],
+    appsTh: ['ค้นหา', 'โครงการใหม่', 'ROI', 'ตรวจสอบ'],
   },
   {
-    id: 'manage', icon: Building2,
-    label: 'MANAGE', labelRu: 'УПРАВЛЯТЬ',
-    description: 'Property management', descriptionRu: 'Управление недвижимостью',
+    id: 'manage',
+    icon: Building2,
     accentColor: '#06B6D4',
     path: APP_ROUTES.MC,
-    apps: ['StaySync', 'Calendar', 'Financials', 'Team'],
-    appsRu: ['StaySync', 'Календарь', 'Финансы', 'Команда'],
+    apps: ['Dashboard', 'Calendar', 'Finances', 'CRM'],
+    appsRu: ['Кабинет', 'Календарь', 'Финансы', 'CRM'],
+    appsTh: ['แดชบอร์ด', 'ปฏิทิน', 'การเงิน', 'CRM'],
   },
   {
-    id: 'build', icon: HardHat,
-    label: 'BUILD & SELL', labelRu: 'ДЕВЕЛОПЕРАМ',
-    description: 'For developers & agents', descriptionRu: 'Для застройщиков и агентов',
+    id: 'build',
+    icon: HardHat,
     accentColor: '#F43F5E',
     path: APP_ROUTES.OFFPLAN,
-    apps: ['Sales Dashboard', 'Construction', 'Pricing', 'Agent CRM'],
-    appsRu: ['Продажи', 'Стройка', 'Ценообразование', 'CRM агентов'],
+    apps: ['Portal', 'Program', 'Showcase', 'Advisory'],
+    appsRu: ['Портал', 'Программа', 'Витрина', 'Консультация'],
+    appsTh: ['พอร์ทัล', 'โปรแกรม', 'โชว์รูม', 'ปรึกษา'],
   },
 ];
+
+function appTagsForLang(c: HubCluster, language: Language): string[] {
+  if (language === 'ru') return c.appsRu;
+  if (language === 'th') return c.appsTh;
+  return c.apps;
+}
 
 const containerVariants = {
   hidden: {},
@@ -94,7 +99,6 @@ const itemVariants = {
 
 export const ClusterHub: React.FC = () => {
   const { language } = useLanguage();
-  const t = language === 'ru';
   const navigate = useNavigate();
   const isDesktop = useIsDesktop();
 
@@ -102,10 +106,18 @@ export const ClusterHub: React.FC = () => {
     <section className="space-y-4">
       <div className="text-center space-y-1">
         <h2 className="font-display font-bold text-foreground text-lg md:text-xl">
-          {t ? 'Один аккаунт — весь Пхукет' : 'One account — all of Phuket'}
+          {language === 'ru'
+            ? 'Один аккаунт — весь Пхукет'
+            : language === 'th'
+              ? 'บัญชีเดียว — ทั้งภูเก็ต'
+              : 'One account — all of Phuket'}
         </h2>
         <p className="text-sm text-muted-foreground">
-          {t ? '6 кластеров. 40+ сервисов. Одна экосистема.' : '6 clusters. 40+ services. One ecosystem.'}
+          {language === 'ru'
+            ? '6 кластеров. 40+ сервисов. Одна экосистема.'
+            : language === 'th'
+              ? '6 กลุ่ม · 40+ บริการ · ระบบเดียว'
+              : '6 clusters. 40+ services. One ecosystem.'}
         </p>
       </div>
 
@@ -116,8 +128,12 @@ export const ClusterHub: React.FC = () => {
         viewport={{ once: true, margin: '-50px' }}
         className="grid grid-cols-2 md:grid-cols-3 gap-3"
       >
-        {CLUSTERS.map(cluster => {
+        {CLUSTERS.map((cluster) => {
           const Icon = cluster.icon;
+          const cat = getClusterById(cluster.id);
+          const title = cat ? getClusterHeaderLabel(cat, language) : cluster.id;
+          const blurb = cat ? getClusterValueLine(cat, language) : '';
+          const tagList = appTagsForLang(cluster, language);
           return (
             <motion.button
               key={cluster.id}
@@ -146,33 +162,32 @@ export const ClusterHub: React.FC = () => {
                 <Icon className="w-5 h-5" style={{ color: cluster.accentColor }} />
               </div>
 
-              <h3 className="text-xs font-bold tracking-wider uppercase mb-0.5 font-display"
+              <h3
+                className="text-sm font-semibold leading-tight mb-0.5 font-display"
                 style={{ color: cluster.accentColor }}
               >
-                {t ? cluster.labelRu : cluster.label}
+                {title}
               </h3>
               
               {/* Description — hidden on mobile */}
-              {isDesktop && (
-                <p className="text-xs text-muted-foreground mb-3 line-clamp-1">
-                  {t ? cluster.descriptionRu : cluster.description}
-                </p>
+              {isDesktop && blurb && (
+                <p className="text-xs text-muted-foreground mb-3 line-clamp-2">{blurb}</p>
               )}
 
               {/* Tags — max 2 on mobile */}
               <div className="flex flex-wrap gap-1 mt-2">
-                {(t ? cluster.appsRu : cluster.apps).slice(0, isDesktop ? 3 : 2).map(app => (
+                {tagList.slice(0, isDesktop ? 3 : 2).map((app) => (
                   <span key={app} className="text-[10px] px-2 py-0.5 rounded-[var(--radius-full)] text-muted-foreground"
                     style={{ background: 'hsl(var(--bg-elevated))' }}
                   >
                     {app}
                   </span>
                 ))}
-                {cluster.apps.length > (isDesktop ? 3 : 2) && (
+                {tagList.length > (isDesktop ? 3 : 2) && (
                   <span className="text-[10px] px-2 py-0.5 rounded-[var(--radius-full)] text-muted-foreground"
                     style={{ background: 'hsl(var(--bg-elevated))' }}
                   >
-                    +{cluster.apps.length - (isDesktop ? 3 : 2)}
+                    +{tagList.length - (isDesktop ? 3 : 2)}
                   </span>
                 )}
               </div>

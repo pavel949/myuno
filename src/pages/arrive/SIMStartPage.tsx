@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Smartphone, Wifi, Globe, Check, ExternalLink } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { getClusterById, getClusterHeaderLabel } from '@/lib/nav/clusterCatalog';
 
 interface SIMPlan {
   id: string;
@@ -127,6 +128,8 @@ const SIM_PLANS: SIMPlan[] = [
 const SIMStartPage: React.FC = () => {
   const { language } = useLanguage();
   const t = language === 'ru';
+  const arriveCluster = getClusterById('arrive');
+  const arrivePill = arriveCluster ? getClusterHeaderLabel(arriveCluster, language) : 'Arrival';
   const [durationFilter, setDurationFilter] = useState<string>('all');
   const [providerFilter, setProviderFilter] = useState<string>('all');
 
@@ -152,7 +155,7 @@ const SIMStartPage: React.FC = () => {
         <div className="text-center space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cluster-arrive/10 text-cluster-arrive text-sm font-medium">
             <Smartphone className="w-4 h-4" />
-            {t ? 'ПРИЕХАТЬ' : 'ARRIVE'}
+            {arrivePill}
           </div>
           <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground">
             {t ? '📱 SIM-карты на Пхукете' : '📱 SIM Cards in Phuket'}

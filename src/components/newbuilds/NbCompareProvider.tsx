@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import { X, GitCompareArrows } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
+import { FLOATING, FLOATING_OFFSET } from '@/lib/nav/floatingStack';
 
 const MAX_COMPARE = 3;
 const STORAGE_KEY = 'myuno_compare_newbuilds';
@@ -90,7 +91,7 @@ export function NbCompareProvider({ children }: { children: React.ReactNode }) {
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
-            className="fixed bottom-[calc(var(--bottom-nav-h)+1rem)] left-4 right-4 md:left-auto md:right-8 md:w-auto z-40"
+            className={`fixed ${FLOATING_OFFSET.aboveBottomNav} left-4 right-4 md:left-auto md:right-8 md:w-auto ${FLOATING.compare}`}
           >
             <div className="nb-glass p-3 flex items-center gap-3 nb-glow-pulse" style={{ background: 'hsl(var(--nb-bg) / 0.95)' }}>
               <GitCompareArrows className="w-5 h-5 flex-shrink-0" style={{ color: 'hsl(var(--nb-gold))' }} />

@@ -17,6 +17,7 @@ import { UnderlineInput } from '@/components/auth/UnderlineInput';
 import { GoogleSignInButton, OAuthDivider } from '@/components/auth/GoogleSignInButton';
 import { AuthValuePanel } from '@/components/auth/AuthValuePanel';
 import { AuthTrustFooter } from '@/components/auth/AuthTrustFooter';
+import { BrandWordmark } from '@/components/uno/BrandWordmark';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Timeout helper — prevents infinite spinner when Supabase is unreachable
@@ -63,9 +64,25 @@ export default function Auth() {
   const { activeRole } = useUserContext();
   const { isMCPortal, isLoading: ownerTypeLoading } = useOwnerType();
 
-  const redirectPath = (location.state as { from?: string })?.from ||
+  const rawRedirect = (location.state as { from?: string })?.from ||
     searchParams.get('redirect') ||
     APP_ROUTES.HOME;
+
+  const redirectPath = React.useMemo(() => {
+    if (!rawRedirect) return APP_ROUTES.HOME;
+    try {
+      const parsed = new URL(rawRedirect, window.location.origin);
+      if (parsed.origin !== window.location.origin) return APP_ROUTES.HOME;
+      return `${parsed.pathname}${parsed.search}${parsed.hash}` || APP_ROUTES.HOME;
+    } catch {
+      return rawRedirect.startsWith('/') ? rawRedirect : APP_ROUTES.HOME;
+    }
+  }, [rawRedirect]);
+
+  const oauthRedirectUrl = React.useMemo(
+    () => new URL(redirectPath, window.location.origin).toString(),
+    [redirectPath]
+  );
 
   useEffect(() => {
     if (!user || authLoading) return;
@@ -355,8 +372,8 @@ export default function Auth() {
   // Logo component used in signup steps — neutral mint badge (no gold gradient)
   const AppLogo = () => (
     <div className="flex justify-center mb-4">
-      <Link to={APP_ROUTES.HOME} className="w-16 h-16 rounded-2xl bg-primary/10 ring-1 ring-primary/30 flex items-center justify-center hover:scale-105 transition-transform">
-        <span className="font-display text-3xl font-bold text-primary">U</span>
+      <Link to={APP_ROUTES.HOME} className="h-16 px-4 rounded-2xl bg-primary/10 ring-1 ring-primary/30 flex items-center justify-center hover:scale-105 transition-transform">
+        <BrandWordmark as="static" className="scale-110" />
       </Link>
     </div>
   );
@@ -378,8 +395,8 @@ export default function Auth() {
 
       {/* Header */}
       <header className="relative z-10 p-4 flex justify-between items-center">
-        <Link to={APP_ROUTES.HOME} className="w-10 h-10 rounded-xl bg-primary/10 ring-1 ring-primary/30 flex items-center justify-center hover:scale-105 transition-transform">
-          <span className="font-display text-xl font-bold text-primary">U</span>
+        <Link to={APP_ROUTES.HOME} className="h-10 px-3 rounded-xl bg-primary/10 ring-1 ring-primary/30 flex items-center justify-center hover:scale-105 transition-transform">
+          <BrandWordmark as="static" />
         </Link>
         <div className="flex items-center gap-2">
           <LanguageSwitcher size="sm" />
@@ -408,7 +425,7 @@ export default function Auth() {
                   </p>
                 </div>
 
-                <GoogleSignInButton redirectTo={`${window.location.origin}${redirectPath}`} />
+                <GoogleSignInButton redirectTo={oauthRedirectUrl} />
                 <OAuthDivider />
 
                 <form onSubmit={handleLogin} name="login" className="space-y-4">
@@ -529,7 +546,7 @@ export default function Auth() {
                       </div>
 
                       <div className="pt-2">
-                        <GoogleSignInButton redirectTo={`${window.location.origin}${redirectPath}`} />
+                        <GoogleSignInButton redirectTo={oauthRedirectUrl} />
                         <OAuthDivider />
                       </div>
 

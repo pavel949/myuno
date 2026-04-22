@@ -16,8 +16,13 @@ import {
   CLUSTER_CATALOG_AVAILABLE,
   CLUSTER_CATALOG_SOON,
   CLUSTER_CATALOG_TOTAL_AVAILABLE,
+  getClusterHeaderLabel,
+  getClusterServiceLocalizedLabel,
+  getClusterValueLine,
   type ClusterService,
 } from '@/lib/nav/clusterCatalog';
+import { pickTriplet } from '@/lib/ecosystemGlossary';
+import type { Language } from '@/i18n';
 
 // Local aliases — keep call-sites readable; SSOT lives in clusterCatalog.ts
 const CLUSTERS = CLUSTER_CATALOG;
@@ -27,33 +32,53 @@ const TOTAL_NAVIGATOR_SERVICES = CLUSTER_CATALOG_TOTAL_AVAILABLE;
 
 function NavigatorStatsFooter({
   stats,
-  isRu,
+  language,
 }: {
   stats: { properties: number; bookings: number; providers: number } | undefined;
-  isRu: boolean;
+  language: Language;
 }) {
   if (stats === undefined) {
     return (
       <p className="text-xs text-muted-foreground">
-        {isRu ? 'Загрузка…' : 'Loading…'}
+        {pickTriplet({ ru: 'Загрузка…', en: 'Loading…', th: 'กำลังโหลด…' }, language)}
       </p>
     );
   }
 
   const chunks: React.ReactNode[] = [];
   if (stats.properties > 0)
-    chunks.push(<span key="p"><span className="text-primary font-bold">{stats.properties}+</span> {isRu ? 'объектов' : 'properties'}</span>);
+    chunks.push(
+      <span key="p">
+        <span className="text-primary font-bold">{stats.properties}+</span>{' '}
+        {pickTriplet({ ru: 'объектов', en: 'properties', th: 'อสังหาฯ' }, language)}
+      </span>
+    );
   if (stats.bookings > 0)
-    chunks.push(<span key="b"><span className="text-primary font-bold">{stats.bookings}+</span> {isRu ? 'бронирований' : 'bookings'}</span>);
+    chunks.push(
+      <span key="b">
+        <span className="text-primary font-bold">{stats.bookings}+</span>{' '}
+        {pickTriplet({ ru: 'бронирований', en: 'bookings', th: 'การจอง' }, language)}
+      </span>
+    );
   if (stats.providers > 0)
-    chunks.push(<span key="v"><span className="text-primary font-bold">{stats.providers}+</span> {isRu ? 'партнёров' : 'partners'}</span>);
+    chunks.push(
+      <span key="v">
+        <span className="text-primary font-bold">{stats.providers}+</span>{' '}
+        {pickTriplet({ ru: 'партнёров', en: 'partners', th: 'พาร์ทเนอร์' }, language)}
+      </span>
+    );
 
   if (chunks.length === 0) {
     return (
       <p className="text-xs text-muted-foreground leading-relaxed">
-        {isRu
-          ? 'Сервисы и партнёры на Пхукете — в одной экосистеме. Поддержка 24/7.'
-          : 'Phuket services & partners in one ecosystem. 24/7 support.'}
+        {pickTriplet(
+          {
+            ru: 'Сервисы и партнёры на Пхукете — в одной экосистеме. Поддержка 24/7.',
+            en: 'Phuket services & partners in one ecosystem. 24/7 support.',
+            th: 'บริการและพาร์ทเนอร์ภูเก็ตในระบบเดียว ซัพพอร์ต 24/7',
+          },
+          language
+        )}
       </p>
     );
   }
@@ -64,7 +89,12 @@ function NavigatorStatsFooter({
     if (i < chunks.length - 1) out.push(<span key={`d${i}`} className="mx-2 text-muted-foreground/40">·</span>);
   });
   out.push(<span key="d247" className="mx-2 text-muted-foreground/40">·</span>);
-  out.push(<span key="247"><span className="text-primary font-bold">24/7</span> {isRu ? 'поддержка' : 'support'}</span>);
+  out.push(
+    <span key="247">
+      <span className="text-primary font-bold">24/7</span>{' '}
+      {pickTriplet({ ru: 'поддержка', en: 'support', th: 'ซัพพอร์ต' }, language)}
+    </span>
+  );
 
   return <p className="text-xs text-muted-foreground leading-relaxed">{out}</p>;
 }
@@ -72,12 +102,12 @@ function NavigatorStatsFooter({
 function ServiceTile({
   service,
   clusterColor,
-  isRu,
+  language,
   onNavigate,
 }: {
   service: ClusterService;
   clusterColor: string;
-  isRu: boolean;
+  language: Language;
   onNavigate: (path: string) => void;
 }) {
   const SIcon = service.icon;
@@ -98,7 +128,7 @@ function ServiceTile({
     >
       <SIcon className="w-5 h-5" style={{ color: clusterColor }} />
       <span className="text-[10px] font-medium text-foreground leading-tight text-center px-1 line-clamp-1">
-        {isRu ? service.labelRu : service.labelEn}
+        {getClusterServiceLocalizedLabel(service, language)}
       </span>
       {isPro && (
         <span
@@ -122,22 +152,25 @@ function ServiceTile({
 
 export default function NavigatorPage() {
   const { language } = useLanguage();
-  const isRu = language === 'ru';
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [activeCluster, setActiveCluster] = useState<string>('all');
 
   const clusterChips: NavChipItem[] = useMemo(
     () => [
-      { id: 'all', label: isRu ? 'Все' : 'All', count: TOTAL_NAVIGATOR_SERVICES },
+      {
+        id: 'all',
+        label: pickTriplet({ ru: 'Все', en: 'All', th: 'ทั้งหมด' }, language),
+        count: TOTAL_NAVIGATOR_SERVICES,
+      },
       ...CLUSTERS.map((c) => ({
         id: c.id,
-        label: isRu ? c.labelRu : c.labelEn,
+        label: getClusterHeaderLabel(c, language),
         accentColor: c.color,
         count: c.services.filter((s) => s.status !== 'soon').length,
       })),
     ],
-    [isRu],
+    [language],
   );
 
   const visibleClusters = useMemo(
@@ -166,15 +199,18 @@ export default function NavigatorPage() {
 
   const searchResults = useMemo(() => {
     if (!trimmedQuery) return null;
-    return ALL_SERVICES.filter(s => {
-      const label = isRu ? s.labelRu : s.labelEn;
-      const cluster = isRu ? s.clusterLabelRu : s.clusterLabelEn;
+    return ALL_SERVICES.filter((s) => {
+      const label = getClusterServiceLocalizedLabel(s, language);
+      const cluster = pickTriplet(
+        { ru: s.clusterLabelRu, en: s.clusterLabelEn, th: s.clusterLabelEn },
+        language
+      );
       return (
         label.toLowerCase().includes(trimmedQuery) ||
         cluster.toLowerCase().includes(trimmedQuery)
       );
     });
-  }, [trimmedQuery, isRu]);
+  }, [trimmedQuery, language]);
 
   return (
     <AppLayout>
@@ -183,12 +219,17 @@ export default function NavigatorPage() {
         {/* Header */}
         <div className="text-center space-y-1">
           <h1 className="text-[22px] font-display font-bold text-foreground">
-            {isRu ? 'Навигатор' : 'Navigator'}
+            {pickTriplet({ ru: 'Навигатор', en: 'Navigator', th: 'นาวิเกเตอร์' }, language)}
           </h1>
           <p className="text-sm text-muted-foreground leading-snug">
-            {isRu
-              ? `${TOTAL_NAVIGATOR_SERVICES} сервисов · один суперапп myUNO`
-              : `${TOTAL_NAVIGATOR_SERVICES} services · one myUNO superapp`}
+            {pickTriplet(
+              {
+                ru: `${TOTAL_NAVIGATOR_SERVICES} сервисов · один суперапп myUNO`,
+                en: `${TOTAL_NAVIGATOR_SERVICES} services · one myUNO superapp`,
+                th: `${TOTAL_NAVIGATOR_SERVICES} บริการ · ซูเปอร์แอป myUNO แอปเดียวจบ`,
+              },
+              language
+            )}
           </p>
         </div>
 
@@ -199,7 +240,10 @@ export default function NavigatorPage() {
             type="text"
             value={query}
             onChange={e => setQuery(e.target.value)}
-            placeholder={isRu ? 'Найти сервис…' : 'Search services…'}
+            placeholder={pickTriplet(
+              { ru: 'Найти сервис…', en: 'Search services…', th: 'ค้นหาบริการ…' },
+              language
+            )}
             className={cn(
               'w-full h-10 pl-9 pr-9 rounded-[var(--radius-md)] text-sm',
               'bg-[hsl(var(--bg-elevated))] border border-[hsl(0_0%_100%_/_0.07)]',
@@ -224,7 +268,10 @@ export default function NavigatorPage() {
             items={clusterChips}
             activeId={activeCluster}
             onChange={setActiveCluster}
-            ariaLabel={isRu ? 'Фильтр по кластерам' : 'Filter by cluster'}
+            ariaLabel={pickTriplet(
+              { ru: 'Фильтр по кластерам', en: 'Filter by cluster', th: 'กรองตามกลุ่ม' },
+              language
+            )}
           />
         )}
 
@@ -233,7 +280,10 @@ export default function NavigatorPage() {
           <div className="space-y-2">
             {searchResults.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-6">
-                {isRu ? 'Ничего не найдено' : 'No results found'}
+                {pickTriplet(
+                  { ru: 'Ничего не найдено', en: 'No results found', th: 'ไม่พบผลลัพธ์' },
+                  language
+                )}
               </p>
             ) : (
               <div className="flex flex-wrap gap-2">
@@ -242,7 +292,7 @@ export default function NavigatorPage() {
                     key={`search-${service.path}-${service.labelEn}`}
                     service={service}
                     clusterColor={service.clusterColor}
-                    isRu={isRu}
+                    language={language}
                     onNavigate={navigate}
                   />
                 ))}
@@ -275,14 +325,14 @@ export default function NavigatorPage() {
                           className="text-[13px] font-display font-bold tracking-wide"
                           style={{ color: cluster.color }}
                         >
-                          {isRu ? cluster.labelRu : cluster.labelEn}
+                          {getClusterHeaderLabel(cluster, language)}
                         </h3>
                         <span className="text-[10px] text-muted-foreground/50 font-medium">
                           {availableCount}
                         </span>
                       </div>
                       <p className="text-[11px] text-muted-foreground/70 leading-snug line-clamp-1">
-                        {isRu ? cluster.valueRu : cluster.valueEn}
+                        {getClusterValueLine(cluster, language)}
                       </p>
                     </div>
                   </div>
@@ -294,7 +344,7 @@ export default function NavigatorPage() {
                         key={`${cluster.id}-${service.path}-${service.labelEn}`}
                         service={service}
                         clusterColor={cluster.color}
-                        isRu={isRu}
+                        language={language}
                         onNavigate={navigate}
                       />
                     ))}
@@ -312,7 +362,7 @@ export default function NavigatorPage() {
             style={{ background: 'hsl(var(--bg-elevated))', border: '1px solid hsl(0 0% 100% / 0.05)' }}
           >
             <p className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-wider">
-              {isRu ? 'Скоро' : 'Coming soon'}
+              {pickTriplet({ ru: 'Скоро', en: 'Coming soon', th: 'เร็ว ๆ นี้' }, language)}
             </p>
             <div className="flex flex-wrap gap-2">
               {SOON_SERVICES.map(s => {
@@ -325,7 +375,7 @@ export default function NavigatorPage() {
                   >
                     <SIcon className="w-3.5 h-3.5" style={{ color: s.clusterColor }} />
                     <span className="text-[11px] font-medium" style={{ color: s.clusterColor }}>
-                      {isRu ? s.labelRu : s.labelEn}
+                      {getClusterServiceLocalizedLabel(s, language)}
                     </span>
                   </div>
                 );
@@ -340,7 +390,7 @@ export default function NavigatorPage() {
             className="rounded-[var(--radius-md)] p-4 space-y-3 text-center"
             style={{ background: 'hsl(var(--bg-surface))', border: '1px solid hsl(0 0% 100% / 0.05)' }}
           >
-            <NavigatorStatsFooter stats={stats} isRu={isRu} />
+            <NavigatorStatsFooter stats={stats} language={language} />
             <button
               onClick={() => {
                 window.dispatchEvent(new CustomEvent('navigator:open-apps-drawer'));
@@ -348,7 +398,10 @@ export default function NavigatorPage() {
               className="inline-flex items-center gap-1.5 text-[12px] text-primary font-medium hover:underline"
             >
               <LayoutGrid className="w-3.5 h-3.5" />
-              {isRu ? 'Все сервисы →' : 'All services →'}
+              {pickTriplet(
+                { ru: 'Все сервисы →', en: 'All services →', th: 'บริการทั้งหมด →' },
+                language
+              )}
             </button>
           </div>
         )}

@@ -1,19 +1,16 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import { NavShell } from '@/components/nav/NavShell';
+import { AppLayout } from '@/components/layout/AppLayout';
 
 interface GuestLayoutProps {
   children?: React.ReactNode;
 }
 
-/**
- * GuestLayout — hotel-guest workspace shell.
- * Migrated to NavShell (Stage 4 of nav refactor).
- */
+/** Hotel-guest workspace shell — `AppLayout` + `navRole="guest"`. */
 export function GuestLayout({ children }: GuestLayoutProps) {
   return (
-    <NavShell role="guest">
+    <AppLayout variant="workspace" navRole="guest" usePageContainer={false} showFooter={false}>
       {children || <Outlet />}
-    </NavShell>
+    </AppLayout>
   );
 }

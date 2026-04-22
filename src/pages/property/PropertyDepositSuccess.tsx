@@ -1,7 +1,6 @@
 import React from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Check, Calendar, Home, MessageCircle, ArrowRight } from 'lucide-react';
-import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -20,8 +19,7 @@ export default function PropertyDepositSuccess() {
   const bookingId = orderId || searchParams.get('booking_id');
 
   return (
-    <AppLayout showBottomNav={false}>
-      <div className="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh]">
+    <div className="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh]">
         {/* Success Icon */}
         <div className="w-20 h-20 rounded-full bg-success/20 flex items-center justify-center mb-6 animate-in zoom-in-50 duration-300">
           <Check className="w-10 h-10 text-success" />
@@ -121,6 +119,5 @@ export default function PropertyDepositSuccess() {
           </p>
         )}
       </div>
-    </AppLayout>
   );
 }

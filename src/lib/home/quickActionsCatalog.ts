@@ -65,6 +65,8 @@ export interface CatalogQuickAction {
   icon: ElementType;
   label: string;
   labelRu: string;
+  /** Thai — optional; often resolved via `APP_REGISTRY` + `getAppEntryLabel` */
+  labelTh?: string;
   path: string;
   isUrgent?: boolean;
   accentColor?: string;
@@ -73,14 +75,22 @@ export interface CatalogQuickAction {
   intents?: string[];
 }
 
-export const GROUP_LABELS: Record<QuickActionGroupId, { ru: string; en: string }> = {
-  capital: { ru: 'Капитал', en: 'Capital' },
-  diligence: { ru: 'Сервисы сделки и аналитика', en: 'Diligence & deal support' },
-  company_setup: { ru: 'Компания и комплаенс', en: 'Company & compliance' },
-  workspace: { ru: 'Помещение и работа', en: 'Workspace' },
-  ops: { ru: 'Эксплуатация', en: 'Operations' },
-  growth: { ru: 'Рост и партнёрства', en: 'Growth' },
-  general: { ru: 'Быстрые действия', en: 'Quick actions' },
+export const GROUP_LABELS: Record<QuickActionGroupId, { ru: string; en: string; th: string }> = {
+  capital: { ru: 'Капитал', en: 'Capital', th: 'เงินทุน' },
+  diligence: {
+    ru: 'Сервисы сделки и аналитика',
+    en: 'Diligence & deal support',
+    th: 'วิเคราะห์ดีล',
+  },
+  company_setup: {
+    ru: 'Компания и комплаенс',
+    en: 'Company & compliance',
+    th: 'บริษัทและกฎระเบียบ',
+  },
+  workspace: { ru: 'Помещение и работа', en: 'Workspace', th: 'พื้นที่ทำงาน' },
+  ops: { ru: 'Эксплуатация', en: 'Operations', th: 'ปฏิบัติการ' },
+  growth: { ru: 'Рост и партнёрства', en: 'Growth', th: 'การเติบโต' },
+  general: { ru: 'Быстрые действия', en: 'Quick actions', th: 'ทางลัด' },
 };
 
 const PRIMARY_PERSONA_SCORE_BOOST = 14;

@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { CheckCircle2, Clock, Copy, MessageCircle, Loader2, Home, AlertCircle, FileCheck2, XCircle } from 'lucide-react';
-import { AppLayout } from '@/components/layout/AppLayout';
 import { BackButton } from '@/components/uno/BackButton';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -128,28 +127,24 @@ export default function ManualPaymentPending() {
 
   if (isLoading) {
     return (
-      <AppLayout showBottomNav={false}>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-        </div>
-      </AppLayout>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+      </div>
     );
   }
 
   if (!request || !order) {
     return (
-      <AppLayout showBottomNav={false}>
-        <div className="p-6 text-center space-y-4">
-          <AlertCircle className="w-12 h-12 mx-auto text-muted-foreground" />
-          <h1 className="text-xl font-display font-bold">
-            {isRu ? 'Заявка не найдена' : 'Request not found'}
-          </h1>
-          <Button onClick={() => navigate('/')} variant="outline">
-            <Home className="w-4 h-4 mr-2" />
-            {isRu ? 'На главную' : 'Go home'}
-          </Button>
-        </div>
-      </AppLayout>
+      <div className="p-6 text-center space-y-4">
+        <AlertCircle className="w-12 h-12 mx-auto text-muted-foreground" />
+        <h1 className="text-xl font-display font-bold">
+          {isRu ? 'Заявка не найдена' : 'Request not found'}
+        </h1>
+        <Button onClick={() => navigate('/')} variant="outline">
+          <Home className="w-4 h-4 mr-2" />
+          {isRu ? 'На главную' : 'Go home'}
+        </Button>
+      </div>
     );
   }
 
@@ -166,8 +161,7 @@ export default function ManualPaymentPending() {
   });
 
   return (
-    <AppLayout showBottomNav={false}>
-      <div className="pb-12">
+    <div className="pb-12">
         <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-md border-b">
           <div className="flex items-center gap-4 p-4">
             <BackButton fallbackPath="/" variant="ghost" />
@@ -375,6 +369,5 @@ export default function ManualPaymentPending() {
           </p>
         </div>
       </div>
-    </AppLayout>
   );
 }

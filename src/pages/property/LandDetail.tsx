@@ -6,7 +6,6 @@ import { Trees, ShieldCheck, Route, Mail, BadgeCheck } from 'lucide-react';
 import { SEOHead } from '@/components/seo';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
-import { AppLayout } from '@/components/layout/AppLayout';
 import { BackButton } from '@/components/uno/BackButton';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -29,27 +28,23 @@ export default function LandDetail() {
 
   if (isLoading) {
     return (
-      <AppLayout>
-        <div className={ECOSYSTEM_PAGE_CONTAINER}>
-          <div className="px-4 pt-3"><BackButton /></div>
-          <Skeleton className="aspect-[16/9] mx-4 rounded-2xl mt-3" />
-        </div>
-      </AppLayout>
+      <div className={ECOSYSTEM_PAGE_CONTAINER}>
+        <div className="px-4 pt-3"><BackButton /></div>
+        <Skeleton className="aspect-[16/9] mx-4 rounded-2xl mt-3" />
+      </div>
     );
   }
 
   if (error || !property) {
     return (
-      <AppLayout>
-        <div className={ECOSYSTEM_PAGE_CONTAINER}>
-          <div className="px-4 pt-3"><BackButton /></div>
-          <div className="px-4 py-12 text-center">
-            <p className="text-sm text-muted-foreground">
-              {isRu ? 'Участок не найден' : 'Plot not found'}
-            </p>
-          </div>
+      <div className={ECOSYSTEM_PAGE_CONTAINER}>
+        <div className="px-4 pt-3"><BackButton /></div>
+        <div className="px-4 py-12 text-center">
+          <p className="text-sm text-muted-foreground">
+            {isRu ? 'Участок не найден' : 'Plot not found'}
+          </p>
         </div>
-      </AppLayout>
+      </div>
     );
   }
 
@@ -69,7 +64,7 @@ export default function LandDetail() {
     : null;
 
   return (
-    <AppLayout>
+    <>
       <SEOHead title={`${title} — myUNO`} description={description.slice(0, 160)} />
       <div className={ECOSYSTEM_PAGE_CONTAINER}>
         <div className="px-4 pt-3"><BackButton /></div>
@@ -140,7 +135,7 @@ export default function LandDetail() {
           </div>
         </div>
       </div>
-    </AppLayout>
+    </>
   );
 }
 

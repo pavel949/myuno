@@ -11,7 +11,7 @@
  */
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { Search, Menu } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { useAuth } from '@/contexts/AuthContext';
@@ -22,6 +22,7 @@ import { MiniCart } from '@/components/market/MiniCart';
 import { Button } from '@/components/ui/button';
 import { GlobalSearchModal } from '@/components/search/GlobalSearchModal';
 import { UserAvatarMenu } from '@/components/layout/UserAvatarMenu';
+import { BrandWordmark } from '@/components/uno/BrandWordmark';
 import { useScrolled } from '@/hooks/useScrollBehavior';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { ECOSYSTEM_HEADER_INNER } from '@/design-system/ecosystemLayout';
@@ -93,21 +94,14 @@ export const TopBar = memo(function TopBar({
         >
           {/* Sidebar toggle (workspace roles, ≥md only) */}
           {sidebarVisible && (
-            <SidebarTrigger className="hidden md:flex h-9 w-9 mr-1" />
+            <SidebarTrigger
+              className="flex h-11 w-11 shrink-0 md:h-9 md:w-9 md:mr-1"
+              title={isRu ? 'Меню' : 'Menu'}
+            />
           )}
 
           {/* Logo */}
-          <Link
-            to={APP_ROUTES.HOME}
-            className="flex items-center gap-0.5 flex-shrink-0 whitespace-nowrap group mr-1"
-          >
-            <span className="text-sm lg:text-base text-primary font-bold transition-all duration-200 group-hover:tracking-wider">
-              my
-            </span>
-            <span className="text-base lg:text-xl font-bold text-foreground font-display tracking-tight">
-              UNO
-            </span>
-          </Link>
+          <BrandWordmark />
 
           {/* Nav pills (≥md). Consumer roles get them on tablet+; workspace roles
               have a sidebar — pills are redundant, hidden. */}
@@ -129,7 +123,7 @@ export const TopBar = memo(function TopBar({
                         : 'text-muted-foreground hover:text-foreground hover:bg-muted/40',
                     )}
                   >
-                    <Icon className="w-4 h-4" aria-hidden />
+                    <Icon className="size-5" aria-hidden />
                     <span className="hidden lg:inline">{label}</span>
                   </NavLink>
                 );
@@ -148,7 +142,7 @@ export const TopBar = memo(function TopBar({
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
             )}
           >
-            <Search className="w-4 h-4 text-muted-foreground group-hover/search:text-foreground transition-colors shrink-0" />
+            <Search className="size-5 text-muted-foreground group-hover/search:text-foreground transition-colors shrink-0" />
             <span className="text-[13px] text-muted-foreground flex-1 text-left truncate">
               {isRu ? 'Поиск сервисов...' : 'Search services...'}
             </span>
@@ -172,7 +166,7 @@ export const TopBar = memo(function TopBar({
               className="lg:hidden flex items-center justify-center w-11 h-11 rounded-[var(--radius-sm)] hover:bg-muted/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               aria-label={isRu ? 'Поиск' : 'Search'}
             >
-              <Search className="w-[18px] h-[18px] text-muted-foreground" />
+              <Search className="size-5 text-muted-foreground" />
             </button>
             <LanguageSwitcher size="sm" />
             <CurrencySwitcher size="sm" />

@@ -9,7 +9,6 @@ import { DateRange } from 'react-day-picker';
 import { PropertyShareSheet } from '@/components/property/PropertyShareSheet';
 import { CompareButton, type CompareProperty } from '@/components/property/PropertyCompare';
 import { PropertyPdfButton } from '@/components/property/PropertyPdfBrochure';
-import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { Button } from '@/components/ui/button';
@@ -113,25 +112,21 @@ export default function PropertyDetail() {
 
   if (isLoading) {
     return (
-      <AppLayout>
-        <div className="flex items-center justify-center min-h-screen">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        </div>
-      </AppLayout>
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
     );
   }
 
   if (!property) {
     return (
-      <AppLayout>
-        <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-          <Home className="w-16 h-16 text-muted-foreground/50" />
-          <h2 className="text-xl font-semibold">{isRu ? 'Объект не найден' : 'Property not found'}</h2>
-          <Button variant="outline" onClick={() => navigate('/property')}>
-            {isRu ? 'К списку' : 'Back to listings'}
-          </Button>
-        </div>
-      </AppLayout>
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+        <Home className="w-16 h-16 text-muted-foreground/50" />
+        <h2 className="text-xl font-semibold">{isRu ? 'Объект не найден' : 'Property not found'}</h2>
+        <Button variant="outline" onClick={() => navigate('/property')}>
+          {isRu ? 'К списку' : 'Back to listings'}
+        </Button>
+      </div>
     );
   }
 
@@ -178,7 +173,7 @@ export default function PropertyDetail() {
   };
 
   return (
-    <AppLayout>
+    <>
       <SEOHead
         title={propertyTitle || undefined}
         description={propertyDesc.slice(0, 160)}
@@ -683,6 +678,6 @@ export default function PropertyDetail() {
         projectTitle={isRu ? property.title_ru : property.title_en}
         projectId={id}
       />
-    </AppLayout>
+    </>
   );
 }

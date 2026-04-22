@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
+import { FLOATING, FLOATING_OFFSET } from '@/lib/nav/floatingStack';
 
 const MAX_COMPARE = 3;
 const STORAGE_KEY = 'myuno_compare_properties';
@@ -103,7 +104,7 @@ export function CompareProvider({ children }: { children: React.ReactNode }) {
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
-            className="fixed bottom-[calc(var(--bottom-nav-h)+1rem)] left-1/2 -translate-x-1/2 z-50"
+            className={`fixed ${FLOATING_OFFSET.aboveBottomNav} left-1/2 -translate-x-1/2 ${FLOATING.compare}`}
           >
             <Button
               onClick={() => setSheetOpen(true)}

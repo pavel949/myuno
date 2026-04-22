@@ -5,7 +5,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Building2, CheckCircle2, ExternalLink, Star } from 'lucide-react';
-import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -23,10 +22,7 @@ export default function DevelopersIndex() {
   const { data: developers, isLoading } = useDevelopers();
 
   return (
-    <AppLayout 
-      title={isRu ? 'Застройщики' : 'Developers'}
-    >
-      <div className="px-4 py-4 pb-24 space-y-4">
+    <div className="px-4 py-4 pb-24 space-y-4">
         {/* Hero */}
         <div className="rounded-2xl bg-gradient-to-br from-primary/10 via-background to-accent/5 p-4 border border-border/50">
           <div className="flex items-center gap-3 mb-3">
@@ -149,6 +145,5 @@ export default function DevelopersIndex() {
           </div>
         )}
       </div>
-    </AppLayout>
   );
 }

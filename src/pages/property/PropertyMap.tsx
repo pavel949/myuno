@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { Sliders, MapPin, Loader2 } from 'lucide-react';
 import { BackButton } from '@/components/uno/BackButton';
 import { APP_ROUTES } from '@/lib/config/routes';
-import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import SalonMap from '@/components/map/SalonMap';
 import { FilterChip } from '@/components/uno/FilterChip';
@@ -76,8 +75,7 @@ export default function PropertyMap() {
   };
 
   return (
-    <AppLayout>
-      <div className="h-[calc(100vh-60px)] flex flex-col">
+    <div className="h-[calc(100vh-60px)] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 bg-background/80 backdrop-blur-sm border-b border-border/50">
           <BackButton fallbackPath={APP_ROUTES.PROPERTY} variant="ghost" size="sm" />
@@ -220,7 +218,6 @@ export default function PropertyMap() {
             iconBgColor="bg-emerald-600"
           />
         )}
-      </div>
-    </AppLayout>
+    </div>
   );
 }
