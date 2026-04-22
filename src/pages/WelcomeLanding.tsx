@@ -26,7 +26,6 @@ import {
   Hammer,
   Shield,
   Globe,
-  Sparkles,
   type LucideIcon,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';

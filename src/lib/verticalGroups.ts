@@ -49,8 +49,9 @@ export interface VerticalGroup {
   items: VerticalGroupItem[];
 }
 
-function g(id: keyof typeof ECOSYSTEM_JOURNEY_GROUP_TRIPLET): LocalizedTriplet {
-  return ECOSYSTEM_JOURNEY_GROUP_TRIPLET[id];
+function g(id: keyof typeof ECOSYSTEM_JOURNEY_GROUP_TRIPLET): { labelRu: string; labelEn: string; labelTh: string } {
+  const t = ECOSYSTEM_JOURNEY_GROUP_TRIPLET[id];
+  return { labelRu: t.ru, labelEn: t.en, labelTh: t.th };
 }
 
 export const VERTICAL_GROUPS: VerticalGroup[] = [
@@ -352,7 +353,12 @@ export function getVerticalGroupItemLabel(
   opts: { labelRu: string; labelEn: string; labelTh: string } | null,
   lang: Language
 ): string {
-  if (opts) return pickTriplet(opts, lang);
+  if (opts) {
+    return pickTriplet(
+      { ru: opts.labelRu, en: opts.labelEn, th: opts.labelTh },
+      lang
+    );
+  }
   if (item.labelRu && item.labelEn) {
     return pickTriplet(
       { ru: item.labelRu, en: item.labelEn, th: item.labelTh ?? item.labelEn },
