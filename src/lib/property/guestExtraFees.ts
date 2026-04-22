@@ -80,28 +80,29 @@ export function getFeeLabel(fee: GuestExtraFee, isRu: boolean): string {
  */
 export function parseGuestExtraFees(raw: unknown): GuestExtraFee[] {
   if (!Array.isArray(raw)) return [];
-  return raw
-    .filter((item): item is Record<string, unknown> => !!item && typeof item === 'object')
-    .map((item) => {
-      const kind = (item.kind as GuestFeeKind) ?? 'other';
-      if (!GUEST_FEE_KIND_PRESETS[kind]) return null;
-      return {
-        id: String(item.id ?? cryptoRandomId()),
-        kind,
-        label_en: typeof item.label_en === 'string' ? item.label_en : undefined,
-        label_ru: typeof item.label_ru === 'string' ? item.label_ru : undefined,
-        unit: typeof item.unit === 'string' ? item.unit : undefined,
-        rate: typeof item.rate === 'number' ? item.rate : null,
-        currency: typeof item.currency === 'string' ? item.currency : undefined,
-        estimate_min: typeof item.estimate_min === 'number' ? item.estimate_min : null,
-        estimate_max: typeof item.estimate_max === 'number' ? item.estimate_max : null,
-        when_paid:
-          (item.when_paid as GuestFeePaymentMoment) ?? 'at_check_out',
-        notes_en: typeof item.notes_en === 'string' ? item.notes_en : undefined,
-        notes_ru: typeof item.notes_ru === 'string' ? item.notes_ru : undefined,
-      } satisfies GuestExtraFee;
-    })
-    .filter((x): x is GuestExtraFee => x !== null);
+  const out: GuestExtraFee[] = [];
+  for (const item of raw) {
+    if (!item || typeof item !== 'object') continue;
+    const obj = item as Record<string, unknown>;
+    const kind = (obj.kind as GuestFeeKind) ?? 'other';
+    if (!GUEST_FEE_KIND_PRESETS[kind]) continue;
+    const fee: GuestExtraFee = {
+      id: String(obj.id ?? cryptoRandomId()),
+      kind,
+      label_en: typeof obj.label_en === 'string' ? obj.label_en : undefined,
+      label_ru: typeof obj.label_ru === 'string' ? obj.label_ru : undefined,
+      unit: typeof obj.unit === 'string' ? obj.unit : undefined,
+      rate: typeof obj.rate === 'number' ? obj.rate : null,
+      currency: typeof obj.currency === 'string' ? obj.currency : undefined,
+      estimate_min: typeof obj.estimate_min === 'number' ? obj.estimate_min : null,
+      estimate_max: typeof obj.estimate_max === 'number' ? obj.estimate_max : null,
+      when_paid: (obj.when_paid as GuestFeePaymentMoment) ?? 'at_check_out',
+      notes_en: typeof obj.notes_en === 'string' ? obj.notes_en : undefined,
+      notes_ru: typeof obj.notes_ru === 'string' ? obj.notes_ru : undefined,
+    };
+    out.push(fee);
+  }
+  return out;
 }
 
 function cryptoRandomId(): string {
