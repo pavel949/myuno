@@ -257,7 +257,7 @@ export function AppDrawer({
                 {isRu ? 'Все сервисы' : 'All services'}
               </h3>
               <Accordion type="multiple" className="w-full">
-                {CLUSTER_CATALOG.map((cluster) => {
+                {visibleClusters.map((cluster) => {
                   const Icon = cluster.icon;
                   // Drawer hides "soon" items — keep launcher purely actionable
                   const links = cluster.services.filter((s) => s.status !== 'soon');
