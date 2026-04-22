@@ -524,6 +524,11 @@ export default function PropertyDetail() {
                 district={property.district}
                 propertyType={property.property_type}
                 bedrooms={property.bedrooms}
+                nights={
+                  dateRange?.from && dateRange?.to
+                    ? Math.max(0, Math.round((dateRange.to.getTime() - dateRange.from.getTime()) / 86_400_000))
+                    : undefined
+                }
               />
             </article>
 
