@@ -3,7 +3,7 @@
  * @description Authentication provider wrapping Supabase Auth.
  *
  * Provides: user, session, isLoading, signUp, signIn, signOut, resetPassword, updatePassword.
- * Listens to auth state changes and persists session in localStorage.
+ * Listens to auth state changes and relies on Supabase session APIs.
  *
  * Usage: `const { user, signIn } = useAuth();`
  */
@@ -47,22 +47,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refreshFailureCountRef = useRef(0);
 
   const clearStoredAuthSession = useCallback(() => {
-    const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-
     if (typeof window !== 'undefined') {
       Object.keys(window.sessionStorage)
         .filter((key) => key.startsWith('qa_multi_role_bundle_checked:'))
         .forEach((key) => window.sessionStorage.removeItem(key));
-    }
-
-    if (typeof window !== 'undefined' && projectId) {
-      const authStoragePrefix = `sb-${projectId}-auth-token`;
-
-      [window.localStorage, window.sessionStorage].forEach((storage) => {
-        Object.keys(storage)
-          .filter((key) => key.startsWith(authStoragePrefix))
-          .forEach((key) => storage.removeItem(key));
-      });
     }
 
     clearAdminCache();
