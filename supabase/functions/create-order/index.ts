@@ -1,4 +1,4 @@
-// Creates order with server-side prices from marketplace_products. Returns order_id for create-order-checkout.
+// Creates order with server-side prices from marketplace_products. Returns order_id for downstream checkout.
 import { createClient } from "../_shared/supabase.ts";
 import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
