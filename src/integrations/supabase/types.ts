@@ -15432,6 +15432,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          active_clusters: string[]
           address_line1: string | null
           address_line2: string | null
           avatar_url: string | null
@@ -15441,19 +15442,29 @@ export type Database = {
           current_visa_id: string | null
           date_of_birth: string | null
           deactivated_at: string | null
+          detected_persona: string | null
+          detected_persona_confidence: number | null
           dietary_restrictions: string[] | null
           email: string | null
           emergency_contact_name: string | null
           emergency_contact_phone: string | null
           emergency_contact_relationship: string | null
           family_member_ids: string[] | null
+          first_visit_at: string | null
           full_name: string | null
           gender: string | null
+          household_type:
+            | Database["public"]["Enums"]["household_type_enum"]
+            | null
           id: string
+          kids_ages: number[]
           languages_spoken: string[] | null
+          lifecycle_stage: Database["public"]["Enums"]["lifecycle_stage"] | null
+          lifecycle_stage_history: Json
           medical_conditions: string | null
           myuno_id_version: number
           nationality: string | null
+          next_lifecycle_stage_eta: string | null
           owner_type: string | null
           phone: string | null
           postal_code: string | null
@@ -15462,17 +15473,22 @@ export type Database = {
           referral_balance: number
           referral_code: string | null
           referred_by: string | null
+          special_status: string[]
           state_province: string | null
           status: string
           status_changed_by: string | null
           suspended_at: string | null
           tax_residency: string | null
+          total_days_in_thailand: number
           travel_preferences: Json | null
+          triggers_active: string[]
           updated_at: string
           user_type: Database["public"]["Enums"]["user_type"] | null
           vault_pin_set: boolean
+          visits_count: number
         }
         Insert: {
+          active_clusters?: string[]
           address_line1?: string | null
           address_line2?: string | null
           avatar_url?: string | null
@@ -15482,19 +15498,31 @@ export type Database = {
           current_visa_id?: string | null
           date_of_birth?: string | null
           deactivated_at?: string | null
+          detected_persona?: string | null
+          detected_persona_confidence?: number | null
           dietary_restrictions?: string[] | null
           email?: string | null
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
           emergency_contact_relationship?: string | null
           family_member_ids?: string[] | null
+          first_visit_at?: string | null
           full_name?: string | null
           gender?: string | null
+          household_type?:
+            | Database["public"]["Enums"]["household_type_enum"]
+            | null
           id: string
+          kids_ages?: number[]
           languages_spoken?: string[] | null
+          lifecycle_stage?:
+            | Database["public"]["Enums"]["lifecycle_stage"]
+            | null
+          lifecycle_stage_history?: Json
           medical_conditions?: string | null
           myuno_id_version?: number
           nationality?: string | null
+          next_lifecycle_stage_eta?: string | null
           owner_type?: string | null
           phone?: string | null
           postal_code?: string | null
@@ -15503,17 +15531,22 @@ export type Database = {
           referral_balance?: number
           referral_code?: string | null
           referred_by?: string | null
+          special_status?: string[]
           state_province?: string | null
           status?: string
           status_changed_by?: string | null
           suspended_at?: string | null
           tax_residency?: string | null
+          total_days_in_thailand?: number
           travel_preferences?: Json | null
+          triggers_active?: string[]
           updated_at?: string
           user_type?: Database["public"]["Enums"]["user_type"] | null
           vault_pin_set?: boolean
+          visits_count?: number
         }
         Update: {
+          active_clusters?: string[]
           address_line1?: string | null
           address_line2?: string | null
           avatar_url?: string | null
@@ -15523,19 +15556,31 @@ export type Database = {
           current_visa_id?: string | null
           date_of_birth?: string | null
           deactivated_at?: string | null
+          detected_persona?: string | null
+          detected_persona_confidence?: number | null
           dietary_restrictions?: string[] | null
           email?: string | null
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
           emergency_contact_relationship?: string | null
           family_member_ids?: string[] | null
+          first_visit_at?: string | null
           full_name?: string | null
           gender?: string | null
+          household_type?:
+            | Database["public"]["Enums"]["household_type_enum"]
+            | null
           id?: string
+          kids_ages?: number[]
           languages_spoken?: string[] | null
+          lifecycle_stage?:
+            | Database["public"]["Enums"]["lifecycle_stage"]
+            | null
+          lifecycle_stage_history?: Json
           medical_conditions?: string | null
           myuno_id_version?: number
           nationality?: string | null
+          next_lifecycle_stage_eta?: string | null
           owner_type?: string | null
           phone?: string | null
           postal_code?: string | null
@@ -15544,15 +15589,19 @@ export type Database = {
           referral_balance?: number
           referral_code?: string | null
           referred_by?: string | null
+          special_status?: string[]
           state_province?: string | null
           status?: string
           status_changed_by?: string | null
           suspended_at?: string | null
           tax_residency?: string | null
+          total_days_in_thailand?: number
           travel_preferences?: Json | null
+          triggers_active?: string[]
           updated_at?: string
           user_type?: Database["public"]["Enums"]["user_type"] | null
           vault_pin_set?: boolean
+          visits_count?: number
         }
         Relationships: []
       }
@@ -30093,6 +30142,91 @@ export type Database = {
           },
         ]
       }
+      v_profiles_canonical: {
+        Row: {
+          active_clusters: string[] | null
+          canonical_all_roles: string[] | null
+          canonical_primary_role: string | null
+          created_at: string | null
+          detected_persona: string | null
+          detected_persona_confidence: number | null
+          email: string | null
+          first_visit_at: string | null
+          full_name: string | null
+          household_type:
+            | Database["public"]["Enums"]["household_type_enum"]
+            | null
+          id: string | null
+          kids_ages: number[] | null
+          lifecycle_stage: Database["public"]["Enums"]["lifecycle_stage"] | null
+          lifecycle_stage_history: Json | null
+          next_lifecycle_stage_eta: string | null
+          preferred_language: string | null
+          special_status: string[] | null
+          total_days_in_thailand: number | null
+          triggers_active: string[] | null
+          updated_at: string | null
+          user_type: Database["public"]["Enums"]["user_type"] | null
+          visits_count: number | null
+        }
+        Insert: {
+          active_clusters?: string[] | null
+          canonical_all_roles?: never
+          canonical_primary_role?: never
+          created_at?: string | null
+          detected_persona?: string | null
+          detected_persona_confidence?: number | null
+          email?: string | null
+          first_visit_at?: string | null
+          full_name?: string | null
+          household_type?:
+            | Database["public"]["Enums"]["household_type_enum"]
+            | null
+          id?: string | null
+          kids_ages?: number[] | null
+          lifecycle_stage?:
+            | Database["public"]["Enums"]["lifecycle_stage"]
+            | null
+          lifecycle_stage_history?: Json | null
+          next_lifecycle_stage_eta?: string | null
+          preferred_language?: string | null
+          special_status?: string[] | null
+          total_days_in_thailand?: number | null
+          triggers_active?: string[] | null
+          updated_at?: string | null
+          user_type?: Database["public"]["Enums"]["user_type"] | null
+          visits_count?: number | null
+        }
+        Update: {
+          active_clusters?: string[] | null
+          canonical_all_roles?: never
+          canonical_primary_role?: never
+          created_at?: string | null
+          detected_persona?: string | null
+          detected_persona_confidence?: number | null
+          email?: string | null
+          first_visit_at?: string | null
+          full_name?: string | null
+          household_type?:
+            | Database["public"]["Enums"]["household_type_enum"]
+            | null
+          id?: string | null
+          kids_ages?: number[] | null
+          lifecycle_stage?:
+            | Database["public"]["Enums"]["lifecycle_stage"]
+            | null
+          lifecycle_stage_history?: Json | null
+          next_lifecycle_stage_eta?: string | null
+          preferred_language?: string | null
+          special_status?: string[] | null
+          total_days_in_thailand?: number | null
+          triggers_active?: string[] | null
+          updated_at?: string | null
+          user_type?: Database["public"]["Enums"]["user_type"] | null
+          visits_count?: number | null
+        }
+        Relationships: []
+      }
       v_properties_public: {
         Row: {
           address: string | null
@@ -30900,6 +31034,14 @@ export type Database = {
       }
       generate_referral_code: { Args: { p_user_id: string }; Returns: string }
       get_all_currency_rates: { Args: never; Returns: Json }
+      get_canonical_primary_role: {
+        Args: { _user_id: string }
+        Returns: string
+      }
+      get_canonical_secondary_roles: {
+        Args: { _user_id: string }
+        Returns: string[]
+      }
       get_capital_crm_owner: { Args: never; Returns: string }
       get_company_member_role: {
         Args: { _company_id: string; _user_id: string }
@@ -31056,6 +31198,10 @@ export type Database = {
       get_yacht_price_for_date: {
         Args: { p_charter_type?: string; p_date: string; p_yacht_id: string }
         Returns: number
+      }
+      has_canonical_role: {
+        Args: { _canonical_role: string; _user_id: string }
+        Returns: boolean
       }
       has_elevated_access: {
         Args: { p_required_roles?: string[] }
@@ -31468,6 +31614,12 @@ export type Database = {
         | "profitable"
         | "exiting"
       education_entity_type: "institution" | "individual"
+      household_type_enum:
+        | "solo"
+        | "couple"
+        | "family_with_kids"
+        | "family_extended"
+        | "group_friends"
       inquiry_status: "new" | "contacted" | "qualified" | "matched" | "declined"
       intent_status:
         | "pending"
@@ -31485,6 +31637,16 @@ export type Database = {
       invoice_status: "draft" | "sent" | "paid" | "overdue" | "cancelled"
       invoice_type: "tenant_billing" | "owner_report" | "service_fee"
       item_condition: "new" | "like_new" | "good" | "fair" | "for_parts"
+      language_code: "ru" | "en" | "th"
+      lifecycle_stage:
+        | "scout"
+        | "tourist"
+        | "snowbird"
+        | "nomad"
+        | "settler"
+        | "resident"
+        | "absentee"
+        | "returnee"
       listing_application_status:
         | "draft"
         | "pending"
@@ -31787,6 +31949,13 @@ export const Constants = {
       ],
       deal_stage: ["idea", "pre_revenue", "operating", "profitable", "exiting"],
       education_entity_type: ["institution", "individual"],
+      household_type_enum: [
+        "solo",
+        "couple",
+        "family_with_kids",
+        "family_extended",
+        "group_friends",
+      ],
       inquiry_status: ["new", "contacted", "qualified", "matched", "declined"],
       intent_status: [
         "pending",
@@ -31806,6 +31975,17 @@ export const Constants = {
       invoice_status: ["draft", "sent", "paid", "overdue", "cancelled"],
       invoice_type: ["tenant_billing", "owner_report", "service_fee"],
       item_condition: ["new", "like_new", "good", "fair", "for_parts"],
+      language_code: ["ru", "en", "th"],
+      lifecycle_stage: [
+        "scout",
+        "tourist",
+        "snowbird",
+        "nomad",
+        "settler",
+        "resident",
+        "absentee",
+        "returnee",
+      ],
       listing_application_status: [
         "draft",
         "pending",
