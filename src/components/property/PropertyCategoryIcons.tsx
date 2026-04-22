@@ -8,6 +8,9 @@ import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { PROPERTY_FEATURE_GROUPS, PROPERTY_FEATURE_MAP, type PropertyFeature } from '@/lib/config/propertyFeatures';
 
+/** Property listing intent — rent vs buy. Shared across search, ribbon, cards. */
+export type PropertyMode = 'rent' | 'buy';
+
 export interface PropertyCategory {
   id: string;
   icon: React.ElementType;
