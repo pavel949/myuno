@@ -1,126 +1,83 @@
 
 
-# План — Auth-перестройка с сохранением Single-UUID
+# Сравнение Airbnb «Booking a home» (Mobbin) vs myUNO
 
-## 1. Контекст: «единый UUID»
+## Что я посмотрел в Mobbin (16 экранов flow)
 
-В myUNO **`auth.users.id` = `profiles.id` = единый UUID пользователя** через всю систему. Этот UUID используется как FK в десятках таблиц (`properties.owner_id`, `crm_contacts.user_id`, `bookings.user_id`, `wallets.user_id`, `terms_acceptances.user_id`, и т.д.). Каскадные триггеры на `INSERT INTO auth.users` создают:
+PDP → Reserve → **Review and continue** (одна страница) → Add payment method (PayPal/Card/Bank) → Card details (нативная iOS клавиатура) → Confirm.
 
-1. `public.profiles` (миграция `20260108232401`, функция `handle_new_user`)
-2. `public.user_roles` (та же функция, role='user')
-3. `public.wallets` (`handle_new_user_wallet`)
+## Что у myUNO уже хорошо (не трогаем)
 
-**Любой новый auth-flow обязан проходить через `auth.users` ровно один раз** — иначе появятся «осиротевшие» записи и дубли UUID. Это и есть инвариант, который нельзя сломать.
+- **`PropertyInquiry`** уже сделан в логике Airbnb «Review and continue»: trip mini-card, dates row + Edit, guests row + Edit, price breakdown, cancellation, ground rules, sticky CTA.
+- **Order-First** + RPC `check_property_dates_available` (атомарная защита от гонок) — лучше, чем у Airbnb mock.
+- **Draft persistence** в localStorage с TTL 24ч — переживает OAuth round-trip, Airbnb так не умеет.
+- **Two paths**: instant (предоплата) / request (бесплатно) — у Airbnb «Choose when to pay» Pay now / Pay later, у нас своя модель (10/30/50% prepay).
 
-## 2. Build-проверка — найден баг (не связан с auth)
+## Что взять из Airbnb (без поломки системы)
 
-`npm run build` падает: `Rollup failed to resolve "workbox-window"`. Пакет `vite-plugin-pwa` ссылается на него из виртуального модуля `virtual:pwa-register/react`, но `workbox-window` не указан в `package.json` (есть `workbox-build`, `workbox-core`, `workbox-routing`, `workbox-strategies`, но нет именно `-window`).
+### A. Top-3 — высокая ценность, низкий риск
 
-**Фикс:** добавить `workbox-window: ^7.4.0` в `package.json` → `npm install`. Один раз, отдельным маленьким коммитом перед auth-работой, чтобы не смешивать.
+**A1. «Choose when to pay» — выбор момента оплаты**
+- *Airbnb:* radio group «Pay $201.54 now» / «Pay part now, part later — $40.31 now, $161.23 charged on Aug 27».
+- *myUNO сейчас:* prepay_percent захардкожен на уровне `rentalTerms`, гость видит только результат.
+- *Сделать:* в `PropertyInquiry` секцию **«Когда оплачивать»** с двумя radio: «Полная оплата сейчас» / «Предоплата X% сейчас, остаток за N дней до заезда» — только если `rentalTerms.allow_pay_later === true` (новый флаг). Не ломает pricingEngine: тот уже считает `prepayAmount` и `balanceAmount`.
 
-## 3. Стратегия Auth без поломки UUID
+**A2. Объединённый «Add payment method» с tabs по способам**
+- *Airbnb:* единый список PayPal / Credit card / Bank Account, выбор → раскрывает форму данных.
+- *myUNO сейчас:* `DepositPaymentOptions` = одна большая кнопка Stripe + ContactAdminButton отдельно.
+- *Сделать:* `PaymentMethodPicker` компонент — radio со способами:
+  1. Карта (Stripe) — как сейчас
+  2. Bank transfer (offline через ContactAdminButton)
+  3. WhatsApp с менеджером (для кастомных условий)
+  Метод запоминается в `localStorage` (`uno_last_payment_method`) и выбирается по умолчанию при следующей оплате.
 
-### 3.1 Принцип «один путь к auth.users»
+**A3. Sticky footer по образцу Airbnb для instant-режима**
+- *Airbnb:* всегда виден `Reserve` / `Next` снизу, не привязан к скроллу до payment options.
+- *myUNO сейчас:* sticky footer есть **только** для request-режима. В instant-режиме `DepositPaymentOptions` живёт inline и кнопка «Pay» теряется при скролле.
+- *Сделать:* единый sticky footer для обоих режимов: показывает total + кнопка `Confirm and pay X` / `Request to book` в зависимости от режима. Кнопка скроллит к секции оплаты, если способ ещё не выбран, или запускает checkout.
 
-Все способы входа (phone OTP, email/password, Google, Apple, PIN) **финализируются через стандартный Supabase Auth API**, который вставляет/находит запись в `auth.users`. Никаких параллельных таблиц «пользователей», никаких «пред-аккаунтов» в `profiles` без `auth.users`.
+### B. Polish — средняя ценность
 
-| Метод | Конечный API | Что попадает в auth.users |
-|---|---|---|
-| Email + пароль | `signInWithPassword` / `signUp` | Существующий путь, не трогаем |
-| Phone OTP | `signInWithOtp({phone})` + `verifyOtp` | Та же запись, ID тот же при повторных входах |
-| Google / Apple | `signInWithOAuth` | Стандартный provider linking |
-| PIN | `setSession(refreshToken)` | Никаких новых пользователей — только ре-гидрация существующей сессии |
+**B1. «Rare find! This place is usually booked» trust badge на mini-card**
+- Уже есть данные: можно вычислить через `property_bookings` last 30d > 70% occupancy. Маленький badge на trip mini-card в `PropertyInquiry`. Усиливает urgency.
 
-Триггер `handle_new_user` срабатывает один раз на `INSERT auth.users` независимо от метода → `profiles`/`user_roles`/`wallets` создаются автоматически с одним и тем же UUID. **Логика UUID не меняется ни в одной строчке.**
+**B2. Итоговая строка `Total price · USD` с подчёркнутой валютой → всплывающий пояснитель**
+- Сейчас валюта спрятана. Гость с RUB/THB пресетом не понимает, что именно списывается. Нужен `<sup>USD</sup>` с popover «Charged in property currency. Your bank may apply FX fee.»
 
-### 3.2 Account linking — где риск дублей и как его убираем
+**B3. Раскрытие «Details» рядом с Total**
+- Airbnb: Total строка с боковой ссылкой `Details` → expand → разбивка.
+- У нас разбивка всегда видна ниже. Можно оставить как есть, но добавить `Details` ссылку в sticky footer, открывающую полный breakdown в Sheet снизу — ускоряет review до click `Confirm`.
 
-Risk-кейс: юзер регистрируется через email → потом пробует войти через тот же телефон → Supabase создаёт **второй** auth.users-row → второй UUID → данные потеряны.
+### C. Не брать (нарушает нашу систему)
 
-**Решение: identity linking через `profiles` lookup перед OTP-отправкой.**
+- ❌ **PayPal как radio** — у нас нет PayPal интеграции, противоречит «WorldCheck перед платежом» (memory: payment rails). Оставляем Stripe + offline.
+- ❌ **Bank Account как direct ACH** — в Таиланде ACH нет, только bank transfer через менеджера. Уже есть в `ContactAdminButton`.
+- ❌ **Native iOS keypad mock** — мы PWA + Capacitor, нативная клавиатура и так открывается на `<Input type="number">`. Ничего делать не нужно.
 
-Перед `signInWithOtp({phone})`:
-1. Edge Function `auth-phone-prelink` принимает `phone` (E.164).
-2. Ищет `profiles.phone = $1`. Если найден — записывает `auth.users.phone` для этого UUID через service-role (`supabase.auth.admin.updateUserById(uid, { phone })`) **до** OTP-вызова.
-3. Возвращает `{ linked_uid: uid | null }` фронту (без секретов).
-4. Фронт вызывает `signInWithOtp({ phone })` → Supabase найдёт уже привязанный UID и не создаст дубль.
+## Баги, которые нашёл по пути (фиксим)
 
-То же самое для OAuth — Supabase сам делает linking по email, если `Identity Linking` включён в Auth settings (нужно проверить через `cloud_status` + дашборд).
+1. **Sticky footer пропадает в instant-режиме** (`PropertyInquiry.tsx:653`) — условие `&& !isInstantBooking` оставляет instant-юзера без видимой total-кнопки. → переделать в общий footer (см. A3).
+2. **`DepositPaymentOptions` ловит ошибку Stripe и просто `toast.error('Ошибка при создании платежа')`** (`DepositPaymentOptions.tsx:93`) — без deeplink к деталям, без Sentry. → Передать `error.message` в toast и `Sentry.captureException(error, { extra: { propertyId, totalAmount } })`.
+3. **`createOrder` в request-режиме не учитывает `result.success === false`** (`PropertyInquiry.tsx:777`) — если success=false и order_id=null, юзер остаётся на странице без сообщения. → `else { toast.error(...) }`.
+4. **`deposit_amount` в metadata всегда нулевой** (`PropertyInquiry.tsx:747`) — берётся из `rentalTerms.deposit_amount` (security deposit), а не из `pricing.depositAmount`. Запутывает в репортах. → переименовать в `security_deposit_amount`.
+5. **Кнопка `Confirm and pay` дёргает Stripe checkout без availability re-check** (`DepositPaymentOptions.handleOnlinePayment`) — request-режим re-check делает (`check_property_dates_available`), instant-режим **не делает**. Гонка возможна. → добавить тот же RPC перед `supabase.functions.invoke('create-property-deposit-checkout')`.
 
-### 3.3 Защита от race на стороне триггера
+## План реализации (порядок)
 
-`handle_new_user` сейчас делает обычный `INSERT INTO profiles`. Если Supabase создаст auth.users дважды (теоретический edge case), второй INSERT упадёт по PK и сломает signup. Усиливаем: меняем на `INSERT ... ON CONFLICT (id) DO NOTHING` (и то же для `user_roles`, `wallets`). Это идемпотентность без изменения семантики.
+1. **Bugfixes #1–#5** — точечные правки в `PropertyInquiry.tsx` и `DepositPaymentOptions.tsx`. Без новых компонентов.
+2. **A3 — единый sticky footer** для обоих режимов (instant/request). Рефактор финальной секции `PropertyInquiry`.
+3. **A1 — `PayWhenSelector`** компонент: radio Now / Now+Later. Гейт за `rentalTerms.allow_pay_later` (новая колонка, default false → текущее поведение не меняется).
+4. **A2 — `PaymentMethodPicker`** компонент: card/transfer/whatsapp. Замена inline-разметки в `DepositPaymentOptions`.
+5. **B1, B2** — мелкие визуальные улучшения trip mini-card.
+6. **(B3 — опционально)** — Sheet с breakdown по `Details` в footer.
 
-### 3.4 Phone-feature flag
+## Технические заметки
 
-Если SMS-провайдер ещё не подключён в Cloud Auth → ставим `feature_flag:auth_phone = false` в `system_settings`. UI показывает только email + Google/Apple. Phone-кнопка появляется автоматически после включения флага. Никаких ветвлений в БД-слое.
-
-## 4. Что строим
-
-### Track 1 — Build hotfix (5 минут, отдельный коммит)
-- `package.json`: `+ "workbox-window": "^7.4.0"`
-- `npm install`
-- `npm run build` зелёный
-
-### Track 2 — Identity-safe AuthSheet
-1. **`AuthSheet.tsx`** — новый bottom-sheet/modal shell, заменяет full-page navigation. Открывается из любой точки через `useAuthSheet()` context.
-2. **`PhoneStep.tsx`** + **`OtpStep.tsx`** — только если `feature_flag:auth_phone`. До OTP вызывает `auth-phone-prelink`.
-3. **`EmailStep.tsx`** — упрощённый email + пароль + имя в один шаг (вместо 5-шагового wizard).
-4. **`OAuthRow.tsx`** — Google + Apple через `signInWithOAuth`. Facebook за `feature_flag:auth_facebook` (off).
-5. **`ProfileCompletionStep.tsx`** — открывается только если `profiles.first_name IS NULL` после успешного входа. Не блокирует доступ, но просит заполнить имя.
-6. **`AccountTypeSelection.tsx`** — удаляем (218 строк). Роль определяется действием.
-
-### Track 3 — Edge Function `auth-phone-prelink`
-- Deno 2.0, `verify_jwt = false` (вызывается до сессии).
-- Input: `{ phone: string (E.164) }`. Validation Zod.
-- Ищет `profiles.phone`. Если матч — `auth.admin.updateUserById`. Возвращает `{ linked: boolean }`.
-- Никогда не возвращает email/PII даже при матче (anti-enumeration).
-- Rate-limit через `system_settings` (5 запросов/минуту/IP).
-
-### Track 4 — Идемпотентность триггеров (миграция)
-- `handle_new_user`: `INSERT ... ON CONFLICT (id) DO NOTHING` для `profiles` и `user_roles`.
-- `handle_new_user_wallet`: то же.
-- Добавить partial unique index `profiles_phone_unique ON profiles(phone) WHERE phone IS NOT NULL` — гарантирует, что один телефон = один UUID.
-
-### Track 5 — Snap-in замена точек входа
-- `MessageHostButton`, `PropertyBookingCard`, `LoginRequiredPage`, любые `navigate('/auth')` → `openAuthSheet({ onSuccess })`. Контекст бронирования сохраняется.
-- Маршрут `/auth` остаётся (deep-link совместимость) и рендерит `AuthSheet` standalone.
-
-## 5. Что НЕ меняем (защищено)
-
-- `auth.users` schema — не трогаем.
-- `handle_new_user` business-logic — только идемпотентность.
-- `profiles.id` PK = `auth.users.id` FK — единый UUID.
-- Существующие `user.id` по всему коду (1456 мест) — **0 изменений**.
-- `PinLogin` flow — оставляем, он уже использует `setSession` без создания нового UUID.
-- Email confirmation flow + `EmailVerificationBanner` — без изменений.
-
-## 6. Порядок выполнения
-
-1. **Build fix** (workbox-window) — отдельный коммит, проверка `npm run build`.
-2. **Миграция идемпотентности** + `profiles.phone` unique index.
-3. **`auth-phone-prelink` edge function** + тест.
-4. **`AuthSheet` shell + Email path** (работает сразу даже без SMS).
-5. **Phone path** под feature flag.
-6. **Замена точек входа** на `openAuthSheet`.
-7. **Удаление `Auth.tsx` legacy и `AccountTypeSelection.tsx`** после переключения всех caller'ов.
-
-## 7. Acceptance criteria
-
-- [ ] `npm run build` зелёный.
-- [ ] Регистрация через email → ровно одна запись в `auth.users`, `profiles`, `user_roles`, `wallets` с одним UUID.
-- [ ] Регистрация через phone → то же.
-- [ ] Юзер с email-аккаунтом, добавивший телефон в профиль, может войти через phone OTP → попадает в **тот же** UUID, никаких дублей.
-- [ ] Юзер с phone-аккаунтом, нажавший Google → linking по email если возможно; иначе понятная ошибка «этот email уже привязан к другому аккаунту».
-- [ ] PIN flow работает без изменений.
-- [ ] `properties.owner_id` для существующих юзеров не меняется ни на байт.
-- [ ] Bottom-sheet поверх `/property/:id` сохраняет URL и состояние выбранных дат после `signIn`.
-
-## 8. Технические заметки
-
-- Identity linking в Supabase Auth включается флагом в дашборде (`Auth → Settings → Manual Linking`). Если выключен — phone-prelink делает работу руками через admin API.
-- `auth-phone-prelink` нужен сервис-роль key — `SUPABASE_SERVICE_ROLE_KEY` уже доступен в edge runtime.
-- Все user-facing строки RU+EN из дня 1 через `useLanguage`.
-- Telemetry: `auth_step_view`, `auth_method`, `auth_link_attempt`, `auth_completed` для воронки.
-- Тесты: добавить unit-тест на `handle_new_user` идемпотентность через двойной `INSERT auth.users` с одинаковым UUID.
+- Новая колонка `properties.allow_pay_later boolean default false` — миграция, добавить в `usePropertyWithRentalTerms` select.
+- `useLastPaymentMethod` хук на базе `localStorage` — параллель к существующему draft-паттерну.
+- Все user-facing строки RU+EN через текущий `useLanguage()`.
+- Pricing math не трогаем — `pricingEngine.ts` уже отдаёт `prepayAmount` + `balanceAmount`.
+- Telemetry: `booking_pay_when_selected`, `booking_method_selected`, `booking_confirm_clicked`, `booking_confirm_error` через существующий analytics-канал.
+- Migration риск: zero — все новые поля опциональные, дефолты сохраняют текущее поведение.
+- Тесты: добавить unit на `PayWhenSelector` (выбор сохраняется в order metadata) и e2e на «request → sticky footer виден» / «instant → sticky footer виден».
 
