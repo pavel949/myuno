@@ -20,8 +20,11 @@
 
 ## Архитектура (architecture/)
 
+> Точка входа — **[`architecture/OVERVIEW.md`](./architecture/OVERVIEW.md)**: единый обзор, карта зависимостей, decision tree, поиск нужного документа за 1–2 клика.
+
 | Файл | Назначение |
 |------|------------|
+| [architecture/OVERVIEW.md](./architecture/OVERVIEW.md) ⭐ | Единый обзор архитектуры с навигацией по модулям и схемой зависимостей |
 | [architecture/ARCHITECTURE_V2.md](./architecture/ARCHITECTURE_V2.md) | Architecture v2 blueprint — roles · clusters · surfaces · agents, hard rules |
 | [architecture/FEASIBILITY.md](./architecture/FEASIBILITY.md) | Architecture v2 migration path и per-role implementation status |
 | [architecture/CLAUDE_PATCH.md](./architecture/CLAUDE_PATCH.md) | Source patch для блока «1.5 · Architecture source of truth (v2)» в `CLAUDE.md` |
@@ -45,7 +48,7 @@
 
 ## История изменений
 
-См. [CHANGELOG.md](./CHANGELOG.md). Текущая версия канонического набора: **v1.8.0**.
+См. [CHANGELOG.md](./CHANGELOG.md). Текущая версия канонического набора: **v1.9.0**.
 
 ## Язык документов
 

@@ -42,8 +42,9 @@
 ## 1.5 · Architecture source of truth (v2)
 
 **Before any structural change, read:**
-1. `docs/canonical/architecture/ARCHITECTURE_V2.md` — target architecture (roles · clusters · surfaces · agents)
-2. `docs/canonical/architecture/FEASIBILITY.md` — migration path and current implementation status per role
+1. `docs/canonical/architecture/OVERVIEW.md` — единый обзор: карта зависимостей, decision tree, навигация
+2. `docs/canonical/architecture/ARCHITECTURE_V2.md` — target architecture (roles · clusters · surfaces · agents)
+3. `docs/canonical/architecture/FEASIBILITY.md` — migration path and current implementation status per role
 
 ### Hard rules (from ARCHITECTURE_V2.md §13)
 
