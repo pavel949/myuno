@@ -15879,6 +15879,7 @@ export type Database = {
           frontage_m: number | null
           furnishing_level: string | null
           garden_type: string | null
+          guest_extra_fees: Json
           has_crib: boolean | null
           has_elevator: boolean | null
           has_high_chair: boolean | null
@@ -16127,6 +16128,7 @@ export type Database = {
           frontage_m?: number | null
           furnishing_level?: string | null
           garden_type?: string | null
+          guest_extra_fees?: Json
           has_crib?: boolean | null
           has_elevator?: boolean | null
           has_high_chair?: boolean | null
@@ -16375,6 +16377,7 @@ export type Database = {
           frontage_m?: number | null
           furnishing_level?: string | null
           garden_type?: string | null
+          guest_extra_fees?: Json
           has_crib?: boolean | null
           has_elevator?: boolean | null
           has_high_chair?: boolean | null

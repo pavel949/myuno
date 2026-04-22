@@ -122,6 +122,9 @@ export interface PropertyFormData {
   deposit_currency?: string;
   negotiation_enabled?: boolean;
   custom_length_discounts?: Array<{ min_nights: number; discount_percent: number }>;
+  /** Host-configurable extra fees the guest pays separately (electricity, water, internet, cleaning, etc).
+   *  See src/lib/property/guestExtraFees.ts for the GuestExtraFee shape. */
+  guest_extra_fees?: unknown[];
   lock_code?: string;
   // Commercial / Land specifics
   floor_area_sqm?: number;

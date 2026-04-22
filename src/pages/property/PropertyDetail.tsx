@@ -29,6 +29,7 @@ import {
   HouseRules,
   PropertyBookingCard,
   MessageHostButton,
+  GuestExtraFeesDisplay,
 } from '@/components/property';
 import { ProjectInfoCard } from '@/components/property/ProjectInfoCard';
 import { RelatedServicesSection } from '@/components/crosssell';
@@ -432,6 +433,16 @@ export default function PropertyDetail() {
                       provider: rentalTerms.internet_provider,
                     }}
                   />
+                </>
+              )}
+
+              {/* Guest extra fees — host-configurable: metered electricity/water,
+                  internet, cleaning, etc. Informational only; settled at the moment
+                  the host specifies (usually check-out). */}
+              {(property as any).guest_extra_fees && (
+                <>
+                  <Separator />
+                  <GuestExtraFeesDisplay fees={(property as any).guest_extra_fees} />
                 </>
               )}
 

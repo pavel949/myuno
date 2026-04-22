@@ -497,6 +497,14 @@ export function PropertyBookingCard({
                   </div>
                 )}
               </div>
+
+              {/* Hint: extra fees (metered utilities, cleaning) live in their own
+                  block below the card and are settled with the host on-site. */}
+              <p className="text-[11px] text-muted-foreground text-center pt-1">
+                {isRu
+                  ? 'Доп. оплаты (электричество, вода, уборка) — см. блок ниже'
+                  : 'Additional fees (electricity, water, cleaning) — see details below'}
+              </p>
             </div>
           </>
         )}
