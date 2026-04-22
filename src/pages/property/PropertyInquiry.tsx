@@ -101,8 +101,6 @@ export default function PropertyInquiry() {
   // Clear draft once user is signed in AND has a complete profile applied —
   // also clear after successful submit (handled where navigate('/bookings/:id') runs).
   // We intentionally keep the draft until submit so re-mount after sign-in restores it.
-  const [rulesOpen, setRulesOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // rentalTerms already derived above from property
   // Autofill from profile
