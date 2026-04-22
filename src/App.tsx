@@ -35,6 +35,7 @@ import { StorefrontProvider } from "@/contexts/StorefrontContext";
 import { GoogleMapsProvider } from "@/contexts/GoogleMapsContext";
 import { defaultQueryClientOptions } from "@/lib/queryConfig";
 import { HintProvider } from "@/components/hints/HintProvider";
+import { AuthSheetProvider } from "@/contexts/AuthSheetContext";
 import { UnderConstruction } from "@/components/maintenance/UnderConstruction";
 import { PWAUpdatePrompt } from "@/components/pwa/PWAUpdatePrompt";
 import { useAuth } from "@/contexts/AuthContext";
@@ -67,6 +68,7 @@ const QueryProviders = composeProviders([
   TooltipProvider,
   HintProvider,
   PrefetchProvider,
+  AuthSheetProvider,
 ]);
 
 /** Gate that shows Coming Soon for unauthenticated users (except /auth routes). Set VITE_BYPASS_COMING_SOON=true to test app without login. */

@@ -98,6 +98,18 @@ const FLAGS: Record<string, FeatureFlag> = {
     description: 'Bulk import for vendor products',
   },
   
+  // Auth
+  AUTH_PHONE: {
+    key: 'auth_phone',
+    enabled: false,
+    description: 'Phone OTP login (requires SMS provider in Cloud Auth)',
+  },
+  AUTH_FACEBOOK: {
+    key: 'auth_facebook',
+    enabled: false,
+    description: 'Facebook OAuth login (not natively supported in Lovable Cloud)',
+  },
+
   // Experimental
   BETA_MAP_VIEW: {
     key: 'beta_map_view',
