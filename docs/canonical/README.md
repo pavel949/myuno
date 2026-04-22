@@ -30,10 +30,11 @@
 | [audits/M1-i18n-audit.md](./audits/M1-i18n-audit.md) | M1 | ✅ done (read-only) |
 | [audits/M2-schema-extension.md](./audits/M2-schema-extension.md) | M2 | ✅ done (3 миграции применены) |
 | [audits/M3-types-and-api-contracts.md](./audits/M3-types-and-api-contracts.md) | M3 | ✅ done (типы + API + хуки) |
+| [audits/M4-ai-orchestration.md](./audits/M4-ai-orchestration.md) | M4 | ✅ done (Edge Function + hook) |
 
 ## История изменений
 
-См. [CHANGELOG.md](./CHANGELOG.md). Текущая версия канонического набора: **v1.4.0**.
+См. [CHANGELOG.md](./CHANGELOG.md). Текущая версия канонического набора: **v1.5.0**.
 
 ## Язык документов
 
@@ -59,4 +60,5 @@
 - [x] **M1 — done.** Canonical-инфраструктура + i18n audit (read-only). См. [audits/M1-i18n-audit.md](./audits/M1-i18n-audit.md).
 - [x] **M2 — done.** Schema extension: 13 колонок, 3 enum, 3 функции маппинга, view `v_profiles_canonical`. См. [audits/M2-schema-extension.md](./audits/M2-schema-extension.md).
 - [x] **M3 — done.** TypeScript types + API contracts + React Query хуки. См. [audits/M3-types-and-api-contracts.md](./audits/M3-types-and-api-contracts.md).
-- [ ] M4 — AI-orchestration (persona detection, lifecycle transitions) — **next**
+- [x] **M4 — done.** AI-orchestration: persona/lifecycle detection через Lovable AI Gateway. См. [audits/M4-ai-orchestration.md](./audits/M4-ai-orchestration.md).
+- [ ] M5 — UX-обвязка детекции (preview/apply UI, авто-вызов на ключевых событиях) — **next**

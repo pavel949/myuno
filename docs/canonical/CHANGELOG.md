@@ -5,6 +5,22 @@
 
 ---
 
+## [1.5.0] — 2026-04-22 (M4 done)
+
+### Added
+- **AI-orchestration (M4)** — детекция lifecycle / persona / clusters / triggers через Lovable AI:
+  - `supabase/functions/canonical-persona-detect/index.ts` — Edge Function с tool-calling structured output (`submit_segmentation`), enum-валидацией, RBAC (self или admin), опциональным аддитивным `apply` в `profiles`.
+  - `src/hooks/useDetectPersona.ts` — React Query mutation hook + `isHighConfidence` helper (порог 0.75).
+  - `audits/M4-ai-orchestration.md` — отчёт по M4 + контракты.
+
+### Notes
+- AI **никогда не применяет автоматически** — решение принимает UX-слой.
+- AI не управляет `primary_role` (только app_role-маппинг M2). Работает с lifecycle / persona / clusters / triggers.
+- Default-модель: `google/gemini-3-flash-preview`. 429 / 402 от Lovable AI пробрасываются на фронт с понятными кодами.
+- Schema не менялась — M4 чисто оркестрационный слой над M2/M3.
+
+---
+
 ## [1.4.0] — 2026-04-22
 
 ### Added
