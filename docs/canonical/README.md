@@ -1,81 +1,87 @@
 # myUNO · Canonical Documents
 
-> **Статус:** эталон. Эти документы — единственный источник правды для продуктовых, контентных и инженерных решений. При расхождении кода/UI с этими документами — правится код, а не документ.
+> **Источник правды.** Эти документы определяют все продуктовые, контентные и инженерные решения. При расхождении кода/UI с документами правится **код**, а не документ.
 >
-> **Перед каноном читай `/PROJECT.md` в корне** — стратегический источник истины, отменяющий все предыдущие версии и роадмапы.
+> **Перед каноном:** [`/PROJECT.md`](../../PROJECT.md) — стратегия (цель, монетизация, моаты, KPI).
+> **Перед изменением архитектуры:** [`architecture/OVERVIEW.md`](./architecture/OVERVIEW.md) — карта зависимостей и decision tree.
 
-## Состав
+---
 
-| # | Файл | Назначение |
-|---|------|------------|
-| 01 | [segmentation-framework.md](./01-segmentation-framework.md) | 3-осевая сегментация (lifecycle × role × modifier), 25 персон, 10 кластеров жизненных ситуаций, CRM-схема |
-| 02 | [service-catalogue-v2.md](./02-service-catalogue-v2.md) | 16 категорий × 230 услуг с тегами lifecycle/role/cluster и моделями монетизации |
-| 03 | [tone-of-voice.md](./03-tone-of-voice.md) | Канонический голос бренда: интерфейс, WhatsApp, email, лендинги, AI-консьерж |
-| 04 | [implementation-protocol.md](./04-implementation-protocol.md) | Operational playbook M1→M7 для встраивания канонических документов в стек |
-| 05 | [visual-design-system.md](./05-visual-design-system.md) | Визуальная дизайн-система v1.0: принципы, цвет, типографика, сетка, компоненты, кластеры |
-| 06 | [clearview-methodology.md](./06-clearview-methodology.md) | ClearView™ методология рейтингов off-plan (моат #8): 8 категорий, AAA–BB, 5-step maturity, audited modifiers |
-| 07 | [information-architecture.md](./07-information-architecture.md) | Информационная архитектура: URL-структура, субдомены, навигация, cross-domain SSO |
-| 08 | [08-ai-prompts-library.md](./08-ai-prompts-library.md) | AI Prompts Library v1.0: канонические system prompts для всех AI-агентов (консьерж, ClearView draft, Tax Advisor, support и др.) |
-| 09 | [09-data-schema.md](./09-data-schema.md) | Canonical Data Schema v1.0: таблицы, enums, индексы, RLS-политики, FK, naming conventions Supabase. Источник истины по схеме данных |
+## ⚡ Быстрая навигация
 
-## Архитектура (architecture/)
+| Если нужно… | Документ |
+|---|---|
+| Понять стратегию и моаты | [`/PROJECT.md`](../../PROJECT.md) |
+| Найти архитектурный документ за 1 клик | [`architecture/OVERVIEW.md`](./architecture/OVERVIEW.md) ⭐ |
+| Описать персону / lifecycle / role | [`01`](./01-segmentation-framework.md) |
+| Добавить услугу в каталог | [`02`](./02-service-catalogue-v2.md) |
+| Написать UI / WhatsApp / email текст | [`03`](./03-tone-of-voice.md) |
+| Запустить миграционный спринт (M-веха) | [`04`](./04-implementation-protocol.md) |
+| Стилизовать компонент (цвет, шрифт, spacing) | [`05`](./05-visual-design-system.md) + [`/DESIGN.md`](../../DESIGN.md) |
+| Работать с ClearView рейтингами | [`06`](./06-clearview-methodology.md) + [`audits/M8`](./audits/M8-clearview-integration-protocol.md) |
+| Изменить URL / субдомен / навигацию | [`07`](./07-information-architecture.md) |
+| Изменить промпт AI-агента | [`08`](./08-ai-prompts-library.md) |
+| Создать миграцию БД / новую таблицу | [`09`](./09-data-schema.md) |
+| Понять hard rules архитектуры | [`architecture/ARCHITECTURE_V2.md`](./architecture/ARCHITECTURE_V2.md) §13 |
+| Узнать, что уже сделано vs планируется | [`architecture/FEASIBILITY.md`](./architecture/FEASIBILITY.md) |
 
-> Точка входа — **[`architecture/OVERVIEW.md`](./architecture/OVERVIEW.md)**: единый обзор, карта зависимостей, decision tree, поиск нужного документа за 1–2 клика.
+---
 
-| Файл | Назначение |
-|------|------------|
-| [architecture/OVERVIEW.md](./architecture/OVERVIEW.md) ⭐ | Единый обзор архитектуры с навигацией по модулям и схемой зависимостей |
-| [architecture/ARCHITECTURE_V2.md](./architecture/ARCHITECTURE_V2.md) | Architecture v2 blueprint — roles · clusters · surfaces · agents, hard rules |
-| [architecture/FEASIBILITY.md](./architecture/FEASIBILITY.md) | Architecture v2 migration path и per-role implementation status |
-| [architecture/CLAUDE_PATCH.md](./architecture/CLAUDE_PATCH.md) | Source patch для блока «1.5 · Architecture source of truth (v2)» в `CLAUDE.md` |
+## 📚 Канонические документы (01–09)
 
-## Дополнительно (research)
+| # | Документ | О чём | Версия |
+|---|---|---|---|
+| 01 | [segmentation-framework](./01-segmentation-framework.md) | 3-осевая сегментация (lifecycle × role × modifier), 25 персон, 10 кластеров жизненных ситуаций, CRM-схема | v1.0 |
+| 02 | [service-catalogue-v2](./02-service-catalogue-v2.md) | 16 категорий × 230 услуг с тегами lifecycle/role/cluster и моделями монетизации | v2.0 |
+| 03 | [tone-of-voice](./03-tone-of-voice.md) | Голос бренда: интерфейс, WhatsApp, email, лендинги, AI-консьерж | v1.0 |
+| 04 | [implementation-protocol](./04-implementation-protocol.md) | Operational playbook M1→M7 — встраивание канона в стек | v1.0 |
+| 05 | [visual-design-system](./05-visual-design-system.md) | Цвет, типографика, сетка, компоненты, кластеры | v1.0 |
+| 06 | [clearview-methodology](./06-clearview-methodology.md) | ClearView™ off-plan (моат #8): 8 категорий, AAA–BB, 5-step maturity | v1.0 |
+| 07 | [information-architecture](./07-information-architecture.md) | URL-структура, субдомены, навигация, cross-domain SSO | v1.0 |
+| 08 | [ai-prompts-library](./08-ai-prompts-library.md) | Канонические system prompts: концьерж, ClearView draft, Tax Advisor, support | v1.0 |
+| 09 | [data-schema](./09-data-schema.md) | Supabase: таблицы, enums, индексы, RLS, FK, naming conventions | v1.0 |
 
-| Файл | Назначение |
-|------|------------|
-| [research/phuket-proptech-market.md](./research/phuket-proptech-market.md) | Анализ рынка proptech на Пхукете: $1.25B, 30k STR-листингов, конкурентный ландшафт |
-| [research/myuno-taxonomy-canonical.md](./research/myuno-taxonomy-canonical.md) | 6-уровневая таксономия: 12 ситуаций × 140 микроситуаций × 38 персон × 36 приложений |
+## 🏛 Architecture (`architecture/`)
 
-## Аудиты
+| Документ | О чём |
+|---|---|
+| [OVERVIEW](./architecture/OVERVIEW.md) ⭐ | Единая карта: навигация, схема зависимостей (Mermaid), слои L0–L6, decision tree |
+| [ARCHITECTURE_V2](./architecture/ARCHITECTURE_V2.md) | Целевая модель: roles · clusters · surfaces · agents · 7 hard rules |
+| [FEASIBILITY](./architecture/FEASIBILITY.md) | Migration path и per-role implementation status |
+| [CLAUDE_PATCH](./architecture/CLAUDE_PATCH.md) | Source patch блока «1.5 Architecture source of truth» в `CLAUDE.md` (применён) |
 
-| Файл | Веха | Статус |
-|------|------|--------|
-| [audits/M1-i18n-audit.md](./audits/M1-i18n-audit.md) | M1 | ✅ done (read-only) |
-| [audits/M2-schema-extension.md](./audits/M2-schema-extension.md) | M2 | ✅ done (3 миграции применены) |
-| [audits/M3-types-and-api-contracts.md](./audits/M3-types-and-api-contracts.md) | M3 | ✅ done (типы + API + хуки) |
-| [audits/M4-ai-orchestration.md](./audits/M4-ai-orchestration.md) | M4 | ✅ done (Edge Function + hook) |
-| [audits/M8-clearview-integration-protocol.md](./audits/M8-clearview-integration-protocol.md) | M8 | 📋 protocol (ClearView integration playbook) |
+## 🔬 Research (`research/`)
 
-## История изменений
+| Документ | О чём |
+|---|---|
+| [phuket-proptech-market](./research/phuket-proptech-market.md) | Рынок proptech на Пхукете: $1.25B, 30k STR-листингов, конкуренты |
+| [myuno-taxonomy-canonical](./research/myuno-taxonomy-canonical.md) | 6-уровневая таксономия: 12 ситуаций × 140 микроситуаций × 38 персон × 36 приложений |
 
-См. [CHANGELOG.md](./CHANGELOG.md). Текущая версия канонического набора: **v1.9.0**.
+## ✅ Audits / вехи (`audits/`)
 
-## Язык документов
+| Веха | Документ | Статус |
+|---|---|---|
+| M1 | [i18n-audit](./audits/M1-i18n-audit.md) | ✅ done |
+| M2 | [schema-extension](./audits/M2-schema-extension.md) | ✅ done (13 колонок, 3 enum, view) |
+| M3 | [types-and-api-contracts](./audits/M3-types-and-api-contracts.md) | ✅ done (типы + API + хуки) |
+| M4 | [ai-orchestration](./audits/M4-ai-orchestration.md) | ✅ done (Edge Function + hook) |
+| M5 | UX-обвязка детекции | 🔜 **next** |
+| M6 | Cross-domain SSO + субдомены | ⏳ planned |
+| M7 | Production hardening | ⏳ planned |
+| M8 | [clearview-integration-protocol](./audits/M8-clearview-integration-protocol.md) | 📋 protocol (parallel track) |
 
-Канонические документы 01-05 — **внутренний инструментарий команды и AI-агентов**. Язык: русский. Bilingual-константа проекта применяется к **user-facing UI и контенту**, не к internal docs.
+---
 
 ## Правила работы
 
-1. **Audit before change** — ни одно изменение не делается до прочтения текущего состояния и сравнения с целевым.
-2. **Additive over replacement** — новое добавляется параллельно старому; старое удаляется только после 7 дней работы нового в проде.
-3. **One atomic change per PR** — одна веха = один PR = один мёрдж = следующая веха.
+1. **Audit before change** — прочитай текущее состояние до правки.
+2. **Additive over replacement** — новое параллельно старому; старое удаляется через 7 дней работы нового в проде.
+3. **One atomic change per PR** — одна веха = один PR = один мёрдж.
 
-См. `04-implementation-protocol.md` § 0 для полного описания философии.
+Полная философия: [`04-implementation-protocol.md §0`](./04-implementation-protocol.md).
 
-## Текущий статус
+## Язык и версии
 
-- [x] 01 — Segmentation Framework v1.0
-- [x] 02 — Service Catalogue v2.0
-- [x] 03 — Tone of Voice
-- [x] 04 — Implementation Protocol
-- [x] 05 — Visual Design System v1.0
-- [x] 06 — ClearView™ Methodology v1.0
-- [x] 07 — Information Architecture v1.0
-- [x] 08 — AI Prompts Library v1.0
-- [x] 09 — Data Schema v1.0
-- [x] **M1 — done.** Canonical-инфраструктура + i18n audit (read-only). См. [audits/M1-i18n-audit.md](./audits/M1-i18n-audit.md).
-- [x] **M2 — done.** Schema extension: 13 колонок, 3 enum, 3 функции маппинга, view `v_profiles_canonical`. См. [audits/M2-schema-extension.md](./audits/M2-schema-extension.md).
-- [x] **M3 — done.** TypeScript types + API contracts + React Query хуки. См. [audits/M3-types-and-api-contracts.md](./audits/M3-types-and-api-contracts.md).
-- [x] **M4 — done.** AI-orchestration: persona/lifecycle detection через Lovable AI Gateway. См. [audits/M4-ai-orchestration.md](./audits/M4-ai-orchestration.md).
-- [ ] M5 — UX-обвязка детекции (preview/apply UI, авто-вызов на ключевых событиях) — **next**
-- [ ] M8 — ClearView Integration: пошаговая реализация ClearView как функционального продукта. См. [audits/M8-clearview-integration-protocol.md](./audits/M8-clearview-integration-protocol.md).
+- **Язык документов:** русский (внутренний инструментарий команды и AI). Bilingual RU/EN — только user-facing UI/контент.
+- **История:** [`CHANGELOG.md`](./CHANGELOG.md). Текущая версия канонического набора: **v1.9.0**.
+- **Поддержание:** при добавлении нового документа обнови этот README + CHANGELOG в одном PR.
