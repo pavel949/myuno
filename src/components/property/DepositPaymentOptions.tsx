@@ -25,11 +25,15 @@ interface DepositPaymentOptionsProps {
   guests: number;
   nights: number;
   totalAmount: number;
+  /** Listing currency (USD/THB/EUR/...). Used for the RUB estimate + order metadata. */
+  currency?: string;
   cleaningFee?: number;
   guestName: string;
   guestPhone: string;
   guestEmail: string;
   providerOrgId?: string;
+  /** Owner of the property — receives manual-payment notifications alongside admins. */
+  ownerUserId?: string;
   /** Prepayment amount calculated by the central pricing engine. Defaults to 10% if omitted. */
   prepayAmount?: number;
   /** Prepay percent (for display). Defaults to 10. */
