@@ -7,6 +7,7 @@ import { BackButton } from '@/components/uno/BackButton';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAuthSheet } from '@/contexts/AuthSheetContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -34,9 +35,15 @@ export default function PropertyInquiry() {
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const { user } = useAuth();
+  const { openAuthSheet } = useAuthSheet();
   const { profile } = useProfile();
   const isRu = language === 'ru';
   const { createOrder } = useOrders();
+
+  // Draft persistence key — survives the AuthSheet round-trip so guests
+  // never lose contact info / message after signing in. URL already carries
+  // dates + guests, so we only need to stash the form fields.
+  const draftKey = id ? `uno_inquiry_draft_${id}` : null;
 
   // Determine booking mode from property data
   const { data: property } = usePropertyWithRentalTerms(id);
@@ -53,15 +60,47 @@ export default function PropertyInquiry() {
 
   const hasDates = checkIn && checkOut;
 
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    message: '',
+  const [formData, setFormData] = useState(() => {
+    // Restore draft (e.g. after returning from AuthSheet sign-in).
+    if (typeof window !== 'undefined' && draftKey) {
+      try {
+        const raw = sessionStorage.getItem(draftKey);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          // Expire after 1 hour to avoid stale leakage across sessions.
+          if (parsed?.ts && Date.now() - parsed.ts < 60 * 60 * 1000) {
+            return {
+              name: parsed.name ?? '',
+              email: parsed.email ?? '',
+              phone: parsed.phone ?? '',
+              message: parsed.message ?? '',
+            };
+          }
+        }
+      } catch { /* ignore */ }
+    }
+    return { name: '', email: '', phone: '', message: '' };
   });
   const [contactOpen, setContactOpen] = useState(false);
   const [rulesOpen, setRulesOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Persist form draft so signing in via AuthSheet doesn't wipe input.
+  useEffect(() => {
+    if (!draftKey) return;
+    const hasContent = formData.name || formData.phone || formData.email || formData.message;
+    if (!hasContent) return;
+    try {
+      sessionStorage.setItem(
+        draftKey,
+        JSON.stringify({ ...formData, ts: Date.now() }),
+      );
+    } catch { /* ignore quota errors */ }
+  }, [draftKey, formData]);
+
+  // Clear draft once user is signed in AND has a complete profile applied —
+  // also clear after successful submit (handled where navigate('/bookings/:id') runs).
+  // We intentionally keep the draft until submit so re-mount after sign-in restores it.
 
   // rentalTerms already derived above from property
   // Autofill from profile
@@ -501,14 +540,22 @@ export default function PropertyInquiry() {
             </>
           )}
 
-          {/* ===== AUTH CHECK ===== */}
+          {/* ===== AUTH CHECK =====
+              Guest sees the full booking form. Sign-in opens the AuthSheet
+              in-place so URL params (dates, guests) and form draft survive
+              the round-trip — onSuccess re-renders this page with `user` set. */}
           {!user && (
             <div className="p-4 rounded-xl bg-muted/50 border text-center space-y-3">
               <p className="text-sm text-muted-foreground">
-                {isRu ? 'Для бронирования необходимо войти в аккаунт' : 'Please sign in to book'}
+                {isRu
+                  ? 'Войдите, чтобы продолжить — даты и контактные данные сохранятся'
+                  : 'Sign in to continue — your dates and contact info will be kept'}
               </p>
-              <Button onClick={() => navigate('/auth')} variant="outline">
-                {isRu ? 'Войти' : 'Sign In'}
+              <Button
+                onClick={() => openAuthSheet({ intent: 'booking' })}
+                variant="default"
+              >
+                {isRu ? 'Войти и продолжить' : 'Sign in & continue'}
               </Button>
             </div>
           )}
@@ -677,6 +724,10 @@ export default function PropertyInquiry() {
                     serviceName: propertyTitle || 'Property',
                   });
                   if (result.success && result.order_id) {
+                    // Clear persisted draft — booking is now live in DB.
+                    if (draftKey) {
+                      try { sessionStorage.removeItem(draftKey); } catch { /* ignore */ }
+                    }
                     toast.success(isRu 
                       ? 'Запрос отправлен! Хозяин ответит в течение 24 часов.' 
                       : 'Request sent! The host will respond within 24 hours.');
