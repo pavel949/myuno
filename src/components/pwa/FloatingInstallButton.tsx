@@ -71,7 +71,7 @@ export function FloatingInstallButton() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 20, scale: 0.8 }}
           transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-          className="fixed bottom-20 right-4 z-[90] md:hidden"
+          className="fixed bottom-[calc(var(--bottom-nav-h)+1rem)] right-4 z-[90] md:hidden"
         >
           <button
             onClick={handleClick}

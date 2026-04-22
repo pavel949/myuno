@@ -38,7 +38,7 @@ export function GuestExplorationBanner({
     return (
       <div 
         className={cn(
-          "fixed bottom-20 left-4 right-4 z-40 md:left-auto md:right-4 md:max-w-sm",
+          "fixed bottom-[calc(var(--bottom-nav-h)+1rem)] left-4 right-4 z-40 md:left-auto md:right-4 md:max-w-sm",
           "bg-card/95 backdrop-blur-xl border border-border rounded-2xl shadow-lg",
           "p-4 animate-in slide-in-from-bottom-4 duration-300",
           className

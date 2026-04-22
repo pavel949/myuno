@@ -125,7 +125,7 @@ export function HumanHelpBanner({
   // ── Floating variant ──
   return (
     <div className={cn(
-      'fixed bottom-20 left-4 right-4 z-40',
+      'fixed bottom-[calc(var(--bottom-nav-h)+1rem)] left-4 right-4 z-40',
       'rounded-xl border shadow-lg bg-card/95 backdrop-blur-sm p-3',
       'flex items-center gap-3',
       className

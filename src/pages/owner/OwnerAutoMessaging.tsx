@@ -173,7 +173,7 @@ export default function OwnerAutoMessaging() {
       {/* FAB */}
       <Button
         onClick={() => setSheetOpen(true)}
-        className="fixed bottom-20 right-4 md:bottom-6 md:right-6 rounded-full h-14 w-14 shadow-lg z-40"
+        className="fixed bottom-[calc(var(--bottom-nav-h)+1rem)] right-4 md:bottom-6 md:right-6 rounded-full h-14 w-14 shadow-lg z-40"
         size="icon"
       >
         <Plus className="h-6 w-6" />

@@ -360,7 +360,7 @@ export default function EditProfile() {
             </SectionCard>
 
             {/* Submit Button */}
-            <div className="fixed bottom-20 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t">
+            <div className="fixed bottom-[var(--bottom-nav-h)] left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t">
               <Button
                 type="submit"
                 className="w-full"

@@ -208,15 +208,35 @@ export default function Auth() {
           },
         }).catch(err => console.error('Signup notification error:', err));
 
+        // When email confirmation is required, Supabase returns no session.
+        // Navigating to a protected `redirectPath` would bounce back to /auth
+        // and trap the user in a loop. Stay on /auth, switch to login mode,
+        // and tell them to verify their inbox.
+        const hasSession = !!data?.session;
+        if (!hasSession) {
+          toast(isTh ? 'ตรวจสอบอีเมลของคุณ' : isRu ? '📧 Подтвердите email' : '📧 Check your inbox', {
+            description: isTh
+              ? 'เราส่งลิงก์ยืนยันไปยังอีเมลของคุณแล้ว'
+              : isRu
+                ? 'Мы отправили ссылку для подтверждения. После подтверждения войдите в аккаунт.'
+                : "We sent a verification link. Confirm your email, then sign in.",
+          });
+          setIsLogin(true);
+          setPassword('');
+          setConfirmPassword('');
+          return;
+        }
+
         toast(isTh ? 'ยินดีต้อนรับ!' : isRu ? '🎉 Добро пожаловать!' : '🎉 Welcome aboard!', {
           description: isTh
-            ? 'สร้างบัญชีเรียบร้อยแล้ว กรุณาตรวจสอบอีเมลเพื่อยืนยัน'
+            ? 'สร้างบัญชีเรียบร้อยแล้ว'
             : isRu
-              ? 'Аккаунт создан. Проверьте почту для подтверждения email.'
-              : 'Account created. Check your email to verify your address.',
+              ? 'Аккаунт создан.'
+              : 'Account created.',
         });
-
-        navigate(redirectPath, { replace: true });
+        // With an active session, the redirect useEffect will pick up the new
+        // `user` and route to the role-aware destination — no manual navigate
+        // is needed (and a duplicate navigate would race the effect).
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : '';
@@ -305,7 +325,11 @@ export default function Auth() {
   const switchToSignup = () => { setIsLogin(false); setSignupStep('phone'); setErrors({}); };
   const switchToLogin = () => { setIsLogin(true); setErrors({}); };
 
-  if (authLoading && user) {
+  // Show spinner while either: auth state is still resolving OR a user is
+  // already authenticated (the redirect effect will fire on the next tick).
+  // Previously this was `authLoading && user` which never both held true at
+  // the same time, briefly flashing the form to logged-in users.
+  if (authLoading || user) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />

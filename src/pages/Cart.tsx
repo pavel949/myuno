@@ -68,50 +68,43 @@ const Cart = () => {
     return acc;
   }, {} as Record<CartItem['type'], CartItem[]>);
 
-  const handleCheckout = () => {
-    if (items.length === 0) return;
-    
-    const firstItem = items[0];
-    const firstType = firstItem.type;
-    
-    switch (firstType) {
+  // Checkout routing per vertical. Each vertical has its own backend flow,
+  // so mixed carts are checked out one group at a time instead of silently
+  // dropping every item that does not match the first one.
+  const checkoutForType = (type: CartItem['type'], items: CartItem[]) => {
+    const first = items[0];
+    switch (type) {
       case 'food':
-        // Food checkout - always use restaurants flow
-        if (firstItem.providerId) {
-          navigate(`/restaurants/${firstItem.providerId}/delivery`);
+        if (first?.providerId) {
+          navigate(`/restaurants/${first.providerId}/delivery`);
         } else {
           navigate('/restaurants');
         }
         break;
       case 'flowers':
-        // Flowers order - always go to /flowers/order, cart is read from context
         navigate('/flowers/order');
         break;
       case 'service':
-        // Service booking - use provider ID if available
-        if (firstItem.providerId) {
-          navigate(`/services/booking/${firstItem.providerId}`);
+        if (first?.providerId) {
+          navigate(`/services/booking/${first.providerId}`);
         } else {
           navigate('/services');
         }
         break;
       case 'product':
-        // Product/Market checkout
         navigate('/market/checkout');
         break;
       case 'tour':
       case 'activity':
-        // Tour/Activity checkout - navigate to experience booking with item ID
-        if (firstItem.providerId) {
-          navigate(`/experiences/${firstItem.providerId}/book`);
+        if (first?.providerId) {
+          navigate(`/experiences/${first.providerId}/book`);
         } else {
           navigate('/experiences');
         }
         break;
       case 'yacht':
-        // Yacht checkout - navigate to yacht booking with item ID
-        if (firstItem.providerId) {
-          navigate(`/yachts/${firstItem.providerId}/booking`);
+        if (first?.providerId) {
+          navigate(`/yachts/${first.providerId}/booking`);
         } else {
           navigate('/yachts');
         }
@@ -119,6 +112,20 @@ const Cart = () => {
       default:
         navigate('/');
     }
+  };
+
+  const groupCount = Object.keys(groupedItems).length;
+  const hasMixedVerticals = groupCount > 1;
+
+  const handleCheckout = () => {
+    if (items.length === 0) return;
+    // For a single-vertical cart we keep the legacy one-tap flow.
+    // For mixed carts the per-group "Checkout" button below is the SSOT,
+    // so the bottom bar simply scrolls the user to the first group.
+    const firstEntry = Object.entries(groupedItems)[0];
+    if (!firstEntry) return;
+    const [type, typeItems] = firstEntry as [CartItem['type'], CartItem[]];
+    checkoutForType(type, typeItems);
   };
 
   if (items.length === 0) {
@@ -168,7 +175,14 @@ const Cart = () => {
           </div>
         </div>
 
-        {/* Grouped Items */}
+        {/* Mixed-vertical notice — each vertical has its own checkout flow */}
+        {hasMixedVerticals && (
+          <div className="bg-warning/10 border border-warning/20 rounded-xl p-3 text-sm text-foreground">
+            {language === 'ru'
+              ? `В корзине ${groupCount} разных категории. Их нужно оформить по отдельности — используйте кнопку «Оформить» в каждой группе.`
+              : `Your cart contains ${groupCount} different categories. Please check them out one group at a time using the "Checkout" button in each group.`}
+          </div>
+        )}
         {Object.entries(groupedItems).map(([type, typeItems]) => {
           const Icon = typeIcons[type as CartItem['type']];
           const label = typeLabels[type as CartItem['type']];
@@ -299,13 +313,28 @@ const Cart = () => {
                   </div>
                 ))}
               </div>
+
+              {/* Per-group checkout — surfaced when the cart spans multiple
+                  verticals so each group can be paid via its own backend flow. */}
+              {hasMixedVerticals && (
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => checkoutForType(type as CartItem['type'], typeItems)}
+                >
+                  {language === 'ru'
+                    ? `Оформить «${label.ru}»`
+                    : `Checkout ${label.en}`}
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              )}
             </div>
           );
         })}
       </div>
 
-      {/* Bottom Checkout Bar - positioned above BottomNav */}
-      <div className="fixed bottom-16 left-0 right-0 bg-background/95 backdrop-blur-lg border-t border-border p-4 z-40">
+      {/* Bottom Checkout Bar - positioned above BottomNav via --bottom-nav-h token */}
+      <div className="fixed bottom-[var(--bottom-nav-h)] left-0 right-0 bg-background/95 backdrop-blur-lg border-t border-border p-4 z-40">
         <div className="max-w-[1536px] mx-auto">
           <div className="flex items-center justify-between mb-3">
             <span className="text-muted-foreground">

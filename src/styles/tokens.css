@@ -195,10 +195,17 @@
   --section-gap: 1.25rem;
   /* Minimum touch target per WCAG / Apple HIG */
   --touch-target: 2.75rem; /* 44px */
+
+  /* ═══ Mobile bottom nav offset (BottomBar height + iOS safe area) ═══ */
+  /* SSOT for any sticky bar / FAB that must sit above the mobile BottomBar.
+     Use as `bottom-[var(--bottom-nav-h)]` instead of hardcoded `bottom-16`/`bottom-20`. */
+  --bottom-nav-h: calc(60px + env(safe-area-inset-bottom, 0px));
 }
 
 @media (min-width: 768px) {
   :root {
+    /* BottomBar is hidden ≥768px, so sticky bars sit flush with the viewport edge. */
+    --bottom-nav-h: 0px;
     --page-padding-x: 1.5rem;
     --section-gap: 1.5rem;
   }

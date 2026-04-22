@@ -77,7 +77,7 @@ export const StickyCartBar = forwardRef<HTMLDivElement, StickyCartBarProps>(
             exit={{ y: 100, opacity: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className={cn(
-              'fixed bottom-16 md:bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border z-40',
+              'fixed bottom-[var(--bottom-nav-h)] left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border z-40',
               className
             )}
           >
