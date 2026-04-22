@@ -30142,6 +30142,91 @@ export type Database = {
           },
         ]
       }
+      v_profiles_canonical: {
+        Row: {
+          active_clusters: string[] | null
+          canonical_primary_role: string | null
+          canonical_secondary_roles: string[] | null
+          created_at: string | null
+          detected_persona: string | null
+          detected_persona_confidence: number | null
+          email: string | null
+          first_visit_at: string | null
+          full_name: string | null
+          household_type:
+            | Database["public"]["Enums"]["household_type_enum"]
+            | null
+          id: string | null
+          kids_ages: number[] | null
+          lifecycle_stage: Database["public"]["Enums"]["lifecycle_stage"] | null
+          lifecycle_stage_history: Json | null
+          next_lifecycle_stage_eta: string | null
+          preferred_language: string | null
+          special_status: string[] | null
+          total_days_in_thailand: number | null
+          triggers_active: string[] | null
+          updated_at: string | null
+          user_type: Database["public"]["Enums"]["user_type"] | null
+          visits_count: number | null
+        }
+        Insert: {
+          active_clusters?: string[] | null
+          canonical_primary_role?: never
+          canonical_secondary_roles?: never
+          created_at?: string | null
+          detected_persona?: string | null
+          detected_persona_confidence?: number | null
+          email?: string | null
+          first_visit_at?: string | null
+          full_name?: string | null
+          household_type?:
+            | Database["public"]["Enums"]["household_type_enum"]
+            | null
+          id?: string | null
+          kids_ages?: number[] | null
+          lifecycle_stage?:
+            | Database["public"]["Enums"]["lifecycle_stage"]
+            | null
+          lifecycle_stage_history?: Json | null
+          next_lifecycle_stage_eta?: string | null
+          preferred_language?: string | null
+          special_status?: string[] | null
+          total_days_in_thailand?: number | null
+          triggers_active?: string[] | null
+          updated_at?: string | null
+          user_type?: Database["public"]["Enums"]["user_type"] | null
+          visits_count?: number | null
+        }
+        Update: {
+          active_clusters?: string[] | null
+          canonical_primary_role?: never
+          canonical_secondary_roles?: never
+          created_at?: string | null
+          detected_persona?: string | null
+          detected_persona_confidence?: number | null
+          email?: string | null
+          first_visit_at?: string | null
+          full_name?: string | null
+          household_type?:
+            | Database["public"]["Enums"]["household_type_enum"]
+            | null
+          id?: string | null
+          kids_ages?: number[] | null
+          lifecycle_stage?:
+            | Database["public"]["Enums"]["lifecycle_stage"]
+            | null
+          lifecycle_stage_history?: Json | null
+          next_lifecycle_stage_eta?: string | null
+          preferred_language?: string | null
+          special_status?: string[] | null
+          total_days_in_thailand?: number | null
+          triggers_active?: string[] | null
+          updated_at?: string | null
+          user_type?: Database["public"]["Enums"]["user_type"] | null
+          visits_count?: number | null
+        }
+        Relationships: []
+      }
       v_properties_public: {
         Row: {
           address: string | null
@@ -30949,6 +31034,14 @@ export type Database = {
       }
       generate_referral_code: { Args: { p_user_id: string }; Returns: string }
       get_all_currency_rates: { Args: never; Returns: Json }
+      get_canonical_primary_role: {
+        Args: { _user_id: string }
+        Returns: string
+      }
+      get_canonical_secondary_roles: {
+        Args: { _user_id: string }
+        Returns: string[]
+      }
       get_capital_crm_owner: { Args: never; Returns: string }
       get_company_member_role: {
         Args: { _company_id: string; _user_id: string }
@@ -31105,6 +31198,10 @@ export type Database = {
       get_yacht_price_for_date: {
         Args: { p_charter_type?: string; p_date: string; p_yacht_id: string }
         Returns: number
+      }
+      has_canonical_role: {
+        Args: { _canonical_role: string; _user_id: string }
+        Returns: boolean
       }
       has_elevated_access: {
         Args: { p_required_roles?: string[] }
