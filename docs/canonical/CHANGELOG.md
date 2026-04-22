@@ -5,6 +5,17 @@
 
 ---
 
+## [1.9.2] — 2026-04-22
+
+### Added
+- **`audits/M5-ux-persona-detection.md`** — M5 audit & sprint plan (draft v0.1, awaiting approval). AUDIT текущего `/start` онбординга, GAP против §M5 (таксономия Q1–Q3 не каноническая, M4-детекция не подключена, канонические колонки `profiles` не заполняются), 12-шаговый PLAN на аддитивный `/start/v2` за новым флагом `concierge_routing_v2_canonical`, 11 критериев приёмки, rollback ≤30 мин.
+
+### Notes
+- Реализация не начата — ждём approval Павла. `/start` v1 остаётся в проде неизменным.
+- M5 не блокирует M8 (ClearView, parallel track) и не блокируется им.
+
+---
+
 ## [1.9.1] — 2026-04-22
 
 ### Changed

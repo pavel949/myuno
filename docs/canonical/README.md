@@ -65,7 +65,7 @@
 | M2 | [schema-extension](./audits/M2-schema-extension.md) | ✅ done (13 колонок, 3 enum, view) |
 | M3 | [types-and-api-contracts](./audits/M3-types-and-api-contracts.md) | ✅ done (типы + API + хуки) |
 | M4 | [ai-orchestration](./audits/M4-ai-orchestration.md) | ✅ done (Edge Function + hook) |
-| M5 | UX-обвязка детекции | 🔜 **next** |
+| M5 | [ux-persona-detection](./audits/M5-ux-persona-detection.md) | 🔜 **next** — draft v0.1, awaiting approval |
 | M6 | Cross-domain SSO + субдомены | ⏳ planned |
 | M7 | Production hardening | ⏳ planned |
 | M8 | [clearview-integration-protocol](./audits/M8-clearview-integration-protocol.md) | 📋 protocol (parallel track) |
