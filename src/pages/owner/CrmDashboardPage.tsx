@@ -283,12 +283,12 @@ export default function CrmDashboardPage() {
         agentFilter={agentFilter}
         onAgentFilterChange={setAgentFilter}
         agents={members}
-        dealVipFilter="all"
-        onDealVipFilterChange={() => {}}
-        contactVipFilter="all"
-        onContactVipFilterChange={() => {}}
-        activePreset="none"
-        onApplyPreset={() => {}}
+        dealVipFilter={dealVipFilter}
+        onDealVipFilterChange={setDealVipFilter}
+        contactVipFilter={contactVipFilter}
+        onContactVipFilterChange={setContactVipFilter}
+        activePreset={activePreset}
+        onApplyPreset={handleApplyPreset}
       />
 
       {/* Kanban Board */}
