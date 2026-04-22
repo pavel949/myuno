@@ -22,9 +22,8 @@
 import React, { useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  Menu, ChevronRight, LogOut, Settings, Globe, MoonStar, Repeat,
-  Plane, Home as HomeIcon, Compass, Building2, HardHat, Scale,
-  TrendingUp, Sparkles,
+  Menu, ChevronRight, LogOut, Settings, Globe, Repeat,
+  Home as HomeIcon, Compass, Building2, TrendingUp,
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import {
@@ -39,121 +38,9 @@ import { APP_ROUTES } from '@/lib/config/routes';
 import {
   resolveNavRole, hasSidebar, SIDEBAR_NAV, type NavRoleKey,
 } from '@/lib/nav/navigationModel';
+import { CLUSTER_CATALOG } from '@/lib/nav/clusterCatalog';
 import { ROLE_META } from '@/lib/roleBlend';
 import type { UserPersona } from '@/hooks/useUserPersonas';
-
-// ─────────────────────────────────────────────────────────────
-// Cluster catalog — duplicated minimally from NavigatorPage to keep
-// drawer self-contained. If the cluster list grows, extract to
-// `src/lib/nav/clusters.ts` and import from both.
-// ─────────────────────────────────────────────────────────────
-
-interface ClusterLink {
-  labelEn: string;
-  labelRu: string;
-  path: string;
-}
-
-interface DrawerCluster {
-  id: string;
-  labelEn: string;
-  labelRu: string;
-  color: string;
-  icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
-  links: ClusterLink[];
-}
-
-const DRAWER_CLUSTERS: DrawerCluster[] = [
-  {
-    id: 'arrive',
-    labelEn: 'Arrive',
-    labelRu: 'Приехать',
-    color: '#00D68F',
-    icon: Plane,
-    links: [
-      { labelEn: 'Airport transfer', labelRu: 'Трансфер из аэропорта', path: APP_ROUTES.AIRPORT_TRANSFER },
-      { labelEn: 'SIM cards',        labelRu: 'SIM-карты',              path: APP_ROUTES.SIM_START },
-      { labelEn: 'Currency exchange',labelRu: 'Обмен валют',            path: APP_ROUTES.EXCHANGE },
-      { labelEn: 'Car rental',       labelRu: 'Аренда авто',            path: APP_ROUTES.TRANSPORT },
-      { labelEn: 'Banking',          labelRu: 'Банк',                   path: APP_ROUTES.BANKING },
-      { labelEn: 'Fast Track',       labelRu: 'Fast Track',             path: APP_ROUTES.FAST_TRACK },
-    ],
-  },
-  {
-    id: 'live',
-    labelEn: 'Live',
-    labelRu: 'Жить',
-    color: '#4E7BFF',
-    icon: HomeIcon,
-    links: [
-      { labelEn: 'Restaurants', labelRu: 'Рестораны', path: APP_ROUTES.RESTAURANTS },
-      { labelEn: 'Events',      labelRu: 'Афиша',     path: APP_ROUTES.EVENTS },
-      { labelEn: 'Beauty',      labelRu: 'Красота',   path: APP_ROUTES.BEAUTY },
-      { labelEn: 'Medical',     labelRu: 'Медицина',  path: APP_ROUTES.MEDICAL },
-      { labelEn: 'Market',      labelRu: 'Маркет',    path: APP_ROUTES.MARKET },
-      { labelEn: 'Cleaning',    labelRu: 'Уборка',    path: APP_ROUTES.CLEANING },
-      { labelEn: 'All services',labelRu: 'Все услуги',path: APP_ROUTES.SERVICES },
-    ],
-  },
-  {
-    id: 'discover',
-    labelEn: 'Explore',
-    labelRu: 'Открывать',
-    color: '#A78BFA',
-    icon: Compass,
-    links: [
-      { labelEn: 'Discover',   labelRu: 'Навигатор',     path: APP_ROUTES.DISCOVER },
-      { labelEn: 'Universal map', labelRu: 'Карта',      path: '/map' },
-    ],
-  },
-  {
-    id: 'manage',
-    labelEn: 'Manage',
-    labelRu: 'Управлять',
-    color: '#F59E0B',
-    icon: Building2,
-    links: [
-      { labelEn: 'Property hub',  labelRu: 'Недвижимость',           path: APP_ROUTES.PROPERTY },
-      { labelEn: 'My property',   labelRu: 'Мой объект',             path: '/my-property' },
-      { labelEn: 'Become host',   labelRu: 'Стать партнёром',        path: '/become-host' },
-    ],
-  },
-  {
-    id: 'invest',
-    labelEn: 'Invest',
-    labelRu: 'Инвестировать',
-    color: '#10B981',
-    icon: TrendingUp,
-    links: [
-      { labelEn: 'New developments', labelRu: 'Новостройки', path: '/newbuilds' },
-      { labelEn: 'Resale market',    labelRu: 'Вторичка',    path: '/property/resale' },
-      { labelEn: 'Investor hub',     labelRu: 'Инвесторам',  path: APP_ROUTES.INVEST_DASHBOARD },
-    ],
-  },
-  {
-    id: 'legal',
-    labelEn: 'Legal & Stay',
-    labelRu: 'Право и виза',
-    color: '#EC4899',
-    icon: Scale,
-    links: [
-      { labelEn: 'Visa quiz',      labelRu: 'Виза-квиз',            path: '/visa/quiz' },
-      { labelEn: 'Visa tracker',   labelRu: 'Трекер визы',          path: '/visa' },
-      { labelEn: 'Lawyer',         labelRu: 'Юрист',                path: '/legal' },
-      { labelEn: 'Cost of living', labelRu: 'Стоимость жизни',      path: '/cost-of-living' },
-    ],
-  },
-  {
-    id: 'build',
-    labelEn: 'Build',
-    labelRu: 'Строить',
-    color: '#C9A84C',
-    icon: HardHat,
-    links: [
-      { labelEn: 'Developer portal', labelRu: 'Портал застройщика', path: APP_ROUTES.DEVELOPER_PORTAL ?? '/developer' },
-    ],
-  },
-];
 
 // ─────────────────────────────────────────────────────────────
 // Quick actions — contextual based on persona stack
