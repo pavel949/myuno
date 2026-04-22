@@ -462,7 +462,7 @@ const queryClient = useQueryClient();
               {propertyTypes.length > 0 && (
                 <FilterRow label={isRu ? 'Тип' : 'Type'}>
                   {propertyTypes.map(t => (
-                    <FilterChip key={t} label={t} active={selectedType === t} onClick={() => setSelectedType(selectedType === t ? null : t)} />
+                    <FilterChip key={t} label={localizePropertyType(t, isRu)} active={selectedType === t} onClick={() => setSelectedType(selectedType === t ? null : t)} />
                   ))}
                 </FilterRow>
               )}
