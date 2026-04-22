@@ -134,7 +134,16 @@ export function AppDrawer({
     pathname: location.pathname,
   });
   const workspaceGroups = hasSidebar(role) ? SIDEBAR_NAV[role] : [];
-  const quickActions = useMemo(() => getQuickActions(personas), [personas]);
+  const quickActions = useMemo(
+    () => getQuickActions(personas, role),
+    [personas, role],
+  );
+  // SSOT-driven cluster filter — hides workspace clusters from users who
+  // can't action them (e.g. /newbuilds dev portal hidden from a tourist).
+  const visibleClusters = useMemo(
+    () => filterCatalogForUser({ personas, role }),
+    [personas, role],
+  );
 
   const initials = (user?.user_metadata?.full_name as string | undefined)
     ?.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase() ?? 'U';
