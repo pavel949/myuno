@@ -7,6 +7,7 @@ import { BackButton } from '@/components/uno/BackButton';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAuthSheet } from '@/contexts/AuthSheetContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -34,9 +35,15 @@ export default function PropertyInquiry() {
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const { user } = useAuth();
+  const { openAuthSheet } = useAuthSheet();
   const { profile } = useProfile();
   const isRu = language === 'ru';
   const { createOrder } = useOrders();
+
+  // Draft persistence key — survives the AuthSheet round-trip so guests
+  // never lose contact info / message after signing in. URL already carries
+  // dates + guests, so we only need to stash the form fields.
+  const draftKey = id ? `uno_inquiry_draft_${id}` : null;
 
   // Determine booking mode from property data
   const { data: property } = usePropertyWithRentalTerms(id);
