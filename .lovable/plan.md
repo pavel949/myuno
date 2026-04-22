@@ -1,109 +1,126 @@
 
 
-# Plan — Property page polish + Airbnb-style onboarding
+# План — Auth-перестройка с сохранением Single-UUID
 
-Two parallel tracks: (1) finish the 4 property-page improvements from last round; (2) rebuild auth/onboarding to match the Airbnb pattern (phone-first bottom-sheet, OTP, social), adapted to MyUNO.
+## 1. Контекст: «единый UUID»
 
----
+В myUNO **`auth.users.id` = `profiles.id` = единый UUID пользователя** через всю систему. Этот UUID используется как FK в десятках таблиц (`properties.owner_id`, `crm_contacts.user_id`, `bookings.user_id`, `wallets.user_id`, `terms_acceptances.user_id`, и т.д.). Каскадные триггеры на `INSERT INTO auth.users` создают:
 
-## Track A — Public property page (P3 polish)
+1. `public.profiles` (миграция `20260108232401`, функция `handle_new_user`)
+2. `public.user_roles` (та же функция, role='user')
+3. `public.wallets` (`handle_new_user_wallet`)
 
-**A1. Hero specifics line.** Add a sub-title under property title: `1 queen bed · Shared bathroom · Sleeps 4`. Composes from `bedrooms`, `beds`, `bathrooms`, `max_guests`. Bilingual via taxonomy. File: `src/pages/property/PropertyDetail.tsx` + new `src/components/property/detail/PropertyHeroFacts.tsx`.
+**Любой новый auth-flow обязан проходить через `auth.users` ровно один раз** — иначе появятся «осиротевшие» записи и дубли UUID. Это и есть инвариант, который нельзя сломать.
 
-**A2. "Guest favorite" 🏆 badge.** Show on PropertyCard + PropertyDetail header when `rating ≥ 4.8 AND reviews_count ≥ 10`. Pure derived flag, no DB change. New `src/components/property/GuestFavoriteBadge.tsx`; consumed in `PropertyCard.tsx`, `PropertyListingCard.tsx`, `PropertyDetail.tsx`.
+## 2. Build-проверка — найден баг (не связан с auth)
 
-**A3. Price markers on Similar map.** In `SimilarProperties.tsx` map view: render small pill markers showing total price for the selected dates (or nightly fallback) instead of generic pins. Highlight hovered/active card ↔ marker. No new lib.
+`npm run build` падает: `Rollup failed to resolve "workbox-window"`. Пакет `vite-plugin-pwa` ссылается на него из виртуального модуля `virtual:pwa-register/react`, но `workbox-window` не указан в `package.json` (есть `workbox-build`, `workbox-core`, `workbox-routing`, `workbox-strategies`, но нет именно `-window`).
 
-**A4. Move pay-now toggle to checkout.** Remove `PaymentStageSelector` / pay-now-vs-arrival toggle from `PropertyBookingCard.tsx`. Pass intent to checkout (`/checkout/property/:id`); render toggle there as the last step before Stripe. Keeps detail page clean per Airbnb pattern.
+**Фикс:** добавить `workbox-window: ^7.4.0` в `package.json` → `npm install`. Один раз, отдельным маленьким коммитом перед auth-работой, чтобы не смешивать.
 
----
+## 3. Стратегия Auth без поломки UUID
 
-## Track B — Auth & Onboarding (Airbnb-style)
+### 3.1 Принцип «один путь к auth.users»
 
-Current state: `src/pages/Auth.tsx` is a 797-line monolith with email + password + signup wizard + role selector. Airbnb's flow is **bottom-sheet, phone-first, OTP, no password by default, social fallback**. We adapt — not copy — keeping email+password as a fallback because MyUNO has admin/MC users who need stable credentials.
+Все способы входа (phone OTP, email/password, Google, Apple, PIN) **финализируются через стандартный Supabase Auth API**, который вставляет/находит запись в `auth.users`. Никаких параллельных таблиц «пользователей», никаких «пред-аккаунтов» в `profiles` без `auth.users`.
 
-### B1. New shell — `AuthSheet`
+| Метод | Конечный API | Что попадает в auth.users |
+|---|---|---|
+| Email + пароль | `signInWithPassword` / `signUp` | Существующий путь, не трогаем |
+| Phone OTP | `signInWithOtp({phone})` + `verifyOtp` | Та же запись, ID тот же при повторных входах |
+| Google / Apple | `signInWithOAuth` | Стандартный provider linking |
+| PIN | `setSession(refreshToken)` | Никаких новых пользователей — только ре-гидрация существующей сессии |
 
-- Mobile (≤768): full-height bottom sheet with rounded top + grab handle + close `×` (matches Airbnb screen 02-03).
-- Desktop: centered modal/card, same content.
-- Single component `src/components/auth/AuthSheet.tsx` used by both `/auth` route and any inline "Sign in" trigger across the app (MessageHostButton, Booking CTA, etc.) — replaces today's full-page navigate-to-`/auth` round-trip for in-context logins.
+Триггер `handle_new_user` срабатывает один раз на `INSERT auth.users` независимо от метода → `profiles`/`user_roles`/`wallets` создаются автоматически с одним и тем же UUID. **Логика UUID не меняется ни в одной строчке.**
 
-### B2. Step 1 — "Log in or sign up"
+### 3.2 Account linking — где риск дублей и как его убираем
 
-- Title: **Log in or sign up** / **Войти или зарегистрироваться**.
-- Country picker (default Russia +7, remembers last choice in localStorage) + phone input. Uses `react-phone-number-input` (already a peer of shadcn) or our existing `Phone` lucide + simple regex — pick existing `phoneSchema`.
-- Primary CTA "Continue" — disabled until phone valid; gradient button on focus (Airbnb screen 03 pattern, MyUNO mint `#00D68F`).
-- Helper line: "We'll text you a code. Standard rates apply." (RU/EN).
-- OAuth divider + 4 buttons in canonical Airbnb order: **Email · Apple · Google · Facebook**. Email opens step "Continue with email" (B5). Apple/Google use existing OAuth via `supabase.auth.signInWithOAuth`. Facebook hidden behind `feature_flag:auth_facebook` (off by default).
+Risk-кейс: юзер регистрируется через email → потом пробует войти через тот же телефон → Supabase создаёт **второй** auth.users-row → второй UUID → данные потеряны.
 
-### B3. Step 2 — SMS OTP
+**Решение: identity linking через `profiles` lookup перед OTP-отправкой.**
 
-- 6-digit underlined inputs (Airbnb screens 04-05).
-- "We sent a code to +7 9XX..." with **Edit** link → back to step 1.
-- "Didn't get an SMS? Send again" with 30s cooldown.
-- "More options" link → Email fallback.
-- Backend: new edge function `auth-phone-otp` (Deno) wrapping `supabase.auth.signInWithOtp({ phone })` and `verifyOtp` — Supabase already supports phone OTP; we just wire it.
+Перед `signInWithOtp({phone})`:
+1. Edge Function `auth-phone-prelink` принимает `phone` (E.164).
+2. Ищет `profiles.phone = $1`. Если найден — записывает `auth.users.phone` для этого UUID через service-role (`supabase.auth.admin.updateUserById(uid, { phone })`) **до** OTP-вызова.
+3. Возвращает `{ linked_uid: uid | null }` фронту (без секретов).
+4. Фронт вызывает `signInWithOtp({ phone })` → Supabase найдёт уже привязанный UID и не создаст дубль.
 
-### B4. Step 3 — Profile completion (only first time)
+То же самое для OAuth — Supabase сам делает linking по email, если `Identity Linking` включён в Auth settings (нужно проверить через `cloud_status` + дашборд).
 
-After successful OTP, if `profiles.first_name` is null → small follow-up sheet:
-- First name (required), last name (optional), birthday (optional, used by Visa/Legal vertical), email (optional but recommended for receipts).
-- Persona/role chips deferred to in-app `OnboardingModal` (already exists) — do not block auth.
+### 3.3 Защита от race на стороне триггера
 
-### B5. Email fallback path
+`handle_new_user` сейчас делает обычный `INSERT INTO profiles`. Если Supabase создаст auth.users дважды (теоретический edge case), второй INSERT упадёт по PK и сломает signup. Усиливаем: меняем на `INSERT ... ON CONFLICT (id) DO NOTHING` (и то же для `user_roles`, `wallets`). Это идемпотентность без изменения семантики.
 
-Keeps current email + password flow but condensed into the sheet. Removes the 5-step signup wizard — collapse to 1 screen: email + password + name. Email confirmation handling already fixed in prior round; we just reuse `EmailVerificationBanner`.
+### 3.4 Phone-feature flag
 
-### B6. Cleanup
+Если SMS-провайдер ещё не подключён в Cloud Auth → ставим `feature_flag:auth_phone = false` в `system_settings`. UI показывает только email + Google/Apple. Phone-кнопка появляется автоматически после включения флага. Никаких ветвлений в БД-слое.
 
-- Delete password-strength wizard step, role-selection wizard step, "Gift" promo block — moved out of auth.
-- `AccountTypeSelection.tsx` (218 lines, "Are you a guest, owner, MC, vendor?") — **delete**. Role is derived from actions (becoming an owner = visit `/list-property` → guard prompts upgrade). Matches Airbnb (no role choice at signup).
-- `PinLogin` kept (used by returning users with PIN); surfaced as "Use PIN" link inside the sheet when device has a stored refresh token.
+## 4. Что строим
 
-### B7. Trust + i18n
+### Track 1 — Build hotfix (5 минут, отдельный коммит)
+- `package.json`: `+ "workbox-window": "^7.4.0"`
+- `npm install`
+- `npm run build` зелёный
 
-- Footer micro-copy: "By continuing, you agree to Terms & Privacy" with links — keep `AuthTrustFooter`.
-- Both languages from day 1 (`useLanguage`).
-- Telemetry: emit `auth_step_view`, `auth_otp_sent`, `auth_otp_failed`, `auth_completed` to existing analytics hook for funnel measurement.
+### Track 2 — Identity-safe AuthSheet
+1. **`AuthSheet.tsx`** — новый bottom-sheet/modal shell, заменяет full-page navigation. Открывается из любой точки через `useAuthSheet()` context.
+2. **`PhoneStep.tsx`** + **`OtpStep.tsx`** — только если `feature_flag:auth_phone`. До OTP вызывает `auth-phone-prelink`.
+3. **`EmailStep.tsx`** — упрощённый email + пароль + имя в один шаг (вместо 5-шагового wizard).
+4. **`OAuthRow.tsx`** — Google + Apple через `signInWithOAuth`. Facebook за `feature_flag:auth_facebook` (off).
+5. **`ProfileCompletionStep.tsx`** — открывается только если `profiles.first_name IS NULL` после успешного входа. Не блокирует доступ, но просит заполнить имя.
+6. **`AccountTypeSelection.tsx`** — удаляем (218 строк). Роль определяется действием.
 
----
+### Track 3 — Edge Function `auth-phone-prelink`
+- Deno 2.0, `verify_jwt = false` (вызывается до сессии).
+- Input: `{ phone: string (E.164) }`. Validation Zod.
+- Ищет `profiles.phone`. Если матч — `auth.admin.updateUserById`. Возвращает `{ linked: boolean }`.
+- Никогда не возвращает email/PII даже при матче (anti-enumeration).
+- Rate-limit через `system_settings` (5 запросов/минуту/IP).
 
-## What MyUNO gains vs today
+### Track 4 — Идемпотентность триггеров (миграция)
+- `handle_new_user`: `INSERT ... ON CONFLICT (id) DO NOTHING` для `profiles` и `user_roles`.
+- `handle_new_user_wallet`: то же.
+- Добавить partial unique index `profiles_phone_unique ON profiles(phone) WHERE phone IS NOT NULL` — гарантирует, что один телефон = один UUID.
 
-| Pain today | After |
-|---|---|
-| Full-page navigation to `/auth` breaks booking context | Bottom-sheet keeps user on property page |
-| 797-line component, 5-step wizard | ~300-line sheet, 2 steps for 90% of users |
-| Email+password mandatory | Phone OTP default; email fallback for power users |
-| Role choice at signup confuses guests | No role choice — derive from action |
-| No SMS path → Russian users abandon (no Apple ID, blocked Google) | Phone+SMS works for the actual target audience |
-| Password reset flows are dead-ends | OTP → no passwords for 90% of accounts |
+### Track 5 — Snap-in замена точек входа
+- `MessageHostButton`, `PropertyBookingCard`, `LoginRequiredPage`, любые `navigate('/auth')` → `openAuthSheet({ onSuccess })`. Контекст бронирования сохраняется.
+- Маршрут `/auth` остаётся (deep-link совместимость) и рендерит `AuthSheet` standalone.
 
----
+## 5. Что НЕ меняем (защищено)
 
-## Out of scope (future)
+- `auth.users` schema — не трогаем.
+- `handle_new_user` business-logic — только идемпотентность.
+- `profiles.id` PK = `auth.users.id` FK — единый UUID.
+- Существующие `user.id` по всему коду (1456 мест) — **0 изменений**.
+- `PinLogin` flow — оставляем, он уже использует `setSession` без создания нового UUID.
+- Email confirmation flow + `EmailVerificationBanner` — без изменений.
 
-- Social proof carousel on the empty Auth screen (Airbnb screen 01 brand splash).
-- Magic-link email (we already have OTP via phone; revisit if needed).
-- Phone-number portability between accounts (rare; merge tool can come later).
+## 6. Порядок выполнения
 
----
+1. **Build fix** (workbox-window) — отдельный коммит, проверка `npm run build`.
+2. **Миграция идемпотентности** + `profiles.phone` unique index.
+3. **`auth-phone-prelink` edge function** + тест.
+4. **`AuthSheet` shell + Email path** (работает сразу даже без SMS).
+5. **Phone path** под feature flag.
+6. **Замена точек входа** на `openAuthSheet`.
+7. **Удаление `Auth.tsx` legacy и `AccountTypeSelection.tsx`** после переключения всех caller'ов.
 
-## Technical notes
+## 7. Acceptance criteria
 
-- **No DB migration** for Track A. Track B requires enabling Phone provider in Supabase Auth dashboard + a Twilio/MessageBird SMS provider. Surface as a Cloud setting question; if the user can't enable SMS, we ship Track B with email-only and keep the new sheet UX (phone field hidden behind `feature_flag:auth_phone`).
-- New routes: none. `/auth` keeps working but renders `AuthSheet` standalone for direct-link compatibility.
-- Files removed: `src/pages/auth/AccountTypeSelection.tsx`, signup-wizard internals inside `Auth.tsx`.
-- Files added: `AuthSheet.tsx`, `PhoneStep.tsx`, `OtpStep.tsx`, `EmailFallbackStep.tsx`, `ProfileCompletionStep.tsx`, `useAuthSheet.ts` (global context to open sheet from anywhere), `supabase/functions/auth-phone-otp/index.ts`.
-- `MessageHostButton` and booking CTAs switch from `navigate('/auth?...')` to `openAuthSheet({ onSuccess })`.
+- [ ] `npm run build` зелёный.
+- [ ] Регистрация через email → ровно одна запись в `auth.users`, `profiles`, `user_roles`, `wallets` с одним UUID.
+- [ ] Регистрация через phone → то же.
+- [ ] Юзер с email-аккаунтом, добавивший телефон в профиль, может войти через phone OTP → попадает в **тот же** UUID, никаких дублей.
+- [ ] Юзер с phone-аккаунтом, нажавший Google → linking по email если возможно; иначе понятная ошибка «этот email уже привязан к другому аккаунту».
+- [ ] PIN flow работает без изменений.
+- [ ] `properties.owner_id` для существующих юзеров не меняется ни на байт.
+- [ ] Bottom-sheet поверх `/property/:id` сохраняет URL и состояние выбранных дат после `signIn`.
 
----
+## 8. Технические заметки
 
-## Order of execution
-
-1. Track A (A1-A4) — small, no blockers, ~1 day.
-2. Confirm Phone OTP provider availability (ask user once before starting B2/B3).
-3. Track B shell + email path (B1, B5, B6) — works immediately even without SMS.
-4. Track B phone path (B2, B3) — when SMS provider confirmed.
-5. B4 profile completion + analytics.
+- Identity linking в Supabase Auth включается флагом в дашборде (`Auth → Settings → Manual Linking`). Если выключен — phone-prelink делает работу руками через admin API.
+- `auth-phone-prelink` нужен сервис-роль key — `SUPABASE_SERVICE_ROLE_KEY` уже доступен в edge runtime.
+- Все user-facing строки RU+EN из дня 1 через `useLanguage`.
+- Telemetry: `auth_step_view`, `auth_method`, `auth_link_attempt`, `auth_completed` для воронки.
+- Тесты: добавить unit-тест на `handle_new_user` идемпотентность через двойной `INSERT auth.users` с одинаковым UUID.
 
