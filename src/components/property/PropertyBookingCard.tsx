@@ -195,20 +195,35 @@ export function PropertyBookingCard({
   return (
     <Card variant="elevated" className={cn(className)}>
       <CardContent className="p-6 space-y-5">
-        {/* Price Header — prominent and clear */}
+        {/* Header — Airbnb pattern:
+            - Before dates: invite to pick dates (no nightly teaser, no operational pricing leak)
+            - After dates: show TOTAL prominently with "for N nights" subtitle */}
         <div>
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-[1.75rem] font-display font-bold tracking-tight text-foreground">
-              {formatPrice(pricePerNight)}
-            </span>
-            <span className="text-base text-muted-foreground font-medium">
-              /{isRu ? 'ночь' : 'night'}
-            </span>
-          </div>
-          {rentalTerms?.weekly_discount && rentalTerms.weekly_discount > 0 && (
-            <p className="text-xs text-success font-medium mt-1">
-              {isRu ? `Скидка ${rentalTerms.weekly_discount}% от 7 ночей` : `${rentalTerms.weekly_discount}% off for 7+ nights`}
-            </p>
+          {nights > 0 ? (
+            <>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-[1.75rem] font-display font-bold tracking-tight text-foreground">
+                  {formatPrice(pricing.total)}
+                </span>
+                <span className="text-sm text-muted-foreground font-medium">
+                  {isRu
+                    ? `за ${nights} ${nights === 1 ? 'ночь' : nights < 5 ? 'ночи' : 'ночей'}`
+                    : `for ${nights} ${nights === 1 ? 'night' : 'nights'}`}
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {isRu ? 'Налоги и сборы включены' : 'Taxes & fees included'}
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-base font-display font-semibold text-foreground">
+                {isRu ? 'Добавьте даты, чтобы увидеть цену' : 'Add dates to see the total price'}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {isRu ? 'Без скрытых платежей' : 'No hidden fees'}
+              </p>
+            </>
           )}
         </div>
         
@@ -401,70 +416,67 @@ export function PropertyBookingCard({
           ))}
         </div>
 
-        {!nights ? (
-          <p className="text-center text-sm text-muted-foreground">
-            {isRu ? 'Выберите даты для расчёта стоимости' : 'Select dates to see total price'}
-          </p>
-        ) : (
+        {!nights ? null : (
           <>
             <Separator />
-            {/* Price Breakdown */}
+            {/* Compact, Airbnb-style summary — no operational pricing details */}
             <div className="space-y-2.5">
-              <button 
-                className="flex items-center justify-between w-full text-sm group" 
+              {/* Single line: nights × shown only on expand for transparency */}
+              <button
+                className="flex items-center justify-between w-full text-sm group"
                 onClick={() => setShowPriceDetails(!showPriceDetails)}
+                aria-expanded={showPriceDetails}
               >
-                <span className="underline decoration-dotted underline-offset-4 text-foreground group-hover:text-foreground transition-colors">
-                  {formatPrice(pricing.nightlyRate)} × {nights} {isRu ? 'ночей' : 'nights'}
+                <span className="underline decoration-dotted underline-offset-4 text-muted-foreground group-hover:text-foreground transition-colors">
+                  {isRu ? 'Расшифровка стоимости' : 'Price breakdown'}
                 </span>
-                <div className="flex items-center gap-2">
-                  <span className="font-medium text-foreground">{formatPrice(pricing.subtotal)}</span>
-                  {showPriceDetails ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
-                </div>
+                {showPriceDetails ? (
+                  <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                ) : (
+                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                )}
               </button>
-              
+
               {showPriceDetails && (
                 <div className="space-y-2 pl-1">
-                  {pricing.seasonalAdjustment !== 0 && (
-                    <div className={cn("flex items-center justify-between text-sm", pricing.seasonalAdjustment > 0 ? "text-warning" : "text-success")}>
-                      <span>{isRu ? 'Сезонная корректировка' : 'Seasonal adjustment'}</span>
-                      <span className="font-medium">{pricing.seasonalAdjustment > 0 ? '+' : ''}{formatPrice(pricing.seasonalAdjustment)}</span>
-                    </div>
-                  )}
+                  <div className="flex items-center justify-between text-sm text-muted-foreground">
+                    <span>{nights} × {isRu ? 'ночей' : 'nights'}</span>
+                    <span>{formatPrice(pricing.subtotal)}</span>
+                  </div>
                   {pricing.lengthDiscount > 0 && (
                     <div className="flex items-center justify-between text-sm text-success">
-                      <span>{pricing.lengthDiscountPercent}% {isRu ? 'скидка за срок' : 'length discount'}</span>
+                      <span>{isRu ? 'Скидка за срок' : 'Length discount'}</span>
                       <span className="font-medium">-{formatPrice(pricing.lengthDiscount)}</span>
                     </div>
                   )}
                   {pricing.earlyBirdDiscount > 0 && (
                     <div className="flex items-center justify-between text-sm text-success">
-                      <span>{pricing.earlyBirdPercent}% {isRu ? 'раннее бронирование' : 'early booking'}</span>
+                      <span>{isRu ? 'Раннее бронирование' : 'Early booking'}</span>
                       <span className="font-medium">-{formatPrice(pricing.earlyBirdDiscount)}</span>
                     </div>
                   )}
                   {pricing.lastMinuteDiscount > 0 && (
                     <div className="flex items-center justify-between text-sm text-success">
-                      <span>{pricing.lastMinutePercent}% {isRu ? 'горящее предложение' : 'last-minute deal'}</span>
+                      <span>{isRu ? 'Горящее предложение' : 'Last-minute deal'}</span>
                       <span className="font-medium">-{formatPrice(pricing.lastMinuteDiscount)}</span>
                     </div>
                   )}
                 </div>
               )}
-              
+
               <Separator className="my-1" />
-              
-              {/* Total — bold and prominent */}
+
+              {/* Total — bold, the single source of price truth */}
               <div className="flex items-center justify-between">
                 <span className="text-base font-bold text-foreground">{isRu ? 'Итого' : 'Total'}</span>
                 <span className="text-lg font-bold text-foreground">{formatPrice(pricing.total)}</span>
               </div>
-              
-              {/* Payment Schedule — subtle card */}
+
+              {/* Payment Schedule — public-friendly: only prepay / balance, no deposit operational details */}
               <div className="pt-2 mt-1 space-y-2 p-3 rounded-xl bg-muted/40">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">
-                    {isRu ? `Предоплата ${pricing.prepayPercent}%` : `${pricing.prepayPercent}% Prepayment`}
+                    {isRu ? `Оплатить сейчас (${pricing.prepayPercent}%)` : `Pay now (${pricing.prepayPercent}%)`}
                   </span>
                   <span className="font-bold text-primary">
                     {formatPrice(pricing.prepayAmount)}
@@ -473,20 +485,9 @@ export function PropertyBookingCard({
                 {pricing.balanceAmount > 0 && (
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">
-                      {isRu ? 'Остаток при заезде' : 'Balance on arrival'}
+                      {isRu ? 'Остаток при заезде' : 'Pay on arrival'}
                     </span>
                     <span className="font-medium text-foreground">{formatPrice(pricing.balanceAmount)}</span>
-                  </div>
-                )}
-                {pricing.depositAmount > 0 && (
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">
-                      {isRu ? 'Возвратный депозит' : 'Refundable deposit'}
-                    </span>
-                    <span className="font-medium text-foreground">
-                      {pricing.depositCurrency === 'USD' ? '$' : pricing.depositCurrency === 'EUR' ? '€' : '฿'}
-                      {pricing.depositAmount.toLocaleString()} {pricing.depositCurrency}
-                    </span>
                   </div>
                 )}
               </div>
