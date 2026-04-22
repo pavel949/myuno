@@ -19,6 +19,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { NavChips, type NavChipItem } from '@/components/nav/NavChips';
 
 interface ClusterService {
   labelRu: string;
@@ -289,6 +290,25 @@ export default function NavigatorPage() {
   const isRu = language === 'ru';
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
+  const [activeCluster, setActiveCluster] = useState<string>('all');
+
+  const clusterChips: NavChipItem[] = useMemo(
+    () => [
+      { id: 'all', label: isRu ? 'Все' : 'All', count: TOTAL_NAVIGATOR_SERVICES },
+      ...CLUSTERS.map((c) => ({
+        id: c.id,
+        label: isRu ? c.labelRu : c.labelEn,
+        accentColor: c.color,
+        count: c.services.filter((s) => s.status !== 'soon').length,
+      })),
+    ],
+    [isRu],
+  );
+
+  const visibleClusters = useMemo(
+    () => (activeCluster === 'all' ? CLUSTERS : CLUSTERS.filter((c) => c.id === activeCluster)),
+    [activeCluster],
+  );
 
   const { data: stats } = useQuery({
     queryKey: ['navigator-stats'],
