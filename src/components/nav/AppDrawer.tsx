@@ -267,7 +267,10 @@ export function AppDrawer({
                             >
                               <span>{isRu ? link.labelRu : link.labelEn}</span>
                               {link.status === 'pro' && (
-                                <span className="text-[8px] font-bold px-1.5 py-px rounded-full bg-amber-500/15 text-amber-500">
+                                <span
+                                  className="text-[8px] font-bold px-1.5 py-px rounded-full"
+                                  style={{ background: 'hsl(var(--accent) / 0.15)', color: 'hsl(var(--accent))' }}
+                                >
                                   PRO
                                 </span>
                               )}
