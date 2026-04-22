@@ -53,14 +53,14 @@ export function SideRail({ role, badges }: SideRailProps) {
   const { language } = useLanguage();
   const { state, isMobile, setOpenMobile } = useSidebar();
   const { role: businessRole } = useBusinessRole();
-  const { properties } = useMyProperties();
+  const { allProperties } = useMyProperties();
   const isRussian = language === 'ru';
   const isCollapsed = !isMobile && state === 'collapsed';
 
   if (!hasSidebar(role)) return null;
 
   const groups: SidebarNavGroup[] = role === 'owner'
-    ? getOwnerSidebarForRole(businessRole, { propertyCount: properties?.length ?? 0 })
+    ? getOwnerSidebarForRole(businessRole, { propertyCount: allProperties?.length ?? 0 })
     : SIDEBAR_NAV[role];
 
   const isActive = (path: string) => {
