@@ -4,191 +4,26 @@
  */
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Plane, Home, Scale, TrendingUp, Building2, HardHat,
-  Smartphone, ArrowLeftRight, Car, Landmark, Zap,
-  Utensils, Sparkles, Stethoscope, ClipboardList, ShoppingBag, Users,
-  FileSearch, Calculator, Shield,
-  Calendar, BarChart3, Wrench, PenTool, DollarSign,
-  Building, Search, LineChart, Palette, LayoutGrid, X,
-  Compass, Anchor, Dumbbell, CalendarDays, GraduationCap, Baby, PawPrint, Heart,
-} from 'lucide-react';
+import { Search, LayoutGrid, X } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { cn } from '@/lib/utils';
-import { APP_ROUTES } from '@/lib/config/routes';
 import { NavChips, type NavChipItem } from '@/components/nav/NavChips';
+import {
+  CLUSTER_CATALOG,
+  CLUSTER_CATALOG_AVAILABLE,
+  CLUSTER_CATALOG_SOON,
+  CLUSTER_CATALOG_TOTAL_AVAILABLE,
+  type ClusterService,
+} from '@/lib/nav/clusterCatalog';
 
-interface ClusterService {
-  labelRu: string;
-  labelEn: string;
-  icon: React.ElementType;
-  path: string;
-  status: 'available' | 'soon' | 'pro';
-}
-
-interface Cluster {
-  id: string;
-  labelRu: string;
-  labelEn: string;
-  valueRu: string;
-  valueEn: string;
-  color: string;
-  icon: React.ElementType;
-  services: ClusterService[];
-}
-
-const CLUSTERS: Cluster[] = [
-  {
-    id: 'arrive',
-    labelRu: 'ПРИЕХАТЬ',
-    labelEn: 'ARRIVE',
-    valueRu: 'Туристы и новые резиденты: дорога от аэропорта, связь, деньги, мобильность.',
-    valueEn: 'Tourists & new residents: airport transfers, connectivity, money, getting around.',
-    color: '#00D68F',
-    icon: Plane,
-    services: [
-      { labelRu: 'Трансферы', labelEn: 'Transfers', icon: Car, path: APP_ROUTES.AIRPORT_TRANSFER, status: 'available' },
-      { labelRu: 'SIM-карты', labelEn: 'SIM Cards', icon: Smartphone, path: APP_ROUTES.SIM_START, status: 'available' },
-      { labelRu: 'Курсы валют', labelEn: 'Exchange', icon: ArrowLeftRight, path: APP_ROUTES.EXCHANGE, status: 'available' },
-      { labelRu: 'Авто', labelEn: 'Car Rental', icon: Car, path: APP_ROUTES.TRANSPORT, status: 'available' },
-      { labelRu: 'Банк', labelEn: 'Bank', icon: Landmark, path: APP_ROUTES.BANKING, status: 'available' },
-      { labelRu: 'Fast Track', labelEn: 'Fast Track', icon: Zap, path: APP_ROUTES.FAST_TRACK, status: 'available' },
-    ],
-  },
-  {
-    id: 'live',
-    labelRu: 'ЖИТЬ',
-    labelEn: 'LIVE',
-    valueRu: 'Резиденты: быт, здоровье, еда, покупки — без хаоса.',
-    valueEn: 'Residents: dining, wellness, home services, shopping — one place.',
-    color: '#4E7BFF',
-    icon: Home,
-    services: [
-      { labelRu: 'Рестораны', labelEn: 'Restaurants', icon: Utensils, path: APP_ROUTES.RESTAURANTS, status: 'available' },
-      { labelRu: 'Афиша', labelEn: 'Events', icon: CalendarDays, path: APP_ROUTES.EVENTS, status: 'available' },
-      { labelRu: 'Красота', labelEn: 'Beauty', icon: Palette, path: APP_ROUTES.BEAUTY, status: 'available' },
-      { labelRu: 'Медицина', labelEn: 'Medical', icon: Stethoscope, path: APP_ROUTES.MEDICAL, status: 'available' },
-      { labelRu: 'Маркет', labelEn: 'Market', icon: ShoppingBag, path: APP_ROUTES.MARKET, status: 'available' },
-      { labelRu: 'Уборка', labelEn: 'Cleaning', icon: Sparkles, path: APP_ROUTES.CLEANING, status: 'available' },
-      { labelRu: 'Услуги', labelEn: 'Services', icon: Wrench, path: APP_ROUTES.SERVICES, status: 'available' },
-    ],
-  },
-  {
-    id: 'enjoy',
-    labelRu: 'ОТДЫХАТЬ',
-    labelEn: 'ENJOY',
-    valueRu: 'Впечатления, яхты, спорт, события — лучшее на Пхукете.',
-    valueEn: 'Experiences, yachts, fitness, events — the best of Phuket.',
-    color: '#EC4899',
-    icon: Heart,
-    services: [
-      { labelRu: 'Впечатления', labelEn: 'Experiences', icon: Compass, path: APP_ROUTES.EXPERIENCES, status: 'available' },
-      { labelRu: 'Яхты', labelEn: 'Yachts', icon: Anchor, path: APP_ROUTES.YACHTS, status: 'available' },
-      { labelRu: 'События', labelEn: 'Events', icon: CalendarDays, path: APP_ROUTES.EVENTS, status: 'available' },
-      { labelRu: 'Фитнес', labelEn: 'Fitness', icon: Dumbbell, path: APP_ROUTES.FITNESS, status: 'available' },
-      { labelRu: 'Цветы', labelEn: 'Flowers', icon: Sparkles, path: APP_ROUTES.FLOWERS, status: 'available' },
-    ],
-  },
-  {
-    id: 'legal',
-    labelRu: 'ЛЕГАЛЬНО',
-    labelEn: 'STAY LEGAL',
-    valueRu: 'Статус, налоги, договоры и страховки.',
-    valueEn: 'Visa status, taxes, contracts & insurance.',
-    color: '#F59E0B',
-    icon: Scale,
-    services: [
-      { labelRu: 'Визы', labelEn: 'Visas', icon: Plane, path: APP_ROUTES.VISA_IMMIGRATION, status: 'available' },
-      { labelRu: 'Налоги', labelEn: 'Taxes', icon: Calculator, path: APP_ROUTES.TAX_NAV, status: 'available' },
-      { labelRu: 'ContractAI', labelEn: 'ContractAI', icon: FileSearch, path: APP_ROUTES.CONTRACT_ANALYSIS, status: 'available' },
-      { labelRu: 'Страховка', labelEn: 'Insurance', icon: Shield, path: APP_ROUTES.INSURANCE, status: 'available' },
-    ],
-  },
-  {
-    id: 'invest',
-    labelRu: 'КУПИТЬ',
-    labelEn: 'INVEST',
-    valueRu: 'Каталог, новостройки, вторичка, застройщики, ROI.',
-    valueEn: 'Search, off-plan, resale, developers, ROI tools.',
-    color: '#A855F7',
-    icon: TrendingUp,
-    services: [
-      { labelRu: 'Поиск', labelEn: 'Property', icon: Search, path: APP_ROUTES.PROPERTY, status: 'available' },
-      { labelRu: 'Новостройки', labelEn: 'Off-plan', icon: Building2, path: APP_ROUTES.OFFPLAN, status: 'available' },
-      { labelRu: 'Вторичка', labelEn: 'Resale', icon: Building2, path: APP_ROUTES.RESALE, status: 'available' },
-      { labelRu: 'Застройщики', labelEn: 'Developers', icon: Users, path: APP_ROUTES.DEVELOPERS, status: 'available' },
-      { labelRu: 'ROI', labelEn: 'ROI Hub', icon: BarChart3, path: APP_ROUTES.INVEST, status: 'available' },
-      { labelRu: 'DueDiligence', labelEn: 'DueDiligence', icon: Shield, path: APP_ROUTES.INVEST, status: 'soon' },
-    ],
-  },
-  {
-    id: 'family',
-    labelRu: 'СЕМЬЯ',
-    labelEn: 'FAMILY & PETS',
-    valueRu: 'Школы, няни, ветеринары, питомцы.',
-    valueEn: 'Schools, childcare, vets, pet services.',
-    color: '#F59E0B',
-    icon: Baby,
-    services: [
-      { labelRu: 'Образование', labelEn: 'Education', icon: GraduationCap, path: APP_ROUTES.EDUCATION, status: 'available' },
-      { labelRu: 'Няни', labelEn: 'Babysitters', icon: Baby, path: APP_ROUTES.BABYSITTER, status: 'available' },
-      { labelRu: 'Питомцы', labelEn: 'Pets', icon: PawPrint, path: APP_ROUTES.PETS, status: 'available' },
-      { labelRu: 'Школы', labelEn: 'Schools', icon: Search, path: APP_ROUTES.SCHOOL_FINDER, status: 'available' },
-      { labelRu: 'Аптеки', labelEn: 'Pharmacy', icon: Stethoscope, path: APP_ROUTES.PHARMACY, status: 'available' },
-    ],
-  },
-  {
-    id: 'manage',
-    labelRu: 'УПРАВЛЯТЬ',
-    labelEn: 'MANAGE',
-    valueRu: 'Собственники: брони, финансы, CRM — один кабинет.',
-    valueEn: 'Hosts & managers: bookings, money, ops, CRM.',
-    color: '#06B6D4',
-    icon: Building2,
-    services: [
-      { labelRu: 'Кабинет', labelEn: 'Dashboard', icon: Calendar, path: '/mc', status: 'available' },
-      { labelRu: 'Календарь', labelEn: 'Calendar', icon: Calendar, path: APP_ROUTES.MC_CALENDAR, status: 'available' },
-      { labelRu: 'Финансы', labelEn: 'Finances', icon: DollarSign, path: APP_ROUTES.MC_FINANCE, status: 'available' },
-      { labelRu: 'Операции', labelEn: 'Operations', icon: ClipboardList, path: '/mc/operations', status: 'available' },
-      { labelRu: 'Отчёты', labelEn: 'Reports', icon: BarChart3, path: APP_ROUTES.MC_REPORTS, status: 'pro' },
-      { labelRu: 'CRM', labelEn: 'CRM', icon: Users, path: APP_ROUTES.MC_CRM_DASHBOARD, status: 'pro' },
-    ],
-  },
-  {
-    id: 'build',
-    labelRu: 'ДЕВЕЛОПЕРАМ',
-    labelEn: 'FOR DEVELOPERS',
-    valueRu: 'Портал, лиды, витрина проектов, консультации.',
-    valueEn: 'Portal, leads, project showcase & deal advisory.',
-    color: '#F43F5E',
-    icon: HardHat,
-    services: [
-      { labelRu: 'Портал', labelEn: 'Portal', icon: Building, path: APP_ROUTES.DEVELOPER_PORTAL, status: 'available' },
-      { labelRu: 'Программа', labelEn: 'Program', icon: LineChart, path: APP_ROUTES.FOR_REAL_ESTATE_DEVELOPERS, status: 'available' },
-      { labelRu: 'Витрина', labelEn: 'Showcase', icon: Building2, path: APP_ROUTES.NEWBUILDS, status: 'available' },
-      { labelRu: 'Консультация', labelEn: 'Advisory', icon: PenTool, path: APP_ROUTES.PROPERTY_CONSULTATION, status: 'available' },
-    ],
-  },
-];
-
-const ALL_SERVICES: Array<ClusterService & { clusterColor: string; clusterLabelRu: string; clusterLabelEn: string }> =
-  CLUSTERS.flatMap(c =>
-    c.services
-      .filter(s => s.status !== 'soon')
-      .map(s => ({ ...s, clusterColor: c.color, clusterLabelRu: c.labelRu, clusterLabelEn: c.labelEn })),
-  );
-
-const SOON_SERVICES: Array<ClusterService & { clusterColor: string; clusterLabelRu: string; clusterLabelEn: string }> =
-  CLUSTERS.flatMap(c =>
-    c.services
-      .filter(s => s.status === 'soon')
-      .map(s => ({ ...s, clusterColor: c.color, clusterLabelRu: c.labelRu, clusterLabelEn: c.labelEn })),
-  );
-
-const TOTAL_NAVIGATOR_SERVICES = CLUSTERS.reduce((n, c) => n + c.services.filter(s => s.status !== 'soon').length, 0);
+// Local aliases — keep call-sites readable; SSOT lives in clusterCatalog.ts
+const CLUSTERS = CLUSTER_CATALOG;
+const ALL_SERVICES = CLUSTER_CATALOG_AVAILABLE;
+const SOON_SERVICES = CLUSTER_CATALOG_SOON;
+const TOTAL_NAVIGATOR_SERVICES = CLUSTER_CATALOG_TOTAL_AVAILABLE;
 
 function NavigatorStatsFooter({
   stats,
