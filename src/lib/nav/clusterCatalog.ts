@@ -56,6 +56,21 @@ export interface ClusterCatalogEntry {
   icon: React.ElementType;
   /** Services inside this cluster (order = display order) */
   services: ClusterService[];
+  /**
+   * Visibility rules (drives AppDrawer filtering by role/persona).
+   *  - `audience: 'public'`   — always visible to everyone (default)
+   *  - `audience: 'workspace'`— hidden unless persona/role matches `personas`/`roles`
+   *
+   * `personas` are checked against the user's `useUserPersonas` stack.
+   * `roles` are checked against the resolved `NavRoleKey` from `navigationModel`.
+   * If both arrays are present, EITHER match makes the cluster visible.
+   *
+   * Public catalog (`/discover` NavigatorPage) ignores these filters and
+   * shows everything — it's the full ecosystem map.
+   */
+  audience?: 'public' | 'workspace';
+  personas?: string[];
+  roles?: string[];
 }
 
 /**
@@ -173,6 +188,10 @@ export const CLUSTER_CATALOG: ClusterCatalogEntry[] = [
     valueEn: 'Hosts & managers: bookings, money, ops, CRM.',
     color: '#06B6D4',
     icon: Building2,
+    // Workspace cluster — gated to property owners and pro operator roles.
+    audience: 'workspace',
+    personas: ['property_owner', 'local_services_provider'],
+    roles: ['owner', 'admin', 'team', 'vendor'],
     services: [
       { labelRu: 'Кабинет',   labelEn: 'Dashboard',  icon: Calendar,        path: '/mc',                       status: 'available' },
       { labelRu: 'Календарь', labelEn: 'Calendar',   icon: Calendar,        path: APP_ROUTES.MC_CALENDAR,      status: 'available' },
@@ -190,6 +209,10 @@ export const CLUSTER_CATALOG: ClusterCatalogEntry[] = [
     valueEn: 'Portal, leads, project showcase & deal advisory.',
     color: '#F43F5E',
     icon: HardHat,
+    // Workspace cluster — gated to real-estate developers and platform admins.
+    audience: 'workspace',
+    personas: ['real_estate_developer'],
+    roles: ['admin', 'team'],
     services: [
       { labelRu: 'Портал',       labelEn: 'Portal',    icon: Building,   path: APP_ROUTES.DEVELOPER_PORTAL,            status: 'available' },
       { labelRu: 'Программа',    labelEn: 'Program',   icon: LineChart,  path: APP_ROUTES.FOR_REAL_ESTATE_DEVELOPERS,  status: 'available' },
@@ -236,4 +259,47 @@ export const CLUSTER_CATALOG_TOTAL_AVAILABLE: number = CLUSTER_CATALOG_AVAILABLE
 /** Lookup by id — O(1) reads from drawer/navigator. */
 export function getClusterById(id: string): ClusterCatalogEntry | undefined {
   return CLUSTER_CATALOG.find((c) => c.id === id);
+}
+
+// ─────────────────────────────────────────────────────────────
+// Role/persona-aware filtering — drives the AppDrawer launcher
+// ─────────────────────────────────────────────────────────────
+
+export interface ClusterAudienceContext {
+  /** Active persona stack from `useUserPersonas()` (string[] for decoupling). */
+  personas?: string[];
+  /** Resolved nav role from `resolveNavRole()` (`navigationModel`). */
+  role?: string | null;
+}
+
+/**
+ * Decide whether a cluster should appear in the AppDrawer for a given user.
+ *
+ * Rules:
+ *  - `audience: 'public'` (default) → always visible.
+ *  - `audience: 'workspace'` → visible only when the user's persona stack
+ *    intersects `cluster.personas` OR their resolved `role` is in
+ *    `cluster.roles`. Empty/missing context hides the cluster (safer default
+ *    — consumer/guest doesn't see operator surfaces by accident).
+ */
+export function isClusterVisibleToUser(
+  cluster: ClusterCatalogEntry,
+  ctx: ClusterAudienceContext,
+): boolean {
+  if (cluster.audience !== 'workspace') return true;
+
+  const { personas = [], role } = ctx;
+  const personaMatch = (cluster.personas ?? []).some((p) => personas.includes(p));
+  const roleMatch = !!role && (cluster.roles ?? []).includes(role);
+  return personaMatch || roleMatch;
+}
+
+/**
+ * Filter the SSOT catalog down to clusters this user is allowed to launch
+ * from the AppDrawer. Pure / memoizable — does not touch React state.
+ */
+export function filterCatalogForUser(
+  ctx: ClusterAudienceContext,
+): ClusterCatalogEntry[] {
+  return CLUSTER_CATALOG.filter((c) => isClusterVisibleToUser(c, ctx));
 }
