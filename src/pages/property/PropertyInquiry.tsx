@@ -102,6 +102,24 @@ export default function PropertyInquiry() {
   const [rulesOpen, setRulesOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // A1 — "Choose when to pay". Only used when rentalTerms.allow_pay_later is on.
+  // Default 'split' preserves the legacy behavior (charge prepay only).
+  const [payWhen, setPayWhen] = useState<PayWhenChoice>('split');
+  // A2 — current payment method, mirrored from DepositPaymentOptions so the
+  // sticky footer can re-label its CTA ("Confirm and pay" vs "Message manager").
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodId>('card');
+  const depositPaymentRef = useRef<DepositPaymentOptionsHandle>(null);
+  const paymentSectionRef = useRef<HTMLDivElement>(null);
+  // Listing currency — pulled out so we can also display it in the Total tooltip.
+  const listingCurrency = useMemo(
+    () =>
+      ((property as any)?.currency?.trim?.() ||
+        (rentalTerms as any)?.currency?.trim?.() ||
+        'THB') as string,
+    [property, rentalTerms],
+  );
+  const { data: isRareFind } = useRareFindBadge(id);
+
   // Persist form draft on every change, with current URL context attached
   // so a stale draft for different dates can be detected on restore.
   // Empty form → remove the key so we don't ressurect a cleared draft.
