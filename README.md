@@ -1,146 +1,189 @@
-# myUNO — SuperApp for Phuket
+# myUNO · Phuket Super-App for Foreigners
 
-myUNO is a comprehensive SuperApp platform providing 18+ service verticals for residents and tourists in Phuket, Thailand. It covers real estate, transport, restaurants, beauty, healthcare, education, events, yachts, and many more — all in one unified application.
+> **Доверенная цифровая инфраструктура для жизни и инвестиций иностранца на Пхукете.**
+> Один аккаунт, одна база, одно окно — от трансфера из аэропорта до сделки с недвижимостью на $5M.
+
+[![Status](https://img.shields.io/badge/status-active%20development-00D68F)](./PROJECT.md)
+[![Version](https://img.shields.io/badge/app-v3.43.0-4E7BFF)](./src/lib/appVersion.ts)
+[![Stack](https://img.shields.io/badge/stack-React%2018%20%C2%B7%20Vite%205%20%C2%B7%20Supabase-0F1C2E)](#tech-stack)
+[![Domain](https://img.shields.io/badge/domain-myuno.app-08101E)](https://myuno.app)
+
+---
+
+## What it is
+
+**myUNO** — суперапп уровня государственного сервисного портала для русскоязычных и англоязычных иностранцев на Пхукете. Платформа охватывает 40+ микро-приложений в шести кластерах жизни (Arrive · Live · Manage · Invest · Legal · Build), объединённых единым AI-консьержем, общим CRM и канонической базой данных.
+
+**Маховик одного клиента:**
+
+```
+ТУРИСТ → АРЕНДАТОР → ПОКУПАТЕЛЬ → СОБСТВЕННИК → РЕФЕРРЕР
+```
+
+Один CAC — четыре денежных события на 24–36 месяцах. Главный финансовый KPI — GMV сделок с недвижимостью; все остальные вертикали прогревают и удерживают пользователя на пути к этой сделке.
+
+**Два продукта-ядра:**
+
+| Продукт | Домен | Назначение |
+|---------|-------|------------|
+| **myUNO** | [`myuno.app`](https://myuno.app) | Единая точка входа, AI-консьерж, все вертикали, витрина новостроек, аренда |
+| **myUNO Invest** | [`invest.myuno.app`](https://invest.myuno.app) | CRM сделок, DueDiligence AI, ClearView™ рейтинги, аналитика для HNW |
+
+---
+
+## Документация — порядок чтения
+
+> При расхождении кода/UI с документами правится **код**, а не документ.
+
+### 1 · Стратегический источник истины
+
+**[`/PROJECT.md`](./PROJECT.md)** — Master document v2.3. Чем является платформа, как устроена монетизация, кто аудитория, восемь моатов (включая ClearView), 13-строчная таблица сделок, Y1 target $1M, дизайн-стандарты, 5-тест для новых фич. **Отменяет все предыдущие версии и роадмапы.**
+
+### 2 · Канонические документы (`docs/canonical/`)
+
+| # | Документ | О чём |
+|---|----------|-------|
+| 01 | [Segmentation Framework](./docs/canonical/01-segmentation-framework.md) | 3-осевая сегментация · 25 персон · 10 кластеров · CRM-поля |
+| 02 | [Service Catalogue v2](./docs/canonical/02-service-catalogue-v2.md) | 16 категорий × 230 услуг с тегами lifecycle/role/cluster |
+| 03 | [Tone of Voice](./docs/canonical/03-tone-of-voice.md) | Голос бренда: спокойная уверенность, продаём доверие |
+| 04 | [Implementation Protocol](./docs/canonical/04-implementation-protocol.md) | Operational playbook M1→M7 |
+| 05 | [Visual Design System](./docs/canonical/05-visual-design-system.md) | Цвет, типографика, сетка, компоненты, кластеры |
+| 06 | [ClearView™ Methodology](./docs/canonical/06-clearview-methodology.md) | Off-plan rating system · 8 категорий · AAA–BB · моат #8 |
+| 07 | [Information Architecture](./docs/canonical/07-information-architecture.md) | URL-структура · субдомены · навигация · cross-domain SSO |
+| 08 | [AI Prompts Library](./docs/canonical/08-ai-prompts-library.md) | Канонические system prompts для всех AI-агентов |
+| 09 | [Data Schema](./docs/canonical/09-data-schema.md) | Таблицы · enums · RLS · FK · naming conventions Supabase |
+
+### 3 · Архитектура (`docs/canonical/architecture/`)
+
+| Документ | О чём |
+|----------|-------|
+| [ARCHITECTURE_V2](./docs/canonical/architecture/ARCHITECTURE_V2.md) | Roles · clusters · surfaces · agents · hard rules |
+| [FEASIBILITY](./docs/canonical/architecture/FEASIBILITY.md) | Migration path и per-role implementation status |
+
+Индекс канона: [`docs/canonical/README.md`](./docs/canonical/README.md) · История: [`docs/canonical/CHANGELOG.md`](./docs/canonical/CHANGELOG.md).
+
+### 4 · Операционные референсы
+
+| Документ | О чём |
+|----------|-------|
+| [`CLAUDE.md`](./CLAUDE.md) | Инструкции для AI-ассистентов — обязательно к прочтению до любой задачи |
+| [`DESIGN.md`](./DESIGN.md) | Design tokens — цвета, шрифты, spacing, motion |
+| [`docs/ENVIRONMENT.md`](./docs/ENVIRONMENT.md) | Окружения, БД, ключи (источник истины) |
+| [`docs/CONVENTIONS.md`](./docs/CONVENTIONS.md) | Коды, нейминг, паттерны |
+| [`docs/EDGE_FUNCTIONS.md`](./docs/EDGE_FUNCTIONS.md) | Реестр Edge Functions (Deno 2.0) |
+| [`supabase/functions/_docs/API_REFERENCE.md`](./supabase/functions/_docs/API_REFERENCE.md) | Полный API-референс |
+
+---
 
 ## Tech Stack
 
-- **Frontend:** React 18 + TypeScript + Vite
-- **UI:** shadcn/ui + Radix UI + Tailwind CSS (semantic tokens)
-- **State:** React Context (9 providers) + TanStack React Query
-- **Backend:** Lovable Cloud (Supabase) — 60+ Edge Functions, PostgreSQL with RLS
-- **Payments:** Stripe (checkout sessions, webhooks, vendor subscriptions)
-- **Maps:** Mapbox GL
-- **Notifications:** Resend (email), WhatsApp integrations
-- **AI:** Lovable AI (descriptions, search, translations, moderation)
-- **PWA:** vite-plugin-pwa with offline support
+| Слой | Технологии |
+|------|------------|
+| **Frontend** | React 18 · TypeScript 5.8 · Vite 5 (SWC) · React Router 6 · TanStack Query 5 |
+| **UI** | Tailwind CSS 3.4 · shadcn/ui · Radix UI · Framer Motion |
+| **Forms** | React Hook Form 7 · Zod |
+| **Backend** | Supabase (Postgres · Auth · Storage · Edge Functions on Deno 2.0) |
+| **Payments** | Stripe (Checkout · Connect · Subscriptions) |
+| **Maps** | Google Maps (`@react-google-maps/api`) |
+| **Messaging** | UltraMSG (WhatsApp) · Telegram Bot · Resend (email) |
+| **Mobile** | PWA (`vite-plugin-pwa`) · Capacitor (iOS/Android) |
+| **Quality** | Vitest · Testing Library · Playwright · Sentry |
+
+**Шрифты:** Golos Text (display) · DM Sans (body) · JetBrains Mono (data) · Playfair Display (luxury RE).
+**Палитра (dark default):** bg `#08101E` · primary `#00D68F` (mint) · accent `#4E7BFF` (blue).
+
+---
 
 ## Quick Start
 
 ```bash
-# 1. Clone the repository
 git clone <YOUR_GIT_URL>
-cd <YOUR_PROJECT_NAME>
-
-# 2. Install dependencies
+cd myuno
 npm install
-
-# 3. Copy environment variables
-cp .env.example .env
-# Fill in your values (see .env.example for details)
-
-# 4. Start development server
-npm run dev
+cp .env.example .env   # заполнить значения (см. docs/ENVIRONMENT.md)
+npm run dev            # localhost:8080
 ```
 
-The app will be available at `http://localhost:5173`.
+Команды:
 
-## Environment Variables, Databases & Keys
-
-> 📖 **Single source of truth:** [`docs/ENVIRONMENT.md`](docs/ENVIRONMENT.md) — read this first if you're unsure where data goes or which key to use.
-
-**Databases (TL;DR):**
-- **PRIMARY (production):** Supabase `kakkwibljrjsawxgnupk` — all reads & writes go here (frontend + edge functions).
-- **MIRROR (optional):** Supabase `erfwtoavipwjqmylpizt` — standalone backup, only via manual `scripts/` migration.
-- **PEYLAA:** migrated into PRIMARY DB (`slug=peylaa-phuket-marriott`). The legacy separate Supabase project is no longer used.
-
-⚠️ Local dev, preview and production all hit the **same PRIMARY DB**. There is no separate staging — mark test data with `[TEST]` / `source='smoke_test'` / `*@myuno.test`.
-
-See [`.env.example`](.env.example) for the full variable list. Frontend keys (publishable, OK in code):
-
-| Variable | Description |
-|----------|-------------|
-| `VITE_SUPABASE_URL` | Primary DB URL |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | Primary DB anon key |
-| `VITE_SUPABASE_PROJECT_ID` | `kakkwibljrjsawxgnupk` |
-| ~~`VITE_PEYLAA_SUPABASE_URL` / `_KEY`~~ | Removed — PEYLAA is now in PRIMARY DB |
-| `VITE_GOOGLE_MAPS_API_KEY` | Google Maps JS + Places + Geocoding |
-
-**Backend secrets** (managed in Lovable Cloud, never in `.env`): `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY`, `FIRECRAWL_API_KEY`, `LOVABLE_API_KEY`, `RENTALS_UNITED_*`, `ANTHROPIC_API_KEY`, `TELEGRAM_BOT_TOKEN`, etc. Full list in [`docs/ENVIRONMENT.md`](docs/ENVIRONMENT.md#42-backend-secrets-lovable-cloud--edge-functions).
-
-## Project Structure
-
-```
-src/
-  components/    — UI components organized by domain (60+ folders)
-  pages/         — Route pages (40+ verticals)
-  hooks/         — Business logic hooks (230+)
-  contexts/      — Global providers (Auth, Cart, Language, Currency, Theme, etc.)
-  lib/           — Utilities, configs, taxonomies, adapters
-  types/         — TypeScript type definitions
-  integrations/  — Auto-generated files (DO NOT EDIT)
-
-supabase/
-  functions/     — Edge Functions (60+)
-  migrations/    — SQL migrations (DO NOT EDIT)
-
-docs/            — Developer documentation
+```bash
+npm run dev       # dev server
+npm run build     # production build
+npm run preview   # preview production at localhost:4173
+npm run lint      # ESLint
 ```
 
-## Documentation
+---
 
-### Strategic source of truth
+## Структура проекта
 
-**Перед любой задачей читай [`/PROJECT.md`](PROJECT.md)** — стратегический документ верхнего уровня (v2.3). Отменяет все предыдущие версии, драфты и роадмапы. Описывает позиционирование, монетизацию, 8 моатов (включая ClearView), 13-строчную таблицу сделок, Y1 target $1M, дизайн-стандарты и 5-тест для новых фич.
+```
+.
+├── PROJECT.md                  ← strategic source of truth (read first)
+├── CLAUDE.md                   ← AI assistant instructions
+├── DESIGN.md                   ← design tokens reference
+├── README.md                   ← this file
+│
+├── docs/
+│   ├── canonical/              ← operational source of truth (01–09 + architecture/)
+│   ├── ENVIRONMENT.md          ← envs, DBs, keys
+│   ├── CONVENTIONS.md
+│   └── …                       ← topic-specific docs
+│
+├── src/
+│   ├── pages/                  ← 366+ pages by vertical
+│   ├── components/             ← 1000+ components / 60+ domains
+│   ├── hooks/                  ← 345 custom hooks
+│   ├── contexts/               ← 11 global providers
+│   ├── integrations/supabase/  ← auto-generated client + types (DO NOT EDIT)
+│   ├── lib/                    ← utilities · taxonomies · adapters
+│   ├── design-system/          ← tokens · component docs
+│   └── i18n/                   ← RU/EN translations
+│
+├── supabase/
+│   ├── functions/              ← Edge Functions (Deno 2.0)
+│   └── migrations/             ← SQL migrations (DO NOT EDIT)
+│
+└── archive/                    ← frozen historical context (do not reference)
+```
 
-### Canonical Documentation (operational source of truth)
+---
 
-После PROJECT.md — **читай документы из [`docs/canonical/`](docs/canonical/) по номерам** для конкретных решений. При расхождении кода/UI с этими документами правится код, а не документ.
+## Окружения
 
-| # | Document | Description |
-|---|----------|-------------|
-| 01 | [`docs/canonical/01-segmentation-framework.md`](docs/canonical/01-segmentation-framework.md) | 3-осевая сегментация, 25 персон, 10 кластеров, CRM-поля |
-| 02 | [`docs/canonical/02-service-catalogue-v2.md`](docs/canonical/02-service-catalogue-v2.md) | 16 категорий × 230 услуг с тегами lifecycle/role/cluster |
-| 03 | [`docs/canonical/03-tone-of-voice.md`](docs/canonical/03-tone-of-voice.md) | Канонический голос бренда |
-| 04 | [`docs/canonical/04-implementation-protocol.md`](docs/canonical/04-implementation-protocol.md) | Operational playbook M1→M7 |
-| 05 | [`docs/canonical/05-visual-design-system.md`](docs/canonical/05-visual-design-system.md) | Визуальная дизайн-система v1.0 |
-| 06 | [`docs/canonical/06-clearview-methodology.md`](docs/canonical/06-clearview-methodology.md) | ClearView™ методология рейтингов off-plan (моат #8) |
-| 07 | [`docs/canonical/07-information-architecture.md`](docs/canonical/07-information-architecture.md) | Информационная архитектура: URL, субдомены, SSO |
+| Окружение | URL | База данных |
+|-----------|-----|-------------|
+| **Production** | [myuno.app](https://myuno.app) · [www.myuno.app](https://www.myuno.app) | Supabase `kakkwibljrjsawxgnupk` |
+| **Preview** | [uno-connect-hub.lovable.app](https://uno-connect-hub.lovable.app) | Та же PRIMARY DB |
+| **Local** | `localhost:8080` | Та же PRIMARY DB |
 
-См. также [`docs/canonical/CHANGELOG.md`](docs/canonical/CHANGELOG.md).
+⚠️ Отдельного staging нет — все три окружения работают с одной production БД. Тестовые данные помечайте `[TEST]` / `source='smoke_test'` / `*@myuno.test`.
 
-### Other references
+---
 
-| Document | Description |
-|----------|-------------|
-| [`CLAUDE.md`](CLAUDE.md) | AI assistant instructions — start here for any AI-assisted work |
-| [`DESIGN.md`](DESIGN.md) | Design system DS 2.1 — colors, fonts, spacing, motion (source of truth) |
-| [`project.md`](project.md) | Comprehensive system spec — verticals, CRM, flows, known gaps |
-| [`docs/ENVIRONMENT.md`](docs/ENVIRONMENT.md) | Environments, databases, credentials reference |
-| [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md) | Coding standards and naming conventions |
-| [`docs/UX_CONTRACT.md`](docs/UX_CONTRACT.md) | UX patterns v2.0 — DS 2.1 aligned (dark-first, cluster accents, fonts) |
-| [`docs/EDGE_FUNCTIONS.md`](docs/EDGE_FUNCTIONS.md) | Edge Functions overview |
-| [`docs/DATABASE.md`](docs/DATABASE.md) | Database schema, tables, RLS policies |
-| [`supabase/functions/_docs/API_REFERENCE.md`](supabase/functions/_docs/API_REFERENCE.md) | Full API reference for all Edge Functions |
-| [`docs/canonical/architecture/ARCHITECTURE_V2.md`](docs/canonical/architecture/ARCHITECTURE_V2.md) | Architecture v2 blueprint — roles, clusters, surfaces, hard rules |
-| [`docs/canonical/architecture/FEASIBILITY.md`](docs/canonical/architecture/FEASIBILITY.md) | Architecture v2 migration path and per-role implementation status |
+## User surfaces
 
-### Archive
+| Surface | Маршрут | Назначение |
+|---------|---------|------------|
+| Home | `/` | LifeOS — ситуационные шорткаты |
+| Discover | `/discover` | Хаб сервисов по жизненным контекстам |
+| Operate | `/operate` | Управление активами для собственников и УК |
+| Wallet | `/wallet` | Платежи, подписки, история |
+| Me | `/account` | Профиль, бронирования, настройки |
+| Admin | `/admin` | Платформенное управление (контент, заказы, AI) |
 
-Stale and superseded documents are in [`archive/`](archive/). Each file has an `ARCHIVED:` header with the reason and superseding document. Do not reference archived files in new code — follow the superseding document instead.
+Кластеры (colour-locked): **Arrive · Live · Manage · Invest · Legal · Build**.
 
-## Key Concepts
-
-- **Verticals** — Each service category (property, yachts, restaurants, etc.) is a self-contained vertical with its own pages, hooks, filters, and components. See `src/lib/verticals.ts` for the canonical registry.
-- **MiniAppLayout** — Every vertical uses this standardized layout wrapper.
-- **Canonical Listing Wizard** — Schema-driven forms for creating/editing listings across all verticals.
-- **Taxonomy System** — Static (`src/lib/taxonomies/`) + dynamic (`lookup_values` table) classification system.
-- **Bilingual** — All content supports English and Russian via `useLanguage()` context.
-
-## User Modes
-
-1. **Life** (`/`) — LifeOS dashboard with situational shortcuts
-2. **Services** (`/discover`) — Service discovery hub organized by life contexts
-3. **Marketplace** (`/market`) — Product marketplace
-4. **Me** (`/account`) — Profile, bookings, wallet, settings
-
-## Portals
-
-- **Admin** (`/admin`) — Platform management (content, orders, analytics, AI)
-- **Vendor** (`/vendor`) — Service provider dashboard
-- **Owner** (`/owner`) — Property owner management
-- **Team** (`/team`) — Internal team tools
-- **Manager** (`/manager`) — Property manager tools
+---
 
 ## Deployment
 
-The app is deployed via Lovable. Frontend changes require clicking "Update" in the publish dialog. Backend changes (Edge Functions, migrations) deploy automatically.
+- **Production:** Vercel auto-deploy с `main` ветки.
+- **Edge Functions:** Supabase auto-deploy при пуше в `supabase/functions/`.
+- **Lovable preview:** обновляется автоматически.
+
+---
+
+## License & ownership
+
+Proprietary · © Ignatev Group · All rights reserved. Контакт: Pavel Ignatev.

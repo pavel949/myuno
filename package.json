@@ -1,7 +1,12 @@
 {
-  "name": "vite_react_shadcn_ts",
+  "name": "myuno",
+  "description": "myUNO — Phuket Super-App for Foreigners. Доверенная цифровая инфраструктура для жизни, аренды и инвестиций иностранца на Пхукете: stays, services, property, investments в одном приложении.",
+  "keywords": ["phuket", "thailand", "super-app", "real-estate", "off-plan", "clearview", "rental", "expat", "relocation", "myuno"],
+  "homepage": "https://myuno.app",
+  "author": "Ignatev Group",
+  "license": "UNLICENSED",
   "private": true,
-  "version": "0.0.0",
+  "version": "3.43.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
