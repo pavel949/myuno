@@ -5,6 +5,26 @@
 
 ---
 
+## [1.2.0] — 2026-04-22 (M2 done)
+
+### Added
+- **Schema extension (M2)** — расширение `public.profiles`:
+  - 13 новых колонок (lifecycle/persona/modifier/triggers)
+  - 3 enum: `lifecycle_stage`, `household_type_enum`, `language_code`
+  - 3 SECURITY DEFINER функции: `get_canonical_primary_role`, `get_canonical_secondary_roles`, `has_canonical_role`
+  - View `v_profiles_canonical` с `security_invoker=true`
+- `audits/M2-schema-extension.md` — отчёт по M2.
+
+### Changed
+- `README.md` (canonical) — статус M2 → done.
+
+### Notes
+- Smart-additive стратегия: `app_role` enum НЕ изменён (17 значений сохранены), маппинг канон ↔ существующие роли через функции.
+- Zero breaking changes. 6 существующих профилей бэкфилены defaults.
+- Линтер чистый по M2-изменениям. Pre-existing `Extension in Public` warn — out of scope.
+
+---
+
 ## [1.1.0] — 2026-04-22
 
 ### Added
