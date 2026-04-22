@@ -123,7 +123,7 @@ export function HeroIntro() {
                 type="button"
                 role="tab"
                 aria-selected={active}
-                onClick={() => setVertical(v.id)}
+                onClick={() => handleVerticalClick(v.id)}
                 className={cn(
                   'flex items-center gap-1.5 px-3 h-8 rounded-full text-[12.5px] font-medium whitespace-nowrap shrink-0 transition-all border',
                   active
