@@ -3,17 +3,15 @@
  * Shows price + "Reserve / Select dates / Book now" or "Request consultation" for sale listings.
  */
 import { useNavigate } from 'react-router-dom';
-import { Phone, Calendar as CalendarIcon, Zap } from 'lucide-react';
+import { Calendar as CalendarIcon, Zap } from 'lucide-react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { DateRange } from 'react-day-picker';
 import { Button } from '@/components/ui/button';
 import { MessageHostButton } from '@/components/property';
-import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
-import { pluralizeNights } from '@/lib/i18n/pluralize';
 import { APP_ROUTES } from '@/lib/config/routes';
 
 interface PropertyDetailMobileBarProps {
