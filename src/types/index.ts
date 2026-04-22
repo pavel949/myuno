@@ -28,6 +28,9 @@ export * from './favorites';     // FavoriteItem, FavoriteCollection
 export * from './bouquet';       // BouquetBase, SizeVariant
 export * from './investmentHub'; // InvestmentOpportunity, InvestmentHubRole
 
+// Canonical segmentation framework (M3) — see docs/canonical/01-segmentation-framework.md
+export * from './canonical';     // CanonicalRole, LifecycleStage, HouseholdType, ClusterId, PersonaCode, CanonicalProfile
+
 // Intentionally NOT barrel-exported (name conflicts — fix naming first):
 // export * from './capital';    — CampaignStatus conflicts with marketing.ts
 // export * from './marketing';  — CampaignStatus conflicts with capital.ts
