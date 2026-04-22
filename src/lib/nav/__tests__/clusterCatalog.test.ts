@@ -1,6 +1,4 @@
 /**
- * @vitest-environment node
- *
  * Tests for the SSOT cluster-catalog audience filter.
  * The drawer relies on these to keep workspace surfaces hidden from
  * consumers, so a regression here directly leaks UI to the wrong role.
