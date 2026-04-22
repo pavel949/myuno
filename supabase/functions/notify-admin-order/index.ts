@@ -1,10 +1,6 @@
 import { Resend } from 'npm:resend@2.0.0';
 import { getAdminEmails, getAdminWhatsApp } from '../_shared/admin-config.ts';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': 'https://myuno.app',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { NOTIFY_CORS as corsHeaders } from '../_shared/notify-utils.ts';
 
 interface OrderNotificationPayload {
   order_id: string;
