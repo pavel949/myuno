@@ -700,7 +700,7 @@ export default function PropertyInquiry() {
                 totalAmount={pricing.total}
                 prepayAmount={pricing.prepayAmount}
                 prepayPercent={pricing.prepayPercent}
-                payInFull={payWhen === 'full' || !rentalTerms?.allow_pay_later ? false : false}
+                payInFull={!!rentalTerms?.allow_pay_later && payWhen === 'full'}
                 cleaningFee={rentalTerms?.extra_cleaning_price || (property as any)?.cleaning_fee || 0}
                 guestName={formData.name}
                 guestPhone={formData.phone}
