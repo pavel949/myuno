@@ -1,5 +1,6 @@
 import React, { useState, useImperativeHandle, forwardRef } from 'react';
-import { CreditCard, MessageCircle, Loader2, Shield, AlertCircle, Building2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { CreditCard, MessageCircle, Loader2, Shield, AlertCircle, Building2, Wallet } from 'lucide-react';
 import * as Sentry from '@sentry/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -11,6 +12,8 @@ import { toast } from 'sonner';
 import { ContactAdminButton } from './ContactAdminButton';
 import { PaymentMethodPicker } from './PaymentMethodPicker';
 import { useLastPaymentMethod, type PaymentMethodId } from '@/hooks/useLastPaymentMethod';
+import { useRubEstimate } from '@/hooks/useRubEstimate';
+import { useOrders } from '@/hooks/useOrders';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 
