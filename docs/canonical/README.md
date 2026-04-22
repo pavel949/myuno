@@ -10,6 +10,7 @@
 | 02 | [service-catalogue-v2.md](./02-service-catalogue-v2.md) | 16 категорий × 230 услуг с тегами lifecycle/role/cluster и моделями монетизации |
 | 03 | [tone-of-voice.md](./03-tone-of-voice.md) | Канонический голос бренда: интерфейс, WhatsApp, email, лендинги, AI-консьерж |
 | 04 | [implementation-protocol.md](./04-implementation-protocol.md) | Operational playbook M1→M7 для встраивания канонических документов в стек |
+| 05 | [visual-design-system.md](./05-visual-design-system.md) | Визуальная дизайн-система v1.0: принципы, цвет, типографика, сетка, компоненты, кластеры |
 
 ## Дополнительно (research)
 
