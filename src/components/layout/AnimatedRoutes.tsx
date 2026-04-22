@@ -309,6 +309,7 @@ export const AnimatedRoutes: React.FC = () => {
           {/* Property Detail (must be last — catches :id) */}
           <Route path=":id" element={<LazyPage><Pages.PropertyDetail /></LazyPage>} />
           <Route path=":id/inquiry" element={<LazyPage><Pages.PropertyInquiry /></LazyPage>} />
+          <Route path="booking/manual-payment/:orderId" element={<LazyPage><Pages.ManualPaymentPending /></LazyPage>} />
         </Route>
         <Route path="/company/:slug" element={<LazyPage><Pages.ManagementCompanyProfile /></LazyPage>} />
         
