@@ -278,14 +278,14 @@ export default function CrmDashboardPage() {
         </p>
         <div className="grid grid-cols-4 md:grid-cols-8 gap-2">
           {[
-            { icon: Mail, label: isRu ? 'Email' : 'Email', path: '/mc/crm-emails' },
-            { icon: Zap, label: isRu ? 'Автоматизации' : 'Automations', path: '/mc/automations' },
-            { icon: FileText, label: isRu ? 'Шаблоны' : 'Templates', path: '/mc/crm-templates' },
-            { icon: Globe, label: isRu ? 'Веб-формы' : 'Web Forms', path: '/mc/forms' },
-            { icon: Calendar, label: isRu ? 'Встречи' : 'Meetings', path: '/mc/meetings' },
-            { icon: Building2, label: isRu ? 'Компании' : 'Companies', path: '/mc/companies' },
-            { icon: Copy, label: isRu ? 'Дубликаты' : 'Duplicates', path: '/mc/duplicates' },
-            { icon: UserCog, label: isRu ? 'Назначение' : 'Assignment', path: '/mc/assignment' },
+            { icon: Mail, label: isRu ? 'Email' : 'Email', path: APP_ROUTES.MC_CRM_EMAILS },
+            { icon: Zap, label: isRu ? 'Автоматизации' : 'Automations', path: APP_ROUTES.MC_AUTOMATIONS },
+            { icon: FileText, label: isRu ? 'Шаблоны' : 'Templates', path: APP_ROUTES.MC_CRM_TEMPLATES },
+            { icon: Globe, label: isRu ? 'Веб-формы' : 'Web Forms', path: APP_ROUTES.MC_FORMS },
+            { icon: Calendar, label: isRu ? 'Встречи' : 'Meetings', path: APP_ROUTES.MC_MEETINGS },
+            { icon: Building2, label: isRu ? 'Компании' : 'Companies', path: APP_ROUTES.MC_COMPANIES },
+            { icon: Copy, label: isRu ? 'Дубликаты' : 'Duplicates', path: APP_ROUTES.MC_DUPLICATES },
+            { icon: UserCog, label: isRu ? 'Назначение' : 'Assignment', path: APP_ROUTES.MC_ASSIGNMENT },
           ].map(tool => (
             <button
               key={tool.path}
