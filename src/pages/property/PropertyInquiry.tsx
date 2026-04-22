@@ -698,6 +698,7 @@ export default function PropertyInquiry() {
                 guests={guests}
                 nights={nights}
                 totalAmount={pricing.total}
+                currency={listingCurrency}
                 prepayAmount={pricing.prepayAmount}
                 prepayPercent={pricing.prepayPercent}
                 payInFull={!!rentalTerms?.allow_pay_later && payWhen === 'full'}
@@ -706,6 +707,7 @@ export default function PropertyInquiry() {
                 guestPhone={formData.phone}
                 guestEmail={formData.email}
                 providerOrgId={(property as any)?.provider_id || undefined}
+                ownerUserId={(property as any)?.owner_id || undefined}
                 onMethodChange={setPaymentMethod}
               />
             </section>
