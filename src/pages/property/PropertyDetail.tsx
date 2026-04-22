@@ -377,24 +377,10 @@ export default function PropertyDetail() {
                 </p>
               </div>
 
-              {rentalTerms && !isSaleListing && (
-                <div id="property-pricing">
-                  <Separator />
-                  <PropertyPriceBreakdown
-                    pricePerNight={rentalTerms.price_per_night}
-                    weeklyDiscount={rentalTerms.weekly_discount}
-                    monthlyDiscount={rentalTerms.monthly_discount}
-                    depositAmount={rentalTerms.deposit_amount}
-                    depositType={rentalTerms.deposit_type}
-                    depositCurrency={rentalTerms.deposit_currency}
-                    extraGuestPrice={rentalTerms.extra_guest_price}
-                    extraGuestThreshold={rentalTerms.extra_guest_threshold}
-                    minStayNights={rentalTerms.min_stay_nights}
-                    seasonalPricing={rentalTerms.seasonal_pricing as any}
-                    currency="THB"
-                  />
-                </div>
-              )}
+              {/* Pricing breakdown intentionally not rendered publicly.
+                  Base/seasonal pricing belongs to the host workspace.
+                  Public sees only the calculated total in PropertyBookingCard
+                  after selecting dates. */}
 
               {includedServices.length > 0 && (
                 <>
