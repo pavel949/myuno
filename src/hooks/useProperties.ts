@@ -107,6 +107,8 @@ export interface PropertyRentalTerms {
   house_rules_ru?: string;
   cancellation_policy?: string;
   instant_booking?: boolean;
+  /** When true, guests can choose between paying full now vs prepay+balance later. */
+  allow_pay_later?: boolean;
   weekly_discount?: number;
   monthly_discount?: number;
   seasonal_pricing?: Record<string, unknown>;
@@ -455,6 +457,7 @@ export function usePropertyWithRentalTerms(marketplacePropertyId?: string) {
         house_rules_ru: property.house_rules_ru,
         cancellation_policy: property.cancellation_policy,
         instant_booking: property.instant_booking,
+        allow_pay_later: (property as any).allow_pay_later,
         weekly_discount: property.weekly_discount,
         monthly_discount: property.monthly_discount,
         seasonal_pricing: property.seasonal_pricing as Record<string, unknown> | undefined,
