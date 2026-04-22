@@ -1,0 +1,128 @@
+/**
+ * @vitest-environment node
+ *
+ * Tests for the SSOT cluster-catalog audience filter.
+ * The drawer relies on these to keep workspace surfaces hidden from
+ * consumers, so a regression here directly leaks UI to the wrong role.
+ */
+import { describe, it, expect } from 'vitest';
+import {
+  CLUSTER_CATALOG,
+  filterCatalogForUser,
+  isClusterVisibleToUser,
+  getClusterById,
+} from '../clusterCatalog';
+
+describe('clusterCatalog — audience model invariants', () => {
+  it('every cluster has a stable id, label pair, and at least one service', () => {
+    for (const c of CLUSTER_CATALOG) {
+      expect(c.id, `cluster ${c.id} missing id`).toBeTruthy();
+      expect(c.labelEn).toBeTruthy();
+      expect(c.labelRu).toBeTruthy();
+      expect(c.services.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('cluster ids are unique across the catalog', () => {
+    const ids = CLUSTER_CATALOG.map((c) => c.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it('every workspace cluster declares at least one persona OR role', () => {
+    for (const c of CLUSTER_CATALOG.filter((x) => x.audience === 'workspace')) {
+      const hasPersonas = (c.personas?.length ?? 0) > 0;
+      const hasRoles = (c.roles?.length ?? 0) > 0;
+      expect(
+        hasPersonas || hasRoles,
+        `workspace cluster ${c.id} has no audience targets`,
+      ).toBe(true);
+    }
+  });
+});
+
+describe('isClusterVisibleToUser', () => {
+  const publicCluster = getClusterById('arrive')!;
+  const manageCluster = getClusterById('manage')!;
+  const buildCluster = getClusterById('build')!;
+
+  it('always shows public clusters regardless of context', () => {
+    expect(isClusterVisibleToUser(publicCluster, {})).toBe(true);
+    expect(isClusterVisibleToUser(publicCluster, { role: 'guest' })).toBe(true);
+    expect(
+      isClusterVisibleToUser(publicCluster, { personas: ['tourist'], role: 'guest' }),
+    ).toBe(true);
+  });
+
+  it('hides workspace clusters from a bare guest with no personas', () => {
+    expect(isClusterVisibleToUser(manageCluster, { role: 'guest' })).toBe(false);
+    expect(isClusterVisibleToUser(buildCluster, { role: 'guest' })).toBe(false);
+  });
+
+  it('shows the manage cluster to a property owner persona', () => {
+    expect(
+      isClusterVisibleToUser(manageCluster, { personas: ['property_owner'], role: 'guest' }),
+    ).toBe(true);
+  });
+
+  it('shows the manage cluster when nav role is owner even without persona', () => {
+    expect(isClusterVisibleToUser(manageCluster, { role: 'owner' })).toBe(true);
+  });
+
+  it('shows the build cluster only to developer persona or admin/team role', () => {
+    expect(
+      isClusterVisibleToUser(buildCluster, { personas: ['real_estate_developer'] }),
+    ).toBe(true);
+    expect(isClusterVisibleToUser(buildCluster, { role: 'admin' })).toBe(true);
+    expect(isClusterVisibleToUser(buildCluster, { role: 'team' })).toBe(true);
+    expect(isClusterVisibleToUser(buildCluster, { role: 'guest' })).toBe(false);
+    expect(
+      isClusterVisibleToUser(buildCluster, { personas: ['tourist'], role: 'guest' }),
+    ).toBe(false);
+  });
+});
+
+describe('filterCatalogForUser', () => {
+  it('returns ONLY public clusters for an unauthenticated guest', () => {
+    const visible = filterCatalogForUser({ role: 'guest' });
+    expect(visible.every((c) => c.audience !== 'workspace')).toBe(true);
+    expect(visible.some((c) => c.id === 'manage')).toBe(false);
+    expect(visible.some((c) => c.id === 'build')).toBe(false);
+  });
+
+  it('exposes the manage cluster to a property owner', () => {
+    const visible = filterCatalogForUser({
+      personas: ['property_owner'],
+      role: 'owner',
+    });
+    expect(visible.some((c) => c.id === 'manage')).toBe(true);
+  });
+
+  it('exposes the build cluster to a real-estate developer persona', () => {
+    const visible = filterCatalogForUser({
+      personas: ['real_estate_developer'],
+      role: 'guest',
+    });
+    expect(visible.some((c) => c.id === 'build')).toBe(true);
+    // …without leaking the manage cluster they don't own
+    expect(visible.some((c) => c.id === 'manage')).toBe(false);
+  });
+
+  it('exposes BOTH workspace clusters to a platform admin', () => {
+    const visible = filterCatalogForUser({ role: 'admin' });
+    expect(visible.some((c) => c.id === 'manage')).toBe(true);
+    expect(visible.some((c) => c.id === 'build')).toBe(true);
+  });
+
+  it('preserves the canonical cluster ordering from the SSOT', () => {
+    const visible = filterCatalogForUser({ role: 'admin' });
+    const visibleIds = visible.map((c) => c.id);
+    const fullIds = CLUSTER_CATALOG.map((c) => c.id);
+    // visible order is a subsequence of canonical order
+    let cursor = 0;
+    for (const id of visibleIds) {
+      cursor = fullIds.indexOf(id, cursor);
+      expect(cursor, `cluster ${id} is out of canonical order`).toBeGreaterThanOrEqual(0);
+      cursor += 1;
+    }
+  });
+});
