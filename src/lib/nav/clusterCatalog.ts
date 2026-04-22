@@ -188,6 +188,10 @@ export const CLUSTER_CATALOG: ClusterCatalogEntry[] = [
     valueEn: 'Hosts & managers: bookings, money, ops, CRM.',
     color: '#06B6D4',
     icon: Building2,
+    // Workspace cluster — gated to property owners and pro operator roles.
+    audience: 'workspace',
+    personas: ['property_owner', 'local_services_provider'],
+    roles: ['owner', 'admin', 'team', 'vendor'],
     services: [
       { labelRu: 'Кабинет',   labelEn: 'Dashboard',  icon: Calendar,        path: '/mc',                       status: 'available' },
       { labelRu: 'Календарь', labelEn: 'Calendar',   icon: Calendar,        path: APP_ROUTES.MC_CALENDAR,      status: 'available' },
@@ -205,6 +209,10 @@ export const CLUSTER_CATALOG: ClusterCatalogEntry[] = [
     valueEn: 'Portal, leads, project showcase & deal advisory.',
     color: '#F43F5E',
     icon: HardHat,
+    // Workspace cluster — gated to real-estate developers and platform admins.
+    audience: 'workspace',
+    personas: ['real_estate_developer'],
+    roles: ['admin', 'team'],
     services: [
       { labelRu: 'Портал',       labelEn: 'Portal',    icon: Building,   path: APP_ROUTES.DEVELOPER_PORTAL,            status: 'available' },
       { labelRu: 'Программа',    labelEn: 'Program',   icon: LineChart,  path: APP_ROUTES.FOR_REAL_ESTATE_DEVELOPERS,  status: 'available' },
