@@ -31,11 +31,34 @@ export function HeroIntro() {
   const { data: tasks } = usePopularTasks();
   const top3 = tasks.slice(0, 3);
 
+  const goToVertical = useCallback(
+    (target: Vertical, q: string) => {
+      const base = VERTICAL_ROUTES[target];
+      const trimmed = q.trim();
+      const params = new URLSearchParams();
+      if (trimmed) params.set('q', trimmed);
+      // autofocus=1 lets target catalogs focus their search input on mount
+      params.set('autofocus', '1');
+      navigate(`${base}?${params.toString()}`);
+    },
+    [navigate],
+  );
+
   const handleSearch = useCallback(() => {
-    const q = query.trim();
-    const base = VERTICAL_ROUTES[vertical];
-    navigate(q ? `${base}?q=${encodeURIComponent(q)}` : base);
-  }, [query, vertical, navigate]);
+    goToVertical(vertical, query);
+  }, [goToVertical, vertical, query]);
+
+  const handleVerticalClick = useCallback(
+    (target: Vertical) => {
+      setVertical(target);
+      // If user has typed a query, jump straight into the catalog with it.
+      // Otherwise just switch placeholder context (no extra step needed).
+      if (query.trim()) {
+        goToVertical(target, query);
+      }
+    },
+    [goToVertical, query],
+  );
 
   const verticals: Array<{ id: Vertical; labelRu: string; labelEn: string; icon: React.ComponentType<{ className?: string }> }> = [
     { id: 'all', labelRu: 'Всё', labelEn: 'All', icon: Search },
