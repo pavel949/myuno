@@ -13,6 +13,7 @@ import { motion } from 'framer-motion';
 import { Plane, Home, Briefcase, TrendingUp, Scale, Hammer, Check, MapPin } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
+import { BrandWordmark } from '@/components/uno/BrandWordmark';
 
 interface AuthValuePanelProps {
   compact?: boolean;
@@ -33,7 +34,7 @@ export function AuthValuePanel({ compact = false }: AuthValuePanelProps) {
   if (compact) {
     return (
       <div className="flex items-baseline gap-3 px-1">
-        <span className="font-display text-xl font-semibold tracking-tight text-foreground">myUNO</span>
+        <BrandWordmark as="static" className="scale-105" />
         <span className="text-xs text-muted-foreground truncate">{t('auth.value.subtitle')}</span>
       </div>
     );
@@ -43,7 +44,7 @@ export function AuthValuePanel({ compact = false }: AuthValuePanelProps) {
     <div className="w-full max-w-md mx-auto md:mx-0 space-y-7">
       {/* Wordmark + headline */}
       <div className="space-y-3">
-        <span className="font-display text-3xl font-semibold tracking-tight text-foreground">myUNO</span>
+        <BrandWordmark as="static" className="scale-125 origin-left" />
         <h1 className="font-display text-2xl md:text-3xl font-semibold leading-tight text-foreground">
           {t('auth.value.title')}
         </h1>

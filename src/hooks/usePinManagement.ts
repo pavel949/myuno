@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { usePinAuth, storeRefreshToken } from './usePinAuth';
+import { usePinAuth } from './usePinAuth';
 
 const PIN_USER_KEY = 'uno_pin_user_id';
 const PIN_EMAIL_KEY = 'uno_pin_email';
@@ -24,7 +24,7 @@ export function usePinManagement() {
   // Set up new PIN (for users without PIN)
   const setupPin = useCallback(async (newPin: string): Promise<{ success: boolean; error?: string }> => {
     if (!user) return { success: false, error: 'Not authenticated' };
-    if (!session?.refresh_token) return { success: false, error: 'No session available' };
+    if (!session) return { success: false, error: 'No session available' };
 
     setIsLoading(true);
     try {
@@ -38,10 +38,9 @@ export function usePinManagement() {
 
       if (error) throw error;
 
-      // Save user info and refresh token for PIN login
+      // Save only user metadata; auth tokens are never persisted manually.
       localStorage.setItem(PIN_USER_KEY, user.id);
       localStorage.setItem(PIN_EMAIL_KEY, user.email || '');
-      storeRefreshToken(session.refresh_token);
       
       await checkHasPin();
       return { success: true };
@@ -78,11 +77,6 @@ export function usePinManagement() {
 
       if (setError) throw setError;
 
-      // Update stored refresh token
-      if (session?.refresh_token) {
-        storeRefreshToken(session.refresh_token);
-      }
-
       return { success: true };
     } catch (error: unknown) {
       const msg = error instanceof Error ? error.message : 'Failed to change PIN';
@@ -118,12 +112,11 @@ export function usePinManagement() {
 
       if (setError) throw setError;
 
-      // Refresh session tokens after re-auth
+      // Save only user metadata after re-auth.
       const { data: sessionData } = await supabase.auth.getSession();
-      if (sessionData.session?.refresh_token) {
+      if (sessionData.session) {
         localStorage.setItem(PIN_USER_KEY, user.id);
         localStorage.setItem(PIN_EMAIL_KEY, user.email || '');
-        storeRefreshToken(sessionData.session.refresh_token);
       }
 
       await checkHasPin();

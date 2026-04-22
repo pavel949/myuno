@@ -31,3 +31,4 @@ tmp/
 *.sln
 *.sw?
 supabase/.temp/
+.gstack/
