@@ -45,8 +45,6 @@ project_id = "erfwtoavipwjqmylpizt"
     verify_jwt = false
   [functions.create-flowers-checkout]
     verify_jwt = false
-  [functions.create-order-checkout]
-    verify_jwt = false
   [functions.create-restaurant-checkout]
     verify_jwt = false
   [functions.create-vendor-subscription]
