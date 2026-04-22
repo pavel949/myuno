@@ -9,6 +9,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { useUserPersonas } from '@/hooks/useUserPersonas';
 
 import { HomeTopBar } from '@/components/home/HomeTopBar';
+import { HomeContextChips } from '@/components/home/HomeContextChips';
 import { AppDrawer } from '@/components/nav/AppDrawer';
 import { WorkspaceHomeBanner } from '@/components/home/WorkspaceHomeBanner';
 import { HeroIntro } from '@/components/home/HeroIntro';
