@@ -540,14 +540,22 @@ export default function PropertyInquiry() {
             </>
           )}
 
-          {/* ===== AUTH CHECK ===== */}
+          {/* ===== AUTH CHECK =====
+              Guest sees the full booking form. Sign-in opens the AuthSheet
+              in-place so URL params (dates, guests) and form draft survive
+              the round-trip — onSuccess re-renders this page with `user` set. */}
           {!user && (
             <div className="p-4 rounded-xl bg-muted/50 border text-center space-y-3">
               <p className="text-sm text-muted-foreground">
-                {isRu ? 'Для бронирования необходимо войти в аккаунт' : 'Please sign in to book'}
+                {isRu
+                  ? 'Войдите, чтобы продолжить — даты и контактные данные сохранятся'
+                  : 'Sign in to continue — your dates and contact info will be kept'}
               </p>
-              <Button onClick={() => navigate('/auth')} variant="outline">
-                {isRu ? 'Войти' : 'Sign In'}
+              <Button
+                onClick={() => openAuthSheet({ intent: 'booking' })}
+                variant="default"
+              >
+                {isRu ? 'Войти и продолжить' : 'Sign in & continue'}
               </Button>
             </div>
           )}
