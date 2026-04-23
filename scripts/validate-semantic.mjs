@@ -239,7 +239,11 @@ auditLandingFile(resolve(ROOT, 'src/content/landings/clusterLandings.ts'), 'clus
 const semanticFiles = listFiles('src/content/landings/*.ts');
 const pillarTsFiles = listFiles('src/content/semantic/*.ts');
 const edgeFunctionFiles = listFiles('supabase/functions/*/index.ts');
-for (const f of [...semanticFiles, ...pillarTsFiles, ...edgeFunctionFiles]) scanFileForSynonyms(f);
+// M9.7b — i18n dictionaries (uiStrings + per-language tables) are first-class
+// canonical surfaces. Every user-facing string lives here, so we scan them
+// alongside landings and edge functions.
+const i18nFiles = listFiles('src/i18n/*.ts');
+for (const f of [...semanticFiles, ...pillarTsFiles, ...edgeFunctionFiles, ...i18nFiles]) scanFileForSynonyms(f);
 
 checkPillarSitemapCoverage();
 
