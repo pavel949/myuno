@@ -10,13 +10,13 @@
 
 ## 1. Summary
 
-- ✅ OK:        64408 строк (99.3%)
+- ✅ OK:        64550 строк (99.5%)
 - ⚠️ Edge:      22 строк (0.0%)
-- ❌ Violation: 454 строк (0.7%)
+- ❌ Violation: 312 строк (0.5%)
 
 **Топ нарушений по частоте:**
 
-1. Капс-лок — 265 случаев
+1. Капс-лок — 122 случаев
 2. Восклицательные знаки — 67 случаев
 3. Urgency-лексика — 49 случаев
 4. Запрещённые слова (EN) — 34 случаев
@@ -30,50 +30,50 @@
 
 ### Капс-лок
 
-Всего: **265**. Показано: 40.
+Всего: **122**. Показано: 40.
 
 | Файл | Строка | Текст | Деталь | Раздел |
 |---|---|---|---|---|
 | `src/components/admin/ai-insights/AIROIReport.tsx` | 26 | KEEP MONITORING | KEEP, MONITORING | §5.6 |
 | `src/components/admin/ai-insights/AIROIReport.tsx` | 34 | NEEDS ADJUSTMENT | NEEDS, ADJUSTMENT | §5.6 |
 | `src/components/admin/ai-insights/AIROIReport.tsx` | 42 | READY TO SCALE | READY, SCALE | §5.6 |
-| `src/components/booking/BookingContactForm.tsx` | 203 | +66 XX XXX XXXX | XXX, XXXX | §5.6 |
-| `src/components/home/TrustFooter.tsx` | 23 | SEC Thailand · DBD 0105567890123 · соответствие PDPA | SEC, DBD, PDPA | §5.6 |
-| `src/components/home/TrustFooter.tsx` | 24 | SEC Thailand · DBD 0105567890123 · PDPA compliant | SEC, DBD, PDPA | §5.6 |
-| `src/components/layout/PlatformViewAsBanner.tsx` | 26 | JWT не меняется, RLS как у вашего аккаунта. | JWT, RLS | §5.6 |
-| `src/components/layout/PlatformViewAsBanner.tsx` | 32 | JWT unchanged; RLS still applies to your admin session. | JWT, RLS | §5.6 |
-| `src/components/layout/UserAvatarMenu.tsx` | 454 | Введите email или UUID профиля. Действие записывается в журнал; RLS и ваши права не меняются. | UUID, RLS | §5.6 |
-| `src/components/layout/UserAvatarMenu.tsx` | 455 | Enter profile email or UUID. This is audited; RLS still applies to your admin session. | UUID, RLS | §5.6 |
-| `src/components/market/InternationalAddressForm.tsx` | 48 | +7 XXX XXX XX XX | XXX, XXX | §5.6 |
-| `src/components/mc/settings/CompanyProfileSettings.tsx` | 279 | +66 XX XXX XXXX | XXX, XXXX | §5.6 |
-| `src/components/mc/settings/CompanyProfileSettings.tsx` | 283 | +66 XX XXX XXXX | XXX, XXXX | §5.6 |
-| `src/components/owner/FinancialDateFilter.tsx` | 100 | ${format(dateRange.from, 'd MMM', { locale: isRu ? ru : undefined })} - ${format(dateRange.to, 'd MMM yyyy', { locale: i | MMM, MMM | §5.6 |
-| `src/components/owner/crm/OdooCrmSettingsImportModal.tsx` | 358 | Импорт CRM из ODOO | CRM, ODOO | §5.6 |
-| `src/components/owner/crm/OdooCrmSettingsImportModal.tsx` | 358 | Import CRM from ODOO | CRM, ODOO | §5.6 |
-| `src/components/owner/financial-planning/MonteCarloPanel.tsx` | 79 | Варьирует NOI, рост NOI и Exit Cap Rate по треугольному распределению. Использует параметры из вкладки DCF. | NOI, NOI, DCF | §5.6 |
-| `src/components/owner/financial-planning/MonteCarloPanel.tsx` | 80 | Varies NOI, NOI growth and Exit Cap Rate by triangular distribution. Uses inputs from DCF tab. | NOI, NOI, DCF | §5.6 |
-| `src/components/owner/guide/GuideChannels.tsx` | 86 | Экспортируйте календарь UNO обратно на OTA | UNO, OTA | §5.6 |
-| `src/components/owner/guide/GuideChannels.tsx` | 87 | Export UNO calendar back to your OTA | UNO, OTA | §5.6 |
-| `src/components/owner/property-wizard/steps/UtilitiesStep.tsx` | 85 | PEA, MEA... | PEA, MEA | §5.6 |
-| `src/components/property/BookingTermsCard.tsx` | 152 | ${format(fullRefundDeadline, 'd MMM')} — ${format(partialRefundDeadline, 'd MMM')}: возврат ${formatPrice(partialRefundA | MMM, MMM | §5.6 |
-| `src/components/property/BookingTermsCard.tsx` | 153 | ${format(fullRefundDeadline, 'd MMM')} — ${format(partialRefundDeadline, 'd MMM')}: refund ${formatPrice(partialRefundAm | MMM, MMM | §5.6 |
-| `src/components/property/PropertyBookingSuccess.tsx` | 132 | ${isRu ? 'Заезд' : 'Check-in'}: ${format(checkIn, 'dd MMM yyyy', { locale: isRu ? ru : undefined })} ${isRu ? 'Выезд' :  | MMM, MMM | §5.6 |
-| `src/components/sell-wizard/steps/SellContactStep.tsx` | 38 | +66 XX XXX XXXX | XXX, XXXX | §5.6 |
-| `src/components/sell-wizard/steps/SellContactStep.tsx` | 52 | +66 XX XXX XXXX | XXX, XXXX | §5.6 |
 | `src/components/vendor/PayoutMethodsSection.tsx` | 239 | SOMCHAI JAIDEE | SOMCHAI, JAIDEE | §5.6 |
-| `src/components/vertical/VerticalInsightPanel.tsx` | 64 | TR, STV, LTR, Thailand Elite compared | STV, LTR | §5.6 |
-| `src/components/vertical/VerticalInsightPanel.tsx` | 64 | TR, STV, LTR, Thailand Elite — сравнение | STV, LTR | §5.6 |
-| `src/components/vertical/VerticalInsightPanel.tsx` | 70 | Technically yes for any paid work in Thailand. In practice, SMART Visa or LTR (remote worker) covers most digital nomads | SMART, LTR | §5.6 |
-| `src/components/vertical/VerticalInsightPanel.tsx` | 70 | Технически да для любой оплачиваемой работы. На практике SMART Visa или LTR (удалённый работник) покрывают большинство д | SMART, LTR | §5.6 |
-| `src/components/wallet/PaymentMethodsSection.tsx` | 165 | IVAN PETROV | IVAN, PETROV | §5.6 |
-| `src/content/landings/personaLandings.ts` | 296 | 8 категорий с весами: финансы застройщика, юридический статус земли, история сдач, эскроу, локация, продукт, управление, | AAA, BBB | §5.6 |
-| `src/content/landings/personaLandings.ts` | 297 | Eight weighted categories: developer finance, land legal status, delivery history, escrow, location, product, management | AAA, BBB | §5.6 |
-| `src/content/semantic/pillarPages.ts` | 56 | Визы Таиланда для долгого пребывания: DTV, LTR, Elite, Non-B | DTV, LTR | §5.6 |
-| `src/content/semantic/pillarPages.ts` | 56 | Thailand long-stay visas: DTV, LTR, Elite, Non-B | DTV, LTR | §5.6 |
-| `src/content/semantic/pillarPages.ts` | 57 | Визы Таиланда: DTV, LTR, Elite, Non-B — myUNO | DTV, LTR | §5.6 |
-| `src/content/semantic/pillarPages.ts` | 57 | Thailand visas: DTV, LTR, Elite, Non-B — myUNO | DTV, LTR | §5.6 |
-| `src/content/semantic/pillarPages.ts` | 59 | Визы Таиланда для долгого пребывания: DTV, LTR, Thailand Elite, Non-B. Стоимость, сроки, документы, продление. Гайд myUN | DTV, LTR | §5.6 |
-| `src/content/semantic/pillarPages.ts` | 60 | Thailand long-stay visas: DTV, LTR, Thailand Elite, Non-B. Cost, timing, documents, extension. myUNO guide. | DTV, LTR | §5.6 |
+| `src/hooks/useVendorLocations.ts` | 309 | [INFO REQUEST] ${reason} | INFO, REQUEST | §5.6 |
+| `src/lib/constants.ts` | 18 | CURRENCY.SYMBOLS is deprecated. Use getCurrencySymbol() from src/lib/config/currencies.ts | CURRENCY, SYMBOLS | §5.6 |
+| `src/pages/Auth.tsx` | 544 | SIGN IN OR SIGN UP | SIGN, SIGN | §5.6 |
+| `src/pages/admin/AdminNewbuilds.tsx` | 382 | Рек. (BUY/WATCH/AVOID) | WATCH, AVOID | §5.6 |
+| `src/pages/info/DisputeResolutionPage.tsx` | 74 | Для споров свыше $1,000 или при несогласии с решением Омбудсмена — обязательный арбитраж THAC/HKIAC. Решение арбитра око | THAC, HKIAC | §5.6 |
+| `src/pages/info/DisputeResolutionPage.tsx` | 75 | For disputes over $1,000 or if you disagree with Ombudsman — mandatory THAC/HKIAC arbitration. Arbitrator's decision is  | THAC, HKIAC | §5.6 |
+| `src/pages/info/DisputeResolutionPage.tsx` | 376 | Применимое право: Сингапур \| Арбитраж: SIAC (Singapore International Arbitration Centre) или THAC | SIAC, THAC | §5.6 |
+| `src/pages/info/DisputeResolutionPage.tsx` | 377 | Governing Law: Singapore \| Arbitration: SIAC (Singapore International Arbitration Centre) or THAC | SIAC, THAC | §5.6 |
+| `src/pages/info/IPPolicyPage.tsx` | 314 | Вся информация на Платформе www.myuno.app защищена законодательством Республики Сингапур, международными соглашениями (Б | TRIPS, WIPO | §5.6 |
+| `src/pages/info/IPPolicyPage.tsx` | 315 | All information on www.myuno.app is protected by Republic of Singapore law, international agreements (Berne Convention,  | TRIPS, WIPO | §5.6 |
+| `src/pages/info/IPPolicyPage.tsx` | 425 | STRICTLY PROHIBITED | STRICTLY, PROHIBITED | §5.6 |
+| `src/pages/info/IPPolicyPage.tsx` | 600 | Эта политика регулируется законодательством Республики Сингапур. Споры подлежат разрешению в судах Сингапура или через а | SIAC, THAC | §5.6 |
+| `src/pages/info/IPPolicyPage.tsx` | 601 | This policy is governed by the laws of the Republic of Singapore. Disputes are subject to resolution in Singapore courts | SIAC, THAC | §5.6 |
+| `src/pages/info/TermsPage.tsx` | 60 | PARTIAL ESCROW | PARTIAL, ESCROW | §5.6 |
+| `src/pages/info/TermsPage.tsx` | 69 | LEAD GENERATION | LEAD, GENERATION | §5.6 |
+| `src/pages/info/TermsPage.tsx` | 80 | 6. PLATFORM TRANSACTION REQUIREMENT | PLATFORM, TRANSACTION, REQUIREMENT | §5.6 |
+| `src/pages/info/TermsPage.tsx` | 358 | STRICTLY PROHIBITED: | STRICTLY, PROHIBITED | §5.6 |
+| `src/pages/info/TermsPage.tsx` | 372 | CONSEQUENCES OF VIOLATION: | CONSEQUENCES, VIOLATION | §5.6 |
+| `src/pages/info/TermsPage.tsx` | 501 | Все споры, не разрешённые через медиацию, подлежат обязательному арбитражу в Thailand Arbitration Center (THAC) или Hong | THAC, HKIAC | §5.6 |
+| `src/pages/info/TermsPage.tsx` | 502 | All disputes not resolved through mediation are subject to mandatory arbitration at Thailand Arbitration Center (THAC) o | THAC, HKIAC | §5.6 |
+| `src/pages/info/TermsPage.tsx` | 507 | CLASS ACTION WAIVER: | CLASS, ACTION, WAIVER | §5.6 |
+| `src/pages/legal/VisaQuizPage.tsx` | 256 | VISAS & DOCUMENTS | VISAS, DOCUMENTS | §5.6 |
+| `src/pages/owner/OwnerPerformance.tsx` | 299 | OVERALL RATING | OVERALL, RATING | §5.6 |
+| `src/pages/property/OffplanIndex.tsx` | 140 | Каталог новостроек Пхукета: BUY/WATCH/AVOID рейтинг ClearView V3, due diligence, ROI, фильтры по району и застройщику. Н | WATCH, AVOID | §5.6 |
+| `src/pages/property/OffplanIndex.tsx` | 141 | Phuket off-plan property catalog with ClearView V3 BUY/WATCH/AVOID ratings, due diligence, ROI, filters by district and  | WATCH, AVOID | §5.6 |
+| `src/pages/relocate/RelocateLandingPage.tsx` | 148 | RELOCATION · 9 STEPS | RELOCATION, STEPS | §5.6 |
+| `supabase/functions/_shared/cors.ts` | 21 | POST, GET, OPTIONS | POST, OPTIONS | §5.6 |
+| `supabase/functions/_shared/rate-limit.ts` | 83 | [RATE-LIMIT] Error checking rate limit: | RATE, LIMIT | §5.6 |
+| `supabase/functions/_shared/rate-limit.ts` | 102 | [RATE-LIMIT] Exception: | RATE, LIMIT | §5.6 |
+| `supabase/functions/_shared/rate-limit.ts` | 156 | [RATE-LIMIT] Blocked: ${identifier} on ${endpoint} | RATE, LIMIT | §5.6 |
+| `supabase/functions/ai-agent/index.ts` | 114 | CURRENT CONTEXT: ${JSON.stringify(context, null, 2)} | CURRENT, CONTEXT | §5.6 |
+| `supabase/functions/ai-concierge/index.ts` | 95 | DOCUMENTS EXPIRING SOON: ${docSummary} | DOCUMENTS, EXPIRING, SOON | §5.6 |
+| `supabase/functions/ai-concierge/index.ts` | 129 | USER PERSONA: ${persona} | USER, PERSONA | §5.6 |
+| `supabase/functions/ai-concierge/index.ts` | 130 | LIFE SITUATION: ${life_situation} | LIFE, SITUATION | §5.6 |
+| `supabase/functions/ai-concierge/index.ts` | 153 | USER CONTEXT: ${contextParts.join(" ")}  Generate 2-3 proactive suggestions. | USER, CONTEXT | §5.6 |
+| `supabase/functions/ai-guest-autoreply/index.ts` | 136 | CHAT HISTORY: | CHAT, HISTORY | §5.6 |
 
 ### Восклицательные знаки
 
@@ -309,11 +309,10 @@
 ### P0 — trust-критично (платежи, onboarding, SOS, legal, auth, KYC)
 
 - src/components/legal/VisaTracker.tsx (1)
-- src/pages/Auth.tsx (2)
-- src/pages/SOS.tsx (10)
+- src/pages/Auth.tsx (1)
+- src/pages/SOS.tsx (9)
 - src/pages/auth/ForgotPassword.tsx (2)
 - src/pages/auth/ResetPassword.tsx (2)
-- src/pages/legal/ContractAnalysisPage.tsx (3)
 - src/pages/legal/VisaImmigrationPage.tsx (1)
 - src/pages/legal/VisaQuizPage.tsx (1)
 - supabase/functions/ai-legal-assistant/index.ts (1)
@@ -323,22 +322,14 @@
 
 ### P1 — основные user-flows (search, property, booking, CRM, catalog, wallet)
 
-- src/components/booking/BookingContactForm.tsx (1)
-- src/components/owner/crm/OdooCrmSettingsImportModal.tsx (2)
 - src/components/owner/property-manage/StaysSubscriptionCard.tsx (1)
 - src/components/owner/property-wizard/steps/PricingStep.tsx (1)
-- src/components/owner/property-wizard/steps/UtilitiesStep.tsx (1)
-- src/components/property/BookingTermsCard.tsx (2)
 - src/components/property/PropertyBookingCard.tsx (1)
-- src/components/property/PropertyBookingSuccess.tsx (1)
 - src/components/property/SimilarProperties.tsx (1)
 - src/components/property/UnitFields.tsx (1)
-- src/components/wallet/PaymentMethodsSection.tsx (1)
 - src/pages/booking/AdvanceRequested.tsx (2)
-- src/pages/property/CommercialDetail.tsx (2)
 - src/pages/property/ManualPaymentPending.tsx (2)
 - src/pages/property/OffplanIndex.tsx (2)
-- src/pages/property/PropertyConsultation.tsx (2)
 - src/pages/property/PropertyMySection.tsx (2)
 - src/pages/property/WhyMyUno.tsx (1)
 - supabase/functions/_shared/property-email-templates.ts (2)
@@ -349,7 +340,7 @@
 
 ### P2 — остальное
 
-Файлов: 172. Топ-30:
+Файлов: 133. Топ-30:
 
 - src/components/ErrorBoundary.tsx (5)
 - src/components/admin/ai-agents/UtilityAgentCard.tsx (1)
@@ -363,15 +354,9 @@
 - src/components/home/PersonaSmartFeed.tsx (5)
 - src/components/home/ProactiveConcierge.tsx (1)
 - src/components/home/QuickActionsGrid.tsx (1)
-- src/components/home/TrustFooter.tsx (2)
-- src/components/layout/PlatformViewAsBanner.tsx (2)
-- src/components/layout/UserAvatarMenu.tsx (2)
 - src/components/market/FlashDealsSection.tsx (1)
-- src/components/market/InternationalAddressForm.tsx (1)
-- src/components/mc/settings/CompanyProfileSettings.tsx (2)
 - src/components/newbuilds/tabs/NbInventoryTab.tsx (1)
 - src/components/owner/ComplexFormDialog.tsx (1)
-- src/components/owner/FinancialDateFilter.tsx (1)
 - src/components/owner/OperationalTaskCard.tsx (1)
 - src/components/owner/OwnerAIAssistant.tsx (2)
 - src/components/owner/TaskDetailSheet.tsx (1)
@@ -379,8 +364,14 @@
 - src/components/owner/contacts/CrmAiAssistantPanel.tsx (1)
 - src/components/owner/dashboard/RisksBlock.tsx (1)
 - src/components/owner/documents/AILegalAssistant.tsx (1)
-- src/components/owner/financial-planning/MonteCarloPanel.tsx (2)
-- src/components/owner/guide/GuideChannels.tsx (2)
+- src/components/owner/management/ManagementTermsForm.tsx (1)
+- src/components/owner/sales/dealTypePresentation.ts (2)
+- src/components/owner/transparency/OwnerTermsTab.tsx (1)
+- src/components/profile/UserRolesPermissions.tsx (1)
+- src/components/services/ServiceFunctionCard.tsx (1)
+- src/components/services/VerticalShowcaseSection.tsx (1)
+- src/components/shared/YourDayFeed.tsx (1)
+- src/components/staff/StaffTaskCalendar.tsx (2)
 
 ---
 
