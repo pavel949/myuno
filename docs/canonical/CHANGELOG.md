@@ -5,6 +5,30 @@
 
 ---
 
+## [1.11.4] — 2026-04-23
+
+### Added (M6 · трек B · шаг B.4)
+- **`src/pages/landings/PersonaLandingPage.tsx`** — динамическая страница `/for/:persona`:
+  - Берёт `:persona` slug из URL → `findPersonaLandingBySlug(PERSONA_LANDINGS, slug)` → `isLivePersonaLanding(landing)`. Любой провал (неизвестный slug, draft, отсутствует SEO/контент) → ререндер `<NotFound />` без redirect (контракт B.4 — 200 vs 404 на одном маршруте).
+  - Минимальный коммит-ready layout (Hero + Pains + Services + FAQ + CTA), bilingual через `useLanguage()`. SEO-голова (`<LandingSeoHead />`) появится в B.6 — пока используется `document.title` из `landing.h1` для корректной вкладки браузера.
+  - Lazy-импорт в `AnimatedRoutes.tsx` через `React.lazy` — добавлен ровно 1 новый Route `/for/:persona`, ничего не удалено и не перенесено.
+- **`src/pages/landings/__tests__/PersonaLandingPage.test.tsx`** — **5 тестов зелёные** через MemoryRouter:
+  - 404 для неизвестного slug.
+  - 404 для draft-лендинга (контракт «спрятан до B.7»).
+  - Live-лендинг рендерит h1.
+  - Live-лендинг рендерит services + pains.
+  - Live primary CTA имеет правильный href.
+
+### Changed
+- `src/components/layout/AnimatedRoutes.tsx` — добавлены ровно 2 строки: lazy import + `<Route path="/for/:persona" />` перед catch-all.
+- `audits/M6-persona-landings.md` — статус B.4 → ✅ done. B.5 (роут `/cluster/:cluster`) → 🔜 next.
+
+### Notes
+- На стадии B.4 **все 25 persona-лендингов отдают 404** — это намеренно: PERSONA_LANDINGS пока полностью draft (B.2). Шаг B.7 заполнит контент 3 live (P1/P9/P13) и они оживут без релиза, через простой commit в `personaLandings.ts`.
+- 42/42 тестов зелёные (10 типов + 12 personaLandings + 15 clusterLandings + 5 routing). `npx tsc --noEmit` чистый.
+
+---
+
 ## [1.11.3] — 2026-04-23
 
 ### Added (M6 · трек B · шаг B.3)
