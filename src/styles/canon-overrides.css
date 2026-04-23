@@ -233,3 +233,38 @@
 
 :where([class*="via-purple-"], [class*="via-violet-"], [class*="via-fuchsia-"])
   { --tw-gradient-via-position: hsl(var(--primary)) !important; }
+
+/* ════════════════════════════════════════════════════════════════
+   4 · CANON RADII ENFORCEMENT (Phase 4)
+   Canon §5 mandates square corners (0px) for all surfaces, cards,
+   buttons, inputs, badges, and overlays. The only exceptions are:
+     - true circles (rounded-full on avatars / icon chips)
+     - shadcn skeleton loaders (visual feedback only)
+   All other rounded-* utilities collapse to 0.
+   This kills residual rounded-2xl / rounded-3xl / rounded-lg from
+   ~1.2k component sites without touching them.
+   ════════════════════════════════════════════════════════════════ */
+:where(
+  .rounded-sm, .rounded, .rounded-md, .rounded-lg,
+  .rounded-xl, .rounded-2xl, .rounded-3xl,
+  [class*="rounded-t-"]:not(.rounded-t-full),
+  [class*="rounded-b-"]:not(.rounded-b-full),
+  [class*="rounded-l-"]:not(.rounded-l-full),
+  [class*="rounded-r-"]:not(.rounded-r-full),
+  [class*="rounded-tl-"]:not(.rounded-tl-full),
+  [class*="rounded-tr-"]:not(.rounded-tr-full),
+  [class*="rounded-bl-"]:not(.rounded-bl-full),
+  [class*="rounded-br-"]:not(.rounded-br-full)
+) {
+  border-radius: 0 !important;
+}
+
+/* Preserve circles for avatars and icon chips */
+:where(.rounded-full) {
+  border-radius: 9999px !important;
+}
+
+/* Preserve shadcn skeleton pill shape (visual loading affordance only) */
+:where([data-slot="skeleton"], .skeleton) {
+  border-radius: 4px !important;
+}
