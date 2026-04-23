@@ -113,8 +113,8 @@ const A_ARRIVAL: ClusterLanding = {
     {
       q: { ru: 'Где брать наличные с минимальной комиссией?', en: 'Where to get cash with the lowest fee?' },
       a: {
-        ru: 'Банкоматы Aeon — без комиссии. SuperRich — лучший курс при обмене USD/EUR/RUB наличными.',
-        en: 'Aeon ATMs charge no fee. SuperRich gives the best rate for USD/EUR/RUB cash exchange.',
+        ru: 'Банкоматы Aeon — без комиссии. SuperRich — выгодный курс при обмене USD/EUR/RUB наличными.',
+        en: 'Aeon ATMs charge no fee. SuperRich offers competitive rates for USD/EUR/RUB cash exchange.',
       },
     },
     {
