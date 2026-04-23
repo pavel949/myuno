@@ -5,6 +5,58 @@
 
 ---
 
+## [1.21.0] — 2026-04-23
+
+### Added (M11.1 + M11.7 + M11.11 + M11.5 + M11.9 — auto-remediation of M10 critical findings)
+
+**M11.1 · Canonical profile columns (closes SEG-1)**
+- New enum `canonical_role` (tourist/resident/owner/investor/developer/vendor/staff/admin).
+- `profiles.roles_stack jsonb DEFAULT '[]'` + `profiles.primary_role canonical_role`.
+- GIN index on `roles_stack`, partial b-tree on `primary_role`.
+
+**M11.7 · ClearView schema (closes CV-1)**
+- 3 new tables: `clearview_categories` (8 seeded weighted criteria from canon 06 §3), `clearview_projects` (slug, grade AAA–BB, recommendation BUY/WATCH/AVOID, maturity_step 1–5), `clearview_scores` (0–10 per category).
+- Enums: `clearview_grade`, `clearview_recommendation`.
+- RLS: categories public, projects published-only for non-admin, scores follow project visibility, admin-only writes.
+- Auto updated_at triggers on all 3 tables.
+
+**M11.11 · system_settings RLS scope (security finding)**
+- Removed anon SELECT (`USING:true`) — was exposing 46 operational params to unauthenticated visitors.
+- New policy `system_settings_authenticated_read` restricts to `authenticated` role.
+
+**Security · developers.stripe_connect_id**
+- New `developers_public` view (SECURITY INVOKER) excludes `stripe_connect_id` and `registration_number`.
+- Base `developers` table SELECT scoped to authenticated only.
+
+**M11.5 · Cluster colour tokens**
+- `ClusterHub.tsx` and `PrimaryActions.tsx` migrated from hex literals to `--cluster-{arrive,live,legal,invest,manage,build}` CSS-vars (already defined in `tokens.css` §7.4).
+- New helper `clusterAccent(varName)` resolves to `hsl(var(--cluster-*))`.
+
+**M11.9 · Shared AI system prompts**
+- New `supabase/functions/_shared/systemPrompts.ts` mirrors `src/lib/ai/systemPrompts.ts` for Deno Edge Functions.
+- Exports 7 canonical prompts (concierge, property, capital, support, clearviewDraft, taxAdvisor, chatModerator).
+- Migration of 24 inline prompts → import to be done incrementally.
+
+### Verification
+- Migration: 5 schema changes applied successfully.
+- Linter: 0 new warnings (pre-existing `extension_in_public` only, tracked under M11.10).
+- `clearview_categories` row count: **8** (verified seed).
+- TypeScript build errors fixed in `ClusterHub.tsx`.
+- App: 3.52.0 → **3.53.0**.
+
+### Backlog after this release (M11.x continued)
+- M11.2 · 25 personas enum
+- M11.3 · persona/cluster landings (10 + 25 files)
+- M11.4 · `console.log` ban (275 hits)
+- M11.5b · 6 более горячих файлов с hex (CatalogProjectCard, QuickActionsGrid, ActivityFeed)
+- M11.6 · 44px touch-target Playwright test
+- M11.8 · top-level routes growth log
+- M11.9b · refactor 24 Edge Functions to import from `_shared/systemPrompts.ts`
+- M11.10 · move `pg_trgm` extension out of `public`
+- M11.12 · `bulk-import` → `has_role()` RPC (security warn)
+
+---
+
 ## [1.20.0] — 2026-04-23
 
 ### Added (M10 · Full canonical conformance audit)
