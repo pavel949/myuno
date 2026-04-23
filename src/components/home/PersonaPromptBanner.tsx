@@ -51,7 +51,7 @@ export function PersonaPromptBanner() {
   const lang = language === 'ru' ? 'ru' : 'en';
 
   return (
-    <section className="px-4 mt-3" aria-label="Persona detection prompt">
+    <section className="px-4 mt-3" aria-label="Persona detection prompt" data-testid="persona-prompt-banner">
       <div
         className={cn(
           'relative flex items-center gap-3 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/5 via-background to-background p-3.5',
@@ -71,12 +71,14 @@ export function PersonaPromptBanner() {
         </div>
         <Link
           to={target}
+          data-testid="persona-prompt-cta"
           className="rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
         >
           {COPY.cta[lang as 'en' | 'ru']}
         </Link>
         <button
           type="button"
+          data-testid="persona-prompt-dismiss"
           onClick={() => {
             setDismissed(true);
             try { sessionStorage.setItem(KEY, '1'); } catch { /* ignore */ }

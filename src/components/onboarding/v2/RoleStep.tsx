@@ -31,6 +31,7 @@ export function RoleStep({ value, onChange, lang }: Props) {
             type="button"
             onClick={() => onChange(role)}
             whileTap={{ scale: 0.98 }}
+            data-testid={`onboarding-role-${role}`}
             className={cn(
               'relative flex items-start gap-3 rounded-xl border-2 bg-card p-4 text-left transition-all min-h-[88px]',
               'hover:border-primary/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary',
