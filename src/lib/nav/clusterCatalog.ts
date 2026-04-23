@@ -145,8 +145,8 @@ export const CLUSTER_CATALOG: ClusterCatalogEntry[] = [
     labelRu: 'Досуг',
     labelEn: 'Leisure',
     labelTh: 'กิจกรรม',
-    valueRu: 'Впечатления, яхты, спорт, события — лучшее на Пхукете.',
-    valueEn: 'Experiences, yachts, fitness, events — the best of Phuket.',
+    valueRu: 'Впечатления, яхты, спорт, события — избранное на Пхукете.',
+    valueEn: 'Experiences, yachts, fitness, events — curated for Phuket.',
     color: '#EC4899',
     icon: Heart,
     services: [

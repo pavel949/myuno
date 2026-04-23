@@ -39,8 +39,8 @@ export const MarketComingSoonOverlay: React.FC = () => {
           </h2>
           <p className="text-muted-foreground text-sm leading-relaxed">
             {isRu
-              ? 'Мы готовим для вас лучший выбор товаров от проверенных продавцов. Совсем скоро!'
-              : 'We\'re curating the best selection of products from verified sellers. Stay tuned!'}
+              ? 'Готовим подборку товаров от проверенных продавцов. Скоро откроем доступ.'
+              : 'We are curating products from verified sellers. Access opens soon.'}
           </p>
         </div>
 

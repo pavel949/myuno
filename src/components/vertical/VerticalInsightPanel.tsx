@@ -28,11 +28,11 @@ interface InsightConfig {
 const INSIGHT_CONFIG: Partial<Record<string, InsightConfig>> = {
   yacht: {
     guides: [
-      { slugEn: 'phuket-yacht-routes', titleEn: 'Best Yacht Routes from Phuket', titleRu: 'Лучшие маршруты на яхте', descEn: 'Phi Phi, Similan, Racha — which to choose', descRu: 'Phi Phi, Симилан, Рача — что выбрать' },
+      { slugEn: 'phuket-yacht-routes', titleEn: 'Top Yacht Routes from Phuket', titleRu: 'Популярные маршруты на яхте', descEn: 'Phi Phi, Similan, Racha — which to choose', descRu: 'Phi Phi, Симилан, Рача — что выбрать' },
       { slugEn: 'yacht-charter-guide', titleEn: 'What to Bring on a Charter', titleRu: 'Что взять с собой', descEn: 'Checklist for a perfect day at sea', descRu: 'Чеклист для идеального дня на море' },
     ],
     faqs: [
-      { questionEn: 'What is the best season for yacht charters?', questionRu: 'Когда лучший сезон для чартера?', answerEn: 'November to April: calm Andaman Sea, ideal visibility. May–Oct is possible but check weather.', answerRu: 'Ноябрь–Апрель: спокойное Андаманское море, хорошая видимость. Май–Октябрь — возможно, но следите за погодой.' },
+      { questionEn: 'When is the optimal season for yacht charters?', questionRu: 'Когда оптимальный сезон для чартера?', answerEn: 'November to April: calm Andaman Sea, ideal visibility. May–Oct is possible but check weather.', answerRu: 'Ноябрь–Апрель: спокойное Андаманское море, хорошая видимость. Май–Октябрь — возможно, но следите за погодой.' },
       { questionEn: 'How many people fit on a speedboat vs catamaran?', questionRu: 'Сколько человек на спидботе и катамаране?', answerEn: 'Speedboats: 8–12 pax. Catamarans: 10–20 pax. Superyachts: 6–10 in luxury.', answerRu: 'Спидбот: 8–12 чел. Катамаран: 10–20 чел. Суперяхта: 6–10 в роскоши.' },
       { questionEn: 'Is fuel included in the charter price?', questionRu: 'Топливо включено в цену?', answerEn: 'Usually yes for day charters. Check the listing — some providers charge extra for long routes.', answerRu: 'Обычно да для дневных рейдов. Проверьте листинг — некоторые провайдеры берут доп. оплату за длинные маршруты.' },
     ],

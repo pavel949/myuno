@@ -57,8 +57,8 @@ export function VerticalCTA({
       return {
         title: isRu ? 'Не нашли подходящий вариант?' : "Couldn't find what you need?",
         subtitle: isRu 
-          ? 'Оставьте заявку и мы подберём лучшие варианты для вас' 
-          : 'Leave a request and we will find the best options for you',
+          ? 'Оставьте заявку — подберём подходящие варианты под ваш запрос' 
+          : 'Leave a request — we will pick suitable options for you',
         button: isRu ? 'Оставить заявку' : 'Submit Request',
       };
     }

@@ -147,7 +147,7 @@ const SIMStartPage: React.FC = () => {
     <AppLayout>
       <SEOHead
         title={t ? 'SIM-карты в Таиланде — Сравнение тарифов | myUNO' : 'Thailand SIM Cards — Plan Comparison | myUNO'}
-        description={t ? 'Сравните тарифы SIM-карт AIS, DTAC, True для туристов на Пхукете. eSIM, 5G, лучшие цены.' : 'Compare AIS, DTAC, True tourist SIM plans for Phuket. eSIM, 5G, best prices.'}
+        description={t ? 'Сравните тарифы SIM-карт AIS, DTAC, True для туристов на Пхукете. eSIM, 5G, выгодные цены.' : 'Compare AIS, DTAC, True tourist SIM plans for Phuket. eSIM, 5G, competitive prices.'}
       />
 
       <div className="px-4 md:px-6 lg:px-8 py-6 pb-20 md:pb-8 max-w-[1200px] mx-auto space-y-6">

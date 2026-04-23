@@ -209,7 +209,7 @@ const ExchangeBotPage: React.FC = () => {
                 </h2>
                 <ul className="space-y-1.5 text-sm text-muted-foreground">
                   <li>• {t ? 'Избегайте обмена в аэропорту — курс на 2-5% хуже' : 'Avoid airport exchanges — rates are 2-5% worse'}</li>
-                  <li>• {t ? 'SuperRich и K79 — лучшие курсы на острове' : 'SuperRich and K79 offer the best rates on the island'}</li>
+                  <li>• {t ? 'SuperRich и K79 — выгодные курсы на острове' : 'SuperRich and K79 offer competitive rates on the island'}</li>
                   <li>• {t ? 'Банкоматы берут комиссию 220฿ за снятие. Банк Bangkok Bank — минимальная комиссия' : 'ATMs charge ฿220 withdrawal fee. Bangkok Bank has lowest fees'}</li>
                   <li>• {t ? 'Visa/Mastercard в крупных магазинах — курс банка, без наценки' : 'Visa/Mastercard at large stores — bank rate, no markup'}</li>
                 </ul>

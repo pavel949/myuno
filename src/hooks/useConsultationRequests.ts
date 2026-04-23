@@ -267,7 +267,7 @@ export function useConsultationRequests() {
       });
     },
     onSuccess: () => {
-      toast.success('Заявка на аренду отправлена! Мы подберём лучшие варианты.');
+      toast.success('Заявка на аренду отправлена. Подберём подходящие варианты.');
     },
     onError: () => {
       toast.error('Ошибка при отправке заявки.');
