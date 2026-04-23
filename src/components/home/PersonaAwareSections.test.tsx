@@ -90,8 +90,9 @@ describe('<PersonaAwareSections />', () => {
       <PersonaAwareSections defaultOrder={ORDER} sections={sections} />,
     );
     const order = getOrder(container);
-    // FeaturedPropertiesCarousel должен подняться выше CategoryGrid.
-    expect(order.indexOf('s-feat')).toBeLessThan(order.indexOf('s-cat'));
+    // FeaturedPropertiesCarousel должен подняться выше своей дефолтной позиции (2).
+    // Для P9 (persona+cluster invest) он получает максимальный score среди этих 4.
+    expect(order.indexOf('s-feat')).toBeLessThan(2);
   });
 
   it('4. tolerates missing keys in sections', () => {
