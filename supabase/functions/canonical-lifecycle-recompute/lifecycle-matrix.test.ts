@@ -52,7 +52,7 @@ Deno.test("snowbird: 2+ distinct seasons", () => {
 Deno.test("nomad: active DTV visa, low totalDays", () => {
   const r = resolveLifecycleStage({
     currentStage: "tourist",
-    totalDaysInThailand: 90,
+    totalDaysInThailand: 30,
     visitsCount: 1,
     visaType: "DTV",
     visaExpiresAt: FUTURE,
