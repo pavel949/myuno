@@ -508,7 +508,7 @@ export default function Bookings() {
                       >
                         <span className="uppercase tracking-[0.08em] flex items-center gap-1.5">
                           {language === 'ru' ? 'История статусов' : 'Status timeline'}
-                          {historyLoading ? (
+                          {isHistoryLoading ? (
                             <span
                               className="inline-block h-3 w-3 rounded-full border border-muted-foreground/30 border-t-transparent animate-spin"
                               aria-hidden="true"
