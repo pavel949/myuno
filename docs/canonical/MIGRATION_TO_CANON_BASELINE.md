@@ -146,3 +146,33 @@ fontFamily: {
 ### Verify
 - `tsc --noEmit` → exit 0.
 - Ручная проверка `/newbuilds`, `/newbuilds/map`, `/newbuilds/area-guides` — рекомендуется в превью.
+
+---
+
+## Фаза 3 — Canon overrides (✅ выполнено 2026-04-23)
+
+### Стратегия
+Вместо точечной правки 552 хардкод-цветов в 100+ файлах добавлен один глобальный override-слой.
+
+### Изменения
+- **`src/styles/canon-overrides.css`** (новый файл, ~250 строк) — маппит legacy Tailwind палитру на канон через `:where()` (specificity 0,0,0) + `!important`:
+  - `text/bg/border-emerald|teal|green|lime|mint-*` → `--success` / `--success-bg`
+  - `text/bg/border-cyan|sky|blue|indigo-*` → `--brand-navy-700` / `--info-bg`
+  - `text/bg/border-purple|violet|fuchsia-*` → `--primary` (navy)
+  - `text/bg/border-pink|rose-*` → `--cat-wedding`
+  - `text/bg/border-amber|orange|yellow-*` → `--accent` (orange) / `--brand-orange-100`
+  - `from-/to-/via-` градиенты также перемаплены (peylaa, invest, services drawer теперь рендерятся navy↔orange).
+  - **Glassmorphism вырублен глобально**: `[class*="backdrop-blur"]` → `backdrop-filter: none` (canon §6).
+
+- **`src/index.css`** — добавлен `@import './styles/canon-overrides.css'` сразу после design-tokens (до Tailwind).
+
+### Результат без правок компонентов
+- ~552 неканонических цветов в peylaa, GTrust, WelcomeFlow, InvestmentHub, services drawer, capital, legal, property/commercial и др. визуально приведены к канону.
+- 142 файла с glassmorphism теперь рендерят solid surfaces.
+- TypeScript: `tsc --noEmit` exit 0.
+- Vite production build: успешен (1m 21s, 2139 PWA entries).
+
+### Ограничения подхода
+- `:where()` используется для матча, но `!important` нужен для победы над Tailwind utility-классами. В Фазе 4 эти classes будут переписаны на семантические (`text-primary`, `bg-success`) и override-файл сократится/удалится.
+- Inline-стили с хексами (88 случаев) не покрыты — они правятся точечно в Фазе 4.
+- Внешние компоненты (Google Maps маркеры с прямыми hex) тоже требуют точечной правки.
