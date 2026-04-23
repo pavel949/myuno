@@ -28,12 +28,12 @@ const CRITERION_LABELS: Record<string, { label: string; weight: number }> = {
 
 function gradeColor(grade?: string | null) {
   switch (grade) {
-    case 'AAA': return '#10b981';
-    case 'AA':  return '#22c55e';
-    case 'A':   return '#84cc16';
-    case 'BBB': return '#f59e0b';
-    case 'BB':  return '#ef4444';
-    default:    return 'hsl(var(--nb-muted))';
+    case 'AAA': return 'hsl(var(--success))';
+    case 'AA':  return 'hsl(var(--success))';
+    case 'A':   return 'hsl(var(--brand-navy-700))';
+    case 'BBB': return 'hsl(var(--accent))';
+    case 'BB':  return 'hsl(var(--destructive))';
+    default:    return 'hsl(var(--muted-foreground))';
   }
 }
 
