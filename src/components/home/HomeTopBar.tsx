@@ -59,9 +59,9 @@ export function HomeTopBar({ personas, onRoleSheetOpen, onAppDrawerOpen }: HomeT
             <Menu className="w-[19px] h-[19px]" />
           </button>
         )}
-        <div className="flex flex-col min-w-0">
+        <div className="flex flex-col min-w-0 leading-none">
           <BrandWordmark as="static" className="min-w-0" />
-          <span className="hidden sm:block text-[10px] leading-tight text-muted-foreground/80 tracking-wide -mt-0.5 font-sans truncate">
+          <span className="text-[9px] sm:text-[10px] tracking-[0.14em] uppercase text-muted-foreground/60 font-semibold mt-1 truncate">
             {isRu ? 'Инфраструктура для жизни на Пхукете' : 'Infrastructure for life on Phuket'}
           </span>
         </div>
