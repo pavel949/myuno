@@ -114,9 +114,9 @@ export function resolveLifecycleStage(s: LifecycleSignals): LifecycleResolution 
     return { stage: "settler", reason: `${visa} visa with totalDays >= 90` };
   }
 
-  // nomad — DTV-виза с малым налётом
-  if (visaActive && visa === "dtv" && s.totalDaysInThailand < 180) {
-    return { stage: "nomad", reason: "active DTV visa, totalDays < 180" };
+  // nomad — активная DTV-виза с малым налётом (< 90 дней).
+  if (visaActive && visa === "dtv" && s.totalDaysInThailand < 90) {
+    return { stage: "nomad", reason: "active DTV visa, totalDays < 90" };
   }
 
   // snowbird — 2+ распознанных сезона
