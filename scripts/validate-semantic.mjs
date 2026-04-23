@@ -140,18 +140,24 @@ function auditLandingFile(file, kind /* persona | cluster */) {
 // Forbidden synonyms scan (lightweight — only files in commercial dirs)
 // ────────────────────────────────────────────────────────────────────
 
-const COMMERCIAL_RE = /\/(landings|content\/landings|content\/semantic|guides|for|services|clearview|landing|knowledge)\//;
+const COMMERCIAL_RE = /\/(landings|content\/landings|content\/semantic|guides|for|services|clearview|landing|knowledge|supabase\/functions)\//;
 
 // The semantic dictionary itself legitimately contains every forbidden term as
 // data (it defines them). Skip those files for the synonym scan to avoid
 // recursive false positives. ESLint + content audits cover the rest.
 const SEMANTIC_DICTIONARY_RE = /\/src\/content\/semantic\//;
 
+// Edge-function meta-instructions that legitimately enumerate forbidden→
+// canonical pairs inside their own system prompts (e.g. instructing the LLM
+// «use "объект" (not "юнит")»). Such files opt out via this marker comment.
+const VALIDATOR_OPT_OUT_MARKER = '@validate-semantic-allow-lexicon-list';
+
 function scanFileForSynonyms(file) {
   if (!existsSync(file)) return;
   if (SEMANTIC_DICTIONARY_RE.test(file)) return;
   const isCommercial = COMMERCIAL_RE.test(file);
   const src = readFileSync(file, 'utf-8');
+  if (src.includes(VALIDATOR_OPT_OUT_MARKER)) return;
   const hasCyrillic = /[\u0400-\u04FF]/.test(src);
   for (const rule of SYNONYMS) {
     if (rule.contexts.includes('all')) {
@@ -232,7 +238,8 @@ auditLandingFile(resolve(ROOT, 'src/content/landings/clusterLandings.ts'), 'clus
 
 const semanticFiles = listFiles('src/content/landings/*.ts');
 const pillarTsFiles = listFiles('src/content/semantic/*.ts');
-for (const f of [...semanticFiles, ...pillarTsFiles]) scanFileForSynonyms(f);
+const edgeFunctionFiles = listFiles('supabase/functions/*/index.ts');
+for (const f of [...semanticFiles, ...pillarTsFiles, ...edgeFunctionFiles]) scanFileForSynonyms(f);
 
 checkPillarSitemapCoverage();
 

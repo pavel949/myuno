@@ -74,7 +74,7 @@
 | M6 | [persona-landings](./audits/M6-persona-landings.md) | 📋 **audit** — draft v0.1, awaiting approval (3 трека: D Home → B Landings → C Lifecycle) |
 | M7 | [tone-of-voice](./audits/M7-tone-of-voice.md) + [M7b edge-functions-tone-sweep](./audits/M7b-edge-functions-tone-sweep.md) | ✅ tracks A/B/C done · ⏳ M7d (DB content) · M7e (alt-text) |
 | M8 | [clearview-integration-protocol](./audits/M8-clearview-integration-protocol.md) | 📋 protocol (parallel track) |
-| M9 | [semantic-core-rollout](./audits/M9-semantic-core-rollout.md) | 🚧 ~85% (словарь + schema.org + LandingSeoHead + ESLint + sitemap; backlog: AI sync, Knowledge Hub seeding) |
+| M9 | [semantic-core-rollout](./audits/M9-semantic-core-rollout.md) | 🚧 ~90% (словарь + schema.org + LandingSeoHead + ESLint + sitemap + edge-function prompt sweep M9.5; backlog: M9.6 Knowledge Hub seeding, M9.7 ESLint guard expansion) |
 
 ---
 
@@ -89,5 +89,5 @@
 ## Язык и версии
 
 - **Язык документов:** русский (внутренний инструментарий команды и AI). Bilingual RU/EN — только user-facing UI/контент.
-- **История:** [`CHANGELOG.md`](./CHANGELOG.md). Текущая версия канонического набора: **v1.15.0**.
+- **История:** [`CHANGELOG.md`](./CHANGELOG.md). Текущая версия канонического набора: **v1.17.0**.
 - **Поддержание:** при добавлении нового документа обнови этот README + CHANGELOG в одном PR.

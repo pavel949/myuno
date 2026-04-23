@@ -108,7 +108,7 @@ investment_intent_detected, long_stay_eligible, cart_abandoned, high_value_lead.
 
 Правила:
 - confidence — честная оценка 0..1.
-- reasoning — 1-2 предложения по-русски, без воды.
+- reasoning — 1-2 предложения по-русски, без воды. Используй каноническую лексику: «объект», «сделка», «off-plan», «Chanote», «escrow», «Land Office»; продукт пиши как «myUNO», «ClearView», «ContractAI».
 - Если сигналов мало — confidence ≤ 0.4, выбирай дефолты (tourist + arrive + P1).
 - Никогда не придумывай поля вне схемы.`;
 
