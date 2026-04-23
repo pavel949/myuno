@@ -1,7 +1,7 @@
 # myUNO · Canonical Documents
 
-> **Версия канона:** v1.15.0 (2026-04-23) — **Semantic Core v1.1 добавлен** (`10-semantic-core.md`, 1476 строк). Эталонный документ: контракт между смыслом и поиском (findability + meaning) для SEO, Knowledge Hub, лендингов, AI-консьержа, system prompts, URL и schema.org. Добавлен в README/CHANGELOG; код пока не правится — отдельный имплементационный спринт **M9 · Semantic Core Rollout** (план ниже).
-> **Предыдущее:** v1.14.1 — M7b Edge Functions Tone Sweep (vendor-outreach, ai-personalize, peylaa-lead-notify). v1.14.0 — M7 Tone of Voice (ESLint guard + uiStrings + 24 правки). v1.13.0 — M6 закрыт.
+> **Версия канона:** v1.16.0 (2026-04-23) — **M9 · Semantic Core Rollout (~85%)**: словарь `src/content/semantic/*` (canonicalNames, forbiddenSynonyms, metaTemplates, taxonomy, pillarPages), JSON-LD билдеры (`schemaBuilders.ts` + `JsonLd.tsx`), рефакторинг `LandingSeoHead.tsx` под §10, ESLint-guard `no-canonical-synonyms`, `sitemap-pillars.xml` (10 URL), `vercel.json` редиректы, CI-валидатор `validate-semantic.mjs`, PR-template и AI-промпты для генерации страниц/статей. Backlog: M9.5 (AI edge functions sync), M9.6 (Knowledge Hub seeding), M9.7 (ESLint расширение).
+> **Предыдущее:** v1.15.0 — Semantic Core v1.1 (`10-semantic-core.md`, 1476 строк). v1.14.1 — M7b Edge Functions Tone Sweep. v1.14.0 — M7 Tone of Voice (ESLint guard + uiStrings + 24 правки). v1.13.0 — M6 закрыт.
 >
 > **Источник правды.** Эти документы определяют все продуктовые, контентные и инженерные решения. При расхождении кода/UI с документами правится **код**, а не документ.
 >
@@ -72,8 +72,9 @@
 | M4 | [ai-orchestration](./audits/M4-ai-orchestration.md) | ✅ done (Edge Function + hook) |
 | M5 | [ux-persona-detection](./audits/M5-ux-persona-detection.md) + [hardening](./audits/M5-hardening.md) | ✅ done (v1.10.2 — H.1–H.7 автоматизированы; ручной prod-прогон по [`M5-e2e-qa-checklist.md`](./audits/M5-e2e-qa-checklist.md) рекомендован) |
 | M6 | [persona-landings](./audits/M6-persona-landings.md) | 📋 **audit** — draft v0.1, awaiting approval (3 трека: D Home → B Landings → C Lifecycle) |
-| M7 | Production hardening | ⏳ planned |
+| M7 | [tone-of-voice](./audits/M7-tone-of-voice.md) + [M7b edge-functions-tone-sweep](./audits/M7b-edge-functions-tone-sweep.md) | ✅ tracks A/B/C done · ⏳ M7d (DB content) · M7e (alt-text) |
 | M8 | [clearview-integration-protocol](./audits/M8-clearview-integration-protocol.md) | 📋 protocol (parallel track) |
+| M9 | [semantic-core-rollout](./audits/M9-semantic-core-rollout.md) | 🚧 ~85% (словарь + schema.org + LandingSeoHead + ESLint + sitemap; backlog: AI sync, Knowledge Hub seeding) |
 
 ---
 
