@@ -5,6 +5,23 @@
 
 ---
 
+## [1.10.6] — 2026-04-23
+
+### Added (M6 · трек D · шаг D.4)
+- **`src/pages/Index.tsx`** — интеграция `<PersonaAwareSections />` в Home за флагом `feature_flag:home_persona_aware_v1` (default OFF). Priority-зона: `PersonaPromptBanner` + `ActiveSituation`. Hero, tasks-блок, RealEstateEntry/TrustAsAService, AllSectionsAccordion остаются на фиксированных позициях (вне priority-зоны).
+- **DB seed** — `INSERT INTO system_settings (key='feature_flag:home_persona_aware_v1', value='false')` (idempotent через `ON CONFLICT DO NOTHING`).
+
+### Changed
+- `audits/M6-persona-landings.md` — статус D.4 → ✅ done. Трек D · шаг D.6 (tone-of-voice pass) → 🔜 next.
+
+### Notes
+- **Регрессия безопасна:** при флаге OFF, loading-состоянии профиля или anon-юзере `<PersonaAwareSections />` рендерит `defaultOrder` 1:1 — порядок блоков идентичен пред-D.4 поведению.
+- **Включение после QA** — одна строка в `system_settings` (`UPDATE … SET value='true'`), без релиза.
+- **Откат** — обратное `UPDATE … SET value='false'`. Никакого кода править не нужно.
+- Track D вышел в продакшн-готовое состояние; видимый persona-aware эффект включится по решению Павла.
+
+---
+
 ## [1.10.5] — 2026-04-23
 
 ### Added (M6 · трек D · шаг D.3)
