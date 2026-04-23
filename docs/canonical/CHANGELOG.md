@@ -5,6 +5,39 @@
 
 ---
 
+## [1.16.0] — 2026-04-23
+
+### Added (M9 · Semantic Core Rollout — ~85%)
+- **`src/content/semantic/`** — типизированный словарь Semantic Core v1.1: `canonicalNames.ts`, `forbiddenSynonyms.ts`, `metaTemplates.ts` (H1/title/description шаблоны по 10 кластерам × 25 персонам), `taxonomy.ts` (lifecycle × role × cluster), `pillarPages.ts` (10 pillar URL), `searchClusters.ts`, `anchorWords.ts`.
+- **`src/lib/seo/schemaBuilders.ts`** — JSON-LD билдеры: `Organization`, `BreadcrumbList`, `Article`, `Service`, `FAQPage` согласно §10.
+- **`src/components/seo/JsonLd.tsx`** — head-инжектор schema.org разметки.
+- **`scripts/validate-semantic.mjs`** — CI-валидатор: проверка длин title/description, запрещённых синонимов, наличия H1.
+- **`public/sitemap-pillars.xml`** — sitemap для 10 pillar URL (§4.1), зарегистрирован в основном `sitemap.xml`.
+- **`docs/prompts/semantic-page-creation.md`**, **`docs/prompts/semantic-article-creation.md`** — system prompts для AI-генерации страниц/статей по канону §10.
+- **`.github/pull_request_template.md`** — чеклист PR с обязательной сверкой по §10 (H1/meta/synonyms/schema).
+- **`docs/canonical/audits/M9-semantic-core-rollout.md`** — аудит-матрица «страница → факт vs канон → дельта».
+
+### Changed (M9)
+- **`src/components/seo/LandingSeoHead.tsx`** — рефакторинг: подтягивает H1/title/description из `metaTemplates.ts`, добавляет `BreadcrumbList` JSON-LD.
+- **`eslint.config.js`** — новое правило `no-canonical-synonyms`: блокирует литералы из `forbiddenSynonyms.ts` (например, «off plan» → «оф-план», «condotel» → «кондо-отель»).
+- **`vercel.json`** — `cleanUrls: true` + 301-редиректы для legacy маршрутов (`/properties` → `/property`, и др. согласно §7).
+- **`public/sitemap.xml`** — добавлен sitemap-pillars в индекс.
+- **`package.json`** — npm script `validate:semantic`.
+- `src/lib/appVersion.ts` → `3.48.0`, `public/version.json` → `3.48.0`.
+
+### Notes — что осталось в M9 backlog
+- **M9.5** — синхронизация AI-edge functions (`concierge-route`, `ai-smart-search`, `ai-personalize-home`) с canonicalNames §10.
+- **M9.6** — Knowledge Hub seeding по приоритетным запросам (план статей).
+- **M9.7** — расширение ESLint правила на template-literals и i18n-словари.
+- **M7d/M7e** — DB content sweep и alt-text/A11y sweep (перенесены, не блокируют M9).
+
+### Verification
+- `npx tsc --noEmit` — clean.
+- `npm run validate:semantic` — все pillar pages проходят (title ≤60, description ≤160, H1 уникален, synonyms 0).
+- `public/sitemap-pillars.xml` — валидируется по XSD sitemap.org.
+
+---
+
 ## [1.15.0] — 2026-04-23
 
 ### Added (Semantic Core v1.1)
