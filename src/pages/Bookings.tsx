@@ -113,6 +113,14 @@ export default function Bookings() {
   const [realtimeStatus, setRealtimeStatus] = useState<RealtimeStatus>('connecting');
   const highlightTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
+  // Session-level dedup set of every booking_status_history.id we've already
+  // applied to state — from initial load, lazy load, cache hydration, OR a
+  // prior realtime INSERT. Realtime can deliver the same row more than once
+  // (reconnect/replay, multiple subscribers, optimistic + server echo), so we
+  // gate every realtime update on this set BEFORE touching state, the cache,
+  // expansion, highlight, or timers. Reset on user change / manual refresh.
+  const seenEventIdsRef = useRef<Set<string>>(new Set());
+
   // Cleanup any pending highlight timers on unmount.
   useEffect(() => {
     return () => {
@@ -120,6 +128,12 @@ export default function Bookings() {
       highlightTimersRef.current.clear();
     };
   }, []);
+
+  // Reset the dedup set when the user changes — different account, different
+  // history universe.
+  useEffect(() => {
+    seenEventIdsRef.current = new Set();
+  }, [user?.id]);
 
   const loadBookings = useCallback(async (forceRefresh = false) => {
     if (!user) return;
