@@ -1,6 +1,6 @@
 # myUNO · Canonical Documents
 
-> **Версия канона:** v1.12.0 (2026-04-23) — M6 трек B закрыт (B.1–B.10): типы + 25 personaLandings (3 live) + 10 clusterLandings (3 live) + динамические роуты `/for/:persona` и `/cluster/:cluster` + `<LandingSeoHead>` (OG/schema.org/hreflang) + sitemap-landings.xml. Трек C (lifecycle automation) — в очереди.
+> **Версия канона:** v1.13.0 (2026-04-23) — **M6 закрыт целиком** (треки D + B + C). Track C: edge function `canonical-lifecycle-recompute` развёрнута, DB-триггер на `bookings.confirmed` активен, pg_cron daily batch (03:00 ICT, top-100 stalest profiles) запланирован. Следующая веха — M7.
 >
 > **Источник правды.** Эти документы определяют все продуктовые, контентные и инженерные решения. При расхождении кода/UI с документами правится **код**, а не документ.
 >
