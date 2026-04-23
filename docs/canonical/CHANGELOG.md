@@ -5,6 +5,22 @@
 
 ---
 
+## [1.10.2] — 2026-04-23
+
+### Added (M5 H.7 — Playwright-автоматизация e2e чек-листа)
+- **Playwright specs** под `e2e/tests/onboarding/`:
+  - `account-persona-preview.spec.ts` — Сценарии C+D из `M5-e2e-qa-checklist.md` (empty state с CTA `/start/v2?return=/account`, refine loop с авто-возвратом).
+  - `persona-prompt-banner.spec.ts` — Сценарий B (баннер появляется для authed без персоны, dismiss держится в session).
+  - `anon-to-user-backfill.spec.ts` — Сценарий A (smoke). Авто-skip, если окружение требует email-подтверждение (signup без активной сессии).
+- **Test utilities** `e2e/utils/personaTestHelpers.ts` — `resetSeedAdminPersona()` (PATCH через REST под seed-токеном), `loginAsSeedAdmin`, `signupFreshUser`, `completeCanonicalOnboarding` (детерминированный прогон Q1→Q3).
+- **Stable selectors** — `data-testid` на `PersonaDetectionPreview`, `PersonaPromptBanner`, `LifecycleStep`, `RoleStep`, `ResultStep`. UI без визуальных изменений.
+
+### Notes
+- Автоматизация покрывает 3 из 4 ручных сценариев M5 без service-role ключа. Backfill-spec (A) скипается под политикой email-confirmation — flip auto-confirm в Lovable Cloud разблокирует его.
+- Ручной прогон чек-листа `M5-e2e-qa-checklist.md` всё ещё рекомендован перед v1.11 (M6) для финальной верификации в проде.
+
+---
+
 ## [1.10.1] — 2026-04-23
 
 ### Added (M5 hardening — закрытие остатков перед M6)

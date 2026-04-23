@@ -1,6 +1,6 @@
 # M5 — Hardening (закрытие остатков перед M6)
 
-**Status:** 🔜 in progress (2026-04-23)
+**Status:** ✅ done (2026-04-23, v1.10.2) — H.1–H.7 закрыты (E2E автоматизированы под Playwright, ручной prod-прогон по `M5-e2e-qa-checklist.md` опционален перед M6)
 **Owner:** Pavel + AI engineer
 **Parent milestone:** [M5 · UX Persona Detection](./M5-ux-persona-detection.md) v1.10.0
 **Canonical refs:** `04-implementation-protocol.md §M5`, `01-segmentation-framework.md §6`, `09-data-schema.md`
