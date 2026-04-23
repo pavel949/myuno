@@ -285,6 +285,14 @@ export default function Bookings() {
           // limits us to the user's own rows, but this avoids cross-user noise).
           if (!bookingsRef.current.some((b) => b.id === row.booking_id)) return;
 
+          // Dedup gate: if we've already applied this status_history row in this
+          // session (initial load, lazy load, cache hydration, or a prior
+          // realtime delivery), drop the event entirely. This prevents duplicate
+          // entries on reconnect/replay AND avoids re-triggering the highlight
+          // animation, auto-expand, and timer churn on echoes.
+          if (seenEventIdsRef.current.has(row.id)) return;
+          seenEventIdsRef.current.add(row.id);
+
           const newEvent: BookingStatusEvent = {
             id: row.id,
             from_status: row.from_status,
