@@ -80,7 +80,7 @@ export function useCanonicalOnboarding() {
 
     let finalProposal: PersonaDetectionProposal = localProposal;
     let source: 'ai_v1' | 'rules_v1' = 'rules_v1';
-    const anonId = user?.id ? null : getOrCreateAnonId();
+    const anonId = user?.id ? null : getOrCreateAnonSessionId();
 
     try {
       // 1. Authed → ask the AI orchestrator and let it merge into profiles
