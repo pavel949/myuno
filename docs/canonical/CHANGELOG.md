@@ -5,6 +5,28 @@
 
 ---
 
+## [1.19.2] — 2026-04-23
+
+### Added (M9.7c · Fuzzy / near-match guard for uiStrings)
+- **`src/test/semantic/uiStrings-fuzzy.test.ts`** — новый Vitest suite (30 тестов), ловит вариации forbidden-синонимов, которые не покрыл exact-match guard:
+  - **Variant pass** — генерирует склонения русских корней (-а/-ы/-у/-ом/-е/-ов/-ам/-ами/-ах/-и) и вариации разделителей для многословных терминов (off-plan / off plan / offplan / Off Plan).
+  - **Fuzzy pass** — Damerau-Levenshtein distance ≤ 1 на каждый токен ≥5 символов: ловит typos типа «MyUNNO», «приобритение», «чанотэ», «оффплан».
+  - **Whitelist** — канонические термины из `forbiddenSynonyms.canonical` + высокотрафиковые легитимные слова, сидящие 1 edit от forbidden (например, «транзакция» против forbidden «трансакция», «myUNO» против forbidden «MyUNO»). Без whitelist guard ложно срабатывал бы на правильных употреблениях.
+  - **Detector self-check** — 6 встроенных тестов: positive (declensions, separator variants, fuzzy typo) + negative (канонические `транзакция` / `off-plan` / `myUNO` НЕ должны флагаться).
+
+### Defense-in-depth stack для UI-словарей (после M9.7c)
+1. **ESLint** — статический guard на исходники (`src/i18n/**` = error).
+2. **`validate-semantic.mjs --strict`** — regex-скан файлов словарей.
+3. **uiStrings-canonical.test.ts** — runtime exact-match по словарю.
+4. **uiStrings-fuzzy.test.ts** ← новое — runtime near-match (variants + Damerau-Levenshtein 1).
+
+### Verification
+- `npx vitest run src/test/semantic/` → **57 passed** (canonical 26 + fuzzy 30 + validate-semantic 1).
+- `node scripts/validate-semantic.mjs --strict` → 0/0.
+- `src/lib/appVersion.ts` → `3.51.2`, `public/version.json` → `3.51.2`.
+
+---
+
 ## [1.19.1] — 2026-04-23
 
 ### Added (M9.7b · Runtime + CI guard for uiStrings canonical lexicon)
