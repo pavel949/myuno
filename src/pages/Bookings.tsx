@@ -534,7 +534,7 @@ export default function Bookings() {
                       >
                         <div className="overflow-hidden">
                           <div className="px-4 pb-4 pt-1">
-                            {historyLoading ? (
+                            {isHistoryLoading && events.length === 0 ? (
                               <BookingStatusTimelineSkeleton rows={3} compact />
                             ) : (
                               <BookingStatusTimeline
