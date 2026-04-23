@@ -654,8 +654,8 @@ export default function PropertyConsultation() {
                     </div>
                     <p className="text-sm text-muted-foreground">
                       {isRu 
-                        ? 'Анализ доходности, рисков и лучших локаций для инвестиций' 
-                        : 'ROI analysis, risks, and best locations for investment'}
+                        ? 'Анализ доходности, рисков и подходящих локаций для инвестиций' 
+                        : 'ROI analysis, risks, and suitable locations for investment'}
                     </p>
                   </div>
                 </CardContent>

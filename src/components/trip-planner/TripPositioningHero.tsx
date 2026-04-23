@@ -14,7 +14,7 @@ export function TripPositioningHero() {
         'Трансфер, аренда, фаст-трек — всё в одном месте',
       ]
     : [
-        'Flights — best routes and when to book',
+        'Flights — optimal routes and when to book',
         'Insurance — we help you choose and assist with claims',
         'Arrival Card — we fill it for you or guide you through',
         'Transfer, rentals, fast track — all in one place',

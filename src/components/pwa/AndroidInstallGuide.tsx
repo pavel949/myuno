@@ -26,7 +26,7 @@ export function AndroidInstallGuide({ onClose }: AndroidInstallGuideProps) {
       back: 'Back',
       gotIt: 'Got it!',
       close: 'Close',
-      chromeNote: 'Use Chrome for the best experience',
+      chromeNote: 'Use Chrome for a smoother experience',
     },
     ru: {
       title: 'Установка myUNO',

@@ -161,8 +161,8 @@ export default function PartnersPage() {
       title: isRu ? 'Обучение' : 'Training',
       duration: isRu ? '1 час' : '1 hour',
       description: isRu 
-        ? 'Онлайн-обучение работе с платформой и лучшим практикам'
-        : 'Online training on platform and best practices',
+        ? 'Онлайн-обучение работе с платформой и проверенным практикам'
+        : 'Online training on platform and proven practices',
     },
     {
       step: 6,
