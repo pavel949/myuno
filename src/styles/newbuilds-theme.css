@@ -1,224 +1,180 @@
 /**
- * Newbuilds "Dark Luxury Editorial" Theme
- * Scoped under .nb-theme class
+ * Newbuilds Theme — UNIFIED WITH CANON (Phase 2 of Canon Migration)
+ *
+ * Per migration decision (2026-04-23): newbuilds is no longer a separate
+ * "Dark Luxury Editorial" sub-brand. It now uses the same navy + orange +
+ * cream palette, Noto Serif/Unbounded display, 0px radii, no glassmorphism,
+ * no gold, no glow.
+ *
+ * Legacy --nb-* tokens are kept as aliases that resolve to canon tokens so
+ * existing call sites (~40 components) keep rendering until Phase 3 rewrites
+ * them to use semantic tokens directly.
+ *
+ * Source of truth: docs/canonical/05-visual-design-system.md
  */
 
-/* Newbuilds fonts are loaded globally in index.html (Playfair Display + DM Sans + JetBrains Mono) */
-
-.nb-theme {
-  /* ─ Core palette (HSL) ─ */
-  --nb-bg: 0 0% 6%;                /* #0F0F0F */
-  --nb-surface: 0 0% 8%;           /* #141414 */
-  --nb-card: 0 0% 10%;             /* #1A1A1A */
-  --nb-gold: 43 52% 54%;           /* #C9A84C */
-  --nb-gold-dim: 43 40% 40%;       /* darker gold */
-  --nb-gold-bright: 43 70% 65%;    /* lighter gold */
-  --nb-muted: 50 5% 50%;           /* #8A8A7A */
-  --nb-text: 0 0% 95%;             /* near-white */
-  --nb-text-secondary: 50 5% 60%;  /* warm grey */
-  --nb-border: 43 52% 54%;         /* gold for borders */
-  --nb-glass-bg: 0 0% 100% / 0.04;
-  --nb-glass-border: 43 52% 54% / 0.2;
-
-  /* ─ Semantic overrides ─ */
-  --background: var(--nb-bg);
-  --foreground: var(--nb-text);
-  --card: var(--nb-surface);
-  --card-foreground: var(--nb-text);
-  --muted: var(--nb-muted);
-  --muted-foreground: var(--nb-text-secondary);
-  --border: var(--nb-glass-border);
-
-  /* ─ Typography ─ */
-  --font-display-nb: 'Playfair Display', Georgia, serif;
-  --font-heading-nb: 'Playfair Display', Georgia, serif;
-  --font-body-nb: 'DM Sans', system-ui, sans-serif;
-  --font-mono-nb: 'JetBrains Mono', monospace;
-
-  font-family: var(--font-body-nb);
-  color: hsl(var(--nb-text));
-  background-color: hsl(var(--nb-bg));
-}
-
-/* ─ Light variant — overrides dark palette for unified Property Hub theme.
-   Now mapped to global semantic tokens (--primary, --background, --foreground,
-   --muted-foreground, --border, --card) so the luxury accent stays in sync with
-   the design system. Gold becomes a warmer primary accent with AA contrast.
-*/
+.nb-theme,
 .nb-theme--light {
-  --nb-bg: var(--background);
-  --nb-surface: var(--card);
-  --nb-card: var(--card);
-  /* Gold accent — darker for AA contrast on light cream */
-  --nb-gold: 38 65% 38%;
-  --nb-gold-dim: 38 55% 30%;
-  --nb-gold-bright: 43 70% 48%;
-  --nb-muted: var(--muted-foreground);
-  --nb-text: var(--foreground);
-  --nb-text-secondary: var(--muted-foreground);
-  --nb-border: var(--border);
-  --nb-glass-bg: 0 0% 100% / 0.7;
-  --nb-glass-border: var(--border);
+  /* ─ Legacy aliases mapped to canon ─ */
+  --nb-bg:              var(--background);
+  --nb-surface:         var(--card);
+  --nb-card:            var(--card);
 
+  /* "Gold" → brand orange (canon §1, used ≤3% of screen) */
+  --nb-gold:            var(--brand-orange);
+  --nb-gold-dim:        var(--brand-orange-700);
+  --nb-gold-bright:     var(--brand-orange-400);
+
+  --nb-muted:           var(--muted-foreground);
+  --nb-text:            var(--foreground);
+  --nb-text-secondary:  var(--muted-foreground);
+  --nb-border:          var(--border);
+
+  /* Glassmorphism is forbidden by canon — collapse to solid surfaces */
+  --nb-glass-bg:        var(--card);
+  --nb-glass-border:    var(--border);
+
+  /* Typography → canon (Noto Serif / Unbounded for RU via --font-display) */
+  --font-display-nb:    var(--font-display);
+  --font-heading-nb:    var(--font-display);
+  --font-body-nb:       var(--font-body);
+  --font-mono-nb:       var(--font-mono);
+
+  font-family: var(--font-body);
   color: hsl(var(--foreground));
   background-color: hsl(var(--background));
 }
 
-.nb-theme--light .nb-glass {
-  background: hsl(var(--card));
-  border-color: hsl(var(--border));
-}
-
-.nb-theme--light .nb-glass:hover {
-  border-color: hsl(var(--primary) / 0.6);
-  box-shadow: 0 4px 16px hsl(var(--primary) / 0.08);
-}
-
-.nb-theme--light .nb-blueprint {
-  background-image:
-    linear-gradient(hsl(var(--primary) / 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, hsl(var(--primary) / 0.04) 1px, transparent 1px);
-  background-size: 60px 60px;
-}
-
-/* ─ Grain texture overlay ─ */
-.nb-grain::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  opacity: 0.03;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* ─ Glass card ─ */
+/* ─ Glass card → flat card with canonical border ─ */
 .nb-glass {
-  background: hsl(var(--nb-glass-bg));
-  border: 1px solid hsl(var(--nb-glass-border));
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-radius: 16px;
-  transition: all 300ms ease;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-none);
+  transition: border-color 200ms ease, box-shadow 200ms ease;
 }
 
 .nb-glass:hover {
-  border-color: hsl(var(--nb-gold) / 0.5);
-  box-shadow: 0 0 24px hsl(var(--nb-gold) / 0.1);
+  border-color: hsl(var(--primary) / 0.6);
+  box-shadow: var(--shadow-xs);
 }
 
-/* ─ Gold separator ─ */
+/* ─ Section separator (canon: thin, neutral) ─ */
 .nb-separator {
   height: 1px;
-  background: linear-gradient(90deg, transparent, hsl(var(--nb-gold) / 0.4), transparent);
+  background: hsl(var(--border));
 }
 
 /* ─ Typography helpers ─ */
 .nb-display {
-  font-family: var(--font-display-nb);
+  font-family: var(--font-display);
   font-weight: 600;
   letter-spacing: -0.02em;
   line-height: 1.1;
 }
 
 .nb-mono {
-  font-family: var(--font-mono-nb);
+  font-family: var(--font-mono);
   font-weight: 500;
   letter-spacing: 0.05em;
 }
 
 .nb-label {
-  font-family: var(--font-mono-nb);
+  font-family: var(--font-mono);
   font-size: 0.75rem;
   font-weight: 500;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: hsl(var(--nb-gold));
+  color: hsl(var(--accent));
 }
 
-/* ─ Gold progress bar ─ */
+/* ─ Progress bar (canon: navy fill on neutral track) ─ */
 .nb-progress-track {
-  background: hsl(var(--nb-muted) / 0.2);
-  border-radius: 999px;
+  background: hsl(var(--muted));
+  border-radius: var(--radius-full);
   height: 6px;
   overflow: hidden;
 }
 
 .nb-progress-fill {
-  background: linear-gradient(90deg, hsl(var(--nb-gold-dim)), hsl(var(--nb-gold)));
+  background: hsl(var(--primary));
   height: 100%;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   transition: width 600ms ease;
 }
 
-/* ─ Status badges ─ */
+/* ─ Status badges (canon-aligned semantic colours) ─ */
 .nb-badge {
-  font-family: var(--font-mono-nb);
+  font-family: var(--font-mono);
   font-size: 0.7rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   padding: 4px 10px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   font-weight: 500;
 }
 
 .nb-badge-construction {
-  background: hsl(38 92% 50% / 0.15);
-  color: hsl(38 92% 60%);
-  border: 1px solid hsl(38 92% 50% / 0.3);
+  background: hsl(var(--warning-bg));
+  color: hsl(var(--warning));
+  border: 1px solid hsl(var(--warning) / 0.3);
 }
 
 .nb-badge-offplan {
-  background: hsl(160 55% 40% / 0.18);
-  color: hsl(160 45% 55%);
-  border: 1px solid hsl(160 55% 40% / 0.35);
+  background: hsl(var(--info-bg));
+  color: hsl(var(--info));
+  border: 1px solid hsl(var(--info) / 0.3);
 }
 
 .nb-badge-completed {
-  background: hsl(142 70% 45% / 0.15);
-  color: hsl(142 70% 55%);
-  border: 1px solid hsl(142 70% 45% / 0.3);
+  background: hsl(var(--success-bg));
+  color: hsl(var(--success));
+  border: 1px solid hsl(var(--success) / 0.3);
 }
 
 .nb-badge-upcoming {
-  background: hsl(215 80% 55% / 0.15);
-  color: hsl(215 80% 65%);
-  border: 1px solid hsl(215 80% 55% / 0.3);
+  background: hsl(var(--brand-navy-100));
+  color: hsl(var(--brand-navy-700));
+  border: 1px solid hsl(var(--brand-navy-700) / 0.3);
 }
 
-/* ─ Gold button ─ */
+/* ─ Primary CTA (replaces gold gradient button) ─ */
 .nb-btn-gold {
-  background: linear-gradient(135deg, hsl(var(--nb-gold)), hsl(var(--nb-gold-dim)));
-  color: hsl(0 0% 6%);
-  font-family: var(--font-body-nb);
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  font-family: var(--font-body);
   font-weight: 600;
   padding: 12px 28px;
-  border-radius: 10px;
+  border-radius: var(--radius-none);
   border: none;
   cursor: pointer;
-  transition: all 300ms ease;
+  transition: background-color 200ms ease;
   letter-spacing: 0.02em;
 }
 
 .nb-btn-gold:hover {
-  box-shadow: 0 4px 20px hsl(var(--nb-gold) / 0.3);
-  transform: translateY(-1px);
+  background: hsl(var(--primary-hover));
 }
 
-/* ─ Blueprint grid pattern (for hero) ─ */
+/* ─ Blueprint grid pattern — neutral navy at very low opacity ─ */
 .nb-blueprint {
-  background-image: 
-    linear-gradient(hsl(var(--nb-gold) / 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, hsl(var(--nb-gold) / 0.04) 1px, transparent 1px);
+  background-image:
+    linear-gradient(hsl(var(--primary) / 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--primary) / 0.04) 1px, transparent 1px);
   background-size: 60px 60px;
 }
 
-/* ─ Animation keyframes ─ */
-@keyframes nb-gold-glow {
-  0%, 100% { box-shadow: 0 0 8px hsl(var(--nb-gold) / 0.2); }
-  50% { box-shadow: 0 0 20px hsl(var(--nb-gold) / 0.4); }
+/* ─ Grain texture overlay — kept (purely decorative noise) ─ */
+.nb-grain::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
 }
 
+/* ─ Glow pulse animation removed (canon forbids glow); class kept as no-op ─ */
 .nb-glow-pulse {
-  animation: nb-gold-glow 3s ease-in-out infinite;
+  /* intentionally empty — glow forbidden by canon §6 */
 }
