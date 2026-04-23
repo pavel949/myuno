@@ -176,3 +176,16 @@ fontFamily: {
 - `:where()` используется для матча, но `!important` нужен для победы над Tailwind utility-классами. В Фазе 4 эти classes будут переписаны на семантические (`text-primary`, `bg-success`) и override-файл сократится/удалится.
 - Inline-стили с хексами (88 случаев) не покрыты — они правятся точечно в Фазе 4.
 - Внешние компоненты (Google Maps маркеры с прямыми hex) тоже требуют точечной правки.
+
+---
+
+## Hotfix 2026-04-23 (post-Phase-3 verification)
+
+При визуальной проверке скриншотов выявлено: страницы с классами `bg-cluster-arrive` / `text-cluster-arrive` (например `/sim`) всё ещё рендерились **mint/teal**, потому что `--cluster-arrive` в `tokens.css` остался `172 79% 27%` (tourism teal) — `bg-cluster-*` классы используют этот токен напрямую и не покрываются `canon-overrides.css`.
+
+### Изменения
+- **`src/styles/tokens.css` §Cluster aliases** — все 8 кластеров переведены на канонические hue (navy / orange / neutral). `--cluster-arrive`, `--cluster-family` → navy-700; `--cluster-invest`, `--cluster-enjoy` → brand-orange; `--cluster-legal` → neutral-dark.
+
+### Результат
+- `/sim`, `/arrive`, ArriveClusterPage, ExploreMoreRail, ClusterHub — все mint-акценты заменены на navy.
+- Все 3 фазы (foundation, newbuilds, overrides) теперь покрывают наблюдаемые поверхности без mint-leakage.
