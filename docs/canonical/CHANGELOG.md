@@ -5,6 +5,28 @@
 
 ---
 
+## [1.10.1] — 2026-04-23
+
+### Added (M5 hardening — закрытие остатков перед M6)
+- **H.1 · Backfill trigger anon→user.** Миграция расширила `handle_new_user()`: при наличии `raw_user_meta_data ->> 'anon_session_id'` триггер переносит `concierge_sessions` и `persona_detection_log` на нового `user_id`, бэкофилит канонические колонки `profiles` (lifecycle_stage / detected_persona / active_clusters / special_status) из последнего `proposal`. Все шаги обёрнуты в `EXCEPTION WHEN OTHERS THEN NULL` — signup не падает.
+- **H.2 · Frontend pass-through anon_session_id.** `src/lib/segmentation/anonSession.ts` — единая утилита для `myuno-anon-session-id`. `AuthContext.signUp` передаёт его в `options.data` для всех точек входа (email, Google, phone). Рефакторинг `useCanonicalOnboarding`, `useStartOnboarding`, `MyJourneyRecommendations` на новую утилиту.
+- **H.3 · `<PersonaDetectionPreview />`** в `src/components/account/`. Три состояния (loading / empty / filled) на канонической read-модели `useCanonicalProfile`. CTA → `/start/v2?return=/account`. Скрывается при `feature_flag:concierge_routing_v2_canonical = false`.
+- **H.4 · Интеграция в `/account`.** Карточка `<PersonaDetectionPreview />` встроена в `UserAccountDashboard.tsx` под `AccountActiveStay`.
+- **H.5 · `?return=` redirect в `StartOnboardingV2`.** Добавлена `sanitizeReturnPath()` (защита от open-redirect: только internal `/`-paths). После Result-шага через 1.8s — `navigate(returnTo)`. Skip / Go Home кнопки тоже уважают `returnTo`.
+- **H.6 · Tone-of-voice pass.** Прогон `ResultStep`, `PersonaPromptBanner`, `PersonaDetectionPreview` через §14: 0 совпадений «лучший / уникальный / революционный», 0 «!» в инфо-копиях. Смягчён primary CTA (`Open the first one` → `Open · {service title}`) — конкретика вместо обещания.
+- **H.7 · `audits/M5-e2e-qa-checklist.md`** — 4 сценария (anon→user backfill, authed-only, /account refine loop, empty state) + готовые SQL-запросы для верификации в проде.
+- **Тест.** `src/components/account/PersonaDetectionPreview.test.tsx` — 3 unit-теста (loading skeleton, empty state CTA, filled state с refine CTA). Все проходят.
+
+### Changed
+- `audits/M5-ux-persona-detection.md` — статус acceptance bullets 5.7 (PersonaDetectionPreview) и 5.9 (backfill trigger) переведены из ❌ в ✅.
+- `audits/M5-hardening.md` — статус → ✅ done (H.1–H.6, H.8 готовы; H.7 ждёт ручного прогона в проде).
+
+### Notes
+- M5 формально готов к закрытию после прогона `M5-e2e-qa-checklist.md` в проде. После этого README статус M5 → ✅ done и разблокируется M6 (persona-aware Home, авто-перерасчёт lifecycle).
+- Anon-to-user backfill идемпотентен: повторный signup с тем же `anon_session_id` (теоретически невозможно, но defensive) не задублирует данные — все UPDATE имеют `WHERE user_id IS NULL`.
+
+---
+
 ## [1.10.0] — 2026-04-23
 
 ### Added
