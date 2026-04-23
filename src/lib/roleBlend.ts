@@ -1,20 +1,36 @@
 import type { UserPersona } from '@/hooks/useUserPersonas';
 
-export const ROLE_META: Record<UserPersona, { short: string; glyph: string; color: string; label: string; labelRu: string }> = {
-  tourist:                 { short: 'Tourist',   glyph: 'T', color: '#4E7BFF', label: 'Visiting Phuket',    labelRu: 'Турист' },
-  resident:                { short: 'Resident',  glyph: 'R', color: '#00D68F', label: 'Living in Phuket',   labelRu: 'Резидент' },
-  property_owner:          { short: 'Owner',     glyph: 'O', color: '#16BDCA', label: 'Property owner',     labelRu: 'Собственник' },
-  investor:                { short: 'Investor',  glyph: 'I', color: '#A78BFA', label: 'Investor',           labelRu: 'Инвестор' },
-  real_estate_developer:   { short: 'Developer', glyph: 'D', color: '#EF4444', label: 'Property developer', labelRu: 'Застройщик' },
-  local_services_provider: { short: 'Provider',  glyph: 'P', color: '#F59E0B', label: 'Local business',     labelRu: 'Поставщик' },
-  family:                  { short: 'Family',    glyph: 'F', color: '#EC4899', label: 'Family',             labelRu: 'Семья' },
-  couple:                  { short: 'Couple',    glyph: 'C', color: '#F43F5E', label: 'Couple',             labelRu: 'Пара' },
-  nightlife:               { short: 'Night',     glyph: 'N', color: '#D946EF', label: 'Nightlife',          labelRu: 'Ночная жизнь' },
-  active:                  { short: 'Active',    glyph: 'A', color: '#F97316', label: 'Active',             labelRu: 'Спорт' },
-  business:                { short: 'Business',  glyph: 'B', color: '#64748B', label: 'Business',           labelRu: 'Бизнес' },
-  nomad:                   { short: 'Nomad',     glyph: 'M', color: '#14B8A6', label: 'Nomad',              labelRu: 'Номад' },
-  pet_owner:               { short: 'Pets',      glyph: 'X', color: '#FB923C', label: 'Pet owner',          labelRu: 'С питомцем' },
-  relocation:              { short: 'Relocate',  glyph: 'L', color: '#6366F1', label: 'Relocating',         labelRu: 'Переезд' },
+/**
+ * ROLE_META — canonical visual + textual metadata for every persona.
+ *
+ * `descRu` / `descEn` come from design package v5 (`screens-core.jsx · S03_Roles`)
+ * and are surfaced in `RoleSheet` as a sub-line under each role name. One
+ * sentence each: nominal phrases describing the user's life-context, not
+ * promises. Keep < 40 chars where possible to fit single-line on 375px.
+ */
+export const ROLE_META: Record<UserPersona, {
+  short: string;
+  glyph: string;
+  color: string;
+  label: string;
+  labelRu: string;
+  descEn: string;
+  descRu: string;
+}> = {
+  tourist:                 { short: 'Tourist',   glyph: 'T', color: '#4E7BFF', label: 'Visiting Phuket',    labelRu: 'Турист',        descEn: 'Arrival, stays, experiences',           descRu: 'Прилёт, аренда, впечатления' },
+  resident:                { short: 'Resident',  glyph: 'R', color: '#00D68F', label: 'Living in Phuket',   labelRu: 'Резидент',      descEn: 'Visa, housing, daily services',         descRu: 'Виза, жильё, ежедневные сервисы' },
+  property_owner:          { short: 'Owner',     glyph: 'O', color: '#16BDCA', label: 'Property owner',     labelRu: 'Собственник',   descEn: 'Property and income management',        descRu: 'Управление недвижимостью и доходом' },
+  investor:                { short: 'Investor',  glyph: 'I', color: '#A78BFA', label: 'Investor',           labelRu: 'Инвестор',      descEn: 'Pipeline, partners, capital',           descRu: 'Pipeline, партнёры, капитал' },
+  real_estate_developer:   { short: 'Developer', glyph: 'D', color: '#EF4444', label: 'Property developer', labelRu: 'Застройщик',    descEn: 'Projects, reservations, sales',         descRu: 'Проекты, бронирования, продажи' },
+  local_services_provider: { short: 'Provider',  glyph: 'P', color: '#F59E0B', label: 'Local business',     labelRu: 'Поставщик',     descEn: 'Storefront, bookings, payouts',         descRu: 'Витрина, брони, выплаты' },
+  family:                  { short: 'Family',    glyph: 'F', color: '#EC4899', label: 'Family',             labelRu: 'Семья',         descEn: 'Schools, clinics, family logistics',    descRu: 'Школы, клиники, семейная логистика' },
+  couple:                  { short: 'Couple',    glyph: 'C', color: '#F43F5E', label: 'Couple',             labelRu: 'Пара',          descEn: 'Restaurants, getaways, moments',        descRu: 'Рестораны, выезды, моменты' },
+  nightlife:               { short: 'Night',     glyph: 'N', color: '#D946EF', label: 'Nightlife',          labelRu: 'Ночная жизнь',  descEn: 'Clubs, bars, late-night transfers',     descRu: 'Клубы, бары, ночной трансфер' },
+  active:                  { short: 'Active',    glyph: 'A', color: '#F97316', label: 'Active',             labelRu: 'Спорт',         descEn: 'Training, gear, sports facilities',     descRu: 'Тренировки, экипировка, спортзалы' },
+  business:                { short: 'Business',  glyph: 'B', color: '#64748B', label: 'Business',           labelRu: 'Бизнес',        descEn: 'Companies, accounting, contracts',      descRu: 'Компании, бухгалтерия, договоры' },
+  nomad:                   { short: 'Nomad',     glyph: 'M', color: '#14B8A6', label: 'Nomad',              labelRu: 'Номад',         descEn: 'Co-working, SIM, long-term housing',    descRu: 'Коворкинг, SIM, долгосрочное жильё' },
+  pet_owner:               { short: 'Pets',      glyph: 'X', color: '#FB923C', label: 'Pet owner',          labelRu: 'С питомцем',    descEn: 'Vets, pet-friendly housing, transfer',  descRu: 'Ветеринар, жильё с животными, перевозка' },
+  relocation:              { short: 'Relocate',  glyph: 'L', color: '#6366F1', label: 'Relocating',         labelRu: 'Переезд',       descEn: 'Visa, housing search, paperwork',       descRu: 'Виза, поиск жилья, документы' },
 };
 
 export type ClusterId = 'live' | 'manage' | 'invest' | 'legal' | 'arrive' | 'build';
