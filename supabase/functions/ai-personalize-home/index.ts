@@ -41,15 +41,15 @@ const PERSONA_CATEGORIES: Record<UserPersona, string[]> = {
 // Service suggestions per persona
 const PERSONA_SERVICES: Record<UserPersona, Array<{ id: string; reasonEn: string; reasonRu: string }>> = {
   tourist: [
-    { id: 'villa-rental', reasonEn: 'Best villas on the island', reasonRu: 'Лучшие виллы на острове' },
+    { id: 'villa-rental', reasonEn: 'Curated villas across the island', reasonRu: 'Подобранные виллы по острову' },
     { id: 'bike-rental', reasonEn: 'Easy way to get around', reasonRu: 'Удобное передвижение' },
-    { id: 'yacht-charter', reasonEn: 'Unforgettable sea experience', reasonRu: 'Незабываемый отдых на воде' },
-    { id: 'island-tour', reasonEn: 'Discover island beauty', reasonRu: 'Откройте красоты острова' },
+    { id: 'yacht-charter', reasonEn: 'A day on the water', reasonRu: 'Отдых на воде' },
+    { id: 'island-tour', reasonEn: 'Discover the island', reasonRu: 'Откройте остров' },
     { id: 'spa-massage', reasonEn: 'Relaxation and wellness', reasonRu: 'Расслабление и релакс' },
   ],
   resident: [
-    { id: 'visa-extension', reasonEn: 'Hassle-free visa renewal', reasonRu: 'Продление визы без проблем' },
-    { id: 'international-school', reasonEn: 'Best schools for children', reasonRu: 'Лучшие школы для детей' },
+    { id: 'visa-extension', reasonEn: 'Visa renewal without hassle', reasonRu: 'Продление визы без хлопот' },
+    { id: 'international-school', reasonEn: 'Verified schools for children', reasonRu: 'Проверенные школы для детей' },
     { id: 'long-term-rental', reasonEn: 'Long-term housing', reasonRu: 'Жильё на долгий срок' },
     { id: 'health-insurance', reasonEn: 'Security for you and family', reasonRu: 'Защита для вас и семьи' },
   ],
@@ -75,13 +75,13 @@ function getGreeting(personas: UserPersona[], language: 'en' | 'ru'): string {
 
   if (language === 'ru') {
     if (personas.length === 1) {
-      return `Привет! Вот лучшие предложения для ${personaLabels[personas[0]].ru} 🌴`;
+      return `Привет! Подобрали для ${personaLabels[personas[0]].ru} 🌴`;
     }
     const labels = personas.map(p => personaLabels[p].ru).join(' и ');
-    return `Привет! Специально для вас как ${labels} 🌟`;
+    return `Привет! Подобрали для вас как ${labels} 🌟`;
   } else {
     if (personas.length === 1) {
-      return `Hi! Here are the best offers for a ${personaLabels[personas[0]].en} 🌴`;
+      return `Hi! Curated for a ${personaLabels[personas[0]].en} 🌴`;
     }
     const labels = personas.map(p => personaLabels[p].en).join(' and ');
     return `Hi! Curated just for you as a ${labels} 🌟`;

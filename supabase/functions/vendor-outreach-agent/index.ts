@@ -143,39 +143,39 @@ function getTemplateMessage(
   // Email templates
   if (sequence === 1) {
     return {
-      subject: `Join myUNO — Connect with Premium Clients in Phuket`,
+      subject: `myUNO — partner invitation for service providers in Phuket`,
       body: `<p>Hi ${name},</p>
-<p>I'm reaching out from myUNO, a premium concierge platform serving high-net-worth clients in Phuket.</p>
-<p>We're building a curated network of the best local service providers${company ? `, and ${company} caught our attention` : ""}.</p>
-<p><strong>Why join myUNO?</strong></p>
+<p>I'm reaching out from myUNO, a concierge platform connecting international residents and visitors in Phuket with verified local service providers.</p>
+<p>We're growing a curated network of trusted partners${company ? `, and ${company} stood out` : ""}.</p>
+<p><strong>How myUNO works for partners:</strong></p>
 <ul>
-<li>Access to affluent international clients</li>
-<li>Zero upfront costs — we only succeed when you do</li>
-<li>Simple 2-minute onboarding</li>
+<li>Steady flow of international clients</li>
+<li>No upfront costs — commission only on completed orders</li>
+<li>Onboarding takes about 2 minutes</li>
 </ul>
 <p><a href="${INVITE_URL}" style="background: #1e3a5f; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">Join myUNO</a></p>
-<p>Happy to answer any questions!</p>
-<p>Best regards,<br>myUNO Team</p>`,
+<p>Happy to answer any questions.</p>
+<p>Kind regards,<br>myUNO Team</p>`,
     };
   } else if (sequence === 2) {
     return {
-      subject: `Quick follow-up: myUNO Partner Invitation`,
+      subject: `Quick follow-up: myUNO partner invitation`,
       body: `<p>Hi ${name},</p>
-<p>I wanted to follow up on my previous email about joining myUNO.</p>
-<p>We're seeing great traction with our vendor partners, and I think there's a real opportunity for ${contact.company_name || "your business"}.</p>
-<p><a href="${INVITE_URL}" style="background: #1e3a5f; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">Get Started</a></p>
-<p>Let me know if you have any questions!</p>
-<p>Best,<br>myUNO Team</p>`,
+<p>Following up on my previous email about joining myUNO.</p>
+<p>We continue to onboard new partners, and there may be a fit for ${contact.company_name || "your business"}.</p>
+<p><a href="${INVITE_URL}" style="background: #1e3a5f; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">Get started</a></p>
+<p>Let me know if you have questions.</p>
+<p>Kind regards,<br>myUNO Team</p>`,
     };
   } else {
     return {
-      subject: `Final invitation: Join myUNO's vendor network`,
+      subject: `Final follow-up: myUNO partner network`,
       body: `<p>Hi ${name},</p>
-<p>This is my final follow-up about joining myUNO's vendor network.</p>
-<p>If you're interested in connecting with premium clients, the invitation remains open:</p>
+<p>This is the final follow-up about joining the myUNO partner network.</p>
+<p>If working with international clients is relevant for you, the invitation remains open:</p>
 <p><a href="${INVITE_URL}" style="background: #1e3a5f; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">Join myUNO</a></p>
-<p>Wishing you continued success!</p>
-<p>Best regards,<br>myUNO Team</p>`,
+<p>Wishing you continued success.</p>
+<p>Kind regards,<br>myUNO Team</p>`,
     };
   }
 }
