@@ -11,6 +11,7 @@ import {
   Home, Compass, ShoppingBag, User, LayoutDashboard, Building2,
   CalendarDays, Calendar, Package, Wallet, UserCheck, MessageSquare,
   FileCheck, Users, MessageCircle, BarChart3, FileText, TrendingUp, Inbox,
+  Briefcase,
 } from 'lucide-react';
 import { APP_ROUTES } from '@/lib/config/routes';
 
@@ -60,6 +61,26 @@ export const GUEST_NAV_ME_HUB: NavItem[] = [
   { path: APP_ROUTES.ME_SERVICES,  icon: Compass,       labelEn: 'Services',  labelRu: 'Услуги' },
   { path: APP_ROUTES.ME_DOCUMENTS, icon: FileText,      labelEn: 'Documents', labelRu: 'Документы' },
   { path: APP_ROUTES.ME_PROFILE,   icon: User,          labelEn: 'Profile',   labelRu: 'Профиль' },
+];
+
+/**
+ * GUEST_NAV_PRO_SHELL — Pro-shell variant per design package v5
+ * (`screens-core.jsx · TabBar variant="pro"`). Used when the guest user
+ * has at least one professional persona active in the Role Sheet
+ * (owner / investor / developer / vendor / agent) AND the
+ * `feature_flag:pro_shell_tabbar_v1` is enabled.
+ *
+ * Layout: Home · Operate · Wallet · Me  (4 slots, Apps drawer adds 5th).
+ *
+ * The "Operate" slot points to the canonical management workspace (`/mc`).
+ * Highlight logic recognises `/mc`, `/owner`, `/vendor`, `/invest` as
+ * "operate-area" so the icon stays active across pro flows.
+ */
+export const GUEST_NAV_PRO_SHELL: NavItem[] = [
+  { path: APP_ROUTES.HOME,    icon: Home,      labelEn: 'Home',    labelRu: 'Главная', exact: true },
+  { path: APP_ROUTES.MC,      icon: Briefcase, labelEn: 'Operate', labelRu: 'Управление' },
+  { path: APP_ROUTES.WALLET,  icon: Wallet,    labelEn: 'Wallet',  labelRu: 'Кошелёк' },
+  { path: APP_ROUTES.ACCOUNT, icon: User,      labelEn: 'Me',      labelRu: 'Профиль' },
 ];
 
 export const OWNER_NAV: NavItem[] = [
