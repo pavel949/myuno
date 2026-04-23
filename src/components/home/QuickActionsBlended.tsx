@@ -4,18 +4,10 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import type { UserPersona } from '@/hooks/useUserPersonas';
 import { ROLE_META } from '@/lib/roleBlend';
 import { selectActionsForPersonas } from '@/lib/home/quickActionsCatalog';
+import { SectionHead } from './SectionHead';
 
 interface QuickActionsBlendedProps {
   personas: UserPersona[];
-}
-
-function SectionHead({ title, meta }: { title: string; meta?: string }) {
-  return (
-    <div className="flex items-baseline justify-between mb-2.5">
-      <div className="text-[11px] tracking-[0.12em] uppercase text-muted-foreground/60 font-semibold">{title}</div>
-      {meta && <div className="text-[11px] text-muted-foreground/50">{meta}</div>}
-    </div>
-  );
 }
 
 export function QuickActionsBlended({ personas }: QuickActionsBlendedProps) {

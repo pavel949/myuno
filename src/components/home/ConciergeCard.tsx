@@ -3,6 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import type { UserPersona } from '@/hooks/useUserPersonas';
 import { ROLE_META } from '@/lib/roleBlend';
+import { SectionHead } from './SectionHead';
 
 interface ConciergeCardProps {
   personas: UserPersona[];
@@ -24,6 +25,7 @@ export function ConciergeCard({ personas }: ConciergeCardProps) {
 
   return (
     <div className="px-4 pb-5">
+      <SectionHead title={isRu ? 'Уведомление' : 'Notice'} />
       <div className="rounded-[16px] border border-dashed border-border p-4 flex gap-3">
         {/* Service marker */}
         <div
@@ -33,9 +35,6 @@ export function ConciergeCard({ personas }: ConciergeCardProps) {
           i
         </div>
         <div className="flex-1">
-          <div className="text-[10.5px] tracking-[0.08em] uppercase text-muted-foreground/50 font-semibold mb-1">
-            {isRu ? 'Уведомление' : 'Notice'}
-          </div>
           <div className="text-[13.5px] text-foreground leading-relaxed">{nudge}</div>
           <div className="flex gap-1.5 mt-2.5">
             <button
