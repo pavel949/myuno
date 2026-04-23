@@ -45,6 +45,9 @@ export default function UserAccountDashboard() {
             {/* Active Stay banner */}
             <AccountActiveStay />
 
+            {/* Persona / clusters self-service preview (M5 H.3) */}
+            <PersonaDetectionPreview />
+
             {/* Stats bar */}
             <DashboardStatsBar />
 
