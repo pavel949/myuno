@@ -121,14 +121,22 @@ export default function Bookings() {
     };
   }, []);
 
-  const loadBookings = useCallback(async () => {
+  const loadBookings = useCallback(async (forceRefresh = false) => {
     if (!user) return;
 
     setIsLoading(true);
     setLoadError(false);
-    // Reset history so any previously cached entries don't bleed into the new fetch.
-    setStatusHistory({});
-    setHistoryLoading(true);
+
+    // Hydrate from cache immediately on cache hit — avoids a flash of skeleton
+    // and a refetch when the user returns to the screen within the TTL window.
+    const cached = forceRefresh ? null : getCachedStatusHistory(user.id);
+    if (cached) {
+      setStatusHistory(cached);
+      setHistoryLoading(false);
+    } else {
+      setStatusHistory({});
+      setHistoryLoading(true);
+    }
 
     try {
       // Phase 1: Load bookings — render cards as soon as this resolves.
@@ -159,10 +167,16 @@ export default function Bookings() {
       setBookings(formattedBookings);
       setIsLoading(false);
 
-      // Phase 2: Batch-fetch status history (RLS limits to user's own).
+      // Phase 2: Status history.
       const bookingIds = formattedBookings.map((b) => b.id);
       if (bookingIds.length === 0) {
+        setCachedStatusHistory(user.id, {});
         setHistoryLoading(false);
+        return;
+      }
+
+      // Cache hit and not a forced refresh → skip the network call entirely.
+      if (cached && !forceRefresh) {
         return;
       }
 
@@ -185,6 +199,7 @@ export default function Bookings() {
           });
         }
         setStatusHistory(grouped);
+        setCachedStatusHistory(user.id, grouped);
       }
     } catch (error) {
       console.error('Error loading bookings:', error);
