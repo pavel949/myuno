@@ -58,6 +58,8 @@ const PropertyHub = React.lazy(() => import('@/pages/property/PropertyHub'));
 
 // M6 · Track B.4 — persona landing route `/for/:persona`
 const PersonaLandingPage = React.lazy(() => import('@/pages/landings/PersonaLandingPage'));
+// M6 · Track B.5 — cluster landing route `/cluster/:cluster`
+const ClusterLandingPage = React.lazy(() => import('@/pages/landings/ClusterLandingPage'));
 
 // Home router: guests see marketing landing, authed users see Index
 const HomeRouter = () => {
@@ -905,6 +907,10 @@ export const AnimatedRoutes: React.FC = () => {
         {/* ── M6 Persona Landings (B.4) ── */}
         {/* Draft slugs and unknown slugs return 404 inside the page itself. */}
         <Route path="/for/:persona" element={<LazyPage><PersonaLandingPage /></LazyPage>} />
+
+        {/* ── M6 Cluster Landings (B.5) ── */}
+        {/* Same 200/404 contract as `/for/:persona`. */}
+        <Route path="/cluster/:cluster" element={<LazyPage><ClusterLandingPage /></LazyPage>} />
 
         {/* ── Catch-all ── */}
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
