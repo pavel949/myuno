@@ -87,7 +87,7 @@ export function PersonaDetectionPreview() {
 
   if (isEmpty) {
     return (
-      <Card className="p-5 sm:p-6">
+      <Card className="p-5 sm:p-6" data-testid="persona-preview-empty">
         <div className="flex items-start gap-4">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
             <Sparkles className="h-5 w-5" />
@@ -101,7 +101,7 @@ export function PersonaDetectionPreview() {
                 {pick(COPY.subEmpty, lang)}
               </p>
             </div>
-            <Button asChild size="sm">
+            <Button asChild size="sm" data-testid="persona-preview-cta-start">
               <Link to={TARGET_HREF}>
                 {pick(COPY.startCta, lang)}
                 <ArrowRight className="ml-1.5 h-4 w-4" />
@@ -114,7 +114,7 @@ export function PersonaDetectionPreview() {
   }
 
   return (
-    <Card className="p-5 sm:p-6">
+    <Card className="p-5 sm:p-6" data-testid="persona-preview-filled">
       <div className="flex items-start gap-4">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
           <Sparkles className="h-5 w-5" />
@@ -125,7 +125,7 @@ export function PersonaDetectionPreview() {
             <h3 className="text-base font-semibold text-foreground">
               {pick(COPY.heading, lang)}
             </h3>
-            <Button asChild variant="ghost" size="sm" className="shrink-0 -mt-1 -mr-1 text-xs">
+            <Button asChild variant="ghost" size="sm" className="shrink-0 -mt-1 -mr-1 text-xs" data-testid="persona-preview-cta-refine">
               <Link to={TARGET_HREF}>
                 <RefreshCw className="mr-1 h-3.5 w-3.5" />
                 {pick(COPY.refineCta, lang)}

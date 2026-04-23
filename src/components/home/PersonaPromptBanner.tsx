@@ -51,7 +51,7 @@ export function PersonaPromptBanner() {
   const lang = language === 'ru' ? 'ru' : 'en';
 
   return (
-    <section className="px-4 mt-3" aria-label="Persona detection prompt">
+    <section className="px-4 mt-3" aria-label="Persona detection prompt" data-testid="persona-prompt-banner">
       <div
         className={cn(
           'relative flex items-center gap-3 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/5 via-background to-background p-3.5',
