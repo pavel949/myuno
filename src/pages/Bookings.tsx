@@ -16,6 +16,7 @@ import { format } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { BookingStatusTimeline, BookingStatusTimelineSkeleton, type BookingStatusEvent } from '@/components/bookings/BookingStatusTimeline';
+import { RealtimeIndicator, type RealtimeStatus } from '@/components/bookings/RealtimeIndicator';
 import { cn } from '@/lib/utils';
 
 interface BookingItem {
@@ -103,6 +104,7 @@ export default function Bookings() {
   const [highlightedEventIds, setHighlightedEventIds] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
+  const [realtimeStatus, setRealtimeStatus] = useState<RealtimeStatus>('connecting');
   const highlightTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   // Cleanup any pending highlight timers on unmount.
@@ -211,6 +213,8 @@ export default function Bookings() {
   useEffect(() => {
     if (!user) return;
 
+    setRealtimeStatus('connecting');
+
     const channel = supabase
       .channel(`bookings-realtime-${user.id}`)
       .on(
@@ -293,10 +297,24 @@ export default function Bookings() {
           );
         },
       )
-      .subscribe();
+      .subscribe((status) => {
+        // Map Supabase channel statuses to a simple 3-state UI indicator.
+        if (status === 'SUBSCRIBED') {
+          setRealtimeStatus('live');
+        } else if (
+          status === 'CHANNEL_ERROR' ||
+          status === 'TIMED_OUT' ||
+          status === 'CLOSED'
+        ) {
+          setRealtimeStatus('offline');
+        } else {
+          setRealtimeStatus('connecting');
+        }
+      });
 
     return () => {
       supabase.removeChannel(channel);
+      setRealtimeStatus('connecting');
     };
   }, [user]);
 
@@ -333,7 +351,10 @@ export default function Bookings() {
     <AppLayout>
       <PullToRefresh onRefresh={handleRefresh} className="min-h-0 flex-1 h-[calc(100vh-8rem)]">
         <PageContainer>
-          <PageHeader title={t('nav.bookings')} />
+          <PageHeader
+            title={t('nav.bookings')}
+            actions={<RealtimeIndicator status={realtimeStatus} language={language} />}
+          />
           
           {loadError ? (
             <EmptyState
