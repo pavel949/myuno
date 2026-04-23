@@ -1,4 +1,5 @@
 import React from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import {
@@ -142,5 +143,47 @@ export function BookingStatusTimeline({
         );
       })}
     </ol>
+  );
+}
+
+interface BookingStatusTimelineSkeletonProps {
+  rows?: number;
+  compact?: boolean;
+  className?: string;
+}
+
+export function BookingStatusTimelineSkeleton({
+  rows = 3,
+  compact = true,
+  className,
+}: BookingStatusTimelineSkeletonProps) {
+  return (
+    <div
+      className={cn('relative', className)}
+      role="status"
+      aria-busy="true"
+      aria-live="polite"
+      aria-label="Loading status timeline"
+    >
+      <div
+        aria-hidden="true"
+        className="absolute left-[11px] top-2 bottom-2 w-px bg-border"
+      />
+      {Array.from({ length: rows }).map((_, idx) => (
+        <div
+          key={idx}
+          className={cn('relative flex gap-3', compact ? 'pb-2.5 last:pb-0' : 'pb-3.5 last:pb-0')}
+        >
+          <Skeleton className="relative z-10 h-6 w-6 flex-shrink-0 rounded-full" />
+          <div className="flex-1 min-w-0 pt-0.5 space-y-1.5">
+            <div className="flex items-center justify-between gap-2">
+              <Skeleton className="h-3.5 w-28 rounded" />
+              <Skeleton className="h-3 w-16 rounded" />
+            </div>
+            {idx === 0 && <Skeleton className="h-3 w-3/4 rounded" />}
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }

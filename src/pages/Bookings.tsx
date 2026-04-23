@@ -15,7 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { toast } from 'sonner';
-import { BookingStatusTimeline, type BookingStatusEvent } from '@/components/bookings/BookingStatusTimeline';
+import { BookingStatusTimeline, BookingStatusTimelineSkeleton, type BookingStatusEvent } from '@/components/bookings/BookingStatusTimeline';
 import { cn } from '@/lib/utils';
 
 interface BookingItem {
@@ -98,17 +98,22 @@ export default function Bookings() {
   const navigate = useNavigate();
   const [bookings, setBookings] = useState<BookingItem[]>([]);
   const [statusHistory, setStatusHistory] = useState<Record<string, BookingStatusEvent[]>>({});
+  const [historyLoading, setHistoryLoading] = useState(false);
   const [expandedTimelines, setExpandedTimelines] = useState<Record<string, boolean>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
 
   const loadBookings = useCallback(async () => {
     if (!user) return;
-    
+
     setIsLoading(true);
     setLoadError(false);
+    // Reset history so any previously cached entries don't bleed into the new fetch.
+    setStatusHistory({});
+    setHistoryLoading(true);
+
     try {
-      // Load ALL bookings from unified table only
+      // Phase 1: Load bookings — render cards as soon as this resolves.
       const { data: allBookingsData, error } = await supabase
         .from('bookings')
         .select('*, booking_items(*)')
@@ -134,39 +139,42 @@ export default function Bookings() {
       });
 
       setBookings(formattedBookings);
+      setIsLoading(false);
 
-      // Batch-fetch status history for all bookings (RLS limits to user's own).
+      // Phase 2: Batch-fetch status history (RLS limits to user's own).
       const bookingIds = formattedBookings.map((b) => b.id);
-      if (bookingIds.length > 0) {
-        const { data: historyRows, error: historyError } = await supabase
-          .from('booking_status_history')
-          .select('id, booking_id, from_status, to_status, notes, created_at')
-          .in('booking_id', bookingIds)
-          .order('created_at', { ascending: true });
+      if (bookingIds.length === 0) {
+        setHistoryLoading(false);
+        return;
+      }
 
-        if (!historyError && historyRows) {
-          const grouped: Record<string, BookingStatusEvent[]> = {};
-          for (const row of historyRows) {
-            if (!grouped[row.booking_id]) grouped[row.booking_id] = [];
-            grouped[row.booking_id].push({
-              id: row.id,
-              from_status: row.from_status,
-              to_status: row.to_status,
-              notes: row.notes,
-              created_at: row.created_at,
-            });
-          }
-          setStatusHistory(grouped);
+      const { data: historyRows, error: historyError } = await supabase
+        .from('booking_status_history')
+        .select('id, booking_id, from_status, to_status, notes, created_at')
+        .in('booking_id', bookingIds)
+        .order('created_at', { ascending: true });
+
+      if (!historyError && historyRows) {
+        const grouped: Record<string, BookingStatusEvent[]> = {};
+        for (const row of historyRows) {
+          if (!grouped[row.booking_id]) grouped[row.booking_id] = [];
+          grouped[row.booking_id].push({
+            id: row.id,
+            from_status: row.from_status,
+            to_status: row.to_status,
+            notes: row.notes,
+            created_at: row.created_at,
+          });
         }
-      } else {
-        setStatusHistory({});
+        setStatusHistory(grouped);
       }
     } catch (error) {
       console.error('Error loading bookings:', error);
       setLoadError(true);
       toast.error(language === 'ru' ? 'Не удалось загрузить бронирования' : 'Failed to load bookings');
-    } finally {
       setIsLoading(false);
+    } finally {
+      setHistoryLoading(false);
     }
   }, [user, language]);
 
@@ -297,13 +305,18 @@ export default function Bookings() {
                         aria-controls={`timeline-${booking.id}`}
                         className="w-full flex items-center justify-between px-4 py-2.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors min-h-[44px]"
                       >
-                        <span className="uppercase tracking-[0.08em]">
+                        <span className="uppercase tracking-[0.08em] flex items-center gap-1.5">
                           {language === 'ru' ? 'История статусов' : 'Status timeline'}
-                          {events.length > 0 && (
-                            <span className="ml-1.5 text-muted-foreground/60 normal-case tracking-normal">
+                          {historyLoading ? (
+                            <span
+                              className="inline-block h-3 w-3 rounded-full border border-muted-foreground/30 border-t-transparent animate-spin"
+                              aria-hidden="true"
+                            />
+                          ) : events.length > 0 ? (
+                            <span className="text-muted-foreground/60 normal-case tracking-normal">
                               · {events.length}
                             </span>
-                          )}
+                          ) : null}
                         </span>
                         {isExpanded ? (
                           <ChevronUp className="w-4 h-4" aria-hidden="true" />
@@ -320,12 +333,16 @@ export default function Bookings() {
                       >
                         <div className="overflow-hidden">
                           <div className="px-4 pb-4 pt-1">
-                            <BookingStatusTimeline
-                              events={events}
-                              currentStatus={booking.status}
-                              createdAt={booking.createdAt}
-                              compact
-                            />
+                            {historyLoading ? (
+                              <BookingStatusTimelineSkeleton rows={3} compact />
+                            ) : (
+                              <BookingStatusTimeline
+                                events={events}
+                                currentStatus={booking.status}
+                                createdAt={booking.createdAt}
+                                compact
+                              />
+                            )}
                           </div>
                         </div>
                       </div>
