@@ -20,7 +20,6 @@
  * отображения вкладки в браузере — без react-helmet, чтобы не дублировать
  * поведение, которое появится в B.6.
  */
-import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -32,6 +31,7 @@ import {
 import { PERSONA_LANDINGS } from '@/content/landings/personaLandings';
 import NotFound from '@/pages/NotFound';
 import { Button } from '@/components/ui/button';
+import LandingSeoHead from '@/components/seo/LandingSeoHead';
 
 interface PersonaLandingViewProps {
   landing: PersonaLanding;
@@ -42,18 +42,9 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
   const isRu = language === 'ru';
   const t = <T,>(pair: { ru: T; en: T }): T => (isRu ? pair.ru : pair.en);
 
-  // Минимальный document.title до подключения <LandingSeoHead /> (B.6).
-  useEffect(() => {
-    const prev = document.title;
-    const titleSource = landing.seo?.metaTitle ?? landing.h1;
-    document.title = t(titleSource);
-    return () => {
-      document.title = prev;
-    };
-  }, [landing, isRu]);
-
   return (
     <AppLayout>
+      <LandingSeoHead landing={landing} type="persona" language={language as 'ru' | 'en'} />
       <article className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
         {/* Hero */}
         <header className="mb-10">
