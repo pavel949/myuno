@@ -71,12 +71,14 @@ export function PersonaPromptBanner() {
         </div>
         <Link
           to={target}
+          data-testid="persona-prompt-cta"
           className="rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
         >
           {COPY.cta[lang as 'en' | 'ru']}
         </Link>
         <button
           type="button"
+          data-testid="persona-prompt-dismiss"
           onClick={() => {
             setDismissed(true);
             try { sessionStorage.setItem(KEY, '1'); } catch { /* ignore */ }
