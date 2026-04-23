@@ -67,7 +67,7 @@ Deno.serve(async (req) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: 'MyUNO CRM <crm@updates.myuno.ai>',
+          from: 'myUNO CRM <crm@updates.myuno.ai>',
           to: [to_email],
           subject,
           html: body_html || `<p>${subject}</p>`,
@@ -154,7 +154,7 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'MyUNO CRM <crm@updates.myuno.ai>',
+        from: 'myUNO CRM <crm@updates.myuno.ai>',
         to: [email.to_email],
         subject: email.subject,
         html: email.body_html || `<p>${email.subject}</p>`,

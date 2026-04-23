@@ -136,7 +136,7 @@ Deno.serve(async (req) => {
           { label: "Email", value: lead.email || "—" },
           { label: "WhatsApp", value: lead.whatsapp || "—" },
           { label: "Бюджет", value: budget },
-          { label: "Тип юнита", value: lead.unit_preference || "—" },
+          { label: "Тип объекта", value: lead.unit_preference || "—" },
           { label: "Сообщение", value: lead.message || "—" },
           { label: "Источник", value: lead.source || "—" },
         ],

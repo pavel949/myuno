@@ -78,7 +78,7 @@ Deno.serve(async (req) => {
               },
               body: JSON.stringify({
                 to: msg.recipient_email,
-                subject: msg.subject || "Update from MyUNO",
+                subject: msg.subject || "Update from myUNO",
                 html: msg.message_body,
               }),
             }

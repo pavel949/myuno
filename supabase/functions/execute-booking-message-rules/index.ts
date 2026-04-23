@@ -81,7 +81,7 @@ Deno.serve(async (req) => {
                 method: "POST",
                 headers: { Authorization: `Bearer ${resendKey}`, "Content-Type": "application/json" },
                 body: JSON.stringify({
-                  from: "MyUNO <noreply@myuno.ai>",
+                  from: "myUNO <noreply@myuno.ai>",
                   to: [guestEmail],
                   subject,
                   html: `<p>${body.replace(/\n/g, "</p><p>")}</p>`,

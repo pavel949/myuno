@@ -51,9 +51,10 @@ Deno.serve(async (req) => {
       risk_alert: `Analyze this deal for risk factors. Consider: stale pipeline position, lack of recent activity, budget mismatches, missing information. Rate risk as Low/Medium/High with explanation.`,
     };
 
-    const systemPrompt = `You are a CRM AI assistant for a real estate management company (MyUNO). 
-You help agents manage contacts and deals effectively. 
+    const systemPrompt = `You are a CRM AI assistant for a real estate management company (myUNO).
+You help agents manage contacts and deals effectively.
 Always respond in the same language as the contact's data (Russian if data is in Russian, English otherwise).
+Use canonical lexicon: "myUNO" (lowercase m), "ClearView", "ContractAI"; in Russian use "объект" (not "юнит"), "сделка" (not "приобретение/трансакция"), "Chanote" (not "чаноте"), "off-plan" (not "котлован"), "Land Office" (not "Земельный департамент"), "escrow" (not "гарантийный счёт").
 Be concise and practical.`;
 
     const userPrompt = `${prompts[action] || prompts.summarize}

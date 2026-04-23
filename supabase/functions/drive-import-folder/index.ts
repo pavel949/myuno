@@ -1,7 +1,7 @@
 /**
  * drive-import-folder
  * Импортирует файлы из Google Drive папки в project-documents bucket,
- * классифицирует через Lovable AI (Gemini), извлекает метаданные проекта и юниты
+ * классифицирует через Lovable AI (Gemini), извлекает метаданные проекта и объекты
  * из брошюр/прайслистов (multimodal vision) — все данные складывает в drive_import_jobs
  * для ревью пользователем.
  *
@@ -221,7 +221,7 @@ async function extractProjectMetaFromFile(
 }
 
 /**
- * Извлекает массив юнитов из прайслиста (PDF/изображение/Excel-export).
+ * Извлекает массив объектов из прайслиста (PDF/изображение/Excel-export).
  */
 async function extractUnitsFromFile(
   buf: ArrayBuffer,
@@ -241,7 +241,7 @@ async function extractUnitsFromFile(
       messages: [{
         role: 'user',
         content: [
-          { type: 'text', text: 'Это прайслист квартир/вилл застройщика. Извлеки каждый юнит как объект с полями. Если файл не прайслист — верни пустой массив.' },
+          { type: 'text', text: 'Это прайслист квартир/вилл застройщика. Извлеки каждый объект с полями. Если файл не прайслист — верни пустой массив.' },
           { type: 'image_url', image_url: { url: dataUrl } },
         ],
       }],
