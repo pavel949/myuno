@@ -5,6 +5,29 @@
 
 ---
 
+## [1.22.0] — 2026-04-23
+
+### Added (M12 — Home polish wave from design package v5)
+
+**M12.1 · NowInPhuket mounted on Home**
+- The ambient 3-stat strip (weather · AQI · THB/USD) was orphaned in the codebase. Now placed right after the role-aware `PersonaAwareSections` block on `/`, matching the design v5 layout.
+- Reinforces "Phuket pulse" — a daily reason to open the app even when no personalized signal is active.
+- Live data via `usePhuketConditions` (Open-Meteo + Open Exchange Rates).
+
+**M12.2 · HomeTopBar caption refined**
+- Tagline is now visible on mobile (was `hidden sm:block`), rendered in the canonical uppercase tracked caption style (`tracking-[0.14em] text-[9px]`).
+- Aligns with design v5 "structure over freedom" principle: the brand wordmark gets a quiet typographic anchor on every viewport.
+
+**M12.3 · TrustFooter alignment polish**
+- "03" mono numeral switched from `items-start` + `mt-0.5` to `items-center` for proper baseline alignment with the title block.
+- Internal spacing tuned (`px-4 py-3.5`, gap `4`); micro-copy tightened.
+
+### Notes
+- Pure presentation changes — no DB / RLS / API touched.
+- All four blocks already exist as canonical components; M12 is layout / typography polish per the design hand-off package "myUNO_design_5".
+
+---
+
 ## [1.21.0] — 2026-04-23
 
 ### Added (M11.1 + M11.7 + M11.11 + M11.5 + M11.9 — auto-remediation of M10 critical findings)
