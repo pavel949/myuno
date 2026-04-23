@@ -33,8 +33,8 @@ describe('PersonaDetectionPreview', () => {
   it('renders loading skeleton', () => {
     profileMock.mockReturnValue({ profile: null, isLoading: true });
     const { container } = renderWith();
-    // shadcn Skeleton renders a div with data-slot="skeleton"
-    expect(container.querySelectorAll('[data-slot="skeleton"]').length).toBe(3);
+    // Skeleton blocks use the shimmer animation utility class
+    expect(container.querySelectorAll('.before\\:animate-shimmer').length).toBe(3);
     expect(screen.queryByText(/Your profile signals/i)).not.toBeInTheDocument();
   });
 
