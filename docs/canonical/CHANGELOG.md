@@ -5,6 +5,26 @@
 
 ---
 
+## [1.20.0] — 2026-04-23
+
+### Added (M10 · Full canonical conformance audit)
+- **`docs/canonical/audits/M10-full-canon-conformance-2026-04-23.md`** — сводный аудит соответствия кодовой базы всем 10 канонам + ARCHITECTURE_V2 §13. Inventory-only (no fixes).
+  - Результат: **7/11 green · 3/11 yellow · 1/11 red**.
+  - **2 critical findings** блокируют закрытие финального gate M9:
+    - **CV-1** — нет таблиц `clearview_*` в БД (06 §1–§8 нематериализован).
+    - **SEG-1** — `profiles` без канонических колонок `roles_stack` / `primary_role` / `lifecycle_phase` (01 §12).
+  - **17 warnings** → backlog **M11.1–M11.11** (приоритезирован).
+  - Сильные стороны: validate-semantic 0/0, RLS 392/392 (100%), wallet zero-update RLS, 4-layer i18n guard, 1024 RLS политики, AuditMarker на всех money-screens (§13.6).
+- **App bump:** 3.51.2 → **3.52.0**.
+
+### Verification
+- `node scripts/validate-semantic.mjs --strict` → 0/0.
+- `supabase--linter` → 1 warn (extension in public).
+- `security--get_scan_results` → 3 active warnings (system_settings anon read · developers stripe_connect_id exposed · bulk_import role check) — все занесены в M11.x.
+- `supabase--read_query` → 392 public tables, 392 RLS-enabled, 1024 policies, 195 SECURITY DEFINER funcs, 10 knowledge_pillars, **0 clearview_*** tables.
+
+---
+
 ## [1.19.2] — 2026-04-23
 
 ### Added (M9.7c · Fuzzy / near-match guard for uiStrings)
