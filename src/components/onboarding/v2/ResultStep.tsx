@@ -12,13 +12,13 @@ interface Props {
 }
 
 const COPY = {
-  resultTitle: { en: 'Here is your starting map', ru: 'Ваша стартовая карта' },
+  resultTitle: { en: 'Your starting map', ru: 'Ваша стартовая карта' },
   proposalLine: {
-    en: 'Detected stage and active clusters:',
-    ru: 'Определён этап и активные кластеры:',
+    en: 'Stage and active clusters:',
+    ru: 'Этап и активные кластеры:',
   },
-  primaryCta: { en: 'Open the first one', ru: 'Открыть первый' },
-  exploreLater: { en: 'Explore on my own', ru: 'Посмотреть самому' },
+  openPrefix: { en: 'Open', ru: 'Открыть' },
+  exploreLater: { en: 'Browse all services', ru: 'Смотреть все сервисы' },
   redo: { en: 'Redo questions', ru: 'Пройти заново' },
   bySource: {
     ai_v1: { en: 'AI-assisted', ru: 'С помощью ИИ' },
