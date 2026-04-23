@@ -22,6 +22,7 @@ import { TrustFooter } from '@/components/home/TrustFooter';
 import { RoleSheet } from '@/components/home/RoleSheet';
 import { RealEstateEntry } from '@/components/home/RealEstateEntry';
 import { TrustAsAService } from '@/components/home/TrustAsAService';
+import { PersonaPromptBanner } from '@/components/home/PersonaPromptBanner';
 import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 
 const Index = () => {
@@ -46,6 +47,7 @@ const Index = () => {
         </div>
         <HomeContextChips personas={[...activePersonas]} />
         <WorkspaceHomeBanner />
+        <PersonaPromptBanner />
 
         {/* 1. Hero — search-first entry, with desktop popular preview */}
         <HeroIntro />
