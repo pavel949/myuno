@@ -17,6 +17,12 @@ import { ru, enUS } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { BookingStatusTimeline, BookingStatusTimelineSkeleton, type BookingStatusEvent } from '@/components/bookings/BookingStatusTimeline';
 import { RealtimeIndicator, type RealtimeStatus } from '@/components/bookings/RealtimeIndicator';
+import {
+  getCachedStatusHistory,
+  setCachedStatusHistory,
+  updateCachedStatusHistory,
+  invalidateStatusHistoryCache,
+} from '@/lib/bookings/statusHistoryCache';
 import { cn } from '@/lib/utils';
 
 interface BookingItem {
