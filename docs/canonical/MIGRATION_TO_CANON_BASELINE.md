@@ -189,3 +189,32 @@ fontFamily: {
 ### Результат
 - `/sim`, `/arrive`, ArriveClusterPage, ExploreMoreRail, ClusterHub — все mint-акценты заменены на navy.
 - Все 3 фазы (foundation, newbuilds, overrides) теперь покрывают наблюдаемые поверхности без mint-leakage.
+
+---
+
+## Hotfix #2 2026-04-23 (full-app verification + theme switcher)
+
+### Аудит всех 3 фаз
+Прошёл grep по всему `src/` на остатки legacy палитры:
+1. **mint hex (#00D68F, #4E7BFF, #10B981, #06B6D4, #A855F7, etc.)** найдены в data-файлах с inline `style={{ background: accentColor }}` — overrides их не покрывают (это не CSS classes).
+2. **Playfair Display** — отсутствует. ✅
+3. **Inline backdrop-filter** — найден 1 случай в `BottomBar.tsx`.
+
+### Изменения
+
+- **`src/lib/home/quickActionsCatalog.ts`** — все hex акцент-цвета (~30 случаев) переведены на CSS-переменные канона: `#00D68F → hsl(var(--brand-navy-700))`, `#10B981 → hsl(var(--success))`, `#F59E0B → hsl(var(--accent))` и т.д. Quick actions теперь рендерятся в navy/orange.
+
+- **`src/hooks/useUserPersonas.ts`** — `PERSONA_GRADIENTS` (14 персон) полностью переписаны: вместо cyan/emerald/purple/pink градиентов используются navy↔orange вариации канона.
+
+- **`src/components/newbuilds/ClearViewReport.tsx`** — `gradeColor()` маппит ClearView рейтинги (AAA/AA/A/BBB/BB) на семантические токены (`--success`, `--brand-navy-700`, `--accent`, `--destructive`). Inline `color: '#10b981'/'#ef4444'` заменены на CSS-переменные.
+
+- **`src/components/nav/BottomBar.tsx`** — убран inline `backdropFilter: 'blur(20px) saturate(180%)'`; нижняя навигация теперь solid surface (canon §6, без glass).
+
+### Theme switcher
+- **`src/components/nav/TopBar.tsx`** — `<ThemeSwitcher size="sm" />` добавлен в правый блок утилит рядом с Language/Currency. Теперь light/dark/system переключаются с любой страницы.
+- Dark mode tokens (`src/styles/tokens.css §.dark`) уже содержат канонические инверсии: navy-900 background + cream foreground + orange CTA. Никакого mint/glass/glow.
+
+### Verify
+- `tsc --noEmit` → exit 0
+- `vite build` → success
+- Все три фазы покрыты на public, owner, admin, MC, vendor поверхностях.
