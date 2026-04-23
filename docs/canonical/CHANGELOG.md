@@ -5,6 +5,27 @@
 
 ---
 
+## [1.11.1] — 2026-04-23
+
+### Added (M6 · трек B · шаг B.1)
+- **`src/lib/landings/types.ts`** — типы для конфигов лендингов:
+  - `LandingClusterCode = 'A'..'J'` + `LANDING_CLUSTER_CODES` + `isLandingClusterCode()`. Это **10 жизненных кластеров** из §5 канона (Arrival/Extension/Settlement/Investment/Transaction/Operations/Compliance/Emergency/Lifestyle/Exit) — отдельная ось от 6 surface-кластеров `ClusterId` в `src/types/canonical.ts` (arrive/live/manage/invest/legal/build). Не смешивать.
+  - `BilingualString = { ru, en }` — обязательные RU+EN строки (никаких fallback на render, по `docs/CONTENT_STYLE.md` §9).
+  - `PersonaLanding` — конфиг `/for/:slug`: `personaCode: P1..P25`, `slug`, `status: 'live'|'draft'`, `h1`, `subtitle`, `pains[]`, `services[]`, `bundle?`, `faq[]`, `primaryCta`, `secondaryCta?`, `seo?`.
+  - `ClusterLanding` — конфиг `/cluster/:slug`: `clusterCode: A..J`, `slug`, `status`, `h1`, `subtitle`, `jobs[]` (lifecycle-фразы из §5), `services[]`, `bundle?`, `faq[]`, `primaryCta`, `relatedPersonas[]`, `seo?`.
+  - Сопутствующие: `LandingServiceRef`, `LandingBundle`, `LandingFaqEntry`, `LandingCta`, `LandingSeo`.
+  - Helpers: `isLivePersonaLanding()`, `isLiveClusterLanding()` — гарантируют, что `live` лендинг имеет непустые `pains/jobs`, `services`, `faq` и SEO-блок (используется в роутах B.4/B.5 для решения 200 vs 404). `findPersonaLandingBySlug()`, `findClusterLandingBySlug()`.
+- **`src/lib/landings/__tests__/types.test.ts`** — **10 тестов зелёные:** проверка `LandingClusterCode` (ровно A..J), guard `isLandingClusterCode`, `isLivePersonaLanding` / `isLiveClusterLanding` (live + draft + missing seo + пустые массивы), find-helpers.
+
+### Changed
+- `audits/M6-persona-landings.md` — статус B.1 → ✅ done. B.2 (конфиг 25 personaLandings) → 🔜 next.
+
+### Notes
+- B.1 — pure types-pass: ничего не рендерится, ни одного нового роута. UI/контент появятся в B.2–B.4.
+- Решение про разделение `LandingClusterCode` vs `ClusterId` зафиксировано в JSDoc файла, чтобы будущие правки не «слили» две оси.
+
+---
+
 ## [1.11.0] — 2026-04-23
 
 ### Closed (M6 · трек D · шаги D.6 + D.7 — track D complete)

@@ -118,7 +118,7 @@
 
 | # | Шаг | Файлы | Зависимости |
 |---|---|---|---|
-| B.1 | Тип `PersonaLanding` + интерфейс `ClusterLanding` (slug, h1, subtitle, pains[], services[], bundle?, faq[], cta, ogImage, hreflang, status: 'live'\|'draft') | `src/lib/landings/types.ts` | M3 типы |
+| B.1 | Тип `PersonaLanding` + интерфейс `ClusterLanding` (slug, h1, subtitle, pains[], services[], bundle?, faq[], cta, ogImage, hreflang, status: 'live'\|'draft') | `src/lib/landings/types.ts` + `__tests__/types.test.ts` | M3 типы | ✅ done (2026-04-23, 10 тестов) |
 | B.2 | Конфиг `personaLandings.ts` — 25 объектов (3 live: P1/P9/P13 + 22 draft с `status: 'draft'`) | `src/content/landings/personaLandings.ts` | B.1 |
 | B.3 | Конфиг `clusterLandings.ts` — 10 объектов (3 live: A/D/F + 7 draft) | `src/content/landings/clusterLandings.ts` | B.1 |
 | B.4 | Динамический route `/for/:persona` → `PersonaLandingPage.tsx`. Если `status === 'draft'` → 404 | `src/pages/landings/PersonaLandingPage.tsx`, route в `AnimatedRoutes.tsx` | B.2 |
