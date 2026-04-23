@@ -5,6 +5,26 @@
 
 ---
 
+## [1.11.3] — 2026-04-23
+
+### Added (M6 · трек B · шаг B.3)
+- **`src/content/landings/clusterLandings.ts`** — конфиг **10 cluster-лендингов** (A..J), полное покрытие §5 канона:
+  - Все 10 кластеров в системе типов как `status: 'draft'` (включая будущие live: A arrival / D investment / F operations — контент придёт в шаге B.8).
+  - Stable kebab-case slug'и: `arrival` (A), `extension` (B), `settlement` (C), `investment` (D), `transaction` (E), `operations` (F), `compliance` (G), `emergency` (H), `lifestyle` (I), `exit` (J).
+  - Helper `draftCluster(code, slug, hint, relatedPersonas)` — минимально валидный плейсхолдер: непустые `h1` / `subtitle` / `primaryCta`, но **пустые** `jobs/services/faq` и **отсутствует** `seo` → не проходит `isLiveClusterLanding()`. На стадии B.3 `/cluster/:slug` отдаст 404 для всех 10.
+  - **`relatedPersonas`** — заполнены сразу по матрице §6 (это структура, а не копирайт). Используется в cross-link блоке «Лендинги по персонам ↗» (компонент B.6). Пример: `arrival` → P1/P2/P3/P4/P5/P6/P7/P11/P14/P15/P16/P25 (туристы + первый сезон snowbird/nomad + settler + medical/wedding/athlete/student).
+  - Экспорт `LIVE_CLUSTER_SLUGS = ['arrival','investment','operations']` — контракт ожиданий для шага B.8.
+- **`src/content/landings/__tests__/clusterLandings.test.ts`** — **15 тестов зелёные:** ровно 10 объектов, покрытие всех `LandingClusterCode` без дубликатов, уникальные kebab-case slug'и, **все 10 в `draft`**, ни один не проходит `isLiveClusterLanding()`, валидные h1/subtitle/cta, валидация `relatedPersonas` (непусто, валидные `PersonaCode`, без дубликатов), контракт `LIVE_CLUSTER_SLUGS` (A/D/F).
+
+### Changed
+- `audits/M6-persona-landings.md` — статус B.3 → ✅ done. B.4 (динамический роут `/for/:persona`) → 🔜 next.
+
+### Notes
+- B.3 — **structure-only пасс**: 25 персон (B.2) + 10 кластеров (B.3) = вся таксономия лендингов в коде, но без контента и без роутов. Цель достигнута: следующий шаг B.4/B.5 может реализовать динамические роуты с уверенностью, что любая фабрикация slug'а валидируется через `findPersonaLandingBySlug` / `findClusterLandingBySlug` + `isLive*()`-guard.
+- 37/37 тестов зелёные (10 типов B.1 + 12 personaLandings B.2 + 15 clusterLandings B.3). `npx tsc --noEmit` чистый.
+
+---
+
 ## [1.11.2] — 2026-04-23
 
 ### Added (M6 · трек B · шаг B.2)
