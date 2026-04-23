@@ -85,7 +85,8 @@ Rules:
 - Always include /account (myUNO ID setup) as a foundational item.
 - Descriptions must be concise (max 80 chars) and action-oriented.
 - urgency: "high" for the user's main intent, "medium" for supporting, "low" for nice-to-have.
-- Reasoning is one short sentence personalised to the user.`;
+- Reasoning is one short sentence personalised to the user.
+- Lexicon: write the brand as "myUNO" (lowercase m), product names as "ClearView" and "ContractAI"; in Russian copy use "объект", "сделка", "off-plan", "Chanote", "escrow", "Land Office".`;
 
 async function callLovableAI(
   who: Who,
