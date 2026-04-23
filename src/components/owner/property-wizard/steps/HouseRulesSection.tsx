@@ -40,9 +40,9 @@ function HouseRulesSectionInner({ formData, updateFormData }: HouseRulesSectionP
         {/* Quick toggles */}
         <div className="grid gap-3">
           {/* Pets */}
-          <div className="flex items-center justify-between p-3 rounded-xl border bg-background hover:bg-muted/50 transition-colors">
+          <div className="flex items-center justify-between p-3 rounded-none border bg-background hover:bg-muted/50 transition-colors">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-none bg-primary/10 flex items-center justify-center">
                 <Dog className="h-5 w-5 text-primary" />
               </div>
               <div>
@@ -83,9 +83,9 @@ function HouseRulesSectionInner({ formData, updateFormData }: HouseRulesSectionP
           )}
 
           {/* Smoking */}
-          <div className="flex items-center justify-between p-3 rounded-xl border bg-background hover:bg-muted/50 transition-colors">
+          <div className="flex items-center justify-between p-3 rounded-none border bg-background hover:bg-muted/50 transition-colors">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-destructive/10 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-none bg-destructive/10 flex items-center justify-center">
                 <Cigarette className="h-5 w-5 text-destructive" />
               </div>
               <div>
@@ -126,10 +126,10 @@ function HouseRulesSectionInner({ formData, updateFormData }: HouseRulesSectionP
           )}
 
           {/* Parties */}
-          <div className="flex items-center justify-between p-3 rounded-xl border bg-background hover:bg-muted/50 transition-colors">
+          <div className="flex items-center justify-between p-3 rounded-none border bg-background hover:bg-muted/50 transition-colors">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                <Music className="h-5 w-5 text-amber-600" />
+              <div className="w-10 h-10 rounded-none bg-accent/10 flex items-center justify-center">
+                <Music className="h-5 w-5 text-accent" />
               </div>
               <div>
                 <p className="font-medium text-sm">{isRu ? 'Вечеринки' : 'Parties'}</p>
@@ -140,7 +140,7 @@ function HouseRulesSectionInner({ formData, updateFormData }: HouseRulesSectionP
             </div>
             <div className="flex items-center gap-2">
               {formData.parties_allowed && (
-                <Badge variant="secondary" className="text-xs bg-amber-500/20 text-amber-700">
+                <Badge variant="secondary" className="text-xs bg-accent/20 text-accent">
                   {isRu ? 'Да' : 'Yes'}
                 </Badge>
               )}
@@ -153,7 +153,7 @@ function HouseRulesSectionInner({ formData, updateFormData }: HouseRulesSectionP
 
           {/* Max party guests - shown only when parties allowed */}
           {formData.parties_allowed && (
-            <div className="ml-13 pl-4 border-l-2 border-amber-500/20">
+            <div className="ml-13 pl-4 border-l-2 border-accent/40/20">
               <div className="space-y-2">
                 <Label className="text-sm flex items-center gap-1">
                   <Users className="h-3 w-3" />
@@ -172,10 +172,10 @@ function HouseRulesSectionInner({ formData, updateFormData }: HouseRulesSectionP
           )}
 
           {/* Children Friendly */}
-          <div className="flex items-center justify-between p-3 rounded-xl border bg-background hover:bg-muted/50 transition-colors">
+          <div className="flex items-center justify-between p-3 rounded-none border bg-background hover:bg-muted/50 transition-colors">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                <Baby className="h-5 w-5 text-blue-600" />
+              <div className="w-10 h-10 rounded-none bg-primary/10 flex items-center justify-center">
+                <Baby className="h-5 w-5 text-primary" />
               </div>
               <div>
                 <p className="font-medium text-sm">{isRu ? 'Для семей с детьми' : 'Children Friendly'}</p>
@@ -192,7 +192,7 @@ function HouseRulesSectionInner({ formData, updateFormData }: HouseRulesSectionP
 
           {/* Child equipment - shown when children friendly */}
           {formData.children_friendly && (
-            <div className="ml-13 pl-4 border-l-2 border-blue-500/20 space-y-3">
+            <div className="ml-13 pl-4 border-l-2 border-primary/40/20 space-y-3">
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
                 <label className="flex items-center gap-2 text-sm">
                   <Switch

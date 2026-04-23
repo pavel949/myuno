@@ -148,7 +148,7 @@ export function AIIntakePanel({ onDataExtracted }: AIIntakePanelProps) {
           <TabsContent value="files" className="mt-3 space-y-3">
             <input ref={fileInputRef} type="file" multiple accept={ACCEPTED_FILE_TYPES} onChange={handleFilesSelected} className="hidden" />
             <div onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-muted-foreground/25 rounded-xl p-6 text-center cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-colors">
+              className="border-2 border-dashed border-muted-foreground/25 rounded-none p-6 text-center cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-colors">
               <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground/50" />
               <p className="text-sm font-medium">{isRu ? 'Нажмите для загрузки файлов' : 'Click to upload files'}</p>
               <p className="text-xs text-muted-foreground mt-1">PDF, Word, Excel, CSV, фото — {isRu ? 'до' : 'up to'} {MAX_FILE_SIZE_MB}MB</p>
@@ -156,7 +156,7 @@ export function AIIntakePanel({ onDataExtracted }: AIIntakePanelProps) {
             {files.length > 0 && (
               <div className="space-y-2 max-h-[200px] overflow-y-auto">
                 {files.map((f) => (
-                  <div key={f.id} className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
+                  <div key={f.id} className="flex items-center gap-2 p-2 rounded-none bg-muted/50">
                     <span className="text-lg">{getFileIcon(f.type)}</span>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{f.file.name}</p>

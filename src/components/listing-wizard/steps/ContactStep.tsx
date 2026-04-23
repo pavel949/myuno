@@ -41,7 +41,7 @@ export function ContactStep({ draft, onChange, onNext, onBack }: ContactStepProp
       </p>
       
       {user && (
-        <div className="bg-primary/10 rounded-xl p-4 text-sm">
+        <div className="bg-primary/10 rounded-none p-4 text-sm">
           {isRu 
             ? '✓ Вы вошли в систему. Контактные данные заполнены автоматически.'
             : '✓ You are signed in. Contact info is pre-filled.'}

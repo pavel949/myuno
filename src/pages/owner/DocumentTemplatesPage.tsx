@@ -644,7 +644,7 @@ export default function DocumentTemplatesPage() {
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-muted">
+                <div className="p-2 rounded-none bg-muted">
                   <FileText className="h-5 w-5 text-foreground/70" />
                 </div>
                 <div>
@@ -675,7 +675,7 @@ export default function DocumentTemplatesPage() {
               {!previewMode ? (
                 <div className="space-y-4 mt-4">
                   {needsPropertySelect && (
-                    <div className="p-3 bg-muted/50 rounded-lg space-y-2 border border-border">
+                    <div className="p-3 bg-muted/50 rounded-none space-y-2 border border-border">
                       <Label className="text-xs font-semibold">
                         {isRu ? '🏠 Автозаполнение из инвентаря' : '🏠 Auto-fill from inventory'}
                       </Label>
@@ -692,7 +692,7 @@ export default function DocumentTemplatesPage() {
                         </SelectContent>
                       </Select>
                       {inventoryItems && inventoryItems.length > 0 && (
-                        <p className="text-xs text-green-600">
+                        <p className="text-xs text-success">
                           ✓ {inventoryItems.length} {isRu ? 'предметов загружено' : 'items loaded'}
                         </p>
                       )}
@@ -733,11 +733,11 @@ export default function DocumentTemplatesPage() {
                 </div>
               ) : (
                 <div className="space-y-4 mt-4">
-                  <div className="bg-muted/50 rounded-lg p-4 whitespace-pre-wrap text-sm font-mono leading-relaxed border border-border">
+                  <div className="bg-muted/50 rounded-none p-4 whitespace-pre-wrap text-sm font-mono leading-relaxed border border-border">
                     {fillTemplate(selectedTemplate)}
                   </div>
                   {selectedTemplate.hasTable && selectedTemplate.id === 'inventory_list' && inventoryItems?.length ? (
-                    <div className="border rounded-lg overflow-hidden">
+                    <div className="border rounded-none overflow-hidden">
                       <table className="w-full text-xs">
                         <thead className="bg-muted">
                           <tr>
@@ -761,7 +761,7 @@ export default function DocumentTemplatesPage() {
                     </div>
                   ) : null}
                   {selectedTemplate.hasTable && selectedTemplate.id === 'cleaning_checklist' && (
-                    <div className="border rounded-lg overflow-hidden">
+                    <div className="border rounded-none overflow-hidden">
                       <table className="w-full text-xs">
                         <thead className="bg-muted">
                           <tr>

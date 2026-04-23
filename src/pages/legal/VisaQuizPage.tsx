@@ -294,7 +294,7 @@ export default function VisaQuizPage() {
                 : `${step + 1} / ${QUIZ_STEPS.length}`}
             </p>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-none bg-primary/10 flex items-center justify-center">
             <Shield className="w-5 h-5 text-primary" />
           </div>
         </div>
@@ -313,7 +313,7 @@ export default function VisaQuizPage() {
                   key={opt.id}
                   onClick={() => handleSelect(opt.id)}
                   className={cn(
-                    "w-full flex items-center gap-3 p-4 rounded-xl border text-left transition-all",
+                    "w-full flex items-center gap-3 p-4 rounded-none border text-left transition-all",
                     "hover:border-primary hover:bg-primary/5",
                     answers[currentStep.id] === opt.id
                       ? "border-primary bg-primary/10"
@@ -344,14 +344,14 @@ export default function VisaQuizPage() {
                 <p className="text-sm text-muted-foreground">{isRu ? result.descRu : result.descEn}</p>
 
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="flex items-center gap-2 p-3 rounded-lg bg-background">
+                  <div className="flex items-center gap-2 p-3 rounded-none bg-background">
                     <Clock className="w-4 h-4 text-muted-foreground" />
                     <div>
                       <p className="text-[10px] text-muted-foreground">{isRu ? 'Срок' : 'Duration'}</p>
                       <p className="text-xs font-semibold">{result.duration}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 p-3 rounded-lg bg-background">
+                  <div className="flex items-center gap-2 p-3 rounded-none bg-background">
                     <DollarSign className="w-4 h-4 text-muted-foreground" />
                     <div>
                       <p className="text-[10px] text-muted-foreground">{isRu ? 'Стоимость' : 'Cost'}</p>
@@ -369,7 +369,7 @@ export default function VisaQuizPage() {
                 {isRu ? 'Важные советы' : 'Important Tips'}
               </h3>
               {result.tips.map((tip, i) => (
-                <div key={i} className="flex items-start gap-2 p-3 rounded-lg bg-muted/50">
+                <div key={i} className="flex items-start gap-2 p-3 rounded-none bg-muted/50">
                   <CheckCircle2 className="w-4 h-4 text-primary mt-0.5 shrink-0" />
                   <p className="text-sm">{isRu ? tip.ru : tip.en}</p>
                 </div>
@@ -380,7 +380,7 @@ export default function VisaQuizPage() {
             <Card className="border-primary bg-gradient-to-br from-primary/10 to-primary/5 overflow-hidden">
               <CardContent className="p-5 space-y-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 rounded-none bg-primary/20 flex items-center justify-center shrink-0">
                     <Scale className="w-5 h-5 text-primary" />
                   </div>
                   <div>

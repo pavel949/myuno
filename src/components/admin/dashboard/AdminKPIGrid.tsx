@@ -56,7 +56,7 @@ const KPICard = React.forwardRef<HTMLDivElement, KPICardProps>(
               </div>
             )}
           </div>
-          <div className={cn("p-2 rounded-lg", color)}>
+          <div className={cn("p-2 rounded-none", color)}>
             <Icon className="h-5 w-5 text-white" />
           </div>
         </div>

@@ -133,9 +133,9 @@ export default function CrmDashboardPage() {
       <div className="p-4 md:p-6 space-y-4">
         <Skeleton className="h-8 w-48" />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-20 rounded-xl" />)}
+          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-20 rounded-none" />)}
         </div>
-        <Skeleton className="h-[400px] w-full rounded-xl" />
+        <Skeleton className="h-[400px] w-full rounded-none" />
       </div>
     );
   }
@@ -217,7 +217,7 @@ export default function CrmDashboardPage() {
             key={k.label}
             onClick={k.onClick}
             className={cn(
-              'flex items-center gap-2 p-2.5 rounded-lg border bg-card text-left transition-colors',
+              'flex items-center gap-2 p-2.5 rounded-none border bg-card text-left transition-colors',
               k.onClick && 'hover:bg-accent/50 cursor-pointer',
               !k.onClick && 'cursor-default',
             )}
@@ -318,9 +318,9 @@ export default function CrmDashboardPage() {
             <button
               key={tool.path}
               onClick={() => navigate(tool.path)}
-              className="flex flex-col items-center gap-1.5 p-2.5 rounded-xl transition-colors hover:bg-muted/50 group"
+              className="flex flex-col items-center gap-1.5 p-2.5 rounded-none transition-colors hover:bg-muted/50 group"
             >
-              <div className="w-9 h-9 rounded-lg bg-muted/60 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+              <div className="w-9 h-9 rounded-none bg-muted/60 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
                 <tool.icon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" strokeWidth={1.8} />
               </div>
               <span className="text-[10px] font-medium text-muted-foreground leading-tight text-center line-clamp-1">

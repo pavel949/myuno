@@ -22,7 +22,7 @@ export function PopularServicesSection() {
         <Skeleton className="h-6 w-44 mb-4" />
         <div className="flex gap-3">
           {[1, 2, 3].map(i => (
-            <Skeleton key={i} className="w-[180px] h-[200px] rounded-2xl shrink-0" />
+            <Skeleton key={i} className="w-[180px] h-[200px] rounded-none shrink-0" />
           ))}
         </div>
       </div>
@@ -112,7 +112,7 @@ export function ServiceCard({ service, onClick, compact = false }: ServiceCardPr
       onClick={onClick}
       className={cn(
         "shrink-0 snap-center text-left",
-        "bg-card rounded-2xl border border-border overflow-hidden",
+        "bg-card rounded-none border border-border overflow-hidden",
         "shadow-sm hover:shadow-md hover:-translate-y-0.5",
         "transition-all duration-200 group touch-manipulation",
         compact ? "w-[140px]" : "w-[180px]"

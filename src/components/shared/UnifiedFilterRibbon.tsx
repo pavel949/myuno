@@ -71,7 +71,7 @@ const RibbonButton = memo(function RibbonButton({ item, isActive, onClick }: Rib
   const Icon = item.icon;
   
   const baseClasses = cn(
-    "flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium shrink-0",
+    "flex items-center gap-2 px-3 py-2 rounded-none text-xs font-medium shrink-0",
     "transition-all duration-200"
   );
   
@@ -101,7 +101,7 @@ const RibbonButton = memo(function RibbonButton({ item, isActive, onClick }: Rib
       className={cn(baseClasses, variantClasses[item.variant || 'default'])}
     >
       {item.image && (
-        <div className="w-5 h-5 rounded-md overflow-hidden">
+        <div className="w-5 h-5 rounded-none overflow-hidden">
           <img src={item.image} alt="" className="w-full h-full object-cover" />
         </div>
       )}

@@ -372,7 +372,7 @@ export default function Auth() {
   // Logo component used in signup steps — neutral mint badge (no gold gradient)
   const AppLogo = () => (
     <div className="flex justify-center mb-4">
-      <Link to={APP_ROUTES.HOME} className="h-16 px-4 rounded-2xl bg-primary/10 ring-1 ring-primary/30 flex items-center justify-center hover:scale-105 transition-transform">
+      <Link to={APP_ROUTES.HOME} className="h-16 px-4 rounded-none bg-primary/10 ring-1 ring-primary/30 flex items-center justify-center hover:scale-105 transition-transform">
         <BrandWordmark as="static" className="scale-110" />
       </Link>
     </div>
@@ -395,7 +395,7 @@ export default function Auth() {
 
       {/* Header */}
       <header className="relative z-10 p-4 flex justify-between items-center">
-        <Link to={APP_ROUTES.HOME} className="h-10 px-3 rounded-xl bg-primary/10 ring-1 ring-primary/30 flex items-center justify-center hover:scale-105 transition-transform">
+        <Link to={APP_ROUTES.HOME} className="h-10 px-3 rounded-none bg-primary/10 ring-1 ring-primary/30 flex items-center justify-center hover:scale-105 transition-transform">
           <BrandWordmark as="static" />
         </Link>
         <div className="flex items-center gap-2">
@@ -441,7 +441,7 @@ export default function Auth() {
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="your@email.com"
                         className={cn(
-                          "w-full h-12 pl-10 pr-4 rounded-xl bg-secondary border transition-colors",
+                          "w-full h-12 pl-10 pr-4 rounded-none bg-secondary border transition-colors",
                           "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary",
                           errors.email ? "border-destructive" : "border-border"
                         )}
@@ -462,7 +462,7 @@ export default function Auth() {
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="••••••••"
                         className={cn(
-                          "w-full h-12 pl-10 pr-12 rounded-xl bg-secondary border transition-colors",
+                          "w-full h-12 pl-10 pr-12 rounded-none bg-secondary border transition-colors",
                           "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary",
                           errors.password ? "border-destructive" : "border-border"
                         )}
@@ -489,7 +489,7 @@ export default function Auth() {
                     <motion.div
                       initial={{ opacity: 0, y: -8 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-sm"
+                      className="p-3 rounded-none bg-destructive/10 border border-destructive/20 text-sm"
                     >
                       <p className="text-destructive font-medium mb-1">
                         {isTh ? 'เข้าสู่ระบบล้มเหลวหลายครั้ง' : isRu ? 'Несколько неудачных попыток' : 'Multiple failed attempts'}
@@ -570,7 +570,7 @@ export default function Auth() {
                       </div>
 
                       {referralCode && (
-                        <div className="bg-primary/10 border border-primary/20 rounded-xl p-3 flex items-center gap-3">
+                        <div className="bg-primary/10 border border-primary/20 rounded-none p-3 flex items-center gap-3">
                           <Gift className="w-5 h-5 text-primary" />
                           <div className="flex-1">
                             <p className="text-sm font-medium">
@@ -730,12 +730,12 @@ export default function Auth() {
                       </div>
 
                       {/* Terms */}
-                      <label className="flex items-start gap-3 p-3 rounded-xl bg-primary/5 border border-primary/10 cursor-pointer mt-6">
+                      <label className="flex items-start gap-3 p-3 rounded-none bg-primary/5 border border-primary/10 cursor-pointer mt-6">
                         <input
                           type="checkbox"
                           checked={termsAccepted}
                           onChange={(e) => setTermsAccepted(e.target.checked)}
-                          className="mt-0.5 w-4 h-4 rounded border-border text-primary focus:ring-primary/50"
+                          className="mt-0.5 w-4 h-4 rounded-none border-border text-primary focus:ring-primary/50"
                         />
                         <p className="text-xs text-muted-foreground">
                           {isTh ? (

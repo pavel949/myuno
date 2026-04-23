@@ -110,7 +110,7 @@ export const PropertyChatWindow: React.FC<PropertyChatWindowProps> = ({
   }
 
   return (
-    <div className={cn('flex flex-col h-full bg-background rounded-lg border', className)}>
+    <div className={cn('flex flex-col h-full bg-background rounded-none border', className)}>
       {/* Header */}
       <div className="flex items-center gap-3 p-4 border-b">
         <Avatar className="h-10 w-10">
@@ -319,9 +319,9 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isOwn, isRu }) =
         
         <div
           className={cn(
-            'rounded-2xl px-4 py-2',
+            'rounded-none px-4 py-2',
             getBubbleColor(message.sender_type),
-            isOwn ? 'rounded-br-sm' : 'rounded-bl-sm'
+            isOwn ? 'rounded-none' : 'rounded-none'
           )}
         >
           <p className="text-sm whitespace-pre-wrap break-words">{message.message}</p>

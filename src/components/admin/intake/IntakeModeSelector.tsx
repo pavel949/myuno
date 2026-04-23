@@ -78,7 +78,7 @@ export function IntakeModeSelector({ mode, onChange, disabled }: IntakeModeSelec
             onClick={() => onChange(m.id)}
             disabled={disabled}
             className={cn(
-              "flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all",
+              "flex flex-col items-center gap-2 p-4 rounded-none border-2 transition-all",
               isActive 
                 ? "border-primary bg-primary/5 text-primary" 
                 : "border-border hover:border-primary/50 hover:bg-muted/50",
@@ -86,7 +86,7 @@ export function IntakeModeSelector({ mode, onChange, disabled }: IntakeModeSelec
             )}
           >
             <div className={cn(
-              "w-10 h-10 rounded-lg flex items-center justify-center",
+              "w-10 h-10 rounded-none flex items-center justify-center",
               isActive ? "bg-primary text-primary-foreground" : "bg-muted"
             )}>
               <Icon className="h-5 w-5" />

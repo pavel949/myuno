@@ -168,7 +168,7 @@ export function PropertyBookingSuccess({
       </p>
 
       {/* Property Card */}
-      <div className="w-full max-w-md rounded-xl border bg-card overflow-hidden mb-6">
+      <div className="w-full max-w-md rounded-none border bg-card overflow-hidden mb-6">
         {propertyImage && (
           <div className="aspect-video relative overflow-hidden">
             <img 

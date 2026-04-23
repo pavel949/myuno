@@ -183,7 +183,7 @@ export function DuplicatesMergeModal({ open, onOpenChange, leftId, rightId, comp
       ) : (
         <div className="space-y-4">
           {/* Winner selection */}
-          <div className="flex items-center gap-4 p-3 rounded-lg bg-muted/50">
+          <div className="flex items-center gap-4 p-3 rounded-none bg-muted/50">
             <span className="text-sm font-medium">{label('Keep as primary contact:', 'Оставить основным контактом:')}</span>
             <div className="flex gap-2">
               <Button
@@ -280,7 +280,7 @@ function FieldRow({
         type="button"
         onClick={() => onChoice('left')}
         className={cn(
-          'text-left py-1.5 px-2 rounded border transition-colors truncate',
+          'text-left py-1.5 px-2 rounded-none border transition-colors truncate',
           choice === 'left' ? 'border-primary bg-primary/5' : 'border-transparent hover:bg-muted/50'
         )}
         title={leftStr}
@@ -291,7 +291,7 @@ function FieldRow({
         type="button"
         onClick={() => onChoice('right')}
         className={cn(
-          'text-left py-1.5 px-2 rounded border transition-colors truncate',
+          'text-left py-1.5 px-2 rounded-none border transition-colors truncate',
           choice === 'right' ? 'border-primary bg-primary/5' : 'border-transparent hover:bg-muted/50'
         )}
         title={rightStr}

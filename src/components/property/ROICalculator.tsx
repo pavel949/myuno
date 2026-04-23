@@ -108,15 +108,15 @@ export function ROICalculator({ purchasePrice = 0, currency = 'THB', nightlyRate
         {calc && (
           <div className="border-t pt-3 space-y-2">
             <div className="grid grid-cols-3 gap-2 text-center">
-              <div className="bg-muted/50 rounded-lg p-2">
+              <div className="bg-muted/50 rounded-none p-2">
                 <p className="text-[10px] text-muted-foreground">{isRu ? 'Валовая доходн.' : 'Gross Yield'}</p>
                 <p className="text-lg font-bold text-primary">{calc.grossYield}%</p>
               </div>
-              <div className="bg-muted/50 rounded-lg p-2">
+              <div className="bg-muted/50 rounded-none p-2">
                 <p className="text-[10px] text-muted-foreground">{isRu ? 'Чистая доходн.' : 'Net Yield'}</p>
                 <p className="text-lg font-bold text-success">{calc.netYield}%</p>
               </div>
-              <div className="bg-muted/50 rounded-lg p-2">
+              <div className="bg-muted/50 rounded-none p-2">
                 <p className="text-[10px] text-muted-foreground">{isRu ? 'ROI 5 лет' : '5yr ROI'}</p>
                 <p className="text-lg font-bold text-info">{calc.annualizedROI}%</p>
               </div>

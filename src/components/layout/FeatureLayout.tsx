@@ -173,7 +173,7 @@ function MiniappMode({
           variant="ghost"
           size="icon"
           onClick={onMapClick || (mapPath ? () => navigate(mapPath) : undefined)}
-          className="shrink-0 h-9 w-9 rounded-xl"
+          className="shrink-0 h-9 w-9 rounded-none"
         >
           <MapIcon className="w-5 h-5" />
         </Button>
@@ -187,7 +187,7 @@ function MiniappMode({
           variant="ghost"
           size="icon"
           onClick={() => navigate(APP_ROUTES.CART)}
-          className="relative shrink-0 h-9 w-9 rounded-xl"
+          className="relative shrink-0 h-9 w-9 rounded-none"
         >
           <ShoppingCart className="w-5 h-5" />
           {cartItemCount > 0 && (
@@ -207,7 +207,7 @@ function MiniappMode({
           values={filterValues || {}}
           onChange={onFilterChange}
         >
-          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl relative shrink-0">
+          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-none relative shrink-0">
             <SlidersHorizontal className="w-5 h-5" />
             {filterActiveCount > 0 && (
               <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-[10px]">
@@ -340,7 +340,7 @@ function MiniappMode({
         {quickActions}
 
         {showEcosystemHint && (
-          <div className="rounded-2xl border border-border/60 bg-card/70 px-4 py-3 flex items-center justify-between gap-3">
+          <div className="rounded-none border border-border/60 bg-card/70 px-4 py-3 flex items-center justify-between gap-3">
             <p className="text-xs md:text-sm text-muted-foreground">
               {language === 'ru'
                 ? 'myUNO: экосистема сервисов и решений — изучайте рынок и бронируйте в одном контуре.'
@@ -378,7 +378,7 @@ export interface LandingLayoutProps {
   icon: LucideIcon;
   title: string;
   subtitle: string;
-  /** e.g. "from-indigo-700 via-indigo-600 to-violet-700" */
+  /** e.g. "from-primary via-primary to-primary" */
   gradient: string;
   fallbackPath?: string;
   heroCta?: { label: string; onClick: () => void };
@@ -406,7 +406,7 @@ function LandingMode({
         <div className={cn('relative bg-gradient-to-br p-6 pt-16 pb-12', gradient)}>
           <BackButton fallbackPath={fallbackPath} variant="overlay" className="absolute top-4 left-4" />
           <div className="text-white text-center max-w-lg mx-auto">
-            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-white/20 rounded-none flex items-center justify-center mx-auto mb-4">
               <Icon className="w-8 h-8" />
             </div>
             <h1 className="text-3xl font-bold font-display mb-2">{title}</h1>

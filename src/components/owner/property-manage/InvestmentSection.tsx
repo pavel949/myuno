@@ -123,8 +123,8 @@ export function PropertyManageInvestmentSection({ propertyId }: InvestmentSectio
   if (loadingProperty || loadingStats) {
     return (
       <div className="space-y-6">
-        <Skeleton className="h-48 w-full rounded-2xl" />
-        <Skeleton className="h-64 w-full rounded-2xl" />
+        <Skeleton className="h-48 w-full rounded-none" />
+        <Skeleton className="h-64 w-full rounded-none" />
       </div>
     );
   }
@@ -134,7 +134,7 @@ export function PropertyManageInvestmentSection({ propertyId }: InvestmentSectio
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-primary/10">
+          <div className="p-2 rounded-none bg-primary/10">
             <TrendingUp className="h-5 w-5 text-primary" />
           </div>
           <div>
@@ -343,7 +343,7 @@ export function PropertyManageInvestmentSection({ propertyId }: InvestmentSectio
               {/* Payback Period */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-muted">
+                  <div className="p-2 rounded-none bg-muted">
                     <Clock className="h-4 w-4 text-muted-foreground" />
                   </div>
                   <div>
@@ -399,11 +399,11 @@ interface MetricCardProps {
 
 function MetricCard({ label, value, trend, trendUp, highlight }: MetricCardProps) {
   return (
-    <div className={`p-3 rounded-xl border ${highlight ? 'bg-green-500/10 border-green-500/20' : 'bg-muted/50'}`}>
+    <div className={`p-3 rounded-none border ${highlight ? 'bg-success/10 border-success/40/20' : 'bg-muted/50'}`}>
       <p className="text-xs text-muted-foreground mb-1">{label}</p>
-      <p className={`text-lg font-bold ${highlight ? 'text-green-600' : ''}`}>{value}</p>
+      <p className={`text-lg font-bold ${highlight ? 'text-success' : ''}`}>{value}</p>
       {trend && (
-        <p className={`text-xs ${trendUp ? 'text-green-600' : 'text-muted-foreground'}`}>
+        <p className={`text-xs ${trendUp ? 'text-success' : 'text-muted-foreground'}`}>
           {trend}
         </p>
       )}

@@ -150,7 +150,7 @@ function PODetail({ poId, onClose }: { poId: string; onClose: () => void }) {
       <div className="space-y-2">
         <p className="text-xs font-semibold uppercase text-muted-foreground">{isRu ? 'Позиции' : 'Items'}</p>
         {items.map(it => (
-          <div key={it.id} className="flex items-center gap-2 p-2 rounded-md border bg-muted/20">
+          <div key={it.id} className="flex items-center gap-2 p-2 rounded-none border bg-muted/20">
             <div className="flex-1 min-w-0">
               <p className="text-sm truncate">{it.description}</p>
               <p className="text-xs text-muted-foreground">
@@ -196,7 +196,7 @@ function PODetail({ poId, onClose }: { poId: string; onClose: () => void }) {
         <div className="space-y-2">
           <p className="text-xs font-semibold uppercase text-muted-foreground">{isRu ? 'Получения' : 'Receipts'}</p>
           {receipts.map(r => (
-            <div key={r.id} className="p-2 rounded-md border text-xs space-y-0.5">
+            <div key={r.id} className="p-2 rounded-none border text-xs space-y-0.5">
               <p>{format(new Date(r.received_at), 'd MMM HH:mm', { locale: isRu ? ru : undefined })}</p>
               {r.notes && <p className="text-muted-foreground">{r.notes}</p>}
             </div>
@@ -267,7 +267,7 @@ function CreatePOForm({ onClose }: { onClose: () => void }) {
         <Label>{isRu ? 'Заметки' : 'Notes'}</Label>
         <Textarea rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
       </div>
-      <div className="flex items-center justify-between p-2 rounded-md bg-muted/40">
+      <div className="flex items-center justify-between p-2 rounded-none bg-muted/40">
         <span className="text-sm font-medium">{isRu ? 'Итого' : 'Total'}</span>
         <span className="text-base font-bold tabular-nums">{total.toLocaleString()} THB</span>
       </div>

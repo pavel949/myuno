@@ -18,7 +18,7 @@ export function MorningBriefing() {
   const isLoading = metricsLoading || dayLoading;
 
   if (isLoading) {
-    return <Skeleton className="h-20 w-full rounded-xl" />;
+    return <Skeleton className="h-20 w-full rounded-none" />;
   }
 
   const checkIns = dayItems.filter((i: DayItem) => i.type === 'check_in').length;

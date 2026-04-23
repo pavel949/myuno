@@ -220,7 +220,7 @@ export function OfferGeneratorModal({ open, onOpenChange, deal }: Props) {
 
         {/* NEW_PROJECT extra fields */}
         {dealType === 'new_project' && (
-          <div className="grid grid-cols-3 gap-2 p-3 bg-muted/30 rounded-lg">
+          <div className="grid grid-cols-3 gap-2 p-3 bg-muted/30 rounded-none">
             <div>
               <Label className="text-xs">{isRu ? 'Проект' : 'Project'}</Label>
               <Input

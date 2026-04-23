@@ -72,9 +72,9 @@ export default function OrderTracking() {
       <AppLayout title={isRu ? 'Отслеживание заказа' : 'Order Tracking'}>
         <PageContainer>
           <div className="space-y-4">
-            <Skeleton className="h-32 w-full rounded-xl" />
-            <Skeleton className="h-48 w-full rounded-xl" />
-            <Skeleton className="h-64 w-full rounded-xl" />
+            <Skeleton className="h-32 w-full rounded-none" />
+            <Skeleton className="h-48 w-full rounded-none" />
+            <Skeleton className="h-64 w-full rounded-none" />
           </div>
         </PageContainer>
       </AppLayout>

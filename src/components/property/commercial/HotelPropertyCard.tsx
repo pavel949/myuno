@@ -43,7 +43,7 @@ function StarPips({ value }: { value: number }) {
             key={i}
             className={cn(
               'h-3 w-3',
-              filled ? 'fill-amber-400 text-amber-400' : 'text-muted-foreground/40',
+              filled ? 'fill-accent text-accent' : 'text-muted-foreground/40',
             )}
           />
         );
@@ -74,10 +74,10 @@ export function HotelPropertyCard({ property, className }: Props) {
     : isRu ? 'Продажа' : 'For sale';
 
   const intentColor = isSeekingOperator
-    ? 'bg-violet-500/95 text-white hover:bg-violet-500'
+    ? 'bg-primary/95 text-white hover:bg-primary'
     : isRent
-    ? 'bg-blue-500/95 text-white hover:bg-blue-500'
-    : 'bg-amber-500/95 text-white hover:bg-amber-500';
+    ? 'bg-primary/95 text-white hover:bg-primary'
+    : 'bg-accent/95 text-white hover:bg-accent';
 
   const priceMain = isSeekingOperator
     ? null
@@ -93,7 +93,7 @@ export function HotelPropertyCard({ property, className }: Props) {
     <Link
       to={APP_ROUTES.HOTEL_DETAIL(property.id)}
       className={cn(
-        'group block rounded-2xl border border-border bg-card overflow-hidden hover:shadow-lg transition-shadow',
+        'group block rounded-none border border-border bg-card overflow-hidden hover:shadow-lg transition-shadow',
         className,
       )}
     >
@@ -121,7 +121,7 @@ export function HotelPropertyCard({ property, className }: Props) {
         {/* Top-right: stars + verified */}
         <div className="absolute top-3 right-3 flex flex-col items-end gap-1.5">
           {property.is_verified && (
-            <Badge className="bg-emerald-500/95 text-white hover:bg-emerald-500 backdrop-blur-sm gap-1">
+            <Badge className="bg-success/95 text-white hover:bg-success backdrop-blur-sm gap-1">
               <BadgeCheck className="w-3 h-3" />
               {isRu ? 'Проверено' : 'Verified'}
             </Badge>
@@ -188,14 +188,14 @@ export function HotelPropertyCard({ property, className }: Props) {
           {priceMain ? (
             <p className="text-base font-bold text-foreground">{priceMain}</p>
           ) : isSeekingOperator ? (
-            <p className="text-xs font-medium text-violet-600 dark:text-violet-400">
+            <p className="text-xs font-medium text-primary dark:text-primary">
               {isRu ? 'Запрос предложения от оператора' : 'Operator proposal welcome'}
             </p>
           ) : (
             <span className="text-xs text-muted-foreground">{isRu ? 'По запросу' : 'On request'}</span>
           )}
           {property.cap_rate_pct != null && (
-            <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
+            <p className="text-xs font-medium text-success dark:text-success">
               Cap {property.cap_rate_pct.toFixed(1)}%
             </p>
           )}
@@ -208,9 +208,9 @@ export function HotelPropertyCard({ property, className }: Props) {
               className={cn(
                 'text-[10px] font-medium px-2 py-0.5 rounded-full',
                 property.hotel_management_status === 'under_hma'
-                  ? 'bg-blue-500/10 text-blue-700 dark:text-blue-400'
+                  ? 'bg-primary/10 text-primary dark:text-primary'
                   : property.hotel_management_status === 'seeking_operator'
-                  ? 'bg-violet-500/10 text-violet-700 dark:text-violet-400'
+                  ? 'bg-primary/10 text-primary dark:text-primary'
                   : 'bg-muted text-muted-foreground',
               )}
             >
@@ -224,9 +224,9 @@ export function HotelPropertyCard({ property, className }: Props) {
               className={cn(
                 'text-[10px] font-medium px-2 py-0.5 rounded-full',
                 property.hotel_license_type === 'full_hotel_license'
-                  ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
+                  ? 'bg-success/10 text-success dark:text-success'
                   : property.hotel_license_type === 'pending'
-                  ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400'
+                  ? 'bg-accent/10 text-accent dark:text-accent'
                   : 'bg-muted text-muted-foreground',
               )}
             >

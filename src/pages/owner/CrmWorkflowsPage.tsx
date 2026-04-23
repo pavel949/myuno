@@ -131,7 +131,7 @@ const [createOpen, setCreateOpen] = useState(false);
             <Card key={wf.id} className="hover:bg-muted/50 transition-colors">
               <CardContent className="p-4">
                 <div className="flex items-center gap-4">
-                  <div className="p-2 rounded-lg bg-primary/10">
+                  <div className="p-2 rounded-none bg-primary/10">
                     <Workflow className="h-4 w-4 text-primary" />
                   </div>
                   <div className="flex-1 min-w-0">

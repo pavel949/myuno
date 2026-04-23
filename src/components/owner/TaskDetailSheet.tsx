@@ -172,7 +172,7 @@ export function TaskDetailSheet({ open, onOpenChange, task, onComplete, onStartP
 
       {/* Completed info */}
       {isCompleted && task.completed_at && (
-        <div className="p-3 rounded-lg bg-success/10 border border-success/20 text-sm">
+        <div className="p-3 rounded-none bg-success/10 border border-success/20 text-sm">
           <div className="flex items-center gap-2 text-success font-medium">
             <CheckCircle2 className="h-4 w-4" />
             {isRu ? 'Выполнена' : 'Completed'}

@@ -65,10 +65,10 @@ function PricingRulesSectionInner({ formData, updateFormData }: PricingRulesSect
       </CardHeader>
       <CardContent className="space-y-5">
         {/* Early Booking Discount */}
-        <div className="p-4 rounded-xl border bg-gradient-to-r from-primary/5 to-transparent space-y-3">
+        <div className="p-4 rounded-none border bg-gradient-to-r from-primary/5 to-transparent space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+              <div className="w-9 h-9 rounded-none bg-primary/10 flex items-center justify-center">
                 <Clock className="h-4 w-4 text-primary" />
               </div>
               <div>
@@ -137,10 +137,10 @@ function PricingRulesSectionInner({ formData, updateFormData }: PricingRulesSect
         </div>
 
         {/* Last-Minute Discount */}
-        <div className="p-4 rounded-xl border bg-gradient-to-r from-warning/5 to-transparent space-y-3">
+        <div className="p-4 rounded-none border bg-gradient-to-r from-warning/5 to-transparent space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-lg bg-warning/10 flex items-center justify-center">
+              <div className="w-9 h-9 rounded-none bg-warning/10 flex items-center justify-center">
                 <Zap className="h-4 w-4 text-warning" />
               </div>
               <div>
@@ -200,7 +200,7 @@ function PricingRulesSectionInner({ formData, updateFormData }: PricingRulesSect
         </div>
 
         {/* Custom Length-of-Stay Discounts */}
-        <div className="p-4 rounded-xl border space-y-3">
+        <div className="p-4 rounded-none border space-y-3">
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium text-sm">{isRu ? 'Свои скидки за срок' : 'Custom Stay Discounts'}</p>
@@ -254,7 +254,7 @@ function PricingRulesSectionInner({ formData, updateFormData }: PricingRulesSect
         </div>
 
         {/* Negotiation Toggle */}
-        <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+        <div className="flex items-center justify-between p-4 bg-muted rounded-none">
           <div>
             <p className="font-medium text-sm">{isRu ? 'Торг с гостем' : 'Price Negotiation'}</p>
             <p className="text-xs text-muted-foreground">

@@ -27,7 +27,7 @@ export function ProgressIndicator({ usedCount = 3, totalCount = 40, className }:
       }}
     >
       <div className="flex items-center gap-3 mb-3">
-        <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+        <div className="w-8 h-8 rounded-none flex items-center justify-center shrink-0"
           style={{ background: 'hsl(var(--primary) / 0.12)' }}
         >
           <Compass className="w-4 h-4 text-primary" />

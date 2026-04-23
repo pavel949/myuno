@@ -87,7 +87,7 @@ export function NbProjectCard({ project, variant = 'compact' }: Props) {
             {project.unit_types && project.unit_types.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
                 {project.unit_types.map(t => (
-                  <span key={t} className="text-xs px-2 py-0.5 rounded" style={{ background: 'hsl(var(--nb-gold) / 0.1)', color: 'hsl(var(--nb-gold))' }}>
+                  <span key={t} className="text-xs px-2 py-0.5 rounded-none" style={{ background: 'hsl(var(--nb-gold) / 0.1)', color: 'hsl(var(--nb-gold))' }}>
                     {unitTypeLabels[t] || t}
                   </span>
                 ))}
@@ -141,7 +141,7 @@ export function NbProjectCard({ project, variant = 'compact' }: Props) {
         {project.unit_types && project.unit_types.length > 0 && (
           <div className="flex flex-wrap gap-1">
             {project.unit_types.slice(0, 3).map(t => (
-              <span key={t} className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: 'hsl(var(--nb-gold) / 0.08)', color: 'hsl(var(--nb-gold) / 0.8)' }}>
+              <span key={t} className="text-[10px] px-1.5 py-0.5 rounded-none" style={{ background: 'hsl(var(--nb-gold) / 0.08)', color: 'hsl(var(--nb-gold) / 0.8)' }}>
                 {unitTypeLabels[t] || t}
               </span>
             ))}

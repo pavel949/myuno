@@ -307,10 +307,10 @@ function PropertyHealthCard({ report, isRu }: { report: PropertyHealthReport; is
             <img
               src={report.coverImage}
               alt={title}
-              className="h-10 w-10 rounded-lg object-cover flex-shrink-0"
+              className="h-10 w-10 rounded-none object-cover flex-shrink-0"
             />
           ) : (
-            <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+            <div className="h-10 w-10 rounded-none bg-muted flex items-center justify-center flex-shrink-0">
               <HeartPulse className="h-4 w-4 text-muted-foreground" />
             </div>
           )}
@@ -356,7 +356,7 @@ function PropertyHealthCard({ report, isRu }: { report: PropertyHealthReport; is
                   <div
                     key={check.id}
                     className={cn(
-                      "flex items-center gap-2 py-1.5 px-2 rounded-md text-xs",
+                      "flex items-center gap-2 py-1.5 px-2 rounded-none text-xs",
                       check.status !== 'ok' && "bg-muted/50"
                     )}
                   >
@@ -403,9 +403,9 @@ export function PortfolioHealthWidget() {
     return (
       <div className="space-y-3">
         <Skeleton className="h-6 w-48" />
-        <Skeleton className="h-16 w-full rounded-xl" />
-        <Skeleton className="h-24 w-full rounded-xl" />
-        <Skeleton className="h-24 w-full rounded-xl" />
+        <Skeleton className="h-16 w-full rounded-none" />
+        <Skeleton className="h-24 w-full rounded-none" />
+        <Skeleton className="h-24 w-full rounded-none" />
       </div>
     );
   }

@@ -39,9 +39,9 @@ export function DownloadAppButton() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-success/10 border border-success/30"
+        className="w-full flex items-center gap-3 px-4 py-3 rounded-none bg-success/10 border border-success/30"
       >
-        <div className="w-10 h-10 rounded-xl bg-success flex items-center justify-center shrink-0">
+        <div className="w-10 h-10 rounded-none bg-success flex items-center justify-center shrink-0">
           <Check className="w-5 h-5 text-success-foreground" />
         </div>
         
@@ -105,9 +105,9 @@ export function DownloadAppButton() {
       transition={{ duration: 0.3, delay: 0.1 }}
       onClick={handleClick}
       disabled={installState === 'installing'}
-      className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-muted/50 border border-border hover:bg-muted/80 hover:border-primary/20 transition-all duration-200 active:scale-[0.98] group disabled:opacity-70 disabled:cursor-wait"
+      className="w-full flex items-center gap-3 px-4 py-3 rounded-none bg-muted/50 border border-border hover:bg-muted/80 hover:border-primary/20 transition-all duration-200 active:scale-[0.98] group disabled:opacity-70 disabled:cursor-wait"
     >
-      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+      <div className="w-10 h-10 rounded-none bg-primary/10 flex items-center justify-center shrink-0">
         {installState === 'installing' ? (
           <Loader2 className="w-5 h-5 text-primary animate-spin" />
         ) : isIOS ? (

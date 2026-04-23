@@ -145,7 +145,7 @@ export default function HowItWorks() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center py-8"
         >
-          <div className="w-20 h-20 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
+          <div className="w-20 h-20 mx-auto mb-6 rounded-none bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
             <Sparkles className="w-10 h-10 text-primary-foreground" />
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold mb-4">{t.heroTitle}</h1>
@@ -165,7 +165,7 @@ export default function HowItWorks() {
             {t.categories.map((cat, i) => (
               <motion.div key={i} variants={itemVariants}>
                 <SectionCard className="flex gap-4 items-start h-full">
-                  <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <div className="w-12 h-12 rounded-none bg-primary/10 flex items-center justify-center shrink-0">
                     <cat.icon className="w-6 h-6 text-primary" />
                   </div>
                   <div>
@@ -191,7 +191,7 @@ export default function HowItWorks() {
             {t.benefits.map((benefit, i) => (
               <motion.div key={i} variants={itemVariants}>
                 <SectionCard className="flex gap-4 items-start">
-                  <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 rounded-none bg-secondary flex items-center justify-center shrink-0">
                     <benefit.icon className="w-5 h-5 text-foreground" />
                   </div>
                   <div>
@@ -219,7 +219,7 @@ export default function HowItWorks() {
                     <p className="text-sm text-muted-foreground">{step.desc}</p>
                   </div>
                   {i < t.steps.length - 1 && (
-                    <CheckCircle className="w-5 h-5 text-green-500 shrink-0 mt-2" />
+                    <CheckCircle className="w-5 h-5 text-success shrink-0 mt-2" />
                   )}
                 </div>
               ))}
@@ -233,7 +233,7 @@ export default function HowItWorks() {
           <div className="grid grid-cols-2 gap-3">
             {t.roles.map((role, i) => (
               <SectionCard key={i} className="text-center p-4">
-                <div className="w-12 h-12 mx-auto mb-3 rounded-2xl bg-secondary flex items-center justify-center">
+                <div className="w-12 h-12 mx-auto mb-3 rounded-none bg-secondary flex items-center justify-center">
                   <role.icon className="w-6 h-6 text-foreground" />
                 </div>
                 <h3 className="font-semibold text-sm mb-1">{role.title}</h3>

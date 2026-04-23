@@ -213,7 +213,7 @@ export function VerticalCTA({
             onClick={() => setIsOpen(true)}
             className="flex-shrink-0 relative overflow-hidden group"
           >
-            <span className="absolute inset-0 rounded-md animate-ping bg-primary/30 opacity-75" style={{ animationDuration: '2s' }} />
+            <span className="absolute inset-0 rounded-none animate-ping bg-primary/30 opacity-75" style={{ animationDuration: '2s' }} />
             <span className="relative flex items-center">
               {text.button}
               <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-0.5 transition-transform" />
@@ -269,7 +269,7 @@ function CTASheet({
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetContent 
         side="bottom" 
-        className="h-[85vh] rounded-t-3xl px-0"
+        className="h-[85vh] rounded-none px-0"
       >
         <SheetHeader className="px-6 pb-4 border-b">
           <SheetTitle>

@@ -257,21 +257,21 @@ export function YachtCalendar({
         {/* Legend & Stats */}
         <div className="flex flex-wrap gap-3 mb-4 text-xs">
           <div className="flex items-center gap-1.5">
-            <div className={cn("w-4 h-4 rounded", statusColors.available)} />
+            <div className={cn("w-4 h-4 rounded-none", statusColors.available)} />
             <span>{isRu ? 'Свободно' : 'Available'}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className={cn("w-4 h-4 rounded", statusColors.blocked)} />
+            <div className={cn("w-4 h-4 rounded-none", statusColors.blocked)} />
             <span>{isRu ? 'Закрыто' : 'Blocked'}</span>
             {stats.blocked > 0 && <Badge variant="secondary" className="h-4 px-1 text-[10px]">{stats.blocked}</Badge>}
           </div>
           <div className="flex items-center gap-1.5">
-            <div className={cn("w-4 h-4 rounded", statusColors.booked)} />
+            <div className={cn("w-4 h-4 rounded-none", statusColors.booked)} />
             <span>{isRu ? 'Забронировано' : 'Booked'}</span>
             {stats.booked > 0 && <Badge variant="secondary" className="h-4 px-1 text-[10px]">{stats.booked}</Badge>}
           </div>
           <div className="flex items-center gap-1.5">
-            <div className={cn("w-4 h-4 rounded", statusColors.maintenance)} />
+            <div className={cn("w-4 h-4 rounded-none", statusColors.maintenance)} />
             <span>{isRu ? 'Обслуживание' : 'Maintenance'}</span>
             {stats.maintenance > 0 && <Badge variant="secondary" className="h-4 px-1 text-[10px]">{stats.maintenance}</Badge>}
           </div>
@@ -302,7 +302,7 @@ export function YachtCalendar({
                 <div
                   key={index}
                   className={cn(
-                    "relative h-14 sm:h-16 p-1 rounded-md border transition-all",
+                    "relative h-14 sm:h-16 p-1 rounded-none border transition-all",
                     readOnly ? "cursor-default" : "cursor-pointer",
                     !isCurrentMonth && "opacity-40",
                     isPast && "opacity-30 cursor-not-allowed",

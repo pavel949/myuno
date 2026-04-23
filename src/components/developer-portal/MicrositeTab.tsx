@@ -92,9 +92,9 @@ export function MicrositeTab({ projectId, slug, initial }: MicrositeTabProps) {
   return (
     <div className="nb-glass p-6 space-y-6">
       {/* Toggle */}
-      <div className="flex items-start justify-between gap-4 p-4 rounded-xl bg-[hsl(var(--nb-glass-bg))] border border-[hsl(var(--nb-glass-border))]">
+      <div className="flex items-start justify-between gap-4 p-4 rounded-none bg-[hsl(var(--nb-glass-bg))] border border-[hsl(var(--nb-glass-border))]">
         <div className="flex items-start gap-3">
-          <div className="w-9 h-9 rounded-lg bg-[hsl(var(--nb-gold)/0.15)] flex items-center justify-center shrink-0">
+          <div className="w-9 h-9 rounded-none bg-[hsl(var(--nb-gold)/0.15)] flex items-center justify-center shrink-0">
             <Globe className="w-4 h-4 text-[hsl(var(--nb-gold))]" />
           </div>
           <div>
@@ -112,7 +112,7 @@ export function MicrositeTab({ projectId, slug, initial }: MicrositeTabProps) {
 
       {/* URL */}
       {url && (
-        <div className="p-4 rounded-xl bg-[hsl(var(--nb-glass-bg))] border border-[hsl(var(--nb-glass-border))] space-y-2">
+        <div className="p-4 rounded-none bg-[hsl(var(--nb-glass-bg))] border border-[hsl(var(--nb-glass-border))] space-y-2">
           <label className="text-xs text-[hsl(var(--nb-muted))]">Публичный URL</label>
           <div className="flex gap-2">
             <Input value={url} readOnly className="font-mono text-xs bg-[hsl(var(--nb-bg))] border-[hsl(var(--nb-glass-border))] text-[hsl(var(--nb-text))]" />
@@ -126,7 +126,7 @@ export function MicrositeTab({ projectId, slug, initial }: MicrositeTabProps) {
             </a>
           </div>
           {!form.landing_enabled && (
-            <p className="text-xs text-amber-400">⚠ Включите тумблер выше, иначе страница вернёт 404</p>
+            <p className="text-xs text-accent">⚠ Включите тумблер выше, иначе страница вернёт 404</p>
           )}
         </div>
       )}
@@ -135,7 +135,7 @@ export function MicrositeTab({ projectId, slug, initial }: MicrositeTabProps) {
       <div className="space-y-5">
         <div className="flex items-center justify-between">
           <h3 className="font-semibold text-[hsl(var(--nb-text))]">SEO и соцсети</h3>
-          <button onClick={autofill} className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-md bg-[hsl(var(--nb-gold)/0.1)] text-[hsl(var(--nb-gold))] hover:bg-[hsl(var(--nb-gold)/0.2)] transition-colors">
+          <button onClick={autofill} className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-none bg-[hsl(var(--nb-gold)/0.1)] text-[hsl(var(--nb-gold))] hover:bg-[hsl(var(--nb-gold)/0.2)] transition-colors">
             <Sparkles className="w-3.5 h-3.5" />
             Автозаполнить
           </button>
@@ -161,7 +161,7 @@ export function MicrositeTab({ projectId, slug, initial }: MicrositeTabProps) {
             maxLength={170}
             rows={3}
             placeholder="Краткое описание проекта, до 160 символов"
-            className="w-full rounded-md bg-[hsl(var(--nb-bg))] border border-[hsl(var(--nb-glass-border))] px-3 py-2 text-sm text-[hsl(var(--nb-text))]"
+            className="w-full rounded-none bg-[hsl(var(--nb-bg))] border border-[hsl(var(--nb-glass-border))] px-3 py-2 text-sm text-[hsl(var(--nb-text))]"
           />
           <p className="text-xs text-[hsl(var(--nb-muted))] mt-1">{form.meta_description.length}/160 — сниппет в поиске и превью ссылки</p>
         </div>
@@ -183,7 +183,7 @@ export function MicrositeTab({ projectId, slug, initial }: MicrositeTabProps) {
             onChange={e => update('social_share_text', e.target.value)}
             rows={2}
             placeholder="Yes — это будет вставлено при шаринге в WhatsApp, Telegram, Twitter"
-            className="w-full rounded-md bg-[hsl(var(--nb-bg))] border border-[hsl(var(--nb-glass-border))] px-3 py-2 text-sm text-[hsl(var(--nb-text))]"
+            className="w-full rounded-none bg-[hsl(var(--nb-bg))] border border-[hsl(var(--nb-glass-border))] px-3 py-2 text-sm text-[hsl(var(--nb-text))]"
           />
         </div>
       </div>

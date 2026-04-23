@@ -54,7 +54,7 @@ function PaymentPolicySectionInner({ formData, updateFormData }: PaymentPolicySe
                   prepay_percent: model.prepayPercent,
                 });
               }}
-              className={`p-3 rounded-xl border-2 text-left transition-colors ${
+              className={`p-3 rounded-none border-2 text-left transition-colors ${
                 policy === model.id
                   ? 'border-primary bg-primary/5'
                   : 'border-muted hover:border-muted-foreground/30'
@@ -72,7 +72,7 @@ function PaymentPolicySectionInner({ formData, updateFormData }: PaymentPolicySe
           <button
             type="button"
             onClick={() => updateFormData({ payment_policy: 'custom' })}
-            className={`p-3 rounded-xl border-2 text-left transition-colors ${
+            className={`p-3 rounded-none border-2 text-left transition-colors ${
               isCustom
                 ? 'border-primary bg-primary/5'
                 : 'border-muted hover:border-muted-foreground/30'
@@ -89,7 +89,7 @@ function PaymentPolicySectionInner({ formData, updateFormData }: PaymentPolicySe
 
         {/* Custom prepay % */}
         {isCustom && (
-          <div className="grid grid-cols-2 gap-4 p-3 bg-muted/50 rounded-lg">
+          <div className="grid grid-cols-2 gap-4 p-3 bg-muted/50 rounded-none">
             <div className="space-y-1">
               <Label className="text-xs">{isRu ? 'Предоплата %' : 'Prepay %'}</Label>
               <div className="relative">

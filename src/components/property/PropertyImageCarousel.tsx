@@ -71,7 +71,7 @@ export function PropertyImageCarousel({
   if (!carouselActive || !hasMultiple) {
     return (
       <div
-        className={cn(aspectClass, "rounded-lg sm:rounded-xl overflow-hidden relative", hasMultiple && "group/carousel", className)}
+        className={cn(aspectClass, "rounded-none sm:rounded-none overflow-hidden relative", hasMultiple && "group/carousel", className)}
         onMouseEnter={hasMultiple ? activateCarousel : undefined}
         onTouchStart={hasMultiple ? activateCarousel : undefined}
       >
@@ -98,7 +98,7 @@ export function PropertyImageCarousel({
   }
 
   return (
-    <div className={cn(aspectClass, "rounded-lg sm:rounded-xl overflow-hidden relative group/carousel", className)}>
+    <div className={cn(aspectClass, "rounded-none sm:rounded-none overflow-hidden relative group/carousel", className)}>
       <div ref={emblaRef} className="overflow-hidden h-full">
         <div className="flex h-full">
           {allImages.slice(0, 5).map((img, i) => (

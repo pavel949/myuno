@@ -153,7 +153,7 @@ export default function SalesAnalytics() {
           { label: isRu ? 'Прогноз' : 'Forecast', value: formatValue(kpis.forecast) },
           { label: isRu ? 'Выиграно' : 'Won Deals', value: kpis.won },
         ].map(k => (
-          <div key={k.label} className="p-3 rounded-xl border bg-card text-center">
+          <div key={k.label} className="p-3 rounded-none border bg-card text-center">
             <p className="text-2xl font-bold">{k.value}</p>
             <p className="text-xs text-muted-foreground mt-1">{k.label}</p>
           </div>
@@ -161,7 +161,7 @@ export default function SalesAnalytics() {
       </div>
 
       {/* Funnel */}
-      <div className="border rounded-xl p-4 bg-card">
+      <div className="border rounded-none p-4 bg-card">
         <p className="text-sm font-medium mb-3">{isRu ? 'Воронка продаж' : 'Sales Funnel'}</p>
         {deals.length === 0 ? (
           <div className="text-center py-8">
@@ -176,9 +176,9 @@ export default function SalesAnalytics() {
               return (
                 <div key={item.name} className="flex items-center gap-3">
                   <span className="text-xs w-24 text-right text-muted-foreground">{item.name}</span>
-                  <div className="flex-1 h-7 rounded-md overflow-hidden bg-muted">
+                  <div className="flex-1 h-7 rounded-none overflow-hidden bg-muted">
                     <div
-                      className="h-full rounded-md flex items-center px-2 text-xs font-medium text-white transition-all"
+                      className="h-full rounded-none flex items-center px-2 text-xs font-medium text-white transition-all"
                       style={{ width: `${width}%`, backgroundColor: item.fill }}
                     >
                       {item.value}
@@ -192,7 +192,7 @@ export default function SalesAnalytics() {
       </div>
 
       {/* Monthly bar chart */}
-      <div className="border rounded-xl p-4 bg-card">
+      <div className="border rounded-none p-4 bg-card">
         <p className="text-sm font-medium mb-3">{isRu ? 'Сделки по месяцам' : 'Deals by Month'}</p>
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={monthlyData}>
@@ -208,7 +208,7 @@ export default function SalesAnalytics() {
 
       {/* Sources pie */}
       {sourceData.length > 0 && (
-        <div className="border rounded-xl p-4 bg-card">
+        <div className="border rounded-none p-4 bg-card">
           <p className="text-sm font-medium mb-3">{isRu ? 'Источники клиентов' : 'Client Sources'}</p>
           <div className="flex items-center gap-4">
             <ResponsiveContainer width={160} height={160}>
@@ -221,7 +221,7 @@ export default function SalesAnalytics() {
             <div className="space-y-1">
               {sourceData.map((s, i) => (
                 <div key={s.name} className="flex items-center gap-2 text-xs">
-                  <div className="h-3 w-3 rounded-sm" style={{ backgroundColor: SOURCE_COLORS[i % SOURCE_COLORS.length] }} />
+                  <div className="h-3 w-3 rounded-none" style={{ backgroundColor: SOURCE_COLORS[i % SOURCE_COLORS.length] }} />
                   <span>{s.name} ({s.value})</span>
                 </div>
               ))}

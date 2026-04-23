@@ -125,7 +125,7 @@ function ServiceCard({ service, language, formatPrice, onClick }: {
   onClick: () => void;
 }) {
   return (
-    <button onClick={onClick} className="w-full flex items-center gap-4 p-4 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all text-left">
+    <button onClick={onClick} className="w-full flex items-center gap-4 p-4 rounded-none bg-card border border-border/50 hover:border-primary/30 transition-all text-left">
       <IconBadge icon={Sparkles} size="lg" variant="primary" />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">

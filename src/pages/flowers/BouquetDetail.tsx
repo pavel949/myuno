@@ -198,7 +198,7 @@ const BouquetDetail = () => {
             )}
             {socialProof && (
               <Badge className="bg-background/90 text-foreground text-xs backdrop-blur-sm border-0">
-                <Star className="w-3 h-3 mr-1 text-amber-500" />
+                <Star className="w-3 h-3 mr-1 text-accent" />
                 {isRu 
                   ? socialProof === 'Most ordered this week' ? 'Самый заказываемый на этой неделе'
                     : socialProof === 'Customer favorite' ? 'Любимец покупателей'
@@ -258,7 +258,7 @@ const BouquetDetail = () => {
                     key={variant.size}
                     onClick={() => setSelectedSize(variant.size as SizeKey)}
                     className={cn(
-                      "relative p-3 rounded-xl border-2 transition-all duration-200",
+                      "relative p-3 rounded-none border-2 transition-all duration-200",
                       "flex flex-col items-center gap-1",
                       selectedSize === variant.size
                         ? "border-primary bg-primary/10 shadow-sm"
@@ -300,7 +300,7 @@ const BouquetDetail = () => {
             {showUpgradeNudge && (
               <button
                 onClick={() => setSelectedSize('M')}
-                className="w-full p-2.5 rounded-lg bg-primary/5 border border-primary/20 text-left hover:bg-primary/10 transition-colors"
+                className="w-full p-2.5 rounded-none bg-primary/5 border border-primary/20 text-left hover:bg-primary/10 transition-colors"
               >
                 <p className="text-xs text-primary font-medium">
                   💡 {isRu
@@ -318,14 +318,14 @@ const BouquetDetail = () => {
 
           {/* Trust & delivery badges */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="flex items-center gap-2 p-3 rounded-lg bg-secondary/50">
+            <div className="flex items-center gap-2 p-3 rounded-none bg-secondary/50">
               <Shield className="w-5 h-5 text-primary flex-shrink-0" />
               <div>
                 <p className="text-xs text-muted-foreground">{isRu ? 'Гарантия' : 'Guarantee'}</p>
                 <p className="font-medium text-sm">{isRu ? 'Свежесть 5 дней' : '5-day freshness'}</p>
               </div>
             </div>
-            <div className="flex items-center gap-2 p-3 rounded-lg bg-secondary/50">
+            <div className="flex items-center gap-2 p-3 rounded-none bg-secondary/50">
               <Truck className="w-5 h-5 text-primary flex-shrink-0" />
               <div>
                 <p className="text-xs text-muted-foreground">{isRu ? 'Доставка' : 'Delivery'}</p>
@@ -333,7 +333,7 @@ const BouquetDetail = () => {
               </div>
             </div>
             {isBefore2PM && (
-              <div className="col-span-2 flex items-center gap-2 p-3 rounded-lg bg-primary/5 border border-primary/20">
+              <div className="col-span-2 flex items-center gap-2 p-3 rounded-none bg-primary/5 border border-primary/20">
                 <Clock className="w-5 h-5 text-primary flex-shrink-0" />
                 <p className="text-sm font-medium text-primary">
                   {isRu ? 'Закажите до 14:00 — доставим сегодня!' : 'Order by 2 PM — same-day delivery!'}
@@ -341,7 +341,7 @@ const BouquetDetail = () => {
               </div>
             )}
             {urgencyBadge && !isBefore2PM && (
-              <div className="col-span-2 flex items-center gap-2 p-3 rounded-lg bg-muted/50 border">
+              <div className="col-span-2 flex items-center gap-2 p-3 rounded-none bg-muted/50 border">
                 <Clock className="w-5 h-5 text-muted-foreground flex-shrink-0" />
                 <p className="text-xs text-muted-foreground">{urgencyBadge}</p>
               </div>
@@ -404,7 +404,7 @@ const BouquetDetail = () => {
                       });
                       toast.success(isRu ? 'Добавлено!' : 'Added!');
                     }}
-                    className="flex items-center gap-2 p-3 rounded-lg border hover:border-primary/50 hover:bg-primary/5 transition-colors text-left"
+                    className="flex items-center gap-2 p-3 rounded-none border hover:border-primary/50 hover:bg-primary/5 transition-colors text-left"
                   >
                     <Plus className="w-4 h-4 text-primary flex-shrink-0" />
                     <div className="min-w-0">
@@ -429,7 +429,7 @@ const BouquetDetail = () => {
                     const modifiedBouquet = { ...bouquet, price: currentPrice };
                     buyNow(modifiedBouquet, 1, { size: selectedSize, sizeVariant: currentVariant });
                   }}
-                  className="flex-1 h-12 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+                  className="flex-1 h-12 bg-gradient-to-r from-accent to-accent hover:from-accent hover:to-accent text-white"
                 >
                   <Zap className="w-5 h-5 mr-2" />
                   {isRu ? 'Купить сейчас' : 'Buy Now'}
@@ -447,7 +447,7 @@ const BouquetDetail = () => {
               </>
             ) : (
               <>
-                <div className="flex items-center gap-2 bg-secondary rounded-lg p-1">
+                <div className="flex items-center gap-2 bg-secondary rounded-none p-1">
                   <Button size="icon" variant="ghost" onClick={(e) => { triggerRipple(e); removeFromCart(); }} className="h-10 w-10">
                     <Minus className="w-4 h-4" />
                   </Button>
@@ -462,7 +462,7 @@ const BouquetDetail = () => {
                     const modifiedBouquet = { ...bouquet, price: currentPrice };
                     buyNow(modifiedBouquet, quantity, { size: selectedSize, sizeVariant: currentVariant });
                   }}
-                  className="flex-1 h-12 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+                  className="flex-1 h-12 bg-gradient-to-r from-accent to-accent hover:from-accent hover:to-accent text-white"
                 >
                   <Zap className="w-5 h-5 mr-2" />
                   {isRu ? 'Купить' : 'Buy'}

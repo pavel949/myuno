@@ -183,7 +183,7 @@ export default function Favorites() {
                     variant={filter === f.value ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setFilter(f.value)}
-                    className="flex-shrink-0 rounded-xl"
+                    className="flex-shrink-0 rounded-none"
                   >
                     <f.icon className="h-4 w-4 mr-1" />
                     {language === 'ru' ? f.labelRu : f.label}
@@ -239,7 +239,7 @@ export default function Favorites() {
                             <img
                               src={data.image || data.images?.[0] || '/placeholder.svg'}
                               alt={title}
-                              className="w-16 h-16 rounded-2xl object-cover flex-shrink-0"
+                              className="w-16 h-16 rounded-none object-cover flex-shrink-0"
                             />
                             <div className="flex-1 min-w-0 text-left">
                               <div className="flex items-center gap-2 mb-1">
@@ -287,7 +287,7 @@ export default function Favorites() {
                       <div
                         key={item.id}
                         onClick={() => handleNavigate(item)}
-                        className="bg-card rounded-2xl overflow-hidden border hover:shadow-md transition-all cursor-pointer group"
+                        className="bg-card rounded-none overflow-hidden border hover:shadow-md transition-all cursor-pointer group"
                       >
                         <div className="relative aspect-[4/3] overflow-hidden">
                           <img

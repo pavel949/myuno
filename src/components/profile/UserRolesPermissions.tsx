@@ -111,14 +111,14 @@ export function UserRolesPermissions() {
       {memberships.length > 0 && (
         <SectionCard>
           <div className="flex items-center gap-2 mb-3">
-            <Building2 className="w-4 h-4 text-teal-600" />
+            <Building2 className="w-4 h-4 text-success" />
             <h3 className="text-sm font-semibold">
               {isRu ? 'Управляющие компании' : 'Management Companies'}
             </h3>
           </div>
           <div className="space-y-2">
             {memberships.map((m) => (
-              <div key={m.company_id} className="flex items-center justify-between p-2 rounded-lg bg-secondary/30">
+              <div key={m.company_id} className="flex items-center justify-between p-2 rounded-none bg-secondary/30">
                 <span className="text-sm font-medium truncate">{m.company_name}</span>
                 <Badge variant="outline" className="text-xs shrink-0">
                   {mcRoleLabel(m.role)}

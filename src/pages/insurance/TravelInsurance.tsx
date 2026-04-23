@@ -13,15 +13,15 @@ import { toast } from 'sonner';
 const FACTS = {
   en: [
     { icon: AlertTriangle, title: 'Hospital bills', desc: 'Average ER visit in Thailand costs $2,000–$15,000. ICU can exceed $50,000.', color: 'text-destructive' },
-    { icon: Heart, title: 'Medical evacuation', desc: 'Air evacuation to home country costs $50,000–$300,000 without insurance.', color: 'text-orange-500' },
+    { icon: Heart, title: 'Medical evacuation', desc: 'Air evacuation to home country costs $50,000–$300,000 without insurance.', color: 'text-accent' },
     { icon: Clock, title: 'Buy before you fly', desc: 'Most policies must be purchased before entering Thailand to be valid.', color: 'text-primary' },
-    { icon: Shield, title: 'Peace of mind', desc: 'Travel insurance from $1–3/day covers medical, theft, flight delays & more.', color: 'text-emerald-500' },
+    { icon: Shield, title: 'Peace of mind', desc: 'Travel insurance from $1–3/day covers medical, theft, flight delays & more.', color: 'text-success' },
   ],
   ru: [
     { icon: AlertTriangle, title: 'Счета за лечение', desc: 'Средний визит в ER в Таиланде стоит 70 000–500 000 ₽. Реанимация — от 1,5 млн ₽.', color: 'text-destructive' },
-    { icon: Heart, title: 'Эвакуация', desc: 'Медицинская эвакуация на родину стоит 3–20 млн ₽ без страховки.', color: 'text-orange-500' },
+    { icon: Heart, title: 'Эвакуация', desc: 'Медицинская эвакуация на родину стоит 3–20 млн ₽ без страховки.', color: 'text-accent' },
     { icon: Clock, title: 'Купите до вылета', desc: 'Большинство полисов действительны только если оформлены до въезда в страну.', color: 'text-primary' },
-    { icon: Shield, title: 'Спокойствие', desc: 'Страховка от 100–300 ₽/день покрывает лечение, кражу, задержки рейсов.', color: 'text-emerald-500' },
+    { icon: Shield, title: 'Спокойствие', desc: 'Страховка от 100–300 ₽/день покрывает лечение, кражу, задержки рейсов.', color: 'text-success' },
   ],
 };
 
@@ -81,7 +81,7 @@ export default function TravelInsurance() {
 
       <div className="max-w-lg mx-auto px-4 pb-24 space-y-6">
         {/* Hero */}
-        <div className="relative mt-4 rounded-2xl overflow-hidden bg-gradient-to-br from-destructive/10 via-orange-500/10 to-primary/10 p-6 text-center">
+        <div className="relative mt-4 rounded-none overflow-hidden bg-gradient-to-br from-destructive/10 via-accent/10 to-primary/10 p-6 text-center">
           <div className="flex justify-center mb-3">
             <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center">
               <AlertTriangle className="w-8 h-8 text-destructive" />

@@ -48,7 +48,7 @@ export const DeveloperBadge = forwardRef<HTMLDivElement, DeveloperBadgeProps>(
           src={developerLogo}
           alt={developerName}
           className={cn(
-            "rounded object-contain bg-muted",
+            "rounded-none object-contain bg-muted",
             size === 'sm' ? "w-4 h-4" : "w-5 h-5"
           )}
         />

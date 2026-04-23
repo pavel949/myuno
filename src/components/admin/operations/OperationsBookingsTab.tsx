@@ -173,7 +173,7 @@ export function OperationsBookingsTab() {
               {isRu ? 'Загрузка...' : 'Loading...'}
             </div>
           ) : (
-            <div className="rounded-md border overflow-x-auto">
+            <div className="rounded-none border overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>

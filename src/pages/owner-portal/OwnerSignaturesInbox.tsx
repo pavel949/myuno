@@ -114,7 +114,7 @@ export default function OwnerSignaturesInbox() {
       )}
 
       <Sheet open={!!active} onOpenChange={open => !open && close()}>
-        <SheetContent side="bottom" className="rounded-t-2xl max-h-[90vh] overflow-y-auto">
+        <SheetContent side="bottom" className="rounded-none max-h-[90vh] overflow-y-auto">
           <SheetHeader>
             <SheetTitle>
               {mode === 'sign'
@@ -125,7 +125,7 @@ export default function OwnerSignaturesInbox() {
 
           {active && (
             <div className="mt-4 space-y-4">
-              <div className="bg-muted/30 rounded-xl p-3 space-y-1">
+              <div className="bg-muted/30 rounded-none p-3 space-y-1">
                 <p className="font-semibold text-sm">{active.signature_requests.title}</p>
                 {active.signature_requests.description && (
                   <p className="text-xs text-muted-foreground">{active.signature_requests.description}</p>

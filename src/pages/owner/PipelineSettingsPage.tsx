@@ -93,12 +93,12 @@ const [showAdd, setShowAdd] = useState(false);
     }
   };
 
-  if (isLoading) return <Skeleton className="h-40 w-full rounded-xl" />;
+  if (isLoading) return <Skeleton className="h-40 w-full rounded-none" />;
 
   return (
     <div className="space-y-3">
       {options.filter(o => o.is_active).map(opt => (
-        <div key={opt.id} className="flex items-center gap-3 p-3 rounded-xl border bg-card group">
+        <div key={opt.id} className="flex items-center gap-3 p-3 rounded-none border bg-card group">
           <GripVertical className="h-4 w-4 text-muted-foreground shrink-0 opacity-30" />
           <div
             className="h-4 w-4 rounded-full shrink-0 border"
@@ -139,7 +139,7 @@ const [showAdd, setShowAdd] = useState(false);
       ))}
 
       {showAdd ? (
-        <div className="border rounded-xl p-4 bg-card space-y-3">
+        <div className="border rounded-none p-4 bg-card space-y-3">
           <p className="text-sm font-medium">{isRu ? 'Новый элемент' : 'New Item'}</p>
           <div className="grid grid-cols-3 gap-3">
             <div>
@@ -244,7 +244,7 @@ const [selectedType, setSelectedType] = useState<DealType>('sale');
     }
   };
 
-  if (isLoading) return <Skeleton className="h-40 w-full rounded-xl" />;
+  if (isLoading) return <Skeleton className="h-40 w-full rounded-none" />;
 
   return (
     <div className="space-y-4">
@@ -276,7 +276,7 @@ const [selectedType, setSelectedType] = useState<DealType>('sale');
       ) : (
         <div className="space-y-2">
           {typeStages.map(stage => (
-            <div key={stage.id} className="flex items-center gap-3 p-3 rounded-xl border bg-card group">
+            <div key={stage.id} className="flex items-center gap-3 p-3 rounded-none border bg-card group">
               <GripVertical className="h-4 w-4 text-muted-foreground shrink-0 opacity-30" />
               <div className="h-4 w-4 rounded-full shrink-0" style={{ backgroundColor: stage.color }} />
               <div className="flex-1 min-w-0">
@@ -297,7 +297,7 @@ const [selectedType, setSelectedType] = useState<DealType>('sale');
       )}
 
       {showAdd ? (
-        <div className="border rounded-xl p-4 bg-card space-y-3">
+        <div className="border rounded-none p-4 bg-card space-y-3">
           <p className="text-sm font-medium">{isRu ? 'Новый этап' : 'New Stage'}</p>
           <div className="grid grid-cols-2 gap-3">
             <div><Label>Key</Label><Input value={newStage.stage_key} onChange={e => setNewStage(s => ({ ...s, stage_key: e.target.value }))} placeholder="proposal" className="h-8 text-xs" /></div>
@@ -335,7 +335,7 @@ export default function PipelineSettingsPage() {
   const [showOdooImport, setShowOdooImport] = useState(false);
 
   if (membershipLoading) {
-    return <div className="p-4 space-y-4 max-w-2xl mx-auto"><Skeleton className="h-8 w-48" /><Skeleton className="h-40 w-full rounded-xl" /></div>;
+    return <div className="p-4 space-y-4 max-w-2xl mx-auto"><Skeleton className="h-8 w-48" /><Skeleton className="h-40 w-full rounded-none" /></div>;
   }
 
   if (!membership || !['owner', 'admin', 'director', 'manager'].includes(membership.role)) {
@@ -379,12 +379,12 @@ export default function PipelineSettingsPage() {
       </p>
 
       <Tabs defaultValue="stages">
-        <TabsList className="w-full flex overflow-x-auto h-auto flex-wrap gap-1 bg-muted/50 p-1 rounded-xl">
+        <TabsList className="w-full flex overflow-x-auto h-auto flex-wrap gap-1 bg-muted/50 p-1 rounded-none">
           {tabs.map(tab => (
             <TabsTrigger
               key={tab.value}
               value={tab.value}
-              className="text-xs flex-1 min-w-fit data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-lg"
+              className="text-xs flex-1 min-w-fit data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-none"
             >
               {tab.label}
             </TabsTrigger>

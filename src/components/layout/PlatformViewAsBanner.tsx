@@ -15,7 +15,7 @@ export function PlatformViewAsBanner() {
   const label = targetEmail || targetUserId.slice(0, 8);
 
   return (
-    <div className="sticky top-0 z-50 bg-violet-600/95 text-violet-50 backdrop-blur border-b border-violet-800/40">
+    <div className="sticky top-0 z-50 bg-primary/95 text-muted-foreground backdrop-blur border-b border-primary/40/40">
       <div className="max-w-7xl mx-auto px-4 py-1.5 flex items-center gap-3 text-xs sm:text-sm">
         <Eye className="w-4 h-4 shrink-0" />
         <span className="truncate flex-1">
@@ -36,7 +36,7 @@ export function PlatformViewAsBanner() {
         <button
           type="button"
           onClick={() => void exit()}
-          className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-violet-950/25 hover:bg-violet-950/40 transition-colors font-medium shrink-0"
+          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-none bg-primary/25 hover:bg-primary/40 transition-colors font-medium shrink-0"
         >
           <X className="w-3.5 h-3.5" />
           {isRu ? 'Выйти' : 'Exit'}

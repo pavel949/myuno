@@ -93,7 +93,7 @@ export const ChatMessageTranslation: React.FC<ChatMessageTranslationProps> = ({
         </Button>
       ) : (
         <div className="space-y-1">
-          <div className="flex items-start gap-2 p-2 rounded-lg bg-muted/50 border border-border/50">
+          <div className="flex items-start gap-2 p-2 rounded-none bg-muted/50 border border-border/50">
             <Check className="w-3 h-3 text-primary mt-0.5 flex-shrink-0" />
             <p className="text-xs text-foreground/90 whitespace-pre-wrap break-words">
               {translation}

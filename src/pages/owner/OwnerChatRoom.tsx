@@ -90,7 +90,7 @@ export default function OwnerChatRoom() {
         <div className="mb-2">
           <button
             onClick={() => setShowBookingContext(!showBookingContext)}
-            className="w-full flex items-center justify-between px-3 py-2 bg-muted/50 rounded-lg text-sm"
+            className="w-full flex items-center justify-between px-3 py-2 bg-muted/50 rounded-none text-sm"
           >
             <span className="font-medium flex items-center gap-1.5">
               <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
@@ -104,7 +104,7 @@ export default function OwnerChatRoom() {
             {showBookingContext ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
           {showBookingContext && (
-            <div className="px-3 py-2 bg-muted/30 rounded-b-lg border-t border-border/50 flex items-center gap-4 text-xs text-muted-foreground">
+            <div className="px-3 py-2 bg-muted/30 rounded-none border-t border-border/50 flex items-center gap-4 text-xs text-muted-foreground">
               {booking.guests_count && (
                 <span className="flex items-center gap-1">
                   <Users className="w-3 h-3" /> {booking.guests_count} {isRu ? 'гост.' : 'guests'}

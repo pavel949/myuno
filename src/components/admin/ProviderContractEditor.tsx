@@ -216,7 +216,7 @@ export function ProviderContractEditor({ providerId, providerName }: ProviderCon
                 <RadioGroupItem value={opt.value} id={`payment-${opt.value}`} className="peer sr-only" />
                 <Label
                   htmlFor={`payment-${opt.value}`}
-                  className="flex items-center justify-center rounded-md border-2 border-muted bg-popover px-3 py-2 text-sm font-medium cursor-pointer peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 hover:bg-accent hover:text-accent-foreground"
+                  className="flex items-center justify-center rounded-none border-2 border-muted bg-popover px-3 py-2 text-sm font-medium cursor-pointer peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 hover:bg-accent hover:text-accent-foreground"
                 >
                   {isRussian ? opt.labelRu : opt.labelEn}
                 </Label>
@@ -245,7 +245,7 @@ export function ProviderContractEditor({ providerId, providerName }: ProviderCon
                 <RadioGroupItem value={opt.value} id={`type-${opt.value}`} className="peer sr-only" />
                 <Label
                   htmlFor={`type-${opt.value}`}
-                  className="flex items-center justify-center rounded-md border-2 border-muted bg-popover px-3 py-2 text-sm font-medium cursor-pointer peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 hover:bg-accent hover:text-accent-foreground"
+                  className="flex items-center justify-center rounded-none border-2 border-muted bg-popover px-3 py-2 text-sm font-medium cursor-pointer peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 hover:bg-accent hover:text-accent-foreground"
                 >
                   {isRussian ? opt.labelRu : opt.labelEn}
                 </Label>

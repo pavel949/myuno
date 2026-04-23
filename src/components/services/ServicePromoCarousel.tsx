@@ -16,8 +16,8 @@ export function ServicePromoCarousel() {
     return (
       <div className="px-4 py-4">
         <div className="flex gap-3 overflow-hidden">
-          <Skeleton className="w-[280px] h-[140px] rounded-2xl shrink-0" />
-          <Skeleton className="w-[280px] h-[140px] rounded-2xl shrink-0" />
+          <Skeleton className="w-[280px] h-[140px] rounded-none shrink-0" />
+          <Skeleton className="w-[280px] h-[140px] rounded-none shrink-0" />
         </div>
       </div>
     );
@@ -33,7 +33,7 @@ export function ServicePromoCarousel() {
           onClick={() => navigate(promo.link_path)}
           className={cn(
             "w-[280px] h-[140px] shrink-0 snap-center",
-            "relative rounded-2xl overflow-hidden",
+            "relative rounded-none overflow-hidden",
             "group touch-manipulation"
           )}
         >
@@ -47,7 +47,7 @@ export function ServicePromoCarousel() {
           {/* Gradient overlay */}
           <div className={cn(
             "absolute inset-0 bg-gradient-to-r",
-            promo.gradient || 'from-primary/80 to-amber-500/60'
+            promo.gradient || 'from-primary/80 to-accent/60'
           )} />
           
           {/* Content */}

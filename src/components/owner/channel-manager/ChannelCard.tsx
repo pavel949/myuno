@@ -37,7 +37,7 @@ export function ChannelCard({ calendar, channel, propertyName, bookingsCount, is
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
           <div className={cn(
-            "w-12 h-12 rounded-xl flex items-center justify-center text-2xl shrink-0",
+            "w-12 h-12 rounded-none flex items-center justify-center text-2xl shrink-0",
             channel.bgColor
           )}>
             {channel.logo}

@@ -115,7 +115,7 @@ const MarketCatalogPage = () => {
                 placeholder={language === 'ru' ? 'Найти категорию' : 'Find category'}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 h-11 rounded-xl bg-muted border-0"
+                className="pl-10 h-11 rounded-none bg-muted border-0"
               />
             </div>
           </div>
@@ -126,7 +126,7 @@ const MarketCatalogPage = () => {
           {isLoading ? (
             <div className="space-y-2">
               {[...Array(8)].map((_, i) => (
-                <div key={i} className="h-16 bg-muted animate-pulse rounded-xl" />
+                <div key={i} className="h-16 bg-muted animate-pulse rounded-none" />
               ))}
             </div>
           ) : sortedCategories.length === 0 ? (
@@ -143,7 +143,7 @@ const MarketCatalogPage = () => {
                     key={category.id}
                     onClick={() => navigate(`/market/category/${category.slug}`)}
                     className={cn(
-                      "w-full flex items-center gap-4 p-4 rounded-xl",
+                      "w-full flex items-center gap-4 p-4 rounded-none",
                       "bg-card hover:bg-muted/50 active:bg-muted",
                       "transition-colors duration-150",
                       "text-left"
@@ -154,10 +154,10 @@ const MarketCatalogPage = () => {
                       <img 
                         src={category.image_url} 
                         alt=""
-                        className="w-12 h-12 rounded-xl object-cover shrink-0"
+                        className="w-12 h-12 rounded-none object-cover shrink-0"
                       />
                     ) : (
-                      <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center text-2xl shrink-0">
+                      <div className="w-12 h-12 rounded-none bg-muted flex items-center justify-center text-2xl shrink-0">
                         {category.icon || getCategoryIcon(category.slug)}
                       </div>
                     )}

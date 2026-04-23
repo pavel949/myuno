@@ -47,7 +47,7 @@ export function ProductAttributes({ productId, compact = false }: ProductAttribu
         {attributes.map((attr) => (
           <div 
             key={attr.key} 
-            className="flex items-start gap-2 p-2 rounded-lg bg-muted/50"
+            className="flex items-start gap-2 p-2 rounded-none bg-muted/50"
           >
             <span className="text-muted-foreground shrink-0 mt-0.5">
               {ATTRIBUTE_ICONS[attr.key] || <Tag className="w-3.5 h-3.5" />}

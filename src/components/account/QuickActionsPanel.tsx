@@ -34,7 +34,7 @@ export function QuickActionsPanel() {
               onClick={() => navigate(action.path)}
               className="flex flex-col items-center gap-2 min-w-[72px] group"
             >
-              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-105 group-active:scale-95 ${action.color}`}>
+              <div className={`w-14 h-14 rounded-none flex items-center justify-center transition-transform group-hover:scale-105 group-active:scale-95 ${action.color}`}>
                 <Icon className="w-6 h-6" />
               </div>
               <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">

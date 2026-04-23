@@ -265,7 +265,7 @@ export default function AdminApiKeys() {
                 </CardContent>
                 {revealedSecrets.has(secret.key) && (
                   <div className="px-4 pb-4 pt-0">
-                    <div className="rounded-md bg-muted/50 p-3 font-mono text-xs text-muted-foreground">
+                    <div className="rounded-none bg-muted/50 p-3 font-mono text-xs text-muted-foreground">
                       {secret.configured 
                         ? (isRu ? '✅ Ключ настроен и доступен в edge functions' : '✅ Key is configured and available in edge functions')
                         : (isRu ? '❌ Ключ отсутствует. Добавьте через Lovable Cloud → Settings → Secrets' : '❌ Key is missing. Add via Lovable Cloud → Settings → Secrets')}

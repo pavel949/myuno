@@ -149,7 +149,7 @@ export default function TeamModerationPage() {
                         return (
                           <div key={item.id} className="p-4">
                             <div className="flex items-start gap-3">
-                              <div className={cn("p-2 rounded-lg shrink-0", config?.color)}>
+                              <div className={cn("p-2 rounded-none shrink-0", config?.color)}>
                                 <Icon className="h-4 w-4" />
                               </div>
                               <div className="flex-1 min-w-0">
@@ -163,7 +163,7 @@ export default function TeamModerationPage() {
                                   {item.submitted_by_name || (isRu ? 'Аноним' : 'Anonymous')} • {formatDistanceToNow(new Date(item.created_at), { addSuffix: true, locale: dateLocale })}
                                 </p>
                                 {item.item_type === 'review' && item.content && (
-                                  <div className="p-2 bg-muted/50 rounded-lg text-sm mb-2">
+                                  <div className="p-2 bg-muted/50 rounded-none text-sm mb-2">
                                     <div className="flex items-center gap-1 mb-1">
                                       {[...Array(5)].map((_, i) => (
                                         <Star key={i} className={cn("h-3 w-3", i < (item.rating || 0) ? "text-warning fill-warning" : "text-muted")} />

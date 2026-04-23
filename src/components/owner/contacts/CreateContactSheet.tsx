@@ -352,7 +352,7 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
           <Button variant="outline" size="sm" type="button" onClick={addCustomInterest} disabled={!customInterest.trim()}>+</Button>
         </div>
       </div>
-      <div className="flex items-center justify-between rounded-lg border p-3">
+      <div className="flex items-center justify-between rounded-none border p-3">
         <div>
           <p className="text-sm font-medium">{isRu ? 'VIP' : 'VIP'}</p>
           <p className="text-xs text-muted-foreground">{isRu ? 'Приоритетный клиент' : 'Priority client'}</p>
@@ -443,7 +443,7 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
       </div>
 
       {/* KYC Section */}
-      <div className="rounded-lg border p-3 space-y-3">
+      <div className="rounded-none border p-3 space-y-3">
         <p className="text-sm font-semibold flex items-center gap-2">
           <Shield className="h-4 w-4 text-muted-foreground" />
           {isRu ? 'KYC / Compliance' : 'KYC / Compliance'}

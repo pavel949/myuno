@@ -216,7 +216,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
           <button
             type="button"
             title={isRu ? 'Открыть на карте' : 'Open on map'}
-            className="h-11 w-11 shrink-0 rounded-lg border border-border bg-background flex items-center justify-center hover:bg-accent transition-colors"
+            className="h-11 w-11 shrink-0 rounded-none border border-border bg-background flex items-center justify-center hover:bg-accent transition-colors"
             onClick={() => {
               const mapQuery = encodeURIComponent(value);
               const mapUrl = isRu
@@ -231,7 +231,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
       </div>
 
       {showDropdown && (
-        <div className="absolute z-[100] left-0 right-0 mt-1 bg-popover border border-border rounded-xl shadow-lg max-h-[60vh] overflow-y-auto touch-pan-y">
+        <div className="absolute z-[100] left-0 right-0 mt-1 bg-popover border border-border rounded-none shadow-lg max-h-[60vh] overflow-y-auto touch-pan-y">
           {/* Use my location */}
           <button
             type="button"
@@ -239,7 +239,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
             onClick={handleUseLocation}
             disabled={geolocating}
           >
-            <div className="w-8 h-8 rounded-lg bg-info/10 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-none bg-info/10 flex items-center justify-center shrink-0">
               {geolocating ? <Loader2 className="w-4 h-4 animate-spin text-info" /> : <Navigation className="w-4 h-4 text-info" />}
             </div>
             <span className="text-sm font-medium">{isRu ? 'Мое местоположение' : 'Use my location'}</span>
@@ -314,7 +314,7 @@ function SuggestionRow({ suggestion, onSelect, icon, iconBg }: {
       className="w-full flex items-start gap-3 px-3 py-2.5 hover:bg-accent/50 active:bg-accent transition-colors text-left min-h-[48px]"
       onClick={() => onSelect(suggestion)}
     >
-      <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5", iconBg)}>
+      <div className={cn("w-8 h-8 rounded-none flex items-center justify-center shrink-0 mt-0.5", iconBg)}>
         {icon}
       </div>
       <div className="min-w-0">

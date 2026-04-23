@@ -49,7 +49,7 @@ export function ListCard({
     <div
       onClick={handleClick}
       className={cn(
-        "cursor-pointer bg-card rounded-2xl overflow-hidden shadow-sm border",
+        "cursor-pointer bg-card rounded-none overflow-hidden shadow-sm border",
         "hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 transition-all active:scale-[0.98]",
         className
       )}
@@ -66,12 +66,12 @@ export function ListCard({
           {(isNew || isFeatured) && (
             <div className="absolute top-2 left-2 flex flex-col gap-1">
               {isNew && (
-                <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-primary text-primary-foreground">
+                <span className="px-1.5 py-0.5 text-[10px] font-medium rounded-none bg-primary text-primary-foreground">
                   NEW
                 </span>
               )}
               {isFeatured && (
-                <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-primary text-primary-foreground flex items-center gap-0.5">
+                <span className="px-1.5 py-0.5 text-[10px] font-medium rounded-none bg-primary text-primary-foreground flex items-center gap-0.5">
                   <Star className="w-3 h-3 fill-current" />
                 </span>
               )}

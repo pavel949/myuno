@@ -23,7 +23,7 @@ function DraggableCard({ deal, onEdit }: { deal: Record<string, unknown>; onEdit
 
   return (
     <div
-      className="rounded-lg border border-border/30 p-3 bg-background hover:border-emerald-500/30 transition-colors cursor-grab active:cursor-grabbing"
+      className="rounded-none border border-border/30 p-3 bg-background hover:border-success/40/30 transition-colors cursor-grab active:cursor-grabbing"
       onClick={onEdit}
     >
       <div className="flex items-start gap-2">
@@ -32,7 +32,7 @@ function DraggableCard({ deal, onEdit }: { deal: Record<string, unknown>; onEdit
           <p className="font-medium text-sm truncate">{contact?.name || 'Контакт'}</p>
           {project?.name && <p className="text-xs text-muted-foreground truncate">{project.name}</p>}
           {deal.commission_expected && (
-            <p className="text-xs text-emerald-400 mt-1">
+            <p className="text-xs text-success mt-1">
               {(deal.commission_expected as number).toLocaleString()} {deal.price_currency as string}
             </p>
           )}
@@ -153,10 +153,10 @@ export default function CapitalPipeline() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
         <h1 className="text-xl font-bold">Воронка</h1>
         <div className="flex items-center gap-3">
-          <Badge className="bg-emerald-500/20 text-emerald-400">
+          <Badge className="bg-success/20 text-success">
             Ожидаемая комиссия: {totalCommission.toLocaleString()} THB
           </Badge>
-          <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700" onClick={openCreate}>
+          <Button size="sm" className="bg-success hover:bg-success" onClick={openCreate}>
             <Plus className="w-4 h-4 mr-1" /> Сделка
           </Button>
         </div>
@@ -231,7 +231,7 @@ export default function CapitalPipeline() {
             </div>
             <div><Label>Ожидаемая комиссия</Label><Input type="number" value={form.commission_expected} onChange={(e) => setForm({ ...form, commission_expected: e.target.value })} /></div>
             <div><Label>Заметки</Label><Input value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></div>
-            <Button onClick={handleSave} className="bg-emerald-600 hover:bg-emerald-700">{editId ? 'Сохранить' : 'Создать'}</Button>
+            <Button onClick={handleSave} className="bg-success hover:bg-success">{editId ? 'Сохранить' : 'Создать'}</Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -245,9 +245,9 @@ function KanbanColumn({ stage, deals, onEdit }: { stage: PipelineStage; deals: R
   return (
     <div
       ref={setNodeRef}
-      className="flex-shrink-0 w-64 md:w-72 rounded-lg border border-border/30 bg-muted/10"
+      className="flex-shrink-0 w-64 md:w-72 rounded-none border border-border/30 bg-muted/10"
     >
-      <div className={`p-3 border-b border-border/30 ${PIPELINE_STAGE_COLORS[stage]} rounded-t-lg`}>
+      <div className={`p-3 border-b border-border/30 ${PIPELINE_STAGE_COLORS[stage]} rounded-none`}>
         <div className="flex items-center justify-between">
           <span className="font-medium text-sm">{PIPELINE_STAGE_LABELS[stage]}</span>
           <Badge variant="outline" className="text-xs">{deals.length}</Badge>

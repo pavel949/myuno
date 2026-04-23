@@ -64,7 +64,7 @@ export function LocationStep({ formData, updateFormData }: LocationStepProps) {
         <CardContent className="space-y-4">
           {showCompactLocation ? (
             <>
-              <div className="flex items-center justify-between gap-2 rounded-lg bg-muted/50 p-3">
+              <div className="flex items-center justify-between gap-2 rounded-none bg-muted/50 p-3">
                 <p className="text-sm truncate flex-1" title={formData.address}>
                   <MapPin className="h-3.5 w-3 inline-block mr-1.5 text-muted-foreground" />
                   {formData.address || (formData.lat != null && formData.lng != null ? `${formData.lat.toFixed(4)}, ${formData.lng.toFixed(4)}` : '')}

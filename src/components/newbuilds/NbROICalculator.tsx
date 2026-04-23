@@ -146,7 +146,7 @@ export function NbROICalculator({ defaultPrice, defaultRoi, defaultCamFee, compa
               value={inputs[key] || ''}
               onChange={e => update(key, e.target.value)}
               placeholder={placeholder}
-              className="w-full px-3 py-2 rounded-lg text-sm"
+              className="w-full px-3 py-2 rounded-none text-sm"
               style={inputStyle}
             />
           </div>
@@ -159,19 +159,19 @@ export function NbROICalculator({ defaultPrice, defaultRoi, defaultCamFee, compa
         <p className="nb-label">РЕЗУЛЬТАТЫ</p>
 
         <div className={`grid ${compact ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-4'} gap-3`}>
-          <div className="p-3 rounded-lg" style={{ background: 'hsl(var(--nb-surface))' }}>
+          <div className="p-3 rounded-none" style={{ background: 'hsl(var(--nb-surface))' }}>
             <p className="text-[10px] mb-1" style={{ color: 'hsl(var(--nb-muted))' }}>Gross доход/год</p>
             <p className="nb-mono text-sm font-bold" style={{ color: 'hsl(var(--nb-gold))' }}>{formatThb(results.grossRentalIncome)}</p>
           </div>
-          <div className="p-3 rounded-lg" style={{ background: 'hsl(var(--nb-surface))' }}>
+          <div className="p-3 rounded-none" style={{ background: 'hsl(var(--nb-surface))' }}>
             <p className="text-[10px] mb-1" style={{ color: 'hsl(var(--nb-muted))' }}>Net доход/год</p>
             <p className="nb-mono text-sm font-bold" style={{ color: results.netRentalIncome >= 0 ? 'hsl(142 70% 55%)' : 'hsl(0 70% 55%)' }}>{formatThb(results.netRentalIncome)}</p>
           </div>
-          <div className="p-3 rounded-lg" style={{ background: 'hsl(var(--nb-surface))' }}>
+          <div className="p-3 rounded-none" style={{ background: 'hsl(var(--nb-surface))' }}>
             <p className="text-[10px] mb-1" style={{ color: 'hsl(var(--nb-muted))' }}>Gross yield</p>
             <p className="nb-mono text-sm font-bold" style={{ color: 'hsl(var(--nb-gold))' }}>{results.grossYield.toFixed(1)}%</p>
           </div>
-          <div className="p-3 rounded-lg" style={{ background: 'hsl(var(--nb-surface))' }}>
+          <div className="p-3 rounded-none" style={{ background: 'hsl(var(--nb-surface))' }}>
             <p className="text-[10px] mb-1" style={{ color: 'hsl(var(--nb-muted))' }}>Net yield</p>
             <p className="nb-mono text-sm font-bold" style={{ color: results.netYield >= 0 ? 'hsl(142 70% 55%)' : 'hsl(0 70% 55%)' }}>{results.netYield.toFixed(1)}%</p>
           </div>
@@ -242,7 +242,7 @@ export function NbROICalculator({ defaultPrice, defaultRoi, defaultCamFee, compa
         {/* Copy results */}
         <button
           onClick={copyResults}
-          className="w-full py-2.5 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-all"
+          className="w-full py-2.5 rounded-none text-sm font-medium flex items-center justify-center gap-2 transition-all"
           style={{ background: 'hsl(var(--nb-gold) / 0.15)', color: 'hsl(var(--nb-gold))', border: '1px solid hsl(var(--nb-gold) / 0.3)' }}
         >
           {copied ? <><Check className="w-4 h-4" /> Скопировано</> : <><Copy className="w-4 h-4" /> Копировать результаты</>}

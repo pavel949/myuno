@@ -99,7 +99,7 @@ export default function TeamLeadsPage() {
 
         {/* Stats */}
         <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-5 gap-2">
-          <Card className="p-3 text-center bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200">
+          <Card className="p-3 text-center bg-accent/10 dark:bg-accent/30 border-accent/40">
             <p className="text-xl font-bold">{stats.pending}</p>
             <p className="text-xs text-muted-foreground">{isRu ? 'Новые' : 'New'}</p>
           </Card>
@@ -107,15 +107,15 @@ export default function TeamLeadsPage() {
             <p className="text-xl font-bold">{stats.overdue}</p>
             <p className="text-xs text-muted-foreground">{isRu ? 'Просрочено' : 'Overdue'}</p>
           </Card>
-          <Card className="p-3 text-center bg-blue-50 dark:bg-blue-950/30 border-blue-200">
+          <Card className="p-3 text-center bg-primary/10 dark:bg-primary/30 border-primary/40">
             <p className="text-xl font-bold">{stats.contacted}</p>
             <p className="text-xs text-muted-foreground">{isRu ? 'Связались' : 'Contacted'}</p>
           </Card>
-          <Card className="p-3 text-center bg-indigo-50 dark:bg-indigo-950/30 border-indigo-200">
+          <Card className="p-3 text-center bg-primary/10 dark:bg-primary/30 border-primary/40">
             <p className="text-xl font-bold">{stats.inProgress}</p>
             <p className="text-xs text-muted-foreground">{isRu ? 'В работе' : 'In Progress'}</p>
           </Card>
-          <Card className="p-3 text-center bg-green-50 dark:bg-green-950/30 border-green-200">
+          <Card className="p-3 text-center bg-success/10 dark:bg-success/30 border-success/40">
             <p className="text-xl font-bold">{stats.completed}</p>
             <p className="text-xs text-muted-foreground">{isRu ? 'Готово' : 'Done'}</p>
           </Card>
@@ -187,7 +187,7 @@ export default function TeamLeadsPage() {
                     )}>
                       <CardContent className="p-4">
                         <div className="flex items-start gap-3">
-                          <div className={cn("p-2 rounded-lg", typeConfig?.color)}>
+                          <div className={cn("p-2 rounded-none", typeConfig?.color)}>
                             <TypeIcon className="h-4 w-4" />
                           </div>
                           

@@ -158,7 +158,7 @@ export function StepByStepNav({ title, steps, className }: StepByStepNavProps) {
                   : {})}
                 className={cn(
                   'w-full text-left flex items-start gap-3 py-3 min-h-[44px]',
-                  interactive && 'active:opacity-70 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md',
+                  interactive && 'active:opacity-70 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-none',
                   step.status === 'locked' && 'opacity-50'
                 )}
                 disabled={interactive ? false : undefined}

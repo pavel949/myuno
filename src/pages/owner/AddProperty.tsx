@@ -227,7 +227,7 @@ export default function AddProperty() {
           
           {/* Map preview when coordinates are set */}
           {wizard.formData.lat && wizard.formData.lng && (
-            <div className="rounded-lg overflow-hidden border">
+            <div className="rounded-none overflow-hidden border">
               {GOOGLE_MAPS_API_KEY && (
                 <img
                   src={`https://maps.googleapis.com/maps/api/staticmap?center=${wizard.formData.lat},${wizard.formData.lng}&zoom=14&size=320x200&scale=2&markers=color:red%7C${wizard.formData.lat},${wizard.formData.lng}&key=${GOOGLE_MAPS_API_KEY}`}

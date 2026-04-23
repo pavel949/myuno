@@ -120,7 +120,7 @@ export function QuickCategoryGrid({
               type="button"
               onClick={() => onSelect(cat.code)}
               className={cn(
-                'flex flex-col items-center gap-1 p-2.5 rounded-xl shrink-0 min-w-[64px] transition-all',
+                'flex flex-col items-center gap-1 p-2.5 rounded-none shrink-0 min-w-[64px] transition-all',
                 'border-2 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1',
                 isSelected 
                   ? 'border-primary bg-primary text-primary-foreground shadow-md' 
@@ -128,7 +128,7 @@ export function QuickCategoryGrid({
               )}
             >
               <div className={cn(
-                'w-10 h-10 rounded-xl flex items-center justify-center shadow-sm',
+                'w-10 h-10 rounded-none flex items-center justify-center shadow-sm',
                 isSelected ? 'bg-primary-foreground/20' : color
               )}>
                 <Icon className={cn('h-5 w-5', isSelected && 'text-primary-foreground')} strokeWidth={2.2} />
@@ -142,7 +142,7 @@ export function QuickCategoryGrid({
               {/* Classification badge */}
               {!isSelected && (
                 <span className={cn(
-                  'text-[8px] leading-none px-1 py-0.5 rounded font-medium border',
+                  'text-[8px] leading-none px-1 py-0.5 rounded-none font-medium border',
                   CLASS_COLORS[cat.category_class] || 'text-muted-foreground bg-muted'
                 )}>
                   {isRu ? CLASS_LABELS[cat.category_class]?.ru?.charAt(0) : CLASS_LABELS[cat.category_class]?.en?.charAt(0)}
@@ -160,11 +160,11 @@ export function QuickCategoryGrid({
           type="button"
           onClick={() => setShowAdd(true)}
           className={cn(
-            'flex flex-col items-center gap-1 p-2.5 rounded-xl shrink-0 min-w-[64px] transition-all',
+            'flex flex-col items-center gap-1 p-2.5 rounded-none shrink-0 min-w-[64px] transition-all',
             'border-2 border-dashed border-muted-foreground/30 hover:border-primary/50 hover:bg-muted'
           )}
         >
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-muted">
+          <div className="w-10 h-10 rounded-none flex items-center justify-center bg-muted">
             <Plus className="h-5 w-5 text-muted-foreground" strokeWidth={2.2} />
           </div>
           <span className="text-[10px] font-medium text-muted-foreground whitespace-nowrap">

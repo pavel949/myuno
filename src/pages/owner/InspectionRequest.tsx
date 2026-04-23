@@ -155,7 +155,7 @@ export default function InspectionRequest() {
                 key={type.value}
                 onClick={() => setFormData(prev => ({ ...prev, inspection_type: type.value }))}
                 className={cn(
-                  "flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors",
+                  "flex items-start gap-3 p-4 rounded-none border-2 cursor-pointer transition-colors",
                   formData.inspection_type === type.value
                     ? "border-primary bg-primary/5"
                     : "border-muted hover:border-muted-foreground/30"

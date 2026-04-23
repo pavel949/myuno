@@ -45,7 +45,7 @@ export function PartnerCTACard() {
       <button
         onClick={() => navigate('/become-partner')}
         className={cn(
-          "relative w-full rounded-2xl overflow-hidden",
+          "relative w-full rounded-none overflow-hidden",
           "bg-gradient-to-br from-primary via-primary/90 to-accent",
           "p-5 text-left",
           "shadow-lg hover:shadow-xl transition-all duration-300",
@@ -63,7 +63,7 @@ export function PartnerCTACard() {
           <div className="flex items-start justify-between">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                <div className="w-10 h-10 rounded-none bg-white/20 backdrop-blur-sm flex items-center justify-center">
                   <TrendingUp className="w-5 h-5 text-white" />
                 </div>
                 <div>
@@ -105,7 +105,7 @@ export function PartnerCTACard() {
           
           {/* Bottom CTA */}
           <div className="flex items-center gap-2 pt-1">
-            <Zap className="w-4 h-4 text-amber-300" />
+            <Zap className="w-4 h-4 text-accent" />
             <span className="text-white/90 text-sm">
               {isRu 
                 ? 'Бесплатная регистрация • Комиссия от 5%' 

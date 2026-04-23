@@ -106,7 +106,7 @@ export function CancellationPolicySelector({
             <div className="space-y-4 py-2">
               {/* Selected policy preview */}
               <div className={cn(
-                "p-4 rounded-xl border-2",
+                "p-4 rounded-none border-2",
                 getColorClasses(selectedPolicy.color, true).bg,
                 getColorClasses(selectedPolicy.color, true).border
               )}>
@@ -155,7 +155,7 @@ export function CancellationPolicySelector({
 
               {/* Discount badge for non-refundable */}
               {'discount' in selectedPolicy && selectedPolicy.discount && (
-                <div className="flex items-center gap-2 p-3 bg-primary/10 rounded-lg">
+                <div className="flex items-center gap-2 p-3 bg-primary/10 rounded-none">
                   <DollarSign className="w-5 h-5 text-primary" />
                   <span className="text-sm font-medium">
                     {isRu 
@@ -185,7 +185,7 @@ export function CancellationPolicySelector({
               transition={{ delay: index * 0.05 }}
               onClick={() => onChange(policy.key)}
               className={cn(
-                "relative flex items-start gap-3 p-3 rounded-xl border-2 text-left transition-all",
+                "relative flex items-start gap-3 p-3 rounded-none border-2 text-left transition-all",
                 colors.bg,
                 colors.border,
                 isSelected ? 'ring-2 ring-primary/20' : 'hover:border-primary/50'
@@ -205,7 +205,7 @@ export function CancellationPolicySelector({
 
               {/* Icon */}
               <div className={cn(
-                "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0",
+                "w-8 h-8 rounded-none flex items-center justify-center flex-shrink-0",
                 colors.bg
               )}>
                 <Icon className={cn("w-4 h-4", colors.text)} />
@@ -242,7 +242,7 @@ export function CancellationPolicySelector({
       </div>
 
       {/* Recommendation hint */}
-      <div className="flex items-start gap-2 p-3 bg-muted/50 rounded-lg">
+      <div className="flex items-start gap-2 p-3 bg-muted/50 rounded-none">
         <AlertTriangle className="w-4 h-4 text-warning flex-shrink-0 mt-0.5" />
         <p className="text-xs text-muted-foreground">
           {isRu 

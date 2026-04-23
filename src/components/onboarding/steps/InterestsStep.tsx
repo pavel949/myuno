@@ -52,7 +52,7 @@ export const InterestsStep = forwardRef<HTMLDivElement, InterestsStepProps>(
     return (
       <div ref={ref} className="space-y-6 flex-1">
         <div className="text-center">
-          <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center mb-4">
+          <div className="w-16 h-16 mx-auto rounded-none bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center mb-4">
             <StepIcon className="w-8 h-8 text-primary-foreground" />
           </div>
           <h2 className="text-xl font-bold mb-1">
@@ -79,14 +79,14 @@ export const InterestsStep = forwardRef<HTMLDivElement, InterestsStepProps>(
                 variants={itemVariants}
                 onClick={() => toggleInterest(interest.id)}
                 className={cn(
-                  "flex items-center gap-3 p-4 rounded-xl border-2 transition-all relative",
+                  "flex items-center gap-3 p-4 rounded-none border-2 transition-all relative",
                   isSelected 
                     ? "border-primary bg-primary/10" 
                     : "border-border hover:border-primary/50 bg-card"
                 )}
               >
                 <div className={cn(
-                  "w-10 h-10 rounded-lg bg-gradient-to-br flex items-center justify-center shrink-0",
+                  "w-10 h-10 rounded-none bg-gradient-to-br flex items-center justify-center shrink-0",
                   interest.color
                 )}>
                   <IconComponent className="w-5 h-5 text-white" />

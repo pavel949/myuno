@@ -120,10 +120,10 @@ export default function AdminNewbuilds() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Новостройки — Управление</h1>
         <div className="flex gap-2 text-xs text-muted-foreground">
-          <span className="px-2 py-1 rounded bg-muted">{stats.total} всего</span>
-          <span className="px-2 py-1 rounded bg-green-100 text-green-700">{stats.approved} одобрено</span>
-          <span className="px-2 py-1 rounded bg-yellow-100 text-yellow-700">{stats.withCatalog} с каталогом</span>
-          <span className="px-2 py-1 rounded bg-blue-100 text-blue-700">{stats.featured} featured</span>
+          <span className="px-2 py-1 rounded-none bg-muted">{stats.total} всего</span>
+          <span className="px-2 py-1 rounded-none bg-success/10 text-success">{stats.approved} одобрено</span>
+          <span className="px-2 py-1 rounded-none bg-accent/10 text-accent">{stats.withCatalog} с каталогом</span>
+          <span className="px-2 py-1 rounded-none bg-primary/10 text-primary">{stats.featured} featured</span>
         </div>
       </div>
 
@@ -156,7 +156,7 @@ export default function AdminNewbuilds() {
 
         {/* ALL PROJECTS */}
         <TabsContent value="all" className="mt-2">
-          <div className="overflow-x-auto border rounded-lg">
+          <div className="overflow-x-auto border rounded-none">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b bg-muted/30">
@@ -196,7 +196,7 @@ export default function AdminNewbuilds() {
             <p className="text-muted-foreground">Нет проектов на проверке</p>
           ) : (
             <>
-              <div className="sticky top-0 z-10 flex items-center justify-between gap-2 p-3 mb-3 rounded-lg border bg-card shadow-sm">
+              <div className="sticky top-0 z-10 flex items-center justify-between gap-2 p-3 mb-3 rounded-none border bg-card shadow-sm">
                 <div className="flex items-center gap-3">
                   <Checkbox
                     checked={selectedIds.size > 0 && pending.every((p: any) => selectedIds.has(p.id))}
@@ -225,9 +225,9 @@ export default function AdminNewbuilds() {
                 )}
               </div>
               {pending.map((p: any) => (
-                <div key={p.id} className="border rounded-lg p-4 flex items-center gap-4">
+                <div key={p.id} className="border rounded-none p-4 flex items-center gap-4">
                   <Checkbox checked={selectedIds.has(p.id)} onCheckedChange={() => toggleSelect(p.id)} aria-label={`Выбрать ${p.name_en}`} />
-                  {p.cover_image && <img src={p.cover_image} className="w-16 h-16 rounded object-cover" alt={p.name_en} />}
+                  {p.cover_image && <img src={p.cover_image} className="w-16 h-16 rounded-none object-cover" alt={p.name_en} />}
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold truncate">{p.name_en}</h3>
                     <p className="text-sm text-muted-foreground">{p.developer_name} · {p.district || p.location_area}</p>
@@ -315,11 +315,11 @@ function ProjectRow({ project: p, index, isEditing, onEdit, onUpdate }: {
 
   return (
     <>
-      <tr className={`border-b hover:bg-muted/50 ${isEditing ? 'bg-blue-50/50' : ''}`}>
+      <tr className={`border-b hover:bg-muted/50 ${isEditing ? 'bg-primary/10/50' : ''}`}>
         <td className="p-3 text-xs text-muted-foreground">{index}</td>
         <td className="p-3">
           <div className="flex items-center gap-2">
-            {p.cover_image && <img src={p.cover_image} className="w-8 h-8 rounded object-cover" />}
+            {p.cover_image && <img src={p.cover_image} className="w-8 h-8 rounded-none object-cover" />}
             <span className="font-medium truncate max-w-[200px]">{p.name_en}</span>
           </div>
         </td>
@@ -335,16 +335,16 @@ function ProjectRow({ project: p, index, isEditing, onEdit, onUpdate }: {
               <Edit2 className="w-3.5 h-3.5" />
             </Button>
             <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => onUpdate({ is_featured: !p.is_featured })}>
-              {p.is_featured ? <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" /> : <StarOff className="w-3.5 h-3.5 text-muted-foreground" />}
+              {p.is_featured ? <Star className="w-3.5 h-3.5 text-accent fill-accent" /> : <StarOff className="w-3.5 h-3.5 text-muted-foreground" />}
             </Button>
             <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => onUpdate({ is_approved: !p.is_approved })}>
-              {p.is_approved ? <Check className="w-3.5 h-3.5 text-green-500" /> : <X className="w-3.5 h-3.5 text-red-400" />}
+              {p.is_approved ? <Check className="w-3.5 h-3.5 text-success" /> : <X className="w-3.5 h-3.5 text-red-400" />}
             </Button>
           </div>
         </td>
       </tr>
       {isEditing && (
-        <tr className="bg-blue-50/30">
+        <tr className="bg-primary/10/30">
           <td colSpan={9} className="p-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
               <div>
@@ -426,7 +426,7 @@ function ProjectRow({ project: p, index, isEditing, onEdit, onUpdate }: {
 /* ─── Featured row with rank/label editing ─── */
 function FeaturedRow({ project: p, onUpdate, onRemove }: { project: any; onUpdate: (u: any) => void; onRemove: () => void }) {
   return (
-    <div className="border rounded-lg p-4 flex items-center gap-4">
+    <div className="border rounded-none p-4 flex items-center gap-4">
       <div className="flex items-center gap-2 w-12">
         <Input
           type="number"
@@ -436,7 +436,7 @@ function FeaturedRow({ project: p, onUpdate, onRemove }: { project: any; onUpdat
           placeholder="#"
         />
       </div>
-      {p.cover_image && <img src={p.cover_image} className="w-14 h-10 rounded object-cover" />}
+      {p.cover_image && <img src={p.cover_image} className="w-14 h-10 rounded-none object-cover" />}
       <div className="flex-1 min-w-0">
         <h3 className="font-semibold text-sm truncate">{p.name_en}</h3>
         <p className="text-xs text-muted-foreground">{p.developer_name} · Score: {p.muuno_score || '—'}</p>
@@ -459,7 +459,7 @@ function DeveloperRow({ developer: d, projectCount, onUpdate }: { developer: any
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className="border rounded-lg">
+    <div className="border rounded-none">
       <div className="p-4 flex items-center gap-4">
         {d.logo_url && <img src={d.logo_url} className="w-12 h-12 rounded-full object-cover" />}
         <div className="flex-1">
@@ -467,7 +467,7 @@ function DeveloperRow({ developer: d, projectCount, onUpdate }: { developer: any
           <p className="text-sm text-muted-foreground">{projectCount} проектов · {d.email || d.website || '—'}</p>
         </div>
         <Button size="sm" variant="outline" onClick={() => onUpdate({ is_verified: !d.is_verified })}>
-          {d.is_verified ? <Shield className="w-4 h-4 text-green-500 mr-1" /> : <ShieldOff className="w-4 h-4 text-muted-foreground mr-1" />}
+          {d.is_verified ? <Shield className="w-4 h-4 text-success mr-1" /> : <ShieldOff className="w-4 h-4 text-muted-foreground mr-1" />}
           {d.is_verified ? 'Верифицирован' : 'Верифицировать'}
         </Button>
         <Button size="sm" variant="ghost" onClick={() => setExpanded(!expanded)}>

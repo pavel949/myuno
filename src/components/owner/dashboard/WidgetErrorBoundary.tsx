@@ -37,7 +37,7 @@ export class WidgetErrorBoundary extends Component<Props, State> {
 
     const isRu = getStoredLang() === 'ru';
     return (
-      <div className="flex items-center gap-3 p-4 rounded-xl border border-border bg-muted/30 text-muted-foreground">
+      <div className="flex items-center gap-3 p-4 rounded-none border border-border bg-muted/30 text-muted-foreground">
         <AlertTriangle className="h-4 w-4 shrink-0 text-warning" />
         <span className="text-sm flex-1">
           {isRu ? 'Виджет временно недоступен' : 'Widget temporarily unavailable'}

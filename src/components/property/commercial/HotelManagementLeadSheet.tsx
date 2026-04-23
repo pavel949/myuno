@@ -107,10 +107,10 @@ export function HotelManagementLeadSheet({ open, onOpenChange }: Props) {
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="rounded-t-2xl max-h-[90vh] overflow-y-auto">
+      <SheetContent side="bottom" className="rounded-none max-h-[90vh] overflow-y-auto">
         <SheetHeader>
           <div className="flex items-center gap-2">
-            <div className="h-9 w-9 rounded-xl bg-violet-500/15 text-violet-600 dark:text-violet-400 flex items-center justify-center">
+            <div className="h-9 w-9 rounded-none bg-primary/15 text-primary dark:text-primary flex items-center justify-center">
               <Handshake className="h-4 w-4" />
             </div>
             <SheetTitle>

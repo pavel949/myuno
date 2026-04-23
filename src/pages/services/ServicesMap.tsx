@@ -111,7 +111,7 @@ export default function ServicesMap() {
                     ))}
                   </div>
                 </div>
-                <div className="p-4 rounded-xl bg-secondary/50">
+                <div className="p-4 rounded-none bg-secondary/50">
                   <div className="flex items-center gap-2 mb-2">
                     <MapPin className="w-4 h-4 text-primary" />
                     <span className="text-sm font-medium">{language === 'ru' ? 'Ваша локация' : 'Your Location'}</span>

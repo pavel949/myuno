@@ -407,7 +407,7 @@ export function OtaImportPanel({ onDataExtracted }: OtaImportPanelProps) {
                           key={channel.id}
                           onClick={() => handleSelectPlatform(channel)}
                           className={`
-                            flex items-center gap-2.5 p-3 rounded-xl border transition-all text-left
+                            flex items-center gap-2.5 p-3 rounded-none border transition-all text-left
                             ${channel.bgColor} ${channel.borderColor}
                             hover:scale-[1.02] active:scale-[0.98]
                           `}
@@ -455,7 +455,7 @@ export function OtaImportPanel({ onDataExtracted }: OtaImportPanelProps) {
             </div>
 
             {/* What will be imported */}
-            <div className="bg-muted/50 rounded-lg p-3 text-sm text-muted-foreground">
+            <div className="bg-muted/50 rounded-none p-3 text-sm text-muted-foreground">
               <p className="font-medium mb-1.5">
                 {isRu ? 'Что будет извлечено:' : 'What will be extracted:'}
               </p>

@@ -63,8 +63,8 @@ export default function ContractAnalysisPage() {
   };
 
   const riskColor = (score: number) => {
-    if (score <= 3) return 'text-emerald-500';
-    if (score <= 6) return 'text-amber-500';
+    if (score <= 3) return 'text-success';
+    if (score <= 6) return 'text-accent';
     return 'text-destructive';
   };
 
@@ -75,10 +75,10 @@ export default function ContractAnalysisPage() {
         description={t ? 'Загрузите договор для AI-анализа рисков и ключевых условий' : 'Upload a contract for AI-powered risk analysis and key terms extraction'}
       />
       <div className="pb-24">
-        <div className="relative bg-gradient-to-br from-sky-600 via-blue-600 to-indigo-700 p-6 pt-16 pb-8">
+        <div className="relative bg-gradient-to-br from-primary via-primary to-primary p-6 pt-16 pb-8">
           <BackButton fallbackPath={APP_ROUTES.LEGAL} variant="overlay" className="absolute top-4 left-4" />
           <div className="text-white text-center">
-            <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-3">
+            <div className="w-14 h-14 bg-white/20 rounded-none flex items-center justify-center mx-auto mb-3">
               <FileSearch className="w-7 h-7" />
             </div>
             <h1 className="text-2xl font-bold mb-1">{t ? 'ContractAI' : 'ContractAI'}</h1>
@@ -90,7 +90,7 @@ export default function ContractAnalysisPage() {
           {/* Upload */}
           <Card>
             <CardContent className="p-4 space-y-3">
-              <label className="flex flex-col items-center justify-center h-32 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary/50 transition-colors">
+              <label className="flex flex-col items-center justify-center h-32 border-2 border-dashed border-border rounded-none cursor-pointer hover:border-primary/50 transition-colors">
                 <input
                   type="file"
                   accept=".txt,.pdf,.doc,.docx"
@@ -173,12 +173,12 @@ export default function ContractAnalysisPage() {
               <Card>
                 <CardContent className="p-4">
                   <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                    <CheckCircle2 className="w-4 h-4 text-success" />
                     {t ? 'Ключевые условия' : 'Key Terms'}
                   </h3>
                   <div className="flex flex-wrap gap-1.5">
                     {result.key_terms.map((term, i) => (
-                      <span key={i} className="text-xs px-2 py-1 rounded-lg bg-muted text-muted-foreground">{term}</span>
+                      <span key={i} className="text-xs px-2 py-1 rounded-none bg-muted text-muted-foreground">{term}</span>
                     ))}
                   </div>
                 </CardContent>

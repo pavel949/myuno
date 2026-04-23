@@ -100,7 +100,7 @@ export const PinInput: React.FC<PinInputProps> = ({
                 onClick={handleClear}
                 disabled={disabled || pin.length === 0}
                 className={cn(
-                  'h-16 rounded-2xl flex items-center justify-center transition-all duration-200',
+                  'h-16 rounded-none flex items-center justify-center transition-all duration-200',
                   'text-muted-foreground hover:text-foreground',
                   'hover:bg-secondary/80 active:scale-95',
                   'disabled:opacity-30 disabled:cursor-not-allowed'
@@ -119,7 +119,7 @@ export const PinInput: React.FC<PinInputProps> = ({
                 onClick={handleDelete}
                 disabled={disabled || pin.length === 0}
                 className={cn(
-                  'h-16 rounded-2xl flex items-center justify-center transition-all duration-200',
+                  'h-16 rounded-none flex items-center justify-center transition-all duration-200',
                   'text-muted-foreground hover:text-foreground',
                   'hover:bg-secondary/80 active:scale-95',
                   'disabled:opacity-30 disabled:cursor-not-allowed'
@@ -137,7 +137,7 @@ export const PinInput: React.FC<PinInputProps> = ({
               onClick={() => handleNumberClick(item as number)}
               disabled={disabled}
               className={cn(
-                'h-16 rounded-2xl flex items-center justify-center transition-all duration-200',
+                'h-16 rounded-none flex items-center justify-center transition-all duration-200',
                 'bg-secondary/50 hover:bg-secondary border border-border/50',
                 'text-2xl font-semibold text-foreground',
                 'hover:scale-105 active:scale-95 active:bg-primary/20',

@@ -121,7 +121,7 @@ const queryClient = useQueryClient();
             const scheduledDate = order.start_at ? format(new Date(order.start_at), 'dd.MM.yyyy HH:mm') : '—';
 
             return (
-              <div key={order.id} className="p-4 rounded-xl border border-border/50 bg-card space-y-3">
+              <div key={order.id} className="p-4 rounded-none border border-border/50 bg-card space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-sm">#{order.order_number}</span>

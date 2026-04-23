@@ -281,7 +281,7 @@ export function LifeOSSituationsTab() {
                 <CardHeader className="pb-2">
                   <div className="flex items-start justify-between">
                     <div 
-                      className="w-12 h-12 rounded-xl flex items-center justify-center"
+                      className="w-12 h-12 rounded-none flex items-center justify-center"
                       style={{ backgroundColor: `${situation.color}20` }}
                     >
                       <DynamicIcon name={situation.icon} className="w-6 h-6" style={{ color: situation.color }} />

@@ -34,8 +34,8 @@ const ROLE_COLORS: Record<string, string> = {
   vendor: 'bg-accent-purple/15 text-accent-purple border-accent-purple/30',
   owner: 'bg-success/15 text-success border-success/30',
   finance: 'bg-warning/15 text-warning border-warning/30',
-  support: 'bg-sky-500/15 text-sky-600 border-sky-500/30',
-  sales: 'bg-purple-500/15 text-purple-600 border-purple-500/30',
+  support: 'bg-primary/15 text-primary border-primary/40/30',
+  sales: 'bg-primary/15 text-primary border-primary/40/30',
   user: 'bg-muted text-muted-foreground border-border',
 };
 
@@ -176,7 +176,7 @@ export function ControlUsersTab() {
                       onOpenChange={() => setExpandedUser(prev => prev === profile.id ? null : profile.id)}
                     >
                       <CollapsibleTrigger asChild>
-                        <div className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors border border-transparent hover:border-border">
+                        <div className="flex items-center gap-3 p-2.5 rounded-none hover:bg-muted/50 cursor-pointer transition-colors border border-transparent hover:border-border">
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
                               <span className="text-sm font-medium truncate">
@@ -228,7 +228,7 @@ export function ControlUsersTab() {
                               <span>{isRu ? 'Роли' : 'Roles'}: {profile.roles.length > 0 ? profile.roles.join(', ') : (isRu ? 'нет' : 'none')}</span>
                             </div>
                             <p className="text-[11px] text-muted-foreground">
-                              ID: <code className="bg-muted px-1 rounded text-[10px]">{profile.id.slice(0, 8)}…</code>
+                              ID: <code className="bg-muted px-1 rounded-none text-[10px]">{profile.id.slice(0, 8)}…</code>
                             </p>
                           </div>
 

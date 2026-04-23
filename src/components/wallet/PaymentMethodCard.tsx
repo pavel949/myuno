@@ -28,11 +28,11 @@ export function PaymentMethodCard({ method, onSetDefault, onDelete }: PaymentMet
     <motion.div
       layout
       className={cn(
-        'flex items-center gap-3 p-3 rounded-xl border transition-all',
+        'flex items-center gap-3 p-3 rounded-none border transition-all',
         method.is_default ? 'border-primary/40 bg-primary/5' : 'border-border bg-card'
       )}
     >
-      <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+      <div className="w-10 h-10 rounded-none bg-muted flex items-center justify-center flex-shrink-0">
         <CreditCard className="w-5 h-5 text-muted-foreground" />
       </div>
 

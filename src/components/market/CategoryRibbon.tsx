@@ -45,14 +45,14 @@ function RibbonButton({ icon, emoji, label, onClick, variant = 'default' }: Cate
   const variants = {
     default: 'bg-muted/60 hover:bg-muted text-foreground',
     primary: 'bg-primary/10 hover:bg-primary/20 text-primary',
-    accent: 'bg-gradient-to-r from-orange-100 to-amber-100 dark:from-orange-900/30 dark:to-amber-900/30 hover:from-orange-200 hover:to-amber-200 text-orange-700 dark:text-orange-300',
+    accent: 'bg-gradient-to-r from-accent to-accent dark:from-accent/30 dark:to-accent/30 hover:from-accent hover:to-accent text-accent dark:text-accent',
   };
 
   return (
     <button
       onClick={onClick}
       className={cn(
-        "flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-colors shrink-0",
+        "flex items-center gap-1.5 px-3 py-2 rounded-none text-xs font-medium transition-colors shrink-0",
         variants[variant]
       )}
     >
@@ -99,7 +99,7 @@ export function CategoryRibbon() {
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-1.5 px-3 py-2 h-auto rounded-xl border-primary/30 bg-primary/5 hover:bg-primary/10 text-primary font-medium shrink-0"
+                className="gap-1.5 px-3 py-2 h-auto rounded-none border-primary/30 bg-primary/5 hover:bg-primary/10 text-primary font-medium shrink-0"
               >
                 <Menu className="w-4 h-4" />
                 <span className="text-xs">{language === 'ru' ? 'Каталог' : 'Catalog'}</span>
@@ -110,18 +110,18 @@ export function CategoryRibbon() {
           <div className="w-px h-6 bg-border" />
 
           <RibbonButton
-            icon={<Flame className="w-4 h-4 text-orange-500" />}
+            icon={<Flame className="w-4 h-4 text-accent" />}
             label={language === 'ru' ? 'Акции' : 'Deals'}
             onClick={() => navigate('/market/category/deals')}
             variant="accent"
           />
           <RibbonButton
-            icon={<Star className="w-4 h-4 text-amber-500" />}
+            icon={<Star className="w-4 h-4 text-accent" />}
             label={language === 'ru' ? 'Хиты' : 'Hits'}
             onClick={() => navigate('/market/category/popular')}
           />
           <RibbonButton
-            icon={<Sparkles className="w-4 h-4 text-purple-500" />}
+            icon={<Sparkles className="w-4 h-4 text-primary" />}
             label={language === 'ru' ? 'Новинки' : 'New'}
             onClick={() => navigate('/market/category/new')}
           />

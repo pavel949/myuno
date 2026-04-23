@@ -221,7 +221,7 @@ export default function Support() {
 
           <div className="grid grid-cols-2 gap-2 mb-4">
             {conciergeServices.map((service, idx) => (
-              <div key={idx} className="flex items-center gap-2 text-sm py-2 px-3 bg-background/50 rounded-lg">
+              <div key={idx} className="flex items-center gap-2 text-sm py-2 px-3 bg-background/50 rounded-none">
                 <service.icon className="w-4 h-4 text-primary flex-shrink-0" />
                 <span className="text-muted-foreground">{service.label}</span>
               </div>

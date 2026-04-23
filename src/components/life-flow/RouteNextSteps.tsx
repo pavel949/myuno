@@ -48,13 +48,13 @@ export function RouteNextSteps({ nextRoutes, labels, currentLabel }: RouteNextSt
               key={routeCode}
               onClick={() => navigate(`/life/${routeCode}`)}
               className={cn(
-                "w-full flex items-center gap-3 p-3 rounded-xl",
+                "w-full flex items-center gap-3 p-3 rounded-none",
                 "border bg-card hover:bg-accent/50 hover:border-primary/30",
                 "transition-all duration-200 text-left group"
               )}
             >
               <div
-                className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+                className="w-9 h-9 rounded-none flex items-center justify-center shrink-0"
                 style={{ backgroundColor: `${situation.color}15` }}
               >
                 <DynamicIcon name={situation.icon} className="w-4.5 h-4.5" style={{ color: situation.color }} />

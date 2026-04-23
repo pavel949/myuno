@@ -196,7 +196,7 @@ export default function NewbuildsMap() {
       {/* Header */}
       <div className="relative z-20 px-4 py-3 flex items-center justify-between" style={{ background: 'hsl(var(--nb-bg))', borderBottom: '1px solid hsl(var(--nb-gold) / 0.15)' }}>
         <div className="flex items-center gap-3">
-          <Link to={APP_ROUTES.OFFPLAN} className="p-1.5 rounded-lg transition-colors" style={{ color: 'hsl(var(--nb-gold))' }}>
+          <Link to={APP_ROUTES.OFFPLAN} className="p-1.5 rounded-none transition-colors" style={{ color: 'hsl(var(--nb-gold))' }}>
             <ChevronLeft className="w-5 h-5" />
           </Link>
           <h1 className="nb-display text-lg" style={{ color: 'hsl(var(--nb-text))' }}>Карта проектов</h1>
@@ -207,14 +207,14 @@ export default function NewbuildsMap() {
         <div className="flex gap-2">
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-none text-xs"
             style={{ background: showFilters ? 'hsl(var(--nb-gold) / 0.2)' : 'hsl(var(--nb-gold) / 0.1)', color: 'hsl(var(--nb-gold))', border: '1px solid hsl(var(--nb-gold) / 0.3)' }}
           >
             <Layers className="w-3.5 h-3.5" /> Слои
           </button>
           <button
             onClick={() => setShowList(!showList)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-none text-xs"
             style={{ background: 'hsl(var(--nb-gold) / 0.15)', color: 'hsl(var(--nb-gold))', border: '1px solid hsl(var(--nb-gold) / 0.3)' }}
           >
             <List className="w-3.5 h-3.5" /> {showList ? 'Скрыть' : 'Список'}
@@ -230,12 +230,12 @@ export default function NewbuildsMap() {
           {showFilters && (
             <div className="absolute top-3 left-3 z-20 space-y-2">
               {/* Status filters */}
-              <div className="nb-glass p-2 rounded-xl flex flex-wrap gap-1.5">
+              <div className="nb-glass p-2 rounded-none flex flex-wrap gap-1.5">
                 {STATUS_LAYERS.map(s => (
                   <button
                     key={s.key}
                     onClick={() => setStatusFilter(s.key)}
-                    className="px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all"
+                    className="px-2.5 py-1 rounded-none text-[11px] font-medium transition-all"
                     style={{
                       background: statusFilter === s.key ? s.color + '33' : 'transparent',
                       color: statusFilter === s.key ? s.color : 'hsl(var(--nb-muted))',
@@ -248,12 +248,12 @@ export default function NewbuildsMap() {
               </div>
 
               {/* Type filters */}
-              <div className="nb-glass p-2 rounded-xl flex flex-wrap gap-1.5">
+              <div className="nb-glass p-2 rounded-none flex flex-wrap gap-1.5">
                 {TYPE_LAYERS.map(t => (
                   <button
                     key={t.key}
                     onClick={() => setTypeFilter(t.key)}
-                    className="px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all"
+                    className="px-2.5 py-1 rounded-none text-[11px] font-medium transition-all"
                     style={{
                       background: typeFilter === t.key ? 'hsl(var(--nb-gold) / 0.2)' : 'transparent',
                       color: typeFilter === t.key ? 'hsl(var(--nb-gold))' : 'hsl(var(--nb-muted))',
@@ -270,7 +270,7 @@ export default function NewbuildsMap() {
 
           {/* Map legend (bottom-right) */}
           {showFilters && (
-            <div className="absolute bottom-3 right-3 z-20 nb-glass rounded-xl p-3 w-[180px] space-y-2.5">
+            <div className="absolute bottom-3 right-3 z-20 nb-glass rounded-none p-3 w-[180px] space-y-2.5">
               <div
                 className="nb-display text-[11px] uppercase tracking-wider pb-1.5 border-b"
                 style={{ color: 'hsl(var(--nb-gold))', borderColor: 'hsl(var(--nb-gold) / 0.2)' }}
@@ -295,7 +295,7 @@ export default function NewbuildsMap() {
               <div className="pt-2 border-t space-y-2" style={{ borderColor: 'hsl(var(--nb-gold) / 0.15)' }}>
                 <div className="flex items-center gap-2 text-[11px]" style={{ color: 'hsl(var(--nb-text))' }}>
                   <span
-                    className="inline-flex items-center justify-center px-1.5 py-0.5 rounded text-[9px] font-bold flex-shrink-0"
+                    className="inline-flex items-center justify-center px-1.5 py-0.5 rounded-none text-[9px] font-bold flex-shrink-0"
                     style={{
                       background: 'hsl(var(--nb-bg) / 0.92)',
                       color: 'hsl(var(--nb-gold))',
@@ -380,7 +380,7 @@ export default function NewbuildsMap() {
                         style={{ zIndex: isSelected ? 1000 : 1 }}
                       >
                         <div
-                          className="px-2 py-1 rounded-lg text-[10px] font-bold whitespace-nowrap transition-all"
+                          className="px-2 py-1 rounded-none text-[10px] font-bold whitespace-nowrap transition-all"
                           style={{
                             background: isSelected ? markerColor : 'hsl(var(--nb-bg) / 0.92)',
                             color: isSelected ? 'hsl(var(--nb-bg))' : markerColor,
@@ -456,7 +456,7 @@ export default function NewbuildsMap() {
               <div className="nb-glass p-4 space-y-3">
                 <div className="flex items-start gap-3">
                   {selectedProject.cover_image && (
-                    <img src={selectedProject.cover_image} alt="" className="w-20 h-14 rounded-lg object-cover flex-shrink-0" />
+                    <img src={selectedProject.cover_image} alt="" className="w-20 h-14 rounded-none object-cover flex-shrink-0" />
                   )}
                   <div className="flex-1 min-w-0">
                     <h3 className="nb-display text-base truncate" style={{ color: 'hsl(var(--nb-text))' }}>
@@ -477,7 +477,7 @@ export default function NewbuildsMap() {
                   <NbPriceDisplay price={selectedProject.price_from} priceTo={selectedProject.price_to} size="md" />
                   <button
                     onClick={() => navigate(APP_ROUTES.OFFPLAN_DETAIL(selectedProject.id))}
-                    className="text-xs font-medium px-3 py-1.5 rounded-lg transition-all"
+                    className="text-xs font-medium px-3 py-1.5 rounded-none transition-all"
                     style={{ background: 'hsl(var(--nb-gold))', color: 'hsl(var(--nb-bg))' }}
                   >
                     Подробнее

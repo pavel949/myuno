@@ -119,7 +119,7 @@ export function ImageUpload({
           <img 
             src={value} 
             alt="Uploaded" 
-            className="w-full h-32 object-cover rounded-lg border border-border"
+            className="w-full h-32 object-cover rounded-none border border-border"
           />
           <Button
             type="button"
@@ -132,7 +132,7 @@ export function ImageUpload({
           </Button>
         </div>
       ) : showUrlInput ? (
-        <div className="flex flex-col gap-2 p-4 border-2 border-dashed border-border rounded-lg">
+        <div className="flex flex-col gap-2 p-4 border-2 border-dashed border-border rounded-none">
           <div className="flex gap-2">
             <Input
               type="url"
@@ -154,7 +154,7 @@ export function ImageUpload({
         </div>
       ) : (
         <div className="flex flex-col gap-2">
-          <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
+          <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-border rounded-none cursor-pointer hover:bg-muted/50 transition-colors">
             <input
               type="file"
               accept="image/jpeg,image/png,image/webp,image/gif"
@@ -473,7 +473,7 @@ export function MultiImageUpload({
     <div className={`space-y-3 ${className}`}>
       {/* URL input mode */}
       {showUrlInput ? (
-        <div className="p-4 border-2 border-dashed border-border rounded-lg space-y-3">
+        <div className="p-4 border-2 border-dashed border-border rounded-none space-y-3">
           <div className="flex gap-2">
             <Input
               type="url"
@@ -514,7 +514,7 @@ export function MultiImageUpload({
       ) : (
         <>
           {/* Upload area */}
-          <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
+          <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-border rounded-none cursor-pointer hover:bg-muted/50 transition-colors">
             <input
               type="file"
               accept="image/jpeg,image/png,image/webp,image/gif"
@@ -595,14 +595,14 @@ export function MultiImageUpload({
               <img 
                 src={url} 
                 alt={`Image ${index + 1}`}
-                className="w-full h-full object-cover rounded-lg border border-border"
+                className="w-full h-full object-cover rounded-none border border-border"
               />
               {index === 0 && (
-                <span className="absolute bottom-1 left-1 text-[10px] bg-primary text-primary-foreground px-1.5 py-0.5 rounded">
+                <span className="absolute bottom-1 left-1 text-[10px] bg-primary text-primary-foreground px-1.5 py-0.5 rounded-none">
                   Обложка
                 </span>
               )}
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-1">
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-none flex items-center justify-center gap-1">
                 {index !== 0 && (
                   <Button
                     type="button"

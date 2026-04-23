@@ -29,7 +29,7 @@ export function IntakeBulkActions({
   const allProcessed = pendingCount === 0;
 
   return (
-    <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border">
+    <div className="flex items-center justify-between p-4 bg-muted/50 rounded-none border">
       <div className="flex items-center gap-4">
         {/* Summary badges */}
         <div className="flex items-center gap-2">
@@ -51,7 +51,7 @@ export function IntakeBulkActions({
         {/* Verticals breakdown */}
         <div className="hidden md:flex items-center gap-1 text-xs text-muted-foreground">
           {Object.entries(summary.byVertical).slice(0, 3).map(([vertical, count]) => (
-            <span key={vertical} className="px-2 py-0.5 bg-background rounded">
+            <span key={vertical} className="px-2 py-0.5 bg-background rounded-none">
               {vertical}: {count}
             </span>
           ))}

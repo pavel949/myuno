@@ -76,7 +76,7 @@ function ZoneCard({
     >
       <CardContent className="p-5 space-y-3">
         <div className="flex items-start justify-between">
-          <div className={cn('w-11 h-11 rounded-xl flex items-center justify-center', iconBgClass)}>
+          <div className={cn('w-11 h-11 rounded-none flex items-center justify-center', iconBgClass)}>
             <Icon className="w-5 h-5" />
           </div>
           {badgeRu && (
@@ -124,7 +124,7 @@ export default function InvestmentHubLanding() {
         <div className="flex gap-4 overflow-x-auto pb-2">
           {[1, 2, 3].map((i) => (
             <div key={i} className="flex-shrink-0 w-[280px]">
-              <Skeleton className="h-[280px] rounded-xl" />
+              <Skeleton className="h-[280px] rounded-none" />
             </div>
           ))}
         </div>
@@ -182,9 +182,9 @@ export default function InvestmentHubLanding() {
       >
         <div className="space-y-6 pb-10">
           {/* Hero — calm, gov-style */}
-          <div className="rounded-2xl border border-border bg-card p-5 space-y-3">
+          <div className="rounded-none border border-border bg-card p-5 space-y-3">
             <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-xl bg-cluster-invest/10 flex items-center justify-center flex-shrink-0">
+              <div className="w-11 h-11 rounded-none bg-cluster-invest/10 flex items-center justify-center flex-shrink-0">
                 <TrendingUp className="h-5 w-5 text-cluster-invest" />
               </div>
               <div className="min-w-0 flex-1">
@@ -231,7 +231,7 @@ export default function InvestmentHubLanding() {
           <Card>
             <CardContent className="p-5 space-y-3">
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 rounded-none bg-muted flex items-center justify-center flex-shrink-0">
                   <TrendingUp className="h-5 w-5 text-foreground" />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -279,8 +279,8 @@ export default function InvestmentHubLanding() {
                   { ru: 'Калькулятор доходности', en: 'ROI & yield calculator' },
                 ]}
                 ctaPath={APP_ROUTES.INVEST_REAL_ESTATE}
-                accentClass="hover:bg-emerald-500/5"
-                iconBgClass="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                accentClass="hover:bg-success/5"
+                iconBgClass="bg-success/10 text-success dark:text-success"
                 badgeRu="Популярно"
                 badgeEn="Popular"
               />
@@ -296,8 +296,8 @@ export default function InvestmentHubLanding() {
                   { ru: 'F&B, отели, retail, marine, import/export', en: 'F&B, hotels, retail, marine, trade' },
                 ]}
                 ctaPath={APP_ROUTES.INVEST_BUSINESS}
-                accentClass="hover:bg-amber-500/5"
-                iconBgClass="bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                accentClass="hover:bg-accent/5"
+                iconBgClass="bg-accent/10 text-accent dark:text-accent"
                 badgeRu="Новое"
                 badgeEn="New"
               />
@@ -313,8 +313,8 @@ export default function InvestmentHubLanding() {
                   { ru: 'Как открыть ресторан / отель / spa', en: 'How to open restaurant / hotel / spa' },
                 ]}
                 ctaPath={APP_ROUTES.INVEST_KNOWLEDGE}
-                accentClass="hover:bg-blue-500/5"
-                iconBgClass="bg-blue-500/10 text-blue-600 dark:text-blue-400"
+                accentClass="hover:bg-primary/5"
+                iconBgClass="bg-primary/10 text-primary dark:text-primary"
               />
               <ZoneCard
                 icon={Handshake}
@@ -328,8 +328,8 @@ export default function InvestmentHubLanding() {
                   { ru: 'Due diligence и M&A', en: 'Due diligence & M&A' },
                 ]}
                 ctaPath={APP_ROUTES.INVEST_SERVICES}
-                accentClass="hover:bg-violet-500/5"
-                iconBgClass="bg-violet-500/10 text-violet-600 dark:text-violet-400"
+                accentClass="hover:bg-primary/5"
+                iconBgClass="bg-primary/10 text-primary dark:text-primary"
               />
               <ZoneCard
                 icon={Megaphone}
@@ -343,8 +343,8 @@ export default function InvestmentHubLanding() {
                   { ru: 'Найти ко-инвестора', en: 'Find a co-investor' },
                 ]}
                 ctaPath={APP_ROUTES.INVEST_RAISE}
-                accentClass="hover:bg-rose-500/5 sm:col-span-2"
-                iconBgClass="bg-rose-500/10 text-rose-600 dark:text-rose-400"
+                accentClass="hover:bg-accent/5 sm:col-span-2"
+                iconBgClass="bg-accent/10 text-accent dark:text-accent"
               />
             </div>
           </section>
@@ -446,7 +446,7 @@ export default function InvestmentHubLanding() {
             onClick={() => navigate(APP_ROUTES.INVEST_KNOWLEDGE)}
           >
             <CardContent className="p-5 flex items-start gap-3">
-              <div className="p-2 rounded-lg bg-muted">
+              <div className="p-2 rounded-none bg-muted">
                 <BookOpen className="h-5 w-5 text-foreground" />
               </div>
               <div className="flex-1 min-w-0">
@@ -469,7 +469,7 @@ export default function InvestmentHubLanding() {
             onClick={() => navigate(APP_ROUTES.INVEST_SERVICES)}
           >
             <CardContent className="p-5 flex items-start gap-3">
-              <div className="p-2 rounded-lg bg-muted">
+              <div className="p-2 rounded-none bg-muted">
                 <ShieldCheck className="h-5 w-5 text-foreground" />
               </div>
               <div className="flex-1 min-w-0">
@@ -487,9 +487,9 @@ export default function InvestmentHubLanding() {
           </Card>
 
           {/* Raise CTA */}
-          <section className="rounded-2xl border border-border bg-card p-5 space-y-3">
+          <section className="rounded-none border border-border bg-card p-5 space-y-3">
             <div className="flex items-start gap-3">
-              <div className="p-2 rounded-lg bg-muted">
+              <div className="p-2 rounded-none bg-muted">
                 <Megaphone className="h-5 w-5 text-foreground" />
               </div>
               <div className="flex-1">

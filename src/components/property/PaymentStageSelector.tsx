@@ -116,7 +116,7 @@ export function PaymentStageSelector({
         {/* Full Payment Option */}
         <div
           className={cn(
-            "flex items-start gap-3 p-4 rounded-xl border-2 transition-all cursor-pointer",
+            "flex items-start gap-3 p-4 rounded-none border-2 transition-all cursor-pointer",
             selectedModel === 'full' 
               ? "border-primary bg-primary/5" 
               : "border-border hover:border-primary/50"
@@ -144,7 +144,7 @@ export function PaymentStageSelector({
         {/* Split Payment Option */}
         <div
           className={cn(
-            "flex items-start gap-3 p-4 rounded-xl border-2 transition-all cursor-pointer",
+            "flex items-start gap-3 p-4 rounded-none border-2 transition-all cursor-pointer",
             selectedModel === 'split' 
               ? "border-primary bg-primary/5" 
               : "border-border hover:border-primary/50"
@@ -184,7 +184,7 @@ export function PaymentStageSelector({
 
       {/* Security Deposit Note */}
       {securityDeposit > 0 && (
-        <div className="flex items-start gap-2 p-3 rounded-lg bg-muted/50 text-sm">
+        <div className="flex items-start gap-2 p-3 rounded-none bg-muted/50 text-sm">
           <Shield className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
           <div>
             <span className="font-medium">{isRu ? 'Залоговый депозит' : 'Security Deposit'}: </span>

@@ -78,7 +78,7 @@ function ConflictRow({
   const propName = isRu ? prop?.title_ru || prop?.title_en : prop?.title_en || prop?.title_ru;
 
   return (
-    <div className="flex items-center justify-between gap-2 p-2 rounded-lg bg-background/50 border text-sm">
+    <div className="flex items-center justify-between gap-2 p-2 rounded-none bg-background/50 border text-sm">
       <div className="min-w-0 flex-1">
         <span className="font-medium truncate block">{propName || conflict.property_id.slice(0, 8)}</span>
         <span className="text-muted-foreground">

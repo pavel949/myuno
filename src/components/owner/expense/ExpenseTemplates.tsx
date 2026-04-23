@@ -66,7 +66,7 @@ export function ExpenseTemplates({ propertyId, onApplied }: ExpenseTemplatesProp
       >
         <div className="grid grid-cols-1 gap-3">
           {TEMPLATES.map((template) => (
-            <div key={template.id} className="flex items-center justify-between p-3 rounded-xl border bg-card">
+            <div key={template.id} className="flex items-center justify-between p-3 rounded-none border bg-card">
               <div className="flex items-center gap-3">
                 <span className="text-2xl">{template.icon}</span>
                 <div>

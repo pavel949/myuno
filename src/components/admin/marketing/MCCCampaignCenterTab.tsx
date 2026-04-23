@@ -267,7 +267,7 @@ export function MCCCampaignCenterTab() {
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <div className={`p-2 rounded-lg shrink-0 ${rule.is_active ? 'bg-primary/10' : 'bg-muted'}`}>
+                      <div className={`p-2 rounded-none shrink-0 ${rule.is_active ? 'bg-primary/10' : 'bg-muted'}`}>
                         <ChannelIcon className={`h-4 w-4 ${rule.is_active ? 'text-primary' : 'text-muted-foreground'}`} />
                       </div>
                       <div className="min-w-0">

@@ -386,7 +386,7 @@ const Install = () => {
         >
           {/* Hero Section */}
           <motion.div variants={itemVariants} className="text-center py-6">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary/30">
+            <div className="w-20 h-20 rounded-none bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary/30">
               <Smartphone className="w-10 h-10 text-primary-foreground" />
             </div>
             <h1 className="text-2xl font-bold mb-2">{t.title}</h1>
@@ -451,7 +451,7 @@ const Install = () => {
                 <div className="grid grid-cols-2 gap-3">
                   {t.benefits.items.map((item, index) => (
                     <div key={index} className="flex items-start gap-2 text-sm">
-                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <div className="w-8 h-8 rounded-none bg-primary/10 flex items-center justify-center flex-shrink-0">
                         <item.icon className="w-4 h-4 text-primary" />
                       </div>
                       <span className="text-muted-foreground leading-tight pt-1">{item.text}</span>
@@ -469,11 +469,11 @@ const Install = () => {
                 <CardContent className="p-4">
                   <h3 className="font-semibold mb-4 flex items-center gap-2">
                     {isIOS ? (
-                      <div className="w-6 h-6 rounded bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center">
+                      <div className="w-6 h-6 rounded-none bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center">
                         <span className="text-white text-xs font-bold">iOS</span>
                       </div>
                     ) : (
-                      <div className="w-6 h-6 rounded bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center">
+                      <div className="w-6 h-6 rounded-none bg-gradient-to-br from-success to-success flex items-center justify-center">
                         <span className="text-white text-xs font-bold">A</span>
                       </div>
                     )}
@@ -488,7 +488,7 @@ const Install = () => {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.15 }}
                       >
-                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <div className="w-10 h-10 rounded-none bg-primary/10 flex items-center justify-center flex-shrink-0">
                           <step.icon className="w-5 h-5 text-primary" />
                         </div>
                         <div className="flex-1">
@@ -503,7 +503,7 @@ const Install = () => {
                   
                   {/* Safari warning for iOS */}
                   {isIOS && (
-                     <div className="mt-4 p-3 rounded-lg bg-warning/10 border border-warning/20">
+                     <div className="mt-4 p-3 rounded-none bg-warning/10 border border-warning/20">
                       <p className="text-xs text-warning flex items-start gap-2">
                         <ExternalLink className="w-4 h-4 shrink-0 mt-0.5" />
                         <span>{(t as any).iosNote || "⚠️ Important: Use Safari. This option is not available in Chrome/Firefox."}</span>

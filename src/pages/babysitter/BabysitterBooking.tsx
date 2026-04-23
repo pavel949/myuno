@@ -145,7 +145,7 @@ export default function BabysitterBooking() {
         />
 
         {/* Babysitter Info */}
-        <div className="flex items-center gap-3 p-4 bg-card rounded-xl border mt-4 mb-6">
+        <div className="flex items-center gap-3 p-4 bg-card rounded-none border mt-4 mb-6">
           <img
             src={babysitter.image}
             alt={language === 'ru' ? babysitter.nameRu : babysitter.nameEn}
@@ -162,7 +162,7 @@ export default function BabysitterBooking() {
         </div>
 
         {/* Date & Time */}
-        <div className="bg-card rounded-xl border p-5 mb-4">
+        <div className="bg-card rounded-none border p-5 mb-4">
           <h3 className="font-semibold mb-4">
             {language === 'ru' ? 'Дата и время' : 'Date & Time'}
           </h3>
@@ -177,7 +177,7 @@ export default function BabysitterBooking() {
         </div>
 
         {/* Duration */}
-        <div className="bg-card rounded-xl border p-5 mb-4">
+        <div className="bg-card rounded-none border p-5 mb-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Clock className="w-5 h-5 text-primary" />
@@ -208,7 +208,7 @@ export default function BabysitterBooking() {
         </div>
 
         {/* Children Info */}
-        <div className="bg-card rounded-xl border p-5 mb-4">
+        <div className="bg-card rounded-none border p-5 mb-4">
           <h3 className="font-semibold mb-4 flex items-center gap-2">
             <Baby className="w-5 h-5 text-primary" />
             {language === 'ru' ? 'Информация о детях' : 'Children Info'}
@@ -249,7 +249,7 @@ export default function BabysitterBooking() {
         </div>
 
         {/* Address */}
-        <div className="bg-card rounded-xl border p-5 mb-4">
+        <div className="bg-card rounded-none border p-5 mb-4">
           <AddressPickerInput
             value={address}
             onChange={(addr) => setAddress(addr)}
@@ -261,7 +261,7 @@ export default function BabysitterBooking() {
         </div>
 
         {/* Contact Info */}
-        <div className="bg-card rounded-xl border p-5 mb-4">
+        <div className="bg-card rounded-none border p-5 mb-4">
           <h3 className="font-semibold mb-4">
             {language === 'ru' ? 'Контактные данные' : 'Contact Information'}
           </h3>
@@ -273,7 +273,7 @@ export default function BabysitterBooking() {
         </div>
 
         {/* Payment Method */}
-        <div className="bg-card rounded-xl border p-5 mb-4">
+        <div className="bg-card rounded-none border p-5 mb-4">
           <h3 className="font-semibold mb-4">
             {language === 'ru' ? 'Способ оплаты' : 'Payment Method'}
           </h3>
@@ -288,7 +288,7 @@ export default function BabysitterBooking() {
         </div>
 
         {/* Price Summary */}
-        <div className="bg-card rounded-xl border p-5 mb-4">
+        <div className="bg-card rounded-none border p-5 mb-4">
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-muted-foreground">

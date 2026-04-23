@@ -28,12 +28,12 @@ export function ActivityFeed({ personas }: ActivityFeedProps) {
             <div key={i} className="py-3 border-b border-border/[0.05] flex gap-3 items-start">
               <div className="w-[18px] h-[18px] rounded-full bg-muted/30 animate-pulse flex-shrink-0 mt-0.5" />
               <div className="flex-1 space-y-1.5">
-                <div className="h-3 bg-muted/30 animate-pulse rounded w-2/3" />
-                <div className="h-2.5 bg-muted/20 animate-pulse rounded w-1/2" />
+                <div className="h-3 bg-muted/30 animate-pulse rounded-none w-2/3" />
+                <div className="h-2.5 bg-muted/20 animate-pulse rounded-none w-1/2" />
               </div>
               <div className="text-right space-y-1.5">
-                <div className="h-3 bg-muted/30 animate-pulse rounded w-12" />
-                <div className="h-2.5 bg-muted/20 animate-pulse rounded w-8" />
+                <div className="h-3 bg-muted/30 animate-pulse rounded-none w-12" />
+                <div className="h-2.5 bg-muted/20 animate-pulse rounded-none w-8" />
               </div>
             </div>
           ))}

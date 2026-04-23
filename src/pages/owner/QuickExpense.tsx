@@ -162,7 +162,7 @@ export default function QuickExpense() {
         </div>
 
         {/* Amount */}
-        <div className="bg-card rounded-2xl p-4 border">
+        <div className="bg-card rounded-none p-4 border">
           <Label className="text-xs text-muted-foreground mb-2 block">{isRu ? 'Сумма' : 'Amount'}</Label>
           <div className="flex gap-1.5 mb-3 overflow-x-auto scrollbar-hide -mx-1 px-1 touch-pan-y">
             {QUICK_AMOUNTS.map(amt => (
@@ -186,7 +186,7 @@ export default function QuickExpense() {
               placeholder="0"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="pl-12 text-3xl h-16 font-bold border-0 bg-muted/50 rounded-xl focus-visible:ring-2"
+              className="pl-12 text-3xl h-16 font-bold border-0 bg-muted/50 rounded-none focus-visible:ring-2"
             />
           </div>
         </div>
@@ -262,7 +262,7 @@ export default function QuickExpense() {
         </div>
 
         <div className={cn(
-          'flex items-center justify-between p-3 rounded-xl border transition-colors',
+          'flex items-center justify-between p-3 rounded-none border transition-colors',
           isRecurring ? 'border-primary/40 bg-primary/5' : 'border-border bg-card'
         )}>
           <div className="flex items-center gap-2">

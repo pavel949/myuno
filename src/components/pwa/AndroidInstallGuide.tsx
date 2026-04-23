@@ -54,9 +54,9 @@ export function AndroidInstallGuide({ onClose }: AndroidInstallGuideProps) {
       description: text.step1Desc,
       visual: (
         <div className="relative mt-4">
-          <div className="bg-muted/50 rounded-2xl p-6">
+          <div className="bg-muted/50 rounded-none p-6">
             <div className="flex items-center justify-between mb-4">
-              <div className="h-4 w-24 bg-background/50 rounded" />
+              <div className="h-4 w-24 bg-background/50 rounded-none" />
               <motion.div
                 animate={{ scale: [1, 1.2, 1] }}
                 transition={{ duration: 1.5, repeat: Infinity }}
@@ -65,7 +65,7 @@ export function AndroidInstallGuide({ onClose }: AndroidInstallGuideProps) {
                 <MoreVertical className="w-6 h-6 text-primary" />
               </motion.div>
             </div>
-            <div className="h-32 bg-background/30 rounded-lg" />
+            <div className="h-32 bg-background/30 rounded-none" />
           </div>
           <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs px-3 py-1 rounded-full">
             Chrome
@@ -78,28 +78,28 @@ export function AndroidInstallGuide({ onClose }: AndroidInstallGuideProps) {
       title: text.step2Title,
       description: text.step2Desc,
       visual: (
-        <div className="mt-4 bg-muted/50 rounded-2xl p-4">
+        <div className="mt-4 bg-muted/50 rounded-none p-4">
           <div className="space-y-2">
-            <div className="h-10 bg-background/50 rounded-lg flex items-center px-4 gap-3">
+            <div className="h-10 bg-background/50 rounded-none flex items-center px-4 gap-3">
               <Menu className="w-4 h-4 text-muted-foreground" />
               <span className="text-sm text-muted-foreground">
                 {language === 'ru' ? 'Новая вкладка' : 'New tab'}
               </span>
             </div>
-            <div className="h-10 bg-background/50 rounded-lg" />
+            <div className="h-10 bg-background/50 rounded-none" />
             <motion.div
               animate={{ 
                 backgroundColor: ['hsl(var(--background))', 'hsl(var(--primary) / 0.2)', 'hsl(var(--background))']
               }}
               transition={{ duration: 2, repeat: Infinity }}
-              className="h-12 rounded-lg flex items-center px-4 gap-3 border-2 border-primary"
+              className="h-12 rounded-none flex items-center px-4 gap-3 border-2 border-primary"
             >
               <Download className="w-5 h-5 text-primary" />
               <span className="text-sm font-medium">
                 {language === 'ru' ? 'Установить приложение' : 'Install app'}
               </span>
             </motion.div>
-            <div className="h-10 bg-background/50 rounded-lg" />
+            <div className="h-10 bg-background/50 rounded-none" />
           </div>
         </div>
       ),
@@ -114,7 +114,7 @@ export function AndroidInstallGuide({ onClose }: AndroidInstallGuideProps) {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: 'spring', delay: 0.3 }}
-            className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg"
+            className="w-20 h-20 rounded-none bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg"
           >
             <span className="text-3xl font-bold text-primary-foreground">U</span>
           </motion.div>

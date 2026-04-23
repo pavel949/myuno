@@ -89,8 +89,8 @@ export function CommissionForecast({ deals, pipelineData, wonLostKeys }: Commiss
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
       {cards.map(c => (
-        <div key={c.label} className="flex items-center gap-2.5 p-3 rounded-xl border bg-card">
-          <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center shrink-0', c.bg)}>
+        <div key={c.label} className="flex items-center gap-2.5 p-3 rounded-none border bg-card">
+          <div className={cn('w-8 h-8 rounded-none flex items-center justify-center shrink-0', c.bg)}>
             <c.icon className={cn('h-4 w-4', c.color)} />
           </div>
           <div className="min-w-0">

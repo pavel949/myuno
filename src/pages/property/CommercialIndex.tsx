@@ -165,7 +165,7 @@ export default function CommercialIndex() {
                 onClick={() => navigate(APP_ROUTES.HOTELS)}
                 className={cn(
                   'px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap border transition-colors',
-                  'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/40 hover:bg-amber-500/20',
+                  'bg-accent/10 text-accent dark:text-accent border-accent/40/40 hover:bg-accent/20',
                 )}
               >
                 <Hotel className="inline w-3 h-3 mr-1" />
@@ -196,19 +196,19 @@ export default function CommercialIndex() {
           {isLoading && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {Array.from({ length: 6 }).map((_, i) => (
-                <Skeleton key={i} className="aspect-[16/10] rounded-2xl" />
+                <Skeleton key={i} className="aspect-[16/10] rounded-none" />
               ))}
             </div>
           )}
 
           {!isLoading && error && (
-            <div className="text-sm text-destructive p-4 rounded-xl bg-destructive/5">
+            <div className="text-sm text-destructive p-4 rounded-none bg-destructive/5">
               {isRu ? 'Не удалось загрузить листинги' : 'Failed to load listings'}
             </div>
           )}
 
           {!isLoading && !error && items.length === 0 && (
-            <div className="text-center py-16 px-4 border border-dashed border-border rounded-2xl">
+            <div className="text-center py-16 px-4 border border-dashed border-border rounded-none">
               <Building2 className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
               <p className="text-sm font-medium text-foreground mb-1">
                 {isRu ? 'Скоро здесь будут объекты' : 'Listings coming soon'}

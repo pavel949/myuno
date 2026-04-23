@@ -82,7 +82,7 @@ export function MCCFunnelsTab() {
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-primary/10">
+                  <div className="p-2 rounded-none bg-primary/10">
                     <GitBranch className="h-5 w-5 text-primary" />
                   </div>
                   <div>
@@ -119,7 +119,7 @@ export function MCCFunnelsTab() {
                 {funnel.stages.map((stage, idx) => (
                   <React.Fragment key={idx}>
                     <div 
-                      className="flex-shrink-0 p-4 rounded-lg bg-gradient-to-b from-primary/10 to-primary/5 border border-primary/20 text-center min-w-[120px]"
+                      className="flex-shrink-0 p-4 rounded-none bg-gradient-to-b from-primary/10 to-primary/5 border border-primary/20 text-center min-w-[120px]"
                       style={{ 
                         opacity: 0.5 + (stage.rate / 200),
                       }}

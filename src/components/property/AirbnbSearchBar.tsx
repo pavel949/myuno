@@ -251,7 +251,7 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
               key={option.id}
               onClick={() => toggleBedroom(option.id)}
               className={cn(
-                "py-2.5 px-2 rounded-xl text-sm font-medium transition-all border text-center",
+                "py-2.5 px-2 rounded-none text-sm font-medium transition-all border text-center",
                 selectedBedrooms.includes(option.id)
                   ? "bg-primary text-primary-foreground border-primary"
                   : "border-border hover:border-primary/40 bg-card"
@@ -286,7 +286,7 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
                 key={cat.id}
                 onClick={() => toggleAmenity(cat.id)}
                 className={cn(
-                  "flex flex-col items-center gap-1 py-2.5 px-2 rounded-xl text-center transition-all border",
+                  "flex flex-col items-center gap-1 py-2.5 px-2 rounded-none text-center transition-all border",
                   isActive
                     ? "bg-primary/10 border-primary/30 text-primary"
                     : "border-border hover:bg-muted text-muted-foreground hover:text-foreground"
@@ -394,7 +394,7 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
               <h4 className="font-semibold mb-3">{isRu ? 'Тип жилья' : 'Property type'}</h4>
               <div className="grid grid-cols-2 gap-2">
                 {propertyTypes.map(type => (
-                  <button key={type.id} className={cn("flex items-center gap-2 p-3 rounded-xl text-left text-sm transition-all border-2", selectedPropertyTypes.includes(type.id) ? "bg-primary/10 border-primary text-primary font-medium" : "border-transparent hover:bg-muted")} onClick={() => togglePropertyType(type.id)}>
+                  <button key={type.id} className={cn("flex items-center gap-2 p-3 rounded-none text-left text-sm transition-all border-2", selectedPropertyTypes.includes(type.id) ? "bg-primary/10 border-primary text-primary font-medium" : "border-transparent hover:bg-muted")} onClick={() => togglePropertyType(type.id)}>
                     <Home className="w-4 h-4 shrink-0" />
                     {isRu ? type.labelRu : type.labelEn}
                   </button>
@@ -420,7 +420,7 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
               </div>
               <div className="grid grid-cols-2 gap-2">
                 {locations.map((loc) => (
-                  <button key={loc.id} className={cn("flex items-center gap-3 p-3 rounded-xl text-left text-sm transition-all border", selectedLocations.includes(loc.id) ? "bg-primary/10 border-primary text-primary font-medium" : "border-transparent hover:bg-muted")} onClick={() => toggleLocation(loc.id)}>
+                  <button key={loc.id} className={cn("flex items-center gap-3 p-3 rounded-none text-left text-sm transition-all border", selectedLocations.includes(loc.id) ? "bg-primary/10 border-primary text-primary font-medium" : "border-transparent hover:bg-muted")} onClick={() => toggleLocation(loc.id)}>
                     <Waves className="w-4 h-4 shrink-0 text-muted-foreground" />
                     {isRu ? loc.labelRu : loc.labelEn}
                   </button>

@@ -303,7 +303,7 @@ export default function VendorExperiences() {
                 <CardContent className="p-4">
                   <div className="flex gap-4">
                     {/* Thumbnail */}
-                    <div className="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-muted">
+                    <div className="w-20 h-20 flex-shrink-0 rounded-none overflow-hidden bg-muted">
                       {item.cover_image ? (
                         <img src={item.cover_image} alt="" className="w-full h-full object-cover" />
                       ) : (
@@ -529,14 +529,14 @@ export default function VendorExperiences() {
 
                 {/* Toggles */}
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center justify-between p-3 border rounded-none">
                     <Label className="cursor-pointer">{isRu ? 'Активен' : 'Active'}</Label>
                     <Switch
                       checked={formData.is_active}
                       onCheckedChange={(v) => setFormData(prev => ({ ...prev, is_active: v }))}
                     />
                   </div>
-                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center justify-between p-3 border rounded-none">
                     <Label className="cursor-pointer">{isRu ? 'Снаряжение' : 'Equipment'}</Label>
                     <Switch
                       checked={formData.equipment_included}

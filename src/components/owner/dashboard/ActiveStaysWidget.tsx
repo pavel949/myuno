@@ -79,8 +79,8 @@ export function ActiveStaysWidget() {
           <Skeleton className="h-4 w-16" />
         </div>
         <div className="flex gap-3 overflow-hidden">
-          <Skeleton className="h-28 w-64 rounded-xl shrink-0" />
-          <Skeleton className="h-28 w-64 rounded-xl shrink-0" />
+          <Skeleton className="h-28 w-64 rounded-none shrink-0" />
+          <Skeleton className="h-28 w-64 rounded-none shrink-0" />
         </div>
       </div>
     );
@@ -112,7 +112,7 @@ export function ActiveStaysWidget() {
             <CardContent className="p-0">
               <div className="flex gap-3 p-3">
                 {/* Property Image */}
-                <div className="shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-muted">
+                <div className="shrink-0 w-16 h-16 rounded-none overflow-hidden bg-muted">
                   {stay.propertyImage ? (
                     <img 
                       src={stay.propertyImage} 

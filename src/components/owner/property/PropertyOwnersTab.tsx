@@ -83,7 +83,7 @@ export function PropertyOwnersTab({ propertyId, companyId }: Props) {
       </div>
 
       {showAdd && (
-        <div className="rounded-lg border p-3 space-y-3 bg-card">
+        <div className="rounded-none border p-3 space-y-3 bg-card">
           <ContactSearchInput companyId={companyId} selectedContact={selectedContact} onSelect={setSelectedContact} onClear={() => setSelectedContact(null)} isRu={isRu} />
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -114,7 +114,7 @@ export function PropertyOwnersTab({ propertyId, companyId }: Props) {
         {owners.map(o => {
           const roleLabel = OWNER_ROLES.find(r => r.value === o.role);
           return (
-            <div key={o.id} className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
+            <div key={o.id} className="flex items-center gap-3 p-3 rounded-none border bg-card hover:bg-accent/50 transition-colors">
               <UserCircle className="h-8 w-8 text-muted-foreground shrink-0" />
               <div className="flex-1 min-w-0">
                 <button
@@ -128,7 +128,7 @@ export function PropertyOwnersTab({ propertyId, companyId }: Props) {
                   {o.ownership_pct && <span className="text-xs text-muted-foreground">{o.ownership_pct}%</span>}
                 </div>
               </div>
-              <button onClick={() => handleRemove(o.id)} className="p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive">
+              <button onClick={() => handleRemove(o.id)} className="p-1 rounded-none hover:bg-destructive/10 text-muted-foreground hover:text-destructive">
                 <Trash2 className="h-4 w-4" />
               </button>
             </div>

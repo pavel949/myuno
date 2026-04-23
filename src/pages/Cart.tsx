@@ -47,13 +47,13 @@ const typeLabels: Record<CartItem['type'], { en: string; ru: string }> = {
 };
 
 const typeColors: Record<CartItem['type'], string> = {
-  food: 'from-orange-500 to-red-500',
-  flowers: 'from-rose-500 to-pink-500',
+  food: 'from-accent to-red-500',
+  flowers: 'from-accent to-accent',
   service: 'from-slate-500 to-zinc-600',
-  product: 'from-blue-500 to-indigo-500',
-  tour: 'from-emerald-500 to-teal-500',
-  yacht: 'from-sky-500 to-blue-500',
-  activity: 'from-cyan-500 to-blue-500',
+  product: 'from-primary to-primary',
+  tour: 'from-success to-success',
+  yacht: 'from-primary to-primary',
+  activity: 'from-primary to-primary',
 };
 
 const Cart = () => {
@@ -155,7 +155,7 @@ const Cart = () => {
     <AppLayout title={language === 'ru' ? 'Корзина' : 'Cart'}>
       <div className="p-4 space-y-6 pb-40">
         {/* Cart Summary */}
-        <div className="bg-gradient-to-r from-primary/20 to-primary/10 rounded-xl p-4 border border-primary/20">
+        <div className="bg-gradient-to-r from-primary/20 to-primary/10 rounded-none p-4 border border-primary/20">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">
@@ -177,7 +177,7 @@ const Cart = () => {
 
         {/* Mixed-vertical notice — each vertical has its own checkout flow */}
         {hasMixedVerticals && (
-          <div className="bg-warning/10 border border-warning/20 rounded-xl p-3 text-sm text-foreground">
+          <div className="bg-warning/10 border border-warning/20 rounded-none p-3 text-sm text-foreground">
             {language === 'ru'
               ? `В корзине ${groupCount} разных категории. Их нужно оформить по отдельности — используйте кнопку «Оформить» в каждой группе.`
               : `Your cart contains ${groupCount} different categories. Please check them out one group at a time using the "Checkout" button in each group.`}
@@ -192,7 +192,7 @@ const Cart = () => {
             <div key={type} className="space-y-3">
               {/* Type Header */}
               <div className="flex items-center gap-2">
-                <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${color} flex items-center justify-center`}>
+                <div className={`w-8 h-8 rounded-none bg-gradient-to-br ${color} flex items-center justify-center`}>
                   <Icon className="w-4 h-4 text-white" />
                 </div>
                 <h3 className="font-semibold">
@@ -208,14 +208,14 @@ const Cart = () => {
                 {typeItems.map((item) => (
                   <div 
                     key={item.id}
-                    className="bg-card border border-border rounded-xl p-3 flex gap-3"
+                    className="bg-card border border-border rounded-none p-3 flex gap-3"
                   >
                     {/* Image */}
                     {item.image && (
                       <img 
                         src={item.image} 
                         alt={item.name}
-                        className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
+                        className="w-16 h-16 rounded-none object-cover flex-shrink-0"
                       />
                     )}
 
@@ -284,14 +284,14 @@ const Cart = () => {
                         <Trash2 className="w-4 h-4" />
                       </button>
 
-                      <div className="flex items-center gap-2 bg-secondary rounded-lg p-1" role="group" aria-label={language === 'ru' ? 'Количество' : 'Quantity'}>
+                      <div className="flex items-center gap-2 bg-secondary rounded-none p-1" role="group" aria-label={language === 'ru' ? 'Количество' : 'Quantity'}>
                         <button
                           onClick={(e) => {
                             triggerRipple(e);
                             updateQuantity(item.id, item.quantity - 1);
                           }}
                           aria-label={language === 'ru' ? 'Уменьшить количество' : 'Decrease quantity'}
-                          className="w-6 h-6 rounded flex items-center justify-center hover:bg-background transition-colors"
+                          className="w-6 h-6 rounded-none flex items-center justify-center hover:bg-background transition-colors"
                         >
                           <Minus className="w-3 h-3" />
                         </button>
@@ -304,7 +304,7 @@ const Cart = () => {
                             updateQuantity(item.id, item.quantity + 1);
                           }}
                           aria-label={language === 'ru' ? 'Увеличить количество' : 'Increase quantity'}
-                          className="w-6 h-6 rounded flex items-center justify-center hover:bg-background transition-colors"
+                          className="w-6 h-6 rounded-none flex items-center justify-center hover:bg-background transition-colors"
                         >
                           <Plus className="w-3 h-3" />
                         </button>

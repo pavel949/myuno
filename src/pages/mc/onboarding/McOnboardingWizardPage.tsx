@@ -45,7 +45,7 @@ export default function McOnboardingWizardPage() {
     <div className="p-4 md:p-6 max-w-3xl mx-auto space-y-6 pb-24">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+          <div className="w-10 h-10 rounded-none bg-primary/10 flex items-center justify-center shrink-0">
             <Rocket className="w-5 h-5 text-primary" />
           </div>
           <div>
@@ -90,7 +90,7 @@ export default function McOnboardingWizardPage() {
                     ? <CheckCircle2 className="w-6 h-6 text-success" />
                     : <Circle className="w-6 h-6 text-muted-foreground" />}
                 </button>
-                <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 rounded-none bg-muted flex items-center justify-center shrink-0">
                   <Icon className="w-4 h-4 text-muted-foreground" />
                 </div>
                 <div className="flex-1 min-w-0">

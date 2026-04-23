@@ -126,7 +126,7 @@ export function TranslationsTable({
       </div>
 
       {/* Table */}
-      <div className="border rounded-lg overflow-hidden">
+      <div className="border rounded-none overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>

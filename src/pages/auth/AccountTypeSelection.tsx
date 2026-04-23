@@ -125,7 +125,7 @@ export default function AccountTypeSelection() {
               onClick={() => setSelectedType(type.id)}
             >
               <CardContent className="flex items-center gap-4 p-6">
-                <div className={`p-3 rounded-xl ${
+                <div className={`p-3 rounded-none ${
                   selectedType === type.id ? 'bg-primary text-primary-foreground' : 'bg-muted'
                 }`}>
                   {type.icon}

@@ -52,11 +52,11 @@ export function CalmClusterHero({
   return (
     <div className={cn('relative px-4 pt-4 pb-5', className)}>
       <BackButton fallbackPath={fallbackPath} className="mb-3" />
-      <div className="rounded-2xl border border-border bg-card p-5">
+      <div className="rounded-none border border-border bg-card p-5">
         <div className="flex items-center gap-3">
           <div
             className={cn(
-              'w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0',
+              'w-11 h-11 rounded-none flex items-center justify-center flex-shrink-0',
               ACCENT_BG[clusterId],
             )}
           >

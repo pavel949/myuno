@@ -291,10 +291,10 @@ function CatalogItemAvatar({ item }: { item: UnifiedCatalogItem }) {
   const initials = getNameInitials(itemName);
   
   return (
-    <Avatar className="h-10 w-10 rounded-lg">
+    <Avatar className="h-10 w-10 rounded-none">
       <AvatarImage src={item.image} className="object-cover" />
       <AvatarFallback className={cn(
-        "rounded-lg",
+        "rounded-none",
         item.type === 'service' && "bg-info/10",
         item.type === 'product' && "bg-success/10",
         item.type === 'property' && "bg-accent-amber/10"
@@ -448,7 +448,7 @@ export function UnifiedCatalogTable({ providerId }: UnifiedCatalogTableProps = {
 
   if (error) {
     return (
-      <div className="rounded-lg border border-destructive/50 bg-destructive/5 p-6 text-center">
+      <div className="rounded-none border border-destructive/50 bg-destructive/5 p-6 text-center">
         <p className="font-medium text-destructive">{isRussian ? 'Ошибка загрузки каталога' : 'Failed to load catalog'}</p>
         <p className="mt-1 text-sm text-muted-foreground">{error}</p>
         <Button variant="outline" size="sm" className="mt-4" onClick={() => refetch()}>
@@ -516,7 +516,7 @@ export function UnifiedCatalogTable({ providerId }: UnifiedCatalogTableProps = {
       </div>
 
       {/* Table */}
-      <div className="border rounded-lg">
+      <div className="border rounded-none">
         <Table>
           <TableHeader>
             <TableRow>

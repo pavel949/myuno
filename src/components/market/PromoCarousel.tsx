@@ -40,7 +40,7 @@ export const PromoCarousel: React.FC<PromoCarouselProps> = ({ className }) => {
   if (isLoading) {
     return (
       <div className={cn("px-4 py-2 max-w-[1536px] mx-auto", className)}>
-        <Skeleton className="w-full h-32 rounded-2xl" />
+        <Skeleton className="w-full h-32 rounded-none" />
       </div>
     );
   }
@@ -67,7 +67,7 @@ export const PromoCarousel: React.FC<PromoCarouselProps> = ({ className }) => {
                 <button
                   onClick={() => navigate(banner.link_path)}
                   className={cn(
-                    "relative w-full overflow-hidden rounded-2xl",
+                    "relative w-full overflow-hidden rounded-none",
                     "bg-gradient-to-r",
                     banner.gradient,
                     "p-5 sm:p-6 text-left",
@@ -91,7 +91,7 @@ export const PromoCarousel: React.FC<PromoCarouselProps> = ({ className }) => {
                     
                     {/* Title Row */}
                     <div className="flex items-center gap-3 mb-2">
-                      <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0">
+                      <div className="w-10 h-10 rounded-none bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0">
                         <Icon className="w-5 h-5 text-white" />
                       </div>
                       <h3 className="text-lg sm:text-xl font-bold text-white leading-tight">
@@ -105,7 +105,7 @@ export const PromoCarousel: React.FC<PromoCarouselProps> = ({ className }) => {
                     </p>
                     
                     {/* CTA */}
-                    <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white font-semibold text-sm px-4 py-2 rounded-xl group-hover:bg-white/30 transition-colors">
+                    <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white font-semibold text-sm px-4 py-2 rounded-none group-hover:bg-white/30 transition-colors">
                       <span>{isRu ? 'Смотреть' : 'Shop Now'}</span>
                       <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                     </div>

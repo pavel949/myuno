@@ -70,7 +70,7 @@ export default function WelcomeLanding() {
       <header className="sticky top-0 z-30 border-b border-border/40 bg-background/80 backdrop-blur-xl">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-5">
           <Link to="/" className="flex items-center gap-2 group">
-            <div className="grid h-7 w-7 place-items-center rounded-md bg-primary/15 text-primary ring-1 ring-primary/30">
+            <div className="grid h-7 w-7 place-items-center rounded-none bg-primary/15 text-primary ring-1 ring-primary/30">
               <span className="text-[11px] font-bold tracking-tight">M</span>
             </div>
             <span className="text-[15px] font-semibold tracking-tight">
@@ -82,14 +82,14 @@ export default function WelcomeLanding() {
             <LanguageSwitcher />
             <Link
               to="/auth"
-              className="hidden sm:inline-flex h-8 items-center rounded-md px-3 text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors"
+              className="hidden sm:inline-flex h-8 items-center rounded-none px-3 text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
               {isRu ? 'Войти' : 'Sign in'}
             </Link>
             <Link
               to="/auth?mode=signup"
               className={cn(
-                'inline-flex h-8 items-center gap-1 rounded-md px-3 text-[13px] font-semibold',
+                'inline-flex h-8 items-center gap-1 rounded-none px-3 text-[13px] font-semibold',
                 'bg-foreground text-background hover:bg-foreground/90 transition-colors'
               )}
             >
@@ -177,7 +177,7 @@ export default function WelcomeLanding() {
             <button
               onClick={() => navigate('/auth?mode=signup')}
               className={cn(
-                'group inline-flex h-11 items-center gap-2 rounded-lg px-5 text-[14px] font-semibold',
+                'group inline-flex h-11 items-center gap-2 rounded-none px-5 text-[14px] font-semibold',
                 'bg-foreground text-background hover:bg-foreground/90 transition-all',
                 'shadow-[0_1px_0_0_hsl(var(--background))_inset,0_0_0_1px_hsl(var(--foreground))]'
               )}
@@ -187,7 +187,7 @@ export default function WelcomeLanding() {
             </button>
             <button
               onClick={() => navigate('/auth')}
-              className="inline-flex h-11 items-center rounded-lg border border-border bg-card/40 px-5 text-[14px] font-medium text-foreground hover:bg-card transition-colors"
+              className="inline-flex h-11 items-center rounded-none border border-border bg-card/40 px-5 text-[14px] font-medium text-foreground hover:bg-card transition-colors"
             >
               {isRu ? 'У меня есть аккаунт' : 'I have an account'}
             </button>
@@ -198,7 +198,7 @@ export default function WelcomeLanding() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.25 }}
-            className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-px overflow-hidden rounded-xl border border-border bg-border/50 max-w-3xl"
+            className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-px overflow-hidden rounded-none border border-border bg-border/50 max-w-3xl"
           >
             {[
               { num: '50+', en: 'apps and systems for comfortable living', ru: 'приложений и систем для комфортной жизни' },
@@ -231,7 +231,7 @@ export default function WelcomeLanding() {
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px overflow-hidden rounded-xl border border-border bg-border/50">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px overflow-hidden rounded-none border border-border bg-border/50">
             {CLUSTERS.map((c, i) => {
               const Icon = c.icon;
               return (
@@ -244,7 +244,7 @@ export default function WelcomeLanding() {
                   className="group relative bg-background p-5 sm:p-6 hover:bg-card/40 transition-colors"
                 >
                   <div className="flex items-start gap-4">
-                    <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-border bg-card text-foreground group-hover:border-primary/40 group-hover:text-primary transition-colors">
+                    <div className="grid h-10 w-10 shrink-0 place-items-center rounded-none border border-border bg-card text-foreground group-hover:border-primary/40 group-hover:text-primary transition-colors">
                       <Icon className="h-4.5 w-4.5" strokeWidth={1.75} />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -302,7 +302,7 @@ export default function WelcomeLanding() {
             <button
               onClick={() => navigate('/auth?mode=signup')}
               className={cn(
-                'group inline-flex h-12 items-center gap-2 rounded-lg px-6 text-[14px] font-semibold',
+                'group inline-flex h-12 items-center gap-2 rounded-none px-6 text-[14px] font-semibold',
                 'bg-primary text-primary-foreground hover:bg-primary/90 transition-all',
                 'shadow-[0_8px_24px_-8px_hsl(var(--primary)/0.5)]'
               )}

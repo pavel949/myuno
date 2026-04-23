@@ -41,11 +41,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   if (variant === 'horizontal') {
     return (
       <div 
-        className="flex gap-3 p-3 bg-card rounded-2xl border border-border group hover:shadow-md transition-all"
+        className="flex gap-3 p-3 bg-card rounded-none border border-border group hover:shadow-md transition-all"
         onClick={onClick}
       >
         {/* Image */}
-        <div className="relative w-24 h-24 shrink-0 rounded-lg overflow-hidden">
+        <div className="relative w-24 h-24 shrink-0 rounded-none overflow-hidden">
           <img
             src={product.cover_image || '/placeholder.svg'}
             alt={name}
@@ -124,7 +124,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   // Grid variant (default)
   return (
     <div 
-      className="bg-card rounded-2xl border border-border overflow-hidden group hover:shadow-md transition-all cursor-pointer"
+      className="bg-card rounded-none border border-border overflow-hidden group hover:shadow-md transition-all cursor-pointer"
       onClick={onClick}
     >
       {/* Image */}

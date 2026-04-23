@@ -156,7 +156,7 @@ const VendorAnalytics = () => {
             <Card key={index}>
               <CardContent className="p-4">
                 <div className="flex items-center gap-3 mb-2">
-                  <div className={`p-2 rounded-lg ${stat.bgColor}`}>
+                  <div className={`p-2 rounded-none ${stat.bgColor}`}>
                     <stat.icon className={`h-4 w-4 ${stat.color}`} />
                   </div>
                   <span className="text-xs text-muted-foreground">{stat.label}</span>

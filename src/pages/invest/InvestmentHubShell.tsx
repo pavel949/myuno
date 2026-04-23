@@ -105,7 +105,7 @@ export default function InvestmentHubShell() {
           </CardHeader>
           <CardContent className="space-y-3">
             {INVESTMENT_HUB_ROLES.map((item) => (
-              <div key={item.role} className="rounded-lg border p-3">
+              <div key={item.role} className="rounded-none border p-3">
                 <div className="font-medium">{pickByLanguage(language, { ru: item.labelRu, en: item.labelEn, th: item.labelTh })}</div>
                 <div className="text-sm text-muted-foreground">{pickByLanguage(language, { ru: item.primaryGoalRu, en: item.primaryGoalEn, th: item.primaryGoalTh })}</div>
               </div>
@@ -153,7 +153,7 @@ export default function InvestmentHubShell() {
               </div>
             ) : (
               opportunities.data.slice(0, 6).map((item) => (
-                <div key={item.id} className="rounded-lg border p-3">
+                <div key={item.id} className="rounded-none border p-3">
                   <div className="flex items-center justify-between gap-2">
                     <div className="font-medium">{getLocalizedOpportunityTitle(language, item.title, item.metadata)}</div>
                     <Badge variant="outline">{item.stage}</Badge>
@@ -176,7 +176,7 @@ export default function InvestmentHubShell() {
           </CardHeader>
           <CardContent className="space-y-3">
             {INVESTMENT_MONETIZATION_RULES.map((rule) => (
-              <div key={rule.id} className="rounded-lg border p-3">
+              <div key={rule.id} className="rounded-none border p-3">
                 <div className="font-medium">
                   {pickByLanguage(language, { ru: rule.titleRu, en: rule.titleEn, th: rule.titleTh })}
                 </div>
@@ -194,7 +194,7 @@ export default function InvestmentHubShell() {
           </CardHeader>
           <CardContent className="space-y-3">
             {INVESTMENT_HUB_ROLLOUT.map((stage) => (
-              <div key={stage.id} className="rounded-lg border p-3">
+              <div key={stage.id} className="rounded-none border p-3">
                 <div className="font-medium">
                   {pickByLanguage(language, { ru: stage.titleRu, en: stage.titleEn, th: stage.titleTh })}
                 </div>

@@ -94,7 +94,7 @@ export default function LegalServicesIndex() {
             <div className="grid gap-4">
               {[1,2,3].map(i => (
                 <div key={i} className="flex gap-3">
-                  <Skeleton className="w-24 h-24 rounded-xl" />
+                  <Skeleton className="w-24 h-24 rounded-none" />
                   <div className="flex-1 space-y-2">
                     <Skeleton className="h-4 w-3/4" />
                     <Skeleton className="h-3 w-1/2" />

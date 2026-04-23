@@ -141,10 +141,10 @@ export default function ChannelManager() {
           </TabsList>
 
           <TabsContent value="connections" className="space-y-4 mt-4">
-            <Card className="bg-gradient-to-br from-rose-500/10 to-pink-500/10 border-rose-200 dark:border-rose-800">
+            <Card className="bg-gradient-to-br from-accent/10 to-accent/10 border-accent/40 dark:border-accent/40">
               <CardContent className="pt-4">
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-xl bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center text-3xl shrink-0">🏠</div>
+                  <div className="w-14 h-14 rounded-none bg-accent/10 dark:bg-accent/50 flex items-center justify-center text-3xl shrink-0">🏠</div>
                   <div className="flex-1">
                     <h3 className="font-semibold">{isRu ? 'Импорт листинга с Airbnb' : 'Import listing from Airbnb'}</h3>
                     <p className="text-sm text-muted-foreground">
@@ -216,7 +216,7 @@ export default function ChannelManager() {
             <Card className="border border-primary/20 bg-primary/5">
               <CardContent className="pt-5 pb-5">
                 <div className="flex items-start gap-4">
-                  <div className="p-2.5 rounded-xl bg-primary/10 shrink-0">
+                  <div className="p-2.5 rounded-none bg-primary/10 shrink-0">
                     <Crown className="h-5 w-5 text-primary" />
                   </div>
                   <div className="flex-1">
@@ -271,7 +271,7 @@ export default function ChannelManager() {
               <h2 className="text-lg font-semibold mb-3">{isRu ? 'Подключённые каналы (iCal)' : 'Connected Channels (iCal)'}</h2>
               {isLoading ? (
                 <div className="space-y-3">
-                  {[1, 2].map((i) => <div key={i} className="h-24 bg-muted animate-pulse rounded-lg" />)}
+                  {[1, 2].map((i) => <div key={i} className="h-24 bg-muted animate-pulse rounded-none" />)}
                 </div>
               ) : calendars && calendars.length > 0 ? (
                 <div className="space-y-3">

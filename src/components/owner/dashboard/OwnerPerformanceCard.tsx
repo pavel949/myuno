@@ -29,7 +29,7 @@ export function OwnerPerformanceCard() {
           <Skeleton className="h-5 w-28" />
           <Skeleton className="h-4 w-16" />
         </div>
-        <Skeleton className="h-24 rounded-xl" />
+        <Skeleton className="h-24 rounded-none" />
       </div>
     );
   }

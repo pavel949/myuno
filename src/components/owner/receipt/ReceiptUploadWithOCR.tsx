@@ -111,7 +111,7 @@ export function ReceiptUploadWithOCR({
     <div className="space-y-4">
       {/* Upload Zone */}
       {!receiptUrl ? (
-        <div className="border-2 border-dashed border-muted-foreground/25 rounded-xl p-6 text-center hover:border-primary/50 transition-colors">
+        <div className="border-2 border-dashed border-muted-foreground/25 rounded-none p-6 text-center hover:border-primary/50 transition-colors">
           <ImageUpload
             value=""
             onChange={handleImageUpload}
@@ -139,10 +139,10 @@ export function ReceiptUploadWithOCR({
               <img 
                 src={receiptUrl} 
                 alt="Receipt" 
-                className="w-full max-h-48 object-contain rounded-lg bg-muted"
+                className="w-full max-h-48 object-contain rounded-none bg-muted"
               />
               {isProcessing && (
-                <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center rounded-lg">
+                <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center rounded-none">
                   <div className="flex flex-col items-center gap-2">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                     <span className="text-sm font-medium">
@@ -169,7 +169,7 @@ export function ReceiptUploadWithOCR({
                 </div>
 
                 {/* Extracted Fields */}
-                <div className="grid grid-cols-2 gap-3 p-3 bg-muted/50 rounded-lg">
+                <div className="grid grid-cols-2 gap-3 p-3 bg-muted/50 rounded-none">
                   {parsedData.vendor && (
                     <div>
                       <Label className="text-xs text-muted-foreground">
@@ -232,7 +232,7 @@ export function ReceiptUploadWithOCR({
 
             {/* Error State */}
             {error && !isProcessing && (
-              <div className="flex items-center gap-2 text-warning p-3 bg-warning/10 rounded-lg">
+              <div className="flex items-center gap-2 text-warning p-3 bg-warning/10 rounded-none">
                 <AlertCircle className="h-4 w-4 flex-shrink-0" />
                 <div className="flex-1">
                   <p className="text-sm font-medium">{error}</p>

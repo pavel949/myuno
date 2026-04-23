@@ -214,7 +214,7 @@ const AdminStores = () => {
                   <img
                     src={store.cover_image}
                     alt={store.name_en}
-                    className="w-20 h-20 rounded-lg object-cover"
+                    className="w-20 h-20 rounded-none object-cover"
                   />
                 )}
                 <div className="flex-1 min-w-0">
@@ -224,17 +224,17 @@ const AdminStores = () => {
                   <p className="text-sm text-muted-foreground">{getCategoryLabel(store.category)}</p>
                   <div className="flex items-center gap-2 mt-2">
                     {store.is_featured && (
-                      <span className="text-xs bg-warning/10 text-warning px-2 py-0.5 rounded">
+                      <span className="text-xs bg-warning/10 text-warning px-2 py-0.5 rounded-none">
                         {language === 'en' ? 'Featured' : 'Рекомендуемый'}
                       </span>
                     )}
                     {store.delivery_available && (
-                      <span className="text-xs bg-info/10 text-info px-2 py-0.5 rounded">
+                      <span className="text-xs bg-info/10 text-info px-2 py-0.5 rounded-none">
                         {language === 'en' ? 'Delivery' : 'Доставка'}
                       </span>
                     )}
                     {!store.is_active && (
-                      <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded">
+                      <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-none">
                         {language === 'en' ? 'Inactive' : 'Неактивно'}
                       </span>
                     )}

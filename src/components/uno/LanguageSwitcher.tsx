@@ -37,7 +37,7 @@ export function LanguageSwitcher({
         <DropdownMenuTrigger asChild>
           <button
             className={cn(
-              "inline-flex items-center gap-1 px-2 py-1.5 rounded-md",
+              "inline-flex items-center gap-1 px-2 py-1.5 rounded-none",
               "bg-secondary/60 hover:bg-secondary text-foreground",
               "text-xs font-medium transition-colors",
               "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
@@ -81,7 +81,7 @@ export function LanguageSwitcher({
           key={lang.code}
           onClick={() => setLanguage(lang.code)}
           className={cn(
-            "flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl",
+            "flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-none",
             "font-medium transition-all duration-200 border text-sm",
             language === lang.code
               ? "bg-primary/10 border-primary text-primary"

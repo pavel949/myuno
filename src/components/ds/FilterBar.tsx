@@ -56,7 +56,7 @@ export function FilterBar({
           <select
             value={activeSort}
             onChange={(e) => onSortChange(e.target.value)}
-            className="text-xs bg-card border border-border/60 rounded-lg px-2 py-1.5 text-foreground [box-shadow:var(--shadow-elevation-1)]"
+            className="text-xs bg-card border border-border/60 rounded-none px-2 py-1.5 text-foreground [box-shadow:var(--shadow-elevation-1)]"
           >
             {sortOptions.map(opt => (
               <option key={opt.id} value={opt.id}>{opt.label}</option>

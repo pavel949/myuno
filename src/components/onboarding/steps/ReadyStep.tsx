@@ -49,7 +49,7 @@ export const ReadyStep = forwardRef<HTMLDivElement, ReadyStepProps>(
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-            className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-emerald-500 to-green-500 flex items-center justify-center mb-4 shadow-lg shadow-emerald-500/25"
+            className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-success to-success flex items-center justify-center mb-4 shadow-lg shadow-success/20/25"
           >
             <Check className="w-10 h-10 text-white" />
           </motion.div>
@@ -70,9 +70,9 @@ export const ReadyStep = forwardRef<HTMLDivElement, ReadyStepProps>(
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2 + index * 0.1 }}
-                className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border"
+                className="flex items-center gap-3 p-3 rounded-none bg-card border border-border"
               >
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-none bg-primary/10 flex items-center justify-center">
                   <IconComponent className="w-5 h-5 text-primary" />
                 </div>
                 <span className="text-sm font-medium">

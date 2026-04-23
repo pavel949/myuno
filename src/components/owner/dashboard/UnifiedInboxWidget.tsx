@@ -44,7 +44,7 @@ export function UnifiedInboxWidget() {
     return (
       <Card>
         <CardContent className="py-6">
-          <div className="h-20 bg-muted animate-pulse rounded-lg" />
+          <div className="h-20 bg-muted animate-pulse rounded-none" />
         </CardContent>
       </Card>
     );
@@ -113,7 +113,7 @@ export function UnifiedInboxWidget() {
                     ? `/mc/chat/booking/${chat.bookingId}`
                     : `/mc/chat/property/${chat.propertyId}`
                 )}
-                className="w-full flex items-center gap-2.5 p-2 rounded-lg hover:bg-muted/50 transition-colors text-left"
+                className="w-full flex items-center gap-2.5 p-2 rounded-none hover:bg-muted/50 transition-colors text-left"
               >
                 <Avatar className="h-8 w-8 flex-shrink-0">
                   <AvatarFallback className="bg-primary/10 text-primary text-xs">
@@ -137,7 +137,7 @@ export function UnifiedInboxWidget() {
                   </p>
                 </div>
                 <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                  <span className={cn("p-1 rounded", channelCfg.color)}>
+                  <span className={cn("p-1 rounded-none", channelCfg.color)}>
                     <ChannelIcon className="h-3 w-3" />
                   </span>
                   {chat.lastMessageTime && (

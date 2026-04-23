@@ -164,7 +164,7 @@ const updateProspect = useUpdateProspect();
         }
       >
         {prospect.ai_score !== null ? (
-          <div className="bg-muted/50 rounded-md p-2">
+          <div className="bg-muted/50 rounded-none p-2">
             <div className="flex items-center gap-2">
               <span className="text-xl font-bold text-primary">{prospect.ai_score}</span>
               <span className="text-[10px] text-muted-foreground">

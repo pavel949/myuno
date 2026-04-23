@@ -203,7 +203,7 @@ export function QuickConnectCards({ onConnected }: QuickConnectCardsProps) {
           <div className="space-y-4">
             {/* Instructions — shown by default */}
             {selectedOta && selectedOta.instructions[isRu ? 'ru' : 'en'].length > 0 && (
-              <div className="rounded-lg bg-muted/50 border border-border p-3 space-y-2">
+              <div className="rounded-none bg-muted/50 border border-border p-3 space-y-2">
                 <h4 className="text-sm font-medium text-foreground">
                   {isRu ? '📋 Как получить iCal-ссылку' : '📋 How to get iCal link'}
                 </h4>

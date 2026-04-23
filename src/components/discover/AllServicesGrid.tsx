@@ -46,7 +46,7 @@ export const AllServicesGrid = memo(function AllServicesGrid({ audienceFilter = 
   return (
     <section className="space-y-4">
       <div className="flex items-center gap-2">
-        <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
+        <div className="w-8 h-8 rounded-none bg-muted flex items-center justify-center">
           <Grid3X3 className="w-4 h-4 text-muted-foreground" />
         </div>
         <h2 className="text-lg font-bold text-foreground">
@@ -82,7 +82,7 @@ export const AllServicesGrid = memo(function AllServicesGrid({ audienceFilter = 
                         key={item.id}
                         onClick={() => handleNav(item.route)}
                         className={cn(
-                          "flex flex-col items-center gap-2 p-2.5 rounded-xl",
+                          "flex flex-col items-center gap-2 p-2.5 rounded-none",
                           "hover:bg-muted/50 active:bg-muted",
                           "active:scale-[0.95] transition-all duration-200",
                           "text-center cursor-pointer group touch-manipulation"

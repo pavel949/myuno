@@ -35,10 +35,10 @@ const paddingStyles = {
 
 const radiusStyles = {
   none: '',
-  md: 'rounded-md',
-  lg: 'rounded-lg',
-  xl: 'rounded-xl',
-  '2xl': 'rounded-2xl',
+  md: 'rounded-none',
+  lg: 'rounded-none',
+  xl: 'rounded-none',
+  '2xl': 'rounded-none',
 };
 
 export const Surface = React.forwardRef<HTMLDivElement, SurfaceProps>(

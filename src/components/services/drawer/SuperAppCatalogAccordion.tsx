@@ -23,16 +23,16 @@ import { cn } from '@/lib/utils';
 
 // Vertical gradient colors for visual distinction
 const VERTICAL_GRADIENTS: Record<string, string> = {
-  yachts: 'from-blue-500 to-cyan-400',
-  tours: 'from-amber-500 to-orange-400',
-  restaurants: 'from-rose-500 to-pink-400',
-  property: 'from-emerald-500 to-green-400',
-  transport: 'from-indigo-500 to-violet-400',
-  home_services: 'from-amber-500 to-yellow-400',
-  salons: 'from-pink-500 to-purple-400',
-  medical: 'from-teal-500 to-emerald-400',
-  pets: 'from-orange-500 to-amber-400',
-  events: 'from-purple-500 to-indigo-400',
+  yachts: 'from-primary to-primary',
+  tours: 'from-accent to-accent',
+  restaurants: 'from-accent to-accent',
+  property: 'from-success to-success',
+  transport: 'from-primary to-primary',
+  home_services: 'from-accent to-accent',
+  salons: 'from-accent to-primary',
+  medical: 'from-success to-success',
+  pets: 'from-accent to-accent',
+  events: 'from-primary to-primary',
   general: 'from-primary to-accent',
 };
 
@@ -58,7 +58,7 @@ export function SuperAppCatalogAccordion({ searchQuery, onNavigate }: SuperAppCa
       <div className="px-4 py-2 space-y-3">
         {[1, 2, 3, 4, 5].map(i => (
           <div key={i} className="flex items-center gap-3">
-            <Skeleton className="w-10 h-10 rounded-xl" />
+            <Skeleton className="w-10 h-10 rounded-none" />
             <Skeleton className="h-4 w-32" />
           </div>
         ))}
@@ -202,7 +202,7 @@ function CatalogHierarchyItems({
           <AccordionItem key={parent.id} value={parent.id} className="border-0">
             <AccordionTrigger 
               className={cn(
-                "px-3 py-2.5 hover:bg-muted/50 hover:no-underline rounded-lg",
+                "px-3 py-2.5 hover:bg-muted/50 hover:no-underline rounded-none",
                 "[&>svg]:text-muted-foreground [&>svg]:w-3.5 [&>svg]:h-3.5"
               )}
             >
@@ -255,7 +255,7 @@ function CatalogItemButton({
       onClick={onClick}
       className={cn(
         "w-full flex items-center gap-3 px-3 py-2.5",
-        "hover:bg-muted/50 active:bg-muted rounded-lg transition-colors",
+        "hover:bg-muted/50 active:bg-muted rounded-none transition-colors",
         "text-left text-sm"
       )}
     >

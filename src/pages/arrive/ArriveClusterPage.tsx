@@ -43,12 +43,12 @@ function AppItem({ app, t }: { app: ClusterApp; t: boolean }) {
     <button
       onClick={() => navigate(app.path)}
       className={cn(
-        'w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card text-left',
+        'w-full flex items-center gap-4 p-4 rounded-none border border-border bg-card text-left',
         'transition-all hover:border-cluster-arrive/40 hover:[box-shadow:var(--shadow-elevation-2)] active:scale-[0.98]',
         !app.ready && 'opacity-50 pointer-events-none'
       )}
     >
-      <div className="w-11 h-11 rounded-xl bg-cluster-arrive/10 flex items-center justify-center flex-shrink-0">
+      <div className="w-11 h-11 rounded-none bg-cluster-arrive/10 flex items-center justify-center flex-shrink-0">
         {app.emoji
           ? <span className="text-xl">{app.icon as string}</span>
           : (() => { const Icon = app.icon as React.ElementType; return <Icon className="w-5 h-5 text-cluster-arrive" />; })()

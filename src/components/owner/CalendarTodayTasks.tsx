@@ -70,11 +70,11 @@ export function CalendarTodayTasks({ propertyId }: CalendarTodayTasksProps) {
             <div
               key={task.id}
               className={cn(
-                "flex items-center gap-3 p-2.5 rounded-lg border transition-colors",
+                "flex items-center gap-3 p-2.5 rounded-none border transition-colors",
                 isCompleted ? "opacity-50 bg-muted/30" : "bg-card hover:bg-muted/50"
               )}
             >
-              <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0", config.bgColor)}>
+              <div className={cn("w-8 h-8 rounded-none flex items-center justify-center shrink-0", config.bgColor)}>
                 <Icon className={cn("h-4 w-4", config.color)} />
               </div>
               <div className="flex-1 min-w-0">

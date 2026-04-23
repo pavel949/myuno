@@ -67,7 +67,7 @@ const STATUS_FILTERS: { id: 'all' | Status; en: string; ru: string }[] = [
 const STATUS_BADGE: Record<Status, { en: string; ru: string; cls: string }> = {
   awaiting_admin: { en: 'Awaiting admin', ru: 'Ожидает админа', cls: 'bg-warning/10 text-warning border-warning/20' },
   contacted:      { en: 'Contacted',      ru: 'На связи',       cls: 'bg-primary/10 text-primary border-primary/20' },
-  paid:           { en: 'Paid',           ru: 'Оплачено',       cls: 'bg-blue-500/10 text-blue-600 border-blue-500/20' },
+  paid:           { en: 'Paid',           ru: 'Оплачено',       cls: 'bg-primary/10 text-primary border-primary/40/20' },
   confirmed:      { en: 'Confirmed',      ru: 'Подтверждено',   cls: 'bg-success/10 text-success border-success/20' },
   rejected:       { en: 'Rejected',       ru: 'Отклонено',      cls: 'bg-destructive/10 text-destructive border-destructive/20' },
   expired:        { en: 'Expired',        ru: 'Истекло',        cls: 'bg-muted text-muted-foreground' },
@@ -466,7 +466,7 @@ function DetailSheet({
             <div className="grid grid-cols-1 gap-2">
               <a
                 href={`tel:${row.guest_phone}`}
-                className="flex items-center justify-between p-2.5 rounded-md border hover:bg-muted/50"
+                className="flex items-center justify-between p-2.5 rounded-none border hover:bg-muted/50"
               >
                 <span className="inline-flex items-center gap-2 text-sm">
                   <Phone className="w-4 h-4 text-muted-foreground" />
@@ -477,7 +477,7 @@ function DetailSheet({
               <button
                 type="button"
                 onClick={onCopyEmail}
-                className="flex items-center justify-between p-2.5 rounded-md border hover:bg-muted/50 text-left"
+                className="flex items-center justify-between p-2.5 rounded-none border hover:bg-muted/50 text-left"
               >
                 <span className="inline-flex items-center gap-2 text-sm truncate">
                   <Mail className="w-4 h-4 text-muted-foreground shrink-0" />
@@ -488,7 +488,7 @@ function DetailSheet({
               <button
                 type="button"
                 onClick={onWhatsApp}
-                className="flex items-center justify-between p-2.5 rounded-md border bg-success/5 border-success/20 hover:bg-success/10 text-left"
+                className="flex items-center justify-between p-2.5 rounded-none border bg-success/5 border-success/20 hover:bg-success/10 text-left"
               >
                 <span className="inline-flex items-center gap-2 text-sm">
                   <MessageCircle className="w-4 h-4 text-success" />
@@ -531,7 +531,7 @@ function DetailSheet({
             <>
               <Separator />
               <Field label={isRu ? 'Причина отклонения' : 'Rejection reason'}>
-                <p className="text-sm p-2.5 rounded bg-destructive/5 text-destructive">{row.rejected_reason}</p>
+                <p className="text-sm p-2.5 rounded-none bg-destructive/5 text-destructive">{row.rejected_reason}</p>
               </Field>
             </>
           )}

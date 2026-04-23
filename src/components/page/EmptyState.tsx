@@ -44,7 +44,7 @@ export function EmptyState({
       {icon && (
         <div
           className={cn(
-            'rounded-2xl bg-secondary flex items-center justify-center mb-5',
+            'rounded-none bg-secondary flex items-center justify-center mb-5',
             compact ? 'w-14 h-14' : 'w-20 h-20',
           )}
         >

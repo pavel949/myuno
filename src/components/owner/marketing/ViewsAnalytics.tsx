@@ -137,7 +137,7 @@ export function ViewsAnalytics({ analytics, summary, className }: ViewsAnalytics
           {stats.map((stat) => (
             <div 
               key={stat.label}
-              className={cn("p-3 rounded-xl", stat.bgColor)}
+              className={cn("p-3 rounded-none", stat.bgColor)}
             >
               <div className="flex items-center justify-between mb-1">
                 <stat.icon className={cn("h-4 w-4", stat.color)} />
@@ -161,7 +161,7 @@ export function ViewsAnalytics({ analytics, summary, className }: ViewsAnalytics
         </div>
         
         {/* Conversion Rate */}
-        <div className="flex items-center justify-between p-3 bg-muted rounded-xl">
+        <div className="flex items-center justify-between p-3 bg-muted rounded-none">
           <div>
             <p className="text-sm text-muted-foreground">
               {isRu ? 'Конверсия просмотры → бронь' : 'View to Booking Rate'}
@@ -198,7 +198,7 @@ export function ViewsAnalytics({ analytics, summary, className }: ViewsAnalytics
                   content={({ active, payload, label }) => {
                     if (!active || !payload?.length) return null;
                     return (
-                      <div className="bg-popover border rounded-lg shadow-lg p-2 text-xs">
+                      <div className="bg-popover border rounded-none shadow-lg p-2 text-xs">
                         <p className="font-medium mb-1">
                           {format(parseISO(label), 'd MMMM yyyy', { locale })}
                         </p>

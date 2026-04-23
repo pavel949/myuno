@@ -70,14 +70,14 @@ export function useAuditLogs(options: UseAuditLogsOptions = {}) {
 // Helper to format action for display
 export function formatAuditAction(action: string): { label: string; color: string } {
   const actionMap: Record<string, { label: string; color: string }> = {
-    create: { label: 'Создание', color: 'bg-green-100 text-green-800' },
-    update: { label: 'Изменение', color: 'bg-blue-100 text-blue-800' },
+    create: { label: 'Создание', color: 'bg-success/10 text-success' },
+    update: { label: 'Изменение', color: 'bg-primary/10 text-primary' },
     delete: { label: 'Удаление', color: 'bg-red-100 text-red-800' },
-    approve: { label: 'Одобрение', color: 'bg-emerald-100 text-emerald-800' },
-    reject: { label: 'Отклонение', color: 'bg-orange-100 text-orange-800' },
-    verify: { label: 'Верификация', color: 'bg-purple-100 text-purple-800' },
-    suspend: { label: 'Приостановка', color: 'bg-yellow-100 text-yellow-800' },
-    activate: { label: 'Активация', color: 'bg-teal-100 text-teal-800' },
+    approve: { label: 'Одобрение', color: 'bg-success/10 text-success' },
+    reject: { label: 'Отклонение', color: 'bg-accent/10 text-accent' },
+    verify: { label: 'Верификация', color: 'bg-primary/10 text-primary' },
+    suspend: { label: 'Приостановка', color: 'bg-accent/10 text-accent' },
+    activate: { label: 'Активация', color: 'bg-success/10 text-success' },
   };
 
   const key = action.toLowerCase();

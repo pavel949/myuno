@@ -179,7 +179,7 @@ export function MCCUserTimelineTab() {
                           </span>
                         </div>
                         {event.payload && Object.keys(event.payload).length > 0 && (
-                          <div className="mt-1 text-xs text-muted-foreground font-mono bg-muted/50 rounded p-1.5 overflow-x-auto">
+                          <div className="mt-1 text-xs text-muted-foreground font-mono bg-muted/50 rounded-none p-1.5 overflow-x-auto">
                             {JSON.stringify(event.payload, null, 0).slice(0, 200)}
                           </div>
                         )}

@@ -420,7 +420,7 @@ export default function ImportOdooContactsPage() {
               <Badge variant="default">
                 {processed.stats.toImport} {t('to import', 'к импорту')}
               </Badge>
-              <Badge variant="outline" className="text-amber-600">
+              <Badge variant="outline" className="text-accent">
                 {processed.stats.skipped} {t('skipped', 'пропущено')}
               </Badge>
               {Object.entries(processed.stats.skipReasons).map(([reason, count]) => (
@@ -432,7 +432,7 @@ export default function ImportOdooContactsPage() {
 
             {/* Preview table */}
             {previewRows.length > 0 && (
-              <ScrollArea className="rounded-md border max-h-[240px]">
+              <ScrollArea className="rounded-none border max-h-[240px]">
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="border-b bg-muted/50">
@@ -488,7 +488,7 @@ export default function ImportOdooContactsPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex flex-wrap gap-2">
-              <Badge className="bg-green-600">{result.imported} {t('imported', 'импортировано')}</Badge>
+              <Badge className="bg-success">{result.imported} {t('imported', 'импортировано')}</Badge>
               <Badge variant="secondary">{result.updated} {t('updated', 'обновлено')}</Badge>
               <Badge variant="outline">{result.skipped} {t('skipped', 'пропущено')}</Badge>
               {result.errors.length > 0 && (

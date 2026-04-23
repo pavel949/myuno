@@ -146,7 +146,7 @@ export const TopBar = memo(function TopBar({
             <span className="text-[13px] text-muted-foreground flex-1 text-left truncate">
               {isRu ? 'Поиск сервисов...' : 'Search services...'}
             </span>
-            <kbd className="hidden xl:inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-mono text-muted-foreground bg-[hsl(var(--bg-base)/0.6)] border border-border">
+            <kbd className="hidden xl:inline-flex items-center px-1.5 py-0.5 rounded-none text-[10px] font-mono text-muted-foreground bg-[hsl(var(--bg-base)/0.6)] border border-border">
               ⌘K
             </kbd>
           </button>

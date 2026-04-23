@@ -49,7 +49,7 @@ export const QuickCategoryIcons: React.FC<QuickCategoryIconsProps> = ({
                 "group-active:scale-95"
               )}>
                 {category.image_url ? (
-                  <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
+                  <div className="w-14 h-14 rounded-none bg-primary/10 flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
                     <img 
                       src={category.image_url} 
                       alt=""

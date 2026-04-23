@@ -106,9 +106,9 @@ export function PropertyShareSheet({ title, image, url, district, children }: Pr
         </DialogHeader>
 
         {/* Preview card */}
-        <div className="flex gap-3 p-3 rounded-xl bg-muted/50 border border-border/50">
+        <div className="flex gap-3 p-3 rounded-none bg-muted/50 border border-border/50">
           {image && (
-            <img src={image} alt="" className="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
+            <img src={image} alt="" className="w-16 h-16 rounded-none object-cover flex-shrink-0" />
           )}
           <div className="min-w-0">
             <p className="font-semibold text-sm line-clamp-2 text-foreground">{title}</p>
@@ -126,7 +126,7 @@ export function PropertyShareSheet({ title, image, url, district, children }: Pr
                 key={channel.id}
                 onClick={() => handleShare(channel.id)}
                 className={cn(
-                  "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all",
+                  "flex items-center gap-3 px-4 py-3 rounded-none text-sm font-medium transition-all",
                   channel.color
                 )}
               >

@@ -151,7 +151,7 @@ function UnitSheet({
       <div
         className={cn(
           'fixed z-50 bg-[hsl(var(--nb-surface))] border-[hsl(var(--nb-glass-border))]',
-          'bottom-0 left-0 right-0 rounded-t-2xl border-t',
+          'bottom-0 left-0 right-0 rounded-none border-t',
           'md:top-0 md:right-0 md:bottom-0 md:left-auto md:w-80 md:rounded-none md:border-l md:border-t-0',
           'overflow-y-auto transition-transform duration-300',
         )}
@@ -186,7 +186,7 @@ function UnitSheet({
             <img
               src={unit.floor_plan_image_url}
               alt="Floor plan"
-              className="w-full rounded-xl object-contain max-h-40 bg-[hsl(var(--nb-bg))]"
+              className="w-full rounded-none object-contain max-h-40 bg-[hsl(var(--nb-bg))]"
             />
           )}
 
@@ -258,7 +258,7 @@ function UnitSheet({
             holdExpiresAt ? (
               /* ── Active soft hold countdown ── */
               <div
-                className="rounded-xl p-4 space-y-3 border"
+                className="rounded-none p-4 space-y-3 border"
                 style={{
                   background: 'rgba(184,150,46,0.08)',
                   borderColor: 'rgba(184,150,46,0.3)',
@@ -282,7 +282,7 @@ function UnitSheet({
                 </p>
                 {holdId && (
                   <button
-                    className="w-full flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold"
+                    className="w-full flex items-center justify-center gap-2 rounded-none py-3 text-sm font-semibold"
                     style={{ background: '#B8962E', color: '#fff' }}
                     disabled={bookingCheckout.isPending}
                     onClick={handleBookingFee}
@@ -300,7 +300,7 @@ function UnitSheet({
                   />
                 ) : (
                   <button
-                    className="w-full rounded-xl py-3 text-sm font-medium border"
+                    className="w-full rounded-none py-3 text-sm font-medium border"
                     style={{
                       borderColor: 'rgba(184,150,46,0.3)',
                       color: '#B8962E',
@@ -323,7 +323,7 @@ function UnitSheet({
               /* ── Available unit CTAs ── */
               <div className="space-y-2">
                 <button
-                  className="w-full flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold transition-all"
+                  className="w-full flex items-center justify-center gap-2 rounded-none py-3 text-sm font-semibold transition-all"
                   style={{
                     background: 'rgba(184,150,46,0.12)',
                     color: '#B8962E',
@@ -443,7 +443,7 @@ export function PublicFloorPlan({ projectId, developerId }: Props) {
               key={plan.id}
               onClick={() => { setActiveFloorId(plan.id); resetView(); }}
               className={cn(
-                'px-3 py-1.5 rounded-lg text-sm transition-all',
+                'px-3 py-1.5 rounded-none text-sm transition-all',
                 plan.id === activeFloorId
                   ? 'bg-[hsl(var(--nb-gold)/0.15)] text-[hsl(var(--nb-gold))] border border-[hsl(var(--nb-gold)/0.3)]'
                   : 'text-[hsl(var(--nb-muted))] border border-[hsl(var(--nb-glass-border))]'
@@ -493,13 +493,13 @@ export function PublicFloorPlan({ projectId, developerId }: Props) {
         <div className="nb-glass overflow-hidden">
           {/* Zoom toolbar */}
           <div className="flex items-center gap-1.5 p-2 border-b border-[hsl(var(--nb-glass-border))]">
-            <button onClick={() => setZoom(z => Math.min(4, z + 0.25))} className="p-1.5 rounded hover:bg-[hsl(var(--nb-glass-bg))] text-[hsl(var(--nb-muted))]">
+            <button onClick={() => setZoom(z => Math.min(4, z + 0.25))} className="p-1.5 rounded-none hover:bg-[hsl(var(--nb-glass-bg))] text-[hsl(var(--nb-muted))]">
               <ZoomIn className="w-4 h-4" />
             </button>
-            <button onClick={() => setZoom(z => Math.max(0.5, z - 0.25))} className="p-1.5 rounded hover:bg-[hsl(var(--nb-glass-bg))] text-[hsl(var(--nb-muted))]">
+            <button onClick={() => setZoom(z => Math.max(0.5, z - 0.25))} className="p-1.5 rounded-none hover:bg-[hsl(var(--nb-glass-bg))] text-[hsl(var(--nb-muted))]">
               <ZoomOut className="w-4 h-4" />
             </button>
-            <button onClick={resetView} className="p-1.5 rounded hover:bg-[hsl(var(--nb-glass-bg))] text-[hsl(var(--nb-muted))]">
+            <button onClick={resetView} className="p-1.5 rounded-none hover:bg-[hsl(var(--nb-glass-bg))] text-[hsl(var(--nb-muted))]">
               <RotateCcw className="w-4 h-4" />
             </button>
             <span className="nb-mono text-xs text-[hsl(var(--nb-muted))]">{Math.round(zoom * 100)}%</span>

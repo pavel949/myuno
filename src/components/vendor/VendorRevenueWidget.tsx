@@ -125,14 +125,14 @@ export function VendorRevenueWidget() {
 
         {/* Stats row */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg">
+          <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-none">
             <ShoppingBag className="h-4 w-4 text-muted-foreground" />
             <div>
               <p className="text-sm font-semibold">{data.totalOrders}</p>
               <p className="text-[10px] text-muted-foreground">{isRu ? 'Всего заказов' : 'Total Orders'}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg">
+          <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-none">
             <DollarSign className="h-4 w-4 text-muted-foreground" />
             <div>
               <p className="text-sm font-semibold">

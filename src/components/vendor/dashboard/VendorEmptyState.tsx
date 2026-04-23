@@ -139,7 +139,7 @@ export function VendorEmptyStateInline({
   const Icon = config.icon;
 
   return (
-    <div className={cn('flex items-center gap-3 p-3 rounded-lg bg-muted/30', className)}>
+    <div className={cn('flex items-center gap-3 p-3 rounded-none bg-muted/30', className)}>
       <div className={cn('p-2 rounded-full shrink-0', config.bgColor)}>
         <Icon className={cn('h-4 w-4', config.color)} />
       </div>

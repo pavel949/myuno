@@ -43,7 +43,7 @@ export function DealCard({ deal, selectable, selected, onToggleSelect }: Props) 
   return (
     <div
       className={cn(
-        'w-full text-left p-4 rounded-xl border bg-card hover:bg-accent/50 transition-colors flex items-start gap-3 border-l-4',
+        'w-full text-left p-4 rounded-none border bg-card hover:bg-accent/50 transition-colors flex items-start gap-3 border-l-4',
         isOverdue && 'border-destructive/50 bg-destructive/5',
         isDueToday && 'border-primary/50 bg-primary/5',
         age > 30 && !isOverdue && !isDueToday && 'border-l-2 border-l-destructive',
@@ -101,7 +101,7 @@ export function DealCard({ deal, selectable, selected, onToggleSelect }: Props) 
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
               {typeFacts.slice(0, 2).map((fact) => (
-                <div key={fact.key} className="rounded-lg border bg-background/80 px-2.5 py-2">
+                <div key={fact.key} className="rounded-none border bg-background/80 px-2.5 py-2">
                   <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{fact.label}</p>
                   <p className="text-xs font-medium truncate mt-0.5">{fact.value}</p>
                 </div>

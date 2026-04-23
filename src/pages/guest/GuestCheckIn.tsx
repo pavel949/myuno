@@ -361,9 +361,9 @@ export default function GuestCheckIn() {
           title={isRu ? 'Онлайн регистрация' : 'Online Check-in'} 
           showBack 
         />
-        <Card className="border-yellow-500/50 bg-yellow-500/5">
+        <Card className="border-accent/40/50 bg-accent/5">
           <CardContent className="p-6 text-center">
-            <Clock className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
+            <Clock className="w-16 h-16 text-accent mx-auto mb-4" />
             <h2 className="text-xl font-bold mb-2">
               {isRu ? 'Ожидайте подтверждения' : 'Awaiting Confirmation'}
             </h2>
@@ -636,7 +636,7 @@ export default function GuestCheckIn() {
               />
             </div>
 
-            <div className="flex items-center space-x-3 p-4 bg-muted rounded-lg">
+            <div className="flex items-center space-x-3 p-4 bg-muted rounded-none">
               <Checkbox
                 id="needs_transfer"
                 checked={formData.needs_transfer}
@@ -664,7 +664,7 @@ export default function GuestCheckIn() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="bg-muted p-4 rounded-lg mb-4 text-sm space-y-2">
+            <div className="bg-muted p-4 rounded-none mb-4 text-sm space-y-2">
               {(() => {
                 const ownerProperty = (propertyBooking as any)?.properties as { house_rules?: string; house_rules_ru?: string; check_in_time?: string; check_out_time?: string } | null;
                 const houseRules = isRu ? ownerProperty?.house_rules_ru : ownerProperty?.house_rules;
@@ -709,7 +709,7 @@ export default function GuestCheckIn() {
             </div>
 
             {/* GDPR / Data Protection Consent */}
-            <div className="mt-4 p-3 border rounded-lg bg-muted/30">
+            <div className="mt-4 p-3 border rounded-none bg-muted/30">
               <div className="flex items-start gap-2 mb-2">
                 <Shield className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
                 <p className="text-xs text-muted-foreground">

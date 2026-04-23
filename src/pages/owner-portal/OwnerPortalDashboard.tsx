@@ -30,7 +30,7 @@ export default function OwnerPortalDashboard() {
   if (!portalProperties || portalProperties.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 px-6 text-center">
-        <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
+        <div className="w-16 h-16 rounded-none bg-primary/10 flex items-center justify-center">
           <Building2 className="w-8 h-8 text-primary" />
         </div>
         <h1 className="text-xl font-bold">
@@ -56,7 +56,7 @@ export default function OwnerPortalDashboard() {
           <h1 className="text-xl font-bold">
             {isRu ? 'Мои объекты' : 'My Properties'}
           </h1>
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-accent/15 text-accent dark:text-accent border border-accent/40/20">
             <Lock className="w-3 h-3" />
             {isRu ? 'Портал УК' : 'MC Portal'}
           </span>
@@ -72,7 +72,7 @@ export default function OwnerPortalDashboard() {
       <div className="grid grid-cols-2 gap-3">
         <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/my-property/statements')}>
           <CardContent className="p-3 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+            <div className="w-9 h-9 rounded-none bg-primary/10 flex items-center justify-center shrink-0">
               <FileCheck className="w-4 h-4 text-primary" />
             </div>
             <div className="min-w-0">
@@ -85,7 +85,7 @@ export default function OwnerPortalDashboard() {
         </Card>
         <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/my-property/signatures')}>
           <CardContent className="p-3 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+            <div className="w-9 h-9 rounded-none bg-primary/10 flex items-center justify-center shrink-0">
               <FileSignature className="w-4 h-4 text-primary" />
             </div>
             <div className="min-w-0">
@@ -115,11 +115,11 @@ export default function OwnerPortalDashboard() {
                 <div className="flex gap-4">
                   {/* Cover image */}
                   {prop.cover_image ? (
-                    <div className="w-24 h-24 md:w-32 md:h-28 shrink-0 rounded-l-xl overflow-hidden">
+                    <div className="w-24 h-24 md:w-32 md:h-28 shrink-0 rounded-none overflow-hidden">
                       <img src={prop.cover_image} alt="" className="w-full h-full object-cover" />
                     </div>
                   ) : (
-                    <div className="w-24 h-24 md:w-32 md:h-28 shrink-0 rounded-l-xl bg-muted flex items-center justify-center">
+                    <div className="w-24 h-24 md:w-32 md:h-28 shrink-0 rounded-none bg-muted flex items-center justify-center">
                       <Building2 className="w-8 h-8 text-muted-foreground/30" />
                     </div>
                   )}

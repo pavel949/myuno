@@ -90,7 +90,7 @@ export default function PetServiceDetail() {
 
       {/* Content */}
       <div className="px-4 pb-32 -mt-4 relative">
-        <div className="bg-background rounded-t-2xl pt-4">
+        <div className="bg-background rounded-none pt-4">
           <div className="mb-4">
             <h1 className="text-xl font-bold mb-2">{name}</h1>
             <div className="flex items-center gap-4 text-sm">

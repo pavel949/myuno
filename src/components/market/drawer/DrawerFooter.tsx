@@ -15,12 +15,12 @@ export function DrawerFooter() {
 
         {/* Language Toggle */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1 bg-background rounded-lg p-1 border border-border">
+          <div className="flex items-center gap-1 bg-background rounded-none p-1 border border-border">
             <Button
               variant="ghost"
               size="sm"
               className={cn(
-                "h-7 px-3 text-xs font-medium rounded-md transition-colors",
+                "h-7 px-3 text-xs font-medium rounded-none transition-colors",
                 language === 'ru' && "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
               )}
               onClick={() => setLanguage('ru')}
@@ -31,7 +31,7 @@ export function DrawerFooter() {
               variant="ghost"
               size="sm"
               className={cn(
-                "h-7 px-3 text-xs font-medium rounded-md transition-colors",
+                "h-7 px-3 text-xs font-medium rounded-none transition-colors",
                 language === 'en' && "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
               )}
               onClick={() => setLanguage('en')}

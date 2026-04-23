@@ -255,7 +255,7 @@ export default function AdminInvestments() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10">
+              <div className="p-2 rounded-none bg-primary/10">
                 <TrendingUp className="h-5 w-5 text-primary" />
               </div>
               <div>
@@ -270,7 +270,7 @@ export default function AdminInvestments() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-success/10">
+              <div className="p-2 rounded-none bg-success/10">
                 <Target className="h-5 w-5 text-success" />
               </div>
               <div>
@@ -285,7 +285,7 @@ export default function AdminInvestments() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-warning/10">
+              <div className="p-2 rounded-none bg-warning/10">
                 <CheckCircle className="h-5 w-5 text-warning" />
               </div>
               <div>
@@ -300,7 +300,7 @@ export default function AdminInvestments() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-accent/10">
+              <div className="p-2 rounded-none bg-accent/10">
                 <DollarSign className="h-5 w-5 text-accent-foreground" />
               </div>
               <div>
@@ -404,18 +404,18 @@ export default function AdminInvestments() {
                               <img 
                                 src={project.cover_image} 
                                 alt="" 
-                                className="w-12 h-12 rounded-lg object-cover"
+                                className="w-12 h-12 rounded-none object-cover"
                               />
                             ) : (
-                              <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
+                              <div className="w-12 h-12 rounded-none bg-muted flex items-center justify-center">
                                 <Building2 className="h-6 w-6 text-muted-foreground" />
                               </div>
                             )}
                             <div>
                               <div className="font-medium flex items-center gap-2">
                                 {isRu ? project.title_ru : project.title_en}
-                                {project.is_featured && <Star className="h-4 w-4 text-amber-500" />}
-                                {project.is_hot && <Flame className="h-4 w-4 text-orange-500" />}
+                                {project.is_featured && <Star className="h-4 w-4 text-accent" />}
+                                {project.is_hot && <Flame className="h-4 w-4 text-accent" />}
                               </div>
                               {project.district && (
                                 <div className="text-sm text-muted-foreground">{project.district}</div>
@@ -618,7 +618,7 @@ export default function AdminInvestments() {
               <div className="grid grid-cols-3 gap-4 pt-4">
                 <div className="flex items-center justify-between">
                   <Label className="flex items-center gap-2">
-                    <Star className="h-4 w-4 text-amber-500" />
+                    <Star className="h-4 w-4 text-accent" />
                     Featured
                   </Label>
                   <Switch
@@ -628,7 +628,7 @@ export default function AdminInvestments() {
                 </div>
                 <div className="flex items-center justify-between">
                   <Label className="flex items-center gap-2">
-                    <Flame className="h-4 w-4 text-orange-500" />
+                    <Flame className="h-4 w-4 text-accent" />
                     Hot
                   </Label>
                   <Switch

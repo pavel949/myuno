@@ -16,31 +16,31 @@ export function FounderQuickActions() {
       icon: UserPlus,
       label: isRu ? 'Контакт' : 'Contact',
       path: APP_ROUTES.MC_CONTACTS,
-      color: 'text-blue-500',
+      color: 'text-primary',
     },
     {
       icon: Handshake,
       label: isRu ? 'Сделка' : 'Deal',
       path: APP_ROUTES.MC_SALES_NEW,
-      color: 'text-emerald-500',
+      color: 'text-success',
     },
     {
       icon: Building2,
       label: isRu ? 'Объект' : 'Property',
       path: APP_ROUTES.MC_PROPERTY_NEW,
-      color: 'text-amber-500',
+      color: 'text-accent',
     },
     {
       icon: Building2,
       label: isRu ? 'Комплекс' : 'Complex',
       path: APP_ROUTES.MC_COMPLEXES,
-      color: 'text-cyan-500',
+      color: 'text-primary',
     },
     {
       icon: Target,
       label: isRu ? 'Вендор' : 'Vendor',
       path: '/mc/vendor-acquisition',
-      color: 'text-purple-500',
+      color: 'text-primary',
     },
   ];
 

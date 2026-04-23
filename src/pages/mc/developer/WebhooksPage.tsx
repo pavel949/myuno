@@ -107,9 +107,9 @@ export default function WebhooksPage() {
             </div>
             <div className="space-y-2">
               <label className="text-xs font-medium">{isRu ? 'События' : 'Events'} ({selectedEvents.length})</label>
-              <div className="grid grid-cols-1 gap-1.5 max-h-64 overflow-y-auto border rounded-md p-2">
+              <div className="grid grid-cols-1 gap-1.5 max-h-64 overflow-y-auto border rounded-none p-2">
                 {WEBHOOK_EVENTS.map((ev) => (
-                  <label key={ev} className="flex items-center gap-2 text-xs cursor-pointer hover:bg-muted/50 px-2 py-1 rounded">
+                  <label key={ev} className="flex items-center gap-2 text-xs cursor-pointer hover:bg-muted/50 px-2 py-1 rounded-none">
                     <Checkbox checked={selectedEvents.includes(ev)} onCheckedChange={() => toggleEvent(ev)} />
                     <span className="font-mono">{ev}</span>
                   </label>

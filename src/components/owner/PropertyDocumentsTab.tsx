@@ -132,7 +132,7 @@ export function PropertyDocumentsTab({ propertyId }: PropertyDocumentsTabProps) 
   };
 
   if (isLoading) {
-    return <div className="animate-pulse h-48 bg-muted rounded-lg" />;
+    return <div className="animate-pulse h-48 bg-muted rounded-none" />;
   }
 
   return (
@@ -151,10 +151,10 @@ export function PropertyDocumentsTab({ propertyId }: PropertyDocumentsTabProps) 
               {accessCodes.map((doc) => (
                 <div
                   key={doc.id}
-                  className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border"
+                  className="flex items-center justify-between p-3 rounded-none bg-muted/50 border"
                 >
                   <div className="flex items-center gap-2">
-                    <div className="p-2 rounded-md bg-primary/10">
+                    <div className="p-2 rounded-none bg-primary/10">
                       {doc.document_type === 'wifi_password' ? (
                         <Wifi className="h-4 w-4 text-primary" />
                       ) : doc.document_type === 'door_code' ? (
@@ -416,10 +416,10 @@ function DocumentList({ documents, isRu, onDelete, isDeleting }: DocumentListPro
         return (
           <div
             key={doc.id}
-            className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/30 transition-colors"
+            className="flex items-center justify-between p-3 rounded-none border hover:bg-muted/30 transition-colors"
           >
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-md bg-muted">
+              <div className="p-2 rounded-none bg-muted">
                 <FileText className="h-4 w-4" />
               </div>
               <div>

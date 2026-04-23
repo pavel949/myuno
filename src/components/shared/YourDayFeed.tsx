@@ -200,9 +200,9 @@ export function YourDayFeed({ role, compact }: YourDayFeedProps = {}) {
         key="skeleton"
       >
         <Skeleton className="h-5 w-48" />
-        <Skeleton className="h-16 w-full rounded-xl" />
-        <Skeleton className="h-16 w-full rounded-xl" />
-        <Skeleton className="h-16 w-full rounded-xl" />
+        <Skeleton className="h-16 w-full rounded-none" />
+        <Skeleton className="h-16 w-full rounded-none" />
+        <Skeleton className="h-16 w-full rounded-none" />
       </motion.div>
     );
   }
@@ -345,7 +345,7 @@ function DayItemCard({ item, isRu, onClick }: { item: DayItem; isRu: boolean; on
       onClick={onClick}
     >
       <CardContent className="p-3 flex items-center gap-3">
-        <div className={cn('p-2 rounded-lg shrink-0', styles.bg)}>
+        <div className={cn('p-2 rounded-none shrink-0', styles.bg)}>
           <Icon className={cn('h-4 w-4', styles.color)} />
         </div>
         <div className="flex-1 min-w-0">

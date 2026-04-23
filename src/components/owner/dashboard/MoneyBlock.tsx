@@ -72,7 +72,7 @@ export function MoneyBlock() {
         </div>
 
         <div className="grid grid-cols-3 gap-2">
-          <div className="p-2 rounded-lg bg-success/5 border border-success/10">
+          <div className="p-2 rounded-none bg-success/5 border border-success/10">
             <div className="flex items-center gap-1 mb-0.5">
               <TrendingUp className="h-3 w-3 text-success" />
               <span className="text-[10px] text-muted-foreground uppercase">{isRu ? 'Доход' : isTh ? 'รายได้' : 'Income'}</span>
@@ -80,7 +80,7 @@ export function MoneyBlock() {
             <p className="text-sm font-semibold text-success">{formatCurrency(income)}</p>
           </div>
 
-          <div className="p-2 rounded-lg bg-destructive/5 border border-destructive/10">
+          <div className="p-2 rounded-none bg-destructive/5 border border-destructive/10">
             <div className="flex items-center gap-1 mb-0.5">
               <TrendingDown className="h-3 w-3 text-destructive" />
               <span className="text-[10px] text-muted-foreground uppercase">{isRu ? 'Расход' : isTh ? 'รายจ่าย' : 'Expenses'}</span>
@@ -88,7 +88,7 @@ export function MoneyBlock() {
             <p className="text-sm font-semibold text-destructive">{formatCurrency(expenses)}</p>
           </div>
 
-          <div className="p-2 rounded-lg bg-info/5 border border-info/10">
+          <div className="p-2 rounded-none bg-info/5 border border-info/10">
             <div className="flex items-center gap-1 mb-0.5">
               <Shield className="h-3 w-3 text-info" />
               <span className="text-[10px] text-muted-foreground uppercase">{isRu ? 'Депозит' : isTh ? 'เงินมัดจำ' : 'Deposits'}</span>

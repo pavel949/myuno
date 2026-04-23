@@ -496,7 +496,7 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
         </div>
       </div>
 
-      <div className="flex items-center justify-between rounded-lg border p-3">
+      <div className="flex items-center justify-between rounded-none border p-3">
         <div>
           <p className="text-sm font-medium">VIP</p>
           <p className="text-xs text-muted-foreground">{isRu ? 'Приоритетный клиент' : 'Priority client'}</p>

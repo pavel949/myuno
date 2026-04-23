@@ -42,7 +42,7 @@ export function ControlAnalyticsTab() {
           <Card key={kpi.label}>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className={`h-10 w-10 rounded-lg bg-muted flex items-center justify-center`}>
+                <div className={`h-10 w-10 rounded-none bg-muted flex items-center justify-center`}>
                   <kpi.icon className={`h-5 w-5 ${kpi.color}`} />
                 </div>
                 <div>

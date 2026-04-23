@@ -173,7 +173,7 @@ export function SyncedListingPreview({ connectionId, propertyId, onApplied }: Sy
       <CardContent className="space-y-4">
         {/* Cover Photo Preview */}
         {listing.cover_photo && (
-          <div className="aspect-video rounded-lg overflow-hidden bg-muted">
+          <div className="aspect-video rounded-none overflow-hidden bg-muted">
             <img 
               src={listing.cover_photo} 
               alt="Cover"
@@ -215,7 +215,7 @@ export function SyncedListingPreview({ connectionId, propertyId, onApplied }: Sy
                   <div
                     key={field.id}
                     className={cn(
-                      "flex items-center gap-3 p-3 rounded-lg border transition-colors",
+                      "flex items-center gap-3 p-3 rounded-none border transition-colors",
                       hasValue ? "bg-background cursor-pointer hover:bg-muted/50" : "bg-muted/30 opacity-50",
                       selectedFields.includes(field.id) && hasValue && "border-primary bg-primary/5"
                     )}
@@ -227,7 +227,7 @@ export function SyncedListingPreview({ connectionId, propertyId, onApplied }: Sy
                       onCheckedChange={() => hasValue && toggleField(field.id)}
                     />
                     <div className={cn(
-                      "h-8 w-8 rounded-md flex items-center justify-center",
+                      "h-8 w-8 rounded-none flex items-center justify-center",
                       hasValue ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
                     )}>
                       {field.icon}

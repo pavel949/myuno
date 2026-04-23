@@ -53,7 +53,7 @@ function ActivityItem({ item, isRu }: { item: TermsActivity; isRu: boolean }) {
 
   return (
     <div className="flex gap-3 py-2.5">
-      <div className="mt-0.5 p-1.5 rounded-lg bg-muted/60 shrink-0">
+      <div className="mt-0.5 p-1.5 rounded-none bg-muted/60 shrink-0">
         <Icon className="h-3.5 w-3.5 text-muted-foreground" />
       </div>
       <div className="flex-1 min-w-0">
@@ -108,7 +108,7 @@ export function TermsActivityLog({ termsId }: TermsActivityLogProps) {
       {isLoading ? (
         <div className="space-y-2">
           {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-12 w-full rounded-lg" />
+            <Skeleton key={i} className="h-12 w-full rounded-none" />
           ))}
         </div>
       ) : !activities?.length ? (

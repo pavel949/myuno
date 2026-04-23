@@ -59,7 +59,7 @@ export const HomeServiceProviderCard = memo(function HomeServiceProviderCard({
       onClick={onClick}
       className={cn(
         "w-full flex items-start gap-4 p-4",
-        "bg-card border border-border/50 rounded-2xl",
+        "bg-card border border-border/50 rounded-none",
         "hover:shadow-lg hover:border-primary/30",
         "active:scale-[0.99]",
         "transition-all duration-200",
@@ -90,7 +90,7 @@ export const HomeServiceProviderCard = memo(function HomeServiceProviderCard({
           
           {provider.rating && (
             <div className="flex items-center gap-1 text-sm shrink-0">
-              <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+              <Star className="w-3.5 h-3.5 text-accent fill-accent" />
               <span className="font-medium">{provider.rating.toFixed(1)}</span>
               {provider.review_count && (
                 <span className="text-muted-foreground">({provider.review_count})</span>
@@ -107,7 +107,7 @@ export const HomeServiceProviderCard = memo(function HomeServiceProviderCard({
             className={cn(
               "text-xs px-2 py-0",
               isIndividual 
-                ? "border-amber-500/50 text-amber-700 dark:text-amber-300" 
+                ? "border-accent/40/50 text-accent dark:text-accent" 
                 : "border-primary/50 text-primary"
             )}
           >
@@ -127,28 +127,28 @@ export const HomeServiceProviderCard = memo(function HomeServiceProviderCard({
         {/* Badges row */}
         <div className="flex items-center gap-2 flex-wrap">
           {provider.is_verified && (
-            <span className="flex items-center gap-0.5 text-xs text-emerald-600 dark:text-emerald-400">
+            <span className="flex items-center gap-0.5 text-xs text-success dark:text-success">
               <CheckCircle2 className="w-3.5 h-3.5" />
               {language === 'ru' ? 'Проверен' : 'Verified'}
             </span>
           )}
           
           {provider.has_insurance && (
-            <span className="flex items-center gap-0.5 text-xs text-blue-600 dark:text-blue-400">
+            <span className="flex items-center gap-0.5 text-xs text-primary dark:text-primary">
               <Shield className="w-3.5 h-3.5" />
               {language === 'ru' ? 'Страховка' : 'Insured'}
             </span>
           )}
           
           {provider.has_guarantee && (
-            <span className="flex items-center gap-0.5 text-xs text-purple-600 dark:text-purple-400">
+            <span className="flex items-center gap-0.5 text-xs text-primary dark:text-primary">
               <CheckCircle2 className="w-3.5 h-3.5" />
               {language === 'ru' ? 'Гарантия' : 'Guaranteed'}
             </span>
           )}
           
           {provider.response_time_minutes && provider.response_time_minutes <= 30 && (
-            <span className="flex items-center gap-0.5 text-xs text-orange-600 dark:text-orange-400">
+            <span className="flex items-center gap-0.5 text-xs text-accent dark:text-accent">
               <Zap className="w-3.5 h-3.5" />
               {provider.response_time_minutes} {language === 'ru' ? 'мин' : 'min'}
             </span>

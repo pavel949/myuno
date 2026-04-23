@@ -98,7 +98,7 @@ export function NbCompareProvider({ children }: { children: React.ReactNode }) {
               <div className="flex gap-2">
                 {items.map(item => (
                   <div key={item.id} className="relative group">
-                    <div className="w-10 h-10 rounded-lg overflow-hidden" style={{ background: 'hsl(var(--nb-surface))' }}>
+                    <div className="w-10 h-10 rounded-none overflow-hidden" style={{ background: 'hsl(var(--nb-surface))' }}>
                       {item.cover_image ? (
                         <img src={item.cover_image} alt="" className="w-full h-full object-cover" />
                       ) : (
@@ -117,14 +117,14 @@ export function NbCompareProvider({ children }: { children: React.ReactNode }) {
                   </div>
                 ))}
                 {items.length < MAX_COMPARE && (
-                  <div className="w-10 h-10 rounded-lg border-2 border-dashed flex items-center justify-center" style={{ borderColor: 'hsl(var(--nb-gold) / 0.3)' }}>
+                  <div className="w-10 h-10 rounded-none border-2 border-dashed flex items-center justify-center" style={{ borderColor: 'hsl(var(--nb-gold) / 0.3)' }}>
                     <span className="text-xs" style={{ color: 'hsl(var(--nb-gold) / 0.5)' }}>+</span>
                   </div>
                 )}
               </div>
               <Link
                 to="/newbuilds/compare"
-                className="px-4 py-2 rounded-lg text-xs font-medium whitespace-nowrap"
+                className="px-4 py-2 rounded-none text-xs font-medium whitespace-nowrap"
                 style={{ background: 'hsl(var(--nb-gold))', color: 'hsl(var(--nb-bg))' }}
               >
                 Сравнить ({items.length})

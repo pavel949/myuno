@@ -155,7 +155,7 @@ export function MCCBroadcastPanel() {
       </CardHeader>
       <CardContent className="space-y-5">
         {lastSent && (
-          <div className="flex items-center gap-2 p-3 bg-primary/10 rounded-lg text-primary text-sm">
+          <div className="flex items-center gap-2 p-3 bg-primary/10 rounded-none text-primary text-sm">
             <CheckCircle className="h-4 w-4" />
             {isRu ? `Последняя рассылка: ${lastSent.sent} получателей` : `Last broadcast: ${lastSent.sent} recipients`}
           </div>

@@ -52,7 +52,7 @@ export function ChatSidebar({ channels, activeChannel, onSelectChannel, classNam
               key={channel.id}
               onClick={() => onSelectChannel(channel.slug)}
               className={cn(
-                "w-full flex items-center gap-2 px-2 py-2 rounded-lg text-left transition-colors",
+                "w-full flex items-center gap-2 px-2 py-2 rounded-none text-left transition-colors",
                 isActive 
                   ? "bg-primary/10 text-primary font-medium" 
                   : "hover:bg-muted text-muted-foreground hover:text-foreground"
@@ -106,10 +106,10 @@ function MessageBubble({ message, isOwn, onReply }: MessageBubbleProps) {
         </div>
         
         <div className={cn(
-          "px-4 py-2 rounded-2xl",
+          "px-4 py-2 rounded-none",
           isOwn 
-            ? "bg-primary text-primary-foreground rounded-br-sm" 
-            : "bg-muted rounded-bl-sm"
+            ? "bg-primary text-primary-foreground rounded-none" 
+            : "bg-muted rounded-none"
         )}>
           <p className="text-sm whitespace-pre-wrap">{message.content}</p>
         </div>

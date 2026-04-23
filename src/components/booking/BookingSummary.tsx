@@ -45,14 +45,14 @@ export function BookingSummary({
   const hasDiscount = originalPrice && originalPrice > price;
 
   return (
-    <div className="bg-card rounded-xl border overflow-hidden">
+    <div className="bg-card rounded-none border overflow-hidden">
       {/* Header with image */}
       <div className="flex gap-4 p-4 border-b">
         {image && (
           <img
             src={image}
             alt=""
-            className="w-20 h-20 rounded-xl object-cover flex-shrink-0"
+            className="w-20 h-20 rounded-none object-cover flex-shrink-0"
           />
         )}
         <div className="flex-1 min-w-0">

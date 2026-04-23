@@ -95,7 +95,7 @@ export function MobileInstallSheet() {
             <img
               src="/icons/icon-192x192.png"
               alt="myUNO"
-              className="w-16 h-16 rounded-2xl shadow-lg"
+              className="w-16 h-16 rounded-none shadow-lg"
             />
             <div className="flex-1 min-w-0">
               <h2 className="text-lg font-bold text-foreground">{t.title}</h2>
@@ -108,7 +108,7 @@ export function MobileInstallSheet() {
           <div className="space-y-3">
             {t.benefits.map((b, i) => (
               <div key={i} className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 rounded-none bg-primary/10 flex items-center justify-center shrink-0">
                   <b.icon className="w-4.5 h-4.5 text-primary" />
                 </div>
                 <span className="text-sm text-foreground">{b.text}</span>
@@ -118,7 +118,7 @@ export function MobileInstallSheet() {
 
           {/* Quick hint for manual install */}
           {!canInstall && (
-            <div className="rounded-xl bg-muted/50 border border-border/50 p-3 flex items-center gap-3">
+            <div className="rounded-none bg-muted/50 border border-border/50 p-3 flex items-center gap-3">
               {isIOS ? (
                 <>
                   <Share className="w-5 h-5 text-muted-foreground shrink-0" />

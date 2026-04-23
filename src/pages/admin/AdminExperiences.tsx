@@ -506,8 +506,8 @@ export default function AdminExperiences() {
                 <div><Label>Gallery</Label><MultiImageUpload value={formData.images} onChange={(urls) => setFormData(prev => ({ ...prev, images: urls }))} folder="experiences" /></div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="flex items-center justify-between p-3 border rounded-lg"><Label className="cursor-pointer">Active</Label><Switch checked={formData.is_active} onCheckedChange={(v) => setFormData(prev => ({ ...prev, is_active: v }))} /></div>
-                  <div className="flex items-center justify-between p-3 border rounded-lg"><Label className="cursor-pointer">Featured</Label><Switch checked={formData.is_featured} onCheckedChange={(v) => setFormData(prev => ({ ...prev, is_featured: v }))} /></div>
+                  <div className="flex items-center justify-between p-3 border rounded-none"><Label className="cursor-pointer">Active</Label><Switch checked={formData.is_active} onCheckedChange={(v) => setFormData(prev => ({ ...prev, is_active: v }))} /></div>
+                  <div className="flex items-center justify-between p-3 border rounded-none"><Label className="cursor-pointer">Featured</Label><Switch checked={formData.is_featured} onCheckedChange={(v) => setFormData(prev => ({ ...prev, is_featured: v }))} /></div>
                 </div>
               </div>
             </ScrollArea>

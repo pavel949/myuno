@@ -33,7 +33,7 @@ export function ServiceCategoryDrawer({ className }: ServiceCategoryDrawerProps)
         variant="outline"
         size="sm"
         className={cn(
-          "gap-1.5 px-3 py-2 h-auto rounded-xl shrink-0",
+          "gap-1.5 px-3 py-2 h-auto rounded-none shrink-0",
           "border-primary/30 bg-primary/5 hover:bg-primary/10",
           "text-primary font-medium text-xs",
           "transition-all duration-200 shadow-sm hover:shadow",

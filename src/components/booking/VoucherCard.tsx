@@ -119,7 +119,7 @@ export function VoucherCard({
                 </p>
               )}
             </div>
-            <div className="w-14 h-14 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
+            <div className="w-14 h-14 bg-muted rounded-none flex items-center justify-center flex-shrink-0">
               <QrCode className="w-8 h-8 text-muted-foreground" />
             </div>
           </div>
@@ -238,7 +238,7 @@ export function VoucherCard({
           </div>
 
           {/* QR Code */}
-          <div className="w-24 h-24 bg-white rounded-xl border-2 border-dashed border-muted flex items-center justify-center">
+          <div className="w-24 h-24 bg-white rounded-none border-2 border-dashed border-muted flex items-center justify-center">
             {qrCodeData ? (
               <img 
                 src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrCodeData)}`} 

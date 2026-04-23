@@ -127,7 +127,7 @@ export const LifeOSStatusBlock = memo(forwardRef<HTMLElement>(function LifeOSSta
     <section className="space-y-4">
       {/* Status card — uses CSS custom property to apply dynamic color cleanly */}
       <div
-        className="rounded-xl border p-4 space-y-3"
+        className="rounded-none border p-4 space-y-3"
         style={{
           '--situation-color': activeColor || 'hsl(var(--primary))',
           backgroundColor: 'color-mix(in srgb, var(--situation-color) 6%, transparent)',
@@ -139,7 +139,7 @@ export const LifeOSStatusBlock = memo(forwardRef<HTMLElement>(function LifeOSSta
           <div className="flex items-center gap-2.5">
             {activeSituation && (
               <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center"
+                className="w-8 h-8 rounded-none flex items-center justify-center"
                 style={{ backgroundColor: 'color-mix(in srgb, var(--situation-color) 12%, transparent)' }}
               >
                 <DynamicIcon name={activeSituation.icon} className="w-4 h-4" style={{ color: 'var(--situation-color)' }} />
@@ -190,7 +190,7 @@ export const LifeOSStatusBlock = memo(forwardRef<HTMLElement>(function LifeOSSta
                 <button
                   key={action.path}
                   onClick={() => navigate(action.path)}
-                  className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl bg-card border border-border/50 hover:border-border text-left transition-all active:scale-[0.98]"
+                  className="flex items-center gap-3 w-full px-3 py-2.5 rounded-none bg-card border border-border/50 hover:border-border text-left transition-all active:scale-[0.98]"
                 >
                   <DynamicIcon name={action.icon} className="w-4 h-4 text-muted-foreground shrink-0" />
                   <span className="text-[13px] font-medium text-foreground flex-1">

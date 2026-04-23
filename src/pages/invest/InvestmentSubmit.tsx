@@ -123,7 +123,7 @@ export default function InvestmentSubmit() {
               <h2 className="text-xl font-semibold mb-2">What are you looking for?</h2>
               <RadioGroup value={form.deal_intent} onValueChange={(v) => set('deal_intent', v as DealIntent)}>
                 {DEAL_INTENTS.map((opt) => (
-                  <Label key={opt.key} htmlFor={opt.key} className="flex items-start gap-3 p-4 rounded-lg border border-border cursor-pointer hover:border-primary/50 has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+                  <Label key={opt.key} htmlFor={opt.key} className="flex items-start gap-3 p-4 rounded-none border border-border cursor-pointer hover:border-primary/50 has-[:checked]:border-primary has-[:checked]:bg-primary/5">
                     <RadioGroupItem id={opt.key} value={opt.key} className="mt-1" />
                     <div className="flex-1">
                       <div className="font-medium flex items-center gap-2">
@@ -270,7 +270,7 @@ export default function InvestmentSubmit() {
                 <div><span className="text-muted-foreground">Capital range:</span> {form.capital_range && CAPITAL_RANGES.find((c) => c.key === form.capital_range)?.labelShort}</div>
                 <div><span className="text-muted-foreground">Contact:</span> {form.submitter_name} • {form.submitter_email}</div>
               </div>
-              <Label className="flex items-start gap-3 p-4 border rounded-lg cursor-pointer">
+              <Label className="flex items-start gap-3 p-4 border rounded-none cursor-pointer">
                 <Checkbox checked={form.consent} onCheckedChange={(v) => set('consent', !!v)} className="mt-0.5" />
                 <span className="text-sm">My opportunity will be <strong>anonymized</strong> by the myUNO team before being shown to investors. Personal details, exact location and identity remain private until I approve an introduction.</span>
               </Label>

@@ -78,10 +78,10 @@ export function PortalChatTab({ propertyId, senderRole = 'owner' }: Props) {
             <div key={msg.id} className={cn('flex', isOwn ? 'justify-end' : 'justify-start')}>
               <div
                 className={cn(
-                  'max-w-[75%] rounded-2xl px-3.5 py-2 text-sm',
+                  'max-w-[75%] rounded-none px-3.5 py-2 text-sm',
                   isOwn
-                    ? 'bg-primary text-primary-foreground rounded-br-md'
-                    : 'bg-muted text-foreground rounded-bl-md'
+                    ? 'bg-primary text-primary-foreground rounded-none'
+                    : 'bg-muted text-foreground rounded-none'
                 )}
               >
                 <p className="whitespace-pre-wrap break-words">{msg.message}</p>

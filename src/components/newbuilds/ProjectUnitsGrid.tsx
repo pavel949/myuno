@@ -20,10 +20,10 @@ interface Props {
 const UNIT_TYPES = ['studio', '1br', '2br', '3br', 'penthouse', 'villa', 'townhouse', 'duplex'];
 
 const STATUS_COLORS: Record<string, string> = {
-  available: 'bg-emerald-500/10 text-emerald-600 border-emerald-200',
-  reserved: 'bg-amber-500/10 text-amber-600 border-amber-200',
+  available: 'bg-success/10 text-success border-success/40',
+  reserved: 'bg-accent/10 text-accent border-accent/40',
   sold: 'bg-red-500/10 text-red-600 border-red-200',
-  held: 'bg-blue-500/10 text-blue-600 border-blue-200',
+  held: 'bg-primary/10 text-primary border-primary/40',
 };
 
 const STATUS_LABELS: Record<string, { en: string; ru: string }> = {
@@ -110,7 +110,7 @@ export function ProjectUnitsGrid({ projectId }: Props) {
           <p className="text-sm">{isRu ? 'Нет юнитов. Добавьте первый юнит.' : 'No units yet. Add the first unit.'}</p>
         </div>
       ) : (
-        <div className="border rounded-lg overflow-hidden">
+        <div className="border rounded-none overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>

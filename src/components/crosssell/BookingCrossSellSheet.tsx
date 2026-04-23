@@ -31,15 +31,15 @@ const SERVICE_ICONS: Record<string, any> = {
 };
 
 const SERVICE_GRADIENTS: Record<string, string> = {
-  transfer: 'from-blue-500 to-cyan-500',
+  transfer: 'from-primary to-primary',
   car_rental: 'from-slate-600 to-slate-800',
-  grocery: 'from-green-500 to-emerald-600',
-  flowers: 'from-pink-400 to-rose-500',
-  cleaning: 'from-teal-400 to-cyan-500',
-  restaurant: 'from-orange-400 to-red-500',
-  babysitter: 'from-violet-400 to-purple-500',
-  yacht: 'from-cyan-500 to-blue-600',
-  experience: 'from-amber-500 to-orange-500',
+  grocery: 'from-success to-success',
+  flowers: 'from-accent to-accent',
+  cleaning: 'from-success to-primary',
+  restaurant: 'from-accent to-red-500',
+  babysitter: 'from-primary to-primary',
+  yacht: 'from-primary to-primary',
+  experience: 'from-accent to-accent',
 };
 
 const SERVICE_PATHS: Record<string, string> = {
@@ -155,7 +155,7 @@ export function BookingCrossSellSheet({ bookingId, open, onOpenChange }: Booking
         {loading ? (
           Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="flex gap-3 p-3">
-              <Skeleton className="w-12 h-12 rounded-xl" />
+              <Skeleton className="w-12 h-12 rounded-none" />
               <div className="flex-1 space-y-2">
                 <Skeleton className="h-4 w-32" />
                 <Skeleton className="h-3 w-48" />
@@ -180,9 +180,9 @@ export function BookingCrossSellSheet({ bookingId, open, onOpenChange }: Booking
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: -100 }}
                   transition={{ delay: idx * 0.1 }}
-                  className="flex gap-3 p-3 rounded-xl border bg-card hover:bg-accent/50 transition-colors"
+                  className="flex gap-3 p-3 rounded-none border bg-card hover:bg-accent/50 transition-colors"
                 >
-                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center flex-shrink-0`}>
+                  <div className={`w-12 h-12 rounded-none bg-gradient-to-br ${gradient} flex items-center justify-center flex-shrink-0`}>
                     <Icon className="w-6 h-6 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">

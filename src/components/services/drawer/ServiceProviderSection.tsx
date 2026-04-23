@@ -33,7 +33,7 @@ export function ProviderSection({ onNavigate }: ServiceProviderSectionProps) {
           "hover:bg-muted/50 active:bg-muted transition-colors"
         )}
       >
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/20 to-amber-500/20 flex items-center justify-center shrink-0">
+        <div className="w-9 h-9 rounded-none bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center shrink-0">
           <UserPlus className="w-5 h-5 text-primary" />
         </div>
         <div className="flex-1 text-left">
@@ -55,7 +55,7 @@ export function ProviderSection({ onNavigate }: ServiceProviderSectionProps) {
           "hover:bg-muted/50 active:bg-muted transition-colors"
         )}
       >
-        <div className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center shrink-0">
+        <div className="w-9 h-9 rounded-none bg-muted flex items-center justify-center shrink-0">
           <Briefcase className="w-5 h-5 text-muted-foreground" />
         </div>
         <span className="flex-1 text-sm font-medium text-left">

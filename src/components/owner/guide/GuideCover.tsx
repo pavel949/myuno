@@ -10,7 +10,7 @@ export function GuideCover() {
     <div className="min-h-[90vh] flex flex-col items-center justify-center text-center p-8 print:min-h-[100vh] print:p-12">
       {/* Logo */}
       <div className="mb-8">
-        <div className="w-24 h-24 mx-auto bg-gradient-to-br from-primary to-primary/80 rounded-3xl flex items-center justify-center shadow-gold">
+        <div className="w-24 h-24 mx-auto bg-gradient-to-br from-primary to-primary/80 rounded-none flex items-center justify-center shadow-gold">
           <span className="text-4xl font-bold text-primary-foreground">U</span>
         </div>
       </div>
@@ -58,7 +58,7 @@ export function GuideCover() {
       </div>
 
       {/* Tagline */}
-      <div className="mt-8 py-4 px-6 bg-primary/10 rounded-xl border border-primary/20">
+      <div className="mt-8 py-4 px-6 bg-primary/10 rounded-none border border-primary/20">
         <p className="text-primary font-medium italic">
           {isRu 
             ? '«Чувствуйте себя дома — где бы вы ни были»'
@@ -73,7 +73,7 @@ export function GuideCover() {
 function FeatureIcon({ icon: Icon, label }: { icon: React.ElementType; label: string }) {
   return (
     <div className="flex flex-col items-center gap-2">
-      <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center">
+      <div className="w-12 h-12 rounded-none bg-secondary flex items-center justify-center">
         <Icon className="w-6 h-6 text-primary" />
       </div>
       <span className="text-xs text-muted-foreground text-center">{label}</span>

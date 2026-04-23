@@ -30,7 +30,7 @@ export function StripeModeIndicator() {
       className={
         isLive
           ? 'gap-1 border-success/40 bg-success/10 text-success text-[10px] font-mono uppercase'
-          : 'gap-1 border-orange-400/40 bg-orange-400/10 text-orange-600 dark:text-orange-400 text-[10px] font-mono uppercase'
+          : 'gap-1 border-accent/40/40 bg-accent/10 text-accent dark:text-accent text-[10px] font-mono uppercase'
       }
     >
       <Zap className="h-3 w-3" />

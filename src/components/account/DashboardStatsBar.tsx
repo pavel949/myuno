@@ -22,9 +22,9 @@ function StatItem({ icon, label, value, onClick, color, isLoading }: StatItemPro
   return (
     <button
       onClick={onClick}
-      className="flex-1 flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-muted/50 transition-colors active:scale-95"
+      className="flex-1 flex flex-col items-center gap-1.5 p-3 rounded-none hover:bg-muted/50 transition-colors active:scale-95"
     >
-      <div className={cn("p-2 rounded-xl", color)}>
+      <div className={cn("p-2 rounded-none", color)}>
         {icon}
       </div>
       {isLoading ? (

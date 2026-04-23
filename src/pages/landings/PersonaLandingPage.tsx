@@ -96,7 +96,7 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
                 <li key={service.slug}>
                   <a
                     href={service.href}
-                    className="block rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary/60"
+                    className="block rounded-none border border-border bg-card p-4 transition-colors hover:border-primary/60"
                   >
                     <div className="font-medium text-foreground">
                       {t(service.label)}

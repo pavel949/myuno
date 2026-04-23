@@ -183,12 +183,12 @@ const isRu = language === 'ru';
               modifiersClassNames={{
                 blocked: 'bg-destructive/20 text-destructive',
               }}
-              className="rounded-md border"
+              className="rounded-none border"
             />
           </div>
           
           {dateRange?.from && (
-            <div className="p-3 bg-muted rounded-lg text-sm">
+            <div className="p-3 bg-muted rounded-none text-sm">
               <p className="font-medium">
                 {format(dateRange.from, 'd MMMM yyyy', { locale: isRu ? ru : undefined })}
                 {dateRange.to && dateRange.to.getTime() !== dateRange.from.getTime() && (
@@ -205,7 +205,7 @@ const isRu = language === 'ru';
           )}
           
           {mode === 'block' && hasConflicts && (
-            <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg flex items-start gap-2">
+            <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-none flex items-start gap-2">
               <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
               <div className="text-sm">
                 <p className="font-medium text-destructive">

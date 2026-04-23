@@ -96,8 +96,8 @@ export function InvestmentAuthGate({ children }: InvestmentAuthGateProps) {
           <DialogHeader>
             <div className="flex items-center gap-3 mb-2">
               <div className={cn(
-                "w-12 h-12 rounded-xl flex items-center justify-center",
-                "bg-gradient-to-br from-emerald-500 to-teal-600"
+                "w-12 h-12 rounded-none flex items-center justify-center",
+                "bg-gradient-to-br from-success to-success"
               )}>
                 <TrendingUp className="w-6 h-6 text-white" />
               </div>

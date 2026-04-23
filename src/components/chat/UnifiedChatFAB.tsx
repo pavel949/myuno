@@ -210,7 +210,7 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
                 {/* AI Assistant */}
                 <button
                   onClick={handleOpenAI}
-                  className="w-full flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 hover:border-primary/40 transition-colors"
+                  className="w-full flex items-center gap-4 p-4 rounded-none bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 hover:border-primary/40 transition-colors"
                 >
                   <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
                     <Sparkles className="w-6 h-6 text-primary" />
@@ -226,7 +226,7 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
                 {/* WhatsApp */}
                 <button
                   onClick={handleWhatsApp}
-                  className="w-full flex items-center gap-4 p-4 rounded-xl bg-success/10 border border-success/20 hover:border-success/40 transition-colors"
+                  className="w-full flex items-center gap-4 p-4 rounded-none bg-success/10 border border-success/20 hover:border-success/40 transition-colors"
                 >
                   <div className="w-12 h-12 rounded-full bg-success flex items-center justify-center">
                     <WhatsAppIcon className="w-6 h-6 text-white" />
@@ -242,7 +242,7 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
                 {/* Telegram */}
                 <button
                   onClick={handleTelegram}
-                  className="w-full flex items-center gap-4 p-4 rounded-xl bg-info/10 border border-info/20 hover:border-info/40 transition-colors"
+                  className="w-full flex items-center gap-4 p-4 rounded-none bg-info/10 border border-info/20 hover:border-info/40 transition-colors"
                 >
                   <div className="w-12 h-12 rounded-full bg-info flex items-center justify-center">
                     <TelegramIcon className="w-6 h-6 text-white" />
@@ -309,7 +309,7 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
                             setInput(q);
                             inputRef.current?.focus();
                           }}
-                          className="w-full text-left p-3 rounded-lg bg-muted/50 hover:bg-muted text-sm transition-colors"
+                          className="w-full text-left p-3 rounded-none bg-muted/50 hover:bg-muted text-sm transition-colors"
                         >
                           {q}
                         </button>
@@ -336,10 +336,10 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
                           }
                         </div>
                         <div className={cn(
-                          'rounded-2xl px-3 py-2 max-w-[80%]',
+                          'rounded-none px-3 py-2 max-w-[80%]',
                           msg.role === 'user' 
-                            ? 'bg-primary text-primary-foreground rounded-br-md' 
-                            : 'bg-muted rounded-bl-md'
+                            ? 'bg-primary text-primary-foreground rounded-none' 
+                            : 'bg-muted rounded-none'
                         )}>
                           <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                         </div>
@@ -350,7 +350,7 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
                         <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
                           <Bot className="w-3.5 h-3.5 text-primary" />
                         </div>
-                        <div className="rounded-2xl rounded-bl-md bg-muted px-3 py-2">
+                        <div className="rounded-none rounded-none bg-muted px-3 py-2">
                           <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
                         </div>
                       </div>

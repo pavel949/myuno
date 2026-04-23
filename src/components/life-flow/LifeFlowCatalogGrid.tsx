@@ -49,7 +49,7 @@ function CatalogCard({ item, index }: { item: EnrichedCatalogItem; index: number
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.03 }}
       onClick={handleClick}
-      className="w-[160px] md:w-auto shrink-0 md:shrink text-left rounded-xl border border-border/60 overflow-hidden bg-card hover:shadow-sm active:scale-[0.98] transition-all touch-manipulation group"
+      className="w-[160px] md:w-auto shrink-0 md:shrink text-left rounded-none border border-border/60 overflow-hidden bg-card hover:shadow-sm active:scale-[0.98] transition-all touch-manipulation group"
     >
       {/* Cover */}
       <div className="relative h-24 overflow-hidden bg-muted">
@@ -83,7 +83,7 @@ function CatalogCard({ item, index }: { item: EnrichedCatalogItem; index: number
 
         {/* Rating */}
         {item.rating != null && item.rating > 0 && (
-          <div className="absolute bottom-1.5 right-1.5 flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-background/90 text-[10px] font-semibold">
+          <div className="absolute bottom-1.5 right-1.5 flex items-center gap-0.5 px-1.5 py-0.5 rounded-none bg-background/90 text-[10px] font-semibold">
             <Star className="w-2.5 h-2.5 text-warning fill-warning" />
             {item.rating.toFixed(1)}
           </div>

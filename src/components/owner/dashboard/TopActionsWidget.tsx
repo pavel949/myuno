@@ -83,7 +83,7 @@ export function TopActionsWidget() {
       <div className="space-y-2">
         <Skeleton className="h-5 w-36" />
         {Array.from({ length: 3 }).map((_, i) => (
-          <Skeleton key={i} className="h-12 w-full rounded-xl" />
+          <Skeleton key={i} className="h-12 w-full rounded-none" />
         ))}
       </div>
     );

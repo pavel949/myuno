@@ -106,7 +106,7 @@ export default function CourseDetail() {
       </div>
 
       <div className="px-4 -mt-8 relative">
-        <div className="bg-card rounded-xl shadow-lg p-4">
+        <div className="bg-card rounded-none shadow-lg p-4">
           <h1 className="text-2xl font-bold text-foreground">{title}</h1>
           <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
             <div className="flex items-center gap-1">
@@ -125,7 +125,7 @@ export default function CourseDetail() {
         {images.length > 1 && (
           <div className="flex gap-2 mt-4 overflow-x-auto pb-2">
             {images.map((img, idx) => (
-              <img key={idx} src={img} alt="" className="w-24 h-24 rounded-lg object-cover flex-shrink-0" />
+              <img key={idx} src={img} alt="" className="w-24 h-24 rounded-none object-cover flex-shrink-0" />
             ))}
           </div>
         )}

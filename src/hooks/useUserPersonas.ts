@@ -320,43 +320,43 @@ export const PERSONA_INFO: Record<UserPersona, {
   tourist: {
     labelEn: 'Tourist', labelRu: 'Турист',
     descEn: 'Trips, tours, transfers', descRu: 'Поездки, туры, трансферы',
-    icon: 'Plane', color: 'text-cyan-600', bgColor: 'bg-cyan-500/10',
+    icon: 'Plane', color: 'text-primary', bgColor: 'bg-primary/10',
   },
   resident: {
     labelEn: 'Resident', labelRu: 'Резидент',
     descEn: 'Already living here: home, health, routine', descRu: 'Уже живу: быт, здоровье, регулярные сервисы',
-    icon: 'Home', color: 'text-emerald-600', bgColor: 'bg-emerald-500/10',
+    icon: 'Home', color: 'text-success', bgColor: 'bg-success/10',
   },
   property_owner: {
     labelEn: 'Owner', labelRu: 'Собственник',
     descEn: 'My property & services', descRu: 'Мой объект и сервисы',
-    icon: 'Building2', color: 'text-amber-600', bgColor: 'bg-amber-500/10',
+    icon: 'Building2', color: 'text-accent', bgColor: 'bg-accent/10',
   },
   investor: {
     labelEn: 'Investor', labelRu: 'Инвестор',
     descEn: 'Capital, off-plan, buy-side plus legal, banking, and diligence tools',
     descRu: 'Капитал, новостройки, покупка и сервисы сделки: право, банки, аналитика',
-    icon: 'TrendingUp', color: 'text-purple-600', bgColor: 'bg-purple-500/10',
+    icon: 'TrendingUp', color: 'text-primary', bgColor: 'bg-primary/10',
   },
   family: {
     labelEn: 'Family', labelRu: 'Семья',
     descEn: 'Schools, doctors, kids', descRu: 'Школы, врачи, дети',
-    icon: 'Baby', color: 'text-pink-600', bgColor: 'bg-pink-500/10',
+    icon: 'Baby', color: 'text-accent', bgColor: 'bg-accent/10',
   },
   couple: {
     labelEn: 'Couple', labelRu: 'Пара',
     descEn: 'Romance, spa, dining', descRu: 'Романтика, спа, рестораны',
-    icon: 'Heart', color: 'text-rose-600', bgColor: 'bg-rose-500/10',
+    icon: 'Heart', color: 'text-accent', bgColor: 'bg-accent/10',
   },
   nightlife: {
     labelEn: 'Nightlife', labelRu: 'Тусовщик',
     descEn: 'Clubs, parties, VIP', descRu: 'Клубы, вечеринки, VIP',
-    icon: 'Music', color: 'text-fuchsia-600', bgColor: 'bg-fuchsia-500/10',
+    icon: 'Music', color: 'text-primary', bgColor: 'bg-primary/10',
   },
   active: {
     labelEn: 'Active', labelRu: 'Спортсмен',
     descEn: 'Fitness, surf, MMA', descRu: 'Фитнес, серфинг, MMA',
-    icon: 'Dumbbell', color: 'text-orange-600', bgColor: 'bg-orange-500/10',
+    icon: 'Dumbbell', color: 'text-accent', bgColor: 'bg-accent/10',
   },
   business: {
     labelEn: 'Business', labelRu: 'Бизнес',
@@ -367,26 +367,26 @@ export const PERSONA_INFO: Record<UserPersona, {
   nomad: {
     labelEn: 'Nomad', labelRu: 'Номад',
     descEn: 'Connectivity, long stay, work-friendly cafés', descRu: 'Связь, долгий визит, кафе для работы',
-    icon: 'Laptop', color: 'text-teal-600', bgColor: 'bg-teal-500/10',
+    icon: 'Laptop', color: 'text-success', bgColor: 'bg-success/10',
   },
   pet_owner: {
     labelEn: 'Pet Owner', labelRu: 'С питомцем',
     descEn: 'Vet, grooming, hotels', descRu: 'Ветеринар, груминг, отели',
-    icon: 'PawPrint', color: 'text-amber-600', bgColor: 'bg-amber-500/10',
+    icon: 'PawPrint', color: 'text-accent', bgColor: 'bg-accent/10',
   },
   relocation: {
     labelEn: 'Relocating', labelRu: 'Переезд',
     descEn: 'Moving checklist: visa, home, schools from day one', descRu: 'Переезд с нуля: виза, жильё, школы, дорожная карта',
-    icon: 'Globe', color: 'text-indigo-600', bgColor: 'bg-indigo-500/10',
+    icon: 'Globe', color: 'text-primary', bgColor: 'bg-primary/10',
   },
   real_estate_developer: {
     labelEn: 'Developer', labelRu: 'Застройщик',
     descEn: 'Projects, leads, newbuilds', descRu: 'Проекты, лиды, новостройки',
-    icon: 'HardHat', color: 'text-sky-600', bgColor: 'bg-sky-500/10',
+    icon: 'HardHat', color: 'text-primary', bgColor: 'bg-primary/10',
   },
   local_services_provider: {
     labelEn: 'Service provider', labelRu: 'Поставщик услуг',
     descEn: 'Join marketplace & payouts', descRu: 'Маркетплейс и выплаты',
-    icon: 'Store', color: 'text-emerald-600', bgColor: 'bg-emerald-500/10',
+    icon: 'Store', color: 'text-success', bgColor: 'bg-success/10',
   },
 };

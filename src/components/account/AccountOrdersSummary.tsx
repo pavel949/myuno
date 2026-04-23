@@ -113,7 +113,7 @@ export function AccountOrdersSummary() {
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
               <div key={i} className="flex items-center gap-3">
-                <Skeleton className="h-10 w-10 rounded-lg" />
+                <Skeleton className="h-10 w-10 rounded-none" />
                 <div className="flex-1 space-y-1.5">
                   <Skeleton className="h-4 w-24" />
                   <Skeleton className="h-3 w-16" />
@@ -131,9 +131,9 @@ export function AccountOrdersSummary() {
                 <button
                   key={order.id}
                   onClick={() => navigate(`/bookings/${order.id}`)}
-                  className="w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-muted/50 transition-colors text-left"
+                  className="w-full flex items-center gap-3 p-2.5 rounded-none hover:bg-muted/50 transition-colors text-left"
                 >
-                  <div className="p-2 rounded-lg bg-muted">
+                  <div className="p-2 rounded-none bg-muted">
                     <Icon className="h-4 w-4 text-muted-foreground" />
                   </div>
                   <div className="flex-1 min-w-0">

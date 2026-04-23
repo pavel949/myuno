@@ -40,7 +40,7 @@ export function YachtExperienceSelect({ selected, onChange, className }: YachtEx
         <Skeleton className="h-6 w-40" />
         <div className="grid grid-cols-2 gap-3">
           {[1, 2, 3, 4].map(i => (
-            <Skeleton key={i} className="h-28 rounded-xl" />
+            <Skeleton key={i} className="h-28 rounded-none" />
           ))}
         </div>
       </div>
@@ -74,14 +74,14 @@ export function YachtExperienceSelect({ selected, onChange, className }: YachtEx
               key={exp.id}
               onClick={() => toggleExperience(exp.id)}
               className={cn(
-                "relative p-3 rounded-xl border text-left transition-all",
+                "relative p-3 rounded-none border text-left transition-all",
                 isSelected 
                   ? "border-primary bg-primary/5 ring-1 ring-primary" 
                   : "border-border hover:border-primary/30 hover:bg-muted/50"
               )}
             >
               {exp.popular && (
-                <span className="absolute -top-2 -right-2 text-[10px] px-1.5 py-0.5 rounded-full bg-amber-500 text-white font-medium">
+                <span className="absolute -top-2 -right-2 text-[10px] px-1.5 py-0.5 rounded-full bg-accent text-white font-medium">
                   {language === 'ru' ? 'ТОП' : 'HOT'}
                 </span>
               )}
@@ -108,7 +108,7 @@ export function YachtExperienceSelect({ selected, onChange, className }: YachtEx
       </div>
 
       {selected.length > 0 && (
-        <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
+        <div className="p-3 bg-primary/5 rounded-none border border-primary/20">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">
               {language === 'ru' ? 'Выбрано опций:' : 'Selected:'} {selected.length}

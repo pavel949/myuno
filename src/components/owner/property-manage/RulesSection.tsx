@@ -157,7 +157,7 @@ export function PropertyManageRulesSection({ formData, updateFormData }: RulesSe
 
           {/* Toggle rules */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between p-3 rounded-lg border">
+            <div className="flex items-center justify-between p-3 rounded-none border">
               <div className="flex items-center gap-3">
                 <PawPrint className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm">{isRu ? 'Можно с питомцами' : 'Pets allowed'}</span>
@@ -168,7 +168,7 @@ export function PropertyManageRulesSection({ formData, updateFormData }: RulesSe
               />
             </div>
 
-            <div className="flex items-center justify-between p-3 rounded-lg border">
+            <div className="flex items-center justify-between p-3 rounded-none border">
               <div className="flex items-center gap-3">
                 <Baby className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm">{isRu ? 'Подходит для детей' : 'Children friendly'}</span>
@@ -179,7 +179,7 @@ export function PropertyManageRulesSection({ formData, updateFormData }: RulesSe
               />
             </div>
 
-            <div className="flex items-center justify-between p-3 rounded-lg border">
+            <div className="flex items-center justify-between p-3 rounded-none border">
               <div className="flex items-center gap-3">
                 <PartyPopper className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm">{isRu ? 'Можно вечеринки' : 'Parties allowed'}</span>
@@ -246,7 +246,7 @@ export function PropertyManageRulesSection({ formData, updateFormData }: RulesSe
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <div className="flex items-center justify-between p-3 rounded-lg border">
+          <div className="flex items-center justify-between p-3 rounded-none border">
             <div className="flex items-center gap-3">
               <Zap className="h-4 w-4 text-muted-foreground" />
               <div>
@@ -264,7 +264,7 @@ export function PropertyManageRulesSection({ formData, updateFormData }: RulesSe
             />
           </div>
 
-          <div className="flex items-center justify-between p-3 rounded-lg border">
+          <div className="flex items-center justify-between p-3 rounded-none border">
             <div className="flex items-center gap-3">
               <Droplets className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm">{isRu ? 'Вода' : 'Water'}</span>
@@ -275,7 +275,7 @@ export function PropertyManageRulesSection({ formData, updateFormData }: RulesSe
             />
           </div>
 
-          <div className="flex items-center justify-between p-3 rounded-lg border">
+          <div className="flex items-center justify-between p-3 rounded-none border">
             <div className="flex items-center gap-3">
               <Sparkles className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm">{isRu ? 'Уборка' : 'Cleaning'}</span>
@@ -286,7 +286,7 @@ export function PropertyManageRulesSection({ formData, updateFormData }: RulesSe
             />
           </div>
 
-          <div className="flex items-center justify-between p-3 rounded-lg border">
+          <div className="flex items-center justify-between p-3 rounded-none border">
             <div className="flex items-center gap-3">
               <Car className="h-4 w-4 text-muted-foreground" />
               <div>

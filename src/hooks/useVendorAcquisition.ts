@@ -77,21 +77,21 @@ export interface OutreachTemplate {
 
 // Pipeline status colors and labels
 export const statusConfig: Record<string, { label: string; labelRu: string; color: string; bgColor: string }> = {
-  new: { label: 'New', labelRu: 'Новый', color: 'text-blue-700', bgColor: 'bg-blue-100' },
-  researching: { label: 'Researching', labelRu: 'Исследование', color: 'text-purple-700', bgColor: 'bg-purple-100' },
-  contacted: { label: 'Contacted', labelRu: 'Контакт', color: 'text-yellow-700', bgColor: 'bg-yellow-100' },
-  replied: { label: 'Replied', labelRu: 'Ответил', color: 'text-orange-700', bgColor: 'bg-orange-100' },
-  meeting: { label: 'Meeting', labelRu: 'Встреча', color: 'text-cyan-700', bgColor: 'bg-cyan-100' },
-  negotiating: { label: 'Negotiating', labelRu: 'Переговоры', color: 'text-indigo-700', bgColor: 'bg-indigo-100' },
-  won: { label: 'Won', labelRu: 'Выигран', color: 'text-green-700', bgColor: 'bg-green-100' },
+  new: { label: 'New', labelRu: 'Новый', color: 'text-primary', bgColor: 'bg-primary/10' },
+  researching: { label: 'Researching', labelRu: 'Исследование', color: 'text-primary', bgColor: 'bg-primary/10' },
+  contacted: { label: 'Contacted', labelRu: 'Контакт', color: 'text-accent', bgColor: 'bg-accent/10' },
+  replied: { label: 'Replied', labelRu: 'Ответил', color: 'text-accent', bgColor: 'bg-accent/10' },
+  meeting: { label: 'Meeting', labelRu: 'Встреча', color: 'text-primary', bgColor: 'bg-primary/10' },
+  negotiating: { label: 'Negotiating', labelRu: 'Переговоры', color: 'text-primary', bgColor: 'bg-primary/10' },
+  won: { label: 'Won', labelRu: 'Выигран', color: 'text-success', bgColor: 'bg-success/10' },
   lost: { label: 'Lost', labelRu: 'Потерян', color: 'text-red-700', bgColor: 'bg-red-100' },
   not_interested: { label: 'Not Interested', labelRu: 'Не интересно', color: 'text-gray-700', bgColor: 'bg-gray-100' },
 };
 
 export const priorityConfig: Record<string, { label: string; color: string; bgColor: string }> = {
   hot: { label: '🔥 Hot', color: 'text-red-700', bgColor: 'bg-red-100' },
-  warm: { label: '☀️ Warm', color: 'text-orange-700', bgColor: 'bg-orange-100' },
-  cold: { label: '❄️ Cold', color: 'text-blue-700', bgColor: 'bg-blue-100' },
+  warm: { label: '☀️ Warm', color: 'text-accent', bgColor: 'bg-accent/10' },
+  cold: { label: '❄️ Cold', color: 'text-primary', bgColor: 'bg-primary/10' },
   not_fit: { label: '⛔ Not Fit', color: 'text-gray-700', bgColor: 'bg-gray-100' },
 };
 

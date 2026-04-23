@@ -26,7 +26,7 @@ import { cn } from '@/lib/utils';
 
 const statusCfg = (isRu: boolean) => ({
   draft: { label: isRu ? 'Черновик' : 'Draft', cls: 'bg-muted text-muted-foreground', Icon: Clock },
-  sent: { label: isRu ? 'Отправлено' : 'Sent', cls: 'bg-blue-500/15 text-blue-600', Icon: Send },
+  sent: { label: isRu ? 'Отправлено' : 'Sent', cls: 'bg-primary/15 text-primary', Icon: Send },
   partially_signed: { label: isRu ? 'Частично подписано' : 'Partial', cls: 'bg-warning/15 text-warning', Icon: Clock },
   completed: { label: isRu ? 'Подписано' : 'Completed', cls: 'bg-success/15 text-success', Icon: CheckCircle2 },
   declined: { label: isRu ? 'Отклонено' : 'Declined', cls: 'bg-destructive/15 text-destructive', Icon: XCircle },

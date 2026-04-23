@@ -189,9 +189,9 @@ export const WARMTH_LABELS: Record<Warmth, string> = {
 
 export const WARMTH_COLORS: Record<Warmth, string> = {
   cold: 'bg-slate-500/20 text-slate-400',
-  warm: 'bg-amber-500/20 text-amber-400',
+  warm: 'bg-accent/20 text-accent',
   hot: 'bg-red-500/20 text-red-400',
-  client: 'bg-emerald-500/20 text-emerald-400',
+  client: 'bg-success/20 text-success',
 };
 
 export const PIPELINE_STAGE_LABELS: Record<PipelineStage, string> = {
@@ -206,11 +206,11 @@ export const PIPELINE_STAGE_LABELS: Record<PipelineStage, string> = {
 
 export const PIPELINE_STAGE_COLORS: Record<PipelineStage, string> = {
   lead: 'bg-slate-500/20 text-slate-400 border-slate-500/30',
-  qualified: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-  viewing: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-  reservation: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-  contract: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-  closed_won: 'bg-green-500/20 text-green-400 border-green-500/30',
+  qualified: 'bg-primary/20 text-primary border-primary/40/30',
+  viewing: 'bg-primary/20 text-primary border-primary/40/30',
+  reservation: 'bg-accent/20 text-accent border-accent/40/30',
+  contract: 'bg-success/20 text-success border-success/40/30',
+  closed_won: 'bg-success/20 text-success border-success/40/30',
   closed_lost: 'bg-red-500/20 text-red-400 border-red-500/30',
 };
 

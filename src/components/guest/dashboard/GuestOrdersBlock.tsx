@@ -111,7 +111,7 @@ export function GuestOrdersBlock({ activeOrders, loading, onViewAll }: GuestOrde
         {activeOrders.slice(0, 2).map((order) => (
           <div 
             key={order.id}
-            className="flex items-center justify-between p-2 rounded-lg bg-muted/30"
+            className="flex items-center justify-between p-2 rounded-none bg-muted/30"
           >
             <div className="min-w-0">
               <p className="text-sm font-medium truncate">

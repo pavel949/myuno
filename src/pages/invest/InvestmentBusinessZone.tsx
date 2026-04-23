@@ -54,9 +54,9 @@ export default function InvestmentBusinessZone() {
           <button
             type="button"
             onClick={() => navigate(`${APP_ROUTES.COMMERCIAL}?intent=rent`)}
-            className="w-full text-left rounded-xl border border-border bg-card hover:bg-muted/40 transition-colors p-4 flex items-center gap-3"
+            className="w-full text-left rounded-none border border-border bg-card hover:bg-muted/40 transition-colors p-4 flex items-center gap-3"
           >
-            <div className="p-2 rounded-lg bg-amber-500/15 text-amber-600 dark:text-amber-400">
+            <div className="p-2 rounded-none bg-accent/15 text-accent dark:text-accent">
               <Building2 className="h-5 w-5" />
             </div>
             <div className="flex-1 min-w-0">
@@ -107,7 +107,7 @@ export default function InvestmentBusinessZone() {
               </div>
               {loadingListings ? (
                 <div className="grid gap-4 sm:grid-cols-2">
-                  {[1, 2].map((i) => <Skeleton key={i} className="h-[300px] rounded-xl" />)}
+                  {[1, 2].map((i) => <Skeleton key={i} className="h-[300px] rounded-none" />)}
                 </div>
               ) : (
                 <div className="grid gap-4 sm:grid-cols-2">
@@ -120,7 +120,7 @@ export default function InvestmentBusinessZone() {
           {isLoading ? (
             <div className="grid gap-4">
               {[1, 2, 3].map((i) => (
-                <Skeleton key={i} className="h-[260px] rounded-xl" />
+                <Skeleton key={i} className="h-[260px] rounded-none" />
               ))}
             </div>
           ) : businessProjects.length === 0 ? (
@@ -148,9 +148,9 @@ export default function InvestmentBusinessZone() {
             </div>
           )}
 
-          <section className="rounded-xl bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 p-5 space-y-3">
+          <section className="rounded-none bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 p-5 space-y-3">
             <div className="flex items-start gap-3">
-              <div className="p-2 rounded-lg bg-primary/20">
+              <div className="p-2 rounded-none bg-primary/20">
                 <Megaphone className="h-5 w-5 text-primary" />
               </div>
               <div className="flex-1">

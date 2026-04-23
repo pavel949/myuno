@@ -414,7 +414,7 @@ export default function VendorSubscription() {
                 } ${isCurrentPlan ? 'ring-2 ring-primary' : ''}`}
               >
                 {plan.is_popular && (
-                  <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-3 py-1 text-xs font-medium rounded-bl-lg">
+                  <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-3 py-1 text-xs font-medium rounded-none">
                     <Sparkles className="h-3 w-3 inline mr-1" />
                     {isRussian ? 'Популярный' : 'Popular'}
                   </div>
@@ -428,7 +428,7 @@ export default function VendorSubscription() {
 
                 <CardHeader className={isCurrentPlan ? 'pt-10' : ''}>
                   <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg ${
+                    <div className={`p-2 rounded-none ${
                       plan.slug === 'business' ? 'bg-accent-amber/10 text-accent-amber' :
                       plan.slug === 'pro' ? 'bg-accent-purple/10 text-accent-purple' :
                       'bg-muted text-muted-foreground'

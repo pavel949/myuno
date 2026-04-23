@@ -251,7 +251,7 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
         </div>
 
         {/* Timeline grid */}
-        <div className="border rounded-lg overflow-hidden">
+        <div className="border rounded-none overflow-hidden">
           <div className="flex">
             {/* Sticky property labels */}
             <div className="flex-shrink-0 z-10 bg-background border-r" style={{ width: LABEL_WIDTH }}>
@@ -448,8 +448,8 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
                               "absolute h-5 flex items-center px-1.5 text-[10px] font-medium cursor-pointer z-10 top-1",
                               statusColor,
                               "hover:opacity-90 hover:shadow-sm transition-all",
-                              isStart && "rounded-l-md ml-0.5",
-                              isEnd && "rounded-r-md mr-0.5",
+                              isStart && "rounded-none ml-0.5",
+                              isEnd && "rounded-none mr-0.5",
                             )}
                             style={{
                               left: left + (isStart ? 2 : 0),
@@ -482,15 +482,15 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground justify-center pt-2">
           <span className="font-medium text-foreground/70">{isRu ? 'Бронирования:' : 'Bookings:'}</span>
           <div className="flex items-center gap-1.5">
-            <div className="w-5 h-3 rounded bg-primary/80" />
+            <div className="w-5 h-3 rounded-none bg-primary/80" />
             <span>{isRu ? 'Подтверждено' : 'Confirmed'}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-5 h-3 rounded bg-warning/80" />
+            <div className="w-5 h-3 rounded-none bg-warning/80" />
             <span>{isRu ? 'Ожидает подтверждения' : 'Awaiting confirmation'}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-5 h-3 rounded bg-success/80" />
+            <div className="w-5 h-3 rounded-none bg-success/80" />
             <span>{isRu ? 'Гость на месте' : 'Checked in'}</span>
           </div>
 

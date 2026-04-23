@@ -99,7 +99,7 @@ export function SignaturePad({ onChange, height = 180, className, disabled }: Pr
     <div className={cn('space-y-2', className)}>
       <div
         ref={containerRef}
-        className="relative w-full rounded-xl border-2 border-dashed border-border bg-muted/20 overflow-hidden"
+        className="relative w-full rounded-none border-2 border-dashed border-border bg-muted/20 overflow-hidden"
         style={{ height }}
       >
         <canvas

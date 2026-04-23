@@ -66,13 +66,13 @@ export function InvestorInterestsList() {
             return (
               <CardContent
                 key={interest.id}
-                className="p-3 rounded-lg border bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors flex items-center gap-3"
+                className="p-3 rounded-none border bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors flex items-center gap-3"
                 onClick={() => project && navigate(`/invest/${project.id}`)}
               >
                 {project?.cover_image ? (
-                  <img src={project.cover_image} alt="" className="w-12 h-12 rounded-lg object-cover shrink-0" />
+                  <img src={project.cover_image} alt="" className="w-12 h-12 rounded-none object-cover shrink-0" />
                 ) : (
-                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <div className="w-12 h-12 rounded-none bg-primary/10 flex items-center justify-center shrink-0">
                     <TrendingUp className="h-5 w-5 text-primary" />
                   </div>
                 )}

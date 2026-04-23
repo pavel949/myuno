@@ -61,7 +61,7 @@ export function GuideIntegration() {
           <CardContent className="p-6">
             <div className="flex flex-col items-center gap-4">
               {/* Property */}
-              <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-lg border border-primary/20">
+              <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-none border border-primary/20">
                 <Building2 className="w-5 h-5 text-primary" />
                 <span className="font-medium text-foreground">
                   {isRu ? 'Ваш объект в UNO' : 'Your Property in UNO'}
@@ -71,7 +71,7 @@ export function GuideIntegration() {
               <ArrowDown className="w-5 h-5 text-muted-foreground" />
 
               {/* Booking */}
-              <div className="px-4 py-2 bg-secondary rounded-lg">
+              <div className="px-4 py-2 bg-secondary rounded-none">
                 <span className="text-sm text-muted-foreground">
                   {isRu ? 'Бронирование от гостя' : 'Guest Booking'}
                 </span>
@@ -80,7 +80,7 @@ export function GuideIntegration() {
               <ArrowDown className="w-5 h-5 text-muted-foreground" />
 
               {/* Auto Tasks */}
-              <div className="w-full max-w-md p-4 bg-secondary/50 rounded-xl">
+              <div className="w-full max-w-md p-4 bg-secondary/50 rounded-none">
                 <p className="text-sm font-medium text-foreground mb-3 text-center">
                   📅 {isRu ? 'Автоматические задачи:' : 'Automatic tasks:'}
                 </p>
@@ -96,7 +96,7 @@ export function GuideIntegration() {
               <ArrowDown className="w-5 h-5 text-muted-foreground" />
 
               {/* Connected Services */}
-              <div className="w-full max-w-md p-4 bg-primary/5 rounded-xl border border-primary/20">
+              <div className="w-full max-w-md p-4 bg-primary/5 rounded-none border border-primary/20">
                 <p className="text-sm font-medium text-foreground mb-3 text-center">
                   🔗 {isRu ? 'Связанные сервисы UNO:' : 'Connected UNO Services:'}
                 </p>
@@ -120,7 +120,7 @@ export function GuideIntegration() {
             <Card key={uc.situationEn} className="bg-card border-border">
               <CardContent className="p-4">
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 rounded-none bg-primary/10 flex items-center justify-center flex-shrink-0">
                     <uc.icon className="w-5 h-5 text-primary" />
                   </div>
                   <div>
@@ -197,7 +197,7 @@ export function GuideIntegration() {
                 <li>✓ {isRu ? 'Поддержка гостей 24/7' : '24/7 guest support'}</li>
                 <li>✓ {isRu ? 'Ежемесячные отчёты' : 'Monthly reports'}</li>
               </ul>
-              <div className="mt-4 p-3 bg-primary/10 rounded-lg">
+              <div className="mt-4 p-3 bg-primary/10 rounded-none">
                 <p className="text-xs text-primary flex items-center gap-1">
                   <Percent className="w-3 h-3" />
                   {isRu ? 'Прозрачная отчётность каждый месяц' : 'Transparent monthly reporting'}

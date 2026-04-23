@@ -106,7 +106,7 @@ export function SupplierDiscoveryPanel() {
   });
 
   const getScoreBadge = (score: number) => {
-    if (score >= 80) return <Badge className="bg-emerald-600 text-white text-xs">{score}</Badge>;
+    if (score >= 80) return <Badge className="bg-success text-white text-xs">{score}</Badge>;
     if (score >= 60) return <Badge variant="secondary" className="text-xs">{score}</Badge>;
     if (score >= 40) return <Badge variant="outline" className="text-xs">{score}</Badge>;
     return <Badge variant="outline" className="text-xs text-muted-foreground">{score}</Badge>;
@@ -118,7 +118,7 @@ export function SupplierDiscoveryPanel() {
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger>
-              <ShieldCheck className="h-4 w-4 text-emerald-500" />
+              <ShieldCheck className="h-4 w-4 text-success" />
             </TooltipTrigger>
             <TooltipContent>{isRu ? 'Верифицирован' : 'Verified'}</TooltipContent>
           </Tooltip>
@@ -204,7 +204,7 @@ export function SupplierDiscoveryPanel() {
                 <span>→ {isRu ? 'Скрейп:' : 'Scraped:'} {lastResult.deep_scraped}</span>
                 <span>→ {isRu ? 'AI:' : 'AI:'} {lastResult.suppliers_analyzed}</span>
                 <span className="flex items-center gap-1 text-foreground font-medium">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                  <CheckCircle2 className="h-3.5 w-3.5 text-success" />
                   {lastResult.suppliers_inserted}
                 </span>
                 <span className="text-xs">{lastResult.latency_ms}ms</span>
@@ -286,7 +286,7 @@ export function SupplierDiscoveryPanel() {
                     <TableCell>
                       {s.rating ? (
                         <span className="flex items-center gap-1 text-sm">
-                          <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
+                          <Star className="h-3.5 w-3.5 text-accent fill-accent" />
                           {s.rating} {s.review_count ? `(${s.review_count})` : ''}
                         </span>
                       ) : '—'}

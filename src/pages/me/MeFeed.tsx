@@ -41,7 +41,7 @@ function FeedCard({ item }: { item: MeFeedItem }) {
   return (
     <Card variant="content" className={cn('transition-all', style.ring)}>
       <CardContent className="p-4 flex gap-3 items-start">
-        <div className={cn('h-10 w-10 rounded-xl flex items-center justify-center shrink-0', style.bg)}>
+        <div className={cn('h-10 w-10 rounded-none flex items-center justify-center shrink-0', style.bg)}>
           <Icon className={cn('h-5 w-5', style.icon)} />
         </div>
         <div className="flex-1 min-w-0">

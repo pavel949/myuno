@@ -236,7 +236,7 @@ export function PropertyHubTabs() {
                   'ml-0.5 inline-flex items-center rounded-full px-1.5 py-0 text-[9px] font-semibold tracking-wide uppercase leading-tight',
                   isActive
                     ? 'bg-primary-foreground/20 text-primary-foreground'
-                    : 'bg-amber-500/15 text-amber-600 dark:text-amber-400'
+                    : 'bg-accent/15 text-accent dark:text-accent'
                 )}
               >
                 Pro

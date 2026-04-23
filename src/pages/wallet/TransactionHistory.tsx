@@ -43,7 +43,7 @@ export default function TransactionHistory() {
 
         {/* Stats Summary */}
         <div className="grid grid-cols-3 gap-3 mb-4">
-          <div className="p-3 rounded-lg bg-success/10 text-center">
+          <div className="p-3 rounded-none bg-success/10 text-center">
             <p className="text-lg font-bold text-success">
               +{stats.totalIncome.toLocaleString()}
             </p>
@@ -51,7 +51,7 @@ export default function TransactionHistory() {
               {isRu ? 'Доход' : 'Income'}
             </p>
           </div>
-          <div className="p-3 rounded-lg bg-destructive/10 text-center">
+          <div className="p-3 rounded-none bg-destructive/10 text-center">
             <p className="text-lg font-bold text-foreground">
               -{stats.totalSpent.toLocaleString()}
             </p>
@@ -59,7 +59,7 @@ export default function TransactionHistory() {
               {isRu ? 'Расход' : 'Spent'}
             </p>
           </div>
-          <div className="p-3 rounded-lg bg-muted text-center">
+          <div className="p-3 rounded-none bg-muted text-center">
             <p className="text-lg font-bold">
               {stats.transactionCount}
             </p>

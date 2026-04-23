@@ -77,7 +77,7 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
     return (
       <div
         className={cn(
-          'w-full h-[400px] lg:h-[500px] rounded-2xl overflow-hidden border flex flex-col items-center justify-center bg-muted/30 gap-2 p-4',
+          'w-full h-[400px] lg:h-[500px] rounded-none overflow-hidden border flex flex-col items-center justify-center bg-muted/30 gap-2 p-4',
           className
         )}
       >
@@ -97,7 +97,7 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
     return (
       <div
         className={cn(
-          'w-full h-[400px] lg:h-[500px] rounded-2xl overflow-hidden border flex items-center justify-center bg-muted/30',
+          'w-full h-[400px] lg:h-[500px] rounded-none overflow-hidden border flex items-center justify-center bg-muted/30',
           className
         )}
       >
@@ -107,7 +107,7 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
   }
 
   return (
-    <div className={cn('w-full h-[400px] lg:h-[500px] rounded-2xl overflow-hidden border', className)}>
+    <div className={cn('w-full h-[400px] lg:h-[500px] rounded-none overflow-hidden border', className)}>
       <GoogleMap
         mapContainerStyle={mapContainerStyle}
         center={DEFAULT_MAP_CENTER}

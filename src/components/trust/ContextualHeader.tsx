@@ -148,7 +148,7 @@ export function ContextualHeader({
 
   return (
     <div className={cn(
-      'flex items-start gap-2.5 p-3 rounded-xl',
+      'flex items-start gap-2.5 p-3 rounded-none',
       'bg-primary/5 border border-primary/10',
       className
     )}>

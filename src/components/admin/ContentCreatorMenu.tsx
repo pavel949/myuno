@@ -297,7 +297,7 @@ export function ContentCreatorMenu({
               onClick={() => handleSelect(type)}
               className="cursor-pointer py-2.5"
             >
-              <div className={cn('p-1.5 rounded-md mr-3', type.color)}>
+              <div className={cn('p-1.5 rounded-none mr-3', type.color)}>
                 {type.icon}
               </div>
               <div className="flex flex-col">
@@ -326,7 +326,7 @@ export function ContentCreatorMenu({
               onClick={() => handleSelect(type)}
               className="cursor-pointer py-2.5"
             >
-              <div className={cn('p-1.5 rounded-md mr-3', type.color)}>
+              <div className={cn('p-1.5 rounded-none mr-3', type.color)}>
                 {type.icon}
               </div>
               <div className="flex flex-col">
@@ -355,7 +355,7 @@ export function ContentCreatorMenu({
               onClick={() => handleSelect(type)}
               className="cursor-pointer py-2.5"
             >
-              <div className={cn('p-1.5 rounded-md mr-3', type.color)}>
+              <div className={cn('p-1.5 rounded-none mr-3', type.color)}>
                 {type.icon}
               </div>
               <div className="flex flex-col">

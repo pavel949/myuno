@@ -30,7 +30,7 @@ const TRIP_SERVICES: TripService[] = [
     labelRu: 'Трансфер',
     descEn: 'Meet & greet service',
     descRu: 'Встреча в аэропорту',
-    gradient: 'from-blue-500 to-cyan-500',
+    gradient: 'from-primary to-primary',
     priority: 1,
   },
   {
@@ -52,7 +52,7 @@ const TRIP_SERVICES: TripService[] = [
     labelRu: 'Продукты',
     descEn: 'Stock up fridge',
     descRu: 'Заполнить холодильник',
-    gradient: 'from-green-500 to-emerald-600',
+    gradient: 'from-success to-success',
     priority: 3,
   },
   {
@@ -63,7 +63,7 @@ const TRIP_SERVICES: TripService[] = [
     labelRu: 'Цветы',
     descEn: 'Welcome bouquet',
     descRu: 'Букет к приезду',
-    gradient: 'from-pink-400 to-rose-500',
+    gradient: 'from-accent to-accent',
     priority: 4,
   },
   {
@@ -74,7 +74,7 @@ const TRIP_SERVICES: TripService[] = [
     labelRu: 'Уборка',
     descEn: 'During your stay',
     descRu: 'Во время проживания',
-    gradient: 'from-teal-400 to-cyan-500',
+    gradient: 'from-success to-primary',
     priority: 5,
   },
   {
@@ -85,7 +85,7 @@ const TRIP_SERVICES: TripService[] = [
     labelRu: 'Открыть счёт',
     descEn: 'Thai bank account',
     descRu: 'Тайский банк',
-    gradient: 'from-amber-500 to-orange-500',
+    gradient: 'from-accent to-accent',
     priority: 6,
   },
   {
@@ -96,7 +96,7 @@ const TRIP_SERVICES: TripService[] = [
     labelRu: 'Рестораны',
     descEn: 'Book a table',
     descRu: 'Забронировать столик',
-    gradient: 'from-orange-400 to-red-500',
+    gradient: 'from-accent to-red-500',
     priority: 7,
   },
   {
@@ -107,7 +107,7 @@ const TRIP_SERVICES: TripService[] = [
     labelRu: 'Няня',
     descEn: 'Childcare service',
     descRu: 'Присмотр за детьми',
-    gradient: 'from-violet-400 to-purple-500',
+    gradient: 'from-primary to-primary',
     priority: 8,
   },
   {
@@ -118,7 +118,7 @@ const TRIP_SERVICES: TripService[] = [
     labelRu: 'SIM-карта',
     descEn: 'Stay connected',
     descRu: 'Оставайся на связи',
-    gradient: 'from-indigo-500 to-blue-600',
+    gradient: 'from-primary to-primary',
     priority: 9,
   },
 ];
@@ -188,10 +188,10 @@ export function TripServicesGrid({
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: index * 0.05 }}
                 onClick={() => handleServiceClick(service)}
-                className="flex flex-col items-center p-3 rounded-xl bg-card border border-border hover:border-primary/30 hover:shadow-md transition-all"
+                className="flex flex-col items-center p-3 rounded-none bg-card border border-border hover:border-primary/30 hover:shadow-md transition-all"
               >
                 <div className={cn(
-                  "w-10 h-10 rounded-xl flex items-center justify-center mb-2 bg-gradient-to-br",
+                  "w-10 h-10 rounded-none flex items-center justify-center mb-2 bg-gradient-to-br",
                   service.gradient
                 )}>
                   <Icon className="w-5 h-5 text-white" />
@@ -240,10 +240,10 @@ export function TripServicesGrid({
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
               onClick={() => handleServiceClick(service)}
-              className="flex flex-col items-center p-4 rounded-xl bg-card border border-border hover:border-primary/30 hover:shadow-lg transition-all group"
+              className="flex flex-col items-center p-4 rounded-none bg-card border border-border hover:border-primary/30 hover:shadow-lg transition-all group"
             >
               <div className={cn(
-                "w-12 h-12 rounded-xl flex items-center justify-center mb-3 bg-gradient-to-br group-hover:scale-110 transition-transform",
+                "w-12 h-12 rounded-none flex items-center justify-center mb-3 bg-gradient-to-br group-hover:scale-110 transition-transform",
                 service.gradient
               )}>
                 <Icon className="w-6 h-6 text-white" />

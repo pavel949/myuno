@@ -244,7 +244,7 @@ export default function OwnerFinancials() {
             </CardContent></Card>
             <Card><CardContent className="p-3">
               <p className="text-xs text-muted-foreground">{isRu ? 'Комиссия' : 'Commission'}</p>
-              <p className="text-lg font-bold text-orange-600">{formatPrice(bookingSummary.totalCommission)}</p>
+              <p className="text-lg font-bold text-accent">{formatPrice(bookingSummary.totalCommission)}</p>
             </CardContent></Card>
             <Card><CardContent className="p-3">
               <p className="text-xs text-muted-foreground">{isRu ? 'К выплате' : 'Net Payout'}</p>

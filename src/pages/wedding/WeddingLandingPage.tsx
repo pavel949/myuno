@@ -26,7 +26,7 @@ export default function WeddingLandingPage() {
       icon={Heart}
       title={t ? 'Свадьба на Пхукете' : 'Wedding in Phuket'}
       subtitle={t ? 'Организуем свадьбу вашей мечты — от площадки до последнего лепестка' : 'We organize your dream wedding — from venue to the last petal'}
-      gradient="from-rose-600 via-rose-500 to-pink-600"
+      gradient="from-accent via-accent to-accent"
       heroCta={{ label: t ? 'Обсудить свадьбу' : 'Discuss Your Wedding', onClick: () => window.open(whatsappUrl, '_blank') }}
       whatsappUrl={whatsappUrl}
       whatsappLabel={t ? 'Получить предложение' : 'Get a Quote'}
@@ -38,8 +38,8 @@ export default function WeddingLandingPage() {
         {SERVICES.map((s, i) => {
           const Icon = s.icon;
           return (
-            <button key={i} onClick={() => navigate(s.path)} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card text-left transition-all hover:[box-shadow:var(--shadow-elevation-2)] active:scale-[0.98]">
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: tokenColor(s.color, 0.15) }}>
+            <button key={i} onClick={() => navigate(s.path)} className="w-full flex items-center gap-4 p-4 rounded-none border border-border bg-card text-left transition-all hover:[box-shadow:var(--shadow-elevation-2)] active:scale-[0.98]">
+              <div className="w-11 h-11 rounded-none flex items-center justify-center shrink-0" style={{ background: tokenColor(s.color, 0.15) }}>
                 <Icon className="w-5 h-5" style={{ color: tokenColor(s.color) }} />
               </div>
               <div className="flex-1 min-w-0">

@@ -213,7 +213,7 @@ export function YachtICalSync({ yachtId, className }: YachtICalSyncProps) {
                   {calendars.map((calendar) => (
                     <div 
                       key={calendar.id}
-                      className="flex items-center justify-between p-3 rounded-lg border bg-muted/30"
+                      className="flex items-center justify-between p-3 rounded-none border bg-muted/30"
                     >
                       <div className="flex items-center gap-3 min-w-0 flex-1">
                         <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />

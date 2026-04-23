@@ -247,7 +247,7 @@ export default function InventoryPage() {
                 <button
                   key={p.property_id}
                   onClick={() => setFilterPropertyId(isActive ? 'all' : p.property_id)}
-                  className={`text-left p-3 rounded-xl border transition ${isActive ? 'border-primary bg-primary/5' : 'border-border bg-card hover:bg-muted/40'}`}
+                  className={`text-left p-3 rounded-none border transition ${isActive ? 'border-primary bg-primary/5' : 'border-border bg-card hover:bg-muted/40'}`}
                 >
                   <p className="text-xs text-muted-foreground">{isRu ? 'Объект' : 'Property'}</p>
                   <p className="text-sm font-medium truncate">{isRu ? p.title_ru : p.title}</p>
@@ -293,7 +293,7 @@ export default function InventoryPage() {
           </div>
 
           {isLoading || propsLoading ? (
-            <div className="space-y-3">{[1, 2, 3].map(i => <Skeleton key={i} className="h-16 w-full rounded-xl" />)}</div>
+            <div className="space-y-3">{[1, 2, 3].map(i => <Skeleton key={i} className="h-16 w-full rounded-none" />)}</div>
           ) : !filtered.length ? (
             <Card className="p-8 text-center">
               <Package className="h-12 w-12 mx-auto text-muted-foreground/40 mb-3" />
@@ -314,7 +314,7 @@ export default function InventoryPage() {
                       return (
                         <Card key={item.id} className={`p-3 flex items-center gap-3 ${isLow ? 'border-destructive/50 bg-destructive/5' : ''}`}>
                           {itemPhotos && itemPhotos[0] && (
-                            <img src={itemPhotos[0]} alt="" className="h-10 w-10 rounded-md object-cover flex-shrink-0" />
+                            <img src={itemPhotos[0]} alt="" className="h-10 w-10 rounded-none object-cover flex-shrink-0" />
                           )}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">

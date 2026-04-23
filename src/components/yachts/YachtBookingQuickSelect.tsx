@@ -188,7 +188,7 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
                   key={option.type}
                   onClick={() => setCharterType(option.type)}
                   className={cn(
-                    "p-3 rounded-xl border-2 text-left transition-all",
+                    "p-3 rounded-none border-2 text-left transition-all",
                     charterType === option.type
                       ? "border-primary bg-primary/5"
                       : "border-border hover:border-primary/50"
@@ -255,7 +255,7 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
                 onSelect={(date) => { setSelectedDate(date); setShowCalendar(false); }}
                 disabled={(date) => date < today}
                 locale={language === 'ru' ? ru : enUS}
-                className="rounded-xl border p-3 pointer-events-auto"
+                className="rounded-none border p-3 pointer-events-auto"
               />
               <Button variant="ghost" size="sm" onClick={() => setShowCalendar(false)} className="w-full">
                 {language === 'ru' ? 'Назад' : 'Back'}
@@ -297,7 +297,7 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
               <Users className="w-4 h-4 text-muted-foreground" />
               {language === 'ru' ? 'Сколько гостей?' : 'How many guests?'}
             </h4>
-            <div className="flex items-center gap-4 bg-muted/50 rounded-xl p-3">
+            <div className="flex items-center gap-4 bg-muted/50 rounded-none p-3">
               <button
                 onClick={() => setGuests(Math.max(1, guests - 1))}
                 disabled={guests <= 1}
@@ -320,7 +320,7 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
 
         {/* Summary */}
         {canProceed && (
-          <div className="p-4 bg-muted/50 rounded-xl space-y-2">
+          <div className="p-4 bg-muted/50 rounded-none space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">
                 {selectedOption ? (language === 'ru' ? `Аренда (${selectedOption.labelRu.toLowerCase()})` : `Charter (${selectedOption.labelEn.toLowerCase()})`) : ''}
@@ -335,13 +335,13 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
         )}
 
         {/* Trust banner */}
-        <div className="flex items-center gap-3 p-3 bg-emerald-50/60 dark:bg-emerald-950/20 rounded-xl border border-emerald-200/50 dark:border-emerald-800/30">
-          <Shield className="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+        <div className="flex items-center gap-3 p-3 bg-success/10/60 dark:bg-success/20 rounded-none border border-success/40/50 dark:border-success/40/30">
+          <Shield className="w-5 h-5 text-success dark:text-success flex-shrink-0" />
           <div>
-            <p className="text-xs font-medium text-emerald-800 dark:text-emerald-300">
+            <p className="text-xs font-medium text-success dark:text-success">
               {language === 'ru' ? 'Защищено myUNO' : 'Protected by myUNO'}
             </p>
-            <p className="text-[11px] text-emerald-700/70 dark:text-emerald-400/60">
+            <p className="text-[11px] text-success/70 dark:text-success/60">
               {language === 'ru' ? 'Проверенный оператор • Экипаж • Страховка' : 'Verified operator • Crew • Insurance'}
             </p>
           </div>

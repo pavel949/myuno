@@ -79,7 +79,7 @@ export function DealTagsInput({ tags, onChange, readonly }: Props) {
       ) : (
         <button
           onClick={() => setShowInput(true)}
-          className="h-5 px-1.5 rounded border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-primary hover:text-primary text-[10px] flex items-center gap-0.5"
+          className="h-5 px-1.5 rounded-none border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-primary hover:text-primary text-[10px] flex items-center gap-0.5"
         >
           <Plus className="h-2.5 w-2.5" />
         </button>

@@ -44,8 +44,8 @@ export function CleaningDashboard() {
     return (
       <div className="space-y-2">
         <Skeleton className="h-5 w-36" />
-        <Skeleton className="h-14 w-full rounded-xl" />
-        <Skeleton className="h-14 w-full rounded-xl" />
+        <Skeleton className="h-14 w-full rounded-none" />
+        <Skeleton className="h-14 w-full rounded-none" />
       </div>
     );
   }

@@ -77,7 +77,7 @@ export function LegalComplianceModal() {
         <ScrollArea className="flex-1 max-h-[60vh] pr-4">
           <div className="space-y-4">
             {pendingDocs.map((doc) => (
-              <div key={doc.id} className="border rounded-lg p-4">
+              <div key={doc.id} className="border rounded-none p-4">
                 <div className="flex items-start gap-3">
                   <Checkbox
                     id={`doc-${doc.id}`}
@@ -103,7 +103,7 @@ export function LegalComplianceModal() {
                         : (isRu ? 'Читать полностью' : 'Read full text')}
                     </button>
                     {expandedDoc === doc.id && (
-                      <div className="mt-3 p-3 bg-muted/50 rounded text-sm prose prose-sm max-w-none dark:prose-invert">
+                      <div className="mt-3 p-3 bg-muted/50 rounded-none text-sm prose prose-sm max-w-none dark:prose-invert">
                         <ReactMarkdown>{doc.content_md}</ReactMarkdown>
                       </div>
                     )}

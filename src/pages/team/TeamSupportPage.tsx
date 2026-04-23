@@ -18,9 +18,9 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 const STATUS_CONFIG = {
-  open: { labelEn: 'Open', labelRu: 'Открыт', color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' },
-  in_progress: { labelEn: 'In Progress', labelRu: 'В работе', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' },
-  resolved: { labelEn: 'Resolved', labelRu: 'Решён', color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' },
+  open: { labelEn: 'Open', labelRu: 'Открыт', color: 'bg-accent/10 text-accent dark:bg-accent dark:text-muted-foreground' },
+  in_progress: { labelEn: 'In Progress', labelRu: 'В работе', color: 'bg-primary/10 text-primary dark:bg-primary dark:text-muted-foreground' },
+  resolved: { labelEn: 'Resolved', labelRu: 'Решён', color: 'bg-success/10 text-success dark:bg-success dark:text-muted-foreground' },
   closed: { labelEn: 'Closed', labelRu: 'Закрыт', color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200' },
 };
 
@@ -87,8 +87,8 @@ export default function TeamSupportPage() {
         </div>
 
         <div className="grid grid-cols-4 gap-3">
-          <Card className="p-3 text-center bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-800">
-            <AlertTriangle className="h-5 w-5 mx-auto mb-1 text-yellow-600" />
+          <Card className="p-3 text-center bg-accent/10 dark:bg-accent/30 border-accent/40 dark:border-accent/40">
+            <AlertTriangle className="h-5 w-5 mx-auto mb-1 text-accent" />
             <p className="text-xl font-bold">{openCount}</p>
             <p className="text-xs text-muted-foreground">{isRu ? 'Открытых' : 'Open'}</p>
           </Card>

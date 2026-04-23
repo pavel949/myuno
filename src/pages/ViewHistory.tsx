@@ -116,10 +116,10 @@ export default function ViewHistory() {
             <div className="space-y-3">
               {[1, 2, 3].map(i => (
                 <SectionCard key={i} className="animate-pulse flex gap-3">
-                  <div className="w-16 h-16 bg-muted rounded-xl" />
+                  <div className="w-16 h-16 bg-muted rounded-none" />
                   <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-muted rounded w-3/4" />
-                    <div className="h-3 bg-muted rounded w-1/2" />
+                    <div className="h-4 bg-muted rounded-none w-3/4" />
+                    <div className="h-3 bg-muted rounded-none w-1/2" />
                   </div>
                 </SectionCard>
               ))}
@@ -146,7 +146,7 @@ export default function ViewHistory() {
                     <SectionCard className="flex items-center gap-3">
                       <button
                         onClick={() => handleItemClick(item.item_type, item.item_id)}
-                        className="relative w-16 h-16 rounded-xl overflow-hidden bg-muted flex-shrink-0"
+                        className="relative w-16 h-16 rounded-none overflow-hidden bg-muted flex-shrink-0"
                       >
                         {item.item_data?.image ? (
                           <img
@@ -185,7 +185,7 @@ export default function ViewHistory() {
 
                       <button
                         onClick={() => removeFromHistory(item.id)}
-                        className="p-2 hover:bg-secondary rounded-xl transition-colors"
+                        className="p-2 hover:bg-secondary rounded-none transition-colors"
                       >
                         <X className="w-4 h-4 text-muted-foreground" />
                       </button>

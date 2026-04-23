@@ -474,7 +474,7 @@ export function MCCLeadsTab() {
           onKeyDown={(event) => activateOnEnterOrSpace(event, () => { setPriorityFilter(null); setSourceFilter('all'); })}
         >
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10">
+            <div className="p-2 rounded-none bg-primary/10">
               <Users className="h-5 w-5 text-primary" />
             </div>
             <div>
@@ -492,7 +492,7 @@ export function MCCLeadsTab() {
           onKeyDown={(event) => activateOnEnterOrSpace(event, () => setPriorityFilter(priorityFilter === 'hot' ? null : 'hot'))}
         >
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-destructive/10">
+            <div className="p-2 rounded-none bg-destructive/10">
               <Flame className="h-5 w-5 text-destructive" />
             </div>
             <div>
@@ -510,7 +510,7 @@ export function MCCLeadsTab() {
           onKeyDown={(event) => activateOnEnterOrSpace(event, () => setPriorityFilter(priorityFilter === 'warm' ? null : 'warm'))}
         >
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-warning/10">
+            <div className="p-2 rounded-none bg-warning/10">
               <Thermometer className="h-5 w-5 text-warning" />
             </div>
             <div>
@@ -528,7 +528,7 @@ export function MCCLeadsTab() {
           onKeyDown={(event) => activateOnEnterOrSpace(event, () => setPriorityFilter(priorityFilter === 'cold' ? null : 'cold'))}
         >
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-info/10">
+            <div className="p-2 rounded-none bg-info/10">
               <Snowflake className="h-5 w-5 text-info" />
             </div>
             <div>
@@ -540,7 +540,7 @@ export function MCCLeadsTab() {
         
         <Card className="hover:shadow-md transition-shadow">
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-success/10">
+            <div className="p-2 rounded-none bg-success/10">
               <ChevronRight className="h-5 w-5 text-success" />
             </div>
             <div>
@@ -552,7 +552,7 @@ export function MCCLeadsTab() {
         
         <Card className="hover:shadow-md transition-shadow">
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-chart-5/10">
+            <div className="p-2 rounded-none bg-chart-5/10">
               <Brain className="h-5 w-5 text-chart-5" />
             </div>
             <div>

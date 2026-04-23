@@ -58,7 +58,7 @@ export function CrmQuickActions() {
           <button
             key={a.label}
             onClick={a.action}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg border bg-card hover:bg-muted/50 transition-colors shrink-0"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-none border bg-card hover:bg-muted/50 transition-colors shrink-0"
           >
             <a.icon className={cn('h-3.5 w-3.5', a.color)} />
             <span className="text-xs font-medium whitespace-nowrap">{a.label}</span>

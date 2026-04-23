@@ -42,7 +42,7 @@ export default function MarketSuccess() {
                 : 'Your order has been placed. We will contact you to confirm delivery.'}
             </p>
 
-            <div className="bg-muted/50 rounded-lg p-4 text-left mb-6">
+            <div className="bg-muted/50 rounded-none p-4 text-left mb-6">
               <p className="text-sm font-medium mb-2">
                 {isRu ? 'Что дальше:' : 'What happens next:'}
               </p>

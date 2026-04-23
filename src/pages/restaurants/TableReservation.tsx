@@ -199,11 +199,11 @@ export default function TableReservation() {
 
         <div className="px-4 py-6 space-y-6">
           {/* Restaurant Card */}
-          <div className="flex gap-4 p-4 rounded-xl bg-card border border-border/50">
+          <div className="flex gap-4 p-4 rounded-none bg-card border border-border/50">
             <img 
               src={restaurant.cover_image || PLACEHOLDER_IMAGES.restaurant} 
               alt={restaurant.name_en}
-              className="w-20 h-20 rounded-lg object-cover"
+              className="w-20 h-20 rounded-none object-cover"
             />
             <div>
               <h2 className="font-semibold">
@@ -247,7 +247,7 @@ export default function TableReservation() {
             </Label>
             
             <div className="space-y-3">
-              <div className="flex items-center space-x-3 p-3 rounded-lg bg-card border border-border/50">
+              <div className="flex items-center space-x-3 p-3 rounded-none bg-card border border-border/50">
                 <Checkbox 
                   id="highchair" 
                   checked={needHighChair}
@@ -261,7 +261,7 @@ export default function TableReservation() {
                 </label>
               </div>
 
-              <div className="flex items-center space-x-3 p-3 rounded-lg bg-card border border-border/50">
+              <div className="flex items-center space-x-3 p-3 rounded-none bg-card border border-border/50">
                 <Checkbox 
                   id="outdoor" 
                   checked={isOutdoor}
@@ -295,7 +295,7 @@ export default function TableReservation() {
 
           {/* Reservation Notice */}
           {depositRequired ? (
-            <div className="flex items-start gap-3 p-4 rounded-xl bg-warning/10 border border-warning/30">
+            <div className="flex items-start gap-3 p-4 rounded-none bg-warning/10 border border-warning/30">
               <CreditCard className="w-5 h-5 text-warning flex-shrink-0" />
               <div>
                 <p className="font-medium text-warning">
@@ -309,7 +309,7 @@ export default function TableReservation() {
               </div>
             </div>
           ) : (
-            <div className="flex items-start gap-3 p-4 rounded-xl bg-success/10 border border-success/30">
+            <div className="flex items-start gap-3 p-4 rounded-none bg-success/10 border border-success/30">
               <div className="w-5 h-5 rounded-full bg-success text-success-foreground flex items-center justify-center text-xs flex-shrink-0">✓</div>
               <div>
                 <p className="font-medium text-success">

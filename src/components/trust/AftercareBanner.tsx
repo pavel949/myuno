@@ -103,7 +103,7 @@ export function AftercareBanner({
   return (
     <div className={cn('space-y-4', className)}>
       {/* Timeline */}
-      <div className="rounded-xl border bg-card p-4 space-y-3">
+      <div className="rounded-none border bg-card p-4 space-y-3">
         <div className="flex items-center gap-2">
           <CheckCircle2 className="w-4 h-4 text-success" />
           <h4 className="text-sm font-semibold">
@@ -138,7 +138,7 @@ export function AftercareBanner({
 
       {/* Preparation tips */}
       {preparationTips && preparationTips.length > 0 && (
-        <div className="rounded-xl border bg-primary/5 p-4 space-y-2">
+        <div className="rounded-none border bg-primary/5 p-4 space-y-2">
           <h4 className="text-sm font-semibold flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-primary" />
             {isRu ? 'Полезные советы' : 'Preparation tips'}
@@ -155,7 +155,7 @@ export function AftercareBanner({
       )}
 
       {/* Support contact */}
-      <div className="flex items-center justify-between px-3 py-2.5 rounded-lg bg-muted/50">
+      <div className="flex items-center justify-between px-3 py-2.5 rounded-none bg-muted/50">
         <p className="text-xs text-muted-foreground">
           {isRu ? 'Есть вопросы?' : 'Have questions?'}
         </p>

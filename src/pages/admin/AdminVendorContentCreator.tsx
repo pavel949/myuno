@@ -101,7 +101,7 @@ const CONTENT_TYPES: ContentType[] = [
     descEn: 'Flower arrangements',
     descRu: 'Цветочные композиции',
     route: '/admin/flowers',
-    color: 'bg-rose-500/10 text-rose-600 border-rose-500/30',
+    color: 'bg-accent/10 text-accent border-accent/40/30',
   },
   {
     id: 'property',
@@ -111,7 +111,7 @@ const CONTENT_TYPES: ContentType[] = [
     descEn: 'Real estate listings',
     descRu: 'Объекты недвижимости',
     route: '/admin/properties',
-    color: 'bg-teal-500/10 text-teal-600 border-teal-500/30',
+    color: 'bg-success/10 text-success border-success/40/30',
   },
   {
     id: 'vehicle',
@@ -121,7 +121,7 @@ const CONTENT_TYPES: ContentType[] = [
     descEn: 'Cars, bikes, scooters',
     descRu: 'Авто, мото, скутеры',
     route: '/admin/vehicles',
-    color: 'bg-cyan-500/10 text-cyan-600 border-cyan-500/30',
+    color: 'bg-primary/10 text-primary border-primary/40/30',
   },
   {
     id: 'yacht',
@@ -131,7 +131,7 @@ const CONTENT_TYPES: ContentType[] = [
     descEn: 'Boats and yachts',
     descRu: 'Лодки и яхты',
     route: '/admin/yachts',
-    color: 'bg-sky-500/10 text-sky-600 border-sky-500/30',
+    color: 'bg-primary/10 text-primary border-primary/40/30',
   },
 ];
 
@@ -296,7 +296,7 @@ export default function AdminVendorContentCreator() {
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <div className="h-10 w-10 rounded-none bg-primary/10 flex items-center justify-center">
                         <Building2 className="h-5 w-5 text-primary" />
                       </div>
                       <div>
@@ -377,7 +377,7 @@ export default function AdminVendorContentCreator() {
             onClick={() => handleContentSelect(type)}
           >
             <CardContent className="p-6">
-              <div className={cn('h-12 w-12 rounded-xl flex items-center justify-center mb-4', type.color)}>
+              <div className={cn('h-12 w-12 rounded-none flex items-center justify-center mb-4', type.color)}>
                 {type.icon}
               </div>
               <h3 className="font-semibold mb-1">
@@ -392,7 +392,7 @@ export default function AdminVendorContentCreator() {
       </div>
 
       {/* Info footer */}
-      <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50">
+      <div className="flex items-start gap-3 p-4 rounded-none bg-muted/50">
         <Clock className="h-5 w-5 text-muted-foreground mt-0.5" />
         <div className="text-sm text-muted-foreground">
           <p className="font-medium text-foreground mb-1">

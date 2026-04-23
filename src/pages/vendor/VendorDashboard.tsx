@@ -225,7 +225,7 @@ const VendorDashboard = () => {
       {/* Org Header */}
       <Card>
         <CardContent className="p-4 flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-primary/10">
+          <div className="p-2.5 rounded-none bg-primary/10">
             <Building2 className="h-5 w-5 text-primary" />
           </div>
           <div className="flex-1">
@@ -320,7 +320,7 @@ const VendorDashboard = () => {
             <p className="text-center py-6 text-sm text-muted-foreground">{isRu ? 'Нет заказов' : 'No orders'}</p>
           ) : (
             recentOrders.map(order => (
-              <div key={order.id} className="flex items-center justify-between p-3 rounded-lg border bg-muted/30 group">
+              <div key={order.id} className="flex items-center justify-between p-3 rounded-none border bg-muted/30 group">
                 <div>
                   <p className="font-medium text-sm">{order.order_number || order.id.slice(0, 8)}</p>
                   <p className="text-xs text-muted-foreground">{format(new Date(order.created_at), 'd MMM, HH:mm', { locale })}</p>

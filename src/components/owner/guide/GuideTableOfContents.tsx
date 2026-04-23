@@ -49,7 +49,7 @@ export function GuideTableOfContents() {
           <button
             key={item.id}
             onClick={() => handleClick(item.id)}
-            className="w-full flex items-center justify-between py-3 px-4 rounded-lg hover:bg-secondary/50 transition-colors group text-left print:hover:bg-transparent"
+            className="w-full flex items-center justify-between py-3 px-4 rounded-none hover:bg-secondary/50 transition-colors group text-left print:hover:bg-transparent"
           >
             <div className="flex items-center gap-3">
               <span className="text-primary font-medium w-6">

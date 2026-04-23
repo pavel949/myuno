@@ -138,7 +138,7 @@ export function LocationProjectSearch({
             <button
               type="button"
               onClick={clearSelection}
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md hover:bg-muted text-muted-foreground"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-none hover:bg-muted text-muted-foreground"
               aria-label={isRu ? 'Очистить' : 'Clear'}
             >
               <X className="h-4 w-4" />
@@ -147,7 +147,7 @@ export function LocationProjectSearch({
         </div>
 
         {showDropdown && (
-          <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-popover border border-border rounded-lg shadow-lg max-h-[320px] overflow-y-auto">
+          <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-popover border border-border rounded-none shadow-lg max-h-[320px] overflow-y-auto">
             {!mapsReady && (
               <div className="p-3 flex items-center gap-2 text-sm text-muted-foreground">
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -176,9 +176,9 @@ export function LocationProjectSearch({
                     }}
                   >
                     {p.cover_image ? (
-                      <img src={p.cover_image} alt="" className="w-10 h-10 rounded-lg object-cover shrink-0" />
+                      <img src={p.cover_image} alt="" className="w-10 h-10 rounded-none object-cover shrink-0" />
                     ) : (
-                      <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                      <div className="w-10 h-10 rounded-none bg-muted flex items-center justify-center shrink-0">
                         <Building2 className="h-4 w-4 text-muted-foreground" />
                       </div>
                     )}

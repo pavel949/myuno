@@ -115,9 +115,9 @@ export default function ServiceBooking() {
         <PageContainer className="pb-32">
           <PageHeader title={language === 'ru' ? 'Загрузка...' : 'Loading...'} showBack />
           <div className="space-y-4 mt-4">
-            <Skeleton className="h-20 w-full rounded-xl" />
-            <Skeleton className="h-40 w-full rounded-xl" />
-            <Skeleton className="h-40 w-full rounded-xl" />
+            <Skeleton className="h-20 w-full rounded-none" />
+            <Skeleton className="h-40 w-full rounded-none" />
+            <Skeleton className="h-40 w-full rounded-none" />
           </div>
         </PageContainer>
       </AppLayout>
@@ -221,7 +221,7 @@ export default function ServiceBooking() {
         />
 
         {/* Provider Info */}
-        <div className="flex items-center gap-3 p-4 bg-card rounded-xl border mt-4 mb-6">
+        <div className="flex items-center gap-3 p-4 bg-card rounded-none border mt-4 mb-6">
           <img
             src={providerInfo.image}
             alt={providerInfo.name}
@@ -236,7 +236,7 @@ export default function ServiceBooking() {
         </div>
 
         {/* Select Services */}
-        <div className="bg-card rounded-xl border p-5 mb-4">
+        <div className="bg-card rounded-none border p-5 mb-4">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold">
               {language === 'ru' ? 'Выберите услуги' : 'Select Services'}
@@ -255,7 +255,7 @@ export default function ServiceBooking() {
                   key={service.id}
                   onClick={() => toggleService(service.id)}
                   className={cn(
-                    "flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all",
+                    "flex items-center justify-between p-4 rounded-none border cursor-pointer transition-all",
                     isSelected 
                       ? "border-primary bg-primary/5" 
                       : "border-border hover:border-primary/50"
@@ -263,7 +263,7 @@ export default function ServiceBooking() {
                 >
                   <div className="flex items-center gap-3">
                     <div className={cn(
-                      "w-5 h-5 rounded border-2 flex items-center justify-center",
+                      "w-5 h-5 rounded-none border-2 flex items-center justify-center",
                       isSelected ? "border-primary bg-primary" : "border-muted-foreground"
                     )}>
                       {isSelected && <CheckCircle2 className="w-3 h-3 text-primary-foreground" />}
@@ -286,7 +286,7 @@ export default function ServiceBooking() {
         </div>
 
         {/* Date & Time */}
-        <div className="bg-card rounded-xl border p-5 mb-4">
+        <div className="bg-card rounded-none border p-5 mb-4">
           <h3 className="font-semibold mb-4">
             {language === 'ru' ? 'Дата и время' : 'Date & Time'}
           </h3>
@@ -301,7 +301,7 @@ export default function ServiceBooking() {
         </div>
 
         {/* Address */}
-        <div className="bg-card rounded-xl border p-5 mb-4">
+        <div className="bg-card rounded-none border p-5 mb-4">
           <Label className="font-semibold mb-4 flex items-center gap-2">
             <Home className="w-5 h-5 text-primary" />
             {language === 'ru' ? 'Адрес' : 'Address'}
@@ -316,7 +316,7 @@ export default function ServiceBooking() {
         </div>
 
         {/* Contact Info */}
-        <div className="bg-card rounded-xl border p-5 mb-4">
+        <div className="bg-card rounded-none border p-5 mb-4">
           <h3 className="font-semibold mb-4">
             {language === 'ru' ? 'Контактные данные' : 'Contact Information'}
           </h3>
@@ -328,7 +328,7 @@ export default function ServiceBooking() {
         </div>
 
         {/* Payment Method */}
-        <div className="bg-card rounded-xl border p-5 mb-4">
+        <div className="bg-card rounded-none border p-5 mb-4">
           <h3 className="font-semibold mb-4">
             {language === 'ru' ? 'Способ оплаты' : 'Payment Method'}
           </h3>
@@ -344,7 +344,7 @@ export default function ServiceBooking() {
 
         {/* Price Summary */}
         {selectedServices.length > 0 && (
-          <div className="bg-card rounded-xl border p-5 mb-4">
+          <div className="bg-card rounded-none border p-5 mb-4">
             <div className="space-y-2 text-sm">
               {selectedServicesData.map(service => (
                 <div key={service.id} className="flex justify-between">

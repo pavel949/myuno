@@ -9,9 +9,9 @@ import { toast } from 'sonner';
 
 const STATUS_COLORS: Record<CampaignStatus, string> = {
   draft: 'bg-slate-500/20 text-slate-400',
-  active: 'bg-emerald-500/20 text-emerald-400',
-  paused: 'bg-amber-500/20 text-amber-400',
-  completed: 'bg-blue-500/20 text-blue-400',
+  active: 'bg-success/20 text-success',
+  paused: 'bg-accent/20 text-accent',
+  completed: 'bg-primary/20 text-primary',
 };
 
 export default function CapitalCampaigns() {
@@ -34,7 +34,7 @@ export default function CapitalCampaigns() {
     <div className="p-4 md:p-6 space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold">Кампании</h1>
-        <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700" onClick={() => navigate('/capital/campaigns/launch')}>
+        <Button size="sm" className="bg-success hover:bg-success" onClick={() => navigate('/capital/campaigns/launch')}>
           <Plus className="w-4 h-4 mr-1" /> Новая кампания
         </Button>
       </div>
@@ -51,7 +51,7 @@ export default function CapitalCampaigns() {
       ) : (
         <div className="space-y-3">
           {campaigns.map((c) => (
-            <div key={c.id} className="rounded-lg border border-border/50 p-4">
+            <div key={c.id} className="rounded-none border border-border/50 p-4">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 flex-wrap">

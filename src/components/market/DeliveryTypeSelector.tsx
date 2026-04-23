@@ -107,7 +107,7 @@ export const DeliveryTypeSelector = ({
         {/* Local Delivery */}
         <div 
           className={cn(
-            "flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all",
+            "flex items-start gap-4 p-4 rounded-none border-2 cursor-pointer transition-all",
             selectedType === 'local' 
               ? "border-primary bg-primary/5" 
               : "border-border hover:border-primary/50"
@@ -144,7 +144,7 @@ export const DeliveryTypeSelector = ({
         {/* International Delivery */}
         <div 
           className={cn(
-            "flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all",
+            "flex items-start gap-4 p-4 rounded-none border-2 cursor-pointer transition-all",
             selectedType === 'international' 
               ? "border-primary bg-primary/5" 
               : "border-border hover:border-primary/50",
@@ -166,7 +166,7 @@ export const DeliveryTypeSelector = ({
             {selectedType === 'international' && (
               <div className="mt-4 space-y-3" onClick={(e) => e.stopPropagation()}>
                 {hasNonShippableItems && (
-                  <div className="flex items-start gap-2 p-3 bg-warning/10 rounded-lg border border-warning/30">
+                  <div className="flex items-start gap-2 p-3 bg-warning/10 rounded-none border border-warning/30">
                     <AlertTriangle className="w-4 h-4 text-warning mt-0.5 shrink-0" />
                     <p className="text-xs text-warning-foreground">
                       {language === 'ru' 
@@ -203,7 +203,7 @@ export const DeliveryTypeSelector = ({
                 </div>
 
                 {selectedZone && (
-                  <div className="bg-muted/50 rounded-lg p-3 space-y-2">
+                  <div className="bg-muted/50 rounded-none p-3 space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">
                         {language === 'ru' ? 'Вес заказа' : 'Order Weight'}

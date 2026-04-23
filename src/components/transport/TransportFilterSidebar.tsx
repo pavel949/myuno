@@ -114,7 +114,7 @@ export function TransportFilterSidebar({
       <aside
         className={cn(
           "fixed top-0 right-0 z-50 h-full w-[320px] bg-background border-l border-border shadow-2xl transition-transform duration-300 overflow-y-auto",
-          "lg:static lg:z-auto lg:shadow-none lg:border-l-0 lg:border-r lg:border-border/50 lg:rounded-2xl lg:h-auto lg:w-[280px] lg:shrink-0",
+          "lg:static lg:z-auto lg:shadow-none lg:border-l-0 lg:border-r lg:border-border/50 lg:rounded-none lg:h-auto lg:w-[280px] lg:shrink-0",
           open ? "translate-x-0" : "translate-x-full lg:translate-x-0 lg:hidden"
         )}
       >
@@ -135,7 +135,7 @@ export function TransportFilterSidebar({
                 {isRu ? 'Сбросить' : 'Reset'}
               </button>
             )}
-            <button onClick={onClose} className="lg:hidden p-1 rounded-lg hover:bg-muted">
+            <button onClick={onClose} className="lg:hidden p-1 rounded-none hover:bg-muted">
               <X className="w-4 h-4" />
             </button>
           </div>

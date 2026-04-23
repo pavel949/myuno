@@ -65,7 +65,7 @@ function KanbanCard({ deal, agentName }: { deal: AgentDeal; agentName?: string }
       {...attributes}
       {...listeners}
       className={cn(
-        'p-3 rounded-lg border bg-card cursor-grab active:cursor-grabbing touch-none transition-shadow hover:shadow-md group border-l-4',
+        'p-3 rounded-none border bg-card cursor-grab active:cursor-grabbing touch-none transition-shadow hover:shadow-md group border-l-4',
         isDragging && 'opacity-50 shadow-lg z-50',
         isOverdue && 'border-l-2 border-l-destructive',
         !isOverdue && age > 30 && 'border-l-2 border-l-destructive',
@@ -130,7 +130,7 @@ function KanbanCard({ deal, agentName }: { deal: AgentDeal; agentName?: string }
 
       <div className="grid grid-cols-1 gap-1 mt-2">
         {typeFacts.slice(0, 2).map((fact) => (
-          <div key={fact.key} className="rounded-md border bg-background/70 px-2 py-1">
+          <div key={fact.key} className="rounded-none border bg-background/70 px-2 py-1">
             <p className="text-[9px] uppercase tracking-wide text-muted-foreground">{fact.label}</p>
             <p className="text-[11px] font-medium truncate">{fact.value}</p>
           </div>
@@ -209,7 +209,7 @@ function KanbanColumn({ stage, deals, maxValue, agentMap, onQuickCreate }: { sta
     <div
       ref={setNodeRef}
       className={cn(
-        'flex-shrink-0 w-[220px] lg:w-[260px] xl:min-w-[240px] xl:flex-1 rounded-xl border border-t-4 bg-muted/30 flex flex-col',
+        'flex-shrink-0 w-[220px] lg:w-[260px] xl:min-w-[240px] xl:flex-1 rounded-none border border-t-4 bg-muted/30 flex flex-col',
         stage.borderColor,
         isOver && 'ring-2 ring-primary/50',
       )}
@@ -223,7 +223,7 @@ function KanbanColumn({ stage, deals, maxValue, agentMap, onQuickCreate }: { sta
           </div>
           <button
             onClick={() => onQuickCreate(stage.key)}
-            className="h-6 w-6 rounded-md flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+            className="h-6 w-6 rounded-none flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
             title={isRu ? 'Добавить сделку' : 'Add deal'}
           >
             <Plus className="h-3.5 w-3.5" />
@@ -374,7 +374,7 @@ export function KanbanBoard({ deals, members = [], pipelineData, onQuickCreate }
       </div>
       <DragOverlay>
         {activeDeal && (
-          <div className="p-3 rounded-lg border bg-card shadow-xl w-[240px]">
+          <div className="p-3 rounded-none border bg-card shadow-xl w-[240px]">
             <p className="font-medium text-sm">{activeDeal.client_name}</p>
             {activeDeal.deal_value && (
               <p className="text-xs text-muted-foreground mt-1">{formatValue(activeDeal.deal_value, activeDeal.currency)}</p>

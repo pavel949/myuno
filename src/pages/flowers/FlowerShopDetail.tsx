@@ -167,7 +167,7 @@ const FlowerShopDetail = () => {
               {(bouquets || []).map((product) => {
                 const quantity = getQuantity(product.id);
                 return (
-                  <div key={product.id} className="rounded-xl bg-card border border-border/50 overflow-hidden">
+                  <div key={product.id} className="rounded-none bg-card border border-border/50 overflow-hidden">
                     <div className="relative aspect-square">
                       <img src={product.image || PLACEHOLDER_IMAGES.flowerProduct} alt={language === 'ru' ? product.name_ru : product.name_en} className="w-full h-full object-cover" />
                     </div>

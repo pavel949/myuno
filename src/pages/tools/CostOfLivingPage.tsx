@@ -132,7 +132,7 @@ export default function CostOfLivingPage() {
             <h1 className="text-sm font-semibold truncate">{isRu ? 'Стоимость жизни' : 'Cost of Living'}</h1>
             <p className="text-xs text-muted-foreground">Phuket, Thailand</p>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-none bg-primary/10 flex items-center justify-center">
             <Calculator className="w-5 h-5 text-primary" />
           </div>
         </div>
@@ -182,7 +182,7 @@ export default function CostOfLivingPage() {
                     className="w-full flex items-center gap-3 p-3 text-left"
                     onClick={() => setExpandedId(isExpanded ? null : cat.id)}
                   >
-                    <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-none bg-muted flex items-center justify-center shrink-0">
                       <Icon className="w-4 h-4 text-muted-foreground" />
                     </div>
                     <div className="flex-1 min-w-0">

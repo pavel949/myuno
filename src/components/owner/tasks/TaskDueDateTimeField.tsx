@@ -112,7 +112,7 @@ export function TaskDueDateTimeField({
   };
 
   return (
-    <div className="space-y-3 rounded-xl border bg-muted/20 p-4">
+    <div className="space-y-3 rounded-none border bg-muted/20 p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="space-y-1">
           <Label>{t('Due Date & Time', 'Срок и время')}</Label>

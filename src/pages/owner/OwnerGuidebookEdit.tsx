@@ -334,7 +334,7 @@ export default function OwnerGuidebookEdit() {
           </CardHeader>
           <CardContent className="space-y-4">
             {(formData.directions || []).map((step, index) => (
-              <div key={step.id} className="p-4 border rounded-lg space-y-3">
+              <div key={step.id} className="p-4 border rounded-none space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">
@@ -399,7 +399,7 @@ export default function OwnerGuidebookEdit() {
           </CardHeader>
           <CardContent className="space-y-4">
             {(formData.appliance_guides || []).map((guide) => (
-              <div key={guide.id} className="p-4 border rounded-lg space-y-3">
+              <div key={guide.id} className="p-4 border rounded-none space-y-3">
                 <div className="flex items-center justify-between">
                   <Input value={guide.name} onChange={(e) => updateApplianceGuide(guide.id, 'name', e.target.value)} placeholder={isRu ? 'Кондиционер' : 'Air Conditioner'} className="flex-1 mr-2" />
                   <Button type="button" variant="ghost" size="icon" onClick={() => removeApplianceGuide(guide.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
@@ -443,7 +443,7 @@ export default function OwnerGuidebookEdit() {
           </CardHeader>
           <CardContent className="space-y-4">
             {(formData.emergency_contacts || []).map((contact) => (
-              <div key={contact.id} className="p-4 border rounded-lg space-y-3">
+              <div key={contact.id} className="p-4 border rounded-none space-y-3">
                 <div className="flex items-center gap-2">
                   <Input value={contact.name} onChange={(e) => updateEmergencyContact(contact.id, 'name', e.target.value)} placeholder={isRu ? 'Имя' : 'Name'} className="flex-1" />
                   <Button type="button" variant="ghost" size="icon" onClick={() => removeEmergencyContact(contact.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
@@ -469,7 +469,7 @@ export default function OwnerGuidebookEdit() {
           </CardHeader>
           <CardContent className="space-y-4">
             {(formData.local_tips || []).map((tip) => (
-              <div key={tip.id} className="p-4 border rounded-lg space-y-3">
+              <div key={tip.id} className="p-4 border rounded-none space-y-3">
                 <div className="flex items-center gap-2">
                   <Select value={tip.category} onValueChange={(value) => updateLocalTip(tip.id, 'category', value)}>
                     <SelectTrigger className="w-[140px]"><SelectValue /></SelectTrigger>

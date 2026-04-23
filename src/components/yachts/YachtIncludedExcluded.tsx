@@ -29,7 +29,7 @@ export function YachtIncludedExcluded({ features, exclusions, addons, currency =
     <div className="space-y-5">
       {/* Crew callout */}
       {hasCrew && (
-        <div className="p-4 bg-primary/5 border border-primary/20 rounded-xl flex items-start gap-3">
+        <div className="p-4 bg-primary/5 border border-primary/20 rounded-none flex items-start gap-3">
           <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
             <Check className="w-5 h-5 text-primary" />
           </div>
@@ -46,15 +46,15 @@ export function YachtIncludedExcluded({ features, exclusions, addons, currency =
       {(features?.length || exclusions?.length) ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {features && features.length > 0 && (
-            <div className="p-4 bg-emerald-50/50 dark:bg-emerald-950/20 rounded-xl border border-emerald-200/50 dark:border-emerald-800/30">
-              <h4 className="font-semibold text-sm mb-3 text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
+            <div className="p-4 bg-success/10/50 dark:bg-success/20 rounded-none border border-success/40/50 dark:border-success/40/30">
+              <h4 className="font-semibold text-sm mb-3 text-success dark:text-success flex items-center gap-2">
                 <Check className="w-4 h-4" />
                 {t ? 'Включено в стоимость' : "What's included"}
               </h4>
               <div className="space-y-2">
                 {features.map((f, i) => (
                   <div key={i} className="flex items-start gap-2 text-sm">
-                    <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
+                    <Check className="w-3.5 h-3.5 text-success dark:text-success flex-shrink-0 mt-0.5" />
                     <span>{f}</span>
                   </div>
                 ))}
@@ -63,7 +63,7 @@ export function YachtIncludedExcluded({ features, exclusions, addons, currency =
           )}
 
           {exclusions && exclusions.length > 0 && (
-            <div className="p-4 bg-destructive/5 rounded-xl border border-destructive/20">
+            <div className="p-4 bg-destructive/5 rounded-none border border-destructive/20">
               <h4 className="font-semibold text-sm mb-3 text-destructive flex items-center gap-2">
                 <X className="w-4 h-4" />
                 {t ? 'Не включено' : 'Not included'}
@@ -90,7 +90,7 @@ export function YachtIncludedExcluded({ features, exclusions, addons, currency =
           </h4>
           <div className="space-y-2">
             {addons.map((addon, idx) => (
-              <div key={idx} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border border-border/50">
+              <div key={idx} className="flex items-center justify-between p-3 bg-muted/50 rounded-none border border-border/50">
                 <span className="text-sm">{t ? (addon.name_ru || addon.name_en) : addon.name_en}</span>
                 {addon.price != null && addon.price > 0 && (
                   <span className="text-sm font-semibold text-primary whitespace-nowrap ml-3">

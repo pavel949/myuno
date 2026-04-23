@@ -191,7 +191,7 @@ export function DocumentMode({
       {value ? (
         <div className="relative group">
           {isPdf ? (
-            <div className="w-full h-48 rounded-xl border-2 border-border bg-muted/50 flex flex-col items-center justify-center gap-3">
+            <div className="w-full h-48 rounded-none border-2 border-border bg-muted/50 flex flex-col items-center justify-center gap-3">
               <FileText className="h-12 w-12 text-muted-foreground" />
               <span className="text-sm text-muted-foreground">PDF документ</span>
               <Button
@@ -205,7 +205,7 @@ export function DocumentMode({
               </Button>
             </div>
           ) : (
-            <div className="relative aspect-[4/3] rounded-xl overflow-hidden border-2 border-border">
+            <div className="relative aspect-[4/3] rounded-none overflow-hidden border-2 border-border">
               <img 
                 src={value} 
                 alt="Документ" 
@@ -253,7 +253,7 @@ export function DocumentMode({
               onClick={() => cameraInputRef.current?.click()}
               disabled={isUploading || disabled}
               className={cn(
-                "w-full py-10 rounded-xl border-2 border-dashed transition-all",
+                "w-full py-10 rounded-none border-2 border-dashed transition-all",
                 "flex flex-col items-center justify-center gap-3",
                 isUploading 
                   ? "border-primary bg-primary/5" 

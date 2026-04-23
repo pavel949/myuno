@@ -62,7 +62,7 @@ export function DealScheduledActivities({ dealId, companyId }: Props) {
   };
 
   return (
-    <div className="border rounded-xl p-4 bg-card space-y-3">
+    <div className="border rounded-none p-4 bg-card space-y-3">
       <div className="flex items-center justify-between">
         <p className="text-sm font-medium flex items-center gap-1.5">
           <CalendarClock className="h-4 w-4 text-primary" />
@@ -74,7 +74,7 @@ export function DealScheduledActivities({ dealId, companyId }: Props) {
       </div>
 
       {showForm && (
-        <div className="space-y-2 p-3 rounded-lg bg-muted/50 border">
+        <div className="space-y-2 p-3 rounded-none bg-muted/50 border">
           <Select value={form.activity_type} onValueChange={v => setForm(f => ({ ...f, activity_type: v }))}>
             <SelectTrigger className="h-8 text-xs">
               <SelectValue />
@@ -119,7 +119,7 @@ export function DealScheduledActivities({ dealId, companyId }: Props) {
 
         return (
           <div key={a.id} className={cn(
-            'flex items-start gap-2 p-2 rounded-lg border text-sm',
+            'flex items-start gap-2 p-2 rounded-none border text-sm',
             overdue && 'border-destructive/50 bg-destructive/5',
             today && 'border-primary/50 bg-primary/5',
           )}>

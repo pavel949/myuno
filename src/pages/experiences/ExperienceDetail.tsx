@@ -31,9 +31,9 @@ export default function ExperienceDetail() {
     return (
       <MiniAppLayout title="" fallbackPath="/experiences" showHero={false} showFilter={false} showCategories={false}>
         <div className="space-y-4 animate-pulse">
-          <div className="h-64 bg-muted rounded-2xl" />
-          <div className="h-8 bg-muted rounded w-3/4" />
-          <div className="h-4 bg-muted rounded w-1/2" />
+          <div className="h-64 bg-muted rounded-none" />
+          <div className="h-8 bg-muted rounded-none w-3/4" />
+          <div className="h-4 bg-muted rounded-none w-1/2" />
         </div>
       </MiniAppLayout>
     );
@@ -137,7 +137,7 @@ export default function ExperienceDetail() {
                   key={idx}
                   onClick={() => setActiveImage(idx)}
                   className={cn(
-                    "w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border-2 transition-all",
+                    "w-16 h-16 rounded-none overflow-hidden flex-shrink-0 border-2 transition-all",
                     activeImage === idx ? "border-primary" : "border-transparent opacity-70"
                   )}
                 >

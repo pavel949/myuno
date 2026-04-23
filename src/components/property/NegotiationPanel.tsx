@@ -82,7 +82,7 @@ export function NegotiationPanel({ propertyId, pricePerNight, className }: Negot
       <CardContent className="space-y-4">
         {/* Create Offer Form */}
         {showForm && (
-          <div className="p-4 rounded-lg border border-primary/20 bg-primary/5 space-y-3">
+          <div className="p-4 rounded-none border border-primary/20 bg-primary/5 space-y-3">
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
                 <Label className="text-xs">{isRu ? 'Цена (THB)' : 'Price (THB)'}</Label>
@@ -154,7 +154,7 @@ export function NegotiationPanel({ propertyId, pricePerNight, className }: Negot
               const config = statusConfig[offer.status] || statusConfig.pending;
               const StatusIcon = config.icon;
               return (
-                <div key={offer.id} className="p-3 rounded-lg border flex items-start justify-between">
+                <div key={offer.id} className="p-3 rounded-none border flex items-start justify-between">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <Badge className={config.color}>

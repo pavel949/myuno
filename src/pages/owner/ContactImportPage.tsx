@@ -555,7 +555,7 @@ export default function ContactImportPage() {
             <ScrollArea className="max-h-[300px]">
               <div className="space-y-1">
                 {parsed.slice(0, 50).map((c, i) => (
-                  <div key={i} className={`flex items-center gap-2 text-sm py-1.5 px-2 rounded ${!c.valid ? 'bg-destructive/5' : ''}`}>
+                  <div key={i} className={`flex items-center gap-2 text-sm py-1.5 px-2 rounded-none ${!c.valid ? 'bg-destructive/5' : ''}`}>
                     {c.valid ? <CheckCircle2 className="h-3.5 w-3.5 text-success flex-shrink-0" /> : <AlertCircle className="h-3.5 w-3.5 text-destructive flex-shrink-0" />}
                     <span className="font-medium">{c.first_name} {c.last_name}</span>
                     {c.phone && <span className="text-muted-foreground">{c.phone}</span>}

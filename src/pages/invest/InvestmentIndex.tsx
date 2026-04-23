@@ -92,7 +92,7 @@ export default function InvestmentIndex() {
         <div className="flex gap-4 overflow-x-auto pb-2">
           {[1, 2, 3].map((i) => (
             <div key={i} className="flex-shrink-0 w-[280px]">
-              <Skeleton className="h-[280px] rounded-xl" />
+              <Skeleton className="h-[280px] rounded-none" />
             </div>
           ))}
         </div>
@@ -155,7 +155,7 @@ export default function InvestmentIndex() {
       >
         <div className="space-y-6">
           {/* Hero section */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 p-6 text-white">
+          <div className="relative overflow-hidden rounded-none bg-gradient-to-br from-success to-success p-6 text-white">
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
             <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2" />
             
@@ -273,9 +273,9 @@ export default function InvestmentIndex() {
           )}
 
           {/* Raise funding CTA */}
-          <section className="rounded-xl bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 p-5 space-y-3">
+          <section className="rounded-none bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 p-5 space-y-3">
             <div className="flex items-start gap-3">
-              <div className="p-2 rounded-lg bg-primary/20">
+              <div className="p-2 rounded-none bg-primary/20">
                 <FileText className="h-5 w-5 text-primary" />
               </div>
               <div className="flex-1">

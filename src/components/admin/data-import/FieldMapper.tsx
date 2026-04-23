@@ -102,7 +102,7 @@ export function FieldMapper({ mappings, targetId, sampleData, onUpdateMapping, o
           return (
             <div 
               key={mapping.sourceColumn}
-              className={`flex items-center gap-3 p-2 rounded-lg ${
+              className={`flex items-center gap-3 p-2 rounded-none ${
                 status === 'unmapped' 
                   ? 'bg-muted/50' 
                   : status === 'required'

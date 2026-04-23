@@ -101,7 +101,7 @@ export function TeamSidebar({ className }: TeamSidebarProps) {
 
         {/* Streak */}
         {(stats?.streak_days || 0) > 0 && (
-          <div className="mt-2 flex items-center gap-1 text-xs text-amber-500">
+          <div className="mt-2 flex items-center gap-1 text-xs text-accent">
             <Sparkles className="h-3 w-3" />
             <span>{stats?.streak_days} {isRu ? 'дней подряд' : 'day streak'}</span>
           </div>
@@ -120,7 +120,7 @@ export function TeamSidebar({ className }: TeamSidebarProps) {
                 key={link.path}
                 to={link.path}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
+                  "flex items-center gap-3 px-3 py-2.5 rounded-none transition-all duration-200",
                   "hover:bg-sidebar-accent/50",
                   active && "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
                 )}
@@ -145,7 +145,7 @@ export function TeamSidebar({ className }: TeamSidebarProps) {
         <NavLink
           to="/team/my-profile"
           className={cn(
-            "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
+            "flex items-center gap-3 px-3 py-2 rounded-none transition-colors",
             "hover:bg-muted/50 text-sm text-muted-foreground"
           )}
         >

@@ -219,7 +219,7 @@ function TimeLeft({ expiresAt }: { expiresAt: string | null }) {
   const m = Math.floor(ms / 60000);
   const s = Math.floor((ms % 60000) / 1000);
   return (
-    <span className="font-mono text-xs text-amber-600">
+    <span className="font-mono text-xs text-accent">
       {m}:{s.toString().padStart(2, '0')}
     </span>
   );
@@ -232,10 +232,10 @@ function Kpi({ icon: Icon, label, value, sub }: {
   sub?: string;
 }) {
   return (
-    <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+    <div className="bg-white rounded-none p-4 border border-gray-100 shadow-sm">
       <div className="flex items-center gap-2 mb-2">
-        <div className="p-2 rounded-lg bg-emerald-50">
-          <Icon className="w-4 h-4 text-emerald-600" />
+        <div className="p-2 rounded-none bg-success/10">
+          <Icon className="w-4 h-4 text-success" />
         </div>
         <span className="text-xs text-gray-500">{label}</span>
       </div>
@@ -269,14 +269,14 @@ export default function CapitalNewbuildsDeals() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <Building2 className="w-6 h-6 text-emerald-600" />
+            <Building2 className="w-6 h-6 text-success" />
             Newbuilds — Broker Console
           </h1>
           <p className="text-sm text-gray-500 mt-0.5">Кросс-девелоперский пайплайн · Ignatev Capital</p>
         </div>
         <button
           onClick={() => refetchRln()}
-          className="p-2 rounded-lg hover:bg-gray-100 text-gray-500"
+          className="p-2 rounded-none hover:bg-gray-100 text-gray-500"
         >
           <RefreshCw className="w-4 h-4" />
         </button>
@@ -298,13 +298,13 @@ export default function CapitalNewbuildsDeals() {
       )}
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit">
+      <div className="flex gap-1 bg-gray-100 p-1 rounded-none w-fit">
         {TABS.map(t => (
           <button
             key={t.key}
             onClick={() => setActiveTab(t.key)}
             className={cn(
-              'px-4 py-2 rounded-lg text-sm transition-all flex items-center gap-2',
+              'px-4 py-2 rounded-none text-sm transition-all flex items-center gap-2',
               activeTab === t.key
                 ? 'bg-white shadow-sm text-gray-900 font-medium'
                 : 'text-gray-500 hover:text-gray-700',
@@ -314,7 +314,7 @@ export default function CapitalNewbuildsDeals() {
             {t.count != null && t.count > 0 && (
               <span className={cn(
                 'text-xs px-1.5 py-0.5 rounded-full',
-                activeTab === t.key ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-200 text-gray-500',
+                activeTab === t.key ? 'bg-success/10 text-success' : 'bg-gray-200 text-gray-500',
               )}>
                 {t.count}
               </span>
@@ -325,10 +325,10 @@ export default function CapitalNewbuildsDeals() {
 
       {/* ── Tab: Leads / Attribution ── */}
       {activeTab === 'leads' && (
-        <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+        <div className="bg-white rounded-none border border-gray-100 overflow-hidden">
           <div className="p-4 border-b border-gray-100">
             <h2 className="font-semibold text-gray-900 flex items-center gap-2">
-              <Users className="w-4 h-4 text-emerald-600" />
+              <Users className="w-4 h-4 text-success" />
               Attribution Records — {attributions.length} лидов
             </h2>
           </div>
@@ -380,7 +380,7 @@ export default function CapitalNewbuildsDeals() {
                                 phone: lead?.phone ?? undefined,
                               })}
                               disabled={sendRln.isPending}
-                              className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors"
+                              className="flex items-center gap-1 text-xs px-2 py-1 rounded-none bg-success/10 text-success hover:bg-success/10 transition-colors"
                             >
                               <Send className="w-3 h-3" />
                               RLN
@@ -399,10 +399,10 @@ export default function CapitalNewbuildsDeals() {
 
       {/* ── Tab: Holds ── */}
       {activeTab === 'holds' && (
-        <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+        <div className="bg-white rounded-none border border-gray-100 overflow-hidden">
           <div className="p-4 border-b border-gray-100">
             <h2 className="font-semibold text-gray-900 flex items-center gap-2">
-              <Clock className="w-4 h-4 text-amber-500" />
+              <Clock className="w-4 h-4 text-accent" />
               Удержания — {holds.length} записей
             </h2>
           </div>
@@ -439,7 +439,7 @@ export default function CapitalNewbuildsDeals() {
                         <td className="p-3">
                           <span className={cn(
                             'text-xs px-2 py-0.5 rounded-full',
-                            isSoftHold ? 'bg-amber-50 text-amber-700' : 'bg-blue-50 text-blue-700',
+                            isSoftHold ? 'bg-accent/10 text-accent' : 'bg-primary/10 text-primary',
                           )}>
                             {h.hold_type === 'soft_hold' ? 'Soft Hold' : 'Booking Fee'}
                           </span>
@@ -447,7 +447,7 @@ export default function CapitalNewbuildsDeals() {
                         <td className="p-3">
                           <span className={cn(
                             'text-xs px-2 py-0.5 rounded-full',
-                            h.fee_status === 'paid' ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500',
+                            h.fee_status === 'paid' ? 'bg-success/10 text-success' : 'bg-gray-100 text-gray-500',
                           )}>
                             {h.fee_status}
                           </span>
@@ -476,10 +476,10 @@ export default function CapitalNewbuildsDeals() {
 
       {/* ── Tab: RLN Journal ── */}
       {activeTab === 'rln' && (
-        <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+        <div className="bg-white rounded-none border border-gray-100 overflow-hidden">
           <div className="p-4 border-b border-gray-100">
             <h2 className="font-semibold text-gray-900 flex items-center gap-2">
-              <FileText className="w-4 h-4 text-emerald-600" />
+              <FileText className="w-4 h-4 text-success" />
               RLN Журнал — {rlnEvents.length} записей
             </h2>
           </div>
@@ -501,7 +501,7 @@ export default function CapitalNewbuildsDeals() {
                 <tbody className="divide-y divide-gray-50">
                   {rlnEvents.map(r => (
                     <tr key={r.id} className="hover:bg-gray-50">
-                      <td className="p-3 font-mono text-xs font-semibold text-emerald-700">{r.rln_number}</td>
+                      <td className="p-3 font-mono text-xs font-semibold text-success">{r.rln_number}</td>
                       <td className="p-3 text-xs text-gray-600">{r.property_projects?.name_en ?? '—'}</td>
                       <td className="p-3 text-xs text-gray-500">
                         {new Date(r.sent_at).toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' })}
@@ -518,9 +518,9 @@ export default function CapitalNewbuildsDeals() {
 
       {/* ── Tab: Commissions ── */}
       {activeTab === 'commissions' && (
-        <div className="bg-white rounded-xl border border-gray-100 p-6">
+        <div className="bg-white rounded-none border border-gray-100 p-6">
           <div className="flex items-center gap-2 mb-4">
-            <DollarSign className="w-5 h-5 text-emerald-600" />
+            <DollarSign className="w-5 h-5 text-success" />
             <h2 className="font-semibold text-gray-900">Commission Forecast</h2>
           </div>
           <CommissionForecast />
@@ -573,15 +573,15 @@ function CommissionForecast() {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-4">
-        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-100">
-          <p className="text-xs text-emerald-600 mb-1">Booking Fees получено</p>
-          <p className="text-2xl font-bold text-emerald-700">฿{data.earnedFees.toLocaleString()}</p>
-          <p className="text-xs text-emerald-500 mt-1">{data.paidCount} транзакций</p>
+        <div className="p-4 rounded-none bg-success/10 border border-success/40">
+          <p className="text-xs text-success mb-1">Booking Fees получено</p>
+          <p className="text-2xl font-bold text-success">฿{data.earnedFees.toLocaleString()}</p>
+          <p className="text-xs text-success mt-1">{data.paidCount} транзакций</p>
         </div>
-        <div className="p-4 rounded-xl bg-blue-50 border border-blue-100">
-          <p className="text-xs text-blue-600 mb-1">Активных соглашений</p>
-          <p className="text-2xl font-bold text-blue-700">{data.agreements.length}</p>
-          <p className="text-xs text-blue-500 mt-1">с застройщиками</p>
+        <div className="p-4 rounded-none bg-primary/10 border border-primary/40">
+          <p className="text-xs text-primary mb-1">Активных соглашений</p>
+          <p className="text-2xl font-bold text-primary">{data.agreements.length}</p>
+          <p className="text-xs text-primary mt-1">с застройщиками</p>
         </div>
       </div>
 
@@ -592,13 +592,13 @@ function CommissionForecast() {
         ) : (
           <div className="space-y-2">
             {data.agreements.map(a => (
-              <div key={a.id} className="flex items-center justify-between p-3 rounded-lg border border-gray-100 hover:bg-gray-50">
+              <div key={a.id} className="flex items-center justify-between p-3 rounded-none border border-gray-100 hover:bg-gray-50">
                 <div>
                   <p className="text-sm font-medium text-gray-800">{a.developers?.name_en ?? 'Застройщик'}</p>
                   <p className="text-xs text-gray-400">{a.property_projects?.name_en ?? 'Все проекты'}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-semibold text-emerald-600">{a.myuno_retained_rate}%</p>
+                  <p className="text-sm font-semibold text-success">{a.myuno_retained_rate}%</p>
                   <p className="text-xs text-gray-400">myUNO retains</p>
                 </div>
               </div>
@@ -607,9 +607,9 @@ function CommissionForecast() {
         )}
       </div>
 
-      <div className="p-4 rounded-xl bg-amber-50 border border-amber-100 flex items-start gap-3">
-        <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
-        <p className="text-xs text-amber-700">
+      <div className="p-4 rounded-none bg-accent/10 border border-accent/40 flex items-start gap-3">
+        <AlertTriangle className="w-4 h-4 text-accent flex-shrink-0 mt-0.5" />
+        <p className="text-xs text-accent">
           Комиссия признаётся при подписании SPA (event_type='invoiced'). Booking fee — это
           только депозит. Полный расчёт появится после создания commission_events в системе.
         </p>

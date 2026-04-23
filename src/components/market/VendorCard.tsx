@@ -44,7 +44,7 @@ export const VendorCard: React.FC<VendorCardProps> = ({
         <CardContent className="p-3">
           <div className="flex items-center gap-3">
             {/* Logo */}
-            <div className="w-10 h-10 rounded-lg bg-muted/80 flex items-center justify-center overflow-hidden shrink-0">
+            <div className="w-10 h-10 rounded-none bg-muted/80 flex items-center justify-center overflow-hidden shrink-0">
               {vendor.logo_url ? (
                 <img src={vendor.logo_url} alt={name} className="w-full h-full object-cover" />
               ) : (
@@ -95,7 +95,7 @@ export const VendorCard: React.FC<VendorCardProps> = ({
         
         {/* Logo overlay */}
         <div className="absolute -bottom-6 left-4">
-          <div className="w-14 h-14 rounded-xl bg-background border-2 border-background shadow-lg flex items-center justify-center overflow-hidden">
+          <div className="w-14 h-14 rounded-none bg-background border-2 border-background shadow-lg flex items-center justify-center overflow-hidden">
             {vendor.logo_url ? (
               <img src={vendor.logo_url} alt={name} className="w-full h-full object-cover" />
             ) : (

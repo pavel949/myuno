@@ -79,8 +79,8 @@ export function NbDeveloperTab({ developerId, currentProjectId }: Props) {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <Skeleton className="h-40 rounded-xl" style={{ background: 'hsl(var(--nb-surface))' }} />
-        <Skeleton className="h-60 rounded-xl" style={{ background: 'hsl(var(--nb-surface))' }} />
+        <Skeleton className="h-40 rounded-none" style={{ background: 'hsl(var(--nb-surface))' }} />
+        <Skeleton className="h-60 rounded-none" style={{ background: 'hsl(var(--nb-surface))' }} />
       </div>
     );
   }
@@ -100,9 +100,9 @@ export function NbDeveloperTab({ developerId, currentProjectId }: Props) {
       <div className="nb-glass p-6 space-y-5">
         <div className="flex items-start gap-5">
           {dev.logo_url ? (
-            <img src={dev.logo_url} alt={dev.name_en} className="w-16 h-16 rounded-xl object-cover" />
+            <img src={dev.logo_url} alt={dev.name_en} className="w-16 h-16 rounded-none object-cover" />
           ) : (
-            <div className="w-16 h-16 rounded-xl flex items-center justify-center" style={{ background: 'hsl(var(--nb-gold) / 0.15)' }}>
+            <div className="w-16 h-16 rounded-none flex items-center justify-center" style={{ background: 'hsl(var(--nb-gold) / 0.15)' }}>
               <Building2 className="w-7 h-7" style={{ color: 'hsl(var(--nb-gold))' }} />
             </div>
           )}
@@ -119,7 +119,7 @@ export function NbDeveloperTab({ developerId, currentProjectId }: Props) {
           </div>
           {dev.muuno_score && (
             <div className="text-center flex-shrink-0">
-              <div className="flex items-center gap-1 px-3 py-1.5 rounded-lg" style={{ background: 'hsl(var(--nb-gold) / 0.12)' }}>
+              <div className="flex items-center gap-1 px-3 py-1.5 rounded-none" style={{ background: 'hsl(var(--nb-gold) / 0.12)' }}>
                 <Award className="w-4 h-4" style={{ color: 'hsl(var(--nb-gold))' }} />
                 <span className="nb-mono text-lg font-bold" style={{ color: 'hsl(var(--nb-gold))' }}>{dev.muuno_score}</span>
               </div>
@@ -138,21 +138,21 @@ export function NbDeveloperTab({ developerId, currentProjectId }: Props) {
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4">
           {dev.founded_year && (
-            <div className="text-center p-3 rounded-lg" style={{ background: 'hsl(var(--nb-surface))' }}>
+            <div className="text-center p-3 rounded-none" style={{ background: 'hsl(var(--nb-surface))' }}>
               <Calendar className="w-4 h-4 mx-auto mb-1" style={{ color: 'hsl(var(--nb-gold))' }} />
               <p className="nb-mono text-sm font-bold" style={{ color: 'hsl(var(--nb-text))' }}>{dev.founded_year}</p>
               <p className="text-[10px]" style={{ color: 'hsl(var(--nb-muted))' }}>Основан</p>
             </div>
           )}
           {dev.projects_completed !== null && (
-            <div className="text-center p-3 rounded-lg" style={{ background: 'hsl(var(--nb-surface))' }}>
+            <div className="text-center p-3 rounded-none" style={{ background: 'hsl(var(--nb-surface))' }}>
               <Building2 className="w-4 h-4 mx-auto mb-1" style={{ color: 'hsl(var(--nb-gold))' }} />
               <p className="nb-mono text-sm font-bold" style={{ color: 'hsl(var(--nb-text))' }}>{dev.projects_completed}</p>
               <p className="text-[10px]" style={{ color: 'hsl(var(--nb-muted))' }}>Проектов сдано</p>
             </div>
           )}
           {dev.total_units_sold !== null && (
-            <div className="text-center p-3 rounded-lg" style={{ background: 'hsl(var(--nb-surface))' }}>
+            <div className="text-center p-3 rounded-none" style={{ background: 'hsl(var(--nb-surface))' }}>
               <Award className="w-4 h-4 mx-auto mb-1" style={{ color: 'hsl(var(--nb-gold))' }} />
               <p className="nb-mono text-sm font-bold" style={{ color: 'hsl(var(--nb-text))' }}>{dev.total_units_sold}</p>
               <p className="text-[10px]" style={{ color: 'hsl(var(--nb-muted))' }}>Юнитов продано</p>

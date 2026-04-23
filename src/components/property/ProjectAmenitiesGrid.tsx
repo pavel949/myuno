@@ -70,9 +70,9 @@ export function ProjectAmenitiesGrid({
           return (
             <div
               key={amenity}
-              className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 border border-border/50"
+              className="flex items-center gap-3 p-3 rounded-none bg-muted/50 border border-border/50"
             >
-              <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+              <div className="flex-shrink-0 w-10 h-10 rounded-none bg-primary/10 flex items-center justify-center text-primary">
                 {config?.icon || <Building2 className="h-5 w-5" />}
               </div>
               <span className="text-sm font-medium line-clamp-2">

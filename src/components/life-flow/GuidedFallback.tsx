@@ -32,7 +32,7 @@ export const GuidedFallback = memo(function GuidedFallback({
     >
       {/* Illustration — simple, no glow */}
       <div className="text-center mb-6">
-        <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-muted flex items-center justify-center">
+        <div className="w-16 h-16 mx-auto mb-4 rounded-none bg-muted flex items-center justify-center">
           <Compass className="w-7 h-7 text-muted-foreground" />
         </div>
 
@@ -56,9 +56,9 @@ export const GuidedFallback = memo(function GuidedFallback({
             const chatButton = document.querySelector('[data-chat-fab]') as HTMLButtonElement;
             chatButton?.click();
           }}
-          className="w-full flex items-center gap-3 p-4 rounded-2xl bg-primary text-primary-foreground text-left active:scale-[0.98] transition-transform touch-manipulation"
+          className="w-full flex items-center gap-3 p-4 rounded-none bg-primary text-primary-foreground text-left active:scale-[0.98] transition-transform touch-manipulation"
         >
-          <div className="w-10 h-10 rounded-xl bg-primary-foreground/15 flex items-center justify-center shrink-0">
+          <div className="w-10 h-10 rounded-none bg-primary-foreground/15 flex items-center justify-center shrink-0">
             <MessageCircle className="w-5 h-5" />
           </div>
           <div>
@@ -74,9 +74,9 @@ export const GuidedFallback = memo(function GuidedFallback({
         {/* Secondary: Call */}
         <button
           onClick={() => window.location.href = getTelLink()}
-          className="w-full flex items-center gap-3 p-4 rounded-2xl bg-card border border-border/60 text-left hover:shadow-sm active:scale-[0.98] transition-all touch-manipulation"
+          className="w-full flex items-center gap-3 p-4 rounded-none bg-card border border-border/60 text-left hover:shadow-sm active:scale-[0.98] transition-all touch-manipulation"
         >
-          <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center shrink-0">
+          <div className="w-10 h-10 rounded-none bg-muted flex items-center justify-center shrink-0">
             <Phone className="w-5 h-5 text-muted-foreground" />
           </div>
           <div>
@@ -92,9 +92,9 @@ export const GuidedFallback = memo(function GuidedFallback({
         {/* Tertiary: VIP Concierge */}
         <button
           onClick={() => navigate('/vip-concierge')}
-          className="w-full flex items-center gap-3 p-4 rounded-2xl bg-card border border-border/60 text-left hover:shadow-sm active:scale-[0.98] transition-all touch-manipulation"
+          className="w-full flex items-center gap-3 p-4 rounded-none bg-card border border-border/60 text-left hover:shadow-sm active:scale-[0.98] transition-all touch-manipulation"
         >
-          <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center shrink-0">
+          <div className="w-10 h-10 rounded-none bg-muted flex items-center justify-center shrink-0">
             <HeartHandshake className="w-5 h-5 text-muted-foreground" />
           </div>
           <div>

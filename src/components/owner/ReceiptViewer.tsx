@@ -51,14 +51,14 @@ export function ReceiptViewer({
 
         <div className="space-y-4">
           {isPdf ? (
-            <div className="w-full h-64 rounded-lg border border-border bg-muted/50 flex flex-col items-center justify-center gap-3">
+            <div className="w-full h-64 rounded-none border border-border bg-muted/50 flex flex-col items-center justify-center gap-3">
               <FileText className="h-16 w-16 text-muted-foreground" />
               <span className="text-sm text-muted-foreground">
                 {isRu ? 'PDF документ' : 'PDF Document'}
               </span>
             </div>
           ) : (
-            <div className="relative rounded-lg overflow-hidden border border-border">
+            <div className="relative rounded-none overflow-hidden border border-border">
               <img 
                 src={receiptUrl} 
                 alt="Receipt" 

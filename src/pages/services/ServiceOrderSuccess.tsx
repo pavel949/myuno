@@ -115,7 +115,7 @@ export default function ServiceOrderSuccess() {
 
             {/* Real order details */}
             {order && (
-              <div className="bg-muted/50 rounded-lg p-4 text-left mb-4 space-y-2">
+              <div className="bg-muted/50 rounded-none p-4 text-left mb-4 space-y-2">
                 {order.metadata?.provider_name && (
                   <div className="flex items-center gap-2 text-sm">
                     <span className="font-medium">{order.metadata.provider_name}</span>
@@ -155,7 +155,7 @@ export default function ServiceOrderSuccess() {
             </p>
             
             {/* What's next */}
-            <div className="bg-muted/50 rounded-lg p-4 text-left mb-6">
+            <div className="bg-muted/50 rounded-none p-4 text-left mb-6">
               <p className="text-sm font-medium mb-2">
                 {isRu ? 'Что дальше:' : 'What happens next:'}
               </p>

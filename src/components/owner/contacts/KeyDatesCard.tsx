@@ -65,7 +65,7 @@ const updateContact = useUpdateContact();
   };
 
   return (
-    <div className="rounded-xl border bg-card p-4 space-y-4">
+    <div className="rounded-none border bg-card p-4 space-y-4">
       <div className="flex items-center justify-between">
         <p className="text-sm font-semibold flex items-center gap-2">
           <CalendarDays className="h-4 w-4 text-muted-foreground" />
@@ -114,7 +114,7 @@ const updateContact = useUpdateContact();
             <div
               key={i}
               className={cn(
-                'flex items-center justify-between p-3 rounded-lg border',
+                'flex items-center justify-between p-3 rounded-none border',
                 isPast(new Date(entry.date)) ? 'bg-muted/30' : 'bg-background/50'
               )}
             >

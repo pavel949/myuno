@@ -106,8 +106,8 @@ const serviceLinks = [
     desc: 'Tow, fuel, battery, tires',
     descRu: 'Эвакуатор, топливо, аккумулятор',
     path: '/services?category=road-assistance',
-    color: 'text-amber-500',
-    bg: 'bg-amber-500/10'
+    color: 'text-accent',
+    bg: 'bg-accent/10'
   },
   { 
     id: 'locksmith', 
@@ -286,7 +286,7 @@ export default function SOS() {
         {/* Offline indicator + Emergency Card */}
         {isOffline && (
           <div className="mb-4 space-y-3">
-            <div className="p-3 rounded-xl bg-warning/10 border border-warning/30 flex items-center gap-2">
+            <div className="p-3 rounded-none bg-warning/10 border border-warning/30 flex items-center gap-2">
               <WifiOff className="w-5 h-5 text-warning" />
               <span className="text-sm text-warning font-medium">
                 {language === 'ru' ? 'Вы офлайн — данные из кеша' : 'You are offline — using cached data'}
@@ -297,7 +297,7 @@ export default function SOS() {
         )}
 
         {/* UNO ALERT */}
-        <div className="mb-5 p-4 rounded-2xl bg-primary/5 border border-primary/20">
+        <div className="mb-5 p-4 rounded-none bg-primary/5 border border-primary/20">
           <div className="flex items-center gap-2 mb-2">
             <div className="p-1.5 rounded-full bg-primary">
               <Star className="w-4 h-4 text-primary-foreground" fill="currentColor" />
@@ -316,7 +316,7 @@ export default function SOS() {
           <div className="flex gap-2">
             <Button
               size="sm"
-              className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+              className="flex-1 bg-gradient-to-r from-accent to-accent hover:from-accent hover:to-accent text-white"
               onClick={() => window.location.href = getTelLink()}
             >
               <Phone className="w-4 h-4 mr-1.5" />
@@ -325,7 +325,7 @@ export default function SOS() {
             <Button
               size="sm"
               variant="outline"
-              className="flex-1 border-amber-500/50 text-amber-600 hover:bg-amber-500/10"
+              className="flex-1 border-accent/40/50 text-accent hover:bg-accent/10"
               onClick={() => window.open(COMPANY_CONTACTS.whatsapp.link, '_blank')}
             >
               <MessageCircle className="w-4 h-4 mr-1.5" />
@@ -343,7 +343,7 @@ export default function SOS() {
                 key={action.id}
                 onClick={() => handleCall(action.phone)}
                 className={cn(
-                  "flex flex-col items-center p-3 rounded-xl border transition-all active:scale-95",
+                  "flex flex-col items-center p-3 rounded-none border transition-all active:scale-95",
                   action.bg, "border-transparent hover:border-current/20"
                 )}
               >
@@ -359,24 +359,24 @@ export default function SOS() {
 
         {/* VIP Concierge Link */}
         <button 
-          className="w-full mb-5 p-3 rounded-xl bg-gradient-to-r from-violet-500/10 to-purple-500/10 border border-purple-500/30 flex items-center justify-between hover:border-purple-500/50 transition-colors"
+          className="w-full mb-5 p-3 rounded-none bg-gradient-to-r from-primary/10 to-primary/10 border border-primary/40/30 flex items-center justify-between hover:border-primary/40/50 transition-colors"
           onClick={() => navigate('/vip-concierge')}
         >
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-full bg-gradient-to-r from-violet-500 to-purple-500">
+            <div className="p-2 rounded-full bg-gradient-to-r from-primary to-primary">
               <Crown className="w-5 h-5 text-white" />
             </div>
             <div className="text-left">
               <div className="font-semibold text-sm flex items-center gap-1">
                 {language === 'ru' ? 'VIP Консьерж' : 'VIP Concierge'}
-                <Sparkles className="w-3 h-3 text-purple-500" />
+                <Sparkles className="w-3 h-3 text-primary" />
               </div>
               <div className="text-xs text-muted-foreground">
                 {language === 'ru' ? 'Вертолёты, яхты, повара...' : 'Helicopters, yachts, chefs...'}
               </div>
             </div>
           </div>
-          <ChevronRight className="w-5 h-5 text-purple-500" />
+          <ChevronRight className="w-5 h-5 text-primary" />
         </button>
 
         {/* Service Links */}
@@ -388,7 +388,7 @@ export default function SOS() {
                 key={service.id}
                 onClick={() => navigate(service.path)}
                 className={cn(
-                  "flex items-center gap-3 p-3 rounded-xl border transition-all text-left",
+                  "flex items-center gap-3 p-3 rounded-none border transition-all text-left",
                   service.bg, "border-transparent hover:border-current/20"
                 )}
               >
@@ -453,7 +453,7 @@ export default function SOS() {
 
         {/* Grouped Tips - Accordion Style */}
         <div className="flex items-center gap-2 mb-3">
-          <Lightbulb className="w-5 h-5 text-amber-500" />
+          <Lightbulb className="w-5 h-5 text-accent" />
           <h2 className="font-semibold text-lg">
             {language === 'ru' ? 'Что делать если...' : 'What to do if...'}
           </h2>
@@ -463,7 +463,7 @@ export default function SOS() {
           {tipCategories.map((category) => {
             const isExpanded = expandedCategories.includes(category.id);
             return (
-              <div key={category.id} className="rounded-xl border border-border/50 bg-card overflow-hidden">
+              <div key={category.id} className="rounded-none border border-border/50 bg-card overflow-hidden">
                 <button
                   onClick={() => toggleCategory(category.id)}
                   className="w-full flex items-center justify-between p-3 hover:bg-muted/30 transition-colors"
@@ -473,7 +473,7 @@ export default function SOS() {
                     <span className="font-medium text-sm">
                       {language === 'ru' ? category.titleRu : category.title}
                     </span>
-                    <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                    <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded-none">
                       {category.tips.length}
                     </span>
                   </div>
@@ -511,7 +511,7 @@ export default function SOS() {
         >
           {isSOSCached ? (
             <>
-              <CheckCircle2 className="w-4 h-4 text-green-500" />
+              <CheckCircle2 className="w-4 h-4 text-success" />
               {language === 'ru' ? 'Сохранено для офлайн' : 'Saved for offline'}
             </>
           ) : (

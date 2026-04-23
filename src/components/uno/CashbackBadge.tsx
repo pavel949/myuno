@@ -54,7 +54,7 @@ export function CashbackBadge({
   if (variant === 'card') {
     return (
       <div className={cn(
-        "flex items-center gap-2 p-3 rounded-xl bg-success/10 border border-success/20",
+        "flex items-center gap-2 p-3 rounded-none bg-success/10 border border-success/20",
         className
       )}>
         <div className="w-8 h-8 rounded-full bg-success/20 flex items-center justify-center">
@@ -77,7 +77,7 @@ export function CashbackBadge({
   if (variant === 'banner') {
     return (
       <div className={cn(
-        "relative overflow-hidden p-4 rounded-2xl bg-gradient-to-r from-success/10 via-success/10 to-accent-teal/10 border border-success/20",
+        "relative overflow-hidden p-4 rounded-none bg-gradient-to-r from-success/10 via-success/10 to-accent-teal/10 border border-success/20",
         className
       )}>
         <div className="absolute top-0 right-0 w-20 h-20 bg-success/10 rounded-full blur-2xl" />
@@ -132,7 +132,7 @@ export function CashbackRatesCard({ className }: { className?: string }) {
 
   return (
     <div className={cn(
-      "p-4 rounded-2xl bg-gradient-to-r from-success/5 via-success/5 to-accent-teal/5 border border-success/10",
+      "p-4 rounded-none bg-gradient-to-r from-success/5 via-success/5 to-accent-teal/5 border border-success/10",
       className
     )}>
       <div className="flex items-center gap-2 mb-3">

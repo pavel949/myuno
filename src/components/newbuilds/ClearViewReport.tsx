@@ -116,7 +116,7 @@ export function ClearViewReport({ projectId, isBrokered }: Props) {
 
       {brokered && (
         <div
-          className="rounded-lg p-3 text-xs flex items-start gap-2"
+          className="rounded-none p-3 text-xs flex items-start gap-2"
           style={{ background: 'hsl(var(--nb-gold) / 0.08)', border: '1px solid hsl(var(--nb-gold) / 0.25)', color: 'hsl(var(--nb-text))' }}
         >
           <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" style={{ color: 'hsl(var(--nb-gold))' }} />
@@ -153,7 +153,7 @@ export function ClearViewReport({ projectId, isBrokered }: Props) {
           <div className="grid grid-cols-3 gap-3 items-center">
             <div className="col-span-1">
               <div
-                className="rounded-2xl p-4 text-center"
+                className="rounded-none p-4 text-center"
                 style={{ background: 'hsl(var(--nb-bg))', border: `2px solid ${gradeColor(report.grade)}` }}
               >
                 <div className="text-3xl font-bold nb-display" style={{ color: gradeColor(report.grade) }}>

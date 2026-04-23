@@ -264,9 +264,9 @@ export function CashFlowForecast({ propertyId }: { propertyId?: string }) {
   if (isLoading) {
     return (
       <div className="space-y-3">
-        <Skeleton className="h-48 w-full rounded-xl" />
-        <Skeleton className="h-32 w-full rounded-xl" />
-        <Skeleton className="h-32 w-full rounded-xl" />
+        <Skeleton className="h-48 w-full rounded-none" />
+        <Skeleton className="h-32 w-full rounded-none" />
+        <Skeleton className="h-32 w-full rounded-none" />
       </div>
     );
   }
@@ -374,7 +374,7 @@ export function CashFlowForecast({ propertyId }: { propertyId?: string }) {
             <CardContent className="pt-0 space-y-2">
               {month.items.map((item, idx) => (
                 <div key={idx} className="flex items-center gap-2 py-1.5 border-b border-border/50 last:border-0">
-                  <div className={`p-1.5 rounded-lg shrink-0 ${
+                  <div className={`p-1.5 rounded-none shrink-0 ${
                     item.type === 'income' ? 'bg-success/10' : 'bg-destructive/10'
                   }`}>
                     {item.type === 'income'

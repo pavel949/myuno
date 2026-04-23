@@ -48,7 +48,7 @@ function CategoryGridCell({ item }: { item: CategoryGridItem }) {
       onClick={item.onClick}
       className={cn(
         'relative flex flex-col items-center justify-center gap-2',
-        'rounded-xl p-3 min-h-[88px]',
+        'rounded-none p-3 min-h-[88px]',
         'bg-card border border-border/60',
         '[box-shadow:var(--shadow-elevation-1)]',
         'hover:[box-shadow:var(--shadow-elevation-2)] hover:-translate-y-0.5 hover:border-primary/30',
@@ -66,7 +66,7 @@ function CategoryGridCell({ item }: { item: CategoryGridItem }) {
 
       {/* Icon */}
       <div className={cn(
-        'w-10 h-10 rounded-xl flex items-center justify-center',
+        'w-10 h-10 rounded-none flex items-center justify-center',
         'bg-gradient-to-br from-primary/15 to-primary/5',
         'group-hover:scale-110 transition-transform duration-150'
       )}>

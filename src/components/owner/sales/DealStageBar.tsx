@@ -34,7 +34,7 @@ export function DealStageBar({ currentStage, onStageClick }: Props) {
             onClick={() => onStageClick?.(stage)}
             disabled={!onStageClick}
             className={cn(
-              'flex-1 py-2.5 text-[11px] font-medium rounded-lg transition-all min-h-[44px] flex items-center justify-center',
+              'flex-1 py-2.5 text-[11px] font-medium rounded-none transition-all min-h-[44px] flex items-center justify-center',
               isActive ? `${stageColors[stage]} text-white` : 'bg-muted text-muted-foreground',
               onStageClick && 'cursor-pointer hover:opacity-80',
             )}

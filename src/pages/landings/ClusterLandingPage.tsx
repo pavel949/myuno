@@ -111,7 +111,7 @@ const ClusterLandingView = ({ landing }: ClusterLandingViewProps) => {
                 <li key={service.slug}>
                   <a
                     href={service.href}
-                    className="block rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary/60"
+                    className="block rounded-none border border-border bg-card p-4 transition-colors hover:border-primary/60"
                   >
                     <div className="font-medium text-foreground">
                       {t(service.label)}
@@ -158,7 +158,7 @@ const ClusterLandingView = ({ landing }: ClusterLandingViewProps) => {
                 <li key={p.slug}>
                   <a
                     href={`/for/${p.slug}`}
-                    className="block rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground transition-colors hover:border-primary/60"
+                    className="block rounded-none border border-border bg-card px-3 py-2 text-sm text-foreground transition-colors hover:border-primary/60"
                   >
                     {t(p.h1)}
                   </a>

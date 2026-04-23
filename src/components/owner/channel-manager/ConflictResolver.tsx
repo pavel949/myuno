@@ -32,7 +32,7 @@ export function ConflictResolver({ propertyId, propertyName }: ConflictResolverP
     return (
       <div className="space-y-2">
         {[1, 2].map(i => (
-          <div key={i} className="h-24 bg-muted animate-pulse rounded-lg" />
+          <div key={i} className="h-24 bg-muted animate-pulse rounded-none" />
         ))}
       </div>
     );
@@ -162,7 +162,7 @@ function BookingConflictItem({
 }) {
   return (
     <div 
-      className="p-3 bg-background rounded-lg border cursor-pointer hover:border-primary transition-colors"
+      className="p-3 bg-background rounded-none border cursor-pointer hover:border-primary transition-colors"
       onClick={onClick}
     >
       <div className="flex items-center justify-between mb-2">

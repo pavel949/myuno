@@ -146,7 +146,7 @@ const ProductDetailPage = () => {
     return (
       <AppLayout>
         <PageContainer className="pb-32">
-          <Skeleton className="aspect-square w-full rounded-2xl mb-4" />
+          <Skeleton className="aspect-square w-full rounded-none mb-4" />
           <Skeleton className="h-8 w-3/4 mb-2" />
           <Skeleton className="h-4 w-1/2 mb-4" />
           <Skeleton className="h-20 w-full" />
@@ -226,18 +226,18 @@ const ProductDetailPage = () => {
           {/* Badges */}
           <div className="absolute bottom-4 left-4 flex flex-wrap gap-2">
             {product.is_shippable_international && (
-              <Badge className="bg-sky-500 text-white text-xs font-semibold px-2.5 py-1 shadow-lg">
+              <Badge className="bg-primary text-white text-xs font-semibold px-2.5 py-1 shadow-lg">
                 <Plane className="w-3 h-3 mr-1" />
                 {language === 'ru' ? 'Доставка домой' : 'Ship Home'}
               </Badge>
             )}
             {product.is_new && (
-              <Badge className="bg-blue-500 text-white text-xs font-semibold px-2.5 py-1 shadow-lg">
+              <Badge className="bg-primary text-white text-xs font-semibold px-2.5 py-1 shadow-lg">
                 NEW
               </Badge>
             )}
             {product.is_popular && (
-              <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-semibold px-2.5 py-1 shadow-lg">
+              <Badge className="bg-gradient-to-r from-accent to-accent text-white text-xs font-semibold px-2.5 py-1 shadow-lg">
                 🔥 BESTSELLER
               </Badge>
             )}
@@ -298,7 +298,7 @@ const ProductDetailPage = () => {
 
           {/* Product Specifications */}
           {(product.unit_value || product.weight_kg) && (
-            <div className="bg-muted/30 rounded-xl p-4 mb-4">
+            <div className="bg-muted/30 rounded-none p-4 mb-4">
               <h3 className="font-semibold mb-3 flex items-center gap-2">
                 <Ruler className="h-4 w-4" />
                 {language === 'ru' ? 'Характеристики' : 'Specifications'}
@@ -357,7 +357,7 @@ const ProductDetailPage = () => {
           
           {/* Features */}
           <div className="grid grid-cols-2 gap-3 mb-6">
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
+            <div className="flex items-center gap-3 p-3 rounded-none bg-muted/50">
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                 <Truck className="h-5 w-5 text-primary" />
               </div>
@@ -371,9 +371,9 @@ const ProductDetailPage = () => {
               </div>
             </div>
             
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
-              <div className="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center">
-                <Shield className="h-5 w-5 text-green-500" />
+            <div className="flex items-center gap-3 p-3 rounded-none bg-muted/50">
+              <div className="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center">
+                <Shield className="h-5 w-5 text-success" />
               </div>
               <div>
                 <p className="text-sm font-medium">
@@ -386,9 +386,9 @@ const ProductDetailPage = () => {
             </div>
             
             {product.is_shippable_international && (
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 col-span-2">
-                <div className="w-10 h-10 rounded-full bg-sky-500/10 flex items-center justify-center">
-                  <Plane className="h-5 w-5 text-sky-500" />
+              <div className="flex items-center gap-3 p-3 rounded-none bg-muted/50 col-span-2">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Plane className="h-5 w-5 text-primary" />
                 </div>
                 <div>
                   <p className="text-sm font-medium">

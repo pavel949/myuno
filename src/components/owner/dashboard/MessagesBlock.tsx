@@ -39,7 +39,7 @@ export function MessagesBlock() {
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-muted">
+            <div className="p-1.5 rounded-none bg-muted">
               <MessageCircle className="h-4 w-4 text-muted-foreground" />
             </div>
             <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
@@ -64,7 +64,7 @@ export function MessagesBlock() {
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <div className={cn(
-            "p-1.5 rounded-lg",
+            "p-1.5 rounded-none",
             totalUnread > 0 ? "bg-primary/10" : "bg-muted"
           )}>
             <MessageCircle className={cn(
@@ -90,7 +90,7 @@ export function MessagesBlock() {
           <div 
             key={chat.id}
             className={cn(
-              "p-2 rounded-lg border",
+              "p-2 rounded-none border",
               chat.unreadCount > 0 ? "bg-primary/5 border-primary/20" : "bg-muted/30 border-transparent"
             )}
           >

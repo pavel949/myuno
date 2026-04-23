@@ -159,8 +159,8 @@ const { data: contact, isLoading, isError } = useCrmContact(id);
     return (
       <div className="p-4 md:p-6 lg:p-8 space-y-4 max-w-[1536px] mx-auto">
         <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-48 w-full rounded-2xl" />
-        <Skeleton className="h-64 w-full rounded-2xl" />
+        <Skeleton className="h-48 w-full rounded-none" />
+        <Skeleton className="h-64 w-full rounded-none" />
       </div>
     );
   }
@@ -307,7 +307,7 @@ const { data: contact, isLoading, isError } = useCrmContact(id);
         {/* ═══ LEFT PANEL ═══ */}
         <div className="space-y-4">
           {/* ─── Smart Buttons Strip (Odoo-style) ─── */}
-          <div className="flex items-center gap-1 border rounded-xl bg-card p-1 overflow-x-auto">
+          <div className="flex items-center gap-1 border rounded-none bg-card p-1 overflow-x-auto">
             {[
               { icon: CalendarDays, label: isRu ? 'Встречи' : 'Meetings', count: meetings.length, onClick: () => setActiveTab('timeline') },
               { icon: Star, label: isRu ? 'Сделки' : 'Opportunities', count: opportunityCount, onClick: () => setActiveTab('deals') },
@@ -317,7 +317,7 @@ const { data: contact, isLoading, isError } = useCrmContact(id);
               <button
                 key={i}
                 onClick={btn.onClick}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm hover:bg-muted transition-colors whitespace-nowrap flex-1 justify-center"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-none text-sm hover:bg-muted transition-colors whitespace-nowrap flex-1 justify-center"
               >
                 <btn.icon className="h-4 w-4 text-muted-foreground" />
                 <span className="text-muted-foreground">{btn.label}</span>
@@ -327,7 +327,7 @@ const { data: contact, isLoading, isError } = useCrmContact(id);
           </div>
 
           {/* ─── Main Contact Card (Odoo-style) ─── */}
-          <div className="rounded-2xl border bg-card overflow-hidden">
+          <div className="rounded-none border bg-card overflow-hidden">
             {/* Individual / Company toggle */}
             <div className="px-5 pt-4 pb-2 flex items-center gap-4 border-b">
               <label className="flex items-center gap-2 cursor-pointer text-sm">
@@ -364,7 +364,7 @@ const { data: contact, isLoading, isError } = useCrmContact(id);
                       }
                     </h1>
                     {(contact.is_vip || (contact.tags || []).some((t) => t.toUpperCase() === 'VIP')) && (
-                      <Badge className="shrink-0 bg-amber-500/15 text-amber-900 border-amber-500/30">VIP</Badge>
+                      <Badge className="shrink-0 bg-accent/15 text-accent border-accent/40/30">VIP</Badge>
                     )}
                     {contact.hnw_tier && contact.hnw_tier !== 'standard' && (
                       <Badge className={cn('shrink-0', HNW_TIER_LABELS[contact.hnw_tier as HnwTier]?.color || '')}>
@@ -395,9 +395,9 @@ const { data: contact, isLoading, isError } = useCrmContact(id);
                   )}
                 </div>
                 {contact.avatar_url ? (
-                  <img src={contact.avatar_url} alt="" className="h-20 w-20 rounded-xl object-cover border shadow-sm" />
+                  <img src={contact.avatar_url} alt="" className="h-20 w-20 rounded-none object-cover border shadow-sm" />
                 ) : (
-                  <div className="h-20 w-20 rounded-xl bg-primary/10 border shadow-sm flex items-center justify-center shrink-0">
+                  <div className="h-20 w-20 rounded-none bg-primary/10 border shadow-sm flex items-center justify-center shrink-0">
                     <span className="text-2xl font-bold text-primary">
                       {contact.first_name.charAt(0)}{contact.last_name.charAt(0)}
                     </span>
@@ -553,7 +553,7 @@ const { data: contact, isLoading, isError } = useCrmContact(id);
             <TabsContent value="overview" className="mt-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {(contact.birthday || contact.family_info || contact.interests?.length || isMaritalStatus(contact.marital_status)) && (
-                  <div className="rounded-xl border bg-card p-4 space-y-3">
+                  <div className="rounded-none border bg-card p-4 space-y-3">
                     <p className="text-sm font-semibold flex items-center gap-2">
                       <Heart className="h-4 w-4 text-muted-foreground" />
                       {isRu ? 'Персональное' : 'Personal'}
@@ -592,7 +592,7 @@ const { data: contact, isLoading, isError } = useCrmContact(id);
                 )}
 
                 {(contact.budget_max || contact.preferred_types?.length || contact.preferred_districts?.length) && (
-                  <div className="rounded-xl border bg-card p-4 space-y-3">
+                  <div className="rounded-none border bg-card p-4 space-y-3">
                     <p className="text-sm font-semibold flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-muted-foreground" />
                       {isRu ? 'Предпочтения' : 'Preferences'}
@@ -614,7 +614,7 @@ const { data: contact, isLoading, isError } = useCrmContact(id);
                 )}
 
                 {contact.notes && (
-                  <div className="rounded-xl border bg-card p-4 space-y-2 md:col-span-2">
+                  <div className="rounded-none border bg-card p-4 space-y-2 md:col-span-2">
                     <p className="text-sm font-semibold">{isRu ? 'Заметки' : 'Notes'}</p>
                     <p className="text-sm text-muted-foreground whitespace-pre-wrap">{contact.notes}</p>
                   </div>
@@ -624,7 +624,7 @@ const { data: contact, isLoading, isError } = useCrmContact(id);
 
             {/* KYC */}
             <TabsContent value="kyc" className="mt-4">
-              <div className="rounded-xl border bg-card p-5 space-y-4">
+              <div className="rounded-none border bg-card p-5 space-y-4">
                 <h3 className="text-sm font-semibold">{isRu ? 'KYC / Compliance' : 'KYC / Compliance'}</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FieldRow label={isRu ? 'Статус KYC' : 'KYC Status'}>
@@ -670,7 +670,7 @@ const { data: contact, isLoading, isError } = useCrmContact(id);
               <div className="space-y-4">
                 <p className="text-sm font-medium">{isRu ? 'Активность' : 'Activity'}</p>
                 {timelineItems.length === 0 ? (
-                  <div className="text-center py-12 rounded-xl border bg-card">
+                  <div className="text-center py-12 rounded-none border bg-card">
                     <Clock className="h-10 w-10 mx-auto text-muted-foreground/30 mb-2" />
                     <p className="text-sm text-muted-foreground">{isRu ? 'Нет активности' : 'No activity yet'}</p>
                   </div>
@@ -681,7 +681,7 @@ const { data: contact, isLoading, isError } = useCrmContact(id);
                       if (item.type === 'note') {
                         const note = item.data as { id: string; note_type: string; content: string; created_at: string };
                         return (
-                          <div key={`note-${note.id}`} className="flex gap-2.5 p-2 rounded-lg hover:bg-muted/30 relative">
+                          <div key={`note-${note.id}`} className="flex gap-2.5 p-2 rounded-none hover:bg-muted/30 relative">
                             <span className="flex h-[26px] w-[26px] items-center justify-center rounded-full bg-card border-2 border-border text-xs shrink-0 z-10">
                               {noteTypeIcons[note.note_type] || '📝'}
                             </span>
@@ -706,7 +706,7 @@ const { data: contact, isLoading, isError } = useCrmContact(id);
                           activity.activity_type === 'workflow_executed' ? '⚡' :
                           activity.activity_type === 'notification' ? '🔔' : '📋';
                         return (
-                          <div key={`act-${activity.id}`} className="flex gap-2.5 p-2 rounded-lg hover:bg-muted/30 relative">
+                          <div key={`act-${activity.id}`} className="flex gap-2.5 p-2 rounded-none hover:bg-muted/30 relative">
                             <span className={cn(
                               'flex h-[26px] w-[26px] items-center justify-center rounded-full bg-card border-2 text-xs shrink-0 z-10',
                               config?.color ? 'border-primary' : 'border-border'
@@ -734,7 +734,7 @@ const { data: contact, isLoading, isError } = useCrmContact(id);
                             key={`deal-${d.id}`}
                             type="button"
                             onClick={() => navigate(APP_ROUTES.MC_SALES_DEAL(d.id))}
-                            className="flex gap-2.5 p-2 rounded-lg hover:bg-muted/30 relative w-full text-left"
+                            className="flex gap-2.5 p-2 rounded-none hover:bg-muted/30 relative w-full text-left"
                           >
                             <span className="flex h-[26px] w-[26px] items-center justify-center rounded-full bg-card border-2 border-primary text-xs shrink-0 z-10">
                               💼
@@ -778,7 +778,7 @@ const { data: contact, isLoading, isError } = useCrmContact(id);
             {/* Deals */}
             <TabsContent value="deals" className="mt-4 space-y-4">
               {deals.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 rounded-xl border bg-muted/30 p-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 rounded-none border bg-muted/30 p-4">
                   <div>
                     <p className="text-xs text-muted-foreground uppercase tracking-wide">{isRu ? 'В работе (сумма)' : 'Open pipeline'}</p>
                     <p className="text-lg font-semibold tabular-nums">
@@ -808,7 +808,7 @@ const { data: contact, isLoading, isError } = useCrmContact(id);
                 </Button>
               </div>
               {deals.length === 0 ? (
-                <div className="text-center py-12 rounded-xl border bg-card">
+                <div className="text-center py-12 rounded-none border bg-card">
                   <DollarSign className="h-10 w-10 mx-auto text-muted-foreground/30 mb-2" />
                   <p className="text-sm text-muted-foreground">{isRu ? 'Нет связанных сделок' : 'No linked deals'}</p>
                 </div>
@@ -821,7 +821,7 @@ const { data: contact, isLoading, isError } = useCrmContact(id);
                       <button
                         key={d.id}
                         onClick={() => navigate(APP_ROUTES.MC_SALES_DEAL(d.id))}
-                        className="w-full text-left p-4 rounded-xl border bg-card hover:bg-accent/50 transition-colors flex items-center gap-3"
+                        className="w-full text-left p-4 rounded-none border bg-card hover:bg-accent/50 transition-colors flex items-center gap-3"
                       >
                         <div className={cn('h-3 w-3 rounded-full shrink-0', stageDotColors[stage] || 'bg-muted')} />
                         <div className="flex-1 min-w-0">
@@ -850,14 +850,14 @@ const { data: contact, isLoading, isError } = useCrmContact(id);
                 <InlineTaskCreator companyId={membership.company_id} contactId={contact.id} />
               )}
               {contactTasks.length === 0 ? (
-                <div className="text-center py-12 rounded-xl border bg-card">
+                <div className="text-center py-12 rounded-none border bg-card">
                   <ListTodo className="h-10 w-10 mx-auto text-muted-foreground/30 mb-2" />
                   <p className="text-sm text-muted-foreground">{isRu ? 'Нет задач' : 'No tasks'}</p>
                 </div>
               ) : (
                 <div className="space-y-2">
                   {contactTasks.map(task => (
-                    <div key={task.id} className="flex items-center gap-3 p-3 rounded-xl border bg-card">
+                    <div key={task.id} className="flex items-center gap-3 p-3 rounded-none border bg-card">
                       <button onClick={() => handleCompleteTask(task.id)} className="shrink-0">
                         <CheckCircle className={cn('h-5 w-5', task.status === 'completed' ? 'text-success' : 'text-muted-foreground/30 hover:text-success/60')} />
                       </button>
@@ -884,7 +884,7 @@ const { data: contact, isLoading, isError } = useCrmContact(id);
             {/* Documents */}
             <TabsContent value="documents" className="mt-4">
               {membership?.company_id ? (
-                <div className="rounded-xl border bg-card p-5">
+                <div className="rounded-none border bg-card p-5">
                   <CrmDocumentsSection companyId={membership.company_id} contactId={contact.id} />
                 </div>
               ) : (
@@ -904,7 +904,7 @@ const { data: contact, isLoading, isError } = useCrmContact(id);
         {/* ═══ RIGHT PANEL: Chatter (Odoo-style) ═══ */}
         <div className="space-y-4">
           {/* Action buttons */}
-          <div className="flex gap-1 border rounded-xl bg-card p-1">
+          <div className="flex gap-1 border rounded-none bg-card p-1">
             {[
               { key: 'message' as const, label: isRu ? 'Сообщение' : 'Send message', color: 'bg-primary text-primary-foreground' },
               { key: 'note' as const, label: isRu ? 'Заметка' : 'Log note', color: 'bg-warning/10 text-warning' },
@@ -914,7 +914,7 @@ const { data: contact, isLoading, isError } = useCrmContact(id);
                 key={btn.key}
                 onClick={() => setChatterTab(btn.key)}
                 className={cn(
-                  'flex-1 px-3 py-2 rounded-lg text-xs font-medium transition-colors',
+                  'flex-1 px-3 py-2 rounded-none text-xs font-medium transition-colors',
                   chatterTab === btn.key ? btn.color || 'bg-muted' : 'hover:bg-muted/50'
                 )}
               >
@@ -957,7 +957,7 @@ const { data: contact, isLoading, isError } = useCrmContact(id);
           )}
 
           {chatterTab === 'activities' && user && (
-            <div className="space-y-2 rounded-xl border bg-card p-3">
+            <div className="space-y-2 rounded-none border bg-card p-3">
               <Select value={logActType} onValueChange={setLogActType}>
                 <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -1006,22 +1006,22 @@ const { data: contact, isLoading, isError } = useCrmContact(id);
           {/* Quick contacts */}
           <div className="flex flex-wrap gap-2">
             {contact.phone && (
-              <a href={`tel:${contact.phone}`} className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl bg-muted hover:bg-muted/80 transition-colors">
+              <a href={`tel:${contact.phone}`} className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-none bg-muted hover:bg-muted/80 transition-colors">
                 <Phone className="h-3.5 w-3.5 text-primary" />{isRu ? 'Позвонить' : 'Call'}
               </a>
             )}
             {whatsappUrl && (
-              <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl bg-success/10 text-success hover:bg-success/20 transition-colors">
+              <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-none bg-success/10 text-success hover:bg-success/20 transition-colors">
                 <MessageCircle className="h-3.5 w-3.5" />WhatsApp
               </a>
             )}
             {contact.email && (
-              <a href={`mailto:${contact.email}`} className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl bg-muted hover:bg-muted/80 transition-colors">
+              <a href={`mailto:${contact.email}`} className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-none bg-muted hover:bg-muted/80 transition-colors">
                 <Mail className="h-3.5 w-3.5 text-primary" />Email
               </a>
             )}
             {contact.telegram && (
-              <a href={`https://t.me/${contact.telegram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl bg-info/10 text-info hover:bg-info/20 transition-colors">
+              <a href={`https://t.me/${contact.telegram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-none bg-info/10 text-info hover:bg-info/20 transition-colors">
                 <TelegramIcon className="h-3.5 w-3.5" />Telegram
               </a>
             )}
@@ -1047,7 +1047,7 @@ const { data: contact, isLoading, isError } = useCrmContact(id);
                   if (item.type === 'note') {
                     const note = item.data as any;
                     return (
-                      <div key={`note-${note.id}`} className="flex gap-2.5 p-2 rounded-lg hover:bg-muted/30 transition-colors group relative">
+                      <div key={`note-${note.id}`} className="flex gap-2.5 p-2 rounded-none hover:bg-muted/30 transition-colors group relative">
                         <div className="relative z-10 shrink-0 mt-1">
                           <span className="flex h-[26px] w-[26px] items-center justify-center rounded-full bg-card border-2 border-border text-xs">
                             {noteTypeIcons[note.note_type] || '📝'}
@@ -1074,7 +1074,7 @@ const { data: contact, isLoading, isError } = useCrmContact(id);
                       activity.activity_type === 'workflow_executed' ? '⚡' :
                       activity.activity_type === 'notification' ? '🔔' : '📋';
                     return (
-                      <div key={`act-${activity.id}`} className="flex gap-2.5 p-2 rounded-lg hover:bg-muted/30 transition-colors relative">
+                      <div key={`act-${activity.id}`} className="flex gap-2.5 p-2 rounded-none hover:bg-muted/30 transition-colors relative">
                         <div className="relative z-10 shrink-0 mt-1">
                           <span className={cn(
                             'flex h-[26px] w-[26px] items-center justify-center rounded-full bg-card border-2 text-xs',
@@ -1104,7 +1104,7 @@ const { data: contact, isLoading, isError } = useCrmContact(id);
                         key={`deal-${d.id}`}
                         type="button"
                         onClick={() => navigate(APP_ROUTES.MC_SALES_DEAL(d.id))}
-                        className="flex gap-2.5 p-2 rounded-lg hover:bg-muted/30 transition-colors relative w-full text-left"
+                        className="flex gap-2.5 p-2 rounded-none hover:bg-muted/30 transition-colors relative w-full text-left"
                       >
                         <div className="relative z-10 shrink-0 mt-1">
                           <span className="flex h-[26px] w-[26px] items-center justify-center rounded-full bg-card border-2 border-primary text-xs">

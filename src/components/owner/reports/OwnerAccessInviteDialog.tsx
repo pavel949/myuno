@@ -148,7 +148,7 @@ export function OwnerAccessInviteDialog({ open, onOpenChange }: Props) {
             <Label className="text-sm font-semibold mb-2 block">
               {isRu ? 'Разрешения' : 'Permissions'}
             </Label>
-            <div className="space-y-2.5 rounded-lg border p-3 bg-muted/20">
+            <div className="space-y-2.5 rounded-none border p-3 bg-muted/20">
               {Object.entries(permLabels).map(([key, label]) => {
                 const Icon = label.icon;
                 const isView = key === 'view';

@@ -89,7 +89,7 @@ export function EmailVerificationBadge({ variant = 'inline' }: EmailVerification
   // Card variant
   if (isVerified) {
     return (
-      <div className="flex items-center gap-3 p-4 bg-success/10 border border-success/30 rounded-xl">
+      <div className="flex items-center gap-3 p-4 bg-success/10 border border-success/30 rounded-none">
         <div className="w-10 h-10 rounded-full bg-success/15 flex items-center justify-center">
           <CheckCircle className="w-5 h-5 text-success" />
         </div>
@@ -106,7 +106,7 @@ export function EmailVerificationBadge({ variant = 'inline' }: EmailVerification
   }
 
   return (
-    <div className="p-4 bg-warning/10 border border-warning/30 rounded-xl">
+    <div className="p-4 bg-warning/10 border border-warning/30 rounded-none">
       <div className="flex items-start gap-3">
         <div className="w-10 h-10 rounded-full bg-warning/15 flex items-center justify-center shrink-0">
           <Mail className="w-5 h-5 text-warning" />

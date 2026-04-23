@@ -60,8 +60,8 @@ interface OrderItemProps {
 }
 
 const OrderItemCard = ({ item, language, showShippingWarning }: OrderItemProps) => (
-  <div className={`flex items-center gap-3 py-3 ${showShippingWarning ? 'bg-warning/5 -mx-2 px-2 rounded-lg' : ''}`}>
-    <div className="w-14 h-14 rounded-xl bg-muted overflow-hidden flex-shrink-0 relative">
+  <div className={`flex items-center gap-3 py-3 ${showShippingWarning ? 'bg-warning/5 -mx-2 px-2 rounded-none' : ''}`}>
+    <div className="w-14 h-14 rounded-none bg-muted overflow-hidden flex-shrink-0 relative">
       {item.image ? (
         <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
       ) : (
@@ -111,7 +111,7 @@ const FreeDeliveryProgress = ({ subtotal, threshold, remaining, language }: Free
   const isFree = remaining <= 0;
 
   return (
-    <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-xl p-4 mb-4">
+    <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-none p-4 mb-4">
       <div className="flex items-center gap-2 mb-2">
         {isFree ? (
           <>
@@ -489,7 +489,7 @@ const MarketCheckout = () => {
         )}
 
         {/* Order Items */}
-        <div className="bg-card rounded-2xl border p-4 mb-4">
+        <div className="bg-card rounded-none border p-4 mb-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-semibold flex items-center gap-2">
               <Package className="w-5 h-5 text-primary" />
@@ -526,7 +526,7 @@ const MarketCheckout = () => {
         {storeInfo && (
           <Card className="mb-4">
             <CardContent className="p-4 flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-none bg-primary/10 flex items-center justify-center">
                 <Truck className="w-6 h-6 text-primary" />
               </div>
               <div>
@@ -538,7 +538,7 @@ const MarketCheckout = () => {
         )}
 
         {/* Delivery Type Selector */}
-        <div className="bg-card rounded-xl border p-5 mb-4">
+        <div className="bg-card rounded-none border p-5 mb-4">
           <DeliveryTypeSelector
             selectedType={deliveryType}
             onTypeChange={setDeliveryType}
@@ -552,7 +552,7 @@ const MarketCheckout = () => {
         </div>
 
         {/* Address Form */}
-        <div className="bg-card rounded-xl border p-5 mb-4">
+        <div className="bg-card rounded-none border p-5 mb-4">
           {deliveryType === 'local' ? (
             <>
               <div className="flex items-center gap-2 mb-4">
@@ -655,7 +655,7 @@ const MarketCheckout = () => {
         </div>
 
         {/* Payment Method */}
-        <div className="bg-card rounded-xl border p-5 mb-4">
+        <div className="bg-card rounded-none border p-5 mb-4">
           <h3 className="font-semibold mb-4">
             {language === 'ru' ? 'Способ оплаты' : 'Payment Method'}
           </h3>
@@ -686,7 +686,7 @@ const MarketCheckout = () => {
         </div>
 
         {/* Order Summary */}
-        <div className="bg-card rounded-xl border p-5 mb-4">
+        <div className="bg-card rounded-none border p-5 mb-4">
           <h3 className="font-semibold mb-4">{language === 'ru' ? 'Итого' : 'Order Summary'}</h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">

@@ -348,7 +348,7 @@ export default function OwnerFinancialForm() {
                         key={opt.value}
                         type="button"
                         onClick={() => setFormData(prev => ({ ...prev, cost_source: opt.value, staff_member_id: '' }))}
-                        className={`rounded-xl border p-2 text-xs font-medium transition-colors ${
+                        className={`rounded-none border p-2 text-xs font-medium transition-colors ${
                           formData.cost_source === opt.value
                             ? 'bg-primary text-primary-foreground border-primary'
                             : 'bg-card text-muted-foreground hover:border-primary/50'

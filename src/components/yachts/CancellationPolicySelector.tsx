@@ -85,24 +85,24 @@ export function CancellationPolicySelector({
     switch (code) {
       case 'flexible':
         return {
-          border: 'border-green-200 dark:border-green-800',
-          bg: 'bg-green-50/50 dark:bg-green-950/20',
-          badge: 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300',
-          icon: <CheckCircle className="h-4 w-4 text-green-600" />,
+          border: 'border-success/40 dark:border-success/40',
+          bg: 'bg-success/10/50 dark:bg-success/20',
+          badge: 'bg-success/10 text-success dark:bg-success/50 dark:text-success',
+          icon: <CheckCircle className="h-4 w-4 text-success" />,
         };
       case 'moderate':
         return {
-          border: 'border-blue-200 dark:border-blue-800',
-          bg: 'bg-blue-50/50 dark:bg-blue-950/20',
-          badge: 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300',
-          icon: <Clock className="h-4 w-4 text-blue-600" />,
+          border: 'border-primary/40 dark:border-primary/40',
+          bg: 'bg-primary/10/50 dark:bg-primary/20',
+          badge: 'bg-primary/10 text-primary dark:bg-primary/50 dark:text-primary',
+          icon: <Clock className="h-4 w-4 text-primary" />,
         };
       case 'strict':
         return {
-          border: 'border-amber-200 dark:border-amber-800',
-          bg: 'bg-amber-50/50 dark:bg-amber-950/20',
-          badge: 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300',
-          icon: <AlertCircle className="h-4 w-4 text-amber-600" />,
+          border: 'border-accent/40 dark:border-accent/40',
+          bg: 'bg-accent/10/50 dark:bg-accent/20',
+          badge: 'bg-accent/10 text-accent dark:bg-accent/50 dark:text-accent',
+          icon: <AlertCircle className="h-4 w-4 text-accent" />,
         };
       case 'super_strict':
         return {
@@ -141,7 +141,7 @@ export function CancellationPolicySelector({
             <label
               key={policy.id}
               className={cn(
-                "flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all",
+                "flex items-start gap-3 p-4 rounded-none border-2 cursor-pointer transition-all",
                 style.border,
                 isSelected ? style.bg : 'hover:bg-muted/30',
                 isSelected && "ring-2 ring-primary ring-offset-2"

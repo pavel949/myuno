@@ -26,7 +26,7 @@ export function FeaturedProvidersCarousel() {
         <Skeleton className="h-6 w-40 mb-4" />
         <div className="flex gap-3">
           {[1, 2, 3].map(i => (
-            <Skeleton key={i} className="w-[200px] h-[220px] rounded-2xl shrink-0" />
+            <Skeleton key={i} className="w-[200px] h-[220px] rounded-none shrink-0" />
           ))}
         </div>
       </div>
@@ -54,7 +54,7 @@ export function FeaturedProvidersCarousel() {
             onClick={() => navigate(`/services/provider/${provider.id}?category=${provider.business_category}`)}
             className={cn(
               "w-[200px] shrink-0 snap-center",
-              "bg-card rounded-2xl border border-border overflow-hidden",
+              "bg-card rounded-none border border-border overflow-hidden",
               "shadow-sm hover:shadow-md hover:-translate-y-0.5",
               "transition-all duration-200 group touch-manipulation text-left"
             )}
@@ -77,7 +77,7 @@ export function FeaturedProvidersCarousel() {
               
               {/* Rating */}
               {provider.rating && (
-                <div className="absolute bottom-2 left-2 bg-background/90 backdrop-blur-sm px-2 py-1 rounded-lg flex items-center gap-1">
+                <div className="absolute bottom-2 left-2 bg-background/90 backdrop-blur-sm px-2 py-1 rounded-none flex items-center gap-1">
                   <Star className="w-3.5 h-3.5 fill-primary text-primary" />
                   <span className="text-xs font-bold">{provider.rating.toFixed(1)}</span>
                   {provider.review_count && (

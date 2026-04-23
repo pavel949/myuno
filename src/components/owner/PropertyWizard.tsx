@@ -107,7 +107,7 @@ function PropertyWizardInner({
                 key={step.id}
                 onClick={() => handleStepClick(index)}
                 className={cn(
-                  "flex-1 flex flex-col items-center gap-1 p-2 rounded-lg transition-all",
+                  "flex-1 flex flex-col items-center gap-1 p-2 rounded-none transition-all",
                   isCurrent && "bg-primary/10",
                   isCompleted && "cursor-pointer hover:bg-muted",
                   !isCurrent && !isCompleted && "opacity-50"

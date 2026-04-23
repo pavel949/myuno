@@ -289,7 +289,7 @@ const LocationPickerMap = forwardRef<HTMLDivElement, LocationPickerMapProps>(({
         )}
       </button>
 
-      <div className="absolute bottom-0 left-0 right-0 z-10 bg-background/95 backdrop-blur-sm border-t border-border rounded-t-2xl">
+      <div className="absolute bottom-0 left-0 right-0 z-10 bg-background/95 backdrop-blur-sm border-t border-border rounded-none">
         <div className="px-4 py-3">
           <p className="text-xs text-muted-foreground mb-2">
             {language === 'ru' ? 'Популярные места' : 'Popular locations'}
@@ -307,7 +307,7 @@ const LocationPickerMap = forwardRef<HTMLDivElement, LocationPickerMapProps>(({
           </div>
         </div>
         <div className="px-4 pb-4">
-          <div className="p-3 rounded-xl bg-muted/50 border border-border/50 mb-3 flex items-start gap-3">
+          <div className="p-3 rounded-none bg-muted/50 border border-border/50 mb-3 flex items-start gap-3">
             <div className={cn(
               "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0",
               type === 'pickup' ? "bg-success/20" : "bg-primary/20"

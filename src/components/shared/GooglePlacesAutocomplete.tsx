@@ -285,7 +285,7 @@ export function GooglePlacesAutocomplete({
       </div>
 
       {isOpen && predictions.length > 0 && (
-        <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-lg shadow-lg overflow-hidden">
+        <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-none shadow-lg overflow-hidden">
           {predictions.map((prediction) => (
             <button
               key={prediction.id}

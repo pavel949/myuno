@@ -73,16 +73,16 @@ export const createMapPopupHtml = (params: {
         <img
           src="${safeImageUrl}"
           alt="${escapedName}"
-          class="w-full h-24 object-cover rounded-lg mb-2"
+          class="w-full h-24 object-cover rounded-none mb-2"
           onerror="this.style.display='none'"
         />
       ` : ''}
       <h3 class="font-bold text-sm text-gray-900 line-clamp-2">${escapedName}</h3>
       <div class="flex items-center gap-2 mt-1">
         ${params.rating ? `
-          <span class="text-yellow-500 text-xs">★ ${escapedRating}</span>
+          <span class="text-accent text-xs">★ ${escapedRating}</span>
         ` : ''}
-        ${params.price ? `<span class="text-xs font-medium text-emerald-600">${escapedPrice}</span>` : ''}
+        ${params.price ? `<span class="text-xs font-medium text-success">${escapedPrice}</span>` : ''}
       </div>
       ${params.description ? `<p class="text-xs text-gray-500 mt-1 line-clamp-2">${escapedDescription}</p>` : ''}
     </div>

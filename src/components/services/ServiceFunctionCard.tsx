@@ -29,7 +29,7 @@
        >
          <CardContent className="p-3">
            <div className="flex items-center gap-3">
-             <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center text-xl shrink-0">
+             <div className="w-10 h-10 rounded-none bg-muted flex items-center justify-center text-xl shrink-0">
                {fn.icon}
              </div>
              <div className="flex-1 min-w-0">
@@ -53,7 +53,7 @@
        <CardContent className="p-4">
          <div className="flex gap-4">
            {/* Icon */}
-           <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-2xl shrink-0 group-hover:bg-primary/20 transition-colors">
+           <div className="w-12 h-12 rounded-none bg-primary/10 flex items-center justify-center text-2xl shrink-0 group-hover:bg-primary/20 transition-colors">
              {fn.icon}
            </div>
            
@@ -112,7 +112,7 @@
    return (
      <button
        onClick={onClick}
-       className="flex flex-col items-center p-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 hover:shadow-sm transition-all text-center min-w-0"
+       className="flex flex-col items-center p-3 rounded-none bg-card border border-border/50 hover:border-primary/30 hover:shadow-sm transition-all text-center min-w-0"
      >
        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-lg mb-2">
          {fn.icon}

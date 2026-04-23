@@ -50,7 +50,7 @@ const WELCOME_SERVICES: WelcomeService[] = [
   {
     id: 'restaurants',
     icon: UtensilsCrossed,
-    gradient: 'from-orange-400 to-red-500',
+    gradient: 'from-accent to-red-500',
     path: '/restaurants',
     labelEn: 'Restaurants',
     labelRu: 'Рестораны',
@@ -63,7 +63,7 @@ const WELCOME_SERVICES: WelcomeService[] = [
   {
     id: 'experiences',
     icon: MapPin,
-    gradient: 'from-emerald-400 to-teal-600',
+    gradient: 'from-success to-success',
     path: '/experiences',
     labelEn: 'Tours & Activities',
     labelRu: 'Туры и активности',
@@ -74,7 +74,7 @@ const WELCOME_SERVICES: WelcomeService[] = [
   {
     id: 'yachts',
     icon: Ship,
-    gradient: 'from-cyan-400 to-blue-600',
+    gradient: 'from-primary to-primary',
     path: '/yachts',
     labelEn: 'Yacht Charters',
     labelRu: 'Аренда яхт',
@@ -84,7 +84,7 @@ const WELCOME_SERVICES: WelcomeService[] = [
   {
     id: 'cleaning',
     icon: Brush,
-    gradient: 'from-teal-400 to-cyan-500',
+    gradient: 'from-success to-primary',
     path: '/cleaning',
     labelEn: 'Extra Cleaning',
     labelRu: 'Доп. уборка',
@@ -94,7 +94,7 @@ const WELCOME_SERVICES: WelcomeService[] = [
   {
     id: 'grocery',
     icon: ShoppingCart,
-    gradient: 'from-green-400 to-emerald-600',
+    gradient: 'from-success to-success',
     path: '/market',
     labelEn: 'Grocery Delivery',
     labelRu: 'Доставка продуктов',
@@ -104,7 +104,7 @@ const WELCOME_SERVICES: WelcomeService[] = [
   {
     id: 'flowers',
     icon: Flower2,
-    gradient: 'from-pink-400 to-rose-500',
+    gradient: 'from-accent to-accent',
     path: '/flowers',
     labelEn: 'Flowers',
     labelRu: 'Цветы',
@@ -114,7 +114,7 @@ const WELCOME_SERVICES: WelcomeService[] = [
   {
     id: 'water',
     icon: Waves,
-    gradient: 'from-blue-400 to-cyan-500',
+    gradient: 'from-primary to-primary',
     path: '/experiences?type=activity',
     labelEn: 'Water Sports',
     labelRu: 'Водный спорт',
@@ -124,7 +124,7 @@ const WELCOME_SERVICES: WelcomeService[] = [
   {
     id: 'fitness',
     icon: Dumbbell,
-    gradient: 'from-violet-400 to-purple-600',
+    gradient: 'from-primary to-primary',
     path: '/fitness',
     labelEn: 'Fitness',
     labelRu: 'Фитнес',
@@ -134,7 +134,7 @@ const WELCOME_SERVICES: WelcomeService[] = [
   {
     id: 'spa',
     icon: Heart,
-    gradient: 'from-rose-300 to-pink-500',
+    gradient: 'from-accent to-accent',
     path: '/beauty',
     labelEn: 'Spa & Beauty',
     labelRu: 'Спа и красота',
@@ -144,7 +144,7 @@ const WELCOME_SERVICES: WelcomeService[] = [
   {
     id: 'babysitter',
     icon: Baby,
-    gradient: 'from-amber-300 to-orange-400',
+    gradient: 'from-accent to-accent',
     path: '/babysitter',
     labelEn: 'Babysitter',
     labelRu: 'Няня',
@@ -154,7 +154,7 @@ const WELCOME_SERVICES: WelcomeService[] = [
   {
     id: 'concierge',
     icon: Sparkles,
-    gradient: 'from-amber-400 to-yellow-500',
+    gradient: 'from-accent to-accent',
     path: '/vip-concierge',
     labelEn: 'VIP Concierge',
     labelRu: 'VIP-консьерж',
@@ -178,11 +178,11 @@ const ServiceCard: React.FC<{
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 + index * 0.04, duration: 0.3, ease: 'easeOut' }}
       onClick={() => onNavigate(service.path)}
-      className="flex items-center gap-4 p-4 bg-card border border-border rounded-2xl hover:shadow-md hover:border-primary/20 transition-all duration-200 text-left w-full group"
+      className="flex items-center gap-4 p-4 bg-card border border-border rounded-none hover:shadow-md hover:border-primary/20 transition-all duration-200 text-left w-full group"
     >
       {/* Icon */}
       <div className={cn(
-        'w-12 h-12 rounded-xl bg-gradient-to-br flex items-center justify-center flex-shrink-0',
+        'w-12 h-12 rounded-none bg-gradient-to-br flex items-center justify-center flex-shrink-0',
         service.gradient
       )}>
         <Icon className="w-5 h-5 text-white" />
@@ -338,7 +338,7 @@ export default function WelcomeFlow() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1, duration: 0.4 }}
-          className="mt-8 p-5 bg-card border border-border rounded-2xl text-center"
+          className="mt-8 p-5 bg-card border border-border rounded-none text-center"
         >
           <Sparkles className="w-6 h-6 text-primary mx-auto mb-2" />
           <p className="font-medium text-foreground text-[15px]">

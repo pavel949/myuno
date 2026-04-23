@@ -70,11 +70,11 @@ export function SellReviewStep({ draft, categories, onEdit, onSubmit, onBack, is
               key={i}
               src={url}
               alt=""
-              className="w-12 h-12 rounded-lg object-cover"
+              className="w-12 h-12 rounded-none object-cover"
             />
           ))}
           {(draft.images?.length || 0) > 4 && (
-            <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center text-sm text-muted-foreground">
+            <div className="w-12 h-12 rounded-none bg-muted flex items-center justify-center text-sm text-muted-foreground">
               +{(draft.images?.length || 0) - 4}
             </div>
           )}
@@ -135,11 +135,11 @@ export function SellReviewStep({ draft, categories, onEdit, onSubmit, onBack, is
         {sections.map((section) => (
           <div
             key={section.step}
-            className="p-4 rounded-xl border bg-card"
+            className="p-4 rounded-none border bg-card"
           >
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-start gap-3 flex-1">
-                <div className="p-2 rounded-lg bg-muted text-muted-foreground">
+                <div className="p-2 rounded-none bg-muted text-muted-foreground">
                   {section.icon}
                 </div>
                 <div className="flex-1">
@@ -161,7 +161,7 @@ export function SellReviewStep({ draft, categories, onEdit, onSubmit, onBack, is
         ))}
       </div>
       
-      <div className="p-4 rounded-xl bg-warning/10 border border-warning/20">
+      <div className="p-4 rounded-none bg-warning/10 border border-warning/20">
         <p className="text-sm">
           {isRu 
             ? '⏳ После публикации объявление будет проверено модератором. Обычно это занимает до 24 часов.' 

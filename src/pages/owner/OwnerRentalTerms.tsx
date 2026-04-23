@@ -651,7 +651,7 @@ const isRu = language === 'ru';
                   onChange={(v) => setFormData({ ...formData, cancellation_policy: v })}
                 />
 
-                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                <div className="flex items-center justify-between p-3 rounded-none bg-muted/50">
                   <div>
                     <p className="font-medium text-sm">
                       {isRu ? 'Мгновенное бронирование' : 'Instant Booking'}
@@ -686,7 +686,7 @@ const isRu = language === 'ru';
                   {INCLUDED_SERVICES_OPTIONS.map((service) => (
                     <div
                       key={service.id}
-                      className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted/50"
+                      className="flex items-center space-x-2 p-2 rounded-none hover:bg-muted/50"
                     >
                       <Checkbox
                         id={service.id}
@@ -712,7 +712,7 @@ const isRu = language === 'ru';
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                <div className="flex items-center justify-between p-3 rounded-none bg-muted/50">
                   <p className="font-medium text-sm">
                     {isRu ? 'Электричество включено' : 'Electricity included'}
                   </p>
@@ -795,7 +795,7 @@ const isRu = language === 'ru';
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                <div className="flex items-center justify-between p-3 rounded-none bg-muted/50">
                   <p className="font-medium text-sm">
                     {isRu ? 'Вода включена' : 'Water included'}
                   </p>
@@ -860,7 +860,7 @@ const isRu = language === 'ru';
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                <div className="flex items-center justify-between p-3 rounded-none bg-muted/50">
                   <p className="font-medium text-sm">
                     {isRu ? 'Уборка включена' : 'Cleaning included'}
                   </p>
@@ -925,7 +925,7 @@ const isRu = language === 'ru';
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                <div className="flex items-center justify-between p-3 rounded-none bg-muted/50">
                   <p className="font-medium text-sm">
                     {isRu ? 'Парковка включена' : 'Parking included'}
                   </p>
@@ -959,7 +959,7 @@ const isRu = language === 'ru';
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                <div className="flex items-center justify-between p-3 rounded-none bg-muted/50">
                   <p className="font-medium text-sm">
                     {isRu ? 'Трансфер доступен' : 'Transfer available'}
                   </p>
@@ -1241,7 +1241,7 @@ const isRu = language === 'ru';
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                <div className="flex items-center justify-between p-3 rounded-none bg-muted/50">
                   <div className="flex items-center gap-2">
                     <PartyPopper className="h-4 w-4 text-muted-foreground" />
                     <p className="font-medium text-sm">
@@ -1277,7 +1277,7 @@ const isRu = language === 'ru';
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                <div className="flex items-center justify-between p-3 rounded-none bg-muted/50">
                   <p className="font-medium text-sm">
                     {isRu ? 'Питомцы разрешены' : 'Pets allowed'}
                   </p>
@@ -1322,7 +1322,7 @@ const isRu = language === 'ru';
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                <div className="flex items-center justify-between p-3 rounded-none bg-muted/50">
                   <p className="font-medium text-sm">
                     {isRu ? 'Подходит для детей' : 'Children friendly'}
                   </p>

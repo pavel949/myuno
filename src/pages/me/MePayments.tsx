@@ -20,7 +20,7 @@ function PaymentRow({ row, due }: { row: MyPaymentRow; due: boolean }) {
   const isRu = language === 'ru';
   return (
     <div className="flex items-center gap-3 py-3 border-b border-border/60 last:border-0">
-      <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center shrink-0">
+      <div className="h-9 w-9 rounded-none bg-muted flex items-center justify-center shrink-0">
         <CreditCard className="h-4 w-4 text-muted-foreground" />
       </div>
       <div className="flex-1 min-w-0">

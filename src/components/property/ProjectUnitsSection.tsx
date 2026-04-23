@@ -109,7 +109,7 @@ export function ProjectUnitsSection({
         </div>
         <div className="flex gap-4 overflow-hidden">
           {[1, 2, 3].map(i => (
-            <Skeleton key={i} className="w-72 h-64 flex-shrink-0 rounded-2xl" />
+            <Skeleton key={i} className="w-72 h-64 flex-shrink-0 rounded-none" />
           ))}
         </div>
       </div>
@@ -200,7 +200,7 @@ export function ProjectUnitsSection({
         
         {properties.length > 10 && (
           <div 
-            className="w-72 flex-shrink-0 snap-start flex items-center justify-center rounded-2xl border-2 border-dashed border-border cursor-pointer hover:border-primary/50 transition-colors"
+            className="w-72 flex-shrink-0 snap-start flex items-center justify-center rounded-none border-2 border-dashed border-border cursor-pointer hover:border-primary/50 transition-colors"
             onClick={() => navigate(`/property?project=${projectId}`)}
           >
             <div className="text-center p-6">
@@ -228,7 +228,7 @@ interface PriceBadgeProps {
 
 function PriceBadge({ label, count, minPrice, formatPriceFn, isRu }: PriceBadgeProps) {
   return (
-    <div className="flex-shrink-0 px-4 py-2 rounded-xl bg-primary/5 border border-primary/20">
+    <div className="flex-shrink-0 px-4 py-2 rounded-none bg-primary/5 border border-primary/20">
       <p className="text-sm font-medium">{label}</p>
       <p className="text-xs text-muted-foreground">
         {count} {isRu ? 'шт' : 'units'} • {isRu ? 'от' : 'from'} {minPrice ? formatPriceFn(minPrice) : '—'}
@@ -251,7 +251,7 @@ function SimplePropertyCard({ property, isRu, formatPrice }: SimplePropertyCardP
   return (
     <div
       onClick={() => navigate(APP_ROUTES.PROPERTY_DETAIL(property.id))}
-      className="overflow-hidden rounded-2xl bg-card border border-border cursor-pointer hover:border-primary/50 hover:shadow-lg transition-all group"
+      className="overflow-hidden rounded-none bg-card border border-border cursor-pointer hover:border-primary/50 hover:shadow-lg transition-all group"
     >
       <AspectRatio ratio={4 / 3}>
         {property.cover_image ? (

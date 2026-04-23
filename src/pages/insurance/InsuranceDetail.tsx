@@ -138,7 +138,7 @@ export default function InsuranceDetail() {
               plans.map((plan) => (
                 <div
                   key={plan.id}
-                  className="bg-card border border-border rounded-xl p-4 cursor-pointer hover:border-primary/50 transition-colors"
+                  className="bg-card border border-border rounded-none p-4 cursor-pointer hover:border-primary/50 transition-colors"
                   onClick={() => navigate(`/insurance/plan/${plan.id}`)}
                 >
                   <div className="flex items-start justify-between mb-3">
@@ -202,14 +202,14 @@ export default function InsuranceDetail() {
           </TabsContent>
 
           <TabsContent value="about" className="space-y-4 mt-4">
-            <div className="bg-card border border-border rounded-xl p-4">
+            <div className="bg-card border border-border rounded-none p-4">
               <p className="text-sm text-muted-foreground">
                 {language === 'ru' ? provider.description_ru : provider.description_en}
               </p>
             </div>
 
             {provider.license_number && (
-              <div className="bg-card border border-border rounded-xl p-4">
+              <div className="bg-card border border-border rounded-none p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <Award className="w-4 h-4 text-primary" />
                   <h3 className="font-semibold">{language === 'ru' ? 'Лицензия' : 'License'}</h3>
@@ -218,7 +218,7 @@ export default function InsuranceDetail() {
               </div>
             )}
 
-            <div className="bg-card border border-border rounded-xl p-4">
+            <div className="bg-card border border-border rounded-none p-4">
               <div className="flex items-center gap-2 mb-3">
                 <Languages className="w-4 h-4 text-primary" />
                 <h3 className="font-semibold">{language === 'ru' ? 'Языки поддержки' : 'Support Languages'}</h3>
@@ -232,7 +232,7 @@ export default function InsuranceDetail() {
               </div>
             </div>
 
-            <div className="bg-card border border-border rounded-xl p-4">
+            <div className="bg-card border border-border rounded-none p-4">
               <h3 className="font-semibold mb-3">{language === 'ru' ? 'Преимущества' : 'Features'}</h3>
               <div className="space-y-2">
                 {provider.has_online_claims && (
@@ -252,7 +252,7 @@ export default function InsuranceDetail() {
           </TabsContent>
 
           <TabsContent value="contact" className="space-y-4 mt-4">
-            <div className="bg-card border border-border rounded-xl p-4 space-y-3">
+            <div className="bg-card border border-border rounded-none p-4 space-y-3">
               {provider.phone && (
                 <a href={`tel:${provider.phone}`} className="flex items-center gap-3 text-sm hover:text-primary transition-colors">
                   <Phone className="w-4 h-4 text-muted-foreground" />

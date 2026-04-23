@@ -154,7 +154,7 @@ export function ABVariantManager({ landingId, landingName }: ABVariantManagerPro
                 {(['A', 'B'] as const).map(label => {
                   const v = label === 'A' ? test.variant_a : test.variant_b;
                   return (
-                    <div key={label} className="bg-muted/40 rounded-lg p-3 space-y-1">
+                    <div key={label} className="bg-muted/40 rounded-none p-3 space-y-1">
                       <div className="flex items-center justify-between">
                         <Badge variant="outline" className="text-[10px]">
                           {label} {label === 'A' ? (isRu ? '(Контроль)' : '(Control)') : (isRu ? '(Тест)' : '(Test)')}
@@ -168,7 +168,7 @@ export function ABVariantManager({ landingId, landingName }: ABVariantManagerPro
                       <p className="text-sm font-medium truncate">{v.headline_en || '—'}</p>
                       <p className="text-xs text-muted-foreground truncate">{v.subheadline_en || '—'}</p>
                       {v.cta_label_en && (
-                        <span className="inline-block mt-1 text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded">
+                        <span className="inline-block mt-1 text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-none">
                           {v.cta_label_en}
                         </span>
                       )}

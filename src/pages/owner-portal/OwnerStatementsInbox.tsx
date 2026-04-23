@@ -119,7 +119,7 @@ export default function OwnerStatementsInbox() {
 
       {/* Sign / Reject sheet */}
       <Sheet open={!!active} onOpenChange={open => !open && closeSheet()}>
-        <SheetContent side="bottom" className="rounded-t-2xl max-h-[90vh] overflow-y-auto">
+        <SheetContent side="bottom" className="rounded-none max-h-[90vh] overflow-y-auto">
           <SheetHeader>
             <SheetTitle>
               {mode === 'sign'
@@ -131,7 +131,7 @@ export default function OwnerStatementsInbox() {
           {active && (
             <div className="mt-4 space-y-4">
               {/* Period & amount */}
-              <div className="bg-muted/30 rounded-xl p-3 space-y-1 text-sm">
+              <div className="bg-muted/30 rounded-none p-3 space-y-1 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{isRu ? 'Период' : 'Period'}</span>
                   <span className="font-medium">

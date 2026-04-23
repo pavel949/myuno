@@ -108,7 +108,7 @@ export function MyJourneyRecommendations() {
   return (
     <Surface variant="muted" bordered padding="md" radius="2xl" className="space-y-4">
       <div className="flex items-start gap-3">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shrink-0 shadow-sm">
+        <div className="w-10 h-10 rounded-none bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shrink-0 shadow-sm">
           <Sparkles className="w-5 h-5 text-primary-foreground" />
         </div>
         <div className="flex-1 min-w-0">
@@ -135,7 +135,7 @@ export function MyJourneyRecommendations() {
             key={`${item.route}-${idx}`}
             onClick={() => navigate(item.route)}
             className={cn(
-              'flex items-center gap-3 p-3 rounded-xl bg-card border text-left transition-all min-h-[64px]',
+              'flex items-center gap-3 p-3 rounded-none bg-card border text-left transition-all min-h-[64px]',
               'hover:border-primary/60 hover:bg-primary/5 active:scale-[0.99] touch-manipulation',
               idx === 0 ? 'border-primary/60 bg-primary/5' : 'border-border/60',
             )}

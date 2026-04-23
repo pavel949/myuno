@@ -177,7 +177,7 @@ export default function ReviewsManagementPage() {
       </Tabs>
 
       {isLoading ? (
-        <div className="space-y-3">{[1, 2, 3].map(i => <Skeleton key={i} className="h-24 rounded-xl" />)}</div>
+        <div className="space-y-3">{[1, 2, 3].map(i => <Skeleton key={i} className="h-24 rounded-none" />)}</div>
       ) : filtered.length === 0 ? (
         <Card className="border-dashed">
           <CardContent className="py-12 text-center">
@@ -217,7 +217,7 @@ export default function ReviewsManagementPage() {
                     </p>
                   )}
                   {review.response_text ? (
-                    <div className="bg-muted/50 rounded-lg p-3 mt-2">
+                    <div className="bg-muted/50 rounded-none p-3 mt-2">
                       <p className="text-xs font-medium text-muted-foreground mb-1">{isRu ? 'Ваш ответ:' : 'Your response:'}</p>
                       <p className="text-sm">{review.response_text}</p>
                     </div>

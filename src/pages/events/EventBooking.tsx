@@ -197,7 +197,7 @@ export default function EventBooking() {
         </div>
 
         {/* Participants */}
-        <div className="bg-card rounded-xl border p-5 mb-4">
+        <div className="bg-card rounded-none border p-5 mb-4">
           <BookingParticipants
             count={participants}
             onChange={setParticipants}
@@ -216,7 +216,7 @@ export default function EventBooking() {
         )}
 
         {/* Contact Info */}
-        <div className="bg-card rounded-xl border p-5 mb-4">
+        <div className="bg-card rounded-none border p-5 mb-4">
           <h3 className="font-semibold mb-4">
             {isRu ? 'Контактные данные' : 'Contact Information'}
           </h3>
@@ -228,7 +228,7 @@ export default function EventBooking() {
         </div>
 
         {/* Pickup Info */}
-        <div className="bg-card rounded-xl border p-5 mb-4">
+        <div className="bg-card rounded-none border p-5 mb-4">
           <h3 className="font-semibold mb-4">
             {isRu ? 'Место забора' : 'Pickup Location'}
           </h3>
@@ -254,7 +254,7 @@ export default function EventBooking() {
         </div>
 
         {/* Payment Method */}
-        <div className="bg-card rounded-xl border p-5 mb-4">
+        <div className="bg-card rounded-none border p-5 mb-4">
           <h3 className="font-semibold mb-4">
             {isRu ? 'Способ оплаты' : 'Payment Method'}
           </h3>

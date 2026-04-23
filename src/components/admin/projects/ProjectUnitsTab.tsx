@@ -126,7 +126,7 @@ export function ProjectUnitsTab({ projectId }: Props) {
           </CardContent>
         </Card>
       ) : (
-        <div className="border rounded-lg overflow-hidden">
+        <div className="border rounded-none overflow-hidden">
           <table className="w-full text-sm">
             <thead className="bg-muted/50">
               <tr>

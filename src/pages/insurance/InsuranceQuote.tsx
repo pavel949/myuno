@@ -70,8 +70,8 @@ export default function InsuranceQuote() {
     return (
       <AppLayout showBottomNav={false}>
         <div className="p-4 flex flex-col items-center justify-center min-h-[70vh] text-center">
-          <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center mb-4">
-            <CheckCircle2 className="w-8 h-8 text-green-500" />
+          <div className="w-16 h-16 rounded-full bg-success/20 flex items-center justify-center mb-4">
+            <CheckCircle2 className="w-8 h-8 text-success" />
           </div>
           <h1 className="text-xl font-bold mb-2">
             {language === 'ru' ? 'Заявка отправлена!' : 'Quote Request Submitted!'}
@@ -98,10 +98,10 @@ export default function InsuranceQuote() {
     <AppLayout showBottomNav={false}>
       <div className="pb-24">
         {/* Header */}
-        <div className="bg-gradient-to-br from-emerald-600/20 via-teal-600/20 to-cyan-700/20 p-4 pb-6">
+        <div className="bg-gradient-to-br from-success/20 via-success/20 to-primary/20 p-4 pb-6">
           <BackButton fallbackPath={`/insurance/${id}`} className="mb-4" />
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-none bg-primary/20 flex items-center justify-center">
               <Shield className="w-6 h-6 text-primary" />
             </div>
             <div>
@@ -239,7 +239,7 @@ export default function InsuranceQuote() {
 
           {/* Selected Plan Summary */}
           {selectedPlan && (
-            <div className="bg-card border border-border rounded-xl p-4">
+            <div className="bg-card border border-border rounded-none p-4">
               <h3 className="font-semibold mb-2">{language === 'ru' ? 'Выбранный план' : 'Selected Plan'}</h3>
               <div className="flex items-center justify-between">
                 <span>{language === 'ru' ? selectedPlan.name_ru : selectedPlan.name_en}</span>

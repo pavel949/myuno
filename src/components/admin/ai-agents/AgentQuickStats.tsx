@@ -80,7 +80,7 @@ export function AgentQuickStats() {
       {stats.map((stat, i) => (
         <Card key={i} className="border-dashed">
           <CardContent className="p-3 flex items-center gap-3">
-            <div className={`p-2 rounded-lg ${stat.highlight ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'}`}>
+            <div className={`p-2 rounded-none ${stat.highlight ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'}`}>
               <stat.icon className="h-4 w-4" />
             </div>
             <div>

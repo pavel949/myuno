@@ -92,7 +92,7 @@ export function MCCLandingControlTab() {
               <CardContent className="p-4">
                 <div className="flex items-start gap-4">
                   {/* Icon */}
-                  <div className={`p-3 rounded-lg shrink-0 ${landing.is_active ? 'bg-primary/10' : 'bg-muted'}`}>
+                  <div className={`p-3 rounded-none shrink-0 ${landing.is_active ? 'bg-primary/10' : 'bg-muted'}`}>
                     <Icon className={`h-5 w-5 ${landing.is_active ? 'text-primary' : 'text-muted-foreground'}`} />
                   </div>
 
@@ -103,9 +103,9 @@ export function MCCLandingControlTab() {
                       <div>
                         <h3 className="font-medium">{isRu ? landing.name_ru || landing.name_en : landing.name_en}</h3>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-                          <code className="bg-muted px-1.5 py-0.5 rounded">{landing.route_path}</code>
+                          <code className="bg-muted px-1.5 py-0.5 rounded-none">{landing.route_path}</code>
                           <ChevronRight className="h-3 w-3" />
-                          <code className="bg-muted px-1.5 py-0.5 rounded">{landing.target_path}</code>
+                          <code className="bg-muted px-1.5 py-0.5 rounded-none">{landing.target_path}</code>
                         </div>
                       </div>
                       <Switch 
@@ -117,7 +117,7 @@ export function MCCLandingControlTab() {
                     {/* Mini Funnel */}
                     {funnel && landing.is_active && (
                       <div
-                        className="flex items-center gap-1.5 overflow-x-auto cursor-pointer rounded-lg p-2 bg-muted/30 hover:bg-muted/50 transition-colors"
+                        className="flex items-center gap-1.5 overflow-x-auto cursor-pointer rounded-none p-2 bg-muted/30 hover:bg-muted/50 transition-colors"
                         onClick={() => navigateTo('funnel-diag', { landingId: landing.landing_id })}
                       >
                         {[

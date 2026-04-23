@@ -21,7 +21,7 @@ export function NbTermsTab({ projectId }: Props) {
     return (
       <div className="space-y-4">
         {[1, 2, 3].map(i => (
-          <Skeleton key={i} className="h-32 rounded-xl" style={{ background: 'hsl(var(--nb-surface))' }} />
+          <Skeleton key={i} className="h-32 rounded-none" style={{ background: 'hsl(var(--nb-surface))' }} />
         ))}
       </div>
     );
@@ -72,7 +72,7 @@ export function NbTermsTab({ projectId }: Props) {
                       )}
                     </div>
                     {remaining && (
-                      <span className="nb-mono text-xs px-2 py-1 rounded" style={{ background: 'hsl(38 92% 50% / 0.12)', color: 'hsl(38 92% 60%)' }}>
+                      <span className="nb-mono text-xs px-2 py-1 rounded-none" style={{ background: 'hsl(38 92% 50% / 0.12)', color: 'hsl(38 92% 60%)' }}>
                         {remaining} дн. осталось
                       </span>
                     )}
@@ -94,7 +94,7 @@ export function NbTermsTab({ projectId }: Props) {
 
                   {/* Payment details */}
                   {term.payment_details && (
-                    <div className="p-4 rounded-lg" style={{ background: 'hsl(var(--nb-bg))' }}>
+                    <div className="p-4 rounded-none" style={{ background: 'hsl(var(--nb-bg))' }}>
                       <p className="nb-label text-[10px] mb-2">ДЕТАЛИ ОПЛАТЫ</p>
                       <p className="text-sm whitespace-pre-line" style={{ color: 'hsl(var(--nb-text))' }}>
                         {term.payment_details}
@@ -123,7 +123,7 @@ export function NbTermsTab({ projectId }: Props) {
           <div className="space-y-3">
             {promotions!.map(promo => (
               <div key={promo.id} className="nb-glass p-4 flex items-center gap-4">
-                <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: 'hsl(var(--nb-gold) / 0.15)' }}>
+                <div className="w-10 h-10 rounded-none flex items-center justify-center" style={{ background: 'hsl(var(--nb-gold) / 0.15)' }}>
                   <Tag className="w-5 h-5" style={{ color: 'hsl(var(--nb-gold))' }} />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -153,7 +153,7 @@ export function NbTermsTab({ projectId }: Props) {
         to="/legal/contract-analysis"
         className="nb-glass p-5 flex items-center gap-4 group hover:border-[hsl(var(--nb-gold)/0.5)] transition-all"
       >
-        <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: 'hsl(215 80% 55% / 0.15)' }}>
+        <div className="w-10 h-10 rounded-none flex items-center justify-center" style={{ background: 'hsl(215 80% 55% / 0.15)' }}>
           <FileText className="w-5 h-5" style={{ color: 'hsl(215 80% 65%)' }} />
         </div>
         <div className="flex-1">

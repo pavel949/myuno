@@ -105,7 +105,7 @@ function ShowcaseCard({ showcase, isRu, onClick }: ShowcaseCardProps) {
     <button
       onClick={onClick}
       className={cn(
-        "relative w-full h-[120px] rounded-2xl overflow-hidden",
+        "relative w-full h-[120px] rounded-none overflow-hidden",
         "bg-gradient-to-r",
         showcase.gradient,
         "shadow-lg hover:shadow-xl transition-all duration-300",
@@ -122,7 +122,7 @@ function ShowcaseCard({ showcase, isRu, onClick }: ShowcaseCardProps) {
         {/* Top row */}
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg">
+            <div className="w-12 h-12 rounded-none bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg">
               <span className="text-2xl">{showcase.icon}</span>
             </div>
             <div>

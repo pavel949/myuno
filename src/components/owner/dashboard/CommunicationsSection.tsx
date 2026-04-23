@@ -25,8 +25,8 @@ export function CommunicationsSection() {
           <Skeleton className="h-4 w-16" />
         </div>
         <div className="space-y-2">
-          <Skeleton className="h-16 rounded-xl" />
-          <Skeleton className="h-16 rounded-xl" />
+          <Skeleton className="h-16 rounded-none" />
+          <Skeleton className="h-16 rounded-none" />
         </div>
       </div>
     );

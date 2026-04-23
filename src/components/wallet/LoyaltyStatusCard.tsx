@@ -31,22 +31,22 @@ const tierColors: Record<string, { bg: string; text: string; border: string; pro
     progress: "bg-muted-foreground"
   },
   blue: { 
-    bg: "bg-blue-500/10", 
-    text: "text-blue-600", 
-    border: "border-blue-500/30",
-    progress: "bg-blue-500"
+    bg: "bg-primary/10", 
+    text: "text-primary", 
+    border: "border-primary/40/30",
+    progress: "bg-primary"
   },
   purple: { 
-    bg: "bg-purple-500/10", 
-    text: "text-purple-600", 
-    border: "border-purple-500/30",
-    progress: "bg-purple-500"
+    bg: "bg-primary/10", 
+    text: "text-primary", 
+    border: "border-primary/40/30",
+    progress: "bg-primary"
   },
   amber: { 
-    bg: "bg-amber-500/10", 
-    text: "text-amber-600", 
-    border: "border-amber-500/30",
-    progress: "bg-amber-500"
+    bg: "bg-accent/10", 
+    text: "text-accent", 
+    border: "border-accent/40/30",
+    progress: "bg-accent"
   },
 };
 
@@ -138,7 +138,7 @@ export const LoyaltyStatusCard = () => {
       
       <CardContent className="space-y-4">
         {/* Cashback highlight */}
-        <div className={cn("rounded-lg p-4 flex items-center justify-between", colors.bg)}>
+        <div className={cn("rounded-none p-4 flex items-center justify-between", colors.bg)}>
           <div className="flex items-center gap-3">
             <div className={cn("p-2 rounded-full", colors.bg, colors.text)}>
               <Gift className="h-5 w-5" />

@@ -111,7 +111,7 @@ export function PartnerSetupGate({ className, currentStep = 0 }: PartnerSetupGat
               <div
                 key={step.id}
                 className={cn(
-                  "flex items-center gap-3 p-3 rounded-lg border transition-all",
+                  "flex items-center gap-3 p-3 rounded-none border transition-all",
                   isComplete && "bg-success/5 border-success/30",
                   isCurrent && "bg-primary/5 border-primary/30 ring-1 ring-primary/20",
                   !isComplete && !isCurrent && "bg-muted/20 border-muted/30 opacity-60"

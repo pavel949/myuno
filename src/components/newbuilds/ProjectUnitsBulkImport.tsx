@@ -124,7 +124,7 @@ export function ProjectUnitsBulkImport({ projectId, open, onOpenChange }: Props)
         <Alert>
           <AlertDescription className="text-xs space-y-1">
             <p className="font-medium">{isRu ? 'Колонки (через запятую/таб):' : 'Columns (comma/tab):'}</p>
-            <code className="block text-[11px] bg-muted p-2 rounded">
+            <code className="block text-[11px] bg-muted p-2 rounded-none">
               {COLUMNS.join(', ')}
             </code>
             <p className="text-muted-foreground">
@@ -161,7 +161,7 @@ export function ProjectUnitsBulkImport({ projectId, open, onOpenChange }: Props)
         )}
 
         {errorRows.length > 0 && (
-          <div className="max-h-32 overflow-y-auto border rounded p-2 space-y-1 bg-destructive/5">
+          <div className="max-h-32 overflow-y-auto border rounded-none p-2 space-y-1 bg-destructive/5">
             {errorRows.slice(0, 10).map((r, i) => (
               <p key={i} className="text-xs text-destructive">{r.error}</p>
             ))}

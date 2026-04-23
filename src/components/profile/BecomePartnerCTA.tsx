@@ -63,7 +63,7 @@ export function BecomePartnerCTA({ className }: BecomePartnerCTAProps) {
       title: t.owner.title,
       desc: t.owner.desc,
       path: '/owner/onboarding',
-      color: 'from-teal-500 to-teal-600',
+      color: 'from-success to-success',
       hidden: hasOwnerRole,
     },
     {
@@ -72,7 +72,7 @@ export function BecomePartnerCTA({ className }: BecomePartnerCTAProps) {
       title: t.vendor.title,
       desc: t.vendor.desc,
       path: '/vendor/join',
-      color: 'from-purple-500 to-purple-600',
+      color: 'from-primary to-primary',
       hidden: hasVendorRole,
     },
   ].filter(o => !o.hidden);
@@ -94,7 +94,7 @@ export function BecomePartnerCTA({ className }: BecomePartnerCTAProps) {
               key={option.key}
               onClick={() => navigate(option.path)}
               className={cn(
-                "flex flex-col items-start gap-2 p-3 rounded-xl",
+                "flex flex-col items-start gap-2 p-3 rounded-none",
                 "bg-gradient-to-br text-white",
                 option.color,
                 "hover:opacity-90 transition-opacity",
@@ -102,7 +102,7 @@ export function BecomePartnerCTA({ className }: BecomePartnerCTAProps) {
               )}
             >
               <div className="flex items-center justify-between w-full">
-                <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-none bg-white/20 flex items-center justify-center">
                   <Icon className="w-4 h-4" />
                 </div>
                 <ArrowRight className="w-4 h-4 opacity-70" />

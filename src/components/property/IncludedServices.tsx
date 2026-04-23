@@ -37,7 +37,7 @@ export function IncludedServices({ services, className }: IncludedServicesProps)
           return (
             <div
               key={serviceId}
-              className="flex items-center gap-2 p-2.5 rounded-lg bg-primary/5 border border-primary/10"
+              className="flex items-center gap-2 p-2.5 rounded-none bg-primary/5 border border-primary/10"
             >
               {(() => { const Icon = resolveIcon(icon); return <Icon className="w-5 h-5 text-primary" />; })()}
               <span className="text-sm font-medium">{label}</span>

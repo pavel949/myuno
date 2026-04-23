@@ -210,7 +210,7 @@ export default function OwnerSetupWizard() {
               <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
           ) : (
-            <Button onClick={handleFinish} className="flex-1 bg-green-600 hover:bg-green-700">
+            <Button onClick={handleFinish} className="flex-1 bg-success hover:bg-success">
               <CheckCircle className="h-4 w-4 mr-2" />
               {isRu ? 'Начать работу!' : 'Start Working!'}
             </Button>
@@ -256,7 +256,7 @@ function WelcomeStep({ isRu }: { isRu: boolean }) {
           <ul className="space-y-2 text-left">
             {benefits.map((b, i) => (
               <li key={i} className="flex items-start gap-2 text-sm">
-                <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                <CheckCircle className="h-4 w-4 text-success mt-0.5 flex-shrink-0" />
                 <span>{b}</span>
               </li>
             ))}
@@ -283,9 +283,9 @@ function PropertyStep({ isRu, hasProperties, count, onAdd }: {
       </div>
 
       {hasProperties ? (
-        <Card className="border-green-200 bg-green-50 dark:bg-green-950/20 dark:border-green-800">
+        <Card className="border-success/40 bg-success/10 dark:bg-success/20 dark:border-success/40">
           <CardContent className="pt-4 flex items-center gap-3">
-            <CheckCircle className="h-8 w-8 text-green-500" />
+            <CheckCircle className="h-8 w-8 text-success" />
             <div>
               <p className="font-medium">{isRu ? 'Готово!' : 'Done!'}</p>
               <p className="text-sm text-muted-foreground">
@@ -345,9 +345,9 @@ function ChannelsStep({ isRu, hasChannels, count, onConnect }: {
       </div>
 
       {hasChannels && (
-        <Card className="border-green-200 bg-green-50 dark:bg-green-950/20 dark:border-green-800">
+        <Card className="border-success/40 bg-success/10 dark:bg-success/20 dark:border-success/40">
           <CardContent className="pt-4 flex items-center gap-3">
-            <CheckCircle className="h-8 w-8 text-green-500" />
+            <CheckCircle className="h-8 w-8 text-success" />
             <div>
               <p className="font-medium">{isRu ? 'Подключено!' : 'Connected!'}</p>
               <p className="text-sm text-muted-foreground">
@@ -410,7 +410,7 @@ function PricingStep({ isRu, hasProperties, onSetup }: {
             { labelEn: 'Check-in / Check-out times', labelRu: 'Время заезда / выезда', emoji: '🕐' },
             { labelEn: 'Deposit amount', labelRu: 'Сумма залога', emoji: '🛡️' },
           ].map((item, i) => (
-            <div key={i} className="flex items-center gap-3 p-2 rounded-lg bg-muted/50">
+            <div key={i} className="flex items-center gap-3 p-2 rounded-none bg-muted/50">
               <span className="text-lg">{item.emoji}</span>
               <span className="text-sm">{isRu ? item.labelRu : item.labelEn}</span>
             </div>
@@ -425,7 +425,7 @@ function PricingStep({ isRu, hasProperties, onSetup }: {
           <ArrowRight className="h-4 w-4 ml-2" />
         </Button>
       ) : (
-        <Card className="bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800">
+        <Card className="bg-accent/10 dark:bg-accent/20 border-accent/40 dark:border-accent/40">
           <CardContent className="pt-3 pb-3 flex items-center gap-2">
             <span className="text-lg">⚠️</span>
             <p className="text-sm text-muted-foreground">
@@ -460,7 +460,7 @@ function MessagingStep({ isRu, onSetup }: {
       <Card>
         <CardContent className="pt-4 space-y-2">
           {templates.map((t, i) => (
-            <div key={i} className="flex items-center gap-3 p-2 rounded-lg bg-muted/50">
+            <div key={i} className="flex items-center gap-3 p-2 rounded-none bg-muted/50">
               <Badge variant="secondary" className="text-xs w-6 h-6 flex items-center justify-center p-0 rounded-full">
                 {i + 1}
               </Badge>

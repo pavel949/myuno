@@ -114,7 +114,7 @@ export function VerticalInsightPanel({ verticalId, className }: VerticalInsightP
   return (
     <div className={cn('space-y-4 mt-8', className)}>
       {config.guides.length > 0 && (
-        <div className="rounded-xl border border-border/50 bg-card/50 overflow-hidden">
+        <div className="rounded-none border border-border/50 bg-card/50 overflow-hidden">
           <div className="flex items-center gap-2 px-4 pt-4 pb-2">
             <BookOpen className="w-4 h-4 text-primary" />
             <h3 className="text-sm font-semibold text-foreground">
@@ -140,7 +140,7 @@ export function VerticalInsightPanel({ verticalId, className }: VerticalInsightP
       )}
 
       {config.faqs.length > 0 && (
-        <div className="rounded-xl border border-border/50 bg-card/50 px-4">
+        <div className="rounded-none border border-border/50 bg-card/50 px-4">
           <div className="flex items-center gap-2 pt-4 pb-1">
             <span className="text-sm">❓</span>
             <h3 className="text-sm font-semibold text-foreground">FAQ</h3>
@@ -157,7 +157,7 @@ export function VerticalInsightPanel({ verticalId, className }: VerticalInsightP
 
       <button
         onClick={() => navigate(APP_ROUTES.VIP_CONCIERGE)}
-        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-border/50 bg-card/50 text-sm text-muted-foreground hover:text-foreground hover:border-border hover:bg-muted/30 transition-colors"
+        className="w-full flex items-center justify-center gap-2 py-3 rounded-none border border-border/50 bg-card/50 text-sm text-muted-foreground hover:text-foreground hover:border-border hover:bg-muted/30 transition-colors"
       >
         <MessageCircle className="w-4 h-4 text-primary" />
         {isRu ? 'Нужна помощь? Свяжитесь с VIP Консьержем' : 'Need help? Contact VIP Concierge'}

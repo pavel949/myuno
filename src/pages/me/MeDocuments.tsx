@@ -126,7 +126,7 @@ function DocCard({
         aria-busy={isDeleting}
       >
         <div className="flex items-start gap-3">
-          <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+          <div className="h-10 w-10 rounded-none bg-primary/10 text-primary flex items-center justify-center shrink-0">
             <Icon className="h-5 w-5" />
           </div>
           <div className="flex-1 min-w-0">

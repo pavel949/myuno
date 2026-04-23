@@ -209,7 +209,7 @@ export default function FinancialPlanning() {
       {propertiesLoading ? (
         <div className="space-y-3 mb-4">
           <Skeleton className="h-9 w-full max-w-md" />
-          <Skeleton className="h-64 w-full rounded-xl" />
+          <Skeleton className="h-64 w-full rounded-none" />
         </div>
       ) : noProperties ? (
         <Card className="border-dashed">

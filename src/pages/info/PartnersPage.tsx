@@ -255,9 +255,9 @@ export default function PartnersPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <SectionCard className="text-center bg-gradient-to-br from-primary/10 via-primary/5 to-amber-500/10 border-primary/20">
+          <SectionCard className="text-center bg-gradient-to-br from-primary/10 via-primary/5 to-accent/10 border-primary/20">
             <div className="flex justify-center mb-4">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg">
+              <div className="w-16 h-16 rounded-none bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg">
                 <Handshake className="w-8 h-8 text-primary-foreground" />
               </div>
             </div>
@@ -278,7 +278,7 @@ export default function PartnersPage() {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.2 + index * 0.1 }}
-                  className="bg-background/60 rounded-xl p-3"
+                  className="bg-background/60 rounded-none p-3"
                 >
                   <div className="text-xl font-bold text-primary">{stat.value}</div>
                   <div className="text-xs text-muted-foreground">{stat.label}</div>
@@ -340,7 +340,7 @@ export default function PartnersPage() {
                 >
                   <SectionCard>
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <div className="w-10 h-10 rounded-none bg-primary/10 flex items-center justify-center flex-shrink-0">
                         <Icon className="w-5 h-5 text-primary" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -429,7 +429,7 @@ export default function PartnersPage() {
                 >
                   <div className="flex items-start gap-3">
                     <div className="flex flex-col items-center">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                      <div className={`w-10 h-10 rounded-none flex items-center justify-center ${
                         isLast ? 'bg-success text-white' : 'bg-primary/10'
                       }`}>
                         <Icon className={`w-5 h-5 ${isLast ? '' : 'text-primary'}`} />
@@ -487,7 +487,7 @@ export default function PartnersPage() {
         {/* G-Trust Badge */}
         <SectionCard className="bg-gradient-to-br from-accent-amber/10 to-warning/5 border-accent-amber/20">
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent-amber to-accent-amber/80 flex items-center justify-center flex-shrink-0">
+            <div className="w-12 h-12 rounded-none bg-gradient-to-br from-accent-amber to-accent-amber/80 flex items-center justify-center flex-shrink-0">
               <Crown className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -539,14 +539,14 @@ export default function PartnersPage() {
             {isRu ? 'Контакты для партнёров' : 'Partner Contacts'}
           </h3>
           <div className="grid grid-cols-2 gap-3">
-            <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50">
+            <div className="flex items-center gap-2 p-3 rounded-none bg-muted/50">
               <Mail className="w-5 h-5 text-primary" />
               <div>
                 <p className="text-xs text-muted-foreground">{isRu ? 'Email' : 'Email'}</p>
                 <p className="text-sm font-medium">{COMPANY_CONTACTS.email.partners}</p>
               </div>
             </div>
-            <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50">
+            <div className="flex items-center gap-2 p-3 rounded-none bg-muted/50">
               <Phone className="w-5 h-5 text-primary" />
               <div>
                 <p className="text-xs text-muted-foreground">{isRu ? 'Телефон' : 'Phone'}</p>

@@ -35,15 +35,15 @@ function DeveloperPortalGate({ isRu }: { isRu: boolean }) {
           : 'The developer dashboard is available after you register your company on myUNO. Start onboarding or browse new developments.'}
       </p>
       <div className="mt-8 flex w-full max-w-md flex-col gap-3 sm:flex-row sm:justify-center">
-        <Button asChild className="rounded-xl font-semibold">
+        <Button asChild className="rounded-none font-semibold">
           <Link to={APP_ROUTES.DEVELOPER_PORTAL_ONBOARDING}>
             {isRu ? 'Начать регистрацию' : 'Start registration'}
           </Link>
         </Button>
-        <Button variant="outline" asChild className="rounded-xl border-[hsl(var(--nb-glass-border))] bg-[hsl(var(--nb-glass-bg))]">
+        <Button variant="outline" asChild className="rounded-none border-[hsl(var(--nb-glass-border))] bg-[hsl(var(--nb-glass-bg))]">
           <Link to={APP_ROUTES.DEVELOPER_PORTAL_APPLY}>{isRu ? 'Краткая заявка' : 'Short application'}</Link>
         </Button>
-        <Button variant="ghost" asChild className="rounded-xl text-[hsl(var(--nb-muted))]">
+        <Button variant="ghost" asChild className="rounded-none text-[hsl(var(--nb-muted))]">
           <Link to={APP_ROUTES.NEWBUILDS}>{isRu ? 'Новостройки' : 'New developments'}</Link>
         </Button>
       </div>
@@ -105,7 +105,7 @@ export default function DeveloperPortalLayout() {
                   key={item.path}
                   to={item.path}
                   className={cn(
-                    'flex items-center gap-3 px-4 py-3 rounded-lg text-sm transition-all',
+                    'flex items-center gap-3 px-4 py-3 rounded-none text-sm transition-all',
                     active
                       ? 'bg-[hsl(var(--nb-gold)/0.15)] text-[hsl(var(--nb-gold))] font-medium'
                       : 'text-[hsl(var(--nb-text-secondary))] hover:text-[hsl(var(--nb-text))] hover:bg-[hsl(var(--nb-glass-bg))]'

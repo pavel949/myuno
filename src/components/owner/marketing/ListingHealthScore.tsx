@@ -116,7 +116,7 @@ export function ListingHealthScore({ score, className }: ListingHealthScoreProps
           {categories.map((cat) => (
             <div key={cat.key} className="flex items-center gap-2">
               <div className={cn(
-                "w-8 h-8 rounded-lg flex items-center justify-center",
+                "w-8 h-8 rounded-none flex items-center justify-center",
                 cat.score >= 80 ? "bg-success/15 text-success" :
                 cat.score >= 60 ? "bg-warning/15 text-warning" :
                 "bg-destructive/15 text-destructive"
@@ -139,7 +139,7 @@ export function ListingHealthScore({ score, className }: ListingHealthScoreProps
         
         {/* Missing Fields Warning */}
         {score.missing_fields.length > 0 && (
-          <div className="flex items-start gap-2 p-3 bg-destructive/10 rounded-lg">
+          <div className="flex items-start gap-2 p-3 bg-destructive/10 rounded-none">
             <AlertCircle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-medium text-destructive">
@@ -163,7 +163,7 @@ export function ListingHealthScore({ score, className }: ListingHealthScoreProps
               <div 
                 key={index} 
                 className={cn(
-                  "flex items-start gap-2 p-2 rounded-lg text-sm",
+                  "flex items-start gap-2 p-2 rounded-none text-sm",
                   tip.priority === 'high' ? "bg-destructive/10" :
                   tip.priority === 'medium' ? "bg-warning/10" :
                   "bg-muted"

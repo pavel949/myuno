@@ -58,7 +58,7 @@ const VeterinaryPage = () => {
         </div>
 
         {/* Filters */}
-        <div className="flex items-center gap-4 mb-4 p-3 bg-muted/50 rounded-lg">
+        <div className="flex items-center gap-4 mb-4 p-3 bg-muted/50 rounded-none">
           <div className="flex items-center gap-2">
             <Switch id="24h" checked={show24h} onCheckedChange={setShow24h} />
             <Label htmlFor="24h" className="text-sm cursor-pointer">
@@ -165,7 +165,7 @@ const VeterinaryPage = () => {
                     <img 
                       src={selectedClinic.cover_image} 
                       alt={getName(selectedClinic)}
-                      className="w-full h-48 object-cover rounded-lg"
+                      className="w-full h-48 object-cover rounded-none"
                     />
                   )}
 
@@ -253,7 +253,7 @@ const VeterinaryPage = () => {
 
                   {/* Price */}
                   {selectedClinic.price_consultation && (
-                    <div className="p-3 bg-muted rounded-lg">
+                    <div className="p-3 bg-muted rounded-none">
                       <p className="text-xs text-muted-foreground">
                         {isRussian ? 'Консультация от' : 'Consultation from'}
                       </p>
@@ -297,10 +297,10 @@ const ClinicCard = ({ clinic, isRussian, getName, onClick }: ClinicCardProps) =>
           <img 
             src={clinic.cover_image} 
             alt={getName(clinic)}
-            className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
+            className="w-16 h-16 rounded-none object-cover flex-shrink-0"
           />
         ) : (
-          <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-accent-coral to-destructive flex items-center justify-center flex-shrink-0">
+          <div className="w-16 h-16 rounded-none bg-gradient-to-br from-accent-coral to-destructive flex items-center justify-center flex-shrink-0">
             <Stethoscope className="h-7 w-7 text-white" />
           </div>
         )}

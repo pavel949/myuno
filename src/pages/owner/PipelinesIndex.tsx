@@ -28,7 +28,7 @@ function PipelineCard({ pipeline, dealCount, totalValue, isRu, onClick }: {
   return (
     <button
       onClick={onClick}
-      className="text-left border rounded-xl p-5 bg-card hover:border-primary/50 hover:shadow-md transition-all group"
+      className="text-left border rounded-none p-5 bg-card hover:border-primary/50 hover:shadow-md transition-all group"
     >
       <div className="flex items-start justify-between mb-3">
         <div>
@@ -45,7 +45,7 @@ function PipelineCard({ pipeline, dealCount, totalValue, isRu, onClick }: {
 
       <div className="grid grid-cols-2 gap-3 mt-4">
         <div className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+          <div className="h-8 w-8 rounded-none bg-primary/10 flex items-center justify-center">
             <Layers className="h-4 w-4 text-primary" />
           </div>
           <div>
@@ -54,7 +54,7 @@ function PipelineCard({ pipeline, dealCount, totalValue, isRu, onClick }: {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-success/10 flex items-center justify-center">
+          <div className="h-8 w-8 rounded-none bg-success/10 flex items-center justify-center">
             <DollarSign className="h-4 w-4 text-success" />
           </div>
           <div>
@@ -109,7 +109,7 @@ export default function PipelinesIndex() {
       <div className="p-4 md:p-6 space-y-4">
         <Skeleton className="h-8 w-48" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="h-48 rounded-xl" />)}
+          {[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="h-48 rounded-none" />)}
         </div>
       </div>
     );

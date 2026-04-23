@@ -76,7 +76,7 @@ export function CrmAiAssistantPanel({ contactId, dealId, companyId }: Props) {
         )}
 
         {result && (
-          <div className="bg-muted/50 rounded-lg p-3 text-sm prose prose-sm max-w-none dark:prose-invert">
+          <div className="bg-muted/50 rounded-none p-3 text-sm prose prose-sm max-w-none dark:prose-invert">
             <ReactMarkdown>{result}</ReactMarkdown>
           </div>
         )}

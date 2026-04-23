@@ -82,7 +82,7 @@ export default function ResaleIndex() {
                 )}
               </Button>
             </SheetTrigger>
-            <SheetContent side="bottom" className="h-[60vh] rounded-t-2xl">
+            <SheetContent side="bottom" className="h-[60vh] rounded-none">
               <SheetHeader>
                 <SheetTitle>{isRu ? 'Фильтры' : 'Filters'}</SheetTitle>
               </SheetHeader>
@@ -162,7 +162,7 @@ export default function ResaleIndex() {
         {isLoading ? (
           <div className="space-y-4">
             {[1, 2, 3].map(i => (
-              <Skeleton key={i} className="h-64 rounded-xl" />
+              <Skeleton key={i} className="h-64 rounded-none" />
             ))}
           </div>
         ) : properties && properties.length > 0 ? (

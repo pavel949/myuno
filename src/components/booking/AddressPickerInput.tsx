@@ -177,7 +177,7 @@ export function AddressPickerInput({
           type="button"
           onClick={() => setIsOpen(true)}
           className={cn(
-            'w-full flex items-center gap-3 p-3 rounded-xl border bg-card text-left transition-all',
+            'w-full flex items-center gap-3 p-3 rounded-none border bg-card text-left transition-all',
             'hover:border-primary/50 focus:border-primary focus:ring-2 focus:ring-primary/20',
             value ? 'border-border' : 'border-dashed border-muted-foreground/30'
           )}
@@ -241,7 +241,7 @@ export function AddressPickerInput({
             </div>
 
             {searchResults.length > 0 && (
-              <div className="bg-muted/50 rounded-lg divide-y divide-border overflow-hidden">
+              <div className="bg-muted/50 rounded-none divide-y divide-border overflow-hidden">
                 {searchResults.map((result, index) => (
                   <button
                     key={index}
@@ -279,7 +279,7 @@ export function AddressPickerInput({
               </div>
             )}
 
-            <div className="flex-1 relative rounded-xl overflow-hidden border min-h-[200px]">
+            <div className="flex-1 relative rounded-none overflow-hidden border min-h-[200px]">
               {mapPlaceholder}
               {showMap && (
                 <GoogleMap
@@ -313,7 +313,7 @@ export function AddressPickerInput({
             </div>
 
             {selectedAddress && (
-              <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
+              <div className="p-3 bg-primary/5 rounded-none border border-primary/20">
                 <div className="text-xs text-muted-foreground mb-1">
                   {language === 'ru' ? 'Выбранный адрес:' : 'Selected address:'}
                 </div>

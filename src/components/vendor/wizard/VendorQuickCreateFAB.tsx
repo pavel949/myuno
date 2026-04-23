@@ -136,7 +136,7 @@ export function VendorQuickCreateFAB({
           </Button>
         </SheetTrigger>
         
-        <SheetContent side="bottom" className="rounded-t-2xl max-h-[80vh]">
+        <SheetContent side="bottom" className="rounded-none max-h-[80vh]">
           <SheetHeader className="pb-4">
             <SheetTitle className="flex items-center gap-2">
               <Plus className="h-5 w-5 text-primary" />

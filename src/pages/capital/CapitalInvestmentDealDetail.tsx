@@ -64,7 +64,7 @@ export default function CapitalInvestmentDealDetail() {
           <div className="flex flex-wrap gap-1.5 mt-1.5">
             <Badge variant="secondary">{DEAL_INTENTS.find(i => i.key === deal.deal_intent)?.icon} {deal.deal_intent}</Badge>
             <Badge variant="outline">{deal.category}</Badge>
-            <Badge className="bg-emerald-500/15 text-emerald-500">{fmtUsd(deal.deal_size_midpoint_usd)}</Badge>
+            <Badge className="bg-success/15 text-success">{fmtUsd(deal.deal_size_midpoint_usd)}</Badge>
             <Badge variant="outline">≈ {fmtUsd(Number(deal.platform_fee_estimate_usd || 0))} комиссия</Badge>
           </div>
         </div>
@@ -119,7 +119,7 @@ export default function CapitalInvestmentDealDetail() {
               <Switch checked={form.is_published} onCheckedChange={(v) => setForm(f => ({ ...f, is_published: v }))} />
               <Label className="text-xs">Опубликовать на доске инвесторов</Label>
             </div>
-            <Button onClick={save} disabled={update.isPending} className="w-full bg-emerald-500 hover:bg-emerald-600">
+            <Button onClick={save} disabled={update.isPending} className="w-full bg-success hover:bg-success">
               <Save className="w-4 h-4 mr-1" /> Сохранить
             </Button>
             <p className="text-[10px] text-muted-foreground">Изменения автоматически отражаются в воронке Capital и в карточке контакта.</p>
@@ -134,7 +134,7 @@ export default function CapitalInvestmentDealDetail() {
           {inquiries.length === 0 ? (
             <p className="text-xs text-muted-foreground">Пока нет запросов</p>
           ) : inquiries.map(inq => (
-            <div key={inq.id} className="border border-border/40 rounded p-2 text-sm">
+            <div key={inq.id} className="border border-border/40 rounded-none p-2 text-sm">
               <div className="flex items-center justify-between">
                 <span className="font-medium">{inq.investor_name}</span>
                 <Badge variant="outline" className="text-[10px]">{inq.investor_type}</Badge>

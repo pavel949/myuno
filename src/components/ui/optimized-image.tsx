@@ -174,7 +174,7 @@ export const OptimizedThumbnail = memo(function OptimizedThumbnail({
   alt,
   size = 80,
   className,
-  rounded = 'lg',
+  rounded-none = 'lg',
 }: {
   src: string;
   alt: string;
@@ -184,10 +184,10 @@ export const OptimizedThumbnail = memo(function OptimizedThumbnail({
 }) {
   const roundedClasses = {
     none: '',
-    sm: 'rounded-sm',
-    md: 'rounded-md',
-    lg: 'rounded-lg',
-    xl: 'rounded-xl',
+    sm: 'rounded-none',
+    md: 'rounded-none',
+    lg: 'rounded-none',
+    xl: 'rounded-none',
     full: 'rounded-full',
   };
 

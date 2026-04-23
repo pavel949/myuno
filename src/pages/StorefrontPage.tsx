@@ -117,7 +117,7 @@ export default function StorefrontPage() {
         <div className="mb-8">
           <div className="flex items-center gap-4 mb-4">
             {company.logo && (
-              <img src={company.logo} alt={company.name_en} className="h-16 w-16 rounded-lg object-cover" />
+              <img src={company.logo} alt={company.name_en} className="h-16 w-16 rounded-none object-cover" />
             )}
             <div>
               <h1 className="text-2xl font-bold">{isRu ? company.name_ru : company.name_en}</h1>

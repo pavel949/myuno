@@ -116,11 +116,11 @@ export default function OwnerCalendar() {
           </p>
         </div>
         {allProperties.length > 1 && (
-          <div className="flex items-center gap-1 bg-muted rounded-lg p-0.5">
+          <div className="flex items-center gap-1 bg-muted rounded-none p-0.5">
             <button
               onClick={() => setViewMode('multi')}
               className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors",
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-none text-xs font-medium transition-colors",
                 isMulti ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
               )}
             >
@@ -130,7 +130,7 @@ export default function OwnerCalendar() {
             <button
               onClick={() => setViewMode('single')}
               className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors",
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-none text-xs font-medium transition-colors",
                 !isMulti ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
               )}
             >
@@ -224,7 +224,7 @@ export default function OwnerCalendar() {
           {/* iCal Sync - Collapsible */}
           {selectedPropertyId && (
             <Accordion type="single" collapsible>
-              <AccordionItem value="sync" className="border rounded-lg">
+              <AccordionItem value="sync" className="border rounded-none">
                 <AccordionTrigger className="px-4 py-3 hover:no-underline">
                   <span className="flex items-center gap-2 text-sm font-medium">
                     <RefreshCw className="h-4 w-4" />

@@ -32,8 +32,8 @@ export default function InvestmentBusinessDetail() {
     return (
       <MiniAppLayout title={isRu ? 'Загрузка...' : 'Loading...'} showSearch={false}>
         <div className="space-y-4">
-          <Skeleton className="h-48 rounded-xl" />
-          <Skeleton className="h-32 rounded-xl" />
+          <Skeleton className="h-48 rounded-none" />
+          <Skeleton className="h-32 rounded-none" />
         </div>
       </MiniAppLayout>
     );
@@ -72,7 +72,7 @@ export default function InvestmentBusinessDetail() {
       <MiniAppLayout title={isRu ? 'Объявление' : 'Listing'} showSearch={false}>
         <div className="space-y-4 pb-10">
           {/* Hero */}
-          <div className="relative h-44 rounded-xl bg-gradient-to-br from-primary/20 via-accent/10 to-muted/20 flex items-center justify-center overflow-hidden">
+          <div className="relative h-44 rounded-none bg-gradient-to-br from-primary/20 via-accent/10 to-muted/20 flex items-center justify-center overflow-hidden">
             <span className="text-7xl opacity-80">{assetMeta?.icon ?? '💼'}</span>
             <Badge variant="secondary" className="absolute top-3 right-3 gap-1">
               <Lock className="h-3 w-3" /> {isRu ? 'Анонимно' : 'Anonymous'}

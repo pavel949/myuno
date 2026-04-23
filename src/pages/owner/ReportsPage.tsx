@@ -472,7 +472,7 @@ export default function ReportsPage() {
       <Card className="mb-4 border-dashed bg-muted/20">
         <CardContent className="py-3 sm:py-3.5 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm">
           <div className="flex items-start gap-2 min-w-0">
-            <LineChart className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+            <LineChart className="h-4 w-4 text-success dark:text-success shrink-0 mt-0.5" />
             <p className="text-muted-foreground">
               {isRu
                 ? 'Отчёты строятся из фактов, периодов и политик учёта. Прогнозы, сценарии и DCF — в разделе финансового планирования.'
@@ -512,7 +512,7 @@ export default function ReportsPage() {
             <div className="flex items-center gap-1.5 mb-4 overflow-x-auto pb-1">
               <button
                 onClick={() => { setFilterScope('all'); setFilterComplexId(''); setFilterOwnerId(''); }}
-                className={`px-2.5 py-1 rounded-md text-xs font-medium shrink-0 border transition-colors ${
+                className={`px-2.5 py-1 rounded-none text-xs font-medium shrink-0 border transition-colors ${
                   filterScope === 'all' ? 'bg-primary/10 text-primary border-primary/30' : 'bg-secondary border-border text-muted-foreground'
                 }`}
               >
@@ -528,7 +528,7 @@ export default function ReportsPage() {
                   <button
                     key={c.id}
                     onClick={() => { setFilterScope('complex'); setFilterComplexId(c.id); setFilterOwnerId(''); }}
-                    className={`px-2.5 py-1 rounded-md text-xs font-medium shrink-0 border transition-colors ${
+                    className={`px-2.5 py-1 rounded-none text-xs font-medium shrink-0 border transition-colors ${
                       filterScope === 'complex' && filterComplexId === c.id
                         ? 'bg-primary/10 text-primary border-primary/30'
                         : 'bg-secondary border-border text-muted-foreground'
@@ -545,7 +545,7 @@ export default function ReportsPage() {
                   <button
                     key={o.id}
                     onClick={() => { setFilterScope('owner'); setFilterOwnerId(o.id); setFilterComplexId(''); }}
-                    className={`px-2.5 py-1 rounded-md text-xs font-medium shrink-0 border transition-colors ${
+                    className={`px-2.5 py-1 rounded-none text-xs font-medium shrink-0 border transition-colors ${
                       filterScope === 'owner' && filterOwnerId === o.id
                         ? 'bg-primary/10 text-primary border-primary/30'
                         : 'bg-secondary border-border text-muted-foreground'
@@ -708,7 +708,7 @@ export default function ReportsPage() {
                           setEmailRecipients(emails.length ? `${emailRecipients}, ${o.email}` : o.email);
                         }
                       }}
-                      className={`px-2.5 py-1 rounded-md text-xs font-medium border transition-colors ${
+                      className={`px-2.5 py-1 rounded-none text-xs font-medium border transition-colors ${
                         emailRecipients.includes(o.email)
                           ? 'bg-primary/10 border-primary/30 text-primary'
                           : 'bg-secondary border-border text-muted-foreground hover:text-foreground'

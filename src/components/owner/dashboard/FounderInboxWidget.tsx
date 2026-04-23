@@ -9,9 +9,9 @@ import { useFounderInbox, type FounderInboxItem } from '@/hooks/useFounderInbox'
 import { APP_ROUTES } from '@/lib/config/routes';
 
 const SOURCE_CONFIG = {
-  task: { icon: ClipboardList, color: 'bg-blue-500/10 text-blue-600', label: 'Task', labelRu: 'Задача', route: APP_ROUTES.MC_TASKS },
-  deal: { icon: Handshake, color: 'bg-emerald-500/10 text-emerald-600', label: 'Deal', labelRu: 'Сделка', route: APP_ROUTES.MC_SALES },
-  prospect: { icon: Target, color: 'bg-purple-500/10 text-purple-600', label: 'Prospect', labelRu: 'Проспект', route: '/mc/vendor-acquisition' },
+  task: { icon: ClipboardList, color: 'bg-primary/10 text-primary', label: 'Task', labelRu: 'Задача', route: APP_ROUTES.MC_TASKS },
+  deal: { icon: Handshake, color: 'bg-success/10 text-success', label: 'Deal', labelRu: 'Сделка', route: APP_ROUTES.MC_SALES },
+  prospect: { icon: Target, color: 'bg-primary/10 text-primary', label: 'Prospect', labelRu: 'Проспект', route: '/mc/vendor-acquisition' },
 };
 
 const PRIORITY_BADGE: Record<string, string> = {
@@ -30,9 +30,9 @@ function InboxItem({ item }: { item: FounderInboxItem }) {
   return (
     <button
       onClick={() => navigate(config.route)}
-      className="flex items-center gap-3 w-full text-left py-2 px-2 rounded-lg hover:bg-muted/50 transition-colors"
+      className="flex items-center gap-3 w-full text-left py-2 px-2 rounded-none hover:bg-muted/50 transition-colors"
     >
-      <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${config.color}`}>
+      <div className={`w-8 h-8 rounded-none flex items-center justify-center flex-shrink-0 ${config.color}`}>
         <Icon className="h-4 w-4" />
       </div>
       <div className="flex-1 min-w-0">
@@ -54,7 +54,7 @@ export function FounderInboxWidget() {
   const { data: items, isLoading } = useFounderInbox(8);
 
   if (isLoading) {
-    return <Skeleton className="h-[200px] rounded-xl" />;
+    return <Skeleton className="h-[200px] rounded-none" />;
   }
 
   if (!items?.length) return null;

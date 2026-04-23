@@ -186,7 +186,7 @@ export function ListingWizard() {
       
       {/* Saving indicator */}
       {isSaving && (
-        <div className="fixed bottom-4 left-4 bg-muted px-3 py-2 rounded-lg text-sm text-muted-foreground">
+        <div className="fixed bottom-4 left-4 bg-muted px-3 py-2 rounded-none text-sm text-muted-foreground">
           {isRu ? 'Сохранение...' : 'Saving...'}
         </div>
       )}

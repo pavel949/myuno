@@ -81,7 +81,7 @@ export const GlobalSearchModal = memo(forwardRef<HTMLDivElement, GlobalSearchMod
             {query && (
               <button
                 onClick={() => setQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-muted rounded"
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-muted rounded-none"
               >
                 <X className="w-4 h-4 text-muted-foreground" />
               </button>
@@ -127,16 +127,16 @@ export const GlobalSearchModal = memo(forwardRef<HTMLDivElement, GlobalSearchMod
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: index * 0.05 }}
                           onClick={() => handleSelect(item)}
-                          className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-muted transition-colors text-left"
+                          className="w-full flex items-center gap-3 p-3 rounded-none hover:bg-muted transition-colors text-left"
                         >
                           {item.image ? (
                             <img
                               src={item.image}
                               alt=""
-                              className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
+                              className="w-12 h-12 rounded-none object-cover flex-shrink-0"
                             />
                           ) : (
-                            <div className={cn("w-12 h-12 rounded-lg flex items-center justify-center bg-gradient-to-br flex-shrink-0", config?.color || 'from-gray-500 to-gray-600')}>
+                            <div className={cn("w-12 h-12 rounded-none flex items-center justify-center bg-gradient-to-br flex-shrink-0", config?.color || 'from-gray-500 to-gray-600')}>
                               <Icon className="w-6 h-6 text-white" />
                             </div>
                           )}
@@ -241,10 +241,10 @@ export const GlobalSearchModal = memo(forwardRef<HTMLDivElement, GlobalSearchMod
                             onOpenChange(false);
                             navigate(`/${key === 'property' ? 'property' : key}`);
                           }}
-                          className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-muted transition-colors"
+                          className="flex flex-col items-center gap-1.5 p-2 rounded-none hover:bg-muted transition-colors"
                         >
                           <div className={cn(
-                            "w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br",
+                            "w-10 h-10 rounded-none flex items-center justify-center bg-gradient-to-br",
                             config.color
                           )}>
                             <Icon className="w-5 h-5 text-white" />

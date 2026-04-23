@@ -295,7 +295,7 @@ export function UserAvatarMenu() {
 
       <DropdownMenuContent
         align="end"
-        className="w-72 p-0 rounded-2xl shadow-xl border border-border/50 max-h-[min(85vh,560px)] overflow-y-auto overflow-x-hidden"
+        className="w-72 p-0 rounded-none shadow-xl border border-border/50 max-h-[min(85vh,560px)] overflow-y-auto overflow-x-hidden"
       >
         {/* Role switch + developer portal — top, prominent (portal is not an AppRole) */}
         <DropdownMenuGroup>
@@ -321,9 +321,9 @@ export function UserAvatarMenu() {
                   setViewAsError(null);
                   setViewAsOpen(true);
                 }}
-                className="flex items-center gap-3 px-4 py-3 cursor-pointer focus:bg-muted/50 bg-amber-500/5"
+                className="flex items-center gap-3 px-4 py-3 cursor-pointer focus:bg-muted/50 bg-accent/5"
               >
-                <Eye className="w-5 h-5 text-amber-700 dark:text-amber-400 flex-shrink-0" />
+                <Eye className="w-5 h-5 text-accent dark:text-accent flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-foreground">
                     {isRu ? 'Просмотр от имени пользователя' : 'View as user (audit)'}

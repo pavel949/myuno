@@ -108,7 +108,7 @@ export default function InvestmentServicesZone() {
                 <Card key={idx} className="hover:border-primary/30 transition-colors">
                   <CardContent className="p-4 space-y-2">
                     <div className="flex items-start justify-between">
-                      <div className="w-9 h-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                      <div className="w-9 h-9 rounded-none bg-primary/10 text-primary flex items-center justify-center">
                         <Icon className="h-4 w-4" />
                       </div>
                       {svc.badgeRu && (
@@ -125,9 +125,9 @@ export default function InvestmentServicesZone() {
             })}
           </div>
 
-          <section className="rounded-xl bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 p-5 space-y-3">
+          <section className="rounded-none bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 p-5 space-y-3">
             <div className="flex items-start gap-3">
-              <div className="p-2 rounded-lg bg-primary/20">
+              <div className="p-2 rounded-none bg-primary/20">
                 <ShieldCheck className="h-5 w-5 text-primary" />
               </div>
               <div className="flex-1">

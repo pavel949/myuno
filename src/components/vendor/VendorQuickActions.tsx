@@ -45,7 +45,7 @@ const quickActions: QuickAction[] = [
     title: 'Analytics', 
     titleRu: 'Аналитика',
     href: '/vendor/analytics',
-    color: 'text-purple-500'
+    color: 'text-primary'
   },
   { 
     id: 'payouts',
@@ -61,7 +61,7 @@ const quickActions: QuickAction[] = [
     title: 'Messages', 
     titleRu: 'Сообщения',
     href: '/vendor/messages',
-    color: 'text-pink-500'
+    color: 'text-accent'
   },
   { 
     id: 'settings',

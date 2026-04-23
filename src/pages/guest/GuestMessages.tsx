@@ -161,13 +161,13 @@ const ConversationCard: React.FC<ConversationCardProps> = ({
     <button
       onClick={onClick}
       className={cn(
-        "w-full flex items-center gap-3 p-3 rounded-xl text-left transition-colors",
+        "w-full flex items-center gap-3 p-3 rounded-none text-left transition-colors",
         "hover:bg-muted/50 active:bg-muted",
         conversation.unreadCount > 0 && "bg-primary/5"
       )}
     >
       {/* Property Image */}
-      <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-muted">
+      <div className="w-14 h-14 rounded-none overflow-hidden flex-shrink-0 bg-muted">
         {conversation.propertyImage ? (
           <img 
             src={conversation.propertyImage} 

@@ -57,7 +57,7 @@ export function KnowledgeCard({
       onClick={() => navigate(`/knowledge/${section}`)}
     >
       <CardContent className="p-4 flex items-center gap-4">
-        <div className={cn("p-3 rounded-xl", colorClass)}>
+        <div className={cn("p-3 rounded-none", colorClass)}>
           <IconComponent className="h-6 w-6" />
         </div>
         <div className="flex-1 min-w-0">

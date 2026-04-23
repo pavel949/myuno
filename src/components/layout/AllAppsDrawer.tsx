@@ -63,7 +63,7 @@ export function AllAppsDrawer({ open, onOpenChange }: AllAppsDrawerProps) {
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="rounded-t-3xl h-[90vh] max-h-[90vh] flex flex-col pb-safe">
+      <SheetContent side="bottom" className="rounded-none h-[90vh] max-h-[90vh] flex flex-col pb-safe">
         <SheetHeader className="pb-2 shrink-0">
           <div className="flex items-center justify-between">
             <SheetTitle className="text-lg font-bold">
@@ -87,11 +87,11 @@ export function AllAppsDrawer({ open, onOpenChange }: AllAppsDrawerProps) {
               navigate(APP_ROUTES.DEVELOPER_PORTAL);
             }}
             className={cn(
-              'w-full flex items-center gap-3 px-4 py-3 mb-2 rounded-2xl text-left shrink-0',
+              'w-full flex items-center gap-3 px-4 py-3 mb-2 rounded-none text-left shrink-0',
               'bg-primary/10 border border-primary/20 hover:bg-primary/15 transition-colors',
             )}
           >
-            <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 rounded-none bg-primary/20 flex items-center justify-center shrink-0">
               <Construction className="w-5 h-5 text-primary" />
             </div>
             <div className="min-w-0 flex-1">
@@ -126,14 +126,14 @@ export function AllAppsDrawer({ open, onOpenChange }: AllAppsDrawerProps) {
                         type="button"
                         onClick={() => handleAppClick(app.path)}
                         className={cn(
-                          'flex flex-col items-center gap-1.5 p-3 rounded-2xl',
+                          'flex flex-col items-center gap-1.5 p-3 rounded-none',
                           'transition-all duration-200 active:scale-95',
                           'hover:bg-secondary/80',
                         )}
                       >
                         <div
                           className={cn(
-                            'w-12 h-12 rounded-2xl flex items-center justify-center',
+                            'w-12 h-12 rounded-none flex items-center justify-center',
                             'bg-gradient-to-br',
                             app.color || 'from-primary/20 to-primary/10',
                           )}

@@ -91,8 +91,8 @@ export default function CrmCompaniesPage() {
     return (
       <div className="p-4 md:p-6 lg:p-8 space-y-4 max-w-[1536px] mx-auto">
         <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-24 w-full rounded-xl" />
-        <Skeleton className="h-24 w-full rounded-xl" />
+        <Skeleton className="h-24 w-full rounded-none" />
+        <Skeleton className="h-24 w-full rounded-none" />
       </div>
     );
   }
@@ -143,9 +143,9 @@ export default function CrmCompaniesPage() {
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
                     {c.logo_url ? (
-                      <img src={c.logo_url} alt="" className="h-10 w-10 rounded-lg object-cover" />
+                      <img src={c.logo_url} alt="" className="h-10 w-10 rounded-none object-cover" />
                     ) : (
-                      <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <div className="h-10 w-10 rounded-none bg-primary/10 flex items-center justify-center">
                         <Building2 className="h-5 w-5 text-primary" />
                       </div>
                     )}
@@ -206,7 +206,7 @@ export default function CrmCompaniesPage() {
 
       {/* Create Sheet */}
       <Sheet open={showCreate} onOpenChange={setShowCreate}>
-        <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto rounded-t-2xl">
+        <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto rounded-none">
           <SheetHeader>
             <SheetTitle>{isRu ? 'Новая компания' : 'New Company'}</SheetTitle>
           </SheetHeader>

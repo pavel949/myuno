@@ -82,7 +82,7 @@ export default function AboutPage() {
         : isTh 
         ? ['15+ หมวดหมู่บริการ', 'จองออนไลน์ 24/7', 'จัดการทรัพย์สิน', 'การวิเคราะห์ทางการเงิน']
         : ['15+ service categories', 'Online booking 24/7', 'Property management', 'Financial analytics'],
-      color: 'from-blue-500 to-cyan-500'
+      color: 'from-primary to-primary'
     },
     {
       icon: Users2,
@@ -92,7 +92,7 @@ export default function AboutPage() {
         : isTh 
         ? ['ทีมในท้องถิ่น', 'SOS ออกบริการ 24/7', 'ช่วยเหลือส่วนตัว', 'แก้ปัญหาด้วยตนเอง']
         : ['Local team on-site', 'SOS dispatch 24/7', 'Personal assistance', 'Real-world problem solving'],
-      color: 'from-green-500 to-emerald-500'
+      color: 'from-success to-success'
     },
     {
       icon: HandshakeIcon,
@@ -102,7 +102,7 @@ export default function AboutPage() {
         : isTh 
         ? ['500+ พันธมิตรที่ได้รับการยืนยัน', 'ทุกคนผ่าน G-Trust', 'สนับสนุนหลายภาษา', 'ความเชี่ยวชาญท้องถิ่น']
         : ['500+ verified partners', 'All G-Trust certified', 'Multilingual support', 'Local expertise'],
-      color: 'from-amber-500 to-orange-500'
+      color: 'from-accent to-accent'
     },
   ];
 
@@ -345,7 +345,7 @@ export default function AboutPage() {
           transition={{ duration: 0.5 }}
         >
           <SectionCard className="text-center bg-gradient-to-br from-primary/10 via-background to-accent/10 border-primary/20">
-            <div className="w-20 h-20 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-none bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg">
               <Globe className="w-10 h-10 text-primary-foreground" />
             </div>
             <h1 className="text-2xl md:text-3xl font-display font-bold mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
@@ -406,8 +406,8 @@ export default function AboutPage() {
               {infrastructurePillars.map((pillar, index) => {
                 const Icon = pillar.icon;
                 return (
-                  <div key={index} className="p-4 rounded-xl border bg-card hover:shadow-md transition-shadow">
-                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${pillar.color} flex items-center justify-center mb-3`}>
+                  <div key={index} className="p-4 rounded-none border bg-card hover:shadow-md transition-shadow">
+                    <div className={`w-12 h-12 rounded-none bg-gradient-to-br ${pillar.color} flex items-center justify-center mb-3`}>
                       <Icon className="w-6 h-6 text-white" />
                     </div>
                     <h3 className="font-semibold mb-2">{pillar.title}</h3>
@@ -439,7 +439,7 @@ export default function AboutPage() {
               return (
                 <SectionCard key={index} className={`${segment.color} border`}>
                   <div className="flex items-start gap-3">
-                    <div className={`w-10 h-10 rounded-lg bg-background flex items-center justify-center shrink-0`}>
+                    <div className={`w-10 h-10 rounded-none bg-background flex items-center justify-center shrink-0`}>
                       <Icon className={`w-5 h-5 ${segment.iconColor}`} />
                     </div>
                     <div className="flex-1">
@@ -497,7 +497,7 @@ export default function AboutPage() {
                 return (
                   <div 
                     key={index}
-                    className="p-3 rounded-xl border bg-card hover:shadow-sm transition-shadow text-center"
+                    className="p-3 rounded-none border bg-card hover:shadow-sm transition-shadow text-center"
                   >
                     <Icon className="w-6 h-6 mx-auto mb-2 text-primary" />
                     <h4 className="text-xs font-medium mb-0.5 line-clamp-1">{task.title}</h4>
@@ -520,7 +520,7 @@ export default function AboutPage() {
         >
           <SectionCard className="bg-gradient-to-br from-accent-purple/5 to-accent-purple/10 border-accent-purple/20">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-accent-purple/20 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-none bg-accent-purple/20 flex items-center justify-center">
                 <Building2 className="w-6 h-6 text-accent-purple" />
               </div>
               <div>
@@ -535,7 +535,7 @@ export default function AboutPage() {
 
             <div className="grid md:grid-cols-2 gap-4">
               {/* Pain points */}
-              <div className="p-4 rounded-xl bg-destructive/5 border border-destructive/20">
+              <div className="p-4 rounded-none bg-destructive/5 border border-destructive/20">
                 <h3 className="font-medium text-sm mb-3 flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4 text-destructive" />
                   {isRu ? 'Знакомые проблемы?' : isTh ? 'ปัญหาที่คุ้นเคย?' : 'Familiar problems?'}
@@ -551,7 +551,7 @@ export default function AboutPage() {
               </div>
 
               {/* Solutions */}
-              <div className="p-4 rounded-xl bg-success/5 border border-success/20">
+              <div className="p-4 rounded-none bg-success/5 border border-success/20">
                 <h3 className="font-medium text-sm mb-3 flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-success" />
                   {isRu ? 'myUNO решает эти задачи' : isTh ? 'myUNO แก้ปัญหาเหล่านี้' : 'myUNO solves these'}
@@ -602,9 +602,9 @@ export default function AboutPage() {
                 return (
                   <div 
                     key={index}
-                    className="flex flex-col items-center p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors cursor-pointer"
+                    className="flex flex-col items-center p-3 rounded-none bg-muted/50 hover:bg-muted transition-colors cursor-pointer"
                   >
-                    <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${vertical.color} flex items-center justify-center mb-2`}>
+                    <div className={`w-10 h-10 rounded-none bg-gradient-to-br ${vertical.color} flex items-center justify-center mb-2`}>
                       <Icon className="w-5 h-5 text-white" />
                     </div>
                     <span className="text-[10px] text-center text-muted-foreground leading-tight">{vertical.name}</span>
@@ -623,7 +623,7 @@ export default function AboutPage() {
         >
           <SectionCard className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-none bg-primary/20 flex items-center justify-center">
                 <Shield className="w-6 h-6 text-primary" />
               </div>
               <div>
@@ -644,7 +644,7 @@ export default function AboutPage() {
               {verificationSteps.map((step, index) => {
                 const Icon = step.icon;
                 return (
-                  <div key={index} className="flex items-start gap-2 p-3 rounded-lg bg-background/50">
+                  <div key={index} className="flex items-start gap-2 p-3 rounded-none bg-background/50">
                     <Icon className="w-5 h-5 text-primary mt-0.5 shrink-0" />
                     <div>
                       <h4 className="text-sm font-medium">{step.title}</h4>
@@ -697,7 +697,7 @@ export default function AboutPage() {
               {roadmap.map((phase, index) => (
                 <div 
                   key={index}
-                  className={`p-4 rounded-xl border ${
+                  className={`p-4 rounded-none border ${
                     phase.status === 'current' 
                       ? 'border-primary bg-primary/5' 
                       : phase.status === 'completed'
@@ -706,7 +706,7 @@ export default function AboutPage() {
                   }`}
                 >
                   <div className="flex items-center gap-2 mb-2">
-                    <span className={`px-2 py-0.5 rounded text-xs font-bold ${
+                    <span className={`px-2 py-0.5 rounded-none text-xs font-bold ${
                       phase.status === 'current' 
                         ? 'bg-primary text-primary-foreground' 
                         : phase.status === 'completed'

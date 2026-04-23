@@ -217,7 +217,7 @@ export function PropertySearchSheet({ open, onOpenChange, initial, onSearch }: P
           {/* Sheet */}
           <motion.div
             key="search-sheet"
-            className="fixed inset-x-0 bottom-0 z-[101] bg-background rounded-t-3xl shadow-2xl flex flex-col max-h-[92vh]"
+            className="fixed inset-x-0 bottom-0 z-[101] bg-background rounded-none shadow-2xl flex flex-col max-h-[92vh]"
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
@@ -272,14 +272,14 @@ export function PropertySearchSheet({ open, onOpenChange, initial, onSearch }: P
                     placeholder={isRu ? 'Поиск пляжа или района' : 'Search beach or area'}
                     value={textQuery}
                     onChange={(e) => setTextQuery(e.target.value)}
-                    className="pl-9 h-11 rounded-xl"
+                    className="pl-9 h-11 rounded-none"
                     aria-label={isRu ? 'Поиск места' : 'Search location'}
                   />
                 </div>
 
                 {/* Autocomplete results */}
                 {autocompleteResults.length > 0 && (
-                  <div className="mb-4 border rounded-xl overflow-hidden">
+                  <div className="mb-4 border rounded-none overflow-hidden">
                     {autocompleteResults.map((d) => (
                       <button
                         key={d.id}
@@ -287,7 +287,7 @@ export function PropertySearchSheet({ open, onOpenChange, initial, onSearch }: P
                         className="w-full flex items-center gap-3 px-3 py-3 text-left hover:bg-muted active:bg-muted border-b last:border-b-0"
                         onClick={() => handlePickAutocomplete(d.valueKey)}
                       >
-                        <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                        <div className="w-10 h-10 rounded-none bg-muted flex items-center justify-center shrink-0">
                           <MapPin className="w-4 h-4 text-muted-foreground" />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -314,10 +314,10 @@ export function PropertySearchSheet({ open, onOpenChange, initial, onSearch }: P
                     <button
                       type="button"
                       onClick={handleNearby}
-                      className="w-full flex items-center gap-3 p-3 rounded-2xl border hover:bg-muted active:bg-muted mb-2"
+                      className="w-full flex items-center gap-3 p-3 rounded-none border hover:bg-muted active:bg-muted mb-2"
                       disabled={geo.loading}
                     >
-                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                      <div className="w-12 h-12 rounded-none bg-primary/10 flex items-center justify-center shrink-0">
                         {geo.loading ? (
                           <Loader2 className="w-5 h-5 text-primary animate-spin" />
                         ) : (
@@ -345,13 +345,13 @@ export function PropertySearchSheet({ open, onOpenChange, initial, onSearch }: P
                             type="button"
                             onClick={() => handlePickSuggested(b.id)}
                             className={cn(
-                              'flex flex-col items-start gap-1 p-3 rounded-2xl border text-left transition-colors',
+                              'flex flex-col items-start gap-1 p-3 rounded-none border text-left transition-colors',
                               active
                                 ? 'border-primary bg-primary/5'
                                 : 'border-border hover:bg-muted',
                             )}
                           >
-                            <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center mb-1">
+                            <div className="w-9 h-9 rounded-none bg-muted flex items-center justify-center mb-1">
                               <Icon className="w-4 h-4 text-foreground" />
                             </div>
                             <p className="text-sm font-semibold leading-tight">
@@ -411,13 +411,13 @@ export function PropertySearchSheet({ open, onOpenChange, initial, onSearch }: P
                         numberOfMonths={1}
                         disabled={(date) => date < startOfDay(new Date())}
                         locale={isRu ? ru : undefined}
-                        className={cn('rounded-xl border-0 p-0 pointer-events-auto')}
+                        className={cn('rounded-none border-0 p-0 pointer-events-auto')}
                       />
                     </div>
 
                     {checkIn && checkOut && (
                       <>
-                        <div className="text-center p-2.5 bg-primary/5 rounded-xl">
+                        <div className="text-center p-2.5 bg-primary/5 rounded-none">
                           <p className="text-sm font-medium text-primary">
                             {nights} {isRu ? (nights === 1 ? 'ночь' : nights < 5 ? 'ночи' : 'ночей') : nights === 1 ? 'night' : 'nights'}
                           </p>
@@ -492,7 +492,7 @@ export function PropertySearchSheet({ open, onOpenChange, initial, onSearch }: P
                           disabled={(date) => date < startOfDay(new Date())}
                           locale={isRu ? ru : undefined}
                           numberOfMonths={1}
-                          className={cn('rounded-xl border-0 p-0 pointer-events-auto')}
+                          className={cn('rounded-none border-0 p-0 pointer-events-auto')}
                         />
                       </div>
                     </div>
@@ -521,7 +521,7 @@ export function PropertySearchSheet({ open, onOpenChange, initial, onSearch }: P
                             setCheckIn(from);
                             setCheckOut(addDays(from, opt.days));
                           }}
-                          className="p-3 rounded-2xl border text-center hover:bg-muted"
+                          className="p-3 rounded-none border text-center hover:bg-muted"
                         >
                           <p className="text-sm font-semibold">{isRu ? opt.ru : opt.en}</p>
                           <p className="text-[11px] text-muted-foreground">
@@ -569,7 +569,7 @@ export function PropertySearchSheet({ open, onOpenChange, initial, onSearch }: P
             {/* Footer CTA */}
             <div className="p-4 border-t bg-background shrink-0 pb-[max(1rem,env(safe-area-inset-bottom))]">
               <Button
-                className="w-full h-14 rounded-xl text-base gap-2 font-semibold"
+                className="w-full h-14 rounded-none text-base gap-2 font-semibold"
                 onClick={handleSearch}
               >
                 <Search className="w-5 h-5" />
@@ -599,7 +599,7 @@ function SearchCard({ title, summary, expanded, hasValue, onClick, children }: S
   return (
     <div
       className={cn(
-        'rounded-3xl border bg-card transition-shadow',
+        'rounded-none border bg-card transition-shadow',
         expanded ? 'shadow-md' : 'shadow-sm',
       )}
     >

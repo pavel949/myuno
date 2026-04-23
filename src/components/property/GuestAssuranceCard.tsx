@@ -56,7 +56,7 @@ export function GuestAssuranceCard({ compact, className }: GuestAssuranceCardPro
     return (
       <div
         className={cn(
-          'rounded-xl border border-border/60 bg-muted/20 px-3 py-2.5 text-xs text-muted-foreground leading-snug',
+          'rounded-none border border-border/60 bg-muted/20 px-3 py-2.5 text-xs text-muted-foreground leading-snug',
           className
         )}
       >
@@ -75,7 +75,7 @@ export function GuestAssuranceCard({ compact, className }: GuestAssuranceCardPro
   return (
     <div
       className={cn(
-        'rounded-xl border border-border/60 bg-muted/15 px-3 py-3 space-y-2.5',
+        'rounded-none border border-border/60 bg-muted/15 px-3 py-3 space-y-2.5',
         className
       )}
     >

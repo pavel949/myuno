@@ -63,7 +63,7 @@ export function CatalogProjectCard({ project, rank, onInquiry }: Props) {
 
   return (
     <div
-      className="rounded-xl overflow-hidden transition-all duration-200 hover:-translate-y-0.5"
+      className="rounded-none overflow-hidden transition-all duration-200 hover:-translate-y-0.5"
       style={{
         background: 'hsl(var(--nb-surface))',
         border: isFeatured ? '2px solid hsl(var(--nb-gold))' : '1px solid hsl(var(--nb-gold) / 0.12)',
@@ -88,7 +88,7 @@ export function CatalogProjectCard({ project, rank, onInquiry }: Props) {
         {/* Featured badge */}
         {isFeatured && (
           <div
-            className="absolute top-2 left-2 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider"
+            className="absolute top-2 left-2 px-2 py-0.5 rounded-none text-[10px] font-bold uppercase tracking-wider"
             style={{ background: 'hsl(var(--nb-gold))', color: 'hsl(var(--nb-bg))' }}
           >
             <span className="inline-flex items-center gap-1"><Star className="w-3 h-3 fill-current" aria-hidden />{project.featuredLabel || 'FEATURED'}</span>
@@ -98,7 +98,7 @@ export function CatalogProjectCard({ project, rank, onInquiry }: Props) {
         {/* Rating badge */}
         {rating != null && rating > 0 && (
           <div
-            className="absolute top-2 right-2 px-2 py-1 rounded-lg text-xs font-bold"
+            className="absolute top-2 right-2 px-2 py-1 rounded-none text-xs font-bold"
             style={{ background: 'hsl(var(--nb-gold))', color: 'hsl(var(--nb-bg))' }}
           >
             {rating.toFixed(1)}
@@ -109,7 +109,7 @@ export function CatalogProjectCard({ project, rank, onInquiry }: Props) {
         {/* Rec badge */}
         {rec && REC_COLORS[rec] && (
           <div
-            className="absolute top-2 left-2 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider"
+            className="absolute top-2 left-2 px-2 py-0.5 rounded-none text-[10px] font-bold uppercase tracking-wider"
             style={{
               background: REC_COLORS[rec].bg,
               color: REC_COLORS[rec].text,
@@ -123,7 +123,7 @@ export function CatalogProjectCard({ project, rank, onInquiry }: Props) {
         {/* Segment badge */}
         {seg && (
           <div
-            className="absolute bottom-2 left-2 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider"
+            className="absolute bottom-2 left-2 px-2 py-0.5 rounded-none text-[9px] font-bold uppercase tracking-wider"
             style={{
               background: 'hsl(var(--nb-bg) / 0.85)',
               color: 'hsl(var(--nb-gold))',
@@ -154,7 +154,7 @@ export function CatalogProjectCard({ project, rank, onInquiry }: Props) {
         {/* Risk + Completion */}
         <div className="flex items-center gap-2 text-[11px]" style={{ color: 'hsl(var(--nb-muted))' }}>
           {riskTier && (
-            <span className="px-1.5 py-0.5 rounded" style={{ background: 'hsl(var(--nb-gold) / 0.08)', color: 'hsl(var(--nb-gold))' }}>
+            <span className="px-1.5 py-0.5 rounded-none" style={{ background: 'hsl(var(--nb-gold) / 0.08)', color: 'hsl(var(--nb-gold))' }}>
               Risk {riskTier}
             </span>
           )}
@@ -211,7 +211,7 @@ export function CatalogProjectCard({ project, rank, onInquiry }: Props) {
         <div className="flex gap-2 pt-1">
           <button
             onClick={() => onInquiry(project)}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold transition-all"
+            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-none text-xs font-semibold transition-all"
             style={{
               background: 'hsl(var(--nb-gold))',
               color: 'hsl(var(--nb-bg))',
@@ -224,7 +224,7 @@ export function CatalogProjectCard({ project, rank, onInquiry }: Props) {
             href={`https://wa.me/66922407355?text=${waText}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all"
+            className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-none text-xs font-semibold transition-all"
             style={{
               background: 'hsl(var(--brand-whatsapp) / 0.15)',
               color: 'hsl(var(--brand-whatsapp))',
@@ -243,7 +243,7 @@ export function CatalogProjectCard({ project, rank, onInquiry }: Props) {
 function TagPill({ icon, label }: { icon?: React.ReactNode; label: string }) {
   return (
     <span
-      className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px]"
+      className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-none text-[10px]"
       style={{
         background: 'hsl(var(--nb-gold) / 0.06)',
         color: 'hsl(var(--nb-muted))',

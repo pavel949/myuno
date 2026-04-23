@@ -50,7 +50,7 @@ export function AchievementCard({
 
   return (
     <div className={cn(
-      "relative p-4 rounded-xl border transition-all",
+      "relative p-4 rounded-none border transition-all",
       isUnlocked 
         ? "bg-gradient-to-br from-accent-amber/10 to-warning/10 border-accent-amber/30" 
         : "bg-muted/30 border-muted opacity-60",
@@ -69,7 +69,7 @@ export function AchievementCard({
       <div className="flex items-start gap-3">
         {/* Icon */}
         <div className={cn(
-          "p-3 rounded-xl",
+          "p-3 rounded-none",
           isUnlocked 
             ? "bg-gradient-to-br from-accent-amber to-warning text-white shadow-lg" 
             : "bg-muted text-muted-foreground"

@@ -15,7 +15,7 @@ export function MoscowOmbudsmanNotice({ className }: { className?: string }) {
 
   return (
     <div
-      className={`rounded-lg border border-border bg-muted/30 px-3 py-2.5 text-[12px] leading-snug ${className ?? ''}`}
+      className={`rounded-none border border-border bg-muted/30 px-3 py-2.5 text-[12px] leading-snug ${className ?? ''}`}
       role="note"
     >
       <div className="flex items-start gap-2">

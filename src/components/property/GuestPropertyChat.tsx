@@ -109,7 +109,7 @@ export const GuestPropertyChat: React.FC<GuestPropertyChatProps> = ({
   // Show login prompt if not authenticated
   if (!user) {
     return (
-      <div className="flex flex-col items-center justify-center p-6 text-center space-y-4 bg-muted/30 rounded-xl">
+      <div className="flex flex-col items-center justify-center p-6 text-center space-y-4 bg-muted/30 rounded-none">
         <MessageCircle className="w-12 h-12 text-muted-foreground" />
         <div>
           <h3 className="font-semibold text-lg">
@@ -139,11 +139,11 @@ export const GuestPropertyChat: React.FC<GuestPropertyChatProps> = ({
 
   return (
     <div className={cn(
-      "flex flex-col bg-background rounded-xl border border-border",
+      "flex flex-col bg-background rounded-none border border-border",
       compact ? "h-[400px]" : "h-[500px]"
     )}>
       {/* Chat Header */}
-      <div className="flex items-center justify-between p-3 border-b border-border bg-muted/30 rounded-t-xl">
+      <div className="flex items-center justify-between p-3 border-b border-border bg-muted/30 rounded-none">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
             <MessageCircle className="w-4 h-4 text-primary" />
@@ -211,7 +211,7 @@ export const GuestPropertyChat: React.FC<GuestPropertyChatProps> = ({
 
       {/* User warning level banner */}
       {warningLevel >= 2 && (
-        <div className="mx-3 px-3 py-2 bg-warning/10 border border-warning/30 rounded-lg flex items-center gap-2">
+        <div className="mx-3 px-3 py-2 bg-warning/10 border border-warning/30 rounded-none flex items-center gap-2">
           <AlertTriangle className="w-4 h-4 text-warning flex-shrink-0" />
           <span className="text-xs text-warning">
             {isRu 
@@ -222,7 +222,7 @@ export const GuestPropertyChat: React.FC<GuestPropertyChatProps> = ({
       )}
 
       {/* Input */}
-      <div className="p-3 border-t border-border bg-muted/20 rounded-b-xl">
+      <div className="p-3 border-t border-border bg-muted/20 rounded-none">
         <div className="flex gap-2">
           <Textarea
             placeholder={isRu ? 'Напишите сообщение...' : 'Type a message...'}
@@ -286,10 +286,10 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isOwn, locale, i
     <div className={cn('flex', isOwn ? 'justify-end' : 'justify-start')}>
       <div
         className={cn(
-          'max-w-[85%] rounded-2xl px-4 py-2',
+          'max-w-[85%] rounded-none px-4 py-2',
           isOwn 
-            ? 'bg-primary text-primary-foreground rounded-br-sm' 
-            : 'bg-secondary rounded-bl-sm'
+            ? 'bg-primary text-primary-foreground rounded-none' 
+            : 'bg-secondary rounded-none'
         )}
       >
         {!isOwn && (

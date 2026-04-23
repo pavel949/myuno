@@ -125,7 +125,7 @@ const isRu = language === 'ru';
           exit={{ y: '100%', opacity: 0 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
           onClick={(e) => e.stopPropagation()}
-          className="bg-background rounded-t-3xl sm:rounded-3xl w-full sm:max-w-md max-h-[90vh] overflow-y-auto"
+          className="bg-background rounded-none sm:rounded-none w-full sm:max-w-md max-h-[90vh] overflow-y-auto"
         >
           {step === 'form' ? (
             <>
@@ -133,7 +133,7 @@ const isRu = language === 'ru';
               <div className="sticky top-0 bg-background z-10 px-6 pt-6 pb-4 border-b border-border/50">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-success flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-none bg-success flex items-center justify-center">
                       <span className="text-white font-bold text-lg">G</span>
                     </div>
                     <div>
@@ -228,7 +228,7 @@ const isRu = language === 'ru';
                 </div>
 
                 {/* Info note */}
-                <div className="p-3 rounded-xl bg-primary/10 border border-primary/20">
+                <div className="p-3 rounded-none bg-primary/10 border border-primary/20">
                   <p className="text-xs text-muted-foreground">
                     {isRu 
                       ? '📱 После отправки вы будете перенаправлены в приложение Grab для завершения заказа. myUNO сохранит вашу заявку для поддержки.'
@@ -268,7 +268,7 @@ const isRu = language === 'ru';
                 transition={{ type: 'spring', damping: 15 }}
                 className="mb-6"
               >
-                <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-success to-success/90 flex items-center justify-center shadow-lg">
+                <div className="w-20 h-20 mx-auto rounded-none bg-gradient-to-br from-success to-success/90 flex items-center justify-center shadow-lg">
                   <span className="text-white font-bold text-3xl">G</span>
                 </div>
               </motion.div>

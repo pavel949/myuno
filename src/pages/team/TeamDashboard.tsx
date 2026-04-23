@@ -120,9 +120,9 @@ export default function TeamDashboard() {
 
         {/* Stats Row */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <Card className="p-4 bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200">
+          <Card className="p-4 bg-accent/10 dark:bg-accent/30 border-accent/40">
             <div className="flex items-center gap-3">
-              <Inbox className="h-8 w-8 text-yellow-600" />
+              <Inbox className="h-8 w-8 text-accent" />
               <div>
                 <p className="text-2xl font-bold">{leadStats.pending}</p>
                 <p className="text-xs text-muted-foreground">{isRu ? 'Новые лиды' : 'New Leads'}</p>
@@ -138,18 +138,18 @@ export default function TeamDashboard() {
               </div>
             </div>
           </Card>
-          <Card className="p-4 bg-blue-50 dark:bg-blue-950/30 border-blue-200">
+          <Card className="p-4 bg-primary/10 dark:bg-primary/30 border-primary/40">
             <div className="flex items-center gap-3">
-              <Clock className="h-8 w-8 text-blue-600" />
+              <Clock className="h-8 w-8 text-primary" />
               <div>
                 <p className="text-2xl font-bold">{leadStats.inProgress}</p>
                 <p className="text-xs text-muted-foreground">{isRu ? 'В работе' : 'In Progress'}</p>
               </div>
             </div>
           </Card>
-          <Card className="p-4 bg-green-50 dark:bg-green-950/30 border-green-200">
+          <Card className="p-4 bg-success/10 dark:bg-success/30 border-success/40">
             <div className="flex items-center gap-3">
-              <CheckCircle2 className="h-8 w-8 text-green-600" />
+              <CheckCircle2 className="h-8 w-8 text-success" />
               <div>
                 <p className="text-2xl font-bold">{leadStats.completed}</p>
                 <p className="text-xs text-muted-foreground">{isRu ? 'Завершено' : 'Completed'}</p>
@@ -180,7 +180,7 @@ export default function TeamDashboard() {
                   const Icon = vertical.icon;
                   const count = getVerticalCount(vertical.key);
                   return (
-                    <div key={vertical.key} className="text-center p-3 rounded-lg bg-muted/50">
+                    <div key={vertical.key} className="text-center p-3 rounded-none bg-muted/50">
                       <Icon className="h-6 w-6 mx-auto mb-1 text-muted-foreground" />
                       <p className="text-lg font-bold">{platformLoading ? '-' : count}</p>
                       <p className="text-[10px] text-muted-foreground truncate">

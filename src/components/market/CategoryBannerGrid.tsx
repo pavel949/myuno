@@ -43,7 +43,7 @@ export const CategoryBannerGrid: React.FC<CategoryBannerGridProps> = ({
           key={banner.id}
           onClick={() => handleClick(banner.id)}
           className={cn(
-            "relative overflow-hidden rounded-2xl text-left transition-transform active:scale-[0.98]",
+            "relative overflow-hidden rounded-none text-left transition-transform active:scale-[0.98]",
             index === 0 ? "col-span-2 aspect-[2.5/1]" : "aspect-[1.2/1]"
           )}
         >

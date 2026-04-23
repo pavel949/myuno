@@ -233,7 +233,7 @@ export function AdminYachtForm({
         <ScrollArea className="max-h-[calc(90vh-140px)] px-6">
           <div className="space-y-6 py-4">
             {/* Provider */}
-            <div className="p-4 bg-muted/50 rounded-lg border-2 border-dashed">
+            <div className="p-4 bg-muted/50 rounded-none border-2 border-dashed">
               <ProviderSelector
                 value={formData.provider_id}
                 onChange={(id) => update('provider_id', id)}
@@ -430,7 +430,7 @@ export function AdminYachtForm({
                 <button
                   type="button"
                   onClick={() => update('booking_flow', 'in_app_request')}
-                  className={`p-4 rounded-xl border-2 text-left transition-all ${
+                  className={`p-4 rounded-none border-2 text-left transition-all ${
                     formData.booking_flow === 'in_app_request'
                       ? 'border-warning bg-warning/10'
                       : 'border-border hover:border-warning/30'
@@ -449,7 +449,7 @@ export function AdminYachtForm({
                 <button
                   type="button"
                   onClick={() => update('booking_flow', 'instant')}
-                  className={`p-4 rounded-xl border-2 text-left transition-all ${
+                  className={`p-4 rounded-none border-2 text-left transition-all ${
                     formData.booking_flow === 'instant'
                       ? 'border-primary bg-primary/5'
                       : 'border-border hover:border-primary/50'

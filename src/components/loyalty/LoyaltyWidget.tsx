@@ -42,8 +42,8 @@ const TIERS: LoyaltyTier[] = [
     nameEn: 'Traveler',
     nameRu: 'Путешественник',
     minPoints: 500,
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50 dark:bg-blue-950/30',
+    color: 'text-primary',
+    bgColor: 'bg-primary/10 dark:bg-primary/30',
     icon: TrendingUp,
     benefitsEn: ['2× points on activities', 'Priority support'],
     benefitsRu: ['2× баллы за активности', 'Приоритетная поддержка'],
@@ -53,8 +53,8 @@ const TIERS: LoyaltyTier[] = [
     nameEn: 'Insider',
     nameRu: 'Инсайдер',
     minPoints: 2000,
-    color: 'text-amber-600',
-    bgColor: 'bg-amber-50 dark:bg-amber-950/30',
+    color: 'text-accent',
+    bgColor: 'bg-accent/10 dark:bg-accent/30',
     icon: Sparkles,
     benefitsEn: ['3× points', 'Exclusive offers', 'Free upgrades'],
     benefitsRu: ['3× баллы', 'Эксклюзивные офферы', 'Бесплатные апгрейды'],
@@ -117,11 +117,11 @@ export const LoyaltyWidget: React.FC<LoyaltyWidgetProps> = ({
       <button
         onClick={() => navigate('/wallet')}
         className={cn(
-          'flex items-center gap-3 p-3 bg-card border border-border rounded-xl hover:shadow-sm transition-all w-full text-left',
+          'flex items-center gap-3 p-3 bg-card border border-border rounded-none hover:shadow-sm transition-all w-full text-left',
           className
         )}
       >
-        <div className={cn('w-9 h-9 rounded-lg flex items-center justify-center', current.bgColor)}>
+        <div className={cn('w-9 h-9 rounded-none flex items-center justify-center', current.bgColor)}>
           <TierIcon className={cn('w-4 h-4', current.color)} />
         </div>
         <div className="flex-1">
@@ -140,7 +140,7 @@ export const LoyaltyWidget: React.FC<LoyaltyWidgetProps> = ({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       className={cn(
-        'bg-card border border-border rounded-2xl overflow-hidden',
+        'bg-card border border-border rounded-none overflow-hidden',
         className
       )}
     >
@@ -148,7 +148,7 @@ export const LoyaltyWidget: React.FC<LoyaltyWidgetProps> = ({
       <div className="p-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center', current.bgColor)}>
+            <div className={cn('w-10 h-10 rounded-none flex items-center justify-center', current.bgColor)}>
               <TierIcon className={cn('w-5 h-5', current.color)} />
             </div>
             <div>
@@ -204,7 +204,7 @@ export const LoyaltyWidget: React.FC<LoyaltyWidgetProps> = ({
             { labelEn: 'Review', labelRu: 'Отзывы', pts: '+25', icon: '⭐' },
             { labelEn: 'Refer', labelRu: 'Друзья', pts: '+100', icon: '🤝' },
           ].map((item) => (
-            <div key={item.labelEn} className="p-2 bg-muted/50 rounded-xl">
+            <div key={item.labelEn} className="p-2 bg-muted/50 rounded-none">
               <span className="text-lg">{item.icon}</span>
               <p className="text-xs font-medium text-foreground mt-1">
                 {isRu ? item.labelRu : item.labelEn}

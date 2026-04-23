@@ -51,7 +51,7 @@ export function ProjectDealsTab({ projectId }: Props) {
           <button
             key={d.id}
             onClick={() => navigate(`${APP_ROUTES.MC_SALES}/${d.id}`)}
-            className="w-full text-left flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+            className="w-full text-left flex items-center gap-3 p-3 rounded-none border bg-card hover:bg-accent/50 transition-colors"
           >
             <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
               <Handshake className="h-4 w-4 text-primary" />

@@ -57,10 +57,10 @@ export function YachtOperatorCard({ providerId }: YachtOperatorCardProps) {
   if (!provider) return null;
 
   return (
-    <div className="p-5 border border-border/60 rounded-2xl bg-card">
+    <div className="p-5 border border-border/60 rounded-none bg-card">
       <div className="flex items-start gap-4">
         {/* Avatar / Logo */}
-        <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+        <div className="w-14 h-14 rounded-none bg-primary/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
           {provider.logo_url ? (
             <img src={provider.logo_url} alt={provider.name} className="w-full h-full object-contain p-1" />
           ) : (
@@ -83,7 +83,7 @@ export function YachtOperatorCard({ providerId }: YachtOperatorCardProps) {
           <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
             {provider.rating > 0 && (
               <span className="flex items-center gap-1">
-                <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                <Star className="w-3 h-3 fill-accent text-accent" />
                 {provider.rating} ({provider.review_count})
               </span>
             )}

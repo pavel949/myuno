@@ -55,7 +55,7 @@ function UnitPicker({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
-      <div className="nb-glass rounded-2xl p-5 w-full max-w-sm max-h-[70vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+      <div className="nb-glass rounded-none p-5 w-full max-w-sm max-h-[70vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
           <h3 className="nb-display text-base text-[hsl(var(--nb-text))]">Выбрать юнит</h3>
           <button onClick={onClose} className="text-[hsl(var(--nb-muted))] hover:text-[hsl(var(--nb-text))]"><X className="w-4 h-4" /></button>
@@ -73,7 +73,7 @@ function UnitPicker({
             <button
               key={u.id}
               onClick={() => onSelect(u)}
-              className="w-full flex items-center gap-3 p-3 rounded-xl bg-[hsl(var(--nb-glass-bg))] border border-[hsl(var(--nb-glass-border))] hover:border-[hsl(var(--nb-gold)/0.4)] transition-all text-left"
+              className="w-full flex items-center gap-3 p-3 rounded-none bg-[hsl(var(--nb-glass-bg))] border border-[hsl(var(--nb-glass-border))] hover:border-[hsl(var(--nb-gold)/0.4)] transition-all text-left"
             >
               <span
                 className="w-3 h-3 rounded-full shrink-0"
@@ -157,7 +157,7 @@ function AddFloorModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
-      <div className="nb-glass rounded-2xl p-6 w-full max-w-sm space-y-4" onClick={e => e.stopPropagation()}>
+      <div className="nb-glass rounded-none p-6 w-full max-w-sm space-y-4" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between">
           <h3 className="nb-display text-base text-[hsl(var(--nb-text))]">Добавить этаж / зону</h3>
           <button onClick={onClose} className="text-[hsl(var(--nb-muted))] hover:text-[hsl(var(--nb-text))]"><X className="w-4 h-4" /></button>
@@ -169,7 +169,7 @@ function AddFloorModal({
             value={name}
             onChange={e => setName(e.target.value)}
             placeholder="Floor 1, Penthouse, Villa Zone..."
-            className="w-full rounded-md bg-[hsl(var(--nb-bg))] border border-[hsl(var(--nb-glass-border))] px-3 py-2 text-sm text-[hsl(var(--nb-text))]"
+            className="w-full rounded-none bg-[hsl(var(--nb-bg))] border border-[hsl(var(--nb-glass-border))] px-3 py-2 text-sm text-[hsl(var(--nb-text))]"
           />
         </div>
 
@@ -177,7 +177,7 @@ function AddFloorModal({
           <label className="nb-label mb-1.5 block">Изображение плана *</label>
           {imageUrl ? (
             <div className="relative">
-              <img src={imageUrl} alt="floor plan" className="w-full rounded-lg object-contain max-h-32 bg-[hsl(var(--nb-surface))]" />
+              <img src={imageUrl} alt="floor plan" className="w-full rounded-none object-contain max-h-32 bg-[hsl(var(--nb-surface))]" />
               <button
                 onClick={() => { setImageUrl(''); setImgSize(null); }}
                 className="absolute top-1 right-1 bg-black/60 rounded-full p-1"
@@ -189,7 +189,7 @@ function AddFloorModal({
             <button
               onClick={() => fileRef.current?.click()}
               disabled={uploading}
-              className="w-full border-2 border-dashed border-[hsl(var(--nb-glass-border))] rounded-xl p-6 flex flex-col items-center gap-2 text-[hsl(var(--nb-muted))] hover:border-[hsl(var(--nb-gold)/0.4)] transition-colors disabled:opacity-50"
+              className="w-full border-2 border-dashed border-[hsl(var(--nb-glass-border))] rounded-none p-6 flex flex-col items-center gap-2 text-[hsl(var(--nb-muted))] hover:border-[hsl(var(--nb-gold)/0.4)] transition-colors disabled:opacity-50"
             >
               <Upload className="w-6 h-6" />
               <span className="text-sm">{uploading ? 'Загрузка...' : 'PNG / JPG / PDF'}</span>
@@ -199,7 +199,7 @@ function AddFloorModal({
         </div>
 
         <div className="flex gap-3 justify-end pt-2">
-          <button onClick={onClose} className="px-4 py-2 text-sm text-[hsl(var(--nb-muted))] border border-[hsl(var(--nb-glass-border))] rounded-lg">Отмена</button>
+          <button onClick={onClose} className="px-4 py-2 text-sm text-[hsl(var(--nb-muted))] border border-[hsl(var(--nb-glass-border))] rounded-none">Отмена</button>
           <button
             onClick={handleSave}
             disabled={upsert.isPending || !imageUrl || !name}
@@ -368,7 +368,7 @@ export function FloorPlanEditor({ projectId }: Props) {
             <button
               onClick={() => { setActiveFloorId(plan.id); resetView(); }}
               className={cn(
-                'px-3 py-1.5 rounded-lg text-sm transition-all',
+                'px-3 py-1.5 rounded-none text-sm transition-all',
                 plan.id === activeFloorId
                   ? 'bg-[hsl(var(--nb-gold)/0.15)] text-[hsl(var(--nb-gold))] border border-[hsl(var(--nb-gold)/0.3)]'
                   : 'text-[hsl(var(--nb-muted))] border border-[hsl(var(--nb-glass-border))] hover:text-[hsl(var(--nb-text))]'
@@ -394,7 +394,7 @@ export function FloorPlanEditor({ projectId }: Props) {
         ))}
         <button
           onClick={() => setShowAddFloor(true)}
-          className="px-3 py-1.5 rounded-lg text-sm border border-dashed border-[hsl(var(--nb-glass-border))] text-[hsl(var(--nb-muted))] hover:text-[hsl(var(--nb-gold))] hover:border-[hsl(var(--nb-gold)/0.3)]"
+          className="px-3 py-1.5 rounded-none text-sm border border-dashed border-[hsl(var(--nb-glass-border))] text-[hsl(var(--nb-muted))] hover:text-[hsl(var(--nb-gold))] hover:border-[hsl(var(--nb-gold)/0.3)]"
         >
           <Plus className="w-3 h-3 inline mr-1" /> Этаж
         </button>
@@ -405,13 +405,13 @@ export function FloorPlanEditor({ projectId }: Props) {
           {/* Toolbar */}
           <div className="flex items-center justify-between p-3 border-b border-[hsl(var(--nb-glass-border))]">
             <div className="flex items-center gap-1.5">
-              <button onClick={() => setZoom(z => Math.min(4, z + 0.25))} className="p-1.5 rounded-lg hover:bg-[hsl(var(--nb-glass-bg))] text-[hsl(var(--nb-muted))] hover:text-[hsl(var(--nb-text))]">
+              <button onClick={() => setZoom(z => Math.min(4, z + 0.25))} className="p-1.5 rounded-none hover:bg-[hsl(var(--nb-glass-bg))] text-[hsl(var(--nb-muted))] hover:text-[hsl(var(--nb-text))]">
                 <ZoomIn className="w-4 h-4" />
               </button>
-              <button onClick={() => setZoom(z => Math.max(0.5, z - 0.25))} className="p-1.5 rounded-lg hover:bg-[hsl(var(--nb-glass-bg))] text-[hsl(var(--nb-muted))] hover:text-[hsl(var(--nb-text))]">
+              <button onClick={() => setZoom(z => Math.max(0.5, z - 0.25))} className="p-1.5 rounded-none hover:bg-[hsl(var(--nb-glass-bg))] text-[hsl(var(--nb-muted))] hover:text-[hsl(var(--nb-text))]">
                 <ZoomOut className="w-4 h-4" />
               </button>
-              <button onClick={resetView} className="p-1.5 rounded-lg hover:bg-[hsl(var(--nb-glass-bg))] text-[hsl(var(--nb-muted))] hover:text-[hsl(var(--nb-text))]">
+              <button onClick={resetView} className="p-1.5 rounded-none hover:bg-[hsl(var(--nb-glass-bg))] text-[hsl(var(--nb-muted))] hover:text-[hsl(var(--nb-text))]">
                 <RotateCcw className="w-4 h-4" />
               </button>
               <span className="nb-mono text-xs text-[hsl(var(--nb-muted))] ml-1">{Math.round(zoom * 100)}%</span>

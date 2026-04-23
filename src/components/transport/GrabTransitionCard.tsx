@@ -25,7 +25,7 @@ export function GrabTransitionCard({ pickupAddress, destinationAddress, classNam
         whileTap={{ scale: 0.98 }}
         onClick={() => setIsModalOpen(true)}
         className={cn(
-          "w-full p-4 rounded-2xl text-left transition-all",
+          "w-full p-4 rounded-none text-left transition-all",
           "bg-gradient-to-br from-success via-success/90 to-success/80",
           "shadow-lg shadow-success/20",
           "border border-white/10",
@@ -35,7 +35,7 @@ export function GrabTransitionCard({ pickupAddress, destinationAddress, classNam
         <div className="flex items-start gap-4">
           {/* Grab Logo */}
           <div className="flex-shrink-0">
-            <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+            <div className="w-14 h-14 rounded-none bg-white/20 backdrop-blur-sm flex items-center justify-center">
               <span className="text-white font-bold text-2xl">G</span>
             </div>
           </div>

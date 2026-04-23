@@ -68,7 +68,7 @@ export function PropertyPriceBreakdown({
       <div className="space-y-3">
         {/* Base price */}
         {pricePerNight && (
-          <div className="p-4 rounded-xl bg-primary/10 border border-primary/20">
+          <div className="p-4 rounded-none bg-primary/10 border border-primary/20">
             <div className="flex items-end justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">{isRu ? 'Базовая цена' : 'Base Price'}</p>
@@ -93,7 +93,7 @@ export function PropertyPriceBreakdown({
         {(weeklyDiscount || monthlyDiscount) && (
           <div className="grid grid-cols-2 gap-2">
             {weeklyDiscount && weeklyDiscount > 0 && (
-              <div className="p-3 rounded-lg bg-success/10 border border-success/20">
+              <div className="p-3 rounded-none bg-success/10 border border-success/20">
                 <div className="flex items-center gap-1 mb-1">
                   <Percent className="w-4 h-4 text-success" />
                   <span className="text-xs text-muted-foreground">{isRu ? '7+ ночей' : '7+ nights'}</span>
@@ -102,7 +102,7 @@ export function PropertyPriceBreakdown({
               </div>
             )}
             {monthlyDiscount && monthlyDiscount > 0 && (
-              <div className="p-3 rounded-lg bg-success/10 border border-success/20">
+              <div className="p-3 rounded-none bg-success/10 border border-success/20">
                 <div className="flex items-center gap-1 mb-1">
                   <Percent className="w-4 h-4 text-success" />
                   <span className="text-xs text-muted-foreground">{isRu ? '30+ ночей' : '30+ nights'}</span>
@@ -139,7 +139,7 @@ export function PropertyPriceBreakdown({
                 return (
                   <div 
                     key={season.id} 
-                    className={`flex items-center justify-between p-2.5 rounded-lg border ${
+                    className={`flex items-center justify-between p-2.5 rounded-none border ${
                       isHigher ? 'bg-warning/5 border-warning/20' : isLower ? 'bg-success/5 border-success/20' : 'bg-muted/30 border-border/50'
                     }`}
                   >
@@ -170,7 +170,7 @@ export function PropertyPriceBreakdown({
         )}
 
         {extraGuestPrice && extraGuestPrice > 0 && (
-          <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border/50">
+          <div className="flex items-center justify-between p-3 rounded-none bg-muted/30 border border-border/50">
             <div className="flex items-center gap-2">
               <Users className="w-4 h-4 text-muted-foreground" />
               <span className="text-sm">
@@ -187,7 +187,7 @@ export function PropertyPriceBreakdown({
 
         {/* Deposit */}
         {depositAmount && depositAmount > 0 && (
-          <div className="p-3 rounded-lg bg-warning/10 border border-warning/20">
+          <div className="p-3 rounded-none bg-warning/10 border border-warning/20">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium">{isRu ? 'Залог' : 'Security Deposit'}</p>

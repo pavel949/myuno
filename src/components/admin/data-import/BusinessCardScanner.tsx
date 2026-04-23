@@ -292,7 +292,7 @@ const isRu = language === 'ru';
 
       {/* Camera View */}
       {isCameraActive && (
-        <div className="relative aspect-video bg-black rounded-xl overflow-hidden">
+        <div className="relative aspect-video bg-black rounded-none overflow-hidden">
           <video
             ref={videoRef}
             autoPlay
@@ -300,7 +300,7 @@ const isRu = language === 'ru';
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="border-2 border-white/50 border-dashed rounded-lg w-[80%] h-[60%]" />
+            <div className="border-2 border-white/50 border-dashed rounded-none w-[80%] h-[60%]" />
           </div>
           <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-4">
             <Button variant="secondary" onClick={stopCamera}>
@@ -320,10 +320,10 @@ const isRu = language === 'ru';
           <img
             src={imagePreview}
             alt="Business card"
-            className="w-full max-h-64 object-contain rounded-xl border bg-muted"
+            className="w-full max-h-64 object-contain rounded-none border bg-muted"
           />
           {isProcessing && (
-            <div className="absolute inset-0 flex items-center justify-center bg-background/80 rounded-xl">
+            <div className="absolute inset-0 flex items-center justify-center bg-background/80 rounded-none">
               <div className="flex flex-col items-center gap-3">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 <span className="text-sm font-medium">

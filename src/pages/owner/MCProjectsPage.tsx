@@ -69,7 +69,7 @@ export default function MCProjectsPage() {
       {isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-64 rounded-xl" />
+            <Skeleton key={i} className="h-64 rounded-none" />
           ))}
         </div>
       ) : filtered.length === 0 ? (
@@ -107,7 +107,7 @@ function ProjectCard({
   return (
     <button
       onClick={() => navigate(APP_ROUTES.OFFPLAN_DETAIL(project.id))}
-      className="text-left rounded-xl border bg-card overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+      className="text-left rounded-none border bg-card overflow-hidden shadow-sm hover:shadow-md transition-shadow"
     >
       {project.cover_image ? (
         <img src={project.cover_image} alt="" className="w-full h-40 object-cover" />

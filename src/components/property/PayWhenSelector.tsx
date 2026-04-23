@@ -67,7 +67,7 @@ export function PayWhenSelector({
         <label
           htmlFor="pay-when-full"
           className={cn(
-            'flex items-start gap-3 rounded-xl border p-4 cursor-pointer transition-colors',
+            'flex items-start gap-3 rounded-none border p-4 cursor-pointer transition-colors',
             value === 'full' ? 'border-primary bg-primary/5' : 'hover:bg-muted/40',
           )}
         >
@@ -90,7 +90,7 @@ export function PayWhenSelector({
         <label
           htmlFor="pay-when-split"
           className={cn(
-            'flex items-start gap-3 rounded-xl border p-4 cursor-pointer transition-colors',
+            'flex items-start gap-3 rounded-none border p-4 cursor-pointer transition-colors',
             value === 'split' ? 'border-primary bg-primary/5' : 'hover:bg-muted/40',
           )}
         >

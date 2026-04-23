@@ -267,7 +267,7 @@ export function BilingualFieldWithAI({
           placeholder={placeholderPrimary || `Введите на ${LANG_NAMES[primaryLang]}`}
           maxLength={maxLength}
           className={cn(
-            'w-full px-3 py-2 border rounded-lg bg-background',
+            'w-full px-3 py-2 border rounded-none bg-background',
             'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary',
             multiline && 'min-h-[100px] resize-y'
           )}
@@ -297,7 +297,7 @@ export function BilingualFieldWithAI({
           placeholder={placeholderSecondary || `Enter in ${LANG_NAMES[secondaryLang]}`}
           maxLength={maxLength}
           className={cn(
-            'w-full px-3 py-2 border rounded-lg bg-background',
+            'w-full px-3 py-2 border rounded-none bg-background',
             'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary',
             multiline && 'min-h-[100px] resize-y'
           )}

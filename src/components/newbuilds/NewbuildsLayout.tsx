@@ -68,7 +68,7 @@ export default function NewbuildsLayout({ children, className = '', hideNav }: N
                     key={item.path}
                     to={item.path}
                     className={cn(
-                      'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs whitespace-nowrap transition-all flex-shrink-0 font-medium',
+                      'flex items-center gap-1.5 px-3 py-1.5 rounded-none text-xs whitespace-nowrap transition-all flex-shrink-0 font-medium',
                       active
                         ? 'bg-primary/10 text-primary'
                         : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'

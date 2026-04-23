@@ -258,7 +258,7 @@ export default function AdminLookups() {
                 {values.map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                    className="flex items-center gap-3 p-3 rounded-none border bg-card hover:bg-accent/50 transition-colors"
                   >
                     <GripVertical className="h-4 w-4 text-muted-foreground cursor-move" />
                     
@@ -267,7 +267,7 @@ export default function AdminLookups() {
                         {isRussian ? (item.value_ru || item.value_en) : item.value_en}
                       </div>
                       <div className="text-xs text-muted-foreground flex items-center gap-2">
-                        <code className="bg-muted px-1 rounded">{item.value_key}</code>
+                        <code className="bg-muted px-1 rounded-none">{item.value_key}</code>
                         {item.value_ru && !isRussian && (
                           <span>• {item.value_ru}</span>
                         )}

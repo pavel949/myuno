@@ -73,7 +73,7 @@ export function ChannelHealthDashboard() {
     return (
       <div className="space-y-4">
         {[1, 2, 3].map(i => (
-          <div key={i} className="h-24 bg-muted animate-pulse rounded-lg" />
+          <div key={i} className="h-24 bg-muted animate-pulse rounded-none" />
         ))}
       </div>
     );
@@ -149,7 +149,7 @@ export function ChannelHealthDashboard() {
               <div className="flex items-start gap-3">
                 {/* Channel Icon */}
                 <div className={cn(
-                  "w-11 h-11 rounded-lg flex items-center justify-center text-xl shrink-0",
+                  "w-11 h-11 rounded-none flex items-center justify-center text-xl shrink-0",
                   getChannelColor(channel.channelType)
                 )}>
                   {getChannelIcon(channel.channelType)}
@@ -242,7 +242,7 @@ function SummaryCard({
   return (
     <Card>
       <CardContent className="pt-3 pb-2">
-        <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center mb-1.5", color)}>
+        <div className={cn("w-8 h-8 rounded-none flex items-center justify-center mb-1.5", color)}>
           {icon}
         </div>
         <div className="text-xl font-bold">{value}</div>

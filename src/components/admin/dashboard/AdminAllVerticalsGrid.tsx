@@ -50,7 +50,7 @@ export function AdminAllVerticalsGrid() {
         <Skeleton className="h-5 w-32 mb-3" />
         <div className="grid grid-cols-5 sm:grid-cols-8 lg:grid-cols-10 gap-1.5">
           {[...Array(10)].map((_, i) => (
-            <Skeleton key={i} className="h-14 w-full rounded-lg" />
+            <Skeleton key={i} className="h-14 w-full rounded-none" />
           ))}
         </div>
       </Surface>
@@ -71,7 +71,7 @@ export function AdminAllVerticalsGrid() {
     <Surface variant="card" padding="sm" radius="xl">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger asChild>
-          <div className="flex items-center justify-between cursor-pointer hover:bg-muted/30 -m-1 p-1 rounded-lg transition-colors">
+          <div className="flex items-center justify-between cursor-pointer hover:bg-muted/30 -m-1 p-1 rounded-none transition-colors">
             <div className="flex items-center gap-2">
               <SectionHeader
                 title={isRu ? 'Вертикали' : 'Verticals'}
@@ -126,7 +126,7 @@ export function AdminAllVerticalsGrid() {
                 return (
                   <div
                     key={vertical.key}
-                    className="flex flex-col items-center p-1.5 rounded-lg bg-muted/30 hover:bg-muted/50 cursor-pointer transition-colors text-center opacity-50"
+                    className="flex flex-col items-center p-1.5 rounded-none bg-muted/30 hover:bg-muted/50 cursor-pointer transition-colors text-center opacity-50"
                     onClick={() => navigate(vertical.href)}
                   >
                     <div className={cn("mb-0.5", vertical.color)}>

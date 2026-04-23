@@ -37,7 +37,7 @@ const VISA_TYPES = {
       id: 'tourist',
       name: 'Tourist Visa',
       icon: Plane,
-      color: 'bg-blue-500',
+      color: 'bg-primary',
       duration: '60 days',
       extendable: 'Yes, +30 days',
       cost: '฿1,900',
@@ -56,7 +56,7 @@ const VISA_TYPES = {
       id: 'visa_exempt',
       name: 'Visa Exemption',
       icon: Globe,
-      color: 'bg-green-500',
+      color: 'bg-success',
       duration: '30-90 days',
       extendable: 'Yes, +30 days',
       cost: 'Free',
@@ -73,7 +73,7 @@ const VISA_TYPES = {
       id: 'education',
       name: 'Education Visa (ED)',
       icon: GraduationCap,
-      color: 'bg-purple-500',
+      color: 'bg-primary',
       duration: '90 days - 1 year',
       extendable: 'Yes, renewable',
       cost: '฿2,000',
@@ -92,7 +92,7 @@ const VISA_TYPES = {
       id: 'business',
       name: 'Non-Immigrant B (Business)',
       icon: Briefcase,
-      color: 'bg-amber-500',
+      color: 'bg-accent',
       duration: '90 days - 1 year',
       extendable: 'Yes, with Work Permit',
       cost: '฿2,000',
@@ -111,7 +111,7 @@ const VISA_TYPES = {
       id: 'marriage',
       name: 'Non-Immigrant O (Marriage)',
       icon: Heart,
-      color: 'bg-pink-500',
+      color: 'bg-accent',
       duration: '90 days - 1 year',
       extendable: 'Yes, annually',
       cost: '฿2,000',
@@ -130,7 +130,7 @@ const VISA_TYPES = {
       id: 'retirement',
       name: 'Retirement Visa (O-A/O-X)',
       icon: Users,
-      color: 'bg-emerald-500',
+      color: 'bg-success',
       duration: '1 year (O-A) / 5 years (O-X)',
       extendable: 'Yes, annually',
       cost: '฿2,000 / ฿10,000',
@@ -149,7 +149,7 @@ const VISA_TYPES = {
       id: 'elite',
       name: 'Thailand Elite Visa',
       icon: Crown,
-      color: 'bg-amber-400',
+      color: 'bg-accent',
       duration: '5-20 years',
       extendable: 'Via new membership',
       cost: '฿600,000 - ฿2,140,000',
@@ -169,7 +169,7 @@ const VISA_TYPES = {
       id: 'tourist',
       name: 'Туристическая виза',
       icon: Plane,
-      color: 'bg-blue-500',
+      color: 'bg-primary',
       duration: '60 дней',
       extendable: 'Да, +30 дней',
       cost: '฿1,900',
@@ -188,7 +188,7 @@ const VISA_TYPES = {
       id: 'visa_exempt',
       name: 'Безвизовый въезд',
       icon: Globe,
-      color: 'bg-green-500',
+      color: 'bg-success',
       duration: '30-90 дней',
       extendable: 'Да, +30 дней',
       cost: 'Бесплатно',
@@ -205,7 +205,7 @@ const VISA_TYPES = {
       id: 'education',
       name: 'Учебная виза (ED)',
       icon: GraduationCap,
-      color: 'bg-purple-500',
+      color: 'bg-primary',
       duration: '90 дней - 1 год',
       extendable: 'Да, продлеваемая',
       cost: '฿2,000',
@@ -224,7 +224,7 @@ const VISA_TYPES = {
       id: 'business',
       name: 'Бизнес виза (Non-B)',
       icon: Briefcase,
-      color: 'bg-amber-500',
+      color: 'bg-accent',
       duration: '90 дней - 1 год',
       extendable: 'Да, с Work Permit',
       cost: '฿2,000',
@@ -243,7 +243,7 @@ const VISA_TYPES = {
       id: 'marriage',
       name: 'Виза по браку (Non-O)',
       icon: Heart,
-      color: 'bg-pink-500',
+      color: 'bg-accent',
       duration: '90 дней - 1 год',
       extendable: 'Да, ежегодно',
       cost: '฿2,000',
@@ -262,7 +262,7 @@ const VISA_TYPES = {
       id: 'retirement',
       name: 'Пенсионная виза (O-A/O-X)',
       icon: Users,
-      color: 'bg-emerald-500',
+      color: 'bg-success',
       duration: '1 год (O-A) / 5 лет (O-X)',
       extendable: 'Да, ежегодно',
       cost: '฿2,000 / ฿10,000',
@@ -281,7 +281,7 @@ const VISA_TYPES = {
       id: 'elite',
       name: 'Thailand Elite Visa',
       icon: Crown,
-      color: 'bg-amber-400',
+      color: 'bg-accent',
       duration: '5-20 лет',
       extendable: 'Через новое членство',
       cost: '฿600,000 - ฿2,140,000',
@@ -405,11 +405,11 @@ export default function VisaImmigrationPage() {
     <AppLayout>
       <div className="pb-24">
         {/* Hero */}
-        <div className="relative bg-gradient-to-br from-indigo-600 via-blue-600 to-purple-700 p-6 pt-16 pb-8">
+        <div className="relative bg-gradient-to-br from-primary via-primary to-primary p-6 pt-16 pb-8">
           <BackButton fallbackPath="/legal" variant="overlay" className="absolute top-4 left-4" />
           
           <div className="text-white text-center">
-            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-white/20 rounded-none flex items-center justify-center mx-auto mb-4">
               <Plane className="w-8 h-8" />
             </div>
             <h1 className="text-2xl font-bold mb-2">
@@ -478,7 +478,7 @@ export default function VisaImmigrationPage() {
                 </Button>
                 
                 <div className="flex items-center gap-3 mb-4">
-                  <div className={`w-12 h-12 rounded-xl ${selectedVisa.color} flex items-center justify-center`}>
+                  <div className={`w-12 h-12 rounded-none ${selectedVisa.color} flex items-center justify-center`}>
                     <selectedVisa.icon className="w-6 h-6 text-white" />
                   </div>
                   <div>
@@ -575,7 +575,7 @@ export default function VisaImmigrationPage() {
                   >
                     <CardContent className="p-4">
                       <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-xl ${visa.color} flex items-center justify-center flex-shrink-0`}>
+                        <div className={`w-10 h-10 rounded-none ${visa.color} flex items-center justify-center flex-shrink-0`}>
                           <visa.icon className="w-5 h-5 text-white" />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -646,7 +646,7 @@ export default function VisaImmigrationPage() {
                 </div>
 
                 {/* Tips */}
-                <div className="bg-muted/50 rounded-lg p-3">
+                <div className="bg-muted/50 rounded-none p-3">
                   <h4 className="font-semibold mb-2 flex items-center gap-2">
                     <Info className="w-4 h-4 text-primary" />
                     {language === 'ru' ? 'Советы' : 'Tips'}
@@ -720,7 +720,7 @@ export default function VisaImmigrationPage() {
             {isLoading ? (
               <div className="space-y-3">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-24 bg-muted animate-pulse rounded-xl" />
+                  <div key={i} className="h-24 bg-muted animate-pulse rounded-none" />
                 ))}
               </div>
             ) : visaServices.length === 0 ? (

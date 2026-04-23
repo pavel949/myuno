@@ -38,7 +38,7 @@ export function GuestStayBlock({ booking, loading }: GuestStayBlockProps) {
           <Skeleton className="h-4 w-4" />
         </div>
         <div className="flex gap-3">
-          <Skeleton className="h-16 w-16 rounded-xl" />
+          <Skeleton className="h-16 w-16 rounded-none" />
           <div className="flex-1 space-y-2">
             <Skeleton className="h-5 w-32" />
             <Skeleton className="h-4 w-24" />
@@ -62,7 +62,7 @@ export function GuestStayBlock({ booking, loading }: GuestStayBlockProps) {
           <ChevronRight className="h-4 w-4 text-muted-foreground" />
         </div>
         <div className="flex items-center gap-3 py-3">
-          <div className="p-3 rounded-xl bg-muted">
+          <div className="p-3 rounded-none bg-muted">
             <Home className="h-6 w-6 text-muted-foreground" />
           </div>
           <div>
@@ -112,7 +112,7 @@ export function GuestStayBlock({ booking, loading }: GuestStayBlockProps) {
 
       {/* Property info */}
       <div className="flex gap-3 mb-3">
-        <div className="w-16 h-16 rounded-xl overflow-hidden bg-muted flex-shrink-0">
+        <div className="w-16 h-16 rounded-none overflow-hidden bg-muted flex-shrink-0">
           {booking.property?.cover_image ? (
             <img 
               src={booking.property.cover_image} 

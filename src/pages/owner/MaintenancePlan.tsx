@@ -66,7 +66,7 @@ export default function MaintenancePlan() {
       </div>
 
       {/* Health Score */}
-      <div className="flex items-center gap-3 p-4 rounded-2xl bg-muted/30">
+      <div className="flex items-center gap-3 p-4 rounded-none bg-muted/30">
         <div className={`rounded-full w-12 h-12 flex items-center justify-center ${healthScore >= 80 ? 'bg-success/10' : healthScore >= 50 ? 'bg-warning/10' : 'bg-destructive/10'}`}>
           <ShieldCheck className={`h-6 w-6 ${healthScore >= 80 ? 'text-success' : healthScore >= 50 ? 'text-warning' : 'text-destructive'}`} />
         </div>

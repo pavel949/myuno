@@ -360,7 +360,7 @@ export function OdooCrmSettingsImportModal({
       size="lg"
     >
       <div className="space-y-4">
-        <div className="rounded-xl border border-border/60 p-4 bg-card">
+        <div className="rounded-none border border-border/60 p-4 bg-card">
           <p className="text-sm font-medium mb-2">{isRu ? 'Загрузите CSV из ODOO' : 'Upload CSV export from ODOO'}</p>
           <p className="text-xs text-muted-foreground mb-3">
             {isRu
@@ -368,7 +368,7 @@ export function OdooCrmSettingsImportModal({
               : 'Supports deal stages and CRM dictionaries (contact type, lead source, deal type, task type, lost reasons).'}
           </p>
           <div
-            className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 transition-colors"
+            className="border-2 border-dashed rounded-none p-6 text-center cursor-pointer hover:border-primary/50 transition-colors"
             onClick={() => {
               const input = document.createElement('input');
               input.type = 'file';
@@ -390,7 +390,7 @@ export function OdooCrmSettingsImportModal({
         </div>
 
         {rows.length > 0 && (
-          <div className="rounded-xl border border-border/60 p-4 space-y-3 bg-card">
+          <div className="rounded-none border border-border/60 p-4 space-y-3 bg-card">
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="secondary">{isRu ? `Строк: ${rows.length}` : `Rows: ${rows.length}`}</Badge>
               <Badge variant="secondary">{isRu ? `Опции: ${parsed.options.length}` : `Options: ${parsed.options.length}`}</Badge>

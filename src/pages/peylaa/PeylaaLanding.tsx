@@ -172,7 +172,7 @@ export default function PeylaaLanding() {
             <span className="text-xl font-bold tracking-wider" style={{ fontFamily: 'Syne, sans-serif' }}>
               PEYLAA
             </span>
-            <Badge variant="outline" className="text-[10px] border-amber-500/50 text-amber-400">
+            <Badge variant="outline" className="text-[10px] border-accent/40/50 text-accent">
               AUTOGRAPH COLLECTION
             </Badge>
           </div>
@@ -187,7 +187,7 @@ export default function PeylaaLanding() {
             <Button
               size="sm"
               variant="outline"
-              className="border-amber-500/50 text-amber-400 hover:bg-amber-500/10 hidden sm:flex"
+              className="border-accent/40/50 text-accent hover:bg-accent/10 hidden sm:flex"
               onClick={() => window.open('https://wa.me/66922407355?text=Здравствуйте! Интересует PEYLAA Phuket', '_blank')}
             >
               <MessageCircle className="w-4 h-4 mr-1" />
@@ -195,7 +195,7 @@ export default function PeylaaLanding() {
             </Button>
             <Button
               size="sm"
-              className="bg-amber-500 hover:bg-amber-600 text-black font-semibold"
+              className="bg-accent hover:bg-accent text-black font-semibold"
               onClick={() => openLeadForm('header_cta')}
             >
               Получить каталог
@@ -214,7 +214,7 @@ export default function PeylaaLanding() {
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a]/80 via-[#0a0a0a]/60 to-[#0a0a0a]" />
 
         <div className="relative z-10 max-w-5xl mx-auto px-4 text-center space-y-8">
-          <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/30 px-4 py-1.5 text-xs">
+          <Badge className="bg-accent/20 text-accent border-accent/40/30 px-4 py-1.5 text-xs">
             ПЕРВЫЕ В АЗИАТСКО-ТИХООКЕАНСКОМ РЕГИОНЕ
           </Badge>
 
@@ -223,7 +223,7 @@ export default function PeylaaLanding() {
             style={{ fontFamily: 'Syne, sans-serif' }}
           >
             <span className="text-white">PEYLAA</span>{' '}
-            <span className="text-amber-400">Phuket</span>
+            <span className="text-accent">Phuket</span>
             <br />
             <span className="text-2xl sm:text-3xl md:text-4xl text-white/60 font-normal">
               Autograph Collection Residences
@@ -233,7 +233,7 @@ export default function PeylaaLanding() {
           <p className="text-lg md:text-xl text-white/60 max-w-2xl mx-auto" style={{ fontFamily: 'DM Sans, sans-serif' }}>
             408 премиальных резиденций в Bang Tao. Бренд Marriott.
             {minPrice && (
-              <span className="block mt-2 text-amber-400 font-semibold">
+              <span className="block mt-2 text-accent font-semibold">
                 от {formatThb(minPrice)} (~${Math.round(minPrice / 35).toLocaleString()})
               </span>
             )}
@@ -251,7 +251,7 @@ export default function PeylaaLanding() {
             ))}
             {totalAvailable > 0 && (
               <div className="text-center">
-                <div className="text-2xl md:text-3xl font-bold text-emerald-400" style={{ fontFamily: 'Syne, sans-serif' }}>
+                <div className="text-2xl md:text-3xl font-bold text-success" style={{ fontFamily: 'Syne, sans-serif' }}>
                   {totalAvailable}
                 </div>
                 <div className="text-xs text-white/50 mt-1">В продаже</div>
@@ -263,7 +263,7 @@ export default function PeylaaLanding() {
           <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
             <Button
               size="lg"
-              className="bg-amber-500 hover:bg-amber-600 text-black font-bold text-base px-8"
+              className="bg-accent hover:bg-accent text-black font-bold text-base px-8"
               onClick={() => openLeadForm('hero_cta')}
             >
               Получить презентацию
@@ -284,10 +284,10 @@ export default function PeylaaLanding() {
 
           {/* Trust badges */}
           <div className="flex flex-wrap justify-center gap-4 pt-6 text-xs text-white/40">
-            <span className="flex items-center gap-1"><Check className="w-3 h-3 text-emerald-500" /> Marriott International</span>
-            <span className="flex items-center gap-1"><Check className="w-3 h-3 text-emerald-500" /> EIA одобрен</span>
-            <span className="flex items-center gap-1"><Check className="w-3 h-3 text-emerald-500" /> Финансирование до 50%</span>
-            <span className="flex items-center gap-1"><Check className="w-3 h-3 text-emerald-500" /> Полная отделка</span>
+            <span className="flex items-center gap-1"><Check className="w-3 h-3 text-success" /> Marriott International</span>
+            <span className="flex items-center gap-1"><Check className="w-3 h-3 text-success" /> EIA одобрен</span>
+            <span className="flex items-center gap-1"><Check className="w-3 h-3 text-success" /> Финансирование до 50%</span>
+            <span className="flex items-center gap-1"><Check className="w-3 h-3 text-success" /> Полная отделка</span>
           </div>
         </div>
       </section>
@@ -296,17 +296,17 @@ export default function PeylaaLanding() {
       <section className="py-20 px-4">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-4" style={{ fontFamily: 'Syne, sans-serif' }}>
-            Почему <span className="text-amber-400">PEYLAA</span>
+            Почему <span className="text-accent">PEYLAA</span>
           </h2>
           <p className="text-center text-white/50 mb-12 max-w-2xl mx-auto">
             Первый проект Autograph Collection Residences в Азиатско-Тихоокеанском регионе от Marriott International
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {KEY_FEATURES.map((f) => (
-              <Card key={f.title} className="bg-white/5 border-white/10 hover:border-amber-500/30 transition-colors">
+              <Card key={f.title} className="bg-white/5 border-white/10 hover:border-accent/40/30 transition-colors">
                 <CardContent className="p-6 space-y-4">
-                  <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center">
-                    <f.icon className="w-6 h-6 text-amber-400" />
+                  <div className="w-12 h-12 rounded-none bg-accent/10 flex items-center justify-center">
+                    <f.icon className="w-6 h-6 text-accent" />
                   </div>
                   <h3 className="text-lg font-semibold text-white">{f.title}</h3>
                   <p className="text-sm text-white/50 leading-relaxed">{f.desc}</p>
@@ -322,7 +322,7 @@ export default function PeylaaLanding() {
         <section id="gallery" className="py-20 px-4 bg-white/[0.02]">
           <div className="max-w-7xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold text-center mb-4" style={{ fontFamily: 'Syne, sans-serif' }}>
-              <span className="text-amber-400">Галерея</span> проекта
+              <span className="text-accent">Галерея</span> проекта
             </h2>
             <p className="text-center text-white/50 mb-10">
               Экстерьер, инфраструктура и интерьеры PEYLAA Phuket
@@ -334,7 +334,7 @@ export default function PeylaaLanding() {
                 <button
                   key={item.id}
                   onClick={() => setLightboxIdx(idx)}
-                  className={`relative group overflow-hidden rounded-xl ${
+                  className={`relative group overflow-hidden rounded-none ${
                     item.is_hero ? 'col-span-2 row-span-2' : ''
                   }`}
                 >
@@ -385,7 +385,7 @@ export default function PeylaaLanding() {
               <img
                 src={gallery[lightboxIdx].url}
                 alt={gallery[lightboxIdx].title_ru || gallery[lightboxIdx].title}
-                className="max-w-full max-h-[90vh] object-contain rounded-lg"
+                className="max-w-full max-h-[90vh] object-contain rounded-none"
                 onClick={(e) => e.stopPropagation()}
               />
               <div className="absolute bottom-6 text-center text-white">
@@ -401,7 +401,7 @@ export default function PeylaaLanding() {
       <section className="py-20 px-4 bg-white/[0.02]">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-4" style={{ fontFamily: 'Syne, sans-serif' }}>
-            Типы <span className="text-amber-400">резиденций</span>
+            Типы <span className="text-accent">резиденций</span>
           </h2>
           <p className="text-center text-white/50 mb-12">
             3 типа планировок от 45 до 129 м². Все с полной отделкой и мебелью.
@@ -435,12 +435,12 @@ export default function PeylaaLanding() {
               <Card
                 key={unit.type}
                 className={`bg-white/5 border-white/10 relative overflow-hidden ${
-                  unit.popular ? 'ring-1 ring-amber-500/50' : ''
+                  unit.popular ? 'ring-1 ring-accent/50' : ''
                 }`}
               >
                 {unit.popular && (
                   <div className="absolute top-3 right-3">
-                    <Badge className="bg-amber-500 text-black text-[10px]">ПОПУЛЯРНЫЙ</Badge>
+                    <Badge className="bg-accent text-black text-[10px]">ПОПУЛЯРНЫЙ</Badge>
                   </div>
                 )}
                 {unit.comingSoon && (
@@ -462,7 +462,7 @@ export default function PeylaaLanding() {
                   <div className="space-y-2">
                     {unit.features.map(f => (
                       <div key={f} className="flex items-center gap-2 text-sm text-white/70">
-                        <Check className="w-3 h-3 text-amber-400 flex-shrink-0" />
+                        <Check className="w-3 h-3 text-accent flex-shrink-0" />
                         {f}
                       </div>
                     ))}
@@ -472,7 +472,7 @@ export default function PeylaaLanding() {
                     {unit.priceFrom ? (
                       <>
                         <div className="text-xs text-white/40">от</div>
-                        <div className="text-2xl font-bold text-amber-400" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
+                        <div className="text-2xl font-bold text-accent" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
                           {formatThb(unit.priceFrom)}
                         </div>
                         <div className="text-xs text-white/40">
@@ -483,7 +483,7 @@ export default function PeylaaLanding() {
                       <div className="text-white/40 text-sm">Цена по запросу</div>
                     )}
                     {unit.count > 0 && (
-                      <div className="text-xs text-emerald-400 mt-2">{unit.count} доступно</div>
+                      <div className="text-xs text-success mt-2">{unit.count} доступно</div>
                     )}
                   </div>
 
@@ -507,7 +507,7 @@ export default function PeylaaLanding() {
       <section id="units" className="py-20 px-4">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-4" style={{ fontFamily: 'Syne, sans-serif' }}>
-            Выберите <span className="text-amber-400">резиденцию</span>
+            Выберите <span className="text-accent">резиденцию</span>
           </h2>
           <p className="text-center text-white/50 mb-8">
             {totalAvailable} юнитов доступно. Актуальные цены от {new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}.
@@ -523,7 +523,7 @@ export default function PeylaaLanding() {
       <section id="amenities" className="py-20 px-4 bg-white/[0.02]">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-4" style={{ fontFamily: 'Syne, sans-serif' }}>
-            <span className="text-amber-400">Инфраструктура</span> мирового уровня
+            <span className="text-accent">Инфраструктура</span> мирового уровня
           </h2>
           <p className="text-center text-white/50 mb-12">
             28 объектов инфраструктуры. Бассейны, фитнес, теннис, рестораны, консьерж-сервис.
@@ -541,7 +541,7 @@ export default function PeylaaLanding() {
                 {items?.map((a) => (
                   <div
                     key={a.id}
-                    className={`px-4 py-3 rounded-xl border text-sm flex items-center gap-2 ${
+                    className={`px-4 py-3 rounded-none border text-sm flex items-center gap-2 ${
                       a.is_phase2
                         ? 'bg-white/[0.02] border-white/5 text-white/40'
                         : 'bg-white/5 border-white/10 text-white/70'
@@ -561,7 +561,7 @@ export default function PeylaaLanding() {
       <section id="roi" className="py-20 px-4">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-4" style={{ fontFamily: 'Syne, sans-serif' }}>
-            Калькулятор <span className="text-amber-400">доходности</span>
+            Калькулятор <span className="text-accent">доходности</span>
           </h2>
           <p className="text-center text-white/50 mb-8">
             Рассчитайте ROI от сдачи в аренду. Средняя доходность branded residences на Пхукете: 6–8% годовых.
@@ -574,7 +574,7 @@ export default function PeylaaLanding() {
       <section id="payment" className="py-20 px-4 bg-white/[0.02]">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-4" style={{ fontFamily: 'Syne, sans-serif' }}>
-            Условия <span className="text-amber-400">покупки</span>
+            Условия <span className="text-accent">покупки</span>
           </h2>
           <p className="text-center text-white/50 mb-12">
             Для иностранных покупателей. Рассрочка привязана к этапам строительства.
@@ -584,9 +584,9 @@ export default function PeylaaLanding() {
             {PAYMENT_STEPS_FOREIGN.map((s, i) => (
               <div
                 key={s.step}
-                className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/10"
+                className="flex items-center gap-4 p-4 rounded-none bg-white/5 border border-white/10"
               >
-                <div className="w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm font-bold flex-shrink-0">
+                <div className="w-8 h-8 rounded-full bg-accent/20 text-accent flex items-center justify-center text-sm font-bold flex-shrink-0">
                   {i + 1}
                 </div>
                 <div className="flex-1">
@@ -594,7 +594,7 @@ export default function PeylaaLanding() {
                 </div>
                 <div className="text-right">
                   {s.pct && (
-                    <div className="text-lg font-bold text-amber-400" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
+                    <div className="text-lg font-bold text-accent" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
                       {s.pct}
                     </div>
                   )}
@@ -607,10 +607,10 @@ export default function PeylaaLanding() {
           </div>
 
           {/* Financing badge */}
-          <Card className="mt-8 bg-amber-500/10 border-amber-500/20">
+          <Card className="mt-8 bg-accent/10 border-accent/40/20">
             <CardContent className="p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center flex-shrink-0">
-                <Landmark className="w-6 h-6 text-amber-400" />
+              <div className="w-12 h-12 rounded-none bg-accent/20 flex items-center justify-center flex-shrink-0">
+                <Landmark className="w-6 h-6 text-accent" />
               </div>
               <div className="flex-1">
                 <h3 className="text-white font-semibold">Финансирование для иностранцев</h3>
@@ -620,7 +620,7 @@ export default function PeylaaLanding() {
               </div>
               <Button
                 variant="outline"
-                className="border-amber-500/50 text-amber-400 hover:bg-amber-500/10 whitespace-nowrap"
+                className="border-accent/40/50 text-accent hover:bg-accent/10 whitespace-nowrap"
                 onClick={() => openLeadForm('financing_inquiry')}
               >
                 Узнать подробнее
@@ -629,7 +629,7 @@ export default function PeylaaLanding() {
           </Card>
 
           {/* Additional costs */}
-          <div className="mt-8 p-6 rounded-xl bg-white/5 border border-white/10">
+          <div className="mt-8 p-6 rounded-none bg-white/5 border border-white/10">
             <h3 className="text-white font-semibold mb-4">Дополнительные расходы</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
               <div className="flex justify-between text-white/60">
@@ -675,7 +675,7 @@ export default function PeylaaLanding() {
       <section className="py-20 px-4 bg-white/[0.02]">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-12" style={{ fontFamily: 'Syne, sans-serif' }}>
-            Локация: <span className="text-amber-400">Bang Tao</span>
+            Локация: <span className="text-accent">Bang Tao</span>
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
@@ -688,10 +688,10 @@ export default function PeylaaLanding() {
               { label: 'British Int. School', dist: '5 мин', icon: '🎓' },
               { label: 'Bangkok Hospital', dist: '15 мин', icon: '🏥' },
             ].map(l => (
-              <div key={l.label} className="p-4 rounded-xl bg-white/5 border border-white/10 text-center">
+              <div key={l.label} className="p-4 rounded-none bg-white/5 border border-white/10 text-center">
                 <div className="text-2xl mb-2">{l.icon}</div>
                 <div className="text-sm text-white font-medium">{l.label}</div>
-                <div className="text-xs text-amber-400 mt-1">{l.dist}</div>
+                <div className="text-xs text-accent mt-1">{l.dist}</div>
               </div>
             ))}
           </div>
@@ -702,7 +702,7 @@ export default function PeylaaLanding() {
       <section className="py-24 px-4">
         <div className="max-w-3xl mx-auto text-center space-y-8">
           <h2 className="text-3xl md:text-4xl font-bold" style={{ fontFamily: 'Syne, sans-serif' }}>
-            Готовы выбрать свою <span className="text-amber-400">резиденцию</span>?
+            Готовы выбрать свою <span className="text-accent">резиденцию</span>?
           </h2>
           <p className="text-white/50 text-lg">
             Получите персональную подборку юнитов, расчёт доходности и условия финансирования
@@ -710,7 +710,7 @@ export default function PeylaaLanding() {
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button
               size="lg"
-              className="bg-amber-500 hover:bg-amber-600 text-black font-bold text-base px-10"
+              className="bg-accent hover:bg-accent text-black font-bold text-base px-10"
               onClick={() => openLeadForm('final_cta')}
             >
               Получить консультацию

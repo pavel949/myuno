@@ -84,7 +84,7 @@ export default function WellnessOrderSuccess() {
             </div>
 
             {order && (
-              <div className="w-full bg-muted/50 rounded-xl p-4 text-sm space-y-2">
+              <div className="w-full bg-muted/50 rounded-none p-4 text-sm space-y-2">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">
                     {language === 'ru' ? 'Заказ' : 'Order'}

@@ -118,7 +118,7 @@ export const QuickReplies: React.FC<QuickRepliesProps> = ({ onSelect, disabled }
                     <button
                       key={reply.id}
                       onClick={() => handleSelect(isRu ? reply.bodyRu : reply.body)}
-                      className="w-full text-left p-2 rounded-lg hover:bg-secondary transition-colors"
+                      className="w-full text-left p-2 rounded-none hover:bg-secondary transition-colors"
                     >
                       <p className="text-sm font-medium">{isRu ? reply.labelRu : reply.labelEn}</p>
                       <p className="text-xs text-muted-foreground line-clamp-1">
@@ -136,7 +136,7 @@ export const QuickReplies: React.FC<QuickRepliesProps> = ({ onSelect, disabled }
                       <button
                         key={template.id}
                         onClick={() => handleSelect(isRu && template.body_ru ? template.body_ru : template.body)}
-                        className="w-full text-left p-2 rounded-lg hover:bg-secondary transition-colors"
+                        className="w-full text-left p-2 rounded-none hover:bg-secondary transition-colors"
                       >
                         <p className="text-sm font-medium">{template.name}</p>
                         <p className="text-xs text-muted-foreground line-clamp-2">

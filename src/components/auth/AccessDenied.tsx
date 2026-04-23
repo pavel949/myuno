@@ -108,7 +108,7 @@ export function AccessDenied({ requiredRoles, currentPath, className }: AccessDe
 
         <CardContent className="space-y-6">
           {/* Role comparison */}
-          <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+          <div className="bg-muted/50 rounded-none p-4 space-y-3">
             {/* Current role */}
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">
@@ -256,7 +256,7 @@ export function RoleRequiredGate({ requiredRoles, children, fallback }: RoleRequ
   const meta = primaryRole ? ROLE_METADATA[primaryRole] : null;
 
   return (
-    <div className="rounded-lg border border-dashed border-muted-foreground/25 p-6 text-center">
+    <div className="rounded-none border border-dashed border-muted-foreground/25 p-6 text-center">
       <Shield className="w-8 h-8 mx-auto mb-3 text-muted-foreground/50" />
       <p className="text-sm text-muted-foreground">
         {isRussian ? 'Требуется роль: ' : 'Requires role: '}

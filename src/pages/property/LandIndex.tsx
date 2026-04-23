@@ -124,19 +124,19 @@ export default function LandIndex() {
           {isLoading && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {Array.from({ length: 6 }).map((_, i) => (
-                <Skeleton key={i} className="aspect-[16/10] rounded-2xl" />
+                <Skeleton key={i} className="aspect-[16/10] rounded-none" />
               ))}
             </div>
           )}
 
           {!isLoading && error && (
-            <div className="text-sm text-destructive p-4 rounded-xl bg-destructive/5">
+            <div className="text-sm text-destructive p-4 rounded-none bg-destructive/5">
               {isRu ? 'Не удалось загрузить участки' : 'Failed to load plots'}
             </div>
           )}
 
           {!isLoading && !error && items.length === 0 && (
-            <div className="text-center py-16 px-4 border border-dashed border-border rounded-2xl">
+            <div className="text-center py-16 px-4 border border-dashed border-border rounded-none">
               <Trees className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
               <p className="text-sm font-medium text-foreground mb-1">
                 {isRu ? 'Подбираем эксклюзивные участки' : 'Curating exclusive plots'}

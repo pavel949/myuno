@@ -39,7 +39,7 @@ export function ScheduleCard({ schedule, isRu, onComplete, onDelete, onEdit, isP
       <CardContent className="flex items-center gap-3 p-4">
         {Icon && (
           <div className={cn(
-            "rounded-lg flex items-center justify-center shrink-0 w-11 h-11",
+            "rounded-none flex items-center justify-center shrink-0 w-11 h-11",
             template?.bgColor
           )}>
             <Icon className={cn("h-5 w-5", template?.color)} />

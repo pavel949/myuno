@@ -3,7 +3,7 @@
  *
  * Pure derived component. Shows nothing unless rating ≥ 4.8 AND reviewsCount ≥ 10.
  * Two visual variants:
- *   - 'pill'  (default) — rounded white pill with award icon, used inside hero/header.
+ *   - 'pill'  (default) — rounded-none white pill with award icon, used inside hero/header.
  *   - 'inline' — small chip with no background, used inline in card metadata.
  *
  * No DB change required: the threshold is computed from the existing

@@ -56,7 +56,7 @@ export function ControlRolesTab() {
                 <Card key={role.key} className="cursor-pointer hover:shadow-md transition-shadow">
                   <CardContent className="p-4">
                     <div className="flex items-center gap-3">
-                      <div className={`h-10 w-10 rounded-lg ${role.color} flex items-center justify-center`}>
+                      <div className={`h-10 w-10 rounded-none ${role.color} flex items-center justify-center`}>
                         <Icon className="h-5 w-5 text-white" />
                       </div>
                       <div className="flex-1">
@@ -79,7 +79,7 @@ export function ControlRolesTab() {
             })}
           </div>
 
-          <div className="mt-6 p-4 bg-muted/50 rounded-lg space-y-2">
+          <div className="mt-6 p-4 bg-muted/50 rounded-none space-y-2">
             <p className="text-sm font-medium">
               {isRussian ? 'Архитектура ролей' : 'Role Architecture'}
             </p>

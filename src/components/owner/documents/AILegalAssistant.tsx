@@ -232,7 +232,7 @@ export function AILegalAssistant({ propertyContext, bookingContext }: AILegalAss
                       <Bot className="h-4 w-4 text-primary" />
                     </div>
                   )}
-                  <div className={`max-w-[85%] rounded-xl px-3 py-2 ${
+                  <div className={`max-w-[85%] rounded-none px-3 py-2 ${
                     msg.role === 'user'
                       ? 'bg-primary text-primary-foreground'
                       : 'bg-muted'
@@ -268,7 +268,7 @@ export function AILegalAssistant({ propertyContext, bookingContext }: AILegalAss
                   <div className="flex-shrink-0 w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
                     <Bot className="h-4 w-4 text-primary" />
                   </div>
-                  <div className="bg-muted rounded-xl px-3 py-2">
+                  <div className="bg-muted rounded-none px-3 py-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
                   </div>
                 </div>

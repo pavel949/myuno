@@ -625,7 +625,7 @@ export default function AdminProjects() {
                       {project.address}
                     </p>
                   ) : (
-                    <p className="text-sm text-amber-600 mt-1">
+                    <p className="text-sm text-accent mt-1">
                       {isRu ? 'Адрес не указан' : 'Address missing'}
                     </p>
                   )}
@@ -833,12 +833,12 @@ export default function AdminProjects() {
               <TabsContent value="amenities" className="space-y-4 mt-4">
                 <div className="space-y-2">
                   <Label>{isRu ? 'Удобства территории' : 'Project Amenities'}</Label>
-                  <ScrollArea className="h-64 border rounded-lg p-3">
+                  <ScrollArea className="h-64 border rounded-none p-3">
                     <div className="grid grid-cols-2 gap-2">
                       {ALL_AMENITIES.map((amenity) => (
                         <label 
                           key={amenity.id}
-                          className="flex items-center gap-2 p-2 hover:bg-muted rounded cursor-pointer"
+                          className="flex items-center gap-2 p-2 hover:bg-muted rounded-none cursor-pointer"
                         >
                           <input
                             type="checkbox"
@@ -851,7 +851,7 @@ export default function AdminProjects() {
                                 updateFormField('amenities', current.filter(a => a !== amenity.id));
                               }
                             }}
-                            className="rounded"
+                            className="rounded-none"
                           />
                           <span className="text-sm">
                             {isRu ? amenity.labelRu : amenity.labelEn}

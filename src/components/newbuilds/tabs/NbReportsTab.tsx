@@ -27,7 +27,7 @@ export function NbReportsTab({ projectId }: Props) {
     return (
       <div className="space-y-3">
         {[1, 2, 3].map(i => (
-          <Skeleton key={i} className="h-20 rounded-xl" style={{ background: 'hsl(var(--nb-surface))' }} />
+          <Skeleton key={i} className="h-20 rounded-none" style={{ background: 'hsl(var(--nb-surface))' }} />
         ))}
       </div>
     );
@@ -54,7 +54,7 @@ export function NbReportsTab({ projectId }: Props) {
           <div key={report.id} className="nb-glass p-5 flex items-start gap-4">
             {/* Icon */}
             <div
-              className="w-11 h-11 rounded-lg flex items-center justify-center flex-shrink-0"
+              className="w-11 h-11 rounded-none flex items-center justify-center flex-shrink-0"
               style={{ background: idx === 0 ? 'hsl(var(--nb-gold) / 0.15)' : 'hsl(var(--nb-surface))' }}
             >
               <FileText className="w-5 h-5" style={{ color: idx === 0 ? 'hsl(var(--nb-gold))' : 'hsl(var(--nb-muted))' }} />
@@ -91,7 +91,7 @@ export function NbReportsTab({ projectId }: Props) {
                 href={report.pdf_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all flex-shrink-0"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-none text-xs font-medium transition-all flex-shrink-0"
                 style={{ background: 'hsl(var(--nb-gold) / 0.15)', color: 'hsl(var(--nb-gold))', border: '1px solid hsl(var(--nb-gold) / 0.3)' }}
               >
                 <Download className="w-3.5 h-3.5" /> PDF

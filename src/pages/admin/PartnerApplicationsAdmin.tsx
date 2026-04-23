@@ -347,7 +347,7 @@ export default function PartnerApplicationsAdmin() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
-            className={cn("rounded-xl p-4 text-center", stat.color)}
+            className={cn("rounded-none p-4 text-center", stat.color)}
           >
             <div className="text-2xl font-bold">{stat.value}</div>
             <div className="text-xs opacity-80">{stat.label}</div>
@@ -397,7 +397,7 @@ export default function PartnerApplicationsAdmin() {
       {isPageLoading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-24 bg-secondary/50 rounded-xl animate-pulse" />
+            <div key={i} className="h-24 bg-secondary/50 rounded-none animate-pulse" />
           ))}
         </div>
       ) : filteredApplications.length === 0 ? (
@@ -421,7 +421,7 @@ export default function PartnerApplicationsAdmin() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ delay: index * 0.03 }}
-                  className="bg-card border border-border rounded-xl p-4 hover:border-primary/30 transition-colors cursor-pointer"
+                  className="bg-card border border-border rounded-none p-4 hover:border-primary/30 transition-colors cursor-pointer"
                   onClick={() => {
                     setSelectedApp(app);
                     setIsDetailOpen(true);
@@ -506,7 +506,7 @@ export default function PartnerApplicationsAdmin() {
                         <span className="text-muted-foreground block mb-1">
                           {language === 'ru' ? 'Описание' : 'Description'}
                         </span>
-                        <p className="bg-secondary/50 rounded-lg p-3">
+                        <p className="bg-secondary/50 rounded-none p-3">
                           {selectedApp.business_description}
                         </p>
                       </div>
@@ -596,7 +596,7 @@ export default function PartnerApplicationsAdmin() {
 
                 {/* Rejection Reason */}
                 {selectedApp.status === 'rejected' && selectedApp.rejection_reason && (
-                  <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+                  <div className="bg-destructive/10 border border-destructive/20 rounded-none p-4">
                     <h4 className="font-medium text-destructive mb-2 flex items-center gap-2">
                       <XCircle className="w-4 h-4" />
                       {language === 'ru' ? 'Причина отклонения' : 'Rejection Reason'}

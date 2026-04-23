@@ -24,7 +24,7 @@ export function UploadProgress({
 }: UploadProgressProps) {
   return (
     <div className={cn(
-      "relative aspect-square rounded-xl overflow-hidden border-2 border-dashed border-primary/50 bg-muted",
+      "relative aspect-square rounded-none overflow-hidden border-2 border-dashed border-primary/50 bg-muted",
       className
     )}>
       {preview && (
@@ -49,7 +49,7 @@ export function UploadProgress({
         )}
         
         {status === 'done' && (
-          <div className="bg-green-500 rounded-full p-2">
+          <div className="bg-success rounded-full p-2">
             <Check className="h-6 w-6 text-white" />
           </div>
         )}

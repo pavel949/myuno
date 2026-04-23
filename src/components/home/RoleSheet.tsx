@@ -93,17 +93,17 @@ export function RoleSheet({ open, personas, onClose, onToggle, onReorder }: Role
                         <button
                           onClick={() => moveUp(i)}
                           disabled={i === 0}
-                          className="text-[8px] px-1.5 py-0.5 rounded border border-border text-muted-foreground disabled:opacity-30"
+                          className="text-[8px] px-1.5 py-0.5 rounded-none border border-border text-muted-foreground disabled:opacity-30"
                         >▲</button>
                         <button
                           onClick={() => moveDown(i)}
                           disabled={i === personas.length - 1}
-                          className="text-[8px] px-1.5 py-0.5 rounded border border-border text-muted-foreground disabled:opacity-30"
+                          className="text-[8px] px-1.5 py-0.5 rounded-none border border-border text-muted-foreground disabled:opacity-30"
                         >▼</button>
                       </div>
                       <button
                         onClick={() => onToggle(p)}
-                        className="text-[10px] font-medium px-2 py-1 rounded-md border border-border text-muted-foreground"
+                        className="text-[10px] font-medium px-2 py-1 rounded-none border border-border text-muted-foreground"
                       >
                         {isRu ? 'Убрать' : 'Remove'}
                       </button>

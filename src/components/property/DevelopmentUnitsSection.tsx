@@ -37,7 +37,7 @@ export function DevelopmentUnitsSection({ developmentId }: DevelopmentUnitsSecti
   if (isLoading) {
     return (
       <div className="space-y-3">
-        {[1, 2].map(i => <Skeleton key={i} className="h-24 rounded-xl" />)}
+        {[1, 2].map(i => <Skeleton key={i} className="h-24 rounded-none" />)}
       </div>
     );
   }
@@ -59,7 +59,7 @@ export function DevelopmentUnitsSection({ developmentId }: DevelopmentUnitsSecti
           <div
             key={unit.id}
             className={cn(
-              "border rounded-xl p-3 space-y-2",
+              "border rounded-none p-3 space-y-2",
               isSoldOut ? "opacity-60 border-border/30" : "border-border/50"
             )}
           >

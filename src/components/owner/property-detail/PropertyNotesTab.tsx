@@ -42,7 +42,7 @@ export function PropertyNotesTab({ propertyId }: PropertyNotesTabProps) {
     await deleteNote.mutateAsync(id);
   };
 
-  if (isLoading) return <div className="animate-pulse h-32 bg-muted rounded-lg" />;
+  if (isLoading) return <div className="animate-pulse h-32 bg-muted rounded-none" />;
 
   return (
     <div className="space-y-4">

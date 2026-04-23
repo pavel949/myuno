@@ -110,7 +110,7 @@ export default function ExperiencesIndex() {
       stickySubHeader={
         <div className="px-4 py-2 flex items-center gap-2 overflow-x-auto scrollbar-hide touch-pan-y">
           {/* Type toggle */}
-          <div className="flex gap-1 p-0.5 bg-muted/50 rounded-lg shrink-0">
+          <div className="flex gap-1 p-0.5 bg-muted/50 rounded-none shrink-0">
             {([
               { id: 'all', labelEn: 'All', labelRu: 'Все' },
               { id: 'tour', labelEn: 'Tours', labelRu: 'Туры', icon: Compass },
@@ -120,7 +120,7 @@ export default function ExperiencesIndex() {
                 key={type.id}
                 onClick={() => handleTypeChange(type.id)}
                 className={cn(
-                  "py-1.5 px-3 rounded-md text-xs font-medium transition-all flex items-center gap-1 whitespace-nowrap",
+                  "py-1.5 px-3 rounded-none text-xs font-medium transition-all flex items-center gap-1 whitespace-nowrap",
                   viewType === type.id
                     ? "bg-background text-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
@@ -151,7 +151,7 @@ export default function ExperiencesIndex() {
               {isRu ? SORT_OPTIONS.find(s => s.id === sortKey)?.labelRu : SORT_OPTIONS.find(s => s.id === sortKey)?.labelEn}
             </Button>
             {showSort && (
-              <div className="absolute right-0 top-full mt-1 z-20 bg-popover border rounded-xl shadow-lg py-1 min-w-[160px]">
+              <div className="absolute right-0 top-full mt-1 z-20 bg-popover border rounded-none shadow-lg py-1 min-w-[160px]">
                 {SORT_OPTIONS.map(opt => (
                   <button
                     key={opt.id}
@@ -183,7 +183,7 @@ export default function ExperiencesIndex() {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
           {[1,2,3,4,5,6].map(i => (
             <div key={i} className="space-y-2">
-              <Skeleton className="aspect-[4/3] rounded-xl" />
+              <Skeleton className="aspect-[4/3] rounded-none" />
               <Skeleton className="h-4 w-3/4" />
               <Skeleton className="h-3 w-1/2" />
             </div>

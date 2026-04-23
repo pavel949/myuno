@@ -37,7 +37,7 @@ export const ChatModerationWarning: React.FC<ChatModerationWarningProps> = ({
   return (
     <div 
       className={cn(
-        'rounded-lg border p-3 animate-in slide-in-from-top-2 duration-300',
+        'rounded-none border p-3 animate-in slide-in-from-top-2 duration-300',
         isCritical 
           ? 'bg-destructive/10 border-destructive/30' 
           : 'bg-warning/10 border-warning/30',
@@ -62,7 +62,7 @@ export const ChatModerationWarning: React.FC<ChatModerationWarningProps> = ({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <span className={cn(
-              'text-xs font-semibold px-2 py-0.5 rounded',
+              'text-xs font-semibold px-2 py-0.5 rounded-none',
               isCritical 
                 ? 'bg-destructive/20 text-destructive' 
                 : 'bg-warning/20 text-warning'

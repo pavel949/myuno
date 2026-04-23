@@ -125,7 +125,7 @@ export default function DisputeResolutionPage() {
         ? ['Аренда яхт и катеров', 'Туры и экскурсии', 'Транспорт (escrow)', 'Маркетплейс товаров']
         : ['Boat charters', 'Tours & excursions', 'Transport (escrow)', 'Marketplace products'],
       maxCoverage: isRu ? 'До 100% стоимости' : 'Up to 100% of cost',
-      color: 'bg-green-500/10 border-green-500/30',
+      color: 'bg-success/10 border-success/40/30',
     },
     {
       category: isRu ? 'Покрытие депозита' : 'Deposit Coverage',
@@ -133,7 +133,7 @@ export default function DisputeResolutionPage() {
         ? ['Краткосрочная аренда', 'Рестораны (no-show)', 'Красота и СПА', 'Медицина']
         : ['Short-term rentals', 'Restaurants (no-show)', 'Beauty & SPA', 'Medical'],
       maxCoverage: isRu ? 'До суммы депозита' : 'Up to deposit amount',
-      color: 'bg-yellow-500/10 border-yellow-500/30',
+      color: 'bg-accent/10 border-accent/40/30',
     },
     {
       category: isRu ? 'Только лид-защита' : 'Lead Protection Only',
@@ -141,7 +141,7 @@ export default function DisputeResolutionPage() {
         ? ['Долгосрочная аренда', 'Визы', 'Юридические услуги', 'Образование']
         : ['Long-term rentals', 'Visas', 'Legal services', 'Education'],
       maxCoverage: isRu ? 'Возврат lead-fee' : 'Lead-fee refund',
-      color: 'bg-orange-500/10 border-orange-500/30',
+      color: 'bg-accent/10 border-accent/40/30',
     },
   ];
 
@@ -207,7 +207,7 @@ export default function DisputeResolutionPage() {
                         <step.icon className="h-4 w-4 text-primary" />
                         {step.title}
                       </h3>
-                      <span className="text-xs bg-muted px-2 py-1 rounded flex items-center gap-1">
+                      <span className="text-xs bg-muted px-2 py-1 rounded-none flex items-center gap-1">
                         <Clock className="h-3 w-3" />
                         {step.timeframe}
                       </span>
@@ -249,7 +249,7 @@ export default function DisputeResolutionPage() {
                     <tr key={index} className={`border-t ${!item.covered ? 'bg-destructive/5' : ''}`}>
                       <td className="p-3 flex items-center gap-2">
                         {item.covered ? (
-                          <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+                          <CheckCircle className="h-4 w-4 text-success flex-shrink-0" />
                         ) : (
                           <XCircle className="h-4 w-4 text-destructive flex-shrink-0" />
                         )}
@@ -278,7 +278,7 @@ export default function DisputeResolutionPage() {
               <CardHeader className="pb-2">
                 <CardTitle className="text-base flex items-center justify-between">
                   {category.category}
-                  <span className="text-xs font-normal bg-background px-2 py-1 rounded">
+                  <span className="text-xs font-normal bg-background px-2 py-1 rounded-none">
                     {category.maxCoverage}
                   </span>
                 </CardTitle>
@@ -286,7 +286,7 @@ export default function DisputeResolutionPage() {
               <CardContent>
                 <div className="flex flex-wrap gap-2">
                   {category.items.map((item, idx) => (
-                    <span key={idx} className="text-xs bg-background px-2 py-1 rounded">
+                    <span key={idx} className="text-xs bg-background px-2 py-1 rounded-none">
                       {item}
                     </span>
                   ))}
@@ -305,14 +305,14 @@ export default function DisputeResolutionPage() {
           <CardContent className="pt-6">
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {evidenceTypes.map((type, index) => (
-                <div key={index} className="text-center p-3 bg-muted rounded-lg">
+                <div key={index} className="text-center p-3 bg-muted rounded-none">
                   <span className="text-2xl mb-2 block">{type.icon}</span>
                   <h4 className="font-medium text-sm">{type.name}</h4>
                   <p className="text-xs text-muted-foreground">{type.desc}</p>
                 </div>
               ))}
             </div>
-            <div className="mt-4 p-3 bg-primary/10 rounded-lg">
+            <div className="mt-4 p-3 bg-primary/10 rounded-none">
               <p className="text-sm text-primary">
                 💡 {isRu 
                   ? 'Чем больше доказательств вы предоставите, тем быстрее мы решим ваш спор.'
@@ -371,7 +371,7 @@ export default function DisputeResolutionPage() {
                 ? 'Используя Платформу, вы соглашаетесь разрешать все споры только индивидуально. Вы отказываетесь от права на участие в коллективных исках, групповых арбитражах или любых объединённых процессах против myUNO Pte. Ltd.'
                 : 'By using the Platform, you agree to resolve all disputes only individually. You waive the right to participate in class actions, group arbitrations, or any consolidated proceedings against myUNO Pte. Ltd.'}
             </p>
-            <p className="text-xs text-muted-foreground mt-3 p-2 bg-muted rounded">
+            <p className="text-xs text-muted-foreground mt-3 p-2 bg-muted rounded-none">
               {isRu 
                 ? 'Применимое право: Сингапур | Арбитраж: SIAC (Singapore International Arbitration Centre) или THAC'
                 : 'Governing Law: Singapore | Arbitration: SIAC (Singapore International Arbitration Centre) or THAC'}
@@ -384,12 +384,12 @@ export default function DisputeResolutionPage() {
           <CardContent className="pt-6">
             <h3 className="font-semibold text-center mb-4">{isRu ? 'Контакты для споров' : 'Dispute Contacts'}</h3>
             <div className="grid md:grid-cols-2 gap-4">
-              <div className="text-center p-4 bg-muted rounded-lg">
+              <div className="text-center p-4 bg-muted rounded-none">
                 <Mail className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
                 <p className="text-sm font-medium">disputes@myuno.app</p>
                 <p className="text-xs text-muted-foreground">{isRu ? 'Основная почта' : 'Primary email'}</p>
               </div>
-              <div className="text-center p-4 bg-muted rounded-lg">
+              <div className="text-center p-4 bg-muted rounded-none">
                 <Phone className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
                 <p className="text-sm font-medium">{COMPANY_CONTACTS.phone.display}</p>
                 <p className="text-xs text-muted-foreground">{isRu ? 'Срочная линия' : 'Urgent line'}</p>
@@ -408,11 +408,11 @@ export default function DisputeResolutionPage() {
 
         {/* Related Links */}
         <div className="grid grid-cols-2 gap-2 mb-6">
-          <Link to="/terms" className="p-3 bg-muted rounded-lg text-center hover:bg-muted/80 transition-colors">
+          <Link to="/terms" className="p-3 bg-muted rounded-none text-center hover:bg-muted/80 transition-colors">
             <FileText className="h-5 w-5 mx-auto mb-1 text-muted-foreground" />
             <span className="text-xs">{isRu ? 'Условия использования' : 'Terms of Use'}</span>
           </Link>
-          <Link to="/refund-policy" className="p-3 bg-muted rounded-lg text-center hover:bg-muted/80 transition-colors">
+          <Link to="/refund-policy" className="p-3 bg-muted rounded-none text-center hover:bg-muted/80 transition-colors">
             <Shield className="h-5 w-5 mx-auto mb-1 text-muted-foreground" />
             <span className="text-xs">{isRu ? 'Политика возврата' : 'Refund Policy'}</span>
           </Link>

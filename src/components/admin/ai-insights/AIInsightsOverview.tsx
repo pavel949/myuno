@@ -55,8 +55,8 @@ function MetricCard({
   className?: string;
 }) {
   return (
-    <div className={cn("flex items-start gap-3 p-4 rounded-xl bg-muted/50", className)}>
-      <div className="p-2 rounded-lg bg-primary/10">
+    <div className={cn("flex items-start gap-3 p-4 rounded-none bg-muted/50", className)}>
+      <div className="p-2 rounded-none bg-primary/10">
         <Icon className="w-4 h-4 text-primary" />
       </div>
       <div className="flex-1 min-w-0">
@@ -184,7 +184,7 @@ export function AIInsightsOverview() {
           <h4 className="text-sm font-medium text-muted-foreground">
             {isRussian ? 'Распределение качества' : 'Quality Distribution'}
           </h4>
-          <div className="flex gap-1 h-8 rounded-lg overflow-hidden">
+          <div className="flex gap-1 h-8 rounded-none overflow-hidden">
             {metrics.scoreDistribution.excellent > 0 && (
               <div 
                 className="bg-success flex items-center justify-center text-success-foreground text-xs font-medium"

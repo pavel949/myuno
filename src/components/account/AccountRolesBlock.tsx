@@ -94,8 +94,8 @@ const ROLE_CARDS: RoleCardConfig[] = [
     descEn: 'Internal staff workspace',
     descRu: 'Рабочее место сотрудника',
     icon: UserCog,
-    color: 'text-orange-500',
-    bgColor: 'bg-orange-500/10',
+    color: 'text-accent',
+    bgColor: 'bg-accent/10',
     path: '/staff',
   },
   {
@@ -105,8 +105,8 @@ const ROLE_CARDS: RoleCardConfig[] = [
     descEn: 'MC dashboard & properties',
     descRu: 'Панель УК и объекты',
     icon: Briefcase,
-    color: 'text-cyan-600',
-    bgColor: 'bg-cyan-500/10',
+    color: 'text-primary',
+    bgColor: 'bg-primary/10',
     path: '/mc',
   },
 ];
@@ -161,12 +161,12 @@ export function AccountRolesBlock({ showCTA = true }: AccountRolesBlockProps) {
               onClick={() => handleRoleSwitch(role)}
               disabled={isSwitching}
               className={cn(
-                "w-full flex items-center gap-3 p-3 rounded-xl transition-all text-left",
+                "w-full flex items-center gap-3 p-3 rounded-none transition-all text-left",
                 "hover:bg-muted/50 active:scale-[0.98]",
                 isActive && "bg-primary/5 ring-1 ring-primary/20"
               )}
             >
-              <div className={cn("p-2.5 rounded-xl", role.bgColor)}>
+              <div className={cn("p-2.5 rounded-none", role.bgColor)}>
                 <Icon className={cn("h-5 w-5", role.color)} />
               </div>
               <div className="flex-1 min-w-0">

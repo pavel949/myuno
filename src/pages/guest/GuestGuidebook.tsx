@@ -160,7 +160,7 @@ export default function GuestGuidebook() {
               </CardHeader>
               <CardContent className="space-y-3">
                 {guidebook.wifi_name && (
-                  <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-muted rounded-none">
                     <div>
                       <p className="text-sm text-muted-foreground">{isRu ? 'Сеть' : 'Network'}</p>
                       <p className="font-medium">{guidebook.wifi_name}</p>
@@ -179,7 +179,7 @@ export default function GuestGuidebook() {
                   </div>
                 )}
                 {guidebook.wifi_password && (
-                  <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-muted rounded-none">
                     <div>
                       <p className="text-sm text-muted-foreground">{isRu ? 'Пароль' : 'Password'}</p>
                       <p className="font-mono font-medium">{guidebook.wifi_password}</p>
@@ -212,7 +212,7 @@ export default function GuestGuidebook() {
               </CardHeader>
               <CardContent className="space-y-3">
                 {guidebook.door_code && (
-                  <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-muted rounded-none">
                     <div>
                       <p className="text-sm text-muted-foreground">{isRu ? 'Код двери' : 'Door Code'}</p>
                       <p className="font-mono font-bold text-lg">{guidebook.door_code}</p>
@@ -231,7 +231,7 @@ export default function GuestGuidebook() {
                   </div>
                 )}
                 {guidebook.gate_code && (
-                  <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-muted rounded-none">
                     <div>
                       <p className="text-sm text-muted-foreground">{isRu ? 'Код ворот' : 'Gate Code'}</p>
                       <p className="font-mono font-bold text-lg">{guidebook.gate_code}</p>
@@ -250,7 +250,7 @@ export default function GuestGuidebook() {
                   </div>
                 )}
                 {guidebook.lockbox_code && (
-                  <div className="p-3 bg-muted rounded-lg">
+                  <div className="p-3 bg-muted rounded-none">
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm text-muted-foreground">{isRu ? 'Код сейфа' : 'Lockbox Code'}</p>
@@ -290,7 +290,7 @@ export default function GuestGuidebook() {
               </CardHeader>
               <CardContent className="space-y-3">
                 {guidebook.appliance_guides.map((guide) => (
-                  <div key={guide.id} className="p-3 bg-muted rounded-lg">
+                  <div key={guide.id} className="p-3 bg-muted rounded-none">
                     <div className="flex items-start justify-between">
                       <div>
                         <p className="font-medium">
@@ -371,7 +371,7 @@ export default function GuestGuidebook() {
               </CardHeader>
               <CardContent className="space-y-3">
                 {guidebook.emergency_contacts.map((contact) => (
-                  <div key={contact.id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                  <div key={contact.id} className="flex items-center justify-between p-3 bg-muted rounded-none">
                     <div>
                       <p className="font-medium">
                         {isRu && contact.name_ru ? contact.name_ru : contact.name}
@@ -416,7 +416,7 @@ export default function GuestGuidebook() {
                   </CardHeader>
                   <CardContent className="space-y-3">
                     {tips.map((tip) => (
-                      <div key={tip.id} className="p-3 bg-muted rounded-lg">
+                      <div key={tip.id} className="p-3 bg-muted rounded-none">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <p className="font-medium">

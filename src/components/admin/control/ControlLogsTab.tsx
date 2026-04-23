@@ -46,7 +46,7 @@ export function ControlLogsTab() {
             {logs.map((log) => (
               <div 
                 key={log.id} 
-                className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                className="flex items-center gap-3 p-3 rounded-none bg-muted/50 hover:bg-muted transition-colors"
               >
                 {getLogIcon(log.type)}
                 <span className="flex-1 text-sm">{log.message}</span>

@@ -55,7 +55,7 @@ export function NewbuildProjectDeepTabs({ project, variant }: NewbuildProjectDee
       {variant === 'full' && (
         <>
           <section className="max-w-7xl mx-auto px-4 mb-6">
-            <div className="relative rounded-2xl overflow-hidden aspect-[16/9] md:aspect-[21/9]">
+            <div className="relative rounded-none overflow-hidden aspect-[16/9] md:aspect-[21/9]">
               <img src={heroImage} alt={project.name_en} className="w-full h-full object-cover" />
               <div className="absolute top-4 left-4 flex gap-2">
                 <NbProjectStatusBadge status={project.project_status} />
@@ -80,7 +80,7 @@ export function NewbuildProjectDeepTabs({ project, variant }: NewbuildProjectDee
                     key={i}
                     type="button"
                     onClick={() => setSelectedImage(i)}
-                    className="flex-shrink-0 w-20 h-14 rounded-lg overflow-hidden transition-all"
+                    className="flex-shrink-0 w-20 h-14 rounded-none overflow-hidden transition-all"
                     style={{
                       border: selectedImage === i ? '2px solid hsl(var(--nb-gold))' : '2px solid transparent',
                       opacity: selectedImage === i ? 1 : 0.6,
@@ -118,7 +118,7 @@ export function NewbuildProjectDeepTabs({ project, variant }: NewbuildProjectDee
             key={tab.key}
             type="button"
             onClick={() => setActiveTab(tab.key)}
-            className="px-3 py-2 text-xs md:text-sm whitespace-nowrap transition-all rounded-t-lg flex-shrink-0"
+            className="px-3 py-2 text-xs md:text-sm whitespace-nowrap transition-all rounded-none flex-shrink-0"
             style={{
               color: activeTab === tab.key ? 'hsl(var(--nb-gold))' : 'hsl(var(--nb-muted))',
               borderBottom: activeTab === tab.key ? '2px solid hsl(var(--nb-gold))' : '2px solid transparent',
@@ -178,7 +178,7 @@ export function NewbuildProjectDeepTabs({ project, variant }: NewbuildProjectDee
                     {project.amenities.map(a => (
                       <span
                         key={a}
-                        className="px-3 py-1.5 rounded-lg text-sm"
+                        className="px-3 py-1.5 rounded-none text-sm"
                         style={{
                           background: 'hsl(var(--nb-gold) / 0.08)',
                           color: 'hsl(var(--nb-gold) / 0.8)',

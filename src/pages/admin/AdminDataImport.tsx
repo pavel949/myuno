@@ -181,7 +181,7 @@ export default function AdminDataImport() {
               )}
             </div>
             {importResult.errors.length > 0 && (
-              <div className="text-left bg-destructive/10 p-3 rounded-lg mb-4 max-h-32 overflow-auto">
+              <div className="text-left bg-destructive/10 p-3 rounded-none mb-4 max-h-32 overflow-auto">
                 {importResult.errors.slice(0, 5).map((err, i) => (
                   <p key={i} className="text-xs text-destructive">{err}</p>
                 ))}

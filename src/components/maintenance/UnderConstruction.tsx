@@ -69,7 +69,7 @@ export function UnderConstruction() {
           className="absolute top-4 right-4 z-50"
         >
           <div className={cn(
-            "flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border-2",
+            "flex items-center gap-3 px-4 py-3 rounded-none shadow-lg border-2",
             isMaintenanceMode 
               ? "bg-warning/20 border-warning" 
               : "bg-background border-primary"
@@ -103,7 +103,7 @@ export function UnderConstruction() {
           className="flex items-center justify-center gap-2"
         >
           <span className="text-xl font-medium text-muted-foreground">my</span>
-          <div className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center shadow-lg">
+          <div className="w-10 h-10 rounded-none gradient-gold flex items-center justify-center shadow-lg">
             <span className="text-lg font-bold text-primary-foreground">U</span>
           </div>
           <span className="text-2xl font-display font-bold text-gradient-gold">UNO</span>
@@ -146,7 +146,7 @@ export function UnderConstruction() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 + i * 0.1 }}
-              className="flex flex-col items-center gap-2 p-3 rounded-xl bg-muted/50"
+              className="flex flex-col items-center gap-2 p-3 rounded-none bg-muted/50"
             >
               <item.icon className="w-5 h-5 text-primary" />
               <span className="text-xs text-muted-foreground">{item.label}</span>
@@ -180,7 +180,7 @@ export function UnderConstruction() {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="py-4 px-6 bg-success/10 text-success rounded-xl"
+            className="py-4 px-6 bg-success/10 text-success rounded-none"
           >
             ✓ You'll be notified when we launch!
           </motion.div>

@@ -144,7 +144,7 @@ export default function DocumentsInsurancePage() {
       </Tabs>
 
       {isLoading ? (
-        <div className="space-y-3">{[1, 2, 3].map(i => <Skeleton key={i} className="h-24 rounded-xl" />)}</div>
+        <div className="space-y-3">{[1, 2, 3].map(i => <Skeleton key={i} className="h-24 rounded-none" />)}</div>
       ) : filtered.length === 0 ? (
         <Card className="border-dashed">
           <CardContent className="py-12 text-center">
@@ -167,7 +167,7 @@ export default function DocumentsInsurancePage() {
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-3">
-                      <div className="p-2 rounded-lg bg-muted shrink-0"><TypeIcon className="h-4 w-4 text-foreground/70" /></div>
+                      <div className="p-2 rounded-none bg-muted shrink-0"><TypeIcon className="h-4 w-4 text-foreground/70" /></div>
                       <div className="space-y-0.5">
                         <h3 className="font-medium text-sm">{doc.title}</h3>
                         {property && <p className="text-xs text-muted-foreground">{property.title}</p>}

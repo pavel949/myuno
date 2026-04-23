@@ -14,7 +14,7 @@ export function ProviderTypeToggle({ selectedType, onTypeChange, className }: Pr
   const { language } = useLanguage();
 
   return (
-    <div className={cn("flex gap-1 p-1 bg-muted rounded-lg", className)}>
+    <div className={cn("flex gap-1 p-1 bg-muted rounded-none", className)}>
       {PROVIDER_TYPE_OPTIONS.map((option) => {
         const isSelected = selectedType === option.id;
         const label = language === 'ru' ? option.labelRu : option.labelEn;
@@ -24,7 +24,7 @@ export function ProviderTypeToggle({ selectedType, onTypeChange, className }: Pr
             key={option.id}
             onClick={() => onTypeChange(option.id as ProviderType | 'all')}
             className={cn(
-              "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all flex-1",
+              "flex items-center gap-1.5 px-3 py-1.5 rounded-none text-sm font-medium transition-all flex-1",
               isSelected
                 ? "bg-background text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground"

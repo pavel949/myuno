@@ -14,11 +14,11 @@ import { toast } from 'sonner';
 import { Mail, Bell, Clock, Pencil, ArrowRight, Plane, Sun, Home, LogOut, Star } from 'lucide-react';
 
 const STAGES = [
-  { key: 'pre_arrival', icon: Plane, color: 'bg-blue-500', labelEn: 'Pre-Arrival', labelRu: 'До заезда', desc: '-24h before check-in' },
-  { key: 'check_in', icon: Home, color: 'bg-green-500', labelEn: 'Check-in Day', labelRu: 'День заезда', desc: 'At check-in time' },
-  { key: 'mid_stay', icon: Sun, color: 'bg-amber-500', labelEn: 'Mid-Stay', labelRu: 'Середина', desc: '+72h after check-in' },
-  { key: 'pre_checkout', icon: LogOut, color: 'bg-orange-500', labelEn: 'Pre-Checkout', labelRu: 'До выезда', desc: '-24h before check-out' },
-  { key: 'post_stay', icon: Star, color: 'bg-purple-500', labelEn: 'Post-Stay', labelRu: 'После выезда', desc: '+24h after check-out' },
+  { key: 'pre_arrival', icon: Plane, color: 'bg-primary', labelEn: 'Pre-Arrival', labelRu: 'До заезда', desc: '-24h before check-in' },
+  { key: 'check_in', icon: Home, color: 'bg-success', labelEn: 'Check-in Day', labelRu: 'День заезда', desc: 'At check-in time' },
+  { key: 'mid_stay', icon: Sun, color: 'bg-accent', labelEn: 'Mid-Stay', labelRu: 'Середина', desc: '+72h after check-in' },
+  { key: 'pre_checkout', icon: LogOut, color: 'bg-accent', labelEn: 'Pre-Checkout', labelRu: 'До выезда', desc: '-24h before check-out' },
+  { key: 'post_stay', icon: Star, color: 'bg-primary', labelEn: 'Post-Stay', labelRu: 'После выезда', desc: '+24h after check-out' },
 ];
 
 interface Template {
@@ -133,13 +133,13 @@ export default function LifecycleMessaging() {
         </Card>
         <Card>
           <CardContent className="pt-4 text-center">
-            <p className="text-2xl font-bold text-green-600">{stats?.sent || 0}</p>
+            <p className="text-2xl font-bold text-success">{stats?.sent || 0}</p>
             <p className="text-xs text-muted-foreground">{isRu ? 'Доставлено' : 'Delivered'}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4 text-center">
-            <p className="text-2xl font-bold text-amber-600">{stats?.pending || 0}</p>
+            <p className="text-2xl font-bold text-accent">{stats?.pending || 0}</p>
             <p className="text-xs text-muted-foreground">{isRu ? 'В очереди' : 'Pending'}</p>
           </CardContent>
         </Card>

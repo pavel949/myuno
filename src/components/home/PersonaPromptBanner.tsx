@@ -54,11 +54,11 @@ export function PersonaPromptBanner() {
     <section className="px-4 mt-3" aria-label="Persona detection prompt" data-testid="persona-prompt-banner">
       <div
         className={cn(
-          'relative flex items-center gap-3 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/5 via-background to-background p-3.5',
+          'relative flex items-center gap-3 rounded-none border border-primary/30 bg-gradient-to-br from-primary/5 via-background to-background p-3.5',
           'shadow-sm',
         )}
       >
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-none bg-primary/15 text-primary">
           <Sparkles className="h-5 w-5" />
         </div>
         <div className="flex-1 min-w-0">
@@ -72,7 +72,7 @@ export function PersonaPromptBanner() {
         <Link
           to={target}
           data-testid="persona-prompt-cta"
-          className="rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
+          className="rounded-none bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
         >
           {COPY.cta[lang as 'en' | 'ru']}
         </Link>
@@ -83,7 +83,7 @@ export function PersonaPromptBanner() {
             setDismissed(true);
             try { sessionStorage.setItem(KEY, '1'); } catch { /* ignore */ }
           }}
-          className="absolute right-1.5 top-1.5 inline-flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+          className="absolute right-1.5 top-1.5 inline-flex h-6 w-6 items-center justify-center rounded-none text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
           aria-label={COPY.dismiss[lang as 'en' | 'ru']}
         >
           <X className="h-3.5 w-3.5" />

@@ -362,10 +362,10 @@ export default function AdminProviders() {
                           <img 
                             src={provider.logo_url} 
                             alt={provider.name} 
-                            className="h-12 w-12 rounded-xl object-cover border"
+                            className="h-12 w-12 rounded-none object-cover border"
                           />
                         ) : (
-                          <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                          <div className="h-12 w-12 rounded-none bg-primary/10 flex items-center justify-center">
                             <Building2 className="h-6 w-6 text-primary" />
                           </div>
                         )}

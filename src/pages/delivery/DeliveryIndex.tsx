@@ -20,7 +20,7 @@ const deliveryTypes = [
     descEn: '1-2 hours',
     descRu: '1-2 часа',
     priceFrom: 150,
-    color: 'from-orange-500 to-red-500',
+    color: 'from-accent to-red-500',
     isPopular: true,
   },
   {
@@ -31,7 +31,7 @@ const deliveryTypes = [
     descEn: 'Before 8 PM',
     descRu: 'До 20:00',
     priceFrom: 100,
-    color: 'from-info to-indigo-500',
+    color: 'from-info to-primary',
   },
   {
     id: 'scheduled',
@@ -41,7 +41,7 @@ const deliveryTypes = [
     descEn: 'Choose time',
     descRu: 'Выберите время',
     priceFrom: 80,
-    color: 'from-success to-emerald-500',
+    color: 'from-success to-success',
   },
   {
     id: 'freight',
@@ -51,7 +51,7 @@ const deliveryTypes = [
     descEn: 'Furniture, etc.',
     descRu: 'Мебель и др.',
     priceFrom: 500,
-    color: 'from-accent-purple to-violet-500',
+    color: 'from-accent-purple to-primary',
   },
 ];
 
@@ -123,7 +123,7 @@ export default function DeliveryIndex() {
       showFilter={false}
     >
       {/* Hero */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-warning/20 via-warning/10 to-background p-6">
+      <div className="relative overflow-hidden rounded-none bg-gradient-to-br from-warning/20 via-warning/10 to-background p-6">
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-2">
             <Truck className="w-6 h-6 text-warning" />
@@ -160,7 +160,7 @@ export default function DeliveryIndex() {
               <button
                 key={type.id}
                 onClick={() => navigate(`/delivery?type=${type.id}`)}
-                className="relative bg-card rounded-2xl border border-border/50 p-4 text-left hover:border-primary/30 transition-all active:scale-[0.98] [box-shadow:var(--shadow-elevation-1)]"
+                className="relative bg-card rounded-none border border-border/50 p-4 text-left hover:border-primary/30 transition-all active:scale-[0.98] [box-shadow:var(--shadow-elevation-1)]"
               >
                 {type.isPopular && (
                   <Badge className="absolute -top-2 -right-2 bg-warning text-warning-foreground text-[10px]">
@@ -168,7 +168,7 @@ export default function DeliveryIndex() {
                   </Badge>
                 )}
                 <div className={cn(
-                  "w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br mb-3",
+                  "w-12 h-12 rounded-none flex items-center justify-center bg-gradient-to-br mb-3",
                   type.color
                 )}>
                   <Icon className="w-6 h-6 text-white" />
@@ -200,7 +200,7 @@ export default function DeliveryIndex() {
               <button
                 key={service.id}
                 onClick={() => navigate(`/delivery?service=${service.id}`)}
-                className="flex-shrink-0 w-40 bg-card rounded-2xl overflow-hidden border border-border/50 hover:border-primary/30 transition-all [box-shadow:var(--shadow-elevation-1)]"
+                className="flex-shrink-0 w-40 bg-card rounded-none overflow-hidden border border-border/50 hover:border-primary/30 transition-all [box-shadow:var(--shadow-elevation-1)]"
               >
                 <div className="h-24 relative">
                   <img
@@ -241,7 +241,7 @@ export default function DeliveryIndex() {
             {recentOrders.map((order) => (
               <div
                 key={order.id}
-                className="bg-card rounded-xl border border-border/50 p-4 [box-shadow:var(--shadow-elevation-1)]"
+                className="bg-card rounded-none border border-border/50 p-4 [box-shadow:var(--shadow-elevation-1)]"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
@@ -275,7 +275,7 @@ export default function DeliveryIndex() {
       )}
 
       {/* Promo Banner */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary to-primary/80 p-6 text-primary-foreground">
+      <div className="relative overflow-hidden rounded-none bg-gradient-to-r from-primary to-primary/80 p-6 text-primary-foreground">
         <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-2">

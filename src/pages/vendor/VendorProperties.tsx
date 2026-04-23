@@ -304,10 +304,10 @@ const VendorProperties = () => {
                     <img 
                       src={property.cover_image} 
                       alt={property.title_en}
-                      className="w-20 h-20 rounded-lg object-cover"
+                      className="w-20 h-20 rounded-none object-cover"
                     />
                   ) : (
-                    <div className="w-20 h-20 rounded-lg bg-muted flex items-center justify-center">
+                    <div className="w-20 h-20 rounded-none bg-muted flex items-center justify-center">
                       <Building2 className="h-8 w-8 text-muted-foreground" />
                     </div>
                   )}

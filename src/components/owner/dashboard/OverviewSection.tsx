@@ -107,9 +107,9 @@ function OverviewBlock({
           <Skeleton className="h-4 w-full" />
         </CardHeader>
         <CardContent className="space-y-3">
-          <Skeleton className="h-16 w-full rounded-xl" />
-          <Skeleton className="h-16 w-full rounded-xl" />
-          <Skeleton className="h-10 w-full rounded-xl" />
+          <Skeleton className="h-16 w-full rounded-none" />
+          <Skeleton className="h-16 w-full rounded-none" />
+          <Skeleton className="h-10 w-full rounded-none" />
         </CardContent>
       </Card>
     );
@@ -148,9 +148,9 @@ function OverviewBlock({
                 key={item.id}
                 type="button"
                 onClick={() => navigate(item.href || ctaHref)}
-                className="flex w-full items-start gap-3 rounded-xl border bg-card p-3 text-left transition-colors hover:bg-muted/50"
+                className="flex w-full items-start gap-3 rounded-none border bg-card p-3 text-left transition-colors hover:bg-muted/50"
               >
-                <div className="rounded-lg bg-muted p-2">
+                <div className="rounded-none bg-muted p-2">
                   <ItemIcon className="h-4 w-4 text-primary" />
                 </div>
                 <div className="min-w-0 flex-1 space-y-1">
@@ -166,13 +166,13 @@ function OverviewBlock({
               </button>
             );
           }) : (
-            <div className="rounded-xl border border-dashed p-4 text-sm text-muted-foreground">
+            <div className="rounded-none border border-dashed p-4 text-sm text-muted-foreground">
               {emptyText}
             </div>
           )}
         </div>
 
-        <div className="space-y-2 rounded-xl bg-muted/40 p-3">
+        <div className="space-y-2 rounded-none bg-muted/40 p-3">
           <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
             {isRu ? 'Следующее действие' : 'Next action'}
           </p>

@@ -113,13 +113,13 @@ export function JuristicRequestForm({ propertyId, projectId, onSuccess }: Jurist
                       setCategory(key);
                       setFormData(prev => ({ ...prev, requires_payment: key === 'payment' }));
                     }}
-                    className={`p-4 rounded-xl border-2 transition-all text-left ${
+                    className={`p-4 rounded-none border-2 transition-all text-left ${
                       isSelected 
                         ? 'border-primary bg-primary/5' 
                         : 'border-border hover:border-primary/50'
                     }`}
                   >
-                    <div className={`inline-flex p-2 rounded-lg mb-2 ${
+                    <div className={`inline-flex p-2 rounded-none mb-2 ${
                       value.color === 'orange' ? 'bg-accent-amber/10 text-accent-amber' :
                       value.color === 'red' ? 'bg-destructive/10 text-destructive' :
                       value.color === 'green' ? 'bg-success/10 text-success' :
@@ -165,7 +165,7 @@ export function JuristicRequestForm({ propertyId, projectId, onSuccess }: Jurist
               {availableTypes.map((type) => (
                 <label
                   key={type.id}
-                  className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                  className={`flex items-center gap-3 p-3 rounded-none border cursor-pointer transition-colors ${
                     formData.request_type === type.id 
                       ? 'border-primary bg-primary/5' 
                       : 'hover:bg-muted/50'
@@ -240,7 +240,7 @@ export function JuristicRequestForm({ propertyId, projectId, onSuccess }: Jurist
 
             {/* Payment Section */}
             {category === 'payment' && (
-              <div className="space-y-4 p-4 rounded-lg bg-success/5 border border-success/20">
+              <div className="space-y-4 p-4 rounded-none bg-success/5 border border-success/20">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <CreditCard className="h-5 w-5 text-success" />

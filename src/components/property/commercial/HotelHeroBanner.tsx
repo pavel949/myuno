@@ -51,10 +51,10 @@ export function HotelHeroBanner({ onOpenHmaForm }: Props) {
   ];
 
   const toneClasses = {
-    amber: 'border-amber-500/30 bg-amber-500/5 text-amber-700 dark:text-amber-400 hover:border-amber-500/60',
-    blue: 'border-blue-500/30 bg-blue-500/5 text-blue-700 dark:text-blue-400 hover:border-blue-500/60',
-    emerald: 'border-emerald-500/30 bg-emerald-500/5 text-emerald-700 dark:text-emerald-400 hover:border-emerald-500/60',
-    violet: 'border-violet-500/30 bg-violet-500/5 text-violet-700 dark:text-violet-400 hover:border-violet-500/60',
+    amber: 'border-accent/40/30 bg-accent/5 text-accent dark:text-accent hover:border-accent/40/60',
+    blue: 'border-primary/40/30 bg-primary/5 text-primary dark:text-primary hover:border-primary/40/60',
+    emerald: 'border-success/40/30 bg-success/5 text-success dark:text-success hover:border-success/40/60',
+    violet: 'border-primary/40/30 bg-primary/5 text-primary dark:text-primary hover:border-primary/40/60',
   };
 
   return (
@@ -64,17 +64,17 @@ export function HotelHeroBanner({ onOpenHmaForm }: Props) {
         const inner = (
           <div
             className={cn(
-              'h-full flex flex-col gap-2 p-3.5 rounded-2xl border-2 transition-all bg-card hover:shadow-md',
+              'h-full flex flex-col gap-2 p-3.5 rounded-none border-2 transition-all bg-card hover:shadow-md',
               toneClasses[c.tone],
             )}
           >
             <div
               className={cn(
-                'h-9 w-9 rounded-xl flex items-center justify-center',
-                c.tone === 'amber' && 'bg-amber-500/15',
-                c.tone === 'blue' && 'bg-blue-500/15',
-                c.tone === 'emerald' && 'bg-emerald-500/15',
-                c.tone === 'violet' && 'bg-violet-500/15',
+                'h-9 w-9 rounded-none flex items-center justify-center',
+                c.tone === 'amber' && 'bg-accent/15',
+                c.tone === 'blue' && 'bg-primary/15',
+                c.tone === 'emerald' && 'bg-success/15',
+                c.tone === 'violet' && 'bg-primary/15',
               )}
             >
               <Icon className="h-4 w-4" />

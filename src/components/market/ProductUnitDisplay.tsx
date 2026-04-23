@@ -60,7 +60,7 @@ export const ProductUnitBadge: React.FC<ProductUnitBadgeProps> = ({
   
   return (
     <span className={cn(
-      'inline-flex items-center px-1.5 py-0.5 rounded bg-muted/80 text-[10px] font-medium text-muted-foreground',
+      'inline-flex items-center px-1.5 py-0.5 rounded-none bg-muted/80 text-[10px] font-medium text-muted-foreground',
       className
     )}>
       {unitString}

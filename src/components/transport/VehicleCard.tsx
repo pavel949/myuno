@@ -32,7 +32,7 @@ export const VehicleCard = memo(function VehicleCard({ vehicle, onClick, classNa
     <article
       onClick={onClick}
       className={cn(
-        "group cursor-pointer bg-card rounded-2xl border border-border/50 overflow-hidden transition-all duration-200",
+        "group cursor-pointer bg-card rounded-none border border-border/50 overflow-hidden transition-all duration-200",
         "hover:shadow-lg hover:shadow-black/5 hover:border-border",
         className
       )}
@@ -52,12 +52,12 @@ export const VehicleCard = memo(function VehicleCard({ vehicle, onClick, classNa
         <div className="absolute top-3 left-3 right-3 flex items-start justify-between">
           <div className="flex gap-1.5">
             {vehicle.year_built && (
-              <span className="px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-sm text-white text-[10px] font-semibold">
+              <span className="px-2 py-0.5 rounded-none bg-black/60 backdrop-blur-sm text-white text-[10px] font-semibold">
                 {vehicle.year_built}
               </span>
             )}
             {vehicle.is_featured && (
-              <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-warning/90 text-white text-[10px] font-semibold">
+              <span className="flex items-center gap-1 px-2 py-0.5 rounded-none bg-warning/90 text-white text-[10px] font-semibold">
                 <Sparkles className="w-3 h-3" />
                 {isRu ? 'Лучшее' : 'Best Value'}
               </span>
@@ -65,7 +65,7 @@ export const VehicleCard = memo(function VehicleCard({ vehicle, onClick, classNa
           </div>
 
           {vehicle.is_verified && (
-            <span className="flex items-center gap-0.5 px-2 py-0.5 rounded-md bg-success/90 text-white text-[10px] font-semibold">
+            <span className="flex items-center gap-0.5 px-2 py-0.5 rounded-none bg-success/90 text-white text-[10px] font-semibold">
               <ShieldCheck className="w-3 h-3" />
               G-Verified
             </span>

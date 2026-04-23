@@ -353,13 +353,13 @@ export default function TaxiBooking() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Route Selection */}
-          <div className="p-4 rounded-xl bg-card border border-border/50 space-y-3">
+          <div className="p-4 rounded-none bg-card border border-border/50 space-y-3">
             {/* Current Location Quick Button */}
             <button
               type="button"
               onClick={useCurrentLocation}
               disabled={isGettingCurrentLocation}
-              className="w-full flex items-center gap-3 p-3 rounded-lg bg-primary/10 hover:bg-primary/20 border border-primary/20 transition-colors text-left"
+              className="w-full flex items-center gap-3 p-3 rounded-none bg-primary/10 hover:bg-primary/20 border border-primary/20 transition-colors text-left"
             >
               <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
                 {isGettingCurrentLocation ? (
@@ -383,7 +383,7 @@ export default function TaxiBooking() {
             <button
               type="button"
               onClick={() => setLocationPickerType('pickup')}
-              className="w-full flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors text-left"
+              className="w-full flex items-center gap-3 p-3 rounded-none bg-muted/50 hover:bg-muted transition-colors text-left"
             >
               <div className="w-8 h-8 rounded-full bg-success/20 flex items-center justify-center">
                 <Navigation className="w-4 h-4 text-success" />
@@ -413,7 +413,7 @@ export default function TaxiBooking() {
             <button
               type="button"
               onClick={() => setLocationPickerType('destination')}
-              className="w-full flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors text-left"
+              className="w-full flex items-center gap-3 p-3 rounded-none bg-muted/50 hover:bg-muted transition-colors text-left"
             >
               <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
                 <MapPin className="w-4 h-4 text-primary" />
@@ -465,7 +465,7 @@ export default function TaxiBooking() {
               <Users className="w-4 h-4" />
               {language === 'ru' ? 'Пассажиры' : 'Passengers'}
             </Label>
-            <div className="flex items-center gap-4 p-4 rounded-xl bg-card border border-border/50">
+            <div className="flex items-center gap-4 p-4 rounded-none bg-card border border-border/50">
               <button
                 type="button"
                 onClick={() => handlePassengerChange(-1)}
@@ -510,7 +510,7 @@ export default function TaxiBooking() {
                       type="button"
                       onClick={() => setFormData({ ...formData, vehicleType: vehicle.id })}
                       className={cn(
-                        "w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all",
+                        "w-full flex items-center gap-4 p-4 rounded-none border-2 transition-all",
                         formData.vehicleType === vehicle.id
                           ? "border-primary bg-primary/10"
                           : "border-border/50 bg-card"
@@ -556,7 +556,7 @@ export default function TaxiBooking() {
 
           {/* Estimated Trip Info */}
           {estimatedDistance > 0 && (
-            <div className="p-4 rounded-xl bg-primary/10 border border-primary/20">
+            <div className="p-4 rounded-none bg-primary/10 border border-primary/20">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-sm text-muted-foreground">
                   {language === 'ru' ? 'Расстояние' : 'Distance'}

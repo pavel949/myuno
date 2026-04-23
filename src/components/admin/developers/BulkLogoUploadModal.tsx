@@ -144,7 +144,7 @@ export function BulkLogoUploadModal({ open, onOpenChange, developers }: BulkLogo
         />
 
         {mappings.length > 0 && (
-          <div className="border border-border rounded-lg overflow-hidden">
+          <div className="border border-border rounded-none overflow-hidden">
             <div className="px-3 py-2 bg-muted/50 text-xs font-medium text-muted-foreground flex justify-between">
               <span>{isRu ? 'Сопоставление' : 'Mapping'}</span>
               <span>
@@ -154,7 +154,7 @@ export function BulkLogoUploadModal({ open, onOpenChange, developers }: BulkLogo
             <div className="divide-y divide-border max-h-[300px] overflow-y-auto">
               {mappings.map((m, i) => (
                 <div key={m.url} className="flex items-center gap-3 p-2">
-                  <img src={m.url} alt="" className="w-12 h-12 object-contain bg-muted rounded shrink-0" />
+                  <img src={m.url} alt="" className="w-12 h-12 object-contain bg-muted rounded-none shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-muted-foreground truncate">{m.filename}</p>
                   </div>

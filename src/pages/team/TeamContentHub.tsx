@@ -122,7 +122,7 @@ export default function TeamContentHub() {
                 onClick={() => hasAccess && route && navigate(`${route}?uno_team=true`)}
               >
                 <CardContent className="p-4 flex flex-col items-center text-center gap-3">
-                  <div className={`p-3 rounded-xl ${
+                  <div className={`p-3 rounded-none ${
                     hasAccess 
                       ? 'bg-primary/10 text-primary' 
                       : 'bg-muted text-muted-foreground'

@@ -212,17 +212,17 @@ const SIMStartPage: React.FC = () => {
 
                 {/* Key stats */}
                 <div className="grid grid-cols-3 gap-2 text-center">
-                  <div className="p-2 rounded-lg bg-muted">
+                  <div className="p-2 rounded-none bg-muted">
                     <Wifi className="w-4 h-4 mx-auto text-cluster-arrive mb-1" />
                     <div className="text-sm font-bold text-foreground">{plan.dataGb} GB</div>
                     <div className="text-[10px] text-muted-foreground">{t ? 'Данные' : 'Data'}</div>
                   </div>
-                  <div className="p-2 rounded-lg bg-muted">
+                  <div className="p-2 rounded-none bg-muted">
                     <Globe className="w-4 h-4 mx-auto text-cluster-arrive mb-1" />
                     <div className="text-sm font-bold text-foreground">{plan.durationDays} {t ? 'дн' : 'days'}</div>
                     <div className="text-[10px] text-muted-foreground">{t ? 'Срок' : 'Duration'}</div>
                   </div>
-                  <div className="p-2 rounded-lg bg-muted">
+                  <div className="p-2 rounded-none bg-muted">
                     <Smartphone className="w-4 h-4 mx-auto text-cluster-arrive mb-1" />
                     <div className="text-sm font-bold text-foreground">{plan.callMinutes} {t ? 'мин' : 'min'}</div>
                     <div className="text-[10px] text-muted-foreground">{t ? 'Звонки' : 'Calls'}</div>

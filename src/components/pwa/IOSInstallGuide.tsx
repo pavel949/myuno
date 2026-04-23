@@ -52,13 +52,13 @@ export function IOSInstallGuide({ onClose }: IOSInstallGuideProps) {
       description: text.step1Desc,
       visual: (
         <div className="relative mt-4">
-          <div className="bg-muted/50 rounded-2xl p-6 flex items-center justify-center">
+          <div className="bg-muted/50 rounded-none p-6 flex items-center justify-center">
             <motion.div
               animate={{ y: [0, -8, 0] }}
               transition={{ duration: 1.5, repeat: Infinity }}
               className="flex flex-col items-center"
             >
-              <div className="w-16 h-16 rounded-xl bg-primary/20 flex items-center justify-center border-2 border-primary">
+              <div className="w-16 h-16 rounded-none bg-primary/20 flex items-center justify-center border-2 border-primary">
                 <Share className="w-8 h-8 text-primary" />
               </div>
               <ArrowDown className="w-6 h-6 text-primary mt-2 animate-bounce" />
@@ -75,29 +75,29 @@ export function IOSInstallGuide({ onClose }: IOSInstallGuideProps) {
       title: text.step2Title,
       description: text.step2Desc,
       visual: (
-        <div className="mt-4 bg-muted/50 rounded-2xl p-4">
+        <div className="mt-4 bg-muted/50 rounded-none p-4">
           <div className="space-y-2">
-            <div className="h-10 bg-background/50 rounded-lg" />
-            <div className="h-10 bg-background/50 rounded-lg" />
+            <div className="h-10 bg-background/50 rounded-none" />
+            <div className="h-10 bg-background/50 rounded-none" />
             <motion.div
               animate={{ 
                 backgroundColor: ['hsl(var(--background))', 'hsl(var(--primary) / 0.2)', 'hsl(var(--background))']
               }}
               transition={{ duration: 2, repeat: Infinity }}
-              className="h-12 rounded-lg flex items-center px-4 gap-3 border-2 border-primary"
+              className="h-12 rounded-none flex items-center px-4 gap-3 border-2 border-primary"
             >
               <Plus className="w-5 h-5 text-primary" />
               <span className="text-sm font-medium">
                 {language === 'ru' ? 'На экран «Домой»' : 'Add to Home Screen'}
               </span>
             </motion.div>
-            <div className="h-10 bg-background/50 rounded-lg" />
+            <div className="h-10 bg-background/50 rounded-none" />
           </div>
         </div>
       ),
     },
     {
-      icon: <CheckCircle2 className="w-12 h-12 text-green-500" />,
+      icon: <CheckCircle2 className="w-12 h-12 text-success" />,
       title: text.step3Title,
       description: text.step3Desc,
       visual: (
@@ -106,7 +106,7 @@ export function IOSInstallGuide({ onClose }: IOSInstallGuideProps) {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: 'spring', delay: 0.3 }}
-            className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg"
+            className="w-20 h-20 rounded-none bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg"
           >
             <span className="text-3xl font-bold text-primary-foreground">U</span>
           </motion.div>
@@ -122,7 +122,7 @@ export function IOSInstallGuide({ onClose }: IOSInstallGuideProps) {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7 }}
-            className="mt-4 flex items-center gap-2 text-green-500"
+            className="mt-4 flex items-center gap-2 text-success"
           >
             <CheckCircle2 className="w-5 h-5" />
             <span className="text-sm font-medium">{text.done}</span>

@@ -13,7 +13,7 @@ export function ChannelStatsCard({ icon, label, value, color }: ChannelStatsCard
   return (
     <Card>
       <CardContent className="pt-4 pb-3">
-        <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center mb-2", color)}>
+        <div className={cn("w-10 h-10 rounded-none flex items-center justify-center mb-2", color)}>
           {icon}
         </div>
         <div className="text-2xl font-bold">{value}</div>

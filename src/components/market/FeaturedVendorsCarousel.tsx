@@ -27,7 +27,7 @@ const VendorCard: React.FC<VendorCardProps> = ({ vendor, onClick }) => {
       onClick={onClick}
       className={cn(
         "w-[160px] shrink-0 text-left snap-start",
-        "bg-card rounded-2xl border border-border overflow-hidden",
+        "bg-card rounded-none border border-border overflow-hidden",
         "shadow-sm hover:shadow-md hover:-translate-y-0.5",
         "transition-all duration-200 group touch-manipulation"
       )}
@@ -38,10 +38,10 @@ const VendorCard: React.FC<VendorCardProps> = ({ vendor, onClick }) => {
           <img
             src={vendor.logo_url}
             alt={name}
-            className="w-12 h-12 rounded-xl object-cover shadow-sm"
+            className="w-12 h-12 rounded-none object-cover shadow-sm"
           />
         ) : (
-          <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
+          <div className="w-12 h-12 rounded-none bg-muted flex items-center justify-center">
             <Store className="w-6 h-6 text-primary" />
           </div>
         )}
@@ -99,7 +99,7 @@ export const FeaturedVendorsCarousel: React.FC<FeaturedVendorsCarouselProps> = (
       <div className="px-4 max-w-[1536px] mx-auto">
         <UnifiedSectionHeader
           icon={CheckCircle2}
-          iconColor="text-emerald-500"
+          iconColor="text-success"
           title={isRu ? 'Проверенные продавцы' : 'Verified Vendors'}
           viewAllPath="/market/vendors"
           viewAllLabel={isRu ? 'Все' : 'All'}
@@ -109,7 +109,7 @@ export const FeaturedVendorsCarousel: React.FC<FeaturedVendorsCarouselProps> = (
       {isLoading ? (
         <div className="flex gap-3 px-4 overflow-hidden">
           {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="w-[160px] h-[130px] rounded-2xl shrink-0" />
+            <Skeleton key={i} className="w-[160px] h-[130px] rounded-none shrink-0" />
           ))}
         </div>
       ) : (

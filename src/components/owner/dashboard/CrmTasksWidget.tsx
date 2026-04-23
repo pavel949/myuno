@@ -80,11 +80,11 @@ export function CrmTasksWidget() {
           const TypeIcon = config.icon;
           return (
             <div key={task.id} className={cn(
-              "flex items-center gap-2.5 py-1.5 px-2 rounded-lg",
+              "flex items-center gap-2.5 py-1.5 px-2 rounded-none",
               isOverdue ? 'bg-destructive/5' : 'bg-muted/50'
             )}>
               <Checkbox onCheckedChange={() => handleComplete(task.id)} className="flex-shrink-0" />
-              <div className={cn("w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0", config.bgColor)}>
+              <div className={cn("w-7 h-7 rounded-none flex items-center justify-center flex-shrink-0", config.bgColor)}>
                 <TypeIcon className={cn("h-3.5 w-3.5", config.color)} />
               </div>
               <span className="text-sm flex-1 truncate">{task.title}</span>

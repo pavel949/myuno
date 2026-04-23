@@ -54,7 +54,7 @@ export default function FinanceOverview() {
     { icon: Receipt, label: isRu ? 'Транзакции' : 'Transactions', path: '/mc/financials', color: 'text-primary' },
     { icon: FileText, label: isRu ? 'Отчёты' : 'Reports', path: '/mc/reports', color: 'text-info' },
     { icon: Target, label: isRu ? 'Бюджет' : 'Budget', path: '/mc/budget', color: 'text-warning' },
-    { icon: LineChart, label: isRu ? 'Финансовое планирование' : 'Financial planning', path: APP_ROUTES.MC_FINANCE_PLANNING, color: 'text-emerald-600 dark:text-emerald-400' },
+    { icon: LineChart, label: isRu ? 'Финансовое планирование' : 'Financial planning', path: APP_ROUTES.MC_FINANCE_PLANNING, color: 'text-success dark:text-success' },
     { icon: Receipt, label: isRu ? 'Инвойсы' : 'Invoices', path: '/mc/invoices', color: 'text-muted-foreground' },
   ];
 
@@ -70,7 +70,7 @@ export default function FinanceOverview() {
       {/* Hero Cards */}
       {isLoading ? (
         <div className="grid grid-cols-3 gap-3 mb-6">
-          {[1, 2, 3].map(i => <Skeleton key={i} className="h-24 rounded-xl" />)}
+          {[1, 2, 3].map(i => <Skeleton key={i} className="h-24 rounded-none" />)}
         </div>
       ) : (
         <div className="grid grid-cols-3 gap-3 mb-6">
@@ -227,7 +227,7 @@ export default function FinanceOverview() {
         <h3 className="text-sm font-semibold text-muted-foreground px-1">
           {isRu ? 'Разделы' : 'Sections'}
         </h3>
-        <div className="divide-y rounded-xl border overflow-hidden">
+        <div className="divide-y rounded-none border overflow-hidden">
           {quickLinks.map(link => {
             const Icon = link.icon;
             return (

@@ -99,7 +99,7 @@ export const CookieConsentBanner = forwardRef<HTMLDivElement>(function CookieCon
         className="fixed bottom-0 left-0 right-0 z-40 p-4 pb-safe pointer-events-none"
       >
         <div
-          className="max-w-lg mx-auto bg-card border border-border rounded-2xl shadow-2xl overflow-hidden pointer-events-auto isolate"
+          className="max-w-lg mx-auto bg-card border border-border rounded-none shadow-2xl overflow-hidden pointer-events-auto isolate"
           onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => e.stopPropagation()}
         >

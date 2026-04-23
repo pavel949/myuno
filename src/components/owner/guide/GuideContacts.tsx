@@ -35,7 +35,7 @@ export function GuideContacts() {
           {steps.map((step, index) => (
             <div 
               key={index}
-              className="flex items-start gap-3 p-4 bg-secondary/30 rounded-xl"
+              className="flex items-start gap-3 p-4 bg-secondary/30 rounded-none"
             >
               <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm flex-shrink-0">
                 {step.numRu}
@@ -58,7 +58,7 @@ export function GuideContacts() {
           {contacts.map((contact) => (
             <Card key={contact.labelEn} className="bg-card border-border">
               <CardContent className="p-4 flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-none bg-primary/10 flex items-center justify-center">
                   <contact.icon className="w-6 h-6 text-primary" />
                 </div>
                 <div>
@@ -77,7 +77,7 @@ export function GuideContacts() {
         {/* QR Code placeholder */}
         <Card className="bg-primary/5 border-primary/20">
           <CardContent className="p-6 text-center">
-            <div className="w-32 h-32 mx-auto bg-white rounded-xl flex items-center justify-center mb-4">
+            <div className="w-32 h-32 mx-auto bg-white rounded-none flex items-center justify-center mb-4">
               <QrCode className="w-24 h-24 text-foreground" />
             </div>
             <p className="text-sm text-muted-foreground">

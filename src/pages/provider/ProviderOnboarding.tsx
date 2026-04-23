@@ -143,7 +143,7 @@ const ProviderOnboarding = () => {
               className="space-y-6"
             >
               <div className="text-center space-y-2">
-                <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center mb-4">
+                <div className="w-16 h-16 mx-auto rounded-none bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center mb-4">
                   <Store className="w-8 h-8 text-primary-foreground" />
                 </div>
                 <h2 className="text-xl font-bold">
@@ -157,7 +157,7 @@ const ProviderOnboarding = () => {
               {categoriesLoading ? (
                 <div className="grid grid-cols-2 gap-3">
                   {Array.from({ length: 8 }).map((_, i) => (
-                    <Skeleton key={i} className="h-16 rounded-xl" />
+                    <Skeleton key={i} className="h-16 rounded-none" />
                   ))}
                 </div>
               ) : (
@@ -171,14 +171,14 @@ const ProviderOnboarding = () => {
                         whileTap={{ scale: 0.95 }}
                         onClick={() => toggleCategory(cat.slug)}
                         className={cn(
-                          "flex items-center gap-3 p-4 rounded-xl border-2 transition-all relative text-left",
+                          "flex items-center gap-3 p-4 rounded-none border-2 transition-all relative text-left",
                           isSelected 
                             ? "border-primary bg-primary/10" 
                             : "border-border hover:border-primary/50 bg-card"
                         )}
                       >
                         <div className={cn(
-                          "w-10 h-10 rounded-lg bg-gradient-to-br flex items-center justify-center shrink-0",
+                          "w-10 h-10 rounded-none bg-gradient-to-br flex items-center justify-center shrink-0",
                           cat.color
                         )}>
                           <Icon className="w-5 h-5 text-white" />
@@ -209,7 +209,7 @@ const ProviderOnboarding = () => {
               className="space-y-6"
             >
               <div className="text-center space-y-2">
-                <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center mb-4">
+                <div className="w-16 h-16 mx-auto rounded-none bg-gradient-to-br from-accent to-accent flex items-center justify-center mb-4">
                   <Building2 className="w-8 h-8 text-white" />
                 </div>
                 <h2 className="text-xl font-bold">
@@ -282,7 +282,7 @@ const ProviderOnboarding = () => {
               className="space-y-6"
             >
               <div className="text-center space-y-2">
-                <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-emerald-500 to-green-500 flex items-center justify-center mb-4">
+                <div className="w-16 h-16 mx-auto rounded-none bg-gradient-to-br from-success to-success flex items-center justify-center mb-4">
                   <MessageSquare className="w-8 h-8 text-white" />
                 </div>
                 <h2 className="text-xl font-bold">
@@ -367,7 +367,7 @@ const ProviderOnboarding = () => {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-                className="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-emerald-500 to-green-500 flex items-center justify-center shadow-lg shadow-emerald-500/25"
+                className="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-success to-success flex items-center justify-center shadow-lg shadow-success/20/25"
               >
                 <Check className="w-12 h-12 text-white" />
               </motion.div>

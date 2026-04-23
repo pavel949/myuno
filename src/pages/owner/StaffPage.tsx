@@ -226,7 +226,7 @@ function StaffPermissionBadges({ userId, isRu, onClick }: { userId: string; isRu
           return (
             <span
               key={mod.key}
-              className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
+              className={`text-[10px] px-1.5 py-0.5 rounded-none font-medium ${
                 hasEdit
                   ? 'bg-primary/10 text-primary'
                   : hasView
@@ -586,7 +586,7 @@ export default function StaffPage() {
       </Tabs>
 
       {pageTab === 'access' ? (
-        <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
+        <Suspense fallback={<Skeleton className="h-64 w-full rounded-none" />}>
           <TeamAccessTab />
         </Suspense>
       ) : (
@@ -602,7 +602,7 @@ export default function StaffPage() {
         ].map(({ label, value, icon: Icon, color }) => (
           <Card key={label}>
             <CardContent className="p-4 flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-muted">
+              <div className="p-2 rounded-none bg-muted">
                 <Icon className={`h-5 w-5 ${color}`} />
               </div>
               <div>
@@ -659,7 +659,7 @@ export default function StaffPage() {
       {/* Staff grid */}
       {isLoading ? (
         <div className="grid md:grid-cols-2 gap-4">
-          {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-48 w-full rounded-2xl" />)}
+          {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-48 w-full rounded-none" />)}
         </div>
       ) : shown.length === 0 ? (
         <Card>
@@ -766,7 +766,7 @@ export default function StaffPage() {
               </div>
 
               {editing && (
-                <div className="flex items-center justify-between p-3 rounded-xl border">
+                <div className="flex items-center justify-between p-3 rounded-none border">
                   <div>
                     <p className="text-sm font-medium">{t('Active', 'Активен')}</p>
                     <p className="text-xs text-muted-foreground">
@@ -793,7 +793,7 @@ export default function StaffPage() {
               </div>
 
               {!editing && form.email.trim() && activeCompany?.company_id && (
-                <div className="flex items-center justify-between rounded-xl border p-3 bg-muted/30">
+                <div className="flex items-center justify-between rounded-none border p-3 bg-muted/30">
                   <div className="space-y-0.5 min-w-0 mr-3">
                     <p className="text-sm font-medium">{t('Send login credentials', 'Отправить данные для входа')}</p>
                     <p className="text-xs text-muted-foreground">{t('Create account & send password to email', 'Создать аккаунт и отправить пароль')}</p>
@@ -969,7 +969,7 @@ function StaffPropertyAssignments({
               {(assignments || []).map(a => {
                 const prop = properties.find(p => p.property_id === a.property_id);
                 return (
-                  <div key={a.id} className="flex items-center justify-between py-2 px-3 rounded-xl bg-muted/50">
+                  <div key={a.id} className="flex items-center justify-between py-2 px-3 rounded-none bg-muted/50">
                     <span className="text-sm flex items-center gap-2">
                       <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
                       {prop ? (isRu ? prop.title_ru || prop.title : prop.title) : a.property_id.slice(0, 8)}

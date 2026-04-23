@@ -64,7 +64,7 @@ export function ProjectHeroMedia({
   // Render YouTube embed
   if (showVideo && youtubeId) {
     return (
-      <div className={cn("relative overflow-hidden rounded-2xl", className)}>
+      <div className={cn("relative overflow-hidden rounded-none", className)}>
         <AspectRatio ratio={16 / 9}>
           <iframe
             src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&mute=1&loop=1&playlist=${youtubeId}&rel=0`}
@@ -94,7 +94,7 @@ export function ProjectHeroMedia({
   // Render direct video
   if (showVideo && videoUrl && !youtubeId) {
     return (
-      <div className={cn("relative overflow-hidden rounded-2xl", className)}>
+      <div className={cn("relative overflow-hidden rounded-none", className)}>
         <AspectRatio ratio={16 / 9}>
           <video
             src={videoUrl}
@@ -123,7 +123,7 @@ export function ProjectHeroMedia({
 
   // Render photo carousel
   return (
-    <div className={cn("relative overflow-hidden rounded-2xl group", className)}>
+    <div className={cn("relative overflow-hidden rounded-none group", className)}>
       <AspectRatio ratio={16 / 9}>
         {allImages.length > 0 ? (
           <img

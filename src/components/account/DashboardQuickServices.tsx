@@ -43,9 +43,9 @@ export function DashboardQuickServices() {
             <button
               key={service.path}
               onClick={() => navigate(service.path)}
-              className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-muted/50 transition-colors active:scale-95"
+              className="flex flex-col items-center gap-1.5 p-2 rounded-none hover:bg-muted/50 transition-colors active:scale-95"
             >
-              <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center text-xl", service.color)}>
+              <div className={cn("w-10 h-10 rounded-none flex items-center justify-center text-xl", service.color)}>
                 {service.icon}
               </div>
               <span className="text-[10px] text-muted-foreground font-medium text-center leading-tight">

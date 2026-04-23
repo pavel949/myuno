@@ -34,9 +34,9 @@ export function PropertyManageMarketingSection({ propertyId }: MarketingSectionP
   if (propertyLoading || analyticsLoading) {
     return (
       <div className="space-y-4">
-        <Skeleton className="h-[200px] w-full rounded-xl" />
-        <Skeleton className="h-[300px] w-full rounded-xl" />
-        <Skeleton className="h-[250px] w-full rounded-xl" />
+        <Skeleton className="h-[200px] w-full rounded-none" />
+        <Skeleton className="h-[300px] w-full rounded-none" />
+        <Skeleton className="h-[250px] w-full rounded-none" />
       </div>
     );
   }

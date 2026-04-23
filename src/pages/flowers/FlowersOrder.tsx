@@ -590,7 +590,7 @@ const FlowersOrder = () => {
                         setFormData({ ...formData, deliverySlot: slot.id });
                       }}
                       className={cn(
-                        "relative overflow-hidden p-3 rounded-xl border text-center transition-all active:scale-95",
+                        "relative overflow-hidden p-3 rounded-none border text-center transition-all active:scale-95",
                         formData.deliverySlot === slot.id
                           ? "border-primary bg-primary/10"
                           : "border-border hover:border-primary/30"
@@ -623,7 +623,7 @@ const FlowersOrder = () => {
               rows={3}
             />
 
-            <label className="flex items-center gap-3 p-4 rounded-xl border border-border cursor-pointer hover:border-primary/30 transition-all">
+            <label className="flex items-center gap-3 p-4 rounded-none border border-border cursor-pointer hover:border-primary/30 transition-all">
               <input
                 type="checkbox"
                 checked={formData.giftWrap}
@@ -631,7 +631,7 @@ const FlowersOrder = () => {
                 className="sr-only"
               />
               <div className={cn(
-                "w-5 h-5 rounded border flex items-center justify-center transition-all",
+                "w-5 h-5 rounded-none border flex items-center justify-center transition-all",
                 formData.giftWrap ? "bg-primary border-primary" : "border-border"
               )}>
                 {formData.giftWrap && <Check className="w-3 h-3 text-primary-foreground" />}
@@ -662,7 +662,7 @@ const FlowersOrder = () => {
             >
               {/* Wallet Option */}
               <label className={cn(
-                "flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-all",
+                "flex items-center gap-3 p-4 rounded-none border cursor-pointer transition-all",
                 canPayWithWallet 
                   ? "border-border hover:border-primary/30" 
                   : "border-border/30 opacity-60 cursor-not-allowed"
@@ -694,7 +694,7 @@ const FlowersOrder = () => {
               </label>
 
               {/* Card Option */}
-              <label className="flex items-center gap-3 p-4 rounded-xl border border-border cursor-pointer hover:border-primary/30 transition-all">
+              <label className="flex items-center gap-3 p-4 rounded-none border border-border cursor-pointer hover:border-primary/30 transition-all">
                 <RadioGroupItem value="card" id="card" />
                 <CreditCard className="w-5 h-5 text-primary" />
                 <div className="flex-1">
@@ -708,9 +708,9 @@ const FlowersOrder = () => {
               </label>
 
               {/* Cash Option */}
-              <label className="flex items-center gap-3 p-4 rounded-xl border border-border cursor-pointer hover:border-primary/30 transition-all">
+              <label className="flex items-center gap-3 p-4 rounded-none border border-border cursor-pointer hover:border-primary/30 transition-all">
                 <RadioGroupItem value="cash" id="cash" />
-                <div className="w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center">
+                <div className="w-5 h-5 rounded-full bg-success/20 flex items-center justify-center">
                   <span className="text-xs">฿</span>
                 </div>
                 <div className="flex-1">
@@ -737,7 +737,7 @@ const FlowersOrder = () => {
           </div>
 
           {/* Order Summary */}
-          <div className="bg-card rounded-2xl border p-4 space-y-3">
+          <div className="bg-card rounded-none border p-4 space-y-3">
             <h3 className="font-semibold">{language === 'ru' ? 'Ваш заказ' : 'Your Order'}</h3>
             
             {cartItems.map((item) => (

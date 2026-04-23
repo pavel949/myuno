@@ -183,7 +183,7 @@ export function PaymentMethodsSection() {
       </div>
 
       {paymentMethods.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground border rounded-lg border-dashed">
+        <div className="text-center py-8 text-muted-foreground border rounded-none border-dashed">
           <CreditCard className="w-10 h-10 mx-auto mb-2 opacity-50" />
           <p className="text-sm">{isRu ? 'Нет сохранённых карт' : 'No saved cards'}</p>
           <p className="text-xs">{isRu ? 'Добавьте карту для быстрой оплаты' : 'Add a card for quick payments'}</p>

@@ -46,7 +46,7 @@ export function BookingDetailSheet({ open, onOpenChange, booking, propertyTitle 
 
       {/* Dates */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="p-3 rounded-lg bg-success/10 border border-success/20">
+        <div className="p-3 rounded-none bg-success/10 border border-success/20">
           <div className="flex items-center gap-2 mb-1">
             <CalendarDays className="h-4 w-4 text-success" />
             <span className="text-xs font-medium text-success">{isRu ? 'Заезд' : 'Check-in'}</span>
@@ -55,7 +55,7 @@ export function BookingDetailSheet({ open, onOpenChange, booking, propertyTitle 
             {format(new Date(booking.check_in), 'd MMM yyyy', { locale: isRu ? ru : undefined })}
           </p>
         </div>
-        <div className="p-3 rounded-lg bg-warning/10 border border-warning/20">
+        <div className="p-3 rounded-none bg-warning/10 border border-warning/20">
           <div className="flex items-center gap-2 mb-1">
             <CalendarDays className="h-4 w-4 text-warning" />
             <span className="text-xs font-medium text-warning">{isRu ? 'Выезд' : 'Check-out'}</span>

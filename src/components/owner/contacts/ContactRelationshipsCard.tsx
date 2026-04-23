@@ -78,7 +78,7 @@ const { data: relationships = [], isLoading } = useContactRelationships(contactI
   };
 
   return (
-    <div className="rounded-xl border bg-card p-4 space-y-4">
+    <div className="rounded-none border bg-card p-4 space-y-4">
       <div className="flex items-center justify-between">
         <p className="text-sm font-semibold flex items-center gap-2">
           <Users className="h-4 w-4 text-muted-foreground" />
@@ -179,7 +179,7 @@ function RelationshipRow({
   const label = rc ? (isRu ? CONTACT_RELATIONSHIP_LABELS[type]?.ru : CONTACT_RELATIONSHIP_LABELS[type]?.en) : '—';
 
   return (
-    <div className="flex items-center gap-3 p-3 rounded-lg border bg-background/50 hover:bg-muted/30 transition-colors group">
+    <div className="flex items-center gap-3 p-3 rounded-none border bg-background/50 hover:bg-muted/30 transition-colors group">
       <button
         onClick={() => rc && onNavigate(`${APP_ROUTES.MC_CONTACTS}/${rc.id}`)}
         className="flex-1 text-left min-w-0 flex items-center gap-3"
@@ -207,7 +207,7 @@ function RelationshipRow({
         onMouseLeave={() => setShowUnlink(false)}
         disabled={unlinkPending}
         className={cn(
-          'p-1.5 rounded-md transition-colors shrink-0',
+          'p-1.5 rounded-none transition-colors shrink-0',
           showUnlink ? 'text-destructive hover:bg-destructive/10' : 'text-muted-foreground/50 opacity-0 group-hover:opacity-100'
         )}
         title={isRu ? 'Удалить связь' : 'Remove'}

@@ -128,7 +128,7 @@ function OptionGrid<T extends string>({ options, selected, onSelect, lang }: Opt
             onClick={() => onSelect(opt.value)}
             whileTap={{ scale: 0.98 }}
             className={cn(
-              'relative flex items-start gap-3 rounded-xl border-2 bg-card p-4 text-left transition-all min-h-[88px]',
+              'relative flex items-start gap-3 rounded-none border-2 bg-card p-4 text-left transition-all min-h-[88px]',
               'hover:border-primary/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary',
               isActive ? 'border-primary bg-primary/5 shadow-sm' : 'border-border',
             )}
@@ -229,7 +229,7 @@ export default function StartOnboarding() {
       <div className="mx-auto max-w-xl px-4 py-8 sm:py-12">
         {/* Header */}
         <header className="text-center mb-8">
-          <div className="mx-auto mb-3 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/60 shadow-lg shadow-primary/25">
+          <div className="mx-auto mb-3 inline-flex h-12 w-12 items-center justify-center rounded-none bg-gradient-to-br from-primary to-primary/60 shadow-lg shadow-primary/25">
             <Sparkles className="h-6 w-6 text-primary-foreground" />
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{T(COPY.title, lang)}</h1>
@@ -323,7 +323,7 @@ export default function StartOnboarding() {
                         type="button"
                         onClick={() => navigate(item.route)}
                         className={cn(
-                          'group flex w-full items-center gap-3 rounded-xl border bg-card p-3 text-left transition-all min-h-[64px]',
+                          'group flex w-full items-center gap-3 rounded-none border bg-card p-3 text-left transition-all min-h-[64px]',
                           'hover:border-primary/60 hover:bg-primary/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary',
                           idx === 0 && 'border-primary/60 bg-primary/5',
                         )}
@@ -368,7 +368,7 @@ export default function StartOnboarding() {
           </AnimatePresence>
 
           {error && step !== 3 && (
-            <p className="mt-4 rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+            <p className="mt-4 rounded-none border border-destructive/40 bg-destructive/5 px-3 py-2 text-xs text-destructive">
               {T(COPY.errorPrefix, lang)} {error}
             </p>
           )}

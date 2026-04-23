@@ -38,7 +38,7 @@ export function OperationalTaskCard({
     )}>
       <CardContent className={cn("flex items-center gap-3", compact ? "p-3" : "p-4")}>
         <div className={cn(
-          "rounded-lg flex items-center justify-center shrink-0",
+          "rounded-none flex items-center justify-center shrink-0",
           config.bgColor,
           compact ? "w-10 h-10" : "w-12 h-12"
         )}>

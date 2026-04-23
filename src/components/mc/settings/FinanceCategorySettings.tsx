@@ -64,11 +64,11 @@ const CategoryRow = memo(function CategoryRow({
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
       <div className={cn(
-        'rounded-lg transition-colors border border-transparent',
+        'rounded-none transition-colors border border-transparent',
         open && 'border-border bg-muted/30',
         !isEnabled && 'opacity-40',
       )}>
-        <div className="flex items-center gap-2 py-1.5 px-2.5 hover:bg-muted/50 rounded-lg">
+        <div className="flex items-center gap-2 py-1.5 px-2.5 hover:bg-muted/50 rounded-none">
           <CollapsibleTrigger asChild>
             <button type="button" className="shrink-0 p-0.5 text-muted-foreground hover:text-foreground transition-colors">
               {open ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
@@ -207,7 +207,7 @@ const CustomCategoryRow = memo(function CustomCategoryRow({
   onEdit: (cat: { code: string; name_en: string; name_ru: string }) => void;
 }) {
   return (
-    <div className="flex items-center justify-between py-1.5 px-2.5 rounded-lg hover:bg-muted/50 group/custom">
+    <div className="flex items-center justify-between py-1.5 px-2.5 rounded-none hover:bg-muted/50 group/custom">
       <div className="flex items-center gap-1 flex-1 truncate">
         <span className="text-sm text-foreground truncate">{isRu ? cat.name_ru : cat.name_en}</span>
         <button

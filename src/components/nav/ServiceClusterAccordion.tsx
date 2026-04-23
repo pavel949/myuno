@@ -69,7 +69,7 @@ export function ServiceClusterAccordion({
                       key={`${cluster.id}-${link.path}-${link.labelEn}`}
                       type="button"
                       onClick={() => onNavigate(link.path)}
-                      className="text-left text-[13px] text-muted-foreground hover:text-foreground py-2 px-2 -mx-2 rounded-md hover:bg-muted/40 transition-colors flex items-center justify-between gap-2"
+                      className="text-left text-[13px] text-muted-foreground hover:text-foreground py-2 px-2 -mx-2 rounded-none hover:bg-muted/40 transition-colors flex items-center justify-between gap-2"
                     >
                       <span>{getClusterServiceLocalizedLabel(link, language)}</span>
                       {link.status === 'pro' && (

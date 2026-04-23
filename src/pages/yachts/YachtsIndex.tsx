@@ -117,7 +117,7 @@ export default function YachtsIndex() {
               {isRu ? SORT_OPTIONS.find(s => s.id === sortKey)?.labelRu : SORT_OPTIONS.find(s => s.id === sortKey)?.labelEn}
             </Button>
             {showSort && (
-              <div className="absolute right-0 top-full mt-1 z-20 bg-popover border rounded-xl shadow-lg py-1 min-w-[160px]">
+              <div className="absolute right-0 top-full mt-1 z-20 bg-popover border rounded-none shadow-lg py-1 min-w-[160px]">
                 {SORT_OPTIONS.map(opt => (
                   <button
                     key={opt.id}
@@ -149,7 +149,7 @@ export default function YachtsIndex() {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
           {[1,2,3,4].map(i => (
             <div key={i} className="space-y-2">
-              <Skeleton className="aspect-[4/3] rounded-xl" />
+              <Skeleton className="aspect-[4/3] rounded-none" />
               <Skeleton className="h-4 w-3/4" />
               <Skeleton className="h-3 w-1/2" />
             </div>

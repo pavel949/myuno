@@ -198,7 +198,7 @@ export function TaskDetailSheet({ task, open, onOpenChange, members, properties,
                       key={opt.value}
                       onClick={() => setStatus(opt.value)}
                       className={cn(
-                        'flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-sm transition-all',
+                        'flex items-center gap-1.5 px-3 py-1.5 rounded-none border text-sm transition-all',
                         status === opt.value
                           ? 'border-primary bg-primary/10 font-medium'
                           : 'border-border hover:bg-muted'

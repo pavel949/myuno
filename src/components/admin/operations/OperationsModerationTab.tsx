@@ -198,7 +198,7 @@ export function OperationsModerationTab() {
   };
 
   const renderTable = (items: ModerationItem[], showActions: boolean) => (
-    <div className="rounded-md border overflow-x-auto">
+    <div className="rounded-none border overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>

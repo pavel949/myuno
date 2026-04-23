@@ -539,7 +539,7 @@ export default function Bookings() {
                 return (
                   <div
                     key={booking.id}
-                    className="bg-card border border-border rounded-xl hover:border-primary/30 transition-all"
+                    className="bg-card border border-border rounded-none hover:border-primary/30 transition-all"
                   >
                     {/* Card body */}
                     <div
@@ -547,7 +547,7 @@ export default function Bookings() {
                       className="p-4 cursor-pointer"
                     >
                       <div className="flex gap-3">
-                        <div className="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <div className="w-16 h-16 rounded-none bg-primary/10 flex items-center justify-center">
                           <Icon className="w-6 h-6 text-primary" />
                         </div>
                         <div className="flex-1 min-w-0">

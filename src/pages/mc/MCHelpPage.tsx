@@ -349,7 +349,7 @@ function HelpAIAssistant({ isRu }: { isRu: boolean }) {
                 <button
                   key={i}
                   onClick={() => setInput(q)}
-                  className="text-left p-2.5 rounded-lg bg-muted/50 hover:bg-muted text-xs transition-colors"
+                  className="text-left p-2.5 rounded-none bg-muted/50 hover:bg-muted text-xs transition-colors"
                 >
                   <ChevronRight className="h-3 w-3 inline mr-1 text-primary" />
                   {q}
@@ -364,7 +364,7 @@ function HelpAIAssistant({ isRu }: { isRu: boolean }) {
                 <div className={cn('w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0', msg.role === 'user' ? 'bg-primary' : 'bg-primary/10')}>
                   {msg.role === 'user' ? <User className="w-3.5 h-3.5 text-primary-foreground" /> : <Bot className="w-3.5 h-3.5 text-primary" />}
                 </div>
-                <div className={cn('rounded-xl px-3 py-2 max-w-[85%] text-sm', msg.role === 'user' ? 'bg-primary text-primary-foreground rounded-br-sm' : 'bg-muted rounded-bl-sm')}>
+                <div className={cn('rounded-none px-3 py-2 max-w-[85%] text-sm', msg.role === 'user' ? 'bg-primary text-primary-foreground rounded-none' : 'bg-muted rounded-none')}>
                   <p className="whitespace-pre-wrap">{msg.content}</p>
                 </div>
               </div>
@@ -374,7 +374,7 @@ function HelpAIAssistant({ isRu }: { isRu: boolean }) {
                 <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
                   <Bot className="w-3.5 h-3.5 text-primary" />
                 </div>
-                <div className="rounded-xl rounded-bl-sm bg-muted px-3 py-2">
+                <div className="rounded-none rounded-none bg-muted px-3 py-2">
                   <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
                 </div>
               </div>
@@ -513,10 +513,10 @@ export default function MCHelpPage() {
               {filteredFeatures.map(section => {
                 const Icon = section.icon;
                 return (
-                  <AccordionItem key={section.id} value={section.id} className="border rounded-lg bg-card px-0">
+                  <AccordionItem key={section.id} value={section.id} className="border rounded-none bg-card px-0">
                     <AccordionTrigger className="px-4 py-3 hover:no-underline">
                       <div className="flex items-center gap-3 text-left">
-                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <div className="w-8 h-8 rounded-none bg-primary/10 flex items-center justify-center flex-shrink-0">
                           <Icon className="h-4 w-4 text-primary" />
                         </div>
                         <div>
@@ -550,7 +550,7 @@ export default function MCHelpPage() {
                   <Card key={i}>
                     <CardContent className="p-4">
                       <div className="flex items-start gap-3">
-                        <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <div className="w-9 h-9 rounded-none bg-primary/10 flex items-center justify-center flex-shrink-0">
                           <Icon className="h-4.5 w-4.5 text-primary" />
                         </div>
                         <div>

@@ -15,9 +15,9 @@ export function ContentSkeleton({ variant = 'card', count = 1, className }: Cont
       return (
         <div className={cn('space-y-3', className)}>
           {items.map(i => (
-            <div key={i} className="p-4 rounded-xl border border-border bg-card animate-pulse">
+            <div key={i} className="p-4 rounded-none border border-border bg-card animate-pulse">
               <div className="flex items-start gap-3">
-                <Skeleton className="h-12 w-12 rounded-lg shrink-0" />
+                <Skeleton className="h-12 w-12 rounded-none shrink-0" />
                 <div className="flex-1 space-y-2">
                   <Skeleton className="h-4 w-3/4" />
                   <Skeleton className="h-3 w-1/2" />
@@ -86,7 +86,7 @@ export function ContentSkeleton({ variant = 'card', count = 1, className }: Cont
       return (
         <div className={cn('grid grid-cols-2 gap-3', className)}>
           {items.map(i => (
-            <div key={i} className="p-3 rounded-lg border border-border animate-pulse">
+            <div key={i} className="p-3 rounded-none border border-border animate-pulse">
               <Skeleton className="h-3 w-16 mb-2" />
               <Skeleton className="h-6 w-20" />
             </div>

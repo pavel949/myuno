@@ -73,21 +73,21 @@ export const PAIN_POINTS = [
 ] as const;
 
 export const SERVICE_VERTICALS = [
-  { name: 'Transport', nameRu: 'Транспорт', icon: 'Car', color: 'bg-blue-500', category: 'travel' },
-  { name: 'Tours', nameRu: 'Туры', icon: 'Palmtree', color: 'bg-green-500', category: 'travel' },
-  { name: 'Boat Charters', nameRu: 'Чартер', icon: 'Ship', color: 'bg-cyan-500', category: 'travel' },
-  { name: 'Property', nameRu: 'Недвижимость', icon: 'Home', color: 'bg-indigo-500', category: 'lifestyle' },
-  { name: 'Restaurants', nameRu: 'Рестораны', icon: 'UtensilsCrossed', color: 'bg-orange-500', category: 'lifestyle' },
-  { name: 'Spa & Beauty', nameRu: 'Спа и красота', icon: 'Sparkles', color: 'bg-pink-500', category: 'lifestyle' },
+  { name: 'Transport', nameRu: 'Транспорт', icon: 'Car', color: 'bg-primary', category: 'travel' },
+  { name: 'Tours', nameRu: 'Туры', icon: 'Palmtree', color: 'bg-success', category: 'travel' },
+  { name: 'Boat Charters', nameRu: 'Чартер', icon: 'Ship', color: 'bg-primary', category: 'travel' },
+  { name: 'Property', nameRu: 'Недвижимость', icon: 'Home', color: 'bg-primary', category: 'lifestyle' },
+  { name: 'Restaurants', nameRu: 'Рестораны', icon: 'UtensilsCrossed', color: 'bg-accent', category: 'lifestyle' },
+  { name: 'Spa & Beauty', nameRu: 'Спа и красота', icon: 'Sparkles', color: 'bg-accent', category: 'lifestyle' },
   { name: 'Medical', nameRu: 'Медицина', icon: 'Heart', color: 'bg-red-500', category: 'infrastructure' },
-  { name: 'Legal & Visa', nameRu: 'Юридические и виза', icon: 'Scale', color: 'bg-purple-500', category: 'infrastructure' },
+  { name: 'Legal & Visa', nameRu: 'Юридические и виза', icon: 'Scale', color: 'bg-primary', category: 'infrastructure' },
   { name: 'Insurance', nameRu: 'Страхование', icon: 'Shield', color: 'bg-slate-500', category: 'infrastructure' },
-  { name: 'Fitness', nameRu: 'Фитнес', icon: 'Dumbbell', color: 'bg-amber-500', category: 'lifestyle' },
-  { name: 'Events', nameRu: 'Мероприятия', icon: 'Calendar', color: 'bg-rose-500', category: 'travel' },
-  { name: 'Water Sports', nameRu: 'Водный спорт', icon: 'Waves', color: 'bg-teal-500', category: 'travel' },
-  { name: 'Pharmacy', nameRu: 'Аптека', icon: 'Pill', color: 'bg-emerald-500', category: 'infrastructure' },
-  { name: 'Pet Services', nameRu: 'Услуги для питомцев', icon: 'PawPrint', color: 'bg-yellow-500', category: 'lifestyle' },
-  { name: 'Education', nameRu: 'Образование', icon: 'GraduationCap', color: 'bg-violet-500', category: 'lifestyle' },
+  { name: 'Fitness', nameRu: 'Фитнес', icon: 'Dumbbell', color: 'bg-accent', category: 'lifestyle' },
+  { name: 'Events', nameRu: 'Мероприятия', icon: 'Calendar', color: 'bg-accent', category: 'travel' },
+  { name: 'Water Sports', nameRu: 'Водный спорт', icon: 'Waves', color: 'bg-success', category: 'travel' },
+  { name: 'Pharmacy', nameRu: 'Аптека', icon: 'Pill', color: 'bg-success', category: 'infrastructure' },
+  { name: 'Pet Services', nameRu: 'Услуги для питомцев', icon: 'PawPrint', color: 'bg-accent', category: 'lifestyle' },
+  { name: 'Education', nameRu: 'Образование', icon: 'GraduationCap', color: 'bg-primary', category: 'lifestyle' },
 ] as const;
 
 export const COMPETITORS = [
@@ -154,10 +154,10 @@ export const INVESTMENT_DETAILS = {
   valuation: 2000000, // $2M pre-money
   stage: 'Pre-Seed / Seed',
   useOfFunds: [
-    { label: 'Product & Engineering', labelRu: 'Продукт и разработка', percent: 40, color: 'bg-blue-500' },
-    { label: 'Marketing & Growth', labelRu: 'Маркетинг и рост', percent: 30, color: 'bg-green-500' },
-    { label: 'Operations & myUNO Team', labelRu: 'Операции и myUNO Team', percent: 20, color: 'bg-purple-500' },
-    { label: 'Legal & Compliance', labelRu: 'Юридические', percent: 10, color: 'bg-amber-500' },
+    { label: 'Product & Engineering', labelRu: 'Продукт и разработка', percent: 40, color: 'bg-primary' },
+    { label: 'Marketing & Growth', labelRu: 'Маркетинг и рост', percent: 30, color: 'bg-success' },
+    { label: 'Operations & myUNO Team', labelRu: 'Операции и myUNO Team', percent: 20, color: 'bg-primary' },
+    { label: 'Legal & Compliance', labelRu: 'Юридические', percent: 10, color: 'bg-accent' },
   ],
 } as const;
 

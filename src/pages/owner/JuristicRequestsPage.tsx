@@ -22,7 +22,7 @@ export default function JuristicRequestsPage() {
   const { requests, stats, isLoading } = useJuristicRequests(propertyId);
 
   if (isLoading) {
-    return <div className="p-6 animate-pulse"><div className="h-48 bg-muted rounded-lg" /></div>;
+    return <div className="p-6 animate-pulse"><div className="h-48 bg-muted rounded-none" /></div>;
   }
 
   return (

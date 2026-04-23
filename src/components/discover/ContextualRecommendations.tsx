@@ -83,7 +83,7 @@ export const ContextualRecommendations = memo(function ContextualRecommendations
               onClick={() => handleTap(item)}
               className={cn(
                 'flex-shrink-0 w-[160px] snap-start',
-                'rounded-2xl bg-card border border-border/50',
+                'rounded-none bg-card border border-border/50',
                 'hover:border-primary/30 active:scale-[0.98]',
                 'transition-all touch-manipulation text-left overflow-hidden',
               )}

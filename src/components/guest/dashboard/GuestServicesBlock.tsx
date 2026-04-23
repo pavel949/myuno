@@ -47,7 +47,7 @@ export function GuestServicesBlock() {
           return (
             <div
               key={service.id}
-              className="flex-shrink-0 w-14 p-2 rounded-xl bg-muted/50 hover:bg-muted text-center cursor-pointer transition-colors"
+              className="flex-shrink-0 w-14 p-2 rounded-none bg-muted/50 hover:bg-muted text-center cursor-pointer transition-colors"
               onClick={(e) => {
                 e.stopPropagation();
                 navigate(service.href);

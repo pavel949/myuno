@@ -89,7 +89,7 @@ export function OffplanProjectCard({
       data-listing-id={surface.id}
       onClick={handleClick}
       className={cn(
-        "group cursor-pointer rounded-2xl overflow-hidden",
+        "group cursor-pointer rounded-none overflow-hidden",
         "bg-card border border-border/50 shadow-sm",
         "hover:shadow-lg hover:-translate-y-1 transition-all duration-300",
         isCarousel ? "flex-shrink-0 w-[280px] sm:w-[300px]" : "w-full",
@@ -209,7 +209,7 @@ export function OffplanProjectCard({
 
         {/* Due Diligence status */}
         <div className={cn(
-          "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium",
+          "flex items-center gap-1.5 px-2.5 py-1.5 rounded-none text-xs font-medium",
           project.riskLevel 
             ? "bg-success/10 text-success" 
             : "bg-warning/10 text-warning"

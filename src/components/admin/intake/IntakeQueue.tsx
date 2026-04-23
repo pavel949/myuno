@@ -122,7 +122,7 @@ export function IntakeQueue({
               if (showActions) setActiveId(item.id);
             }}
             className={cn(
-              'rounded-lg transition-all',
+              'rounded-none transition-all',
               isPanelSelected && 'ring-2 ring-primary',
               !isPanelSelected && isActive && 'ring-2 ring-accent'
             )}

@@ -194,10 +194,10 @@ export default function PropertyQuickSetup() {
               <img 
                 src={property.cover_image} 
                 alt={property.title}
-                className="w-12 h-12 rounded-lg object-cover"
+                className="w-12 h-12 rounded-none object-cover"
               />
             ) : (
-              <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
+              <div className="w-12 h-12 rounded-none bg-muted flex items-center justify-center">
                 <Home className="h-6 w-6 text-muted-foreground" />
               </div>
             )}

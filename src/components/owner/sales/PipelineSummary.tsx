@@ -31,21 +31,21 @@ export function PipelineSummary({ deals, pipelineData }: Props) {
 
   return (
     <div className="grid grid-cols-3 gap-2">
-      <div className="flex items-center gap-2 p-2.5 rounded-lg border bg-card">
+      <div className="flex items-center gap-2 p-2.5 rounded-none border bg-card">
         <DollarSign className="h-4 w-4 text-primary shrink-0" />
         <div>
           <p className="text-xs text-muted-foreground">{isRu ? 'Воронка' : 'Pipeline'}</p>
           <p className="text-sm font-bold">{formatValue(stats.totalPipeline)}</p>
         </div>
       </div>
-      <div className="flex items-center gap-2 p-2.5 rounded-lg border bg-card">
+      <div className="flex items-center gap-2 p-2.5 rounded-none border bg-card">
         <Target className="h-4 w-4 text-accent-amber shrink-0" />
         <div>
           <p className="text-xs text-muted-foreground">{isRu ? 'Прогноз' : 'Forecast'}</p>
           <p className="text-sm font-bold">{formatValue(stats.weighted)}</p>
         </div>
       </div>
-      <div className="flex items-center gap-2 p-2.5 rounded-lg border bg-card">
+      <div className="flex items-center gap-2 p-2.5 rounded-none border bg-card">
         <TrendingUp className="h-4 w-4 text-success shrink-0" />
         <div>
           <p className="text-xs text-muted-foreground">{isRu ? 'Закрыто' : 'Won'}</p>

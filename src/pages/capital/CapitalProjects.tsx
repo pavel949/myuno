@@ -108,7 +108,7 @@ export default function CapitalProjects() {
         <h1 className="text-xl font-bold">Проекты</h1>
         <Dialog open={dialogOpen} onOpenChange={(o) => { setDialogOpen(o); if (!o) resetForm(); }}>
           <DialogTrigger asChild>
-            <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700">
+            <Button size="sm" className="bg-success hover:bg-success">
               <Plus className="w-4 h-4 mr-1" /> Добавить
             </Button>
           </DialogTrigger>
@@ -180,7 +180,7 @@ export default function CapitalProjects() {
                 <div><Label>Доступно</Label><Input type="number" value={form.units_available} onChange={(e) => setForm({ ...form, units_available: e.target.value })} /></div>
               </div>
               <div><Label>Заметки</Label><Input value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></div>
-              <Button onClick={handleSave} className="bg-emerald-600 hover:bg-emerald-700">
+              <Button onClick={handleSave} className="bg-success hover:bg-success">
                 {editId ? 'Сохранить' : 'Создать'}
               </Button>
             </div>
@@ -199,7 +199,7 @@ export default function CapitalProjects() {
           {projects.map((p) => (
             <div
               key={p.id}
-              className="rounded-lg border border-border/50 p-4 space-y-2 hover:border-emerald-500/30 transition-colors cursor-pointer"
+              className="rounded-none border border-border/50 p-4 space-y-2 hover:border-success/40/30 transition-colors cursor-pointer"
               onClick={() => openEdit(p)}
             >
               <div className="flex items-start justify-between">
@@ -220,7 +220,7 @@ export default function CapitalProjects() {
                     {CONSTRUCTION_STATUS_LABELS[p.construction_status as ConstructionStatus]}
                   </Badge>
                 )}
-                {p.commission_pct && <Badge className="bg-emerald-500/20 text-emerald-400 text-xs">{p.commission_pct}%</Badge>}
+                {p.commission_pct && <Badge className="bg-success/20 text-success text-xs">{p.commission_pct}%</Badge>}
               </div>
               <p className="text-sm">
                 {p.price_from?.toLocaleString()}–{p.price_to?.toLocaleString()} {p.currency}

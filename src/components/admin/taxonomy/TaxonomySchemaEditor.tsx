@@ -240,7 +240,7 @@ export default function TaxonomySchemaEditor({ typeKey }: TaxonomySchemaEditorPr
     <div className="space-y-6">
       {/* Save Banner */}
       {hasChanges && (
-        <div className="flex items-center justify-between p-3 bg-warning/10 border border-warning/20 rounded-lg">
+        <div className="flex items-center justify-between p-3 bg-warning/10 border border-warning/20 rounded-none">
           <div className="flex items-center gap-2 text-warning">
             <AlertCircle className="h-4 w-4" />
             <span className="text-sm font-medium">
@@ -256,7 +256,7 @@ export default function TaxonomySchemaEditor({ typeKey }: TaxonomySchemaEditorPr
 
       <Accordion type="multiple" defaultValue={['fields', 'pricing', 'media']} className="space-y-4">
         {/* Custom Fields */}
-        <AccordionItem value="fields" className="border rounded-lg px-4">
+        <AccordionItem value="fields" className="border rounded-none px-4">
           <AccordionTrigger className="hover:no-underline">
             <div className="flex items-center gap-2">
               <Settings2 className="h-4 w-4 text-primary" />
@@ -267,7 +267,7 @@ export default function TaxonomySchemaEditor({ typeKey }: TaxonomySchemaEditorPr
           <AccordionContent className="pt-4">
             <div className="space-y-3">
               {schema.fields.length === 0 ? (
-                <div className="text-center py-6 text-muted-foreground border-2 border-dashed rounded-lg">
+                <div className="text-center py-6 text-muted-foreground border-2 border-dashed rounded-none">
                   <Settings2 className="h-8 w-8 mx-auto mb-2 opacity-50" />
                   <p>{t('No custom fields yet', 'Пока нет кастомных полей')}</p>
                 </div>
@@ -277,7 +277,7 @@ export default function TaxonomySchemaEditor({ typeKey }: TaxonomySchemaEditorPr
                     {schema.fields.map((field, index) => (
                       <div 
                         key={field.key} 
-                        className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg group"
+                        className="flex items-center gap-3 p-3 bg-muted/50 rounded-none group"
                       >
                         <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab" />
                         <div className="flex-1 min-w-0">
@@ -292,7 +292,7 @@ export default function TaxonomySchemaEditor({ typeKey }: TaxonomySchemaEditorPr
                             )}
                           </div>
                           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <code className="bg-muted px-1 rounded">{field.key}</code>
+                            <code className="bg-muted px-1 rounded-none">{field.key}</code>
                             <span>•</span>
                             <span>{FIELD_TYPE_OPTIONS.find(o => o.value === field.type)?.labelEn}</span>
                           </div>
@@ -329,7 +329,7 @@ export default function TaxonomySchemaEditor({ typeKey }: TaxonomySchemaEditorPr
         </AccordionItem>
 
         {/* Pricing Models */}
-        <AccordionItem value="pricing" className="border rounded-lg px-4">
+        <AccordionItem value="pricing" className="border rounded-none px-4">
           <AccordionTrigger className="hover:no-underline">
             <div className="flex items-center gap-2">
               <DollarSign className="h-4 w-4 text-success" />
@@ -345,7 +345,7 @@ export default function TaxonomySchemaEditor({ typeKey }: TaxonomySchemaEditorPr
                   <button
                     key={option.value}
                     onClick={() => togglePricingModel(option.value)}
-                    className={`p-3 rounded-lg border text-left transition-all ${
+                    className={`p-3 rounded-none border text-left transition-all ${
                       isSelected 
                         ? 'border-primary bg-primary/10 text-primary' 
                         : 'border-border hover:border-primary/50'
@@ -363,7 +363,7 @@ export default function TaxonomySchemaEditor({ typeKey }: TaxonomySchemaEditorPr
         </AccordionItem>
 
         {/* Availability Types */}
-        <AccordionItem value="availability" className="border rounded-lg px-4">
+        <AccordionItem value="availability" className="border rounded-none px-4">
           <AccordionTrigger className="hover:no-underline">
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4 text-info" />
@@ -379,7 +379,7 @@ export default function TaxonomySchemaEditor({ typeKey }: TaxonomySchemaEditorPr
                   <button
                     key={option.value}
                     onClick={() => toggleAvailabilityType(option.value)}
-                    className={`p-3 rounded-lg border text-left transition-all ${
+                    className={`p-3 rounded-none border text-left transition-all ${
                       isSelected 
                         ? 'border-primary bg-primary/10 text-primary' 
                         : 'border-border hover:border-primary/50'
@@ -397,7 +397,7 @@ export default function TaxonomySchemaEditor({ typeKey }: TaxonomySchemaEditorPr
         </AccordionItem>
 
         {/* Media Requirements */}
-        <AccordionItem value="media" className="border rounded-lg px-4">
+        <AccordionItem value="media" className="border rounded-none px-4">
           <AccordionTrigger className="hover:no-underline">
             <div className="flex items-center gap-2">
               <Image className="h-4 w-4 text-accent-purple" />

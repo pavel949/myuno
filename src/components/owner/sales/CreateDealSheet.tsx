@@ -231,7 +231,7 @@ const navigate = useNavigate();
       <div className="space-y-4 pr-1">
         {/* Duplicate warning */}
         {duplicates.length > 0 && (
-          <div className="p-3 rounded-lg border border-warning/50 bg-warning/10 text-sm">
+          <div className="p-3 rounded-none border border-warning/50 bg-warning/10 text-sm">
             <div className="flex items-center gap-2 text-warning font-medium mb-1">
               <AlertCircle className="h-4 w-4" />
               {isRu ? 'Возможный дубликат!' : 'Possible duplicate!'}
@@ -277,7 +277,7 @@ const navigate = useNavigate();
           )}
         </div>
 
-      <div className="flex items-center justify-between rounded-lg border border-warning/30 bg-warning/5 px-3 py-2">
+      <div className="flex items-center justify-between rounded-none border border-warning/30 bg-warning/5 px-3 py-2">
         <div className="flex items-center gap-2">
           <Crown className="h-4 w-4 text-warning" />
           <Label htmlFor="deal-vip-toggle" className="cursor-pointer">

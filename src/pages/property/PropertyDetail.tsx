@@ -297,7 +297,7 @@ export default function PropertyDetail() {
               {isSaleListing && (
                 <>
                   <Separator />
-                  <div className="rounded-xl border border-border/60 bg-muted/30 p-4 space-y-2">
+                  <div className="rounded-none border border-border/60 bg-muted/30 p-4 space-y-2">
                     <h2 className="text-lg font-semibold">{isRu ? 'Продажа' : 'For sale'}</h2>
                     <p className="text-2xl font-bold tracking-tight">{formatPrice(salePrice)}</p>
                     {ownershipLabel && (
@@ -333,7 +333,7 @@ export default function PropertyDetail() {
                   { icon: Maximize, value: property.area_sqm || 0, label: 'м²' },
                   { icon: Users, value: property.max_guests || rentalTerms?.max_guests || 0, label: isRu ? 'Гости' : 'Guests' },
                 ].filter((spec) => spec.value > 0).map((spec, i) => (
-                  <div key={i} className="flex flex-col items-center p-3 lg:p-5 rounded-xl bg-muted/50">
+                  <div key={i} className="flex flex-col items-center p-3 lg:p-5 rounded-none bg-muted/50">
                     <spec.icon className="w-5 h-5 lg:w-6 lg:h-6 text-muted-foreground mb-1" />
                     <span className="text-lg lg:text-xl font-bold">{spec.value}</span>
                     <span className="text-xs lg:text-sm text-muted-foreground">{spec.label}</span>
@@ -562,7 +562,7 @@ export default function PropertyDetail() {
                       labelRu="Запросить консультацию"
                       labelEn="Request consultation"
                     />
-                    <div className="rounded-lg border border-border/60 bg-muted/20 px-3 py-2.5 text-xs text-muted-foreground leading-snug">
+                    <div className="rounded-none border border-border/60 bg-muted/20 px-3 py-2.5 text-xs text-muted-foreground leading-snug">
                       <p>
                         {isRu
                           ? 'Консьерж myUNO поможет с трансфером, визой и вопросами по бронированию.'
@@ -607,7 +607,7 @@ export default function PropertyDetail() {
                     labelRu="Написать менеджеру"
                     labelEn="Message manager"
                   />
-                  <div className="rounded-lg border border-border/60 bg-muted/20 px-3 py-2.5 text-xs text-muted-foreground leading-snug">
+                  <div className="rounded-none border border-border/60 bg-muted/20 px-3 py-2.5 text-xs text-muted-foreground leading-snug">
                     <p>
                       {isRu
                         ? 'Консьерж myUNO поможет с трансфером, визой и вопросами по бронированию.'

@@ -28,10 +28,10 @@ export function ContactSearchInput({ companyId, onSelect, onClear, selectedConta
 
   if (selectedContact) {
     return (
-      <div className="flex items-center gap-2 p-2 rounded-lg border bg-primary/5">
+      <div className="flex items-center gap-2 p-2 rounded-none border bg-primary/5">
         <UserCircle className="h-4 w-4 text-primary shrink-0" />
         <span className="text-sm font-medium flex-1">{selectedContact.first_name} {selectedContact.last_name}</span>
-        <button onClick={onClear} className="p-0.5 rounded hover:bg-muted"><X className="h-3.5 w-3.5" /></button>
+        <button onClick={onClear} className="p-0.5 rounded-none hover:bg-muted"><X className="h-3.5 w-3.5" /></button>
       </div>
     );
   }
@@ -45,7 +45,7 @@ export function ContactSearchInput({ companyId, onSelect, onClear, selectedConta
         onFocus={() => query.length >= 1 && setOpen(true)}
       />
       {open && results.length > 0 && (
-        <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-popover border rounded-lg shadow-lg max-h-48 overflow-y-auto">
+        <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-popover border rounded-none shadow-lg max-h-48 overflow-y-auto">
           {results.map(c => (
             <button
               key={c.id}

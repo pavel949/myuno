@@ -35,7 +35,7 @@ export function OwnerTermsTab({ propertyId }: Props) {
   const { data: termsList = [], isLoading } = usePropertyManagementTerms(propertyId);
 
   if (isLoading) {
-    return <div className="space-y-3">{[1, 2].map(i => <div key={i} className="h-24 bg-muted animate-pulse rounded-xl" />)}</div>;
+    return <div className="space-y-3">{[1, 2].map(i => <div key={i} className="h-24 bg-muted animate-pulse rounded-none" />)}</div>;
   }
 
   const activeTerms = termsList.find(t => t.status === 'active') || termsList[0];

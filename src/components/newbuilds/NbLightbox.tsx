@@ -92,7 +92,7 @@ export function NbLightbox({ images, initialIndex = 0, onClose, captions }: Prop
         <img
           src={images[index]}
           alt={captions?.[index] || `Image ${index + 1}`}
-          className="max-w-full max-h-[85vh] object-contain rounded-lg select-none"
+          className="max-w-full max-h-[85vh] object-contain rounded-none select-none"
           draggable={false}
         />
       </div>
@@ -131,7 +131,7 @@ export function NbLightbox({ images, initialIndex = 0, onClose, captions }: Prop
             <button
               key={i}
               onClick={e => { e.stopPropagation(); setIndex(i); }}
-              className="flex-shrink-0 w-12 h-9 rounded overflow-hidden transition-all"
+              className="flex-shrink-0 w-12 h-9 rounded-none overflow-hidden transition-all"
               style={{
                 border: i === index ? '2px solid hsl(var(--nb-gold))' : '2px solid transparent',
                 opacity: i === index ? 1 : 0.5,

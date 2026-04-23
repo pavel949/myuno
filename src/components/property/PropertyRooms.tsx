@@ -148,7 +148,7 @@ export function PropertyRooms({ rooms, onChange, className }: PropertyRoomsProps
       </CardHeader>
       <CardContent className="space-y-4">
         {rooms.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg">
+          <div className="text-center py-8 text-muted-foreground border-2 border-dashed rounded-none">
             <Bed className="h-8 w-8 mx-auto mb-2 opacity-50" />
             <p>{isRu ? 'Нет добавленных комнат' : 'No rooms added yet'}</p>
             <Button onClick={addRoom} variant="link" className="mt-2">
@@ -159,10 +159,10 @@ export function PropertyRooms({ rooms, onChange, className }: PropertyRoomsProps
           rooms.map((room) => {
             const RoomIcon = getRoomIcon(room.type);
             return (
-              <div key={room.id} className="border rounded-lg p-4 space-y-4">
+              <div key={room.id} className="border rounded-none p-4 space-y-4">
                 {/* Room Header */}
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-primary/10 rounded-lg">
+                  <div className="p-2 bg-primary/10 rounded-none">
                     <RoomIcon className="h-5 w-5 text-primary" />
                   </div>
                   <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-3">

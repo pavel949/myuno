@@ -66,7 +66,7 @@ function GuestExtraFeesSectionInner({ formData, updateFormData }: GuestExtraFees
         </p>
 
         {fees.length === 0 && (
-          <div className="rounded-xl border-2 border-dashed border-border/60 p-4 text-center text-sm text-muted-foreground">
+          <div className="rounded-none border-2 border-dashed border-border/60 p-4 text-center text-sm text-muted-foreground">
             {isRu ? 'Доп. позиции не настроены' : 'No extra fees configured'}
           </div>
         )}
@@ -74,7 +74,7 @@ function GuestExtraFeesSectionInner({ formData, updateFormData }: GuestExtraFees
         {fees.map((fee) => {
           const preset = GUEST_FEE_KIND_PRESETS[fee.kind];
           return (
-            <div key={fee.id} className="rounded-xl border border-border/60 p-3 space-y-3 bg-card/40">
+            <div key={fee.id} className="rounded-none border border-border/60 p-3 space-y-3 bg-card/40">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 flex-1 min-w-0">
                   <span className="text-base">{preset.icon}</span>

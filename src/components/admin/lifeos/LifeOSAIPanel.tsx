@@ -286,7 +286,7 @@ const isRu = language === 'ru';
           <CardHeader className="cursor-pointer hover:bg-muted/30 transition-colors pb-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-primary/10">
+                <div className="p-2 rounded-none bg-primary/10">
                   <Brain className="w-5 h-5 text-primary" />
                 </div>
                 <div>
@@ -334,7 +334,7 @@ const isRu = language === 'ru';
             </div>
 
             {/* Selected Mode Description */}
-            <div className="flex items-start gap-2 text-xs text-muted-foreground bg-muted/50 p-2 rounded-lg">
+            <div className="flex items-start gap-2 text-xs text-muted-foreground bg-muted/50 p-2 rounded-none">
               <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" />
               <span>{getAnalysisModeInfo(selectedMode, isRu).description}</span>
             </div>
@@ -383,7 +383,7 @@ const isRu = language === 'ru';
 
                 {/* Summary */}
                 {result.summary && (
-                  <p className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
+                  <p className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-none">
                     {result.summary}
                   </p>
                 )}
@@ -475,7 +475,7 @@ const SuggestionCard = forwardRef<HTMLDivElement, SuggestionCardProps>(function 
     <div 
       ref={ref}
       className={cn(
-        "border rounded-lg p-3 space-y-2 transition-colors",
+        "border rounded-none p-3 space-y-2 transition-colors",
         getImpactStyle(suggestion.impact_level)
       )}
     >
@@ -540,7 +540,7 @@ const SuggestionCard = forwardRef<HTMLDivElement, SuggestionCardProps>(function 
           </Button>
         </CollapsibleTrigger>
         <CollapsibleContent className="pt-2">
-          <div className="bg-background/50 p-2 rounded text-xs space-y-2">
+          <div className="bg-background/50 p-2 rounded-none text-xs space-y-2">
             <p>{suggestion.recommended_human_action}</p>
             
             {/* Governance Conflict Warning */}
@@ -589,7 +589,7 @@ const SuggestionCard = forwardRef<HTMLDivElement, SuggestionCardProps>(function 
             {/* Fix Result */}
             {fixResult && (
               <div className={cn(
-                "p-2 rounded text-xs space-y-1 mt-2",
+                "p-2 rounded-none text-xs space-y-1 mt-2",
                 fixResult.success ? "bg-success/10 border border-success/30" : "bg-destructive/10 border border-destructive/30"
               )}>
                 <div className="flex items-center gap-1.5 font-medium">

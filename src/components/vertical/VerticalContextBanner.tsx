@@ -11,7 +11,7 @@ interface VerticalContextBannerProps {
 }
 
 const TYPE_STYLES: Record<VerticalContextType, { bg: string; border: string; iconBg: string }> = {
-  weather:      { bg: 'bg-sky-500/10',     border: 'border-sky-500/20',     iconBg: 'bg-sky-500/15' },
+  weather:      { bg: 'bg-primary/10',     border: 'border-primary/40/20',     iconBg: 'bg-primary/15' },
   market:       { bg: 'bg-primary/10',     border: 'border-primary/20',     iconBg: 'bg-primary/15' },
   alert:        { bg: 'bg-warning/10',     border: 'border-warning/20',     iconBg: 'bg-warning/15' },
   seasonal:     { bg: 'bg-accent/10',      border: 'border-accent/20',      iconBg: 'bg-accent/15' },
@@ -35,11 +35,11 @@ export function VerticalContextBanner({ verticalId, className }: VerticalContext
 
   return (
     <div className={cn(
-      'flex items-start gap-3 rounded-xl border p-3 mb-4',
+      'flex items-start gap-3 rounded-none border p-3 mb-4',
       styles.bg, styles.border,
       className
     )}>
-      <div className={cn('w-9 h-9 rounded-lg flex items-center justify-center shrink-0 text-lg', styles.iconBg)}>
+      <div className={cn('w-9 h-9 rounded-none flex items-center justify-center shrink-0 text-lg', styles.iconBg)}>
         {config.icon}
       </div>
 
@@ -60,7 +60,7 @@ export function VerticalContextBanner({ verticalId, className }: VerticalContext
       {config.dismissible && (
         <button
           onClick={() => setDismissed(true)}
-          className="shrink-0 w-6 h-6 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+          className="shrink-0 w-6 h-6 flex items-center justify-center rounded-none text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
           aria-label="Dismiss"
         >
           <X className="w-3.5 h-3.5" />

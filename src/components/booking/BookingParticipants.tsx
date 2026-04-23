@@ -31,7 +31,7 @@ export function BookingParticipants({
         {label || t('tours.participants')}
       </Label>
       
-      <div className="flex items-center justify-between bg-muted/50 rounded-xl p-4">
+      <div className="flex items-center justify-between bg-muted/50 rounded-none p-4">
         <Button
           type="button"
           variant="outline"

@@ -26,7 +26,7 @@ export function SkipToContent({
       className={cn(
         "sr-only focus:not-sr-only",
         "fixed top-2 left-2 z-[9999]",
-        "px-4 py-2 rounded-lg",
+        "px-4 py-2 rounded-none",
         "bg-primary text-primary-foreground",
         "font-medium text-sm",
         "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",

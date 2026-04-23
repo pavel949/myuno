@@ -24,7 +24,7 @@ export function NbUpdatesTab({ projectId, currentProgress = 0, completionDate }:
     return (
       <div className="space-y-6">
         {[1, 2, 3].map(i => (
-          <Skeleton key={i} className="h-40 rounded-xl" style={{ background: 'hsl(var(--nb-surface))' }} />
+          <Skeleton key={i} className="h-40 rounded-none" style={{ background: 'hsl(var(--nb-surface))' }} />
         ))}
       </div>
     );
@@ -38,7 +38,7 @@ export function NbUpdatesTab({ projectId, currentProgress = 0, completionDate }:
           <p className="nb-label">ТЕКУЩИЙ ПРОГРЕСС</p>
           <button
             onClick={() => setShowSubscribe(true)}
-            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-all"
+            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-none transition-all"
             style={{ background: 'hsl(var(--nb-gold) / 0.15)', color: 'hsl(var(--nb-gold))', border: '1px solid hsl(var(--nb-gold) / 0.3)' }}
           >
             <Bell className="w-3.5 h-3.5" /> Подписаться
@@ -89,7 +89,7 @@ export function NbUpdatesTab({ projectId, currentProgress = 0, completionDate }:
                         <span className="nb-mono text-xs" style={{ color: 'hsl(var(--nb-muted))' }}>{date}</span>
                       )}
                       {update.progress_at_time !== null && (
-                        <span className="flex items-center gap-1 nb-mono text-xs px-2 py-0.5 rounded" style={{ background: 'hsl(var(--nb-gold) / 0.12)', color: 'hsl(var(--nb-gold))' }}>
+                        <span className="flex items-center gap-1 nb-mono text-xs px-2 py-0.5 rounded-none" style={{ background: 'hsl(var(--nb-gold) / 0.12)', color: 'hsl(var(--nb-gold))' }}>
                           <TrendingUp className="w-3 h-3" /> {update.progress_at_time}%
                         </span>
                       )}
@@ -114,7 +114,7 @@ export function NbUpdatesTab({ projectId, currentProgress = 0, completionDate }:
                           <button
                             key={i}
                             onClick={() => setLightbox({ images: photos, index: i })}
-                            className="flex-shrink-0 w-28 h-20 rounded-lg overflow-hidden group relative"
+                            className="flex-shrink-0 w-28 h-20 rounded-none overflow-hidden group relative"
                           >
                             <img src={url} alt="" className="w-full h-full object-cover" />
                             <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">

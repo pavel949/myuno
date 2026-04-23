@@ -46,10 +46,10 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({
             <button
               key={cat.id}
               onClick={() => handleClick(cat.slug)}
-              className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-muted/50 transition-colors group"
+              className="flex flex-col items-center gap-1.5 p-2 rounded-none hover:bg-muted/50 transition-colors group"
             >
               <div className={cn(
-                "w-12 h-12 rounded-xl flex items-center justify-center text-2xl",
+                "w-12 h-12 rounded-none flex items-center justify-center text-2xl",
                 "bg-muted shadow-sm transition-transform group-hover:scale-105"
               )}>
                 {cat.icon}
@@ -85,7 +85,7 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({
             <button
               key={cat.id}
               onClick={() => handleClick(cat.slug)}
-              className="relative overflow-hidden rounded-2xl text-left transition-all duration-300 hover:shadow-lg active:scale-[0.98] group"
+              className="relative overflow-hidden rounded-none text-left transition-all duration-300 hover:shadow-lg active:scale-[0.98] group"
             >
               <div className="aspect-[1.4/1] relative">
                 {/* Background Image */}

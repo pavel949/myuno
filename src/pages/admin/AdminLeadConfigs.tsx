@@ -145,7 +145,7 @@ export default function AdminLeadConfigs() {
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-primary/10">
+                <div className="p-2 rounded-none bg-primary/10">
                   <Users className="h-5 w-5 text-primary" />
                 </div>
                 <div>
@@ -158,7 +158,7 @@ export default function AdminLeadConfigs() {
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-success/10">
+                <div className="p-2 rounded-none bg-success/10">
                   <TrendingUp className="h-5 w-5 text-success" />
                 </div>
                 <div>
@@ -171,7 +171,7 @@ export default function AdminLeadConfigs() {
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-info/10">
+                <div className="p-2 rounded-none bg-info/10">
                   <FormInput className="h-5 w-5 text-info" />
                 </div>
                 <div>
@@ -210,7 +210,7 @@ export default function AdminLeadConfigs() {
                       <button
                         key={config.id}
                         onClick={() => handleSelect(config)}
-                        className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition-colors ${
+                        className={`w-full flex items-center justify-between px-3 py-2 rounded-none text-left transition-colors ${
                           selectedId === config.id
                             ? 'bg-primary/10 text-primary'
                             : 'hover:bg-muted'
@@ -286,7 +286,7 @@ export default function AdminLeadConfigs() {
                   </TabsList>
 
                   <TabsContent value="general" className="space-y-4">
-                    <div className="flex items-center justify-between p-4 rounded-lg border">
+                    <div className="flex items-center justify-between p-4 rounded-none border">
                       <div>
                         <Label>{t('Active', 'Активна')}</Label>
                         <p className="text-sm text-muted-foreground">

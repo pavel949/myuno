@@ -44,8 +44,8 @@ export function TaskComments({ taskId, taskSource }: Props) {
 
       {isLoading ? (
         <div className="space-y-2">
-          <Skeleton className="h-10 w-full rounded-lg" />
-          <Skeleton className="h-10 w-full rounded-lg" />
+          <Skeleton className="h-10 w-full rounded-none" />
+          <Skeleton className="h-10 w-full rounded-none" />
         </div>
       ) : comments.length > 0 ? (
         <div className="space-y-2 max-h-48 overflow-y-auto">

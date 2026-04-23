@@ -91,8 +91,8 @@ export function TodayBriefingWidget() {
     return (
       <div className="space-y-2">
         <Skeleton className="h-5 w-40" />
-        <Skeleton className="h-16 w-full rounded-xl" />
-        <Skeleton className="h-16 w-full rounded-xl" />
+        <Skeleton className="h-16 w-full rounded-none" />
+        <Skeleton className="h-16 w-full rounded-none" />
       </div>
     );
   }
@@ -155,7 +155,7 @@ export function TodayBriefingWidget() {
         onClick={() => navigate(`/mc/bookings/${event.bookingId}`)}
       >
         <CardContent className="p-3 flex items-center gap-3">
-          <div className={cn('p-2 rounded-lg shrink-0', cfg.bg)}>
+          <div className={cn('p-2 rounded-none shrink-0', cfg.bg)}>
             <Icon className={cn('h-4 w-4', cfg.color)} />
           </div>
           <div className="flex-1 min-w-0">

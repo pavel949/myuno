@@ -75,7 +75,7 @@ export function PropertyListingsTab({ propertyId, companyId }: Props) {
       </div>
 
       {showAdd && (
-        <div className="rounded-lg border p-3 space-y-3 bg-card">
+        <div className="rounded-none border p-3 space-y-3 bg-card">
           <div>
             <Label>{isRu ? 'Тип листинга' : 'Listing Type'}</Label>
             <div className="flex flex-wrap gap-1.5 mt-1">
@@ -123,7 +123,7 @@ export function PropertyListingsTab({ propertyId, companyId }: Props) {
         {listings.map(l => {
           const statusInfo = AVAILABILITY_STATUS_LABELS[l.availability_status] || AVAILABILITY_STATUS_LABELS.available;
           return (
-            <div key={l.id} className="flex items-center gap-3 p-3 rounded-lg border bg-card">
+            <div key={l.id} className="flex items-center gap-3 p-3 rounded-none border bg-card">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium">
@@ -140,7 +140,7 @@ export function PropertyListingsTab({ propertyId, companyId }: Props) {
                   <span className="flex items-center gap-1"><MessageSquare className="h-3 w-3" />{l.inquiry_count}</span>
                 </div>
               </div>
-              <button onClick={() => handleDelete(l.id)} className="p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive">
+              <button onClick={() => handleDelete(l.id)} className="p-1 rounded-none hover:bg-destructive/10 text-muted-foreground hover:text-destructive">
                 <Trash2 className="h-4 w-4" />
               </button>
             </div>

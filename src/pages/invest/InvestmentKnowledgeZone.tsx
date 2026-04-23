@@ -98,7 +98,7 @@ export default function InvestmentKnowledgeZone() {
                 <Card key={idx} className="hover:border-primary/30 transition-colors">
                   <CardContent className="p-4 space-y-3">
                     <div className="flex items-center gap-2">
-                      <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-primary/10 text-primary">
+                      <div className="w-9 h-9 rounded-none flex items-center justify-center bg-primary/10 text-primary">
                         <Icon className="h-4 w-4" />
                       </div>
                       <h3 className="font-semibold text-sm">

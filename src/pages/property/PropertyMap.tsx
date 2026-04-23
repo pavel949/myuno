@@ -138,7 +138,7 @@ export default function PropertyMap() {
                 </div>
 
                 {/* Location info */}
-                <div className="p-4 rounded-xl bg-secondary/50">
+                <div className="p-4 rounded-none bg-secondary/50">
                   <div className="flex items-center gap-2 mb-2">
                     <MapPin className="w-4 h-4 text-primary" />
                     <span className="text-sm font-medium">
@@ -215,7 +215,7 @@ export default function PropertyMap() {
             distanceFilter={distanceFilter}
             className="flex-1 min-h-0 w-full"
             icon="🏠"
-            iconBgColor="bg-emerald-600"
+            iconBgColor="bg-success"
           />
         )}
     </div>

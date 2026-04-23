@@ -193,7 +193,7 @@ export const LifeSituationsGrid = memo(function LifeSituationsGrid() {
               whileTap={{ scale: 0.96 }}
               onClick={() => { triggerHaptic('light'); navigate(s.route); }}
               className={cn(
-                "relative flex flex-col items-start gap-3 p-4 rounded-2xl text-left group cursor-pointer",
+                "relative flex flex-col items-start gap-3 p-4 rounded-none text-left group cursor-pointer",
                 "border shadow-sm min-h-[130px]",
                 "hover:shadow-lg hover:-translate-y-1 transition-all duration-300",
                 s.bg,
@@ -202,7 +202,7 @@ export const LifeSituationsGrid = memo(function LifeSituationsGrid() {
               style={{ touchAction: 'manipulation' }}
             >
               <div className={cn(
-                "w-11 h-11 rounded-xl flex items-center justify-center shadow-md",
+                "w-11 h-11 rounded-none flex items-center justify-center shadow-md",
                 "group-hover:scale-110 group-hover:shadow-lg transition-all duration-300",
                 s.iconBg,
               )}>
@@ -227,7 +227,7 @@ export const LifeSituationsGrid = memo(function LifeSituationsGrid() {
       {/* "Show more" toggle */}
       <button
         onClick={() => { setShowMore(!showMore); triggerHaptic('light'); }}
-        className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-medium text-primary hover:bg-primary/5 active:scale-[0.98] transition-all touch-manipulation"
+        className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-none text-sm font-medium text-primary hover:bg-primary/5 active:scale-[0.98] transition-all touch-manipulation"
       >
         <span>{isRu ? (showMore ? 'Свернуть' : `Ещё ${SECONDARY_SITUATIONS.length} ситуаций`) : (showMore ? 'Show less' : `${SECONDARY_SITUATIONS.length} more situations`)}</span>
         <ChevronDown className={cn("w-4 h-4 transition-transform duration-200", showMore && "rotate-180")} />
@@ -250,10 +250,10 @@ export const LifeSituationsGrid = memo(function LifeSituationsGrid() {
                   <button
                     key={s.code}
                     onClick={() => { triggerHaptic('light'); navigate(s.route); }}
-                    className="w-full flex items-center gap-3 p-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 active:scale-[0.99] transition-all touch-manipulation text-left group"
+                    className="w-full flex items-center gap-3 p-3 rounded-none bg-card border border-border/50 hover:border-primary/30 active:scale-[0.99] transition-all touch-manipulation text-left group"
                   >
                     <div className={cn(
-                      "w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0",
+                      "w-9 h-9 rounded-none flex items-center justify-center flex-shrink-0",
                       ICON_GRADIENT,
                     )}>
                       <Icon className="w-4 h-4 text-white" />

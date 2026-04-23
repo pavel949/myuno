@@ -132,7 +132,7 @@ export default function OwnerTrendsAndTips() {
       <PageContainer>
         <PageHeader title={isRu ? 'Тренды и советы' : 'Trends & Tips'} showBack fallbackPath="/mc/performance" />
         <div className="space-y-4">
-          {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-36 w-full rounded-xl" />)}
+          {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-36 w-full rounded-none" />)}
         </div>
       </PageContainer>
     );

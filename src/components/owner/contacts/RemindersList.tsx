@@ -81,7 +81,7 @@ const { user } = useAuth();
   };
 
   return (
-    <div className="rounded-xl border bg-card p-4 space-y-4">
+    <div className="rounded-none border bg-card p-4 space-y-4">
       <div className="flex items-center justify-between">
         <p className="text-sm font-semibold flex items-center gap-2">
           <Bell className="h-4 w-4 text-muted-foreground" />
@@ -135,7 +135,7 @@ const { user } = useAuth();
           {reminders.map((r) => (
             <div
               key={r.id}
-              className="flex items-center justify-between p-3 rounded-lg border bg-background/50 hover:bg-muted/30 transition-colors group"
+              className="flex items-center justify-between p-3 rounded-none border bg-background/50 hover:bg-muted/30 transition-colors group"
             >
               <div>
                 <p className="text-sm font-medium">

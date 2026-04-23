@@ -232,7 +232,7 @@ export function WriteReviewModal({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="pros" className="flex items-center gap-1">
-                <span className="text-green-500 font-bold">+</span>
+                <span className="text-success font-bold">+</span>
                 {language === 'ru' ? 'Плюсы' : 'Pros'}
               </Label>
               <Textarea
@@ -266,7 +266,7 @@ export function WriteReviewModal({
             <div className="flex gap-2 flex-wrap">
               {images.map((img, index) => (
                 <div key={index} className="relative w-16 h-16">
-                  <img src={img} alt="" className="w-full h-full object-cover rounded-lg" />
+                  <img src={img} alt="" className="w-full h-full object-cover rounded-none" />
                   <button
                     type="button"
                     className="absolute -top-1 -right-1 w-5 h-5 bg-destructive rounded-full flex items-center justify-center"
@@ -278,7 +278,7 @@ export function WriteReviewModal({
               ))}
               {images.length < MAX_PHOTOS && (
                 <label
-                  className={`w-16 h-16 border-2 border-dashed border-muted-foreground/30 rounded-lg flex items-center justify-center text-muted-foreground hover:border-primary hover:text-primary transition-colors cursor-pointer ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
+                  className={`w-16 h-16 border-2 border-dashed border-muted-foreground/30 rounded-none flex items-center justify-center text-muted-foreground hover:border-primary hover:text-primary transition-colors cursor-pointer ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
                 >
                   {isUploading ? (
                     <Loader2 className="w-5 h-5 animate-spin" />

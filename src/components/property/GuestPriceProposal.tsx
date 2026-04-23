@@ -77,7 +77,7 @@ export function GuestPriceProposal({
           <DialogTitle>{isRu ? 'Предложить свою цену' : 'Propose Your Price'}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 pt-2">
-          <div className="p-3 bg-muted rounded-lg text-sm">
+          <div className="p-3 bg-muted rounded-none text-sm">
             <p className="text-muted-foreground">
               {isRu ? 'Текущая цена:' : 'Current price:'}
               {' '}

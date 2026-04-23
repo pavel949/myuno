@@ -220,7 +220,7 @@ export default function NewbuildsAreaDetail() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {nearbyAreas.map(na => (
               <Link key={na.slug} to={`/newbuilds/areas/${na.slug}`} className="nb-glass p-4 flex items-center gap-3 group hover:border-[hsl(var(--nb-gold)/0.5)] transition-all">
-                <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: 'hsl(var(--nb-gold) / 0.1)' }}>
+                <div className="w-10 h-10 rounded-none flex items-center justify-center" style={{ background: 'hsl(var(--nb-gold) / 0.1)' }}>
                   <MapPin className="w-5 h-5" style={{ color: 'hsl(var(--nb-gold))' }} />
                 </div>
                 <div className="flex-1">

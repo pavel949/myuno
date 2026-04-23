@@ -51,7 +51,7 @@ export function HumanHelpBanner({
   if (variant === 'inline') {
     return (
       <div className={cn(
-        'flex items-center gap-3 py-2.5 px-3 rounded-lg',
+        'flex items-center gap-3 py-2.5 px-3 rounded-none',
         'bg-success/5 border border-success/10',
         className
       )}>
@@ -79,11 +79,11 @@ export function HumanHelpBanner({
   if (variant === 'card') {
     return (
       <div className={cn(
-        'rounded-xl border bg-card p-4 space-y-3',
+        'rounded-none border bg-card p-4 space-y-3',
         className
       )}>
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-success/10">
+          <div className="w-10 h-10 rounded-none flex items-center justify-center shrink-0 bg-success/10">
             <MessageCircle className="w-5 h-5 text-success" />
           </div>
           <div>
@@ -126,7 +126,7 @@ export function HumanHelpBanner({
   return (
     <div className={cn(
       'fixed bottom-[calc(var(--bottom-nav-h)+1rem)] left-4 right-4 z-40',
-      'rounded-xl border shadow-lg bg-card/95 backdrop-blur-sm p-3',
+      'rounded-none border shadow-lg bg-card/95 backdrop-blur-sm p-3',
       'flex items-center gap-3',
       className
     )}>

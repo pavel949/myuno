@@ -15,7 +15,7 @@ export function PropertyTourBanner() {
         role="button"
         tabIndex={0}
         aria-label={isRu ? 'Открыть форму: тур по недвижимости или консультация' : 'Open form: property tour or advice'}
-        className="relative rounded-2xl overflow-hidden cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        className="relative rounded-none overflow-hidden cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         onClick={() => setFormOpen(true)}
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setFormOpen(true); } }}
       >

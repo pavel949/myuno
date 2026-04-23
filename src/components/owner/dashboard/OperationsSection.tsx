@@ -34,7 +34,7 @@ export function OperationsSection() {
           <Skeleton className="h-4 w-16" />
         </div>
         <div className="grid grid-cols-1 xs:grid-cols-2 gap-2">
-          {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-16 rounded-xl" />)}
+          {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-16 rounded-none" />)}
         </div>
       </div>
     );
@@ -118,7 +118,7 @@ export function OperationsSection() {
               onClick={() => navigate(`/mc/operations?type=${type}`)}
             >
               <div className="flex items-center gap-2">
-                <div className={cn("p-1.5 rounded-lg", config.bgColor)}>
+                <div className={cn("p-1.5 rounded-none", config.bgColor)}>
                   <Icon className={cn("h-4 w-4", config.color)} />
                 </div>
                 <div>

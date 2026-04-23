@@ -159,7 +159,7 @@ export function HeroIntro() {
                   trackTaskOpen(task.id);
                   navigate(task.route);
                 }}
-                className="w-full flex items-center justify-between gap-3 py-2.5 px-1 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md text-left"
+                className="w-full flex items-center justify-between gap-3 py-2.5 px-1 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-none text-left"
               >
                 <div className="flex items-baseline gap-3 min-w-0">
                   <span className="font-mono text-[11px] text-muted-foreground/60 tabular-nums shrink-0">

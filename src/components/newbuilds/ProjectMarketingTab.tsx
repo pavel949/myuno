@@ -37,7 +37,7 @@ export function ProjectMarketingTab({ commissionPct, paymentPlan, marketingMater
             </Badge>
           )}
           {exclusive && (
-            <Badge className="bg-amber-500/10 text-amber-600 border-amber-200 text-xs">
+            <Badge className="bg-accent/10 text-accent border-accent/40 text-xs">
               {isRu ? 'Эксклюзив' : 'Exclusive'}
             </Badge>
           )}
@@ -56,7 +56,7 @@ export function ProjectMarketingTab({ commissionPct, paymentPlan, marketingMater
           </h3>
           <div className="space-y-2">
             {plans.map((step, i) => (
-              <div key={i} className="flex items-center gap-3 p-2 rounded-lg border bg-card">
+              <div key={i} className="flex items-center gap-3 p-2 rounded-none border bg-card">
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary shrink-0">
                   {step.percent}%
                 </div>
@@ -84,7 +84,7 @@ export function ProjectMarketingTab({ commissionPct, paymentPlan, marketingMater
                 href={url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 p-2 rounded-lg border bg-card hover:bg-accent/50 transition-colors text-sm"
+                className="flex items-center gap-2 p-2 rounded-none border bg-card hover:bg-accent/50 transition-colors text-sm"
               >
                 <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
                 <span className="truncate flex-1">{url.split('/').pop() || url}</span>

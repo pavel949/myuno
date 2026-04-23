@@ -66,7 +66,7 @@ export function FileImporter({ onFileSelect, parsedData, isLoading, onClear }: F
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-success/20 rounded-lg">
+              <div className="p-2 bg-success/20 rounded-none">
                 <CheckCircle className="h-6 w-6 text-success" />
               </div>
               <div>
@@ -93,7 +93,7 @@ export function FileImporter({ onFileSelect, parsedData, isLoading, onClear }: F
               {parsedData.headers.map((header, i) => (
                 <span 
                   key={i} 
-                  className="px-2 py-1 bg-muted rounded text-xs font-mono"
+                  className="px-2 py-1 bg-muted rounded-none text-xs font-mono"
                 >
                   {header}
                 </span>
@@ -165,9 +165,9 @@ export function FileImporter({ onFileSelect, parsedData, isLoading, onClear }: F
               </label>
               
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span className="px-2 py-0.5 bg-muted rounded">.xlsx</span>
-                <span className="px-2 py-0.5 bg-muted rounded">.xls</span>
-                <span className="px-2 py-0.5 bg-muted rounded">.csv</span>
+                <span className="px-2 py-0.5 bg-muted rounded-none">.xlsx</span>
+                <span className="px-2 py-0.5 bg-muted rounded-none">.xls</span>
+                <span className="px-2 py-0.5 bg-muted rounded-none">.csv</span>
               </div>
             </>
           )}

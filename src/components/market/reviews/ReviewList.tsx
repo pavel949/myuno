@@ -88,7 +88,7 @@ function ReviewCard({ review }: { review: MarketplaceReview }) {
                 key={idx}
                 src={photo}
                 alt=""
-                className="w-16 h-16 rounded-lg object-cover"
+                className="w-16 h-16 rounded-none object-cover"
               />
             ))}
           </div>

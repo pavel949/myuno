@@ -41,7 +41,7 @@ export function ProviderQuickStats({ provider, services, products, contracts }: 
           <Card key={card.key}>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-lg ${card.colorClass}`}>
+                <div className={`p-2 rounded-none ${card.colorClass}`}>
                   <Icon className="h-5 w-5" />
                 </div>
                 <div>

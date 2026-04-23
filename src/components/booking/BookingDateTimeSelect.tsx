@@ -95,7 +95,7 @@ export function BookingDateTimeSelect({
         )}
 
         {showCalendarInline ? (
-          <div className="bg-card rounded-xl border p-4 flex justify-center">
+          <div className="bg-card rounded-none border p-4 flex justify-center">
             {CalendarComponent}
           </div>
         ) : (

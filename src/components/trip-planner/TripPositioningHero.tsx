@@ -24,10 +24,10 @@ export function TripPositioningHero() {
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/10 p-5"
+      className="relative overflow-hidden rounded-none bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/10 p-5"
     >
       <div className="flex items-center gap-2 mb-3">
-        <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center">
+        <div className="w-8 h-8 rounded-none bg-primary/15 flex items-center justify-center">
           <Sparkles className="w-4 h-4 text-primary" />
         </div>
         <span className="text-xs font-semibold uppercase tracking-wider text-primary">

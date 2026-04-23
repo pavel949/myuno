@@ -58,9 +58,9 @@ export function ScoreBreakdown({
   };
 
   const getProgressColor = (score: number) => {
-    if (score >= 85) return 'bg-emerald-500';
-    if (score >= 70) return 'bg-amber-500';
-    if (score >= 50) return 'bg-orange-500';
+    if (score >= 85) return 'bg-success';
+    if (score >= 70) return 'bg-accent';
+    if (score >= 50) return 'bg-accent';
     return 'bg-red-500';
   };
 

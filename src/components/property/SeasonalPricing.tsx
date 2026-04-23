@@ -177,7 +177,7 @@ export function SeasonalPricing({
       <CardContent className="space-y-4">
         {/* Quick Add Presets */}
         {seasons.length === 0 && (
-          <div className="border-2 border-dashed rounded-lg p-4 space-y-3">
+          <div className="border-2 border-dashed rounded-none p-4 space-y-3">
             <p className="text-sm text-muted-foreground text-center">
               {isRu ? 'Быстрое добавление:' : 'Quick add:'}
             </p>
@@ -203,10 +203,10 @@ export function SeasonalPricing({
           const priceDiff = effectivePrice - basePrice;
           
           return (
-            <div key={season.id} className="border rounded-lg p-4 space-y-3">
+            <div key={season.id} className="border rounded-none p-4 space-y-3">
               {/* Row 1: Name + Type + Delete */}
               <div className="flex items-start gap-2">
-                <div className={cn("p-2 bg-muted rounded-lg mt-1", getSeasonColor(season.type))}>
+                <div className={cn("p-2 bg-muted rounded-none mt-1", getSeasonColor(season.type))}>
                   <SeasonIcon className="h-4 w-4" />
                 </div>
                 <div className="flex-1 grid grid-cols-2 gap-2">
@@ -329,7 +329,7 @@ export function SeasonalPricing({
               </div>
 
               {/* Summary */}
-              <div className="flex items-center justify-between text-sm bg-muted/50 rounded-lg px-3 py-2">
+              <div className="flex items-center justify-between text-sm bg-muted/50 rounded-none px-3 py-2">
                 <span className="text-muted-foreground">{formatDateRange(season)}</span>
                 <div className="flex items-center gap-2">
                   <span className="font-semibold">

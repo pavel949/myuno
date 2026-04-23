@@ -58,7 +58,7 @@ export function TransferUpsellScreen({
       <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
         {/* Hero message */}
         <div className="text-center space-y-3">
-          <div className="w-16 h-16 rounded-3xl bg-primary/10 flex items-center justify-center mx-auto">
+          <div className="w-16 h-16 rounded-none bg-primary/10 flex items-center justify-center mx-auto">
             <Car className="w-8 h-8 text-primary" />
           </div>
           <div>
@@ -104,7 +104,7 @@ export function TransferUpsellScreen({
                 transition={{ delay: 0.1 * (i + 1) }}
                 onClick={() => onSelectTransfer(v.type)}
                 className={cn(
-                  "w-full p-4 rounded-2xl border-2 flex items-center gap-4 text-left transition-all",
+                  "w-full p-4 rounded-none border-2 flex items-center gap-4 text-left transition-all",
                   "hover:border-primary/50 hover:shadow-sm",
                   v.highlight
                     ? "border-primary/30 bg-primary/5"

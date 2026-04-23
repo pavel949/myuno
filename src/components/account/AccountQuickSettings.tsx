@@ -26,7 +26,7 @@ export function AccountQuickSettings() {
       {/* Theme */}
       <div className="flex items-center justify-between">
         <span className="text-sm text-foreground/80">{isRu ? 'Тема' : 'Theme'}</span>
-        <div className="flex rounded-lg border border-border overflow-hidden">
+        <div className="flex rounded-none border border-border overflow-hidden">
           {themeOptions.map(({ value, icon: Icon }) => (
             <button
               key={value}

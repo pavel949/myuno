@@ -28,7 +28,7 @@ export const ChatDelegationBanner: React.FC<ChatDelegationBannerProps> = ({
   if (variant === 'compact') {
     return (
       <div className={cn(
-        'flex items-center justify-between gap-3 px-3 py-2 rounded-lg border',
+        'flex items-center justify-between gap-3 px-3 py-2 rounded-none border',
         isDelegated 
           ? 'bg-primary/5 border-primary/20' 
           : 'bg-muted/50 border-border',
@@ -64,7 +64,7 @@ export const ChatDelegationBanner: React.FC<ChatDelegationBannerProps> = ({
       <CardContent className="p-4">
         <div className="flex items-start gap-4">
           <div className={cn(
-            'p-3 rounded-xl',
+            'p-3 rounded-none',
             isDelegated ? 'bg-primary/10' : 'bg-muted'
           )}>
             <HeadphonesIcon className={cn(

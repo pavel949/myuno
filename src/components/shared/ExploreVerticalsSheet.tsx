@@ -40,11 +40,11 @@ export const ExploreVerticalsSheet = memo(function ExploreVerticalsSheet({
     <button 
       onClick={() => setOpen(true)}
       className={cn(
-        "flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-muted/70 active:bg-muted transition-all duration-200 touch-manipulation active:scale-95",
+        "flex flex-col items-center gap-1.5 p-2 rounded-none hover:bg-muted/70 active:bg-muted transition-all duration-200 touch-manipulation active:scale-95",
         className
       )}
     >
-      <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center ring-1 ring-black/[0.04] dark:ring-white/[0.06]">
+      <div className="w-12 h-12 rounded-none bg-muted flex items-center justify-center ring-1 ring-black/[0.04] dark:ring-white/[0.06]">
         <LayoutGrid className="w-5 h-5 text-gray-900 dark:text-gray-100" />
       </div>
       <span className="text-[10px] font-medium text-gray-900 dark:text-gray-100">
@@ -77,7 +77,7 @@ export const ExploreVerticalsSheet = memo(function ExploreVerticalsSheet({
                 key={v.id}
                 onClick={() => handleNavigate(v.plural)}
                 className={cn(
-                  'flex flex-col items-center gap-1.5 p-2 rounded-xl',
+                  'flex flex-col items-center gap-1.5 p-2 rounded-none',
                   'hover:bg-muted/50 active:bg-muted transition-all duration-200',
                   'touch-manipulation active:scale-95'
                 )}

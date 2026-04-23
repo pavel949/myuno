@@ -114,7 +114,7 @@ const ExchangeBotPage: React.FC = () => {
                     <select
                       value={selectedPair}
                       onChange={(e) => setSelectedPair(e.target.value)}
-                      className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+                      className="w-full h-10 rounded-none border border-input bg-background px-3 text-sm"
                     >
                       {EXCHANGE_RATES.map(r => (
                         <option key={r.pair} value={r.pair}>{r.pair}</option>
@@ -123,7 +123,7 @@ const ExchangeBotPage: React.FC = () => {
                   </div>
                   <div className="flex-1 min-w-[120px]">
                     <label className="text-xs text-muted-foreground mb-1 block">{t ? 'Результат (THB)' : 'Result (THB)'}</label>
-                    <div className="h-10 flex items-center px-3 rounded-md bg-muted text-lg font-mono font-bold text-foreground">
+                    <div className="h-10 flex items-center px-3 rounded-none bg-muted text-lg font-mono font-bold text-foreground">
                       ฿{convertedAmount.toLocaleString(undefined, { maximumFractionDigits: 2 })}
                     </div>
                   </div>

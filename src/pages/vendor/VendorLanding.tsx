@@ -98,9 +98,9 @@ export default function VendorLanding() {
       icon: Crown,
       level: 'Premium',
       levelRu: 'Премиум',
-      color: 'text-amber-500',
-      bg: 'bg-amber-500/5',
-      border: 'border-amber-500/30',
+      color: 'text-accent',
+      bg: 'bg-accent/5',
+      border: 'border-accent/40/30',
       desc: isRu ? 'Рейтинг 4.5+ и 50+ заказов' : 'Rating 4.5+ & 50+ orders',
       perks: isRu 
         ? ['Топ выдачи', 'Сниженная комиссия', 'Персональный менеджер']
@@ -172,7 +172,7 @@ export default function VendorLanding() {
             >
               <Card className="h-full">
                 <CardContent className="p-4 flex gap-3">
-                  <div className="shrink-0 p-2 rounded-lg bg-primary/10">
+                  <div className="shrink-0 p-2 rounded-none bg-primary/10">
                     <b.icon className="h-5 w-5 text-primary" />
                   </div>
                   <div>
@@ -193,7 +193,7 @@ export default function VendorLanding() {
         </h2>
         <div className="space-y-3">
           {howItWorks.map((item, i) => (
-            <div key={i} className="flex items-center gap-4 p-3 rounded-xl border bg-card">
+            <div key={i} className="flex items-center gap-4 p-3 rounded-none border bg-card">
               <div className="shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary">
                 {item.step}
               </div>
@@ -224,7 +224,7 @@ export default function VendorLanding() {
             <Card key={i} className={cn('border', lvl.border)}>
               <CardContent className="p-4">
                 <div className="flex items-center gap-3 mb-2">
-                  <div className={cn('p-2 rounded-lg', lvl.bg)}>
+                  <div className={cn('p-2 rounded-none', lvl.bg)}>
                     <lvl.icon className={cn('h-5 w-5', lvl.color)} />
                   </div>
                   <div>

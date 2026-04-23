@@ -71,13 +71,13 @@ export default function InvestmentArticleDetail() {
           {(article.avg_ticket_thb || article.typical_roi_pct) && (
             <div className="grid grid-cols-2 gap-2">
               {article.avg_ticket_thb && (
-                <div className="rounded-lg border p-3">
+                <div className="rounded-none border p-3">
                   <div className="text-xs text-muted-foreground flex items-center gap-1"><Banknote className="w-3 h-3" />{isRu ? 'Средний тикет' : 'Avg ticket'}</div>
                   <p className="font-semibold">{(article.avg_ticket_thb / 1_000_000).toFixed(0)}M ฿</p>
                 </div>
               )}
               {article.typical_roi_pct && (
-                <div className="rounded-lg border p-3">
+                <div className="rounded-none border p-3">
                   <div className="text-xs text-muted-foreground flex items-center gap-1"><TrendingUp className="w-3 h-3" />{isRu ? 'Типичный ROI' : 'Typical ROI'}</div>
                   <p className="font-semibold">{article.typical_roi_pct}%</p>
                 </div>
@@ -88,15 +88,15 @@ export default function InvestmentArticleDetail() {
           <div className="prose prose-sm max-w-none space-y-1">{renderBody(body)}</div>
 
           {article.risks_summary && (
-            <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 mt-4">
-              <div className="flex items-center gap-1.5 text-xs font-medium text-amber-600 mb-1">
+            <div className="rounded-none border border-accent/40/30 bg-accent/5 p-3 mt-4">
+              <div className="flex items-center gap-1.5 text-xs font-medium text-accent mb-1">
                 <AlertTriangle className="w-3.5 h-3.5" /> {isRu ? 'Риски' : 'Risks'}
               </div>
               <p className="text-sm">{article.risks_summary}</p>
             </div>
           )}
 
-          <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 mt-4">
+          <div className="rounded-none border border-primary/30 bg-primary/5 p-4 mt-4">
             <h3 className="font-semibold mb-1">{isRu ? 'Готовы инвестировать?' : 'Ready to invest?'}</h3>
             <p className="text-sm text-muted-foreground mb-3">
               {isRu ? 'Посмотрите анонимизированные сделки или подайте свой проект.' : 'Browse anonymized deals or submit your own project.'}

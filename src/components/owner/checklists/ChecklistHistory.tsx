@@ -18,7 +18,7 @@ export function ChecklistHistory({ propertyId }: Props) {
   const { data: completions = [], isLoading } = useChecklistCompletions(propertyId);
 
   if (isLoading) {
-    return <Skeleton className="h-24 w-full rounded-xl" />;
+    return <Skeleton className="h-24 w-full rounded-none" />;
   }
 
   if (completions.length === 0) {
@@ -41,7 +41,7 @@ export function ChecklistHistory({ propertyId }: Props) {
           const allDone = total > 0 && checked === total;
 
           return (
-            <div key={c.id} className="flex items-center gap-3 p-2 rounded-lg border text-sm">
+            <div key={c.id} className="flex items-center gap-3 p-2 rounded-none border text-sm">
               {allDone ? (
                 <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
               ) : (

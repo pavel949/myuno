@@ -34,10 +34,10 @@ export default function ResaleDetail() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background p-4 space-y-4">
-        <Skeleton className="h-64 rounded-xl" />
+        <Skeleton className="h-64 rounded-none" />
         <Skeleton className="h-8 w-3/4" />
         <Skeleton className="h-6 w-1/2" />
-        <Skeleton className="h-32 rounded-xl" />
+        <Skeleton className="h-32 rounded-none" />
       </div>
     );
   }
@@ -108,7 +108,7 @@ export default function ResaleDetail() {
           <BackButton fallbackPath="/property/resale" />
         </div>
         {images.length > 1 && (
-          <div className="absolute bottom-3 right-3 bg-background/80 backdrop-blur-sm px-2 py-1 rounded text-xs">
+          <div className="absolute bottom-3 right-3 bg-background/80 backdrop-blur-sm px-2 py-1 rounded-none text-xs">
             {currentImageIdx + 1}/{images.length}
           </div>
         )}
@@ -159,7 +159,7 @@ export default function ResaleDetail() {
 
         {/* Assignment Details */}
         {property.is_assignment && property.original_purchase_price && (
-          <div className="bg-accent/10 border border-accent/30 rounded-xl p-4 space-y-2">
+          <div className="bg-accent/10 border border-accent/30 rounded-none p-4 space-y-2">
             <h3 className="font-semibold text-sm flex items-center gap-1.5">
               <ArrowRightLeft className="w-4 h-4" />
               {isRu ? 'Условия переуступки' : 'Assignment Details'}
@@ -206,7 +206,7 @@ export default function ResaleDetail() {
 
         {/* Rental income */}
         {property.current_rental_income && (
-          <div className="bg-primary/5 border border-primary/20 rounded-xl p-4">
+          <div className="bg-primary/5 border border-primary/20 rounded-none p-4">
             <h3 className="font-semibold text-sm mb-1">
               {isRu ? 'Текущий доход от аренды' : 'Current Rental Income'}
             </h3>
@@ -262,7 +262,7 @@ function MetricCard({ label, value, icon, highlight }: {
 }) {
   return (
     <div className={cn(
-      "rounded-xl p-3 text-center border",
+      "rounded-none p-3 text-center border",
       highlight ? "bg-primary/5 border-primary/20" : "bg-muted/50 border-border/50"
     )}>
       {icon && <div className="flex justify-center mb-1">{icon}</div>}
@@ -274,7 +274,7 @@ function MetricCard({ label, value, icon, highlight }: {
 
 function SpecItem({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="flex items-center gap-2 bg-muted/50 rounded-lg p-2">
+    <div className="flex items-center gap-2 bg-muted/50 rounded-none p-2">
       <div className="text-muted-foreground">{icon}</div>
       <div>
         <p className="text-sm font-medium">{value}</p>

@@ -146,7 +146,7 @@ function HeroPreview({
   return (
     <div
       className={cn(
-        "rounded-lg bg-gradient-to-br from-primary/10 to-accent/10 border flex flex-col items-center justify-center text-center p-6",
+        "rounded-none bg-gradient-to-br from-primary/10 to-accent/10 border flex flex-col items-center justify-center text-center p-6",
         device === 'mobile' ? 'w-[240px] h-[380px]' : 'w-full h-[200px]'
       )}
     >
@@ -158,7 +158,7 @@ function HeroPreview({
       </p>
       {cta && (
         <div className="mt-4">
-          <span className="inline-block px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium">
+          <span className="inline-block px-4 py-2 bg-primary text-primary-foreground rounded-none text-sm font-medium">
             {cta}
           </span>
         </div>

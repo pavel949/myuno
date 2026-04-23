@@ -80,10 +80,10 @@ export default function EventSuccess() {
           <div className="w-full max-w-md space-y-6">
             {/* Status */}
             <div className="text-center space-y-3">
-              <div className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center ${isConfirmed ? 'bg-green-100 dark:bg-green-950/40' : 'bg-yellow-100 dark:bg-yellow-950/40'}`}>
+              <div className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center ${isConfirmed ? 'bg-success/10 dark:bg-success/40' : 'bg-accent/10 dark:bg-accent/40'}`}>
                 {isConfirmed
-                  ? <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
-                  : <Ticket className="w-8 h-8 text-yellow-600 dark:text-yellow-400" />
+                  ? <CheckCircle className="w-8 h-8 text-success dark:text-success" />
+                  : <Ticket className="w-8 h-8 text-accent dark:text-accent" />
                 }
               </div>
               <h1 className="text-2xl font-display font-bold">

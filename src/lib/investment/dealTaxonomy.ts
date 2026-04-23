@@ -142,13 +142,13 @@ export const INVESTOR_TYPES: { key: InvestorType; labelEn: string; labelRu: stri
 
 export const PIPELINE_STAGES: { key: DealPipelineStatus; labelEn: string; labelRu: string; color: string }[] = [
   { key: 'submitted',         labelEn: 'Submitted',         labelRu: 'Подана',           color: 'bg-slate-500/15 text-slate-300' },
-  { key: 'under_review',      labelEn: 'Under Review',      labelRu: 'На рассмотрении',  color: 'bg-blue-500/15 text-blue-400' },
-  { key: 'anonymized',        labelEn: 'Anonymized',        labelRu: 'Анонимизирована',  color: 'bg-indigo-500/15 text-indigo-400' },
-  { key: 'published',         labelEn: 'Published',         labelRu: 'Опубликована',     color: 'bg-emerald-500/15 text-emerald-400' },
-  { key: 'interest_received', labelEn: 'Interest Received', labelRu: 'Есть интерес',     color: 'bg-amber-500/15 text-amber-400' },
-  { key: 'matched',           labelEn: 'Matched',           labelRu: 'Сматчено',         color: 'bg-orange-500/15 text-orange-400' },
-  { key: 'term_sheet',        labelEn: 'Term Sheet',        labelRu: 'Term Sheet',       color: 'bg-purple-500/15 text-purple-400' },
-  { key: 'closed',            labelEn: 'Closed',            labelRu: 'Закрыта',          color: 'bg-emerald-600/20 text-emerald-300' },
+  { key: 'under_review',      labelEn: 'Under Review',      labelRu: 'На рассмотрении',  color: 'bg-primary/15 text-primary' },
+  { key: 'anonymized',        labelEn: 'Anonymized',        labelRu: 'Анонимизирована',  color: 'bg-primary/15 text-primary' },
+  { key: 'published',         labelEn: 'Published',         labelRu: 'Опубликована',     color: 'bg-success/15 text-success' },
+  { key: 'interest_received', labelEn: 'Interest Received', labelRu: 'Есть интерес',     color: 'bg-accent/15 text-accent' },
+  { key: 'matched',           labelEn: 'Matched',           labelRu: 'Сматчено',         color: 'bg-accent/15 text-accent' },
+  { key: 'term_sheet',        labelEn: 'Term Sheet',        labelRu: 'Term Sheet',       color: 'bg-primary/15 text-primary' },
+  { key: 'closed',            labelEn: 'Closed',            labelRu: 'Закрыта',          color: 'bg-success/20 text-success' },
   { key: 'dead',              labelEn: 'Dead',              labelRu: 'Отвалилась',       color: 'bg-red-500/15 text-red-400' },
 ];
 

@@ -135,7 +135,7 @@ export default function InvestmentPitch() {
                       key={opt.v}
                       type="button"
                       onClick={() => setListingType(opt.v)}
-                      className={`w-full text-left p-3 rounded-lg border transition-colors ${
+                      className={`w-full text-left p-3 rounded-none border transition-colors ${
                         listingType === opt.v
                           ? 'border-primary bg-primary/10'
                           : 'border-border hover:border-primary/50'

@@ -170,7 +170,7 @@ export default function AdminAIOps() {
 
   const getHealthBadge = (calls: number, successRate: number) => {
     if (calls === 0) return <Badge variant="outline" className="text-xs gap-1"><Clock className="h-3 w-3" />{isRu ? 'Неактивен' : 'Idle'}</Badge>;
-    if (successRate >= 95) return <Badge className="text-xs gap-1 bg-emerald-600"><CheckCircle2 className="h-3 w-3" />{isRu ? 'Здоров' : 'Healthy'}</Badge>;
+    if (successRate >= 95) return <Badge className="text-xs gap-1 bg-success"><CheckCircle2 className="h-3 w-3" />{isRu ? 'Здоров' : 'Healthy'}</Badge>;
     if (successRate >= 80) return <Badge variant="secondary" className="text-xs gap-1"><AlertTriangle className="h-3 w-3" />{isRu ? 'Предупреждение' : 'Warning'}</Badge>;
     return <Badge variant="destructive" className="text-xs gap-1"><XCircle className="h-3 w-3" />{isRu ? 'Критично' : 'Critical'}</Badge>;
   };

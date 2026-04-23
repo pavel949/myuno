@@ -10,8 +10,8 @@ import { MessageCircle, Send, Check, Clock, X, MinusCircle, ExternalLink, Calend
 import { CHANNEL_LABELS, type ResponseType } from '@/types/capital';
 
 const REACTION_BUTTONS: { type: ResponseType; label: string; icon: typeof Check; color: string }[] = [
-  { type: 'interested', label: 'Интересно', icon: Check, color: 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30' },
-  { type: 'not_now', label: 'Не сейчас', icon: Clock, color: 'bg-amber-500/20 text-amber-400 hover:bg-amber-500/30' },
+  { type: 'interested', label: 'Интересно', icon: Check, color: 'bg-success/20 text-success hover:bg-success/30' },
+  { type: 'not_now', label: 'Не сейчас', icon: Clock, color: 'bg-accent/20 text-accent hover:bg-accent/30' },
   { type: 'declined', label: 'Отказ', icon: X, color: 'bg-red-500/20 text-red-400 hover:bg-red-500/30' },
   { type: 'no_response', label: 'Нет ответа', icon: MinusCircle, color: 'bg-slate-500/20 text-slate-400 hover:bg-slate-500/30' },
 ];
@@ -69,11 +69,11 @@ export default function CapitalOutreach() {
       {/* Tab Toggle */}
       <div className="flex gap-2">
         <Button variant={tab === 'today' ? 'default' : 'outline'} size="sm" onClick={() => setTab('today')}
-          className={tab === 'today' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}>
+          className={tab === 'today' ? 'bg-success hover:bg-success' : ''}>
           На сегодня ({todayFeed.length})
         </Button>
         <Button variant={tab === 'all' ? 'default' : 'outline'} size="sm" onClick={() => setTab('all')}
-          className={tab === 'all' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}>
+          className={tab === 'all' ? 'bg-success hover:bg-success' : ''}>
           Все ({outreach.length})
         </Button>
       </div>
@@ -96,7 +96,7 @@ export default function CapitalOutreach() {
             const telegramId = contact?.telegram_id || '';
 
             return (
-              <div key={o.id as string} className="rounded-lg border border-border/50 p-4 space-y-3">
+              <div key={o.id as string} className="rounded-none border border-border/50 p-4 space-y-3">
                 {/* Header */}
                 <div className="flex items-start justify-between">
                   <div>
@@ -131,7 +131,7 @@ export default function CapitalOutreach() {
                       rel="noopener noreferrer"
                       onClick={() => markSent(o.id as string)}
                     >
-                      <Button variant="outline" size="sm" className="text-green-400 border-green-400/30">
+                      <Button variant="outline" size="sm" className="text-success border-success/40/30">
                         <ExternalLink className="w-3 h-3 mr-1" /> WhatsApp
                       </Button>
                     </a>
@@ -139,7 +139,7 @@ export default function CapitalOutreach() {
                   {telegramId && (
                     <a href={`https://t.me/${telegramId.replace('@', '')}`} target="_blank" rel="noopener noreferrer"
                       onClick={() => markSent(o.id as string)}>
-                      <Button variant="outline" size="sm" className="text-blue-400 border-blue-400/30">
+                      <Button variant="outline" size="sm" className="text-primary border-primary/40/30">
                         <Send className="w-3 h-3 mr-1" /> Telegram
                       </Button>
                     </a>
@@ -177,7 +177,7 @@ export default function CapitalOutreach() {
                       <Label className="text-xs">Дата follow-up</Label>
                       <Input type="date" value={followUpDate} onChange={(e) => setFollowUpDate(e.target.value)} />
                     </div>
-                    <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700" onClick={() => handleFollowUp(o.id as string)}>
+                    <Button size="sm" className="bg-success hover:bg-success" onClick={() => handleFollowUp(o.id as string)}>
                       Сохранить
                     </Button>
                   </div>

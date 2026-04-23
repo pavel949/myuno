@@ -123,7 +123,7 @@ export default function ProfileSettings() {
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
             <SectionCard className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 rounded-none bg-primary/10 flex items-center justify-center flex-shrink-0">
                   <ShieldCheck className="w-5 h-5 text-primary" />
                 </div>
                 <div>
@@ -233,7 +233,7 @@ export default function ProfileSettings() {
               {isRu ? 'Верифицированные данные' : 'Verified Identity'}
             </div>
             <SectionCard className="space-y-4 border-primary/20">
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-primary/5 -mt-2 mb-2">
+              <div className="flex items-start gap-3 p-3 rounded-none bg-primary/5 -mt-2 mb-2">
                 <Lock className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   {isRu 
@@ -343,11 +343,11 @@ export default function ProfileSettings() {
 
           {/* Emergency Contact */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-            <div className="flex items-center gap-2 mb-3 text-sm font-medium text-amber-600">
+            <div className="flex items-center gap-2 mb-3 text-sm font-medium text-accent">
               <AlertTriangle className="w-4 h-4" />
               {isRu ? 'Экстренный контакт' : 'Emergency Contact'}
             </div>
-            <SectionCard className="space-y-4 border-amber-500/20">
+            <SectionCard className="space-y-4 border-accent/40/20">
               <p className="text-xs text-muted-foreground -mt-2 mb-2">
                 {isRu 
                   ? 'Этот контакт будет использован в экстренных ситуациях во время вашего путешествия.'

@@ -138,8 +138,8 @@ const { data: activities = [], isLoading } = useCrmActivities(contactId, dealId)
             const cfg = ACTIVITY_TYPE_CONFIG[a.activity_type] || ACTIVITY_TYPE_CONFIG.note;
             const IconComp = iconMap[cfg.icon] || FileText;
             return (
-              <div key={a.id} className="flex items-start gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                <div className={cn('mt-0.5 p-1 rounded', cfg.color.replace('text-', 'bg-') + '/10')}>
+              <div key={a.id} className="flex items-start gap-2 p-2 rounded-none hover:bg-muted/50 transition-colors">
+                <div className={cn('mt-0.5 p-1 rounded-none', cfg.color.replace('text-', 'bg-') + '/10')}>
                   <IconComp className={cn('h-3.5 w-3.5', cfg.color)} />
                 </div>
                 <div className="flex-1 min-w-0">

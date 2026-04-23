@@ -318,7 +318,7 @@ export function BulkImportSheet({
             </TabsList>
 
             <TabsContent value="file" className="mt-4">
-              <div className="border-2 border-dashed rounded-lg p-6 text-center">
+              <div className="border-2 border-dashed rounded-none p-6 text-center">
                 <FileText className="h-10 w-10 mx-auto mb-3 text-muted-foreground" />
                 <p className="text-sm text-muted-foreground mb-3">
                   {isRu ? 'CSV или Excel файл' : 'CSV or Excel file'}
@@ -358,7 +358,7 @@ export function BulkImportSheet({
           </Tabs>
 
           {/* Template Download */}
-          <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+          <div className="flex items-center justify-between p-3 bg-muted rounded-none">
             <span className="text-sm text-muted-foreground">
               {isRu ? 'Скачать шаблон' : 'Download template'}
             </span>
@@ -372,7 +372,7 @@ export function BulkImportSheet({
           {rows.length > 0 && (
             <div className="space-y-3">
               {/* Stats */}
-              <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+              <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-none">
                 <Badge variant="secondary" className="gap-1">
                   <FileText className="h-3 w-3" />
                   {rows.length}
@@ -404,7 +404,7 @@ export function BulkImportSheet({
               </div>
 
               {/* Column Mapping */}
-              <div className="p-3 border rounded-lg space-y-2">
+              <div className="p-3 border rounded-none space-y-2">
                 <h4 className="text-sm font-medium">
                   {isRu ? 'Сопоставление колонок' : 'Column Mapping'}
                 </h4>
@@ -439,7 +439,7 @@ export function BulkImportSheet({
               </div>
 
               {/* Preview Table */}
-              <ScrollArea className="h-[200px] border rounded-lg">
+              <ScrollArea className="h-[200px] border rounded-none">
                 <Table>
                   <TableHeader>
                     <TableRow>

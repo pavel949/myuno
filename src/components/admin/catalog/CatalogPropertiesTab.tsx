@@ -38,7 +38,7 @@ export function CatalogPropertiesTab({ searchQuery, statusFilter }: CatalogPrope
             onClick={() => navigate(cat.path)}
           >
             <CardContent className="p-6 flex items-center gap-4">
-              <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shrink-0">
+              <div className="h-12 w-12 rounded-none bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shrink-0">
                 <cat.icon className="h-6 w-6 text-primary" />
               </div>
               <div className="flex-1 min-w-0">

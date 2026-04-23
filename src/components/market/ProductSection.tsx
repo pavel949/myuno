@@ -102,13 +102,13 @@ export const ProductSection = forwardRef<HTMLElement, ProductSectionProps>(funct
   if (isLoading) {
     return (
       <section className="space-y-4">
-        <div className="h-7 w-40 bg-muted rounded-lg animate-pulse" />
+        <div className="h-7 w-40 bg-muted rounded-none animate-pulse" />
         <div className="flex gap-3 overflow-hidden">
           {[1, 2, 3].map(i => (
             <div key={i} className="w-[170px] shrink-0">
-              <div className="aspect-square bg-muted rounded-2xl mb-3 animate-pulse" />
-              <div className="h-4 bg-muted rounded w-3/4 mb-2 animate-pulse" />
-              <div className="h-5 bg-muted rounded w-1/2 animate-pulse" />
+              <div className="aspect-square bg-muted rounded-none mb-3 animate-pulse" />
+              <div className="h-4 bg-muted rounded-none w-3/4 mb-2 animate-pulse" />
+              <div className="h-5 bg-muted rounded-none w-1/2 animate-pulse" />
             </div>
           ))}
         </div>

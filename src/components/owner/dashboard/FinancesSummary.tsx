@@ -28,8 +28,8 @@ export function FinancesSummary() {
           <Skeleton className="h-4 w-16" />
         </div>
         <div className="grid grid-cols-1 xs:grid-cols-2 gap-2">
-          <Skeleton className="h-20 rounded-xl" />
-          <Skeleton className="h-20 rounded-xl" />
+          <Skeleton className="h-20 rounded-none" />
+          <Skeleton className="h-20 rounded-none" />
         </div>
       </div>
     );
