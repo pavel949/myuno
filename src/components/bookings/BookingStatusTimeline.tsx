@@ -1,4 +1,5 @@
 import React from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import {
