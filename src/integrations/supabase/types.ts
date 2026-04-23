@@ -14620,6 +14620,42 @@ export type Database = {
           },
         ]
       }
+      persona_detection_log: {
+        Row: {
+          anon_session_id: string | null
+          applied: boolean
+          confidence: number | null
+          created_at: string
+          id: string
+          proposal: Json
+          signals: Json
+          source: string
+          user_id: string | null
+        }
+        Insert: {
+          anon_session_id?: string | null
+          applied?: boolean
+          confidence?: number | null
+          created_at?: string
+          id?: string
+          proposal: Json
+          signals?: Json
+          source?: string
+          user_id?: string | null
+        }
+        Update: {
+          anon_session_id?: string | null
+          applied?: boolean
+          confidence?: number | null
+          created_at?: string
+          id?: string
+          proposal?: Json
+          signals?: Json
+          source?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       personal_reminders: {
         Row: {
           completed_at: string | null
