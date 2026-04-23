@@ -3,6 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import type { UserPersona } from '@/hooks/useUserPersonas';
 import { ROLE_META } from '@/lib/roleBlend';
 import { useActivityFeed } from '@/hooks/useActivityFeed';
+import { SectionHead } from './SectionHead';
 
 interface ActivityFeedProps {
   personas: UserPersona[];
@@ -15,14 +16,11 @@ export function ActivityFeed({ personas }: ActivityFeedProps) {
 
   return (
     <div className="px-4 pb-5">
-      <div className="flex items-baseline justify-between mb-2.5">
-        <div className="text-[11px] tracking-[0.12em] uppercase text-muted-foreground/60 font-semibold">
-          {isRu ? 'История событий' : 'Activity log'}
-        </div>
-        <div className="text-[11px] text-muted-foreground/50">
-          {isRu ? 'За неделю · все роли' : 'This week · all roles'}
-        </div>
-      </div>
+      <SectionHead
+        title={isRu ? 'История событий' : 'Activity log'}
+        meta={isRu ? 'За неделю · все роли' : 'This week · all roles'}
+      />
+
 
       {isLoading ? (
         <div className="border-t border-border/[0.05]">
