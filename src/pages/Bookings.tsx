@@ -479,6 +479,7 @@ export default function Bookings() {
                 const isExpanded = !!expandedTimelines[booking.id];
                 const events = statusHistory[booking.id] ?? [];
                 const isHistoryLoading = loadingHistoryIds.has(booking.id);
+                const hasHistoryError = historyErrorIds.has(booking.id);
                 return (
                   <div
                     key={booking.id}
