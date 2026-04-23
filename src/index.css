@@ -570,3 +570,8 @@ html.light .hero-dots {
   @page { size: A4; margin: 15mm; }
   body { background: white !important; }
 }
+
+/* Phase 3 of Canon Migration — globally remap legacy palette + remove glassmorphism.
+   Loaded last so its rules win the cascade. See file header for rationale. */
+@import './styles/canon-overrides.css';
+
