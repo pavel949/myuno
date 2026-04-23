@@ -98,17 +98,22 @@ export default function Bookings() {
   const navigate = useNavigate();
   const [bookings, setBookings] = useState<BookingItem[]>([]);
   const [statusHistory, setStatusHistory] = useState<Record<string, BookingStatusEvent[]>>({});
+  const [historyLoading, setHistoryLoading] = useState(false);
   const [expandedTimelines, setExpandedTimelines] = useState<Record<string, boolean>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
 
   const loadBookings = useCallback(async () => {
     if (!user) return;
-    
+
     setIsLoading(true);
     setLoadError(false);
+    // Reset history so any previously cached entries don't bleed into the new fetch.
+    setStatusHistory({});
+    setHistoryLoading(true);
+
     try {
-      // Load ALL bookings from unified table only
+      // Phase 1: Load bookings — render cards as soon as this resolves.
       const { data: allBookingsData, error } = await supabase
         .from('bookings')
         .select('*, booking_items(*)')
@@ -134,39 +139,42 @@ export default function Bookings() {
       });
 
       setBookings(formattedBookings);
+      setIsLoading(false);
 
-      // Batch-fetch status history for all bookings (RLS limits to user's own).
+      // Phase 2: Batch-fetch status history (RLS limits to user's own).
       const bookingIds = formattedBookings.map((b) => b.id);
-      if (bookingIds.length > 0) {
-        const { data: historyRows, error: historyError } = await supabase
-          .from('booking_status_history')
-          .select('id, booking_id, from_status, to_status, notes, created_at')
-          .in('booking_id', bookingIds)
-          .order('created_at', { ascending: true });
+      if (bookingIds.length === 0) {
+        setHistoryLoading(false);
+        return;
+      }
 
-        if (!historyError && historyRows) {
-          const grouped: Record<string, BookingStatusEvent[]> = {};
-          for (const row of historyRows) {
-            if (!grouped[row.booking_id]) grouped[row.booking_id] = [];
-            grouped[row.booking_id].push({
-              id: row.id,
-              from_status: row.from_status,
-              to_status: row.to_status,
-              notes: row.notes,
-              created_at: row.created_at,
-            });
-          }
-          setStatusHistory(grouped);
+      const { data: historyRows, error: historyError } = await supabase
+        .from('booking_status_history')
+        .select('id, booking_id, from_status, to_status, notes, created_at')
+        .in('booking_id', bookingIds)
+        .order('created_at', { ascending: true });
+
+      if (!historyError && historyRows) {
+        const grouped: Record<string, BookingStatusEvent[]> = {};
+        for (const row of historyRows) {
+          if (!grouped[row.booking_id]) grouped[row.booking_id] = [];
+          grouped[row.booking_id].push({
+            id: row.id,
+            from_status: row.from_status,
+            to_status: row.to_status,
+            notes: row.notes,
+            created_at: row.created_at,
+          });
         }
-      } else {
-        setStatusHistory({});
+        setStatusHistory(grouped);
       }
     } catch (error) {
       console.error('Error loading bookings:', error);
       setLoadError(true);
       toast.error(language === 'ru' ? 'Не удалось загрузить бронирования' : 'Failed to load bookings');
-    } finally {
       setIsLoading(false);
+    } finally {
+      setHistoryLoading(false);
     }
   }, [user, language]);
 
