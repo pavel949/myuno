@@ -140,7 +140,7 @@ function auditLandingFile(file, kind /* persona | cluster */) {
 // Forbidden synonyms scan (lightweight — only files in commercial dirs)
 // ────────────────────────────────────────────────────────────────────
 
-const COMMERCIAL_RE = /\/(landings|content\/landings|content\/semantic|guides|for|services|clearview|landing|knowledge|supabase\/functions)\//;
+const COMMERCIAL_RE = /\/(landings|content\/landings|content\/semantic|guides|for|services|clearview|landing|knowledge|i18n|supabase\/functions)\//;
 
 // The semantic dictionary itself legitimately contains every forbidden term as
 // data (it defines them). Skip those files for the synonym scan to avoid
@@ -239,7 +239,11 @@ auditLandingFile(resolve(ROOT, 'src/content/landings/clusterLandings.ts'), 'clus
 const semanticFiles = listFiles('src/content/landings/*.ts');
 const pillarTsFiles = listFiles('src/content/semantic/*.ts');
 const edgeFunctionFiles = listFiles('supabase/functions/*/index.ts');
-for (const f of [...semanticFiles, ...pillarTsFiles, ...edgeFunctionFiles]) scanFileForSynonyms(f);
+// M9.7b — i18n dictionaries (uiStrings + per-language tables) are first-class
+// canonical surfaces. Every user-facing string lives here, so we scan them
+// alongside landings and edge functions.
+const i18nFiles = listFiles('src/i18n/*.ts');
+for (const f of [...semanticFiles, ...pillarTsFiles, ...edgeFunctionFiles, ...i18nFiles]) scanFileForSynonyms(f);
 
 checkPillarSitemapCoverage();
 
