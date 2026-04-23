@@ -213,6 +213,8 @@ export default function Bookings() {
   useEffect(() => {
     if (!user) return;
 
+    setRealtimeStatus('connecting');
+
     const channel = supabase
       .channel(`bookings-realtime-${user.id}`)
       .on(
@@ -295,10 +297,24 @@ export default function Bookings() {
           );
         },
       )
-      .subscribe();
+      .subscribe((status) => {
+        // Map Supabase channel statuses to a simple 3-state UI indicator.
+        if (status === 'SUBSCRIBED') {
+          setRealtimeStatus('live');
+        } else if (
+          status === 'CHANNEL_ERROR' ||
+          status === 'TIMED_OUT' ||
+          status === 'CLOSED'
+        ) {
+          setRealtimeStatus('offline');
+        } else {
+          setRealtimeStatus('connecting');
+        }
+      });
 
     return () => {
       supabase.removeChannel(channel);
+      setRealtimeStatus('connecting');
     };
   }, [user]);
 
