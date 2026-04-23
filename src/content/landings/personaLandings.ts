@@ -347,8 +347,8 @@ const P9_HNW: PersonaLanding = {
   },
   seo: {
     metaTitle: {
-      ru: 'Недвижимость Пхукета для HNW: ClearView™, юрист, управление — myUNO',
-      en: 'Phuket real estate for HNW: ClearView™, lawyer, management — myUNO',
+      ru: 'Недвижимость Пхукета для HNW: ClearView™ и юрист — myUNO',
+      en: 'Phuket real estate for HNW: ClearView™ + lawyer — myUNO',
     },
     metaDescription: {
       ru: 'Закрытый шорт-лист, ClearView™ рейтинг застройщика, юридическая структура и управление активом. Конфиденциально, от 15M THB.',
