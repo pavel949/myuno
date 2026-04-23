@@ -48,7 +48,7 @@ export function ActivityFeed({ personas }: ActivityFeedProps) {
         <div className="border-t border-border/[0.05]">
           {feedItems.map((item) => {
             const roleMeta = item.role ? ROLE_META[item.role] : ROLE_META[personas[0]];
-            const roleColor = roleMeta?.color || '#8FA3B8';
+            const roleColor = roleMeta?.color || 'hsl(var(--muted-foreground))';
             const roleGlyph = roleMeta?.glyph || '·';
 
             return (

@@ -14,7 +14,7 @@ export function ConciergeCard({ personas }: ConciergeCardProps) {
   const isRu = language === 'ru';
   const [dismissed, setDismissed] = useState(false);
   const primaryMeta = ROLE_META[personas[0]];
-  const accentColor = primaryMeta?.color || '#00D68F';
+  const accentColor = primaryMeta?.color || 'hsl(var(--primary))';
 
   if (dismissed) return null;
 

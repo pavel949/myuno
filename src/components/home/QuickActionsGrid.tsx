@@ -136,7 +136,7 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
   const renderDesktopTile = (action: CatalogQuickAction) => {
     const Icon = action.icon;
     const label = quickActionLabel(action, language);
-    const color = action.accentColor || '#00D68F';
+    const color = action.accentColor || 'hsl(var(--primary))';
     const isLocked = action.requiresFullAccess && !hasFullAccess;
     return (
       <motion.button
@@ -174,7 +174,7 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
   const renderMobileCard = (action: CatalogQuickAction, i: number) => {
     const Icon = action.icon;
     const label = quickActionLabel(action, language);
-    const color = action.accentColor || '#00D68F';
+    const color = action.accentColor || 'hsl(var(--primary))';
     const isLocked = action.requiresFullAccess && !hasFullAccess;
     const animClass = `anim-qa-${i + 1}`;
     return (
@@ -212,7 +212,7 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
 
   const renderPill = (action: CatalogQuickAction) => {
     const Icon = action.icon;
-    const color = action.accentColor || '#00D68F';
+    const color = action.accentColor || 'hsl(var(--primary))';
     return (
       <button
         key={action.id}
