@@ -536,10 +536,15 @@ export default function Bookings() {
                         <span className="uppercase tracking-[0.08em] flex items-center gap-1.5">
                           {language === 'ru' ? 'История статусов' : 'Status timeline'}
                           {isHistoryLoading ? (
+                            // Skeleton placeholder mimics the "· N" count footprint
+                            // so the header doesn't reflow when the count appears.
                             <span
-                              className="inline-block h-3 w-3 rounded-full border border-muted-foreground/30 border-t-transparent animate-spin"
-                              aria-hidden="true"
-                            />
+                              className="inline-flex items-center gap-1 normal-case tracking-normal"
+                              aria-label={language === 'ru' ? 'Загрузка количества' : 'Loading count'}
+                            >
+                              <span aria-hidden="true" className="text-muted-foreground/40">·</span>
+                              <Skeleton className="h-3 w-4 rounded-sm" aria-hidden="true" />
+                            </span>
                           ) : hasHistoryError ? (
                             <AlertCircle
                               className="w-3 h-3 text-destructive"
