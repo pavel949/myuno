@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  M9 · §4.1 + §6 — pillar / cluster canonical URLs.
+  Placeholder URLs: бодé пишутся под M9d (pillar content sprint).
+  Источник: src/content/semantic/pillarPages.ts + src/content/semantic/searchClusters.ts
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+  <!-- Pillar pages (10 шт., §4.1) -->
+  <url>
+    <loc>https://myuno.app/guides/buying-property-thailand</loc>
+    <lastmod>2026-04-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/guides/buying-property-thailand?lang=ru"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/guides/buying-property-thailand?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/guides/buying-property-thailand"/>
+  </url>
+  <url>
+    <loc>https://myuno.app/guides/foreign-ownership-thailand</loc>
+    <lastmod>2026-04-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/guides/foreign-ownership-thailand?lang=ru"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/guides/foreign-ownership-thailand?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/guides/foreign-ownership-thailand"/>
+  </url>
+  <url>
+    <loc>https://myuno.app/guides/visas-thailand</loc>
+    <lastmod>2026-04-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/guides/visas-thailand?lang=ru"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/guides/visas-thailand?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/guides/visas-thailand"/>
+  </url>
+  <url>
+    <loc>https://myuno.app/guides/taxes-thailand-foreigner</loc>
+    <lastmod>2026-04-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/guides/taxes-thailand-foreigner?lang=ru"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/guides/taxes-thailand-foreigner?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/guides/taxes-thailand-foreigner"/>
+  </url>
+  <url>
+    <loc>https://myuno.app/guides/property-management-phuket</loc>
+    <lastmod>2026-04-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/guides/property-management-phuket?lang=ru"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/guides/property-management-phuket?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/guides/property-management-phuket"/>
+  </url>
+  <url>
+    <loc>https://myuno.app/guides/off-plan-due-diligence</loc>
+    <lastmod>2026-04-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/guides/off-plan-due-diligence?lang=ru"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/guides/off-plan-due-diligence?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/guides/off-plan-due-diligence"/>
+  </url>
+  <url>
+    <loc>https://myuno.app/guides/tm30-thailand</loc>
+    <lastmod>2026-04-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/guides/tm30-thailand?lang=ru"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/guides/tm30-thailand?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/guides/tm30-thailand"/>
+  </url>
+  <url>
+    <loc>https://myuno.app/guides/rental-phuket-str-ltr</loc>
+    <lastmod>2026-04-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/guides/rental-phuket-str-ltr?lang=ru"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/guides/rental-phuket-str-ltr?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/guides/rental-phuket-str-ltr"/>
+  </url>
+  <url>
+    <loc>https://myuno.app/guides/bank-account-thailand</loc>
+    <lastmod>2026-04-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/guides/bank-account-thailand?lang=ru"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/guides/bank-account-thailand?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/guides/bank-account-thailand"/>
+  </url>
+  <url>
+    <loc>https://myuno.app/guides/areas/where-to-live-phuket</loc>
+    <lastmod>2026-04-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/guides/areas/where-to-live-phuket?lang=ru"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/guides/areas/where-to-live-phuket?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/guides/areas/where-to-live-phuket"/>
+  </url>
+</urlset>

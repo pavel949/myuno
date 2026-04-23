@@ -1,10 +1,19 @@
 {
   "framework": "vite",
+  "cleanUrls": true,
+  "trailingSlash": false,
   "headers": [
     {
       "source": "/assets/(.*)",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
+    {
+      "source": "/sitemap(.*).xml",
+      "headers": [
+        { "key": "Content-Type", "value": "application/xml; charset=utf-8" },
+        { "key": "Cache-Control", "value": "public, max-age=3600" }
       ]
     }
   ],
@@ -24,6 +33,12 @@
       "has": [{ "type": "host", "value": "crm.bymyuno.com" }],
       "destination": "/capital",
       "permanent": false
-    }
+    },
+    { "source": "/properties", "destination": "/property", "permanent": true },
+    { "source": "/properties/:path*", "destination": "/property/:path*", "permanent": true },
+    { "source": "/offplan", "destination": "/newbuilds", "permanent": true },
+    { "source": "/offplan/:path*", "destination": "/newbuilds/:path*", "permanent": true },
+    { "source": "/property/offplan", "destination": "/newbuilds", "permanent": true },
+    { "source": "/property/offplan/:path*", "destination": "/newbuilds/:path*", "permanent": true }
   ]
 }

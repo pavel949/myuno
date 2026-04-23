@@ -1,37 +1,34 @@
 /**
  * @file LandingSeoHead.tsx
- * @description M6 · Track B.6 — SEO/OG/schema.org/hreflang head для лендингов.
+ * @description M6 · Track B.6 + M9 · §9.1 — SEO/OG/schema.org/hreflang head для лендингов.
  *
  * Источник правды:
  *  - `docs/canonical/audits/M6-persona-landings.md` §3 Трек B.6
+ *  - `docs/canonical/10-semantic-core.md` §9 (BreadcrumbList добавлен в M9)
  *  - `docs/canonical/07-information-architecture.md` (canonical URL, hreflang)
  *  - `docs/canonical/03-tone-of-voice.md` §14 (текст meta — без urgency)
  *
  * Контракт:
  *  - Принимает `landing` (PersonaLanding | ClusterLanding) + `type`.
  *  - Если `landing.seo` отсутствует — компонент рендерит ничего (null).
- *    Это безопасно: live-страница не рендерится без SEO (`isLive*Landing()`),
- *    а draft-страница вообще не доходит до маршрута. Защита на случай
- *    регрессии guard'а.
- *  - Использует `react-helmet-async` (уже включён `HelmetProvider` в App.tsx).
+ *  - Использует `react-helmet-async` (HelmetProvider в App.tsx).
  *
- * Структурированные данные:
- *  - persona → schema.org `Service` с `serviceType` = h1.
- *  - cluster → schema.org `Service` (та же модель), плюс `knowsAbout` =
- *    список jobs[] (lifecycle-фразы из §5).
- *  - Provider — фиксированная организация myUNO (см. PROJECT.md §3).
- *
- * hreflang:
- *  - RU↔EN. Lovable hosting не делает контент-неготиацию, поэтому
- *    canonical = текущий путь (без trailing slash). Альтернативы — те же
- *    URL с query `?lang=ru` / `?lang=en` (LanguageContext поддерживает).
- *    Конкретные альтернативы могут быть переопределены в `seo.hreflangAlternates`.
+ * Schema.org (M9 update — соответствует §9.1):
+ *  - persona / cluster → `Service` (через buildServiceSchema из schemaBuilders).
+ *  - FAQ → `FAQPage`.
+ *  - Хлебные крошки → `BreadcrumbList` (M9 §9.1 строка «Pillar/Cluster»).
+ *  - Provider — `Organization` myUNO (см. `SEO_CONSTANTS.ORG_PROVIDER`).
  */
 import { Helmet } from 'react-helmet-async';
 import type {
   ClusterLanding,
   PersonaLanding,
 } from '@/lib/landings/types';
+import {
+  buildBreadcrumbSchema,
+  buildFaqSchema as buildFaqSchemaShared,
+  SEO_CONSTANTS,
+} from '@/lib/seo/schemaBuilders';
 
 type LandingType = 'persona' | 'cluster';
 
@@ -44,14 +41,8 @@ interface LandingSeoHeadProps {
   origin?: string;
 }
 
-const DEFAULT_ORIGIN = 'https://myuno.app';
-
-const ORG_PROVIDER = {
-  '@type': 'Organization',
-  name: 'myUNO',
-  url: 'https://myuno.app',
-  logo: 'https://myuno.app/icons/icon-512x512.png',
-} as const;
+const DEFAULT_ORIGIN = SEO_CONSTANTS.ORIGIN;
+const ORG_PROVIDER = SEO_CONSTANTS.ORG_PROVIDER;
 
 function resolveOrigin(explicit?: string): string {
   if (explicit) return explicit.replace(/\/$/, '');
@@ -107,23 +98,37 @@ function buildServiceSchema(
   };
 }
 
-function buildFaqSchema(
+function buildLandingFaqSchema(
   landing: PersonaLanding | ClusterLanding,
   language: 'ru' | 'en',
 ): Record<string, unknown> | null {
   if (!landing.faq || landing.faq.length === 0) return null;
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: landing.faq.map((entry) => ({
-      '@type': 'Question',
-      name: entry.q[language],
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: entry.a[language],
-      },
+  return buildFaqSchemaShared(
+    landing.faq.map((entry) => ({
+      question: entry.q[language],
+      answer: entry.a[language],
     })),
-  };
+  );
+}
+
+function buildLandingBreadcrumb(
+  landing: PersonaLanding | ClusterLanding,
+  type: LandingType,
+  language: 'ru' | 'en',
+  baseOrigin: string,
+): Record<string, unknown> {
+  const homeLabel = language === 'ru' ? 'Главная' : 'Home';
+  const sectionLabel =
+    type === 'persona'
+      ? language === 'ru' ? 'Для вас' : 'For you'
+      : language === 'ru' ? 'Жизненные кластеры' : 'Life clusters';
+  const sectionHref = type === 'persona' ? '/for' : '/cluster';
+  const items = [
+    { name: homeLabel, url: `${baseOrigin}/` },
+    { name: sectionLabel, url: `${baseOrigin}${sectionHref}` },
+    { name: landing.h1[language], url: `${baseOrigin}${landing.seo!.canonicalPath}` },
+  ];
+  return buildBreadcrumbSchema(items);
 }
 
 const LandingSeoHead = ({ landing, type, language, origin }: LandingSeoHeadProps) => {
@@ -146,7 +151,8 @@ const LandingSeoHead = ({ landing, type, language, origin }: LandingSeoHeadProps
         ] as const);
 
   const serviceSchema = buildServiceSchema(landing, type, language, canonicalUrl);
-  const faqSchema = buildFaqSchema(landing, language);
+  const faqSchema = buildLandingFaqSchema(landing, language);
+  const breadcrumbSchema = buildLandingBreadcrumb(landing, type, language, baseOrigin);
 
   return (
     <Helmet>
@@ -183,6 +189,10 @@ const LandingSeoHead = ({ landing, type, language, origin }: LandingSeoHeadProps
       {/* schema.org Service */}
       <script type="application/ld+json">
         {JSON.stringify(serviceSchema)}
+      </script>
+      {/* schema.org BreadcrumbList (M9 — §9.1) */}
+      <script type="application/ld+json">
+        {JSON.stringify(breadcrumbSchema)}
       </script>
       {faqSchema ? (
         <script type="application/ld+json">

@@ -35,5 +35,11 @@
     <loc>https://myuno.app/sitemap-landings.xml</loc>
     <lastmod>2026-04-23</lastmod>
   </sitemap>
+
+  <!-- M9 · §4.1 — pillar / cluster guides (placeholder URLs) -->
+  <sitemap>
+    <loc>https://myuno.app/sitemap-pillars.xml</loc>
+    <lastmod>2026-04-23</lastmod>
+  </sitemap>
 </sitemapindex>
 
