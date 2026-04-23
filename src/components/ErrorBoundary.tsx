@@ -124,6 +124,24 @@ export function useGlobalErrorHandler() {
       errorLog.silent(event.reason, 'unhandled_rejection');
       
       const message = event.reason?.message || String(event.reason);
+
+      // Suppress non-user-facing browser/PWA noise (service worker lifecycle,
+      // push subscription, abort errors). These are not actionable and confuse users
+      // — e.g. surfacing as "An error occurred" right after a successful Google login.
+      if (
+        message.includes('ServiceWorker') ||
+        message.includes('service worker') ||
+        message.includes('push service') ||
+        message.includes('PushSubscription') ||
+        message.includes('AbortError') ||
+        message.includes('The operation was aborted') ||
+        message.includes('The object is in an invalid state') ||
+        event.reason?.name === 'AbortError'
+      ) {
+        event.preventDefault();
+        return;
+      }
+
       if (message.includes('dynamically imported') || 
           message.includes('Failed to fetch') ||
           message.includes('Loading chunk')) {
