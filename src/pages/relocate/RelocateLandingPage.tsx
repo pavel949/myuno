@@ -145,7 +145,7 @@ export default function RelocateLandingPage() {
     >
       {/* GOV.UK-style start page */}
       <StartPageLayout
-        cluster={t ? 'РЕЛОКАЦИЯ · 9 ШАГОВ' : 'RELOCATION · 9 STEPS'}
+        cluster={t ? 'Релокация · 9 шагов' : 'Relocation · 9 steps'}
         title={t ? 'Переезд на Пхукет за 9 шагов' : 'Relocate to Phuket in 9 steps'}
         summary={t
           ? 'Понятный план для тех, кто планирует переехать на 6+ месяцев. От выбора визы до открытия счёта в банке.'

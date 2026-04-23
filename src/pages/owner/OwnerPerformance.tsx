@@ -295,8 +295,8 @@ export default function OwnerPerformance() {
                 <p className="text-sm text-muted-foreground">
                   {isRu ? '5-звездочные рейтинги' : '5-star ratings'}
                 </p>
-                <p className="text-xs text-muted-foreground uppercase">
-                  {isRu ? 'ОБЩАЯ ОЦЕНКА' : 'OVERALL RATING'}{' '}
+                <p className="text-xs text-muted-foreground">
+                  {isRu ? 'Общая оценка' : 'Overall rating'}{' '}
                   {quality.averageRating > 0 ? quality.averageRating.toFixed(1) : '-'}
                 </p>
               </div>

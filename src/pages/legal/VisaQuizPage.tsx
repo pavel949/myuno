@@ -253,7 +253,7 @@ export default function VisaQuizPage() {
 
       {!started ? (
         <StartPageLayout
-          cluster={isRu ? 'ВИЗЫ И ДОКУМЕНТЫ' : 'VISAS & DOCUMENTS'}
+          cluster={isRu ? 'Визы и документы' : 'Visas & documents'}
           title={isRu ? 'Подберите подходящую визу за 4 шага' : 'Find the right visa in 4 steps'}
           summary={isRu
             ? 'Короткий квиз, который покажет, какая тайская виза подходит вашей цели поездки. В конце — стоимость, сроки и контакт юриста.'
