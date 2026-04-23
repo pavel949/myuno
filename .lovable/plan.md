@@ -1,146 +1,77 @@
 
 
-# Аудит дублей в кодовой базе myUNO
+# Аудит платформы myUNO на соответствие каноническим документам
 
-Прошёл по 397 хукам, 22 layout-обёрткам, 18 checkout edge-функциям, 7 notify-функциям и компонентам `property/`. Ниже — **только подтверждённые дубли с цифрами**, ранжированные по соотношению «вред/усилие на удаление».
+## Цель
 
----
+Проверить кодовую базу против всех 10 канонических документов (`docs/canonical/01–10`) + архитектурных правил (`architecture/ARCHITECTURE_V2.md §13`) и выдать отчёт со списком расхождений по приоритету.
 
-## 🔴 P0 — Чистая копипаста, удалить целиком
+## Объём проверок (по документам)
 
-### 1. Per-vertical Vendor-хуки (15 файлов, ~120 строк суммарно)
+| # | Документ | Что проверяю в коде | Артефакты проверки |
+|---|----------|---------------------|--------------------|
+| 01 | segmentation-framework | `profiles.roles_stack`, `primary_role`, lifecycle/role/cluster теги в `src/lib/personas/`, CRM-схема | SQL select по `profiles`, поиск `lifecycle_phase`, `persona_*` |
+| 02 | service-catalogue-v2 | 16 категорий × 230 услуг — сверка с `src/lib/taxonomies/`, `lookup_types`, lifecycle/role-теги в БД | SQL по `lookup_values`, обход `src/content/landings/` |
+| 03 | tone-of-voice | Запрещённые слова §14 + Tone в `src/i18n/{ru,en,uiStrings}.ts`, в DB-content (cms-страницы) | grep по UI + `validate-semantic.mjs` + ESLint sweep |
+| 04 | implementation-protocol | Процессные правила (M-вехи, additive, audit-before-change) — сверка с `CHANGELOG.md` и наличием M6/M7d/M7e/M9.6 заделов | чтение CHANGELOG + audits/ |
+| 05 | visual-design-system | Hex-литералы вне `src/styles/tokens.css`, шрифты (Golos/DM Sans/JetBrains/Playfair), 44px touch-targets, кластерные цвета | regex `#[0-9a-f]{3,6}` по `src/**`, обход tailwind.config |
+| 06 | clearview-methodology | 8 категорий × веса, AAA–BB шкала, 5-step maturity в `src/pages/clearview/`, RPC и таблицах ratings | сверка с `mem://strategy/clearview-methodology-v3` |
+| 07 | information-architecture | URL-структура, отсутствие новых top-level routes, redirects (offplan→property/offplan), субдомены | обход `src/App.tsx`, `APP_ROUTES`, `vercel.json` |
+| 08 | ai-prompts-library | Промпты Edge Functions vs канон (concierge, ClearView draft, Tax Advisor, support) | обход `supabase/functions/*/index.ts` system prompts |
+| 09 | data-schema | Naming conventions, RLS на всех публикуемых таблицах, FK, enums, отсутствие триггеров в reserved schemas | `supabase--linter`, `supabase--read_query` по `pg_policies` |
+| 10 | semantic-core | `validate-semantic.mjs` + 4 слоя guard (ESLint, exact, fuzzy, CI), schema.org, sitemap, meta-templates | прогон `npm run validate:semantic` (по результатам — список нарушений) |
+| Arch | ARCHITECTURE_V2 §13 hard rules | Новые top-level routes, новые shells, hex-цвета, cross-cluster imports, money-moves без аудит-маркера, feature_flags | grep по `src/App.tsx`, `MiniAppLayout`, `ledger_entries` usage |
 
-Все эти хуки — **тонкие 7–11-строчные обёртки** над `useVerticalCRUD`, отличаются ровно одной строкой (имя вертикали + ярлыки):
+## Методика
+
+Для каждого документа:
+1. **Прочитать канон** (full read MD-файла).
+2. **Снять текущее состояние** в коде/БД (search_files / read_query / linter).
+3. **Сопоставить** правило ↔ реализация.
+4. **Зафиксировать** в матрице: `Pass / Warn / Fail` + конкретный файл/таблица + цитата из канона.
+
+## Deliverable
+
+Один сводный документ `docs/canonical/audits/M10-full-canon-conformance-2026-04-23.md` со структурой:
 
 ```
-useVendorFlowers · Cleaning · Yachts · Restaurants · Pets · Babysitters
-Salons · Gyms · Activities · Events · Vehicles · Clinics · Legal
-useVendorEducation (11 строк) · useVendorExperiences (26 строк, единственный с extra-логикой)
+1. Executive summary
+   - Overall conformance: X/10 docs green
+   - Critical violations: N (block release)
+   - Warnings: M (cleanup backlog)
+
+2. Per-document matrix (01..10 + Arch)
+   ┌────┬─────────────┬────────┬──────────────┬────────┐
+   │ #  │ Rule        │ Status │ Evidence     │ Fix    │
+   └────┴─────────────┴────────┴──────────────┴────────┘
+
+3. Critical findings (must-fix before next release)
+4. Warnings (M11 backlog)
+5. Recommended remediation milestones (M11.x)
+6. Appendix: raw outputs (validate-semantic, supabase linter, ESLint stats)
 ```
 
-`useVerticalCRUD` уже умеет всё через `getVerticalById(id).table`. Вместо 15 файлов — прямой вызов в компоненте: `useVerticalCRUD<Yacht>('yacht', providerId)`.
+Плюс: bump канона до **v1.20.0** + запись в `CHANGELOG.md` + bump app до **3.52.0**.
 
-**Действие:** удалить 14 файлов (Experiences оставить — там кастомная логика). Заменить импорты (≈30–50 мест, find-replace).
+## Технические шаги (default mode)
 
----
+1. Прочитать каждый из 10 MD-файлов целиком.
+2. Запустить `npm run validate:semantic -- --verbose` и `npm run lint` — собрать счётчики.
+3. Запросить `supabase--linter` и `supabase--read_query` по `pg_policies`, `pg_tables`, `lookup_values`, `profiles`, `clearview_*`.
+4. Grep-аудит:
+   - hex literals: `#[0-9a-fA-F]{3,8}\b` по `src/**` исключая `tokens.css`/`tailwind.config.ts`/`design-system/`
+   - cross-cluster imports: `from '@/pages/(arrive|live|manage|invest|legal|build)/.+/.+/'` из чужих кластеров
+   - hardcoded routes: строковые `'/...'` мимо `APP_ROUTES`
+   - `noscript` в `<head>` (`index.html`)
+   - money-move screens без `tx_id` маркера
+5. Сверить `supabase/functions/*/index.ts` system prompts с `08-ai-prompts-library.md`.
+6. Скомпоновать отчёт, обновить CHANGELOG/version.
 
-### 2. Дублирующиеся property-компоненты
+## Что НЕ входит в этот pass
 
-| Группа | Файлы | Что сейчас |
-|---|---|---|
-| Category icons | `PropertyCategoryIcons.tsx` (165) · `PropertyCategoryIcons.ribbon.tsx` (82) · `PropertyCategoryRibbon.tsx` (207) | 3 версии одного и того же |
-| Highlights | `PropertyHighlights.tsx` (153) · `PropertyHighlightsDisplay.tsx` (83) | Старая + «новая» рядом |
-| Extra fees | `GuestExtraFeesDisplay.tsx` (113) · `GuestExtraFeesSection.tsx` (281) | Section включает Display, но Display всё ещё импортируется отдельно |
-| Contact | `ContactAdminButton.tsx` (98) · `MessageHostButton.tsx` (97) | Почти одинаковая логика — открыть WhatsApp/Inbox с шаблоном |
+- Автоматическое исправление найденных нарушений — только инвентаризация.
+- Контентный sweep DB (М7d) и alt-text (M7e) — только подсчёт остатка.
+- Полный E2E-прогон Playwright — только наличие/конфигурация.
 
-**Действие:** в каждой группе оставить одного «победителя», удалить остальные, мигрировать импорты.
-
----
-
-## 🟠 P1 — Параллельные имплементации одного концепта
-
-### 3. Layout-обёртки (5 thin adapters над `AppLayout`)
-
-`AdminLayout` · `MCLayout` · `VendorLayout` · `GuestLayout` · `TeamLayout` — **каждая** просто рендерит:
-
-```tsx
-<AppLayout variant="workspace" navRole="<role>" usePageContainer={false} showFooter={false}>
-  <Outlet />
-</AppLayout>
-```
-
-Это 5 файлов по ~20 строк ради одной prop-переменной. Плюс `StaffLayout` использует ещё **третью** реализацию shell (свои `SidebarProvider + StaffSidebar`), хотя `NavShell` это уже умеет.
-
-**Действие:**
-- 4 из 5 «AppLayout-обёрток» можно удалить, в роутере писать `<AppLayout variant="workspace" navRole="vendor"/>` напрямую.
-- `StaffLayout` мигрировать на `AppLayout variant="workspace" navRole="staff"` (потребует добавить роль `staff` в `navigationModel`).
-
----
-
-### 4. Payment-селекторы (5 компонентов, 938 строк)
-
-Все «выбери способ оплаты / момент оплаты» в одной папке, с пересекающейся ответственностью:
-
-| Файл | Lines | Что делает |
-|---|---|---|
-| `PaymentMethodPicker.tsx` | 108 | card/transfer/whatsapp/rub_manual (новый) |
-| `BookingPaymentSelect.tsx` | 302 | старый селектор, до DS2.0 |
-| `PayWhenSelector.tsx` | 128 | full / split prepay |
-| `PaymentStageSelector.tsx` | 241 | устаревший «когда платить» — заменён `PayWhenSelector` |
-| `PaymentPolicySection.tsx` | 159 | отображение, не выбор |
-
-**Действие:** удалить `BookingPaymentSelect` и `PaymentStageSelector`, оставить тройку `PaymentMethodPicker` + `PayWhenSelector` + `PaymentPolicySection` — это и есть текущая Airbnb-лайк связка.
-
----
-
-### 5. Order-хуки (5 файлов, 1445 строк)
-
-`useOrders` (411) · `useOrderTracking` (174) · `useServiceOrders` (377) · `usePurchaseOrders` (227) · `useBooking` (256). Все читают одну таблицу `orders`, фильтруют по разным `order_type`. Сейчас каждый дублирует свой supabase-запрос + realtime + типы.
-
-**Действие:** ввести один `useOrdersByType(type)` поверх `useSupabaseQuery`; оставить `useOrders` как универсальный + `usePostOrderReview`/`useMultiPropertyBookings` (специализированные). Сократит ~600 строк дубля.
-
----
-
-## 🟡 P2 — Backend-дубли в edge functions
-
-### 6. Checkout-функции (18 шт., 5 уже мигрированы, 13 — нет)
-
-В `_shared/checkout-handler.ts` и `checkout-factory.ts` уже есть готовая абстракция. Проверка `grep checkout-handler|checkout-factory`:
-
-| Function | Использует _shared? |
-|---|---|
-| flowers / restaurant / event / market / wellness | ✅ да |
-| cleaning / pet / legal / yacht / service | ❌ нет, копипаста |
-| create-checkout / create-checkout-session / create-order-checkout | ❌ нет — **3 параллельных «универсальных»** входа |
-
-Особенно болит: `create-checkout` vs `create-checkout-session` vs `create-order-checkout` — три обобщённые функции, никто не помнит, какая «правильная». Build-error из текущей сессии (`create-flowers-checkout` падает на TS2769) тоже про это — типы `orders` уже изменились, но 13 функций не подцепили общий handler.
-
-**Действие:** мигрировать оставшиеся 10 vertical-функций на `checkout-handler.ts`, выбрать **одну** generic (`create-order-checkout`) и удалить 2 другие.
-
----
-
-### 7. Notify-функции
-
-`notify-admin-order` (344) vs `notify-vendor-order` (114) vs `notify-manual-payment-request` (235) vs `notify-fasttrack-booking` (275) vs `notify-transfer-booking` (256) — все делают **одно и то же**: собрать payload → `_shared/notify-utils.ts` → email + WhatsApp + insert into `notifications`. Логика разная только в шаблоне сообщения.
-
-**Действие:** ввести `_shared/notify-event.ts` с интерфейсом `{ event, recipients, template, data }`, переписать notify-* как 30-строчные адаптеры, выносящие шаблоны в `email-templates/`.
-
----
-
-## 🟢 P3 — Косметика, можно оставить на потом
-
-- `useSupabaseQuery` + `useSupabaseCRUD` + `useVerticalCRUD` — нормальная иерархия, **не дубль**, оставить.
-- `Sentry`/`toast` обёртки — единичные, ок.
-- `MeShellLayout` / `OnboardingLayout` / `MiniAppLayout` / `LandingLayout` — у каждой реальное отличие (узкий ширина, без nav), не трогаем.
-
----
-
-## Сводка экономии
-
-| Категория | Файлов удалить | Строк убрать | Риск |
-|---|---|---|---|
-| Vendor-хуки (P0.1) | 14 | ~120 | низкий — find-replace |
-| Property-компоненты (P0.2) | 5 | ~530 | низкий — точечная миграция импортов |
-| Layout-обёртки (P1.3) | 4–5 | ~120 | средний — править router |
-| Payment-селекторы (P1.4) | 2 | ~540 | средний — нужен smoke checkout-flow |
-| Order-хуки (P1.5) | 0 удалить, ~600 строк ужать | ~600 | высокий — типы фронта |
-| Checkout edge (P2.6) | 2 generic + рефактор 10 | ~800 | высокий — money path, нужен e2e |
-| Notify edge (P2.7) | 0, рефактор 7 | ~600 | средний — нужен smoke по каждому каналу |
-
-**Итого реалистично:** ~25 файлов и **~3 300 строк дублей** уходит без изменения поведения.
-
----
-
-## План реализации (8 атомарных шагов, в порядке риска)
-
-1. **P0.1 Vendor-хуки** — удалить 14 файлов, заменить импорты на `useVerticalCRUD<T>(verticalId, providerId)`. Полностью механический шаг.
-2. **P0.2.a Category icons** — оставить `PropertyCategoryRibbon` (самый полный), удалить две другие, поправить импорты.
-3. **P0.2.b Highlights / ExtraFees / Contact** — выбрать «победителя» в каждой паре, удалить лишнее.
-4. **P1.3 Layout-обёртки** — удалить `AdminLayout` / `MCLayout` / `VendorLayout` / `GuestLayout`, в роутере подставить `AppLayout` напрямую. Отдельным шагом мигрировать `StaffLayout`.
-5. **P1.4 Payment-селекторы** — удалить `BookingPaymentSelect` и `PaymentStageSelector`, протестировать checkout instant + request + RUB.
-6. **P2.6.a Checkout** — мигрировать 10 оставшихся vertical-функций на `checkout-handler.ts` (закроет текущий build-error в `create-flowers-checkout`).
-7. **P2.6.b Generic checkout** — выбрать `create-order-checkout` как канон, удалить `create-checkout` и `create-checkout-session`, переадресовать вызовы.
-8. **P1.5 + P2.7 (Phase 2, отдельный большой PR)** — order-хуки и notify-функции: высокий риск, нужен e2e regression, делаем последним.
-
-**Риск-контроль:** шаги 1–5 не трогают платёжный flow → можно мерджить в один день. Шаги 6–7 фиксят сегодняшние build errors. Шаг 8 — отдельная итерация со smoke-тестами на каждый order_type.
+После approve — переключаюсь в default mode, читаю все 10 канонов, выполняю шаги 1–6 и публикую отчёт.
 
