@@ -5,6 +5,34 @@
 
 ---
 
+## [1.15.0] — 2026-04-23
+
+### Added (Semantic Core v1.1)
+- **`docs/canonical/10-semantic-core.md`** (1476 строк) — новый канонический документ. Контракт между смыслом и поиском: ключевые слова по 25 персонам × 10 кластерам, URL-slug правила, шаблоны H1/title/meta description, schema.org разметка, тон AI-ответов, FAQ-семантика для Knowledge Hub, anti-patterns. Двойная функция: (1) findability — индексация в Google/Yandex/Baidu/WeChat; (2) meaning — единый смысловой каркас, синхронизирующий лендинг ↔ статью ↔ AI-ответ ↔ schema.org ↔ URL.
+- **`README.md`** — добавлена строка `10-semantic-core` в обе навигационные таблицы; обновлён заголовок «Канонические документы (01–10)»; в Quick-nav добавлена строка «Подобрать ключевые слова, URL-slug, H1, meta, schema.org».
+
+### Changed
+- `src/lib/appVersion.ts` → `3.47.0` (документация-only bump для трекинга в `version.json`).
+
+### Notes — Что это меняет в коде (план M9 · Semantic Core Rollout)
+Документ **не правит код напрямую** — он становится источником истины для серии последующих имплементационных вех. Предлагаемый порядок:
+
+1. **M9.1 · Audit** — сверить существующие лендинги (M6, B-track), Knowledge Hub статьи, страницы ClearView, страницы кластеров (Arrive/Live/Manage/Invest/Legal/Build) с шаблонами H1/title/meta из §10. Создать `audits/M9-semantic-core-audit.md` с матрицей «страница → факт vs канон → дельта».
+2. **M9.2 · URL hygiene** — пройтись по `src/lib/routes/APP_ROUTES`, `public/sitemap.xml`, `sitemap-landings.xml`. Поправить slug'и, добавить редиректы в `vercel.json` для исторических URL.
+3. **M9.3 · LandingSeoHead refactor** — `src/components/seo/LandingSeoHead.tsx` начать брать H1/title/description из словаря, синхронизированного с §10 (новый `src/content/semantic/landingSeo.ts` или расширение `src/content/landings/*`).
+4. **M9.4 · schema.org** — добавить JSON-LD (`Service`, `LocalBusiness`, `RealEstateListing`, `FAQPage`, `BreadcrumbList`) во все публичные страницы согласно §10 разделу schema. Создать `src/components/seo/JsonLd.tsx`.
+5. **M9.5 · AI prompts sync** — обновить `08-ai-prompts-library.md` и edge functions (`concierge-route`, `ai-smart-search`, `ai-personalize-home`), чтобы terminology AI-ответов совпадала с §10 (одни и те же названия услуг/кластеров/ситуаций).
+6. **M9.6 · Knowledge Hub seeding** — план статей по приоритетным запросам §10; ручное наполнение или AI-draft через новую edge function.
+7. **M9.7 · ESLint terminology guard** — расширить `eslint.config.js` на запрещённые синонимы (например, если §10 фиксирует «оф-план» вместо «off plan» в RU UI, или «condotel» vs «кондо-отель»).
+
+⚠️ M9 — **отдельный crawl** (после закрытия M7 backlog: M7d content-в-БД, M7e alt-text). Сейчас в код **ничего не вносим**, кроме регистрации документа.
+
+### Verification
+- `05-visual-design-system.md` — присутствует в `docs/canonical/` (1063 строки), уже зарегистрирован в README v1.0.
+- `10-semantic-core.md` — загружен (1476 строк), доступен по ссылке в README.
+
+---
+
 ## [1.14.1] — 2026-04-23
 
 ### Added (M7b · Edge Functions Tone Sweep)

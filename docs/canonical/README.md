@@ -1,7 +1,7 @@
 # myUNO · Canonical Documents
 
-> **Версия канона:** v1.14.1 (2026-04-23) — **M7b · Edge Functions Tone Sweep**: переписаны email/WhatsApp/AI-personalize шаблоны (`vendor-outreach-agent`, `ai-personalize-home`, `peylaa-lead-notify`); убраны overpromise (`high-net-worth`, `great traction`, `Premium Clients`, `эксклюзивный`) и `Best regards/Best,` → `Kind regards,`. AI system prompts намеренно не тронуты. M7c (empty-states/errors) — ревизия пройдена, нарушений нет.
-> **Предыдущее:** v1.14.0 — M7 Tone of Voice tracks A/B/C закрыты (ESLint guard, `uiStrings.ts`, 24 правки в 17 файлах). v1.13.0 — M6 закрыт (D + B + C).
+> **Версия канона:** v1.15.0 (2026-04-23) — **Semantic Core v1.1 добавлен** (`10-semantic-core.md`, 1476 строк). Эталонный документ: контракт между смыслом и поиском (findability + meaning) для SEO, Knowledge Hub, лендингов, AI-консьержа, system prompts, URL и schema.org. Добавлен в README/CHANGELOG; код пока не правится — отдельный имплементационный спринт **M9 · Semantic Core Rollout** (план ниже).
+> **Предыдущее:** v1.14.1 — M7b Edge Functions Tone Sweep (vendor-outreach, ai-personalize, peylaa-lead-notify). v1.14.0 — M7 Tone of Voice (ESLint guard + uiStrings + 24 правки). v1.13.0 — M6 закрыт.
 >
 > **Источник правды.** Эти документы определяют все продуктовые, контентные и инженерные решения. При расхождении кода/UI с документами правится **код**, а не документ.
 >
@@ -25,12 +25,13 @@
 | Изменить URL / субдомен / навигацию | [`07`](./07-information-architecture.md) |
 | Изменить промпт AI-агента | [`08`](./08-ai-prompts-library.md) |
 | Создать миграцию БД / новую таблицу | [`09`](./09-data-schema.md) |
+| Подобрать ключевые слова, URL-slug, H1, meta, schema.org | [`10`](./10-semantic-core.md) ⭐ |
 | Понять hard rules архитектуры | [`architecture/ARCHITECTURE_V2.md`](./architecture/ARCHITECTURE_V2.md) §13 |
 | Узнать, что уже сделано vs планируется | [`architecture/FEASIBILITY.md`](./architecture/FEASIBILITY.md) |
 
 ---
 
-## 📚 Канонические документы (01–09)
+## 📚 Канонические документы (01–10)
 
 | # | Документ | О чём | Версия |
 |---|---|---|---|
@@ -43,6 +44,7 @@
 | 07 | [information-architecture](./07-information-architecture.md) | URL-структура, субдомены, навигация, cross-domain SSO | v1.0 |
 | 08 | [ai-prompts-library](./08-ai-prompts-library.md) | Канонические system prompts: концьерж, ClearView draft, Tax Advisor, support | v1.0 |
 | 09 | [data-schema](./09-data-schema.md) | Supabase: таблицы, enums, индексы, RLS, FK, naming conventions | v1.0 |
+| 10 | [semantic-core](./10-semantic-core.md) ⭐ | Семантическое ядро: ключевые слова, URL-slug, H1/meta-шаблоны, schema.org, контракт смысла↔поиска | v1.1 |
 
 ## 🏛 Architecture (`architecture/`)
 
@@ -86,5 +88,5 @@
 ## Язык и версии
 
 - **Язык документов:** русский (внутренний инструментарий команды и AI). Bilingual RU/EN — только user-facing UI/контент.
-- **История:** [`CHANGELOG.md`](./CHANGELOG.md). Текущая версия канонического набора: **v1.10.5**.
+- **История:** [`CHANGELOG.md`](./CHANGELOG.md). Текущая версия канонического набора: **v1.15.0**.
 - **Поддержание:** при добавлении нового документа обнови этот README + CHANGELOG в одном PR.
