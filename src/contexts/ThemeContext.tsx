@@ -18,7 +18,8 @@ const getStoredTheme = (): Theme => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY) as Theme;
     if (stored === 'light' || stored === 'dark' || stored === 'system') return stored;
-    return 'dark';
+    // Canon: light is the default. Dark stays available as opt-in for admin/MC.
+    return 'light';
   } catch {
     return 'light';
   }
