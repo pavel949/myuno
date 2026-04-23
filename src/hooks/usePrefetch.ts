@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
@@ -110,8 +110,9 @@ export function usePrefetchPopularData() {
     return () => cancelIdlePrefetch(idleId);
   }, [prefetchCategories, prefetchFeaturedContent]);
 
-  // Schedule on mount
-  scheduleIdlePrefetch();
+  useEffect(() => {
+    return scheduleIdlePrefetch();
+  }, [scheduleIdlePrefetch]);
 }
 
 /**

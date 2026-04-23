@@ -43,6 +43,20 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       react(),
+      // Cursor / VS Code Simple Browser loads dev URLs inside an iframe; CSP
+      // frame-ancestors 'none' in index.html blocks that and yields a blank preview.
+      mode === "development" && {
+        name: "csp-allow-embedded-dev-preview",
+        transformIndexHtml(html: string) {
+          let out = html.replace(/frame-ancestors 'none';/g, "frame-ancestors *;");
+          // Vite HMR uses ws: to the dev server; strict connect-src can block it in embedded previews.
+          out = out.replace(
+            /connect-src 'self'/,
+            "connect-src 'self' ws://127.0.0.1:* ws://localhost:* wss://127.0.0.1:* wss://localhost:*"
+          );
+          return out;
+        },
+      },
       mode === "development" && componentTagger(),
       VitePWA({
         // injectManifest = full control over the service worker

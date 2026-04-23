@@ -45,13 +45,11 @@ const PropertyHubIndex = () => {
 import Index from '@/pages/Index';
 import Auth from '@/pages/Auth';
 import NotFound from '@/pages/NotFound';
+import WelcomeLanding from '@/pages/WelcomeLanding';
 import { useAuth } from '@/contexts/AuthContext';
 
 // All lazy page imports from centralized registry
 import * as Pages from './pageRegistry';
-
-// Welcome landing for unauthenticated visitors (lazy — only rendered for guests)
-const WelcomeLanding = React.lazy(() => import('@/pages/WelcomeLanding'));
 
 // Property Hub wrapper
 const PropertyHub = React.lazy(() => import('@/pages/property/PropertyHub'));
@@ -66,11 +64,7 @@ const HomeRouter = () => {
   const { user, isLoading } = useAuth();
   if (isLoading) return <LoadingState />;
   if (!user) {
-    return (
-      <Suspense fallback={<LoadingState />}>
-        <WelcomeLanding />
-      </Suspense>
-    );
+    return <WelcomeLanding />;
   }
   return <Index />;
 };
