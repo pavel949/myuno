@@ -33,7 +33,7 @@ interface JourneyRow {
   created_at: string;
 }
 
-const ANON_KEY = 'myuno-anon-session-id';
+import { ANON_SESSION_KEY as ANON_KEY } from '@/lib/segmentation/anonSession';
 
 export function MyJourneyRecommendations() {
   const { user } = useAuth();
