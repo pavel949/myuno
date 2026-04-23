@@ -104,6 +104,7 @@ export default function Bookings() {
   const [highlightedEventIds, setHighlightedEventIds] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
+  const [realtimeStatus, setRealtimeStatus] = useState<RealtimeStatus>('connecting');
   const highlightTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   // Cleanup any pending highlight timers on unmount.
