@@ -120,8 +120,9 @@ export const ClusterHub: React.FC = () => {
                 boxShadow: 'var(--shadow-card)',
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.borderColor = cluster.accentColor + '40';
-                (e.currentTarget as HTMLElement).style.boxShadow = `0 0 32px ${cluster.accentColor}15`;
+                const accent = clusterAccent(cluster.accentVar);
+                (e.currentTarget as HTMLElement).style.borderColor = accent;
+                (e.currentTarget as HTMLElement).style.boxShadow = `0 0 32px ${accent}`;
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLElement).style.borderColor = 'hsl(0 0% 100% / 0.07)';
@@ -129,16 +130,16 @@ export const ClusterHub: React.FC = () => {
               }}
             >
               {/* Icon */}
-              <div 
+              <div
                 className="inline-flex items-center justify-center w-10 h-10 rounded-lg mb-3"
-                style={{ background: cluster.accentColor + '1A' }}
+                style={{ background: `hsl(var(${cluster.accentVar}) / 0.1)` }}
               >
-                <Icon className="w-5 h-5" style={{ color: cluster.accentColor }} />
+                <Icon className="w-5 h-5" style={{ color: clusterAccent(cluster.accentVar) }} />
               </div>
 
               <h3
                 className="text-sm font-semibold leading-tight mb-0.5 font-display"
-                style={{ color: cluster.accentColor }}
+                style={{ color: clusterAccent(cluster.accentVar) }}
               >
                 {title}
               </h3>
