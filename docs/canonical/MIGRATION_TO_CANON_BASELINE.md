@@ -189,3 +189,51 @@ fontFamily: {
 ### Результат
 - `/sim`, `/arrive`, ArriveClusterPage, ExploreMoreRail, ClusterHub — все mint-акценты заменены на navy.
 - Все 3 фазы (foundation, newbuilds, overrides) теперь покрывают наблюдаемые поверхности без mint-leakage.
+
+---
+
+## Phase 4 — Radii enforcement + ESLint regression rules ✅ (2026-04-23)
+
+**Цель:** закрепить канон в коде, чтобы новые компоненты не могли регрессировать визуальную систему.
+
+### 1 · Глобальный 0px радиус
+**`src/styles/canon-overrides.css` §4** — добавлен блок:
+- Все `rounded-{sm,md,lg,xl,2xl,3xl}` и направленные варианты (`rounded-t-*`, `rounded-bl-*` и т.д.) → `border-radius: 0 !important`.
+- Исключения: `rounded-full` (аватары, icon chips), `rounded-*-full` (направленные круги), shadcn `[data-slot="skeleton"]` (визуальный affordance).
+- Покрывает ~1.2k call-sites без правки компонентов.
+
+### 2 · ESLint regression rules
+**`eslint.config.js`** — добавлен набор `CANON_VISUAL_RULES`, блокирующий три класса нарушений на уровне линтера:
+
+| Что блокируется | Regex | Severity | Сообщение |
+|---|---|---|---|
+| Legacy palette | `(bg\|text\|border\|from\|to\|via\|ring\|fill\|stroke\|shadow)-(emerald\|teal\|cyan\|sky\|indigo\|purple\|violet\|fuchsia\|pink\|rose\|lime\|mint\|amber)-{50..950}` | warn | "Use semantic tokens (bg-primary, text-success, …)" |
+| Glassmorphism | `backdrop-blur(?:-{none\|sm\|md\|lg\|xl\|2xl\|3xl})?` | warn | "Forbidden by canon §6 (solid surfaces)" |
+| Legacy radii | `rounded(?:-{sm\|md\|lg\|xl\|2xl\|3xl})?` (negative-lookahead на `-full`) | warn | "Canon §5 mandates 0px (allowed: rounded-full)" |
+
+Применяется через `no-restricted-syntax` к `Literal` и `TemplateElement` нодам — ловит и обычные строки, и template literals.
+
+**Scope:**
+- Уровень `warn` для всего проекта — не блокирует CI, но создаёт видимый счётчик регрессий в IDE/CI logs.
+- Уровень `error` для `src/i18n/**` остаётся только для ToV / canonical synonyms (не визуальных правил), чтобы не ломать билд из-за data-строк.
+- Исключения (`src/content/semantic/**`, `eslint.config.js`, `scripts/validate-semantic.mjs`) — отключают `no-restricted-syntax` целиком, чтобы source-of-truth файлы не флагали сами себя.
+
+### 3 · Что Phase 4 НЕ делает
+- Не переписывает существующие ~552 hardcoded classNames на семантические токены — эту работу подхватит **Phase 5** (cleanup) поверх warning-list, выдаваемого ESLint.
+- Не трогает inline-стили с хексами (~88 случаев) — отдельный итерационный pass с poderеним по pages.
+- Не удаляет `canon-overrides.css` — он остаётся safety-net, пока счётчик ESLint warnings > 0.
+
+### Verification
+- `npx tsc --noEmit` → exit 0.
+- Phase 1-3 hotfix (cluster tokens, data-layer hex sweep) уже применён и закреплён.
+- ThemeSwitcher (light/dark/system) интегрирован в TopBar.
+
+### Итог по миграции (Phases 1-4)
+| Phase | Scope | Status |
+|---|---|---|
+| 1 — Foundation | tokens.css, palette, fonts, ThemeProvider light default | ✅ |
+| 2 — Newbuilds unification | newbuilds-theme.css → canon, удалён Playfair-only flow | ✅ |
+| 3 — Global override | canon-overrides.css (~552 классов + glassmorphism off) + cluster hotfix | ✅ |
+| 4 — Enforcement | 0px radii global, ESLint regression rules | ✅ |
+| 5 — Cleanup (next) | Переписать warning-классы на semantic tokens, убрать override-файл | 🟡 todo |
+
