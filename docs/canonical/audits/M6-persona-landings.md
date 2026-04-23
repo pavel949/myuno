@@ -1,6 +1,6 @@
 # M6 — Persona-aware Home + Landings (25 + 10)
 
-**Status:** 📋 draft v0.1 — awaiting approval (2026-04-23)
+**Status:** ✅ Track D closed (2026-04-23, v1.11.0) · 🔜 Track B next
 **Date:** 2026-04-23 (audit)
 **Owner:** Pavel + AI engineer
 **Source:** `04-implementation-protocol.md §M6` · `audits/M5-hardening.md` (out-of-scope items)
@@ -92,8 +92,25 @@
 | D.3 | Компонент-обёртка `<PersonaAwareSections defaultOrder={[...]} />` — рендерит существующие блоки в порядке D.1 | `src/components/home/PersonaAwareSections.tsx` | D.1, D.2 | ✅ done (2026-04-23, 5 тестов) |
 | D.4 | Интеграция в `Home.tsx` за флагом `feature_flag:home_persona_aware_v1` (default OFF, включается после QA) | `src/pages/Index.tsx` + DB seed | D.3 | ✅ done (2026-04-23) |
 | D.5 | Unit-тесты `prioritizeSectionsByPersona`: ≥6 кейсов (anon → default, authed без persona → default, P1 tourist, P9 HNW, P10 operator, P13 pet-owner) | `__tests__/prioritizeHomeSections.test.ts` | D.1 | ✅ done (10 тестов зелёные) |
-| D.6 | Tone-of-voice pass: проверить, что новые secondary CTA в priority-секциях не нарушают §14 | grep + ручной просмотр | D.3 | ⏳ |
-| D.7 | CHANGELOG → v1.11.0, статус трека D в этом документе → ✅ | docs | все выше | ⏳ |
+| D.6 | Tone-of-voice pass: проверить, что новые secondary CTA в priority-секциях не нарушают §14 | grep + ручной просмотр | D.3 | ✅ done (2026-04-23) |
+| D.7 | CHANGELOG → v1.11.0, статус трека D в этом документе → ✅ | docs | все выше | ✅ done (2026-04-23) |
+
+#### D.6 · Tone-of-voice findings (§14 чек-лист)
+
+Проверены priority-зона `<PersonaAwareSections />`: `PersonaPromptBanner` + `ActiveSituation`.
+
+| Чек §14 | PersonaPromptBanner | ActiveSituation |
+|---|---|---|
+| Нет `!` / urgency | ✅ ("за 30 секунд" — конкретика, не давление) | ✅ (нет собственного текста) |
+| Нет «лучший / уникальный / революционный» | ✅ | ✅ |
+| Нет «быстро / удобно / выгодно» без цифр | ✅ ("30 секунд") | ✅ |
+| Первое предложение про клиента | ✅ ("Расскажите о себе…") | ✅ |
+| CTA — глагол действия | ✅ ("Начать" / "Start") | n/a |
+| Активные глаголы, ≤25 слов | ✅ | ✅ |
+| Обращение на «вы» | ✅ ("Подстроим… под вас") | n/a |
+| Нет эмодзи в UI-тексте | ✅ (только Lucide-иконка `Sparkles`) | ✅ |
+
+**Результат:** 0 нарушений §14. Дополнительных вторичных CTA трек D в priority-зоне не вводил — перестановка не порождает нового копирайта.
 
 **Out of scope трека D:** изменение содержимого самих секций; новые секции; mutation `lifecycle_stage` (только read).
 
