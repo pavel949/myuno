@@ -26,7 +26,7 @@ export function QuickActionsBlended({ personas }: QuickActionsBlendedProps) {
   const { actions } = useMemo(() => selectActionsForPersonas(personas), [personas]);
   const displayActions = actions.slice(0, 8);
 
-  const primaryColor = ROLE_META[personas[0]]?.color || '#00D68F';
+  const primaryColor = ROLE_META[personas[0]]?.color || 'hsl(var(--primary))';
 
   return (
     <div className="px-4 pb-5">
