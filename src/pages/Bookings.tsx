@@ -15,7 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { toast } from 'sonner';
-import { BookingStatusTimeline, type BookingStatusEvent } from '@/components/bookings/BookingStatusTimeline';
+import { BookingStatusTimeline, BookingStatusTimelineSkeleton, type BookingStatusEvent } from '@/components/bookings/BookingStatusTimeline';
 import { cn } from '@/lib/utils';
 
 interface BookingItem {
