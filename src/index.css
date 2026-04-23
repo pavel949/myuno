@@ -1,6 +1,11 @@
 /* Design system tokens — single source of truth */
 @import './design-system/index.css';
 
+/* Phase 3 of Canon Migration — globally remap legacy palette + remove glassmorphism.
+   Imported AFTER design tokens AND BEFORE Tailwind so utilities can layer on top,
+   but the override layer below wins via !important + :where() pattern. */
+@import './styles/canon-overrides.css';
+
 /* Fonts loaded via index.html for better performance */
 
 @keyframes shake {
@@ -571,7 +576,4 @@ html.light .hero-dots {
   body { background: white !important; }
 }
 
-/* Phase 3 of Canon Migration — globally remap legacy palette + remove glassmorphism.
-   Loaded last so its rules win the cascade. See file header for rationale. */
-@import './styles/canon-overrides.css';
 
