@@ -422,7 +422,7 @@ export default function IPPolicyPage() {
               <AlertTriangle className="h-5 w-5 text-destructive mt-0.5" />
               <div>
                 <p className="text-sm font-medium text-destructive mb-1">
-                  {isRu ? 'СТРОГО ЗАПРЕЩЕНО' : 'STRICTLY PROHIBITED'}
+                  {isRu ? 'Строго запрещено' : 'Strictly prohibited'}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   {isRu 

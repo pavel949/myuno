@@ -227,8 +227,8 @@ export const ru: Record<string, string> = {
   // Messages
   'message.noResults': 'Ничего не найдено',
   'message.loading': 'Загрузка...',
-  'message.error': 'Произошла ошибка',
-  'message.success': 'Успешно!',
+  'message.error': 'Запрос не выполнен',
+  'message.success': 'Готово',
   'message.loginRequired': 'Требуется авторизация',
   
   // Home page

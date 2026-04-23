@@ -69,7 +69,7 @@ const ExchangeBotPage: React.FC = () => {
     <AppLayout>
       <SEOHead
         title={t ? 'Курс валют на Пхукете — Обменники | myUNO' : 'Phuket Exchange Rates — Currency Exchangers | myUNO'}
-        description={t ? 'Актуальные курсы валют THB/RUB/USD/EUR. Лучшие обменники на Пхукете с рейтингами.' : 'Live THB/RUB/USD/EUR exchange rates. Best Phuket currency exchangers with ratings.'}
+        description={t ? 'Актуальные курсы валют THB/RUB/USD/EUR. Карта обменников Пхукета с рейтингами.' : 'Live THB/RUB/USD/EUR exchange rates. Phuket currency exchangers map with ratings.'}
       />
 
       <div className="px-4 md:px-6 lg:px-8 py-6 pb-20 md:pb-8 max-w-[1200px] mx-auto space-y-6">

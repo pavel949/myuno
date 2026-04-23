@@ -540,8 +540,8 @@ export default function Auth() {
                         <h1 className="text-2xl font-display font-bold">
                           {t('auth.signInOrSignUp')}
                         </h1>
-                        <p className="text-sm text-primary font-medium uppercase tracking-wide">
-                          {isTh ? 'SIGN IN OR SIGN UP' : isTh ? '' : isRu ? '' : ''}
+                        <p className="text-sm text-primary font-medium tracking-wide">
+                          {isTh ? 'Sign in or sign up' : isTh ? '' : isRu ? '' : ''}
                         </p>
                       </div>
 

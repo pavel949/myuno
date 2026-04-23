@@ -50,7 +50,7 @@ export function useClaude(vertical: SystemPromptKey) {
           setError("No response from assistant");
         }
       } catch (err) {
-        const msg = err instanceof Error ? err.message : "Something went wrong";
+        const msg = err instanceof Error ? err.message : "Assistant did not respond";
         setError(msg);
       } finally {
         setIsLoading(false);

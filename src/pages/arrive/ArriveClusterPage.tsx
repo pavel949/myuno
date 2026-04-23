@@ -32,7 +32,7 @@ const DAY_ONE: ClusterApp[] = [
   { icon: Plane, label: 'Airport Transfers', labelRu: 'Трансферы', desc: 'Private car to your hotel', descRu: 'Личный авто до отеля', path: APP_ROUTES.AIRPORT_TRANSFER, ready: true },
   { icon: Zap, label: 'Airport Fast Track', labelRu: 'Fast Track', desc: 'Skip the immigration queue', descRu: 'Без очереди на паспортном контроле', path: APP_ROUTES.FAST_TRACK, ready: true },
   { icon: Smartphone, label: 'SIM Cards', labelRu: 'SIM-карты', desc: 'Tourist SIM plans comparison', descRu: 'Сравнение тарифов', path: APP_ROUTES.SIM_START, ready: true },
-  { icon: ArrowLeftRight, label: 'Exchange Rates', labelRu: 'Курсы валют', desc: 'Best rates & exchangers map', descRu: 'Лучшие курсы и карта обменников', path: APP_ROUTES.EXCHANGE, ready: true },
+  { icon: ArrowLeftRight, label: 'Exchange Rates', labelRu: 'Курсы валют', desc: 'Live rates & exchangers map', descRu: 'Актуальные курсы и карта обменников', path: APP_ROUTES.EXCHANGE, ready: true },
   { icon: Landmark, label: 'Bank Account', labelRu: 'Банковский счёт', desc: 'Open a Thai bank account', descRu: 'Открыть счёт в тайском банке', path: APP_ROUTES.BANKING, ready: true },
   { icon: Globe, label: 'Relocation Guide', labelRu: 'Гид по переезду', desc: 'Full relocation roadmap', descRu: 'Полная дорожная карта переезда', path: APP_ROUTES.RELOCATE, ready: true },
 ];
@@ -94,7 +94,7 @@ export default function ArriveClusterPage() {
                   {t ? 'До отъезда' : 'Before You Come'}
                 </h2>
                 <p className="text-xs text-muted-foreground">
-                  {t ? 'Бронируйте заранее — места разбирают быстро' : 'Book in advance — spots fill up fast'}
+                  {t ? 'Бронируйте за 1–2 недели в высокий сезон' : 'Book 1–2 weeks ahead in high season'}
                 </p>
               </div>
             </div>

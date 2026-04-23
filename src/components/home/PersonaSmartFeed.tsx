@@ -77,7 +77,7 @@ const PERSONA_RECS: Record<UserPersona, { en: Recommendation[]; ru: Recommendati
       { id: 'f3', title: 'Kids Activities', subtitle: 'Fun for all ages', path: '/experiences?tag=family', emoji: '🎠' },
     ],
     ru: [
-      { id: 'f1', title: 'Международные школы', subtitle: 'Лучшие рейтинги', path: '/education', emoji: '🎓' },
+      { id: 'f1', title: 'Международные школы', subtitle: 'С аккредитацией', path: '/education', emoji: '🎓' },
       { id: 'f2', title: 'Педиатр', subtitle: 'Англоговорящие', path: '/medical', emoji: '👶' },
       { id: 'f3', title: 'Детские активности', subtitle: 'Для всех возрастов', path: '/experiences?tag=family', emoji: '🎠' },
     ],
@@ -96,12 +96,12 @@ const PERSONA_RECS: Record<UserPersona, { en: Recommendation[]; ru: Recommendati
   },
   nightlife: {
     en: [
-      { id: 'n1', title: 'Beach Clubs', subtitle: 'Best vibes today', path: '/experiences?tag=nightlife', emoji: '🎵' },
+      { id: 'n1', title: 'Beach Clubs', subtitle: 'Open tonight', path: '/experiences?tag=nightlife', emoji: '🎵' },
       { id: 'n2', title: 'VIP Tables', subtitle: 'Skip the line', path: '/experiences?tag=vip', emoji: '🥂' },
       { id: 'n3', title: 'Yacht Party', subtitle: 'Weekend special', path: '/yachts', emoji: '🛥️' },
     ],
     ru: [
-      { id: 'n1', title: 'Бич-клабы', subtitle: 'Лучшее сегодня', path: '/experiences?tag=nightlife', emoji: '🎵' },
+      { id: 'n1', title: 'Бич-клабы', subtitle: 'Открыто сегодня', path: '/experiences?tag=nightlife', emoji: '🎵' },
       { id: 'n2', title: 'VIP-столы', subtitle: 'Без очереди', path: '/experiences?tag=vip', emoji: '🥂' },
       { id: 'n3', title: 'Яхт-пати', subtitle: 'Выходные', path: '/yachts', emoji: '🛥️' },
     ],
@@ -145,12 +145,12 @@ const PERSONA_RECS: Record<UserPersona, { en: Recommendation[]; ru: Recommendati
   pet_owner: {
     en: [
       { id: 'p1', title: 'Find a Vet', subtitle: '24/7 clinics', path: '/pets?category=veterinary', emoji: '🏥' },
-      { id: 'p2', title: 'Pet Grooming', subtitle: 'Best salons', path: '/pets?category=grooming', emoji: '✂️' },
+      { id: 'p2', title: 'Pet Grooming', subtitle: 'Verified salons', path: '/pets?category=grooming', emoji: '✂️' },
       { id: 'p3', title: 'Pet Hotel', subtitle: 'While you travel', path: '/pets?category=hotel', emoji: '🏨' },
     ],
     ru: [
       { id: 'p1', title: 'Найти ветеринара', subtitle: 'Клиники 24/7', path: '/pets?category=veterinary', emoji: '🏥' },
-      { id: 'p2', title: 'Груминг', subtitle: 'Лучшие салоны', path: '/pets?category=grooming', emoji: '✂️' },
+      { id: 'p2', title: 'Груминг', subtitle: 'Проверенные салоны', path: '/pets?category=grooming', emoji: '✂️' },
       { id: 'p3', title: 'Отель для питомцев', subtitle: 'Пока вы в поездке', path: '/pets?category=hotel', emoji: '🏨' },
     ],
   },

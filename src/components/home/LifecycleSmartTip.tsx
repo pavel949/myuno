@@ -56,7 +56,7 @@ const TIPS_BY_SITUATION: Record<string, Tip[]> = {
     { id: 'fam-restaurant', titleRu: 'Семейные рестораны', titleEn: 'Family restaurants', descRu: 'Места с детскими меню и площадками', descEn: 'Places with kids menus & play areas', path: '/restaurants', icon: '🍕' },
   ],
   digital_nomad: [
-    { id: 'dn-cowork', titleRu: 'Коворкинги', titleEn: 'Coworking spaces', descRu: 'Лучшие рабочие пространства с быстрым Wi-Fi', descEn: 'Top workspaces with fast Wi-Fi', path: '/discover', icon: '💻' },
+    { id: 'dn-cowork', titleRu: 'Коворкинги', titleEn: 'Coworking spaces', descRu: 'Рабочие пространства с Wi-Fi от 100 Мбит', descEn: 'Workspaces with 100+ Mbps Wi-Fi', path: '/discover', icon: '💻' },
     { id: 'dn-internet', titleRu: 'Быстрый интернет', titleEn: 'Fast internet spots', descRu: 'Кафе и залы с интернетом от 100 Мбит', descEn: 'Cafés & lounges with 100+ Mbps', path: '/discover', icon: '📶' },
     { id: 'dn-visa', titleRu: 'Визаран и продление', titleEn: 'Visa run & extension', descRu: 'Проверенные агенты для виз и border-run', descEn: 'Verified agents for visas & border runs', path: '/legal', icon: '🛂' },
   ],

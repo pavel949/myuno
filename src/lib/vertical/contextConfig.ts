@@ -26,8 +26,8 @@ export const VERTICAL_CONTEXT_CONFIG: Partial<Record<string, VerticalContextConf
   experience: {
     type: 'seasonal',
     icon: '🌤️',
-    titleEn: 'Best Season for Tours',
-    titleRu: 'Лучшее время для экскурсий',
+    titleEn: 'Tour Season: Nov–Apr',
+    titleRu: 'Сезон туров: ноябрь–апрель',
     bodyEn: 'Nov–Apr: dry season, all tours running. Book Phi Phi & Similan early — fills fast.',
     bodyRu: 'Ноябрь–Апрель: сухой сезон, все туры работают. Phi Phi и Симилан — бронируйте заранее.',
     ctaRoute: '/experiences?category=island',
@@ -89,8 +89,8 @@ export const VERTICAL_CONTEXT_CONFIG: Partial<Record<string, VerticalContextConf
   fitness: {
     type: 'weather',
     icon: '🌅',
-    titleEn: 'Best Time for Outdoor Training',
-    titleRu: 'Лучшее время для тренировок на улице',
+    titleEn: 'Outdoor Training: Before 10am',
+    titleRu: 'Тренировки на улице: до 10:00',
     bodyEn: 'Today: 28°C, low humidity until 10am. Ideal for beach runs and Muay Thai.',
     bodyRu: 'Сегодня: 28°C, низкая влажность до 10:00. Отлично для пробежек и Муай Тай.',
     dismissible: true,

@@ -57,7 +57,7 @@ export default function TermsPage() {
       protection: isRu ? 'Полная защита G-Trust' : 'Full G-Trust Protection',
     },
     {
-      type: isRu ? 'ЧАСТИЧНЫЙ ESCROW' : 'PARTIAL ESCROW',
+      type: isRu ? 'Частичный escrow' : 'Partial escrow',
       color: 'bg-warning',
       description: isRu ? 'Депозит через myUNO + остаток на месте' : 'Deposit via myUNO + balance on-site',
       examples: isRu 
@@ -66,7 +66,7 @@ export default function TermsPage() {
       protection: isRu ? 'Защита депозита G-Trust' : 'G-Trust Deposit Protection',
     },
     {
-      type: isRu ? 'ЛИДОГЕНЕРАЦИЯ' : 'LEAD GENERATION',
+      type: isRu ? 'Лидогенерация' : 'Lead generation',
       color: 'bg-accent-amber',
       description: isRu ? 'Платная заявка + оплата партнёру напрямую' : 'Paid request + direct payment to partner',
       examples: isRu 
@@ -77,7 +77,7 @@ export default function TermsPage() {
   ];
 
   const platformTransactionSection = {
-    title: isRu ? '6. ОБЯЗАТЕЛЬСТВО ПРОВЕДЕНИЯ ТРАНЗАКЦИЙ ЧЕРЕЗ ПЛАТФОРМУ' : '6. PLATFORM TRANSACTION REQUIREMENT',
+    title: isRu ? '6. Обязательство проведения транзакций через Платформу' : '6. Platform transaction requirement',
     content: isRu 
       ? 'ВСЕ транзакции между Пользователями и Партнёрами должны осуществляться исключительно через Платформу myUNO в соответствии с классификацией Услуг (см. раздел 5).'
       : 'ALL transactions between Users and Partners must be conducted exclusively through the myUNO Platform in accordance with the Service classification (see section 5).',
@@ -355,7 +355,7 @@ export default function TermsPage() {
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <Ban className="w-4 h-4 text-destructive" />
-                <h3 className="font-semibold text-sm">{isRu ? 'СТРОГО ЗАПРЕЩАЕТСЯ:' : 'STRICTLY PROHIBITED:'}</h3>
+                <h3 className="font-semibold text-sm">{isRu ? 'Строго запрещается:' : 'Strictly prohibited:'}</h3>
               </div>
               <ul className="space-y-2">
                 {platformTransactionSection.prohibitedItems.map((item, idx) => (
@@ -369,7 +369,7 @@ export default function TermsPage() {
 
             <div>
               <h3 className="font-semibold text-sm mb-3 text-destructive">
-                ⚠️ {isRu ? 'ПОСЛЕДСТВИЯ НАРУШЕНИЯ:' : 'CONSEQUENCES OF VIOLATION:'}
+                ⚠️ {isRu ? 'Последствия нарушения:' : 'Consequences of violation:'}
               </h3>
               <ul className="space-y-2">
                 {platformTransactionSection.consequences.map((item, idx) => (
@@ -504,7 +504,7 @@ export default function TermsPage() {
             </div>
             <div className="mt-3 p-3 bg-warning/10 border border-warning/30 rounded-none">
               <p className="text-xs text-warning">
-                <strong>{isRu ? 'ОТКАЗ ОТ КОЛЛЕКТИВНЫХ ИСКОВ:' : 'CLASS ACTION WAIVER:'}</strong> {isRu 
+                <strong>{isRu ? 'Отказ от коллективных исков:' : 'Class action waiver:'}</strong> {isRu 
                   ? 'Вы соглашаетесь разрешать споры только индивидуально и отказываетесь от участия в коллективных исках против myUNO.'
                   : 'You agree to resolve disputes only individually and waive participation in class actions against myUNO.'}
               </p>

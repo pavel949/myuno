@@ -227,8 +227,8 @@ export const en: Record<string, string> = {
   // Messages
   'message.noResults': 'No results found',
   'message.loading': 'Loading...',
-  'message.error': 'An error occurred',
-  'message.success': 'Success!',
+  'message.error': 'Request failed',
+  'message.success': 'Done',
   'message.loginRequired': 'Login required',
   
   // Home page

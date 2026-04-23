@@ -49,7 +49,7 @@ export const ReviewCard = ({ review, onHelpful, providerName }: ReviewCardProps)
         <div className="mb-3">
           <Badge className="bg-gradient-to-r from-warning to-accent-amber text-white border-0">
             <Star className="w-3 h-3 mr-1 fill-current" />
-            {language === 'ru' ? 'Лучший отзыв' : 'Featured Review'}
+            {language === 'ru' ? 'Рекомендуемый отзыв' : 'Featured Review'}
           </Badge>
         </div>
       )}
