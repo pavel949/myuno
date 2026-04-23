@@ -28,12 +28,12 @@ const CRITERION_LABELS: Record<string, { label: string; weight: number }> = {
 
 function gradeColor(grade?: string | null) {
   switch (grade) {
-    case 'AAA': return '#10b981';
-    case 'AA':  return '#22c55e';
-    case 'A':   return '#84cc16';
-    case 'BBB': return '#f59e0b';
-    case 'BB':  return '#ef4444';
-    default:    return 'hsl(var(--nb-muted))';
+    case 'AAA': return 'hsl(var(--success))';
+    case 'AA':  return 'hsl(var(--success))';
+    case 'A':   return 'hsl(var(--brand-navy-700))';
+    case 'BBB': return 'hsl(var(--accent))';
+    case 'BB':  return 'hsl(var(--destructive))';
+    default:    return 'hsl(var(--muted-foreground))';
   }
 }
 
@@ -199,7 +199,7 @@ export function ClearViewReport({ projectId, isBrokered }: Props) {
           <div className="grid sm:grid-cols-2 gap-3">
             {report.green_flags?.length > 0 && (
               <div className="space-y-1.5">
-                <h4 className="text-xs uppercase tracking-wider flex items-center gap-1.5" style={{ color: '#10b981' }}>
+                <h4 className="text-xs uppercase tracking-wider flex items-center gap-1.5" style={{ color: 'hsl(var(--success))' }}>
                   <CheckCircle2 className="w-3.5 h-3.5" />Сильные стороны
                 </h4>
                 <ul className="text-xs space-y-1" style={{ color: 'hsl(var(--nb-text))' }}>
@@ -209,7 +209,7 @@ export function ClearViewReport({ projectId, isBrokered }: Props) {
             )}
             {report.red_flags?.length > 0 && (
               <div className="space-y-1.5">
-                <h4 className="text-xs uppercase tracking-wider flex items-center gap-1.5" style={{ color: '#ef4444' }}>
+                <h4 className="text-xs uppercase tracking-wider flex items-center gap-1.5" style={{ color: 'hsl(var(--destructive))' }}>
                   <AlertTriangle className="w-3.5 h-3.5" />Риски
                 </h4>
                 <ul className="text-xs space-y-1" style={{ color: 'hsl(var(--nb-text))' }}>
