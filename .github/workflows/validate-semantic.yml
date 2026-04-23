@@ -28,5 +28,90 @@ jobs:
       - name: Install dependencies
         run: npm ci --no-audit --no-fund
 
-      - name: Run validate:semantic in strict mode
-        run: npm run validate:semantic:strict
+      - name: Prepare report directory
+        run: mkdir -p reports/semantic
+
+      # Verbose run captures the full per-rule listing (no truncation), so the
+      # uploaded artifact is enough to diagnose regressions without re-running
+      # the script locally. We tee output to stdout so it also appears in the
+      # GitHub Actions log.
+      - name: Run validate:semantic (verbose, non-strict)
+        id: verbose
+        run: |
+          set -o pipefail
+          node scripts/validate-semantic.mjs --verbose \
+            > >(tee reports/semantic/validate-semantic.verbose.log) \
+            2> >(tee reports/semantic/validate-semantic.verbose.err >&2)
+        continue-on-error: true
+
+      # Strict mode is the gate: any warning fails CI. We keep continue-on-error
+      # so the artifact upload step always runs, then re-fail explicitly below.
+      - name: Run validate:semantic:strict (gate)
+        id: strict
+        run: |
+          set -o pipefail
+          node scripts/validate-semantic.mjs --strict \
+            > >(tee reports/semantic/validate-semantic.strict.log) \
+            2> >(tee reports/semantic/validate-semantic.strict.err >&2)
+        continue-on-error: true
+
+      # Compact summary: counts per rule + severity, parsed from the verbose log.
+      - name: Build per-rule summary
+        if: always()
+        run: |
+          node - <<'NODE' > reports/semantic/summary.md
+          const fs = require('node:fs');
+          const log = fs.readFileSync('reports/semantic/validate-semantic.verbose.log', 'utf-8');
+          const lines = log.split('\n');
+
+          const totals = { errors: 0, warnings: 0 };
+          const errMatch = log.match(/Errors:\s+(\d+)/);
+          const warnMatch = log.match(/Warnings:\s+(\d+)/);
+          if (errMatch) totals.errors = Number(errMatch[1]);
+          if (warnMatch) totals.warnings = Number(warnMatch[1]);
+
+          // Lines look like "[ERROR] rule-name (12)" or "[WARN ] rule-name (3)".
+          const ruleRe = /^\[(ERROR|WARN )\]\s+([\w-]+)\s+\((\d+)\)/;
+          const rows = [];
+          for (const line of lines) {
+            const m = line.match(ruleRe);
+            if (m) rows.push({ severity: m[1].trim(), rule: m[2], count: Number(m[3]) });
+          }
+          rows.sort((a, b) => b.count - a.count || a.rule.localeCompare(b.rule));
+
+          let md = `# validate-semantic report\n\n`;
+          md += `- **Errors:** ${totals.errors}\n`;
+          md += `- **Warnings:** ${totals.warnings}\n`;
+          md += `- **Strict mode exit:** ${process.env.STRICT_OUTCOME || 'unknown'}\n\n`;
+          if (rows.length === 0) {
+            md += `No violations. Semantic Core is clean.\n`;
+          } else {
+            md += `## Counts by rule\n\n| Severity | Rule | Count |\n|---|---|---:|\n`;
+            for (const r of rows) md += `| ${r.severity} | \`${r.rule}\` | ${r.count} |\n`;
+          }
+          fs.writeFileSync('reports/semantic/summary.md', md);
+          console.log(md);
+          NODE
+        env:
+          STRICT_OUTCOME: ${{ steps.strict.outcome }}
+
+      - name: Append summary to GitHub job summary
+        if: always()
+        run: cat reports/semantic/summary.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload validate-semantic report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: validate-semantic-report-${{ github.run_id }}
+          path: reports/semantic/
+          retention-days: 30
+          if-no-files-found: warn
+
+      # Re-fail the job after the artifact is safely uploaded so reviewers can
+      # still download the report from a red build.
+      - name: Enforce strict outcome
+        if: always() && steps.strict.outcome != 'success'
+        run: |
+          echo "::error::validate:semantic:strict reported violations. See uploaded artifact 'validate-semantic-report-${{ github.run_id }}'."
+          exit 1
