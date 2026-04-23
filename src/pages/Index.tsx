@@ -75,19 +75,25 @@ const Index = () => {
         </div>
         <HomeContextChips personas={[...activePersonas]} />
         <WorkspaceHomeBanner />
-        <PersonaPromptBanner />
+
+        {/*
+          M6 · D.4 — priority-zone (PersonaPromptBanner + ActiveSituation).
+          Под флагом `home_persona_aware_v1` обёртка перестраивает порядок
+          по канонической персоне (`useCanonicalProfile` → `prioritizeHomeSections`).
+          Если флаг OFF / loading / anon → дефолтный порядок (regression-safe).
+          Hero и tasks-блок остаются на фиксированных позициях ниже.
+        */}
+        <PersonaAwareSections
+          defaultOrder={PRIORITY_DEFAULT_ORDER}
+          sections={prioritySections}
+          disabled={!personaAwareOn}
+        />
 
         {/* 1. Hero — search-first entry, with desktop popular preview */}
         <HeroIntro />
 
         {/* 2. Tasks — what do I need to do */}
         {popularTasksOn ? <PopularTasks /> : <PrimaryActions />}
-
-        {/* 3. Active — what's already in progress */}
-        <ActiveSituation
-          personas={[...activePersonas]}
-          onRoleSheetOpen={() => setRoleSheetOpen(true)}
-        />
 
         {/* 4. Trust / discovery — story blocks */}
         {reEngineOn && <RealEstateEntry />}
