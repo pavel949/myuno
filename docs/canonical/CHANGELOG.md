@@ -5,6 +5,21 @@
 
 ---
 
+## [1.10.5] — 2026-04-23
+
+### Added (M6 · трек D · шаг D.3)
+- **`src/components/home/PersonaAwareSections.tsx`** — обёртка-перестановщик Home-секций. Принимает `defaultOrder: HomeSectionKey[]` + `sections: Partial<Record<HomeSectionKey, ReactNode>>` (готовые JSX-элементы со своими props) и рендерит их в приоритетном порядке через `prioritizeHomeSections()`. Loading и `disabled=true` → дефолтный порядок (regression-safe). Отсутствующие в `sections` ключи тихо пропускаются. Сам компонент не управляет flag'ом — это делает родитель в шаге D.4 (упрощает A/B и rollback).
+- **`src/components/home/PersonaAwareSections.test.tsx`** — 5 render-тестов (`disabled` → default, loading → default, P9 поднимает FeaturedPropertiesCarousel, missing keys, anon → default). **Все 5 зелёные.**
+
+### Changed
+- `audits/M6-persona-landings.md` — статус D.3 → ✅ done. D.4 → 🔜 next.
+
+### Notes
+- Компонент намеренно не владеет JSX отдельных блоков — родитель передаёт готовые elements. Это сохраняет lazy-loading, текущие props и не требует синхронизации сигнатур всех Home-блоков.
+- UI пока не виден: `<PersonaAwareSections />` создан, но в `Home.tsx` не интегрирован — это шаг D.4 за флагом `home_persona_aware_v1`.
+
+---
+
 ## [1.10.4] — 2026-04-23
 
 ### Added (M6 · трек D · шаги D.1 + D.2 + D.5)
