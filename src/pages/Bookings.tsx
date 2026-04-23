@@ -12,6 +12,7 @@ import { BookingListSkeleton } from '@/components/ui/page-skeletons';
 import { EmptyState } from '@/components/uno/EmptyState';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { toast } from 'sonner';
