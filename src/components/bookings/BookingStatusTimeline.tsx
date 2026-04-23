@@ -65,10 +65,15 @@ export function BookingStatusTimeline({
   createdAt,
   className,
   compact = false,
+  highlightIds,
 }: BookingStatusTimelineProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const locale = isRu ? ru : enUS;
+  const highlightSet =
+    highlightIds instanceof Set
+      ? highlightIds
+      : new Set(highlightIds ?? []);
 
   // Build a chronological list. Always seed with "created" event if we know createdAt.
   const sorted = [...events].sort(
