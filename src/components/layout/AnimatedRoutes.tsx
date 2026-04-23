@@ -159,6 +159,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.PRICING} element={<LazyPage><Pages.PricingPage /></LazyPage>} />
         <Route path="/welcome-landing" element={<LazyPage><WelcomeLanding /></LazyPage>} />
         <Route path="/start" element={<LazyPage><Pages.StartOnboarding /></LazyPage>} />
+        <Route path="/start/v2" element={<LazyPage><Pages.StartOnboardingV2 /></LazyPage>} />
         <Route path={APP_ROUTES.AUTH} element={<PageTransition><Auth /></PageTransition>} />
         {/* OAuth providers may return to callback-style paths; render Auth instead of 404 */}
         <Route path="/auth/callback" element={<PageTransition><Auth /></PageTransition>} />

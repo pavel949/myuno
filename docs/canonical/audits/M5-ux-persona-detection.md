@@ -1,12 +1,12 @@
 # M5 — UX обвязка детекции персон
 
-**Status:** 🔜 Planned (awaiting approval)
-**Date:** 2026-04-22
+**Status:** ✅ Implemented (2026-04-23) — flag `concierge_routing_v2_canonical` default OFF, готово к QA-включению
+**Date:** 2026-04-22 (audit) · 2026-04-23 (impl)
 **Owner:** Pavel + AI engineer
 **Source:** `04-implementation-protocol.md §M5` · `audits/M4-ai-orchestration.md §7`
 **Canonical refs:** `01-segmentation-framework.md` §4 (25 personas), §5 (10 clusters), §9.2 (3-question flow), §6 (cluster matrix); `03-tone-of-voice.md`; `08-ai-prompts-library.md` §1 (Concierge)
 
-> **TL;DR.** M4 даёт серверную детекцию (`canonical-persona-detect` + `useDetectPersona`), но в проде она ни к чему не подключена. В то же время существует public онбординг `/start` с собственной таксономией (`tourist/relocator/investor/owner`), которая не маппится на канонические оси. M5 приводит их в соответствие: переводит `/start` на канон, подключает M4-детекцию, отображает результат в UI и пишет всё в `profiles` через аддитивный контракт.
+> **TL;DR.** Реализован `/start/v2` за флагом `concierge_routing_v2_canonical`. 8 lifecycle × 6 ролей × 10 модификаторов → `detectPersona()` (rules_v1, 11 тестов) → AI `canonical-persona-detect` (apply:true для authed, побеждает при confidence ≥ 0.75) → запись в `profiles` + `persona_detection_log` (RLS-защищён). Result-экран показывает 5–7 сервисов через `recommendServices()`. Home получил `<PersonaPromptBanner />` — нудж к онбордингу для authed без `detected_persona`. Старый `/start` не тронут.
 
 ---
 

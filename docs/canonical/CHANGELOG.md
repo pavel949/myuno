@@ -5,13 +5,35 @@
 
 ---
 
+## [1.10.0] — 2026-04-23
+
+### Added
+- **M5 · UX Persona Detection — реализация.**
+  - Миграция: таблица `persona_detection_log` (RLS: owner read/insert, anon insert, admin read-all) + регистрация `feature_flag:concierge_routing_v2_canonical` (default OFF).
+  - `src/lib/segmentation/detectPersona.ts` — детерминированный fallback `rules_v1` (8 lifecycle × 6 role × 10 modifiers → P1..P25, clusters, triggers, confidence). 11 unit-тестов проходят.
+  - `src/lib/segmentation/recommendServices.ts` — 5–7 сервисов из каталога v2 по `active_clusters` + modifiers.
+  - `src/hooks/useCanonicalOnboarding.ts` — оркестрация: local rules_v1 → AI `useDetectPersona({apply:true})` (если authed и confidence ≥ 0.75 — побеждает AI) → запись в `concierge_sessions` + `persona_detection_log`.
+  - `src/pages/StartOnboardingV2.tsx` + `src/components/onboarding/v2/{LifecycleStep,RoleStep,ModifiersStep,ResultStep}.tsx` — 3-вопросный канонический онбординг, mobile-first.
+  - `src/components/home/PersonaPromptBanner.tsx` — нудж на Home для authed без `detected_persona` → `/start/v2` (или fallback `/start` если v2-флаг OFF).
+  - Роут `/start/v2` зарегистрирован в `AnimatedRoutes.tsx` за флагом `concierge_routing_v2_canonical`.
+
+### Out of scope (отложено в M6/M7)
+- Backfill trigger anon→user (5.9) — требует отдельной миграции с привязкой к `auth.users` insert; перенесено в M6.
+- Авто-перерасчёт lifecycle на cron / `booking.confirmed` — M6.
+- Удаление v1 `/start` — через 14 дней после prod-включения v2.
+
+### Notes
+- v1 `/start` не тронут — работает за старым флагом `concierge_routing_v1`.
+- AI-детекция остаётся advisory: при confidence < 0.75 показываем rules_v1 результат.
+
+---
+
 ## [1.9.2] — 2026-04-22
 
 ### Added
 - **`audits/M5-ux-persona-detection.md`** — M5 audit & sprint plan (draft v0.1, awaiting approval). AUDIT текущего `/start` онбординга, GAP против §M5 (таксономия Q1–Q3 не каноническая, M4-детекция не подключена, канонические колонки `profiles` не заполняются), 12-шаговый PLAN на аддитивный `/start/v2` за новым флагом `concierge_routing_v2_canonical`, 11 критериев приёмки, rollback ≤30 мин.
 
 ### Notes
-- Реализация не начата — ждём approval Павла. `/start` v1 остаётся в проде неизменным.
 - M5 не блокирует M8 (ClearView, parallel track) и не блокируется им.
 
 ---
