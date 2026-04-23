@@ -1,7 +1,7 @@
 # myUNO · Canonical Documents
 
-> **Версия канона:** v1.19.0 (2026-04-23) — **M9 · Semantic Core Rollout (100% ✅)**: M9.7 ESLint canonical guard закрыт. Правило `no-restricted-syntax` в `eslint.config.js` теперь автогенерируется из `src/content/semantic/forbiddenSynonyms.ts` (drift невозможен), покрывает И string literals И template literals для всех 14 запрещённых синонимов §14. Для `src/i18n/**` severity = `error` (любой синоним в UI-словарях ломает CI), для остального `src/**` = `warn` (полная зачистка legacy в M9b). Источник истины (`src/content/semantic/**`) явно opt-out. Bump app → 3.51.0.
-> **Предыдущее:** v1.18.0 — M9.6 Knowledge Hub Seeding (10 pillar pages в БД, страницы `/knowledge/pillars` и `/knowledge/pillars/:slug`). v1.17.0 — M9.5 Edge Function Prompts Sweep. v1.16.1 — validate-semantic noise reduction.
+> **Версия канона:** v1.20.0 (2026-04-23) — **M10 · Full canonical conformance audit**: автоматизированный sweep всей кодовой базы против 10 канонов + ARCHITECTURE_V2 §13. Результат **7/11 green · 3/11 yellow · 1/11 red**. 2 critical findings блокируют закрытие финального gate M9: **CV-1** (нет таблиц `clearview_*`) и **SEG-1** (нет канонических колонок `roles_stack`/`primary_role`/`lifecycle_phase` в `profiles`). 17 warnings → backlog M11.1–M11.11. Сильные стороны: validate-semantic 0/0, RLS 392/392 (100%), wallet zero-update RLS, 4-layer i18n guard, AuditMarker на money-screens. См. полный отчёт: [`audits/M10-full-canon-conformance-2026-04-23.md`](./audits/M10-full-canon-conformance-2026-04-23.md). Bump app → 3.52.0.
+> **Предыдущее:** v1.19.2 — M9.7c Fuzzy near-match guard для uiStrings (Damerau-Levenshtein ≤1 + variants + whitelist). v1.19.0 — M9.7 ESLint canonical guard.
 >
 > **Источник правды.** Эти документы определяют все продуктовые, контентные и инженерные решения. При расхождении кода/UI с документами правится **код**, а не документ.
 >
