@@ -34,13 +34,13 @@ export function ResultStep({ result, lang, onReset }: Props) {
 
   return (
     <>
-      <header className="text-center">
+      <header className="text-center" data-testid="onboarding-result">
         <div className="mx-auto mb-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
           <Check className="h-5 w-5 text-primary" />
         </div>
         <h2 className="text-lg font-semibold">{COPY.resultTitle[lang]}</h2>
         <p className="mt-1 text-xs text-muted-foreground">
-          {COPY.proposalLine[lang]} <strong className="text-foreground">{stageLabel}</strong> · {proposal.detected_persona}
+          {COPY.proposalLine[lang]} <strong className="text-foreground">{stageLabel}</strong> · <span data-testid="onboarding-result-persona">{proposal.detected_persona}</span>
         </p>
         <div className="mt-2 flex flex-wrap items-center justify-center gap-1.5">
           {proposal.active_clusters.map((c) => (
