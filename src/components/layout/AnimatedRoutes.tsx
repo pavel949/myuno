@@ -505,6 +505,9 @@ export const AnimatedRoutes: React.FC = () => {
         
         {/* ── Knowledge ── */}
         <Route path={APP_ROUTES.KNOWLEDGE} element={<LazyPage><Pages.KnowledgeHub /></LazyPage>} />
+        {/* Pillars must precede generic /knowledge/:section to take routing priority */}
+        <Route path={APP_ROUTES.KNOWLEDGE_PILLARS} element={<LazyPage><Pages.KnowledgePillarsIndex /></LazyPage>} />
+        <Route path="/knowledge/pillars/:slug" element={<LazyPage><Pages.KnowledgePillarPage /></LazyPage>} />
         <Route path="/knowledge/:section" element={<LazyPage><Pages.KnowledgeSectionPage /></LazyPage>} />
         <Route path="/knowledge/:section/:slug" element={<LazyPage><Pages.KnowledgeArticlePage /></LazyPage>} />
         
