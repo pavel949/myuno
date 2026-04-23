@@ -313,7 +313,7 @@ export default function NewbuildsMap() {
                       background: 'hsl(var(--nb-card))',
                       color: 'hsl(var(--nb-gold))',
                       border: '1.5px solid hsl(var(--nb-gold) / 0.6)',
-                      fontFamily: '"Playfair Display", Georgia, serif',
+                      fontFamily: 'var(--font-display)',
                       fontSize: 11,
                       fontWeight: 600,
                     }}
@@ -427,8 +427,8 @@ export default function NewbuildsMap() {
                         background: 'hsl(var(--nb-card))',
                         color: 'hsl(var(--nb-gold))',
                         border: '1.5px solid hsl(var(--nb-gold) / 0.6)',
-                        boxShadow: '0 4px 14px rgba(0,0,0,0.45)',
-                        fontFamily: '"Playfair Display", Georgia, serif',
+                        boxShadow: 'var(--shadow-sm)',
+                        fontFamily: 'var(--font-display)',
                         fontSize: count >= 100 ? 13 : 15,
                         fontWeight: 600,
                       }}
