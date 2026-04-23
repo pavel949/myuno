@@ -398,12 +398,14 @@ export default function Bookings() {
     // Pull-to-refresh bypasses the cache so users always get fresh data.
     if (user) invalidateStatusHistoryCache(user.id);
     loadedHistoryIdsRef.current = new Set();
+    setHistoryErrorIds(new Set());
     await loadBookings(true);
   }, [loadBookings, user]);
 
   const handleRetry = useCallback(() => {
     if (user) invalidateStatusHistoryCache(user.id);
     loadedHistoryIdsRef.current = new Set();
+    setHistoryErrorIds(new Set());
     void loadBookings(true);
   }, [loadBookings, user]);
 
