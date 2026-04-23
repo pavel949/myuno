@@ -1,6 +1,7 @@
 # myUNO · Canonical Documents
 
-> **Версия канона:** v1.14.0 (2026-04-23) — **M7 · Tone of Voice tracks A/B/C закрыты**: ESLint guard `no-restricted-syntax` на §14 forbidden words, канонический словарь `src/i18n/uiStrings.ts`, зачищены 24 нарушения в 17 файлах. M7 backlog (email/WhatsApp/empty/error/alt sweep) — отдельные PR'ы. Перед M7 закрыт M6 целиком (D + B + C).
+> **Версия канона:** v1.14.1 (2026-04-23) — **M7b · Edge Functions Tone Sweep**: переписаны email/WhatsApp/AI-personalize шаблоны (`vendor-outreach-agent`, `ai-personalize-home`, `peylaa-lead-notify`); убраны overpromise (`high-net-worth`, `great traction`, `Premium Clients`, `эксклюзивный`) и `Best regards/Best,` → `Kind regards,`. AI system prompts намеренно не тронуты. M7c (empty-states/errors) — ревизия пройдена, нарушений нет.
+> **Предыдущее:** v1.14.0 — M7 Tone of Voice tracks A/B/C закрыты (ESLint guard, `uiStrings.ts`, 24 правки в 17 файлах). v1.13.0 — M6 закрыт (D + B + C).
 >
 > **Источник правды.** Эти документы определяют все продуктовые, контентные и инженерные решения. При расхождении кода/UI с документами правится **код**, а не документ.
 >

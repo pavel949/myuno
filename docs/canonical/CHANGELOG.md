@@ -5,6 +5,25 @@
 
 ---
 
+## [1.14.1] — 2026-04-23
+
+### Added (M7b · Edge Functions Tone Sweep)
+- **`docs/canonical/audits/M7b-edge-functions-tone-sweep.md`** — расширение M7 на исходящие коммуникации (email/WhatsApp/Telegram). Методология разделения system-prompt'ов AI (не правим) vs user-facing шаблонов (правим) vs технических идиом (`Best regards`, `best-effort` — не правим).
+
+### Changed (M7b)
+- **`supabase/functions/ai-personalize-home/index.ts`** — 6 reason-строк (RU+EN) и 2 greeting-шаблона: `Best villas` → `Curated villas`, `Best schools` → `Verified schools`, `best offers` → `Curated for {persona}`.
+- **`supabase/functions/vendor-outreach-agent/index.ts`** — полная переписка трёх sequence email-шаблонов: убраны overpromise (`high-net-worth clients`, `great traction`, `we only succeed when you do`, `Premium Clients`) и `Best regards/Best,` заменено на нейтральное `Kind regards,`. Subject 1: `Join myUNO — Connect with Premium Clients in Phuket` → `myUNO — partner invitation for service providers in Phuket`.
+- **`supabase/functions/peylaa-lead-notify/index.ts`** — `эксклюзивный консультант PEYLAA` → `официальный партнёр PEYLAA` (снимает hype-оттенок, точнее юридически).
+
+### Notes
+- M7c (empty-states / `throw new Error` sweep) — ревизия проведена, бесспорных нарушений §14 не выявлено: формулировки `Не удалось …`, `Произошла ошибка`, `Пока пусто` соответствуют канону «factual, no blame, offer next step». Отдельный PR не требуется.
+- AI system prompt'ы (`ai-owner-nurture`, `ai-smart-search`, `concierge-route`, `crm-ai-assistant`, `vendor-acquisition`) сознательно НЕ правились — изменение инструкций для LLM ломает intent extraction и output schema.
+- `Best regards` оставлено только там, где это устоявшаяся email-сigning convention (none after sweep — везде заменили). `best-effort` (technical idiom) — оставлено как было.
+- M7 backlog → закрыто частично (b). Остаются: M7d (content в БД), M7e (alt-text).
+- `src/lib/appVersion.ts` → `3.46.1`.
+
+---
+
 ## [1.14.0] — 2026-04-23
 
 ### Added (M7 · Tone of Voice — tracks A/B/C closed)
