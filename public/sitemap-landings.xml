@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  M6 · Track B.9 — sitemap для persona/cluster лендингов.
+  Только LIVE (status='live') страницы. Draft возвращают 404 на роутах,
+  поэтому индексация для них не нужна.
+  Источник: src/content/landings/personaLandings.ts (LIVE_PERSONA_SLUGS)
+            src/content/landings/clusterLandings.ts  (LIVE_CLUSTER_SLUGS)
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+  <!-- ===== Persona landings (3 live) ===== -->
+  <url>
+    <loc>https://myuno.app/for/tourists</loc>
+    <lastmod>2026-04-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/for/tourists?lang=ru"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/for/tourists?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/for/tourists"/>
+  </url>
+  <url>
+    <loc>https://myuno.app/for/hnw</loc>
+    <lastmod>2026-04-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/for/hnw?lang=ru"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/for/hnw?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/for/hnw"/>
+  </url>
+  <url>
+    <loc>https://myuno.app/for/pet-owners</loc>
+    <lastmod>2026-04-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/for/pet-owners?lang=ru"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/for/pet-owners?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/for/pet-owners"/>
+  </url>
+
+  <!-- ===== Cluster landings (3 live) ===== -->
+  <url>
+    <loc>https://myuno.app/cluster/arrival</loc>
+    <lastmod>2026-04-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/cluster/arrival?lang=ru"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/cluster/arrival?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/cluster/arrival"/>
+  </url>
+  <url>
+    <loc>https://myuno.app/cluster/investment</loc>
+    <lastmod>2026-04-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/cluster/investment?lang=ru"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/cluster/investment?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/cluster/investment"/>
+  </url>
+  <url>
+    <loc>https://myuno.app/cluster/operations</loc>
+    <lastmod>2026-04-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/cluster/operations?lang=ru"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/cluster/operations?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/cluster/operations"/>
+  </url>
+
+</urlset>
