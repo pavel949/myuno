@@ -82,7 +82,7 @@ export function InvestmentCard({
 
           {/* Category */}
           <div className="absolute bottom-2 left-2">
-            <Badge variant="secondary" className="text-[10px] bg-background/90 backdrop-blur-sm">
+            <Badge variant="secondary" className="text-[10px] bg-background/90">
               {categoryIcon} {categoryLabel}
             </Badge>
           </div>
@@ -198,14 +198,14 @@ export function InvestmentCard({
 
         {/* Category badge */}
         <div className="absolute bottom-3 left-3">
-          <Badge variant="secondary" className="bg-background/90 backdrop-blur-sm">
+          <Badge variant="secondary" className="bg-background/90">
             {categoryIcon} {categoryLabel}
           </Badge>
         </div>
 
         {/* Score widget */}
         <div className="absolute top-3 right-3">
-          <div className="bg-background/90 backdrop-blur-sm rounded-none p-2">
+          <div className="bg-background/90 rounded-none p-2">
             <MuunoScoreWidget
               score={project.muuno_score}
               size="sm"

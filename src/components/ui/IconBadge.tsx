@@ -28,7 +28,7 @@ const containerStyles = {
   muted: 'bg-muted/50 text-muted-foreground',
   gradient: '', // Dynamic - set via gradient prop
   ghost: 'bg-transparent text-foreground',
-  glass: 'bg-background/60 backdrop-blur-sm border border-border/50 text-foreground shadow-sm',
+  glass: 'bg-background/60 border border-border/50 text-foreground shadow-sm',
 };
 
 /** strokeWidth by size — bolder at small sizes for clarity */

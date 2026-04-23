@@ -445,7 +445,7 @@ const Install = () => {
 
           {/* Benefits */}
           <motion.div variants={itemVariants}>
-            <Card className="bg-card/50 backdrop-blur border-border/50">
+            <Card className="bg-card/50 border-border/50">
               <CardContent className="p-4">
                 <h3 className="font-semibold mb-3">{t.benefits.title}</h3>
                 <div className="grid grid-cols-2 gap-3">
@@ -465,7 +465,7 @@ const Install = () => {
           {/* Manual Installation Steps (shown when no native prompt) */}
           {!showNativeInstall && (
             <motion.div variants={itemVariants}>
-              <Card className="bg-card/50 backdrop-blur border-border/50">
+              <Card className="bg-card/50 border-border/50">
                 <CardContent className="p-4">
                   <h3 className="font-semibold mb-4 flex items-center gap-2">
                     {isIOS ? (

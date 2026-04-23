@@ -149,7 +149,7 @@ export const ServiceProviderCard = memo(function ServiceProviderCard({
         
         {/* Rating badge */}
         {service.rating && (
-          <div className="absolute top-2.5 right-2.5 flex items-center gap-1 px-2 py-1 rounded-none bg-background/95 backdrop-blur-sm text-xs font-semibold shadow-sm">
+          <div className="absolute top-2.5 right-2.5 flex items-center gap-1 px-2 py-1 rounded-none bg-background/95 text-xs font-semibold shadow-sm">
             <Star className="w-3.5 h-3.5 text-warning fill-warning" />
             {service.rating.toFixed(1)}
           </div>

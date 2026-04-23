@@ -108,7 +108,7 @@ export default function ResaleDetail() {
           <BackButton fallbackPath="/property/resale" />
         </div>
         {images.length > 1 && (
-          <div className="absolute bottom-3 right-3 bg-background/80 backdrop-blur-sm px-2 py-1 rounded-none text-xs">
+          <div className="absolute bottom-3 right-3 bg-background/80 px-2 py-1 rounded-none text-xs">
             {currentImageIdx + 1}/{images.length}
           </div>
         )}
@@ -226,7 +226,7 @@ export default function ResaleDetail() {
       </div>
 
       {/* Fixed CTA */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border p-4 flex gap-2 z-30">
+      <div className="fixed bottom-0 left-0 right-0 bg-background/95 border-t border-border p-4 flex gap-2 z-30">
         <div className="flex-1">
           <p className="text-xs text-muted-foreground">{isRu ? 'Цена' : 'Price'}</p>
           <p className="text-lg font-bold text-foreground">{formatPrice(property.asking_price)}</p>

@@ -51,7 +51,7 @@ export default function GuestMessages() {
     <AppLayout>
       <div className="pb-20">
         {/* Header */}
-        <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border">
+        <div className="sticky top-0 z-40 bg-background/95 border-b border-border">
           <div className="flex items-center gap-3 p-4">
             <BackButton fallbackPath="/" variant="default" size="md" />
             <div className="flex-1">

@@ -142,7 +142,7 @@ export function ReceiptUploadWithOCR({
                 className="w-full max-h-48 object-contain rounded-none bg-muted"
               />
               {isProcessing && (
-                <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center rounded-none">
+                <div className="absolute inset-0 bg-background/80 flex items-center justify-center rounded-none">
                   <div className="flex flex-col items-center gap-2">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                     <span className="text-sm font-medium">

@@ -141,7 +141,7 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
   return (
     <>
       {/* Fixed Bottom Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-lg border-t p-4 z-40">
+      <div className="fixed bottom-0 left-0 right-0 bg-background/95 border-t p-4 z-40">
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="text-xs text-muted-foreground">{language === 'ru' ? 'от' : 'from'}</p>

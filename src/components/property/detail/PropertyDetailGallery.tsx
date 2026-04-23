@@ -92,7 +92,7 @@ export function PropertyDetailGallery({ images, alt, onOpenLightbox }: PropertyD
 
       <button
         onClick={() => onOpenLightbox(0)}
-        className="absolute bottom-4 right-4 px-3 py-1.5 bg-background/90 backdrop-blur-sm rounded-none text-sm font-medium flex items-center gap-2 hover:bg-background transition-colors"
+        className="absolute bottom-4 right-4 px-3 py-1.5 bg-background/90 rounded-none text-sm font-medium flex items-center gap-2 hover:bg-background transition-colors"
       >
         <Eye className="w-4 h-4" />
         {images.length} {isRu ? 'фото' : 'photos'}

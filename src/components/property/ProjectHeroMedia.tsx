@@ -80,7 +80,7 @@ export function ProjectHeroMedia({
           <Button
             variant="secondary"
             size="sm"
-            className="absolute bottom-4 right-4 gap-2 bg-background/80 backdrop-blur-sm"
+            className="absolute bottom-4 right-4 gap-2 bg-background/80"
             onClick={() => setShowVideo(false)}
           >
             <Images className="h-4 w-4" />
@@ -110,7 +110,7 @@ export function ProjectHeroMedia({
           <Button
             variant="secondary"
             size="sm"
-            className="absolute bottom-4 right-4 gap-2 bg-background/80 backdrop-blur-sm"
+            className="absolute bottom-4 right-4 gap-2 bg-background/80"
             onClick={() => setShowVideo(false)}
           >
             <Images className="h-4 w-4" />
@@ -146,7 +146,7 @@ export function ProjectHeroMedia({
           <Button
             variant="secondary"
             size="icon"
-            className="absolute left-3 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-background/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute left-3 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-background/80 opacity-0 group-hover:opacity-100 transition-opacity"
             onClick={handlePrevImage}
           >
             <ChevronLeft className="h-5 w-5" />
@@ -154,7 +154,7 @@ export function ProjectHeroMedia({
           <Button
             variant="secondary"
             size="icon"
-            className="absolute right-3 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-background/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute right-3 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-background/80 opacity-0 group-hover:opacity-100 transition-opacity"
             onClick={handleNextImage}
           >
             <ChevronRight className="h-5 w-5" />
@@ -187,7 +187,7 @@ export function ProjectHeroMedia({
           <Button
             variant="secondary"
             size="sm"
-            className="gap-2 bg-background/80 backdrop-blur-sm"
+            className="gap-2 bg-background/80"
             onClick={() => setShowVideo(true)}
           >
             <Play className="h-4 w-4" />
@@ -198,7 +198,7 @@ export function ProjectHeroMedia({
           <Button
             variant="secondary"
             size="sm"
-            className="gap-2 bg-background/80 backdrop-blur-sm"
+            className="gap-2 bg-background/80"
             onClick={onGalleryOpen}
           >
             <Images className="h-4 w-4" />

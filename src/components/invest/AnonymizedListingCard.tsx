@@ -43,13 +43,13 @@ export function AnonymizedListingCard({ listing }: Props) {
       >
         <span className="text-5xl opacity-80">{assetMeta?.icon ?? '💼'}</span>
         {listing.is_anonymized && (
-          <Badge variant="secondary" className="absolute top-2 right-2 gap-1 backdrop-blur">
+          <Badge variant="secondary" className="absolute top-2 right-2 gap-1">
             <Lock className="h-3 w-3" /> {isRu ? 'Анонимно' : 'Anonymous'}
           </Badge>
         )}
         <Badge
           variant="outline"
-          className="absolute top-2 left-2 bg-background/80 backdrop-blur text-[10px]"
+          className="absolute top-2 left-2 bg-background/80 text-[10px]"
         >
           {isRu ? typeLabel.ru : typeLabel.en}
         </Badge>

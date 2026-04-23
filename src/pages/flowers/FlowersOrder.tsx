@@ -443,7 +443,7 @@ const FlowersOrder = () => {
     return (
       <AppLayout>
         <div className="min-h-screen bg-background">
-          <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border">
+          <div className="sticky top-0 z-40 bg-background/80 border-b border-border">
             <div className="flex items-center gap-3 p-4">
               <BackButton fallbackPath="/flowers" />
               <div className="flex-1">
@@ -474,7 +474,7 @@ const FlowersOrder = () => {
     <AppLayout>
       <div className="min-h-screen bg-background">
         {/* Header */}
-        <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border">
+        <div className="sticky top-0 z-40 bg-background/80 border-b border-border">
           <div className="flex items-center gap-3 p-4">
             <BackButton fallbackPath="/flowers" />
             <div className="flex-1">

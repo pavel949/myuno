@@ -51,7 +51,7 @@ export function MarketHero({ totalProducts, totalCategories, freeDeliveryThresho
       <div className="relative px-4 py-6 max-w-[1536px] mx-auto">
         {/* Header with badge */}
         <div className="flex items-center gap-2 mb-3">
-        <Badge className="bg-white/20 text-white border-0 backdrop-blur-sm">
+        <Badge className="bg-white/20 text-white border-0">
             <Sparkles className="w-3 h-3 mr-1" />
             {isRu ? 'Всё для жизни за рубежом' : 'Everything abroad'}
           </Badge>

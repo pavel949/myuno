@@ -85,7 +85,7 @@ export default function InvestmentDetail() {
 
       <div className="min-h-screen bg-background pb-24">
         {/* Header */}
-        <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/50">
+        <div className="sticky top-0 z-50 bg-background/80 border-b border-border/50">
           <div className="flex items-center justify-between p-4">
             <Button
               variant="ghost"
@@ -347,7 +347,7 @@ export default function InvestmentDetail() {
         </div>
 
         {/* Fixed bottom CTA */}
-        <div className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-lg border-t border-border/50 p-4 z-50">
+        <div className="fixed bottom-0 left-0 right-0 bg-background/80 border-t border-border/50 p-4 z-50">
           <InterestForm
             projectId={project.id}
             projectTitle={title}

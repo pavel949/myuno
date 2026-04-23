@@ -15,5 +15,5 @@ export const ECOSYSTEM_MAIN_SPACING = "space-y-4 md:space-y-6";
 export const ECOSYSTEM_HEADER_TITLE = "text-lg md:text-xl font-bold font-display tracking-tight truncate";
 export const ECOSYSTEM_HEADER_SUBTITLE = "text-xs md:text-sm text-muted-foreground truncate";
 
-export const ECOSYSTEM_STICKY_SURFACE = "bg-background/95 backdrop-blur-md border-b border-border/50";
+export const ECOSYSTEM_STICKY_SURFACE = "bg-background/95 border-b border-border/50";
 

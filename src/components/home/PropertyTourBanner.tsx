@@ -37,7 +37,7 @@ export function PropertyTourBanner() {
         <div className="relative px-5 py-5 md:py-6 flex items-center gap-4">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <span className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-primary-foreground bg-white/25 px-2 py-0.5 rounded-full backdrop-blur-sm">
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-primary-foreground bg-white/25 px-2 py-0.5 rounded-full">
                 <Gift className="w-3 h-3" />
                 {isRu ? 'Бесплатно' : 'Free'}
               </span>
@@ -52,7 +52,7 @@ export function PropertyTourBanner() {
             </p>
           </div>
 
-          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center transition-transform group-hover:translate-x-1">
+          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-white/20 flex items-center justify-center transition-transform group-hover:translate-x-1">
             <ArrowRight className="w-5 h-5 text-primary-foreground" />
           </div>
         </div>

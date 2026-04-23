@@ -46,7 +46,7 @@ export function BackButton({
   const variantClasses = {
     default: 'bg-secondary hover:bg-secondary/80 text-foreground border border-border/50',
     ghost: 'hover:bg-secondary/80 text-muted-foreground hover:text-foreground',
-    overlay: 'bg-black/50 hover:bg-black/70 text-white backdrop-blur-sm',
+    overlay: 'bg-black/50 hover:bg-black/70 text-white',
   };
 
   return (

@@ -129,7 +129,7 @@ export default function QuickIncome() {
   return (
     <div className="min-h-screen bg-background pb-24">
       {/* Header */}
-      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b px-4 py-3">
+      <div className="sticky top-0 z-40 bg-background/95 border-b px-4 py-3">
         <div className="flex items-center gap-3">
           <BackButton fallbackPath={APP_ROUTES.MC_FINANCE} variant="ghost" />
           <div>
@@ -272,7 +272,7 @@ export default function QuickIncome() {
       </div>
 
       {/* Sticky CTA */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-md border-t safe-area-bottom">
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 border-t safe-area-bottom">
         <Button
           className="w-full h-12 text-base font-semibold shadow-lg bg-success hover:bg-success/90"
           disabled={!canSubmit || isSubmitting}

@@ -86,7 +86,7 @@ export function ResalePropertyCard({ property, onClick, className }: ResalePrope
 
         {/* Title type badge */}
         <div className="absolute bottom-2 right-2">
-          <Badge variant="secondary" className="text-[10px] bg-background/80 backdrop-blur-sm">
+          <Badge variant="secondary" className="text-[10px] bg-background/80">
             {TITLE_TYPE_LABELS[property.title_type]?.[isRu ? 'ru' : 'en'] || property.title_type}
           </Badge>
         </div>

@@ -282,7 +282,7 @@ const MarketIndex = () => {
       showFilter={false}
     >
       {/* Filter Ribbon - Quick Actions Row */}
-      <div className="sticky top-0 z-30 -mx-4 px-4 md:px-6 lg:px-8 bg-background/95 backdrop-blur-sm border-b border-border/30">
+      <div className="sticky top-0 z-30 -mx-4 px-4 md:px-6 lg:px-8 bg-background/95 border-b border-border/30">
         <UnifiedFilterRibbon
           items={quickActionItems}
           onSelect={handleQuickActionSelect}

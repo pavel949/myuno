@@ -59,7 +59,7 @@ export default function ResaleIndex() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3">
+      <div className="sticky top-0 z-20 bg-background/95 border-b border-border/50 px-4 py-3">
         <div className="flex items-center justify-between mb-3">
           <div>
             <h1 className="text-lg font-bold text-foreground">

@@ -98,7 +98,7 @@ export function PWAUpdatePrompt() {
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
           className="fixed bottom-20 left-4 right-4 z-[100] md:left-auto md:right-6 md:bottom-6 md:w-96"
         >
-          <div className="bg-background/95 backdrop-blur-xl border-2 border-primary/50 rounded-none p-4 shadow-2xl shadow-primary/20">
+          <div className="bg-background/95 border-2 border-primary/50 rounded-none p-4 shadow-2xl shadow-primary/20">
             <div className="flex items-start gap-3">
               <div className="flex-shrink-0 w-12 h-12 rounded-none gradient-gold flex items-center justify-center">
                 <Sparkles className="w-6 h-6 text-primary-foreground" />

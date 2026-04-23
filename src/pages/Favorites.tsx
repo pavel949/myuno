@@ -300,13 +300,13 @@ export default function Favorites() {
                               e.stopPropagation();
                               handleRemove(item);
                             }}
-                            className="absolute top-2 right-2 p-1.5 bg-background/80 backdrop-blur-sm rounded-full hover:bg-destructive hover:text-destructive-foreground transition-colors"
+                            className="absolute top-2 right-2 p-1.5 bg-background/80 rounded-full hover:bg-destructive hover:text-destructive-foreground transition-colors"
                           >
                             <Heart className="w-4 h-4 fill-current" />
                           </button>
                           <Badge 
                             variant="secondary" 
-                            className="absolute bottom-2 left-2 text-[10px] bg-background/80 backdrop-blur-sm"
+                            className="absolute bottom-2 left-2 text-[10px] bg-background/80"
                           >
                             {getTypeLabel(item.item_type)}
                           </Badge>

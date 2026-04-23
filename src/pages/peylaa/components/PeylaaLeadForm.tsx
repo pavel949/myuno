@@ -67,7 +67,7 @@ export function PeylaaLeadForm({ source, utm, unitId, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center">
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/70" onClick={onClose} />
       <div className="relative bg-[#141414] border border-white/10 rounded-none sm:rounded-none w-full max-w-md max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-white/10">

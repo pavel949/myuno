@@ -132,12 +132,12 @@ const FlowerShopDetail = () => {
           <img src={shop.cover_image || PLACEHOLDER_IMAGES.flower} alt={shopName} className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
           <div className="absolute top-0 left-0 right-0 flex items-center justify-between p-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate('/flowers')} className="bg-black/20 backdrop-blur-sm text-white hover:bg-black/40"><ArrowLeft className="w-5 h-5" /></Button>
+            <Button variant="ghost" size="icon" onClick={() => navigate('/flowers')} className="bg-black/20 text-white hover:bg-black/40"><ArrowLeft className="w-5 h-5" /></Button>
             <div className="flex gap-2">
-              <Button variant="ghost" size="icon" onClick={() => setIsFavorite(!isFavorite)} className="bg-black/20 backdrop-blur-sm text-white hover:bg-black/40">
+              <Button variant="ghost" size="icon" onClick={() => setIsFavorite(!isFavorite)} className="bg-black/20 text-white hover:bg-black/40">
                 <Heart className={cn("w-5 h-5", isFavorite && "fill-red-500 text-red-500")} />
               </Button>
-              <Button variant="ghost" size="icon" className="bg-black/20 backdrop-blur-sm text-white hover:bg-black/40"><Share2 className="w-5 h-5" /></Button>
+              <Button variant="ghost" size="icon" className="bg-black/20 text-white hover:bg-black/40"><Share2 className="w-5 h-5" /></Button>
             </div>
           </div>
         </div>

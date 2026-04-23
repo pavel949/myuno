@@ -207,7 +207,7 @@ const GymDetail = () => {
 
       {/* Fixed Bottom CTA */}
       {currentPrice && (
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border">
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 border-t border-border">
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="text-sm text-muted-foreground">{language === 'ru' ? currentPrice.labelRu : currentPrice.labelEn}</p>

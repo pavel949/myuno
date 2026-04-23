@@ -100,7 +100,7 @@ export const ProfessionalCategoryBanner: React.FC<ProfessionalCategoryBannerProp
                     {language === 'ru' ? heroCategory.name_ru : heroCategory.name_en}
                   </h2>
                   {products.length > 0 && (
-                    <Badge className="bg-white/20 backdrop-blur-sm text-white border-0 text-xs">
+                    <Badge className="bg-white/20 text-white border-0 text-xs">
                       {getProductCount(heroCategory.slug)} {language === 'ru' ? 'шт' : 'items'}
                     </Badge>
                   )}
@@ -111,7 +111,7 @@ export const ProfessionalCategoryBanner: React.FC<ProfessionalCategoryBannerProp
               </div>
               
               {/* Arrow indicator */}
-              <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center transition-all duration-300 group-hover:bg-white/30 group-hover:scale-110">
+              <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center transition-all duration-300 group-hover:bg-white/30 group-hover:scale-110">
                 <ArrowRight className="w-5 h-5 text-white transition-transform duration-300 group-hover:translate-x-0.5" />
               </div>
             </div>
@@ -146,7 +146,7 @@ export const ProfessionalCategoryBanner: React.FC<ProfessionalCategoryBannerProp
                 {/* Product count badge */}
                 {products.length > 0 && (
                   <div className="flex justify-end">
-                    <Badge className="bg-white/20 backdrop-blur-sm text-white border-0 text-[10px] px-1.5 py-0.5">
+                    <Badge className="bg-white/20 text-white border-0 text-[10px] px-1.5 py-0.5">
                       {getProductCount(category.slug)}
                     </Badge>
                   </div>
@@ -166,7 +166,7 @@ export const ProfessionalCategoryBanner: React.FC<ProfessionalCategoryBannerProp
               </div>
               
               {/* Subtle arrow */}
-              <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                 <ChevronRight className="w-3 h-3 text-white" />
               </div>
             </div>

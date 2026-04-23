@@ -63,7 +63,7 @@ export function PartnerCTACard() {
           <div className="flex items-start justify-between">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-none bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                <div className="w-10 h-10 rounded-none bg-white/20 flex items-center justify-center">
                   <TrendingUp className="w-5 h-5 text-white" />
                 </div>
                 <div>
@@ -92,7 +92,7 @@ export function PartnerCTACard() {
               return (
                 <div 
                   key={idx}
-                  className="flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-full px-3 py-1.5"
+                  className="flex items-center gap-1.5 bg-white/15 rounded-full px-3 py-1.5"
                 >
                   <Icon className="w-3.5 h-3.5 text-white" />
                   <span className="text-white text-xs font-medium">

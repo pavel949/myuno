@@ -81,7 +81,7 @@ export const TopBar = memo(function TopBar({
         className={cn(
           'sticky top-0 z-50 w-full border-b border-border transition-all duration-300',
           scrolled
-            ? 'bg-[hsl(var(--bg-surface)/0.95)] backdrop-blur-xl shadow-[0_1px_0_hsl(var(--border))]'
+            ? 'bg-[hsl(var(--bg-surface)/0.95)] shadow-[0_1px_0_hsl(var(--border))]'
             : 'bg-[hsl(var(--bg-surface))]',
           className,
         )}

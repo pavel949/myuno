@@ -65,12 +65,12 @@ export function CommercialPropertyCard({ property, className }: Props) {
         )}
         {/* Top-left: type + intent */}
         <div className="absolute top-3 left-3 flex gap-1.5">
-          <Badge className="bg-background/95 text-foreground hover:bg-background backdrop-blur-sm">
+          <Badge className="bg-background/95 text-foreground hover:bg-background">
             {typeLabel}
           </Badge>
           <Badge
             className={cn(
-              'backdrop-blur-sm',
+              '',
               isRent
                 ? 'bg-primary/95 text-white hover:bg-primary'
                 : 'bg-accent/95 text-white hover:bg-accent',
@@ -81,7 +81,7 @@ export function CommercialPropertyCard({ property, className }: Props) {
         </div>
         {/* Top-right: verified */}
         {property.is_verified && (
-          <Badge className="absolute top-3 right-3 bg-success/95 text-white hover:bg-success backdrop-blur-sm gap-1">
+          <Badge className="absolute top-3 right-3 bg-success/95 text-white hover:bg-success gap-1">
             <BadgeCheck className="w-3 h-3" />
             {isRu ? 'Проверено' : 'Verified'}
           </Badge>

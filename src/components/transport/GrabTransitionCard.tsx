@@ -35,7 +35,7 @@ export function GrabTransitionCard({ pickupAddress, destinationAddress, classNam
         <div className="flex items-start gap-4">
           {/* Grab Logo */}
           <div className="flex-shrink-0">
-            <div className="w-14 h-14 rounded-none bg-white/20 backdrop-blur-sm flex items-center justify-center">
+            <div className="w-14 h-14 rounded-none bg-white/20 flex items-center justify-center">
               <span className="text-white font-bold text-2xl">G</span>
             </div>
           </div>

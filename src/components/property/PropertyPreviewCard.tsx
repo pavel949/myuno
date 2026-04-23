@@ -77,7 +77,7 @@ export function PropertyPreviewCard({ data, className, variant = 'search' }: Pro
                 const highlight = PROPERTY_HIGHLIGHTS.find(hl => hl.id === h);
                 if (!highlight) return null;
                 return (
-                  <Badge key={h} variant="secondary" className="text-[10px] py-0.5 px-1.5 bg-background/80 backdrop-blur-sm">
+                  <Badge key={h} variant="secondary" className="text-[10px] py-0.5 px-1.5 bg-background/80">
                     {highlight.icon} {isRu ? highlight.labelRu : highlight.labelEn}
                   </Badge>
                 );

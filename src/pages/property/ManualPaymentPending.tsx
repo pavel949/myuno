@@ -162,7 +162,7 @@ export default function ManualPaymentPending() {
 
   return (
     <div className="pb-12">
-        <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-md border-b">
+        <div className="sticky top-0 z-20 bg-background/95 border-b">
           <div className="flex items-center gap-4 p-4">
             <BackButton fallbackPath="/" variant="ghost" />
             <h1 className="text-lg font-display font-bold">

@@ -176,14 +176,14 @@ const BouquetDetail = () => {
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
           <div className="absolute top-0 left-0 right-0 flex items-center justify-between p-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate('/flowers')} className="bg-black/20 backdrop-blur-sm text-white hover:bg-black/40">
+            <Button variant="ghost" size="icon" onClick={() => navigate('/flowers')} className="bg-black/20 text-white hover:bg-black/40">
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div className="flex gap-2">
-              <Button variant="ghost" size="icon" onClick={() => setIsFavorite(!isFavorite)} className="bg-black/20 backdrop-blur-sm text-white hover:bg-black/40">
+              <Button variant="ghost" size="icon" onClick={() => setIsFavorite(!isFavorite)} className="bg-black/20 text-white hover:bg-black/40">
                 <Heart className={cn("w-5 h-5", isFavorite && "fill-red-500 text-red-500")} />
               </Button>
-              <Button variant="ghost" size="icon" className="bg-black/20 backdrop-blur-sm text-white hover:bg-black/40">
+              <Button variant="ghost" size="icon" className="bg-black/20 text-white hover:bg-black/40">
                 <Share2 className="w-5 h-5" />
               </Button>
             </div>
@@ -197,7 +197,7 @@ const BouquetDetail = () => {
               </Badge>
             )}
             {socialProof && (
-              <Badge className="bg-background/90 text-foreground text-xs backdrop-blur-sm border-0">
+              <Badge className="bg-background/90 text-foreground text-xs border-0">
                 <Star className="w-3 h-3 mr-1 text-accent" />
                 {isRu 
                   ? socialProof === 'Most ordered this week' ? 'Самый заказываемый на этой неделе'
@@ -419,7 +419,7 @@ const BouquetDetail = () => {
         </div>
 
         {/* Sticky Bottom Bar */}
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-xl border-t border-border z-50">
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 border-t border-border z-50">
           <div className="flex items-center gap-3 max-w-[1536px] mx-auto">
             {quantity === 0 ? (
               <>

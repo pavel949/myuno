@@ -26,7 +26,7 @@ export function WorkspaceHeader({
   return (
     <header
       className={cn(
-        'sticky top-0 z-40 flex h-14 min-w-0 items-center gap-2 sm:gap-4 border-b border-border bg-background/95 px-3 sm:px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60',
+        'sticky top-0 z-40 flex h-14 min-w-0 items-center gap-2 sm:gap-4 border-b border-border bg-background/95 px-3 sm:px-4 supports-[backdrop-filter]:bg-background/60',
         className
       )}
     >

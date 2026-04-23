@@ -32,11 +32,11 @@ export const FeaturedBanner: React.FC<FeaturedBannerProps> = ({
       <div className="relative z-10">
         {/* Top badges */}
         <div className="flex items-center gap-2 mb-3">
-          <Badge className="bg-white/20 backdrop-blur-sm border-0 text-white text-xs font-medium">
+          <Badge className="bg-white/20 border-0 text-white text-xs font-medium">
             <Sparkles className="w-3 h-3 mr-1" />
             {language === 'ru' ? 'Пхукет' : 'Phuket'}
           </Badge>
-          <Badge className="bg-white/20 backdrop-blur-sm border-0 text-white text-xs">
+          <Badge className="bg-white/20 border-0 text-white text-xs">
             <Plane className="w-3 h-3 mr-1" />
             {language === 'ru' ? '+Доставка домой' : '+Ship Home'}
           </Badge>
@@ -79,18 +79,18 @@ export const FeaturedBanner: React.FC<FeaturedBannerProps> = ({
         {/* Feature pills */}
         <div className="flex flex-wrap gap-2">
           {freeDeliveryThreshold && (
-            <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-medium">
+            <div className="flex items-center gap-1.5 bg-white/10 px-3 py-1.5 rounded-full text-xs font-medium">
               <Truck className="w-3.5 h-3.5" />
               {language === 'ru' ? `Бесплатно от ฿${freeDeliveryThreshold}` : `Free from ฿${freeDeliveryThreshold}`}
             </div>
           )}
           {estimatedTime && (
-            <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-medium">
+            <div className="flex items-center gap-1.5 bg-white/10 px-3 py-1.5 rounded-full text-xs font-medium">
               <Clock className="w-3.5 h-3.5" />
               {estimatedTime} {language === 'ru' ? 'мин' : 'min'}
             </div>
           )}
-          <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-medium">
+          <div className="flex items-center gap-1.5 bg-white/10 px-3 py-1.5 rounded-full text-xs font-medium">
             <Shield className="w-3.5 h-3.5" />
             {language === 'ru' ? 'Гарантия' : 'Guarantee'}
           </div>

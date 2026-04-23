@@ -77,7 +77,7 @@ export function FeaturedProvidersCarousel() {
               
               {/* Rating */}
               {provider.rating && (
-                <div className="absolute bottom-2 left-2 bg-background/90 backdrop-blur-sm px-2 py-1 rounded-none flex items-center gap-1">
+                <div className="absolute bottom-2 left-2 bg-background/90 px-2 py-1 rounded-none flex items-center gap-1">
                   <Star className="w-3.5 h-3.5 fill-primary text-primary" />
                   <span className="text-xs font-bold">{provider.rating.toFixed(1)}</span>
                   {provider.review_count && (

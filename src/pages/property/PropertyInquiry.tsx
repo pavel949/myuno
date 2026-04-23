@@ -299,7 +299,7 @@ export default function PropertyInquiry() {
   return (
     <div className="pb-28">
         {/* Sticky Header */}
-        <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-md border-b">
+        <div className="sticky top-0 z-20 bg-background/95 border-b">
           <div className="flex items-center gap-4 p-4">
             <BackButton fallbackPath={editUrl} variant="ghost" />
             <h1 className="text-lg font-display font-bold">
@@ -723,7 +723,7 @@ export default function PropertyInquiry() {
 
         {/* ===== UNIFIED STICKY FOOTER (A3) — visible for both instant + request modes ===== */}
         {user && isFormValid && (
-          <div className="fixed bottom-0 left-0 right-0 z-30 bg-background/95 backdrop-blur-md border-t p-4 safe-area-bottom">
+          <div className="fixed bottom-0 left-0 right-0 z-30 bg-background/95 border-t p-4 safe-area-bottom">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-baseline gap-1">
                 <span className="text-sm font-medium">{formatPrice(pricing.total)}</span>

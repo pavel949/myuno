@@ -578,7 +578,7 @@ export default function AdminProjects() {
                     <Checkbox
                       checked={isSelected}
                       onCheckedChange={() => toggleSelect(project.id)}
-                      className="bg-background/80 backdrop-blur"
+                      className="bg-background/80"
                     />
                   </div>
                   <div className="cursor-pointer w-full h-full" onClick={() => handleOpenEdit(project)}>

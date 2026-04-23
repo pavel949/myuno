@@ -57,10 +57,10 @@ export function YachtImageGallery({ images, name, isVerified, isFeatured }: Yach
       </div>
 
       <div className="absolute top-4 right-4 flex gap-2">
-        <button className="w-10 h-10 rounded-full bg-background/70 backdrop-blur-sm flex items-center justify-center text-foreground">
+        <button className="w-10 h-10 rounded-full bg-background/70 flex items-center justify-center text-foreground">
           <Share2 className="w-5 h-5" />
         </button>
-        <button className="w-10 h-10 rounded-full bg-background/70 backdrop-blur-sm flex items-center justify-center text-foreground">
+        <button className="w-10 h-10 rounded-full bg-background/70 flex items-center justify-center text-foreground">
           <Heart className="w-5 h-5" />
         </button>
       </div>

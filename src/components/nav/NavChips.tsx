@@ -108,7 +108,7 @@ export function NavChips({
 
   return (
     <div
-      className="sticky z-30 bg-[hsl(var(--bg-base)/0.85)] backdrop-blur-md border-b border-border/40"
+      className="sticky z-30 bg-[hsl(var(--bg-base)/0.85)] border-b border-border/40"
       style={{ top: stickyTop }}
     >
       {content}

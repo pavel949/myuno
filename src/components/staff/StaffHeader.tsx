@@ -44,7 +44,7 @@ export function StaffHeader() {
   });
 
   return (
-    <header className="flex h-14 items-center gap-2 border-b bg-background/95 backdrop-blur px-4">
+    <header className="flex h-14 items-center gap-2 border-b bg-background/95 px-4">
       <SidebarTrigger className="-ml-1" />
 
       <div className="h-4 w-px bg-border mx-1" />

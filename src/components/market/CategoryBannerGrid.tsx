@@ -81,7 +81,7 @@ export const CategoryBannerGrid: React.FC<CategoryBannerGridProps> = ({
             </p>
             
             {/* Arrow indicator */}
-            <div className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+            <div className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
               <ChevronRight className="w-4 h-4 text-white" />
             </div>
           </div>

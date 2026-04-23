@@ -106,7 +106,7 @@ export default function CleaningDetail() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur border-t p-4 z-50">
+        <div className="fixed bottom-0 left-0 right-0 bg-background/95 border-t p-4 z-50">
           <div className="flex items-center justify-between gap-4 max-w-lg mx-auto">
             <div>
               <p className="text-sm text-muted-foreground">
