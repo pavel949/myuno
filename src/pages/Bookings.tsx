@@ -251,6 +251,31 @@ export default function Bookings() {
             );
             return { ...prev, [row.booking_id]: next };
           });
+
+          // Auto-expand the timeline so the user can see the new event flash in.
+          setExpandedTimelines((prev) =>
+            prev[row.booking_id] ? prev : { ...prev, [row.booking_id]: true },
+          );
+
+          // Mark the new event as highlighted; clear after the animation completes.
+          setHighlightedEventIds((prev) => {
+            if (prev.has(row.id)) return prev;
+            const next = new Set(prev);
+            next.add(row.id);
+            return next;
+          });
+          const existingTimer = highlightTimersRef.current.get(row.id);
+          if (existingTimer) clearTimeout(existingTimer);
+          const timer = setTimeout(() => {
+            setHighlightedEventIds((prev) => {
+              if (!prev.has(row.id)) return prev;
+              const next = new Set(prev);
+              next.delete(row.id);
+              return next;
+            });
+            highlightTimersRef.current.delete(row.id);
+          }, 2600);
+          highlightTimersRef.current.set(row.id, timer);
         },
       )
       .on(
