@@ -122,7 +122,7 @@
 | B.2 | Конфиг `personaLandings.ts` — 25 объектов (все 25 как `draft` на этапе B.2; контент live P1/P9/P13 → B.7) | `src/content/landings/personaLandings.ts` + `__tests__/personaLandings.test.ts` | B.1 | ✅ done (2026-04-23, 12 тестов) |
 | B.3 | Конфиг `clusterLandings.ts` — 10 объектов (все 10 как `draft` на этапе B.3 + `relatedPersonas` по матрице §6; контент live A/D/F → B.8) | `src/content/landings/clusterLandings.ts` + `__tests__/clusterLandings.test.ts` | B.1 | ✅ done (2026-04-23, 15 тестов) |
 | B.4 | Динамический route `/for/:persona` → `PersonaLandingPage.tsx`. Если `status === 'draft'` → 404 | `src/pages/landings/PersonaLandingPage.tsx`, route в `AnimatedRoutes.tsx` | B.2 | ✅ done (2026-04-23, 5 тестов) |
-| B.5 | Динамический route `/cluster/:cluster` → `ClusterLandingPage.tsx`. То же поведение draft → 404 | `src/pages/landings/ClusterLandingPage.tsx` | B.3 |
+| B.5 | Динамический route `/cluster/:cluster` → `ClusterLandingPage.tsx`. То же поведение draft → 404 + cross-link «По персонам» (фильтрует через `isLivePersonaLanding`) | `src/pages/landings/ClusterLandingPage.tsx`, route в `AnimatedRoutes.tsx` | B.3 | ✅ done (2026-04-23, 8 тестов) |
 | B.6 | Компонент `<LandingSeoHead landing={...} type="persona"\|"cluster" />` — meta/OG/schema.org Service/hreflang RU↔EN | `src/components/seo/LandingSeoHead.tsx` | B.4, B.5 |
 | B.7 | Контент 3 persona-лендингов (P1, P9, P13) — RU+EN, по prompt'ам §M6 канона | в `personaLandings.ts` | B.2 |
 | B.8 | Контент 3 cluster-лендингов (A Arrival, D Investment, F Operations) | в `clusterLandings.ts` | B.3 |
