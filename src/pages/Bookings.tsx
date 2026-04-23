@@ -258,19 +258,30 @@ export default function Bookings() {
           // limits us to the user's own rows, but this avoids cross-user noise).
           if (!bookingsRef.current.some((b) => b.id === row.booking_id)) return;
 
+          const newEvent: BookingStatusEvent = {
+            id: row.id,
+            from_status: row.from_status,
+            to_status: row.to_status,
+            notes: row.notes,
+            created_at: row.created_at,
+          };
+
           setStatusHistory((prev) => {
             const existing = prev[row.booking_id] ?? [];
             if (existing.some((e) => e.id === row.id)) return prev;
-            const next = [
-              ...existing,
-              {
-                id: row.id,
-                from_status: row.from_status,
-                to_status: row.to_status,
-                notes: row.notes,
-                created_at: row.created_at,
-              },
-            ].sort(
+            const next = [...existing, newEvent].sort(
+              (a, b) =>
+                new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+            );
+            return { ...prev, [row.booking_id]: next };
+          });
+
+          // Mirror the same merge into the module-level cache so the next
+          // mount of the screen sees the realtime event without refetching.
+          updateCachedStatusHistory(user.id, (prev) => {
+            const existing = prev[row.booking_id] ?? [];
+            if (existing.some((e) => e.id === row.id)) return prev;
+            const next = [...existing, newEvent].sort(
               (a, b) =>
                 new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
             );
