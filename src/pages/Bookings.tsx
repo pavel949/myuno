@@ -401,7 +401,7 @@ export default function Bookings() {
               title={language === 'ru' ? 'Ошибка загрузки' : 'Failed to load'}
               description={language === 'ru' ? 'Потяните вниз, чтобы повторить' : 'Pull down to retry'}
               action={
-                <PremiumButton onClick={loadBookings}>
+                <PremiumButton onClick={handleRetry}>
                   {language === 'ru' ? 'Повторить' : 'Retry'}
                 </PremiumButton>
               }
