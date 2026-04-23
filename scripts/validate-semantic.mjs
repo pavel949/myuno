@@ -140,7 +140,7 @@ function auditLandingFile(file, kind /* persona | cluster */) {
 // Forbidden synonyms scan (lightweight — only files in commercial dirs)
 // ────────────────────────────────────────────────────────────────────
 
-const COMMERCIAL_RE = /\/(landings|content\/landings|content\/semantic|guides|for|services|clearview|landing|knowledge|supabase\/functions)\//;
+const COMMERCIAL_RE = /\/(landings|content\/landings|content\/semantic|guides|for|services|clearview|landing|knowledge|i18n|supabase\/functions)\//;
 
 // The semantic dictionary itself legitimately contains every forbidden term as
 // data (it defines them). Skip those files for the synonym scan to avoid
