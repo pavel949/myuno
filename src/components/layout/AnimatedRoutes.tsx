@@ -56,6 +56,9 @@ const WelcomeLanding = React.lazy(() => import('@/pages/WelcomeLanding'));
 // Property Hub wrapper
 const PropertyHub = React.lazy(() => import('@/pages/property/PropertyHub'));
 
+// M6 · Track B.4 — persona landing route `/for/:persona`
+const PersonaLandingPage = React.lazy(() => import('@/pages/landings/PersonaLandingPage'));
+
 // Home router: guests see marketing landing, authed users see Index
 const HomeRouter = () => {
   const { user, isLoading } = useAuth();
@@ -898,7 +901,11 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/my-property/statements" element={<AuthGuard><MCPortalGuard><LazyPage><Pages.OwnerStatementsInbox /></LazyPage></MCPortalGuard></AuthGuard>} />
         <Route path="/my-property/signatures" element={<AuthGuard><MCPortalGuard><LazyPage><Pages.OwnerSignaturesInbox /></LazyPage></MCPortalGuard></AuthGuard>} />
         <Route path="/my-property/:propertyId" element={<AuthGuard><MCPortalGuard><LazyPage><Pages.OwnerPortalPropertyView /></LazyPage></MCPortalGuard></AuthGuard>} />
-        
+
+        {/* ── M6 Persona Landings (B.4) ── */}
+        {/* Draft slugs and unknown slugs return 404 inside the page itself. */}
+        <Route path="/for/:persona" element={<LazyPage><PersonaLandingPage /></LazyPage>} />
+
         {/* ── Catch-all ── */}
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
       </Routes>
