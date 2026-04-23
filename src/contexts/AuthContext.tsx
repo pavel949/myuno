@@ -12,6 +12,7 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { getPasswordResetRedirectUrl } from '@/lib/config/routes';
 import { clearAdminCache } from '@/hooks/useIsAdmin';
+import { readAnonSessionId, clearAnonSessionId } from '@/lib/segmentation/anonSession';
 
 interface SignUpResult {
   error: Error | null;
@@ -25,6 +26,12 @@ interface SignUpData {
   password: string;
   fullName?: string;
   phone?: string;
+  /**
+   * Optional override. If omitted, signUp() reads the id from localStorage
+   * (`myuno-anon-session-id`). Passed through to `auth.signUp({ options.data })`
+   * so the `handle_new_user` trigger can claim anonymous onboarding data.
+   */
+  anonSessionId?: string;
 }
 
 interface AuthContextType {
@@ -138,9 +145,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [clearStoredAuthSession]);
 
-  const signUp = useCallback(async ({ email, password, fullName, phone }: SignUpData): Promise<SignUpResult> => {
+  const signUp = useCallback(async ({ email, password, fullName, phone, anonSessionId }: SignUpData): Promise<SignUpResult> => {
     const redirectUrl = `${window.location.origin}/`;
-    
+
+    // M5 H.2 — read anon onboarding session id so handle_new_user() can
+    // claim concierge_sessions / persona_detection_log on the new user.
+    const resolvedAnonId = anonSessionId ?? readAnonSessionId();
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -149,6 +160,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         data: {
           full_name: fullName || '',
           phone: phone || '',
+          ...(resolvedAnonId ? { anon_session_id: resolvedAnonId } : {}),
         },
       },
     });
@@ -160,7 +172,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .update({ phone })
         .eq('id', data.user.id);
     }
-    
+
+    // Anon id is now claimed by the trigger — clear local copy so future
+    // sessions on this device start fresh.
+    if (!error && data?.user && resolvedAnonId) {
+      clearAnonSessionId();
+    }
+
     return {
       error: error as Error | null,
       data: data ? { user: data.user, session: data.session } : undefined,
