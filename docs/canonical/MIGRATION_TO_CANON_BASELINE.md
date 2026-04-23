@@ -283,10 +283,19 @@ fontFamily: {
 2. Глобальный 0px радиус для legacy `rounded-*` (на случай 3rd-party HTML).
 3. Gradient stops для `from-*-*`/`to-*-*` — на случай embedded external content.
 
-### 5 · Verification
+### 5 · Verification (after follow-up)
 - `npx tsc --noEmit` → exit 0.
 - `npm run build` → exit 0, PWA precache 2139 entries.
-- ESLint regression rules (Phase 4) теперь не выдают visual warnings на `src/**`.
+- ESLint canon visual rules: **0 warnings** на `src/**` (legacy palette / glassmorphism / radii).
+- Остаточные ESLint warnings — только canonical-synonyms / tone-of-voice / `@typescript-eslint/no-explicit-any`, не связаны с визуальной системой.
+
+### 6 · Glassmorphism cleanup follow-up
+ESLint поймал 209 остаточных `backdrop-blur` — все были голым токеном без суффикса (codemod Phase 5 матчил `backdrop-blur-{sm,md,…}` с обязательным дефисом).
+
+**`scripts/canon-strip-glassmorphism.mjs`** — отдельный sweep, удалил 209 токенов из 144 файлов. После прохода:
+- Остаток `backdrop-blur*` в коде: **0**.
+- `canon-overrides.css §1` (глобальное подавление) остаётся как safety-net против внешнего HTML.
+
 
 ### Итог по миграции (Phases 1-5)
 | Phase | Scope | Status |
