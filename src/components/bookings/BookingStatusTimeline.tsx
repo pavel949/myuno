@@ -29,6 +29,8 @@ interface BookingStatusTimelineProps {
   createdAt?: string;
   className?: string;
   compact?: boolean;
+  /** Event IDs that should briefly flash to draw attention (e.g. just-arrived realtime events). */
+  highlightIds?: Set<string> | string[];
 }
 
 const STATUS_CONFIG: Record<
