@@ -28,27 +28,13 @@ import {
 } from '@/lib/segmentation/detectPersona';
 import { recommendServices, type ServiceRecommendation } from '@/lib/segmentation/recommendServices';
 import { createErrorHandler } from '@/lib/errorHandler';
+import { getOrCreateAnonSessionId } from '@/lib/segmentation/anonSession';
 import type { LifecycleStage } from '@/types/canonical';
 
 export interface CanonicalOnboardingResult {
   proposal: PersonaDetectionProposal;
   source: 'ai_v1' | 'rules_v1';
   recommendations: ServiceRecommendation[];
-}
-
-const ANON_KEY = 'myuno-anon-session-id';
-
-function getOrCreateAnonId(): string {
-  try {
-    let id = localStorage.getItem(ANON_KEY);
-    if (!id) {
-      id = crypto.randomUUID();
-      localStorage.setItem(ANON_KEY, id);
-    }
-    return id;
-  } catch {
-    return crypto.randomUUID();
-  }
 }
 
 export function useCanonicalOnboarding() {
@@ -94,7 +80,7 @@ export function useCanonicalOnboarding() {
 
     let finalProposal: PersonaDetectionProposal = localProposal;
     let source: 'ai_v1' | 'rules_v1' = 'rules_v1';
-    const anonId = user?.id ? null : getOrCreateAnonId();
+    const anonId = user?.id ? null : getOrCreateAnonSessionId();
 
     try {
       // 1. Authed → ask the AI orchestrator and let it merge into profiles

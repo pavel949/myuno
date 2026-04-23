@@ -39,16 +39,7 @@ export interface OnboardingResult {
   reasoning: { en: string; ru: string };
 }
 
-const ANON_KEY = 'myuno-anon-session-id';
-
-function getOrCreateAnonId(): string {
-  let id = localStorage.getItem(ANON_KEY);
-  if (!id) {
-    id = crypto.randomUUID();
-    localStorage.setItem(ANON_KEY, id);
-  }
-  return id;
-}
+import { getOrCreateAnonSessionId as getOrCreateAnonId } from '@/lib/segmentation/anonSession';
 
 /** Deterministic routing rules — first matching rule wins for primary CTA. */
 function recommend(answers: Required<StartAnswers>): OnboardingResult['items'] {
