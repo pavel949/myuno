@@ -100,8 +100,18 @@ export default function Bookings() {
   const [statusHistory, setStatusHistory] = useState<Record<string, BookingStatusEvent[]>>({});
   const [historyLoading, setHistoryLoading] = useState(false);
   const [expandedTimelines, setExpandedTimelines] = useState<Record<string, boolean>>({});
+  const [highlightedEventIds, setHighlightedEventIds] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
+  const highlightTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+
+  // Cleanup any pending highlight timers on unmount.
+  useEffect(() => {
+    return () => {
+      highlightTimersRef.current.forEach((t) => clearTimeout(t));
+      highlightTimersRef.current.clear();
+    };
+  }, []);
 
   const loadBookings = useCallback(async () => {
     if (!user) return;
