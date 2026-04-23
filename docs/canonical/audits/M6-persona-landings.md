@@ -1,6 +1,6 @@
 # M6 — Persona-aware Home + Landings (25 + 10)
 
-**Status:** ✅ Track D closed (v1.11.0) · ✅ Track B closed (v1.12.0) · 🟡 Track C in progress (C.1, C.2, C.5 done — v1.12.1; C.3/C.4/C.6/C.7 pending)
+**Status:** ✅ M6 closed (v1.13.0) — Track D (v1.11.0) · Track B (v1.12.0) · Track C (v1.13.0). C.3 (intakes trigger) deferred — N/A: таблицы `intakes` нет в схеме.
 **Date:** 2026-04-23 (audit)
 **Owner:** Pavel + AI engineer
 **Source:** `04-implementation-protocol.md §M6` · `audits/M5-hardening.md` (out-of-scope items)
@@ -140,13 +140,13 @@
 
 | # | Шаг | Файлы | Зависимости |
 |---|---|---|---|
-| C.1 | Edge Function `canonical-lifecycle-recompute` — для одного `user_id`: читает `bookings`, `orders`, `total_days_in_thailand`, `visits_count`, `visa_type/expires_at` → пересчитывает `lifecycle_stage` по матрице §1; пишет в `profiles` + appendit `lifecycle_stage_history` | `supabase/functions/canonical-lifecycle-recompute/` | M2 (history jsonb) |
-| C.2 | DB trigger на `bookings` AFTER INSERT/UPDATE WHERE `status = 'confirmed'` → asynchronous вызов C.1 (через `net.http_post` или `pg_notify`) | новая миграция | C.1 |
-| C.3 | DB trigger на `intakes` AFTER INSERT WHERE `status = 'submitted'` → C.1 + asynchronous вызов `canonical-persona-detect` если `detected_persona IS NULL` | новая миграция | C.1, M4 |
-| C.4 | pg_cron job (daily 03:00 ICT) — проходит по active `profiles` с `updated_at < now() - interval '7 days'` и вызывает C.1 батчами по 100 | миграция + cron | C.1 |
-| C.5 | Unit-тесты матрицы lifecycle (8 переходов): tourist → snowbird (2-й сезон), snowbird → settler (180+ дней), settler → resident (2 года), resident → absentee (visa expired), и т.д. | `__tests__/recomputeLifecycle.test.ts` | C.1 |
-| C.6 | Observability: логирование переходов в `lifecycle_stage_history` с `{ from, to, source: 'cron'\|'booking'\|'intake', at }` | в C.1 | C.1 |
-| C.7 | CHANGELOG → v1.13.0, статус трека C | docs | все выше |
+| C.1 | Edge Function `canonical-lifecycle-recompute` — для одного `user_id`: читает `bookings`, `total_days_in_thailand`, `visits_count`, `visa_type/expires_at` → пересчитывает `lifecycle_stage` по матрице §1; пишет в `profiles` + appendit `lifecycle_stage_history` | `supabase/functions/canonical-lifecycle-recompute/` | M2 (history jsonb) | ✅ done (v1.12.1) |
+| C.2 | DB trigger на `bookings` AFTER INSERT/UPDATE WHERE `status = 'confirmed'` → asynchronous вызов C.1 (через `net.http_post`) | миграция `20260423043016` | C.1 | ✅ done (v1.12.1) |
+| C.3 | DB trigger на `intakes` AFTER INSERT WHERE `status = 'submitted'` → C.1 + `canonical-persona-detect` | n/a | C.1, M4 | ⚠️ N/A — таблицы `intakes` нет в схеме; добавится отдельной миграцией при появлении таблицы |
+| C.4 | pg_cron job (daily 03:00 ICT) — top-100 stalest profiles, batch http_post | `supabase--insert` SQL (не миграция, содержит bearer) | C.1 | ✅ done (v1.13.0) — `canonical-lifecycle-recompute-daily`, `0 20 * * *` UTC |
+| C.5 | Unit-тесты матрицы lifecycle (8+ переходов) | `lifecycle-matrix.test.ts` | C.1 | ✅ done — 11/11 зелёные |
+| C.6 | Observability: `{from, to, source, reason, at}` в `lifecycle_stage_history` | внутри C.1 | C.1 | ✅ done (v1.12.1) |
+| C.7 | CHANGELOG → v1.13.0, статус трека C | docs | все выше | ✅ done (v1.13.0) |
 
 **Out of scope трека C:**
 - Inline-уведомления пользователю «Ваш статус обновлён» — M7.

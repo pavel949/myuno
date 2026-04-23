@@ -5,6 +5,23 @@
 
 ---
 
+## [1.13.0] — 2026-04-23
+
+### Added (M6 · трек C закрыт · шаги C.3, C.4, C.7)
+- **pg_cron job** `canonical-lifecycle-recompute-daily` (C.4) — ежедневно в 03:00 ICT (20:00 UTC) `cron.schedule()` дёргает edge function `canonical-lifecycle-recompute` для 100 самых «протухших» профилей (`updated_at < now() - interval '7 days'`, `ORDER BY updated_at NULLS FIRST LIMIT 100`). Вызов через `net.http_post` с `Authorization: Bearer <anon_key>` (verify_jwt=false на функции, валидация source = `cron` внутри). Идемпотентный `cron.unschedule()` перед `schedule()`.
+- **Edge Function развёрнута** (`supabase/functions/canonical-lifecycle-recompute`) — POST `{user_id, source}` отдаёт 200 на тестовый id.
+
+### Changed
+- `audits/M6-persona-landings.md` — Track C → ✅ closed. C.3 (intakes-триггер) помечен как **N/A** (таблицы `intakes` нет в схеме; будет добавлен при появлении таблицы отдельной миграцией). M6 в целом → ✅ closed (D + B + C).
+- README статус канона → v1.13.0.
+- `src/lib/appVersion.ts` → `3.45.0` (minor — закрытие M6).
+
+### Notes
+- Cron job сохранён через `supabase--insert` (не миграция), чтобы service-bearer не утекал в публичные миграции при ремиксах. Job id выдан Postgres'ом автоматически.
+- Acceptance C: edge function 200 ✅ · booking trigger active ✅ · cron scheduled ✅ · history append ✅ · 11/11 unit-тестов матрицы зелёные ✅.
+
+---
+
 ## [1.12.1] — 2026-04-23
 
 ### Added (M6 · трек C · шаги C.1, C.2, C.5)
