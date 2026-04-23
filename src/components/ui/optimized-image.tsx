@@ -174,7 +174,7 @@ export const OptimizedThumbnail = memo(function OptimizedThumbnail({
   alt,
   size = 80,
   className,
-  rounded-none = 'lg',
+  rounded = 'lg',
 }: {
   src: string;
   alt: string;
