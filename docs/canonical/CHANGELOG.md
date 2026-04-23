@@ -5,6 +5,23 @@
 
 ---
 
+## [1.17.0] — 2026-04-23
+
+### Added (M9.5 · Semantic Core — Edge Function Prompts Sweep)
+- **`scripts/validate-semantic.mjs`** — расширен скан запрещённых синонимов на `supabase/functions/*/index.ts`. Добавлен опт-аут маркер `@validate-semantic-allow-lexicon-list` для системных промптов, в которых легитимно перечисляется список «forbidden → canonical» (иначе бы сам промпт стал нарушением).
+- Канонические подсказки лексики (§14) добавлены в системные промпты edge functions: `concierge-route`, `canonical-persona-detect`, `crm-ai-assistant`. LLM теперь явно проинструктирован писать «myUNO», «ClearView», «ContractAI», «объект», «сделка», «off-plan», «Chanote», «escrow», «Land Office».
+
+### Changed (M9.5)
+- **`supabase/functions/peylaa-nurture/index.ts`**, **`peylaa-lead-notify/index.ts`**, **`nb-lead-notify/index.ts`**, **`drive-import-folder/index.ts`** — заменены вхождения «юнит/юнита/юнитов» → «объект/объекта/объектов» в шаблонах WhatsApp/email и в системных промптах vision-извлечения.
+- **`supabase/functions/crm-ai-assistant/index.ts`**, **`execute-booking-message-rules/index.ts`**, **`send-crm-email/index.ts`**, **`send-nurture-messages/index.ts`** — нормализован регистр бренда «MyUNO» → «myUNO» в `from`-полях Resend и системных промптах CRM-ассистента.
+
+### Verification
+- `node scripts/validate-semantic.mjs --strict` → **0 errors / 0 warnings** на расширенном объёме (landings + semantic + supabase/functions).
+- Vitest `src/test/semantic/validate-semantic.test.ts` зелёный.
+- `src/lib/appVersion.ts` → `3.49.0`, `public/version.json` → `3.49.0`.
+
+---
+
 ## [1.16.1] — 2026-04-23
 
 ### Fixed (M9.4a · validate-semantic noise reduction)
