@@ -5,6 +5,37 @@
 
 ---
 
+## [1.23.0] — 2026-04-23
+
+### Added (M13.A — Pro-shell + Reference-Screens polish from design package v5)
+
+**M13.A.1 · `<SectionHead>` canonical component**
+- Single source of truth for Home section microheadings (11px / uppercase / tracking 0.12em / muted-foreground/60 / semibold + optional right meta).
+- Wired into `ActivityFeed`, `ConciergeCard`, `QuickActionsBlended`, `PrimaryActions` — replaces 4 previously-divergent inline header styles. Visual rhythm of `/` is now regular per design v5 `screen.jsx · SectionHead`.
+
+**M13.A.2 · Role descriptions in Role Sheet**
+- Added `descRu` / `descEn` to `ROLE_META` (sourced from design v5 `screens-core.jsx · S03_Roles`). Examples: tourist → «Прилёт, аренда, впечатления», owner → «Управление недвижимостью и доходом».
+- "Add a role" section in `RoleSheet` switched from `grid-cols-2` to single column with sub-line description per row, matching S03 reference. Active-roles list now also shows the description instead of the long English label.
+
+**M13.A.3 · PrimaryActions role tag dot**
+- Each of the 3 "rule of three" cards now carries a 5px role-color dot in the top-right corner (per design v5 `S04_Home`). Dot color = primary persona accent, providing immediate visual proof of role-aware curation.
+- Added `min-h-[44px]` for touch-target compliance.
+
+**M13.A.4 · Pro-shell tabbar (feature-flagged)**
+- New `GUEST_NAV_PRO_SHELL` (Home · Operate · Wallet · Me) per design v5 `TabBar variant="pro"`.
+- `BottomBar` reads `feature_flag:pro_shell_tabbar_v1` and swaps the guest nav to Pro-shell when the user has at least one professional persona (owner / investor / developer / provider) active in the Role Sheet.
+- Default OFF — migration `20260423130000_pro_shell_tabbar_flag.sql` seeds the flag in `system_settings`. Enable from Cloud UI without release.
+
+### Notes
+- Pure presentation + nav-config changes. No DB schema mutations beyond the new feature_flag row.
+- Light-luxury palette and the 19 non-Home reference screens from the design package are intentionally out of scope — they are visual-design references, not canonical instructions to refactor existing pages. Token system stays single (dark default).
+
+### Files
+- created: `src/components/home/SectionHead.tsx`, `supabase/migrations/20260423130000_pro_shell_tabbar_flag.sql`
+- edited: `src/lib/roleBlend.ts`, `src/components/home/{ActivityFeed,ConciergeCard,QuickActionsBlended,PrimaryActions,RoleSheet}.tsx`, `src/lib/navConfig.ts`, `src/components/nav/BottomBar.tsx`, `src/lib/appVersion.ts`, `public/version.json`
+
+---
+
 ## [1.22.0] — 2026-04-23
 
 ### Added (M12 — Home polish wave from design package v5)

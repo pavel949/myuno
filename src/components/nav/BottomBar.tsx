@@ -21,7 +21,9 @@ import { getFeedbackSettings } from '@/hooks/useFeedbackSettings';
 import { usePrefetchRoute } from '@/hooks/usePrefetch';
 import { AllAppsDrawer } from '@/components/layout/AllAppsDrawer';
 import { useFeatureFlag } from '@/hooks/useFeatureFlag';
+import { useUserPersonas } from '@/hooks/useUserPersonas';
 import { GUEST_NAV_ME_HUB } from '@/lib/navConfig';
+import { GUEST_NAV_PRO_SHELL } from '@/lib/navConfig';
 import {
   PRIMARY_NAV,
   shouldShowAppsLauncher,
@@ -58,8 +60,21 @@ export const BottomBar = forwardRef<HTMLDivElement, BottomBarProps>(
 
     // Phase A5: feature-flagged swap of guest nav to Gosuslugi-style /me hub.
     const meHubEnabled = useFeatureFlag('me_shell_v1', false);
+    // Wave 13 (M13.A): pro-shell tabbar (Home · Operate · Wallet · Me) for
+    // guest users with at least one professional persona active.
+    const proShellEnabled = useFeatureFlag('pro_shell_tabbar_v1', false);
+    const { personas } = useUserPersonas();
+    const PRO_PERSONAS = new Set([
+      'property_owner', 'investor', 'real_estate_developer',
+      'local_services_provider',
+    ]);
+    const hasProPersona = personas.some(p => PRO_PERSONAS.has(p));
     const navItems: NavItem[] =
-      role === 'guest' && meHubEnabled ? GUEST_NAV_ME_HUB : PRIMARY_NAV[role];
+      role === 'guest' && proShellEnabled && hasProPersona
+        ? GUEST_NAV_PRO_SHELL
+        : role === 'guest' && meHubEnabled
+          ? GUEST_NAV_ME_HUB
+          : PRIMARY_NAV[role];
     const showAppsButton = shouldShowAppsLauncher(role);
 
     const handleNavClick = (e: React.MouseEvent<HTMLElement>) => {
