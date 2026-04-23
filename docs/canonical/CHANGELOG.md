@@ -5,6 +5,21 @@
 
 ---
 
+## [1.16.1] — 2026-04-23
+
+### Fixed (M9.4a · validate-semantic noise reduction)
+- **`scripts/validate-semantic.mjs`** — два источника ложных срабатываний устранены:
+  1. Сканер игнорировал регистр (`/i`), из-за чего канонический `myUNO` помечался как нарушение правила `MyUNO → myUNO`. Сделан case-sensitive — §14 явно требует точного регистра.
+  2. Сканер обходил сам словарь (`src/content/semantic/**`), который по определению содержит каждое запрещённое слово как данные. Добавлено исключение `SEMANTIC_DICTIONARY_RE`.
+- **`src/content/landings/personaLandings.ts`** — `P9_HNW.metaTitle` сокращён до 56/55 символов (было 67/66, превышало §10 лимит 60).
+- **`src/content/landings/clusterLandings.ts`** — `D_INVESTMENT.metaTitle` (51/52) и `F_OPERATIONS.metaTitle.ru` (48) приведены к лимиту §10.
+
+### Verification
+- `npm run validate:semantic` → **0 errors / 0 warnings** (было 0/40).
+- `src/lib/appVersion.ts` → `3.48.1`, `public/version.json` → `3.48.1`.
+
+---
+
 ## [1.16.0] — 2026-04-23
 
 ### Added (M9 · Semantic Core Rollout — ~85%)
