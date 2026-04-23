@@ -9,10 +9,11 @@
  * Run:
  *   npm run validate:semantic
  *   npm run validate:semantic -- --verbose
+ *   npm run validate:semantic:strict   (treats warnings as errors — used in CI)
  *
  * Exit code:
- *   0 — no errors (warnings allowed)
- *   1 — at least one error
+ *   0 — no errors (warnings allowed unless --strict)
+ *   1 — at least one error (or any warning when --strict)
  */
 
 import { readFileSync, existsSync } from 'node:fs';
