@@ -60,7 +60,7 @@ export default function AdminTickets() {
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-info/10 rounded-lg">
+                <div className="p-2 bg-info/10 rounded-none">
                   <Ticket className="w-5 h-5 text-info" />
                 </div>
                 <div>
@@ -74,7 +74,7 @@ export default function AdminTickets() {
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-warning/10 rounded-lg">
+                <div className="p-2 bg-warning/10 rounded-none">
                   <Clock className="w-5 h-5 text-warning" />
                 </div>
                 <div>
@@ -88,7 +88,7 @@ export default function AdminTickets() {
           <Card className={stats.overdueSla > 0 ? 'border-destructive/30 bg-destructive/5' : ''}>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-lg ${stats.overdueSla > 0 ? 'bg-destructive/10' : 'bg-muted'}`}>
+                <div className={`p-2 rounded-none ${stats.overdueSla > 0 ? 'bg-destructive/10' : 'bg-muted'}`}>
                   <AlertTriangle className={`w-5 h-5 ${stats.overdueSla > 0 ? 'text-destructive' : 'text-muted-foreground'}`} />
                 </div>
                 <div>
@@ -102,7 +102,7 @@ export default function AdminTickets() {
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-success/10 rounded-lg">
+                <div className="p-2 bg-success/10 rounded-none">
                   <CheckCircle className="w-5 h-5 text-success" />
                 </div>
                 <div>

@@ -62,7 +62,7 @@ export function SellPricingStep({ draft, onChange, onNext, onBack }: SellPricing
         </div>
       </div>
       
-      <div className="flex items-center justify-between p-4 rounded-xl bg-muted/50">
+      <div className="flex items-center justify-between p-4 rounded-none bg-muted/50">
         <div className="flex items-center gap-3">
           <BadgePercent className="h-5 w-5 text-muted-foreground" />
           <div>
@@ -83,7 +83,7 @@ export function SellPricingStep({ draft, onChange, onNext, onBack }: SellPricing
       </div>
       
       {draft.price && draft.price > 0 && (
-        <div className="p-4 rounded-xl bg-primary/5 border border-primary/20">
+        <div className="p-4 rounded-none bg-primary/5 border border-primary/20">
           <p className="text-sm text-muted-foreground">
             {isRu ? 'Итоговая цена' : 'Your listing price'}
           </p>

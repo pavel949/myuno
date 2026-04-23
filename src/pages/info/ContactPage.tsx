@@ -101,7 +101,7 @@ export default function ContactPage() {
             <Card key={index}>
               <CardContent className="py-4">
                 <div className="flex items-center gap-4">
-                  <div className="p-2 rounded-lg bg-muted">
+                  <div className="p-2 rounded-none bg-muted">
                     <dept.icon className="h-5 w-5 text-muted-foreground" />
                   </div>
                   <div className="flex-1">

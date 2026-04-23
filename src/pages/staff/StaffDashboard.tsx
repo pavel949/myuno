@@ -205,7 +205,7 @@ export default function StaffDashboard() {
                       </div>
                     )}
                     {order.notes && (
-                      <p className="text-sm text-muted-foreground bg-muted p-2 rounded">
+                      <p className="text-sm text-muted-foreground bg-muted p-2 rounded-none">
                         {order.notes}
                       </p>
                     )}
@@ -258,7 +258,7 @@ export default function StaffDashboard() {
                       </div>
                     )}
                     {order.notes && (
-                      <p className="text-sm text-muted-foreground bg-muted p-2 rounded">
+                      <p className="text-sm text-muted-foreground bg-muted p-2 rounded-none">
                         {order.notes}
                       </p>
                     )}

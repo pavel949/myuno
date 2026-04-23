@@ -150,7 +150,7 @@ export default function AdminAddHub() {
                   <div className="flex items-start justify-between gap-3">
                     <div
                       className={cn(
-                        'h-12 w-12 rounded-xl bg-background/80 backdrop-blur flex items-center justify-center shadow-sm',
+                        'h-12 w-12 rounded-none bg-background/80 backdrop-blur flex items-center justify-center shadow-sm',
                         card.tone
                       )}
                     >

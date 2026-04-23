@@ -246,7 +246,7 @@ export function PipelinePivotTable({ deals, pipelineData }: Props) {
             <ChevronDown className="h-3 w-3" />
           </Button>
           {showMeasureMenu && (
-            <div className="absolute top-full left-0 mt-1 bg-popover border rounded-lg shadow-lg z-50 min-w-[180px] py-1">
+            <div className="absolute top-full left-0 mt-1 bg-popover border rounded-none shadow-lg z-50 min-w-[180px] py-1">
               {MEASURES.map(m => (
                 <button
                   key={m.key}
@@ -276,7 +276,7 @@ export function PipelinePivotTable({ deals, pipelineData }: Props) {
             <ChevronDown className="h-3 w-3" />
           </Button>
           {showExportMenu && (
-            <div className="absolute top-full left-0 mt-1 bg-popover border rounded-lg shadow-lg z-50 min-w-[180px] py-1">
+            <div className="absolute top-full left-0 mt-1 bg-popover border rounded-none shadow-lg z-50 min-w-[180px] py-1">
               {exportOptions.map(opt => {
                 const Icon = opt.icon;
                 return (
@@ -300,7 +300,7 @@ export function PipelinePivotTable({ deals, pipelineData }: Props) {
       </div>
 
       {/* Table */}
-      <div className="border rounded-xl overflow-x-auto bg-card">
+      <div className="border rounded-none overflow-x-auto bg-card">
         <table className="w-full text-xs">
           <thead>
             <tr className="border-b bg-muted/50">

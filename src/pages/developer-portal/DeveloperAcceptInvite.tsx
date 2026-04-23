@@ -99,10 +99,10 @@ export default function DeveloperAcceptInvite() {
     <NewbuildsLayout hideNav>
       <div className="min-h-screen flex items-center justify-center px-4">
         <div className="w-full max-w-md">
-          <div className="nb-glass p-8 rounded-2xl text-center space-y-5">
+          <div className="nb-glass p-8 rounded-none text-center space-y-5">
             {state === 'found' && (
               <>
-                <div className="w-14 h-14 rounded-2xl bg-[hsl(var(--nb-gold)/0.15)] flex items-center justify-center mx-auto">
+                <div className="w-14 h-14 rounded-none bg-[hsl(var(--nb-gold)/0.15)] flex items-center justify-center mx-auto">
                   <Building2 className="w-7 h-7 text-[hsl(var(--nb-gold))]" />
                 </div>
                 <div>
@@ -125,7 +125,7 @@ export default function DeveloperAcceptInvite() {
 
             {state === 'accepted' && (
               <>
-                <CheckCircle className="w-14 h-14 text-green-400 mx-auto" />
+                <CheckCircle className="w-14 h-14 text-success mx-auto" />
                 <h1 className="nb-display text-2xl text-[hsl(var(--nb-text))]">Добро пожаловать!</h1>
                 <p className="text-[hsl(var(--nb-text-secondary))]">Вы успешно добавлены в команду. Перенаправление...</p>
               </>

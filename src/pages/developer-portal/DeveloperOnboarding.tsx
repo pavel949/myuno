@@ -299,7 +299,7 @@ export default function DeveloperOnboarding() {
         <div className="w-full max-w-2xl mx-auto">
           {/* Header */}
           <div className="flex items-center gap-3 mb-6 md:mb-8">
-            <div className="w-11 h-11 rounded-xl bg-[hsl(var(--nb-gold)/0.15)] border border-[hsl(var(--nb-gold)/0.25)] flex items-center justify-center shrink-0">
+            <div className="w-11 h-11 rounded-none bg-[hsl(var(--nb-gold)/0.15)] border border-[hsl(var(--nb-gold)/0.25)] flex items-center justify-center shrink-0">
               <Building2 className="w-5 h-5 text-[hsl(var(--nb-gold))]" />
             </div>
             <div className="min-w-0">
@@ -338,7 +338,7 @@ export default function DeveloperOnboarding() {
             })}
           </div>
 
-          <div className="nb-glass p-6 md:p-8 rounded-2xl mt-4">
+          <div className="nb-glass p-6 md:p-8 rounded-none mt-4">
 
             {/* ── Step 1: Company details ── */}
             {step === 1 && (
@@ -419,12 +419,12 @@ export default function DeveloperOnboarding() {
                 <div>
                   <label className="nb-label mb-2 block">Логотип компании</label>
                   <div
-                    className="border-2 border-dashed border-[hsl(var(--nb-glass-border))] rounded-xl p-6 text-center cursor-pointer hover:border-[hsl(var(--nb-gold)/0.5)] transition-colors"
+                    className="border-2 border-dashed border-[hsl(var(--nb-glass-border))] rounded-none p-6 text-center cursor-pointer hover:border-[hsl(var(--nb-gold)/0.5)] transition-colors"
                     onClick={() => fileInputRef.current?.click()}
                   >
                     {logoUrl ? (
                       <div className="flex flex-col items-center gap-2">
-                        <img src={logoUrl} alt="Logo" className="h-16 object-contain rounded" />
+                        <img src={logoUrl} alt="Logo" className="h-16 object-contain rounded-none" />
                         <span className="text-xs text-[hsl(var(--nb-muted))]">Нажмите для замены</span>
                       </div>
                     ) : (
@@ -493,7 +493,7 @@ export default function DeveloperOnboarding() {
                   </p>
                 </div>
 
-                <div className="bg-[hsl(var(--nb-gold)/0.08)] border border-[hsl(var(--nb-gold)/0.2)] rounded-xl p-4 text-sm text-[hsl(var(--nb-text-secondary))]">
+                <div className="bg-[hsl(var(--nb-gold)/0.08)] border border-[hsl(var(--nb-gold)/0.2)] rounded-none p-4 text-sm text-[hsl(var(--nb-text-secondary))]">
                   <p className="font-medium text-[hsl(var(--nb-text))] mb-2">Что вы получаете:</p>
                   <ul className="space-y-1">
                     <li>• Автоматические выплаты при закрытии сделок</li>
@@ -502,7 +502,7 @@ export default function DeveloperOnboarding() {
                   </ul>
                 </div>
 
-                <div className="bg-[hsl(var(--nb-surface))] border border-[hsl(var(--nb-glass-border))] rounded-xl p-4 text-sm">
+                <div className="bg-[hsl(var(--nb-surface))] border border-[hsl(var(--nb-glass-border))] rounded-none p-4 text-sm">
                   <p className="text-[hsl(var(--nb-muted))]">
                     Можно пропустить сейчас и подключить позже в разделе «Компания».
                     До подключения Stripe вы не сможете публиковать проекты.

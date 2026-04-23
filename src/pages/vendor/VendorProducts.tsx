@@ -453,10 +453,10 @@ const VendorProducts = () => {
                       <img 
                         src={product.cover_image} 
                         alt={product.name_en}
-                        className="w-20 h-20 rounded-lg object-cover"
+                        className="w-20 h-20 rounded-none object-cover"
                       />
                     ) : (
-                      <div className="w-20 h-20 rounded-lg bg-muted flex items-center justify-center">
+                      <div className="w-20 h-20 rounded-none bg-muted flex items-center justify-center">
                         <Package className="h-8 w-8 text-muted-foreground" />
                       </div>
                     )}

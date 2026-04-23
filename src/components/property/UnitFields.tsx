@@ -498,7 +498,7 @@ function UnitFieldsInner({
 
             {/* Elevator for multi-story villas */}
             {(totalFloors ?? 0) > 1 && (
-              <div className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
+              <div className="flex items-center justify-between p-3 rounded-none border bg-muted/30">
                 <div className="space-y-0.5">
                   <Label className="font-medium">{isRu ? 'Есть лифт' : 'Has Elevator'}</Label>
                   <p className="text-xs text-muted-foreground">

@@ -101,7 +101,7 @@ export function CalendarDayEventsSheet({
         )}
 
         {isBlocked && availability?.note && (
-          <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+          <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-none">
             <p className="text-sm text-muted-foreground">{availability.note}</p>
           </div>
         )}
@@ -127,7 +127,7 @@ export function CalendarDayEventsSheet({
                       <Card key={booking.id} className="cursor-pointer hover:bg-muted/50 transition-colors"
                         onClick={() => setSelectedBooking(booking)}>
                         <CardContent className="p-3 flex items-center gap-3">
-                          <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center",
+                          <div className={cn("w-10 h-10 rounded-none flex items-center justify-center",
                             isCheckIn ? "bg-success/10" : isCheckOut ? "bg-warning/10" : "bg-primary/10")}>
                             {isCheckIn ? <LogIn className="h-5 w-5 text-success" /> :
                              isCheckOut ? <LogOut className="h-5 w-5 text-warning" /> :
@@ -168,7 +168,7 @@ export function CalendarDayEventsSheet({
                       <Card key={task.id} className={cn("cursor-pointer hover:bg-muted/50 transition-colors", isCompleted && "opacity-60")}
                         onClick={() => setSelectedTask(task)}>
                         <CardContent className="p-3 flex items-center gap-3">
-                          <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center", config.bgColor)}>
+                          <div className={cn("w-10 h-10 rounded-none flex items-center justify-center", config.bgColor)}>
                             <Icon className={cn("h-5 w-5", config.color)} />
                           </div>
                           <div className="flex-1 min-w-0">

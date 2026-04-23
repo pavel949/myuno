@@ -113,14 +113,14 @@ export function ProfileCompletionCard() {
                 key={item.key}
                 onClick={() => !item.completed && navigate(item.path)}
                 disabled={item.completed}
-                className={`w-full flex items-center gap-3 p-2 rounded-lg transition-colors ${
+                className={`w-full flex items-center gap-3 p-2 rounded-none transition-colors ${
                   item.completed 
                     ? 'opacity-60 cursor-default' 
                     : 'hover:bg-primary/10 cursor-pointer'
                 }`}
               >
                 {item.completed ? (
-                  <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 text-success flex-shrink-0" />
                 ) : (
                   <Circle className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                 )}

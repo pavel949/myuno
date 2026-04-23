@@ -45,7 +45,7 @@ export function LifecycleStageBar({ currentStage, onChange, readonly = false, co
             disabled={readonly}
             onClick={() => !readonly && onChange?.(stage.key)}
             className={cn(
-              'relative flex-1 min-h-11 px-2 flex items-center justify-center text-[10px] font-medium transition-all rounded-sm',
+              'relative flex-1 min-h-11 px-2 flex items-center justify-center text-[10px] font-medium transition-all rounded-none',
               isActive ? cn(stage.color, 'text-white') : 'bg-muted text-muted-foreground',
               isCurrent && 'ring-2 ring-offset-1 ring-primary',
               !readonly && 'cursor-pointer hover:opacity-80',

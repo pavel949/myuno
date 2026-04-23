@@ -49,13 +49,13 @@ export function MCCommandSearchTrigger({ onOpen, className }: MCCommandSearchTri
       type="button"
       onClick={onOpen}
       className={cn(
-        'flex h-9 w-full min-w-0 max-w-2xl items-center gap-2 rounded-md bg-muted/50 px-3 text-left text-sm text-muted-foreground transition-colors hover:bg-muted',
+        'flex h-9 w-full min-w-0 max-w-2xl items-center gap-2 rounded-none bg-muted/50 px-3 text-left text-sm text-muted-foreground transition-colors hover:bg-muted',
         className
       )}
     >
       <Search className="h-4 w-4 shrink-0" />
       <span className="min-w-0 flex-1 truncate">{isRu ? 'Поиск...' : 'Search...'}</span>
-      <kbd className="pointer-events-none hidden h-5 shrink-0 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium sm:flex">
+      <kbd className="pointer-events-none hidden h-5 shrink-0 select-none items-center gap-1 rounded-none border bg-muted px-1.5 font-mono text-[10px] font-medium sm:flex">
         ⌘K
       </kbd>
     </button>

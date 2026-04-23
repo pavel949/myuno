@@ -93,7 +93,7 @@ export function PayoutWaterfall({
         <div
           key={i}
           className={cn(
-            'flex justify-between items-center px-3 py-1.5 rounded-lg',
+            'flex justify-between items-center px-3 py-1.5 rounded-none',
             row.type === 'income' && 'bg-primary/10 text-primary font-semibold',
             row.type === 'expense' && 'text-muted-foreground pl-6',
             row.type === 'subtotal' && 'border-t border-border font-semibold mt-1 pt-2',

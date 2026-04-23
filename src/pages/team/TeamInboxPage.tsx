@@ -165,7 +165,7 @@ export default function TeamInboxPage() {
                   {isLoading ? (
                     <div className="p-4 space-y-3">
                       {Array.from({ length: 4 }).map((_, i) => (
-                        <Skeleton key={i} className="h-16 w-full rounded-lg" />
+                        <Skeleton key={i} className="h-16 w-full rounded-none" />
                       ))}
                     </div>
                   ) : filteredTasks.length === 0 ? (
@@ -196,7 +196,7 @@ export default function TeamInboxPage() {
                             >
                               <div className="flex items-start gap-3">
                                 <div className={cn(
-                                  "p-2 rounded-lg shrink-0",
+                                  "p-2 rounded-none shrink-0",
                                   config?.color
                                 )}>
                                   <Icon className="h-4 w-4" />

@@ -1,6 +1,6 @@
 /**
  * ResponsiveModal — Airbnb-style adaptive modal.
- * Mobile: bottom Sheet with rounded top corners.
+ * Mobile: bottom Sheet with rounded-none top corners.
  * Desktop (≥768px): large centered Dialog with premium styling.
  */
 import * as React from 'react';
@@ -76,7 +76,7 @@ export function ResponsiveModal({
         <DialogContent
           className={cn(
             SIZE_CLASSES[size],
-            'p-0 gap-0 overflow-hidden rounded-2xl border-border/60',
+            'p-0 gap-0 overflow-hidden rounded-none border-border/60',
             'max-h-[90vh] flex flex-col',
             className,
           )}
@@ -86,7 +86,7 @@ export function ResponsiveModal({
             <DialogHeader className="space-y-1">
               <DialogTitle className="flex items-center gap-3 text-xl font-display font-bold tracking-tight">
                 {icon && (
-                  <div className="w-10 h-10 rounded-xl bg-primary/8 flex items-center justify-center shrink-0 ring-1 ring-primary/10 shadow-sm">
+                  <div className="w-10 h-10 rounded-none bg-primary/8 flex items-center justify-center shrink-0 ring-1 ring-primary/10 shadow-sm">
                     {icon}
                   </div>
                 )}
@@ -126,7 +126,7 @@ export function ResponsiveModal({
       <SheetContent
         side="bottom"
         className={cn(
-          'rounded-t-2xl p-0 flex flex-col overflow-hidden',
+          'rounded-none p-0 flex flex-col overflow-hidden',
           mobileHeight,
           className,
         )}
@@ -136,7 +136,7 @@ export function ResponsiveModal({
           <SheetHeader className="text-left space-y-1">
             <SheetTitle className="flex items-center gap-2.5 text-lg font-display font-bold">
               {icon && (
-                <div className="w-9 h-9 rounded-xl bg-primary/8 flex items-center justify-center shrink-0 ring-1 ring-primary/10">
+                <div className="w-9 h-9 rounded-none bg-primary/8 flex items-center justify-center shrink-0 ring-1 ring-primary/10">
                   {icon}
                 </div>
               )}

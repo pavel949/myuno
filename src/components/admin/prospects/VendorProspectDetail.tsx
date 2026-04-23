@@ -332,7 +332,7 @@ const updateProspect = useUpdateProspect();
                 </Button>
               </div>
               {prospect.ai_score !== null && (
-                <div className="bg-muted/50 rounded-lg p-3">
+                <div className="bg-muted/50 rounded-none p-3">
                   <div className="flex items-center gap-3">
                     <div className="text-3xl font-bold text-primary">{prospect.ai_score}</div>
                     <div className="text-sm text-muted-foreground">
@@ -441,7 +441,7 @@ const updateProspect = useUpdateProspect();
 
             {/* Notes from prospect */}
             {prospect.notes && (
-              <div className="bg-muted/50 rounded-lg p-3 text-sm">
+              <div className="bg-muted/50 rounded-none p-3 text-sm">
                 <p className="text-muted-foreground">{prospect.notes}</p>
               </div>
             )}

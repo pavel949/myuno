@@ -138,7 +138,7 @@ export default function RelocateLandingPage() {
       icon={Globe}
       title={t ? 'Переезд на Пхукет' : 'Relocate to Phuket'}
       subtitle={t ? 'Полное сопровождение переезда — от визы до школы для детей' : 'Full relocation support — from visa to school for your kids'}
-      gradient="from-indigo-700 via-indigo-600 to-violet-700"
+      gradient="from-primary via-primary to-primary"
       heroCta={{ label: t ? 'Бесплатная консультация' : 'Free Consultation', onClick: () => window.open(whatsappUrl, '_blank') }}
       whatsappUrl={whatsappUrl}
       whatsappLabel={t ? 'Написать в WhatsApp' : 'Chat on WhatsApp'}
@@ -176,7 +176,7 @@ export default function RelocateLandingPage() {
       {/* Quiz */}
       <div id="relocation-quiz" className="px-4 py-8 scroll-mt-20">
 
-        <div className="max-w-3xl mx-auto rounded-2xl border border-border bg-card p-5 md:p-6">
+        <div className="max-w-3xl mx-auto rounded-none border border-border bg-card p-5 md:p-6">
           <h2 className="text-xl font-bold font-display text-foreground">
             {t ? 'Relocation Quiz: персональный roadmap' : 'Relocation Quiz: personalized roadmap'}
           </h2>
@@ -276,7 +276,7 @@ export default function RelocateLandingPage() {
             </div>
           </div>
 
-          <div className="mt-6 rounded-xl border border-border bg-muted/30 p-4">
+          <div className="mt-6 rounded-none border border-border bg-muted/30 p-4">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               {t ? 'Сформированный запрос' : 'Generated request'}
             </p>
@@ -303,9 +303,9 @@ export default function RelocateLandingPage() {
           {selectedSteps.map((step, i) => {
             const Icon = step.icon;
             return (
-              <button key={`${step.id}-${i}`} onClick={() => navigate(step.path)} className="w-full flex items-start gap-4 p-4 rounded-xl border border-border bg-card text-left transition-all hover:[box-shadow:var(--shadow-elevation-2)] active:scale-[0.98]">
+              <button key={`${step.id}-${i}`} onClick={() => navigate(step.path)} className="w-full flex items-start gap-4 p-4 rounded-none border border-border bg-card text-left transition-all hover:[box-shadow:var(--shadow-elevation-2)] active:scale-[0.98]">
                 <div className="relative flex flex-col items-center">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: tokenColor(step.color, 0.15) }}>
+                  <div className="w-10 h-10 rounded-none flex items-center justify-center shrink-0" style={{ background: tokenColor(step.color, 0.15) }}>
                     <Icon className="w-5 h-5" style={{ color: tokenColor(step.color) }} />
                   </div>
                   {i < selectedSteps.length - 1 && <div className="w-px h-6 mt-1" style={{ background: tokenColor(step.color, 0.3) }} />}
@@ -333,9 +333,9 @@ export default function RelocateLandingPage() {
           {STEPS.map((step, i) => {
             const Icon = step.icon;
             return (
-              <button key={i} onClick={() => navigate(step.path)} className="w-full flex items-start gap-4 p-4 rounded-xl border border-border bg-card text-left transition-all hover:[box-shadow:var(--shadow-elevation-2)] active:scale-[0.98]">
+              <button key={i} onClick={() => navigate(step.path)} className="w-full flex items-start gap-4 p-4 rounded-none border border-border bg-card text-left transition-all hover:[box-shadow:var(--shadow-elevation-2)] active:scale-[0.98]">
                 <div className="relative flex flex-col items-center">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: tokenColor(step.color, 0.15) }}>
+                  <div className="w-10 h-10 rounded-none flex items-center justify-center shrink-0" style={{ background: tokenColor(step.color, 0.15) }}>
                     <Icon className="w-5 h-5" style={{ color: tokenColor(step.color) }} />
                   </div>
                   {i < STEPS.length - 1 && <div className="w-px h-6 mt-1" style={{ background: tokenColor(step.color, 0.3) }} />}
@@ -361,7 +361,7 @@ export default function RelocateLandingPage() {
         </h2>
         <div className="grid gap-4 max-w-lg mx-auto md:grid-cols-3 md:max-w-3xl">
           {PLANS.map((plan, i) => (
-            <div key={i} className={cn("rounded-xl border p-5 bg-card", plan.highlight ? "border-primary ring-2 ring-primary/20 shadow-lg" : "border-border")}>
+            <div key={i} className={cn("rounded-none border p-5 bg-card", plan.highlight ? "border-primary ring-2 ring-primary/20 shadow-lg" : "border-border")}>
               {plan.highlight && <span className="text-[10px] font-bold text-primary uppercase tracking-wider">{t ? 'Популярный' : 'Popular'}</span>}
               <h3 className="text-lg font-bold font-display text-foreground mt-1">{t ? plan.nameRu : plan.nameEn}</h3>
               <p className="text-2xl font-bold text-primary mt-2">{t ? plan.priceRu : plan.priceEn}</p>

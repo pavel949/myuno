@@ -109,13 +109,13 @@ export default function AdminOperations() {
       icon: Home, 
       path: '/admin/properties',
       action: 'new',
-      color: 'text-emerald-600',
+      color: 'text-success',
     },
     { 
       label: isRu ? 'УК' : 'PM Company', 
       icon: Building2, 
       path: '/admin/pm-companies',
-      color: 'text-indigo-600',
+      color: 'text-primary',
     },
     { 
       label: isRu ? 'Услуга' : 'Service', 
@@ -127,7 +127,7 @@ export default function AdminOperations() {
       label: isRu ? 'Контракт' : 'Contract', 
       icon: FileText, 
       path: '/admin/contracts',
-      color: 'text-violet-600',
+      color: 'text-primary',
     },
   ];
 

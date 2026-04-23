@@ -67,7 +67,7 @@ function KpiTile({
   return (
     <Card className="border-border">
       <CardContent className="p-4 flex items-center gap-3">
-        <div className={cn('w-10 h-10 rounded-lg flex items-center justify-center shrink-0', toneClass)}>
+        <div className={cn('w-10 h-10 rounded-none flex items-center justify-center shrink-0', toneClass)}>
           <Icon className="w-5 h-5" />
         </div>
         <div className="min-w-0">
@@ -95,7 +95,7 @@ function PendingCard({
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 rounded-none bg-primary/10 flex items-center justify-center shrink-0">
               <Building2 className="w-5 h-5 text-primary" />
             </div>
             <div className="min-w-0">
@@ -196,7 +196,7 @@ function DirectoryRow({
     <Card className="border border-border hover:border-primary/30 transition-colors">
       <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+          <div className="w-9 h-9 rounded-none bg-primary/10 flex items-center justify-center shrink-0">
             <Building2 className="w-4 h-4 text-primary" />
           </div>
           <div className="min-w-0">
@@ -538,7 +538,7 @@ export default function CapitalDevelopersPending() {
             </>
           ) : (
             <div className="space-y-3 py-2">
-              <div className="rounded-lg border border-success/20 bg-success/5 p-3 text-sm">
+              <div className="rounded-none border border-success/20 bg-success/5 p-3 text-sm">
                 <CheckCircle className="w-4 h-4 inline mr-1.5 text-success" />
                 Email отправлен. Срок действия:{' '}
                 <strong>{new Date(claimResult.expires_at).toLocaleString('ru-RU')}</strong>

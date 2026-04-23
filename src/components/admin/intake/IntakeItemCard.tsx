@@ -109,7 +109,7 @@ export function IntakeItemCard({
 
   return (
     <div
-      className={cn('relative rounded-lg transition-colors', enableSwipe && swipeBgTone)}
+      className={cn('relative rounded-none transition-colors', enableSwipe && swipeBgTone)}
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
@@ -214,7 +214,7 @@ export function IntakeItemCard({
         {(hasMissingFields || hasWarnings) && (
           <div className="space-y-1">
             {hasMissingFields && (
-              <div className="flex items-start gap-2 text-xs text-destructive bg-destructive/10 p-2 rounded">
+              <div className="flex items-start gap-2 text-xs text-destructive bg-destructive/10 p-2 rounded-none">
                 <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
                 <span>
                   {isRu ? 'Не хватает: ' : 'Missing: '}
@@ -223,7 +223,7 @@ export function IntakeItemCard({
               </div>
             )}
             {hasWarnings && (
-              <div className="flex items-start gap-2 text-xs text-warning bg-warning/10 p-2 rounded">
+              <div className="flex items-start gap-2 text-xs text-warning bg-warning/10 p-2 rounded-none">
                 <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
                 <span>{warningText}</span>
               </div>

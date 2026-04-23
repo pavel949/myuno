@@ -53,7 +53,7 @@ export function ReferralCard() {
 
   if (isLoading) {
     return (
-      <div className="rounded-2xl bg-card border border-border p-5 space-y-4">
+      <div className="rounded-none bg-card border border-border p-5 space-y-4">
         <Skeleton className="h-6 w-40" />
         <Skeleton className="h-12 w-full" />
         <Skeleton className="h-10 w-full" />
@@ -64,10 +64,10 @@ export function ReferralCard() {
   const bonus = settings?.referrer_bonus || 50;
 
   return (
-    <div className="rounded-2xl bg-gradient-to-br from-primary/5 via-card to-primary/10 border border-primary/20 p-5 space-y-4">
+    <div className="rounded-none bg-gradient-to-br from-primary/5 via-card to-primary/10 border border-primary/20 p-5 space-y-4">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+        <div className="w-10 h-10 rounded-none bg-primary/10 flex items-center justify-center">
           <Gift className="w-5 h-5 text-primary" />
         </div>
         <div>
@@ -85,13 +85,13 @@ export function ReferralCard() {
       {/* Referral Code */}
       {referralCode && (
         <div className="flex items-center gap-2">
-          <div className="flex-1 bg-background rounded-xl px-4 py-3 border border-border font-mono text-lg font-bold tracking-widest text-center text-foreground">
+          <div className="flex-1 bg-background rounded-none px-4 py-3 border border-border font-mono text-lg font-bold tracking-widest text-center text-foreground">
             {referralCode}
           </div>
           <Button
             variant="outline"
             size="icon"
-            className="h-12 w-12 rounded-xl shrink-0"
+            className="h-12 w-12 rounded-none shrink-0"
             onClick={handleCopyCode}
           >
             {copied === 'code' ? (
@@ -105,7 +105,7 @@ export function ReferralCard() {
 
       {/* Share Button */}
       <Button
-        className="w-full rounded-xl h-11"
+        className="w-full rounded-none h-11"
         onClick={handleShare}
       >
         <Share2 className="w-4 h-4 mr-2" />

@@ -96,7 +96,7 @@ export default function SalonDetail() {
 
       {/* Content */}
       <div className="px-4 -mt-8 relative z-10 space-y-6 pb-32">
-        <div className="bg-card rounded-2xl p-5 border border-border/50 shadow-lg">
+        <div className="bg-card rounded-none p-5 border border-border/50 shadow-lg">
           <div className="flex items-start justify-between mb-3">
             <div>
               <h1 className="text-xl font-display font-bold flex items-center gap-2">
@@ -109,7 +109,7 @@ export default function SalonDetail() {
                 </div>
               )}
             </div>
-            <div className="flex items-center gap-1 bg-primary/10 px-2 py-1 rounded-lg">
+            <div className="flex items-center gap-1 bg-primary/10 px-2 py-1 rounded-none">
               <Star className="w-4 h-4 fill-primary text-primary" />
               <span className="font-semibold">{salon.rating}</span>
               <span className="text-xs text-muted-foreground">({salon.review_count})</span>
@@ -148,7 +148,7 @@ export default function SalonDetail() {
                     key={service.id}
                     onClick={() => toggleService(service.id)}
                     className={cn(
-                      "w-full flex items-center justify-between p-4 rounded-xl border transition-all",
+                      "w-full flex items-center justify-between p-4 rounded-none border transition-all",
                       isSelected ? "bg-primary/10 border-primary" : "bg-card border-border/50 hover:border-primary/30"
                     )}
                   >

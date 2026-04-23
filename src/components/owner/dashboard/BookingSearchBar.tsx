@@ -113,7 +113,7 @@ export function BookingSearchBar() {
                       className="w-full px-3 py-2.5 text-left hover:bg-muted/50 transition-colors flex items-start gap-3"
                       onClick={() => handleSelect(booking.id, booking.property_id)}
                     >
-                      <div className="p-1.5 rounded-lg bg-muted flex-shrink-0 mt-0.5">
+                      <div className="p-1.5 rounded-none bg-muted flex-shrink-0 mt-0.5">
                         <User className="h-4 w-4 text-muted-foreground" />
                       </div>
                       

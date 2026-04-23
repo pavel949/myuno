@@ -75,10 +75,10 @@ const [searchParams, setSearchParams] = useSearchParams();
 
   return (
     <>
-      <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-4 mb-6">
+      <div className="rounded-none border bg-card text-card-foreground shadow-sm p-4 mb-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-none bg-primary/10 text-primary">
               <Sparkles className="h-5 w-5" />
             </div>
             <div>
@@ -109,7 +109,7 @@ const [searchParams, setSearchParams] = useSearchParams();
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
             ) : isLocked ? (
               <span className="text-xs text-muted-foreground inline-flex items-center gap-1">
-                <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                <CheckCircle2 className="h-4 w-4 text-success" />
                 {isRu ? 'Подписка активна' : 'Subscription active'}
               </span>
             ) : (
@@ -139,7 +139,7 @@ const [searchParams, setSearchParams] = useSearchParams();
                 type="button"
                 onClick={() => setSelectedTierCode(t.code)}
                 className={cn(
-                  'rounded-lg border p-3 text-left transition-colors',
+                  'rounded-none border p-3 text-left transition-colors',
                   selectedTierCode === t.code
                     ? 'border-primary bg-primary/5 ring-1 ring-primary'
                     : 'border-border hover:bg-muted/50',

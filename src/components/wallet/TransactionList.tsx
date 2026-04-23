@@ -135,7 +135,7 @@ export function TransactionList({ transactions, showStatus = false }: Transactio
               return (
                 <div
                   key={transaction.id}
-                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors"
+                  className="flex items-center gap-3 p-3 rounded-none hover:bg-muted/50 transition-colors"
                 >
                   <div className={cn('p-2 rounded-full', config.colorClass)}>
                     <Icon className="w-4 h-4" />

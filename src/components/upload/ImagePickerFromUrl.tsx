@@ -196,13 +196,13 @@ export function ImagePickerFromUrl({
 
       {/* Yandex Disk hint */}
       {isYandexDiskUrl && !isLoading && images.length === 0 && (
-        <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
+        <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-none">
           🔗 Обнаружена ссылка на Yandex Disk. Нажмите "Найти" для загрузки изображений.
         </div>
       )}
 
       {isGoogleDriveUrl && !isLoading && images.length === 0 && (
-        <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
+        <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-none">
           🔗 Обнаружена ссылка на Google Drive. Убедитесь, что доступ открыт «для всех, у кого есть ссылка».
         </div>
       )}
@@ -213,7 +213,7 @@ export function ImagePickerFromUrl({
           <ExternalLink className="h-4 w-4 shrink-0" />
           <span className="truncate">{pageTitle}</span>
           {isYandexSource && (
-            <span className="bg-primary/10 text-primary text-xs px-2 py-0.5 rounded shrink-0">Yandex Disk</span>
+            <span className="bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-none shrink-0">Yandex Disk</span>
           )}
         </div>
       )}
@@ -234,7 +234,7 @@ export function ImagePickerFromUrl({
       {!isLoading && images.length > 0 && (
         <>
           {/* Selection controls */}
-          <div className="flex items-center justify-between gap-2 flex-wrap bg-muted/30 p-3 rounded-lg">
+          <div className="flex items-center justify-between gap-2 flex-wrap bg-muted/30 p-3 rounded-none">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">
                 Выбрано: <span className="text-primary">{selectedImages.size}</span> / {remainingSlots}
@@ -271,7 +271,7 @@ export function ImagePickerFromUrl({
                   <div
                     key={index}
                     className={cn(
-                      "relative aspect-square rounded-xl overflow-hidden cursor-pointer transition-all group",
+                      "relative aspect-square rounded-none overflow-hidden cursor-pointer transition-all group",
                       "border-2 bg-muted",
                       isSelected 
                         ? "border-primary ring-2 ring-primary/30 scale-[0.98]" 

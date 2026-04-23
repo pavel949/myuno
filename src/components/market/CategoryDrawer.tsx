@@ -64,7 +64,7 @@ export function CategoryDrawer({ trigger }: CategoryDrawerProps) {
               placeholder={language === 'ru' ? 'Поиск категории...' : 'Search category...'}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 h-10 rounded-xl bg-muted border-0"
+              className="pl-10 h-10 rounded-none bg-muted border-0"
             />
           </div>
         </div>

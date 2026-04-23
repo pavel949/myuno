@@ -122,7 +122,7 @@ export const OwnerAIAssistant: React.FC<OwnerAIAssistantProps> = ({
                   <Bot className="h-4 w-4" />
                 </AvatarFallback>
               </Avatar>
-              <div className="bg-muted rounded-2xl rounded-bl-sm px-4 py-3 max-w-[85%]">
+              <div className="bg-muted rounded-none rounded-none px-4 py-3 max-w-[85%]">
                 <p className="text-sm">
                   {isRu 
                     ? 'Здравствуйте! 👋 Я ваш персональный ассистент UNO. Могу помочь с управлением объектами, ответить на вопросы о системе, рынке недвижимости Пхукета или законах Таиланда. Чем могу помочь?'
@@ -141,7 +141,7 @@ export const OwnerAIAssistant: React.FC<OwnerAIAssistantProps> = ({
                   <button
                     key={index}
                     onClick={() => handleQuickTopic(topic.prompt)}
-                    className="flex items-center gap-2 p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors text-left text-sm"
+                    className="flex items-center gap-2 p-3 rounded-none bg-muted/50 hover:bg-muted transition-colors text-left text-sm"
                   >
                     <topic.icon className="h-4 w-4 text-primary flex-shrink-0" />
                     <span className="truncate">{topic.label}</span>
@@ -162,7 +162,7 @@ export const OwnerAIAssistant: React.FC<OwnerAIAssistantProps> = ({
                     <Bot className="h-4 w-4" />
                   </AvatarFallback>
                 </Avatar>
-                <div className="bg-muted rounded-2xl rounded-bl-sm px-4 py-3">
+                <div className="bg-muted rounded-none rounded-none px-4 py-3">
                   <div className="flex gap-1">
                     <span className="w-2 h-2 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                     <span className="w-2 h-2 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -222,10 +222,10 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isRu }) => {
       <div className={cn('max-w-[85%]', isUser ? 'text-right' : 'text-left')}>
         <div
           className={cn(
-            'rounded-2xl px-4 py-2',
+            'rounded-none px-4 py-2',
             isUser
-              ? 'bg-primary text-primary-foreground rounded-br-sm'
-              : 'bg-muted rounded-bl-sm'
+              ? 'bg-primary text-primary-foreground rounded-none'
+              : 'bg-muted rounded-none'
           )}
         >
           {isUser ? (

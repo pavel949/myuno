@@ -238,7 +238,7 @@ export default function RestaurantDetail() {
                   key={i}
                   src={img}
                   alt={`${restaurant.name_en} ${i + 1}`}
-                  className="w-32 h-24 rounded-lg object-cover flex-shrink-0"
+                  className="w-32 h-24 rounded-none object-cover flex-shrink-0"
                 />
               ))}
             </div>
@@ -387,9 +387,9 @@ export default function RestaurantDetail() {
                       </h2>
                       <div className="space-y-2">
                         {items.map(item => (
-                          <div key={item.id} className="flex gap-3 p-3 rounded-xl bg-card border border-border/50">
+                          <div key={item.id} className="flex gap-3 p-3 rounded-none bg-card border border-border/50">
                             {item.image && (
-                              <img src={item.image} alt="" className="w-16 h-16 rounded-lg object-cover shrink-0" />
+                              <img src={item.image} alt="" className="w-16 h-16 rounded-none object-cover shrink-0" />
                             )}
                             <div className="flex-1 min-w-0">
                               <h3 className="font-medium text-sm">

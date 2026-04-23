@@ -215,7 +215,7 @@ export default function OwnerOperations() {
                 <div
                   key={task.id}
                   id={`task-${task.id}`}
-                  className={highlightedTaskId === task.id ? 'ring-2 ring-primary rounded-xl' : ''}
+                  className={highlightedTaskId === task.id ? 'ring-2 ring-primary rounded-none' : ''}
                 >
                   <OperationalTaskCard 
                     task={task} 

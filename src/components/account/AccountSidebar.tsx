@@ -60,7 +60,7 @@ export function AccountSidebar() {
               key={item.path}
               onClick={() => navigate(item.path)}
               className={cn(
-                "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors",
+                "w-full flex items-center gap-3 px-3 py-2.5 rounded-none text-sm transition-colors",
                 active
                   ? "bg-primary/10 text-primary font-medium"
                   : "text-foreground/70 hover:bg-muted hover:text-foreground"
@@ -82,7 +82,7 @@ export function AccountSidebar() {
       <div className="mt-auto pt-4">
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-destructive hover:bg-destructive/10 transition-colors"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-none text-sm text-destructive hover:bg-destructive/10 transition-colors"
         >
           <LogOut className="h-4 w-4" />
           <span>{isRu ? 'Выйти' : 'Log out'}</span>

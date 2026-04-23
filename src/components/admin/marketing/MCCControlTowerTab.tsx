@@ -126,7 +126,7 @@ export function MCCControlTowerTab() {
             <div
               key={alert.id}
               className={cn(
-                'flex items-center gap-3 p-3 rounded-lg text-sm',
+                'flex items-center gap-3 p-3 rounded-none text-sm',
                 alert.severity === 'critical' && 'bg-destructive/10 border border-destructive/30',
                 alert.severity === 'warning' && 'bg-warning/10 border border-warning/30',
                 alert.severity === 'info' && 'bg-info/10 border border-info/30',
@@ -235,9 +235,9 @@ export function MCCControlTowerTab() {
               return (
                 <div key={state} className="flex items-center gap-3">
                   <div className="w-28 text-sm text-muted-foreground truncate">{isRu ? label.ru : label.en}</div>
-                  <div className="flex-1 h-6 bg-muted rounded overflow-hidden">
+                  <div className="flex-1 h-6 bg-muted rounded-none overflow-hidden">
                     <div
-                      className="h-full bg-primary/60 rounded flex items-center justify-end px-2"
+                      className="h-full bg-primary/60 rounded-none flex items-center justify-end px-2"
                       style={{ width: `${Math.max(pct, 5)}%` }}
                     >
                       <span className="text-xs font-medium text-primary-foreground">{count}</span>
@@ -268,7 +268,7 @@ export function MCCControlTowerTab() {
           <CardContent className="space-y-3">
             {recommendations && recommendations.length > 0 ? (
               recommendations.map((rec: any) => (
-                <div key={rec.id} className="p-3 rounded-lg bg-muted/50 space-y-2">
+                <div key={rec.id} className="p-3 rounded-none bg-muted/50 space-y-2">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium">{rec.what_happened}</p>
@@ -355,7 +355,7 @@ export function MCCControlTowerTab() {
                 { label: '2nd', value: pulse?.secondAction ?? 0 },
               ].map((step, idx, arr) => (
                 <React.Fragment key={step.label}>
-                  <div className="text-center px-3 py-2 rounded-lg bg-muted/50 min-w-[70px]">
+                  <div className="text-center px-3 py-2 rounded-none bg-muted/50 min-w-[70px]">
                     <p className="text-xs text-muted-foreground">{step.label}</p>
                     <p className="text-lg font-bold">{step.value}</p>
                   </div>
@@ -388,7 +388,7 @@ function PulseCard({
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">{title}</p>
             <p className="text-2xl font-bold">{value}</p>
           </div>
-          <div className={cn('p-2 rounded-lg', color)}>
+          <div className={cn('p-2 rounded-none', color)}>
             <Icon className="h-5 w-5 text-white" />
           </div>
         </div>

@@ -16,7 +16,7 @@ export const ReviewStats = ({ average, total, distribution }: ReviewStatsProps) 
   };
 
   return (
-    <div className="bg-card rounded-2xl p-4 border">
+    <div className="bg-card rounded-none p-4 border">
       <div className="flex items-center gap-6">
         {/* Average Score */}
         <div className="text-center">

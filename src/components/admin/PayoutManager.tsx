@@ -113,7 +113,7 @@ export function PayoutManager() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-lg bg-warning/10 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-none bg-warning/10 flex items-center justify-center">
                 <Clock className="w-6 h-6 text-warning" />
               </div>
               <div>
@@ -126,7 +126,7 @@ export function PayoutManager() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-lg bg-info/10 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-none bg-info/10 flex items-center justify-center">
                 <Users className="w-6 h-6 text-info" />
               </div>
               <div>
@@ -139,7 +139,7 @@ export function PayoutManager() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-lg bg-accent-purple/10 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-none bg-accent-purple/10 flex items-center justify-center">
                 <Send className="w-6 h-6 text-accent-purple" />
               </div>
               <div>
@@ -195,7 +195,7 @@ export function PayoutManager() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.03 }}
-                      className={`flex items-center justify-between p-4 rounded-lg border ${
+                      className={`flex items-center justify-between p-4 rounded-none border ${
                         selectedProviders.includes(provider.id) 
                           ? 'border-primary bg-primary/5' 
                           : 'border-border hover:bg-muted/50'
@@ -256,7 +256,7 @@ export function PayoutManager() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.03 }}
-                      className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50"
+                      className="flex items-center justify-between p-4 rounded-none border border-border hover:bg-muted/50"
                     >
                       <div className="flex items-center gap-4">
                         <div className="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center">
@@ -313,7 +313,7 @@ export function PayoutManager() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.02 }}
-                      className="flex items-center justify-between p-4 rounded-lg border border-border"
+                      className="flex items-center justify-between p-4 rounded-none border border-border"
                     >
                       <div className="flex items-center gap-4">
                         <div className="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center">

@@ -184,7 +184,7 @@ export function AutomationRulesBuilder() {
                 </div>
 
                 {/* Trigger */}
-                <div className="p-3 bg-muted/50 rounded-lg space-y-3">
+                <div className="p-3 bg-muted/50 rounded-none space-y-3">
                   <p className="text-xs font-semibold uppercase text-muted-foreground">
                     {isRu ? 'Когда (триггер)' : 'When (Trigger)'}
                   </p>
@@ -200,7 +200,7 @@ export function AutomationRulesBuilder() {
 
                 {/* Condition */}
                 {form.triggerEntity && (
-                  <div className="p-3 bg-muted/50 rounded-lg space-y-3">
+                  <div className="p-3 bg-muted/50 rounded-none space-y-3">
                     <p className="text-xs font-semibold uppercase text-muted-foreground">
                       {isRu ? 'Если (условие)' : 'If (Condition)'}
                     </p>
@@ -231,7 +231,7 @@ export function AutomationRulesBuilder() {
                 )}
 
                 {/* Action */}
-                <div className="p-3 bg-muted/50 rounded-lg space-y-3">
+                <div className="p-3 bg-muted/50 rounded-none space-y-3">
                   <p className="text-xs font-semibold uppercase text-muted-foreground">
                     {isRu ? 'Тогда (действие)' : 'Then (Action)'}
                   </p>

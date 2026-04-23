@@ -67,7 +67,7 @@ export const IconBadge = memo(forwardRef<HTMLDivElement, IconBadgeProps>(functio
     <div
       ref={ref}
       className={cn(
-        'rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-200',
+        'rounded-none flex items-center justify-center flex-shrink-0 transition-all duration-200',
         containerSize,
         variantStyle,
         className

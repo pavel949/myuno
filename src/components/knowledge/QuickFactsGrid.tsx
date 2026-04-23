@@ -60,8 +60,8 @@ export function QuickFactsGrid() {
 
 function QuickFactItem({ icon: Icon, label, value }: QuickFact) {
   return (
-    <div className="bg-muted/50 rounded-xl p-3 flex items-center gap-3">
-      <div className="p-2 bg-primary/10 rounded-lg">
+    <div className="bg-muted/50 rounded-none p-3 flex items-center gap-3">
+      <div className="p-2 bg-primary/10 rounded-none">
         <Icon className="h-4 w-4 text-primary" />
       </div>
       <div className="min-w-0">

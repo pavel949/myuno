@@ -153,7 +153,7 @@ export function ControlAuditTab() {
                             {formatEntityType(log.entity_type)}
                           </Badge>
                           {log.entity_id && (
-                            <code className="text-xs bg-muted px-1 py-0.5 rounded">
+                            <code className="text-xs bg-muted px-1 py-0.5 rounded-none">
                               {log.entity_id.slice(0, 8)}...
                             </code>
                           )}
@@ -257,7 +257,7 @@ export function ControlAuditTab() {
                     <h4 className="font-medium mb-2 text-accent-amber">
                       {isRu ? 'Старые данные:' : 'Old Data:'}
                     </h4>
-                    <pre className="bg-accent-amber/5 p-3 rounded-lg text-xs overflow-auto max-h-48">
+                    <pre className="bg-accent-amber/5 p-3 rounded-none text-xs overflow-auto max-h-48">
                       {JSON.stringify(selectedLog.old_data, null, 2)}
                     </pre>
                   </div>
@@ -269,7 +269,7 @@ export function ControlAuditTab() {
                     <h4 className="font-medium mb-2 text-success">
                       {isRu ? 'Новые данные:' : 'New Data:'}
                     </h4>
-                    <pre className="bg-success/5 p-3 rounded-lg text-xs overflow-auto max-h-48">
+                    <pre className="bg-success/5 p-3 rounded-none text-xs overflow-auto max-h-48">
                       {JSON.stringify(selectedLog.new_data, null, 2)}
                     </pre>
                   </div>

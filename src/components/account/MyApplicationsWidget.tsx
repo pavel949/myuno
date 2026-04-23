@@ -56,8 +56,8 @@ export function MyApplicationsWidget() {
           <Skeleton className="h-5 w-32" />
         </CardHeader>
         <CardContent className="space-y-3">
-          <Skeleton className="h-16 w-full rounded-lg" />
-          <Skeleton className="h-16 w-full rounded-lg" />
+          <Skeleton className="h-16 w-full rounded-none" />
+          <Skeleton className="h-16 w-full rounded-none" />
         </CardContent>
       </Card>
     );
@@ -96,7 +96,7 @@ export function MyApplicationsWidget() {
           return (
             <div
               key={app.id}
-              className="flex items-center gap-3 p-3 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
+              className="flex items-center gap-3 p-3 rounded-none bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
               onClick={() => {
                 // TODO: Navigate to application detail/edit page
               }}
@@ -105,10 +105,10 @@ export function MyApplicationsWidget() {
                 <img
                   src={app.cover_image}
                   alt=""
-                  className="h-12 w-12 rounded-lg object-cover"
+                  className="h-12 w-12 rounded-none object-cover"
                 />
               ) : (
-                <div className="h-12 w-12 rounded-lg bg-muted flex items-center justify-center">
+                <div className="h-12 w-12 rounded-none bg-muted flex items-center justify-center">
                   <TypeIcon className="h-5 w-5 text-muted-foreground" />
                 </div>
               )}

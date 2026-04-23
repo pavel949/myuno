@@ -46,11 +46,11 @@ export default function OwnerTransparencyDashboard() {
   if (roleLoading || propLoading) {
     return (
       <div className="p-4 space-y-4 max-w-3xl mx-auto">
-        <div className="h-8 bg-muted animate-pulse rounded w-1/3" />
+        <div className="h-8 bg-muted animate-pulse rounded-none w-1/3" />
         <div className="grid grid-cols-2 gap-3">
-          {[1, 2, 3, 4].map(i => <div key={i} className="h-20 bg-muted animate-pulse rounded-xl" />)}
+          {[1, 2, 3, 4].map(i => <div key={i} className="h-20 bg-muted animate-pulse rounded-none" />)}
         </div>
-        <div className="h-64 bg-muted animate-pulse rounded-xl" />
+        <div className="h-64 bg-muted animate-pulse rounded-none" />
       </div>
     );
   }
@@ -91,7 +91,7 @@ export default function OwnerTransparencyDashboard() {
 
       {/* Cover image */}
       {property?.cover_image && (
-        <div className="rounded-xl overflow-hidden h-40">
+        <div className="rounded-none overflow-hidden h-40">
           <img src={property.cover_image} alt="" className="w-full h-full object-cover" />
         </div>
       )}

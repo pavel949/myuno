@@ -13,7 +13,7 @@ import { Trophy, Medal, Award, Sparkles, TrendingUp, Calendar, Clock } from 'luc
 import { useAuth } from '@/contexts/AuthContext';
 
 const RANK_ICONS = [Trophy, Medal, Award];
-const RANK_COLORS = ['text-amber-500', 'text-gray-400', 'text-amber-700'];
+const RANK_COLORS = ['text-accent', 'text-gray-400', 'text-accent'];
 
 interface LeaderboardProps {
   className?: string;
@@ -39,7 +39,7 @@ export function Leaderboard({ className, compact = false, maxItems = 10 }: Leade
       <Card className={className}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Trophy className="h-5 w-5 text-amber-500" />
+            <Trophy className="h-5 w-5 text-accent" />
             {isRu ? 'Рейтинг' : 'Leaderboard'}
           </CardTitle>
         </CardHeader>
@@ -58,7 +58,7 @@ export function Leaderboard({ className, compact = false, maxItems = 10 }: Leade
         <CardHeader className="pb-2">
           <CardTitle className="text-sm flex items-center justify-between">
             <span className="flex items-center gap-2">
-              <Trophy className="h-4 w-4 text-amber-500" />
+              <Trophy className="h-4 w-4 text-accent" />
               {isRu ? 'Топ команды' : 'Top Team'}
             </span>
             {currentUserRank && (
@@ -86,7 +86,7 @@ export function Leaderboard({ className, compact = false, maxItems = 10 }: Leade
     <Card className={className}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Trophy className="h-5 w-5 text-amber-500" />
+          <Trophy className="h-5 w-5 text-accent" />
           {isRu ? 'Рейтинг команды' : 'Team Leaderboard'}
         </CardTitle>
       </CardHeader>
@@ -180,7 +180,7 @@ function LeaderboardRow({ entry, isCurrentUser, compact, period = 'all_time' }: 
 
   return (
     <div className={cn(
-      "flex items-center gap-3 p-3 rounded-lg transition-colors",
+      "flex items-center gap-3 p-3 rounded-none transition-colors",
       isCurrentUser ? "bg-primary/10 border border-primary/20" : "bg-muted/30 hover:bg-muted/50"
     )}>
       {/* Rank */}
@@ -211,7 +211,7 @@ function LeaderboardRow({ entry, isCurrentUser, compact, period = 'all_time' }: 
           <LevelBadge level={entry.level} size="sm" />
         </div>
         {entry.streak_days > 0 && (
-          <div className="flex items-center gap-1 text-xs text-amber-500 mt-0.5">
+          <div className="flex items-center gap-1 text-xs text-accent mt-0.5">
             <Sparkles className="h-3 w-3" />
             <span>{entry.streak_days} {isRu ? 'дней' : 'days'}</span>
           </div>

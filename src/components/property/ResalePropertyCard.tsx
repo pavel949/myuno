@@ -55,7 +55,7 @@ export function ResalePropertyCard({ property, onClick, className }: ResalePrope
       data-listing-id={surface.id}
       onClick={handleClick}
       className={cn(
-        "bg-card rounded-xl border border-border/50 overflow-hidden cursor-pointer",
+        "bg-card rounded-none border border-border/50 overflow-hidden cursor-pointer",
         "hover:shadow-md transition-shadow",
         className
       )}

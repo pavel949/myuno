@@ -16,7 +16,7 @@ export function DetailPageSkeleton({ className }: SkeletonProps) {
       <Skeleton className="w-full aspect-video rounded-none" />
       
       {/* Content */}
-      <div className="p-4 space-y-4 -mt-4 relative z-10 bg-background rounded-t-3xl">
+      <div className="p-4 space-y-4 -mt-4 relative z-10 bg-background rounded-none">
         {/* Title & Badge */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 space-y-2">
@@ -27,10 +27,10 @@ export function DetailPageSkeleton({ className }: SkeletonProps) {
         </div>
 
         {/* Stats Grid - 4 columns */}
-        <div className="grid grid-cols-4 gap-3 p-4 bg-muted/30 rounded-2xl">
+        <div className="grid grid-cols-4 gap-3 p-4 bg-muted/30 rounded-none">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="flex flex-col items-center gap-1.5">
-              <Skeleton className="w-6 h-6 rounded-lg" />
+              <Skeleton className="w-6 h-6 rounded-none" />
               <Skeleton className="h-4 w-10" />
               <Skeleton className="h-3 w-8" />
             </div>
@@ -57,8 +57,8 @@ export function DetailPageSkeleton({ className }: SkeletonProps) {
 
         {/* Action buttons placeholder */}
         <div className="flex gap-3 pt-4">
-          <Skeleton className="h-12 flex-1 rounded-xl" />
-          <Skeleton className="h-12 w-12 rounded-xl" />
+          <Skeleton className="h-12 flex-1 rounded-none" />
+          <Skeleton className="h-12 w-12 rounded-none" />
         </div>
       </div>
     </div>
@@ -106,10 +106,10 @@ export function BookingListSkeleton({ className, count = 5 }: SkeletonProps & { 
         {Array.from({ length: count }).map((_, i) => (
           <div
             key={i}
-            className="flex gap-3 p-4 bg-card border border-border rounded-2xl"
+            className="flex gap-3 p-4 bg-card border border-border rounded-none"
           >
             {/* Icon placeholder */}
-            <Skeleton className="w-16 h-16 rounded-xl flex-shrink-0" />
+            <Skeleton className="w-16 h-16 rounded-none flex-shrink-0" />
             
             {/* Content */}
             <div className="flex-1 min-w-0 space-y-2">
@@ -125,7 +125,7 @@ export function BookingListSkeleton({ className, count = 5 }: SkeletonProps & { 
             </div>
             
             {/* Chevron */}
-            <Skeleton className="w-5 h-5 rounded flex-shrink-0 self-center" />
+            <Skeleton className="w-5 h-5 rounded-none flex-shrink-0 self-center" />
           </div>
         ))}
       </div>
@@ -140,43 +140,43 @@ export function ProfileSkeleton({ className }: SkeletonProps) {
   return (
     <div className={cn('p-4 space-y-4', className)}>
       {/* Avatar & Name Card */}
-      <div className="p-4 bg-card border border-border rounded-2xl space-y-3">
+      <div className="p-4 bg-card border border-border rounded-none space-y-3">
         <div className="flex items-center gap-3">
           <Skeleton className="w-16 h-16 rounded-full flex-shrink-0" />
           <div className="flex-1 space-y-2">
             <Skeleton className="h-5 w-2/3" />
             <Skeleton className="h-4 w-1/2" />
           </div>
-          <Skeleton className="h-9 w-20 rounded-lg" />
+          <Skeleton className="h-9 w-20 rounded-none" />
         </div>
-        <Skeleton className="h-8 w-full rounded-lg" />
+        <Skeleton className="h-8 w-full rounded-none" />
       </div>
 
       {/* Menu items */}
-      <div className="bg-card border border-border rounded-2xl overflow-hidden divide-y divide-border">
+      <div className="bg-card border border-border rounded-none overflow-hidden divide-y divide-border">
         {Array.from({ length: 6 }).map((_, i) => (
           <div key={i} className="flex items-center gap-3 p-4">
-            <Skeleton className="w-5 h-5 rounded flex-shrink-0" />
+            <Skeleton className="w-5 h-5 rounded-none flex-shrink-0" />
             <Skeleton className="h-4 flex-1" />
-            <Skeleton className="w-5 h-5 rounded flex-shrink-0" />
+            <Skeleton className="w-5 h-5 rounded-none flex-shrink-0" />
           </div>
         ))}
       </div>
 
       {/* Info section */}
       <Skeleton className="h-4 w-24" />
-      <div className="bg-card border border-border rounded-2xl overflow-hidden divide-y divide-border">
+      <div className="bg-card border border-border rounded-none overflow-hidden divide-y divide-border">
         {Array.from({ length: 4 }).map((_, i) => (
           <div key={i} className="flex items-center gap-3 p-4">
-            <Skeleton className="w-5 h-5 rounded flex-shrink-0" />
+            <Skeleton className="w-5 h-5 rounded-none flex-shrink-0" />
             <Skeleton className="h-4 flex-1" />
-            <Skeleton className="w-5 h-5 rounded flex-shrink-0" />
+            <Skeleton className="w-5 h-5 rounded-none flex-shrink-0" />
           </div>
         ))}
       </div>
 
       {/* Logout button */}
-      <Skeleton className="h-12 w-full rounded-xl" />
+      <Skeleton className="h-12 w-full rounded-none" />
     </div>
   );
 }
@@ -186,7 +186,7 @@ export function ProfileSkeleton({ className }: SkeletonProps) {
  */
 export function CardSkeleton({ className }: SkeletonProps) {
   return (
-    <div className={cn('rounded-2xl overflow-hidden bg-card', className)}>
+    <div className={cn('rounded-none overflow-hidden bg-card', className)}>
       <Skeleton className="aspect-[4/3] w-full rounded-none" />
       <div className="p-3 space-y-2">
         <Skeleton className="h-4 w-3/4" />

@@ -205,7 +205,7 @@ const MarketIndex = () => {
                   setSearchQuery('');
                 }}
               >
-                <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center text-xl">
+                <div className="w-10 h-10 rounded-none bg-muted flex items-center justify-center text-xl">
                   {category.icon || getCategoryFallbackIcon(category.slug)}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -242,7 +242,7 @@ const MarketIndex = () => {
                 <img
                   src={product.cover_image || '/placeholder.svg'}
                   alt=""
-                  className="w-12 h-12 rounded-lg object-cover"
+                  className="w-12 h-12 rounded-none object-cover"
                 />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium line-clamp-1">
@@ -292,7 +292,7 @@ const MarketIndex = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="gap-1.5 px-3 py-2 h-auto rounded-xl border-primary/30 bg-primary/5 hover:bg-primary/10 text-primary font-medium shrink-0"
+                  className="gap-1.5 px-3 py-2 h-auto rounded-none border-primary/30 bg-primary/5 hover:bg-primary/10 text-primary font-medium shrink-0"
                 >
                   <Menu className="w-4 h-4" />
                   <span className="text-xs">{isRu ? 'Каталог' : 'Catalog'}</span>
@@ -306,7 +306,7 @@ const MarketIndex = () => {
                 <button
                   key={item.id}
                   onClick={() => handleCategorySelect(item.id)}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium bg-muted/60 hover:bg-muted text-foreground transition-colors shrink-0"
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-none text-xs font-medium bg-muted/60 hover:bg-muted text-foreground transition-colors shrink-0"
                 >
                   <span className="text-base">{item.emoji}</span>
                   <span className="whitespace-nowrap">{item.label}</span>
@@ -355,7 +355,7 @@ const MarketIndex = () => {
             <div className="px-4 md:px-6 lg:px-8 max-w-[1800px] mx-auto">
               <UnifiedSectionHeader
                 icon={Flame}
-                iconColor="text-orange-500"
+                iconColor="text-accent"
                 title={isRu ? 'Хиты продаж' : 'Bestsellers'}
                 viewAllPath="/market/category/popular"
                 viewAllLabel={isRu ? 'Все' : 'All'}
@@ -390,7 +390,7 @@ const MarketIndex = () => {
             <div className="px-4 md:px-6 lg:px-8 max-w-[1800px] mx-auto">
               <UnifiedSectionHeader
                 icon={Sparkles}
-                iconColor="text-purple-500"
+                iconColor="text-primary"
                 title={isRu ? 'Новинки' : 'New Arrivals'}
                 viewAllPath="/market/category/new"
                 viewAllLabel={isRu ? 'Все' : 'All'}
@@ -481,7 +481,7 @@ const MarketIndex = () => {
           {allProducts.length > 20 && (
             <Button 
               variant="outline" 
-              className="w-full mt-6 h-12 rounded-xl text-base font-medium"
+              className="w-full mt-6 h-12 rounded-none text-base font-medium"
               onClick={() => navigate('/market/categories')}
             >
               {isRu ? 'Показать все товары' : 'Show All Products'}

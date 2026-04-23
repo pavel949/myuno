@@ -129,7 +129,7 @@ function AgentCard({ agent, onEdit, onDelete, onToggleActive }: {
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className={`p-2.5 rounded-xl ${agent.is_active ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
+            <div className={`p-2.5 rounded-none ${agent.is_active ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
               <IconComponent className="h-5 w-5" />
             </div>
             <div>
@@ -200,7 +200,7 @@ function AgentCard({ agent, onEdit, onDelete, onToggleActive }: {
 
         {/* Capabilities List */}
         {AGENT_CAPABILITIES[agent.slug] && (
-          <div className="bg-muted/50 rounded-md p-2 space-y-1">
+          <div className="bg-muted/50 rounded-none p-2 space-y-1">
             <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
               {isRussian ? 'Возможности' : 'Capabilities'}
             </span>
@@ -350,7 +350,7 @@ export default function AdminAIAgents() {
               {[1, 2, 3, 4].map((i) => (
                 <Card key={i}>
                   <CardHeader>
-                    <Skeleton className="h-10 w-10 rounded-xl" />
+                    <Skeleton className="h-10 w-10 rounded-none" />
                     <Skeleton className="h-5 w-32 mt-2" />
                     <Skeleton className="h-4 w-24" />
                   </CardHeader>

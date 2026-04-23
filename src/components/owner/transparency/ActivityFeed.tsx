@@ -121,8 +121,8 @@ export function ActivityFeed({ propertyId, limit = 50 }: ActivityFeedProps) {
           <div key={i} className="flex gap-3 animate-pulse">
             <div className="w-9 h-9 rounded-full bg-muted" />
             <div className="flex-1 space-y-1">
-              <div className="h-4 bg-muted rounded w-2/3" />
-              <div className="h-3 bg-muted rounded w-1/2" />
+              <div className="h-4 bg-muted rounded-none w-2/3" />
+              <div className="h-3 bg-muted rounded-none w-1/2" />
             </div>
           </div>
         ))}

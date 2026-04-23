@@ -75,7 +75,7 @@ export default function ProjectMicrosite() {
           </Link>
           <a
             href="#lead-form"
-            className="px-5 py-2 rounded-lg text-sm font-medium"
+            className="px-5 py-2 rounded-none text-sm font-medium"
             style={{ background: 'hsl(var(--nb-gold, 38 50% 55%))', color: 'hsl(222 47% 4%)' }}
           >
             Запросить информацию
@@ -98,7 +98,7 @@ export default function ProjectMicrosite() {
           <div className="flex flex-wrap gap-2 mb-4">
             <NbProjectStatusBadge status={project.project_status} />
             {project.is_featured && (
-              <span className="px-3 py-1 rounded text-xs font-semibold" style={{ background: 'hsl(38 50% 55% / 0.15)', color: 'hsl(38 50% 55%)', border: '1px solid hsl(38 50% 55% / 0.3)' }}>
+              <span className="px-3 py-1 rounded-none text-xs font-semibold" style={{ background: 'hsl(38 50% 55% / 0.15)', color: 'hsl(38 50% 55%)', border: '1px solid hsl(38 50% 55% / 0.3)' }}>
                 FEATURED
               </span>
             )}
@@ -139,11 +139,11 @@ export default function ProjectMicrosite() {
           ) : null}
 
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="p-5 rounded-xl border" style={{ background: 'hsl(222 47% 8%)', borderColor: 'hsl(38 50% 55% / 0.15)' }}>
+            <div className="p-5 rounded-none border" style={{ background: 'hsl(222 47% 8%)', borderColor: 'hsl(38 50% 55% / 0.15)' }}>
               <p className="text-xs uppercase tracking-wider opacity-60 mb-2">Цена от</p>
               <NbPriceDisplay price={project.price_from} size="md" />
             </div>
-            <div className="p-5 rounded-xl border" style={{ background: 'hsl(222 47% 8%)', borderColor: 'hsl(38 50% 55% / 0.15)' }}>
+            <div className="p-5 rounded-none border" style={{ background: 'hsl(222 47% 8%)', borderColor: 'hsl(38 50% 55% / 0.15)' }}>
               <p className="text-xs uppercase tracking-wider opacity-60 mb-2">Прогресс</p>
               <NbConstructionProgress progress={project.construction_progress} />
             </div>
@@ -154,7 +154,7 @@ export default function ProjectMicrosite() {
               <h2 className="text-2xl font-semibold mb-4">Доступные юниты</h2>
               <div className="grid sm:grid-cols-2 gap-4">
                 {units.slice(0, 6).map((u) => (
-                  <div key={u.id} className="p-4 rounded-xl border" style={{ background: 'hsl(222 47% 8%)', borderColor: 'hsl(38 50% 55% / 0.15)' }}>
+                  <div key={u.id} className="p-4 rounded-none border" style={{ background: 'hsl(222 47% 8%)', borderColor: 'hsl(38 50% 55% / 0.15)' }}>
                     <p className="font-semibold mb-1">{u.name}</p>
                     <p className="text-sm opacity-70 mb-2">{u.bedrooms ?? 0} BR · {u.area_sqm} m²</p>
                     <NbPriceDisplay price={u.price} size="sm" />
@@ -169,7 +169,7 @@ export default function ProjectMicrosite() {
               <h2 className="text-2xl font-semibold mb-4">Удобства</h2>
               <div className="flex flex-wrap gap-2">
                 {project.amenities.slice(0, 20).map((a) => (
-                  <span key={a} className="px-3 py-1.5 rounded-lg text-sm border" style={{ background: 'hsl(222 47% 8%)', borderColor: 'hsl(38 50% 55% / 0.2)' }}>
+                  <span key={a} className="px-3 py-1.5 rounded-none text-sm border" style={{ background: 'hsl(222 47% 8%)', borderColor: 'hsl(38 50% 55% / 0.2)' }}>
                     {a}
                   </span>
                 ))}
@@ -180,7 +180,7 @@ export default function ProjectMicrosite() {
 
         {/* Sticky lead form */}
         <aside className="lg:sticky lg:top-20 self-start" id="lead-form">
-          <div className="p-6 rounded-2xl border" style={{ background: 'hsl(222 47% 8%)', borderColor: 'hsl(38 50% 55% / 0.25)' }}>
+          <div className="p-6 rounded-none border" style={{ background: 'hsl(222 47% 8%)', borderColor: 'hsl(38 50% 55% / 0.25)' }}>
             <h3 className="text-xl font-semibold mb-2">Получить детали</h3>
             <p className="text-sm opacity-70 mb-4">Брошюра, цены, планировки — за 1 минуту</p>
             <NbLeadForm projectId={project.id} source={`microsite_${slug}`} />

@@ -149,7 +149,7 @@ export default function TaxNavPage() {
       <AppLayout>
         <SEOHead title={t ? 'Налоговый навигатор' : 'Tax Navigator'} description={t ? 'AI-навигатор налоговых обязательств для иностранцев в Таиланде' : 'AI tax obligations navigator for foreigners in Thailand'} />
         <div className="pb-24">
-          <div className="relative bg-gradient-to-br from-sky-600 via-blue-600 to-indigo-700 p-6 pt-16 pb-8">
+          <div className="relative bg-gradient-to-br from-primary via-primary to-primary p-6 pt-16 pb-8">
             <BackButton fallbackPath={APP_ROUTES.LEGAL} variant="overlay" className="absolute top-4 left-4" />
             <div className="text-white text-center">
               <Calculator className="w-8 h-8 mx-auto mb-2" />
@@ -192,7 +192,7 @@ export default function TaxNavPage() {
     <AppLayout>
       <SEOHead title={t ? 'Налоговый навигатор' : 'Tax Navigator'} description={t ? 'AI-навигатор налоговых обязательств для иностранцев в Таиланде' : 'AI tax obligations navigator for foreigners in Thailand'} />
       <div className="pb-24">
-        <div className="relative bg-gradient-to-br from-sky-600 via-blue-600 to-indigo-700 p-6 pt-16 pb-8">
+        <div className="relative bg-gradient-to-br from-primary via-primary to-primary p-6 pt-16 pb-8">
           <BackButton fallbackPath={APP_ROUTES.LEGAL} variant="overlay" className="absolute top-4 left-4" />
           <div className="text-white text-center">
             <Calculator className="w-8 h-8 mx-auto mb-2" />
@@ -218,7 +218,7 @@ export default function TaxNavPage() {
               {currentStep.type === 'radio' ? (
                 <RadioGroup value={answers[currentStep.id] as string || ''} onValueChange={handleRadio} className="space-y-2">
                   {currentStep.options.map(opt => (
-                    <div key={opt.value} className="flex items-center space-x-3 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
+                    <div key={opt.value} className="flex items-center space-x-3 p-3 rounded-none border border-border hover:bg-muted/50 transition-colors">
                       <RadioGroupItem value={opt.value} id={opt.value} />
                       <Label htmlFor={opt.value} className="text-sm cursor-pointer flex-1">{t ? opt.labelRu : opt.label}</Label>
                     </div>
@@ -227,7 +227,7 @@ export default function TaxNavPage() {
               ) : (
                 <div className="space-y-2">
                   {currentStep.options.map(opt => (
-                    <div key={opt.value} className="flex items-center space-x-3 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
+                    <div key={opt.value} className="flex items-center space-x-3 p-3 rounded-none border border-border hover:bg-muted/50 transition-colors">
                       <Checkbox
                         id={opt.value}
                         checked={((answers[currentStep.id] as string[]) || []).includes(opt.value)}

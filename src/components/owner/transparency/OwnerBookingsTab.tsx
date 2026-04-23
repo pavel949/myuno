@@ -35,7 +35,7 @@ export function OwnerBookingsTab({ propertyId }: OwnerBookingsTabProps) {
   });
 
   if (isLoading) {
-    return <div className="space-y-3">{[1, 2, 3].map(i => <div key={i} className="h-20 bg-muted animate-pulse rounded-xl" />)}</div>;
+    return <div className="space-y-3">{[1, 2, 3].map(i => <div key={i} className="h-20 bg-muted animate-pulse rounded-none" />)}</div>;
   }
 
   if (bookings.length === 0) {
@@ -75,7 +75,7 @@ export function OwnerBookingsTab({ propertyId }: OwnerBookingsTabProps) {
                 <DollarSign className="w-3.5 h-3.5" />
                 ฿{Number(b.total_amount || 0).toLocaleString()}
               </div>
-              {b.source && <span className="text-[11px] bg-muted px-1.5 py-0.5 rounded">{b.source}</span>}
+              {b.source && <span className="text-[11px] bg-muted px-1.5 py-0.5 rounded-none">{b.source}</span>}
             </div>
           </CardContent>
         </Card>

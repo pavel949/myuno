@@ -188,7 +188,7 @@ const VendorOnboarding = () => {
                 </p>
 
                 {/* Stacked input group — Airbnb aesthetic */}
-                <div className="rounded-2xl border border-border overflow-hidden mb-6">
+                <div className="rounded-none border border-border overflow-hidden mb-6">
                   {/* Business name */}
                   <div className="relative group">
                     <input
@@ -264,7 +264,7 @@ const VendorOnboarding = () => {
                 <Button
                   onClick={handleStep1Submit}
                   disabled={isSubmitting || !businessName.trim() || !category}
-                  className="w-full h-14 text-base font-semibold rounded-xl"
+                  className="w-full h-14 text-base font-semibold rounded-none"
                   size="lg"
                 >
                   {isSubmitting ? (
@@ -295,7 +295,7 @@ const VendorOnboarding = () => {
                 </p>
 
                 {/* Stacked inputs */}
-                <div className="rounded-2xl border border-border overflow-hidden mb-6">
+                <div className="rounded-none border border-border overflow-hidden mb-6">
                   {/* Service name */}
                   <div className="relative">
                     <input
@@ -402,7 +402,7 @@ const VendorOnboarding = () => {
                 <Button
                   onClick={handleStep2Submit}
                   disabled={isSubmitting || !serviceName.trim() || !servicePrice}
-                  className="w-full h-14 text-base font-semibold rounded-xl"
+                  className="w-full h-14 text-base font-semibold rounded-none"
                   size="lg"
                 >
                   {isSubmitting ? (
@@ -443,7 +443,7 @@ const VendorOnboarding = () => {
                   </p>
 
                   {/* Checklist */}
-                  <div className="text-left rounded-2xl border border-border p-5 mb-8 space-y-3">
+                  <div className="text-left rounded-none border border-border p-5 mb-8 space-y-3">
                     <p className="text-sm font-semibold">
                       {isRu ? 'Что дальше:' : 'What\'s next:'}
                     </p>
@@ -469,7 +469,7 @@ const VendorOnboarding = () => {
 
                   <Button
                     onClick={() => navigate('/vendor')}
-                    className="w-full h-14 text-base font-semibold rounded-xl"
+                    className="w-full h-14 text-base font-semibold rounded-none"
                     size="lg"
                   >
                     {isRu ? 'Перейти в панель управления' : 'Go to Dashboard'}

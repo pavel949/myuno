@@ -46,7 +46,7 @@ export function UtilitiesInfo({ electricity, water, internet, className }: Utili
       <div className="space-y-3">
         {/* Electricity */}
         {electricity && (
-          <div className="p-3 rounded-lg bg-warning/5 border border-warning/20">
+          <div className="p-3 rounded-none bg-warning/5 border border-warning/20">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <Zap className="w-5 h-5 text-warning" />
@@ -75,7 +75,7 @@ export function UtilitiesInfo({ electricity, water, internet, className }: Utili
 
         {/* Water */}
         {water && (
-          <div className="p-3 rounded-lg bg-info/5 border border-info/20">
+          <div className="p-3 rounded-none bg-info/5 border border-info/20">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <Droplets className="w-5 h-5 text-info" />
@@ -102,7 +102,7 @@ export function UtilitiesInfo({ electricity, water, internet, className }: Utili
 
         {/* Internet */}
         {internet && (internet.speed || internet.provider) && (
-          <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
+          <div className="p-3 rounded-none bg-primary/5 border border-primary/20">
             <div className="flex items-center gap-2 mb-1">
               <Wifi className="w-5 h-5 text-primary" />
               <span className="font-medium">{isRu ? 'Интернет' : 'Internet'}</span>

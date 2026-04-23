@@ -140,8 +140,8 @@ export const ReviewsSection = ({
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <div className="h-32 bg-muted animate-pulse rounded-2xl" />
-        <div className="h-40 bg-muted animate-pulse rounded-xl" />
+        <div className="h-32 bg-muted animate-pulse rounded-none" />
+        <div className="h-40 bg-muted animate-pulse rounded-none" />
       </div>
     );
   }
@@ -238,7 +238,7 @@ export const ReviewsSection = ({
 
       {/* Reviews List */}
       {filteredReviews.length === 0 ? (
-        <div className="text-center py-12 bg-muted/30 rounded-2xl">
+        <div className="text-center py-12 bg-muted/30 rounded-none">
           <MessageSquare className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
           <p className="text-muted-foreground">
             {filterBy !== 'all' 

@@ -128,13 +128,13 @@ export function LifecycleSmartTip() {
   if (!tip) return null;
 
   return (
-    <div className="rounded-2xl bg-card border border-primary/15 shadow-[var(--shadow-card)] overflow-hidden">
+    <div className="rounded-none bg-card border border-primary/15 shadow-[var(--shadow-card)] overflow-hidden">
       {/* Subtle gradient accent bar */}
       <div className="h-0.5 w-full bg-gradient-to-r from-primary/40 via-primary/20 to-transparent" />
       
       <div className="p-4">
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary/8 border border-primary/10 flex items-center justify-center text-lg shrink-0">
+          <div className="w-10 h-10 rounded-none bg-primary/8 border border-primary/10 flex items-center justify-center text-lg shrink-0">
             {tip.icon}
           </div>
           <div className="flex-1 min-w-0">
@@ -149,7 +149,7 @@ export function LifecycleSmartTip() {
               </div>
               <button
                 onClick={() => dismiss(tip.id)}
-                className="p-1.5 rounded-lg hover:bg-muted transition-colors shrink-0 -mt-0.5"
+                className="p-1.5 rounded-none hover:bg-muted transition-colors shrink-0 -mt-0.5"
               >
                 <X className="w-3.5 h-3.5 text-muted-foreground" />
               </button>

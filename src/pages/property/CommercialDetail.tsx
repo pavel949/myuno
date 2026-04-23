@@ -37,7 +37,7 @@ export default function CommercialDetail() {
     return (
       <div className={ECOSYSTEM_PAGE_CONTAINER}>
         <div className="px-4 pt-3"><BackButton /></div>
-        <Skeleton className="aspect-[16/9] mx-4 rounded-2xl mt-3" />
+        <Skeleton className="aspect-[16/9] mx-4 rounded-none mt-3" />
         <div className="px-4 py-4 space-y-3">
           <Skeleton className="h-6 w-2/3" />
           <Skeleton className="h-4 w-1/2" />
@@ -83,18 +83,18 @@ export default function CommercialDetail() {
         <div className="px-4 pt-3"><BackButton /></div>
 
         {/* Hero */}
-        <div className="relative aspect-[16/9] mx-4 mt-3 rounded-2xl overflow-hidden bg-muted">
+        <div className="relative aspect-[16/9] mx-4 mt-3 rounded-none overflow-hidden bg-muted">
           {cover && (
             <img src={cover} alt={title} className="w-full h-full object-cover" />
           )}
           <div className="absolute top-3 left-3 flex gap-1.5">
             <Badge className="bg-background/95 text-foreground backdrop-blur-sm">{typeLabel}</Badge>
-            <Badge className={isRent ? 'bg-blue-500/95 text-white' : 'bg-amber-500/95 text-white'}>
+            <Badge className={isRent ? 'bg-primary/95 text-white' : 'bg-accent/95 text-white'}>
               {isRent ? (isRu ? 'Аренда' : 'Rent') : isRu ? 'Продажа' : 'Sale'}
             </Badge>
           </div>
           {property.is_verified && (
-            <Badge className="absolute top-3 right-3 bg-emerald-500/95 text-white gap-1">
+            <Badge className="absolute top-3 right-3 bg-success/95 text-white gap-1">
               <BadgeCheck className="w-3 h-3" />
               {isRu ? 'Проверено' : 'Verified'}
             </Badge>
@@ -128,9 +128,9 @@ export default function CommercialDetail() {
 
           {/* Hotel-specific KPI section */}
           {isHotel && (
-            <section className="rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/5 to-transparent p-4 space-y-4">
+            <section className="rounded-none border border-accent/40/30 bg-gradient-to-br from-accent/5 to-transparent p-4 space-y-4">
               <div className="flex items-center gap-2">
-                <Hotel className="w-4 h-4 text-amber-500" />
+                <Hotel className="w-4 h-4 text-accent" />
                 <h2 className="text-base font-semibold">{isRu ? 'Параметры отеля' : 'Hotel performance'}</h2>
                 {property.hotel_star_rating != null && (
                   <div className="flex items-center gap-0.5 ml-auto">
@@ -139,7 +139,7 @@ export default function CommercialDetail() {
                         key={i}
                         className={`w-3.5 h-3.5 ${
                           i < Math.round(property.hotel_star_rating!)
-                            ? 'fill-amber-500 text-amber-500'
+                            ? 'fill-accent text-accent'
                             : 'text-muted-foreground/30'
                         }`}
                       />
@@ -164,7 +164,7 @@ export default function CommercialDetail() {
               </div>
 
               {(property.hotel_adr_thb != null || property.hotel_revpar_thb != null || property.hotel_gop_margin_pct != null) && (
-                <div className="pt-3 border-t border-amber-500/20">
+                <div className="pt-3 border-t border-accent/40/20">
                   <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-2 flex items-center gap-1.5">
                     <TrendingUp className="w-3 h-3" />
                     {isRu ? 'Финансовые метрики' : 'Financial metrics'}
@@ -183,7 +183,7 @@ export default function CommercialDetail() {
                       )}
                     </div>
                   ) : (
-                    <div className="rounded-lg border border-dashed border-amber-500/40 bg-background/50 p-3 text-xs text-muted-foreground text-center">
+                    <div className="rounded-none border border-dashed border-accent/40/40 bg-background/50 p-3 text-xs text-muted-foreground text-center">
                       {isRu ? 'Войдите, чтобы увидеть ADR, RevPAR и GOP%' : 'Sign in to view ADR, RevPAR and GOP%'}
                     </div>
                   )}
@@ -192,7 +192,7 @@ export default function CommercialDetail() {
 
               <div className="flex flex-wrap gap-2">
                 {property.hotel_management_status && (
-                  <Badge variant="secondary" className="bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30">
+                  <Badge variant="secondary" className="bg-accent/15 text-accent dark:text-accent border-accent/40/30">
                     {getHotelManagementStatusLabel(property.hotel_management_status, isRu)}
                     {property.hotel_operator_name && ` · ${property.hotel_operator_name}`}
                   </Badge>
@@ -202,8 +202,8 @@ export default function CommercialDetail() {
                     variant="secondary"
                     className={
                       property.hotel_license_type === 'full_hotel_license'
-                        ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
-                        : 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30'
+                        ? 'bg-success/15 text-success dark:text-success border-success/40/30'
+                        : 'bg-accent/15 text-accent dark:text-accent border-accent/40/30'
                     }
                   >
                     <ShieldCheck className="w-3 h-3 mr-1" />
@@ -283,7 +283,7 @@ export default function CommercialDetail() {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-border bg-card p-3">
+    <div className="rounded-none border border-border bg-card p-3">
       <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</p>
       <p className="text-base font-bold text-foreground mt-0.5">{value}</p>
     </div>

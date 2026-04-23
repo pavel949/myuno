@@ -44,7 +44,7 @@ export function InvestmentCard({
         onClick={handleClick}
         className={cn(
           'group flex-shrink-0 w-[280px] cursor-pointer',
-          'bg-card rounded-xl border border-border/50',
+          'bg-card rounded-none border border-border/50',
           'hover:shadow-lg hover:border-primary/30 transition-all',
           'overflow-hidden',
           className
@@ -151,7 +151,7 @@ export function InvestmentCard({
       onClick={handleClick}
       className={cn(
         'group cursor-pointer',
-        'bg-card rounded-xl border border-border/50',
+        'bg-card rounded-none border border-border/50',
         'hover:shadow-xl hover:border-primary/30 transition-all duration-300',
         'overflow-hidden',
         className
@@ -205,7 +205,7 @@ export function InvestmentCard({
 
         {/* Score widget */}
         <div className="absolute top-3 right-3">
-          <div className="bg-background/90 backdrop-blur-sm rounded-lg p-2">
+          <div className="bg-background/90 backdrop-blur-sm rounded-none p-2">
             <MuunoScoreWidget
               score={project.muuno_score}
               size="sm"

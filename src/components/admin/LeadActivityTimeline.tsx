@@ -292,7 +292,7 @@ function ActivityItem({ activity, isRu }: { activity: LeadActivity; isRu: boolea
   };
 
   return (
-    <div className="flex gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+    <div className="flex gap-3 p-3 rounded-none bg-muted/30 hover:bg-muted/50 transition-colors">
       <div className="p-2 rounded-full bg-background shrink-0">
         <Icon className="h-4 w-4" />
       </div>

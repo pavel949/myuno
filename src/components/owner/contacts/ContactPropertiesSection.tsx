@@ -81,7 +81,7 @@ const { data: links = [], isLoading } = useContactProperties(contactId);
   const availableProperties = properties.filter((p) => !alreadyLinkedIds.has(p.id));
 
   return (
-    <div className="rounded-xl border bg-card p-4 space-y-4">
+    <div className="rounded-none border bg-card p-4 space-y-4">
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <p className="text-sm font-semibold flex items-center gap-2">
           <Home className="h-4 w-4 text-muted-foreground" />
@@ -202,7 +202,7 @@ function PropertyLinkRow({
   return (
     <div
       className={cn(
-        'flex items-center gap-3 p-3 rounded-lg border bg-background/50 hover:bg-muted/30 transition-colors group'
+        'flex items-center gap-3 p-3 rounded-none border bg-background/50 hover:bg-muted/30 transition-colors group'
       )}
     >
       <button
@@ -226,7 +226,7 @@ function PropertyLinkRow({
         onMouseLeave={() => setShowUnlink(false)}
         disabled={unlinkPending}
         className={cn(
-          'p-1.5 rounded-md transition-colors shrink-0',
+          'p-1.5 rounded-none transition-colors shrink-0',
           showUnlink ? 'text-destructive hover:bg-destructive/10' : 'text-muted-foreground/50 opacity-0 group-hover:opacity-100'
         )}
         title={isRu ? 'Отвязать' : 'Unlink'}

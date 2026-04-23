@@ -44,7 +44,7 @@ const AchievementBadge = ({ definition, isUnlocked, achievement }: AchievementBa
   return (
     <div 
       className={cn(
-        "relative flex flex-col items-center p-3 rounded-xl border-2 transition-all",
+        "relative flex flex-col items-center p-3 rounded-none border-2 transition-all",
         isUnlocked 
           ? "bg-primary/5 border-primary/30 shadow-sm" 
           : "bg-muted/30 border-muted opacity-60"
@@ -104,7 +104,7 @@ export const AchievementsCard = () => {
         <CardContent>
           <div className="grid grid-cols-4 gap-2">
             {[1, 2, 3, 4].map((i) => (
-              <Skeleton key={i} className="h-24 w-full rounded-xl" />
+              <Skeleton key={i} className="h-24 w-full rounded-none" />
             ))}
           </div>
         </CardContent>

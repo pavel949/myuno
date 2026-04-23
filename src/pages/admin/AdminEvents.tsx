@@ -164,7 +164,7 @@ export default function AdminEvents() {
               <Card key={item.id}>
                 <CardContent className="p-4">
                   <div className="flex gap-3">
-                    {item.cover_image ? <img src={item.cover_image} alt="" className="w-20 h-20 rounded-lg object-cover" /> : <div className="w-20 h-20 rounded-lg bg-muted flex items-center justify-center"><Calendar className="h-8 w-8 text-muted-foreground" /></div>}
+                    {item.cover_image ? <img src={item.cover_image} alt="" className="w-20 h-20 rounded-none object-cover" /> : <div className="w-20 h-20 rounded-none bg-muted flex items-center justify-center"><Calendar className="h-8 w-8 text-muted-foreground" /></div>}
                     <div className="flex-1">
                       <div className="flex justify-between">
                         <div>

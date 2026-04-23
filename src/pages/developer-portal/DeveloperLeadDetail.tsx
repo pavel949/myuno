@@ -131,7 +131,7 @@ export default function DeveloperLeadDetail() {
         <select
           value={lead.status}
           onChange={e => updateStatus.mutate({ id: lead.id, status: e.target.value })}
-          className="w-full rounded-md bg-[hsl(var(--nb-bg))] border border-[hsl(var(--nb-glass-border))] px-3 py-2 text-sm text-[hsl(var(--nb-text))]"
+          className="w-full rounded-none bg-[hsl(var(--nb-bg))] border border-[hsl(var(--nb-glass-border))] px-3 py-2 text-sm text-[hsl(var(--nb-text))]"
         >
           {STATUS_OPTIONS.map(s => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
         </select>

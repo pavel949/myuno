@@ -35,9 +35,9 @@ type ImportMode = 'spreadsheet' | 'url' | 'ai';
 // Supported OTA platforms
 const OTA_PLATFORMS = [
   { id: 'airbnb', name: 'Airbnb', icon: '🏠', color: 'bg-red-100 text-red-800' },
-  { id: 'booking', name: 'Booking.com', icon: '🏨', color: 'bg-blue-100 text-blue-800' },
-  { id: 'vrbo', name: 'VRBO', icon: '🏡', color: 'bg-purple-100 text-purple-800' },
-  { id: 'expedia', name: 'Expedia', icon: '✈️', color: 'bg-yellow-100 text-yellow-800' },
+  { id: 'booking', name: 'Booking.com', icon: '🏨', color: 'bg-primary/10 text-primary' },
+  { id: 'vrbo', name: 'VRBO', icon: '🏡', color: 'bg-primary/10 text-primary' },
+  { id: 'expedia', name: 'Expedia', icon: '✈️', color: 'bg-accent/10 text-accent' },
 ];
 
 // Fields that can be imported
@@ -356,7 +356,7 @@ export default function OwnerPropertyImport() {
                     {OTA_PLATFORMS.map(p => (
                       <div
                         key={p.id}
-                        className={`p-3 rounded-lg border text-center transition-all ${
+                        className={`p-3 rounded-none border text-center transition-all ${
                           selectedPlatform === p.id 
                             ? 'border-primary bg-primary/5 ring-2 ring-primary/20' 
                             : 'border-border hover:border-primary/50'
@@ -394,7 +394,7 @@ export default function OwnerPropertyImport() {
                     />
                     {platform && (
                       <p className="text-sm text-muted-foreground flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        <CheckCircle2 className="h-4 w-4 text-success" />
                         {isRu ? 'Обнаружено:' : 'Detected:'} {platform.icon} {platform.name}
                       </p>
                     )}
@@ -507,12 +507,12 @@ export default function OwnerPropertyImport() {
       {/* Step: AI Result */}
       {step === 'ai-result' && intakeSession && intakeSession.items.length > 0 && (
         <div className="space-y-6">
-          <Alert className="border-green-500/50 bg-green-50 dark:bg-green-950/20">
-            <CheckCircle2 className="h-5 w-5 text-green-600" />
-            <AlertTitle className="text-green-800 dark:text-green-200">
+          <Alert className="border-success/40/50 bg-success/10 dark:bg-success/20">
+            <CheckCircle2 className="h-5 w-5 text-success" />
+            <AlertTitle className="text-success dark:text-muted-foreground">
               {isRu ? 'Данные успешно извлечены!' : 'Data Successfully Extracted!'}
             </AlertTitle>
-            <AlertDescription className="text-green-700 dark:text-green-300">
+            <AlertDescription className="text-success dark:text-success">
               {isRu 
                 ? 'AI обработал текст и извлёк информацию об объекте'
                 : 'AI processed the text and extracted property information'
@@ -538,25 +538,25 @@ export default function OwnerPropertyImport() {
                   {/* Key specs */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {fields.bedrooms?.value && (
-                      <div className="flex items-center gap-2 p-2 bg-muted rounded-lg">
+                      <div className="flex items-center gap-2 p-2 bg-muted rounded-none">
                         <Bed className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm">{String(fields.bedrooms.value)} {isRu ? 'спален' : 'bed'}</span>
                       </div>
                     )}
                     {fields.bathrooms?.value && (
-                      <div className="flex items-center gap-2 p-2 bg-muted rounded-lg">
+                      <div className="flex items-center gap-2 p-2 bg-muted rounded-none">
                         <Bath className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm">{String(fields.bathrooms.value)} {isRu ? 'ванных' : 'bath'}</span>
                       </div>
                     )}
                     {fields.max_guests?.value && (
-                      <div className="flex items-center gap-2 p-2 bg-muted rounded-lg">
+                      <div className="flex items-center gap-2 p-2 bg-muted rounded-none">
                         <Users className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm">{String(fields.max_guests.value)} {isRu ? 'гостей' : 'guests'}</span>
                       </div>
                     )}
                     {fields.price_per_night?.value && (
-                      <div className="flex items-center gap-2 p-2 bg-muted rounded-lg">
+                      <div className="flex items-center gap-2 p-2 bg-muted rounded-none">
                         <DollarSign className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm">{String(fields.price_per_night.value)} {isRu ? '/ночь' : '/night'}</span>
                       </div>
@@ -565,7 +565,7 @@ export default function OwnerPropertyImport() {
 
                   {/* Description preview */}
                   {(item.suggestedDescription?.en || item.suggestedDescription?.ru) && (
-                    <div className="p-3 bg-muted/50 rounded-lg">
+                    <div className="p-3 bg-muted/50 rounded-none">
                       <p className="text-sm text-muted-foreground line-clamp-3">
                         {isRu ? item.suggestedDescription?.ru : item.suggestedDescription?.en}
                       </p>
@@ -598,8 +598,8 @@ export default function OwnerPropertyImport() {
 
                   {/* Warnings */}
                   {item.missingRequiredFields.length > 0 && (
-                    <Alert variant="default" className="border-yellow-500/50">
-                      <AlertCircle className="h-4 w-4 text-yellow-600" />
+                    <Alert variant="default" className="border-accent/40/50">
+                      <AlertCircle className="h-4 w-4 text-accent" />
                       <AlertDescription className="text-sm">
                         {isRu ? 'Не удалось извлечь:' : 'Could not extract:'} {item.missingRequiredFields.join(', ')}
                       </AlertDescription>
@@ -637,12 +637,12 @@ export default function OwnerPropertyImport() {
       {/* Step: Blocked - OTA restricts automated access */}
       {step === 'blocked' && (
         <div className="space-y-6">
-          <Alert variant="destructive" className="border-orange-500/50 bg-orange-50 dark:bg-orange-950/20">
-            <ShieldAlert className="h-5 w-5 text-orange-600" />
-            <AlertTitle className="text-orange-800 dark:text-orange-200">
+          <Alert variant="destructive" className="border-accent/40/50 bg-accent/10 dark:bg-accent/20">
+            <ShieldAlert className="h-5 w-5 text-accent" />
+            <AlertTitle className="text-accent dark:text-muted-foreground">
               {isRu ? 'Площадка ограничивает автоматический доступ' : 'Platform Restricts Automated Access'}
             </AlertTitle>
-            <AlertDescription className="text-orange-700 dark:text-orange-300">
+            <AlertDescription className="text-accent dark:text-accent">
               {isRu 
                 ? 'Airbnb и некоторые другие площадки блокируют автоматическое считывание данных. Это ограничение на стороне площадки, а не ошибка системы.'
                 : 'Airbnb and some other platforms block automated data extraction. This is a platform-side restriction, not a system error.'
@@ -774,7 +774,7 @@ export default function OwnerPropertyImport() {
                 <CardContent className="space-y-4">
                   {/* Cover photo */}
                   {syncedListing.cover_photo && (
-                    <div className="aspect-video rounded-lg overflow-hidden bg-muted">
+                    <div className="aspect-video rounded-none overflow-hidden bg-muted">
                       <img 
                         src={syncedListing.cover_photo} 
                         alt={syncedListing.title || ''} 
@@ -785,22 +785,22 @@ export default function OwnerPropertyImport() {
 
                   {/* Key stats */}
                   <div className="grid grid-cols-4 gap-4">
-                    <div className="text-center p-3 bg-muted rounded-lg">
+                    <div className="text-center p-3 bg-muted rounded-none">
                       <Bed className="h-5 w-5 mx-auto mb-1 text-muted-foreground" />
                       <p className="font-semibold">{syncedListing.bedrooms || '—'}</p>
                       <p className="text-xs text-muted-foreground">{isRu ? 'Спальни' : 'Beds'}</p>
                     </div>
-                    <div className="text-center p-3 bg-muted rounded-lg">
+                    <div className="text-center p-3 bg-muted rounded-none">
                       <Bath className="h-5 w-5 mx-auto mb-1 text-muted-foreground" />
                       <p className="font-semibold">{syncedListing.bathrooms || '—'}</p>
                       <p className="text-xs text-muted-foreground">{isRu ? 'Ванные' : 'Baths'}</p>
                     </div>
-                    <div className="text-center p-3 bg-muted rounded-lg">
+                    <div className="text-center p-3 bg-muted rounded-none">
                       <Users className="h-5 w-5 mx-auto mb-1 text-muted-foreground" />
                       <p className="font-semibold">{syncedListing.max_guests || '—'}</p>
                       <p className="text-xs text-muted-foreground">{isRu ? 'Гостей' : 'Guests'}</p>
                     </div>
-                    <div className="text-center p-3 bg-muted rounded-lg">
+                    <div className="text-center p-3 bg-muted rounded-none">
                       <DollarSign className="h-5 w-5 mx-auto mb-1 text-muted-foreground" />
                       <p className="font-semibold">
                         {syncedListing.price_per_night 
@@ -865,7 +865,7 @@ export default function OwnerPropertyImport() {
                       return (
                         <div
                           key={field.id}
-                          className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                          className={`flex items-center gap-3 p-3 rounded-none border cursor-pointer transition-all ${
                             selectedFields.includes(field.id)
                               ? 'border-primary bg-primary/5'
                               : 'border-border hover:border-primary/50'
@@ -985,7 +985,7 @@ export default function OwnerPropertyImport() {
               )}
             </div>
             {importResult.errors.length > 0 && (
-              <div className="text-left bg-destructive/10 p-3 rounded-lg mb-4 max-h-32 overflow-auto">
+              <div className="text-left bg-destructive/10 p-3 rounded-none mb-4 max-h-32 overflow-auto">
                 {importResult.errors.slice(0, 5).map((err, i) => (
                   <p key={i} className="text-xs text-destructive">{err}</p>
                 ))}

@@ -66,8 +66,8 @@ export function ChatWidget({ vertical, placeholder = defaultPlaceholder }: ChatW
       {isOpen && (
       <div
         className={cn(
-          "fixed inset-x-0 bottom-0 z-50 flex max-h-[85vh] flex-col rounded-t-2xl bg-background shadow-xl",
-          "md:inset-auto md:right-6 md:bottom-24 md:left-auto md:max-h-[480px] md:w-full md:max-w-sm md:rounded-xl"
+          "fixed inset-x-0 bottom-0 z-50 flex max-h-[85vh] flex-col rounded-none bg-background shadow-xl",
+          "md:inset-auto md:right-6 md:bottom-24 md:left-auto md:max-h-[480px] md:w-full md:max-w-sm md:rounded-none"
         )}
         role="dialog"
         aria-label="Chat"
@@ -109,7 +109,7 @@ export function ChatWidget({ vertical, placeholder = defaultPlaceholder }: ChatW
             </p>
           )}
           {error && (
-            <div className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            <div className="rounded-none bg-destructive/10 px-3 py-2 text-sm text-destructive">
               {error}
             </div>
           )}
@@ -123,7 +123,7 @@ export function ChatWidget({ vertical, placeholder = defaultPlaceholder }: ChatW
             >
               <div
                 className={cn(
-                  "max-w-[85%] rounded-2xl px-4 py-2.5 text-sm",
+                  "max-w-[85%] rounded-none px-4 py-2.5 text-sm",
                   msg.role === "user"
                     ? "bg-primary text-primary-foreground"
                     : "bg-muted text-foreground"
@@ -135,7 +135,7 @@ export function ChatWidget({ vertical, placeholder = defaultPlaceholder }: ChatW
           ))}
           {isLoading && (
             <div className="flex justify-start">
-              <div className="flex items-center gap-2 rounded-2xl bg-muted px-4 py-2.5 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2 rounded-none bg-muted px-4 py-2.5 text-sm text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 <span>Thinking...</span>
               </div>

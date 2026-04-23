@@ -82,7 +82,7 @@ export default function AdminTaxonomyManager() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10">
+              <div className="p-2 rounded-none bg-primary/10">
                 <Database className="h-5 w-5 text-primary" />
               </div>
               <div>
@@ -95,7 +95,7 @@ export default function AdminTaxonomyManager() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-success/10">
+              <div className="p-2 rounded-none bg-success/10">
                 <FolderTree className="h-5 w-5 text-success" />
               </div>
               <div>
@@ -108,7 +108,7 @@ export default function AdminTaxonomyManager() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-info/10">
+              <div className="p-2 rounded-none bg-info/10">
                 <span className="text-xl">🏠</span>
               </div>
               <div>
@@ -121,7 +121,7 @@ export default function AdminTaxonomyManager() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-accent-purple/10">
+              <div className="p-2 rounded-none bg-accent-purple/10">
                 <Settings className="h-5 w-5 text-accent-purple" />
               </div>
               <div>
@@ -185,7 +185,7 @@ export default function AdminTaxonomyManager() {
                                 setSelectedType(type.type_key);
                                 setActiveTab('values');
                               }}
-                              className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition-colors ${
+                              className={`w-full flex items-center justify-between px-3 py-2 rounded-none text-left transition-colors ${
                                 selectedType === type.type_key
                                   ? 'bg-primary/10 text-primary'
                                   : 'hover:bg-muted'

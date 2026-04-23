@@ -893,7 +893,7 @@ export default function PropertyConsultation() {
                 
                 {/* Nights count badge */}
                 {nightsCount > 0 && (
-                  <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/10 border border-primary/20">
+                  <div className="flex items-center gap-2 p-3 rounded-none bg-primary/10 border border-primary/20">
                     <Moon className="w-4 h-4 text-primary" />
                     <span className="text-sm font-medium">
                       {nightsCount} {isRu 

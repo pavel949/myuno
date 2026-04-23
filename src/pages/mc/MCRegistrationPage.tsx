@@ -112,7 +112,7 @@ export default function MCRegistrationPage() {
       <PageContainer>
         {/* Hero */}
         <div className="text-center mb-8 pt-4">
-          <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 rounded-none bg-primary/10 flex items-center justify-center mx-auto mb-4">
             <Building2 className="w-8 h-8 text-primary" />
           </div>
           <h1 className="text-3xl font-bold mb-2">
@@ -128,7 +128,7 @@ export default function MCRegistrationPage() {
         {/* Benefits */}
         <div className="grid grid-cols-2 gap-3 mb-8">
           {BENEFITS.map(({ icon: Icon, en, ru: ruText }, i) => (
-            <div key={i} className="flex items-start gap-2 p-3 rounded-xl bg-muted/50">
+            <div key={i} className="flex items-start gap-2 p-3 rounded-none bg-muted/50">
               <Icon className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
               <span className="text-sm">{isRu ? ruText : en}</span>
             </div>
@@ -201,7 +201,7 @@ export default function MCRegistrationPage() {
             </div>
 
             {!user && !authLoading && (
-              <div className="p-3 rounded-xl bg-warning/10 border border-warning/20 text-sm">
+              <div className="p-3 rounded-none bg-warning/10 border border-warning/20 text-sm">
                 {isRu
                   ? '⚠️ Для регистрации необходимо войти в аккаунт'
                   : '⚠️ You need to sign in to register a company'}

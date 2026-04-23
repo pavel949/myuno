@@ -128,7 +128,7 @@ export default function TransportIndex() {
             <button
               key={link.id}
               onClick={() => navigate(link.path)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border bg-card hover:border-foreground/20 transition-colors"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-none border border-border bg-card hover:border-foreground/20 transition-colors"
             >
               <link.icon className="w-4 h-4 text-primary" />
               <span className="text-xs font-medium whitespace-nowrap">{isRu ? link.labelRu : link.labelEn}</span>
@@ -203,7 +203,7 @@ export default function TransportIndex() {
               {isLoading ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                   {[1, 2, 3, 4, 5, 6].map(i => (
-                    <div key={i} className="rounded-2xl border border-border/50 overflow-hidden">
+                    <div key={i} className="rounded-none border border-border/50 overflow-hidden">
                       <Skeleton className="aspect-[4/3]" />
                       <div className="p-4 space-y-2">
                         <Skeleton className="h-4 w-3/4" />

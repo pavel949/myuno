@@ -96,9 +96,9 @@ export function ProjectROICalculator({
           <button
             key={p.label}
             onClick={() => selectPreset(i)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`px-4 py-2 rounded-none text-sm font-medium transition-colors ${
               activePreset === i
-                ? 'bg-amber-500 text-black'
+                ? 'bg-accent text-black'
                 : 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10'
             }`}
           >
@@ -111,7 +111,7 @@ export function ProjectROICalculator({
         <Card className="bg-white/5 border-white/10">
           <CardContent className="p-6 space-y-5">
             <h3 className="text-white font-semibold flex items-center gap-2">
-              <Calculator className="w-4 h-4 text-amber-400" /> Параметры
+              <Calculator className="w-4 h-4 text-accent" /> Параметры
             </h3>
 
             <SliderRow
@@ -141,7 +141,7 @@ export function ProjectROICalculator({
         <Card className="bg-white/5 border-white/10">
           <CardContent className="p-6 space-y-5">
             <h3 className="text-white font-semibold flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-emerald-400" />
+              <TrendingUp className="w-4 h-4 text-success" />
               Результат за {holdYears} {holdYears === 1 ? 'год' : holdYears < 5 ? 'года' : 'лет'}
             </h3>
 
@@ -157,7 +157,7 @@ export function ProjectROICalculator({
               <Row label="Рост стоимости" value={`+${formatThb(calc.capitalGain, currencySymbol)}`} accent="emerald" />
               <div className="flex justify-between text-white/60 border-t border-white/10 pt-2">
                 <span className="font-semibold text-white">Общий доход</span>
-                <span className="font-bold text-amber-400" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
+                <span className="font-bold text-accent" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
                   +{formatThb(calc.totalReturn, currencySymbol)}
                 </span>
               </div>
@@ -167,7 +167,7 @@ export function ProjectROICalculator({
               </div>
             </div>
 
-            <Button className="w-full bg-amber-500 hover:bg-amber-600 text-black font-bold" onClick={onGetConsultation}>
+            <Button className="w-full bg-accent hover:bg-accent text-black font-bold" onClick={onGetConsultation}>
               Получить детальный расчёт
             </Button>
 
@@ -189,7 +189,7 @@ function SliderRow({ label, value, display, min, max, step, onChange }: {
     <div>
       <label className="text-xs text-white/40 flex justify-between">
         <span>{label}</span>
-        <span className="text-amber-400" style={{ fontFamily: 'JetBrains Mono, monospace' }}>{display}</span>
+        <span className="text-accent" style={{ fontFamily: 'JetBrains Mono, monospace' }}>{display}</span>
       </label>
       <input
         type="range" min={min} max={max} step={step} value={value}
@@ -201,9 +201,9 @@ function SliderRow({ label, value, display, min, max, step, onChange }: {
 }
 
 function Metric({ label, value, tone }: { label: string; value: string; tone: 'white' | 'emerald' | 'amber' }) {
-  const toneClass = tone === 'emerald' ? 'text-emerald-400' : tone === 'amber' ? 'text-amber-400' : 'text-white';
+  const toneClass = tone === 'emerald' ? 'text-success' : tone === 'amber' ? 'text-accent' : 'text-white';
   return (
-    <div className="p-3 rounded-lg bg-white/5">
+    <div className="p-3 rounded-none bg-white/5">
       <div className="text-xs text-white/40">{label}</div>
       <div className={`text-xl font-bold ${toneClass}`} style={{ fontFamily: 'JetBrains Mono, monospace' }}>
         {value}
@@ -216,7 +216,7 @@ function Row({ label, value, accent }: { label: string; value: string; accent: '
   return (
     <div className="flex justify-between text-white/60">
       <span>{label}</span>
-      <span className={accent === 'emerald' ? 'text-emerald-400' : ''} style={{ fontFamily: 'JetBrains Mono, monospace' }}>
+      <span className={accent === 'emerald' ? 'text-success' : ''} style={{ fontFamily: 'JetBrains Mono, monospace' }}>
         {value}
       </span>
     </div>

@@ -52,7 +52,7 @@ export function PropertyDetailDateSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="rounded-t-2xl max-h-[85vh] overflow-y-auto">
+      <SheetContent side="bottom" className="rounded-none max-h-[85vh] overflow-y-auto">
         <SheetHeader className="pb-2">
           <SheetTitle>{isRu ? 'Выберите даты' : 'Select dates'}</SheetTitle>
         </SheetHeader>
@@ -86,7 +86,7 @@ export function PropertyDetailDateSheet({
           </div>
 
           {dateRange?.from && dateRange?.to && (
-            <div className="flex items-center justify-between px-2 py-3 rounded-xl bg-muted/50">
+            <div className="flex items-center justify-between px-2 py-3 rounded-none bg-muted/50">
               <div className="text-sm">
                 <span className="font-medium">
                   {format(dateRange.from, 'd MMM', { locale: isRu ? ru : undefined })}

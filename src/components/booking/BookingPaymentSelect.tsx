@@ -48,9 +48,9 @@ export interface BookingPaymentSelectProps {
 }
 
 const brandColors: Record<string, string> = {
-  visa: 'from-blue-600 to-blue-800',
-  mastercard: 'from-orange-500 to-red-600',
-  mir: 'from-green-500 to-teal-600',
+  visa: 'from-primary to-primary',
+  mastercard: 'from-accent to-red-600',
+  mir: 'from-success to-success',
   amex: 'from-gray-600 to-gray-800',
   default: 'from-gray-500 to-gray-700',
 };
@@ -173,7 +173,7 @@ export const BookingPaymentSelect = forwardRef<HTMLDivElement, BookingPaymentSel
             }}
             disabled={option.disabled}
             className={cn(
-              "w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all text-left",
+              "w-full flex items-center gap-3 p-4 rounded-none border-2 transition-all text-left",
               selected === option.id
                 ? "border-primary bg-primary/5"
                 : "border-border hover:border-primary/50",
@@ -250,7 +250,7 @@ export const BookingPaymentSelect = forwardRef<HTMLDivElement, BookingPaymentSel
                 type="button"
                 onClick={() => handleCardSelect(card.id)}
                 className={cn(
-                  "w-full flex items-center justify-between p-3 rounded-xl border transition-colors",
+                  "w-full flex items-center justify-between p-3 rounded-none border transition-colors",
                   selectedCardId === card.id
                     ? "border-primary bg-primary/5"
                     : "hover:bg-accent/50"
@@ -258,7 +258,7 @@ export const BookingPaymentSelect = forwardRef<HTMLDivElement, BookingPaymentSel
               >
                 <div className="flex items-center gap-3">
                   <div className={cn(
-                    'w-10 h-6 rounded flex items-center justify-center text-[10px] font-bold text-white bg-gradient-to-r',
+                    'w-10 h-6 rounded-none flex items-center justify-center text-[10px] font-bold text-white bg-gradient-to-r',
                     gradientClass
                   )}>
                     {brandLogos[brand] || <CreditCard className="w-4 h-4" />}
@@ -289,7 +289,7 @@ export const BookingPaymentSelect = forwardRef<HTMLDivElement, BookingPaymentSel
           <button
             type="button"
             onClick={() => window.location.href = '/wallet/cards'}
-            className="w-full p-3 rounded-xl border border-dashed text-center text-sm text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
+            className="w-full p-3 rounded-none border border-dashed text-center text-sm text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
           >
             {language === 'ru' ? '+ Добавить новую карту' : '+ Add new card'}
           </button>

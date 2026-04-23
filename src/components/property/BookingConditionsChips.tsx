@@ -179,7 +179,7 @@ export function BookingConditionsChips({
           <div 
             key={chip.id}
             className={cn(
-              "flex items-center gap-2 p-2 rounded-lg border",
+              "flex items-center gap-2 p-2 rounded-none border",
               getColorClass(chip.color) || "bg-muted/50"
             )}
           >

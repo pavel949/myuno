@@ -88,7 +88,7 @@ export function BookingTermsCard({
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-primary/10">
+                <div className="p-2 rounded-none bg-primary/10">
                   <Shield className="w-4 h-4 text-primary" />
                 </div>
                 <div className="text-left">
@@ -117,7 +117,7 @@ export function BookingTermsCard({
                 <Clock className="w-4 h-4 text-muted-foreground" />
                 {isRu ? 'Политика отмены' : 'Cancellation Policy'}
               </h4>
-              <div className={cn("p-3 rounded-lg border", policyColorClass)}>
+              <div className={cn("p-3 rounded-none border", policyColorClass)}>
                 <p className="text-sm font-medium">
                   {isRu ? policy.nameRu : policy.nameEn}
                 </p>
@@ -128,7 +128,7 @@ export function BookingTermsCard({
 
               {/* Refund Calculator - Shows exact amounts and dates when available */}
               {fullRefundDeadline && totalPrice && (
-                <div className="p-3 rounded-lg bg-success/10 border border-success/20 space-y-2">
+                <div className="p-3 rounded-none bg-success/10 border border-success/20 space-y-2">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-success" />
                     <span className="text-sm font-medium text-success">
@@ -247,7 +247,7 @@ export function BookingTermsCard({
                 <Separator />
                 <div className="grid grid-cols-2 gap-3">
                   {checkInTime && (
-                    <div className="text-center p-2 rounded-lg bg-muted/50">
+                    <div className="text-center p-2 rounded-none bg-muted/50">
                       <p className="text-xs text-muted-foreground">
                         {isRu ? 'Заезд с' : 'Check-in from'}
                       </p>
@@ -255,7 +255,7 @@ export function BookingTermsCard({
                     </div>
                   )}
                   {checkOutTime && (
-                    <div className="text-center p-2 rounded-lg bg-muted/50">
+                    <div className="text-center p-2 rounded-none bg-muted/50">
                       <p className="text-xs text-muted-foreground">
                         {isRu ? 'Выезд до' : 'Check-out by'}
                       </p>

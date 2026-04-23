@@ -89,7 +89,7 @@ export default function OffplanDetail() {
   if (isLoading) {
     return (
       <div className="space-y-4 p-4">
-        <Skeleton className="aspect-[16/9] rounded-2xl" />
+        <Skeleton className="aspect-[16/9] rounded-none" />
         <Skeleton className="h-8 w-3/4" />
         <Skeleton className="h-6 w-1/2" />
         <Skeleton className="h-32 w-full" />
@@ -202,7 +202,7 @@ export default function OffplanDetail() {
       <div className="px-4 py-4 pb-32 space-y-6">
         {/* ClearView Disclosure — for brokered/curated projects */}
         {!project.isClearviewRated && (
-          <div className="rounded-xl border border-warning/30 bg-warning/5 p-4 flex items-start gap-3">
+          <div className="rounded-none border border-warning/30 bg-warning/5 p-4 flex items-start gap-3">
             <Info className="w-5 h-5 text-warning flex-shrink-0 mt-0.5" />
             <div className="flex-1 text-sm">
               <p className="font-semibold text-warning">
@@ -221,14 +221,14 @@ export default function OffplanDetail() {
         <div className="grid grid-cols-2 gap-3">
           {/* muUNO Score */}
           {project.muunoScore && (
-            <div className="rounded-xl border bg-card p-3">
+            <div className="rounded-none border bg-card p-3">
               <MuunoScoreWidget score={project.muunoScore} size="md" showLabel />
             </div>
           )}
 
           {/* ROI */}
           {project.roiProjected && (
-            <div className="rounded-xl border bg-card p-3 flex flex-col justify-center">
+            <div className="rounded-none border bg-card p-3 flex flex-col justify-center">
               <div className="flex items-center gap-2 text-success mb-1">
                 <TrendingUp className="w-5 h-5" />
                 <span className="text-2xl font-bold">{project.roiProjected}%</span>
@@ -241,7 +241,7 @@ export default function OffplanDetail() {
         </div>
 
         {/* Price & Units */}
-        <div className="rounded-xl border bg-card p-4 space-y-3">
+        <div className="rounded-none border bg-card p-4 space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">
               {isRu ? 'Цена от' : 'Price from'}
@@ -274,7 +274,7 @@ export default function OffplanDetail() {
 
         {/* Construction Progress */}
         {project.projectStatus !== 'completed' && (
-          <div className="rounded-xl border bg-card p-4 space-y-3">
+          <div className="rounded-none border bg-card p-4 space-y-3">
             <div className="flex items-center justify-between">
               <span className="font-medium">
                 {isRu ? 'Прогресс строительства' : 'Construction Progress'}
@@ -296,7 +296,7 @@ export default function OffplanDetail() {
 
         {/* Investment Funding Progress */}
         {project.investmentEnabled && project.fundingGoal && (
-          <div className="rounded-xl border bg-card p-4">
+          <div className="rounded-none border bg-card p-4">
             <FundingProgress
               amountRaised={project.amountRaised}
               fundingGoal={project.fundingGoal}
@@ -337,7 +337,7 @@ export default function OffplanDetail() {
 
             {/* Due Diligence Status Block */}
             <div className={cn(
-              "rounded-xl p-4 space-y-3 border",
+              "rounded-none p-4 space-y-3 border",
               project.riskLevel 
                 ? "bg-success/5 border-success/20" 
                 : "bg-warning/5 border-warning/20"
@@ -433,9 +433,9 @@ export default function OffplanDetail() {
                         href={doc.file_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-3 rounded-xl border bg-card p-3 hover:bg-accent/40 transition-colors"
+                        className="flex items-center gap-3 rounded-none border bg-card p-3 hover:bg-accent/40 transition-colors"
                       >
-                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <div className="w-10 h-10 rounded-none bg-primary/10 flex items-center justify-center flex-shrink-0">
                           <FileText className="w-5 h-5 text-primary" />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -472,9 +472,9 @@ export default function OffplanDetail() {
               <div className="space-y-4">
                 <div className="flex items-center gap-4">
                   {developer.logoUrl ? (
-                    <img src={developer.logoUrl} alt={developer.nameEn} className="w-16 h-16 rounded-xl object-contain bg-muted" />
+                    <img src={developer.logoUrl} alt={developer.nameEn} className="w-16 h-16 rounded-none object-contain bg-muted" />
                   ) : (
-                    <div className="w-16 h-16 rounded-xl bg-muted flex items-center justify-center">
+                    <div className="w-16 h-16 rounded-none bg-muted flex items-center justify-center">
                       <Building2 className="w-8 h-8 text-muted-foreground" />
                     </div>
                   )}
@@ -492,11 +492,11 @@ export default function OffplanDetail() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="rounded-lg bg-muted/50 p-3 text-center">
+                  <div className="rounded-none bg-muted/50 p-3 text-center">
                     <div className="text-2xl font-bold">{developer.projectsCompleted}</div>
                     <div className="text-xs text-muted-foreground">{isRu ? 'Проектов' : 'Projects'}</div>
                   </div>
-                  <div className="rounded-lg bg-muted/50 p-3 text-center">
+                  <div className="rounded-none bg-muted/50 p-3 text-center">
                     <div className="text-2xl font-bold">{developer.muunoScore || '—'}</div>
                     <div className="text-xs text-muted-foreground">muUNO Score</div>
                   </div>
@@ -521,7 +521,7 @@ export default function OffplanDetail() {
 
         {nbProject && (
           <section
-            className="rounded-2xl border overflow-hidden bg-card"
+            className="rounded-none border overflow-hidden bg-card"
             aria-label={isRu ? 'Расширенные данные проекта' : 'Extended project data'}
           >
             <NewbuildProjectDeepTabs project={nbProject} variant="embedded" />

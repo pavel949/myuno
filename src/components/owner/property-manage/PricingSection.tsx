@@ -205,7 +205,7 @@ export function PropertyManagePricingSection({ formData, updateFormData }: Prici
             </div>
           </div>
 
-          <div className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
+          <div className="flex items-center justify-between p-3 rounded-none border bg-muted/30">
             <div className="flex items-center gap-3">
               <Zap className="h-4 w-4 text-primary" />
               <div>

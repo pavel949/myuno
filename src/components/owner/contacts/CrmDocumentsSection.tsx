@@ -106,7 +106,7 @@ export function CrmDocumentsSection({ companyId, contactId, propertyId, dealId, 
 
       {/* Upload form */}
       {showUpload && (
-        <div className="border rounded-lg p-3 space-y-3 bg-muted/30">
+        <div className="border rounded-none p-3 space-y-3 bg-muted/30">
           <Input
             placeholder={isRu ? 'Название документа...' : 'Document title...'}
             value={title}
@@ -170,7 +170,7 @@ export function CrmDocumentsSection({ companyId, contactId, propertyId, dealId, 
             return (
               <div
                 key={doc.id}
-                className="flex items-center gap-3 p-2.5 rounded-lg border bg-card hover:bg-accent/30 transition-colors group"
+                className="flex items-center gap-3 p-2.5 rounded-none border bg-card hover:bg-accent/30 transition-colors group"
               >
                 <span className="text-lg shrink-0">{typeLabel.icon}</span>
                 <div className="flex-1 min-w-0">

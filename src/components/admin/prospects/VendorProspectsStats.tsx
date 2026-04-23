@@ -55,7 +55,7 @@ export function VendorProspectsStats() {
           <Card key={i}>
             <CardContent className="pt-4">
               <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-lg bg-muted ${kpi.color}`}>
+                <div className={`p-2 rounded-none bg-muted ${kpi.color}`}>
                   <kpi.icon className="h-5 w-5" />
                 </div>
                 <div>
@@ -156,7 +156,7 @@ export function VendorProspectsStats() {
             {Object.entries(sourceConfig).map(([source, config]) => {
               const count = stats?.bySource?.[source] || 0;
               return (
-                <div key={source} className="text-center p-3 bg-muted/50 rounded-lg">
+                <div key={source} className="text-center p-3 bg-muted/50 rounded-none">
                   <div className="text-xl mb-1">{config.icon}</div>
                   <div className="text-2xl font-bold">{count}</div>
                   <div className="text-xs text-muted-foreground">

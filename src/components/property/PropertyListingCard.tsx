@@ -191,7 +191,7 @@ export function PropertyListingCard({
             {highlightChips.map((h) => (
               <span
                 key={h.id}
-                className="text-[10px] sm:text-[11px] px-1.5 py-0.5 rounded-md bg-muted/80 text-muted-foreground line-clamp-1 max-w-full"
+                className="text-[10px] sm:text-[11px] px-1.5 py-0.5 rounded-none bg-muted/80 text-muted-foreground line-clamp-1 max-w-full"
               >
                 {h.label}
               </span>

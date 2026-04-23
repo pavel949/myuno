@@ -102,11 +102,11 @@ export function BookingConfirmation({
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-        className={`w-20 h-20 rounded-full flex items-center justify-center mb-6 ${isRequest ? 'bg-amber-100 dark:bg-amber-900/40' : 'bg-green-100 dark:bg-green-900'}`}
+        className={`w-20 h-20 rounded-full flex items-center justify-center mb-6 ${isRequest ? 'bg-accent/10 dark:bg-accent/40' : 'bg-success/10 dark:bg-success'}`}
       >
         {isRequest
-          ? <Clock className="w-10 h-10 text-amber-600 dark:text-amber-400" />
-          : <CheckCircle className="w-10 h-10 text-green-600 dark:text-green-400" />
+          ? <Clock className="w-10 h-10 text-accent dark:text-accent" />
+          : <CheckCircle className="w-10 h-10 text-success dark:text-success" />
         }
       </motion.div>
 
@@ -136,7 +136,7 @@ export function BookingConfirmation({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="w-full max-w-sm bg-card rounded-2xl border p-5 mb-4"
+        className="w-full max-w-sm bg-card rounded-none border p-5 mb-4"
       >
         <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
           <Anchor className="w-4 h-4 text-primary" />
@@ -174,10 +174,10 @@ export function BookingConfirmation({
               </div>
               {isRequest ? (
                 <div className="flex justify-between text-sm">
-                  <span className="text-amber-600 dark:text-amber-400 font-medium">
+                  <span className="text-accent dark:text-accent font-medium">
                     {language === 'ru' ? `Депозит (будет выставлен)` : `Deposit (to be invoiced)`}
                   </span>
-                  <span className="text-amber-600 dark:text-amber-400 font-medium">
+                  <span className="text-accent dark:text-accent font-medium">
                     {currencySymbol}{depositAmount.toLocaleString()}
                   </span>
                 </div>
@@ -210,23 +210,23 @@ export function BookingConfirmation({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.35 }}
-        className="w-full max-w-sm bg-muted/50 rounded-xl p-4 mb-6"
+        className="w-full max-w-sm bg-muted/50 rounded-none p-4 mb-6"
       >
         <p className="text-xs text-muted-foreground mb-3">
           {language === 'ru' ? 'Уведомления отправлены:' : 'Notifications sent to:'}
         </p>
         <div className="flex flex-wrap gap-2 justify-center">
-          <div className="flex items-center gap-1.5 bg-background px-3 py-1.5 rounded-lg text-sm">
+          <div className="flex items-center gap-1.5 bg-background px-3 py-1.5 rounded-none text-sm">
             <Mail className="w-3.5 h-3.5 text-primary" />
             <span>Email</span>
           </div>
-          <div className="flex items-center gap-1.5 bg-background px-3 py-1.5 rounded-lg text-sm">
+          <div className="flex items-center gap-1.5 bg-background px-3 py-1.5 rounded-none text-sm">
             <Smartphone className="w-3.5 h-3.5 text-primary" />
             <span>{language === 'ru' ? 'Приложение' : 'App'}</span>
           </div>
           {isCash && (
-            <div className="flex items-center gap-1.5 bg-background px-3 py-1.5 rounded-lg text-sm">
-              <MessageCircle className="w-3.5 h-3.5 text-green-600" />
+            <div className="flex items-center gap-1.5 bg-background px-3 py-1.5 rounded-none text-sm">
+              <MessageCircle className="w-3.5 h-3.5 text-success" />
               <span>WhatsApp</span>
             </div>
           )}

@@ -103,8 +103,8 @@ export default function TrustAccountsPage() {
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="bg-muted/40 rounded p-2"><div className="text-muted-foreground">{isRu ? 'Баланс' : 'Balance'}</div><div className="font-mono font-semibold">{fmt(a.current_balance)}</div></div>
-                <div className="bg-muted/40 rounded p-2"><div className="text-muted-foreground">{isRu ? 'Зарезервировано' : 'Reserved'}</div><div className="font-mono font-semibold">{fmt(a.reserved_balance)}</div></div>
+                <div className="bg-muted/40 rounded-none p-2"><div className="text-muted-foreground">{isRu ? 'Баланс' : 'Balance'}</div><div className="font-mono font-semibold">{fmt(a.current_balance)}</div></div>
+                <div className="bg-muted/40 rounded-none p-2"><div className="text-muted-foreground">{isRu ? 'Зарезервировано' : 'Reserved'}</div><div className="font-mono font-semibold">{fmt(a.reserved_balance)}</div></div>
               </div>
               <div className="flex gap-2">
                 <Button size="sm" variant="outline" className="flex-1" onClick={() => { setMoveForm({ direction: 'in', amount: 0, description: '' }); setMoveSheet({ open: true, account: a }); }}>

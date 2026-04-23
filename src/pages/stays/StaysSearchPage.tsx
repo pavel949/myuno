@@ -250,7 +250,7 @@ export default function StaysSearchPage() {
               <Label htmlFor="stays-type">{isRu ? 'Тип объекта' : 'Property Type'}</Label>
               <select
                 id="stays-type"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="flex h-10 w-full rounded-none border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 value={propertyType}
                 onChange={(e) => setPropertyType(e.target.value)}
               >

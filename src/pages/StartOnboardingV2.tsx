@@ -137,7 +137,7 @@ export default function StartOnboardingV2() {
 
       <div className="mx-auto max-w-xl px-4 py-8 sm:py-12">
         <header className="text-center mb-8">
-          <div className="mx-auto mb-3 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/60 shadow-lg shadow-primary/25">
+          <div className="mx-auto mb-3 inline-flex h-12 w-12 items-center justify-center rounded-none bg-gradient-to-br from-primary to-primary/60 shadow-lg shadow-primary/25">
             <Sparkles className="h-6 w-6 text-primary-foreground" />
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{T(COPY.title, lang)}</h1>
@@ -205,7 +205,7 @@ export default function StartOnboardingV2() {
           </AnimatePresence>
 
           {o.error && o.step !== 3 && (
-            <p className="mt-4 rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+            <p className="mt-4 rounded-none border border-destructive/40 bg-destructive/5 px-3 py-2 text-xs text-destructive">
               {T(COPY.errorPrefix, lang)} {o.error}
             </p>
           )}

@@ -65,9 +65,9 @@ export function PeylaaUnitCatalog({ onInquiry }: Props) {
             <button
               key={br}
               onClick={() => toggleFilter('bedrooms', br)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-4 py-2 rounded-none text-sm font-medium transition-colors ${
                 filters.bedrooms?.includes(br)
-                  ? 'bg-amber-500 text-black'
+                  ? 'bg-accent text-black'
                   : 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10'
               }`}
             >
@@ -82,9 +82,9 @@ export function PeylaaUnitCatalog({ onInquiry }: Props) {
             <button
               key={b}
               onClick={() => toggleFilter('buildings', b)}
-              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-3 py-2 rounded-none text-sm font-medium transition-colors ${
                 filters.buildings?.includes(b)
-                  ? 'bg-amber-500 text-black'
+                  ? 'bg-accent text-black'
                   : 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10'
               }`}
             >
@@ -97,12 +97,12 @@ export function PeylaaUnitCatalog({ onInquiry }: Props) {
         {/* More filters toggle */}
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className="px-3 py-2 rounded-lg text-sm bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 flex items-center gap-1"
+          className="px-3 py-2 rounded-none text-sm bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 flex items-center gap-1"
         >
           <SlidersHorizontal className="w-3 h-3" />
           Фильтры
           {activeFilterCount > 0 && (
-            <Badge className="bg-amber-500 text-black text-[10px] ml-1 h-4 w-4 p-0 flex items-center justify-center rounded-full">
+            <Badge className="bg-accent text-black text-[10px] ml-1 h-4 w-4 p-0 flex items-center justify-center rounded-full">
               {activeFilterCount}
             </Badge>
           )}
@@ -112,7 +112,7 @@ export function PeylaaUnitCatalog({ onInquiry }: Props) {
         <select
           value={sortBy}
           onChange={e => setSortBy(e.target.value as any)}
-          className="ml-auto px-3 py-2 rounded-lg text-sm bg-white/5 border border-white/10 text-white/60 appearance-none cursor-pointer"
+          className="ml-auto px-3 py-2 rounded-none text-sm bg-white/5 border border-white/10 text-white/60 appearance-none cursor-pointer"
         >
           <option value="price_asc">Цена ↑</option>
           <option value="price_desc">Цена ↓</option>
@@ -128,7 +128,7 @@ export function PeylaaUnitCatalog({ onInquiry }: Props) {
 
       {/* Extended filters */}
       {showFilters && (
-        <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-4">
+        <div className="p-4 rounded-none bg-white/5 border border-white/10 space-y-4">
           {/* Floor */}
           <div>
             <div className="text-xs text-white/40 mb-2 flex items-center gap-1">
@@ -139,9 +139,9 @@ export function PeylaaUnitCatalog({ onInquiry }: Props) {
                 <button
                   key={f}
                   onClick={() => toggleFilter('floors', f)}
-                  className={`w-9 h-9 rounded-lg text-sm font-medium transition-colors ${
+                  className={`w-9 h-9 rounded-none text-sm font-medium transition-colors ${
                     filters.floors?.includes(f)
-                      ? 'bg-amber-500 text-black'
+                      ? 'bg-accent text-black'
                       : 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10'
                   }`}
                 >
@@ -161,9 +161,9 @@ export function PeylaaUnitCatalog({ onInquiry }: Props) {
                 <button
                   key={v}
                   onClick={() => toggleFilter('views', v)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                  className={`px-3 py-1.5 rounded-none text-xs font-medium transition-colors ${
                     filters.views?.includes(v)
-                      ? 'bg-amber-500 text-black'
+                      ? 'bg-accent text-black'
                       : 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10'
                   }`}
                 >
@@ -189,7 +189,7 @@ export function PeylaaUnitCatalog({ onInquiry }: Props) {
       {isLoading ? (
         <div className="space-y-2">
           {Array.from({ length: 8 }).map((_, i) => (
-            <Skeleton key={i} className="h-16 bg-white/5 rounded-xl" />
+            <Skeleton key={i} className="h-16 bg-white/5 rounded-none" />
           ))}
         </div>
       ) : sortedUnits.length === 0 ? (
@@ -234,7 +234,7 @@ export function PeylaaUnitCatalog({ onInquiry }: Props) {
                       {u.area_sqm} м²
                     </td>
                     <td className="py-3 text-white/50 text-xs">{u.view}</td>
-                    <td className="py-3 text-right font-semibold text-amber-400" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
+                    <td className="py-3 text-right font-semibold text-accent" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
                       {u.asking_price_thb ? `฿${u.asking_price_thb.toLocaleString()}` : '—'}
                     </td>
                     <td className="py-3 text-right text-white/40 text-xs" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
@@ -244,7 +244,7 @@ export function PeylaaUnitCatalog({ onInquiry }: Props) {
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="text-amber-400 hover:bg-amber-500/10 h-7 text-xs"
+                        className="text-accent hover:bg-accent/10 h-7 text-xs"
                         onClick={() => onInquiry(u.id)}
                       >
                         <Send className="w-3 h-3 mr-1" />
@@ -262,7 +262,7 @@ export function PeylaaUnitCatalog({ onInquiry }: Props) {
             {sortedUnits.map((u) => (
               <div
                 key={u.id}
-                className="p-4 rounded-xl bg-white/5 border border-white/10 flex items-center gap-3"
+                className="p-4 rounded-none bg-white/5 border border-white/10 flex items-center gap-3"
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
@@ -278,11 +278,11 @@ export function PeylaaUnitCatalog({ onInquiry }: Props) {
                   </div>
                 </div>
                 <div className="text-right flex-shrink-0">
-                  <div className="text-amber-400 font-semibold text-sm" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
+                  <div className="text-accent font-semibold text-sm" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
                     {formatThb(u.asking_price_thb)}
                   </div>
                   <button
-                    className="text-[10px] text-amber-400/70 mt-1"
+                    className="text-[10px] text-accent/70 mt-1"
                     onClick={() => onInquiry(u.id)}
                   >
                     Запрос →

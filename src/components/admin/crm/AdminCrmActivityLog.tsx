@@ -86,7 +86,7 @@ function useUnifiedActivity(typeFilter?: string) {
 }
 
 const typeIcons = { vendor: Target, user: Users, owner: Building2 };
-const typeColors = { vendor: 'bg-blue-100 text-blue-800', user: 'bg-green-100 text-green-800', owner: 'bg-purple-100 text-purple-800' };
+const typeColors = { vendor: 'bg-primary/10 text-primary', user: 'bg-success/10 text-success', owner: 'bg-primary/10 text-primary' };
 
 export function AdminCrmActivityLog() {
   const { language } = useLanguage();

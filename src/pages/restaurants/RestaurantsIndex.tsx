@@ -176,7 +176,7 @@ export default function RestaurantsIndex() {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
           {[1, 2, 3, 4, 5, 6].map(i => (
             <div key={i} className="space-y-2">
-              <Skeleton className="aspect-[4/3] rounded-xl" />
+              <Skeleton className="aspect-[4/3] rounded-none" />
               <Skeleton className="h-4 w-3/4" />
               <Skeleton className="h-3 w-1/2" />
             </div>

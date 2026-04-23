@@ -114,7 +114,7 @@ export function AccountingPolicyEditor({
             <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={() => setGrouping('period')}
-                className={`flex items-center gap-2 p-3 rounded-xl border-2 transition-all ${
+                className={`flex items-center gap-2 p-3 rounded-none border-2 transition-all ${
                   grouping === 'period' ? 'border-primary bg-primary/5' : 'border-border'
                 }`}
               >
@@ -126,7 +126,7 @@ export function AccountingPolicyEditor({
               </button>
               <button
                 onClick={() => setGrouping('per_booking')}
-                className={`flex items-center gap-2 p-3 rounded-xl border-2 transition-all ${
+                className={`flex items-center gap-2 p-3 rounded-none border-2 transition-all ${
                   grouping === 'per_booking' ? 'border-primary bg-primary/5' : 'border-border'
                 }`}
               >

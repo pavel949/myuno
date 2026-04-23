@@ -139,7 +139,7 @@ export function ProjectDocumentsVault({ projectId }: { projectId: string }) {
                   {cat.docs.map((doc: ProjectDocument) => {
                     const VIcon = VISIBILITY_OPTIONS.find((v) => v.value === doc.visibility)?.icon || Eye;
                     return (
-                      <div key={doc.id} className="flex items-center justify-between p-2 rounded bg-muted/30">
+                      <div key={doc.id} className="flex items-center justify-between p-2 rounded-none bg-muted/30">
                         <div className="flex items-center gap-2 min-w-0 flex-1">
                           <FileText className="w-4 h-4 text-muted-foreground shrink-0" />
                           <div className="min-w-0 flex-1">

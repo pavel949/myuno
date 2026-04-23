@@ -252,7 +252,7 @@ export default function PropertyManage() {
     return (
       <PageContainer className="px-0">
         <div className="flex items-center gap-4 px-4 mb-4">
-          <Skeleton className="h-10 w-10 rounded-lg" />
+          <Skeleton className="h-10 w-10 rounded-none" />
           <Skeleton className="h-6 w-48" />
         </div>
         <Skeleton className="h-[calc(100vh-120px)] w-full" />
@@ -338,7 +338,7 @@ export default function PropertyManage() {
                   key={section.id}
                   onClick={() => handleSectionChange(section.id)}
                   className={cn(
-                    "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors text-left",
+                    "w-full flex items-center gap-3 px-3 py-2.5 rounded-none text-sm transition-colors text-left",
                     activeSection === section.id || (section.id === 'listing' && activeSection === 'photos')
                       ? "bg-primary text-primary-foreground font-medium"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted"
@@ -365,7 +365,7 @@ export default function PropertyManage() {
                 key={section.id}
                 onClick={() => handleSectionChange(section.id)}
                 className={cn(
-                  "flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-colors",
+                  "flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-none transition-colors",
                   activeSection === section.id || (section.id === 'listing' && activeSection === 'photos')
                     ? "text-primary"
                     : "text-muted-foreground"
@@ -381,7 +381,7 @@ export default function PropertyManage() {
               <DropdownMenuTrigger asChild>
                 <button
                   className={cn(
-                    "flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-colors",
+                    "flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-none transition-colors",
                     OVERFLOW_ITEMS.some(s => s.id === activeSection)
                       ? "text-primary"
                       : "text-muted-foreground"

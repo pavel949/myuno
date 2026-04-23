@@ -54,19 +54,19 @@ export function AIWeeklySummary() {
       <CardContent className="space-y-4">
         {/* Quick Stats */}
         <div className="grid grid-cols-3 gap-2 text-center">
-          <div className="p-2 rounded-lg bg-muted/50">
+          <div className="p-2 rounded-none bg-muted/50">
             <div className="text-lg font-bold">{summary.totalAnalyzed}</div>
             <div className="text-[10px] text-muted-foreground">
               {isRussian ? 'Проанализировано' : 'Analyzed'}
             </div>
           </div>
-          <div className="p-2 rounded-lg bg-muted/50">
+          <div className="p-2 rounded-none bg-muted/50">
             <div className="text-lg font-bold">{summary.avgScore ?? '—'}</div>
             <div className="text-[10px] text-muted-foreground">
               {isRussian ? 'Ср. балл' : 'Avg Score'}
             </div>
           </div>
-          <div className="p-2 rounded-lg bg-muted/50">
+          <div className="p-2 rounded-none bg-muted/50">
             <div className="text-lg font-bold">{summary.suspiciousRate}%</div>
             <div className="text-[10px] text-muted-foreground">
               {isRussian ? 'Подозрит.' : 'Suspicious'}

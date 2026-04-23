@@ -108,7 +108,7 @@ export default memo(function PlatformCatalog() {
               {isLoading ? (
                 <div className="space-y-2">
                   {Array.from({ length: 8 }).map((_, i) => (
-                    <Skeleton key={i} className="h-11 rounded-xl" />
+                    <Skeleton key={i} className="h-11 rounded-none" />
                   ))}
                 </div>
               ) : (
@@ -117,7 +117,7 @@ export default memo(function PlatformCatalog() {
                   <button
                     onClick={() => setActiveSituation(null)}
                     className={cn(
-                      "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all duration-200",
+                      "w-full flex items-center gap-3 px-3 py-2.5 rounded-none text-left transition-all duration-200",
                       !activeSituation
                         ? "bg-primary/10 text-primary font-medium"
                         : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
@@ -145,7 +145,7 @@ export default memo(function PlatformCatalog() {
                           activeSituation === sit.code ? null : sit.code
                         )}
                         className={cn(
-                          "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all duration-200",
+                          "w-full flex items-center gap-3 px-3 py-2.5 rounded-none text-left transition-all duration-200",
                           activeSituation === sit.code
                             ? "bg-primary/10 text-primary font-medium"
                             : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
@@ -185,7 +185,7 @@ export default memo(function PlatformCatalog() {
             {isLoading ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                 {Array.from({ length: 12 }).map((_, i) => (
-                  <Skeleton key={i} className="h-28 rounded-2xl" />
+                  <Skeleton key={i} className="h-28 rounded-none" />
                 ))}
               </div>
             ) : filteredApps.length === 0 ? (
@@ -213,13 +213,13 @@ export default memo(function PlatformCatalog() {
                         transition={{ duration: 0.2 }}
                         onClick={() => navigate(app.path)}
                         className={cn(
-                          "flex flex-col items-center justify-center gap-2.5 p-5 rounded-2xl",
+                          "flex flex-col items-center justify-center gap-2.5 p-5 rounded-none",
                           "bg-card border border-border/50",
                           "hover:shadow-md hover:-translate-y-0.5 hover:border-border",
                           "transition-all duration-200 cursor-pointer group text-center"
                         )}
                       >
-                        <div className="w-12 h-12 rounded-xl bg-primary/[0.07] flex items-center justify-center group-hover:bg-primary/[0.12] transition-colors">
+                        <div className="w-12 h-12 rounded-none bg-primary/[0.07] flex items-center justify-center group-hover:bg-primary/[0.12] transition-colors">
                           <Icon className="w-5 h-5 text-primary" />
                         </div>
                         <div>

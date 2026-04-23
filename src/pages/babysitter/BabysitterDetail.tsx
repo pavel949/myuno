@@ -130,14 +130,14 @@ const BabysitterDetail = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="bg-white rounded-none shadow-md p-6">
               <h2 className="text-2xl font-semibold mb-4">{language === 'en' ? 'About Me' : 'Обо мне'}</h2>
               <p className="text-gray-700">{description}</p>
 
               <div className="mt-6">
                 <h3 className="text-xl font-semibold mb-3">{language === 'en' ? 'Details' : 'Подробности'}</h3>
                 <div className="flex items-center space-x-2 mb-2">
-                  <Star className="text-yellow-500" size={16} />
+                  <Star className="text-accent" size={16} />
                   <span>{babysitter.rating} ({babysitter.reviewCount} {language === 'en' ? 'reviews' : 'отзывов'})</span>
                 </div>
                 <div className="flex items-center space-x-2 mb-2">
@@ -169,7 +169,7 @@ const BabysitterDetail = () => {
           </div>
 
           <div>
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="bg-white rounded-none shadow-md p-6">
               <h2 className="text-2xl font-semibold mb-4">{language === 'en' ? 'Book Now' : 'Заказать'}</h2>
               <div className="mb-4">
                 <span className="text-gray-700">{language === 'en' ? 'Price per hour' : 'Цена за час'}:</span>

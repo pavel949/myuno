@@ -167,7 +167,7 @@ export function SingleImageMode({
 
       {value ? (
         <div 
-          className="relative group rounded-xl overflow-hidden border-2 border-border"
+          className="relative group rounded-none overflow-hidden border-2 border-border"
           style={aspectRatio ? { paddingTop: aspectPadding } : undefined}
         >
           <img 
@@ -224,7 +224,7 @@ export function SingleImageMode({
           onDrop={handleDrop}
           disabled={isUploading || disabled}
           className={cn(
-            "w-full rounded-xl border-2 border-dashed transition-all",
+            "w-full rounded-none border-2 border-dashed transition-all",
             "flex flex-col items-center justify-center gap-3",
             disabled && "opacity-50 cursor-not-allowed",
             isDragOver 

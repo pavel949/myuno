@@ -409,7 +409,7 @@ export default function RefundPolicyPage() {
             <Card key={type} className={`border ${type === 'escrow' ? 'border-success/30' : 'border-warning/30'}`}>
               <CardContent className="pt-4">
                 <div className="flex items-start gap-3">
-                  <div className={`p-2 rounded-lg ${type === 'escrow' ? 'bg-success/10' : 'bg-warning/10'}`}>
+                  <div className={`p-2 rounded-none ${type === 'escrow' ? 'bg-success/10' : 'bg-warning/10'}`}>
                     {type === 'escrow' ? (
                       <ShieldCheck className="h-5 w-5 text-success" />
                     ) : (
@@ -459,7 +459,7 @@ export default function RefundPolicyPage() {
                   {vertical.policies.map((policy, pIndex) => (
                     <div 
                       key={pIndex} 
-                      className="flex items-center justify-between py-2 px-3 bg-muted rounded-lg"
+                      className="flex items-center justify-between py-2 px-3 bg-muted rounded-none"
                     >
                       <span className="text-sm">{policy.period}</span>
                       <span className={`text-sm font-semibold ${
@@ -566,11 +566,11 @@ export default function RefundPolicyPage() {
         </div>
 
         {/* G-Trust Link */}
-        <Card className="mb-6 border-amber-500/30 bg-gradient-to-r from-amber-500/5 to-transparent">
+        <Card className="mb-6 border-accent/40/30 bg-gradient-to-r from-accent/5 to-transparent">
           <CardContent className="pt-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <ShieldCheck className="h-6 w-6 text-amber-500" />
+                <ShieldCheck className="h-6 w-6 text-accent" />
                 <div>
                   <p className="font-medium">{isRu ? 'G-Trust защита' : 'G-Trust Protection'}</p>
                   <p className="text-sm text-muted-foreground">
@@ -596,7 +596,7 @@ export default function RefundPolicyPage() {
             <p className="text-xs text-muted-foreground mt-3">
               {isRu ? 'Последнее обновление: Январь 2026' : 'Last updated: January 2026'}
             </p>
-            <div className="mt-4 p-3 bg-muted rounded-lg text-xs text-muted-foreground">
+            <div className="mt-4 p-3 bg-muted rounded-none text-xs text-muted-foreground">
               <p className="font-medium text-foreground mb-1">myUNO Pte. Ltd.</p>
               <p>{isRu ? 'Сингапур | Сервисное подразделение: Таиланд' : 'Singapore | Service Operations: Thailand'}</p>
               <p className="mt-1">www.myuno.app</p>

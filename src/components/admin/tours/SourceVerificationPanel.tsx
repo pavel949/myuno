@@ -119,7 +119,7 @@ export function SourceVerificationPanel({ experienceId, sourcePageUrl, bookingUr
         {media.length > 0 && (
           <div className="grid grid-cols-4 gap-1 mt-2">
             {media.slice(0, 8).map(m => (
-              <div key={m.id} className="aspect-square rounded overflow-hidden bg-muted">
+              <div key={m.id} className="aspect-square rounded-none overflow-hidden bg-muted">
                 {m.stored_path ? (
                   <img
                     src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/tour-media/${m.stored_path}`}

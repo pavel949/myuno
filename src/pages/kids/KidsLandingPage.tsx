@@ -24,14 +24,14 @@ export default function KidsLandingPage() {
       icon={Baby}
       title={t ? 'Пхукет для детей' : 'Phuket for Kids'}
       subtitle={t ? 'Школы, врачи, активности — всё для семьи на острове' : 'Schools, doctors, activities — everything for families on the island'}
-      gradient="from-amber-500 via-orange-500 to-pink-500"
+      gradient="from-accent via-accent to-accent"
     >
       <div className="px-4 py-8 max-w-lg mx-auto space-y-3">
         {CATEGORIES.map((cat, i) => {
           const Icon = cat.icon;
           return (
-            <button key={i} onClick={() => navigate(cat.path)} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card text-left transition-all hover:[box-shadow:var(--shadow-elevation-2)] active:scale-[0.98]">
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: tokenColor(cat.color, 0.15) }}>
+            <button key={i} onClick={() => navigate(cat.path)} className="w-full flex items-center gap-4 p-4 rounded-none border border-border bg-card text-left transition-all hover:[box-shadow:var(--shadow-elevation-2)] active:scale-[0.98]">
+              <div className="w-11 h-11 rounded-none flex items-center justify-center shrink-0" style={{ background: tokenColor(cat.color, 0.15) }}>
                 <Icon className="w-5 h-5" style={{ color: tokenColor(cat.color) }} />
               </div>
               <div className="flex-1 min-w-0">

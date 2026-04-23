@@ -118,7 +118,7 @@ export default function AcquisitionMetrics() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-green-500/10 to-green-500/5">
+          <Card className="bg-gradient-to-br from-success/10 to-success/5">
             <CardContent className="p-4">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Target className="h-4 w-4" />
@@ -131,7 +131,7 @@ export default function AcquisitionMetrics() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-blue-500/10 to-blue-500/5">
+          <Card className="bg-gradient-to-br from-primary/10 to-primary/5">
             <CardContent className="p-4">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Repeat className="h-4 w-4" />
@@ -142,7 +142,7 @@ export default function AcquisitionMetrics() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-purple-500/10 to-purple-500/5">
+          <Card className="bg-gradient-to-br from-primary/10 to-primary/5">
             <CardContent className="p-4">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <ArrowRightLeft className="h-4 w-4" />
@@ -198,19 +198,19 @@ export default function AcquisitionMetrics() {
                   <CardDescription>Key unit economics indicators</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
+                  <div className="flex justify-between items-center p-3 bg-muted/50 rounded-none">
                     <span className="text-sm">Average Order Value</span>
                     <span className="font-bold">{formatCurrency(summary.avgOrderValue)}</span>
                   </div>
-                  <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
+                  <div className="flex justify-between items-center p-3 bg-muted/50 rounded-none">
                     <span className="text-sm">Take Rate</span>
                     <span className="font-bold">{formatPercent(summary.avgTakeRate)}</span>
                   </div>
-                  <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
+                  <div className="flex justify-between items-center p-3 bg-muted/50 rounded-none">
                     <span className="text-sm">Gross Margin</span>
                     <span className="font-bold">{formatPercent(summary.grossMargin)}</span>
                   </div>
-                  <div className="flex justify-between items-center p-3 bg-primary/10 rounded-lg">
+                  <div className="flex justify-between items-center p-3 bg-primary/10 rounded-none">
                     <span className="text-sm font-medium">Customer Acquisition Cost</span>
                     <span className="font-bold">{formatCurrency(summary.avgCAC)}</span>
                   </div>
@@ -322,7 +322,7 @@ export default function AcquisitionMetrics() {
                 </CardHeader>
                 <CardContent className="space-y-3 max-h-80 overflow-y-auto">
                   {verticalSummary.map((v, i) => (
-                    <div key={v.vertical} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                    <div key={v.vertical} className="flex items-center justify-between p-3 bg-muted/50 rounded-none">
                       <div className="flex items-center gap-3">
                         <div 
                           className="w-3 h-3 rounded-full" 
@@ -395,15 +395,15 @@ export default function AcquisitionMetrics() {
                 <CardTitle>Super-App Value Proposition</CardTitle>
               </CardHeader>
               <CardContent className="grid md:grid-cols-3 gap-4">
-                <div className="p-4 bg-primary/10 rounded-lg text-center">
+                <div className="p-4 bg-primary/10 rounded-none text-center">
                   <p className="text-4xl font-bold">{verticalSummary.length}</p>
                   <p className="text-sm text-muted-foreground">Active Verticals</p>
                 </div>
-                <div className="p-4 bg-success/10 rounded-lg text-center">
+                <div className="p-4 bg-success/10 rounded-none text-center">
                   <p className="text-4xl font-bold">{formatPercent(summary.crossSellRate)}</p>
                   <p className="text-sm text-muted-foreground">Cross-Sell Rate</p>
                 </div>
-                <div className="p-4 bg-info/10 rounded-lg text-center">
+                <div className="p-4 bg-info/10 rounded-none text-center">
                   <p className="text-4xl font-bold">{summary.ltvCacRatio.toFixed(1)}x</p>
                   <p className="text-sm text-muted-foreground">LTV/CAC Multiplier</p>
                 </div>
@@ -532,19 +532,19 @@ export default function AcquisitionMetrics() {
                   <div className="space-y-4">
                     <h4 className="font-semibold">📊 Key Metrics Summary</h4>
                     <div className="grid grid-cols-2 gap-3">
-                      <div className="p-3 bg-muted/50 rounded-lg text-center">
+                      <div className="p-3 bg-muted/50 rounded-none text-center">
                         <p className="text-2xl font-bold">{airbnbMetrics.uniqueVerticals}</p>
                         <p className="text-xs text-muted-foreground">Verticals</p>
                       </div>
-                      <div className="p-3 bg-muted/50 rounded-lg text-center">
+                      <div className="p-3 bg-muted/50 rounded-none text-center">
                         <p className="text-2xl font-bold">{formatCurrency(airbnbMetrics.totalGMV)}</p>
                         <p className="text-xs text-muted-foreground">Combined GMV</p>
                       </div>
-                      <div className="p-3 bg-muted/50 rounded-lg text-center">
+                      <div className="p-3 bg-muted/50 rounded-none text-center">
                         <p className="text-2xl font-bold">{formatPercent(airbnbMetrics.crossSellRate)}</p>
                         <p className="text-xs text-muted-foreground">Cross-Sell</p>
                       </div>
-                      <div className="p-3 bg-muted/50 rounded-lg text-center">
+                      <div className="p-3 bg-muted/50 rounded-none text-center">
                         <p className="text-2xl font-bold">{summary.ltvCacRatio.toFixed(1)}x</p>
                         <p className="text-xs text-muted-foreground">LTV/CAC</p>
                       </div>

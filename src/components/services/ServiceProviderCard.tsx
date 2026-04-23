@@ -45,7 +45,7 @@ export const ServiceProviderCard = memo(function ServiceProviderCard({
         onClick={onClick}
       className={cn(
         "w-full flex items-center gap-4 p-4",
-        "bg-card border border-border/50 rounded-2xl",
+        "bg-card border border-border/50 rounded-none",
         "hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30",
         "active:scale-[0.99]",
         "transition-all duration-200",
@@ -121,7 +121,7 @@ export const ServiceProviderCard = memo(function ServiceProviderCard({
     <button
       onClick={onClick}
       className={cn(
-        "w-[260px] shrink-0 rounded-2xl overflow-hidden",
+        "w-[260px] shrink-0 rounded-none overflow-hidden",
         "bg-card border border-border/50",
         "hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30",
         "active:scale-[0.98]",
@@ -149,7 +149,7 @@ export const ServiceProviderCard = memo(function ServiceProviderCard({
         
         {/* Rating badge */}
         {service.rating && (
-          <div className="absolute top-2.5 right-2.5 flex items-center gap-1 px-2 py-1 rounded-lg bg-background/95 backdrop-blur-sm text-xs font-semibold shadow-sm">
+          <div className="absolute top-2.5 right-2.5 flex items-center gap-1 px-2 py-1 rounded-none bg-background/95 backdrop-blur-sm text-xs font-semibold shadow-sm">
             <Star className="w-3.5 h-3.5 text-warning fill-warning" />
             {service.rating.toFixed(1)}
           </div>
@@ -210,7 +210,7 @@ export const ServiceProviderCard = memo(function ServiceProviderCard({
           )}
           
           {service.duration_minutes && (
-            <span className="flex items-center gap-1 text-xs text-muted-foreground bg-muted px-2 py-1 rounded-md">
+            <span className="flex items-center gap-1 text-xs text-muted-foreground bg-muted px-2 py-1 rounded-none">
               <Clock className="w-3 h-3" />
               {service.duration_minutes} {language === 'ru' ? 'мин' : 'min'}
             </span>

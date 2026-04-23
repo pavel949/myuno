@@ -35,22 +35,22 @@ const GROUP_ICONS: Record<string, LucideIcon> = {
 
 // Group gradient colors
 const GROUP_GRADIENTS: Record<string, string> = {
-  'lifestyle': 'from-purple-500/20 to-pink-500/10',
-  'lifestyle-leisure': 'from-purple-500/20 to-pink-500/10',
-  'travel': 'from-blue-500/20 to-cyan-500/10',
-  'travel-transport': 'from-blue-500/20 to-cyan-500/10',
-  'water': 'from-cyan-500/20 to-teal-500/10',
-  'water-sports': 'from-cyan-500/20 to-teal-500/10',
-  'health': 'from-emerald-500/20 to-green-500/10',
-  'health-care': 'from-emerald-500/20 to-green-500/10',
-  'home': 'from-amber-500/20 to-orange-500/10',
-  'home-services': 'from-amber-500/20 to-orange-500/10',
-  'expat': 'from-indigo-500/20 to-violet-500/10',
-  'expat-services': 'from-indigo-500/20 to-violet-500/10',
+  'lifestyle': 'from-primary/20 to-accent/10',
+  'lifestyle-leisure': 'from-primary/20 to-accent/10',
+  'travel': 'from-primary/20 to-primary/10',
+  'travel-transport': 'from-primary/20 to-primary/10',
+  'water': 'from-primary/20 to-success/10',
+  'water-sports': 'from-primary/20 to-success/10',
+  'health': 'from-success/20 to-success/10',
+  'health-care': 'from-success/20 to-success/10',
+  'home': 'from-accent/20 to-accent/10',
+  'home-services': 'from-accent/20 to-accent/10',
+  'expat': 'from-primary/20 to-primary/10',
+  'expat-services': 'from-primary/20 to-primary/10',
   'professional': 'from-slate-500/20 to-gray-500/10',
-  'quick': 'from-rose-500/20 to-red-500/10',
-  'quick-services': 'from-rose-500/20 to-red-500/10',
-  'shopping': 'from-orange-500/20 to-amber-500/10',
+  'quick': 'from-accent/20 to-red-500/10',
+  'quick-services': 'from-accent/20 to-red-500/10',
+  'shopping': 'from-accent/20 to-accent/10',
 };
 
 // Get group icon
@@ -129,7 +129,7 @@ export function ServiceCategoryAccordion({ searchQuery, onNavigate }: ServiceCat
                 "text-left"
               )}
             >
-              <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center shrink-0", `bg-gradient-to-br ${groupGradient}`)}>
+              <div className={cn("w-9 h-9 rounded-none flex items-center justify-center shrink-0", `bg-gradient-to-br ${groupGradient}`)}>
                 <GroupIcon className="w-5 h-5 text-primary" />
               </div>
               <span className="flex-1 font-medium text-sm">
@@ -153,7 +153,7 @@ export function ServiceCategoryAccordion({ searchQuery, onNavigate }: ServiceCat
               )}
             >
               <div className="flex items-center gap-3 flex-1">
-                <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center shrink-0", `bg-gradient-to-br ${groupGradient}`)}>
+                <div className={cn("w-9 h-9 rounded-none flex items-center justify-center shrink-0", `bg-gradient-to-br ${groupGradient}`)}>
                   <GroupIcon className="w-5 h-5 text-primary" />
                 </div>
                 <span className="font-medium text-sm">
@@ -175,11 +175,11 @@ export function ServiceCategoryAccordion({ searchQuery, onNavigate }: ServiceCat
                       onClick={() => handleCategoryClick(category)}
                       className={cn(
                         "w-full flex items-center gap-3 px-3 py-2.5",
-                        "hover:bg-muted/50 active:bg-muted rounded-lg transition-colors",
+                        "hover:bg-muted/50 active:bg-muted rounded-none transition-colors",
                         "text-left text-sm"
                       )}
                     >
-                      <div className="w-7 h-7 rounded-lg bg-muted/50 flex items-center justify-center shrink-0">
+                      <div className="w-7 h-7 rounded-none bg-muted/50 flex items-center justify-center shrink-0">
                         <Icon className="w-4 h-4 text-muted-foreground" />
                       </div>
                       <span className="flex-1 text-muted-foreground">

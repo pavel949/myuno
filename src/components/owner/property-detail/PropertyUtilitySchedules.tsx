@@ -144,7 +144,7 @@ export function PropertyUtilitySchedules({ propertyId }: { propertyId: string })
               const status = isDueThisMonth(s.due_day, s.last_paid_date);
 
               return (
-                <div key={s.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/40">
+                <div key={s.id} className="flex items-center justify-between p-2 rounded-none bg-muted/40">
                   <div className="flex items-center gap-2 min-w-0">
                     <Icon className={`h-4 w-4 ${meta.color} flex-shrink-0`} />
                     <div className="min-w-0">

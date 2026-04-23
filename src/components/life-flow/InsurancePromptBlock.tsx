@@ -114,11 +114,11 @@ export function InsurancePromptBlock({ routeCode, accentColor }: InsurancePrompt
 
       <button
         onClick={() => navigate('/insurance/travel')}
-        className="w-full text-left rounded-2xl border border-border/60 bg-card overflow-hidden hover:shadow-sm active:scale-[0.99] transition-all touch-manipulation"
+        className="w-full text-left rounded-none border border-border/60 bg-card overflow-hidden hover:shadow-sm active:scale-[0.99] transition-all touch-manipulation"
       >
         <div className="p-4 space-y-3">
           <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary/8 flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 rounded-none bg-primary/8 flex items-center justify-center shrink-0">
               <Icon className="w-5 h-5 text-primary" />
             </div>
             <div className="flex-1 min-w-0">
@@ -132,7 +132,7 @@ export function InsurancePromptBlock({ routeCode, accentColor }: InsurancePrompt
           </div>
 
           {/* USP badge */}
-          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50 border border-border/40">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-none bg-muted/50 border border-border/40">
             <Phone className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
             <p className="text-[11px] text-muted-foreground leading-snug">
               {isRu 

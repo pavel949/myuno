@@ -141,7 +141,7 @@ export function TripChecklist() {
       </div>
 
       {/* Reassurance banner */}
-      <div className="flex items-center gap-2.5 rounded-xl bg-primary/5 border border-primary/10 px-3.5 py-2.5">
+      <div className="flex items-center gap-2.5 rounded-none bg-primary/5 border border-primary/10 px-3.5 py-2.5">
         <Shield className="w-4 h-4 text-primary shrink-0" />
         <p className="text-xs text-muted-foreground">
           {isRu
@@ -166,7 +166,7 @@ export function TripChecklist() {
             >
               <div
                 className={cn(
-                  'rounded-xl border bg-card transition-all',
+                  'rounded-none border bg-card transition-all',
                   isCompleted ? 'border-primary/20 bg-primary/5' : 'border-border',
                 )}
               >
@@ -179,7 +179,7 @@ export function TripChecklist() {
 
                   <div
                     className={cn(
-                      'w-9 h-9 rounded-lg flex items-center justify-center shrink-0',
+                      'w-9 h-9 rounded-none flex items-center justify-center shrink-0',
                       isCompleted ? 'bg-primary/15' : 'bg-muted'
                     )}
                   >

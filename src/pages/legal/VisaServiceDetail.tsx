@@ -30,9 +30,9 @@ export default function VisaServiceDetail() {
     return (
       <AppLayout>
         <div className="p-4 space-y-4">
-          <div className="h-48 bg-muted animate-pulse rounded-xl" />
-          <div className="h-8 bg-muted animate-pulse rounded" />
-          <div className="h-24 bg-muted animate-pulse rounded-xl" />
+          <div className="h-48 bg-muted animate-pulse rounded-none" />
+          <div className="h-8 bg-muted animate-pulse rounded-none" />
+          <div className="h-24 bg-muted animate-pulse rounded-none" />
         </div>
       </AppLayout>
     );
@@ -59,7 +59,7 @@ export default function VisaServiceDetail() {
     <AppLayout>
       <div className="pb-24">
         {/* Hero */}
-        <div className="relative bg-gradient-to-br from-indigo-600 via-blue-600 to-purple-700 p-6 pt-16">
+        <div className="relative bg-gradient-to-br from-primary via-primary to-primary p-6 pt-16">
           <BackButton fallbackPath="/legal" variant="overlay" className="absolute top-4 left-4" />
           
           <div className="text-white">
@@ -130,7 +130,7 @@ export default function VisaServiceDetail() {
 
           <TabsContent value="overview" className="space-y-4 mt-4">
             {/* Pricing */}
-            <div className="bg-card border border-border rounded-xl p-4">
+            <div className="bg-card border border-border rounded-none p-4">
               <h3 className="font-semibold mb-3">{language === 'ru' ? 'Стоимость' : 'Pricing'}</h3>
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
@@ -158,7 +158,7 @@ export default function VisaServiceDetail() {
 
             {/* Requirements */}
             {requirements && (
-              <div className="bg-card border border-border rounded-xl p-4">
+              <div className="bg-card border border-border rounded-none p-4">
                 <h3 className="font-semibold mb-3 flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 text-warning" />
                   {language === 'ru' ? 'Требования' : 'Requirements'}
@@ -177,7 +177,7 @@ export default function VisaServiceDetail() {
             {/* Provider */}
             {visa.provider && (
               <div 
-                className="bg-card border border-border rounded-xl p-4 cursor-pointer hover:border-primary/50 transition-colors"
+                className="bg-card border border-border rounded-none p-4 cursor-pointer hover:border-primary/50 transition-colors"
                 onClick={() => navigate(`/legal/provider/${visa.provider_id}`)}
               >
                 <h3 className="font-semibold mb-3 flex items-center gap-2">
@@ -211,7 +211,7 @@ export default function VisaServiceDetail() {
           </TabsContent>
 
           <TabsContent value="documents" className="space-y-4 mt-4">
-            <div className="bg-card border border-border rounded-xl p-4">
+            <div className="bg-card border border-border rounded-none p-4">
               <h3 className="font-semibold mb-3 flex items-center gap-2">
                 <FileText className="w-4 h-4 text-primary" />
                 {language === 'ru' ? 'Необходимые документы' : 'Required Documents'}
@@ -230,7 +230,7 @@ export default function VisaServiceDetail() {
           </TabsContent>
 
           <TabsContent value="process" className="space-y-4 mt-4">
-            <div className="bg-card border border-border rounded-xl p-4">
+            <div className="bg-card border border-border rounded-none p-4">
               <h3 className="font-semibold mb-4">{language === 'ru' ? 'Этапы оформления' : 'Process Steps'}</h3>
               <div className="space-y-4">
                 {(language === 'ru' ? process.ru : process.en)?.map((step, idx) => (

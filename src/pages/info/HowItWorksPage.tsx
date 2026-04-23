@@ -207,7 +207,7 @@ export default function HowItWorksPage() {
           transition={{ duration: 0.5 }}
         >
           <SectionCard className="text-center bg-gradient-to-br from-primary/10 to-accent/10 border-primary/20">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-none bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
               <Smartphone className="w-8 h-8 text-primary-foreground" />
             </div>
             <h1 className="text-2xl font-display font-bold mb-3">
@@ -255,7 +255,7 @@ export default function HowItWorksPage() {
                   >
                     <SectionCard className="flex gap-4">
                       <div className="flex-shrink-0">
-                        <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center relative">
+                        <div className="w-14 h-14 rounded-none bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center relative">
                           <Icon className="w-7 h-7 text-primary" />
                           <span className="absolute -top-2 -left-2 w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center">
                             {step.number}
@@ -293,7 +293,7 @@ export default function HowItWorksPage() {
                   >
                     <SectionCard className="flex gap-4">
                       <div className="flex-shrink-0">
-                        <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-accent/20 to-accent/10 flex items-center justify-center relative">
+                        <div className="w-14 h-14 rounded-none bg-gradient-to-br from-accent/20 to-accent/10 flex items-center justify-center relative">
                           <Icon className="w-7 h-7 text-accent-foreground" />
                           <span className="absolute -top-2 -left-2 w-6 h-6 rounded-full bg-accent text-accent-foreground text-xs font-bold flex items-center justify-center">
                             {step.number}
@@ -333,7 +333,7 @@ export default function HowItWorksPage() {
               const Icon = benefit.icon;
               return (
                 <SectionCard key={index} className="p-4 text-center">
-                  <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <div className="w-10 h-10 mx-auto mb-2 rounded-none bg-primary/10 flex items-center justify-center">
                     <Icon className="w-5 h-5 text-primary" />
                   </div>
                   <h3 className="font-medium text-sm mb-1">{benefit.title}</h3>
@@ -360,11 +360,11 @@ export default function HowItWorksPage() {
             <div className="space-y-3">
               {quickStart.map((item, index) => (
                 <div key={index} className="flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center text-xs font-bold">
+                  <div className="w-6 h-6 rounded-full bg-success text-white flex items-center justify-center text-xs font-bold">
                     {index + 1}
                   </div>
                   <span className="flex-1 text-sm">{item.step}</span>
-                  <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+                  <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-none">
                     {item.time}
                   </span>
                 </div>
@@ -405,7 +405,7 @@ export default function HowItWorksPage() {
 
         {/* Help */}
         <SectionCard className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
+          <div className="w-12 h-12 rounded-none bg-muted flex items-center justify-center">
             <MessageCircle className="w-6 h-6 text-muted-foreground" />
           </div>
           <div className="flex-1">

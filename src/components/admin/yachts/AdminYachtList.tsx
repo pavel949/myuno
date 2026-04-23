@@ -58,9 +58,9 @@ export function AdminYachtList({ yachts, isLoading, onEdit, onDelete }: AdminYac
           <CardContent className="p-4">
             <div className="flex gap-3">
               {yacht.cover_image ? (
-                <img src={yacht.cover_image} alt={yacht.name_en} className="w-20 h-20 rounded-lg object-cover" />
+                <img src={yacht.cover_image} alt={yacht.name_en} className="w-20 h-20 rounded-none object-cover" />
               ) : (
-                <div className="w-20 h-20 rounded-lg bg-muted flex items-center justify-center">
+                <div className="w-20 h-20 rounded-none bg-muted flex items-center justify-center">
                   <Sailboat className="h-8 w-8 text-muted-foreground" />
                 </div>
               )}

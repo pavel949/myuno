@@ -43,7 +43,7 @@ export function ActiveDealsWidget() {
           {(Object.entries(stageCounts) as [DealStage, number][]).map(([stage, count]) => (
             <div
               key={stage}
-              className="shrink-0 px-3 py-2 rounded-lg bg-muted/50 text-center min-w-[70px]"
+              className="shrink-0 px-3 py-2 rounded-none bg-muted/50 text-center min-w-[70px]"
             >
               <p className="text-lg font-bold">{count}</p>
               <p className="text-[10px] text-muted-foreground">{isRu ? DEAL_STAGE_LABELS[stage].ru : DEAL_STAGE_LABELS[stage].en}</p>

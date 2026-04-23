@@ -25,7 +25,7 @@ export function QuickPropertySelector({
     return (
       <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4 scrollbar-hide touch-pan-y">
         {[1, 2, 3].map((i) => (
-          <Skeleton key={i} className="w-28 h-20 rounded-xl shrink-0" />
+          <Skeleton key={i} className="w-28 h-20 rounded-none shrink-0" />
         ))}
       </div>
     );
@@ -53,7 +53,7 @@ export function QuickPropertySelector({
             type="button"
             onClick={() => onSelect(property.id)}
             className={cn(
-              'relative w-28 h-20 rounded-xl overflow-hidden shrink-0 transition-all',
+              'relative w-28 h-20 rounded-none overflow-hidden shrink-0 transition-all',
               'border-2 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1',
               isSelected ? 'border-primary shadow-lg scale-[1.02]' : 'border-transparent'
             )}

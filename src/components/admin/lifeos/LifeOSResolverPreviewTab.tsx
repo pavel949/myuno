@@ -178,7 +178,7 @@ export function LifeOSResolverPreviewTab() {
             <div 
               key={i}
               className={cn(
-                "flex items-center gap-2 p-3 rounded-lg",
+                "flex items-center gap-2 p-3 rounded-none",
                 w.type === 'error' ? 'bg-destructive/10 text-destructive' : 'bg-warning/10 text-warning'
               )}
             >

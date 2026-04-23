@@ -139,7 +139,7 @@ export default function PersonalDetails() {
 
         {/* Emergency Contact */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-          <div className="flex items-center gap-2 mb-3 text-sm font-medium text-amber-600">
+          <div className="flex items-center gap-2 mb-3 text-sm font-medium text-accent">
             <AlertTriangle className="w-4 h-4" />
             {isRu ? 'Экстренный контакт' : 'Emergency Contact'}
           </div>

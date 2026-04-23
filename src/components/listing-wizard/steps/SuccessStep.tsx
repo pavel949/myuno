@@ -58,7 +58,7 @@ export function SuccessStep({ listingType }: SuccessStepProps) {
             : 'We\'ll review your application and get back to you within 24-48 hours.'}
         </p>
         
-        <div className="bg-muted/50 rounded-xl p-4 text-sm text-left space-y-2 mt-6">
+        <div className="bg-muted/50 rounded-none p-4 text-sm text-left space-y-2 mt-6">
           <p className="font-medium">{isRu ? 'Что дальше:' : 'What\'s next:'}</p>
           <ul className="space-y-1 text-muted-foreground">
             <li>• {isRu ? 'Проверьте email для подтверждения' : 'Check your email for confirmation'}</li>

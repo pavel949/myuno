@@ -147,10 +147,10 @@ export function CategoryAccordion({ searchQuery, onNavigate }: CategoryAccordion
                 <img 
                   src={category.image_url} 
                   alt=""
-                  className="w-9 h-9 rounded-xl object-cover shrink-0"
+                  className="w-9 h-9 rounded-none object-cover shrink-0"
                 />
               ) : (
-                <div className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center text-lg shrink-0">
+                <div className="w-9 h-9 rounded-none bg-muted flex items-center justify-center text-lg shrink-0">
                   {category.icon || getCategoryIcon(category.slug)}
                 </div>
               )}
@@ -189,10 +189,10 @@ export function CategoryAccordion({ searchQuery, onNavigate }: CategoryAccordion
                   <img 
                     src={category.image_url} 
                     alt=""
-                    className="w-9 h-9 rounded-xl object-cover shrink-0"
+                    className="w-9 h-9 rounded-none object-cover shrink-0"
                   />
                 ) : (
-                  <div className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center text-lg shrink-0">
+                  <div className="w-9 h-9 rounded-none bg-muted flex items-center justify-center text-lg shrink-0">
                     {category.icon || getCategoryIcon(category.slug)}
                   </div>
                 )}
@@ -214,7 +214,7 @@ export function CategoryAccordion({ searchQuery, onNavigate }: CategoryAccordion
                   onClick={() => handleCategoryClick(category.slug)}
                   className={cn(
                     "w-full flex items-center justify-between px-3 py-2.5",
-                    "hover:bg-muted/50 active:bg-muted rounded-lg transition-colors",
+                    "hover:bg-muted/50 active:bg-muted rounded-none transition-colors",
                     "text-left text-sm font-medium text-primary"
                   )}
                 >
@@ -235,7 +235,7 @@ export function CategoryAccordion({ searchQuery, onNavigate }: CategoryAccordion
                       onClick={() => handleSubcategoryClick(category.slug, sub.slug)}
                       className={cn(
                         "w-full flex items-center justify-between px-3 py-2.5",
-                        "hover:bg-muted/50 active:bg-muted rounded-lg transition-colors",
+                        "hover:bg-muted/50 active:bg-muted rounded-none transition-colors",
                         "text-left text-sm text-muted-foreground"
                       )}
                     >

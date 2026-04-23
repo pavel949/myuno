@@ -236,7 +236,7 @@ export default function AdminQuickListings() {
         {isLoading ? (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-32 w-full rounded-xl" />
+              <Skeleton key={i} className="h-32 w-full rounded-none" />
             ))}
           </div>
         ) : listings.length === 0 ? (
@@ -383,7 +383,7 @@ export default function AdminQuickListings() {
               </div>
 
               {selectedListing.rejection_reason && (
-                <div className="bg-destructive/10 p-3 rounded-lg">
+                <div className="bg-destructive/10 p-3 rounded-none">
                   <p className="text-sm text-destructive font-medium">
                     {language === 'ru' ? 'Причина отклонения:' : 'Rejection reason:'}
                   </p>

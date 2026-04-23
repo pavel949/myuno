@@ -145,7 +145,7 @@ export function MemberPermissionsSheet({ open, onOpenChange, userId, userName, c
 
         {/* Read-only notice for non-directors */}
         {!canManage && (
-          <div className="mb-4 p-3 rounded-lg bg-warning/10 border border-warning/30 text-sm text-warning-foreground">
+          <div className="mb-4 p-3 rounded-none bg-warning/10 border border-warning/30 text-sm text-warning-foreground">
             <p className="font-medium">{t('View Only', 'Только просмотр')}</p>
             <p className="text-xs text-muted-foreground mt-0.5">
               {t('Only directors can change permissions', 'Только директор может изменять права доступа')}
@@ -202,7 +202,7 @@ export function MemberPermissionsSheet({ open, onOpenChange, userId, userName, c
         {isLoading ? (
           <div className="space-y-3">
             {[1, 2, 3, 4].map((i) => (
-              <Skeleton key={i} className="h-14 w-full rounded-xl" />
+              <Skeleton key={i} className="h-14 w-full rounded-none" />
             ))}
           </div>
         ) : (
@@ -218,7 +218,7 @@ export function MemberPermissionsSheet({ open, onOpenChange, userId, userName, c
 
               return (
                 <Collapsible key={mod.key} open={isOpen} onOpenChange={() => toggleModule(mod.key)}>
-                  <div className="rounded-xl border border-border/60 overflow-hidden">
+                  <div className="rounded-none border border-border/60 overflow-hidden">
                     {/* Module header */}
                     <div className="flex items-center gap-2 px-3 py-2.5 bg-muted/30">
                       <Switch

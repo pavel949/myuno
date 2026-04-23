@@ -42,7 +42,7 @@ export function ModifiersStep({ selected, onToggle, lang }: Props) {
               onClick={() => onToggle(m)}
               whileTap={{ scale: 0.98 }}
               className={cn(
-                'relative flex items-center gap-3 rounded-xl border-2 bg-card p-3 text-left transition-all min-h-[56px]',
+                'relative flex items-center gap-3 rounded-none border-2 bg-card p-3 text-left transition-all min-h-[56px]',
                 'hover:border-primary/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary',
                 isActive ? 'border-primary bg-primary/5' : 'border-border',
               )}

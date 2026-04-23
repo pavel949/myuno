@@ -12,11 +12,11 @@ export default function AdminNewbuildsConsole() {
   const { data, isLoading } = useAdminNewbuildsKpi();
 
   const kpis = [
-    { label: 'Проекты в модерации', value: data?.pendingProjects, color: 'text-amber-500', icon: Clock, href: '/admin/projects?filter=pending' },
-    { label: 'Заявки застройщиков', value: data?.pendingDevs, color: 'text-amber-500', icon: Users, href: '/admin/developers?filter=pending' },
+    { label: 'Проекты в модерации', value: data?.pendingProjects, color: 'text-accent', icon: Clock, href: '/admin/projects?filter=pending' },
+    { label: 'Заявки застройщиков', value: data?.pendingDevs, color: 'text-accent', icon: Users, href: '/admin/developers?filter=pending' },
     { label: 'Orphan-проекты', value: data?.orphan, color: 'text-destructive', icon: AlertTriangle, href: '/admin/projects?filter=orphan' },
     { label: 'Требуют ревью', value: data?.needsReview, color: 'text-destructive', icon: AlertTriangle, href: '/admin/projects?filter=needs_review' },
-    { label: 'Stale (>45 дней)', value: data?.stale, color: 'text-orange-500', icon: Clock, href: '/admin/projects?filter=stale' },
+    { label: 'Stale (>45 дней)', value: data?.stale, color: 'text-accent', icon: Clock, href: '/admin/projects?filter=stale' },
     { label: 'Лидов сегодня', value: data?.leadsToday, color: 'text-primary', icon: TrendingUp, href: '/admin/projects?tab=leads' },
     { label: 'Лидов за неделю', value: data?.leadsWeek, color: 'text-primary', icon: TrendingUp, href: '/admin/projects?tab=leads' },
     { label: 'Всего проектов', value: data?.totalProjects, color: 'text-muted-foreground', icon: Building2, href: '/admin/projects' },

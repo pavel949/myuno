@@ -157,7 +157,7 @@ ${description}
                 className="space-y-3"
               >
                 <div className={cn(
-                  'flex items-center space-x-3 p-4 rounded-xl border-2 transition-colors cursor-pointer',
+                  'flex items-center space-x-3 p-4 rounded-none border-2 transition-colors cursor-pointer',
                   projectType === 'real_estate' ? 'border-primary bg-primary/5' : 'border-border'
                 )}>
                   <RadioGroupItem value="real_estate" id="real_estate" />
@@ -175,7 +175,7 @@ ${description}
                 </div>
 
                 <div className={cn(
-                  'flex items-center space-x-3 p-4 rounded-xl border-2 transition-colors cursor-pointer',
+                  'flex items-center space-x-3 p-4 rounded-none border-2 transition-colors cursor-pointer',
                   projectType === 'business' ? 'border-primary bg-primary/5' : 'border-border'
                 )}>
                   <RadioGroupItem value="business" id="business" />

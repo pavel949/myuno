@@ -24,14 +24,14 @@ export default function NomadGuidePage() {
       icon={Laptop}
       title={t ? 'Гид для номадов' : 'Digital Nomad Guide'}
       subtitle={t ? 'Работай удалённо с Пхукета — всё для комфортной жизни' : 'Work remotely from Phuket — everything for a comfortable life'}
-      gradient="from-teal-600 via-teal-500 to-cyan-600"
+      gradient="from-success via-success to-primary"
     >
       <div className="px-4 py-8 max-w-lg mx-auto space-y-3">
         {SECTIONS.map((s, i) => {
           const Icon = s.icon;
           return (
-            <button key={i} onClick={() => navigate(s.path)} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card text-left transition-all hover:[box-shadow:var(--shadow-elevation-2)] active:scale-[0.98]">
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: tokenColor(s.color, 0.15) }}>
+            <button key={i} onClick={() => navigate(s.path)} className="w-full flex items-center gap-4 p-4 rounded-none border border-border bg-card text-left transition-all hover:[box-shadow:var(--shadow-elevation-2)] active:scale-[0.98]">
+              <div className="w-11 h-11 rounded-none flex items-center justify-center shrink-0" style={{ background: tokenColor(s.color, 0.15) }}>
                 <Icon className="w-5 h-5" style={{ color: tokenColor(s.color) }} />
               </div>
               <div className="flex-1 min-w-0">

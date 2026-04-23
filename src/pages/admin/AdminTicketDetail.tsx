@@ -266,7 +266,7 @@ export default function AdminTicketDetail() {
                 </div>
 
                 {ticket.sla_deadline && (
-                  <div className={`p-3 rounded-lg ${isOverdue ? 'bg-destructive/5 border border-destructive/20' : 'bg-muted'}`}>
+                  <div className={`p-3 rounded-none ${isOverdue ? 'bg-destructive/5 border border-destructive/20' : 'bg-muted'}`}>
                     <div className="flex items-center gap-2">
                       {isOverdue ? (
                         <AlertTriangle className="w-4 h-4 text-destructive" />

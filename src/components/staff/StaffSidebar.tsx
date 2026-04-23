@@ -61,7 +61,7 @@ export function StaffSidebar() {
     <Sidebar collapsible="icon" className="border-r">
       <SidebarHeader className="border-b p-4">
         <div className={cn("flex items-center gap-3", !open && "justify-center")}>
-          <div className="p-1.5 rounded-lg bg-primary/10">
+          <div className="p-1.5 rounded-none bg-primary/10">
             <User className="h-5 w-5 text-primary" />
           </div>
           {open && (

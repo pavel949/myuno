@@ -168,7 +168,7 @@ export function DriveImportReview({ job, projectId, open, onClose }: Props) {
                 {extractedUnits.map((u, i) => (
                   <label
                     key={i}
-                    className="flex items-center gap-3 p-2.5 bg-muted/30 rounded-md cursor-pointer hover:bg-muted/50 transition-colors"
+                    className="flex items-center gap-3 p-2.5 bg-muted/30 rounded-none cursor-pointer hover:bg-muted/50 transition-colors"
                   >
                     <Checkbox
                       checked={selectedUnits.has(i)}

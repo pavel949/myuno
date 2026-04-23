@@ -351,9 +351,9 @@ describe('UX-VC: Visual Consistency', () => {
     expect(mutedClasses).toContain('muted-foreground');
   });
 
-  it('VC-004: Border radius follows design system (rounded-xl/2xl)', () => {
-    const componentRadius = 'rounded-xl';
-    expect(['rounded-lg', 'rounded-xl', 'rounded-2xl', 'rounded-full']).toContain(componentRadius);
+  it('VC-004: Border radius follows design system (rounded-none/2xl)', () => {
+    const componentRadius = 'rounded-none';
+    expect(['rounded-none', 'rounded-none', 'rounded-none', 'rounded-full']).toContain(componentRadius);
   });
 
   it('VC-005: Overscroll behavior prevents unwanted gestures', () => {

@@ -43,7 +43,7 @@ export const ReviewCard = ({ review, onHelpful, providerName }: ReviewCardProps)
   };
 
   return (
-    <div className="bg-card rounded-xl p-4 border">
+    <div className="bg-card rounded-none p-4 border">
       {/* Featured Badge */}
       {review.is_featured && (
         <div className="mb-3">
@@ -118,7 +118,7 @@ export const ReviewCard = ({ review, onHelpful, providerName }: ReviewCardProps)
               key={index}
               src={img}
               alt=""
-              className="w-16 h-16 rounded-lg object-cover shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+              className="w-16 h-16 rounded-none object-cover shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
             />
           ))}
         </div>
@@ -126,7 +126,7 @@ export const ReviewCard = ({ review, onHelpful, providerName }: ReviewCardProps)
 
       {/* Provider Response */}
       {review.response && review.response_at && (
-        <div className="mt-3 p-3 bg-primary/5 rounded-lg border border-primary/10">
+        <div className="mt-3 p-3 bg-primary/5 rounded-none border border-primary/10">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
               <MessageCircle className="w-3.5 h-3.5 text-primary" />

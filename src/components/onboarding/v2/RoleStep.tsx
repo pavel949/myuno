@@ -33,7 +33,7 @@ export function RoleStep({ value, onChange, lang }: Props) {
             whileTap={{ scale: 0.98 }}
             data-testid={`onboarding-role-${role}`}
             className={cn(
-              'relative flex items-start gap-3 rounded-xl border-2 bg-card p-4 text-left transition-all min-h-[88px]',
+              'relative flex items-start gap-3 rounded-none border-2 bg-card p-4 text-left transition-all min-h-[88px]',
               'hover:border-primary/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary',
               isActive ? 'border-primary bg-primary/5 shadow-sm' : 'border-border',
             )}

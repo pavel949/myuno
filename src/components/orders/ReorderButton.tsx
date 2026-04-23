@@ -164,7 +164,7 @@ export function QuickReorderCard({ order, className }: QuickReorderCardProps) {
   const itemCount = order.order_items?.length || 0;
 
   return (
-    <div className={`flex items-center justify-between p-3 bg-muted/50 rounded-lg ${className}`}>
+    <div className={`flex items-center justify-between p-3 bg-muted/50 rounded-none ${className}`}>
       <div className="flex-1 min-w-0">
         <p className="font-medium truncate">
           {firstItem?.item_name || order.order_type}

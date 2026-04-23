@@ -47,7 +47,7 @@ export function GoogleSignInButton({ redirectTo, label }: GoogleSignInButtonProp
       type="button"
       onClick={handleClick}
       disabled={loading}
-      className="w-full h-12 inline-flex items-center justify-center gap-3 rounded-xl border border-border bg-background hover:bg-muted transition-colors text-sm font-medium disabled:opacity-60"
+      className="w-full h-12 inline-flex items-center justify-center gap-3 rounded-none border border-border bg-background hover:bg-muted transition-colors text-sm font-medium disabled:opacity-60"
     >
       {loading ? (
         <LoadingSpinner size="sm" />

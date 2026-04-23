@@ -164,7 +164,7 @@ export default function RateManagementPage() {
                   const priceDiff = s.recommended_price - s.current_price;
                   const pctChange = s.current_price > 0 ? Math.round((priceDiff / s.current_price) * 100) : 0;
                   return (
-                    <div key={s.id} className="p-3 bg-background rounded-lg border">
+                    <div key={s.id} className="p-3 bg-background rounded-none border">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xs text-muted-foreground">
                           {format(new Date(s.date_from), 'dd MMM', { locale: isRu ? ru : undefined })}
@@ -250,7 +250,7 @@ export default function RateManagementPage() {
 
         {isLoading ? (
           <div className="space-y-3">
-            {[1, 2, 3].map(i => <Skeleton key={i} className="h-24 w-full rounded-xl" />)}
+            {[1, 2, 3].map(i => <Skeleton key={i} className="h-24 w-full rounded-none" />)}
           </div>
         ) : activeRates.length === 0 ? (
           <Card className="border-dashed">
@@ -369,7 +369,7 @@ export default function RateManagementPage() {
         <CollapsibleContent className="space-y-2 mt-2">
           {logsLoading ? (
             <div className="space-y-2">
-              {[1, 2, 3].map(i => <Skeleton key={i} className="h-12 w-full rounded-lg" />)}
+              {[1, 2, 3].map(i => <Skeleton key={i} className="h-12 w-full rounded-none" />)}
             </div>
           ) : activityLogs.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-6">
@@ -420,12 +420,12 @@ export default function RateManagementPage() {
 /* ─── Activity log helpers ─── */
 function ActivityActionBadge({ action, isRu }: { action: string; isRu: boolean }) {
   const labels: Record<string, [string, string, string]> = {
-    price_override: ['Price Override', 'Изменение цены', 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'],
-    base_price_changed: ['Base Price', 'Базовая цена', 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300'],
-    season_created: ['Season Created', 'Сезон создан', 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'],
-    season_updated: ['Season Updated', 'Сезон обновлён', 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300'],
+    price_override: ['Price Override', 'Изменение цены', 'bg-primary/10 text-primary dark:bg-primary/30 dark:text-primary'],
+    base_price_changed: ['Base Price', 'Базовая цена', 'bg-primary/10 text-primary dark:bg-primary/30 dark:text-primary'],
+    season_created: ['Season Created', 'Сезон создан', 'bg-success/10 text-success dark:bg-success/30 dark:text-success'],
+    season_updated: ['Season Updated', 'Сезон обновлён', 'bg-accent/10 text-accent dark:bg-accent/30 dark:text-accent'],
     season_deleted: ['Season Deleted', 'Сезон удалён', 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'],
-    availability_changed: ['Availability', 'Доступность', 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300'],
+    availability_changed: ['Availability', 'Доступность', 'bg-success/10 text-success dark:bg-success/30 dark:text-success'],
   };
   const [en, rur, color] = labels[action] || [action, action, 'bg-muted text-muted-foreground'];
   return <Badge className={cn("text-[10px] font-normal", color)}>{isRu ? rur : en}</Badge>;

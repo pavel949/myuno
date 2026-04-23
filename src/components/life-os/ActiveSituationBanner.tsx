@@ -47,7 +47,7 @@ export const ActiveSituationBanner = memo(forwardRef<HTMLDivElement>(function Ac
       {/* Dismiss */}
       <button
         onClick={clearLifeSituation}
-        className="p-1 -mr-1 rounded-md hover:bg-muted shrink-0"
+        className="p-1 -mr-1 rounded-none hover:bg-muted shrink-0"
         aria-label="Clear context"
       >
         <X className="w-3.5 h-3.5 text-muted-foreground" />

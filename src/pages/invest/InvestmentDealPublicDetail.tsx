@@ -24,8 +24,8 @@ export default function InvestmentDealPublicDetail() {
     return (
       <div className="container max-w-3xl mx-auto p-4 space-y-4">
         <Skeleton className="h-8 w-32" />
-        <Skeleton className="h-64 w-full rounded-xl" />
-        <Skeleton className="h-32 w-full rounded-xl" />
+        <Skeleton className="h-64 w-full rounded-none" />
+        <Skeleton className="h-32 w-full rounded-none" />
       </div>
     );
   }
@@ -68,10 +68,10 @@ export default function InvestmentDealPublicDetail() {
           </Button>
 
           {/* Hero */}
-          <Card className="overflow-hidden border-emerald-500/20 bg-gradient-to-br from-emerald-500/5 via-background to-blue-500/5">
+          <Card className="overflow-hidden border-success/40/20 bg-gradient-to-br from-success/5 via-background to-primary/5">
             <CardContent className="p-6 space-y-4">
               <div className="flex flex-wrap items-center gap-2">
-                <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30">
+                <Badge className="bg-success/10 text-success dark:text-success border-success/40/30">
                   {categoryLabel}
                 </Badge>
                 <Badge variant="outline">{intentLabel}</Badge>
@@ -84,7 +84,7 @@ export default function InvestmentDealPublicDetail() {
 
               <div className="space-y-1">
                 <div className="flex items-baseline gap-2">
-                  <DollarSign className="h-5 w-5 text-emerald-500" />
+                  <DollarSign className="h-5 w-5 text-success" />
                   <h1 className="text-2xl md:text-3xl font-bold leading-tight">{rangeLabel}</h1>
                 </div>
                 {deal.location_display && (
@@ -102,7 +102,7 @@ export default function InvestmentDealPublicDetail() {
               <Button
                 size="lg"
                 onClick={() => setShowInterest(true)}
-                className="w-full bg-emerald-500 hover:bg-emerald-600 text-white gap-2"
+                className="w-full bg-success hover:bg-success text-white gap-2"
               >
                 <Sparkles className="h-4 w-4" />
                 Express interest
@@ -157,9 +157,9 @@ export default function InvestmentDealPublicDetail() {
           )}
 
           {/* Anonymity disclosure */}
-          <Card className="border-blue-500/20 bg-blue-500/5">
+          <Card className="border-primary/40/20 bg-primary/5">
             <CardContent className="p-4 flex gap-3">
-              <Shield className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
+              <Shield className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
               <div className="space-y-1">
                 <div className="font-semibold text-sm">All opportunities are anonymized</div>
                 <p className="text-xs text-muted-foreground">

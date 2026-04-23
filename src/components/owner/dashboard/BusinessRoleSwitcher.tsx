@@ -19,7 +19,7 @@ export function BusinessRoleSwitcher({ activeRole, onRoleChange }: BusinessRoleS
           key={r.id}
           onClick={() => onRoleChange(r.id)}
           className={cn(
-            'flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex-shrink-0',
+            'flex items-center gap-2 px-3.5 py-2 rounded-none text-xs font-semibold whitespace-nowrap transition-all flex-shrink-0',
             'ring-1 shadow-sm',
             activeRole === r.id
               ? 'bg-primary text-primary-foreground ring-primary/30 shadow-md'

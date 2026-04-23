@@ -13,7 +13,7 @@ export function PropertyTourPromo() {
   return (
     <>
       <div
-        className="relative rounded-2xl overflow-hidden cursor-pointer group border border-primary/20"
+        className="relative rounded-none overflow-hidden cursor-pointer group border border-primary/20"
         onClick={() => setFormOpen(true)}
       >
         <div className="flex flex-col sm:flex-row">

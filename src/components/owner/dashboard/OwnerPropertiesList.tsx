@@ -16,8 +16,8 @@ export function OwnerPropertiesList() {
     return (
       <div className="space-y-3">
         <Skeleton className="h-7 w-40" />
-        <Skeleton className="h-20 w-full rounded-xl" />
-        <Skeleton className="h-20 w-full rounded-xl" />
+        <Skeleton className="h-20 w-full rounded-none" />
+        <Skeleton className="h-20 w-full rounded-none" />
       </div>
     );
   }
@@ -32,7 +32,7 @@ export function OwnerPropertiesList() {
           onClick={() => navigate('/mc/properties/new')}
           className="w-full flex items-center gap-4 py-4 hover:opacity-70 transition-opacity"
         >
-          <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+          <div className="w-14 h-14 rounded-none bg-primary/10 flex items-center justify-center flex-shrink-0">
             <Plus className="h-6 w-6 text-primary" />
           </div>
           <div className="flex-1 text-left">

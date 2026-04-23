@@ -206,7 +206,7 @@ function DuplicateGroupCard({
       <CardContent className="space-y-3">
         <div className="divide-y">
           {group.contacts.map((c, i) => (
-            <div key={c.id} className={cn('py-2 flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-sm', selectedKeep === i && 'bg-success/5 rounded-lg px-2')}>
+            <div key={c.id} className={cn('py-2 flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-sm', selectedKeep === i && 'bg-success/5 rounded-none px-2')}>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setSelectedKeep(i)}

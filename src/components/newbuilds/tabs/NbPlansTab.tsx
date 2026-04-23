@@ -31,7 +31,7 @@ export function NbPlansTab({ projectId }: Props) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {[1, 2, 3].map(i => (
-          <Skeleton key={i} className="aspect-[4/3] rounded-xl" style={{ background: 'hsl(var(--nb-surface))' }} />
+          <Skeleton key={i} className="aspect-[4/3] rounded-none" style={{ background: 'hsl(var(--nb-surface))' }} />
         ))}
       </div>
     );

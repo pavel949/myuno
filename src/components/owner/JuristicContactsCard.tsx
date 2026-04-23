@@ -81,7 +81,7 @@ export function JuristicContactsCard({ projectId, propertyId, projectData, class
       <CardContent className="space-y-4">
         {/* Main Juristic Person Info */}
         {projectData?.juristic_person_name && (
-          <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
+          <div className="p-4 rounded-none bg-primary/5 border border-primary/20">
             <h4 className="font-semibold mb-2">
               {isRu 
                 ? projectData.juristic_person_name_ru || projectData.juristic_person_name 
@@ -180,9 +180,9 @@ export function JuristicContactsCard({ projectId, propertyId, projectData, class
               return (
                 <div 
                   key={contact.id}
-                  className="flex items-start gap-3 p-3 rounded-lg border hover:bg-muted/30 transition-colors"
+                  className="flex items-start gap-3 p-3 rounded-none border hover:bg-muted/30 transition-colors"
                 >
-                  <div className="p-2 rounded-md bg-muted">
+                  <div className="p-2 rounded-none bg-muted">
                     <Icon className="h-4 w-4" />
                   </div>
                   <div className="flex-1 min-w-0">

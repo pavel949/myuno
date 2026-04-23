@@ -38,9 +38,9 @@ export function WhatsAppConciergeBlock({ context = 'trip', className }: WhatsApp
       transition={{ delay: 0.4 }}
       className={className}
     >
-      <div className="rounded-2xl border border-border/60 bg-card p-5 space-y-3">
+      <div className="rounded-none border border-border/60 bg-card p-5 space-y-3">
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center shrink-0">
+          <div className="w-10 h-10 rounded-none bg-success/10 flex items-center justify-center shrink-0">
             <MessageCircle className="w-5 h-5 text-success" />
           </div>
           <div className="flex-1 pt-0.5">

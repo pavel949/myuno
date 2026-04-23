@@ -91,7 +91,7 @@ export function EmailVerificationBanner() {
       <button
         onClick={handleDismiss}
         aria-label={isRu ? 'Закрыть' : 'Dismiss'}
-        className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded hover:bg-muted transition-colors text-muted-foreground"
+        className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-none hover:bg-muted transition-colors text-muted-foreground"
       >
         <X className="w-3.5 h-3.5" />
       </button>

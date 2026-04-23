@@ -132,7 +132,7 @@ export default function CookiePolicyPage() {
                 <p className="text-sm text-muted-foreground">{type.description}</p>
                 <p className="text-xs text-muted-foreground">
                   <span className="font-medium">{isRu ? 'Примеры: ' : 'Examples: '}</span>
-                  <code className="bg-muted px-1 py-0.5 rounded">{type.examples}</code>
+                  <code className="bg-muted px-1 py-0.5 rounded-none">{type.examples}</code>
                 </p>
               </CardContent>
             </Card>

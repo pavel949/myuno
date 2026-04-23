@@ -45,7 +45,7 @@ export default function FlowerDeliveryLanding() {
               transition={{ duration: 0.3 }}
               className="flex items-center gap-1.5 mb-6"
             >
-              <div className="w-6 h-6 rounded-md bg-primary flex items-center justify-center">
+              <div className="w-6 h-6 rounded-none bg-primary flex items-center justify-center">
                 <span className="text-[10px] font-bold text-primary-foreground">U</span>
               </div>
               <span className="text-sm font-semibold text-foreground/70">myUNO</span>
@@ -112,7 +112,7 @@ export default function FlowerDeliveryLanding() {
               <Button
                 onClick={handleOrder}
                 size="lg"
-                className="w-full h-14 text-base font-bold rounded-xl shadow-lg shadow-primary/20"
+                className="w-full h-14 text-base font-bold rounded-none shadow-lg shadow-primary/20"
               >
                 <Flower2 className="w-5 h-5 mr-2" />
                 {isRu ? 'Выбрать букет' : 'Choose a Bouquet'}
@@ -155,7 +155,7 @@ export default function FlowerDeliveryLanding() {
               },
             ].map(({ icon: Icon, title, desc }) => (
               <div key={title} className="flex gap-3.5">
-                <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mt-0.5">
+                <div className="flex-shrink-0 w-10 h-10 rounded-none bg-primary/10 flex items-center justify-center mt-0.5">
                   <Icon className="w-5 h-5 text-primary" />
                 </div>
                 <div>
@@ -166,7 +166,7 @@ export default function FlowerDeliveryLanding() {
             ))}
           </div>
 
-          <div className="mt-8 p-4 rounded-xl bg-muted/50 border border-border">
+          <div className="mt-8 p-4 rounded-none bg-muted/50 border border-border">
             <p className="text-xs text-muted-foreground leading-relaxed">
               {isRu
                 ? 'Некоторые цветы могут быть заменены сезонными аналогами. Стиль, палитра и ценность букета сохраняются.'
@@ -283,7 +283,7 @@ export default function FlowerDeliveryLanding() {
 
         {/* ─── FINAL CTA ─── */}
         <section className="max-w-lg mx-auto px-5 pb-12 pt-2">
-          <div className="p-6 rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-background border border-primary/15">
+          <div className="p-6 rounded-none bg-gradient-to-br from-primary/10 via-primary/5 to-background border border-primary/15">
             <h2 className="text-lg font-display font-bold text-foreground text-center">
               {isRu
                 ? 'Пусть цветы скажут за вас'
@@ -299,7 +299,7 @@ export default function FlowerDeliveryLanding() {
             <Button
               onClick={handleOrder}
               size="lg"
-              className="w-full h-14 text-base font-bold rounded-xl shadow-lg shadow-primary/20"
+              className="w-full h-14 text-base font-bold rounded-none shadow-lg shadow-primary/20"
             >
               {isRu ? 'Выбрать букет' : 'Choose a Bouquet'}
             </Button>

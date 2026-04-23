@@ -43,12 +43,12 @@ export default function OwnerPerformance() {
       <PageContainer>
         <PageHeader title={isRu ? 'Показатели' : 'Performance'} showBack fallbackPath="/mc" />
         <div className="space-y-4">
-          <Skeleton className="h-12 w-full rounded-xl" />
+          <Skeleton className="h-12 w-full rounded-none" />
           <div className="grid grid-cols-3 gap-3">
-            {[1, 2, 3].map(i => <Skeleton key={i} className="h-24 rounded-xl" />)}
+            {[1, 2, 3].map(i => <Skeleton key={i} className="h-24 rounded-none" />)}
           </div>
-          <Skeleton className="h-64 w-full rounded-xl" />
-          <Skeleton className="h-48 w-full rounded-xl" />
+          <Skeleton className="h-64 w-full rounded-none" />
+          <Skeleton className="h-48 w-full rounded-none" />
         </div>
       </PageContainer>
     );
@@ -78,7 +78,7 @@ export default function OwnerPerformance() {
     const positive = value > 0;
     const Icon = positive ? TrendingUp : TrendingDown;
     return (
-      <span className={cn('inline-flex items-center gap-0.5 text-xs font-medium', positive ? 'text-green-600' : 'text-red-500')}>
+      <span className={cn('inline-flex items-center gap-0.5 text-xs font-medium', positive ? 'text-success' : 'text-red-500')}>
         <Icon className="w-3 h-3" />
         {positive ? '+' : ''}{value}{suffix}
       </span>
@@ -148,7 +148,7 @@ export default function OwnerPerformance() {
             ))}
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground rounded-lg border border-dashed px-4 py-6 text-center">
+          <p className="text-sm text-muted-foreground rounded-none border border-dashed px-4 py-6 text-center">
             {isRu
               ? 'Персональные советы появятся, когда накопится достаточно данных. Откройте раздел целиком — там может быть больше материалов.'
               : 'Personal tips will appear as we have more data. Open the full section for more.'}

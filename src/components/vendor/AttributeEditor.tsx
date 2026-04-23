@@ -99,7 +99,7 @@ export function AttributeEditor({
       </div>
 
       {attributes.length === 0 ? (
-        <div className="text-center py-4 border border-dashed rounded-lg bg-muted/30">
+        <div className="text-center py-4 border border-dashed rounded-none bg-muted/30">
           <p className="text-sm text-muted-foreground mb-2">
             {isRussian 
               ? 'Добавьте характеристики товара' 
@@ -116,7 +116,7 @@ export function AttributeEditor({
           {attributes.map((attr, index) => (
             <div 
               key={index} 
-              className="flex items-start gap-2 p-2 border rounded-lg bg-card"
+              className="flex items-start gap-2 p-2 border rounded-none bg-card"
             >
               <GripVertical className="w-4 h-4 text-muted-foreground mt-2.5 shrink-0 cursor-grab" />
               

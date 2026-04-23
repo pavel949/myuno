@@ -184,7 +184,7 @@ function CompareSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (v:
                           onClick={() => { onOpenChange(false); navigate(APP_ROUTES.PROPERTY_DETAIL(p.id)); }}
                         >
                           {p.cover_image && (
-                            <img src={p.cover_image} alt="" className="w-full aspect-[4/3] rounded-lg object-cover mb-2" />
+                            <img src={p.cover_image} alt="" className="w-full aspect-[4/3] rounded-none object-cover mb-2" />
                           )}
                           <p className="font-semibold text-sm line-clamp-2 text-foreground">
                             {isRu ? (p.title_ru || p.title_en) : p.title_en}
@@ -196,7 +196,7 @@ function CompareSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (v:
                   {items.length < MAX_COMPARE && (
                     <th className="p-2 align-top">
                       <div
-                        className="aspect-[4/3] rounded-lg border-2 border-dashed border-border flex items-center justify-center cursor-pointer hover:border-primary/50 transition-colors"
+                        className="aspect-[4/3] rounded-none border-2 border-dashed border-border flex items-center justify-center cursor-pointer hover:border-primary/50 transition-colors"
                         onClick={() => { onOpenChange(false); navigate('/property'); }}
                       >
                         <div className="text-center text-muted-foreground">

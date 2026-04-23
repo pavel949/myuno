@@ -77,7 +77,7 @@ export function MiniCart({ className }: MiniCartProps) {
         <div className="max-h-64 overflow-y-auto">
           {displayItems.map((item) => (
             <div key={item.id} className="flex items-center gap-3 px-4 py-3 border-b last:border-b-0">
-              <div className="w-12 h-12 rounded-lg bg-muted overflow-hidden flex-shrink-0">
+              <div className="w-12 h-12 rounded-none bg-muted overflow-hidden flex-shrink-0">
                 {item.image ? (
                   <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                 ) : (

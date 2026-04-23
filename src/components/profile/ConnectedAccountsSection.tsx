@@ -117,16 +117,16 @@ export function ConnectedAccountsSection() {
             return (
               <div
                 key={provider.id}
-                className="flex items-center justify-between p-3 rounded-lg border bg-card"
+                className="flex items-center justify-between p-3 rounded-none border bg-card"
               >
                 <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${provider.bgColor} ${provider.textColor}`}>
+                  <div className={`w-10 h-10 rounded-none flex items-center justify-center ${provider.bgColor} ${provider.textColor}`}>
                     {provider.icon}
                   </div>
                   <div>
                     <p className="text-sm font-medium">{provider.name}</p>
                     {isConnected && (
-                      <p className="text-xs text-green-600 flex items-center gap-1">
+                      <p className="text-xs text-success flex items-center gap-1">
                         <Check className="w-3 h-3" />
                         {t.connected}
                       </p>

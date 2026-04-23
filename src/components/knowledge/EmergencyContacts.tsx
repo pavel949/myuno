@@ -60,10 +60,10 @@ export function EmergencyContacts({ citySlug = 'phuket', className }: EmergencyC
         {contacts.map((contact, index) => (
           <div 
             key={index} 
-            className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
+            className="flex items-center justify-between p-3 bg-muted/50 rounded-none"
           >
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-destructive/10 rounded-lg">
+              <div className="p-2 bg-destructive/10 rounded-none">
                 <contact.icon className="h-4 w-4 text-destructive" />
               </div>
               <div>

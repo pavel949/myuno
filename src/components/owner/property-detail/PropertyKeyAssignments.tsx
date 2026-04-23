@@ -129,7 +129,7 @@ export function PropertyKeyAssignments({ propertyId }: { propertyId: string }) {
             {keys.map(k => {
               const typeInfo = TYPE_LABELS[k.assigned_to_type] || TYPE_LABELS.staff;
               return (
-                <div key={k.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/40">
+                <div key={k.id} className="flex items-center justify-between p-2 rounded-none bg-muted/40">
                   <div className="flex items-center gap-2 min-w-0">
                     <span className="text-base">{typeInfo.emoji}</span>
                     <div className="min-w-0">

@@ -81,7 +81,7 @@ export default function TeamPage() {
     
     return (
       <div 
-        className={`p-1.5 rounded-md ${enabled ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}
+        className={`p-1.5 rounded-none ${enabled ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}
         title={permission}
       >
         {icons[permission]}

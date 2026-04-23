@@ -129,7 +129,7 @@ export function InvestorLeadForm({ onSuccess, entryPoint = 'hero_promo_card' }: 
               type="button"
               onClick={() => toggleInterest(option.id)}
               className={cn(
-                "flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all",
+                "flex flex-col items-center gap-1.5 p-3 rounded-none border-2 transition-all",
                 "hover:border-primary/50 hover:bg-primary/5",
                 interests.includes(option.id)
                   ? "border-primary bg-primary/10 text-primary"

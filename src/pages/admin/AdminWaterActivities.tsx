@@ -284,7 +284,7 @@ const AdminWaterActivities = () => {
                   <img
                     src={activity.cover_image}
                     alt={activity.title_en}
-                    className="w-20 h-20 rounded-lg object-cover"
+                    className="w-20 h-20 rounded-none object-cover"
                   />
                 )}
                 <div className="flex-1 min-w-0">
@@ -301,17 +301,17 @@ const AdminWaterActivities = () => {
                       </span>
                     )}
                     {activity.equipment_included && (
-                      <span className="text-xs bg-success/10 text-success px-2 py-0.5 rounded">
+                      <span className="text-xs bg-success/10 text-success px-2 py-0.5 rounded-none">
                         {language === 'en' ? 'Equipment' : 'Оборудование'}
                       </span>
                     )}
                     {activity.is_featured && (
-                      <span className="text-xs bg-warning/10 text-warning px-2 py-0.5 rounded">
+                      <span className="text-xs bg-warning/10 text-warning px-2 py-0.5 rounded-none">
                         {language === 'en' ? 'Featured' : 'Рекомендуемый'}
                       </span>
                     )}
                     {!activity.is_active && (
-                      <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded">
+                      <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-none">
                         {language === 'en' ? 'Inactive' : 'Неактивно'}
                       </span>
                     )}

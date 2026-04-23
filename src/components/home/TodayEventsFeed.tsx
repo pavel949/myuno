@@ -32,7 +32,7 @@ export const TodayEventsFeed = memo(function TodayEventsFeed({ compact }: TodayE
         <Skeleton className="h-5 w-48" />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {[1, 2, 3, 4].map(i => (
-            <Skeleton key={i} className="h-[140px] w-full rounded-xl" />
+            <Skeleton key={i} className="h-[140px] w-full rounded-none" />
           ))}
         </div>
       </div>

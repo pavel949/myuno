@@ -86,7 +86,7 @@ function ContactCard({
   return (
     <button
       onClick={onClick}
-      className="w-full text-left rounded-xl border bg-card hover:bg-accent/30 transition-all hover:shadow-md group"
+      className="w-full text-left rounded-none border bg-card hover:bg-accent/30 transition-all hover:shadow-md group"
     >
       <div className="p-4">
         <div className="flex items-start gap-3">
@@ -169,7 +169,7 @@ function ContactCard({
         </div>
       </div>
 
-      <div className="flex items-center justify-between px-4 py-2 border-t bg-muted/20 rounded-b-xl">
+      <div className="flex items-center justify-between px-4 py-2 border-t bg-muted/20 rounded-none">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-0.5">
             {[1, 2, 3].map(i => (
@@ -219,7 +219,7 @@ function ContactListRow({
     <button
       type="button"
       onClick={onClick}
-      className="w-full flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-lg border bg-card hover:bg-accent/30 transition-colors text-left"
+      className="w-full flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-none border bg-card hover:bg-accent/30 transition-colors text-left"
     >
       <div className={cn('h-10 w-10 rounded-full flex items-center justify-center shrink-0 text-sm font-semibold', avatarColor)}>
         {firstName.charAt(0) || '?'}{lastName.charAt(0) || '?'}
@@ -446,11 +446,11 @@ export default function ContactsList() {
             className="pl-9"
           />
         </div>
-        <div className="flex items-center gap-1 border rounded-md p-0.5">
+        <div className="flex items-center gap-1 border rounded-none p-0.5">
           <button
             type="button"
             onClick={() => setViewMode('grid')}
-            className={cn('p-1.5 rounded', viewMode === 'grid' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted')}
+            className={cn('p-1.5 rounded-none', viewMode === 'grid' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted')}
             title={isRu ? 'Сетка' : 'Grid'}
           >
             <LayoutGrid className="h-4 w-4" />
@@ -458,7 +458,7 @@ export default function ContactsList() {
           <button
             type="button"
             onClick={() => setViewMode('list')}
-            className={cn('p-1.5 rounded', viewMode === 'list' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted')}
+            className={cn('p-1.5 rounded-none', viewMode === 'list' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted')}
             title={isRu ? 'Список' : 'List'}
           >
             <List className="h-4 w-4" />
@@ -490,7 +490,7 @@ export default function ContactsList() {
       </div>
 
       {showFilters && (
-        <div className="space-y-3 p-3 rounded-xl border bg-card">
+        <div className="space-y-3 p-3 rounded-none border bg-card">
           {/* Type filter */}
           <div>
             <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-1.5">{isRu ? 'Тип' : 'Type'}</p>
@@ -644,12 +644,12 @@ export default function ContactsList() {
         viewMode === 'list' ? (
           <div className="space-y-1.5">
             {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="h-14 w-full rounded-lg" />
+              <Skeleton key={i} className="h-14 w-full rounded-none" />
             ))}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
-            {Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-52 w-full rounded-xl" />)}
+            {Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-52 w-full rounded-none" />)}
           </div>
         )
       ) : contacts.length === 0 ? (

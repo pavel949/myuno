@@ -383,7 +383,7 @@ export default function AdminLocationKnowledge() {
       {isLoading ? (
         <div className="space-y-3">
           {[1, 2, 3].map(i => (
-            <Skeleton key={i} className="h-24 rounded-lg" />
+            <Skeleton key={i} className="h-24 rounded-none" />
           ))}
         </div>
       ) : filteredSections.length === 0 ? (
@@ -430,7 +430,7 @@ export default function AdminLocationKnowledge() {
                         {sectionItems.map(item => (
                           <div 
                             key={item.id}
-                            className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-muted/30 transition-colors"
+                            className="flex items-center gap-3 p-3 rounded-none border bg-card hover:bg-muted/30 transition-colors"
                           >
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2">

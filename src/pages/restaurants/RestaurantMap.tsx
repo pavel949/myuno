@@ -139,7 +139,7 @@ export default function RestaurantMap() {
 
         {selected && (
           <div className="absolute bottom-4 left-4 right-4 z-20">
-            <div className="bg-card rounded-xl border shadow-lg p-4">
+            <div className="bg-card rounded-none border shadow-lg p-4">
               <div className="flex gap-3">
                 <img
                   src={
@@ -147,7 +147,7 @@ export default function RestaurantMap() {
                     'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400'
                   }
                   alt={language === 'ru' ? selected.name_ru : selected.name_en}
-                  className="w-20 h-20 rounded-lg object-cover"
+                  className="w-20 h-20 rounded-none object-cover"
                 />
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold truncate">
@@ -156,7 +156,7 @@ export default function RestaurantMap() {
                   <p className="text-sm text-muted-foreground">{selected.cuisine}</p>
                   <div className="flex items-center gap-2 mt-1">
                     <div className="flex items-center gap-1">
-                      <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                      <Star className="w-4 h-4 text-accent fill-accent" />
                       <span className="text-sm font-medium">{selected.rating}</span>
                     </div>
                     <Badge variant={selected.is_active ? 'default' : 'secondary'}>
@@ -188,7 +188,7 @@ export default function RestaurantMap() {
 
         <div className="absolute bottom-4 left-4 z-10">
           {!selected && (
-            <div className="bg-card/90 backdrop-blur-sm rounded-lg p-2 text-xs">
+            <div className="bg-card/90 backdrop-blur-sm rounded-none p-2 text-xs">
               <div className="flex items-center gap-2">
                 <span>🍽️</span>
                 <span className="text-muted-foreground">

@@ -96,7 +96,7 @@ export function OwnerKPISummary({ propertyId }: OwnerKPISummaryProps) {
         return (
           <Card key={card.label} variant="content" className="p-0">
             <CardContent className="p-3 flex items-center gap-3">
-              <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0", card.color)}>
+              <div className={cn("w-10 h-10 rounded-none flex items-center justify-center flex-shrink-0", card.color)}>
                 <Icon className="w-5 h-5" />
               </div>
               <div className="min-w-0">

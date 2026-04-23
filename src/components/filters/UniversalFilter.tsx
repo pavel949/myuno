@@ -63,7 +63,7 @@ function PriceLevelSelect({ value, onChange }: { value: string | null; onChange:
           key={level.id}
           onClick={() => onChange(value === level.id ? null : level.id)}
           className={cn(
-            "flex-1 py-2 rounded-lg text-sm font-medium border transition-colors",
+            "flex-1 py-2 rounded-none text-sm font-medium border transition-colors",
             value === level.id
               ? "bg-primary text-primary-foreground border-primary"
               : "bg-card border-border text-muted-foreground hover:border-primary/50"
@@ -94,7 +94,7 @@ function SingleSelectList({ options, value, onChange }: {
             key={option.id}
             onClick={() => onChange(isActive ? null : option.id)}
             className={cn(
-              "inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border transition-all",
+              "inline-flex items-center gap-1.5 px-3 py-2 rounded-none text-sm font-medium border transition-all",
               isActive
                 ? "bg-primary text-primary-foreground border-primary"
                 : "bg-card border-border text-foreground hover:border-primary/50"
@@ -136,7 +136,7 @@ function MultiSelectChips({ options, value, onChange }: {
             key={option.id}
             onClick={() => toggle(option.id)}
             className={cn(
-              "inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border transition-all",
+              "inline-flex items-center gap-1.5 px-3 py-2 rounded-none text-sm font-medium border transition-all",
               isActive
                 ? "bg-primary text-primary-foreground border-primary"
                 : "bg-card border-border text-foreground hover:border-primary/50"
@@ -184,7 +184,7 @@ function BedroomSelect({ value, onChange }: { value: string[]; onChange: (v: str
             key={option.id}
             onClick={() => toggle(option.id)}
             className={cn(
-              "flex-1 py-2.5 rounded-lg text-sm font-medium border transition-colors flex items-center justify-center gap-1",
+              "flex-1 py-2.5 rounded-none text-sm font-medium border transition-colors flex items-center justify-center gap-1",
               isActive
                 ? "bg-primary text-primary-foreground border-primary"
                 : "bg-card border-border text-foreground hover:border-primary/50"

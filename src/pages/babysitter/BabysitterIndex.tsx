@@ -151,7 +151,7 @@ export default function BabysitterIndex() {
                   className="cursor-pointer group"
                   onClick={() => navigate(`/babysitter/${bs.id}`)}
                 >
-                  <div className="relative aspect-[3/4] rounded-xl overflow-hidden mb-2">
+                  <div className="relative aspect-[3/4] rounded-none overflow-hidden mb-2">
                     <OptimizedImage
                       src={bs.image}
                       alt={name}

@@ -95,7 +95,7 @@ export function PriceDisplay({
 
       {/* Discount badge */}
       {hasDiscount && (
-        <span className="px-1.5 py-0.5 text-xs font-medium rounded bg-destructive/20 text-destructive">
+        <span className="px-1.5 py-0.5 text-xs font-medium rounded-none bg-destructive/20 text-destructive">
           -{discountPercent}%
         </span>
       )}

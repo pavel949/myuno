@@ -244,7 +244,7 @@ export function PropertyTeamTab({ propertyId }: PropertyTeamTabProps) {
             {pendingDelegates.map(delegate => (
               <div 
                 key={delegate.id} 
-                className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
+                className="flex items-center justify-between p-3 rounded-none bg-muted/50"
               >
                 <div className="flex items-center gap-3">
                   <Avatar className="h-8 w-8">
@@ -315,7 +315,7 @@ export function PropertyTeamTab({ propertyId }: PropertyTeamTabProps) {
               {activeDelegates.map(delegate => (
                 <div 
                   key={delegate.id} 
-                  className="flex items-center justify-between p-3 rounded-lg border"
+                  className="flex items-center justify-between p-3 rounded-none border"
                 >
                   <div className="flex items-center gap-3">
                     <Avatar>

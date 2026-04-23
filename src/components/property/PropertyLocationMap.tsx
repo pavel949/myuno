@@ -60,7 +60,7 @@ export function PropertyLocationMap({
         </h2>
       )}
 
-      <div className={cn('rounded-2xl overflow-hidden border border-border h-[300px] relative', showHeading && 'mb-3')}>
+      <div className={cn('rounded-none overflow-hidden border border-border h-[300px] relative', showHeading && 'mb-3')}>
         {noKey && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted/30 gap-3 p-4">
             <MapPin className="w-8 h-8 text-muted-foreground" />
@@ -112,7 +112,7 @@ export function PropertyLocationMap({
               href={googleMapsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs bg-background/95 hover:bg-background border border-border rounded-lg px-2 py-1.5 shadow-sm text-primary hover:underline"
+              className="text-xs bg-background/95 hover:bg-background border border-border rounded-none px-2 py-1.5 shadow-sm text-primary hover:underline"
             >
               {isRu ? 'Открыть в Google Картах' : 'Open in Google Maps'}
             </a>

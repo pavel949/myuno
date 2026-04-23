@@ -26,7 +26,7 @@ export function NbServicesSection() {
             to={service.path}
             className="nb-glass p-3.5 flex items-center gap-3 group hover:border-[hsl(var(--nb-gold)/0.5)] transition-all block"
           >
-            <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'hsl(var(--nb-gold) / 0.1)' }}>
+            <div className="w-9 h-9 rounded-none flex items-center justify-center flex-shrink-0" style={{ background: 'hsl(var(--nb-gold) / 0.1)' }}>
               <Icon className="w-4 h-4" style={{ color: 'hsl(var(--nb-gold))' }} />
             </div>
             <div className="flex-1 min-w-0">

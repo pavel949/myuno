@@ -489,7 +489,7 @@ export function CanonicalPropertyForm({
     <div className="flex flex-col h-full">
       {/* Provider Selector for Admin */}
       {providerSelector && (
-        <div className="p-4 bg-muted/50 rounded-lg border-2 border-dashed mb-4">
+        <div className="p-4 bg-muted/50 rounded-none border-2 border-dashed mb-4">
           {providerSelector}
         </div>
       )}

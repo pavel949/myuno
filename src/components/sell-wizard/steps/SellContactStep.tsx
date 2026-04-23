@@ -69,7 +69,7 @@ export function SellContactStep({ draft, onChange, onNext, onBack }: SellContact
         </div>
       </div>
       
-      <div className="flex items-center justify-between p-4 rounded-xl bg-muted/50">
+      <div className="flex items-center justify-between p-4 rounded-none bg-muted/50">
         <div className="flex items-center gap-3">
           {draft.show_phone ? (
             <Eye className="h-5 w-5 text-muted-foreground" />

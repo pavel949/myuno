@@ -46,7 +46,7 @@ export function OfflineEmergencyCard({ compact = false }: OfflineEmergencyCardPr
               key={item.phone}
               onClick={() => handleCall(item.phone)}
               className={cn(
-                "flex flex-col items-center gap-1 p-2.5 rounded-xl border border-transparent transition-all active:scale-95",
+                "flex flex-col items-center gap-1 p-2.5 rounded-none border border-transparent transition-all active:scale-95",
                 item.bg, "hover:border-current/20"
               )}
             >
@@ -66,7 +66,7 @@ export function OfflineEmergencyCard({ compact = false }: OfflineEmergencyCardPr
             <button
               key={c.phone}
               onClick={() => handleCall(c.phone)}
-              className="w-full flex items-center justify-between py-1.5 text-sm hover:bg-muted/30 rounded-lg px-2 transition-colors"
+              className="w-full flex items-center justify-between py-1.5 text-sm hover:bg-muted/30 rounded-none px-2 transition-colors"
             >
               <span className="text-muted-foreground text-xs">
                 {isRu ? c.labelRu : c.labelEn}

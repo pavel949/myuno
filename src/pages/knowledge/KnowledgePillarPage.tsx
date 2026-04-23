@@ -41,7 +41,7 @@ function renderMarkdownLite(content: string): React.ReactNode[] {
       return (
         <pre
           key={idx}
-          className="text-xs bg-muted/40 rounded-md p-3 my-3 overflow-x-auto font-mono"
+          className="text-xs bg-muted/40 rounded-none p-3 my-3 overflow-x-auto font-mono"
         >
           {block}
         </pre>
@@ -154,7 +154,7 @@ export default function KnowledgePillarPage() {
                       <Link
                         key={r.slug}
                         to={`/knowledge/pillars/${encodeURIComponent(param)}`}
-                        className="flex items-center justify-between rounded-lg border bg-card px-4 py-3 hover:bg-accent transition-colors"
+                        className="flex items-center justify-between rounded-none border bg-card px-4 py-3 hover:bg-accent transition-colors"
                       >
                         <span className="text-sm font-medium text-foreground">
                           {isRu ? r.h1_ru : r.h1_en}

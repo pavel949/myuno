@@ -8,7 +8,7 @@ export interface LanguageInfo {
   flag: string;
   nameEn: string;
   nameRu: string;
-  color: string; // Tailwind color class suffix (e.g., 'blue' for bg-blue-500)
+  color: string; // Tailwind color class suffix (e.g., 'blue' for bg-primary)
 }
 
 export const SUPPORTED_LANGUAGES: Record<string, LanguageInfo> = {

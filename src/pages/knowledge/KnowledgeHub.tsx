@@ -73,9 +73,9 @@ export default function KnowledgeHub() {
           <button
             type="button"
             onClick={() => navigate(APP_ROUTES.KNOWLEDGE_PILLARS)}
-            className="w-full text-left rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-card p-5 hover:border-primary/60 transition-colors flex items-center gap-4"
+            className="w-full text-left rounded-none border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-card p-5 hover:border-primary/60 transition-colors flex items-center gap-4"
           >
-            <div className="h-12 w-12 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
+            <div className="h-12 w-12 rounded-none bg-primary/15 flex items-center justify-center shrink-0">
               <Compass className="h-6 w-6 text-primary" />
             </div>
             <div className="flex-1 min-w-0">
@@ -101,7 +101,7 @@ export default function KnowledgeHub() {
           {isLoading ? (
             <div className="space-y-3">
               {[1, 2, 3, 4].map(i => (
-                <Skeleton key={i} className="h-20 w-full rounded-xl" />
+                <Skeleton key={i} className="h-20 w-full rounded-none" />
               ))}
             </div>
           ) : (

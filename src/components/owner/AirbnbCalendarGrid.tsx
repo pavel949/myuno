@@ -212,7 +212,7 @@ export function AirbnbCalendarGrid({ propertyId, properties = [] }: AirbnbCalend
         </div>
 
         {/* Calendar grid */}
-        <div className="border rounded-lg overflow-hidden">
+        <div className="border rounded-none overflow-hidden">
           {weeks.map((week, weekIdx) => {
             const spans = weekBookingSpans.get(weekIdx) || [];
 
@@ -325,8 +325,8 @@ export function AirbnbCalendarGrid({ propertyId, properties = [] }: AirbnbCalend
                             className={cn(
                               "absolute h-5 flex items-center px-1.5 text-[10px] font-medium cursor-pointer z-10",
                               "bg-primary/80 text-primary-foreground hover:bg-primary/90 transition-colors",
-                              span.isStart && "rounded-l-md ml-0.5",
-                              span.isEnd && "rounded-r-md mr-0.5",
+                              span.isStart && "rounded-none ml-0.5",
+                              span.isEnd && "rounded-none mr-0.5",
                               !span.isStart && !span.isEnd && "",
                             )}
                             style={{
@@ -385,7 +385,7 @@ export function AirbnbCalendarGrid({ propertyId, properties = [] }: AirbnbCalend
         {/* Legend */}
         <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground justify-center pt-1">
           <div className="flex items-center gap-1.5">
-            <div className="w-6 h-3 rounded bg-primary/80" />
+            <div className="w-6 h-3 rounded-none bg-primary/80" />
             <span>{isRu ? 'Гость' : 'Booked'}</span>
           </div>
           <div className="flex items-center gap-1.5">

@@ -61,7 +61,7 @@ export function GuestExtraFeesDisplay({ fees, className }: GuestExtraFeesDisplay
           : 'These items are not included in the booking total and are paid to the host based on actual usage.'}
       </p>
 
-      <ul className="divide-y divide-border/60 rounded-xl border border-border/60 overflow-hidden">
+      <ul className="divide-y divide-border/60 rounded-none border border-border/60 overflow-hidden">
         {parsed.map((fee) => {
           const preset = GUEST_FEE_KIND_PRESETS[fee.kind];
           const label = getFeeLabel(fee, isRu);

@@ -89,8 +89,8 @@ export const SavedAddressSelector: React.FC<SavedAddressSelectorProps> = ({
   if (isLoading) {
     return (
       <div className="animate-pulse space-y-3">
-        <div className="h-16 bg-muted rounded-xl" />
-        <div className="h-16 bg-muted rounded-xl" />
+        <div className="h-16 bg-muted rounded-none" />
+        <div className="h-16 bg-muted rounded-none" />
       </div>
     );
   }
@@ -111,7 +111,7 @@ export const SavedAddressSelector: React.FC<SavedAddressSelectorProps> = ({
             <div
               key={address.id}
               className={cn(
-                'relative flex items-start gap-3 p-4 rounded-xl border transition-colors cursor-pointer',
+                'relative flex items-start gap-3 p-4 rounded-none border transition-colors cursor-pointer',
                 selectedId === address.id
                   ? 'border-primary bg-primary/5'
                   : 'border-border hover:border-primary/50'

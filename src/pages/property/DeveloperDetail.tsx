@@ -40,9 +40,9 @@ export default function DeveloperDetail() {
   if (isLoading) {
     return (
       <div className="space-y-4 p-4">
-        <Skeleton className="h-24 rounded-xl" />
-        <Skeleton className="h-40 rounded-xl" />
-        <Skeleton className="h-60 rounded-xl" />
+        <Skeleton className="h-24 rounded-none" />
+        <Skeleton className="h-40 rounded-none" />
+        <Skeleton className="h-60 rounded-none" />
       </div>
     );
   }
@@ -101,16 +101,16 @@ export default function DeveloperDetail() {
 
       {/* Profile card */}
       <div className="px-4 -mt-12 relative z-10">
-        <div className="rounded-2xl border bg-card p-4 shadow-lg">
+        <div className="rounded-none border bg-card p-4 shadow-lg">
           <div className="flex items-start gap-4">
             {developer.logoUrl ? (
               <img
                 src={developer.logoUrl}
                 alt={name}
-                className="w-20 h-20 rounded-xl object-contain bg-muted flex-shrink-0 -mt-12 border-4 border-background"
+                className="w-20 h-20 rounded-none object-contain bg-muted flex-shrink-0 -mt-12 border-4 border-background"
               />
             ) : (
-              <div className="w-20 h-20 rounded-xl bg-muted flex items-center justify-center flex-shrink-0 -mt-12 border-4 border-background">
+              <div className="w-20 h-20 rounded-none bg-muted flex items-center justify-center flex-shrink-0 -mt-12 border-4 border-background">
                 <Building2 className="w-10 h-10 text-muted-foreground" />
               </div>
             )}
@@ -140,15 +140,15 @@ export default function DeveloperDetail() {
       <div className="px-4 py-4 pb-24 space-y-6">
         {/* Stats */}
         <div className="grid grid-cols-3 gap-3">
-          <div className="rounded-xl bg-muted/50 p-3 text-center">
+          <div className="rounded-none bg-muted/50 p-3 text-center">
             <div className="text-2xl font-bold text-primary">{developer.projectsCompleted}</div>
             <div className="text-xs text-muted-foreground">{isRu ? 'Проектов' : 'Projects'}</div>
           </div>
-          <div className="rounded-xl bg-muted/50 p-3 text-center">
+          <div className="rounded-none bg-muted/50 p-3 text-center">
             <div className="text-2xl font-bold">{developer.totalUnitsSold}</div>
             <div className="text-xs text-muted-foreground">{isRu ? 'Юнитов' : 'Units Sold'}</div>
           </div>
-          <div className="rounded-xl bg-muted/50 p-3 text-center">
+          <div className="rounded-none bg-muted/50 p-3 text-center">
             <div className="text-2xl font-bold inline-flex items-center justify-center gap-1">
               {developer.averageRating > 0 ? (
                 <>
@@ -178,7 +178,7 @@ export default function DeveloperDetail() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label={isRu ? `Сайт ${name}` : `${name} website`}
-              className="flex items-center gap-2 text-sm text-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+              className="flex items-center gap-2 text-sm text-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-none"
             >
               <Globe className="w-4 h-4" aria-hidden />
               {developer.website}
@@ -188,7 +188,7 @@ export default function DeveloperDetail() {
             <a
               href={`tel:${developer.phone}`}
               aria-label={isRu ? `Позвонить ${name}` : `Call ${name}`}
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-none"
             >
               <Phone className="w-4 h-4" aria-hidden />
               {developer.phone}
@@ -198,7 +198,7 @@ export default function DeveloperDetail() {
             <a
               href={`mailto:${developer.email}`}
               aria-label={isRu ? `Написать ${name}` : `Email ${name}`}
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-none"
             >
               <Mail className="w-4 h-4" aria-hidden />
               {developer.email}

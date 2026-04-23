@@ -60,7 +60,7 @@ export default function InsuranceIndex() {
       {/* Travel Insurance Promo Banner */}
       <div
         onClick={() => navigate('/insurance/travel')}
-        className="p-4 rounded-2xl bg-destructive/5 border border-destructive/20 cursor-pointer hover:border-destructive/40 transition-colors"
+        className="p-4 rounded-none bg-destructive/5 border border-destructive/20 cursor-pointer hover:border-destructive/40 transition-colors"
       >
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center shrink-0">
@@ -82,7 +82,7 @@ export default function InsuranceIndex() {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
           {[1,2,3].map(i => (
             <div key={i} className="space-y-2">
-              <Skeleton className="aspect-[4/3] rounded-xl" />
+              <Skeleton className="aspect-[4/3] rounded-none" />
               <Skeleton className="h-4 w-3/4" />
               <Skeleton className="h-3 w-1/2" />
             </div>
@@ -101,7 +101,7 @@ export default function InsuranceIndex() {
                   <div
                     key={plan.id}
                     onClick={() => navigate(`/insurance/plan/${plan.id}`)}
-                    className="bg-card border border-border rounded-xl p-4 cursor-pointer hover:border-primary/50 transition-colors [box-shadow:var(--shadow-elevation-1)]"
+                    className="bg-card border border-border rounded-none p-4 cursor-pointer hover:border-primary/50 transition-colors [box-shadow:var(--shadow-elevation-1)]"
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div>

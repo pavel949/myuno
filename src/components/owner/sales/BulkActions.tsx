@@ -42,7 +42,7 @@ const bulkStage = useBulkUpdateStage();
   };
 
   return (
-    <div className="flex items-center gap-2 p-3 rounded-xl border bg-primary/5 border-primary/30">
+    <div className="flex items-center gap-2 p-3 rounded-none border bg-primary/5 border-primary/30">
       <span className="text-sm font-medium shrink-0">
         {selectedIds.length} {isRu ? 'выбрано' : 'selected'}
       </span>

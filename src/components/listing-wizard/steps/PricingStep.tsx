@@ -74,7 +74,7 @@ export function PricingStep({ draft, onChange, onNext, onBack }: PricingStepProp
       </div>
       
       {draft.listing_type === 'property' && (
-        <div className="bg-muted/50 rounded-xl p-4">
+        <div className="bg-muted/50 rounded-none p-4">
           <p className="text-sm text-muted-foreground">
             {isRu 
               ? 'После одобрения вы сможете настроить сезонные цены, скидки за длительное проживание и специальные предложения.'

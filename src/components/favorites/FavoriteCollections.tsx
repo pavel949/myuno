@@ -40,11 +40,11 @@ interface Collection {
 }
 
 const defaultCollections: Collection[] = [
-  { id: 'all', name: 'Все избранное', icon: 'heart', color: 'from-red-500 to-pink-500', count: 0 },
-  { id: 'places', name: 'Места', icon: 'map-pin', color: 'from-blue-500 to-cyan-500', count: 0 },
-  { id: 'food', name: 'Еда', icon: 'utensils', color: 'from-orange-500 to-amber-500', count: 0 },
-  { id: 'stay', name: 'Жильё', icon: 'home', color: 'from-emerald-500 to-green-500', count: 0 },
-  { id: 'activities', name: 'Активности', icon: 'compass', color: 'from-purple-500 to-violet-500', count: 0 },
+  { id: 'all', name: 'Все избранное', icon: 'heart', color: 'from-red-500 to-accent', count: 0 },
+  { id: 'places', name: 'Места', icon: 'map-pin', color: 'from-primary to-primary', count: 0 },
+  { id: 'food', name: 'Еда', icon: 'utensils', color: 'from-accent to-accent', count: 0 },
+  { id: 'stay', name: 'Жильё', icon: 'home', color: 'from-success to-success', count: 0 },
+  { id: 'activities', name: 'Активности', icon: 'compass', color: 'from-primary to-primary', count: 0 },
 ];
 
 const iconMap: Record<string, React.ElementType> = {
@@ -217,7 +217,7 @@ export function FavoriteCollections({
             <div
               key={collection.id}
               className={cn(
-                "relative flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer",
+                "relative flex items-center gap-3 p-3 rounded-none border transition-all cursor-pointer",
                 isSelected 
                   ? "bg-primary/10 border-primary" 
                   : "bg-card hover:bg-muted/50"
@@ -225,7 +225,7 @@ export function FavoriteCollections({
               onClick={() => onSelectCollection(collection.id)}
             >
               <div className={cn(
-                "w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br",
+                "w-10 h-10 rounded-none flex items-center justify-center bg-gradient-to-br",
                 collection.color
               )}>
                 <Icon className="w-5 h-5 text-white" />

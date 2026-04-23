@@ -516,7 +516,7 @@ export function CanonicalListingWizard({
                     </button>
                     {index < WIZARD_STEPS.length - 1 && (
                       <div className={cn(
-                        'flex-1 h-0.5 rounded',
+                        'flex-1 h-0.5 rounded-none',
                         index < currentStep ? 'bg-primary' : 'bg-muted'
                       )} />
                     )}
@@ -734,7 +734,7 @@ function CategoryStep({ categories, selectedId, onSelect, isLocked, isRu }: Cate
           type="button"
           onClick={() => hasChildren ? toggleExpand(node.id) : onSelect(node.id)}
           className={cn(
-            'w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors',
+            'w-full flex items-center gap-3 p-3 rounded-none text-left transition-colors',
             'hover:bg-muted/50',
             isSelected && 'bg-primary/10 border border-primary',
             depth > 0 && 'ml-4'
@@ -796,7 +796,7 @@ function CategoryStep({ categories, selectedId, onSelect, isLocked, isRu }: Cate
         <button
           type="button"
           onClick={() => setShowSuggestionDialog(true)}
-          className="w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors hover:bg-warning/10 border border-dashed border-warning/30"
+          className="w-full flex items-center gap-3 p-3 rounded-none text-left transition-colors hover:bg-warning/10 border border-dashed border-warning/30"
         >
           <div className="p-2 rounded-full bg-warning/10">
             <Lightbulb className="h-4 w-4 text-warning" />
@@ -1103,7 +1103,7 @@ function PricingStep({ data, updateField, schema, errors, isRu }: PricingStepPro
                 type="button"
                 onClick={() => updateField('pricing_model', model)}
                 className={cn(
-                  'p-3 rounded-lg border text-sm transition-colors',
+                  'p-3 rounded-none border text-sm transition-colors',
                   data.pricing_model === model 
                     ? 'border-primary bg-primary/10' 
                     : 'hover:border-primary/50'
@@ -1146,7 +1146,7 @@ function PricingStep({ data, updateField, schema, errors, isRu }: PricingStepPro
               type="button"
               onClick={() => updateField('availability_type', type)}
               className={cn(
-                'w-full p-3 rounded-lg border text-left transition-colors',
+                'w-full p-3 rounded-none border text-left transition-colors',
                 data.availability_type === type 
                   ? 'border-primary bg-primary/10' 
                   : 'hover:border-primary/50'
@@ -1217,7 +1217,7 @@ function MediaStep({ data, updateField, setData, schema, errors, isRu }: MediaSt
       </div>
       
       {data.gallery.length > 0 && (
-        <div className="p-3 rounded-lg bg-muted/50 text-sm">
+        <div className="p-3 rounded-none bg-muted/50 text-sm">
           <p className="text-muted-foreground">
             {isRu 
               ? 'Первое фото будет использовано как обложка'
@@ -1295,7 +1295,7 @@ function PreviewStep({ data, updateField, category, allValidation, isRu }: Previ
                 key={i}
                 src={img}
                 alt=""
-                className="w-16 h-16 rounded-lg object-cover shrink-0"
+                className="w-16 h-16 rounded-none object-cover shrink-0"
               />
             ))}
           </div>
@@ -1304,7 +1304,7 @@ function PreviewStep({ data, updateField, category, allValidation, isRu }: Previ
       
       {/* Summary */}
       <div className="space-y-3">
-        <div className="p-3 rounded-lg border">
+        <div className="p-3 rounded-none border">
           <h4 className="text-sm font-medium mb-2">{isRu ? 'Детали' : 'Details'}</h4>
           <div className="grid grid-cols-2 gap-2 text-sm">
             <div className="text-muted-foreground">{isRu ? 'Категория' : 'Category'}</div>
@@ -1318,7 +1318,7 @@ function PreviewStep({ data, updateField, category, allValidation, isRu }: Previ
       </div>
       
       {/* Terms Acknowledgment */}
-      <div className="p-4 rounded-lg border bg-muted/30">
+      <div className="p-4 rounded-none border bg-muted/30">
         <div className="flex items-start gap-3">
           <Checkbox
             id="terms"

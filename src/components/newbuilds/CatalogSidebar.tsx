@@ -92,7 +92,7 @@ export function CatalogSidebar({ filters, onChange, facets, developers, activeCo
           placeholder="Search projects..."
           value={filters.q}
           onChange={e => onChange({ q: e.target.value })}
-          className="w-full pl-8 pr-3 py-2 rounded-lg text-xs"
+          className="w-full pl-8 pr-3 py-2 rounded-none text-xs"
           style={{
             background: 'hsl(var(--nb-bg))',
             border: '1px solid hsl(var(--nb-gold) / 0.15)',
@@ -219,7 +219,7 @@ function FilterSelect({
       <select
         value={value}
         onChange={e => onChange(e.target.value)}
-        className="w-full px-2.5 py-1.5 rounded-lg text-xs appearance-none cursor-pointer"
+        className="w-full px-2.5 py-1.5 rounded-none text-xs appearance-none cursor-pointer"
         style={{
           background: 'hsl(var(--nb-bg))',
           border: '1px solid hsl(var(--nb-gold) / 0.15)',

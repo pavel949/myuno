@@ -71,7 +71,7 @@ export function MyDayWidget({ deals }: MyDayWidgetProps) {
   if (totalItems === 0 && upcomingTasks.length === 0) return null;
 
   return (
-    <div className="rounded-xl border bg-card p-4 space-y-3">
+    <div className="rounded-none border bg-card p-4 space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Star className="h-5 w-5 text-warning" />
@@ -125,7 +125,7 @@ export function MyDayWidget({ deals }: MyDayWidgetProps) {
             <button
               key={d.id}
               onClick={() => navigate(`${APP_ROUTES.MC_SALES}/${d.id}`)}
-              className="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors text-left"
+              className="w-full flex items-center gap-2 p-2 rounded-none hover:bg-muted/50 transition-colors text-left"
             >
               <Flame className="h-3.5 w-3.5 text-warning shrink-0" />
               <div className="flex-1 min-w-0">
@@ -169,7 +169,7 @@ function TaskRow({ task, isRu, isOverdue, onComplete }: {
 
   return (
     <div className={cn(
-      'flex items-center gap-2 p-2 rounded-lg group transition-colors',
+      'flex items-center gap-2 p-2 rounded-none group transition-colors',
       isOverdue ? 'bg-destructive/5' : 'hover:bg-muted/30',
     )}>
       <Checkbox

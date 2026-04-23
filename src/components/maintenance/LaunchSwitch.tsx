@@ -92,7 +92,7 @@ export function LaunchSwitch({ className, variant = 'full' }: LaunchSwitchProps)
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       className={cn(
-        'rounded-2xl border-2 p-6',
+        'rounded-none border-2 p-6',
         isMaintenanceMode 
           ? 'bg-warning/10 border-warning' 
           : 'bg-success/10 border-success',
@@ -101,7 +101,7 @@ export function LaunchSwitch({ className, variant = 'full' }: LaunchSwitchProps)
     >
       <div className="flex items-start gap-4">
         <div className={cn(
-          'w-12 h-12 rounded-xl flex items-center justify-center',
+          'w-12 h-12 rounded-none flex items-center justify-center',
           isMaintenanceMode ? 'bg-warning/20' : 'bg-success/20'
         )}>
           <AnimatePresence mode="wait">

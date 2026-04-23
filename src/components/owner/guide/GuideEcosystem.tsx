@@ -127,9 +127,9 @@ export function GuideEcosystem() {
           {services.map((service) => (
             <div 
               key={service.labelEn}
-              className="flex flex-col items-center gap-2 p-3 rounded-xl bg-secondary/30 print:bg-muted/20"
+              className="flex flex-col items-center gap-2 p-3 rounded-none bg-secondary/30 print:bg-muted/20"
             >
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-none bg-primary/10 flex items-center justify-center">
                 <service.icon className="w-5 h-5 text-primary" />
               </div>
               <span className="text-xs text-center text-muted-foreground">
@@ -159,7 +159,7 @@ export function GuideEcosystem() {
           ))}
         </div>
 
-        <div className="mt-6 p-4 bg-secondary/30 rounded-xl">
+        <div className="mt-6 p-4 bg-secondary/30 rounded-none">
           <p className="text-sm text-muted-foreground">
             {isRu 
               ? 'Все партнёры проходят проверку документов, лицензий и отзывов. При проблемах — возврат денег или альтернатива.'

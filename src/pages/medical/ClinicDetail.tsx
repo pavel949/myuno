@@ -88,7 +88,7 @@ const ClinicDetail = () => {
           <div className="absolute bottom-4 left-4 right-4 flex gap-2 justify-center">
             {images.map((img, idx) => (
               <button key={idx} onClick={() => setSelectedImage(idx)}
-                className={`w-12 h-12 rounded-lg overflow-hidden border-2 ${selectedImage === idx ? 'border-primary' : 'border-white/50'}`}>
+                className={`w-12 h-12 rounded-none overflow-hidden border-2 ${selectedImage === idx ? 'border-primary' : 'border-white/50'}`}>
                 <img src={img} alt="" className="w-full h-full object-cover" />
               </button>
             ))}
@@ -96,7 +96,7 @@ const ClinicDetail = () => {
         )}
       </div>
 
-      <div className="flex-1 px-4 py-6 -mt-6 bg-background rounded-t-3xl relative z-10">
+      <div className="flex-1 px-4 py-6 -mt-6 bg-background rounded-none relative z-10">
         <div className="mb-4">
           <div className="flex items-start justify-between">
             <div>
@@ -108,12 +108,12 @@ const ClinicDetail = () => {
                     {language === 'ru' ? 'Аккредитован' : 'Accredited'}
                   </Badge>
                 )}
-                {clinic.is_24h && <Badge className="bg-green-500 text-xs">24/7</Badge>}
+                {clinic.is_24h && <Badge className="bg-success text-xs">24/7</Badge>}
               </div>
             </div>
             <div className="text-right">
               <div className="flex items-center gap-1">
-                <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                <Star className="w-5 h-5 fill-accent text-accent" />
                 <span className="font-bold">{clinic.rating}</span>
               </div>
               <p className="text-sm text-muted-foreground">{clinic.review_count} reviews</p>
@@ -167,7 +167,7 @@ const ClinicDetail = () => {
 
           <TabsContent value="doctors" className="mt-4 space-y-3">
             {doctors.length > 0 ? doctors.map((doctor) => (
-              <div key={doctor.id} className="flex items-center gap-4 p-3 bg-card rounded-xl border border-border"
+              <div key={doctor.id} className="flex items-center gap-4 p-3 bg-card rounded-none border border-border"
                 onClick={() => navigate(`/medical/appointment/${id}?doctor=${doctor.id}`)}>
                 {doctor.photo && (
                   <img src={doctor.photo} alt={doctor.name_en} className="w-14 h-14 rounded-full object-cover" />
@@ -189,7 +189,7 @@ const ClinicDetail = () => {
 
           <TabsContent value="services" className="mt-4 space-y-2">
             {services.length > 0 ? services.map((service) => (
-              <div key={service.id} className="flex items-center justify-between p-3 bg-card rounded-xl border border-border">
+              <div key={service.id} className="flex items-center justify-between p-3 bg-card rounded-none border border-border">
                 <span>{language === 'ru' ? service.name_ru : service.name_en}</span>
                 {service.price && <span className="font-semibold text-primary">฿{service.price.toLocaleString()}</span>}
               </div>

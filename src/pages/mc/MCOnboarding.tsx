@@ -238,7 +238,7 @@ const MCOnboarding: React.FC = () => {
           {step === 1 && (
             <motion.div key="step1" variants={stepVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.25 }}>
               <div className="text-center mb-6">
-                <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                <div className="w-14 h-14 rounded-none bg-primary/10 flex items-center justify-center mx-auto mb-3">
                   <Building2 className="h-7 w-7 text-primary" />
                 </div>
                 <h2 className="text-xl font-bold">{isRu ? 'О компании' : 'Company Details'}</h2>
@@ -296,7 +296,7 @@ const MCOnboarding: React.FC = () => {
           {step === 2 && (
             <motion.div key="step2" variants={stepVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.25 }}>
               <div className="text-center mb-6">
-                <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                <div className="w-14 h-14 rounded-none bg-primary/10 flex items-center justify-center mx-auto mb-3">
                   <Upload className="h-7 w-7 text-primary" />
                 </div>
                 <h2 className="text-xl font-bold">{isRu ? 'Логотип компании' : 'Company Logo'}</h2>
@@ -307,9 +307,9 @@ const MCOnboarding: React.FC = () => {
 
               <Card>
                 <CardContent className="pt-6">
-                  <label className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-xl p-8 cursor-pointer hover:border-primary/50 transition-colors">
+                  <label className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-none p-8 cursor-pointer hover:border-primary/50 transition-colors">
                     {logoPreview ? (
-                      <img src={logoPreview} alt="Logo preview" className="w-24 h-24 object-contain rounded-lg mb-3" />
+                      <img src={logoPreview} alt="Logo preview" className="w-24 h-24 object-contain rounded-none mb-3" />
                     ) : (
                       <Upload className="h-10 w-10 text-muted-foreground mb-3" />
                     )}
@@ -337,7 +337,7 @@ const MCOnboarding: React.FC = () => {
           {step === 3 && (
             <motion.div key="step3" variants={stepVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.25 }}>
               <div className="text-center mb-6">
-                <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                <div className="w-14 h-14 rounded-none bg-primary/10 flex items-center justify-center mx-auto mb-3">
                   <Users className="h-7 w-7 text-primary" />
                 </div>
                 <h2 className="text-xl font-bold">{isRu ? 'Пригласите команду' : 'Invite Your Team'}</h2>

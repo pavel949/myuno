@@ -275,7 +275,7 @@ export default function EditProfile() {
                             type="button"
                             onClick={() => field.onChange(lang.code)}
                             className={cn(
-                              'flex-1 py-3 px-4 rounded-lg border-2 transition-all',
+                              'flex-1 py-3 px-4 rounded-none border-2 transition-all',
                               'flex flex-col items-center gap-1',
                               field.value === lang.code
                                 ? 'border-primary bg-primary/10'
@@ -297,7 +297,7 @@ export default function EditProfile() {
             {/* Emergency Contact Section */}
             <SectionCard>
               <div className="flex items-center gap-2 mb-4">
-                <AlertTriangle className="w-4 h-4 text-amber-500" />
+                <AlertTriangle className="w-4 h-4 text-accent" />
                 <SectionTitle className="mb-0">{t.emergencyContact}</SectionTitle>
               </div>
               <p className="text-xs text-muted-foreground mb-4">{t.emergencyNote}</p>

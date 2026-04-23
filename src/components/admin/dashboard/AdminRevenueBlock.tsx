@@ -66,7 +66,7 @@ export function AdminRevenueBlock() {
         <span className="text-sm text-muted-foreground">GMV</span>
         {growth !== 0 && (
           <div className={cn(
-            "flex items-center gap-0.5 text-xs font-medium px-1.5 py-0.5 rounded",
+            "flex items-center gap-0.5 text-xs font-medium px-1.5 py-0.5 rounded-none",
             growth > 0 ? "text-success bg-success/10" : "text-destructive bg-destructive/10"
           )}>
             {growth > 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}

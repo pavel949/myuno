@@ -91,7 +91,7 @@ export function PostOrderReviewPrompt({
             </p>
             
             {showReferralCTA && rating >= 4 && (
-              <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 space-y-3">
+              <div className="bg-primary/5 border border-primary/20 rounded-none p-4 space-y-3">
                 <div className="flex items-center justify-center gap-2">
                   <Gift className="w-5 h-5 text-primary" />
                   <span className="font-medium text-sm">

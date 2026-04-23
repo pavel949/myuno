@@ -31,7 +31,7 @@ export const CrossSellCard = memo(function CrossSellCard({
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       onClick={handleClick}
-      className="flex flex-col items-center justify-center p-4 bg-card border border-border rounded-xl hover:shadow-lg hover:border-primary/30 transition-all duration-200 min-w-[100px] w-full"
+      className="flex flex-col items-center justify-center p-4 bg-card border border-border rounded-none hover:shadow-lg hover:border-primary/30 transition-all duration-200 min-w-[100px] w-full"
     >
       <IconBadge
         icon={link.icon}

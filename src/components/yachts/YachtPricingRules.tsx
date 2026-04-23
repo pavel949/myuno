@@ -210,7 +210,7 @@ export function YachtPricingRules({
         <CollapsibleContent>
           <CardContent className="space-y-4">
             {/* Base Prices */}
-            <div className="p-3 rounded-lg bg-muted/50 space-y-1">
+            <div className="p-3 rounded-none bg-muted/50 space-y-1">
               <p className="text-xs text-muted-foreground">
                 {isRu ? 'Базовые цены' : 'Base Prices'}
               </p>
@@ -233,13 +233,13 @@ export function YachtPricingRules({
                   <div 
                     key={rule.id}
                     className={cn(
-                      "flex items-center justify-between p-3 rounded-lg border",
+                      "flex items-center justify-between p-3 rounded-none border",
                       rule.is_active ? "bg-background" : "bg-muted/30 opacity-60"
                     )}
                   >
                     <div className="flex items-center gap-3 min-w-0 flex-1">
                       <div className={cn(
-                        "p-2 rounded-lg",
+                        "p-2 rounded-none",
                         rule.rule_type === 'season' && "bg-warning/10 text-warning",
                         rule.rule_type === 'day_of_week' && "bg-info/10 text-info",
                         rule.rule_type === 'special_event' && "bg-accent-purple/10 text-accent-purple"

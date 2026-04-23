@@ -58,7 +58,7 @@ export function OwnerFinanceTab({ propertyId }: OwnerFinanceTabProps) {
   };
 
   if (isLoading) {
-    return <div className="space-y-2">{[1, 2, 3].map(i => <div key={i} className="h-12 bg-muted animate-pulse rounded" />)}</div>;
+    return <div className="space-y-2">{[1, 2, 3].map(i => <div key={i} className="h-12 bg-muted animate-pulse rounded-none" />)}</div>;
   }
 
   if (financials.length === 0) {
@@ -150,7 +150,7 @@ export function OwnerFinanceTab({ propertyId }: OwnerFinanceTabProps) {
                     </div>
                   ) : (
                     <span className={cn(
-                      "text-[10px] px-1.5 py-0.5 rounded",
+                      "text-[10px] px-1.5 py-0.5 rounded-none",
                       f.approval_status === 'approved' && 'bg-success/10 text-success',
                       f.approval_status === 'rejected' && 'bg-destructive/10 text-destructive',
                       f.approval_status === 'auto_approved' && 'bg-muted text-muted-foreground',

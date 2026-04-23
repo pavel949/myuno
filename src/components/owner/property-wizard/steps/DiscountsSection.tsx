@@ -41,10 +41,10 @@ function DiscountsSectionInner({ formData, updateFormData }: DiscountsSectionPro
 
         <div className="grid gap-4">
           {/* Weekly discount */}
-          <div className="p-4 rounded-xl border bg-gradient-to-r from-info/5 to-transparent">
+          <div className="p-4 rounded-none border bg-gradient-to-r from-info/5 to-transparent">
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-lg bg-info/10 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-none bg-info/10 flex items-center justify-center">
                   <Calendar className="h-5 w-5 text-info" />
                 </div>
                 <div>
@@ -90,10 +90,10 @@ function DiscountsSectionInner({ formData, updateFormData }: DiscountsSectionPro
           </div>
 
           {/* Monthly discount */}
-          <div className="p-4 rounded-xl border bg-gradient-to-r from-success/5 to-transparent">
+          <div className="p-4 rounded-none border bg-gradient-to-r from-success/5 to-transparent">
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-lg bg-success/10 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-none bg-success/10 flex items-center justify-center">
                   <Sparkles className="h-5 w-5 text-success" />
                 </div>
                 <div>
@@ -140,7 +140,7 @@ function DiscountsSectionInner({ formData, updateFormData }: DiscountsSectionPro
         </div>
 
         {/* Recommendation */}
-        <div className="p-3 bg-muted/50 rounded-lg flex items-start gap-2">
+        <div className="p-3 bg-muted/50 rounded-none flex items-start gap-2">
           <Sparkles className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
           <p className="text-xs text-muted-foreground">
             {isRu 

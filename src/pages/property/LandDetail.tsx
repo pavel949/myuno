@@ -30,7 +30,7 @@ export default function LandDetail() {
     return (
       <div className={ECOSYSTEM_PAGE_CONTAINER}>
         <div className="px-4 pt-3"><BackButton /></div>
-        <Skeleton className="aspect-[16/9] mx-4 rounded-2xl mt-3" />
+        <Skeleton className="aspect-[16/9] mx-4 rounded-none mt-3" />
       </div>
     );
   }
@@ -69,7 +69,7 @@ export default function LandDetail() {
       <div className={ECOSYSTEM_PAGE_CONTAINER}>
         <div className="px-4 pt-3"><BackButton /></div>
 
-        <div className="relative aspect-[16/9] mx-4 mt-3 rounded-2xl overflow-hidden bg-muted">
+        <div className="relative aspect-[16/9] mx-4 mt-3 rounded-none overflow-hidden bg-muted">
           {cover ? (
             <img src={cover} alt={title} className="w-full h-full object-cover" />
           ) : (
@@ -79,12 +79,12 @@ export default function LandDetail() {
           )}
           <div className="absolute top-3 left-3 flex gap-1.5">
             <Badge className="bg-background/95 text-foreground backdrop-blur-sm">{typeLabel}</Badge>
-            <Badge className={isRent ? 'bg-blue-500/95 text-white' : 'bg-amber-500/95 text-white'}>
+            <Badge className={isRent ? 'bg-primary/95 text-white' : 'bg-accent/95 text-white'}>
               {isRent ? (isRu ? 'Аренда' : 'Rent') : isRu ? 'Продажа' : 'Sale'}
             </Badge>
           </div>
           {property.is_verified && (
-            <Badge className="absolute top-3 right-3 bg-emerald-500/95 text-white gap-1">
+            <Badge className="absolute top-3 right-3 bg-success/95 text-white gap-1">
               <BadgeCheck className="w-3 h-3" />
               {isRu ? 'Проверено' : 'Verified'}
             </Badge>
@@ -141,7 +141,7 @@ export default function LandDetail() {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-border bg-card p-3">
+    <div className="rounded-none border border-border bg-card p-3">
       <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</p>
       <p className="text-base font-bold text-foreground mt-0.5">{value}</p>
     </div>

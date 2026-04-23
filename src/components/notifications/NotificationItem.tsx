@@ -94,7 +94,7 @@ export function NotificationItem({ notification, onMarkRead, onDelete }: Notific
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: -100 }}
       className={cn(
-        "relative overflow-hidden rounded-xl border p-3 transition-all",
+        "relative overflow-hidden rounded-none border p-3 transition-all",
         !notification.is_read 
           ? "border-primary/30 bg-primary/5" 
           : "border-border bg-card",
@@ -104,7 +104,7 @@ export function NotificationItem({ notification, onMarkRead, onDelete }: Notific
     >
       <div className="flex items-start gap-3">
         {/* Icon */}
-        <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0", config.iconBg)}>
+        <div className={cn("w-10 h-10 rounded-none flex items-center justify-center flex-shrink-0", config.iconBg)}>
           <Icon className="w-5 h-5" />
         </div>
 
@@ -127,7 +127,7 @@ export function NotificationItem({ notification, onMarkRead, onDelete }: Notific
           </p>
 
           {notification.data?.promo_code && (
-            <code className="inline-block mt-1.5 text-[10px] font-mono bg-primary/10 text-primary px-2 py-0.5 rounded">
+            <code className="inline-block mt-1.5 text-[10px] font-mono bg-primary/10 text-primary px-2 py-0.5 rounded-none">
               {notification.data.promo_code}
             </code>
           )}

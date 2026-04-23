@@ -98,7 +98,7 @@ export function CheckInDetails({
         <div className="grid md:grid-cols-2 gap-3 md:gap-4 w-full min-w-0">
           <div className="grid grid-cols-2 gap-2 min-w-0">
             {checkIn && (
-              <div className="p-3 rounded-lg bg-primary/5 border border-primary/10 min-w-0">
+              <div className="p-3 rounded-none bg-primary/5 border border-primary/10 min-w-0">
                 <p className="text-xs text-muted-foreground mb-1">{isRu ? 'Заезд' : 'Check-in'}</p>
                 <p className="text-base font-semibold tabular-nums">{checkIn}</p>
                 {earlyCheckinPrice != null && earlyCheckinPrice > 0 && (
@@ -127,7 +127,7 @@ export function CheckInDetails({
               </div>
             )}
             {checkOut && (
-              <div className="p-3 rounded-lg bg-muted/30 border border-border/50 min-w-0">
+              <div className="p-3 rounded-none bg-muted/30 border border-border/50 min-w-0">
                 <p className="text-xs text-muted-foreground mb-1">{isRu ? 'Выезд' : 'Check-out'}</p>
                 <p className="text-base font-semibold tabular-nums">{checkOut}</p>
                 {lateCheckoutPrice != null && lateCheckoutPrice > 0 && (
@@ -170,7 +170,7 @@ export function CheckInDetails({
 
           <div className="min-w-0 flex flex-col gap-2">
             {keyHandover ? (
-              <div className="flex gap-2 p-3 rounded-lg bg-card border border-border/50 min-h-[4.5rem]">
+              <div className="flex gap-2 p-3 rounded-none bg-card border border-border/50 min-h-[4.5rem]">
                 <Key className="w-5 h-5 text-muted-foreground shrink-0 mt-0.5" />
                 <div className="min-w-0">
                   <p className="text-xs text-muted-foreground mb-0.5">{isRu ? 'Доступ / ключи' : 'Access'}</p>
@@ -182,7 +182,7 @@ export function CheckInDetails({
                 </div>
               </div>
             ) : (
-              <div className="p-3 rounded-lg border border-dashed border-border/60 text-xs text-muted-foreground min-h-[4.5rem] flex items-center">
+              <div className="p-3 rounded-none border border-dashed border-border/60 text-xs text-muted-foreground min-h-[4.5rem] flex items-center">
                 {isRu
                   ? 'Способ передачи ключей уточните у менеджера после бронирования.'
                   : 'Key handover details are confirmed with the manager after booking.'}
@@ -192,7 +192,7 @@ export function CheckInDetails({
         </div>
 
         {showPricingDeposit && (
-          <div className="flex items-start gap-2 rounded-lg bg-warning/5 border border-warning/15 px-3 py-2">
+          <div className="flex items-start gap-2 rounded-none bg-warning/5 border border-warning/15 px-3 py-2">
             <Info className="w-4 h-4 text-warning shrink-0 mt-0.5" />
             <div className="min-w-0 text-sm">
               <p className="font-medium text-foreground">{isRu ? 'Залог / депозит' : 'Security deposit'}</p>
@@ -244,7 +244,7 @@ export function CheckInDetails({
         )}
 
         {transfer && transfer.available && (
-          <div className="p-3 rounded-lg bg-primary/5 border border-primary/10">
+          <div className="p-3 rounded-none bg-primary/5 border border-primary/10">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 min-w-0">
                 <Car className="w-5 h-5 text-primary shrink-0" />
@@ -263,7 +263,7 @@ export function CheckInDetails({
         )}
 
         {manager && (manager.name || manager.phone) && (
-          <div className="p-3 rounded-lg bg-card border border-border/50">
+          <div className="p-3 rounded-none bg-card border border-border/50">
             <p className="text-sm font-medium mb-2">{isRu ? 'Менеджер' : 'Property manager'}</p>
             {manager.name && <p className="text-sm">{manager.name}</p>}
             <div className="flex flex-wrap items-center gap-3 mt-2">

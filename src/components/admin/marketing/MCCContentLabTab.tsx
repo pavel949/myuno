@@ -454,7 +454,7 @@ export function MCCContentLabTab() {
 
             {/* Error Message */}
             {generationError && (
-              <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+              <div className="p-3 rounded-none bg-destructive/10 text-destructive text-sm">
                 {generationError}
               </div>
             )}
@@ -483,7 +483,7 @@ export function MCCContentLabTab() {
               <div className="space-y-3 pt-4 border-t">
                 <p className="text-sm font-medium">{isRu ? 'Сгенерированные варианты:' : 'Generated Variants:'}</p>
                 {generatedVariants.map((variant) => (
-                  <div key={variant.index} className="p-3 rounded-lg bg-muted/50 relative group">
+                  <div key={variant.index} className="p-3 rounded-none bg-muted/50 relative group">
                     <Badge variant="outline" className="absolute top-2 left-2 text-xs">
                       #{variant.index}
                     </Badge>
@@ -534,7 +534,7 @@ export function MCCContentLabTab() {
                 {creatives.slice(0, 10).map((creative) => (
                   <div 
                     key={creative.id} 
-                    className="p-3 rounded-lg border hover:bg-muted/30 transition-colors group"
+                    className="p-3 rounded-none border hover:bg-muted/30 transition-colors group"
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1 min-w-0">
@@ -651,7 +651,7 @@ export function MCCContentLabTab() {
               onChange={(e) => setCreativeName(e.target.value)}
             />
             {selectedVariant && (
-              <div className="p-3 rounded-lg bg-muted/50 text-sm max-h-32 overflow-y-auto">
+              <div className="p-3 rounded-none bg-muted/50 text-sm max-h-32 overflow-y-auto">
                 {selectedVariant.content}
               </div>
             )}

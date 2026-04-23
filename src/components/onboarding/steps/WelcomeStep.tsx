@@ -70,7 +70,7 @@ export const WelcomeStep = forwardRef<HTMLDivElement, WelcomeStepProps>(
           initial={{ scale: 0, rotate: -180 }}
           animate={{ scale: 1, rotate: 0 }}
           transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.1 }}
-          className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-primary via-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/25"
+          className="w-20 h-20 mx-auto rounded-none bg-gradient-to-br from-primary via-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/25"
         >
           <StepIcon className="w-10 h-10 text-primary-foreground" />
         </motion.div>
@@ -106,9 +106,9 @@ export const WelcomeStep = forwardRef<HTMLDivElement, WelcomeStepProps>(
               <motion.div
                 key={index}
                 variants={itemVariants}
-                className="flex flex-col items-center gap-2 p-3 rounded-xl bg-card/50 backdrop-blur-sm border border-border/50 hover:border-primary/30 hover:bg-card/80 transition-all duration-200"
+                className="flex flex-col items-center gap-2 p-3 rounded-none bg-card/50 backdrop-blur-sm border border-border/50 hover:border-primary/30 hover:bg-card/80 transition-all duration-200"
               >
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-none bg-primary/10 flex items-center justify-center">
                   <IconComponent className="w-5 h-5 text-primary" />
                 </div>
                 <span className="text-xs font-medium text-foreground/80">
@@ -131,7 +131,7 @@ export const WelcomeStep = forwardRef<HTMLDivElement, WelcomeStepProps>(
               key={opt.code}
               onClick={() => setLanguage(opt.code)}
               className={cn(
-                "px-3 py-2 rounded-lg text-sm flex items-center gap-2 transition-all duration-200",
+                "px-3 py-2 rounded-none text-sm flex items-center gap-2 transition-all duration-200",
                 language === opt.code
                   ? "bg-primary text-primary-foreground shadow-md"
                   : "bg-muted hover:bg-muted/80"

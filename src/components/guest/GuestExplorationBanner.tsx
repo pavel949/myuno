@@ -39,7 +39,7 @@ export function GuestExplorationBanner({
       <div 
         className={cn(
           "fixed bottom-[calc(var(--bottom-nav-h)+1rem)] left-4 right-4 z-40 md:left-auto md:right-4 md:max-w-sm",
-          "bg-card/95 backdrop-blur-xl border border-border rounded-2xl shadow-lg",
+          "bg-card/95 backdrop-blur-xl border border-border rounded-none shadow-lg",
           "p-4 animate-in slide-in-from-bottom-4 duration-300",
           className
         )}
@@ -83,7 +83,7 @@ export function GuestExplorationBanner({
   return (
     <div 
       className={cn(
-        "bg-primary/5 border border-primary/20 rounded-xl p-3",
+        "bg-primary/5 border border-primary/20 rounded-none p-3",
         "flex items-center justify-between gap-3",
         className
       )}

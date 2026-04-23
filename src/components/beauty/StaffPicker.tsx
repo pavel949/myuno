@@ -52,7 +52,7 @@ export function StaffPicker({
       <div className={cn('space-y-3', className)}>
         <div className="flex gap-3 overflow-x-auto pb-2">
           {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="w-32 h-40 rounded-xl flex-shrink-0" />
+            <Skeleton key={i} className="w-32 h-40 rounded-none flex-shrink-0" />
           ))}
         </div>
       </div>
@@ -210,7 +210,7 @@ export function StaffPickerInline({
         type="button"
         onClick={() => onSelect(undefined)}
         className={cn(
-          'flex flex-col items-center gap-1 p-2 rounded-xl transition-all min-w-[60px]',
+          'flex flex-col items-center gap-1 p-2 rounded-none transition-all min-w-[60px]',
           !selectedId ? 'bg-primary/10' : 'hover:bg-muted'
         )}
       >
@@ -237,7 +237,7 @@ export function StaffPickerInline({
             type="button"
             onClick={() => onSelect(member.id)}
             className={cn(
-              'flex flex-col items-center gap-1 p-2 rounded-xl transition-all min-w-[60px]',
+              'flex flex-col items-center gap-1 p-2 rounded-none transition-all min-w-[60px]',
               isSelected ? 'bg-primary/10' : 'hover:bg-muted'
             )}
           >

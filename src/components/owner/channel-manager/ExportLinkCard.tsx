@@ -21,14 +21,14 @@ export function ExportLinkCard({ propertyId, propertyName, isRu }: ExportLinkCar
   };
 
   if (isLoading) {
-    return <div className="h-16 bg-muted animate-pulse rounded-lg" />;
+    return <div className="h-16 bg-muted animate-pulse rounded-none" />;
   }
 
   return (
     <Card>
       <CardContent className="p-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+          <div className="w-10 h-10 rounded-none bg-primary/10 flex items-center justify-center shrink-0">
             <Calendar className="h-5 w-5 text-primary" />
           </div>
           <div className="flex-1 min-w-0">

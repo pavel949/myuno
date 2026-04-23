@@ -84,7 +84,7 @@ export default function YachtDetail() {
         isFeatured={yacht.is_featured}
       />
 
-      <PageContainer className="-mt-4 relative z-10 bg-background rounded-t-3xl pt-6">
+      <PageContainer className="-mt-4 relative z-10 bg-background rounded-none pt-6">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -118,7 +118,7 @@ export default function YachtDetail() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.2 }}
-          className="grid grid-cols-2 xs:grid-cols-4 gap-3 p-4 bg-muted/50 rounded-xl mb-6"
+          className="grid grid-cols-2 xs:grid-cols-4 gap-3 p-4 bg-muted/50 rounded-none mb-6"
         >
           <QuickStat icon={Users} value={`${yacht.capacity}`} label={language === 'ru' ? 'гостей' : 'guests'} />
           <QuickStat icon={Ruler} value={yacht.length_meters ? `${yacht.length_meters}m` : '—'} label={language === 'ru' ? 'длина' : 'length'} />
@@ -228,7 +228,7 @@ function QuickStat({ icon: Icon, value, label }: { icon: React.ElementType; valu
 
 function SpecCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="p-3 bg-muted/50 rounded-lg">
+    <div className="p-3 bg-muted/50 rounded-none">
       <p className="text-xs text-muted-foreground">{label}</p>
       <p className="font-medium">{value}</p>
     </div>

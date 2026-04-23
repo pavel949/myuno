@@ -125,10 +125,10 @@ export default function Search() {
                       <AnimatedCard key={type}>
                         <button
                           onClick={() => setSelectedType(type)}
-                          className="w-full flex items-center gap-3 p-3 rounded-xl bg-card border border-border hover:border-primary/30 transition-all"
+                          className="w-full flex items-center gap-3 p-3 rounded-none bg-card border border-border hover:border-primary/30 transition-all"
                         >
                           <div className={cn(
-                            "w-10 h-10 rounded-lg flex items-center justify-center bg-gradient-to-br",
+                            "w-10 h-10 rounded-none flex items-center justify-center bg-gradient-to-br",
                             config.color
                           )}>
                             <Icon className="w-5 h-5 text-white" />
@@ -183,17 +183,17 @@ export default function Search() {
                       <AnimatedItem key={item.id}>
                         <div
                           onClick={() => navigate(item.path)}
-                          className="flex gap-3 p-3 rounded-xl bg-card border border-border hover:border-primary/30 transition-all cursor-pointer"
+                          className="flex gap-3 p-3 rounded-none bg-card border border-border hover:border-primary/30 transition-all cursor-pointer"
                         >
                           {item.image ? (
                             <img
                               src={item.image}
                               alt={isRu ? item.titleRu : item.titleEn}
-                              className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
+                              className="w-20 h-20 rounded-none object-cover flex-shrink-0"
                             />
                           ) : (
                             <div className={cn(
-                              "w-20 h-20 rounded-lg flex items-center justify-center bg-gradient-to-br flex-shrink-0",
+                              "w-20 h-20 rounded-none flex items-center justify-center bg-gradient-to-br flex-shrink-0",
                               config?.color || 'from-gray-500 to-gray-600'
                             )}>
                               <Icon className="w-8 h-8 text-white" />

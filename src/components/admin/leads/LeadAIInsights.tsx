@@ -124,7 +124,7 @@ export function LeadAIInsights({
             )}
 
             {aiRecommendedAction && (
-              <div className="bg-muted/50 rounded-md p-2">
+              <div className="bg-muted/50 rounded-none p-2">
                 <p className="text-sm font-medium">💡 Рекомендация:</p>
                 <p className="text-sm">{aiRecommendedAction}</p>
               </div>
@@ -168,7 +168,7 @@ export function LeadAIInsights({
             </div>
 
             {followUpMessage && (
-              <div className="bg-muted rounded-md p-3 mt-2">
+              <div className="bg-muted rounded-none p-3 mt-2">
                 <div className="flex justify-between items-start mb-2">
                   <span className="text-xs font-medium">Сообщение:</span>
                   <Button variant="ghost" size="sm" className="h-6 px-2" onClick={handleCopyMessage}>

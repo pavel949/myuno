@@ -163,13 +163,13 @@ export const ExitIntentModal = memo(function ExitIntentModal({
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-md z-[101]"
           >
-            <div className="bg-card rounded-2xl border border-border/50 shadow-2xl overflow-hidden">
+            <div className="bg-card rounded-none border border-border/50 shadow-2xl overflow-hidden">
               {/* Header with gradient */}
               <div className={cn(
                 "p-6 text-center relative",
                 vertical === 'investment' 
-                  ? "bg-gradient-to-br from-purple-500/20 via-violet-500/10 to-transparent"
-                  : "bg-gradient-to-br from-primary/20 via-amber-500/10 to-transparent"
+                  ? "bg-gradient-to-br from-primary/20 via-primary/10 to-transparent"
+                  : "bg-gradient-to-br from-primary/20 via-accent/10 to-transparent"
               )}>
                 <button
                   onClick={handleClose}
@@ -181,8 +181,8 @@ export const ExitIntentModal = memo(function ExitIntentModal({
                 <div className={cn(
                   "w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center",
                   vertical === 'investment' 
-                    ? "bg-gradient-to-br from-purple-500 to-violet-600"
-                    : "bg-gradient-to-br from-primary to-amber-500"
+                    ? "bg-gradient-to-br from-primary to-primary"
+                    : "bg-gradient-to-br from-primary to-accent"
                 )}>
                   <Gift className="w-8 h-8 text-white" />
                 </div>
@@ -204,11 +204,11 @@ export const ExitIntentModal = memo(function ExitIntentModal({
                   <span>{c.benefit1}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <Shield className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                  <Shield className="w-4 h-4 text-success flex-shrink-0" />
                   <span>{c.benefit2}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <Clock className="w-4 h-4 text-amber-500 flex-shrink-0" />
+                  <Clock className="w-4 h-4 text-accent flex-shrink-0" />
                   <span>{c.benefit3}</span>
                 </div>
               </div>
@@ -233,7 +233,7 @@ export const ExitIntentModal = memo(function ExitIntentModal({
                   className={cn(
                     "w-full h-12 font-semibold",
                     vertical === 'investment'
-                      ? "bg-gradient-to-r from-purple-500 to-violet-600 hover:from-purple-600 hover:to-violet-700"
+                      ? "bg-gradient-to-r from-primary to-primary hover:from-primary hover:to-primary"
                       : ""
                   )}
                 >

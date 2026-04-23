@@ -40,7 +40,7 @@ export function AIAgentStatusWidget() {
   });
 
   if (isLoading) {
-    return <Skeleton className="h-[120px] rounded-xl" />;
+    return <Skeleton className="h-[120px] rounded-none" />;
   }
 
   const hasErrors = (data?.errors24h || 0) > 0;

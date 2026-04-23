@@ -58,7 +58,7 @@ export function BookingsSection({ activeOrders, upcomingOrders }: BookingsSectio
                 return (
                   <div 
                     key={order.id}
-                    className="flex items-center gap-3 p-2.5 rounded-lg bg-success/10 border border-success/20"
+                    className="flex items-center gap-3 p-2.5 rounded-none bg-success/10 border border-success/20"
                   >
                     <div className="p-1.5 rounded-full bg-success/20">
                       <Users className="h-3.5 w-3.5 text-success" />
@@ -96,7 +96,7 @@ export function BookingsSection({ activeOrders, upcomingOrders }: BookingsSectio
                 return (
                   <div 
                     key={order.id}
-                    className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/50"
+                    className="flex items-center gap-3 p-2.5 rounded-none bg-muted/50"
                   >
                     <div className="p-1.5 rounded-full bg-primary/10">
                       <Calendar className="h-3.5 w-3.5 text-primary" />

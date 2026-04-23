@@ -226,7 +226,7 @@ const updateDeal = useUpdateDeal();
           {errors.client_email && <p className="text-xs text-destructive mt-1">{errors.client_email}</p>}
         </div>
       </div>
-      <div className="flex items-center justify-between rounded-lg border border-warning/30 bg-warning/5 px-3 py-2">
+      <div className="flex items-center justify-between rounded-none border border-warning/30 bg-warning/5 px-3 py-2">
         <div className="flex items-center gap-2">
           <Crown className="h-4 w-4 text-warning" />
           <Label htmlFor="deal-edit-vip" className="cursor-pointer">

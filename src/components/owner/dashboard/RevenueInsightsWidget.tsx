@@ -80,8 +80,8 @@ export function RevenueInsightsWidget() {
           <Skeleton className="h-5 w-40" />
         </CardHeader>
         <CardContent className="space-y-3">
-          <Skeleton className="h-16 w-full rounded-lg" />
-          <Skeleton className="h-16 w-full rounded-lg" />
+          <Skeleton className="h-16 w-full rounded-none" />
+          <Skeleton className="h-16 w-full rounded-none" />
         </CardContent>
       </Card>
     );
@@ -110,7 +110,7 @@ export function RevenueInsightsWidget() {
           const currSym = getCurrencySymbol(rec.currency || 'THB');
 
           return (
-            <div key={rec.id} className="p-3 rounded-lg border bg-card space-y-2">
+            <div key={rec.id} className="p-3 rounded-none border bg-card space-y-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   {isUp

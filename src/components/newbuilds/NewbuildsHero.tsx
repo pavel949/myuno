@@ -51,7 +51,7 @@ export function NewbuildsHero({
           {Icon && (
             <span
               aria-hidden
-              className="inline-flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-xl bg-primary/10 text-primary flex-shrink-0"
+              className="inline-flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-none bg-primary/10 text-primary flex-shrink-0"
             >
               <Icon className="w-5 h-5 md:w-6 md:h-6" />
             </span>

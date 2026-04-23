@@ -61,7 +61,7 @@ export function InlineTaskCreator({ companyId, contactId, dealId, onCreated }: P
   }
 
   return (
-    <div className="rounded-xl border bg-card p-4 space-y-3">
+    <div className="rounded-none border bg-card p-4 space-y-3">
       <Input
         placeholder={isRu ? 'Название задачи...' : 'Task title...'}
         value={title}

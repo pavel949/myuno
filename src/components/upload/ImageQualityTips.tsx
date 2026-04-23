@@ -188,7 +188,7 @@ export function ImageQualityTips({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
             className={cn(
-              "flex items-start gap-3 p-3 rounded-lg text-sm",
+              "flex items-start gap-3 p-3 rounded-none text-sm",
               tip.type === 'error' && "bg-destructive/10 text-destructive",
               tip.type === 'warning' && "bg-warning/10 text-warning",
               tip.type === 'success' && "bg-success/10 text-success",

@@ -502,7 +502,7 @@ export function LifeOSMappingsTab() {
                           }));
                         }}
                       />
-                      <span className={cn('text-xs px-2 py-1 rounded border', role.color)}>
+                      <span className={cn('text-xs px-2 py-1 rounded-none border', role.color)}>
                         {role.label}
                       </span>
                     </label>

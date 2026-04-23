@@ -174,7 +174,7 @@ export function IntakeFileUpload({
         onDragLeave={handleDragLeave}
         onClick={() => inputRef.current?.click()}
         className={cn(
-          "border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all",
+          "border-2 border-dashed rounded-none p-8 text-center cursor-pointer transition-all",
           isDragging 
             ? "border-primary bg-primary/10" 
             : "border-border hover:border-primary/50 hover:bg-muted/30",
@@ -212,7 +212,7 @@ export function IntakeFileUpload({
             return (
               <div
                 key={file.id}
-                className="relative group border rounded-lg overflow-hidden bg-card"
+                className="relative group border rounded-none overflow-hidden bg-card"
               >
                 {/* Preview */}
                 <div className="aspect-square flex items-center justify-center bg-muted/50">

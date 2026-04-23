@@ -104,7 +104,7 @@ export function ExperiencePricingEditor({ experienceId }: Props) {
       </div>
 
       {rows.map((row, idx) => (
-        <div key={idx} className="grid grid-cols-12 gap-2 items-end border rounded-lg p-2">
+        <div key={idx} className="grid grid-cols-12 gap-2 items-end border rounded-none p-2">
           <div className="col-span-3">
             <Label className="text-xs">Name</Label>
             <Input

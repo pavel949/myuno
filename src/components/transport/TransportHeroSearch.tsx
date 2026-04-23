@@ -58,11 +58,11 @@ export function TransportHeroSearch({ onSearch }: TransportHeroSearchProps) {
         </div>
 
         {/* Search Card */}
-        <div className="bg-white rounded-2xl p-4 md:p-6 shadow-2xl shadow-black/20">
+        <div className="bg-white rounded-none p-4 md:p-6 shadow-2xl shadow-black/20">
           {/* Main search row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {/* Location */}
-            <div className="flex items-center gap-3 min-h-11 p-3.5 rounded-xl bg-muted/50 border border-border/50">
+            <div className="flex items-center gap-3 min-h-11 p-3.5 rounded-none bg-muted/50 border border-border/50">
               <MapPin className="w-6 h-6 text-primary shrink-0" aria-hidden />
               <div className="flex-1 min-w-0">
                 <p className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
@@ -79,7 +79,7 @@ export function TransportHeroSearch({ onSearch }: TransportHeroSearchProps) {
               <PopoverTrigger asChild>
                 <button
                   type="button"
-                  className="flex items-center gap-3 min-h-11 p-3.5 rounded-xl bg-muted/50 border border-border/50 text-left hover:border-primary/50 transition-colors w-full"
+                  className="flex items-center gap-3 min-h-11 p-3.5 rounded-none bg-muted/50 border border-border/50 text-left hover:border-primary/50 transition-colors w-full"
                 >
                   <CalendarIcon className="w-6 h-6 text-primary shrink-0" aria-hidden />
                   <div className="flex-1 min-w-0">
@@ -116,7 +116,7 @@ export function TransportHeroSearch({ onSearch }: TransportHeroSearchProps) {
               <PopoverTrigger asChild>
                 <button
                   type="button"
-                  className="flex items-center gap-3 min-h-11 p-3.5 rounded-xl bg-muted/50 border border-border/50 text-left hover:border-primary/50 transition-colors w-full"
+                  className="flex items-center gap-3 min-h-11 p-3.5 rounded-none bg-muted/50 border border-border/50 text-left hover:border-primary/50 transition-colors w-full"
                 >
                   <CalendarIcon className="w-6 h-6 text-primary shrink-0" aria-hidden />
                   <div className="flex-1 min-w-0">
@@ -145,7 +145,7 @@ export function TransportHeroSearch({ onSearch }: TransportHeroSearchProps) {
 
             {/* Search button */}
             <Button
-              className="h-11 min-h-11 py-3 rounded-xl text-sm font-semibold gap-2 sm:col-span-2 lg:col-span-1"
+              className="h-11 min-h-11 py-3 rounded-none text-sm font-semibold gap-2 sm:col-span-2 lg:col-span-1"
               onClick={() => onSearch?.({
                 location: 'Phuket',
                 pickupDate: pickupDate ? pickupDate.toISOString() : '',

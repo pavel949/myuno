@@ -208,7 +208,7 @@ const AdminPharmacies = () => {
                   <img
                     src={pharmacy.cover_image}
                     alt={pharmacy.name_en}
-                    className="w-20 h-20 rounded-lg object-cover"
+                    className="w-20 h-20 rounded-none object-cover"
                   />
                 )}
                 <div className="flex-1 min-w-0">
@@ -218,15 +218,15 @@ const AdminPharmacies = () => {
                   <p className="text-sm text-muted-foreground truncate">{pharmacy.address}</p>
                   <div className="flex items-center gap-2 mt-2">
                     {pharmacy.is_24h && (
-                      <span className="text-xs bg-success/10 text-success px-2 py-0.5 rounded">24/7</span>
+                      <span className="text-xs bg-success/10 text-success px-2 py-0.5 rounded-none">24/7</span>
                     )}
                     {pharmacy.delivery_available && (
-                      <span className="text-xs bg-info/10 text-info px-2 py-0.5 rounded">
+                      <span className="text-xs bg-info/10 text-info px-2 py-0.5 rounded-none">
                         {language === 'en' ? 'Delivery' : 'Доставка'}
                       </span>
                     )}
                     {!pharmacy.is_active && (
-                      <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded">
+                      <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-none">
                         {language === 'en' ? 'Inactive' : 'Неактивно'}
                       </span>
                     )}

@@ -104,7 +104,7 @@ const GymDetail = () => {
               <button
                 key={idx}
                 onClick={() => setSelectedImage(idx)}
-                className={`w-12 h-12 rounded-lg overflow-hidden border-2 ${selectedImage === idx ? 'border-primary' : 'border-white/50'}`}
+                className={`w-12 h-12 rounded-none overflow-hidden border-2 ${selectedImage === idx ? 'border-primary' : 'border-white/50'}`}
               >
                 <img src={img} alt="" className="w-full h-full object-cover" />
               </button>
@@ -114,7 +114,7 @@ const GymDetail = () => {
       </div>
 
       {/* Content */}
-      <div className="flex-1 px-4 py-6 -mt-6 bg-background rounded-t-3xl relative z-10">
+      <div className="flex-1 px-4 py-6 -mt-6 bg-background rounded-none relative z-10">
         <div className="mb-4">
           <div className="flex items-start justify-between">
             <div>
@@ -160,7 +160,7 @@ const GymDetail = () => {
                 <button
                   key={price.type}
                   onClick={() => setSelectedPrice(price)}
-                  className={`p-3 rounded-xl border text-center transition-all ${
+                  className={`p-3 rounded-none border text-center transition-all ${
                     currentPrice?.type === price.type ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/30'
                   }`}
                 >

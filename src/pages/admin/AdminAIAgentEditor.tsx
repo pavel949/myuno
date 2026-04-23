@@ -509,7 +509,7 @@ export default function AdminAIAgentEditor() {
                   {versions.map((knowledge) => (
                     <div 
                       key={knowledge.id}
-                      className={`p-4 rounded-lg border ${knowledge.is_published ? 'border-primary bg-primary/5' : ''}`}
+                      className={`p-4 rounded-none border ${knowledge.is_published ? 'border-primary bg-primary/5' : ''}`}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">

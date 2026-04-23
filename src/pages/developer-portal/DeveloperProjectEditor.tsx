@@ -32,7 +32,7 @@ const DOC_TYPES = ['brochure', 'floorplan', 'permit', 'contract', 'presentation'
 
 const STATUS_BADGE: Record<string, string> = {
   available: 'bg-[hsl(var(--nb-gold)/0.15)] text-[hsl(var(--nb-gold))]',
-  reserved: 'bg-amber-500/15 text-amber-400',
+  reserved: 'bg-accent/15 text-accent',
   sold: 'bg-[hsl(var(--nb-muted)/0.15)] text-[hsl(var(--nb-muted))]',
 };
 
@@ -60,7 +60,7 @@ function UnitModal({ initial, projectId, onClose }: {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/60">
-      <div className="w-full max-w-lg nb-glass rounded-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div className="w-full max-w-lg nb-glass rounded-none p-6 space-y-4 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-2">
           <h3 className="nb-display text-lg text-[hsl(var(--nb-text))]">{initial?.id ? 'Редактировать юнит' : 'Добавить юнит'}</h3>
           <button onClick={onClose} className="text-[hsl(var(--nb-muted))] hover:text-[hsl(var(--nb-text))]">✕</button>
@@ -69,7 +69,7 @@ function UnitModal({ initial, projectId, onClose }: {
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="nb-label mb-1.5 block">Тип *</label>
-            <select value={form.unit_type || ''} onChange={e => u('unit_type', e.target.value)} className="w-full rounded-md bg-[hsl(var(--nb-bg))] border border-[hsl(var(--nb-glass-border))] px-3 py-2 text-sm text-[hsl(var(--nb-text))]">
+            <select value={form.unit_type || ''} onChange={e => u('unit_type', e.target.value)} className="w-full rounded-none bg-[hsl(var(--nb-bg))] border border-[hsl(var(--nb-glass-border))] px-3 py-2 text-sm text-[hsl(var(--nb-text))]">
               {UNIT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
             </select>
           </div>
@@ -99,7 +99,7 @@ function UnitModal({ initial, projectId, onClose }: {
           </div>
           <div>
             <label className="nb-label mb-1.5 block">Валюта</label>
-            <select value={form.currency || 'THB'} onChange={e => u('currency', e.target.value)} className="w-full rounded-md bg-[hsl(var(--nb-bg))] border border-[hsl(var(--nb-glass-border))] px-3 py-2 text-sm text-[hsl(var(--nb-text))]">
+            <select value={form.currency || 'THB'} onChange={e => u('currency', e.target.value)} className="w-full rounded-none bg-[hsl(var(--nb-bg))] border border-[hsl(var(--nb-glass-border))] px-3 py-2 text-sm text-[hsl(var(--nb-text))]">
               {CURRENCIES.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
@@ -109,7 +109,7 @@ function UnitModal({ initial, projectId, onClose }: {
           </div>
           <div>
             <label className="nb-label mb-1.5 block">Статус</label>
-            <select value={form.status || 'available'} onChange={e => u('status', e.target.value)} className="w-full rounded-md bg-[hsl(var(--nb-bg))] border border-[hsl(var(--nb-glass-border))] px-3 py-2 text-sm text-[hsl(var(--nb-text))]">
+            <select value={form.status || 'available'} onChange={e => u('status', e.target.value)} className="w-full rounded-none bg-[hsl(var(--nb-bg))] border border-[hsl(var(--nb-glass-border))] px-3 py-2 text-sm text-[hsl(var(--nb-text))]">
               {UNIT_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
@@ -122,7 +122,7 @@ function UnitModal({ initial, projectId, onClose }: {
 
         <div>
           <label className="nb-label mb-1.5 block">Заметки</label>
-          <textarea value={form.notes || ''} onChange={e => u('notes', e.target.value)} rows={2} className="w-full rounded-md bg-[hsl(var(--nb-bg))] border border-[hsl(var(--nb-glass-border))] px-3 py-2 text-sm text-[hsl(var(--nb-text))]" />
+          <textarea value={form.notes || ''} onChange={e => u('notes', e.target.value)} rows={2} className="w-full rounded-none bg-[hsl(var(--nb-bg))] border border-[hsl(var(--nb-glass-border))] px-3 py-2 text-sm text-[hsl(var(--nb-text))]" />
         </div>
 
         <div className="flex gap-3 justify-end pt-2">
@@ -160,7 +160,7 @@ function UpdateModal({ initial, projectId, onClose }: {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/60">
-      <div className="w-full max-w-lg nb-glass rounded-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div className="w-full max-w-lg nb-glass rounded-none p-6 space-y-4 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-2">
           <h3 className="nb-display text-lg text-[hsl(var(--nb-text))]">{initial?.id ? 'Редактировать обновление' : 'Новое обновление'}</h3>
           <button onClick={onClose} className="text-[hsl(var(--nb-muted))] hover:text-[hsl(var(--nb-text))]">✕</button>
@@ -172,7 +172,7 @@ function UpdateModal({ initial, projectId, onClose }: {
         </div>
         <div>
           <label className="nb-label mb-1.5 block">Текст</label>
-          <textarea value={form.content || ''} onChange={e => u('content', e.target.value)} rows={4} className="w-full rounded-md bg-[hsl(var(--nb-bg))] border border-[hsl(var(--nb-glass-border))] px-3 py-2 text-sm text-[hsl(var(--nb-text))]" />
+          <textarea value={form.content || ''} onChange={e => u('content', e.target.value)} rows={4} className="w-full rounded-none bg-[hsl(var(--nb-bg))] border border-[hsl(var(--nb-glass-border))] px-3 py-2 text-sm text-[hsl(var(--nb-text))]" />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
@@ -208,8 +208,8 @@ function DocRow({ doc, onDelete }: { doc: { id: string; title: string; document_
         <p className="text-sm text-[hsl(var(--nb-text))] truncate">{doc.title}</p>
         <p className="text-xs text-[hsl(var(--nb-muted))]">{doc.file_name || doc.document_type}</p>
       </div>
-      <span className="text-xs px-2 py-0.5 rounded bg-[hsl(var(--nb-glass-bg))] text-[hsl(var(--nb-muted))]">{doc.document_type}</span>
-      {doc.is_sensitive ? <Lock className="w-3.5 h-3.5 text-amber-400" /> : <Unlock className="w-3.5 h-3.5 text-[hsl(var(--nb-muted))]" />}
+      <span className="text-xs px-2 py-0.5 rounded-none bg-[hsl(var(--nb-glass-bg))] text-[hsl(var(--nb-muted))]">{doc.document_type}</span>
+      {doc.is_sensitive ? <Lock className="w-3.5 h-3.5 text-accent" /> : <Unlock className="w-3.5 h-3.5 text-[hsl(var(--nb-muted))]" />}
       {doc.file_url && <a href={doc.file_url} target="_blank" rel="noopener noreferrer" className="text-[hsl(var(--nb-gold))] hover:underline text-xs">Открыть</a>}
       <button onClick={onDelete} className="text-[hsl(var(--nb-muted))] hover:text-red-400 transition-colors"><Trash2 className="w-4 h-4" /></button>
     </div>
@@ -379,14 +379,14 @@ export default function DeveloperProjectEditor() {
       </div>
 
       <Tabs defaultValue="основное">
-        <TabsList className="flex flex-wrap gap-1 mb-6 bg-[hsl(var(--nb-surface))] border border-[hsl(var(--nb-glass-border))] p-1 rounded-xl h-auto">
+        <TabsList className="flex flex-wrap gap-1 mb-6 bg-[hsl(var(--nb-surface))] border border-[hsl(var(--nb-glass-border))] p-1 rounded-none h-auto">
           {(['основное', 'медиа', 'описание', 'инвентарь', 'мастер-план', 'документы', 'прогресс', 'микросайт', 'превью'] as const).map(tab => (
             <TabsTrigger
               key={tab}
               value={tab}
               disabled={isNewProject && ['инвентарь', 'мастер-план', 'документы', 'прогресс', 'микросайт', 'превью'].includes(tab)}
               className={cn(
-                'capitalize text-sm px-3 py-1.5 rounded-lg transition-all',
+                'capitalize text-sm px-3 py-1.5 rounded-none transition-all',
                 'data-[state=active]:bg-[hsl(var(--nb-gold)/0.15)] data-[state=active]:text-[hsl(var(--nb-gold))]',
                 'text-[hsl(var(--nb-muted))] disabled:opacity-40 disabled:cursor-not-allowed'
               )}
@@ -415,7 +415,7 @@ export default function DeveloperProjectEditor() {
             </div>
             <div>
               <label className="nb-label mb-2 block">Район</label>
-              <select value={form.location_area} onChange={e => update('location_area', e.target.value)} className="w-full rounded-md bg-[hsl(var(--nb-bg))] border border-[hsl(var(--nb-glass-border))] px-3 py-2 text-sm text-[hsl(var(--nb-text))]">
+              <select value={form.location_area} onChange={e => update('location_area', e.target.value)} className="w-full rounded-none bg-[hsl(var(--nb-bg))] border border-[hsl(var(--nb-glass-border))] px-3 py-2 text-sm text-[hsl(var(--nb-text))]">
                 <option value="">Выберите район</option>
                 {AREAS.map(a => <option key={a} value={a}>{a}</option>)}
               </select>
@@ -452,7 +452,7 @@ export default function DeveloperProjectEditor() {
                         : [...form.unit_types, t];
                       update('unit_types', arr);
                     }}
-                    className={cn('px-3 py-1.5 rounded-lg text-sm border transition-all', form.unit_types.includes(t)
+                    className={cn('px-3 py-1.5 rounded-none text-sm border transition-all', form.unit_types.includes(t)
                       ? 'bg-[hsl(var(--nb-gold)/0.15)] border-[hsl(var(--nb-gold)/0.4)] text-[hsl(var(--nb-gold))]'
                       : 'border-[hsl(var(--nb-glass-border))] text-[hsl(var(--nb-muted))]')}
                   >{t}</button>
@@ -461,7 +461,7 @@ export default function DeveloperProjectEditor() {
             </div>
             <div>
               <label className="nb-label mb-2 block">Статус</label>
-              <select value={form.project_status} onChange={e => update('project_status', e.target.value)} className="w-full rounded-md bg-[hsl(var(--nb-bg))] border border-[hsl(var(--nb-glass-border))] px-3 py-2 text-sm text-[hsl(var(--nb-text))]">
+              <select value={form.project_status} onChange={e => update('project_status', e.target.value)} className="w-full rounded-none bg-[hsl(var(--nb-bg))] border border-[hsl(var(--nb-glass-border))] px-3 py-2 text-sm text-[hsl(var(--nb-text))]">
                 <option value="under_construction">Строится</option>
                 <option value="completed">Сдан</option>
                 <option value="upcoming">Скоро</option>
@@ -493,11 +493,11 @@ export default function DeveloperProjectEditor() {
           <div className="nb-glass p-6 space-y-5">
             <div>
               <label className="nb-label mb-2 block">Description (EN)</label>
-              <textarea value={form.description_en} onChange={e => update('description_en', e.target.value)} rows={7} className="w-full rounded-md bg-[hsl(var(--nb-bg))] border border-[hsl(var(--nb-glass-border))] px-3 py-2 text-sm text-[hsl(var(--nb-text))]" />
+              <textarea value={form.description_en} onChange={e => update('description_en', e.target.value)} rows={7} className="w-full rounded-none bg-[hsl(var(--nb-bg))] border border-[hsl(var(--nb-glass-border))] px-3 py-2 text-sm text-[hsl(var(--nb-text))]" />
             </div>
             <div>
               <label className="nb-label mb-2 block">Описание (RU)</label>
-              <textarea value={form.description_ru} onChange={e => update('description_ru', e.target.value)} rows={7} className="w-full rounded-md bg-[hsl(var(--nb-bg))] border border-[hsl(var(--nb-glass-border))] px-3 py-2 text-sm text-[hsl(var(--nb-text))]" />
+              <textarea value={form.description_ru} onChange={e => update('description_ru', e.target.value)} rows={7} className="w-full rounded-none bg-[hsl(var(--nb-bg))] border border-[hsl(var(--nb-glass-border))] px-3 py-2 text-sm text-[hsl(var(--nb-text))]" />
             </div>
             <div>
               <label className="nb-label mb-2 block">Прогресс строительства: {form.construction_progress}%</label>
@@ -603,7 +603,7 @@ export default function DeveloperProjectEditor() {
                   onUploaded={(signedUrl, fileName) => handleDocumentUploaded(signedUrl, fileName)}
                 />
               ) : !pendingDoc ? null : (
-                <div className="border border-[hsl(var(--nb-gold)/0.3)] rounded-xl p-4 space-y-3 bg-[hsl(var(--nb-gold)/0.05)]">
+                <div className="border border-[hsl(var(--nb-gold)/0.3)] rounded-none p-4 space-y-3 bg-[hsl(var(--nb-gold)/0.05)]">
                   <p className="text-sm text-[hsl(var(--nb-text-secondary))]">Загружен: <span className="text-[hsl(var(--nb-text))]">{pendingDoc.name}</span></p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
@@ -612,7 +612,7 @@ export default function DeveloperProjectEditor() {
                     </div>
                     <div>
                       <label className="nb-label mb-1.5 block">Тип</label>
-                      <select value={docForm.document_type} onChange={e => setDocForm(p => ({ ...p, document_type: e.target.value }))} className="w-full rounded-md bg-[hsl(var(--nb-bg))] border border-[hsl(var(--nb-glass-border))] px-3 py-2 text-sm text-[hsl(var(--nb-text))]">
+                      <select value={docForm.document_type} onChange={e => setDocForm(p => ({ ...p, document_type: e.target.value }))} className="w-full rounded-none bg-[hsl(var(--nb-bg))] border border-[hsl(var(--nb-glass-border))] px-3 py-2 text-sm text-[hsl(var(--nb-text))]">
                         {DOC_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
                       </select>
                     </div>
@@ -666,7 +666,7 @@ export default function DeveloperProjectEditor() {
               </div>
 
               {/* Progress slider */}
-              <div className="p-4 rounded-xl bg-[hsl(var(--nb-glass-bg))] border border-[hsl(var(--nb-glass-border))]">
+              <div className="p-4 rounded-none bg-[hsl(var(--nb-glass-bg))] border border-[hsl(var(--nb-glass-border))]">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm text-[hsl(var(--nb-text-secondary))]">Текущий прогресс</span>
                   <span className="nb-mono text-[hsl(var(--nb-gold))]">{form.construction_progress}%</span>
@@ -686,7 +686,7 @@ export default function DeveloperProjectEditor() {
               ) : (
                 <div className="space-y-3">
                   {updates.map(upd => (
-                    <div key={upd.id} className="p-4 rounded-xl border border-[hsl(var(--nb-glass-border))] bg-[hsl(var(--nb-glass-bg))]">
+                    <div key={upd.id} className="p-4 rounded-none border border-[hsl(var(--nb-glass-border))] bg-[hsl(var(--nb-glass-bg))]">
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
@@ -733,7 +733,7 @@ export default function DeveloperProjectEditor() {
                 Открыть публичную страницу
               </a>
               {existing && !existing.is_approved && (
-                <p className="text-xs text-amber-400 mt-2">⏳ Проект ожидает проверки — пока недоступен в каталоге</p>
+                <p className="text-xs text-accent mt-2">⏳ Проект ожидает проверки — пока недоступен в каталоге</p>
               )}
             </div>
           )}

@@ -86,7 +86,7 @@ export default function AdminLifeOS() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-primary/10">
+          <div className="p-2 rounded-none bg-primary/10">
             <Sparkles className="w-6 h-6 text-primary" />
           </div>
           <div>

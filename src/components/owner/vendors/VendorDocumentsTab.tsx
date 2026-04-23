@@ -68,7 +68,7 @@ export function VendorDocumentsTab({ vendorId, docSource = 'vendor' }: VendorDoc
     return 'valid';
   };
 
-  if (isLoading) return <div className="animate-pulse h-24 bg-muted rounded-lg" />;
+  if (isLoading) return <div className="animate-pulse h-24 bg-muted rounded-none" />;
 
   return (
     <div className="space-y-3">
@@ -93,7 +93,7 @@ export function VendorDocumentsTab({ vendorId, docSource = 'vendor' }: VendorDoc
             const status = getExpiryStatus(doc.expiry_date);
             const typeLabel = VENDOR_DOC_TYPES.find(t => t.value === doc.doc_type);
             return (
-              <div key={doc.id} className="flex items-center justify-between p-3 rounded-lg border">
+              <div key={doc.id} className="flex items-center justify-between p-3 rounded-none border">
                 <div className="flex items-center gap-3 min-w-0">
                   <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
                   <div className="min-w-0">

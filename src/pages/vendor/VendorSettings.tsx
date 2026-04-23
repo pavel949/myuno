@@ -101,7 +101,7 @@ const VendorSettings = () => {
                     <button
                       onClick={item.action}
                       disabled={!item.action}
-                      className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors text-left disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full flex items-center gap-3 p-3 rounded-none hover:bg-muted/50 transition-colors text-left disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                         <item.icon className="h-5 w-5 text-primary" />

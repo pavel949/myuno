@@ -312,10 +312,10 @@ export default function AdminActivities() {
                       <img 
                         src={activity.cover_image} 
                         alt={activity.title_en}
-                        className="w-20 h-20 rounded-lg object-cover"
+                        className="w-20 h-20 rounded-none object-cover"
                       />
                     ) : (
-                      <div className="w-20 h-20 rounded-lg bg-muted flex items-center justify-center">
+                      <div className="w-20 h-20 rounded-none bg-muted flex items-center justify-center">
                         <Waves className="h-8 w-8 text-muted-foreground" />
                       </div>
                     )}
@@ -398,7 +398,7 @@ export default function AdminActivities() {
 
             <div className="space-y-4 py-4">
               {/* Provider Selection */}
-              <div className="p-4 bg-muted/50 rounded-lg border-2 border-dashed">
+              <div className="p-4 bg-muted/50 rounded-none border-2 border-dashed">
                 <ProviderSelector
                   value={formData.provider_id}
                   onChange={(id) => setFormData(prev => ({ ...prev, provider_id: id }))}

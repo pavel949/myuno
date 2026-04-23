@@ -129,7 +129,7 @@ export default function CapitalContacts() {
           </Button>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700">
+              <Button size="sm" className="bg-success hover:bg-success">
                 <Plus className="w-4 h-4 mr-1" /> Добавить
               </Button>
             </DialogTrigger>
@@ -230,7 +230,7 @@ export default function CapitalContacts() {
                   <Label>Заметки</Label>
                   <Input value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
                 </div>
-                <Button onClick={handleCreate} className="bg-emerald-600 hover:bg-emerald-700" disabled={createContact.isPending}>
+                <Button onClick={handleCreate} className="bg-success hover:bg-success" disabled={createContact.isPending}>
                   {createContact.isPending ? 'Сохранение...' : 'Создать'}
                 </Button>
               </div>
@@ -280,7 +280,7 @@ export default function CapitalContacts() {
           Контактов пока нет. Добавьте первого!
         </div>
       ) : (
-        <div className="rounded-lg border border-border/50 overflow-x-auto">
+        <div className="rounded-none border border-border/50 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border/50 bg-muted/30">

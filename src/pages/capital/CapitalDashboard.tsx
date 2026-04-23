@@ -51,7 +51,7 @@ export default function CapitalDashboard() {
     <div className="p-4 md:p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold">Дашборд</h1>
-        <Badge className="bg-emerald-500/20 text-emerald-400">Ignatev Capital</Badge>
+        <Badge className="bg-success/20 text-success">Ignatev Capital</Badge>
       </div>
 
       {/* KPI Cards */}
@@ -60,11 +60,11 @@ export default function CapitalDashboard() {
           <div
             key={kpi.label}
             onClick={() => navigate(kpi.path)}
-            className="rounded-lg border border-border/50 p-4 hover:border-emerald-500/30 transition-colors cursor-pointer"
+            className="rounded-none border border-border/50 p-4 hover:border-success/40/30 transition-colors cursor-pointer"
           >
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                <kpi.icon className="w-4 h-4 text-emerald-500" />
+              <div className="w-8 h-8 rounded-none bg-success/10 flex items-center justify-center">
+                <kpi.icon className="w-4 h-4 text-success" />
               </div>
             </div>
             <p className="text-2xl font-bold">{kpi.value}</p>
@@ -75,20 +75,20 @@ export default function CapitalDashboard() {
 
       {/* Today */}
       <div
-        className="rounded-lg border border-border/50 p-4 hover:border-emerald-500/30 transition-colors cursor-pointer"
+        className="rounded-none border border-border/50 p-4 hover:border-success/40/30 transition-colors cursor-pointer"
         onClick={() => navigate('/capital/outreach')}
       >
         <div className="flex items-center justify-between">
           <div>
             <h2 className="font-medium">Касания на сегодня</h2>
-            <p className="text-3xl font-bold text-emerald-500 mt-1">{stats.todayTouchesCount}</p>
+            <p className="text-3xl font-bold text-success mt-1">{stats.todayTouchesCount}</p>
           </div>
           <ArrowRight className="w-5 h-5 text-muted-foreground" />
         </div>
       </div>
 
       {/* Pipeline Funnel */}
-      <div className="rounded-lg border border-border/50 p-4">
+      <div className="rounded-none border border-border/50 p-4">
         <h2 className="font-medium mb-4 flex items-center gap-2">
           <KanbanSquare className="w-4 h-4" /> Воронка
         </h2>
@@ -123,7 +123,7 @@ export default function CapitalDashboard() {
           <div
             key={link.path}
             onClick={() => navigate(link.path)}
-            className="rounded-lg border border-border/30 p-3 text-center hover:border-emerald-500/30 transition-colors cursor-pointer"
+            className="rounded-none border border-border/30 p-3 text-center hover:border-success/40/30 transition-colors cursor-pointer"
           >
             <link.icon className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
             <p className="text-sm">{link.label}</p>

@@ -79,7 +79,7 @@ export function WorkspaceHomeBanner() {
   return (
     <div
       className={cn(
-        'mb-4 flex w-full max-w-3xl flex-col gap-3 rounded-xl border border-border/60 bg-muted/40 px-4 py-3 mx-auto',
+        'mb-4 flex w-full max-w-3xl flex-col gap-3 rounded-none border border-border/60 bg-muted/40 px-4 py-3 mx-auto',
         'sm:flex-row sm:items-center sm:justify-between'
       )}
       role="region"

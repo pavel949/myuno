@@ -142,7 +142,7 @@ export function CloudStoragePicker({
                 </p>
               </div>
               
-              <div className="bg-muted/50 rounded-lg p-4 text-sm text-left space-y-2">
+              <div className="bg-muted/50 rounded-none p-4 text-sm text-left space-y-2">
                 <p className="font-medium">Как импортировать:</p>
                 <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
                   <li>Откройте нужный файл в Google Drive</li>
@@ -174,7 +174,7 @@ export function CloudStoragePicker({
                 </p>
               </div>
               
-              <div className="bg-muted/50 rounded-lg p-4 text-sm text-left space-y-2">
+              <div className="bg-muted/50 rounded-none p-4 text-sm text-left space-y-2">
                 <p className="font-medium">Как импортировать:</p>
                 <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
                   <li>Откройте файл в Dropbox</li>

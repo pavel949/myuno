@@ -31,7 +31,7 @@ export function AdminFormToolbar({
   const isRu = language === 'ru';
 
   return (
-    <div className="flex items-center justify-between gap-3 p-3 bg-muted/50 rounded-lg border mb-4">
+    <div className="flex items-center justify-between gap-3 p-3 bg-muted/50 rounded-none border mb-4">
       {/* Progress indicator */}
       <div className="flex items-center gap-2 flex-1 min-w-0">
         <Progress value={progress} className="h-2 flex-1" />

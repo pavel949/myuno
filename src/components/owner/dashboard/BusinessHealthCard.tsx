@@ -9,8 +9,8 @@ import { Activity, AlertTriangle, CheckCircle2 } from 'lucide-react';
 
 function PillarBar({ pillar, isRu }: { pillar: HealthPillar; isRu: boolean }) {
   const colors = {
-    good: 'bg-emerald-500',
-    warning: 'bg-amber-500',
+    good: 'bg-success',
+    warning: 'bg-accent',
     critical: 'bg-destructive',
   };
 
@@ -53,8 +53,8 @@ export function BusinessHealthCard() {
     );
   }
 
-  const scoreColor = score >= 70 ? 'text-emerald-600' : score >= 40 ? 'text-amber-600' : 'text-destructive';
-  const progressColor = score >= 70 ? '[&>div]:bg-emerald-500' : score >= 40 ? '[&>div]:bg-amber-500' : '[&>div]:bg-destructive';
+  const scoreColor = score >= 70 ? 'text-success' : score >= 40 ? 'text-accent' : 'text-destructive';
+  const progressColor = score >= 70 ? '[&>div]:bg-success' : score >= 40 ? '[&>div]:bg-accent' : '[&>div]:bg-destructive';
 
   return (
     <Card className="overflow-hidden">
@@ -84,7 +84,7 @@ export function BusinessHealthCard() {
             </Badge>
           )}
           {onTrackCount > 0 && (
-            <Badge variant="secondary" className="text-xs gap-1 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+            <Badge variant="secondary" className="text-xs gap-1 bg-success/10 text-success dark:bg-success/30 dark:text-success">
               <CheckCircle2 className="h-3 w-3" />
               {onTrackCount} {isRu ? 'в норме' : 'on track'}
             </Badge>

@@ -365,7 +365,7 @@ const queryClient = useQueryClient();
 
       {/* Workspace badge */}
       <div className="flex items-center gap-2 mb-4">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/8 text-primary">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-primary/8 text-primary">
           <Building2 className="h-4 w-4" />
           <span className="text-sm font-medium">{isRu ? 'Рабочее место УК' : 'MC Workspace'}</span>
         </div>
@@ -632,7 +632,7 @@ const queryClient = useQueryClient();
               <button
                 type="button"
                 onClick={() => setShowInactiveSection(!showInactiveSection)}
-                className="w-full flex items-center gap-2 p-4 text-left hover:bg-muted/30 transition-colors rounded-t-lg"
+                className="w-full flex items-center gap-2 p-4 text-left hover:bg-muted/30 transition-colors rounded-none"
               >
                 {showInactiveSection ? <ChevronDown className="h-4 w-4 shrink-0" /> : <ChevronRight className="h-4 w-4 shrink-0" />}
                 <Archive className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -693,7 +693,7 @@ const queryClient = useQueryClient();
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 80, opacity: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed bottom-[calc(var(--bottom-nav-h)+1rem)] left-1/2 -translate-x-1/2 z-50 bg-card border border-border rounded-2xl shadow-lg px-4 py-3 flex items-center gap-2 max-w-[95vw] overflow-x-auto"
+            className="fixed bottom-[calc(var(--bottom-nav-h)+1rem)] left-1/2 -translate-x-1/2 z-50 bg-card border border-border rounded-none shadow-lg px-4 py-3 flex items-center gap-2 max-w-[95vw] overflow-x-auto"
           >
             <span className="text-sm font-medium text-foreground whitespace-nowrap mr-1">
               {selectedIds.size}

@@ -135,15 +135,15 @@ export function GuideRoadmap() {
         <Card className="bg-card border-border mb-6">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
-              <span className="px-2 py-1 bg-primary text-primary-foreground rounded text-sm">2025</span>
+              <span className="px-2 py-1 bg-primary text-primary-foreground rounded-none text-sm">2025</span>
               {isRu ? 'Автоматизация и Guest Experience' : 'Automation & Guest Experience'}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid md:grid-cols-2 gap-4">
               {roadmap2025.map((item) => (
-                <div key={item.titleEn} className="flex items-start gap-3 p-3 bg-secondary/30 rounded-lg">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <div key={item.titleEn} className="flex items-start gap-3 p-3 bg-secondary/30 rounded-none">
+                  <div className="w-10 h-10 rounded-none bg-primary/10 flex items-center justify-center flex-shrink-0">
                     <item.icon className="w-5 h-5 text-primary" />
                   </div>
                   <div className="flex-1">
@@ -167,15 +167,15 @@ export function GuideRoadmap() {
         <Card className="bg-card border-border">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
-              <span className="px-2 py-1 bg-secondary text-foreground rounded text-sm">2026</span>
+              <span className="px-2 py-1 bg-secondary text-foreground rounded-none text-sm">2026</span>
               {isRu ? 'Масштабирование и инновации' : 'Scaling & Innovation'}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid md:grid-cols-2 gap-4">
               {roadmap2026.map((item) => (
-                <div key={item.titleEn} className="flex items-start gap-3 p-3 bg-secondary/30 rounded-lg">
-                  <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                <div key={item.titleEn} className="flex items-start gap-3 p-3 bg-secondary/30 rounded-none">
+                  <div className="w-10 h-10 rounded-none bg-muted flex items-center justify-center flex-shrink-0">
                     <item.icon className="w-5 h-5 text-muted-foreground" />
                   </div>
                   <div className="flex-1">

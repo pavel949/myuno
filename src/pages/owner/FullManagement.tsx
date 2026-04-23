@@ -189,7 +189,7 @@ export default function FullManagement() {
         <Card className="mb-6 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-3 rounded-2xl bg-primary/20">
+              <div className="p-3 rounded-none bg-primary/20">
                 <Sparkles className="w-8 h-8 text-primary" />
               </div>
               <div>
@@ -238,7 +238,7 @@ export default function FullManagement() {
           ].map((benefit, idx) => (
             <Card key={idx}>
               <CardContent className="flex items-center gap-3 p-3">
-                <div className="p-2 rounded-lg bg-primary/10">
+                <div className="p-2 rounded-none bg-primary/10">
                   <benefit.icon className="w-4 h-4 text-primary" />
                 </div>
                 <span className="font-medium text-sm">
@@ -307,7 +307,7 @@ export default function FullManagement() {
             {SERVICES.map((service) => (
               <label 
                 key={service.value}
-                className="flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors hover:bg-muted/50"
+                className="flex items-start gap-3 p-3 rounded-none border cursor-pointer transition-colors hover:bg-muted/50"
               >
                 <Checkbox
                   checked={formData.services_requested.includes(service.value)}

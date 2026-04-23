@@ -155,8 +155,8 @@ export function DataBackupSettings() {
               const Icon = cat.icon;
               const isExporting = exportingType === cat.type;
               return (
-                <div key={cat.type} className="flex items-center gap-3 p-3 rounded-lg border border-border">
-                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                <div key={cat.type} className="flex items-center gap-3 p-3 rounded-none border border-border">
+                  <div className="w-8 h-8 rounded-none bg-primary/10 flex items-center justify-center shrink-0">
                     <Icon className="h-4 w-4 text-primary" />
                   </div>
                   <div className="flex-1 min-w-0">

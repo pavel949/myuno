@@ -81,7 +81,7 @@ export default function KnowledgePillarsIndex() {
         {isLoading ? (
           <div className="space-y-3">
             {[1, 2, 3, 4].map((i) => (
-              <Skeleton key={i} className="h-24 w-full rounded-xl" />
+              <Skeleton key={i} className="h-24 w-full rounded-none" />
             ))}
           </div>
         ) : !pillars || pillars.length === 0 ? (

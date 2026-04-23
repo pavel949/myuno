@@ -80,7 +80,7 @@ export default function SalesDealDetail() {
     return (
       <div className="p-4 space-y-4 max-w-lg mx-auto">
         <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-24 w-full rounded-xl" />
+        <Skeleton className="h-24 w-full rounded-none" />
       </div>
     );
   }
@@ -217,7 +217,7 @@ export default function SalesDealDetail() {
       </div>
 
       {/* Client info */}
-      <div className="border rounded-xl p-4 bg-card space-y-2">
+      <div className="border rounded-none p-4 bg-card space-y-2">
         <div className="flex items-center gap-2 flex-wrap">
           <h1 className="text-lg font-bold">{deal.client_name}</h1>
           {deal.priority > 0 && <DealPriorityStars priority={deal.priority} size="md" />}
@@ -242,7 +242,7 @@ export default function SalesDealDetail() {
         </div>
 
         {deal.property_project_id && linkedProject && (
-          <div className="flex items-start gap-2 mt-2 rounded-lg border bg-muted/40 px-3 py-2 text-sm">
+          <div className="flex items-start gap-2 mt-2 rounded-none border bg-muted/40 px-3 py-2 text-sm">
             <Building2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
             <div>
               <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
@@ -289,7 +289,7 @@ export default function SalesDealDetail() {
       </div>
 
       {/* Deal-type brief */}
-      <div className="border rounded-xl p-4 bg-card space-y-3">
+      <div className="border rounded-none p-4 bg-card space-y-3">
         <div>
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{typeEyebrow}</p>
           <p className="text-sm text-muted-foreground mt-1">
@@ -298,13 +298,13 @@ export default function SalesDealDetail() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           {typeFacts.map((fact) => (
-            <div key={fact.key} className="rounded-lg border bg-background/70 px-3 py-2">
+            <div key={fact.key} className="rounded-none border bg-background/70 px-3 py-2">
               <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{fact.label}</p>
               <p className="text-sm font-medium mt-1 break-words">{fact.value}</p>
             </div>
           ))}
         </div>
-        <div className="rounded-lg border bg-muted/30 px-3 py-2 text-sm text-muted-foreground">
+        <div className="rounded-none border bg-muted/30 px-3 py-2 text-sm text-muted-foreground">
           <span className="font-medium text-foreground">{isRu ? 'Контекст:' : 'Context:'}</span> {typeNote}
           {deal.deal_value && (
             <span className="block mt-1 text-success">
@@ -323,7 +323,7 @@ export default function SalesDealDetail() {
       </div>
 
       {/* Stage bar */}
-      <div className="border rounded-xl p-4 bg-card">
+      <div className="border rounded-none p-4 bg-card">
         <p className="text-xs font-medium text-muted-foreground mb-2">{isRu ? 'Этап сделки' : 'Deal Stage'}</p>
         <DealStageBar currentStage={deal.stage} onStageClick={!isClosed ? handleStageChange : undefined} />
         {deal.stage === 'closed_won' && deal.won_reason && (
@@ -375,13 +375,13 @@ export default function SalesDealDetail() {
       <DealScheduledActivities dealId={deal.id} companyId={deal.company_id} />
 
       {/* Property matching */}
-      <div className="border rounded-xl p-4 bg-card">
+      <div className="border rounded-none p-4 bg-card">
         <p className="text-sm font-medium mb-3">{isRu ? 'Подходящие объекты' : 'Matching Properties'}</p>
         <PropertyMatching deal={deal} />
       </div>
 
       {/* Quick actions: add activity */}
-      <div className="space-y-3 border rounded-xl p-4 bg-card">
+      <div className="space-y-3 border rounded-none p-4 bg-card">
         <p className="text-sm font-medium">{isRu ? 'Добавить активность' : 'Add Activity'}</p>
         <div className="flex gap-2">
           <Select value={activityType} onValueChange={setActivityType}>

@@ -54,9 +54,9 @@ export interface LeaderboardEntry {
 
 export const LEVEL_CONFIG = [
   { level: 1, name_en: 'Rookie', name_ru: 'Новичок', min_points: 0, color: 'text-gray-500' },
-  { level: 2, name_en: 'Specialist', name_ru: 'Специалист', min_points: 500, color: 'text-blue-500' },
-  { level: 3, name_en: 'Professional', name_ru: 'Профи', min_points: 2000, color: 'text-purple-500' },
-  { level: 4, name_en: 'Expert', name_ru: 'Эксперт', min_points: 5000, color: 'text-amber-500' },
+  { level: 2, name_en: 'Specialist', name_ru: 'Специалист', min_points: 500, color: 'text-primary' },
+  { level: 3, name_en: 'Professional', name_ru: 'Профи', min_points: 2000, color: 'text-primary' },
+  { level: 4, name_en: 'Expert', name_ru: 'Эксперт', min_points: 5000, color: 'text-accent' },
   { level: 5, name_en: 'Legend', name_ru: 'Легенда', min_points: 10000, color: 'text-red-500' },
 ];
 

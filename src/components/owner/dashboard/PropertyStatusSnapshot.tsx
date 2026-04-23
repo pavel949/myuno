@@ -43,8 +43,8 @@ export function PropertyStatusSnapshot() {
     return (
       <div className="space-y-3">
         <Skeleton className="h-6 w-48" />
-        <Skeleton className="h-24 w-full rounded-xl" />
-        <Skeleton className="h-24 w-full rounded-xl" />
+        <Skeleton className="h-24 w-full rounded-none" />
+        <Skeleton className="h-24 w-full rounded-none" />
       </div>
     );
   }

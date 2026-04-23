@@ -148,23 +148,23 @@ function HubCardGrid({
           key={to + titleKey}
           to={to}
           className={cn(
-            'group flex flex-col rounded-2xl border p-5 shadow-sm transition-all',
+            'group flex flex-col rounded-none border p-5 shadow-sm transition-all',
             highlight
-              ? 'border-amber-500/40 bg-gradient-to-br from-amber-500/5 to-card hover:border-amber-500/70 hover:shadow-md'
+              ? 'border-accent/40/40 bg-gradient-to-br from-accent/5 to-card hover:border-accent/40/70 hover:shadow-md'
               : 'border-border/60 bg-card hover:border-primary/40 hover:shadow-md'
           )}
         >
           <div className="flex items-start gap-3">
             <div
               className={cn(
-                'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl',
-                highlight ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400' : 'bg-primary/10 text-primary'
+                'flex h-10 w-10 shrink-0 items-center justify-center rounded-none',
+                highlight ? 'bg-accent/15 text-accent dark:text-accent' : 'bg-primary/10 text-primary'
               )}
             >
               <Icon className="h-5 w-5" />
             </div>
             <div className="min-w-0 flex-1">
-              <span className={cn('font-semibold leading-snug transition-colors', highlight ? 'group-hover:text-amber-600 dark:group-hover:text-amber-400' : 'group-hover:text-primary')}>
+              <span className={cn('font-semibold leading-snug transition-colors', highlight ? 'group-hover:text-accent dark:group-hover:text-accent' : 'group-hover:text-primary')}>
                 {t(titleKey)}
               </span>
               <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
@@ -189,9 +189,9 @@ function CapitalPersonaPrompt({
   isToggling: boolean;
 }) {
   return (
-    <div className="rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/5 via-card to-card p-5 shadow-sm">
+    <div className="rounded-none border border-accent/40/30 bg-gradient-to-br from-accent/5 via-card to-card p-5 shadow-sm">
       <div className="flex items-start gap-3 mb-4">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-none bg-accent/15 text-accent dark:text-accent">
           <Sparkles className="h-5 w-5" />
         </div>
         <div className="min-w-0 flex-1">
@@ -209,7 +209,7 @@ function CapitalPersonaPrompt({
           variant="outline"
           onClick={() => onEnable('business')}
           disabled={isToggling}
-          className="gap-1.5 border-amber-500/30 hover:border-amber-500/60 hover:bg-amber-500/10"
+          className="gap-1.5 border-accent/40/30 hover:border-accent/40/60 hover:bg-accent/10"
         >
           <Briefcase className="h-3.5 w-3.5" />
           {t('propertyHub.landing.personaPrompt.enableBusiness')}
@@ -219,7 +219,7 @@ function CapitalPersonaPrompt({
           variant="outline"
           onClick={() => onEnable('investor')}
           disabled={isToggling}
-          className="gap-1.5 border-amber-500/30 hover:border-amber-500/60 hover:bg-amber-500/10"
+          className="gap-1.5 border-accent/40/30 hover:border-accent/40/60 hover:bg-accent/10"
         >
           <TrendingUp className="h-3.5 w-3.5" />
           {t('propertyHub.landing.personaPrompt.enableInvestor')}
@@ -271,7 +271,7 @@ export default function PropertyLanding() {
             </h2>
             <Badge
               variant="outline"
-              className="border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-400 text-[10px] font-semibold tracking-wide uppercase px-1.5 py-0"
+              className="border-accent/40/40 bg-accent/10 text-accent dark:text-accent text-[10px] font-semibold tracking-wide uppercase px-1.5 py-0"
             >
               {t('propertyHub.landing.proBadge')}
             </Badge>

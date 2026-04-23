@@ -84,19 +84,19 @@ export function AIROIReport() {
       
       <CardContent className="space-y-5">
         {/* Summary */}
-        <div className="p-4 rounded-xl bg-muted/50">
+        <div className="p-4 rounded-none bg-muted/50">
           <p className="text-sm leading-relaxed">{report.summary}</p>
         </div>
         
         {/* Key Metrics */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="text-center p-3 rounded-lg bg-muted/30">
+          <div className="text-center p-3 rounded-none bg-muted/30">
             <div className="text-2xl font-bold">{report.metrics.listingsAnalyzed}</div>
             <div className="text-xs text-muted-foreground">
               {isRussian ? 'Проанализировано' : 'Analyzed'}
             </div>
           </div>
-          <div className="text-center p-3 rounded-lg bg-muted/30">
+          <div className="text-center p-3 rounded-none bg-muted/30">
             <div className="text-2xl font-bold">
               {report.metrics.avgQualityScore ?? '—'}
             </div>
@@ -104,13 +104,13 @@ export function AIROIReport() {
               {isRussian ? 'Ср. балл' : 'Avg Score'}
             </div>
           </div>
-          <div className="text-center p-3 rounded-lg bg-muted/30">
+          <div className="text-center p-3 rounded-none bg-muted/30">
             <div className="text-2xl font-bold">{report.metrics.suspiciousDetected}</div>
             <div className="text-xs text-muted-foreground">
               {isRussian ? 'Подозрительных' : 'Suspicious'}
             </div>
           </div>
-          <div className="text-center p-3 rounded-lg bg-muted/30">
+          <div className="text-center p-3 rounded-none bg-muted/30">
             <div className="text-2xl font-bold">
               {report.metrics.aiAccuracyProxy ?? '—'}%
             </div>
@@ -154,9 +154,9 @@ export function AIROIReport() {
         </div>
         
         {/* Recommendation */}
-        <div className={cn("p-4 rounded-xl", config.bgColor)}>
+        <div className={cn("p-4 rounded-none", config.bgColor)}>
           <div className="flex items-center gap-3 mb-3">
-            <div className={cn("p-2 rounded-lg", config.color)}>
+            <div className={cn("p-2 rounded-none", config.color)}>
               <RecommendationIcon className="w-5 h-5 text-white" />
             </div>
             <div>

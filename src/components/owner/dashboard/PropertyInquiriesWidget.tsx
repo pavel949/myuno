@@ -69,7 +69,7 @@ export function PropertyInquiriesWidget() {
   });
 
   if (isLoading) {
-    return <Skeleton className="h-[180px] rounded-xl" />;
+    return <Skeleton className="h-[180px] rounded-none" />;
   }
 
   const allItems = [
@@ -166,7 +166,7 @@ export function PropertyInquiriesWidget() {
                     navigate(`/mc/messages`);
                   }
                 }}
-                className="w-full flex items-center gap-2.5 p-2 rounded-lg hover:bg-muted/50 transition-colors text-left"
+                className="w-full flex items-center gap-2.5 p-2 rounded-none hover:bg-muted/50 transition-colors text-left"
               >
                 <Avatar className="h-8 w-8 flex-shrink-0">
                   <AvatarFallback className="bg-primary/10 text-primary text-xs">
@@ -192,7 +192,7 @@ export function PropertyInquiriesWidget() {
                   </p>
                 </div>
                 <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                  <span className={cn("p-1 rounded", statusCfg.color)}>
+                  <span className={cn("p-1 rounded-none", statusCfg.color)}>
                     <StatusIcon className="h-3 w-3" />
                   </span>
                   <span className="text-[10px] text-muted-foreground">

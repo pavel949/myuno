@@ -27,7 +27,7 @@ const RelatedServicesCard = memo(function RelatedServicesCard({ entity, index }:
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: index * 0.08, duration: 0.3 }}
       onClick={() => navigate(entity.path)}
-      className="flex-shrink-0 w-[200px] bg-card border border-border rounded-xl overflow-hidden hover:shadow-lg hover:border-primary/30 transition-all duration-200 text-left snap-start"
+      className="flex-shrink-0 w-[200px] bg-card border border-border rounded-none overflow-hidden hover:shadow-lg hover:border-primary/30 transition-all duration-200 text-left snap-start"
     >
       {/* Image */}
       <div className="relative h-[120px] w-full overflow-hidden">
@@ -44,7 +44,7 @@ const RelatedServicesCard = memo(function RelatedServicesCard({ entity, index }:
         )}
         {entity.rating && entity.rating > 0 && (
           <div className="absolute top-2 right-2 flex items-center gap-0.5 bg-background/80 text-foreground text-xs px-1.5 py-0.5 rounded-full backdrop-blur-sm">
-            <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
+            <Star className="w-3 h-3 fill-accent text-accent" />
             {entity.rating.toFixed(1)}
           </div>
         )}

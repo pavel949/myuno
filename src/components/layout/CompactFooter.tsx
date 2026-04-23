@@ -154,7 +154,7 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`flex items-center justify-center w-9 h-9 rounded-xl bg-muted/50 hover:bg-muted text-muted-foreground transition-all duration-200 ${social.hoverColor}`}
+                    className={`flex items-center justify-center w-9 h-9 rounded-none bg-muted/50 hover:bg-muted text-muted-foreground transition-all duration-200 ${social.hoverColor}`}
                     aria-label={social.label}
                   >
                     <social.icon className="w-4 h-4" />

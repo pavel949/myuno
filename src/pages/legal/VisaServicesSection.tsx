@@ -20,7 +20,7 @@ export function VisaServicesSection({ limit = 6, showTitle = true }: VisaService
     return (
       <div className="space-y-3">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="h-24 bg-muted animate-pulse rounded-xl" />
+          <div key={i} className="h-24 bg-muted animate-pulse rounded-none" />
         ))}
       </div>
     );
@@ -51,7 +51,7 @@ export function VisaServicesSection({ limit = 6, showTitle = true }: VisaService
           <div
             key={visa.id}
             onClick={() => navigate(`/legal/visa/${visa.id}`)}
-            className="bg-card border border-border rounded-xl p-4 cursor-pointer hover:border-primary/50 transition-all group"
+            className="bg-card border border-border rounded-none p-4 cursor-pointer hover:border-primary/50 transition-all group"
           >
             <div className="flex items-start justify-between">
               <div className="flex-1">
@@ -60,9 +60,9 @@ export function VisaServicesSection({ limit = 6, showTitle = true }: VisaService
                     variant="outline" 
                     className={`text-xs ${
                       visa.visa_type === 'elite' 
-                        ? 'border-amber-500 text-amber-600 bg-amber-50 dark:bg-amber-500/10' 
+                        ? 'border-accent/40 text-accent bg-accent/10 dark:bg-accent/10' 
                         : visa.visa_type === 'retirement'
-                        ? 'border-emerald-500 text-emerald-600 bg-emerald-50 dark:bg-emerald-500/10'
+                        ? 'border-success/40 text-success bg-success/10 dark:bg-success/10'
                         : ''
                     }`}
                   >

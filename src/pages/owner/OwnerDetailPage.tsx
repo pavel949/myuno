@@ -408,7 +408,7 @@ export default function OwnerDetailPage() {
                               {f.transaction_date && format(parseISO(f.transaction_date), 'dd.MM.yyyy')}
                             </p>
                           </div>
-                          <span className={`text-sm font-semibold ${f.transaction_type === 'income' ? 'text-emerald-600' : 'text-red-500'}`}>
+                          <span className={`text-sm font-semibold ${f.transaction_type === 'income' ? 'text-success' : 'text-red-500'}`}>
                             {f.transaction_type === 'income' ? '+' : '-'}฿{Math.abs(f.amount || 0).toLocaleString()}
                           </span>
                         </div>

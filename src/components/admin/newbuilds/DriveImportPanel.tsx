@@ -70,7 +70,7 @@ export function DriveImportPanel({ projectId }: Props) {
       </div>
 
       {/* New source form */}
-      <div className="space-y-3 p-4 bg-muted/30 rounded-lg">
+      <div className="space-y-3 p-4 bg-muted/30 rounded-none">
         <div className="space-y-1.5">
           <Label htmlFor="drive-url" className="text-sm">Ссылка на папку</Label>
           <Input
@@ -110,7 +110,7 @@ export function DriveImportPanel({ projectId }: Props) {
 
       {/* Active job progress */}
       {activeJob && (
-        <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg space-y-2">
+        <div className="p-4 bg-primary/5 border border-primary/20 rounded-none space-y-2">
           <div className="flex items-center justify-between text-sm">
             <span className="font-medium flex items-center gap-2">
               <Loader2 className="w-4 h-4 animate-spin text-primary" />
@@ -135,7 +135,7 @@ export function DriveImportPanel({ projectId }: Props) {
         <div className="space-y-2">
           <Label className="text-sm">Подключённые папки</Label>
           {sources.map((src) => (
-            <div key={src.id} className="flex items-center gap-3 p-3 bg-card border rounded-lg">
+            <div key={src.id} className="flex items-center gap-3 p-3 bg-card border rounded-none">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 text-sm font-medium">
                   <span className="truncate">{src.folder_id}</span>
@@ -184,7 +184,7 @@ export function DriveImportPanel({ projectId }: Props) {
 
       {/* AI extraction review banner */}
       {pendingReviewJob && (
-        <div className="p-3 bg-primary/10 border border-primary/30 rounded-lg flex items-center gap-3">
+        <div className="p-3 bg-primary/10 border border-primary/30 rounded-none flex items-center gap-3">
           <Sparkles className="w-5 h-5 text-primary shrink-0" />
           <div className="flex-1 text-sm">
             <p className="font-medium">AI извлёк данные из документов</p>

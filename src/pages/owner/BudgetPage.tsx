@@ -171,7 +171,7 @@ export default function BudgetPage() {
             onClick={() => navigate(APP_ROUTES.MC_FINANCE_PLANNING)}
             className="mt-2 inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors text-left"
           >
-            <LineChart className="h-3.5 w-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+            <LineChart className="h-3.5 w-3.5 shrink-0 text-success dark:text-success" />
             <span>
               {isRu
                 ? 'Плановые статьи попадают в P&L финансовой модели — открыть планирование'

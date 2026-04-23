@@ -124,7 +124,7 @@ export default function VendorDirectoryPage() {
       {/* List */}
       {isLoading ? (
         <div className="grid sm:grid-cols-2 gap-3">
-          {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-32 rounded-xl" />)}
+          {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-32 rounded-none" />)}
         </div>
       ) : !filtered.length ? (
         <Card>

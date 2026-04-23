@@ -37,7 +37,7 @@ export function ConciergeAdvanceOption({
       type="button"
       onClick={onSelect}
       className={cn(
-        "w-full p-4 rounded-xl border-2 transition-all text-left",
+        "w-full p-4 rounded-none border-2 transition-all text-left",
         "bg-gradient-to-br from-warning/5 to-accent-amber/5",
         isSelected
           ? "border-warning bg-warning/10"
@@ -100,7 +100,7 @@ export function ConciergeAdvanceOption({
           </p>
           
           {/* Pricing breakdown */}
-          <div className="bg-background/60 rounded-lg p-3 space-y-1.5">
+          <div className="bg-background/60 rounded-none p-3 space-y-1.5">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">
                 {language === 'ru' ? 'Сумма заказа' : 'Order amount'}

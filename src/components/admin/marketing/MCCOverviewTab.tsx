@@ -59,7 +59,7 @@ function KPICard({ title, value, change, changeLabel, icon: Icon, trend, loading
               </div>
             )}
           </div>
-          <div className="p-2 rounded-lg bg-primary/10">
+          <div className="p-2 rounded-none bg-primary/10">
             <Icon className="h-5 w-5 text-primary" />
           </div>
         </div>
@@ -273,7 +273,7 @@ export function MCCOverviewTab() {
               ].map((item, idx) => (
                 <div key={idx} className="flex items-center gap-3">
                   <div className="w-24 text-sm text-muted-foreground">{item.stage}</div>
-                  <div className="flex-1 h-8 bg-muted rounded overflow-hidden">
+                  <div className="flex-1 h-8 bg-muted rounded-none overflow-hidden">
                     <div 
                       className="h-full bg-gradient-to-r from-primary to-chart-1 flex items-center justify-end px-2"
                       style={{ width: `${Math.max((item.value / item.maxValue) * 100, 5)}%` }}
@@ -338,7 +338,7 @@ export function MCCOverviewTab() {
           </CardHeader>
           <CardContent className="space-y-3">
             {aiInsights.map((insight, idx) => (
-              <div key={idx} className="p-3 rounded-lg bg-muted/50 space-y-2">
+              <div key={idx} className="p-3 rounded-none bg-muted/50 space-y-2">
                 <div className="flex items-start gap-2">
                   {insight.type === 'warning' ? (
                     <AlertCircle className="h-4 w-4 text-warning shrink-0 mt-0.5" />

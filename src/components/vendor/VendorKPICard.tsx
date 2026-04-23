@@ -58,10 +58,10 @@ export function VendorKPICard({
       <Card className="animate-pulse">
         <CardContent className="p-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-muted" />
+            <div className="w-10 h-10 rounded-none bg-muted" />
             <div className="flex-1 space-y-2">
-              <div className="h-3 w-16 bg-muted rounded" />
-              <div className="h-6 w-12 bg-muted rounded" />
+              <div className="h-3 w-16 bg-muted rounded-none" />
+              <div className="h-6 w-12 bg-muted rounded-none" />
             </div>
           </div>
         </CardContent>
@@ -80,7 +80,7 @@ export function VendorKPICard({
       <CardContent className="p-4">
         <div className="flex items-center gap-3">
           <div className={cn(
-            "p-2.5 rounded-xl bg-muted/80",
+            "p-2.5 rounded-none bg-muted/80",
             iconColor.replace('text-', 'bg-').replace(/(\w+)$/, '$1/10')
           )}>
             <Icon className={cn("h-5 w-5", iconColor)} />

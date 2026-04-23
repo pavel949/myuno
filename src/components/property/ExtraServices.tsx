@@ -44,7 +44,7 @@ export function ExtraServices({ services, currency = 'THB', className }: ExtraSe
           return (
             <div
               key={service.id}
-              className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border/50"
+              className="flex items-center justify-between p-3 rounded-none bg-muted/30 border border-border/50"
             >
               <div className="flex items-center gap-3">
                 <span className="text-lg">{icon}</span>

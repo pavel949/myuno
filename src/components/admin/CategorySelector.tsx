@@ -367,7 +367,7 @@ function CategoryRow({
     <button
       onClick={onSelect}
       className={cn(
-        "w-full flex items-center gap-2.5 px-3 py-2 text-sm rounded-md transition-colors",
+        "w-full flex items-center gap-2.5 px-3 py-2 text-sm rounded-none transition-colors",
         "hover:bg-accent/50",
         isSelected && "bg-primary/10 text-primary font-medium"
       )}

@@ -67,7 +67,7 @@ export function StaffDashboard() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-none bg-primary/10 flex items-center justify-center">
               <ShoppingCart className="h-5 w-5 text-primary" />
             </div>
             <div>
@@ -78,7 +78,7 @@ export function StaffDashboard() {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-success/10 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-none bg-success/10 flex items-center justify-center">
               <CheckCircle2 className="h-5 w-5 text-success" />
             </div>
             <div>
@@ -89,7 +89,7 @@ export function StaffDashboard() {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-info/10 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-none bg-info/10 flex items-center justify-center">
               <Users className="h-5 w-5 text-info" />
             </div>
             <div>
@@ -100,8 +100,8 @@ export function StaffDashboard() {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-orange-500/10 flex items-center justify-center">
-              <Clock className="h-5 w-5 text-orange-500" />
+            <div className="h-10 w-10 rounded-none bg-accent/10 flex items-center justify-center">
+              <Clock className="h-5 w-5 text-accent" />
             </div>
             <div>
               <p className="text-lg font-bold">
@@ -125,7 +125,7 @@ export function StaffDashboard() {
             ) : !orders?.length ? (
               <p className="text-sm text-muted-foreground py-4 text-center">{isRu ? 'Пока нет заказов' : 'No orders yet'}</p>
             ) : orders.map(order => (
-              <div key={order.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+              <div key={order.id} className="flex items-center justify-between p-2 rounded-none bg-muted/50">
                 <div className="min-w-0">
                   <p className="text-sm font-medium">{order.order_number || order.id.slice(0, 8)}</p>
                   <p className="text-xs text-muted-foreground">{order.vertical || order.order_type}</p>
@@ -152,7 +152,7 @@ export function StaffDashboard() {
             ) : !leads?.length ? (
               <p className="text-sm text-muted-foreground py-4 text-center">{isRu ? 'Нет лидов' : 'No leads'}</p>
             ) : leads.map(lead => (
-              <div key={lead.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+              <div key={lead.id} className="flex items-center justify-between p-2 rounded-none bg-muted/50">
                 <div className="min-w-0">
                   <p className="text-sm font-medium">{lead.name || (isRu ? 'Без имени' : 'No name')}</p>
                   <p className="text-xs text-muted-foreground">{lead.phone} · {lead.vertical_id}</p>

@@ -9,7 +9,7 @@ export function ImpersonationBanner() {
   const { developerId, developerName, exit } = useImpersonation();
   if (!developerId) return null;
   return (
-    <div className="sticky top-0 z-50 bg-amber-500/95 text-amber-950 backdrop-blur border-b border-amber-700/30">
+    <div className="sticky top-0 z-50 bg-accent/95 text-accent backdrop-blur border-b border-accent/40/30">
       <div className="max-w-7xl mx-auto px-4 py-1.5 flex items-center gap-3 text-xs sm:text-sm">
         <Eye className="w-4 h-4 shrink-0" />
         <span className="truncate flex-1">
@@ -17,7 +17,7 @@ export function ImpersonationBanner() {
         </span>
         <button
           onClick={exit}
-          className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-950/15 hover:bg-amber-950/25 transition-colors font-medium shrink-0"
+          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-none bg-accent/15 hover:bg-accent/25 transition-colors font-medium shrink-0"
         >
           <X className="w-3.5 h-3.5" />
           Выйти

@@ -601,7 +601,7 @@ const VendorLocations = () => {
 
                     {/* Rejection reason */}
                     {location.rejection_reason && (
-                      <div className="mt-2 p-2 rounded bg-destructive/10 text-destructive text-xs">
+                      <div className="mt-2 p-2 rounded-none bg-destructive/10 text-destructive text-xs">
                         {location.rejection_reason}
                       </div>
                     )}

@@ -84,13 +84,13 @@ export default function TutorDetail() {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      <div className="relative bg-gradient-to-r from-indigo-500 to-purple-600 pt-4 pb-24">
+      <div className="relative bg-gradient-to-r from-primary to-primary pt-4 pb-24">
         <BackButton fallbackPath={APP_ROUTES.EDUCATION} variant="overlay" size="md" className="absolute top-4 left-4" />
         <FavoriteButton itemType="tutor" itemId={tutor.id} itemData={{ name: tutor.name_en, specialty_en: tutor.name_en, specialty_ru: tutor.name_ru, image, price: tutor.price_per_hour, currency: tutor.currency || '฿', rating: tutor.rating }} className="absolute top-4 right-4" />
       </div>
 
       <div className="px-4 -mt-16">
-        <div className="bg-card rounded-xl shadow-lg p-4 text-center">
+        <div className="bg-card rounded-none shadow-lg p-4 text-center">
           <img src={image} alt={name} className="w-24 h-24 rounded-full object-cover mx-auto -mt-16 border-4 border-card" />
           <h1 className="text-xl font-bold text-foreground mt-2">{name}</h1>
           <p className="text-primary font-medium">{specialty}</p>

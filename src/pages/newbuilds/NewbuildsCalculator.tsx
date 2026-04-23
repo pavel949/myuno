@@ -36,7 +36,7 @@ export default function NewbuildsCalculator() {
               id="project-select"
               value={selectedProjectId}
               onChange={e => setSelectedProjectId(e.target.value)}
-              className="w-full px-4 py-3 rounded-lg text-sm bg-background text-foreground border border-border focus:outline-none focus:ring-2 focus:ring-ring"
+              className="w-full px-4 py-3 rounded-none text-sm bg-background text-foreground border border-border focus:outline-none focus:ring-2 focus:ring-ring"
             >
               <option value="">Произвольный расчёт (без привязки к проекту)</option>
               {projects.map(p => (

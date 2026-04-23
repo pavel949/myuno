@@ -130,7 +130,7 @@ export function AirbnbSyncDialog({ open, onOpenChange, onSuccess }: AirbnbSyncDi
                 )}
               </div>
 
-              <div className="bg-muted/50 rounded-lg p-3 text-sm text-muted-foreground">
+              <div className="bg-muted/50 rounded-none p-3 text-sm text-muted-foreground">
                 <p className="font-medium mb-1">
                   {isRu ? 'Что будет импортировано:' : 'What will be imported:'}
                 </p>
@@ -206,7 +206,7 @@ export function AirbnbSyncDialog({ open, onOpenChange, onSuccess }: AirbnbSyncDi
                 </AlertDescription>
               </Alert>
 
-              <div className="bg-muted/50 rounded-lg p-3 space-y-2">
+              <div className="bg-muted/50 rounded-none p-3 space-y-2">
                 <p className="text-sm font-medium">
                   {isRu ? 'Как получить iCal ссылку:' : 'How to get iCal link:'}
                 </p>

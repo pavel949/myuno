@@ -88,7 +88,7 @@ export const CatalogCard = memo(function CatalogCard({
       onClick={onClick}
     >
       {/* Image */}
-      <div className={cn("relative rounded-xl overflow-hidden mb-2", ASPECT_MAP[aspectRatio])}>
+      <div className={cn("relative rounded-none overflow-hidden mb-2", ASPECT_MAP[aspectRatio])}>
         <OptimizedImage
           src={image || PLACEHOLDER_IMAGES.service}
           alt={title}

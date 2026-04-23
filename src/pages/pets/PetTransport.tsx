@@ -94,7 +94,7 @@ export default function PetTransport() {
       <PageContainer className="pb-32">
         <PageHeader title={language === 'ru' ? 'Перевозка питомцев' : 'Pet Transport'} showBack fallbackPath="/pets" />
         {/* Hero */}
-        <div className="relative rounded-2xl overflow-hidden mb-6">
+        <div className="relative rounded-none overflow-hidden mb-6">
           <img
             src={PLACEHOLDER_IMAGES.pet}
             alt="Pet Transport"
@@ -128,7 +128,7 @@ export default function PetTransport() {
                 <Label
                   key={type.id}
                   className={cn(
-                    "flex-1 flex items-center justify-center gap-2 p-4 rounded-xl border cursor-pointer transition-all",
+                    "flex-1 flex items-center justify-center gap-2 p-4 rounded-none border cursor-pointer transition-all",
                     petType === type.id
                       ? "border-primary bg-primary/5"
                       : "border-border hover:border-primary/30"
@@ -230,7 +230,7 @@ export default function PetTransport() {
         </div>
 
         {/* What's Included */}
-        <div className="bg-muted/50 rounded-xl p-4 mb-6">
+        <div className="bg-muted/50 rounded-none p-4 mb-6">
           <h3 className="font-semibold mb-3 flex items-center gap-2">
             <Shield className="w-5 h-5 text-primary" />
             {language === 'ru' ? 'Что включено' : "What's Included"}
@@ -246,7 +246,7 @@ export default function PetTransport() {
         </div>
 
         {/* Process Timeline */}
-        <div className="bg-card border rounded-xl p-4 mb-6">
+        <div className="bg-card border rounded-none p-4 mb-6">
           <h3 className="font-semibold mb-3 flex items-center gap-2">
             <Clock className="w-5 h-5 text-primary" />
             {language === 'ru' ? 'Процесс' : 'Process'}

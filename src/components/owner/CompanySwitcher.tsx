@@ -106,7 +106,7 @@ export function CompanySwitcher() {
                   key={c.company_id}
                   onClick={() => { setActiveCompanyId(c.company_id); setOpen(false); setSearch(''); }}
                   className={cn(
-                    'flex items-center gap-3 w-full rounded-md px-2 py-2 text-sm transition-colors',
+                    'flex items-center gap-3 w-full rounded-none px-2 py-2 text-sm transition-colors',
                     isActive ? 'bg-accent text-accent-foreground' : 'hover:bg-muted'
                   )}
                 >
@@ -130,7 +130,7 @@ export function CompanySwitcher() {
         <Separator className="my-1" />
         <button
           onClick={() => { navigate('/mc/onboarding'); setOpen(false); }}
-          className="flex items-center gap-2 w-full rounded-md px-2 py-2 text-sm text-primary hover:bg-muted transition-colors"
+          className="flex items-center gap-2 w-full rounded-none px-2 py-2 text-sm text-primary hover:bg-muted transition-colors"
         >
           <Plus className="h-4 w-4" />
           {isRu ? 'Создать УК' : 'Create Company'}

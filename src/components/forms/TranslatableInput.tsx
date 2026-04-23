@@ -121,7 +121,7 @@ export function TranslatableInput({
         <div className="flex items-center justify-between">
           <Label className="flex items-center gap-2">
             {label}
-            <span className="text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded font-medium">
+            <span className="text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded-none font-medium">
               {sourceLangLabel}
             </span>
           </Label>
@@ -158,7 +158,7 @@ export function TranslatableInput({
       <div className="flex items-center justify-between">
           <Label className="flex items-center gap-2">
             {isRu ? 'Перевод' : 'Translation'}
-            <span className="text-xs bg-muted text-muted-foreground px-1.5 py-0.5 rounded font-medium">
+            <span className="text-xs bg-muted text-muted-foreground px-1.5 py-0.5 rounded-none font-medium">
               {targetLangLabel}
             </span>
             {isAutoTranslated && translatedValue && (

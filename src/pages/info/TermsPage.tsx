@@ -252,19 +252,19 @@ export default function TermsPage() {
 
         {/* Quick Links */}
         <div className="grid grid-cols-2 gap-2 mb-6">
-          <Link to="/privacy" className="p-3 bg-muted rounded-lg text-center hover:bg-muted/80 transition-colors">
+          <Link to="/privacy" className="p-3 bg-muted rounded-none text-center hover:bg-muted/80 transition-colors">
             <Shield className="h-5 w-5 mx-auto mb-1 text-muted-foreground" />
             <span className="text-xs">{isRu ? 'Конфиденциальность' : 'Privacy Policy'}</span>
           </Link>
-          <Link to="/refund-policy" className="p-3 bg-muted rounded-lg text-center hover:bg-muted/80 transition-colors">
+          <Link to="/refund-policy" className="p-3 bg-muted rounded-none text-center hover:bg-muted/80 transition-colors">
             <RefreshCw className="h-5 w-5 mx-auto mb-1 text-muted-foreground" />
             <span className="text-xs">{isRu ? 'Возвраты' : 'Refund Policy'}</span>
           </Link>
-          <Link to="/ip-policy" className="p-3 bg-muted rounded-lg text-center hover:bg-muted/80 transition-colors">
+          <Link to="/ip-policy" className="p-3 bg-muted rounded-none text-center hover:bg-muted/80 transition-colors">
             <Lock className="h-5 w-5 mx-auto mb-1 text-muted-foreground" />
             <span className="text-xs">{isRu ? 'Интеллектуальная собственность' : 'IP Policy'}</span>
           </Link>
-          <Link to="/dispute-resolution" className="p-3 bg-muted rounded-lg text-center hover:bg-muted/80 transition-colors">
+          <Link to="/dispute-resolution" className="p-3 bg-muted rounded-none text-center hover:bg-muted/80 transition-colors">
             <Gavel className="h-5 w-5 mx-auto mb-1 text-muted-foreground" />
             <span className="text-xs">{isRu ? 'Споры' : 'Disputes'}</span>
           </Link>
@@ -322,7 +322,7 @@ export default function TermsPage() {
                 : 'Services on the Platform are classified by transaction method. Your protection rights depend on the service type:'}
             </p>
             {serviceClassifications.map((item, index) => (
-              <div key={index} className="p-4 bg-muted/50 rounded-lg">
+              <div key={index} className="p-4 bg-muted/50 rounded-none">
                 <div className="flex items-center gap-2 mb-2">
                   <span className={`w-3 h-3 rounded-full ${item.color}`} />
                   <span className="font-semibold text-sm">{item.type}</span>
@@ -330,7 +330,7 @@ export default function TermsPage() {
                 </div>
                 <div className="flex flex-wrap gap-2 mb-2">
                   {item.examples.map((ex, i) => (
-                    <span key={i} className="text-xs bg-background px-2 py-1 rounded">{ex}</span>
+                    <span key={i} className="text-xs bg-background px-2 py-1 rounded-none">{ex}</span>
                   ))}
                 </div>
                 <p className="text-xs text-primary font-medium">✓ {item.protection}</p>
@@ -348,7 +348,7 @@ export default function TermsPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="p-3 bg-destructive/10 rounded-lg">
+            <div className="p-3 bg-destructive/10 rounded-none">
               <p className="text-sm font-medium">{platformTransactionSection.content}</p>
             </div>
 
@@ -407,7 +407,7 @@ export default function TermsPage() {
                 </div>
               ))}
             </div>
-            <div className="p-3 bg-warning/10 border border-warning/30 rounded-lg">
+            <div className="p-3 bg-warning/10 border border-warning/30 rounded-none">
               <p className="text-sm text-warning">
                 ⚠️ {isRu 
                   ? 'При оплате вне Платформы вы теряете ВСЕ эти гарантии и не можете рассчитывать на помощь myUNO.'
@@ -485,7 +485,7 @@ export default function TermsPage() {
           <CardContent>
             <div className="flex gap-2 overflow-x-auto pb-2">
               {disputeProcess.map((step, index) => (
-                <div key={index} className="min-w-[140px] p-3 bg-muted rounded-lg text-center">
+                <div key={index} className="min-w-[140px] p-3 bg-muted rounded-none text-center">
                   <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center mx-auto mb-2 text-sm font-bold">
                     {step.step}
                   </div>
@@ -495,14 +495,14 @@ export default function TermsPage() {
                 </div>
               ))}
             </div>
-            <div className="mt-4 p-3 bg-muted rounded-lg">
+            <div className="mt-4 p-3 bg-muted rounded-none">
               <p className="text-sm text-muted-foreground">
                 <strong>{isRu ? 'Арбитраж:' : 'Arbitration:'}</strong> {isRu 
                   ? 'Все споры, не разрешённые через медиацию, подлежат обязательному арбитражу в Thailand Arbitration Center (THAC) или Hong Kong International Arbitration Centre (HKIAC). Решение арбитража является окончательным.'
                   : 'All disputes not resolved through mediation are subject to mandatory arbitration at Thailand Arbitration Center (THAC) or Hong Kong International Arbitration Centre (HKIAC). The arbitration decision is final.'}
               </p>
             </div>
-            <div className="mt-3 p-3 bg-warning/10 border border-warning/30 rounded-lg">
+            <div className="mt-3 p-3 bg-warning/10 border border-warning/30 rounded-none">
               <p className="text-xs text-warning">
                 <strong>{isRu ? 'ОТКАЗ ОТ КОЛЛЕКТИВНЫХ ИСКОВ:' : 'CLASS ACTION WAIVER:'}</strong> {isRu 
                   ? 'Вы соглашаетесь разрешать споры только индивидуально и отказываетесь от участия в коллективных исках против myUNO.'
@@ -573,7 +573,7 @@ export default function TermsPage() {
                 {isRu ? 'Юридические вопросы:' : 'Legal inquiries:'}
               </p>
               <p className="text-sm font-medium">legal@myuno.app</p>
-              <div className="mt-4 p-3 bg-muted rounded-lg text-xs text-muted-foreground">
+              <div className="mt-4 p-3 bg-muted rounded-none text-xs text-muted-foreground">
                 <p className="font-medium text-foreground mb-1">myUNO Pte. Ltd.</p>
                 <p>{isRu ? 'Регистрация: Сингапур' : 'Incorporated in Singapore'}</p>
                 <p>{isRu ? 'Сервисное подразделение: Таиланд' : 'Service Operations: Thailand'}</p>

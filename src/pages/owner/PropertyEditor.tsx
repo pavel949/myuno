@@ -537,7 +537,7 @@ const isRu = language === 'ru';
 
       {/* Autosave status bar */}
       {saveState !== 'idle' && (
-        <div className={`flex items-center gap-2 text-xs px-1 py-1.5 rounded-lg mb-2 ${
+        <div className={`flex items-center gap-2 text-xs px-1 py-1.5 rounded-none mb-2 ${
           saveState === 'saving' ? 'text-muted-foreground' :
           saveState === 'unsaved' ? 'text-warning' :
           saveState === 'saved' ? 'text-success' :

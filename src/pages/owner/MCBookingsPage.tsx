@@ -192,7 +192,7 @@ export default function MCBookingsPage() {
       <PageContainer>
         <PageHeader title={isRu ? 'Бронирования' : 'Bookings'} />
         <div className="space-y-3">
-          {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-28 rounded-xl" />)}
+          {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-28 rounded-none" />)}
         </div>
       </PageContainer>
     );
@@ -220,28 +220,28 @@ export default function MCBookingsPage() {
       <div className="grid grid-cols-4 gap-2 mb-4">
         <button
           onClick={() => setStatusFilter('all')}
-          className={cn('text-center p-2 rounded-lg transition-colors', statusFilter === 'all' ? 'bg-primary/10 ring-1 ring-primary' : 'bg-muted/50')}
+          className={cn('text-center p-2 rounded-none transition-colors', statusFilter === 'all' ? 'bg-primary/10 ring-1 ring-primary' : 'bg-muted/50')}
         >
           <div className="text-lg font-bold">{stats.total}</div>
           <div className="text-xs text-muted-foreground">{isRu ? 'Всего' : 'Total'}</div>
         </button>
         <button
           onClick={() => setStatusFilter('active')}
-          className={cn('text-center p-2 rounded-lg transition-colors', statusFilter === 'active' ? 'bg-success/10 ring-1 ring-success' : 'bg-muted/50')}
+          className={cn('text-center p-2 rounded-none transition-colors', statusFilter === 'active' ? 'bg-success/10 ring-1 ring-success' : 'bg-muted/50')}
         >
           <div className="text-lg font-bold text-success">{stats.active}</div>
           <div className="text-xs text-muted-foreground">{isRu ? 'Сейчас' : 'Active'}</div>
         </button>
         <button
           onClick={() => setStatusFilter('upcoming')}
-          className={cn('text-center p-2 rounded-lg transition-colors', statusFilter === 'upcoming' ? 'bg-primary/10 ring-1 ring-primary' : 'bg-muted/50')}
+          className={cn('text-center p-2 rounded-none transition-colors', statusFilter === 'upcoming' ? 'bg-primary/10 ring-1 ring-primary' : 'bg-muted/50')}
         >
           <div className="text-lg font-bold">{stats.upcoming}</div>
           <div className="text-xs text-muted-foreground">{isRu ? 'Скоро' : 'Upcoming'}</div>
         </button>
         <button
           onClick={() => setStatusFilter('pending')}
-          className={cn('text-center p-2 rounded-lg transition-colors', statusFilter === 'pending' ? 'bg-warning/10 ring-1 ring-warning' : 'bg-muted/50')}
+          className={cn('text-center p-2 rounded-none transition-colors', statusFilter === 'pending' ? 'bg-warning/10 ring-1 ring-warning' : 'bg-muted/50')}
         >
           <div className="text-lg font-bold text-warning">{stats.pending}</div>
           <div className="text-xs text-muted-foreground">{isRu ? 'Ожидает' : 'Pending'}</div>
@@ -296,7 +296,7 @@ export default function MCBookingsPage() {
 
       {/* Bulk Actions Toolbar */}
       {selectedIds.size > 0 && (
-        <div className="flex items-center gap-2 mb-3 p-3 bg-primary/5 border border-primary/20 rounded-lg">
+        <div className="flex items-center gap-2 mb-3 p-3 bg-primary/5 border border-primary/20 rounded-none">
           <Checkbox
             checked={selectedIds.size === filteredBookings.length}
             onCheckedChange={toggleSelectAll}

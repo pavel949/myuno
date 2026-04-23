@@ -37,8 +37,8 @@ export default function DeveloperPending() {
     <NewbuildsLayout hideNav>
       <div className="min-h-screen flex items-center justify-center px-4">
         <div className="w-full max-w-md text-center">
-          <div className="nb-glass p-10 rounded-2xl space-y-6">
-            <div className="w-16 h-16 rounded-2xl bg-[hsl(var(--nb-gold)/0.15)] flex items-center justify-center mx-auto">
+          <div className="nb-glass p-10 rounded-none space-y-6">
+            <div className="w-16 h-16 rounded-none bg-[hsl(var(--nb-gold)/0.15)] flex items-center justify-center mx-auto">
               <Clock className="w-8 h-8 text-[hsl(var(--nb-gold))]" />
             </div>
 
@@ -53,7 +53,7 @@ export default function DeveloperPending() {
 
             <div className="space-y-3 text-left">
               <StatusItem
-                icon={<CheckCircle className="w-4 h-4 text-green-400" />}
+                icon={<CheckCircle className="w-4 h-4 text-success" />}
                 label="Заявка отправлена"
                 done
               />
@@ -89,9 +89,9 @@ export default function DeveloperPending() {
 
 function StatusItem({ icon, label, done }: { icon: React.ReactNode; label: string; done: boolean }) {
   return (
-    <div className={`flex items-center gap-3 p-3 rounded-lg ${done ? 'bg-green-500/10' : 'bg-[hsl(var(--nb-glass-bg))]'}`}>
+    <div className={`flex items-center gap-3 p-3 rounded-none ${done ? 'bg-success/10' : 'bg-[hsl(var(--nb-glass-bg))]'}`}>
       {icon}
-      <span className={`text-sm ${done ? 'text-green-400' : 'text-[hsl(var(--nb-text-secondary))]'}`}>{label}</span>
+      <span className={`text-sm ${done ? 'text-success' : 'text-[hsl(var(--nb-text-secondary))]'}`}>{label}</span>
     </div>
   );
 }

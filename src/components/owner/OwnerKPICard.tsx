@@ -50,10 +50,10 @@ export function OwnerKPICard({
       <Card className={cn("animate-pulse", compact && "min-w-[120px]")}>
         <CardContent className={compact ? "p-3" : "p-4"}>
           <div className="flex items-center gap-2">
-            <div className={cn("rounded-lg bg-muted", compact ? "w-8 h-8" : "w-10 h-10")} />
+            <div className={cn("rounded-none bg-muted", compact ? "w-8 h-8" : "w-10 h-10")} />
             <div className="flex-1 space-y-1.5">
-              <div className="h-3 w-12 bg-muted rounded" />
-              <div className={cn("bg-muted rounded", compact ? "h-5 w-8" : "h-6 w-12")} />
+              <div className="h-3 w-12 bg-muted rounded-none" />
+              <div className={cn("bg-muted rounded-none", compact ? "h-5 w-8" : "h-6 w-12")} />
             </div>
           </div>
         </CardContent>
@@ -73,7 +73,7 @@ export function OwnerKPICard({
         <CardContent className="p-3">
           <div className="flex items-center gap-2">
             <div className={cn(
-              "p-1.5 rounded-lg bg-muted/80",
+              "p-1.5 rounded-none bg-muted/80",
               iconColor.replace('text-', 'bg-').replace(/(\w+)$/, '$1/10')
             )}>
               <Icon className={cn("h-4 w-4", iconColor)} />
@@ -102,7 +102,7 @@ export function OwnerKPICard({
       <CardContent className="p-4">
         <div className="flex items-center gap-3">
           <div className={cn(
-            "p-2.5 rounded-xl bg-muted/80",
+            "p-2.5 rounded-none bg-muted/80",
             iconColor.replace('text-', 'bg-').replace(/(\w+)$/, '$1/10')
           )}>
             <Icon className={cn("h-5 w-5", iconColor)} />

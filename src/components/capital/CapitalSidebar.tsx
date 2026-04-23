@@ -48,8 +48,8 @@ export function CapitalSidebar() {
           className="flex items-center gap-2 cursor-pointer"
           onClick={() => navigate('/capital')}
         >
-          <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-            <Building2 className="w-4 h-4 text-emerald-500" />
+          <div className="w-8 h-8 rounded-none bg-success/20 flex items-center justify-center">
+            <Building2 className="w-4 h-4 text-success" />
           </div>
           <div>
             <h2 className="text-sm font-semibold">Ignatev Capital</h2>
@@ -66,7 +66,7 @@ export function CapitalSidebar() {
                   <SidebarMenuButton
                     onClick={() => navigate(item.path)}
                     isActive={isActive(item.path, item.end)}
-                    className="data-[active=true]:bg-emerald-500/10 data-[active=true]:text-emerald-500"
+                    className="data-[active=true]:bg-success/10 data-[active=true]:text-success"
                   >
                     <item.icon className="w-4 h-4" />
                     <span>{item.label}</span>

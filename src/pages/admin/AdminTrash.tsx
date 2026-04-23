@@ -88,7 +88,7 @@ export default function AdminTrash() {
           <p>{isRussian ? 'Корзина пуста' : 'Trash is empty'}</p>
         </div>
       ) : (
-        <div className="border rounded-lg">
+        <div className="border rounded-none">
           <Table>
             <TableHeader>
               <TableRow>

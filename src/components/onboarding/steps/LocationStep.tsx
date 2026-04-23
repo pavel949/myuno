@@ -39,7 +39,7 @@ export const LocationStep = forwardRef<HTMLDivElement, LocationStepProps>(
     return (
       <div ref={ref} className="space-y-6 flex-1">
         <div className="text-center">
-          <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center mb-4">
+          <div className="w-16 h-16 mx-auto rounded-none bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center mb-4">
             <StepIcon className="w-8 h-8 text-primary-foreground" />
           </div>
           <h2 className="text-xl font-bold mb-1">
@@ -57,7 +57,7 @@ export const LocationStep = forwardRef<HTMLDivElement, LocationStepProps>(
               key={loc.id}
               onClick={() => setSelectedLocation(loc.id)}
               className={cn(
-                "w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all",
+                "w-full flex items-center gap-3 p-4 rounded-none border-2 transition-all",
                 selectedLocation === loc.id 
                   ? "border-primary bg-primary/10 shadow-md" 
                   : "border-primary/50 hover:border-primary bg-card"
@@ -85,7 +85,7 @@ export const LocationStep = forwardRef<HTMLDivElement, LocationStepProps>(
               {locations.filter(loc => !loc.available).map(loc => (
                 <div
                   key={loc.id}
-                  className="flex items-center gap-2 p-2.5 rounded-xl border border-border/50 bg-muted/30 opacity-60"
+                  className="flex items-center gap-2 p-2.5 rounded-none border border-border/50 bg-muted/30 opacity-60"
                 >
                   <span className="text-lg">{loc.flag}</span>
                   <div className="flex-1 min-w-0">
@@ -110,7 +110,7 @@ export const LocationStep = forwardRef<HTMLDivElement, LocationStepProps>(
           
           {/* Trust & Safety badge */}
           <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground pt-2">
-            <Shield className="w-4 h-4 text-emerald-500" />
+            <Shield className="w-4 h-4 text-success" />
             <span>
               {lang === 'ru' ? 'Все провайдеры проверены' : 
                lang === 'th' ? 'ผู้ให้บริการทุกรายได้รับการยืนยัน' : 

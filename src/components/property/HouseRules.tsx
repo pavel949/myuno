@@ -125,7 +125,7 @@ export function HouseRules({
 
         {/* Quiet hours */}
         {quietHours && (quietHours.start || quietHours.end) && (
-          <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/30">
+          <div className="flex items-center gap-2 p-2 rounded-none bg-muted/30">
             <Volume2 className="w-4 h-4 text-muted-foreground" />
             <span className="text-sm">
               {isRu ? 'Тишина:' : 'Quiet hours:'} {quietHours.start || '22:00'} – {quietHours.end || '08:00'}
@@ -135,7 +135,7 @@ export function HouseRules({
 
         {/* Pet details */}
         {pets?.allowed && (pets.deposit || pets.notes) && (
-          <div className="text-sm text-muted-foreground p-2 rounded-lg bg-muted/30">
+          <div className="text-sm text-muted-foreground p-2 rounded-none bg-muted/30">
             {pets.deposit && (
               <p>{isRu ? `Депозит за питомца: ฿${pets.deposit}` : `Pet deposit: ฿${pets.deposit}`}</p>
             )}
@@ -147,7 +147,7 @@ export function HouseRules({
 
         {/* Children amenities */}
         {children?.friendly && (children.hasCrib || children.hasHighChair) && (
-          <div className="text-sm text-muted-foreground p-2 rounded-lg bg-muted/30">
+          <div className="text-sm text-muted-foreground p-2 rounded-none bg-muted/30">
             <p className="flex items-center gap-2">
               <Baby className="w-4 h-4" />
               {isRu ? 'Доступно:' : 'Available:'}
@@ -160,7 +160,7 @@ export function HouseRules({
 
         {/* Smoking penalty */}
         {!smoking?.allowed && smoking?.penalty && (
-          <div className="flex items-center gap-2 text-sm text-destructive p-2 rounded-lg bg-destructive/10">
+          <div className="flex items-center gap-2 text-sm text-destructive p-2 rounded-none bg-destructive/10">
             <AlertTriangle className="w-4 h-4" />
             {isRu ? `Штраф за курение: ฿${smoking.penalty}` : `Smoking penalty: ฿${smoking.penalty}`}
           </div>
@@ -168,7 +168,7 @@ export function HouseRules({
 
         {/* Written rules */}
         {(rules || rules_ru) && (
-          <div className="p-3 rounded-lg bg-card border border-border/50">
+          <div className="p-3 rounded-none bg-card border border-border/50">
             <p className="text-sm whitespace-pre-line">
               {isRu ? rules_ru || rules : rules}
             </p>
@@ -177,7 +177,7 @@ export function HouseRules({
 
         {/* Cancellation policy */}
         {cancellationPolicy && (
-          <div className="p-3 rounded-lg bg-muted/30">
+          <div className="p-3 rounded-none bg-muted/30">
             <p className="text-xs text-muted-foreground mb-1">
               {isRu ? 'Политика отмены' : 'Cancellation Policy'}
             </p>
@@ -189,7 +189,7 @@ export function HouseRules({
 
         {/* Emergency contact */}
         {emergencyContact && (emergencyContact.name || emergencyContact.phone) && (
-          <div className="p-3 rounded-lg bg-destructive/5 border border-destructive/20">
+          <div className="p-3 rounded-none bg-destructive/5 border border-destructive/20">
             <div className="flex items-center gap-2 mb-1">
               <Shield className="w-4 h-4 text-destructive" />
               <span className="text-sm font-medium">{isRu ? 'Экстренный контакт' : 'Emergency Contact'}</span>

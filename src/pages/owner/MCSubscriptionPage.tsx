@@ -176,9 +176,9 @@ export default function MCSubscriptionPage() {
   if (isLoading) {
     return (
       <div className="p-6 space-y-4 animate-pulse">
-        <div className="h-8 bg-muted rounded w-64" />
-        <div className="h-48 bg-muted rounded" />
-        <div className="h-48 bg-muted rounded" />
+        <div className="h-8 bg-muted rounded-none w-64" />
+        <div className="h-48 bg-muted rounded-none" />
+        <div className="h-48 bg-muted rounded-none" />
       </div>
     );
   }
@@ -249,7 +249,7 @@ export default function MCSubscriptionPage() {
                   <div
                     key={item.step}
                     className={cn(
-                      "flex items-center gap-3 p-3 rounded-lg transition-colors",
+                      "flex items-center gap-3 p-3 rounded-none transition-colors",
                       item.done ? "bg-primary/5" : "bg-background hover:bg-muted/50",
                       item.path && !item.done && "cursor-pointer"
                     )}
@@ -346,7 +346,7 @@ export default function MCSubscriptionPage() {
                   )}
                   <CardHeader className="pb-3">
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-none bg-primary/10 flex items-center justify-center">
                         <PlanIcon className="h-4 w-4 text-primary" />
                       </div>
                       <div>
@@ -520,7 +520,7 @@ export default function MCSubscriptionPage() {
                 >
                   <CardContent className="flex items-center gap-3 py-3 px-4">
                     <div className={cn(
-                      "w-8 h-8 rounded-lg flex items-center justify-center shrink-0",
+                      "w-8 h-8 rounded-none flex items-center justify-center shrink-0",
                       property.slotActive ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
                     )}>
                       <Building2 className="h-4 w-4" />

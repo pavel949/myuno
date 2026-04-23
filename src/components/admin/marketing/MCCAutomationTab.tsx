@@ -205,8 +205,8 @@ export function MCCAutomationTab() {
             {CRON_JOBS.map((job) => {
               const Icon = job.icon;
               return (
-                <div key={job.name} className="flex items-start gap-3 p-3 rounded-lg border bg-card">
-                  <div className="p-2 rounded-md bg-primary/10">
+                <div key={job.name} className="flex items-start gap-3 p-3 rounded-none border bg-card">
+                  <div className="p-2 rounded-none bg-primary/10">
                     <Icon className="h-4 w-4 text-primary" />
                   </div>
                   <div className="min-w-0">
@@ -347,7 +347,7 @@ export function MCCAutomationTab() {
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-start gap-4">
-                      <div className={`p-3 rounded-lg ${rule.is_active ? 'bg-primary/10' : 'bg-muted'}`}>
+                      <div className={`p-3 rounded-none ${rule.is_active ? 'bg-primary/10' : 'bg-muted'}`}>
                         <TriggerIcon className={`h-5 w-5 ${rule.is_active ? 'text-primary' : 'text-muted-foreground'}`} />
                       </div>
                       <div className="space-y-1.5">

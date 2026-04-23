@@ -186,7 +186,7 @@ export function ProviderListingsManager({
         <CardContent className="p-0">
           <div className="flex gap-3 p-3">
             {/* Image */}
-            <div className="w-20 h-20 rounded-lg bg-muted shrink-0 overflow-hidden">
+            <div className="w-20 h-20 rounded-none bg-muted shrink-0 overflow-hidden">
               {listing.cover_image ? (
                 <img 
                   src={listing.cover_image} 

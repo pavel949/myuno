@@ -20,8 +20,8 @@ export function InvestorRecommendations() {
       <Card className="p-6 space-y-3">
         <Skeleton className="h-5 w-40" />
         <div className="flex gap-3">
-          <Skeleton className="h-36 w-56 rounded-xl shrink-0" />
-          <Skeleton className="h-36 w-56 rounded-xl shrink-0" />
+          <Skeleton className="h-36 w-56 rounded-none shrink-0" />
+          <Skeleton className="h-36 w-56 rounded-none shrink-0" />
         </div>
       </Card>
     );
@@ -56,7 +56,7 @@ export function InvestorRecommendations() {
               return (
                 <CardContent
                   key={project.id}
-                  className="p-0 shrink-0 w-56 rounded-xl border overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+                  className="p-0 shrink-0 w-56 rounded-none border overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
                   onClick={() => navigate(`/invest/${project.id}`)}
                 >
                   {project.cover_image ? (

@@ -28,7 +28,7 @@ const SPECIAL_CATEGORIES = {
     description_en: 'Best prices on popular products',
     description_ru: 'Лучшие цены на популярные товары',
     icon: '🔥',
-    gradient: 'from-orange-600/90 to-red-500/80',
+    gradient: 'from-accent/90 to-red-500/80',
     image_url: PLACEHOLDER_IMAGES.marketCategories['hot'],
   },
   popular: {
@@ -38,7 +38,7 @@ const SPECIAL_CATEGORIES = {
     description_en: 'Most popular products',
     description_ru: 'Самые популярные товары',
     icon: '⭐',
-    gradient: 'from-amber-600/90 to-yellow-500/80',
+    gradient: 'from-accent/90 to-accent/80',
     image_url: PLACEHOLDER_IMAGES.marketCategories['popular'],
   },
   new: {
@@ -48,7 +48,7 @@ const SPECIAL_CATEGORIES = {
     description_en: 'Fresh products just added',
     description_ru: 'Свежие товары только что добавлены',
     icon: '✨',
-    gradient: 'from-purple-600/90 to-pink-500/80',
+    gradient: 'from-primary/90 to-accent/80',
     image_url: PLACEHOLDER_IMAGES.marketCategories['new'],
   },
 };
@@ -198,7 +198,7 @@ const MarketCategoryPage = () => {
 
         {/* Hero Banner */}
         {category && (
-          <div className="relative rounded-2xl overflow-hidden mb-6 h-32">
+          <div className="relative rounded-none overflow-hidden mb-6 h-32">
             <img
               src={category.image_url || '/placeholder.svg'}
               alt=""
@@ -228,7 +228,7 @@ const MarketCategoryPage = () => {
             placeholder={language === 'ru' ? 'Поиск в категории...' : 'Search in category...'}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 pr-4 h-11 rounded-xl bg-muted/50"
+            className="pl-10 pr-4 h-11 rounded-none bg-muted/50"
           />
         </div>
 
@@ -274,7 +274,7 @@ const MarketCategoryPage = () => {
             viewMode === 'grid' ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6" : "flex flex-col"
           )}>
             {[1, 2, 3, 4].map(i => (
-              <div key={i} className="bg-card rounded-2xl border border-border overflow-hidden">
+              <div key={i} className="bg-card rounded-none border border-border overflow-hidden">
                 <Skeleton className={viewMode === 'grid' ? "aspect-square" : "h-28 w-28"} />
                 <div className="p-3">
                   <Skeleton className="h-10 mb-2" />

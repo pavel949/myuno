@@ -46,7 +46,7 @@ export function NbInventoryTab({ projectId, developerId }: Props) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {[1, 2, 3, 4].map(i => (
-          <Skeleton key={i} className="h-60 rounded-xl" style={{ background: 'hsl(var(--nb-surface))' }} />
+          <Skeleton key={i} className="h-60 rounded-none" style={{ background: 'hsl(var(--nb-surface))' }} />
         ))}
       </div>
     );
@@ -130,7 +130,7 @@ export function NbInventoryTab({ projectId, developerId }: Props) {
               {unit.floor_plan_url && (
                 <button
                   onClick={() => setLightboxUrl(unit.floor_plan_url!)}
-                  className="w-full aspect-[16/10] rounded-lg overflow-hidden relative group"
+                  className="w-full aspect-[16/10] rounded-none overflow-hidden relative group"
                   style={{ background: 'hsl(var(--nb-surface))' }}
                 >
                   <img src={unit.floor_plan_url} alt={`${unit.name} floor plan`} className="w-full h-full object-contain" />
@@ -172,7 +172,7 @@ export function NbInventoryTab({ projectId, developerId }: Props) {
               {unit.views && unit.views.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">
                   {unit.views.map(v => (
-                    <span key={v} className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded" style={{ background: 'hsl(var(--nb-gold) / 0.08)', color: 'hsl(var(--nb-gold) / 0.8)' }}>
+                    <span key={v} className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-none" style={{ background: 'hsl(var(--nb-gold) / 0.08)', color: 'hsl(var(--nb-gold) / 0.8)' }}>
                       <Eye className="w-3 h-3" /> {v}
                     </span>
                   ))}
@@ -183,7 +183,7 @@ export function NbInventoryTab({ projectId, developerId }: Props) {
               {unit.features && unit.features.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">
                   {unit.features.map(f => (
-                    <span key={f} className="text-[10px] px-2 py-0.5 rounded" style={{ background: 'hsl(var(--nb-surface))', color: 'hsl(var(--nb-text-secondary))' }}>
+                    <span key={f} className="text-[10px] px-2 py-0.5 rounded-none" style={{ background: 'hsl(var(--nb-surface))', color: 'hsl(var(--nb-text-secondary))' }}>
                       {f}
                     </span>
                   ))}
@@ -210,7 +210,7 @@ export function NbInventoryTab({ projectId, developerId }: Props) {
                   {avail !== 'sold_out' && (
                     <button
                       onClick={() => setLeadUnit(unit.name_ru || unit.name)}
-                      className="mt-1 text-xs font-medium px-3 py-1.5 rounded-lg transition-all"
+                      className="mt-1 text-xs font-medium px-3 py-1.5 rounded-none transition-all"
                       style={{ background: 'hsl(var(--nb-gold) / 0.15)', color: 'hsl(var(--nb-gold))', border: '1px solid hsl(var(--nb-gold) / 0.3)' }}
                     >
                       Запросить

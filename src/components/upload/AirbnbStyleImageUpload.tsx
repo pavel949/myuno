@@ -103,7 +103,7 @@ function SortableImageItem({
       ref={setNodeRef}
       style={style}
       className={cn(
-        "relative group rounded-xl overflow-hidden border-2 transition-all select-none",
+        "relative group rounded-none overflow-hidden border-2 transition-all select-none",
         isFirst ? "col-span-2 row-span-2 border-primary" : "border-border",
         isItemDragging && "opacity-30 scale-95 shadow-2xl ring-2 ring-primary",
         !isItemDragging && isDragging && "transition-transform duration-200"
@@ -135,7 +135,7 @@ function SortableImageItem({
       
       {/* Cover badge */}
       {isFirst && (
-        <div className="absolute top-2 left-2 bg-primary text-primary-foreground text-xs font-medium px-2 py-1 rounded-md flex items-center gap-1 shadow-lg z-20">
+        <div className="absolute top-2 left-2 bg-primary text-primary-foreground text-xs font-medium px-2 py-1 rounded-none flex items-center gap-1 shadow-lg z-20">
           <Star className="h-3 w-3" fill="currentColor" />
           Обложка
         </div>
@@ -154,7 +154,7 @@ function SortableImageItem({
             e.stopPropagation();
             onEdit();
           }}
-          className="p-1.5 bg-black/60 hover:bg-primary rounded-md transition-colors"
+          className="p-1.5 bg-black/60 hover:bg-primary rounded-none transition-colors"
         >
           <Pencil className="h-4 w-4 text-white" />
         </button>
@@ -164,14 +164,14 @@ function SortableImageItem({
             e.stopPropagation();
             onRemove();
           }}
-          className="p-1.5 bg-black/60 hover:bg-destructive rounded-md transition-colors"
+          className="p-1.5 bg-black/60 hover:bg-destructive rounded-none transition-colors"
         >
           <X className="h-4 w-4 text-white" />
         </button>
       </div>
       
       {/* Photo number */}
-      <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-md z-20 pointer-events-none">
+      <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-none z-20 pointer-events-none">
         {index + 1}
       </div>
       
@@ -184,7 +184,7 @@ function SortableImageItem({
 // Uploading Image Preview
 function UploadingImageItem({ image }: { image: UploadingImage }) {
   return (
-    <div className="relative aspect-square rounded-xl overflow-hidden border-2 border-dashed border-primary/50 bg-muted">
+    <div className="relative aspect-square rounded-none overflow-hidden border-2 border-dashed border-primary/50 bg-muted">
       <img 
         src={image.preview} 
         alt="Загрузка"
@@ -633,7 +633,7 @@ export function AirbnbStyleImageUpload({
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         className={cn(
-          "relative rounded-xl transition-all",
+          "relative rounded-none transition-all",
           isDragOver && "ring-2 ring-primary ring-offset-2"
         )}
       >
@@ -668,7 +668,7 @@ export function AirbnbStyleImageUpload({
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="aspect-square rounded-xl border-2 border-dashed border-muted-foreground/30 hover:border-primary/50 flex flex-col items-center justify-center gap-2 transition-colors bg-muted/30 hover:bg-muted/50"
+                  className="aspect-square rounded-none border-2 border-dashed border-muted-foreground/30 hover:border-primary/50 flex flex-col items-center justify-center gap-2 transition-colors bg-muted/30 hover:bg-muted/50"
                 >
                   <Plus className="h-6 w-6 text-muted-foreground" />
                   <span className="text-xs text-muted-foreground">Ещё</span>
@@ -680,7 +680,7 @@ export function AirbnbStyleImageUpload({
           {/* Drag overlay */}
           <DragOverlay>
             {activeImage && (
-              <div className="aspect-square rounded-xl overflow-hidden border-2 border-primary shadow-2xl scale-110 rotate-3">
+              <div className="aspect-square rounded-none overflow-hidden border-2 border-primary shadow-2xl scale-110 rotate-3">
                 <img 
                   src={activeImage} 
                   alt="Перетаскивание"
@@ -698,7 +698,7 @@ export function AirbnbStyleImageUpload({
             type="button"
             onClick={() => fileInputRef.current?.click()}
             className={cn(
-              "w-full py-16 rounded-xl border-2 border-dashed transition-all flex flex-col items-center justify-center gap-4",
+              "w-full py-16 rounded-none border-2 border-dashed transition-all flex flex-col items-center justify-center gap-4",
               isDragOver 
                 ? "border-primary bg-primary/5" 
                 : "border-muted-foreground/30 hover:border-primary/50 hover:bg-muted/30"
@@ -727,8 +727,8 @@ export function AirbnbStyleImageUpload({
 
         {/* Drag over overlay */}
         {isDragOver && value.length > 0 && (
-          <div className="absolute inset-0 bg-primary/10 rounded-xl flex items-center justify-center pointer-events-none">
-            <div className="bg-background/90 backdrop-blur-sm px-6 py-4 rounded-xl shadow-lg">
+          <div className="absolute inset-0 bg-primary/10 rounded-none flex items-center justify-center pointer-events-none">
+            <div className="bg-background/90 backdrop-blur-sm px-6 py-4 rounded-none shadow-lg">
               <p className="font-medium text-primary">Отпустите для загрузки</p>
             </div>
           </div>

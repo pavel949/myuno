@@ -9,7 +9,7 @@ import { AlertTriangle, Clock, CheckCircle, XCircle, Eye } from 'lucide-react';
 const STATUS_CONFIG: Record<string, { icon: React.ElementType; color: string; labelEn: string; labelRu: string }> = {
   open: { icon: AlertTriangle, color: 'text-warning', labelEn: 'Open', labelRu: 'Открыт' },
   under_review: { icon: Eye, color: 'text-primary', labelEn: 'Under Review', labelRu: 'На рассмотрении' },
-  resolved: { icon: CheckCircle, color: 'text-emerald-600', labelEn: 'Resolved', labelRu: 'Решён' },
+  resolved: { icon: CheckCircle, color: 'text-success', labelEn: 'Resolved', labelRu: 'Решён' },
   rejected: { icon: XCircle, color: 'text-destructive', labelEn: 'Rejected', labelRu: 'Отклонён' },
 };
 
@@ -52,7 +52,7 @@ export function DisputeCard({ dispute, showActions, onAction }: Props) {
         </div>
 
         {dispute.resolution && (
-          <div className="bg-muted/50 rounded-lg p-3">
+          <div className="bg-muted/50 rounded-none p-3">
             <p className="text-xs font-medium mb-1">{isRu ? 'Решение:' : 'Resolution:'}</p>
             <p className="text-xs text-muted-foreground">{dispute.resolution}</p>
           </div>

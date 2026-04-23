@@ -221,7 +221,7 @@ interface ProductCardProps {
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, language, quantity, onAdd, onRemove }) => {
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
+    <div className="bg-card rounded-none border border-border overflow-hidden">
       <div className="relative aspect-square">
         <img src={product.image} alt={language === 'ru' ? product.nameRu : product.nameEn} className="w-full h-full object-cover" />
         {product.originalPrice && (

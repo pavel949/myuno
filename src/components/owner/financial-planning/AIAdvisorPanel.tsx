@@ -84,9 +84,9 @@ export function AIAdvisorPanel({ computed, dcf, property, monthlyOccupancy, mont
 
         {loading && (
           <div className="space-y-2 animate-pulse">
-            <div className="h-3 bg-muted rounded w-3/4" />
-            <div className="h-3 bg-muted rounded w-full" />
-            <div className="h-3 bg-muted rounded w-5/6" />
+            <div className="h-3 bg-muted rounded-none w-3/4" />
+            <div className="h-3 bg-muted rounded-none w-full" />
+            <div className="h-3 bg-muted rounded-none w-5/6" />
           </div>
         )}
 
@@ -141,5 +141,5 @@ function renderInline(text: string): string {
   return text
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    .replace(/`(.+?)`/g, '<code class="px-1 bg-muted rounded text-[0.85em]">$1</code>');
+    .replace(/`(.+?)`/g, '<code class="px-1 bg-muted rounded-none text-[0.85em]">$1</code>');
 }

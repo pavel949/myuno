@@ -45,7 +45,7 @@ export default function DeveloperLeads() {
           <select
             value={statusFilter}
             onChange={e => setStatusFilter(e.target.value)}
-            className="rounded-md bg-[hsl(var(--nb-surface))] border border-[hsl(var(--nb-glass-border))] px-3 py-2 text-sm text-[hsl(var(--nb-text))]"
+            className="rounded-none bg-[hsl(var(--nb-surface))] border border-[hsl(var(--nb-glass-border))] px-3 py-2 text-sm text-[hsl(var(--nb-text))]"
           >
             <option value="">Все статусы</option>
             {STATUS_OPTIONS.map(s => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
@@ -96,7 +96,7 @@ export default function DeveloperLeads() {
                   <select
                     value={lead.status}
                     onChange={e => updateStatus.mutate({ id: lead.id, status: e.target.value })}
-                    className="rounded bg-[hsl(var(--nb-bg))] border border-[hsl(var(--nb-glass-border))] px-2 py-1 text-xs text-[hsl(var(--nb-text))]"
+                    className="rounded-none bg-[hsl(var(--nb-bg))] border border-[hsl(var(--nb-glass-border))] px-2 py-1 text-xs text-[hsl(var(--nb-text))]"
                   >
                     {STATUS_OPTIONS.map(s => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
                   </select>

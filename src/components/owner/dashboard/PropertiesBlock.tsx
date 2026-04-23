@@ -22,7 +22,7 @@ export function PropertiesBlock() {
           <Skeleton className="h-5 w-24 mb-2" />
           <div className="flex gap-2">
             {[1, 2, 3].map(i => (
-              <Skeleton key={i} className="h-16 w-16 shrink-0 rounded-lg" />
+              <Skeleton key={i} className="h-16 w-16 shrink-0 rounded-none" />
             ))}
           </div>
         </CardContent>
@@ -126,7 +126,7 @@ export function PropertiesBlock() {
                   navigate(`/mc/properties/${property.id}`);
                 }}
               >
-                <div className="w-14 h-14 rounded-lg overflow-hidden bg-muted">
+                <div className="w-14 h-14 rounded-none overflow-hidden bg-muted">
                   {property.cover_image ? (
                     <img 
                       src={property.cover_image} 
@@ -158,7 +158,7 @@ export function PropertiesBlock() {
           
           {/* Add new button */}
           <button
-            className="w-14 h-14 rounded-lg border-2 border-dashed border-muted-foreground/30 flex items-center justify-center shrink-0 snap-start touch-manipulation hover:border-primary/50 hover:bg-muted/50 transition-colors"
+            className="w-14 h-14 rounded-none border-2 border-dashed border-muted-foreground/30 flex items-center justify-center shrink-0 snap-start touch-manipulation hover:border-primary/50 hover:bg-muted/50 transition-colors"
             onClick={(e) => {
               e.stopPropagation();
               navigate('/mc/properties/new');

@@ -105,7 +105,7 @@ export default function NewbuildsDueDiligence() {
                 aria-selected={isActive}
                 onClick={() => setActiveCategory(cat.id)}
                 className={cn(
-                  'flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm whitespace-nowrap transition-all flex-shrink-0 border',
+                  'flex items-center gap-2 px-4 py-2.5 rounded-none text-sm whitespace-nowrap transition-all flex-shrink-0 border',
                   'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                   isActive
                     ? 'bg-primary/15 text-primary border-primary/30'
@@ -115,7 +115,7 @@ export default function NewbuildsDueDiligence() {
                 <Icon className="w-4 h-4" aria-hidden />
                 <span>{cat.label_ru}</span>
                 <span className={cn(
-                  'nb-mono text-[10px] px-1.5 py-0.5 rounded',
+                  'nb-mono text-[10px] px-1.5 py-0.5 rounded-none',
                   isDone ? 'bg-success/15 text-success' : 'bg-primary/10 text-muted-foreground'
                 )}>
                   {counts.done}/{counts.total}

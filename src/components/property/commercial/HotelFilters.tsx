@@ -57,7 +57,7 @@ export function HotelFiltersSheet({ value, onChange }: Props) {
           )}
         </Button>
       </SheetTrigger>
-      <SheetContent side="bottom" className="rounded-t-2xl max-h-[85vh] overflow-y-auto">
+      <SheetContent side="bottom" className="rounded-none max-h-[85vh] overflow-y-auto">
         <SheetHeader>
           <SheetTitle>{isRu ? 'Параметры отеля' : 'Hotel filters'}</SheetTitle>
         </SheetHeader>
@@ -99,7 +99,7 @@ export function HotelFiltersSheet({ value, onChange }: Props) {
                     key={s}
                     type="button"
                     onClick={() => setDraft({ ...draft, minStars: sel ? undefined : String(s) })}
-                    className={`flex-1 px-2 py-2 rounded-lg border text-sm font-semibold transition-colors ${
+                    className={`flex-1 px-2 py-2 rounded-none border text-sm font-semibold transition-colors ${
                       sel
                         ? 'bg-foreground text-background border-foreground'
                         : 'bg-background text-muted-foreground border-border hover:text-foreground'
@@ -120,7 +120,7 @@ export function HotelFiltersSheet({ value, onChange }: Props) {
             <select
               value={draft.licenseType ?? ''}
               onChange={(e) => setDraft({ ...draft, licenseType: e.target.value || undefined })}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
+              className="flex h-10 w-full rounded-none border border-input bg-background px-3 py-1 text-sm shadow-sm"
             >
               <option value="">{isRu ? 'Любая' : 'Any'}</option>
               {HOTEL_LICENSE_TYPES.map((l) => (
@@ -139,7 +139,7 @@ export function HotelFiltersSheet({ value, onChange }: Props) {
             <select
               value={draft.managementStatus ?? ''}
               onChange={(e) => setDraft({ ...draft, managementStatus: e.target.value || undefined })}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
+              className="flex h-10 w-full rounded-none border border-input bg-background px-3 py-1 text-sm shadow-sm"
             >
               <option value="">{isRu ? 'Любой' : 'Any'}</option>
               {HOTEL_MANAGEMENT_STATUSES.map((m) => (

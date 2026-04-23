@@ -83,7 +83,7 @@ export function MCCUserStatesTab() {
               onClick={() => navigateTo('campaign-rules', { targetState: state })}
             >
               <CardContent className="p-3 text-center space-y-1">
-                <div className={`w-10 h-10 rounded-lg mx-auto flex items-center justify-center ${config.color}`}>
+                <div className={`w-10 h-10 rounded-none mx-auto flex items-center justify-center ${config.color}`}>
                   <Icon className="h-5 w-5" />
                 </div>
                 <p className="text-xl font-bold">{count}</p>
@@ -113,9 +113,9 @@ export function MCCUserStatesTab() {
                   <div className="w-32 text-sm text-muted-foreground truncate">
                     {isRu ? config.label_ru : config.label_en}
                   </div>
-                  <div className="flex-1 h-7 bg-muted rounded overflow-hidden">
+                  <div className="flex-1 h-7 bg-muted rounded-none overflow-hidden">
                     <div
-                      className={`h-full rounded flex items-center justify-end px-2 transition-all ${config.color}`}
+                      className={`h-full rounded-none flex items-center justify-end px-2 transition-all ${config.color}`}
                       style={{ width: `${widthPct}%`, minWidth: count > 0 ? '2rem' : '0' }}
                     >
                       {count > 0 && <span className="text-xs font-medium">{count}</span>}
@@ -174,7 +174,7 @@ export function MCCUserStatesTab() {
               {churnUsers.slice(0, 15).map((u: any) => (
                 <div
                   key={u.user_id}
-                  className="flex items-center justify-between py-2 px-2 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
+                  className="flex items-center justify-between py-2 px-2 rounded-none hover:bg-muted/50 cursor-pointer transition-colors"
                   onClick={() => navigateTo('timeline', { userId: u.user_id })}
                 >
                   <div className="flex items-center gap-3 min-w-0">

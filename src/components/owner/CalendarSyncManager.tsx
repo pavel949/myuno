@@ -169,7 +169,7 @@ export function CalendarSyncManager({ propertyId }: CalendarSyncManagerProps) {
             </Button>
           </div>
           {isExpiringSoon && expiresAt && (
-            <div className="flex items-center gap-2 mt-2 p-2 bg-warning/10 border border-warning/20 rounded text-warning">
+            <div className="flex items-center gap-2 mt-2 p-2 bg-warning/10 border border-warning/20 rounded-none text-warning">
               <AlertCircle className="h-4 w-4 flex-shrink-0" />
               <p className="text-xs">
                 {isRu 
@@ -293,7 +293,7 @@ export function CalendarSyncManager({ propertyId }: CalendarSyncManagerProps) {
               {calendars.map(calendar => (
                 <div 
                   key={calendar.id} 
-                  className="flex items-center justify-between p-3 border rounded-lg"
+                  className="flex items-center justify-between p-3 border rounded-none"
                 >
                   <div className="flex items-center gap-3">
                     <Calendar className="h-5 w-5 text-muted-foreground" />
@@ -350,7 +350,7 @@ export function CalendarSyncManager({ propertyId }: CalendarSyncManagerProps) {
           ) : (
             <div className="py-8 space-y-6">
               <div className="text-center">
-                <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 rounded-none bg-primary/10 flex items-center justify-center mx-auto mb-4">
                   <Calendar className="h-8 w-8 text-primary" />
                 </div>
                 <h3 className="font-semibold mb-2">
@@ -363,7 +363,7 @@ export function CalendarSyncManager({ propertyId }: CalendarSyncManagerProps) {
                 </p>
               </div>
 
-              <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+              <div className="bg-muted/50 rounded-none p-4 space-y-3">
                 <p className="text-sm font-medium">
                   {isRu ? '📋 Как найти iCal-ссылку:' : '📋 How to find iCal link:'}
                 </p>

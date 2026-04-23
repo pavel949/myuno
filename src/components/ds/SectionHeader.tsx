@@ -19,9 +19,9 @@ interface SectionHeaderProps {
 }
 
 const sizeStyles = {
-  sm: { title: 'text-sm font-semibold', subtitle: 'text-[10px]', icon: 'w-4 h-4', box: 'p-1.5 rounded-lg' },
-  md: { title: 'text-base font-bold', subtitle: 'text-xs', icon: 'w-5 h-5', box: 'p-2 rounded-xl' },
-  lg: { title: 'text-lg font-bold tracking-[-0.01em]', subtitle: 'text-xs', icon: 'w-5 h-5', box: 'p-2.5 rounded-xl' },
+  sm: { title: 'text-sm font-semibold', subtitle: 'text-[10px]', icon: 'w-4 h-4', box: 'p-1.5 rounded-none' },
+  md: { title: 'text-base font-bold', subtitle: 'text-xs', icon: 'w-5 h-5', box: 'p-2 rounded-none' },
+  lg: { title: 'text-lg font-bold tracking-[-0.01em]', subtitle: 'text-xs', icon: 'w-5 h-5', box: 'p-2.5 rounded-none' },
 };
 
 export function SectionHeader({

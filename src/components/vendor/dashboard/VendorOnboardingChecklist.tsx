@@ -165,7 +165,7 @@ export function VendorOnboardingChecklist({
                   <div
                     key={step.id}
                     className={cn(
-                      "flex items-start gap-3 p-3 rounded-lg transition-all",
+                      "flex items-start gap-3 p-3 rounded-none transition-all",
                       step.isComplete 
                         ? "bg-primary/5 border border-primary/15" 
                         : "bg-muted/30 border border-transparent hover:border-muted"

@@ -229,13 +229,13 @@ function BasicInfoStepInner({
                   key={opt.value}
                   type="button"
                   onClick={() => handleAssetClassChange(opt.value)}
-                  className={`flex items-start gap-3 p-3 rounded-xl border-2 transition-all text-left ${
+                  className={`flex items-start gap-3 p-3 rounded-none border-2 transition-all text-left ${
                     isSelected
                       ? 'border-primary bg-primary/5'
                       : 'border-muted hover:border-muted-foreground/30 bg-muted/30'
                   }`}
                 >
-                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
+                  <div className={`w-10 h-10 rounded-none flex items-center justify-center shrink-0 ${
                     isSelected ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
                   }`}>
                     <Icon className="h-4 w-4" />
@@ -273,13 +273,13 @@ function BasicInfoStepInner({
                   key={opt.value}
                   type="button"
                   onClick={() => updateFormData({ property_type: opt.value })}
-                  className={`flex flex-col items-center gap-1.5 p-2.5 rounded-xl border-2 transition-all text-center ${
+                  className={`flex flex-col items-center gap-1.5 p-2.5 rounded-none border-2 transition-all text-center ${
                     isSelected
                       ? 'border-primary bg-primary/5 text-primary'
                       : 'border-transparent bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground'
                   }`}
                 >
-                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${
+                  <div className={`w-9 h-9 rounded-none flex items-center justify-center ${
                     isSelected ? 'bg-primary text-primary-foreground' : 'bg-muted'
                   }`}>
                     <Icon className="h-4 w-4" />
@@ -334,7 +334,7 @@ function BasicInfoStepInner({
                   <select
                     value={formData.title_deed_type ?? ''}
                     onChange={(e) => updateFormData({ title_deed_type: e.target.value || undefined })}
-                    className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
+                    className="flex h-9 w-full rounded-none border border-input bg-background px-3 py-1 text-sm shadow-sm"
                   >
                     <option value="">{isRu ? 'Не выбрано' : 'Not specified'}</option>
                     {TITLE_DEED_TYPES.map((d) => (
@@ -398,7 +398,7 @@ function BasicInfoStepInner({
                   <select
                     value={formData.title_deed_type ?? ''}
                     onChange={(e) => updateFormData({ title_deed_type: e.target.value || undefined })}
-                    className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
+                    className="flex h-9 w-full rounded-none border border-input bg-background px-3 py-1 text-sm shadow-sm"
                   >
                     <option value="">{isRu ? 'Не выбрано' : 'Not specified'}</option>
                     {TITLE_DEED_TYPES.map((d) => (
@@ -414,10 +414,10 @@ function BasicInfoStepInner({
 
       {/* Hotel-specific block — operational hospitality data */}
       {isCommercial && isHotelType(formData.property_type) && (
-        <Card className="border-amber-500/30 bg-gradient-to-br from-amber-500/5 to-transparent">
+        <Card className="border-accent/40/30 bg-gradient-to-br from-accent/5 to-transparent">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
-              <Hotel className="h-4 w-4 text-amber-500" />
+              <Hotel className="h-4 w-4 text-accent" />
               {isRu ? 'Параметры отеля' : 'Hotel details'}
             </CardTitle>
           </CardHeader>
@@ -464,7 +464,7 @@ function BasicInfoStepInner({
                 <select
                   value={formData.hotel_license_type ?? ''}
                   onChange={(e) => updateFormData({ hotel_license_type: e.target.value || undefined })}
-                  className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
+                  className="flex h-9 w-full rounded-none border border-input bg-background px-3 py-1 text-sm shadow-sm"
                 >
                   <option value="">{isRu ? 'Не выбрано' : 'Not specified'}</option>
                   {HOTEL_LICENSE_TYPES.map((d) => (
@@ -493,9 +493,9 @@ function BasicInfoStepInner({
                       key={s.id}
                       type="button"
                       onClick={() => updateFormData({ hotel_management_status: s.id })}
-                      className={`flex items-center gap-2 p-2.5 rounded-lg border-2 text-left transition-all ${
+                      className={`flex items-center gap-2 p-2.5 rounded-none border-2 text-left transition-all ${
                         isSelected
-                          ? 'border-amber-500 bg-amber-500/10'
+                          ? 'border-accent/40 bg-accent/10'
                           : 'border-muted hover:border-muted-foreground/30 bg-muted/30'
                       }`}
                     >
@@ -566,7 +566,7 @@ function BasicInfoStepInner({
             </div>
 
             {formData.hotel_management_status === 'seeking_operator' && (
-              <div className="rounded-lg p-3 bg-amber-500/10 border border-amber-500/30 text-xs text-foreground">
+              <div className="rounded-none p-3 bg-accent/10 border border-accent/40/30 text-xs text-foreground">
                 {isRu
                   ? '✨ Этот объект будет помечен как «Ищет оператора» в разделе HMA opportunities — управляющие компании увидят его в специальной выдаче.'
                   : '✨ This listing will be flagged as "Seeking Operator" in the HMA opportunities section — hotel management companies will see it in a dedicated feed.'}
@@ -658,7 +658,7 @@ function BasicInfoStepInner({
         <Collapsible defaultOpen={ownershipData.ownership_type !== 'own'} className="group/ownership">
           <Card>
             <CollapsibleTrigger asChild>
-              <CardHeader className="pb-3 cursor-pointer hover:bg-muted/30 transition-colors rounded-t-lg flex flex-row items-center justify-between gap-2 [&>div]:flex-1">
+              <CardHeader className="pb-3 cursor-pointer hover:bg-muted/30 transition-colors rounded-none flex flex-row items-center justify-between gap-2 [&>div]:flex-1">
                 <div className="flex items-center gap-2">
                   <Shield className="h-4 w-4" />
                   <CardTitle className="text-base">
@@ -679,7 +679,7 @@ function BasicInfoStepInner({
                   key={option.id}
                   type="button"
                   onClick={() => updateOwnershipData({ ownership_type: option.id })}
-                  className={`p-3 rounded-xl border-2 text-center transition-all ${
+                  className={`p-3 rounded-none border-2 text-center transition-all ${
                     ownershipData.ownership_type === option.id
                       ? 'border-primary bg-primary/5'
                       : 'border-muted hover:border-muted-foreground/30'
@@ -701,7 +701,7 @@ function BasicInfoStepInner({
 
                 {/* Auto-create contact hint */}
                 {showHint && (
-                  <div className="flex items-start gap-3 p-3 rounded-lg bg-primary/5 border border-primary/20 text-sm">
+                  <div className="flex items-start gap-3 p-3 rounded-none bg-primary/5 border border-primary/20 text-sm">
                     <UserPlus className="h-4 w-4 text-primary mt-0.5 shrink-0" />
                     <div className="flex-1 space-y-1">
                       <p className="text-foreground font-medium">
@@ -729,7 +729,7 @@ function BasicInfoStepInner({
                 )}
             {/* Quick owner contact for verbal/management */}
             {ownershipData.ownership_type !== 'own' && (
-              <div className="mt-4 p-3 bg-muted/50 rounded-lg space-y-3">
+              <div className="mt-4 p-3 bg-muted/50 rounded-none space-y-3">
                 <p className="text-sm text-muted-foreground">
                   {isRu ? 'Контакты собственника для верификации:' : 'Owner contacts for verification:'}
                 </p>

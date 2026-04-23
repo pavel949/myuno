@@ -87,7 +87,7 @@ export function AccountActiveStay() {
       <CardContent className="p-0">
         <div className="flex gap-3 p-4">
           {/* Property Image */}
-          <div className="relative w-20 h-20 rounded-xl overflow-hidden flex-shrink-0">
+          <div className="relative w-20 h-20 rounded-none overflow-hidden flex-shrink-0">
             {property?.images?.[0] ? (
               <img
                 src={property.images[0]}

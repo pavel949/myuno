@@ -129,7 +129,7 @@ export const LanguageIndicator = memo(function LanguageIndicator({
         />
       )}
       {remainingCount > 0 && (
-        <span className="text-[10px] px-1 py-0.5 rounded bg-muted text-muted-foreground">
+        <span className="text-[10px] px-1 py-0.5 rounded-none bg-muted text-muted-foreground">
           +{remainingCount}
         </span>
       )}
@@ -164,7 +164,7 @@ const LanguageBadge = memo(function LanguageBadge({ flag, code, color, title }: 
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium',
+        'inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-none text-[10px] font-medium',
         colorClasses[color] || colorClasses.gray
       )}
       title={title}

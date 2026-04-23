@@ -34,7 +34,7 @@ export const ChatTransactionWarning: React.FC<ChatTransactionWarningProps> = ({
 
   return (
     <div className={cn(
-      "mx-3 mt-3 p-3 rounded-lg bg-gradient-to-r from-primary/10 to-amber-500/10 border border-primary/20",
+      "mx-3 mt-3 p-3 rounded-none bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20",
       className
     )}>
       <div className="flex items-start gap-3">

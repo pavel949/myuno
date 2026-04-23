@@ -110,9 +110,9 @@ export function MCCFunnelDiagnosticsTab() {
                           )}
                         </div>
                       </div>
-                      <div className="h-8 bg-muted rounded overflow-hidden">
+                      <div className="h-8 bg-muted rounded-none overflow-hidden">
                         <div
-                          className="h-full bg-gradient-to-r from-primary to-chart-1 rounded flex items-center justify-end px-2 transition-all"
+                          className="h-full bg-gradient-to-r from-primary to-chart-1 rounded-none flex items-center justify-end px-2 transition-all"
                           style={{ width: `${Math.max(widthPct, 2)}%` }}
                         >
                           {step.count > 0 && (

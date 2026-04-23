@@ -55,7 +55,7 @@ export function ChannelSyncWidget() {
     return (
       <Card>
         <CardContent className="py-6">
-          <div className="h-20 bg-muted animate-pulse rounded-lg" />
+          <div className="h-20 bg-muted animate-pulse rounded-none" />
         </CardContent>
       </Card>
     );

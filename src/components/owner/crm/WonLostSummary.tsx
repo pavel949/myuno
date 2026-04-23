@@ -54,7 +54,7 @@ export function WonLostSummary({ deals, wonLostKeys }: WonLostSummaryProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
       {/* Won */}
-      <div className="rounded-xl border border-success/30 bg-success/5 p-3 space-y-2">
+      <div className="rounded-none border border-success/30 bg-success/5 p-3 space-y-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Trophy className="h-4 w-4 text-success" />
@@ -78,7 +78,7 @@ export function WonLostSummary({ deals, wonLostKeys }: WonLostSummaryProps) {
       </div>
 
       {/* Lost */}
-      <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-3 space-y-2">
+      <div className="rounded-none border border-destructive/30 bg-destructive/5 p-3 space-y-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <XCircle className="h-4 w-4 text-destructive" />

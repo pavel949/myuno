@@ -51,7 +51,7 @@ export function ThemeSwitcher({ variant = 'dropdown', size = 'default', classNam
         <DropdownMenuTrigger asChild>
           <button
             className={cn(
-              "inline-flex items-center gap-1 px-2 py-1.5 rounded-md",
+              "inline-flex items-center gap-1 px-2 py-1.5 rounded-none",
               "bg-secondary/60 hover:bg-secondary text-foreground",
               "text-xs font-medium transition-colors",
               "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
@@ -90,13 +90,13 @@ export function ThemeSwitcher({ variant = 'dropdown', size = 'default', classNam
   // Inline buttons variant
   if (variant === 'buttons') {
     return (
-      <div className={cn("flex bg-secondary/50 rounded-lg p-0.5", className)}>
+      <div className={cn("flex bg-secondary/50 rounded-none p-0.5", className)}>
         {themes.map((t) => (
           <button
             key={t.value}
             onClick={() => setTheme(t.value)}
             className={cn(
-              "flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all",
+              "flex items-center gap-1.5 px-2.5 py-1.5 rounded-none text-xs font-medium transition-all",
               theme === t.value 
                 ? "bg-background text-foreground shadow-sm" 
                 : "text-muted-foreground hover:text-foreground"
@@ -118,7 +118,7 @@ export function ThemeSwitcher({ variant = 'dropdown', size = 'default', classNam
           key={t.value}
           onClick={() => setTheme(t.value)}
           className={cn(
-            "flex-1 flex flex-col items-center gap-2 p-3 rounded-xl border transition-all",
+            "flex-1 flex flex-col items-center gap-2 p-3 rounded-none border transition-all",
             theme === t.value 
               ? "bg-primary/10 border-primary text-primary" 
               : "bg-secondary/50 border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary"

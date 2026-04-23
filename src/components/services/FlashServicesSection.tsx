@@ -54,7 +54,7 @@ export function FlashServicesSection() {
         <Skeleton className="h-6 w-48" />
         <div className="flex gap-3 overflow-hidden">
           {[1, 2, 3].map(i => (
-            <Skeleton key={i} className="w-[160px] h-[180px] rounded-2xl shrink-0" />
+            <Skeleton key={i} className="w-[160px] h-[180px] rounded-none shrink-0" />
           ))}
         </div>
       </div>
@@ -69,7 +69,7 @@ export function FlashServicesSection() {
       <div className="px-4 mb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-destructive to-destructive/70 flex items-center justify-center animate-pulse">
+            <div className="w-8 h-8 rounded-none bg-gradient-to-br from-destructive to-destructive/70 flex items-center justify-center animate-pulse">
               <Flame className="w-4 h-4 text-destructive-foreground" />
             </div>
             <div>
@@ -140,7 +140,7 @@ function FlashServiceCard({ service, index, onClick }: FlashServiceCardProps) {
       onClick={onClick}
       className={cn(
         "relative w-[160px] shrink-0 snap-start",
-        "rounded-2xl overflow-hidden bg-card border border-border/50",
+        "rounded-none overflow-hidden bg-card border border-border/50",
         "hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200",
         "text-left group"
       )}

@@ -103,7 +103,7 @@ export default function NewbuildsLanding() {
             <Button
               asChild
               size="lg"
-              className="mt-2 gap-2 rounded-xl font-semibold"
+              className="mt-2 gap-2 rounded-none font-semibold"
             >
               <Link to={APP_ROUTES.OFFPLAN}>
                 Открыть каталог
@@ -152,13 +152,13 @@ export default function NewbuildsLanding() {
                 key={to}
                 to={to}
                 className={
-                  'flex items-start gap-3 p-4 rounded-2xl border transition-all hover:shadow-card-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ' +
+                  'flex items-start gap-3 p-4 rounded-none border transition-all hover:shadow-card-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ' +
                   (primary
                     ? 'border-primary/35 bg-primary/5'
                     : 'border-border bg-card hover:border-primary/30')
                 }
               >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-none bg-primary/10 text-primary">
                   <Icon className="w-5 h-5" aria-hidden />
                 </div>
                 <div>

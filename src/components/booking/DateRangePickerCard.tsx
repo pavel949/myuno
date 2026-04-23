@@ -161,7 +161,7 @@ export function DateRangePickerCard({
   };
 
   return (
-    <div className={cn("bg-card rounded-2xl border p-5", className)}>
+    <div className={cn("bg-card rounded-none border p-5", className)}>
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold flex items-center gap-2">
           <CalendarIcon className="w-5 h-5 text-primary" />

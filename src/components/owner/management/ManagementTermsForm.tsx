@@ -339,7 +339,7 @@ export function ManagementTermsForm({ propertyId, existing, onSaved, compact = f
 
   if (compact) {
     return (
-      <div className="space-y-4 p-4 bg-muted/30 rounded-xl border">
+      <div className="space-y-4 p-4 bg-muted/30 rounded-none border">
         <p className="text-sm font-medium text-foreground">
           {isRu ? 'Условия управления (кратко)' : 'Management Terms (Quick Setup)'}
         </p>
@@ -389,7 +389,7 @@ export function ManagementTermsForm({ propertyId, existing, onSaved, compact = f
                 key={opt.value}
                 type="button"
                 onClick={() => setExpense('cleaning', opt.value)}
-                className={`flex-1 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                className={`flex-1 py-1.5 rounded-none text-xs font-medium border transition-colors ${
                   expenses.cleaning === opt.value
                     ? 'bg-primary text-primary-foreground border-primary'
                     : 'border-muted hover:border-muted-foreground/40'
@@ -445,7 +445,7 @@ export function ManagementTermsForm({ propertyId, existing, onSaved, compact = f
               type="button"
               onClick={() => applyPreset(preset)}
               className={cn(
-                'w-full text-left p-3 rounded-xl border-2 transition-all',
+                'w-full text-left p-3 rounded-none border-2 transition-all',
                 presetApplied === preset.id
                   ? 'border-primary bg-primary/5'
                   : 'border-transparent bg-muted/40 hover:bg-muted/60'
@@ -485,7 +485,7 @@ export function ManagementTermsForm({ propertyId, existing, onSaved, compact = f
                 key={opt.value}
                 type="button"
                 onClick={() => update({ commission_type: opt.value as 'percent' | 'fixed' })}
-                className={`p-3 rounded-xl border-2 text-center text-sm font-medium transition-colors ${
+                className={`p-3 rounded-none border-2 text-center text-sm font-medium transition-colors ${
                   form.commission_type === opt.value
                     ? 'border-primary bg-primary/5 text-primary'
                     : 'border-muted hover:border-muted-foreground/30'
@@ -511,11 +511,11 @@ export function ManagementTermsForm({ propertyId, existing, onSaved, compact = f
                 <span>5%</span><span>50%</span>
               </div>
               <div className="flex gap-3 mt-2">
-                <div className="flex-1 p-3 rounded-xl bg-muted/40 text-center">
+                <div className="flex-1 p-3 rounded-none bg-muted/40 text-center">
                   <p className="text-xs text-muted-foreground mb-1">{isRu ? 'Собственник' : 'Owner'}</p>
                   <p className="text-xl font-bold">{ownerSplit}%</p>
                 </div>
-                <div className="flex-1 p-3 rounded-xl bg-primary/10 text-center">
+                <div className="flex-1 p-3 rounded-none bg-primary/10 text-center">
                   <p className="text-xs text-muted-foreground mb-1">{isRu ? 'УК' : 'Manager'}</p>
                   <p className="text-xl font-bold text-primary">{commissionRate}%</p>
                 </div>
@@ -553,7 +553,7 @@ export function ManagementTermsForm({ propertyId, existing, onSaved, compact = f
                   key={opt.value}
                   type="button"
                   onClick={() => update({ commission_base: opt.value as 'gross' | 'net' })}
-                  className={`flex-1 py-2 rounded-lg text-xs font-medium border transition-colors ${
+                  className={`flex-1 py-2 rounded-none text-xs font-medium border transition-colors ${
                     form.commission_base === opt.value
                       ? 'bg-primary text-primary-foreground border-primary'
                       : 'border-muted hover:border-muted-foreground/30'
@@ -595,7 +595,7 @@ export function ManagementTermsForm({ propertyId, existing, onSaved, compact = f
                     type="button"
                     onClick={() => setExpense(key, opt.value)}
                     className={cn(
-                      'rounded-lg border text-xs font-medium transition-all py-1',
+                      'rounded-none border text-xs font-medium transition-all py-1',
                       opt.value === 'owner' ? 'w-16' : opt.value === 'manager' ? 'w-12' : 'w-16',
                       expenses[key] === opt.value
                         ? opt.value === 'owner'
@@ -708,7 +708,7 @@ export function ManagementTermsForm({ propertyId, existing, onSaved, compact = f
         </CardHeader>
         <CardContent className="space-y-4">
           {payoutRules.map((rule) => (
-            <div key={rule.id} className="flex items-center gap-2 p-3 rounded-xl bg-muted/40 border">
+            <div key={rule.id} className="flex items-center gap-2 p-3 rounded-none bg-muted/40 border">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   <Badge variant="secondary" className="text-xs">
@@ -734,7 +734,7 @@ export function ManagementTermsForm({ propertyId, existing, onSaved, compact = f
             </div>
           ))}
 
-          <div className="space-y-3 p-3 rounded-xl border border-dashed border-primary/30">
+          <div className="space-y-3 p-3 rounded-none border border-dashed border-primary/30">
             <p className="text-xs font-medium text-primary">{isRu ? 'Добавить получателя' : 'Add recipient'}</p>
             <div className="grid grid-cols-2 gap-2">
               <div className="space-y-1">

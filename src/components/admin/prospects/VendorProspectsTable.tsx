@@ -63,7 +63,7 @@ export function VendorProspectsTable() {
       </div>
 
       {/* Table */}
-      <div className="border rounded-lg">
+      <div className="border rounded-none">
         <Table>
           <TableHeader>
             <TableRow>

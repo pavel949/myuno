@@ -52,8 +52,8 @@ export default function OwnerSuperhost() {
           fallbackPath="/owner" 
         />
         <div className="space-y-4">
-          <Skeleton className="h-48 w-full rounded-xl" />
-          <Skeleton className="h-64 w-full rounded-xl" />
+          <Skeleton className="h-48 w-full rounded-none" />
+          <Skeleton className="h-64 w-full rounded-none" />
         </div>
       </PageContainer>
     );
@@ -223,7 +223,7 @@ export default function OwnerSuperhost() {
               <div 
                 key={idx}
                 className={cn(
-                  'flex items-start gap-3 p-3 rounded-xl',
+                  'flex items-start gap-3 p-3 rounded-none',
                   isSuperhost 
                     ? 'bg-accent-amber/10 border border-accent-amber/20' 
                     : 'bg-muted/50'
@@ -319,7 +319,7 @@ interface MetricCardProps {
 function MetricCard({ icon, value, label, target, met }: MetricCardProps) {
   return (
     <div className={cn(
-      'p-3 rounded-xl border',
+      'p-3 rounded-none border',
       met ? 'bg-success/5 border-success/20' : 'bg-muted/30'
     )}>
       <div className="flex items-center gap-2 mb-2">

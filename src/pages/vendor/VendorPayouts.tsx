@@ -258,7 +258,7 @@ const VendorPayouts = () => {
                 {payouts.map((payout) => (
                   <div
                     key={payout.id}
-                    className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
+                    className="flex items-center justify-between p-3 rounded-none bg-muted/50"
                   >
                     <div>
                       <p className="font-medium">{payout.amount.toLocaleString()} ₽</p>

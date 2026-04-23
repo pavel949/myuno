@@ -312,10 +312,10 @@ const VendorServices = () => {
                       <img 
                         src={(service as any).image} 
                         alt={service.name}
-                        className="w-16 h-16 rounded-lg object-cover"
+                        className="w-16 h-16 rounded-none object-cover"
                       />
                     ) : (
-                      <div className="w-16 h-16 rounded-lg bg-muted flex items-center justify-center">
+                      <div className="w-16 h-16 rounded-none bg-muted flex items-center justify-center">
                         <Package className="h-6 w-6 text-muted-foreground" />
                       </div>
                     )}
@@ -514,7 +514,7 @@ const VendorServices = () => {
                       min={1}
                     />
 
-                    <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                    <div className="flex items-center justify-between p-3 bg-muted/50 rounded-none">
                       <div>
                         <Label htmlFor="is_active" className="font-medium">
                           {isRussian ? 'Услуга активна' : 'Service active'}
@@ -561,7 +561,7 @@ const VendorServices = () => {
                     icon={<Eye className="h-5 w-5" />}
                   >
                     <div className="space-y-4">
-                      <div className="p-4 rounded-lg bg-muted/50 space-y-3">
+                      <div className="p-4 rounded-none bg-muted/50 space-y-3">
                         <div>
                           <span className="text-xs text-muted-foreground uppercase tracking-wide">
                             {isRussian ? 'Название' : 'Name'}

@@ -46,7 +46,7 @@ export default function InvestmentDetail() {
       <div className="min-h-screen bg-background">
         <div className="p-4 space-y-4">
           <Skeleton className="h-8 w-32" />
-          <Skeleton className="h-64 w-full rounded-xl" />
+          <Skeleton className="h-64 w-full rounded-none" />
           <Skeleton className="h-32 w-full" />
           <Skeleton className="h-48 w-full" />
         </div>
@@ -142,7 +142,7 @@ export default function InvestmentDetail() {
 
         <div className="px-4 -mt-8 relative z-10 space-y-6">
           {/* Title & Category */}
-          <div className="bg-card rounded-xl p-4 border border-border/50 shadow-lg space-y-3">
+          <div className="bg-card rounded-none p-4 border border-border/50 shadow-lg space-y-3">
             <Badge variant="secondary">
               {categoryIcon} {categoryLabel}
             </Badge>
@@ -168,7 +168,7 @@ export default function InvestmentDetail() {
 
           {/* Key Metrics */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-card rounded-xl p-4 border border-border/50">
+            <div className="bg-card rounded-none p-4 border border-border/50">
               <div className="flex items-center gap-2 text-muted-foreground text-sm">
                 <TrendingUp className="h-4 w-4 text-success" />
                 <span>{isRu ? 'Прогноз ROI' : 'Projected ROI'}</span>
@@ -181,7 +181,7 @@ export default function InvestmentDetail() {
               </div>
             </div>
 
-            <div className="bg-card rounded-xl p-4 border border-border/50">
+            <div className="bg-card rounded-none p-4 border border-border/50">
               <div className="flex items-center gap-2 text-muted-foreground text-sm">
                 <DollarSign className="h-4 w-4" />
                 <span>{isRu ? 'Мин. вход' : 'Min Entry'}</span>
@@ -197,7 +197,7 @@ export default function InvestmentDetail() {
               </div>
             </div>
 
-            <div className="bg-card rounded-xl p-4 border border-border/50">
+            <div className="bg-card rounded-none p-4 border border-border/50">
               <div className="flex items-center gap-2 text-muted-foreground text-sm">
                 <Clock className="h-4 w-4" />
                 <span>{isRu ? 'Срок' : 'Term'}</span>
@@ -210,7 +210,7 @@ export default function InvestmentDetail() {
               </div>
             </div>
 
-            <div className="bg-card rounded-xl p-4 border border-border/50">
+            <div className="bg-card rounded-none p-4 border border-border/50">
               <div className="flex items-center gap-2 text-muted-foreground text-sm">
                 <Target className="h-4 w-4" />
                 <span>{isRu ? 'Выход' : 'Exit'}</span>
@@ -223,7 +223,7 @@ export default function InvestmentDetail() {
 
           {/* Funding Progress */}
           {project.funding_goal && (
-            <div className="bg-card rounded-xl p-4 border border-border/50">
+            <div className="bg-card rounded-none p-4 border border-border/50">
               <h3 className="font-semibold mb-3 flex items-center gap-2">
                 <Building2 className="h-4 w-4" />
                 {isRu ? 'Прогресс сбора' : 'Funding Progress'}
@@ -253,7 +253,7 @@ export default function InvestmentDetail() {
             </TabsList>
 
             <TabsContent value="overview" className="mt-4">
-              <div className="bg-card rounded-xl p-4 border border-border/50 space-y-4">
+              <div className="bg-card rounded-none p-4 border border-border/50 space-y-4">
                 {description ? (
                   <p className="text-muted-foreground leading-relaxed">
                     {description}
@@ -277,7 +277,7 @@ export default function InvestmentDetail() {
             </TabsContent>
 
             <TabsContent value="scoring" className="mt-4">
-              <div className="bg-card rounded-xl p-4 border border-border/50">
+              <div className="bg-card rounded-none p-4 border border-border/50">
                 <ScoreBreakdown
                   scoreBreakdown={project.score_breakdown as Record<string, number> | null}
                   projectType={project.project_type}
@@ -295,7 +295,7 @@ export default function InvestmentDetail() {
             </TabsContent>
 
             <TabsContent value="risks" className="mt-4">
-              <div className="bg-card rounded-xl p-4 border border-border/50 space-y-3">
+              <div className="bg-card rounded-none p-4 border border-border/50 space-y-3">
                 <h3 className="font-semibold flex items-center gap-2">
                   <AlertTriangle className="h-4 w-4 text-warning" />
                   {isRu ? 'Факторы риска' : 'Risk Factors'}

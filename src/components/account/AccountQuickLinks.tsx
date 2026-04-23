@@ -47,9 +47,9 @@ export function AccountQuickLinks() {
               <button
                 key={link.path}
                 onClick={() => navigate(link.path)}
-                className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-muted/50 transition-colors active:scale-95"
+                className="flex flex-col items-center gap-1.5 p-2 rounded-none hover:bg-muted/50 transition-colors active:scale-95"
               >
-                <div className="p-2 rounded-xl bg-primary/8">
+                <div className="p-2 rounded-none bg-primary/8">
                   <Icon className="h-4 w-4 text-primary" />
                 </div>
                 <span className="text-[10px] text-muted-foreground font-medium text-center leading-tight">

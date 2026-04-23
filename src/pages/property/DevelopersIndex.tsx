@@ -24,9 +24,9 @@ export default function DevelopersIndex() {
   return (
     <div className="px-4 py-4 pb-24 space-y-4">
         {/* Hero */}
-        <div className="rounded-2xl bg-gradient-to-br from-primary/10 via-background to-accent/5 p-4 border border-border/50">
+        <div className="rounded-none bg-gradient-to-br from-primary/10 via-background to-accent/5 p-4 border border-border/50">
           <div className="flex items-center gap-3 mb-3">
-            <div className="p-2.5 rounded-xl bg-primary/10">
+            <div className="p-2.5 rounded-none bg-primary/10">
               <Building2 className="w-6 h-6 text-primary" />
             </div>
             <div>
@@ -52,7 +52,7 @@ export default function DevelopersIndex() {
         {isLoading ? (
           <div className="space-y-4">
             {[1, 2, 3].map(i => (
-              <Skeleton key={i} className="h-32 rounded-xl" />
+              <Skeleton key={i} className="h-32 rounded-none" />
             ))}
           </div>
         ) : developers && developers.length > 0 ? (
@@ -71,7 +71,7 @@ export default function DevelopersIndex() {
                   if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); goToDetail(); }
                 }}
                 className={cn(
-                  "rounded-xl border bg-card p-4 cursor-pointer",
+                  "rounded-none border bg-card p-4 cursor-pointer",
                   "hover:border-primary/50 hover:shadow-md transition-all",
                   "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 )}
@@ -82,10 +82,10 @@ export default function DevelopersIndex() {
                     <img
                       src={dev.logoUrl}
                       alt={dev.nameEn}
-                      className="w-16 h-16 rounded-xl object-contain bg-muted flex-shrink-0"
+                      className="w-16 h-16 rounded-none object-contain bg-muted flex-shrink-0"
                     />
                   ) : (
-                    <div className="w-16 h-16 rounded-xl bg-muted flex items-center justify-center flex-shrink-0">
+                    <div className="w-16 h-16 rounded-none bg-muted flex items-center justify-center flex-shrink-0">
                       <Building2 className="w-8 h-8 text-muted-foreground" />
                     </div>
                   )}

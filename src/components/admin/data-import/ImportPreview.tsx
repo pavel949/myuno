@@ -144,7 +144,7 @@ export function ImportPreview({
       </CardHeader>
       
       <CardContent>
-        <ScrollArea className="h-[400px] rounded-md border">
+        <ScrollArea className="h-[400px] rounded-none border">
           <Table>
             <TableHeader>
               <TableRow>

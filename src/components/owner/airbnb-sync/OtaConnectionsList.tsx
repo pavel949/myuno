@@ -61,7 +61,7 @@ export function OtaConnectionsList({ onSelectConnection }: OtaConnectionsListPro
     return (
       <div className="space-y-3">
         {[1, 2].map(i => (
-          <div key={i} className="h-24 bg-muted animate-pulse rounded-lg" />
+          <div key={i} className="h-24 bg-muted animate-pulse rounded-none" />
         ))}
       </div>
     );
@@ -106,7 +106,7 @@ export function OtaConnectionsList({ onSelectConnection }: OtaConnectionsListPro
                 <div className="flex items-start gap-3">
                   {/* Platform Logo */}
                   <div className={cn(
-                    "w-12 h-12 rounded-xl flex items-center justify-center text-2xl shrink-0",
+                    "w-12 h-12 rounded-none flex items-center justify-center text-2xl shrink-0",
                     platform.bgColor
                   )}>
                     {platform.logo}

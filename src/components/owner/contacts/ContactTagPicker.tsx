@@ -143,7 +143,7 @@ const [open, setOpen] = useState(false);
                         <button
                           key={tag.id}
                           onClick={() => onToggle(tag.name)}
-                          className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted text-sm text-left"
+                          className="w-full flex items-center gap-2 px-2 py-1.5 rounded-none hover:bg-muted text-sm text-left"
                         >
                           <span
                             className="w-3 h-3 rounded-full flex-shrink-0"
@@ -237,7 +237,7 @@ function ManageView({ tags, onDelete, onBack, isRu }: {
       </div>
       <div className="max-h-52 overflow-y-auto space-y-0.5">
         {tags.map(tag => (
-          <div key={tag.id} className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted group">
+          <div key={tag.id} className="flex items-center gap-2 px-2 py-1.5 rounded-none hover:bg-muted group">
             <span
               className="w-3 h-3 rounded-full flex-shrink-0"
               style={{ backgroundColor: tag.color }}

@@ -19,10 +19,10 @@ export function ArrivalCardBlock({ onAssisted }: ArrivalCardBlockProps) {
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-2xl border border-border bg-card p-5 space-y-4"
+      className="rounded-none border border-border bg-card p-5 space-y-4"
     >
       <div className="flex items-start gap-3">
-        <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center shrink-0">
+        <div className="w-10 h-10 rounded-none bg-accent flex items-center justify-center shrink-0">
           <FileText className="w-5 h-5 text-accent-foreground" />
         </div>
         <div>

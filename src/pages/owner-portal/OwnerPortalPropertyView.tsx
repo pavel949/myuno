@@ -116,7 +116,7 @@ export default function OwnerPortalPropertyView() {
 
       {/* Cover */}
       {property?.cover_image && (
-        <div className="rounded-xl overflow-hidden h-40">
+        <div className="rounded-none overflow-hidden h-40">
           <img src={property.cover_image} alt="" className="w-full h-full object-cover" />
         </div>
       )}

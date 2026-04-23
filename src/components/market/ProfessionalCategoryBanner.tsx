@@ -74,7 +74,7 @@ export const ProfessionalCategoryBanner: React.FC<ProfessionalCategoryBannerProp
       {/* Hero Category */}
       <button
         onClick={() => handleClick(heroCategory.slug)}
-        className="w-full relative overflow-hidden rounded-2xl text-left transition-all duration-300 hover:shadow-xl active:scale-[0.99] group"
+        className="w-full relative overflow-hidden rounded-none text-left transition-all duration-300 hover:shadow-xl active:scale-[0.99] group"
       >
         <div className="aspect-[2.2/1] relative">
           {/* Background Image */}
@@ -125,7 +125,7 @@ export const ProfessionalCategoryBanner: React.FC<ProfessionalCategoryBannerProp
           <button
             key={category.id}
             onClick={() => handleClick(category.slug)}
-            className="relative overflow-hidden rounded-xl text-left transition-all duration-300 hover:shadow-lg active:scale-[0.98] group"
+            className="relative overflow-hidden rounded-none text-left transition-all duration-300 hover:shadow-lg active:scale-[0.98] group"
           >
             <div className="aspect-[1.3/1] relative">
               {/* Background Image */}

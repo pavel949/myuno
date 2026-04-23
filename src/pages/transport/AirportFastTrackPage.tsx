@@ -310,7 +310,7 @@ export default function AirportFastTrackPage() {
         {/* Hero — myUNO branded */}
         <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-background px-4 py-6">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-none bg-primary/10 flex items-center justify-center">
               <Shield className="w-6 h-6 text-primary" />
             </div>
             <div>
@@ -374,7 +374,7 @@ export default function AirportFastTrackPage() {
                     type="button"
                     onClick={() => handleDirectionChange(d)}
                     className={cn(
-                      "p-3 rounded-xl border-2 text-center transition-all",
+                      "p-3 rounded-none border-2 text-center transition-all",
                       direction === d
                         ? "border-primary bg-primary/5"
                         : "border-border hover:border-primary/30"
@@ -432,13 +432,13 @@ export default function AirportFastTrackPage() {
                 </div>
               </div>
               {cutoffViolated && (
-                <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+                <div className="flex items-center gap-2 p-3 rounded-none bg-destructive/10 text-destructive text-sm">
                   <AlertCircle className="w-4 h-4 shrink-0" />
                   {isRu ? 'Бронирование возможно за 24+ часов до рейса' : 'Booking requires 24+ hours before flight'}
                 </div>
               )}
               {isNightFlight && !cutoffViolated && selectedService && Number(selectedService.night_surcharge) > 0 && (
-                <div className="flex items-center gap-2 p-3 rounded-lg bg-accent text-accent-foreground text-sm">
+                <div className="flex items-center gap-2 p-3 rounded-none bg-accent text-accent-foreground text-sm">
                   <Clock className="w-4 h-4 shrink-0" />
                   {isRu
                     ? `Ночной рейс — доплата ฿${selectedService.night_surcharge}/чел.`
@@ -461,7 +461,7 @@ export default function AirportFastTrackPage() {
                       type="button"
                       onClick={() => setSelectedServiceId(service.id)}
                       className={cn(
-                        "w-full p-4 rounded-2xl border-2 text-left transition-all",
+                        "w-full p-4 rounded-none border-2 text-left transition-all",
                         isSelected
                           ? "border-primary bg-primary/5 shadow-sm"
                           : "border-border hover:border-primary/30"
@@ -470,7 +470,7 @@ export default function AirportFastTrackPage() {
                       <div className="flex items-start justify-between gap-2 mb-2">
                         <div className="flex items-center gap-2">
                           <div className={cn(
-                            "w-8 h-8 rounded-xl flex items-center justify-center shrink-0",
+                            "w-8 h-8 rounded-none flex items-center justify-center shrink-0",
                             isSelected ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
                           )}>
                             {getTierIcon(service)}
@@ -515,7 +515,7 @@ export default function AirportFastTrackPage() {
                     type="button"
                     onClick={() => toggleAddon(addon.id)}
                     className={cn(
-                      "w-full p-3 rounded-xl border-2 flex items-center gap-3 text-left transition-all",
+                      "w-full p-3 rounded-none border-2 flex items-center gap-3 text-left transition-all",
                       selectedAddons.has(addon.id)
                         ? "border-primary bg-primary/5"
                         : "border-border hover:border-primary/30"
@@ -550,13 +550,13 @@ export default function AirportFastTrackPage() {
                       type="button"
                       onClick={() => setSelectedServiceId(bundle.id)}
                       className={cn(
-                        "w-full p-4 rounded-2xl border-2 text-left transition-all relative overflow-hidden",
+                        "w-full p-4 rounded-none border-2 text-left transition-all relative overflow-hidden",
                         isSelected
                           ? "border-primary bg-primary/5 shadow-sm"
                           : "border-border hover:border-primary/30"
                       )}
                     >
-                      <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-bold px-2 py-0.5 rounded-bl-lg">
+                      <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-bold px-2 py-0.5 rounded-none">
                         {isRu ? 'ВЫГОДА' : 'SAVE'}
                       </div>
                       <div className="flex items-start justify-between gap-2 mb-2">
@@ -607,7 +607,7 @@ export default function AirportFastTrackPage() {
         {step === 'passenger' && (
           <div className="px-4 space-y-5">
             {passengers.map((pax, i) => (
-              <div key={i} className="p-4 rounded-2xl border bg-card space-y-3">
+              <div key={i} className="p-4 rounded-none border bg-card space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="font-semibold text-sm">
                     {isRu ? `Пассажир ${i + 1}` : `Passenger ${i + 1}`}
@@ -694,7 +694,7 @@ export default function AirportFastTrackPage() {
                       type="button"
                       onClick={() => setPreferredLang(lang)}
                       className={cn(
-                        "px-3 py-1.5 rounded-lg border text-sm font-medium transition-all",
+                        "px-3 py-1.5 rounded-none border text-sm font-medium transition-all",
                         preferredLang === lang ? "border-primary bg-primary/10 text-primary" : "border-border"
                       )}
                     >
@@ -716,7 +716,7 @@ export default function AirportFastTrackPage() {
         {/* ═══ Step 3: Review — white-label, no supplier name shown ═══ */}
         {step === 'review' && selectedService && (
           <div className="px-4 space-y-4">
-            <div className="p-4 rounded-2xl border bg-card space-y-3">
+            <div className="p-4 rounded-none border bg-card space-y-3">
               <div className="flex items-center gap-2 mb-1">
                 <Shield className="w-4 h-4 text-primary" />
                 <span className="text-xs text-muted-foreground font-medium">myUNO Airport VIP</span>

@@ -224,7 +224,7 @@ export default function SetMenuBooking() {
           />
 
           {/* What's Included */}
-          <div className="p-4 rounded-xl bg-card border border-border/50">
+          <div className="p-4 rounded-none bg-card border border-border/50">
             <h3 className="font-semibold mb-3">
               {language === 'ru' ? 'Что включено' : "What's Included"}
             </h3>

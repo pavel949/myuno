@@ -543,7 +543,7 @@ function CompactVariant({ cardProps, isRu, onClick }: CompactVariantProps) {
       <CardContent className="p-2">
         <div className="flex gap-3">
           {/* Small thumbnail */}
-          <div className="w-16 h-16 bg-muted rounded-lg overflow-hidden flex-shrink-0">
+          <div className="w-16 h-16 bg-muted rounded-none overflow-hidden flex-shrink-0">
             {cardProps.coverImage ? (
               <img 
                 src={cardProps.coverImage} 
@@ -694,7 +694,7 @@ export function PropertyCardSkeleton({ variant = 'list' }: { variant?: PropertyC
       <Card>
         <CardContent className="p-2">
           <div className="flex gap-3">
-            <Skeleton className="w-16 h-16 rounded-lg" />
+            <Skeleton className="w-16 h-16 rounded-none" />
             <div className="flex-1 space-y-2 py-1">
               <Skeleton className="h-4 w-3/4" />
               <Skeleton className="h-3 w-1/2" />

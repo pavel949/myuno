@@ -527,10 +527,10 @@ export default function OwnerReviews() {
                     <img 
                       src={review.property_cover} 
                       alt="" 
-                      className="w-10 h-10 rounded-lg object-cover"
+                      className="w-10 h-10 rounded-none object-cover"
                     />
                   ) : (
-                    <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-none bg-muted flex items-center justify-center">
                       <Building2 className="h-5 w-5 text-muted-foreground" />
                     </div>
                   )}
@@ -600,7 +600,7 @@ export default function OwnerReviews() {
 
                     {/* Owner Response */}
                     {review.response && (
-                      <div className="mt-3 p-3 bg-primary/5 rounded-lg border border-primary/10">
+                      <div className="mt-3 p-3 bg-primary/5 rounded-none border border-primary/10">
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-xs font-medium text-primary">
                             {isRu ? 'Ваш ответ' : 'Your Response'}
@@ -662,7 +662,7 @@ export default function OwnerReviews() {
           {replyingTo && (
             <div className="space-y-4">
               {/* Original Review Preview */}
-              <div className="p-3 bg-muted rounded-lg">
+              <div className="p-3 bg-muted rounded-none">
                 <div className="flex items-center gap-2 mb-2">
                   {renderStars(replyingTo.rating)}
                   <span className="text-sm font-medium">

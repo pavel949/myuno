@@ -83,7 +83,7 @@ export function PaymentMethodPicker({ value, onChange, className }: PaymentMetho
             key={id}
             htmlFor={`pay-method-${id}`}
             className={cn(
-              'flex items-center gap-3 rounded-xl border p-4 cursor-pointer transition-colors',
+              'flex items-center gap-3 rounded-none border p-4 cursor-pointer transition-colors',
               selected ? 'border-primary bg-primary/5' : 'hover:bg-muted/40',
             )}
           >
@@ -93,7 +93,7 @@ export function PaymentMethodPicker({ value, onChange, className }: PaymentMetho
               <div className="flex items-center gap-2">
                 <p className="text-sm font-medium">{isRu ? title.ru : title.en}</p>
                 {badge && (
-                  <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-warning/15 text-warning border border-warning/20">
+                  <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-none bg-warning/15 text-warning border border-warning/20">
                     {isRu ? badge.ru : badge.en}
                   </span>
                 )}

@@ -21,7 +21,7 @@ function VendorLink({ icon, iconBg, label, description, onClick }: VendorLinkPro
         "hover:bg-muted/50 active:bg-muted transition-colors"
       )}
     >
-      <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center shrink-0", iconBg)}>
+      <div className={cn("w-9 h-9 rounded-none flex items-center justify-center shrink-0", iconBg)}>
         {icon}
       </div>
       <div className="flex-1 min-w-0 text-left">

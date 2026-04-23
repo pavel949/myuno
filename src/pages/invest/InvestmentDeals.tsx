@@ -51,14 +51,14 @@ export default function InvestmentDeals() {
       </Helmet>
 
       {/* Hero */}
-      <div className="bg-gradient-to-b from-emerald-500/10 via-background to-background border-b border-border/50">
+      <div className="bg-gradient-to-b from-success/10 via-background to-background border-b border-border/50">
         <div className="max-w-6xl mx-auto px-4 py-12">
           <button onClick={() => navigate(APP_ROUTES.INVEST)} className="mb-4 text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-2">
             <ArrowLeft className="w-4 h-4" /> Investment Hub
           </button>
           <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="w-4 h-4 text-emerald-500" />
-            <span className="text-sm uppercase tracking-wider text-emerald-500 font-medium">Curated deals</span>
+            <Sparkles className="w-4 h-4 text-success" />
+            <span className="text-sm uppercase tracking-wider text-success font-medium">Curated deals</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-bold mb-3">
             Invest in Thailand
@@ -71,7 +71,7 @@ export default function InvestmentDeals() {
             <Button onClick={() => navigate(APP_ROUTES.INVEST_PITCH)} variant="outline">
               Pitch your project
             </Button>
-            <Button onClick={() => navigate('/invest/submit')} className="bg-emerald-500 hover:bg-emerald-600">
+            <Button onClick={() => navigate('/invest/submit')} className="bg-success hover:bg-success">
               Submit opportunity
             </Button>
           </div>
@@ -133,13 +133,13 @@ export default function InvestmentDeals() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredDeals.map((d) => (
-              <Card key={d.id} className="p-5 hover:border-emerald-500/50 transition-colors">
+              <Card key={d.id} className="p-5 hover:border-success/40/50 transition-colors">
                 <div className="flex items-center gap-2 mb-2">
                   <Badge variant="outline" className="text-xs">{getCategoryLabel(d.category)}</Badge>
                   {d.deal_stage && <Badge variant="secondary" className="text-xs">{d.deal_stage}</Badge>}
                 </div>
                 <div className="flex items-baseline gap-2 mb-3">
-                  <span className="text-2xl font-bold font-mono text-emerald-500">{getCapitalRangeLabel(d.capital_range)}</span>
+                  <span className="text-2xl font-bold font-mono text-success">{getCapitalRangeLabel(d.capital_range)}</span>
                   <span className="text-xs text-muted-foreground">{getIntentLabel(d.deal_intent)}</span>
                 </div>
                 <h3 className="font-semibold mb-2 line-clamp-2">{d.teaser_public ?? '—'}</h3>
@@ -155,7 +155,7 @@ export default function InvestmentDeals() {
                     {d.deal_structure && <span className="capitalize">{d.deal_structure.replace('_', ' ')}</span>}
                   </div>
                 )}
-                <Button onClick={() => setInterestDeal(d)} className="w-full bg-emerald-500 hover:bg-emerald-600" size="sm">
+                <Button onClick={() => setInterestDeal(d)} className="w-full bg-success hover:bg-success" size="sm">
                   Express interest
                 </Button>
               </Card>

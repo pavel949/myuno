@@ -133,7 +133,7 @@ export function CardPreview(props: CardPreviewProps) {
 
   if (!hasContent) {
     return (
-      <div className="border border-dashed border-border rounded-2xl p-6 text-center text-muted-foreground">
+      <div className="border border-dashed border-border rounded-none p-6 text-center text-muted-foreground">
         <Eye className="w-8 h-8 mx-auto mb-2 opacity-50" />
         <p className="text-sm">
           {isRussian ? 'Заполните форму для предпросмотра' : 'Fill the form to see preview'}
@@ -143,7 +143,7 @@ export function CardPreview(props: CardPreviewProps) {
   }
 
   return (
-    <div className="border border-border rounded-2xl overflow-hidden bg-card shadow-sm">
+    <div className="border border-border rounded-none overflow-hidden bg-card shadow-sm">
       {/* Image */}
       <div className="aspect-[16/10] relative bg-muted">
         {props.image ? (
@@ -169,7 +169,7 @@ export function CardPreview(props: CardPreviewProps) {
                 </Badge>
               )}
               {(props as ProductPreviewProps).isPopular && (
-                <Badge className="bg-amber-500 text-white text-xs">
+                <Badge className="bg-accent text-white text-xs">
                   {isRussian ? 'Хит' : 'Hit'}
                 </Badge>
               )}
@@ -198,7 +198,7 @@ export function CardPreview(props: CardPreviewProps) {
 
         {/* Verified badge simulation */}
         <div className="absolute top-2 right-2">
-          <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center">
+          <div className="w-5 h-5 rounded-full bg-success flex items-center justify-center">
             <CheckCircle2 className="w-3 h-3 text-white" />
           </div>
         </div>

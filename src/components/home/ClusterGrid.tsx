@@ -38,7 +38,7 @@ export function ClusterGrid({ personas }: ClusterGridProps) {
           >
             {/* 2px left spine */}
             <div
-              className="absolute top-3.5 bottom-3.5 left-0 w-0.5 rounded-r-sm"
+              className="absolute top-3.5 bottom-3.5 left-0 w-0.5 rounded-none"
               style={{ background: c.accent }}
             />
             <div>

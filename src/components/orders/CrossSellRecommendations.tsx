@@ -103,7 +103,7 @@ export function CrossSellRecommendations({ orderType, orderId, className }: Cros
           <button
             key={s.slug}
             onClick={() => navigate(s.path)}
-            className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-muted/50 transition-colors text-left group"
+            className="w-full flex items-center gap-3 p-3 rounded-none hover:bg-muted/50 transition-colors text-left group"
           >
             <span className="text-2xl">{s.icon}</span>
             <span className="flex-1 font-medium text-sm">

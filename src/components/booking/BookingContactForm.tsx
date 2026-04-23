@@ -117,10 +117,10 @@ export function BookingContactForm({
     const hasFloatingLabel = isFocused || value.length > 0;
 
     const borderRadius = {
-      top: 'rounded-t-xl rounded-b-none',
+      top: 'rounded-none rounded-b-none',
       middle: 'rounded-none',
-      bottom: 'rounded-b-xl rounded-t-none',
-      single: 'rounded-xl',
+      bottom: 'rounded-none rounded-t-none',
+      single: 'rounded-none',
     }[config.position];
 
     const borderTop = config.position !== 'top' && config.position !== 'single' ? '-mt-px' : '';
@@ -238,7 +238,7 @@ export function BookingContactForm({
         <div className="relative">
           <div
             className={cn(
-              "relative border-2 rounded-xl transition-all duration-200",
+              "relative border-2 rounded-none transition-all duration-200",
               focused === 'notes' ? "border-foreground" : "border-border",
             )}
           >

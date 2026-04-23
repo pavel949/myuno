@@ -129,7 +129,7 @@ export function CSVImportWizard({ isProcessing, onAnalyze }: CSVImportWizardProp
           <label
             onDragOver={(e) => e.preventDefault()}
             onDrop={onDrop}
-            className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-xl p-8 cursor-pointer hover:border-primary/50 hover:bg-muted/30 transition-colors"
+            className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-none p-8 cursor-pointer hover:border-primary/50 hover:bg-muted/30 transition-colors"
           >
             <input
               type="file"
@@ -220,7 +220,7 @@ export function CSVImportWizard({ isProcessing, onAnalyze }: CSVImportWizardProp
         </div>
 
         {/* Preview table — first 5 rows */}
-        <div className="border rounded-lg overflow-hidden">
+        <div className="border rounded-none overflow-hidden">
           <div className="overflow-x-auto max-h-64">
             <table className="w-full text-xs">
               <thead className="bg-muted sticky top-0">

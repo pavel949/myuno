@@ -19,7 +19,7 @@ export function PersonaGatePrompt() {
   if (hasBusiness || hasInvestor) return null;
 
   return (
-    <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4 mb-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+    <div className="rounded-none border border-primary/20 bg-primary/5 p-4 mb-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
       <div className="flex-1">
         <p className="text-sm font-medium text-foreground">
           {isRu

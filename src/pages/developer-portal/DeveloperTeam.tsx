@@ -113,14 +113,14 @@ export default function DeveloperTeam() {
       {isLoading ? (
         <div className="text-[hsl(var(--nb-muted))]">Загрузка...</div>
       ) : members.length === 0 ? (
-        <div className="nb-glass p-8 rounded-xl text-center">
+        <div className="nb-glass p-8 rounded-none text-center">
           <Shield className="w-8 h-8 text-[hsl(var(--nb-muted))] mx-auto mb-3" />
           <p className="text-[hsl(var(--nb-text-secondary))]">Пока нет участников команды</p>
         </div>
       ) : (
         <div className="space-y-3">
           {members.map((m) => (
-            <div key={m.id} className="nb-glass p-4 rounded-xl flex items-center justify-between">
+            <div key={m.id} className="nb-glass p-4 rounded-none flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-[hsl(var(--nb-text))]">
                   {m.full_name || m.email}
@@ -132,12 +132,12 @@ export default function DeveloperTeam() {
                   {ROLE_LABELS[m.role] ?? m.role}
                 </Badge>
                 {m.status === 'invited' && (
-                  <span className="flex items-center gap-1 text-xs text-amber-400">
+                  <span className="flex items-center gap-1 text-xs text-accent">
                     <Clock className="w-3 h-3" /> Ожидает
                   </span>
                 )}
                 {m.status === 'active' && (
-                  <span className="text-xs text-green-400">Активен</span>
+                  <span className="text-xs text-success">Активен</span>
                 )}
               </div>
             </div>

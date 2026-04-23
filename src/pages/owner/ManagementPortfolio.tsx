@@ -216,7 +216,7 @@ function TermsMobileCard({
         </div>
 
         <div className="grid grid-cols-2 gap-3 text-sm">
-          <div className="p-2 rounded-lg bg-muted/50">
+          <div className="p-2 rounded-none bg-muted/50">
             <p className="text-xs text-muted-foreground mb-0.5">{isRu ? 'Комиссия' : 'Commission'}</p>
             <div className="flex items-center gap-1 font-medium">
               {terms.commission_type === 'percent' ? (
@@ -233,18 +233,18 @@ function TermsMobileCard({
               )}
             </div>
           </div>
-          <div className="p-2 rounded-lg bg-muted/50">
+          <div className="p-2 rounded-none bg-muted/50">
             <p className="text-xs text-muted-foreground mb-0.5">{isRu ? 'Выплата' : 'Payout'}</p>
             <p className="font-medium">
               {terms.payment_day ? (isRu ? `${terms.payment_day}-е число` : `${terms.payment_day}th`) : '—'}{' '}
               {terms.payment_currency}
             </p>
           </div>
-          <div className="p-2 rounded-lg bg-muted/50">
+          <div className="p-2 rounded-none bg-muted/50">
             <p className="text-xs text-muted-foreground mb-0.5">{isRu ? 'Уборка' : 'Cleaning'}</p>
             <p className="font-medium">{expensePartyLabel(terms.expense_responsibility?.cleaning || 'owner', isRu)}</p>
           </div>
-          <div className="p-2 rounded-lg bg-muted/50">
+          <div className="p-2 rounded-none bg-muted/50">
             <p className="text-xs text-muted-foreground mb-0.5">{isRu ? 'Ремонт' : 'Repairs'}</p>
             <p className="font-medium">{expensePartyLabel(terms.expense_responsibility?.repairs_major || 'owner', isRu)}</p>
           </div>
@@ -399,7 +399,7 @@ export default function ManagementPortfolio() {
           { icon: TrendingUp, label: isRu ? 'Ср. комиссия' : 'Avg Commission', value: `${counts.avgCommission}%`, color: 'text-primary', bg: 'bg-primary/8' },
           { icon: AlertTriangle, label: isRu ? 'Истекают' : 'Expiring', value: counts.expiredCount, color: counts.expiredCount > 0 ? 'text-destructive' : 'text-muted-foreground', bg: counts.expiredCount > 0 ? 'bg-destructive/8' : 'bg-muted/50' },
         ].map(({ icon: Icon, label, value, color, bg }) => (
-          <div key={label} className={cn('rounded-xl border p-3', bg)}>
+          <div key={label} className={cn('rounded-none border p-3', bg)}>
             <div className="flex items-center gap-2 mb-1">
               <Icon className={cn('h-4 w-4', color)} />
               <span className="text-xs text-muted-foreground">{label}</span>
@@ -459,7 +459,7 @@ export default function ManagementPortfolio() {
 
       {/* ── Bulk Action Bar ── */}
       {bulkMode && (
-        <div className="mb-4 p-3 rounded-xl border-2 border-primary/30 bg-primary/5 space-y-3">
+        <div className="mb-4 p-3 rounded-none border-2 border-primary/30 bg-primary/5 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Checkbox
@@ -523,7 +523,7 @@ export default function ManagementPortfolio() {
       {isLoading ? (
         <div className="space-y-3">
           {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-32 w-full rounded-xl" />
+            <Skeleton key={i} className="h-32 w-full rounded-none" />
           ))}
         </div>
       ) : filtered.length === 0 ? (
@@ -550,7 +550,7 @@ export default function ManagementPortfolio() {
           ))}
         </div>
       ) : (
-        <div className="rounded-xl border overflow-hidden">
+        <div className="rounded-none border overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow>

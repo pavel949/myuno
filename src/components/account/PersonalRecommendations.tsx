@@ -71,9 +71,9 @@ export function PersonalRecommendations() {
       <div className="space-y-3">
         <Skeleton className="h-6 w-48" />
         <div className="flex gap-3">
-          <Skeleton className="h-24 w-40 rounded-xl" />
-          <Skeleton className="h-24 w-40 rounded-xl" />
-          <Skeleton className="h-24 w-40 rounded-xl" />
+          <Skeleton className="h-24 w-40 rounded-none" />
+          <Skeleton className="h-24 w-40 rounded-none" />
+          <Skeleton className="h-24 w-40 rounded-none" />
         </div>
       </div>
     );
@@ -103,7 +103,7 @@ export function PersonalRecommendations() {
                 onClick={() => navigate('/discover')}
                 className="w-full flex items-center gap-3 py-3 hover:opacity-70 transition-opacity"
               >
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-lg">
+                <div className="w-10 h-10 rounded-none bg-primary/10 flex items-center justify-center text-lg">
                   🔄
                 </div>
                 <div className="flex-1 text-left min-w-0">
@@ -128,7 +128,7 @@ export function PersonalRecommendations() {
               <button
                 key={service.id}
                 onClick={() => navigate(`/service/${service.id}`)}
-                className="min-w-[160px] rounded-xl border bg-card overflow-hidden hover:shadow-elevation-2 transition-shadow group"
+                className="min-w-[160px] rounded-none border bg-card overflow-hidden hover:shadow-elevation-2 transition-shadow group"
               >
                 {service.images?.[0] ? (
                   <div className="h-20 overflow-hidden">

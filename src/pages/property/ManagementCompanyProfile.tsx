@@ -37,7 +37,7 @@ export default function ManagementCompanyProfile() {
     return (
       <AppLayout showHeader={false} showBottomNav>
         <div className="min-h-screen bg-background p-4 space-y-4">
-          <Skeleton className="h-48 w-full rounded-2xl" />
+          <Skeleton className="h-48 w-full rounded-none" />
           <Skeleton className="h-8 w-64" />
           <Skeleton className="h-4 w-full" />
           <Skeleton className="h-4 w-3/4" />
@@ -86,10 +86,10 @@ export default function ManagementCompanyProfile() {
 
         {/* Company Info */}
         <div className="px-4 -mt-12 relative z-10">
-          <div className="bg-card rounded-2xl border shadow-sm p-4">
+          <div className="bg-card rounded-none border shadow-sm p-4">
             <div className="flex items-start gap-4">
               {/* Logo */}
-              <div className="w-16 h-16 rounded-xl bg-muted border overflow-hidden shrink-0">
+              <div className="w-16 h-16 rounded-none bg-muted border overflow-hidden shrink-0">
                 {company.logo ? (
                   <img src={company.logo} alt={name} className="w-full h-full object-cover" />
                 ) : (

@@ -149,7 +149,7 @@
          <Card className="border-primary/20 bg-primary/5">
            <CardContent className="p-4">
              <div className="flex gap-4">
-               <div className="w-14 h-14 rounded-xl bg-primary/20 flex items-center justify-center text-2xl shrink-0">
+               <div className="w-14 h-14 rounded-none bg-primary/20 flex items-center justify-center text-2xl shrink-0">
                  {fn.icon}
                </div>
                <div className="flex-1 min-w-0">
@@ -249,7 +249,7 @@
                <Label
                  key={slot.value}
                  htmlFor={`time-${slot.value}`}
-                 className={`flex items-center gap-2 p-3 rounded-lg border cursor-pointer transition-colors ${
+                 className={`flex items-center gap-2 p-3 rounded-none border cursor-pointer transition-colors ${
                    formData.preferredTime === slot.value
                      ? 'border-primary bg-primary/5'
                      : 'border-border hover:border-primary/30'

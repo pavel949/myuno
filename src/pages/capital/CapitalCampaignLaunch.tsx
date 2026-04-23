@@ -122,7 +122,7 @@ export default function CapitalCampaignLaunch() {
         {[1, 2, 3, 4].map((s) => (
           <div key={s} className="flex items-center gap-2">
             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-              s === step ? 'bg-emerald-500 text-white' : s < step ? 'bg-emerald-500/20 text-emerald-400' : 'bg-muted text-muted-foreground'
+              s === step ? 'bg-success text-white' : s < step ? 'bg-success/20 text-success' : 'bg-muted text-muted-foreground'
             }`}>{s}</div>
             {s < 4 && <div className="w-8 h-px bg-border" />}
           </div>
@@ -139,8 +139,8 @@ export default function CapitalCampaignLaunch() {
               <div
                 key={p.id}
                 onClick={() => setSelectedProject(p)}
-                className={`rounded-lg border p-3 cursor-pointer transition-colors ${
-                  selectedProject?.id === p.id ? 'border-emerald-500 bg-emerald-500/5' : 'border-border/50 hover:border-emerald-500/30'
+                className={`rounded-none border p-3 cursor-pointer transition-colors ${
+                  selectedProject?.id === p.id ? 'border-success/40 bg-success/5' : 'border-border/50 hover:border-success/40/30'
                 }`}
               >
                 <h3 className="font-medium text-sm">{p.name}</h3>
@@ -150,7 +150,7 @@ export default function CapitalCampaignLaunch() {
             ))}
           </div>
           <Button
-            className="bg-emerald-600 hover:bg-emerald-700"
+            className="bg-success hover:bg-success"
             disabled={!selectedProject}
             onClick={() => setStep(2)}
           >
@@ -185,7 +185,7 @@ export default function CapitalCampaignLaunch() {
               </div>
               <div className="space-y-1 max-h-[40vh] overflow-y-auto">
                 {matchedContacts.map((c) => (
-                  <div key={c.id} className="flex items-center gap-3 p-2 rounded hover:bg-muted/20">
+                  <div key={c.id} className="flex items-center gap-3 p-2 rounded-none hover:bg-muted/20">
                     <Checkbox checked={selectedContacts.has(c.id)} onCheckedChange={() => toggleContact(c.id)} />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{c.name}</p>
@@ -200,7 +200,7 @@ export default function CapitalCampaignLaunch() {
           )}
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => setStep(1)}>Назад</Button>
-            <Button className="bg-emerald-600 hover:bg-emerald-700" disabled={selectedContacts.size === 0} onClick={() => setStep(3)}>
+            <Button className="bg-success hover:bg-success" disabled={selectedContacts.size === 0} onClick={() => setStep(3)}>
               Далее <ArrowRight className="w-4 h-4 ml-1" />
             </Button>
           </div>
@@ -225,14 +225,14 @@ export default function CapitalCampaignLaunch() {
           </div>
 
           {selectedTemplate ? (
-            <div className="rounded-lg border border-border/50 p-3 bg-muted/20">
+            <div className="rounded-none border border-border/50 p-3 bg-muted/20">
               <p className="text-sm whitespace-pre-wrap">{templates.find((t) => t.id === selectedTemplate)?.body}</p>
             </div>
           ) : (
             <div>
               <Label>Текст сообщения</Label>
               <textarea
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm min-h-[120px] resize-y"
+                className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm min-h-[120px] resize-y"
                 value={customMessage}
                 onChange={(e) => setCustomMessage(e.target.value)}
                 placeholder="Введите текст сообщения..."
@@ -242,7 +242,7 @@ export default function CapitalCampaignLaunch() {
 
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => setStep(2)}>Назад</Button>
-            <Button className="bg-emerald-600 hover:bg-emerald-700" disabled={!messageText} onClick={() => setStep(4)}>
+            <Button className="bg-success hover:bg-success" disabled={!messageText} onClick={() => setStep(4)}>
               Далее <ArrowRight className="w-4 h-4 ml-1" />
             </Button>
           </div>
@@ -253,16 +253,16 @@ export default function CapitalCampaignLaunch() {
       {step === 4 && (
         <div className="space-y-3">
           <h2 className="font-medium">Подтверждение запуска</h2>
-          <div className="rounded-lg border border-border/50 p-4 space-y-2">
+          <div className="rounded-none border border-border/50 p-4 space-y-2">
             <p className="text-sm"><span className="text-muted-foreground">Проект:</span> {selectedProject?.name}</p>
             <p className="text-sm"><span className="text-muted-foreground">Контактов:</span> {selectedContacts.size}</p>
             <p className="text-sm"><span className="text-muted-foreground">Сообщение:</span></p>
-            <p className="text-sm bg-muted/20 rounded p-2 whitespace-pre-wrap line-clamp-4">{messageText}</p>
+            <p className="text-sm bg-muted/20 rounded-none p-2 whitespace-pre-wrap line-clamp-4">{messageText}</p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => setStep(3)}>Назад</Button>
             <Button
-              className="bg-emerald-600 hover:bg-emerald-700"
+              className="bg-success hover:bg-success"
               onClick={handleLaunch}
               disabled={launching}
             >

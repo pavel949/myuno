@@ -88,7 +88,7 @@ export function NbLeadForm({ projectId, developerId, source = 'project_page', co
         placeholder="Ваше имя *"
         value={form.full_name}
         onChange={e => setForm(f => ({ ...f, full_name: e.target.value }))}
-        className="w-full px-3 py-2.5 rounded-lg text-sm"
+        className="w-full px-3 py-2.5 rounded-none text-sm"
         style={{ background: 'hsl(var(--nb-bg))', color: 'hsl(var(--nb-text))', border: '1px solid hsl(var(--nb-gold) / 0.2)' }}
       />
       <input
@@ -96,7 +96,7 @@ export function NbLeadForm({ projectId, developerId, source = 'project_page', co
         placeholder="Телефон / WhatsApp *"
         value={form.phone}
         onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
-        className="w-full px-3 py-2.5 rounded-lg text-sm"
+        className="w-full px-3 py-2.5 rounded-none text-sm"
         style={{ background: 'hsl(var(--nb-bg))', color: 'hsl(var(--nb-text))', border: '1px solid hsl(var(--nb-gold) / 0.2)' }}
       />
       {!compact && (
@@ -106,7 +106,7 @@ export function NbLeadForm({ projectId, developerId, source = 'project_page', co
             placeholder="Email"
             value={form.email}
             onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-            className="w-full px-3 py-2.5 rounded-lg text-sm"
+            className="w-full px-3 py-2.5 rounded-none text-sm"
             style={{ background: 'hsl(var(--nb-bg))', color: 'hsl(var(--nb-text))', border: '1px solid hsl(var(--nb-gold) / 0.2)' }}
           />
           <textarea
@@ -114,7 +114,7 @@ export function NbLeadForm({ projectId, developerId, source = 'project_page', co
             rows={3}
             value={form.message}
             onChange={e => setForm(f => ({ ...f, message: e.target.value }))}
-            className="w-full px-3 py-2.5 rounded-lg text-sm resize-none"
+            className="w-full px-3 py-2.5 rounded-none text-sm resize-none"
             style={{ background: 'hsl(var(--nb-bg))', color: 'hsl(var(--nb-text))', border: '1px solid hsl(var(--nb-gold) / 0.2)' }}
           />
         </>

@@ -45,7 +45,7 @@ export default function NewDevelopmentsLanding() {
               transition={{ duration: 0.3 }}
               className="flex items-center gap-1.5 mb-6"
             >
-              <div className="w-6 h-6 rounded-md bg-primary flex items-center justify-center">
+              <div className="w-6 h-6 rounded-none bg-primary flex items-center justify-center">
                 <span className="text-[10px] font-bold text-primary-foreground">U</span>
               </div>
               <span className="text-sm font-semibold text-foreground/70">myUNO</span>
@@ -111,7 +111,7 @@ export default function NewDevelopmentsLanding() {
               <Button
                 onClick={handleBrowse}
                 size="lg"
-                className="w-full h-14 text-base font-bold rounded-xl shadow-lg shadow-primary/20"
+                className="w-full h-14 text-base font-bold rounded-none shadow-lg shadow-primary/20"
               >
                 <Building2 className="w-5 h-5 mr-2" />
                 {isRu ? 'Смотреть проверенные проекты' : 'View Rated Projects'}
@@ -161,7 +161,7 @@ export default function NewDevelopmentsLanding() {
               },
             ].map(({ icon: Icon, title, desc }) => (
               <div key={title} className="flex gap-3.5">
-                <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mt-0.5">
+                <div className="flex-shrink-0 w-10 h-10 rounded-none bg-primary/10 flex items-center justify-center mt-0.5">
                   <Icon className="w-5 h-5 text-primary" />
                 </div>
                 <div>
@@ -249,7 +249,7 @@ export default function NewDevelopmentsLanding() {
               { label: isRu ? 'Спрос' : 'Demand', weight: 15, desc: isRu ? 'Заполняемость района, динамика продаж' : 'Area occupancy, sales velocity' },
               { label: isRu ? 'Юр. безопасность' : 'Legal safety', weight: 10, desc: isRu ? 'Титул, разрешения, структура владения' : 'Title, permits, ownership structure' },
             ].map(({ label, weight, desc }) => (
-              <div key={label} className="p-3.5 rounded-xl bg-muted/50 border border-border">
+              <div key={label} className="p-3.5 rounded-none bg-muted/50 border border-border">
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="text-sm font-semibold text-foreground">{label}</span>
                   <span className="text-xs font-bold text-primary">{weight}%</span>
@@ -316,7 +316,7 @@ export default function NewDevelopmentsLanding() {
 
         {/* ─── FINAL CTA ─── */}
         <section className="max-w-lg mx-auto px-5 pb-12 pt-10">
-          <div className="p-6 rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-background border border-primary/15">
+          <div className="p-6 rounded-none bg-gradient-to-br from-primary/10 via-primary/5 to-background border border-primary/15">
             <h2 className="text-lg font-display font-bold text-foreground text-center">
               {isRu
                 ? 'Проверьте проект до покупки'
@@ -332,7 +332,7 @@ export default function NewDevelopmentsLanding() {
             <Button
               onClick={handleBrowse}
               size="lg"
-              className="w-full h-14 text-base font-bold rounded-xl shadow-lg shadow-primary/20"
+              className="w-full h-14 text-base font-bold rounded-none shadow-lg shadow-primary/20"
             >
               {isRu ? 'Смотреть проверенные проекты' : 'View Rated Projects'}
             </Button>

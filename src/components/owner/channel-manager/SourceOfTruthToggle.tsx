@@ -88,9 +88,9 @@ export function SourceOfTruthToggle({ propertyId, currentMode, propertyTitle, on
       <button
         type="button"
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center gap-3 p-4 text-left hover:bg-muted/30 transition-colors rounded-t-xl"
+        className="w-full flex items-center gap-3 p-4 text-left hover:bg-muted/30 transition-colors rounded-none"
       >
-        <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+        <div className="w-9 h-9 rounded-none bg-primary/10 flex items-center justify-center shrink-0">
           <Home className="h-4 w-4 text-primary" />
         </div>
         <div className="flex-1 min-w-0">
@@ -127,7 +127,7 @@ export function SourceOfTruthToggle({ propertyId, currentMode, propertyTitle, on
               <div
                 key={value}
                 className={cn(
-                  'flex items-start gap-3 rounded-lg border p-3 cursor-pointer transition-colors',
+                  'flex items-start gap-3 rounded-none border p-3 cursor-pointer transition-colors',
                   mode === value ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'
                 )}
                 onClick={() => setMode(value)}
@@ -148,7 +148,7 @@ export function SourceOfTruthToggle({ propertyId, currentMode, propertyTitle, on
           </RadioGroup>
 
           {mode === 'myuno_master' && (
-            <div className="flex items-start gap-2 rounded-md bg-warning/10 border border-warning/30 p-3">
+            <div className="flex items-start gap-2 rounded-none bg-warning/10 border border-warning/30 p-3">
               <AlertCircle className="h-4 w-4 text-warning mt-0.5 shrink-0" />
               <p className="text-xs text-muted-foreground">
                 {isRu

@@ -154,7 +154,7 @@ export function LifeOSRoutesTab() {
               <CardContent className="p-3 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div
-                    className="w-8 h-8 rounded-lg flex items-center justify-center"
+                    className="w-8 h-8 rounded-none flex items-center justify-center"
                     style={{ backgroundColor: `${situation?.color || '#666'}20` }}
                   >
                     <Route className="w-4 h-4" style={{ color: situation?.color }} />
@@ -226,21 +226,21 @@ export function LifeOSRoutesTab() {
               </div>
 
               {/* Block 1: Recognition */}
-              <div className="space-y-2 p-3 rounded-lg bg-muted/30 border">
+              <div className="space-y-2 p-3 rounded-none bg-muted/30 border">
                 <p className="text-xs font-semibold text-muted-foreground">① {isRu ? 'Узнавание (эмпатия)' : 'Recognition (empathy)'}</p>
                 <Textarea rows={2} value={editingRoute.recognition_en} onChange={e => updateField('recognition_en', e.target.value)} placeholder="EN" className="text-sm" />
                 <Textarea rows={2} value={editingRoute.recognition_ru} onChange={e => updateField('recognition_ru', e.target.value)} placeholder="RU" className="text-sm" />
               </div>
 
               {/* Block 2: Reassurance */}
-              <div className="space-y-2 p-3 rounded-lg bg-muted/30 border">
+              <div className="space-y-2 p-3 rounded-none bg-muted/30 border">
                 <p className="text-xs font-semibold text-muted-foreground">② {isRu ? 'Успокоение' : 'Reassurance'}</p>
                 <Input value={editingRoute.reassurance_en} onChange={e => updateField('reassurance_en', e.target.value)} placeholder="EN" className="text-sm" />
                 <Input value={editingRoute.reassurance_ru} onChange={e => updateField('reassurance_ru', e.target.value)} placeholder="RU" className="text-sm" />
               </div>
 
               {/* Block 3: What Matters */}
-              <div className="space-y-2 p-3 rounded-lg bg-muted/30 border">
+              <div className="space-y-2 p-3 rounded-none bg-muted/30 border">
                 <p className="text-xs font-semibold text-muted-foreground">③ {isRu ? 'Что важно сейчас' : 'What matters now'}</p>
                 <div className="space-y-3">
                   <div>
@@ -275,7 +275,7 @@ export function LifeOSRoutesTab() {
               </div>
 
               {/* Block 4: Recommendation */}
-              <div className="space-y-2 p-3 rounded-lg bg-muted/30 border">
+              <div className="space-y-2 p-3 rounded-none bg-muted/30 border">
                 <p className="text-xs font-semibold text-muted-foreground">④ {isRu ? 'Рекомендация' : 'Recommendation'}</p>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
@@ -294,7 +294,7 @@ export function LifeOSRoutesTab() {
               </div>
 
               {/* Block 5: Alternatives */}
-              <div className="space-y-2 p-3 rounded-lg bg-muted/30 border">
+              <div className="space-y-2 p-3 rounded-none bg-muted/30 border">
                 <p className="text-xs font-semibold text-muted-foreground">⑤ {isRu ? 'Альтернативы (макс 2)' : 'Alternatives (max 2)'}</p>
                 <Textarea
                   rows={2}
@@ -306,7 +306,7 @@ export function LifeOSRoutesTab() {
               </div>
 
               {/* Block 6: CTA */}
-              <div className="space-y-2 p-3 rounded-lg bg-muted/30 border">
+              <div className="space-y-2 p-3 rounded-none bg-muted/30 border">
                 <p className="text-xs font-semibold text-muted-foreground">⑥ {isRu ? 'Действие (CTA)' : 'Action (CTA)'}</p>
                 <div className="grid grid-cols-2 gap-2">
                   <Input value={editingRoute.cta_text_en} onChange={e => updateField('cta_text_en', e.target.value)} placeholder="CTA EN" className="text-sm" />
@@ -332,7 +332,7 @@ export function LifeOSRoutesTab() {
               </div>
 
               {/* Block 7: Next Routes */}
-              <div className="space-y-2 p-3 rounded-lg bg-muted/30 border">
+              <div className="space-y-2 p-3 rounded-none bg-muted/30 border">
                 <p className="text-xs font-semibold text-muted-foreground">⑦ {isRu ? 'Далее (next routes)' : 'Next routes'}</p>
                 <Textarea
                   rows={2}

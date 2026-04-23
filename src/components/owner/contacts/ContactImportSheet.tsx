@@ -184,7 +184,7 @@ export function ContactImportSheet({ open, onOpenChange, companyId }: ContactImp
     >
       {step === 'upload' && (
         <div onDrop={handleDrop} onDragOver={e => e.preventDefault()}
-          className="border-2 border-dashed rounded-xl p-8 text-center cursor-pointer hover:border-primary/50 transition-colors"
+          className="border-2 border-dashed rounded-none p-8 text-center cursor-pointer hover:border-primary/50 transition-colors"
           onClick={() => {
             const input = document.createElement('input'); input.type = 'file'; input.accept = '.csv';
             input.onchange = (e) => { const file = (e.target as HTMLInputElement).files?.[0]; if (file) handleFile(file); };
@@ -220,7 +220,7 @@ export function ContactImportSheet({ open, onOpenChange, companyId }: ContactImp
             ))}
           </div>
           {previewRows.length > 0 && (
-            <div className="overflow-x-auto max-h-[20vh] overflow-y-auto border rounded-lg">
+            <div className="overflow-x-auto max-h-[20vh] overflow-y-auto border rounded-none">
               <p className="text-xs font-medium mb-1 px-2 pt-2">{isRu ? 'Предпросмотр (5 строк):' : 'Preview (5 rows):'}</p>
               <table className="text-xs w-full">
                 <thead><tr>{columns.filter(c => mapping[c]).map(c => {
@@ -232,7 +232,7 @@ export function ContactImportSheet({ open, onOpenChange, companyId }: ContactImp
             </div>
           )}
           {!hasMapped && (
-            <div className="rounded-lg bg-destructive/10 border border-destructive/20 px-3 py-2 text-sm text-destructive">
+            <div className="rounded-none bg-destructive/10 border border-destructive/20 px-3 py-2 text-sm text-destructive">
               ⚠ {t('mapAtLeastOne', lang)}
             </div>
           )}

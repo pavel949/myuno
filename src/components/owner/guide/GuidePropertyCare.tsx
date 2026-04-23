@@ -110,7 +110,7 @@ export function GuidePropertyCare() {
         </div>
 
         {/* Screenshot placeholder */}
-        <div className="rounded-xl border border-border bg-secondary/20 p-8 text-center">
+        <div className="rounded-none border border-border bg-secondary/20 p-8 text-center">
           <LayoutDashboard className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
           <p className="text-sm text-muted-foreground">
             {isRu ? 'Скриншот панели управления' : 'Dashboard Screenshot'}
@@ -195,7 +195,7 @@ export function GuidePropertyCare() {
               <div className="space-y-2">
                 {taskStatuses.map((status) => (
                   <div key={status.labelEn} className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-lg ${status.color} flex items-center justify-center`}>
+                    <div className={`w-8 h-8 rounded-none ${status.color} flex items-center justify-center`}>
                       <status.icon className="w-4 h-4 text-foreground" />
                     </div>
                     <span className="text-sm text-muted-foreground">
@@ -249,7 +249,7 @@ export function GuidePropertyCare() {
               </h4>
               <div className="flex flex-wrap gap-1">
                 {expenseCategories.slice(0, 8).map((cat) => (
-                  <span key={cat} className="text-xs bg-secondary px-2 py-0.5 rounded">
+                  <span key={cat} className="text-xs bg-secondary px-2 py-0.5 rounded-none">
                     {cat}
                   </span>
                 ))}

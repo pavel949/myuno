@@ -61,7 +61,7 @@ function SuggestionCard({
       <button
         onClick={onNavigate}
         className={cn(
-          'w-full text-left rounded-xl border-l-[3px] border border-border/40 transition-all duration-150',
+          'w-full text-left rounded-none border-l-[3px] border border-border/40 transition-all duration-150',
           'hover:shadow-sm active:scale-[0.98]',
           'p-3.5',
           config.border,
@@ -70,7 +70,7 @@ function SuggestionCard({
       >
         <div className="flex items-start gap-3">
           {/* Icon */}
-          <div className="w-9 h-9 rounded-lg bg-card border border-border/60 flex items-center justify-center shrink-0 shadow-sm">
+          <div className="w-9 h-9 rounded-none bg-card border border-border/60 flex items-center justify-center shrink-0 shadow-sm">
             <span className="text-base leading-none">{suggestion.icon}</span>
           </div>
 
@@ -89,7 +89,7 @@ function SuggestionCard({
             </p>
             <div className="flex items-center gap-2 mt-2">
               <span className={cn(
-                'inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium',
+                'inline-flex items-center px-2 py-0.5 rounded-none text-[10px] font-medium',
                 config.badge,
               )}>
                 {badgeLabel}
@@ -107,7 +107,7 @@ function SuggestionCard({
               e.stopPropagation();
               onDismiss();
             }}
-            className="p-1 rounded-lg hover:bg-muted/80 transition-colors shrink-0 -mt-0.5 -mr-0.5"
+            className="p-1 rounded-none hover:bg-muted/80 transition-colors shrink-0 -mt-0.5 -mr-0.5"
             aria-label="Dismiss"
           >
             <X className="w-3.5 h-3.5 text-muted-foreground" />
@@ -128,14 +128,14 @@ export function ProactiveConcierge() {
     return (
       <SectionCard className="space-y-3">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+          <div className="w-7 h-7 rounded-none bg-primary/10 flex items-center justify-center">
             <Sparkles className="w-3.5 h-3.5 text-primary animate-pulse" />
           </div>
           <Skeleton className="h-4 w-36" />
         </div>
         <div className="space-y-2">
-          <Skeleton className="h-[76px] w-full rounded-xl" />
-          <Skeleton className="h-[76px] w-full rounded-xl" />
+          <Skeleton className="h-[76px] w-full rounded-none" />
+          <Skeleton className="h-[76px] w-full rounded-none" />
         </div>
       </SectionCard>
     );
@@ -148,7 +148,7 @@ export function ProactiveConcierge() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+          <div className="w-7 h-7 rounded-none bg-primary/10 flex items-center justify-center">
             <Sparkles className="w-3.5 h-3.5 text-primary" />
           </div>
           <div>
@@ -162,7 +162,7 @@ export function ProactiveConcierge() {
         </div>
         <button
           onClick={refresh}
-          className="p-2 rounded-lg hover:bg-muted transition-colors group"
+          className="p-2 rounded-none hover:bg-muted transition-colors group"
           title={isRu ? 'Обновить' : 'Refresh'}
         >
           <RefreshCw className={cn(

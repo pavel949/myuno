@@ -56,12 +56,12 @@ function PayoutMethodCard({ method, onSetDefault, onDelete }: PayoutMethodCardPr
 
   return (
     <div className={cn(
-      'relative p-4 rounded-xl border bg-card',
+      'relative p-4 rounded-none border bg-card',
       method.is_default && 'ring-2 ring-primary/50 border-primary'
     )}>
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-none bg-gradient-to-br from-primary to-primary flex items-center justify-center">
             {method.type === 'bank_account' ? (
               <span className="text-xs font-bold text-white">
                 {bankLogos[bankCode] || 'BANK'}
@@ -265,7 +265,7 @@ export function PayoutMethodsSection() {
       </div>
 
       {payoutMethods.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground border rounded-xl border-dashed">
+        <div className="text-center py-8 text-muted-foreground border rounded-none border-dashed">
           <Building2 className="w-10 h-10 mx-auto mb-2 opacity-50" />
           <p className="text-sm">{isRu ? 'Нет реквизитов для выплат' : 'No payout methods'}</p>
           <p className="text-xs">

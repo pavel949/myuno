@@ -135,7 +135,7 @@ export default function OwnerAutoMessaging() {
 
       {isLoading ? (
         <div className="space-y-3">
-          {[1, 2, 3].map(i => <Skeleton key={i} className="h-24 rounded-xl" />)}
+          {[1, 2, 3].map(i => <Skeleton key={i} className="h-24 rounded-none" />)}
         </div>
       ) : grouped.length === 0 ? (
         <Card className="p-8 text-center">
@@ -181,7 +181,7 @@ export default function OwnerAutoMessaging() {
 
       {/* Create Sheet */}
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto rounded-t-2xl">
+        <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto rounded-none">
           <SheetHeader>
             <SheetTitle>{isRu ? 'Новое правило' : 'New Rule'}</SheetTitle>
           </SheetHeader>

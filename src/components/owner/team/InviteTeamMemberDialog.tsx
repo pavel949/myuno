@@ -203,7 +203,7 @@ export function InviteTeamMemberDialog({ open, onOpenChange, preselectedProperty
                     onClick={() => handleRoleSelect(role.value)}
                   >
                     <CardContent className="p-3 flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-primary/10">
+                      <div className="p-2 rounded-none bg-primary/10">
                         <role.icon className="h-4 w-4 text-primary" />
                       </div>
                       <div className="flex-1">
@@ -227,7 +227,7 @@ export function InviteTeamMemberDialog({ open, onOpenChange, preselectedProperty
         {step === 'permissions' && (
           <div className="space-y-4">
             <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 rounded-lg border">
+              <div className="flex items-center justify-between p-3 rounded-none border">
                 <div className="flex items-center gap-3">
                   <Eye className="h-4 w-4 text-muted-foreground" />
                   <div>
@@ -244,7 +244,7 @@ export function InviteTeamMemberDialog({ open, onOpenChange, preselectedProperty
                 />
               </div>
 
-              <div className="flex items-center justify-between p-3 rounded-lg border">
+              <div className="flex items-center justify-between p-3 rounded-none border">
                 <div className="flex items-center gap-3">
                   <Shield className="h-4 w-4 text-muted-foreground" />
                   <div>
@@ -260,7 +260,7 @@ export function InviteTeamMemberDialog({ open, onOpenChange, preselectedProperty
                 />
               </div>
 
-              <div className="flex items-center justify-between p-3 rounded-lg border">
+              <div className="flex items-center justify-between p-3 rounded-none border">
                 <div className="flex items-center gap-3">
                   <DollarSign className="h-4 w-4 text-muted-foreground" />
                   <div>
@@ -276,7 +276,7 @@ export function InviteTeamMemberDialog({ open, onOpenChange, preselectedProperty
                 />
               </div>
 
-              <div className="flex items-center justify-between p-3 rounded-lg border">
+              <div className="flex items-center justify-between p-3 rounded-none border">
                 <div className="flex items-center gap-3">
                   <CalendarDays className="h-4 w-4 text-muted-foreground" />
                   <div>
@@ -335,22 +335,22 @@ export function InviteTeamMemberDialog({ open, onOpenChange, preselectedProperty
                 </div>
                 <div className="flex gap-2 pt-2 border-t">
                   {permissions.view && (
-                    <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
+                    <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-none">
                       {isRu ? 'Просмотр' : 'View'}
                     </span>
                   )}
                   {permissions.edit && (
-                    <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
+                    <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-none">
                       {isRu ? 'Редактирование' : 'Edit'}
                     </span>
                   )}
                   {permissions.financial && (
-                    <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
+                    <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-none">
                       {isRu ? 'Финансы' : 'Financial'}
                     </span>
                   )}
                   {permissions.bookings && (
-                    <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
+                    <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-none">
                       {isRu ? 'Бронирования' : 'Bookings'}
                     </span>
                   )}

@@ -31,7 +31,7 @@ export default function NewbuildsCompare() {
             </p>
             <Link
               to={APP_ROUTES.OFFPLAN}
-              className="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors"
+              className="inline-flex items-center justify-center px-5 py-2.5 rounded-none bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors"
             >
               К каталогу
             </Link>
@@ -45,8 +45,8 @@ export default function NewbuildsCompare() {
     {
       label: 'Фото',
       render: item => item.cover_image ? (
-        <img src={item.cover_image} alt="" className="w-full h-32 rounded-lg object-cover" />
-      ) : <div className="w-full h-32 rounded-lg bg-muted" />,
+        <img src={item.cover_image} alt="" className="w-full h-32 rounded-none object-cover" />
+      ) : <div className="w-full h-32 rounded-none bg-muted" />,
     },
     {
       label: 'Статус',
@@ -101,7 +101,7 @@ export default function NewbuildsCompare() {
       render: item => (
         <div className="flex flex-wrap gap-1">
           {(item.unit_types || []).map(t => (
-            <span key={t} className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary">
+            <span key={t} className="text-[10px] px-1.5 py-0.5 rounded-none bg-primary/10 text-primary">
               {unitTypeLabels[t] || t}
             </span>
           ))}
@@ -122,7 +122,7 @@ export default function NewbuildsCompare() {
       render: item => (
         <div className="flex flex-wrap gap-1">
           {(item.amenities || []).slice(0, 5).map(a => (
-            <span key={a} className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+            <span key={a} className="text-[10px] px-1.5 py-0.5 rounded-none bg-muted text-muted-foreground">
               {a}
             </span>
           ))}
@@ -147,7 +147,7 @@ export default function NewbuildsCompare() {
           </div>
           <button
             onClick={clear}
-            className="text-xs px-3 py-1.5 rounded-lg text-muted-foreground border border-border hover:text-foreground hover:border-foreground/30 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="text-xs px-3 py-1.5 rounded-none text-muted-foreground border border-border hover:text-foreground hover:border-foreground/30 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             Очистить
           </button>
@@ -170,7 +170,7 @@ export default function NewbuildsCompare() {
                       </Link>
                       <button
                         onClick={() => remove(item.id)}
-                        className="p-1 flex-shrink-0 text-muted-foreground hover:text-foreground rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        className="p-1 flex-shrink-0 text-muted-foreground hover:text-foreground rounded-none focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                         aria-label={`Убрать ${item.name_ru || item.name_en} из сравнения`}
                       >
                         <X className="w-4 h-4" aria-hidden />

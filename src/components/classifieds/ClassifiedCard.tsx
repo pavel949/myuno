@@ -25,7 +25,7 @@ export function ClassifiedCard({ listing, onClick }: ClassifiedCardProps) {
   return (
     <button
       onClick={onClick}
-      className="text-left rounded-xl overflow-hidden bg-card border border-border shadow-sm hover:shadow-md transition-shadow w-full"
+      className="text-left rounded-none overflow-hidden bg-card border border-border shadow-sm hover:shadow-md transition-shadow w-full"
     >
       {/* Image */}
       <div className="aspect-square bg-muted relative overflow-hidden">

@@ -326,7 +326,7 @@ export function UnifiedVendorWizard({
                 </button>
                 {index < steps.length - 1 && (
                   <div className={cn(
-                    'flex-1 h-0.5 rounded',
+                    'flex-1 h-0.5 rounded-none',
                     index < currentStep ? 'bg-primary' : 'bg-muted'
                   )} />
                 )}
@@ -339,7 +339,7 @@ export function UnifiedVendorWizard({
           <div className="p-4 space-y-4">
             {/* AI Quick Fill - Step 0 only */}
             {currentStep === 0 && (
-              <div className="p-3 rounded-lg border border-dashed border-primary/30 bg-primary/5">
+              <div className="p-3 rounded-none border border-dashed border-primary/30 bg-primary/5">
                 <div className="flex items-center gap-2 mb-2">
                   <Wand2 className="h-4 w-4 text-primary" />
                   <span className="text-sm font-medium">
@@ -699,7 +699,7 @@ function ReviewStep({ formData, isRu, vertical }: ReviewStepProps) {
       </CardPreviewSection>
 
       <div className="space-y-3">
-        <div className="p-3 rounded-lg border">
+        <div className="p-3 rounded-none border">
           <h4 className="text-sm font-medium mb-2">{isRu ? 'Статус' : 'Status'}</h4>
           <div className="flex gap-2">
             {formData.is_active && (
@@ -716,7 +716,7 @@ function ReviewStep({ formData, isRu, vertical }: ReviewStepProps) {
         </div>
 
         {formData.images.length > 0 && (
-          <div className="p-3 rounded-lg border">
+          <div className="p-3 rounded-none border">
             <h4 className="text-sm font-medium mb-2">{isRu ? 'Галерея' : 'Gallery'}</h4>
             <div className="flex gap-1 overflow-x-auto">
               {formData.images.slice(0, 4).map((img, i) => (
@@ -724,11 +724,11 @@ function ReviewStep({ formData, isRu, vertical }: ReviewStepProps) {
                   key={i} 
                   src={img} 
                   alt="" 
-                  className="w-12 h-12 rounded object-cover"
+                  className="w-12 h-12 rounded-none object-cover"
                 />
               ))}
               {formData.images.length > 4 && (
-                <div className="w-12 h-12 rounded bg-muted flex items-center justify-center text-xs">
+                <div className="w-12 h-12 rounded-none bg-muted flex items-center justify-center text-xs">
                   +{formData.images.length - 4}
                 </div>
               )}
@@ -737,7 +737,7 @@ function ReviewStep({ formData, isRu, vertical }: ReviewStepProps) {
         )}
       </div>
 
-      <div className="p-3 rounded-lg bg-muted/50 text-sm text-muted-foreground">
+      <div className="p-3 rounded-none bg-muted/50 text-sm text-muted-foreground">
         {isRu 
           ? 'После сохранения запись будет отправлена на модерацию.'
           : 'After saving, the entry will be sent for moderation.'

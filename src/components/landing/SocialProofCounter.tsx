@@ -85,7 +85,7 @@ export function SocialProofCounter({
   if (variant === 'banner') {
     return (
       <div className={cn(
-        'flex items-center justify-center gap-6 py-3 px-4 bg-muted/40 rounded-xl',
+        'flex items-center justify-center gap-6 py-3 px-4 bg-muted/40 rounded-none',
         className
       )}>
         {metrics.map((m, i) => (

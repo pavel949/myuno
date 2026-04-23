@@ -240,7 +240,7 @@ export default function AdminFlowers() {
                             <TableCell className="text-xs text-muted-foreground">{b.bestseller_rank || '-'}</TableCell>
                             <TableCell>
                               <div className="flex items-center gap-2">
-                                {b.image && <img src={b.image} alt="" className="w-8 h-8 rounded object-cover" />}
+                                {b.image && <img src={b.image} alt="" className="w-8 h-8 rounded-none object-cover" />}
                                 <div>
                                   <p className="font-medium text-sm truncate max-w-[120px]">
                                     {isRu ? b.name_ru : b.name_en}

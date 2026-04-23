@@ -20,7 +20,7 @@ export function QuickInstallButton() {
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-success/10 border border-success/30"
+        className="flex items-center gap-2 px-4 py-2 rounded-none bg-success/10 border border-success/30"
       >
         <div className="w-8 h-8 rounded-full bg-success flex items-center justify-center">
           <Check className="h-5 w-5 text-success-foreground" />
@@ -86,7 +86,7 @@ export function QuickInstallButton() {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 100, opacity: 0 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="w-full max-w-sm bg-background rounded-2xl p-5 shadow-xl relative"
+              className="w-full max-w-sm bg-background rounded-none p-5 shadow-xl relative"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Close button */}

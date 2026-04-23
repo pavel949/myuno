@@ -101,8 +101,8 @@ export function TodayActionsWidget() {
     return (
       <div className="space-y-2">
         <Skeleton className="h-5 w-32" />
-        <Skeleton className="h-14 w-full rounded-xl" />
-        <Skeleton className="h-14 w-full rounded-xl" />
+        <Skeleton className="h-14 w-full rounded-none" />
+        <Skeleton className="h-14 w-full rounded-none" />
       </div>
     );
   }
@@ -152,7 +152,7 @@ export function TodayActionsWidget() {
               onClick={() => navigate(item.href)}
             >
               <CardContent className="p-3 flex items-center gap-3">
-                <div className={cn('p-2 rounded-lg shrink-0', styles.bg)}>
+                <div className={cn('p-2 rounded-none shrink-0', styles.bg)}>
                   <Icon className={cn('h-4 w-4', styles.text)} />
                 </div>
                 <div className="flex-1 min-w-0">

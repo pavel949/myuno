@@ -39,7 +39,7 @@ export function AuditMarker({ txId, ledgerEntryId, timestamp, stream, className 
 
   return (
     <div
-      className={`rounded-lg border border-border bg-card/60 px-3 py-2.5 text-[11.5px] leading-snug font-mono ${className ?? ''}`}
+      className={`rounded-none border border-border bg-card/60 px-3 py-2.5 text-[11.5px] leading-snug font-mono ${className ?? ''}`}
       role="status"
       aria-label={isRu ? MONETIZATION_LABELS.auditMarker.ru : MONETIZATION_LABELS.auditMarker.en}
     >

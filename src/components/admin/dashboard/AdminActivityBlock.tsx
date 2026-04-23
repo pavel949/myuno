@@ -108,7 +108,7 @@ export function AdminActivityBlock() {
                 bordered={false}
                 className="flex items-center gap-2.5"
               >
-                <div className={cn("p-1.5 rounded-lg bg-muted", config.color)}>
+                <div className={cn("p-1.5 rounded-none bg-muted", config.color)}>
                   <Icon className="h-3.5 w-3.5" />
                 </div>
                 <div className="flex-1 min-w-0">

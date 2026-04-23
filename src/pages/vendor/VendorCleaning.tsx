@@ -161,9 +161,9 @@ const VendorCleaning = () => {
                 <CardContent className="p-4">
                   <div className="flex gap-3">
                     {item.cover_image ? (
-                      <img src={item.cover_image} alt={item.name_en} className="w-20 h-20 rounded-lg object-cover" />
+                      <img src={item.cover_image} alt={item.name_en} className="w-20 h-20 rounded-none object-cover" />
                     ) : (
-                      <div className="w-20 h-20 rounded-lg bg-muted flex items-center justify-center">
+                      <div className="w-20 h-20 rounded-none bg-muted flex items-center justify-center">
                         <Sparkles className="h-8 w-8 text-muted-foreground" />
                       </div>
                     )}

@@ -52,13 +52,13 @@ export function OffplanCTASection({ className }: OffplanCTASectionProps) {
     <>
       <section
         className={cn(
-          "rounded-2xl bg-gradient-to-br from-primary/5 via-background to-accent/10 border border-border/50 p-5",
+          "rounded-none bg-gradient-to-br from-primary/5 via-background to-accent/10 border border-border/50 p-5",
           className
         )}
       >
         {/* Header */}
         <div className="flex items-start gap-3 mb-5">
-          <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5">
+          <div className="p-2.5 rounded-none bg-gradient-to-br from-primary/20 to-primary/5">
             <Building2 className="w-5 h-5 text-primary" />
           </div>
           <div className="flex-1 min-w-0">
@@ -80,9 +80,9 @@ export function OffplanCTASection({ className }: OffplanCTASectionProps) {
             <button
               key={index}
               onClick={feature.action}
-              className="flex items-center gap-3 p-3 rounded-xl bg-background/80 border border-border/50 hover:border-primary/30 hover:bg-muted/50 transition-all text-left group"
+              className="flex items-center gap-3 p-3 rounded-none bg-background/80 border border-border/50 hover:border-primary/30 hover:bg-muted/50 transition-all text-left group"
             >
-              <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+              <div className="p-2 rounded-none bg-primary/10 group-hover:bg-primary/20 transition-colors">
                 <feature.icon className="w-4 h-4 text-primary" />
               </div>
               <div className="flex-1 min-w-0">

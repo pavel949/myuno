@@ -161,7 +161,7 @@ export function CompanyProfileSettings() {
     <div className="space-y-3">
       <Accordion type="multiple" defaultValue={[]} className="space-y-3">
         {/* Branding */}
-        <AccordionItem value="branding" className="border rounded-xl px-4">
+        <AccordionItem value="branding" className="border rounded-none px-4">
           <AccordionTrigger className="text-sm font-semibold gap-2 hover:no-underline py-3">
             <span className="flex items-center gap-2">
               <Building2 className="h-4 w-4 text-primary" />
@@ -174,9 +174,9 @@ export function CompanyProfileSettings() {
                 <Label className="text-xs text-muted-foreground">
                   {isRu ? 'Логотип' : 'Logo'}
                 </Label>
-                <Avatar className="h-16 w-16 rounded-xl border-2 border-dashed border-border">
+                <Avatar className="h-16 w-16 rounded-none border-2 border-dashed border-border">
                   <AvatarImage src={form.logo || undefined} className="object-cover" />
-                  <AvatarFallback className="rounded-xl bg-muted text-base font-bold">
+                  <AvatarFallback className="rounded-none bg-muted text-base font-bold">
                     {(form.name_en || 'MC')[0]}
                   </AvatarFallback>
                 </Avatar>
@@ -199,7 +199,7 @@ export function CompanyProfileSettings() {
                 {isRu ? 'Обложка' : 'Cover'}
               </Label>
               {form.cover_image && (
-                <img src={form.cover_image} alt="Cover" className="w-full h-24 object-cover rounded-lg border border-border" />
+                <img src={form.cover_image} alt="Cover" className="w-full h-24 object-cover rounded-none border border-border" />
               )}
               <UnifiedMediaUploader
                 mode="single"
@@ -223,7 +223,7 @@ export function CompanyProfileSettings() {
                     key={scheme.id}
                     type="button"
                     onClick={() => update({ brand_color: scheme.id })}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all ${
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-none border text-xs font-medium transition-all ${
                       form.brand_color === scheme.id
                         ? 'border-foreground ring-2 ring-foreground/20 bg-accent'
                         : 'border-border hover:border-foreground/30 bg-card'
@@ -261,7 +261,7 @@ export function CompanyProfileSettings() {
         </AccordionItem>
 
         {/* Contacts */}
-        <AccordionItem value="contacts" className="border rounded-xl px-4">
+        <AccordionItem value="contacts" className="border rounded-none px-4">
           <AccordionTrigger className="text-sm font-semibold gap-2 hover:no-underline py-3">
             <span className="flex items-center gap-2">
               <Phone className="h-4 w-4 text-primary" />
@@ -301,7 +301,7 @@ export function CompanyProfileSettings() {
         </AccordionItem>
 
         {/* About */}
-        <AccordionItem value="about" className="border rounded-xl px-4">
+        <AccordionItem value="about" className="border rounded-none px-4">
           <AccordionTrigger className="text-sm font-semibold gap-2 hover:no-underline py-3">
             <span className="flex items-center gap-2">
               <FileText className="h-4 w-4 text-primary" />
@@ -320,7 +320,7 @@ export function CompanyProfileSettings() {
           </AccordionContent>
         </AccordionItem>
         {/* Legal Details */}
-        <AccordionItem value="legal" className="border rounded-xl px-4">
+        <AccordionItem value="legal" className="border rounded-none px-4">
           <AccordionTrigger className="text-sm font-semibold gap-2 hover:no-underline py-3">
             <span className="flex items-center gap-2">
               <FileText className="h-4 w-4 text-primary" />
@@ -363,7 +363,7 @@ export function CompanyProfileSettings() {
                 {isRu ? 'DBD карточка (Dept. of Business Development)' : 'DBD Card (Dept. of Business Development)'}
               </Label>
               {form.dbd_card_url && (
-                <img src={form.dbd_card_url} alt="DBD Card" className="w-full max-w-sm h-auto rounded-lg border border-border" />
+                <img src={form.dbd_card_url} alt="DBD Card" className="w-full max-w-sm h-auto rounded-none border border-border" />
               )}
               <UnifiedMediaUploader
                 mode="single"
@@ -378,7 +378,7 @@ export function CompanyProfileSettings() {
         </AccordionItem>
 
         {/* Banking */}
-        <AccordionItem value="banking" className="border rounded-xl px-4">
+        <AccordionItem value="banking" className="border rounded-none px-4">
           <AccordionTrigger className="text-sm font-semibold gap-2 hover:no-underline py-3">
             <span className="flex items-center gap-2">
               <Landmark className="h-4 w-4 text-primary" />
@@ -404,7 +404,7 @@ export function CompanyProfileSettings() {
         </AccordionItem>
 
         {/* Company Documents */}
-        <AccordionItem value="documents" className="border rounded-xl px-4">
+        <AccordionItem value="documents" className="border rounded-none px-4">
           <AccordionTrigger className="text-sm font-semibold gap-2 hover:no-underline py-3">
             <span className="flex items-center gap-2">
               <FileText className="h-4 w-4 text-primary" />
@@ -422,7 +422,7 @@ export function CompanyProfileSettings() {
             {form.documents.length > 0 && (
               <div className="space-y-2">
                 {form.documents.map((doc, i) => (
-                  <div key={i} className="flex items-center gap-3 p-2 rounded-lg border border-border bg-muted/30">
+                  <div key={i} className="flex items-center gap-3 p-2 rounded-none border border-border bg-muted/30">
                     <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
                     <a href={doc.url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline truncate flex-1">
                       {doc.name}

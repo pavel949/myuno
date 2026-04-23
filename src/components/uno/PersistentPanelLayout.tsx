@@ -92,7 +92,7 @@ export function RightContextPanel({
     <aside
       className={cn(
         "hidden lg:flex lg:flex-col shrink-0",
-        "border-l bg-card/50 rounded-lg border",
+        "border-l bg-card/50 rounded-none border",
         "sticky top-16 max-h-[calc(100vh-5rem)] overflow-hidden",
         width,
         "animate-in slide-in-from-right-4 duration-200",

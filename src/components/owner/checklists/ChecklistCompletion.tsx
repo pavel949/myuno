@@ -69,7 +69,7 @@ export function ChecklistCompletion({ propertyId, bookingId, taskId, checklistTy
   };
 
   if (isLoading) {
-    return <Skeleton className="h-32 w-full rounded-xl" />;
+    return <Skeleton className="h-32 w-full rounded-none" />;
   }
 
   if (filteredTemplates.length === 0) {
@@ -125,7 +125,7 @@ export function ChecklistCompletion({ propertyId, bookingId, taskId, checklistTy
               {items.map((item, i) => (
                 <label
                   key={i}
-                  className="flex items-center gap-3 p-2.5 rounded-lg border hover:bg-muted/50 cursor-pointer transition-colors"
+                  className="flex items-center gap-3 p-2.5 rounded-none border hover:bg-muted/50 cursor-pointer transition-colors"
                 >
                   <Checkbox
                     checked={!!checkedItems[i]}

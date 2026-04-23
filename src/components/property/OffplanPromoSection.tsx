@@ -45,7 +45,7 @@ export function OffplanPromoSection({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-primary/8">
+          <div className="p-2.5 rounded-none bg-primary/8">
             <Building2 className="w-5 h-5 text-primary" />
           </div>
           <div>
@@ -92,8 +92,8 @@ export function OffplanPromoSection({
         <div className="flex gap-4 overflow-hidden pb-2">
           {[1, 2, 3].map((i) => (
             <div key={i} className="w-[280px] flex-shrink-0">
-              <Skeleton className="aspect-[16/10] rounded-t-2xl" />
-              <div className="p-4 space-y-3 bg-card rounded-b-2xl border border-t-0">
+              <Skeleton className="aspect-[16/10] rounded-none" />
+              <div className="p-4 space-y-3 bg-card rounded-none border border-t-0">
                 <Skeleton className="h-5 w-3/4" />
                 <Skeleton className="h-4 w-1/2" />
                 <Skeleton className="h-4 w-full" />
@@ -123,7 +123,7 @@ export function OffplanPromoSection({
             <div
               onClick={() => navigate('/property/offplan')}
               className={cn(
-                "flex-shrink-0 w-[200px] rounded-2xl",
+                "flex-shrink-0 w-[200px] rounded-none",
                 "bg-gradient-to-br from-primary/10 to-primary/5",
                 "border border-primary/20",
                 "flex flex-col items-center justify-center gap-3",

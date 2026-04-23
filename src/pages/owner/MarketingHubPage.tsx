@@ -268,8 +268,8 @@ export default function MarketingHubPage() {
 
           {promosLoading ? (
             <div className="space-y-3">
-              <Skeleton className="h-20 w-full rounded-xl" />
-              <Skeleton className="h-20 w-full rounded-xl" />
+              <Skeleton className="h-20 w-full rounded-none" />
+              <Skeleton className="h-20 w-full rounded-none" />
             </div>
           ) : promos.length === 0 ? (
             <Card className="p-8 text-center">
@@ -353,7 +353,7 @@ export default function MarketingHubPage() {
           {statsLoading ? (
             <div className="grid grid-cols-2 gap-3">
               {Array.from({ length: 4 }).map((_, i) => (
-                <Skeleton key={i} className="h-24 w-full rounded-xl" />
+                <Skeleton key={i} className="h-24 w-full rounded-none" />
               ))}
             </div>
           ) : stats ? (

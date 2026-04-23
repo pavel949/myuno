@@ -25,7 +25,7 @@ export function PropertyThumbnailSelector({
         {[1, 2, 3].map(i => (
           <div
             key={i}
-            className="flex-shrink-0 w-24 h-20 rounded-xl bg-muted animate-pulse"
+            className="flex-shrink-0 w-24 h-20 rounded-none bg-muted animate-pulse"
           />
         ))}
       </div>
@@ -52,7 +52,7 @@ export function PropertyThumbnailSelector({
             key={property.id}
             onClick={() => onSelect(property.id)}
             className={cn(
-              "flex-shrink-0 p-2 rounded-xl border-2 transition-all",
+              "flex-shrink-0 p-2 rounded-none border-2 transition-all",
               "hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/30",
               isSelected 
                 ? "border-primary bg-primary/10 ring-2 ring-primary/20" 
@@ -63,10 +63,10 @@ export function PropertyThumbnailSelector({
               <img 
                 src={property.cover_image} 
                 alt={title}
-                className="w-20 h-12 rounded-lg object-cover"
+                className="w-20 h-12 rounded-none object-cover"
               />
             ) : (
-              <div className="w-20 h-12 rounded-lg bg-muted flex items-center justify-center">
+              <div className="w-20 h-12 rounded-none bg-muted flex items-center justify-center">
                 <Home className="h-5 w-5 text-muted-foreground" />
               </div>
             )}

@@ -79,7 +79,7 @@ export function YachtPolicies({
 
 function PolicyItem({ icon, label, value, note }: { icon: React.ReactNode; label: string; value: string; note?: string }) {
   return (
-    <div className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg">
+    <div className="flex items-start gap-3 p-3 bg-muted/30 rounded-none">
       <div className="mt-0.5 flex-shrink-0">{icon}</div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2">

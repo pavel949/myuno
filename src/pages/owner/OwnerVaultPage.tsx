@@ -272,7 +272,7 @@ export default function OwnerVaultPage() {
       {isLoading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-16 bg-muted/50 rounded-xl animate-pulse" />
+            <div key={i} className="h-16 bg-muted/50 rounded-none animate-pulse" />
           ))}
         </div>
       ) : filteredFiles.length === 0 ? (
@@ -303,7 +303,7 @@ export default function OwnerVaultPage() {
                 return (
                   <Card key={file.id} className="group">
                     <CardContent className="p-3 flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-muted/80">
+                      <div className="p-2 rounded-none bg-muted/80">
                         <FileIcon className="h-5 w-5 text-primary" />
                       </div>
                       <div className="flex-1 min-w-0">

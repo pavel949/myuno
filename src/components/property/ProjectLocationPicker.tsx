@@ -276,7 +276,7 @@ export function ProjectLocationPicker({ value, onChange }: ProjectLocationPicker
       <Label>{isRu ? 'Локация на карте' : 'Location on Map'}</Label>
       <div
         onClick={() => setIsOpen(true)}
-        className="flex items-center gap-3 p-3 border border-border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+        className="flex items-center gap-3 p-3 border border-border rounded-none cursor-pointer hover:bg-muted/50 transition-colors"
       >
         <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
           <MapPin className="w-5 h-5 text-primary" />
@@ -339,7 +339,7 @@ export function ProjectLocationPicker({ value, onChange }: ProjectLocationPicker
               </div>
               {/* Dropdown: addresses + projects */}
               {showSearchDropdown && (
-                <div className="absolute top-full left-4 right-4 z-[120] mt-1 bg-popover border border-border rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                <div className="absolute top-full left-4 right-4 z-[120] mt-1 bg-popover border border-border rounded-none shadow-lg max-h-60 overflow-y-auto">
                   {searching && (
                     <div className="p-3 flex items-center gap-2 text-sm text-muted-foreground">
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -438,7 +438,7 @@ export function ProjectLocationPicker({ value, onChange }: ProjectLocationPicker
                   href={`https://www.google.com/maps/search/?api=1&query=${(selectedLocation ?? value)!.lat},${(selectedLocation ?? value)!.lng}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="absolute bottom-2 right-2 z-10 text-xs bg-background/95 hover:bg-background border border-border rounded-lg px-2 py-1.5 shadow-sm text-primary hover:underline"
+                  className="absolute bottom-2 right-2 z-10 text-xs bg-background/95 hover:bg-background border border-border rounded-none px-2 py-1.5 shadow-sm text-primary hover:underline"
                 >
                   {isRu ? 'Открыть в Google Картах' : 'Open in Google Maps'}
                 </a>

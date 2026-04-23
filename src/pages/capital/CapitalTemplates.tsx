@@ -87,7 +87,7 @@ export default function CapitalTemplates() {
         <h1 className="text-xl font-bold">Шаблоны сообщений</h1>
         <Dialog open={dialogOpen} onOpenChange={(o) => { setDialogOpen(o); if (!o) resetForm(); }}>
           <DialogTrigger asChild>
-            <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700">
+            <Button size="sm" className="bg-success hover:bg-success">
               <Plus className="w-4 h-4 mr-1" /> Добавить
             </Button>
           </DialogTrigger>
@@ -128,7 +128,7 @@ export default function CapitalTemplates() {
               <div>
                 <Label>Текст сообщения *</Label>
                 <textarea
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm min-h-[120px] resize-y"
+                  className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm min-h-[120px] resize-y"
                   value={form.body}
                   onChange={(e) => setForm({ ...form, body: e.target.value })}
                   placeholder="Используйте {{name}}, {{project_name}}, {{price_from}} и т.д."
@@ -137,7 +137,7 @@ export default function CapitalTemplates() {
                   Переменные: {'{{name}}, {{project_name}}, {{selling_point}}, {{price_from}}, {{yield}}'}
                 </p>
               </div>
-              <Button onClick={handleSave} className="bg-emerald-600 hover:bg-emerald-700">
+              <Button onClick={handleSave} className="bg-success hover:bg-success">
                 {editId ? 'Сохранить' : 'Создать'}
               </Button>
             </div>
@@ -154,7 +154,7 @@ export default function CapitalTemplates() {
       ) : (
         <div className="space-y-3">
           {templates.map((t) => (
-            <div key={t.id} className="rounded-lg border border-border/50 p-4">
+            <div key={t.id} className="rounded-none border border-border/50 p-4">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 flex-wrap">

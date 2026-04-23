@@ -75,7 +75,7 @@ const AdvanceRequested = () => {
         <div className="max-w-lg mx-auto px-4 py-8">
           {/* Success Header */}
           <div className="text-center mb-8">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center mx-auto mb-4">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-accent to-accent flex items-center justify-center mx-auto mb-4">
               <CheckCircle2 className="w-10 h-10 text-white" />
             </div>
             <h1 className="text-2xl font-display font-bold mb-2">
@@ -91,7 +91,7 @@ const AdvanceRequested = () => {
           </div>
 
           {/* Order Summary Card */}
-          <div className="bg-card border rounded-2xl p-5 mb-6">
+          <div className="bg-card border rounded-none p-5 mb-6">
             <div className="flex items-center gap-2 mb-4">
               <FileText className="w-5 h-5 text-primary" />
               <span className="font-semibold">
@@ -116,11 +116,11 @@ const AdvanceRequested = () => {
                 <span className="text-muted-foreground">
                   {language === 'ru' ? 'Сервис myUNO (5%)' : 'myUNO Service (5%)'}
                 </span>
-                <span className="text-amber-600">+฿{state.conciergeFee.toLocaleString()}</span>
+                <span className="text-accent">+฿{state.conciergeFee.toLocaleString()}</span>
               </div>
               <div className="border-t pt-3 flex justify-between font-semibold text-lg">
                 <span>{language === 'ru' ? 'К оплате' : 'Total to Pay'}</span>
-                <span className="text-amber-600">฿{state.totalWithFee.toLocaleString()}</span>
+                <span className="text-accent">฿{state.totalWithFee.toLocaleString()}</span>
               </div>
             </div>
           </div>

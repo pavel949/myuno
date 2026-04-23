@@ -69,10 +69,10 @@ export function ProjectInfoCard({ project, className }: ProjectInfoCardProps) {
             <img
               src={project.cover_image}
               alt={name}
-              className="w-20 h-20 rounded-lg object-cover"
+              className="w-20 h-20 rounded-none object-cover"
             />
           ) : (
-            <div className="w-20 h-20 rounded-lg bg-muted flex items-center justify-center">
+            <div className="w-20 h-20 rounded-none bg-muted flex items-center justify-center">
               <Building2 className="h-8 w-8 text-muted-foreground" />
             </div>
           )}
@@ -183,7 +183,7 @@ export function ProjectInfoCard({ project, className }: ProjectInfoCardProps) {
                   key={idx}
                   src={img}
                   alt={`${name} ${idx + 1}`}
-                  className="aspect-square rounded-lg object-cover"
+                  className="aspect-square rounded-none object-cover"
                 />
               ))}
             </div>

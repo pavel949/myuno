@@ -36,7 +36,7 @@ export default function TripPlannerPage() {
               className="px-4 pb-5"
             >
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-primary/8">
+                <div className="w-12 h-12 rounded-none flex items-center justify-center shrink-0 bg-primary/8">
                   <Palmtree className="w-7 h-7 text-primary" />
                 </div>
                 <div className="flex-1 pt-0.5">

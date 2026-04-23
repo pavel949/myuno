@@ -61,13 +61,13 @@ export default function AdminCRM() {
         <TabsContent value="vendors" className="mt-4">
           <div className="space-y-4">
             <div className="flex gap-1">
-              <button onClick={() => setVendorView('pipeline')} className={`px-3 py-1.5 rounded text-sm ${vendorView === 'pipeline' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+              <button onClick={() => setVendorView('pipeline')} className={`px-3 py-1.5 rounded-none text-sm ${vendorView === 'pipeline' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
                 <Kanban className="h-3.5 w-3.5 inline mr-1" />Pipeline
               </button>
-              <button onClick={() => setVendorView('table')} className={`px-3 py-1.5 rounded text-sm ${vendorView === 'table' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+              <button onClick={() => setVendorView('table')} className={`px-3 py-1.5 rounded-none text-sm ${vendorView === 'table' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
                 <Table className="h-3.5 w-3.5 inline mr-1" />{isRu ? 'Таблица' : 'Table'}
               </button>
-              <button onClick={() => setVendorView('stats')} className={`px-3 py-1.5 rounded text-sm ${vendorView === 'stats' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+              <button onClick={() => setVendorView('stats')} className={`px-3 py-1.5 rounded-none text-sm ${vendorView === 'stats' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
                 <BarChart3 className="h-3.5 w-3.5 inline mr-1" />{isRu ? 'Статистика' : 'Stats'}
               </button>
             </div>

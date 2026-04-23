@@ -346,15 +346,15 @@ export function PropertyCalendar({
         {/* Legend */}
         <div className="flex flex-wrap gap-3 mb-4 text-xs">
           <div className="flex items-center gap-1.5">
-            <div className={cn("w-4 h-4 rounded", statusColors.available)} />
+            <div className={cn("w-4 h-4 rounded-none", statusColors.available)} />
             <span>{isRu ? 'Свободно' : 'Available'}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className={cn("w-4 h-4 rounded", statusColors.blocked)} />
+            <div className={cn("w-4 h-4 rounded-none", statusColors.blocked)} />
             <span>{isRu ? 'Заблокировано' : 'Blocked'}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className={cn("w-4 h-4 rounded", statusColors.booked)} />
+            <div className={cn("w-4 h-4 rounded-none", statusColors.booked)} />
             <span>{isRu ? 'Забронировано' : 'Booked'}</span>
           </div>
           {unifiedDayMeta && (
@@ -365,7 +365,7 @@ export function PropertyCalendar({
               {(Object.keys(STAYS_CHANNEL_COLORS) as StaysChannelKey[]).map((k) => (
                 <span key={k} className="inline-flex items-center gap-1">
                   <span
-                    className="w-3 h-3 rounded-sm border border-border/50 shrink-0"
+                    className="w-3 h-3 rounded-none border border-border/50 shrink-0"
                     style={{ backgroundColor: getStaysChannelColor(k) }}
                   />
                   <span className="text-[10px] capitalize">
@@ -374,7 +374,7 @@ export function PropertyCalendar({
                 </span>
               ))}
               <span className="inline-flex items-center gap-1">
-                <span className="w-3 h-3 rounded-sm ring-2 ring-destructive bg-background shrink-0" />
+                <span className="w-3 h-3 rounded-none ring-2 ring-destructive bg-background shrink-0" />
                 <span className="text-[10px]">{isRu ? 'Конфликт' : 'Conflict'}</span>
               </span>
             </div>
@@ -407,7 +407,7 @@ export function PropertyCalendar({
                 <div
                   key={index}
                   className={cn(
-                    "relative h-16 p-1 rounded-md border transition-all cursor-pointer overflow-hidden",
+                    "relative h-16 p-1 rounded-none border transition-all cursor-pointer overflow-hidden",
                     !isCurrentMonth && "opacity-40",
                     isPast && "opacity-30 cursor-not-allowed",
                     isToday(day) && !conflictCount && "ring-2 ring-primary",

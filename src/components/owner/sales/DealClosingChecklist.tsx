@@ -77,7 +77,7 @@ export function DealClosingChecklist({ dealId, dealType, companyId }: Props) {
               onClick={() => toggleItem.mutate({ id: item.id, done: !isDone })}
               disabled={toggleItem.isPending}
               className={cn(
-                'flex items-center gap-3 w-full text-left px-3 py-2 rounded-lg transition-colors text-sm',
+                'flex items-center gap-3 w-full text-left px-3 py-2 rounded-none transition-colors text-sm',
                 isDone ? 'text-muted-foreground' : 'hover:bg-muted/50'
               )}
             >

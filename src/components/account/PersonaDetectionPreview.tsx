@@ -89,7 +89,7 @@ export function PersonaDetectionPreview() {
     return (
       <Card className="p-5 sm:p-6" data-testid="persona-preview-empty">
         <div className="flex items-start gap-4">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-none bg-primary/10 text-primary">
             <Sparkles className="h-5 w-5" />
           </div>
           <div className="flex-1 min-w-0 space-y-3">
@@ -116,7 +116,7 @@ export function PersonaDetectionPreview() {
   return (
     <Card className="p-5 sm:p-6" data-testid="persona-preview-filled">
       <div className="flex items-start gap-4">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-none bg-primary/10 text-primary">
           <Sparkles className="h-5 w-5" />
         </div>
 

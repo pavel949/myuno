@@ -289,7 +289,7 @@ export default function TaxonomyValueEditor({ typeKey }: Props) {
       </div>
 
       {/* Table */}
-      <div className="border rounded-lg">
+      <div className="border rounded-none">
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}

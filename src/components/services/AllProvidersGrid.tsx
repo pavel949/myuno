@@ -24,7 +24,7 @@ export function AllProvidersGrid({ className }: AllProvidersGridProps) {
         <Skeleton className="h-6 w-44 mb-4" />
         <div className="grid gap-3">
           {[1, 2, 3, 4].map(i => (
-            <Skeleton key={i} className="h-[100px] rounded-2xl" />
+            <Skeleton key={i} className="h-[100px] rounded-none" />
           ))}
         </div>
       </div>

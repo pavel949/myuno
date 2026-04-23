@@ -107,9 +107,9 @@ export function AddScheduleDialog({ open, onOpenChange, properties, isRu, onAdd,
                   <button
                     key={t.category}
                     onClick={() => selectTemplate(t)}
-                    className="flex items-center gap-2 p-3 rounded-xl border border-border text-left transition-all hover:border-primary/50"
+                    className="flex items-center gap-2 p-3 rounded-none border border-border text-left transition-all hover:border-primary/50"
                   >
-                    <div className={cn("rounded-lg w-9 h-9 flex items-center justify-center shrink-0", t.bgColor)}>
+                    <div className={cn("rounded-none w-9 h-9 flex items-center justify-center shrink-0", t.bgColor)}>
                       <Icon className={cn("h-4 w-4", t.color)} />
                     </div>
                     <div className="min-w-0">
@@ -134,8 +134,8 @@ export function AddScheduleDialog({ open, onOpenChange, properties, isRu, onAdd,
                 {isRu ? 'Назад к выбору' : 'Back to selection'}
               </button>
 
-              <div className="flex items-center gap-2 p-3 rounded-xl border border-primary bg-primary/5">
-                <div className={cn("rounded-lg w-9 h-9 flex items-center justify-center shrink-0", selectedTemplate.bgColor)}>
+              <div className="flex items-center gap-2 p-3 rounded-none border border-primary bg-primary/5">
+                <div className={cn("rounded-none w-9 h-9 flex items-center justify-center shrink-0", selectedTemplate.bgColor)}>
                   <selectedTemplate.icon className={cn("h-4 w-4", selectedTemplate.color)} />
                 </div>
                 <p className="text-sm font-medium">{isRu ? selectedTemplate.titleRu : selectedTemplate.titleEn}</p>

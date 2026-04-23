@@ -93,7 +93,7 @@ export const ItemCard = React.forwardRef<HTMLDivElement, ItemCardProps>(
         ref={ref}
         onClick={handleClick}
         className={cn(
-          "relative overflow-hidden rounded-xl bg-card border border-border/60 transition-all [box-shadow:var(--shadow-elevation-2)]",
+          "relative overflow-hidden rounded-none bg-card border border-border/60 transition-all [box-shadow:var(--shadow-elevation-2)]",
           isAvailable && "cursor-pointer hover:border-primary/30 hover:[box-shadow:var(--shadow-elevation-3)] hover:-translate-y-0.5 active:scale-[0.98]",
           !isAvailable && "opacity-60",
           className
@@ -114,22 +114,22 @@ export const ItemCard = React.forwardRef<HTMLDivElement, ItemCardProps>(
           {/* Badges overlay */}
           <div className="absolute top-2 left-2 flex flex-col gap-1">
             {discount > 0 && (
-              <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-destructive text-destructive-foreground">
+              <span className="px-1.5 py-0.5 text-[10px] font-bold rounded-none bg-destructive text-destructive-foreground">
                 -{discount}%
               </span>
             )}
             {isNew && (
-              <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-primary text-primary-foreground">
+              <span className="px-1.5 py-0.5 text-[10px] font-medium rounded-none bg-primary text-primary-foreground">
                 NEW
               </span>
             )}
             {isFeatured && (
-              <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-primary text-primary-foreground flex items-center gap-0.5">
+              <span className="px-1.5 py-0.5 text-[10px] font-medium rounded-none bg-primary text-primary-foreground flex items-center gap-0.5">
                 <Star className={cn(iconSizes.xs, "fill-current")} />
               </span>
             )}
             {badge && (
-              <span className={cn("px-1.5 py-0.5 text-[10px] font-medium rounded", badge.className || "bg-primary text-primary-foreground")}>
+              <span className={cn("px-1.5 py-0.5 text-[10px] font-medium rounded-none", badge.className || "bg-primary text-primary-foreground")}>
                 {badge.text}
               </span>
             )}
@@ -137,7 +137,7 @@ export const ItemCard = React.forwardRef<HTMLDivElement, ItemCardProps>(
           
           {!isAvailable && (
             <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-              <span className="text-white font-medium px-3 py-1 rounded bg-black/50">
+              <span className="text-white font-medium px-3 py-1 rounded-none bg-black/50">
                 {t('booking.unavailable')}
               </span>
             </div>
@@ -183,7 +183,7 @@ export const ItemCard = React.forwardRef<HTMLDivElement, ItemCardProps>(
       ref={ref}
       onClick={handleClick}
       className={cn(
-        "bg-card rounded-xl overflow-hidden border border-border/60 [box-shadow:var(--shadow-elevation-2)]",
+        "bg-card rounded-none overflow-hidden border border-border/60 [box-shadow:var(--shadow-elevation-2)]",
         isAvailable && "cursor-pointer hover:[box-shadow:var(--shadow-elevation-3)] hover:-translate-y-0.5 hover:border-primary/30 active:scale-[0.98]",
         !isAvailable && "opacity-60",
         "transition-all",
@@ -192,7 +192,7 @@ export const ItemCard = React.forwardRef<HTMLDivElement, ItemCardProps>(
     >
       <div className="flex">
         {/* Image - larger on mobile for better tap targets */}
-        <div className="w-28 h-28 sm:w-32 sm:h-32 flex-shrink-0 relative overflow-hidden rounded-2xl">
+        <div className="w-28 h-28 sm:w-32 sm:h-32 flex-shrink-0 relative overflow-hidden rounded-none">
           <OptimizedImage
             src={image || PLACEHOLDER_IMAGES.service}
             alt={title}
@@ -206,17 +206,17 @@ export const ItemCard = React.forwardRef<HTMLDivElement, ItemCardProps>(
           {/* Badges */}
           <div className="absolute top-2 left-2 flex flex-col gap-1">
              {isNew && (
-              <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-primary text-primary-foreground">
+              <span className="px-1.5 py-0.5 text-[10px] font-medium rounded-none bg-primary text-primary-foreground">
                 NEW
               </span>
             )}
             {isFeatured && (
-              <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-primary text-primary-foreground flex items-center gap-0.5">
+              <span className="px-1.5 py-0.5 text-[10px] font-medium rounded-none bg-primary text-primary-foreground flex items-center gap-0.5">
                 <Star className={cn(iconSizes.xs, "fill-current")} />
               </span>
             )}
             {badge && (
-              <span className={cn("px-1.5 py-0.5 text-[10px] font-medium rounded", badge.className || "bg-primary text-primary-foreground")}>
+              <span className={cn("px-1.5 py-0.5 text-[10px] font-medium rounded-none", badge.className || "bg-primary text-primary-foreground")}>
                 {badge.text}
               </span>
             )}
@@ -224,7 +224,7 @@ export const ItemCard = React.forwardRef<HTMLDivElement, ItemCardProps>(
           
           {!isAvailable && (
             <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-              <span className="text-white font-medium px-3 py-1 rounded bg-black/50 text-xs">
+              <span className="text-white font-medium px-3 py-1 rounded-none bg-black/50 text-xs">
                 {language === 'ru' ? 'Занято' : 'Unavailable'}
               </span>
             </div>
@@ -300,7 +300,7 @@ export const ItemCard = React.forwardRef<HTMLDivElement, ItemCardProps>(
               {ctaLabel && (
                 <button
                   onClick={(e) => { e.stopPropagation(); (onCtaClick || onClick)?.(); }}
-                  className="text-[11px] font-semibold text-primary-foreground bg-primary px-2.5 py-1 rounded-md whitespace-nowrap flex-shrink-0"
+                  className="text-[11px] font-semibold text-primary-foreground bg-primary px-2.5 py-1 rounded-none whitespace-nowrap flex-shrink-0"
                 >
                   {ctaLabel}
                 </button>

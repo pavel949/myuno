@@ -47,7 +47,7 @@ function RecentCard({ item, onClick }: { item: RecentProperty; onClick: () => vo
   const isRu = language === 'ru';
   return (
     <button onClick={onClick} className="w-[150px] shrink-0 text-left group">
-      <div className="relative aspect-square rounded-xl overflow-hidden mb-1.5">
+      <div className="relative aspect-square rounded-none overflow-hidden mb-1.5">
         <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" loading="lazy" />
       </div>
       <p className="text-xs font-semibold line-clamp-1">{item.district}</p>
@@ -204,7 +204,7 @@ export default function PropertyIndex() {
                 activeCount={activeFilterCount}
               >
                 <button
-                  className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-medium text-foreground hover:shadow-sm transition-all"
+                  className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-none border text-xs font-medium text-foreground hover:shadow-sm transition-all"
                 >
                   <SlidersHorizontal className="w-3.5 h-3.5" />
                   {isRu ? 'Фильтры' : 'Filters'}
@@ -261,10 +261,10 @@ export default function PropertyIndex() {
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 gap-y-6 sm:gap-x-6 sm:gap-y-10">
                 {Array.from({ length: 8 }).map((_, i) => (
                   <div key={i} className="space-y-2">
-                    <div className="aspect-[4/5] sm:aspect-square rounded-lg sm:rounded-xl bg-muted animate-pulse" />
-                    <div className="h-3 bg-muted rounded animate-pulse w-2/3" />
-                    <div className="h-3 bg-muted rounded animate-pulse w-1/2" />
-                    <div className="h-3 bg-muted rounded animate-pulse w-1/3" />
+                    <div className="aspect-[4/5] sm:aspect-square rounded-none sm:rounded-none bg-muted animate-pulse" />
+                    <div className="h-3 bg-muted rounded-none animate-pulse w-2/3" />
+                    <div className="h-3 bg-muted rounded-none animate-pulse w-1/2" />
+                    <div className="h-3 bg-muted rounded-none animate-pulse w-1/3" />
                   </div>
                 ))}
               </div>

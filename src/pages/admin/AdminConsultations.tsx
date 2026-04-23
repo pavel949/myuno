@@ -94,7 +94,7 @@ function ConsultationCard({
           <div className="flex-1 min-w-0">
             {/* Header */}
             <div className="flex items-center gap-2 mb-2">
-              <div className={`p-1.5 rounded-md ${typeConfig.color}`}>
+              <div className={`p-1.5 rounded-none ${typeConfig.color}`}>
                 <TypeIcon className="w-4 h-4 text-white" />
               </div>
               <span className="font-medium truncate">{consultation.name}</span>
@@ -278,7 +278,7 @@ function ConsultationCard({
                   {consultation.notes && (
                     <div>
                       <h4 className="text-sm font-medium mb-2">{isRu ? 'Пожелания клиента' : 'Client Notes'}</h4>
-                      <p className="text-sm bg-muted p-2 rounded">{consultation.notes}</p>
+                      <p className="text-sm bg-muted p-2 rounded-none">{consultation.notes}</p>
                     </div>
                   )}
 

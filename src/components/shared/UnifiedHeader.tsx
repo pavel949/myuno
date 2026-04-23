@@ -87,7 +87,7 @@ export const UnifiedHeader = memo(function UnifiedHeader({
           
           {/* Search results dropdown */}
           {isSearching && searchResults && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-xl [box-shadow:var(--shadow-elevation-4)] z-50 overflow-hidden max-h-[60vh] overflow-y-auto">
+            <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-none [box-shadow:var(--shadow-elevation-4)] z-50 overflow-hidden max-h-[60vh] overflow-y-auto">
               {searchResults}
             </div>
           )}

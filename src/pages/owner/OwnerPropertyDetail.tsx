@@ -72,9 +72,9 @@ export default function OwnerPropertyDetail() {
     return (
       <PageContainer>
         <BackButton />
-        <Skeleton className="h-48 w-full rounded-xl mb-4" />
+        <Skeleton className="h-48 w-full rounded-none mb-4" />
         <Skeleton className="h-8 w-48 mb-4" />
-        <Skeleton className="h-64 w-full rounded-xl" />
+        <Skeleton className="h-64 w-full rounded-none" />
       </PageContainer>
     );
   }

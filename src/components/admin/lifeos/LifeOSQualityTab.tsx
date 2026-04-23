@@ -140,7 +140,7 @@ export function LifeOSQualityTab() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-3 rounded-xl bg-primary/10">
+              <div className="p-3 rounded-none bg-primary/10">
                 <BarChart3 className="w-6 h-6 text-primary" />
               </div>
               <div>
@@ -156,7 +156,7 @@ export function LifeOSQualityTab() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-3 rounded-xl bg-success/10">
+              <div className="p-3 rounded-none bg-success/10">
                 <ShieldCheck className="w-6 h-6 text-success" />
               </div>
               <div>
@@ -173,7 +173,7 @@ export function LifeOSQualityTab() {
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
               <div className={cn(
-                "p-3 rounded-xl",
+                "p-3 rounded-none",
                 (overallHealth?.conflictsCount || 0) > 0 ? "bg-warning/10" : "bg-success/10"
               )}>
                 <AlertTriangle className={cn(
@@ -195,7 +195,7 @@ export function LifeOSQualityTab() {
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
               <div className={cn(
-                "p-3 rounded-xl",
+                "p-3 rounded-none",
                 (overallHealth?.situationsWithIssues || 0) > 0 ? "bg-destructive/10" : "bg-success/10"
               )}>
                 {(overallHealth?.situationsWithIssues || 0) > 0 

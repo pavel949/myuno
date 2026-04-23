@@ -126,13 +126,13 @@ const LegalProviderDetail = () => {
           <TabsContent value="about" className="space-y-4 mt-4">
             {/* Description */}
             {description && (
-              <div className="bg-card border border-border rounded-xl p-4">
+              <div className="bg-card border border-border rounded-none p-4">
                 <p className="text-sm text-muted-foreground">{description}</p>
               </div>
             )}
 
             {/* Contact Info */}
-            <div className="bg-card border border-border rounded-xl p-4 space-y-3">
+            <div className="bg-card border border-border rounded-none p-4 space-y-3">
               <h3 className="font-semibold">{isRu ? "Контакты" : "Contact"}</h3>
               <div className="space-y-2">
                 {service.address && (
@@ -175,7 +175,7 @@ const LegalProviderDetail = () => {
 
             {/* Languages */}
             {service.languages && service.languages.length > 0 && (
-              <div className="bg-card border border-border rounded-xl p-4">
+              <div className="bg-card border border-border rounded-none p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <Languages className="w-4 h-4 text-primary" />
                   <h3 className="font-semibold">{isRu ? "Языки" : "Languages"}</h3>
@@ -194,7 +194,7 @@ const LegalProviderDetail = () => {
               service.specializations.map((spec, idx) => (
                 <div
                   key={idx}
-                  className="bg-card border border-border rounded-xl p-4 flex items-center justify-between"
+                  className="bg-card border border-border rounded-none p-4 flex items-center justify-between"
                 >
                   <div className="flex items-center gap-3">
                     <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />
@@ -210,7 +210,7 @@ const LegalProviderDetail = () => {
 
             {/* Consultation Price */}
             {service.price_consultation && (
-              <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 mt-4">
+              <div className="bg-primary/5 border border-primary/20 rounded-none p-4 mt-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="font-semibold">{isRu ? 'Консультация' : 'Consultation'}</p>

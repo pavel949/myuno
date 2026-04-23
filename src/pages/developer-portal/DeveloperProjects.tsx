@@ -42,7 +42,7 @@ export default function DeveloperProjects() {
             <div key={project.id} className="nb-glass p-5 flex flex-col md:flex-row md:items-center gap-4">
               {/* Thumbnail */}
               {project.cover_image && (
-                <img src={project.cover_image} alt="" className="w-20 h-20 rounded-lg object-cover flex-shrink-0" />
+                <img src={project.cover_image} alt="" className="w-20 h-20 rounded-none object-cover flex-shrink-0" />
               )}
               
               {/* Info */}

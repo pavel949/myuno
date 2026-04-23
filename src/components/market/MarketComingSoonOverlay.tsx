@@ -28,7 +28,7 @@ export const MarketComingSoonOverlay: React.FC = () => {
         className="max-w-sm w-full text-center space-y-6"
       >
         {/* Icon */}
-        <div className="mx-auto w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center">
+        <div className="mx-auto w-20 h-20 rounded-none bg-primary/10 flex items-center justify-center">
           <ShoppingBag className="w-10 h-10 text-primary" />
         </div>
 
@@ -48,7 +48,7 @@ export const MarketComingSoonOverlay: React.FC = () => {
         <div className="flex flex-col gap-3">
           <Button
             size="lg"
-            className="w-full gap-2 rounded-xl"
+            className="w-full gap-2 rounded-none"
             onClick={() => navigate('/services')}
           >
             {isRu ? 'Перейти к услугам' : 'Browse Services'}
@@ -57,7 +57,7 @@ export const MarketComingSoonOverlay: React.FC = () => {
           <Button
             variant="outline"
             size="lg"
-            className="w-full gap-2 rounded-xl"
+            className="w-full gap-2 rounded-none"
             onClick={() => navigate('/')}
           >
             <Home className="w-4 h-4" />

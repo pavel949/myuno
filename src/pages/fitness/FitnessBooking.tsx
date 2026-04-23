@@ -166,7 +166,7 @@ export default function FitnessBooking() {
         </div>
 
         {/* Start Date */}
-        <div className="bg-card rounded-xl border p-5 mb-4">
+        <div className="bg-card rounded-none border p-5 mb-4">
           <h3 className="font-semibold mb-4">
             {language === 'ru' ? 'Дата начала' : 'Start Date'}
           </h3>
@@ -180,7 +180,7 @@ export default function FitnessBooking() {
         </div>
 
         {/* Contact Info */}
-        <div className="bg-card rounded-xl border p-5 mb-4">
+        <div className="bg-card rounded-none border p-5 mb-4">
           <h3 className="font-semibold mb-4">
             {language === 'ru' ? 'Контактные данные' : 'Contact Information'}
           </h3>
@@ -192,7 +192,7 @@ export default function FitnessBooking() {
         </div>
 
         {/* Payment Method */}
-        <div className="bg-card rounded-xl border p-5 mb-4">
+        <div className="bg-card rounded-none border p-5 mb-4">
           <h3 className="font-semibold mb-4">
             {language === 'ru' ? 'Способ оплаты' : 'Payment Method'}
           </h3>

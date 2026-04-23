@@ -45,7 +45,7 @@ export function PropertyDetailHeader({ property, isRu }: PropertyDetailHeaderPro
   };
 
   return (
-    <div className="relative rounded-xl overflow-hidden mb-6">
+    <div className="relative rounded-none overflow-hidden mb-6">
       {property.cover_image ? (
         <img
           src={property.cover_image}

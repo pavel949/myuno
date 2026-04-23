@@ -51,7 +51,7 @@ export default function PartnerAgreementPage() {
             { emoji: '3️⃣', text: isRu ? 'Вы оказываете услугу, мы переводим оплату каждую пятницу' : 'You deliver the service, we transfer payment every Friday' },
             { emoji: '4️⃣', text: isRu ? 'Платформа удерживает комиссию по правилам ниже' : 'Platform deducts commission according to the rules below' },
           ].map((item, i) => (
-            <div key={i} className="flex items-start gap-3 p-3 rounded-lg border bg-card">
+            <div key={i} className="flex items-start gap-3 p-3 rounded-none border bg-card">
               <span className="text-lg">{item.emoji}</span>
               <p className="text-sm">{item.text}</p>
             </div>
@@ -117,8 +117,8 @@ export default function PartnerAgreementPage() {
           <VerificationCard
             icon={Crown}
             level={isRu ? 'Премиум' : 'Premium'}
-            color="text-amber-500"
-            bg="bg-amber-500/5"
+            color="text-accent"
+            bg="bg-accent/5"
             desc={isRu ? 'Рейтинг 4.5+ и 50+ заказов' : 'Rating 4.5+ & 50+ orders'}
             perks={isRu 
               ? ['Топ выдачи', 'Сниженная комиссия', 'Персональный менеджер']
@@ -222,7 +222,7 @@ function VerificationCard({ icon: Icon, level, color, bg, desc, perks }: {
     <Card>
       <CardContent className="p-4">
         <div className="flex items-center gap-3 mb-2">
-          <div className={cn('p-2 rounded-lg', bg)}>
+          <div className={cn('p-2 rounded-none', bg)}>
             <Icon className={cn('h-5 w-5', color)} />
           </div>
           <div>

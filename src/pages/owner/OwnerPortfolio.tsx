@@ -273,7 +273,7 @@ export default function OwnerPortfolio() {
               {propertyMetrics.map((property, index) => (
                 <div 
                   key={property.id}
-                  className="p-3 rounded-xl border bg-card hover:bg-muted/50 transition-colors cursor-pointer"
+                  className="p-3 rounded-none border bg-card hover:bg-muted/50 transition-colors cursor-pointer"
                   onClick={() => navigate(`/mc/properties/${property.id}`)}
                 >
                   <div className="flex items-start gap-3">
@@ -281,10 +281,10 @@ export default function OwnerPortfolio() {
                       <img 
                         src={property.coverImage} 
                         alt={property.title}
-                        className="w-16 h-12 rounded-lg object-cover flex-shrink-0"
+                        className="w-16 h-12 rounded-none object-cover flex-shrink-0"
                       />
                     ) : (
-                      <div className="w-16 h-12 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                      <div className="w-16 h-12 rounded-none bg-muted flex items-center justify-center flex-shrink-0">
                         <Home className="h-5 w-5 text-muted-foreground" />
                       </div>
                     )}

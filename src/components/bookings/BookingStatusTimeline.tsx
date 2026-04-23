@@ -117,7 +117,7 @@ export function BookingStatusTimeline({
             key={event.id ?? `${event.to_status}-${event.created_at}-${idx}`}
             data-event-id={event.id}
             className={cn(
-              'relative flex gap-3 -mx-2 px-2 rounded-md scroll-mt-20',
+              'relative flex gap-3 -mx-2 px-2 rounded-none scroll-mt-20',
               compact ? 'pb-2.5 last:pb-0' : 'pb-3.5 last:pb-0',
               isHighlighted && 'animate-timeline-highlight',
             )}
@@ -192,10 +192,10 @@ export function BookingStatusTimelineSkeleton({
           <Skeleton className="relative z-10 h-6 w-6 flex-shrink-0 rounded-full" />
           <div className="flex-1 min-w-0 pt-0.5 space-y-1.5">
             <div className="flex items-center justify-between gap-2">
-              <Skeleton className="h-3.5 w-28 rounded" />
-              <Skeleton className="h-3 w-16 rounded" />
+              <Skeleton className="h-3.5 w-28 rounded-none" />
+              <Skeleton className="h-3 w-16 rounded-none" />
             </div>
-            {idx === 0 && <Skeleton className="h-3 w-3/4 rounded" />}
+            {idx === 0 && <Skeleton className="h-3 w-3/4 rounded-none" />}
           </div>
         </div>
       ))}

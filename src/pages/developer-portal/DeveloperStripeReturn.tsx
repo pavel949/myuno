@@ -34,10 +34,10 @@ export default function DeveloperStripeReturn() {
   return (
     <NewbuildsLayout>
       <div className="min-h-[60vh] flex items-center justify-center p-6">
-        <div className="nb-glass max-w-md w-full p-8 rounded-2xl text-center">
+        <div className="nb-glass max-w-md w-full p-8 rounded-none text-center">
           {ok ? (
             <>
-              <CheckCircle2 className="w-14 h-14 mx-auto text-green-400 mb-4" />
+              <CheckCircle2 className="w-14 h-14 mx-auto text-success mb-4" />
               <h1 className="nb-display text-2xl text-[hsl(var(--nb-text))] mb-2">Stripe подключён</h1>
               <p className="text-sm text-[hsl(var(--nb-text-secondary))] mb-6">
                 Платёжный аккаунт активен — вы готовы принимать бронирования.
@@ -45,7 +45,7 @@ export default function DeveloperStripeReturn() {
             </>
           ) : (
             <>
-              <AlertCircle className="w-14 h-14 mx-auto text-amber-400 mb-4" />
+              <AlertCircle className="w-14 h-14 mx-auto text-accent mb-4" />
               <h1 className="nb-display text-2xl text-[hsl(var(--nb-text))] mb-2">Почти готово</h1>
               <p className="text-sm text-[hsl(var(--nb-text-secondary))] mb-6">
                 Stripe ещё проверяет ваши данные. Это может занять несколько минут — статус обновится автоматически.

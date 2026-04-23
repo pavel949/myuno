@@ -184,7 +184,7 @@ export default function ForDevelopers() {
 
         {/* Bottom CTA */}
         <section className="max-w-3xl mx-auto px-4 pb-20 text-center">
-          <div className="rounded-2xl border border-border/80 bg-card p-8">
+          <div className="rounded-none border border-border/80 bg-card p-8">
             <h3 className="text-xl font-display font-bold mb-2">
               {isRu ? 'Готовы разместить проект?' : 'Ready to list your project?'}
             </h3>

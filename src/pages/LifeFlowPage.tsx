@@ -65,7 +65,7 @@ export default function LifeFlowPage() {
                 animate={{ opacity: 1, y: 0 }}
                 className="flex items-start gap-4"
               >
-                <div className="w-12 h-12 rounded-xl bg-primary/8 flex items-center justify-center shrink-0">
+                <div className="w-12 h-12 rounded-none bg-primary/8 flex items-center justify-center shrink-0">
                   <DynamicIcon name={situationIconName} className="w-6 h-6 text-primary" />
                 </div>
                 <div className="flex-1 min-w-0 pt-1">
@@ -87,11 +87,11 @@ export default function LifeFlowPage() {
         <div className="p-4 space-y-6 max-w-5xl mx-auto">
           {isLoading ? (
             <div className="space-y-4">
-              <Skeleton className="h-16 w-full rounded-xl" />
+              <Skeleton className="h-16 w-full rounded-none" />
               <Skeleton className="h-4 w-3/4" />
               <Skeleton className="h-4 w-1/2" />
-              <Skeleton className="h-32 w-full rounded-2xl mt-4" />
-              <Skeleton className="h-32 w-full rounded-2xl" />
+              <Skeleton className="h-32 w-full rounded-none mt-4" />
+              <Skeleton className="h-32 w-full rounded-none" />
             </div>
           ) : !route && (!enrichedItems || enrichedItems.length === 0) ? (
             <GuidedFallback

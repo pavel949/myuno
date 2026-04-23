@@ -53,7 +53,7 @@ export function RecentlyViewedServices() {
             onClick={() => navigate(`/services/provider/${service.provider_id}?service=${service.id}`)}
             className={cn(
               "w-[120px] shrink-0 text-left",
-              "bg-card rounded-xl border border-border overflow-hidden",
+              "bg-card rounded-none border border-border overflow-hidden",
               "shadow-sm hover:shadow-md hover:-translate-y-0.5",
               "transition-all duration-200 group touch-manipulation"
             )}

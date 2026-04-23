@@ -205,7 +205,7 @@ export function StaffTaskCalendar({
                   <div 
                     key={order.id} 
                     className={cn(
-                      "p-3 rounded-lg border cursor-pointer transition-colors hover:bg-muted/50",
+                      "p-3 rounded-none border cursor-pointer transition-colors hover:bg-muted/50",
                       order.status === 'in_progress' && "border-warning bg-warning/5"
                     )}
                     onClick={() => {
@@ -306,7 +306,7 @@ export function StaffTaskCalendar({
                     )}
 
                     {order.notes && (
-                      <div className="text-sm text-muted-foreground bg-muted p-2 rounded">
+                      <div className="text-sm text-muted-foreground bg-muted p-2 rounded-none">
                         {order.notes}
                       </div>
                     )}

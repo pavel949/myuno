@@ -40,7 +40,7 @@ export default function DeveloperOverview() {
           Добрый день, <span className="text-[hsl(var(--nb-gold))]">{developer!.name_en}</span>
         </h1>
         {!developer!.is_verified && (
-          <p className="text-sm text-amber-400 mt-2">⏳ Аккаунт на проверке</p>
+          <p className="text-sm text-accent mt-2">⏳ Аккаунт на проверке</p>
         )}
       </div>
 
@@ -59,8 +59,8 @@ export default function DeveloperOverview() {
 
       {/* Pending approval banner */}
       {pendingApproval.length > 0 && (
-        <div className="border-l-4 border-amber-400 bg-amber-500/10 p-4 rounded-r-lg">
-          <p className="text-sm text-amber-300">
+        <div className="border-l-4 border-accent/40 bg-accent/10 p-4 rounded-none">
+          <p className="text-sm text-accent">
             <span className="font-semibold">{pendingApproval.length} проект{pendingApproval.length > 1 ? 'а' : ''}</span> ожидает проверки.
             Страница появится в каталоге после одобрения.
           </p>
@@ -71,7 +71,7 @@ export default function DeveloperOverview() {
       {attentionProjects.length > 0 && (
         <div>
           <div className="flex items-center gap-2 mb-3">
-            <AlertTriangle className="w-4 h-4 text-amber-400" />
+            <AlertTriangle className="w-4 h-4 text-accent" />
             <h2 className="text-sm font-semibold text-[hsl(var(--nb-text))]">Требуют внимания</h2>
           </div>
           <div className="space-y-2">
@@ -83,7 +83,7 @@ export default function DeveloperOverview() {
                 <div key={p.id} className="nb-glass p-4 flex items-center justify-between gap-4">
                   <div>
                     <p className="text-sm text-[hsl(var(--nb-text))]">{p.name_en || p.name_ru}</p>
-                    <p className="text-xs text-amber-400 mt-0.5">{issues.join(', ')}</p>
+                    <p className="text-xs text-accent mt-0.5">{issues.join(', ')}</p>
                   </div>
                   <Link to={APP_ROUTES.DEVELOPER_PORTAL_PROJECT_EDIT(p.id)}>
                     <Button size="sm" variant="outline" className="border-[hsl(var(--nb-glass-border))] text-[hsl(var(--nb-text-secondary))] shrink-0">

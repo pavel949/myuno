@@ -262,7 +262,7 @@ export function ProviderSelector({
                             setOpen(false);
                           }}
                           className={cn(
-                            "relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none",
+                            "relative flex w-full cursor-pointer select-none items-center rounded-none px-2 py-1.5 text-sm outline-none",
                             "hover:bg-accent hover:text-accent-foreground",
                             value === mc.id && "bg-accent"
                           )}
@@ -297,7 +297,7 @@ export function ProviderSelector({
                             setOpen(false);
                           }}
                           className={cn(
-                            "relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none",
+                            "relative flex w-full cursor-pointer select-none items-center rounded-none px-2 py-1.5 text-sm outline-none",
                             "hover:bg-accent hover:text-accent-foreground",
                             value === provider.id && "bg-accent"
                           )}

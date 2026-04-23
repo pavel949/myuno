@@ -56,7 +56,7 @@ export function LoginRequiredPage({
   return (
     <AppLayout>
       <PageContainer className="flex flex-col items-center justify-center min-h-[70vh] text-center">
-        <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
+        <div className="w-16 h-16 rounded-none bg-primary/10 flex items-center justify-center mb-6">
           <Lock className="w-8 h-8 text-primary" />
         </div>
 
@@ -80,7 +80,7 @@ export function LoginRequiredPage({
               key={idx}
               className="flex items-center gap-3 text-sm text-left"
             >
-              <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 rounded-none bg-secondary flex items-center justify-center flex-shrink-0">
                 <benefit.icon className="w-4 h-4 text-primary" />
               </div>
               <span className="text-muted-foreground">

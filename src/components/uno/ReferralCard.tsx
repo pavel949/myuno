@@ -43,7 +43,7 @@ export const ReferralCard: React.FC<ReferralCardProps> = ({
   if (isLoading) {
     return (
       <SectionCard className={cn('animate-pulse', className)}>
-        <div className="h-32 bg-muted rounded-lg" />
+        <div className="h-32 bg-muted rounded-none" />
       </SectionCard>
     );
   }
@@ -97,7 +97,7 @@ export const ReferralCard: React.FC<ReferralCardProps> = ({
 
       {/* Bonus info */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="bg-secondary/50 rounded-lg p-3 text-center">
+        <div className="bg-secondary/50 rounded-none p-3 text-center">
           <p className="text-2xl font-bold text-primary">
             {settings?.referrer_bonus || 100} ₽
           </p>
@@ -105,7 +105,7 @@ export const ReferralCard: React.FC<ReferralCardProps> = ({
             {language === 'ru' ? 'Вам за друга' : 'You get'}
           </p>
         </div>
-        <div className="bg-secondary/50 rounded-lg p-3 text-center">
+        <div className="bg-secondary/50 rounded-none p-3 text-center">
           <p className="text-2xl font-bold text-primary">
             {settings?.referred_bonus || 50} ₽
           </p>
@@ -117,7 +117,7 @@ export const ReferralCard: React.FC<ReferralCardProps> = ({
 
       {/* Referral code */}
       {referralCode && (
-        <div className="bg-muted/50 border border-border rounded-lg p-4">
+        <div className="bg-muted/50 border border-border rounded-none p-4">
           <p className="text-xs text-muted-foreground mb-2 text-center">
             {language === 'ru' ? 'Ваш реферальный код' : 'Your referral code'}
           </p>
@@ -127,7 +127,7 @@ export const ReferralCard: React.FC<ReferralCardProps> = ({
             </span>
             <button
               onClick={handleCopyCode}
-              className="p-2 hover:bg-secondary rounded-lg transition-colors"
+              className="p-2 hover:bg-secondary rounded-none transition-colors"
             >
               <Copy className="w-5 h-5 text-muted-foreground" />
             </button>
@@ -225,7 +225,7 @@ export const ReferralList: React.FC<{ className?: string }> = ({ className }) =>
   if (isLoading) {
     return (
       <SectionCard className={cn('animate-pulse', className)}>
-        <div className="h-24 bg-muted rounded-lg" />
+        <div className="h-24 bg-muted rounded-none" />
       </SectionCard>
     );
   }
@@ -243,7 +243,7 @@ export const ReferralList: React.FC<{ className?: string }> = ({ className }) =>
         {referrals.map((referral) => (
           <div 
             key={referral.id}
-            className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg"
+            className="flex items-center justify-between p-3 bg-secondary/50 rounded-none"
           >
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">

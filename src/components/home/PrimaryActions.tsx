@@ -69,7 +69,7 @@ export function PrimaryActions() {
             className="relative text-left rounded-[14px] bg-card border border-border px-4 py-3.5 active:scale-[0.99] transition-transform overflow-hidden flex items-center gap-3 min-h-[44px]"
           >
             <div
-              className="absolute top-3 bottom-3 left-0 w-0.5 rounded-r-sm"
+              className="absolute top-3 bottom-3 left-0 w-0.5 rounded-none"
               style={{ background: `hsl(var(${a.accentVar}))` }}
             />
             {/* Role tag dot — top-right (S04 reference) */}

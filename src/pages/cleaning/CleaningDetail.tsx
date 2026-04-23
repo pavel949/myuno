@@ -60,7 +60,7 @@ export default function CleaningDetail() {
 
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1">
-              <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
+              <Star className="w-5 h-5 fill-accent text-accent" />
               <span className="font-semibold">{currentService.rating}</span>
               <span className="text-muted-foreground">({currentService.reviewCount})</span>
             </div>
@@ -75,7 +75,7 @@ export default function CleaningDetail() {
           </p>
 
           {/* What's Included */}
-          <div className="bg-card rounded-xl border p-5">
+          <div className="bg-card rounded-none border p-5">
             <h3 className="font-semibold mb-4">
               {language === 'ru' ? 'Что включено' : "What's Included"}
             </h3>
@@ -90,7 +90,7 @@ export default function CleaningDetail() {
           </div>
 
           {/* Trust Badge */}
-          <div className="flex items-center gap-2 p-3 bg-primary/10 rounded-xl">
+          <div className="flex items-center gap-2 p-3 bg-primary/10 rounded-none">
             <Shield className="w-5 h-5 text-primary" />
             <span className="text-sm">
               {language === 'ru' 

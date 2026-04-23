@@ -151,25 +151,25 @@ export function AIAgentLogsPanel({ agentId, className }: AIAgentLogsPanelProps) 
       <CardContent className="space-y-4">
         {/* Stats Row */}
         <div className="grid grid-cols-4 gap-2">
-          <div className="bg-muted/50 rounded-lg p-2 text-center">
+          <div className="bg-muted/50 rounded-none p-2 text-center">
             <p className="text-lg font-semibold">{stats.total}</p>
             <p className="text-[10px] text-muted-foreground uppercase">
               {isRu ? 'Вызовов' : 'Calls'}
             </p>
           </div>
-          <div className="bg-muted/50 rounded-lg p-2 text-center">
+          <div className="bg-muted/50 rounded-none p-2 text-center">
             <p className="text-lg font-semibold">{stats.avgTime}<span className="text-xs">ms</span></p>
             <p className="text-[10px] text-muted-foreground uppercase">
               {isRu ? 'Ср. время' : 'Avg Time'}
             </p>
           </div>
-          <div className="bg-muted/50 rounded-lg p-2 text-center">
+          <div className="bg-muted/50 rounded-none p-2 text-center">
             <p className="text-lg font-semibold">{stats.avgTokens}</p>
             <p className="text-[10px] text-muted-foreground uppercase">
               {isRu ? 'Ср. токенов' : 'Avg Tokens'}
             </p>
           </div>
-          <div className="bg-muted/50 rounded-lg p-2 text-center">
+          <div className="bg-muted/50 rounded-none p-2 text-center">
             <p className="text-lg font-semibold">{stats.avgRating || '—'}</p>
             <p className="text-[10px] text-muted-foreground uppercase">
               {isRu ? 'Рейтинг' : 'Rating'}

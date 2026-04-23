@@ -106,9 +106,9 @@ export function PropertySearchInput({ companyId, onSelect, onClear, selectedProp
 
   if (selectedProperty) {
     return (
-      <div className="flex items-center gap-2 p-2 rounded-lg border bg-primary/5">
+      <div className="flex items-center gap-2 p-2 rounded-none border bg-primary/5">
         {selectedProperty.cover_image ? (
-          <img src={selectedProperty.cover_image} alt="" className="w-8 h-8 rounded object-cover shrink-0" />
+          <img src={selectedProperty.cover_image} alt="" className="w-8 h-8 rounded-none object-cover shrink-0" />
         ) : (
           <Building2 className="h-4 w-4 text-primary shrink-0" />
         )}
@@ -126,7 +126,7 @@ export function PropertySearchInput({ companyId, onSelect, onClear, selectedProp
             {selectedProperty.price && <span>฿{formatPrice(selectedProperty.price)}</span>}
           </div>
         </div>
-        <button onClick={onClear} className="p-0.5 rounded hover:bg-muted"><X className="h-3.5 w-3.5" /></button>
+        <button onClick={onClear} className="p-0.5 rounded-none hover:bg-muted"><X className="h-3.5 w-3.5" /></button>
       </div>
     );
   }
@@ -142,7 +142,7 @@ export function PropertySearchInput({ companyId, onSelect, onClear, selectedProp
         onFocus={() => query.length >= 2 && setOpen(true)}
       />
       {open && results.length > 0 && (
-        <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-popover border rounded-lg shadow-lg max-h-56 overflow-y-auto">
+        <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-popover border rounded-none shadow-lg max-h-56 overflow-y-auto">
           {results.map(p => (
             <button
               key={p.id}
@@ -150,9 +150,9 @@ export function PropertySearchInput({ companyId, onSelect, onClear, selectedProp
               className="w-full text-left px-3 py-2 hover:bg-accent text-sm flex items-center gap-2"
             >
               {p.cover_image ? (
-                <img src={p.cover_image} alt="" className="w-8 h-8 rounded object-cover shrink-0" />
+                <img src={p.cover_image} alt="" className="w-8 h-8 rounded-none object-cover shrink-0" />
               ) : (
-                <div className="w-8 h-8 rounded bg-muted flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-none bg-muted flex items-center justify-center shrink-0">
                   {p.is_project ? <Layers className="h-4 w-4 text-muted-foreground" /> : <Building2 className="h-4 w-4 text-muted-foreground" />}
                 </div>
               )}

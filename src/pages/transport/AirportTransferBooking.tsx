@@ -339,7 +339,7 @@ export default function AirportTransferBooking() {
           )}
           
           {formData.direction === 'from-airport' && (
-            <div className="w-full max-w-sm p-4 rounded-xl bg-card border border-border/50 mb-4">
+            <div className="w-full max-w-sm p-4 rounded-none bg-card border border-border/50 mb-4">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                   <User className="w-5 h-5 text-primary" />
@@ -439,7 +439,7 @@ export default function AirportTransferBooking() {
                     type="button"
                     onClick={() => handleDirectionChange('from-airport')}
                     className={cn(
-                      "p-3.5 rounded-xl border-2 transition-all text-left relative",
+                      "p-3.5 rounded-none border-2 transition-all text-left relative",
                       formData.direction === 'from-airport'
                         ? "border-primary bg-primary/10"
                         : "border-border/50 bg-card hover:border-primary/50"
@@ -461,7 +461,7 @@ export default function AirportTransferBooking() {
                     type="button"
                     onClick={() => handleDirectionChange('to-airport')}
                     className={cn(
-                      "p-3.5 rounded-xl border-2 transition-all text-left relative",
+                      "p-3.5 rounded-none border-2 transition-all text-left relative",
                       formData.direction === 'to-airport'
                         ? "border-primary bg-primary/10"
                         : "border-border/50 bg-card hover:border-primary/50"
@@ -493,7 +493,7 @@ export default function AirportTransferBooking() {
                       type="button"
                       onClick={() => setFormData(prev => ({ ...prev, terminal: terminal.id }))}
                       className={cn(
-                        "p-3.5 rounded-xl border-2 transition-all text-center relative",
+                        "p-3.5 rounded-none border-2 transition-all text-center relative",
                         formData.terminal === terminal.id
                           ? "border-primary bg-primary/10"
                           : "border-border/50 bg-card hover:border-primary/50"
@@ -537,7 +537,7 @@ export default function AirportTransferBooking() {
                               destinationAddress: language === 'ru' ? dest.name_ru : dest.name_en,
                             }))}
                             className={cn(
-                              "p-3 rounded-xl border-2 transition-all text-left relative",
+                              "p-3 rounded-none border-2 transition-all text-left relative",
                               formData.selectedDestinationId === dest.id
                                 ? "border-primary bg-primary/10"
                                 : "border-border/50 bg-card hover:border-primary/30"
@@ -617,14 +617,14 @@ export default function AirportTransferBooking() {
                       type="button"
                       onClick={() => setFormData(prev => ({ ...prev, vehicleType: vehicle.id }))}
                       className={cn(
-                        "w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all text-left",
+                        "w-full flex items-center gap-3 p-4 rounded-none border-2 transition-all text-left",
                         isSelected
                           ? "border-primary bg-primary/10"
                           : "border-border/50 bg-card hover:border-primary/30"
                       )}
                     >
                       <div className={cn(
-                        "w-12 h-12 rounded-xl flex items-center justify-center shrink-0",
+                        "w-12 h-12 rounded-none flex items-center justify-center shrink-0",
                         isSelected ? "bg-primary/20" : "bg-muted"
                       )}>
                         <Icon className="w-6 h-6 text-primary" />
@@ -661,7 +661,7 @@ export default function AirportTransferBooking() {
               transition={{ duration: 0.25 }}
               className="space-y-5"
             >
-              <div className="p-3 rounded-xl bg-muted/50 border border-border/50 flex items-center gap-3">
+              <div className="p-3 rounded-none bg-muted/50 border border-border/50 flex items-center gap-3">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-0.5">
                     {formData.direction === 'from-airport' ? (
@@ -682,7 +682,7 @@ export default function AirportTransferBooking() {
               <button
                 type="button"
                 onClick={() => navigate('/transport/fast-track')}
-                className="w-full p-3 rounded-xl border border-primary/20 bg-primary/5 flex items-center gap-3 text-left hover:bg-primary/10 transition-colors"
+                className="w-full p-3 rounded-none border border-primary/20 bg-primary/5 flex items-center gap-3 text-left hover:bg-primary/10 transition-colors"
               >
                 <Shield className="w-5 h-5 text-primary shrink-0" />
                 <div className="flex-1 min-w-0">
@@ -842,7 +842,7 @@ export default function AirportTransferBooking() {
                       type="button"
                       onClick={() => setFormData(prev => ({ ...prev, paymentMethod: pm.key }))}
                       className={cn(
-                        "p-3 rounded-xl border-2 transition-all text-left relative",
+                        "p-3 rounded-none border-2 transition-all text-left relative",
                         formData.paymentMethod === pm.key
                           ? "border-primary bg-primary/10"
                           : "border-border/50 bg-card hover:border-primary/50"
@@ -858,14 +858,14 @@ export default function AirportTransferBooking() {
                   ))}
                 </div>
                 {formData.paymentMethod === 'cash' && (
-                  <p className="text-xs text-muted-foreground p-2 bg-success/10 rounded-lg">
+                  <p className="text-xs text-muted-foreground p-2 bg-success/10 rounded-none">
                     {language === 'ru' 
                       ? 'Оплата наличными водителю при встрече. THB или USD.'
                       : 'Pay cash to the driver upon meeting. THB or USD.'}
                   </p>
                 )}
                 {formData.paymentMethod === 'concierge_advance' && (
-                  <p className="text-xs text-muted-foreground p-2 bg-warning/10 rounded-lg">
+                  <p className="text-xs text-muted-foreground p-2 bg-warning/10 rounded-none">
                     {language === 'ru' 
                       ? 'myUNO оплатит трансфер. Вы вернёте сумму после поездки удобным способом.'
                       : 'myUNO will pay for your transfer. Return the amount after your trip.'}

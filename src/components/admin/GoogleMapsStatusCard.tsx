@@ -128,8 +128,8 @@ export function GoogleMapsStatusCard() {
         <div className="flex items-center gap-2 text-sm">
           {apiAvailable ? (
             <>
-              <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-500 flex-shrink-0" />
-              <span className="font-medium text-green-700 dark:text-green-400">
+              <CheckCircle2 className="h-4 w-4 text-success dark:text-success flex-shrink-0" />
+              <span className="font-medium text-success dark:text-success">
                 {isRu ? 'API доступен' : 'API available'}
               </span>
             </>
@@ -149,7 +149,7 @@ export function GoogleMapsStatusCard() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
           <div className="flex items-center gap-2">
             {hasKey ? (
-              <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-500 flex-shrink-0" />
+              <CheckCircle2 className="h-4 w-4 text-success dark:text-success flex-shrink-0" />
             ) : (
               <span className="h-4 w-4 flex-shrink-0 text-muted-foreground">—</span>
             )}
@@ -158,11 +158,11 @@ export function GoogleMapsStatusCard() {
           </div>
           <div className="flex items-center gap-2">
             {!hasKey ? (
-              <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-500 flex-shrink-0" />
+              <CheckCircle2 className="h-4 w-4 text-success dark:text-success flex-shrink-0" />
             ) : loadError ? (
               <XCircle className="h-4 w-4 text-destructive flex-shrink-0" />
             ) : isLoaded ? (
-              <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-500 flex-shrink-0" />
+              <CheckCircle2 className="h-4 w-4 text-success dark:text-success flex-shrink-0" />
             ) : (
               <Loader2 className="h-4 w-4 animate-spin text-muted-foreground flex-shrink-0" />
             )}
@@ -173,7 +173,7 @@ export function GoogleMapsStatusCard() {
             {geocodeStatus === 'running' ? (
               <Loader2 className="h-4 w-4 animate-spin text-muted-foreground flex-shrink-0" />
             ) : geocodeStatus === 'ok' ? (
-              <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-500 flex-shrink-0" />
+              <CheckCircle2 className="h-4 w-4 text-success dark:text-success flex-shrink-0" />
             ) : geocodeStatus === 'fail' ? (
               <XCircle className="h-4 w-4 text-destructive flex-shrink-0" />
             ) : (
@@ -219,7 +219,7 @@ export function GoogleMapsStatusCard() {
           </p>
         )}
         {geocodeStatus === 'fail' && geocodeFailReason && (
-          <div className="mt-2 p-3 rounded-md bg-destructive/10 border border-destructive/20" role="alert">
+          <div className="mt-2 p-3 rounded-none bg-destructive/10 border border-destructive/20" role="alert">
             <p className="text-sm font-medium text-destructive">
               {isRu ? 'Проверка не прошла' : 'Check failed'}
             </p>

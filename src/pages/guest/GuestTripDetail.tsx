@@ -168,7 +168,7 @@ export default function GuestTripDetail() {
 
   const statusBadge = {
     upcoming: { label: isRu ? 'Предстоящая' : 'Upcoming', variant: 'default' as const },
-    active: { label: isRu ? 'Сейчас' : 'Active', variant: 'default' as const, className: 'bg-green-500' },
+    active: { label: isRu ? 'Сейчас' : 'Active', variant: 'default' as const, className: 'bg-success' },
     completed: { label: isRu ? 'Завершена' : 'Completed', variant: 'secondary' as const },
   }[tripStatus];
 
@@ -273,7 +273,7 @@ export default function GuestTripDetail() {
             <CardContent className="space-y-4">
               {/* WiFi */}
               {(property?.wifi_network || property?.wifi_password) && (
-                <div className="p-3 bg-muted/50 rounded-lg">
+                <div className="p-3 bg-muted/50 rounded-none">
                   <div className="flex items-center gap-2 mb-2">
                     <Wifi className="w-4 h-4 text-primary" />
                     <span className="font-medium text-sm">WiFi</span>
@@ -345,7 +345,7 @@ export default function GuestTripDetail() {
             {property?.manager_phone && (
               <a
                 href={`tel:${property.manager_phone}`}
-                className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
+                className="flex items-center justify-between p-3 bg-muted/50 rounded-none hover:bg-muted transition-colors"
               >
                 <div>
                   <p className="font-medium text-sm">
@@ -369,7 +369,7 @@ export default function GuestTripDetail() {
             {property?.emergency_contact_phone && (
               <a
                 href={`tel:${property.emergency_contact_phone}`}
-                className="flex items-center justify-between p-3 border border-destructive/30 bg-destructive/5 rounded-lg"
+                className="flex items-center justify-between p-3 border border-destructive/30 bg-destructive/5 rounded-none"
               >
                 <div>
                   <p className="font-medium text-sm text-destructive">
@@ -498,7 +498,7 @@ export default function GuestTripDetail() {
                 : 'This action cannot be undone. Refund depends on the cancellation policy.'}
             </DialogDescription>
           </DialogHeader>
-          <div className="p-3 bg-muted rounded-lg text-sm">
+          <div className="p-3 bg-muted rounded-none text-sm">
             <p className="font-medium">{isRu ? property?.title_ru : property?.title}</p>
             <p className="text-muted-foreground">
               {format(new Date(booking.check_in), 'dd MMM yyyy', { locale: isRu ? ru : undefined })}

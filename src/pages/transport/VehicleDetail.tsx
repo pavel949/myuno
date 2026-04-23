@@ -133,7 +133,7 @@ export default function VehicleDetail() {
                   key={i}
                   onClick={() => setActiveImage(i)}
                   className={cn(
-                    "w-16 h-12 rounded-lg overflow-hidden flex-shrink-0 border-2 transition-all",
+                    "w-16 h-12 rounded-none overflow-hidden flex-shrink-0 border-2 transition-all",
                     activeImage === i ? "border-primary shadow-sm" : "border-transparent opacity-50 hover:opacity-80"
                   )}
                 >
@@ -169,7 +169,7 @@ export default function VehicleDetail() {
               {/* Rating */}
               {vehicle.rating && vehicle.rating > 0 && (
                 <div className="flex items-center gap-2 mt-2.5">
-                  <div className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-warning/10">
+                  <div className="flex items-center gap-1 px-2.5 py-1 rounded-none bg-warning/10">
                     <Star className="w-4 h-4 text-warning fill-warning" />
                     <span className="font-bold text-sm">{vehicle.rating.toFixed(1)}</span>
                   </div>
@@ -182,7 +182,7 @@ export default function VehicleDetail() {
 
             {/* G-Trust Block */}
             {vehicle.is_verified && (
-              <div className="p-4 rounded-2xl bg-success/5 border border-success/20">
+              <div className="p-4 rounded-none bg-success/5 border border-success/20">
                 <div className="flex items-center gap-2 mb-3">
                   <ShieldCheck className="w-5 h-5 text-success" />
                   <h3 className="font-semibold text-sm text-foreground">
@@ -202,7 +202,7 @@ export default function VehicleDetail() {
             )}
 
             {/* Price Card */}
-            <div className="p-4 rounded-2xl bg-primary/5 border border-primary/15">
+            <div className="p-4 rounded-none bg-primary/5 border border-primary/15">
               <div className="flex items-end justify-between mb-3">
                 <div>
                   <span className="text-xs text-muted-foreground uppercase tracking-wider">
@@ -283,7 +283,7 @@ export default function VehicleDetail() {
                 <h2 className="text-base font-semibold mb-3">{isRu ? 'Включено' : 'Included'}</h2>
                 <div className="grid grid-cols-2 gap-2">
                   {localizedFeatures.map((feature, i) => (
-                    <div key={i} className="flex items-center gap-2.5 p-3 rounded-xl bg-card border border-border/50">
+                    <div key={i} className="flex items-center gap-2.5 p-3 rounded-none bg-card border border-border/50">
                       <Check className="w-4 h-4 text-success shrink-0" />
                       <span className="text-sm">{feature}</span>
                     </div>
@@ -314,7 +314,7 @@ export default function VehicleDetail() {
             </div>
 
             {/* FAQ placeholder */}
-            <div className="p-4 rounded-2xl bg-muted/50 border border-border/50">
+            <div className="p-4 rounded-none bg-muted/50 border border-border/50">
               <h3 className="font-semibold text-sm mb-2">{isRu ? 'Часто задаваемые вопросы' : 'FAQ'}</h3>
               <div className="space-y-2">
                 <FaqItem q={isRu ? 'Нужны ли международные права?' : 'Do I need an international license?'} a={isRu ? 'Для аренды автомобиля или скутера на Пхукете рекомендуется иметь международное водительское удостоверение (МВУ). Полиция может проверить документы.' : 'An International Driving Permit (IDP) is recommended for renting cars or scooters in Phuket. Police may check your documents.'} />
@@ -347,7 +347,7 @@ export default function VehicleDetail() {
               <MessageCircle className="w-4 h-4" />
             </Button>
             <Button
-              className="flex-1 h-11 rounded-xl font-semibold"
+              className="flex-1 h-11 rounded-none font-semibold"
               onClick={() => navigate(`/transport/booking/${id}`, {
                 state: {
                   vehicle: {
@@ -373,7 +373,7 @@ export default function VehicleDetail() {
 
 function SpecCard({ icon: Icon, label, value }: { icon: typeof Users; label: string; value: string }) {
   return (
-    <div className="flex flex-col items-center p-3 rounded-xl bg-card border border-border/50 text-center">
+    <div className="flex flex-col items-center p-3 rounded-none bg-card border border-border/50 text-center">
       <Icon className="w-5 h-5 text-primary mb-1.5" />
       <span className="text-sm font-bold text-foreground">{value}</span>
       <span className="text-[10px] text-muted-foreground mt-0.5">{label}</span>
@@ -392,7 +392,7 @@ function TrustItem({ label }: { label: string }) {
 
 function PriceVariant({ label, value }: { label: string; value: string }) {
   return (
-    <div className="p-2.5 rounded-xl bg-background text-center">
+    <div className="p-2.5 rounded-none bg-background text-center">
       <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{label}</p>
       <p className="text-sm font-bold text-foreground mt-0.5">{value}</p>
     </div>
@@ -412,7 +412,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
   return (
     <button
-      className="w-full flex flex-col p-3 rounded-xl hover:bg-muted/50 transition-colors text-left"
+      className="w-full flex flex-col p-3 rounded-none hover:bg-muted/50 transition-colors text-left"
       onClick={() => setOpen(!open)}
     >
       <div className="flex items-center justify-between w-full">

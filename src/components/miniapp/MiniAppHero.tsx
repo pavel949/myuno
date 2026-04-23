@@ -26,7 +26,7 @@ export function MiniAppHero({
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-2xl p-6 bg-muted/30 border border-border/60",
+        "relative overflow-hidden rounded-none p-6 bg-muted/30 border border-border/60",
         className
       )}
     >

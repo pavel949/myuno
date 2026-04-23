@@ -91,7 +91,7 @@ export function ReportDetailSheet({ report, open, onOpenChange, actionSlot }: Re
         ) : isPnl ? (
           /* P&L inline view */
           <div className="space-y-4">
-            <div className="rounded-xl p-4 bg-muted/50 space-y-3">
+            <div className="rounded-none p-4 bg-muted/50 space-y-3">
               <div className="flex justify-between text-sm">
                 <span>{isRu ? 'Выручка' : 'Revenue'}</span>
                 <span className="font-bold text-success">{formatCurrency(income.total || 0)}</span>
@@ -116,11 +116,11 @@ export function ReportDetailSheet({ report, open, onOpenChange, actionSlot }: Re
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-lg bg-muted/50 p-3 text-center">
+              <div className="rounded-none bg-muted/50 p-3 text-center">
                 <p className="text-xs text-muted-foreground">{isRu ? 'Коэфф. расходов' : 'Expense Ratio'}</p>
                 <p className="text-lg font-bold">{expenseRatio}%</p>
               </div>
-              <div className="rounded-lg bg-muted/50 p-3 text-center">
+              <div className="rounded-none bg-muted/50 p-3 text-center">
                 <p className="text-xs text-muted-foreground">{isRu ? 'Маржа' : 'Margin'}</p>
                 <p className="text-lg font-bold">{income.total ? Math.round((netIncome / income.total) * 100) : 0}%</p>
               </div>
@@ -142,13 +142,13 @@ export function ReportDetailSheet({ report, open, onOpenChange, actionSlot }: Re
         ) : isOwnerStatement ? (
           /* Owner Statement inline view */
           <div className="space-y-4">
-            <div className={`rounded-xl p-4 text-center ${ownerPayout >= 0 ? 'bg-success/10' : 'bg-destructive/10'}`}>
+            <div className={`rounded-none p-4 text-center ${ownerPayout >= 0 ? 'bg-success/10' : 'bg-destructive/10'}`}>
               <p className="text-xs text-muted-foreground mb-1">{isRu ? 'К выплате собственнику' : 'Net Payout to Owner'}</p>
               <p className={`text-3xl font-bold ${ownerPayout >= 0 ? 'text-success' : 'text-destructive'}`}>
                 {formatCurrency(ownerPayout)}
               </p>
             </div>
-            <div className="rounded-xl bg-muted/50 p-4 space-y-2">
+            <div className="rounded-none bg-muted/50 p-4 space-y-2">
               <div className="flex justify-between text-sm">
                 <span>{isRu ? 'Общий доход' : 'Total Revenue'}</span>
                 <span className="font-bold text-success">{formatCurrency(income.total || 0)}</span>
@@ -173,7 +173,7 @@ export function ReportDetailSheet({ report, open, onOpenChange, actionSlot }: Re
               </div>
             </div>
             {data.occupancy !== undefined && (
-              <div className="rounded-lg bg-muted/50 p-3">
+              <div className="rounded-none bg-muted/50 p-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">{isRu ? 'Заполняемость' : 'Occupancy'}</span>
                   <Badge variant="secondary">{Math.round(data.occupancy?.rate || 0)}%</Badge>
@@ -184,7 +184,7 @@ export function ReportDetailSheet({ report, open, onOpenChange, actionSlot }: Re
         ) : (
           <>
             {/* Net income hero */}
-            <div className={`rounded-xl p-4 mb-4 text-center ${netIncome >= 0 ? 'bg-success/10' : 'bg-destructive/10'}`}>
+            <div className={`rounded-none p-4 mb-4 text-center ${netIncome >= 0 ? 'bg-success/10' : 'bg-destructive/10'}`}>
               <p className="text-xs text-muted-foreground mb-1">{isRu ? 'Чистый доход' : 'Net Income'}</p>
               <p className={`text-3xl font-bold ${netIncome >= 0 ? 'text-success' : 'text-destructive'}`}>
                 {netIncome >= 0 ? '+' : ''}{formatCurrency(netIncome)}
@@ -193,14 +193,14 @@ export function ReportDetailSheet({ report, open, onOpenChange, actionSlot }: Re
 
             {/* Income vs Expenses summary */}
             <div className="grid grid-cols-2 gap-3 mb-4">
-              <div className="rounded-lg bg-success/5 border border-success/20 p-3">
+              <div className="rounded-none bg-success/5 border border-success/20 p-3">
                 <div className="flex items-center gap-1.5 mb-1">
                   <TrendingUp className="h-4 w-4 text-success" />
                   <span className="text-xs text-muted-foreground">{isRu ? 'Доходы' : 'Income'}</span>
                 </div>
                 <p className="text-lg font-bold text-success">{formatCurrency(income.total || 0)}</p>
               </div>
-              <div className="rounded-lg bg-destructive/5 border border-destructive/20 p-3">
+              <div className="rounded-none bg-destructive/5 border border-destructive/20 p-3">
                 <div className="flex items-center gap-1.5 mb-1">
                   <TrendingDown className="h-4 w-4 text-destructive" />
                   <span className="text-xs text-muted-foreground">{isRu ? 'Расходы' : 'Expenses'}</span>
@@ -247,7 +247,7 @@ export function ReportDetailSheet({ report, open, onOpenChange, actionSlot }: Re
 
             {/* Occupancy if available */}
             {data.occupancy !== undefined && (
-              <div className="rounded-lg bg-muted/50 p-3">
+              <div className="rounded-none bg-muted/50 p-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">{isRu ? 'Заполняемость' : 'Occupancy'}</span>
                   <Badge variant="secondary">{Math.round(data.occupancy?.rate || 0)}%</Badge>

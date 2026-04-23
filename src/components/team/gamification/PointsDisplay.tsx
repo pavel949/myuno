@@ -36,10 +36,10 @@ export function PointsDisplay({ compact = false, className }: PointsDisplayProps
   }
 
   return (
-    <div className={cn("p-4 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border", className)}>
+    <div className={cn("p-4 rounded-none bg-gradient-to-br from-primary/10 to-primary/5 border", className)}>
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <div className={cn("p-2 rounded-lg bg-background shadow-sm", level.color)}>
+          <div className={cn("p-2 rounded-none bg-background shadow-sm", level.color)}>
             <LevelIcon className="h-5 w-5" />
           </div>
           <div>

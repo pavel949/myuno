@@ -162,7 +162,7 @@ const navigate = useNavigate();
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative rounded-2xl overflow-hidden mb-8 p-6 sm:p-8"
+        className="relative rounded-none overflow-hidden mb-8 p-6 sm:p-8"
       >
         <div className="absolute inset-0 gradient-gold opacity-10" />
         <div className="relative">
@@ -209,7 +209,7 @@ const navigate = useNavigate();
                 type="button"
                 onClick={() => setSelectedCategory(category.id)}
                 className={cn(
-                  "flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all",
+                  "flex flex-col items-center gap-2 p-4 rounded-none border-2 transition-all",
                   selectedCategory === category.id
                     ? "border-primary bg-primary/10"
                     : "border-border hover:border-primary/50"
@@ -315,7 +315,7 @@ const navigate = useNavigate();
         </SectionCard>
 
         {/* Verification Info */}
-        <div className="bg-secondary/50 rounded-xl p-4 border border-border/50">
+        <div className="bg-secondary/50 rounded-none p-4 border border-border/50">
           <div className="flex items-start gap-3">
             <Shield className="w-5 h-5 text-primary mt-0.5" />
             <div>

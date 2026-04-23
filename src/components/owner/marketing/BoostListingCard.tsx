@@ -117,7 +117,7 @@ export function BoostListingCard({ propertyId, className }: BoostListingCardProp
       <Card className={cn("overflow-hidden", className)}>
         <CardHeader className="pb-2">
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-none bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
               <Zap className="h-5 w-5 text-primary-foreground" />
             </div>
             <div>
@@ -134,7 +134,7 @@ export function BoostListingCard({ propertyId, className }: BoostListingCardProp
         <CardContent className="space-y-3">
           {/* Active Promotion */}
           {activePromotion && (
-            <div className="p-3 rounded-xl bg-success/10 border border-success/20">
+            <div className="p-3 rounded-none bg-success/10 border border-success/20">
               <div className="flex items-center gap-2 mb-2">
                 <CheckCircle2 className="h-4 w-4 text-success" />
                 <span className="text-sm font-medium text-success">
@@ -161,7 +161,7 @@ export function BoostListingCard({ propertyId, className }: BoostListingCardProp
                   key={tier.key}
                   onClick={() => handleSelectTier(tier.key)}
                   className={cn(
-                    "w-full p-3 rounded-xl border-2 transition-all text-left",
+                    "w-full p-3 rounded-none border-2 transition-all text-left",
                     "hover:shadow-md active:scale-[0.99]",
                     tier.borderColor,
                     tier.bgColor
@@ -170,7 +170,7 @@ export function BoostListingCard({ propertyId, className }: BoostListingCardProp
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-3">
                       <div className={cn(
-                        "w-10 h-10 rounded-lg flex items-center justify-center",
+                        "w-10 h-10 rounded-none flex items-center justify-center",
                         tier.bgColor
                       )}>
                         <tier.icon className={cn("h-5 w-5", tier.color)} />
@@ -241,7 +241,7 @@ export function BoostListingCard({ propertyId, className }: BoostListingCardProp
           </DialogHeader>
           
           {selectedTierData && (
-            <div className="p-4 bg-muted rounded-xl space-y-2">
+            <div className="p-4 bg-muted rounded-none space-y-2">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">{isRu ? 'Тариф' : 'Plan'}</span>
                 <span className="font-medium">{isRu ? selectedTierData.name_ru : selectedTierData.name_en}</span>

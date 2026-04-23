@@ -108,13 +108,13 @@ export function IntakeItemPanel({
         <PanelSection title={isRu ? 'Предупреждения' : 'Warnings'}>
           <div className="space-y-1">
             {item.missingRequiredFields.length > 0 && (
-              <div className="flex items-start gap-1.5 text-[10px] text-warning bg-warning/10 p-1.5 rounded">
+              <div className="flex items-start gap-1.5 text-[10px] text-warning bg-warning/10 p-1.5 rounded-none">
                 <AlertTriangle className="h-3 w-3 shrink-0 mt-0.5" />
                 <span>{isRu ? 'Нет: ' : 'Missing: '}{item.missingRequiredFields.join(', ')}</span>
               </div>
             )}
             {item.warnings.map((w, i) => (
-              <div key={i} className="flex items-start gap-1.5 text-[10px] text-muted-foreground bg-muted/50 p-1.5 rounded">
+              <div key={i} className="flex items-start gap-1.5 text-[10px] text-muted-foreground bg-muted/50 p-1.5 rounded-none">
                 <AlertTriangle className="h-3 w-3 shrink-0 mt-0.5" />
                 <span>{w}</span>
               </div>

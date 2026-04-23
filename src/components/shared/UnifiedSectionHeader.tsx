@@ -53,19 +53,19 @@ export const UnifiedSectionHeader = memo(forwardRef<HTMLDivElement, UnifiedSecti
           <img 
             src={iconImage} 
             alt="" 
-            className="w-10 h-10 rounded-xl object-cover shrink-0"
+            className="w-10 h-10 rounded-none object-cover shrink-0"
           />
         ) : iconEmoji ? (
           (() => {
             const ResolvedIcon = resolveIcon(iconEmoji);
             return (
-              <div className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-none bg-muted/50 flex items-center justify-center shrink-0">
                 <ResolvedIcon className="w-5 h-5 text-primary" />
               </div>
             );
           })()
         ) : Icon ? (
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+          <div className="w-10 h-10 rounded-none bg-primary/10 flex items-center justify-center shrink-0">
             <Icon className={cn("w-5 h-5", iconColor)} />
           </div>
         ) : null}

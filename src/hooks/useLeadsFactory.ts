@@ -127,9 +127,9 @@ export function getPriorityColor(priority: string | null): string {
     case 'hot':
       return 'text-red-600 bg-red-100';
     case 'warm':
-      return 'text-amber-600 bg-amber-100';
+      return 'text-accent bg-accent/10';
     case 'cold':
-      return 'text-blue-600 bg-blue-100';
+      return 'text-primary bg-primary/10';
     default:
       return 'text-muted-foreground bg-muted';
   }
@@ -139,6 +139,6 @@ export function getPriorityColor(priority: string | null): string {
 export function getScoreColor(score: number | null): string {
   if (score === null) return 'text-muted-foreground';
   if (score >= 70) return 'text-red-600';
-  if (score >= 40) return 'text-amber-600';
-  return 'text-blue-600';
+  if (score >= 40) return 'text-accent';
+  return 'text-primary';
 }

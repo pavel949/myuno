@@ -58,7 +58,7 @@ export function SellConditionStep({ condition, onChange, onNext, onBack }: SellC
             type="button"
             onClick={() => onChange(item.value)}
             className={cn(
-              'w-full p-4 rounded-xl border-2 text-left transition-all',
+              'w-full p-4 rounded-none border-2 text-left transition-all',
               'hover:border-primary/50 hover:bg-accent/50',
               condition === item.value
                 ? 'border-primary bg-primary/5'
@@ -67,7 +67,7 @@ export function SellConditionStep({ condition, onChange, onNext, onBack }: SellC
           >
             <div className="flex items-start gap-3">
               <div className={cn(
-                'p-2 rounded-lg',
+                'p-2 rounded-none',
                 condition === item.value
                   ? 'bg-primary text-primary-foreground'
                   : 'bg-muted text-muted-foreground'

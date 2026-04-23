@@ -207,7 +207,7 @@ export default function DeliveryCheckout() {
 
         <div className="px-4 py-6 space-y-6">
           {/* Order Summary */}
-          <div className="p-4 rounded-xl bg-card border border-border/50">
+          <div className="p-4 rounded-none bg-card border border-border/50">
             <h2 className="font-semibold mb-3">
               {language === 'ru' ? 'Ваш заказ' : 'Your Order'}
             </h2>

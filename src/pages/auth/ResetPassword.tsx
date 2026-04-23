@@ -123,7 +123,7 @@ export default function ResetPassword() {
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 pointer-events-none" />
       
       <header className="relative z-10 p-4 flex justify-between items-center">
-        <Link to={APP_ROUTES.HOME} className="h-10 px-3 rounded-xl bg-primary/10 ring-1 ring-primary/30 flex items-center justify-center hover:scale-105 transition-transform">
+        <Link to={APP_ROUTES.HOME} className="h-10 px-3 rounded-none bg-primary/10 ring-1 ring-primary/30 flex items-center justify-center hover:scale-105 transition-transform">
           <BrandWordmark as="static" />
         </Link>
         <div className="flex items-center gap-2">
@@ -155,7 +155,7 @@ export default function ResetPassword() {
                   : 'This password reset link is invalid or has already been used. Request a new one.'}
               </p>
               {linkError && (
-                <p className="text-sm text-destructive bg-destructive/10 rounded-lg px-3 py-2">
+                <p className="text-sm text-destructive bg-destructive/10 rounded-none px-3 py-2">
                   {linkError}
                 </p>
               )}
@@ -175,8 +175,8 @@ export default function ResetPassword() {
             </div>
           ) : isSuccess ? (
             <div className="text-center space-y-6">
-              <div className="w-16 h-16 mx-auto rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
+              <div className="w-16 h-16 mx-auto rounded-full bg-success/10 dark:bg-success/30 flex items-center justify-center">
+                <CheckCircle className="w-8 h-8 text-success dark:text-success" />
               </div>
               <h1 className="text-2xl font-display font-bold">
                 {language === 'ru' ? 'Пароль изменён!' : 'Password updated!'}
@@ -221,7 +221,7 @@ export default function ResetPassword() {
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
                       className={cn(
-                        "w-full h-12 pl-10 pr-12 rounded-xl bg-secondary border transition-colors",
+                        "w-full h-12 pl-10 pr-12 rounded-none bg-secondary border transition-colors",
                         "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary",
                         errors.password ? "border-destructive" : "border-border"
                       )}
@@ -256,7 +256,7 @@ export default function ResetPassword() {
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="••••••••"
                       className={cn(
-                        "w-full h-12 pl-10 pr-4 rounded-xl bg-secondary border transition-colors",
+                        "w-full h-12 pl-10 pr-4 rounded-none bg-secondary border transition-colors",
                         "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary",
                         errors.confirm ? "border-destructive" : "border-border"
                       )}

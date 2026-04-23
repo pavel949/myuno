@@ -36,7 +36,7 @@ export function PromoBanner({
       onClick={onClick}
       role={onClick ? 'button' : undefined}
       className={cn(
-        'relative overflow-hidden rounded-xl',
+        'relative overflow-hidden rounded-none',
         'bg-gradient-to-br from-[hsl(222_47%_11%)] via-[hsl(224_55%_22%)] to-[hsl(222_47%_11%)]',
         '[box-shadow:var(--shadow-elevation-2)]',
         onClick && 'cursor-pointer hover:[box-shadow:var(--shadow-elevation-3)] hover:-translate-y-0.5 transition-all duration-150',

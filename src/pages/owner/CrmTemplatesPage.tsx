@@ -136,7 +136,7 @@ const [open, setOpen] = useState(false);
                       key={tag}
                       type="button"
                       onClick={() => insertTag(tag)}
-                      className="px-2 py-0.5 rounded text-[10px] bg-muted hover:bg-muted/80 border text-muted-foreground"
+                      className="px-2 py-0.5 rounded-none text-[10px] bg-muted hover:bg-muted/80 border text-muted-foreground"
                     >
                       {tag}
                     </button>
@@ -176,7 +176,7 @@ const [open, setOpen] = useState(false);
               <Card key={tpl.id} className="hover:bg-muted/50 transition-colors">
                 <CardContent className="p-4">
                   <div className="flex items-start gap-3">
-                    <div className="p-2 rounded-lg bg-primary/10 shrink-0">
+                    <div className="p-2 rounded-none bg-primary/10 shrink-0">
                       <Icon className="h-4 w-4 text-primary" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -190,7 +190,7 @@ const [open, setOpen] = useState(false);
                       {tpl.merge_tags && tpl.merge_tags.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-2">
                           {tpl.merge_tags.map(tag => (
-                            <span key={tag} className="text-[9px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">{tag}</span>
+                            <span key={tag} className="text-[9px] px-1.5 py-0.5 rounded-none bg-muted text-muted-foreground">{tag}</span>
                           ))}
                         </div>
                       )}

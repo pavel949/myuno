@@ -26,10 +26,10 @@ export interface TeamMember {
 }
 
 export const SPECIALIZATION_LABELS: Record<TeamSpecialization, { en: string; ru: string; icon: string; color: string }> = {
-  content_manager: { en: 'Content Manager', ru: 'Контент-менеджер', icon: 'file-edit', color: 'bg-blue-500' },
-  support_operator: { en: 'Support Operator', ru: 'Оператор поддержки', icon: 'headphones', color: 'bg-green-500' },
-  sales_manager: { en: 'Sales Manager', ru: 'Менеджер по продажам', icon: 'trending-up', color: 'bg-purple-500' },
-  moderation_officer: { en: 'Moderator', ru: 'Модератор', icon: 'shield-check', color: 'bg-amber-500' },
+  content_manager: { en: 'Content Manager', ru: 'Контент-менеджер', icon: 'file-edit', color: 'bg-primary' },
+  support_operator: { en: 'Support Operator', ru: 'Оператор поддержки', icon: 'headphones', color: 'bg-success' },
+  sales_manager: { en: 'Sales Manager', ru: 'Менеджер по продажам', icon: 'trending-up', color: 'bg-primary' },
+  moderation_officer: { en: 'Moderator', ru: 'Модератор', icon: 'shield-check', color: 'bg-accent' },
   team_lead: { en: 'Team Lead', ru: 'Тимлид', icon: 'crown', color: 'bg-red-500' },
 };
 

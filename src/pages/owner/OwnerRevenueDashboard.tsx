@@ -220,15 +220,15 @@ export default function OwnerRevenueDashboard() {
           )}
           <div className="flex justify-center gap-4 mt-2 text-[10px] text-muted-foreground">
             <span className="flex items-center gap-1">
-              <span className="w-3 h-0.5 bg-success inline-block rounded" />
+              <span className="w-3 h-0.5 bg-success inline-block rounded-none" />
               {isRu ? 'Доход' : 'Income'}
             </span>
             <span className="flex items-center gap-1">
-              <span className="w-3 h-0.5 bg-destructive inline-block rounded" style={{ borderTop: '1px dashed' }} />
+              <span className="w-3 h-0.5 bg-destructive inline-block rounded-none" style={{ borderTop: '1px dashed' }} />
               {isRu ? 'Расходы' : 'Expenses'}
             </span>
             <span className="flex items-center gap-1">
-              <span className="w-3 h-0.5 bg-primary inline-block rounded" style={{ borderTop: '1px dashed' }} />
+              <span className="w-3 h-0.5 bg-primary inline-block rounded-none" style={{ borderTop: '1px dashed' }} />
               {isRu ? 'Прогноз' : 'Forecast'}
             </span>
           </div>
@@ -278,11 +278,11 @@ export default function OwnerRevenueDashboard() {
           )}
           <div className="flex justify-center gap-4 mt-2 text-[10px] text-muted-foreground">
             <span className="flex items-center gap-1">
-              <span className="w-3 h-3 rounded-sm bg-info/30 inline-block" />
+              <span className="w-3 h-3 rounded-none bg-info/30 inline-block" />
               {isRu ? 'Загрузка %' : 'Occupancy %'}
             </span>
             <span className="flex items-center gap-1">
-              <span className="w-3 h-0.5 bg-primary inline-block rounded" />
+              <span className="w-3 h-0.5 bg-primary inline-block rounded-none" />
               ADR
             </span>
           </div>
@@ -309,12 +309,12 @@ export default function OwnerRevenueDashboard() {
           ) : (
             <div className="space-y-3">
               {propertyRevenue.map(p => (
-                <div key={p.id} className="p-3 rounded-xl border bg-card">
+                <div key={p.id} className="p-3 rounded-none border bg-card">
                   <div className="flex items-center gap-3 mb-2">
                     {p.coverImage ? (
-                      <img src={p.coverImage} alt="" className="w-10 h-10 rounded-lg object-cover" />
+                      <img src={p.coverImage} alt="" className="w-10 h-10 rounded-none object-cover" />
                     ) : (
-                      <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-none bg-muted flex items-center justify-center">
                         <BedDouble className="h-4 w-4 text-muted-foreground" />
                       </div>
                     )}
@@ -369,7 +369,7 @@ export default function OwnerRevenueDashboard() {
           <CardContent>
             <div className="space-y-2">
               {forecast.map(f => (
-                <div key={f.month} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                <div key={f.month} className="flex items-center justify-between p-3 rounded-none bg-muted/50">
                   <span className="font-medium text-sm">{f.label}</span>
                   <div className="text-right">
                     <p className="font-bold text-sm">{fmt(f.projected)}</p>

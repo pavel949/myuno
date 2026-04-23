@@ -73,7 +73,7 @@ export function ChangeImpactModal({
         <div className="space-y-4">
           {/* Impact Summary */}
           {impact && (
-            <div className="rounded-lg border p-4 space-y-3">
+            <div className="rounded-none border p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">
                   {isRussian ? 'Затронутые сценарии' : 'Affected Situations'}
@@ -133,7 +133,7 @@ export function ChangeImpactModal({
 
           {/* Errors */}
           {validation?.errors.map((error, idx) => (
-            <div key={idx} className="rounded-lg border border-destructive/50 bg-destructive/5 p-3">
+            <div key={idx} className="rounded-none border border-destructive/50 bg-destructive/5 p-3">
               <div className="flex items-start gap-2">
                 <XCircle className="w-4 h-4 text-destructive mt-0.5 shrink-0" />
                 <div>
@@ -152,7 +152,7 @@ export function ChangeImpactModal({
 
           {/* Warnings */}
           {validation?.warnings.map((warning, idx) => (
-            <div key={idx} className="rounded-lg border border-warning/50 bg-warning/5 p-3">
+            <div key={idx} className="rounded-none border border-warning/50 bg-warning/5 p-3">
               <div className="flex items-start gap-2">
                 <AlertTriangle className="w-4 h-4 text-warning mt-0.5 shrink-0" />
                 <div>

@@ -231,7 +231,7 @@ export function AdminOrderDetailSheet({ orderId, onClose, onStatusChanged }: Adm
                 <User className="h-4 w-4" />
                 {isRu ? 'Клиент' : 'Customer'}
               </h4>
-              <div className="bg-muted/50 rounded-lg p-3 space-y-1.5 text-sm">
+              <div className="bg-muted/50 rounded-none p-3 space-y-1.5 text-sm">
                 <p className="font-medium">{primary?.name || order._profile?.full_name || 'Guest'}</p>
                 {(primary?.phone || order._profile?.phone) && (
                   <a
@@ -264,7 +264,7 @@ export function AdminOrderDetailSheet({ orderId, onClose, onStatusChanged }: Adm
                     <Calendar className="h-4 w-4" />
                     {isRu ? 'Дата и время' : 'Date & Time'}
                   </h4>
-                  <p className="text-sm bg-muted/50 rounded-lg p-3">
+                  <p className="text-sm bg-muted/50 rounded-none p-3">
                     📅 {format(new Date(order.start_at), 'dd.MM.yyyy HH:mm')}
                     {order.end_at && ` — ${format(new Date(order.end_at), 'dd.MM.yyyy HH:mm')}`}
                   </p>
@@ -279,7 +279,7 @@ export function AdminOrderDetailSheet({ orderId, onClose, onStatusChanged }: Adm
                 <Package className="h-4 w-4" />
                 {isRu ? 'Состав заказа' : 'Order Items'}
               </h4>
-              <div className="bg-muted/50 rounded-lg p-3 space-y-2">
+              <div className="bg-muted/50 rounded-none p-3 space-y-2">
                 {order.order_items?.map((item: any) => (
                   <div key={item.id} className="flex justify-between text-sm">
                     <span>{item.item_name} {item.qty > 1 ? `×${item.qty}` : ''}</span>
@@ -306,7 +306,7 @@ export function AdminOrderDetailSheet({ orderId, onClose, onStatusChanged }: Adm
                     <MapPin className="h-4 w-4" />
                     {isRu ? 'Адреса' : 'Addresses'}
                   </h4>
-                  <div className="bg-muted/50 rounded-lg p-3 space-y-2 text-sm">
+                  <div className="bg-muted/50 rounded-none p-3 space-y-2 text-sm">
                     {order.order_addresses.map((addr: any) => (
                       <div key={addr.id}>
                         <span className="text-xs uppercase text-muted-foreground">
@@ -333,7 +333,7 @@ export function AdminOrderDetailSheet({ orderId, onClose, onStatusChanged }: Adm
                     <FileText className="h-4 w-4" />
                     {isRu ? 'Примечания' : 'Notes'}
                   </h4>
-                  <p className="text-sm bg-muted/50 rounded-lg p-3">{order.notes}</p>
+                  <p className="text-sm bg-muted/50 rounded-none p-3">{order.notes}</p>
                 </div>
               </>
             )}

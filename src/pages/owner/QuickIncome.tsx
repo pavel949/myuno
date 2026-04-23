@@ -153,7 +153,7 @@ export default function QuickIncome() {
         </div>
 
         {/* Amount */}
-        <div className="bg-card rounded-2xl p-4 border border-success/20">
+        <div className="bg-card rounded-none p-4 border border-success/20">
           <Label className="text-xs text-muted-foreground mb-2 block">
             {isRu ? 'Сумма дохода' : 'Income Amount'}
           </Label>
@@ -179,7 +179,7 @@ export default function QuickIncome() {
               placeholder="0"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="pl-12 text-3xl h-16 font-bold border-0 bg-success/5 rounded-xl focus-visible:ring-2 focus-visible:ring-success text-success"
+              className="pl-12 text-3xl h-16 font-bold border-0 bg-success/5 rounded-none focus-visible:ring-2 focus-visible:ring-success text-success"
             />
           </div>
         </div>

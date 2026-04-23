@@ -108,7 +108,7 @@ export const TranslatableTextarea = memo(function TranslatableTextarea({
         <div className="flex items-center justify-between">
           <Label className="flex items-center gap-2">
             {label}
-            <span className="text-xs px-1.5 py-0.5 bg-primary/10 text-primary rounded">
+            <span className="text-xs px-1.5 py-0.5 bg-primary/10 text-primary rounded-none">
               {sourceLangLabel}
             </span>
           </Label>
@@ -165,7 +165,7 @@ export const TranslatableTextarea = memo(function TranslatableTextarea({
         <div className="flex items-center justify-between">
           <Label className="flex items-center gap-2">
             {label}
-            <span className="text-xs px-1.5 py-0.5 bg-muted text-muted-foreground rounded">
+            <span className="text-xs px-1.5 py-0.5 bg-muted text-muted-foreground rounded-none">
               {targetLangLabel}
             </span>
             {isAutoTranslated && !isEditingTranslation && (

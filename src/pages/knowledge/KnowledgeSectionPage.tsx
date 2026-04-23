@@ -80,7 +80,7 @@ export default function KnowledgeSectionPage() {
           {isLoading ? (
             <div className="space-y-4">
               {[1, 2, 3].map(i => (
-                <Skeleton key={i} className="h-24 w-full rounded-xl" />
+                <Skeleton key={i} className="h-24 w-full rounded-none" />
               ))}
             </div>
           ) : articles && articles.length > 0 ? (

@@ -74,7 +74,7 @@ export default function OwnerSupportChat() {
       </Card>
 
       {/* AI Assistant Chat */}
-      <div className="flex-1 flex flex-col bg-background rounded-lg border min-h-0 overflow-hidden">
+      <div className="flex-1 flex flex-col bg-background rounded-none border min-h-0 overflow-hidden">
         <OwnerAIAssistant />
       </div>
     </PageContainer>

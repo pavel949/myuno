@@ -85,16 +85,16 @@ export function InterestForm({
   if (hasExpressedInterest && existingInterest) {
     return (
       <div className={cn(
-        'p-4 rounded-xl bg-emerald-50 border border-emerald-200',
+        'p-4 rounded-none bg-success/10 border border-success/40',
         className
       )}>
-        <div className="flex items-center gap-2 text-emerald-700">
+        <div className="flex items-center gap-2 text-success">
           <CheckCircle className="h-5 w-5" />
           <span className="font-medium">
             {isRu ? 'Вы уже выразили интерес' : 'Interest submitted'}
           </span>
         </div>
-        <p className="text-sm text-emerald-600 mt-1">
+        <p className="text-sm text-success mt-1">
           {isRu 
             ? 'Наш эксперт свяжется с вами в течение 24 часов.'
             : 'Our team will contact you within 24 hours.'
@@ -149,10 +149,10 @@ export function InterestForm({
                 onValueChange={(v) => setInterestType(v as any)}
                 className="space-y-2"
               >
-                <div className="flex items-center space-x-3 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
+                <div className="flex items-center space-x-3 p-3 rounded-none border border-border hover:bg-muted/50 transition-colors">
                   <RadioGroupItem value="invest" id="invest" />
                   <Label htmlFor="invest" className="flex items-center gap-2 cursor-pointer flex-1">
-                    <TrendingUp className="h-4 w-4 text-emerald-600" />
+                    <TrendingUp className="h-4 w-4 text-success" />
                     <div>
                       <div className="font-medium">
                         {isRu ? 'Хочу инвестировать' : 'I want to invest'}
@@ -164,10 +164,10 @@ export function InterestForm({
                   </Label>
                 </div>
 
-                <div className="flex items-center space-x-3 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
+                <div className="flex items-center space-x-3 p-3 rounded-none border border-border hover:bg-muted/50 transition-colors">
                   <RadioGroupItem value="learn_more" id="learn_more" />
                   <Label htmlFor="learn_more" className="flex items-center gap-2 cursor-pointer flex-1">
-                    <MessageCircle className="h-4 w-4 text-blue-600" />
+                    <MessageCircle className="h-4 w-4 text-primary" />
                     <div>
                       <div className="font-medium">
                         {isRu ? 'Хочу узнать больше' : 'I want to learn more'}
@@ -179,10 +179,10 @@ export function InterestForm({
                   </Label>
                 </div>
 
-                <div className="flex items-center space-x-3 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
+                <div className="flex items-center space-x-3 p-3 rounded-none border border-border hover:bg-muted/50 transition-colors">
                   <RadioGroupItem value="call_request" id="call_request" />
                   <Label htmlFor="call_request" className="flex items-center gap-2 cursor-pointer flex-1">
-                    <Phone className="h-4 w-4 text-amber-600" />
+                    <Phone className="h-4 w-4 text-accent" />
                     <div>
                       <div className="font-medium">
                         {isRu ? 'Запрос на звонок' : 'Request a call'}

@@ -71,9 +71,9 @@ export default function CleaningBooking() {
         <PageContainer>
           <PageHeader title={language === 'ru' ? 'Загрузка...' : 'Loading...'} showBack />
           <div className="space-y-4 mt-4">
-            <Skeleton className="h-20 w-full rounded-xl" />
-            <Skeleton className="h-40 w-full rounded-xl" />
-            <Skeleton className="h-40 w-full rounded-xl" />
+            <Skeleton className="h-20 w-full rounded-none" />
+            <Skeleton className="h-40 w-full rounded-none" />
+            <Skeleton className="h-40 w-full rounded-none" />
           </div>
         </PageContainer>
       </AppLayout>
@@ -192,7 +192,7 @@ export default function CleaningBooking() {
         <BookingStepProgress steps={serviceBookingSteps} currentStep={currentStep} className="mt-4" />
 
         {/* Service Info */}
-        <div className="flex items-center gap-3 p-4 bg-card rounded-xl border mb-6">
+        <div className="flex items-center gap-3 p-4 bg-card rounded-none border mb-6">
           <div className="w-12 h-12 rounded-full bg-success/20 flex items-center justify-center">
             <Sparkles className="w-6 h-6 text-success" />
           </div>
@@ -207,7 +207,7 @@ export default function CleaningBooking() {
         </div>
 
         {/* Date & Time */}
-        <div className="bg-card rounded-xl border p-5 mb-4">
+        <div className="bg-card rounded-none border p-5 mb-4">
           <h3 className="font-semibold mb-4">
             {language === 'ru' ? 'Дата и время' : 'Date & Time'}
           </h3>
@@ -222,7 +222,7 @@ export default function CleaningBooking() {
         </div>
 
         {/* Address */}
-        <div className="bg-card rounded-xl border p-5 mb-4">
+        <div className="bg-card rounded-none border p-5 mb-4">
           <AddressPickerInput
             value={address}
             onChange={(addr) => setAddress(addr)}
@@ -234,7 +234,7 @@ export default function CleaningBooking() {
         </div>
 
         {/* Contact Info */}
-        <div className="bg-card rounded-xl border p-5 mb-4">
+        <div className="bg-card rounded-none border p-5 mb-4">
           <h3 className="font-semibold mb-4">
             {language === 'ru' ? 'Контактные данные' : 'Contact Information'}
           </h3>
@@ -246,7 +246,7 @@ export default function CleaningBooking() {
         </div>
 
         {/* Payment Method */}
-        <div className="bg-card rounded-xl border p-5 mb-4">
+        <div className="bg-card rounded-none border p-5 mb-4">
           <h3 className="font-semibold mb-4">
             {language === 'ru' ? 'Способ оплаты' : 'Payment Method'}
           </h3>
@@ -262,7 +262,7 @@ export default function CleaningBooking() {
         </div>
 
         {/* Price Summary */}
-        <div className="bg-card rounded-xl border p-5 mb-4">
+        <div className="bg-card rounded-none border p-5 mb-4">
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-muted-foreground">

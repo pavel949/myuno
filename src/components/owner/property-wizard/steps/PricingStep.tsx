@@ -64,7 +64,7 @@ function CollapsibleSection({
     <Collapsible open={open} onOpenChange={setOpen}>
       <Card>
         <CollapsibleTrigger asChild>
-          <CardHeader className="pb-3 cursor-pointer hover:bg-muted/30 transition-colors rounded-t-lg">
+          <CardHeader className="pb-3 cursor-pointer hover:bg-muted/30 transition-colors rounded-none">
             <CardTitle className="text-base flex items-center gap-2">
               {icon}
               <span className="flex-1">{title}</span>
@@ -175,13 +175,13 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
                   key={tpl.id}
                   type="button"
                   onClick={() => handleSelectTemplate(tpl.id)}
-                  className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 text-center transition-all ${
+                  className={`flex flex-col items-center gap-1.5 p-3 rounded-none border-2 text-center transition-all ${
                     isActive
                       ? 'border-primary bg-primary/5 text-primary'
                       : 'border-transparent bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground'
                   }`}
                 >
-                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${
+                  <div className={`w-9 h-9 rounded-none flex items-center justify-center ${
                     isActive ? 'bg-primary text-primary-foreground' : 'bg-muted'
                   }`}>
                     {tpl.icon}
@@ -210,7 +210,7 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
               key={option.value}
               type="button"
               onClick={() => updateFormData({ ownership_form: option.value as PropertyFormData['ownership_form'] })}
-              className={`p-3 rounded-xl border-2 text-left transition-colors ${
+              className={`p-3 rounded-none border-2 text-left transition-colors ${
                 formData.ownership_form === option.value
                   ? 'border-primary bg-primary/5'
                   : 'border-muted hover:border-muted-foreground/30'
@@ -305,7 +305,7 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
             </div>
           </div>
 
-          <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+          <div className="flex items-center justify-between p-4 bg-muted rounded-none">
             <div>
               <p className="font-medium">{isRu ? 'Мгновенное бронирование' : 'Instant Booking'}</p>
               <p className="text-sm text-muted-foreground">
@@ -399,7 +399,7 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
         title={isRu ? 'Размещение на платформе' : 'Platform Listing'}
         badge={formData.platform_listed ? (isRu ? 'Вкл' : 'On') : undefined}
       >
-        <div className={`p-4 rounded-lg border-2 transition-colors ${
+        <div className={`p-4 rounded-none border-2 transition-colors ${
           formData.platform_listed 
             ? 'border-primary/40 bg-primary/5' 
             : 'border-muted bg-muted'
@@ -485,7 +485,7 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
               : 'Description is set on step «Basic Info». You can fill it from the project here.'}
           </p>
           {hasProjectDescription && isDescriptionEmpty && (
-            <div className="flex items-center gap-2 p-3 bg-primary/5 border border-primary/20 rounded-lg">
+            <div className="flex items-center gap-2 p-3 bg-primary/5 border border-primary/20 rounded-none">
               <Sparkles className="h-4 w-4 text-primary flex-shrink-0" />
               <p className="text-sm text-muted-foreground flex-1">
                 {isRu ? 'Использовать описание проекта?' : 'Use project description?'}
@@ -498,7 +498,7 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
           )}
 
           {projectAmenities.length > 0 && (
-            <div className="p-3 bg-muted/50 rounded-lg space-y-2">
+            <div className="p-3 bg-muted/50 rounded-none space-y-2">
               <p className="text-sm font-medium">
                 {isRu ? 'Удобства проекта:' : 'Project amenities:'}
               </p>
@@ -517,7 +517,7 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
             </div>
           )}
 
-          <div className="p-4 bg-muted rounded-lg flex items-start gap-2">
+          <div className="p-4 bg-muted rounded-none flex items-start gap-2">
             <Sparkles className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
             <p className="text-sm text-muted-foreground">
               {isRu 

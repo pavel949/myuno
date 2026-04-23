@@ -25,7 +25,7 @@ export function PropertyDetailGallery({ images, alt, onOpenLightbox }: PropertyD
       {images.length >= 5 ? (
         <div className="grid grid-cols-2 md:grid-cols-4 grid-rows-2 gap-2 h-[50vh] min-h-[300px] max-h-[500px]">
           <div
-            className="col-span-2 row-span-2 relative cursor-pointer overflow-hidden rounded-l-xl"
+            className="col-span-2 row-span-2 relative cursor-pointer overflow-hidden rounded-none"
             onClick={() => onOpenLightbox(0)}
           >
             <img
@@ -39,8 +39,8 @@ export function PropertyDetailGallery({ images, alt, onOpenLightbox }: PropertyD
               key={i}
               className={cn(
                 'relative cursor-pointer overflow-hidden',
-                i === 1 && 'rounded-tr-xl',
-                i === 3 && 'rounded-br-xl',
+                i === 1 && 'rounded-none',
+                i === 3 && 'rounded-none',
               )}
               onClick={() => onOpenLightbox(i + 1)}
             >
@@ -76,7 +76,7 @@ export function PropertyDetailGallery({ images, alt, onOpenLightbox }: PropertyD
                   key={i}
                   onClick={() => setActiveImage(i)}
                   className={cn(
-                    'w-16 h-12 rounded-lg overflow-hidden flex-shrink-0 border-2 transition-all',
+                    'w-16 h-12 rounded-none overflow-hidden flex-shrink-0 border-2 transition-all',
                     activeImage === i
                       ? 'border-primary ring-2 ring-primary/30'
                       : 'border-transparent opacity-70 hover:opacity-100',
@@ -92,7 +92,7 @@ export function PropertyDetailGallery({ images, alt, onOpenLightbox }: PropertyD
 
       <button
         onClick={() => onOpenLightbox(0)}
-        className="absolute bottom-4 right-4 px-3 py-1.5 bg-background/90 backdrop-blur-sm rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-background transition-colors"
+        className="absolute bottom-4 right-4 px-3 py-1.5 bg-background/90 backdrop-blur-sm rounded-none text-sm font-medium flex items-center gap-2 hover:bg-background transition-colors"
       >
         <Eye className="w-4 h-4" />
         {images.length} {isRu ? 'фото' : 'photos'}

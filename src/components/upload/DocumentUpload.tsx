@@ -102,7 +102,7 @@ export function DocumentUpload({
       {value ? (
         <div className="relative group">
           {isPdf ? (
-            <div className="w-full h-32 rounded-lg border border-border bg-muted/50 flex flex-col items-center justify-center gap-2">
+            <div className="w-full h-32 rounded-none border border-border bg-muted/50 flex flex-col items-center justify-center gap-2">
               <FileText className="h-10 w-10 text-muted-foreground" />
               <span className="text-xs text-muted-foreground">PDF Document</span>
             </div>
@@ -110,7 +110,7 @@ export function DocumentUpload({
             <img 
               src={value} 
               alt="Uploaded" 
-              className="w-full h-32 object-cover rounded-lg border border-border"
+              className="w-full h-32 object-cover rounded-none border border-border"
             />
           )}
           <Button

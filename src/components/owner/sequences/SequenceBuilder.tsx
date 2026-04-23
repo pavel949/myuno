@@ -141,7 +141,7 @@ const upsertSteps = useUpsertSequenceSteps();
           const actionCfg = ACTION_TYPES.find(a => a.value === step.action_type) || ACTION_TYPES[0];
           const Icon = actionCfg.icon;
           return (
-            <div key={idx} className="flex items-start gap-2 p-3 rounded-lg border bg-card">
+            <div key={idx} className="flex items-start gap-2 p-3 rounded-none border bg-card">
               <div className="flex flex-col items-center gap-1 pt-1">
                 <Badge variant="outline" className="text-[10px] h-5 w-5 p-0 flex items-center justify-center">
                   {idx + 1}

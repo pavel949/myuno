@@ -71,7 +71,7 @@ const VendorPage = () => {
             <Skeleton className="h-4 w-32 mb-4" />
             <div className="grid grid-cols-2 gap-3">
               {[...Array(4)].map((_, i) => (
-                <Skeleton key={i} className="aspect-square rounded-xl" />
+                <Skeleton key={i} className="aspect-square rounded-none" />
               ))}
             </div>
           </div>
@@ -124,7 +124,7 @@ const VendorPage = () => {
 
           {/* Logo */}
           <div className="absolute -bottom-8 left-4">
-            <div className="w-20 h-20 rounded-2xl bg-background border-4 border-background shadow-xl flex items-center justify-center overflow-hidden">
+            <div className="w-20 h-20 rounded-none bg-background border-4 border-background shadow-xl flex items-center justify-center overflow-hidden">
               {vendor.logo_url ? (
                 <img src={vendor.logo_url} alt={name} className="w-full h-full object-cover" />
               ) : (
@@ -233,7 +233,7 @@ const VendorPage = () => {
             {productsLoading ? (
               <div className="grid grid-cols-2 gap-3">
                 {[...Array(4)].map((_, i) => (
-                  <Skeleton key={i} className="aspect-square rounded-xl" />
+                  <Skeleton key={i} className="aspect-square rounded-none" />
                 ))}
               </div>
             ) : products.length === 0 ? (

@@ -125,7 +125,7 @@ export const FlashDealsSection: React.FC<FlashDealsSectionProps> = ({
         {/* Header with Countdown */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <div className="p-1.5 bg-destructive/10 rounded-lg">
+            <div className="p-1.5 bg-destructive/10 rounded-none">
               <Zap className="w-5 h-5 text-destructive fill-destructive" />
             </div>
             <h2 className="text-lg font-bold text-foreground">
@@ -188,7 +188,7 @@ export const FlashDealsSection: React.FC<FlashDealsSectionProps> = ({
 
 // Time block component
 const TimeBlock: React.FC<{ value: number }> = ({ value }) => (
-  <span className="bg-destructive text-white text-xs font-bold px-1.5 py-0.5 rounded">
+  <span className="bg-destructive text-white text-xs font-bold px-1.5 py-0.5 rounded-none">
     {formatTime(value)}
   </span>
 );

@@ -111,11 +111,11 @@ function useRunOutreach() {
 }
 
 const statusColors: Record<string, string> = {
-  sent: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
-  delivered: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-  opened: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300',
-  clicked: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
-  replied: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
+  sent: 'bg-primary/10 text-primary dark:bg-primary/30 dark:text-primary',
+  delivered: 'bg-success/10 text-success dark:bg-success/30 dark:text-success',
+  opened: 'bg-success/10 text-success dark:bg-success/30 dark:text-success',
+  clicked: 'bg-primary/10 text-primary dark:bg-primary/30 dark:text-primary',
+  replied: 'bg-accent/10 text-accent dark:bg-accent/30 dark:text-accent',
   registered: 'bg-primary/10 text-primary',
   failed: 'bg-destructive/10 text-destructive',
 };
@@ -148,7 +148,7 @@ export function VendorOutreachPanel() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <Send className="h-4 w-4 text-blue-500" />
+              <Send className="h-4 w-4 text-primary" />
               <span className="text-xs text-muted-foreground">{isRu ? 'Отправлено' : 'Sent'}</span>
             </div>
             {statsLoading ? (
@@ -162,7 +162,7 @@ export function VendorOutreachPanel() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-amber-500" />
+              <Clock className="h-4 w-4 text-accent" />
               <span className="text-xs text-muted-foreground">{isRu ? 'Follow-up 1' : 'Follow-up 1'}</span>
             </div>
             {statsLoading ? (
@@ -176,7 +176,7 @@ export function VendorOutreachPanel() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <RefreshCw className="h-4 w-4 text-orange-500" />
+              <RefreshCw className="h-4 w-4 text-accent" />
               <span className="text-xs text-muted-foreground">{isRu ? 'Follow-up 2' : 'Follow-up 2'}</span>
             </div>
             {statsLoading ? (
@@ -260,12 +260,12 @@ export function VendorOutreachPanel() {
               {log.map((entry) => (
                 <div
                   key={entry.id}
-                  className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
+                  className="flex items-center gap-3 p-3 rounded-none border bg-card hover:bg-muted/50 transition-colors"
                 >
                   {entry.channel === 'whatsapp' ? (
-                    <MessageSquare className="h-4 w-4 text-green-600 flex-shrink-0" />
+                    <MessageSquare className="h-4 w-4 text-success flex-shrink-0" />
                   ) : (
-                    <Mail className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                    <Mail className="h-4 w-4 text-primary flex-shrink-0" />
                   )}
                   
                   <div className="flex-1 min-w-0">

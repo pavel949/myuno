@@ -59,7 +59,7 @@ export function CommercialFilters({ value, onChange }: Props) {
           )}
         </Button>
       </SheetTrigger>
-      <SheetContent side="bottom" className="rounded-t-2xl max-h-[85vh] overflow-y-auto">
+      <SheetContent side="bottom" className="rounded-none max-h-[85vh] overflow-y-auto">
         <SheetHeader>
           <SheetTitle>{isRu ? 'Фильтры коммерческой недвижимости' : 'Commercial filters'}</SheetTitle>
         </SheetHeader>
@@ -119,7 +119,7 @@ export function CommercialFilters({ value, onChange }: Props) {
           </div>
 
           <div className="space-y-2">
-            <label className="flex items-center justify-between p-3 rounded-xl border border-border cursor-pointer hover:bg-muted/50 transition-colors">
+            <label className="flex items-center justify-between p-3 rounded-none border border-border cursor-pointer hover:bg-muted/50 transition-colors">
               <span className="text-sm font-medium">
                 {isRu ? 'Только с Chanote' : 'Chanote only'}
               </span>
@@ -130,7 +130,7 @@ export function CommercialFilters({ value, onChange }: Props) {
                 className="w-4 h-4"
               />
             </label>
-            <label className="flex items-center justify-between p-3 rounded-xl border border-border cursor-pointer hover:bg-muted/50 transition-colors">
+            <label className="flex items-center justify-between p-3 rounded-none border border-border cursor-pointer hover:bg-muted/50 transition-colors">
               <span className="text-sm font-medium">
                 {isRu ? 'С действующим арендатором' : 'With current tenant'}
               </span>

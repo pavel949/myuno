@@ -151,7 +151,7 @@ export function ReviewForm({ productId, productName, isOpen, onClose, onSuccess 
 
           {/* Pros */}
           <div>
-            <Label htmlFor="pros" className="text-green-600">
+            <Label htmlFor="pros" className="text-success">
               + {language === 'ru' ? 'Достоинства' : 'Pros'}
             </Label>
             <Input

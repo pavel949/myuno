@@ -79,7 +79,7 @@ export function CatalogServicesTab({ searchQuery, statusFilter }: CatalogService
             onClick={() => navigate(cat.path)}
           >
             <CardContent className="p-4 flex flex-col items-center gap-2">
-              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+              <div className="h-10 w-10 rounded-none bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                 <cat.icon className="h-5 w-5 text-primary" />
               </div>
               <span className="text-sm font-medium text-center">

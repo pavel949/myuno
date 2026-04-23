@@ -49,8 +49,8 @@ function SectionSkeleton() {
   return (
     <div className="space-y-3">
       <Skeleton className="h-6 w-40" />
-      <Skeleton className="h-16 w-full rounded-xl" />
-      <Skeleton className="h-16 w-full rounded-xl" />
+      <Skeleton className="h-16 w-full rounded-none" />
+      <Skeleton className="h-16 w-full rounded-none" />
     </div>
   );
 }
@@ -59,7 +59,7 @@ function KPISkeleton() {
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
       {Array.from({ length: 6 }).map((_, i) => (
-        <Skeleton key={i} className="h-[88px] rounded-xl" />
+        <Skeleton key={i} className="h-[88px] rounded-none" />
       ))}
     </div>
   );
@@ -71,7 +71,7 @@ function ListSkeleton() {
       <Skeleton className="h-6 w-36 mb-2" />
       {Array.from({ length: 3 }).map((_, i) => (
         <div key={i} className="flex items-center gap-4 py-3">
-          <Skeleton className="w-[72px] h-[72px] rounded-xl flex-shrink-0" />
+          <Skeleton className="w-[72px] h-[72px] rounded-none flex-shrink-0" />
           <div className="flex-1 space-y-2">
             <Skeleton className="h-4 w-3/4" />
             <Skeleton className="h-3 w-1/2" />
@@ -366,7 +366,7 @@ export default function OwnerDashboard() {
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] text-center px-4">
-        <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
+        <div className="w-20 h-20 rounded-none bg-primary/10 flex items-center justify-center mb-6">
           <Home className="h-10 w-10 text-primary" />
         </div>
         <h2 className="text-2xl font-bold mb-2">{isRu ? 'Управление недвижимостью' : 'Property Management'}</h2>

@@ -45,8 +45,8 @@ export function AccountActivitySection() {
     return (
       <div className="space-y-4">
         <Skeleton className="h-6 w-40" />
-        <Skeleton className="h-16 w-full rounded-xl" />
-        <Skeleton className="h-16 w-full rounded-xl" />
+        <Skeleton className="h-16 w-full rounded-none" />
+        <Skeleton className="h-16 w-full rounded-none" />
       </div>
     );
   }

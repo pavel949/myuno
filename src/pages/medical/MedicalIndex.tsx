@@ -101,7 +101,7 @@ export default function MedicalIndex() {
   }, []);
 
   const emergencyBanner = (
-    <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/30">
+    <div className="p-3 rounded-none bg-destructive/10 border border-destructive/30">
       <div className="flex items-center gap-2 mb-1">
         <ShieldAlert className="w-4 h-4 text-destructive shrink-0" />
         <span className="text-sm font-semibold text-destructive">{isRu ? 'Скорая помощь' : 'Emergency'}</span>
@@ -163,7 +163,7 @@ export default function MedicalIndex() {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="space-y-2">
-              <Skeleton className="aspect-[4/3] rounded-xl" />
+              <Skeleton className="aspect-[4/3] rounded-none" />
               <Skeleton className="h-4 w-3/4" />
               <Skeleton className="h-3 w-1/2" />
             </div>

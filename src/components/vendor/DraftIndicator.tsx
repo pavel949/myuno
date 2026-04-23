@@ -98,7 +98,7 @@ export function DraftRestorationBanner({ onRestore, onDiscard }: DraftRestoratio
   const isRussian = language === 'ru';
 
   return (
-    <div className="flex items-center justify-between p-3 mb-4 bg-primary/10 border border-primary/20 rounded-lg">
+    <div className="flex items-center justify-between p-3 mb-4 bg-primary/10 border border-primary/20 rounded-none">
       <div className="flex items-center gap-2">
         <RefreshCw className="h-4 w-4 text-primary" />
         <span className="text-sm">

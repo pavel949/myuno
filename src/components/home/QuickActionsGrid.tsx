@@ -193,7 +193,7 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
         )}
       >
         <div
-          className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+          className="w-10 h-10 rounded-none flex items-center justify-center shrink-0"
           style={{ background: `${color}1A` }}
         >
           <Icon style={{ width: 20, height: 20, color }} strokeWidth={2} />

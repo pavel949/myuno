@@ -378,7 +378,7 @@ function PermissionMatrix({
         </Button>
       </div>
       
-      <div className="border rounded-lg overflow-hidden">
+      <div className="border rounded-none overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50">

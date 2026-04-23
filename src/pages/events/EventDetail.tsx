@@ -139,7 +139,7 @@ const EventDetail = () => {
               <button
                 key={idx}
                 onClick={() => setSelectedImage(idx)}
-                className={`w-10 h-10 rounded-lg overflow-hidden border-2 ${selectedImage === idx ? 'border-primary' : 'border-white/50'}`}
+                className={`w-10 h-10 rounded-none overflow-hidden border-2 ${selectedImage === idx ? 'border-primary' : 'border-white/50'}`}
               >
                 <img src={img} alt="" className="w-full h-full object-cover" />
               </button>
@@ -149,7 +149,7 @@ const EventDetail = () => {
       </div>
 
       {/* Content */}
-      <div className="flex-1 px-4 py-6 -mt-6 bg-background rounded-t-3xl relative z-10">
+      <div className="flex-1 px-4 py-6 -mt-6 bg-background rounded-none relative z-10">
         {/* Title */}
         <div className="mb-4">
           <div className="flex items-start justify-between">
@@ -161,7 +161,7 @@ const EventDetail = () => {
             {event.rating > 0 && (
               <div className="text-right">
                 <div className="flex items-center gap-1">
-                  <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                  <Star className="w-5 h-5 fill-accent text-accent" />
                   <span className="font-bold">{event.rating}</span>
                 </div>
                 <p className="text-sm text-muted-foreground">{event.review_count} reviews</p>
@@ -172,18 +172,18 @@ const EventDetail = () => {
 
         {/* Info Cards */}
         <div className="grid grid-cols-3 gap-3 mb-6">
-          <div className="bg-card rounded-xl p-3 border border-border text-center">
+          <div className="bg-card rounded-none p-3 border border-border text-center">
             <Calendar className="w-5 h-5 mx-auto mb-1 text-primary" />
             <p className="text-xs font-medium">{formatDate(event.event_date).split(',')[0]}</p>
             <p className="text-xs text-muted-foreground">{event.event_time}</p>
           </div>
-          <div className="bg-card rounded-xl p-3 border border-border text-center">
+          <div className="bg-card rounded-none p-3 border border-border text-center">
             <Clock className="w-5 h-5 mx-auto mb-1 text-primary" />
             <p className="text-xs font-medium">
               {event.duration_hours ? `${event.duration_hours}${language === 'ru' ? 'ч' : 'h'}` : '—'}
             </p>
           </div>
-          <div className="bg-card rounded-xl p-3 border border-border text-center">
+          <div className="bg-card rounded-none p-3 border border-border text-center">
             <Tag className="w-5 h-5 mx-auto mb-1 text-primary" />
             <p className="text-xs font-medium">
               {isFree ? (language === 'ru' ? 'Бесплатно' : 'Free') : `${currencyInfo.symbol}${event.price?.toLocaleString()}`}
@@ -195,13 +195,13 @@ const EventDetail = () => {
         {(event.age_policy !== 'all_ages' || (event.dress_code && event.dress_code !== 'none')) && (
           <div className="flex gap-3 mb-6">
             {event.age_policy && event.age_policy !== 'all_ages' && (
-              <div className="flex items-center gap-2 bg-orange-50 dark:bg-orange-950/30 text-orange-700 dark:text-orange-400 rounded-lg px-3 py-2 text-sm">
+              <div className="flex items-center gap-2 bg-accent/10 dark:bg-accent/30 text-accent dark:text-accent rounded-none px-3 py-2 text-sm">
                 <ShieldCheck className="w-4 h-4" />
                 {AGE_POLICY_LABELS[event.age_policy]?.[language === 'ru' ? 'ru' : 'en'] || event.age_policy}
               </div>
             )}
             {event.dress_code && event.dress_code !== 'none' && (
-              <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 rounded-lg px-3 py-2 text-sm">
+              <div className="flex items-center gap-2 bg-primary/10 dark:bg-primary/30 text-primary dark:text-primary rounded-none px-3 py-2 text-sm">
                 👔 {DRESS_CODE_LABELS[event.dress_code]?.[language === 'ru' ? 'ru' : 'en'] || event.dress_code}
               </div>
             )}
@@ -212,7 +212,7 @@ const EventDetail = () => {
         {venue ? (
           <Card className="mb-6 cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate(`/venues/${venue.id}`)}>
             <CardContent className="p-3 flex items-center gap-3">
-              <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+              <div className="w-16 h-16 rounded-none overflow-hidden flex-shrink-0">
                 <img src={venue.cover_image || '/placeholder.svg'} alt={language === 'ru' ? venue.name_ru : venue.name_en} className="w-full h-full object-cover" />
               </div>
               <div className="flex-1 min-w-0">
@@ -290,7 +290,7 @@ const EventDetail = () => {
         {event.excludes.length > 0 && (
           <div className="mb-6">
             <h3 className="font-semibold mb-2 flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-orange-500" />
+              <AlertCircle className="w-4 h-4 text-accent" />
               {language === 'ru' ? 'Не включено' : 'Not Included'}
             </h3>
             <div className="grid grid-cols-1 gap-2">
@@ -306,7 +306,7 @@ const EventDetail = () => {
 
         {/* Source verification */}
         {event.source_urls && event.source_urls.length > 0 && (
-          <div className="mb-24 p-3 rounded-lg bg-muted/50 border border-border">
+          <div className="mb-24 p-3 rounded-none bg-muted/50 border border-border">
             <p className="text-xs text-muted-foreground flex items-center gap-1 mb-1">
               <ShieldCheck className="w-3 h-3" />
               {language === 'ru' ? 'Данные от организатора' : 'Data from organizer'}
@@ -326,7 +326,7 @@ const EventDetail = () => {
         <div className="flex items-center justify-between gap-4">
           {!isFree && (
             <div className="flex items-center gap-3">
-              <div className="flex items-center border border-border rounded-lg">
+              <div className="flex items-center border border-border rounded-none">
                 <Button variant="ghost" size="sm" onClick={() => setTickets(Math.max(1, tickets - 1))} disabled={tickets <= 1}>-</Button>
                 <span className="w-8 text-center font-medium">{tickets}</span>
                 <Button variant="ghost" size="sm" onClick={() => setTickets(Math.min(event.spots_left || 10, tickets + 1))}>+</Button>

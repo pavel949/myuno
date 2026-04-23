@@ -265,14 +265,14 @@ export default function PropertySearchPage() {
                     <div className="space-y-1">
                       <button
                         onClick={() => setSelectedCompanyId(null)}
-                        className={cn("w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors", !selectedCompanyId ? "bg-primary/10 text-primary" : "hover:bg-muted")}
+                        className={cn("w-full flex items-center gap-2 px-3 py-2 rounded-none text-sm transition-colors", !selectedCompanyId ? "bg-primary/10 text-primary" : "hover:bg-muted")}
                       >
                         <span className="flex-1 text-left">{isRu ? 'Все' : 'All'}</span>
                       </button>
                       {companies.map(c => {
                         const label = isRu ? c.name_ru : c.name_en;
                         return (
-                          <button key={c.id} onClick={() => setSelectedCompanyId(c.id === selectedCompanyId ? null : c.id)} className={cn("w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors", selectedCompanyId === c.id ? "bg-primary/10 text-primary" : "hover:bg-muted")}>
+                          <button key={c.id} onClick={() => setSelectedCompanyId(c.id === selectedCompanyId ? null : c.id)} className={cn("w-full flex items-center gap-2 px-3 py-2 rounded-none text-sm transition-colors", selectedCompanyId === c.id ? "bg-primary/10 text-primary" : "hover:bg-muted")}>
                             <span className="flex-1 text-left">{label}</span>
                             {selectedCompanyId === c.id && <span className="w-4 h-4 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center">✓</span>}
                           </button>
@@ -357,7 +357,7 @@ export default function PropertySearchPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {[1,2,3,4,5,6,7,8].map(i => (
                 <div key={i} className="space-y-3">
-                  <Skeleton className="aspect-square rounded-xl" />
+                  <Skeleton className="aspect-square rounded-none" />
                   <Skeleton className="h-4 w-3/4" />
                   <Skeleton className="h-4 w-1/2" />
                 </div>

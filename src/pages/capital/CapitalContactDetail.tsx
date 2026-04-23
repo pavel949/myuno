@@ -88,14 +88,14 @@ export default function CapitalContactDetail() {
         {!editing ? (
           <Button variant="outline" size="sm" onClick={startEdit}>Редактировать</Button>
         ) : (
-          <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700" onClick={handleSave}>
+          <Button size="sm" className="bg-success hover:bg-success" onClick={handleSave}>
             <Save className="w-4 h-4 mr-1" /> Сохранить
           </Button>
         )}
       </div>
 
       {/* Info Card */}
-      <div className="rounded-lg border border-border/50 p-4 space-y-3">
+      <div className="rounded-none border border-border/50 p-4 space-y-3">
         {editing ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div><Label>Имя</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
@@ -112,12 +112,12 @@ export default function CapitalContactDetail() {
               {contact.phone && <p className="text-sm">{contact.phone}</p>}
               {contact.email && <p className="text-sm">{contact.email}</p>}
               {contact.whatsapp_phone && (
-                <a href={`https://wa.me/${contact.whatsapp_phone.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="text-sm text-emerald-500 hover:underline flex items-center gap-1">
+                <a href={`https://wa.me/${contact.whatsapp_phone.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="text-sm text-success hover:underline flex items-center gap-1">
                   <MessageCircle className="w-3 h-3" /> WhatsApp
                 </a>
               )}
               {contact.telegram_id && (
-                <a href={`https://t.me/${contact.telegram_id.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-400 hover:underline flex items-center gap-1">
+                <a href={`https://t.me/${contact.telegram_id.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline flex items-center gap-1">
                   <Send className="w-3 h-3" /> Telegram
                 </a>
               )}
@@ -158,7 +158,7 @@ export default function CapitalContactDetail() {
             <p className="text-sm text-muted-foreground py-4">Касаний пока нет</p>
           ) : (
             outreach.map((o: Record<string, unknown>) => (
-              <div key={o.id as string} className="rounded-lg border border-border/30 p-3 flex items-start gap-3">
+              <div key={o.id as string} className="rounded-none border border-border/30 p-3 flex items-start gap-3">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 text-sm">
                     <Badge variant="outline" className="text-xs">
@@ -183,7 +183,7 @@ export default function CapitalContactDetail() {
             <p className="text-sm text-muted-foreground py-4">Сделок пока нет</p>
           ) : (
             deals.map((d: Record<string, unknown>) => (
-              <div key={d.id as string} className="rounded-lg border border-border/30 p-3">
+              <div key={d.id as string} className="rounded-none border border-border/30 p-3">
                 <div className="flex items-center gap-2">
                   <Badge className={PIPELINE_STAGE_COLORS[(d.stage as PipelineStage)]}>
                     {PIPELINE_STAGE_LABELS[(d.stage as PipelineStage)]}

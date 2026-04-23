@@ -68,7 +68,7 @@ export function PeylaaLeadForm({ source, utm, unitId, onClose }: Props) {
   return (
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-[#141414] border border-white/10 rounded-t-2xl sm:rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+      <div className="relative bg-[#141414] border border-white/10 rounded-none sm:rounded-none w-full max-w-md max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-white/10">
           <h3 className="text-lg font-bold text-white" style={{ fontFamily: 'Syne, sans-serif' }}>
@@ -81,15 +81,15 @@ export function PeylaaLeadForm({ source, utm, unitId, onClose }: Props) {
 
         {submitted ? (
           <div className="p-8 text-center space-y-4">
-            <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto">
-              <Check className="w-8 h-8 text-emerald-400" />
+            <div className="w-16 h-16 rounded-full bg-success/20 flex items-center justify-center mx-auto">
+              <Check className="w-8 h-8 text-success" />
             </div>
             <h4 className="text-xl font-bold text-white">Спасибо, {form.full_name}!</h4>
             <p className="text-white/50">
               Наш консультант свяжется с вами в ближайшее время по WhatsApp или телефону.
             </p>
             <Button
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+              className="w-full bg-success hover:bg-success text-white"
               onClick={() => window.open(`https://wa.me/66922407355?text=Здравствуйте! Я ${form.full_name}, оставил заявку на PEYLAA Phuket`, '_blank')}
             >
               <MessageCircle className="w-4 h-4 mr-2" />
@@ -146,9 +146,9 @@ export function PeylaaLeadForm({ source, utm, unitId, onClose }: Props) {
                     key={br}
                     type="button"
                     onClick={() => toggleBedroom(br)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    className={`px-4 py-2 rounded-none text-sm font-medium transition-colors ${
                       form.preferred_bedrooms.includes(br)
-                        ? 'bg-amber-500 text-black'
+                        ? 'bg-accent text-black'
                         : 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10'
                     }`}
                   >
@@ -172,9 +172,9 @@ export function PeylaaLeadForm({ source, utm, unitId, onClose }: Props) {
                     key={opt.value}
                     type="button"
                     onClick={() => setForm(p => ({ ...p, purchase_timeline: opt.value }))}
-                    className={`px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
+                    className={`px-3 py-2 rounded-none text-xs font-medium transition-colors ${
                       form.purchase_timeline === opt.value
-                        ? 'bg-amber-500 text-black'
+                        ? 'bg-accent text-black'
                         : 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10'
                     }`}
                   >
@@ -197,9 +197,9 @@ export function PeylaaLeadForm({ source, utm, unitId, onClose }: Props) {
                     key={opt.value}
                     type="button"
                     onClick={() => setForm(p => ({ ...p, purchase_purpose: opt.value }))}
-                    className={`px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
+                    className={`px-3 py-2 rounded-none text-xs font-medium transition-colors ${
                       form.purchase_purpose === opt.value
-                        ? 'bg-amber-500 text-black'
+                        ? 'bg-accent text-black'
                         : 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10'
                     }`}
                   >
@@ -212,7 +212,7 @@ export function PeylaaLeadForm({ source, utm, unitId, onClose }: Props) {
             {/* Submit */}
             <Button
               type="submit"
-              className="w-full bg-amber-500 hover:bg-amber-600 text-black font-bold h-12"
+              className="w-full bg-accent hover:bg-accent text-black font-bold h-12"
               disabled={mutation.isPending || !form.full_name || !form.phone}
             >
               {mutation.isPending ? 'Отправляю...' : (

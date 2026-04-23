@@ -50,7 +50,7 @@ export function ReviewStep({ draft, onEdit, onSubmit, onBack, isLoading }: Revie
               <img 
                 src={draft.cover_image} 
                 alt="Cover" 
-                className="w-full h-full object-cover rounded-t-lg"
+                className="w-full h-full object-cover rounded-none"
               />
             </div>
           )}
@@ -111,7 +111,7 @@ export function ReviewStep({ draft, onEdit, onSubmit, onBack, isLoading }: Revie
       
       {/* Auth notice */}
       {!user && (
-        <div className="bg-warning/10 border border-warning/30 rounded-xl p-4">
+        <div className="bg-warning/10 border border-warning/30 rounded-none p-4">
           <p className="text-sm">
             {isRu 
               ? '⚠️ Для отправки заявки потребуется создать аккаунт или войти.'
@@ -121,7 +121,7 @@ export function ReviewStep({ draft, onEdit, onSubmit, onBack, isLoading }: Revie
       )}
       
       {/* What happens next */}
-      <div className="bg-muted/50 rounded-xl p-4 space-y-2">
+      <div className="bg-muted/50 rounded-none p-4 space-y-2">
         <h4 className="font-medium">{isRu ? 'Что дальше?' : 'What happens next?'}</h4>
         <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
           <li>{isRu ? 'Мы рассмотрим вашу заявку в течение 24-48 часов' : 'We\'ll review your application within 24-48 hours'}</li>

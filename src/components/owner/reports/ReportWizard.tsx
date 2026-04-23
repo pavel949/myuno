@@ -197,14 +197,14 @@ export function ReportWizard({ properties, complexes, ownerContacts, onComplete,
                 <button
                   key={opt.value}
                   onClick={() => setGrouping(opt.value)}
-                  className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
+                  className={`w-full text-left p-4 rounded-none border-2 transition-all ${
                     grouping === opt.value
                       ? 'border-primary bg-primary/5 shadow-sm'
                       : 'border-border hover:border-primary/30'
                   }`}
                 >
                   <div className="flex items-start gap-3">
-                    <div className={`p-2 rounded-lg ${grouping === opt.value ? 'bg-primary/10' : 'bg-muted'}`}>
+                    <div className={`p-2 rounded-none ${grouping === opt.value ? 'bg-primary/10' : 'bg-muted'}`}>
                       <Icon className="h-5 w-5" />
                     </div>
                     <div>
@@ -225,7 +225,7 @@ export function ReportWizard({ properties, complexes, ownerContacts, onComplete,
                   <button
                     key={rt.value}
                     onClick={() => setReportType(rt.value)}
-                    className={`px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                    className={`px-3 py-2 rounded-none border text-sm font-medium transition-colors ${
                       reportType === rt.value
                         ? 'bg-primary/10 border-primary/30 text-primary'
                         : 'bg-secondary border-border text-muted-foreground hover:text-foreground'
@@ -256,7 +256,7 @@ export function ReportWizard({ properties, complexes, ownerContacts, onComplete,
                   key={opt.value}
                   onClick={() => !opt.disabled && setScope(opt.value)}
                   disabled={opt.disabled}
-                  className={`flex items-center gap-2 p-3 rounded-lg border text-sm font-medium transition-colors ${
+                  className={`flex items-center gap-2 p-3 rounded-none border text-sm font-medium transition-colors ${
                     opt.disabled ? 'opacity-40 cursor-not-allowed' : ''
                   } ${
                     scope === opt.value
@@ -335,7 +335,7 @@ export function ReportWizard({ properties, complexes, ownerContacts, onComplete,
               <button
                 key={opt.value}
                 onClick={() => setPeriodPreset(opt.value)}
-                className={`w-full text-left px-4 py-3 rounded-lg border transition-colors ${
+                className={`w-full text-left px-4 py-3 rounded-none border transition-colors ${
                   periodPreset === opt.value
                     ? 'border-primary bg-primary/5'
                     : 'border-border hover:border-primary/30'
@@ -387,7 +387,7 @@ export function ReportWizard({ properties, complexes, ownerContacts, onComplete,
               { key: 'maintenance', label: isRu ? 'Обслуживание и ремонт' : 'Maintenance & repairs', value: includeMaintenance, set: setIncludeMaintenance },
               { key: 'commission', label: isRu ? 'Комиссия УК' : 'Management commission', value: includeCommission, set: setIncludeCommission },
             ].map(item => (
-              <div key={item.key} className="flex items-center justify-between rounded-lg border p-3">
+              <div key={item.key} className="flex items-center justify-between rounded-none border p-3">
                 <span className="text-sm font-medium">{item.label}</span>
                 <Switch checked={item.value} onCheckedChange={item.set} />
               </div>

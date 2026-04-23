@@ -211,8 +211,8 @@ export default function SalesPipeline() {
     return (
       <div className="p-4 md:p-6 lg:p-8 space-y-4 max-w-[1536px] mx-auto">
         <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-20 w-full rounded-xl" />
-        <Skeleton className="h-20 w-full rounded-xl" />
+        <Skeleton className="h-20 w-full rounded-none" />
+        <Skeleton className="h-20 w-full rounded-none" />
       </div>
     );
   }
@@ -275,7 +275,7 @@ export default function SalesPipeline() {
               <CheckSquare className="h-4 w-4" />
             </Button>
           )}
-          <div className="flex border rounded-lg overflow-hidden">
+          <div className="flex border rounded-none overflow-hidden">
             <button
               onClick={() => { setView('list'); setSelectMode(false); setSelectedIds([]); }}
               className={cn('p-2', view === 'list' ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground')}

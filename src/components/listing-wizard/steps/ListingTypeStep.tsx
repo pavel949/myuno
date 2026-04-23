@@ -67,7 +67,7 @@ export function ListingTypeStep({ value, onChange, onNext }: ListingTypeStepProp
             >
               <CardContent className="flex items-center gap-4 p-4">
                 <div className={cn(
-                  "flex h-12 w-12 items-center justify-center rounded-xl",
+                  "flex h-12 w-12 items-center justify-center rounded-none",
                   isSelected ? "bg-primary text-primary-foreground" : "bg-muted"
                 )}>
                   <Icon className="h-6 w-6" />

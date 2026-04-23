@@ -84,7 +84,7 @@ export function ProviderFormValidationSummary({
   if (warnings.length === 0 && infos.length === 0) return null;
 
   return (
-    <div className={cn("rounded-lg border border-warning/30 bg-warning/5 p-3 space-y-2", className)}>
+    <div className={cn("rounded-none border border-warning/30 bg-warning/5 p-3 space-y-2", className)}>
       <div className="flex items-center gap-2 text-sm font-medium text-warning">
         <AlertTriangle className="w-4 h-4" />
         {isRu ? 'Рекомендации по улучшению' : 'Improvement Suggestions'}

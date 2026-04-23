@@ -98,7 +98,7 @@ export function InvestorInterestModal({ open, onOpenChange, dealId, dealTitle }:
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={handleSubmit} disabled={submit.isPending} className="bg-emerald-500 hover:bg-emerald-600">
+          <Button onClick={handleSubmit} disabled={submit.isPending} className="bg-success hover:bg-success">
             {submit.isPending && <Loader2 className="w-4 h-4 mr-1 animate-spin" />}
             Send request
           </Button>

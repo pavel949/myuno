@@ -35,7 +35,7 @@ export const PageHeader = memo(forwardRef<HTMLDivElement, PageHeaderProps>(
     };
 
     const variantClasses = {
-      default: 'bg-card border border-border/40 rounded-2xl px-4 py-3',
+      default: 'bg-card border border-border/40 rounded-none px-4 py-3',
       sticky: 'sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border/50 py-3 -mx-4 px-4',
       transparent: 'absolute top-0 left-0 right-0 z-10 bg-transparent',
     };

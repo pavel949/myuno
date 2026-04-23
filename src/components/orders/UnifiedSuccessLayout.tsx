@@ -63,7 +63,7 @@ export function UnifiedSuccessLayout({
       <div className="min-h-screen bg-background flex items-start justify-center p-4 pt-10">
         <div className="w-full max-w-md space-y-5">
           {/* Status block */}
-          <div className="rounded-2xl border border-border bg-card p-5">
+          <div className="rounded-none border border-border bg-card p-5">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
                 <Check className="w-5 h-5 text-foreground" />
@@ -88,7 +88,7 @@ export function UnifiedSuccessLayout({
 
           {/* Order details */}
           {details && (
-            <div className="rounded-2xl border border-border bg-card p-5">{details}</div>
+            <div className="rounded-none border border-border bg-card p-5">{details}</div>
           )}
 
           {/* Cross-sell, etc. */}

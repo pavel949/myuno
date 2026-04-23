@@ -56,7 +56,7 @@ export default function MCSettingsPage() {
   return (
     <div className="p-4 md:p-6 space-y-6">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+        <div className="w-10 h-10 rounded-none bg-primary/10 flex items-center justify-center">
           <Settings className="h-5 w-5 text-primary" />
         </div>
         <div>
@@ -74,11 +74,11 @@ export default function MCSettingsPage() {
           <AccordionItem
             key={id}
             value={id}
-            className="border border-border/60 rounded-xl bg-card px-4 data-[state=open]:shadow-sm transition-shadow"
+            className="border border-border/60 rounded-none bg-card px-4 data-[state=open]:shadow-sm transition-shadow"
           >
             <AccordionTrigger className="hover:no-underline py-4 gap-3">
               <div className="flex items-center gap-3 text-left">
-                <div className="w-9 h-9 rounded-lg bg-primary/8 flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 rounded-none bg-primary/8 flex items-center justify-center shrink-0">
                   <Icon className="h-4.5 w-4.5 text-primary" />
                 </div>
                 <div>
@@ -96,7 +96,7 @@ export default function MCSettingsPage() {
                 </Suspense>
               )}
               {id === 'operations' && (
-                <div className="flex items-center gap-3 p-4 rounded-lg bg-muted/30">
+                <div className="flex items-center gap-3 p-4 rounded-none bg-muted/30">
                   <Wrench className="h-5 w-5 text-muted-foreground shrink-0" />
                   <p className="text-sm text-muted-foreground">
                     {isRu ? 'Шаблоны чек-листов, настройки задач — скоро' : 'Checklist templates, task settings — coming soon'}

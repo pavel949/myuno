@@ -207,7 +207,7 @@ export function VendorModerationQueue({
         {items.map((item) => (
           <div
             key={`${item.table}-${item.id}`}
-            className="flex items-center justify-between p-3 rounded-lg border bg-muted/30 hover:bg-muted/50 transition-colors group"
+            className="flex items-center justify-between p-3 rounded-none border bg-muted/30 hover:bg-muted/50 transition-colors group"
           >
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">

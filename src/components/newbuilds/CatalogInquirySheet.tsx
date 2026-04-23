@@ -56,7 +56,7 @@ export function CatalogInquirySheet({ project, open, onOpenChange }: Props) {
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="bottom"
-        className="rounded-t-2xl"
+        className="rounded-none"
         style={{ background: 'hsl(var(--nb-surface))', borderColor: 'hsl(var(--nb-gold) / 0.2)' }}
       >
         <SheetHeader>
@@ -76,7 +76,7 @@ export function CatalogInquirySheet({ project, open, onOpenChange }: Props) {
             onChange={e => setName(e.target.value)}
             required
             maxLength={100}
-            className="w-full px-3 py-2.5 rounded-lg text-sm"
+            className="w-full px-3 py-2.5 rounded-none text-sm"
             style={inputStyle}
           />
           <input
@@ -86,7 +86,7 @@ export function CatalogInquirySheet({ project, open, onOpenChange }: Props) {
             onChange={e => setPhone(e.target.value)}
             required
             maxLength={20}
-            className="w-full px-3 py-2.5 rounded-lg text-sm"
+            className="w-full px-3 py-2.5 rounded-none text-sm"
             style={inputStyle}
           />
           <input
@@ -95,13 +95,13 @@ export function CatalogInquirySheet({ project, open, onOpenChange }: Props) {
             value={email}
             onChange={e => setEmail(e.target.value)}
             maxLength={255}
-            className="w-full px-3 py-2.5 rounded-lg text-sm"
+            className="w-full px-3 py-2.5 rounded-none text-sm"
             style={inputStyle}
           />
           <button
             type="submit"
             disabled={createLead.isPending || !name.trim() || !phone.trim()}
-            className="w-full flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-semibold transition-all disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-none text-sm font-semibold transition-all disabled:opacity-50"
             style={{ background: 'hsl(var(--nb-gold))', color: 'hsl(var(--nb-bg))' }}
           >
             <Send className="w-4 h-4" />

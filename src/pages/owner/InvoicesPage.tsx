@@ -306,8 +306,8 @@ export default function InvoicesPage() {
       {/* List */}
       {isLoading ? (
         <div className="space-y-3">
-          <Skeleton className="h-20 w-full rounded-xl" />
-          <Skeleton className="h-20 w-full rounded-xl" />
+          <Skeleton className="h-20 w-full rounded-none" />
+          <Skeleton className="h-20 w-full rounded-none" />
         </div>
       ) : !invoices?.length ? (
         <Card className="p-8 text-center">

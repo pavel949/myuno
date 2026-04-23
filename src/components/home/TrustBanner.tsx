@@ -47,7 +47,7 @@ export const TrustBanner = memo(forwardRef<HTMLDivElement, TrustBannerProps>(fun
           <React.Fragment key={i}>
             {i > 0 && <div className="w-px h-8 bg-border/40" />}
             <div className="flex flex-col items-center gap-1">
-              <div className="w-8 h-8 rounded-xl bg-muted/60 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-none bg-muted/60 flex items-center justify-center">
                 <Icon className={cn("w-4 h-4", stat.color)} />
               </div>
               <span className={cn(
@@ -67,7 +67,7 @@ export const TrustBanner = memo(forwardRef<HTMLDivElement, TrustBannerProps>(fun
             to="/sos"
             className="flex flex-col items-center gap-1 group transition-colors"
           >
-            <div className="w-8 h-8 rounded-xl bg-destructive/10 flex items-center justify-center group-hover:bg-destructive/15 transition-colors">
+            <div className="w-8 h-8 rounded-none bg-destructive/10 flex items-center justify-center group-hover:bg-destructive/15 transition-colors">
               <AlertTriangle className="w-4 h-4 text-destructive" />
             </div>
             <span className="text-sm font-bold text-foreground group-hover:text-destructive transition-colors">

@@ -60,7 +60,7 @@ export function CategoryPicker({ value, onChange }: CategoryPickerProps) {
     <div className="space-y-3">
       {/* Selected badge */}
       {current && !selectedGroup && (
-        <div className="flex items-center gap-2 px-4 py-3 rounded-2xl bg-primary/5 border border-primary/20">
+        <div className="flex items-center gap-2 px-4 py-3 rounded-none bg-primary/5 border border-primary/20">
           <span className="text-lg">{current.item.icon}</span>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium truncate">{isRu ? current.item.labelRu : current.item.labelEn}</p>
@@ -90,7 +90,7 @@ export function CategoryPicker({ value, onChange }: CategoryPickerProps) {
                   type="button"
                   onClick={() => setSelectedGroup(group)}
                   className={cn(
-                    "flex items-center gap-3 p-4 rounded-2xl text-left transition-all",
+                    "flex items-center gap-3 p-4 rounded-none text-left transition-all",
                     "border hover:border-primary/40 hover:bg-primary/5",
                     "active:scale-[0.98]",
                     current?.group.id === group.id
@@ -145,7 +145,7 @@ export function CategoryPicker({ value, onChange }: CategoryPickerProps) {
                       setSelectedGroup(null);
                     }}
                     className={cn(
-                      "relative flex items-center gap-3 p-4 rounded-2xl text-left transition-all",
+                      "relative flex items-center gap-3 p-4 rounded-none text-left transition-all",
                       "border active:scale-[0.98]",
                       isSelected
                         ? "border-primary bg-primary/5 ring-2 ring-primary/20"

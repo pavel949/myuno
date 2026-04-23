@@ -215,7 +215,7 @@ export function HostListingsPanel() {
               />
             ) : (
               <>
-                <div className="flex items-center gap-2 p-3 bg-warning/10 rounded-lg text-sm text-warning-foreground mb-2">
+                <div className="flex items-center gap-2 p-3 bg-warning/10 rounded-none text-sm text-warning-foreground mb-2">
                   <AlertCircle className="h-4 w-4 flex-shrink-0" />
                   <span>
                     {isRu 
@@ -273,7 +273,7 @@ export function HostListingsPanel() {
               />
             ) : (
               <>
-                <div className="flex items-center gap-2 p-3 bg-destructive/10 rounded-lg text-sm text-destructive mb-2">
+                <div className="flex items-center gap-2 p-3 bg-destructive/10 rounded-none text-sm text-destructive mb-2">
                   <XCircle className="h-4 w-4 flex-shrink-0" />
                   <span>
                     {isRu 

@@ -197,7 +197,7 @@ export function VendorFormWizard({
                 {index < steps.length - 1 && (
                   <div
                     className={cn(
-                      'flex-1 h-0.5 mx-1 sm:mx-2 rounded transition-colors min-w-[8px]',
+                      'flex-1 h-0.5 mx-1 sm:mx-2 rounded-none transition-colors min-w-[8px]',
                       index < currentStep ? 'bg-primary' : 'bg-muted'
                     )}
                   />

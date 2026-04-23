@@ -366,11 +366,11 @@ export default function YachtBooking() {
         </motion.div>
 
         {/* Yacht Summary */}
-        <div className="flex gap-4 p-4 bg-card rounded-xl border mb-6">
+        <div className="flex gap-4 p-4 bg-card rounded-none border mb-6">
           <img
             src={yacht.cover_image || '/placeholder.svg'}
             alt={yachtName}
-            className="w-24 h-24 rounded-lg object-cover"
+            className="w-24 h-24 rounded-none object-cover"
           />
           <div className="flex-1">
             <h3 className="font-semibold">{yachtName}</h3>
@@ -422,7 +422,7 @@ export default function YachtBooking() {
           />
 
           {/* Experiences */}
-          <div className="p-4 bg-gradient-to-br from-primary/5 to-accent/10 rounded-xl border border-primary/15">
+          <div className="p-4 bg-gradient-to-br from-primary/5 to-accent/10 rounded-none border border-primary/15">
             <YachtExperienceSelect
               selected={selectedExperiences}
               onChange={setSelectedExperiences}
@@ -463,7 +463,7 @@ export default function YachtBooking() {
               />
             </div>
           ) : (
-            <div className="flex items-start gap-3 p-4 bg-accent/50 border border-border rounded-xl">
+            <div className="flex items-start gap-3 p-4 bg-accent/50 border border-border rounded-none">
               <Info className="w-5 h-5 text-muted-foreground shrink-0 mt-0.5" />
               <div>
                 <p className="text-sm font-medium">
@@ -505,7 +505,7 @@ export default function YachtBooking() {
 
           {/* Deposit Info for Instant Booking */}
           {isInstant && (
-            <div className="flex items-start gap-3 p-4 bg-primary/5 border border-primary/20 rounded-xl">
+            <div className="flex items-start gap-3 p-4 bg-primary/5 border border-primary/20 rounded-none">
               <Shield className="w-5 h-5 text-primary shrink-0 mt-0.5" />
               <div className="text-sm">
                 <p className="font-medium text-primary">

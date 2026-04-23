@@ -69,8 +69,8 @@ export default function ExperienceBooking() {
     return (
       <MiniAppLayout title="" fallbackPath={`/experiences/${id}`} showHero={false} showFilter={false} showCategories={false}>
         <div className="space-y-4 animate-pulse">
-          <div className="h-32 bg-muted rounded-xl" />
-          <div className="h-64 bg-muted rounded-xl" />
+          <div className="h-32 bg-muted rounded-none" />
+          <div className="h-64 bg-muted rounded-none" />
         </div>
       </MiniAppLayout>
     );
@@ -234,7 +234,7 @@ export default function ExperienceBooking() {
             <img 
               src={experience.cover_image || PLACEHOLDER_IMAGES.experience} 
               alt=""
-              className="w-20 h-20 rounded-xl object-cover"
+              className="w-20 h-20 rounded-none object-cover"
             />
             <div className="flex-1 min-w-0">
               <h3 className="font-semibold line-clamp-2">
@@ -280,7 +280,7 @@ export default function ExperienceBooking() {
                   onSelect={setSelectedDate}
                   locale={isRu ? ru : undefined}
                   disabled={(date) => date < new Date()}
-                  className="rounded-md border"
+                  className="rounded-none border"
                 />
               </CardContent>
             </Card>
@@ -301,7 +301,7 @@ export default function ExperienceBooking() {
                         key={time}
                         onClick={() => setSelectedTime(time)}
                         className={cn(
-                          "py-3 px-4 rounded-lg border text-center font-medium transition-all",
+                          "py-3 px-4 rounded-none border text-center font-medium transition-all",
                           selectedTime === time
                             ? "bg-primary text-primary-foreground border-primary"
                             : "hover:bg-muted"
@@ -404,7 +404,7 @@ export default function ExperienceBooking() {
                   <span className="text-muted-foreground">{isRu ? 'Контакт' : 'Contact'}</span>
                   <span className="font-medium">{contactData.name}</span>
                 </div>
-                <div className="flex justify-between py-3 bg-primary/5 rounded-lg px-3">
+                <div className="flex justify-between py-3 bg-primary/5 rounded-none px-3">
                   <span className="font-semibold">{isRu ? 'Итого' : 'Total'}</span>
                   <span className="font-bold text-xl text-primary">{formatPrice(totalPrice)}</span>
                 </div>

@@ -238,7 +238,7 @@ export function PropertyBookingCard({
           <PopoverTrigger asChild>
             <button
               className={cn(
-                "w-full rounded-xl border-2 border-border/80 hover:border-foreground/40 transition-colors",
+                "w-full rounded-none border-2 border-border/80 hover:border-foreground/40 transition-colors",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                 calendarOpen && "border-foreground/60 ring-1 ring-foreground/20"
               )}
@@ -349,7 +349,7 @@ export function PropertyBookingCard({
           <PopoverTrigger asChild>
             <button
               className={cn(
-                "w-full rounded-xl border-2 border-border/80 hover:border-foreground/40 transition-colors",
+                "w-full rounded-none border-2 border-border/80 hover:border-foreground/40 transition-colors",
                 "flex items-center justify-between px-4 py-3",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               )}
@@ -384,7 +384,7 @@ export function PropertyBookingCard({
         
         {/* Validation Errors */}
         {validationErrors.length > 0 && (
-          <div className="text-sm text-destructive flex items-start gap-2 p-3 bg-destructive/10 rounded-xl border border-destructive/20">
+          <div className="text-sm text-destructive flex items-start gap-2 p-3 bg-destructive/10 rounded-none border border-destructive/20">
             <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
             <div className="space-y-1">{validationErrors.map((error, i) => (<p key={i}>{error}</p>))}</div>
           </div>
@@ -394,7 +394,7 @@ export function PropertyBookingCard({
         <Button 
           size="lg" 
           className={cn(
-            "w-full text-base font-semibold h-12 rounded-xl",
+            "w-full text-base font-semibold h-12 rounded-none",
             "bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70",
             "shadow-[0_4px_14px_-3px_hsl(var(--primary)/0.4)]",
             "transition-all duration-200 hover:shadow-[0_6px_20px_-3px_hsl(var(--primary)/0.5)] hover:-translate-y-0.5",
@@ -479,7 +479,7 @@ export function PropertyBookingCard({
               </div>
 
               {/* Payment Schedule — public-friendly: only prepay / balance, no deposit operational details */}
-              <div className="pt-2 mt-1 space-y-2 p-3 rounded-xl bg-muted/40">
+              <div className="pt-2 mt-1 space-y-2 p-3 rounded-none bg-muted/40">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">
                     {isRu ? `Оплатить сейчас (${pricing.prepayPercent}%)` : `Pay now (${pricing.prepayPercent}%)`}

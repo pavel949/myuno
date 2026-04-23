@@ -30,7 +30,7 @@ export const VendorInfo: React.FC<VendorInfoProps> = ({
       <Card className={cn("border-border/50", className)}>
         <CardContent className="p-4">
           <div className="flex items-center gap-3">
-            <Skeleton className="w-14 h-14 rounded-xl" />
+            <Skeleton className="w-14 h-14 rounded-none" />
             <div className="flex-1">
               <Skeleton className="h-5 w-32 mb-2" />
               <Skeleton className="h-4 w-24" />
@@ -61,7 +61,7 @@ export const VendorInfo: React.FC<VendorInfoProps> = ({
       <CardContent className="p-4">
         <div className="flex items-center gap-3">
           {/* Vendor Logo */}
-          <div className="w-14 h-14 rounded-xl bg-muted/80 flex items-center justify-center overflow-hidden shrink-0">
+          <div className="w-14 h-14 rounded-none bg-muted/80 flex items-center justify-center overflow-hidden shrink-0">
             {vendor.logo_url ? (
               <img 
                 src={vendor.logo_url} 

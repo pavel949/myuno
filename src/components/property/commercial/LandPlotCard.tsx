@@ -45,7 +45,7 @@ export function LandPlotCard({ property, className }: Props) {
     <Link
       to={APP_ROUTES.LAND_DETAIL(property.id)}
       className={cn(
-        'group block rounded-2xl border border-border bg-card overflow-hidden hover:shadow-lg transition-shadow',
+        'group block rounded-none border border-border bg-card overflow-hidden hover:shadow-lg transition-shadow',
         className,
       )}
     >
@@ -70,15 +70,15 @@ export function LandPlotCard({ property, className }: Props) {
             className={cn(
               'backdrop-blur-sm',
               isRent
-                ? 'bg-blue-500/95 text-white hover:bg-blue-500'
-                : 'bg-amber-500/95 text-white hover:bg-amber-500',
+                ? 'bg-primary/95 text-white hover:bg-primary'
+                : 'bg-accent/95 text-white hover:bg-accent',
             )}
           >
             {isRent ? (isRu ? 'Аренда' : 'Rent') : isRu ? 'Продажа' : 'Sale'}
           </Badge>
         </div>
         {property.is_verified && (
-          <Badge className="absolute top-3 right-3 bg-emerald-500/95 text-white hover:bg-emerald-500 backdrop-blur-sm gap-1">
+          <Badge className="absolute top-3 right-3 bg-success/95 text-white hover:bg-success backdrop-blur-sm gap-1">
             <BadgeCheck className="w-3 h-3" />
             {isRu ? 'Проверено' : 'Verified'}
           </Badge>

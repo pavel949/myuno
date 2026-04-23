@@ -66,14 +66,14 @@ export function ManagementReportDetail({ report }: ManagementReportDetailProps) 
 
       {/* Financial summary */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-lg bg-success/5 border border-success/20 p-3">
+        <div className="rounded-none bg-success/5 border border-success/20 p-3">
           <div className="flex items-center gap-1.5 mb-1">
             <TrendingUp className="h-4 w-4 text-success" />
             <span className="text-xs text-muted-foreground">{isRu ? 'Доход' : 'Income'}</span>
           </div>
           <p className="text-base font-bold text-success">{formatCurrency(income.total || 0)}</p>
         </div>
-        <div className="rounded-lg bg-destructive/5 border border-destructive/20 p-3">
+        <div className="rounded-none bg-destructive/5 border border-destructive/20 p-3">
           <div className="flex items-center gap-1.5 mb-1">
             <TrendingDown className="h-4 w-4 text-destructive" />
             <span className="text-xs text-muted-foreground">{isRu ? 'Расходы' : 'Expenses'}</span>
@@ -84,7 +84,7 @@ export function ManagementReportDetail({ report }: ManagementReportDetailProps) 
 
       {/* Commission & owner net */}
       {mgmtCommission > 0 && (
-        <div className="rounded-lg bg-muted/50 p-3 space-y-2">
+        <div className="rounded-none bg-muted/50 p-3 space-y-2">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground flex items-center gap-1.5">
               <DollarSign className="h-3.5 w-3.5" />
@@ -104,7 +104,7 @@ export function ManagementReportDetail({ report }: ManagementReportDetailProps) 
 
       {/* Net income if no commission breakdown */}
       {mgmtCommission === 0 && (
-        <div className={`rounded-xl p-3 text-center ${netIncome >= 0 ? 'bg-success/10' : 'bg-destructive/10'}`}>
+        <div className={`rounded-none p-3 text-center ${netIncome >= 0 ? 'bg-success/10' : 'bg-destructive/10'}`}>
           <p className="text-xs text-muted-foreground mb-0.5">{isRu ? 'Чистый доход' : 'Net Income'}</p>
           <p className={`text-2xl font-bold ${netIncome >= 0 ? 'text-success' : 'text-destructive'}`}>
             {netIncome >= 0 ? '+' : ''}{formatCurrency(netIncome)}

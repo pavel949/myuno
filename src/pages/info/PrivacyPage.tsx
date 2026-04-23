@@ -198,9 +198,9 @@ export default function PrivacyPage() {
                     : 'myUNO Limited takes your data protection seriously. This policy complies with PDPA (Thailand), GDPR (EU), and other applicable laws.'}
                 </p>
                 <div className="flex flex-wrap gap-2 mt-3">
-                  <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">PDPA Compliant</span>
-                  <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">GDPR Compliant</span>
-                  <span className="text-xs bg-muted px-2 py-1 rounded">{isRu ? 'Январь 2026' : 'January 2026'}</span>
+                  <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-none">PDPA Compliant</span>
+                  <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-none">GDPR Compliant</span>
+                  <span className="text-xs bg-muted px-2 py-1 rounded-none">{isRu ? 'Январь 2026' : 'January 2026'}</span>
                 </div>
               </div>
             </div>
@@ -249,10 +249,10 @@ export default function PrivacyPage() {
                   ))}
                 </ul>
                 <div className="flex flex-wrap gap-2 text-xs">
-                  <span className="bg-muted px-2 py-1 rounded">
+                  <span className="bg-muted px-2 py-1 rounded-none">
                     {isRu ? 'Хранение:' : 'Retention:'} {category.retention}
                   </span>
-                  <span className="bg-primary/10 text-primary px-2 py-1 rounded">
+                  <span className="bg-primary/10 text-primary px-2 py-1 rounded-none">
                     {category.legal}
                   </span>
                 </div>
@@ -270,12 +270,12 @@ export default function PrivacyPage() {
           <CardContent className="pt-6">
             <div className="space-y-4">
               {dataPurposes.map((item, index) => (
-                <div key={index} className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
+                <div key={index} className="flex items-start gap-3 p-3 bg-muted/50 rounded-none">
                   <div className="flex-1">
                     <h4 className="font-medium text-sm">{item.purpose}</h4>
                     <p className="text-xs text-muted-foreground">{item.description}</p>
                   </div>
-                  <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded whitespace-nowrap">
+                  <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-none whitespace-nowrap">
                     {item.basis}
                   </span>
                 </div>
@@ -297,7 +297,7 @@ export default function PrivacyPage() {
               </AccordionTrigger>
               <AccordionContent>
                 <p className="text-sm text-muted-foreground mb-2">{item.description}</p>
-                <p className="text-xs bg-muted p-2 rounded">
+                <p className="text-xs bg-muted p-2 rounded-none">
                   <strong>{isRu ? 'Как:' : 'How:'}</strong> {item.how}
                 </p>
               </AccordionContent>
@@ -344,7 +344,7 @@ export default function PrivacyPage() {
           <CardContent className="pt-6">
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {securityMeasures.map((measure, index) => (
-                <div key={index} className="text-center p-3 bg-muted rounded-lg">
+                <div key={index} className="text-center p-3 bg-muted rounded-none">
                   <span className="text-2xl mb-2 block">{measure.icon}</span>
                   <h4 className="font-medium text-sm">{measure.title}</h4>
                   <p className="text-xs text-muted-foreground">{measure.desc}</p>
@@ -411,9 +411,9 @@ export default function PrivacyPage() {
         </Card>
 
         {/* Children */}
-        <Card className="mb-8 border-amber-500/30">
+        <Card className="mb-8 border-accent/40/30">
           <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2 text-amber-700 dark:text-amber-400">
+            <CardTitle className="text-base flex items-center gap-2 text-accent dark:text-accent">
               <AlertTriangle className="h-4 w-4" />
               {isRu ? '8. Дети' : '8. Children'}
             </CardTitle>
@@ -441,7 +441,7 @@ export default function PrivacyPage() {
                 <span className="font-medium">privacy@myuno.app</span>
               </p>
             </div>
-            <div className="mt-4 p-3 bg-muted rounded-lg text-xs text-muted-foreground">
+            <div className="mt-4 p-3 bg-muted rounded-none text-xs text-muted-foreground">
               <p className="font-medium text-foreground mb-1">myUNO Pte. Ltd.</p>
               <p>{isRu ? 'Регистрация: Сингапур | Операции: Таиланд' : 'Incorporated: Singapore | Operations: Thailand'}</p>
               <p className="mt-1">{isRu 
@@ -453,11 +453,11 @@ export default function PrivacyPage() {
 
         {/* Related Links */}
         <div className="grid grid-cols-2 gap-2 mb-6">
-          <Link to="/terms" className="p-3 bg-muted rounded-lg text-center hover:bg-muted/80 transition-colors">
+          <Link to="/terms" className="p-3 bg-muted rounded-none text-center hover:bg-muted/80 transition-colors">
             <FileText className="h-5 w-5 mx-auto mb-1 text-muted-foreground" />
             <span className="text-xs">{isRu ? 'Условия использования' : 'Terms of Use'}</span>
           </Link>
-          <Link to="/cookies" className="p-3 bg-muted rounded-lg text-center hover:bg-muted/80 transition-colors">
+          <Link to="/cookies" className="p-3 bg-muted rounded-none text-center hover:bg-muted/80 transition-colors">
             <Settings className="h-5 w-5 mx-auto mb-1 text-muted-foreground" />
             <span className="text-xs">{isRu ? 'Cookie Политика' : 'Cookie Policy'}</span>
           </Link>

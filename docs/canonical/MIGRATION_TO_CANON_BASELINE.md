@@ -237,3 +237,67 @@ fontFamily: {
 | 4 — Enforcement | 0px radii global, ESLint regression rules | ✅ |
 | 5 — Cleanup (next) | Переписать warning-классы на semantic tokens, убрать override-файл | 🟡 todo |
 
+---
+
+## Phase 5 — Codemod cleanup ✅ (2026-04-23)
+
+**Цель:** заменить все legacy-классы (palette + radii) в `src/**` на канонические семантические токены, чтобы уменьшить `canon-overrides.css` до safety-net.
+
+### 1 · Codemod
+**`scripts/canon-cleanup-codemod.mjs`** — детерминированный AST-free regex codemod, зеркалирующий маппинг из `canon-overrides.css`:
+
+| Family | → semantic token |
+|---|---|
+| emerald · teal · green · lime · mint | `success` / `success/10` |
+| cyan · sky · blue · indigo | `primary` (navy) / `primary/10` |
+| purple · violet · fuchsia | `primary` / `primary/10` |
+| pink · rose | `accent` (orange-warm) |
+| amber · orange · yellow | `accent` / `accent/10` |
+
+Правила интенсивности:
+- step ≤ 200 → tinted surface (`bg-success/10`, `text-muted-foreground`).
+- step ≥ 300 → solid token (`bg-success`, `text-primary`).
+- `border-*` → `border-{token}/40` (полупрозрачный).
+- `rounded-{sm,md,lg,xl,2xl,3xl}` (включая `rounded-tl-lg` и т.д.) → `rounded-none`.
+- `rounded-full` НЕ трогается (аватары/icon chips сохраняются).
+
+### 2 · Применение
+Запуск: `node scripts/canon-cleanup-codemod.mjs --write`
+
+| Метрика | Значение |
+|---|---|
+| Файлов изменено | 1137 |
+| Color-классов переписано | 1786 |
+| Radii-классов переписано | 3304 |
+| Остаток legacy color-классов в `src/**` | **0** |
+| Остаток legacy radii в `src/**` | **0** |
+
+### 3 · Hotfix
+Один edge case — `OptimizedThumbnail` принимал prop с именем `rounded`. Codemod переименовал его в `rounded-none = 'lg'`. Восстановлено вручную в `src/components/ui/optimized-image.tsx:177`.
+
+### 4 · Сокращение canon-overrides.css
+Файл переписан с ~235 строк (Phase 3) → ~100 строк. Из него удалены ВСЕ маппинги цветов (text/bg/border/gradient stops для emerald/teal/cyan/purple и т.д.) — они больше не нужны, поскольку код использует `bg-success`/`text-primary` напрямую.
+
+Что осталось как safety-net:
+1. Глобальное подавление `backdrop-blur-*` (canon §6).
+2. Глобальный 0px радиус для legacy `rounded-*` (на случай 3rd-party HTML).
+3. Gradient stops для `from-*-*`/`to-*-*` — на случай embedded external content.
+
+### 5 · Verification
+- `npx tsc --noEmit` → exit 0.
+- `npm run build` → exit 0, PWA precache 2139 entries.
+- ESLint regression rules (Phase 4) теперь не выдают visual warnings на `src/**`.
+
+### Итог по миграции (Phases 1-5)
+| Phase | Scope | Status |
+|---|---|---|
+| 1 — Foundation | tokens.css, palette, fonts, ThemeProvider light default | ✅ |
+| 2 — Newbuilds unification | newbuilds-theme.css → canon | ✅ |
+| 3 — Global override | canon-overrides.css (~552 классов + glassmorphism off) | ✅ |
+| 4 — Enforcement | 0px radii global, ESLint regression rules | ✅ |
+| 5 — Cleanup | Codemod 1786 colors + 3304 radii → semantic tokens | ✅ |
+| 6 — Inline hex sweep (next) | ~88 hardcoded hex в style={{...}} → CSS vars | 🟡 todo |
+
+Канонический визуальный baseline теперь живёт в коде, а не в override-листе.
+
+

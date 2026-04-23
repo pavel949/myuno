@@ -57,7 +57,7 @@ export default function OwnerAccountSettings() {
               onClick={() => navigate(item.path)}
               className={cn(
                 'flex items-center w-full px-1 py-5 text-left',
-                'hover:bg-muted/50 transition-colors rounded-lg group'
+                'hover:bg-muted/50 transition-colors rounded-none group'
               )}
             >
               <item.icon className="h-6 w-6 text-muted-foreground mr-4 flex-shrink-0" />
@@ -80,7 +80,7 @@ export default function OwnerAccountSettings() {
               onClick={() => navigate(item.path)}
               className={cn(
                 'flex items-center w-full px-1 py-5 text-left',
-                'hover:bg-muted/50 transition-colors rounded-lg group'
+                'hover:bg-muted/50 transition-colors rounded-none group'
               )}
             >
               <item.icon className="h-6 w-6 text-muted-foreground mr-4 flex-shrink-0" />

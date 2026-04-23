@@ -155,7 +155,7 @@ export default function PetServiceBooking() {
         />
 
         {/* Service Info */}
-        <div className="flex items-center gap-3 p-4 bg-card rounded-xl border mt-4 mb-6">
+        <div className="flex items-center gap-3 p-4 bg-card rounded-none border mt-4 mb-6">
           <div className="w-12 h-12 rounded-full bg-gradient-to-br from-accent-amber/20 to-warning/20 flex items-center justify-center">
             <PawPrint className="w-6 h-6 text-accent-amber" />
           </div>
@@ -166,7 +166,7 @@ export default function PetServiceBooking() {
         </div>
 
         {/* Pet Info */}
-        <div className="bg-card rounded-2xl border p-5 mb-4">
+        <div className="bg-card rounded-none border p-5 mb-4">
           <h3 className="font-semibold mb-4">{language === 'ru' ? 'Питомец' : 'Pet'}</h3>
           <RadioGroup value={petType} onValueChange={setPetType} className="flex gap-2 mb-4">
             {petTypes.map((type) => {
@@ -175,7 +175,7 @@ export default function PetServiceBooking() {
                 <Label 
                   key={type.id} 
                   className={cn(
-                    "flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border cursor-pointer transition-all", 
+                    "flex-1 flex items-center justify-center gap-2 p-3 rounded-none border cursor-pointer transition-all", 
                     petType === type.id ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
                   )}
                 >
@@ -209,7 +209,7 @@ export default function PetServiceBooking() {
         </div>
 
         {/* Date & Time */}
-        <div className="bg-card rounded-2xl border p-5 mb-4">
+        <div className="bg-card rounded-none border p-5 mb-4">
           <h3 className="font-semibold mb-4">
             {language === 'ru' ? 'Дата и время' : 'Date & Time'}
           </h3>
@@ -224,7 +224,7 @@ export default function PetServiceBooking() {
         </div>
 
         {/* Contact Info */}
-        <div className="bg-card rounded-2xl border p-5 mb-4">
+        <div className="bg-card rounded-none border p-5 mb-4">
           <h3 className="font-semibold mb-4">
             {language === 'ru' ? 'Контактные данные' : 'Contact Information'}
           </h3>
@@ -236,7 +236,7 @@ export default function PetServiceBooking() {
         </div>
 
         {/* Payment Method */}
-        <div className="bg-card rounded-2xl border p-5 mb-4">
+        <div className="bg-card rounded-none border p-5 mb-4">
           <h3 className="font-semibold mb-4">
             {language === 'ru' ? 'Способ оплаты' : 'Payment Method'}
           </h3>

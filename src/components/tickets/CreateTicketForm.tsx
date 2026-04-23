@@ -103,7 +103,7 @@ export function CreateTicketForm({ orderId, orderNumber, prefilledCategory, onSu
                   key={cat.value}
                   type="button"
                   onClick={() => setFormData(prev => ({ ...prev, category: cat.value }))}
-                  className={`flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all ${
+                  className={`flex flex-col items-center gap-2 p-4 rounded-none border-2 transition-all ${
                     isSelected 
                       ? 'border-primary bg-primary/5' 
                       : 'border-border hover:border-primary/50'
@@ -183,7 +183,7 @@ export function CreateTicketForm({ orderId, orderNumber, prefilledCategory, onSu
             <Label>
               {language === 'ru' ? 'Прикрепить файлы' : 'Attachments'}
             </Label>
-            <div className="border-2 border-dashed rounded-lg p-6 text-center">
+            <div className="border-2 border-dashed rounded-none p-6 text-center">
               <Upload className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
               <p className="text-sm text-muted-foreground">
                 {language === 'ru' 

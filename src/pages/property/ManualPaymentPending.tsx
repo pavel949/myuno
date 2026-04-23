@@ -322,7 +322,7 @@ export default function ManualPaymentPending() {
 
           {/* === Hold timer === */}
           {isAwaiting && (
-            <div className="flex items-start gap-2 p-3 rounded-lg bg-warning/5 border border-warning/20 text-xs text-muted-foreground">
+            <div className="flex items-start gap-2 p-3 rounded-none bg-warning/5 border border-warning/20 text-xs text-muted-foreground">
               <Clock className="w-4 h-4 shrink-0 text-warning mt-0.5" />
               <p>
                 {isRu

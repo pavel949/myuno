@@ -238,7 +238,7 @@ export default function AdminCities() {
         <div className="mb-4"><BackButton fallbackPath={APP_ROUTES.ADMIN} variant="ghost" size="sm" /></div>
         
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 rounded-lg bg-primary/10">
+          <div className="p-2 rounded-none bg-primary/10">
             <Globe className="w-6 h-6 text-primary" />
           </div>
           <div>
@@ -259,7 +259,7 @@ export default function AdminCities() {
       {isLoading ? (
         <div className="space-y-3">
           {[1, 2, 3].map(i => (
-            <Skeleton key={i} className="h-24 rounded-lg" />
+            <Skeleton key={i} className="h-24 rounded-none" />
           ))}
         </div>
       ) : (
@@ -269,7 +269,7 @@ export default function AdminCities() {
               key={city.id}
               className={cn(
                 "transition-all",
-                city.is_active && !city.is_coming_soon && "border-emerald-500/50"
+                city.is_active && !city.is_coming_soon && "border-success/40/50"
               )}
             >
               <CardContent className="p-4">
@@ -498,7 +498,7 @@ export default function AdminCities() {
             </div>
 
             {/* Status */}
-            <div className="flex items-center justify-between gap-4 p-3 border rounded-lg">
+            <div className="flex items-center justify-between gap-4 p-3 border rounded-none">
               <div>
                 <p className="font-medium">{isRu ? 'Активен' : 'Active'}</p>
                 <p className="text-sm text-muted-foreground">
@@ -515,7 +515,7 @@ export default function AdminCities() {
               />
             </div>
 
-            <div className="flex items-center justify-between gap-4 p-3 border rounded-lg">
+            <div className="flex items-center justify-between gap-4 p-3 border rounded-none">
               <div>
                 <p className="font-medium">{isRu ? 'Скоро' : 'Coming Soon'}</p>
                 <p className="text-sm text-muted-foreground">

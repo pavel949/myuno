@@ -32,9 +32,9 @@ const LEVELS = {
   },
   premium: {
     icon: Crown,
-    color: 'text-amber-500',
-    bg: 'bg-amber-500/5',
-    border: 'border-amber-500/30',
+    color: 'text-accent',
+    bg: 'bg-accent/5',
+    border: 'border-accent/40/30',
   },
 };
 
@@ -80,7 +80,7 @@ export function VendorVerificationBadge({
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            <div className={cn('p-1.5 rounded-lg', config.bg)}>
+            <div className={cn('p-1.5 rounded-none', config.bg)}>
               <LevelIcon className={cn('h-4 w-4', config.color)} />
             </div>
             <div>
@@ -116,7 +116,7 @@ export function VendorVerificationBadge({
         )}
 
         {level === 'premium' && (
-          <div className="flex items-center gap-1.5 text-xs text-amber-600">
+          <div className="flex items-center gap-1.5 text-xs text-accent">
             <CheckCircle2 className="h-3.5 w-3.5" />
             {isRu ? 'Максимальный уровень достигнут' : 'Maximum level achieved'}
           </div>

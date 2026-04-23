@@ -18,11 +18,11 @@ export const ELEVATION = {
 // ═══ Radius Scale ═══
 export const RADIUS = {
   none: 'rounded-none',
-  sm: 'rounded-sm',         // 4px — tags, chips
-  md: 'rounded-md',         // 8px — badges, inputs
-  lg: 'rounded-lg',         // 12px — buttons, compact cards
-  xl: 'rounded-xl',         // 16px — cards
-  '2xl': 'rounded-2xl',     // 20px — hero cards
+  sm: 'rounded-none',         // 4px — tags, chips
+  md: 'rounded-none',         // 8px — badges, inputs
+  lg: 'rounded-none',         // 12px — buttons, compact cards
+  xl: 'rounded-none',         // 16px — cards
+  '2xl': 'rounded-none',     // 20px — hero cards
   full: 'rounded-full',     // pills, avatars
 } as const;
 
@@ -70,37 +70,37 @@ export const MOTION = {
 
 // ═══ Composite Card Styles ═══
 export const CARD = {
-  surface: 'bg-muted/30 rounded-2xl',
-  base: `bg-card border border-border/60 rounded-xl ${ELEVATION[2]}`,
-  interactive: `bg-card border border-border/60 rounded-xl ${ELEVATION[2]} hover:${ELEVATION[3]} hover:-translate-y-0.5 transition-all duration-150 cursor-pointer`,
-  elevated: `bg-card border border-border/60 rounded-xl ${ELEVATION[4]}`,
-  featured: `bg-card border border-border/60 rounded-xl ${ELEVATION[4]}`,
+  surface: 'bg-muted/30 rounded-none',
+  base: `bg-card border border-border/60 rounded-none ${ELEVATION[2]}`,
+  interactive: `bg-card border border-border/60 rounded-none ${ELEVATION[2]} hover:${ELEVATION[3]} hover:-translate-y-0.5 transition-all duration-150 cursor-pointer`,
+  elevated: `bg-card border border-border/60 rounded-none ${ELEVATION[4]}`,
+  featured: `bg-card border border-border/60 rounded-none ${ELEVATION[4]}`,
 } as const;
 
 // ═══ Badge System ═══
 export const BADGE = {
-  primary: 'bg-primary text-primary-foreground text-[10px] font-medium px-2 py-0.5 rounded-md',
-  muted: 'bg-muted text-muted-foreground text-[10px] font-medium px-2 py-0.5 rounded-md',
-  success: 'bg-success/20 text-success text-[10px] font-medium px-2 py-0.5 rounded-md',
-  warning: 'bg-warning/20 text-warning text-[10px] font-medium px-2 py-0.5 rounded-md',
-  danger: 'bg-destructive/20 text-destructive text-[10px] font-medium px-2 py-0.5 rounded-md',
-  info: 'bg-info/20 text-info text-[10px] font-medium px-2 py-0.5 rounded-md',
-  new: 'bg-primary text-primary-foreground text-[10px] font-medium px-2 py-0.5 rounded-md',
-  hot: 'bg-foreground text-background text-[10px] font-medium px-2 py-0.5 rounded-md',
-  sale: 'bg-destructive text-destructive-foreground text-[10px] font-medium px-2 py-0.5 rounded-md',
-  featured: 'bg-primary text-primary-foreground text-[10px] font-medium px-2 py-0.5 rounded-md',
-  discount: 'bg-destructive text-destructive-foreground text-[10px] font-medium px-2 py-0.5 rounded-md',
-  tour: 'bg-primary/80 text-primary-foreground text-[10px] font-medium px-2 py-0.5 rounded-md',
-  activity: 'bg-muted text-foreground text-[10px] font-medium px-2 py-0.5 rounded-md',
-  type: 'bg-muted text-foreground text-[10px] font-medium px-2 py-0.5 rounded-md',
-  urgent: 'bg-destructive text-destructive-foreground text-[10px] font-medium px-2 py-0.5 rounded-md',
+  primary: 'bg-primary text-primary-foreground text-[10px] font-medium px-2 py-0.5 rounded-none',
+  muted: 'bg-muted text-muted-foreground text-[10px] font-medium px-2 py-0.5 rounded-none',
+  success: 'bg-success/20 text-success text-[10px] font-medium px-2 py-0.5 rounded-none',
+  warning: 'bg-warning/20 text-warning text-[10px] font-medium px-2 py-0.5 rounded-none',
+  danger: 'bg-destructive/20 text-destructive text-[10px] font-medium px-2 py-0.5 rounded-none',
+  info: 'bg-info/20 text-info text-[10px] font-medium px-2 py-0.5 rounded-none',
+  new: 'bg-primary text-primary-foreground text-[10px] font-medium px-2 py-0.5 rounded-none',
+  hot: 'bg-foreground text-background text-[10px] font-medium px-2 py-0.5 rounded-none',
+  sale: 'bg-destructive text-destructive-foreground text-[10px] font-medium px-2 py-0.5 rounded-none',
+  featured: 'bg-primary text-primary-foreground text-[10px] font-medium px-2 py-0.5 rounded-none',
+  discount: 'bg-destructive text-destructive-foreground text-[10px] font-medium px-2 py-0.5 rounded-none',
+  tour: 'bg-primary/80 text-primary-foreground text-[10px] font-medium px-2 py-0.5 rounded-none',
+  activity: 'bg-muted text-foreground text-[10px] font-medium px-2 py-0.5 rounded-none',
+  type: 'bg-muted text-foreground text-[10px] font-medium px-2 py-0.5 rounded-none',
+  urgent: 'bg-destructive text-destructive-foreground text-[10px] font-medium px-2 py-0.5 rounded-none',
 } as const;
 
 // ═══ Image Styles ═══
 export const IMAGE = {
   hover: 'w-full h-full object-cover transition-transform duration-200 group-hover:scale-[1.02]',
   static: 'w-full h-full object-cover',
-  container: 'relative overflow-hidden rounded-lg',
+  container: 'relative overflow-hidden rounded-none',
 } as const;
 
 // ═══ Aspect Ratios ═══
@@ -124,13 +124,13 @@ export const CAROUSEL_WIDTH = {
 // These maintain compat with existing component imports
 export const DESIGN_TOKENS = {
   radius: {
-    card: 'rounded-xl',
-    cardCompact: 'rounded-lg',
-    button: 'rounded-lg',
-    badge: 'rounded-md',
+    card: 'rounded-none',
+    cardCompact: 'rounded-none',
+    button: 'rounded-none',
+    badge: 'rounded-none',
     pill: 'rounded-full',
-    input: 'rounded-lg',
-    image: 'rounded-lg',
+    input: 'rounded-none',
+    image: 'rounded-none',
   },
   shadow: {
     none: ELEVATION[0],

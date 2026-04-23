@@ -54,7 +54,7 @@ export function ImportTargetSelector({ selectedTarget, onSelect }: ImportTargetS
             onClick={() => onSelect(target.id)}
           >
             <CardContent className="p-4 flex flex-col items-center gap-2 text-center">
-              <div className={`p-2 rounded-lg ${
+              <div className={`p-2 rounded-none ${
                 selectedTarget === target.id 
                   ? 'bg-primary text-primary-foreground' 
                   : 'bg-muted'
@@ -73,7 +73,7 @@ export function ImportTargetSelector({ selectedTarget, onSelect }: ImportTargetS
       </div>
       
       {selectedTarget && (
-        <div className="mt-4 p-3 bg-muted/50 rounded-lg">
+        <div className="mt-4 p-3 bg-muted/50 rounded-none">
           {(() => {
             const target = importTargets.find(t => t.id === selectedTarget);
             if (!target) return null;

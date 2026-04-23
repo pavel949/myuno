@@ -149,7 +149,7 @@ export default function ServiceRequest() {
                   type="button"
                   onClick={() => setFormData(prev => ({ ...prev, service_type: type.value }))}
                   className={cn(
-                    "flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-colors",
+                    "flex flex-col items-center gap-2 p-3 rounded-none border-2 transition-colors",
                     formData.service_type === type.value
                       ? "border-primary bg-primary/5"
                       : "border-muted hover:border-muted-foreground/30"

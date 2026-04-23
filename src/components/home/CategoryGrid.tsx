@@ -26,7 +26,7 @@ export function CategoryGrid({ showAll = false, compact = false }: CategoryGridP
         compact ? "grid-cols-4 sm:grid-cols-6" : "grid-cols-2 sm:grid-cols-4"
       )}>
         {Array.from({ length: 12 }).map((_, i) => (
-          <Skeleton key={i} className="h-20 rounded-xl" />
+          <Skeleton key={i} className="h-20 rounded-none" />
         ))}
       </div>
     );
@@ -46,7 +46,7 @@ export function CategoryGrid({ showAll = false, compact = false }: CategoryGridP
                 triggerRipple(e);
                 navigate(cat.path);
               }}
-              className="relative flex flex-col items-center p-2 rounded-xl hover:bg-card/50 transition-all group active:scale-95"
+              className="relative flex flex-col items-center p-2 rounded-none hover:bg-card/50 transition-all group active:scale-95"
             >
               {(cat.isNew || cat.isHot) && (
                 <Badge 
@@ -60,7 +60,7 @@ export function CategoryGrid({ showAll = false, compact = false }: CategoryGridP
                 </Badge>
               )}
               <div className={cn(
-                "w-10 h-10 rounded-xl flex items-center justify-center mb-1.5 bg-gradient-to-br",
+                "w-10 h-10 rounded-none flex items-center justify-center mb-1.5 bg-gradient-to-br",
                 cat.color,
                 "group-hover:scale-110 transition-transform"
               )}>
@@ -93,7 +93,7 @@ export function CategoryGrid({ showAll = false, compact = false }: CategoryGridP
                     triggerRipple(e);
                     navigate(cat.path);
                   }}
-                  className="relative flex items-center gap-3 p-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all group active:scale-[0.98]"
+                  className="relative flex items-center gap-3 p-3 rounded-none bg-card border border-border/50 hover:border-primary/30 transition-all group active:scale-[0.98]"
                 >
                   {(cat.isNew || cat.isHot) && (
                     <Badge 
@@ -107,7 +107,7 @@ export function CategoryGrid({ showAll = false, compact = false }: CategoryGridP
                     </Badge>
                   )}
                   <div className={cn(
-                    "w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br flex-shrink-0",
+                    "w-10 h-10 rounded-none flex items-center justify-center bg-gradient-to-br flex-shrink-0",
                     cat.color,
                     "group-hover:scale-110 transition-transform"
                   )}>

@@ -137,7 +137,7 @@ export function PageHeader({
                       key={i}
                       onClick={a.onClick}
                       className={cn(
-                        'inline-flex items-center gap-1.5 rounded-lg text-sm font-medium transition-all active:scale-95',
+                        'inline-flex items-center gap-1.5 rounded-none text-sm font-medium transition-all active:scale-95',
                         'h-[var(--touch-target)] px-3',
                         'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary',
                         a.variant === 'primary'

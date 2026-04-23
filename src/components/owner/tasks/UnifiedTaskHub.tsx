@@ -306,7 +306,7 @@ export function UnifiedTaskHub() {
               <div className="flex gap-2">
                 <button
                   onClick={() => setTaskCategory('business')}
-                  className={cn('flex-1 flex flex-col items-center gap-1 py-2.5 rounded-lg border text-sm transition-all',
+                  className={cn('flex-1 flex flex-col items-center gap-1 py-2.5 rounded-none border text-sm transition-all',
                     taskCategory === 'business' ? 'border-primary bg-primary/10 font-medium' : 'border-border hover:bg-muted'
                   )}
                 >
@@ -320,7 +320,7 @@ export function UnifiedTaskHub() {
                 </button>
                 <button
                   onClick={() => setTaskCategory('operations')}
-                  className={cn('flex-1 flex flex-col items-center gap-1 py-2.5 rounded-lg border text-sm transition-all',
+                  className={cn('flex-1 flex flex-col items-center gap-1 py-2.5 rounded-none border text-sm transition-all',
                     taskCategory === 'operations' ? 'border-primary bg-primary/10 font-medium' : 'border-border hover:bg-muted'
                   )}
                 >
@@ -354,11 +354,11 @@ export function UnifiedTaskHub() {
                       const Icon = config.icon;
                       return (
                         <button key={type} type="button" onClick={() => setTaskType(type)}
-                          className={cn('flex flex-col items-center gap-1 rounded-lg p-2 text-xs border transition-all',
+                          className={cn('flex flex-col items-center gap-1 rounded-none p-2 text-xs border transition-all',
                             taskType === type ? 'border-primary bg-primary/10 font-medium' : 'border-transparent hover:bg-muted/60'
                           )}
                         >
-                          <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center', config.bgColor)}>
+                          <div className={cn('w-8 h-8 rounded-none flex items-center justify-center', config.bgColor)}>
                             <Icon className={cn('h-4 w-4', config.color)} />
                           </div>
                           <span className="truncate w-full text-center">{isRu ? config.labelRu : config.labelEn}</span>
@@ -376,11 +376,11 @@ export function UnifiedTaskHub() {
                       const Icon = config.icon;
                       return (
                         <button key={type} type="button" onClick={() => setOpsTaskType(type)}
-                          className={cn('flex flex-col items-center gap-1 rounded-lg p-2 text-xs border transition-all',
+                          className={cn('flex flex-col items-center gap-1 rounded-none p-2 text-xs border transition-all',
                             opsTaskType === type ? 'border-primary bg-primary/10 font-medium' : 'border-transparent hover:bg-muted/60'
                           )}
                         >
-                          <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center', config.bgColor)}>
+                          <div className={cn('w-8 h-8 rounded-none flex items-center justify-center', config.bgColor)}>
                             <Icon className={cn('h-4 w-4', config.color)} />
                           </div>
                           <span className="truncate w-full text-center">{isRu ? config.labelRu : config.label}</span>
@@ -454,7 +454,7 @@ export function UnifiedTaskHub() {
       {/* Task list */}
       {isLoading ? (
         <div className="space-y-3">
-          {[1,2,3].map(i => <Skeleton key={i} className="h-20 w-full rounded-xl" />)}
+          {[1,2,3].map(i => <Skeleton key={i} className="h-20 w-full rounded-none" />)}
         </div>
       ) : !filtered.length ? (
         <Card className="p-8 text-center">
@@ -490,7 +490,7 @@ export function UnifiedTaskHub() {
                   onClick={(e) => e.stopPropagation()}
                   className="flex-shrink-0"
                 />
-                <div className={cn('w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0',
+                <div className={cn('w-9 h-9 rounded-none flex items-center justify-center flex-shrink-0',
                   isCrm ? (config as any).bgColor : (config as any).bgColor
                 )}>
                   <TypeIcon className={cn('h-4 w-4', isCrm ? (config as any).color : (config as any).color)} />

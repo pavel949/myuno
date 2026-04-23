@@ -29,7 +29,7 @@ describe('utils', () => {
     it('merges Tailwind classes correctly', () => {
       // Later classes should override earlier ones
       expect(cn('px-2 py-1', 'px-4')).toBe('py-1 px-4');
-      expect(cn('text-red-500', 'text-blue-500')).toBe('text-blue-500');
+      expect(cn('text-red-500', 'text-primary')).toBe('text-primary');
     });
 
     it('handles complex combinations', () => {

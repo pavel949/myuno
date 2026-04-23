@@ -144,7 +144,7 @@ export function DragDropReceiptUpload({
       {value ? (
         <div className="relative group">
           {isPdf ? (
-            <div className="w-full h-32 rounded-lg border border-border bg-muted/50 flex flex-col items-center justify-center gap-2">
+            <div className="w-full h-32 rounded-none border border-border bg-muted/50 flex flex-col items-center justify-center gap-2">
               <FileText className="h-10 w-10 text-muted-foreground" />
               <span className="text-xs text-muted-foreground">PDF Document</span>
             </div>
@@ -152,7 +152,7 @@ export function DragDropReceiptUpload({
             <img 
               src={value} 
               alt="Uploaded" 
-              className="w-full h-32 object-cover rounded-lg border border-border"
+              className="w-full h-32 object-cover rounded-none border border-border"
             />
           )}
           <Button
@@ -176,7 +176,7 @@ export function DragDropReceiptUpload({
           {/* Drag & Drop Zone */}
           <div 
             className={cn(
-              'relative border-2 border-dashed rounded-xl transition-all duration-200',
+              'relative border-2 border-dashed rounded-none transition-all duration-200',
               isDragging 
                 ? 'border-primary bg-primary/10 scale-[1.02]' 
                 : 'border-muted-foreground/30 hover:border-muted-foreground/50',
@@ -184,7 +184,7 @@ export function DragDropReceiptUpload({
             )}
           >
             {isDragging && (
-              <div className="absolute inset-0 flex items-center justify-center bg-primary/5 rounded-xl z-10">
+              <div className="absolute inset-0 flex items-center justify-center bg-primary/5 rounded-none z-10">
                 <div className="text-center">
                   <div className="flex justify-center gap-1 mb-2">
                     {[...Array(5)].map((_, i) => (

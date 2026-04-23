@@ -318,12 +318,12 @@ export default function PropertyInquiry() {
 
             {/* Property mini-card */}
             {property && (
-              <div className="flex gap-3 p-3 rounded-xl border bg-card">
+              <div className="flex gap-3 p-3 rounded-none border bg-card">
                 {propertyImage && (
                   <img
                     src={propertyImage}
                     alt={propertyTitle || ''}
-                    className="w-20 h-20 rounded-lg object-cover shrink-0"
+                    className="w-20 h-20 rounded-none object-cover shrink-0"
                   />
                 )}
                 <div className="min-w-0 flex-1">
@@ -479,7 +479,7 @@ export default function PropertyInquiry() {
 
             {/* Prepayment callout — only for instant booking. Uses real prepay_percent. */}
             {isInstantBooking && pricing.prepayAmount > 0 && (
-              <div className="p-3 rounded-lg bg-primary/5 border border-primary/10">
+              <div className="p-3 rounded-none bg-primary/5 border border-primary/10">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">
                     {isRu
@@ -500,7 +500,7 @@ export default function PropertyInquiry() {
 
             {/* Request info — only for non-instant */}
             {!isInstantBooking && (
-              <div className="p-3 rounded-lg bg-muted/50 border">
+              <div className="p-3 rounded-none bg-muted/50 border">
                 <p className="text-sm text-muted-foreground">
                   {isRu
                     ? 'Оплата не списывается сейчас. Хозяин рассмотрит ваш запрос в течение 24 часов.'
@@ -512,7 +512,7 @@ export default function PropertyInquiry() {
 
           {/* Validation Errors */}
           {validationErrors.length > 0 && (
-            <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 space-y-1">
+            <div className="p-3 rounded-none bg-destructive/10 border border-destructive/20 space-y-1">
               {validationErrors.map((error, i) => (
                 <div key={i} className="flex items-center gap-2 text-sm text-destructive">
                   <AlertCircle className="h-4 w-4 flex-shrink-0" />
@@ -618,7 +618,7 @@ export default function PropertyInquiry() {
                   <ChevronDown className={cn("h-4 w-4 transition-transform", rulesOpen && "rotate-180")} />
                 </CollapsibleTrigger>
                 <CollapsibleContent className="mt-3">
-                  <div className="text-sm text-muted-foreground whitespace-pre-line rounded-lg bg-muted/30 p-3">
+                  <div className="text-sm text-muted-foreground whitespace-pre-line rounded-none bg-muted/30 p-3">
                     {isRu ? (rentalTerms?.house_rules_ru || rentalTerms?.house_rules) : rentalTerms?.house_rules}
                   </div>
                   {(rentalTerms?.smoking_penalty || rentalTerms?.late_checkout_penalty || rentalTerms?.pet_deposit) && (
@@ -651,7 +651,7 @@ export default function PropertyInquiry() {
               in-place so URL params (dates, guests) and form draft survive
               the round-trip — onSuccess re-renders this page with `user` set. */}
           {!user && (
-            <div className="p-4 rounded-xl bg-muted/50 border text-center space-y-3">
+            <div className="p-4 rounded-none bg-muted/50 border text-center space-y-3">
               <p className="text-sm text-muted-foreground">
                 {isRu
                   ? 'Войдите, чтобы продолжить — даты и контактные данные сохранятся'
@@ -711,7 +711,7 @@ export default function PropertyInquiry() {
 
           {/* Form incomplete nudge */}
           {user && !isFormValid && (
-            <div className="p-4 rounded-xl bg-muted/50 text-center">
+            <div className="p-4 rounded-none bg-muted/50 text-center">
               <p className="text-sm text-muted-foreground">
                 {!formData.name || !formData.phone
                   ? (isRu ? 'Заполните контактные данные для продолжения' : 'Fill in your contact info to continue')

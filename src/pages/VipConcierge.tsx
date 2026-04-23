@@ -164,7 +164,7 @@ export default function VipConcierge() {
 
         {/* Hero Section */}
         <FadeInUp>
-          <div className="mb-6 p-6 rounded-3xl bg-gradient-to-br from-accent-purple/20 via-accent-purple/15 to-accent-purple/20 border-2 border-accent-purple/40 shadow-lg">
+          <div className="mb-6 p-6 rounded-none bg-gradient-to-br from-accent-purple/20 via-accent-purple/15 to-accent-purple/20 border-2 border-accent-purple/40 shadow-lg">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-3 rounded-full bg-gradient-to-r from-accent-purple to-accent-purple/80 shadow-lg">
                 <Crown className="w-7 h-7 text-white" />
@@ -208,7 +208,7 @@ export default function VipConcierge() {
 
         {/* Features */}
         <FadeInUp delay={0.05}>
-          <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-accent-amber/10 to-warning/10 border border-accent-amber/20">
+          <div className="mb-6 p-4 rounded-none bg-gradient-to-r from-accent-amber/10 to-warning/10 border border-accent-amber/20">
             <div className="flex items-center gap-2 mb-2">
               <Star className="w-5 h-5 text-accent-amber" fill="currentColor" />
               <span className="font-semibold text-accent-amber">
@@ -238,11 +238,11 @@ export default function VipConcierge() {
             return (
               <AnimatedItem key={service.id}>
               <div 
-                  className="p-4 rounded-2xl border bg-card cursor-pointer hover:border-accent-purple/30 transition-colors"
+                  className="p-4 rounded-none border bg-card cursor-pointer hover:border-accent-purple/30 transition-colors"
                   onClick={() => window.open(COMPANY_CONTACTS.whatsapp.link, '_blank')}
                 >
                   <div className="flex items-center gap-4">
-                    <div className={cn("p-3 rounded-xl", service.bgColor)}>
+                    <div className={cn("p-3 rounded-none", service.bgColor)}>
                       <Icon className={cn("w-6 h-6", service.color)} />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -263,7 +263,7 @@ export default function VipConcierge() {
 
         {/* Bottom CTA */}
         <FadeInUp delay={0.3}>
-          <div className="p-5 rounded-2xl bg-gradient-to-r from-accent-purple/10 to-accent-purple/5 border border-accent-purple/20 text-center">
+          <div className="p-5 rounded-none bg-gradient-to-r from-accent-purple/10 to-accent-purple/5 border border-accent-purple/20 text-center">
             <Crown className="w-10 h-10 text-accent-purple mx-auto mb-3" />
             <h3 className="font-semibold mb-2">
               {t('vip.readyForVip')}

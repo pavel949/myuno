@@ -68,7 +68,7 @@ function AuthenticatedMySection() {
         : `${allProperties.length} propert${allProperties.length !== 1 ? 'ies' : 'y'} managed`,
       path: '/owner',
       show: isOwner || isManager || hasProperties,
-      gradient: 'from-sky-500 to-blue-600',
+      gradient: 'from-primary to-primary',
     },
     {
       id: 'invest',
@@ -77,7 +77,7 @@ function AuthenticatedMySection() {
       description: isRu ? 'Проекты и аналитика' : 'Projects & analytics',
       path: '/property/invest',
       show: true,
-      gradient: 'from-emerald-500 to-green-600',
+      gradient: 'from-success to-success',
     },
     {
       id: 'add',
@@ -86,7 +86,7 @@ function AuthenticatedMySection() {
       description: isRu ? 'Разместить на платформе' : 'List on the platform',
       path: '/owner',
       show: true,
-      gradient: 'from-amber-500 to-orange-600',
+      gradient: 'from-accent to-accent',
     },
   ];
 
@@ -99,7 +99,7 @@ function AuthenticatedMySection() {
       {isLoading ? (
         <div className="space-y-3">
           {[1, 2, 3].map(i => (
-            <div key={i} className="h-20 rounded-xl bg-muted animate-pulse" />
+            <div key={i} className="h-20 rounded-none bg-muted animate-pulse" />
           ))}
         </div>
       ) : (
@@ -114,7 +114,7 @@ function AuthenticatedMySection() {
               >
                 <CardContent className="flex items-center gap-4 p-4">
                   <div className={cn(
-                    "w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br flex-shrink-0",
+                    "w-12 h-12 rounded-none flex items-center justify-center bg-gradient-to-br flex-shrink-0",
                     section.gradient
                   )}>
                     <Icon className="w-6 h-6 text-white" />
@@ -153,9 +153,9 @@ function AuthenticatedMySection() {
               >
                 <CardContent className="flex items-center gap-4 p-4">
                   {prop.cover_image ? (
-                    <img src={prop.cover_image} alt="" className="w-12 h-12 rounded-xl object-cover flex-shrink-0" />
+                    <img src={prop.cover_image} alt="" className="w-12 h-12 rounded-none object-cover flex-shrink-0" />
                   ) : (
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center flex-shrink-0">
+                    <div className="w-12 h-12 rounded-none bg-gradient-to-br from-primary to-primary flex items-center justify-center flex-shrink-0">
                       <Eye className="w-6 h-6 text-white" />
                     </div>
                   )}
@@ -174,7 +174,7 @@ function AuthenticatedMySection() {
       )}
 
       {delegLoading && activeDelegations.length === 0 && (
-        <div className="h-16 rounded-xl bg-muted animate-pulse" />
+        <div className="h-16 rounded-none bg-muted animate-pulse" />
       )}
     </div>
   );

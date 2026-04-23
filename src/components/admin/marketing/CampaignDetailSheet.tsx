@@ -230,19 +230,19 @@ export function CampaignDetailSheet({
               <CardContent className="pt-4">
                 <h4 className="font-medium mb-4">{isRu ? 'Дополнительные метрики' : 'Additional Metrics'}</h4>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-4 bg-muted/50 rounded-lg">
+                  <div className="text-center p-4 bg-muted/50 rounded-none">
                     <p className="text-2xl font-bold">{performance?.impressions || 0}</p>
                     <p className="text-xs text-muted-foreground">{isRu ? 'Показы' : 'Impressions'}</p>
                   </div>
-                  <div className="text-center p-4 bg-muted/50 rounded-lg">
+                  <div className="text-center p-4 bg-muted/50 rounded-none">
                     <p className="text-2xl font-bold">{performance?.clicks || 0}</p>
                     <p className="text-xs text-muted-foreground">{isRu ? 'Клики' : 'Clicks'}</p>
                   </div>
-                  <div className="text-center p-4 bg-muted/50 rounded-lg">
+                  <div className="text-center p-4 bg-muted/50 rounded-none">
                     <p className="text-2xl font-bold">{performance?.ctr?.toFixed(2) || 0}%</p>
                     <p className="text-xs text-muted-foreground">CTR</p>
                   </div>
-                  <div className="text-center p-4 bg-muted/50 rounded-lg">
+                  <div className="text-center p-4 bg-muted/50 rounded-none">
                     <p className="text-2xl font-bold">{currencySymbol}{cac}</p>
                     <p className="text-xs text-muted-foreground">CAC</p>
                   </div>

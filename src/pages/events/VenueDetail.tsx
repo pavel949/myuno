@@ -33,7 +33,7 @@ export default function VenueDetail() {
     return (
       <AppLayout>
         <PageContainer>
-          <Skeleton className="h-64 w-full rounded-xl mb-4" />
+          <Skeleton className="h-64 w-full rounded-none mb-4" />
           <Skeleton className="h-8 w-1/2 mb-2" />
           <Skeleton className="h-4 w-1/3" />
         </PageContainer>
@@ -85,7 +85,7 @@ export default function VenueDetail() {
         />
 
         {/* Hero Image */}
-        <div className="relative aspect-video rounded-xl overflow-hidden mb-4">
+        <div className="relative aspect-video rounded-none overflow-hidden mb-4">
           <img 
             src={venue.cover_image || '/placeholder.svg'} 
             alt={name}
@@ -94,7 +94,7 @@ export default function VenueDetail() {
           <div className="absolute bottom-4 left-4 flex gap-2">
             <Badge className="bg-primary text-primary-foreground">{typeLabel}</Badge>
             {venue.is_featured && (
-              <Badge variant="secondary" className="bg-yellow-500 text-white">
+              <Badge variant="secondary" className="bg-accent text-white">
                 ⭐ {language === 'ru' ? 'Популярное' : 'Featured'}
               </Badge>
             )}
@@ -109,7 +109,7 @@ export default function VenueDetail() {
                 key={idx}
                 src={img} 
                 alt={`${name} ${idx + 1}`}
-                className="w-24 h-24 rounded-lg object-cover flex-shrink-0"
+                className="w-24 h-24 rounded-none object-cover flex-shrink-0"
               />
             ))}
           </div>
@@ -233,12 +233,12 @@ export default function VenueDetail() {
                     <div 
                       key={event.id}
                       onClick={() => navigate(`/events/${event.id}`)}
-                      className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted cursor-pointer"
+                      className="flex items-center gap-3 p-2 rounded-none hover:bg-muted cursor-pointer"
                     >
                       <img 
                         src={event.cover_image || '/placeholder.svg'} 
                         alt={language === 'ru' ? event.title_ru : event.title_en}
-                        className="w-12 h-12 rounded-lg object-cover"
+                        className="w-12 h-12 rounded-none object-cover"
                       />
                       <div className="flex-1 min-w-0">
                         <p className="font-medium truncate">

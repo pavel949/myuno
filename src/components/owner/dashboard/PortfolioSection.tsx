@@ -37,7 +37,7 @@ export function PortfolioSection() {
         </h2>
         
         <div 
-          className="border-2 border-dashed border-muted-foreground/20 rounded-xl p-8 text-center cursor-pointer hover:border-primary/50 hover:bg-muted/30 transition-colors"
+          className="border-2 border-dashed border-muted-foreground/20 rounded-none p-8 text-center cursor-pointer hover:border-primary/50 hover:bg-muted/30 transition-colors"
           onClick={() => navigate('/mc/properties/new')}
         >
           <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
@@ -91,7 +91,7 @@ export function PortfolioSection() {
           
           {/* Add new card */}
           <div 
-            className="border-2 border-dashed border-muted-foreground/20 rounded-xl flex flex-col items-center justify-center p-6 cursor-pointer hover:border-primary/50 hover:bg-muted/30 transition-colors min-h-[200px]"
+            className="border-2 border-dashed border-muted-foreground/20 rounded-none flex flex-col items-center justify-center p-6 cursor-pointer hover:border-primary/50 hover:bg-muted/30 transition-colors min-h-[200px]"
             onClick={() => navigate('/mc/properties/new')}
           >
             <Plus className="h-8 w-8 text-muted-foreground mb-2" />
@@ -110,7 +110,7 @@ export function PortfolioSection() {
           
           {/* Add new card */}
           <button 
-            className="w-[85vw] max-w-[280px] flex-shrink-0 snap-start touch-manipulation border-2 border-dashed border-muted-foreground/20 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 hover:bg-muted/30 transition-colors min-h-[200px]"
+            className="w-[85vw] max-w-[280px] flex-shrink-0 snap-start touch-manipulation border-2 border-dashed border-muted-foreground/20 rounded-none flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 hover:bg-muted/30 transition-colors min-h-[200px]"
             onClick={() => navigate('/mc/properties/new')}
           >
             <Plus className="h-8 w-8 text-muted-foreground mb-2" />

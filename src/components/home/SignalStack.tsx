@@ -60,7 +60,7 @@ function SignalHero({ persona, sig, isRu }: { persona: UserPersona; sig: RoleSig
       className="w-full text-left relative overflow-hidden rounded-[20px] bg-card border border-border p-[18px] active:scale-[0.99] transition-transform"
     >
       {/* 2px left spine */}
-      <div className="absolute top-4 bottom-4 left-0 w-0.5 rounded-r-sm" style={{ background: meta.color }} />
+      <div className="absolute top-4 bottom-4 left-0 w-0.5 rounded-none" style={{ background: meta.color }} />
 
       <div className="flex items-center justify-between gap-2 mb-1.5 min-w-0">
         <div className="flex items-center gap-2 min-w-0">
@@ -92,7 +92,7 @@ function SignalSlim({ persona, sig, isRu }: { persona: UserPersona; sig: RoleSig
       onClick={() => navigate(SIGNAL_ROUTE[persona])}
       className="w-full text-left relative overflow-hidden rounded-[14px] bg-card/60 border border-border grid grid-cols-[auto_1fr_auto] gap-2.5 items-center px-3.5 py-2.5 active:scale-[0.99] transition-transform"
     >
-      <div className="absolute top-2.5 bottom-2.5 left-0 w-0.5 rounded-r-sm" style={{ background: meta.color }} />
+      <div className="absolute top-2.5 bottom-2.5 left-0 w-0.5 rounded-none" style={{ background: meta.color }} />
       <RoleChip persona={persona} meta={meta} compact />
       <div className="overflow-hidden">
         <div className="text-[12.5px] font-medium text-foreground whitespace-nowrap overflow-hidden text-ellipsis">
@@ -112,7 +112,7 @@ function SignalSlim({ persona, sig, isRu }: { persona: UserPersona; sig: RoleSig
 
 function DemoBadge({ isRu }: { isRu: boolean }) {
   return (
-    <span className="text-[9px] font-semibold tracking-[0.1em] uppercase text-muted-foreground/60 px-1.5 py-0.5 rounded border border-border/60">
+    <span className="text-[9px] font-semibold tracking-[0.1em] uppercase text-muted-foreground/60 px-1.5 py-0.5 rounded-none border border-border/60">
       {isRu ? 'демо' : 'demo'}
     </span>
   );
