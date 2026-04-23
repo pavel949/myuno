@@ -9011,6 +9011,69 @@ export type Database = {
           },
         ]
       }
+      knowledge_pillars: {
+        Row: {
+          body_en: string
+          body_ru: string
+          cluster: string
+          created_at: string
+          h1_en: string
+          h1_ru: string
+          hreflang: Json
+          meta_description_en: string
+          meta_description_ru: string
+          meta_title_en: string
+          meta_title_ru: string
+          related_slugs: Json
+          search_vector: unknown
+          slug: string
+          source_section: string | null
+          status: string
+          updated_at: string
+          word_count: number
+        }
+        Insert: {
+          body_en?: string
+          body_ru?: string
+          cluster: string
+          created_at?: string
+          h1_en: string
+          h1_ru: string
+          hreflang?: Json
+          meta_description_en: string
+          meta_description_ru: string
+          meta_title_en: string
+          meta_title_ru: string
+          related_slugs?: Json
+          search_vector?: unknown
+          slug: string
+          source_section?: string | null
+          status?: string
+          updated_at?: string
+          word_count?: number
+        }
+        Update: {
+          body_en?: string
+          body_ru?: string
+          cluster?: string
+          created_at?: string
+          h1_en?: string
+          h1_ru?: string
+          hreflang?: Json
+          meta_description_en?: string
+          meta_description_ru?: string
+          meta_title_en?: string
+          meta_title_ru?: string
+          related_slugs?: Json
+          search_vector?: unknown
+          slug?: string
+          source_section?: string | null
+          status?: string
+          updated_at?: string
+          word_count?: number
+        }
+        Relationships: []
+      }
       lead_activity_log: {
         Row: {
           activity_type: string
