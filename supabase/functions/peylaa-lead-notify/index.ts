@@ -100,7 +100,7 @@ function formatWelcomeMessage(lead: Lead): string {
 
 Удобно обсудить здесь в WhatsApp или созвониться?
 
-_Ignatev Capital — эксклюзивный консультант PEYLAA_`;
+_Ignatev Capital — официальный партнёр PEYLAA_`;
 }
 
 serve(async (req) => {
