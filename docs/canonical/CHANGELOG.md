@@ -5,6 +5,25 @@
 
 ---
 
+## [1.11.2] — 2026-04-23
+
+### Added (M6 · трек B · шаг B.2)
+- **`src/content/landings/personaLandings.ts`** — конфиг **25 persona-лендингов** (P1..P25), полное покрытие §4 канона:
+  - Все 25 персон в системе типов как `status: 'draft'` (включая будущие live: P1 tourists / P9 hnw / P13 pet-owners — контент придёт в шаге B.7).
+  - Stable kebab-case slug'и: `tourists`, `cn-investors`, `eu-guests`, `digital-nomads`, `snowbirds`, `ru-expats`, `families`, `passive-investors`, `hnw`, `operators`, `mn-investors`, `bn-business`, `pet-owners`, `medical`, `weddings`, `athletes`, `halal`, `lgbtq`, `accessibility`, `retirees`, `providers`, `freelancers`, `smb`, `creatives`, `students`.
+  - Helper `draftPersona(code, slug, hint)` — минимально валидный плейсхолдер: непустые `h1` / `subtitle` / `primaryCta` (страница не упадёт, если кто-то снимет 404), но **пустые** `pains/services/faq` и **отсутствует** `seo` → не проходит `isLivePersonaLanding()`. Это и обеспечивает 404 на `/for/:slug` для всех 25 на этапе B.2.
+  - Экспорт `LIVE_PERSONA_SLUGS = ['tourists','hnw','pet-owners']` — контракт ожиданий для шага B.7.
+- **`src/content/landings/__tests__/personaLandings.test.ts`** — **12 тестов зелёные:** ровно 25 объектов, покрытие всех `PersonaCode` без дубликатов, уникальные kebab-case slug'и, **все 25 в `draft`** на стадии B.2, ни один не проходит `isLivePersonaLanding()`, валидные h1/subtitle/cta для безопасного рендера, контракт `LIVE_PERSONA_SLUGS` (P1/P9/P13).
+
+### Changed
+- `audits/M6-persona-landings.md` — статус B.2 → ✅ done. B.3 (конфиг 10 clusterLandings) → 🔜 next.
+
+### Notes
+- B.2 — **structure-only пасс**: все 25 персон в системе, но контента нет. `/for/:slug` ещё не существует как роут (B.4), а если бы существовал — отдавал бы 404 для всех 25. Это намеренно: разделяем «структура» (B.2) и «копирайт» (B.7), чтобы tone-of-voice §14 пасс шёл сфокусированно по 3 live, а не размазывался.
+- 22/22 теста зелёные (10 типов B.1 + 12 конфига B.2). `npx tsc --noEmit` чистый.
+
+---
+
 ## [1.11.1] — 2026-04-23
 
 ### Added (M6 · трек B · шаг B.1)
