@@ -367,12 +367,22 @@ export default function Bookings() {
       .subscribe((status) => {
         // Map Supabase channel statuses to a simple 3-state UI indicator.
         if (status === 'SUBSCRIBED') {
+          // Resync trigger: if the channel was previously offline (error,
+          // timeout, closed) and just came back, we may have missed INSERTs
+          // entirely while disconnected. Force a fresh fetch of bookings +
+          // history so the UI catches up. The dedup set is reset inside
+          // resync() so authoritative server rows re-seed it cleanly.
+          if (wasOfflineRef.current) {
+            wasOfflineRef.current = false;
+            void resyncRef.current?.();
+          }
           setRealtimeStatus('live');
         } else if (
           status === 'CHANNEL_ERROR' ||
           status === 'TIMED_OUT' ||
           status === 'CLOSED'
         ) {
+          wasOfflineRef.current = true;
           setRealtimeStatus('offline');
         } else {
           setRealtimeStatus('connecting');
@@ -382,6 +392,52 @@ export default function Bookings() {
     return () => {
       supabase.removeChannel(channel);
       setRealtimeStatus('connecting');
+    };
+  }, [user]);
+
+  // Resync: invalidate cache + dedup set, then refetch bookings and history.
+  // Used by realtime reconnect, the browser `online` event, and tab-visibility
+  // recovery. Safe to call repeatedly — loadBookings(true) is idempotent.
+  const resync = useCallback(async () => {
+    if (!user) return;
+    invalidateStatusHistoryCache(user.id);
+    seenEventIdsRef.current = new Set();
+    await loadBookings(true);
+  }, [user, loadBookings]);
+
+  // Stable ref so the realtime subscribe callback (captured once per channel)
+  // can always reach the latest resync without resubscribing the channel.
+  const resyncRef = useRef<typeof resync>();
+  useEffect(() => {
+    resyncRef.current = resync;
+  }, [resync]);
+
+  // Tracks whether the realtime channel was last seen offline, so the next
+  // SUBSCRIBED transition is recognised as a recovery (not initial connect).
+  const wasOfflineRef = useRef(false);
+
+  // Browser-level network recovery: when the OS reports we're back online, or
+  // the tab becomes visible again after being hidden, refetch. Catches cases
+  // realtime alone wouldn't (laptop sleep, brief WiFi drop the channel
+  // doesn't notice, mobile tab backgrounded for a while).
+  useEffect(() => {
+    if (!user) return;
+
+    const handleOnline = () => {
+      void resyncRef.current?.();
+    };
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible' && navigator.onLine) {
+        void resyncRef.current?.();
+      }
+    };
+
+    window.addEventListener('online', handleOnline);
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      document.removeEventListener('visibilitychange', handleVisibility);
     };
   }, [user]);
 
