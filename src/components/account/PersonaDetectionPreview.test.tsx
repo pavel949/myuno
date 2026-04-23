@@ -33,8 +33,9 @@ describe('PersonaDetectionPreview', () => {
   it('renders loading skeleton', () => {
     profileMock.mockReturnValue({ profile: null, isLoading: true });
     const { container } = renderWith();
-    // 3 skeleton blocks
-    expect(container.querySelectorAll('[data-slot], .animate-pulse').length).toBeGreaterThan(0);
+    // shadcn Skeleton renders a div with data-slot="skeleton"
+    expect(container.querySelectorAll('[data-slot="skeleton"]').length).toBe(3);
+    expect(screen.queryByText(/Your profile signals/i)).not.toBeInTheDocument();
   });
 
   it('renders empty state with primary CTA → /start/v2?return=/account', () => {
