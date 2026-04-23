@@ -84,14 +84,14 @@ export const PromoCarousel: React.FC<PromoCarouselProps> = ({ className }) => {
                   <div className="relative z-10">
                     {/* Badge */}
                     {(banner.badge_en || banner.badge_ru) && (
-                      <Badge className="bg-white/20 backdrop-blur-sm border-0 text-white text-[10px] font-semibold mb-2">
+                      <Badge className="bg-white/20 border-0 text-white text-[10px] font-semibold mb-2">
                         {isRu ? banner.badge_ru : banner.badge_en}
                       </Badge>
                     )}
                     
                     {/* Title Row */}
                     <div className="flex items-center gap-3 mb-2">
-                      <div className="w-10 h-10 rounded-none bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0">
+                      <div className="w-10 h-10 rounded-none bg-white/20 flex items-center justify-center shrink-0">
                         <Icon className="w-5 h-5 text-white" />
                       </div>
                       <h3 className="text-lg sm:text-xl font-bold text-white leading-tight">
@@ -105,7 +105,7 @@ export const PromoCarousel: React.FC<PromoCarouselProps> = ({ className }) => {
                     </p>
                     
                     {/* CTA */}
-                    <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white font-semibold text-sm px-4 py-2 rounded-none group-hover:bg-white/30 transition-colors">
+                    <div className="inline-flex items-center gap-2 bg-white/20 text-white font-semibold text-sm px-4 py-2 rounded-none group-hover:bg-white/30 transition-colors">
                       <span>{isRu ? 'Смотреть' : 'Shop Now'}</span>
                       <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                     </div>

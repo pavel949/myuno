@@ -214,14 +214,14 @@ function LivePropertyPreviewInner({ data, className, collapsed, onToggle }: Live
 
           {/* Property Type Badge */}
           {typeLabel && (
-            <Badge variant="secondary" className="absolute top-2 right-2 text-[10px] bg-background/80 backdrop-blur-sm">
+            <Badge variant="secondary" className="absolute top-2 right-2 text-[10px] bg-background/80">
               {typeLabel}
             </Badge>
           )}
 
           {/* Image count */}
           {data.images && data.images.length > 1 && (
-            <Badge variant="secondary" className="absolute bottom-2 right-2 text-[10px] bg-background/80 backdrop-blur-sm">
+            <Badge variant="secondary" className="absolute bottom-2 right-2 text-[10px] bg-background/80">
               +{data.images.length - 1} {isRu ? 'фото' : 'photos'}
             </Badge>
           )}

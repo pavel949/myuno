@@ -85,7 +85,7 @@ export default function ServicesMap() {
   return (
     <AppLayout>
       <div className="h-[calc(100vh-60px)] flex flex-col">
-        <div className="flex items-center justify-between p-4 bg-background/80 backdrop-blur-sm border-b border-border/50">
+        <div className="flex items-center justify-between p-4 bg-background/80 border-b border-border/50">
           <BackButton fallbackPath={APP_ROUTES.SERVICES} variant="ghost" size="sm" />
           <h1 className="font-display font-semibold">{language === 'ru' ? 'Карта мастеров' : 'Professionals Map'}</h1>
           <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
@@ -126,7 +126,7 @@ export default function ServicesMap() {
           </Sheet>
         </div>
 
-        <div className="flex gap-2 p-3 overflow-x-auto bg-background/50 backdrop-blur-sm border-b border-border/30">
+        <div className="flex gap-2 p-3 overflow-x-auto bg-background/50 border-b border-border/30">
           {categories.map((cat) => {
             const Icon = cat.icon;
             return (

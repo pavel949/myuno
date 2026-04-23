@@ -446,7 +446,7 @@ export default function ExperienceDetail() {
       </div>
 
       {/* Fixed Bottom Bar */}
-      <div className="fixed bottom-[var(--bottom-nav-h)] left-0 right-0 bg-background/95 backdrop-blur-sm border-t p-4 flex items-center justify-between gap-4 z-50 shadow-[0_-4px_12px_rgba(0,0,0,0.1)]">
+      <div className="fixed bottom-[var(--bottom-nav-h)] left-0 right-0 bg-background/95 border-t p-4 flex items-center justify-between gap-4 z-50 shadow-[0_-4px_12px_rgba(0,0,0,0.1)]">
         <div>
           <p className="text-sm text-muted-foreground">
             {isRu ? 'Цена от' : 'From'}

@@ -149,7 +149,7 @@ export function FeaturedPropertiesCarousel() {
                 />
                 <div className="absolute top-2 left-2 flex flex-col gap-1">
                   {property.is_featured && (
-                    <span className="px-2 py-0.5 text-[10px] font-semibold rounded-[var(--radius-full)] backdrop-blur-sm flex items-center gap-1 text-white"
+                    <span className="px-2 py-0.5 text-[10px] font-semibold rounded-[var(--radius-full)] flex items-center gap-1 text-white"
                       style={{ background: 'rgba(0,0,0,0.55)' }}
                     >
                       <Star className="w-2.5 h-2.5 fill-warning text-warning" aria-hidden />

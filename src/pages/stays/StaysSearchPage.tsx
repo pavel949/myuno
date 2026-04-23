@@ -146,7 +146,7 @@ export default function StaysSearchPage() {
   return (
     <AppLayout showHeader={false} showBottomNav>
       <div className="min-h-screen bg-background pb-24">
-        <header className="sticky top-0 z-40 bg-background/95 backdrop-blur border-b">
+        <header className="sticky top-0 z-40 bg-background/95 border-b">
           <div className="px-4 py-3 flex items-center gap-3">
             <BackButton fallbackPath={APP_ROUTES.PROPERTY} variant="ghost" size="sm" />
             <h1 className="text-lg font-semibold">{isRu ? 'Поиск жилья' : 'Find a Stay'}</h1>

@@ -67,7 +67,7 @@ export default function WelcomeLanding() {
   return (
     <div className="min-h-screen bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary">
       {/* Top bar */}
-      <header className="sticky top-0 z-30 border-b border-border/40 bg-background/80 backdrop-blur-xl">
+      <header className="sticky top-0 z-30 border-b border-border/40 bg-background/80">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-5">
           <Link to="/" className="flex items-center gap-2 group">
             <div className="grid h-7 w-7 place-items-center rounded-none bg-primary/15 text-primary ring-1 ring-primary/30">

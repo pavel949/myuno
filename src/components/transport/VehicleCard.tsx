@@ -52,7 +52,7 @@ export const VehicleCard = memo(function VehicleCard({ vehicle, onClick, classNa
         <div className="absolute top-3 left-3 right-3 flex items-start justify-between">
           <div className="flex gap-1.5">
             {vehicle.year_built && (
-              <span className="px-2 py-0.5 rounded-none bg-black/60 backdrop-blur-sm text-white text-[10px] font-semibold">
+              <span className="px-2 py-0.5 rounded-none bg-black/60 text-white text-[10px] font-semibold">
                 {vehicle.year_built}
               </span>
             )}
@@ -74,7 +74,7 @@ export const VehicleCard = memo(function VehicleCard({ vehicle, onClick, classNa
 
         {/* Availability dot */}
         {vehicle.is_available && (
-          <div className="absolute bottom-3 right-3 flex items-center gap-1.5 px-2 py-1 rounded-full bg-black/50 backdrop-blur-sm">
+          <div className="absolute bottom-3 right-3 flex items-center gap-1.5 px-2 py-1 rounded-full bg-black/50">
             <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
             <span className="text-[10px] text-white font-medium">
               {isRu ? 'Доступен' : 'Available'}

@@ -43,7 +43,7 @@ export function ClassifiedCard({ listing, onClick }: ClassifiedCardProps) {
         )}
         {/* Condition badge */}
         {listing.condition !== 'good' && (
-          <span className="absolute top-2 left-2 text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-background/80 backdrop-blur-sm text-foreground">
+          <span className="absolute top-2 left-2 text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-background/80 text-foreground">
             {conditionLabel}
           </span>
         )}

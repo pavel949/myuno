@@ -30,7 +30,7 @@ export const WishlistButton = forwardRef<HTMLButtonElement, WishlistButtonProps>
         ref={ref}
         onClick={handleClick}
         className={cn(
-          'p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-all',
+          'p-2 rounded-full bg-background/80 hover:bg-background transition-all',
           'border border-border/50 shadow-sm',
           className
         )}

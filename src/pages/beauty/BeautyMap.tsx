@@ -55,7 +55,7 @@ export default function BeautyMap() {
   return (
     <AppLayout>
       <div className="h-[calc(100vh-60px)] flex flex-col">
-        <div className="flex items-center justify-between p-4 bg-background/80 backdrop-blur-sm border-b border-border/50">
+        <div className="flex items-center justify-between p-4 bg-background/80 border-b border-border/50">
           <BackButton fallbackPath={APP_ROUTES.BEAUTY} variant="ghost" size="sm" />
           <h1 className="font-display font-semibold">{language === 'ru' ? 'Карта салонов' : 'Salon Map'}</h1>
           <Button variant="ghost" size="icon" onClick={() => setIsFilterOpen(true)}>
@@ -96,7 +96,7 @@ export default function BeautyMap() {
           </div>
         </ResponsiveModal>
 
-        <div className="flex gap-2 p-3 overflow-x-auto bg-background/50 backdrop-blur-sm border-b border-border/30">
+        <div className="flex gap-2 p-3 overflow-x-auto bg-background/50 border-b border-border/30">
           {distanceOptions.map((opt) => (
             <FilterChip key={opt.value} label={language === 'ru' ? opt.labelRu : opt.labelEn} isActive={distanceFilter === opt.value} onToggle={() => setDistanceFilter(opt.value)} />
           ))}

@@ -79,7 +79,7 @@ export default function InvestmentDeals() {
       </div>
 
       {/* Filters */}
-      <div className="max-w-6xl mx-auto px-4 py-6 sticky top-0 z-10 bg-background/95 backdrop-blur border-b border-border/50">
+      <div className="max-w-6xl mx-auto px-4 py-6 sticky top-0 z-10 bg-background/95 border-b border-border/50">
         <div className="flex items-center gap-2 mb-3">
           <Filter className="w-4 h-4 text-muted-foreground" />
           <span className="text-sm font-medium">Filters</span>

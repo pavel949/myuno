@@ -194,7 +194,7 @@ export default function PropertyDetail() {
       />
       <div className="pb-28">
         {/* Sticky Header */}
-        <div className="sticky top-0 z-50 flex items-center justify-between px-4 md:px-0 py-3 bg-background/95 backdrop-blur-md border-b border-border/30">
+        <div className="sticky top-0 z-50 flex items-center justify-between px-4 md:px-0 py-3 bg-background/95 border-b border-border/30">
           <BackButton fallbackPath="/property" variant="default" size="md" />
           <div className="flex items-center gap-1">
             <PropertyShareSheet

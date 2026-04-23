@@ -113,21 +113,21 @@ export function HotelPropertyCard({ property, className }: Props) {
         )}
         {/* Top-left: type + intent */}
         <div className="absolute top-3 left-3 flex gap-1.5 flex-wrap">
-          <Badge className="bg-background/95 text-foreground hover:bg-background backdrop-blur-sm">
+          <Badge className="bg-background/95 text-foreground hover:bg-background">
             {typeLabel}
           </Badge>
-          <Badge className={cn('backdrop-blur-sm', intentColor)}>{intentLabel}</Badge>
+          <Badge className={cn('', intentColor)}>{intentLabel}</Badge>
         </div>
         {/* Top-right: stars + verified */}
         <div className="absolute top-3 right-3 flex flex-col items-end gap-1.5">
           {property.is_verified && (
-            <Badge className="bg-success/95 text-white hover:bg-success backdrop-blur-sm gap-1">
+            <Badge className="bg-success/95 text-white hover:bg-success gap-1">
               <BadgeCheck className="w-3 h-3" />
               {isRu ? 'Проверено' : 'Verified'}
             </Badge>
           )}
           {property.hotel_star_rating != null && (
-            <div className="rounded-full bg-background/95 backdrop-blur-sm px-2 py-1">
+            <div className="rounded-full bg-background/95 px-2 py-1">
               <StarPips value={property.hotel_star_rating} />
             </div>
           )}

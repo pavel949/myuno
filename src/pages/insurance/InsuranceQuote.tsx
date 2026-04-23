@@ -252,7 +252,7 @@ export default function InsuranceQuote() {
         </form>
 
         {/* Fixed Bottom */}
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur border-t border-border">
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 border-t border-border">
           <Button className="w-full" size="lg" onClick={handleSubmit} disabled={isSubmitting}>
             {isSubmitting ? (
               <LoadingSpinner size="sm" />

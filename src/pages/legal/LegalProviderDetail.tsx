@@ -237,7 +237,7 @@ const LegalProviderDetail = () => {
         </Tabs>
 
         {/* Fixed Bottom Actions */}
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur border-t border-border safe-area-bottom">
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 border-t border-border safe-area-bottom">
           <div className="flex gap-3 max-w-lg mx-auto">
             {service.phone && (
               <Button

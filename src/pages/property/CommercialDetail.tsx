@@ -88,7 +88,7 @@ export default function CommercialDetail() {
             <img src={cover} alt={title} className="w-full h-full object-cover" />
           )}
           <div className="absolute top-3 left-3 flex gap-1.5">
-            <Badge className="bg-background/95 text-foreground backdrop-blur-sm">{typeLabel}</Badge>
+            <Badge className="bg-background/95 text-foreground">{typeLabel}</Badge>
             <Badge className={isRent ? 'bg-primary/95 text-white' : 'bg-accent/95 text-white'}>
               {isRent ? (isRu ? 'Аренда' : 'Rent') : isRu ? 'Продажа' : 'Sale'}
             </Badge>
@@ -262,7 +262,7 @@ export default function CommercialDetail() {
           )}
 
           {/* CTAs */}
-          <div className="flex gap-2 sticky bottom-4 bg-background/95 backdrop-blur-sm p-3 -mx-4 border-t border-border sm:static sm:bg-transparent sm:p-0 sm:border-0">
+          <div className="flex gap-2 sticky bottom-4 bg-background/95 p-3 -mx-4 border-t border-border sm:static sm:bg-transparent sm:p-0 sm:border-0">
             <Button className="flex-1" asChild>
               <a href={`mailto:capital@myuno.app?subject=${encodeURIComponent(`Inquiry: ${title}`)}`}>
                 <Mail className="w-4 h-4 mr-1.5" />

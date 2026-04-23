@@ -62,7 +62,7 @@ export function PropertyDetailMobileBar({
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-md border-t border-border shadow-lg lg:hidden">
+    <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 border-t border-border shadow-lg lg:hidden">
       <div className="max-w-[1536px] mx-auto flex items-center gap-3">
         {isSaleListing ? (
           <>

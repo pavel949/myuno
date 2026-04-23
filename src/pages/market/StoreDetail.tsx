@@ -145,11 +145,11 @@ const StoreDetail = () => {
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
           
           <div className="absolute top-4 left-4 right-4 flex justify-between">
-            <Button variant="secondary" size="icon" className="rounded-full bg-white/90 backdrop-blur" onClick={() => navigate('/market')}>
+            <Button variant="secondary" size="icon" className="rounded-full bg-white/90" onClick={() => navigate('/market')}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div className="flex gap-2">
-              <Button variant="secondary" size="icon" className="rounded-full bg-white/90 backdrop-blur" onClick={() => setIsFavorite(!isFavorite)}>
+              <Button variant="secondary" size="icon" className="rounded-full bg-white/90" onClick={() => setIsFavorite(!isFavorite)}>
                 <Heart className={cn("h-5 w-5", isFavorite && "fill-destructive text-destructive")} />
               </Button>
             </div>

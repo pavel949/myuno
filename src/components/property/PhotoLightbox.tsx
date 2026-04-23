@@ -68,7 +68,7 @@ export function PhotoLightbox({ images, initialIndex = 0, open, onClose }: Photo
         {currentIndex > 0 && (
           <button
             onClick={goPrev}
-            className="absolute left-4 z-10 p-2 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-colors text-white"
+            className="absolute left-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white"
           >
             <ChevronLeft className="w-6 h-6" />
           </button>
@@ -86,7 +86,7 @@ export function PhotoLightbox({ images, initialIndex = 0, open, onClose }: Photo
         {currentIndex < images.length - 1 && (
           <button
             onClick={goNext}
-            className="absolute right-4 z-10 p-2 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-colors text-white"
+            className="absolute right-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white"
           >
             <ChevronRight className="w-6 h-6" />
           </button>

@@ -295,7 +295,7 @@ const GTrustPage = () => {
           </div>
           <div className="relative z-10">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-3 bg-white/20 rounded-none backdrop-blur-sm">
+              <div className="p-3 bg-white/20 rounded-none">
                 <ShieldCheck className="w-8 h-8" />
               </div>
               <div>

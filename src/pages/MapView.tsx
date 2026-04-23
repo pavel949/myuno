@@ -174,7 +174,7 @@ export default function MapView() {
   return (
     <AppLayout>
       <div className="flex flex-col h-[calc(100vh-8rem)]">
-        <div className="px-4 py-3 bg-background/95 backdrop-blur-sm border-b border-border z-10">
+        <div className="px-4 py-3 bg-background/95 border-b border-border z-10">
           <FilterChipGroup scrollable>
             {FILTER_OPTIONS.map((opt) => (
               <FilterChip

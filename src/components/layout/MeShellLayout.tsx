@@ -44,7 +44,7 @@ export function MeShellLayout({ title, children }: MeShellLayoutProps) {
   const isRu = language === 'ru';
   return (
     <AppLayout title={title ?? (isRu ? 'Мой кабинет' : 'My Hub')}>
-      <div className="sticky top-0 z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/70 border-b border-border/60">
+      <div className="sticky top-0 z-20 bg-background/95 supports-[backdrop-filter]:bg-background/70 border-b border-border/60">
         <div className="mx-auto w-full max-w-5xl px-[var(--page-padding-x)]">
           <nav
             aria-label={isRu ? 'Разделы' : 'Sections'}

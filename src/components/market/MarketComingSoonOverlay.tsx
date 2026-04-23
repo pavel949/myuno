@@ -19,7 +19,7 @@ export const MarketComingSoonOverlay: React.FC = () => {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="fixed inset-0 z-[100] bg-background/80 backdrop-blur-md flex flex-col items-center justify-center px-6 py-10"
+      className="fixed inset-0 z-[100] bg-background/80 flex flex-col items-center justify-center px-6 py-10"
     >
       <motion.div
         initial={{ opacity: 0, y: 20, scale: 0.95 }}

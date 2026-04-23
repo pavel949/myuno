@@ -39,7 +39,7 @@ export function ContextualFAB({ role }: ContextualFABProps) {
     <>
       {open && (
         <div
-          className={`fixed inset-0 ${FLOATING.contextualOverlay} bg-foreground/40 backdrop-blur-sm md:hidden`}
+          className={`fixed inset-0 ${FLOATING.contextualOverlay} bg-foreground/40 md:hidden`}
           onClick={() => setOpen(false)}
         >
           <div className="absolute bottom-24 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3">
@@ -55,7 +55,7 @@ export function ContextualFAB({ role }: ContextualFABProps) {
                   className="flex items-center gap-3 animate-in slide-in-from-bottom-4 fade-in"
                   style={{ animationDelay: `${i * 50}ms`, animationFillMode: 'both' }}
                 >
-                  <span className="text-sm font-semibold text-primary-foreground bg-foreground/60 backdrop-blur rounded-full px-3 py-1.5 [box-shadow:var(--shadow-elevation-3)]">
+                  <span className="text-sm font-semibold text-primary-foreground bg-foreground/60 rounded-full px-3 py-1.5 [box-shadow:var(--shadow-elevation-3)]">
                     {isRu ? action.labelRu : action.labelEn}
                   </span>
                   <div

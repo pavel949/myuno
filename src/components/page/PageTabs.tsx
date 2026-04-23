@@ -39,7 +39,7 @@ export function PageTabs<T extends string>({
       <div
         className={cn(
           'overflow-x-auto scrollbar-none -mx-[var(--page-padding-x)] px-[var(--page-padding-x)]',
-          sticky && 'sticky top-0 z-20 bg-background/85 backdrop-blur-md py-2 border-b border-border/40',
+          sticky && 'sticky top-0 z-20 bg-background/85 py-2 border-b border-border/40',
         )}
       >
         <TabsList className="inline-flex w-auto">

@@ -37,7 +37,7 @@ export function ComplexCard({ complex, onClick }: ComplexCardProps) {
           </div>
         )}
         {typeLabel && (
-          <Badge variant="secondary" className="absolute top-3 left-3 bg-background/90 backdrop-blur-sm text-xs">
+          <Badge variant="secondary" className="absolute top-3 left-3 bg-background/90 text-xs">
             {isRu ? typeLabel.labelRu : typeLabel.labelEn}
           </Badge>
         )}

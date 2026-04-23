@@ -179,7 +179,7 @@ export default function SalonDetail() {
 
       {/* Bottom booking bar */}
       {selectedServices.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-xl border-t border-border/50 z-50">
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 border-t border-border/50 z-50">
           <div className="max-w-lg mx-auto flex items-center justify-between gap-4">
             <div>
               <p className="text-sm text-muted-foreground">

@@ -15,7 +15,7 @@ export function PlatformViewAsBanner() {
   const label = targetEmail || targetUserId.slice(0, 8);
 
   return (
-    <div className="sticky top-0 z-50 bg-primary/95 text-muted-foreground backdrop-blur border-b border-primary/40/40">
+    <div className="sticky top-0 z-50 bg-primary/95 text-muted-foreground border-b border-primary/40/40">
       <div className="max-w-7xl mx-auto px-4 py-1.5 flex items-center gap-3 text-xs sm:text-sm">
         <Eye className="w-4 h-4 shrink-0" />
         <span className="truncate flex-1">

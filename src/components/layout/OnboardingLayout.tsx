@@ -93,7 +93,7 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
   return (
     <div className={cn("min-h-screen bg-background flex flex-col", className)}>
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
+      <header className="sticky top-0 z-50 bg-background/95 supports-[backdrop-filter]:bg-background/60 border-b border-border">
         {/* Progress bar at very top */}
         <div className="h-1">
           <Progress 

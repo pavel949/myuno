@@ -96,7 +96,7 @@ export const PropertyHeroCard = forwardRef<HTMLDivElement, PropertyHeroCardProps
           <Badge 
             variant="outline" 
             className={cn(
-              "absolute top-3 left-3 gap-1.5 backdrop-blur-sm border",
+              "absolute top-3 left-3 gap-1.5 border",
               status.color
             )}
           >
@@ -108,7 +108,7 @@ export const PropertyHeroCard = forwardRef<HTMLDivElement, PropertyHeroCardProps
           {property.rating && property.rating > 0 && (
             <Badge 
               variant="secondary" 
-              className="absolute top-3 right-3 gap-1 backdrop-blur-sm bg-background/80"
+              className="absolute top-3 right-3 gap-1 bg-background/80"
             >
               <Star className="h-3 w-3 fill-primary text-primary" />
               {property.rating.toFixed(1)}

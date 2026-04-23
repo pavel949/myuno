@@ -106,7 +106,7 @@ export const WelcomeStep = forwardRef<HTMLDivElement, WelcomeStepProps>(
               <motion.div
                 key={index}
                 variants={itemVariants}
-                className="flex flex-col items-center gap-2 p-3 rounded-none bg-card/50 backdrop-blur-sm border border-border/50 hover:border-primary/30 hover:bg-card/80 transition-all duration-200"
+                className="flex flex-col items-center gap-2 p-3 rounded-none bg-card/50 border border-border/50 hover:border-primary/30 hover:bg-card/80 transition-all duration-200"
               >
                 <div className="w-10 h-10 rounded-none bg-primary/10 flex items-center justify-center">
                   <IconComponent className="w-5 h-5 text-primary" />

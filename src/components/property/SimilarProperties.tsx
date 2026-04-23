@@ -88,7 +88,7 @@ export function SimilarProperties({
                 {nightly > 0 && (
                   <Badge
                     variant="secondary"
-                    className="absolute bottom-2 left-2 bg-background/95 text-foreground border border-border/40 backdrop-blur-sm font-semibold shadow-sm"
+                    className="absolute bottom-2 left-2 bg-background/95 text-foreground border border-border/40 font-semibold shadow-sm"
                   >
                     {showTotal
                       ? `${formatPrice(total!)} ${isRu ? 'за ' + nights + (nights === 1 ? ' ночь' : nights < 5 ? ' ночи' : ' ночей') : 'for ' + nights + (nights === 1 ? ' night' : ' nights')}`
@@ -97,7 +97,7 @@ export function SimilarProperties({
                 )}
                 {favourite && (
                   <span
-                    className="absolute top-2 right-2 inline-flex items-center gap-1 rounded-full bg-background/95 px-2 py-0.5 text-[10px] font-semibold text-foreground border border-border/40 backdrop-blur-sm shadow-sm"
+                    className="absolute top-2 right-2 inline-flex items-center gap-1 rounded-full bg-background/95 px-2 py-0.5 text-[10px] font-semibold text-foreground border border-border/40 shadow-sm"
                     title={isRu ? 'Любимец гостей' : 'Guest favorite'}
                   >
                     <Award className="w-3 h-3 text-primary" />

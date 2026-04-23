@@ -147,7 +147,7 @@ export default function RestaurantDetail() {
                   location: area || restaurant.district,
                   cuisine: cuisineTags?.join(', ') || restaurant.cuisine,
                 }}
-                className="bg-background/80 backdrop-blur-sm"
+                className="bg-background/80"
               />
             }
           />

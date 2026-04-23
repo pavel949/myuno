@@ -142,7 +142,7 @@ export function ListingWizard() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b">
+      <header className="sticky top-0 z-50 bg-background/95 border-b">
         <div className="flex items-center justify-between px-4 h-14">
           {currentStep > 0 ? (
             <Button variant="ghost" size="icon" onClick={prevStep}>

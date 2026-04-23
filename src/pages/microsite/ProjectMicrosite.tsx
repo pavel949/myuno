@@ -67,7 +67,7 @@ export default function ProjectMicrosite() {
       </Helmet>
 
       {/* Minimal nav (no main app header) */}
-      <header className="sticky top-0 z-40 backdrop-blur-md border-b" style={{ background: 'hsl(var(--nb-bg, 222 47% 4%) / 0.85)', borderColor: 'hsl(var(--nb-gold, 38 50% 55%) / 0.2)' }}>
+      <header className="sticky top-0 z-40 border-b" style={{ background: 'hsl(var(--nb-bg, 222 47% 4%) / 0.85)', borderColor: 'hsl(var(--nb-gold, 38 50% 55%) / 0.2)' }}>
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 text-sm hover:opacity-80">
             <ChevronLeft className="w-4 h-4" />

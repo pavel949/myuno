@@ -66,7 +66,7 @@ export default function TravelInsurance() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md border-b border-border">
+      <div className="sticky top-0 z-30 bg-background/95 border-b border-border">
         <div className="flex items-center gap-3 px-4 py-3 max-w-lg mx-auto">
           <BackButton fallbackPath={APP_ROUTES.INSURANCE} variant="ghost" size="sm" />
           <div className="flex-1">

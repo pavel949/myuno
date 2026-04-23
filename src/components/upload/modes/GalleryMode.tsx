@@ -629,7 +629,7 @@ export function GalleryMode({
 
         {isDragOver && value.length > 0 && (
           <div className="absolute inset-0 bg-primary/10 rounded-none flex items-center justify-center pointer-events-none">
-            <div className="bg-background/90 backdrop-blur-sm px-6 py-4 rounded-none shadow-lg">
+            <div className="bg-background/90 px-6 py-4 rounded-none shadow-lg">
               <p className="font-medium text-primary">{isRu ? 'Отпустите для загрузки' : 'Drop to upload'}</p>
             </div>
           </div>

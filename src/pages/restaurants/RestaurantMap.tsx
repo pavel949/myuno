@@ -62,7 +62,7 @@ export default function RestaurantMap() {
           <Button
             variant="secondary"
             size="icon"
-            className="bg-background/90 backdrop-blur-sm shadow-lg"
+            className="bg-background/90 shadow-lg"
             onClick={() => navigate('/restaurants')}
           >
             <ArrowLeft className="w-5 h-5" />
@@ -70,7 +70,7 @@ export default function RestaurantMap() {
           <Button
             variant="secondary"
             size="sm"
-            className="bg-background/90 backdrop-blur-sm shadow-lg"
+            className="bg-background/90 shadow-lg"
             onClick={() => navigate(`/restaurants?mode=${mode}`)}
           >
             <List className="w-4 h-4 mr-2" />
@@ -188,7 +188,7 @@ export default function RestaurantMap() {
 
         <div className="absolute bottom-4 left-4 z-10">
           {!selected && (
-            <div className="bg-card/90 backdrop-blur-sm rounded-none p-2 text-xs">
+            <div className="bg-card/90 rounded-none p-2 text-xs">
               <div className="flex items-center gap-2">
                 <span>🍽️</span>
                 <span className="text-muted-foreground">

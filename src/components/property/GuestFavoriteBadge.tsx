@@ -67,7 +67,7 @@ export function GuestFavoriteBadge({
     <span
       className={cn(
         'inline-flex items-center gap-1.5 rounded-full bg-background/95 px-2.5 py-1',
-        'text-[11px] font-semibold text-foreground shadow-sm border border-border/40 backdrop-blur-sm',
+        'text-[11px] font-semibold text-foreground shadow-sm border border-border/40',
         className,
       )}
       title={isRu ? `Рейтинг ${rating} из ${reviewsCount} отзывов` : `${rating} from ${reviewsCount} reviews`}

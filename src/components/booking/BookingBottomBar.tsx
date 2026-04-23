@@ -58,7 +58,7 @@ export function BookingBottomBar({
     <motion.div
       initial={{ y: 100 }}
       animate={{ y: 0 }}
-      className="fixed bottom-[var(--bottom-nav-h)] left-0 right-0 bg-background/95 backdrop-blur-lg border-t z-40"
+      className="fixed bottom-[var(--bottom-nav-h)] left-0 right-0 bg-background/95 border-t z-40"
     >
       {/* Step Hint */}
       {showStepHint && currentHint && (

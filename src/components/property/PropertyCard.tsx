@@ -205,7 +205,7 @@ function HeroVariant({ cardProps, stats, isRu, onClick }: HeroVariantProps) {
         <Badge 
           variant="outline" 
           className={cn(
-            "absolute top-3 left-3 gap-1.5 backdrop-blur-sm border",
+            "absolute top-3 left-3 gap-1.5 border",
             status.color
           )}
         >
@@ -217,7 +217,7 @@ function HeroVariant({ cardProps, stats, isRu, onClick }: HeroVariantProps) {
         {cardProps.rating && cardProps.rating > 0 && (
           <Badge
             variant="secondary"
-            className="absolute top-3 right-3 gap-1 backdrop-blur-sm bg-background/80"
+            className="absolute top-3 right-3 gap-1 bg-background/80"
           >
             <Star className="h-3 w-3 fill-primary text-primary" />
             {cardProps.rating.toFixed(1)}

@@ -122,7 +122,7 @@ function ShowcaseCard({ showcase, isRu, onClick }: ShowcaseCardProps) {
         {/* Top row */}
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-none bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg">
+            <div className="w-12 h-12 rounded-none bg-white/20 flex items-center justify-center shadow-lg">
               <span className="text-2xl">{showcase.icon}</span>
             </div>
             <div>
@@ -155,7 +155,7 @@ function ShowcaseCard({ showcase, isRu, onClick }: ShowcaseCardProps) {
             {showcase.badges.map((badge, idx) => (
               <Badge 
                 key={idx}
-                className="bg-white/20 text-white text-[10px] backdrop-blur-sm border-0"
+                className="bg-white/20 text-white text-[10px] border-0"
               >
                 {idx === 0 && <Shield className="w-2.5 h-2.5 mr-0.5" />}
                 {badge}

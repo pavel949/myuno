@@ -142,7 +142,7 @@ export default function QuickExpense() {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b px-4 py-3">
+      <div className="sticky top-0 z-40 bg-background/95 border-b px-4 py-3">
         <div className="flex items-center gap-3">
           <BackButton fallbackPath={APP_ROUTES.MC_FINANCE} variant="ghost" />
           <h1 className="font-semibold">{isRu ? 'Быстрый расход' : 'Quick Expense'}</h1>
@@ -327,7 +327,7 @@ export default function QuickExpense() {
         </Collapsible>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-md border-t z-[55]" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 5rem)' }}>
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 border-t z-[55]" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 5rem)' }}>
         <Button
           className="w-full h-12 text-base font-semibold shadow-lg"
           disabled={!canSubmit || isSubmitting}

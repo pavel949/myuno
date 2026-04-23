@@ -62,7 +62,7 @@ export function ServicePromoCarousel() {
             )}
             
             {/* CTA Arrow */}
-            <div className="absolute right-3 bottom-3 w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:bg-white/30 transition-colors">
+            <div className="absolute right-3 bottom-3 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white/30 transition-colors">
               <ChevronRight className="w-5 h-5 text-white" />
             </div>
           </div>

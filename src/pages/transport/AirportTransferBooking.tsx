@@ -878,7 +878,7 @@ export default function AirportTransferBooking() {
       </div>
 
       <div 
-        className="sticky bottom-0 left-0 right-0 bg-background/95 backdrop-blur-lg border-t border-border/50 z-50"
+        className="sticky bottom-0 left-0 right-0 bg-background/95 border-t border-border/50 z-50"
         style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 16px)' }}
       >
         <div className="px-4 pt-3 pb-2">

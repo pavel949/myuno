@@ -227,7 +227,7 @@ export default function BookingDetail() {
     <AppLayout>
       <div className="min-h-screen bg-background">
         {/* Header */}
-        <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border">
+        <div className="sticky top-0 z-40 bg-background/80 border-b border-border">
           <div className="flex items-center gap-3 p-4">
             <Button
               variant="ghost"
@@ -377,7 +377,7 @@ export default function BookingDetail() {
 
         {/* Bottom Actions */}
         {canCancel && (
-          <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-xl border-t border-border">
+          <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 border-t border-border">
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="destructive" className="w-full" disabled={isCancelling}>

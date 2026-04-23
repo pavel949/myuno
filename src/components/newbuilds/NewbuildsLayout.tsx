@@ -57,7 +57,7 @@ export default function NewbuildsLayout({ children, className = '', hideNav }: N
     <div className={cn('nb-theme nb-theme--light min-h-screen bg-background text-foreground', className)}>
       {/* Sticky navigation */}
       {showNav && (
-        <nav className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur-md">
+        <nav className="sticky top-0 z-30 border-b border-border bg-background/95">
           <div className="max-w-7xl mx-auto px-4">
             <div className="flex items-center gap-1 overflow-x-auto py-2 scrollbar-hide">
               {NAV_ITEMS.map(item => {

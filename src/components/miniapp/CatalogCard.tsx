@@ -133,7 +133,7 @@ export const CatalogCard = memo(function CatalogCard({
         {/* Social proof bottom overlay */}
         {socialProof && (
           <div className="absolute bottom-2 left-2 right-2">
-            <Badge className="bg-background/90 text-foreground text-[9px] backdrop-blur-sm border-0 w-full justify-center">
+            <Badge className="bg-background/90 text-foreground text-[9px] border-0 w-full justify-center">
               <Star className="w-2.5 h-2.5 mr-0.5 text-warning" />
               {socialProof}
             </Badge>

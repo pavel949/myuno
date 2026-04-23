@@ -43,7 +43,7 @@ const RelatedServicesCard = memo(function RelatedServicesCard({ entity, index }:
           </div>
         )}
         {entity.rating && entity.rating > 0 && (
-          <div className="absolute top-2 right-2 flex items-center gap-0.5 bg-background/80 text-foreground text-xs px-1.5 py-0.5 rounded-full backdrop-blur-sm">
+          <div className="absolute top-2 right-2 flex items-center gap-0.5 bg-background/80 text-foreground text-xs px-1.5 py-0.5 rounded-full">
             <Star className="w-3 h-3 fill-accent text-accent" />
             {entity.rating.toFixed(1)}
           </div>

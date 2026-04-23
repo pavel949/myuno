@@ -15,7 +15,7 @@ export default function ClearViewLanding() {
 
   return (
     <div className="min-h-screen bg-background pb-16">
-      <header className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b border-border">
+      <header className="sticky top-0 z-10 bg-background/95 border-b border-border">
         <div className="px-4 py-3 flex items-center gap-3">
           <Link to={APP_ROUTES.PROPERTY} aria-label={isRu ? 'Назад' : 'Back'}>
             <ArrowLeft className="w-5 h-5 text-foreground" />

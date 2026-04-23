@@ -49,7 +49,7 @@ export function ProviderDashboardLayout({
     >
       {/* Sticky Header */}
       {header && (
-        <header className="shrink-0 sticky top-0 z-40 bg-background/95 backdrop-blur border-b">
+        <header className="shrink-0 sticky top-0 z-40 bg-background/95 border-b">
           {header}
         </header>
       )}

@@ -137,7 +137,7 @@ export function OffplanProjectCard({
 
           {/* Brokered / not ClearView-rated */}
           {!project.isClearviewRated && (
-            <Badge variant="outline" className="text-[10px] bg-background/80 backdrop-blur-sm border-warning/40 text-warning">
+            <Badge variant="outline" className="text-[10px] bg-background/80 border-warning/40 text-warning">
               {isRu ? 'Не оценён ClearView' : 'Not ClearView rated'}
             </Badge>
           )}

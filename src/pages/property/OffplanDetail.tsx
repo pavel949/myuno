@@ -530,7 +530,7 @@ export default function OffplanDetail() {
       </div>
 
       {/* Fixed CTA */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t safe-area-bottom">
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 border-t safe-area-bottom">
         <div className="flex gap-3">
           <Button variant="outline" size="lg" className="flex-1 gap-2" onClick={() => setShowLeadForm(true)}>
             <FileSearch className="w-5 h-5" />
