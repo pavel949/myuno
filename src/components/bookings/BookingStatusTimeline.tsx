@@ -115,8 +115,9 @@ export function BookingStatusTimeline({
         return (
           <li
             key={event.id ?? `${event.to_status}-${event.created_at}-${idx}`}
+            data-event-id={event.id}
             className={cn(
-              'relative flex gap-3 -mx-2 px-2 rounded-md',
+              'relative flex gap-3 -mx-2 px-2 rounded-md scroll-mt-20',
               compact ? 'pb-2.5 last:pb-0' : 'pb-3.5 last:pb-0',
               isHighlighted && 'animate-timeline-highlight',
             )}

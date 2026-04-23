@@ -347,6 +347,28 @@ export default function Bookings() {
             highlightTimersRef.current.delete(row.id);
           }, 2600);
           highlightTimersRef.current.set(row.id, timer);
+
+          // Auto-scroll the new event into view. Two rAFs give React time to
+          // commit the auto-expand + new <li>, then the browser time to lay
+          // it out, before we look up the node. We respect the user's
+          // reduced-motion preference and skip scrolling if the tab is
+          // hidden (no point fighting their scroll position offscreen).
+          if (typeof window !== 'undefined' && document.visibilityState === 'visible') {
+            const prefersReducedMotion = window.matchMedia(
+              '(prefers-reduced-motion: reduce)',
+            ).matches;
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                const node = document.querySelector<HTMLElement>(
+                  `[data-event-id="${CSS.escape(row.id)}"]`,
+                );
+                node?.scrollIntoView({
+                  behavior: prefersReducedMotion ? 'auto' : 'smooth',
+                  block: 'center',
+                });
+              });
+            });
+          }
         },
       )
       .on(
