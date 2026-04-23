@@ -1,0 +1,120 @@
+# Migration to Canonical Design System — Baseline
+
+> **Дата:** 2026-04-23
+> **Версия приложения до миграции:** 3.43.0
+> **Канонический документ:** [`05-visual-design-system.md`](./05-visual-design-system.md) v1.0
+> **Инициатор:** Pavel Ignatev
+> **Статус:** Phase 1 in progress
+
+---
+
+## Зачем этот файл
+
+Это **фиксация точки** перед началом большой визуальной миграции. Если что-то пойдёт не так — этот файл объясняет, к чему откатываться и как.
+
+Параллельно с ним каждый шаг миграции записан как Lovable checkpoint и доступен через **History** (кнопка над чатом).
+
+---
+
+## Контекст
+
+До миграции в проекте сосуществовали **три параллельные дизайн-системы**:
+
+1. **Super-App Dark Theme** (фактический дефолт) — навигация: `#08101E` фон, `#00D68F` mint primary, glassmorphism, `rounded-xl`. Описана в `mem://style/super-app-visual-identity` и `mem://style/design-system-ds2-standards`.
+2. **Dark Luxury Editorial** — Newbuilds (`/newbuilds`): `#0F0F0F` + золото `#C9A84C` + Playfair Display. В `src/styles/newbuilds-theme.css`.
+3. **Vercel-минимализм** — WelcomeLanding (`/index`), inline-токены, hairline-сетка.
+
+**Канон** (`05-visual-design-system.md`) описывает **четвёртую систему** — «GOV.UK / e-Estonia»: cream `#F7F5F1` + navy `#0A2240` + orange `#D96B1A`, шрифты Unbounded/Golos Text (RU) + Noto Serif/Noto Sans (EN), `rounded-none` по дефолту.
+
+Решение от 2026-04-23: **привести весь код к канону** (Путь A). Поэтапно, 4 фазы.
+
+---
+
+## Решения, зафиксированные перед стартом
+
+| Вопрос | Решение |
+|---|---|
+| Dark mode | Удаляется как дефолт. Остаётся опцией для `/admin` и `/mc` (navy-инверсия, без mint, без glassmorphism). |
+| Newbuilds (Playfair + золото) | Унифицируется с каноном. Файл `newbuilds-theme.css` удаляется. |
+| Радиусы | 0px по канону везде. Допускаются `rounded-sm` (2px) для chips и `rounded-full` для аватаров. |
+| Темп миграции | 4 фазы с review checkpoint между ними. |
+
+---
+
+## Фазы миграции
+
+| Фаза | Содержание | Длительность |
+|---|---|---|
+| **1. Фундамент** | tokens.css, tailwind.config.ts, index.html (шрифты), themeSwitch | 1-2 дня |
+| **2. Внешний контур** | WelcomeLanding, Property, Invest, Newbuilds, ds-компоненты | 3-5 дней |
+| **3. Внутренний app** | Home, CRM, MC, Bookings, Auth, Admin (~80 экранов) | 1-2 недели |
+| **4. Финал** | Радиусы 0px, ESLint правила, чистка memory | 3-5 дней |
+
+---
+
+## Файлы, которые меняет Фаза 1
+
+- `src/styles/tokens.css` — полная перезапись на каноническую палитру
+- `tailwind.config.ts` — новые шрифты, type-scale, удаление mint/gold/glass токенов
+- `index.html` — Google Fonts URL заменён на канонический набор; критический inline CSS перенастроен на cream/navy
+- `src/index.css` — добавлен глобальный язык-зависимый `font-family`
+- `src/lib/themeSwitch.ts` — light как дефолт
+- `src/contexts/ThemeContext.tsx` — light как дефолт, dark только в admin/MC контекстах
+
+## Файлы, которые удаляет Фаза 2
+
+- `src/styles/newbuilds-theme.css` — после миграции `/newbuilds` на канон
+
+---
+
+## Как откатить полностью
+
+**Способ 1 — через UI Lovable (рекомендуется):**
+1. Открыть **History** (кнопка над чатом)
+2. Найти точку «До Фазы 1 миграции к канону» (от 2026-04-23)
+3. Revert
+
+**Способ 2 — через chat:**
+Найти AI-сообщение перед началом миграции и нажать кнопку Revert под ним.
+
+После отката этот файл будет удалён вместе с остальными изменениями миграции.
+
+---
+
+## Snapshot ключевых токенов «до миграции»
+
+### tokens.css (light mode, фрагмент)
+```css
+--background: 40 10% 97%;       /* #fafaf9 — НЕ канон, должно быть #F7F5F1 */
+--primary: 160 79% 24%;         /* #0d6e4f emerald — НЕ канон, должно быть #0A2240 navy */
+--accent: 224 55% 32%;          /* navy — канон, но в роли accent, не primary */
+--radius: 16px;                 /* НЕ канон, должно быть 0 */
+--font-display: 'Golos Text';   /* частично канон (Golos OK для body, но heading должен быть Unbounded) */
+```
+
+### tailwind.config.ts (фрагмент)
+```ts
+fontFamily: {
+  sans: ['DM Sans', ...],         // НЕ канон — должно быть Golos Text (RU) / Noto Sans (EN)
+  display: ['Golos Text', ...],   // НЕ канон — должно быть Unbounded (RU) / Noto Serif (EN)
+  serif: ['Playfair Display'],    // используется только в Newbuilds, удаляется
+}
+```
+
+### index.html (фрагмент)
+```html
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:...&family=DM+Sans:...&family=Playfair+Display:...&family=Sarabun:..." />
+<!-- НЕ канон — должно подгружать Unbounded, Noto Serif, Noto Sans, Golos Text, JetBrains Mono -->
+```
+
+---
+
+## Связанные документы
+
+- Канон: [`docs/canonical/05-visual-design-system.md`](./05-visual-design-system.md)
+- Стратегия: [`PROJECT.md`](../../PROJECT.md) §2 (двойной тезис), §3 (омбудсмен), §22 (дизайн-стандарты)
+- Сегментация: [`docs/canonical/01-segmentation-framework.md`](./01-segmentation-framework.md)
+- Memory (требуют пересмотра в Фазе 4):
+  - `mem://style/super-app-visual-identity` → archive
+  - `mem://style/design-system-ds2-standards` → переписать
+  - `mem://style/editorial-dark-luxury-theme` → archive

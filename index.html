@@ -17,7 +17,7 @@
     <meta name="description" content="myUNO — доверенная цифровая инфраструктура для жизни и инвестиций иностранца на Пхукете. Аренда, услуги, юридическая помощь, новостройки и сделки с недвижимостью в одном приложении." />
     <meta name="keywords" content="Phuket, Thailand, super app, property, real estate, off-plan, ClearView, rental, expat services, visa, relocation, иностранцы Пхукет, недвижимость Таиланд, аренда вилл" />
     <meta name="author" content="Ignatev Group" />
-    <meta name="theme-color" content="#00D68F" />
+    <meta name="theme-color" content="#0A2240" />
     <meta name="version" content="3.43.0" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -62,12 +62,15 @@
     <link rel="dns-prefetch" href="//kakkwibljrjsawxgnupk.supabase.co" />
     <link rel="dns-prefetch" href="https://maps.googleapis.com" />
     
-    <!-- Google Fonts: Golos Text (display, official RU govt font) + DM Sans (body) + JetBrains Mono + Playfair Display (luxury RE) + Sarabun (Thai) -->
+    <!-- Canonical font stack (docs/canonical/05-visual-design-system.md §3.2):
+         RU: Unbounded (heading) + Golos Text (body)
+         EN: Noto Serif (heading) + Noto Sans (body)
+         Numbers / data: JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700;800;900&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Sarabun:wght@400;500;600&display=swap" />
-    <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700;800;900&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Sarabun:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
-    <noscript><link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700;800;900&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Sarabun:wght@400;500;600&display=swap" rel="stylesheet" /></noscript>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600&family=Golos+Text:wght@400;500;600&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" />
+    <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600&family=Golos+Text:wght@400;500;600&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600&family=Golos+Text:wght@400;500;600&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" /></noscript>
     
     <!-- Version check with forced reload on mismatch -->
     <script>
@@ -136,17 +139,19 @@
   </head>
 
   <body>
-    <!-- Inline critical CSS for fast FCP — supports light & dark -->
+    <!-- Inline critical CSS for fast FCP — canonical cream + navy.
+         Default lang=en uses Noto Sans; html[lang="ru"] swaps in Golos Text via tokens.css. -->
     <style>
       *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-      html{-webkit-text-size-adjust:100%;font-family:'DM Sans',system-ui,-apple-system,sans-serif}
-      body{min-height:100vh;background:#fafaf9;color:#1a1a19;-webkit-font-smoothing:antialiased}
-      html.dark body{background:#08101E;color:#EDF2FF}
+      html{-webkit-text-size-adjust:100%;font-family:'Noto Sans',system-ui,-apple-system,sans-serif}
+      html[lang="ru"]{font-family:'Golos Text','Noto Sans',system-ui,sans-serif}
+      body{min-height:100vh;background:#F7F5F1;color:#1C1917;-webkit-font-smoothing:antialiased}
+      html.dark body{background:#051428;color:#F7F5F1}
       #root{min-height:100vh;display:flex;flex-direction:column}
-      .uno-splash{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#fafaf9}
-      html.dark .uno-splash{background:#08101E}
-      .uno-splash svg{width:48px;height:48px;animation:uno-spin 1s linear infinite;stroke:#0d6e4f}
-      html.dark .uno-splash svg{stroke:#00D68F}
+      .uno-splash{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#F7F5F1}
+      html.dark .uno-splash{background:#051428}
+      .uno-splash svg{width:48px;height:48px;animation:uno-spin 1s linear infinite;stroke:#0A2240}
+      html.dark .uno-splash svg{stroke:#D96B1A}
       @keyframes uno-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
     </style>
     <!-- Apply stored theme before paint to prevent flash -->
@@ -155,7 +160,7 @@
     </script>
     <div id="root">
       <div class="uno-splash" aria-label="Loading myUNO">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#00D68F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#0A2240" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
       </div>
     </div>
     <script type="module" src="/src/main.tsx"></script>
