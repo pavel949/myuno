@@ -305,13 +305,18 @@ export default function Bookings() {
                         aria-controls={`timeline-${booking.id}`}
                         className="w-full flex items-center justify-between px-4 py-2.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors min-h-[44px]"
                       >
-                        <span className="uppercase tracking-[0.08em]">
+                        <span className="uppercase tracking-[0.08em] flex items-center gap-1.5">
                           {language === 'ru' ? 'История статусов' : 'Status timeline'}
-                          {events.length > 0 && (
-                            <span className="ml-1.5 text-muted-foreground/60 normal-case tracking-normal">
+                          {historyLoading ? (
+                            <span
+                              className="inline-block h-3 w-3 rounded-full border border-muted-foreground/30 border-t-transparent animate-spin"
+                              aria-hidden="true"
+                            />
+                          ) : events.length > 0 ? (
+                            <span className="text-muted-foreground/60 normal-case tracking-normal">
                               · {events.length}
                             </span>
-                          )}
+                          ) : null}
                         </span>
                         {isExpanded ? (
                           <ChevronUp className="w-4 h-4" aria-hidden="true" />
@@ -328,12 +333,16 @@ export default function Bookings() {
                       >
                         <div className="overflow-hidden">
                           <div className="px-4 pb-4 pt-1">
-                            <BookingStatusTimeline
-                              events={events}
-                              currentStatus={booking.status}
-                              createdAt={booking.createdAt}
-                              compact
-                            />
+                            {historyLoading ? (
+                              <BookingStatusTimelineSkeleton rows={3} compact />
+                            ) : (
+                              <BookingStatusTimeline
+                                events={events}
+                                currentStatus={booking.status}
+                                createdAt={booking.createdAt}
+                                compact
+                              />
+                            )}
                           </div>
                         </div>
                       </div>
