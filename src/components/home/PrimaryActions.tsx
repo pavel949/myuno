@@ -10,7 +10,7 @@ const ACTIONS = [
   {
     id: 'housing',
     route: '/property',
-    accent: '#00D68F',
+    accentVar: '--cluster-arrive',
     titleRu: 'Поиск жилья',
     titleEn: 'Housing',
     subRu: 'Аренда, покупка, новостройки',
@@ -19,7 +19,7 @@ const ACTIONS = [
   {
     id: 'services',
     route: '/discover',
-    accent: '#4E7BFF',
+    accentVar: '--cluster-live',
     titleRu: 'Заказ услуги',
     titleEn: 'Order a service',
     subRu: 'Трансфер, клининг, доставка',
@@ -28,7 +28,7 @@ const ACTIONS = [
   {
     id: 'documents',
     route: '/legal',
-    accent: '#F5A524',
+    accentVar: '--cluster-legal',
     titleRu: 'Документы и визы',
     titleEn: 'Documents & visas',
     subRu: 'TM30, разрешение на работу, LTR',
@@ -55,7 +55,7 @@ export function PrimaryActions() {
           >
             <div
               className="absolute top-3 bottom-3 left-0 w-0.5 rounded-r-sm"
-              style={{ background: a.accent }}
+              style={{ background: `hsl(var(${a.accentVar}))` }}
             />
             <div className="flex-1 min-w-0">
               <div className="font-display text-[16px] font-semibold text-foreground tracking-[-0.01em]">

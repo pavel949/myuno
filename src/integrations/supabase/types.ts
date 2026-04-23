@@ -3536,6 +3536,147 @@ export type Database = {
           },
         ]
       }
+      clearview_categories: {
+        Row: {
+          code: string
+          created_at: string
+          description_en: string | null
+          description_ru: string | null
+          display_order: number
+          id: string
+          name_en: string
+          name_ru: string
+          updated_at: string
+          weight: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description_en?: string | null
+          description_ru?: string | null
+          display_order?: number
+          id?: string
+          name_en: string
+          name_ru: string
+          updated_at?: string
+          weight: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description_en?: string | null
+          description_ru?: string | null
+          display_order?: number
+          id?: string
+          name_en?: string
+          name_ru?: string
+          updated_at?: string
+          weight?: number
+        }
+        Relationships: []
+      }
+      clearview_projects: {
+        Row: {
+          created_at: string
+          developer_id: string | null
+          grade: Database["public"]["Enums"]["clearview_grade"] | null
+          id: string
+          is_published: boolean
+          location: string | null
+          maturity_step: number | null
+          name: string
+          recommendation:
+            | Database["public"]["Enums"]["clearview_recommendation"]
+            | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          slug: string
+          total_score: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          developer_id?: string | null
+          grade?: Database["public"]["Enums"]["clearview_grade"] | null
+          id?: string
+          is_published?: boolean
+          location?: string | null
+          maturity_step?: number | null
+          name: string
+          recommendation?:
+            | Database["public"]["Enums"]["clearview_recommendation"]
+            | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          slug: string
+          total_score?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          developer_id?: string | null
+          grade?: Database["public"]["Enums"]["clearview_grade"] | null
+          id?: string
+          is_published?: boolean
+          location?: string | null
+          maturity_step?: number | null
+          name?: string
+          recommendation?:
+            | Database["public"]["Enums"]["clearview_recommendation"]
+            | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          slug?: string
+          total_score?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      clearview_scores: {
+        Row: {
+          category_id: string
+          created_at: string
+          evidence: string | null
+          id: string
+          project_id: string
+          score: number
+          updated_at: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          evidence?: string | null
+          id?: string
+          project_id: string
+          score: number
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          evidence?: string | null
+          id?: string
+          project_id?: string
+          score?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clearview_scores_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "clearview_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clearview_scores_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "clearview_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cohort_analytics: {
         Row: {
           active_users: number | null
@@ -3645,6 +3786,13 @@ export type Database = {
             columns: ["developer_id"]
             isOneToOne: false
             referencedRelation: "developers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commission_agreements_developer_id_fkey"
+            columns: ["developer_id"]
+            isOneToOne: false
+            referencedRelation: "developers_public"
             referencedColumns: ["id"]
           },
           {
@@ -6454,6 +6602,13 @@ export type Database = {
             columns: ["developer_id"]
             isOneToOne: false
             referencedRelation: "developers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "developer_users_developer_id_fkey"
+            columns: ["developer_id"]
+            isOneToOne: false
+            referencedRelation: "developers_public"
             referencedColumns: ["id"]
           },
         ]
@@ -12547,6 +12702,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "nb_leads_developer_id_fkey"
+            columns: ["developer_id"]
+            isOneToOne: false
+            referencedRelation: "developers_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "nb_leads_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
@@ -15569,9 +15731,11 @@ export type Database = {
           postal_code: string | null
           preferred_language: string | null
           primary_passport_id: string | null
+          primary_role: Database["public"]["Enums"]["canonical_role"] | null
           referral_balance: number
           referral_code: string | null
           referred_by: string | null
+          roles_stack: Json
           special_status: string[]
           state_province: string | null
           status: string
@@ -15627,9 +15791,11 @@ export type Database = {
           postal_code?: string | null
           preferred_language?: string | null
           primary_passport_id?: string | null
+          primary_role?: Database["public"]["Enums"]["canonical_role"] | null
           referral_balance?: number
           referral_code?: string | null
           referred_by?: string | null
+          roles_stack?: Json
           special_status?: string[]
           state_province?: string | null
           status?: string
@@ -15685,9 +15851,11 @@ export type Database = {
           postal_code?: string | null
           preferred_language?: string | null
           primary_passport_id?: string | null
+          primary_role?: Database["public"]["Enums"]["canonical_role"] | null
           referral_balance?: number
           referral_code?: string | null
           referred_by?: string | null
+          roles_stack?: Json
           special_status?: string[]
           state_province?: string | null
           status?: string
@@ -19979,6 +20147,13 @@ export type Database = {
             referencedRelation: "developers"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "property_projects_developer_id_fkey"
+            columns: ["developer_id"]
+            isOneToOne: false
+            referencedRelation: "developers_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       property_promotions: {
@@ -21727,6 +21902,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "reservations_developer_id_fkey"
+            columns: ["developer_id"]
+            isOneToOne: false
+            referencedRelation: "developers_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "reservations_hold_id_fkey"
             columns: ["hold_id"]
             isOneToOne: false
@@ -22118,6 +22300,13 @@ export type Database = {
             columns: ["developer_id"]
             isOneToOne: false
             referencedRelation: "developers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rln_events_developer_id_fkey"
+            columns: ["developer_id"]
+            isOneToOne: false
+            referencedRelation: "developers_public"
             referencedColumns: ["id"]
           },
           {
@@ -28199,6 +28388,96 @@ export type Database = {
           },
         ]
       }
+      developers_public: {
+        Row: {
+          address: string | null
+          average_rating: number | null
+          country: string | null
+          cover_image: string | null
+          created_at: string | null
+          description_en: string | null
+          description_ru: string | null
+          devmod_status: string | null
+          email: string | null
+          founded_year: number | null
+          id: string | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          is_verified: boolean | null
+          logo_url: string | null
+          muuno_score: number | null
+          name: string | null
+          name_en: string | null
+          name_ru: string | null
+          phone: string | null
+          projects_completed: number | null
+          projects_ongoing: number | null
+          slug: string | null
+          total_units_delivered: number | null
+          total_units_sold: number | null
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          average_rating?: number | null
+          country?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          devmod_status?: string | null
+          email?: string | null
+          founded_year?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          logo_url?: string | null
+          muuno_score?: number | null
+          name?: never
+          name_en?: string | null
+          name_ru?: string | null
+          phone?: string | null
+          projects_completed?: number | null
+          projects_ongoing?: number | null
+          slug?: string | null
+          total_units_delivered?: number | null
+          total_units_sold?: number | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          average_rating?: number | null
+          country?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          devmod_status?: string | null
+          email?: string | null
+          founded_year?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          logo_url?: string | null
+          muuno_score?: number | null
+          name?: never
+          name_en?: string | null
+          name_ru?: string | null
+          phone?: string | null
+          projects_completed?: number | null
+          projects_ongoing?: number | null
+          slug?: string | null
+          total_units_delivered?: number | null
+          total_units_sold?: number | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
       education_centers: {
         Row: {
           address: string | null
@@ -31671,12 +31950,23 @@ export type Database = {
         | "food"
         | "tour"
         | "medical"
+      canonical_role:
+        | "tourist"
+        | "resident"
+        | "owner"
+        | "investor"
+        | "developer"
+        | "vendor"
+        | "staff"
+        | "admin"
       capital_range:
         | "sub_100k"
         | "100k_500k"
         | "500k_2m"
         | "2m_10m"
         | "10m_plus"
+      clearview_grade: "AAA" | "AA" | "A" | "BBB" | "BB"
+      clearview_recommendation: "BUY" | "WATCH" | "AVOID"
       crm_document_type:
         | "passport"
         | "id_card"
@@ -32013,7 +32303,19 @@ export const Constants = {
         "tour",
         "medical",
       ],
+      canonical_role: [
+        "tourist",
+        "resident",
+        "owner",
+        "investor",
+        "developer",
+        "vendor",
+        "staff",
+        "admin",
+      ],
       capital_range: ["sub_100k", "100k_500k", "500k_2m", "2m_10m", "10m_plus"],
+      clearview_grade: ["AAA", "AA", "A", "BBB", "BB"],
+      clearview_recommendation: ["BUY", "WATCH", "AVOID"],
       crm_document_type: [
         "passport",
         "id_card",
