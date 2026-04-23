@@ -17,6 +17,7 @@
     "preview": "vite preview",
     "validate:semantic": "node scripts/validate-semantic.mjs",
     "validate:semantic:verbose": "node scripts/validate-semantic.mjs --verbose",
+    "validate:semantic:strict": "node scripts/validate-semantic.mjs --strict",
     "supabase:deploy": "npx supabase functions deploy approve-partner-application && npx supabase functions deploy notify-admin-partner-application",
     "supabase:db-push": "npx supabase db push",
     "offplan:fetch-seed": "node scripts/fetch-offplan-seed.mjs",

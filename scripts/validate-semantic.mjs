@@ -9,10 +9,11 @@
  * Run:
  *   npm run validate:semantic
  *   npm run validate:semantic -- --verbose
+ *   npm run validate:semantic:strict   (treats warnings as errors — used in CI)
  *
  * Exit code:
- *   0 — no errors (warnings allowed)
- *   1 — at least one error
+ *   0 — no errors (warnings allowed unless --strict)
+ *   1 — at least one error (or any warning when --strict)
  */
 
 import { readFileSync, existsSync } from 'node:fs';
@@ -28,6 +29,7 @@ const MAX_TITLE = 60;
 const MAX_DESCRIPTION = 160;
 
 const verbose = process.argv.includes('--verbose');
+const strict = process.argv.includes('--strict') || process.env.SEMANTIC_STRICT === '1';
 const violations = [];
 
 function pushViolation(rule, severity, file, message) {
@@ -271,4 +273,9 @@ if (errors.length === 0 && warnings.length === 0) {
   console.log('✓ Semantic Core validation passed. 0 violations.');
 }
 
-process.exit(errors.length > 0 ? 1 : 0);
+if (strict && warnings.length > 0) {
+  console.log(`\n✗ --strict mode: ${warnings.length} warning(s) treated as errors.`);
+}
+
+const failed = errors.length > 0 || (strict && warnings.length > 0);
+process.exit(failed ? 1 : 0);
