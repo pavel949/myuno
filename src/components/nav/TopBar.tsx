@@ -171,6 +171,7 @@ export const TopBar = memo(function TopBar({
             </button>
             <LanguageSwitcher size="sm" />
             <CurrencySwitcher size="sm" />
+            <ThemeSwitcher size="sm" />
             {cartEnabled && (
               <MiniCart className="rounded-[var(--radius-sm)] hover:bg-muted/40 transition-colors" />
             )}
