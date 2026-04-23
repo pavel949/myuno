@@ -76,7 +76,7 @@ export function RoleSheet({ open, personas, onClose, onToggle, onReorder }: Role
                       >
                         {meta.glyph}
                       </div>
-                      <div className="flex-1">
+                      <div className="flex-1 min-w-0">
                         <div className="text-[13px] font-medium text-foreground flex items-center gap-1.5">
                           {isRu ? meta.labelRu : meta.short}
                           {i === 0 && (
@@ -85,7 +85,9 @@ export function RoleSheet({ open, personas, onClose, onToggle, onReorder }: Role
                             </span>
                           )}
                         </div>
-                        <div className="text-[11px] text-muted-foreground">{meta.label}</div>
+                        <div className="text-[11px] text-muted-foreground leading-snug">
+                          {isRu ? meta.descRu : meta.descEn}
+                        </div>
                       </div>
                       <div className="flex flex-col gap-0.5">
                         <button
@@ -118,7 +120,7 @@ export function RoleSheet({ open, personas, onClose, onToggle, onReorder }: Role
               <div className="text-[10.5px] tracking-[0.1em] uppercase text-muted-foreground/50 font-semibold mb-2">
                 {isRu ? 'Добавить роль' : 'Add a role'}
               </div>
-              <div className="grid grid-cols-2 gap-1.5">
+              <div className="flex flex-col gap-1.5">
                 {availableRoles.map(p => {
                   const meta = ROLE_META[p];
                   if (!meta) return null;
@@ -126,7 +128,7 @@ export function RoleSheet({ open, personas, onClose, onToggle, onReorder }: Role
                     <button
                       key={p}
                       onClick={() => onToggle(p)}
-                      className="flex items-center gap-2.5 p-3 rounded-[12px] border border-border text-left hover:border-border/80 transition-colors"
+                      className="flex items-center gap-3 p-3 rounded-[12px] border border-border text-left hover:border-border/80 transition-colors"
                     >
                       <div
                         className="w-[22px] h-[22px] rounded-full flex items-center justify-center font-display text-[10px] font-bold text-background flex-shrink-0"
@@ -134,11 +136,13 @@ export function RoleSheet({ open, personas, onClose, onToggle, onReorder }: Role
                       >
                         {meta.glyph}
                       </div>
-                      <div>
+                      <div className="min-w-0 flex-1">
                         <div className="text-[12.5px] font-medium text-foreground">{isRu ? meta.labelRu : meta.short}</div>
-                        <div className="text-[10.5px] text-muted-foreground">{meta.label}</div>
+                        <div className="text-[11px] text-muted-foreground leading-snug">
+                          {isRu ? meta.descRu : meta.descEn}
+                        </div>
                       </div>
-                      <div className="ml-auto text-[11px] text-muted-foreground">+</div>
+                      <div className="ml-auto text-[14px] text-muted-foreground/60 leading-none">+</div>
                     </button>
                   );
                 })}
