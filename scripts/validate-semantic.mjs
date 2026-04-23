@@ -140,8 +140,14 @@ function auditLandingFile(file, kind /* persona | cluster */) {
 
 const COMMERCIAL_RE = /\/(landings|content\/landings|content\/semantic|guides|for|services|clearview|landing|knowledge)\//;
 
+// The semantic dictionary itself legitimately contains every forbidden term as
+// data (it defines them). Skip those files for the synonym scan to avoid
+// recursive false positives. ESLint + content audits cover the rest.
+const SEMANTIC_DICTIONARY_RE = /\/src\/content\/semantic\//;
+
 function scanFileForSynonyms(file) {
   if (!existsSync(file)) return;
+  if (SEMANTIC_DICTIONARY_RE.test(file)) return;
   const isCommercial = COMMERCIAL_RE.test(file);
   const src = readFileSync(file, 'utf-8');
   const hasCyrillic = /[\u0400-\u04FF]/.test(src);
@@ -155,9 +161,12 @@ function scanFileForSynonyms(file) {
     } else if (rule.contexts.includes('en') && hasCyrillic && !rule.contexts.includes('ru')) {
       continue;
     }
+    // Case-sensitive match: many product-name rules differ from the canonical
+    // term only by case (e.g. "MyUNO" → "myUNO"). A case-insensitive scan
+    // would flag every legitimate "myUNO" mention. The §14 guard table is
+    // explicit: capitalisation matters.
     const pattern = new RegExp(
       `(?:^|[^а-яёa-zа-яё0-9_])${escapeRegex(rule.forbidden)}(?:[^а-яёa-zа-яё0-9_]|$)`,
-      'i',
     );
     if (pattern.test(src)) {
       pushViolation('forbidden-synonym', 'warning', file,
