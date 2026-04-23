@@ -31545,6 +31545,10 @@ export type Database = {
         }
         Returns: Json
       }
+      trigger_lifecycle_recompute: {
+        Args: { _source?: string; _user_id: string }
+        Returns: undefined
+      }
       uno_team_can: {
         Args: { _action: string; _user_id: string; _vertical: string }
         Returns: boolean

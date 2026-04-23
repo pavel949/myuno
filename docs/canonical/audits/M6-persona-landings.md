@@ -1,6 +1,6 @@
 # M6 — Persona-aware Home + Landings (25 + 10)
 
-**Status:** ✅ Track D closed (v1.11.0) · ✅ Track B closed (v1.12.0, 2026-04-23) · 🔜 Track C next
+**Status:** ✅ Track D closed (v1.11.0) · ✅ Track B closed (v1.12.0) · 🟡 Track C in progress (C.1, C.2, C.5 done — v1.12.1; C.3/C.4/C.6/C.7 pending)
 **Date:** 2026-04-23 (audit)
 **Owner:** Pavel + AI engineer
 **Source:** `04-implementation-protocol.md §M6` · `audits/M5-hardening.md` (out-of-scope items)

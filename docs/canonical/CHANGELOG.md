@@ -5,6 +5,25 @@
 
 ---
 
+## [1.12.1] — 2026-04-23
+
+### Added (M6 · трек C · шаги C.1, C.2, C.5)
+- **`supabase/functions/canonical-lifecycle-recompute/`** (C.1) — Edge Function пересчёта `lifecycle_stage`:
+  - `lifecycle-matrix.ts` — pure-функция `resolveLifecycleStage()` с детерминированной матрицей 8 фаз (scout/tourist/snowbird/nomad/settler/resident/absentee/returnee) по сигналам `totalDaysInThailand`, `visitsCount`, `visaType`, `visaExpiresAt`, `distinctSeasons`, `hasRecentReturnBooking`.
+  - `index.ts` — POST `{user_id, source}`: читает profile + bookings (status='confirmed'), вызывает матрицу, сравнивает с текущей фазой, на изменении — пишет `lifecycle_stage` и appendит запись `{from, to, source, reason, at}` в `lifecycle_stage_history` (jsonb). Идемпотентна.
+- **DB-триггер** `bookings_after_confirm_recompute` (C.2) — `AFTER INSERT OR UPDATE OF status ON bookings` для `status='confirmed'` вызывает helper `public.trigger_lifecycle_recompute(user_id, 'booking')` через `pg_net.http_post`. Errors swallowed, не блокирует транзакцию booking.
+- **`lifecycle-matrix.test.ts`** (C.5) — **11/11 Deno тестов зелёные**: scout, tourist, snowbird, nomad (DTV<90), settler (180+, DTV+90), resident (730+, LTR), absentee (visa expired), returnee (after gap), idempotent.
+
+### Changed
+- `audits/M6-persona-landings.md` — Track C статус: C.1/C.2/C.5 ✅, C.3 (intakes-триггер — таблицы `intakes` нет, отложено), C.4 (pg_cron daily) — pending (требует service_role secret в http header), C.6 (observability) сделан внутри C.1 (`reason` поле в history).
+- `src/lib/appVersion.ts` → `3.44.1` (patch — backend-only, без UI-изменений).
+
+### Notes
+- Линтер: предупреждение `extension_in_public` для `pg_net` — known false-positive (Supabase требует `pg_net` в public).
+- Track C полностью закрывается отдельным шагом (C.3 ждёт появления `intakes` таблицы; C.4 cron — отдельным insert SQL с service-role bearer; C.7 — bump v1.13.0 после закрытия C.4).
+
+---
+
 ## [1.12.0] — 2026-04-23
 
 ### Added (M6 · трек B · шаги B.6 → B.10 закрыты, B → ✅)
