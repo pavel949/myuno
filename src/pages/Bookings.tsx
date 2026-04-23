@@ -190,6 +190,81 @@ export default function Bookings() {
     }
   }, [user, loadBookings]);
 
+  // Keep a stable ref to the latest bookings list for the realtime handlers
+  // (so we can filter incoming events without resubscribing on every change).
+  const bookingsRef = useRef<BookingItem[]>([]);
+  useEffect(() => {
+    bookingsRef.current = bookings;
+  }, [bookings]);
+
+  // Realtime: keep status history + booking status fresh while screen is open.
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel(`bookings-realtime-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'booking_status_history',
+        },
+        (payload) => {
+          const row = payload.new as {
+            id: string;
+            booking_id: string;
+            from_status: string | null;
+            to_status: string;
+            notes: string | null;
+            created_at: string;
+          };
+          // Only react to events for bookings currently rendered (RLS already
+          // limits us to the user's own rows, but this avoids cross-user noise).
+          if (!bookingsRef.current.some((b) => b.id === row.booking_id)) return;
+
+          setStatusHistory((prev) => {
+            const existing = prev[row.booking_id] ?? [];
+            if (existing.some((e) => e.id === row.id)) return prev;
+            const next = [
+              ...existing,
+              {
+                id: row.id,
+                from_status: row.from_status,
+                to_status: row.to_status,
+                notes: row.notes,
+                created_at: row.created_at,
+              },
+            ].sort(
+              (a, b) =>
+                new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+            );
+            return { ...prev, [row.booking_id]: next };
+          });
+        },
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'bookings',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          const row = payload.new as { id: string; status: string };
+          setBookings((prev) =>
+            prev.map((b) => (b.id === row.id ? { ...b, status: row.status } : b)),
+          );
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
   const handleRefresh = useCallback(async () => {
     await loadBookings();
   }, [loadBookings]);
