@@ -108,6 +108,9 @@ export default function Bookings() {
   // Per-booking loading: only the bookings whose ids are in this set show a
   // skeleton/spinner. Other timelines stay idle.
   const [loadingHistoryIds, setLoadingHistoryIds] = useState<Set<string>>(new Set());
+  // Per-booking error state — set when the lazy history fetch fails so we can
+  // render an inline retry without affecting other timelines.
+  const [historyErrorIds, setHistoryErrorIds] = useState<Set<string>>(new Set());
   // Tracks which booking ids we've already fetched (or hydrated from cache),
   // so re-expanding a timeline doesn't trigger a refetch.
   const loadedHistoryIdsRef = useRef<Set<string>>(new Set());
