@@ -201,6 +201,13 @@ export default function Bookings() {
       next.add(bookingId);
       return next;
     });
+    // Clear any prior error for this booking — we're trying again.
+    setHistoryErrorIds((prev) => {
+      if (!prev.has(bookingId)) return prev;
+      const next = new Set(prev);
+      next.delete(bookingId);
+      return next;
+    });
 
     try {
       const { data: historyRows, error } = await supabase
@@ -225,6 +232,12 @@ export default function Bookings() {
       loadedHistoryIdsRef.current.add(bookingId);
     } catch (error) {
       console.error('Error loading status history:', error);
+      setHistoryErrorIds((prev) => {
+        if (prev.has(bookingId)) return prev;
+        const next = new Set(prev);
+        next.add(bookingId);
+        return next;
+      });
     } finally {
       setLoadingHistoryIds((prev) => {
         if (!prev.has(bookingId)) return prev;
@@ -234,6 +247,13 @@ export default function Bookings() {
       });
     }
   }, [user, loadingHistoryIds]);
+
+  /** Manually retry a failed history fetch for a single booking. */
+  const retryHistoryFor = useCallback((bookingId: string) => {
+    // Drop the "loaded" mark so loadHistoryFor() actually runs the network call.
+    loadedHistoryIdsRef.current.delete(bookingId);
+    void loadHistoryFor(bookingId);
+  }, [loadHistoryFor]);
 
   useEffect(() => {
     if (!authLoading && !user) {
