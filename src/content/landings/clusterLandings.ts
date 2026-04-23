@@ -292,8 +292,8 @@ const D_INVESTMENT: ClusterLanding = {
   relatedPersonas: ['P2', 'P5', 'P6', 'P8', 'P9', 'P11', 'P12'],
   seo: {
     metaTitle: {
-      ru: 'Покупка недвижимости на Пхукете: ClearView™, юристы, доходность — myUNO',
-      en: 'Buying property on Phuket: ClearView™, lawyers, yields — myUNO',
+      ru: 'Покупка недвижимости на Пхукете: ClearView™ — myUNO',
+      en: 'Buying property on Phuket: ClearView™ rating — myUNO',
     },
     metaDescription: {
       ru: 'Сравнение районов, рейтинг застройщика, юридическая структура и калькулятор доходности. Без давления продавца.',
@@ -426,7 +426,7 @@ const F_OPERATIONS: ClusterLanding = {
   relatedPersonas: ['P8', 'P9', 'P10'],
   seo: {
     metaTitle: {
-      ru: 'Управление недвижимостью на Пхукете: PMS, сдача, отчёты — myUNO',
+      ru: 'Управление недвижимостью на Пхукете: PMS — myUNO',
       en: 'Phuket property management: PMS, rentals, reporting — myUNO',
     },
     metaDescription: {
