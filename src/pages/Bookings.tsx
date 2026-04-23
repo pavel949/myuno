@@ -222,6 +222,8 @@ export default function Bookings() {
             notes: row.notes,
             created_at: row.created_at,
           });
+          // Seed dedup set so realtime echoes of these rows are ignored.
+          seenEventIdsRef.current.add(row.id);
         }
         setStatusHistory(grouped);
         setCachedStatusHistory(user.id, grouped);
