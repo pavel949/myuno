@@ -5,6 +5,25 @@
 
 ---
 
+## [1.10.4] — 2026-04-23
+
+### Added (M6 · трек D · шаги D.1 + D.2 + D.5)
+- **`src/lib/segmentation/prioritizeHomeSections.ts`** — чистая детерминированная функция `prioritizeHomeSections(profile, defaultOrder, options?)`. Boost-score по 3 каналам: `active_clusters` (×3), `lifecycle_stage` (×2), `detected_persona` (×2). Особый случай: `PersonaPromptBanner` пинится в топ для authed без persona. Permutation-invariant (никогда не добавляет/удаляет ключи). Опциональный `maxJump` ограничивает прыжок секции вверх для anti-layout-shift защиты.
+- **D.2 · Маппинги в том же файле**:
+  - `CLUSTER_TO_SECTIONS` — 6 канонических кластеров (`arrive | live | manage | invest | legal | build`) → home-секции.
+  - `LIFECYCLE_TO_SECTIONS` — 8 lifecycle-фаз → home-секции.
+  - `PERSONA_TO_SECTIONS` — точечные boost'ы для 10 ключевых персон (P1, P4, P5, P7, P8, P9, P10, P13, P14, P20).
+- **`src/lib/segmentation/__tests__/prioritizeHomeSections.test.ts`** — 10 unit-тестов (anon → default, authed без сигналов → default, P1 tourist, P9 HNW, P10 operator, P13 pet-owner, PersonaPromptBanner-pin для authed без persona, permutation invariant, maxJump=1, стабильная сортировка). **Все 10 зелёные.**
+
+### Changed
+- `audits/M6-persona-landings.md` — статусы D.1 / D.2 / D.5 → ✅ done. D.3 → 🔜 next.
+
+### Notes
+- UI пока не затронут — это backend-логика. Видимый эффект появится на шаге D.3 (`<PersonaAwareSections />`) и D.4 (интеграция за флагом `home_persona_aware_v1`).
+- Все остальные секции (Hero, HomeTopBar, Footer) фиксированы вне priority-зоны и не участвуют в перестановке.
+
+---
+
 ## [1.10.3] — 2026-04-23
 
 ### Added (M6 audit — старт следующей вехи)

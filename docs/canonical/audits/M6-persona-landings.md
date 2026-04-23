@@ -85,15 +85,15 @@
 
 ### Трек D · Persona-aware Home rearrangement (приоритет 1)
 
-| # | Шаг | Файлы | Зависимости |
-|---|---|---|---|
-| D.1 | Утилита `prioritizeSectionsByPersona(profile, defaultOrder)` — детерминированный sort по `active_clusters` + `lifecycle_stage` | `src/lib/segmentation/prioritizeHomeSections.ts` | M3 типы |
-| D.2 | Маппинг «cluster → home-section keys» (например, `arrival` → `OfflineEmergencyCard`+`NowInPhuket`; `investment` → `FeaturedPropertiesCarousel`) | константа в той же утилите | D.1 |
-| D.3 | Компонент-обёртка `<PersonaAwareSections defaultOrder={[...]} />` — рендерит существующие блоки в порядке D.1 | `src/components/home/PersonaAwareSections.tsx` | D.1, D.2 |
-| D.4 | Интеграция в `Home.tsx` за флагом `feature_flag:home_persona_aware_v1` (default OFF, включается после QA) | `src/pages/Home.tsx` (или Index) | D.3 |
-| D.5 | Unit-тесты `prioritizeSectionsByPersona`: ≥6 кейсов (anon → default, authed без persona → default, P1 tourist, P9 HNW, P10 operator, P13 pet-owner) | `__tests__/prioritizeHomeSections.test.ts` | D.1 |
-| D.6 | Tone-of-voice pass: проверить, что новые secondary CTA в priority-секциях не нарушают §14 | grep + ручной просмотр | D.3 |
-| D.7 | CHANGELOG → v1.11.0, статус трека D в этом документе → ✅ | docs | все выше |
+| # | Шаг | Файлы | Зависимости | Статус |
+|---|---|---|---|---|
+| D.1 | Утилита `prioritizeSectionsByPersona(profile, defaultOrder)` — детерминированный sort по `active_clusters` + `lifecycle_stage` | `src/lib/segmentation/prioritizeHomeSections.ts` | M3 типы | ✅ done (2026-04-23) |
+| D.2 | Маппинг «cluster → home-section keys» (например, `arrival` → `OfflineEmergencyCard`+`NowInPhuket`; `investment` → `FeaturedPropertiesCarousel`) | константа в той же утилите | D.1 | ✅ done (2026-04-23) |
+| D.3 | Компонент-обёртка `<PersonaAwareSections defaultOrder={[...]} />` — рендерит существующие блоки в порядке D.1 | `src/components/home/PersonaAwareSections.tsx` | D.1, D.2 | 🔜 next |
+| D.4 | Интеграция в `Home.tsx` за флагом `feature_flag:home_persona_aware_v1` (default OFF, включается после QA) | `src/pages/Home.tsx` (или Index) | D.3 | ⏳ |
+| D.5 | Unit-тесты `prioritizeSectionsByPersona`: ≥6 кейсов (anon → default, authed без persona → default, P1 tourist, P9 HNW, P10 operator, P13 pet-owner) | `__tests__/prioritizeHomeSections.test.ts` | D.1 | ✅ done (10 тестов зелёные) |
+| D.6 | Tone-of-voice pass: проверить, что новые secondary CTA в priority-секциях не нарушают §14 | grep + ручной просмотр | D.3 | ⏳ |
+| D.7 | CHANGELOG → v1.11.0, статус трека D в этом документе → ✅ | docs | все выше | ⏳ |
 
 **Out of scope трека D:** изменение содержимого самих секций; новые секции; mutation `lifecycle_stage` (только read).
 
