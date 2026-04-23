@@ -23,7 +23,19 @@ import { RoleSheet } from '@/components/home/RoleSheet';
 import { RealEstateEntry } from '@/components/home/RealEstateEntry';
 import { TrustAsAService } from '@/components/home/TrustAsAService';
 import { PersonaPromptBanner } from '@/components/home/PersonaPromptBanner';
+import { PersonaAwareSections } from '@/components/home/PersonaAwareSections';
+import type { HomeSectionKey } from '@/lib/segmentation/prioritizeHomeSections';
 import { useFeatureFlag } from '@/hooks/useFeatureFlag';
+
+/**
+ * M6 · D.4 — priority-zone keys, в каноническом дефолтном порядке.
+ * Это секции, участвующие в перестановке `prioritizeHomeSections()`.
+ * Hero, HomeTopBar, Footer и т.п. фиксированы вне priority-зоны.
+ */
+const PRIORITY_DEFAULT_ORDER: readonly HomeSectionKey[] = [
+  'PersonaPromptBanner',
+  'ActiveSituation',
+] as const;
 
 const Index = () => {
   const { personas, togglePersona, setPersonas } = useUserPersonas();
@@ -32,8 +44,24 @@ const Index = () => {
   const reEngineOn = useFeatureFlag('re_revenue_engine', true);
   const trustOn = useFeatureFlag('trust_as_service', true);
   const popularTasksOn = useFeatureFlag('popular_tasks_block', false);
+  // M6 · D.4 — gated за `feature_flag:home_persona_aware_v1` (default OFF).
+  // Включается одной строкой в `system_settings` без релиза.
+  const personaAwareOn = useFeatureFlag('home_persona_aware_v1', false);
 
   const activePersonas = personas.length > 0 ? personas : (['tourist'] as const);
+
+  // Готовые JSX-элементы для priority-зоны. Передаются в PersonaAwareSections
+  // как Partial<Record<HomeSectionKey, ReactNode>>; отсутствующие ключи
+  // безопасно пропускаются.
+  const prioritySections: Partial<Record<HomeSectionKey, React.ReactNode>> = {
+    PersonaPromptBanner: <PersonaPromptBanner />,
+    ActiveSituation: (
+      <ActiveSituation
+        personas={[...activePersonas]}
+        onRoleSheetOpen={() => setRoleSheetOpen(true)}
+      />
+    ),
+  };
 
   return (
     <AppLayout showHeader={false} showFooter={false}>
@@ -47,19 +75,25 @@ const Index = () => {
         </div>
         <HomeContextChips personas={[...activePersonas]} />
         <WorkspaceHomeBanner />
-        <PersonaPromptBanner />
+
+        {/*
+          M6 · D.4 — priority-zone (PersonaPromptBanner + ActiveSituation).
+          Под флагом `home_persona_aware_v1` обёртка перестраивает порядок
+          по канонической персоне (`useCanonicalProfile` → `prioritizeHomeSections`).
+          Если флаг OFF / loading / anon → дефолтный порядок (regression-safe).
+          Hero и tasks-блок остаются на фиксированных позициях ниже.
+        */}
+        <PersonaAwareSections
+          defaultOrder={PRIORITY_DEFAULT_ORDER}
+          sections={prioritySections}
+          disabled={!personaAwareOn}
+        />
 
         {/* 1. Hero — search-first entry, with desktop popular preview */}
         <HeroIntro />
 
         {/* 2. Tasks — what do I need to do */}
         {popularTasksOn ? <PopularTasks /> : <PrimaryActions />}
-
-        {/* 3. Active — what's already in progress */}
-        <ActiveSituation
-          personas={[...activePersonas]}
-          onRoleSheetOpen={() => setRoleSheetOpen(true)}
-        />
 
         {/* 4. Trust / discovery — story blocks */}
         {reEngineOn && <RealEstateEntry />}
