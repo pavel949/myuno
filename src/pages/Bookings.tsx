@@ -453,6 +453,7 @@ export default function Bookings() {
                 const Icon = getBookingIcon(booking.type);
                 const isExpanded = !!expandedTimelines[booking.id];
                 const events = statusHistory[booking.id] ?? [];
+                const isHistoryLoading = loadingHistoryIds.has(booking.id);
                 return (
                   <div
                     key={booking.id}
