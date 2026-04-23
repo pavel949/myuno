@@ -17,6 +17,12 @@ import { ru, enUS } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { BookingStatusTimeline, BookingStatusTimelineSkeleton, type BookingStatusEvent } from '@/components/bookings/BookingStatusTimeline';
 import { RealtimeIndicator, type RealtimeStatus } from '@/components/bookings/RealtimeIndicator';
+import {
+  getCachedStatusHistory,
+  setCachedStatusHistory,
+  updateCachedStatusHistory,
+  invalidateStatusHistoryCache,
+} from '@/lib/bookings/statusHistoryCache';
 import { cn } from '@/lib/utils';
 
 interface BookingItem {
@@ -115,14 +121,22 @@ export default function Bookings() {
     };
   }, []);
 
-  const loadBookings = useCallback(async () => {
+  const loadBookings = useCallback(async (forceRefresh = false) => {
     if (!user) return;
 
     setIsLoading(true);
     setLoadError(false);
-    // Reset history so any previously cached entries don't bleed into the new fetch.
-    setStatusHistory({});
-    setHistoryLoading(true);
+
+    // Hydrate from cache immediately on cache hit — avoids a flash of skeleton
+    // and a refetch when the user returns to the screen within the TTL window.
+    const cached = forceRefresh ? null : getCachedStatusHistory(user.id);
+    if (cached) {
+      setStatusHistory(cached);
+      setHistoryLoading(false);
+    } else {
+      setStatusHistory({});
+      setHistoryLoading(true);
+    }
 
     try {
       // Phase 1: Load bookings — render cards as soon as this resolves.
@@ -153,10 +167,16 @@ export default function Bookings() {
       setBookings(formattedBookings);
       setIsLoading(false);
 
-      // Phase 2: Batch-fetch status history (RLS limits to user's own).
+      // Phase 2: Status history.
       const bookingIds = formattedBookings.map((b) => b.id);
       if (bookingIds.length === 0) {
+        setCachedStatusHistory(user.id, {});
         setHistoryLoading(false);
+        return;
+      }
+
+      // Cache hit and not a forced refresh → skip the network call entirely.
+      if (cached && !forceRefresh) {
         return;
       }
 
@@ -179,6 +199,7 @@ export default function Bookings() {
           });
         }
         setStatusHistory(grouped);
+        setCachedStatusHistory(user.id, grouped);
       }
     } catch (error) {
       console.error('Error loading bookings:', error);
@@ -237,19 +258,30 @@ export default function Bookings() {
           // limits us to the user's own rows, but this avoids cross-user noise).
           if (!bookingsRef.current.some((b) => b.id === row.booking_id)) return;
 
+          const newEvent: BookingStatusEvent = {
+            id: row.id,
+            from_status: row.from_status,
+            to_status: row.to_status,
+            notes: row.notes,
+            created_at: row.created_at,
+          };
+
           setStatusHistory((prev) => {
             const existing = prev[row.booking_id] ?? [];
             if (existing.some((e) => e.id === row.id)) return prev;
-            const next = [
-              ...existing,
-              {
-                id: row.id,
-                from_status: row.from_status,
-                to_status: row.to_status,
-                notes: row.notes,
-                created_at: row.created_at,
-              },
-            ].sort(
+            const next = [...existing, newEvent].sort(
+              (a, b) =>
+                new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+            );
+            return { ...prev, [row.booking_id]: next };
+          });
+
+          // Mirror the same merge into the module-level cache so the next
+          // mount of the screen sees the realtime event without refetching.
+          updateCachedStatusHistory(user.id, (prev) => {
+            const existing = prev[row.booking_id] ?? [];
+            if (existing.some((e) => e.id === row.id)) return prev;
+            const next = [...existing, newEvent].sort(
               (a, b) =>
                 new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
             );
@@ -319,8 +351,15 @@ export default function Bookings() {
   }, [user]);
 
   const handleRefresh = useCallback(async () => {
-    await loadBookings();
-  }, [loadBookings]);
+    // Pull-to-refresh bypasses the cache so users always get fresh data.
+    if (user) invalidateStatusHistoryCache(user.id);
+    await loadBookings(true);
+  }, [loadBookings, user]);
+
+  const handleRetry = useCallback(() => {
+    if (user) invalidateStatusHistoryCache(user.id);
+    void loadBookings(true);
+  }, [loadBookings, user]);
 
   const toggleTimeline = useCallback((bookingId: string) => {
     setExpandedTimelines((prev) => ({ ...prev, [bookingId]: !prev[bookingId] }));
@@ -362,7 +401,7 @@ export default function Bookings() {
               title={language === 'ru' ? 'Ошибка загрузки' : 'Failed to load'}
               description={language === 'ru' ? 'Потяните вниз, чтобы повторить' : 'Pull down to retry'}
               action={
-                <PremiumButton onClick={loadBookings}>
+                <PremiumButton onClick={handleRetry}>
                   {language === 'ru' ? 'Повторить' : 'Retry'}
                 </PremiumButton>
               }
