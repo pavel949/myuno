@@ -252,7 +252,7 @@ export default function StartOnboardingV2() {
           <div className="mt-4 text-center">
             <button
               type="button"
-              onClick={() => navigate('/')}
+              onClick={() => navigate(returnTo)}
               className="text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
               {T(COPY.skip, lang)}
