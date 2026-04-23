@@ -240,17 +240,16 @@
   --color-success-border: 143 64% 24%;
   --color-warning-border: 28 93% 30%;
 
-  /* Cluster aliases — canon does not use mint clusters; map to category palette
-     so existing `bg-cluster-*` callers keep rendering until Phase 3 rewrites them.
-     enjoy & family added (were missing). */
-  --cluster-arrive:   172 79% 27%;   /* tourism teal */
+  /* Cluster aliases — canon §6.2: clusters distinguished by hue only,
+     all mapped to navy/orange canonical surfaces. No mint, no luxury gold. */
+  --cluster-arrive:   211 67% 32%;   /* navy-700 — was tourism teal */
   --cluster-live:     211 67% 32%;   /* navy-700 */
-  --cluster-legal:    265 75% 35%;   /* business-legal */
-  --cluster-invest:   207 77% 28%;   /* finance */
+  --cluster-legal:    220 13% 26%;   /* neutral-dark — was purple */
+  --cluster-invest:   22  79% 47%;   /* brand-orange — finance accent */
   --cluster-manage:   220 13% 26%;   /* partner */
   --cluster-build:    24  10% 25%;   /* text-body for stone tone */
-  --cluster-enjoy:    330 81% 42%;   /* wedding */
-  --cluster-family:   225 71% 40%;   /* family */
+  --cluster-enjoy:    22  79% 47%;   /* brand-orange — was rose */
+  --cluster-family:   211 67% 32%;   /* navy-700 — was family blue */
 
   /* Removed/zeroed — these used to drive mint accents and luxury gold. */
   --gold:             22 79% 47%;             /* gold tokens collapse to brand-orange */
