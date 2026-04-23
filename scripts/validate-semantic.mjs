@@ -238,7 +238,8 @@ auditLandingFile(resolve(ROOT, 'src/content/landings/clusterLandings.ts'), 'clus
 
 const semanticFiles = listFiles('src/content/landings/*.ts');
 const pillarTsFiles = listFiles('src/content/semantic/*.ts');
-for (const f of [...semanticFiles, ...pillarTsFiles]) scanFileForSynonyms(f);
+const edgeFunctionFiles = listFiles('supabase/functions/*/index.ts');
+for (const f of [...semanticFiles, ...pillarTsFiles, ...edgeFunctionFiles]) scanFileForSynonyms(f);
 
 checkPillarSitemapCoverage();
 

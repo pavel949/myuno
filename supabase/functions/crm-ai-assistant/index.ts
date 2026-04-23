@@ -51,6 +51,7 @@ Deno.serve(async (req) => {
       risk_alert: `Analyze this deal for risk factors. Consider: stale pipeline position, lack of recent activity, budget mismatches, missing information. Rate risk as Low/Medium/High with explanation.`,
     };
 
+    // @validate-semantic-allow-lexicon-list — system prompt enumerates §14 canonical pairs
     const systemPrompt = `You are a CRM AI assistant for a real estate management company (myUNO).
 You help agents manage contacts and deals effectively.
 Always respond in the same language as the contact's data (Russian if data is in Russian, English otherwise).
