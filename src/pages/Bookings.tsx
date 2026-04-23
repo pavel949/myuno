@@ -351,8 +351,15 @@ export default function Bookings() {
   }, [user]);
 
   const handleRefresh = useCallback(async () => {
-    await loadBookings();
-  }, [loadBookings]);
+    // Pull-to-refresh bypasses the cache so users always get fresh data.
+    if (user) invalidateStatusHistoryCache(user.id);
+    await loadBookings(true);
+  }, [loadBookings, user]);
+
+  const handleRetry = useCallback(() => {
+    if (user) invalidateStatusHistoryCache(user.id);
+    void loadBookings(true);
+  }, [loadBookings, user]);
 
   const toggleTimeline = useCallback((bookingId: string) => {
     setExpandedTimelines((prev) => ({ ...prev, [bookingId]: !prev[bookingId] }));
