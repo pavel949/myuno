@@ -15,6 +15,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 import { Surface } from '@/components/ui/surface';
 import { cn } from '@/lib/utils';
+import { ANON_SESSION_KEY as ANON_KEY } from '@/lib/segmentation/anonSession';
 
 interface JourneyItem {
   title: { en: string; ru: string };
@@ -33,7 +34,6 @@ interface JourneyRow {
   created_at: string;
 }
 
-import { ANON_SESSION_KEY as ANON_KEY } from '@/lib/segmentation/anonSession';
 
 export function MyJourneyRecommendations() {
   const { user } = useAuth();
