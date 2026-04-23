@@ -539,6 +539,11 @@ export default function Bookings() {
                               className="inline-block h-3 w-3 rounded-full border border-muted-foreground/30 border-t-transparent animate-spin"
                               aria-hidden="true"
                             />
+                          ) : hasHistoryError ? (
+                            <AlertCircle
+                              className="w-3 h-3 text-destructive"
+                              aria-label={language === 'ru' ? 'Ошибка загрузки' : 'Failed to load'}
+                            />
                           ) : events.length > 0 ? (
                             <span className="text-muted-foreground/60 normal-case tracking-normal">
                               · {events.length}
@@ -562,6 +567,30 @@ export default function Bookings() {
                           <div className="px-4 pb-4 pt-1">
                             {isHistoryLoading && events.length === 0 ? (
                               <BookingStatusTimelineSkeleton rows={3} compact />
+                            ) : hasHistoryError && events.length === 0 ? (
+                              <div
+                                role="alert"
+                                className="flex items-center justify-between gap-3 rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2.5"
+                              >
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <AlertCircle className="w-4 h-4 text-destructive shrink-0" aria-hidden="true" />
+                                  <p className="text-xs text-muted-foreground truncate">
+                                    {language === 'ru'
+                                      ? 'Не удалось загрузить историю'
+                                      : 'Could not load history'}
+                                  </p>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    retryHistoryFor(booking.id);
+                                  }}
+                                  className="shrink-0 text-xs font-medium text-primary hover:text-primary/80 underline-offset-2 hover:underline min-h-[32px] px-2"
+                                >
+                                  {language === 'ru' ? 'Повторить' : 'Retry'}
+                                </button>
+                              </div>
                             ) : (
                               <BookingStatusTimeline
                                 events={events}
