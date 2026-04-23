@@ -118,3 +118,31 @@ fontFamily: {
   - `mem://style/super-app-visual-identity` → archive
   - `mem://style/design-system-ds2-standards` → переписать
   - `mem://style/editorial-dark-luxury-theme` → archive
+
+---
+
+## Фаза 2 — Newbuilds unification (✅ выполнено 2026-04-23)
+
+### Решение
+По плану миграции newbuilds объединён с каноном — отказ от "Dark Luxury Editorial" sub-brand.
+
+### Изменения
+- **`src/styles/newbuilds-theme.css`** — полностью переписан:
+  - Удалён dark luxury режим (чёрный фон `#0F0F0F` + золото `#C9A84C`).
+  - Все `--nb-*` токены теперь алиасы к канону: `--nb-bg → --background`, `--nb-gold → --brand-orange`, `--nb-text → --foreground`, и т.д.
+  - Убран `backdrop-filter`, glow-анимации, gold-градиенты.
+  - Шрифты `Playfair Display`/`DM Sans` заменены на канонические `var(--font-display)`/`var(--font-body)` (Noto Serif / Unbounded).
+  - Радиусы `.nb-glass`, `.nb-btn-gold` → `var(--radius-none)` (0px по канону).
+  - `.nb-btn-gold` теперь navy primary (без градиента).
+  - Бейджи (`construction`, `offplan`, `completed`, `upcoming`) переведены на семантические `--warning/--info/--success/--brand-navy` токены.
+  - `.nb-glow-pulse` → no-op (glow запрещён каноном §6).
+
+- **`src/pages/newbuilds/NewbuildsMap.tsx`** — убраны последние инлайн `'Playfair Display"` font-family (заменены на `var(--font-display)`); тёмная тень `rgba(0,0,0,0.45)` → `var(--shadow-sm)`.
+
+### Что осталось работать как раньше
+- ~40 компонентов в `src/components/newbuilds/` продолжают использовать `--nb-*` классы — они автоматически получают канонические цвета через aliases. Точечный рефакторинг — Фаза 3.
+- WelcomeLanding, RentalLanding, FlowerDeliveryLanding, AirportTransferLanding, NewDevelopmentsLanding используют семантические токены (`--primary`, `--accent`, `--border`, `--muted`) и уже мигрировали через обновление `tokens.css` без правок кода.
+
+### Verify
+- `tsc --noEmit` → exit 0.
+- Ручная проверка `/newbuilds`, `/newbuilds/map`, `/newbuilds/area-guides` — рекомендуется в превью.
