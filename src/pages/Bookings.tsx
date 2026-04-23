@@ -146,10 +146,21 @@ export default function Bookings() {
     const cached = forceRefresh ? null : getCachedStatusHistory(user.id);
     if (cached) {
       setStatusHistory(cached);
+      // Seed the dedup set from cache so realtime events for already-known
+      // history rows are no-ops.
+      for (const events of Object.values(cached)) {
+        for (const e of events) seenEventIdsRef.current.add(e.id);
+      }
       setHistoryLoading(false);
     } else {
       setStatusHistory({});
       setHistoryLoading(true);
+    }
+
+    // Forced refresh wipes the dedup set so the upcoming network fetch can
+    // re-seed from authoritative server state.
+    if (forceRefresh) {
+      seenEventIdsRef.current = new Set();
     }
 
     try {
