@@ -451,6 +451,7 @@ export default function Bookings() {
                                 currentStatus={booking.status}
                                 createdAt={booking.createdAt}
                                 compact
+                                highlightIds={highlightedEventIds}
                               />
                             )}
                           </div>
