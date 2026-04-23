@@ -1,106 +1,165 @@
 
 
-# Wave 13 · Pro-Shell + Reference-Screens Polish (myUNO Design v5)
+# Миграция myUNO к канонической дизайн-системе
 
-Пакет `myUNO_design_5.zip` глубоко проанализирован. Большая часть Home-каноны (SignalStack, RoleSheet, ConciergeCard, NowInPhuket, ClusterHub, RoleChip, HomeTopBar) уже соответствует пакету — внедрено в Wave 12. Остаются 4 целевых улучшения, которые подтянут оставшиеся отличия.
+## Ваши решения
+- **Dark mode:** удаляется как дефолт, остаётся опцией для admin/MC (navy-инверсия, без mint, без glassmorphism)
+- **Newbuilds:** унифицируется с каноном (отказ от Playfair + золота)
+- **Радиусы:** строго 0px по канону везде
+- **Темп:** 4 фазы с review между ними
 
----
+## Точка отката
 
-## 1. Pro-Shell tabbar (Operate variant)
+Создаю в первом коммите `docs/canonical/MIGRATION_TO_CANON_BASELINE.md` с фиксацией:
+- дата, версия `3.40.0`, ветка
+- список затронутых файлов
+- инструкция «как откатить» через History
+- snapshot ключевых токенов «до»
 
-**Что:** в пакете `screens-core.jsx` `<TabBar variant="pro">` для проф-ролей показывает `Home · Operate · Wallet · Me` вместо `Home · Discover · Wallet · Me`.
-
-**Где:** `src/components/nav/BottomBar.tsx` + `src/lib/nav/navigationModel.ts`.
-
-**Реализация:**
-- Добавить вариант `pro_shell` в `PRIMARY_NAV` для ролей `owner / agent / developer / provider / mc_admin` со 2-м слотом → **Operate** (`/operate` или `/owner` для текущей роли).
-- Consumer-роли (tourist/resident/family) сохраняют `Discover` без изменений.
-- Слот **Operate** — иконка `Briefcase`, label EN `Operate` / RU `Управление`. Активная подсветка по префиксу `/operate, /owner, /mc, /agent, /vendor`.
-- Под флагом `feature_flag:pro_shell_tabbar_v1` (default OFF в `system_settings`).
-
-**Acceptance:** Tourist видит Discover (как сейчас); Owner видит Operate; переключение роли через RoleSheet — TabBar обновляется реактивно.
+Дополнительно — каждый шаг сохраняется как Lovable checkpoint, доступен через `View History`.
 
 ---
 
-## 2. Quick-Actions: 8-slot grid с role-tag dots
+## Фаза 1 · Фундамент (1-2 дня) — старт сразу после approve
 
-**Что:** в дизайне `QuickActions` всегда **8 элементов = 4 cols × 2 rows** с микро-точкой роли в правом верхнем углу карточки.
+**Цель:** заменить токены и шрифты. Внутренний UI временно «потеряет красоту», но ничего не сломается — все компоненты используют CSS-переменные.
 
-**Где:** `src/components/home/QuickActionsBlended.tsx` (уже есть точки), `src/components/home/PrimaryActions.tsx` (нет).
+1. **`src/styles/tokens.css`** — полная перезапись:
+   - Новая палитра: `--brand-navy: 213 73% 15%` (#0A2240), `--brand-orange: 22 79% 47%` (#D96B1A), `--brand-cream: 36 27% 96%` (#F7F5F1)
+   - Stone-шкала из 9 ступеней (`--ink`, `--text-body`, `--text-muted`, `--border-strong`...)
+   - Семантика: success/warning/danger/info по канону (`#166534`, `#92400E`, `#991B1B`, `#1B4F8A`)
+   - 16 фиксированных цветов категорий каталога
+   - Удаление: `--cluster-*` mint-палитры, glass-tokens, glow-shadows, mint primary
+   - Light = дефолт. `.dark` переписан на navy-инверсию для admin/MC (cream→navy-900, ink→cream)
 
-**Реализация:**
-- Унифицировать `PrimaryActions.tsx`: жёсткая сетка `grid-cols-4`, 8 слотов (брать из `blendActions(personas, 8)` — расширить хук).
-- Каждый слот: 32×32 icon-square + 10.5px label + role-dot 5×5px в `top-2 right-2`, цвет = `ROLE_META[role].color`.
-- Если активная роль одна — точка цвета этой роли на всех слотах (не пусто, единый стиль).
-- `min-h-[44px]` на всю карточку — touch-target compliance.
+2. **`tailwind.config.ts`**:
+   - Шрифты: `display: ['Unbounded', ...]`, `display-en: ['Noto Serif']`, `sans: ['Golos Text', ...]`, `sans-en: ['Noto Sans']`, `mono: ['JetBrains Mono']`
+   - Type-scale из канона (`display`, `h1`-`h4`, `body-lg/sm`, `caption`, `label`)
+   - Spacing — без изменений (4px-grid уже совпадает)
+   - **Радиусы оставляем как есть в Фазе 1**, перенастроим в Фазе 4 (иначе сломается слишком много за раз)
+   - Удаляются: `gold`, `coral`, `cluster.*`, `accent-*` фуксии/violets
 
-**Acceptance:** на Home всегда видно 8 квадратных карточек 4×2, каждая с role-точкой; mobile 375px не ломается, no horizontal scroll.
+3. **`index.html`** — Google Fonts URL по канону (Unbounded + Golos Text + Noto Serif + Noto Sans + JetBrains Mono)
 
----
+4. **`src/index.css`** — глобальный `font-family` через CSS-логику по `lang` (RU → Unbounded/Golos, EN → Noto Serif/Noto Sans)
 
-## 3. SectionHead унификация (Label + meta)
+5. **`src/lib/themeSwitch.ts`, `src/contexts/ThemeContext.tsx`** — light по дефолту, переключатель доступен только в admin/MC секциях
 
-**Что:** в дизайне каждый блок начинается с компактного `<SectionHead title="ACTIVITY" meta="All roles · this week"/>` — 11px uppercase, letter-spacing 0.12em, muted-2 цвет, meta справа.
+6. **Создаётся `docs/canonical/MIGRATION_TO_CANON_BASELINE.md`**
 
-**Где:** новый компонент `src/components/home/SectionHead.tsx`; применить в:
-- `ActivityFeed.tsx` (`Activity` / `Активность`)
-- `QuickActionsBlended` / `PrimaryActions` (`For you` / `Для вас`)
-- `ClusterHub` (`All services` / `Все сервисы`)
-- `ConciergeCard` (`Concierge` / `Консьерж`)
-
-**Реализация:**
-- Один экспортируемый компонент `<SectionHead title meta?/>` — заменить 4 разных варианта заголовков на один canonical.
-- Использовать токены `text-muted-foreground/80` + `tracking-[0.12em] text-[11px] uppercase font-semibold`.
-
-**Acceptance:** все 4 блока на Home имеют одинаковый микро-заголовок; визуальный ритм страницы становится регулярным.
+**Review checkpoint:** прохожу по 5 ключевым экранам (`/`, `/discover`, `/admin`, `/property`, `/mc`), показываю скриншоты «до/после», ты решаешь идти дальше.
 
 ---
 
-## 4. Role-onboarding screen (S03 reference)
+## Фаза 2 · Внешний контур — деньги и доверие (3-5 дней)
 
-**Что:** в `screens-core.jsx · S03_Roles` — вертикальный список 7 ролей с подзаголовками RU («Прилёт, аренда, впечатления»), цветной точкой 12px и checkbox 20px справа. На сегодня RoleSheet не показывает описаний и расположен горизонтально grid-2.
+**Цель:** довести до канона все экраны, которые видит HNWI и инвестор перед сделкой.
 
-**Где:** `src/components/home/RoleSheet.tsx`.
+- `src/pages/WelcomeLanding.tsx` (`/index`) — переписать в каноническом стиле: cream фон, navy CTA, Unbounded H1, документная сетка с hairline-разделителями, без glassmorphism, без mint
+- `src/pages/Discover.tsx` — переход на новые токены
+- `src/pages/property/*` — листинги, карточки, detail-экраны
+- `src/pages/invest/*` — Investor dashboard, ClearView рейтинги, отчёты
+- `src/pages/newbuilds/*` — **унификация:** удалить `.nb-theme`, `nb-glass`, gold, Playfair. Заменить на каноническую navy + Noto Serif для заголовков. Сохранить editorial-ощущение через типографику и spacing, не через цвет/материал
+- Удалить файл `src/styles/newbuilds-theme.css`
+- Email-шаблоны (если в репо) — обновить под канон
 
-**Реализация:**
-- Раздел "Add a role" — переключить с `grid-cols-2` на одну колонку `flex flex-col`, добавить `description` поле в `ROLE_META` (RU + EN) и отображать вторую строку 12px muted под именем роли.
-- Active-роли — оставить ordered list как сейчас, но добавить тот же sub-line с описанием.
-- Длины: использовать существующие RU описания из `data.jsx`:
-  - tourist: «Прилёт, аренда, впечатления»
-  - resident: «Виза, жильё, ежедневные сервисы»
-  - owner: «Управление недвижимостью и доходом»
-  - agent: «Листинги, лиды, комиссии»
-  - provider: «Витрина, брони, выплаты»
-  - investor: «Pipeline, партнёры, капитал»
-  - developer: «Проекты, бронирования, продажи»
+**Новые компоненты в `src/components/ds/`:**
+- `MarketingHero` — eyebrow + H1 + sub + CTA-пара по канону
+- `StatGrid` — hairline-сетка цифр (mono)
+- `ClusterCard` — нумерованная карточка `01...08`
+- `TrustStrip` — горизонтальный список доверия
+- `DocumentSection` — секция документ-стиля для лендингов и Invest
 
-**Acceptance:** Role sheet выглядит как S03 в референсе — описание под каждой ролью, единая колонка, читается без скролла на 375px при ≤7 доступных ролях.
+**Review checkpoint.**
 
 ---
 
-## Что НЕ входит в этот pass
+## Фаза 3 · Внутренний app (1-2 недели)
 
-- **Light-luxury cream/navy theme** — это вариация tweaks-панели в дизайне (демо-режим), не canonical. Тёмная палитра остаётся прода-стандартом по `05-visual-design-system.md`.
-- 20 reference screens (S01..S20) кроме Home — это Figma-референс, не инструкция переписывать существующие страницы. Точечные элементы из S04 (Home) уже частично внедрены в Wave 12.
-- Migration `/operate` shell (это отдельный architecture task, см. ARCHITECTURE_V2 §08).
+**Цель:** привести внутренние экраны к канону. Большая часть автоматически получит правильный вид от Фазы 1 (токены), но ~80 экранов используют hardcoded mint/glass/неканонические радиусы.
+
+Поэтапно по доменам, в порядке частоты использования:
+
+1. **Home / Index** — `src/pages/Index.tsx`, `HeroBlock`, `ActiveSituationBanner`, `QuickActionsGrid`
+2. **CRM** — `src/pages/admin/CRM*`, `CreateContactSheet`, contact lists
+3. **MC / Operate** — `src/pages/mc/*`, owner dashboards
+4. **Bookings / Property care** — экраны с timeline, status history, calendar
+5. **Auth / Onboarding** — `WelcomeLanding` уже сделан в Ф2, остальные auth-формы
+6. **Admin** — `AdminDashboard`, `AdminKPIGrid` и подразделы
+
+**Что чинится в каждом домене:**
+- Замена hardcoded `bg-[#...]`, `text-[hsl(...)]` → семантические токены
+- Удаление `nb-glass`, `backdrop-blur-xl`, `bg-card/40` glassmorphism → плотные карточки с `border-border-strong`
+- Замена mint accents (`text-primary` где primary был mint) → navy/orange по семантике
+- Замена шрифтовых arbitrary values (`text-[40px]`, `tracking-[-0.035em]`) → токены типошкалы
+- Тени → `shadow-xs/sm` максимум, по умолчанию `shadow-none` + бордер
+
+**Review checkpoint после каждого домена.**
+
+---
+
+## Фаза 4 · Финальная зачистка и радиусы (3-5 дней)
+
+**Цель:** окончательное соответствие канону.
+
+1. **Радиусы → 0px по канону**:
+   - `tailwind.config.ts`: `borderRadius.lg/md/sm` → `0`, оставляем `rounded-sm` (2px) для chips, `rounded-full` для аватаров
+   - `tokens.css`: `--radius: 0`, `--card-radius: 0`
+   - Глобальный поиск-замена: `rounded-xl` → удалить, `rounded-2xl` → удалить, `rounded-lg` (на CTA/карточках) → удалить
+   - Сохраняем `rounded-full` (аватары, статусные точки) и `rounded-sm` (badges, category chips)
+   - Ожидается ~200-300 правок в компонентах
+
+2. **ESLint правила** — добавить запрет на:
+   - arbitrary color values (`bg-[#...]`, `text-[hsl(...)]`)
+   - запрещённые шрифт-классы (Playfair, кроме конкретных editorial-блоков если останутся)
+   - `rounded-xl`, `rounded-2xl`, `rounded-md` (8-16px запрещены каноном)
+   - `backdrop-blur-*`, `glassmorphism` patterns
+
+3. **Документация:**
+   - Обновить `mem://style/super-app-visual-identity` → пометить как archived
+   - Обновить `mem://style/design-system-ds2-standards` → переписать под канон
+   - Обновить `src/design-system/foundations/README.md` под канон
+   - Обновить `mem://style/editorial-dark-luxury-theme` → пометить archived
+
+4. **Удаление мёртвого кода:**
+   - `src/styles/newbuilds-theme.css`
+   - Cluster-цвета из tokens (заменены 16 категориями)
+   - Gold/coral/teal палитры
+
+5. **Финальный визуальный sweep** — пройтись по сайтмэпу, зафиксировать 30+ экранов как «эталонные» в `docs/canonical/screens/`.
 
 ---
 
 ## Технические детали
 
-**Файлы к правке:**
-1. `src/lib/nav/navigationModel.ts` — добавить `pro_shell_tabbar_v1` flag handling + Operate slot
-2. `src/components/nav/BottomBar.tsx` — read flag, swap слот по роли
-3. `src/components/home/PrimaryActions.tsx` — 8-slot grid + role dots
-4. `src/components/home/SectionHead.tsx` — **новый** canonical компонент
-5. `src/components/home/ActivityFeed.tsx`, `ClusterHub.tsx`, `QuickActionsBlended.tsx`, `ConciergeCard.tsx` — заменить inline-заголовки на `<SectionHead>`
-6. `src/components/home/RoleSheet.tsx` — single-column layout, descriptions
-7. `src/lib/roleBlend.ts` — добавить `description: { ru, en }` в `ROLE_META`
-8. `docs/canonical/CHANGELOG.md`, `src/lib/appVersion.ts` (3.55.0), `public/version.json`
+### Стратегия отката
+- **Глобальный rollback:** через History → выбрать чекпоинт перед началом Фазы 1
+- **Частичный rollback:** каждая фаза = отдельный чекпоинт, можно вернуться к любому
+- **Файл-якорь:** `MIGRATION_TO_CANON_BASELINE.md` содержит точный snapshot ключевых файлов
 
-**Migration:** `INSERT INTO system_settings (key, value) VALUES ('feature_flag:pro_shell_tabbar_v1', 'false')` — флаг готов к включению из Cloud UI без релиза.
+### Что НЕ ломается миграцией
+- Бизнес-логика (Supabase queries, API, RLS)
+- Routing, state management, contexts
+- Edge Functions
+- БД схема
+- i18n строки
+- Все hooks
 
-**Версия:** app `3.55.0`, canonical `v1.23.0`, milestone `M13.A`.
+### Риски и митигация
+| Риск | Митигация |
+|---|---|
+| Регрессия в редко-посещаемых экранах | После каждой фазы — review checkpoint, можно остановиться |
+| Шрифты не загрузятся → FOUT | Фоллбэки в font-family stack, `font-display: swap` |
+| Сломается dark mode для admin | Отдельный re-test в Фазе 1, инверсия navy = читаемость гарантирована |
+| Newbuilds потеряет premium-ощущение | Editorial через типографику Noto Serif + правильный spacing вместо золота |
+| Большое количество визуальных regressions, которые сложно увидеть | Разбивка на 4 фазы + чекпоинт перед каждой |
 
-**Acceptance overall:** на дев-превью Home выглядит ритмичнее (одинаковые SectionHead), Quick Actions = ровная сетка 4×2 с цветными точками, RoleSheet — компактный список с описаниями. Pro-shell tabbar готов, но включается по флагу.
+### Объём
+- Фаза 1: 6 файлов
+- Фаза 2: ~25 файлов + 5 новых компонентов
+- Фаза 3: ~80 компонентов в 6 доменах
+- Фаза 4: ~200-300 точечных правок радиусов + правила линтера
+
+### Длительность
+~3-4 недели рабочего времени с твоими review между фазами. Сейчас approve запускает Фазу 1.
 
