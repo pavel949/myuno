@@ -5,6 +5,24 @@
 
 ---
 
+## [1.19.1] — 2026-04-23
+
+### Added (M9.7b · Runtime + CI guard for uiStrings canonical lexicon)
+- **`src/test/semantic/uiStrings-canonical.test.ts`** — новый Vitest suite (24 параметризованных + 2 sanity = 26 тестов). Импортирует `uiStrings` напрямую и проходит каждый bilingual leaf (RU + EN), проверяя его против `FORBIDDEN_SYNONYMS` с тем же word-boundary regex, что использует `validate-semantic.mjs`. Покрывает то, что ESLint в принципе не видит: строки, собранные из шаблонов в рантайме, спреды из хелперов, динамические merge'ы. Также проверяет, что у каждой записи заполнены обе локали (RU + EN, non-empty).
+- **`scripts/validate-semantic.mjs`** — расширен скан synonyms на `src/i18n/*.ts`. `COMMERCIAL_RE` дополнен `i18n` чтобы `commercial`-теги (собственность, котлован) применялись к UI-словарям как user-facing copy.
+
+### Verification
+- `npx vitest run src/test/semantic/` → **27 passed** (uiStrings 26 + validate-semantic 1).
+- `node scripts/validate-semantic.mjs --strict` → 0/0 (включая i18n).
+- `src/lib/appVersion.ts` → `3.51.1`, `public/version.json` → `3.51.1`.
+
+### Defense-in-depth stack для UI-словарей (после M9.7b)
+1. **ESLint** (`no-restricted-syntax`, severity=error на `src/i18n/**`) — статический guard на исходники.
+2. **Validate-semantic** (`--strict` в CI) — regex-скан файлов словарей.
+3. **Vitest runtime test** — импортирует и обходит реальное дерево объекта, ловит динамику.
+
+---
+
 ## [1.19.0] — 2026-04-23
 
 ### Added (M9.7 · ESLint canonical synonyms guard — template literals + i18n)
