@@ -84,7 +84,7 @@ export function ResultStep({ result, lang, onReset }: Props) {
       <div className="flex flex-col gap-2 pt-2 sm:flex-row">
         {primary && (
           <Button className="flex-1" onClick={() => navigate(primary.route)}>
-            {COPY.primaryCta[lang]}
+            {COPY.openPrefix[lang]} · {primary.title[lang]}
           </Button>
         )}
         <Button variant="outline" className="flex-1" onClick={() => navigate('/discover')}>
