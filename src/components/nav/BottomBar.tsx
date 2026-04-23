@@ -148,7 +148,11 @@ export const BottomBar = forwardRef<HTMLDivElement, BottomBarProps>(
           {...props}
         >
           <div
-            className="absolute inset-0 border-t border-border bg-[hsl(var(--bg-surface))]"
+            className="absolute inset-0 border-t border-border bg-[hsl(var(--bg-surface)/0.85)]"
+            style={{
+              backdropFilter: 'blur(20px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+            }}
           />
 
           <div

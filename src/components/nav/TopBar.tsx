@@ -18,7 +18,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { CurrencySwitcher } from '@/components/uno/CurrencySwitcher';
-import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
 import { MiniCart } from '@/components/market/MiniCart';
 import { Button } from '@/components/ui/button';
 import { GlobalSearchModal } from '@/components/search/GlobalSearchModal';
@@ -171,7 +170,6 @@ export const TopBar = memo(function TopBar({
             </button>
             <LanguageSwitcher size="sm" />
             <CurrencySwitcher size="sm" />
-            <ThemeSwitcher size="sm" />
             {cartEnabled && (
               <MiniCart className="rounded-[var(--radius-sm)] hover:bg-muted/40 transition-colors" />
             )}

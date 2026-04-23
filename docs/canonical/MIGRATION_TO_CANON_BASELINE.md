@@ -192,29 +192,48 @@ fontFamily: {
 
 ---
 
-## Hotfix #2 2026-04-23 (full-app verification + theme switcher)
+## Phase 4 — Radii enforcement + ESLint regression rules ✅ (2026-04-23)
 
-### Аудит всех 3 фаз
-Прошёл grep по всему `src/` на остатки legacy палитры:
-1. **mint hex (#00D68F, #4E7BFF, #10B981, #06B6D4, #A855F7, etc.)** найдены в data-файлах с inline `style={{ background: accentColor }}` — overrides их не покрывают (это не CSS classes).
-2. **Playfair Display** — отсутствует. ✅
-3. **Inline backdrop-filter** — найден 1 случай в `BottomBar.tsx`.
+**Цель:** закрепить канон в коде, чтобы новые компоненты не могли регрессировать визуальную систему.
 
-### Изменения
+### 1 · Глобальный 0px радиус
+**`src/styles/canon-overrides.css` §4** — добавлен блок:
+- Все `rounded-{sm,md,lg,xl,2xl,3xl}` и направленные варианты (`rounded-t-*`, `rounded-bl-*` и т.д.) → `border-radius: 0 !important`.
+- Исключения: `rounded-full` (аватары, icon chips), `rounded-*-full` (направленные круги), shadcn `[data-slot="skeleton"]` (визуальный affordance).
+- Покрывает ~1.2k call-sites без правки компонентов.
 
-- **`src/lib/home/quickActionsCatalog.ts`** — все hex акцент-цвета (~30 случаев) переведены на CSS-переменные канона: `#00D68F → hsl(var(--brand-navy-700))`, `#10B981 → hsl(var(--success))`, `#F59E0B → hsl(var(--accent))` и т.д. Quick actions теперь рендерятся в navy/orange.
+### 2 · ESLint regression rules
+**`eslint.config.js`** — добавлен набор `CANON_VISUAL_RULES`, блокирующий три класса нарушений на уровне линтера:
 
-- **`src/hooks/useUserPersonas.ts`** — `PERSONA_GRADIENTS` (14 персон) полностью переписаны: вместо cyan/emerald/purple/pink градиентов используются navy↔orange вариации канона.
+| Что блокируется | Regex | Severity | Сообщение |
+|---|---|---|---|
+| Legacy palette | `(bg\|text\|border\|from\|to\|via\|ring\|fill\|stroke\|shadow)-(emerald\|teal\|cyan\|sky\|indigo\|purple\|violet\|fuchsia\|pink\|rose\|lime\|mint\|amber)-{50..950}` | warn | "Use semantic tokens (bg-primary, text-success, …)" |
+| Glassmorphism | `backdrop-blur(?:-{none\|sm\|md\|lg\|xl\|2xl\|3xl})?` | warn | "Forbidden by canon §6 (solid surfaces)" |
+| Legacy radii | `rounded(?:-{sm\|md\|lg\|xl\|2xl\|3xl})?` (negative-lookahead на `-full`) | warn | "Canon §5 mandates 0px (allowed: rounded-full)" |
 
-- **`src/components/newbuilds/ClearViewReport.tsx`** — `gradeColor()` маппит ClearView рейтинги (AAA/AA/A/BBB/BB) на семантические токены (`--success`, `--brand-navy-700`, `--accent`, `--destructive`). Inline `color: '#10b981'/'#ef4444'` заменены на CSS-переменные.
+Применяется через `no-restricted-syntax` к `Literal` и `TemplateElement` нодам — ловит и обычные строки, и template literals.
 
-- **`src/components/nav/BottomBar.tsx`** — убран inline `backdropFilter: 'blur(20px) saturate(180%)'`; нижняя навигация теперь solid surface (canon §6, без glass).
+**Scope:**
+- Уровень `warn` для всего проекта — не блокирует CI, но создаёт видимый счётчик регрессий в IDE/CI logs.
+- Уровень `error` для `src/i18n/**` остаётся только для ToV / canonical synonyms (не визуальных правил), чтобы не ломать билд из-за data-строк.
+- Исключения (`src/content/semantic/**`, `eslint.config.js`, `scripts/validate-semantic.mjs`) — отключают `no-restricted-syntax` целиком, чтобы source-of-truth файлы не флагали сами себя.
 
-### Theme switcher
-- **`src/components/nav/TopBar.tsx`** — `<ThemeSwitcher size="sm" />` добавлен в правый блок утилит рядом с Language/Currency. Теперь light/dark/system переключаются с любой страницы.
-- Dark mode tokens (`src/styles/tokens.css §.dark`) уже содержат канонические инверсии: navy-900 background + cream foreground + orange CTA. Никакого mint/glass/glow.
+### 3 · Что Phase 4 НЕ делает
+- Не переписывает существующие ~552 hardcoded classNames на семантические токены — эту работу подхватит **Phase 5** (cleanup) поверх warning-list, выдаваемого ESLint.
+- Не трогает inline-стили с хексами (~88 случаев) — отдельный итерационный pass с poderеним по pages.
+- Не удаляет `canon-overrides.css` — он остаётся safety-net, пока счётчик ESLint warnings > 0.
 
-### Verify
-- `tsc --noEmit` → exit 0
-- `vite build` → success
-- Все три фазы покрыты на public, owner, admin, MC, vendor поверхностях.
+### Verification
+- `npx tsc --noEmit` → exit 0.
+- Phase 1-3 hotfix (cluster tokens, data-layer hex sweep) уже применён и закреплён.
+- ThemeSwitcher (light/dark/system) интегрирован в TopBar.
+
+### Итог по миграции (Phases 1-4)
+| Phase | Scope | Status |
+|---|---|---|
+| 1 — Foundation | tokens.css, palette, fonts, ThemeProvider light default | ✅ |
+| 2 — Newbuilds unification | newbuilds-theme.css → canon, удалён Playfair-only flow | ✅ |
+| 3 — Global override | canon-overrides.css (~552 классов + glassmorphism off) + cluster hotfix | ✅ |
+| 4 — Enforcement | 0px radii global, ESLint regression rules | ✅ |
+| 5 — Cleanup (next) | Переписать warning-классы на semantic tokens, убрать override-файл | 🟡 todo |
+
