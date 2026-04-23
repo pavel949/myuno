@@ -5,6 +5,27 @@
 
 ---
 
+## [1.19.0] — 2026-04-23
+
+### Added (M9.7 · ESLint canonical synonyms guard — template literals + i18n)
+- **`eslint.config.js`** — правило `no-restricted-syntax` для запрещённых синонимов §14 теперь **автогенерируется** из `src/content/semantic/forbiddenSynonyms.ts`. Раньше regex был захардкожен и быстро дрифтил с источником истины — теперь источник один, drift невозможен.
+- **Template literal coverage** — каждый канонический синоним проверяется И на `Literal` нодах (`"юнит"`), И на `TemplateElement` (`` `Купить юнит` ``, `` `${x} MyUNO` ``). Раньше template-вариант покрывал только узкий список (юнит/чаноте/котлован/MyUNO), теперь покрывает все 14 терминов из словаря: `юнит`, `собственность`, `приобретение`, `трансакция`, `чаноте`, `котлован`, `Земельный департамент`, `гарантийный счёт`, `КонтрактAI`, `ДоговорAI`, `Клиарвью`, `КлирВью`, `MyUNO`, `My UNO`, `MYUNO`.
+- **i18n strict scope** — для `src/i18n/**/*.{ts,tsx}` (`uiStrings.ts`, `ru.ts`, `en.ts`, `th.ts`) severity поднята до **`error`**. Любой forbidden-синоним в словарях UI ломает CI. Сейчас словари 100% canonical (verified) — это закрепляет состояние.
+- **Wider codebase scope** — для остального `src/**` severity остаётся `warn` (как у tone-of-voice rule M7), полная зачистка трекается в M9b. Текущий бейзлайн: ~69 предупреждений в legacy-коде (newbuilds, owner, info pages).
+- **Source-of-truth opt-out** — `src/content/semantic/**`, `scripts/validate-semantic.mjs`, `eslint.config.js` явно отключают правило, т.к. легитимно содержат forbidden-термины как данные/regex.
+
+### Verification
+- Sanity canary: `juni`-литерал в `src/i18n/_canary.ts` → 4 errors (правильно). Тот же файл в `src/_canary.ts` → 4 warnings (правильно).
+- `npx eslint src/i18n/uiStrings.ts src/i18n/{ru,en,th}.ts` → clean.
+- `npx eslint src/content/semantic/forbiddenSynonyms.ts` → clean (opt-out работает).
+- `node scripts/validate-semantic.mjs --strict` → **0 errors / 0 warnings**.
+- `src/lib/appVersion.ts` → `3.51.0`, `public/version.json` → `3.51.0`.
+
+### Status
+- **M9 · Semantic Core Rollout: 100% complete.** M9.1 (audit) + M9.2 (URL hygiene) + M9.3 (SEO refactor) + M9.4 (JSON-LD) + M9.5 (edge prompts) + M9.6 (Knowledge Hub seeding) + M9.7 (ESLint guard) — все закрыты.
+
+---
+
 ## [1.18.0] — 2026-04-23
 
 ### Added (M9.6 · Knowledge Hub Seeding)
