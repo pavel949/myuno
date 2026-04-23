@@ -11,7 +11,8 @@
  * remains discoverable without breaking existing /start.
  */
 import { Helmet } from 'react-helmet-async';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useMemo } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Sparkles, Check, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -68,13 +69,37 @@ function StepDots({ step }: { step: number }) {
   );
 }
 
+/**
+ * Sanitize the `?return=` query param so it can only redirect inside the app
+ * (must start with `/` and not be a protocol-relative URL).
+ */
+function sanitizeReturnPath(raw: string | null): string {
+  if (!raw) return '/';
+  if (!raw.startsWith('/') || raw.startsWith('//')) return '/';
+  return raw;
+}
+
 export default function StartOnboardingV2() {
   const { language } = useLanguage();
   const lang = (language === 'ru' ? 'ru' : 'en') as L;
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const flagOn = useFeatureFlag('concierge_routing_v2_canonical', false);
 
+  const returnTo = useMemo(
+    () => sanitizeReturnPath(searchParams.get('return')),
+    [searchParams],
+  );
+
   const o = useCanonicalOnboarding();
+
+  // After the result step renders, auto-return to the caller (e.g. /account)
+  // so refining persona feels like a quick edit, not a detour.
+  useEffect(() => {
+    if (o.step !== 3 || returnTo === '/') return;
+    const t = setTimeout(() => navigate(returnTo), 1800);
+    return () => clearTimeout(t);
+  }, [o.step, returnTo, navigate]);
 
   if (!flagOn) {
     return (
@@ -89,7 +114,7 @@ export default function StartOnboardingV2() {
             </div>
             <h1 className="text-xl font-bold">{T(COPY.flagOffTitle, lang)}</h1>
             <p className="text-sm text-muted-foreground">{T(COPY.flagOffBody, lang)}</p>
-            <Button onClick={() => navigate('/')} className="w-full">
+            <Button onClick={() => navigate(returnTo)} className="w-full">
               {T(COPY.goHome, lang)}
             </Button>
           </Card>
@@ -227,7 +252,7 @@ export default function StartOnboardingV2() {
           <div className="mt-4 text-center">
             <button
               type="button"
-              onClick={() => navigate('/')}
+              onClick={() => navigate(returnTo)}
               className="text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
               {T(COPY.skip, lang)}

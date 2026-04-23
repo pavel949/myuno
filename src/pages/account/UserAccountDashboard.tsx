@@ -12,6 +12,7 @@ import { QuickActionsPanel } from '@/components/account/QuickActionsPanel';
 import { PersonalRecommendations } from '@/components/account/PersonalRecommendations';
 import { DashboardStatsBar } from '@/components/account/DashboardStatsBar';
 import { AccountSidebar } from '@/components/account/AccountSidebar';
+import { PersonaDetectionPreview } from '@/components/account/PersonaDetectionPreview';
 
 import { DownloadAppButton } from '@/components/pwa/DownloadAppButton';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -43,6 +44,9 @@ export default function UserAccountDashboard() {
 
             {/* Active Stay banner */}
             <AccountActiveStay />
+
+            {/* Persona / clusters self-service preview (M5 H.3) */}
+            <PersonaDetectionPreview />
 
             {/* Stats bar */}
             <DashboardStatsBar />
