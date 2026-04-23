@@ -54,8 +54,8 @@ export default function ForgotPassword() {
     } catch (error) {
       toast.error(
         language === 'ru'
-          ? 'Произошла ошибка'
-          : 'An error occurred'
+          ? 'Не удалось отправить письмо. Проверьте адрес и попробуйте снова.'
+          : 'Could not send email. Check the address and try again.'
       );
     } finally {
       setIsLoading(false);

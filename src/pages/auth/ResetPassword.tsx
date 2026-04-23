@@ -110,8 +110,8 @@ export default function ResetPassword() {
     } catch (error) {
       toast.error(
         language === 'ru'
-          ? 'Произошла ошибка'
-          : 'An error occurred'
+          ? 'Не удалось обновить пароль. Попробуйте позже или запросите ссылку заново.'
+          : 'Could not update password. Try again later or request a new link.'
       );
     } finally {
       setIsLoading(false);

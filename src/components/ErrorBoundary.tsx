@@ -25,8 +25,8 @@ const ERROR_MESSAGES = {
     desc: { en: 'Some components could not be loaded. Please check your connection and try again.', ru: 'Не удалось загрузить некоторые компоненты. Проверьте подключение и попробуйте снова.' },
   },
   generic: {
-    title: { en: 'Something went wrong', ru: 'Произошла ошибка' },
-    desc: { en: 'We are working on it. Please try again.', ru: 'Мы работаем над этим. Пожалуйста, попробуйте снова.' },
+    title: { en: 'This page failed to load', ru: 'Страница не загрузилась' },
+    desc: { en: 'Try again, or reload the page. We have logged the issue.', ru: 'Попробуйте снова или перезагрузите страницу. Мы записали ошибку.' },
   },
   tryAgain: { en: 'Try again', ru: 'Попробовать снова' },
   reload: { en: 'Reload page', ru: 'Перезагрузить' },
@@ -158,9 +158,9 @@ export function useGlobalErrorHandler() {
         );
       } else {
         toast.error(
-          lang === 'ru' 
-            ? 'Произошла ошибка. Попробуйте снова.' 
-            : 'An error occurred. Please try again.'
+          lang === 'ru'
+            ? 'Запрос не выполнен. Попробуйте ещё раз.'
+            : 'Request failed. Please try again.'
         );
       }
       
