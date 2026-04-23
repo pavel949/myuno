@@ -105,7 +105,12 @@ export default function Bookings() {
   const navigate = useNavigate();
   const [bookings, setBookings] = useState<BookingItem[]>([]);
   const [statusHistory, setStatusHistory] = useState<Record<string, BookingStatusEvent[]>>({});
-  const [historyLoading, setHistoryLoading] = useState(false);
+  // Per-booking loading: only the bookings whose ids are in this set show a
+  // skeleton/spinner. Other timelines stay idle.
+  const [loadingHistoryIds, setLoadingHistoryIds] = useState<Set<string>>(new Set());
+  // Tracks which booking ids we've already fetched (or hydrated from cache),
+  // so re-expanding a timeline doesn't trigger a refetch.
+  const loadedHistoryIdsRef = useRef<Set<string>>(new Set());
   const [expandedTimelines, setExpandedTimelines] = useState<Record<string, boolean>>({});
   const [highlightedEventIds, setHighlightedEventIds] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
