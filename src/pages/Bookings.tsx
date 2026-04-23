@@ -137,14 +137,15 @@ export default function Bookings() {
     const cached = forceRefresh ? null : getCachedStatusHistory(user.id);
     if (cached) {
       setStatusHistory(cached);
-      setHistoryLoading(false);
+      // Mark every cached booking id as already-loaded so re-expanding skips
+      // the network entirely.
+      loadedHistoryIdsRef.current = new Set(Object.keys(cached));
     } else {
       setStatusHistory({});
-      setHistoryLoading(true);
+      loadedHistoryIdsRef.current = new Set();
     }
 
     try {
-      // Phase 1: Load bookings — render cards as soon as this resolves.
       const { data: allBookingsData, error } = await supabase
         .from('bookings')
         .select('*, booking_items(*)')
@@ -171,50 +172,65 @@ export default function Bookings() {
 
       setBookings(formattedBookings);
       setIsLoading(false);
-
-      // Phase 2: Status history.
-      const bookingIds = formattedBookings.map((b) => b.id);
-      if (bookingIds.length === 0) {
-        setCachedStatusHistory(user.id, {});
-        setHistoryLoading(false);
-        return;
-      }
-
-      // Cache hit and not a forced refresh → skip the network call entirely.
-      if (cached && !forceRefresh) {
-        return;
-      }
-
-      const { data: historyRows, error: historyError } = await supabase
-        .from('booking_status_history')
-        .select('id, booking_id, from_status, to_status, notes, created_at')
-        .in('booking_id', bookingIds)
-        .order('created_at', { ascending: true });
-
-      if (!historyError && historyRows) {
-        const grouped: Record<string, BookingStatusEvent[]> = {};
-        for (const row of historyRows) {
-          if (!grouped[row.booking_id]) grouped[row.booking_id] = [];
-          grouped[row.booking_id].push({
-            id: row.id,
-            from_status: row.from_status,
-            to_status: row.to_status,
-            notes: row.notes,
-            created_at: row.created_at,
-          });
-        }
-        setStatusHistory(grouped);
-        setCachedStatusHistory(user.id, grouped);
-      }
+      // Status history is now fetched lazily per booking via loadHistoryFor()
+      // when the user expands a timeline.
     } catch (error) {
       console.error('Error loading bookings:', error);
       setLoadError(true);
       toast.error(language === 'ru' ? 'Не удалось загрузить бронирования' : 'Failed to load bookings');
       setIsLoading(false);
-    } finally {
-      setHistoryLoading(false);
     }
   }, [user, language]);
+
+  /**
+   * Lazily fetch status history for a single booking. No-op if we already have
+   * it (either from a previous fetch or hydrated from the module-level cache).
+   * Only this booking's loading flag flips — other timelines stay idle.
+   */
+  const loadHistoryFor = useCallback(async (bookingId: string) => {
+    if (!user) return;
+    if (loadedHistoryIdsRef.current.has(bookingId)) return;
+    if (loadingHistoryIds.has(bookingId)) return;
+
+    setLoadingHistoryIds((prev) => {
+      if (prev.has(bookingId)) return prev;
+      const next = new Set(prev);
+      next.add(bookingId);
+      return next;
+    });
+
+    try {
+      const { data: historyRows, error } = await supabase
+        .from('booking_status_history')
+        .select('id, booking_id, from_status, to_status, notes, created_at')
+        .eq('booking_id', bookingId)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+
+      const events: BookingStatusEvent[] = (historyRows || []).map((row) => ({
+        id: row.id,
+        from_status: row.from_status,
+        to_status: row.to_status,
+        notes: row.notes,
+        created_at: row.created_at,
+      }));
+
+      setStatusHistory((prev) => ({ ...prev, [bookingId]: events }));
+      // Mirror into the module-level cache so a remount skips the network.
+      updateCachedStatusHistory(user.id, (prev) => ({ ...prev, [bookingId]: events }));
+      loadedHistoryIdsRef.current.add(bookingId);
+    } catch (error) {
+      console.error('Error loading status history:', error);
+    } finally {
+      setLoadingHistoryIds((prev) => {
+        if (!prev.has(bookingId)) return prev;
+        const next = new Set(prev);
+        next.delete(bookingId);
+        return next;
+      });
+    }
+  }, [user, loadingHistoryIds]);
 
   useEffect(() => {
     if (!authLoading && !user) {
