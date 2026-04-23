@@ -111,16 +111,23 @@ export function BookingStatusTimeline({
         const { Icon, label, tone } = getStatusMeta(event.to_status, isRu);
         const isLast = idx === timeline.length - 1;
         const date = new Date(event.created_at);
+        const isHighlighted = !!event.id && highlightSet.has(event.id);
         return (
           <li
             key={event.id ?? `${event.to_status}-${event.created_at}-${idx}`}
-            className={cn('relative flex gap-3', compact ? 'pb-2.5 last:pb-0' : 'pb-3.5 last:pb-0')}
+            className={cn(
+              'relative flex gap-3 -mx-2 px-2 rounded-md',
+              compact ? 'pb-2.5 last:pb-0' : 'pb-3.5 last:pb-0',
+              isHighlighted && 'animate-timeline-highlight',
+            )}
+            aria-live={isHighlighted ? 'polite' : undefined}
           >
             <span
               className={cn(
                 'relative z-10 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border bg-background',
                 isLast ? 'border-primary/40 ring-2 ring-primary/15' : 'border-border',
                 tone,
+                isHighlighted && 'animate-timeline-dot-pop ring-2 ring-primary/40',
               )}
             >
               <Icon className="h-3.5 w-3.5" aria-hidden="true" />
