@@ -351,7 +351,10 @@ export default function Bookings() {
     <AppLayout>
       <PullToRefresh onRefresh={handleRefresh} className="min-h-0 flex-1 h-[calc(100vh-8rem)]">
         <PageContainer>
-          <PageHeader title={t('nav.bookings')} />
+          <PageHeader
+            title={t('nav.bookings')}
+            actions={<RealtimeIndicator status={realtimeStatus} language={language} />}
+          />
           
           {loadError ? (
             <EmptyState
