@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Package, Scissors, Home, Car, Ship, Ticket, Flower2, Stethoscope, Clock, ChevronRight, Dumbbell, AlertCircle } from 'lucide-react';
+import { Calendar, Package, Scissors, Home, Car, Ship, Ticket, Flower2, Stethoscope, Clock, ChevronRight, Dumbbell, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -15,6 +15,8 @@ import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { toast } from 'sonner';
+import { BookingStatusTimeline, type BookingStatusEvent } from '@/components/bookings/BookingStatusTimeline';
+import { cn } from '@/lib/utils';
 
 interface BookingItem {
   id: string;
@@ -22,6 +24,7 @@ interface BookingItem {
   title: string;
   subtitle?: string;
   date: string;
+  createdAt: string;
   status: string;
   total: number;
   currency: string;
@@ -94,6 +97,8 @@ export default function Bookings() {
   const { user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [bookings, setBookings] = useState<BookingItem[]>([]);
+  const [statusHistory, setStatusHistory] = useState<Record<string, BookingStatusEvent[]>>({});
+  const [expandedTimelines, setExpandedTimelines] = useState<Record<string, boolean>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
 
@@ -121,6 +126,7 @@ export default function Bookings() {
           title: firstItem?.item_name || getBookingTypeLabel(b.booking_type, language),
           subtitle: getBookingTypeLabel(b.booking_type, language),
           date: b.scheduled_at || b.created_at,
+          createdAt: b.created_at,
           status: b.status,
           total: b.total_amount || 0,
           currency: b.currency || 'THB',
@@ -128,6 +134,33 @@ export default function Bookings() {
       });
 
       setBookings(formattedBookings);
+
+      // Batch-fetch status history for all bookings (RLS limits to user's own).
+      const bookingIds = formattedBookings.map((b) => b.id);
+      if (bookingIds.length > 0) {
+        const { data: historyRows, error: historyError } = await supabase
+          .from('booking_status_history')
+          .select('id, booking_id, from_status, to_status, notes, created_at')
+          .in('booking_id', bookingIds)
+          .order('created_at', { ascending: true });
+
+        if (!historyError && historyRows) {
+          const grouped: Record<string, BookingStatusEvent[]> = {};
+          for (const row of historyRows) {
+            if (!grouped[row.booking_id]) grouped[row.booking_id] = [];
+            grouped[row.booking_id].push({
+              id: row.id,
+              from_status: row.from_status,
+              to_status: row.to_status,
+              notes: row.notes,
+              created_at: row.created_at,
+            });
+          }
+          setStatusHistory(grouped);
+        }
+      } else {
+        setStatusHistory({});
+      }
     } catch (error) {
       console.error('Error loading bookings:', error);
       setLoadError(true);
@@ -152,6 +185,10 @@ export default function Bookings() {
   const handleRefresh = useCallback(async () => {
     await loadBookings();
   }, [loadBookings]);
+
+  const toggleTimeline = useCallback((bookingId: string) => {
+    setExpandedTimelines((prev) => ({ ...prev, [bookingId]: !prev[bookingId] }));
+  }, []);
 
   if (authLoading || isLoading) {
     return (
@@ -206,39 +243,92 @@ export default function Bookings() {
             <div className="space-y-3">
               {bookings.map((booking) => {
                 const Icon = getBookingIcon(booking.type);
+                const isExpanded = !!expandedTimelines[booking.id];
+                const events = statusHistory[booking.id] ?? [];
                 return (
                   <div
                     key={booking.id}
-                    onClick={() => navigate(`/bookings/${booking.id}`)}
-                    className="bg-card border border-border rounded-xl p-4 hover:border-primary/30 transition-all cursor-pointer"
+                    className="bg-card border border-border rounded-xl hover:border-primary/30 transition-all"
                   >
-                    <div className="flex gap-3">
-                      <div className="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center">
-                        <Icon className="w-6 h-6 text-primary" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2">
-                          <h3 className="font-medium truncate">{booking.title}</h3>
-                          <Badge className={`shrink-0 ${getStatusColor(booking.status)}`}>
-                            {getStatusLabel(booking.status, language)}
-                          </Badge>
+                    {/* Card body */}
+                    <div
+                      onClick={() => navigate(`/bookings/${booking.id}`)}
+                      className="p-4 cursor-pointer"
+                    >
+                      <div className="flex gap-3">
+                        <div className="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center">
+                          <Icon className="w-6 h-6 text-primary" />
                         </div>
-                        {booking.subtitle && (
-                          <p className="text-sm text-muted-foreground capitalize">{booking.subtitle}</p>
-                        )}
-                        <div className="flex items-center gap-3 mt-2 text-sm text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <Clock className="w-3.5 h-3.5" />
-                            <span>{formatDate(booking.date)}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2">
+                            <h3 className="font-medium truncate">{booking.title}</h3>
+                            <Badge className={`shrink-0 ${getStatusColor(booking.status)}`}>
+                              {getStatusLabel(booking.status, language)}
+                            </Badge>
                           </div>
-                          {booking.total > 0 && (
-                            <span className="font-medium text-foreground">
-                              ฿{booking.total.toLocaleString()}
+                          {booking.subtitle && (
+                            <p className="text-sm text-muted-foreground capitalize">{booking.subtitle}</p>
+                          )}
+                          <div className="flex items-center gap-3 mt-2 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-1">
+                              <Clock className="w-3.5 h-3.5" />
+                              <span>{formatDate(booking.date)}</span>
+                            </div>
+                            {booking.total > 0 && (
+                              <span className="font-medium text-foreground">
+                                ฿{booking.total.toLocaleString()}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0 self-center" />
+                      </div>
+                    </div>
+
+                    {/* Timeline toggle + content */}
+                    <div className="border-t border-border/60">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleTimeline(booking.id);
+                        }}
+                        aria-expanded={isExpanded}
+                        aria-controls={`timeline-${booking.id}`}
+                        className="w-full flex items-center justify-between px-4 py-2.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors min-h-[44px]"
+                      >
+                        <span className="uppercase tracking-[0.08em]">
+                          {language === 'ru' ? 'История статусов' : 'Status timeline'}
+                          {events.length > 0 && (
+                            <span className="ml-1.5 text-muted-foreground/60 normal-case tracking-normal">
+                              · {events.length}
                             </span>
                           )}
+                        </span>
+                        {isExpanded ? (
+                          <ChevronUp className="w-4 h-4" aria-hidden="true" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4" aria-hidden="true" />
+                        )}
+                      </button>
+                      <div
+                        id={`timeline-${booking.id}`}
+                        className={cn(
+                          'grid transition-[grid-template-rows] duration-200 ease-out',
+                          isExpanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
+                        )}
+                      >
+                        <div className="overflow-hidden">
+                          <div className="px-4 pb-4 pt-1">
+                            <BookingStatusTimeline
+                              events={events}
+                              currentStatus={booking.status}
+                              createdAt={booking.createdAt}
+                              compact
+                            />
+                          </div>
                         </div>
                       </div>
-                      <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0" />
                     </div>
                   </div>
                 );
