@@ -21,7 +21,7 @@
    { id: 'sunset-dinner', icon: '🌅', labelEn: 'Sunset Dinner', labelRu: 'Ужин на закате', descEn: 'Romantic dinner with sea view', descRu: 'Романтический ужин с видом на море', price: 8000, popular: true },
    { id: 'fishing', icon: '🎣', labelEn: 'Fishing Trip', labelRu: 'Рыбалка', descEn: 'Deep sea fishing with equipment', descRu: 'Морская рыбалка со снаряжением', price: 5000 },
    { id: 'water-toys', icon: '🎢', labelEn: 'Water Toys', labelRu: 'Водные игрушки', descEn: 'Banana, tube, wakeboard & more', descRu: 'Банан, ватрушка, вейкборд и др.', price: 6000, popular: true },
-   { id: 'snorkeling', icon: '🤿', labelEn: 'Snorkeling', labelRu: 'Снорклинг', descEn: 'Equipment & guide to best spots', descRu: 'Снаряжение и гид к лучшим местам', price: 3000 },
+   { id: 'snorkeling', icon: '🤿', labelEn: 'Snorkeling', labelRu: 'Снорклинг', descEn: 'Equipment & guide to top spots', descRu: 'Снаряжение и гид к проверенным местам', price: 3000 },
    { id: 'romantic', icon: '🥂', labelEn: 'Romantic Date', labelRu: 'Романтика', descEn: 'Champagne, flowers & private setup', descRu: 'Шампанское, цветы и приватная обстановка', price: 12000, popular: true },
    { id: 'birthday', icon: '🎂', labelEn: 'Birthday Party', labelRu: 'День рождения', descEn: 'Cake, decorations & celebration', descRu: 'Торт, декор и праздник', price: 10000 },
  ];

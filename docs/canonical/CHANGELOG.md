@@ -5,6 +5,36 @@
 
 ---
 
+## [1.14.0] — 2026-04-23
+
+### Added (M7 · Tone of Voice — tracks A/B/C closed)
+- **`docs/canonical/audits/M7-tone-of-voice.md`** — base-line аудит §14: 17 файлов с нарушениями, категоризация (❌/⚠️/✅), план зачистки.
+- **`src/i18n/uiStrings.ts`** (Track B) — канонический типизированный словарь для CTA / empty / errors / success (RU + EN). Совместим с существующим `src/i18n/{ru,en,th}.ts` (additive). Все формулировки прошли §14.
+- **ESLint rule `no-restricted-syntax`** в `eslint.config.js` (Track A) — блокирует литералы и template-элементы с forbidden tone words: `лучш(ий|ая|ие|ее)`, `уникальн(ый|ая|ое|ые)`, `революцион(ный|ная|ное|ные)`, `revolutionary`, `только сегодня`, `не упустите`, `hurry up`, `don't miss out`, `Упс`, `Oops`. Уровень `warn` (CI surface, не блокирует legacy сборки до завершения email/WhatsApp sweep).
+
+### Changed (Track C — cleanup нарушений)
+24 точечные правки текстов в 17 файлах (CTA / описания / FAQ / hero / SEO meta / toast):
+- `src/components/home/LifecycleSmartTip.tsx` — 3 строки (gym, sunset, beauty).
+- `src/components/leads/VerticalCTA.tsx` — empty-state CTA.
+- `src/components/market/MarketComingSoonOverlay.tsx`, `src/components/reviews/PostOrderReviewPrompt.tsx`, `src/components/trip-planner/{TripPositioningHero,TripChecklist}.tsx`, `src/components/vertical/VerticalInsightPanel.tsx`, `src/components/experiences/PropertyTourPromo.tsx`, `src/components/pwa/AndroidInstallGuide.tsx`.
+- `src/hooks/useConsultationRequests.ts` (toast), `src/hooks/useYachtExperiences.ts`.
+- `src/lib/config/phuketAreas.ts` (Phuket Town description), `src/lib/nav/clusterCatalog.ts` (cluster I value).
+- `src/pages/Support.tsx` (2×), `src/pages/arrive/ExchangeBotPage.tsx`, `src/pages/arrive/SIMStartPage.tsx` (SEO meta), `src/pages/guest/WelcomeFlow.tsx`, `src/pages/property/PropertyConsultation.tsx` (3×), `src/pages/babysitter/BabysitterDetail.tsx`, `src/pages/info/PartnersPage.tsx`, `src/pages/owner/ChannelManager.tsx`.
+
+Канонические замены:
+- `лучший / best` → `проверенный / verified`, `подходящий / suitable`, `оптимальный / optimal`, `выгодный / competitive`, `избранный / curated`.
+- `Подберём лучшие варианты` → `Подберём подходящие варианты`.
+- `Совсем скоро!` (urgency) → `Скоро откроем доступ`.
+
+### Notes
+- ⚠️ Edge-cases оставлены без правок: `medicalTaxonomy.ts:73` (системный tier `⭐⭐⭐` icon), `prioritizeHomeSections.ts:141` (комментарий разработчика, не UI), комментарии в `personaLandings.ts:6` / `realEstateEngine.ts` / `ContextualHeader.tsx` (упоминают forbidden слова в описании tone-of-voice — намеренно).
+- ⚠️ `best-effort` (5 файлов) — устоявшаяся техническая идиома (best-effort delivery), не тональное нарушение. Регэксп ESLint пропускает (требует word-boundary `\bbest\b` без дефиса).
+- `npx tsc --noEmit` — clean.
+- M7 backlog (M7b/M7c): email-templates (`supabase/functions/notify-*`, `send-*`), WhatsApp/Telegram outreach (vendor-acquisition), empty-states sweep (компоненты `EmptyState`/`NoData`), error sweep (`throw new Error`), alt-text sweep — отдельные PR'ы.
+- `src/lib/appVersion.ts` → `3.46.0`.
+
+---
+
 ## [1.13.0] — 2026-04-23
 
 ### Added (M6 · трек C закрыт · шаги C.3, C.4, C.7)

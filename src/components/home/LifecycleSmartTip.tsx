@@ -29,7 +29,7 @@ const TIPS_BY_SITUATION: Record<string, Tip[]> = {
   ],
   living: [
     { id: 'living-90day', titleRu: '90-дневный отчёт', titleEn: '90-day report', descRu: 'Отслеживайте сроки иммиграционных отчётов', descEn: 'Track your immigration report deadlines', path: '/profile/documents', icon: '📄' },
-    { id: 'living-gym', titleRu: 'Абонемент в зал', titleEn: 'Gym membership', descRu: 'Сравните лучшие залы рядом', descEn: 'Compare the best gyms nearby', path: '/gyms', icon: '💪' },
+    { id: 'living-gym', titleRu: 'Абонемент в зал', titleEn: 'Gym membership', descRu: 'Сравните проверенные залы рядом', descEn: 'Compare verified gyms nearby', path: '/gyms', icon: '💪' },
     { id: 'living-market', titleRu: 'Рынки и доставка', titleEn: 'Markets & delivery', descRu: 'Фрукты и продукты с доставкой', descEn: 'Fresh fruits & groceries delivered', path: '/market', icon: '🛒' },
   ],
   property: [
@@ -37,13 +37,13 @@ const TIPS_BY_SITUATION: Record<string, Tip[]> = {
     { id: 'prop-income', titleRu: 'Доход за месяц', titleEn: 'Monthly income', descRu: 'Отслеживайте доходность', descEn: 'Track your rental yield', path: '/owner', icon: '📊' },
   ],
   leisure: [
-    { id: 'leisure-sunset', titleRu: 'Закат на яхте', titleEn: 'Sunset cruise', descRu: 'Лучшие закатные прогулки по Андаманскому морю', descEn: 'Best sunset tours on the Andaman Sea', path: '/yachts', icon: '🌅' },
-    { id: 'leisure-food', titleRu: 'Лучшие рестораны', titleEn: 'Top restaurants', descRu: 'Подборка проверенных мест для ужина', descEn: 'Curated dining spots', path: '/restaurants', icon: '🍽️' },
+    { id: 'leisure-sunset', titleRu: 'Закат на яхте', titleEn: 'Sunset cruise', descRu: 'Закатные прогулки по Андаманскому морю', descEn: 'Sunset tours on the Andaman Sea', path: '/yachts', icon: '🌅' },
+    { id: 'leisure-food', titleRu: 'Рестораны на вечер', titleEn: 'Dinner spots', descRu: 'Подборка проверенных мест для ужина', descEn: 'Curated dining spots', path: '/restaurants', icon: '🍽️' },
   ],
   default_tourist: [
     { id: 'tourist-explore', titleRu: 'Чем заняться сегодня?', titleEn: 'What to do today?', descRu: 'Экскурсии, яхты и активности рядом', descEn: 'Tours, yachts & activities nearby', path: '/experiences', icon: '🧭' },
     { id: 'tourist-transport', titleRu: 'Аренда транспорта', titleEn: 'Rent transport', descRu: 'Байки и авто — сравните цены', descEn: 'Bikes & cars — compare prices', path: '/transport', icon: '🛵' },
-    { id: 'tourist-beauty', titleRu: 'SPA и массаж', titleEn: 'SPA & massage', descRu: 'Расслабьтесь — лучшие салоны острова', descEn: 'Relax — best island salons', path: '/beauty', icon: '💆' },
+    { id: 'tourist-beauty', titleRu: 'SPA и массаж', titleEn: 'SPA & massage', descRu: 'Расслабьтесь — проверенные салоны острова', descEn: 'Relax — verified island salons', path: '/beauty', icon: '💆' },
   ],
   default_resident: [
     { id: 'res-visa', titleRu: 'Визовые вопросы', titleEn: 'Visa matters', descRu: 'Проверенные юристы для продления визы', descEn: 'Verified lawyers for visa extension', path: '/legal', icon: '📑' },

@@ -129,8 +129,8 @@ export default function Support() {
     {
       title: isRu ? 'Локальная экспертиза' : 'Local Expertise',
       desc: isRu 
-        ? 'Мы живём на Пхукете и знаем остров изнутри — советуем только лучшее' 
-        : 'We live in Phuket and know the island inside out — we recommend only the best'
+        ? 'Мы живём на Пхукете и знаем остров изнутри — рекомендуем только проверенное' 
+        : 'We live in Phuket and know the island inside out — we recommend only verified options'
     },
     {
       title: isRu ? 'Без языкового барьера' : 'No Language Barrier',
@@ -215,8 +215,8 @@ export default function Support() {
 
           <p className="text-sm text-muted-foreground mb-4">
             {isRu 
-              ? 'Не хотите искать сами? Менеджер UNO подберёт лучшие варианты, договорится о цене и забронирует за вас:' 
-              : 'Don\'t want to search yourself? UNO manager will find the best options, negotiate the price and book for you:'}
+              ? 'Не хотите искать сами? Менеджер UNO подберёт подходящие варианты, договорится о цене и забронирует за вас:' 
+              : 'Don\'t want to search yourself? UNO manager will find suitable options, negotiate the price and book for you:'}
           </p>
 
           <div className="grid grid-cols-2 gap-2 mb-4">

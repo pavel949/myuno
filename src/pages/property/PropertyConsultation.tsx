@@ -445,8 +445,8 @@ export default function PropertyConsultation() {
                     : 'Our developer partnerships lead will reach out with next steps: listing, lead flow, or media plan.')
                 : requestType === 'vacation_rental'
                   ? (isRu
-                      ? 'Мы подберём лучшие варианты и свяжемся с вами в течение 2 часов.'
-                      : 'We will find the best options and contact you within 2 hours.')
+                      ? 'Подберём подходящие варианты и свяжемся с вами в течение 2 часов.'
+                      : 'We will pick suitable options and contact you within 2 hours.')
                   : (isRu
                       ? 'Наш менеджер свяжется с вами в ближайшее время для обсуждения ваших пожеланий.'
                       : 'Our manager will contact you shortly to discuss your requirements.')}
@@ -609,8 +609,8 @@ export default function PropertyConsultation() {
                     </div>
                     <p className="text-sm text-muted-foreground">
                       {isRu 
-                        ? 'Подберём лучшие варианты для покупки под ваш бюджет' 
-                        : 'Find the best options to buy within your budget'}
+                        ? 'Подберём подходящие варианты для покупки под ваш бюджет' 
+                        : 'Find suitable options to buy within your budget'}
                     </p>
                   </div>
                 </CardContent>
@@ -654,8 +654,8 @@ export default function PropertyConsultation() {
                     </div>
                     <p className="text-sm text-muted-foreground">
                       {isRu 
-                        ? 'Анализ доходности, рисков и лучших локаций для инвестиций' 
-                        : 'ROI analysis, risks, and best locations for investment'}
+                        ? 'Анализ доходности, рисков и подходящих локаций для инвестиций' 
+                        : 'ROI analysis, risks, and suitable locations for investment'}
                     </p>
                   </div>
                 </CardContent>

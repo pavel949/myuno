@@ -38,8 +38,8 @@ export function PropertyTourPromo() {
             </h3>
             <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
               {isRu
-                ? 'Индивидуальная экскурсия по лучшим виллам и кондо с экспертом рынка'
-                : 'Personalized tour of the best villas & condos with a market expert'}
+                ? 'Индивидуальная экскурсия по проверенным виллам и кондо с экспертом рынка'
+                : 'Personalized tour of verified villas & condos with a market expert'}
             </p>
 
             <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mb-4">

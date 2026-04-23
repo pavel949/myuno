@@ -1,6 +1,6 @@
 # myUNO · Canonical Documents
 
-> **Версия канона:** v1.13.0 (2026-04-23) — **M6 закрыт целиком** (треки D + B + C). Track C: edge function `canonical-lifecycle-recompute` развёрнута, DB-триггер на `bookings.confirmed` активен, pg_cron daily batch (03:00 ICT, top-100 stalest profiles) запланирован. Следующая веха — M7.
+> **Версия канона:** v1.14.0 (2026-04-23) — **M7 · Tone of Voice tracks A/B/C закрыты**: ESLint guard `no-restricted-syntax` на §14 forbidden words, канонический словарь `src/i18n/uiStrings.ts`, зачищены 24 нарушения в 17 файлах. M7 backlog (email/WhatsApp/empty/error/alt sweep) — отдельные PR'ы. Перед M7 закрыт M6 целиком (D + B + C).
 >
 > **Источник правды.** Эти документы определяют все продуктовые, контентные и инженерные решения. При расхождении кода/UI с документами правится **код**, а не документ.
 >

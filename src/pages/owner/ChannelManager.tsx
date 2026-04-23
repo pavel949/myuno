@@ -226,7 +226,7 @@ export default function ChannelManager() {
                     <p className="text-sm text-muted-foreground mt-1">
                       {isRu
                         ? 'Мы поможем настроить синхронизацию, управление ценами и размещение на OTA-площадках. Напишите нам — подберём оптимальное решение.'
-                        : 'We can help set up synchronization, pricing management, and OTA listings. Contact us — we\'ll find the best solution.'}
+                        : 'We can help set up synchronization, pricing management, and OTA listings. Contact us — we will pick a suitable solution.'}
                     </p>
                     <Button variant="outline" size="sm" className="mt-3" onClick={() => window.open('mailto:support@myuno.app', '_blank')}>
                       {isRu ? 'Написать нам' : 'Contact us'}

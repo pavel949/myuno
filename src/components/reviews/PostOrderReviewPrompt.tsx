@@ -86,8 +86,8 @@ export function PostOrderReviewPrompt({
             </h2>
             <p className="text-sm text-muted-foreground">
               {isRu 
-                ? 'Ваш отзыв помогает другим выбрать лучший сервис' 
-                : 'Your review helps others choose the best service'}
+                ? 'Ваш отзыв помогает другим выбрать подходящий сервис' 
+                : 'Your review helps others choose the right service'}
             </p>
             
             {showReferralCTA && rating >= 4 && (

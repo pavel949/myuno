@@ -32,7 +32,7 @@ const babysitters = [
     certificationsRu: ['Первая помощь', 'СЛР'],
     available: true,
     isVerified: true,
-    descEn: 'Professional nanny with early childhood education degree. I have been working with children for over 5 years and love creating educational and fun activities. I am patient, caring, and dedicated to providing the best care for your little ones.',
+    descEn: 'Professional nanny with early childhood education degree. I have been working with children for over 5 years and love creating educational and fun activities. I am patient, caring, and dedicated to providing attentive care for your little ones.',
     descRu: 'Профессиональная няня с педагогическим образованием. Я работаю с детьми более 5 лет и люблю создавать образовательные и весёлые занятия. Я терпеливая, заботливая и преданная своему делу.',
   },
   {

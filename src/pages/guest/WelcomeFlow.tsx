@@ -277,8 +277,8 @@ export default function WelcomeFlow() {
             className="text-muted-foreground mt-2 text-[15px] leading-relaxed"
           >
             {isRu 
-              ? 'Мы подготовили для вас лучшие сервисы. Всё в одном месте — просто выберите.' 
-              : 'We\'ve curated the best services for your stay. Everything in one place — just pick what you need.'}
+              ? 'Подобрали проверенные сервисы для вашего пребывания. Всё в одном месте — выберите нужное.' 
+              : 'We have curated verified services for your stay. Everything in one place — pick what you need.'}
           </motion.p>
         </div>
       </motion.div>
