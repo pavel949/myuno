@@ -374,17 +374,26 @@ export default function Bookings() {
   const handleRefresh = useCallback(async () => {
     // Pull-to-refresh bypasses the cache so users always get fresh data.
     if (user) invalidateStatusHistoryCache(user.id);
+    loadedHistoryIdsRef.current = new Set();
     await loadBookings(true);
   }, [loadBookings, user]);
 
   const handleRetry = useCallback(() => {
     if (user) invalidateStatusHistoryCache(user.id);
+    loadedHistoryIdsRef.current = new Set();
     void loadBookings(true);
   }, [loadBookings, user]);
 
   const toggleTimeline = useCallback((bookingId: string) => {
-    setExpandedTimelines((prev) => ({ ...prev, [bookingId]: !prev[bookingId] }));
-  }, []);
+    setExpandedTimelines((prev) => {
+      const next = { ...prev, [bookingId]: !prev[bookingId] };
+      // If we're expanding, kick off a lazy fetch for this booking only.
+      if (next[bookingId]) {
+        void loadHistoryFor(bookingId);
+      }
+      return next;
+    });
+  }, [loadHistoryFor]);
 
   if (authLoading || isLoading) {
     return (
