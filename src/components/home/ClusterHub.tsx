@@ -17,68 +17,42 @@ import type { Language } from '@/i18n';
 interface HubCluster {
   id: 'arrive' | 'live' | 'legal' | 'invest' | 'manage' | 'build';
   icon: React.ElementType;
-  accentColor: string;
+  /** CSS variable name from tokens.css §7.4 cluster accents (M11.5). */
+  accentVar: string;
   path: string;
   apps: string[];
   appsRu: string[];
   appsTh: string[];
 }
 
+/** Resolve cluster CSS-var to inline color string (HSL token from tokens.css). */
+export const clusterAccent = (varName: string): string => `hsl(var(${varName}))`;
+
 const CLUSTERS: HubCluster[] = [
-  {
-    id: 'arrive',
-    icon: Plane,
-    accentColor: '#00D68F',
-    path: APP_ROUTES.ARRIVE_CLUSTER,
-    apps: ['Transfers', 'SIM Cards', 'Exchange', 'Car Rental'],
-    appsRu: ['Трансферы', 'SIM-карты', 'Обмен валют', 'Аренда авто'],
-    appsTh: ['รับส่ง', 'SIM', 'แลกเงิน', 'เช่ารถ'],
-  },
-  {
-    id: 'live',
-    icon: Home,
-    accentColor: '#4E7BFF',
-    path: APP_ROUTES.DISCOVER,
-    apps: ['Restaurants', 'Cleaning', 'Medical', 'Flowers'],
-    appsRu: ['Рестораны', 'Уборка', 'Медицина', 'Цветы'],
-    appsTh: ['ร้านอาหาร', 'ทำความสะอาด', 'การแพทย์', 'ดอกไม้'],
-  },
-  {
-    id: 'legal',
-    icon: Scale,
-    accentColor: '#F59E0B',
-    path: APP_ROUTES.LEGAL_CLUSTER,
-    apps: ['Visas', 'Taxes', 'Contracts', 'Insurance'],
-    appsRu: ['Визы', 'Налоги', 'Договоры', 'Страховка'],
-    appsTh: ['วีซ่า', 'ภาษี', 'สัญญา', 'ประกัน'],
-  },
-  {
-    id: 'invest',
-    icon: TrendingUp,
-    accentColor: '#A855F7',
-    path: APP_ROUTES.INVEST,
-    apps: ['Property search', 'Off-plan', 'ROI', 'Due diligence'],
-    appsRu: ['Поиск', 'Off-plan', 'ROI', 'Проверка'],
-    appsTh: ['ค้นหา', 'โครงการใหม่', 'ROI', 'ตรวจสอบ'],
-  },
-  {
-    id: 'manage',
-    icon: Building2,
-    accentColor: '#06B6D4',
-    path: APP_ROUTES.MC,
-    apps: ['Dashboard', 'Calendar', 'Finances', 'CRM'],
-    appsRu: ['Кабинет', 'Календарь', 'Финансы', 'CRM'],
-    appsTh: ['แดชบอร์ด', 'ปฏิทิน', 'การเงิน', 'CRM'],
-  },
-  {
-    id: 'build',
-    icon: HardHat,
-    accentColor: '#F43F5E',
-    path: APP_ROUTES.OFFPLAN,
-    apps: ['Portal', 'Program', 'Showcase', 'Advisory'],
-    appsRu: ['Портал', 'Программа', 'Витрина', 'Консультация'],
-    appsTh: ['พอร์ทัล', 'โปรแกรม', 'โชว์รูม', 'ปรึกษา'],
-  },
+  { id: 'arrive', icon: Plane,      accentVar: '--cluster-arrive', path: APP_ROUTES.ARRIVE_CLUSTER,
+    apps: ['Transfers','SIM Cards','Exchange','Car Rental'],
+    appsRu: ['Трансферы','SIM-карты','Обмен валют','Аренда авто'],
+    appsTh: ['รับส่ง','SIM','แลกเงิน','เช่ารถ'] },
+  { id: 'live',   icon: Home,       accentVar: '--cluster-live',   path: APP_ROUTES.DISCOVER,
+    apps: ['Restaurants','Cleaning','Medical','Flowers'],
+    appsRu: ['Рестораны','Уборка','Медицина','Цветы'],
+    appsTh: ['ร้านอาหาร','ทำความสะอาด','การแพทย์','ดอกไม้'] },
+  { id: 'legal',  icon: Scale,      accentVar: '--cluster-legal',  path: APP_ROUTES.LEGAL_CLUSTER,
+    apps: ['Visas','Taxes','Contracts','Insurance'],
+    appsRu: ['Визы','Налоги','Договоры','Страховка'],
+    appsTh: ['วีซ่า','ภาษี','สัญญา','ประกัน'] },
+  { id: 'invest', icon: TrendingUp, accentVar: '--cluster-invest', path: APP_ROUTES.INVEST,
+    apps: ['Property search','Off-plan','ROI','Due diligence'],
+    appsRu: ['Поиск','Off-plan','ROI','Проверка'],
+    appsTh: ['ค้นหา','โครงการใหม่','ROI','ตรวจสอบ'] },
+  { id: 'manage', icon: Building2,  accentVar: '--cluster-manage', path: APP_ROUTES.MC,
+    apps: ['Dashboard','Calendar','Finances','CRM'],
+    appsRu: ['Кабинет','Календарь','Финансы','CRM'],
+    appsTh: ['แดชบอร์ด','ปฏิทิน','การเงิน','CRM'] },
+  { id: 'build',  icon: HardHat,    accentVar: '--cluster-build',  path: APP_ROUTES.OFFPLAN,
+    apps: ['Portal','Program','Showcase','Advisory'],
+    appsRu: ['Портал','Программа','Витрина','Консультация'],
+    appsTh: ['พอร์ทัล','โปรแกรม','โชว์รูม','ปรึกษา'] },
 ];
 
 function appTagsForLang(c: HubCluster, language: Language): string[] {
