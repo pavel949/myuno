@@ -139,9 +139,15 @@ export default tseslint.config(
       "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/no-explicit-any": "warn",
       "no-console": "off",
-      // M7 · Tone of Voice + M9.7 · Canonical synonyms — both at warn for the
-      // wider codebase. i18n dictionaries are escalated to `error` below.
-      "no-restricted-syntax": ["warn", ...TONE_OF_VOICE_RULES, ...CANONICAL_SYNONYM_RULES],
+      // M7 · Tone of Voice + M9.7 · Canonical synonyms + Phase 4 · Canon
+      // visual regression — all at warn for the wider codebase.
+      // i18n dictionaries are escalated to `error` below.
+      "no-restricted-syntax": [
+        "warn",
+        ...TONE_OF_VOICE_RULES,
+        ...CANONICAL_SYNONYM_RULES,
+        ...CANON_VISUAL_RULES,
+      ],
     },
   },
   // ── M9.7 · Strict canonical guard for i18n dictionaries ──
