@@ -29,6 +29,8 @@ interface BookingStatusTimelineProps {
   createdAt?: string;
   className?: string;
   compact?: boolean;
+  /** Event IDs that should briefly flash to draw attention (e.g. just-arrived realtime events). */
+  highlightIds?: Set<string> | string[];
 }
 
 const STATUS_CONFIG: Record<
@@ -63,10 +65,15 @@ export function BookingStatusTimeline({
   createdAt,
   className,
   compact = false,
+  highlightIds,
 }: BookingStatusTimelineProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const locale = isRu ? ru : enUS;
+  const highlightSet =
+    highlightIds instanceof Set
+      ? highlightIds
+      : new Set(highlightIds ?? []);
 
   // Build a chronological list. Always seed with "created" event if we know createdAt.
   const sorted = [...events].sort(
@@ -104,16 +111,23 @@ export function BookingStatusTimeline({
         const { Icon, label, tone } = getStatusMeta(event.to_status, isRu);
         const isLast = idx === timeline.length - 1;
         const date = new Date(event.created_at);
+        const isHighlighted = !!event.id && highlightSet.has(event.id);
         return (
           <li
             key={event.id ?? `${event.to_status}-${event.created_at}-${idx}`}
-            className={cn('relative flex gap-3', compact ? 'pb-2.5 last:pb-0' : 'pb-3.5 last:pb-0')}
+            className={cn(
+              'relative flex gap-3 -mx-2 px-2 rounded-md',
+              compact ? 'pb-2.5 last:pb-0' : 'pb-3.5 last:pb-0',
+              isHighlighted && 'animate-timeline-highlight',
+            )}
+            aria-live={isHighlighted ? 'polite' : undefined}
           >
             <span
               className={cn(
                 'relative z-10 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border bg-background',
                 isLast ? 'border-primary/40 ring-2 ring-primary/15' : 'border-border',
                 tone,
+                isHighlighted && 'animate-timeline-dot-pop ring-2 ring-primary/40',
               )}
             >
               <Icon className="h-3.5 w-3.5" aria-hidden="true" />

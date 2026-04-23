@@ -175,6 +175,25 @@ export default {
           "0%, 100%": { opacity: "1", transform: "scale(1)" },
           "50%": { opacity: "0.6", transform: "scale(1.3)" },
         },
+        "timeline-highlight": {
+          "0%": {
+            backgroundColor: "hsl(var(--primary) / 0.18)",
+            boxShadow: "0 0 0 0 hsl(var(--primary) / 0.35)",
+          },
+          "50%": {
+            backgroundColor: "hsl(var(--primary) / 0.10)",
+            boxShadow: "0 0 0 6px hsl(var(--primary) / 0)",
+          },
+          "100%": {
+            backgroundColor: "hsl(var(--primary) / 0)",
+            boxShadow: "0 0 0 0 hsl(var(--primary) / 0)",
+          },
+        },
+        "timeline-dot-pop": {
+          "0%": { transform: "scale(0.6)", opacity: "0.4" },
+          "60%": { transform: "scale(1.15)", opacity: "1" },
+          "100%": { transform: "scale(1)", opacity: "1" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -185,6 +204,8 @@ export default {
         "slide-in-right": "slide-in-right 0.3s ease-out",
         "shimmer": "shimmer 2s infinite linear",
         "pulse-green": "pulse-green 2s ease-in-out infinite",
+        "timeline-highlight": "timeline-highlight 2.4s ease-out both",
+        "timeline-dot-pop": "timeline-dot-pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both",
       },
     },
   },

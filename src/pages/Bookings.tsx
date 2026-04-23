@@ -100,8 +100,18 @@ export default function Bookings() {
   const [statusHistory, setStatusHistory] = useState<Record<string, BookingStatusEvent[]>>({});
   const [historyLoading, setHistoryLoading] = useState(false);
   const [expandedTimelines, setExpandedTimelines] = useState<Record<string, boolean>>({});
+  const [highlightedEventIds, setHighlightedEventIds] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
+  const highlightTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+
+  // Cleanup any pending highlight timers on unmount.
+  useEffect(() => {
+    return () => {
+      highlightTimersRef.current.forEach((t) => clearTimeout(t));
+      highlightTimersRef.current.clear();
+    };
+  }, []);
 
   const loadBookings = useCallback(async () => {
     if (!user) return;
@@ -241,6 +251,31 @@ export default function Bookings() {
             );
             return { ...prev, [row.booking_id]: next };
           });
+
+          // Auto-expand the timeline so the user can see the new event flash in.
+          setExpandedTimelines((prev) =>
+            prev[row.booking_id] ? prev : { ...prev, [row.booking_id]: true },
+          );
+
+          // Mark the new event as highlighted; clear after the animation completes.
+          setHighlightedEventIds((prev) => {
+            if (prev.has(row.id)) return prev;
+            const next = new Set(prev);
+            next.add(row.id);
+            return next;
+          });
+          const existingTimer = highlightTimersRef.current.get(row.id);
+          if (existingTimer) clearTimeout(existingTimer);
+          const timer = setTimeout(() => {
+            setHighlightedEventIds((prev) => {
+              if (!prev.has(row.id)) return prev;
+              const next = new Set(prev);
+              next.delete(row.id);
+              return next;
+            });
+            highlightTimersRef.current.delete(row.id);
+          }, 2600);
+          highlightTimersRef.current.set(row.id, timer);
         },
       )
       .on(
@@ -416,6 +451,7 @@ export default function Bookings() {
                                 currentStatus={booking.status}
                                 createdAt={booking.createdAt}
                                 compact
+                                highlightIds={highlightedEventIds}
                               />
                             )}
                           </div>
