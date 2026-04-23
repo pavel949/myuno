@@ -1,77 +1,106 @@
 
 
-# Аудит платформы myUNO на соответствие каноническим документам
+# Wave 13 · Pro-Shell + Reference-Screens Polish (myUNO Design v5)
 
-## Цель
+Пакет `myUNO_design_5.zip` глубоко проанализирован. Большая часть Home-каноны (SignalStack, RoleSheet, ConciergeCard, NowInPhuket, ClusterHub, RoleChip, HomeTopBar) уже соответствует пакету — внедрено в Wave 12. Остаются 4 целевых улучшения, которые подтянут оставшиеся отличия.
 
-Проверить кодовую базу против всех 10 канонических документов (`docs/canonical/01–10`) + архитектурных правил (`architecture/ARCHITECTURE_V2.md §13`) и выдать отчёт со списком расхождений по приоритету.
+---
 
-## Объём проверок (по документам)
+## 1. Pro-Shell tabbar (Operate variant)
 
-| # | Документ | Что проверяю в коде | Артефакты проверки |
-|---|----------|---------------------|--------------------|
-| 01 | segmentation-framework | `profiles.roles_stack`, `primary_role`, lifecycle/role/cluster теги в `src/lib/personas/`, CRM-схема | SQL select по `profiles`, поиск `lifecycle_phase`, `persona_*` |
-| 02 | service-catalogue-v2 | 16 категорий × 230 услуг — сверка с `src/lib/taxonomies/`, `lookup_types`, lifecycle/role-теги в БД | SQL по `lookup_values`, обход `src/content/landings/` |
-| 03 | tone-of-voice | Запрещённые слова §14 + Tone в `src/i18n/{ru,en,uiStrings}.ts`, в DB-content (cms-страницы) | grep по UI + `validate-semantic.mjs` + ESLint sweep |
-| 04 | implementation-protocol | Процессные правила (M-вехи, additive, audit-before-change) — сверка с `CHANGELOG.md` и наличием M6/M7d/M7e/M9.6 заделов | чтение CHANGELOG + audits/ |
-| 05 | visual-design-system | Hex-литералы вне `src/styles/tokens.css`, шрифты (Golos/DM Sans/JetBrains/Playfair), 44px touch-targets, кластерные цвета | regex `#[0-9a-f]{3,6}` по `src/**`, обход tailwind.config |
-| 06 | clearview-methodology | 8 категорий × веса, AAA–BB шкала, 5-step maturity в `src/pages/clearview/`, RPC и таблицах ratings | сверка с `mem://strategy/clearview-methodology-v3` |
-| 07 | information-architecture | URL-структура, отсутствие новых top-level routes, redirects (offplan→property/offplan), субдомены | обход `src/App.tsx`, `APP_ROUTES`, `vercel.json` |
-| 08 | ai-prompts-library | Промпты Edge Functions vs канон (concierge, ClearView draft, Tax Advisor, support) | обход `supabase/functions/*/index.ts` system prompts |
-| 09 | data-schema | Naming conventions, RLS на всех публикуемых таблицах, FK, enums, отсутствие триггеров в reserved schemas | `supabase--linter`, `supabase--read_query` по `pg_policies` |
-| 10 | semantic-core | `validate-semantic.mjs` + 4 слоя guard (ESLint, exact, fuzzy, CI), schema.org, sitemap, meta-templates | прогон `npm run validate:semantic` (по результатам — список нарушений) |
-| Arch | ARCHITECTURE_V2 §13 hard rules | Новые top-level routes, новые shells, hex-цвета, cross-cluster imports, money-moves без аудит-маркера, feature_flags | grep по `src/App.tsx`, `MiniAppLayout`, `ledger_entries` usage |
+**Что:** в пакете `screens-core.jsx` `<TabBar variant="pro">` для проф-ролей показывает `Home · Operate · Wallet · Me` вместо `Home · Discover · Wallet · Me`.
 
-## Методика
+**Где:** `src/components/nav/BottomBar.tsx` + `src/lib/nav/navigationModel.ts`.
 
-Для каждого документа:
-1. **Прочитать канон** (full read MD-файла).
-2. **Снять текущее состояние** в коде/БД (search_files / read_query / linter).
-3. **Сопоставить** правило ↔ реализация.
-4. **Зафиксировать** в матрице: `Pass / Warn / Fail` + конкретный файл/таблица + цитата из канона.
+**Реализация:**
+- Добавить вариант `pro_shell` в `PRIMARY_NAV` для ролей `owner / agent / developer / provider / mc_admin` со 2-м слотом → **Operate** (`/operate` или `/owner` для текущей роли).
+- Consumer-роли (tourist/resident/family) сохраняют `Discover` без изменений.
+- Слот **Operate** — иконка `Briefcase`, label EN `Operate` / RU `Управление`. Активная подсветка по префиксу `/operate, /owner, /mc, /agent, /vendor`.
+- Под флагом `feature_flag:pro_shell_tabbar_v1` (default OFF в `system_settings`).
 
-## Deliverable
+**Acceptance:** Tourist видит Discover (как сейчас); Owner видит Operate; переключение роли через RoleSheet — TabBar обновляется реактивно.
 
-Один сводный документ `docs/canonical/audits/M10-full-canon-conformance-2026-04-23.md` со структурой:
+---
 
-```
-1. Executive summary
-   - Overall conformance: X/10 docs green
-   - Critical violations: N (block release)
-   - Warnings: M (cleanup backlog)
+## 2. Quick-Actions: 8-slot grid с role-tag dots
 
-2. Per-document matrix (01..10 + Arch)
-   ┌────┬─────────────┬────────┬──────────────┬────────┐
-   │ #  │ Rule        │ Status │ Evidence     │ Fix    │
-   └────┴─────────────┴────────┴──────────────┴────────┘
+**Что:** в дизайне `QuickActions` всегда **8 элементов = 4 cols × 2 rows** с микро-точкой роли в правом верхнем углу карточки.
 
-3. Critical findings (must-fix before next release)
-4. Warnings (M11 backlog)
-5. Recommended remediation milestones (M11.x)
-6. Appendix: raw outputs (validate-semantic, supabase linter, ESLint stats)
-```
+**Где:** `src/components/home/QuickActionsBlended.tsx` (уже есть точки), `src/components/home/PrimaryActions.tsx` (нет).
 
-Плюс: bump канона до **v1.20.0** + запись в `CHANGELOG.md` + bump app до **3.52.0**.
+**Реализация:**
+- Унифицировать `PrimaryActions.tsx`: жёсткая сетка `grid-cols-4`, 8 слотов (брать из `blendActions(personas, 8)` — расширить хук).
+- Каждый слот: 32×32 icon-square + 10.5px label + role-dot 5×5px в `top-2 right-2`, цвет = `ROLE_META[role].color`.
+- Если активная роль одна — точка цвета этой роли на всех слотах (не пусто, единый стиль).
+- `min-h-[44px]` на всю карточку — touch-target compliance.
 
-## Технические шаги (default mode)
+**Acceptance:** на Home всегда видно 8 квадратных карточек 4×2, каждая с role-точкой; mobile 375px не ломается, no horizontal scroll.
 
-1. Прочитать каждый из 10 MD-файлов целиком.
-2. Запустить `npm run validate:semantic -- --verbose` и `npm run lint` — собрать счётчики.
-3. Запросить `supabase--linter` и `supabase--read_query` по `pg_policies`, `pg_tables`, `lookup_values`, `profiles`, `clearview_*`.
-4. Grep-аудит:
-   - hex literals: `#[0-9a-fA-F]{3,8}\b` по `src/**` исключая `tokens.css`/`tailwind.config.ts`/`design-system/`
-   - cross-cluster imports: `from '@/pages/(arrive|live|manage|invest|legal|build)/.+/.+/'` из чужих кластеров
-   - hardcoded routes: строковые `'/...'` мимо `APP_ROUTES`
-   - `noscript` в `<head>` (`index.html`)
-   - money-move screens без `tx_id` маркера
-5. Сверить `supabase/functions/*/index.ts` system prompts с `08-ai-prompts-library.md`.
-6. Скомпоновать отчёт, обновить CHANGELOG/version.
+---
+
+## 3. SectionHead унификация (Label + meta)
+
+**Что:** в дизайне каждый блок начинается с компактного `<SectionHead title="ACTIVITY" meta="All roles · this week"/>` — 11px uppercase, letter-spacing 0.12em, muted-2 цвет, meta справа.
+
+**Где:** новый компонент `src/components/home/SectionHead.tsx`; применить в:
+- `ActivityFeed.tsx` (`Activity` / `Активность`)
+- `QuickActionsBlended` / `PrimaryActions` (`For you` / `Для вас`)
+- `ClusterHub` (`All services` / `Все сервисы`)
+- `ConciergeCard` (`Concierge` / `Консьерж`)
+
+**Реализация:**
+- Один экспортируемый компонент `<SectionHead title meta?/>` — заменить 4 разных варианта заголовков на один canonical.
+- Использовать токены `text-muted-foreground/80` + `tracking-[0.12em] text-[11px] uppercase font-semibold`.
+
+**Acceptance:** все 4 блока на Home имеют одинаковый микро-заголовок; визуальный ритм страницы становится регулярным.
+
+---
+
+## 4. Role-onboarding screen (S03 reference)
+
+**Что:** в `screens-core.jsx · S03_Roles` — вертикальный список 7 ролей с подзаголовками RU («Прилёт, аренда, впечатления»), цветной точкой 12px и checkbox 20px справа. На сегодня RoleSheet не показывает описаний и расположен горизонтально grid-2.
+
+**Где:** `src/components/home/RoleSheet.tsx`.
+
+**Реализация:**
+- Раздел "Add a role" — переключить с `grid-cols-2` на одну колонку `flex flex-col`, добавить `description` поле в `ROLE_META` (RU + EN) и отображать вторую строку 12px muted под именем роли.
+- Active-роли — оставить ordered list как сейчас, но добавить тот же sub-line с описанием.
+- Длины: использовать существующие RU описания из `data.jsx`:
+  - tourist: «Прилёт, аренда, впечатления»
+  - resident: «Виза, жильё, ежедневные сервисы»
+  - owner: «Управление недвижимостью и доходом»
+  - agent: «Листинги, лиды, комиссии»
+  - provider: «Витрина, брони, выплаты»
+  - investor: «Pipeline, партнёры, капитал»
+  - developer: «Проекты, бронирования, продажи»
+
+**Acceptance:** Role sheet выглядит как S03 в референсе — описание под каждой ролью, единая колонка, читается без скролла на 375px при ≤7 доступных ролях.
+
+---
 
 ## Что НЕ входит в этот pass
 
-- Автоматическое исправление найденных нарушений — только инвентаризация.
-- Контентный sweep DB (М7d) и alt-text (M7e) — только подсчёт остатка.
-- Полный E2E-прогон Playwright — только наличие/конфигурация.
+- **Light-luxury cream/navy theme** — это вариация tweaks-панели в дизайне (демо-режим), не canonical. Тёмная палитра остаётся прода-стандартом по `05-visual-design-system.md`.
+- 20 reference screens (S01..S20) кроме Home — это Figma-референс, не инструкция переписывать существующие страницы. Точечные элементы из S04 (Home) уже частично внедрены в Wave 12.
+- Migration `/operate` shell (это отдельный architecture task, см. ARCHITECTURE_V2 §08).
 
-После approve — переключаюсь в default mode, читаю все 10 канонов, выполняю шаги 1–6 и публикую отчёт.
+---
+
+## Технические детали
+
+**Файлы к правке:**
+1. `src/lib/nav/navigationModel.ts` — добавить `pro_shell_tabbar_v1` flag handling + Operate slot
+2. `src/components/nav/BottomBar.tsx` — read flag, swap слот по роли
+3. `src/components/home/PrimaryActions.tsx` — 8-slot grid + role dots
+4. `src/components/home/SectionHead.tsx` — **новый** canonical компонент
+5. `src/components/home/ActivityFeed.tsx`, `ClusterHub.tsx`, `QuickActionsBlended.tsx`, `ConciergeCard.tsx` — заменить inline-заголовки на `<SectionHead>`
+6. `src/components/home/RoleSheet.tsx` — single-column layout, descriptions
+7. `src/lib/roleBlend.ts` — добавить `description: { ru, en }` в `ROLE_META`
+8. `docs/canonical/CHANGELOG.md`, `src/lib/appVersion.ts` (3.55.0), `public/version.json`
+
+**Migration:** `INSERT INTO system_settings (key, value) VALUES ('feature_flag:pro_shell_tabbar_v1', 'false')` — флаг готов к включению из Cloud UI без релиза.
+
+**Версия:** app `3.55.0`, canonical `v1.23.0`, milestone `M13.A`.
+
+**Acceptance overall:** на дев-превью Home выглядит ритмичнее (одинаковые SectionHead), Quick Actions = ровная сетка 4×2 с цветными точками, RoleSheet — компактный список с описаниями. Pro-shell tabbar готов, но включается по флагу.
 
