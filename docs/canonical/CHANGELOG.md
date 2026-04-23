@@ -5,6 +5,18 @@
 
 ---
 
+## [1.11.0] — 2026-04-23
+
+### Closed (M6 · трек D · шаги D.6 + D.7 — track D complete)
+- **D.6 · Tone-of-voice pass §14** — priority-зона (`PersonaPromptBanner` + `ActiveSituation`) проверена по 8-пунктному чек-листу §14 канона. **0 нарушений.** Никаких urgency-слов, восклицаний, «лучший / уникальный», эмодзи в UI-тексте. CTA `Начать` / `Start` — глагол действия. Подробности — в `audits/M6-persona-landings.md` § «D.6 findings».
+- **D.7 · Track D closed** — статус трека D в `audits/M6-persona-landings.md` → ✅ closed. Persona-aware Home готов end-to-end за флагом `feature_flag:home_persona_aware_v1` (default OFF), включается одной строкой в `system_settings` без релиза.
+
+### Notes
+- Трек D дал инфраструктуру: `prioritizeHomeSections()` + `<PersonaAwareSections />` + DB-флаг + 15 unit-тестов. Видимый эффект включится по решению Павла.
+- Следующий рекомендованный трек — **B (Persona + Cluster Landings)**: типы → конфиги (25 + 10) → 2 динамических роута → `<LandingSeoHead />` → 3 live persona + 3 live cluster → sitemap → tone pass.
+
+---
+
 ## [1.10.6] — 2026-04-23
 
 ### Added (M6 · трек D · шаг D.4)
