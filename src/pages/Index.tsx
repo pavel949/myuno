@@ -16,6 +16,7 @@ import { HeroIntro } from '@/components/home/HeroIntro';
 import { PrimaryActions } from '@/components/home/PrimaryActions';
 import { PopularTasks } from '@/components/home/PopularTasks';
 import { ActiveSituation } from '@/components/home/ActiveSituation';
+import { NowInPhuket } from '@/components/home/NowInPhuket';
 import { AllSectionsAccordion } from '@/components/home/AllSectionsAccordion';
 import { FloatingConcierge } from '@/components/home/FloatingConcierge';
 import { TrustFooter } from '@/components/home/TrustFooter';
@@ -88,6 +89,11 @@ const Index = () => {
           sections={prioritySections}
           disabled={!personaAwareOn}
         />
+
+        {/* "Now in Phuket" — ambient pulse strip (weather · AQI · FX), per design v5.
+            Positioned right after the role signals so the home page feels rooted in
+            real-time local context, even when no personalized signals are active. */}
+        <NowInPhuket />
 
         {/* 1. Hero — search-first entry, with desktop popular preview */}
         <HeroIntro />

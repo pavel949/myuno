@@ -7,13 +7,18 @@ export function TrustFooter() {
 
   return (
     <div className="px-4 pb-8">
-      <div className="rounded-[14px] border border-border/10 p-4 flex gap-3.5 items-start">
-        <div className="font-mono text-[20px] font-medium text-foreground leading-none mt-0.5">03</div>
-        <div className="flex-1">
-          <div className="text-[12.5px] font-medium text-foreground">
+      <div className="rounded-[14px] border border-border/10 px-4 py-3.5 flex gap-4 items-center">
+        <div
+          className="font-mono text-[20px] font-medium text-foreground leading-none tracking-[0.01em] shrink-0"
+          aria-hidden
+        >
+          03
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="text-[12.5px] font-medium text-foreground leading-tight">
             {isRu ? 'Сервис работает в правовом поле Таиланда' : 'Service operates within the legal framework of Thailand'}
           </div>
-          <div className="text-[11px] text-muted-foreground mt-0.5">
+          <div className="text-[11px] text-muted-foreground mt-1">
             {isRu
               ? 'SEC Thailand · DBD 0105567890123 · соответствие PDPA'
               : 'SEC Thailand · DBD 0105567890123 · PDPA compliant'}
