@@ -29,4 +29,11 @@
     <loc>https://erfwtoavipwjqmylpizt.supabase.co/functions/v1/generate-sitemap?type=restaurants</loc>
     <lastmod>2026-04-08</lastmod>
   </sitemap>
+
+  <!-- M6 · Track B.9 — persona/cluster landings (LIVE only) -->
+  <sitemap>
+    <loc>https://myuno.app/sitemap-landings.xml</loc>
+    <lastmod>2026-04-23</lastmod>
+  </sitemap>
 </sitemapindex>
+

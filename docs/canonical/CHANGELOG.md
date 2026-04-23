@@ -5,6 +5,40 @@
 
 ---
 
+## [1.12.0] — 2026-04-23
+
+### Added (M6 · трек B · шаги B.6 → B.10 закрыты, B → ✅)
+- **`src/components/seo/LandingSeoHead.tsx`** (B.6) — SEO-голова для persona/cluster лендингов через `react-helmet-async`:
+  - `<title>`, `<meta name="description">`, canonical, hreflang RU↔EN + `x-default`.
+  - Open Graph + Twitter Card с `og:image` 1200×630.
+  - JSON-LD `Service` (provider = myUNO Organization, areaServed = Phuket, hasOfferCatalog из `services[]`, knowsAbout из `pains/jobs[]`) + `FAQPage` для FAQ-блока.
+  - Безопасный `null` если `landing.seo` не задан (дополнительный страх. слой к `isLive*Landing()`).
+- **Контент 3 live persona-лендингов (B.7)** в `src/content/landings/personaLandings.ts`:
+  - **P1 `tourists`** — трансфер, eSIM, аренда, экскурсии, поддержка по-русски (5 pains, 5 services, 6 FAQ).
+  - **P9 `hnw`** — ClearView™, шорт-лист, юр. структура, налоги, asset management (5/5/6).
+  - **P13 `pet-owners`** — pet-friendly виллы, ввоз DLD/R7, аэропорт, ветеринар, груминг (5/5/6).
+- **Контент 3 live cluster-лендингов (B.8)** в `src/content/landings/clusterLandings.ts`:
+  - **A `arrival`** — 6 jobs / 6 services / 6 FAQ. Первые 72 часа.
+  - **D `investment`** — сравнение районов, ClearView, off-plan, доходность, юр. структура, осмотр.
+  - **F `operations`** — PMS, сдача, ТО, отчёт, налоги, страховка.
+- **`public/sitemap-landings.xml`** (B.9) — 6 LIVE URL с `xhtml:link rel="alternate" hreflang="ru|en|x-default"`. Зарегистрирован в `public/sitemap.xml` через `<sitemap>` index. Draft-страницы намеренно отсутствуют — они отдают 404.
+
+### Changed
+- `src/pages/landings/PersonaLandingPage.tsx` + `ClusterLandingPage.tsx` — подключён `<LandingSeoHead />`, удалён временный `useEffect(document.title)` из B.4/B.5.
+- `src/lib/appVersion.ts` → `3.44.0` (минорный bump, новые публичные SEO-страницы).
+- `audits/M6-persona-landings.md` — статусы B.6–B.10 → ✅; трек B → ✅. B.11 закрыт этим CHANGELOG.
+
+### Tone-of-voice (§14, B.10)
+- Прогон 6 живых страниц (3 persona + 3 cluster): запретные слова устранены (исправлено «лучший курс» → «выгодный курс / competitive rates» в FAQ кластера A).
+- Все CTA — глаголы действия («Заказать», «Запросить», «Подключить», «Подобрать»). Подзаголовки CTA — конкретные цифры/сроки в THB или USD, без urgency.
+- Pains/jobs — task-first, обращение «вы», без «!», без «лучший / уникальный / революционный».
+
+### Notes
+- 50/50 ранее существовавших тестов остаются зелёными (новые e2e-тесты SEO-головы — отдельный шаг при подключении ssr-prerender).
+- Трек C (Lifecycle automation, C.1–C.7) — следующая итерация: edge function `canonical-lifecycle-recompute`, DB-триггеры на `bookings`/`intakes`, pg_cron daily.
+
+---
+
 ## [1.11.5] — 2026-04-23
 
 ### Added (M6 · трек B · шаг B.5)

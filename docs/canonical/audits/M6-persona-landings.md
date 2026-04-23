@@ -1,6 +1,6 @@
 # M6 — Persona-aware Home + Landings (25 + 10)
 
-**Status:** ✅ Track D closed (2026-04-23, v1.11.0) · 🔜 Track B next
+**Status:** ✅ Track D closed (v1.11.0) · ✅ Track B closed (v1.12.0, 2026-04-23) · 🔜 Track C next
 **Date:** 2026-04-23 (audit)
 **Owner:** Pavel + AI engineer
 **Source:** `04-implementation-protocol.md §M6` · `audits/M5-hardening.md` (out-of-scope items)
@@ -123,12 +123,12 @@
 | B.3 | Конфиг `clusterLandings.ts` — 10 объектов (все 10 как `draft` на этапе B.3 + `relatedPersonas` по матрице §6; контент live A/D/F → B.8) | `src/content/landings/clusterLandings.ts` + `__tests__/clusterLandings.test.ts` | B.1 | ✅ done (2026-04-23, 15 тестов) |
 | B.4 | Динамический route `/for/:persona` → `PersonaLandingPage.tsx`. Если `status === 'draft'` → 404 | `src/pages/landings/PersonaLandingPage.tsx`, route в `AnimatedRoutes.tsx` | B.2 | ✅ done (2026-04-23, 5 тестов) |
 | B.5 | Динамический route `/cluster/:cluster` → `ClusterLandingPage.tsx`. То же поведение draft → 404 + cross-link «По персонам» (фильтрует через `isLivePersonaLanding`) | `src/pages/landings/ClusterLandingPage.tsx`, route в `AnimatedRoutes.tsx` | B.3 | ✅ done (2026-04-23, 8 тестов) |
-| B.6 | Компонент `<LandingSeoHead landing={...} type="persona"\|"cluster" />` — meta/OG/schema.org Service/hreflang RU↔EN | `src/components/seo/LandingSeoHead.tsx` | B.4, B.5 |
-| B.7 | Контент 3 persona-лендингов (P1, P9, P13) — RU+EN, по prompt'ам §M6 канона | в `personaLandings.ts` | B.2 |
-| B.8 | Контент 3 cluster-лендингов (A Arrival, D Investment, F Operations) | в `clusterLandings.ts` | B.3 |
-| B.9 | Sitemap: расширить `public/sitemap.xml` или edge function — добавить только `live` лендинги, hreflang альтернативы | `public/sitemap.xml` или новая edge func | B.7, B.8 |
-| B.10 | Tone-of-voice pass §14 по 6 живым лендингам | grep + ручной | B.7, B.8 |
-| B.11 | CHANGELOG → v1.12.0, README статус трека B | docs | все выше |
+| B.6 | Компонент `<LandingSeoHead landing={...} type="persona"\|"cluster" />` — meta/OG/schema.org Service+FAQPage/hreflang RU↔EN | `src/components/seo/LandingSeoHead.tsx` | B.4, B.5 | ✅ done (2026-04-23, v1.12.0) |
+| B.7 | Контент 3 persona-лендингов (P1 tourists, P9 hnw, P13 pet-owners) — RU+EN, по prompt'ам §M6 канона | в `personaLandings.ts` | B.2 | ✅ done (2026-04-23) |
+| B.8 | Контент 3 cluster-лендингов (A Arrival, D Investment, F Operations) | в `clusterLandings.ts` | B.3 | ✅ done (2026-04-23) |
+| B.9 | Sitemap: расширить `public/sitemap.xml` — добавить только `live` лендинги, hreflang альтернативы | `public/sitemap-landings.xml` + `public/sitemap.xml` | B.7, B.8 | ✅ done (2026-04-23) |
+| B.10 | Tone-of-voice pass §14 по 6 живым лендингам | grep + ручной | B.7, B.8 | ✅ done (исправлен «лучший курс» в кластере A) |
+| B.11 | CHANGELOG → v1.12.0, README статус трека B | docs | все выше | ✅ done (2026-04-23) |
 
 **Out of scope трека B (отложено в M6b/M7):**
 - Контент остальных 22 persona-лендингов и 7 cluster-лендингов — по 3–5/неделю с ручной редактурой.
