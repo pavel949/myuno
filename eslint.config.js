@@ -21,27 +21,31 @@ export default tseslint.config(
       ...reactHooks.configs.recommended.rules,
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       "@typescript-eslint/no-unused-vars": "off",
-      // New code: avoid explicit any; legacy any to be replaced incrementally (P1-T1).
       "@typescript-eslint/no-explicit-any": "warn",
-      // Prefer @/lib/logger in new code (no-op in production). no-console off to avoid mass warnings until migration.
       "no-console": "off",
-      // M7 · Track A — Tone of Voice guard. Forbidden words from canonical doc 03 §14.
-      // Level: warn — CI surfaces violations without blocking legacy builds; raise to "error"
-      // after sweep of email/WhatsApp templates (M7b).
+      // M7 · Tone of Voice (canonical 03 §14) + M9 · Canonical synonyms (canonical 10 §5/§14).
+      // Both at warn — full sweep tracked under M9b.
       "no-restricted-syntax": [
         "warn",
         {
           selector: "Literal[value=/\\b(лучш(ий|ая|ие|ее)|уникальн(ый|ая|ое|ые)|революцион(ный|ная|ное|ные)|revolutionary|только сегодня|не упустите|hurry up|don't miss out|Упс\\b|Oops\\b)\\b/i]",
-          message: "Tone of Voice (canonical 03 §14): forbidden word. Rephrase using uiStrings or canonical alternatives (проверенный, выгодный, подходящий, оптимальный).",
+          message: "Tone of Voice (canonical 03 §14): forbidden word. Use canonical alternatives (проверенный, выгодный, подходящий, оптимальный).",
         },
         {
-          selector: "TemplateElement[value.raw=/\\b(лучш(ий|ая|ие|ее)|уникальн(ый|ая|ое|ые)|революцион(ный|ная|ное|ные)|revolutionary|только сегодня|не упустите|hurry up|don't miss out|Упс\\b|Oops\\b)\\b/i]",
-          message: "Tone of Voice (canonical 03 §14): forbidden word in template literal. Rephrase using canonical alternatives.",
+          selector: "TemplateElement[value.raw=/\\b(лучш(ий|ая|ие|ее)|уникальн(ый|ая|ое|ые)|революцион(ный|ная|ное|ые)|revolutionary|только сегодня|не упустите|hurry up|don't miss out|Упс\\b|Oops\\b)\\b/i]",
+          message: "Tone of Voice (canonical 03 §14): forbidden word in template literal.",
+        },
+        {
+          selector: "Literal[value=/\\b(юнит|чаноте|котлован|КонтрактAI|ДоговорAI|Клиарвью|КлирВью|MyUNO|My UNO|MYUNO)\\b/]",
+          message: "Semantic Core (canonical 10 §5/§14): forbidden synonym. Use canonical name (объект, Chanote, off-plan, ContractAI, ClearView, myUNO).",
+        },
+        {
+          selector: "TemplateElement[value.raw=/\\b(юнит|чаноте|котлован|КонтрактAI|ДоговорAI|Клиарвью|КлирВью|MyUNO|My UNO|MYUNO)\\b/]",
+          message: "Semantic Core (canonical 10 §5/§14): forbidden synonym in template literal.",
         },
       ],
     },
   },
-  // E2E: Playwright fixtures use callback named "use" (not React); allow lexical declarations in case blocks
   {
     files: ["e2e/**/*.ts"],
     rules: {
