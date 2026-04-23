@@ -51,7 +51,7 @@ export function useKnowledgePillars(search?: string) {
 
       const { data, error } = await q;
       if (error) throw error;
-      return (data ?? []) as KnowledgePillar[];
+      return ((data ?? []) as unknown) as KnowledgePillar[];
     },
   });
 }
@@ -71,7 +71,7 @@ export function useKnowledgePillar(slug: string | undefined) {
         .eq('slug', normalized)
         .maybeSingle();
       if (error) throw error;
-      return (data as KnowledgePillar | null) ?? null;
+      return ((data as unknown) as KnowledgePillar | null) ?? null;
     },
   });
 }
