@@ -39,7 +39,7 @@ const SORT_OPTIONS: { id: SortKey; labelEn: string; labelRu: string }[] = [
   { id: 'price_asc', labelEn: 'Lowest price', labelRu: 'Дешевле' },
   { id: 'price_desc', labelEn: 'Highest price', labelRu: 'Дороже' },
   { id: 'newest', labelEn: 'Newest model', labelRu: 'Новые модели' },
-  { id: 'rating', labelEn: 'Best rated', labelRu: 'По рейтингу' },
+  { id: 'rating', labelEn: 'By rating', labelRu: 'По рейтингу' },
 ];
 
 const QUICK_LINKS = [

@@ -59,7 +59,7 @@ export const VehicleCard = memo(function VehicleCard({ vehicle, onClick, classNa
             {vehicle.is_featured && (
               <span className="flex items-center gap-1 px-2 py-0.5 rounded-none bg-warning/90 text-white text-[10px] font-semibold">
                 <Sparkles className="w-3 h-3" />
-                {isRu ? 'Лучшее' : 'Best Value'}
+                {isRu ? 'Рекомендуем' : 'Featured'}
               </span>
             )}
           </div>

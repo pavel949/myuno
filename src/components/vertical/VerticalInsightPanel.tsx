@@ -50,7 +50,7 @@ const INSIGHT_CONFIG: Partial<Record<string, InsightConfig>> = {
   },
   medical: {
     guides: [
-      { slugEn: 'phuket-hospitals-guide', titleEn: 'Best Hospitals in Phuket', titleRu: 'Лучшие больницы Пхукета', descEn: 'Private vs public, costs & what to expect', descRu: 'Частные и гос., стоимость и что ожидать' },
+      { slugEn: 'phuket-hospitals-guide', titleEn: 'Hospitals in Phuket', titleRu: 'Больницы Пхукета', descEn: 'Private vs public, costs & what to expect', descRu: 'Частные и гос., стоимость и что ожидать' },
       { slugEn: 'insurance-vs-cash', titleEn: 'Insurance or Cash Payment?', titleRu: 'Страховка или наличные?', descEn: 'When each makes sense in Thailand', descRu: 'Когда что выгоднее в Таиланде' },
     ],
     faqs: [

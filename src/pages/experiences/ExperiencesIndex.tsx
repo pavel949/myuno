@@ -173,8 +173,8 @@ export default function ExperiencesIndex() {
       <SEOHead
         title={isRu ? 'Туры и экскурсии на Пхукете' : 'Tours & Experiences in Phuket'}
         description={isRu
-          ? 'Лучшие туры, экскурсии и активности на Пхукете.'
-          : 'Best tours, excursions, and activities in Phuket.'}
+          ? 'Туры, экскурсии и активности на Пхукете — с проверенными операторами.'
+          : 'Tours, excursions, and activities in Phuket — with verified operators.'}
       />
 
       <VerticalContextBanner verticalId="experience" />

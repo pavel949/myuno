@@ -139,8 +139,8 @@ export default function YachtsIndex() {
       <SEOHead
         title={isRu ? 'Чартер яхт на Пхукете' : 'Yacht Charters in Phuket'}
         description={isRu
-          ? 'Аренда яхт, катамаранов и спидботов на Пхукете. Лучшие цены и мгновенное бронирование.'
-          : 'Rent yachts, catamarans, and speedboats in Phuket. Best prices and instant booking.'}
+          ? 'Аренда яхт, катамаранов и спидботов на Пхукете. Прозрачные цены и мгновенное бронирование.'
+          : 'Rent yachts, catamarans, and speedboats in Phuket. Transparent pricing and instant booking.'}
       />
 
       <VerticalContextBanner verticalId="yacht" />
