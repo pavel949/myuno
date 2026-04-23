@@ -324,6 +324,8 @@ export const APP_ROUTES = {
 
   // ── Knowledge ──
   KNOWLEDGE: '/knowledge',
+  KNOWLEDGE_PILLARS: '/knowledge/pillars',
+  KNOWLEDGE_PILLAR: (slug: string) => `/knowledge/pillars/${slug}`,
   KNOWLEDGE_SECTION: (section: string) => `/knowledge/${section}`,
   KNOWLEDGE_ARTICLE: (section: string, slug: string) => `/knowledge/${section}/${slug}`,
 

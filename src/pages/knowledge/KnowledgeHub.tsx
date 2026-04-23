@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { SEOHead } from '@/components/seo';
 import { Skeleton } from '@/components/ui/skeleton';
-import { BookOpen, MapPin } from 'lucide-react';
+import { BookOpen, MapPin, Compass, ChevronRight } from 'lucide-react';
 import { BackButton } from '@/components/uno/BackButton';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { useLocation } from '@/contexts/LocationContext';
@@ -66,6 +66,30 @@ export default function KnowledgeHub() {
             {language === 'ru' ? 'Основные факты' : 'Quick Facts'}
           </h2>
           <QuickFactsGrid />
+        </section>
+
+        {/* Pillar Guides CTA — canonical knowledge pillars (M9.6) */}
+        <section className="mb-8">
+          <button
+            type="button"
+            onClick={() => navigate(APP_ROUTES.KNOWLEDGE_PILLARS)}
+            className="w-full text-left rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-card p-5 hover:border-primary/60 transition-colors flex items-center gap-4"
+          >
+            <div className="h-12 w-12 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
+              <Compass className="h-6 w-6 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-base font-semibold text-foreground">
+                {language === 'ru' ? 'Канонические гайды' : 'Pillar guides'}
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                {language === 'ru'
+                  ? '10 опорных материалов: покупка недвижимости, визы, налоги, управление объектами'
+                  : '10 pillar guides: buying property, visas, taxes, property management'}
+              </p>
+            </div>
+            <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
+          </button>
         </section>
 
         {/* Knowledge Sections Grid */}

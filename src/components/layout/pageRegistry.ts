@@ -306,6 +306,8 @@ export const ListWithUsPage = lazy(() => import('@/pages/ListWithUsPage'));
 export const KnowledgeHub = lazy(() => import('@/pages/knowledge/KnowledgeHub'));
 export const KnowledgeSectionPage = lazy(() => import('@/pages/knowledge/KnowledgeSectionPage'));
 export const KnowledgeArticlePage = lazy(() => import('@/pages/knowledge/KnowledgeArticlePage'));
+export const KnowledgePillarsIndex = lazy(() => import('@/pages/knowledge/KnowledgePillarsIndex'));
+export const KnowledgePillarPage = lazy(() => import('@/pages/knowledge/KnowledgePillarPage'));
 
 // ── Info Pages ──
 export const AboutPage = lazy(() => import('@/pages/info/AboutPage'));
