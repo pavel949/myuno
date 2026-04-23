@@ -5,6 +5,31 @@
 
 ---
 
+## [1.11.5] — 2026-04-23
+
+### Added (M6 · трек B · шаг B.5)
+- **`src/pages/landings/ClusterLandingPage.tsx`** — динамическая страница `/cluster/:cluster`, симметричная B.4:
+  - `findClusterLandingBySlug(CLUSTER_LANDINGS, slug)` → `isLiveClusterLanding(landing)` → 200/404 на одном маршруте.
+  - Layout-каркас: Hero + Jobs (lifecycle-фразы из §5 канона) + Services + FAQ + cross-link «По персонам» + повторный CTA. Bilingual через `useLanguage()`.
+  - **Cross-link «По персонам ↗»** — фильтрует `relatedPersonas` через `isLivePersonaLanding`, чтобы не вести в 404 для draft-персон. На стадии B.5 (PERSONA_LANDINGS все draft) секция не рендерится — оживёт после B.7 без правки этой страницы.
+- **`src/pages/landings/__tests__/ClusterLandingPage.test.tsx`** — **8 тестов зелёные** через MemoryRouter:
+  - 404 для неизвестного slug.
+  - 404 для draft-кластера.
+  - Live: рендерится h1, jobs, services, primary CTA href.
+  - Cross-link: секция скрыта, если все relatedPersonas — draft.
+  - Cross-link: показывает только live-персоны из `relatedPersonas`.
+  - Cross-link: НЕ включает live-персон, отсутствующих в `relatedPersonas`.
+
+### Changed
+- `src/components/layout/AnimatedRoutes.tsx` — добавлены 2 строки: lazy import + `<Route path="/cluster/:cluster" />` рядом с роутом B.4.
+- `audits/M6-persona-landings.md` — статус B.5 → ✅ done. B.6 (`<LandingSeoHead />` для meta/OG/schema.org/hreflang) → 🔜 next.
+
+### Notes
+- На стадии B.5 **все 10 cluster-лендингов отдают 404** — это намеренно: CLUSTER_LANDINGS пока полностью draft (B.3). Шаг B.8 заполнит контент 3 live (A/D/F) и они оживут.
+- 50/50 тестов зелёные (10 типов + 12 personaLandings + 15 clusterLandings + 5 PersonaLandingPage + 8 ClusterLandingPage). `npx tsc --noEmit` чистый.
+
+---
+
 ## [1.11.4] — 2026-04-23
 
 ### Added (M6 · трек B · шаг B.4)
