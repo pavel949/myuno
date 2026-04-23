@@ -5,6 +5,28 @@
 
 ---
 
+## [1.18.0] — 2026-04-23
+
+### Added (M9.6 · Knowledge Hub Seeding)
+- **`knowledge_pillars` table** — bilingual (RU/EN) каноническая таблица для 10 опорных гайдов (`buying-property`, `visas`, `taxes`, `property-management`, `relocation`, `off-plan`, `escrow`, `chanote-due-diligence`, `land-office`, `clearview`). RLS: публичное чтение для статусов `live` / `placeholder`. GIN-индекс на `search_vector` для tsquery, `cluster` enum для группировки по §6 кластерам.
+- **Seed контента** — все 10 pillars засеяны в production БД с H1, meta (≤60/160), body (~300–500 слов RU + EN), hreflang-парами, статусом `placeholder`/`live`. Источник: `pillarPages.ts` + `semantic-article-creation.md`.
+- **`src/hooks/useKnowledgePillars.ts`** — React Query хуки: `usePillarsList()` (группировка по cluster), `usePillarSearch(q)` (ILIKE по 6 колонкам), `usePillarBySlug(slug)` (детальная карточка + related pillars в том же cluster).
+- **`src/pages/knowledge/KnowledgePillarsIndex.tsx`** — индекс-страница со search bar, группировкой по semantic clusters, SEO-meta из §10.
+- **`src/pages/knowledge/KnowledgePillarPage.tsx`** — детальная страница с lightweight Markdown renderer, breadcrumbs, JSON-LD `Article`, блоком «Related guides» (cross-linking внутри cluster).
+- **Routes & navigation** — `KnowledgePillarsIndex` / `KnowledgePillarPage` зарегистрированы в `pageRegistry.ts`. `APP_ROUTES.KNOWLEDGE_PILLARS` (`/knowledge/pillars`) и `APP_ROUTES.KNOWLEDGE_PILLAR(slug)` добавлены в `routes.ts`. В `AnimatedRoutes.tsx` маршруты pillars поставлены **до** generic `/knowledge/:section`, чтобы перехватывать `/knowledge/pillars` раньше, чем его обработает `KnowledgeSectionPage`.
+- **`KnowledgeHub.tsx`** — добавлена CTA-карточка «Канонические гайды / Pillar guides» между Quick Facts и Knowledge Sections для дискаверабилити.
+
+### Verification
+- `npx tsc --noEmit -p tsconfig.app.json` → clean.
+- `node scripts/validate-semantic.mjs --strict` → **0 errors / 0 warnings**.
+- Vitest `validate-semantic.test.ts` зелёный.
+- `src/lib/appVersion.ts` → `3.50.0`, `public/version.json` → `3.50.0`.
+
+### Backlog (M9 → 95% complete)
+- M9.7 — расширить ESLint guard `no-canonical-synonyms` на template literals и `src/i18n/uiStrings.ts`.
+
+---
+
 ## [1.17.0] — 2026-04-23
 
 ### Added (M9.5 · Semantic Core — Edge Function Prompts Sweep)

@@ -1,7 +1,7 @@
 # myUNO · Canonical Documents
 
-> **Версия канона:** v1.16.0 (2026-04-23) — **M9 · Semantic Core Rollout (~85%)**: словарь `src/content/semantic/*` (canonicalNames, forbiddenSynonyms, metaTemplates, taxonomy, pillarPages), JSON-LD билдеры (`schemaBuilders.ts` + `JsonLd.tsx`), рефакторинг `LandingSeoHead.tsx` под §10, ESLint-guard `no-canonical-synonyms`, `sitemap-pillars.xml` (10 URL), `vercel.json` редиректы, CI-валидатор `validate-semantic.mjs`, PR-template и AI-промпты для генерации страниц/статей. Backlog: M9.5 (AI edge functions sync), M9.6 (Knowledge Hub seeding), M9.7 (ESLint расширение).
-> **Предыдущее:** v1.15.0 — Semantic Core v1.1 (`10-semantic-core.md`, 1476 строк). v1.14.1 — M7b Edge Functions Tone Sweep. v1.14.0 — M7 Tone of Voice (ESLint guard + uiStrings + 24 правки). v1.13.0 — M6 закрыт.
+> **Версия канона:** v1.18.0 (2026-04-23) — **M9 · Semantic Core Rollout (~95%)**: M9.6 Knowledge Hub Seeding закрыт. Создана таблица `knowledge_pillars` (RLS public read, GIN search_vector, bilingual RU/EN), засеяно 10 канонических pillar pages по §6 кластерам, реализованы хуки `useKnowledgePillars`, страницы `KnowledgePillarsIndex` + `KnowledgePillarPage` с Markdown-рендером, JSON-LD Article и related-cross-linking. Маршруты `/knowledge/pillars` и `/knowledge/pillars/:slug` зарегистрированы в `pageRegistry.ts`/`AnimatedRoutes.tsx` (pillars перед `:section` для приоритета), CTA на `/knowledge`. Backlog: M9.7 (ESLint расширение).
+> **Предыдущее:** v1.17.0 — M9.5 Edge Function Prompts Sweep (canonical lexicon hints в concierge-route, canonical-persona-detect, crm-ai-assistant + нормализация «юнит→объект», «MyUNO→myUNO» в peylaa/nb/drive/send-* функциях). v1.16.1 — validate-semantic noise reduction (case-sensitive, dictionary skip). v1.16.0 — Semantic Core v1.1 rollout.
 >
 > **Источник правды.** Эти документы определяют все продуктовые, контентные и инженерные решения. При расхождении кода/UI с документами правится **код**, а не документ.
 >
