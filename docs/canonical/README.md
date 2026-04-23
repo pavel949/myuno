@@ -66,7 +66,7 @@
 | M3 | [types-and-api-contracts](./audits/M3-types-and-api-contracts.md) | ✅ done (типы + API + хуки) |
 | M4 | [ai-orchestration](./audits/M4-ai-orchestration.md) | ✅ done (Edge Function + hook) |
 | M5 | [ux-persona-detection](./audits/M5-ux-persona-detection.md) + [hardening](./audits/M5-hardening.md) | ✅ done (v1.10.2 — H.1–H.7 автоматизированы; ручной prod-прогон по [`M5-e2e-qa-checklist.md`](./audits/M5-e2e-qa-checklist.md) рекомендован) |
-| M6 | Cross-domain SSO + субдомены | 🔜 **next** |
+| M6 | [persona-landings](./audits/M6-persona-landings.md) | 📋 **audit** — draft v0.1, awaiting approval (3 трека: D Home → B Landings → C Lifecycle) |
 | M7 | Production hardening | ⏳ planned |
 | M8 | [clearview-integration-protocol](./audits/M8-clearview-integration-protocol.md) | 📋 protocol (parallel track) |
 
@@ -83,5 +83,5 @@
 ## Язык и версии
 
 - **Язык документов:** русский (внутренний инструментарий команды и AI). Bilingual RU/EN — только user-facing UI/контент.
-- **История:** [`CHANGELOG.md`](./CHANGELOG.md). Текущая версия канонического набора: **v1.10.2**.
+- **История:** [`CHANGELOG.md`](./CHANGELOG.md). Текущая версия канонического набора: **v1.10.3**.
 - **Поддержание:** при добавлении нового документа обнови этот README + CHANGELOG в одном PR.

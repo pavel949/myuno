@@ -5,6 +5,20 @@
 
 ---
 
+## [1.10.3] — 2026-04-23
+
+### Added (M6 audit — старт следующей вехи)
+- **`audits/M6-persona-landings.md`** — draft v0.1 (awaiting approval). AUDIT текущего Home (нет persona-aware перестановки) + лендингов (0 из 25 канонических persona-маршрутов, 0 из 10 cluster-маршрутов; существующие `/relocate`, `/wedding`, `/kids`, `/nomad-guide`, `/pets` — ситуационные, не привязаны к канону §4); GAP против §M6; PLAN на 3 трека (D · Persona-aware Home → B · Landings → C · Lifecycle automation) с атомарными шагами, acceptance, rollback, anti-scope; обоснование порядка треков.
+
+### Changed
+- `README.md` — статус M6 → 📋 audit (draft v0.1).
+
+### Notes
+- Рекомендуемый порядок треков: D (Home) → B (Landings) → C (Cron lifecycle). Обоснование в §3 audit-документа: M5 даёт данные, D первым материализует ценность, B без D угадывает приоритет, C — producer для consumer'а из D.
+- M6 формально не блокирован M5 prod-прогоном (`M5-e2e-qa-checklist.md` опционален), но рекомендуется до старта трека C.
+
+---
+
 ## [1.10.2] — 2026-04-23
 
 ### Added (M5 H.7 — Playwright-автоматизация e2e чек-листа)
