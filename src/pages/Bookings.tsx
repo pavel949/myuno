@@ -12,7 +12,6 @@ import { BookingListSkeleton } from '@/components/ui/page-skeletons';
 import { EmptyState } from '@/components/uno/EmptyState';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { toast } from 'sonner';
@@ -106,21 +105,21 @@ export default function Bookings() {
   const navigate = useNavigate();
   const [bookings, setBookings] = useState<BookingItem[]>([]);
   const [statusHistory, setStatusHistory] = useState<Record<string, BookingStatusEvent[]>>({});
-  // Per-booking loading: only the bookings whose ids are in this set show a
-  // skeleton/spinner. Other timelines stay idle.
-  const [loadingHistoryIds, setLoadingHistoryIds] = useState<Set<string>>(new Set());
-  // Per-booking error state — set when the lazy history fetch fails so we can
-  // render an inline retry without affecting other timelines.
-  const [historyErrorIds, setHistoryErrorIds] = useState<Set<string>>(new Set());
-  // Tracks which booking ids we've already fetched (or hydrated from cache),
-  // so re-expanding a timeline doesn't trigger a refetch.
-  const loadedHistoryIdsRef = useRef<Set<string>>(new Set());
+  const [historyLoading, setHistoryLoading] = useState(false);
   const [expandedTimelines, setExpandedTimelines] = useState<Record<string, boolean>>({});
   const [highlightedEventIds, setHighlightedEventIds] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [realtimeStatus, setRealtimeStatus] = useState<RealtimeStatus>('connecting');
   const highlightTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+
+  // Session-level dedup set of every booking_status_history.id we've already
+  // applied to state — from initial load, lazy load, cache hydration, OR a
+  // prior realtime INSERT. Realtime can deliver the same row more than once
+  // (reconnect/replay, multiple subscribers, optimistic + server echo), so we
+  // gate every realtime update on this set BEFORE touching state, the cache,
+  // expansion, highlight, or timers. Reset on user change / manual refresh.
+  const seenEventIdsRef = useRef<Set<string>>(new Set());
 
   // Cleanup any pending highlight timers on unmount.
   useEffect(() => {
@@ -129,6 +128,12 @@ export default function Bookings() {
       highlightTimersRef.current.clear();
     };
   }, []);
+
+  // Reset the dedup set when the user changes — different account, different
+  // history universe.
+  useEffect(() => {
+    seenEventIdsRef.current = new Set();
+  }, [user?.id]);
 
   const loadBookings = useCallback(async (forceRefresh = false) => {
     if (!user) return;
@@ -141,15 +146,25 @@ export default function Bookings() {
     const cached = forceRefresh ? null : getCachedStatusHistory(user.id);
     if (cached) {
       setStatusHistory(cached);
-      // Mark every cached booking id as already-loaded so re-expanding skips
-      // the network entirely.
-      loadedHistoryIdsRef.current = new Set(Object.keys(cached));
+      // Seed the dedup set from cache so realtime events for already-known
+      // history rows are no-ops.
+      for (const events of Object.values(cached)) {
+        for (const e of events) seenEventIdsRef.current.add(e.id);
+      }
+      setHistoryLoading(false);
     } else {
       setStatusHistory({});
-      loadedHistoryIdsRef.current = new Set();
+      setHistoryLoading(true);
+    }
+
+    // Forced refresh wipes the dedup set so the upcoming network fetch can
+    // re-seed from authoritative server state.
+    if (forceRefresh) {
+      seenEventIdsRef.current = new Set();
     }
 
     try {
+      // Phase 1: Load bookings — render cards as soon as this resolves.
       const { data: allBookingsData, error } = await supabase
         .from('bookings')
         .select('*, booking_items(*)')
@@ -176,85 +191,52 @@ export default function Bookings() {
 
       setBookings(formattedBookings);
       setIsLoading(false);
-      // Status history is now fetched lazily per booking via loadHistoryFor()
-      // when the user expands a timeline.
+
+      // Phase 2: Status history.
+      const bookingIds = formattedBookings.map((b) => b.id);
+      if (bookingIds.length === 0) {
+        setCachedStatusHistory(user.id, {});
+        setHistoryLoading(false);
+        return;
+      }
+
+      // Cache hit and not a forced refresh → skip the network call entirely.
+      if (cached && !forceRefresh) {
+        return;
+      }
+
+      const { data: historyRows, error: historyError } = await supabase
+        .from('booking_status_history')
+        .select('id, booking_id, from_status, to_status, notes, created_at')
+        .in('booking_id', bookingIds)
+        .order('created_at', { ascending: true });
+
+      if (!historyError && historyRows) {
+        const grouped: Record<string, BookingStatusEvent[]> = {};
+        for (const row of historyRows) {
+          if (!grouped[row.booking_id]) grouped[row.booking_id] = [];
+          grouped[row.booking_id].push({
+            id: row.id,
+            from_status: row.from_status,
+            to_status: row.to_status,
+            notes: row.notes,
+            created_at: row.created_at,
+          });
+          // Seed dedup set so realtime echoes of these rows are ignored.
+          seenEventIdsRef.current.add(row.id);
+        }
+        setStatusHistory(grouped);
+        setCachedStatusHistory(user.id, grouped);
+      }
     } catch (error) {
       console.error('Error loading bookings:', error);
       setLoadError(true);
       toast.error(language === 'ru' ? 'Не удалось загрузить бронирования' : 'Failed to load bookings');
       setIsLoading(false);
+    } finally {
+      setHistoryLoading(false);
     }
   }, [user, language]);
-
-  /**
-   * Lazily fetch status history for a single booking. No-op if we already have
-   * it (either from a previous fetch or hydrated from the module-level cache).
-   * Only this booking's loading flag flips — other timelines stay idle.
-   */
-  const loadHistoryFor = useCallback(async (bookingId: string) => {
-    if (!user) return;
-    if (loadedHistoryIdsRef.current.has(bookingId)) return;
-    if (loadingHistoryIds.has(bookingId)) return;
-
-    setLoadingHistoryIds((prev) => {
-      if (prev.has(bookingId)) return prev;
-      const next = new Set(prev);
-      next.add(bookingId);
-      return next;
-    });
-    // Clear any prior error for this booking — we're trying again.
-    setHistoryErrorIds((prev) => {
-      if (!prev.has(bookingId)) return prev;
-      const next = new Set(prev);
-      next.delete(bookingId);
-      return next;
-    });
-
-    try {
-      const { data: historyRows, error } = await supabase
-        .from('booking_status_history')
-        .select('id, booking_id, from_status, to_status, notes, created_at')
-        .eq('booking_id', bookingId)
-        .order('created_at', { ascending: true });
-
-      if (error) throw error;
-
-      const events: BookingStatusEvent[] = (historyRows || []).map((row) => ({
-        id: row.id,
-        from_status: row.from_status,
-        to_status: row.to_status,
-        notes: row.notes,
-        created_at: row.created_at,
-      }));
-
-      setStatusHistory((prev) => ({ ...prev, [bookingId]: events }));
-      // Mirror into the module-level cache so a remount skips the network.
-      updateCachedStatusHistory(user.id, (prev) => ({ ...prev, [bookingId]: events }));
-      loadedHistoryIdsRef.current.add(bookingId);
-    } catch (error) {
-      console.error('Error loading status history:', error);
-      setHistoryErrorIds((prev) => {
-        if (prev.has(bookingId)) return prev;
-        const next = new Set(prev);
-        next.add(bookingId);
-        return next;
-      });
-    } finally {
-      setLoadingHistoryIds((prev) => {
-        if (!prev.has(bookingId)) return prev;
-        const next = new Set(prev);
-        next.delete(bookingId);
-        return next;
-      });
-    }
-  }, [user, loadingHistoryIds]);
-
-  /** Manually retry a failed history fetch for a single booking. */
-  const retryHistoryFor = useCallback((bookingId: string) => {
-    // Drop the "loaded" mark so loadHistoryFor() actually runs the network call.
-    loadedHistoryIdsRef.current.delete(bookingId);
-    void loadHistoryFor(bookingId);
-  }, [loadHistoryFor]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -302,6 +284,14 @@ export default function Bookings() {
           // Only react to events for bookings currently rendered (RLS already
           // limits us to the user's own rows, but this avoids cross-user noise).
           if (!bookingsRef.current.some((b) => b.id === row.booking_id)) return;
+
+          // Dedup gate: if we've already applied this status_history row in this
+          // session (initial load, lazy load, cache hydration, or a prior
+          // realtime delivery), drop the event entirely. This prevents duplicate
+          // entries on reconnect/replay AND avoids re-triggering the highlight
+          // animation, auto-expand, and timer churn on echoes.
+          if (seenEventIdsRef.current.has(row.id)) return;
+          seenEventIdsRef.current.add(row.id);
 
           const newEvent: BookingStatusEvent = {
             id: row.id,
@@ -398,28 +388,17 @@ export default function Bookings() {
   const handleRefresh = useCallback(async () => {
     // Pull-to-refresh bypasses the cache so users always get fresh data.
     if (user) invalidateStatusHistoryCache(user.id);
-    loadedHistoryIdsRef.current = new Set();
-    setHistoryErrorIds(new Set());
     await loadBookings(true);
   }, [loadBookings, user]);
 
   const handleRetry = useCallback(() => {
     if (user) invalidateStatusHistoryCache(user.id);
-    loadedHistoryIdsRef.current = new Set();
-    setHistoryErrorIds(new Set());
     void loadBookings(true);
   }, [loadBookings, user]);
 
   const toggleTimeline = useCallback((bookingId: string) => {
-    setExpandedTimelines((prev) => {
-      const next = { ...prev, [bookingId]: !prev[bookingId] };
-      // If we're expanding, kick off a lazy fetch for this booking only.
-      if (next[bookingId]) {
-        void loadHistoryFor(bookingId);
-      }
-      return next;
-    });
-  }, [loadHistoryFor]);
+    setExpandedTimelines((prev) => ({ ...prev, [bookingId]: !prev[bookingId] }));
+  }, []);
 
   if (authLoading || isLoading) {
     return (
@@ -479,8 +458,6 @@ export default function Bookings() {
                 const Icon = getBookingIcon(booking.type);
                 const isExpanded = !!expandedTimelines[booking.id];
                 const events = statusHistory[booking.id] ?? [];
-                const isHistoryLoading = loadingHistoryIds.has(booking.id);
-                const hasHistoryError = historyErrorIds.has(booking.id);
                 return (
                   <div
                     key={booking.id}
@@ -535,20 +512,10 @@ export default function Bookings() {
                       >
                         <span className="uppercase tracking-[0.08em] flex items-center gap-1.5">
                           {language === 'ru' ? 'История статусов' : 'Status timeline'}
-                          {isHistoryLoading ? (
-                            // Skeleton placeholder mimics the "· N" count footprint
-                            // so the header doesn't reflow when the count appears.
+                          {historyLoading ? (
                             <span
-                              className="inline-flex items-center gap-1 normal-case tracking-normal"
-                              aria-label={language === 'ru' ? 'Загрузка количества' : 'Loading count'}
-                            >
-                              <span aria-hidden="true" className="text-muted-foreground/40">·</span>
-                              <Skeleton className="h-3 w-4 rounded-sm" aria-hidden="true" />
-                            </span>
-                          ) : hasHistoryError ? (
-                            <AlertCircle
-                              className="w-3 h-3 text-destructive"
-                              aria-label={language === 'ru' ? 'Ошибка загрузки' : 'Failed to load'}
+                              className="inline-block h-3 w-3 rounded-full border border-muted-foreground/30 border-t-transparent animate-spin"
+                              aria-hidden="true"
                             />
                           ) : events.length > 0 ? (
                             <span className="text-muted-foreground/60 normal-case tracking-normal">
@@ -571,32 +538,8 @@ export default function Bookings() {
                       >
                         <div className="overflow-hidden">
                           <div className="px-4 pb-4 pt-1">
-                            {isHistoryLoading && events.length === 0 ? (
+                            {historyLoading ? (
                               <BookingStatusTimelineSkeleton rows={3} compact />
-                            ) : hasHistoryError && events.length === 0 ? (
-                              <div
-                                role="alert"
-                                className="flex items-center justify-between gap-3 rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2.5"
-                              >
-                                <div className="flex items-center gap-2 min-w-0">
-                                  <AlertCircle className="w-4 h-4 text-destructive shrink-0" aria-hidden="true" />
-                                  <p className="text-xs text-muted-foreground truncate">
-                                    {language === 'ru'
-                                      ? 'Не удалось загрузить историю'
-                                      : 'Could not load history'}
-                                  </p>
-                                </div>
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    retryHistoryFor(booking.id);
-                                  }}
-                                  className="shrink-0 text-xs font-medium text-primary hover:text-primary/80 underline-offset-2 hover:underline min-h-[32px] px-2"
-                                >
-                                  {language === 'ru' ? 'Повторить' : 'Retry'}
-                                </button>
-                              </div>
                             ) : (
                               <BookingStatusTimeline
                                 events={events}
