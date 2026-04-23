@@ -12,9 +12,9 @@ import { APP_ROUTES } from '@/lib/config/routes';
 const THB_USD_RATE = 35;
 
 const REC_COLORS: Record<RecLabel, { bg: string; text: string; border: string }> = {
-  BUY: { bg: 'rgba(22,163,74,0.15)', text: '#22c55e', border: 'rgba(22,163,74,0.4)' },
-  WATCH: { bg: 'rgba(234,179,8,0.15)', text: '#eab308', border: 'rgba(234,179,8,0.4)' },
-  AVOID: { bg: 'rgba(239,68,68,0.15)', text: '#ef4444', border: 'rgba(239,68,68,0.4)' },
+  BUY:   { bg: 'hsl(var(--rec-buy) / 0.15)',   text: 'hsl(var(--rec-buy))',   border: 'hsl(var(--rec-buy) / 0.4)' },
+  WATCH: { bg: 'hsl(var(--rec-watch) / 0.15)', text: 'hsl(var(--rec-watch))', border: 'hsl(var(--rec-watch) / 0.4)' },
+  AVOID: { bg: 'hsl(var(--rec-avoid) / 0.15)', text: 'hsl(var(--rec-avoid))', border: 'hsl(var(--rec-avoid) / 0.4)' },
 };
 
 const BEACH_LABELS: Record<string, string> = { bf: 'Beachfront', '500': '< 500m', '1k': '< 1km', inl: 'Inland' };
@@ -174,7 +174,7 @@ export function CatalogProjectCard({ project, rank, onInquiry }: Props) {
             </span>
           )}
           {project.roiProjected && (
-            <span className="text-[11px] ml-auto font-medium" style={{ color: '#22c55e' }}>
+            <span className="text-[11px] ml-auto font-medium" style={{ color: 'hsl(var(--rec-buy))' }}>
               ~{project.roiProjected}%
             </span>
           )}
@@ -226,9 +226,9 @@ export function CatalogProjectCard({ project, rank, onInquiry }: Props) {
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all"
             style={{
-              background: 'rgba(37,211,102,0.15)',
-              color: '#25d366',
-              border: '1px solid rgba(37,211,102,0.3)',
+              background: 'hsl(var(--brand-whatsapp) / 0.15)',
+              color: 'hsl(var(--brand-whatsapp))',
+              border: '1px solid hsl(var(--brand-whatsapp) / 0.3)',
             }}
           >
             <MessageCircle className="w-3.5 h-3.5" />

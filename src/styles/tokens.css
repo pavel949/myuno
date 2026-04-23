@@ -182,6 +182,12 @@
   --brand-google-light-blue: 214 97% 57%;
   --brand-google-yellow: 44 100% 50%;
   --brand-dropbox: 217 100% 50%;
+  --brand-whatsapp: 142 70% 49%;     /* #25D366 */
+
+  /* Recommendation badges (ClearView BUY / WATCH / AVOID) */
+  --rec-buy: 142 71% 45%;            /* #22c55e */
+  --rec-watch: 48 96% 53%;           /* #eab308 */
+  --rec-avoid: 0 84% 60%;            /* #ef4444 */
 
   /* Typography */
   --font-display: 'Golos Text', sans-serif;
@@ -371,6 +377,14 @@ html.light {
   --glow-from: 160 79% 24%;
   --glow-via: 224 55% 32%;
   --glow-to: 190 65% 40%;
+
+  /* Brand — light-tuned */
+  --brand-whatsapp: 142 65% 42%;
+
+  /* Recommendation badges — slightly darker on white bg */
+  --rec-buy: 142 71% 38%;
+  --rec-watch: 38 92% 44%;
+  --rec-avoid: 0 75% 50%;
 }
 
 /* ═══════════════════════════════════════════════════════════
