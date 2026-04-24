@@ -32,6 +32,12 @@ const NewbuildsContextOutlet = () => (
   </NbCompareProvider>
 );
 
+// Alias: /life-flow/:code → /life/:code (preserves deep-link compatibility)
+const LifeFlowAlias = () => {
+  const { code } = useParams();
+  return <Navigate to={`/life/${code ?? ''}`} replace />;
+};
+
 // Property Hub index: legacy `/property?…` query bookmarks → /property/browse?…
 const PropertyHubIndex = () => {
   const search = typeof window !== 'undefined' ? window.location.search : '';
