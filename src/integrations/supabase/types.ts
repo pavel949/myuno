@@ -4453,6 +4453,72 @@ export type Database = {
           },
         ]
       }
+      contact_identities: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: string
+          primary_email: string | null
+          primary_phone: string | null
+          primary_user_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          primary_email?: string | null
+          primary_phone?: string | null
+          primary_user_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          primary_email?: string | null
+          primary_phone?: string | null
+          primary_user_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      contact_identity_links: {
+        Row: {
+          identity_id: string
+          linked_at: string
+          source_id: string
+          source_table: string
+        }
+        Insert: {
+          identity_id: string
+          linked_at?: string
+          source_id: string
+          source_table: string
+        }
+        Update: {
+          identity_id?: string
+          linked_at?: string
+          source_id?: string
+          source_table?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_identity_links_identity_id_fkey"
+            columns: ["identity_id"]
+            isOneToOne: false
+            referencedRelation: "contact_identities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_identity_links_identity_id_fkey"
+            columns: ["identity_id"]
+            isOneToOne: false
+            referencedRelation: "v_unified_contacts"
+            referencedColumns: ["identity_id"]
+          },
+        ]
+      }
       contact_relationships: {
         Row: {
           company_id: string
@@ -30768,6 +30834,20 @@ export type Database = {
           },
         ]
       }
+      v_unified_contacts: {
+        Row: {
+          display_name: string | null
+          identity_created_at: string | null
+          identity_id: string | null
+          pipeline_count: number | null
+          pipelines: string[] | null
+          primary_email: string | null
+          primary_phone: string | null
+          primary_user_id: string | null
+          source_ids: Json | null
+        }
+        Relationships: []
+      }
       v_unified_pipeline: {
         Row: {
           ai_score: number | null
@@ -31469,6 +31549,15 @@ export type Database = {
           name_ru: string
         }[]
       }
+      find_or_create_identity: {
+        Args: {
+          _display_name: string
+          _email: string
+          _phone: string
+          _user_id: string
+        }
+        Returns: string
+      }
       generate_referral_code: { Args: { p_user_id: string }; Returns: string }
       get_all_currency_rates: { Args: never; Returns: Json }
       get_canonical_primary_role: {
@@ -31749,6 +31838,7 @@ export type Database = {
         Returns: undefined
       }
       normalize_developer_name: { Args: { input: string }; Returns: string }
+      normalize_phone: { Args: { p: string }; Returns: string }
       pay_from_wallet_atomic: {
         Args: {
           p_amount: number

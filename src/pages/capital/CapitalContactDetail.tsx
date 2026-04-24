@@ -17,6 +17,7 @@ import {
   PIPELINE_STAGE_LABELS, PIPELINE_STAGE_COLORS,
   type Warmth, type BuyerType, type PreferredChannel, type PipelineStage,
 } from '@/types/capital';
+import { CrossPipelineBanner } from '@/components/crm/CrossPipelineBanner';
 
 export default function CapitalContactDetail() {
   const { id } = useParams<{ id: string }>();
@@ -93,6 +94,9 @@ export default function CapitalContactDetail() {
           </Button>
         )}
       </div>
+
+      {/* Cross-pipeline awareness — shows if this lead is also an MC contact / vendor prospect */}
+      {id && <CrossPipelineBanner sourceTable="capital_contacts" sourceId={id} />}
 
       {/* Info Card */}
       <div className="rounded-none border border-border/50 p-4 space-y-3">
