@@ -13,7 +13,7 @@ import { ScrollToTop } from './ScrollToTop';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 import { AdminGuard, VendorGuard, TeamGuard, AuthGuard, StaffGuard, MCGuard } from '@/components/auth';
 import { MCPortalGuard } from '@/components/auth/MCPortalGuard';
-import { CapitalGuard } from '@/components/capital/CapitalGuard';
+
 import { CapitalLayout } from '@/components/capital/CapitalLayout';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 
@@ -894,7 +894,7 @@ export const AnimatedRoutes: React.FC = () => {
         </Route>
 
         {/* ── Capital CRM ── */}
-        <Route path="/capital" element={<CapitalGuard><CapitalLayout /></CapitalGuard>}>
+        <Route path="/capital" element={<AuthGuard><CapitalLayout /></AuthGuard>}>
           <Route index element={<LazyPage><Pages.CapitalDashboard /></LazyPage>} />
           <Route path="contacts" element={<LazyPage><Pages.CapitalContacts /></LazyPage>} />
           <Route path="contacts/:id" element={<LazyPage><Pages.CapitalContactDetail /></LazyPage>} />
