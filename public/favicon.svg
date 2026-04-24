@@ -1,11 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <defs>
-    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#1a1a2e"/>
-      <stop offset="50%" style="stop-color:#6366f1"/>
-      <stop offset="100%" style="stop-color:#1a1a2e"/>
-    </linearGradient>
-  </defs>
-  <rect width="64" height="64" rx="14" fill="url(#g)"/>
-  <text x="32" y="46" text-anchor="middle" font-family="Arial,sans-serif" font-weight="bold" font-size="36" fill="white">U</text>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64"><rect width="64" height="64" fill="#0A2240"/><g transform="translate(4.981 54.691) scale(0.06183 -0.06183)" fill="#F7F5F1"><path d="M252 332Q252 249 299.5 201.0Q347 153 437 153Q527 153 574.5 201.0Q622 249 622 332V750H811V323Q811 221 764.0 145.0Q717 69 633.0 26.5Q549 -16 437 -16Q325 -16 241.0 26.5Q157 69 110.0 145.0Q63 221 63 323V750H252Z"/></g></svg>
