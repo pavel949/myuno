@@ -611,5 +611,8 @@ export const MeRequests = lazy(() => import('@/pages/me/MeRequests'));
 export const MeProfile = lazy(() => import('@/pages/me/MeProfile'));
 export const MeBookings = lazy(() => import('@/pages/me/MeBookings'));
 
+// ── Unified Outreach Hub (Stage 4) ──
+export const OutreachHub = lazy(() => import('@/pages/outreach/OutreachHub'));
+
 // ── Investor Quiz (real funnel, replaces /invest redirect stub) ──
 export const InvestorQuiz = lazy(() => import('@/pages/invest/InvestorQuiz'));
