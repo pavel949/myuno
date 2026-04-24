@@ -6,9 +6,12 @@
  * per OPERATING_MODEL v2.0 Year 1 rule.
  */
 import React from 'react';
-import { Shield, AlertTriangle, CheckCircle2, Sparkles, RefreshCw, Eye, EyeOff } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Shield, AlertTriangle, CheckCircle2, Sparkles, RefreshCw, Eye, EyeOff, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
+import { APP_ROUTES } from '@/lib/config/routes';
+import { useIPPLeadEvent } from '@/hooks/useIPPLeadEvent';
 import {
   useDueDiligenceReport,
   useGenerateDueDiligence,
