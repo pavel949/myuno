@@ -70,8 +70,8 @@ const popularServices = [
     icon: FileText,
     nameEn: 'Document Delivery',
     nameRu: 'Доставка документов',
-    descEn: 'Safe and fast',
-    descRu: 'Безопасно и быстро',
+    descEn: 'Tracked, signed on delivery',
+    descRu: 'С отслеживанием и подписью',
     image: PLACEHOLDER_IMAGES.document,
   },
   {

@@ -137,7 +137,7 @@ export function PaymentStageSelector({
           </div>
           <Badge variant="secondary" className="shrink-0">
             <Check className="w-3 h-3 mr-1" />
-            {isRu ? 'Просто' : 'Simple'}
+            {isRu ? 'Один платёж' : 'One payment'}
           </Badge>
         </div>
 

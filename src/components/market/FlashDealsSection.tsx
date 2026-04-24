@@ -129,7 +129,7 @@ export const FlashDealsSection: React.FC<FlashDealsSectionProps> = ({
               <Zap className="w-5 h-5 text-destructive fill-destructive" />
             </div>
             <h2 className="text-lg font-bold text-foreground">
-              {isRu ? 'Успей купить' : 'Flash Deals'}
+              {isRu ? 'Цены на сегодня' : 'Today’s Deals'}
             </h2>
           </div>
           

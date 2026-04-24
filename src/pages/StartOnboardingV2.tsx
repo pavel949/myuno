@@ -44,7 +44,7 @@ const COPY = {
   finish: { en: 'See my recommendations', ru: 'Показать рекомендации' },
   saving: { en: 'Preparing your map…', ru: 'Готовим карту…' },
   skip: { en: 'Skip for now', ru: 'Пропустить' },
-  errorPrefix: { en: 'Something went wrong:', ru: 'Что-то пошло не так:' },
+  errorPrefix: { en: 'Could not save — please retry:', ru: 'Не удалось сохранить — попробуйте ещё раз:' },
   flagOffTitle: { en: 'Onboarding coming soon', ru: 'Онбординг скоро' },
   flagOffBody: {
     en: 'A canonical version of this guided flow is being prepared.',

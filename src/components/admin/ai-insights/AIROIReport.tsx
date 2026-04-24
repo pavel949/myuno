@@ -18,7 +18,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 
 const recommendationConfig = {
-  KEEP: {
+  keep: {
     color: 'bg-info',
     textColor: 'text-info',
     bgColor: 'bg-info/10',
@@ -26,7 +26,7 @@ const recommendationConfig = {
     labelEn: 'Keep monitoring',
     labelRu: 'Продолжать мониторинг',
   },
-  ADJUST: {
+  adjust: {
     color: 'bg-warning',
     textColor: 'text-warning',
     bgColor: 'bg-warning/10',
@@ -34,7 +34,7 @@ const recommendationConfig = {
     labelEn: 'Needs adjustment',
     labelRu: 'Требует настройки',
   },
-  SCALE: {
+  scale: {
     color: 'bg-success',
     textColor: 'text-success',
     bgColor: 'bg-success/10',
