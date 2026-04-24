@@ -1,15 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
-import { CheckCircle, Ticket, Calendar, MapPin, Users, Loader2 } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import { Ticket, Calendar, MapPin, Users } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { supabase } from '@/integrations/supabase/client';
-import { AppLayout } from '@/components/layout/AppLayout';
-import { PageContainer } from '@/components/uno/PageContainer';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
 import { CrossSellRecommendations } from '@/components/orders/CrossSellRecommendations';
+import { UnifiedSuccessLayout } from '@/components/orders/UnifiedSuccessLayout';
 
 interface OrderData {
   id: string;
@@ -23,16 +19,14 @@ interface OrderData {
 
 export default function EventSuccess() {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
 
   const orderId = searchParams.get('order_id');
-  const sessionId = searchParams.get('session_id');
 
   const [order, setOrder] = useState<OrderData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!!orderId);
   const [pollCount, setPollCount] = useState(0);
 
   useEffect(() => {
@@ -47,11 +41,8 @@ export default function EventSuccess() {
 
       if (data) {
         setOrder(data as OrderData);
-        if (data.status === 'confirmed' || pollCount >= 10) {
-          setLoading(false);
-        } else {
-          setPollCount(c => c + 1);
-        }
+        if (data.status === 'confirmed' || pollCount >= 10) setLoading(false);
+        else setPollCount(c => c + 1);
       } else if (pollCount >= 10) {
         setLoading(false);
       } else {
@@ -63,112 +54,70 @@ export default function EventSuccess() {
     return () => clearTimeout(timer);
   }, [orderId, pollCount]);
 
-  const meta = order?.metadata || {} as Record<string, unknown>;
-  const isConfirmed = order?.status === 'confirmed';
+  const meta = order?.metadata || {};
+
+  const details = order ? (
+    <div className="space-y-3 text-sm">
+      {meta.event_title && (
+        <div className="flex items-start gap-3">
+          <Ticket className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" />
+          <div className="min-w-0">
+            <p className="font-medium">{String(meta.event_title)}</p>
+            {meta.ticket_count != null && (
+              <p className="text-xs text-muted-foreground">
+                × {String(meta.ticket_count)} {isRu ? 'билет(ов)' : 'ticket(s)'}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {meta.event_date && (
+        <div className="flex items-center gap-3">
+          <Calendar className="w-4 h-4 text-muted-foreground shrink-0" />
+          <span>
+            {String(meta.event_date)}{meta.event_time ? ` · ${String(meta.event_time)}` : ''}
+          </span>
+        </div>
+      )}
+
+      {meta.contact_name && (
+        <div className="flex items-center gap-3">
+          <Users className="w-4 h-4 text-muted-foreground shrink-0" />
+          <span>{String(meta.contact_name)}</span>
+        </div>
+      )}
+
+      {meta.pickup_hotel && (
+        <div className="flex items-center gap-3">
+          <MapPin className="w-4 h-4 text-muted-foreground shrink-0" />
+          <span>
+            {String(meta.pickup_hotel)}
+            {meta.pickup_room ? `, ${isRu ? 'ком.' : 'rm.'} ${String(meta.pickup_room)}` : ''}
+          </span>
+        </div>
+      )}
+
+      <div className="pt-3 border-t border-border flex justify-between font-semibold">
+        <span>{isRu ? 'Итого' : 'Total'}</span>
+        <span>{formatPrice(order.total_amount)}</span>
+      </div>
+    </div>
+  ) : null;
 
   return (
-    <AppLayout>
-      <PageContainer className="flex flex-col items-center py-8 min-h-[70vh]">
-        {loading ? (
-          <div className="flex flex-col items-center justify-center flex-1 gap-4">
-            <Loader2 className="w-10 h-10 animate-spin text-primary" />
-            <p className="text-muted-foreground">
-              {isRu ? 'Подтверждаем оплату...' : 'Confirming payment...'}
-            </p>
-          </div>
-        ) : (
-          <div className="w-full max-w-md space-y-6">
-            {/* Status */}
-            <div className="text-center space-y-3">
-              <div className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center ${isConfirmed ? 'bg-success/10 dark:bg-success/40' : 'bg-accent/10 dark:bg-accent/40'}`}>
-                {isConfirmed
-                  ? <CheckCircle className="w-8 h-8 text-success dark:text-success" />
-                  : <Ticket className="w-8 h-8 text-accent dark:text-accent" />
-                }
-              </div>
-              <h1 className="text-2xl font-display font-bold">
-                {isConfirmed
-                  ? (isRu ? 'Билеты подтверждены!' : 'Tickets Confirmed!')
-                  : (isRu ? 'Обрабатываем оплату' : 'Processing Payment')
-                }
-              </h1>
-              <Badge variant={isConfirmed ? 'default' : 'secondary'}>
-                {isConfirmed ? (isRu ? 'Подтверждено' : 'Confirmed') : (isRu ? 'Ожидание' : 'Pending')}
-              </Badge>
-            </div>
-
-            {/* Order details */}
-            {order && (
-              <Card>
-                <CardContent className="p-5 space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">{isRu ? 'Заказ' : 'Order'}</span>
-                    <span className="font-mono font-semibold">#{order.order_number}</span>
-                  </div>
-
-                  {meta.event_title && (
-                    <div className="flex items-start gap-3">
-                      <Ticket className="w-4 h-4 mt-0.5 text-primary shrink-0" />
-                      <div>
-                        <p className="font-medium text-sm">{String(meta.event_title)}</p>
-                        {meta.ticket_count && (
-                          <p className="text-xs text-muted-foreground">
-                            × {String(meta.ticket_count)} {isRu ? 'билет(ов)' : 'ticket(s)'}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {meta.event_date && (
-                    <div className="flex items-center gap-3">
-                      <Calendar className="w-4 h-4 text-primary shrink-0" />
-                      <span className="text-sm">
-                        {String(meta.event_date)}{meta.event_time ? ` · ${String(meta.event_time)}` : ''}
-                      </span>
-                    </div>
-                  )}
-
-                  {meta.contact_name && (
-                    <div className="flex items-center gap-3">
-                      <Users className="w-4 h-4 text-primary shrink-0" />
-                      <span className="text-sm">{String(meta.contact_name)}</span>
-                    </div>
-                  )}
-
-                  {meta.pickup_hotel && (
-                    <div className="flex items-center gap-3">
-                      <MapPin className="w-4 h-4 text-primary shrink-0" />
-                      <span className="text-sm">
-                        {String(meta.pickup_hotel)}{meta.pickup_room ? `, ${isRu ? 'ком.' : 'rm.'} ${String(meta.pickup_room)}` : ''}
-                      </span>
-                    </div>
-                  )}
-
-                  <div className="pt-3 border-t border-border flex justify-between">
-                    <span className="font-semibold">{isRu ? 'Итого' : 'Total'}</span>
-                    <span className="font-bold text-primary">
-                      {formatPrice(order.total_amount)}
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            <CrossSellRecommendations orderType="event" className="mt-4" />
-
-            {/* Actions */}
-            <div className="flex flex-col gap-3">
-              <Button onClick={() => navigate('/orders')} className="w-full">
-                {isRu ? 'Мои заказы' : 'My Orders'}
-              </Button>
-              <Button variant="outline" onClick={() => navigate('/events')} className="w-full">
-                {isRu ? 'К событиям' : 'Browse Events'}
-              </Button>
-            </div>
-          </div>
-        )}
-      </PageContainer>
-    </AppLayout>
+    <UnifiedSuccessLayout
+      isLoading={loading}
+      orderNumber={order?.order_number}
+      note={{
+        ru: 'Билеты подтверждены. Детали отправлены на email.',
+        en: 'Tickets confirmed. Details sent to your email.',
+      }}
+      details={details}
+      extras={<CrossSellRecommendations orderType="event" />}
+      primaryHref="/orders"
+      secondaryHref="/events"
+      secondaryLabel={{ ru: 'К событиям', en: 'Browse events' }}
+    />
   );
 }
