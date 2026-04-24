@@ -27,6 +27,14 @@ import { UniversalFilter, FilterValues } from '@/components/filters/UniversalFil
 import { usePropertyFilterOptions } from '@/hooks/usePropertyFilterOptions';
 import { filterValuesToPropertyFilters } from '@/lib/propertyCatalogServerFilters';
 import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
+import {
+  serializeFilters,
+  parseFiltersFromParams,
+  loadFromStorage,
+  saveToStorage,
+  clearStorage,
+  isOwnedKey,
+} from '@/lib/propertyBrowseFilters';
 
 // ── Recently Viewed Property Shape ──
 interface RecentProperty {
