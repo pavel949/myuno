@@ -15786,6 +15786,7 @@ export type Database = {
           phone: string | null
           postal_code: string | null
           preferred_language: string | null
+          preferred_theme: string | null
           primary_passport_id: string | null
           primary_role: Database["public"]["Enums"]["canonical_role"] | null
           referral_balance: number
@@ -15846,6 +15847,7 @@ export type Database = {
           phone?: string | null
           postal_code?: string | null
           preferred_language?: string | null
+          preferred_theme?: string | null
           primary_passport_id?: string | null
           primary_role?: Database["public"]["Enums"]["canonical_role"] | null
           referral_balance?: number
@@ -15906,6 +15908,7 @@ export type Database = {
           phone?: string | null
           postal_code?: string | null
           preferred_language?: string | null
+          preferred_theme?: string | null
           primary_passport_id?: string | null
           primary_role?: Database["public"]["Enums"]["canonical_role"] | null
           referral_balance?: number
