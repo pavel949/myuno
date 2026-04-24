@@ -51,11 +51,11 @@ export function HeroIntro() {
   const handleVerticalClick = useCallback(
     (target: Vertical) => {
       setVertical(target);
-      // If user has typed a query, jump straight into the catalog with it.
-      // Otherwise just switch placeholder context (no extra step needed).
-      if (query.trim()) {
-        goToVertical(target, query);
-      }
+      // `all` is the no-filter state — pressing it just resets the placeholder.
+      // For any concrete vertical we navigate straight into its catalog so a
+      // tab click always produces a visible result (with or without a query).
+      if (target === 'all') return;
+      goToVertical(target, query);
     },
     [goToVertical, query],
   );
