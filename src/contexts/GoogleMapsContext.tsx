@@ -29,11 +29,15 @@ export interface GoogleMapsContextValue {
 const GoogleMapsContext = createContext<GoogleMapsContextValue | null>(null);
 
 /** Inner provider that runs useJsApiLoader once key is available. */
-function GoogleMapsLoader({ apiKey, children }: { apiKey: string; children: React.ReactNode }) {
+function GoogleMapsLoader({ apiKey, language, children }: { apiKey: string; language: string; children: React.ReactNode }) {
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: apiKey,
     libraries: LIBRARIES,
     preventGoogleFontsLoading: true,
+    language,
+    region: MAPS_REGION,
+    // Re-mount loader if language changes (Google Maps script can't be re-localized at runtime)
+    id: `gmaps-${language}`,
   });
 
   // Detect Google Maps auth failures (RefererNotAllowedMapError, InvalidKeyMapError, etc.)
