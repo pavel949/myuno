@@ -818,6 +818,121 @@ const P22_DEVELOPER_PARTNER: PersonaLanding = {
 };
 
 // ──────────────────────────────────────────────────────────────────────
+//  LIVE: P4 — Digital nomads
+// ──────────────────────────────────────────────────────────────────────
+
+const P4_DIGITAL_NOMADS: PersonaLanding = {
+  personaCode: 'P4',
+  slug: 'digital-nomads',
+  status: 'live',
+  h1: {
+    ru: 'Пхукет для digital nomad: виза, жильё, коворкинг',
+    en: 'Phuket for digital nomads: visa, housing, co-working',
+  },
+  subtitle: {
+    ru: 'DTV-виза на 5 лет, long-stay condo с быстрым интернетом, коворкинги и комьюнити — собрали всё, что нужно для удалённой работы из Таиланда.',
+    en: 'DTV visa for up to 5 years, long-stay condos with fast internet, co-working spaces and community — everything you need to work remotely from Thailand.',
+  },
+  pains: [
+    { ru: 'Не понятно, какая виза легально позволяет работать удалённо: туристическая, DTV или Education.', en: 'Unclear which visa lets you legally work remotely: tourist, DTV or Education.' },
+    { ru: 'Нужен интернет 100+ Mbps и резерв на отключения — не каждое жильё это даёт.', en: 'You need 100+ Mbps and outage backup — not every rental delivers.' },
+    { ru: 'Хочется коворкинг с приличным звуком для созвонов и людей вокруг.', en: 'You want a co-working space with good acoustics for calls and people around.' },
+    { ru: 'Приехать одному скучно — где найти комьюнити удалённых работников.', en: 'Coming alone is dull — where to find a remote-worker community.' },
+  ],
+  services: [
+    { slug: 'visa-quiz', label: { ru: 'Подбор визы (DTV / LTR / Education)', en: 'Visa picker (DTV / LTR / Education)' }, oneLiner: { ru: '4 вопроса — рекомендация и список документов.', en: '4 questions — recommendation and document checklist.' }, href: '/visa/quiz' },
+    { slug: 'long-stay-condo', label: { ru: 'Long-stay condo', en: 'Long-stay condo' }, oneLiner: { ru: 'От 1 месяца, fiber 200 Mbps, кухня, бассейн.', en: 'From 1 month, 200 Mbps fibre, kitchen, pool.' }, href: '/property?staytype=long' },
+    { slug: 'coworking-map', label: { ru: 'Карта коворкингов', en: 'Co-working map' }, oneLiner: { ru: 'KoHub, Garage, Hatch — цены, скорость, день-пасс.', en: 'KoHub, Garage, Hatch — prices, speed, day passes.' }, href: '/services/coworking' },
+    { slug: 'nomad-guide', label: { ru: 'Nomad Guide', en: 'Nomad Guide' }, oneLiner: { ru: 'Полный гид по Пхукету для удалёнщика.', en: 'Full Phuket guide for the remote worker.' }, href: '/nomad-guide' },
+  ],
+  faq: [
+    { q: { ru: 'Что такое DTV и кому она подходит?', en: 'What is DTV and who qualifies?' }, a: { ru: 'Destination Thailand Visa — мульти-виза на 5 лет для удалённых работников и фрилансеров. Каждое пребывание до 180 дней. Нужны: контракт/договор, выписка с балансом 500 000 THB, медицинская страховка.', en: 'Destination Thailand Visa — a 5-year multi-entry visa for remote workers and freelancers. Each stay up to 180 days. Required: contract, bank statement showing 500,000 THB, medical insurance.' } },
+    { q: { ru: 'Можно ли работать на туристической визе?', en: 'Can I work on a tourist visa?' }, a: { ru: 'Удалённая работа на иностранного работодателя — серая зона. Тайские власти на практике не преследуют, но статус юридически уязвим. DTV закрывает этот вопрос полностью.', en: 'Remote work for a foreign employer is a grey zone. Authorities rarely enforce, but the status is legally fragile. DTV resolves this fully.' } },
+    { q: { ru: 'Какой район выбрать для long-stay?', en: 'Which area for long-stay?' }, a: { ru: 'Раваи и Чалонг — нижний бюджет, тихо. Бангтао и Лагуна — премиум, инфраструктура, коворкинги. Камала — баланс. Патонг — только если нужна ночная жизнь.', en: 'Rawai and Chalong — lower budget, quiet. Bang Tao and Laguna — premium, infrastructure, co-working. Kamala — balanced. Patong — only if you want nightlife.' } },
+    { q: { ru: 'Сколько стоит жизнь в месяц?', en: 'What is the monthly cost of living?' }, a: { ru: 'Минимум — ฿45 000 (студия, еда вне ресторанов, байк). Комфорт — ฿80 000–120 000 (1-bed condo, рестораны, спорт). Премиум — от ฿200 000.', en: 'Minimum — ฿45,000 (studio, mostly cooking, scooter). Comfortable — ฿80,000–120,000 (1-bed condo, eating out, sports). Premium — from ฿200,000.' } },
+    { q: { ru: 'Где познакомиться с другими удалёнщиками?', en: 'Where to meet other nomads?' }, a: { ru: 'KoHub в Раваи — главное место. Telegram-группа myUNO Nomads — 1 200+ участников, события каждую неделю.', en: 'KoHub in Rawai is the main hub. The myUNO Nomads Telegram group — 1,200+ members, weekly events.' } },
+  ],
+  primaryCta: {
+    label: { ru: 'Подобрать визу', en: 'Pick a visa' },
+    href: '/visa/quiz',
+    subtitle: { ru: '4 вопроса, бесплатно.', en: '4 questions, free.' },
+  },
+  secondaryCta: {
+    label: { ru: 'Открыть Nomad Guide', en: 'Open the Nomad Guide' },
+    href: '/nomad-guide',
+  },
+  seo: {
+    metaTitle: { ru: 'Пхукет для digital nomad: DTV, condo, коворкинг — myUNO', en: 'Phuket for digital nomads: DTV, condo, co-working — myUNO' },
+    metaDescription: { ru: 'DTV-виза на 5 лет, long-stay condo с fiber-интернетом, карта коворкингов и комьюнити удалёнщиков на Пхукете.', en: 'DTV 5-year visa, long-stay condos with fibre internet, co-working map and remote-worker community on Phuket.' },
+    ogImage: OG_DEFAULT,
+    canonicalPath: '/for/digital-nomads',
+    hreflangAlternates: [
+      { lang: 'ru', href: 'https://myuno.app/for/digital-nomads?lang=ru' },
+      { lang: 'en', href: 'https://myuno.app/for/digital-nomads?lang=en' },
+    ],
+  },
+};
+
+// ──────────────────────────────────────────────────────────────────────
+//  LIVE: P7 — Families with children
+// ──────────────────────────────────────────────────────────────────────
+
+const P7_FAMILIES: PersonaLanding = {
+  personaCode: 'P7',
+  slug: 'families',
+  status: 'live',
+  h1: {
+    ru: 'Пхукет с детьми: школы, виллы, безопасность',
+    en: 'Phuket with kids: schools, villas, safety',
+  },
+  subtitle: {
+    ru: 'Международные школы, family-villas с бассейном и кухней, педиатры по-русски, экскурсии для детей — выстраиваем переезд или зимовку под ваш состав семьи.',
+    en: 'International schools, family villas with pool and kitchen, Russian-speaking paediatricians and kid-friendly tours — we plan your move or winter stay around your family.',
+  },
+  pains: [
+    { ru: 'Не понимаете, какая школа подходит ребёнку: British, IB, Russian curriculum.', en: 'Unclear which school fits your child: British, IB, Russian curriculum.' },
+    { ru: 'Нужна вилла с огороженной территорией, кухней и стиральной машиной.', en: 'You need a villa with enclosed grounds, kitchen and washing machine.' },
+    { ru: 'Боитесь ехать без понимания, как устроена медицина для детей.', en: 'You worry about coming over without understanding how kids healthcare works.' },
+    { ru: 'Хотите занятия для детей: спорт, английский, плавание, лагерь на каникулах.', en: 'You want activities for kids: sports, English, swimming, holiday camps.' },
+  ],
+  services: [
+    { slug: 'school-finder', label: { ru: 'Поиск школы', en: 'School Finder' }, oneLiner: { ru: '15 школ, фильтр по программе, бюджету и району.', en: '15 schools filtered by curriculum, budget and area.' }, href: '/school-finder' },
+    { slug: 'family-villas', label: { ru: 'Family-friendly виллы', en: 'Family-friendly villas' }, oneLiner: { ru: 'Бассейн с забором, кухня, детская мебель.', en: 'Fenced pool, kitchen, child-safe furniture.' }, href: '/property?audience=family' },
+    { slug: 'kids-activities', label: { ru: 'Занятия для детей', en: 'Kids activities' }, oneLiner: { ru: 'Спорт, плавание, art, robotics, лагеря на каникулах.', en: 'Sports, swimming, art, robotics, holiday camps.' }, href: '/kids' },
+    { slug: 'paediatrics', label: { ru: 'Детская медицина', en: 'Paediatric care' }, oneLiner: { ru: 'Bangkok Hospital, BIH, частные педиатры по-русски.', en: 'Bangkok Hospital, BIH, Russian-speaking paediatricians.' }, href: '/services/health/paediatrics' },
+    { slug: 'visa-family', label: { ru: 'Виза для семьи', en: 'Family visa' }, oneLiner: { ru: 'Education visa, dependent visa, DTV — что подходит.', en: 'Education, dependent or DTV visa — pick the right one.' }, href: '/visa/quiz' },
+    { slug: 'family-tours', label: { ru: 'Семейные экскурсии', en: 'Family tours' }, oneLiner: { ru: 'Без укачивания, с детским меню и санузлами.', en: 'No motion sickness, kids menu, toilets.' }, href: '/tours?audience=family' },
+  ],
+  faq: [
+    { q: { ru: 'Какая международная школа лучше всего для русскоязычного ребёнка?', en: 'Which international school works best for a Russian-speaking child?' }, a: { ru: 'Зависит от возраста и плана возврата. UWC (IB), British International School (British) — топ. Headstart — баланс цена/качество. HeadStart Russian — программа РФ + английский. Запустите School Finder с возрастом и бюджетом.', en: 'Depends on age and return plan. UWC (IB), British International School (British) — top tier. Headstart — best price/quality. HeadStart Russian — Russian curriculum + English. Run School Finder with age and budget.' } },
+    { q: { ru: 'Сколько стоит школа в год?', en: 'What does school cost per year?' }, a: { ru: 'Бюджет — ฿200 000–350 000 (HeadStart, BCIS). Средний — ฿450 000–650 000 (Berda Claude, KIS). Топ — ฿800 000–1 200 000 (UWC, BISP). Плюс application fee, форма, автобус.', en: 'Budget — ฿200,000–350,000 (HeadStart, BCIS). Mid — ฿450,000–650,000 (Berda Claude, KIS). Top — ฿800,000–1,200,000 (UWC, BISP). Plus application, uniform, bus.' } },
+    { q: { ru: 'Какой район выбрать для семьи?', en: 'Which area is best for families?' }, a: { ru: 'Бангтао и Лагуна — рядом с UWC и BISP, премиум. Камала — баланс цены/инфраструктуры. Чалонг — рядом с BCIS, бюджетнее. Раваи — для младших школьников и дошкольников.', en: 'Bang Tao and Laguna — close to UWC and BISP, premium. Kamala — balance of price and infrastructure. Chalong — near BCIS, more affordable. Rawai — for primary and pre-school.' } },
+    { q: { ru: 'Где наблюдать ребёнка по медицине?', en: 'Where to handle paediatric care?' }, a: { ru: 'Bangkok Hospital Phuket и BIH — детские отделения с врачами, говорящими по-русски через переводчика. Частные педиатры — приём от ฿1 500. Прививки и анализы — там же.', en: 'Bangkok Hospital Phuket and BIH — paediatric wards with Russian translation. Private paediatricians from ฿1,500/visit. Vaccines and labs at the same hospitals.' } },
+    { q: { ru: 'Какая виза для ребёнка-школьника?', en: 'Which visa for a school-age child?' }, a: { ru: 'Education visa (ED) — 1 год с продлением, оформляет школа. Родитель — Guardian visa параллельно. Альтернатива — DTV родителя + dependent visa ребёнку. Подбор — в Visa Quiz.', en: 'Education visa (ED) — 1 year renewable, issued by the school. Parent — guardian visa in parallel. Alternative — parent DTV + dependent for the child. Use Visa Quiz to choose.' } },
+    { q: { ru: 'Безопасно ли отпускать детей одних?', en: 'Is it safe to let kids out alone?' }, a: { ru: 'Школьники с 12 лет — да, в гейтед-комьюнити (Лагуна, BCIS area). Младшие — только со взрослым или организованным транспортом школы. Уличное движение — главный риск.', en: 'School-age 12+ — yes, in gated communities (Laguna, BCIS area). Younger kids — only with an adult or organised school transport. Traffic is the main risk.' } },
+  ],
+  primaryCta: {
+    label: { ru: 'Подобрать школу', en: 'Find a school' },
+    href: '/school-finder',
+    subtitle: { ru: 'Бесплатно, результат за 5 минут.', en: 'Free, results in 5 minutes.' },
+  },
+  secondaryCta: {
+    label: { ru: 'Открыть family-виллы', en: 'Browse family villas' },
+    href: '/property?audience=family',
+  },
+  seo: {
+    metaTitle: { ru: 'Пхукет с детьми: школы, виллы, медицина — myUNO', en: 'Phuket with kids: schools, villas, healthcare — myUNO' },
+    metaDescription: { ru: 'Международные школы, family-friendly виллы, педиатры по-русски, экскурсии и виза для семьи на Пхукете.', en: 'International schools, family villas, Russian-speaking paediatricians, kid-friendly tours and family visas on Phuket.' },
+    ogImage: OG_DEFAULT,
+    canonicalPath: '/for/families',
+    hreflangAlternates: [
+      { lang: 'ru', href: 'https://myuno.app/for/families?lang=ru' },
+      { lang: 'en', href: 'https://myuno.app/for/families?lang=en' },
+    ],
+  },
+};
+
+// ──────────────────────────────────────────────────────────────────────
 //  Canonical list (P1..P25)
 // ──────────────────────────────────────────────────────────────────────
 
@@ -825,10 +940,10 @@ export const PERSONA_LANDINGS: readonly PersonaLanding[] = [
   P1_TOURISTS,
   draftPersona('P2', 'cn-investors', { ru: 'Гости из Китая', en: 'Chinese tourists & scouts' }),
   draftPersona('P3', 'eu-guests', { ru: 'Гости из Европы', en: 'European guests' }),
-  draftPersona('P4', 'digital-nomads', { ru: 'Цифровые кочевники', en: 'Digital nomads' }),
+  P4_DIGITAL_NOMADS,
   P5_SNOWBIRDS,
   P6_RU_EXPATS,
-  draftPersona('P7', 'families', { ru: 'Семьи с детьми', en: 'Families with children' }),
+  P7_FAMILIES,
   P8_PASSIVE_INVESTORS,
   P9_HNW,
   P10_OPERATORS,
@@ -853,8 +968,10 @@ export const PERSONA_LANDINGS: readonly PersonaLanding[] = [
 
 export const LIVE_PERSONA_SLUGS: readonly string[] = [
   'tourists',          // P1
+  'digital-nomads',    // P4  — Sprint 1
   'snowbirds',         // P5  — M10b
   'ru-expats',         // P6  — M10b
+  'families',          // P7  — Sprint 1
   'passive-investors', // P8  — M10b (main IPP funnel)
   'hnw',               // P9
   'operators',         // P10 — M10b
