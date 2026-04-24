@@ -244,10 +244,17 @@ export default function PropertyMap() {
                 {language === 'ru' ? 'Объекты не найдены' : 'No properties found'}
               </h3>
               <p className="text-sm text-muted-foreground">
-                {language === 'ru' 
-                  ? 'Попробуйте изменить фильтры'
-                  : 'Try adjusting your filters'}
+                {districtParam
+                  ? (language === 'ru'
+                      ? `В районе «${districtParam}» пока нет активных объектов на карте.`
+                      : `No active map listings in “${districtParam}” yet.`)
+                  : (language === 'ru' ? 'Попробуйте изменить фильтры' : 'Try adjusting your filters')}
               </p>
+              {districtParam && (
+                <Button variant="outline" size="sm" className="mt-4" onClick={clearDistrict}>
+                  {language === 'ru' ? 'Показать все районы' : 'Show all areas'}
+                </Button>
+              )}
             </div>
           </div>
         )}
@@ -257,7 +264,7 @@ export default function PropertyMap() {
           <SalonMap
             salons={propertyMarkers}
             onSalonSelect={handlePropertySelect}
-            userLocation={userLocation}
+            userLocation={districtCenter ?? userLocation}
             distanceFilter={distanceFilter}
             className="flex-1 min-h-0 w-full"
             icon="🏠"
