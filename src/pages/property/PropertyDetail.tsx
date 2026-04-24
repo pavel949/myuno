@@ -138,6 +138,16 @@ export default function PropertyDetail() {
   const pricePerNight = rentalTerms?.price_per_night || property.price || 0;
   const isSaleListing = property.listing_type === 'sale' || Boolean(property.is_for_sale);
   const salePrice = property.sale_price ?? (isSaleListing ? property.price : undefined) ?? 0;
+  // 6-tracks: detect short/medium/long rental support. When tenancy_modes is
+  // explicitly set, respect it; otherwise fall back to legacy nightly-price
+  // signal so existing listings keep showing the booking card.
+  const tenancyModes: string[] = Array.isArray((property as any).tenancy_modes)
+    ? (property as any).tenancy_modes
+    : [];
+  const supportsShortStay = tenancyModes.length > 0
+    ? tenancyModes.includes('short')
+    : !!pricePerNight;
+  const isLongStayOnly = tenancyModes.length > 0 && !supportsShortStay;
   const viewTypes = normalizeViewTypes(property.view_type);
   const viewLabels = viewTypes.map((vt) => viewTypeLabels[vt]).filter(Boolean);
 
