@@ -6,9 +6,12 @@
  * per OPERATING_MODEL v2.0 Year 1 rule.
  */
 import React from 'react';
-import { Shield, AlertTriangle, CheckCircle2, Sparkles, RefreshCw, Eye, EyeOff } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Shield, AlertTriangle, CheckCircle2, Sparkles, RefreshCw, Eye, EyeOff, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
+import { APP_ROUTES } from '@/lib/config/routes';
+import { useIPPLeadEvent } from '@/hooks/useIPPLeadEvent';
 import {
   useDueDiligenceReport,
   useGenerateDueDiligence,
@@ -48,7 +51,16 @@ export function ClearViewReport({ projectId, isBrokered }: Props) {
   const { data: report, isLoading } = useDueDiligenceReport(projectId);
   const generate = useGenerateDueDiligence();
   const togglePublish = useTogglePublishDueDiligence();
+  const { track } = useIPPLeadEvent();
   const [isAdmin, setIsAdmin] = React.useState(false);
+
+  // Track that a viewer opened the public summary (IPP §3: +20 equivalent intent).
+  React.useEffect(() => {
+    if (report && (report.is_published || isAdmin)) {
+      track({ eventType: 'clearview_summary_open', projectId });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [report?.id, report?.is_published, isAdmin, projectId]);
 
   React.useEffect(() => {
     let cancel = false;
@@ -228,6 +240,37 @@ export function ClearViewReport({ projectId, isBrokered }: Props) {
                 {report.recommendations.map((r, i) => <li key={i}>{i + 1}. {r}</li>)}
               </ul>
             </div>
+          )}
+
+          {/* P8 trigger — Full Report CTA. IPP §12 step 5. Hidden for admins
+              who already have raw access. */}
+          {!isAdmin && (
+            <Link
+              to={`${APP_ROUTES.CLEARVIEW_APPLY}?project=${projectId}`}
+              className="flex items-center justify-between gap-3 px-4 py-3 rounded-none border transition-colors"
+              style={{
+                borderColor: 'hsl(var(--nb-gold) / 0.4)',
+                background: 'hsl(var(--nb-gold) / 0.06)',
+              }}
+              onClick={() => track({
+                eventType: 'clearview_summary_open',
+                projectId,
+                meta: { cta: 'get_full_report' },
+              })}
+            >
+              <div className="flex items-center gap-2.5">
+                <FileText className="w-4 h-4" style={{ color: 'hsl(var(--nb-gold))' }} />
+                <div>
+                  <div className="text-sm font-semibold" style={{ color: 'hsl(var(--nb-text))' }}>
+                    Полный отчёт ClearView™ · ฿4,900
+                  </div>
+                  <div className="text-[11px]" style={{ color: 'hsl(var(--nb-muted))' }}>
+                    Глубокая верификация · 15 рабочих дней · PDF + личный кабинет
+                  </div>
+                </div>
+              </div>
+              <span className="text-xs font-mono" style={{ color: 'hsl(var(--nb-gold))' }}>→</span>
+            </Link>
           )}
 
           <p className="text-[10px] pt-2 border-t" style={{ color: 'hsl(var(--nb-muted))', borderColor: 'hsl(var(--nb-gold) / 0.1)' }}>

@@ -285,7 +285,7 @@ export const AnimatedRoutes: React.FC = () => {
           {/* RE-first revenue engine — explainer + ClearView product landing */}
           <Route path="why-myuno" element={<LazyPage><Pages.WhyMyUno /></LazyPage>} />
           <Route path="clearview" element={<LazyPage><Pages.ClearViewLanding /></LazyPage>} />
-          <Route path="clearview/apply" element={<LazyPage><Pages.ClearViewLanding /></LazyPage>} />
+          <Route path="clearview/apply" element={<LazyPage><Pages.ClearViewApplyPage /></LazyPage>} />
 
           {/* Commercial RE — persona-gated in nav, open via URL */}
           <Route path="commercial" element={<LazyPage><Pages.CommercialIndex /></LazyPage>} />
