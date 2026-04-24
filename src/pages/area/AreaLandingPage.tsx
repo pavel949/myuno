@@ -17,6 +17,7 @@ import {
   AlertTriangle,
   Building2,
   Check,
+  Map as MapIcon,
   MapPin,
   Plane,
   Star,
@@ -141,8 +142,13 @@ const AreaLandingPage = () => {
       ? `${(area.distance_beach_km * 1000).toFixed(0)} ${isRu ? 'м' : 'm'}`
       : `${area.distance_beach_km} ${isRu ? 'км' : 'km'}`;
 
-  const rentSearchHref = `/property/browse?district=${encodeURIComponent(area.name_en)}`;
-  const offplanSearchHref = `/property/offplan?district=${encodeURIComponent(area.name_en)}`;
+  const districtParam = encodeURIComponent(area.name_en);
+  const rentSearchHref = `/property/browse?district=${districtParam}`;
+  const offplanSearchHref = `/property/offplan?district=${districtParam}`;
+  // Both map deep-links share the canonical `/property/map?district=…` entry
+  // (PropertyMap reads the param, filters server-side, and recenters on it).
+  const rentMapHref = `/property/map?district=${districtParam}&listingType=rent`;
+  const offplanMapHref = `/property/map?district=${districtParam}&listingType=offplan`;
 
   // Resolve cross-link labels from canonical landing configs.
   const personaLinks = relatedPersonaSlugs
@@ -238,6 +244,19 @@ const AreaLandingPage = () => {
                 {isRu ? 'Новостройки района' : 'Off-plan in this area'}
               </Link>
             </Button>
+            <Button asChild size="lg" variant="ghost" className="gap-2">
+              <Link
+                to={rentMapHref}
+                aria-label={
+                  isRu
+                    ? `Открыть карту аренды в районе ${name}`
+                    : `Open rental map for ${name}`
+                }
+              >
+                <MapIcon className="h-4 w-4" aria-hidden />
+                {isRu ? 'Открыть на карте' : 'Open on map'}
+              </Link>
+            </Button>
           </div>
         </header>
 
@@ -330,16 +349,22 @@ const AreaLandingPage = () => {
 
         {/* Rental listings */}
         <section className="mb-10">
-          <div className="mb-4 flex items-end justify-between">
+          <div className="mb-4 flex items-end justify-between gap-3">
             <h2 className="text-xl font-semibold text-foreground">
               {isRu ? `Аренда в ${name}` : `Rentals in ${name}`}
             </h2>
-            <Link
-              to={rentSearchHref}
-              className="text-sm font-medium text-primary hover:underline"
-            >
-              {isRu ? 'Все объекты →' : 'View all →'}
-            </Link>
+            <div className="flex shrink-0 items-center gap-3 text-sm font-medium">
+              <Link
+                to={rentMapHref}
+                className="inline-flex items-center gap-1 text-primary hover:underline"
+              >
+                <MapIcon className="h-3.5 w-3.5" aria-hidden />
+                {isRu ? 'На карте' : 'Map'}
+              </Link>
+              <Link to={rentSearchHref} className="text-primary hover:underline">
+                {isRu ? 'Все объекты →' : 'View all →'}
+              </Link>
+            </div>
           </div>
           {rentalSurfaces.length === 0 ? (
             <p className="rounded-md border border-dashed border-border bg-muted/30 p-6 text-center text-sm text-muted-foreground">
@@ -360,16 +385,22 @@ const AreaLandingPage = () => {
 
         {/* Off-plan listings */}
         <section className="mb-10">
-          <div className="mb-4 flex items-end justify-between">
+          <div className="mb-4 flex items-end justify-between gap-3">
             <h2 className="text-xl font-semibold text-foreground">
               {isRu ? 'Новостройки района' : 'Off-plan in this area'}
             </h2>
-            <Link
-              to={offplanSearchHref}
-              className="text-sm font-medium text-primary hover:underline"
-            >
-              {isRu ? 'Все проекты →' : 'View all →'}
-            </Link>
+            <div className="flex shrink-0 items-center gap-3 text-sm font-medium">
+              <Link
+                to={offplanMapHref}
+                className="inline-flex items-center gap-1 text-primary hover:underline"
+              >
+                <MapIcon className="h-3.5 w-3.5" aria-hidden />
+                {isRu ? 'На карте' : 'Map'}
+              </Link>
+              <Link to={offplanSearchHref} className="text-primary hover:underline">
+                {isRu ? 'Все проекты →' : 'View all →'}
+              </Link>
+            </div>
           </div>
           {offplanSurfaces.length === 0 ? (
             <p className="rounded-md border border-dashed border-border bg-muted/30 p-6 text-center text-sm text-muted-foreground">

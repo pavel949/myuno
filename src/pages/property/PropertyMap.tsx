@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Sliders, MapPin, Loader2 } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Sliders, MapPin, Loader2, X } from 'lucide-react';
 import { BackButton } from '@/components/uno/BackButton';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -39,20 +39,46 @@ const propertyTypes = [
 export default function PropertyMap() {
   const { language } = useLanguage();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // District filter from URL (e.g. /property/map?district=Bang%20Tao)
+  const districtParam = searchParams.get('district')?.trim() || undefined;
+
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [distanceFilter, setDistanceFilter] = useState<number>(0);
   const [selectedType, setSelectedType] = useState('all');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  // Fetch real properties from database
+  // Fetch real properties from database (district filter applied server-side when present)
   const { data: properties, isLoading } = usePropertiesForMap({
     propertyType: selectedType !== 'all' ? selectedType : undefined,
+    district: districtParam,
   });
 
   // Transform to map markers
-  const propertyMarkers = transformPropertiesToMarkers(properties || []);
+  const propertyMarkers = useMemo(
+    () => transformPropertiesToMarkers(properties || []),
+    [properties],
+  );
+
+  // When a district is pre-filled, recenter map on the first matching marker
+  // so the user lands directly on that area (overrides geolocation default).
+  const districtCenter = useMemo(() => {
+    if (!districtParam || propertyMarkers.length === 0) return null;
+    const first = propertyMarkers[0];
+    return { lat: first.lat, lng: first.lng };
+  }, [districtParam, propertyMarkers]);
+
+  const clearDistrict = () => {
+    const next = new URLSearchParams(searchParams);
+    next.delete('district');
+    setSearchParams(next, { replace: true });
+  };
 
   useEffect(() => {
+    // When a district is pre-filled via URL, skip geolocation prompt and
+    // center on the district itself (handled by districtCenter below).
+    if (districtParam) return;
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -68,7 +94,7 @@ export default function PropertyMap() {
         }
       );
     }
-  }, []);
+  }, [districtParam]);
 
   const handlePropertySelect = (propertyId: string) => {
     navigate(APP_ROUTES.PROPERTY_DETAIL(propertyId));
@@ -165,6 +191,26 @@ export default function PropertyMap() {
           </Sheet>
         </div>
 
+        {/* Active district chip (deep-linked from area landings) */}
+        {districtParam && (
+          <div className="flex items-center gap-2 px-3 py-2 bg-primary/5 border-b border-border/30">
+            <MapPin className="w-3.5 h-3.5 text-primary" aria-hidden />
+            <span className="text-xs text-foreground">
+              {language === 'ru' ? 'Район:' : 'Area:'}{' '}
+              <span className="font-medium">{districtParam}</span>
+            </span>
+            <button
+              type="button"
+              onClick={clearDistrict}
+              className="ml-auto inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+              aria-label={language === 'ru' ? 'Сбросить фильтр района' : 'Clear area filter'}
+            >
+              <X className="w-3 h-3" aria-hidden />
+              {language === 'ru' ? 'Сбросить' : 'Clear'}
+            </button>
+          </div>
+        )}
+
         {/* Distance pills */}
         <div className="flex gap-2 p-3 overflow-x-auto bg-background/50 border-b border-border/30">
           {distanceOptions.map((opt) => (
@@ -198,10 +244,17 @@ export default function PropertyMap() {
                 {language === 'ru' ? 'Объекты не найдены' : 'No properties found'}
               </h3>
               <p className="text-sm text-muted-foreground">
-                {language === 'ru' 
-                  ? 'Попробуйте изменить фильтры'
-                  : 'Try adjusting your filters'}
+                {districtParam
+                  ? (language === 'ru'
+                      ? `В районе «${districtParam}» пока нет активных объектов на карте.`
+                      : `No active map listings in “${districtParam}” yet.`)
+                  : (language === 'ru' ? 'Попробуйте изменить фильтры' : 'Try adjusting your filters')}
               </p>
+              {districtParam && (
+                <Button variant="outline" size="sm" className="mt-4" onClick={clearDistrict}>
+                  {language === 'ru' ? 'Показать все районы' : 'Show all areas'}
+                </Button>
+              )}
             </div>
           </div>
         )}
@@ -211,7 +264,7 @@ export default function PropertyMap() {
           <SalonMap
             salons={propertyMarkers}
             onSalonSelect={handlePropertySelect}
-            userLocation={userLocation}
+            userLocation={districtCenter ?? userLocation}
             distanceFilter={distanceFilter}
             className="flex-1 min-h-0 w-full"
             icon="🏠"
