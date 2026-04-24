@@ -66,21 +66,25 @@ async function fetchAqi(): Promise<{ aqi: string; aqiBand: PhuketConditions['aqi
 }
 
 async function fetchRate(): Promise<{ rate: string; rateDelta: string }> {
-  // exchangerate.host returns 1 USD = X THB. We want how many THB per 1 USD.
-  // Fetch today + yesterday to compute delta.
-  const today = await fetch('https://api.exchangerate.host/latest?base=USD&symbols=THB');
-  if (!today.ok) throw new Error(`rate ${today.status}`);
-  const j = await today.json();
-  const r = j?.rates?.THB;
+  // fawazahmed0/currency-api returns: { date, usd: { thb: <rate>, ... } }
+  // i.e. 1 USD = X THB — exactly what we display as "THB/USD".
+  // Primary host = jsDelivr; if it ever rate-limits we could add a Cloudflare
+  // mirror as a fallback, but for now the CDN is rock-solid.
+  const todayUrl = 'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json';
+  const res = await fetch(todayUrl);
+  if (!res.ok) throw new Error(`rate ${res.status}`);
+  const j = await res.json();
+  const r = j?.usd?.thb;
   if (typeof r !== 'number') return { rate: '—', rateDelta: '' };
 
   let delta = '';
   try {
     const y = new Date(Date.now() - 24 * 3600 * 1000).toISOString().slice(0, 10);
-    const ys = await fetch(`https://api.exchangerate.host/${y}?base=USD&symbols=THB`);
+    const yUrl = `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@${y}/v1/currencies/usd.json`;
+    const ys = await fetch(yUrl);
     if (ys.ok) {
       const yj = await ys.json();
-      const yr = yj?.rates?.THB;
+      const yr = yj?.usd?.thb;
       if (typeof yr === 'number') {
         const d = r - yr;
         delta = `${d >= 0 ? '+' : ''}${d.toFixed(2)}`;
