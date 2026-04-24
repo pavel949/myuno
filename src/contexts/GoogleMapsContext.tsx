@@ -130,7 +130,7 @@ export function GoogleMapsProvider({ children }: { children: React.ReactNode }) 
     );
   }
 
-  return <GoogleMapsLoader apiKey={apiKey}>{children}</GoogleMapsLoader>;
+  return <GoogleMapsLoader apiKey={apiKey} language={mapsLanguage}>{children}</GoogleMapsLoader>;
 }
 
 export function useGoogleMaps() {
