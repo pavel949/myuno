@@ -51,7 +51,16 @@ export function ClearViewReport({ projectId, isBrokered }: Props) {
   const { data: report, isLoading } = useDueDiligenceReport(projectId);
   const generate = useGenerateDueDiligence();
   const togglePublish = useTogglePublishDueDiligence();
+  const { track } = useIPPLeadEvent();
   const [isAdmin, setIsAdmin] = React.useState(false);
+
+  // Track that a viewer opened the public summary (IPP §3: +20 equivalent intent).
+  React.useEffect(() => {
+    if (report && (report.is_published || isAdmin)) {
+      track({ eventType: 'clearview_summary_open', projectId });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [report?.id, report?.is_published, isAdmin, projectId]);
 
   React.useEffect(() => {
     let cancel = false;
