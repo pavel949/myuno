@@ -62,13 +62,12 @@ describe('routeRegistry — catalog ↔ router contract', () => {
     }
   });
 
-  it('multiple services on one route collapse into the same bucket', () => {
-    // /events is referenced by both `live` and `enjoy` clusters.
-    const events = findCatalogServicesByPath(APP_ROUTES.EVENTS);
-    expect(events.length).toBeGreaterThanOrEqual(2);
-    const clusterIds = new Set(events.map((s) => s.clusterId));
-    expect(clusterIds.has('live')).toBe(true);
-    expect(clusterIds.has('enjoy')).toBe(true);
+  it('catalog supports multiple services on the same base path (e.g. /services?category=*)', () => {
+    // After SSOT migration, /services hosts many sub-services via query string.
+    // findCatalogServicesByPath strips query strings, so a single base path
+    // resolves to multiple service entries.
+    const services = findCatalogServicesByPath(APP_ROUTES.SERVICES);
+    expect(services.length).toBeGreaterThanOrEqual(2);
   });
 
   it('CATALOG_ROUTE_LOOKUP keys are a subset of catalog paths', () => {
