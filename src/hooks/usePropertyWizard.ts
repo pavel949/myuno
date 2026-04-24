@@ -149,6 +149,49 @@ export interface PropertyFormData {
   hotel_management_status?: string;
   hotel_operator_name?: string;
   hotel_year_renovated?: number;
+  // ─── 6-tracks model (rent short / medium / long, sale, assignment, quick-sale) ───
+  /** Which tenancy modes this property supports (multi-select). */
+  tenancy_modes?: Array<'short' | 'medium' | 'long'>;
+  price_per_month?: string; // medium-term THB/mo
+  price_per_year?: string;  // long-term THB/yr
+  deposit_months_long?: number;  // standard 2
+  advance_months_long?: number;  // standard 1
+  min_lease_months?: number;     // 1, 6, 12
+  utilities_included_long?: string[]; // electricity, water, internet, cleaning, cam
+  tm30_registration_supported?: boolean;
+  // Sale intent
+  sale_intent?: 'standard' | 'assignment' | 'quick_sale';
+  is_assignment?: boolean;
+  assignment_premium?: string;          // THB premium over original contract
+  original_contract_price?: string;     // THB SPA price
+  remaining_to_developer?: string;      // THB still owed
+  spa_stage?: string;
+  transfer_fee_split?: 'buyer' | 'seller' | '50_50';
+  // Quick sale
+  is_quick_sale?: boolean;
+  quick_sale_reason?: string;
+  quick_sale_discount_pct?: number;
+  urgency_deadline?: string; // YYYY-MM-DD
+  // Payment options for sale/assignment
+  accepts_installments?: boolean;
+  installment_plan?: Array<{
+    id: string;
+    labelEn: string;
+    labelRu: string;
+    percent: number;
+    dueAt?: string;
+    dueAtRu?: string;
+  }>;
+  escrow_offered?: boolean;
+  escrow_provider?: 'platform' | 'lawyer' | 'bank' | 'other';
+  // Legal readiness (без SoF на покупателе)
+  title_deed_url?: string;
+  encumbrances_disclosed?: boolean;
+  encumbrances_description?: string;
+  foreign_quota_available?: boolean;
+  // Video tour
+  video_file_url?: string;     // uploaded mp4 in Supabase Storage
+  virtual_tour_url?: string;   // Matterport / Kuula / 360
 }
 
 const initialFormData: PropertyFormData = {
