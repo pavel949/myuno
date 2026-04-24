@@ -141,8 +141,13 @@ const AreaLandingPage = () => {
       ? `${(area.distance_beach_km * 1000).toFixed(0)} ${isRu ? 'м' : 'm'}`
       : `${area.distance_beach_km} ${isRu ? 'км' : 'km'}`;
 
-  const rentSearchHref = `/property/browse?district=${encodeURIComponent(area.name_en)}`;
-  const offplanSearchHref = `/property/offplan?district=${encodeURIComponent(area.name_en)}`;
+  const districtParam = encodeURIComponent(area.name_en);
+  const rentSearchHref = `/property/browse?district=${districtParam}`;
+  const offplanSearchHref = `/property/offplan?district=${districtParam}`;
+  // Both map deep-links share the canonical `/property/map?district=…` entry
+  // (PropertyMap reads the param, filters server-side, and recenters on it).
+  const rentMapHref = `/property/map?district=${districtParam}&listingType=rent`;
+  const offplanMapHref = `/property/map?district=${districtParam}&listingType=offplan`;
 
   // Resolve cross-link labels from canonical landing configs.
   const personaLinks = relatedPersonaSlugs
