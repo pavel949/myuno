@@ -62,12 +62,14 @@ describe('routeRegistry — catalog ↔ router contract', () => {
     }
   });
 
-  it('catalog supports multiple services on the same base path (e.g. /services?category=*)', () => {
-    // After SSOT migration, /services hosts many sub-services via query string.
-    // findCatalogServicesByPath strips query strings, so a single base path
-    // resolves to multiple service entries.
-    const services = findCatalogServicesByPath(APP_ROUTES.SERVICES);
-    expect(services.length).toBeGreaterThanOrEqual(2);
+  it('catalog includes multiple services sharing the /services base path', () => {
+    // After SSOT migration, /services hosts many sub-services (laundry,
+    // handyman, plumbing, …) via query string. The flat catalog must list
+    // them as distinct entries even though they share a base route.
+    const sharing = CLUSTER_CATALOG_FLAT.filter((s) =>
+      s.path.startsWith(APP_ROUTES.SERVICES)
+    );
+    expect(sharing.length).toBeGreaterThanOrEqual(2);
   });
 
   it('CATALOG_ROUTE_LOOKUP keys are a subset of catalog paths', () => {
