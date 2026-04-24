@@ -29,7 +29,17 @@ export interface GoogleMapsContextValue {
 const GoogleMapsContext = createContext<GoogleMapsContextValue | null>(null);
 
 /** Inner provider that runs useJsApiLoader once key is available. */
-function GoogleMapsLoader({ apiKey, language, children }: { apiKey: string; language: string; children: React.ReactNode }) {
+function GoogleMapsLoader({
+  apiKey,
+  language,
+  onLanguageFallback,
+  children,
+}: {
+  apiKey: string;
+  language: string;
+  onLanguageFallback: () => void;
+  children: React.ReactNode;
+}) {
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: apiKey,
     libraries: LIBRARIES,
@@ -55,6 +65,15 @@ function GoogleMapsLoader({ apiKey, language, children }: { apiKey: string; lang
   }, []);
 
   const effectiveError = loadError ?? authError;
+
+  // Fallback: if the script failed to load with a non-English locale, retry once with `en`.
+  // Auth failures (gm_authFailure) are NOT a localization issue — don't retry those.
+  useEffect(() => {
+    if (loadError && language !== 'en') {
+      console.warn(`[GoogleMaps] Failed to load with language="${language}", falling back to "en"`, loadError);
+      onLanguageFallback();
+    }
+  }, [loadError, language, onLanguageFallback]);
 
   const value = useMemo<GoogleMapsContextValue>(
     () => ({
