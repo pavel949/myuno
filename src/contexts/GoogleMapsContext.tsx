@@ -111,7 +111,19 @@ const loadingValue: GoogleMapsContextValue = {
 
 export function GoogleMapsProvider({ children }: { children: React.ReactNode }) {
   const { language: appLang } = useLanguage();
-  const mapsLanguage = resolveMapsLanguage(appLang);
+  const requestedLanguage = resolveMapsLanguage(appLang);
+  const [forceFallbackLang, setForceFallbackLang] = useState(false);
+  const mapsLanguage = forceFallbackLang ? 'en' : requestedLanguage;
+
+  // Reset fallback if the user changes app language (give the new language a fresh try)
+  useEffect(() => {
+    setForceFallbackLang(false);
+  }, [requestedLanguage]);
+
+  const handleLanguageFallback = React.useCallback(() => {
+    setForceFallbackLang(true);
+  }, []);
+
   const [apiKey, setApiKey] = useState<string | null>(getGoogleMapsKey());
   const [fetched, setFetched] = useState(!!apiKey);
 
@@ -149,7 +161,11 @@ export function GoogleMapsProvider({ children }: { children: React.ReactNode }) 
     );
   }
 
-  return <GoogleMapsLoader apiKey={apiKey} language={mapsLanguage}>{children}</GoogleMapsLoader>;
+  return (
+    <GoogleMapsLoader apiKey={apiKey} language={mapsLanguage} onLanguageFallback={handleLanguageFallback}>
+      {children}
+    </GoogleMapsLoader>
+  );
 }
 
 export function useGoogleMaps() {
