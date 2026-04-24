@@ -38,11 +38,12 @@ export default function WellnessOrderSuccess() {
     let timer: ReturnType<typeof setTimeout>;
 
     const poll = async () => {
-      const { data } = await supabase
-        .from('orders')
+      const { data } = await (supabase
+        .from('orders') as any)
         .select('id, order_number, status, total_amount, currency, metadata, created_at')
         .eq('stripe_session_id', sessionId)
         .limit(1);
+
 
       if (data && data.length > 0) {
         setOrder(data[0] as OrderRow);
