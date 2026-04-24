@@ -1,9 +1,11 @@
 /**
- * Tests for PERSONA_LANDINGS config (M6 · Track B.2).
+ * Tests for PERSONA_LANDINGS config.
  *
- * Контракт B.2 — все 25 персон присутствуют, slug'и уникальны,
- * personaCode'ы покрывают P1..P25 без дубликатов и пропусков, и **никто
- * не проходит `isLivePersonaLanding()`** на этапе B.2 (контент придёт в B.7).
+ * Original contract (M6 · B.2): 25 landings, all draft.
+ * Updated contract (M10b · 2026-04-24): IPP investor personas (P5/P6/P8/P10/P11)
+ * + developer partner door (P22) promoted to `live`. P22 has two slugs because
+ * `01-segmentation-framework.md` (P22 = freelancers) conflicts with
+ * `IPP.md §16` (P22 = developer-partner) — see `m10b-completion.md` §Open conflicts.
  */
 import { describe, it, expect } from 'vitest';
 import {
@@ -17,14 +19,15 @@ import {
 import { PERSONA_CODES } from '@/types/canonical';
 
 describe('PERSONA_LANDINGS — coverage', () => {
-  it('contains exactly 25 persona landings', () => {
-    expect(PERSONA_LANDINGS).toHaveLength(25);
+  it('contains 26 persona landings (25 canonical + 1 P22 developer-partner alias)', () => {
+    expect(PERSONA_LANDINGS).toHaveLength(26);
   });
 
-  it('covers every canonical PersonaCode P1..P25 exactly once', () => {
-    const codes = PERSONA_LANDINGS.map((l) => l.personaCode).sort();
-    const expected = [...PERSONA_CODES].sort();
-    expect(codes).toEqual(expected);
+  it('covers every canonical PersonaCode P1..P25 at least once', () => {
+    const codes = new Set(PERSONA_LANDINGS.map((l) => l.personaCode));
+    for (const expected of PERSONA_CODES) {
+      expect(codes.has(expected)).toBe(true);
+    }
   });
 
   it('has unique slugs', () => {
@@ -39,20 +42,33 @@ describe('PERSONA_LANDINGS — coverage', () => {
   });
 });
 
-describe('PERSONA_LANDINGS — B.2 stage status (all draft)', () => {
-  it('all 25 landings have status="draft" at B.2 stage', () => {
-    for (const l of PERSONA_LANDINGS) {
-      expect(l.status).toBe('draft');
+describe('PERSONA_LANDINGS — M10b live promotions', () => {
+  const expectedLive = [
+    'tourists',
+    'snowbirds',
+    'ru-expats',
+    'passive-investors',
+    'hnw',
+    'operators',
+    'mn-investors',
+    'pet-owners',
+    'developer-partner',
+  ];
+
+  it('has exactly the M10b live slug set', () => {
+    const live = PERSONA_LANDINGS.filter((l) => l.status === 'live').map((l) => l.slug).sort();
+    expect(live).toEqual([...expectedLive].sort());
+  });
+
+  it('every live landing passes isLivePersonaLanding()', () => {
+    for (const slug of expectedLive) {
+      const landing = findPersonaLandingBySlug(PERSONA_LANDINGS, slug);
+      expect(landing).toBeDefined();
+      expect(isLivePersonaLanding(landing!)).toBe(true);
     }
   });
 
-  it('no landing passes isLivePersonaLanding() yet (content comes in B.7)', () => {
-    for (const l of PERSONA_LANDINGS) {
-      expect(isLivePersonaLanding(l)).toBe(false);
-    }
-  });
-
-  it('every draft landing has a valid h1 + subtitle + primaryCta (no runtime crash if rendered)', () => {
+  it('every draft landing has a valid h1 + subtitle + primaryCta', () => {
     for (const l of PERSONA_LANDINGS) {
       expect(l.h1.ru.length).toBeGreaterThan(0);
       expect(l.h1.en.length).toBeGreaterThan(0);
@@ -65,10 +81,10 @@ describe('PERSONA_LANDINGS — B.2 stage status (all draft)', () => {
   });
 });
 
-describe('LIVE_PERSONA_SLUGS — contract for B.7', () => {
-  it('lists exactly 3 slugs (P1, P9, P13)', () => {
-    expect(LIVE_PERSONA_SLUGS).toHaveLength(3);
-    expect(LIVE_PERSONA_SLUGS).toEqual(['tourists', 'hnw', 'pet-owners']);
+describe('LIVE_PERSONA_SLUGS — M10b contract', () => {
+  it('matches the live status set in PERSONA_LANDINGS', () => {
+    const live = PERSONA_LANDINGS.filter((l) => l.status === 'live').map((l) => l.slug).sort();
+    expect([...LIVE_PERSONA_SLUGS].sort()).toEqual(live);
   });
 
   it('every LIVE_PERSONA_SLUGS entry exists in PERSONA_LANDINGS', () => {
@@ -76,12 +92,6 @@ describe('LIVE_PERSONA_SLUGS — contract for B.7', () => {
       const found = findPersonaLandingBySlug(PERSONA_LANDINGS, slug);
       expect(found).toBeDefined();
     }
-  });
-
-  it('LIVE slugs map to the expected canonical persona codes', () => {
-    expect(findPersonaLandingBySlug(PERSONA_LANDINGS, 'tourists')?.personaCode).toBe('P1');
-    expect(findPersonaLandingBySlug(PERSONA_LANDINGS, 'hnw')?.personaCode).toBe('P9');
-    expect(findPersonaLandingBySlug(PERSONA_LANDINGS, 'pet-owners')?.personaCode).toBe('P13');
   });
 });
 

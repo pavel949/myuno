@@ -58,6 +58,8 @@ const PropertyHub = React.lazy(() => import('@/pages/property/PropertyHub'));
 const PersonaLandingPage = React.lazy(() => import('@/pages/landings/PersonaLandingPage'));
 // M6 · Track B.5 — cluster landing route `/cluster/:cluster`
 const ClusterLandingPage = React.lazy(() => import('@/pages/landings/ClusterLandingPage'));
+// M10b · IPP §4G — Deal Room stub
+const MandateLanding = React.lazy(() => import('@/pages/property/MandateLanding'));
 
 // Home router: guests see marketing landing, authed users see Index
 const HomeRouter = () => {
@@ -904,6 +906,13 @@ export const AnimatedRoutes: React.FC = () => {
         {/* ── M6 Persona Landings (B.4) ── */}
         {/* Draft slugs and unknown slugs return 404 inside the page itself. */}
         <Route path="/for/:persona" element={<LazyPage><PersonaLandingPage /></LazyPage>} />
+
+        {/* ── M10b · IPP — nested entry under Property Hub (ARCHITECTURE_V2 §13.1) ── */}
+        {/* Same content as /for/:persona, accessible from PropertyHub navigation. */}
+        <Route path="/property/for/:persona" element={<LazyPage><PersonaLandingPage /></LazyPage>} />
+
+        {/* ── M10b · IPP §4G — Deal Room stub (P9 HNW invite-only) ── */}
+        <Route path="/property/mandate" element={<LazyPage><MandateLanding /></LazyPage>} />
 
         {/* ── M6 Cluster Landings (B.5) ── */}
         {/* Same 200/404 contract as `/for/:persona`. */}
