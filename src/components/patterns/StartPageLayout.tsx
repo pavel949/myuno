@@ -112,7 +112,7 @@ export function StartPageLayout({
           {metaEntries.map(({ key, label, value, Icon }) => (
             <div
               key={key}
-              className="rounded-[12px] border border-border bg-card/40 px-3 py-2.5"
+              className="rounded-none border border-border bg-card/40 px-3 py-2.5"
             >
               <dt className="flex items-center gap-1.5 text-[11px] text-muted-foreground font-medium">
                 <Icon className="w-3.5 h-3.5" aria-hidden="true" />
@@ -131,7 +131,7 @@ export function StartPageLayout({
           type="button"
           onClick={onStart}
           className={cn(
-            'inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-[12px]',
+            'inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-none',
             'bg-primary text-primary-foreground font-semibold text-[15px]',
             'min-h-[48px] active:scale-[0.99] transition-transform',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
@@ -146,7 +146,7 @@ export function StartPageLayout({
             type="button"
             onClick={onSecondary}
             className={cn(
-              'inline-flex items-center justify-center px-6 py-3.5 rounded-[12px]',
+              'inline-flex items-center justify-center px-6 py-3.5 rounded-none',
               'bg-card border border-border text-foreground font-medium text-[14.5px]',
               'min-h-[48px] active:scale-[0.99] transition-transform',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'

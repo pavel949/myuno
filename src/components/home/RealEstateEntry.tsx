@@ -102,9 +102,9 @@ export function RealEstateEntry() {
               <button
                 type="button"
                 onClick={() => navigate(track.href)}
-                className="w-full text-left rounded-[14px] border border-border bg-card hover:border-border-strong hover:bg-card/80 transition-colors px-3.5 py-3 flex items-start gap-3 active:scale-[0.99]"
+                className="w-full text-left rounded-none border border-border bg-card hover:border-border-strong hover:bg-card/80 transition-colors px-3.5 py-3 flex items-start gap-3 active:scale-[0.99]"
               >
-                <span className="shrink-0 w-9 h-9 rounded-[10px] bg-muted text-foreground flex items-center justify-center">
+                <span className="shrink-0 w-9 h-9 rounded-none bg-muted text-foreground flex items-center justify-center">
                   <Icon className="w-4 h-4" />
                 </span>
                 <span className="flex-1 min-w-0">

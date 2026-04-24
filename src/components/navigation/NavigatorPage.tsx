@@ -245,7 +245,7 @@ export default function NavigatorPage() {
               language
             )}
             className={cn(
-              'w-full h-10 pl-9 pr-9 rounded-[var(--radius-md)] text-sm',
+              'w-full h-10 pl-9 pr-9 rounded-none text-sm',
               'bg-[hsl(var(--bg-elevated))] border border-[hsl(0_0%_100%_/_0.07)]',
               'text-foreground placeholder:text-muted-foreground/60',
               'focus:outline-none focus:ring-1 focus:ring-primary/40',
@@ -314,7 +314,7 @@ export default function NavigatorPage() {
                   {/* Cluster header */}
                   <div className="flex items-center gap-2.5 mb-2.5">
                     <div
-                      className="w-8 h-8 rounded-[10px] flex items-center justify-center shrink-0"
+                      className="w-8 h-8 rounded-none flex items-center justify-center shrink-0"
                       style={{ background: cluster.color + '1A' }}
                     >
                       <Icon className="w-4 h-4" style={{ color: cluster.color }} />
@@ -358,7 +358,7 @@ export default function NavigatorPage() {
         {/* Coming soon */}
         {searchResults === null && SOON_SERVICES.length > 0 && (
           <div
-            className="rounded-[var(--radius-md)] p-4 space-y-3"
+            className="rounded-none p-4 space-y-3"
             style={{ background: 'hsl(var(--bg-elevated))', border: '1px solid hsl(0 0% 100% / 0.05)' }}
           >
             <p className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-wider">
@@ -387,7 +387,7 @@ export default function NavigatorPage() {
         {/* Stats + All apps link */}
         {searchResults === null && (
           <div
-            className="rounded-[var(--radius-md)] p-4 space-y-3 text-center"
+            className="rounded-none p-4 space-y-3 text-center"
             style={{ background: 'hsl(var(--bg-surface))', border: '1px solid hsl(0 0% 100% / 0.05)' }}
           >
             <NavigatorStatsFooter stats={stats} language={language} />

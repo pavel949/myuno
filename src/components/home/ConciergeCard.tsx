@@ -26,7 +26,7 @@ export function ConciergeCard({ personas }: ConciergeCardProps) {
   return (
     <div className="px-4 pb-5">
       <SectionHead title={isRu ? 'Уведомление' : 'Notice'} />
-      <div className="rounded-[16px] border border-dashed border-border p-4 flex gap-3">
+      <div className="rounded-none border border-dashed border-border p-4 flex gap-3">
         {/* Service marker */}
         <div
           className="w-[26px] h-[26px] rounded-full flex-shrink-0 mt-0.5 flex items-center justify-center font-display text-[11px] font-bold text-background"

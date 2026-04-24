@@ -195,7 +195,7 @@ export function HomeDiscoveryCarousel() {
       {sectionLoading && rail.length === 0 ? (
         <div className="flex gap-3 -mx-4 px-4 overflow-hidden">
           {[1, 2, 3, 4, 5, 6].map(i => (
-            <Skeleton key={i} className="h-[168px] w-[148px] rounded-[var(--radius-lg)] shrink-0" />
+            <Skeleton key={i} className="h-[168px] w-[148px] rounded-none shrink-0" />
           ))}
         </div>
       ) : (
@@ -210,7 +210,7 @@ export function HomeDiscoveryCarousel() {
                 type="button"
                 onClick={() => navigate(item.href)}
                 aria-label={`${badge}: ${title}${meta ? `, ${meta}` : ''}`}
-                className="w-[148px] h-[168px] rounded-[var(--radius-lg)] overflow-hidden text-left group transition-all duration-200 hover:-translate-y-1 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                className="w-[148px] h-[168px] rounded-none overflow-hidden text-left group transition-all duration-200 hover:-translate-y-1 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 style={{
                   background: 'hsl(var(--card))',
                   border: '1px solid hsl(var(--border))',

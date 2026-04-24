@@ -33,7 +33,7 @@ export function SignalStack({ personas, onRoleSheetOpen }: SignalStackProps) {
       )}
       <button
         onClick={onRoleSheetOpen}
-        className="mt-2.5 w-full flex items-center justify-between px-3 py-2.5 rounded-[10px] border border-dashed border-border text-left hover:border-border-strong transition-colors"
+        className="mt-2.5 w-full flex items-center justify-between px-3 py-2.5 rounded-none border border-dashed border-border text-left hover:border-border-strong transition-colors"
       >
         <span className="text-[11.5px] text-muted-foreground">{isRu ? 'Категории и порядок отображения' : 'Categories and display order'}</span>
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -57,7 +57,7 @@ function SignalHero({ persona, sig, isRu }: { persona: UserPersona; sig: RoleSig
   return (
     <button
       onClick={() => navigate(SIGNAL_ROUTE[persona])}
-      className="w-full text-left relative overflow-hidden rounded-[20px] bg-card border border-border p-[18px] active:scale-[0.99] transition-transform"
+      className="w-full text-left relative overflow-hidden rounded-none bg-card border border-border p-[18px] active:scale-[0.99] transition-transform"
     >
       {/* 2px left spine */}
       <div className="absolute top-4 bottom-4 left-0 w-0.5 rounded-none" style={{ background: meta.color }} />
@@ -90,7 +90,7 @@ function SignalSlim({ persona, sig, isRu }: { persona: UserPersona; sig: RoleSig
   return (
     <button
       onClick={() => navigate(SIGNAL_ROUTE[persona])}
-      className="w-full text-left relative overflow-hidden rounded-[14px] bg-card/60 border border-border grid grid-cols-[auto_1fr_auto] gap-2.5 items-center px-3.5 py-2.5 active:scale-[0.99] transition-transform"
+      className="w-full text-left relative overflow-hidden rounded-none bg-card/60 border border-border grid grid-cols-[auto_1fr_auto] gap-2.5 items-center px-3.5 py-2.5 active:scale-[0.99] transition-transform"
     >
       <div className="absolute top-2.5 bottom-2.5 left-0 w-0.5 rounded-none" style={{ background: meta.color }} />
       <RoleChip persona={persona} meta={meta} compact />

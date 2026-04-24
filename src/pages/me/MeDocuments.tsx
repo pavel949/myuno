@@ -179,7 +179,7 @@ function DocCard({
 
       {isDeleting && (
         <div
-          className="absolute inset-0 flex items-center justify-center gap-2 rounded-[inherit] bg-background/60-[1px] pointer-events-auto"
+          className="absolute inset-0 flex items-center justify-center gap-2 rounded-none bg-background/60-[1px] pointer-events-auto"
           role="status"
           aria-live="polite"
         >

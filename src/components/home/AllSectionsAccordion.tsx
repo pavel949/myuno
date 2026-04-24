@@ -19,7 +19,7 @@ export function AllSectionsAccordion({ personas }: AllSectionsAccordionProps) {
   return (
     <div className="px-4 pb-3">
       <Accordion type="single" collapsible>
-        <AccordionItem value="all" className="border border-border rounded-[14px] px-4 [&[data-state=open]]:bg-card/40">
+        <AccordionItem value="all" className="border border-border rounded-none px-4 [&[data-state=open]]:bg-card/40">
           <AccordionTrigger className="hover:no-underline py-3.5">
             <div className="flex flex-col items-start text-left">
               <span className="text-[14px] font-semibold text-foreground">

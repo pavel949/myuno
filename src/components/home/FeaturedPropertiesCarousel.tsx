@@ -65,7 +65,7 @@ export function FeaturedPropertiesCarousel() {
         <Skeleton className="h-6 w-48" />
         <div className="flex gap-3 overflow-hidden">
           {[1, 2, 3].map(i => (
-            <Skeleton key={i} className="w-[280px] aspect-[4/5] md:w-[260px] rounded-[var(--radius-lg)] shrink-0" />
+            <Skeleton key={i} className="w-[280px] aspect-[4/5] md:w-[260px] rounded-none shrink-0" />
           ))}
         </div>
       </div>
@@ -82,7 +82,7 @@ export function FeaturedPropertiesCarousel() {
         />
         <div className="flex gap-3 -mx-4 px-4 overflow-hidden">
           {[1, 2, 3].map(i => (
-            <div key={i} className="w-[220px] h-[280px] md:w-[260px] md:h-[320px] rounded-[var(--radius-lg)] shrink-0 flex flex-col items-center justify-center gap-3"
+            <div key={i} className="w-[220px] h-[280px] md:w-[260px] md:h-[320px] rounded-none shrink-0 flex flex-col items-center justify-center gap-3"
               style={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }}
             >
               {isError ? (
@@ -131,7 +131,7 @@ export function FeaturedPropertiesCarousel() {
               key={property.id}
               onClick={() => navigate(APP_ROUTES.PROPERTY_DETAIL(property.id))}
               aria-label={`${isRu ? property.title_ru : property.title_en}, ${district}, ${formatPrice(unitPrice)} ${isRu ? 'за ночь' : 'per night'}`}
-              className="w-[280px] md:w-[260px] rounded-[var(--radius-lg)] overflow-hidden text-left group transition-all duration-200 hover:-translate-y-1 active:scale-[0.97] shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background flex flex-col"
+              className="w-[280px] md:w-[260px] rounded-none overflow-hidden text-left group transition-all duration-200 hover:-translate-y-1 active:scale-[0.97] shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background flex flex-col"
               style={{
                 background: 'hsl(var(--card))',
                 border: '1px solid hsl(var(--border))',

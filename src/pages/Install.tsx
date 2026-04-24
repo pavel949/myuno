@@ -273,7 +273,7 @@ const Install = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="mb-8 mx-auto w-44 h-72 rounded-[2rem] border-4 border-foreground/10 bg-muted/30 p-3 relative overflow-hidden"
+              className="mb-8 mx-auto w-44 h-72 rounded-none border-4 border-foreground/10 bg-muted/30 p-3 relative overflow-hidden"
               aria-hidden
             >
               <div className="grid grid-cols-3 gap-2">

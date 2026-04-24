@@ -238,7 +238,7 @@ export function AppDrawer({
                         key={a.path}
                         onClick={() => go(a.path)}
                         className={cn(
-                          'flex items-center gap-2 px-3 py-2.5 rounded-[var(--radius-md)]',
+                          'flex items-center gap-2 px-3 py-2.5 rounded-none',
                           'bg-[hsl(var(--bg-elevated))] border border-border/40',
                           'text-left transition-colors hover:border-primary/40 hover:bg-primary/5',
                         )}

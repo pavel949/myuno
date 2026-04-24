@@ -30,7 +30,7 @@ export function RoleValueMap({ personas, onMore }: RoleValueMapProps) {
 
   return (
     <div className="px-4 pb-5">
-      <div className="rounded-[16px] bg-card border border-border p-4">
+      <div className="rounded-none bg-card border border-border p-4">
         <div className="flex items-baseline justify-between mb-3">
           <div className="text-[11px] tracking-[0.12em] uppercase text-muted-foreground/60 font-semibold">
             {isRu ? 'Услуги по вашему профилю' : 'Services for your profile'}

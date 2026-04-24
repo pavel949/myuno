@@ -115,7 +115,7 @@ export function ContextualCTA({
   return (
     <section
       className={
-        'rounded-[14px] border border-border bg-card p-4 ' + (className ?? '')
+        'rounded-none border border-border bg-card p-4 ' + (className ?? '')
       }
       aria-label={title}
     >
@@ -137,7 +137,7 @@ export function ContextualCTA({
               <Wrapper
                 {...(wrapperProps as Record<string, unknown>)}
                 className={
-                  'flex items-center justify-between gap-3 px-3 py-2.5 rounded-[10px] border transition-colors ' +
+                  'flex items-center justify-between gap-3 px-3 py-2.5 rounded-none border transition-colors ' +
                   (isLoading
                     ? 'border-border bg-background opacity-80 cursor-default pointer-events-none'
                     : action.transactional

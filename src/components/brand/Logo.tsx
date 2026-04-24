@@ -74,7 +74,7 @@ export const Logo = React.forwardRef<HTMLSpanElement, LogoProps>(function Logo(
         role="img"
         aria-label={title}
         className={cn(
-          "inline-flex items-center justify-center rounded-[6px] border-[1.5px] font-display font-bold leading-none",
+          "inline-flex items-center justify-center rounded-none border-[1.5px] font-display font-bold leading-none",
           palette.border,
           palette.accent,
           className,
@@ -98,7 +98,7 @@ export const Logo = React.forwardRef<HTMLSpanElement, LogoProps>(function Logo(
         role="img"
         aria-label={title}
         className={cn(
-          "inline-flex items-center rounded-[10px] border-2 leading-none",
+          "inline-flex items-center rounded-none border-2 leading-none",
           palette.border,
           className,
         )}

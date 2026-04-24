@@ -93,7 +93,7 @@ export const InlinePersonaSelector = memo(function InlinePersonaSelector({
                 disabled={isSetting}
                 aria-pressed={isActive}
                 className={cn(
-                  "relative flex flex-col items-start gap-2 p-4 rounded-[var(--radius-lg)] shrink-0 transition-all duration-200 text-left",
+                  "relative flex flex-col items-start gap-2 p-4 rounded-none shrink-0 transition-all duration-200 text-left",
                   "w-[140px] md:w-auto min-h-[120px]",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                   isActive
@@ -103,7 +103,7 @@ export const InlinePersonaSelector = memo(function InlinePersonaSelector({
               >
                 {/* Icon */}
                 <div
-                  className="flex items-center justify-center w-10 h-10 rounded-[var(--radius-md)]"
+                  className="flex items-center justify-center w-10 h-10 rounded-none"
                   style={{ background: PERSONA_GRADIENTS[p] }}
                 >
                   <Icon className="w-5 h-5 text-white" strokeWidth={2} />

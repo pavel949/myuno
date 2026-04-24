@@ -72,7 +72,7 @@ export function PageSection({
         </div>
       )}
       {surface ? (
-        <div className="rounded-[var(--card-radius)] bg-card border border-border/40 p-[var(--card-padding)]">
+        <div className="rounded-none bg-card border border-border/40 p-[var(--card-padding)]">
           {children}
         </div>
       ) : (

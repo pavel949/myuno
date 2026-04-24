@@ -49,7 +49,7 @@ export function ServiceClusterAccordion({
               <AccordionTrigger className="py-3 hover:no-underline">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   <div
-                    className="w-8 h-8 rounded-[10px] flex items-center justify-center shrink-0"
+                    className="w-8 h-8 rounded-none flex items-center justify-center shrink-0"
                     style={{ background: cluster.color + '1A' }}
                   >
                     <Icon className="w-4 h-4" style={{ color: cluster.color }} />

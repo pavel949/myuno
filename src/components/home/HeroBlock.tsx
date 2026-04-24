@@ -24,7 +24,7 @@ function HeroSearchInput({ isRu }: { isRu: boolean }) {
 
   return (
     <div
-      className="flex items-center gap-2 rounded-[var(--radius-md)] px-4 py-3 bg-[hsl(var(--bg-elevated))] border border-border focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background transition-shadow"
+      className="flex items-center gap-2 rounded-none px-4 py-3 bg-[hsl(var(--bg-elevated))] border border-border focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background transition-shadow"
     >
       <Search className="w-4 h-4 text-muted-foreground shrink-0" aria-hidden />
       <input
@@ -38,7 +38,7 @@ function HeroSearchInput({ isRu }: { isRu: boolean }) {
       <button
         onClick={handleSubmit}
         aria-label={isRu ? 'Искать' : 'Search'}
-        className="flex items-center justify-center w-9 h-9 rounded-[var(--radius-sm)] bg-primary text-primary-foreground shrink-0 hover:bg-primary-hover active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        className="flex items-center justify-center w-9 h-9 rounded-none bg-primary text-primary-foreground shrink-0 hover:bg-primary-hover active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       >
         <ArrowRight className="w-4 h-4" />
       </button>
@@ -147,7 +147,7 @@ export const HeroBlock = memo(function HeroBlock() {
 
   if (!isDesktop) {
     return (
-      <div className="relative rounded-[var(--radius-lg)] overflow-hidden hero-dark-surface bg-gradient-to-br from-[hsl(var(--bg-base))] to-[hsl(var(--bg-card))]" style={{ boxShadow: 'var(--shadow-card)' }}>
+      <div className="relative rounded-none overflow-hidden hero-dark-surface bg-gradient-to-br from-[hsl(var(--bg-base))] to-[hsl(var(--bg-card))]" style={{ boxShadow: 'var(--shadow-card)' }}>
         <div className="absolute inset-0 opacity-[0.04]" style={{
           backgroundImage: 'radial-gradient(circle at 2px 2px, hsl(var(--foreground)) 1px, transparent 1px)',
           backgroundSize: '24px 24px',
@@ -216,7 +216,7 @@ export const HeroBlock = memo(function HeroBlock() {
 
   // Desktop
   return (
-    <div className="relative rounded-[var(--radius-lg)] overflow-hidden p-8 xl:p-10 hero-dark-surface bg-gradient-to-br from-[hsl(var(--bg-base))] to-[hsl(var(--bg-card))]" style={{ boxShadow: 'var(--shadow-card)' }}>
+    <div className="relative rounded-none overflow-hidden p-8 xl:p-10 hero-dark-surface bg-gradient-to-br from-[hsl(var(--bg-base))] to-[hsl(var(--bg-card))]" style={{ boxShadow: 'var(--shadow-card)' }}>
       <div className="absolute inset-0 opacity-[0.04]" style={{
         backgroundImage: 'radial-gradient(circle at 2px 2px, hsl(var(--foreground)) 1px, transparent 1px)',
         backgroundSize: '24px 24px',

@@ -7,7 +7,7 @@ export function TrustFooter() {
 
   return (
     <div className="px-4 pb-8">
-      <div className="rounded-[14px] border border-border/10 px-4 py-3.5 flex gap-4 items-center">
+      <div className="rounded-none border border-border/10 px-4 py-3.5 flex gap-4 items-center">
         <div
           className="font-mono text-[20px] font-medium text-foreground leading-none tracking-[0.01em] shrink-0"
           aria-hidden

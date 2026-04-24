@@ -76,14 +76,14 @@ export const ValuePropositionStrip = memo(function ValuePropositionStrip() {
                 key={svc.labelEn}
                 to={svc.path}
                 className={cn(
-                  "flex flex-col gap-3 p-4 rounded-[var(--radius-lg)] shrink-0 transition-all duration-200",
+                  "flex flex-col gap-3 p-4 rounded-none shrink-0 transition-all duration-200",
                   "w-[160px] md:w-auto bg-card",
                   "ring-1 ring-border hover:ring-primary/40 hover:shadow-sm active:scale-[0.98]",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 )}
               >
                 <div
-                  className="flex items-center justify-center w-10 h-10 rounded-[var(--radius-md)]"
+                  className="flex items-center justify-center w-10 h-10 rounded-none"
                   style={{ background: svc.gradient }}
                 >
                   <Icon className="w-5 h-5 text-white" strokeWidth={2} />

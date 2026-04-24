@@ -58,7 +58,7 @@ export default function WhyMyUno() {
 
       <section className="px-4 pb-5 space-y-2">
         {COMPARISONS.map((c, i) => (
-          <div key={i} className="rounded-[12px] border border-border bg-card px-3.5 py-3">
+          <div key={i} className="rounded-none border border-border bg-card px-3.5 py-3">
             <h2 className="text-[13.5px] font-semibold text-foreground">
               {isRu ? c.against.ru : c.against.en}
             </h2>
@@ -72,13 +72,13 @@ export default function WhyMyUno() {
       <section className="px-4 pb-6 space-y-2">
         <Link
           to={APP_ROUTES.PRICING}
-          className="block w-full text-center rounded-[12px] bg-foreground text-background py-3 text-[14px] font-semibold"
+          className="block w-full text-center rounded-none bg-foreground text-background py-3 text-[14px] font-semibold"
         >
           {isRu ? 'Тарифы и комиссии' : 'Pricing and fees'}
         </Link>
         <Link
           to={APP_ROUTES.CLEARVIEW}
-          className="block w-full text-center rounded-[12px] border border-border bg-card text-foreground py-3 text-[13.5px]"
+          className="block w-full text-center rounded-none border border-border bg-card text-foreground py-3 text-[13.5px]"
         >
           {isRu ? 'Методика ClearView' : 'ClearView methodology'}
         </Link>
