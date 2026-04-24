@@ -216,6 +216,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.ME_PAYMENTS} element={<LazyPage><Pages.MePayments /></LazyPage>} />
         <Route path={APP_ROUTES.ME_REQUESTS} element={<LazyPage><Pages.MeRequests /></LazyPage>} />
         <Route path={APP_ROUTES.ME_PROFILE} element={<LazyPage><Pages.MeProfile /></LazyPage>} />
+        <Route path="/me/bookings" element={<LazyPage><Pages.MeBookings /></LazyPage>} />
         <Route path={APP_ROUTES.FAVORITES} element={<LazyPage><Pages.Favorites /></LazyPage>} />
         <Route path={APP_ROUTES.SEARCH} element={<LazyPage><Pages.Search /></LazyPage>} />
         <Route path={APP_ROUTES.NOTIFICATIONS} element={<LazyPage><Pages.Notifications /></LazyPage>} />
@@ -494,7 +495,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.INVEST_BUSINESS} element={<LazyPage><Pages.InvestmentBusinessZone /></LazyPage>} />
         <Route path={APP_ROUTES.INVEST_KNOWLEDGE} element={<LazyPage><Pages.InvestmentKnowledgeZone /></LazyPage>} />
         <Route path={APP_ROUTES.INVEST_SERVICES} element={<LazyPage><Pages.InvestmentServicesZone /></LazyPage>} />
-        <Route path={APP_ROUTES.INVEST_QUIZ} element={<Navigate to={APP_ROUTES.INVEST} replace />} />
+        <Route path={APP_ROUTES.INVEST_QUIZ} element={<LazyPage><Pages.InvestorQuiz /></LazyPage>} />
         <Route path={APP_ROUTES.INVEST_DASHBOARD} element={<LazyPage><Pages.InvestorDashboard /></LazyPage>} />
         <Route path={APP_ROUTES.INVEST_RAISE} element={<LazyPage><Pages.RaiseFunding /></LazyPage>} />
         {/* Admin-only ops console (Market/Deals/Network/Execution shell) */}

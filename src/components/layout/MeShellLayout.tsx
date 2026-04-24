@@ -11,7 +11,7 @@
  */
 import React, { ReactNode } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Inbox, Compass, FileText, Wallet, ClipboardList, User } from 'lucide-react';
+import { Inbox, Compass, FileText, Wallet, ClipboardList, User, CalendarCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageShell } from '@/components/page';
@@ -27,6 +27,7 @@ interface MeTab {
 
 const TABS: MeTab[] = [
   { to: '/me',           end: true,  icon: Inbox,         labelEn: 'Feed',      labelRu: 'Лента' },
+  { to: '/me/bookings',              icon: CalendarCheck, labelEn: 'Bookings',  labelRu: 'Заказы' },
   { to: '/me/services',              icon: Compass,       labelEn: 'Services',  labelRu: 'Услуги' },
   { to: '/me/documents',             icon: FileText,      labelEn: 'Documents', labelRu: 'Документы' },
   { to: '/me/payments',              icon: Wallet,        labelEn: 'Payments',  labelRu: 'Платежи' },
