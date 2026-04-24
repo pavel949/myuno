@@ -100,7 +100,18 @@ export default function KnowledgePillarPage() {
   const propertyCtaActions = useMemo<ContextualAction[]>(() => {
     if (!isPropertyPillar) return [];
     const list: ContextualAction[] = [];
-    if (matches.count > 0) {
+    // Loading skeleton placeholder while count resolves; replaced by the real
+    // transactional CTA once data lands (or dropped if count === 0).
+    if (matches.isLoading) {
+      list.push({
+        id: 'browse-offplan',
+        to: matches.href,
+        label: isRu ? 'Считаем подходящие проекты…' : 'Counting matching projects…',
+        icon: Building2,
+        transactional: false,
+        loading: true,
+      });
+    } else if (matches.count > 0) {
       list.push({
         id: 'browse-offplan',
         to: matches.href,
@@ -127,7 +138,7 @@ export default function KnowledgePillarPage() {
       transactional: true,
     });
     return list;
-  }, [isPropertyPillar, matches.count, matches.href, isRu]);
+  }, [isPropertyPillar, matches.count, matches.href, matches.isLoading, isRu]);
 
   const seoTitle = pillar ? (isRu ? pillar.meta_title_ru : pillar.meta_title_en) : 'Knowledge Hub';
   const seoDescription = pillar ? (isRu ? pillar.meta_description_ru : pillar.meta_description_en) : '';
