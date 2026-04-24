@@ -19,6 +19,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useKnowledgePillar, useKnowledgePillars } from '@/hooks/useKnowledgePillars';
 import { ContextualCTA, type ContextualAction } from '@/components/shared/ContextualCTA';
 import { useContextualOffplanMatches } from '@/hooks/useContextualMatches';
+import { useContextualMatchTelemetry } from '@/hooks/useContextualMatchTelemetry';
 import { APP_ROUTES } from '@/lib/config/routes';
 
 /** Pillar clusters that warrant a property/RE next-step CTA. IPP §25. */
@@ -97,6 +98,17 @@ export default function KnowledgePillarPage() {
   // M10f cross-journey CTAs from a property-relevant guide.
   const isPropertyPillar = !!pillar && PROPERTY_CLUSTERS.has(pillar.cluster);
   const matches = useContextualOffplanMatches(isPropertyPillar ? {} : null);
+
+  // Skeleton-to-real-CTA funnel telemetry (M10f).
+  useContextualMatchTelemetry({
+    sourceModule: 'knowledge_pillar',
+    actionId: 'browse-offplan',
+    isLoading: matches.isLoading,
+    count: matches.count,
+    enabled: isPropertyPillar,
+    context: { pillar_slug: pillar?.slug ?? null, cluster: pillar?.cluster ?? null },
+  });
+
   const propertyCtaActions = useMemo<ContextualAction[]>(() => {
     if (!isPropertyPillar) return [];
     const list: ContextualAction[] = [];

@@ -13,6 +13,7 @@ import { NewbuildsHero } from '@/components/newbuilds/NewbuildsHero';
 import { NbROICalculator } from '@/components/newbuilds/NbROICalculator';
 import { useNewbuildProjects } from '@/hooks/useNewbuildProjects';
 import { useContextualOffplanMatches } from '@/hooks/useContextualMatches';
+import { useContextualMatchTelemetry } from '@/hooks/useContextualMatchTelemetry';
 import { ContextualCTA, type ContextualAction } from '@/components/shared/ContextualCTA';
 import { useIPPLeadEvent } from '@/hooks/useIPPLeadEvent';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -62,6 +63,16 @@ export default function NewbuildsCalculator() {
     };
   }, [initialPrice, selectedProject?.location_area]);
   const matches = useContextualOffplanMatches(matchBand);
+
+  // Skeleton-to-real-CTA funnel telemetry (M10f).
+  useContextualMatchTelemetry({
+    sourceModule: 'roi_calculator',
+    actionId: 'matching-properties',
+    isLoading: matches.isLoading,
+    count: matches.count,
+    enabled: !!matchBand,
+    context: { project_id: selectedProjectId || null, preset: presetSlug ?? null },
+  });
 
   const ctaActions = useMemo<ContextualAction[]>(() => {
     const list: ContextualAction[] = [];
