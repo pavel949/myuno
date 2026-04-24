@@ -100,7 +100,7 @@ const COPY = {
   exploreLater: { en: 'Explore on my own', ru: 'Посмотреть самому' },
   redo: { en: 'Redo questions', ru: 'Пройти заново' },
   skip: { en: 'Skip onboarding', ru: 'Пропустить' },
-  errorPrefix: { en: 'Something went wrong:', ru: 'Что-то пошло не так:' },
+  errorPrefix: { en: 'Could not save — please retry:', ru: 'Не удалось сохранить — попробуйте ещё раз:' },
   flagOffTitle: { en: 'Onboarding coming soon', ru: 'Онбординг скоро' },
   flagOffBody: {
     en: 'This guided flow is being prepared. Meanwhile you can explore the platform.',

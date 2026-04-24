@@ -58,7 +58,7 @@ export default function HowItWorksPage() {
     {
       icon: CreditCard,
       number: '04',
-      title: isRu ? 'Оплатите удобно' : isTh ? 'ชำระเงินสะดวก' : 'Pay Conveniently',
+      title: isRu ? 'Оплатите безопасно' : isTh ? 'ชำระเงินอย่างปลอดภัย' : 'Pay Securely',
       description: isRu 
         ? 'Выберите способ оплаты: карта (Visa, Mastercard), UNO Кошелёк с кэшбеком или наличные партнёру. Все платежи защищены escrow.'
         : isTh 
@@ -211,7 +211,7 @@ export default function HowItWorksPage() {
               <Smartphone className="w-8 h-8 text-primary-foreground" />
             </div>
             <h1 className="text-2xl font-display font-bold mb-3">
-              {isRu ? 'Всё просто!' : isTh ? 'ง่ายมาก!' : 'It\'s Simple!'}
+              {isRu ? 'Всё в одном приложении' : isTh ? 'ทุกอย่างในแอปเดียว' : 'Everything in one app'}
             </h1>
             <p className="text-muted-foreground max-w-lg mx-auto">
               {isRu 

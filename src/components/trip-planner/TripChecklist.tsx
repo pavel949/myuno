@@ -145,8 +145,8 @@ export function TripChecklist() {
         <Shield className="w-4 h-4 text-primary shrink-0" />
         <p className="text-xs text-muted-foreground">
           {isRu
-            ? 'Мы позаботимся обо всём. Просто отмечайте готовое.'
-            : "We've got you covered. Just check off what's done."}
+            ? 'Отмечайте пункты по мере готовности — мы поможем со сложным.'
+            : 'Tick off each item as it’s ready — we help with the complex parts.'}
         </p>
       </div>
 

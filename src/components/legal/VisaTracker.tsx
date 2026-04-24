@@ -127,7 +127,7 @@ export function VisaTracker() {
                       </div>
                       {days >= 0 && (
                         <span className="text-[10px] text-muted-foreground">
-                          {days <= 7 ? (t ? 'Срочно!' : 'Urgent!') : days <= 30 ? (t ? 'Скоро' : 'Soon') : (t ? 'ОК' : 'OK')}
+                          {days <= 7 ? (t ? `Истекает через ${days} дн.` : `Expires in ${days} days`) : days <= 30 ? (t ? 'В течение месяца' : 'Within a month') : (t ? 'В сроке' : 'On track')}
                         </span>
                       )}
                       <Button

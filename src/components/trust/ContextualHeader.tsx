@@ -35,8 +35,8 @@ const CONTEXTUAL_MESSAGES: Record<string, Record<string, { en: string; ru: strin
       ru: 'Надёжный трансфер из аэропорта, без сюрпризов',
     },
     default: {
-      en: 'Recommended for your arrival — tested and reliable',
-      ru: 'Рекомендуем для вашего приезда — проверено и надёжно',
+      en: 'Recommended for your arrival — used by recent guests',
+      ru: 'Рекомендуем для вашего приезда — выбор недавних гостей',
     },
   },
   living: {
@@ -61,8 +61,8 @@ const CONTEXTUAL_MESSAGES: Record<string, Record<string, { en: string; ru: strin
   },
   leisure: {
     default: {
-      en: 'Tested by active residents — reliable for leisure',
-      ru: 'Проверено активными жителями — надёжно для отдыха',
+      en: 'Used regularly by active residents',
+      ru: 'Регулярно используют активные жители',
     },
   },
   digital_nomad: {
@@ -101,8 +101,8 @@ const CONTEXTUAL_MESSAGES: Record<string, Record<string, { en: string; ru: strin
   },
   business: {
     default: {
-      en: 'Convenient for remote workers and entrepreneurs',
-      ru: 'Удобно для удалёнщиков и предпринимателей',
+      en: 'Used by remote workers and entrepreneurs',
+      ru: 'Выбор удалёнщиков и предпринимателей',
     },
   },
   relocation: {
