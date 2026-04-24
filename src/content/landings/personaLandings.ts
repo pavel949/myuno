@@ -1248,6 +1248,334 @@ const P17_HALAL: PersonaLanding = {
 };
 
 // ──────────────────────────────────────────────────────────────────────
+//  LIVE: Remaining personas activated 2026-04-24 (no more 404 on /for/*)
+// ──────────────────────────────────────────────────────────────────────
+
+const P2_CN_INVESTORS: PersonaLanding = {
+  personaCode: 'P2',
+  slug: 'cn-investors',
+  status: 'live',
+  h1: { ru: 'Пхукет для гостей и инвесторов из Китая', en: 'Phuket for Chinese guests and scouts' },
+  subtitle: { ru: 'Виллы и кондо с китайско-говорящим менеджером, оплата в CNY/USDT, экскурсии и сделки без барьеров.', en: 'Villas and condos with Mandarin-speaking concierge, CNY/USDT payments, tours and deals without language barriers.' },
+  pains: [
+    { ru: 'Языковой барьер в банке, у застройщика и в страховой.', en: 'Language barrier at the bank, developer and insurer.' },
+    { ru: 'Сложно оплатить из материкового Китая через SWIFT.', en: 'Hard to pay from mainland China via SWIFT.' },
+    { ru: 'Нужен scout-trip с переводчиком и юристом.', en: 'You need a scout trip with translator and lawyer.' },
+    { ru: 'Хочется проверить foreign quota и реальный yield.', en: 'You want verified foreign quota and real yield.' },
+  ],
+  services: [
+    { slug: 'mandarin-concierge', label: { ru: 'Mandarin-консьерж', en: 'Mandarin concierge' }, oneLiner: { ru: 'Сопровождение на просмотрах и сделках.', en: 'Support at viewings and closings.' }, href: '/contact' },
+    { slug: 'usdt-payment', label: { ru: 'Оплата USDT/CNY', en: 'USDT / CNY payment' }, oneLiner: { ru: 'Бронирование без SWIFT-задержек.', en: 'Booking without SWIFT delays.' }, href: '/property/offplan' },
+    { slug: 'scout-trip', label: { ru: 'Scout-trip 3 дня', en: 'Scout trip — 3 days' }, oneLiner: { ru: 'Отель, трансфер, 6–8 объектов.', en: 'Hotel, transfer, 6–8 properties.' }, href: '/property/mandate' },
+    { slug: 'condo-catalog', label: { ru: 'Каталог кондо', en: 'Condo catalogue' }, oneLiner: { ru: 'Foreign quota verified, ROI-расчёт.', en: 'Foreign quota verified, ROI included.' }, href: '/property/offplan' },
+  ],
+  faq: [
+    { q: { ru: 'Как платить из Китая?', en: 'How do I pay from China?' }, a: { ru: 'USDT, Hong Kong wire или через Singapore-аккаунт. Оформим под вашу схему.', en: 'USDT, Hong Kong wire or via a Singapore account. We structure to fit you.' } },
+    { q: { ru: 'Можно купить freehold?', en: 'Can foreigners buy freehold?' }, a: { ru: 'Да — кондо в пределах 49% foreign quota. Виллы — leasehold 30+30+30.', en: 'Yes — condos within the 49% foreign quota. Villas — leasehold 30+30+30.' } },
+  ],
+  primaryCta: { label: { ru: 'Запросить scout-trip', en: 'Request scout trip' }, href: '/property/mandate?source=cn' },
+  secondaryCta: { label: { ru: 'Каталог кондо', en: 'Condo catalogue' }, href: '/property/offplan' },
+  seo: {
+    metaTitle: { ru: 'Пхукет для китайских инвесторов: scout-trip, USDT — myUNO', en: 'Phuket for Chinese investors: scout trip, USDT — myUNO' },
+    metaDescription: { ru: 'Кондо и виллы на Пхукете для гостей из Китая. Mandarin-консьерж, оплата USDT/CNY, проверенный foreign quota и ROI.', en: 'Condos and villas on Phuket for Chinese guests. Mandarin concierge, USDT/CNY payment, verified foreign quota and ROI.' },
+    ogImage: OG_DEFAULT,
+    canonicalPath: '/for/cn-investors',
+    hreflangAlternates: [
+      { lang: 'ru', href: 'https://myuno.app/for/cn-investors?lang=ru' },
+      { lang: 'en', href: 'https://myuno.app/for/cn-investors?lang=en' },
+    ],
+  },
+};
+
+const P12_BN_BUSINESS: PersonaLanding = {
+  personaCode: 'P12',
+  slug: 'bn-business',
+  status: 'live',
+  h1: { ru: 'Пхукет для бизнес-аудитории из Бангладеш', en: 'Phuket for Bangladeshi business audience' },
+  subtitle: { ru: 'Семейные виллы, halal-инфраструктура, корпоративные ретриты и поддержка по визам — всё в одной точке.', en: 'Family villas, halal infrastructure, corporate retreats and visa support — all in one place.' },
+  pains: [
+    { ru: 'Сложно подобрать виллу для большой семьи с halal-сервисом.', en: 'Hard to find a large-family villa with halal service.' },
+    { ru: 'Нужна виза для ретрита команды на 7–14 дней.', en: 'You need visas for a 7–14 day team retreat.' },
+    { ru: 'Хочется проверить инвестиционный кейс перед поездкой.', en: 'You want to vet an investment case before flying in.' },
+    { ru: 'Не хватает посредника, который говорит на бенгали или урду.', en: 'You miss a Bangla- or Urdu-speaking liaison.' },
+  ],
+  services: [
+    { slug: 'family-villa', label: { ru: 'Семейная вилла 4–8 спален', en: 'Family villa 4–8 BR' }, oneLiner: { ru: 'Privacy, бассейн, halal-кухня по запросу.', en: 'Privacy, pool, halal kitchen on request.' }, href: '/property/rent' },
+    { slug: 'team-retreat', label: { ru: 'Корпоративный ретрит', en: 'Corporate retreat' }, oneLiner: { ru: 'Виллы 10+ спален, конференц-зона, кейтеринг.', en: 'Villas 10+ BR, meeting area, catering.' }, href: '/contact' },
+    { slug: 'visa-support', label: { ru: 'Виза и приглашение', en: 'Visa & invitation' }, oneLiner: { ru: 'Tourist / business visa support letter.', en: 'Tourist / business visa support letter.' }, href: '/visa/quiz' },
+    { slug: 'investment-brief', label: { ru: 'Investment brief', en: 'Investment brief' }, oneLiner: { ru: 'Письменный обзор рынка перед визитом.', en: 'Written market brief before your visit.' }, href: '/property/mandate' },
+  ],
+  faq: [
+    { q: { ru: 'Можно ли халяль кейтеринг на вилле?', en: 'Can we get halal catering at the villa?' }, a: { ru: 'Да — повар с сертификатом, меню согласовываем заранее.', en: 'Yes — certified chef, menu agreed in advance.' } },
+    { q: { ru: 'Какая виза подойдёт для команды?', en: 'Which visa fits a team trip?' }, a: { ru: 'Tourist visa или DTV для корпоративных ретритов до 180 дней.', en: 'Tourist visa or DTV for corporate retreats up to 180 days.' } },
+  ],
+  primaryCta: { label: { ru: 'Подобрать виллу', en: 'Find a villa' }, href: '/property/rent' },
+  secondaryCta: { label: { ru: 'Получить investment brief', en: 'Get investment brief' }, href: '/property/mandate?source=bn' },
+  seo: {
+    metaTitle: { ru: 'Пхукет для гостей из Бангладеш: виллы, halal, визы — myUNO', en: 'Phuket for Bangladeshi guests: villas, halal, visas — myUNO' },
+    metaDescription: { ru: 'Семейные виллы, halal-кейтеринг, корпоративные ретриты и визовая поддержка для гостей из Бангладеш.', en: 'Family villas, halal catering, corporate retreats and visa support for Bangladeshi guests on Phuket.' },
+    ogImage: OG_DEFAULT,
+    canonicalPath: '/for/bn-business',
+    hreflangAlternates: [
+      { lang: 'ru', href: 'https://myuno.app/for/bn-business?lang=ru' },
+      { lang: 'en', href: 'https://myuno.app/for/bn-business?lang=en' },
+    ],
+  },
+};
+
+const P18_LGBTQ: PersonaLanding = {
+  personaCode: 'P18',
+  slug: 'lgbtq',
+  status: 'live',
+  h1: { ru: 'Пхукет для ЛГБТК+ путешественников и резидентов', en: 'Phuket for LGBTQ+ travellers and residents' },
+  subtitle: { ru: 'Friendly-виллы и кондо, открытые сообщества, вечеринки и медицинский сервис без вопросов.', en: 'Friendly villas and condos, open community, nightlife and judgement-free healthcare.' },
+  pains: [
+    { ru: 'Хочется быть уверенным, что вилла или отель примет пару.', en: 'You want to be sure a villa or hotel welcomes couples.' },
+    { ru: 'Ищете комьюнити, события и friendly-районы.', en: 'You look for community, events and friendly neighbourhoods.' },
+    { ru: 'Нужны клиники с конфиденциальной PrEP/HRT поддержкой.', en: 'You need clinics with confidential PrEP/HRT support.' },
+    { ru: 'Хочется долгосрочной аренды или покупки без неловких вопросов.', en: 'You want long-stay rental or purchase without awkward questions.' },
+  ],
+  services: [
+    { slug: 'friendly-stays', label: { ru: 'LGBTQ+ friendly жильё', en: 'LGBTQ+ friendly stays' }, oneLiner: { ru: 'Проверенные виллы и кондо, отзывы сообщества.', en: 'Vetted villas and condos with community reviews.' }, href: '/property/rent' },
+    { slug: 'community', label: { ru: 'Сообщество и события', en: 'Community & events' }, oneLiner: { ru: 'Patong / Bangla, Pride-неделя, бранчи.', en: 'Patong / Bangla, Pride week, brunches.' }, href: '/cluster/lifestyle' },
+    { slug: 'health', label: { ru: 'PrEP / HRT клиники', en: 'PrEP / HRT clinics' }, oneLiner: { ru: 'Конфиденциальный приём, рецепты на английском.', en: 'Confidential intake, English prescriptions.' }, href: '/cluster/health' },
+    { slug: 'long-stay', label: { ru: 'Long-stay аренда', en: 'Long-stay rental' }, oneLiner: { ru: 'Контракт на пару, без discrimination clauses.', en: 'Couple-friendly contract, no discrimination clauses.' }, href: '/property/rent' },
+  ],
+  faq: [
+    { q: { ru: 'Безопасно ли в Таиланде для пар?', en: 'Is Thailand safe for couples?' }, a: { ru: 'Да. С 2024 года в Таиланде легализованы однополые браки. Пхукет — один из самых открытых регионов.', en: 'Yes. Thailand legalised same-sex marriage in 2024. Phuket is among the most open regions.' } },
+    { q: { ru: 'Где находится community?', en: 'Where is the community?' }, a: { ru: 'Patong (Paradise complex), Kata, Rawai. Регулярные события и meetups.', en: 'Patong (Paradise complex), Kata, Rawai. Regular events and meetups.' } },
+  ],
+  primaryCta: { label: { ru: 'Подобрать жильё', en: 'Find a stay' }, href: '/property/rent' },
+  secondaryCta: { label: { ru: 'Открыть сообщество', en: 'Browse community' }, href: '/cluster/lifestyle' },
+  seo: {
+    metaTitle: { ru: 'LGBTQ+ Пхукет: friendly жильё, сообщество, клиники — myUNO', en: 'LGBTQ+ Phuket: friendly stays, community, clinics — myUNO' },
+    metaDescription: { ru: 'LGBTQ+ friendly виллы и кондо, события, PrEP/HRT клиники и long-stay аренда на Пхукете без неловких вопросов.', en: 'LGBTQ+ friendly villas and condos, events, PrEP/HRT clinics and long-stay rental on Phuket — no awkward questions.' },
+    ogImage: OG_DEFAULT,
+    canonicalPath: '/for/lgbtq',
+    hreflangAlternates: [
+      { lang: 'ru', href: 'https://myuno.app/for/lgbtq?lang=ru' },
+      { lang: 'en', href: 'https://myuno.app/for/lgbtq?lang=en' },
+    ],
+  },
+};
+
+const P19_ACCESSIBILITY: PersonaLanding = {
+  personaCode: 'P19',
+  slug: 'accessibility',
+  status: 'live',
+  h1: { ru: 'Пхукет для путешественников с ограниченными возможностями', en: 'Phuket for accessibility-first travellers' },
+  subtitle: { ru: 'Виллы без ступеней, трансфер с пандусом, медицинская поддержка и сиделки — путешествие без преград.', en: 'Step-free villas, ramp-equipped transfer, medical support and carers — travel without barriers.' },
+  pains: [
+    { ru: 'Сложно найти виллу или кондо с настоящим step-free доступом.', en: 'Hard to find a truly step-free villa or condo.' },
+    { ru: 'Нужен трансфер, в который влезает коляска.', en: 'You need a transfer that fits a wheelchair.' },
+    { ru: 'Не понятно, какие пляжи реально доступны.', en: 'It’s unclear which beaches are actually accessible.' },
+    { ru: 'Хочется заранее знать, есть ли врач/сиделка по вызову.', en: 'You want to know in advance if a doctor / carer is on call.' },
+  ],
+  services: [
+    { slug: 'accessible-stays', label: { ru: 'Step-free жильё', en: 'Step-free stays' }, oneLiner: { ru: 'Прокат коляски, поручни, roll-in shower.', en: 'Wheelchair rental, grab rails, roll-in shower.' }, href: '/property/rent' },
+    { slug: 'wheelchair-transfer', label: { ru: 'Трансфер с пандусом', en: 'Wheelchair transfer' }, oneLiner: { ru: 'Toyota Hiace с лифтом, водитель обучен.', en: 'Toyota Hiace with lift, trained driver.' }, href: '/landing/airport-transfer' },
+    { slug: 'beach-guide', label: { ru: 'Доступные пляжи', en: 'Accessible beaches' }, oneLiner: { ru: 'Surin, Bang Tao — beach mat и тень.', en: 'Surin, Bang Tao — beach mat and shade.' }, href: '/map' },
+    { slug: 'medical', label: { ru: 'Врач и сиделка', en: 'Doctor & carer' }, oneLiner: { ru: 'Bangkok Hospital, лицензированные сиделки.', en: 'Bangkok Hospital, licensed carers.' }, href: '/cluster/health' },
+  ],
+  faq: [
+    { q: { ru: 'Какой район самый удобный?', en: 'Which area is most convenient?' }, a: { ru: 'Bang Tao, Laguna, Cherngtalay — ровные тротуары и новая застройка с лифтами.', en: 'Bang Tao, Laguna, Cherngtalay — flat sidewalks and modern buildings with lifts.' } },
+    { q: { ru: 'Можно арендовать электроколяску?', en: 'Can I rent a power wheelchair?' }, a: { ru: 'Да — доставка к вилле, инструктаж, поддержка 24/7.', en: 'Yes — delivery to the villa, briefing, 24/7 support.' } },
+  ],
+  primaryCta: { label: { ru: 'Подобрать жильё', en: 'Find a stay' }, href: '/property/rent' },
+  secondaryCta: { label: { ru: 'Заказать трансфер', en: 'Book a transfer' }, href: '/landing/airport-transfer' },
+  seo: {
+    metaTitle: { ru: 'Доступный Пхукет: жильё, трансфер, врачи — myUNO', en: 'Accessible Phuket: stays, transfer, doctors — myUNO' },
+    metaDescription: { ru: 'Step-free виллы, трансфер с пандусом, прокат колясок и медицинская поддержка для путешественников с ограниченными возможностями.', en: 'Step-free villas, ramp transfer, wheelchair rental and medical support for accessibility-first travellers on Phuket.' },
+    ogImage: OG_DEFAULT,
+    canonicalPath: '/for/accessibility',
+    hreflangAlternates: [
+      { lang: 'ru', href: 'https://myuno.app/for/accessibility?lang=ru' },
+      { lang: 'en', href: 'https://myuno.app/for/accessibility?lang=en' },
+    ],
+  },
+};
+
+const P21_PROVIDERS: PersonaLanding = {
+  personaCode: 'P21',
+  slug: 'providers',
+  status: 'live',
+  h1: { ru: 'Локальные подрядчики на myUNO', en: 'Local providers on myUNO' },
+  subtitle: { ru: 'Получайте заказы от УК, владельцев и гостей. Без комиссии за вход, оплата на счёт компании, прозрачный рейтинг.', en: 'Get orders from MCs, owners and guests. No entry fee, payouts to your company account, transparent rating.' },
+  pains: [
+    { ru: 'Поток заказов нестабилен, всё держится на сарафане.', en: 'Order flow is unstable, everything depends on word of mouth.' },
+    { ru: 'Платформы берут комиссию 25–30%, оставляя крошки.', en: 'Platforms charge 25–30% commission, leaving crumbs.' },
+    { ru: 'Гости пишут на разных языках, нет единого окна.', en: 'Guests message in many languages, no single inbox.' },
+    { ru: 'Сложно доказать качество без публичного рейтинга.', en: 'Hard to prove quality without a public rating.' },
+  ],
+  services: [
+    { slug: 'vendor-onboarding', label: { ru: 'Подключение поставщика', en: 'Vendor onboarding' }, oneLiner: { ru: 'Регистрация за 15 минут, KYC онлайн.', en: 'Sign-up in 15 minutes, online KYC.' }, href: '/vendor/apply' },
+    { slug: 'unified-inbox', label: { ru: 'Единый чат с клиентами', en: 'Unified guest inbox' }, oneLiner: { ru: 'WhatsApp + in-app, авто-перевод RU/EN/TH.', en: 'WhatsApp + in-app, auto-translate RU/EN/TH.' }, href: '/vendor/messages' },
+    { slug: 'commission', label: { ru: 'Комиссия 10%', en: '10% commission' }, oneLiner: { ru: 'Фикс 10%, payout каждые 7 дней.', en: 'Flat 10%, payout every 7 days.' }, href: '/vendor/billing' },
+    { slug: 'rating', label: { ru: 'Прозрачный рейтинг', en: 'Transparent rating' }, oneLiner: { ru: 'Отзывы только от подтверждённых клиентов.', en: 'Reviews only from verified customers.' }, href: '/vendor' },
+  ],
+  faq: [
+    { q: { ru: 'Какая комиссия?', en: 'What’s the commission?' }, a: { ru: 'Фиксированные 10% с заказа. Никаких подписок и скрытых платежей.', en: 'Flat 10% per order. No subscriptions, no hidden fees.' } },
+    { q: { ru: 'Когда приходят выплаты?', en: 'When do I get paid?' }, a: { ru: 'Каждые 7 дней на счёт компании или Wise.', en: 'Every 7 days to your company account or Wise.' } },
+  ],
+  primaryCta: { label: { ru: 'Подключиться поставщиком', en: 'Become a provider' }, href: '/vendor/apply' },
+  secondaryCta: { label: { ru: 'Узнать о тарифах', en: 'See pricing' }, href: '/pricing' },
+  seo: {
+    metaTitle: { ru: 'Стать поставщиком myUNO: комиссия 10%, payout 7 дней', en: 'Become a myUNO provider: 10% commission, 7-day payout' },
+    metaDescription: { ru: 'Подключитесь к myUNO как локальный подрядчик: 10% комиссия, единый чат, прозрачный рейтинг и payout каждые 7 дней.', en: 'Join myUNO as a local provider: 10% commission, unified chat, transparent rating and 7-day payout.' },
+    ogImage: OG_DEFAULT,
+    canonicalPath: '/for/providers',
+    hreflangAlternates: [
+      { lang: 'ru', href: 'https://myuno.app/for/providers?lang=ru' },
+      { lang: 'en', href: 'https://myuno.app/for/providers?lang=en' },
+    ],
+  },
+};
+
+const P22_FREELANCERS: PersonaLanding = {
+  personaCode: 'P22',
+  slug: 'freelancers',
+  status: 'live',
+  h1: { ru: 'Локальные фрилансеры: фотографы, гиды, мастера', en: 'Local freelancers: photographers, guides, craftspeople' },
+  subtitle: { ru: 'Найдите клиентов среди гостей и резидентов острова. Профиль, портфолио, оплата картой и FX-курс к THB.', en: 'Find clients among Phuket guests and residents. Profile, portfolio, card payments and THB FX.' },
+  pains: [
+    { ru: 'Instagram перестал давать стабильный поток клиентов.', en: 'Instagram no longer brings stable client flow.' },
+    { ru: 'Сложно принимать оплату с иностранных карт.', en: 'Hard to accept payments from foreign cards.' },
+    { ru: 'Хочется виден ассистент-консьерж, который продаёт за вас.', en: 'You want a concierge assistant that sells for you.' },
+    { ru: 'Нужен публичный портфолио без своего сайта.', en: 'You need a public portfolio without building a site.' },
+  ],
+  services: [
+    { slug: 'profile', label: { ru: 'Публичный профиль', en: 'Public profile' }, oneLiner: { ru: 'Портфолио, отзывы, моментальный booking.', en: 'Portfolio, reviews, instant booking.' }, href: '/vendor/apply' },
+    { slug: 'card-payments', label: { ru: 'Оплата картой', en: 'Card payments' }, oneLiner: { ru: 'Stripe + Wise, выплата в THB.', en: 'Stripe + Wise, payout in THB.' }, href: '/vendor/billing' },
+    { slug: 'concierge', label: { ru: 'AI-консьерж', en: 'AI concierge' }, oneLiner: { ru: 'Подбирает гостям именно вас под их запрос.', en: 'Matches guests to you based on their request.' }, href: '/vendor' },
+    { slug: 'classifieds', label: { ru: 'Объявления и лиды', en: 'Listings & leads' }, oneLiner: { ru: 'Доступ к запросам резидентов острова.', en: 'Access to island resident requests.' }, href: '/classifieds' },
+  ],
+  faq: [
+    { q: { ru: 'Нужно ли быть юр.лицом?', en: 'Do I need a registered company?' }, a: { ru: 'Нет — фрилансеры работают как self-employed, нужен только work permit или соответствующая виза.', en: 'No — freelancers work as self-employed; only work permit or matching visa is required.' } },
+    { q: { ru: 'Сколько стоит размещение?', en: 'What does it cost?' }, a: { ru: 'Регистрация бесплатна. Платформа берёт 10% с выполненных заказов.', en: 'Sign-up is free. The platform charges 10% on completed orders.' } },
+  ],
+  primaryCta: { label: { ru: 'Создать профиль', en: 'Create a profile' }, href: '/vendor/apply' },
+  secondaryCta: { label: { ru: 'Открыть объявления', en: 'Browse listings' }, href: '/classifieds' },
+  seo: {
+    metaTitle: { ru: 'Фрилансеры на Пхукете: клиенты, оплата, портфолио — myUNO', en: 'Phuket freelancers: clients, payments, portfolio — myUNO' },
+    metaDescription: { ru: 'Подключитесь к myUNO как фрилансер: публичный профиль, AI-консьерж, оплата картой и payout в THB. Комиссия 10%.', en: 'Join myUNO as a freelancer: public profile, AI concierge, card payments and THB payout. 10% commission.' },
+    ogImage: OG_DEFAULT,
+    canonicalPath: '/for/freelancers',
+    hreflangAlternates: [
+      { lang: 'ru', href: 'https://myuno.app/for/freelancers?lang=ru' },
+      { lang: 'en', href: 'https://myuno.app/for/freelancers?lang=en' },
+    ],
+  },
+};
+
+const P23_SMB: PersonaLanding = {
+  personaCode: 'P23',
+  slug: 'smb',
+  status: 'live',
+  h1: { ru: 'Локальный малый бизнес на Пхукете', en: 'Local small business on Phuket' },
+  subtitle: { ru: 'Кафе, спа, школы, прокат — получите витрину, бронирование, CRM и поток клиентов в одном инструменте.', en: 'Cafés, spas, schools, rentals — get a storefront, bookings, CRM and client flow in one tool.' },
+  pains: [
+    { ru: 'Нет нормального online-присутствия, кроме Google Maps.', en: 'No proper online presence beyond Google Maps.' },
+    { ru: 'CRM на коленке: Excel, WhatsApp, бумажные записи.', en: 'CRM held together by Excel, WhatsApp and paper notes.' },
+    { ru: 'Сложно принимать online-оплату от иностранцев.', en: 'Hard to accept online payments from foreigners.' },
+    { ru: 'Нет ресурса на маркетинг — нужны клиенты «под ключ».', en: 'No bandwidth for marketing — you need turnkey clients.' },
+  ],
+  services: [
+    { slug: 'storefront', label: { ru: 'Брендированная витрина', en: 'Branded storefront' }, oneLiner: { ru: 'Каталог услуг, фото, отзывы, бронирование.', en: 'Service menu, photos, reviews, bookings.' }, href: '/vendor/apply' },
+    { slug: 'crm', label: { ru: 'Lite CRM', en: 'Lite CRM' }, oneLiner: { ru: 'Контакты, задачи, повторные клиенты.', en: 'Contacts, tasks, repeat customers.' }, href: '/vendor' },
+    { slug: 'payments', label: { ru: 'Online-оплата', en: 'Online payments' }, oneLiner: { ru: 'Stripe, QR PromptPay, USDT.', en: 'Stripe, QR PromptPay, USDT.' }, href: '/vendor/billing' },
+    { slug: 'leads', label: { ru: 'Поток клиентов', en: 'Client flow' }, oneLiner: { ru: 'AI-консьерж рекомендует вас гостям и резидентам.', en: 'AI concierge recommends you to guests and residents.' }, href: '/pricing' },
+  ],
+  faq: [
+    { q: { ru: 'Подходит, если у меня уже есть Line/IG?', en: 'Useful if I already use Line / IG?' }, a: { ru: 'Да — myUNO добавляет англоязычных гостей и резидентов острова, без замены ваших каналов.', en: 'Yes — myUNO adds English-speaking guests and residents, without replacing your channels.' } },
+    { q: { ru: 'Сколько это стоит?', en: 'What does it cost?' }, a: { ru: 'Базовая витрина бесплатна. Платформа удерживает 10% с заказов через myUNO.', en: 'Basic storefront is free. The platform retains 10% on orders made via myUNO.' } },
+  ],
+  primaryCta: { label: { ru: 'Создать витрину', en: 'Create a storefront' }, href: '/vendor/apply' },
+  secondaryCta: { label: { ru: 'Тарифы', en: 'Pricing' }, href: '/pricing' },
+  seo: {
+    metaTitle: { ru: 'SMB на Пхукете: витрина, CRM, оплата — myUNO', en: 'Phuket SMB: storefront, CRM, payments — myUNO' },
+    metaDescription: { ru: 'Локальный малый бизнес на Пхукете: брендированная витрина, lite-CRM, online-оплата и поток клиентов через AI-консьерж.', en: 'Phuket small business: branded storefront, lite CRM, online payments and client flow via AI concierge.' },
+    ogImage: OG_DEFAULT,
+    canonicalPath: '/for/smb',
+    hreflangAlternates: [
+      { lang: 'ru', href: 'https://myuno.app/for/smb?lang=ru' },
+      { lang: 'en', href: 'https://myuno.app/for/smb?lang=en' },
+    ],
+  },
+};
+
+const P24_CREATIVES: PersonaLanding = {
+  personaCode: 'P24',
+  slug: 'creatives',
+  status: 'live',
+  h1: { ru: 'Creative class на Пхукете', en: 'Creative class on Phuket' },
+  subtitle: { ru: 'Дизайнеры, продюсеры, фотографы, артисты — площадка для жизни, коллабораций и съёмок на острове.', en: 'Designers, producers, photographers, artists — a base for living, collaborating and shooting on the island.' },
+  pains: [
+    { ru: 'Нет базы локаций, людей и студий — каждый ресёрч с нуля.', en: 'No base of locations, people and studios — every research from scratch.' },
+    { ru: 'Сложно собрать команду на проект (камера, MUA, локейшн).', en: 'Hard to assemble a project crew (camera, MUA, location).' },
+    { ru: 'Нужна виза для творческой работы — не все знают про DTV.', en: 'You need a visa for creative work — not everyone knows DTV.' },
+    { ru: 'Хочется community: meetups, выставки, lab-сессии.', en: 'You want community: meetups, exhibitions, lab sessions.' },
+  ],
+  services: [
+    { slug: 'locations', label: { ru: 'База локаций', en: 'Location library' }, oneLiner: { ru: 'Виллы, студии, природа — с rate card.', en: 'Villas, studios, nature — with rate cards.' }, href: '/property/rent' },
+    { slug: 'crew', label: { ru: 'Сборка команды', en: 'Crew booking' }, oneLiner: { ru: 'Камера, MUA, стилист, PA — за 24 ч.', en: 'Camera, MUA, stylist, PA — within 24 h.' }, href: '/contact' },
+    { slug: 'dtv-visa', label: { ru: 'DTV для creators', en: 'DTV for creators' }, oneLiner: { ru: 'Destination Thailand Visa: 5 лет, 180 дн.', en: 'Destination Thailand Visa: 5 years, 180 days.' }, href: '/visa/quiz' },
+    { slug: 'community', label: { ru: 'Community и события', en: 'Community & events' }, oneLiner: { ru: 'Meetups, лабы, открытые студии.', en: 'Meetups, labs, open studios.' }, href: '/cluster/lifestyle' },
+  ],
+  faq: [
+    { q: { ru: 'Можно ли работать на иностранных клиентов?', en: 'Can I work for foreign clients?' }, a: { ru: 'Да — DTV специально для удалённой работы, выплат от иностранных клиентов через Wise/Stripe.', en: 'Yes — DTV is built for remote work and payments from foreign clients via Wise/Stripe.' } },
+    { q: { ru: 'Где собираются креаторы?', en: 'Where does the creative scene gather?' }, a: { ru: 'Phuket Town (Old Town), Cherngtalay, Rawai. Регулярные арт-маркеты и meetups.', en: 'Phuket Town (Old Town), Cherngtalay, Rawai. Regular art markets and meetups.' } },
+  ],
+  primaryCta: { label: { ru: 'Подобрать локацию', en: 'Find a location' }, href: '/property/rent' },
+  secondaryCta: { label: { ru: 'Получить DTV', en: 'Get DTV' }, href: '/visa/quiz' },
+  seo: {
+    metaTitle: { ru: 'Creative Phuket: локации, команда, DTV — myUNO', en: 'Creative Phuket: locations, crew, DTV — myUNO' },
+    metaDescription: { ru: 'Площадка для дизайнеров, продюсеров и фотографов на Пхукете: локации, сборка команды, DTV и community.', en: 'A base for designers, producers and photographers on Phuket: locations, crew, DTV visa and community.' },
+    ogImage: OG_DEFAULT,
+    canonicalPath: '/for/creatives',
+    hreflangAlternates: [
+      { lang: 'ru', href: 'https://myuno.app/for/creatives?lang=ru' },
+      { lang: 'en', href: 'https://myuno.app/for/creatives?lang=en' },
+    ],
+  },
+};
+
+const P25_STUDENTS: PersonaLanding = {
+  personaCode: 'P25',
+  slug: 'students',
+  status: 'live',
+  h1: { ru: 'Студенты и молодые взрослые на Пхукете', en: 'Students and young adults on Phuket' },
+  subtitle: { ru: 'Учёба, языковые школы, дайвинг, Muay Thai и доступная аренда — Пхукет как gap-year или semester abroad.', en: 'Study, language schools, diving, Muay Thai and affordable rentals — Phuket as a gap year or semester abroad.' },
+  pains: [
+    { ru: 'Нужна ED-виза, но школы и условия запутаны.', en: 'You need an ED visa, but schools and conditions are confusing.' },
+    { ru: 'Бюджет ограничен — нужна аренда от ฿15K и ниже.', en: 'Budget is tight — you need rentals from ฿15K and below.' },
+    { ru: 'Хочется учить английский, тайский или дайвинг — не понятно где.', en: 'You want to learn English, Thai or diving — unclear where.' },
+    { ru: 'Скучно одному — нужен student community.', en: 'Lonely solo — you need a student community.' },
+  ],
+  services: [
+    { slug: 'language-schools', label: { ru: 'Языковые школы', en: 'Language schools' }, oneLiner: { ru: 'Английский, тайский, китайский — с ED-визой.', en: 'English, Thai, Chinese — with ED visa.' }, href: '/visa/quiz' },
+    { slug: 'student-housing', label: { ru: 'Доступная аренда', en: 'Affordable rentals' }, oneLiner: { ru: 'Студии и shared house от ฿10–15K.', en: 'Studios and shared houses from ฿10–15K.' }, href: '/property/rent' },
+    { slug: 'activities', label: { ru: 'Дайвинг и Muay Thai', en: 'Diving & Muay Thai' }, oneLiner: { ru: 'Сертификации PADI, тренировки в топ-залах.', en: 'PADI certifications, top gym training.' }, href: '/cluster/lifestyle' },
+    { slug: 'community', label: { ru: 'Student community', en: 'Student community' }, oneLiner: { ru: 'Meetups, языковые обмены, спортивные группы.', en: 'Meetups, language exchanges, sports groups.' }, href: '/cluster/lifestyle' },
+  ],
+  faq: [
+    { q: { ru: 'Можно ли работать на ED-визе?', en: 'Can I work on an ED visa?' }, a: { ru: 'Нет — ED-виза только для учёбы. Для работы нужна DTV или work permit.', en: 'No — ED visa is study only. For work you need DTV or a work permit.' } },
+    { q: { ru: 'Сколько стоит жизнь в месяц?', en: 'What does a month cost?' }, a: { ru: 'Бюджет студента: ฿30–45K (аренда + еда + транспорт + школа).', en: 'Student budget: ฿30–45K (rent + food + transport + school).' } },
+  ],
+  primaryCta: { label: { ru: 'Подобрать школу и визу', en: 'Pick school & visa' }, href: '/visa/quiz' },
+  secondaryCta: { label: { ru: 'Найти жильё', en: 'Find housing' }, href: '/property/rent' },
+  seo: {
+    metaTitle: { ru: 'Студенту на Пхукете: ED-виза, школы, жильё — myUNO', en: 'Students on Phuket: ED visa, schools, housing — myUNO' },
+    metaDescription: { ru: 'Gap-year или semester abroad на Пхукете: ED-виза, языковые школы, доступная аренда, дайвинг и community.', en: 'Gap year or semester abroad on Phuket: ED visa, language schools, affordable rentals, diving and community.' },
+    ogImage: OG_DEFAULT,
+    canonicalPath: '/for/students',
+    hreflangAlternates: [
+      { lang: 'ru', href: 'https://myuno.app/for/students?lang=ru' },
+      { lang: 'en', href: 'https://myuno.app/for/students?lang=en' },
+    ],
+  },
+};
+
+// ──────────────────────────────────────────────────────────────────────
 //  Canonical list (P1..P25)
 // ──────────────────────────────────────────────────────────────────────
 
