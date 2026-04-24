@@ -9,6 +9,8 @@ project_id = "erfwtoavipwjqmylpizt"
     verify_jwt = false
   [functions.ai-concierge]
     verify_jwt = false
+  [functions.concierge-intent]
+    verify_jwt = false
   [functions.ai-content-planner]
     verify_jwt = false
   [functions.ai-cross-sell]

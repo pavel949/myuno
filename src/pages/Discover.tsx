@@ -7,7 +7,7 @@
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { COMPANY_CONTACTS, getWhatsAppUrl, getTelLink } from '@/lib/config/contacts';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ChevronRight, Phone, MessageCircle, Headphones } from 'lucide-react';
 import { MiniAppLayout } from '@/components/miniapp/MiniAppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -26,6 +26,7 @@ import { ContextualRecommendations } from '@/components/discover/ContextualRecom
 import { MyJourneyRecommendations } from '@/components/discover/MyJourneyRecommendations';
 import { AudienceFilterTabs, type AudienceFilter } from '@/components/discover/AudienceFilterTabs';
 import { useUserPersonas } from '@/hooks/useUserPersonas';
+import { ConciergeIntentChat } from '@/components/concierge/ConciergeIntentChat';
 
 // ── Search data ───────────────────────────────────
 const LIFE_CONTEXTS_SEARCH = [
@@ -52,7 +53,9 @@ const LIFE_CONTEXTS_SEARCH = [
 export default function Discover() {
   const { language } = useLanguage();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const isRu = language === 'ru';
+  const aiMode = searchParams.get('ai') === '1';
   const [searchQuery, setSearchQuery] = useState('');
   const { personas } = useUserPersonas();
 
@@ -99,6 +102,13 @@ export default function Discover() {
       onSearchChange={setSearchQuery}
       searchPlaceholder={isRu ? 'Поиск услуг и ситуаций...' : 'Search services & situations...'}
     >
+      {/* ── M10d · AI Concierge intent chat (?ai=1) ─────── */}
+      {aiMode && (
+        <div className="mb-6">
+          <ConciergeIntentChat />
+        </div>
+      )}
+
       {/* ── Search Results ──────────────────────────────── */}
       {isSearching && (
         <div className="space-y-4">
