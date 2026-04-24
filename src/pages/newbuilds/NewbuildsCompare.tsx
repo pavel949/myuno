@@ -20,6 +20,18 @@ const unitTypeLabels: Record<string, string> = {
 
 export default function NewbuildsCompare() {
   const { items, remove, clear } = useNbCompare();
+  const { track } = useIPPLeadEvent();
+
+  // IPP §3 lead event: comparison open (+20). Fires once per item-set change.
+  useEffect(() => {
+    if (items.length >= 2) {
+      track({
+        eventType: 'comparison_open',
+        meta: { project_ids: items.map(i => i.id) },
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items.length]);
 
   if (items.length === 0) {
     return (
