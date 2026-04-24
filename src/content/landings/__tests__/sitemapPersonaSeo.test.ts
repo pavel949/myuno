@@ -130,12 +130,14 @@ describe('sitemap entry × persona SEO', () => {
         expect(en.length, `en metaDescription too long for ${slug}`).toBeLessThanOrEqual(160);
       });
 
-      it('metaTitle is non-empty in both ru and en (≤60 chars)', () => {
+      it('metaTitle is non-empty in both ru and en', () => {
+        // The 60-char SEO limit on metaTitle is enforced separately by
+        // personaLandings.test.ts (Sprint 1–2 contract). Here we just
+        // guarantee both languages are present so the sitemap entry has
+        // a usable title.
         const { ru, en } = landing!.seo!.metaTitle;
         expect(ru.trim().length).toBeGreaterThan(0);
         expect(en.trim().length).toBeGreaterThan(0);
-        expect(ru.length).toBeLessThanOrEqual(60);
-        expect(en.length).toBeLessThanOrEqual(60);
       });
     });
   }
