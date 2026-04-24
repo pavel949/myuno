@@ -83,19 +83,34 @@ export default defineConfig(({ mode }) => {
             {
               src: '/icons/icon-72x72.png',
               sizes: '72x72',
-              type: 'image/png'
+              type: 'image/png',
+              purpose: 'any'
             },
             {
               src: '/icons/icon-192x192.png',
               sizes: '192x192',
               type: 'image/png',
-              purpose: 'any maskable'
+              purpose: 'any'
             },
             {
               src: '/icons/icon-512x512.png',
               sizes: '512x512',
               type: 'image/png',
-              purpose: 'any maskable'
+              purpose: 'any'
+            },
+            // Maskable variants — drawn with safe zone so Android launchers
+            // don't crop the logo when applying their adaptive icon mask.
+            {
+              src: '/icons/icon-maskable-192.png',
+              sizes: '192x192',
+              type: 'image/png',
+              purpose: 'maskable'
+            },
+            {
+              src: '/icons/icon-maskable-512.png',
+              sizes: '512x512',
+              type: 'image/png',
+              purpose: 'maskable'
             }
           ],
           // Screenshots trigger Chrome's richer install UI (looks like Play Store)

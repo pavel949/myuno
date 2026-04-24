@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Download, Zap, Bell, Wifi, X, Share, Plus, MoreVertical } from 'lucide-react';
+import { Download, Zap, Bell, Wifi, Share, Plus, MoreVertical } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerOverlay } from '@/components/ui/drawer';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
@@ -8,12 +9,14 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 const SHEET_SHOWN_KEY = 'pwa_install_sheet_shown';
+const PAGE_VIEW_KEY = 'pwa_install_page_views';
 const SHEET_COOLDOWN = 30 * 24 * 60 * 60 * 1000; // 30 days
+const MIN_PAGE_VIEWS = 3; // Show only after user has explored at least 3 pages
 
 /**
- * Full-screen bottom sheet that appears once for first-time mobile visitors.
- * Much more prominent than the small InstallBanner — designed to clearly
- * communicate that myUNO is available as an app.
+ * Full-screen bottom sheet that appears once for engaged mobile visitors.
+ * Triggered after the user has navigated through at least MIN_PAGE_VIEWS
+ * pages — never on landing, never on a timer (less interruptive).
  */
 export function MobileInstallSheet() {
   const [open, setOpen] = useState(false);
@@ -31,9 +34,16 @@ export function MobileInstallSheet() {
     const shownAt = localStorage.getItem(SHEET_SHOWN_KEY);
     if (shownAt && Date.now() - parseInt(shownAt, 10) < SHEET_COOLDOWN) return;
 
-    // Wait for user to engage with the app before prompting install
-    const timer = setTimeout(() => setOpen(true), 45000);
-    return () => clearTimeout(timer);
+    // Increment page-view counter on each mount (route change)
+    const views = parseInt(localStorage.getItem(PAGE_VIEW_KEY) || '0', 10) + 1;
+    localStorage.setItem(PAGE_VIEW_KEY, String(views));
+
+    // Show only after the user has shown engagement (3+ page views)
+    if (views >= MIN_PAGE_VIEWS) {
+      // Tiny delay so the prompt feels triggered by the page settling, not the route change
+      const timer = setTimeout(() => setOpen(true), 800);
+      return () => clearTimeout(timer);
+    }
   }, [isInstalled, isMobile, isIOS, isAndroid, isMobileViewport]);
 
   const handleDismiss = () => {
@@ -46,11 +56,16 @@ export function MobileInstallSheet() {
       const success = await install();
       if (success) {
         await trackInstall({ platform: isAndroid ? 'android' : 'desktop', source: 'install_sheet' });
+        toast.success(
+          language === 'ru'
+            ? 'Готово — иконка на главном экране'
+            : 'Done — icon added to your home screen'
+        );
         handleDismiss();
         return;
       }
     }
-    // Fallback: dismiss and redirect to /install for manual instructions
+    // Fallback: dismiss and redirect to /install for inline instructions
     handleDismiss();
     window.location.href = '/install';
   };
