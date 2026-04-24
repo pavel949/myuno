@@ -31,7 +31,6 @@ export interface InstallmentTimelineProps {
 export function InstallmentTimeline({
   milestones,
   totalPrice,
-  currency = 'THB',
   isRu,
   presetLabel,
   className,
@@ -90,7 +89,7 @@ export function InstallmentTimeline({
           const due = isRu ? m.dueAtRu || m.dueAt : m.dueAt;
           const amount =
             totalPrice && totalPrice > 0
-              ? formatPrice((totalPrice * m.percent) / 100, currency)
+              ? formatPrice((totalPrice * m.percent) / 100)
               : null;
           return (
             <li key={m.id} className="flex items-start gap-3">
@@ -129,7 +128,7 @@ export function InstallmentTimeline({
             {isRu ? 'Итого' : 'Total'}
           </span>
           <span className="text-base font-mono font-bold text-foreground tabular-nums">
-            {formatPrice(totalPrice, currency)}
+            {formatPrice(totalPrice)}
           </span>
         </div>
       ) : null}
