@@ -16534,12 +16534,14 @@ export type Database = {
       }
       properties: {
         Row: {
+          accepts_installments: boolean | null
           accessibility_features: string[] | null
           acquisition_costs: number | null
           actual_owner_email: string | null
           actual_owner_name: string | null
           actual_owner_phone: string | null
           address: string | null
+          advance_months_long: number | null
           ai_autoreply_enabled: boolean
           ai_autoreply_instructions: string | null
           allow_pay_later: boolean
@@ -16549,6 +16551,7 @@ export type Database = {
           approved_by: string | null
           area_sqm: number | null
           asset_class: string
+          assignment_premium: number | null
           auto_report_enabled: boolean | null
           available_from: string | null
           balance_due_days: number | null
@@ -16584,6 +16587,7 @@ export type Database = {
           deleted_by: string | null
           deposit_amount: number | null
           deposit_currency: string | null
+          deposit_months_long: number | null
           deposit_type: string | null
           description_en: string | null
           description_ru: string | null
@@ -16601,7 +16605,11 @@ export type Database = {
           electricity_unit_price: number | null
           emergency_contact_name: string | null
           emergency_contact_phone: string | null
+          encumbrances_description: string | null
+          encumbrances_disclosed: boolean | null
           equipment: string[] | null
+          escrow_offered: boolean | null
+          escrow_provider: string | null
           existing_tenant_anonymized: boolean
           extra_cleaning_price: number | null
           extra_guest_price: number | null
@@ -16609,6 +16617,7 @@ export type Database = {
           extra_services: Json | null
           floor: number | null
           floor_area_sqm: number | null
+          foreign_quota_available: boolean | null
           frontage_m: number | null
           furnishing_level: string | null
           garden_type: string | null
@@ -16639,14 +16648,17 @@ export type Database = {
           id: string
           images: string[] | null
           included_services: Json | null
+          installment_plan: Json | null
           instant_booking: boolean | null
           instant_booking_enabled_at: string | null
           internal_name: string | null
           internet_provider: string | null
           internet_speed: string | null
           is_active: boolean | null
+          is_assignment: boolean | null
           is_featured: boolean | null
           is_for_sale: boolean | null
+          is_quick_sale: boolean | null
           is_rented: boolean | null
           is_verified: boolean | null
           juristic_office_contact: string | null
@@ -16680,6 +16692,7 @@ export type Database = {
           marketplace_property_id: string | null
           max_guests: number | null
           max_party_guests: number | null
+          min_lease_months: number | null
           min_stay_nights: number | null
           monthly_discount: number | null
           monthly_rent_thb: number | null
@@ -16691,6 +16704,7 @@ export type Database = {
           negotiation_enabled: boolean | null
           noi_annual_thb: number | null
           notes: string | null
+          original_contract_price: number | null
           owner_contact_id: string | null
           owner_id: string | null
           ownership_form: string | null
@@ -16720,7 +16734,9 @@ export type Database = {
           pool_type: string | null
           prepay_percent: number | null
           price: number | null
+          price_per_month: number | null
           price_per_night: number | null
+          price_per_year: number | null
           price_period: string | null
           project_id: string | null
           property_type: string
@@ -16729,10 +16745,13 @@ export type Database = {
           purchase_date: string | null
           purchase_price: number | null
           push_sync_error: string | null
+          quick_sale_discount_pct: number | null
+          quick_sale_reason: string | null
           quiet_hours_end: string | null
           quiet_hours_start: string | null
           rating: number | null
           rejection_reason: string | null
+          remaining_to_developer: number | null
           renovation_costs: number | null
           rental_platform: string | null
           rentals_united_id: string | null
@@ -16745,31 +16764,41 @@ export type Database = {
           rooms: Json | null
           safety_features: string[] | null
           sale_currency: string | null
+          sale_intent: string | null
           sale_price: number | null
           seasonal_pricing: Json | null
           security_deposit_collection: string | null
           security_deposit_required: boolean | null
           smoking_penalty: number | null
           smoking_policy: string | null
+          spa_stage: string | null
           status: string | null
           sync_mode: string
           tabien_baan: string | null
+          tenancy_modes: string[] | null
           title: string | null
           title_deed_type: string | null
+          title_deed_url: string | null
           title_en: string
           title_ru: string
+          tm30_registration_supported: boolean | null
           total_floors: number | null
           transfer_airport_price: number | null
           transfer_available: boolean | null
+          transfer_fee_split: string | null
           transfer_notes: string | null
           transfer_notes_ru: string | null
           unit_number: string | null
           uno_team_creator_id: string | null
           updated_at: string
+          urgency_deadline: string | null
+          utilities_included_long: string[] | null
           verified_at: string | null
           verified_by: string | null
+          video_file_url: string | null
           video_url: string | null
           view_type: string | null
+          virtual_tour_url: string | null
           water_included: boolean | null
           water_meter_id: string | null
           water_notes: string | null
@@ -16784,12 +16813,14 @@ export type Database = {
           zoning: string | null
         }
         Insert: {
+          accepts_installments?: boolean | null
           accessibility_features?: string[] | null
           acquisition_costs?: number | null
           actual_owner_email?: string | null
           actual_owner_name?: string | null
           actual_owner_phone?: string | null
           address?: string | null
+          advance_months_long?: number | null
           ai_autoreply_enabled?: boolean
           ai_autoreply_instructions?: string | null
           allow_pay_later?: boolean
@@ -16799,6 +16830,7 @@ export type Database = {
           approved_by?: string | null
           area_sqm?: number | null
           asset_class?: string
+          assignment_premium?: number | null
           auto_report_enabled?: boolean | null
           available_from?: string | null
           balance_due_days?: number | null
@@ -16834,6 +16866,7 @@ export type Database = {
           deleted_by?: string | null
           deposit_amount?: number | null
           deposit_currency?: string | null
+          deposit_months_long?: number | null
           deposit_type?: string | null
           description_en?: string | null
           description_ru?: string | null
@@ -16851,7 +16884,11 @@ export type Database = {
           electricity_unit_price?: number | null
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
+          encumbrances_description?: string | null
+          encumbrances_disclosed?: boolean | null
           equipment?: string[] | null
+          escrow_offered?: boolean | null
+          escrow_provider?: string | null
           existing_tenant_anonymized?: boolean
           extra_cleaning_price?: number | null
           extra_guest_price?: number | null
@@ -16859,6 +16896,7 @@ export type Database = {
           extra_services?: Json | null
           floor?: number | null
           floor_area_sqm?: number | null
+          foreign_quota_available?: boolean | null
           frontage_m?: number | null
           furnishing_level?: string | null
           garden_type?: string | null
@@ -16889,14 +16927,17 @@ export type Database = {
           id?: string
           images?: string[] | null
           included_services?: Json | null
+          installment_plan?: Json | null
           instant_booking?: boolean | null
           instant_booking_enabled_at?: string | null
           internal_name?: string | null
           internet_provider?: string | null
           internet_speed?: string | null
           is_active?: boolean | null
+          is_assignment?: boolean | null
           is_featured?: boolean | null
           is_for_sale?: boolean | null
+          is_quick_sale?: boolean | null
           is_rented?: boolean | null
           is_verified?: boolean | null
           juristic_office_contact?: string | null
@@ -16930,6 +16971,7 @@ export type Database = {
           marketplace_property_id?: string | null
           max_guests?: number | null
           max_party_guests?: number | null
+          min_lease_months?: number | null
           min_stay_nights?: number | null
           monthly_discount?: number | null
           monthly_rent_thb?: number | null
@@ -16941,6 +16983,7 @@ export type Database = {
           negotiation_enabled?: boolean | null
           noi_annual_thb?: number | null
           notes?: string | null
+          original_contract_price?: number | null
           owner_contact_id?: string | null
           owner_id?: string | null
           ownership_form?: string | null
@@ -16970,7 +17013,9 @@ export type Database = {
           pool_type?: string | null
           prepay_percent?: number | null
           price?: number | null
+          price_per_month?: number | null
           price_per_night?: number | null
+          price_per_year?: number | null
           price_period?: string | null
           project_id?: string | null
           property_type: string
@@ -16979,10 +17024,13 @@ export type Database = {
           purchase_date?: string | null
           purchase_price?: number | null
           push_sync_error?: string | null
+          quick_sale_discount_pct?: number | null
+          quick_sale_reason?: string | null
           quiet_hours_end?: string | null
           quiet_hours_start?: string | null
           rating?: number | null
           rejection_reason?: string | null
+          remaining_to_developer?: number | null
           renovation_costs?: number | null
           rental_platform?: string | null
           rentals_united_id?: string | null
@@ -16995,31 +17043,41 @@ export type Database = {
           rooms?: Json | null
           safety_features?: string[] | null
           sale_currency?: string | null
+          sale_intent?: string | null
           sale_price?: number | null
           seasonal_pricing?: Json | null
           security_deposit_collection?: string | null
           security_deposit_required?: boolean | null
           smoking_penalty?: number | null
           smoking_policy?: string | null
+          spa_stage?: string | null
           status?: string | null
           sync_mode?: string
           tabien_baan?: string | null
+          tenancy_modes?: string[] | null
           title?: string | null
           title_deed_type?: string | null
+          title_deed_url?: string | null
           title_en: string
           title_ru: string
+          tm30_registration_supported?: boolean | null
           total_floors?: number | null
           transfer_airport_price?: number | null
           transfer_available?: boolean | null
+          transfer_fee_split?: string | null
           transfer_notes?: string | null
           transfer_notes_ru?: string | null
           unit_number?: string | null
           uno_team_creator_id?: string | null
           updated_at?: string
+          urgency_deadline?: string | null
+          utilities_included_long?: string[] | null
           verified_at?: string | null
           verified_by?: string | null
+          video_file_url?: string | null
           video_url?: string | null
           view_type?: string | null
+          virtual_tour_url?: string | null
           water_included?: boolean | null
           water_meter_id?: string | null
           water_notes?: string | null
@@ -17034,12 +17092,14 @@ export type Database = {
           zoning?: string | null
         }
         Update: {
+          accepts_installments?: boolean | null
           accessibility_features?: string[] | null
           acquisition_costs?: number | null
           actual_owner_email?: string | null
           actual_owner_name?: string | null
           actual_owner_phone?: string | null
           address?: string | null
+          advance_months_long?: number | null
           ai_autoreply_enabled?: boolean
           ai_autoreply_instructions?: string | null
           allow_pay_later?: boolean
@@ -17049,6 +17109,7 @@ export type Database = {
           approved_by?: string | null
           area_sqm?: number | null
           asset_class?: string
+          assignment_premium?: number | null
           auto_report_enabled?: boolean | null
           available_from?: string | null
           balance_due_days?: number | null
@@ -17084,6 +17145,7 @@ export type Database = {
           deleted_by?: string | null
           deposit_amount?: number | null
           deposit_currency?: string | null
+          deposit_months_long?: number | null
           deposit_type?: string | null
           description_en?: string | null
           description_ru?: string | null
@@ -17101,7 +17163,11 @@ export type Database = {
           electricity_unit_price?: number | null
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
+          encumbrances_description?: string | null
+          encumbrances_disclosed?: boolean | null
           equipment?: string[] | null
+          escrow_offered?: boolean | null
+          escrow_provider?: string | null
           existing_tenant_anonymized?: boolean
           extra_cleaning_price?: number | null
           extra_guest_price?: number | null
@@ -17109,6 +17175,7 @@ export type Database = {
           extra_services?: Json | null
           floor?: number | null
           floor_area_sqm?: number | null
+          foreign_quota_available?: boolean | null
           frontage_m?: number | null
           furnishing_level?: string | null
           garden_type?: string | null
@@ -17139,14 +17206,17 @@ export type Database = {
           id?: string
           images?: string[] | null
           included_services?: Json | null
+          installment_plan?: Json | null
           instant_booking?: boolean | null
           instant_booking_enabled_at?: string | null
           internal_name?: string | null
           internet_provider?: string | null
           internet_speed?: string | null
           is_active?: boolean | null
+          is_assignment?: boolean | null
           is_featured?: boolean | null
           is_for_sale?: boolean | null
+          is_quick_sale?: boolean | null
           is_rented?: boolean | null
           is_verified?: boolean | null
           juristic_office_contact?: string | null
@@ -17180,6 +17250,7 @@ export type Database = {
           marketplace_property_id?: string | null
           max_guests?: number | null
           max_party_guests?: number | null
+          min_lease_months?: number | null
           min_stay_nights?: number | null
           monthly_discount?: number | null
           monthly_rent_thb?: number | null
@@ -17191,6 +17262,7 @@ export type Database = {
           negotiation_enabled?: boolean | null
           noi_annual_thb?: number | null
           notes?: string | null
+          original_contract_price?: number | null
           owner_contact_id?: string | null
           owner_id?: string | null
           ownership_form?: string | null
@@ -17220,7 +17292,9 @@ export type Database = {
           pool_type?: string | null
           prepay_percent?: number | null
           price?: number | null
+          price_per_month?: number | null
           price_per_night?: number | null
+          price_per_year?: number | null
           price_period?: string | null
           project_id?: string | null
           property_type?: string
@@ -17229,10 +17303,13 @@ export type Database = {
           purchase_date?: string | null
           purchase_price?: number | null
           push_sync_error?: string | null
+          quick_sale_discount_pct?: number | null
+          quick_sale_reason?: string | null
           quiet_hours_end?: string | null
           quiet_hours_start?: string | null
           rating?: number | null
           rejection_reason?: string | null
+          remaining_to_developer?: number | null
           renovation_costs?: number | null
           rental_platform?: string | null
           rentals_united_id?: string | null
@@ -17245,31 +17322,41 @@ export type Database = {
           rooms?: Json | null
           safety_features?: string[] | null
           sale_currency?: string | null
+          sale_intent?: string | null
           sale_price?: number | null
           seasonal_pricing?: Json | null
           security_deposit_collection?: string | null
           security_deposit_required?: boolean | null
           smoking_penalty?: number | null
           smoking_policy?: string | null
+          spa_stage?: string | null
           status?: string | null
           sync_mode?: string
           tabien_baan?: string | null
+          tenancy_modes?: string[] | null
           title?: string | null
           title_deed_type?: string | null
+          title_deed_url?: string | null
           title_en?: string
           title_ru?: string
+          tm30_registration_supported?: boolean | null
           total_floors?: number | null
           transfer_airport_price?: number | null
           transfer_available?: boolean | null
+          transfer_fee_split?: string | null
           transfer_notes?: string | null
           transfer_notes_ru?: string | null
           unit_number?: string | null
           uno_team_creator_id?: string | null
           updated_at?: string
+          urgency_deadline?: string | null
+          utilities_included_long?: string[] | null
           verified_at?: string | null
           verified_by?: string | null
+          video_file_url?: string | null
           video_url?: string | null
           view_type?: string | null
+          virtual_tour_url?: string | null
           water_included?: boolean | null
           water_meter_id?: string | null
           water_notes?: string | null
