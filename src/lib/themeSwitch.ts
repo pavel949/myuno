@@ -46,11 +46,13 @@ export async function applyTheme(theme: ResolvedTheme): Promise<ResolvedTheme> {
   root.classList.remove('light', 'dark');
   root.classList.add(theme);
 
-  // 3. Notify React (ThemeProvider listens to the `storage` event from other
-  //    tabs only; dispatch one manually so in-tab subscribers update too).
-  window.dispatchEvent(
-    new StorageEvent('storage', { key: STORAGE_KEY, newValue: theme })
-  );
+  // NOTE: We intentionally do NOT dispatch a synthetic `storage` event here.
+  // Browsers only fire `storage` events in OTHER tabs, never in the tab that
+  // wrote the value. The ThemeProvider already drives applyTheme from its own
+  // state; dispatching here caused a feedback loop where the storage handler
+  // would re-set state and occasionally race auth hydration, producing the
+  // "theme flips on its own" bug. Cross-tab sync still works via the real
+  // browser-fired `storage` event.
 
   // 4. Wait for style recalc + paint.
   await nextFrame();
