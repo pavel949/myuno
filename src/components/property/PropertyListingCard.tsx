@@ -19,6 +19,7 @@ import { cn } from '@/lib/utils';
 import { surfaceFromProperty } from '@/lib/real-estate/listingViewModel';
 import type { Property } from '@/hooks/useProperties';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
+import { TrustStrip } from './TrustStrip';
 
 interface PropertyListingCardProps {
   property: Property;
