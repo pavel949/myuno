@@ -173,6 +173,16 @@ export default function NewbuildsCalculator() {
           />
         </div>
 
+        {/* M10f cross-journey CTAs — IPP §25. Hidden when no relevant matches. */}
+        {ctaActions.length > 0 && (
+          <ContextualCTA
+            sourceModule="roi_calculator"
+            title={isRu ? 'Следующие шаги' : 'Next steps'}
+            actions={ctaActions}
+            trackContext={{ project_id: selectedProjectId || null, preset: presetSlug ?? null }}
+          />
+        )}
+
         {/* Disclaimer */}
         <p className="text-xs text-center text-muted-foreground">
           {isRu
