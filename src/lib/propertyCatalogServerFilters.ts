@@ -202,6 +202,10 @@ export function filterValuesToPropertyFilters(
     ...(effectiveListing === 'rent' && options.rentTenancy
       ? { rentTenancy: options.rentTenancy }
       : {}),
+    ...(effectiveListing === 'sale' && options.saleIntent
+      ? { saleIntent: options.saleIntent }
+      : {}),
+    ...(options.isQuickSale ? { isQuickSale: true } : {}),
     ...(districts.length === 1 ? { district: districts[0] } : {}),
     ...(districts.length > 1 ? { districts } : {}),
     ...(amenities.length ? { amenities } : {}),
