@@ -9,7 +9,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
 
-  <!-- ===== Persona landings (11 live) ===== -->
+  <!-- ===== Persona landings (14 live) ===== -->
   <url>
     <loc>https://myuno.app/for/tourists</loc>
     <lastmod>2026-04-24</lastmod>
@@ -101,6 +101,33 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/for/pet-owners"/>
   </url>
   <url>
+    <loc>https://myuno.app/for/medical</loc>
+    <lastmod>2026-04-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/for/medical?lang=ru"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/for/medical?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/for/medical"/>
+  </url>
+  <url>
+    <loc>https://myuno.app/for/weddings</loc>
+    <lastmod>2026-04-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/for/weddings?lang=ru"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/for/weddings?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/for/weddings"/>
+  </url>
+  <url>
+    <loc>https://myuno.app/for/retirees</loc>
+    <lastmod>2026-04-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/for/retirees?lang=ru"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/for/retirees?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/for/retirees"/>
+  </url>
+  <url>
     <loc>https://myuno.app/for/developer-partner</loc>
     <lastmod>2026-04-24</lastmod>
     <changefreq>weekly</changefreq>
@@ -110,7 +137,7 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/for/developer-partner"/>
   </url>
 
-  <!-- ===== Cluster landings (5 live) ===== -->
+  <!-- ===== Cluster landings (8 live) ===== -->
   <url>
     <loc>https://myuno.app/cluster/arrival</loc>
     <lastmod>2026-04-24</lastmod>
@@ -119,6 +146,24 @@
     <xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/cluster/arrival?lang=ru"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/cluster/arrival?lang=en"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/cluster/arrival"/>
+  </url>
+  <url>
+    <loc>https://myuno.app/cluster/extension</loc>
+    <lastmod>2026-04-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/cluster/extension?lang=ru"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/cluster/extension?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/cluster/extension"/>
+  </url>
+  <url>
+    <loc>https://myuno.app/cluster/settlement</loc>
+    <lastmod>2026-04-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/cluster/settlement?lang=ru"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/cluster/settlement?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/cluster/settlement"/>
   </url>
   <url>
     <loc>https://myuno.app/cluster/investment</loc>
@@ -155,6 +200,15 @@
     <xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/cluster/emergency?lang=ru"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/cluster/emergency?lang=en"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/cluster/emergency"/>
+  </url>
+  <url>
+    <loc>https://myuno.app/cluster/lifestyle</loc>
+    <lastmod>2026-04-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/cluster/lifestyle?lang=ru"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/cluster/lifestyle?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/cluster/lifestyle"/>
   </url>
 
 </urlset>

@@ -933,6 +933,175 @@ const P7_FAMILIES: PersonaLanding = {
 };
 
 // ──────────────────────────────────────────────────────────────────────
+//  LIVE: P14 — Medical tourists
+// ──────────────────────────────────────────────────────────────────────
+
+const P14_MEDICAL: PersonaLanding = {
+  personaCode: 'P14',
+  slug: 'medical',
+  status: 'live',
+  h1: {
+    ru: 'Медицинский туризм на Пхукете',
+    en: 'Medical tourism on Phuket',
+  },
+  subtitle: {
+    ru: 'JCI-аккредитованные клиники, цены в 2–4 раза ниже США/ЕС, координатор по-русски с встречей в аэропорту и переводом всех документов.',
+    en: 'JCI-accredited hospitals, prices 2–4× below US/EU, Russian-speaking coordinator with airport pickup and full document translation.',
+  },
+  pains: [
+    { ru: 'Не понимаете, какая клиника подходит под вашу процедуру.', en: 'Unclear which hospital fits your procedure.' },
+    { ru: 'Боитесь языкового барьера при общении с врачом.', en: 'Worried about language barriers with the doctor.' },
+    { ru: 'Сложно собрать пакет: документы, виза, перелёт, recovery.', en: 'Hard to assemble the package: docs, visa, flight, recovery.' },
+    { ru: 'Не понимаете, что покрывает страховка и что нет.', en: 'Unclear what insurance covers and what it does not.' },
+  ],
+  services: [
+    { slug: 'hospital-match', label: { ru: 'Подбор клиники', en: 'Hospital match' }, oneLiner: { ru: 'Bangkok Hospital, BIH, Phuket International — что под вас.', en: 'Bangkok Hospital, BIH, Phuket International — match per case.' }, href: '/services/health/hospitals' },
+    { slug: 'medical-visa', label: { ru: 'Медицинская виза', en: 'Medical visa' }, oneLiner: { ru: 'Treatment visa до 60 дней, оформление через клинику.', en: 'Treatment visa up to 60 days via the hospital.' }, href: '/visa/medical' },
+    { slug: 'medical-coordinator', label: { ru: 'Координатор по-русски', en: 'Russian-speaking coordinator' }, oneLiner: { ru: 'Встреча в аэропорту, перевод, follow-up.', en: 'Airport pickup, translation, follow-up.' }, href: '/services/health/coordinator' },
+    { slug: 'recovery-villa', label: { ru: 'Жильё для recovery', en: 'Recovery housing' }, oneLiner: { ru: 'Виллы и кондо рядом с клиникой, без лестниц.', en: 'Villas and condos near the hospital, no stairs.' }, href: '/property?audience=medical' },
+  ],
+  faq: [
+    { q: { ru: 'Какие процедуры дешевле в Таиланде?', en: 'Which procedures are cheaper in Thailand?' }, a: { ru: 'Стоматология (имплант ฿45 000 vs $4 000 в США), кардио (CABG ฿700K vs $80K), орто (knee replacement ฿450K vs $50K), пластика, IVF. Качество — JCI standard.', en: 'Dental (implant ฿45K vs $4K US), cardiac (CABG ฿700K vs $80K), ortho (knee ฿450K vs $50K), plastic, IVF. Quality — JCI standard.' } },
+    { q: { ru: 'Bangkok Hospital или BIH?', en: 'Bangkok Hospital or BIH?' }, a: { ru: 'Bangkok Hospital Phuket — крупнейшая, сильная кардио и онко. BIH (Bangkok International) — топ-уровень, премиум-сервис, дороже на 20–30%. Обе JCI-аккредитованы.', en: 'Bangkok Hospital Phuket — largest, strong cardiac and oncology. BIH — top tier, premium service, 20–30% more expensive. Both JCI-accredited.' } },
+    { q: { ru: 'Покрывает ли российская страховка лечение в Таиланде?', en: 'Does Russian insurance cover treatment in Thailand?' }, a: { ru: 'ВЗР — да, экстренные случаи (cashless через ассистанс). Плановые — нет, только pay-and-claim. ДМС крупных страховщиков — частично, проверьте полис.', en: 'Russian travel insurance — yes for emergencies (cashless via assistance). Planned — no, only pay-and-claim. Corporate DMS — partial, check the policy.' } },
+    { q: { ru: 'Сколько занимает recovery после операции?', en: 'How long is post-op recovery?' }, a: { ru: 'Стоматология — 1–7 дней. Орто — 2–4 недели. Кардио — 4–6 недель. Пластика — 2–6 недель. Координатор бронирует жильё с поддержкой и follow-up визиты.', en: 'Dental — 1–7 days. Ortho — 2–4 weeks. Cardiac — 4–6 weeks. Plastic — 2–6 weeks. Coordinator books supported housing and follow-up visits.' } },
+  ],
+  primaryCta: {
+    label: { ru: 'Запросить расчёт лечения', en: 'Request a treatment quote' },
+    href: '/services/health/coordinator',
+    subtitle: { ru: 'Ответ в течение 24 часов.', en: '24-hour reply.' },
+  },
+  secondaryCta: {
+    label: { ru: 'Сравнить клиники', en: 'Compare hospitals' },
+    href: '/services/health/hospitals',
+  },
+  seo: {
+    metaTitle: { ru: 'Медицинский туризм на Пхукете: JCI клиники — myUNO', en: 'Medical tourism on Phuket: JCI hospitals — myUNO' },
+    metaDescription: { ru: 'Лечение в Bangkok Hospital и BIH. Цены ниже США/ЕС в 2–4 раза, координатор по-русски, медицинская виза и recovery-жильё.', en: 'Treatment at Bangkok Hospital and BIH. Prices 2–4× below US/EU, Russian coordinator, medical visa and recovery housing.' },
+    ogImage: OG_DEFAULT,
+    canonicalPath: '/for/medical',
+    hreflangAlternates: [
+      { lang: 'ru', href: 'https://myuno.app/for/medical?lang=ru' },
+      { lang: 'en', href: 'https://myuno.app/for/medical?lang=en' },
+    ],
+  },
+};
+
+// ──────────────────────────────────────────────────────────────────────
+//  LIVE: P15 — Wedding travellers
+// ──────────────────────────────────────────────────────────────────────
+
+const P15_WEDDINGS: PersonaLanding = {
+  personaCode: 'P15',
+  slug: 'weddings',
+  status: 'live',
+  h1: {
+    ru: 'Свадьба на Пхукете',
+    en: 'A wedding on Phuket',
+  },
+  subtitle: {
+    ru: 'Площадки от пляжной церемонии до Trisara, фотограф, флорист, ужин на 20–200 гостей и юридическая регистрация — пакет под ключ за 6 месяцев.',
+    en: 'Venues from beach ceremony to Trisara, photographer, florist, dinner for 20–200, plus legal registration — turnkey package in 6 months.',
+  },
+  pains: [
+    { ru: 'Не понимаете, что включает «свадьба под ключ» и где скрытые расходы.', en: 'Unclear what a turnkey wedding really includes and where the hidden costs are.' },
+    { ru: 'Не знаете, как пригласить гостей: визы, перелёт, размещение.', en: 'Unsure how to bring guests: visas, flights, accommodation.' },
+    { ru: 'Хотите фотографа уровня выше «свадебного видеоблогера».', en: 'You want a photographer above wedding-vlogger tier.' },
+    { ru: 'Сомневаетесь, признают ли свадьбу в вашей стране.', en: 'You doubt whether the marriage will be recognised at home.' },
+  ],
+  services: [
+    { slug: 'venue-match', label: { ru: 'Подбор площадки', en: 'Venue match' }, oneLiner: { ru: 'Trisara, Sri Panwa, Anantara, beach — каталог с ценами.', en: 'Trisara, Sri Panwa, Anantara, beach — catalogue with pricing.' }, href: '/wedding' },
+    { slug: 'wedding-photo', label: { ru: 'Фотограф и видео', en: 'Photo & video' }, oneLiner: { ru: 'Топ-3 студии Пхукета, портфолио и пакеты.', en: 'Top 3 Phuket studios, portfolios and packages.' }, href: '/services/wedding/photo' },
+    { slug: 'wedding-decor', label: { ru: 'Флорист и декор', en: 'Florist & décor' }, oneLiner: { ru: 'Тропические композиции, балдахины, освещение.', en: 'Tropical arrangements, canopies, lighting.' }, href: '/services/wedding/decor' },
+    { slug: 'wedding-legal', label: { ru: 'Юридическая регистрация', en: 'Legal registration' }, oneLiner: { ru: 'Брак в Amphur с легализацией для РФ/ЕС.', en: 'Amphur marriage with apostille for home country.' }, href: '/wedding/legal' },
+    { slug: 'guest-housing', label: { ru: 'Размещение гостей', en: 'Guest housing' }, oneLiner: { ru: 'Block-booking виллы и отеля с скидкой 10–20%.', en: 'Block-booking with 10–20% discount.' }, href: '/property?audience=wedding-group' },
+  ],
+  faq: [
+    { q: { ru: 'Сколько стоит свадьба на 30 гостей?', en: 'What does a 30-guest wedding cost?' }, a: { ru: 'Beach + small villa — от ฿250 000 (церемония, фото, ужин, декор). Mid-range hotel — ฿500 000–900 000. Premium (Trisara, Amanpuri) — от ฿1 800 000.', en: 'Beach + small villa — from ฿250,000 (ceremony, photo, dinner, décor). Mid-range hotel — ฿500,000–900,000. Premium (Trisara, Amanpuri) — from ฿1,800,000.' } },
+    { q: { ru: 'Свадьба в Таиланде законна в России и ЕС?', en: 'Is a Thai wedding legal in Russia and EU?' }, a: { ru: 'Да, при регистрации в Amphur (тайском ЗАГСе) и легализации (apostille для ЕС, консульская легализация для РФ). Сроки — 5–10 рабочих дней.', en: 'Yes — when registered at the Amphur and legalised (apostille for EU, consular legalisation for Russia). Timeline — 5–10 working days.' } },
+    { q: { ru: 'Какие документы нужны для регистрации?', en: 'What documents are needed for registration?' }, a: { ru: 'Паспорт + affidavit of marital status из консульства (5 рабочих дней, ฿2 000), перевод на тайский, легализация в МИД Таиланда.', en: 'Passport + affidavit of marital status from consulate (5 working days, ฿2,000), Thai translation, legalisation at Thai MFA.' } },
+    { q: { ru: 'За сколько начинать планировать?', en: 'How far ahead to plan?' }, a: { ru: 'High season (ноябрь–апрель) — за 6–9 месяцев. Low season — 3–4 месяца. Trisara и Amanpuri бронируются за год вперёд.', en: 'High season (Nov–Apr) — 6–9 months ahead. Low season — 3–4 months. Trisara and Amanpuri book a year ahead.' } },
+  ],
+  primaryCta: {
+    label: { ru: 'Подобрать площадку', en: 'Find a venue' },
+    href: '/wedding',
+    subtitle: { ru: 'Бесплатная консультация.', en: 'Free consultation.' },
+  },
+  secondaryCta: {
+    label: { ru: 'Размещение гостей', en: 'Guest housing' },
+    href: '/property?audience=wedding-group',
+  },
+  seo: {
+    metaTitle: { ru: 'Свадьба на Пхукете: площадка, фото, регистрация — myUNO', en: 'Wedding on Phuket: venue, photo, registration — myUNO' },
+    metaDescription: { ru: 'Площадки Trisara, Sri Panwa, beach. Фотограф, флорист, ужин и юридическая регистрация. Пакеты от ฿250K.', en: 'Venues Trisara, Sri Panwa, beach. Photographer, florist, dinner and legal registration. Packages from ฿250K.' },
+    ogImage: OG_DEFAULT,
+    canonicalPath: '/for/weddings',
+    hreflangAlternates: [
+      { lang: 'ru', href: 'https://myuno.app/for/weddings?lang=ru' },
+      { lang: 'en', href: 'https://myuno.app/for/weddings?lang=en' },
+    ],
+  },
+};
+
+// ──────────────────────────────────────────────────────────────────────
+//  LIVE: P20 — Retirees
+// ──────────────────────────────────────────────────────────────────────
+
+const P20_RETIREES: PersonaLanding = {
+  personaCode: 'P20',
+  slug: 'retirees',
+  status: 'live',
+  h1: {
+    ru: 'Пенсия на Пхукете',
+    en: 'Retiring on Phuket',
+  },
+  subtitle: {
+    ru: 'Retirement visa O-A на год с продлением, healthcare-план, тайский счёт, дом или condo с управлением — переезд за 3 месяца.',
+    en: 'Retirement visa O-A renewable yearly, healthcare plan, Thai bank account, house or condo with management — relocate in 3 months.',
+  },
+  pains: [
+    { ru: 'Не понятно, какие документы нужны для retirement visa.', en: 'Unclear which documents are required for retirement visa.' },
+    { ru: 'Беспокоит медицина в возрасте 60+: куда обращаться экстренно.', en: 'Worried about healthcare at 60+: where to turn in emergencies.' },
+    { ru: 'Хочется одноэтажный дом без лестниц с садом.', en: 'You want a single-storey home without stairs and with a garden.' },
+    { ru: 'Не знаете, как переводить пенсию из родной страны.', en: 'Unclear how to transfer pension from home country.' },
+  ],
+  services: [
+    { slug: 'retirement-visa', label: { ru: 'Retirement visa O-A', en: 'Retirement visa O-A' }, oneLiner: { ru: '1 год + продление, нужно ฿800K на счёте или ฿65K/мес дохода.', en: '1 year + renewal, ฿800K on account or ฿65K/mo income required.' }, href: '/visa/retirement' },
+    { slug: 'health-plan-60', label: { ru: 'Healthcare-план 60+', en: 'Healthcare plan 60+' }, oneLiner: { ru: 'Bangkok Hospital, годовой контракт, неотложка 24/7.', en: 'Bangkok Hospital, annual plan, 24/7 emergency.' }, href: '/services/health/seniors' },
+    { slug: 'single-storey', label: { ru: 'Одноэтажный дом', en: 'Single-storey home' }, oneLiner: { ru: 'Подбор без лестниц, с садом, рядом с медициной.', en: 'No-stairs homes with garden, near hospitals.' }, href: '/property?audience=retirees' },
+    { slug: 'pension-transfer', label: { ru: 'Перевод пенсии', en: 'Pension transfer' }, oneLiner: { ru: 'SWIFT и Wise — что выгоднее, налоговые нюансы.', en: 'SWIFT vs Wise — what works best, tax notes.' }, href: '/tax?topic=pension' },
+    { slug: 'home-care', label: { ru: 'Помощь по дому', en: 'Home care' }, oneLiner: { ru: 'Уборка, садовник, сиделка — проверенные кандидаты.', en: 'Cleaning, gardener, carer — vetted candidates.' }, href: '/services/home/carer' },
+  ],
+  faq: [
+    { q: { ru: 'Какой возраст и доход для O-A визы?', en: 'What age and income for O-A visa?' }, a: { ru: '50+ лет, ฿800 000 на тайском счёте за 2 месяца до подачи ИЛИ доход ฿65 000/мес (выписка из банка). Плюс медстраховка ($100 000 покрытие).', en: '50+ years old, ฿800,000 on Thai account 2 months before application OR ฿65,000/mo income (bank statement). Plus medical insurance ($100,000 coverage).' } },
+    { q: { ru: 'Сколько стоит жить на Пхукете для пенсионера?', en: 'Cost of living on Phuket for a retiree?' }, a: { ru: 'Минимум — ฿55 000/мес (1-bed condo, домашняя еда, скутер). Комфорт — ฿100 000–150 000 (2-bed villa, рестораны, авто). Премиум — от ฿250 000 (вилла с pool, помощь по дому).', en: 'Minimum — ฿55,000/mo (1-bed condo, home cooking, scooter). Comfortable — ฿100,000–150,000 (2-bed villa, dining out, car). Premium — from ฿250,000 (pool villa, home care).' } },
+    { q: { ru: 'Где наблюдаться по медицине?', en: 'Where to handle healthcare?' }, a: { ru: 'Bangkok Hospital Phuket — главный центр для иностранцев, кардио и гериатрия сильны. Phuket International — баланс цены. Vachira — государственный, для критических случаев ближе всех.', en: 'Bangkok Hospital Phuket — main centre for foreigners, strong cardiac and geriatrics. Phuket International — balanced pricing. Vachira — public, closest for critical cases.' } },
+    { q: { ru: 'Как платить за лечение в возрасте?', en: 'How to pay for healthcare at older age?' }, a: { ru: '3 опции: international insurance (для O-A обязательно $100K покрытия, ฿80–200K/год), self-insurance с резервом ฿1–2M, hospital direct billing с депозитом. Российские полисы после 65 лет часто не работают.', en: '3 options: international insurance (mandatory for O-A, $100K coverage, ฿80–200K/yr), self-insurance with ฿1–2M buffer, hospital direct billing with deposit. Russian policies often refuse after 65.' } },
+    { q: { ru: 'Какие районы лучше для пенсионера?', en: 'Best areas for retirees?' }, a: { ru: 'Раваи и Чалонг — тихо, рядом с госпиталями, бюджетнее. Камала — баланс цены и инфраструктуры, рядом с Bangkok Hospital. Лагуна — премиум-комьюнити, gated, своя клиника.', en: 'Rawai and Chalong — quiet, near hospitals, more affordable. Kamala — balanced, close to Bangkok Hospital. Laguna — premium gated community with on-site clinic.' } },
+    { q: { ru: 'Можно ли выписать пенсию из России?', en: 'Can I receive a Russian pension here?' }, a: { ru: 'Да, через SWIFT-перевод раз в 3–6 месяцев или через банк-партнёр в третьей стране (Армения, Казахстан). Минимизация комиссии — Wise при сумме до $5K.', en: 'Yes, via SWIFT every 3–6 months or via a partner bank in a third country (Armenia, Kazakhstan). For amounts under $5K Wise minimises fees.' } },
+  ],
+  primaryCta: {
+    label: { ru: 'Подобрать визу', en: 'Pick a visa' },
+    href: '/visa/quiz',
+    subtitle: { ru: 'O-A, LTR Wealthy Pensioner — что подходит.', en: 'O-A or LTR Wealthy Pensioner — pick yours.' },
+  },
+  secondaryCta: {
+    label: { ru: 'Дом для пенсионера', en: 'Retiree-friendly home' },
+    href: '/property?audience=retirees',
+  },
+  seo: {
+    metaTitle: { ru: 'Пенсия на Пхукете: O-A виза, дом, медицина — myUNO', en: 'Retiring on Phuket: O-A visa, home, healthcare — myUNO' },
+    metaDescription: { ru: 'Retirement visa O-A, healthcare-план 60+, одноэтажный дом, перевод пенсии и помощь по дому. Цены в THB, переезд за 3 месяца.', en: 'Retirement visa O-A, 60+ healthcare plan, single-storey home, pension transfer and home care. THB pricing, 3-month relocation.' },
+    ogImage: OG_DEFAULT,
+    canonicalPath: '/for/retirees',
+    hreflangAlternates: [
+      { lang: 'ru', href: 'https://myuno.app/for/retirees?lang=ru' },
+      { lang: 'en', href: 'https://myuno.app/for/retirees?lang=en' },
+    ],
+  },
+};
+
+// ──────────────────────────────────────────────────────────────────────
 //  Canonical list (P1..P25)
 // ──────────────────────────────────────────────────────────────────────
 
@@ -950,13 +1119,13 @@ export const PERSONA_LANDINGS: readonly PersonaLanding[] = [
   P11_MN_INVESTORS,
   draftPersona('P12', 'bn-business', { ru: 'Бизнес-аудитория из Бангладеш', en: 'Bangladeshi business audience' }),
   P13_PET_OWNERS,
-  draftPersona('P14', 'medical', { ru: 'Медицинский туризм', en: 'Medical tourists' }),
-  draftPersona('P15', 'weddings', { ru: 'Свадебные путешественники', en: 'Wedding travellers' }),
+  P14_MEDICAL,
+  P15_WEDDINGS,
   draftPersona('P16', 'athletes', { ru: 'Спортсмены и Fight Camp', en: 'Athletes & fight camps' }),
   draftPersona('P17', 'halal', { ru: 'Мусульманские путешественники', en: 'Muslim travellers' }),
   draftPersona('P18', 'lgbtq', { ru: 'ЛГБТК+ путешественники и резиденты', en: 'LGBTQ+ travellers & residents' }),
   draftPersona('P19', 'accessibility', { ru: 'Путешественники с ограниченными возможностями', en: 'Accessibility-first travellers' }),
-  draftPersona('P20', 'retirees', { ru: 'Пенсионеры', en: 'Retirees' }),
+  P20_RETIREES,
   draftPersona('P21', 'providers', { ru: 'Локальные подрядчики', en: 'Local providers' }),
   // M10b — два slug под P22 (taxonomy conflict, см. m10b-completion.md):
   draftPersona('P22', 'freelancers', { ru: 'Локальные фрилансеры', en: 'Local freelancers' }),
@@ -977,5 +1146,8 @@ export const LIVE_PERSONA_SLUGS: readonly string[] = [
   'operators',         // P10 — M10b
   'mn-investors',      // P11 — M10b
   'pet-owners',        // P13
+  'medical',           // P14 — Sprint 2
+  'weddings',          // P15 — Sprint 2
+  'retirees',          // P20 — Sprint 2
   'developer-partner', // P22 — M10b
 ] as const;

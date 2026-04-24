@@ -567,26 +567,215 @@ const H_EMERGENCY: ClusterLanding = {
 };
 
 // ──────────────────────────────────────────────────────────────────────
+//  LIVE: B — Extension & Transition
+// ──────────────────────────────────────────────────────────────────────
+
+const B_EXTENSION: ClusterLanding = {
+  clusterCode: 'B',
+  slug: 'extension',
+  status: 'live',
+  h1: {
+    ru: 'Продлить пребывание на Пхукете',
+    en: 'Extending your stay on Phuket',
+  },
+  subtitle: {
+    ru: 'Продление визы, visa run, переход на DTV или Education, оформление long-stay аренды — без ночей у иммиграции.',
+    en: 'Visa extensions, visa runs, transition to DTV or Education, long-stay rentals — without nights at immigration.',
+  },
+  jobs: [
+    { ru: 'Продлить туристическую визу на 30 дней.', en: 'Extend a tourist visa by 30 days.' },
+    { ru: 'Сделать visa run в соседнюю страну.', en: 'Run a visa border bounce to a neighbour country.' },
+    { ru: 'Перейти с туристической визы на DTV / Education / LTR.', en: 'Switch from tourist to DTV / Education / LTR.' },
+    { ru: 'Открыть тайский счёт для долгого проживания.', en: 'Open a Thai bank account for long stays.' },
+    { ru: 'Найти long-stay квартиру с скидкой за 3+ месяца.', en: 'Find a long-stay condo with a 3+ month discount.' },
+    { ru: 'Получить тайские права для байка / авто.', en: 'Get a Thai driving licence for scooter or car.' },
+  ],
+  services: [
+    { slug: 'visa-extension', label: { ru: 'Продление визы', en: 'Visa extension' }, oneLiner: { ru: '+30 дней в иммиграции Phuket за 1 900 THB.', en: '+30 days at Phuket immigration for 1,900 THB.' }, href: '/visa/extension' },
+    { slug: 'visa-run', label: { ru: 'Visa run', en: 'Visa run' }, oneLiner: { ru: 'Малайзия / Камбоджа / Лаос — пакет под ключ.', en: 'Malaysia / Cambodia / Laos — turnkey trip.' }, href: '/visa/run' },
+    { slug: 'visa-quiz', label: { ru: 'Подбор долгой визы', en: 'Long-stay visa picker' }, oneLiner: { ru: 'DTV, Education, LTR, Elite — 4 вопроса.', en: 'DTV, Education, LTR, Elite — 4 questions.' }, href: '/visa/quiz' },
+    { slug: 'long-stay-condo', label: { ru: 'Long-stay condo', en: 'Long-stay condo' }, oneLiner: { ru: 'Скидка 20–35% за 3+ месяца, договор на тайском.', en: '20–35% discount for 3+ months, Thai contract.' }, href: '/property?staytype=long' },
+    { slug: 'thai-bank', label: { ru: 'Тайский банк', en: 'Thai bank account' }, oneLiner: { ru: 'Bangkok Bank, Kasikorn — пакет документов и сопровождение.', en: 'Bangkok Bank, Kasikorn — documents and escort.' }, href: '/services/finance/bank-account' },
+    { slug: 'thai-licence', label: { ru: 'Тайские права', en: 'Thai driving licence' }, oneLiner: { ru: 'Конвертация иноправ за 1 день в DLT.', en: 'Foreign-licence conversion in 1 day at DLT.' }, href: '/services/transport/licence' },
+  ],
+  faq: [
+    { q: { ru: 'Сколько раз можно продлевать туристическую визу?', en: 'How many times can a tourist visa be extended?' }, a: { ru: 'Visa exempt (60 дней) → +30 дней в иммиграции = 90 дней. Дальше — visa run или переход на долгую визу. Подряд более 2 раз могут отказать.', en: 'Visa exempt (60 days) → +30 days at immigration = 90 days. Beyond that — visa run or transition to a long-term visa. Consecutive runs may be refused after the second.' } },
+    { q: { ru: 'Сколько стоит visa run?', en: 'How much does a visa run cost?' }, a: { ru: 'Малайзия (Penang) — от 4 500 THB за 2 дня (автобус). Камбоджа (Phnom Penh) — от 8 000 THB (перелёт). Лаос (Vientiane) — от 12 000 THB (включая получение новой визы).', en: 'Malaysia (Penang) — from 4,500 THB for 2 days (bus). Cambodia (Phnom Penh) — from 8,000 THB (flight). Laos (Vientiane) — from 12,000 THB (incl. new visa).' } },
+    { q: { ru: 'Можно ли открыть тайский банковский счёт без долгой визы?', en: 'Can I open a Thai bank account without a long-stay visa?' }, a: { ru: 'Без долгой визы — только с residence certificate (5 дней оформления, 500 THB) или через open-account-package в банке-партнёре. Bangkok Bank наиболее лояльный.', en: 'Without a long-stay visa — only with a residence certificate (5 days, 500 THB) or via a partner bank package. Bangkok Bank is the most permissive.' } },
+    { q: { ru: 'Что выгоднее: продлевать туристическую или сразу DTV?', en: 'Better to extend tourist visa or go DTV?' }, a: { ru: 'При плане жить >6 месяцев — DTV дешевле и легче. Продление + visa run обходится в 25–40K THB за 6 месяцев. DTV — 10K THB на 5 лет (180 дней за раз).', en: 'For 6+ months — DTV is cheaper and simpler. Extension + visa run costs 25–40K THB per 6 months. DTV — 10K THB for 5 years (180 days per stay).' } },
+    { q: { ru: 'Какая скидка на long-stay аренду?', en: 'What discount on long-stay rentals?' }, a: { ru: '3 месяца — 20%, 6 месяцев — 30%, 12 месяцев — 35–40% относительно nightly rate. В low season (май–октябрь) можно torговаться ещё на 10–15%.', en: '3 months — 20%, 6 months — 30%, 12 months — 35–40% off nightly rates. In low season (May–October) negotiate another 10–15% off.' } },
+    { q: { ru: 'Нужны ли международные права?', en: 'Do I need an international driving permit?' }, a: { ru: 'Для проката байка — да (категория A). Для авто — категория B. Альтернатива — конвертация в тайские права за 1 день, действуют 2 года.', en: 'For scooter rental — yes (cat. A). For car — cat. B. Alternative — convert to a Thai licence in 1 day, valid 2 years.' } },
+  ],
+  primaryCta: {
+    label: { ru: 'Подобрать визу', en: 'Pick a visa' },
+    href: '/visa/quiz',
+    subtitle: { ru: '4 вопроса, бесплатно.', en: '4 questions, free.' },
+  },
+  secondaryCta: {
+    label: { ru: 'Long-stay condo', en: 'Long-stay condo' },
+    href: '/property?staytype=long',
+  },
+  relatedPersonas: ['P3', 'P4', 'P5', 'P6', 'P7', 'P25'],
+  seo: {
+    metaTitle: { ru: 'Продление визы и долгое пребывание на Пхукете — myUNO', en: 'Visa extension & long-stay on Phuket — myUNO' },
+    metaDescription: { ru: 'Продление визы, visa run, переход на DTV/LTR, long-stay condo, тайский банк и права. Цены в THB, помощь по-русски.', en: 'Visa extension, visa run, DTV/LTR transition, long-stay condo, Thai bank and licence. THB pricing, English support.' },
+    ogImage: OG_DEFAULT,
+    canonicalPath: '/cluster/extension',
+    hreflangAlternates: [
+      { lang: 'ru', href: 'https://myuno.app/cluster/extension?lang=ru' },
+      { lang: 'en', href: 'https://myuno.app/cluster/extension?lang=en' },
+    ],
+  },
+};
+
+// ──────────────────────────────────────────────────────────────────────
+//  LIVE: C — Settlement
+// ──────────────────────────────────────────────────────────────────────
+
+const C_SETTLEMENT: ClusterLanding = {
+  clusterCode: 'C',
+  slug: 'settlement',
+  status: 'live',
+  h1: {
+    ru: 'Обустройство жизни на Пхукете',
+    en: 'Settling in on Phuket',
+  },
+  subtitle: {
+    ru: 'Снять долгосрочное жильё, перевезти вещи, открыть банк, купить мебель, найти школу, врача и стоматолога — без 6 месяцев на адаптацию.',
+    en: 'Long-stay rental, shipping, bank account, furniture, school, doctor and dentist — without 6 months of adaptation.',
+  },
+  jobs: [
+    { ru: 'Снять виллу или condo на 6+ месяцев с правильным договором.', en: 'Sign a 6+ month villa or condo lease with the right contract.' },
+    { ru: 'Привезти вещи из дома (контейнер / cargo).', en: 'Ship belongings from home (container / cargo).' },
+    { ru: 'Купить мебель, технику, постель — где не переплатить.', en: 'Buy furniture, appliances and bedding without overpaying.' },
+    { ru: 'Найти семейного врача и стоматолога.', en: 'Find a family doctor and dentist.' },
+    { ru: 'Подключить интернет, мусор и коммунальные.', en: 'Set up internet, garbage and utilities.' },
+    { ru: 'Подобрать школу или садик ребёнку.', en: 'Pick a school or kindergarten.' },
+  ],
+  services: [
+    { slug: 'long-rental', label: { ru: 'Долгосрочная аренда', en: 'Long-term rental' }, oneLiner: { ru: 'Виллы и condo от 6 мес, проверенный договор.', en: 'Villas and condos from 6 months, verified contract.' }, href: '/property?staytype=long' },
+    { slug: 'relocation', label: { ru: 'Перевозка вещей', en: 'Shipping & relocation' }, oneLiner: { ru: 'Air / sea cargo, customs, доставка до двери.', en: 'Air or sea cargo, customs, door-to-door.' }, href: '/relocate' },
+    { slug: 'furniture', label: { ru: 'Мебель и техника', en: 'Furniture & appliances' }, oneLiner: { ru: 'IKEA, Index, SB, локальные мастерские — карта и цены.', en: 'IKEA, Index, SB, local workshops — map and prices.' }, href: '/services/home/furniture' },
+    { slug: 'family-doctor', label: { ru: 'Семейный врач', en: 'Family doctor' }, oneLiner: { ru: 'GP по-русски / по-английски, годовой контракт.', en: 'Russian or English-speaking GP, annual plan.' }, href: '/services/health/family-doctor' },
+    { slug: 'school-finder', label: { ru: 'Поиск школы', en: 'School Finder' }, oneLiner: { ru: '15 школ, фильтр по программе и бюджету.', en: '15 schools filtered by curriculum and budget.' }, href: '/school-finder' },
+    { slug: 'utilities', label: { ru: 'Коммуналка и интернет', en: 'Utilities & internet' }, oneLiner: { ru: 'AIS / True / 3BB, мусор, вода — оформление за вас.', en: 'AIS / True / 3BB, garbage, water — set up for you.' }, href: '/services/home/utilities' },
+  ],
+  faq: [
+    { q: { ru: 'Сколько стоит снять виллу на год?', en: 'How much for a yearly villa rental?' }, a: { ru: '2-bed villa с бассейном — от ฿55 000/мес (Раваи, Чалонг), ฿80 000–150 000 (Камала, Сурин), от ฿200 000 (Бангтао, Лагуна). Депозит 2–3 месяца.', en: '2-bed villa with pool — from ฿55,000/mo (Rawai, Chalong), ฿80,000–150,000 (Kamala, Surin), from ฿200,000 (Bang Tao, Laguna). Deposit 2–3 months.' } },
+    { q: { ru: 'Что должно быть в договоре аренды?', en: 'What to include in a rental contract?' }, a: { ru: 'Срок, депозит, условия возврата, кто платит коммуналку, условия расторжения, inventory list с фото. Без inventory — депозит часто не возвращают.', en: 'Term, deposit, refund rules, who pays utilities, termination clause, inventory list with photos. Without inventory, deposits are often withheld.' } },
+    { q: { ru: 'Сколько стоит перевезти контейнер из России / ЕС?', en: 'Cost of a container from Russia / EU?' }, a: { ru: '20-foot container Москва → Пхукет — $4 500–7 000 (60–80 дней по морю). Air cargo до 100 кг — от $800. Растаможка — отдельно, ~10–15% стоимости содержимого.', en: '20-foot container Moscow → Phuket — $4,500–7,000 (60–80 days by sea). Air cargo up to 100 kg — from $800. Customs separately, ~10–15% of content value.' } },
+    { q: { ru: 'Где быстро купить мебель?', en: 'Where to buy furniture quickly?' }, a: { ru: 'IKEA Phuket (Central Floresta) — крупная мебель, доставка 3–7 дней. Index Living Mall — баланс цены и стиля. SB Furniture — недорого. Локальные мастерские в Чалонге — кастом за 2–3 недели.', en: 'IKEA Phuket (Central Floresta) — large items, 3–7 day delivery. Index Living Mall — balanced. SB Furniture — budget. Local workshops in Chalong — custom in 2–3 weeks.' } },
+    { q: { ru: 'Сколько стоит интернет?', en: 'What does internet cost?' }, a: { ru: 'Fiber 200 Mbps — ฿590/мес (AIS, True), 500 Mbps — ฿890/мес. Подключение 2–5 дней, нужен адрес и паспорт. Mobile-роутер 100 GB — ฿700/мес как backup.', en: 'Fibre 200 Mbps — ฿590/mo (AIS, True), 500 Mbps — ฿890/mo. Setup in 2–5 days, address and passport required. Mobile router 100 GB — ฿700/mo as backup.' } },
+    { q: { ru: 'Какой стоматолог по-русски?', en: 'Which dentist speaks Russian?' }, a: { ru: 'Phuket Dental Signature и Sea Smile — топ-уровень, есть переводчик. BIDH — для имплантов и сложной хирургии. Чек-ап и чистка — ฿1 500–3 000.', en: 'Phuket Dental Signature and Sea Smile — top tier with translation. BIDH — for implants and complex surgery. Check-up and cleaning — ฿1,500–3,000.' } },
+  ],
+  primaryCta: {
+    label: { ru: 'Подобрать жильё', en: 'Find housing' },
+    href: '/property?staytype=long',
+    subtitle: { ru: 'Виллы и condo от 6 мес.', en: 'Villas and condos from 6 months.' },
+  },
+  secondaryCta: {
+    label: { ru: 'Перевезти вещи', en: 'Ship your stuff' },
+    href: '/relocate',
+  },
+  relatedPersonas: ['P5', 'P6', 'P7', 'P10', 'P13', 'P20'],
+  seo: {
+    metaTitle: { ru: 'Обустройство жизни на Пхукете: жильё, банк, школа — myUNO', en: 'Settling on Phuket: housing, bank, school — myUNO' },
+    metaDescription: { ru: 'Долгосрочная аренда, перевозка вещей, мебель, врач, школа и интернет. Чек-листы и цены в THB для resident на Пхукете.', en: 'Long-term rental, shipping, furniture, doctor, school and internet. Checklists and THB prices for Phuket residents.' },
+    ogImage: OG_DEFAULT,
+    canonicalPath: '/cluster/settlement',
+    hreflangAlternates: [
+      { lang: 'ru', href: 'https://myuno.app/cluster/settlement?lang=ru' },
+      { lang: 'en', href: 'https://myuno.app/cluster/settlement?lang=en' },
+    ],
+  },
+};
+
+// ──────────────────────────────────────────────────────────────────────
+//  LIVE: I — Lifestyle & Experiences
+// ──────────────────────────────────────────────────────────────────────
+
+const I_LIFESTYLE: ClusterLanding = {
+  clusterCode: 'I',
+  slug: 'lifestyle',
+  status: 'live',
+  h1: {
+    ru: 'Стиль жизни на Пхукете: что делать каждый день',
+    en: 'Lifestyle on Phuket: what to do every day',
+  },
+  subtitle: {
+    ru: 'Wellness, рестораны, спорт, события, beach clubs и яхты — отобранные места и сценарии без зазывал.',
+    en: 'Wellness, dining, sport, events, beach clubs and yachts — curated places and scenarios with no street touts.',
+  },
+  jobs: [
+    { ru: 'Найти ресторан под повод и компанию.', en: 'Find a restaurant by occasion and company.' },
+    { ru: 'Заняться спортом: тренажёрный зал, теннис, гольф, Muay Thai.', en: 'Stay active: gym, tennis, golf, Muay Thai.' },
+    { ru: 'Сходить на массаж и spa уровня выше базового.', en: 'Get a massage or spa above the basic tier.' },
+    { ru: 'Снять яхту на день или закат.', en: 'Charter a yacht for a day or a sunset.' },
+    { ru: 'Узнать о ближайших событиях: party, gallery, фестиваль.', en: 'Learn about upcoming parties, galleries and festivals.' },
+    { ru: 'Забронировать beach club или sky bar для группы.', en: 'Book a beach club or sky bar for a group.' },
+  ],
+  services: [
+    { slug: 'restaurants', label: { ru: 'Рестораны', en: 'Restaurants' }, oneLiner: { ru: 'Гид по 200+ местам с фильтром по поводу.', en: 'Guide to 200+ places filtered by occasion.' }, href: '/dining' },
+    { slug: 'spa-wellness', label: { ru: 'Spa и wellness', en: 'Spa & wellness' }, oneLiner: { ru: 'Banyan Tree, Anantara, Cool Spa — топовый список.', en: 'Banyan Tree, Anantara, Cool Spa — top tier.' }, href: '/services/wellness/spa' },
+    { slug: 'fitness', label: { ru: 'Фитнес и спорт', en: 'Fitness & sport' }, oneLiner: { ru: 'Залы, теннис, гольф, Muay Thai — карта и подписки.', en: 'Gyms, tennis, golf, Muay Thai — map and memberships.' }, href: '/fitness' },
+    { slug: 'yacht-charter', label: { ru: 'Аренда яхты', en: 'Yacht charter' }, oneLiner: { ru: 'Sunset cruise от ฿3 500/чел, day trip до Phi Phi.', en: 'Sunset cruise from ฿3,500/pax, day trip to Phi Phi.' }, href: '/yachts' },
+    { slug: 'events', label: { ru: 'События и party', en: 'Events & parties' }, oneLiner: { ru: 'Афиша на неделю с прямыми билетами.', en: 'Weekly listings with direct ticketing.' }, href: '/events' },
+    { slug: 'beach-clubs', label: { ru: 'Beach clubs и sky bars', en: 'Beach clubs & sky bars' }, oneLiner: { ru: 'Catch, Café del Mar, Baba Nest — резервация и minimum spend.', en: 'Catch, Café del Mar, Baba Nest — booking and minimum spend.' }, href: '/services/dining/beach-clubs' },
+  ],
+  faq: [
+    { q: { ru: 'Где лучшие закаты на Пхукете?', en: 'Where are the best sunsets on Phuket?' }, a: { ru: 'Promthep Cape — классика, бесплатно. Café del Mar (Камала) — beach club. Baba Nest (Шри Панва) — sky bar по бронированию. Ya Nui Beach — без толпы.', en: 'Promthep Cape — classic, free. Café del Mar (Kamala) — beach club. Baba Nest (Sri Panwa) — sky bar by reservation. Ya Nui Beach — uncrowded.' } },
+    { q: { ru: 'Сколько стоит абонемент в хороший зал?', en: 'How much for a good gym membership?' }, a: { ru: 'Premium (Unit27, Movement, Tiger Muay Thai) — ฿3 500–6 000/мес. Mid (Total Fitness) — ฿1 800/мес. Гостиничные — daily ฿500–1 200.', en: 'Premium (Unit27, Movement, Tiger Muay Thai) — ฿3,500–6,000/mo. Mid (Total Fitness) — ฿1,800/mo. Hotel-attached — daily ฿500–1,200.' } },
+    { q: { ru: 'Можно ли арендовать яхту на пол-дня?', en: 'Can I charter a yacht for half a day?' }, a: { ru: 'Да, sunset cruise 4 часа на 8–12 человек — от ฿35 000 за лодку с капитаном и snacks. Day trip 8 часов с остановкой на островах — от ฿80 000.', en: 'Yes, a 4-hour sunset cruise for 8–12 — from ฿35,000 with captain and snacks. 8-hour day trip with island stops — from ฿80,000.' } },
+    { q: { ru: 'Какие spa уровня выше "массаж на пляже"?', en: 'Which spas are above beach massage tier?' }, a: { ru: 'Banyan Tree Spa, Anantara Spa, Cool Spa (Шри Панва), The Spa at Trisara — premium с собственными signature ритуалами. От ฿3 500 за процедуру.', en: 'Banyan Tree Spa, Anantara Spa, Cool Spa (Sri Panwa), The Spa at Trisara — premium with signature rituals. From ฿3,500 per treatment.' } },
+    { q: { ru: 'Где играть в гольф?', en: 'Where to play golf?' }, a: { ru: 'Blue Canyon (PGA), Laguna Phuket, Red Mountain — top-3. Green fee — ฿4 500–7 500 в high season, ฿2 800–5 000 в low. Caddy и cart обычно включены.', en: 'Blue Canyon (PGA), Laguna Phuket, Red Mountain — top 3. Green fee — ฿4,500–7,500 high season, ฿2,800–5,000 low. Caddy and cart usually included.' } },
+    { q: { ru: 'Какие события не пропустить?', en: 'Which events not to miss?' }, a: { ru: 'Songkran (13–15 апреля), Vegetarian Festival (октябрь), Phuket King’s Cup Regatta (декабрь), Loy Krathong (ноябрь). Афиша обновляется в /events еженедельно.', en: 'Songkran (April 13–15), Vegetarian Festival (October), Phuket King’s Cup Regatta (December), Loy Krathong (November). /events updates weekly.' } },
+  ],
+  primaryCta: {
+    label: { ru: 'Открыть афишу', en: 'Open the calendar' },
+    href: '/events',
+    subtitle: { ru: 'Обновляется каждую неделю.', en: 'Updated every week.' },
+  },
+  secondaryCta: {
+    label: { ru: 'Снять яхту', en: 'Charter a yacht' },
+    href: '/yachts',
+  },
+  relatedPersonas: ['P1', 'P3', 'P4', 'P5', 'P6', 'P7', 'P15', 'P16', 'P18', 'P24'],
+  seo: {
+    metaTitle: { ru: 'Стиль жизни на Пхукете: рестораны, спорт, яхты — myUNO', en: 'Lifestyle on Phuket: dining, sport, yachts — myUNO' },
+    metaDescription: { ru: 'Wellness, рестораны, beach clubs, яхты, события и спорт. Curated подборка без зазывал, цены в THB.', en: 'Wellness, dining, beach clubs, yachts, events and sport. Curated picks without street touts, THB pricing.' },
+    ogImage: OG_DEFAULT,
+    canonicalPath: '/cluster/lifestyle',
+    hreflangAlternates: [
+      { lang: 'ru', href: 'https://myuno.app/cluster/lifestyle?lang=ru' },
+      { lang: 'en', href: 'https://myuno.app/cluster/lifestyle?lang=en' },
+    ],
+  },
+};
+
+// ──────────────────────────────────────────────────────────────────────
 //  Canonical list (A..J)
 // ──────────────────────────────────────────────────────────────────────
 
 export const CLUSTER_LANDINGS: readonly ClusterLanding[] = [
   A_ARRIVAL,
-  draftCluster('B', 'extension', { ru: 'Продление визы и переход к долгому пребыванию', en: 'Extending your stay & transitioning' }, ['P3', 'P4', 'P5', 'P6', 'P7', 'P25']),
-  draftCluster('C', 'settlement', { ru: 'Обустройство жизни на Пхукете', en: 'Settling in on Phuket' }, ['P5', 'P6', 'P7', 'P10', 'P13', 'P20']),
+  B_EXTENSION,
+  C_SETTLEMENT,
   D_INVESTMENT,
   draftCluster('E', 'transaction', { ru: 'Покупка и продажа недвижимости', en: 'Buying & selling property' }, ['P2', 'P8', 'P9', 'P11', 'P12']),
   F_OPERATIONS,
   G_COMPLIANCE,
   H_EMERGENCY,
-  draftCluster('I', 'lifestyle', { ru: 'Стиль жизни и впечатления', en: 'Lifestyle & experiences' }, ['P1', 'P3', 'P4', 'P5', 'P6', 'P7', 'P15', 'P16', 'P18', 'P24']),
+  I_LIFESTYLE,
   draftCluster('J', 'exit', { ru: 'Выход из актива и возврат', en: 'Exit & re-entry' }, ['P8', 'P9', 'P10', 'P20']),
 ] as const;
 
 export const LIVE_CLUSTER_SLUGS: readonly string[] = [
   'arrival',     // A
+  'extension',   // B  — Sprint 2
+  'settlement',  // C  — Sprint 2
   'investment',  // D
   'operations',  // F
-  'compliance',  // G
-  'emergency',   // H
+  'compliance',  // G  — Sprint 1
+  'emergency',   // H  — Sprint 1
+  'lifestyle',   // I  — Sprint 2
 ] as const;
