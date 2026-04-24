@@ -64,10 +64,10 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
     return null;
   };
 
-  // Service groups for footer: arrive, live, enjoy, health, settle
-  // invest → dedicated Real Estate column; maintain + help → excluded from services
+  // Service groups for footer (SSOT clusters): arrive, live, legal.
+  // invest → dedicated Real Estate column; manage/build → workspace, hidden in footer.
   const footerGroups = VERTICAL_GROUPS
-    .filter((g) => g.id !== 'invest' && g.id !== 'maintain' && g.id !== 'help')
+    .filter((g) => g.id === 'arrive' || g.id === 'live' || g.id === 'legal')
     .map((group) => {
       const items = group.items
         .slice(0, 5)
