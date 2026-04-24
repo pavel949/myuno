@@ -191,6 +191,26 @@ export default function PropertyMap() {
           </Sheet>
         </div>
 
+        {/* Active district chip (deep-linked from area landings) */}
+        {districtParam && (
+          <div className="flex items-center gap-2 px-3 py-2 bg-primary/5 border-b border-border/30">
+            <MapPin className="w-3.5 h-3.5 text-primary" aria-hidden />
+            <span className="text-xs text-foreground">
+              {language === 'ru' ? 'Район:' : 'Area:'}{' '}
+              <span className="font-medium">{districtParam}</span>
+            </span>
+            <button
+              type="button"
+              onClick={clearDistrict}
+              className="ml-auto inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+              aria-label={language === 'ru' ? 'Сбросить фильтр района' : 'Clear area filter'}
+            >
+              <X className="w-3 h-3" aria-hidden />
+              {language === 'ru' ? 'Сбросить' : 'Clear'}
+            </button>
+          </div>
+        )}
+
         {/* Distance pills */}
         <div className="flex gap-2 p-3 overflow-x-auto bg-background/50 border-b border-border/30">
           {distanceOptions.map((opt) => (
