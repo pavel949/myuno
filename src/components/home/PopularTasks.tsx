@@ -36,7 +36,7 @@ export function PopularTasks() {
                 trackTaskOpen(task.id);
                 navigate(task.route);
               }}
-              className="w-full text-left rounded-[12px] bg-card border border-border px-3 py-3 active:scale-[0.99] transition-transform min-h-[56px] flex items-start gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="w-full text-left rounded-none bg-card border border-border px-3 py-3 active:scale-[0.99] transition-transform min-h-[56px] flex items-start gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               <span className="font-mono text-[11px] text-muted-foreground/70 mt-0.5 tabular-nums">
                 {String(i + 1).padStart(2, '0')}

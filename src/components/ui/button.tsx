@@ -6,25 +6,54 @@ import { cn } from "@/lib/utils";
 import { triggerHaptic } from "@/hooks/useHapticFeedback";
 import { playSound } from "@/hooks/useSoundEffects";
 import { getFeedbackSettings } from "@/hooks/useFeedbackSettings";
-import { triggerRipple } from "@/hooks/useRipple";
 
+/**
+ * Button — myUNO canonical Button component.
+ *
+ * Source of truth: docs/canonical/05-visual-design-system.md §8.1
+ *
+ * Strict rules from canon:
+ *  - Four variants only: default (navy), outline (secondary), ghost, destructive.
+ *  - radius: 0  (canon §5 — no rounded-{sm,md,lg,xl} on buttons).
+ *  - No box-shadow, no -translate-y, no scale, no ripple, no glow.
+ *  - Font weight 500 (medium), body 15px.
+ *  - Min touch target 44px (canon §7.4).
+ *
+ * `link` variant kept for inline anchors (it's a text link, not a button surface).
+ * Haptic + sound feedback retained — that's behaviour, not visual styling.
+ */
 const buttonVariants = cva(
-  "relative overflow-hidden inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-none text-sm font-semibold ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 active:scale-[0.97]",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-none text-[15px] font-medium leading-none transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
-     variants: {
+    variants: {
       variant: {
-        default: "bg-primary text-primary-foreground [box-shadow:var(--shadow-btn)] hover:[box-shadow:var(--shadow-btn-hover)] hover:bg-primary/90 hover:-translate-y-0.5",
-        destructive: "bg-destructive text-destructive-foreground [box-shadow:var(--shadow-btn)] hover:[box-shadow:var(--shadow-btn-hover)] hover:bg-destructive/90 hover:-translate-y-0.5",
-        outline: "glow-border bg-card text-foreground [box-shadow:var(--shadow-card)] hover:[box-shadow:var(--shadow-card-hover)] hover:-translate-y-0.5",
-        secondary: "bg-secondary text-secondary-foreground [box-shadow:var(--shadow-card)] hover:[box-shadow:var(--shadow-card-hover)] hover:bg-secondary/80 hover:-translate-y-0.5",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
+        // Primary CTA — canon §8.1 Primary (navy): bg navy, white text, no border, no shadow.
+        default:
+          "bg-primary text-primary-foreground hover:bg-[hsl(var(--primary-hover))]",
+        // Secondary — canon §8.1 Secondary (outline): transparent, navy text, 1.5px navy border.
+        outline:
+          "bg-transparent text-primary border-[1.5px] border-primary hover:bg-[hsl(var(--brand-navy-50))]",
+        // Secondary surface — alternative for stacked secondary actions on light blocks.
+        secondary:
+          "bg-[hsl(var(--surface-raised))] text-foreground border border-border hover:bg-[hsl(var(--border-subtle))]",
+        // Ghost — canon §8.1 Ghost: transparent, body text, used for nav/table actions.
+        ghost:
+          "bg-transparent text-[hsl(var(--text-body))] hover:bg-[hsl(var(--surface-raised))] hover:text-foreground",
+        // Destructive — canon §8.1: transparent, red text, 1px red border.
+        destructive:
+          "bg-transparent text-destructive border border-destructive hover:bg-[hsl(var(--danger-bg))]",
+        // Inline text link (not a button surface, kept for legacy callers).
+        link: "text-primary underline-offset-4 hover:underline bg-transparent",
       },
       size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-none px-3",
-        lg: "h-11 rounded-none px-8",
-        icon: "h-10 w-10",
+        // Default — canon: 44px touch target, padding 12×24.
+        default: "h-11 px-6 py-3",
+        // Small — for table actions / dense toolbars.
+        sm: "h-9 px-4 text-sm",
+        // Large — for sticky bottom CTAs on conversion forms.
+        lg: "h-12 px-8",
+        // Icon-only — square 44×44.
+        icon: "h-11 w-11 p-0",
       },
     },
     defaultVariants: {
@@ -45,10 +74,9 @@ export interface ButtonProps
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, haptic = true, hapticStyle = 'light', onClick, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
-    
+
     const handleClick = React.useCallback(
       (e: React.MouseEvent<HTMLButtonElement>) => {
-        triggerRipple(e);
         const settings = getFeedbackSettings();
         if (haptic && settings.hapticEnabled) {
           triggerHaptic(hapticStyle);
@@ -60,13 +88,13 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       },
       [haptic, hapticStyle, onClick]
     );
-    
+
     return (
-      <Comp 
-        className={cn(buttonVariants({ variant, size, className }))} 
-        ref={ref} 
+      <Comp
+        className={cn(buttonVariants({ variant, size, className }))}
+        ref={ref}
         onClick={handleClick}
-        {...props} 
+        {...props}
       />
     );
   },

@@ -117,7 +117,7 @@ export const TopBar = memo(function TopBar({
                     to={item.path}
                     aria-label={label}
                     className={cn(
-                      'flex items-center gap-1.5 px-3 py-2 rounded-[var(--radius-md)] text-[13px] font-medium transition-colors',
+                      'flex items-center gap-1.5 px-3 py-2 rounded-none text-[13px] font-medium transition-colors',
                       active
                         ? 'bg-primary/10 text-primary'
                         : 'text-muted-foreground hover:text-foreground hover:bg-muted/40',
@@ -136,7 +136,7 @@ export const TopBar = memo(function TopBar({
             onClick={() => setSearchOpen(true)}
             className={cn(
               'hidden lg:flex items-center gap-3 mx-4 flex-1 max-w-sm',
-              'px-4 py-2 rounded-[var(--radius-md)]',
+              'px-4 py-2 rounded-none',
               'bg-[hsl(var(--bg-elevated))] border border-border',
               'transition-all duration-200 cursor-pointer group/search',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
@@ -163,7 +163,7 @@ export const TopBar = memo(function TopBar({
           <div className="flex items-center gap-0.5 lg:gap-1.5 ml-auto shrink-0">
             <button
               onClick={() => setSearchOpen(true)}
-              className="lg:hidden flex items-center justify-center w-11 h-11 rounded-[var(--radius-sm)] hover:bg-muted/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="lg:hidden flex items-center justify-center w-11 h-11 rounded-none hover:bg-muted/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               aria-label={isRu ? 'Поиск' : 'Search'}
             >
               <Search className="size-5 text-muted-foreground" />
@@ -171,7 +171,7 @@ export const TopBar = memo(function TopBar({
             <LanguageSwitcher size="sm" />
             <CurrencySwitcher size="sm" />
             {cartEnabled && (
-              <MiniCart className="rounded-[var(--radius-sm)] hover:bg-muted/40 transition-colors" />
+              <MiniCart className="rounded-none hover:bg-muted/40 transition-colors" />
             )}
             {user ? (
               <UserAvatarMenu />

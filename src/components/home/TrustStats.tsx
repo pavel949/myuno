@@ -32,7 +32,7 @@ export const TrustStats = memo(function TrustStats() {
 
   return (
     <section className="anim-stats space-y-4">
-      <div className="rounded-[var(--radius-lg)] p-5"
+      <div className="rounded-none p-5"
         style={{
           background: 'hsl(var(--bg-surface))',
           borderTop: '1px solid hsl(var(--border))',

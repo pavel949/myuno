@@ -143,12 +143,13 @@ export function HeroIntro() {
             : 'Housing, services, documents — in one app.'}
         </p>
 
+        {/* Search bar — canon §8.2 (Input): bg white, 1.5px border, square corners. */}
         <div
-          className="mt-4 lg:mt-6 flex items-center gap-2 rounded-[14px] px-3.5 py-2.5 bg-card border border-border focus-within:border-border-strong transition-colors lg:max-w-[480px]"
+          className="mt-4 lg:mt-6 flex items-center gap-2 rounded-none px-3.5 h-11 bg-card border-[1.5px] border-border focus-within:border-primary transition-colors lg:max-w-[480px]"
         >
           <Search className="w-4 h-4 text-muted-foreground shrink-0" />
           <input
-            className="flex-1 bg-transparent text-[14px] text-foreground placeholder:text-muted-foreground/70 outline-none min-w-0"
+            className="flex-1 bg-transparent text-[15px] text-foreground placeholder:text-muted-foreground/70 outline-none min-w-0"
             placeholder={isRu ? placeholderByVertical[vertical].ru : placeholderByVertical[vertical].en}
             value={query}
             onChange={e => setQuery(e.target.value)}
@@ -158,13 +159,13 @@ export function HeroIntro() {
           <button
             onClick={handleSearch}
             aria-label={isRu ? 'Поиск' : 'Search'}
-            className="flex items-center justify-center w-9 h-9 rounded-[10px] bg-foreground text-background shrink-0 active:scale-95 transition-transform"
+            className="flex items-center justify-center w-9 h-9 rounded-none bg-primary text-primary-foreground shrink-0 hover:bg-[hsl(var(--primary-hover))] transition-colors"
           >
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Vertical tabs — Airbnb-style intent picker */}
+        {/* Vertical tabs — canon: square corners, navy active border (canon §8.3 active card pattern). */}
         <div
           className="mt-3 flex items-center gap-1.5 overflow-x-auto scrollbar-none -mx-1 px-1 lg:max-w-[480px]"
           role="tablist"
@@ -181,10 +182,10 @@ export function HeroIntro() {
                 aria-selected={active}
                 onClick={() => handleVerticalClick(v.id)}
                 className={cn(
-                  'flex items-center gap-1.5 px-3 h-8 rounded-full text-[12.5px] font-medium whitespace-nowrap shrink-0 transition-all border',
+                  'flex items-center gap-1.5 px-3 h-9 rounded-none text-[13px] font-medium whitespace-nowrap shrink-0 transition-colors border-[1.5px]',
                   active
-                    ? 'bg-foreground text-background border-foreground'
-                    : 'bg-card text-muted-foreground border-border hover:text-foreground hover:border-border-strong',
+                    ? 'bg-primary text-primary-foreground border-primary'
+                    : 'bg-card text-muted-foreground border-border hover:text-foreground hover:border-primary',
                 )}
               >
                 <Icon className="w-3.5 h-3.5" />
@@ -195,9 +196,9 @@ export function HeroIntro() {
         </div>
       </div>
 
-      {/* Right column — desktop-only popular preview (GOV.UK style) */}
+      {/* Right column — canon §8.3 Card: square corners, 1px border, no shadow. */}
       <aside
-        className="hidden lg:block rounded-[14px] bg-card border border-border p-5"
+        className="hidden lg:block rounded-none bg-card border border-border p-5"
         aria-labelledby="hero-popular-heading"
       >
         <div

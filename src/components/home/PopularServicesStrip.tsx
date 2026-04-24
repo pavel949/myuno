@@ -50,7 +50,7 @@ export function PopularServicesStrip() {
         <Skeleton className="h-6 w-40" />
         <div className="flex gap-3 overflow-hidden">
           {[1, 2, 3].map(i => (
-            <Skeleton key={i} className="h-[190px] w-[150px] md:h-[220px] md:w-[180px] rounded-[var(--radius-lg)] shrink-0" />
+            <Skeleton key={i} className="h-[190px] w-[150px] md:h-[220px] md:w-[180px] rounded-none shrink-0" />
           ))}
         </div>
       </div>
@@ -81,7 +81,7 @@ export function PopularServicesStrip() {
             <button
               key={service.id}
               onClick={() => navigate(`/services/${service.id}`)}
-              className="w-[150px] h-[190px] md:w-[180px] md:h-[220px] rounded-[var(--radius-lg)] overflow-hidden text-left group transition-all duration-200 hover:-translate-y-1 active:scale-[0.97]"
+              className="w-[150px] h-[190px] md:w-[180px] md:h-[220px] rounded-none overflow-hidden text-left group transition-all duration-200 hover:-translate-y-1 active:scale-[0.97]"
               style={{
                 background: 'hsl(var(--card))',
                 border: '1px solid hsl(0 0% 100% / 0.07)',

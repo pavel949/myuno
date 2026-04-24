@@ -16,7 +16,7 @@ export function WhatsAppCTA({ className }: { className?: string }) {
   return (
     <section
       className={cn(
-        'relative rounded-[var(--radius-lg)] overflow-hidden',
+        'relative rounded-none overflow-hidden',
         className
       )}
       aria-labelledby="whatsapp-cta-title"
@@ -31,7 +31,7 @@ export function WhatsAppCTA({ className }: { className?: string }) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-3 mb-2">
             <div
-              className="w-10 h-10 rounded-[var(--radius-sm)] flex items-center justify-center shrink-0"
+              className="w-10 h-10 rounded-none flex items-center justify-center shrink-0"
               style={{ background: 'rgba(255,255,255,0.18)' }}
               aria-hidden
             >

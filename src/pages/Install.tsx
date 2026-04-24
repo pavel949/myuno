@@ -273,7 +273,7 @@ const Install = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="mb-8 mx-auto w-44 h-72 rounded-[2rem] border-4 border-foreground/10 bg-muted/30 p-3 relative overflow-hidden"
+              className="mb-8 mx-auto w-44 h-72 rounded-none border-4 border-foreground/10 bg-muted/30 p-3 relative overflow-hidden"
               aria-hidden
             >
               <div className="grid grid-cols-3 gap-2">
@@ -282,7 +282,7 @@ const Install = () => {
                   return (
                     <div
                       key={i}
-                      className={`aspect-square rounded-xl ${
+                      className={`aspect-square rounded-none ${
                         isMyUno
                           ? "bg-gradient-to-br from-primary to-primary/70 ring-4 ring-primary/40 shadow-lg shadow-primary/40 flex items-center justify-center"
                           : "bg-foreground/5"
@@ -385,7 +385,7 @@ const Install = () => {
         >
           {/* Hero */}
           <motion.div variants={itemVariants} className="text-center py-4">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary/30">
+            <div className="w-20 h-20 rounded-none bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary/30">
               <Smartphone className="w-10 h-10 text-primary-foreground" />
             </div>
             <h1 className="text-2xl font-bold mb-2">{t.title}</h1>
@@ -490,7 +490,7 @@ const Install = () => {
                 <div className="grid grid-cols-2 gap-3">
                   {t.benefits.map((item, index) => (
                     <div key={index} className="flex items-start gap-2 text-sm">
-                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <div className="w-8 h-8 rounded-none bg-primary/10 flex items-center justify-center flex-shrink-0">
                         <item.icon className="w-4 h-4 text-primary" />
                       </div>
                       <span className="text-muted-foreground leading-tight pt-1">
@@ -518,7 +518,7 @@ const Install = () => {
                     <ol className="space-y-2">
                       {t.iosSteps.map((step, index) => (
                         <li key={index} className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                          <div className="w-8 h-8 rounded-none bg-primary/10 flex items-center justify-center flex-shrink-0">
                             <step.icon className="w-4 h-4 text-primary" />
                           </div>
                           <span className="text-sm flex-1">
@@ -542,7 +542,7 @@ const Install = () => {
                     <ol className="space-y-2">
                       {t.androidSteps.map((step, index) => (
                         <li key={index} className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                          <div className="w-8 h-8 rounded-none bg-primary/10 flex items-center justify-center flex-shrink-0">
                             <step.icon className="w-4 h-4 text-primary" />
                           </div>
                           <span className="text-sm flex-1">

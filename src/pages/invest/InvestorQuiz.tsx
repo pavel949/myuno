@@ -221,7 +221,7 @@ export default function InvestorQuiz() {
             )}
             {step === 3 && (
               <div className="space-y-4">
-                <div className="flex items-start gap-3 rounded-lg bg-primary/5 p-4">
+                <div className="flex items-start gap-3 rounded-none bg-primary/5 p-4">
                   <Sparkles className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                   <div>
                     <div className="font-medium text-sm mb-1">
@@ -313,7 +313,7 @@ function Step<T extends string>({
             type="button"
             onClick={() => onChange(o.value)}
             className={cn(
-              'w-full text-left rounded-lg border p-4 transition-all',
+              'w-full text-left rounded-none border p-4 transition-all',
               'hover:border-primary/60 hover:bg-primary/5',
               'min-h-[44px]',
               value === o.value

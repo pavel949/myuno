@@ -25,7 +25,7 @@ export const WelcomeHero = memo(function WelcomeHero() {
   const dateStr = now.toLocaleDateString(isRu ? 'ru-RU' : 'en-US', { day: 'numeric', month: 'short' });
 
   return (
-    <div className="relative rounded-[var(--radius-lg)] overflow-hidden hero-block" style={{ boxShadow: 'var(--shadow-card)' }}>
+    <div className="relative rounded-none overflow-hidden hero-block" style={{ boxShadow: 'var(--shadow-card)' }}>
       <div className="absolute inset-0 hero-bg" />
       <div className="absolute inset-0 hero-dots" />
 
@@ -73,7 +73,7 @@ export const WelcomeHero = memo(function WelcomeHero() {
         </div>
 
         {/* Search */}
-        <div className="flex items-center gap-2 rounded-[var(--radius-md)] px-4 py-3"
+        <div className="flex items-center gap-2 rounded-none px-4 py-3"
           style={{
             background: 'hsl(var(--card))',
             border: '1px solid hsl(var(--border))',
@@ -90,7 +90,7 @@ export const WelcomeHero = memo(function WelcomeHero() {
           <button
             onClick={handleSearch}
             aria-label={isRu ? 'Искать' : 'Search'}
-            className="flex items-center justify-center w-8 h-8 rounded-[var(--radius-sm)] bg-primary text-primary-foreground shrink-0 hover:bg-primary-hover active:scale-95 transition-all"
+            className="flex items-center justify-center w-8 h-8 rounded-none bg-primary text-primary-foreground shrink-0 hover:bg-primary-hover active:scale-95 transition-all"
           >
             <ArrowRight className="w-4 h-4" />
           </button>

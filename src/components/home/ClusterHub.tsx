@@ -113,7 +113,7 @@ export const ClusterHub: React.FC = () => {
               key={cluster.id}
               variants={itemVariants}
               onClick={() => navigate(cluster.path)}
-              className="group relative overflow-hidden text-left rounded-[var(--radius-lg)] p-4 md:p-5 min-h-[140px] transition-all duration-200 active:scale-[0.97]"
+              className="group relative overflow-hidden text-left rounded-none p-4 md:p-5 min-h-[140px] transition-all duration-200 active:scale-[0.97]"
               style={{
                 background: 'hsl(var(--card))',
                 border: '1px solid hsl(0 0% 100% / 0.07)',

@@ -86,7 +86,7 @@ export function CrossPipelineBanner({ sourceTable, sourceId, className }: Props)
                 key={p}
                 to={meta.href(otherId)}
                 className={cn(
-                  'inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium transition-colors hover:opacity-80',
+                  'inline-flex items-center gap-1 rounded-none border px-2 py-1 text-xs font-medium transition-colors hover:opacity-80',
                   meta.tone
                 )}
               >

@@ -145,13 +145,13 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
         onClick={(e) => handleClick(action, e)}
         onMouseEnter={() => handlePrefetch(action.path)}
         className={cn(
-          'relative flex flex-col items-center gap-2 p-2 rounded-[var(--radius-md)]',
+          'relative flex flex-col items-center gap-2 p-2 rounded-none',
           'transition-all group active:scale-[0.95] lg:px-5 lg:py-3',
           isLocked && 'opacity-50',
         )}
       >
         <div
-          className="relative w-16 h-16 rounded-[var(--radius-md)] flex items-center justify-center transition-transform duration-200 group-hover:scale-105 group-active:scale-95"
+          className="relative w-16 h-16 rounded-none flex items-center justify-center transition-transform duration-200 group-hover:scale-105 group-active:scale-95"
           style={{ background: `${color}1A`, border: `1px solid ${color}20` }}
         >
           <Icon className="!w-7 !h-7 drop-shadow-sm" style={{ width: 28, height: 28, color }} strokeWidth={2} />
@@ -186,7 +186,7 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
         aria-disabled={isLocked || undefined}
         className={cn(
           animClass,
-          'relative flex items-center gap-3 p-3 rounded-[var(--radius-md)] min-h-[64px] text-left bg-card border border-border shadow-[var(--shadow-card)]',
+          'relative flex items-center gap-3 p-3 rounded-none min-h-[64px] text-left bg-card border border-border shadow-[var(--shadow-card)]',
           'transition-all duration-150 active:scale-[0.97]',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
           isLocked && 'opacity-50',

@@ -59,7 +59,7 @@ export function TrustAsAService() {
               <button
                 type="button"
                 onClick={() => navigate(href)}
-                className="w-full h-full text-left rounded-[14px] border border-border bg-card hover:border-border-strong transition-colors px-3 py-2.5 flex flex-col gap-1.5 active:scale-[0.99]"
+                className="w-full h-full text-left rounded-none border border-border bg-card hover:border-border-strong transition-colors px-3 py-2.5 flex flex-col gap-1.5 active:scale-[0.99]"
               >
                 <Icon className="w-4 h-4 text-foreground" />
                 <span className="text-[12.5px] font-semibold text-foreground leading-snug">

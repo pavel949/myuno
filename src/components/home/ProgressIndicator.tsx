@@ -20,7 +20,7 @@ export function ProgressIndicator({ usedCount = 3, totalCount = 40, className }:
 
   return (
     <div
-      className={`rounded-[var(--radius-md)] p-4 ${className || ''}`}
+      className={`rounded-none p-4 ${className || ''}`}
       style={{
         background: 'hsl(var(--card))',
         border: '1px solid hsl(0 0% 100% / 0.07)',

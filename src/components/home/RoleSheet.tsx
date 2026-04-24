@@ -38,7 +38,7 @@ export function RoleSheet({ open, personas, onClose, onToggle, onReorder }: Role
 
   return (
     <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
-      <SheetContent side="bottom" className="h-[85vh] rounded-t-[28px] p-0 overflow-auto">
+      <SheetContent side="bottom" className="h-[85vh] rounded-none p-0 overflow-auto">
         <div className="p-5 pb-8">
           {/* Drag handle */}
           <div className="w-9 h-1 rounded-full bg-border/60 mx-auto mb-5" />
@@ -65,7 +65,7 @@ export function RoleSheet({ open, personas, onClose, onToggle, onReorder }: Role
                   return (
                     <div
                       key={p}
-                      className="flex items-center gap-2.5 p-3 rounded-[12px] border"
+                      className="flex items-center gap-2.5 p-3 rounded-none border"
                       style={i === 0
                         ? { borderColor: `${meta.color}55`, background: `${meta.color}0d` }
                         : { borderColor: 'var(--border)' }}
@@ -128,7 +128,7 @@ export function RoleSheet({ open, personas, onClose, onToggle, onReorder }: Role
                     <button
                       key={p}
                       onClick={() => onToggle(p)}
-                      className="flex items-center gap-3 p-3 rounded-[12px] border border-border text-left hover:border-border/80 transition-colors"
+                      className="flex items-center gap-3 p-3 rounded-none border border-border text-left hover:border-border/80 transition-colors"
                     >
                       <div
                         className="w-[22px] h-[22px] rounded-full flex items-center justify-center font-display text-[10px] font-bold text-background flex-shrink-0"
@@ -152,7 +152,7 @@ export function RoleSheet({ open, personas, onClose, onToggle, onReorder }: Role
 
           <button
             onClick={onClose}
-            className="mt-5 w-full py-3.5 rounded-[14px] bg-foreground text-background text-[14px] font-semibold"
+            className="mt-5 w-full py-3.5 rounded-none bg-foreground text-background text-[14px] font-semibold"
           >
             {isRu ? 'Готово' : 'Done'}
           </button>

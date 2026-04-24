@@ -75,7 +75,7 @@ export default function ClearViewApplyPage() {
       </header>
 
       <section className="px-4 py-5">
-        <div className="rounded-[14px] border border-border bg-card p-4 space-y-3">
+        <div className="rounded-none border border-border bg-card p-4 space-y-3">
           <div className="flex items-start gap-2.5">
             <ShieldCheck className="w-5 h-5 text-foreground mt-0.5 shrink-0" />
             <div>
@@ -91,7 +91,7 @@ export default function ClearViewApplyPage() {
           </div>
 
           {projectLabel && (
-            <div className="rounded-[10px] bg-muted/40 border border-border px-3 py-2 text-[13px] text-foreground">
+            <div className="rounded-none bg-muted/40 border border-border px-3 py-2 text-[13px] text-foreground">
               <span className="text-muted-foreground">{isRu ? 'Проект: ' : 'Project: '}</span>
               <span className="font-semibold">{projectLabel}</span>
             </div>
@@ -131,7 +131,7 @@ export default function ClearViewApplyPage() {
       </section>
 
       <section className="px-4 pb-6">
-        <div className="rounded-[14px] border border-border bg-card p-4">
+        <div className="rounded-none border border-border bg-card p-4">
           <h3 className="font-display text-[14px] font-semibold text-foreground mb-3">
             {isRu ? 'Контактные данные' : 'Contact details'}
           </h3>

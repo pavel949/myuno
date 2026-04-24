@@ -81,7 +81,7 @@ export function CapitalDealFeeBreakdown({ sampleDealUsd = 300000, className }: P
 
   return (
     <section
-      className={`rounded-[14px] border border-border bg-card px-3.5 py-3 ${className ?? ''}`}
+      className={`rounded-none border border-border bg-card px-3.5 py-3 ${className ?? ''}`}
       aria-label={isRu ? MONETIZATION_LABELS.feeBlock.ru : MONETIZATION_LABELS.feeBlock.en}
     >
       <header className="mb-2.5 flex items-center gap-2">

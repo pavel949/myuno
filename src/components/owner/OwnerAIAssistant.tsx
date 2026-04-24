@@ -122,7 +122,7 @@ export const OwnerAIAssistant: React.FC<OwnerAIAssistantProps> = ({
                   <Bot className="h-4 w-4" />
                 </AvatarFallback>
               </Avatar>
-              <div className="bg-muted rounded-none rounded-none px-4 py-3 max-w-[85%]">
+              <div className="bg-muted rounded-none px-4 py-3 max-w-[85%]">
                 <p className="text-sm">
                   {isRu 
                     ? 'Здравствуйте! 👋 Я ваш персональный ассистент UNO. Могу помочь с управлением объектами, ответить на вопросы о системе, рынке недвижимости Пхукета или законах Таиланда. Чем могу помочь?'
@@ -162,7 +162,7 @@ export const OwnerAIAssistant: React.FC<OwnerAIAssistantProps> = ({
                     <Bot className="h-4 w-4" />
                   </AvatarFallback>
                 </Avatar>
-                <div className="bg-muted rounded-none rounded-none px-4 py-3">
+                <div className="bg-muted rounded-none px-4 py-3">
                   <div className="flex gap-1">
                     <span className="w-2 h-2 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                     <span className="w-2 h-2 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />

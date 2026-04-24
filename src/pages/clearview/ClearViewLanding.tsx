@@ -27,7 +27,7 @@ export default function ClearViewLanding() {
       </header>
 
       <section className="px-4 py-5">
-        <div className="rounded-[14px] border border-border bg-card p-4">
+        <div className="rounded-none border border-border bg-card p-4">
           <ShieldCheck className="w-5 h-5 text-foreground mb-2" />
           <h2 className="font-display text-[18px] font-semibold text-foreground tracking-[-0.01em]">
             {isRu ? 'Независимый рейтинг проекта' : 'Independent project rating'}
@@ -68,7 +68,7 @@ export default function ClearViewLanding() {
       </section>
 
       <section className="px-4 pb-5">
-        <div className="rounded-[12px] border border-border bg-muted/30 p-3">
+        <div className="rounded-none border border-border bg-muted/30 p-3">
           <p className="text-[12px] text-muted-foreground leading-snug">
             {isRu ? CLEARVIEW_LABELS.yearOneNote.ru : CLEARVIEW_LABELS.yearOneNote.en}
           </p>
@@ -78,14 +78,14 @@ export default function ClearViewLanding() {
       <section className="px-4 pb-6 space-y-2">
         <Link
           to={APP_ROUTES.CLEARVIEW_APPLY}
-          className="block w-full text-center rounded-[12px] bg-foreground text-background py-3 text-[14px] font-semibold active:scale-[0.99] transition-transform"
+          className="block w-full text-center rounded-none bg-foreground text-background py-3 text-[14px] font-semibold active:scale-[0.99] transition-transform"
         >
           {isRu ? CLEARVIEW_LABELS.applyButton.ru : CLEARVIEW_LABELS.applyButton.en}
         </Link>
         <button
           type="button"
           disabled
-          className="block w-full text-center rounded-[12px] border border-border bg-card text-muted-foreground py-3 text-[13.5px] cursor-not-allowed"
+          className="block w-full text-center rounded-none border border-border bg-card text-muted-foreground py-3 text-[13.5px] cursor-not-allowed"
           title={isRu ? 'Образец будет опубликован' : 'Sample will be published'}
         >
           <FileText className="inline w-4 h-4 mr-1.5 -mt-0.5" />
@@ -93,7 +93,7 @@ export default function ClearViewLanding() {
         </button>
         <Link
           to={APP_ROUTES.PRICING}
-          className="block w-full text-center rounded-[12px] border border-border bg-card text-foreground py-3 text-[13.5px]"
+          className="block w-full text-center rounded-none border border-border bg-card text-foreground py-3 text-[13.5px]"
         >
           {isRu ? 'Все тарифы' : 'All pricing'}
         </Link>

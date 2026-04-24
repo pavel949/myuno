@@ -53,9 +53,9 @@ export default function CapitalDealIntake() {
     >
       <div className="space-y-5 pb-12 max-w-2xl">
         {/* Hero / scope */}
-        <section className="rounded-[14px] border border-border bg-card px-3.5 py-3.5">
+        <section className="rounded-none border border-border bg-card px-3.5 py-3.5">
           <div className="flex items-start gap-3">
-            <span className="shrink-0 w-10 h-10 rounded-[10px] bg-muted text-foreground flex items-center justify-center">
+            <span className="shrink-0 w-10 h-10 rounded-none bg-muted text-foreground flex items-center justify-center">
               <Landmark className="w-5 h-5" />
             </span>
             <div className="min-w-0">
@@ -84,7 +84,7 @@ export default function CapitalDealIntake() {
               return (
                 <li
                   key={idx}
-                  className="rounded-[12px] border border-border bg-card px-3 py-2.5 flex items-start gap-3"
+                  className="rounded-none border border-border bg-card px-3 py-2.5 flex items-start gap-3"
                 >
                   <span className="shrink-0 w-7 h-7 rounded-full bg-muted text-foreground/80 flex items-center justify-center text-[11.5px] font-mono">
                     {idx + 1}
@@ -132,7 +132,7 @@ export default function CapitalDealIntake() {
           <h3 className="text-[13px] font-semibold text-foreground uppercase tracking-wide mb-2">
             {isRu ? 'Заявка на сопровождение' : 'Request deal support'}
           </h3>
-          <div className="rounded-[14px] border border-border bg-card px-3.5 py-4">
+          <div className="rounded-none border border-border bg-card px-3.5 py-4">
             <CapitalIntroForm
               defaults={{
                 request_type: 'capital_advisory',

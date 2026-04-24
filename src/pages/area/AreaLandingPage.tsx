@@ -61,7 +61,7 @@ const SeedCard = ({ surface, isRu }: SeedCardProps) => {
   return (
     <Link
       to={surface.href}
-      className="group block overflow-hidden rounded-lg border border-border bg-card transition-colors hover:border-primary/60"
+      className="group block overflow-hidden rounded-none border border-border bg-card transition-colors hover:border-primary/60"
     >
       {surface.coverImageUrl ? (
         <div className="aspect-[4/3] w-full overflow-hidden bg-muted">
@@ -262,7 +262,7 @@ const AreaLandingPage = () => {
 
         {/* Stats */}
         <section className="mb-10 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <div className="rounded-lg border border-border bg-card p-4 text-center">
+          <div className="rounded-none border border-border bg-card p-4 text-center">
             <TrendingUp className="mx-auto mb-2 h-4 w-4 text-primary" aria-hidden />
             <p className="text-lg font-semibold text-foreground">
               ฿{(area.avg_price_sqm / 1000).toFixed(0)}K
@@ -271,14 +271,14 @@ const AreaLandingPage = () => {
               {isRu ? 'Средняя цена за м²' : 'Average price / sqm'}
             </p>
           </div>
-          <div className="rounded-lg border border-border bg-card p-4 text-center">
+          <div className="rounded-none border border-border bg-card p-4 text-center">
             <TrendingUp className="mx-auto mb-2 h-4 w-4 text-primary" aria-hidden />
             <p className="text-lg font-semibold text-foreground">{area.avg_yield}%</p>
             <p className="text-[11px] text-muted-foreground">
               {isRu ? 'Средняя доходность' : 'Average yield'}
             </p>
           </div>
-          <div className="rounded-lg border border-border bg-card p-4 text-center">
+          <div className="rounded-none border border-border bg-card p-4 text-center">
             <Plane className="mx-auto mb-2 h-4 w-4 text-muted-foreground" aria-hidden />
             <p className="text-lg font-semibold text-foreground">
               {area.distance_airport_km} {isRu ? 'км' : 'km'}
@@ -287,7 +287,7 @@ const AreaLandingPage = () => {
               {isRu ? 'До аэропорта' : 'To the airport'}
             </p>
           </div>
-          <div className="rounded-lg border border-border bg-card p-4 text-center">
+          <div className="rounded-none border border-border bg-card p-4 text-center">
             <Waves className="mx-auto mb-2 h-4 w-4 text-muted-foreground" aria-hidden />
             <p className="text-lg font-semibold text-foreground">{beachLabel}</p>
             <p className="text-[11px] text-muted-foreground">
@@ -305,7 +305,7 @@ const AreaLandingPage = () => {
             {highlights.map((h) => (
               <li
                 key={h}
-                className="flex items-center gap-2 rounded-md border border-border bg-card p-3 text-sm text-foreground"
+                className="flex items-center gap-2 rounded-none border border-border bg-card p-3 text-sm text-foreground"
               >
                 <MapPin className="h-4 w-4 shrink-0 text-primary" aria-hidden />
                 <span>{h}</span>
@@ -316,7 +316,7 @@ const AreaLandingPage = () => {
 
         {/* Pros & cons */}
         <section className="mb-10 grid gap-4 md:grid-cols-2">
-          <div className="rounded-lg border border-border bg-card p-5">
+          <div className="rounded-none border border-border bg-card p-5">
             <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
               {isRu ? 'Преимущества' : 'Pros'}
             </h3>
@@ -329,7 +329,7 @@ const AreaLandingPage = () => {
               ))}
             </ul>
           </div>
-          <div className="rounded-lg border border-border bg-card p-5">
+          <div className="rounded-none border border-border bg-card p-5">
             <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
               {isRu ? 'Ограничения' : 'Trade-offs'}
             </h3>
@@ -367,7 +367,7 @@ const AreaLandingPage = () => {
             </div>
           </div>
           {rentalSurfaces.length === 0 ? (
-            <p className="rounded-md border border-dashed border-border bg-muted/30 p-6 text-center text-sm text-muted-foreground">
+            <p className="rounded-none border border-dashed border-border bg-muted/30 p-6 text-center text-sm text-muted-foreground">
               {isRu
                 ? 'Пока нет активных объектов. Откройте поиск или загляните позже.'
                 : 'No active listings yet. Try the search or check back later.'}
@@ -403,7 +403,7 @@ const AreaLandingPage = () => {
             </div>
           </div>
           {offplanSurfaces.length === 0 ? (
-            <p className="rounded-md border border-dashed border-border bg-muted/30 p-6 text-center text-sm text-muted-foreground">
+            <p className="rounded-none border border-dashed border-border bg-muted/30 p-6 text-center text-sm text-muted-foreground">
               {isRu
                 ? 'Каталог новостроек района обновляется. Напишите нам — подберём вручную.'
                 : 'The off-plan catalogue for this area is being updated. Reach out and we will source manually.'}
@@ -421,7 +421,7 @@ const AreaLandingPage = () => {
 
         {/* Cross-links: personas + clusters */}
         {(personaLinks.length > 0 || clusterLinks.length > 0) && (
-          <section className="mb-10 rounded-lg border border-border bg-card p-5">
+          <section className="mb-10 rounded-none border border-border bg-card p-5">
             {personaLinks.length > 0 && (
               <div className="mb-5">
                 <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
@@ -474,9 +474,9 @@ const AreaLandingPage = () => {
                 <li key={na.slug}>
                   <Link
                     to={`/area/${na.slug}`}
-                    className="flex items-center gap-3 rounded-lg border border-border bg-card p-4 transition-colors hover:border-primary/60"
+                    className="flex items-center gap-3 rounded-none border border-border bg-card p-4 transition-colors hover:border-primary/60"
                   >
-                    <span className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-none bg-primary/10">
                       <MapPin className="h-5 w-5 text-primary" aria-hidden />
                     </span>
                     <span className="min-w-0">

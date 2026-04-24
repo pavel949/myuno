@@ -188,7 +188,7 @@ export function StepByStepNav({ title, steps, className }: StepByStepNavProps) {
                   )}
 
                   {isCurrent && step.children && (
-                    <div className="mt-3 rounded-[12px] border border-border bg-card/50 p-3">
+                    <div className="mt-3 rounded-none border border-border bg-card/50 p-3">
                       {step.children}
                     </div>
                   )}
