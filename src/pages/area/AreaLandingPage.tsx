@@ -17,6 +17,7 @@ import {
   AlertTriangle,
   Building2,
   Check,
+  Map as MapIcon,
   MapPin,
   Plane,
   Star,
