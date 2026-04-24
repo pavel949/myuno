@@ -18,6 +18,7 @@ import {
   Briefcase,
   Trees,
   Hotel,
+  Zap,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -47,9 +48,16 @@ const TABS: TabConfig[] = [
     path: `${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=short`,
   },
   {
-    id: 'rent_long',
+    id: 'rent_medium',
     labelEn: 'Monthly',
     labelRu: 'На месяц',
+    icon: CalendarRange,
+    path: `${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=medium`,
+  },
+  {
+    id: 'rent_long',
+    labelEn: 'Yearly',
+    labelRu: 'Долгосрочно',
     icon: CalendarRange,
     path: `${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=long`,
   },
@@ -73,6 +81,14 @@ const TABS: TabConfig[] = [
     labelRu: 'Вторичка',
     icon: ArrowRightLeft,
     path: APP_ROUTES.RESALE,
+  },
+  {
+    id: 'quick_sale',
+    labelEn: 'Quick Sale',
+    labelRu: 'Срочно',
+    icon: Zap,
+    path: `${APP_ROUTES.PROPERTY_BROWSE}?mode=buy&intent=quick_sale`,
+    personaGated: ['investor', 'business'],
   },
   {
     id: 'commercial',

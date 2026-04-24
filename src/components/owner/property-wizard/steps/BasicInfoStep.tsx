@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Home, Bed, Bath, SquareStack, FileSignature, MessageCircle, Shield, Upload, UserPlus, X, Building2, Video, ChevronDown, Minus, Plus, Building, Briefcase, Landmark, Trees, TrendingUp, Ruler, ShieldCheck, Zap } from 'lucide-react';
 import { UnifiedMediaUploader } from '@/components/upload/UnifiedMediaUploader';
+import { PropertyVideoUploader } from '@/components/property/PropertyVideoUploader';
 import { TranslatableInput } from '@/components/forms/TranslatableInput';
 import { TranslatableTextarea } from '@/components/forms/TranslatableTextarea';
 import { LocationProjectSearch } from '@/components/property/LocationProjectSearch';
@@ -825,25 +826,14 @@ function BasicInfoStepInner({
 
       {/* Management Type & Terms — hidden, management_type defaults to 'full' in usePropertyWizard */}
 
-      {/* YouTube Video */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Video className="h-4 w-4" />
-            {isRu ? 'Видео объекта' : 'Property Video'}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Label className="text-sm text-muted-foreground mb-1.5 block">
-            {isRu ? 'Ссылка на YouTube' : 'YouTube URL'}
-          </Label>
-          <Input
-            value={formData.video_url || ''}
-            onChange={e => updateFormData({ video_url: e.target.value })}
-            placeholder="https://www.youtube.com/watch?v=..."
-          />
-        </CardContent>
-      </Card>
+      {/* Video tour: file upload to property-videos bucket OR YouTube/Vimeo URL */}
+      <PropertyVideoUploader
+        value={formData.video_url || null}
+        onChange={(url) => updateFormData({ video_url: url || '' })}
+        propertyId={(formData as any).id || null}
+        ownerId={(formData as any).owner_id || null}
+        isRu={isRu}
+      />
     </div>
   );
 }

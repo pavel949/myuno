@@ -287,8 +287,16 @@ export const AnimatedRoutes: React.FC = () => {
             element={<Navigate to={`${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=short`} replace />}
           />
           <Route
+            path="rent/medium-term"
+            element={<Navigate to={`${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=medium`} replace />}
+          />
+          <Route
             path="rent/long-term"
             element={<Navigate to={`${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=long`} replace />}
+          />
+          <Route
+            path="quick-sale"
+            element={<Navigate to={`${APP_ROUTES.PROPERTY_BROWSE}?mode=buy&intent=quick_sale`} replace />}
           />
           <Route path="search" element={<LazyPage><Pages.PropertySearchPage /></LazyPage>} />
           <Route path="consultation" element={<LazyPage><Pages.PropertyConsultation /></LazyPage>} />

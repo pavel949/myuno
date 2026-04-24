@@ -91,8 +91,12 @@ export interface CatalogFilterSourceOptions {
   /** From AirbnbSearchBar / URL */
   minGuestsFromSearch?: number;
   instantBookingFromSearch?: boolean;
-  /** Nightly STR vs monthly/yearly rent */
-  rentTenancy?: 'short' | 'long';
+  /** Nightly STR vs medium (1m+) vs long-term rent */
+  rentTenancy?: 'short' | 'medium' | 'long';
+  /** Sale intent: standard | assignment | quick_sale */
+  saleIntent?: 'standard' | 'assignment' | 'quick_sale';
+  /** Show only quick / distressed sales */
+  isQuickSale?: boolean;
 }
 
 /**
@@ -198,6 +202,10 @@ export function filterValuesToPropertyFilters(
     ...(effectiveListing === 'rent' && options.rentTenancy
       ? { rentTenancy: options.rentTenancy }
       : {}),
+    ...(effectiveListing === 'sale' && options.saleIntent
+      ? { saleIntent: options.saleIntent }
+      : {}),
+    ...(options.isQuickSale ? { isQuickSale: true } : {}),
     ...(districts.length === 1 ? { district: districts[0] } : {}),
     ...(districts.length > 1 ? { districts } : {}),
     ...(amenities.length ? { amenities } : {}),

@@ -106,7 +106,16 @@ export default function PropertyIndex() {
     searchParamsUrl.get('mode') === 'buy' ? 'buy' : 'rent'
   );
 
-  const rentTenancy = searchParamsUrl.get('tenancy') === 'long' ? 'long' : 'short';
+  const tenancyParam = searchParamsUrl.get('tenancy');
+  const rentTenancy: 'short' | 'medium' | 'long' =
+    tenancyParam === 'long' ? 'long' : tenancyParam === 'medium' ? 'medium' : 'short';
+
+  const intentParam = searchParamsUrl.get('intent');
+  const saleIntent: 'standard' | 'assignment' | 'quick_sale' | undefined =
+    intentParam === 'assignment' || intentParam === 'quick_sale' || intentParam === 'standard'
+      ? intentParam
+      : undefined;
+  const isQuickSale = searchParamsUrl.get('quick') === '1' || saleIntent === 'quick_sale';
 
   useEffect(() => {
     const m = searchParamsUrl.get('mode');
@@ -162,8 +171,10 @@ export default function PropertyIndex() {
       filterValuesToPropertyFilters(filterValues, {
         listingType: propertyMode === 'buy' ? 'sale' : 'rent',
         rentTenancy: propertyMode === 'rent' ? rentTenancy : undefined,
+        saleIntent: propertyMode === 'buy' ? saleIntent : undefined,
+        isQuickSale: propertyMode === 'buy' ? isQuickSale : undefined,
       }),
-    [filterValues, propertyMode, rentTenancy]
+    [filterValues, propertyMode, rentTenancy, saleIntent, isQuickSale]
   );
 
   const { data: infiniteData, isLoading } = usePropertiesInfinite(serverFilters);

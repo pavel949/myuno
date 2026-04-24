@@ -197,8 +197,12 @@ export interface PropertyFilters {
   ownershipForm?: string;
   ownershipForms?: string[];
   managementCompanyId?: string;
-  /** Rent listings: nightly/vacation vs monthly/yearly (price_period) */
-  rentTenancy?: 'short' | 'long';
+  /** Rent listings: nightly vs medium (1+ month) vs long-term contract */
+  rentTenancy?: 'short' | 'medium' | 'long';
+  /** Sale intent: standard | assignment | quick_sale (filters by sale_intent enum) */
+  saleIntent?: 'standard' | 'assignment' | 'quick_sale';
+  /** Show only quick / distressed sales (is_quick_sale = true) */
+  isQuickSale?: boolean;
 }
 
 const PAGE_SIZE = 20;
@@ -239,9 +243,19 @@ function applyPropertyFiltersToQuery(query: any, filters: PropertyFilters) {
   }
 
   if (filters.listingType === 'rent' && filters.rentTenancy === 'short') {
-    query = query.or('price_period.eq.night,price_period.eq.week,price_period.is.null');
+    // Prefer tenancy_modes (new track model) but keep legacy price_period match for back-compat.
+    query = query.or('tenancy_modes.cs.{short},price_period.eq.night,price_period.eq.week,price_period.is.null');
+  } else if (filters.listingType === 'rent' && filters.rentTenancy === 'medium') {
+    query = query.or('tenancy_modes.cs.{medium},price_period.eq.month');
   } else if (filters.listingType === 'rent' && filters.rentTenancy === 'long') {
-    query = query.in('price_period', ['month', 'year']);
+    query = query.or('tenancy_modes.cs.{long},price_period.eq.year');
+  }
+
+  if (filters.listingType === 'sale' && filters.saleIntent) {
+    query = query.eq('sale_intent', filters.saleIntent);
+  }
+  if (filters.isQuickSale) {
+    query = query.eq('is_quick_sale', true);
   }
 
   const dists = filters.districts?.length ? filters.districts : filters.district ? [filters.district] : [];

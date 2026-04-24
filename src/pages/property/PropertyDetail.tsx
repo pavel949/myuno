@@ -50,6 +50,9 @@ import {
 import { GuestFavoriteBadge } from '@/components/property/GuestFavoriteBadge';
 import { usePropertyAvailabilityManagement } from '@/hooks/usePropertyAvailabilityManagement';
 import { normalizeViewTypes } from '@/lib/propertyFormNormalizers';
+import { TrustStrip } from '@/components/property/TrustStrip';
+import { InstallmentTimeline } from '@/components/property/InstallmentTimeline';
+import { getInstallmentPreset, type InstallmentMilestone } from '@/lib/real-estate/installmentPresets';
 
 const viewTypeLabels: Record<string, { en: string; ru: string }> = {
   sea: { en: 'Sea View', ru: 'Вид на море' },
@@ -321,6 +324,30 @@ export default function PropertyDetail() {
                   </div>
                 </>
               )}
+
+              {/* Trust signals: title deed, escrow, ClearView, owner verified */}
+              <TrustStrip
+                titleDeedType={(property as any).title_deed_type}
+                escrowOffered={(property as any).escrow_offered}
+                ownerVerified={property.is_verified}
+                isRu={isRu}
+              />
+
+              {/* Payment schedule (sale / assignment) */}
+              {(() => {
+                const plan = (property as any).installment_plan as { milestones?: InstallmentMilestone[]; preset_id?: string } | null;
+                if (!plan || !Array.isArray(plan.milestones) || plan.milestones.length === 0) return null;
+                const preset = plan.preset_id ? getInstallmentPreset(plan.preset_id) : null;
+                const presetLabel = preset ? (isRu ? preset.labelRu : preset.labelEn) : undefined;
+                return (
+                  <InstallmentTimeline
+                    milestones={plan.milestones}
+                    totalPrice={salePrice ?? null}
+                    presetLabel={presetLabel}
+                    isRu={isRu}
+                  />
+                );
+              })()}
 
               <Separator />
 
