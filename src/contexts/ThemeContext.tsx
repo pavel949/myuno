@@ -87,6 +87,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     const hydrateFromProfile = async (userId: string) => {
       if (userThemeAppliedFor.current === userId) return;
+      // Set the guard IMMEDIATELY (before the await) so concurrent auth events
+      // (TOKEN_REFRESHED, INITIAL_SESSION firing twice, etc.) do not trigger a
+      // second hydrate that races with the first and flips the theme back.
+      userThemeAppliedFor.current = userId;
       try {
         const { data, error } = await supabase
           .from('profiles')
@@ -95,28 +99,32 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
           .maybeSingle();
         if (cancelled || error || !data) return;
 
-        userThemeAppliedFor.current = userId;
         const remote = data.preferred_theme;
 
         if (isTheme(remote)) {
-          // Profile has a saved choice — adopt it.
+          // Profile has a saved choice — adopt it only if it actually differs
+          // from the current local theme. Avoids a no-op re-render that would
+          // re-trigger the apply effect.
           setThemeState((current) => (current === remote ? current : remote));
           try {
-            localStorage.setItem(STORAGE_KEY, remote);
+            const localStored = localStorage.getItem(STORAGE_KEY);
+            if (localStored !== remote) {
+              localStorage.setItem(STORAGE_KEY, remote);
+            }
           } catch {
             // Ignore storage write errors.
           }
-        } else {
-          // Profile has no saved theme yet — backfill it with the local choice
-          // so the first device the user logs in from "wins" the initial value.
-          const local = getStoredTheme();
-          await supabase
-            .from('profiles')
-            .update({ preferred_theme: local })
-            .eq('id', userId);
         }
+        // NOTE: We deliberately do NOT backfill profiles.preferred_theme from
+        // the local value when remote is null. Doing so used to overwrite a
+        // choice the user had made on another device the moment they logged
+        // in here, which felt like the theme flipping on its own. The profile
+        // gets populated the first time the user explicitly toggles the theme
+        // (see setTheme below).
       } catch {
         // Network or schema hiccup — fall back to local theme silently.
+        // Reset the guard so a later auth event can retry.
+        if (!cancelled) userThemeAppliedFor.current = null;
       }
     };
 
