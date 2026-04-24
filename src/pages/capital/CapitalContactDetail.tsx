@@ -17,6 +17,7 @@ import {
   PIPELINE_STAGE_LABELS, PIPELINE_STAGE_COLORS,
   type Warmth, type BuyerType, type PreferredChannel, type PipelineStage,
 } from '@/types/capital';
+import { CrossPipelineBanner } from '@/components/crm/CrossPipelineBanner';
 
 export default function CapitalContactDetail() {
   const { id } = useParams<{ id: string }>();

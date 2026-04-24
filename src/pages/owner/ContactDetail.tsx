@@ -46,6 +46,7 @@ import { ContactRelationshipsCard } from '@/components/owner/contacts/ContactRel
 import { KeyDatesCard } from '@/components/owner/contacts/KeyDatesCard';
 import { RemindersList } from '@/components/owner/contacts/RemindersList';
 import { CRM_ROLE_LABELS, isCrmRole, HNW_TIER_LABELS, type HnwTier, CONTACT_SEGMENT_LABELS, type ContactSegment, KYC_STATUS_LABELS, type KycStatus } from '@/types/contact';
+import { CrossPipelineBanner } from '@/components/crm/CrossPipelineBanner';
 import { isMaritalStatus, MARITAL_STATUS_LABELS } from '@/lib/crmContactFormPresets';
 
 import { toast } from 'sonner';
