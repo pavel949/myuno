@@ -32,6 +32,12 @@ const NewbuildsContextOutlet = () => (
   </NbCompareProvider>
 );
 
+// Alias: /life-flow/:code → /life/:code (preserves deep-link compatibility)
+const LifeFlowAlias = () => {
+  const { code } = useParams();
+  return <Navigate to={`/life/${code ?? ''}`} replace />;
+};
+
 // Property Hub index: legacy `/property?…` query bookmarks → /property/browse?…
 const PropertyHubIndex = () => {
   const search = typeof window !== 'undefined' ? window.location.search : '';
@@ -132,15 +138,28 @@ const GuestRouteLayout = () => (
   </AuthGuard>
 );
 
-// Prefetch popular routes on idle
+// Prefetch popular routes on idle.
+// Wrapped in .catch() so a transient HMR / chunk-load error in one module
+// can't poison the SPA navigation. Failures are silent — these are
+// best-effort warm-ups, not critical loads.
+const safeImport = (loader: () => Promise<unknown>) => {
+  try {
+    loader().catch(() => { /* swallow — non-critical prefetch */ });
+  } catch { /* swallow sync throws too */ }
+};
+
 const prefetchRoutes = () => {
+  if (typeof window === 'undefined') return;
+  const run = () => {
+    safeImport(() => import('@/pages/property/PropertyIndex'));
+    safeImport(() => import('@/pages/restaurants/RestaurantsIndex'));
+    safeImport(() => import('@/pages/experiences/ExperiencesIndex'));
+    safeImport(() => import('@/pages/beauty/BeautySpaIndex'));
+  };
   if ('requestIdleCallback' in window) {
-    requestIdleCallback(() => {
-      import('@/pages/property/PropertyIndex');
-      import('@/pages/restaurants/RestaurantsIndex');
-      import('@/pages/experiences/ExperiencesIndex');
-      import('@/pages/beauty/BeautySpaIndex');
-    });
+    (window as Window & { requestIdleCallback: (cb: () => void) => void }).requestIdleCallback(run);
+  } else {
+    setTimeout(run, 1500);
   }
 };
 
@@ -160,7 +179,8 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.PRICING} element={<LazyPage><Pages.PricingPage /></LazyPage>} />
         <Route path="/welcome-landing" element={<LazyPage><WelcomeLanding /></LazyPage>} />
         <Route path="/start" element={<LazyPage><Pages.StartOnboarding /></LazyPage>} />
-        <Route path="/start/v2" element={<LazyPage><Pages.StartOnboardingV2 /></LazyPage>} />
+        {/* StartOnboardingV2 deprecated → consolidated into /start */}
+        <Route path="/start/v2" element={<Navigate to="/start" replace />} />
         <Route path={APP_ROUTES.AUTH} element={<PageTransition><Auth /></PageTransition>} />
         {/* OAuth providers may return to callback-style paths; render Auth instead of 404 */}
         <Route path="/auth/callback" element={<PageTransition><Auth /></PageTransition>} />
@@ -187,7 +207,8 @@ export const AnimatedRoutes: React.FC = () => {
         {/* ── PEYLAA premium sales funnel ── */}
         <Route path={APP_ROUTES.PEYLAA} element={<LazyPage><Pages.PeylaaLanding /></LazyPage>} />
         <Route path="/peylaa/unit/:unitNo" element={<Navigate to={APP_ROUTES.PEYLAA} replace />} />
-        <Route path={APP_ROUTES.ACCOUNT} element={<LazyPage><Pages.UserAccountDashboard /></LazyPage>} />
+        {/* /account deprecated → /me canonical hub */}
+        <Route path={APP_ROUTES.ACCOUNT} element={<Navigate to={APP_ROUTES.ME} replace />} />
         {/* ── /me Universal Hub (Phase A5) ── */}
         <Route path={APP_ROUTES.ME_FEED} element={<LazyPage><Pages.MeFeed /></LazyPage>} />
         <Route path={APP_ROUTES.ME_SERVICES} element={<LazyPage><Pages.MeServices /></LazyPage>} />
@@ -195,6 +216,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.ME_PAYMENTS} element={<LazyPage><Pages.MePayments /></LazyPage>} />
         <Route path={APP_ROUTES.ME_REQUESTS} element={<LazyPage><Pages.MeRequests /></LazyPage>} />
         <Route path={APP_ROUTES.ME_PROFILE} element={<LazyPage><Pages.MeProfile /></LazyPage>} />
+        <Route path="/me/bookings" element={<LazyPage><Pages.MeBookings /></LazyPage>} />
         <Route path={APP_ROUTES.FAVORITES} element={<LazyPage><Pages.Favorites /></LazyPage>} />
         <Route path={APP_ROUTES.SEARCH} element={<LazyPage><Pages.Search /></LazyPage>} />
         <Route path={APP_ROUTES.NOTIFICATIONS} element={<LazyPage><Pages.Notifications /></LazyPage>} />
@@ -228,7 +250,8 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/b/:slug" element={<LazyPage><Pages.StorefrontPage /></LazyPage>} />
         
         {/* ── LifeOS ── */}
-        <Route path="/life-flow/:code" element={<LazyPage><Pages.LifeFlowPage /></LazyPage>} />
+        {/* /life-flow/:code deprecated → /life/:code canonical */}
+        <Route path="/life-flow/:code" element={<LifeFlowAlias />} />
         <Route path="/life/:code" element={<LazyPage><Pages.LifeFlowPage /></LazyPage>} />
         <Route path="/trip-planner" element={<LazyPage><Pages.TripPlannerPage /></LazyPage>} />
         <Route path="/list-with-us" element={<LazyPage><Pages.ListWithUsPage /></LazyPage>} />
@@ -472,7 +495,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.INVEST_BUSINESS} element={<LazyPage><Pages.InvestmentBusinessZone /></LazyPage>} />
         <Route path={APP_ROUTES.INVEST_KNOWLEDGE} element={<LazyPage><Pages.InvestmentKnowledgeZone /></LazyPage>} />
         <Route path={APP_ROUTES.INVEST_SERVICES} element={<LazyPage><Pages.InvestmentServicesZone /></LazyPage>} />
-        <Route path={APP_ROUTES.INVEST_QUIZ} element={<Navigate to={APP_ROUTES.INVEST} replace />} />
+        <Route path={APP_ROUTES.INVEST_QUIZ} element={<LazyPage><Pages.InvestorQuiz /></LazyPage>} />
         <Route path={APP_ROUTES.INVEST_DASHBOARD} element={<LazyPage><Pages.InvestorDashboard /></LazyPage>} />
         <Route path={APP_ROUTES.INVEST_RAISE} element={<LazyPage><Pages.RaiseFunding /></LazyPage>} />
         {/* Admin-only ops console (Market/Deals/Network/Execution shell) */}

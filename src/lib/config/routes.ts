@@ -33,6 +33,7 @@ export const APP_ROUTES = {
   ME_PAYMENTS: '/me/payments',
   ME_REQUESTS: '/me/requests',
   ME_PROFILE: '/me/profile',
+  ME_BOOKINGS: '/me/bookings',
   BOOKINGS: '/bookings',
   BOOKING_DETAIL: (id: string) => `/bookings/${id}`,
   FAVORITES: '/favorites',
