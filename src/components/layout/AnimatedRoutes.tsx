@@ -173,7 +173,8 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.PRICING} element={<LazyPage><Pages.PricingPage /></LazyPage>} />
         <Route path="/welcome-landing" element={<LazyPage><WelcomeLanding /></LazyPage>} />
         <Route path="/start" element={<LazyPage><Pages.StartOnboarding /></LazyPage>} />
-        <Route path="/start/v2" element={<LazyPage><Pages.StartOnboardingV2 /></LazyPage>} />
+        {/* StartOnboardingV2 deprecated → consolidated into /start */}
+        <Route path="/start/v2" element={<Navigate to="/start" replace />} />
         <Route path={APP_ROUTES.AUTH} element={<PageTransition><Auth /></PageTransition>} />
         {/* OAuth providers may return to callback-style paths; render Auth instead of 404 */}
         <Route path="/auth/callback" element={<PageTransition><Auth /></PageTransition>} />
@@ -200,7 +201,8 @@ export const AnimatedRoutes: React.FC = () => {
         {/* ── PEYLAA premium sales funnel ── */}
         <Route path={APP_ROUTES.PEYLAA} element={<LazyPage><Pages.PeylaaLanding /></LazyPage>} />
         <Route path="/peylaa/unit/:unitNo" element={<Navigate to={APP_ROUTES.PEYLAA} replace />} />
-        <Route path={APP_ROUTES.ACCOUNT} element={<LazyPage><Pages.UserAccountDashboard /></LazyPage>} />
+        {/* /account deprecated → /me canonical hub */}
+        <Route path={APP_ROUTES.ACCOUNT} element={<Navigate to={APP_ROUTES.ME} replace />} />
         {/* ── /me Universal Hub (Phase A5) ── */}
         <Route path={APP_ROUTES.ME_FEED} element={<LazyPage><Pages.MeFeed /></LazyPage>} />
         <Route path={APP_ROUTES.ME_SERVICES} element={<LazyPage><Pages.MeServices /></LazyPage>} />
@@ -241,7 +243,8 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/b/:slug" element={<LazyPage><Pages.StorefrontPage /></LazyPage>} />
         
         {/* ── LifeOS ── */}
-        <Route path="/life-flow/:code" element={<LazyPage><Pages.LifeFlowPage /></LazyPage>} />
+        {/* /life-flow/:code deprecated → /life/:code canonical */}
+        <Route path="/life-flow/:code" element={<LifeFlowAlias />} />
         <Route path="/life/:code" element={<LazyPage><Pages.LifeFlowPage /></LazyPage>} />
         <Route path="/trip-planner" element={<LazyPage><Pages.TripPlannerPage /></LazyPage>} />
         <Route path="/list-with-us" element={<LazyPage><Pages.ListWithUsPage /></LazyPage>} />
