@@ -33,6 +33,12 @@ export interface ContextualAction {
   transactional?: boolean;
   /** Optional IPP scoring event to fire on click. */
   trackEvent?: IPPLeadEventType;
+  /**
+   * When true, the action is still resolving (e.g. waiting on a match-count
+   * query). Non-transactional actions render a skeleton hint; transactional
+   * actions are hidden until ready to avoid surfacing dead-end CTAs.
+   */
+  loading?: boolean;
 }
 
 interface Props {
@@ -57,7 +63,13 @@ export function ContextualCTA({
 
   // Guard: never render empty CTA blocks. Pages that pass an empty list
   // simply won't show this section.
-  const visible = actions.filter(a => !!a.to && !!a.label);
+  // Hide transactional CTAs while their data is loading — better to show
+  // nothing than a CTA that may resolve to "0 matches" and get filtered out
+  // a tick later (causing layout shift). Non-transactional CTAs stay visible
+  // and render a skeleton in their hint area.
+  const visible = actions.filter(
+    a => !!a.to && !!a.label && !(a.transactional && a.loading),
+  );
   if (visible.length === 0) return null;
 
   const handleClick = (action: ContextualAction) => {
