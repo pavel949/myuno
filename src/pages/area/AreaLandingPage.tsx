@@ -244,6 +244,19 @@ const AreaLandingPage = () => {
                 {isRu ? 'Новостройки района' : 'Off-plan in this area'}
               </Link>
             </Button>
+            <Button asChild size="lg" variant="ghost" className="gap-2">
+              <Link
+                to={rentMapHref}
+                aria-label={
+                  isRu
+                    ? `Открыть карту аренды в районе ${name}`
+                    : `Open rental map for ${name}`
+                }
+              >
+                <MapIcon className="h-4 w-4" aria-hidden />
+                {isRu ? 'Открыть на карте' : 'Open on map'}
+              </Link>
+            </Button>
           </div>
         </header>
 
