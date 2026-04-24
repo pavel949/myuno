@@ -79,6 +79,7 @@ export default function WelcomeLanding() {
           </Link>
 
           <div className="flex items-center gap-1.5">
+            <ThemeSwitcher variant="buttons" size="sm" />
             <LanguageSwitcher />
             <Link
               to="/auth"
