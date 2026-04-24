@@ -28,7 +28,9 @@ interface PhuketConditions {
   fetchedAt: number | null;
 }
 
-const CACHE_KEY = 'myuno-phuket-conditions-v2';
+// Bumped to v3 (2026-04-24) when FX source switched away from
+// exchangerate.host — old cached "—" entries should not survive the change.
+const CACHE_KEY = 'myuno-phuket-conditions-v3';
 const CACHE_TTL = 30 * 60 * 1000; // 30 min
 
 // Phuket city centre
