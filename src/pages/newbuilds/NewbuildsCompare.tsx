@@ -213,6 +213,35 @@ export default function NewbuildsCompare() {
           </table>
         </div>
 
+        {/* P8 trigger — Full ClearView for one of the compared projects.
+            IPP §12 step 5: "Get Full ClearView for winner". */}
+        <div className="nb-separator my-10" />
+        <div className="max-w-2xl mx-auto">
+          <div className="text-center mb-3">
+            <h3 className="nb-display text-xl text-foreground">Полный ClearView™ на фаворита</h3>
+            <p className="text-sm mt-1 text-muted-foreground">
+              Институциональный due diligence на выбранный проект · ฿4,900 · 15 рабочих дней
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            {items.map(item => (
+              <Link
+                key={item.id}
+                to={`${APP_ROUTES.CLEARVIEW_APPLY}?project=${item.id}`}
+                className="flex items-center justify-between gap-2 px-3 py-2.5 rounded-none border border-border bg-card hover:border-foreground/40 transition-colors"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <FileText className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <span className="text-sm text-foreground truncate">
+                    {item.name_ru || item.name_en}
+                  </span>
+                </div>
+                <span className="text-xs font-mono text-muted-foreground shrink-0">→</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+
         {/* Bulk lead form */}
         <div className="nb-separator my-10" />
         <div className="max-w-md mx-auto">
