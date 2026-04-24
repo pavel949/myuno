@@ -18,6 +18,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { useIPPLeadEvent } from '@/hooks/useIPPLeadEvent';
 import type { IPPLeadEventType } from '@/lib/leads/ippLeadEvents';
+import { shouldFireOnce, buildDedupKey } from '@/lib/leads/eventDedup';
 
 export interface ContextualAction {
   id: string;
@@ -60,6 +61,17 @@ export function ContextualCTA({
   if (visible.length === 0) return null;
 
   const handleClick = (action: ContextualAction) => {
+    // Dedup: same source → same target within the session shouldn't double-log
+    // on rapid double-clicks or back/forward returns to the same page.
+    const dedupKey = buildDedupKey('cta', sourceModule, action.id, action.to);
+    if (!shouldFireOnce(dedupKey)) {
+      // Still allow trackEvent (it has its own dedup) but skip the cross-cta insert.
+      if (action.trackEvent) {
+        track({ eventType: action.trackEvent, meta: { source_module: sourceModule, ...(trackContext ?? {}) } });
+      }
+      return;
+    }
+
     // Always log the cross-module CTA click for M10a audits.
     void (async () => {
       try {

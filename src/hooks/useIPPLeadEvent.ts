@@ -12,6 +12,7 @@ import {
   IPP_LEAD_EVENTS,
   type IPPLeadEventType,
 } from '@/lib/leads/ippLeadEvents';
+import { shouldFireOnce, buildDedupKey } from '@/lib/leads/eventDedup';
 
 const SESSION_KEY = 'myuno_ipp_session_id';
 
@@ -40,6 +41,19 @@ export function useIPPLeadEvent() {
 
   const track = useCallback(async ({ eventType, projectId, leadId, meta }: TrackArgs) => {
     const score_delta = IPP_LEAD_EVENTS[eventType] ?? 0;
+
+    // Dedup guard — prevents StrictMode double-fire, re-renders, and bfcache
+    // restores from inflating the same logical event. Key includes the
+    // identifying context so distinct interactions still fire.
+    const dedupKey = buildDedupKey(
+      'evt',
+      eventType,
+      projectId ?? null,
+      leadId ?? null,
+      (meta && typeof meta === 'object' ? (meta as Record<string, unknown>).preset as string | undefined : undefined) ?? null,
+    );
+    if (!shouldFireOnce(dedupKey)) return;
+
     try {
       await supabase.from('analytics_events').insert({
         event_name: 'ipp_lead_event',
