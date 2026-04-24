@@ -49,7 +49,7 @@ describe('routeRegistry — catalog ↔ router contract', () => {
     expect(
       broken,
       `Unknown catalog routes:\n${broken
-        .map((s) => `  - ${s.clusterId}/${s.labelEn} → ${s.path}`)
+        .map((s) => ` - ${s.clusterId}/${s.labelEn} → ${s.path}`)
         .join('\n')}`,
     ).toEqual([]);
   });

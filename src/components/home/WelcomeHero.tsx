@@ -90,7 +90,7 @@ export const WelcomeHero = memo(function WelcomeHero() {
           <button
             onClick={handleSearch}
             aria-label={isRu ? 'Искать' : 'Search'}
-            className="flex items-center justify-center w-8 h-8 rounded-none bg-primary text-primary-foreground shrink-0 hover:bg-primary-hover active:scale-95 transition-all"
+            className="flex items-center justify-center w-8 h-8 rounded-none bg-primary text-primary-foreground shrink-0 hover:bg-primary-hover transition-all"
           >
             <ArrowRight className="w-4 h-4" />
           </button>

@@ -13,7 +13,6 @@ import {
   XCircle, AlertCircle, FileEdit, ArrowRight
 } from 'lucide-react';
 
-
 function EmptyState({ 
   title, 
   description, 

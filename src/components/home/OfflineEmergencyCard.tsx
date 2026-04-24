@@ -46,7 +46,7 @@ export function OfflineEmergencyCard({ compact = false }: OfflineEmergencyCardPr
               key={item.phone}
               onClick={() => handleCall(item.phone)}
               className={cn(
-                "flex flex-col items-center gap-1 p-2.5 rounded-none border border-transparent transition-all active:scale-95",
+                "flex flex-col items-center gap-1 p-2.5 rounded-none border border-transparent transition-all ",
                 item.bg, "hover:border-current/20"
               )}
             >

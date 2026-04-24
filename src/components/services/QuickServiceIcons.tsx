@@ -57,7 +57,7 @@ export function QuickServiceIcons() {
               className={cn(
                 "flex flex-col items-center gap-1.5 p-2 rounded-none",
                 "hover:bg-muted/50 active:bg-muted transition-all duration-200",
-                "touch-manipulation active:scale-95"
+                "touch-manipulation "
               )}
             >
               <IconBadge 

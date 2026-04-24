@@ -342,7 +342,7 @@ export default function PeylaaLanding() {
                     src={item.url}
                     alt={item.title_ru || item.title}
                     loading="lazy"
-                    className="w-full h-full object-cover aspect-[4/3] group-hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full object-cover aspect-[4/3] transition-transform duration-500"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                   <div className="absolute bottom-0 left-0 right-0 p-3 text-left opacity-0 group-hover:opacity-100 transition-opacity">

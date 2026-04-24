@@ -62,7 +62,7 @@ function SuggestionCard({
         onClick={onNavigate}
         className={cn(
           'w-full text-left rounded-none border-l-[3px] border border-border/40 transition-all duration-150',
-          'hover:shadow-sm active:scale-[0.98]',
+          'hover:shadow-sm ',
           'p-3.5',
           config.border,
           config.bg,

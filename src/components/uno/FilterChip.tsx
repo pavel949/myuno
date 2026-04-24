@@ -2,7 +2,6 @@ import React, { forwardRef } from 'react';
 import { X, type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
-import { triggerRipple } from '@/hooks/useRipple';
 import { resolveIcon } from '@/lib/iconMap';
 
 interface FilterChipProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -46,14 +45,13 @@ export const FilterChip = forwardRef<HTMLButtonElement, FilterChipProps>(
       <button
         ref={ref}
         onClick={(e) => {
-          triggerRipple(e);
           triggerHaptic('light');
           onToggle?.();
         }}
         className={cn(
           "relative overflow-hidden inline-flex items-center rounded-full font-medium transition-all duration-200",
           "border focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background",
-          "active:scale-[0.98] flex-shrink-0",
+          "flex-shrink-0",
           sizeClasses[size],
           isActive
             ? "bg-primary text-primary-foreground border-primary"

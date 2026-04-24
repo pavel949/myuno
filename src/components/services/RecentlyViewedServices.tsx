@@ -54,7 +54,7 @@ export function RecentlyViewedServices() {
             className={cn(
               "w-[120px] shrink-0 text-left",
               "bg-card rounded-none border border-border overflow-hidden",
-              "shadow-sm hover:shadow-md hover:-translate-y-0.5",
+              "shadow-sm hover:shadow-md ",
               "transition-all duration-200 group touch-manipulation"
             )}
           >
@@ -62,7 +62,7 @@ export function RecentlyViewedServices() {
               <img
                 src={service.image || '/placeholder.svg'}
                 alt=""
-                className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
+                className="w-full h-full object-cover transition-transform duration-300"
               />
             </div>
             <div className="p-2">

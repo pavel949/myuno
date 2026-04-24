@@ -2,7 +2,6 @@ import React from 'react';
 import { Star, MapPin, Clock, Users, Shield, BadgeCheck, LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
-import { triggerRipple } from '@/hooks/useRipple';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { iconSizes } from '@/lib/iconMap';
@@ -81,7 +80,6 @@ export const ItemCard = React.forwardRef<HTMLDivElement, ItemCardProps>(
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!isAvailable) return;
-    triggerRipple(e);
     onClick?.();
   };
 
@@ -94,7 +92,7 @@ export const ItemCard = React.forwardRef<HTMLDivElement, ItemCardProps>(
         onClick={handleClick}
         className={cn(
           "relative overflow-hidden rounded-none bg-card border border-border/60 transition-all [box-shadow:var(--shadow-elevation-2)]",
-          isAvailable && "cursor-pointer hover:border-primary/30 hover:[box-shadow:var(--shadow-elevation-3)] hover:-translate-y-0.5 active:scale-[0.98]",
+          isAvailable && "cursor-pointer hover:border-primary/30 hover:[box-shadow:var(--shadow-elevation-3)] ",
           !isAvailable && "opacity-60",
           className
         )}
@@ -184,7 +182,7 @@ export const ItemCard = React.forwardRef<HTMLDivElement, ItemCardProps>(
       onClick={handleClick}
       className={cn(
         "bg-card rounded-none overflow-hidden border border-border/60 [box-shadow:var(--shadow-elevation-2)]",
-        isAvailable && "cursor-pointer hover:[box-shadow:var(--shadow-elevation-3)] hover:-translate-y-0.5 hover:border-primary/30 active:scale-[0.98]",
+        isAvailable && "cursor-pointer hover:[box-shadow:var(--shadow-elevation-3)] hover:border-primary/30 ",
         !isAvailable && "opacity-60",
         "transition-all",
         className

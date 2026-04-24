@@ -49,7 +49,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           <img
             src={product.cover_image || '/placeholder.svg'}
             alt={name}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+            className="w-full h-full object-cover transition-transform duration-300 "
           />
           {product.is_new && (
             <Badge className={cn("absolute top-1 left-1 text-[10px] px-1.5 py-0", BADGE_STYLES.new)}>
@@ -133,7 +133,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         <img
           src={product.cover_image || '/placeholder.svg'}
           alt={name}
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+          className="w-full h-full object-cover transition-transform duration-300 "
         />
         
         {/* Badges */}

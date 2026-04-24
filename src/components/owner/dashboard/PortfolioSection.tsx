@@ -6,7 +6,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ChevronRight, Plus, Home } from 'lucide-react';
 import { PropertyCard, PropertyCardSkeleton } from '@/components/property/PropertyCard';
 
-
 export function PortfolioSection() {
   const navigate = useNavigate();
   const { language } = useLanguage();

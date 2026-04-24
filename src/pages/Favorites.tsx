@@ -293,7 +293,7 @@ export default function Favorites() {
                           <img
                             src={data.image || data.images?.[0] || '/placeholder.svg'}
                             alt={title}
-                            className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
+                            className="w-full h-full object-cover transition-transform duration-300"
                           />
                           <button
                             onClick={(e) => {

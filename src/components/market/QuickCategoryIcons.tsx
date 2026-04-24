@@ -45,8 +45,8 @@ export const QuickCategoryIcons: React.FC<QuickCategoryIconsProps> = ({
               <div className={cn(
                 "relative",
                 "transform transition-all duration-200",
-                "group-hover:-translate-y-0.5",
-                "group-active:scale-95"
+                "",
+                ""
               )}>
                 {category.image_url ? (
                   <div className="w-14 h-14 rounded-none bg-primary/10 flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">

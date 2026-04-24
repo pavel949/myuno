@@ -21,7 +21,6 @@ export function ActivityFeed({ personas }: ActivityFeedProps) {
         meta={isRu ? 'За неделю · все роли' : 'This week · all roles'}
       />
 
-
       {isLoading ? (
         <div className="border-t border-border/[0.05]">
           {[1, 2, 3].map(i => (

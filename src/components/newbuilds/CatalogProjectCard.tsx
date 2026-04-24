@@ -63,7 +63,7 @@ export function CatalogProjectCard({ project, rank, onInquiry }: Props) {
 
   return (
     <div
-      className="rounded-none overflow-hidden transition-all duration-200 hover:-translate-y-0.5"
+      className="rounded-none overflow-hidden transition-all duration-200 "
       style={{
         background: 'hsl(var(--nb-surface))',
         border: isFeatured ? '2px solid hsl(var(--nb-gold))' : '1px solid hsl(var(--nb-gold) / 0.12)',
@@ -76,7 +76,7 @@ export function CatalogProjectCard({ project, rank, onInquiry }: Props) {
           <img
             src={project.coverImage}
             alt={project.nameEn}
-            className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-cover transition-transform duration-500"
             loading="lazy"
           />
         ) : (

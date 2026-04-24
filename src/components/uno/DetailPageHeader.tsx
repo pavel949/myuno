@@ -52,7 +52,7 @@ export const DetailPageHeader = memo(function DetailPageHeader({
         className={cn(
           "flex items-center justify-center w-10 h-10 rounded-full",
           "bg-background/80 [box-shadow:var(--shadow-elevation-3)]",
-          "hover:bg-background/90 active:scale-95 transition-all",
+          "hover:bg-background/90 transition-all",
           "touch-manipulation"
         )}
       >
@@ -69,7 +69,7 @@ export const DetailPageHeader = memo(function DetailPageHeader({
             className={cn(
               "flex items-center justify-center w-10 h-10 rounded-full",
               "bg-background/80 [box-shadow:var(--shadow-elevation-3)]",
-              "hover:bg-background/90 active:scale-95 transition-all",
+              "hover:bg-background/90 transition-all",
               "touch-manipulation"
             )}
           >

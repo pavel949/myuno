@@ -34,7 +34,6 @@ export function useCashback() {
     return () => { isMounted = false; };
   }, [fetchSettings]);
 
-
   const getCashbackPercentage = useCallback((category?: string): number => {
     // Find category-specific or default
     const categorySettings = settings.find(s => s.category === category);

@@ -51,8 +51,8 @@ function CategoryGridCell({ item }: { item: CategoryGridItem }) {
         'rounded-none p-3 min-h-[88px]',
         'bg-card border border-border/60',
         '[box-shadow:var(--shadow-elevation-1)]',
-        'hover:[box-shadow:var(--shadow-elevation-2)] hover:-translate-y-0.5 hover:border-primary/30',
-        'active:scale-95',
+        'hover:[box-shadow:var(--shadow-elevation-2)] hover:border-primary/30',
+        '',
         'transition-all duration-150',
         'group'
       )}
@@ -68,7 +68,7 @@ function CategoryGridCell({ item }: { item: CategoryGridItem }) {
       <div className={cn(
         'w-10 h-10 rounded-none flex items-center justify-center',
         'bg-gradient-to-br from-primary/15 to-primary/5',
-        'group-hover:scale-110 transition-transform duration-150'
+        'transition-transform duration-150'
       )}>
         {isStringIcon ? (
           <span className="text-xl">{item.icon as string}</span>

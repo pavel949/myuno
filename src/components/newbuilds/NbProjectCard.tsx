@@ -55,7 +55,7 @@ export function NbProjectCard({ project, variant = 'compact' }: Props) {
       <Link to={href} className="nb-glass group flex overflow-hidden h-[380px] relative">
         {/* Image left */}
         <div className="w-[40%] relative overflow-hidden">
-          <img src={img} alt={project.name_en} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          <img src={img} alt={project.name_en} className="w-full h-full object-cover transition-transform duration-500" />
           <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/60" />
         </div>
         
@@ -111,7 +111,7 @@ export function NbProjectCard({ project, variant = 'compact' }: Props) {
     <Link to={href} className="nb-glass group flex flex-col overflow-hidden">
       {/* Image */}
       <div className="relative aspect-[4/3] overflow-hidden">
-        <img src={img} alt={project.name_en} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+        <img src={img} alt={project.name_en} className="w-full h-full object-cover transition-transform duration-500" />
         <div className="absolute top-3 left-3 z-10">
           <NbProjectStatusBadge status={project.project_status || 'under_construction'} />
         </div>

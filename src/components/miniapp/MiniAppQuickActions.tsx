@@ -1,6 +1,5 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { triggerRipple } from '@/hooks/useRipple';
 import { resolveIcon } from '@/lib/iconMap';
 import { Box, type LucideIcon } from 'lucide-react';
 
@@ -41,10 +40,9 @@ export function MiniAppQuickActions({
         <button
           key={i}
           onClick={(e) => {
-            triggerRipple(e);
             action.onClick?.();
           }}
-          className="relative overflow-hidden flex flex-col items-center p-3 rounded-none bg-card border border-border/50 hover:border-primary/30 transition-all active:scale-95 shadow-sm"
+          className="relative overflow-hidden flex flex-col items-center p-3 rounded-none bg-card border border-border/50 hover:border-primary/30 transition-all shadow-sm"
         >
           <div className="mb-1.5">{renderActionIcon(action.icon)}</div>
           <span className="text-xs font-medium text-center truncate w-full text-foreground">

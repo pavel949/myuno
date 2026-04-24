@@ -18,7 +18,6 @@ import { getTypeAwareLabels } from '@/lib/propertyTypeConfig';
 import { COMMERCIAL_TYPES, LAND_TYPES, TITLE_DEED_TYPES, HOTEL_LICENSE_TYPES, HOTEL_MANAGEMENT_STATUSES, formatLandSize, isHotelType } from '@/lib/real-estate/commercialTaxonomy';
 import { Hotel, Star } from 'lucide-react';
 
-
 const DISMISS_KEY = 'owner_contact_auto_create_hint_dismissed';
 
 // --- Asset Class Picker ---
@@ -155,7 +154,6 @@ const ownershipOptions: OwnershipOption[] = [
     descRu: 'На основании договорённости',
   },
 ];
-
 
 function BasicInfoStepInner({ 
   formData, 

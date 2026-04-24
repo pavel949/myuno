@@ -78,7 +78,7 @@ export default function ClearViewLanding() {
       <section className="px-4 pb-6 space-y-2">
         <Link
           to={APP_ROUTES.CLEARVIEW_APPLY}
-          className="block w-full text-center rounded-none bg-foreground text-background py-3 text-[14px] font-semibold active:scale-[0.99] transition-transform"
+          className="block w-full text-center rounded-none bg-foreground text-background py-3 text-[14px] font-semibold transition-transform"
         >
           {isRu ? CLEARVIEW_LABELS.applyButton.ru : CLEARVIEW_LABELS.applyButton.en}
         </Link>

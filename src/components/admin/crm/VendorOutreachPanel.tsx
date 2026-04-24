@@ -37,8 +37,6 @@ interface OutreachLogEntry {
   } | null;
 }
 
-
-
 function useOutreachStats() {
   return useQuery({
     queryKey: ['vendor-outreach-stats'],

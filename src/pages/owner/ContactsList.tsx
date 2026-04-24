@@ -620,7 +620,6 @@ export default function ContactsList() {
             </div>
           </div>
 
-
           <div>
             <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-1.5">{isRu ? 'Стадия' : 'Lifecycle'}</p>
             <div className="flex flex-wrap gap-1">

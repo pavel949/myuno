@@ -49,7 +49,6 @@ const LIFE_CONTEXTS_SEARCH = [
   { code: 'retirement_living', titleEn: 'Retirement Living', titleRu: 'Пенсия на Пхукете', route: '/life/retirement_living' },
 ];
 
-
 export default function Discover() {
   const { language } = useLanguage();
   const navigate = useNavigate();
@@ -122,7 +121,7 @@ export default function Discover() {
                 <button
                   key={ctx.code}
                   onClick={() => handleNav(ctx.route)}
-                  className="w-full flex items-center gap-3 p-3 rounded-none bg-card border border-border/50 hover:border-primary/30 active:scale-[0.99] transition-all touch-manipulation text-left"
+                  className="w-full flex items-center gap-3 p-3 rounded-none bg-card border border-border/50 hover:border-primary/30 transition-all touch-manipulation text-left"
                 >
                   <span className="text-sm font-medium text-foreground">{isRu ? ctx.titleRu : ctx.titleEn}</span>
                   <ChevronRight className="w-4 h-4 text-muted-foreground/40 ml-auto" />
@@ -143,7 +142,7 @@ export default function Discover() {
                   <button
                     key={item.id}
                     onClick={() => handleNav(item.route)}
-                    className="w-full flex items-center gap-3 p-3 rounded-none bg-card border border-border/50 hover:border-primary/30 active:scale-[0.99] transition-all touch-manipulation text-left"
+                    className="w-full flex items-center gap-3 p-3 rounded-none bg-card border border-border/50 hover:border-primary/30 transition-all touch-manipulation text-left"
                   >
                     <div className="w-10 h-10 rounded-none bg-muted flex items-center justify-center flex-shrink-0">
                       <I className="w-5 h-5 text-foreground/70" />
@@ -211,14 +210,14 @@ export default function Discover() {
                 href={getWhatsAppUrl()}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-none bg-primary text-primary-foreground text-sm font-medium active:scale-[0.98] transition-transform touch-manipulation"
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-none bg-primary text-primary-foreground text-sm font-medium transition-transform touch-manipulation"
               >
                 <MessageCircle className="w-4 h-4" />
                 <span>WhatsApp</span>
               </a>
               <a
                 href={getTelLink()}
-                className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-none bg-card border border-border text-sm font-medium text-foreground active:scale-[0.98] transition-transform touch-manipulation"
+                className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-none bg-card border border-border text-sm font-medium text-foreground transition-transform touch-manipulation"
               >
                 <Phone className="w-4 h-4" />
                 <span>{isRu ? 'Позвонить' : 'Call'}</span>

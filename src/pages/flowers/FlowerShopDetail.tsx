@@ -7,7 +7,6 @@ import { useCurrency } from '@/contexts/CurrencyContext';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { triggerRipple } from '@/hooks/useRipple';
 import { StickyCartBar } from '@/components/cart/StickyCartBar';
 import { useCartToast } from '@/hooks/useCartToast';
 import { useSupabaseSingle, useSupabaseQuery, QueryFilter } from '@/hooks/useSupabaseQuery';
@@ -177,14 +176,14 @@ const FlowerShopDetail = () => {
                       <div className="flex items-center justify-between mt-2">
                         <span className="font-semibold text-primary">{formatPrice(product.price)}</span>
                         {quantity === 0 ? (
-                          <Button size="sm" variant="outline" onClick={(e) => { triggerRipple(e); addToCart(product); }} className="relative overflow-hidden h-8 px-3 active:scale-95">
+                          <Button size="sm" variant="outline" onClick={(e) => { addToCart(product); }} className="relative overflow-hidden h-8 px-3 ">
                             <Plus className="w-4 h-4" />
                           </Button>
                         ) : (
                           <div className="flex items-center gap-1">
-                            <Button size="icon" variant="outline" onClick={(e) => { triggerRipple(e); removeFromCart(product.id); }} className="relative overflow-hidden h-7 w-7 active:scale-95"><Minus className="w-3 h-3" /></Button>
+                            <Button size="icon" variant="outline" onClick={(e) => { removeFromCart(product.id); }} className="relative overflow-hidden h-7 w-7 "><Minus className="w-3 h-3" /></Button>
                             <span className="w-6 text-center font-medium text-sm">{quantity}</span>
-                            <Button size="icon" variant="outline" onClick={(e) => { triggerRipple(e); addToCart(product); }} className="relative overflow-hidden h-7 w-7 active:scale-95"><Plus className="w-3 h-3" /></Button>
+                            <Button size="icon" variant="outline" onClick={(e) => { addToCart(product); }} className="relative overflow-hidden h-7 w-7 "><Plus className="w-3 h-3" /></Button>
                           </div>
                         )}
                       </div>

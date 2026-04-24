@@ -102,7 +102,7 @@ export const PinInput: React.FC<PinInputProps> = ({
                 className={cn(
                   'h-16 rounded-none flex items-center justify-center transition-all duration-200',
                   'text-muted-foreground hover:text-foreground',
-                  'hover:bg-secondary/80 active:scale-95',
+                  'hover:bg-secondary/80 ',
                   'disabled:opacity-30 disabled:cursor-not-allowed'
                 )}
                 aria-label="Clear"
@@ -121,7 +121,7 @@ export const PinInput: React.FC<PinInputProps> = ({
                 className={cn(
                   'h-16 rounded-none flex items-center justify-center transition-all duration-200',
                   'text-muted-foreground hover:text-foreground',
-                  'hover:bg-secondary/80 active:scale-95',
+                  'hover:bg-secondary/80 ',
                   'disabled:opacity-30 disabled:cursor-not-allowed'
                 )}
                 aria-label="Delete"
@@ -140,9 +140,9 @@ export const PinInput: React.FC<PinInputProps> = ({
                 'h-16 rounded-none flex items-center justify-center transition-all duration-200',
                 'bg-secondary/50 hover:bg-secondary border border-border/50',
                 'text-2xl font-semibold text-foreground',
-                'hover:scale-105 active:scale-95 active:bg-primary/20',
+                'active:bg-primary/20',
                 'shadow-sm hover:shadow-md',
-                'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100'
+                'disabled:opacity-50 disabled:cursor-not-allowed disabled:'
               )}
             >
               {item}

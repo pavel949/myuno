@@ -98,7 +98,7 @@ describe("uiStrings — canonical lexicon (M9.7 runtime guard)", () => {
 
       if (failures.length > 0) {
         throw new Error(
-          `uiStrings.${path} violates canonical lexicon:\n  ${failures.join("\n  ")}`,
+          `uiStrings.${path} violates canonical lexicon:\n  ${failures.join("\n ")}`,
         );
       }
     },

@@ -127,7 +127,7 @@ export function AllAppsDrawer({ open, onOpenChange }: AllAppsDrawerProps) {
                         onClick={() => handleAppClick(app.path)}
                         className={cn(
                           'flex flex-col items-center gap-1.5 p-3 rounded-none',
-                          'transition-all duration-200 active:scale-95',
+                          'transition-all duration-200 ',
                           'hover:bg-secondary/80',
                         )}
                       >

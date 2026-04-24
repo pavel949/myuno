@@ -215,7 +215,7 @@ export default memo(function PlatformCatalog() {
                         className={cn(
                           "flex flex-col items-center justify-center gap-2.5 p-5 rounded-none",
                           "bg-card border border-border/50",
-                          "hover:shadow-md hover:-translate-y-0.5 hover:border-border",
+                          "hover:shadow-md hover:border-border",
                           "transition-all duration-200 cursor-pointer group text-center"
                         )}
                       >

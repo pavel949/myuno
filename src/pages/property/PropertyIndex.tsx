@@ -48,7 +48,7 @@ function RecentCard({ item, onClick }: { item: RecentProperty; onClick: () => vo
   return (
     <button onClick={onClick} className="w-[150px] shrink-0 text-left group">
       <div className="relative aspect-square rounded-none overflow-hidden mb-1.5">
-        <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" loading="lazy" />
+        <img src={item.image} alt={item.title} className="w-full h-full object-cover transition-transform duration-200" loading="lazy" />
       </div>
       <p className="text-xs font-semibold line-clamp-1">{item.district}</p>
       <p className="text-[11px] text-muted-foreground">

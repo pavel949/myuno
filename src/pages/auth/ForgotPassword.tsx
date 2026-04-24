@@ -67,7 +67,7 @@ export default function ForgotPassword() {
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 pointer-events-none" />
       
       <header className="relative z-10 p-4 flex justify-between items-center">
-        <Link to={APP_ROUTES.HOME} className="h-10 px-3 rounded-none bg-primary/10 ring-1 ring-primary/30 flex items-center justify-center hover:scale-105 transition-transform">
+        <Link to={APP_ROUTES.HOME} className="h-10 px-3 rounded-none bg-primary/10 ring-1 ring-primary/30 flex items-center justify-center transition-transform">
           <BrandWordmark as="static" />
         </Link>
         <div className="flex items-center gap-2">

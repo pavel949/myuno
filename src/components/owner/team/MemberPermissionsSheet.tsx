@@ -198,7 +198,6 @@ export function MemberPermissionsSheet({ open, onOpenChange, userId, userName, c
           </div>
         )}
 
-
         {isLoading ? (
           <div className="space-y-3">
             {[1, 2, 3, 4].map((i) => (

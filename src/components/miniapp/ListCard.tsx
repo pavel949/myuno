@@ -2,8 +2,6 @@ import React from 'react';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { Star, Clock, Users, MapPin, BadgeCheck, LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { triggerRipple } from '@/hooks/useRipple';
-
 interface ListCardMeta {
   icon: LucideIcon;
   value: string | number;
@@ -41,7 +39,6 @@ export function ListCard({
   className,
 }: ListCardProps) {
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    triggerRipple(e);
     onClick?.();
   };
 
@@ -50,7 +47,7 @@ export function ListCard({
       onClick={handleClick}
       className={cn(
         "cursor-pointer bg-card rounded-none overflow-hidden shadow-sm border",
-        "hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 transition-all active:scale-[0.98]",
+        "hover:shadow-md hover:border-primary/30 transition-all ",
         className
       )}
     >

@@ -109,7 +109,7 @@ function ShowcaseCard({ showcase, isRu, onClick }: ShowcaseCardProps) {
         "bg-gradient-to-r",
         showcase.gradient,
         "shadow-lg hover:shadow-xl transition-all duration-300",
-        "hover:scale-[1.02] active:scale-[0.98]",
+        "",
         "text-left group"
       )}
     >
@@ -135,7 +135,7 @@ function ShowcaseCard({ showcase, isRu, onClick }: ShowcaseCardProps) {
             </div>
           </div>
           
-          <ChevronRight className="w-5 h-5 text-white/60 group-hover:text-white group-hover:translate-x-0.5 transition-all" />
+          <ChevronRight className="w-5 h-5 text-white/60 group-hover:text-white transition-all" />
         </div>
         
         {/* Bottom row */}

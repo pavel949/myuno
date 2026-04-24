@@ -72,7 +72,7 @@ export const MOTION = {
 export const CARD = {
   surface: 'bg-muted/30 rounded-none',
   base: `bg-card border border-border/60 rounded-none ${ELEVATION[2]}`,
-  interactive: `bg-card border border-border/60 rounded-none ${ELEVATION[2]} hover:${ELEVATION[3]} hover:-translate-y-0.5 transition-all duration-150 cursor-pointer`,
+  interactive: `bg-card border border-border/60 rounded-none ${ELEVATION[2]} hover:${ELEVATION[3]} transition-all duration-150 cursor-pointer`,
   elevated: `bg-card border border-border/60 rounded-none ${ELEVATION[4]}`,
   featured: `bg-card border border-border/60 rounded-none ${ELEVATION[4]}`,
 } as const;
@@ -98,7 +98,7 @@ export const BADGE = {
 
 // ═══ Image Styles ═══
 export const IMAGE = {
-  hover: 'w-full h-full object-cover transition-transform duration-200 group-hover:scale-[1.02]',
+  hover: 'w-full h-full object-cover transition-transform duration-200 ',
   static: 'w-full h-full object-cover',
   container: 'relative overflow-hidden rounded-none',
 } as const;
@@ -154,7 +154,7 @@ export const DESIGN_TOKENS = {
     heading: 'text-lg',
     display: 'text-xl',
   },
-  imageHover: 'group-hover:scale-[1.02]',
+  imageHover: '',
   imageTransition: 'transition-transform duration-200',
   transition: {
     fast: 'transition-all duration-100',
@@ -163,7 +163,7 @@ export const DESIGN_TOKENS = {
     image: 'transition-transform duration-200',
   },
   card: CARD,
-  buttonPress: 'active:scale-[0.97]',
+  buttonPress: '',
 } as const;
 
 export const CARD_STYLES = {

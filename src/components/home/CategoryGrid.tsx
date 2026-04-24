@@ -4,7 +4,6 @@ import { Package } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCategories, Category, CategoryGroup } from '@/hooks/useCategories';
 import { cn } from '@/lib/utils';
-import { triggerRipple } from '@/hooks/useRipple';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -43,10 +42,9 @@ export function CategoryGrid({ showAll = false, compact = false }: CategoryGridP
             <button
               key={cat.id}
               onClick={(e) => {
-                triggerRipple(e);
                 navigate(cat.path);
               }}
-              className="relative flex flex-col items-center p-2 rounded-none hover:bg-card/50 transition-all group active:scale-95"
+              className="relative flex flex-col items-center p-2 rounded-none hover:bg-card/50 transition-all group "
             >
               {(cat.isNew || cat.isHot) && (
                 <Badge 
@@ -62,7 +60,7 @@ export function CategoryGrid({ showAll = false, compact = false }: CategoryGridP
               <div className={cn(
                 "w-10 h-10 rounded-none flex items-center justify-center mb-1.5 bg-gradient-to-br",
                 cat.color,
-                "group-hover:scale-110 transition-transform"
+                "transition-transform"
               )}>
                 <Icon className="w-5 h-5 text-white" />
               </div>
@@ -90,10 +88,9 @@ export function CategoryGrid({ showAll = false, compact = false }: CategoryGridP
                 <button
                   key={cat.id}
                   onClick={(e) => {
-                    triggerRipple(e);
                     navigate(cat.path);
                   }}
-                  className="relative flex items-center gap-3 p-3 rounded-none bg-card border border-border/50 hover:border-primary/30 transition-all group active:scale-[0.98]"
+                  className="relative flex items-center gap-3 p-3 rounded-none bg-card border border-border/50 hover:border-primary/30 transition-all group "
                 >
                   {(cat.isNew || cat.isHot) && (
                     <Badge 
@@ -109,7 +106,7 @@ export function CategoryGrid({ showAll = false, compact = false }: CategoryGridP
                   <div className={cn(
                     "w-10 h-10 rounded-none flex items-center justify-center bg-gradient-to-br flex-shrink-0",
                     cat.color,
-                    "group-hover:scale-110 transition-transform"
+                    "transition-transform"
                   )}>
                     <Icon className="w-5 h-5 text-white" />
                   </div>

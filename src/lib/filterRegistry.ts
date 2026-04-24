@@ -10,14 +10,12 @@ import { FilterConfig, FilterOption } from '@/components/filters/UniversalFilter
 // Re-export dynamic filter hooks
 export { usePropertyFilterOptions, useTransportFilterOptions, useHomeServiceFilterOptions } from '@/hooks/useDynamicFilterOptions';
 
-
 // ═══════════════ PropertyFilters ═══════════════
 // Property filters are fully database-driven via usePropertyFilterOptions hook.
 // No static config needed — use the hook directly.
 
 // ═══════════════ RestaurantFilters ═══════════════
 // Restaurant-specific filter configuration
-
 
 // ====== CUISINE OPTIONS ======
 export const cuisineOptions: FilterOption[] = [
@@ -235,7 +233,6 @@ export const beautyAvailabilityOptions: FilterOption[] = [
   { id: 'weekend', labelEn: 'Open Weekends', labelRu: 'Работает в выходные', icon: '🗓️' },
   { id: 'open-now', labelEn: 'Open Now', labelRu: 'Открыто сейчас', icon: '🟢' },
 ];
-
 
 // ====== COMPLETE BEAUTY FILTER CONFIG ======
 export const beautyFilterConfig: FilterConfig = {
@@ -698,7 +695,6 @@ export const experienceFilterConfig: FilterConfig = {
     },
   ],
 };
-
 
 // ═══════════════ EventsFilters ═══════════════
 

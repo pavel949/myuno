@@ -34,7 +34,6 @@ interface JourneyRow {
   created_at: string;
 }
 
-
 export function MyJourneyRecommendations() {
   const { user } = useAuth();
   const { language } = useLanguage();
@@ -136,7 +135,7 @@ export function MyJourneyRecommendations() {
             onClick={() => navigate(item.route)}
             className={cn(
               'flex items-center gap-3 p-3 rounded-none bg-card border text-left transition-all min-h-[64px]',
-              'hover:border-primary/60 hover:bg-primary/5 active:scale-[0.99] touch-manipulation',
+              'hover:border-primary/60 hover:bg-primary/5 touch-manipulation',
               idx === 0 ? 'border-primary/60 bg-primary/5' : 'border-border/60',
             )}
           >

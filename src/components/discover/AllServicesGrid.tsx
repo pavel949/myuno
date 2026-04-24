@@ -84,7 +84,7 @@ export const AllServicesGrid = memo(function AllServicesGrid({ audienceFilter = 
                         className={cn(
                           "flex flex-col items-center gap-2 p-2.5 rounded-none",
                           "hover:bg-muted/50 active:bg-muted",
-                          "active:scale-[0.95] transition-all duration-200",
+                          "transition-all duration-200",
                           "text-center cursor-pointer group touch-manipulation"
                         )}
                       >
@@ -93,7 +93,7 @@ export const AllServicesGrid = memo(function AllServicesGrid({ audienceFilter = 
                           size="lg"
                           variant="gradient"
                           gradient={item.gradient}
-                          className="shadow-md group-hover:shadow-lg group-hover:scale-105 transition-all duration-200"
+                          className="shadow-md group-hover:shadow-lg transition-all duration-200"
                         />
                         <span className="text-xs font-medium text-foreground leading-tight line-clamp-2">
                           {item.label}

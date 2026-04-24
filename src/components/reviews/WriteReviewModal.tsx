@@ -172,7 +172,7 @@ export function WriteReviewModal({
                 <button
                   key={star}
                   type="button"
-                  className="p-1 transition-transform hover:scale-110"
+                  className="p-1 transition-transform "
                   onMouseEnter={() => setHoverRating(star)}
                   onMouseLeave={() => setHoverRating(0)}
                   onClick={() => setRating(star)}

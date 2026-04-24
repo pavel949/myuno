@@ -9,7 +9,6 @@ import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { triggerRipple } from '@/hooks/useRipple';
 import { useBouquet, SizeVariant } from '@/hooks/useBouquets';
 import { useCartToast } from '@/hooks/useCartToast';
 import { useBuyNowFlowers } from '@/hooks/useBuyNowFlowers';
@@ -425,7 +424,6 @@ const BouquetDetail = () => {
               <>
                 <Button
                   onClick={(e) => {
-                    triggerRipple(e);
                     const modifiedBouquet = { ...bouquet, price: currentPrice };
                     buyNow(modifiedBouquet, 1, { size: selectedSize, sizeVariant: currentVariant });
                   }}
@@ -437,7 +435,6 @@ const BouquetDetail = () => {
                 <Button
                   variant="outline"
                   onClick={(e) => {
-                    triggerRipple(e);
                     addToCart();
                   }}
                   className="h-12 px-4"
@@ -448,17 +445,16 @@ const BouquetDetail = () => {
             ) : (
               <>
                 <div className="flex items-center gap-2 bg-secondary rounded-none p-1">
-                  <Button size="icon" variant="ghost" onClick={(e) => { triggerRipple(e); removeFromCart(); }} className="h-10 w-10">
+                  <Button size="icon" variant="ghost" onClick={(e) => { removeFromCart(); }} className="h-10 w-10">
                     <Minus className="w-4 h-4" />
                   </Button>
                   <span className="w-8 text-center font-bold text-lg">{quantity}</span>
-                  <Button size="icon" variant="ghost" onClick={(e) => { triggerRipple(e); addToCart(); }} className="h-10 w-10">
+                  <Button size="icon" variant="ghost" onClick={(e) => { addToCart(); }} className="h-10 w-10">
                     <Plus className="w-4 h-4" />
                   </Button>
                 </div>
                 <Button
                   onClick={(e) => {
-                    triggerRipple(e);
                     const modifiedBouquet = { ...bouquet, price: currentPrice };
                     buyNow(modifiedBouquet, quantity, { size: selectedSize, sizeVariant: currentVariant });
                   }}

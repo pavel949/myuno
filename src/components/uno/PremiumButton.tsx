@@ -2,7 +2,6 @@ import React from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
-import { triggerRipple } from '@/hooks/useRipple';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
 import { playSound } from '@/hooks/useSoundEffects';
 import { getFeedbackSettings } from '@/hooks/useFeedbackSettings';
@@ -12,7 +11,7 @@ const premiumButtonVariants = cva(
   {
     variants: {
       variant: {
-        default: "gradient-gold text-primary-foreground shadow-gold hover:[box-shadow:var(--shadow-elevation-3)] hover:scale-[1.02] active:scale-[0.98]",
+        default: "gradient-gold text-primary-foreground shadow-gold hover:[box-shadow:var(--shadow-elevation-3)] ",
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border",
         outline: "border-2 border-primary bg-transparent text-primary hover:bg-primary hover:text-primary-foreground",
         ghost: "text-foreground hover:bg-secondary hover:text-secondary-foreground",
@@ -51,7 +50,6 @@ export const PremiumButton = React.forwardRef<HTMLButtonElement, PremiumButtonPr
     
     const handleClick = React.useCallback(
       (e: React.MouseEvent<HTMLButtonElement>) => {
-        triggerRipple(e);
         const settings = getFeedbackSettings();
         if (settings.hapticEnabled) {
           triggerHaptic('light');

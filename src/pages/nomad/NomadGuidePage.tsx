@@ -30,7 +30,7 @@ export default function NomadGuidePage() {
         {SECTIONS.map((s, i) => {
           const Icon = s.icon;
           return (
-            <button key={i} onClick={() => navigate(s.path)} className="w-full flex items-center gap-4 p-4 rounded-none border border-border bg-card text-left transition-all hover:[box-shadow:var(--shadow-elevation-2)] active:scale-[0.98]">
+            <button key={i} onClick={() => navigate(s.path)} className="w-full flex items-center gap-4 p-4 rounded-none border border-border bg-card text-left transition-all hover:[box-shadow:var(--shadow-elevation-2)] ">
               <div className="w-11 h-11 rounded-none flex items-center justify-center shrink-0" style={{ background: tokenColor(s.color, 0.15) }}>
                 <Icon className="w-5 h-5" style={{ color: tokenColor(s.color) }} />
               </div>

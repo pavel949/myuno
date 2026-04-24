@@ -22,7 +22,7 @@ export function PropertyTourPromo() {
             <img
               src={propertyTourImg}
               alt={isRu ? 'Бесплатный тур по недвижимости' : 'Free Property Tour'}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              className="w-full h-full object-cover transition-transform duration-500"
               loading="lazy"
             />
             <span className="absolute top-3 left-3 inline-flex items-center gap-1 text-xs font-bold uppercase text-primary-foreground bg-primary px-2.5 py-1 rounded-full shadow-lg">

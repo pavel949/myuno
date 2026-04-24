@@ -81,7 +81,7 @@ export function FloatingInstallButton() {
             className={cn(
               'flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium font-sans transition-colors',
               'bg-primary text-primary-foreground shadow-lg shadow-primary/35 ring-1 ring-primary/20',
-              'hover:bg-primary/90 active:scale-[0.98]',
+              'hover:bg-primary/90 ',
             )}
           >
             <Download className="w-4 h-4" />

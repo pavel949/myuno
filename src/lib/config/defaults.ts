@@ -25,7 +25,6 @@ export const DEFAULT_IMAGES = {
   placeholder: '/placeholder.svg',
 } as const;
 
-
 // Default pagination settings
 export const PAGINATION_DEFAULTS = {
   pageSize: 10,

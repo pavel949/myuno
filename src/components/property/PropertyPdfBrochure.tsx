@@ -109,7 +109,7 @@ export function PropertyPdfButton({ property, variant = 'ghost', size = 'sm', cl
         property.area_sqm ? `${property.area_sqm} м²` : null,
         property.max_guests ? `${property.max_guests} ${isRu ? 'гост.' : 'guests'}` : null,
       ].filter(Boolean);
-      doc.text(specs.join('  ·  '), margin, y);
+      doc.text(specs.join(' · '), margin, y);
       y += 6;
 
       // Price

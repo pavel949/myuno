@@ -127,7 +127,6 @@ const VendorRouteLayout = () => (
   </VendorGuard>
 );
 
-
 const GuestRouteLayout = () => (
   <AuthGuard>
     <GuestLayout>

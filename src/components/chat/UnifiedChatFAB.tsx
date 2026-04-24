@@ -395,7 +395,7 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
           FLOATING.chatFab,
           'bg-gradient-to-br from-primary to-primary/80 text-primary-foreground',
           'flex items-center justify-center',
-          'hover:scale-105 active:scale-95 transition-all duration-200',
+          'transition-all duration-200',
           'shadow-[var(--shadow-elevation-2)]',
           'md:bottom-6 md:w-14 md:h-14',
           className

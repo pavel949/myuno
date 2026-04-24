@@ -81,7 +81,7 @@ export function NbPlansTab({ projectId }: Props) {
                   <img
                     src={unit.floor_plan_url!}
                     alt={`${unit.name} floor plan`}
-                    className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-contain p-2 transition-transform duration-300"
                   />
                   <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <span className="nb-badge" style={{ background: 'hsl(var(--nb-gold) / 0.8)', color: 'hsl(var(--nb-bg))' }}>

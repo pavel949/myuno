@@ -420,7 +420,7 @@ export default function NewbuildsMap() {
                   >
                     <button
                       onClick={() => handleClusterClick(cluster)}
-                      className="nb-cluster-bubble rounded-full flex items-center justify-center font-serif transition-all hover:scale-110"
+                      className="nb-cluster-bubble rounded-full flex items-center justify-center font-serif transition-all "
                       style={{
                         width: size,
                         height: size,

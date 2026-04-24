@@ -24,7 +24,7 @@ export function PropertyTourBanner() {
           <img
             src={propertyTourImg}
             alt={isRu ? 'Тур по недвижимости или консультация на Пхукете' : 'Phuket property tour or advice'}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-500 "
             loading="lazy"
           />
           {/* Strong primary overlay on left fading to image on right — ensures text contrast */}
@@ -52,7 +52,7 @@ export function PropertyTourBanner() {
             </p>
           </div>
 
-          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-white/20 flex items-center justify-center transition-transform group-hover:translate-x-1">
+          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-white/20 flex items-center justify-center transition-transform ">
             <ArrowRight className="w-5 h-5 text-primary-foreground" />
           </div>
         </div>

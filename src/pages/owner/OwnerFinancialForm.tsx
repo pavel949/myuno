@@ -332,7 +332,6 @@ export default function OwnerFinancialForm() {
               </div>
             </div>
 
-
             {transactionType === 'expense' && (
               <>
                 {/* Cost Source: internal staff vs external vendor */}

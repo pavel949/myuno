@@ -78,7 +78,6 @@ export function LifeOSSituationsTab() {
     priority: 100,
   });
 
-
   const handleToggleActive = async (situation: LifeSituation) => {
     const { error } = await supabase
       .from('life_situations')

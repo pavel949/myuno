@@ -22,7 +22,6 @@ export function RouteNextSteps({ nextRoutes, labels, currentLabel }: RouteNextSt
 
   if (!nextRoutes.length) return null;
 
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}

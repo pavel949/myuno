@@ -160,7 +160,7 @@ export default function DeliveryIndex() {
               <button
                 key={type.id}
                 onClick={() => navigate(`/delivery?type=${type.id}`)}
-                className="relative bg-card rounded-none border border-border/50 p-4 text-left hover:border-primary/30 transition-all active:scale-[0.98] [box-shadow:var(--shadow-elevation-1)]"
+                className="relative bg-card rounded-none border border-border/50 p-4 text-left hover:border-primary/30 transition-all [box-shadow:var(--shadow-elevation-1)]"
               >
                 {type.isPopular && (
                   <Badge className="absolute -top-2 -right-2 bg-warning text-warning-foreground text-[10px]">

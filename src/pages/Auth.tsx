@@ -372,7 +372,7 @@ export default function Auth() {
   // Logo component used in signup steps — neutral mint badge (no gold gradient)
   const AppLogo = () => (
     <div className="flex justify-center mb-4">
-      <Link to={APP_ROUTES.HOME} className="h-16 px-4 rounded-none bg-primary/10 ring-1 ring-primary/30 flex items-center justify-center hover:scale-105 transition-transform">
+      <Link to={APP_ROUTES.HOME} className="h-16 px-4 rounded-none bg-primary/10 ring-1 ring-primary/30 flex items-center justify-center transition-transform">
         <BrandWordmark as="static" className="scale-110" />
       </Link>
     </div>
@@ -395,7 +395,7 @@ export default function Auth() {
 
       {/* Header */}
       <header className="relative z-10 p-4 flex justify-between items-center">
-        <Link to={APP_ROUTES.HOME} className="h-10 px-3 rounded-none bg-primary/10 ring-1 ring-primary/30 flex items-center justify-center hover:scale-105 transition-transform">
+        <Link to={APP_ROUTES.HOME} className="h-10 px-3 rounded-none bg-primary/10 ring-1 ring-primary/30 flex items-center justify-center transition-transform">
           <BrandWordmark as="static" />
         </Link>
         <div className="flex items-center gap-2">

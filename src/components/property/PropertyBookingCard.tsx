@@ -397,7 +397,7 @@ export function PropertyBookingCard({
             "w-full text-base font-semibold h-12 rounded-none",
             "bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70",
             "shadow-[0_4px_14px_-3px_hsl(var(--primary)/0.4)]",
-            "transition-all duration-200 hover:shadow-[0_6px_20px_-3px_hsl(var(--primary)/0.5)] hover:-translate-y-0.5",
+            "transition-all duration-200 hover:shadow-[0_6px_20px_-3px_hsl(var(--primary)/0.5)] ",
             rentalTerms?.instant_booking && dateRange?.from && dateRange?.to && "from-accent-amber to-accent-amber/80 shadow-[0_4px_14px_-3px_hsl(38_85%_48%/0.4)]"
           )}
           onClick={handleReserve}

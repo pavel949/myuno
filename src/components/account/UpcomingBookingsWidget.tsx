@@ -146,7 +146,7 @@ export function UpcomingBookingsWidget() {
               onClick={() => navigate(`/bookings/${booking.id}`)}
               className={cn(
                 "w-full flex items-center gap-3 p-3 rounded-none text-left transition-colors",
-                "hover:bg-muted/50 active:scale-[0.98]",
+                "hover:bg-muted/50 ",
                 isUrgent && "bg-primary/5 border border-primary/20"
               )}
             >

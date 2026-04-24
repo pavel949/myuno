@@ -84,7 +84,7 @@ export const ContextualRecommendations = memo(function ContextualRecommendations
               className={cn(
                 'flex-shrink-0 w-[160px] snap-start',
                 'rounded-none bg-card border border-border/50',
-                'hover:border-primary/30 active:scale-[0.98]',
+                'hover:border-primary/30 ',
                 'transition-all touch-manipulation text-left overflow-hidden',
               )}
             >

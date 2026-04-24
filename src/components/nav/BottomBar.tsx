@@ -15,7 +15,6 @@ import { LayoutGrid } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
-import { triggerRipple } from '@/hooks/useRipple';
 import { playSound } from '@/hooks/useSoundEffects';
 import { getFeedbackSettings } from '@/hooks/useFeedbackSettings';
 import { usePrefetchRoute } from '@/hooks/usePrefetch';
@@ -78,7 +77,6 @@ export const BottomBar = forwardRef<HTMLDivElement, BottomBarProps>(
     const showAppsButton = shouldShowAppsLauncher(role);
 
     const handleNavClick = (e: React.MouseEvent<HTMLElement>) => {
-      triggerRipple(e);
       const settings = getFeedbackSettings();
       if (settings.hapticEnabled) triggerHaptic('light');
       if (settings.soundEnabled) playSound('click');

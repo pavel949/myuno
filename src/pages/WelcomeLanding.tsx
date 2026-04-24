@@ -184,7 +184,7 @@ export default function WelcomeLanding() {
               )}
             >
               {isRu ? 'Создать аккаунт' : 'Create account'}
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" strokeWidth={2.5} />
+              <ArrowRight className="h-4 w-4 transition-transform " strokeWidth={2.5} />
             </Link>
             <Link
               to="/auth"
@@ -350,7 +350,7 @@ export default function WelcomeLanding() {
               )}
             >
               {isRu ? 'Начать сейчас' : 'Start now'}
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" strokeWidth={2.5} />
+              <ArrowRight className="h-4 w-4 transition-transform " strokeWidth={2.5} />
             </Link>
           </div>
 

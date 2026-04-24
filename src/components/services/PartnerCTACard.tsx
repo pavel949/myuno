@@ -49,7 +49,7 @@ export function PartnerCTACard() {
           "bg-gradient-to-br from-primary via-primary/90 to-accent",
           "p-5 text-left",
           "shadow-lg hover:shadow-xl transition-all duration-300",
-          "hover:scale-[1.01] active:scale-[0.99]",
+          "",
           "group"
         )}
       >
@@ -81,7 +81,7 @@ export function PartnerCTACard() {
               <span className="text-sm font-medium">
                 {isRu ? 'Начать' : 'Start'}
               </span>
-              <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              <ChevronRight className="w-4 h-4 transition-transform" />
             </div>
           </div>
           

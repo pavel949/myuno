@@ -173,7 +173,6 @@ export default function PropertyInquiry() {
 
   // Cleared on successful submit (see navigate(`/bookings/:id`) handler below).
 
-
   // rentalTerms already derived above from property
   // Autofill from profile
   useEffect(() => {

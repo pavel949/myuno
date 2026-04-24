@@ -343,7 +343,7 @@ export default function SOS() {
                 key={action.id}
                 onClick={() => handleCall(action.phone)}
                 className={cn(
-                  "flex flex-col items-center p-3 rounded-none border transition-all active:scale-95",
+                  "flex flex-col items-center p-3 rounded-none border transition-all ",
                   action.bg, "border-transparent hover:border-current/20"
                 )}
               >

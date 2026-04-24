@@ -12,22 +12,22 @@ import type { Variants, Transition } from 'framer-motion';
 export const CARD_ANIMATIONS = {
   /** Image hover zoom - subtle 3% scale for elegance */
   imageHover: {
-    className: 'transition-transform duration-300 group-hover:scale-[1.03]',
+    className: 'transition-transform duration-300 ',
   },
   
   /** Card lift on hover - shadow + subtle translate */
   cardHover: {
-    className: 'transition-all duration-200 hover:shadow-md hover:-translate-y-0.5',
+    className: 'transition-all duration-200 hover:shadow-md ',
   },
   
   /** Button press feedback */
   buttonPress: {
-    className: 'active:scale-[0.98] transition-transform duration-100',
+    className: 'transition-transform duration-100',
   },
   
   /** Icon bounce on parent hover */
   iconHover: {
-    className: 'group-hover:scale-110 transition-transform duration-200',
+    className: 'transition-transform duration-200',
   },
   
   /** Fade in with subtle upward motion */

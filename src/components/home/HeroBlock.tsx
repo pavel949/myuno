@@ -38,7 +38,7 @@ function HeroSearchInput({ isRu }: { isRu: boolean }) {
       <button
         onClick={handleSubmit}
         aria-label={isRu ? 'Искать' : 'Search'}
-        className="flex items-center justify-center w-9 h-9 rounded-none bg-primary text-primary-foreground shrink-0 hover:bg-primary-hover active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        className="flex items-center justify-center w-9 h-9 rounded-none bg-primary text-primary-foreground shrink-0 hover:bg-primary-hover transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       >
         <ArrowRight className="w-4 h-4" />
       </button>
@@ -274,7 +274,7 @@ export const HeroBlock = memo(function HeroBlock() {
         <Link 
           to={APP_ROUTES.SOS}
           aria-label="SOS"
-          className="sos-pulse flex items-center gap-2 px-4 py-2 min-h-[44px] rounded-[var(--radius-full)] transition-all hover:scale-105 bg-destructive/15 border border-destructive/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive focus-visible:ring-offset-2"
+          className="sos-pulse flex items-center gap-2 px-4 py-2 min-h-[44px] rounded-[var(--radius-full)] transition-all bg-destructive/15 border border-destructive/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive focus-visible:ring-offset-2"
         >
           <div className="w-2 h-2 rounded-full bg-destructive animate-pulse" aria-hidden />
           <span className="text-sm font-semibold text-destructive">SOS</span>

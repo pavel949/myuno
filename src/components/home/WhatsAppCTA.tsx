@@ -61,7 +61,7 @@ export function WhatsAppCTA({ className }: { className?: string }) {
           target="_blank"
           rel="noopener noreferrer"
           aria-label={isRu ? 'Написать в WhatsApp' : 'Open WhatsApp chat'}
-          className="flex items-center gap-2 px-5 py-3 rounded-[var(--radius-full)] font-bold text-sm shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all shrink-0 min-h-[44px] bg-white text-[hsl(var(--primary-hover))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--primary))]"
+          className="flex items-center gap-2 px-5 py-3 rounded-[var(--radius-full)] font-bold text-sm shadow-lg hover:shadow-xl transition-all shrink-0 min-h-[44px] bg-white text-[hsl(var(--primary-hover))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--primary))]"
         >
           <span className="relative">
             <MessageCircle className="w-4 h-4" aria-hidden />

@@ -409,8 +409,7 @@ export function OtaImportPanel({ onDataExtracted }: OtaImportPanelProps) {
                           className={`
                             flex items-center gap-2.5 p-3 rounded-none border transition-all text-left
                             ${channel.bgColor} ${channel.borderColor}
-                            hover:scale-[1.02] active:scale-[0.98]
-                          `}
+                                                      `}
                         >
                           <span className="text-xl shrink-0">{channel.icon}</span>
                           <span className="text-sm font-medium truncate">{channel.name}</span>

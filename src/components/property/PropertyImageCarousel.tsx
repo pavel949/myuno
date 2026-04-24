@@ -126,7 +126,7 @@ export function PropertyImageCarousel({
           "absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-background/90 shadow-md",
           "flex items-center justify-center",
           "opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-200",
-          "hover:bg-background hover:shadow-lg hover:scale-105",
+          "hover:bg-background hover:shadow-lg ",
           selectedIndex === 0 && "hidden"
         )}
         aria-label="Previous"
@@ -139,7 +139,7 @@ export function PropertyImageCarousel({
           "absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-background/90 shadow-md",
           "flex items-center justify-center",
           "opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-200",
-          "hover:bg-background hover:shadow-lg hover:scale-105",
+          "hover:bg-background hover:shadow-lg ",
           selectedIndex === allImages.length - 1 && "hidden"
         )}
         aria-label="Next"

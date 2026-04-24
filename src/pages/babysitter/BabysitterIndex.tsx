@@ -157,7 +157,7 @@ export default function BabysitterIndex() {
                       alt={name}
                       width={400}
                       height={533}
-                      className="w-full h-full group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-full transition-transform duration-300"
                       quality={80}
                     />
                     {bs.isFeatured && (

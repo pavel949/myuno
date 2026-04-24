@@ -16,7 +16,6 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { ConciergeAdvanceOption } from '@/components/booking/ConciergeAdvanceOption';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import { triggerRipple } from '@/hooks/useRipple';
 import { supabase } from '@/integrations/supabase/client';
 import { BackButton } from '@/components/uno/BackButton';
 import { AddressPickerInput, BookingStepProgress, deliveryBookingSteps } from '@/components/booking';
@@ -586,11 +585,10 @@ const FlowersOrder = () => {
                       key={slot.id}
                       type="button"
                       onClick={(e) => {
-                        triggerRipple(e);
                         setFormData({ ...formData, deliverySlot: slot.id });
                       }}
                       className={cn(
-                        "relative overflow-hidden p-3 rounded-none border text-center transition-all active:scale-95",
+                        "relative overflow-hidden p-3 rounded-none border text-center transition-all ",
                         formData.deliverySlot === slot.id
                           ? "border-primary bg-primary/10"
                           : "border-border hover:border-primary/30"
