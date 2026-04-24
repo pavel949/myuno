@@ -55,6 +55,27 @@ export default function PropertyInquiry() {
   const { data: property } = usePropertyWithRentalTerms(id);
   const rentalTerms = property?.rentalTerms;
   const isInstantBooking = !!(property?.instant_booking || rentalTerms?.instant_booking);
+
+  // 6-tracks guard: STR booking flow only supports short-stay listings.
+  // If owner has switched the listing to medium/long-only or sale-only, redirect
+  // back to the detail page (which renders the correct lead-form CTA).
+  const tenancyModes: string[] = Array.isArray((property as any)?.tenancy_modes)
+    ? ((property as any).tenancy_modes as string[])
+    : [];
+  const supportsShortStay = tenancyModes.length > 0
+    ? tenancyModes.includes('short')
+    : !!(property?.price_per_night || (rentalTerms as any)?.price_per_night);
+  useEffect(() => {
+    if (!property) return;
+    if (!supportsShortStay) {
+      toast.info(
+        isRu
+          ? 'Этот объект сдаётся на длительный срок — оставьте запрос менеджеру.'
+          : 'This listing is for long-term rental — please send a request to the manager.',
+      );
+      navigate(`/property/${id}`, { replace: true });
+    }
+  }, [property, supportsShortStay, isRu, navigate, id]);
   // Get dates and guests from URL params (set on the property detail page)
   const checkInParam = searchParams.get('checkIn');
   const checkOutParam = searchParams.get('checkOut');

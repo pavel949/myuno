@@ -138,6 +138,16 @@ export default function PropertyDetail() {
   const pricePerNight = rentalTerms?.price_per_night || property.price || 0;
   const isSaleListing = property.listing_type === 'sale' || Boolean(property.is_for_sale);
   const salePrice = property.sale_price ?? (isSaleListing ? property.price : undefined) ?? 0;
+  // 6-tracks: detect short/medium/long rental support. When tenancy_modes is
+  // explicitly set, respect it; otherwise fall back to legacy nightly-price
+  // signal so existing listings keep showing the booking card.
+  const tenancyModes: string[] = Array.isArray((property as any).tenancy_modes)
+    ? (property as any).tenancy_modes
+    : [];
+  const supportsShortStay = tenancyModes.length > 0
+    ? tenancyModes.includes('short')
+    : !!pricePerNight;
+  const isLongStayOnly = tenancyModes.length > 0 && !supportsShortStay;
   const viewTypes = normalizeViewTypes(property.view_type);
   const viewLabels = viewTypes.map((vt) => viewTypeLabels[vt]).filter(Boolean);
 
@@ -546,11 +556,38 @@ export default function PropertyDetail() {
                 'lg:max-h-[calc(100vh-5.5rem)] lg:overflow-y-auto lg:overscroll-contain lg:pr-1',
               )}
             >
-              {isSaleListing ? (
+              {(isSaleListing || isLongStayOnly) ? (
                 <Card>
                   <CardContent className="p-4 space-y-3">
-                    <p className="text-sm text-muted-foreground">{isRu ? 'Цена' : 'Asking price'}</p>
-                    <p className="text-2xl font-bold">{formatPrice(salePrice)}</p>
+                    {isSaleListing ? (
+                      <>
+                        <p className="text-sm text-muted-foreground">{isRu ? 'Цена' : 'Asking price'}</p>
+                        <p className="text-2xl font-bold">{formatPrice(salePrice)}</p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-sm text-muted-foreground">
+                          {tenancyModes.includes('long')
+                            ? (isRu ? 'Долгосрочная аренда' : 'Long-term rental')
+                            : (isRu ? 'Среднесрочная аренда' : 'Medium-term rental')}
+                        </p>
+                        {(property as any).price_per_month && (
+                          <p className="text-2xl font-bold">
+                            {formatPrice((property as any).price_per_month)}
+                            <span className="text-sm font-normal text-muted-foreground ml-1">
+                              /{isRu ? 'мес' : 'mo'}
+                            </span>
+                          </p>
+                        )}
+                        {(property as any).min_lease_months && (
+                          <p className="text-xs text-muted-foreground">
+                            {isRu
+                              ? `Минимальный срок: ${(property as any).min_lease_months} мес.`
+                              : `Minimum lease: ${(property as any).min_lease_months} months`}
+                          </p>
+                        )}
+                      </>
+                    )}
                     {ownershipLabel && <p className="text-sm">{ownershipLabel}</p>}
                     <MessageHostButton
                       propertyId={id || 'prop-1'}
@@ -559,8 +596,8 @@ export default function PropertyDetail() {
                       ownerName={rentalTerms?.manager_name}
                       variant="default"
                       fullWidth
-                      labelRu="Запросить консультацию"
-                      labelEn="Request consultation"
+                      labelRu={isSaleListing ? 'Запросить консультацию' : 'Запросить аренду'}
+                      labelEn={isSaleListing ? 'Request consultation' : 'Request rental'}
                     />
                     <div className="rounded-none border border-border/60 bg-muted/20 px-3 py-2.5 text-xs text-muted-foreground leading-snug">
                       <p>

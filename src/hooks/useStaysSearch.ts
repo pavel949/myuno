@@ -47,6 +47,8 @@ export interface StaysListingRow {
   currency: string | null;
   min_stay_nights: number | null;
   listing_modes?: string[] | null;
+  tenancy_modes?: string[] | null;
+  sale_intent?: string | null;
   amenities?: string[] | null;
 }
 
@@ -84,7 +86,7 @@ async function fetchCandidateProperties(
   let q = supabase
     .from('properties')
     .select(
-      'id, title_ru, title_en, district, cover_image, images, bedrooms, max_guests, property_type, price_per_night, price, currency, min_stay_nights, listing_modes, amenities',
+      'id, title_ru, title_en, district, cover_image, images, bedrooms, max_guests, property_type, price_per_night, price, currency, min_stay_nights, listing_modes, tenancy_modes, sale_intent, amenities',
     )
     .eq('is_active', true)
     .eq('approval_status', PUBLIC_CATALOG_APPROVAL_STATUS);
@@ -113,15 +115,25 @@ async function fetchCandidateProperties(
     rows = rows.filter((r) => nightlyRate(r) <= filters.priceMax!);
   }
 
+  // Strict STR filter: prefer the new `tenancy_modes` enum, fall back to the
+  // legacy `listing_modes` regex only when tenancy_modes is unset (legacy rows).
+  // Always exclude pure sale-only listings (sale_intent set, no tenancy_modes).
   const shortTermOnly = rows.filter((r) => {
+    if (Array.isArray(r.tenancy_modes) && r.tenancy_modes.length > 0) {
+      return r.tenancy_modes.includes('short');
+    }
+    // Legacy fallback for rows without tenancy_modes:
+    if (r.sale_intent && r.sale_intent !== 'none' && !r.price_per_night) {
+      return false; // sale-only listing
+    }
     const modes = r.listing_modes;
     if (modes && Array.isArray(modes) && modes.length > 0) {
-      return modes.some((m) => /short|vacation|night|daily/i.test(String(m)));
+      return modes.some((m) => /short|vacation|night|daily|rent/i.test(String(m)));
     }
-    return true;
+    return !!r.price_per_night; // last-resort: has nightly price
   });
 
-  return shortTermOnly.length > 0 ? shortTermOnly : rows;
+  return shortTermOnly;
 }
 
 async function excludeUnavailableByCalendar(
