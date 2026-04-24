@@ -242,6 +242,37 @@ export function ClearViewReport({ projectId, isBrokered }: Props) {
             </div>
           )}
 
+          {/* P8 trigger — Full Report CTA. IPP §12 step 5. Hidden for admins
+              who already have raw access. */}
+          {!isAdmin && (
+            <Link
+              to={`${APP_ROUTES.CLEARVIEW_APPLY}?project=${projectId}`}
+              className="flex items-center justify-between gap-3 px-4 py-3 rounded-none border transition-colors"
+              style={{
+                borderColor: 'hsl(var(--nb-gold) / 0.4)',
+                background: 'hsl(var(--nb-gold) / 0.06)',
+              }}
+              onClick={() => track({
+                eventType: 'clearview_summary_open',
+                projectId,
+                meta: { cta: 'get_full_report' },
+              })}
+            >
+              <div className="flex items-center gap-2.5">
+                <FileText className="w-4 h-4" style={{ color: 'hsl(var(--nb-gold))' }} />
+                <div>
+                  <div className="text-sm font-semibold" style={{ color: 'hsl(var(--nb-text))' }}>
+                    Полный отчёт ClearView™ · ฿4,900
+                  </div>
+                  <div className="text-[11px]" style={{ color: 'hsl(var(--nb-muted))' }}>
+                    Глубокая верификация · 15 рабочих дней · PDF + личный кабинет
+                  </div>
+                </div>
+              </div>
+              <span className="text-xs font-mono" style={{ color: 'hsl(var(--nb-gold))' }}>→</span>
+            </Link>
+          )}
+
           <p className="text-[10px] pt-2 border-t" style={{ color: 'hsl(var(--nb-muted))', borderColor: 'hsl(var(--nb-gold) / 0.1)' }}>
             ClearView™ — собственная методология оценки в 8 критериях. Не является финансовым или юридическим советом.
             Покупатель обязан провести независимый due diligence.
