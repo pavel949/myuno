@@ -42,16 +42,21 @@ describe('PERSONA_LANDINGS — coverage', () => {
   });
 });
 
-describe('PERSONA_LANDINGS — M10b live promotions', () => {
+describe('PERSONA_LANDINGS — Sprint 1–2 live promotions', () => {
   const expectedLive = [
     'tourists',
+    'digital-nomads',
     'snowbirds',
     'ru-expats',
+    'families',
     'passive-investors',
     'hnw',
     'operators',
     'mn-investors',
     'pet-owners',
+    'medical',
+    'weddings',
+    'retirees',
     'developer-partner',
   ];
 

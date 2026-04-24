@@ -1,160 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
   M6 · Track B.9 — sitemap для persona/cluster лендингов.
-  Только LIVE (status='live') страницы. Draft возвращают 404 на роутах,
-  поэтому индексация для них не нужна.
+  Только LIVE (status='live') страницы. Draft возвращают 404 на роутах.
   Источник: src/content/landings/personaLandings.ts (LIVE_PERSONA_SLUGS)
             src/content/landings/clusterLandings.ts  (LIVE_CLUSTER_SLUGS)
 -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
 
-  <!-- ===== Persona landings (11 live) ===== -->
-  <url>
-    <loc>https://myuno.app/for/tourists</loc>
-    <lastmod>2026-04-24</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/for/tourists?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/for/tourists?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/for/tourists"/>
-  </url>
-  <url>
-    <loc>https://myuno.app/for/digital-nomads</loc>
-    <lastmod>2026-04-24</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/for/digital-nomads?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/for/digital-nomads?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/for/digital-nomads"/>
-  </url>
-  <url>
-    <loc>https://myuno.app/for/snowbirds</loc>
-    <lastmod>2026-04-24</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/for/snowbirds?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/for/snowbirds?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/for/snowbirds"/>
-  </url>
-  <url>
-    <loc>https://myuno.app/for/ru-expats</loc>
-    <lastmod>2026-04-24</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/for/ru-expats?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/for/ru-expats?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/for/ru-expats"/>
-  </url>
-  <url>
-    <loc>https://myuno.app/for/families</loc>
-    <lastmod>2026-04-24</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/for/families?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/for/families?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/for/families"/>
-  </url>
-  <url>
-    <loc>https://myuno.app/for/passive-investors</loc>
-    <lastmod>2026-04-24</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/for/passive-investors?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/for/passive-investors?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/for/passive-investors"/>
-  </url>
-  <url>
-    <loc>https://myuno.app/for/hnw</loc>
-    <lastmod>2026-04-24</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/for/hnw?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/for/hnw?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/for/hnw"/>
-  </url>
-  <url>
-    <loc>https://myuno.app/for/operators</loc>
-    <lastmod>2026-04-24</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/for/operators?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/for/operators?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/for/operators"/>
-  </url>
-  <url>
-    <loc>https://myuno.app/for/mn-investors</loc>
-    <lastmod>2026-04-24</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/for/mn-investors?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/for/mn-investors?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/for/mn-investors"/>
-  </url>
-  <url>
-    <loc>https://myuno.app/for/pet-owners</loc>
-    <lastmod>2026-04-24</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/for/pet-owners?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/for/pet-owners?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/for/pet-owners"/>
-  </url>
-  <url>
-    <loc>https://myuno.app/for/developer-partner</loc>
-    <lastmod>2026-04-24</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/for/developer-partner?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/for/developer-partner?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/for/developer-partner"/>
-  </url>
+  <!-- ===== Persona landings (14 live) ===== -->
+  <url><loc>https://myuno.app/for/tourists</loc><lastmod>2026-04-24</lastmod><changefreq>weekly</changefreq><priority>0.8</priority><xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/for/tourists?lang=ru"/><xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/for/tourists?lang=en"/><xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/for/tourists"/></url>
+  <url><loc>https://myuno.app/for/digital-nomads</loc><lastmod>2026-04-24</lastmod><changefreq>weekly</changefreq><priority>0.8</priority><xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/for/digital-nomads?lang=ru"/><xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/for/digital-nomads?lang=en"/><xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/for/digital-nomads"/></url>
+  <url><loc>https://myuno.app/for/snowbirds</loc><lastmod>2026-04-24</lastmod><changefreq>weekly</changefreq><priority>0.8</priority><xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/for/snowbirds?lang=ru"/><xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/for/snowbirds?lang=en"/><xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/for/snowbirds"/></url>
+  <url><loc>https://myuno.app/for/ru-expats</loc><lastmod>2026-04-24</lastmod><changefreq>weekly</changefreq><priority>0.8</priority><xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/for/ru-expats?lang=ru"/><xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/for/ru-expats?lang=en"/><xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/for/ru-expats"/></url>
+  <url><loc>https://myuno.app/for/families</loc><lastmod>2026-04-24</lastmod><changefreq>weekly</changefreq><priority>0.8</priority><xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/for/families?lang=ru"/><xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/for/families?lang=en"/><xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/for/families"/></url>
+  <url><loc>https://myuno.app/for/passive-investors</loc><lastmod>2026-04-24</lastmod><changefreq>weekly</changefreq><priority>0.8</priority><xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/for/passive-investors?lang=ru"/><xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/for/passive-investors?lang=en"/><xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/for/passive-investors"/></url>
+  <url><loc>https://myuno.app/for/hnw</loc><lastmod>2026-04-24</lastmod><changefreq>weekly</changefreq><priority>0.8</priority><xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/for/hnw?lang=ru"/><xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/for/hnw?lang=en"/><xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/for/hnw"/></url>
+  <url><loc>https://myuno.app/for/operators</loc><lastmod>2026-04-24</lastmod><changefreq>weekly</changefreq><priority>0.8</priority><xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/for/operators?lang=ru"/><xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/for/operators?lang=en"/><xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/for/operators"/></url>
+  <url><loc>https://myuno.app/for/mn-investors</loc><lastmod>2026-04-24</lastmod><changefreq>weekly</changefreq><priority>0.8</priority><xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/for/mn-investors?lang=ru"/><xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/for/mn-investors?lang=en"/><xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/for/mn-investors"/></url>
+  <url><loc>https://myuno.app/for/pet-owners</loc><lastmod>2026-04-24</lastmod><changefreq>weekly</changefreq><priority>0.8</priority><xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/for/pet-owners?lang=ru"/><xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/for/pet-owners?lang=en"/><xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/for/pet-owners"/></url>
+  <url><loc>https://myuno.app/for/medical</loc><lastmod>2026-04-24</lastmod><changefreq>weekly</changefreq><priority>0.8</priority><xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/for/medical?lang=ru"/><xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/for/medical?lang=en"/><xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/for/medical"/></url>
+  <url><loc>https://myuno.app/for/weddings</loc><lastmod>2026-04-24</lastmod><changefreq>weekly</changefreq><priority>0.8</priority><xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/for/weddings?lang=ru"/><xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/for/weddings?lang=en"/><xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/for/weddings"/></url>
+  <url><loc>https://myuno.app/for/retirees</loc><lastmod>2026-04-24</lastmod><changefreq>weekly</changefreq><priority>0.8</priority><xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/for/retirees?lang=ru"/><xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/for/retirees?lang=en"/><xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/for/retirees"/></url>
+  <url><loc>https://myuno.app/for/developer-partner</loc><lastmod>2026-04-24</lastmod><changefreq>weekly</changefreq><priority>0.8</priority><xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/for/developer-partner?lang=ru"/><xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/for/developer-partner?lang=en"/><xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/for/developer-partner"/></url>
 
-  <!-- ===== Cluster landings (5 live) ===== -->
-  <url>
-    <loc>https://myuno.app/cluster/arrival</loc>
-    <lastmod>2026-04-24</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/cluster/arrival?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/cluster/arrival?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/cluster/arrival"/>
-  </url>
-  <url>
-    <loc>https://myuno.app/cluster/investment</loc>
-    <lastmod>2026-04-24</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/cluster/investment?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/cluster/investment?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/cluster/investment"/>
-  </url>
-  <url>
-    <loc>https://myuno.app/cluster/operations</loc>
-    <lastmod>2026-04-24</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/cluster/operations?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/cluster/operations?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/cluster/operations"/>
-  </url>
-  <url>
-    <loc>https://myuno.app/cluster/compliance</loc>
-    <lastmod>2026-04-24</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/cluster/compliance?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/cluster/compliance?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/cluster/compliance"/>
-  </url>
-  <url>
-    <loc>https://myuno.app/cluster/emergency</loc>
-    <lastmod>2026-04-24</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/cluster/emergency?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/cluster/emergency?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/cluster/emergency"/>
-  </url>
+  <!-- ===== Cluster landings (9 live) ===== -->
+  <url><loc>https://myuno.app/cluster/arrival</loc><lastmod>2026-04-24</lastmod><changefreq>weekly</changefreq><priority>0.8</priority><xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/cluster/arrival?lang=ru"/><xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/cluster/arrival?lang=en"/><xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/cluster/arrival"/></url>
+  <url><loc>https://myuno.app/cluster/extension</loc><lastmod>2026-04-24</lastmod><changefreq>weekly</changefreq><priority>0.8</priority><xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/cluster/extension?lang=ru"/><xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/cluster/extension?lang=en"/><xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/cluster/extension"/></url>
+  <url><loc>https://myuno.app/cluster/settlement</loc><lastmod>2026-04-24</lastmod><changefreq>weekly</changefreq><priority>0.8</priority><xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/cluster/settlement?lang=ru"/><xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/cluster/settlement?lang=en"/><xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/cluster/settlement"/></url>
+  <url><loc>https://myuno.app/cluster/investment</loc><lastmod>2026-04-24</lastmod><changefreq>weekly</changefreq><priority>0.8</priority><xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/cluster/investment?lang=ru"/><xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/cluster/investment?lang=en"/><xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/cluster/investment"/></url>
+  <url><loc>https://myuno.app/cluster/transaction</loc><lastmod>2026-04-24</lastmod><changefreq>weekly</changefreq><priority>0.8</priority><xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/cluster/transaction?lang=ru"/><xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/cluster/transaction?lang=en"/><xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/cluster/transaction"/></url>
+  <url><loc>https://myuno.app/cluster/operations</loc><lastmod>2026-04-24</lastmod><changefreq>weekly</changefreq><priority>0.8</priority><xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/cluster/operations?lang=ru"/><xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/cluster/operations?lang=en"/><xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/cluster/operations"/></url>
+  <url><loc>https://myuno.app/cluster/compliance</loc><lastmod>2026-04-24</lastmod><changefreq>weekly</changefreq><priority>0.8</priority><xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/cluster/compliance?lang=ru"/><xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/cluster/compliance?lang=en"/><xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/cluster/compliance"/></url>
+  <url><loc>https://myuno.app/cluster/emergency</loc><lastmod>2026-04-24</lastmod><changefreq>weekly</changefreq><priority>0.8</priority><xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/cluster/emergency?lang=ru"/><xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/cluster/emergency?lang=en"/><xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/cluster/emergency"/></url>
+  <url><loc>https://myuno.app/cluster/lifestyle</loc><lastmod>2026-04-24</lastmod><changefreq>weekly</changefreq><priority>0.8</priority><xhtml:link rel="alternate" hreflang="ru" href="https://myuno.app/cluster/lifestyle?lang=ru"/><xhtml:link rel="alternate" hreflang="en" href="https://myuno.app/cluster/lifestyle?lang=en"/><xhtml:link rel="alternate" hreflang="x-default" href="https://myuno.app/cluster/lifestyle"/></url>
 
 </urlset>
