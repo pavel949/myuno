@@ -149,6 +149,49 @@ export interface PropertyFormData {
   hotel_management_status?: string;
   hotel_operator_name?: string;
   hotel_year_renovated?: number;
+  // ─── 6-tracks model (rent short / medium / long, sale, assignment, quick-sale) ───
+  /** Which tenancy modes this property supports (multi-select). */
+  tenancy_modes?: Array<'short' | 'medium' | 'long'>;
+  price_per_month?: string; // medium-term THB/mo
+  price_per_year?: string;  // long-term THB/yr
+  deposit_months_long?: number;  // standard 2
+  advance_months_long?: number;  // standard 1
+  min_lease_months?: number;     // 1, 6, 12
+  utilities_included_long?: string[]; // electricity, water, internet, cleaning, cam
+  tm30_registration_supported?: boolean;
+  // Sale intent
+  sale_intent?: 'standard' | 'assignment' | 'quick_sale';
+  is_assignment?: boolean;
+  assignment_premium?: string;          // THB premium over original contract
+  original_contract_price?: string;     // THB SPA price
+  remaining_to_developer?: string;      // THB still owed
+  spa_stage?: string;
+  transfer_fee_split?: 'buyer' | 'seller' | '50_50';
+  // Quick sale
+  is_quick_sale?: boolean;
+  quick_sale_reason?: string;
+  quick_sale_discount_pct?: number;
+  urgency_deadline?: string; // YYYY-MM-DD
+  // Payment options for sale/assignment
+  accepts_installments?: boolean;
+  installment_plan?: Array<{
+    id: string;
+    labelEn: string;
+    labelRu: string;
+    percent: number;
+    dueAt?: string;
+    dueAtRu?: string;
+  }>;
+  escrow_offered?: boolean;
+  escrow_provider?: 'platform' | 'lawyer' | 'bank' | 'other';
+  // Legal readiness (без SoF на покупателе)
+  title_deed_url?: string;
+  encumbrances_disclosed?: boolean;
+  encumbrances_description?: string;
+  foreign_quota_available?: boolean;
+  // Video tour
+  video_file_url?: string;     // uploaded mp4 in Supabase Storage
+  virtual_tour_url?: string;   // Matterport / Kuula / 360
 }
 
 const initialFormData: PropertyFormData = {
@@ -213,6 +256,18 @@ const initialFormData: PropertyFormData = {
   deposit_currency: 'USD',
   negotiation_enabled: false,
   lock_code: '',
+  // 6-tracks defaults
+  tenancy_modes: [],
+  deposit_months_long: 2,
+  advance_months_long: 1,
+  utilities_included_long: [],
+  tm30_registration_supported: false,
+  is_assignment: false,
+  is_quick_sale: false,
+  accepts_installments: false,
+  escrow_offered: false,
+  encumbrances_disclosed: false,
+  installment_plan: [],
 };
 
 const initialOwnershipData: OwnershipData = {
@@ -315,6 +370,36 @@ function mapPropertyToFormData(property: any): PropertyFormData {
     land_size_sqm: property.land_size_sqm ?? undefined,
     land_size_rai: property.land_size_rai ?? undefined,
     frontage_m: property.frontage_m ?? undefined,
+    // 6-tracks
+    tenancy_modes: Array.isArray(property.tenancy_modes) ? property.tenancy_modes : [],
+    price_per_month: property.price_per_month != null ? String(property.price_per_month) : '',
+    price_per_year: property.price_per_year != null ? String(property.price_per_year) : '',
+    deposit_months_long: property.deposit_months_long ?? 2,
+    advance_months_long: property.advance_months_long ?? 1,
+    min_lease_months: property.min_lease_months ?? undefined,
+    utilities_included_long: property.utilities_included_long || [],
+    tm30_registration_supported: property.tm30_registration_supported ?? false,
+    sale_intent: property.sale_intent ?? undefined,
+    is_assignment: property.is_assignment ?? false,
+    assignment_premium: property.assignment_premium != null ? String(property.assignment_premium) : '',
+    original_contract_price: property.original_contract_price != null ? String(property.original_contract_price) : '',
+    remaining_to_developer: property.remaining_to_developer != null ? String(property.remaining_to_developer) : '',
+    spa_stage: property.spa_stage ?? undefined,
+    transfer_fee_split: property.transfer_fee_split ?? undefined,
+    is_quick_sale: property.is_quick_sale ?? false,
+    quick_sale_reason: property.quick_sale_reason ?? undefined,
+    quick_sale_discount_pct: property.quick_sale_discount_pct ?? undefined,
+    urgency_deadline: property.urgency_deadline ?? undefined,
+    accepts_installments: property.accepts_installments ?? false,
+    installment_plan: Array.isArray(property.installment_plan) ? property.installment_plan : [],
+    escrow_offered: property.escrow_offered ?? false,
+    escrow_provider: property.escrow_provider ?? undefined,
+    title_deed_url: property.title_deed_url || '',
+    encumbrances_disclosed: property.encumbrances_disclosed ?? false,
+    encumbrances_description: property.encumbrances_description || '',
+    foreign_quota_available: property.foreign_quota_available ?? undefined,
+    video_file_url: property.video_file_url || '',
+    virtual_tour_url: property.virtual_tour_url || '',
   };
 }
 
