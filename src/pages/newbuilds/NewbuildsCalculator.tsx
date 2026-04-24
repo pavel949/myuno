@@ -13,6 +13,7 @@ import { NewbuildsHero } from '@/components/newbuilds/NewbuildsHero';
 import { NbROICalculator } from '@/components/newbuilds/NbROICalculator';
 import { useNewbuildProjects } from '@/hooks/useNewbuildProjects';
 import { useContextualOffplanMatches } from '@/hooks/useContextualMatches';
+import { useContextualMatchTelemetry } from '@/hooks/useContextualMatchTelemetry';
 import { ContextualCTA, type ContextualAction } from '@/components/shared/ContextualCTA';
 import { useIPPLeadEvent } from '@/hooks/useIPPLeadEvent';
 import { APP_ROUTES } from '@/lib/config/routes';
