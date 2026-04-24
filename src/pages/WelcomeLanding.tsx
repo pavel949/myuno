@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
+import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
 import { cn } from '@/lib/utils';
 import { CLUSTERS, CATEGORIES } from '@/lib/catalog/taxonomy';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -78,6 +79,7 @@ export default function WelcomeLanding() {
           </Link>
 
           <div className="flex items-center gap-1.5">
+            <ThemeSwitcher variant="buttons" size="sm" />
             <LanguageSwitcher />
             <Link
               to="/auth"
