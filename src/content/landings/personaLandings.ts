@@ -1283,6 +1283,7 @@ export const PERSONA_LANDINGS: readonly PersonaLanding[] = [
 
 export const LIVE_PERSONA_SLUGS: readonly string[] = [
   'tourists',          // P1
+  'eu-guests',         // P3  — Sprint 3
   'digital-nomads',    // P4  — Sprint 1
   'snowbirds',         // P5  — M10b
   'ru-expats',         // P6  — M10b
@@ -1294,6 +1295,8 @@ export const LIVE_PERSONA_SLUGS: readonly string[] = [
   'pet-owners',        // P13
   'medical',           // P14 — Sprint 2
   'weddings',          // P15 — Sprint 2
+  'athletes',          // P16 — Sprint 3
+  'halal',             // P17 — Sprint 3
   'retirees',          // P20 — Sprint 2
   'developer-partner', // P22 — M10b
 ] as const;
