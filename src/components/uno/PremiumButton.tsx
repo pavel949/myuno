@@ -2,7 +2,6 @@ import React from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
-import { triggerRipple } from '@/hooks/useRipple';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
 import { playSound } from '@/hooks/useSoundEffects';
 import { getFeedbackSettings } from '@/hooks/useFeedbackSettings';

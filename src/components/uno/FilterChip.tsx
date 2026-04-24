@@ -2,7 +2,6 @@ import React, { forwardRef } from 'react';
 import { X, type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
-import { triggerRipple } from '@/hooks/useRipple';
 import { resolveIcon } from '@/lib/iconMap';
 
 interface FilterChipProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {

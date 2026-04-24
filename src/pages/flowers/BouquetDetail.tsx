@@ -9,7 +9,6 @@ import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { triggerRipple } from '@/hooks/useRipple';
 import { useBouquet, SizeVariant } from '@/hooks/useBouquets';
 import { useCartToast } from '@/hooks/useCartToast';
 import { useBuyNowFlowers } from '@/hooks/useBuyNowFlowers';

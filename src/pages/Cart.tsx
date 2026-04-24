@@ -21,7 +21,6 @@ import {
   Clock,
   Users
 } from 'lucide-react';
-import { triggerRipple } from '@/hooks/useRipple';
 import { format, parseISO } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { getCurrencySymbol } from '@/lib/config/currencies';

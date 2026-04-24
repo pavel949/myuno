@@ -2,7 +2,6 @@ import React from 'react';
 import { Star, MapPin, Clock, Users, Shield, BadgeCheck, LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
-import { triggerRipple } from '@/hooks/useRipple';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { iconSizes } from '@/lib/iconMap';

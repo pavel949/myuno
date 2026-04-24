@@ -1,7 +1,6 @@
 import React, { forwardRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { triggerRipple } from '@/hooks/useRipple';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
 import { playSound } from '@/hooks/useSoundEffects';
 import { getFeedbackSettings } from '@/hooks/useFeedbackSettings';

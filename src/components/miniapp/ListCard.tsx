@@ -2,8 +2,6 @@ import React from 'react';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { Star, Clock, Users, MapPin, BadgeCheck, LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { triggerRipple } from '@/hooks/useRipple';
-
 interface ListCardMeta {
   icon: LucideIcon;
   value: string | number;

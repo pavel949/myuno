@@ -7,7 +7,6 @@ import { useCurrency } from '@/contexts/CurrencyContext';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { triggerRipple } from '@/hooks/useRipple';
 import { StickyCartBar } from '@/components/cart/StickyCartBar';
 import { useCartToast } from '@/hooks/useCartToast';
 import { useSupabaseSingle, useSupabaseQuery, QueryFilter } from '@/hooks/useSupabaseQuery';

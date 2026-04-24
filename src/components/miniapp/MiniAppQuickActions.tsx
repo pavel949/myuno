@@ -1,6 +1,5 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { triggerRipple } from '@/hooks/useRipple';
 import { resolveIcon } from '@/lib/iconMap';
 import { Box, type LucideIcon } from 'lucide-react';
 

@@ -13,7 +13,6 @@ import { useUserContext, type AppRole } from '@/hooks/useUserContext';
 import { useOwnerAccess } from '@/hooks/useOwnerAccess';
 import { useIsDesktop } from '@/hooks/use-desktop';
 import { cn } from '@/lib/utils';
-import { triggerRipple } from '@/hooks/useRipple';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
 import { playSound } from '@/hooks/useSoundEffects';
 import { getFeedbackSettings } from '@/hooks/useFeedbackSettings';

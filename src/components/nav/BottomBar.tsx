@@ -15,7 +15,6 @@ import { LayoutGrid } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
-import { triggerRipple } from '@/hooks/useRipple';
 import { playSound } from '@/hooks/useSoundEffects';
 import { getFeedbackSettings } from '@/hooks/useFeedbackSettings';
 import { usePrefetchRoute } from '@/hooks/usePrefetch';

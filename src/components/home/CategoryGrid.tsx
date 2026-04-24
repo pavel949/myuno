@@ -4,7 +4,6 @@ import { Package } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCategories, Category, CategoryGroup } from '@/hooks/useCategories';
 import { cn } from '@/lib/utils';
-import { triggerRipple } from '@/hooks/useRipple';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 
