@@ -91,6 +91,8 @@ const loadingValue: GoogleMapsContextValue = {
 };
 
 export function GoogleMapsProvider({ children }: { children: React.ReactNode }) {
+  const { language: appLang } = useLanguage();
+  const mapsLanguage = resolveMapsLanguage(appLang);
   const [apiKey, setApiKey] = useState<string | null>(getGoogleMapsKey());
   const [fetched, setFetched] = useState(!!apiKey);
 
