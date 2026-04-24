@@ -349,16 +349,22 @@ const AreaLandingPage = () => {
 
         {/* Rental listings */}
         <section className="mb-10">
-          <div className="mb-4 flex items-end justify-between">
+          <div className="mb-4 flex items-end justify-between gap-3">
             <h2 className="text-xl font-semibold text-foreground">
               {isRu ? `Аренда в ${name}` : `Rentals in ${name}`}
             </h2>
-            <Link
-              to={rentSearchHref}
-              className="text-sm font-medium text-primary hover:underline"
-            >
-              {isRu ? 'Все объекты →' : 'View all →'}
-            </Link>
+            <div className="flex shrink-0 items-center gap-3 text-sm font-medium">
+              <Link
+                to={rentMapHref}
+                className="inline-flex items-center gap-1 text-primary hover:underline"
+              >
+                <MapIcon className="h-3.5 w-3.5" aria-hidden />
+                {isRu ? 'На карте' : 'Map'}
+              </Link>
+              <Link to={rentSearchHref} className="text-primary hover:underline">
+                {isRu ? 'Все объекты →' : 'View all →'}
+              </Link>
+            </div>
           </div>
           {rentalSurfaces.length === 0 ? (
             <p className="rounded-md border border-dashed border-border bg-muted/30 p-6 text-center text-sm text-muted-foreground">
