@@ -340,6 +340,10 @@ export const APP_ROUTES = {
   KIDS: '/kids',
   NOMAD_GUIDE: '/nomad-guide',
 
+  // ── Area landings (public, indexable) ──
+  AREA_INDEX: '/area',
+  AREA_DETAIL: (slug: string) => `/area/${slug}`,
+
   // ── Info Pages ──
   ABOUT: '/about',
   HOW_IT_WORKS: '/how-it-works',

@@ -80,6 +80,10 @@ export const NewbuildsAreaGuides = lazy(() => import('@/pages/newbuilds/Newbuild
 export const NewbuildsAreaDetail = lazy(() => import('@/pages/newbuilds/NewbuildsAreaDetail'));
 export const NewbuildsDueDiligence = lazy(() => import('@/pages/newbuilds/NewbuildsDueDiligence'));
 
+// ── Area landings (public, /area, /area/:slug) ──
+export const AreaIndexPage = lazy(() => import('@/pages/area/AreaIndexPage'));
+export const AreaLandingPage = lazy(() => import('@/pages/area/AreaLandingPage'));
+
 // ── Developer Portal ──
 export const DeveloperPortalLayout = lazy(() => import('@/components/newbuilds/DeveloperPortalLayout'));
 export const DeveloperApply = lazy(() => import('@/pages/developer-portal/DeveloperApply'));

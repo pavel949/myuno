@@ -946,6 +946,10 @@ export const AnimatedRoutes: React.FC = () => {
         {/* Same 200/404 contract as `/for/:persona`. */}
         <Route path="/cluster/:cluster" element={<LazyPage><ClusterLandingPage /></LazyPage>} />
 
+        {/* ── Area Landings (public, indexable) ── */}
+        <Route path="/area" element={<LazyPage><Pages.AreaIndexPage /></LazyPage>} />
+        <Route path="/area/:slug" element={<LazyPage><Pages.AreaLandingPage /></LazyPage>} />
+
         {/* ── Catch-all ── */}
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
       </Routes>
