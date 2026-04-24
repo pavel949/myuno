@@ -45,6 +45,7 @@ describe('PERSONA_LANDINGS — coverage', () => {
 describe('PERSONA_LANDINGS — Sprint 1–2 live promotions', () => {
   const expectedLive = [
     'tourists',
+    'eu-guests',
     'digital-nomads',
     'snowbirds',
     'ru-expats',
@@ -56,6 +57,8 @@ describe('PERSONA_LANDINGS — Sprint 1–2 live promotions', () => {
     'pet-owners',
     'medical',
     'weddings',
+    'athletes',
+    'halal',
     'retirees',
     'developer-partner',
   ];
