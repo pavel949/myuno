@@ -91,8 +91,12 @@ export interface CatalogFilterSourceOptions {
   /** From AirbnbSearchBar / URL */
   minGuestsFromSearch?: number;
   instantBookingFromSearch?: boolean;
-  /** Nightly STR vs monthly/yearly rent */
-  rentTenancy?: 'short' | 'long';
+  /** Nightly STR vs medium (1m+) vs long-term rent */
+  rentTenancy?: 'short' | 'medium' | 'long';
+  /** Sale intent: standard | assignment | quick_sale */
+  saleIntent?: 'standard' | 'assignment' | 'quick_sale';
+  /** Show only quick / distressed sales */
+  isQuickSale?: boolean;
 }
 
 /**
