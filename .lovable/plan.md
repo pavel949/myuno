@@ -1,164 +1,231 @@
 
 
-# Унификация CRM — план без потери MC-клиента
+# Stage 4 — Унификация Outreach Engine (без потерь)
 
-## Главный вывод по данным
+## Что нашёл фактически (важная корректировка)
 
-| Таблица | Строк | Владелец | RLS |
-|---|---|---|---|
-| `crm_contacts` (MC CRM) | **386 живых** | `company_id` (multi-tenant MC) | по company_id + members |
-| `capital_contacts` (Capital CRM) | 0 | `user_id` (per-agent) | personal |
-| `vendor_prospects` (Admin аутрич) | 0 | `assigned_manager_id` | admin + assignee |
+В БД нет `outreach_campaigns`. Вместо одного движка работают **четыре независимых системы** с разными моделями владения, каналами и состоянием:
 
-**Решение продиктовано данными:** MC уже работает на `crm_contacts` (386 контактов, 90+ полей, lifecycle, KYC, addresses, pipeline_stage). Эта таблица — самая зрелая и единственная, где есть real-money data. **Сливать таблицы нельзя** — это сломает RLS и данные клиента. Можно и нужно унифицировать **слой выше** — единый интерфейс контакта с маршрутизацией по контексту.
+| Система | Таблицы | Цель | Кто пишет | Строк |
+|---|---|---|---|---|
+| **MC Sequences** | `crm_sequences` + `_steps` + `_enrollments` | Многошаговый drip для контактов MC (гости/арендаторы/owners) | MC team (`company_id`) | 0 |
+| **Capital Outreach** | `capital_outreach` + реакции | 1:1 «сегодня позвонить инвестору» feed | Capital agent (`user_id`) | — |
+| **Capital Campaigns** | `capital_campaigns` | Контейнер кампании (fundraise/project) — без сообщений | Capital agent | 0 |
+| **Vendor Outreach** | `vendor_outreach_log` + `_templates` + `vendor-outreach-agent` edge fn | AI-аутрич вендорам (email/WhatsApp/Instagram) с автоfollow-up | Admin | log: 0, templates: **5** |
+| **MCC Campaigns** | `mcc_campaigns` + `_creatives` + `_channel_metrics` | Маркетинговые кампании (acquisition/awareness) с бюджетами и креативами | MCC admin | 0 |
 
-## Архитектурный принцип
+Из 5 систем **только vendor templates содержат данные (5 шаблонов)**. Остальные пусты. MC client (386 контактов в `crm_contacts`) ещё не запускал ни одной sequence. Это даёт максимальную свободу: **можно реально консолидировать, а не только "обернуть фасадом"**.
 
-**Не «один CRM», а «один контакт — три pipeline».** Один человек (Иван Петров) может одновременно быть:
-- арендатором у MC (запись в `crm_contacts`)
-- инвестором в Capital pipeline (запись в `capital_contacts`)
-- не быть vendor prospect
+## Принцип Stage 4
 
-Сейчас это три не связанные записи. Цель — **связать их через `linked_user_id` / `email` / `phone`**, не объединяя физически.
+**Не переписывать рабочие движки, а ввести единый слой "Outreach" поверх них** — общий dispatcher, общую таблицу шаблонов и единый UI-хаб. Источники остаются (RLS не трогаем), но появляется **единый язык: campaign → audience → channel → template → message → response**.
 
 ```text
-                    ┌─────────────────────────┐
-                    │  UnifiedContact (view)  │  ← один SELECT по 3 таблицам
-                    │  + identity matching    │
-                    └────────────┬────────────┘
-              ┌──────────────────┼──────────────────┐
-              ▼                  ▼                  ▼
-       crm_contacts        capital_contacts   vendor_prospects
-       (MC tenant)         (Capital agent)    (Admin acquisition)
-       386 строк           0                   0
+┌──────────────────────────────────────────────────┐
+│           /outreach (Unified Hub)                │
+│   Tabs: Vendors · Investors · Guests/MC · Mktg   │
+└──────────────────────┬───────────────────────────┘
+                       │
+        ┌──────────────┼──────────────┐
+        ▼              ▼              ▼
+   outreach_       outreach_     outreach_
+   templates       messages      audiences (view)
+   (общая)         (общая лог)   (3 источника)
+        │              │
+        └──────────────┴──────► dispatch-outreach (edge fn)
+                                  ├─ vendor: WhatsApp/Email
+                                  ├─ investor: WhatsApp/TG
+                                  └─ guest: Email/WhatsApp
 ```
 
-## План в 4 этапа
+## План в 5 шагов
 
-### Этап 1 — Identity layer (zero-risk, без миграций данных)
+### Шаг 1 — Единая таблица шаблонов `outreach_templates`
 
-Создать таблицу `contact_identities` — единый идентификатор «человека» поверх трёх pipeline:
+Создать `outreach_templates` как объединение `vendor_outreach_templates` + steps из `crm_sequences` + capital templates.
 
 ```text
-contact_identities (
+outreach_templates (
   id uuid PK,
-  primary_email citext,
-  primary_phone text,
-  primary_user_id uuid (FK → auth.users, nullable),
-  display_name text,
-  created_at timestamptz
-)
-
-contact_identity_links (
-  identity_id uuid FK,
-  source_table text  -- 'crm_contacts' | 'capital_contacts' | 'vendor_prospects'
-  source_id uuid,
-  PRIMARY KEY (source_table, source_id)
+  audience_type text  -- 'vendor' | 'investor' | 'guest' | 'owner' | 'mcc_lead'
+  channel text        -- 'email' | 'whatsapp' | 'telegram' | 'sms' | 'instagram_dm'
+  language text       -- 'ru' | 'en' | 'th'
+  stage text          -- 'initial' | 'followup_1..3' | 'meeting' | 'proposal' | 'thank_you'
+  subject text,
+  body text NOT NULL,
+  variables text[],
+  company_id uuid,    -- nullable для админских/глобальных
+  created_by uuid,
+  is_active bool default true,
+  source_table text   -- откуда мигрирован (audit), nullable
 )
 ```
 
-И SQL-функция `find_or_create_identity(email, phone, user_id)` — вызывается из триггеров на INSERT в каждую из 3 таблиц. Старые данные не трогаем — backfill идёт асинхронно.
+Миграция данных: 5 строк из `vendor_outreach_templates` копируются в `outreach_templates` с `audience_type='vendor'`. Старая таблица **остаётся** (используется `vendor-acquisition` edge fn) — синхронизируется триггером `vendor_outreach_templates → outreach_templates`. Через 2 спринта старая удаляется.
 
-**Эффект для MC-клиента:** ноль ломающих изменений. Их 386 контактов остаются на месте, RLS не меняется, ни одно поле не переименовано.
+RLS: глобальные шаблоны (`company_id IS NULL`) видны admin; MC-шаблоны — членам соответствующей `management_companies`.
 
-### Этап 2 — Unified Contact View (read-only слой)
+### Шаг 2 — Единый лог сообщений `outreach_messages`
 
-Postgres VIEW `v_unified_contacts` объединяет все 3 источника в один список с одинаковыми колонками + `pipelines: text[]` (массив pipeline-ов, в которых контакт есть). RLS — `SECURITY INVOKER` (наследует политики от исходных таблиц), значит:
-- MC видит только свои crm_contacts
-- Capital agent видит только свои capital_contacts
-- Admin видит всё
+```text
+outreach_messages (
+  id uuid PK,
+  identity_id uuid FK contact_identities(id),  -- ключ: используем Stage 1!
+  audience_type text,
+  channel text,
+  template_id uuid FK outreach_templates(id),
+  campaign_id uuid,                  -- nullable, ссылка на любую campaign-таблицу через source
+  campaign_source text,              -- 'capital_campaigns' | 'mcc_campaigns' | 'crm_sequences' | NULL
+  campaign_source_id uuid,
+  subject text, body text,
+  status text,                       -- 'queued' | 'sent' | 'delivered' | 'opened' | 'clicked' | 'replied' | 'failed'
+  sent_at, opened_at, clicked_at, replied_at timestamptz,
+  followup_sequence int default 0,
+  next_followup_at timestamptz,
+  response_type text,                -- 'interested' | 'not_now' | 'declined' | 'no_response'
+  error_message text,
+  created_by uuid, created_at timestamptz
+)
+```
 
-В UI добавляется компонент `<UnifiedContactCard contact={…} />` — показывает все pipeline-ы, в которых контакт присутствует (бейджи MC / Capital / Vendor).
+**Ключевое:** `identity_id` (из Stage 1 = `contact_identities`) делает невозможным «бомбить одного человека из 3 источников» — dispatcher проверяет дубли по identity за последние N дней.
 
-### Этап 3 — Чистка дублей в UI (без миграций)
+Backfill: `vendor_outreach_log` → `outreach_messages` (resolve `contact_id`→`identity_id` через `contact_identity_links`). Старая таблица остаётся read-only до подтверждения.
 
-Сейчас три URL-зоны делают почти одно и то же. Финальная карта:
+### Шаг 3 — Edge Function `dispatch-outreach` (единый отправщик)
 
-| Зона | Назначение | Источник данных | Кто видит |
-|---|---|---|---|
-| `/mc/contacts` | Контакты конкретной MC | `crm_contacts WHERE company_id=…` | MC team |
-| `/capital/contacts` | Лиды отдела недвижимости | `capital_contacts WHERE user_id=…` | Capital agents + admin |
-| `/admin/crm` | Вендоры/Owner outreach + платформенный обзор | `vendor_prospects` + `v_unified_contacts` (read-only) | Admin |
+Один путь для всех каналов и аудиторий:
 
-Удаляются:
-- Дубль вкладок «Vendors» (4 компонента: `VendorProspectsPipeline/Table/Stats` + `AdminVendorProspects`) → один `<VendorProspectsHub />` с тремя view-режимами
-- `vendorView` switch в `AdminCRM.tsx` остаётся, но `AdminVendorProspects.tsx` редиректит на `/admin/crm?tab=vendors`
-- Дублирующиеся outreach точки (`/admin/crm?tab=outreach`, `/capital/outreach`, `/mc/sequences`) сводятся к одному движку `outreach_campaigns` с 3 view: «вендоры», «инвесторы», «гости/клиенты MC»
+```text
+POST /functions/v1/dispatch-outreach
+{
+  identity_ids: ["..."],
+  template_id: "...",       // ИЛИ inline: { subject, body, channel }
+  audience_type: "vendor",
+  campaign_source?: "capital_campaigns",
+  campaign_source_id?: "...",
+  scheduled_at?: ISO8601,
+  dry_run?: boolean
+}
+```
 
-**Что остаётся у MC-клиента:** всё. URL `/mc/contacts`, импорт, дубликаты, заметки, документы, задачи, sequences, automations — без изменений. Только в карточке контакта появляется блок «Также в Capital pipeline» (если матч найден).
+Поведение:
+1. Валидирует доступ (RLS: только admin/owner identity'ев);
+2. Проверяет анти-спам: «не писать одной identity чаще 1 раз в N дней по этому каналу»;
+3. Резолвит контакт по `audience_type` (vendor → email/whatsapp из `crm_contacts`; investor → channels из `capital_contacts`);
+4. Шлёт через существующие провайдеры (`send-email-resend`, `send-whatsapp`, `send-telegram`);
+5. Пишет в `outreach_messages`;
+6. Если шаблон в sequence — планирует следующий шаг через `next_followup_at`.
 
-### Этап 4 — Outreach Engine consolidation
+**Не дублируем**: дёргаем уже работающие функции `vendor-outreach-agent` (для AI-персонализации vendor) и `send-*` адаптеры. Новый код — только тонкий orchestrator.
 
-Сейчас есть 3 параллельных движка:
-- `outreach_campaigns` (Capital)
-- `crm_sequences` (MC)
-- `vendor_outreach_*` (Admin)
+### Шаг 4 — Унифицированный UI `/outreach`
 
-Унификация: 
-- Базовая таблица `outreach_campaigns` (есть в Capital) расширяется полями `company_id` (nullable — для MC) и `audience_type` (`vendor` | `investor` | `guest` | `owner`)
-- MC-овские sequences остаются, но новые создаются через единый интерфейс
-- Edge-функция `outreach-runner` принимает любой campaign и роутит по audience
+Один маршрут с табами по audience. Все три старые точки входа становятся редиректами:
 
-Это уже последний шаг — делаем после того, как стабилизируется identity layer.
+| Старый URL | Новый URL |
+|---|---|
+| `/admin/crm?tab=outreach` (Vendor panel) | `/outreach?audience=vendor` |
+| `/capital/outreach` | `/outreach?audience=investor` |
+| `/mc/sequences` | `/outreach?audience=guest&company=…` |
 
-## Что НЕ делаем (явно)
+Структура страницы `/outreach`:
+- **Табы**: Vendors / Investors / Guests (MC) / Marketing (MCC)
+- **Левая колонка**: список campaigns (читается из 3 источников через view `v_outreach_campaigns_unified`)
+- **Центр**: live feed `outreach_messages` с фильтрами по статусу/каналу/identity
+- **Правая колонка**: «Today» (Capital-style 1:1 actions) + библиотека шаблонов
 
-- ❌ **Не мигрируем `crm_contacts` в новую таблицу** — потеряем 386 контактов клиента и сломаем RLS
-- ❌ **Не объединяем три таблицы в одну** — разные модели владения (`company_id` vs `user_id` vs `assigned_manager_id`)
-- ❌ **Не удаляем `/mc/*` CRM** — это рабочий инструмент клиента
-- ❌ **Не трогаем `useCrmContacts.ts`** — на нём держится MC-витрина (24 файла зависят)
-- ❌ **Не делаем migration big-bang** — все 4 этапа независимы и обратимы
+Существующие компоненты переиспользуются:
+- `VendorOutreachPanel.tsx` → становится содержимым таба «Vendors»
+- `CapitalOutreach.tsx` (Today feed) → содержимое таба «Investors»
+- Sequence builder из `useCrmSequences` → таб «Guests»
+- `mcc_campaigns` → таб «Marketing»
 
-## Технические детали (по этапам)
+### Шаг 5 — View `v_outreach_campaigns_unified` + `v_outreach_messages_with_identity`
 
-### Миграции БД (этап 1)
-
-1. `CREATE EXTENSION IF NOT EXISTS citext`
-2. `CREATE TABLE contact_identities (…)` + `contact_identity_links (…)`
-3. `CREATE FUNCTION find_or_create_identity(…)` — `SECURITY DEFINER`, нормализует email/phone, возвращает identity_id
-4. Триггеры `AFTER INSERT/UPDATE` на `crm_contacts`, `capital_contacts`, `vendor_prospects` — вызывают функцию
-5. RLS на `contact_identities`: `SELECT` для всех authenticated, `INSERT/UPDATE` только через функцию
-6. Backfill-скрипт для 386 существующих `crm_contacts` (one-shot, идёт фоном)
-
-### View (этап 2)
+Чтобы Admin видел все 3 движка в одном списке без ALTER на исходных таблицах:
 
 ```sql
-CREATE VIEW v_unified_contacts AS
-SELECT 
-  ci.id as identity_id, 
-  ci.display_name,
-  ci.primary_email, ci.primary_phone,
-  array_agg(cil.source_table) as pipelines,
-  jsonb_object_agg(cil.source_table, cil.source_id) as source_ids
-FROM contact_identities ci
-JOIN contact_identity_links cil ON cil.identity_id = ci.id
-GROUP BY ci.id;
+CREATE VIEW v_outreach_campaigns_unified AS
+  SELECT id, name, 'capital_campaigns'::text src, status, created_at, user_id::text owner
+    FROM capital_campaigns
+  UNION ALL
+  SELECT id, name, 'mcc_campaigns', status, created_at, created_by::text
+    FROM mcc_campaigns
+  UNION ALL
+  SELECT id, name, 'crm_sequences', CASE WHEN is_active THEN 'active' ELSE 'paused' END,
+         created_at, created_by::text
+    FROM crm_sequences;
 ```
 
-### Новые файлы кода
+`SECURITY INVOKER` → каждый видит только своё.
 
-- `src/hooks/useUnifiedContact.ts` — fetch единой identity + pipelines
-- `src/components/crm/UnifiedContactCard.tsx` — карточка с pipeline-бейджами
-- `src/components/crm/CrossPipelineBanner.tsx` — баннер «этот контакт также в Capital pipeline»
+## Таблица «что остаётся / что меняется / что редиректит»
 
-### Изменения в существующем коде (минимальные)
+| Сущность | Действие |
+|---|---|
+| `crm_sequences` + steps + enrollments | **Остаётся.** Используется как «sequence engine» для guest аудитории. |
+| `vendor_outreach_log` | Read-only после backfill. Удалить через 1 спринт. |
+| `vendor_outreach_templates` | Остаётся, синхронизируется с `outreach_templates` триггером. |
+| `vendor-outreach-agent` edge fn | Остаётся, вызывается из `dispatch-outreach` для AI-персонализации vendor. |
+| `capital_outreach` | Остаётся (специфичная логика реакций инвесторов). UI переезжает в таб. |
+| `capital_campaigns`, `mcc_campaigns` | Остаются как контейнеры; новые сообщения логируются в `outreach_messages`. |
+| `/admin/crm`, `/capital/outreach`, `/mc/sequences` | Редиректы → `/outreach?audience=...` |
 
-- `src/pages/owner/ContactDetail.tsx` — добавить `<CrossPipelineBanner />` в шапку
-- `src/pages/capital/CapitalContactDetail.tsx` — то же
-- `src/pages/admin/AdminCRM.tsx` — Activity tab дополнить «cross-pipeline events»
-- Удалить дубль роута `AdminVendorProspects` → редирект (1 строка)
+## Что НЕ делаем
+
+- ❌ Не удаляем `crm_sequences` — это работающий движок с FK от `agent_deals`
+- ❌ Не мигрируем `vendor_outreach_templates` физически — синхронизация через trigger
+- ❌ Не трогаем edge fn `vendor-outreach-agent` (там AI-логика, риск регресса)
+- ❌ Не объединяем `capital_campaigns` и `mcc_campaigns` — разные модели владения и метрики
+
+## Технические детали (по шагам)
+
+### Миграция БД (одна, идемпотентная)
+1. `CREATE TABLE outreach_templates` + RLS (admin/MC)
+2. `CREATE TABLE outreach_messages` + индексы (`identity_id`, `next_followup_at WHERE status='queued'`, `(audience_type, status)`) + RLS
+3. `INSERT INTO outreach_templates SELECT … FROM vendor_outreach_templates` (audience='vendor')
+4. `INSERT INTO outreach_messages SELECT … FROM vendor_outreach_log JOIN contact_identity_links` (resolve identity)
+5. Trigger `vendor_outreach_templates_sync` → `outreach_templates`
+6. `CREATE VIEW v_outreach_campaigns_unified` (SECURITY INVOKER)
+7. `CREATE VIEW v_outreach_messages_with_identity` (join с `contact_identities`)
+8. `CREATE FUNCTION outreach_throttle_check(_identity uuid, _channel text, _window interval) RETURNS boolean` — для anti-spam в dispatcher
+
+### Edge Function
+- Новая: `supabase/functions/dispatch-outreach/index.ts` (~250 строк, использует `_shared/admin-config.ts`)
+- Зависимости: уже существующие `send-email-resend`, `send-whatsapp`, `send-telegram-message`
+
+### Новые/изменённые файлы кода
+- **New:** `src/pages/outreach/OutreachHub.tsx`, `src/components/outreach/OutreachAudienceTabs.tsx`, `src/components/outreach/OutreachComposer.tsx`, `src/components/outreach/OutreachTemplateLibrary.tsx`, `src/hooks/useOutreachMessages.ts`, `src/hooks/useOutreachTemplates.ts`, `src/hooks/useDispatchOutreach.ts`
+- **Modified:** `src/lib/config/routes.ts` (+`OUTREACH = '/outreach'`), `src/components/layout/AnimatedRoutes.tsx` (+route+ редиректы), `src/components/layout/pageRegistry.ts`
+- **Refactored (минимально):** `VendorOutreachPanel.tsx`, `CapitalOutreach.tsx` — обёрнуты в табы, источник данных не меняется на этом этапе
+- **Redirects (1 строка каждый):** `/admin/crm?tab=outreach`, `/capital/outreach`, `/mc/sequences` → `/outreach?audience=…` (preserve query)
 
 ### Откат
+- `DROP VIEW v_outreach_*` — UI деградирует на старые компоненты (они остались)
+- `DROP TABLE outreach_messages, outreach_templates CASCADE` — данные клиента не задеты (vendor_outreach_log/templates целы)
+- `DROP FUNCTION dispatch-outreach` — старые пути работают
+- Все 5 шагов независимы
 
-Каждый этап откатывается независимо:
-- Этап 1: `DROP TABLE contact_identities CASCADE` — данные клиента не задеты
-- Этап 2: `DROP VIEW v_unified_contacts`
-- Этап 3: только UI-изменения, git revert
-- Этап 4: campaign-таблица расширяется новыми nullable-полями — откат через `DROP COLUMN`
+## Эффект для MC-клиента
 
-## Резюме одной фразой
+Ноль. У них:
+- 0 sequences → нечего ломать
+- 0 outreach сообщений → backfill пустой
+- `crm_contacts` не трогается
+- `crm_sequences` остаётся рабочим — если они начнут использовать, выйдут уже на новый `/outreach?audience=guest`
 
-**Три таблицы остаются, MC-клиент не замечает изменений, но появляется identity-слой, который связывает одного человека во всех трёх pipeline-ах. Дубли убираются на UI-уровне, не на data-уровне.**
+## Что получаем
 
-Если одобряешь — начинаю с **Этапа 1** (миграция БД + identity layer + триггеры). Это ~30 минут работы, ноль риска для MC-клиента, и сразу даёт основу для всего остального.
+1. **Один URL** для всех outreach-операций вместо трёх
+2. **Anti-spam guarantee**: одна identity не получит 3 сообщения от 3 систем за день
+3. **Единая аналитика**: open/click/reply rate по audience и channel в одном дашборде
+4. **Готовность к scale**: новый канал (например, Viber) подключается в одной edge fn, не в трёх
+5. **Identity-aware**: каждое сообщение привязано к человеку, а не к строке в исходной таблице
+
+## Резюме
+
+Stage 4 = **identity-aware unified outreach layer**. Три рабочих движка остаются, но получают общий dispatcher, общую таблицу шаблонов, единый лог сообщений и один UI-хаб `/outreach`. Vendor templates (5 строк) — единственные реальные данные — мигрируются через триггер. Откат каждого шага независим. Срок: ~1 день работы.
+
+Если одобряешь — начинаю с **Шага 1+2 (миграции БД)**, затем Шаг 3 (dispatcher), затем Шаги 4–5 (UI + views + редиректы).
 
