@@ -1,8 +1,21 @@
 import React, { createContext, useContext, useMemo, useState, useEffect } from 'react';
 import { useJsApiLoader } from '@react-google-maps/api';
 import { fetchGoogleMapsKey, getGoogleMapsKey } from '@/lib/googleMaps';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const LIBRARIES: ('places')[] = ['places'];
+
+/**
+ * Force Google Maps UI language (labels, controls, copyright).
+ * Without this, Google falls back to the user's browser locale or the IP region —
+ * which on Phuket means Thai. We pin to the app language (RU/EN).
+ */
+function resolveMapsLanguage(appLang: string): string {
+  return appLang === 'ru' ? 'ru' : 'en';
+}
+
+/** Region biases place results & defaults (e.g. spelling). 'TH' = Thailand. */
+const MAPS_REGION = 'TH';
 
 export interface GoogleMapsContextValue {
   isLoaded: boolean;
@@ -16,11 +29,15 @@ export interface GoogleMapsContextValue {
 const GoogleMapsContext = createContext<GoogleMapsContextValue | null>(null);
 
 /** Inner provider that runs useJsApiLoader once key is available. */
-function GoogleMapsLoader({ apiKey, children }: { apiKey: string; children: React.ReactNode }) {
+function GoogleMapsLoader({ apiKey, language, children }: { apiKey: string; language: string; children: React.ReactNode }) {
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: apiKey,
     libraries: LIBRARIES,
     preventGoogleFontsLoading: true,
+    language,
+    region: MAPS_REGION,
+    // Re-mount loader if language changes (Google Maps script can't be re-localized at runtime)
+    id: `gmaps-${language}`,
   });
 
   // Detect Google Maps auth failures (RefererNotAllowedMapError, InvalidKeyMapError, etc.)
@@ -74,6 +91,8 @@ const loadingValue: GoogleMapsContextValue = {
 };
 
 export function GoogleMapsProvider({ children }: { children: React.ReactNode }) {
+  const { language: appLang } = useLanguage();
+  const mapsLanguage = resolveMapsLanguage(appLang);
   const [apiKey, setApiKey] = useState<string | null>(getGoogleMapsKey());
   const [fetched, setFetched] = useState(!!apiKey);
 
@@ -111,7 +130,7 @@ export function GoogleMapsProvider({ children }: { children: React.ReactNode }) 
     );
   }
 
-  return <GoogleMapsLoader apiKey={apiKey}>{children}</GoogleMapsLoader>;
+  return <GoogleMapsLoader apiKey={apiKey} language={mapsLanguage}>{children}</GoogleMapsLoader>;
 }
 
 export function useGoogleMaps() {
