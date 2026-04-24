@@ -818,6 +818,57 @@ const I_LIFESTYLE: ClusterLanding = {
 //  Canonical list (A..J)
 // ──────────────────────────────────────────────────────────────────────
 
+// ──────────────────────────────────────────────────────────────────────
+//  LIVE: J — Exit & re-entry (Sprint 3)
+// ──────────────────────────────────────────────────────────────────────
+
+const J_EXIT: ClusterLanding = {
+  clusterCode: 'J',
+  slug: 'exit',
+  status: 'live',
+  h1: {
+    ru: 'Выход из актива на Пхукете и репатриация капитала',
+    en: 'Exiting your Phuket asset and repatriating capital',
+  },
+  subtitle: {
+    ru: 'Продажа кондо/виллы, передача договоров, закрытие тайской компании, репатриация THB → EUR/USD без потерь.',
+    en: 'Sell condo/villa, transfer contracts, close Thai company and repatriate THB → EUR/USD without losses.',
+  },
+  jobs: [
+    { ru: 'Оценить рыночную цену актива (broker pricing).', en: 'Get broker pricing for the asset.' },
+    { ru: 'Подготовить пакет к продаже: title deed, due diligence, налоги.', en: 'Prepare the sale pack: title deed, due diligence, taxes.' },
+    { ru: 'Найти покупателя через нашу базу инвесторов.', en: 'Find a buyer via our investor base.' },
+    { ru: 'Закрыть компанию (Co. Ltd.) или передать долю.', en: 'Close the Thai company or transfer shares.' },
+    { ru: 'Перевести деньги в EUR/USD/AED через лицензированного брокера.', en: 'Wire funds to EUR/USD/AED via a licensed broker.' },
+    { ru: 'Снять иммигрантский статус и закрыть TM30.', en: 'Cancel immigration status and close TM30.' },
+  ],
+  services: [
+    { slug: 'asset-valuation', label: { ru: 'Оценка актива', en: 'Asset valuation' }, oneLiner: { ru: 'Comparative market analysis за 48 часов.', en: 'Comparative market analysis in 48 hours.' }, href: '/property/sell' },
+    { slug: 'sale-listing', label: { ru: 'Resale-листинг', en: 'Resale listing' }, oneLiner: { ru: 'Каталог + рассылка по 1 200 инвесторам.', en: 'Catalog + outreach to 1,200 investors.' }, href: '/property/resale' },
+    { slug: 'company-closure', label: { ru: 'Закрытие компании', en: 'Company closure' }, oneLiner: { ru: 'Юристы по тайскому корпоративному праву.', en: 'Thai corporate lawyers.' }, href: '/cluster/compliance' },
+    { slug: 'repatriation', label: { ru: 'Репатриация капитала', en: 'Capital repatriation' }, oneLiner: { ru: 'THB → EUR/USD/AED через лицензированных брокеров.', en: 'THB → EUR/USD/AED via licensed brokers.' }, href: '/contact' },
+    { slug: 'tax-clearance', label: { ru: 'Tax clearance', en: 'Tax clearance' }, oneLiner: { ru: 'Capital gains, Specific Business Tax, RD-сертификат.', en: 'Capital gains, Specific Business Tax, RD certificate.' }, href: '/cluster/compliance' },
+  ],
+  faq: [
+    { q: { ru: 'Какие налоги при продаже кондо?', en: 'What taxes on selling a condo?' }, a: { ru: 'Withholding (1%), Specific Business Tax (3.3% при <5 лет), Transfer Fee (2%). Точная смета — после проверки title deed.', en: 'Withholding (1%), Specific Business Tax (3.3% if <5 years), Transfer Fee (2%). Exact quote after title deed check.' } },
+    { q: { ru: 'Сколько занимает продажа?', en: 'How long does a sale take?' }, a: { ru: '3–9 месяцев в зависимости от сегмента. Premium кондо в Bang Tao продаются быстрее, чем villa в Layan.', en: '3–9 months depending on segment. Premium condos in Bang Tao move faster than villas in Layan.' } },
+    { q: { ru: 'Можно ли вывести деньги в Россию?', en: 'Can I wire funds to Russia?' }, a: { ru: 'Прямой SWIFT в РФ ограничен. Используем транзит через ОАЭ/Казахстан или Wise/Revolut в долларах.', en: 'Direct SWIFT to Russia is restricted. We route via UAE/Kazakhstan or Wise/Revolut in USD.' } },
+  ],
+  primaryCta: { label: { ru: 'Оценить актив', en: 'Get asset valuation' }, href: '/property/sell' },
+  secondaryCta: { label: { ru: 'Связаться с advisor', en: 'Talk to an advisor' }, href: '/contact' },
+  relatedPersonas: ['P8', 'P9', 'P10', 'P20'],
+  seo: {
+    metaTitle: { ru: 'Выход из актива на Пхукете: продажа, налоги, репатриация — myUNO', en: 'Exiting your Phuket asset: sale, taxes, repatriation — myUNO' },
+    metaDescription: { ru: 'Продажа кондо или виллы на Пхукете под ключ: оценка, листинг, налоги, закрытие компании и репатриация THB → EUR/USD.', en: 'Turnkey condo or villa sale on Phuket: valuation, listing, taxes, company closure and THB → EUR/USD repatriation.' },
+    ogImage: OG_DEFAULT,
+    canonicalPath: '/cluster/exit',
+    hreflangAlternates: [
+      { lang: 'ru', href: 'https://myuno.app/cluster/exit?lang=ru' },
+      { lang: 'en', href: 'https://myuno.app/cluster/exit?lang=en' },
+    ],
+  },
+};
+
 export const CLUSTER_LANDINGS: readonly ClusterLanding[] = [
   A_ARRIVAL,
   B_EXTENSION,
@@ -828,7 +879,7 @@ export const CLUSTER_LANDINGS: readonly ClusterLanding[] = [
   G_COMPLIANCE,
   H_EMERGENCY,
   I_LIFESTYLE,
-  draftCluster('J', 'exit', { ru: 'Выход из актива и возврат', en: 'Exit & re-entry' }, ['P8', 'P9', 'P10', 'P20']),
+  J_EXIT,
 ] as const;
 
 export const LIVE_CLUSTER_SLUGS: readonly string[] = [
@@ -841,4 +892,5 @@ export const LIVE_CLUSTER_SLUGS: readonly string[] = [
   'compliance',  // G  — Sprint 1
   'emergency',   // H  — Sprint 1
   'lifestyle',   // I  — Sprint 2
+  'exit',        // J  — Sprint 3
 ] as const;
