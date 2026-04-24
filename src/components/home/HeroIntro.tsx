@@ -1,6 +1,6 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Search, ArrowRight, ArrowUpRight, Home, Sparkles, Briefcase } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePopularTasks, trackTaskOpen } from '@/hooks/home/usePopularTasks';
 import { cn } from '@/lib/utils';
@@ -15,21 +15,61 @@ const VERTICAL_ROUTES: Record<Vertical, string> = {
 };
 
 /**
+ * URL ↔ tab state contract.
+ *
+ * The home page accepts `?vertical=<id>` to pre-select a tab on load. We accept
+ * both the canonical ids (`homes` / `experiences` / `services` / `all`) and a
+ * couple of friendlier aliases the user may type or share (`property`, `tours`).
+ * Anything unrecognised falls back to `all` — never throws.
+ */
+const VERTICAL_ALIASES: Record<string, Vertical> = {
+  all: 'all',
+  homes: 'homes',
+  property: 'homes',
+  experiences: 'experiences',
+  tours: 'experiences',
+  activities: 'experiences',
+  services: 'services',
+};
+
+function parseVertical(raw: string | null | undefined): Vertical {
+  if (!raw) return 'all';
+  const v = VERTICAL_ALIASES[raw.toLowerCase()];
+  return v ?? 'all';
+}
+
+/**
  * HeroIntro — clean entry point for new users.
  * One question: «what do you need now?». One field: search + vertical tabs.
  *
  * Vertical tabs (Homes / Experiences / Services) route the search query to the
  * relevant catalog so users skip the universal `/search` step when they know
  * what they want — same pattern Airbnb uses on its mobile home.
+ *
+ * The selected tab is mirrored to `?vertical=` in the URL and restored on
+ * reload, so deep-links like `/?vertical=homes` land on the right tab.
  */
 export function HeroIntro() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [query, setQuery] = useState('');
-  const [vertical, setVertical] = useState<Vertical>('all');
+  // Initial tab: URL param wins; default is `all`. parseVertical never throws.
+  const [vertical, setVertical] = useState<Vertical>(() =>
+    parseVertical(searchParams.get('vertical')),
+  );
   const { data: tasks } = usePopularTasks();
   const top3 = tasks.slice(0, 3);
+
+  // Keep state in sync if the URL changes externally (e.g. browser Back/Forward
+  // between two `/?vertical=…` entries). We only update when the parsed value
+  // really differs to avoid render loops.
+  useEffect(() => {
+    const fromUrl = parseVertical(searchParams.get('vertical'));
+    if (fromUrl !== vertical) setVertical(fromUrl);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   const goToVertical = useCallback(
     (target: Vertical, q: string) => {
@@ -51,13 +91,29 @@ export function HeroIntro() {
   const handleVerticalClick = useCallback(
     (target: Vertical) => {
       setVertical(target);
+
+      // Mirror the choice to the URL so reload / share-link restores the tab.
+      // `replace: true` keeps the back button useful (no history spam).
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          if (target === 'all') {
+            next.delete('vertical');
+          } else {
+            next.set('vertical', target);
+          }
+          return next;
+        },
+        { replace: true },
+      );
+
       // `all` is the no-filter state — pressing it just resets the placeholder.
       // For any concrete vertical we navigate straight into its catalog so a
       // tab click always produces a visible result (with or without a query).
       if (target === 'all') return;
       goToVertical(target, query);
     },
-    [goToVertical, query],
+    [goToVertical, query, setSearchParams],
   );
 
   const verticals: Array<{ id: Vertical; labelRu: string; labelEn: string; icon: React.ComponentType<{ className?: string }> }> = [
