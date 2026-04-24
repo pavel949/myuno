@@ -169,7 +169,7 @@ export function FeaturedPropertiesCarousel() {
               </div>
 
               {/* Content */}
-              <div className="h-[40%] p-3 md:p-4 flex flex-col justify-between">
+              <div className="flex-1 p-3 md:p-4 flex flex-col justify-between gap-2">
                 <div>
                   <span className="inline-block px-2 py-0.5 text-[10px] font-semibold rounded-[var(--radius-full)] mb-1.5"
                     style={{ background: 'hsl(var(--primary) / 0.12)', color: 'hsl(var(--primary))' }}
