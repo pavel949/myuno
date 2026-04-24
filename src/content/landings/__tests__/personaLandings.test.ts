@@ -45,6 +45,7 @@ describe('PERSONA_LANDINGS — coverage', () => {
 describe('PERSONA_LANDINGS — Sprint 1–2 live promotions', () => {
   const expectedLive = [
     'tourists',
+    'cn-investors',
     'eu-guests',
     'digital-nomads',
     'snowbirds',
@@ -54,13 +55,21 @@ describe('PERSONA_LANDINGS — Sprint 1–2 live promotions', () => {
     'hnw',
     'operators',
     'mn-investors',
+    'bn-business',
     'pet-owners',
     'medical',
     'weddings',
     'athletes',
     'halal',
+    'lgbtq',
+    'accessibility',
     'retirees',
+    'providers',
+    'freelancers',
     'developer-partner',
+    'smb',
+    'creatives',
+    'students',
   ];
 
   it('has exactly the M10b live slug set', () => {

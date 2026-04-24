@@ -1581,7 +1581,7 @@ const P25_STUDENTS: PersonaLanding = {
 
 export const PERSONA_LANDINGS: readonly PersonaLanding[] = [
   P1_TOURISTS,
-  draftPersona('P2', 'cn-investors', { ru: 'Гости из Китая', en: 'Chinese tourists & scouts' }),
+  P2_CN_INVESTORS,
   P3_EU_GUESTS,
   P4_DIGITAL_NOMADS,
   P5_SNOWBIRDS,
@@ -1591,26 +1591,27 @@ export const PERSONA_LANDINGS: readonly PersonaLanding[] = [
   P9_HNW,
   P10_OPERATORS,
   P11_MN_INVESTORS,
-  draftPersona('P12', 'bn-business', { ru: 'Бизнес-аудитория из Бангладеш', en: 'Bangladeshi business audience' }),
+  P12_BN_BUSINESS,
   P13_PET_OWNERS,
   P14_MEDICAL,
   P15_WEDDINGS,
   P16_ATHLETES,
   P17_HALAL,
-  draftPersona('P18', 'lgbtq', { ru: 'ЛГБТК+ путешественники и резиденты', en: 'LGBTQ+ travellers & residents' }),
-  draftPersona('P19', 'accessibility', { ru: 'Путешественники с ограниченными возможностями', en: 'Accessibility-first travellers' }),
+  P18_LGBTQ,
+  P19_ACCESSIBILITY,
   P20_RETIREES,
-  draftPersona('P21', 'providers', { ru: 'Локальные подрядчики', en: 'Local providers' }),
-  // M10b — два slug под P22 (taxonomy conflict, см. m10b-completion.md):
-  draftPersona('P22', 'freelancers', { ru: 'Локальные фрилансеры', en: 'Local freelancers' }),
+  P21_PROVIDERS,
+  // P22 — два slug (taxonomy conflict, см. m10b-completion.md):
+  P22_FREELANCERS,
   P22_DEVELOPER_PARTNER,
-  draftPersona('P23', 'smb', { ru: 'Локальный малый бизнес', en: 'Local SMB' }),
-  draftPersona('P24', 'creatives', { ru: 'Creative Class', en: 'Creative class' }),
-  draftPersona('P25', 'students', { ru: 'Студенты и молодые взрослые', en: 'Students & young adults' }),
+  P23_SMB,
+  P24_CREATIVES,
+  P25_STUDENTS,
 ] as const;
 
 export const LIVE_PERSONA_SLUGS: readonly string[] = [
   'tourists',          // P1
+  'cn-investors',      // P2  — 2026-04-24
   'eu-guests',         // P3  — Sprint 3
   'digital-nomads',    // P4  — Sprint 1
   'snowbirds',         // P5  — M10b
@@ -1620,11 +1621,19 @@ export const LIVE_PERSONA_SLUGS: readonly string[] = [
   'hnw',               // P9
   'operators',         // P10 — M10b
   'mn-investors',      // P11 — M10b
+  'bn-business',       // P12 — 2026-04-24
   'pet-owners',        // P13
   'medical',           // P14 — Sprint 2
   'weddings',          // P15 — Sprint 2
   'athletes',          // P16 — Sprint 3
   'halal',             // P17 — Sprint 3
+  'lgbtq',             // P18 — 2026-04-24
+  'accessibility',     // P19 — 2026-04-24
   'retirees',          // P20 — Sprint 2
+  'providers',         // P21 — 2026-04-24
+  'freelancers',       // P22 — 2026-04-24
   'developer-partner', // P22 — M10b
+  'smb',               // P23 — 2026-04-24
+  'creatives',         // P24 — 2026-04-24
+  'students',          // P25 — 2026-04-24
 ] as const;
