@@ -13,6 +13,7 @@ import { PersonalRecommendations } from '@/components/account/PersonalRecommenda
 import { DashboardStatsBar } from '@/components/account/DashboardStatsBar';
 import { AccountSidebar } from '@/components/account/AccountSidebar';
 import { PersonaDetectionPreview } from '@/components/account/PersonaDetectionPreview';
+import { PersonaWidgets } from '@/components/account/PersonaWidgets';
 
 import { DownloadAppButton } from '@/components/pwa/DownloadAppButton';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -50,6 +51,9 @@ export default function UserAccountDashboard() {
 
             {/* Stats bar */}
             <DashboardStatsBar />
+
+            {/* M10c · IPP §17 — Persona-aware decision widgets */}
+            <PersonaWidgets />
 
             {/* Quick Actions — grid on desktop */}
             <QuickActionsPanel />
