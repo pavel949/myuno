@@ -165,7 +165,7 @@ export default function CommercialIndex() {
                 onClick={() => navigate(APP_ROUTES.HOTELS)}
                 className={cn(
                   'px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap border transition-colors',
-                  'bg-accent/10 text-accent dark:text-accent border-accent/40/40 hover:bg-accent/20',
+                  'bg-accent/10 text-accent dark:text-accent border-accent/40 hover:bg-accent/20',
                 )}
               >
                 <Hotel className="inline w-3 h-3 mr-1" />

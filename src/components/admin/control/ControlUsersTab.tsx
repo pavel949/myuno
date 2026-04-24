@@ -34,8 +34,8 @@ const ROLE_COLORS: Record<string, string> = {
   vendor: 'bg-accent-purple/15 text-accent-purple border-accent-purple/30',
   owner: 'bg-success/15 text-success border-success/30',
   finance: 'bg-warning/15 text-warning border-warning/30',
-  support: 'bg-primary/15 text-primary border-primary/40/30',
-  sales: 'bg-primary/15 text-primary border-primary/40/30',
+  support: 'bg-primary/15 text-primary border-primary/40',
+  sales: 'bg-primary/15 text-primary border-primary/40',
   user: 'bg-muted text-muted-foreground border-border',
 };
 

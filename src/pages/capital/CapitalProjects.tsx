@@ -199,7 +199,7 @@ export default function CapitalProjects() {
           {projects.map((p) => (
             <div
               key={p.id}
-              className="rounded-none border border-border/50 p-4 space-y-2 hover:border-success/40/30 transition-colors cursor-pointer"
+              className="rounded-none border border-border/50 p-4 space-y-2 hover:border-success/40 transition-colors cursor-pointer"
               onClick={() => openEdit(p)}
             >
               <div className="flex items-start justify-between">

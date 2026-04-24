@@ -19,7 +19,7 @@ export default function InvestmentRealEstateZone() {
         <button
           type="button"
           onClick={() => navigate(`${APP_ROUTES.COMMERCIAL}?intent=sale`)}
-          className="w-full text-left rounded-none border border-success/40/20 bg-gradient-to-br from-success/10 to-primary/5 hover:from-success/15 transition-colors p-4 flex items-center gap-3"
+          className="w-full text-left rounded-none border border-success/40 bg-gradient-to-br from-success/10 to-primary/5 hover:from-success/15 transition-colors p-4 flex items-center gap-3"
         >
           <div className="p-2 rounded-none bg-success/20 text-success dark:text-success">
             <TrendingUp className="h-5 w-5" />

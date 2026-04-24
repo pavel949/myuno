@@ -411,7 +411,7 @@ export default function PrivacyPage() {
         </Card>
 
         {/* Children */}
-        <Card className="mb-8 border-accent/40/30">
+        <Card className="mb-8 border-accent/40">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2 text-accent dark:text-accent">
               <AlertTriangle className="h-4 w-4" />

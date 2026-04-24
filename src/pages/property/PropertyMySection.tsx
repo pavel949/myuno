@@ -68,16 +68,17 @@ function AuthenticatedMySection() {
         : `${allProperties.length} propert${allProperties.length !== 1 ? 'ies' : 'y'} managed`,
       path: '/owner',
       show: isOwner || isManager || hasProperties,
-      gradient: 'from-primary to-primary',
+      gradient: 'from-primary to-primary/70',
     },
     {
       id: 'invest',
       icon: TrendingUp,
       title: isRu ? 'Инвестиционный портфель' : 'Investment Portfolio',
       description: isRu ? 'Проекты и аналитика' : 'Projects & analytics',
-      path: '/property/invest',
+      // /property/invest legacy → /invest (handled by router redirect, but link directly to canonical)
+      path: '/invest',
       show: true,
-      gradient: 'from-success to-success',
+      gradient: 'from-success to-success/70',
     },
     {
       id: 'add',
@@ -86,7 +87,7 @@ function AuthenticatedMySection() {
       description: isRu ? 'Разместить на платформе' : 'List on the platform',
       path: '/owner',
       show: true,
-      gradient: 'from-accent to-accent',
+      gradient: 'from-accent to-accent/70',
     },
   ];
 
@@ -155,7 +156,7 @@ function AuthenticatedMySection() {
                   {prop.cover_image ? (
                     <img src={prop.cover_image} alt="" className="w-12 h-12 rounded-none object-cover flex-shrink-0" />
                   ) : (
-                    <div className="w-12 h-12 rounded-none bg-gradient-to-br from-primary to-primary flex items-center justify-center flex-shrink-0">
+                    <div className="w-12 h-12 rounded-none bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center flex-shrink-0">
                       <Eye className="w-6 h-6 text-white" />
                     </div>
                   )}

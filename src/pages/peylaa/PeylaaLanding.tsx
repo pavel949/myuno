@@ -172,7 +172,7 @@ export default function PeylaaLanding() {
             <span className="text-xl font-bold tracking-wider" style={{ fontFamily: 'Syne, sans-serif' }}>
               PEYLAA
             </span>
-            <Badge variant="outline" className="text-[10px] border-accent/40/50 text-accent">
+            <Badge variant="outline" className="text-[10px] border-accent/40 text-accent">
               AUTOGRAPH COLLECTION
             </Badge>
           </div>
@@ -187,7 +187,7 @@ export default function PeylaaLanding() {
             <Button
               size="sm"
               variant="outline"
-              className="border-accent/40/50 text-accent hover:bg-accent/10 hidden sm:flex"
+              className="border-accent/40 text-accent hover:bg-accent/10 hidden sm:flex"
               onClick={() => window.open('https://wa.me/66922407355?text=Здравствуйте! Интересует PEYLAA Phuket', '_blank')}
             >
               <MessageCircle className="w-4 h-4 mr-1" />
@@ -214,7 +214,7 @@ export default function PeylaaLanding() {
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a]/80 via-[#0a0a0a]/60 to-[#0a0a0a]" />
 
         <div className="relative z-10 max-w-5xl mx-auto px-4 text-center space-y-8">
-          <Badge className="bg-accent/20 text-accent border-accent/40/30 px-4 py-1.5 text-xs">
+          <Badge className="bg-accent/20 text-accent border-accent/40 px-4 py-1.5 text-xs">
             ПЕРВЫЕ В АЗИАТСКО-ТИХООКЕАНСКОМ РЕГИОНЕ
           </Badge>
 
@@ -303,7 +303,7 @@ export default function PeylaaLanding() {
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {KEY_FEATURES.map((f) => (
-              <Card key={f.title} className="bg-white/5 border-white/10 hover:border-accent/40/30 transition-colors">
+              <Card key={f.title} className="bg-white/5 border-white/10 hover:border-accent/40 transition-colors">
                 <CardContent className="p-6 space-y-4">
                   <div className="w-12 h-12 rounded-none bg-accent/10 flex items-center justify-center">
                     <f.icon className="w-6 h-6 text-accent" />
@@ -607,7 +607,7 @@ export default function PeylaaLanding() {
           </div>
 
           {/* Financing badge */}
-          <Card className="mt-8 bg-accent/10 border-accent/40/20">
+          <Card className="mt-8 bg-accent/10 border-accent/40">
             <CardContent className="p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
               <div className="w-12 h-12 rounded-none bg-accent/20 flex items-center justify-center flex-shrink-0">
                 <Landmark className="w-6 h-6 text-accent" />
@@ -620,7 +620,7 @@ export default function PeylaaLanding() {
               </div>
               <Button
                 variant="outline"
-                className="border-accent/40/50 text-accent hover:bg-accent/10 whitespace-nowrap"
+                className="border-accent/40 text-accent hover:bg-accent/10 whitespace-nowrap"
                 onClick={() => openLeadForm('financing_inquiry')}
               >
                 Узнать подробнее

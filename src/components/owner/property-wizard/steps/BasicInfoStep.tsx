@@ -412,7 +412,7 @@ function BasicInfoStepInner({
 
       {/* Hotel-specific block — operational hospitality data */}
       {isCommercial && isHotelType(formData.property_type) && (
-        <Card className="border-accent/40/30 bg-gradient-to-br from-accent/5 to-transparent">
+        <Card className="border-accent/40 bg-gradient-to-br from-accent/5 to-transparent">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
               <Hotel className="h-4 w-4 text-accent" />
@@ -564,7 +564,7 @@ function BasicInfoStepInner({
             </div>
 
             {formData.hotel_management_status === 'seeking_operator' && (
-              <div className="rounded-none p-3 bg-accent/10 border border-accent/40/30 text-xs text-foreground">
+              <div className="rounded-none p-3 bg-accent/10 border border-accent/40 text-xs text-foreground">
                 {isRu
                   ? '✨ Этот объект будет помечен как «Ищет оператора» в разделе HMA opportunities — управляющие компании увидят его в специальной выдаче.'
                   : '✨ This listing will be flagged as "Seeking Operator" in the HMA opportunities section — hotel management companies will see it in a dedicated feed.'}

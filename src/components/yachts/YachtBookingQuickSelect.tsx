@@ -335,7 +335,7 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
         )}
 
         {/* Trust banner */}
-        <div className="flex items-center gap-3 p-3 bg-success/10/60 dark:bg-success/20 rounded-none border border-success/40/50 dark:border-success/40/30">
+        <div className="flex items-center gap-3 p-3 bg-success/10 dark:bg-success/20 rounded-none border border-success/40 dark:border-success/40">
           <Shield className="w-5 h-5 text-success dark:text-success flex-shrink-0" />
           <div>
             <p className="text-xs font-medium text-success dark:text-success">

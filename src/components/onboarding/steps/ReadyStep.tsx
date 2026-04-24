@@ -49,7 +49,7 @@ export const ReadyStep = forwardRef<HTMLDivElement, ReadyStepProps>(
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-            className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-success to-success flex items-center justify-center mb-4 shadow-lg shadow-success/20/25"
+            className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-success to-success flex items-center justify-center mb-4 shadow-lg shadow-success/20"
           >
             <Check className="w-10 h-10 text-white" />
           </motion.div>

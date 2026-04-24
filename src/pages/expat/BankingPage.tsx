@@ -72,7 +72,7 @@ const BankingPage = () => {
         </Tabs>
 
         {/* Info Card */}
-        <Card className="mb-4 bg-gradient-to-r from-success/10 to-success/10 border-success/40/20">
+        <Card className="mb-4 bg-gradient-to-r from-success/10 to-success/10 border-success/40">
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
               <Landmark className="h-5 w-5 text-success flex-shrink-0 mt-0.5" />

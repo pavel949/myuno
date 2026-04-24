@@ -88,7 +88,7 @@ export default function InvestmentArticleDetail() {
           <div className="prose prose-sm max-w-none space-y-1">{renderBody(body)}</div>
 
           {article.risks_summary && (
-            <div className="rounded-none border border-accent/40/30 bg-accent/5 p-3 mt-4">
+            <div className="rounded-none border border-accent/40 bg-accent/5 p-3 mt-4">
               <div className="flex items-center gap-1.5 text-xs font-medium text-accent mb-1">
                 <AlertTriangle className="w-3.5 h-3.5" /> {isRu ? 'Риски' : 'Risks'}
               </div>

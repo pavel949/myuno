@@ -62,7 +62,7 @@ export type HnwTier = (typeof HNW_TIERS)[number];
 export const HNW_TIER_LABELS: Record<HnwTier, { en: string; ru: string; color: string }> = {
   standard: { en: 'Standard', ru: 'Стандарт', color: 'bg-muted text-muted-foreground border-border' },
   hnw: { en: 'HNW', ru: 'HNW', color: 'bg-warning/15 text-warning border-warning/30' },
-  uhnw: { en: 'UHNW', ru: 'UHNW', color: 'bg-accent/15 text-accent border-accent/40/30' },
+  uhnw: { en: 'UHNW', ru: 'UHNW', color: 'bg-accent/15 text-accent border-accent/40' },
 };
 
 /** AML/KYC status */

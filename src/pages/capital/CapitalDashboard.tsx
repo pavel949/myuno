@@ -60,7 +60,7 @@ export default function CapitalDashboard() {
           <div
             key={kpi.label}
             onClick={() => navigate(kpi.path)}
-            className="rounded-none border border-border/50 p-4 hover:border-success/40/30 transition-colors cursor-pointer"
+            className="rounded-none border border-border/50 p-4 hover:border-success/40 transition-colors cursor-pointer"
           >
             <div className="flex items-center gap-2 mb-2">
               <div className="w-8 h-8 rounded-none bg-success/10 flex items-center justify-center">
@@ -75,7 +75,7 @@ export default function CapitalDashboard() {
 
       {/* Today */}
       <div
-        className="rounded-none border border-border/50 p-4 hover:border-success/40/30 transition-colors cursor-pointer"
+        className="rounded-none border border-border/50 p-4 hover:border-success/40 transition-colors cursor-pointer"
         onClick={() => navigate('/capital/outreach')}
       >
         <div className="flex items-center justify-between">
@@ -123,7 +123,7 @@ export default function CapitalDashboard() {
           <div
             key={link.path}
             onClick={() => navigate(link.path)}
-            className="rounded-none border border-border/30 p-3 text-center hover:border-success/40/30 transition-colors cursor-pointer"
+            className="rounded-none border border-border/30 p-3 text-center hover:border-success/40 transition-colors cursor-pointer"
           >
             <link.icon className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
             <p className="text-sm">{link.label}</p>

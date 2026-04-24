@@ -325,7 +325,7 @@ export default function SOS() {
             <Button
               size="sm"
               variant="outline"
-              className="flex-1 border-accent/40/50 text-accent hover:bg-accent/10"
+              className="flex-1 border-accent/40 text-accent hover:bg-accent/10"
               onClick={() => window.open(COMPANY_CONTACTS.whatsapp.link, '_blank')}
             >
               <MessageCircle className="w-4 h-4 mr-1.5" />
@@ -359,7 +359,7 @@ export default function SOS() {
 
         {/* VIP Concierge Link */}
         <button 
-          className="w-full mb-5 p-3 rounded-none bg-gradient-to-r from-primary/10 to-primary/10 border border-primary/40/30 flex items-center justify-between hover:border-primary/40/50 transition-colors"
+          className="w-full mb-5 p-3 rounded-none bg-gradient-to-r from-primary/10 to-primary/10 border border-primary/40 flex items-center justify-between hover:border-primary/40 transition-colors"
           onClick={() => navigate('/vip-concierge')}
         >
           <div className="flex items-center gap-3">

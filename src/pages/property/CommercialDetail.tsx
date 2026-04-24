@@ -128,7 +128,7 @@ export default function CommercialDetail() {
 
           {/* Hotel-specific KPI section */}
           {isHotel && (
-            <section className="rounded-none border border-accent/40/30 bg-gradient-to-br from-accent/5 to-transparent p-4 space-y-4">
+            <section className="rounded-none border border-accent/40 bg-gradient-to-br from-accent/5 to-transparent p-4 space-y-4">
               <div className="flex items-center gap-2">
                 <Hotel className="w-4 h-4 text-accent" />
                 <h2 className="text-base font-semibold">{isRu ? 'Параметры отеля' : 'Hotel performance'}</h2>
@@ -164,7 +164,7 @@ export default function CommercialDetail() {
               </div>
 
               {(property.hotel_adr_thb != null || property.hotel_revpar_thb != null || property.hotel_gop_margin_pct != null) && (
-                <div className="pt-3 border-t border-accent/40/20">
+                <div className="pt-3 border-t border-accent/40">
                   <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-2 flex items-center gap-1.5">
                     <TrendingUp className="w-3 h-3" />
                     {isRu ? 'Финансовые метрики' : 'Financial metrics'}
@@ -183,7 +183,7 @@ export default function CommercialDetail() {
                       )}
                     </div>
                   ) : (
-                    <div className="rounded-none border border-dashed border-accent/40/40 bg-background/50 p-3 text-xs text-muted-foreground text-center">
+                    <div className="rounded-none border border-dashed border-accent/40 bg-background/50 p-3 text-xs text-muted-foreground text-center">
                       {isRu ? 'Войдите, чтобы увидеть ADR, RevPAR и GOP%' : 'Sign in to view ADR, RevPAR and GOP%'}
                     </div>
                   )}
@@ -192,7 +192,7 @@ export default function CommercialDetail() {
 
               <div className="flex flex-wrap gap-2">
                 {property.hotel_management_status && (
-                  <Badge variant="secondary" className="bg-accent/15 text-accent dark:text-accent border-accent/40/30">
+                  <Badge variant="secondary" className="bg-accent/15 text-accent dark:text-accent border-accent/40">
                     {getHotelManagementStatusLabel(property.hotel_management_status, isRu)}
                     {property.hotel_operator_name && ` · ${property.hotel_operator_name}`}
                   </Badge>
@@ -202,8 +202,8 @@ export default function CommercialDetail() {
                     variant="secondary"
                     className={
                       property.hotel_license_type === 'full_hotel_license'
-                        ? 'bg-success/15 text-success dark:text-success border-success/40/30'
-                        : 'bg-accent/15 text-accent dark:text-accent border-accent/40/30'
+                        ? 'bg-success/15 text-success dark:text-success border-success/40'
+                        : 'bg-accent/15 text-accent dark:text-accent border-accent/40'
                     }
                   >
                     <ShieldCheck className="w-3 h-3 mr-1" />

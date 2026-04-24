@@ -140,7 +140,7 @@ export default function CapitalCampaignLaunch() {
                 key={p.id}
                 onClick={() => setSelectedProject(p)}
                 className={`rounded-none border p-3 cursor-pointer transition-colors ${
-                  selectedProject?.id === p.id ? 'border-success/40 bg-success/5' : 'border-border/50 hover:border-success/40/30'
+                  selectedProject?.id === p.id ? 'border-success/40 bg-success/5' : 'border-border/50 hover:border-success/40'
                 }`}
               >
                 <h3 className="font-medium text-sm">{p.name}</h3>

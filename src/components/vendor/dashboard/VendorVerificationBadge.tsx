@@ -34,7 +34,7 @@ const LEVELS = {
     icon: Crown,
     color: 'text-accent',
     bg: 'bg-accent/5',
-    border: 'border-accent/40/30',
+    border: 'border-accent/40',
   },
 };
 

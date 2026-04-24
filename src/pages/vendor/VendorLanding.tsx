@@ -100,7 +100,7 @@ export default function VendorLanding() {
       levelRu: 'Премиум',
       color: 'text-accent',
       bg: 'bg-accent/5',
-      border: 'border-accent/40/30',
+      border: 'border-accent/40',
       desc: isRu ? 'Рейтинг 4.5+ и 50+ заказов' : 'Rating 4.5+ & 50+ orders',
       perks: isRu 
         ? ['Топ выдачи', 'Сниженная комиссия', 'Персональный менеджер']

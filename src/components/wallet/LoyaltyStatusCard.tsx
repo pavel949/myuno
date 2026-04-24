@@ -33,19 +33,19 @@ const tierColors: Record<string, { bg: string; text: string; border: string; pro
   blue: { 
     bg: "bg-primary/10", 
     text: "text-primary", 
-    border: "border-primary/40/30",
+    border: "border-primary/40",
     progress: "bg-primary"
   },
   purple: { 
     bg: "bg-primary/10", 
     text: "text-primary", 
-    border: "border-primary/40/30",
+    border: "border-primary/40",
     progress: "bg-primary"
   },
   amber: { 
     bg: "bg-accent/10", 
     text: "text-accent", 
-    border: "border-accent/40/30",
+    border: "border-accent/40",
     progress: "bg-accent"
   },
 };

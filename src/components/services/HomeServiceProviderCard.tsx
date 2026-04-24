@@ -107,7 +107,7 @@ export const HomeServiceProviderCard = memo(function HomeServiceProviderCard({
             className={cn(
               "text-xs px-2 py-0",
               isIndividual 
-                ? "border-accent/40/50 text-accent dark:text-accent" 
+                ? "border-accent/40 text-accent dark:text-accent" 
                 : "border-primary/50 text-primary"
             )}
           >

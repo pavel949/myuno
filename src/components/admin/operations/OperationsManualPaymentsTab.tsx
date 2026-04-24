@@ -67,7 +67,7 @@ const STATUS_FILTERS: { id: 'all' | Status; en: string; ru: string }[] = [
 const STATUS_BADGE: Record<Status, { en: string; ru: string; cls: string }> = {
   awaiting_admin: { en: 'Awaiting admin', ru: 'Ожидает админа', cls: 'bg-warning/10 text-warning border-warning/20' },
   contacted:      { en: 'Contacted',      ru: 'На связи',       cls: 'bg-primary/10 text-primary border-primary/20' },
-  paid:           { en: 'Paid',           ru: 'Оплачено',       cls: 'bg-primary/10 text-primary border-primary/40/20' },
+  paid:           { en: 'Paid',           ru: 'Оплачено',       cls: 'bg-primary/10 text-primary border-primary/40' },
   confirmed:      { en: 'Confirmed',      ru: 'Подтверждено',   cls: 'bg-success/10 text-success border-success/20' },
   rejected:       { en: 'Rejected',       ru: 'Отклонено',      cls: 'bg-destructive/10 text-destructive border-destructive/20' },
   expired:        { en: 'Expired',        ru: 'Истекло',        cls: 'bg-muted text-muted-foreground' },

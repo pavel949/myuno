@@ -315,7 +315,7 @@ function ProjectRow({ project: p, index, isEditing, onEdit, onUpdate }: {
 
   return (
     <>
-      <tr className={`border-b hover:bg-muted/50 ${isEditing ? 'bg-primary/10/50' : ''}`}>
+      <tr className={`border-b hover:bg-muted/50 ${isEditing ? 'bg-primary/10' : ''}`}>
         <td className="p-3 text-xs text-muted-foreground">{index}</td>
         <td className="p-3">
           <div className="flex items-center gap-2">
@@ -344,7 +344,7 @@ function ProjectRow({ project: p, index, isEditing, onEdit, onUpdate }: {
         </td>
       </tr>
       {isEditing && (
-        <tr className="bg-primary/10/30">
+        <tr className="bg-primary/10">
           <td colSpan={9} className="p-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
               <div>

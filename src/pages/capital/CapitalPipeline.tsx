@@ -23,7 +23,7 @@ function DraggableCard({ deal, onEdit }: { deal: Record<string, unknown>; onEdit
 
   return (
     <div
-      className="rounded-none border border-border/30 p-3 bg-background hover:border-success/40/30 transition-colors cursor-grab active:cursor-grabbing"
+      className="rounded-none border border-border/30 p-3 bg-background hover:border-success/40 transition-colors cursor-grab active:cursor-grabbing"
       onClick={onEdit}
     >
       <div className="flex items-start gap-2">

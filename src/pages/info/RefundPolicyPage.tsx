@@ -566,7 +566,7 @@ export default function RefundPolicyPage() {
         </div>
 
         {/* G-Trust Link */}
-        <Card className="mb-6 border-accent/40/30 bg-gradient-to-r from-accent/5 to-transparent">
+        <Card className="mb-6 border-accent/40 bg-gradient-to-r from-accent/5 to-transparent">
           <CardContent className="pt-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
