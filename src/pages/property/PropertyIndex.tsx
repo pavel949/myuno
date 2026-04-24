@@ -70,12 +70,28 @@ function RecentCard({ item, onClick }: { item: RecentProperty; onClick: () => vo
 export default function PropertyIndex() {
   const { language } = useLanguage();
   const navigate = useNavigate();
-  const [searchParamsUrl] = useSearchParams();
+  const [searchParamsUrl, setSearchParamsUrl] = useSearchParams();
   const isRu = language === 'ru';
 
   // UniversalFilter state
   const { filterConfig } = usePropertyFilterOptions();
-  const [filterValues, setFilterValues] = useState<FilterValues>({});
+
+  // ── Hydrate filters/categories from URL → localStorage → defaults (synchronous)
+  const initialState = React.useMemo(() => {
+    const fromUrl = parseFiltersFromParams(searchParamsUrl);
+    if (fromUrl.hasAny) {
+      return { filterValues: fromUrl.filterValues, categories: fromUrl.categories, fromStorage: false };
+    }
+    const fromLs = loadFromStorage();
+    if (fromLs) {
+      return { filterValues: fromLs.filterValues, categories: fromLs.categories, fromStorage: true };
+    }
+    return { filterValues: {} as FilterValues, categories: [] as string[], fromStorage: false };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const [filterValues, setFilterValues] = useState<FilterValues>(initialState.filterValues);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(initialState.categories);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
@@ -97,7 +113,47 @@ export default function PropertyIndex() {
     setPropertyMode(m === 'buy' ? 'buy' : 'rent');
   }, [searchParamsUrl]);
 
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  // If we hydrated from localStorage, push that state back into the URL once
+  // so the visible URL remains a faithful share link.
+  useEffect(() => {
+    if (!initialState.fromStorage) return;
+    const next = new URLSearchParams(searchParamsUrl);
+    const serialized = serializeFilters(initialState.filterValues, initialState.categories);
+    Object.entries(serialized).forEach(([k, v]) => next.set(k, v));
+    setSearchParamsUrl(next, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Sync state → URL + localStorage whenever filters/categories change
+  useEffect(() => {
+    const next = new URLSearchParams(searchParamsUrl);
+    // Strip previously-owned keys
+    Array.from(next.keys()).forEach(k => {
+      if (isOwnedKey(k)) next.delete(k);
+    });
+    const serialized = serializeFilters(filterValues, selectedCategories);
+    Object.entries(serialized).forEach(([k, v]) => next.set(k, v));
+    // Avoid redundant history writes
+    if (next.toString() !== searchParamsUrl.toString()) {
+      setSearchParamsUrl(next, { replace: true });
+    }
+    saveToStorage({ filterValues, categories: selectedCategories });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterValues, selectedCategories]);
+
+  // Re-sync local state when URL changes externally (paste link, back/forward)
+  useEffect(() => {
+    const fromUrl = parseFiltersFromParams(searchParamsUrl);
+    // shallow-compare to avoid infinite loops with the writer effect above
+    const sameCats =
+      fromUrl.categories.length === selectedCategories.length &&
+      fromUrl.categories.every((c, i) => c === selectedCategories[i]);
+    const sameFilters = JSON.stringify(fromUrl.filterValues) === JSON.stringify(filterValues);
+    if (!sameCats) setSelectedCategories(fromUrl.categories);
+    if (!sameFilters) setFilterValues(fromUrl.filterValues);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParamsUrl]);
+
 
   const { items: recentItems } = useRecentlyViewed<RecentProperty>('myuno_recently_viewed_properties');
 
