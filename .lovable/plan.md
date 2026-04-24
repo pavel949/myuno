@@ -1,108 +1,135 @@
 
 
-# Логотип myUNO — система знаков
+# Аудит каталога услуг и план приведения к одному источнику истины
 
-## Что строим
+## Что я нашёл (текущее состояние)
 
-В каноне (`05-visual-design-system.md`) нет ни одной строки про логотип — только цвета, шрифты, сетка. Сейчас в проекте используется временная иконка-«U» на navy-фоне (та, что мы сделали для PWA). Нужна полноценная **система знаков**, выведенная из принципов канона:
+В коде сейчас живут **6 параллельных каталогов**, каждый со своей моделью группировки. Это и есть «разноголосица» на сайте.
 
-- «Информация важнее украшения» → знак минимальный, без декора
-- «Структура важнее свободы» → геометрия на сетке, не рисованный
-- «Цвет — сигнал» → монохромный по умолчанию, цвет только в primary-варианте
-- Эталоны: GOV.UK / e-Estonia / Bloomberg → знак **спроектированный документ**, а не иллюстрация
-- Шрифт заголовков RU — **Unbounded** (геометрический гротеск) → на нём же строим wordmark
+### 1. Канонические документы (источник стратегии — но не подключены к коду)
+- `docs/canonical/02-service-catalogue-v2.md` — **16 категорий × 230 услуг × 10 кластеров (A–J)**
+- `docs/canonical/01-segmentation-framework.md` — 25 персон, lifecycle stages
 
-## Концепция знака
+### 2. Что реально рендерится в UI (6 разных моделей)
 
-**Wordmark «myUNO»** — основной знак. Без иконки.
+| Файл / источник | Группировка | Кол-во групп | Где используется |
+|---|---|---|---|
+| `src/lib/verticalGroups.ts` | `arrive · live · enjoy · health · settle · invest · maintain · help` | **8 групп** | `/discover` (Discover.tsx), CompactFooter, AllServicesGrid, vendor onboarding |
+| `src/lib/nav/clusterCatalog.ts` (`CLUSTER_CATALOG`) | `arrive · live · enjoy · legal · invest · family · manage · build` | **8 кластеров** (другие имена!) | AppDrawer, AllAppsDrawer, NavigatorPage, **Home `ClusterGrid`** |
+| `src/lib/appRegistry.ts` (`APP_REGISTRY`) | 8 journey + 11 legacy = **19 `groupId`** | каждое приложение имеет `groupId` И `clusterIds[]` (часто рассинхронизированы) | Quick actions, иконки в хедере |
+| `src/lib/verticals.ts` (`VERTICALS`) | 20 бизнес-вертикалей (без группировки) | 20 | Бронирования, БД-таблицы, orders |
+| **БД: `category_groups` + `categories`** | `home-living · transport · leisure · health-wellness · life-admin · home-maintenance · professional` | **9 групп / 39 категорий** (ещё `kids-education` дубликат, `professional` пустая) | `/catalog`, `useCategories`, vendor-каталог, поставщики |
+| **БД: `life_situations` + `catalog_life_map`** | `arrival · business · …` (20 ситуаций, 391 mapping) | 20 | LifeOS — `/admin/life-situations`, `LifeOSStatusBlock`, `ContextualHeader` |
 
-Логика: «my» (строчные, тонкие, weight 400) + **UNO** (CAPS, weight 600) — визуальная иерархия отражает суть продукта: «моё личное» обрамляет «единую инфраструктуру». На Unbounded это работает за счёт его геометрии — буквы U-N-O почти равноширокие, образуют визуальный «модуль».
+### 3. Несоответствия, которые видит пользователь
+- На главной (`/`) `ClusterGrid` показывает **8 кластеров** Catalog, а в подвале сайта — **другие 8 групп** Vertical Groups (`enjoy` vs `leisure`, `family` vs `health`, и т.д.).
+- В `/discover` каталог из `VERTICAL_GROUPS` (8), в шторке «все приложения» — `CLUSTER_CATALOG` (8), а в `/catalog` — данные из БД (9 групп / 39 категорий).
+- LifeOS жизненные ситуации (20 в БД) **никак не связаны** с 8 кластерами CLUSTER_CATALOG и с 16 категориями canonical-документа.
+- В `appRegistry` каждое приложение лежит в одном `groupId` и в массиве `clusterIds[]` — эти два поля противоречат друг другу (например, `restaurant.groupId='leisure'`, но `clusterIds=['live','enjoy']`).
+- В БД категория `education` (`is_active=false`) дублирует `education-expat`, а группа `professional` существует и пустая.
 
-Дополнительно: трекинг между **U·N·O** разрежён (`tracking: 0.08em`) — это даёт документную точность, как в logotype The Economist / NYT Magazine.
+### 4. Сводка дубликатов / расхождений по таксономии
+- 4 разных набора имён для «одной и той же» сущности: `enjoy ⟷ leisure ⟷ Развлечения ⟷ Tourism & Activities`
+- 4 разных каталога услуг (canonical doc, verticalGroups, clusterCatalog, БД) — ни один не равен другому.
+- 20 жизненных ситуаций живут в БД, но кластеров в коде только 8 — между ними нет таблицы соответствий.
 
-**Symbol mark «U»** — компактная марка для квадратных контекстов (favicon, app icon, avatar, social).
+---
 
-Логика: одна буква **U** в моноблоке. Не круглая, не «мягкая» — углы строгие (`radius: 0` или `radius: 2`), как и весь UI. Внутренняя ширина штриха = 1/6 высоты буквы (стандартная пропорция для иконки 24-512px без потери читаемости).
+## Что предлагается сделать (план в 4 шага, 1 PR на шаг)
 
-## Цветовые варианты (4 версии каждого знака)
+### Шаг 1 · Зафиксировать SSOT-таксономию (1 файл, без UI-изменений)
 
-| Вариант | Применение | Knockout / fill |
-|---|---|---|
-| **Navy on Cream** (primary) | Дефолт: документы, лендинги, light UI | `#0A2240` на `#F7F5F1` |
-| **Cream on Navy** (reverse) | Footer, dark sections, app icon | `#F7F5F1` на `#0A2240` |
-| **Mono Ink** | Чёрно-белая печать, факс, гос-документы | `#1C1917` на белом |
-| **Mono Cream Reverse** | Watermark на фото, оверлеи | `#F7F5F1` на любом фото с overlay 40% |
+Создать **`src/lib/catalog/taxonomy.ts`** — единственный источник истины с 3 уровнями:
 
-**Orange акцент НЕ используется** в логотипе — `brand-orange` в каноне ограничен 3% площади и зарезервирован под «человечность» (CTA, активный элемент). Если красить им логотип — нарушим принцип «цвет как сигнал».
+```text
+Cluster (6–8)  ─►  Category (16, из canonical-doc)  ─►  Service/App (≈230)
+       │
+       └──────►  LifeSituation[] (М:М, 20 из БД)
+```
 
-## Размерные варианты (responsive logo)
+- Кластеры сводятся к **6 каноническим** (PROJECT.md §1.5): `Arrive · Live · Manage · Invest · Legal · Build`. Текущие `enjoy/family/health/maintain/help` распределяются по ним без потери услуг.
+- 16 категорий берутся напрямую из `02-service-catalogue-v2.md`.
+- Каждый сервис описывается полями: `id, route, vertical?, categoryId, clusterIds[], lifeSituations[], status, persona[], bookable, label{ru,en,th}, icon`.
+- Старые файлы (`verticalGroups.ts`, `clusterCatalog.ts`, `appRegistry.ts`) оставляются как **тонкие адаптеры** над новым SSOT — никаких поломок UI на этом шаге.
 
-Логотип меняется в зависимости от контекста — это часть дизайн-системы Bloomberg / FT. Три уровня:
+Также появляются helper'ы: `getServicesByCluster`, `getServicesByCategory`, `getServicesByLifeSituation`, `getCategoriesByCluster`, `flatServices`, `availableServices`.
 
-1. **Full wordmark** `myUNO` + опциональный tagline `· Phuket Super-App` — для лендингов, header desktop ≥1024px, email signature, документов
-2. **Compact wordmark** `myUNO` без tagline — header mobile, navbar ≥40px высоты
-3. **Symbol U** — favicon, app icon, avatar, share-thumbnails, контекст ≤32px
+### Шаг 2 · Привести БД к таксономии
 
-Правила переключения: если высота логотипа в макете < 24px → используется symbol. Если ширина контейнера < 120px → symbol.
+Миграция:
+1. `category_groups` пересоздаётся в 6 кластеров (slug = SSOT cluster id), `is_active=false` для устаревших.
+2. `categories` приводятся к 16 каноническим категориям; дубликат `education` (неактивный) удаляется, пустой `professional` тоже.
+3. Добавляется таблица `cluster_life_situations (cluster_id, life_situation_id)` — М:М связь.
+4. Существующие 391 mapping в `catalog_life_map` сохраняются — добавляем им `category_id` (через FK на `categories`).
+5. Lint и проверка: после миграции `category_groups → categories → catalog_life_map` дают связную карту.
 
-## Технические артефакты — что генерируем
+### Шаг 3 · Перевести UI на SSOT
 
-Все файлы попадают в `public/brand/` (новая папка) + дублируются в `/mnt/documents/myuno-logo-kit/` для скачивания:
+Один за другим (можно мерджить раздельно):
 
-### SVG (vector, source of truth)
-- `logo-wordmark-navy.svg` — основной wordmark
-- `logo-wordmark-cream.svg` — reverse
-- `logo-wordmark-mono.svg` — для печати
-- `logo-symbol-navy.svg` — symbol U
-- `logo-symbol-cream.svg`
-- `logo-symbol-mono.svg`
+1. **Главная** — `ClusterGrid`, `AllSectionsAccordion`, `CategoryGrid` читают из `getClustersForHome()` SSOT.
+2. **/discover** — `VERTICAL_GROUPS` заменяется на `getCategoriesByCluster()`.
+3. **AppDrawer / AllAppsDrawer / NavigatorPage** — `CLUSTER_CATALOG` заменяется на тот же SSOT (фильтрация по `audience` сохраняется).
+4. **Footer** — берёт первые 6 кластеров SSOT.
+5. **/catalog (PlatformCatalog)** — переходит с `useCategories()` (raw БД) на `useTaxonomy()` (SSOT + БД-fallback).
+6. **LifeOS** — `LifeOSStatusBlock` и `ContextualHeader` начинают подсвечивать кластер для активной ситуации (через `cluster_life_situations`).
+7. **Vendor onboarding `CategoryPicker`** — категории = 16 канонических, не «8 групп журней».
 
-### PNG (raster, для совместимости)
-- Wordmark: 320, 640, 1280, 2560 px ширина (для @1x/@2x/@3x ретина) × 2 цвета = 8 файлов
-- Symbol: 16, 32, 48, 64, 96, 128, 192, 256, 512, 1024 px (квадрат) × 2 цвета = 20 файлов
+После шага 3 в коде только **один способ** ответить на вопрос «к какому кластеру / категории / ситуации относится сервис X».
 
-### App icons (заменяют текущие placeholder-иконки)
-- `public/icons/icon-{72,120,152,180,192,512}.png` — обновляем существующие
-- `public/icons/icon-maskable-{192,512}.png` — обновляем (правильный safe zone 80%)
-- `public/icons/apple-touch-180.png` — без альфы, navy-фон
-- `public/favicon.svg` — symbol mark в SVG (масштабируется без потерь)
-- `public/favicon.ico` — multi-resolution (16, 32, 48 px)
+### Шаг 4 · Чистка и защита
 
-### OG / social
-- `public/og-image.png` — 1200×630, wordmark на cream + tagline
-- `public/og-image-dark.png` — wordmark cream на navy
+1. Удалить deprecated адаптеры из шага 1; старые ID остаются только в `legacyAliases.ts` для редиректов.
+2. Тест `src/test/catalog/taxonomy-coverage.test.ts`:
+   - Каждое приложение принадлежит ровно одной категории.
+   - Каждая категория — ровно одному кластеру.
+   - Все 20 LifeSituations покрыты ≥ 1 категорией.
+   - В БД `category_groups.slug` ⊇ ID из SSOT-кластеров.
+   - В `APP_ROUTES` нет битых ссылок из SSOT.
+3. Обновить документ `docs/canonical/02-service-catalogue-v2.md` — поставить метку «Версия 2.1, синхронизировано с `taxonomy.ts`» и добавить таблицу cluster→category→lifeSituation.
+4. Создать память `mem://architecture/catalog-taxonomy-ssot.md` — как добавлять новый сервис (только через `taxonomy.ts`, иначе CI ругается).
 
-### React-компонент
-- `src/components/brand/Logo.tsx` — единая точка, props: `variant` (`wordmark` | `symbol`), `tone` (`navy` | `cream` | `mono`), `size` (px). Внутри инлайнит SVG (нет лишних HTTP-запросов, цвет через `currentColor` где можно).
-- `src/components/brand/index.ts` — re-exports.
+---
 
-### Документация в каноне
-- Дописать **§ 12 «Логотип»** в `docs/canonical/05-visual-design-system.md` со всем выше: пропорции, минимальные размеры, clear space (≥ высоты буквы U со всех сторон), запреты (нельзя растягивать, наклонять, цветить в orange, ставить на градиент, обводить).
+## Что увидит пользователь после реализации
 
-### Бренд-гайд (downloadable)
-- `/mnt/documents/myuno-brand-mark-guide.pdf` — одностраничный лист в стиле Swiss/GOV.UK: знак, цветовые варианты, clear space, размеры, do/don't. Соответствует визуальному языку канона (cream фон, navy типографика, JetBrains Mono для технических подписей).
+| До | После |
+|---|---|
+| Главная: 8 кластеров (`Manage` показывается всем) | Главная: 6 канонических кластеров, `Manage` только для собственников/УК |
+| Footer: другие 8 групп | Footer: те же 6 кластеров, что и на главной |
+| /discover: `Health` | /discover: `Live` → подкатегория `Health & Wellness` |
+| /catalog: 9 БД-групп, дубликат «Education» | /catalog: 6 кластеров → 16 категорий, без дублей |
+| LifeOS: 20 ситуаций «висят отдельно» | Активная ситуация подсвечивает свой кластер на главной и в навигации |
+| AppDrawer: `Family & kids` | AppDrawer: `Live` → `Family & Kids` (категория, не кластер) |
 
-## Технология производства
+---
 
-1. **Wordmark** строим программно через Python+Pillow или прямо как SVG-код (Unbounded подключаем через Google Fonts → конвертируем нужные глифы в `<path>` чтобы SVG не зависел от системного шрифта). Так wordmark остаётся векторным, корректно показывается на всех устройствах без подгрузки шрифта.
-2. **Symbol U** — рисуем как геометрический `<path>` на сетке 24×24 (масштабируется в 16×, 32×, 512× и т.д. без редактирования).
-3. **PNG** генерируем из SVG через ImageMagick (`magick logo.svg -resize 192x192 logo-192.png`) — чёткие края на всех размерах.
-4. **Maskable иконки** — symbol U в центральных 60% canvas с заливкой navy до краёв (даёт правильный safe zone для Android).
-5. **Favicon.ico** — мультирезолюционный через ImageMagick (`magick favicon.svg -define icon:auto-resize=16,32,48 favicon.ico`).
-6. **PDF гайд** — генерируем через ReportLab (Python), один лист A4, сетка 12-кол.
+## Технические артефакты (для разработчика)
 
-## Что НЕ трогаем
+**Новые файлы:**
+- `src/lib/catalog/taxonomy.ts` (SSOT, ≈400 строк)
+- `src/lib/catalog/legacyAliases.ts` (короткий map старых ID → новые)
+- `src/hooks/useTaxonomy.ts` (объединяет SSOT + кэш `category_groups`/`categories`/`life_situations`)
+- `supabase/migrations/<ts>_catalog_taxonomy_ssot.sql`
+- `src/test/catalog/taxonomy-coverage.test.ts`
 
-- `vite.config.ts` PWA-манифест — иконки уже зареференсены в правильных путях, просто перезапишем файлы (новый `manifest_version` запустит auto-update SW).
-- Цвета и шрифты канона — логотип строим на существующих токенах, новых не вводим.
-- Существующие места использования временной иконки — `Logo.tsx` подменяет всё через единый импорт.
+**Изменённые файлы (суммарно ≈25):**
+- `verticalGroups.ts`, `clusterCatalog.ts`, `appRegistry.ts` → становятся адаптерами над SSOT
+- `Discover.tsx`, `PlatformCatalog.tsx`, `ClusterGrid.tsx`, `AllSectionsAccordion.tsx`, `AllServicesGrid.tsx`, `ServiceClusterAccordion.tsx`, `CompactFooter.tsx`, `LifeOSStatusBlock.tsx`, `ContextualHeader.tsx`, `CategoryPicker.tsx` (vendor onboarding)
+- `docs/canonical/02-service-catalogue-v2.md` (добавляется sync-таблица)
+- `mem://index.md` (+ ссылка на новую память)
 
-## Что попросить у тебя ПОСЛЕ показа первого варианта
+**Что НЕ трогаем:**
+- `VERTICALS` (бизнес-вертикали для бронирований / БД-таблиц) — он SSOT для другого слоя и остаётся как есть.
+- `APP_ROUTES` — пути не меняются, только их группировка.
+- Дизайн-токены, цвета, шрифты.
 
-Я нарисую wordmark + symbol по описанной концепции и сначала покажу 1-страничный preview-PDF (cream + navy + mono варианты на одном листе). После этого:
+---
 
-- Если концепция «mUNO» wordmark **подходит** — раскатываю весь kit (40+ файлов) и подключаю `Logo.tsx` к проекту.
-- Если хочешь **другую концепцию** (например: только symbol без wordmark, или другая обработка букв, или добавить orange-акцент в одной точке) — корректирую и показываю снова.
+## Открытые вопросы (нужны ответы перед стартом шага 1)
 
-Бренд-знак — слишком стратегическое решение, чтобы катить 40 файлов в репо без подтверждения первого вижуала.
+1. **Кластеры:** оставляем 6 канонических (`Arrive · Live · Manage · Invest · Legal · Build` из PROJECT.md), или ты хочешь сохранить нынешние 8 (с `Enjoy · Family · Help` отдельно)? Я склоняюсь к 6 — это уже зафиксировано в архитектуре v2.
+2. **Категории:** берём ровно 16 из canonical-doc, или сокращаем по факту наличия в коде (≈12)? Категории без сервисов в коде помечу `status: 'soon'`.
+3. **LifeSituations:** оставляем 20 как есть в БД, или тоже подрезаем под canonical-doc (там 10 кластеров A–J)? Если оставляем 20 — добавим `cluster_life_situations` мост, как в плане.
+4. **Объём первого PR:** делать всё одним большим PR (4 шага) или по одному PR на шаг (рекомендую — раскатывать постепенно, без риска)?
 
