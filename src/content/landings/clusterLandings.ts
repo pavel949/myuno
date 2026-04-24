@@ -443,6 +443,130 @@ const F_OPERATIONS: ClusterLanding = {
 };
 
 // ──────────────────────────────────────────────────────────────────────
+//  LIVE: G — Compliance & Legal
+// ──────────────────────────────────────────────────────────────────────
+
+const G_COMPLIANCE: ClusterLanding = {
+  clusterCode: 'G',
+  slug: 'compliance',
+  status: 'live',
+  h1: {
+    ru: 'Налоги, право и compliance на Пхукете',
+    en: 'Tax, legal and compliance on Phuket',
+  },
+  subtitle: {
+    ru: 'Tax residency, налоги от аренды, контракты, due diligence и работа с тайскими нотариусами — без сюрпризов в апреле.',
+    en: 'Tax residency, rental tax, contracts, due diligence and Thai notary work — with no April surprises.',
+  },
+  jobs: [
+    { ru: 'Понять, когда вы становитесь tax resident Таиланда.', en: 'Understand when you become a Thai tax resident.' },
+    { ru: 'Подать декларацию о доходах от аренды.', en: 'File a rental income declaration.' },
+    { ru: 'Проверить договор перед подписанием.', en: 'Review a contract before signing.' },
+    { ru: 'Провести due diligence земли или застройщика.', en: 'Run due diligence on land or developer.' },
+    { ru: 'Открыть тайскую компанию для владения землёй.', en: 'Open a Thai company to hold land.' },
+    { ru: 'Сделать PoA для удалённой сделки.', en: 'Issue a PoA for a remote transaction.' },
+  ],
+  services: [
+    { slug: 'tax-advisor', label: { ru: 'Tax Advisor', en: 'Tax Advisor' }, oneLiner: { ru: 'Расчёт обязательств: 180-day rule, foreign income.', en: '180-day rule and foreign-income tax planning.' }, href: '/tax' },
+    { slug: 'rental-tax', label: { ru: 'Налог с аренды', en: 'Rental tax' }, oneLiner: { ru: '5% withholding + House&Land 12.5%, что декларировать.', en: '5% WHT + 12.5% House&Land, what to declare.' }, href: '/legal' },
+    { slug: 'contract-analysis', label: { ru: 'Анализ контракта AI', en: 'AI contract review' }, oneLiner: { ru: 'Проверка sale/lease/PMS-договора за 24 часа.', en: 'Sale, lease and PMS contract review in 24 hours.' }, href: '/legal/contract-analysis' },
+    { slug: 'due-diligence', label: { ru: 'Due Diligence', en: 'Due diligence' }, oneLiner: { ru: 'Title deed, encumbrances, land use, EIA.', en: 'Title deed, encumbrances, land use, EIA.' }, href: '/property/due-diligence' },
+    { slug: 'thai-company', label: { ru: 'Тайская компания', en: 'Thai company setup' }, oneLiner: { ru: 'Регистрация LLC для владения землёй, structure 51/49.', en: 'LLC setup for land ownership, 51/49 structure.' }, href: '/legal/company' },
+    { slug: 'visa-quiz', label: { ru: 'Подбор визы', en: 'Visa picker' }, oneLiner: { ru: 'DTV, LTR, Elite, Retirement — что подходит вам.', en: 'DTV, LTR, Elite, Retirement — pick yours.' }, href: '/visa/quiz' },
+  ],
+  faq: [
+    { q: { ru: 'Когда я становлюсь tax resident Таиланда?', en: 'When do I become a Thai tax resident?' }, a: { ru: 'При пребывании 180+ дней в календарном году. Tax resident декларирует worldwide income, ввезённый в Таиланд в том же году.', en: 'After 180+ days in a calendar year. Residents declare worldwide income remitted to Thailand in the same year.' } },
+    { q: { ru: 'Какие налоги платит владелец сдающейся виллы?', en: 'What taxes does a renting villa owner pay?' }, a: { ru: 'Withholding tax 5% (нерезидент) или PIT по прогрессии (резидент). House & Land tax 12.5% от annual rent — обычно платит арендатор по договору.', en: 'WHT 5% (non-resident) or progressive PIT (resident). House & Land 12.5% on annual rent — typically paid by tenant per contract.' } },
+    { q: { ru: 'Что проверяет Due Diligence?', en: 'What does due diligence cover?' }, a: { ru: 'Чанот (title deed), обременения, land use zone, environmental compliance, корпоративная структура продавца, история переходов прав.', en: 'Title deed (chanote), encumbrances, land-use zone, environmental compliance, seller corporate structure, ownership history.' } },
+    { q: { ru: 'Можно ли владеть землёй через тайскую компанию?', en: 'Can foreigners hold land via a Thai company?' }, a: { ru: 'Да: 51% тайских акционеров, 49% иностранных. Нужны реальные тайские партнёры, не nominee — иначе риск признания структуры nominee и конфискации.', en: 'Yes: 51% Thai shareholders, 49% foreign. Real Thai partners required, not nominees — otherwise the structure may be voided and the asset seized.' } },
+    { q: { ru: 'Сколько стоит контракт-чек?', en: 'How much does a contract review cost?' }, a: { ru: 'AI-анализ — ฿2 500 за документ. Юрист с заключением — ฿8 000–15 000. Сложные M&A или joint venture — по факту времени.', en: 'AI review — ฿2,500/doc. Lawyer opinion — ฿8,000–15,000. Complex M&A or JV — billed by time.' } },
+    { q: { ru: 'Как работает PoA для удалённой сделки?', en: 'How does a PoA work for remote deals?' }, a: { ru: 'Доверенность нотариально заверяется в стране резидентства, апостилируется, переводится на тайский, регистрируется в Land Office. Срок — 2–3 недели.', en: 'PoA notarised in your home country, apostilled, translated to Thai, filed at the Land Office. Timeline — 2–3 weeks.' } },
+  ],
+  primaryCta: {
+    label: { ru: 'Получить консультацию', en: 'Get a consultation' },
+    href: '/tax',
+    subtitle: { ru: 'Первая 15-минутная — бесплатно.', en: 'First 15 minutes — free.' },
+  },
+  secondaryCta: {
+    label: { ru: 'Подобрать визу', en: 'Pick a visa' },
+    href: '/visa/quiz',
+  },
+  relatedPersonas: ['P6', 'P7', 'P8', 'P9', 'P10', 'P20', 'P23'],
+  seo: {
+    metaTitle: { ru: 'Налоги и право для иностранцев на Пхукете — myUNO', en: 'Tax & legal for foreigners on Phuket — myUNO' },
+    metaDescription: { ru: 'Tax residency, налог с аренды, контракты, due diligence, тайская компания. Цены в THB, юрист по-русски.', en: 'Tax residency, rental tax, contracts, due diligence, Thai company. THB pricing, English-speaking lawyer.' },
+    ogImage: OG_DEFAULT,
+    canonicalPath: '/cluster/compliance',
+    hreflangAlternates: [
+      { lang: 'ru', href: 'https://myuno.app/cluster/compliance?lang=ru' },
+      { lang: 'en', href: 'https://myuno.app/cluster/compliance?lang=en' },
+    ],
+  },
+};
+
+// ──────────────────────────────────────────────────────────────────────
+//  LIVE: H — Emergency
+// ──────────────────────────────────────────────────────────────────────
+
+const H_EMERGENCY: ClusterLanding = {
+  clusterCode: 'H',
+  slug: 'emergency',
+  status: 'live',
+  h1: {
+    ru: 'Экстренная помощь на Пхукете',
+    en: 'Emergency support on Phuket',
+  },
+  subtitle: {
+    ru: 'Один номер, один чат, чек-листы по ситуациям: ДТП, госпитализация, потеря документов, юридический инцидент. Помогаем по-русски и по-английски 24/7.',
+    en: 'One number, one chat, checklists for accidents, hospital admission, lost documents and legal incidents. Russian and English support 24/7.',
+  },
+  jobs: [
+    { ru: 'Вызвать скорую и попасть в правильную клинику.', en: 'Call an ambulance and reach the right hospital.' },
+    { ru: 'Восстановить паспорт или визу.', en: 'Recover a passport or visa.' },
+    { ru: 'Оформить полицейский протокол после ДТП или кражи.', en: 'File a police report after an accident or theft.' },
+    { ru: 'Связаться со страховой и получить cashless approval.', en: 'Reach the insurer and get cashless approval.' },
+    { ru: 'Найти срочного юриста для задержания или штрафа.', en: 'Find an urgent lawyer for detention or a fine.' },
+    { ru: 'Получить помощь с эвакуацией питомца или ребёнка.', en: 'Arrange evacuation help for a pet or child.' },
+  ],
+  services: [
+    { slug: 'sos-button', label: { ru: 'SOS-чат myUNO', en: 'myUNO SOS chat' }, oneLiner: { ru: 'Ответ дежурного за 10 минут, 24/7.', en: 'Duty agent reply in 10 minutes, 24/7.' }, href: '/concierge?topic=emergency' },
+    { slug: 'hospitals', label: { ru: 'Карта клиник', en: 'Hospital map' }, oneLiner: { ru: 'Bangkok Hospital, BIH, Mission, Vachira — с прямыми телефонами.', en: 'Bangkok Hospital, BIH, Mission, Vachira — direct phone numbers.' }, href: '/services/health/hospitals' },
+    { slug: 'police-help', label: { ru: 'Помощь с полицией', en: 'Police support' }, oneLiner: { ru: 'Туристическая полиция 1155, перевод и сопровождение.', en: 'Tourist police 1155, translation and escort.' }, href: '/concierge?topic=police' },
+    { slug: 'document-recovery', label: { ru: 'Восстановление документов', en: 'Document recovery' }, oneLiner: { ru: 'Паспорт, виза, права — пошаговый чек-лист.', en: 'Passport, visa, licence — step-by-step checklist.' }, href: '/legal/lost-documents' },
+    { slug: 'insurance-help', label: { ru: 'Связь со страховой', en: 'Insurance liaison' }, oneLiner: { ru: 'Гарантийное письмо в клинику, работа с ассистансом.', en: 'Hospital guarantee letter, assistance coordination.' }, href: '/concierge?topic=insurance' },
+    { slug: 'urgent-lawyer', label: { ru: 'Срочный юрист', en: 'On-call lawyer' }, oneLiner: { ru: 'Задержание, штраф, ДТП — выезд в течение 2 часов.', en: 'Detention, fines, accidents — on-site within 2 hours.' }, href: '/legal' },
+  ],
+  faq: [
+    { q: { ru: 'Какие номера экстренных служб?', en: 'What are the emergency numbers?' }, a: { ru: 'Скорая 1669, полиция 191, туристическая полиция 1155 (английский), пожарная 199. SOS-чат myUNO дублирует все вызовы и помогает с переводом.', en: 'Ambulance 1669, police 191, tourist police 1155 (English), fire 199. The myUNO SOS chat backs up every call and assists with translation.' } },
+    { q: { ru: 'Куда везти при серьёзной травме?', en: 'Where to go with a serious injury?' }, a: { ru: 'Bangkok Hospital Phuket (Phuket Town) и BIH — best equipped для иностранцев. Mission Hospital — бюджетнее. Vachira — государственный, для критических случаев ближе всех.', en: 'Bangkok Hospital Phuket and BIH — best equipped for foreigners. Mission Hospital — more budget. Vachira — public, often the closest for critical cases.' } },
+    { q: { ru: 'Что делать при потере паспорта?', en: 'What if I lose my passport?' }, a: { ru: '1) Полицейский протокол в туристической полиции (1155). 2) Заявление в консульство. 3) При выезде — Certificate of Identity или emergency travel document. Срок — 3–10 дней.', en: '1) Tourist police report (1155). 2) Consular application. 3) For departure — Certificate of Identity or emergency travel document. Timeline — 3–10 days.' } },
+    { q: { ru: 'Покрывает ли страховка лечение в частной клинике?', en: 'Does insurance cover private hospitals?' }, a: { ru: 'Большинство международных полисов — да, через cashless approval (гарантийное письмо). Российские полисы часто требуют оплату на месте с последующим возмещением. Чек-листы и шаблоны — в SOS-чате.', en: 'Most international policies — yes, via cashless approval (guarantee letter). Russian policies often require pay-and-claim. Checklists and templates in the SOS chat.' } },
+    { q: { ru: 'Что делать после ДТП на байке?', en: 'What to do after a scooter accident?' }, a: { ru: 'Не двигать байк до приезда полиции. Вызвать 191 или 1155. Сделать фото места и документов. Без прав категории A — штраф 500–2 000 THB и страховка может отказать.', en: 'Do not move the scooter until police arrive. Call 191 or 1155. Photograph the scene and documents. Without a cat. A licence — a 500–2,000 THB fine, and insurance may decline.' } },
+    { q: { ru: 'Куда обращаться, если задержали в полиции?', en: 'Where to turn if detained by police?' }, a: { ru: 'Право на звонок и переводчика. Сразу пишите в myUNO SOS — мы найдём дежурного юриста и свяжемся с консульством. Не подписывайте документы на тайском без перевода.', en: 'You have the right to a call and an interpreter. Message myUNO SOS immediately — we will find an on-call lawyer and contact the consulate. Never sign documents in Thai without translation.' } },
+  ],
+  primaryCta: {
+    label: { ru: 'Открыть SOS-чат', en: 'Open SOS chat' },
+    href: '/concierge?topic=emergency',
+    subtitle: { ru: 'Дежурный отвечает за 10 минут.', en: 'Duty agent replies in 10 minutes.' },
+  },
+  secondaryCta: {
+    label: { ru: 'Карта клиник', en: 'Hospital map' },
+    href: '/services/health/hospitals',
+  },
+  relatedPersonas: ['P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P13', 'P14', 'P19', 'P20', 'P25'],
+  seo: {
+    metaTitle: { ru: 'Экстренная помощь на Пхукете 24/7 — myUNO', en: 'Emergency support on Phuket 24/7 — myUNO' },
+    metaDescription: { ru: 'Скорая, полиция, потеря документов, ДТП, страховая. Чек-листы по-русски и SOS-чат с ответом за 10 минут.', en: 'Ambulance, police, lost documents, accidents, insurance. Checklists and SOS chat with 10-minute response.' },
+    ogImage: OG_DEFAULT,
+    canonicalPath: '/cluster/emergency',
+    hreflangAlternates: [
+      { lang: 'ru', href: 'https://myuno.app/cluster/emergency?lang=ru' },
+      { lang: 'en', href: 'https://myuno.app/cluster/emergency?lang=en' },
+    ],
+  },
+};
+
+// ──────────────────────────────────────────────────────────────────────
 //  Canonical list (A..J)
 // ──────────────────────────────────────────────────────────────────────
 
@@ -453,8 +577,8 @@ export const CLUSTER_LANDINGS: readonly ClusterLanding[] = [
   D_INVESTMENT,
   draftCluster('E', 'transaction', { ru: 'Покупка и продажа недвижимости', en: 'Buying & selling property' }, ['P2', 'P8', 'P9', 'P11', 'P12']),
   F_OPERATIONS,
-  draftCluster('G', 'compliance', { ru: 'Налоги, право и compliance', en: 'Tax, legal & compliance' }, ['P6', 'P7', 'P8', 'P9', 'P10', 'P20', 'P23']),
-  draftCluster('H', 'emergency', { ru: 'Экстренная помощь на Пхукете', en: 'Emergency support on Phuket' }, ['P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P13', 'P14', 'P19', 'P20', 'P25']),
+  G_COMPLIANCE,
+  H_EMERGENCY,
   draftCluster('I', 'lifestyle', { ru: 'Стиль жизни и впечатления', en: 'Lifestyle & experiences' }, ['P1', 'P3', 'P4', 'P5', 'P6', 'P7', 'P15', 'P16', 'P18', 'P24']),
   draftCluster('J', 'exit', { ru: 'Выход из актива и возврат', en: 'Exit & re-entry' }, ['P8', 'P9', 'P10', 'P20']),
 ] as const;
@@ -463,4 +587,6 @@ export const LIVE_CLUSTER_SLUGS: readonly string[] = [
   'arrival',     // A
   'investment',  // D
   'operations',  // F
+  'compliance',  // G
+  'emergency',   // H
 ] as const;
