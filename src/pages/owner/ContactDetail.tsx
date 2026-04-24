@@ -368,7 +368,7 @@ const { data: contact, isLoading, isError } = useCrmContact(id);
                       }
                     </h1>
                     {(contact.is_vip || (contact.tags || []).some((t) => t.toUpperCase() === 'VIP')) && (
-                      <Badge className="shrink-0 bg-accent/15 text-accent border-accent/40/30">VIP</Badge>
+                      <Badge className="shrink-0 bg-accent/15 text-accent border-accent/40">VIP</Badge>
                     )}
                     {contact.hnw_tier && contact.hnw_tier !== 'standard' && (
                       <Badge className={cn('shrink-0', HNW_TIER_LABELS[contact.hnw_tier as HnwTier]?.color || '')}>

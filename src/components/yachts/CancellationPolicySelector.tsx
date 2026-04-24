@@ -86,21 +86,21 @@ export function CancellationPolicySelector({
       case 'flexible':
         return {
           border: 'border-success/40 dark:border-success/40',
-          bg: 'bg-success/10/50 dark:bg-success/20',
+          bg: 'bg-success/10 dark:bg-success/20',
           badge: 'bg-success/10 text-success dark:bg-success/50 dark:text-success',
           icon: <CheckCircle className="h-4 w-4 text-success" />,
         };
       case 'moderate':
         return {
           border: 'border-primary/40 dark:border-primary/40',
-          bg: 'bg-primary/10/50 dark:bg-primary/20',
+          bg: 'bg-primary/10 dark:bg-primary/20',
           badge: 'bg-primary/10 text-primary dark:bg-primary/50 dark:text-primary',
           icon: <Clock className="h-4 w-4 text-primary" />,
         };
       case 'strict':
         return {
           border: 'border-accent/40 dark:border-accent/40',
-          bg: 'bg-accent/10/50 dark:bg-accent/20',
+          bg: 'bg-accent/10 dark:bg-accent/20',
           badge: 'bg-accent/10 text-accent dark:bg-accent/50 dark:text-accent',
           icon: <AlertCircle className="h-4 w-4 text-accent" />,
         };

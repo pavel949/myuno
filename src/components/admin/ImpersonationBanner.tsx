@@ -9,7 +9,7 @@ export function ImpersonationBanner() {
   const { developerId, developerName, exit } = useImpersonation();
   if (!developerId) return null;
   return (
-    <div className="sticky top-0 z-50 bg-accent/95 text-accent border-b border-accent/40/30">
+    <div className="sticky top-0 z-50 bg-accent/95 text-accent border-b border-accent/40">
       <div className="max-w-7xl mx-auto px-4 py-1.5 flex items-center gap-3 text-xs sm:text-sm">
         <Eye className="w-4 h-4 shrink-0" />
         <span className="truncate flex-1">

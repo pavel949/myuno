@@ -51,10 +51,10 @@ export function HotelHeroBanner({ onOpenHmaForm }: Props) {
   ];
 
   const toneClasses = {
-    amber: 'border-accent/40/30 bg-accent/5 text-accent dark:text-accent hover:border-accent/40/60',
-    blue: 'border-primary/40/30 bg-primary/5 text-primary dark:text-primary hover:border-primary/40/60',
-    emerald: 'border-success/40/30 bg-success/5 text-success dark:text-success hover:border-success/40/60',
-    violet: 'border-primary/40/30 bg-primary/5 text-primary dark:text-primary hover:border-primary/40/60',
+    amber: 'border-accent/40 bg-accent/5 text-accent dark:text-accent hover:border-accent/40',
+    blue: 'border-primary/40 bg-primary/5 text-primary dark:text-primary hover:border-primary/40',
+    emerald: 'border-success/40 bg-success/5 text-success dark:text-success hover:border-success/40',
+    violet: 'border-primary/40 bg-primary/5 text-primary dark:text-primary hover:border-primary/40',
   };
 
   return (

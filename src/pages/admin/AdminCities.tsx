@@ -269,7 +269,7 @@ export default function AdminCities() {
               key={city.id}
               className={cn(
                 "transition-all",
-                city.is_active && !city.is_coming_soon && "border-success/40/50"
+                city.is_active && !city.is_coming_soon && "border-success/40"
               )}
             >
               <CardContent className="p-4">

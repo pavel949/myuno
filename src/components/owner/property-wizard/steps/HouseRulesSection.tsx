@@ -153,7 +153,7 @@ function HouseRulesSectionInner({ formData, updateFormData }: HouseRulesSectionP
 
           {/* Max party guests - shown only when parties allowed */}
           {formData.parties_allowed && (
-            <div className="ml-13 pl-4 border-l-2 border-accent/40/20">
+            <div className="ml-13 pl-4 border-l-2 border-accent/40">
               <div className="space-y-2">
                 <Label className="text-sm flex items-center gap-1">
                   <Users className="h-3 w-3" />
@@ -192,7 +192,7 @@ function HouseRulesSectionInner({ formData, updateFormData }: HouseRulesSectionP
 
           {/* Child equipment - shown when children friendly */}
           {formData.children_friendly && (
-            <div className="ml-13 pl-4 border-l-2 border-primary/40/20 space-y-3">
+            <div className="ml-13 pl-4 border-l-2 border-primary/40 space-y-3">
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
                 <label className="flex items-center gap-2 text-sm">
                   <Switch

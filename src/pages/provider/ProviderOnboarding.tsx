@@ -367,7 +367,7 @@ const ProviderOnboarding = () => {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-                className="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-success to-success flex items-center justify-center shadow-lg shadow-success/20/25"
+                className="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-success to-success flex items-center justify-center shadow-lg shadow-success/20"
               >
                 <Check className="w-12 h-12 text-white" />
               </motion.div>

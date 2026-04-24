@@ -30,7 +30,7 @@ const GTrustPage = () => {
       subtitle: isRu ? 'Pillar 1' : 'Pillar 1',
       weight: '30%',
       color: 'from-primary to-primary',
-      bgColor: 'bg-primary/10 border-primary/40/20',
+      bgColor: 'bg-primary/10 border-primary/40',
       items: isRu 
         ? [
             'Регистрация бизнеса (DBD / MOC Thailand)',
@@ -65,7 +65,7 @@ const GTrustPage = () => {
       subtitle: isRu ? 'Pillar 2' : 'Pillar 2',
       weight: '40%',
       color: 'from-success to-success',
-      bgColor: 'bg-success/10 border-success/40/20',
+      bgColor: 'bg-success/10 border-success/40',
       items: isRu 
         ? [
             'Первичный аудит при онбординге',
@@ -100,7 +100,7 @@ const GTrustPage = () => {
       subtitle: isRu ? 'Pillar 3' : 'Pillar 3',
       weight: '30%',
       color: 'from-accent to-accent',
-      bgColor: 'bg-accent/10 border-accent/40/20',
+      bgColor: 'bg-accent/10 border-accent/40',
       items: isRu 
         ? [
             'Верифицированные отзывы (только от клиентов)',
@@ -474,7 +474,7 @@ const GTrustPage = () => {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: index * 0.05 }}
-                className="p-4 rounded-none bg-success/10 border border-success/40/20 text-center"
+                className="p-4 rounded-none bg-success/10 border border-success/40 text-center"
               >
                 <item.icon className="w-6 h-6 mx-auto mb-2 text-success" />
                 <h4 className="font-medium text-sm mb-1">{item.title}</h4>
@@ -494,7 +494,7 @@ const GTrustPage = () => {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="flex gap-3 p-3 rounded-none bg-primary/10 border border-primary/40/20"
+                className="flex gap-3 p-3 rounded-none bg-primary/10 border border-primary/40"
               >
                 <item.icon className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
                 <div>
@@ -516,7 +516,7 @@ const GTrustPage = () => {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="flex gap-3 p-3 rounded-none bg-primary/10 border border-primary/40/20"
+                className="flex gap-3 p-3 rounded-none bg-primary/10 border border-primary/40"
               >
                 <item.icon className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
                 <div>
@@ -529,7 +529,7 @@ const GTrustPage = () => {
         </SectionCard>
 
         {/* CTA Section */}
-        <SectionCard className="text-center bg-gradient-to-br from-accent/10 to-accent/10 border-accent/40/20">
+        <SectionCard className="text-center bg-gradient-to-br from-accent/10 to-accent/10 border-accent/40">
           <ShieldCheck className="w-12 h-12 text-accent mx-auto mb-4" />
           <h2 className="text-xl font-bold mb-2">
             {isRu ? "Ваша безопасность — наш приоритет" : isTh ? "ความปลอดภัยของคุณคือสิ่งสำคัญของเรา" : "Your Safety is Our Priority"}

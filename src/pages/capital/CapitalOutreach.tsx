@@ -131,7 +131,7 @@ export default function CapitalOutreach() {
                       rel="noopener noreferrer"
                       onClick={() => markSent(o.id as string)}
                     >
-                      <Button variant="outline" size="sm" className="text-success border-success/40/30">
+                      <Button variant="outline" size="sm" className="text-success border-success/40">
                         <ExternalLink className="w-3 h-3 mr-1" /> WhatsApp
                       </Button>
                     </a>
@@ -139,7 +139,7 @@ export default function CapitalOutreach() {
                   {telegramId && (
                     <a href={`https://t.me/${telegramId.replace('@', '')}`} target="_blank" rel="noopener noreferrer"
                       onClick={() => markSent(o.id as string)}>
-                      <Button variant="outline" size="sm" className="text-primary border-primary/40/30">
+                      <Button variant="outline" size="sm" className="text-primary border-primary/40">
                         <Send className="w-3 h-3 mr-1" /> Telegram
                       </Button>
                     </a>

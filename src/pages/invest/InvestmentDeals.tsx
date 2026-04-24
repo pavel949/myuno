@@ -133,7 +133,7 @@ export default function InvestmentDeals() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredDeals.map((d) => (
-              <Card key={d.id} className="p-5 hover:border-success/40/50 transition-colors">
+              <Card key={d.id} className="p-5 hover:border-success/40 transition-colors">
                 <div className="flex items-center gap-2 mb-2">
                   <Badge variant="outline" className="text-xs">{getCategoryLabel(d.category)}</Badge>
                   {d.deal_stage && <Badge variant="secondary" className="text-xs">{d.deal_stage}</Badge>}

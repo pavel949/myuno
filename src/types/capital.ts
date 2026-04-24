@@ -206,11 +206,11 @@ export const PIPELINE_STAGE_LABELS: Record<PipelineStage, string> = {
 
 export const PIPELINE_STAGE_COLORS: Record<PipelineStage, string> = {
   lead: 'bg-slate-500/20 text-slate-400 border-slate-500/30',
-  qualified: 'bg-primary/20 text-primary border-primary/40/30',
-  viewing: 'bg-primary/20 text-primary border-primary/40/30',
-  reservation: 'bg-accent/20 text-accent border-accent/40/30',
-  contract: 'bg-success/20 text-success border-success/40/30',
-  closed_won: 'bg-success/20 text-success border-success/40/30',
+  qualified: 'bg-primary/20 text-primary border-primary/40',
+  viewing: 'bg-primary/20 text-primary border-primary/40',
+  reservation: 'bg-accent/20 text-accent border-accent/40',
+  contract: 'bg-success/20 text-success border-success/40',
+  closed_won: 'bg-success/20 text-success border-success/40',
   closed_lost: 'bg-red-500/20 text-red-400 border-red-500/30',
 };
 

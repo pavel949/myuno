@@ -150,7 +150,7 @@ function HubCardGrid({
           className={cn(
             'group flex flex-col rounded-none border p-5 shadow-sm transition-all',
             highlight
-              ? 'border-accent/40/40 bg-gradient-to-br from-accent/5 to-card hover:border-accent/40/70 hover:shadow-md'
+              ? 'border-accent/40 bg-gradient-to-br from-accent/5 to-card hover:border-accent/40 hover:shadow-md'
               : 'border-border/60 bg-card hover:border-primary/40 hover:shadow-md'
           )}
         >
@@ -189,7 +189,7 @@ function CapitalPersonaPrompt({
   isToggling: boolean;
 }) {
   return (
-    <div className="rounded-none border border-accent/40/30 bg-gradient-to-br from-accent/5 via-card to-card p-5 shadow-sm">
+    <div className="rounded-none border border-accent/40 bg-gradient-to-br from-accent/5 via-card to-card p-5 shadow-sm">
       <div className="flex items-start gap-3 mb-4">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-none bg-accent/15 text-accent dark:text-accent">
           <Sparkles className="h-5 w-5" />
@@ -209,7 +209,7 @@ function CapitalPersonaPrompt({
           variant="outline"
           onClick={() => onEnable('business')}
           disabled={isToggling}
-          className="gap-1.5 border-accent/40/30 hover:border-accent/40/60 hover:bg-accent/10"
+          className="gap-1.5 border-accent/40 hover:border-accent/40 hover:bg-accent/10"
         >
           <Briefcase className="h-3.5 w-3.5" />
           {t('propertyHub.landing.personaPrompt.enableBusiness')}
@@ -219,7 +219,7 @@ function CapitalPersonaPrompt({
           variant="outline"
           onClick={() => onEnable('investor')}
           disabled={isToggling}
-          className="gap-1.5 border-accent/40/30 hover:border-accent/40/60 hover:bg-accent/10"
+          className="gap-1.5 border-accent/40 hover:border-accent/40 hover:bg-accent/10"
         >
           <TrendingUp className="h-3.5 w-3.5" />
           {t('propertyHub.landing.personaPrompt.enableInvestor')}
@@ -271,7 +271,7 @@ export default function PropertyLanding() {
             </h2>
             <Badge
               variant="outline"
-              className="border-accent/40/40 bg-accent/10 text-accent dark:text-accent text-[10px] font-semibold tracking-wide uppercase px-1.5 py-0"
+              className="border-accent/40 bg-accent/10 text-accent dark:text-accent text-[10px] font-semibold tracking-wide uppercase px-1.5 py-0"
             >
               {t('propertyHub.landing.proBadge')}
             </Badge>

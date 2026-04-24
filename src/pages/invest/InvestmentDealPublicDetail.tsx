@@ -68,10 +68,10 @@ export default function InvestmentDealPublicDetail() {
           </Button>
 
           {/* Hero */}
-          <Card className="overflow-hidden border-success/40/20 bg-gradient-to-br from-success/5 via-background to-primary/5">
+          <Card className="overflow-hidden border-success/40 bg-gradient-to-br from-success/5 via-background to-primary/5">
             <CardContent className="p-6 space-y-4">
               <div className="flex flex-wrap items-center gap-2">
-                <Badge className="bg-success/10 text-success dark:text-success border-success/40/30">
+                <Badge className="bg-success/10 text-success dark:text-success border-success/40">
                   {categoryLabel}
                 </Badge>
                 <Badge variant="outline">{intentLabel}</Badge>
@@ -157,7 +157,7 @@ export default function InvestmentDealPublicDetail() {
           )}
 
           {/* Anonymity disclosure */}
-          <Card className="border-primary/40/20 bg-primary/5">
+          <Card className="border-primary/40 bg-primary/5">
             <CardContent className="p-4 flex gap-3">
               <Shield className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
               <div className="space-y-1">

@@ -46,7 +46,7 @@ export function YachtIncludedExcluded({ features, exclusions, addons, currency =
       {(features?.length || exclusions?.length) ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {features && features.length > 0 && (
-            <div className="p-4 bg-success/10/50 dark:bg-success/20 rounded-none border border-success/40/50 dark:border-success/40/30">
+            <div className="p-4 bg-success/10 dark:bg-success/20 rounded-none border border-success/40 dark:border-success/40">
               <h4 className="font-semibold text-sm mb-3 text-success dark:text-success flex items-center gap-2">
                 <Check className="w-4 h-4" />
                 {t ? 'Включено в стоимость' : "What's included"}

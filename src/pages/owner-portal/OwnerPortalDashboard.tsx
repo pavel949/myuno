@@ -56,7 +56,7 @@ export default function OwnerPortalDashboard() {
           <h1 className="text-xl font-bold">
             {isRu ? 'Мои объекты' : 'My Properties'}
           </h1>
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-accent/15 text-accent dark:text-accent border border-accent/40/20">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-accent/15 text-accent dark:text-accent border border-accent/40">
             <Lock className="w-3 h-3" />
             {isRu ? 'Портал УК' : 'MC Portal'}
           </span>

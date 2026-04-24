@@ -38,9 +38,9 @@ function getUrgencyColor(days: number): string {
 function getUrgencyBg(days: number): string {
   if (days < 0) return 'bg-destructive/10 border-destructive/30';
   if (days <= 7) return 'bg-destructive/10 border-destructive/30';
-  if (days <= 14) return 'bg-accent/10 border-accent/40/30';
-  if (days <= 30) return 'bg-accent/10 border-accent/40/30';
-  return 'bg-success/10 border-success/40/30';
+  if (days <= 14) return 'bg-accent/10 border-accent/40';
+  if (days <= 30) return 'bg-accent/10 border-accent/40';
+  return 'bg-success/10 border-success/40';
 }
 
 export function VisaTracker() {

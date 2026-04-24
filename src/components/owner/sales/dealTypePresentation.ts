@@ -17,7 +17,7 @@ interface DealTypePresentation {
 
 const TYPE_PRESENTATION: Record<DealType, DealTypePresentation> = {
   sale: {
-    badgeClassName: 'bg-success/10 text-success border-success/40/30',
+    badgeClassName: 'bg-success/10 text-success border-success/40',
     accentClassName: 'border-l-emerald-500',
     eyebrow: { en: 'Buyer profile', ru: 'Профиль покупателя' },
     emptyNote: {
@@ -26,7 +26,7 @@ const TYPE_PRESENTATION: Record<DealType, DealTypePresentation> = {
     },
   },
   rent_short: {
-    badgeClassName: 'bg-primary/10 text-primary border-primary/40/30',
+    badgeClassName: 'bg-primary/10 text-primary border-primary/40',
     accentClassName: 'border-l-sky-500',
     eyebrow: { en: 'Short-term rental', ru: 'Краткосрочная аренда' },
     emptyNote: {
@@ -35,7 +35,7 @@ const TYPE_PRESENTATION: Record<DealType, DealTypePresentation> = {
     },
   },
   rent_long: {
-    badgeClassName: 'bg-primary/10 text-primary border-primary/40/30',
+    badgeClassName: 'bg-primary/10 text-primary border-primary/40',
     accentClassName: 'border-l-cyan-500',
     eyebrow: { en: 'Long-term rental', ru: 'Долгосрочная аренда' },
     emptyNote: {
@@ -44,7 +44,7 @@ const TYPE_PRESENTATION: Record<DealType, DealTypePresentation> = {
     },
   },
   investment: {
-    badgeClassName: 'bg-accent/10 text-accent border-accent/40/30',
+    badgeClassName: 'bg-accent/10 text-accent border-accent/40',
     accentClassName: 'border-l-amber-500',
     eyebrow: { en: 'Investment brief', ru: 'Инвестиционный бриф' },
     emptyNote: {
@@ -53,7 +53,7 @@ const TYPE_PRESENTATION: Record<DealType, DealTypePresentation> = {
     },
   },
   management: {
-    badgeClassName: 'bg-primary/10 text-primary border-primary/40/30',
+    badgeClassName: 'bg-primary/10 text-primary border-primary/40',
     accentClassName: 'border-l-violet-500',
     eyebrow: { en: 'Management request', ru: 'Запрос на управление' },
     emptyNote: {
@@ -62,7 +62,7 @@ const TYPE_PRESENTATION: Record<DealType, DealTypePresentation> = {
     },
   },
   club_deal: {
-    badgeClassName: 'bg-primary/10 text-primary border-primary/40/30',
+    badgeClassName: 'bg-primary/10 text-primary border-primary/40',
     accentClassName: 'border-l-indigo-500',
     eyebrow: { en: 'Club deal', ru: 'Клубная сделка' },
     emptyNote: {
@@ -71,7 +71,7 @@ const TYPE_PRESENTATION: Record<DealType, DealTypePresentation> = {
     },
   },
   resale: {
-    badgeClassName: 'bg-accent/10 text-accent border-accent/40/30',
+    badgeClassName: 'bg-accent/10 text-accent border-accent/40',
     accentClassName: 'border-l-orange-500',
     eyebrow: { en: 'Resale', ru: 'Вторичка' },
     emptyNote: {
@@ -80,7 +80,7 @@ const TYPE_PRESENTATION: Record<DealType, DealTypePresentation> = {
     },
   },
   offplan: {
-    badgeClassName: 'bg-success/10 text-success border-success/40/30',
+    badgeClassName: 'bg-success/10 text-success border-success/40',
     accentClassName: 'border-l-teal-500',
     eyebrow: { en: 'Off-Plan sale', ru: 'Продажа Off-Plan' },
     emptyNote: {

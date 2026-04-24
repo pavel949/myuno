@@ -361,7 +361,7 @@ export default function GuestCheckIn() {
           title={isRu ? 'Онлайн регистрация' : 'Online Check-in'} 
           showBack 
         />
-        <Card className="border-accent/40/50 bg-accent/5">
+        <Card className="border-accent/40 bg-accent/5">
           <CardContent className="p-6 text-center">
             <Clock className="w-16 h-16 text-accent mx-auto mb-4" />
             <h2 className="text-xl font-bold mb-2">

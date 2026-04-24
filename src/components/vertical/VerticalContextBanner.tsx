@@ -11,7 +11,7 @@ interface VerticalContextBannerProps {
 }
 
 const TYPE_STYLES: Record<VerticalContextType, { bg: string; border: string; iconBg: string }> = {
-  weather:      { bg: 'bg-primary/10',     border: 'border-primary/40/20',     iconBg: 'bg-primary/15' },
+  weather:      { bg: 'bg-primary/10',     border: 'border-primary/40',     iconBg: 'bg-primary/15' },
   market:       { bg: 'bg-primary/10',     border: 'border-primary/20',     iconBg: 'bg-primary/15' },
   alert:        { bg: 'bg-warning/10',     border: 'border-warning/20',     iconBg: 'bg-warning/15' },
   seasonal:     { bg: 'bg-accent/10',      border: 'border-accent/20',      iconBg: 'bg-accent/15' },

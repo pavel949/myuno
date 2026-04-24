@@ -347,7 +347,7 @@ export default function ProfileSettings() {
               <AlertTriangle className="w-4 h-4" />
               {isRu ? 'Экстренный контакт' : 'Emergency Contact'}
             </div>
-            <SectionCard className="space-y-4 border-accent/40/20">
+            <SectionCard className="space-y-4 border-accent/40">
               <p className="text-xs text-muted-foreground -mt-2 mb-2">
                 {isRu 
                   ? 'Этот контакт будет использован в экстренных ситуациях во время вашего путешествия.'

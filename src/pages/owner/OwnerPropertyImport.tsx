@@ -507,7 +507,7 @@ export default function OwnerPropertyImport() {
       {/* Step: AI Result */}
       {step === 'ai-result' && intakeSession && intakeSession.items.length > 0 && (
         <div className="space-y-6">
-          <Alert className="border-success/40/50 bg-success/10 dark:bg-success/20">
+          <Alert className="border-success/40 bg-success/10 dark:bg-success/20">
             <CheckCircle2 className="h-5 w-5 text-success" />
             <AlertTitle className="text-success dark:text-muted-foreground">
               {isRu ? 'Данные успешно извлечены!' : 'Data Successfully Extracted!'}
@@ -598,7 +598,7 @@ export default function OwnerPropertyImport() {
 
                   {/* Warnings */}
                   {item.missingRequiredFields.length > 0 && (
-                    <Alert variant="default" className="border-accent/40/50">
+                    <Alert variant="default" className="border-accent/40">
                       <AlertCircle className="h-4 w-4 text-accent" />
                       <AlertDescription className="text-sm">
                         {isRu ? 'Не удалось извлечь:' : 'Could not extract:'} {item.missingRequiredFields.join(', ')}
@@ -637,7 +637,7 @@ export default function OwnerPropertyImport() {
       {/* Step: Blocked - OTA restricts automated access */}
       {step === 'blocked' && (
         <div className="space-y-6">
-          <Alert variant="destructive" className="border-accent/40/50 bg-accent/10 dark:bg-accent/20">
+          <Alert variant="destructive" className="border-accent/40 bg-accent/10 dark:bg-accent/20">
             <ShieldAlert className="h-5 w-5 text-accent" />
             <AlertTitle className="text-accent dark:text-muted-foreground">
               {isRu ? 'Площадка ограничивает автоматический доступ' : 'Platform Restricts Automated Access'}

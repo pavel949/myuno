@@ -125,7 +125,7 @@ export default function DisputeResolutionPage() {
         ? ['Аренда яхт и катеров', 'Туры и экскурсии', 'Транспорт (escrow)', 'Маркетплейс товаров']
         : ['Boat charters', 'Tours & excursions', 'Transport (escrow)', 'Marketplace products'],
       maxCoverage: isRu ? 'До 100% стоимости' : 'Up to 100% of cost',
-      color: 'bg-success/10 border-success/40/30',
+      color: 'bg-success/10 border-success/40',
     },
     {
       category: isRu ? 'Покрытие депозита' : 'Deposit Coverage',
@@ -133,7 +133,7 @@ export default function DisputeResolutionPage() {
         ? ['Краткосрочная аренда', 'Рестораны (no-show)', 'Красота и СПА', 'Медицина']
         : ['Short-term rentals', 'Restaurants (no-show)', 'Beauty & SPA', 'Medical'],
       maxCoverage: isRu ? 'До суммы депозита' : 'Up to deposit amount',
-      color: 'bg-accent/10 border-accent/40/30',
+      color: 'bg-accent/10 border-accent/40',
     },
     {
       category: isRu ? 'Только лид-защита' : 'Lead Protection Only',
@@ -141,7 +141,7 @@ export default function DisputeResolutionPage() {
         ? ['Долгосрочная аренда', 'Визы', 'Юридические услуги', 'Образование']
         : ['Long-term rentals', 'Visas', 'Legal services', 'Education'],
       maxCoverage: isRu ? 'Возврат lead-fee' : 'Lead-fee refund',
-      color: 'bg-accent/10 border-accent/40/30',
+      color: 'bg-accent/10 border-accent/40',
     },
   ];
 

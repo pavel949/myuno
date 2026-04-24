@@ -367,9 +367,9 @@ export default function IPPolicyPage() {
                 <h4 className="font-medium text-sm mb-3">{isRu ? 'Зарегистрированные ®' : 'Registered ®'}</h4>
                 <div className="grid gap-2">
                   {trademarks.registered.map((tm, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-2 bg-success/5 border border-success/40/20 rounded-none">
+                    <div key={idx} className="flex items-center justify-between p-2 bg-success/5 border border-success/40 rounded-none">
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="bg-success/10 text-success border-success/40/30">®</Badge>
+                        <Badge variant="outline" className="bg-success/10 text-success border-success/40">®</Badge>
                         <span className="font-medium text-sm">{tm.name}</span>
                       </div>
                       <span className="text-xs text-muted-foreground">{tm.description}</span>
@@ -381,9 +381,9 @@ export default function IPPolicyPage() {
                 <h4 className="font-medium text-sm mb-3">{isRu ? 'В процессе регистрации ™' : 'Pending Registration ™'}</h4>
                 <div className="grid gap-2">
                   {trademarks.pending.map((tm, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-2 bg-accent/5 border border-accent/40/20 rounded-none">
+                    <div key={idx} className="flex items-center justify-between p-2 bg-accent/5 border border-accent/40 rounded-none">
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="bg-accent/10 text-accent border-accent/40/30">™</Badge>
+                        <Badge variant="outline" className="bg-accent/10 text-accent border-accent/40">™</Badge>
                         <span className="font-medium text-sm">{tm.name}</span>
                       </div>
                       <span className="text-xs text-muted-foreground">{tm.description}</span>
@@ -504,7 +504,7 @@ export default function IPPolicyPage() {
             </ul>
           </CardContent>
         </Card>
-        <Card className="mb-8 border-accent/40/30 bg-accent/5">
+        <Card className="mb-8 border-accent/40 bg-accent/5">
           <CardContent className="pt-4">
             <p className="text-sm text-muted-foreground">
               ⚠️ {userContentLicense.retention}

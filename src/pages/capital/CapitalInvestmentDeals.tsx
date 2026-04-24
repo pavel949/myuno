@@ -120,7 +120,7 @@ export default function CapitalInvestmentDeals() {
                 </div>
                 <div className="space-y-2">
                   {byStage[stage.key]?.map(d => (
-                    <Card key={d.id} className="hover:border-success/40/50 transition cursor-pointer" onClick={() => navigate(APP_ROUTES.CAPITAL_INVESTMENT_DEAL_DETAIL(d.id))}>
+                    <Card key={d.id} className="hover:border-success/40 transition cursor-pointer" onClick={() => navigate(APP_ROUTES.CAPITAL_INVESTMENT_DEAL_DETAIL(d.id))}>
                       <CardContent className="p-3 space-y-1.5">
                         <div className="flex items-start justify-between gap-2">
                           <p className="text-sm font-medium line-clamp-2">{d.title_private || 'Без названия'}</p>
