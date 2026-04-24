@@ -303,6 +303,9 @@ const { data: contact, isLoading, isError } = useCrmContact(id);
         </div>
       </div>
 
+      {/* Cross-pipeline awareness — shows if same identity is also in Capital / vendor pipelines */}
+      {id && <CrossPipelineBanner sourceTable="crm_contacts" sourceId={id} className="mb-4" />}
+
       {/* ─── Main layout: content left, chatter right ─── */}
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_380px] gap-6">
         {/* ═══ LEFT PANEL ═══ */}

@@ -95,6 +95,9 @@ export default function CapitalContactDetail() {
         )}
       </div>
 
+      {/* Cross-pipeline awareness — shows if this lead is also an MC contact / vendor prospect */}
+      {id && <CrossPipelineBanner sourceTable="capital_contacts" sourceId={id} />}
+
       {/* Info Card */}
       <div className="rounded-none border border-border/50 p-4 space-y-3">
         {editing ? (
