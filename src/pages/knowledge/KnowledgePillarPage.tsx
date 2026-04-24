@@ -183,6 +183,18 @@ export default function KnowledgePillarPage() {
               </CardContent>
             </Card>
 
+            {/* M10f cross-journey CTA — IPP §25. Only for property-relevant clusters. */}
+            {propertyCtaActions.length > 0 && (
+              <div className="mt-6">
+                <ContextualCTA
+                  sourceModule="knowledge_pillar"
+                  title={isRu ? 'От теории к делу' : 'From theory to action'}
+                  actions={propertyCtaActions}
+                  trackContext={{ pillar_slug: pillar.slug, cluster: pillar.cluster }}
+                />
+              </div>
+            )}
+
             {related.length > 0 && (
               <section className="mt-8">
                 <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">
