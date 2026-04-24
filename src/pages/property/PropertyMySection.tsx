@@ -156,7 +156,7 @@ function AuthenticatedMySection() {
                   {prop.cover_image ? (
                     <img src={prop.cover_image} alt="" className="w-12 h-12 rounded-none object-cover flex-shrink-0" />
                   ) : (
-                    <div className="w-12 h-12 rounded-none bg-gradient-to-br from-primary to-primary flex items-center justify-center flex-shrink-0">
+                    <div className="w-12 h-12 rounded-none bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center flex-shrink-0">
                       <Eye className="w-6 h-6 text-white" />
                     </div>
                   )}
