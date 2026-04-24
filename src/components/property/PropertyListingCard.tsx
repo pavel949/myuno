@@ -222,6 +222,17 @@ export function PropertyListingCard({
             </p>
           )}
         </div>
+
+        {/* Trust signals — collapses if no data */}
+        <TrustStrip
+          titleDeedType={(property as unknown as { title_deed_type?: string | null }).title_deed_type ?? null}
+          escrowOffered={(property as unknown as { escrow_offered?: boolean | null }).escrow_offered ?? null}
+          clearviewBadge={(property as unknown as { clearview_badge?: string | null }).clearview_badge ?? null}
+          floodRisk={(property as unknown as { flood_risk?: string | null }).flood_risk ?? null}
+          ownerVerified={property.is_verified ?? null}
+          isRu={isRu}
+          className="mt-1.5 [&>div]:text-[10px] [&>div]:px-1.5 [&>div]:py-0.5 [&_svg]:w-3 [&_svg]:h-3"
+        />
       </div>
     </div>
   );
