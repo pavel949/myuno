@@ -1110,13 +1110,151 @@ const P20_RETIREES: PersonaLanding = {
 };
 
 // ──────────────────────────────────────────────────────────────────────
+//  LIVE: P3 — Гости из Европы (Sprint 3)
+// ──────────────────────────────────────────────────────────────────────
+
+const P3_EU_GUESTS: PersonaLanding = {
+  personaCode: 'P3',
+  slug: 'eu-guests',
+  status: 'live',
+  h1: {
+    ru: 'Пхукет для гостей из Европы',
+    en: 'Phuket for European guests',
+  },
+  subtitle: {
+    ru: 'Long-stay виллы, EUR/SEPA-оплата, частные трансферы и сервис на английском — без посредников.',
+    en: 'Long-stay villas, EUR/SEPA payments, private transfers and English-speaking service — no middlemen.',
+  },
+  pains: [
+    { ru: 'Сложно найти виллу, которая принимает SEPA или карту EUR.', en: 'Hard to find a villa accepting SEPA or EUR card payments.' },
+    { ru: 'Туроператоры предлагают пакетные туры, а вы хотите гибкости.', en: 'Tour operators push packages, but you want flexibility.' },
+    { ru: 'Нужен трансфер бизнес-класса, а не общий шаттл.', en: 'You need a business-class transfer, not a shared shuttle.' },
+    { ru: 'Хочется wellness-режима: йога, fine dining, дайвинг — без беготни.', en: 'You want a wellness routine: yoga, fine dining, diving — without chaos.' },
+  ],
+  services: [
+    { slug: 'long-stay-villas', label: { ru: 'Long-stay виллы', en: 'Long-stay villas' }, oneLiner: { ru: 'От 14 ночей, прямые контракты с владельцами.', en: 'From 14 nights, direct owner contracts.' }, href: '/property/rent' },
+    { slug: 'private-transfer', label: { ru: 'Private transfer', en: 'Private transfer' }, oneLiner: { ru: 'Mercedes/Toyota Alphard, англоговорящий водитель.', en: 'Mercedes/Toyota Alphard, English-speaking driver.' }, href: '/landing/airport-transfer' },
+    { slug: 'wellness', label: { ru: 'Wellness & spa', en: 'Wellness & spa' }, oneLiner: { ru: 'Йога, массаж, detox-программы.', en: 'Yoga, massage, detox programmes.' }, href: '/wellness' },
+    { slug: 'dining', label: { ru: 'Fine dining', en: 'Fine dining' }, oneLiner: { ru: 'Бронирование Michelin-recommended ресторанов.', en: 'Bookings at Michelin-recommended restaurants.' }, href: '/cluster/lifestyle' },
+  ],
+  faq: [
+    { q: { ru: 'Можно платить в EUR?', en: 'Can I pay in EUR?' }, a: { ru: 'Да — SEPA, EUR-карта или Wise. Курс фиксируется на день оплаты.', en: 'Yes — SEPA, EUR card or Wise. Rate locked on payment day.' } },
+    { q: { ru: 'Поддерживаете long-stay (1–3 месяца)?', en: 'Do you support long-stay (1–3 months)?' }, a: { ru: 'Да, со скидкой 20–35% от nightly rate. Контракт на английском.', en: 'Yes, with a 20–35% discount on nightly rate. English contract.' } },
+  ],
+  primaryCta: { label: { ru: 'Подобрать виллу', en: 'Find a villa' }, href: '/property/rent' },
+  secondaryCta: { label: { ru: 'Связаться с консьержем', en: 'Talk to concierge' }, href: '/contact' },
+  seo: {
+    metaTitle: { ru: 'Пхукет для европейцев: long-stay виллы, EUR-оплата — myUNO', en: 'Phuket for Europeans: long-stay villas, EUR payment — myUNO' },
+    metaDescription: { ru: 'Long-stay виллы с прямой арендой, оплата EUR/SEPA, private transfer и wellness без турагентов. Английский сервис на Пхукете.', en: 'Long-stay villas with direct rental, EUR/SEPA payment, private transfer and wellness without tour operators. English service on Phuket.' },
+    ogImage: OG_DEFAULT,
+    canonicalPath: '/for/eu-guests',
+    hreflangAlternates: [
+      { lang: 'ru', href: 'https://myuno.app/for/eu-guests?lang=ru' },
+      { lang: 'en', href: 'https://myuno.app/for/eu-guests?lang=en' },
+    ],
+  },
+};
+
+// ──────────────────────────────────────────────────────────────────────
+//  LIVE: P16 — Спортсмены и Fight Camp (Sprint 3)
+// ──────────────────────────────────────────────────────────────────────
+
+const P16_ATHLETES: PersonaLanding = {
+  personaCode: 'P16',
+  slug: 'athletes',
+  status: 'live',
+  h1: {
+    ru: 'Тренировочные сборы на Пхукете: MMA, Muay Thai, fitness',
+    en: 'Training camps on Phuket: MMA, Muay Thai, fitness',
+  },
+  subtitle: {
+    ru: 'Tiger Muay Thai, Phuket Top Team, AKA Thailand — сборы, проживание рядом с залом, восстановление и виза.',
+    en: 'Tiger Muay Thai, Phuket Top Team, AKA Thailand — camps, gym-side housing, recovery and visa.',
+  },
+  pains: [
+    { ru: 'Не знаете, какой зал подходит под ваш уровень и стиль.', en: 'You don’t know which gym fits your level and style.' },
+    { ru: 'Хотите жить в 5 минутах от зала, а не ездить через весь остров.', en: 'You want to live 5 minutes from the gym, not commute across the island.' },
+    { ru: 'Нужен Education Visa или ED-виза на срок сборов.', en: 'You need an Education or ED visa for the camp duration.' },
+    { ru: 'Восстановление после нагрузки: спортивный массаж, физиотерапевт, питание.', en: 'Recovery after load: sports massage, physio, nutrition.' },
+  ],
+  services: [
+    { slug: 'gym-matcher', label: { ru: 'Подбор зала', en: 'Gym matcher' }, oneLiner: { ru: 'Сравнение Tiger / PTT / AKA / Sinbi по уровню и цене.', en: 'Tiger / PTT / AKA / Sinbi compared by level and price.' }, href: '/cluster/lifestyle' },
+    { slug: 'gym-side-housing', label: { ru: 'Жильё рядом с залом', en: 'Gym-side housing' }, oneLiner: { ru: 'Студии в Чалонге и Раваи от 14 ночей.', en: 'Studios in Chalong and Rawai from 14 nights.' }, href: '/property/rent' },
+    { slug: 'ed-visa', label: { ru: 'ED Visa', en: 'ED Visa' }, oneLiner: { ru: 'Education Visa через лицензированный зал.', en: 'Education Visa via a licensed gym.' }, href: '/visa/quiz' },
+    { slug: 'recovery', label: { ru: 'Sports recovery', en: 'Sports recovery' }, oneLiner: { ru: 'Спорт-массаж, физио, ice bath.', en: 'Sports massage, physio, ice bath.' }, href: '/wellness' },
+  ],
+  faq: [
+    { q: { ru: 'Сколько стоят сборы на месяц?', en: 'How much for a one-month camp?' }, a: { ru: '600–1200 USD за тренировки + 400–900 USD за жильё. Точная смета — по запросу.', en: '600–1200 USD for training + 400–900 USD for housing. Exact quote on request.' } },
+    { q: { ru: 'Можно с нуля без опыта?', en: 'Can I start without experience?' }, a: { ru: 'Да. У всех топ-залов есть beginner-классы и персональный тренер.', en: 'Yes. All top gyms run beginner classes and personal trainers.' } },
+  ],
+  primaryCta: { label: { ru: 'Подобрать зал', en: 'Find a gym' }, href: '/contact' },
+  secondaryCta: { label: { ru: 'Получить ED-визу', en: 'Get ED visa' }, href: '/visa/quiz' },
+  seo: {
+    metaTitle: { ru: 'Сборы на Пхукете: Tiger, PTT, AKA — жильё и виза — myUNO', en: 'Phuket training camps: Tiger, PTT, AKA — housing & visa — myUNO' },
+    metaDescription: { ru: 'Сборы по MMA, Muay Thai и fitness в топ-залах Пхукета. Жильё рядом, ED Visa, восстановление и питание под спортсмена.', en: 'MMA, Muay Thai and fitness camps at Phuket top gyms. Gym-side housing, ED Visa, recovery and athlete nutrition.' },
+    ogImage: OG_DEFAULT,
+    canonicalPath: '/for/athletes',
+    hreflangAlternates: [
+      { lang: 'ru', href: 'https://myuno.app/for/athletes?lang=ru' },
+      { lang: 'en', href: 'https://myuno.app/for/athletes?lang=en' },
+    ],
+  },
+};
+
+// ──────────────────────────────────────────────────────────────────────
+//  LIVE: P17 — Halal-friendly путешественники (Sprint 3)
+// ──────────────────────────────────────────────────────────────────────
+
+const P17_HALAL: PersonaLanding = {
+  personaCode: 'P17',
+  slug: 'halal',
+  status: 'live',
+  h1: {
+    ru: 'Halal-friendly Пхукет: отдых для мусульманских семей',
+    en: 'Halal-friendly Phuket: holidays for Muslim families',
+  },
+  subtitle: {
+    ru: 'Halal-сертифицированные рестораны, виллы с prayer space, мечети рядом и приватные пляжи — спокойный отдых по правилам.',
+    en: 'Halal-certified restaurants, villas with prayer space, nearby mosques and private beaches — calm holidays by your rules.',
+  },
+  pains: [
+    { ru: 'Сложно найти halal-сертифицированную еду вне Patong.', en: 'Hard to find halal-certified food outside Patong.' },
+    { ru: 'Нужна вилла с приватным бассейном и prayer space.', en: 'You need a villa with a private pool and prayer space.' },
+    { ru: 'Хочется быть рядом с мечетью на пятничную молитву.', en: 'You want to be near a mosque for Friday prayer.' },
+    { ru: 'Поездка с большой семьёй — нужен минивэн и трансфер на 6+.', en: 'Travelling with extended family — you need a 6+ seater transfer.' },
+  ],
+  services: [
+    { slug: 'halal-villas', label: { ru: 'Halal-friendly виллы', en: 'Halal-friendly villas' }, oneLiner: { ru: 'Privacy, prayer space, kitchen для своей готовки.', en: 'Privacy, prayer space, kitchen for self-cooking.' }, href: '/property/rent' },
+    { slug: 'halal-dining', label: { ru: 'Halal-рестораны', en: 'Halal restaurants' }, oneLiner: { ru: 'Сертифицированные заведения по районам.', en: 'Certified venues by area.' }, href: '/cluster/lifestyle' },
+    { slug: 'mosque-map', label: { ru: 'Карта мечетей', en: 'Mosque map' }, oneLiner: { ru: 'Bang Tao, Kamala, Phuket Town — расписание молитв.', en: 'Bang Tao, Kamala, Phuket Town — prayer schedule.' }, href: '/map' },
+    { slug: 'family-transfer', label: { ru: 'Семейный трансфер', en: 'Family transfer' }, oneLiner: { ru: 'Toyota Commuter / Hiace на 9 пассажиров.', en: 'Toyota Commuter / Hiace for 9 passengers.' }, href: '/landing/airport-transfer' },
+  ],
+  faq: [
+    { q: { ru: 'Где больше всего halal-инфраструктуры?', en: 'Where is most halal infrastructure?' }, a: { ru: 'Bang Tao, Kamala и Phuket Town — мечети, рестораны и магазины.', en: 'Bang Tao, Kamala and Phuket Town — mosques, restaurants and shops.' } },
+    { q: { ru: 'Можно бронировать виллу только для женщин?', en: 'Can I book a women-only villa stay?' }, a: { ru: 'Да — приватные виллы со staff по запросу (только женщины).', en: 'Yes — private villas with women-only staff on request.' } },
+  ],
+  primaryCta: { label: { ru: 'Подобрать виллу', en: 'Find a villa' }, href: '/property/rent' },
+  secondaryCta: { label: { ru: 'Открыть карту', en: 'Open the map' }, href: '/map' },
+  seo: {
+    metaTitle: { ru: 'Halal Пхукет: виллы, рестораны, мечети — myUNO', en: 'Halal Phuket: villas, restaurants, mosques — myUNO' },
+    metaDescription: { ru: 'Halal-friendly отдых на Пхукете: сертифицированные рестораны, виллы с prayer space, мечети и семейные трансферы.', en: 'Halal-friendly holidays on Phuket: certified restaurants, villas with prayer space, mosques and family transfers.' },
+    ogImage: OG_DEFAULT,
+    canonicalPath: '/for/halal',
+    hreflangAlternates: [
+      { lang: 'ru', href: 'https://myuno.app/for/halal?lang=ru' },
+      { lang: 'en', href: 'https://myuno.app/for/halal?lang=en' },
+    ],
+  },
+};
+
+// ──────────────────────────────────────────────────────────────────────
 //  Canonical list (P1..P25)
 // ──────────────────────────────────────────────────────────────────────
 
 export const PERSONA_LANDINGS: readonly PersonaLanding[] = [
   P1_TOURISTS,
   draftPersona('P2', 'cn-investors', { ru: 'Гости из Китая', en: 'Chinese tourists & scouts' }),
-  draftPersona('P3', 'eu-guests', { ru: 'Гости из Европы', en: 'European guests' }),
+  P3_EU_GUESTS,
   P4_DIGITAL_NOMADS,
   P5_SNOWBIRDS,
   P6_RU_EXPATS,
@@ -1129,8 +1267,8 @@ export const PERSONA_LANDINGS: readonly PersonaLanding[] = [
   P13_PET_OWNERS,
   P14_MEDICAL,
   P15_WEDDINGS,
-  draftPersona('P16', 'athletes', { ru: 'Спортсмены и Fight Camp', en: 'Athletes & fight camps' }),
-  draftPersona('P17', 'halal', { ru: 'Мусульманские путешественники', en: 'Muslim travellers' }),
+  P16_ATHLETES,
+  P17_HALAL,
   draftPersona('P18', 'lgbtq', { ru: 'ЛГБТК+ путешественники и резиденты', en: 'LGBTQ+ travellers & residents' }),
   draftPersona('P19', 'accessibility', { ru: 'Путешественники с ограниченными возможностями', en: 'Accessibility-first travellers' }),
   P20_RETIREES,
@@ -1145,6 +1283,7 @@ export const PERSONA_LANDINGS: readonly PersonaLanding[] = [
 
 export const LIVE_PERSONA_SLUGS: readonly string[] = [
   'tourists',          // P1
+  'eu-guests',         // P3  — Sprint 3
   'digital-nomads',    // P4  — Sprint 1
   'snowbirds',         // P5  — M10b
   'ru-expats',         // P6  — M10b
@@ -1156,6 +1295,8 @@ export const LIVE_PERSONA_SLUGS: readonly string[] = [
   'pet-owners',        // P13
   'medical',           // P14 — Sprint 2
   'weddings',          // P15 — Sprint 2
+  'athletes',          // P16 — Sprint 3
+  'halal',             // P17 — Sprint 3
   'retirees',          // P20 — Sprint 2
   'developer-partner', // P22 — M10b
 ] as const;

@@ -41,9 +41,9 @@ describe('CLUSTER_LANDINGS — coverage', () => {
 });
 
 describe('CLUSTER_LANDINGS — Sprint 1–3 live promotions', () => {
-  const expectedLive = ['arrival', 'extension', 'settlement', 'investment', 'transaction', 'operations', 'compliance', 'emergency', 'lifestyle'];
+  const expectedLive = ['arrival', 'extension', 'settlement', 'investment', 'transaction', 'operations', 'compliance', 'emergency', 'lifestyle', 'exit'];
 
-  it('has exactly the Sprint 1–3 live slug set (9 of 10)', () => {
+  it('has all 10 clusters live (Sprint 3 complete)', () => {
     const live = CLUSTER_LANDINGS.filter((l) => l.status === 'live').map((l) => l.slug).sort();
     expect(live).toEqual([...expectedLive].sort());
   });
