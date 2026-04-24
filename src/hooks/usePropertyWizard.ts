@@ -714,11 +714,17 @@ export function usePropertyWizard() {
       approval_status: approvalStatus,
       is_active: approvalStatus === 'draft' ? false : undefined,
       rental_platform: rental_platforms?.length ? rental_platforms[0] : undefined,
-      listing_modes: [
+      // listing_modes is a denormalised cache mirrored from tenancy_modes/sale_intent
+      // so legacy consumers (useStaysSearch, PropertyCard) keep working.
+      // tenancy_modes ('short'|'medium'|'long') is the new source of truth for rental tracks;
+      // sale_intent gates the 'sale' badge.
+      listing_modes: Array.from(new Set([
         ...(platform_listed ? ['platform'] : []),
-        ...(is_for_sale ? ['sale'] : []),
-        ...(price_per_night ? ['rent'] : []),
-      ],
+        ...((is_for_sale || (cleanData as any).sale_intent) ? ['sale'] : []),
+        ...((cleanData as any).tenancy_modes?.includes?.('short')  ? ['rent', 'short'] : (price_per_night ? ['rent', 'short'] : [])),
+        ...((cleanData as any).tenancy_modes?.includes?.('medium') ? ['medium'] : []),
+        ...((cleanData as any).tenancy_modes?.includes?.('long')   ? ['long']   : []),
+      ])),
       created_on_behalf: isOnBehalf,
       ownership_type: ownershipData.ownership_type,
       actual_owner_email: isOnBehalf ? ownershipData.actual_owner_email : undefined,
