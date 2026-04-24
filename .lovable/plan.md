@@ -1,231 +1,128 @@
 
 
-# Stage 4 — Унификация Outreach Engine (без потерь)
+# Каких публичных лендингов не хватает — аудит и план
 
-## Что нашёл фактически (важная корректировка)
+## Что есть сейчас (live / draft)
 
-В БД нет `outreach_campaigns`. Вместо одного движка работают **четыре независимых системы** с разными моделями владения, каналами и состоянием:
-
-| Система | Таблицы | Цель | Кто пишет | Строк |
-|---|---|---|---|---|
-| **MC Sequences** | `crm_sequences` + `_steps` + `_enrollments` | Многошаговый drip для контактов MC (гости/арендаторы/owners) | MC team (`company_id`) | 0 |
-| **Capital Outreach** | `capital_outreach` + реакции | 1:1 «сегодня позвонить инвестору» feed | Capital agent (`user_id`) | — |
-| **Capital Campaigns** | `capital_campaigns` | Контейнер кампании (fundraise/project) — без сообщений | Capital agent | 0 |
-| **Vendor Outreach** | `vendor_outreach_log` + `_templates` + `vendor-outreach-agent` edge fn | AI-аутрич вендорам (email/WhatsApp/Instagram) с автоfollow-up | Admin | log: 0, templates: **5** |
-| **MCC Campaigns** | `mcc_campaigns` + `_creatives` + `_channel_metrics` | Маркетинговые кампании (acquisition/awareness) с бюджетами и креативами | MCC admin | 0 |
-
-Из 5 систем **только vendor templates содержат данные (5 шаблонов)**. Остальные пусты. MC client (386 контактов в `crm_contacts`) ещё не запускал ни одной sequence. Это даёт максимальную свободу: **можно реально консолидировать, а не только "обернуть фасадом"**.
-
-## Принцип Stage 4
-
-**Не переписывать рабочие движки, а ввести единый слой "Outreach" поверх них** — общий dispatcher, общую таблицу шаблонов и единый UI-хаб. Источники остаются (RLS не трогаем), но появляется **единый язык: campaign → audience → channel → template → message → response**.
-
-```text
-┌──────────────────────────────────────────────────┐
-│           /outreach (Unified Hub)                │
-│   Tabs: Vendors · Investors · Guests/MC · Mktg   │
-└──────────────────────┬───────────────────────────┘
-                       │
-        ┌──────────────┼──────────────┐
-        ▼              ▼              ▼
-   outreach_       outreach_     outreach_
-   templates       messages      audiences (view)
-   (общая)         (общая лог)   (3 источника)
-        │              │
-        └──────────────┴──────► dispatch-outreach (edge fn)
-                                  ├─ vendor: WhatsApp/Email
-                                  ├─ investor: WhatsApp/TG
-                                  └─ guest: Email/WhatsApp
-```
-
-## План в 5 шагов
-
-### Шаг 1 — Единая таблица шаблонов `outreach_templates`
-
-Создать `outreach_templates` как объединение `vendor_outreach_templates` + steps из `crm_sequences` + capital templates.
-
-```text
-outreach_templates (
-  id uuid PK,
-  audience_type text  -- 'vendor' | 'investor' | 'guest' | 'owner' | 'mcc_lead'
-  channel text        -- 'email' | 'whatsapp' | 'telegram' | 'sms' | 'instagram_dm'
-  language text       -- 'ru' | 'en' | 'th'
-  stage text          -- 'initial' | 'followup_1..3' | 'meeting' | 'proposal' | 'thank_you'
-  subject text,
-  body text NOT NULL,
-  variables text[],
-  company_id uuid,    -- nullable для админских/глобальных
-  created_by uuid,
-  is_active bool default true,
-  source_table text   -- откуда мигрирован (audit), nullable
-)
-```
-
-Миграция данных: 5 строк из `vendor_outreach_templates` копируются в `outreach_templates` с `audience_type='vendor'`. Старая таблица **остаётся** (используется `vendor-acquisition` edge fn) — синхронизируется триггером `vendor_outreach_templates → outreach_templates`. Через 2 спринта старая удаляется.
-
-RLS: глобальные шаблоны (`company_id IS NULL`) видны admin; MC-шаблоны — членам соответствующей `management_companies`.
-
-### Шаг 2 — Единый лог сообщений `outreach_messages`
-
-```text
-outreach_messages (
-  id uuid PK,
-  identity_id uuid FK contact_identities(id),  -- ключ: используем Stage 1!
-  audience_type text,
-  channel text,
-  template_id uuid FK outreach_templates(id),
-  campaign_id uuid,                  -- nullable, ссылка на любую campaign-таблицу через source
-  campaign_source text,              -- 'capital_campaigns' | 'mcc_campaigns' | 'crm_sequences' | NULL
-  campaign_source_id uuid,
-  subject text, body text,
-  status text,                       -- 'queued' | 'sent' | 'delivered' | 'opened' | 'clicked' | 'replied' | 'failed'
-  sent_at, opened_at, clicked_at, replied_at timestamptz,
-  followup_sequence int default 0,
-  next_followup_at timestamptz,
-  response_type text,                -- 'interested' | 'not_now' | 'declined' | 'no_response'
-  error_message text,
-  created_by uuid, created_at timestamptz
-)
-```
-
-**Ключевое:** `identity_id` (из Stage 1 = `contact_identities`) делает невозможным «бомбить одного человека из 3 источников» — dispatcher проверяет дубли по identity за последние N дней.
-
-Backfill: `vendor_outreach_log` → `outreach_messages` (resolve `contact_id`→`identity_id` через `contact_identity_links`). Старая таблица остаётся read-only до подтверждения.
-
-### Шаг 3 — Edge Function `dispatch-outreach` (единый отправщик)
-
-Один путь для всех каналов и аудиторий:
-
-```text
-POST /functions/v1/dispatch-outreach
-{
-  identity_ids: ["..."],
-  template_id: "...",       // ИЛИ inline: { subject, body, channel }
-  audience_type: "vendor",
-  campaign_source?: "capital_campaigns",
-  campaign_source_id?: "...",
-  scheduled_at?: ISO8601,
-  dry_run?: boolean
-}
-```
-
-Поведение:
-1. Валидирует доступ (RLS: только admin/owner identity'ев);
-2. Проверяет анти-спам: «не писать одной identity чаще 1 раз в N дней по этому каналу»;
-3. Резолвит контакт по `audience_type` (vendor → email/whatsapp из `crm_contacts`; investor → channels из `capital_contacts`);
-4. Шлёт через существующие провайдеры (`send-email-resend`, `send-whatsapp`, `send-telegram`);
-5. Пишет в `outreach_messages`;
-6. Если шаблон в sequence — планирует следующий шаг через `next_followup_at`.
-
-**Не дублируем**: дёргаем уже работающие функции `vendor-outreach-agent` (для AI-персонализации vendor) и `send-*` адаптеры. Новый код — только тонкий orchestrator.
-
-### Шаг 4 — Унифицированный UI `/outreach`
-
-Один маршрут с табами по audience. Все три старые точки входа становятся редиректами:
-
-| Старый URL | Новый URL |
+### Persona-лендинги `/for/:persona` — **9 live из 25**
+| Live (9) | Draft → 404 (16) |
 |---|---|
-| `/admin/crm?tab=outreach` (Vendor panel) | `/outreach?audience=vendor` |
-| `/capital/outreach` | `/outreach?audience=investor` |
-| `/mc/sequences` | `/outreach?audience=guest&company=…` |
+| P1 tourists, P5 snowbirds, P6 ru-expats, P8 passive-investors, P9 hnw, P10 operators, P11 mn-investors, P13 pet-owners, P22 developer-partner | P2 cn-investors, P3 eu-guests, P4 digital-nomads, P7 families, P12 bn-business, P14 medical, P15 weddings, P16 athletes, P17 halal, P18 lgbtq, P19 accessibility, P20 retirees, P21 providers, P22 freelancers, P23 smb, P24 creatives, P25 students |
 
-Структура страницы `/outreach`:
-- **Табы**: Vendors / Investors / Guests (MC) / Marketing (MCC)
-- **Левая колонка**: список campaigns (читается из 3 источников через view `v_outreach_campaigns_unified`)
-- **Центр**: live feed `outreach_messages` с фильтрами по статусу/каналу/identity
-- **Правая колонка**: «Today» (Capital-style 1:1 actions) + библиотека шаблонов
+### Cluster-лендинги `/cluster/:slug` — **3 live из 10**
+| Live (3) | Draft → 404 (7) |
+|---|---|
+| A arrival, D investment, F operations | B extension, C settlement, E transaction, G compliance, H emergency, I lifestyle, J exit |
 
-Существующие компоненты переиспользуются:
-- `VendorOutreachPanel.tsx` → становится содержимым таба «Vendors»
-- `CapitalOutreach.tsx` (Today feed) → содержимое таба «Investors»
-- Sequence builder из `useCrmSequences` → таб «Guests»
-- `mcc_campaigns` → таб «Marketing»
+### Lifestyle / монетизационные лендинги (отдельно, вне `/for` и `/cluster`)
+Live: `/relocate`, `/wedding`, `/kids`, `/nomad-guide`, `/clearview`, `/new-developments`, `/rent-phuket`, `/peylaa`, `/pricing`, `/why-myuno`, `/visa/quiz`, `/school-finder`, `/cost-of-living`, `/trip-planner`, `/list-with-us`.
 
-### Шаг 5 — View `v_outreach_campaigns_unified` + `v_outreach_messages_with_identity`
+## Главные пробелы (приоритизированные)
 
-Чтобы Admin видел все 3 движка в одном списке без ALTER на исходных таблицах:
+### Уровень 1 — критичные пробелы для SEO и воронки (P0)
 
-```sql
-CREATE VIEW v_outreach_campaigns_unified AS
-  SELECT id, name, 'capital_campaigns'::text src, status, created_at, user_id::text owner
-    FROM capital_campaigns
-  UNION ALL
-  SELECT id, name, 'mcc_campaigns', status, created_at, created_by::text
-    FROM mcc_campaigns
-  UNION ALL
-  SELECT id, name, 'crm_sequences', CASE WHEN is_active THEN 'active' ELSE 'paused' END,
-         created_at, created_by::text
-    FROM crm_sequences;
+**1.1 Cluster H — Emergency** (`/cluster/emergency`)
+Высокая поисковая частотность (медпомощь, туристическая полиция, страховка), затрагивает 12 персон. Сейчас 404.
+
+**1.2 Cluster G — Compliance** (`/cluster/compliance`)
+Налоги/право/visa run для resident'ов и инвесторов. Критично для P6/P8/P9/P10/P20. Сейчас 404 — а это самый прибыльный intent для legal-вертикали.
+
+**1.3 Cluster B — Extension** (`/cluster/extension`)
+Продление визы и переход к долгому пребыванию. P3/P4/P5/P6 — пограничный funnel, сейчас разорван.
+
+**1.4 P7 Families** (`/for/families`)
+Семьи с детьми = крупный сегмент в `/kids` уже есть страница, но persona-входа нет. Связь `/for/families` → `/kids` + `/school-finder` + family-villas → быстрый win.
+
+**1.5 P4 Digital Nomads** (`/for/digital-nomads`)
+`/nomad-guide` существует, persona-страницы нет. Минимум — обёртка над nomad-guide с ROI визы DTV + co-working + long-stay villa.
+
+### Уровень 2 — высокая ценность, средний приоритет (P1)
+
+**2.1 Cluster I — Lifestyle** (`/cluster/lifestyle`) — хаб для wellness/dining/sport/events, тащит 10 персон.
+**2.2 Cluster C — Settlement** (`/cluster/settlement`) — обустройство (мебель, школы, банки, авто, ВУ) для resident'ов.
+**2.3 Cluster E — Transaction** (`/cluster/transaction`) — мост между D (investment) и F (operations): сам процесс сделки.
+**2.4 P14 Medical tourists** (`/for/medical`) — медтуризм, прямая монетизация через Bangkok Hospital и партнёрские клиники.
+**2.5 P20 Retirees** (`/for/retirees`) — Retirement visa O-A, healthcare, банки, недвижимость для пенсионера.
+**2.6 P15 Weddings** (`/for/weddings`) — `/wedding` как продуктовый есть, persona-обёртка нет (intent = "destination wedding Phuket").
+
+### Уровень 3 — нишевые, но с конкретной монетизацией (P2)
+
+**2.7 P2 Chinese tourists & scouts** — большой рынок, нужен китайский lang-вариант (вне scope текущего bilingual setup).
+**2.8 P16 Athletes & fight camps** — Muay Thai / Tiger Muay Thai партнёрство.
+**2.9 P17 Halal travellers** — halal food map, prayer rooms, family resorts.
+**2.10 P21 Providers + P23 SMB** — партнёрский funnel B2B (есть только `/list-with-us`, но это generic).
+**2.11 Cluster J — Exit** — продажа актива, для долгосрочного retention не критично.
+
+### Уровень 4 — намеренно отложить
+P12 BN business, P18 LGBTQ, P19 accessibility, P24 creatives, P25 students — низкий ROI на ближайший квартал, оставить draft.
+
+## Дополнительные пробелы вне `/for` и `/cluster`
+
+| Гипотеза | URL | Зачем |
+|---|---|---|
+| Area landing pages | `/area/:slug` (rawai, kamala, bang-tao, surin, patong, chalong) | Сейчас есть `/guide/areas`, но 6 отдельных area-страниц с ценами/инфраструктурой — мощнейший SEO-funnel под "rent in kamala" |
+| Vertical landing: Yachts | `/yachts` (если ещё нет publicly) | High-AOV вертикаль |
+| Vertical landing: Education | `/education` hub | Дополняет `/school-finder` |
+| Service category landings | `/services/cleaning`, `/services/maintenance` etc. | Вертикали под high-intent local search |
+| Event-driven seasonal | `/songkran`, `/high-season-2026` | Сезонные SEO-spike |
+
+Нужно проверить: эти URL уже в `routes.ts` есть, но контент-лендингов под них нет (страницы — каталоги, не SEO-landings).
+
+## Рекомендованный порядок реализации
+
+```text
+Sprint 1 (P0 — 1 неделя):
+  1. Cluster H emergency
+  2. Cluster G compliance
+  3. P7 families (обёртка над /kids)
+  4. P4 digital-nomads (обёртка над /nomad-guide)
+
+Sprint 2 (P1 — 1 неделя):
+  5. Cluster B extension
+  6. Cluster C settlement
+  7. Cluster I lifestyle
+  8. P14 medical
+  9. P20 retirees
+
+Sprint 3 (P2 + Areas):
+  10. Cluster E transaction
+  11. P15 weddings (обёртка)
+  12. 6 area landings (/area/:slug) — самый большой SEO-buy
+  13. P16 athletes
 ```
 
-`SECURITY INVOKER` → каждый видит только своё.
+## Критерии «готов»
 
-## Таблица «что остаётся / что меняется / что редиректит»
+Каждый новый лендинг должен:
+1. Быть `status: 'live'` в `personaLandings.ts` или `clusterLandings.ts`
+2. Содержать H1, subtitle, 4+ pains, 4+ services, 4+ FAQ, primary+secondary CTA
+3. Иметь полный SEO-блок: metaTitle (≤60), metaDescription (≤160), ogImage, canonicalPath, hreflangAlternates
+4. Быть добавлен в `LIVE_*_SLUGS` массив
+5. Получить запись в `public/sitemap-landings.xml`
+6. Иметь cross-link minimum в 2 связанных lendinга (related personas / related cluster)
+7. Соответствовать `docs/canonical/03-tone-of-voice.md` §14 (без «лучший», «уникальный», urgency)
 
-| Сущность | Действие |
-|---|---|
-| `crm_sequences` + steps + enrollments | **Остаётся.** Используется как «sequence engine» для guest аудитории. |
-| `vendor_outreach_log` | Read-only после backfill. Удалить через 1 спринт. |
-| `vendor_outreach_templates` | Остаётся, синхронизируется с `outreach_templates` триггером. |
-| `vendor-outreach-agent` edge fn | Остаётся, вызывается из `dispatch-outreach` для AI-персонализации vendor. |
-| `capital_outreach` | Остаётся (специфичная логика реакций инвесторов). UI переезжает в таб. |
-| `capital_campaigns`, `mcc_campaigns` | Остаются как контейнеры; новые сообщения логируются в `outreach_messages`. |
-| `/admin/crm`, `/capital/outreach`, `/mc/sequences` | Редиректы → `/outreach?audience=...` |
+## Технические детали
 
-## Что НЕ делаем
+- Правки только в `src/content/landings/personaLandings.ts` и `clusterLandings.ts` — компоненты `PersonaLandingPage.tsx` и `ClusterLandingPage.tsx` уже умеют рендерить любые данные.
+- Никаких новых routes не нужно — `:persona` и `:slug` динамические.
+- `public/sitemap-landings.xml` — append вручную (10 новых `<url>` блоков для Sprint 1+2).
+- Area landings потребуют новый route `/area/:slug` + новую систему конфигов `src/content/landings/areaLandings.ts` (если решим делать).
 
-- ❌ Не удаляем `crm_sequences` — это работающий движок с FK от `agent_deals`
-- ❌ Не мигрируем `vendor_outreach_templates` физически — синхронизация через trigger
-- ❌ Не трогаем edge fn `vendor-outreach-agent` (там AI-логика, риск регресса)
-- ❌ Не объединяем `capital_campaigns` и `mcc_campaigns` — разные модели владения и метрики
+## Ожидаемый эффект
 
-## Технические детали (по шагам)
+- **+9 индексируемых страниц** после Sprint 1+2 (с 12 live до 21).
+- **Cluster H + G** закрывают 2 самых частых tourist/resident intent: «medical emergency phuket», «visa run thailand 2026».
+- **P4/P7 wrappers** — нулевой контентный долг (контент уже на `/kids` и `/nomad-guide`), только связка persona→product.
+- **Area landings** дают long-tail SEO, который обычно приносит 40–60% органики property-порталам.
 
-### Миграция БД (одна, идемпотентная)
-1. `CREATE TABLE outreach_templates` + RLS (admin/MC)
-2. `CREATE TABLE outreach_messages` + индексы (`identity_id`, `next_followup_at WHERE status='queued'`, `(audience_type, status)`) + RLS
-3. `INSERT INTO outreach_templates SELECT … FROM vendor_outreach_templates` (audience='vendor')
-4. `INSERT INTO outreach_messages SELECT … FROM vendor_outreach_log JOIN contact_identity_links` (resolve identity)
-5. Trigger `vendor_outreach_templates_sync` → `outreach_templates`
-6. `CREATE VIEW v_outreach_campaigns_unified` (SECURITY INVOKER)
-7. `CREATE VIEW v_outreach_messages_with_identity` (join с `contact_identities`)
-8. `CREATE FUNCTION outreach_throttle_check(_identity uuid, _channel text, _window interval) RETURNS boolean` — для anti-spam в dispatcher
+## Что НЕ делаем сейчас
 
-### Edge Function
-- Новая: `supabase/functions/dispatch-outreach/index.ts` (~250 строк, использует `_shared/admin-config.ts`)
-- Зависимости: уже существующие `send-email-resend`, `send-whatsapp`, `send-telegram-message`
-
-### Новые/изменённые файлы кода
-- **New:** `src/pages/outreach/OutreachHub.tsx`, `src/components/outreach/OutreachAudienceTabs.tsx`, `src/components/outreach/OutreachComposer.tsx`, `src/components/outreach/OutreachTemplateLibrary.tsx`, `src/hooks/useOutreachMessages.ts`, `src/hooks/useOutreachTemplates.ts`, `src/hooks/useDispatchOutreach.ts`
-- **Modified:** `src/lib/config/routes.ts` (+`OUTREACH = '/outreach'`), `src/components/layout/AnimatedRoutes.tsx` (+route+ редиректы), `src/components/layout/pageRegistry.ts`
-- **Refactored (минимально):** `VendorOutreachPanel.tsx`, `CapitalOutreach.tsx` — обёрнуты в табы, источник данных не меняется на этом этапе
-- **Redirects (1 строка каждый):** `/admin/crm?tab=outreach`, `/capital/outreach`, `/mc/sequences` → `/outreach?audience=…` (preserve query)
-
-### Откат
-- `DROP VIEW v_outreach_*` — UI деградирует на старые компоненты (они остались)
-- `DROP TABLE outreach_messages, outreach_templates CASCADE` — данные клиента не задеты (vendor_outreach_log/templates целы)
-- `DROP FUNCTION dispatch-outreach` — старые пути работают
-- Все 5 шагов независимы
-
-## Эффект для MC-клиента
-
-Ноль. У них:
-- 0 sequences → нечего ломать
-- 0 outreach сообщений → backfill пустой
-- `crm_contacts` не трогается
-- `crm_sequences` остаётся рабочим — если они начнут использовать, выйдут уже на новый `/outreach?audience=guest`
-
-## Что получаем
-
-1. **Один URL** для всех outreach-операций вместо трёх
-2. **Anti-spam guarantee**: одна identity не получит 3 сообщения от 3 систем за день
-3. **Единая аналитика**: open/click/reply rate по audience и channel в одном дашборде
-4. **Готовность к scale**: новый канал (например, Viber) подключается в одной edge fn, не в трёх
-5. **Identity-aware**: каждое сообщение привязано к человеку, а не к строке в исходной таблице
+- ❌ Новые шейлы / layouts — переиспользуем `PersonaLandingView` и `ClusterLandingView`
+- ❌ Китайский язык (P2) — выходит за рамки текущей i18n инфраструктуры (RU/EN)
+- ❌ P18/P19/P24/P25 — не приносят выручки в ближайшем квартале
 
 ## Резюме
 
-Stage 4 = **identity-aware unified outreach layer**. Три рабочих движка остаются, но получают общий dispatcher, общую таблицу шаблонов, единый лог сообщений и один UI-хаб `/outreach`. Vendor templates (5 строк) — единственные реальные данные — мигрируются через триггер. Откат каждого шага независим. Срок: ~1 день работы.
-
-Если одобряешь — начинаю с **Шага 1+2 (миграции БД)**, затем Шаг 3 (dispatcher), затем Шаги 4–5 (UI + views + редиректы).
+Сейчас система покрывает **40% planned persona landings** и **30% cluster landings**. Самый большой пробел — **Cluster H (Emergency), G (Compliance), B (Extension)** и **persona-обёртки над уже работающими продуктами `/kids` и `/nomad-guide`**. Если делать в порядке P0 → P1 → P2, за 3 спринта закроем все коммерчески значимые лендинги без новой инфраструктуры — только контент в двух конфиг-файлах.
 
