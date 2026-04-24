@@ -1,10 +1,15 @@
 /**
  * usePhuketConditions — real-time weather, AQI and FX rate for Phuket.
  *
- * Sources (all keyless / public):
+ * Sources (all keyless / public, CORS-enabled):
  *  - Weather (temp + condition):   Open-Meteo  https://open-meteo.com/en/docs
  *  - Air quality (US AQI):         Open-Meteo  https://open-meteo.com/en/docs/air-quality-api
- *  - FX rate THB/USD:              exchangerate.host (open ECB-backed rates)
+ *  - FX rate THB/USD:              fawazahmed0/currency-api (jsDelivr CDN)
+ *                                  https://github.com/fawazahmed0/exchange-api
+ *
+ * Note: previously used exchangerate.host, which started returning 403
+ * "missing_access_key" in 2026 after switching to a paid model. The new
+ * source is fully open and updated daily.
  *
  * Cached in localStorage for 30 minutes to avoid re-fetching on every mount.
  * If a request fails, we fall back to the last-known cached value, then to
