@@ -33,6 +33,12 @@ export interface ContextualAction {
   transactional?: boolean;
   /** Optional IPP scoring event to fire on click. */
   trackEvent?: IPPLeadEventType;
+  /**
+   * When true, the action is still resolving (e.g. waiting on a match-count
+   * query). Non-transactional actions render a skeleton hint; transactional
+   * actions are hidden until ready to avoid surfacing dead-end CTAs.
+   */
+  loading?: boolean;
 }
 
 interface Props {
@@ -57,7 +63,13 @@ export function ContextualCTA({
 
   // Guard: never render empty CTA blocks. Pages that pass an empty list
   // simply won't show this section.
-  const visible = actions.filter(a => !!a.to && !!a.label);
+  // Hide transactional CTAs while their data is loading — better to show
+  // nothing than a CTA that may resolve to "0 matches" and get filtered out
+  // a tick later (causing layout shift). Non-transactional CTAs stay visible
+  // and render a skeleton in their hint area.
+  const visible = actions.filter(
+    a => !!a.to && !!a.label && !(a.transactional && a.loading),
+  );
   if (visible.length === 0) return null;
 
   const handleClick = (action: ContextualAction) => {
@@ -113,29 +125,46 @@ export function ContextualCTA({
       <ul className="space-y-1.5">
         {visible.map(action => {
           const Icon = action.icon;
+          const isLoading = !!action.loading;
+          // For non-transactional loading actions, render a non-interactive
+          // shell with a skeleton hint while the count resolves.
+          const Wrapper: React.ElementType = isLoading ? 'div' : Link;
+          const wrapperProps = isLoading
+            ? { 'aria-busy': true as const, role: 'status' }
+            : { to: action.to, onClick: () => handleClick(action) };
           return (
             <li key={action.id}>
-              <Link
-                to={action.to}
-                onClick={() => handleClick(action)}
+              <Wrapper
+                {...(wrapperProps as Record<string, unknown>)}
                 className={
                   'flex items-center justify-between gap-3 px-3 py-2.5 rounded-[10px] border transition-colors ' +
-                  (action.transactional
-                    ? 'border-foreground/40 bg-foreground/5 hover:bg-foreground/10'
-                    : 'border-border hover:border-foreground/30 bg-background')
+                  (isLoading
+                    ? 'border-border bg-background opacity-80 cursor-default pointer-events-none'
+                    : action.transactional
+                      ? 'border-foreground/40 bg-foreground/5 hover:bg-foreground/10'
+                      : 'border-border hover:border-foreground/30 bg-background')
                 }
               >
-                <div className="flex items-center gap-2.5 min-w-0">
+                <div className="flex items-center gap-2.5 min-w-0 flex-1">
                   {Icon && <Icon className="w-4 h-4 text-muted-foreground shrink-0" />}
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <div className="text-[13.5px] text-foreground truncate">{action.label}</div>
-                    {action.hint && (
-                      <div className="text-[11.5px] text-muted-foreground truncate">{action.hint}</div>
+                    {isLoading ? (
+                      <div
+                        className="mt-1 h-3 w-24 rounded bg-muted animate-pulse"
+                        aria-label="Loading match count"
+                      />
+                    ) : (
+                      action.hint && (
+                        <div className="text-[11.5px] text-muted-foreground truncate">{action.hint}</div>
+                      )
                     )}
                   </div>
                 </div>
-                <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" aria-hidden />
-              </Link>
+                {!isLoading && (
+                  <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" aria-hidden />
+                )}
+              </Wrapper>
             </li>
           );
         })}

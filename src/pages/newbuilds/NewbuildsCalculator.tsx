@@ -65,7 +65,20 @@ export default function NewbuildsCalculator() {
 
   const ctaActions = useMemo<ContextualAction[]>(() => {
     const list: ContextualAction[] = [];
-    if (matches.count > 0) {
+    // While the match count is loading, render a non-transactional placeholder
+    // so the user sees a skeleton instead of layout shift. Once resolved with
+    // count > 0 it becomes the real transactional CTA. Count === 0 falls
+    // through and nothing is rendered for this slot (per IPP §25).
+    if (matchBand && matches.isLoading) {
+      list.push({
+        id: 'matching-properties',
+        to: matches.href,
+        label: isRu ? 'Подбираем подходящие проекты…' : 'Finding matching projects…',
+        icon: Building2,
+        transactional: false,
+        loading: true,
+      });
+    } else if (matches.count > 0) {
       list.push({
         id: 'matching-properties',
         to: matches.href,
@@ -97,7 +110,7 @@ export default function NewbuildsCalculator() {
       icon: GitCompare,
     });
     return list;
-  }, [matches.count, matches.href, matchBand, selectedProjectId, isRu]);
+  }, [matches.count, matches.href, matches.isLoading, matchBand, selectedProjectId, isRu]);
 
   return (
     <NewbuildsLayout>
