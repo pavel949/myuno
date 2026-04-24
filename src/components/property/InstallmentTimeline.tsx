@@ -20,8 +20,6 @@ import { useCurrency } from '@/contexts/CurrencyContext';
 export interface InstallmentTimelineProps {
   milestones: InstallmentMilestone[] | null | undefined;
   totalPrice?: number | null;
-  /** Source currency of totalPrice (defaults to THB). */
-  currency?: string;
   isRu: boolean;
   /** Optional preset id to display as title. */
   presetLabel?: string;
