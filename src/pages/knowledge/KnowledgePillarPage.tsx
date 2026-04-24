@@ -14,9 +14,15 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight, BookOpen } from 'lucide-react';
+import { ArrowRight, BookOpen, Building2, ShieldCheck, Calculator } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useKnowledgePillar, useKnowledgePillars } from '@/hooks/useKnowledgePillars';
+import { ContextualCTA, type ContextualAction } from '@/components/shared/ContextualCTA';
+import { useContextualOffplanMatches } from '@/hooks/useContextualMatches';
+import { APP_ROUTES } from '@/lib/config/routes';
+
+/** Pillar clusters that warrant a property/RE next-step CTA. IPP §25. */
+const PROPERTY_CLUSTERS = new Set(['6.1', '6.2', '6.6', '6.7', '6.11']);
 
 function renderMarkdownLite(content: string): React.ReactNode[] {
   if (!content) return [];
@@ -88,6 +94,41 @@ export default function KnowledgePillarPage() {
     return allPillars.filter((p) => pillar.related_slugs.includes(p.slug));
   }, [pillar, allPillars]);
 
+  // M10f cross-journey CTAs from a property-relevant guide.
+  const isPropertyPillar = !!pillar && PROPERTY_CLUSTERS.has(pillar.cluster);
+  const matches = useContextualOffplanMatches(isPropertyPillar ? {} : null);
+  const propertyCtaActions = useMemo<ContextualAction[]>(() => {
+    if (!isPropertyPillar) return [];
+    const list: ContextualAction[] = [];
+    if (matches.count > 0) {
+      list.push({
+        id: 'browse-offplan',
+        to: matches.href,
+        label: isRu
+          ? `${matches.count} проектов в каталоге новостроек`
+          : `${matches.count} projects in the off-plan catalog`,
+        icon: Building2,
+        transactional: true,
+      });
+    }
+    list.push({
+      id: 'roi-calculator',
+      to: APP_ROUTES.NEWBUILDS_CALCULATOR,
+      label: isRu ? 'ROI-калькулятор для инвестора' : 'ROI calculator for investors',
+      hint: isRu ? 'Рассчитать доходность' : 'Estimate returns',
+      icon: Calculator,
+      trackEvent: 'roi_calculator_run',
+    });
+    list.push({
+      id: 'clearview',
+      to: APP_ROUTES.CLEARVIEW,
+      label: isRu ? 'ClearView™ — независимый рейтинг проектов' : 'ClearView™ — independent project rating',
+      icon: ShieldCheck,
+      transactional: true,
+    });
+    return list;
+  }, [isPropertyPillar, matches.count, matches.href, isRu]);
+
   const seoTitle = pillar ? (isRu ? pillar.meta_title_ru : pillar.meta_title_en) : 'Knowledge Hub';
   const seoDescription = pillar ? (isRu ? pillar.meta_description_ru : pillar.meta_description_en) : '';
   const h1 = pillar ? (isRu ? pillar.h1_ru : pillar.h1_en) : '';
@@ -141,6 +182,18 @@ export default function KnowledgePillarPage() {
                 </article>
               </CardContent>
             </Card>
+
+            {/* M10f cross-journey CTA — IPP §25. Only for property-relevant clusters. */}
+            {propertyCtaActions.length > 0 && (
+              <div className="mt-6">
+                <ContextualCTA
+                  sourceModule="knowledge_pillar"
+                  title={isRu ? 'От теории к делу' : 'From theory to action'}
+                  actions={propertyCtaActions}
+                  trackContext={{ pillar_slug: pillar.slug, cluster: pillar.cluster }}
+                />
+              </div>
+            )}
 
             {related.length > 0 && (
               <section className="mt-8">

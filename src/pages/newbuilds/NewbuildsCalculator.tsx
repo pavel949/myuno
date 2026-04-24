@@ -5,13 +5,16 @@
  * defaults (snowbird, resident, investor, operator, hnw, mn) so persona
  * landing CTAs land on a pre-shaped calculator, not a blank one.
  */
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Calculator } from 'lucide-react';
+import { Calculator, Building2, GitCompare, ShieldCheck } from 'lucide-react';
 import NewbuildsLayout from '@/components/newbuilds/NewbuildsLayout';
 import { NewbuildsHero } from '@/components/newbuilds/NewbuildsHero';
 import { NbROICalculator } from '@/components/newbuilds/NbROICalculator';
 import { useNewbuildProjects } from '@/hooks/useNewbuildProjects';
+import { useContextualOffplanMatches } from '@/hooks/useContextualMatches';
+import { ContextualCTA, type ContextualAction } from '@/components/shared/ContextualCTA';
+import { useIPPLeadEvent } from '@/hooks/useIPPLeadEvent';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getPreset } from '@/lib/calculator/personaPresets';
@@ -27,6 +30,7 @@ export default function NewbuildsCalculator() {
   const preset = useMemo(() => getPreset(presetSlug), [presetSlug]);
 
   const selectedProject = (projects || []).find(p => p.id === selectedProjectId);
+  const { track } = useIPPLeadEvent();
 
   // Preset wins over project defaults when set
   const initialPrice = preset?.purchasePrice ?? selectedProject?.price_from ?? null;
@@ -34,6 +38,66 @@ export default function NewbuildsCalculator() {
   const initialCamPerSqm = preset
     ? Math.round(preset.camFeeMonthly / preset.area)
     : (selectedProject as { cam_fee_per_sqm?: number } | undefined)?.cam_fee_per_sqm ?? null;
+
+  // IPP §3 lead event: ROI calculator engaged (+25). Fire once per page mount
+  // when an actual price is being modelled.
+  useEffect(() => {
+    if (initialPrice && initialPrice > 0) {
+      track({
+        eventType: 'roi_calculator_run',
+        projectId: selectedProjectId || null,
+        meta: { preset: presetSlug ?? null },
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [presetSlug, selectedProjectId]);
+
+  // M10f cross-journey: "N properties matching this ROI" — band ±35% around price.
+  const matchBand = useMemo(() => {
+    if (!initialPrice || initialPrice <= 0) return null;
+    return {
+      min: Math.round(initialPrice * 0.65),
+      max: Math.round(initialPrice * 1.35),
+      district: selectedProject?.location_area ?? null,
+    };
+  }, [initialPrice, selectedProject?.location_area]);
+  const matches = useContextualOffplanMatches(matchBand);
+
+  const ctaActions = useMemo<ContextualAction[]>(() => {
+    const list: ContextualAction[] = [];
+    if (matches.count > 0) {
+      list.push({
+        id: 'matching-properties',
+        to: matches.href,
+        label: isRu
+          ? `${matches.count} проектов в этом ценовом диапазоне`
+          : `${matches.count} projects in this price band`,
+        hint: matchBand
+          ? `฿${(matchBand.min! / 1_000_000).toFixed(1)}M – ฿${(matchBand.max! / 1_000_000).toFixed(1)}M${matchBand.district ? ` · ${matchBand.district}` : ''}`
+          : null,
+        icon: Building2,
+        transactional: true,
+      });
+    }
+    if (selectedProjectId) {
+      list.push({
+        id: 'clearview-apply',
+        to: `${APP_ROUTES.CLEARVIEW_APPLY}?project=${selectedProjectId}`,
+        label: isRu ? 'Заказать ClearView™ на этот проект' : 'Order ClearView™ for this project',
+        hint: '฿4,900 · 15 ' + (isRu ? 'рабочих дней' : 'business days'),
+        icon: ShieldCheck,
+        transactional: true,
+        trackEvent: 'clearview_summary_open',
+      });
+    }
+    list.push({
+      id: 'compare',
+      to: APP_ROUTES.NEWBUILDS_COMPARE,
+      label: isRu ? 'Сравнить с другими проектами' : 'Compare with other projects',
+      icon: GitCompare,
+    });
+    return list;
+  }, [matches.count, matches.href, matchBand, selectedProjectId, isRu]);
 
   return (
     <NewbuildsLayout>
@@ -108,6 +172,16 @@ export default function NewbuildsCalculator() {
             defaultCamFee={initialCamPerSqm}
           />
         </div>
+
+        {/* M10f cross-journey CTAs — IPP §25. Hidden when no relevant matches. */}
+        {ctaActions.length > 0 && (
+          <ContextualCTA
+            sourceModule="roi_calculator"
+            title={isRu ? 'Следующие шаги' : 'Next steps'}
+            actions={ctaActions}
+            trackContext={{ project_id: selectedProjectId || null, preset: presetSlug ?? null }}
+          />
+        )}
 
         {/* Disclaimer */}
         <p className="text-xs text-center text-muted-foreground">
