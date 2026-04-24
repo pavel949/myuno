@@ -1,6 +1,7 @@
 import { useState, useEffect, forwardRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Download, X, Share, Plus, Loader2, MoreVertical } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
 import { usePWATracking } from '@/hooks/usePWATracking';
@@ -8,8 +9,8 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 const texts = {
-  en: { install: 'Install app for quick access', download: 'Install', close: 'Close', iosTitle: 'Add to Home Screen', androidTitle: 'Install app', toScreen: 'Home Screen' },
-  ru: { install: 'Установите для быстрого доступа', download: 'Установить', close: 'Закрыть', iosTitle: 'Добавить на экран', androidTitle: 'Установить', toScreen: 'На экран' },
+  en: { install: 'Install app for quick access', download: 'Install', close: 'Close', iosTitle: 'Add to Home Screen', androidTitle: 'Install app', toScreen: 'Home Screen', successToast: 'Done — icon added to your home screen' },
+  ru: { install: 'Установите для быстрого доступа', download: 'Установить', close: 'Закрыть', iosTitle: 'Добавить на экран', androidTitle: 'Установить', toScreen: 'На экран', successToast: 'Готово — иконка на главном экране' },
 };
 
 const BANNER_DISMISSED_KEY = 'pwa_banner_dismissed';
@@ -50,13 +51,18 @@ export const InstallBanner = forwardRef<HTMLDivElement>(function InstallBanner(_
         const success = await install();
         if (success) {
           await trackInstall({ platform: isAndroid ? 'android' : 'desktop', source: 'banner' });
+          toast.success(t.successToast);
           setIsVisible(false);
+          localStorage.setItem(BANNER_DISMISSED_KEY, Date.now().toString());
         } else {
+          // User declined the native prompt — show inline hint
           setShowInstructions(true);
         }
       } else {
+        // No native prompt available — open the dedicated /install page
+        // with full inline instructions (no extra modal layer)
         await trackInstall({ platform: isIOS ? 'ios' : 'android', source: 'banner' });
-        setShowInstructions(true);
+        window.location.href = '/install';
       }
     } finally {
       setIsLoading(false);
