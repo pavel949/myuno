@@ -293,6 +293,7 @@ export default function PropertyIndex() {
               onClick={() => {
                 setSelectedCategories([]);
                 setFilterValues({});
+                clearStorage();
               }}
               className="text-xs text-primary font-medium hover:underline"
             >
