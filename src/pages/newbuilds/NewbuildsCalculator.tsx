@@ -5,13 +5,16 @@
  * defaults (snowbird, resident, investor, operator, hnw, mn) so persona
  * landing CTAs land on a pre-shaped calculator, not a blank one.
  */
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Calculator } from 'lucide-react';
+import { Calculator, Building2, GitCompare, ShieldCheck } from 'lucide-react';
 import NewbuildsLayout from '@/components/newbuilds/NewbuildsLayout';
 import { NewbuildsHero } from '@/components/newbuilds/NewbuildsHero';
 import { NbROICalculator } from '@/components/newbuilds/NbROICalculator';
 import { useNewbuildProjects } from '@/hooks/useNewbuildProjects';
+import { useContextualOffplanMatches } from '@/hooks/useContextualMatches';
+import { ContextualCTA, type ContextualAction } from '@/components/shared/ContextualCTA';
+import { useIPPLeadEvent } from '@/hooks/useIPPLeadEvent';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getPreset } from '@/lib/calculator/personaPresets';
