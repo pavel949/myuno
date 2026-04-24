@@ -1,57 +1,51 @@
 /**
  * WelcomeLanding — первый экран для неавторизованных пользователей.
  *
- * Стиль: Vercel-минимализм (геометрия, hairline borders, mono-цифры,
- * тонкая типографика) + myUNO mint accent.
+ * Стиль: Vercel-минимализм + myUNO mint accent.
  *
- * Цели экрана:
- *  1) За 3 секунды объяснить ЧТО такое myUNO (50+ сервисов в одном)
- *  2) Показать 6 кластеров и сигналы доверия
- *  3) Один первичный CTA → /auth (signup), вторичный → /auth (login)
+ * Источник истины по кластерам/категориям/сервисам:
+ *   `src/lib/catalog/taxonomy.ts` (SSOT, 6 кластеров × 16 категорий × ~80 сервисов).
  *
- * Логика signIn/signUp/OAuth не трогается — этот экран только маркетинговый.
+ * Все счётчики на этом экране берутся напрямую из SSOT — никаких
+ * параллельных списков и магических чисел.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   ArrowRight,
-  Building2,
-  Briefcase,
-  Plane,
-  Heart,
-  Sparkles,
-  Baby,
-  Scale,
-  Hammer,
   Shield,
   Globe,
-  type LucideIcon,
+  Sparkles,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { cn } from '@/lib/utils';
+import { CLUSTERS, CATEGORIES } from '@/lib/catalog/taxonomy';
+import { APP_ROUTES } from '@/lib/config/routes';
 
-type Cluster = {
-  id: string;
-  icon: LucideIcon;
-  labelEn: string;
-  labelRu: string;
-  hintEn: string;
-  hintRu: string;
-};
-
-
-const CLUSTERS: Cluster[] = [
-  { id: 'arrive', icon: Plane, labelEn: 'Arrival & setup', labelRu: 'Приезд и адаптация', hintEn: 'Trip planning · Housing · Car · Experiences · Fast Track', hintRu: 'Планирование поездки · Жильё · Авто · Впечатления · Fast Track' },
-  { id: 'live', icon: Heart, labelEn: 'Daily life', labelRu: 'Жизнь и быт', hintEn: 'Healthcare · Education · Fitness · Entertainment · Community', hintRu: 'Медицина · Обучение · Тренировки · Развлечения · Сообщество' },
-  { id: 'enjoy', icon: Sparkles, labelEn: 'Leisure & experiences', labelRu: 'Досуг и впечатления', hintEn: 'Events · Yachts · Experiences', hintRu: 'События · Яхты · Впечатления' },
-  { id: 'family', icon: Baby, labelEn: 'Family & kids', labelRu: 'Семья и дети', hintEn: 'Education · Childcare · Pets', hintRu: 'Образование · Няни · Питомцы' },
-  { id: 'manage', icon: Briefcase, labelEn: 'Asset management', labelRu: 'Управление активами', hintEn: 'Property · PMS · Team', hintRu: 'Объекты · PMS · Команда' },
-  { id: 'invest', icon: Building2, labelEn: 'Investment', labelRu: 'Инвестиции и капитал', hintEn: 'Newbuilds · Resale · Deal support', hintRu: 'Новостройки · Resale · Сопровождение сделок' },
-  { id: 'legal', icon: Scale, labelEn: 'Legal & compliance', labelRu: 'Право и комплаенс', hintEn: 'Taxes · Compliance · Legal requirements', hintRu: 'Налоги · Compliance · Юридические требования властей' },
-  { id: 'build', icon: Hammer, labelEn: 'Construction & fit-out', labelRu: 'Строительство и ремонт', hintEn: 'Renovation · Design · Fit-out', hintRu: 'Ремонт · Дизайн · Комплектация' },
-];
+/**
+ * Считаем сервисы и категории на каждый кластер из SSOT.
+ * Числа на лендинге всегда совпадают с тем, что покажет каталог.
+ */
+function useClusterStats() {
+  return useMemo(() => {
+    const totalServices = CATEGORIES.reduce((sum, cat) => sum + cat.services.length, 0);
+    const byCluster = CLUSTERS.map((c) => {
+      const cats = CATEGORIES.filter((cat) => cat.clusterId === c.id);
+      const services = cats.reduce((sum, cat) => sum + cat.services.length, 0);
+      return {
+        ...c,
+        categoriesCount: cats.length,
+        servicesCount: services,
+        // Берём 4 самых ярких хинта из имён категорий — они уже отсортированы по доменной логике
+        hintsRu: cats.slice(0, 4).map((cat) => cat.labelRu).join(' · '),
+        hintsEn: cats.slice(0, 4).map((cat) => cat.labelEn).join(' · '),
+      };
+    });
+    return { byCluster, totalServices };
+  }, []);
+}
 
 const TRUST = [
   { icon: Shield, en: 'Bank-grade KYC', ru: 'KYC банковского уровня' },
@@ -59,10 +53,15 @@ const TRUST = [
   { icon: Sparkles, en: 'AI concierge', ru: 'AI-консьерж' },
 ];
 
+// Реальное количество жизненных ситуаций в БД (`life_situations` where is_active).
+// Проверено 2026-04-24, держим вручную — если сильно поменяется, обновим.
+const LIFE_SITUATIONS_COUNT = 17;
+
 export default function WelcomeLanding() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const navigate = useNavigate();
+  const { byCluster, totalServices } = useClusterStats();
 
   return (
     <div className="min-h-screen bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary">
@@ -102,7 +101,6 @@ export default function WelcomeLanding() {
 
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-border/40">
-        {/* Subtle grid background */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 opacity-[0.4] [mask-image:radial-gradient(ellipse_at_top,black,transparent_70%)]"
@@ -144,7 +142,8 @@ export default function WelcomeLanding() {
           >
             {isRu ? (
               <>
-                Жизнь за границей — в одном приложении
+                Жизнь за границей —<br />
+                в одном приложении
               </>
             ) : (
               <>
@@ -163,8 +162,8 @@ export default function WelcomeLanding() {
             className="mt-5 max-w-xl text-[15px] sm:text-[17px] leading-relaxed text-muted-foreground"
           >
             {isRu
-              ? '50+ сервисов в единой платформе: переезд и документы, жилье и управление недвижимостью, транспорт, медицина и страхование, lifestyle и family-сервисы, а также решения для бизнеса. Единая инфраструктура myUNO — один аккаунт, единый платежный контур, проверенные партнеры и поддержка 24/7.'
-              : '50+ services in one platform: relocation and documents, housing and property management, transport, healthcare and insurance, lifestyle and family services, plus business solutions. Unified myUNO infrastructure means one account, one payment layer, verified partners, and 24/7 support.'}
+              ? `${totalServices}+ сервисов в единой платформе: переезд и документы, жильё и управление недвижимостью, транспорт, медицина и страхование, lifestyle и family-сервисы, инвестиции и юридическое сопровождение. Один аккаунт, единый платёжный контур, проверенные партнёры и поддержка 24/7.`
+              : `${totalServices}+ services in one platform: relocation and documents, housing and property management, transport, healthcare and insurance, lifestyle and family services, investments and legal support. One account, one payment layer, verified partners, and 24/7 support.`}
           </motion.p>
 
           {/* CTAs */}
@@ -174,8 +173,8 @@ export default function WelcomeLanding() {
             transition={{ duration: 0.5, delay: 0.15 }}
             className="mt-8 flex flex-wrap items-center gap-3"
           >
-            <button
-              onClick={() => navigate('/auth?mode=signup')}
+            <Link
+              to="/auth?mode=signup"
               className={cn(
                 'group inline-flex h-11 items-center gap-2 rounded-none px-5 text-[14px] font-semibold',
                 'bg-foreground text-background hover:bg-foreground/90 transition-all',
@@ -184,16 +183,16 @@ export default function WelcomeLanding() {
             >
               {isRu ? 'Создать аккаунт' : 'Create account'}
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" strokeWidth={2.5} />
-            </button>
-            <button
-              onClick={() => navigate('/auth')}
+            </Link>
+            <Link
+              to="/auth"
               className="inline-flex h-11 items-center rounded-none border border-border bg-card/40 px-5 text-[14px] font-medium text-foreground hover:bg-card transition-colors"
             >
               {isRu ? 'У меня есть аккаунт' : 'I have an account'}
-            </button>
+            </Link>
           </motion.div>
 
-          {/* Stat row — mono numbers, Vercel style */}
+          {/* Stat row — реальные числа из SSOT и БД */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -201,12 +200,12 @@ export default function WelcomeLanding() {
             className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-px overflow-hidden rounded-none border border-border bg-border/50 max-w-3xl"
           >
             {[
-              { num: '50+', en: 'apps and systems for comfortable living', ru: 'приложений и систем для комфортной жизни' },
-              { num: '8', en: 'canonical life clusters', ru: 'канонических кластеров жизни' },
-              { num: '24/7', en: 'AI concierge', ru: 'AI-консьерж' },
-              { num: 'SOS', en: 'emergency assistance', ru: 'помощь в экстренных ситуациях' },
+              { num: String(totalServices), en: 'services in the unified catalog', ru: 'сервисов в едином каталоге' },
+              { num: String(CLUSTERS.length), en: 'canonical life clusters', ru: 'кластеров жизни' },
+              { num: String(LIFE_SITUATIONS_COUNT), en: 'life situations covered', ru: 'жизненных ситуаций' },
+              { num: '24/7', en: 'AI concierge & SOS', ru: 'AI-консьерж и SOS' },
             ].map((s) => (
-              <div key={s.num} className="bg-background px-5 py-4">
+              <div key={s.num + s.en} className="bg-background px-5 py-4">
                 <div className="font-mono text-[22px] font-semibold tracking-tight tabular-nums">
                   {s.num}
                 </div>
@@ -219,52 +218,85 @@ export default function WelcomeLanding() {
         </div>
       </section>
 
-      {/* Clusters grid */}
+      {/* Clusters grid — 6 канонических кластеров × 3 колонки (2 ровных ряда) */}
       <section className="border-b border-border/40">
         <div className="mx-auto max-w-6xl px-5 py-14 sm:py-20">
           <div className="flex items-baseline justify-between mb-8">
             <h2 className="text-[22px] sm:text-[28px] font-semibold tracking-[-0.02em]">
-              {isRu ? 'Восемь кластеров жизни' : 'Eight clusters of life'}
+              {isRu ? 'Шесть кластеров жизни' : 'Six clusters of life'}
             </h2>
             <span className="hidden sm:inline text-[12px] font-mono uppercase tracking-[0.12em] text-muted-foreground">
-              {isRu ? '01 → 08' : '01 → 08'}
+              01 → {String(CLUSTERS.length).padStart(2, '0')}
             </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px overflow-hidden rounded-none border border-border bg-border/50">
-            {CLUSTERS.map((c, i) => {
+            {byCluster.map((c, i) => {
               const Icon = c.icon;
               return (
-                <motion.div
+                <motion.button
                   key={c.id}
+                  type="button"
+                  onClick={() => navigate('/auth?mode=signup')}
                   initial={{ opacity: 0, y: 8 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: '-50px' }}
                   transition={{ duration: 0.35, delay: i * 0.04 }}
-                  className="group relative bg-background p-5 sm:p-6 hover:bg-card/40 transition-colors"
+                  className="group relative bg-background p-5 sm:p-6 hover:bg-card/40 transition-colors text-left"
                 >
                   <div className="flex items-start gap-4">
-                    <div className="grid h-10 w-10 shrink-0 place-items-center rounded-none border border-border bg-card text-foreground group-hover:border-primary/40 group-hover:text-primary transition-colors">
+                    <div
+                      className="grid h-10 w-10 shrink-0 place-items-center rounded-none border border-border bg-card transition-colors group-hover:border-primary/40"
+                      style={{ color: c.color }}
+                    >
                       <Icon className="h-4.5 w-4.5" strokeWidth={1.75} />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground/60">
-                          {String(i + 1).padStart(2, '0')}
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground/60">
+                            {String(i + 1).padStart(2, '0')}
+                          </span>
+                          <h3 className="text-[15px] font-semibold tracking-tight truncate">
+                            {isRu ? c.labelRu : c.labelEn}
+                          </h3>
+                        </div>
+                        <span className="font-mono text-[10px] tabular-nums text-muted-foreground/70 shrink-0">
+                          {c.servicesCount} {isRu ? 'серв' : 'svc'}
                         </span>
-                        <h3 className="text-[15px] font-semibold tracking-tight">
-                          {isRu ? c.labelRu : c.labelEn}
-                        </h3>
                       </div>
-                      <p className="mt-1 text-[13px] text-muted-foreground">
-                        {isRu ? c.hintRu : c.hintEn}
+                      <p className="mt-1 text-[13px] text-muted-foreground line-clamp-2">
+                        {isRu ? c.hintsRu : c.hintsEn}
+                      </p>
+                      <p className="mt-2 text-[11px] text-muted-foreground/70">
+                        {c.categoriesCount}{' '}
+                        {isRu
+                          ? c.categoriesCount === 1
+                            ? 'категория'
+                            : c.categoriesCount < 5
+                            ? 'категории'
+                            : 'категорий'
+                          : c.categoriesCount === 1
+                          ? 'category'
+                          : 'categories'}
+                        {c.audience === 'workspace' && (
+                          <span className="ml-2 inline-flex items-center rounded-none border border-border/60 px-1.5 py-px text-[9px] uppercase tracking-[0.08em] text-muted-foreground/80">
+                            {isRu ? 'Кабинет' : 'Workspace'}
+                          </span>
+                        )}
                       </p>
                     </div>
                   </div>
-                </motion.div>
+                </motion.button>
               );
             })}
           </div>
+
+          <p className="mt-6 text-[12px] text-muted-foreground/70">
+            {isRu
+              ? `Каталог объединяет ${CATEGORIES.length} категорий и ${totalServices} сервисов. Войдите, чтобы открыть полный навигатор.`
+              : `The catalog spans ${CATEGORIES.length} categories and ${totalServices} services. Sign in to open the full navigator.`}
+          </p>
         </div>
       </section>
 
@@ -289,9 +321,17 @@ export default function WelcomeLanding() {
       <section>
         <div className="mx-auto max-w-3xl px-5 py-16 sm:py-24 text-center">
           <h2 className="text-[28px] sm:text-[40px] font-semibold tracking-[-0.025em] leading-[1.05]">
-            {isRu
-              ? 'Один аккаунт. Вся жизнь за рубежом.'
-              : 'One account. Everything you need.'}
+            {isRu ? (
+              <>
+                Один аккаунт.<br />
+                Вся жизнь за рубежом.
+              </>
+            ) : (
+              <>
+                One account.<br />
+                Everything you need.
+              </>
+            )}
           </h2>
           <p className="mt-4 text-[14px] sm:text-[15px] text-muted-foreground">
             {isRu
@@ -299,8 +339,8 @@ export default function WelcomeLanding() {
               : 'Free. 60 seconds to sign up.'}
           </p>
           <div className="mt-7 flex justify-center">
-            <button
-              onClick={() => navigate('/auth?mode=signup')}
+            <Link
+              to="/auth?mode=signup"
               className={cn(
                 'group inline-flex h-12 items-center gap-2 rounded-none px-6 text-[14px] font-semibold',
                 'bg-primary text-primary-foreground hover:bg-primary/90 transition-all',
@@ -309,13 +349,11 @@ export default function WelcomeLanding() {
             >
               {isRu ? 'Начать сейчас' : 'Start now'}
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" strokeWidth={2.5} />
-            </button>
+            </Link>
           </div>
 
           <p className="mt-8 text-[11px] tracking-[0.08em] text-muted-foreground/60">
-            {isRu
-              ? '© myUNO · Phuket · Made for foreigners'
-              : '© myUNO · Phuket · Made for foreigners'}
+            © myUNO · Phuket · Made for foreigners
           </p>
         </div>
       </section>
