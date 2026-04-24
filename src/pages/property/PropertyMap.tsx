@@ -39,18 +39,41 @@ const propertyTypes = [
 export default function PropertyMap() {
   const { language } = useLanguage();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // District filter from URL (e.g. /property/map?district=Bang%20Tao)
+  const districtParam = searchParams.get('district')?.trim() || undefined;
+
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [distanceFilter, setDistanceFilter] = useState<number>(0);
   const [selectedType, setSelectedType] = useState('all');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  // Fetch real properties from database
+  // Fetch real properties from database (district filter applied server-side when present)
   const { data: properties, isLoading } = usePropertiesForMap({
     propertyType: selectedType !== 'all' ? selectedType : undefined,
+    district: districtParam,
   });
 
   // Transform to map markers
-  const propertyMarkers = transformPropertiesToMarkers(properties || []);
+  const propertyMarkers = useMemo(
+    () => transformPropertiesToMarkers(properties || []),
+    [properties],
+  );
+
+  // When a district is pre-filled, recenter map on the first matching marker
+  // so the user lands directly on that area (overrides geolocation default).
+  const districtCenter = useMemo(() => {
+    if (!districtParam || propertyMarkers.length === 0) return null;
+    const first = propertyMarkers[0];
+    return { lat: first.lat, lng: first.lng };
+  }, [districtParam, propertyMarkers]);
+
+  const clearDistrict = () => {
+    const next = new URLSearchParams(searchParams);
+    next.delete('district');
+    setSearchParams(next, { replace: true });
+  };
 
   useEffect(() => {
     if (navigator.geolocation) {
