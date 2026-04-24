@@ -1,8 +1,21 @@
 import React, { createContext, useContext, useMemo, useState, useEffect } from 'react';
 import { useJsApiLoader } from '@react-google-maps/api';
 import { fetchGoogleMapsKey, getGoogleMapsKey } from '@/lib/googleMaps';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const LIBRARIES: ('places')[] = ['places'];
+
+/**
+ * Force Google Maps UI language (labels, controls, copyright).
+ * Without this, Google falls back to the user's browser locale or the IP region —
+ * which on Phuket means Thai. We pin to the app language (RU/EN).
+ */
+function resolveMapsLanguage(appLang: string): string {
+  return appLang === 'ru' ? 'ru' : 'en';
+}
+
+/** Region biases place results & defaults (e.g. spelling). 'TH' = Thailand. */
+const MAPS_REGION = 'TH';
 
 export interface GoogleMapsContextValue {
   isLoaded: boolean;
