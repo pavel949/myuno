@@ -65,7 +65,7 @@ export function FeaturedPropertiesCarousel() {
         <Skeleton className="h-6 w-48" />
         <div className="flex gap-3 overflow-hidden">
           {[1, 2, 3].map(i => (
-            <Skeleton key={i} className="h-[280px] w-[220px] md:h-72 md:w-60 rounded-[var(--radius-lg)] shrink-0" />
+            <Skeleton key={i} className="w-[280px] aspect-[4/5] md:w-[260px] rounded-[var(--radius-lg)] shrink-0" />
           ))}
         </div>
       </div>
