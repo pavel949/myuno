@@ -371,7 +371,7 @@ export default function PropertyIndex() {
               <p className="text-muted-foreground mb-3">
                 {isRu ? 'Нет объектов с выбранными фильтрами' : 'No properties match selected filters'}
               </p>
-              <Button variant="outline" size="sm" onClick={() => setSelectedCategories([])}>
+              <Button variant="outline" size="sm" onClick={() => { setSelectedCategories([]); setFilterValues({}); clearStorage(); }}>
                 {isRu ? 'Сбросить фильтры' : 'Clear filters'}
               </Button>
             </div>
