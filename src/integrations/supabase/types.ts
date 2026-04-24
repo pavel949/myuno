@@ -3677,6 +3677,62 @@ export type Database = {
           },
         ]
       }
+      cluster_life_situations: {
+        Row: {
+          cluster_id: string
+          created_at: string
+          id: string
+          is_primary: boolean
+          life_situation_id: string
+          weight: number
+        }
+        Insert: {
+          cluster_id: string
+          created_at?: string
+          id?: string
+          is_primary?: boolean
+          life_situation_id: string
+          weight?: number
+        }
+        Update: {
+          cluster_id?: string
+          created_at?: string
+          id?: string
+          is_primary?: boolean
+          life_situation_id?: string
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cluster_life_situations_cluster_id_fkey"
+            columns: ["cluster_id"]
+            isOneToOne: false
+            referencedRelation: "category_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cluster_life_situations_life_situation_id_fkey"
+            columns: ["life_situation_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_life_map_v2"
+            referencedColumns: ["life_situation_id"]
+          },
+          {
+            foreignKeyName: "cluster_life_situations_life_situation_id_fkey"
+            columns: ["life_situation_id"]
+            isOneToOne: false
+            referencedRelation: "life_situations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cluster_life_situations_life_situation_id_fkey"
+            columns: ["life_situation_id"]
+            isOneToOne: false
+            referencedRelation: "lifeos_health_view"
+            referencedColumns: ["situation_id"]
+          },
+        ]
+      }
       cohort_analytics: {
         Row: {
           active_users: number | null
