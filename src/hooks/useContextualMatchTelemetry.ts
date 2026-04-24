@@ -39,12 +39,12 @@ function emit(
 ): void {
   void (async () => {
     try {
-      await supabase.from('analytics_events').insert({
+      await supabase.from('analytics_events').insert([{
         event_name: eventName,
         session_id: getSessionId(),
         page_path: typeof window !== 'undefined' ? window.location.pathname : null,
-        event_data: payload,
-      });
+        event_data: payload as never,
+      }]);
     } catch {
       /* never block UX */
     }
