@@ -466,6 +466,8 @@ export const APP_ROUTES = {
   CAPITAL_CAMPAIGNS: '/capital/campaigns',
   CAPITAL_CAMPAIGN_LAUNCH: '/capital/campaigns/launch',
   CAPITAL_OUTREACH: '/capital/outreach',
+  // Stage 4: Unified Outreach Hub (canonical entry for all audiences)
+  OUTREACH: '/outreach',
   CAPITAL_PIPELINE: '/capital/pipeline',
   CAPITAL_TEMPLATES: '/capital/templates',
   CAPITAL_NEWBUILDS_DEALS: '/capital/deals/newbuilds',

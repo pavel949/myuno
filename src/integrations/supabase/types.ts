@@ -13861,6 +13861,196 @@ export type Database = {
           },
         ]
       }
+      outreach_messages: {
+        Row: {
+          audience_type: string
+          body: string | null
+          campaign_source: string | null
+          campaign_source_id: string | null
+          channel: string
+          clicked_at: string | null
+          company_id: string | null
+          created_at: string
+          created_by: string | null
+          delivered_at: string | null
+          error_message: string | null
+          followup_sequence: number
+          id: string
+          identity_id: string | null
+          metadata: Json | null
+          next_followup_at: string | null
+          opened_at: string | null
+          replied_at: string | null
+          response_type: string | null
+          scheduled_at: string | null
+          sent_at: string | null
+          source_id: string | null
+          source_table: string | null
+          status: string
+          subject: string | null
+          template_id: string | null
+          to_address: string | null
+          updated_at: string
+        }
+        Insert: {
+          audience_type: string
+          body?: string | null
+          campaign_source?: string | null
+          campaign_source_id?: string | null
+          channel: string
+          clicked_at?: string | null
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          delivered_at?: string | null
+          error_message?: string | null
+          followup_sequence?: number
+          id?: string
+          identity_id?: string | null
+          metadata?: Json | null
+          next_followup_at?: string | null
+          opened_at?: string | null
+          replied_at?: string | null
+          response_type?: string | null
+          scheduled_at?: string | null
+          sent_at?: string | null
+          source_id?: string | null
+          source_table?: string | null
+          status?: string
+          subject?: string | null
+          template_id?: string | null
+          to_address?: string | null
+          updated_at?: string
+        }
+        Update: {
+          audience_type?: string
+          body?: string | null
+          campaign_source?: string | null
+          campaign_source_id?: string | null
+          channel?: string
+          clicked_at?: string | null
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          delivered_at?: string | null
+          error_message?: string | null
+          followup_sequence?: number
+          id?: string
+          identity_id?: string | null
+          metadata?: Json | null
+          next_followup_at?: string | null
+          opened_at?: string | null
+          replied_at?: string | null
+          response_type?: string | null
+          scheduled_at?: string | null
+          sent_at?: string | null
+          source_id?: string | null
+          source_table?: string | null
+          status?: string
+          subject?: string | null
+          template_id?: string | null
+          to_address?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outreach_messages_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outreach_messages_identity_id_fkey"
+            columns: ["identity_id"]
+            isOneToOne: false
+            referencedRelation: "contact_identities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outreach_messages_identity_id_fkey"
+            columns: ["identity_id"]
+            isOneToOne: false
+            referencedRelation: "v_unified_contacts"
+            referencedColumns: ["identity_id"]
+          },
+          {
+            foreignKeyName: "outreach_messages_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "outreach_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      outreach_templates: {
+        Row: {
+          audience_type: string
+          body: string
+          business_type: string | null
+          channel: string
+          company_id: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          language: string
+          name: string
+          source_id: string | null
+          source_table: string | null
+          stage: string
+          subject: string | null
+          updated_at: string
+          variables: string[] | null
+        }
+        Insert: {
+          audience_type: string
+          body: string
+          business_type?: string | null
+          channel: string
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          language?: string
+          name: string
+          source_id?: string | null
+          source_table?: string | null
+          stage?: string
+          subject?: string | null
+          updated_at?: string
+          variables?: string[] | null
+        }
+        Update: {
+          audience_type?: string
+          body?: string
+          business_type?: string | null
+          channel?: string
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          language?: string
+          name?: string
+          source_id?: string | null
+          source_table?: string | null
+          stage?: string
+          subject?: string | null
+          updated_at?: string
+          variables?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outreach_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       owner_commission_tiers: {
         Row: {
           benefits: Json | null
@@ -29968,6 +30158,79 @@ export type Database = {
         }
         Relationships: []
       }
+      v_outreach_campaigns_unified: {
+        Row: {
+          campaign_source: string | null
+          campaign_type: string | null
+          company_id: string | null
+          created_at: string | null
+          goal: string | null
+          id: string | null
+          name: string | null
+          owner_id: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Relationships: []
+      }
+      v_outreach_messages_with_identity: {
+        Row: {
+          audience_type: string | null
+          campaign_source: string | null
+          campaign_source_id: string | null
+          channel: string | null
+          clicked_at: string | null
+          company_id: string | null
+          created_at: string | null
+          created_by: string | null
+          followup_sequence: number | null
+          id: string | null
+          identity_email: string | null
+          identity_id: string | null
+          identity_name: string | null
+          identity_phone: string | null
+          identity_user_id: string | null
+          next_followup_at: string | null
+          opened_at: string | null
+          replied_at: string | null
+          response_type: string | null
+          sent_at: string | null
+          status: string | null
+          subject: string | null
+          template_id: string | null
+          to_address: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outreach_messages_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outreach_messages_identity_id_fkey"
+            columns: ["identity_id"]
+            isOneToOne: false
+            referencedRelation: "contact_identities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outreach_messages_identity_id_fkey"
+            columns: ["identity_id"]
+            isOneToOne: false
+            referencedRelation: "v_unified_contacts"
+            referencedColumns: ["identity_id"]
+          },
+          {
+            foreignKeyName: "outreach_messages_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "outreach_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_owner_profitability: {
         Row: {
           company_id: string | null
@@ -31839,6 +32102,10 @@ export type Database = {
       }
       normalize_developer_name: { Args: { input: string }; Returns: string }
       normalize_phone: { Args: { p: string }; Returns: string }
+      outreach_throttle_check: {
+        Args: { _channel: string; _identity_id: string; _window?: string }
+        Returns: boolean
+      }
       pay_from_wallet_atomic: {
         Args: {
           p_amount: number

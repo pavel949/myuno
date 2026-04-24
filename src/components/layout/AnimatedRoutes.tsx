@@ -255,6 +255,11 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/life/:code" element={<LazyPage><Pages.LifeFlowPage /></LazyPage>} />
         <Route path="/trip-planner" element={<LazyPage><Pages.TripPlannerPage /></LazyPage>} />
         <Route path="/list-with-us" element={<LazyPage><Pages.ListWithUsPage /></LazyPage>} />
+
+        {/* ── Stage 4: Unified Outreach Hub ── */}
+        <Route path="/outreach" element={<LazyPage><Pages.OutreachHub /></LazyPage>} />
+        {/* Legacy entry: /mc/sequences → /outreach?audience=guest */}
+        <Route path="/mc/sequences" element={<Navigate to="/outreach?audience=guest" replace />} />
         
         {/* ── Beauty & Spa ── */}
         <Route path={APP_ROUTES.BEAUTY} element={<LazyPage><Pages.BeautySpaIndex /></LazyPage>} />
