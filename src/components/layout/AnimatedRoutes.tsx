@@ -132,15 +132,28 @@ const GuestRouteLayout = () => (
   </AuthGuard>
 );
 
-// Prefetch popular routes on idle
+// Prefetch popular routes on idle.
+// Wrapped in .catch() so a transient HMR / chunk-load error in one module
+// can't poison the SPA navigation. Failures are silent — these are
+// best-effort warm-ups, not critical loads.
+const safeImport = (loader: () => Promise<unknown>) => {
+  try {
+    loader().catch(() => { /* swallow — non-critical prefetch */ });
+  } catch { /* swallow sync throws too */ }
+};
+
 const prefetchRoutes = () => {
+  if (typeof window === 'undefined') return;
+  const run = () => {
+    safeImport(() => import('@/pages/property/PropertyIndex'));
+    safeImport(() => import('@/pages/restaurants/RestaurantsIndex'));
+    safeImport(() => import('@/pages/experiences/ExperiencesIndex'));
+    safeImport(() => import('@/pages/beauty/BeautySpaIndex'));
+  };
   if ('requestIdleCallback' in window) {
-    requestIdleCallback(() => {
-      import('@/pages/property/PropertyIndex');
-      import('@/pages/restaurants/RestaurantsIndex');
-      import('@/pages/experiences/ExperiencesIndex');
-      import('@/pages/beauty/BeautySpaIndex');
-    });
+    (window as Window & { requestIdleCallback: (cb: () => void) => void }).requestIdleCallback(run);
+  } else {
+    setTimeout(run, 1500);
   }
 };
 
