@@ -1,15 +1,16 @@
 /**
  * /newbuilds/compare — Side-by-side project comparison
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, MapPin, Building2, Calendar, Layers, Award, X } from 'lucide-react';
+import { ChevronLeft, MapPin, Building2, Calendar, Layers, Award, X, FileText } from 'lucide-react';
 import NewbuildsLayout from '@/components/newbuilds/NewbuildsLayout';
 import { useNbCompare } from '@/components/newbuilds/NbCompareProvider';
 import { NbPriceDisplay } from '@/components/newbuilds/NbPriceDisplay';
 import { NbConstructionProgress } from '@/components/newbuilds/NbConstructionProgress';
 import { NbProjectStatusBadge } from '@/components/newbuilds/NbProjectStatusBadge';
 import { NbLeadForm } from '@/components/newbuilds/NbLeadForm';
+import { useIPPLeadEvent } from '@/hooks/useIPPLeadEvent';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { cn } from '@/lib/utils';
 
