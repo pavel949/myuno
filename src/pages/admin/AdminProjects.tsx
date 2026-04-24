@@ -263,7 +263,6 @@ export default function AdminProjects() {
     cam_includes: [] as string[],
   });
 
-
   const handleOpenCreate = () => {
     setEditingProject(null);
     setFormData(getEmptyProject());

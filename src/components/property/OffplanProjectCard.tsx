@@ -91,7 +91,7 @@ export function OffplanProjectCard({
       className={cn(
         "group cursor-pointer rounded-none overflow-hidden",
         "bg-card border border-border/50 shadow-sm",
-        "hover:shadow-lg hover:-translate-y-1 transition-all duration-300",
+        "hover:shadow-lg transition-all duration-300",
         isCarousel ? "flex-shrink-0 w-[280px] sm:w-[300px]" : "w-full",
         className
       )}
@@ -102,7 +102,7 @@ export function OffplanProjectCard({
           <img
             src={project.coverImage}
             alt={name}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-500 "
           />
         ) : (
           <div className="w-full h-full bg-muted flex items-center justify-center">

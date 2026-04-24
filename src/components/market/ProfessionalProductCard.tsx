@@ -144,7 +144,7 @@ export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalPr
         <img
           src={product.cover_image || '/placeholder.svg'}
           alt={name}
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+          className="w-full h-full object-cover transition-transform duration-300 "
         />
           
           {/* Gradient overlay */}
@@ -240,7 +240,7 @@ export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalPr
           <img
             src={product.cover_image || '/placeholder.svg'}
             alt={name}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+            className="w-full h-full object-cover transition-transform duration-300 "
           />
           {product.is_new && (
             <Badge className="absolute top-1.5 left-1.5 bg-info text-info-foreground text-[10px] px-1.5 py-0">
@@ -329,7 +329,7 @@ export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalPr
   return (
     <div 
       className={cn(
-        "bg-card rounded-none border border-border overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group cursor-pointer",
+        "bg-card rounded-none border border-border overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 group cursor-pointer",
         compact && "rounded-none"
       )}
       onClick={onClick}
@@ -339,7 +339,7 @@ export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalPr
         <img
           src={product.cover_image || '/placeholder.svg'}
           alt={name}
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+          className="w-full h-full object-cover transition-transform duration-300 "
         />
         
         {/* Subtle gradient for badges readability */}

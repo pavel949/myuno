@@ -81,7 +81,7 @@ export function PopularServicesStrip() {
             <button
               key={service.id}
               onClick={() => navigate(`/services/${service.id}`)}
-              className="w-[150px] h-[190px] md:w-[180px] md:h-[220px] rounded-none overflow-hidden text-left group transition-all duration-200 hover:-translate-y-1 active:scale-[0.97]"
+              className="w-[150px] h-[190px] md:w-[180px] md:h-[220px] rounded-none overflow-hidden text-left group transition-all duration-200 "
               style={{
                 background: 'hsl(var(--card))',
                 border: '1px solid hsl(0 0% 100% / 0.07)',
@@ -92,7 +92,7 @@ export function PopularServicesStrip() {
                 <img
                   src={imageUrl}
                   alt={isRu ? service.name_ru : service.name_en}
-                  className="w-full h-24 md:h-28 object-cover transition-transform duration-300 group-hover:scale-[1.05]"
+                  className="w-full h-24 md:h-28 object-cover transition-transform duration-300 "
                   loading="lazy"
                 />
               </div>

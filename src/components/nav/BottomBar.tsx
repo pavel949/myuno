@@ -78,7 +78,6 @@ export const BottomBar = forwardRef<HTMLDivElement, BottomBarProps>(
     const showAppsButton = shouldShowAppsLauncher(role);
 
     const handleNavClick = (e: React.MouseEvent<HTMLElement>) => {
-      triggerRipple(e);
       const settings = getFeedbackSettings();
       if (settings.hapticEnabled) triggerHaptic('light');
       if (settings.soundEnabled) playSound('click');

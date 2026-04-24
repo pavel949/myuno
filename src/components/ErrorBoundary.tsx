@@ -32,7 +32,6 @@ const ERROR_MESSAGES = {
   reload: { en: 'Reload page', ru: 'Перезагрузить' },
 };
 
-
 export class ErrorBoundary extends Component<Props, State> {
   public state: State = {
     hasError: false,

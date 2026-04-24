@@ -50,7 +50,7 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({
             >
               <div className={cn(
                 "w-12 h-12 rounded-none flex items-center justify-center text-2xl",
-                "bg-muted shadow-sm transition-transform group-hover:scale-105"
+                "bg-muted shadow-sm transition-transform "
               )}>
                 {cat.icon}
               </div>
@@ -85,14 +85,14 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({
             <button
               key={cat.id}
               onClick={() => handleClick(cat.slug)}
-              className="relative overflow-hidden rounded-none text-left transition-all duration-300 hover:shadow-lg active:scale-[0.98] group"
+              className="relative overflow-hidden rounded-none text-left transition-all duration-300 hover:shadow-lg group"
             >
               <div className="aspect-[1.4/1] relative">
                 {/* Background Image */}
                 <img
                   src={image}
                   alt=""
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 "
                   loading="lazy"
                 />
                 

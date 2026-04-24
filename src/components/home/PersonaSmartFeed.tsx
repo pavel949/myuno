@@ -220,7 +220,7 @@ export const PersonaSmartFeed = memo(function PersonaSmartFeed() {
           <button
             key={rec.id}
             onClick={() => navigate(rec.path)}
-            className="min-w-[200px] lg:min-w-0 flex items-center gap-3 p-3.5 rounded-none text-left transition-all active:scale-[0.97] hover:shadow-elevation-2"
+            className="min-w-[200px] lg:min-w-0 flex items-center gap-3 p-3.5 rounded-none text-left transition-all hover:shadow-elevation-2"
             style={{
               background: 'hsl(var(--card))',
               border: '1px solid hsl(0 0% 100% / 0.07)',

@@ -44,7 +44,7 @@ export const VehicleCard = memo(function VehicleCard({ vehicle, onClick, classNa
           alt={name}
           width={480}
           height={360}
-          className="w-full h-full group-hover:scale-[1.03] transition-transform duration-500"
+          className="w-full h-full transition-transform duration-500"
           quality={80}
         />
 

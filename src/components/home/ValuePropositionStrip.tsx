@@ -78,7 +78,7 @@ export const ValuePropositionStrip = memo(function ValuePropositionStrip() {
                 className={cn(
                   "flex flex-col gap-3 p-4 rounded-none shrink-0 transition-all duration-200",
                   "w-[160px] md:w-auto bg-card",
-                  "ring-1 ring-border hover:ring-primary/40 hover:shadow-sm active:scale-[0.98]",
+                  "ring-1 ring-border hover:ring-primary/40 hover:shadow-sm ",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 )}
               >

@@ -31,7 +31,7 @@ export function QuickActionsBlended({ personas }: QuickActionsBlendedProps) {
           <button
             key={action.id}
             onClick={() => navigate(action.path)}
-            className="relative rounded-none bg-card border border-border p-3 pb-2.5 flex flex-col items-center gap-1.5 hover:border-border transition-colors active:scale-[0.98]"
+            className="relative rounded-none bg-card border border-border p-3 pb-2.5 flex flex-col items-center gap-1.5 hover:border-border transition-colors "
           >
             {/* Role color dot */}
             <span

@@ -94,7 +94,7 @@ export const CatalogCard = memo(function CatalogCard({
           alt={title}
           width={dims.width}
           height={dims.height}
-          className="w-full h-full group-hover:scale-105 transition-transform duration-300"
+          className="w-full h-full transition-transform duration-300"
           quality={80}
         />
 

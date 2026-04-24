@@ -21,7 +21,7 @@ export const ConciergeBanner = memo(forwardRef<HTMLAnchorElement>(function Conci
       href={whatsappUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center gap-3.5 px-4 py-3.5 rounded-none border border-border/50 bg-card shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all duration-200 active:scale-[0.98] group"
+      className="flex items-center gap-3.5 px-4 py-3.5 rounded-none border border-border/50 bg-card shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all duration-200 group"
     >
       <div className="w-10 h-10 rounded-none flex items-center justify-center shrink-0 bg-success/10 border border-success/15">
         <MessageCircle className="w-5 h-5 text-success" />

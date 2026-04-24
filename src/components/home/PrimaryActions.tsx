@@ -66,7 +66,7 @@ export function PrimaryActions() {
           <button
             key={a.id}
             onClick={() => navigate(a.route)}
-            className="relative text-left rounded-none bg-card border border-border px-4 py-3.5 active:scale-[0.99] transition-transform overflow-hidden flex items-center gap-3 min-h-[44px]"
+            className="relative text-left rounded-none bg-card border border-border px-4 py-3.5 transition-transform overflow-hidden flex items-center gap-3 min-h-[44px]"
           >
             <div
               className="absolute top-3 bottom-3 left-0 w-0.5 rounded-none"

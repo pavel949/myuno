@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 
-
 import { AccountProfileCard } from './AccountProfileCard';
 import { AccountQuickSettings } from './AccountQuickSettings';
 import { Separator } from '@/components/ui/separator';

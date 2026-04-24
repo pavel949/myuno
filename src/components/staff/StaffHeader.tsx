@@ -14,7 +14,6 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
 
-
 const routeLabels: Record<string, { en: string; ru: string }> = {
   '/staff': { en: 'Dashboard', ru: 'Обзор' },
   '/staff/tasks': { en: 'Tasks', ru: 'Задания' },

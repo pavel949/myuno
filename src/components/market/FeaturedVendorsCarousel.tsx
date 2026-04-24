@@ -28,7 +28,7 @@ const VendorCard: React.FC<VendorCardProps> = ({ vendor, onClick }) => {
       className={cn(
         "w-[160px] shrink-0 text-left snap-start",
         "bg-card rounded-none border border-border overflow-hidden",
-        "shadow-sm hover:shadow-md hover:-translate-y-0.5",
+        "shadow-sm hover:shadow-md ",
         "transition-all duration-200 group touch-manipulation"
       )}
     >

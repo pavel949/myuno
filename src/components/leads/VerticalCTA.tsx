@@ -216,7 +216,7 @@ export function VerticalCTA({
             <span className="absolute inset-0 rounded-none animate-ping bg-primary/30 opacity-75" style={{ animationDuration: '2s' }} />
             <span className="relative flex items-center">
               {text.button}
-              <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-0.5 transition-transform" />
+              <ArrowRight className="w-4 h-4 ml-1 transition-transform" />
             </span>
           </Button>
         </div>

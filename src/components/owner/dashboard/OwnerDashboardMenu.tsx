@@ -115,12 +115,12 @@ export function OwnerDashboardMenu() {
                 <button
                   key={item.path}
                   onClick={() => navigate(item.path)}
-                  className="flex flex-col items-center gap-1.5 p-3 rounded-none transition-all active:scale-95 hover:bg-muted/50 group"
+                  className="flex flex-col items-center gap-1.5 p-3 rounded-none transition-all hover:bg-muted/50 group"
                 >
                   <div className={cn(
                     'w-12 h-12 rounded-none flex items-center justify-center shadow-sm',
                     'ring-1 ring-black/[0.04] dark:ring-white/[0.06]',
-                    'transition-transform group-hover:scale-105',
+                    'transition-transform ',
                     bgClass,
                   )}>
                     <Icon className={cn('h-6 w-6', textClass)} strokeWidth={2} />

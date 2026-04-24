@@ -96,7 +96,6 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
 
   const handleClick = useCallback(
     (action: CatalogQuickAction, e: React.MouseEvent<HTMLButtonElement>) => {
-      triggerRipple(e);
       const settings = getFeedbackSettings();
       if (settings.hapticEnabled) triggerHaptic(action.isUrgent ? 'medium' : 'light');
       if (settings.soundEnabled) playSound('click');
@@ -146,12 +145,12 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
         onMouseEnter={() => handlePrefetch(action.path)}
         className={cn(
           'relative flex flex-col items-center gap-2 p-2 rounded-none',
-          'transition-all group active:scale-[0.95] lg:px-5 lg:py-3',
+          'transition-all group lg:px-5 lg:py-3',
           isLocked && 'opacity-50',
         )}
       >
         <div
-          className="relative w-16 h-16 rounded-none flex items-center justify-center transition-transform duration-200 group-hover:scale-105 group-active:scale-95"
+          className="relative w-16 h-16 rounded-none flex items-center justify-center transition-transform duration-200 "
           style={{ background: `${color}1A`, border: `1px solid ${color}20` }}
         >
           <Icon className="!w-7 !h-7 drop-shadow-sm" style={{ width: 28, height: 28, color }} strokeWidth={2} />
@@ -187,7 +186,7 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
         className={cn(
           animClass,
           'relative flex items-center gap-3 p-3 rounded-none min-h-[64px] text-left bg-card border border-border shadow-[var(--shadow-card)]',
-          'transition-all duration-150 active:scale-[0.97]',
+          'transition-all duration-150 ',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
           isLocked && 'opacity-50',
         )}
@@ -219,7 +218,7 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
         onClick={(e) => handleClick(action, e)}
         onTouchStart={() => handlePrefetch(action.path)}
         aria-label={quickActionLabel(action, language)}
-        className="flex items-center gap-2 h-11 px-3.5 rounded-[var(--radius-full)] shrink-0 snap-start whitespace-nowrap transition-all active:scale-[0.95] bg-[hsl(var(--bg-elevated))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        className="flex items-center gap-2 h-11 px-3.5 rounded-[var(--radius-full)] shrink-0 snap-start whitespace-nowrap transition-all bg-[hsl(var(--bg-elevated))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       >
         <Icon style={{ width: 16, height: 16, color }} strokeWidth={2} aria-hidden />
         <span className="text-[11px] font-medium text-muted-foreground">

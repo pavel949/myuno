@@ -31,7 +31,7 @@ export function PropertyDetailGallery({ images, alt, onOpenLightbox }: PropertyD
             <img
               src={images[0]}
               alt={alt}
-              className="w-full h-full object-cover hover:scale-[1.03] transition-transform duration-300"
+              className="w-full h-full object-cover transition-transform duration-300"
             />
           </div>
           {images.slice(1, 5).map((img, i) => (
@@ -47,7 +47,7 @@ export function PropertyDetailGallery({ images, alt, onOpenLightbox }: PropertyD
               <img
                 src={img}
                 alt=""
-                className="w-full h-full object-cover hover:scale-[1.03] transition-transform duration-300"
+                className="w-full h-full object-cover transition-transform duration-300"
               />
               {i === 3 && images.length > 5 && (
                 <div className="absolute inset-0 bg-foreground/40 flex items-center justify-center">
@@ -66,7 +66,7 @@ export function PropertyDetailGallery({ images, alt, onOpenLightbox }: PropertyD
             <img
               src={images[activeImage] || images[0]}
               alt={alt}
-              className="w-full h-full object-contain bg-muted hover:scale-[1.03] transition-transform duration-300"
+              className="w-full h-full object-contain bg-muted transition-transform duration-300"
             />
           </div>
           {images.length > 1 && (

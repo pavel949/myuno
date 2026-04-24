@@ -586,11 +586,10 @@ const FlowersOrder = () => {
                       key={slot.id}
                       type="button"
                       onClick={(e) => {
-                        triggerRipple(e);
                         setFormData({ ...formData, deliverySlot: slot.id });
                       }}
                       className={cn(
-                        "relative overflow-hidden p-3 rounded-none border text-center transition-all active:scale-95",
+                        "relative overflow-hidden p-3 rounded-none border text-center transition-all ",
                         formData.deliverySlot === slot.id
                           ? "border-primary bg-primary/10"
                           : "border-border hover:border-primary/30"

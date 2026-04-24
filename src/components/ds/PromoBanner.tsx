@@ -39,7 +39,7 @@ export function PromoBanner({
         'relative overflow-hidden rounded-none',
         'bg-gradient-to-br from-[hsl(222_47%_11%)] via-[hsl(224_55%_22%)] to-[hsl(222_47%_11%)]',
         '[box-shadow:var(--shadow-elevation-2)]',
-        onClick && 'cursor-pointer hover:[box-shadow:var(--shadow-elevation-3)] hover:-translate-y-0.5 transition-all duration-150',
+        onClick && 'cursor-pointer hover:[box-shadow:var(--shadow-elevation-3)] transition-all duration-150',
         isHero && 'min-h-[140px] md:min-h-[180px]',
         isCompact && 'min-h-[80px]',
         !isHero && !isCompact && 'min-h-[100px]',

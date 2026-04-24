@@ -32,7 +32,6 @@ const QUICK_PAYMENT_METHODS = [
   { value: 'card', icon: CreditCard, labelRu: 'Карта', labelEn: 'Card' },
 ];
 
-
 export default function QuickIncome() {
   const { language } = useLanguage();
   const { user } = useAuth();

@@ -76,7 +76,6 @@ export default function DeliveryCheckout() {
 
   const isFormValid = address && contactData.name && contactData.phone && cartItems.length > 0;
 
-
   const handleSubmit = async () => {
     if (!user || !isFormValid) return;
 

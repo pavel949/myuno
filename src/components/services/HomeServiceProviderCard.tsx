@@ -61,7 +61,7 @@ export const HomeServiceProviderCard = memo(function HomeServiceProviderCard({
         "w-full flex items-start gap-4 p-4",
         "bg-card border border-border/50 rounded-none",
         "hover:shadow-lg hover:border-primary/30",
-        "active:scale-[0.99]",
+        "",
         "transition-all duration-200",
         "text-left group"
       )}

@@ -74,14 +74,14 @@ export const ProfessionalCategoryBanner: React.FC<ProfessionalCategoryBannerProp
       {/* Hero Category */}
       <button
         onClick={() => handleClick(heroCategory.slug)}
-        className="w-full relative overflow-hidden rounded-none text-left transition-all duration-300 hover:shadow-xl active:scale-[0.99] group"
+        className="w-full relative overflow-hidden rounded-none text-left transition-all duration-300 hover:shadow-xl group"
       >
         <div className="aspect-[2.2/1] relative">
           {/* Background Image */}
           <img
             src={heroCategory.image_url || getCategoryImage(heroCategory.slug)}
             alt=""
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 "
           />
           
           {/* Gradient Overlay */}
@@ -111,8 +111,8 @@ export const ProfessionalCategoryBanner: React.FC<ProfessionalCategoryBannerProp
               </div>
               
               {/* Arrow indicator */}
-              <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center transition-all duration-300 group-hover:bg-white/30 group-hover:scale-110">
-                <ArrowRight className="w-5 h-5 text-white transition-transform duration-300 group-hover:translate-x-0.5" />
+              <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center transition-all duration-300 group-hover:bg-white/30 ">
+                <ArrowRight className="w-5 h-5 text-white transition-transform duration-300 " />
               </div>
             </div>
           </div>
@@ -125,14 +125,14 @@ export const ProfessionalCategoryBanner: React.FC<ProfessionalCategoryBannerProp
           <button
             key={category.id}
             onClick={() => handleClick(category.slug)}
-            className="relative overflow-hidden rounded-none text-left transition-all duration-300 hover:shadow-lg active:scale-[0.98] group"
+            className="relative overflow-hidden rounded-none text-left transition-all duration-300 hover:shadow-lg group"
           >
             <div className="aspect-[1.3/1] relative">
               {/* Background Image */}
               <img
                 src={category.image_url || getCategoryImage(category.slug)}
                 alt=""
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 "
               />
               
               {/* Gradient Overlay */}

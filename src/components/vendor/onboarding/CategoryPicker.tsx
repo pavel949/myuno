@@ -92,7 +92,7 @@ export function CategoryPicker({ value, onChange }: CategoryPickerProps) {
                   className={cn(
                     "flex items-center gap-3 p-4 rounded-none text-left transition-all",
                     "border hover:border-primary/40 hover:bg-primary/5",
-                    "active:scale-[0.98]",
+                    "",
                     current?.group.id === group.id
                       ? "border-primary/30 bg-primary/5"
                       : "border-border/60 bg-card"
@@ -146,7 +146,7 @@ export function CategoryPicker({ value, onChange }: CategoryPickerProps) {
                     }}
                     className={cn(
                       "relative flex items-center gap-3 p-4 rounded-none text-left transition-all",
-                      "border active:scale-[0.98]",
+                      "border ",
                       isSelected
                         ? "border-primary bg-primary/5 ring-2 ring-primary/20"
                         : "border-border/60 bg-card hover:border-primary/30 hover:bg-primary/5"

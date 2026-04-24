@@ -19,8 +19,6 @@ interface ActivityEntry {
   details?: string;
 }
 
-
-
 function useUnifiedActivity(typeFilter?: string) {
   return useQuery({
     queryKey: ['admin-crm-activity', typeFilter],

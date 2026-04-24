@@ -243,7 +243,7 @@ export function TripServicesGrid({
               className="flex flex-col items-center p-4 rounded-none bg-card border border-border hover:border-primary/30 hover:shadow-lg transition-all group"
             >
               <div className={cn(
-                "w-12 h-12 rounded-none flex items-center justify-center mb-3 bg-gradient-to-br group-hover:scale-110 transition-transform",
+                "w-12 h-12 rounded-none flex items-center justify-center mb-3 bg-gradient-to-br transition-transform",
                 service.gradient
               )}>
                 <Icon className="w-6 h-6 text-white" />

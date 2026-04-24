@@ -93,7 +93,7 @@ export const TodayEventsFeed = memo(function TodayEventsFeed({ compact }: TodayE
               transition={{ delay: i * 0.05, duration: 0.3 }}
             >
               <Card
-                className="overflow-hidden cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all duration-150 group"
+                className="overflow-hidden cursor-pointer hover:shadow-md transition-all duration-150 group"
                 onClick={() => navigate(`/events/${event.id}`)}
               >
                 <div className="flex h-full">
@@ -103,7 +103,7 @@ export const TodayEventsFeed = memo(function TodayEventsFeed({ compact }: TodayE
                       <img
                         src={event.cover_image}
                         alt={isRu ? event.title_ru : event.title_en}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="w-full h-full object-cover transition-transform duration-300"
                         loading="lazy"
                       />
                       {isHot && (

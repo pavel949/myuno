@@ -120,7 +120,7 @@ function ServiceTile({
       className={cn(
         'relative flex flex-col items-center justify-center gap-1.5',
         'w-[72px] min-w-[72px] h-[72px] rounded-none',
-        'active:scale-[0.93] transition-all duration-150 snap-start shrink-0',
+        'transition-all duration-150 snap-start shrink-0',
         isSoon && 'opacity-40 pointer-events-none',
       )}
       style={{ background: clusterColor + '14' }}

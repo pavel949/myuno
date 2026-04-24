@@ -162,7 +162,7 @@ export function BoostListingCard({ propertyId, className }: BoostListingCardProp
                   onClick={() => handleSelectTier(tier.key)}
                   className={cn(
                     "w-full p-3 rounded-none border-2 transition-all text-left",
-                    "hover:shadow-md active:scale-[0.99]",
+                    "hover:shadow-md ",
                     tier.borderColor,
                     tier.bgColor
                   )}

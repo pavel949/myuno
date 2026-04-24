@@ -162,7 +162,7 @@ export function AccountRolesBlock({ showCTA = true }: AccountRolesBlockProps) {
               disabled={isSwitching}
               className={cn(
                 "w-full flex items-center gap-3 p-3 rounded-none transition-all text-left",
-                "hover:bg-muted/50 active:scale-[0.98]",
+                "hover:bg-muted/50 ",
                 isActive && "bg-primary/5 ring-1 ring-primary/20"
               )}
             >

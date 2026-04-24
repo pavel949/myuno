@@ -51,7 +51,7 @@ export function KnowledgeCard({
   return (
     <Card 
       className={cn(
-        "cursor-pointer transition-all hover:shadow-md hover:scale-[1.02] active:scale-[0.98]",
+        "cursor-pointer transition-all hover:shadow-md ",
         className
       )}
       onClick={() => navigate(`/knowledge/${section}`)}

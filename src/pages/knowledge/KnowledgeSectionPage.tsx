@@ -88,7 +88,7 @@ export default function KnowledgeSectionPage() {
               {articles.map(article => (
                 <Card 
                   key={article.id}
-                  className="cursor-pointer transition-all hover:shadow-md hover:scale-[1.01] active:scale-[0.99]"
+                  className="cursor-pointer transition-all hover:shadow-md "
                   onClick={() => navigate(`/knowledge/${section}/${article.slug}`)}
                 >
                   <CardHeader className="pb-2">

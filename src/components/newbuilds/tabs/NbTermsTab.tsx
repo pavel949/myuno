@@ -160,7 +160,7 @@ export function NbTermsTab({ projectId }: Props) {
           <p className="text-sm font-medium" style={{ color: 'hsl(var(--nb-text))' }}>Нужна проверка контракта?</p>
           <p className="text-xs" style={{ color: 'hsl(var(--nb-muted))' }}>Юристы myUNO проверят договор купли-продажи</p>
         </div>
-        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" style={{ color: 'hsl(var(--nb-gold))' }} />
+        <ArrowRight className="w-5 h-5 transition-transform" style={{ color: 'hsl(var(--nb-gold))' }} />
       </Link>
     </div>
   );

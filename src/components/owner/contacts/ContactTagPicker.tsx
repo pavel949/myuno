@@ -191,7 +191,7 @@ const [open, setOpen] = useState(false);
                         onClick={() => setNewTagColor(color)}
                         className={cn(
                           'w-5 h-5 rounded-full border-2 transition-transform',
-                          newTagColor === color ? 'border-foreground scale-110' : 'border-transparent hover:scale-110'
+                          newTagColor === color ? 'border-foreground scale-110' : 'border-transparent '
                         )}
                         style={{ backgroundColor: color }}
                       />

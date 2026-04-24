@@ -94,7 +94,7 @@ function PropertySection({
             onClick={() => onNavigate(item.path)}
             className={cn(
               'w-full flex items-center gap-4 py-3 text-left',
-              'hover:opacity-70 transition-opacity active:scale-[0.99]'
+              'hover:opacity-70 transition-opacity '
             )}
           >
             <Icon className="h-5 w-5 text-foreground/70 flex-shrink-0" />
@@ -137,7 +137,7 @@ export function AccountFlatMenu() {
             onClick={() => navigate(item.path)}
             className={cn(
               'w-full flex items-center gap-4 py-4 text-left',
-              'hover:opacity-70 transition-opacity active:scale-[0.99]'
+              'hover:opacity-70 transition-opacity '
             )}
           >
             <Icon className="h-5 w-5 text-foreground/70 flex-shrink-0" />
@@ -159,7 +159,7 @@ export function AccountFlatMenu() {
             onClick={() => navigate(item.path)}
             className={cn(
               'w-full flex items-center gap-4 py-4 text-left',
-              'hover:opacity-70 transition-opacity active:scale-[0.99]'
+              'hover:opacity-70 transition-opacity '
             )}
           >
             <Icon className="h-5 w-5 text-foreground/70 flex-shrink-0" />

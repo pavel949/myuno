@@ -49,7 +49,7 @@ function CatalogCard({ item, index }: { item: EnrichedCatalogItem; index: number
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.03 }}
       onClick={handleClick}
-      className="w-[160px] md:w-auto shrink-0 md:shrink text-left rounded-none border border-border/60 overflow-hidden bg-card hover:shadow-sm active:scale-[0.98] transition-all touch-manipulation group"
+      className="w-[160px] md:w-auto shrink-0 md:shrink text-left rounded-none border border-border/60 overflow-hidden bg-card hover:shadow-sm transition-all touch-manipulation group"
     >
       {/* Cover */}
       <div className="relative h-24 overflow-hidden bg-muted">
@@ -57,7 +57,7 @@ function CatalogCard({ item, index }: { item: EnrichedCatalogItem; index: number
           <img
             src={item.coverImage}
             alt={item.title_localized || item.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+            className="w-full h-full object-cover transition-transform duration-200"
             loading="lazy"
           />
         ) : (

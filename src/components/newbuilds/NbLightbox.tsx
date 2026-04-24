@@ -109,14 +109,14 @@ export function NbLightbox({ images, initialIndex = 0, onClose, captions }: Prop
         <>
           <button
             onClick={e => { e.stopPropagation(); goPrev(); }}
-            className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full transition-all hover:scale-110"
+            className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full transition-all "
             style={{ background: 'hsl(var(--nb-gold) / 0.2)', color: 'hsl(var(--nb-gold))' }}
           >
             <ChevronLeft className="w-6 h-6" />
           </button>
           <button
             onClick={e => { e.stopPropagation(); goNext(); }}
-            className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full transition-all hover:scale-110"
+            className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full transition-all "
             style={{ background: 'hsl(var(--nb-gold) / 0.2)', color: 'hsl(var(--nb-gold))' }}
           >
             <ChevronRight className="w-6 h-6" />

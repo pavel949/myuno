@@ -102,7 +102,7 @@ export function PageHeader({
               aria-label="Back"
               className={cn(
                 'flex items-center justify-center rounded-full bg-secondary/80 text-foreground',
-                'hover:bg-secondary transition-all active:scale-95 touch-manipulation flex-shrink-0',
+                'hover:bg-secondary transition-all touch-manipulation flex-shrink-0',
                 'h-[var(--touch-target)] w-[var(--touch-target)]',
                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary',
               )}
@@ -137,7 +137,7 @@ export function PageHeader({
                       key={i}
                       onClick={a.onClick}
                       className={cn(
-                        'inline-flex items-center gap-1.5 rounded-none text-sm font-medium transition-all active:scale-95',
+                        'inline-flex items-center gap-1.5 rounded-none text-sm font-medium transition-all ',
                         'h-[var(--touch-target)] px-3',
                         'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary',
                         a.variant === 'primary'
@@ -157,7 +157,7 @@ export function PageHeader({
                         aria-label="More actions"
                         className={cn(
                           'flex items-center justify-center rounded-full bg-secondary/80 text-foreground',
-                          'hover:bg-secondary transition-all active:scale-95',
+                          'hover:bg-secondary transition-all ',
                           'h-[var(--touch-target)] w-[var(--touch-target)]',
                           'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary',
                         )}

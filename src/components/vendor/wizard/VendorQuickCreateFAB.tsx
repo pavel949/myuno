@@ -124,7 +124,7 @@ export function VendorQuickCreateFAB({
               "fixed bottom-[calc(var(--bottom-nav-h)+1rem)] right-4 md:bottom-6 md:right-6 z-50",
               "h-14 w-14 rounded-full shadow-lg",
               "bg-primary hover:bg-primary/90",
-              "transition-transform hover:scale-105"
+              "transition-transform "
             )}
           >
             <motion.div

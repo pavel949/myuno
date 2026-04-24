@@ -46,8 +46,8 @@ export const ServiceProviderCard = memo(function ServiceProviderCard({
       className={cn(
         "w-full flex items-center gap-4 p-4",
         "bg-card border border-border/50 rounded-none",
-        "hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30",
-        "active:scale-[0.99]",
+        "hover:shadow-md hover:border-primary/30",
+        "",
         "transition-all duration-200",
         "text-left group"
       )}
@@ -123,8 +123,8 @@ export const ServiceProviderCard = memo(function ServiceProviderCard({
       className={cn(
         "w-[260px] shrink-0 rounded-none overflow-hidden",
         "bg-card border border-border/50",
-        "hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30",
-        "active:scale-[0.98]",
+        "hover:shadow-md hover:border-primary/30",
+        "",
         "transition-all duration-200",
         "text-left group"
       )}
@@ -138,7 +138,7 @@ export const ServiceProviderCard = memo(function ServiceProviderCard({
           <img
             src={image}
             alt={name}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+            className="w-full h-full object-cover transition-transform duration-300 "
             loading="lazy"
           />
         ) : (

@@ -83,7 +83,7 @@ export const PropertyHeroCard = forwardRef<HTMLDivElement, PropertyHeroCardProps
             <img 
               src={property.cover_image} 
               alt={title}
-              className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
+              className="w-full h-full object-cover transition-transform duration-300"
               loading="lazy"
             />
           ) : (

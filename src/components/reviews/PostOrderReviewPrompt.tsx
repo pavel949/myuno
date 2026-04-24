@@ -139,7 +139,7 @@ export function PostOrderReviewPrompt({
               <button
                 key={star}
                 type="button"
-                className="p-1 transition-transform hover:scale-110 active:scale-95"
+                className="p-1 transition-transform "
                 onClick={() => setRating(star)}
                 onMouseEnter={() => setHoverRating(star)}
                 onMouseLeave={() => setHoverRating(0)}

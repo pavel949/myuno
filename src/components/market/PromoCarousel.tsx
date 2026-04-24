@@ -107,7 +107,7 @@ export const PromoCarousel: React.FC<PromoCarouselProps> = ({ className }) => {
                     {/* CTA */}
                     <div className="inline-flex items-center gap-2 bg-white/20 text-white font-semibold text-sm px-4 py-2 rounded-none group-hover:bg-white/30 transition-colors">
                       <span>{isRu ? 'Смотреть' : 'Shop Now'}</span>
-                      <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                      <ArrowRight className="w-4 h-4 transition-transform" />
                     </div>
                   </div>
                 </button>

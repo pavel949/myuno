@@ -234,7 +234,7 @@ export default function FinanceOverview() {
               <button
                 key={link.path}
                 onClick={() => navigate(link.path)}
-                className="w-full flex items-center gap-3 p-3.5 hover:bg-muted/50 transition-colors active:scale-[0.99]"
+                className="w-full flex items-center gap-3 p-3.5 hover:bg-muted/50 transition-colors "
               >
                 <Icon className={cn("h-5 w-5 flex-shrink-0", link.color)} />
                 <span className="flex-1 text-sm font-medium text-left">{link.label}</span>

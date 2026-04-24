@@ -23,7 +23,7 @@ export function FloatingConcierge() {
         'fixed right-4 h-12 pl-3 pr-4 rounded-full flex items-center gap-2 font-sans text-sm font-semibold',
         'bg-primary text-primary-foreground shadow-lg shadow-primary/30',
         'ring-1 ring-primary/20',
-        'active:scale-95 transition-transform hover:bg-primary/90',
+        'transition-transform hover:bg-primary/90',
         'z-[55]',
         FLOATING_OFFSET.chatAboveStack,
       )}

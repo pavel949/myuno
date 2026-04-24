@@ -82,7 +82,7 @@ export function ExploreMoreRail({ clusterId, currentPath, className }: ExploreMo
             <button
               key={service.path}
               onClick={() => navigate(service.path)}
-              className="flex items-center gap-3 p-3 rounded-none shrink-0 min-w-[180px] text-left transition-all active:scale-[0.97]"
+              className="flex items-center gap-3 p-3 rounded-none shrink-0 min-w-[180px] text-left transition-all "
               style={{
                 background: 'hsl(var(--card))',
                 border: '1px solid hsl(0 0% 100% / 0.07)',

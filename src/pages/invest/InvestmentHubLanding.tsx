@@ -99,7 +99,7 @@ function ZoneCard({
         </ul>
         <div className="flex items-center text-xs text-primary font-medium pt-1">
           {isRu ? 'Перейти к разделу' : 'Go to section'}
-          <ChevronRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-1 transition-transform" />
+          <ChevronRight className="w-3.5 h-3.5 ml-1 transition-transform" />
         </div>
       </CardContent>
     </Card>

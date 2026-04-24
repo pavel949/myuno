@@ -39,8 +39,6 @@ const flexibleDates = [
   { id: 'month', labelEn: 'Month', labelRu: 'Месяц', getDates: () => ({ from: new Date(), to: addMonths(new Date(), 1) }) },
 ];
 
-
-
 const BEDROOM_OPTIONS = [
   { id: 'studio', labelEn: 'Studio', labelRu: 'Студия' },
   { id: '1', labelEn: '1+', labelRu: '1+' },

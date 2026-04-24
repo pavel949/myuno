@@ -44,7 +44,7 @@ function AppItem({ app, t }: { app: ClusterApp; t: boolean }) {
       onClick={() => navigate(app.path)}
       className={cn(
         'w-full flex items-center gap-4 p-4 rounded-none border border-border bg-card text-left',
-        'transition-all hover:border-cluster-arrive/40 hover:[box-shadow:var(--shadow-elevation-2)] active:scale-[0.98]',
+        'transition-all hover:border-cluster-arrive/40 hover:[box-shadow:var(--shadow-elevation-2)] ',
         !app.ready && 'opacity-50 pointer-events-none'
       )}
     >

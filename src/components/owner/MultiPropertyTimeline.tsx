@@ -368,7 +368,7 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
                               {hasCleaning && (
                                 <button
                                   onClick={(e) => cleaningTask && handleTaskIconClick(cleaningTask, e)}
-                                  className="hover:scale-125 transition-transform"
+                                  className="transition-transform"
                                 >
                                   <Sparkles className="h-3 w-3 text-info" />
                                 </button>
@@ -376,7 +376,7 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
                               {hasMaintenance && (
                                 <button
                                   onClick={(e) => maintenanceTask && handleTaskIconClick(maintenanceTask, e)}
-                                  className="hover:scale-125 transition-transform"
+                                  className="transition-transform"
                                 >
                                   <Wrench className="h-3 w-3 text-accent-foreground" />
                                 </button>

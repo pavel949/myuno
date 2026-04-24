@@ -105,7 +105,7 @@ export function DownloadAppButton() {
       transition={{ duration: 0.3, delay: 0.1 }}
       onClick={handleClick}
       disabled={installState === 'installing'}
-      className="w-full flex items-center gap-3 px-4 py-3 rounded-none bg-muted/50 border border-border hover:bg-muted/80 hover:border-primary/20 transition-all duration-200 active:scale-[0.98] group disabled:opacity-70 disabled:cursor-wait"
+      className="w-full flex items-center gap-3 px-4 py-3 rounded-none bg-muted/50 border border-border hover:bg-muted/80 hover:border-primary/20 transition-all duration-200 group disabled:opacity-70 disabled:cursor-wait"
     >
       <div className="w-10 h-10 rounded-none bg-primary/10 flex items-center justify-center shrink-0">
         {installState === 'installing' ? (
@@ -129,7 +129,7 @@ export function DownloadAppButton() {
       </div>
       
       {installState !== 'installing' && (
-        <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
+        <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-all shrink-0" />
       )}
     </motion.button>
   );

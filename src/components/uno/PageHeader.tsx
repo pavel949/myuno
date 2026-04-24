@@ -50,7 +50,7 @@ export const PageHeader = memo(forwardRef<HTMLDivElement, PageHeaderProps>(
               className={cn(
                 "flex items-center justify-center w-10 h-10 rounded-full transition-all",
                 "hover:bg-secondary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
-                "active:scale-95 touch-manipulation flex-shrink-0",
+                "touch-manipulation flex-shrink-0",
                 variant === 'transparent' 
                   ? "bg-black/50 text-white hover:bg-black/70" 
                   : "bg-secondary/80 text-foreground"

@@ -339,7 +339,7 @@ function DayItemCard({ item, isRu, onClick }: { item: DayItem; isRu: boolean; on
   return (
     <Card
       className={cn(
-        'cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all duration-150 border-l-4',
+        'cursor-pointer hover:shadow-md transition-all duration-150 border-l-4',
         styles.border
       )}
       onClick={onClick}

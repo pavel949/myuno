@@ -131,7 +131,7 @@ export function FeaturedPropertiesCarousel() {
               key={property.id}
               onClick={() => navigate(APP_ROUTES.PROPERTY_DETAIL(property.id))}
               aria-label={`${isRu ? property.title_ru : property.title_en}, ${district}, ${formatPrice(unitPrice)} ${isRu ? 'за ночь' : 'per night'}`}
-              className="w-[280px] md:w-[260px] rounded-none overflow-hidden text-left group transition-all duration-200 hover:-translate-y-1 active:scale-[0.97] shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background flex flex-col"
+              className="w-[280px] md:w-[260px] rounded-none overflow-hidden text-left group transition-all duration-200 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background flex flex-col"
               style={{
                 background: 'hsl(var(--card))',
                 border: '1px solid hsl(var(--border))',
@@ -147,7 +147,7 @@ export function FeaturedPropertiesCarousel() {
                 <img
                   src={image}
                   alt={isRu ? property.title_ru : property.title_en}
-                  className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-[1.05]"
+                  className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-300 "
                   loading="lazy"
                 />
                 <div className="absolute top-2 left-2 flex flex-col gap-1">

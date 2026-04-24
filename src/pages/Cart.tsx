@@ -275,7 +275,6 @@ const Cart = () => {
                     <div className="flex flex-col items-end justify-between">
                       <button
                         onClick={(e) => {
-                          triggerRipple(e);
                           removeItem(item.id);
                         }}
                         aria-label={language === 'ru' ? 'Удалить' : 'Remove item'}
@@ -287,7 +286,6 @@ const Cart = () => {
                       <div className="flex items-center gap-2 bg-secondary rounded-none p-1" role="group" aria-label={language === 'ru' ? 'Количество' : 'Quantity'}>
                         <button
                           onClick={(e) => {
-                            triggerRipple(e);
                             updateQuantity(item.id, item.quantity - 1);
                           }}
                           aria-label={language === 'ru' ? 'Уменьшить количество' : 'Decrease quantity'}
@@ -300,7 +298,6 @@ const Cart = () => {
                         </span>
                         <button
                           onClick={(e) => {
-                            triggerRipple(e);
                             updateQuantity(item.id, item.quantity + 1);
                           }}
                           aria-label={language === 'ru' ? 'Увеличить количество' : 'Increase quantity'}

@@ -100,7 +100,6 @@ export const PropertyChatWindow: React.FC<PropertyChatWindowProps> = ({
     }
   };
 
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">

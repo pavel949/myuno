@@ -141,7 +141,7 @@ function FlashServiceCard({ service, index, onClick }: FlashServiceCardProps) {
       className={cn(
         "relative w-[160px] shrink-0 snap-start",
         "rounded-none overflow-hidden bg-card border border-border/50",
-        "hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200",
+        "hover:shadow-lg transition-all duration-200",
         "text-left group"
       )}
     >
@@ -151,7 +151,7 @@ function FlashServiceCard({ service, index, onClick }: FlashServiceCardProps) {
           <img 
             src={service.images?.[0] || service.image} 
             alt={service.name_en}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-full object-cover transition-transform duration-300"
           />
         ) : (
            <div className="w-full h-full bg-muted flex items-center justify-center">

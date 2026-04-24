@@ -290,7 +290,7 @@ export function OperationsManualPaymentsTab() {
             return (
               <Card
                 key={row.id}
-                className={cn('cursor-pointer active:scale-[0.99] transition-transform', isExpiringSoon && 'border-warning/40')}
+                className={cn('cursor-pointer transition-transform', isExpiringSoon && 'border-warning/40')}
                 onClick={() => setDetailTarget(row)}
               >
                 <CardContent className="p-3 space-y-2">

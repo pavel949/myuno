@@ -57,7 +57,7 @@ function SignalHero({ persona, sig, isRu }: { persona: UserPersona; sig: RoleSig
   return (
     <button
       onClick={() => navigate(SIGNAL_ROUTE[persona])}
-      className="w-full text-left relative overflow-hidden rounded-none bg-card border border-border p-[18px] active:scale-[0.99] transition-transform"
+      className="w-full text-left relative overflow-hidden rounded-none bg-card border border-border p-[18px] transition-transform"
     >
       {/* 2px left spine */}
       <div className="absolute top-4 bottom-4 left-0 w-0.5 rounded-none" style={{ background: meta.color }} />
@@ -90,7 +90,7 @@ function SignalSlim({ persona, sig, isRu }: { persona: UserPersona; sig: RoleSig
   return (
     <button
       onClick={() => navigate(SIGNAL_ROUTE[persona])}
-      className="w-full text-left relative overflow-hidden rounded-none bg-card/60 border border-border grid grid-cols-[auto_1fr_auto] gap-2.5 items-center px-3.5 py-2.5 active:scale-[0.99] transition-transform"
+      className="w-full text-left relative overflow-hidden rounded-none bg-card/60 border border-border grid grid-cols-[auto_1fr_auto] gap-2.5 items-center px-3.5 py-2.5 transition-transform"
     >
       <div className="absolute top-2.5 bottom-2.5 left-0 w-0.5 rounded-none" style={{ background: meta.color }} />
       <RoleChip persona={persona} meta={meta} compact />
