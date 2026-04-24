@@ -68,16 +68,17 @@ function AuthenticatedMySection() {
         : `${allProperties.length} propert${allProperties.length !== 1 ? 'ies' : 'y'} managed`,
       path: '/owner',
       show: isOwner || isManager || hasProperties,
-      gradient: 'from-primary to-primary',
+      gradient: 'from-primary to-primary/70',
     },
     {
       id: 'invest',
       icon: TrendingUp,
       title: isRu ? 'Инвестиционный портфель' : 'Investment Portfolio',
       description: isRu ? 'Проекты и аналитика' : 'Projects & analytics',
-      path: '/property/invest',
+      // /property/invest legacy → /invest (handled by router redirect, but link directly to canonical)
+      path: '/invest',
       show: true,
-      gradient: 'from-success to-success',
+      gradient: 'from-success to-success/70',
     },
     {
       id: 'add',
@@ -86,7 +87,7 @@ function AuthenticatedMySection() {
       description: isRu ? 'Разместить на платформе' : 'List on the platform',
       path: '/owner',
       show: true,
-      gradient: 'from-accent to-accent',
+      gradient: 'from-accent to-accent/70',
     },
   ];
 
