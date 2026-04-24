@@ -76,6 +76,9 @@ export default function PropertyMap() {
   };
 
   useEffect(() => {
+    // When a district is pre-filled via URL, skip geolocation prompt and
+    // center on the district itself (handled by districtCenter below).
+    if (districtParam) return;
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -91,7 +94,7 @@ export default function PropertyMap() {
         }
       );
     }
-  }, []);
+  }, [districtParam]);
 
   const handlePropertySelect = (propertyId: string) => {
     navigate(APP_ROUTES.PROPERTY_DETAIL(propertyId));
