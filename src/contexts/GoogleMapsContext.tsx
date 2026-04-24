@@ -29,7 +29,17 @@ export interface GoogleMapsContextValue {
 const GoogleMapsContext = createContext<GoogleMapsContextValue | null>(null);
 
 /** Inner provider that runs useJsApiLoader once key is available. */
-function GoogleMapsLoader({ apiKey, language, children }: { apiKey: string; language: string; children: React.ReactNode }) {
+function GoogleMapsLoader({
+  apiKey,
+  language,
+  onLanguageFallback,
+  children,
+}: {
+  apiKey: string;
+  language: string;
+  onLanguageFallback: () => void;
+  children: React.ReactNode;
+}) {
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: apiKey,
     libraries: LIBRARIES,
@@ -55,6 +65,15 @@ function GoogleMapsLoader({ apiKey, language, children }: { apiKey: string; lang
   }, []);
 
   const effectiveError = loadError ?? authError;
+
+  // Fallback: if the script failed to load with a non-English locale, retry once with `en`.
+  // Auth failures (gm_authFailure) are NOT a localization issue — don't retry those.
+  useEffect(() => {
+    if (loadError && language !== 'en') {
+      console.warn(`[GoogleMaps] Failed to load with language="${language}", falling back to "en"`, loadError);
+      onLanguageFallback();
+    }
+  }, [loadError, language, onLanguageFallback]);
 
   const value = useMemo<GoogleMapsContextValue>(
     () => ({
@@ -92,7 +111,19 @@ const loadingValue: GoogleMapsContextValue = {
 
 export function GoogleMapsProvider({ children }: { children: React.ReactNode }) {
   const { language: appLang } = useLanguage();
-  const mapsLanguage = resolveMapsLanguage(appLang);
+  const requestedLanguage = resolveMapsLanguage(appLang);
+  const [forceFallbackLang, setForceFallbackLang] = useState(false);
+  const mapsLanguage = forceFallbackLang ? 'en' : requestedLanguage;
+
+  // Reset fallback if the user changes app language (give the new language a fresh try)
+  useEffect(() => {
+    setForceFallbackLang(false);
+  }, [requestedLanguage]);
+
+  const handleLanguageFallback = React.useCallback(() => {
+    setForceFallbackLang(true);
+  }, []);
+
   const [apiKey, setApiKey] = useState<string | null>(getGoogleMapsKey());
   const [fetched, setFetched] = useState(!!apiKey);
 
@@ -130,7 +161,11 @@ export function GoogleMapsProvider({ children }: { children: React.ReactNode }) 
     );
   }
 
-  return <GoogleMapsLoader apiKey={apiKey} language={mapsLanguage}>{children}</GoogleMapsLoader>;
+  return (
+    <GoogleMapsLoader apiKey={apiKey} language={mapsLanguage} onLanguageFallback={handleLanguageFallback}>
+      {children}
+    </GoogleMapsLoader>
+  );
 }
 
 export function useGoogleMaps() {
