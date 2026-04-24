@@ -612,90 +612,111 @@ Label on hover (desktop):
 
 Логотип myUNO — **единственный декоративный элемент**, которому позволено существовать в интерфейсе без функциональной нагрузки. Поэтому к нему предъявлены жёсткие требования: ничего лишнего, никакой импровизации, никаких альтернативных версий, кроме описанных здесь.
 
-### 8a.1 · Два знака — wordmark и symbol
+### 8a.1 · Конструкция знака
 
-| Знак | Что это | Когда использовать |
+Лого — это **двухцветный wordmark `myUNO`**:
+
+- `my` — строчными, weight 700, окрашен в **акцент** (`text-primary`).
+- `UNO` — капителью, weight 700, шрифт `font-display`, трекинг `tracking-tight`, окрашен в **foreground** (основной текст).
+- Между `my` и `UNO` — без пробела, оптический «пробел» создан переходом веса/шрифта.
+
+Это лого **theme-aware**: акцент берётся из токена `--primary`, а значит:
+
+| Тема | `my` | `UNO` |
 |---|---|---|
-| **Wordmark** `myUNO` | Полное написание: `my` строчными в Unbounded Regular + `UNO` капителью в Unbounded SemiBold с трекингом `0.08em` | Лендинги, header desktop ≥1024px, документы, email signature, презентации, договоры |
-| **Symbol** `U` | Глиф U из Unbounded SemiBold, центрированный в квадратном canvas | Favicon, app icon, share-thumbnails, avatar fallback, watermark, контексты ≤32px высоты |
+| **Light** (cream) | `--primary` = navy `#0A2240` | `--foreground` = ink `#1C1917` |
+| **Dark** (navy) | `--primary` = orange `#D96B1A` | `--foreground` = cream `#F7F5F1` |
 
-**Правило переключения.** В макете, где высота логотипа меньше 24px **или** ширина контейнера меньше 120px — используется symbol. Никогда не сжимать wordmark до нечитаемого размера.
+Ровно по той же причине это единственное место, где `brand-orange` появляется как «брендовая константа», а не как 3% акцент действия — потому что в dark-теме `brand-orange` **и есть** primary.
 
-### 8a.2 · Цветовые варианты
+### 8a.2 · Три варианта формы
 
-Только **три** тональности. Никаких других цветов в логотипе — никогда.
-
-| Тон | Применение | Fill | Background (если на цветной поверхности) |
-|---|---|---|---|
-| **Navy** (primary) | Дефолт: на cream и белом фоне | `#0A2240` | — |
-| **Cream** (reverse) | На navy / тёмных surfaces / фото с overlay 40%+ | `#F7F5F1` | — |
-| **Ink mono** | Чёрно-белая печать, факс, гос-документы | `#1C1917` | — |
-
-**`brand-orange` в логотипе НЕ используется.** Это нарушит правило 2.1 (orange ≤ 3% площади, зарезервирован под акцент действия).
-
-### 8a.3 · Clear space (зона тишины)
-
-Минимальная свободная область вокруг знака — **высота буквы `U`** (или, для wordmark, высота cap-line) со всех четырёх сторон. Это пространство нельзя занимать ничем — ни текстом, ни иконками, ни рамкой, ни фоновым изображением.
-
-```
-┌─────────────────────────┐
-│   [U]                   │  ← H = высота U
-│   [U] myUNO         [U] │
-│       [U]               │  ← H снизу
-└─────────────────────────┘
-```
-
-### 8a.4 · Минимальные размеры
-
-| Знак | Минимум на экране | Минимум в печати |
+| Вариант | Что это | Когда использовать |
 |---|---|---|
-| Wordmark | высота 16px (≈ ширина 64px) | 8mm высота |
-| Symbol | 16×16px | 5×5mm |
+| **wordmark** (default) | Чистый текст `myUNO` без рамки | Header, inline в текстах, footer, email-подпись, документы |
+| **badge** | Тот же wordmark внутри rounded-square с обводкой `border-primary` (border-2, rounded-[10px]) | Главный квадратный знак: app drawer, hero корпоративных страниц, share-карточки, sticker — соответствует левой верхней «плашке» на главном экране |
+| **symbol** | Минималистичный «U» в rounded-square с обводкой `border-primary` | Только для контекстов ≤24px (favicon, tab-bar mini, OS app icon, avatar fallback) |
+
+**Правило переключения.** Если высота лого в макете <24px **или** ширина контейнера <120px → используется `symbol`. Никогда не сжимать `wordmark` или `badge` до нечитаемого размера.
+
+### 8a.3 · Tone-overrides
+
+В большинстве случаев `tone="auto"` (дефолт) — лого следует за темой. Жёсткое значение нужно только когда поверхность theme-agnostic:
+
+| `tone` | Когда применять |
+|---|---|
+| `auto` (default) | Любой UI-контекст: лого следует за активной темой |
+| `navy` | Светлая печать, PDF-экспорт, презентации в светлой палитре |
+| `cream` | Тёмные фотоподложки с overlay ≥40%, тёмный footer вне обычной dark-темы |
+| `ink` | Чёрно-белая печать, факс, гос-документы, кассовый чек |
+
+Никаких других значений (gold, neon, рандомные категорийные цвета) — нет.
+
+### 8a.4 · Clear space (зона тишины)
+
+Минимальная свободная область вокруг знака — **высота буквы `U`** (для wordmark — высота cap-line, для badge — внешняя высота рамки) со всех четырёх сторон. Это пространство нельзя занимать ничем — ни текстом, ни иконками, ни рамкой, ни фоновым изображением.
+
+### 8a.5 · Минимальные размеры
+
+| Вариант | Минимум на экране | Минимум в печати |
+|---|---|---|
+| wordmark | cap-height 14px (≈ ширина 60px) | 6mm cap-height |
+| badge | внешняя высота 28px | 10mm высота |
+| symbol | 16×16px | 5×5mm |
 
 Ниже минимума — знак становится нечитаемым и **запрещён** к использованию.
 
-### 8a.5 · Запрещено (категорически)
+### 8a.6 · Запрещено (категорически)
 
 - Растягивать, наклонять, поворачивать, искажать пропорции
-- Перекрашивать в `brand-orange`, в категорийные цвета каталога, в неон
-- Добавлять обводку, тень, glow, gradient fill
+- Перекрашивать вне четырёх sanctioned tones (`auto / navy / cream / ink`)
+- Применять gold/neon/категорийные цвета каталога к лого
+- Добавлять тень, glow, gradient fill к буквам или рамке
 - Размещать на градиентной или хаотичной фотоподложке без overlay 40%
-- Ставить рядом с tagline в шрифте, отличном от Unbounded / Noto Serif
-- Использовать растровую версию там, где доступен SVG
-- Вводить «декоративные» вариации к праздникам (никаких snowflake-логотипов на Новый год)
+- Менять шрифт `UNO` (всегда `font-display` через дизайн-токен)
+- Использовать растровую версию там, где доступен SVG или React-компонент
+- Вводить «декоративные» вариации к праздникам (snowflake-логотипов на Новый год — нет)
 - Сочетать с другими лого партнёров без вертикальной разделительной линии в `border-strong` и одинаковой оптической высоты
 
-### 8a.6 · Файлы и где они лежат
+### 8a.7 · Файлы и где они лежат
 
-Источник истины — SVG в `/public/brand/`. Растры (PNG/WebP/ICO) генерируются из них и **не редактируются вручную** — ре-генерация через `/tmp/myuno-brand/build_svg.py` + `/tmp/myuno-brand/build_rasters.sh`.
+Источник истины для UI — **React-компонент** `src/components/brand/Logo.tsx` (рендерит лого через design tokens, theme-aware). Статические SVG/PNG в `/public/` нужны только для OS-surfaces (favicon, manifest, OG, share-картинки), куда React не достаёт.
 
 | Файл | Назначение |
 |---|---|
-| `/public/brand/logo-wordmark-{navy,cream,mono}.svg` | Wordmark, три тона |
-| `/public/brand/logo-symbol-{navy,cream,mono}.svg` | Symbol, три тона |
-| `/public/brand/logo-symbol-on-{navy,cream}.svg` | Symbol с готовой подложкой |
-| `/public/brand/logo-symbol-maskable.svg` | Maskable вариант для Android PWA (60% safe zone) |
-| `/public/favicon.svg`, `/public/favicon.ico` | Favicon (multi-resolution ICO: 16/32/48/64) |
-| `/public/icons/icon-{72,120,152,180,192,512}x{...}.png` | PWA app icons |
-| `/public/icons/apple-touch-180.png` | iOS apple-touch-icon (без альфы) |
-| `/public/og-image.png`, `/public/og-image-dark.png` | Open Graph 1200×630 |
-| `/mnt/documents/myuno-logo-kit/` | Полный downloadable kit для партнёров: 60+ файлов |
+| `src/components/brand/Logo.tsx` | **SSOT для UI.** Все три варианта (wordmark / badge / symbol), все четыре tone, theme-aware |
+| `/public/brand/logo-wordmark-{on-navy,on-cream}.svg` | Готовые статические wordmark для документов и партнёрских материалов |
+| `/public/brand/logo-badge-{on-navy,on-cream}.svg` | Badge-версии (с рамкой) |
+| `/public/brand/logo-symbol-{navy,cream,mono,on-navy,on-cream}.svg` | Symbol U во всех тонах |
+| `/public/brand/logo-symbol-maskable.svg` | Maskable вариант для Android PWA (80% safe zone, navy fill) |
+| `/public/favicon.svg`, `/public/favicon.ico` | Favicon (ICO multi-resolution: 16/32/48) — symbol on navy с orange border |
+| `/public/icons/icon-{72,120,152,180,192,512}x{...}.png` + `.webp` | PWA app icons — symbol on navy с orange border |
+| `/public/icons/apple-touch-180.png` | iOS apple-touch (без альфы, navy-фон) |
+| `/public/icons/icon-maskable-{192,512}.png` | Android maskable icons |
+| `/public/og-image.png` (dark) + `/public/og-image-dark.png` (light) | Open Graph 1200×630 |
+| `/mnt/documents/myuno-logo-kit/` | Полный downloadable kit для партнёров |
 
-### 8a.7 · React-компонент
+### 8a.8 · React-компонент — как использовать
 
 В коде **никогда не вставляй `<img>` или inline SVG** для логотипа. Используй единый компонент:
 
 ```tsx
 import { Logo, LogoBadge } from "@/components/brand";
 
-// Wordmark в header
-<Logo size={28} />
+// Wordmark в header — следует за темой
+<Logo size={18} />
 
-// Symbol в footer на тёмном фоне
-<Logo variant="symbol" tone="cream" size={20} />
+// Badge-плашка (как в левом верхнем углу главной)
+<Logo variant="badge" size={18} />
+// или эквивалент через утилиту, размер указывается во внешней высоте рамки:
+<LogoBadge size={56} />
 
-// Брендированная плитка (квадратный значок)
-<LogoBadge size={40} />
+// Symbol для tab-bar / favicon-fallback
+<Logo variant="symbol" size={20} />
+
+// Жёсткая тональность (например, в PDF-экспорте)
+<Logo tone="navy" size={24} />
+<Logo variant="badge" tone="cream" size={20} />
 ```
 
 Это гарантирует, что любая будущая замена знака произойдёт в одной точке — не нужно искать `<img src="logo.svg">` по 1000+ компонентов.

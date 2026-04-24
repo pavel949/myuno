@@ -65,7 +65,7 @@ export function FeaturedPropertiesCarousel() {
         <Skeleton className="h-6 w-48" />
         <div className="flex gap-3 overflow-hidden">
           {[1, 2, 3].map(i => (
-            <Skeleton key={i} className="h-[280px] w-[220px] md:h-72 md:w-60 rounded-[var(--radius-lg)] shrink-0" />
+            <Skeleton key={i} className="w-[280px] aspect-[4/5] md:w-[260px] rounded-[var(--radius-lg)] shrink-0" />
           ))}
         </div>
       </div>
@@ -131,7 +131,7 @@ export function FeaturedPropertiesCarousel() {
               key={property.id}
               onClick={() => navigate(APP_ROUTES.PROPERTY_DETAIL(property.id))}
               aria-label={`${isRu ? property.title_ru : property.title_en}, ${district}, ${formatPrice(unitPrice)} ${isRu ? 'за ночь' : 'per night'}`}
-              className="w-[280px] h-[320px] md:w-[260px] md:h-[320px] rounded-[var(--radius-lg)] overflow-hidden text-left group transition-all duration-200 hover:-translate-y-1 active:scale-[0.97] shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              className="w-[280px] md:w-[260px] rounded-[var(--radius-lg)] overflow-hidden text-left group transition-all duration-200 hover:-translate-y-1 active:scale-[0.97] shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background flex flex-col"
               style={{
                 background: 'hsl(var(--card))',
                 border: '1px solid hsl(var(--border))',
@@ -139,12 +139,15 @@ export function FeaturedPropertiesCarousel() {
                 animationDelay: `${0.25 + i * 0.05}s`,
               }}
             >
-              {/* Image */}
-              <div className="relative h-[60%] overflow-hidden">
+              {/* Image — fixed 4:3 ratio so it never gets squashed.
+                  `object-cover` + `object-center` keeps the focal point and
+                  the taller frame (vs the previous 60% slice of a fixed-height
+                  card) shows enough of the property to read the photo. */}
+              <div className="relative w-full aspect-[4/3] overflow-hidden bg-muted">
                 <img
                   src={image}
                   alt={isRu ? property.title_ru : property.title_en}
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.05]"
+                  className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-[1.05]"
                   loading="lazy"
                 />
                 <div className="absolute top-2 left-2 flex flex-col gap-1">
@@ -166,7 +169,7 @@ export function FeaturedPropertiesCarousel() {
               </div>
 
               {/* Content */}
-              <div className="h-[40%] p-3 md:p-4 flex flex-col justify-between">
+              <div className="flex-1 p-3 md:p-4 flex flex-col justify-between gap-2">
                 <div>
                   <span className="inline-block px-2 py-0.5 text-[10px] font-semibold rounded-[var(--radius-full)] mb-1.5"
                     style={{ background: 'hsl(var(--primary) / 0.12)', color: 'hsl(var(--primary))' }}
