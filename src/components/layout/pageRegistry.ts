@@ -609,3 +609,7 @@ export const MeDocuments = lazy(() => import('@/pages/me/MeDocuments'));
 export const MePayments = lazy(() => import('@/pages/me/MePayments'));
 export const MeRequests = lazy(() => import('@/pages/me/MeRequests'));
 export const MeProfile = lazy(() => import('@/pages/me/MeProfile'));
+export const MeBookings = lazy(() => import('@/pages/me/MeBookings'));
+
+// ── Investor Quiz (real funnel, replaces /invest redirect stub) ──
+export const InvestorQuiz = lazy(() => import('@/pages/invest/InvestorQuiz'));
