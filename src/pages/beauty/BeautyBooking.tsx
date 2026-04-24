@@ -3,7 +3,7 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBooking } from "@/hooks/useBooking";
-import { useWellnessCheckout } from "@/hooks/useWellnessCheckout";
+import { useStripeUnifiedCheckout } from "@/hooks/useStripeUnifiedCheckout";
 import { useSalonStaff } from "@/hooks/useSalonStaff";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageContainer } from "@/components/uno/PageContainer";
@@ -32,7 +32,7 @@ export default function BeautyBooking() {
   const { language, t } = useLanguage();
   const { user, isLoading: authLoading } = useAuth();
   const { createBooking, isSubmitting } = useBooking();
-  const { createWellnessCheckout, isProcessing: isStripeProcessing } = useWellnessCheckout();
+  const { createCheckout, isProcessing: isStripeProcessing } = useStripeUnifiedCheckout();
 
   const { selectedServices = [], salon } = (location.state || {}) as {
     selectedServices?: string[];
@@ -107,7 +107,7 @@ export default function BeautyBooking() {
     try {
       // Online card payment → Stripe checkout
       if (paymentMethod === 'card') {
-        const success = await createWellnessCheckout({
+        const success = await createCheckout('create-wellness-checkout', {
           vertical: 'beauty',
           items: selectedServiceDetails.map((service: any) => ({
             id: service.id,
@@ -115,12 +115,12 @@ export default function BeautyBooking() {
             price: service.price,
             duration_minutes: service.duration,
           })),
-          totalAmount: totalPrice,
-          scheduledAt: scheduledAt.toISOString(),
-          contactName: contactData.name,
-          contactPhone: contactData.phone,
-          contactEmail: contactData.email,
-          providerName: salon?.name,
+          total_amount: totalPrice,
+          scheduled_at: scheduledAt.toISOString(),
+          contact_name: contactData.name,
+          contact_phone: contactData.phone,
+          contact_email: contactData.email,
+          provider_name: salon?.name,
           notes: `Duration: ${totalDuration} min${staffName ? `. Staff: ${staffName}` : ''}`,
         });
         if (!success) {

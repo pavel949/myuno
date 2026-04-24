@@ -3,7 +3,7 @@ import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBooking } from "@/hooks/useBooking";
-import { useWellnessCheckout } from "@/hooks/useWellnessCheckout";
+import { useStripeUnifiedCheckout } from "@/hooks/useStripeUnifiedCheckout";
 import { useClinic, useDoctors, useMedicalServices } from "@/hooks/useClinics";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageContainer } from "@/components/uno/PageContainer";
@@ -34,7 +34,7 @@ export default function MedicalAppointment() {
   const { language } = useLanguage();
   const { user, isLoading: authLoading } = useAuth();
   const { createBooking, isSubmitting } = useBooking();
-  const { createWellnessCheckout, isProcessing: isStripeProcessing } = useWellnessCheckout();
+  const { createCheckout, isProcessing: isStripeProcessing } = useStripeUnifiedCheckout();
 
   // Fetch clinic, doctors, and services
   const { clinic, isLoading: clinicLoading } = useClinic(id);
@@ -117,19 +117,19 @@ export default function MedicalAppointment() {
 
     // Online card payment → Stripe checkout
     if (paymentMethod === 'card') {
-      await createWellnessCheckout({
+      await createCheckout('create-wellness-checkout', {
         vertical: 'medical',
         items: [{
           id: selectedService?.id || selectedDoctor?.id || id || 'consultation',
           name: itemName,
           price,
         }],
-        totalAmount: price,
-        scheduledAt: scheduledAt.toISOString(),
-        contactName: contactData.name,
-        contactPhone: contactData.phone,
-        contactEmail: contactData.email,
-        providerName: clinic?.name_en || undefined,
+        total_amount: price,
+        scheduled_at: scheduledAt.toISOString(),
+        contact_name: contactData.name,
+        contact_phone: contactData.phone,
+        contact_email: contactData.email,
+        provider_name: clinic?.name_en || undefined,
         notes: `${selectedDoctor ? `Doctor: ${selectedDoctor.name_en}.` : ''} Symptoms: ${symptoms}`,
       });
       return;

@@ -3,7 +3,7 @@ import { useParams, useSearchParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBooking } from "@/hooks/useBooking";
-import { useWellnessCheckout } from "@/hooks/useWellnessCheckout";
+import { useStripeUnifiedCheckout } from "@/hooks/useStripeUnifiedCheckout";
 import { useGuestCheckout } from "@/hooks/useGuestCheckout";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageContainer } from "@/components/uno/PageContainer";
@@ -34,7 +34,7 @@ export default function FitnessBooking() {
   const { language } = useLanguage();
   const { user } = useAuth();
   const { createBooking, isSubmitting } = useBooking();
-  const { createWellnessCheckout, isProcessing: isStripeProcessing } = useWellnessCheckout();
+  const { createCheckout, isProcessing: isStripeProcessing } = useStripeUnifiedCheckout();
   const { 
     showLoginModal, 
     setShowLoginModal, 
@@ -97,18 +97,18 @@ export default function FitnessBooking() {
 
     // Online card payment → Stripe checkout
     if (paymentMethod === 'card') {
-      await createWellnessCheckout({
+      await createCheckout('create-wellness-checkout', {
         vertical: 'fitness',
         items: [{
           id: id || membershipType,
           name: language === 'ru' ? membership.labelRu : membership.labelEn,
           price: membership.price,
         }],
-        totalAmount: membership.price,
-        scheduledAt: scheduledAt.toISOString(),
-        contactName: contactData.name,
-        contactPhone: contactData.phone,
-        contactEmail: contactData.email,
+        total_amount: membership.price,
+        scheduled_at: scheduledAt.toISOString(),
+        contact_name: contactData.name,
+        contact_phone: contactData.phone,
+        contact_email: contactData.email,
         notes: `Fitness Membership: ${membershipType}`,
       });
       return;
