@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { applyTheme } from '@/lib/themeSwitch';
+import { supabase } from '@/integrations/supabase/client';
 
 type Theme = 'light' | 'dark' | 'system';
 
@@ -25,7 +26,7 @@ const getStoredTheme = (): Theme => {
   }
 };
 
-const isTheme = (value: string | null): value is Theme =>
+const isTheme = (value: string | null | undefined): value is Theme =>
   value === 'light' || value === 'dark' || value === 'system';
 
 const resolveTheme = (theme: Theme): 'light' | 'dark' => {
@@ -35,22 +36,39 @@ const resolveTheme = (theme: Theme): 'light' | 'dark' => {
   return theme;
 };
 
+/**
+ * ThemeProvider
+ *
+ * Persistence strategy:
+ *  - Guests → `localStorage[myuno-theme]` (synchronous, instant first paint).
+ *  - Signed-in users → `profiles.preferred_theme` is the canonical source.
+ *      • On sign-in we hydrate the local state from the profile.
+ *      • On every `setTheme` we mirror to `localStorage` (instant) AND fire an
+ *        async UPDATE to `profiles.preferred_theme` so the choice follows the
+ *        user across devices.
+ *      • The `userThemeAppliedFor` ref guards against re-applying the same
+ *        remote value in a loop and against stale writes from other sessions.
+ *
+ * Sign-out wipes any user-specific row from local state by re-reading
+ * `localStorage` (which we leave as the last known choice for that browser).
+ */
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(getStoredTheme);
   const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>(() => resolveTheme(getStoredTheme()));
+  // Tracks which user id we already hydrated from `profiles.preferred_theme`.
+  // Prevents an infinite loop where local update → remote write → onAuthStateChange → local update.
+  const userThemeAppliedFor = useRef<string | null>(null);
 
+  // Apply theme to <html> whenever it changes.
   useEffect(() => {
     const updateTheme = () => {
       const resolved = resolveTheme(theme);
-      // Delegate to the deterministic helper so `data-theme-ready` and the
-      // `myuno:theme-ready` event fire after styles + fonts settle.
       void applyTheme(resolved);
       setResolvedTheme(resolved);
     };
 
     updateTheme();
 
-    // Listen for system theme changes
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = () => {
       if (theme === 'system') {
@@ -62,6 +80,70 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, [theme]);
 
+  // Pull the saved theme from `profiles` when a user is present, and keep it
+  // in sync with auth lifecycle events.
+  useEffect(() => {
+    let cancelled = false;
+
+    const hydrateFromProfile = async (userId: string) => {
+      if (userThemeAppliedFor.current === userId) return;
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('preferred_theme')
+          .eq('id', userId)
+          .maybeSingle();
+        if (cancelled || error || !data) return;
+
+        userThemeAppliedFor.current = userId;
+        const remote = data.preferred_theme;
+
+        if (isTheme(remote)) {
+          // Profile has a saved choice — adopt it.
+          setThemeState((current) => (current === remote ? current : remote));
+          try {
+            localStorage.setItem(STORAGE_KEY, remote);
+          } catch {
+            // Ignore storage write errors.
+          }
+        } else {
+          // Profile has no saved theme yet — backfill it with the local choice
+          // so the first device the user logs in from "wins" the initial value.
+          const local = getStoredTheme();
+          await supabase
+            .from('profiles')
+            .update({ preferred_theme: local })
+            .eq('id', userId);
+        }
+      } catch {
+        // Network or schema hiccup — fall back to local theme silently.
+      }
+    };
+
+    // Initial check (in case the user is already signed in on mount).
+    void supabase.auth.getSession().then(({ data }) => {
+      const userId = data.session?.user?.id;
+      if (userId) void hydrateFromProfile(userId);
+    });
+
+    // Subscribe to auth changes. Setup BEFORE any future getSession calls per
+    // Supabase guidance to avoid missing the initial event.
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      const userId = session?.user?.id;
+      if (userId) {
+        void hydrateFromProfile(userId);
+      } else {
+        // Signed out — reset the guard so the next sign-in re-hydrates.
+        userThemeAppliedFor.current = null;
+      }
+    });
+
+    return () => {
+      cancelled = true;
+      sub.subscription.unsubscribe();
+    };
+  }, []);
+
   const setTheme = useCallback((newTheme: Theme) => {
     setThemeState(newTheme);
     try {
@@ -69,8 +151,23 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     } catch {
       // Ignore storage write errors (private mode, quota, etc.)
     }
+
+    // Fire-and-forget remote sync. We do not block the UI on the network.
+    void supabase.auth.getSession().then(({ data }) => {
+      const userId = data.session?.user?.id;
+      if (!userId) return;
+      // Mark as applied for this user so the auth listener doesn't bounce the
+      // value back to us if it fires before the UPDATE round-trips.
+      userThemeAppliedFor.current = userId;
+      void supabase
+        .from('profiles')
+        .update({ preferred_theme: newTheme })
+        .eq('id', userId);
+    });
   }, []);
 
+  // Cross-tab sync via storage events (works for guests and signed-in users
+  // sharing the same browser).
   useEffect(() => {
     const handleStorage = (event: StorageEvent) => {
       if (event.key !== STORAGE_KEY) return;
