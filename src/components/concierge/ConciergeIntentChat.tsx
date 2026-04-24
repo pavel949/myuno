@@ -69,7 +69,7 @@ export function ConciergeIntentChat() {
         {/* Header */}
         <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-none bg-primary/10 flex items-center justify-center shrink-0">
               <Sparkles className="w-4 h-4 text-primary" />
             </div>
             <div className="min-w-0">
@@ -84,7 +84,7 @@ export function ConciergeIntentChat() {
           {messages.length > 0 && (
             <button
               onClick={reset}
-              className="p-2 rounded-md hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+              className="p-2 rounded-none hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
               aria-label={isRu ? 'Начать заново' : 'Start over'}
               title={isRu ? 'Начать заново' : 'Start over'}
             >
@@ -110,7 +110,7 @@ export function ConciergeIntentChat() {
                   <button
                     key={p}
                     onClick={() => handleSend(p)}
-                    className="w-full text-left text-sm px-3 py-2.5 rounded-md border border-border hover:border-primary/40 hover:bg-muted/40 transition-colors"
+                    className="w-full text-left text-sm px-3 py-2.5 rounded-none border border-border hover:border-primary/40 hover:bg-muted/40 transition-colors"
                     disabled={isPending}
                   >
                     {p}
@@ -182,7 +182,7 @@ function MessageBubble({
     <div className={cn('flex', isUser ? 'justify-end' : 'justify-start')}>
       <div
         className={cn(
-          'max-w-[85%] rounded-lg px-3.5 py-2.5 text-sm leading-relaxed',
+          'max-w-[85%] rounded-none px-3.5 py-2.5 text-sm leading-relaxed',
           isUser
             ? 'bg-primary text-primary-foreground'
             : message.isError
@@ -220,7 +220,7 @@ function MessageBubble({
         {!isUser && message.route && label && (
           <button
             onClick={() => onNavigate(message.route!)}
-            className="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors"
+            className="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors"
           >
             {label}
             <ArrowRight className="w-3.5 h-3.5" />

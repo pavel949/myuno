@@ -350,7 +350,7 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
                         <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
                           <Bot className="w-3.5 h-3.5 text-primary" />
                         </div>
-                        <div className="rounded-none rounded-none bg-muted px-3 py-2">
+                        <div className="rounded-none bg-muted px-3 py-2">
                           <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
                         </div>
                       </div>

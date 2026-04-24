@@ -55,7 +55,7 @@ const AreaIndexPage = () => {
               <li key={slug}>
                 <Link
                   to={`/area/${slug}`}
-                  className="group block h-full rounded-lg border border-border bg-card p-5 transition-colors hover:border-primary/60"
+                  className="group block h-full rounded-none border border-border bg-card p-5 transition-colors hover:border-primary/60"
                 >
                   <div className="mb-3 flex items-start justify-between">
                     <div>

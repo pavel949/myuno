@@ -226,7 +226,7 @@ function RoiPresetsWidget({ isRu, primarySlug }: { isRu: boolean; primarySlug: P
             <Link
               key={slug}
               to={`/newbuilds/calculator?preset=${slug}`}
-              className="flex items-center justify-between gap-2 px-3 py-2 rounded-md bg-muted/40 hover:bg-muted/70 transition-colors group"
+              className="flex items-center justify-between gap-2 px-3 py-2 rounded-none bg-muted/40 hover:bg-muted/70 transition-colors group"
             >
               <div className="min-w-0">
                 <div className="text-sm font-medium text-foreground truncate">
@@ -265,7 +265,7 @@ function WidgetCard({
       <CardContent className="p-5 space-y-4">
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-none bg-primary/10 flex items-center justify-center">
               <Icon className="w-4 h-4 text-primary" />
             </div>
             <h3 className="text-sm font-semibold text-foreground">{title}</h3>
@@ -280,7 +280,7 @@ function WidgetCard({
 
 function Stat({ label, value, accent = false }: { label: string; value: string; accent?: boolean }) {
   return (
-    <div className="rounded-md bg-muted/40 p-2.5">
+    <div className="rounded-none bg-muted/40 p-2.5">
       <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
       <div
         className={`text-base font-bold ${accent ? 'text-primary' : 'text-foreground'}`}
