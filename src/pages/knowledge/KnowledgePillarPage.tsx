@@ -14,9 +14,15 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight, BookOpen } from 'lucide-react';
+import { ArrowRight, BookOpen, Building2, ShieldCheck, Calculator } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useKnowledgePillar, useKnowledgePillars } from '@/hooks/useKnowledgePillars';
+import { ContextualCTA, type ContextualAction } from '@/components/shared/ContextualCTA';
+import { useContextualOffplanMatches } from '@/hooks/useContextualMatches';
+import { APP_ROUTES } from '@/lib/config/routes';
+
+/** Pillar clusters that warrant a property/RE next-step CTA. IPP §25. */
+const PROPERTY_CLUSTERS = new Set(['6.1', '6.2', '6.6', '6.7', '6.11']);
 
 function renderMarkdownLite(content: string): React.ReactNode[] {
   if (!content) return [];
