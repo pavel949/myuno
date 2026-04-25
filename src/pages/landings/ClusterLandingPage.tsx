@@ -31,6 +31,7 @@ import {
 } from '@/lib/landings/types';
 import { CLUSTER_LANDINGS } from '@/content/landings/clusterLandings';
 import { PERSONA_LANDINGS } from '@/content/landings/personaLandings';
+import { resolveClusterSlug } from '@/lib/landings/slugAliases';
 import NotFound from '@/pages/NotFound';
 import { Button } from '@/components/ui/button';
 import LandingSeoHead from '@/components/seo/LandingSeoHead';
@@ -191,7 +192,7 @@ const ClusterLandingPage = () => {
     return <NotFound />;
   }
 
-  const landing = findClusterLandingBySlug(CLUSTER_LANDINGS, slug);
+  const landing = findClusterLandingBySlug(CLUSTER_LANDINGS, resolveClusterSlug(slug));
 
   if (!landing || !isLiveClusterLanding(landing)) {
     return <NotFound />;

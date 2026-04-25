@@ -29,6 +29,7 @@ import {
   type PersonaLanding,
 } from '@/lib/landings/types';
 import { PERSONA_LANDINGS } from '@/content/landings/personaLandings';
+import { resolvePersonaSlug } from '@/lib/landings/slugAliases';
 import NotFound from '@/pages/NotFound';
 import { Button } from '@/components/ui/button';
 import LandingSeoHead from '@/components/seo/LandingSeoHead';
@@ -155,7 +156,7 @@ const PersonaLandingPage = () => {
     return <NotFound />;
   }
 
-  const landing = findPersonaLandingBySlug(PERSONA_LANDINGS, slug);
+  const landing = findPersonaLandingBySlug(PERSONA_LANDINGS, resolvePersonaSlug(slug));
 
   if (!landing || !isLivePersonaLanding(landing)) {
     return <NotFound />;
