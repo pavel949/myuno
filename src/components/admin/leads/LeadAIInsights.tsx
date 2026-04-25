@@ -1,4 +1,4 @@
-import { Flame, Thermometer, Snowflake, Brain, Loader2, Copy, MessageCircle, Mail } from 'lucide-react';
+import { Flame, Thermometer, Snowflake, Brain, Loader2, Copy, MessageCircle, Mail, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
