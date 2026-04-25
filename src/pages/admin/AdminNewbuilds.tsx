@@ -70,7 +70,7 @@ export default function AdminNewbuilds() {
   });
 
   const updateProject = useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: any }) => {
+    mutationFn: async ({ id, updates }: { id: string; updates: ProjectUpdate }) => {
       const { error } = await supabase.from('property_projects').update(updates).eq('id', id);
       if (error) throw error;
     },
@@ -81,7 +81,7 @@ export default function AdminNewbuilds() {
   });
 
   const updateDeveloper = useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: any }) => {
+    mutationFn: async ({ id, updates }: { id: string; updates: DeveloperUpdate }) => {
       const { error } = await supabase.from('developers').update(updates).eq('id', id);
       if (error) throw error;
     },
@@ -92,7 +92,7 @@ export default function AdminNewbuilds() {
   });
 
   const bulkUpdateProjects = useMutation({
-    mutationFn: async ({ ids, updates }: { ids: string[]; updates: any }) => {
+    mutationFn: async ({ ids, updates }: { ids: string[]; updates: ProjectUpdate }) => {
       const { error } = await supabase.from('property_projects').update(updates).in('id', ids);
       if (error) throw error;
     },
@@ -101,7 +101,7 @@ export default function AdminNewbuilds() {
       clearSelection();
       toast.success(`Обновлено ${vars.ids.length} проектов`);
     },
-    onError: (e: any) => toast.error(e?.message || 'Ошибка'),
+    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : 'Ошибка'),
   });
 
   const filtered = useMemo(() => {
