@@ -36,10 +36,10 @@ export default function CapitalDashboard() {
   }
 
   const kpis = [
-    { label: 'Контактов', value: stats.contactsCount, icon: Users, path: '/capital/contacts' },
-    { label: 'Кампаний', value: stats.activeCampaigns, icon: Megaphone, path: '/capital/campaigns' },
-    { label: 'Касаний за неделю', value: stats.outreachThisWeek, icon: MessageCircle, path: '/capital/outreach' },
-    { label: 'Ожидаемая комиссия', value: `${stats.expectedCommission.toLocaleString()} THB`, icon: TrendingUp, path: '/capital/pipeline' },
+    { label: isRu ? 'Контактов' : 'Contacts', value: stats.contactsCount, icon: Users, path: '/capital/contacts' },
+    { label: isRu ? 'Кампаний' : 'Campaigns', value: stats.activeCampaigns, icon: Megaphone, path: '/capital/campaigns' },
+    { label: isRu ? 'Касаний за неделю' : 'Touches this week', value: stats.outreachThisWeek, icon: MessageCircle, path: '/capital/outreach' },
+    { label: isRu ? 'Ожидаемая комиссия' : 'Expected commission', value: `${stats.expectedCommission.toLocaleString()} THB`, icon: TrendingUp, path: '/capital/pipeline' },
   ];
 
   const chartData = PIPELINE_STAGES_ORDER
