@@ -77,10 +77,10 @@ export function IntakeQueue({
     [session.items]
   );
 
-  const handleRetry = async (itemId: string) => {
+  const handleRetry = async (itemId: string): Promise<boolean> => {
     setRetryingId(itemId);
     try {
-      await onRetry(itemId);
+      return await onRetry(itemId);
     } finally {
       setRetryingId(null);
     }
