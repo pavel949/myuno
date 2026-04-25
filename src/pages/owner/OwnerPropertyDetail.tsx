@@ -36,6 +36,18 @@ import {
 } from 'lucide-react';
 import { formatCurrencyAmount } from '@/lib/config/currencies';
 
+// Property fields not yet present in generated OwnerProperty type.
+type PropertyExt = {
+  seasonal_pricing?: unknown[];
+  wifi_password?: string | null;
+  owner_name?: string | null;
+  owner_email?: string | null;
+  owner_phone?: string | null;
+  owner_nationality?: string | null;
+  management_company_id?: string | null;
+  owner_contact_id?: string | null;
+};
+
 export default function OwnerPropertyDetail() {
   const { id } = useParams<{ id: string }>();
   const { language } = useLanguage();
@@ -43,6 +55,7 @@ export default function OwnerPropertyDetail() {
   const isRu = language === 'ru';
 
   const { data: property, isLoading } = useOwnerProperty(id);
+  const propertyExt = (property ?? {}) as typeof property & PropertyExt;
   const { data: serviceRequests } = useServiceRequests(id);
   const { data: inspections } = usePropertyInspections(id);
   const { documents } = usePropertyDocuments(id || '');
