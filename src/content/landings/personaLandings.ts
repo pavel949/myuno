@@ -1685,4 +1685,5 @@ export const LIVE_PERSONA_SLUGS: readonly string[] = [
   'smb',               // P23 — 2026-04-24
   'creatives',         // P24 — 2026-04-24
   'students',          // P25 — 2026-04-24
+  'conscious-eaters',  // P26 — 2026-04-25
 ] as const;
