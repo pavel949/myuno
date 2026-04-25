@@ -162,10 +162,11 @@ Deno.serve(async (req) => {
             }
 
             // Log execution
-            await supabase.from("mcc_events").insert({
-              event_type: `campaign_sent_${rule.id}`,
+            await supabase.from("mcc_landing_events").insert({
+              event_name: `campaign_sent_${rule.id}`,
               user_id: event.user_id,
-              metadata: {
+              campaign_id: rule.campaign_id,
+              payload: {
                 rule_id: rule.id,
                 channel,
                 trigger_event: rule.trigger_event,
