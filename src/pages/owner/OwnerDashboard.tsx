@@ -440,13 +440,13 @@ export default function OwnerDashboard() {
               {isRu ? 'Прогресс настройки' : 'Setup progress'}
             </span>
             <span className="text-sm text-muted-foreground">
-              {progress.completed} / {progress.total}
+              {completed} / {total}
             </span>
           </div>
           <div className="h-2 bg-muted overflow-hidden">
             <div
               className="h-full bg-primary transition-all"
-              style={{ width: `${progress.percent}%` }}
+              style={{ width: `${percent}%` }}
             />
           </div>
           <div className="flex flex-col sm:flex-row gap-3 pt-2">
