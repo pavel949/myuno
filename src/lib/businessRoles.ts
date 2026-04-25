@@ -89,13 +89,14 @@ export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
     labelEn: 'Sales Management',
     labelRu: 'Управление продажами',
     icon: '💼',
+    // CRM dedupe: a single `crm_snapshot` replaces the previous trio of
+    // `active_deals`, `sell_signal`, `crm_tasks` widgets. Deep CRM workspace
+    // remains at /owner/crm-dashboard (linked from the snapshot card).
     widgets: [
       'today_actions',
       'kpi',
       'your_day',
-      'active_deals',
-      'sell_signal',
-      'crm_tasks',
+      'crm_snapshot',
       'upcoming_payments',
       'operations',
     ],
