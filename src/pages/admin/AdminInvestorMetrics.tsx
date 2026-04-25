@@ -227,7 +227,7 @@ export default function AdminInvestorMetrics() {
                   nameKey="name"
                   label={({ name, value }) => `${name}: ${value}`}
                 >
-                  {m.ordersByStatus.map((_: any, i: number) => (
+                  {m.ordersByStatus.map((_, i) => (
                     <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
                   ))}
                 </Pie>
