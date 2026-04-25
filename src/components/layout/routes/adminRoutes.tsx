@@ -5,7 +5,7 @@
  * All page lazy imports come from pageRegistry.
  */
 import { Route, Navigate } from 'react-router-dom';
-import * as Pages from './pageRegistry';
+import * as Pages from '../pageRegistry';
 
 export const adminRoutes = (
   <>
