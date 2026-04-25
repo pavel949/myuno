@@ -299,7 +299,7 @@ export default function AdminNewbuilds() {
 
 /* ─── Inline editable project row ─── */
 function ProjectRow({ project: p, index, isEditing, onEdit, onUpdate }: {
-  project: ProjectRow;
+  project: Project;
   index: number;
   isEditing: boolean;
   onEdit: () => void;
