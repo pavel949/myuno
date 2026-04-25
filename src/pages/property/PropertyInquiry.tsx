@@ -25,7 +25,7 @@ import { DepositPaymentOptions, type DepositPaymentOptionsHandle } from '@/compo
 import { PayWhenSelector, type PayWhenChoice } from '@/components/property/PayWhenSelector';
 import type { PaymentMethodId } from '@/hooks/useLastPaymentMethod';
 import { useOrders } from '@/hooks/useOrders';
-import { calculatePricing, buildPricingRulesFromSeasons, type PricingRules } from '@/lib/pricingEngine';
+import { calculatePricing, buildPricingRulesFromSeasons, type PricingRules, type SeasonalPricingRule } from '@/lib/pricingEngine';
 import { pluralizeNights, pluralizeGuests } from '@/lib/i18n/pluralize';
 import { differenceInDays, format, parseISO, subDays } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -59,7 +59,7 @@ export default function PropertyInquiry() {
   type PropertyExt = {
     tenancy_modes?: string[] | null;
     currency?: string | null;
-    seasonal_pricing?: unknown;
+    seasonal_pricing?: SeasonalPricingRule[] | null;
     cleaning_fee?: number | null;
     provider_id?: string | null;
     owner_id?: string | null;
@@ -71,7 +71,7 @@ export default function PropertyInquiry() {
     early_booking_days?: number | null;
     last_minute_discount?: number | null;
     last_minute_days?: number | null;
-    custom_length_discounts?: unknown;
+    custom_length_discounts?: Array<{ min_nights: number; discount_percent: number }>;
     payment_policy?: string | null;
     prepay_percent?: number | null;
     manager_email?: string | null;
