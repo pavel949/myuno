@@ -3632,6 +3632,39 @@ export type Database = {
         }
         Relationships: []
       }
+      clearview_purchases: {
+        Row: {
+          amount_paid_cents: number | null
+          created_at: string
+          currency: string | null
+          id: string
+          project_id: string
+          stripe_session_id: string | null
+          user_id: string
+          valid_until: string
+        }
+        Insert: {
+          amount_paid_cents?: number | null
+          created_at?: string
+          currency?: string | null
+          id?: string
+          project_id: string
+          stripe_session_id?: string | null
+          user_id: string
+          valid_until?: string
+        }
+        Update: {
+          amount_paid_cents?: number | null
+          created_at?: string
+          currency?: string | null
+          id?: string
+          project_id?: string
+          stripe_session_id?: string | null
+          user_id?: string
+          valid_until?: string
+        }
+        Relationships: []
+      }
       clearview_scores: {
         Row: {
           category_id: string
@@ -29996,6 +30029,83 @@ export type Database = {
           },
         ]
       }
+      v_clearview_public: {
+        Row: {
+          executive_summary: string | null
+          generated_at: string | null
+          grade: string | null
+          id: string | null
+          is_brokered_project: boolean | null
+          project_id: string | null
+          risk_level: string | null
+          score_construction: number | null
+          score_developer: number | null
+          score_financial: number | null
+          score_legal: number | null
+          score_liquidity: number | null
+          score_location: number | null
+          score_marketing: number | null
+          score_returns: number | null
+          top_green_flags: string[] | null
+          top_red_flags: string[] | null
+          total_score: number | null
+          updated_at: string | null
+          version: number | null
+        }
+        Insert: {
+          executive_summary?: string | null
+          generated_at?: string | null
+          grade?: string | null
+          id?: string | null
+          is_brokered_project?: boolean | null
+          project_id?: string | null
+          risk_level?: string | null
+          score_construction?: number | null
+          score_developer?: number | null
+          score_financial?: number | null
+          score_legal?: number | null
+          score_liquidity?: number | null
+          score_location?: number | null
+          score_marketing?: number | null
+          score_returns?: number | null
+          top_green_flags?: never
+          top_red_flags?: never
+          total_score?: number | null
+          updated_at?: string | null
+          version?: number | null
+        }
+        Update: {
+          executive_summary?: string | null
+          generated_at?: string | null
+          grade?: string | null
+          id?: string | null
+          is_brokered_project?: boolean | null
+          project_id?: string | null
+          risk_level?: string | null
+          score_construction?: number | null
+          score_developer?: number | null
+          score_financial?: number | null
+          score_legal?: number | null
+          score_liquidity?: number | null
+          score_location?: number | null
+          score_marketing?: number | null
+          score_returns?: number | null
+          top_green_flags?: never
+          top_red_flags?: never
+          total_score?: number | null
+          updated_at?: string | null
+          version?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "due_diligence_reports_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "property_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_founder_inbox: {
         Row: {
           company_id: string | null
@@ -32399,6 +32509,10 @@ export type Database = {
         Returns: boolean
       }
       update_realtime_stats: { Args: never; Returns: undefined }
+      user_has_clearview_access: {
+        Args: { _project_id: string }
+        Returns: boolean
+      }
       user_has_org_property_access: {
         Args: { org_uuid: string }
         Returns: boolean
