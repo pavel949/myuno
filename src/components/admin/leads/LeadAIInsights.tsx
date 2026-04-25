@@ -29,11 +29,14 @@ export function LeadAIInsights({
   const { analyzeLead, generateFollowUp } = useLeadsFactory();
   const [followUpMessage, setFollowUpMessage] = useState<string | null>(null);
 
-  const PriorityIcon = aiPriority === 'hot' 
-    ? Flame 
-    : aiPriority === 'warm' 
-      ? Thermometer 
-      : Snowflake;
+  const priorityMeta: Record<string, { Icon: typeof Flame; labelRu: string }> = {
+    ready: { Icon: Sparkles, labelRu: 'Готов' },
+    hot: { Icon: Flame, labelRu: 'Горячий' },
+    warm: { Icon: Thermometer, labelRu: 'Тёплый' },
+    cold: { Icon: Snowflake, labelRu: 'Холодный' },
+  };
+  const meta = priorityMeta[aiPriority ?? 'cold'] ?? priorityMeta.cold;
+  const PriorityIcon = meta.Icon;
 
   const handleAnalyze = () => {
     analyzeLead.mutate(leadId);
