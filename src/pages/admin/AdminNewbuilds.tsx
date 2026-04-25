@@ -466,7 +466,7 @@ function FeaturedRow({ project: p, onUpdate, onRemove }: { project: Project; onU
 }
 
 /* ─── Developer row with inline editing ─── */
-function DeveloperRow({ developer: d, projectCount, onUpdate }: { developer: any; projectCount: number; onUpdate: (u: any) => void }) {
+function DeveloperRow({ developer: d, projectCount, onUpdate }: { developer: Developer; projectCount: number; onUpdate: (u: DeveloperUpdate) => void }) {
   const [expanded, setExpanded] = useState(false);
 
   return (
