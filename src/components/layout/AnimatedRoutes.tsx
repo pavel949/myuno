@@ -25,6 +25,9 @@ import { useNavigationDirection } from '@/hooks/useNavigationDirection';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { NewbuildProjectToOffplanRedirect } from '@/components/routing/NewbuildLegacyRedirects';
 import { NbCompareProvider } from '@/components/newbuilds/NbCompareProvider';
+import { adminRoutes } from './routes/adminRoutes';
+import { mcRoutes } from './routes/mcRoutes';
+import { propertyHubRoutes } from './routes/propertyHubRoutes';
 
 const NewbuildsContextOutlet = () => (
   <NbCompareProvider>
