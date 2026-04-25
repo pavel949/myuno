@@ -279,7 +279,7 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
       {/* ─── STICKY MOBILE CTA ─────────────────────────────────── */}
       <div className="sticky bottom-0 z-30 border-t border-border bg-background/95 p-3 backdrop-blur sm:hidden">
         <Button asChild size="lg" className="w-full">
-          <a href={landing.primaryCta.href}>{t(landing.primaryCta.label)}</a>
+          <a href={wp(landing.primaryCta.href)}>{t(landing.primaryCta.label)}</a>
         </Button>
       </div>
     </AppLayout>
