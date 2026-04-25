@@ -118,7 +118,7 @@ export function LeadAIInsights({
               </div>
               <Badge className={getPriorityColor(aiPriority)}>
                 <PriorityIcon className="h-3 w-3 mr-1" />
-                {aiPriority === 'hot' ? 'Горячий' : aiPriority === 'warm' ? 'Тёплый' : 'Холодный'}
+                {meta.labelRu}
               </Badge>
             </div>
 
