@@ -37,7 +37,7 @@ export interface ApprovalRequest {
   currency: string | null;
   status: ApprovalStatus;
   requested_by: string;
-  metadata: Record<string, any> | null;
+  metadata: Record<string, unknown> | null;
   created_at: string;
   resolved_at: string | null;
 }
@@ -58,13 +58,13 @@ export function useApprovalWorkflows() {
     queryKey: ['approval-workflows', activeCompany?.company_id],
     queryFn: async (): Promise<ApprovalWorkflow[]> => {
       if (!activeCompany) return [];
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('approval_workflows')
         .select('*')
         .eq('company_id', activeCompany.company_id)
         .order('created_at', { ascending: false });
       if (error) throw error;
-      return (data || []) as ApprovalWorkflow[];
+      return ((data || []) as unknown) as ApprovalWorkflow[];
     },
     enabled: !!activeCompany,
   });
@@ -76,7 +76,7 @@ export function useApprovalRequests(filter?: { status?: ApprovalStatus }) {
     queryKey: ['approval-requests', activeCompany?.company_id, filter?.status],
     queryFn: async (): Promise<ApprovalRequest[]> => {
       if (!activeCompany) return [];
-      let q = (supabase as any)
+      let q = supabase
         .from('approval_requests')
         .select('*')
         .eq('company_id', activeCompany.company_id)
@@ -84,7 +84,7 @@ export function useApprovalRequests(filter?: { status?: ApprovalStatus }) {
       if (filter?.status) q = q.eq('status', filter.status);
       const { data, error } = await q;
       if (error) throw error;
-      return (data || []) as ApprovalRequest[];
+      return ((data || []) as unknown) as ApprovalRequest[];
     },
     enabled: !!activeCompany,
   });
@@ -95,15 +95,15 @@ export function useMyPendingApprovalSteps() {
   const { user } = useAuth();
   return useQuery({
     queryKey: ['my-approval-steps', user?.id],
-    queryFn: async () => {
+    queryFn: async (): Promise<Array<ApprovalStep & { approval_requests: ApprovalRequest | null }>> => {
       if (!user) return [];
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('approval_steps')
         .select('*, approval_requests(*)')
         .eq('approver_user_id', user.id)
         .eq('status', 'pending');
       if (error) throw error;
-      return data || [];
+      return ((data || []) as unknown) as Array<ApprovalStep & { approval_requests: ApprovalRequest | null }>;
     },
     enabled: !!user,
   });
@@ -114,13 +114,13 @@ export function useRequestSteps(requestId: string | undefined) {
     queryKey: ['approval-request-steps', requestId],
     queryFn: async (): Promise<ApprovalStep[]> => {
       if (!requestId) return [];
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('approval_steps')
         .select('*')
         .eq('request_id', requestId)
         .order('sequence');
       if (error) throw error;
-      return (data || []) as ApprovalStep[];
+      return ((data || []) as unknown) as ApprovalStep[];
     },
     enabled: !!requestId,
   });
@@ -142,7 +142,7 @@ export function useCreateApprovalRequest() {
       workflow_id?: string;
     }) => {
       if (!user || !activeCompany) throw new Error('Missing context');
-      const { data: req, error } = await (supabase as any)
+      const { data: req, error } = await supabase
         .from('approval_requests')
         .insert({
           company_id: activeCompany.company_id,
@@ -160,12 +160,13 @@ export function useCreateApprovalRequest() {
       if (error) throw error;
       // Create steps
       const steps = args.approver_user_ids.map((uid, i) => ({
-        request_id: req.id,
+        request_id: (req as { id: string }).id,
         sequence: i,
         approver_user_id: uid,
+        status: 'pending' as const,
       }));
       if (steps.length) {
-        const { error: stepsErr } = await (supabase as any).from('approval_steps').insert(steps);
+        const { error: stepsErr } = await supabase.from('approval_steps').insert(steps);
         if (stepsErr) throw stepsErr;
       }
       return req;
@@ -174,7 +175,7 @@ export function useCreateApprovalRequest() {
       toast.success('Approval request created');
       qc.invalidateQueries({ queryKey: ['approval-requests'] });
     },
-    onError: (e: any) => toast.error(e.message || 'Failed'),
+    onError: (e: Error) => toast.error(e.message || 'Failed'),
   });
 }
 
@@ -182,7 +183,7 @@ export function useDecideApprovalStep() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (args: { stepId: string; decision: 'approved' | 'rejected'; comment?: string }) => {
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('approval_steps')
         .update({
           status: args.decision,
@@ -198,6 +199,6 @@ export function useDecideApprovalStep() {
       qc.invalidateQueries({ queryKey: ['approval-requests'] });
       qc.invalidateQueries({ queryKey: ['approval-request-steps'] });
     },
-    onError: (e: any) => toast.error(e.message || 'Failed'),
+    onError: (e: Error) => toast.error(e.message || 'Failed'),
   });
 }

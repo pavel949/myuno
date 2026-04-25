@@ -163,14 +163,16 @@ export function usePropertyReports(propertyId?: string) {
       if (error) throw error;
 
       // Map title_en -> title for backward compatibility across UI
-      return (data || []).map((r: any) => ({
+      type PropertyJoin = { id: string; title_en: string | null; title_ru: string | null };
+      type ReportRow = Omit<PropertyReport, 'property'> & { property?: PropertyJoin | null };
+      return ((data || []) as unknown as ReportRow[]).map((r) => ({
         ...r,
         property: r.property ? {
           id: r.property.id,
-          title: r.property.title_en,
+          title: r.property.title_en ?? '',
           title_ru: r.property.title_ru,
         } : undefined,
-      })) as unknown as PropertyReport[];
+      })) as PropertyReport[];
     },
     enabled: !!user,
   });
@@ -221,8 +223,22 @@ export function useGenerateReport() {
       if (bookError) throw bookError;
 
       // Map orders to report booking shape (align with usePropertyBookings)
-      const bookings = (ordersData || []).map((o: any) => {
-        const guest = o.order_participants?.find((p: { role: string }) => p.role === 'guest');
+      type OrderItemRow = { id: string; resource_id: string | null; item_type: string | null; start_at: string | null; end_at: string | null; amount: number | null; metadata: Record<string, unknown> | null };
+      type ParticipantRow = { id: string; role: string; name: string | null; phone: string | null; email: string | null };
+      type OrderRow = {
+        id: string;
+        start_at: string | null;
+        end_at: string | null;
+        total_amount: number | null;
+        currency: string | null;
+        status: string | null;
+        notes: string | null;
+        metadata: { source?: string; deposit_amount?: number } | null;
+        order_items: OrderItemRow[] | null;
+        order_participants: ParticipantRow[] | null;
+      };
+      const bookings = ((ordersData || []) as unknown as OrderRow[]).map((o) => {
+        const guest = o.order_participants?.find((p) => p.role === 'guest');
         const item = o.order_items?.[0];
         const checkIn = (item?.start_at || o.start_at || '').split('T')[0];
         const checkOut = (item?.end_at || o.end_at || '').split('T')[0];
@@ -235,21 +251,30 @@ export function useGenerateReport() {
           total_amount: Number(o.total_amount || 0),
           source: meta.source || 'direct',
           deposit_amount: meta.deposit_amount || 0,
-          deposit_paid_at: null, // deposit tracking via booking_operations when available
+          deposit_paid_at: null as string | null, // deposit tracking via booking_operations when available
         };
       });
 
       // Fetch booking_operations for security deposits (legacy: references property_bookings; empty for orders)
-      const bIds = bookings.map((b: { id: string }) => b.id);
-      let operations: any[] = [];
+      const bIds = bookings.map((b) => b.id);
+      type OperationRow = {
+        booking_id: string;
+        deposit_amount: number | null;
+        deposit_received_at: string | null;
+        deposit_returned_amount: number | null;
+        deposit_returned_at: string | null;
+        deposit_deduction_amount: number | null;
+        deposit_return_status: string | null;
+      };
+      let operations: OperationRow[] = [];
       if (bIds.length > 0) {
         const { data: ops } = await supabase
           .from('booking_operations')
           .select('booking_id, deposit_amount, deposit_received_at, deposit_returned_amount, deposit_returned_at, deposit_deduction_amount, deposit_return_status')
           .in('booking_id', bIds);
-        operations = ops || [];
+        operations = (ops || []) as unknown as OperationRow[];
       }
-      const opsMap = new Map(operations.map((o: any) => [o.booking_id, o]));
+      const opsMap = new Map(operations.map((o) => [o.booking_id, o]));
 
       // Calculate report data
       const income = {
@@ -269,8 +294,16 @@ export function useGenerateReport() {
       const allowedIncomeCategories = input.incomeCategories;
       const allowedExpenseCategories = input.expenseCategories;
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (financials || []).forEach((f: any) => {
+      type FinancialRow = {
+        id: string;
+        category: string | null;
+        transaction_type: 'income' | 'expense' | string;
+        transaction_date: string;
+        amount: number | string;
+        description: string | null;
+        vendor_name: string | null;
+      };
+      ((financials || []) as unknown as FinancialRow[]).forEach((f) => {
         const cat = (f.category as string) || 'other';
         if (f.transaction_type === 'income' && shouldIncludeIncome) {
           if (allowedIncomeCategories && !allowedIncomeCategories.includes(cat)) return;
@@ -293,7 +326,7 @@ export function useGenerateReport() {
             amount: Number(f.amount),
             category: cat,
             description: f.description || '',
-            vendor: f.vendor_name,
+            vendor: f.vendor_name ?? undefined,
           });
         }
       });
@@ -306,8 +339,7 @@ export function useGenerateReport() {
       const totalNights = Math.max(0, Math.ceil((endExclusiveMs - startDate.getTime()) / 86400000));
 
       let nightsBooked = 0;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (bookings || []).forEach((b: any) => {
+      (bookings || []).forEach((b) => {
         const checkIn = new Date(b.check_in);
         const checkOut = new Date(b.check_out);
 
@@ -326,7 +358,7 @@ export function useGenerateReport() {
       let depositExpected = 0;
       let depositPaid = 0;
       let depositUnpaidCount = 0;
-      (bookings || []).forEach((b: any) => {
+      (bookings || []).forEach((b) => {
         const dep = Number(b.deposit_amount || 0);
         if (dep > 0) {
           depositExpected += dep;
@@ -343,7 +375,7 @@ export function useGenerateReport() {
       let secTotalReturned = 0;
       let secTotalDeductions = 0;
       const securityDepositItems: ReportData['security_deposits']['items'] = [];
-      (bookings || []).forEach((b: any) => {
+      (bookings || []).forEach((b) => {
         const op = opsMap.get(b.id);
         if (!op) return;
         const received = Number(op.deposit_amount || 0);
@@ -372,8 +404,7 @@ export function useGenerateReport() {
           rate: totalNights > 0 ? Math.round((nightsBooked / totalNights) * 100) : 0,
           bookings_count: bookings?.length || 0,
         },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        bookings: (bookings || []).map((b: any) => ({
+        bookings: (bookings || []).map((b) => ({
           id: b.id,
           guest_name: b.guest_name || 'Guest',
           check_in: b.check_in,
@@ -436,7 +467,7 @@ export function useGenerateReport() {
           report_type: input.report_type,
           period_start: input.period_start,
           period_end: input.period_end,
-          data: reportData as any,
+          data: reportData as unknown as never,
           status: 'ready',
         })
         .select()

@@ -14,10 +14,10 @@ type ListingUpdate = Database['public']['Tables']['listings']['Update'];
 /** Generic record shape used by admin CRUD hooks where the underlying schema
  *  varies across verticals (salons, gyms, events, ...). Consumers (AdminEvents,
  *  AdminRestaurants, AdminFlowers) define their own form types that map onto
- *  these dynamic columns; we type the inputs loosely to keep the contract
- *  permissive while still tightening from `any` to a structured shape. */
+ *  these dynamic columns; we keep this as a loose record to interop with
+ *  consumer-defined form types without forcing them to add an index signature. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AdminRecord = any;
+type AdminRecord = Record<string, any>;
 
 // ── Yachts (listings vertical='yacht') ─────────────────────────────────────
 export function useAdminYachts(filterProviderId?: string) {
@@ -532,6 +532,16 @@ function createListingsAdminHook(vertical: string) {
 }
 
 // ── Generic admin hook factory: non-migrated tables ────────────────────────
+// `tableName` is dynamic at runtime, so the call sites must use a permissive
+// cast against the Supabase type system. We isolate the cast to a single helper
+// to avoid sprinkling `as any` across each closure.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type DynamicQuery = any;
+function fromDynamic(name: string): DynamicQuery {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (supabase.from as any)(name);
+}
+
 function createAdminHook(tableName: string) {
   return function useAdminGeneric(filterProviderId?: string) {
     const { user } = useAuth();
@@ -542,9 +552,7 @@ function createAdminHook(tableName: string) {
       const checkMounted = isMounted || (() => true);
       if (!user) return;
       if (checkMounted()) setIsLoading(true);
-      // Dynamic table name — types cannot be inferred at compile time.
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let query = (supabase.from(tableName as any) as any).select('*');
+      let query = fromDynamic(tableName).select('*');
       if (filterProviderId) query = query.eq('provider_id', filterProviderId);
       const { data, error } = await query.order('created_at', { ascending: false });
       if (!error && data && checkMounted()) setItems(data as AdminRecord[]);
@@ -554,8 +562,7 @@ function createAdminHook(tableName: string) {
     useEffect(() => { let m = true; fetchData(() => m); return () => { m = false; }; }, [fetchData]);
 
     const createItem = async (data: AdminRecord) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: result, error } = await (supabase.from(tableName as any) as any)
+      const { data: result, error } = await fromDynamic(tableName)
         .insert({ ...data, is_active: true })
         .select().single();
       if (!error) await fetchData();
@@ -563,8 +570,7 @@ function createAdminHook(tableName: string) {
     };
     const updateItem = async (data: AdminRecord) => {
       const { id, ...rest } = data;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: result, error } = await (supabase.from(tableName as any) as any)
+      const { data: result, error } = await fromDynamic(tableName)
         .update(rest)
         .eq('id', String(id))
         .select().single();
@@ -572,8 +578,7 @@ function createAdminHook(tableName: string) {
       return { data: result, error };
     };
     const deleteItem = async (id: string) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (supabase.from(tableName as any) as any).delete().eq('id', id);
+      const { error } = await fromDynamic(tableName).delete().eq('id', id);
       if (!error) await fetchData();
       return { error };
     };
