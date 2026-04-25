@@ -64,14 +64,14 @@ function useBouquetsAdmin() {
 
   const { data: bouquets = [], isLoading } = useQuery({
     queryKey: ['admin-bouquets'],
-    queryFn: async () => {
+    queryFn: async (): Promise<BouquetRow[]> => {
       const { data, error } = await supabase
         .from('bouquets')
         .select('*, shop:flower_shops!bouquets_shop_id_fkey(name_en, name_ru)')
         .order('bestseller_rank', { ascending: true, nullsFirst: false })
         .order('created_at', { ascending: false });
       if (error) throw error;
-      return data || [];
+      return (data || []) as unknown as BouquetRow[];
     },
   });
 
@@ -94,6 +94,9 @@ function useBouquetsAdmin() {
 
   return { bouquets, isLoading, toggleActive, updatePrice, updateField, updateMutation };
 }
+
+// Inline price-edit state per bouquet row.
+type PriceEdit = { S: number; M: number; L: number; margin: number; [k: string]: number };
 
 export default function AdminFlowers() {
   const { language } = useLanguage();
