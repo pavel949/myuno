@@ -1,13 +1,14 @@
 import type { PropertyFinancialFull } from '@/hooks/usePropertyFinancials';
 import type { BudgetVsActual } from '@/hooks/usePropertyBudgets';
 import type { PropertyReport } from '@/hooks/usePropertyReports';
+import type { Worksheet, Workbook, Cell, Column } from 'exceljs';
 
 // ExcelJS is loaded lazily to avoid 918KB in the main bundle
 
-function autoWidth(ws: any) {
-  ws.columns.forEach((col: any) => {
+function autoWidth(ws: Worksheet) {
+  ws.columns.forEach((col: Partial<Column>) => {
     let max = 12;
-    col.eachCell?.({ includeEmpty: false }, (cell: any) => {
+    col.eachCell?.({ includeEmpty: false }, (cell: Cell) => {
       const len = String(cell.value ?? '').length + 2;
       if (len > max) max = len;
     });
@@ -15,11 +16,11 @@ function autoWidth(ws: any) {
   });
 }
 
-function styledHeader(ws: any) {
-  const HEADER_FILL = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1A73E8' } };
+function styledHeader(ws: Worksheet) {
+  const HEADER_FILL = { type: 'pattern' as const, pattern: 'solid' as const, fgColor: { argb: 'FF1A73E8' } };
   const HEADER_FONT = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
   const row = ws.getRow(1);
-  row.eachCell((cell: any) => {
+  row.eachCell((cell: Cell) => {
     cell.fill = HEADER_FILL;
     cell.font = HEADER_FONT;
     cell.alignment = { vertical: 'middle', horizontal: 'center' };
@@ -121,7 +122,7 @@ export async function exportBudgetExcel(
     isRu ? 'Отклонение' : 'Variance',
     '%',
   ];
-  ws.getRow(4).eachCell((cell: any) => {
+  ws.getRow(4).eachCell((cell: Cell) => {
     cell.fill = HEADER_FILL;
     cell.font = HEADER_FONT;
     cell.alignment = { vertical: 'middle', horizontal: 'center' };
@@ -191,9 +192,9 @@ export async function exportReportExcel(
   const HEADER_FONT = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
 
   ws1.getRow(5).values = [isRu ? 'Показатель' : 'Metric', isRu ? 'Значение' : 'Value'];
-  ws1.getRow(5).eachCell((c: any) => { c.fill = HEADER_FILL; c.font = HEADER_FONT; });
+  ws1.getRow(5).eachCell((c: Cell) => { c.fill = HEADER_FILL; c.font = HEADER_FONT; });
 
-  const summaryRows: any[][] = [
+  const summaryRows: Array<Array<string | number>> = [
     [isRu ? 'Доход' : 'Income', d.income.total],
     [isRu ? 'Расходы' : 'Expenses', d.expenses.total],
     [isRu ? 'Чистый доход' : 'Net Income', d.net_income],
@@ -215,7 +216,7 @@ export async function exportReportExcel(
       { header: isRu ? 'Сумма' : 'Amount', key: 'amount' },
       { header: isRu ? 'Описание' : 'Description', key: 'description' },
     ];
-    d.income.transactions.forEach((t: any) => ws2.addRow(t));
+    d.income.transactions.forEach((t) => ws2.addRow(t));
     ws2.getColumn('amount').numFmt = '#,##0';
     styledHeader(ws2);
     autoWidth(ws2);
@@ -230,7 +231,7 @@ export async function exportReportExcel(
       { header: isRu ? 'Описание' : 'Description', key: 'description' },
       { header: isRu ? 'Поставщик' : 'Vendor', key: 'vendor' },
     ];
-    d.expenses.transactions.forEach((t: any) => ws3.addRow(t));
+    d.expenses.transactions.forEach((t) => ws3.addRow(t));
     ws3.getColumn('amount').numFmt = '#,##0';
     styledHeader(ws3);
     autoWidth(ws3);
@@ -240,7 +241,7 @@ export async function exportReportExcel(
 }
 
 // ========== Helper: download workbook ==========
-async function downloadWorkbook(wb: any, filename: string) {
+async function downloadWorkbook(wb: Workbook, filename: string) {
   const buffer = await wb.xlsx.writeBuffer();
   const blob = new Blob([buffer], {
     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',

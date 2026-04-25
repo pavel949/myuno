@@ -1,7 +1,17 @@
 import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import autoTable, { type CellHookData } from 'jspdf-autotable';
 import { loadCyrillicFont } from './pdfFonts';
 import type { ReportData } from '@/hooks/usePropertyReports';
+
+// jspdf-autotable mutates the doc with `lastAutoTable`. Type it locally instead of casting to any.
+type DocWithAutoTable = jsPDF & { lastAutoTable: { finalY: number } };
+const finalY = (doc: jsPDF): number => (doc as DocWithAutoTable).lastAutoTable.finalY;
+
+// Management-report extras carried on ReportData but not always present in core type.
+type ReportDataExt = ReportData & {
+  management_commission?: number;
+  owner_net_income?: number;
+};
 
 interface GeneratePdfOptions {
   propertyTitle: string;
@@ -289,7 +299,7 @@ export async function generateReportPdf(options: GeneratePdfOptions): Promise<js
       styles: { ...fontStyles },
     });
     
-    yPosition = (doc as any).lastAutoTable.finalY + 15;
+    yPosition = finalY(doc) + 15;
   }
 
   // Expense by Category
@@ -314,7 +324,7 @@ export async function generateReportPdf(options: GeneratePdfOptions): Promise<js
       styles: { ...fontStyles },
     });
     
-    yPosition = (doc as any).lastAutoTable.finalY + 15;
+    yPosition = finalY(doc) + 15;
   }
 
   // Bookings table
@@ -348,7 +358,7 @@ export async function generateReportPdf(options: GeneratePdfOptions): Promise<js
       styles: { fontSize: 9, ...fontStyles },
     });
     
-    yPosition = (doc as any).lastAutoTable.finalY + 15;
+    yPosition = finalY(doc) + 15;
   }
 
   // ---- Booking Deposits (Prepayments) ----
@@ -395,7 +405,7 @@ export async function generateReportPdf(options: GeneratePdfOptions): Promise<js
         columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right' }, 4: { halign: 'right' } },
       });
 
-      yPosition = (doc as any).lastAutoTable.finalY + 15;
+      yPosition = finalY(doc) + 15;
     }
   }
 
@@ -444,7 +454,7 @@ export async function generateReportPdf(options: GeneratePdfOptions): Promise<js
         columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right' }, 3: { halign: 'right' } },
       });
 
-      yPosition = (doc as any).lastAutoTable.finalY + 15;
+      yPosition = finalY(doc) + 15;
     }
   }
 
@@ -478,7 +488,7 @@ export async function generateReportPdf(options: GeneratePdfOptions): Promise<js
       styles: { fontSize: 8, ...fontStyles },
     });
 
-    yPosition = (doc as any).lastAutoTable.finalY + 15;
+    yPosition = finalY(doc) + 15;
   }
 
   // ---- Management-specific sections ----
@@ -509,12 +519,12 @@ export async function generateReportPdf(options: GeneratePdfOptions): Promise<js
         styles: { fontSize: 9, ...fontStyles },
       });
 
-      yPosition = (doc as any).lastAutoTable.finalY + 15;
+      yPosition = finalY(doc) + 15;
     }
 
     // Commission & owner net income box
-    const mgmtCommission = (data as any).management_commission ?? 0;
-    const ownerNet = (data as any).owner_net_income ?? data.net_income;
+    const mgmtCommission = (data as ReportDataExt).management_commission ?? 0;
+    const ownerNet = (data as ReportDataExt).owner_net_income ?? data.net_income;
     if (mgmtCommission > 0) {
       if (yPosition > 240) { doc.addPage(); yPosition = 20; }
 
@@ -578,7 +588,7 @@ export async function generateReportPdf(options: GeneratePdfOptions): Promise<js
       columnStyles: { 0: { fontStyle: 'bold', cellWidth: 80 }, 1: { halign: 'right', cellWidth: 50 }, 2: { halign: 'right', fontStyle: 'bold', cellWidth: 50 } },
     });
 
-    yPosition = (doc as any).lastAutoTable.finalY + 15;
+    yPosition = finalY(doc) + 15;
   }
 
   // ---- Owner Statement Section ----
@@ -622,7 +632,7 @@ export async function generateReportPdf(options: GeneratePdfOptions): Promise<js
       margin: { left: 20, right: 20 },
       styles: { fontSize: 10, ...fontStyles },
       columnStyles: { 1: { halign: 'right' } },
-      didParseCell: (hookData: any) => {
+      didParseCell: (hookData: CellHookData) => {
         // Bold the payout row
         if (hookData.section === 'body' && hookData.row.index === statementRows.length - 1) {
           hookData.cell.styles.fontStyle = 'bold';
@@ -631,7 +641,7 @@ export async function generateReportPdf(options: GeneratePdfOptions): Promise<js
       },
     });
 
-    yPosition = (doc as any).lastAutoTable.finalY + 15;
+    yPosition = finalY(doc) + 15;
 
     // Payout highlight box
     if (yPosition > 250) { doc.addPage(); yPosition = 20; }
@@ -689,7 +699,7 @@ export async function generateReportPdf(options: GeneratePdfOptions): Promise<js
       },
     });
 
-    yPosition = (doc as any).lastAutoTable.finalY + 15;
+    yPosition = finalY(doc) + 15;
 
     // Per-booking totals
     const totalRevenue = data.bookings.reduce((s, b) => s + b.total_amount, 0);

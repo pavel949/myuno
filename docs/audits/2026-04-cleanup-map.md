@@ -627,3 +627,43 @@ Cumulative `any` count: **1111 → 1077 (−34)**.
 Build: ✅ green (`tsc --noEmit` clean, vite build clean).
 
 **Note**: Wave 4.2d / Wave 5 partially completed (2 of 6 planned files). Remaining tasks (generateReportPdf, contentAdapters, edge functions cross-ref, DB tables cross-ref) postponed to next iteration.
+
+### Wave 4.2d — Type safety, top-offenders pass #4 (2026-04-25)
+
+- `generateReportPdf.ts`: **13 → 0** `any` (−100%)
+  - Added local `DocWithAutoTable` and `finalY(doc)` helper for jspdf-autotable's mutated `lastAutoTable.finalY`.
+  - Introduced `ReportDataExt` with optional `management_commission` / `owner_net_income`.
+  - Typed `didParseCell` callback via `CellHookData` from `jspdf-autotable`.
+
+- `contentAdapters.ts`: **12 → 0** `any` (−100%)
+  - Added local `PropertyOptionalAttrs` for fields not on legacy OwnerProperty / VendorProperty types (`floor`, `unit_number`, `plot_size_sqm`, `pool_type`, `total_floors`, `instant_booking`, `approval_status`).
+  - All `(property as any).X` → `ext.X` via single typed alias.
+
+- `AdminOrderDetailSheet.tsx`: **12 → 0** `any` (−100%)
+  - Defined narrow `OrderParticipant`, `OrderAddress`, `OrderItem`, `OrderMetadata` types.
+  - Typed all `find` / `map` callbacks and `metadata` casts.
+  - Typed `onError: (err: Error)`.
+
+- `exportFinancialsExcel.ts`: **11 → 0** `any` (−100%)
+  - Imported real `Worksheet`, `Workbook`, `Cell`, `Column` from `exceljs`.
+  - Typed `autoWidth`, `styledHeader`, `downloadWorkbook` and all `eachCell` callbacks.
+  - `summaryRows: any[][]` → `Array<Array<string | number>>`.
+
+- `OwnerPropertyDetail.tsx`: **11 → 0** `any` (−100%)
+  - Introduced `PropertyExt` extension for owner-side fields not yet in generated property type (`seasonal_pricing`, `wifi_password`, `owner_*`, `management_company_id`, `owner_contact_id`).
+  - All `(property as any).X` → `propertyExt.X`.
+
+Cumulative `any` count: **1077 → 992 (−85)**.
+
+Build: ✅ green (`tsc --noEmit` clean, `bun run build` clean — 1m 12s, 2196 PWA precache entries).
+
+### Wave summary (since start)
+
+| Pass | Δ any | Cumulative |
+|------|-------|------------|
+| Pre-Wave 4.2 | — | 1247 |
+| 4.2c (4 files) | −136 | 1111 |
+| 4.2d #3 (2 files) | −34 | 1077 |
+| 4.2d #4 (5 files) | −85 | 992 |
+
+**Total since Wave 4 began: −255 `any` (−20.4%).**

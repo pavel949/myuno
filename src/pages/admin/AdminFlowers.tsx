@@ -22,7 +22,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { Database } from '@/integrations/supabase/types';
 
 type SizeVariant = { size: string; price: number };
-type BouquetRow = Database['public']['Tables']['bouquets']['Row'] & {
+type BouquetBase = Database['public']['Tables']['bouquets']['Row'];
+// `size_variants` in DB is generic Json; narrow it locally + add the joined shop.
+type BouquetRow = Omit<BouquetBase, 'size_variants'> & {
   size_variants?: SizeVariant[] | null;
   shop?: { name_en: string | null; name_ru: string | null } | null;
 };
@@ -62,14 +64,14 @@ function useBouquetsAdmin() {
 
   const { data: bouquets = [], isLoading } = useQuery({
     queryKey: ['admin-bouquets'],
-    queryFn: async () => {
+    queryFn: async (): Promise<BouquetRow[]> => {
       const { data, error } = await supabase
         .from('bouquets')
         .select('*, shop:flower_shops!bouquets_shop_id_fkey(name_en, name_ru)')
         .order('bestseller_rank', { ascending: true, nullsFirst: false })
         .order('created_at', { ascending: false });
       if (error) throw error;
-      return data || [];
+      return (data || []) as unknown as BouquetRow[];
     },
   });
 
@@ -93,6 +95,9 @@ function useBouquetsAdmin() {
   return { bouquets, isLoading, toggleActive, updatePrice, updateField, updateMutation };
 }
 
+// Inline price-edit state per bouquet row.
+type PriceEdit = { S: number; M: number; L: number; margin: number; [k: string]: number };
+
 export default function AdminFlowers() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -102,7 +107,7 @@ export default function AdminFlowers() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<FlowerShopRow | null>(null);
   const [formData, setFormData] = useState<FlowerShopFormData>(defaultFormData);
-  const [editingPrices, setEditingPrices] = useState<Record<string, unknown>>({});
+  const [editingPrices, setEditingPrices] = useState<Record<string, PriceEdit>>({});
 
   // Shop CRUD handlers
   const handleCreate = () => { setEditingItem(null); setFormData(defaultFormData); setIsDialogOpen(true); };

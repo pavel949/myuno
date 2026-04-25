@@ -22,6 +22,11 @@ interface AdminOrderDetailSheetProps {
   onStatusChanged: () => void;
 }
 
+type OrderParticipant = { id: string; name: string | null; phone: string | null; email: string | null; role: string };
+type OrderAddress = { id: string; address_type: string; address_text: string; notes: string | null };
+type OrderItem = { id: string; item_name: string; item_type: string | null; qty: number | null; unit_price: number | null; amount: number; metadata: unknown };
+type OrderMetadata = { payment_method?: string } | null;
+
 const ORDER_TYPE_EMOJI: Record<string, string> = {
   restaurant: '🍽️', flowers: '💐', yacht: '🛥️', tour: '🗺️',
   transport: '🚗', cleaning: '🧹', beauty: '💅', medical: '🏥',
@@ -124,7 +129,7 @@ export function AdminOrderDetailSheet({ orderId, onClose, onStatusChanged }: Adm
       setShowCancelInput(false);
       setCancelReason('');
     },
-    onError: (err: any) => {
+    onError: (err: Error) => {
       toast.error(isRu ? 'Ошибка' : 'Error', {
         description: err.message,
       });
@@ -133,12 +138,12 @@ export function AdminOrderDetailSheet({ orderId, onClose, onStatusChanged }: Adm
 
   const copyForSupplier = () => {
     if (!order) return;
-    const primary = order.order_participants?.find((p: any) => p.role === 'primary');
-    const pickup = order.order_addresses?.find((a: any) => a.address_type === 'pickup');
-    const dropoff = order.order_addresses?.find((a: any) => a.address_type === 'dropoff');
-    const serviceAddr = order.order_addresses?.find((a: any) => a.address_type === 'service');
+    const primary = order.order_participants?.find((p: OrderParticipant) => p.role === 'primary');
+    const pickup = order.order_addresses?.find((a: OrderAddress) => a.address_type === 'pickup');
+    const dropoff = order.order_addresses?.find((a: OrderAddress) => a.address_type === 'dropoff');
+    const serviceAddr = order.order_addresses?.find((a: OrderAddress) => a.address_type === 'service');
     const emoji = ORDER_TYPE_EMOJI[order.order_type] || '📦';
-    const paymentMethod = (order.metadata as any)?.payment_method || 'cash';
+    const paymentMethod = (order.metadata as OrderMetadata)?.payment_method || 'cash';
     const paymentLabel = PAYMENT_LABELS[paymentMethod]?.en || paymentMethod;
 
     const lines = [
@@ -154,7 +159,7 @@ export function AdminOrderDetailSheet({ orderId, onClose, onStatusChanged }: Adm
       '',
       order.start_at ? `📅 Date: ${format(new Date(order.start_at), 'dd.MM.yyyy HH:mm')}` : '',
       '',
-      ...(order.order_items?.map((item: any) =>
+      ...(order.order_items?.map((item: OrderItem) =>
         `• ${item.item_name} x${item.qty || 1} — ${item.amount} ${order.currency || 'THB'}`
       ) || []),
       '',
@@ -171,7 +176,7 @@ export function AdminOrderDetailSheet({ orderId, onClose, onStatusChanged }: Adm
 
   const openWhatsApp = () => {
     if (!order) return;
-    const primary = order.order_participants?.find((p: any) => p.role === 'primary');
+    const primary = order.order_participants?.find((p: OrderParticipant) => p.role === 'primary');
     const text = `Order #${order.order_number || order.id.slice(0, 8)} — ${order.order_type} — ${order.total_amount} ${order.currency || 'THB'}`;
     const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
@@ -179,8 +184,8 @@ export function AdminOrderDetailSheet({ orderId, onClose, onStatusChanged }: Adm
 
   const status = (order?.status || 'pending') as OrderStatus;
   const statusCfg = ORDER_STATUS_CONFIG[status] || ORDER_STATUS_CONFIG.pending;
-  const primary = order?.order_participants?.find((p: any) => p.role === 'primary');
-  const paymentMethod = (order?.metadata as any)?.payment_method || 'cash';
+  const primary = order?.order_participants?.find((p: OrderParticipant) => p.role === 'primary');
+  const paymentMethod = (order?.metadata as OrderMetadata)?.payment_method || 'cash';
 
   const statusActions: { label: string; labelRu: string; status: OrderStatus; icon: React.ElementType; variant: 'default' | 'outline' | 'destructive' }[] = [];
   if (status === 'pending') {
@@ -280,7 +285,7 @@ export function AdminOrderDetailSheet({ orderId, onClose, onStatusChanged }: Adm
                 {isRu ? 'Состав заказа' : 'Order Items'}
               </h4>
               <div className="bg-muted/50 rounded-none p-3 space-y-2">
-                {order.order_items?.map((item: any) => (
+                {order.order_items?.map((item: OrderItem) => (
                   <div key={item.id} className="flex justify-between text-sm">
                     <span>{item.item_name} {item.qty > 1 ? `×${item.qty}` : ''}</span>
                     <span className="font-medium">{item.amount} {order.currency || 'THB'}</span>
@@ -307,7 +312,7 @@ export function AdminOrderDetailSheet({ orderId, onClose, onStatusChanged }: Adm
                     {isRu ? 'Адреса' : 'Addresses'}
                   </h4>
                   <div className="bg-muted/50 rounded-none p-3 space-y-2 text-sm">
-                    {order.order_addresses.map((addr: any) => (
+                    {order.order_addresses.map((addr: OrderAddress) => (
                       <div key={addr.id}>
                         <span className="text-xs uppercase text-muted-foreground">
                           {addr.address_type === 'pickup' ? (isRu ? 'Откуда' : 'From') :
