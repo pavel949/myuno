@@ -404,6 +404,74 @@ export default function OwnerDashboard() {
     );
   }
 
+  // First-time MC empty state — no properties yet → render onboarding checklist
+  // instead of skeleton-then-blank widget grid.
+  const isFirstTimeMC =
+    !propsLoading && !companyLoading && allProperties.length === 0 && !!activeCompany;
+
+  if (isFirstTimeMC) {
+    const progress = onboardingProgress
+      ? computeProgress(onboardingProgress)
+      : { completed: 0, total: 7, percent: 0 };
+    return (
+      <div className="px-4 md:px-6 lg:px-8 pt-10 pb-24 max-w-2xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="text-center mb-8"
+        >
+          <div className="w-16 h-16 mx-auto rounded-none bg-primary/10 flex items-center justify-center mb-4">
+            <Rocket className="h-8 w-8 text-primary" />
+          </div>
+          <h1 className="text-2xl font-bold mb-2">
+            {isRu ? 'Добро пожаловать в myUNO' : 'Welcome to myUNO'}
+          </h1>
+          <p className="text-muted-foreground max-w-md mx-auto">
+            {isRu
+              ? 'Завершите настройку, чтобы открыть полный дашборд управления.'
+              : 'Finish setup to unlock the full management dashboard.'}
+          </p>
+        </motion.div>
+
+        <div className="rounded-none border bg-card p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">
+              {isRu ? 'Прогресс настройки' : 'Setup progress'}
+            </span>
+            <span className="text-sm text-muted-foreground">
+              {progress.completed} / {progress.total}
+            </span>
+          </div>
+          <div className="h-2 bg-muted overflow-hidden">
+            <div
+              className="h-full bg-primary transition-all"
+              style={{ width: `${progress.percent}%` }}
+            />
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3 pt-2">
+            <Button
+              onClick={() => navigate('/mc/onboarding/wizard')}
+              size="lg"
+              className="flex-1 h-12"
+            >
+              {isRu ? 'Открыть мастер настройки' : 'Open setup wizard'}
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => navigate('/mc/properties/new')}
+              size="lg"
+              className="flex-1 h-12"
+            >
+              {isRu ? 'Добавить объект' : 'Add property'}
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <DashboardFilterProvider>
       <div className="px-4 md:px-6 lg:px-8 pt-6 pb-24 space-y-5 overflow-x-hidden max-w-lg md:max-w-[1536px] mx-auto">
