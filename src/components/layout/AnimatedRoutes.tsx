@@ -38,14 +38,7 @@ const LifeFlowAlias = () => {
   return <Navigate to={`/life/${code ?? ''}`} replace />;
 };
 
-// Property Hub index: legacy `/property?…` query bookmarks → /property/browse?…
-const PropertyHubIndex = () => {
-  const search = typeof window !== 'undefined' ? window.location.search : '';
-  if (search && search.length > 1) {
-    return <Navigate to={`${APP_ROUTES.PROPERTY_BROWSE}${search}`} replace />;
-  }
-  return <Pages.PropertyLanding />;
-};
+// PropertyHubIndex moved to ./routes/propertyHubRoutes.tsx
 
 // Core pages - eagerly loaded for fast initial navigation
 import Index from '@/pages/Index';
