@@ -391,7 +391,7 @@ export function mapEducationToCatalogCard(
 // ─── Cleaning Service ────────────────────────────────────
 
 export function mapCleaningToCatalogCard(
-  service: PetService,
+  service: CleaningService,
   language: string,
   navigate: (path: string) => void
 ): CatalogCardProps {
