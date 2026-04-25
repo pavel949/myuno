@@ -32,7 +32,7 @@ export function ClearViewPaywall({
   className,
 }: Props) {
   const { user } = useAuth();
-  const { openSignIn } = useAuthSheet();
+  const { openAuthSheet } = useAuthSheet();
   const { data: access, isLoading } = useClearViewAccess(projectId);
   const { purchase, isProcessing } = useClearViewCheckout();
 
@@ -42,7 +42,10 @@ export function ClearViewPaywall({
 
   const handleBuy = async () => {
     if (!user) {
-      openSignIn?.();
+      openAuthSheet({
+        intent: 'clearview',
+        onSuccess: () => purchase({ projectId, tier: 'single' }),
+      });
       return;
     }
     await purchase({ projectId, tier: 'single' });
