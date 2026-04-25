@@ -89,8 +89,8 @@ export default function PropertyDetail() {
     () =>
       new Set(
         availability
-          .filter((a: any) => a.status === 'blocked' || a.status === 'booked')
-          .map((a: any) => {
+          .filter((a) => a.status === 'blocked' || a.status === 'booked')
+          .map((a) => {
             const d = a.date instanceof Date ? a.date : new Date(a.date);
             return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
           }),
