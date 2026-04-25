@@ -25,6 +25,7 @@ import { RealEstateEntry } from '@/components/home/RealEstateEntry';
 import { TrustAsAService } from '@/components/home/TrustAsAService';
 import { PersonaPromptBanner } from '@/components/home/PersonaPromptBanner';
 import { PersonaAwareSections } from '@/components/home/PersonaAwareSections';
+import { PersonaDiscoveryStrip } from '@/components/home/PersonaDiscoveryStrip';
 import type { HomeSectionKey } from '@/lib/segmentation/prioritizeHomeSections';
 import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 
@@ -97,6 +98,9 @@ const Index = () => {
 
         {/* 1. Hero — search-first entry, with desktop popular preview */}
         <HeroIntro />
+
+        {/* 1b. Persona discovery strip — surface the 26 tailored landings */}
+        <PersonaDiscoveryStrip />
 
         {/* 2. Tasks — what do I need to do */}
         {popularTasksOn ? <PopularTasks /> : <PrimaryActions />}

@@ -20,6 +20,7 @@ import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
 import { UnifiedFilterRibbon, type FilterRibbonItem } from '@/components/shared/UnifiedFilterRibbon';
 import { FilterChip, FilterChipGroup } from '@/components/uno/FilterChip';
 import { BackButton } from '@/components/uno/BackButton';
+import { PersonaFilterChip } from '@/components/landings/PersonaFilterChip';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { ECOSYSTEM_MAIN_SPACING, ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
 
@@ -356,6 +357,10 @@ function MiniappMode({
             </Button>
           </div>
         )}
+
+        {/* Persona context chip — auto-renders only when ?persona= is in URL.
+            Mounted here so every miniapp catalog inherits it without per-page wiring. */}
+        <PersonaFilterChip />
 
         {resultsCount !== undefined && (
           <div className="flex items-center justify-between">

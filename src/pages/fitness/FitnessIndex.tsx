@@ -15,6 +15,7 @@ import { CrossSellSection } from '@/components/crosssell';
 import { mapGymToCatalogCard } from '@/lib/adapters/catalogCardAdapters';
 import { fitnessFilterConfig } from '@/lib/filterRegistry';
 import type { FilterValues } from '@/components/filters/UniversalFilter';
+import { usePersonaFilter } from '@/hooks/usePersonaFilter';
 
 const CATEGORIES = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -41,6 +42,7 @@ export default function FitnessIndex() {
   const [filterValues, setFilterValues] = useState<FilterValues>({});
   const [sortBy, setSortBy] = useState('recommended');
   const isRu = language === 'ru';
+  const { applyFilter: applyPersonaFilter } = usePersonaFilter();
 
   const filterActiveCount = useMemo(() => {
     return Object.values(filterValues).filter(v =>
@@ -83,8 +85,15 @@ export default function FitnessIndex() {
         break;
     }
 
+    // Persona filter — fitness uses gym_type + tags for matching.
+    result = applyPersonaFilter(result, (g) => {
+      const raw = g as unknown as Record<string, unknown>;
+      const tags = (raw.tags as string[] | null) ?? [];
+      return [...tags, g.gym_type].filter(Boolean) as string[];
+    });
+
     return result;
-  }, [gyms, selectedCategory, searchQuery, sortBy]);
+  }, [gyms, selectedCategory, searchQuery, sortBy, applyPersonaFilter]);
 
   const handleFilterChange = useCallback((values: FilterValues) => {
     setFilterValues(values);

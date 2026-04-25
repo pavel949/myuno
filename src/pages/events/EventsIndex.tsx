@@ -15,6 +15,7 @@ import { CrossSellSection } from '@/components/crosssell';
 import { mapEventToCatalogCard } from '@/lib/adapters/catalogCardAdapters';
 import { eventsFilterConfig } from '@/lib/filterRegistry';
 import type { FilterValues } from '@/components/filters/UniversalFilter';
+import { usePersonaFilter } from '@/hooks/usePersonaFilter';
 
 const CATEGORIES = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -41,6 +42,7 @@ export default function EventsIndex() {
   const [filterValues, setFilterValues] = useState<FilterValues>({});
   const [sortBy, setSortBy] = useState('date_asc');
   const isRu = language === 'ru';
+  const { applyFilter: applyPersonaFilter } = usePersonaFilter();
 
   const { events, isLoading } = useEvents({ category: selectedCategory !== 'all' ? selectedCategory : undefined });
 
@@ -108,8 +110,15 @@ export default function EventsIndex() {
         break;
     }
 
+    // Persona filter — uses category + tags as the synthetic tag pool.
+    result = applyPersonaFilter(result, (e) => {
+      const raw = e as unknown as Record<string, unknown>;
+      const tags = (raw.tags as string[] | null) ?? [];
+      return [...tags, raw.category as string].filter(Boolean) as string[];
+    });
+
     return result;
-  }, [events, searchQuery, filterValues, sortBy]);
+  }, [events, searchQuery, filterValues, sortBy, applyPersonaFilter]);
 
   const handleFilterChange = useCallback((values: FilterValues) => {
     setFilterValues(values);
