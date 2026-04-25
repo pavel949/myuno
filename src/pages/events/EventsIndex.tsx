@@ -110,8 +110,15 @@ export default function EventsIndex() {
         break;
     }
 
+    // Persona filter — uses category + tags as the synthetic tag pool.
+    result = applyPersonaFilter(result, (e) => {
+      const raw = e as unknown as Record<string, unknown>;
+      const tags = (raw.tags as string[] | null) ?? [];
+      return [...tags, raw.category as string].filter(Boolean) as string[];
+    });
+
     return result;
-  }, [events, searchQuery, filterValues, sortBy]);
+  }, [events, searchQuery, filterValues, sortBy, applyPersonaFilter]);
 
   const handleFilterChange = useCallback((values: FilterValues) => {
     setFilterValues(values);
