@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient, SupabaseClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "https://myuno.app",
@@ -167,7 +167,7 @@ async function processPlacesBatch(
       content = content.substring(0, footerIdx).trim();
     }
 
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from("location_knowledge")
       .upsert(
         {
@@ -253,7 +253,7 @@ Deno.serve(async (req) => {
         results = await processPlacesBatch(
           batchUrls,
           firecrawlKey,
-          supabase,
+          supabase as any,
           city.id,
           section || mode
         );

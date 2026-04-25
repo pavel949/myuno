@@ -141,13 +141,15 @@ ${messageBody.slice(0, 500)}
     if (existingContact) {
       console.log(`[WhatsApp Incoming] Matched existing CRM contact: ${existingContact.id}`);
       // Add activity to existing contact
-      await supabase.from("crm_activities").insert({
-        contact_id: existingContact.id,
-        activity_type: "whatsapp_received",
-        subject: "Incoming WhatsApp message",
-        notes: messageBody.slice(0, 1000),
-        created_by: existingContact.id, // self-reference as system
-      }).then(() => {}).catch(() => {});
+      try {
+        await supabase.from("crm_activities").insert({
+          contact_id: existingContact.id,
+          activity_type: "whatsapp_received",
+          subject: "Incoming WhatsApp message",
+          notes: messageBody.slice(0, 1000),
+          created_by: existingContact.id, // self-reference as system
+        });
+      } catch { /* ignore */ }
     }
 
     // Send auto-reply to the customer
