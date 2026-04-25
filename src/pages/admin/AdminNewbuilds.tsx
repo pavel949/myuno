@@ -237,7 +237,7 @@ export default function AdminNewbuilds() {
                   </div>
                 )}
               </div>
-              {pending.map((p: any) => (
+              {pending.map((p) => (
                 <div key={p.id} className="border rounded-none p-4 flex items-center gap-4">
                   <Checkbox checked={selectedIds.has(p.id)} onCheckedChange={() => toggleSelect(p.id)} aria-label={`Выбрать ${p.name_en}`} />
                   {p.cover_image && <img src={p.cover_image} className="w-16 h-16 rounded-none object-cover" alt={p.name_en} />}
