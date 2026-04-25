@@ -38,6 +38,7 @@ import {
   useTogglePublishDueDiligence,
 } from '@/hooks/useDueDiligence';
 import { useClearViewAccess } from '@/hooks/useClearViewPurchase';
+import { useIsProjectDeveloper } from '@/hooks/useIsProjectDeveloper';
 import { ClearViewBadge } from '@/components/clearview/ClearViewBadge';
 import { ClearViewGauge } from '@/components/clearview/ClearViewGauge';
 import { ClearViewRadar } from '@/components/clearview/ClearViewRadar';
@@ -61,6 +62,7 @@ export function ClearViewReport({ projectId, isBrokered }: Props) {
   const isRu = language === 'ru';
   const { data: report, isLoading } = useDueDiligenceReport(projectId);
   const { data: access } = useClearViewAccess(projectId);
+  const { data: isProjectDeveloper = false } = useIsProjectDeveloper(projectId);
   const generate = useGenerateDueDiligence();
   const togglePublish = useTogglePublishDueDiligence();
   const { track } = useIPPLeadEvent();
@@ -95,7 +97,8 @@ export function ClearViewReport({ projectId, isBrokered }: Props) {
   }, [user?.id]);
 
   const brokered = isBrokered ?? report?.is_brokered_project ?? false;
-  const hasFullAccess = isAdmin || (access?.hasAccess ?? false);
+  const hasFullAccess = isAdmin || isProjectDeveloper || (access?.hasAccess ?? false);
+  const ownerView = !isAdmin && isProjectDeveloper;
 
   return (
     <section className="border border-border bg-card p-5 sm:p-6 space-y-5 rounded-none">
@@ -112,6 +115,14 @@ export function ClearViewReport({ projectId, isBrokered }: Props) {
                 ? 'Институциональный рейтинг проекта · методология V3'
                 : 'Institutional project rating · V3 methodology'}
             </p>
+            {ownerView && (
+              <span className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 border border-primary/40 bg-primary/10 text-primary text-[10px] font-medium uppercase tracking-wider rounded-none">
+                <Shield className="w-3 h-3" />
+                {isRu
+                  ? 'Просмотр как владелец проекта'
+                  : 'Owner view — visible to you and admins only'}
+              </span>
+            )}
           </div>
         </div>
         {isAdmin && (
