@@ -5834,6 +5834,54 @@ export type Database = {
           },
         ]
       }
+      crm_nurture_queue: {
+        Row: {
+          channel: string
+          contact_id: string | null
+          created_at: string
+          error: string | null
+          id: string
+          message_body: string
+          metadata: Json | null
+          recipient_email: string | null
+          recipient_phone: string | null
+          scheduled_at: string
+          sent_at: string | null
+          status: string
+          subject: string | null
+        }
+        Insert: {
+          channel: string
+          contact_id?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          message_body: string
+          metadata?: Json | null
+          recipient_email?: string | null
+          recipient_phone?: string | null
+          scheduled_at?: string
+          sent_at?: string | null
+          status?: string
+          subject?: string | null
+        }
+        Update: {
+          channel?: string
+          contact_id?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          message_body?: string
+          metadata?: Json | null
+          recipient_email?: string | null
+          recipient_phone?: string | null
+          scheduled_at?: string
+          sent_at?: string | null
+          status?: string
+          subject?: string | null
+        }
+        Relationships: []
+      }
       crm_pipeline_stages: {
         Row: {
           automation: Json | null
