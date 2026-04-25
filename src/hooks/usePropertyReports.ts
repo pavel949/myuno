@@ -163,14 +163,16 @@ export function usePropertyReports(propertyId?: string) {
       if (error) throw error;
 
       // Map title_en -> title for backward compatibility across UI
-      return (data || []).map((r: any) => ({
+      type PropertyJoin = { id: string; title_en: string | null; title_ru: string | null };
+      type ReportRow = Omit<PropertyReport, 'property'> & { property?: PropertyJoin | null };
+      return ((data || []) as unknown as ReportRow[]).map((r) => ({
         ...r,
         property: r.property ? {
           id: r.property.id,
-          title: r.property.title_en,
+          title: r.property.title_en ?? '',
           title_ru: r.property.title_ru,
         } : undefined,
-      })) as unknown as PropertyReport[];
+      })) as PropertyReport[];
     },
     enabled: !!user,
   });
