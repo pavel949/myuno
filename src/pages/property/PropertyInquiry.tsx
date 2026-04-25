@@ -71,7 +71,7 @@ export default function PropertyInquiry() {
     early_booking_days?: number | null;
     last_minute_discount?: number | null;
     last_minute_days?: number | null;
-    custom_length_discounts?: unknown;
+    custom_length_discounts?: Array<{ min_nights: number; discount_percent: number }>;
     payment_policy?: string | null;
     prepay_percent?: number | null;
     manager_email?: string | null;
