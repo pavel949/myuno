@@ -21,7 +21,7 @@ export function InvestorWelcomeCard() {
         .select('id, status', { count: 'exact' })
         .eq('user_id', user!.id);
       const viewingsRes = await (supabase as any)
-        .from('viewing_requests')
+        .from('property_inquiries')
         .select('id', { count: 'exact', head: true })
         .eq('user_id', user!.id);
 
