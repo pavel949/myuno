@@ -1,5 +1,5 @@
 // Deno.serve used (native edge runtime)
-import { createStripeClient } from "../_shared/stripe.ts";
+import { createStripeClient, Stripe } from "../_shared/stripe.ts";
 import { createClient } from "../_shared/supabase.ts";
 
 const corsHeaders = {
@@ -964,8 +964,8 @@ Deno.serve(async (req) => {
             .update({
               status: subscription.status,
               stripe_subscription_id: subscription.id,
-              current_period_end: subscription.current_period_end
-                ? new Date(subscription.current_period_end * 1000).toISOString()
+              current_period_end: (subscription as any).current_period_end
+                ? new Date((subscription as any).current_period_end * 1000).toISOString()
                 : null,
             })
             .eq("property_id", staysPropertyId);
@@ -1025,8 +1025,8 @@ Deno.serve(async (req) => {
                 stripe_subscription_id: subId,
                 stripe_customer_id: customerId,
                 status: sub.status,
-                current_period_end: sub.current_period_end
-                  ? new Date(sub.current_period_end * 1000).toISOString()
+                current_period_end: (sub as any).current_period_end
+                  ? new Date((sub as any).current_period_end * 1000).toISOString()
                   : null,
               },
               { onConflict: "property_id" },

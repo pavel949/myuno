@@ -127,11 +127,12 @@ Deno.serve(async (req) => {
     if (subErr) throw subErr;
 
     // Increment submit count
-    await supabase.rpc('increment_counter', { row_id: form_id, table_name: 'crm_web_forms', column_name: 'submit_count' })
-      .catch(() => {
-        // Fallback: just update directly
-        supabase.from('crm_web_forms').update({ submit_count: (form.submit_count || 0) + 1 }).eq('id', form_id);
-      });
+    try {
+      await supabase.rpc('increment_counter', { row_id: form_id, table_name: 'crm_web_forms', column_name: 'submit_count' });
+    } catch {
+      // Fallback: just update directly
+      await supabase.from('crm_web_forms').update({ submit_count: (form.submit_count || 0) + 1 }).eq('id', form_id);
+    }
 
     return new Response(JSON.stringify({ 
       success: true, 
@@ -141,7 +142,8 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), {
+    const message = err instanceof Error ? err.message : String(err);
+    return new Response(JSON.stringify({ error: message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
