@@ -14,7 +14,7 @@ export function AIAgentStatusWidget() {
   const isRu = language === 'ru';
   const navigate = useNavigate();
   const { hasRole } = useUserRoles();
-  const isAdmin = hasRole('admin') || hasRole('super_admin');
+  const isAdmin = hasRole('admin');
 
   const { data, isLoading } = useQuery({
     queryKey: ['ai-agents-dashboard-status'],
