@@ -467,7 +467,7 @@ export function useGenerateReport() {
           report_type: input.report_type,
           period_start: input.period_start,
           period_end: input.period_end,
-          data: reportData as unknown as Record<string, unknown>,
+          data: reportData as unknown as never,
           status: 'ready',
         })
         .select()
