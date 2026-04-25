@@ -8,9 +8,9 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
 
-type ProjectRow = Database['public']['Tables']['property_projects']['Row'];
+type Project = Database['public']['Tables']['property_projects']['Row'];
 type ProjectUpdate = Database['public']['Tables']['property_projects']['Update'];
-type DeveloperRow = Database['public']['Tables']['developers']['Row'];
+type Developer = Database['public']['Tables']['developers']['Row'];
 type DeveloperUpdate = Database['public']['Tables']['developers']['Update'];
 
 type CatalogShape = { rec?: string; type?: string; beach?: string } & Record<string, unknown>;
