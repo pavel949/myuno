@@ -105,28 +105,46 @@ export default function OwnerPortalDashboard() {
 
       {/* Quick actions for owner */}
       <div className="grid grid-cols-2 gap-3">
-        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/my-property/statements')}>
+        <Card className="cursor-pointer hover:shadow-md transition-shadow relative" onClick={() => navigate('/my-property/statements')}>
           <CardContent className="p-3 flex items-center gap-3">
             <div className="w-9 h-9 rounded-none bg-primary/10 flex items-center justify-center shrink-0">
               <FileCheck className="w-4 h-4 text-primary" />
             </div>
-            <div className="min-w-0">
-              <p className="text-sm font-semibold truncate">{isRu ? 'Отчёты' : 'Statements'}</p>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-sm font-semibold truncate">{isRu ? 'Отчёты' : 'Statements'}</p>
+                {pendingStatements > 0 && (
+                  <Badge variant="destructive" className="rounded-none px-1.5 py-0 h-5 text-[10px]">
+                    {pendingStatements}
+                  </Badge>
+                )}
+              </div>
               <p className="text-[11px] text-muted-foreground truncate">
-                {isRu ? 'На одобрение' : 'For approval'}
+                {pendingStatements > 0
+                  ? (isRu ? `${pendingStatements} на одобрение` : `${pendingStatements} for approval`)
+                  : (isRu ? 'На одобрение' : 'For approval')}
               </p>
             </div>
           </CardContent>
         </Card>
-        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/my-property/signatures')}>
+        <Card className="cursor-pointer hover:shadow-md transition-shadow relative" onClick={() => navigate('/my-property/signatures')}>
           <CardContent className="p-3 flex items-center gap-3">
             <div className="w-9 h-9 rounded-none bg-primary/10 flex items-center justify-center shrink-0">
               <FileSignature className="w-4 h-4 text-primary" />
             </div>
-            <div className="min-w-0">
-              <p className="text-sm font-semibold truncate">{isRu ? 'Документы' : 'Documents'}</p>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-sm font-semibold truncate">{isRu ? 'Документы' : 'Documents'}</p>
+                {pendingSignatures > 0 && (
+                  <Badge variant="destructive" className="rounded-none px-1.5 py-0 h-5 text-[10px]">
+                    {pendingSignatures}
+                  </Badge>
+                )}
+              </div>
               <p className="text-[11px] text-muted-foreground truncate">
-                {isRu ? 'На подпись' : 'To sign'}
+                {pendingSignatures > 0
+                  ? (isRu ? `${pendingSignatures} на подпись` : `${pendingSignatures} to sign`)
+                  : (isRu ? 'На подпись' : 'To sign')}
               </p>
             </div>
           </CardContent>
