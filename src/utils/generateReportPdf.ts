@@ -1,7 +1,17 @@
 import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import autoTable, { type CellHookData } from 'jspdf-autotable';
 import { loadCyrillicFont } from './pdfFonts';
 import type { ReportData } from '@/hooks/usePropertyReports';
+
+// jspdf-autotable mutates the doc with `lastAutoTable`. Type it locally instead of casting to any.
+type DocWithAutoTable = jsPDF & { lastAutoTable: { finalY: number } };
+const finalY = (doc: jsPDF): number => (doc as DocWithAutoTable).lastAutoTable.finalY;
+
+// Management-report extras carried on ReportData but not always present in core type.
+type ReportDataExt = ReportData & {
+  management_commission?: number;
+  owner_net_income?: number;
+};
 
 interface GeneratePdfOptions {
   propertyTitle: string;
