@@ -402,7 +402,7 @@ export const INTAKE_VERTICALS: VerticalConfig[] = [
   // ⚖️ Legal Services
   {
     id: 'legal_services',
-    table: 'lawyers',
+    table: 'listings', // unified listings table; legacy `lawyers` table was removed
     nameEn: 'Legal Services',
     nameRu: 'Юридические услуги',
     icon: '⚖️',
