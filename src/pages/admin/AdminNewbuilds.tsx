@@ -283,11 +283,11 @@ export default function AdminNewbuilds() {
 
         {/* DEVELOPERS */}
         <TabsContent value="developers" className="mt-4 space-y-3">
-          {developers.map((d: any) => (
+          {developers.map((d) => (
             <DeveloperRow
               key={d.id}
               developer={d}
-              projectCount={projects.filter((p: any) => p.developer_id === d.id || p.developer_name === d.name_en).length}
+              projectCount={projects.filter((p) => p.developer_id === d.id || p.developer_name === d.name_en).length}
               onUpdate={(updates) => updateDeveloper.mutate({ id: d.id, updates })}
             />
           ))}
