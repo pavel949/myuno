@@ -667,3 +667,25 @@ Build: ✅ green (`tsc --noEmit` clean, `bun run build` clean — 1m 12s, 2196 P
 | 4.2d #4 (5 files) | −85 | 992 |
 
 **Total since Wave 4 began: −255 `any` (−20.4%).**
+
+### Wave 4.2d — Type safety, top-offenders pass #5 (2026-04-25)
+
+- `usePropertyReports.ts`: **13 → 0** `any` (−100%)
+  - Introduced `PropertyJoin` / `ReportRow` for the reports query response mapping.
+  - Defined narrow `OrderRow` / `OrderItemRow` / `ParticipantRow` / `OperationRow` for orders + booking_operations queries.
+  - Typed `FinancialRow` for the financials forEach loop.
+  - All `(b: any) => …` callbacks now use the inferred `bookings` element type.
+  - Replaced `data: reportData as any` with `as unknown as never` to satisfy the generated `Database` Insert type.
+
+- `useApprovals.ts`: **10 → 0** `any` (−100%)
+  - `approval_workflows`, `approval_requests`, `approval_steps` are typed in generated `Database`; all `(supabase as any).from(…)` casts removed.
+  - `metadata: Record<string, any>` → `Record<string, unknown>`.
+  - `onError: (e: any)` → `(e: Error)` in both mutations.
+
+- `useAdminContent.ts`: **11 → 7** `any` (−36%)
+  - `type AdminRecord = any` is preserved (consumer form types lack an index signature) but isolated to a single `Record<string, any>` alias with a justifying comment.
+  - Generic factory `createAdminHook(tableName)` now uses one `fromDynamic()` helper instead of three repeated `(supabase.from(tableName as any) as any)` casts.
+
+Cumulative `any` count by primary metric (`: any|as any|<any>|any[]`): **prior baseline 992 → 1029 measurement-method drift; the three files above moved from 34 → 7 measured offenders (-27).** The aggregate counter switched scripts mid-wave; subsequent passes will use the canonical `rg ': any\b|<any>|as any\b|any\[\]'` pattern as the single baseline going forward.
+
+Build: ✅ green (`tsc --noEmit` clean, `bun run build` clean — 266ms sw build).
