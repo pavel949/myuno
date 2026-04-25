@@ -22,7 +22,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { Database } from '@/integrations/supabase/types';
 
 type SizeVariant = { size: string; price: number };
-type BouquetRow = Database['public']['Tables']['bouquets']['Row'] & {
+type BouquetBase = Database['public']['Tables']['bouquets']['Row'];
+// `size_variants` in DB is generic Json; narrow it locally + add the joined shop.
+type BouquetRow = Omit<BouquetBase, 'size_variants'> & {
   size_variants?: SizeVariant[] | null;
   shop?: { name_en: string | null; name_ru: string | null } | null;
 };
