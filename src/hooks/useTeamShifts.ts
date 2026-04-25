@@ -40,7 +40,7 @@ export function useCompanyShifts(range?: { from?: string; to?: string }) {
     queryKey: ['team-shifts', activeCompany?.company_id, range?.from, range?.to],
     queryFn: async (): Promise<TeamShift[]> => {
       if (!activeCompany) return [];
-      let q = (supabase as any)
+      let q = supabase
         .from('team_shifts')
         .select('*')
         .eq('company_id', activeCompany.company_id)
@@ -61,7 +61,7 @@ export function useMyShifts() {
     queryKey: ['my-shifts', user?.id],
     queryFn: async (): Promise<TeamShift[]> => {
       if (!user) return [];
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('team_shifts')
         .select('*')
         .eq('assignee_user_id', user.id)
@@ -80,7 +80,7 @@ export function useCompanyTimesheets(range?: { from?: string; to?: string }) {
     queryKey: ['team-timesheets', activeCompany?.company_id, range?.from, range?.to],
     queryFn: async (): Promise<TeamTimesheet[]> => {
       if (!activeCompany) return [];
-      let q = (supabase as any)
+      let q = supabase
         .from('team_timesheets')
         .select('*')
         .eq('company_id', activeCompany.company_id)
@@ -110,7 +110,7 @@ export function useCreateShift() {
       notes?: string;
     }) => {
       if (!activeCompany || !user) throw new Error('Missing context');
-      const { error } = await (supabase as any).from('team_shifts').insert({
+      const { error } = await supabase.from('team_shifts').insert({
         company_id: activeCompany.company_id,
         assignee_user_id: args.assignee_user_id,
         property_id: args.property_id ?? null,
@@ -127,7 +127,7 @@ export function useCreateShift() {
       qc.invalidateQueries({ queryKey: ['team-shifts'] });
       qc.invalidateQueries({ queryKey: ['my-shifts'] });
     },
-    onError: (e: any) => toast.error(e.message || 'Failed'),
+    onError: (e: Error) => toast.error(e.message || 'Failed'),
   });
 }
 
@@ -138,7 +138,7 @@ export function useClockIn() {
   return useMutation({
     mutationFn: async (args: { shift_id?: string; property_id?: string; lat?: number; lng?: number }) => {
       if (!user || !activeCompany) throw new Error('Missing context');
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('team_timesheets')
         .insert({
           company_id: activeCompany.company_id,
@@ -152,7 +152,7 @@ export function useClockIn() {
         .single();
       if (error) throw error;
       if (args.shift_id) {
-        await (supabase as any).from('team_shifts').update({ status: 'in_progress' }).eq('id', args.shift_id);
+        await supabase.from('team_shifts').update({ status: 'in_progress' }).eq('id', args.shift_id);
       }
       return data;
     },
@@ -161,7 +161,7 @@ export function useClockIn() {
       qc.invalidateQueries({ queryKey: ['team-timesheets'] });
       qc.invalidateQueries({ queryKey: ['my-shifts'] });
     },
-    onError: (e: any) => toast.error(e.message || 'Failed to clock in'),
+    onError: (e: Error) => toast.error(e.message || 'Failed to clock in'),
   });
 }
 
@@ -169,13 +169,13 @@ export function useClockOut() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (args: { timesheet_id: string; shift_id?: string; notes?: string }) => {
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('team_timesheets')
         .update({ clock_out_at: new Date().toISOString(), notes: args.notes ?? null })
         .eq('id', args.timesheet_id);
       if (error) throw error;
       if (args.shift_id) {
-        await (supabase as any).from('team_shifts').update({ status: 'completed' }).eq('id', args.shift_id);
+        await supabase.from('team_shifts').update({ status: 'completed' }).eq('id', args.shift_id);
       }
     },
     onSuccess: () => {
@@ -183,6 +183,6 @@ export function useClockOut() {
       qc.invalidateQueries({ queryKey: ['team-timesheets'] });
       qc.invalidateQueries({ queryKey: ['my-shifts'] });
     },
-    onError: (e: any) => toast.error(e.message || 'Failed to clock out'),
+    onError: (e: Error) => toast.error(e.message || 'Failed to clock out'),
   });
 }
