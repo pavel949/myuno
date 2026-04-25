@@ -22,6 +22,11 @@ interface AdminOrderDetailSheetProps {
   onStatusChanged: () => void;
 }
 
+type OrderParticipant = { id: string; name: string | null; phone: string | null; email: string | null; role: string };
+type OrderAddress = { id: string; address_type: string; address_text: string; notes: string | null };
+type OrderItem = { id: string; item_name: string; item_type: string | null; qty: number | null; unit_price: number | null; amount: number; metadata: unknown };
+type OrderMetadata = { payment_method?: string } | null;
+
 const ORDER_TYPE_EMOJI: Record<string, string> = {
   restaurant: '🍽️', flowers: '💐', yacht: '🛥️', tour: '🗺️',
   transport: '🚗', cleaning: '🧹', beauty: '💅', medical: '🏥',
