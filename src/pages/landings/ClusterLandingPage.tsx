@@ -118,14 +118,14 @@ const ClusterLandingView = ({ landing }: ClusterLandingViewProps) => {
           </p>
           <div className="mt-7 flex flex-col gap-3 sm:flex-row">
             <Button asChild size="lg" className="shadow-lg">
-              <a href={landing.primaryCta.href}>
+              <a href={withPersona(landing.primaryCta.href)}>
                 {t(landing.primaryCta.label)}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </a>
             </Button>
             {landing.secondaryCta ? (
               <Button asChild size="lg" variant="outline">
-                <a href={landing.secondaryCta.href}>{t(landing.secondaryCta.label)}</a>
+                <a href={withPersona(landing.secondaryCta.href)}>{t(landing.secondaryCta.label)}</a>
               </Button>
             ) : null}
           </div>
@@ -165,7 +165,7 @@ const ClusterLandingView = ({ landing }: ClusterLandingViewProps) => {
               {landing.services.map((service) => (
                 <li key={service.slug}>
                   <a
-                    href={service.href}
+                    href={withPersona(service.href)}
                     className="group flex h-full items-start gap-3 border border-border bg-card p-4 transition-all hover:border-primary/60 hover:[box-shadow:var(--shadow-elevation-2)]"
                   >
                     <Sparkles
@@ -260,14 +260,14 @@ const ClusterLandingView = ({ landing }: ClusterLandingViewProps) => {
           </p>
           <div className="mt-4 flex flex-col gap-2 sm:flex-row">
             <Button asChild size="lg">
-              <a href={landing.primaryCta.href}>
+              <a href={withPersona(landing.primaryCta.href)}>
                 {t(landing.primaryCta.label)}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </a>
             </Button>
             {landing.secondaryCta ? (
               <Button asChild size="lg" variant="ghost">
-                <a href={landing.secondaryCta.href}>{t(landing.secondaryCta.label)}</a>
+                <a href={withPersona(landing.secondaryCta.href)}>{t(landing.secondaryCta.label)}</a>
               </Button>
             ) : null}
           </div>
@@ -277,7 +277,7 @@ const ClusterLandingView = ({ landing }: ClusterLandingViewProps) => {
       {/* ─── STICKY MOBILE CTA ─────────────────────────────────── */}
       <div className="sticky bottom-0 z-30 border-t border-border bg-background/95 p-3 backdrop-blur sm:hidden">
         <Button asChild size="lg" className="w-full">
-          <a href={landing.primaryCta.href}>{t(landing.primaryCta.label)}</a>
+          <a href={withPersona(landing.primaryCta.href)}>{t(landing.primaryCta.label)}</a>
         </Button>
       </div>
     </AppLayout>
