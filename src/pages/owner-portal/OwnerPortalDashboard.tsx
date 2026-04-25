@@ -212,8 +212,7 @@ export default function OwnerPortalDashboard() {
           );
         })}
       </div>
-        })}
-      </div>
+
 
       {/* Contact MC */}
       <Card className="border-dashed">
