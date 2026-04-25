@@ -193,7 +193,7 @@ export function mapExperienceToCatalogCard(
 // ─── Bouquet (Flowers) ───────────────────────────────────
 
 export function mapBouquetToCatalogCard(
-  bouquet: any,
+  bouquet: Bouquet,
   language: string,
   navigate: (path: string) => void
 ): CatalogCardProps {
@@ -202,7 +202,7 @@ export function mapBouquetToCatalogCard(
   const shortDesc = isRu ? bouquet.short_description_ru : bouquet.short_description_en;
   const hasVariants = bouquet.size_variants?.length;
   const displayPrice = hasVariants
-    ? (bouquet.size_variants as any[])[0]?.price || bouquet.price
+    ? (bouquet.size_variants as SizeVariant[])[0]?.price || bouquet.price
     : bouquet.price;
 
   const badges: CatalogBadge[] = [];
@@ -239,7 +239,7 @@ export function mapBouquetToCatalogCard(
 // ─── Pet Service ─────────────────────────────────────────
 
 export function mapPetServiceToCatalogCard(
-  service: any,
+  service: PetService,
   language: string,
   navigate: (path: string) => void,
   formatPrice: (price: number) => string
@@ -269,12 +269,12 @@ const PRICE_BAND_LABEL: Record<string, string> = {
 };
 
 export function mapRestaurantToCatalogCard(
-  restaurant: any,
+  restaurant: Restaurant,
   language: string,
   navigate: (path: string) => void
 ): CatalogCardProps {
   const isRu = language === 'ru';
-  const r = restaurant as any;
+  const r = restaurant;
   const cuisineTags = r.cuisine_tags as string[] | null;
   const priceBand = r.price_band as string | null;
   const reservationUrl = r.reservation_url as string | null;
@@ -307,7 +307,7 @@ export function mapRestaurantToCatalogCard(
 // ─── Salon (Beauty & Spa) ────────────────────────────────
 
 export function mapSalonToCatalogCard(
-  salon: any,
+  salon: Salon,
   language: string,
   navigate: (path: string) => void
 ): CatalogCardProps {
@@ -332,7 +332,7 @@ export function mapSalonToCatalogCard(
 // ─── Gym (Fitness) ───────────────────────────────────────
 
 export function mapGymToCatalogCard(
-  gym: any,
+  gym: Gym,
   language: string,
   navigate: (path: string) => void
 ): CatalogCardProps {
@@ -362,7 +362,7 @@ export function mapGymToCatalogCard(
 // ─── Education Provider ──────────────────────────────────
 
 export function mapEducationToCatalogCard(
-  provider: any,
+  provider: EducationProvider,
   language: string,
   navigate: (path: string) => void
 ): CatalogCardProps {
@@ -391,7 +391,7 @@ export function mapEducationToCatalogCard(
 // ─── Cleaning Service ────────────────────────────────────
 
 export function mapCleaningToCatalogCard(
-  service: any,
+  service: PetService,
   language: string,
   navigate: (path: string) => void
 ): CatalogCardProps {
@@ -421,7 +421,7 @@ export function mapCleaningToCatalogCard(
 // ─── Event ───────────────────────────────────────────────
 
 export function mapEventToCatalogCard(
-  event: any,
+  event: EventItem,
   language: string,
   navigate: (path: string) => void,
   formatDate: (dateStr: string | null) => string
@@ -450,7 +450,7 @@ export function mapEventToCatalogCard(
 // ─── Clinic (Medical) ────────────────────────────────────
 
 export function mapClinicToCatalogCard(
-  clinic: any,
+  clinic: Clinic,
   language: string,
   navigate: (path: string) => void,
   isOpen: boolean
