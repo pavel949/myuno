@@ -1,86 +1,119 @@
-## Аудит записей: код → таблицы
+# План «Большая уборка»: оптимизация и снижение рисков myUNO
 
-Прошёлся по всем `.from('xxx').insert/upsert/update/delete` в `src/` и `supabase/functions/` (всего ~395 уникальных ссылок) и сверил с реальной схемой БД (435 публичных таблиц). Отфильтровал шум (тесты, JSDoc-примеры) и нашёл **19 настоящих несуществующих таблиц**, к которым код пытается писать или читать. Все они приведут к runtime-ошибке `relation "xxx" does not exist`.
+## Что мы имеем сейчас (фактические замеры)
 
-### Результаты по группам
+| Метрика | Значение | Комментарий |
+|---|---|---|
+| TS/TSX файлов | 2 308 | очень крупный SPA |
+| Страниц (`src/pages`) | 503 | + 606 `<Route>` в одном `AnimatedRoutes.tsx` (969 строк) |
+| Компонентов | 1 068 | |
+| Хуков | 420 | дубли почти гарантированы |
+| Edge-функций | 169 | многие толстые (>500 строк) |
+| Миграций | 653 | |
+| Таблиц в БД | 448 | |
+| Зависимостей npm | 80 + 21 | |
+| `any` в типах | 441 | дыры в типобезопасности |
+| `console.*` в коде | 294 | мусор и потенциальная утечка данных в проде |
+| Размер `types.ts` | 33 920 строк | сигнал, что схема разрослась |
 
-#### 🔴 P0 — Платный функционал ломается
+Главный риск — **код растёт быстрее, чем стратегия**: новые фичи добавляются раньше, чем интегрируются и тестируются старые. Это приводит к мёртвым файлам, дубликатам, тихим багам и деградации производительности.
 
-| Таблица в коде | Где | Что должно быть | Эффект сейчас |
-|---|---|---|---|
-| `property_stays_subscriptions` | `stripe-webhook/index.ts` (3 места) | `stays_subscription` (ед. число) | Stripe-вебхук падает на upsert подписки → подписки PMS не активируются после оплаты |
-| `manual_payment_proofs` | `OperationsManualPaymentsTab.tsx` (2 места) | `manual_payment_requests` | Админ-вкладка ручных платежей не отображает данные |
-| `mc_finance_transactions` | `export-mc-data`, `scheduled-mc-backup` | Не существует — нужна замена на `property_financials` или `transactions` (требует уточнения) | Экспорт MC-данных и ночной бэкап молча возвращают пустой массив |
+## Подход: 5 волн, каждая даёт измеримый эффект
 
-#### 🟡 P1 — AI-агенты и автоматизации не пишут историю
+Идём итеративно — после каждой волны коммитим, проверяем работу приложения, замеряем эффект. Не «большой рефакторинг на месяц», а серия безопасных шагов.
 
-| Таблица в коде | Где | Что должно быть | Эффект |
-|---|---|---|---|
-| `ai_decisions_log` | `ai-content-planner`, `ai-owner-nurture`, `ai-platform-intelligence`, `publish-telegram-post` (5 мест) | Не существует — закроем `ai_agent_logs` или создадим новую | Агенты работают, но решения не логируются → нет аудита, нет аналитики |
-| `social_content_calendar` | `ai-content-planner`, `auto-social-publish`, `publish-telegram-post` (4 места) | Не существует — нужна новая таблица | Контент-планер и авто-публикация в Telegram падают |
-| `social_posts` | `ai-platform-intelligence`, `publish-telegram-post` | Не существует — нужна новая таблица | Метрики публикаций не сохраняются |
-| `founder_daily_brief` | `ai-orchestrator/index.ts` | Существует только view `v_founder_inbox`; нужна таблица или upsert в подходящую существующую | Дашборд founder’а не получает свежие brief’ы |
-| `owner_prospects` | `ai-owner-nurture` (8 мест) | Не существует — нужна таблица или замена на `vendor_prospects` | Нурчер собственников не работает |
-| `crm_nurture_queue` | `send-nurture-messages` | Не существует — заменить на `outreach_messages` или `vendor_prospect_activity` | Cron-функция нурчинга не отправляет сообщений |
-| `mcc_events` | `execute-campaign-rules` (3 места) | Не существует — `mcc_campaigns` / `mcc_landing_events` есть, нужно решить какое | Кампании MCC не триггерятся |
-| `offer_history` | `ai-generate-offer` | Не существует | История AI-офферов не сохраняется |
+---
 
-#### 🟠 P2 — Frontend-страницы и второстепенные сервисы
+### Волна 1 — Аудит и карта (read-only, без изменений кода)
 
-| Таблица в коде | Где | Что должно быть | Эффект |
-|---|---|---|---|
-| `viewing_requests` | `InvestorWelcomeCard.tsx` | Не существует — заменить на `property_inquiries` | Welcome-карточка инвестора падает |
-| `ai_task_suggestions` | `TopActionsWidget.tsx`, `ai-orchestrator`, `guest-referral-engine` | Не существует — нужна таблица или замена на `crm_tasks` | Виджет «Top actions» в дашборде MC пустой |
-| `booking_conflicts` | `useChannelHealth.ts`, `ical-sync`, `ical-scheduled-sync` | Не существует — нужна таблица | iCal-конфликты не сохраняются (логи показывают, что cron работает, но конфликтов 0 — потому что таблица отсутствует, не потому что конфликтов нет) |
-| `guest_referral_codes` | `guest-referral-engine` | Существует `referral_codes` | Реферальная программа гостей сломана |
-| `property_guidebooks` | `ai-guest-autoreply` | Существует `property_guidebook` (ед.ч.) | AI-автоответ гостям не находит гайдбука |
-| `document_reminders` | `document-reminder-check` | Не существует — нужна таблица | Cron напоминаний о документах падает |
-| `email_subscriptions` | `UnderConstruction.tsx` | Не существует | «Maintenance mode» не сохраняет email-ы |
-| `leads` | `peylaa-nurture` | Существует `nb_leads` (newbuilds) или `mcc_leads` — нужно уточнить | Peylaa-нурчер ничего не находит |
+Цель: получить **точную карту того, что лишнее, что дублируется, что опасно**.
 
-### План работ (в build-режиме, после approve)
+1. **Mёртвый код**: запустить `knip` или `ts-prune` — получить список неиспользуемых файлов/экспортов/зависимостей.
+2. **Дубликаты**: `jscpd` для поиска копипасты (особенно в `src/pages/owner/`, `src/pages/vendor/`, `src/pages/admin/`).
+3. **Размер бандла**: `vite build` + `rollup-plugin-visualizer` — карта чанков, тяжёлые зависимости.
+4. **Анализ БД**: список таблиц без RLS, без записей за 90 дней, без FK — кандидаты на удаление.
+5. **Edge functions**: список функций без вызовов из кода и без cron — кандидаты на архив.
+6. **Routes**: какие из 606 маршрутов реально посещаются (по `analytics`).
 
-1. **Простые ренеймы (5 мин)** — заменить имя таблицы, типы автогенерируются:
-   - `property_stays_subscriptions` → `stays_subscription` (3 строки в `stripe-webhook`)
-   - `manual_payment_proofs` → `manual_payment_requests` (2 строки)
-   - `property_guidebooks` → `property_guidebook` (1 строка)
-   - `guest_referral_codes` → `referral_codes` (2 строки + добавить `kind='guest'` если нужно)
-   - `viewing_requests` → `property_inquiries` (1 строка, поправить поля в адаптере)
+**Результат волны:** документ `docs/audits/2026-04-cleanup-map.md` со списками-кандидатами. Ничего не удаляем — только составляем список.
 
-2. **Создать недостающие таблицы (миграция)** — для функций, которые имеют активный cron / webhook, но льют в пустоту:
-   - `ai_decisions_log` (agent_slug, status, tokens_used, decision_type, payload jsonb, created_at) — общий аудит-лог AI решений
-   - `social_content_calendar` (id, platform, scheduled_at, content jsonb, status, created_by)
-   - `social_posts` (id, platform, status, external_id, posted_at, content)
-   - `owner_prospects` (id, owner_user_id, source, status, last_touched_at, properties jsonb)
-   - `ai_task_suggestions` (id, user_id, kind, title, payload jsonb, status, created_at)
-   - `booking_conflicts` (id, calendar_id, property_id, source_event_id, conflict_type, raw jsonb, resolved_at)
-   - `document_reminders` (id, document_id, user_id, fire_at, status)
-   - `offer_history` (id, contact_id, offer_payload jsonb, generated_by, created_at)
-   - `email_subscriptions` (id, email, source, created_at) — публичный insert с RLS
+---
 
-   Каждая — с RLS (admin-only, кроме `email_subscriptions`).
+### Волна 2 — Безопасные удаления и архивирование
 
-3. **Заменить ссылки на существующие** там, где замена очевидна:
-   - `crm_nurture_queue` → `outreach_messages` (поправить колонки в `send-nurture-messages`)
-   - `mcc_events` → `mcc_landing_events` (поправить колонки в `execute-campaign-rules`)
-   - `leads` в `peylaa-nurture` → `nb_leads` или `mcc_leads` (нужно уточнить у вас, что Peylaa использует)
-   - `mc_finance_transactions` → нет прямой замены; оставить пустой массив с warning или создать новую таблицу
+Только то, что 100% не используется (подтверждено knip + grep + analytics).
 
-4. **`founder_daily_brief`**: либо `INSERT INTO` материализованную таблицу (создать), либо переписать orchestrator на использование `v_founder_inbox`-source таблиц напрямую. Предлагаю создать настоящую таблицу `founder_daily_brief`.
+1. Удалить мёртвые файлы из `src/` (по подтверждённому списку).
+2. Перенести устаревшие edge-функции в `supabase/functions/_archived/` (не удаляем — пометка).
+3. Удалить неиспользуемые npm-зависимости (`bun remove`).
+4. Удалить дубли иконок/ассетов в `public/`.
+5. Архивировать миграции старше года в `supabase/migrations/_archive/` (информационно — Supabase их уже применил).
 
-5. **Verification**: после каждой группы — `tsc --noEmit`, прогон intake/stripe-webhook через `curl_edge_functions`, проверка `edge_function_logs`.
+**Эффект:** −20–30% файлов, −10–20% размера бандла, ускорение TS-компиляции.
 
-### Что НЕ трогаю
+---
 
-- Существующие таблицы с правильными именами, но потенциально сложными RLS-политиками (отдельный аудит, если нужно).
-- 376 ссылок, где код и БД совпадают — они работают.
-- Mock/example/test строки в комментариях и тестовых файлах (`abc`, `foo`, `mytable` и т.п.).
+### Волна 3 — Структурная консолидация
 
-### Уточнения перед стартом
+Привести крупные узлы к стандарту проекта (CLAUDE.md §1.5: surfaces · clusters · hard rules).
 
-Нужно ваше «да» на:
-- **`mc_finance_transactions`**: создать новую таблицу или забить (функции экспорта/бэкапа просто будут возвращать пусто)?
-- **`leads` в peylaa-nurture**: это `nb_leads` или `mcc_leads`?
-- **`founder_daily_brief`**: создать таблицу или переписать orchestrator на `v_founder_inbox`?
+1. **Разбить `AnimatedRoutes.tsx` (969 строк, 606 routes)** на модули по кластерам (Arrive/Live/Manage/Invest/Legal/Build) с lazy-загрузкой.
+2. **Сократить топ-10 самых больших файлов** (>900 строк): `OwnerRentalTerms`, `CanonicalListingWizard`, `PropertyConsultation`, `ContactDetail`, `AdminProjects`, `usePropertyWizard`, `StaffPage`, `OwnerPropertyImport`, `VendorYachts` — выделить хуки и подкомпоненты.
+3. **Дедупликация хуков** (420 шт.) — найти семантические дубли через `jscpd` и слить через barrel-экспорты.
+4. **Edge functions ≥500 строк** — вынести общую логику в `supabase/functions/_shared/`.
 
-Если ответите «решай сам, делай оптимально» — пойду по дефолтам: создам таблицы для всего критичного, остальное — рефактор на существующие.
+**Эффект:** читаемость, скорость онбординга, меньше merge-конфликтов, более стабильный Fast Refresh.
+
+---
+
+### Волна 4 — Качество и типобезопасность
+
+1. **Убрать `any`** — заменить на `unknown` + typed guards в первую очередь в admin/intake/catalog (~441 места, итеративно).
+2. **Заменить `console.*` (294)** на единый logger (`createErrorHandler`), который молчит в проде.
+3. **Включить ESLint правила** как warnings: `@typescript-eslint/no-explicit-any`, `react-hooks/exhaustive-deps`.
+4. **Оптимизировать `types.ts`**: проверить, можно ли исключить из контроля типов архивные таблицы (генерация только по используемым схемам).
+5. **Smoke-тесты на критичные потоки**: auth, checkout, intake, MC dashboard (Vitest + Playwright уже настроены).
+
+---
+
+### Волна 5 — Производительность и риски в проде
+
+1. **Vite chunk strategy**: ручное `manualChunks` для тяжёлых вендоров (Supabase, Maps, Stripe, Framer).
+2. **Lazy-границы**: убедиться, что админка / vendor / MC не попадают в бандл публичных страниц.
+3. **React Query**: единые `staleTime` / `gcTime` для каждой вертикали (см. `defaultQueryClientOptions`).
+4. **Виртуализация** длинных списков в admin/CRM (`@tanstack/react-virtual` уже в зависимостях).
+5. **Безопасность**: запустить `security--run_security_scan` + `supabase--linter`, починить блокирующие находки (RLS, экспонированные данные).
+6. **Sentry**: убедиться, что включён в проде и нет шума от дев-логов.
+
+---
+
+## Технические детали
+
+- **Инструменты добавим разово** в `devDependencies`: `knip`, `ts-prune`, `jscpd`, `rollup-plugin-visualizer`, `depcheck`. Удалим после аудита, если не нужны.
+- **Безопасность удаления**: ничего не сносим без двух подтверждений (knip + grep по строке имени файла + ручная проверка для пограничных случаев).
+- **Архивы**, не `rm`: `archive/2026-04-cleanup/` уже есть в проекте — придерживаемся той же конвенции.
+- **БД-миграции**: всегда новые миграции, никаких изменений в `_archive/`.
+- **Без поломок прод-данных**: PRIMARY DB одна на dev/preview/prod (см. CLAUDE §4) — никакого `DROP TABLE` без явного подтверждения.
+
+## Что я предложу сделать прямо сейчас (после approve)
+
+Стартуем с **Волны 1** (read-only аудит). Это безопасно и даст точные числа для последующих решений. По итогам Волны 1 я вернусь с конкретным списком: «удалить эти 187 файлов», «архивировать эти 23 edge-функции», «удалить эти 14 npm-зависимостей» — и каждое решение будет проверяемым.
+
+Дальнейшие волны запускаем по одной, с твоим одобрением между ними.
+
+## Что НЕ делаем в этом плане
+
+- Не переписываем приложение «с нуля» и не меняем стек.
+- Не трогаем продуктовую логику и UI без явной необходимости.
+- Не удаляем данные из БД — только помечаем кандидатов.
+- Не меняем `types.ts`, `client.ts`, `.env`, `config.toml` — они автогенерируются.
+
+## Ожидаемый итог после всех 5 волн
+
+- −25–35% файлов в `src/`
+- −20–30% размера JS-бандла
+- 0 `any` в критичных модулях (auth, payments, intake)
+- 0 `console.*` в проде
+- Все routes покрыты lazy-загрузкой по кластерам
+- Документированный список «что зачем нужно» в `docs/audits/`
+- Устойчивая база для роста до PMF без накопления нового долга
