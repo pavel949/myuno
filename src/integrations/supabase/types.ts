@@ -3536,6 +3536,35 @@ export type Database = {
           },
         ]
       }
+      clearview_bundle_slots: {
+        Row: {
+          consumed_at: string
+          id: string
+          project_id: string
+          purchase_id: string
+        }
+        Insert: {
+          consumed_at?: string
+          id?: string
+          project_id: string
+          purchase_id: string
+        }
+        Update: {
+          consumed_at?: string
+          id?: string
+          project_id?: string
+          purchase_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clearview_bundle_slots_purchase_id_fkey"
+            columns: ["purchase_id"]
+            isOneToOne: false
+            referencedRelation: "clearview_purchases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clearview_categories: {
         Row: {
           code: string
@@ -3638,8 +3667,11 @@ export type Database = {
           created_at: string
           currency: string | null
           id: string
-          project_id: string
+          project_id: string | null
+          quota_remaining: number | null
           stripe_session_id: string | null
+          stripe_subscription_id: string | null
+          tier: string
           user_id: string
           valid_until: string
         }
@@ -3648,8 +3680,11 @@ export type Database = {
           created_at?: string
           currency?: string | null
           id?: string
-          project_id: string
+          project_id?: string | null
+          quota_remaining?: number | null
           stripe_session_id?: string | null
+          stripe_subscription_id?: string | null
+          tier?: string
           user_id: string
           valid_until?: string
         }
@@ -3658,8 +3693,11 @@ export type Database = {
           created_at?: string
           currency?: string | null
           id?: string
-          project_id?: string
+          project_id?: string | null
+          quota_remaining?: number | null
           stripe_session_id?: string | null
+          stripe_subscription_id?: string | null
+          tier?: string
           user_id?: string
           valid_until?: string
         }
@@ -31897,6 +31935,10 @@ export type Database = {
       clearview_grade_to_recommendation: {
         Args: { _grade: string }
         Returns: string
+      }
+      consume_clearview_bundle_slot: {
+        Args: { _project_id: string }
+        Returns: boolean
       }
       create_booking_with_wallet_payment: {
         Args: {
