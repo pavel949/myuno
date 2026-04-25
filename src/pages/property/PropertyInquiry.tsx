@@ -59,7 +59,7 @@ export default function PropertyInquiry() {
   type PropertyExt = {
     tenancy_modes?: string[] | null;
     currency?: string | null;
-    seasonal_pricing?: unknown;
+    seasonal_pricing?: SeasonalPricingRule[] | null;
     cleaning_fee?: number | null;
     provider_id?: string | null;
     owner_id?: string | null;
