@@ -339,8 +339,7 @@ export function useGenerateReport() {
       const totalNights = Math.max(0, Math.ceil((endExclusiveMs - startDate.getTime()) / 86400000));
 
       let nightsBooked = 0;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (bookings || []).forEach((b: any) => {
+      (bookings || []).forEach((b) => {
         const checkIn = new Date(b.check_in);
         const checkOut = new Date(b.check_out);
 
