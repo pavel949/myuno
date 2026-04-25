@@ -54,17 +54,43 @@ export default function PropertyInquiry() {
   // Determine booking mode from property data
   const { data: property } = usePropertyWithRentalTerms(id);
   const rentalTerms = property?.rentalTerms;
+
+  // Loose extension typings — fields exist in DB but aren't in generated types yet.
+  type PropertyExt = {
+    tenancy_modes?: string[] | null;
+    currency?: string | null;
+    seasonal_pricing?: unknown;
+    cleaning_fee?: number | null;
+    provider_id?: string | null;
+    owner_id?: string | null;
+  };
+  type RentalTermsExt = {
+    currency?: string | null;
+    price_per_night?: number | null;
+    early_booking_discount?: number | null;
+    early_booking_days?: number | null;
+    last_minute_discount?: number | null;
+    last_minute_days?: number | null;
+    custom_length_discounts?: unknown;
+    payment_policy?: string | null;
+    prepay_percent?: number | null;
+    manager_email?: string | null;
+    manager_phone?: string | null;
+  };
+  const propertyExt = (property ?? null) as (typeof property & PropertyExt) | null;
+  const rentalExt = (rentalTerms ?? null) as (typeof rentalTerms & RentalTermsExt) | null;
+
   const isInstantBooking = !!(property?.instant_booking || rentalTerms?.instant_booking);
 
   // 6-tracks guard: STR booking flow only supports short-stay listings.
   // If owner has switched the listing to medium/long-only or sale-only, redirect
   // back to the detail page (which renders the correct lead-form CTA).
-  const tenancyModes: string[] = Array.isArray((property as any)?.tenancy_modes)
-    ? ((property as any).tenancy_modes as string[])
+  const tenancyModes: string[] = Array.isArray(propertyExt?.tenancy_modes)
+    ? (propertyExt!.tenancy_modes as string[])
     : [];
   const supportsShortStay = tenancyModes.length > 0
     ? tenancyModes.includes('short')
-    : !!(property?.price_per_night || (rentalTerms as any)?.price_per_night);
+    : !!(property?.price_per_night || rentalExt?.price_per_night);
   useEffect(() => {
     if (!property) return;
     if (!supportsShortStay) {
