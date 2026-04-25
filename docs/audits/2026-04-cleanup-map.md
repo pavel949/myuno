@@ -475,3 +475,41 @@ rows  table
 4. По **48 таблицам** — пометить как deprecated, через 30 дней мониторинга удалить пустые миграцией.
 
 Каждое удаление = отдельная маленькая PR-волна с прогоном тестов.
+
+---
+
+## Wave 2 — Completed (2026-04-25)
+
+### Removed
+
+- **7 npm-зависимостей**: `@radix-ui/react-aspect-ratio`, `@tanstack/react-virtual`, `@types/dompurify`, `driver.js`, `next-themes`, `react-resizable-panels`, `serialize-javascript`
+- **2 сиротских shadcn-обёртки**: `src/components/ui/resizable.tsx`, `src/components/ui/aspect-ratio.tsx`
+- **192 мёртвых TS/TSX файла** (из 194 кандидатов knip; 2 отсутствовали)
+
+### Fixed
+
+- `VendorAvatarMenu.tsx`: переключён с `next-themes` на собственный `@/contexts/ThemeContext`
+- `vite.config.ts`: убран `@radix-ui/react-aspect-ratio` из `manualChunks`
+- `src/components/vendor/dashboard/index.ts`: barrel почищен от 5 ссылок на удалённые файлы
+
+### Verification
+
+- ✅ `tsc --noEmit` чистый
+- ✅ `vite build` успешен (2 196 entries, 13.6 MB precache)
+
+### Метрики до/после
+
+| Метрика | Было | Стало | Δ |
+|---|---|---|---|
+| TS/TSX файлов | 2 308 | 2 114 | −194 (−8.4%) |
+| Компонентов | 1 068 | 945 | −123 (−11.5%) |
+| npm-зависимостей | 80 | 73 | −7 |
+| Размер `src/` | 30M | 29M | −1M |
+
+### Что НЕ трогали (требует следующих волн)
+
+- 85 edge-функций без вызовов из `src/` — нужна сверка с cron/webhook
+- 48 таблиц БД без упоминаний — мониторинг 30 дней
+- 384 файла с неиспользуемыми экспортами — Волна 4
+- 441 `any`, 294 `console.*` — Волна 4
+- `AnimatedRoutes.tsx` 969 строк / 606 routes — Волна 3
