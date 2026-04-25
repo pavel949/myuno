@@ -9,7 +9,7 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { withPersonaParam } from '@/lib/landings/personaTagMap';
-import { resolvePersonaSlug } from '@/lib/landings/slugAliases';
+import { resolveClusterSlug, resolvePersonaSlug } from '@/lib/landings/slugAliases';
 import {
   findClusterLandingBySlug,
   isLiveClusterLanding,
@@ -18,7 +18,6 @@ import {
 } from '@/lib/landings/types';
 import { CLUSTER_LANDINGS } from '@/content/landings/clusterLandings';
 import { PERSONA_LANDINGS } from '@/content/landings/personaLandings';
-import { resolveClusterSlug } from '@/lib/landings/slugAliases';
 import NotFound from '@/pages/NotFound';
 import { Button } from '@/components/ui/button';
 import LandingSeoHead from '@/components/seo/LandingSeoHead';
