@@ -49,18 +49,30 @@ Deno.serve(async (req) => {
         company_name: company.name_en,
       };
 
-      const [props, contacts, deals, transactions, reports] = await Promise.all([
+      const [props, contacts, deals, reports] = await Promise.all([
         sb.from('properties').select('*').eq('management_company_id', company.id),
         sb.from('crm_contacts').select('*').eq('company_id', company.id),
         sb.from('agent_deals').select('*').eq('company_id', company.id),
-        /* TODO: missing table — see audit */ sb.from('mc_finance_transactions' as any).select('*').eq('company_id', company.id),
         sb.from('owner_reports').select('*').eq('company_id', company.id),
       ]);
+
+      // Finance: pulled from property_financials via this company's properties
+      // (mc_finance_transactions does not exist — financial data lives per-property).
+      const propertyIds = (props.data || []).map((p: { id: string }) => p.id);
+      let financeRows: unknown[] = [];
+      if (propertyIds.length > 0) {
+        const { data: txs } = await sb
+          .from('property_financials')
+          .select('*')
+          .in('property_id', propertyIds)
+          .order('transaction_date', { ascending: false });
+        financeRows = txs || [];
+      }
 
       allData.properties = props.data || [];
       allData.crm_contacts = contacts.data || [];
       allData.crm_deals = deals.data || [];
-      allData.finance_transactions = transactions.data || [];
+      allData.finance_transactions = financeRows;
       allData.reports = reports.data || [];
 
       // Upload to storage
