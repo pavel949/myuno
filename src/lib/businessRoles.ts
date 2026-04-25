@@ -52,6 +52,7 @@ export type DashboardWidgetKey =
   | 'business_health'
   | 'top_actions'
   | 'sell_signal'
+  | 'crm_snapshot'
   | 'menu';
 
 export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
