@@ -196,7 +196,6 @@ export default defineConfig(({ mode }) => {
             'vendor-radix': [
               '@radix-ui/react-accordion',
               '@radix-ui/react-alert-dialog',
-              '@radix-ui/react-aspect-ratio',
               '@radix-ui/react-avatar',
               '@radix-ui/react-checkbox',
               '@radix-ui/react-collapsible',

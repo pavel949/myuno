@@ -1,1 +1,0 @@
-export { StickyCartBar } from './StickyCartBar';
