@@ -84,16 +84,22 @@ Deno.serve(async (req) => {
       throw new Error("Unauthorized");
     }
 
-    // Check if user is admin
-    const { data: profile } = await supabase
-      .from('profiles')
+    // Check if user has admin/staff/uno_team role via user_roles table
+    // (profiles.role does not exist — roles live in public.user_roles for RLS safety)
+    const { data: roles, error: rolesError } = await supabase
+      .from('user_roles')
       .select('role')
-      .eq('id', user.id)
-      .single();
-    
+      .eq('user_id', user.id);
+
+    if (rolesError) {
+      console.error('user_roles lookup failed:', rolesError);
+      throw new Error('Authorization check failed');
+    }
+
     const allowedRoles = ['admin', 'staff', 'uno_team'];
-    if (!profile || !allowedRoles.includes(profile.role)) {
-      throw new Error("Admin access required");
+    const hasAccess = (roles ?? []).some((r: { role: string }) => allowedRoles.includes(r.role));
+    if (!hasAccess) {
+      throw new Error('Admin access required');
     }
 
     // Parse request body
