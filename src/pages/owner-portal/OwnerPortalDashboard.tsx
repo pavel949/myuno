@@ -9,8 +9,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useMyPortalSettings } from '@/hooks/useOwnerPortalSettings';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Building2, ArrowRight, Eye, MessageSquare, Shield, FileCheck, FileSignature, Lock } from 'lucide-react';
 import { LoadingSpinner } from '@/components/uno/LoadingSpinner';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function OwnerPortalDashboard() {
   const navigate = useNavigate();
