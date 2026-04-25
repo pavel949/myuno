@@ -1655,6 +1655,7 @@ export const PERSONA_LANDINGS: readonly PersonaLanding[] = [
   P23_SMB,
   P24_CREATIVES,
   P25_STUDENTS,
+  P26_CONSCIOUS_EATERS,
 ] as const;
 
 export const LIVE_PERSONA_SLUGS: readonly string[] = [
