@@ -42,6 +42,7 @@ export default function FitnessIndex() {
   const [filterValues, setFilterValues] = useState<FilterValues>({});
   const [sortBy, setSortBy] = useState('recommended');
   const isRu = language === 'ru';
+  const { applyFilter: applyPersonaFilter } = usePersonaFilter();
 
   const filterActiveCount = useMemo(() => {
     return Object.values(filterValues).filter(v =>
