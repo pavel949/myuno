@@ -370,7 +370,7 @@ export default function AdminExperiences() {
 
                       <div className="absolute top-2 right-2 flex gap-1">
                         {!item.is_active && <Badge variant="secondary">Inactive</Badge>}
-                        {(item as any).source_page_url && (
+                        {item.source_page_url && (
                           <Badge variant="outline" className="bg-background/80">
                             <Globe className="w-3 h-3" />
                           </Badge>
@@ -387,7 +387,7 @@ export default function AdminExperiences() {
                           <DropdownMenuItem onClick={(e) => { e.stopPropagation(); openEditDialog(item); }}>
                             <Edit className="w-4 h-4 mr-2" /> Edit
                           </DropdownMenuItem>
-                          {(item as any).source_page_url && (
+                          {item.source_page_url && (
                             <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleRunMediaImport(item.id); }}>
                               <Image className="w-4 h-4 mr-2" /> Import Media
                             </DropdownMenuItem>
@@ -403,7 +403,7 @@ export default function AdminExperiences() {
                       <h3 className="font-semibold line-clamp-1 mb-1">{item.title_en}</h3>
                       <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground mb-2">
                         <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{formatDuration(item.duration_minutes)}</span>
-                        {(item as any).pickup_included && (
+                        {item.pickup_included && (
                           <span className="flex items-center gap-1"><Truck className="w-3.5 h-3.5" />Pickup</span>
                         )}
                         {item.category && <Badge variant="outline" className="text-xs">{item.category}</Badge>}
@@ -412,9 +412,9 @@ export default function AdminExperiences() {
                         <span className="font-bold text-primary">
                           {item.price ? `฿${item.price.toLocaleString()}` : 'See pricing'}
                         </span>
-                        {(item as any).booking_url && (
+                        {item.booking_url && (
                           <a
-                            href={(item as any).booking_url}
+                            href={item.booking_url}
                             target="_blank"
                             rel="noopener"
                             onClick={e => e.stopPropagation()}
@@ -454,9 +454,9 @@ export default function AdminExperiences() {
 
               <SourceVerificationPanel
                 experienceId={selectedExp.id}
-                sourcePageUrl={(selectedExp as any).source_page_url}
-                bookingUrl={(selectedExp as any).booking_url}
-                notes={(selectedExp as any).notes as Record<string, unknown> | null}
+                sourcePageUrl={(selectedExp as AdminExperience & ExperienceExt).source_page_url}
+                bookingUrl={(selectedExp as AdminExperience & ExperienceExt).booking_url}
+                notes={(selectedExp as AdminExperience & ExperienceExt).notes as Record<string, unknown> | null}
               />
 
               <Card>
