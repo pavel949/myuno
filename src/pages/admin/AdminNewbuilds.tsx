@@ -435,7 +435,7 @@ function ProjectRow({ project: p, index, isEditing, onEdit, onUpdate }: {
 }
 
 /* ─── Featured row with rank/label editing ─── */
-function FeaturedRow({ project: p, onUpdate, onRemove }: { project: any; onUpdate: (u: any) => void; onRemove: () => void }) {
+function FeaturedRow({ project: p, onUpdate, onRemove }: { project: Project; onUpdate: (u: ProjectUpdate) => void; onRemove: () => void }) {
   return (
     <div className="border rounded-none p-4 flex items-center gap-4">
       <div className="flex items-center gap-2 w-12">
