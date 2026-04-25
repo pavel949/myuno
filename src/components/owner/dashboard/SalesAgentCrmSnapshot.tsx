@@ -80,8 +80,8 @@ export function SalesAgentCrmSnapshot() {
   const activeDeals = deals.filter(
     (d) => d.stage !== 'closed_won' && d.stage !== 'closed_lost',
   );
-  const hotDeals = activeDeals.filter((d) => d.stage === 'qualified' || d.stage === 'viewing');
-  const reservations = activeDeals.filter((d) => d.stage === 'reservation' || d.stage === 'contract');
+  const hotDeals = activeDeals.filter((d) => d.stage === 'showing' || d.stage === 'negotiation');
+  const reservations = activeDeals.filter((d) => d.stage === 'contract');
   const signals = sellSignals.length;
 
   return (
