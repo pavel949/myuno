@@ -1,13 +1,14 @@
 import type { PropertyFinancialFull } from '@/hooks/usePropertyFinancials';
 import type { BudgetVsActual } from '@/hooks/usePropertyBudgets';
 import type { PropertyReport } from '@/hooks/usePropertyReports';
+import type { Worksheet, Workbook, Cell, Column } from 'exceljs';
 
 // ExcelJS is loaded lazily to avoid 918KB in the main bundle
 
-function autoWidth(ws: any) {
-  ws.columns.forEach((col: any) => {
+function autoWidth(ws: Worksheet) {
+  ws.columns.forEach((col: Partial<Column>) => {
     let max = 12;
-    col.eachCell?.({ includeEmpty: false }, (cell: any) => {
+    col.eachCell?.({ includeEmpty: false }, (cell: Cell) => {
       const len = String(cell.value ?? '').length + 2;
       if (len > max) max = len;
     });
@@ -15,11 +16,11 @@ function autoWidth(ws: any) {
   });
 }
 
-function styledHeader(ws: any) {
-  const HEADER_FILL = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1A73E8' } };
+function styledHeader(ws: Worksheet) {
+  const HEADER_FILL = { type: 'pattern' as const, pattern: 'solid' as const, fgColor: { argb: 'FF1A73E8' } };
   const HEADER_FONT = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
   const row = ws.getRow(1);
-  row.eachCell((cell: any) => {
+  row.eachCell((cell: Cell) => {
     cell.fill = HEADER_FILL;
     cell.font = HEADER_FONT;
     cell.alignment = { vertical: 'middle', horizontal: 'center' };
