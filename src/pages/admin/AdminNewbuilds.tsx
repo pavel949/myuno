@@ -212,9 +212,9 @@ export default function AdminNewbuilds() {
               <div className="sticky top-0 z-10 flex items-center justify-between gap-2 p-3 mb-3 rounded-none border bg-card shadow-sm">
                 <div className="flex items-center gap-3">
                   <Checkbox
-                    checked={selectedIds.size > 0 && pending.every((p: any) => selectedIds.has(p.id))}
+                    checked={selectedIds.size > 0 && pending.every((p) => selectedIds.has(p.id))}
                     onCheckedChange={(v) => {
-                      if (v) setSelectedIds(new Set(pending.map((p: any) => p.id)));
+                      if (v) setSelectedIds(new Set(pending.map((p) => p.id)));
                       else clearSelection();
                     }}
                     aria-label="Выбрать все"
