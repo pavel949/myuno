@@ -74,7 +74,7 @@ function useBouquetsAdmin() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: Record<string, any> }) => {
+    mutationFn: async ({ id, updates }: { id: string; updates: Record<string, unknown> }) => {
       const { error } = await supabase.from('bouquets').update(updates).eq('id', id);
       if (error) throw error;
     },
@@ -84,10 +84,10 @@ function useBouquetsAdmin() {
   const toggleActive = (id: string, isActive: boolean) =>
     updateMutation.mutateAsync({ id, updates: { is_active: isActive } });
 
-  const updatePrice = (id: string, price: number, sizeVariants: any) =>
+  const updatePrice = (id: string, price: number, sizeVariants: SizeVariant[]) =>
     updateMutation.mutateAsync({ id, updates: { price, size_variants: sizeVariants } });
 
-  const updateField = (id: string, field: string, value: any) =>
+  const updateField = (id: string, field: string, value: unknown) =>
     updateMutation.mutateAsync({ id, updates: { [field]: value } });
 
   return { bouquets, isLoading, toggleActive, updatePrice, updateField, updateMutation };
@@ -100,13 +100,13 @@ export default function AdminFlowers() {
   const { bouquets, isLoading: bouquetsLoading, toggleActive, updateField } = useBouquetsAdmin();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<any>(null);
+  const [editingItem, setEditingItem] = useState<FlowerShopRow | null>(null);
   const [formData, setFormData] = useState<FlowerShopFormData>(defaultFormData);
-  const [editingPrices, setEditingPrices] = useState<Record<string, any>>({});
+  const [editingPrices, setEditingPrices] = useState<Record<string, unknown>>({});
 
   // Shop CRUD handlers
   const handleCreate = () => { setEditingItem(null); setFormData(defaultFormData); setIsDialogOpen(true); };
-  const handleEdit = (item: any) => {
+  const handleEdit = (item: FlowerShopRow) => {
     setEditingItem(item);
     setFormData({
       name_en: item.name_en || '', name_ru: item.name_ru || '',
@@ -145,23 +145,23 @@ export default function AdminFlowers() {
   };
 
   // Inline price editing
-  const startPriceEdit = (b: any) => {
+  const startPriceEdit = (b: BouquetRow) => {
     const variants = b.size_variants || [];
     setEditingPrices(prev => ({
       ...prev,
       [b.id]: {
-        S: variants.find((v: any) => v.size === 'S')?.price || b.price,
-        M: variants.find((v: any) => v.size === 'M')?.price || b.price,
-        L: variants.find((v: any) => v.size === 'L')?.price || b.price,
+        S: variants.find((v: SizeVariant) => v.size === 'S')?.price || b.price,
+        M: variants.find((v: SizeVariant) => v.size === 'M')?.price || b.price,
+        L: variants.find((v: SizeVariant) => v.size === 'L')?.price || b.price,
         margin: b.margin_percent || 45,
       }
     }));
   };
 
-  const savePriceEdit = async (b: any) => {
+  const savePriceEdit = async (b: BouquetRow) => {
     const edit = editingPrices[b.id];
     if (!edit) return;
-    const variants = (b.size_variants || []).map((v: any) => ({
+    const variants = (b.size_variants || []).map((v: SizeVariant) => ({
       ...v,
       price: edit[v.size] || v.price,
     }));
@@ -178,9 +178,9 @@ export default function AdminFlowers() {
   };
 
   // Stats
-  const activeBouquets = bouquets.filter((b: any) => b.is_active).length;
+  const activeBouquets = bouquets.filter((b: BouquetRow) => b.is_active).length;
   const avgPrice = bouquets.length
-    ? Math.round(bouquets.reduce((s: number, b: any) => s + (b.price || 0), 0) / bouquets.length)
+    ? Math.round(bouquets.reduce((s: number, b: BouquetRow) => s + (b.price || 0), 0) / bouquets.length)
     : 0;
 
   return (
@@ -236,11 +236,11 @@ export default function AdminFlowers() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {bouquets.map((b: any) => {
+                      {bouquets.map((b: BouquetRow) => {
                         const variants = b.size_variants || [];
-                        const sPrice = variants.find((v: any) => v.size === 'S')?.price || b.price;
-                        const mPrice = variants.find((v: any) => v.size === 'M')?.price || b.price;
-                        const lPrice = variants.find((v: any) => v.size === 'L')?.price || b.price;
+                        const sPrice = variants.find((v: SizeVariant) => v.size === 'S')?.price || b.price;
+                        const mPrice = variants.find((v: SizeVariant) => v.size === 'M')?.price || b.price;
+                        const lPrice = variants.find((v: SizeVariant) => v.size === 'L')?.price || b.price;
                         const isEditing = !!editingPrices[b.id];
 
                         return (
@@ -410,7 +410,7 @@ export default function AdminFlowers() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {items.map((item: any) => (
+                    {items.map((item: FlowerShopRow) => (
                       <TableRow key={item.id}>
                         <TableCell className="font-medium">{isRu ? item.name_ru : item.name_en}</TableCell>
                         <TableCell>{item.address || '-'}</TableCell>
