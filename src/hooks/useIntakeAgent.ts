@@ -21,32 +21,52 @@ export interface ExtractedField {
   source: 'text' | 'scraped' | 'image' | 'inferred';
 }
 
+/**
+ * Persistent failure record for an intake item that couldn't be approved.
+ * Surfaced in the admin "Failed" queue so operators can see *why* and retry.
+ */
+export interface IntakeItemError {
+  /** Machine-readable category */
+  code: 'validation' | 'unknown_table' | 'schema' | 'status' | 'network' | 'unknown';
+  /** Human-readable description (already localized when possible) */
+  message: string;
+  /** Required fields the item was missing (only set for code === 'validation') */
+  missing?: string[];
+  /** Target table that rejected the row (when known) */
+  table?: string;
+  /** ISO timestamp of the failure */
+  occurredAt: string;
+}
+
 export interface IntakeItem {
   id: string;
-  status: 'pending' | 'approved' | 'discarded' | 'created';
-  
+  status: 'pending' | 'approved' | 'discarded' | 'created' | 'failed';
+
   // Source
   sourceUrl?: string;
   sourceText?: string;
   sourceImages?: string[];
-  
+
   // AI Analysis
   detectedVertical: string;
   verticalConfidence: number;
   extractedFields: Record<string, ExtractedField>;
-  
+
   // Generated content
   suggestedTitle: { en: string; ru: string };
   suggestedDescription: { en: string; ru: string };
-  
+
   // Validation
   missingRequiredFields: string[];
   warnings: string[];
   overallConfidence: number;
-  
+
   // After approval
   createdListingId?: string;
   createdListingTable?: string;
+
+  /** Last failure (set when approve fails — kept until item is retried/discarded) */
+  lastError?: IntakeItemError;
 }
 
 export interface IntakeSession {
