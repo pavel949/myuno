@@ -45,7 +45,7 @@ function useRecentLeads() {
   });
 }
 
-export function StaffDashboard() {
+export function AdminStaffOverview() {
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
