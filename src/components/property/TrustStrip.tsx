@@ -68,6 +68,8 @@ export function TrustStrip({
   escrowOffered,
   clearviewBadge,
   clearviewRecommendation,
+  clearviewProjectId,
+  clearviewDetailHref,
   floodRisk,
   ownerVerified,
   foreignQuota,
@@ -106,16 +108,30 @@ export function TrustStrip({
     );
   }
 
-  // ClearView score (uses unified ClearViewBadge with V3 grade colors)
+  // ClearView score (uses unified ClearViewBadge with V3 grade colors).
+  // When projectId + detailHref are provided, render an interactive popover
+  // with the public 8-axis radar summary; otherwise stay static.
   if (clearviewBadge) {
     chips.push(
-      <ClearViewBadge
-        key="cv-badge"
-        grade={clearviewBadge as 'AAA' | 'AA' | 'A' | 'BBB' | 'BB'}
-        size="sm"
-        showLabel
-        isRu={isRu}
-      />,
+      clearviewProjectId && clearviewDetailHref ? (
+        <ClearViewBadgePopover
+          key="cv-badge"
+          projectId={clearviewProjectId}
+          detailHref={clearviewDetailHref}
+          grade={clearviewBadge as 'AAA' | 'AA' | 'A' | 'BBB' | 'BB'}
+          size="sm"
+          showLabel
+          isRu={isRu}
+        />
+      ) : (
+        <ClearViewBadge
+          key="cv-badge"
+          grade={clearviewBadge as 'AAA' | 'AA' | 'A' | 'BBB' | 'BB'}
+          size="sm"
+          showLabel
+          isRu={isRu}
+        />
+      ),
     );
   }
 
