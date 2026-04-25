@@ -27,7 +27,7 @@ export default function OwnerPortalDashboard() {
     queryKey: ['owner-portal-pending-statements', user?.id],
     enabled: !!user?.id,
     queryFn: async () => {
-      const { count, error } = await supabase
+      const { count, error } = await (supabase as any)
         .from('owner_statement_approvals')
         .select('id', { count: 'exact', head: true })
         .eq('owner_user_id', user!.id)
