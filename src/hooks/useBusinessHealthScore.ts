@@ -10,6 +10,7 @@
  */
 import { useMemo } from 'react';
 import { useDashboardMetrics, type DashboardKPI, type DashboardOps } from './useDashboardMetrics';
+import { useMyProperties } from './useMyProperties';
 
 export interface HealthPillar {
   key: string;
@@ -36,16 +37,20 @@ function pillarStatus(percent: number): 'good' | 'warning' | 'critical' {
 
 export function useBusinessHealthScore(): BusinessHealthResult {
   const { data, isLoading } = useDashboardMetrics();
+  const { allProperties } = useMyProperties();
   const kpi = data?.kpi as DashboardKPI | null | undefined;
   const ops = data?.ops as DashboardOps | null | undefined;
+  const propertyCount = allProperties?.length ?? 0;
 
   return useMemo(() => {
     if (!kpi || !ops) {
       return { score: 0, pillars: [], isLoading, urgentCount: 0, onTrackCount: 0 };
     }
 
-    // 1. Deals Moving — ratio of active deals (capped at 100%)
-    const dealsPercent = ops.activeDeals > 0 ? Math.min(100, (ops.activeDeals / Math.max(ops.activeDeals, 1)) * 100) : 50;
+    // 1. Deals Moving — healthy when ≈ 1 active deal per 3 properties.
+    //    Solo MC (no properties) judged by absolute count.
+    const dealsTarget = Math.max(propertyCount * 0.3, 1);
+    const dealsPercent = Math.min(100, Math.round((ops.activeDeals / dealsTarget) * 100));
     const dealsScore = Math.round((dealsPercent / 100) * 20);
 
     // 2. Tasks On Time — (total - overdue) / total
@@ -64,10 +69,14 @@ export function useBusinessHealthScore(): BusinessHealthResult {
     const revPercent = Math.min(100, Math.max(0, 50 + revGrowth)); // normalize around 50
     const revScore = Math.round((revPercent / 100) * 20);
 
-    // 5. Service Health — inverse of open issues ratio
-    const servicePercent = ops.openServiceRequests === 0 ? 100
-      : Math.max(0, 100 - (ops.openServiceRequests * 15)); // each open req costs 15%
-    const serviceScore = Math.round((Math.max(0, servicePercent) / 100) * 20);
+    // 5. Service Health — open requests normalised per property (≈ 0.5 req/property = healthy).
+    //    Solo MC: each open request still costs 20%, capped at 0%.
+    const serviceDenominator = Math.max(propertyCount, 1);
+    const requestRatio = ops.openServiceRequests / serviceDenominator;
+    const servicePercent = ops.openServiceRequests === 0
+      ? 100
+      : Math.max(0, Math.round(100 - requestRatio * 50));
+    const serviceScore = Math.round((servicePercent / 100) * 20);
 
     const pillars: HealthPillar[] = [
       { key: 'deals', labelEn: 'Deals', labelRu: 'Сделки', score: dealsScore, percent: dealsPercent, status: pillarStatus(dealsPercent) },
@@ -82,5 +91,5 @@ export function useBusinessHealthScore(): BusinessHealthResult {
     const onTrackCount = pillars.filter(p => p.status === 'good').length;
 
     return { score: totalScore, pillars, isLoading, urgentCount, onTrackCount };
-  }, [kpi, ops, isLoading]);
+  }, [kpi, ops, isLoading, propertyCount]);
 }
