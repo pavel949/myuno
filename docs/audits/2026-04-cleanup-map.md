@@ -566,3 +566,16 @@ Requires file-by-file manual review; not safe for batch automation.
 ### Verification
 - `tsc --noEmit`: clean
 - `vite build`: green (13.6 MB precache, 2196 entries)
+
+### Wave 4 part 2 — Type safety pass (initial)
+
+Refactored top-2 offenders:
+- `useAdminContent.ts`: **40 → 4** `any` (−90%)
+  - Added `ListingRow`/`ListingInsert`/`ListingUpdate` types from supabase Database type
+  - Removed bogus `from('listings' as any)` (table is fully typed)
+  - Generic factories (`createListingsAdminHook`, `createAdminHook`) accept `AdminRecord` (intentionally loose: vertical-specific shapes vary)
+- `usePurchaseOrders.ts`: **18 → 0** `any` (−100%)
+  - Removed `(supabase as any)` casts (all 3 tables are typed)
+  - Typed `GoodsReceiptItem`, narrowed `onError: (e: unknown)` with `errorMessage` helper
+
+Cumulative `any` count: **1247 → 1193 (−54)**.

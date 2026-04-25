@@ -40,6 +40,11 @@ export interface PurchaseOrderItem {
   sort_order: number;
 }
 
+export interface GoodsReceiptItem {
+  item_id: string;
+  received_quantity: number;
+}
+
 export interface GoodsReceipt {
   id: string;
   po_id: string;
@@ -47,10 +52,13 @@ export interface GoodsReceipt {
   received_at: string;
   received_by: string | null;
   receipt_number: string | null;
-  items: any[];
+  items: GoodsReceiptItem[];
   photos: string[];
   notes: string | null;
 }
+
+const errorMessage = (e: unknown, fallback = 'Failed'): string =>
+  e instanceof Error ? e.message : typeof e === 'string' ? e : fallback;
 
 export function usePurchaseOrders(filter?: { status?: POStatus }) {
   const { activeCompany } = useActiveCompany();
@@ -58,7 +66,7 @@ export function usePurchaseOrders(filter?: { status?: POStatus }) {
     queryKey: ['purchase-orders', activeCompany?.company_id, filter?.status],
     queryFn: async (): Promise<PurchaseOrder[]> => {
       if (!activeCompany) return [];
-      let q = (supabase as any)
+      let q = supabase
         .from('purchase_orders')
         .select('*')
         .eq('company_id', activeCompany.company_id)
@@ -66,7 +74,7 @@ export function usePurchaseOrders(filter?: { status?: POStatus }) {
       if (filter?.status) q = q.eq('status', filter.status);
       const { data, error } = await q;
       if (error) throw error;
-      return (data || []) as PurchaseOrder[];
+      return (data || []) as unknown as PurchaseOrder[];
     },
     enabled: !!activeCompany,
   });
@@ -78,15 +86,15 @@ export function usePurchaseOrderDetail(poId: string | undefined) {
     queryFn: async () => {
       if (!poId) return null;
       const [poRes, itemsRes, receiptsRes] = await Promise.all([
-        (supabase as any).from('purchase_orders').select('*').eq('id', poId).maybeSingle(),
-        (supabase as any).from('purchase_order_items').select('*').eq('po_id', poId).order('sort_order'),
-        (supabase as any).from('goods_receipts').select('*').eq('po_id', poId).order('received_at', { ascending: false }),
+        supabase.from('purchase_orders').select('*').eq('id', poId).maybeSingle(),
+        supabase.from('purchase_order_items').select('*').eq('po_id', poId).order('sort_order'),
+        supabase.from('goods_receipts').select('*').eq('po_id', poId).order('received_at', { ascending: false }),
       ]);
       if (poRes.error) throw poRes.error;
       return {
-        po: poRes.data as PurchaseOrder,
-        items: (itemsRes.data || []) as PurchaseOrderItem[],
-        receipts: (receiptsRes.data || []) as GoodsReceipt[],
+        po: poRes.data as unknown as PurchaseOrder,
+        items: (itemsRes.data || []) as unknown as PurchaseOrderItem[],
+        receipts: (receiptsRes.data || []) as unknown as GoodsReceipt[],
       };
     },
     enabled: !!poId,
@@ -109,7 +117,7 @@ export function useCreatePurchaseOrder() {
       if (!activeCompany || !user) throw new Error('Missing context');
       const subtotal = args.items.reduce((s, i) => s + i.quantity * i.unit_price, 0);
       const po_number = `PO-${Date.now().toString().slice(-8)}`;
-      const { data: po, error } = await (supabase as any)
+      const { data: po, error } = await supabase
         .from('purchase_orders')
         .insert({
           company_id: activeCompany.company_id,
@@ -122,28 +130,29 @@ export function useCreatePurchaseOrder() {
           subtotal,
           total_amount: subtotal,
           created_by: user.id,
-        })
+        } as never)
         .select()
         .single();
       if (error) throw error;
+      const insertedPo = po as unknown as { id: string };
       if (args.items.length) {
         const itemsRows = args.items.map((it, i) => ({
-          po_id: po.id,
+          po_id: insertedPo.id,
           description: it.description,
           quantity: it.quantity,
           unit_price: it.unit_price,
           sort_order: i,
         }));
-        const { error: iErr } = await (supabase as any).from('purchase_order_items').insert(itemsRows);
+        const { error: iErr } = await supabase.from('purchase_order_items').insert(itemsRows as never);
         if (iErr) throw iErr;
       }
-      return po;
+      return insertedPo;
     },
     onSuccess: () => {
       toast.success('Purchase order created');
       qc.invalidateQueries({ queryKey: ['purchase-orders'] });
     },
-    onError: (e: any) => toast.error(e.message || 'Failed'),
+    onError: (e: unknown) => toast.error(errorMessage(e)),
   });
 }
 
@@ -151,9 +160,9 @@ export function useUpdatePOStatus() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (args: { id: string; status: POStatus }) => {
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('purchase_orders')
-        .update({ status: args.status })
+        .update({ status: args.status } as never)
         .eq('id', args.id);
       if (error) throw error;
     },
@@ -161,7 +170,7 @@ export function useUpdatePOStatus() {
       qc.invalidateQueries({ queryKey: ['purchase-orders'] });
       qc.invalidateQueries({ queryKey: ['po-detail'] });
     },
-    onError: (e: any) => toast.error(e.message || 'Failed'),
+    onError: (e: unknown) => toast.error(errorMessage(e)),
   });
 }
 
@@ -172,13 +181,13 @@ export function useReceiveGoods() {
   return useMutation({
     mutationFn: async (args: {
       po_id: string;
-      items: { item_id: string; received_quantity: number }[];
+      items: GoodsReceiptItem[];
       receipt_number?: string;
       notes?: string;
       photos?: string[];
     }) => {
       if (!activeCompany || !user) throw new Error('Missing context');
-      const { error } = await (supabase as any).from('goods_receipts').insert({
+      const { error } = await supabase.from('goods_receipts').insert({
         po_id: args.po_id,
         company_id: activeCompany.company_id,
         received_by: user.id,
@@ -186,34 +195,36 @@ export function useReceiveGoods() {
         items: args.items,
         photos: args.photos ?? [],
         notes: args.notes ?? null,
-      });
+      } as never);
       if (error) throw error;
       // Update each item's received_quantity (incremental)
       for (const it of args.items) {
-        const { data: cur } = await (supabase as any)
+        const { data: cur } = await supabase
           .from('purchase_order_items')
           .select('received_quantity, quantity')
           .eq('id', it.item_id)
           .single();
         if (cur) {
-          await (supabase as any)
+          const curRow = cur as unknown as { received_quantity: number | null; quantity: number };
+          await supabase
             .from('purchase_order_items')
-            .update({ received_quantity: (cur.received_quantity || 0) + it.received_quantity })
+            .update({ received_quantity: (curRow.received_quantity || 0) + it.received_quantity } as never)
             .eq('id', it.item_id);
         }
       }
       // Recompute PO status
-      const { data: items } = await (supabase as any)
+      const { data: items } = await supabase
         .from('purchase_order_items')
         .select('quantity, received_quantity')
         .eq('po_id', args.po_id);
       if (items) {
-        const allReceived = items.every((i: any) => (i.received_quantity || 0) >= i.quantity);
-        const someReceived = items.some((i: any) => (i.received_quantity || 0) > 0);
+        const rows = items as unknown as Array<{ quantity: number; received_quantity: number | null }>;
+        const allReceived = rows.every((i) => (i.received_quantity || 0) >= i.quantity);
+        const someReceived = rows.some((i) => (i.received_quantity || 0) > 0);
         const status = allReceived ? 'received' : someReceived ? 'partially_received' : 'sent';
-        await (supabase as any)
+        await supabase
           .from('purchase_orders')
-          .update({ status, received_date: allReceived ? new Date().toISOString().slice(0, 10) : null })
+          .update({ status, received_date: allReceived ? new Date().toISOString().slice(0, 10) : null } as never)
           .eq('id', args.po_id);
       }
     },
@@ -222,6 +233,6 @@ export function useReceiveGoods() {
       qc.invalidateQueries({ queryKey: ['purchase-orders'] });
       qc.invalidateQueries({ queryKey: ['po-detail'] });
     },
-    onError: (e: any) => toast.error(e.message || 'Failed'),
+    onError: (e: unknown) => toast.error(errorMessage(e)),
   });
 }
