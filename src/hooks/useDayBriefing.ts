@@ -159,10 +159,9 @@ export function useDayBriefing(options?: UseDayBriefingOptions) {
       const allBirthdayMDs = [todayMD, ...weekDates];
 
       // Build parallel queries based on role
-      // Helper: wrap supabase query builder into a proper Promise
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const q = (builder: any) => Promise.resolve(builder);
-      const queries: Promise<any>[] = [];
+      // Helper: wrap supabase query builder into a proper Promise (it's thenable already)
+      const q = <T>(builder: PromiseLike<T>): Promise<T> => Promise.resolve(builder);
+      const queries: Promise<{ data: unknown[] | null }>[] = [];
       const queryLabels: string[] = [];
 
       // ── OWNER/PM queries ──
