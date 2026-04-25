@@ -606,3 +606,24 @@ Cumulative `any` count: **1247 → 1193 (−54)**.
 Cumulative `any` count: **1193 → 1111 (−82)**.
 
 Build: ✅ green (`tsc --noEmit` clean, vite build clean).
+
+### Wave 4.2d — Type safety, top-offenders pass #3 (2026-04-25)
+
+- `useDayBriefing.ts`: **19 → 2** `any` (−89%)
+  - Added 13 narrow row types (ContactRow, StaffRow, BookingRow, ActivityRow, CrmTaskRow, VendorOrderRow, StaffTaskRow, MyBookingRow, ReminderRow, DocumentRow, RecommendationRow, NewsRow, EventRow).
+  - Replaced all `(dataMap.X || []) as any[]` with typed casts.
+  - Removed `as any[]` from `.in('status', [...])` literals.
+  - Typed `q<T>(builder: PromiseLike<T>)` helper.
+  - Remaining 2 `as any`: legacy `(supabase.from('orders').select(...) as any)` query builder (vendor orders).
+
+- `AdminFlowers.tsx`: **17 → 0** `any` (−100%)
+  - Imported `Database` types for `bouquets` and `flower_shops`.
+  - Defined local `SizeVariant`, `BouquetRow`, `FlowerShopRow`.
+  - Typed all map/filter/find/reduce callbacks.
+  - Typed `editingPrices` state with explicit shape.
+
+Cumulative `any` count: **1111 → 1077 (−34)**.
+
+Build: ✅ green (`tsc --noEmit` clean, vite build clean).
+
+**Note**: Wave 4.2d / Wave 5 partially completed (2 of 6 planned files). Remaining tasks (generateReportPdf, contentAdapters, edge functions cross-ref, DB tables cross-ref) postponed to next iteration.
