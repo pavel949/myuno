@@ -12,6 +12,8 @@ import { CrossSellSection } from "@/components/crosssell";
 import { SERVICE_CATEGORIES, type ServiceCategory } from "@/lib/config/homeServiceFunctions";
 import { Badge } from "@/components/ui/badge";
 import { ECOSYSTEM_PAGE_CONTAINER } from "@/design-system/ecosystemLayout";
+import { usePersonaFilter } from "@/hooks/usePersonaFilter";
+import { PersonaFilterChip } from "@/components/landings/PersonaFilterChip";
 import { cn } from "@/lib/utils";
 
 export default function ServicesIndex() {
@@ -24,6 +26,7 @@ export default function ServicesIndex() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   
   const { functions, categories, popular, search, getFunctionsByCategory } = useServiceFunctions();
+  const { applyFilter: applyPersonaFilter } = usePersonaFilter();
 
   useEffect(() => {
     const categoryParam = searchParams.get('category');
@@ -42,9 +45,17 @@ export default function ServicesIndex() {
     if (searchQuery.trim()) {
       result = search(searchQuery);
     }
-    
+
+    // Persona filter — uses category + id as tag pool. Hook falls back to full
+    // list if no service matches, so the catalog never goes empty.
+    result = applyPersonaFilter(result, (fn) => {
+      const raw = fn as unknown as Record<string, unknown>;
+      const tags = (raw.tags as string[] | null) ?? [];
+      return [...tags, fn.category, fn.id].filter(Boolean) as string[];
+    });
+
     return result;
-  }, [functions, selectedCategory, searchQuery, getFunctionsByCategory, search]);
+  }, [functions, selectedCategory, searchQuery, getFunctionsByCategory, search, applyPersonaFilter]);
 
   const categoryRibbon = useMemo(() => [
     { id: 'all', label: isRu ? 'Все услуги' : 'All Services' },
