@@ -1,9 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Home, MapPin, Clock } from 'lucide-react';
+import { ClearViewBadge } from '@/components/clearview/ClearViewBadge';
 
 interface PropertyDetailHeaderProps {
   property: {
+    id?: string;
     cover_image?: string | null;
     title: string;
     title_ru?: string | null;
@@ -12,11 +14,16 @@ interface PropertyDetailHeaderProps {
     status: string;
     approval_status?: string | null;
     is_active?: boolean;
+    clearview_score?: number | null;
+    clearview_badge?: string | null;
+    project_id?: string | null;
   };
   isRu: boolean;
 }
 
 export function PropertyDetailHeader({ property, isRu }: PropertyDetailHeaderProps) {
+  const navigate = useNavigate();
+
   const getStatusBadge = (approvalStatus?: string | null, isActive?: boolean) => {
     // Derive display state from approval_status + is_active (single source of truth)
     if (approvalStatus === 'rejected') {
@@ -44,6 +51,8 @@ export function PropertyDetailHeader({ property, isRu }: PropertyDetailHeaderPro
     return <Badge variant="outline">{isRu ? 'Черновик' : 'Draft'}</Badge>;
   };
 
+  const hasClearView = !!(property.clearview_badge || property.clearview_score);
+
   return (
     <div className="relative rounded-none overflow-hidden mb-6">
       {property.cover_image ? (
@@ -58,15 +67,29 @@ export function PropertyDetailHeader({ property, isRu }: PropertyDetailHeaderPro
         </div>
       )}
       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-        <div className="flex items-start justify-between">
-          <div>
-            <h1 className="text-xl font-bold text-white">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <h1 className="text-xl font-bold text-white truncate">
               {isRu && property.title_ru ? property.title_ru : property.title}
             </h1>
             <p className="text-white/80 text-sm flex items-center gap-1">
               <MapPin className="h-3 w-3" />
               {property.district || property.address}
             </p>
+            {hasClearView && (
+              <div className="mt-2">
+                <ClearViewBadge
+                  grade={property.clearview_badge}
+                  score={property.clearview_score}
+                  isRu={isRu}
+                  onClick={
+                    property.project_id
+                      ? () => navigate(`/newbuilds/${property.project_id}#clearview`)
+                      : undefined
+                  }
+                />
+              </div>
+            )}
           </div>
           {getStatusBadge(property.approval_status, property.is_active)}
         </div>
