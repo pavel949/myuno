@@ -11,6 +11,7 @@ const LABELS: Record<CanonicalModifier, { en: string; ru: string; icon: string }
   medical:         { en: 'Medical needs',         ru: 'Медицинские потребности', icon: '🩺' },
   halal:           { en: 'Halal',                 ru: 'Халяль',                 icon: '🕌' },
   kosher:          { en: 'Kosher',                ru: 'Кошер',                  icon: '✡️' },
+  vegan:           { en: 'Vegan / vegetarian',    ru: 'Веган / вегетарианец',   icon: '🌱' },
   accessibility:   { en: 'Accessibility',         ru: 'Доступная среда',        icon: '♿' },
   lgbtq:           { en: 'LGBTQ+ friendly',       ru: 'LGBTQ+ friendly',        icon: '🏳️‍🌈' },
   athlete:         { en: 'Active sport',          ru: 'Активный спорт',         icon: '🏋️' },
