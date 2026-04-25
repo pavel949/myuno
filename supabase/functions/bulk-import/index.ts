@@ -126,12 +126,13 @@ Deno.serve(async (req) => {
     const results = {
       inserted: 0,
       failed: 0,
+      inserted_ids: [] as string[],
       errors: [] as string[],
     };
 
     for (let i = 0; i < records.length; i += batchSize) {
       const batch = records.slice(i, i + batchSize);
-      
+
       // Add default values (table-specific)
       const processedBatch = batch.map((record: Record<string, any>) => {
         const base: Record<string, any> = {
@@ -160,6 +161,11 @@ Deno.serve(async (req) => {
         results.errors.push(`Batch ${i / batchSize + 1}: ${error.message}`);
       } else {
         results.inserted += data?.length || 0;
+        if (Array.isArray(data)) {
+          for (const row of data) {
+            if (row?.id) results.inserted_ids.push(row.id as string);
+          }
+        }
       }
     }
 
