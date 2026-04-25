@@ -579,3 +579,30 @@ Refactored top-2 offenders:
   - Typed `GoodsReceiptItem`, narrowed `onError: (e: unknown)` with `errorMessage` helper
 
 Cumulative `any` count: **1247 → 1193 (−54)**.
+
+### Wave 4.2c — Type safety, top-offenders pass #2 (2026-04-25)
+
+Добавлены типизации для следующих файлов:
+
+- `AdminNewbuilds.tsx`: **26 → 0** `any` (−100%)
+  - Импортированы `Database` types для `property_projects` и `developers`.
+  - `ProjectRow`/`DeveloperRow` функции типизированы через локальные `Project`/`Developer` алиасы.
+  - Удалено несуществующее поле `whatsapp` (developers); заменено на `legal_name`.
+
+- `ReportsPage.tsx`: **24 → 0** `any` (−100%)
+  - Введены локальные narrow types `ReportableProperty`, `OwnerContactRow`.
+  - `useManagedProperties` теперь возвращает `ReportableProperty[]`.
+  - Все .map/.filter аннотированы конкретными типами.
+
+- `PropertyDetail.tsx`: **18 → 3** `any` (−83%)
+  - `availability` использует `AvailabilityEntry` из хука.
+  - `(property as any).foo` заменены на `propertyExt: typeof property & PropertyExt`.
+  - 3 оставшихся `as any` относятся к props компонентов (custom_length_discounts/seasonalPricing/availability) — оставлены без изменений.
+
+- `PropertyInquiry.tsx`: **26 → 0** `any` (−100%)
+  - Введены `PropertyExt` и `RentalTermsExt` для полей вне generated DB types.
+  - Все `(property as any)` → `propertyExt`, `(rentalTerms as any)` → `rentalExt`.
+
+Cumulative `any` count: **1193 → 1111 (−82)**.
+
+Build: ✅ green (`tsc --noEmit` clean, vite build clean).
