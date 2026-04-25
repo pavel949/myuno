@@ -146,6 +146,8 @@ export default function PropertyDetail() {
     min_lease_months?: number | null;
   };
   const propertyExt = property as unknown as typeof property & PropertyExt;
+
+  const images = (property.images && property.images.length > 0)
     ? property.images
     : [property.cover_image].filter(Boolean) as string[];
   const amenities = property.amenities || [];
