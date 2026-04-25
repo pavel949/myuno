@@ -83,7 +83,8 @@ Deno.serve(async (req) => {
           break;
         }
         case 'finance': {
-          const { data: transactions } = await sb.from('mc_finance_transactions').select('*').eq('company_id', company_id);
+          // TODO: table 'mc_finance_transactions' does not exist — needs schema decision (e.g. property_financials or new table)
+          const { data: transactions } = await sb.from('mc_finance_transactions' as any).select('*').eq('company_id', company_id);
           result.finance_transactions = transactions || [];
           break;
         }

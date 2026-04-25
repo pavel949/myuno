@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
         sb.from('properties').select('*').eq('management_company_id', company.id),
         sb.from('crm_contacts').select('*').eq('company_id', company.id),
         sb.from('agent_deals').select('*').eq('company_id', company.id),
-        sb.from('mc_finance_transactions').select('*').eq('company_id', company.id),
+        /* TODO: missing table — see audit */ sb.from('mc_finance_transactions' as any).select('*').eq('company_id', company.id),
         sb.from('owner_reports').select('*').eq('company_id', company.id),
       ]);
 
