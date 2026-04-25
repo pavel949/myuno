@@ -358,7 +358,7 @@ export function useGenerateReport() {
       let depositExpected = 0;
       let depositPaid = 0;
       let depositUnpaidCount = 0;
-      (bookings || []).forEach((b: any) => {
+      (bookings || []).forEach((b) => {
         const dep = Number(b.deposit_amount || 0);
         if (dep > 0) {
           depositExpected += dep;
