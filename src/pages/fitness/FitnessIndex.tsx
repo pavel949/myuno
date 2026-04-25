@@ -85,8 +85,15 @@ export default function FitnessIndex() {
         break;
     }
 
+    // Persona filter — fitness uses gym_type + tags for matching.
+    result = applyPersonaFilter(result, (g) => {
+      const raw = g as unknown as Record<string, unknown>;
+      const tags = (raw.tags as string[] | null) ?? [];
+      return [...tags, g.gym_type].filter(Boolean) as string[];
+    });
+
     return result;
-  }, [gyms, selectedCategory, searchQuery, sortBy]);
+  }, [gyms, selectedCategory, searchQuery, sortBy, applyPersonaFilter]);
 
   const handleFilterChange = useCallback((values: FilterValues) => {
     setFilterValues(values);
