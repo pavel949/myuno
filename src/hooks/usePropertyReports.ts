@@ -404,8 +404,7 @@ export function useGenerateReport() {
           rate: totalNights > 0 ? Math.round((nightsBooked / totalNights) * 100) : 0,
           bookings_count: bookings?.length || 0,
         },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        bookings: (bookings || []).map((b: any) => ({
+        bookings: (bookings || []).map((b) => ({
           id: b.id,
           guest_name: b.guest_name || 'Guest',
           check_in: b.check_in,
