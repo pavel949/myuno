@@ -53,6 +53,8 @@ export default function OwnerPortalDashboard() {
     },
     staleTime: 60_000,
   });
+
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <LoadingSpinner size="lg" />
