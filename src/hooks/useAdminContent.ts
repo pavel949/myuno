@@ -533,12 +533,13 @@ function createListingsAdminHook(vertical: string) {
 
 // ── Generic admin hook factory: non-migrated tables ────────────────────────
 // `tableName` is dynamic at runtime, so the call sites must use a permissive
-// cast against the Supabase type system. We constrain the cast to a single
-// shared shape rather than re-writing `as any` in every closure.
-type DynamicTable = ReturnType<typeof supabase.from> extends infer R ? R : never;
-function fromDynamic(name: string): DynamicTable {
+// cast against the Supabase type system. We isolate the cast to a single helper
+// to avoid sprinkling `as any` across each closure.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type DynamicQuery = any;
+function fromDynamic(name: string): DynamicQuery {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (supabase.from as any)(name) as DynamicTable;
+  return (supabase.from as any)(name);
 }
 
 function createAdminHook(tableName: string) {
@@ -562,7 +563,7 @@ function createAdminHook(tableName: string) {
 
     const createItem = async (data: AdminRecord) => {
       const { data: result, error } = await fromDynamic(tableName)
-        .insert({ ...data, is_active: true } as never)
+        .insert({ ...data, is_active: true })
         .select().single();
       if (!error) await fetchData();
       return { data: result, error };
@@ -570,7 +571,7 @@ function createAdminHook(tableName: string) {
     const updateItem = async (data: AdminRecord) => {
       const { id, ...rest } = data;
       const { data: result, error } = await fromDynamic(tableName)
-        .update(rest as never)
+        .update(rest)
         .eq('id', String(id))
         .select().single();
       if (!error) await fetchData();
