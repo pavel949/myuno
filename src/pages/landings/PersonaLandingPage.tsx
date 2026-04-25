@@ -269,7 +269,7 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
             </Button>
             {landing.secondaryCta ? (
               <Button asChild size="lg" variant="ghost">
-                <a href={landing.secondaryCta.href}>{t(landing.secondaryCta.label)}</a>
+                <a href={wp(landing.secondaryCta.href)}>{t(landing.secondaryCta.label)}</a>
               </Button>
             ) : null}
           </div>
