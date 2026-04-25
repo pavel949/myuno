@@ -1,6 +1,6 @@
 /**
  * @module content/landings/personaLandings
- * @description M6 · Tracks B.2 + B.7 — конфиг 25 persona-лендингов.
+ * @description M6 · Tracks B.2 + B.7 — конфиг 26 persona-лендингов.
  *
  * Источник правды:
  *  - `docs/canonical/01-segmentation-framework.md` §4 (P1..P25)
