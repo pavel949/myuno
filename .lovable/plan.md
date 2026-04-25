@@ -1,180 +1,101 @@
 
-# План: интеграция ClearView V3 как полноценного продукта
+# ClearView blindness fixes — 3 high-impact changes
 
-Цель: превратить ClearView из «карточки в углу» в основной знак доверия для покупателей off-plan и в отдельный SaaS-продукт для девелоперов. Вся работа разбита на 5 этапов (F1–F5). Можно реализовать целиком за один заход или поэтапно — итоговая структура одна.
-
----
-
-## F1 · Нормализация методологии и данных
-
-**Проблема:** в БД две параллельные системы (`due_diligence_reports` + `clearview_projects/scores/categories`), веса категорий не совпадают с Canon V3, `TrustStrip` обращается к несуществующим полям (`clearview_badge`, `clearview_recommendation`).
-
-**Что делаем:**
-1. Создаём единый конфиг `src/lib/clearview/methodology.ts` — 8 категорий, веса по Canon V3 (LRC 20, DCF 20, CQP 15, LMA 15, FRC 10, ROI 10, MAS 5, LRT 5), пороги грейдов AAA/AA/A/BBB/BB, маппинг рекомендаций BUY/WATCH/AVOID.
-2. Миграция БД:
-   - Синхронизируем веса в `clearview_categories` с Canon V3.
-   - Добавляем view `v_clearview_public` поверх `due_diligence_reports`, отдающую только публичные поля (grade, total_score, recommendation, top-3 risks/strengths, executive_summary).
-   - Добавляем computed-колонки на `properties`: `clearview_grade`, `clearview_recommendation`, `clearview_score` (через trigger от последнего published `due_diligence_reports.project_id = properties.project_id`) — чтобы `TrustStrip` и каталог читали без N+1.
-   - Помечаем `clearview_projects/scores` как deprecated (оставляем для обратной совместимости, далее дропнем отдельной миграцией).
-3. RLS:
-   - `due_diligence_reports`: SELECT публично только при `is_published = true`; админы/девелоперы — свои отчёты.
-   - Полные `analysis`, `evidence_gaps`, `red_flags` (всё) — отдаются только покупателям отчёта (см. F3) или владельцу проекта.
+Goal: close the biggest gap (developers paying to see their own report) and lift conversion on the paywall, without restructuring the system.
 
 ---
 
-## F2 · Визуализация рейтинга
+## 1. Developer bypass — owners see their own report for free
 
-Создаём 3 переиспользуемых компонента в `src/components/clearview/`:
+Today `ClearViewPaywall` accepts a `bypass` prop but `OffplanDetail` never passes it. Developers and their team members hit the paywall on their own project. Fix:
 
-1. **`<ClearViewBadge />`** — компактный значок (grade + цвет). Размеры `xs / sm / md`. Используется в:
-   - `TrustStrip` (заменяет текущую заглушку)
-   - `PropertyListingCard` (правый верхний угол изображения)
-   - `PropertyMapView` InfoWindow (рядом с ценой)
-   - `OffplanCard`
-2. **`<ClearViewGauge />`** — полукруговой gauge 0–100 с цветовой шкалой и подписью грейда. Для шапки `ClearViewReport` и `OffplanDetail` hero.
-3. **`<ClearViewRadar />`** — radar chart (recharts) по 8 категориям. Используется в публичной превью отчёта (free) и полной версии (paid).
+- New hook `useIsProjectDeveloper(projectId)`:
+  - resolves the project's `developer_id` (already in `property_projects`)
+  - checks two things in parallel:
+    - `developers.user_id === auth.uid()` (single-owner / onboarding case)
+    - `developer_users` row where `developer_id` matches AND `auth_user_id = auth.uid()` AND `status = 'active'` (multi-seat developer org)
+  - returns `{ isProjectDeveloper, isLoading }`
+- `ClearViewReport` calls the hook and computes `hasFullAccess = isAdmin || isProjectDeveloper || access?.hasAccess`.
+- Same flag also hides the "buy" CTA from developers and shows a small "Owner view — visible to you and admins only" pill instead.
 
-Дизайн: токены `tokens.css` (никаких хексов), grade-цвета:
-- AAA `--success`, AA `--success-soft`, A `--info`, BBB `--warning`, BB `--destructive`.
-
-**Интеграции:**
-- `PropertyListingCard.tsx` — добавить overlay-badge на превью.
-- `PropertyMapView.tsx` — chip в InfoWindow.
-- `OffplanDetail.tsx` — секция «ClearView Rating» с Gauge + Radar + 3 Top Risks (free).
-- `TrustStrip.tsx` — переписать чип `clearview_badge` на `<ClearViewBadge />`.
+Result: developers and their staff see the full report (per-category findings, evidence gaps, modifiers, recommendations) on their own projects without paying. Public buyers still hit the paywall.
 
 ---
 
-## F3 · Free vs Paid (paywall)
+## 2. Public "why this grade" popover on `ClearViewBadge`
 
-Единый принцип «что показываем публично, что нет»:
+Today the badge is a static chip. A buyer sees "AA" on a card with no idea what it means until two clicks deeper. Fix:
 
-| Поле | Public (free) | Premium (paid) |
-|---|---|---|
-| Grade (AAA…BB) | ✅ | ✅ |
-| Total score 0–100 | ✅ | ✅ |
-| Recommendation BUY/WATCH/AVOID | ✅ | ✅ |
-| Radar по 8 категориям (баллы) | ✅ | ✅ |
-| Top-3 red flags / green flags | ✅ | ✅ |
-| Executive summary (1 параграф) | ✅ | ✅ |
-| Полные findings по каждой категории | ❌ | ✅ |
-| Evidence gaps + источники | ❌ | ✅ |
-| Maturity levels | ❌ | ✅ |
-| Modifiers и история ревизий | ❌ | ✅ |
-| PDF-выгрузка | ❌ | ✅ |
+- Optional `interactive` prop on `ClearViewBadge` (default false to keep map markers cheap).
+- When set, badge becomes a Popover trigger that shows:
+  - Score (0–100) + grade letter + recommendation chip (BUY / WATCH / AVOID)
+  - Mini 8-axis radar (reuse `ClearViewRadar` at `height={180}`)
+  - 1-line methodology note + "See full ClearView report →" link to the project's offplan detail page
+- Wired only on `PropertyListingCard` and `TrustStrip` — not on map markers (perf).
+- Anonymous users see this without auth — pure marketing for the paid tier.
 
-**Реализация:**
-- Рефактор `src/components/newbuilds/ClearViewReport.tsx`:
-  - Часть 1 «Free Summary» — всегда видна.
-  - Часть 2 «Full Report» — показывается только если у юзера есть запись в `clearview_purchases (user_id, project_id, expires_at)` или роль `admin/developer-owner`.
-  - Заглушка-paywall с CTA «Купить полный отчёт ฿2,900» / «Корпоративная подписка».
-- Подключаем `ClearViewReport` в `OffplanDetail` (сейчас не используется нигде).
-- Новая таблица `clearview_purchases` + RLS (юзер видит только свои покупки).
+Result: discovery-stage users immediately understand the score and click through to the paywall with intent.
 
 ---
 
-## F4 · Монетизация
+## 3. Paywall card — surface bundle + Investor Pass
 
-**B2C — продажа отчётов покупателям:**
-- Новая Edge Function `create-clearview-checkout` (по шаблону `_shared/checkout-handler.ts`):
-  - One-off Stripe payment, `mode: 'payment'`.
-  - Два price_id: Single Report ฿2,900 / Bundle 3 ฿7,500.
-  - На `payment_intent.succeeded` через `stripe-webhook` создаём запись в `clearview_purchases` (12 мес).
-- Хук `useClearViewPurchase(projectId)` — проверка доступа, инициация чекаута через `useStripeUnifiedCheckout`.
+Today `ClearViewPaywall` only offers `single` (฿2,900). Bundle exists in `CLEARVIEW_PRICING` but has no UI. Heavy users have no subscription option. Fix:
 
-**B2B — продажа оценок девелоперам:**
-- Доводим `ClearViewApplyPage` (intake-форма): сохраняем заявку в `clearview_applications`, шлём admin-уведомление через WhatsApp/Email (`_shared/admin-config.ts`).
-- Тарифы из `06-clearview-methodology.md`: Standard ฿150K, Premium ฿300K, Annual Subscription ฿500K/year. Без онлайн-оплаты — это sales-led.
+- Redesign the paywall card to show **3 tabs** in one card:
+  1. **Single report** — ฿2,900 · 12-month access (current behaviour)
+  2. **Bundle of 3** — ฿7,500 · pick any 3 projects in 12 months (already typed as `bundle3`)
+  3. **Investor Pass** — ฿9,900 / month · unlimited reports · cancel anytime *(new tier)*
+- Add `investor_pass` to `ClearViewTier` and to `CLEARVIEW_PRICING`.
+- Edge function `create-clearview-checkout` extended:
+  - `investor_pass` → Stripe **subscription** mode (price stored in `system_settings` key `clearview_investor_pass_price_id`)
+  - `single` / `bundle3` → keep one-off `payment` mode
+- DB:
+  - Add `tier text` column to `clearview_purchases` (default `'single'`)
+  - For `bundle3`: row stores `tier='bundle3'`, `project_id=NULL`, `quota_remaining=3`, `valid_until=now()+12mo`
+  - For `investor_pass`: row stores `tier='investor_pass'`, `project_id=NULL`, `valid_until=current_period_end` from Stripe webhook
+  - Update `useClearViewAccess` to grant access if any of: matching `single` row · `bundle3` row with quota > 0 · active `investor_pass` row
+  - When a user with a bundle opens a new locked project, decrement `quota_remaining` (RPC `consume_clearview_bundle_slot`).
 
-**CTA-сетка** (везде единая):
-- Public: «Открыть полный отчёт» → checkout.
-- Developer: «Получить рейтинг проекта» → `/clearview/apply`.
-- Inside report: «Подписаться на обновления проекта» (free, lead capture).
-
----
-
-## F5 · Публичная директория и SEO
-
-- Новая страница `/clearview/projects` — каталог опубликованных рейтингов (фильтр по grade, району, девелоперу), карточки с `<ClearViewBadge />` и линком на проект.
-- Sitemap: добавить URL'ы опубликованных отчётов в `public/sitemap-pillars.xml`.
-- Линк в шапке `ClearViewLanding` → «Смотреть рейтинги проектов».
-- На `OffplanIndex` — фильтр «Только с ClearView рейтингом».
+Result: bundle becomes visible (likely 30–40% AOV lift on serious buyers); Investor Pass captures repeat investors who would otherwise abandon at ฿29k.
 
 ---
 
-## Технические детали
+## Things explicitly NOT in this plan
 
-**Файлы создаются:**
-- `src/lib/clearview/methodology.ts` — single source of truth по весам/грейдам
-- `src/components/clearview/ClearViewBadge.tsx`
-- `src/components/clearview/ClearViewGauge.tsx`
-- `src/components/clearview/ClearViewRadar.tsx`
-- `src/components/clearview/ClearViewPaywall.tsx`
-- `src/hooks/useClearViewPurchase.ts`
-- `src/pages/clearview/ClearViewProjects.tsx`
-- `supabase/functions/create-clearview-checkout/index.ts`
-- Миграции: sync весов, `v_clearview_public` view, `clearview_purchases` table + RLS, computed columns на `properties`, обновление `stripe-webhook` для clearview-purchase
-
-**Файлы редактируются:**
-- `src/components/property/TrustStrip.tsx` — использовать `<ClearViewBadge />`, читать из computed columns
-- `src/components/property/PropertyListingCard.tsx` — overlay badge
-- `src/components/property/PropertyMapView.tsx` — chip в InfoWindow
-- `src/components/newbuilds/ClearViewReport.tsx` — split free/paid + Radar/Gauge
-- `src/pages/property/OffplanDetail.tsx` — встроить `ClearViewReport`
-- `src/pages/clearview/ClearViewLanding.tsx` — линк на директорию
-- `src/lib/config/routes.ts` — добавить `CLEARVIEW_PROJECTS`
-- `supabase/functions/stripe-webhook/index.ts` — обработка clearview-purchase
-
-**Стек:** recharts (уже в проекте) для Radar/Gauge, Stripe one-off через `_shared/checkout-handler.ts`, RLS на новых таблицах, токены `tokens.css`.
+- B2B developer self-serve checkout (Standard / Premium / Annual) — leave sales-led for v1
+- Sample/lead-magnet free report — separate content task
+- "Claim your project" flow for unclaimed developers — separate onboarding task
+- Persona-aware ClearView promotion on Home — separate IA task
 
 ---
 
-## Порядок реализации (рекомендуемый)
+## Technical details (for implementation)
 
-1. F1 (миграция + methodology config) — критично, без этого данные несогласованы
-2. F2 (Badge/Gauge/Radar) — даёт мгновенный визуальный эффект на всех карточках
-3. F3 (paywall split) — готовит монетизацию
-4. F4 (Stripe + B2B intake) — включает деньги
-5. F5 (директория + SEO) — рост органики
+### Files to add
+- `src/hooks/useIsProjectDeveloper.ts`
+- `src/components/clearview/ClearViewBadgePopover.tsx` (wraps `ClearViewBadge` with Popover; needs `projectId` + `report` summary)
 
-Подтвердите — иду реализовывать **все 5 этапов** одним проходом, либо назовите конкретные (например только F1+F2 сейчас, остальное позже).
+### Files to edit
+- `src/lib/clearview/methodology.ts` — add `investor_pass` tier + price (฿9,900 / month)
+- `src/hooks/useClearViewPurchase.ts` — extend `ClearViewTier`, update `useClearViewAccess` to honor bundle quota and active subscription
+- `src/components/clearview/ClearViewPaywall.tsx` — 3-tab UI, route each tier to `purchase({ tier })`
+- `src/components/clearview/ClearViewBadge.tsx` — add optional `interactive` + project link props; render via popover when set
+- `src/components/newbuilds/ClearViewReport.tsx` — call `useIsProjectDeveloper`, fold into `hasFullAccess`, hide buy CTA + show "Owner view" pill when developer
+- `src/components/property/PropertyListingCard.tsx` + `src/components/property/TrustStrip.tsx` — pass `interactive` and `projectId` to badge
+- `supabase/functions/create-clearview-checkout/index.ts` — branch on `tier`: `investor_pass` → subscription, others → one-off
+- `supabase/functions/stripe-webhook/index.ts` — on `checkout.session.completed` and `invoice.paid` for `clearview_*` line items, write/refresh `clearview_purchases`
+
+### DB migration
+- `ALTER TABLE clearview_purchases ADD COLUMN tier text NOT NULL DEFAULT 'single'`
+- `ALTER TABLE clearview_purchases ADD COLUMN quota_remaining int` (nullable; only used by `bundle3`)
+- `ALTER TABLE clearview_purchases ALTER COLUMN project_id DROP NOT NULL` (bundles + pass have no project)
+- New RPC `consume_clearview_bundle_slot(p_user uuid, p_project uuid)` — atomic decrement + record
+- Update `clearview_purchases` RLS so users still only see their own rows
+
+### Stripe
+- Stripe is already enabled; needs one new recurring price (Investor Pass) created in Stripe dashboard (Test + Live), price IDs stored in `system_settings`. The user will be prompted to add the IDs as secrets when wiring is done.
 
 ---
 
-## STATUS · 2026-04-25
-
-### ✅ F1 Methodology & data — DONE
-- Migration: `clearview_categories` synced to Canon V3 (LRC/DCF/CQP/LMA/FRC/ROI/MAS/LRT)
-- New table `clearview_purchases` + RLS (12-month access, user-scoped)
-- New helper `user_has_clearview_access(project_id)` SECURITY DEFINER
-- New view `v_clearview_public` (safe summary fields only, top-3 flags)
-- RLS on `due_diligence_reports`: published readable, admins manage
-- `clearview_projects/scores` marked DEPRECATED
-
-### ✅ F2 Visualization — DONE
-- `src/lib/clearview/methodology.ts` — single source of truth (8 categories, weights, grade thresholds, recommendation, pricing)
-- `<ClearViewBadge />` — xs/sm/md grade chip
-- `<ClearViewGauge />` — semi-circular 0–100 gauge
-- `<ClearViewRadar />` — 8-axis recharts radar
-- `TrustStrip` updated to use `<ClearViewBadge />`
-- `PropertyListingCard` — grade overlay on image (bottom-left)
-
-### ✅ F3 Paywall — DONE
-- `<ClearViewPaywall />` — blurred teaser + CTA, opens AuthSheet if needed
-- `useClearViewAccess(projectId)` hook
-- `useClearViewCheckout()` hook (Stripe one-off)
-- `ClearViewReport` refactored: free summary (gauge + radar + top-3 flags + exec summary) → paywalled full report (per-category findings + evidence gaps + recommendations)
-- Integrated into `OffplanDetail`
-
-### ✅ F4 Monetization — DONE
-- Edge function `create-clearview-checkout` (Stripe THB 2,900 single / 7,500 bundle)
-- `stripe-webhook` handles `order_type=clearview_report` → inserts `clearview_purchases`
-- B2B intake (`/property/clearview/apply`) already exists via `ClearViewApplyPage`
-
-### ⏳ F5 Public directory — DEFERRED
-- `/clearview/projects` listing page not yet created (low priority vs revenue path)
-
-### Notes
-- Pre-existing build errors in unrelated edge functions (`npm:stripe`, `npm:resend`, `EdgeRuntime`) are not caused by this work
-- Linter "Security Definer View" warning on `v_clearview_public` is acceptable (view exposes only published+safe fields, RLS still enforced upstream)
-- `properties.clearview_badge` is referenced by `TrustStrip` / `PropertyListingCard` but does not yet exist as a column. Needs a follow-up migration to either add a generated column from latest published `due_diligence_reports.grade`, or join via `project_id` in `useProperties`.
+After approval I'll implement in this order: (1) developer bypass first (smallest, biggest UX win), (2) badge popover, (3) tiered paywall + DB + webhook.
