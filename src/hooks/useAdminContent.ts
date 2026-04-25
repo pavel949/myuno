@@ -14,10 +14,9 @@ type ListingUpdate = Database['public']['Tables']['listings']['Update'];
 /** Generic record shape used by admin CRUD hooks where the underlying schema
  *  varies across verticals (salons, gyms, events, ...). Consumers (AdminEvents,
  *  AdminRestaurants, AdminFlowers) define their own form types that map onto
- *  these dynamic columns; we type the inputs loosely to keep the contract
- *  permissive while still tightening from `any` to a structured shape. */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AdminRecord = any;
+ *  these dynamic columns; we type the inputs as a generic JSON-like map to keep
+ *  the contract permissive while still being structurally typed. */
+type AdminRecord = Record<string, unknown>;
 
 // ── Yachts (listings vertical='yacht') ─────────────────────────────────────
 export function useAdminYachts(filterProviderId?: string) {
