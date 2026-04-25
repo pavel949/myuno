@@ -936,7 +936,8 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/my-property" element={<AuthGuard><MCPortalGuard><LazyPage><Pages.OwnerPortalDashboard /></LazyPage></MCPortalGuard></AuthGuard>} />
         <Route path="/my-property/statements" element={<AuthGuard><MCPortalGuard><LazyPage><Pages.OwnerStatementsInbox /></LazyPage></MCPortalGuard></AuthGuard>} />
         <Route path="/my-property/signatures" element={<AuthGuard><MCPortalGuard><LazyPage><Pages.OwnerSignaturesInbox /></LazyPage></MCPortalGuard></AuthGuard>} />
-        <Route path="/my-property/:propertyId" element={<AuthGuard><MCPortalGuard><LazyPage><Pages.OwnerPortalPropertyView /></LazyPage></MCPortalGuard></AuthGuard>} />
+       <Route path="/my-property/transparency/:propertyId" element={<AuthGuard><MCPortalGuard><LazyPage><Pages.OwnerTransparencyDashboard /></LazyPage></MCPortalGuard></AuthGuard>} />
+       <Route path="/my-property/:propertyId" element={<AuthGuard><MCPortalGuard><LazyPage><Pages.OwnerPortalPropertyView /></LazyPage></MCPortalGuard></AuthGuard>} />
 
         {/* ── M6 Persona Landings (B.4) ── */}
         {/* Draft slugs and unknown slugs return 404 inside the page itself. */}
