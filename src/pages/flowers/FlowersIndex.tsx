@@ -16,6 +16,7 @@ import { useFlowerFilterOptions } from '@/hooks/useDynamicFilterOptions';
 import { ActiveFilters, FilterValues } from '@/components/filters/UniversalFilter';
 import { mapBouquetToCatalogCard } from '@/lib/adapters/catalogCardAdapters';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { usePersonaFilter } from '@/hooks/usePersonaFilter';
 
 export default function FlowersIndex() {
   const navigate = useNavigate();
