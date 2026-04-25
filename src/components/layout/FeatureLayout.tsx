@@ -358,6 +358,10 @@ function MiniappMode({
           </div>
         )}
 
+        {/* Persona context chip — auto-renders only when ?persona= is in URL.
+            Mounted here so every miniapp catalog inherits it without per-page wiring. */}
+        <PersonaFilterChip />
+
         {resultsCount !== undefined && (
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">{resultsLabel || t('booking.results')}</h2>
