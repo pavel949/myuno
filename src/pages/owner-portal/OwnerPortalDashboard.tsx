@@ -43,8 +43,8 @@ export default function OwnerPortalDashboard() {
     queryKey: ['owner-portal-pending-signatures', user?.id],
     enabled: !!user?.id,
     queryFn: async () => {
-      const { count, error } = await supabase
-        .from('signature_signers')
+      const { count, error } = await (supabase as any)
+        .from('signature_request_signers')
         .select('id', { count: 'exact', head: true })
         .eq('signer_user_id', user!.id)
         .eq('status', 'pending');
