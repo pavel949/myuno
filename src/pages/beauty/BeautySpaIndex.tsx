@@ -76,8 +76,17 @@ export default function BeautySpaIndex() {
         break;
     }
 
+    // Persona filter — uses category + service_type + tags as the synthetic tag pool.
+    result = applyPersonaFilter(result, (s) => {
+      const raw = s as unknown as Record<string, unknown>;
+      const tags = (raw.tags as string[] | null) ?? [];
+      const serviceTypes = (raw.service_types as string[] | null) ?? [];
+      const category = raw.category as string | undefined;
+      return [...tags, ...serviceTypes, category].filter(Boolean) as string[];
+    });
+
     return result;
-  }, [salons, searchQuery, sortBy]);
+  }, [salons, searchQuery, sortBy, applyPersonaFilter]);
 
   const handleFilterChange = useCallback((values: FilterValues) => {
     setFilterValues(values);
