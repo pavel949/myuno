@@ -191,13 +191,27 @@ export default function OwnerPortalDashboard() {
                         <Shield className="w-3.5 h-3.5" />
                         <span>{isRu ? 'Под управлением' : 'Managed'}</span>
                       </div>
-                      <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors ml-auto" />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-2 text-xs ml-auto"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/my-property/transparency/${portal.property_id}`);
+                        }}
+                      >
+                        <Eye className="w-3.5 h-3.5 mr-1" />
+                        {isRu ? 'Прозрачность' : 'Transparency'}
+                      </Button>
+                      <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
                     </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
           );
+        })}
+      </div>
         })}
       </div>
 
