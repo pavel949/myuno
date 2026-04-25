@@ -83,9 +83,23 @@ Deno.serve(async (req) => {
           break;
         }
         case 'finance': {
-          // TODO: table 'mc_finance_transactions' does not exist — needs schema decision (e.g. property_financials or new table)
-          const { data: transactions } = await sb.from('mc_finance_transactions' as any).select('*').eq('company_id', company_id);
-          result.finance_transactions = transactions || [];
+          // Source: property_financials filtered via properties.management_company_id
+          // (mc_finance_transactions does not exist — financial data lives per-property).
+          const { data: companyProps } = await sb
+            .from('properties')
+            .select('id')
+            .eq('management_company_id', company_id);
+          const propertyIds = (companyProps || []).map((p: { id: string }) => p.id);
+          if (propertyIds.length > 0) {
+            const { data: transactions } = await sb
+              .from('property_financials')
+              .select('*')
+              .in('property_id', propertyIds)
+              .order('transaction_date', { ascending: false });
+            result.finance_transactions = transactions || [];
+          } else {
+            result.finance_transactions = [];
+          }
           break;
         }
         case 'reports': {
