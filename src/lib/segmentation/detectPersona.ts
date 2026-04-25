@@ -246,6 +246,7 @@ export const MODIFIER_OPTIONS: readonly CanonicalModifier[] = [
   'medical',
   'halal',
   'kosher',
+  'vegan',
   'accessibility',
   'lgbtq',
   'athlete',
