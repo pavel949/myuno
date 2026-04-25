@@ -161,7 +161,7 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
               {landing.services.map((service) => (
                 <li key={service.slug}>
                   <a
-                    href={service.href}
+                    href={wp(service.href)}
                     className="group flex h-full items-start gap-3 border border-border bg-card p-4 transition-all hover:border-primary/60 hover:[box-shadow:var(--shadow-elevation-2)]"
                   >
                     <Sparkles
