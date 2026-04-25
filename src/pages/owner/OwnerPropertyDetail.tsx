@@ -144,9 +144,9 @@ export default function OwnerPropertyDetail() {
                 {formatCurrencyAmount(Number(property.deposit_amount), depositCurrency, true)}
               </span>
             )}
-            {(property as any).seasonal_pricing?.length > 0 && (
+            {propertyExt.seasonal_pricing?.length > 0 && (
               <Badge variant="secondary" className="text-xs">
-                {(property as any).seasonal_pricing.length} {isRu ? 'сезон.' : 'seasons'}
+                {propertyExt.seasonal_pricing.length} {isRu ? 'сезон.' : 'seasons'}
               </Badge>
             )}
           </div>
@@ -233,13 +233,13 @@ export default function OwnerPropertyDetail() {
         {/* OVERVIEW TAB */}
         <TabsContent value="overview" className="mt-4 space-y-4">
           {/* Access codes quick view */}
-          {(property as any).wifi_password && (
+          {propertyExt.wifi_password && (
             <Card>
               <CardContent className="p-3 flex items-center gap-3">
                 <Wifi className="h-4 w-4 text-primary" />
                 <div>
                   <p className="text-xs text-muted-foreground">WiFi</p>
-                  <p className="text-sm font-mono">{(property as any).wifi_password}</p>
+                  <p className="text-sm font-mono">{propertyExt.wifi_password}</p>
                 </div>
               </CardContent>
             </Card>
@@ -406,14 +406,14 @@ export default function OwnerPropertyDetail() {
             <PropertyOwnerInfoTab
               propertyId={id}
               property={{
-                owner_name: (property as any).owner_name,
-                owner_email: (property as any).owner_email,
-                owner_phone: (property as any).owner_phone,
-                owner_nationality: (property as any).owner_nationality,
-                management_company_id: (property as any).management_company_id,
+                owner_name: propertyExt.owner_name,
+                owner_email: propertyExt.owner_email,
+                owner_phone: propertyExt.owner_phone,
+                owner_nationality: propertyExt.owner_nationality,
+                management_company_id: propertyExt.management_company_id,
                 management_type: property.management_type,
                 project_id: property.project_id,
-                owner_contact_id: (property as any).owner_contact_id,
+                owner_contact_id: propertyExt.owner_contact_id,
               }}
             />
           )}
@@ -421,7 +421,7 @@ export default function OwnerPropertyDetail() {
 
         {/* LISTINGS TAB */}
         <TabsContent value="listings" className="mt-4">
-          {id && <PropertyListingsTab propertyId={id} companyId={(property as any).management_company_id || ''} />}
+          {id && <PropertyListingsTab propertyId={id} companyId={propertyExt.management_company_id || ''} />}
         </TabsContent>
 
         {/* DEALS TAB */}
