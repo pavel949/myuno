@@ -2,9 +2,10 @@
  * MC Onboarding Wizard — 7-step guided setup for new management companies.
  * Route: /mc/onboarding/wizard
  */
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useActiveCompany } from '@/hooks/useActiveCompany';
 import {
   useMcOnboarding, useUpdateOnboardingStep, useDismissOnboarding, useCompleteOnboarding,
   ONBOARDING_STEPS, computeProgress, type OnboardingStepKey,
@@ -31,12 +32,18 @@ export default function McOnboardingWizardPage() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const { activeCompany, isLoading: companyLoading } = useActiveCompany();
   const { data: progress, isLoading } = useMcOnboarding();
   const updateStep = useUpdateOnboardingStep();
   const dismiss = useDismissOnboarding();
   const complete = useCompleteOnboarding();
 
-  if (isLoading) return <div className="flex items-center justify-center min-h-[60vh]"><LoadingSpinner size="lg" /></div>;
+  // No company yet → push user to the 4-step creation flow first.
+  if (!companyLoading && !activeCompany) {
+    return <Navigate to="/mc/onboarding" replace />;
+  }
+
+  if (isLoading || companyLoading) return <div className="flex items-center justify-center min-h-[60vh]"><LoadingSpinner size="lg" /></div>;
 
   const pct = computeProgress(progress);
   const allDone = pct === 100;
