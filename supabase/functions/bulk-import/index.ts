@@ -1,10 +1,7 @@
 // Deno.serve used (native edge runtime)
 import { createClient } from "../_shared/supabase.ts";
+import { getCorsHeaders } from "../_shared/cors.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://myuno.app",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
 
 // Allowed tables for bulk import - synchronized with src/lib/providerIdMapping.ts
 const ALLOWED_TABLES = [
@@ -57,6 +54,8 @@ function getProviderField(table: string): string {
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
+
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -84,16 +83,22 @@ Deno.serve(async (req) => {
       throw new Error("Unauthorized");
     }
 
-    // Check if user is admin
-    const { data: profile } = await supabase
-      .from('profiles')
+    // Check if user has admin/staff/uno_team role via user_roles table
+    // (profiles.role does not exist — roles live in public.user_roles for RLS safety)
+    const { data: roles, error: rolesError } = await supabase
+      .from('user_roles')
       .select('role')
-      .eq('id', user.id)
-      .single();
-    
+      .eq('user_id', user.id);
+
+    if (rolesError) {
+      console.error('user_roles lookup failed:', rolesError);
+      throw new Error('Authorization check failed');
+    }
+
     const allowedRoles = ['admin', 'staff', 'uno_team'];
-    if (!profile || !allowedRoles.includes(profile.role)) {
-      throw new Error("Admin access required");
+    const hasAccess = (roles ?? []).some((r: { role: string }) => allowedRoles.includes(r.role));
+    if (!hasAccess) {
+      throw new Error('Admin access required');
     }
 
     // Parse request body
@@ -120,12 +125,13 @@ Deno.serve(async (req) => {
     const results = {
       inserted: 0,
       failed: 0,
+      inserted_ids: [] as string[],
       errors: [] as string[],
     };
 
     for (let i = 0; i < records.length; i += batchSize) {
       const batch = records.slice(i, i + batchSize);
-      
+
       // Add default values (table-specific)
       const processedBatch = batch.map((record: Record<string, any>) => {
         const base: Record<string, any> = {
@@ -154,6 +160,11 @@ Deno.serve(async (req) => {
         results.errors.push(`Batch ${i / batchSize + 1}: ${error.message}`);
       } else {
         results.inserted += data?.length || 0;
+        if (Array.isArray(data)) {
+          for (const row of data) {
+            if (row?.id) results.inserted_ids.push(row.id as string);
+          }
+        }
       }
     }
 
