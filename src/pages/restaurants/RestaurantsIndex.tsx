@@ -15,6 +15,8 @@ import { mapRestaurantToCatalogCard } from '@/lib/adapters/catalogCardAdapters';
 import { restaurantFilterConfig } from '@/lib/filterRegistry';
 import { APP_ROUTES } from '@/lib/config/routes';
 import type { FilterValues } from '@/components/filters/UniversalFilter';
+import { usePersonaFilter } from '@/hooks/usePersonaFilter';
+import { PersonaFilterChip } from '@/components/landings/PersonaFilterChip';
 import { cn } from '@/lib/utils';
 
 const CUISINES = [
@@ -53,6 +55,8 @@ export default function RestaurantsIndex() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterValues, setFilterValues] = useState<FilterValues>({});
   const [sortBy, setSortBy] = useState('recommended');
+
+  const { applyFilter: applyPersonaFilter } = usePersonaFilter();
 
   const { restaurants, isLoading } = useRestaurants({
     cuisine: selectedCuisine === 'all' ? undefined : selectedCuisine,
@@ -112,8 +116,18 @@ export default function RestaurantsIndex() {
         break;
     }
 
+    // Persona filter — combines `cuisine`, `dietary_options`, `features` as
+    // the synthetic tag pool for matching against persona vocabularies.
+    result = applyPersonaFilter(result, (r) => {
+      const raw = r as unknown as Record<string, unknown>;
+      const cuisineTags = (raw.cuisine_tags as string[] | null) ?? [];
+      const dietary = (raw.dietary_options as string[] | null) ?? [];
+      const features = r.features ?? [];
+      return [...cuisineTags, ...dietary, ...features, r.cuisine].filter(Boolean) as string[];
+    });
+
     return result;
-  }, [restaurants, searchQuery, filterValues, sortBy]);
+  }, [restaurants, searchQuery, filterValues, sortBy, applyPersonaFilter]);
 
   const handleFilterChange = useCallback((values: FilterValues) => {
     setFilterValues(values);
@@ -172,6 +186,7 @@ export default function RestaurantsIndex() {
         </div>
       }
     >
+      <PersonaFilterChip className="mb-3" />
       {isLoading ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
           {[1, 2, 3, 4, 5, 6].map(i => (
