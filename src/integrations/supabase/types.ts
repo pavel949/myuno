@@ -10538,6 +10538,7 @@ export type Database = {
           lng: number | null
           name_en: string
           name_ru: string | null
+          persona_tags: string[]
           phone: string | null
           price: number | null
           price_period: string | null
@@ -10579,6 +10580,7 @@ export type Database = {
           lng?: number | null
           name_en: string
           name_ru?: string | null
+          persona_tags?: string[]
           phone?: string | null
           price?: number | null
           price_period?: string | null
@@ -10620,6 +10622,7 @@ export type Database = {
           lng?: number | null
           name_en?: string
           name_ru?: string | null
+          persona_tags?: string[]
           phone?: string | null
           price?: number | null
           price_period?: string | null

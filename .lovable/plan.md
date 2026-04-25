@@ -1,72 +1,133 @@
-# Lead Intelligence v1 — implement PROJECT.md §11
+# Persona system → full canonical alignment + persona-tagged discovery
 
-Scope is the single P0 item from the prior audit: deterministic event-weighted lead scoring with a `Ready` (86–100) tier and an automatic WhatsApp alert to Pavel. No bigger refactor, no new pages.
+## TL;DR
 
-## What gets built
+The system is **already very rich**: 25 persona landings exist (P1–P25, all `live`), the canonical type tree is in place, the modifier system covers halal/kosher/lgbtq/accessibility, and `/for/:slug` routes work end-to-end. The gaps are narrower than your message suggests — and one gap (vegan/dietary persona, broader cultural-religious diet coverage) **is real** and worth fixing now.
 
-### 1 · Database (one migration — the user approves it via the in-app prompt)
+The other real gap is **persona-tagged discovery**: services/listings have a free-text `tags` column today (only 68 of 500 rows tagged, and tags are floral/event-themed, not persona-themed). When a user lands on `/for/halal` and clicks "Restaurants", the catalog **does not filter by `audience=halal`** — it shows everything. We add a persona-aware filter contract so click-throughs auto-apply the persona tag and gracefully fall back to "show all" when no tag is set.
 
-**New tables**
+I will **not** rewrite anything that already works. The persona registry, landing renderer, theme system, slug aliases, segmentation framework — all stay. We add what is missing and tag what is untagged.
 
-- `public.lead_score_events` — config (`event_key` PK, `weight`, `label_ru`, `label_en`, `description`, `is_active`). Seeded with the six §11 events:
-  - `read_3_articles_buying` +15
-  - `contract_uploaded` +20
-  - `duediligence_run` +30
-  - `concierge_question_fet` +25
-  - `property_viewed_3x` +35
-  - `investment_calculator` +20
-- `public.lead_score_events_log` — audit row per increment (`contact_id` FK to `crm_contacts`, `event_key`, `weight_applied`, `score_before/after`, `temperature_before/after`, `source`, `meta`, `created_by`, `created_at`).
+---
 
-**RLS**
+## What already exists (leave as-is)
 
-- `lead_score_events`: SELECT to all authenticated; INSERT/UPDATE/DELETE only `has_role(auth.uid(), 'admin'::app_role)`.
-- `lead_score_events_log`: SELECT gated by an `EXISTS` against `crm_contacts` (so the existing company-membership policies on contacts decide visibility); direct INSERT only by admins (the engine runs through the SECURITY DEFINER RPC).
+- **25 persona landings P1–P25** in `src/content/landings/personaLandings.ts`, all `status: 'live'`. Includes `halal` (P17), `lgbtq` (P18), `accessibility` (P19), `pet-owners` (P13), `medical` (P14), `weddings` (P15), `athletes` (P16), `retirees` (P20), `families` (P7), `digital-nomads` (P4) etc.
+- **Canonical types** (`src/types/canonical.ts`): `PersonaCode` P1–P25, `LifecycleStage`, `HouseholdType`, `ClusterId`, modifier vocabulary.
+- **Routing** `/for/:persona` (with legacy aliases via `slugAliases.ts`) and bilingual SEO via `LandingSeoHead`.
+- **Theme system** `personaTheme.ts` — gradient/icon per persona.
+- **Modifier UI** in onboarding step covering 10 modifiers (pet-owner, medical, halal, kosher, accessibility, lgbtq, athlete, wedding, family-young, family-school).
+- **Detection engine** `detectPersona.ts` — rules-based fallback before the AI call.
 
-**Helper + RPC**
+## Gaps to close (this loop)
 
-- `lead_temperature_from_score(int) -> text` — returns `cold` (≤25), `warm` (≤60), `hot` (≤85), `ready` (≥86). `IMMUTABLE`, `SET search_path = public`.
-- `apply_lead_score_event(p_contact_id uuid, p_event_key text, p_source text, p_meta jsonb)` — `SECURITY DEFINER`, `SET search_path = public`. Locks the contact row, adds the event's weight (clamped to 0–100), updates `lead_score`, `lead_temperature`, `last_activity_at`, `updated_at`, writes the audit row, and returns `(contact_id, score_before, score_after, temperature_before, temperature_after, crossed_ready)`. `crossed_ready = (temp_before <> 'ready' AND temp_after = 'ready')`. Execute granted to `authenticated, service_role`.
+### Gap 1 · Missing persona: dietary/lifestyle eaters (vegan + extended diet vocabulary)
+The canon §4 has 25 personas. Canon also lists `halal` and `kosher` modifiers but **does not have a top-level "vegan/plant-based" persona** even though Phuket has ~120 vegan/vegetarian restaurants and a real expat segment. The user explicitly asked for it.
 
-### 2 · Edge function `supabase/functions/score-lead/index.ts`
+**Fix** — add **P26 · Conscious Eaters** (vegan / vegetarian / plant-based / gluten-free travellers and residents). One canonical persona, multi-modifier inside (`vegan`, `vegetarian`, `gluten-free`). Slug: `conscious-eaters`. Aliases: `vegan`, `vegetarian`, `plant-based`, `gluten-free`.
 
-- Auth-guarded with the existing `requireAuth` helper.
-- `GET /events` — returns the active scoring events config (for surfacing in admin UI).
-- `POST /` — body `{ contact_id, event_key, source?, meta? }`. Validates inputs in-line (UUID + `^[a-z0-9_]{2,64}$`); invokes the RPC via `createServiceClient`; on `crossed_ready === true` sends a WhatsApp alert to `getAdminWhatsApp()` via the existing `sendWhatsApp` helper, with a templated message including name, score delta, trigger key, contact phone, and a deep link to the contact page. Alert failures never fail the score update.
-- CORS uses the standard headers; OPTIONS handled.
+This requires:
+- Extending `PersonaCode` from `P1..P25` to `P1..P26`.
+- Adding modifier `vegan` to `CanonicalModifier` (kosher/halal already exist).
+- Adding a new entry to `PERSONA_LANDINGS` with full bilingual content (pains, services, FAQ, CTA) following the live template (mirror `halal`'s structure). Same for theme.
+- Wiring aliases in `slugAliases.ts` (`vegan` → `conscious-eaters`, `vegetarian` → `conscious-eaters`, `plant-based` → `conscious-eaters`, `gluten-free` → `conscious-eaters`).
+- Adding a `vegan` toggle to onboarding `ModifiersStep`.
+- Updating the canon doc `01-segmentation-framework.md` §4.2 to add P26 row.
 
-### 3 · Frontend — minimal UI changes only
+### Gap 2 · Persona-tagged discovery — apps don't filter by persona
+Today `landing.services[i].href` points at `/restaurants`, `/services`, etc. None of these read a `?persona=` query param. Click-through experience is identical regardless of who you are.
 
-- `src/hooks/useLeadsFactory.ts`
-  - Extend `LeadScoreResult.priority` from `'hot' | 'warm' | 'cold'` to `'ready' | 'hot' | 'warm' | 'cold'`.
-  - `getPriorityColor`: add a `ready` branch → strong red on red surface using semantic tokens (e.g. `text-danger bg-danger-bg`).
-  - `getScoreColor`: add `if (score >= 86) return 'text-danger';` branch above the existing 70/40 thresholds.
-  - Add a small `useLeadScoreEvents()` query that fetches `GET /events` (cached) so future call sites can list available events.
-  - Add a `useApplyLeadScoreEvent()` mutation that posts to `score-lead` and invalidates `crm-contacts` queries on success.
-- `src/components/admin/leads/LeadAIInsights.tsx`
-  - Replace the ternary picking the icon with a small `priorityMeta` map: `ready → Flame (filled, danger)`, `hot → Flame`, `warm → Thermometer`, `cold → Snowflake`.
-  - Update the badge label so `ready` renders "Готов" (RU) / "Ready" (EN). Existing labels untouched.
-  - Increase score visual weight when `aiScore >= 86` (uses the new `getScoreColor` branch).
+**Fix** — establish a single, simple convention with two parts:
 
-No other components are touched in this pass. Existing `leads-factory` LLM scorer is left untouched — it scores `consultation_requests`; this new engine scores `crm_contacts`. They are complementary, not duplicate.
+**a) URL contract.** Every persona-landing CTA href gets `?persona=<slug>` appended automatically by the renderer. Catalog pages read it. Standardising on `?persona=` (single key, kebab-case slug) keeps it discoverable and shareable.
 
-### 4 · Wiring callers (deliberately deferred to a follow-up)
+**b) Filter behaviour.** Every catalog/index page that already uses `useSearchParams()` (Restaurants, Services, Property, Market, Events, Tours, Transport, Beauty, Education, Medical, Experiences) gets a tiny shared hook `usePersonaFilter()` that:
+  - reads `searchParams.get('persona')`
+  - if present, filters listings where `tags && tags.contains(personaSlug) OR tags && tags.contains(matched-modifier)` (e.g., `halal` persona → `halal`, `vegan` persona → `vegan` or `vegetarian` or `plant-based`)
+  - if absent OR no listings match → returns the unfiltered set (graceful fallback you asked for: "if no tag, show all offers")
+  - shows a small dismissable chip "Filtered for: ☪️ Halal — clear" so the user understands what's happening
 
-The §11 events fire in six places (article reader, ContractAI, DueDiligence, concierge intent classifier, property views aggregator, ROI calculator). Wiring those call sites is mechanical but cross-cuts six features. **Out of scope for this loop** — this loop ships the engine + UI tier so call sites can be wired one-by-one without re-deploying the engine. The plan after this is to wire `property_viewed_3x` first (highest-weight event, clearest signal) in a separate small PR.
+The mapping persona-slug → tag-vocabulary lives in **one place**: `src/lib/landings/personaTagMap.ts` (new). Format:
+```ts
+export const PERSONA_TAGS: Record<string, string[]> = {
+  halal:              ['halal', 'muslim-friendly', 'mosque-nearby'],
+  'conscious-eaters': ['vegan', 'vegetarian', 'plant-based', 'gluten-free'],
+  'pet-owners':       ['pet-friendly', 'pet'],
+  families:           ['kids-friendly', 'family'],
+  weddings:           ['wedding', 'celebration', 'romantic'],
+  // …all 26 personas mapped
+};
+```
+
+This is the single source of truth — touched here when we add a persona, never elsewhere.
+
+### Gap 3 · Listings are 86% untagged
+Only 68/500 listings have any tags, and existing tags are floral/event-themed, not persona-themed. Without tags, persona filters return empty sets and trigger the "show all" fallback every time — defeating the point.
+
+**Fix** — two-pronged:
+1. **Migration: add a `persona_tags text[]` column to `public.listings`** (additive, separate from free-text `tags`, so we don't pollute the existing tag vocabulary). Indexed with GIN.
+2. **Backfill (one INSERT query, no AI required for v1)** — derive obvious persona tags from existing listing fields:
+   - Restaurants with `cuisine='indian' OR features @> ARRAY['halal']` → tag `halal`
+   - Restaurants with `cuisine='vegetarian' OR features @> ARRAY['vegan']` → tag `conscious-eaters`
+   - Listings with `pet_friendly=true` → tag `pet-owners`
+   - Properties with `bedrooms >= 3 AND amenities @> ARRAY['kids-pool']` → tag `families`
+   - etc.
+   
+   The backfill is best-effort (rows we can't classify stay empty and benefit from the show-all fallback). Manual tagging UI is **out of scope** for this loop — vendors get a future ticket to self-tag from their dashboard.
+
+### Gap 4 · Persona landing → app discovery surface
+The persona landing pages list a few hand-picked services in `landing.services[]`. They do not show "all apps available filtered for you". Users have to know what to click.
+
+**Fix** — add a single new section to `PersonaLandingView` rendered after `services[]`: **"All apps available for you"** — a 3-column grid pulled from `appRegistry.ts` (which already exists), filtered by `appsAvailableForPersona(slug)` using the same `PERSONA_TAGS` map. Each app card href gets `?persona=<slug>` appended. Empty state: "All apps are available — start anywhere" + grid of all apps.
+
+---
+
+## Implementation steps (in order)
+
+1. **Canon + types**
+   - `docs/canonical/01-segmentation-framework.md` — add P26 row in §4.2 with `modifier: vegan/vegetarian/plant-based/gluten-free`.
+   - `src/types/canonical.ts` — extend `PersonaCode` to include `'P26'` and add to `PERSONA_CODES`.
+   - `src/lib/segmentation/detectPersona.ts` — add `'vegan'` to `CanonicalModifier` and to `MODIFIER_OPTIONS`.
+
+2. **New persona landing**
+   - `src/content/landings/personaLandings.ts` — append `P26_CONSCIOUS_EATERS` (full bilingual content modelled on the `halal` entry).
+   - `src/lib/landings/personaTheme.ts` — add theme for `conscious-eaters` (green palette, leaf icon).
+   - `src/lib/landings/slugAliases.ts` — add the 4 aliases.
+   - `src/components/onboarding/v2/ModifiersStep.tsx` — add `vegan: { en: 'Vegan / vegetarian', ru: 'Веган / вегетарианец', icon: '🌱' }` label.
+
+3. **Persona-tag map + filter hook (single source of truth)**
+   - New `src/lib/landings/personaTagMap.ts` — exports `PERSONA_TAGS` (covers all 26 personas) and helpers `getPersonaTags(slug)`, `getAppsForPersona(slug)`.
+   - New `src/hooks/usePersonaFilter.ts` — reads `?persona=` from URL, returns `{ personaSlug, personaTags, applyFilter<T>(items, getTags), clearFilter() }`. Includes the empty-set fallback.
+   - New `src/components/landings/PersonaFilterChip.tsx` — the dismissable "Filtered for X" chip rendered at the top of each filtered catalog.
+
+4. **Renderer wiring**
+   - `src/pages/landings/PersonaLandingPage.tsx` — automatically suffix every `service.href` with `?persona=<slug>` (use a small helper so it doesn't double-append if the href already has a query string).
+   - Add new "All apps for you" section pulling from `appRegistry.ts` + `getAppsForPersona`.
+
+5. **Catalog wiring (the discovery half)**
+   - Wire `usePersonaFilter()` into the existing `useSearchParams`-using pages: Restaurants, Services, Market, Property, Events, Tours, Transport, Beauty, Education, Medical, Experiences. Each: 1–3 lines of code (compose the filter into the existing query, render the chip).
+
+6. **Database — additive migration**
+   - `ALTER TABLE public.listings ADD COLUMN persona_tags text[] DEFAULT '{}'::text[];`
+   - `CREATE INDEX idx_listings_persona_tags ON public.listings USING GIN(persona_tags);`
+   - Backfill via a single SQL `UPDATE` deriving from existing fields (cuisine, features, amenities, category). RLS unchanged (`persona_tags` inherits the existing listings policy).
+   - One-shot SQL — no Edge Function, no AI call.
+
+7. **Tests**
+   - Extend `personaLandings.test.ts` so the inventory check expects 26 personas.
+   - New unit tests for `usePersonaFilter` (with-tag, no-match → fallback, no-param → passthrough).
+   - New test for the alias resolver covering `vegan` → `conscious-eaters`.
 
 ## What does NOT change
 
-- No edits to `src/integrations/supabase/types.ts`, `client.ts`, `.env`, `supabase/config.toml`.
-- No changes to `consultation_requests` or the `leads-factory` function.
-- No new routes, no new pages, no new components beyond the icon-map change inside `LeadAIInsights`.
-- No data backfill — existing contacts keep their current `lead_score`/`lead_temperature` until an event fires.
+- No new top-level routes (canon §13.1) — `/for/:slug` already exists.
+- No new shells, no new layouts.
+- The 25 existing persona landings are untouched.
+- The `tags` free-text column on `listings` is untouched (existing taxonomy preserved).
+- The cluster system (A..J landings) is untouched — out of scope.
+- No AI calls added — backfill is deterministic SQL.
+- No new edge functions.
 
-## Verification after build
+## Open question (one)
 
-1. Lint check — confirm RLS is on for both new tables and no new warnings appear.
-2. `supabase--curl_edge_functions GET /score-lead/events` — should return the 6 seeded rows.
-3. `POST /score-lead` against a real test contact with `event_key=property_viewed_3x` and assert `score_after = score_before + 35`, `crossed_ready` correctly flips when crossing 86.
-4. `LeadAIInsights` renders the new "Готов"/"Ready" badge for any contact with `aiPriority='ready'`.
-
-## Open question (for after build)
-
-The WhatsApp alert template is in Russian by design (Pavel's primary channel). Confirm the deep-link target `https://myuno.app/owner/contacts/:id` is the canonical contact page — if Pavel uses a different inbox URL, swap the template constant.
+The 10 cluster landings (A..J — Arrival/Extension/Settlement/…) currently don't propagate persona either. Should I add the same `?persona=` pass-through to cluster landings in this loop, or leave it as a follow-up? **Default if you don't answer: leave it for a follow-up** — clusters serve a different mental model (lifecycle, not identity), and the most concrete win is on persona pages where the user has just self-identified.

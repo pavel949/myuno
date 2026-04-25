@@ -25,7 +25,8 @@ import NotFound from '@/pages/NotFound';
 import { Button } from '@/components/ui/button';
 import LandingSeoHead from '@/components/seo/LandingSeoHead';
 import { tokenColor } from '@/lib/utils/hslAlpha';
-import { ArrowRight, CheckCircle2, MapPin, Sparkles } from 'lucide-react';
+import { ArrowRight, CheckCircle2, MapPin, Sparkles, Grid3x3 } from 'lucide-react';
+import { getAppsForPersona, withPersonaParam } from '@/lib/landings/personaTagMap';
 
 interface PersonaLandingViewProps {
   landing: PersonaLanding;
@@ -38,6 +39,9 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
   const theme = getPersonaTheme(landing.slug);
   const Icon = theme.icon;
 
+  // Persona context flows through every click — catalog pages will read it.
+  const wp = (href: string) => withPersonaParam(href, landing.slug);
+
   // Cross-link: areas where this persona is recommended (max 4)
   const relatedAreas = useMemo(
     () =>
@@ -46,6 +50,10 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
       ).slice(0, 4),
     [landing.slug],
   );
+
+  // "All apps for you" — pulled from the canonical app registry, filtered by
+  // persona (with show-all fallback when no specific apps match).
+  const personaApps = useMemo(() => getAppsForPersona(landing.slug), [landing.slug]);
 
   return (
     <AppLayout>
@@ -82,14 +90,14 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
           </p>
           <div className="mt-7 flex flex-col gap-3 sm:flex-row">
             <Button asChild size="lg" className="shadow-lg">
-              <a href={landing.primaryCta.href}>
+              <a href={wp(landing.primaryCta.href)}>
                 {t(landing.primaryCta.label)}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </a>
             </Button>
             {landing.secondaryCta ? (
               <Button asChild size="lg" variant="outline">
-                <a href={landing.secondaryCta.href}>{t(landing.secondaryCta.label)}</a>
+                <a href={wp(landing.secondaryCta.href)}>{t(landing.secondaryCta.label)}</a>
               </Button>
             ) : null}
           </div>
@@ -153,7 +161,7 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
               {landing.services.map((service) => (
                 <li key={service.slug}>
                   <a
-                    href={service.href}
+                    href={wp(service.href)}
                     className="group flex h-full items-start gap-3 border border-border bg-card p-4 transition-all hover:border-primary/60 hover:[box-shadow:var(--shadow-elevation-2)]"
                   >
                     <Sparkles
@@ -173,6 +181,43 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
                 </li>
               ))}
             </ul>
+          </section>
+        ) : null}
+
+        {/* ─── ALL APPS FOR YOU ──────────────────────────────────── */}
+        {personaApps.length > 0 ? (
+          <section className="mb-12">
+            <h2 className="mb-2 flex items-center gap-2 text-2xl font-semibold text-foreground">
+              <Grid3x3 className="h-5 w-5" style={{ color: tokenColor(theme.color) }} />
+              {isRu ? 'Все приложения для вас' : 'All apps for you'}
+            </h2>
+            <p className="mb-5 text-sm text-muted-foreground">
+              {isRu
+                ? 'Любое приложение знает, что вы пришли с этой страницы — каталог откроется уже отфильтрованным.'
+                : 'Every app knows you came from this page — the catalogue opens pre-filtered.'}
+            </p>
+            <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+              {personaApps.slice(0, 16).map((app) => (
+                <li key={app.id}>
+                  <a
+                    href={wp(app.route)}
+                    className="group flex h-full flex-col items-start gap-1 border border-border bg-card p-3 transition-all hover:border-primary/60"
+                  >
+                    <span className="text-xl" aria-hidden>{app.icon}</span>
+                    <span className="text-sm font-medium text-foreground">
+                      {isRu ? app.labelRu : app.labelEn}
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+            {personaApps.length > 16 ? (
+              <p className="mt-3 text-xs text-muted-foreground">
+                {isRu
+                  ? `И ещё ${personaApps.length - 16} приложений в разделе «Все сервисы».`
+                  : `And ${personaApps.length - 16} more in “All services”.`}
+              </p>
+            ) : null}
           </section>
         ) : null}
 
@@ -254,14 +299,14 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
           </p>
           <div className="mt-4 flex flex-col gap-2 sm:flex-row">
             <Button asChild size="lg">
-              <a href={landing.primaryCta.href}>
+              <a href={wp(landing.primaryCta.href)}>
                 {t(landing.primaryCta.label)}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </a>
             </Button>
             {landing.secondaryCta ? (
               <Button asChild size="lg" variant="ghost">
-                <a href={landing.secondaryCta.href}>{t(landing.secondaryCta.label)}</a>
+                <a href={wp(landing.secondaryCta.href)}>{t(landing.secondaryCta.label)}</a>
               </Button>
             ) : null}
           </div>
@@ -271,7 +316,7 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
       {/* ─── STICKY MOBILE CTA ─────────────────────────────────── */}
       <div className="sticky bottom-0 z-30 border-t border-border bg-background/95 p-3 backdrop-blur sm:hidden">
         <Button asChild size="lg" className="w-full">
-          <a href={landing.primaryCta.href}>{t(landing.primaryCta.label)}</a>
+          <a href={wp(landing.primaryCta.href)}>{t(landing.primaryCta.label)}</a>
         </Button>
       </div>
     </AppLayout>

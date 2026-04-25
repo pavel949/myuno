@@ -35,6 +35,7 @@ export type CanonicalModifier =
   | 'medical'
   | 'halal'
   | 'kosher'
+  | 'vegan'
   | 'accessibility'
   | 'lgbtq'
   | 'athlete'
@@ -85,6 +86,7 @@ const MODIFIER_CLUSTERS: Record<CanonicalModifier, ClusterId[]> = {
   medical:         ['live', 'legal'],
   halal:           ['arrive'],
   kosher:          ['arrive'],
+  vegan:           ['arrive', 'live'],
   accessibility:   ['live'],
   lgbtq:           [],
   athlete:         ['live'],
@@ -244,6 +246,7 @@ export const MODIFIER_OPTIONS: readonly CanonicalModifier[] = [
   'medical',
   'halal',
   'kosher',
+  'vegan',
   'accessibility',
   'lgbtq',
   'athlete',

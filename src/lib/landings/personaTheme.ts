@@ -8,7 +8,7 @@ import {
   Plane, Sun, Home, TrendingUp, Crown, Briefcase, Coins, PawPrint,
   Building2, Laptop, Baby, Stethoscope, Heart, Armchair, Globe,
   Dumbbell, MoonStar, Landmark, Building, Rainbow, Accessibility,
-  Wrench, Code, Store, Camera, GraduationCap, Users,
+  Wrench, Code, Store, Camera, GraduationCap, Users, Leaf,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -57,6 +57,7 @@ export const PERSONA_THEME: Record<string, PersonaTheme> = {
   smb:                { icon: Store,         color: 'cluster-build',   colorAccent: 'cluster-invest',tagline: { ru: 'Малому бизнесу', en: 'For SMBs' },                  proof: PROOF_DEFAULT },
   creatives:          { icon: Camera,        color: 'accent-purple',   colorAccent: 'accent-coral',  tagline: { ru: 'Креативщикам', en: 'For creatives' },               proof: PROOF_DEFAULT },
   students:           { icon: GraduationCap, color: 'accent-cyan',     colorAccent: 'accent-amber',  tagline: { ru: 'Студентам', en: 'For students' },                   proof: PROOF_DEFAULT },
+  'conscious-eaters': { icon: Leaf,           color: 'success',         colorAccent: 'accent-amber',  tagline: { ru: 'Vegan · Vegetarian · GF', en: 'Vegan · Vegetarian · GF' }, proof: [{ ru: '120+ растительных кафе', en: '120+ plant-based cafés' }, { ru: 'Verified vegan menus', en: 'Verified vegan menus' }, { ru: 'Кухни в виллах', en: 'Self-catering villas' }] },
 };
 
 export const DEFAULT_PERSONA_THEME: PersonaTheme = {

@@ -134,12 +134,13 @@ Scout ──► Tourist ──► Snowbird ──► Settler ──► Resident
 | P23 | 🏪 Local SMB (ресторан/клиника/школа) | resident | provider | Any | B2B marketplace listing |
 | P24 | 🎨 Creative Class (фотограф/архитектор/дизайнер) | nomad/settler | operator/provider | Any | Специфическая проф. инфраструктура |
 | P25 | 👨‍🎓 Student / Young Adult | tourist/nomad | consumer | EN · solo | UWC, BIS university, gap year |
+| P26 | 🌱 Conscious Eater (vegan/vegetarian/plant-based/gluten-free) | any | consumer/resident-user | vegan/vegetarian/plant-based/gluten-free | ~120 vegan/veg рестораны на Пхукете, растущая аудитория экспатов и wellness-туристов |
 
-### 4.3 Сводная таблица — 25 персон
+### 4.3 Сводная таблица — 26 персон
 
-Всего платформа обслуживает **25 различимых персон**. Из них:
+Всего платформа обслуживает **26 различимых персон**. Из них:
 - **12 core** (первая волна, 90% выручки).
-- **13 extended** (вторая волна, специализированные разделы, high-intent низкий объём).
+- **14 extended** (вторая волна, специализированные разделы, high-intent низкий объём).
 
 ---
 
