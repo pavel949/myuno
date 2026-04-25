@@ -7,11 +7,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useUserRoles } from '@/hooks/useUserRoles';
 
 export function AIAgentStatusWidget() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const navigate = useNavigate();
+  const { data: userRoles } = useUserRoles();
+  const isAdmin = (userRoles || []).some((r: any) => r.role === 'admin' || r.role === 'super_admin');
 
   const { data, isLoading } = useQuery({
     queryKey: ['ai-agents-dashboard-status'],
