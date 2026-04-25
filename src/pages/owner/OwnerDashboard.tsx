@@ -410,9 +410,9 @@ export default function OwnerDashboard() {
     !propsLoading && !companyLoading && allProperties.length === 0 && !!activeCompany;
 
   if (isFirstTimeMC) {
-    const progress = onboardingProgress
-      ? computeProgress(onboardingProgress)
-      : { completed: 0, total: 7, percent: 0 };
+    const percent = onboardingProgress ? computeProgress(onboardingProgress) : 0;
+    const total = 7;
+    const completed = Math.round((percent / 100) * total);
     return (
       <div className="px-4 md:px-6 lg:px-8 pt-10 pb-24 max-w-2xl mx-auto">
         <motion.div
