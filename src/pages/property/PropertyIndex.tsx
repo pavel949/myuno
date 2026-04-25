@@ -27,6 +27,8 @@ import { UniversalFilter, FilterValues } from '@/components/filters/UniversalFil
 import { usePropertyFilterOptions } from '@/hooks/usePropertyFilterOptions';
 import { filterValuesToPropertyFilters } from '@/lib/propertyCatalogServerFilters';
 import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
+import { usePersonaFilter } from '@/hooks/usePersonaFilter';
+import { PersonaFilterChip } from '@/components/landings/PersonaFilterChip';
 import {
   serializeFilters,
   parseFiltersFromParams,
