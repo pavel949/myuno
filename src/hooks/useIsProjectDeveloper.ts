@@ -33,19 +33,20 @@ export function useIsProjectDeveloper(projectId?: string | null) {
       const devId = (project as { developer_id?: string | null } | null)?.developer_id;
       if (!devId) return false;
 
-      // 2. Run both ownership checks in parallel
+      // 2. Run both ownership checks in parallel.
+      // Cast to `any` to avoid Supabase generic recursion blowups on
+      // ad-hoc filters that aren't yet in the auto-generated types.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const sb = supabase as any;
       const [ownRes, teamRes] = await Promise.all([
-        supabase
+        sb
           .from('developers')
           .select('id')
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .eq('id', devId as any)
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .eq('user_id' as any, user.id)
+          .eq('id', devId)
+          .eq('user_id', user.id)
           .maybeSingle(),
-        supabase
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .from('developer_users' as any)
+        sb
+          .from('developer_users')
           .select('id')
           .eq('developer_id', devId)
           .eq('auth_user_id', user.id)
@@ -53,7 +54,7 @@ export function useIsProjectDeveloper(projectId?: string | null) {
           .maybeSingle(),
       ]);
 
-      return !!ownRes.data || !!teamRes.data;
+      return !!ownRes?.data || !!teamRes?.data;
     },
   });
 }
