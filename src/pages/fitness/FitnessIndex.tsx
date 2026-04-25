@@ -15,6 +15,7 @@ import { CrossSellSection } from '@/components/crosssell';
 import { mapGymToCatalogCard } from '@/lib/adapters/catalogCardAdapters';
 import { fitnessFilterConfig } from '@/lib/filterRegistry';
 import type { FilterValues } from '@/components/filters/UniversalFilter';
+import { usePersonaFilter } from '@/hooks/usePersonaFilter';
 
 const CATEGORIES = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
