@@ -244,7 +244,7 @@ export function useAdminProperties(filterProviderId?: string, filterType?: 'prov
 // ── Restaurants (listings vertical='restaurant') ───────────────────────────
 export function useAdminRestaurants(filterProviderId?: string) {
   const { user } = useAuth();
-  const [restaurants, setRestaurants] = useState<ListingRow[]>([]);
+  const [restaurants, setRestaurants] = useState<AdminRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchData = useCallback(async (isMounted?: () => boolean) => {
@@ -254,7 +254,7 @@ export function useAdminRestaurants(filterProviderId?: string) {
     let query = supabase.from('listings').select('*').eq('vertical', 'restaurant');
     if (filterProviderId) query = query.eq('provider_id', filterProviderId);
     const { data, error } = await query.order('created_at', { ascending: false });
-    if (!error && data && checkMounted()) setRestaurants(data);
+    if (!error && data && checkMounted()) setRestaurants(data as AdminRecord[]);
     if (checkMounted()) setIsLoading(false);
   }, [user, filterProviderId]);
 
@@ -327,7 +327,7 @@ export function useAdminSalons(filterProviderId?: string) {
 // ── Clinics (listings vertical='clinic') ───────────────────────────────────
 export function useAdminClinics(filterProviderId?: string) {
   const { user } = useAuth();
-  const [clinics, setClinics] = useState<ListingRow[]>([]);
+  const [clinics, setClinics] = useState<AdminRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchData = useCallback(async (isMounted?: () => boolean) => {
@@ -337,7 +337,7 @@ export function useAdminClinics(filterProviderId?: string) {
     let query = supabase.from('listings').select('*').eq('vertical', 'clinic');
     if (filterProviderId) query = query.eq('provider_id', filterProviderId);
     const { data, error } = await query.order('created_at', { ascending: false });
-    if (!error && data && checkMounted()) setClinics(data);
+    if (!error && data && checkMounted()) setClinics(data as AdminRecord[]);
     if (checkMounted()) setIsLoading(false);
   }, [user, filterProviderId]);
 
@@ -407,7 +407,7 @@ export function useAdminGyms(filterProviderId?: string) {
 // ── Vehicles (listings vertical='vehicle') ─────────────────────────────────
 export function useAdminVehicles(filterProviderId?: string) {
   const { user } = useAuth();
-  const [vehicles, setVehicles] = useState<ListingRow[]>([]);
+  const [vehicles, setVehicles] = useState<AdminRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchData = useCallback(async (isMounted?: () => boolean) => {
@@ -417,7 +417,7 @@ export function useAdminVehicles(filterProviderId?: string) {
     let query = supabase.from('listings').select('*').eq('vertical', 'vehicle');
     if (filterProviderId) query = query.eq('provider_id', filterProviderId);
     const { data, error } = await query.order('created_at', { ascending: false });
-    if (!error && data && checkMounted()) setVehicles(data);
+    if (!error && data && checkMounted()) setVehicles(data as AdminRecord[]);
     if (checkMounted()) setIsLoading(false);
   }, [user, filterProviderId]);
 
@@ -488,7 +488,7 @@ export function useAdminEvents(filterProviderId?: string) {
 function createListingsAdminHook(vertical: string) {
   return function useAdminGeneric(filterProviderId?: string) {
     const { user } = useAuth();
-    const [items, setItems] = useState<ListingRow[]>([]);
+    const [items, setItems] = useState<AdminRecord[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     const fetchData = useCallback(async (isMounted?: () => boolean) => {
@@ -498,7 +498,7 @@ function createListingsAdminHook(vertical: string) {
       let query = supabase.from('listings').select('*').eq('vertical', vertical);
       if (filterProviderId) query = query.eq('provider_id', filterProviderId);
       const { data, error } = await query.order('created_at', { ascending: false });
-      if (!error && data && checkMounted()) setItems(data);
+      if (!error && data && checkMounted()) setItems(data as AdminRecord[]);
       if (checkMounted()) setIsLoading(false);
     }, [user, filterProviderId]);
 
