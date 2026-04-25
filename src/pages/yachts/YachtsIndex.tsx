@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { VerticalContextBanner } from '@/components/vertical/VerticalContextBanner';
 import { VerticalInsightPanel } from '@/components/vertical/VerticalInsightPanel';
+import { usePersonaFilter } from '@/hooks/usePersonaFilter';
 
 type YachtTypeFilter = 'all' | 'motor_yacht' | 'catamaran' | 'speedboat' | 'superyacht';
 type SortKey = 'featured' | 'price_asc' | 'price_desc' | 'rating' | 'capacity';
