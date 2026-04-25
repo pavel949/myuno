@@ -62,6 +62,7 @@ const PropertyHub = React.lazy(() => import('@/pages/property/PropertyHub'));
 
 // M6 · Track B.4 — persona landing route `/for/:persona`
 const PersonaLandingPage = React.lazy(() => import('@/pages/landings/PersonaLandingPage'));
+const PersonaDirectoryPage = React.lazy(() => import('@/pages/landings/PersonaDirectoryPage'));
 // M6 · Track B.5 — cluster landing route `/cluster/:cluster`
 const ClusterLandingPage = React.lazy(() => import('@/pages/landings/ClusterLandingPage'));
 // M10b · IPP §4G — Deal Room stub
