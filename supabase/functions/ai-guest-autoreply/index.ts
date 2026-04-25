@@ -85,8 +85,8 @@ Deno.serve(async (req) => {
 
     // 3. Fetch guidebook if available
     const { data: guidebook } = await supabase
-      .from("property_guidebooks")
-      .select("wifi_name, wifi_password, arrival_instructions, checkout_instructions, house_rules_custom")
+      .from("property_guidebook")
+      .select("wifi_name, wifi_password, directions, checkout_instructions, welcome_message")
       .eq("property_id", propertyId)
       .maybeSingle();
 
