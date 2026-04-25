@@ -91,5 +91,5 @@ export function useBusinessHealthScore(): BusinessHealthResult {
     const onTrackCount = pillars.filter(p => p.status === 'good').length;
 
     return { score: totalScore, pillars, isLoading, urgentCount, onTrackCount };
-  }, [kpi, ops, isLoading]);
+  }, [kpi, ops, isLoading, propertyCount]);
 }
