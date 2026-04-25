@@ -68,9 +68,9 @@ Deno.serve(async (req) => {
 
         // Find matching events
         const eventsQuery = supabase
-          .from("mcc_events")
+          .from("mcc_landing_events")
           .select("*")
-          .eq("event_type", rule.trigger_event)
+          .eq("event_name", rule.trigger_event)
           .gte("created_at", fifteenMinAgo);
 
         const { data: events, error: eventsError } = await eventsQuery;
@@ -94,9 +94,9 @@ Deno.serve(async (req) => {
               ).toISOString();
 
               const { data: recentSends } = await supabase
-                .from("mcc_events")
+                .from("mcc_landing_events")
                 .select("id")
-                .eq("event_type", `campaign_sent_${rule.id}`)
+                .eq("event_name", `campaign_sent_${rule.id}`)
                 .eq("user_id", event.user_id)
                 .gte("created_at", cooldownDate)
                 .limit(1);
@@ -108,10 +108,10 @@ Deno.serve(async (req) => {
             }
 
             // Check target_state filter
-            if (rule.target_state && event.metadata) {
-              const meta = typeof event.metadata === 'string' 
-                ? JSON.parse(event.metadata) 
-                : event.metadata;
+            if (rule.target_state && event.payload) {
+              const meta = typeof event.payload === 'string'
+                ? JSON.parse(event.payload)
+                : event.payload;
               if (meta.user_state && meta.user_state !== rule.target_state) {
                 results.skipped++;
                 continue;
@@ -162,10 +162,11 @@ Deno.serve(async (req) => {
             }
 
             // Log execution
-            await supabase.from("mcc_events").insert({
-              event_type: `campaign_sent_${rule.id}`,
+            await supabase.from("mcc_landing_events").insert({
+              event_name: `campaign_sent_${rule.id}`,
               user_id: event.user_id,
-              metadata: {
+              campaign_id: rule.campaign_id,
+              payload: {
                 rule_id: rule.id,
                 channel,
                 trigger_event: rule.trigger_event,

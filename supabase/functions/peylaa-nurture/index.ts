@@ -20,6 +20,9 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+// NOTE: This function targets the legacy PEYLAA standalone Supabase project (not PRIMARY).
+// The `leads` table lives in that external DB. Per CLAUDE.md the PEYLAA data was migrated
+// into PRIMARY (slug=peylaa-phuket-marriott), so this function may be obsolete — verify before relying on it.
 const PEYLAA_URL = Deno.env.get("PEYLAA_SUPABASE_URL") ?? "https://bhmvnorkswapjkmbvykk.supabase.co";
 const PEYLAA_SERVICE_KEY = Deno.env.get("PEYLAA_SUPABASE_SERVICE_KEY") ?? "";
 const ULTRAMSG_INSTANCE = Deno.env.get("ULTRAMSG_INSTANCE") ?? "";
