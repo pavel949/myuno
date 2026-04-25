@@ -96,7 +96,7 @@ function useOwnerContacts() {
         .in('owner_contact_id', contacts.map(c => c.id));
 
       const propsByOwner = new Map<string, string[]>();
-      (props || []).forEach((p: any) => {
+      (props || []).forEach((p) => {
         if (!p.owner_contact_id) return;
         const list = propsByOwner.get(p.owner_contact_id) || [];
         list.push(p.id);
