@@ -16,6 +16,7 @@ import { mapSalonToCatalogCard } from '@/lib/adapters/catalogCardAdapters';
 import { beautyFilterConfig } from '@/lib/filterRegistry';
 import { APP_ROUTES } from '@/lib/config/routes';
 import type { FilterValues } from '@/components/filters/UniversalFilter';
+import { usePersonaFilter } from '@/hooks/usePersonaFilter';
 
 const CATEGORIES = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
