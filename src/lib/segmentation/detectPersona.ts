@@ -86,6 +86,7 @@ const MODIFIER_CLUSTERS: Record<CanonicalModifier, ClusterId[]> = {
   medical:         ['live', 'legal'],
   halal:           ['arrive'],
   kosher:          ['arrive'],
+  vegan:           ['arrive', 'live'],
   accessibility:   ['live'],
   lgbtq:           [],
   athlete:         ['live'],
