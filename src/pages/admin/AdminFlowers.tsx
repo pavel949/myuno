@@ -18,6 +18,7 @@ import { ProviderSelector } from '@/components/admin/ProviderSelector';
 import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { Database } from '@/integrations/supabase/types';
 
 type SizeVariant = { size: string; price: number };
