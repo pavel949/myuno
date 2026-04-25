@@ -8,7 +8,7 @@ import {
   Plane, Sun, Home, TrendingUp, Crown, Briefcase, Coins, PawPrint,
   Building2, Laptop, Baby, Stethoscope, Heart, Armchair, Globe,
   Dumbbell, MoonStar, Landmark, Building, Rainbow, Accessibility,
-  Wrench, Code, Store, Camera, GraduationCap, Users,
+  Wrench, Code, Store, Camera, GraduationCap, Users, Leaf,
   type LucideIcon,
 } from 'lucide-react';
 
