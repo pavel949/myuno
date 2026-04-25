@@ -223,8 +223,22 @@ export function useGenerateReport() {
       if (bookError) throw bookError;
 
       // Map orders to report booking shape (align with usePropertyBookings)
-      const bookings = (ordersData || []).map((o: any) => {
-        const guest = o.order_participants?.find((p: { role: string }) => p.role === 'guest');
+      type OrderItemRow = { id: string; resource_id: string | null; item_type: string | null; start_at: string | null; end_at: string | null; amount: number | null; metadata: Record<string, unknown> | null };
+      type ParticipantRow = { id: string; role: string; name: string | null; phone: string | null; email: string | null };
+      type OrderRow = {
+        id: string;
+        start_at: string | null;
+        end_at: string | null;
+        total_amount: number | null;
+        currency: string | null;
+        status: string | null;
+        notes: string | null;
+        metadata: { source?: string; deposit_amount?: number } | null;
+        order_items: OrderItemRow[] | null;
+        order_participants: ParticipantRow[] | null;
+      };
+      const bookings = ((ordersData || []) as unknown as OrderRow[]).map((o) => {
+        const guest = o.order_participants?.find((p) => p.role === 'guest');
         const item = o.order_items?.[0];
         const checkIn = (item?.start_at || o.start_at || '').split('T')[0];
         const checkOut = (item?.end_at || o.end_at || '').split('T')[0];
@@ -237,21 +251,30 @@ export function useGenerateReport() {
           total_amount: Number(o.total_amount || 0),
           source: meta.source || 'direct',
           deposit_amount: meta.deposit_amount || 0,
-          deposit_paid_at: null, // deposit tracking via booking_operations when available
+          deposit_paid_at: null as string | null, // deposit tracking via booking_operations when available
         };
       });
 
       // Fetch booking_operations for security deposits (legacy: references property_bookings; empty for orders)
-      const bIds = bookings.map((b: { id: string }) => b.id);
-      let operations: any[] = [];
+      const bIds = bookings.map((b) => b.id);
+      type OperationRow = {
+        booking_id: string;
+        deposit_amount: number | null;
+        deposit_received_at: string | null;
+        deposit_returned_amount: number | null;
+        deposit_returned_at: string | null;
+        deposit_deduction_amount: number | null;
+        deposit_return_status: string | null;
+      };
+      let operations: OperationRow[] = [];
       if (bIds.length > 0) {
         const { data: ops } = await supabase
           .from('booking_operations')
           .select('booking_id, deposit_amount, deposit_received_at, deposit_returned_amount, deposit_returned_at, deposit_deduction_amount, deposit_return_status')
           .in('booking_id', bIds);
-        operations = ops || [];
+        operations = (ops || []) as unknown as OperationRow[];
       }
-      const opsMap = new Map(operations.map((o: any) => [o.booking_id, o]));
+      const opsMap = new Map(operations.map((o) => [o.booking_id, o]));
 
       // Calculate report data
       const income = {
