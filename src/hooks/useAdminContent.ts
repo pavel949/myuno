@@ -532,6 +532,15 @@ function createListingsAdminHook(vertical: string) {
 }
 
 // ── Generic admin hook factory: non-migrated tables ────────────────────────
+// `tableName` is dynamic at runtime, so the call sites must use a permissive
+// cast against the Supabase type system. We constrain the cast to a single
+// shared shape rather than re-writing `as any` in every closure.
+type DynamicTable = ReturnType<typeof supabase.from> extends infer R ? R : never;
+function fromDynamic(name: string): DynamicTable {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (supabase.from as any)(name) as DynamicTable;
+}
+
 function createAdminHook(tableName: string) {
   return function useAdminGeneric(filterProviderId?: string) {
     const { user } = useAuth();
@@ -542,9 +551,7 @@ function createAdminHook(tableName: string) {
       const checkMounted = isMounted || (() => true);
       if (!user) return;
       if (checkMounted()) setIsLoading(true);
-      // Dynamic table name — types cannot be inferred at compile time.
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let query = (supabase.from(tableName as any) as any).select('*');
+      let query = fromDynamic(tableName).select('*');
       if (filterProviderId) query = query.eq('provider_id', filterProviderId);
       const { data, error } = await query.order('created_at', { ascending: false });
       if (!error && data && checkMounted()) setItems(data as AdminRecord[]);
@@ -554,26 +561,23 @@ function createAdminHook(tableName: string) {
     useEffect(() => { let m = true; fetchData(() => m); return () => { m = false; }; }, [fetchData]);
 
     const createItem = async (data: AdminRecord) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: result, error } = await (supabase.from(tableName as any) as any)
-        .insert({ ...data, is_active: true })
+      const { data: result, error } = await fromDynamic(tableName)
+        .insert({ ...data, is_active: true } as never)
         .select().single();
       if (!error) await fetchData();
       return { data: result, error };
     };
     const updateItem = async (data: AdminRecord) => {
       const { id, ...rest } = data;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: result, error } = await (supabase.from(tableName as any) as any)
-        .update(rest)
+      const { data: result, error } = await fromDynamic(tableName)
+        .update(rest as never)
         .eq('id', String(id))
         .select().single();
       if (!error) await fetchData();
       return { data: result, error };
     };
     const deleteItem = async (id: string) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (supabase.from(tableName as any) as any).delete().eq('id', id);
+      const { error } = await fromDynamic(tableName).delete().eq('id', id);
       if (!error) await fetchData();
       return { error };
     };
