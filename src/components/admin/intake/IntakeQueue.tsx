@@ -5,6 +5,7 @@ import { IntakeItemCard } from './IntakeItemCard';
 import { IntakeItemEditor } from './IntakeItemEditor';
 import { IntakeItemPanel } from './IntakeItemPanel';
 import { IntakeBulkActions } from './IntakeBulkActions';
+import { IntakeFailedList } from './IntakeFailedList';
 import { PersistentPanelLayout } from '@/components/uno/PersistentPanelLayout';
 import { useIsDesktop } from '@/hooks/use-desktop';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -19,7 +20,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Clock, CheckCircle, XCircle, List, Keyboard } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, List, Keyboard, AlertTriangle } from 'lucide-react';
 import { calculateHealthScore } from '@/lib/intake/healthScore';
 import { useIntakeQueueHotkeys } from '@/hooks/useIntakeQueueHotkeys';
 import { cn } from '@/lib/utils';
@@ -30,6 +31,7 @@ interface IntakeQueueProps {
   onApprove: (itemId: string) => Promise<boolean>;
   onDiscard: (itemId: string) => void;
   onEdit: (itemId: string, updates: Partial<IntakeItem>) => void;
+  onRetry: (itemId: string) => Promise<boolean>;
   onApproveAll: () => void;
   onReset: () => void;
   isApproving: boolean;
@@ -41,6 +43,7 @@ export function IntakeQueue({
   onApprove,
   onDiscard,
   onEdit,
+  onRetry,
   onApproveAll,
   onReset,
   isApproving
@@ -55,6 +58,7 @@ export function IntakeQueue({
   const [approvingItemId, setApprovingItemId] = useState<string | null>(null);
   const [confirmDiscardId, setConfirmDiscardId] = useState<string | null>(null);
   const [confirmApproveAll, setConfirmApproveAll] = useState(false);
+  const [retryingId, setRetryingId] = useState<string | null>(null);
 
   // Pending sorted worst-first by health-score so operator fixes the broken ones first.
   const pendingItems = useMemo(() => {
@@ -66,6 +70,21 @@ export function IntakeQueue({
   }, [session.items]);
   const createdItems = session.items.filter(i => i.status === 'created');
   const discardedItems = session.items.filter(i => i.status === 'discarded');
+  const failedItems = useMemo(
+    () => session.items
+      .filter(i => i.status === 'failed')
+      .sort((a, b) => (b.lastError?.occurredAt || '').localeCompare(a.lastError?.occurredAt || '')),
+    [session.items]
+  );
+
+  const handleRetry = async (itemId: string): Promise<boolean> => {
+    setRetryingId(itemId);
+    try {
+      return await onRetry(itemId);
+    } finally {
+      setRetryingId(null);
+    }
+  };
 
   const handleApprove = async (itemId: string) => {
     setApprovingItemId(itemId);
@@ -160,9 +179,30 @@ export function IntakeQueue({
         discardedCount={session.discardedCount}
       />
 
+      {/* Persistent failure banner — shown above tabs whenever any item failed */}
+      {failedItems.length > 0 && activeTab !== 'failed' && (
+        <button
+          type="button"
+          onClick={() => setActiveTab('failed')}
+          className="w-full flex items-center justify-between gap-3 border-l-4 border-destructive bg-destructive/5 hover:bg-destructive/10 transition-colors px-3 py-2 text-left"
+        >
+          <span className="flex items-center gap-2 text-sm">
+            <AlertTriangle className="h-4 w-4 text-destructive" />
+            <span className="font-medium">
+              {isRu
+                ? `${failedItems.length} ошибк${failedItems.length === 1 ? 'а' : failedItems.length < 5 ? 'и' : 'ок'} в очереди`
+                : `${failedItems.length} error${failedItems.length === 1 ? '' : 's'} in queue`}
+            </span>
+          </span>
+          <span className="text-xs text-muted-foreground">
+            {isRu ? 'Открыть →' : 'Open →'}
+          </span>
+        </button>
+      )}
+
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="w-full grid grid-cols-4">
+        <TabsList className="w-full grid grid-cols-5">
           <TabsTrigger value="all" className="gap-1">
             <List className="h-4 w-4" />
             {isRu ? 'Все' : 'All'}
@@ -178,6 +218,17 @@ export function IntakeQueue({
             {isRu ? 'Созданы' : 'Created'}
             <span className="text-xs text-muted-foreground">({createdItems.length})</span>
           </TabsTrigger>
+          <TabsTrigger
+            value="failed"
+            className={cn(
+              'gap-1',
+              failedItems.length > 0 && 'data-[state=inactive]:text-destructive'
+            )}
+          >
+            <AlertTriangle className="h-4 w-4" />
+            {isRu ? 'Ошибки' : 'Failed'}
+            <span className="text-xs text-muted-foreground">({failedItems.length})</span>
+          </TabsTrigger>
           <TabsTrigger value="discarded" className="gap-1">
             <XCircle className="h-4 w-4" />
             {isRu ? 'Отклонены' : 'Discarded'}
@@ -190,7 +241,7 @@ export function IntakeQueue({
         </TabsContent>
 
         <TabsContent value="pending" className="mt-4">
-          {pendingItems.length === 0 
+          {pendingItems.length === 0
             ? emptyState(<Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />, isRu ? 'Нет ожидающих объектов' : 'No pending items')
             : renderItems(pendingItems, true)
           }
@@ -201,6 +252,16 @@ export function IntakeQueue({
             ? emptyState(<CheckCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />, isRu ? 'Пока нет созданных листингов' : 'No created listings yet')
             : renderItems(createdItems, false)
           }
+        </TabsContent>
+
+        <TabsContent value="failed" className="mt-4">
+          <IntakeFailedList
+            items={failedItems}
+            onRetry={handleRetry}
+            onEdit={(it) => setEditingItem(it)}
+            onDiscard={(id) => setConfirmDiscardId(id)}
+            retryingId={retryingId}
+          />
         </TabsContent>
 
         <TabsContent value="discarded" className="mt-4">

@@ -21,32 +21,52 @@ export interface ExtractedField {
   source: 'text' | 'scraped' | 'image' | 'inferred';
 }
 
+/**
+ * Persistent failure record for an intake item that couldn't be approved.
+ * Surfaced in the admin "Failed" queue so operators can see *why* and retry.
+ */
+export interface IntakeItemError {
+  /** Machine-readable category */
+  code: 'validation' | 'unknown_table' | 'schema' | 'status' | 'network' | 'unknown';
+  /** Human-readable description (already localized when possible) */
+  message: string;
+  /** Required fields the item was missing (only set for code === 'validation') */
+  missing?: string[];
+  /** Target table that rejected the row (when known) */
+  table?: string;
+  /** ISO timestamp of the failure */
+  occurredAt: string;
+}
+
 export interface IntakeItem {
   id: string;
-  status: 'pending' | 'approved' | 'discarded' | 'created';
-  
+  status: 'pending' | 'approved' | 'discarded' | 'created' | 'failed';
+
   // Source
   sourceUrl?: string;
   sourceText?: string;
   sourceImages?: string[];
-  
+
   // AI Analysis
   detectedVertical: string;
   verticalConfidence: number;
   extractedFields: Record<string, ExtractedField>;
-  
+
   // Generated content
   suggestedTitle: { en: string; ru: string };
   suggestedDescription: { en: string; ru: string };
-  
+
   // Validation
   missingRequiredFields: string[];
   warnings: string[];
   overallConfidence: number;
-  
+
   // After approval
   createdListingId?: string;
   createdListingTable?: string;
+
+  /** Last failure (set when approve fails — kept until item is retried/discarded) */
+  lastError?: IntakeItemError;
 }
 
 export interface IntakeSession {
@@ -67,6 +87,7 @@ export interface IntakeSummary {
   avgConfidence: number;
   readyToApprove: number;
   needsReview: number;
+  failedCount: number;
 }
 
 export function useIntakeAgent() {
@@ -204,28 +225,36 @@ export function useIntakeAgent() {
     const item = session.items.find(i => i.id === itemId);
     if (!item) return false;
 
-    // P0: Validation gate — block invalid items
+    // Helper: persist a failure on the item so it shows up in the "Failed" admin queue.
+    const recordFailure = (err: IntakeItemError) => {
+      updateItem(itemId, { status: 'failed', lastError: err });
+    };
+
+    // P0: Validation gate — block invalid items AND surface them in the failed queue
     const validation = validateIntakeItem(item);
     if (!validation.valid) {
-      if (!opts?.silent) {
-        toast.error(
-          language === 'ru'
-            ? `Не хватает обязательных полей: ${validation.missing.join(', ')}`
-            : `Missing required fields: ${validation.missing.join(', ')}`
-        );
-      }
+      const message = language === 'ru'
+        ? `Не хватает обязательных полей: ${validation.missing.join(', ')}`
+        : `Missing required fields: ${validation.missing.join(', ')}`;
+      recordFailure({
+        code: 'validation',
+        message,
+        missing: validation.missing,
+        occurredAt: new Date().toISOString(),
+      });
+      if (!opts?.silent) toast.error(message);
       return false;
     }
 
     setIsApproving(true);
-    
+
     try {
       // Transform extracted fields to flat object
       const fields: Record<string, unknown> = {};
       for (const [key, field] of Object.entries(item.extractedFields)) {
         fields[key] = field.value;
       }
-      
+
       // Add generated content if not present
       if (!fields.name_en && item.suggestedTitle?.en) {
         fields.name_en = item.suggestedTitle.en;
@@ -252,15 +281,19 @@ export function useIntakeAgent() {
       }
 
       // P0 FIX: Resolve target table from vertical config (not the vertical id itself!)
-      // Edge function returns detectedVertical=vertical.id (e.g. "cleaning_services"),
-      // but bulk-import expects the actual table name (e.g. "cleaning_providers").
       const verticalConfig = getVerticalById(item.detectedVertical);
       const targetTable = verticalConfig?.table ?? item.detectedVertical;
 
       if (!isValidIntakeTable(targetTable)) {
         const errorMsg = language === 'ru'
-          ? `Неизвестная таблица: ${targetTable} (вертикаль ${item.detectedVertical}). Доступно: ${VALID_INTAKE_TABLES.slice(0, 5).join(', ')}...`
-          : `Unknown table: ${targetTable} (vertical ${item.detectedVertical}). Valid: ${VALID_INTAKE_TABLES.slice(0, 5).join(', ')}...`;
+          ? `Неизвестная таблица: ${targetTable} (вертикаль ${item.detectedVertical})`
+          : `Unknown table: ${targetTable} (vertical ${item.detectedVertical})`;
+        recordFailure({
+          code: 'unknown_table',
+          message: errorMsg,
+          table: targetTable,
+          occurredAt: new Date().toISOString(),
+        });
         if (!opts?.silent) toast.error(errorMsg);
         return false;
       }
@@ -280,6 +313,7 @@ export function useIntakeAgent() {
         updateItem(itemId, {
           status: 'created',
           createdListingTable: targetTable,
+          lastError: undefined,
           ...(insertedId ? { createdListingId: insertedId } : {}),
         });
 
@@ -291,7 +325,7 @@ export function useIntakeAgent() {
         // Auto-create CRM contact from extracted contact info
         await createCrmContactFromItem(item);
 
-        // Audit log — non-blocking; we don't fail the approve if logging fails.
+        // Audit log — non-blocking
         try {
           const { data: { user } } = await supabase.auth.getUser();
           if (user) {
@@ -321,10 +355,31 @@ export function useIntakeAgent() {
         }
         return true;
       } else {
-        throw new Error(data.errors?.[0] || 'Failed to create listing');
+        // bulk-import responded but inserted nothing — surface schema/status reason
+        const reason = data?.errors?.[0] || (language === 'ru' ? 'Не удалось создать листинг' : 'Failed to create listing');
+        const code: IntakeItemError['code'] =
+          /status|approval|moderation/i.test(String(reason)) ? 'status' : 'schema';
+        recordFailure({
+          code,
+          message: String(reason),
+          table: targetTable,
+          occurredAt: new Date().toISOString(),
+        });
+        if (!opts?.silent) toast.error(String(reason));
+        return false;
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to approve';
+      // Classify common failure modes from edge function / network
+      let code: IntakeItemError['code'] = 'unknown';
+      if (/fetch|network|timeout|cors/i.test(message)) code = 'network';
+      else if (/column|constraint|null value|violates|invalid input|enum/i.test(message)) code = 'schema';
+      else if (/status|approval|admin/i.test(message)) code = 'status';
+      recordFailure({
+        code,
+        message,
+        occurredAt: new Date().toISOString(),
+      });
       if (!opts?.silent) toast.error(message);
       return false;
     } finally {
@@ -414,6 +469,19 @@ export function useIntakeAgent() {
     } : prev);
   }, [updateItem]);
 
+  /**
+   * Retry a failed item: clear error, restore to pending, re-run approveItem.
+   * Used by the admin "Failed" queue once the operator has fixed the underlying issue
+   * (edited fields, fixed taxonomy, etc.) — or simply wants to retry a network glitch.
+   */
+  const retryItem = useCallback(async (itemId: string) => {
+    if (!session) return false;
+    updateItem(itemId, { status: 'pending', lastError: undefined });
+    // Allow state to flush before re-validating
+    await Promise.resolve();
+    return approveItem(itemId);
+  }, [session, updateItem, approveItem]);
+
   // Approve all pending items — skips invalid, tracks progress
   const approveAll = useCallback(async () => {
     if (!session) return;
@@ -475,12 +543,13 @@ export function useIntakeAgent() {
     avgConfidence: session.items.length > 0
       ? session.items.reduce((sum, item) => sum + item.overallConfidence, 0) / session.items.length
       : 0,
-    readyToApprove: session.items.filter(i => 
+    readyToApprove: session.items.filter(i =>
       i.status === 'pending' && validateIntakeItem(i).valid
     ).length,
-    needsReview: session.items.filter(i => 
+    needsReview: session.items.filter(i =>
       i.status === 'pending' && (!validateIntakeItem(i).valid || i.overallConfidence < 0.7)
     ).length,
+    failedCount: session.items.filter(i => i.status === 'failed').length,
   } : null;
 
   // Reset session
@@ -501,6 +570,7 @@ export function useIntakeAgent() {
     updateItem,
     approveItem,
     discardItem,
+    retryItem,
     approveAll,
     reset,
   };
