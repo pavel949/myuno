@@ -51,6 +51,7 @@ export type DashboardWidgetKey =
   | 'founder_quick_actions'
   | 'business_health'
   | 'top_actions'
+  | 'sell_signal'
   | 'menu';
 
 export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
@@ -76,6 +77,7 @@ export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
       'maintenance_health',
       'crm_tasks',
       'active_deals',
+      'sell_signal',
       'upcoming_payments',
       'revenue_insights',
       'operations',
@@ -91,6 +93,7 @@ export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
       'kpi',
       'your_day',
       'active_deals',
+      'sell_signal',
       'crm_tasks',
       'upcoming_payments',
       'operations',
@@ -129,6 +132,7 @@ export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
       'revenue_insights',
       'upcoming_payments',
       'active_deals',
+      'sell_signal',
       'crm_tasks',
       'operations',
     ],

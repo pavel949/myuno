@@ -1,48 +1,57 @@
-import { Suspense, useState } from 'react';
+import { Suspense, lazy, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBusinessRole } from '@/hooks/useBusinessRole';
+import { useMyProperties } from '@/hooks/useMyProperties';
+import { useMcOnboarding, computeProgress } from '@/hooks/useMcOnboarding';
+import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { type DashboardWidgetKey } from '@/lib/businessRoles';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Home } from 'lucide-react';
+import { Home, Rocket, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useIsDesktop } from '@/hooks/use-desktop';
 import { DashboardFilterProvider } from '@/contexts/DashboardFilterContext';
-import { ActiveStaysWidget } from '@/components/owner/dashboard/ActiveStaysWidget';
-import { OwnerPropertiesList } from '@/components/owner/dashboard/OwnerPropertiesList';
-import { OwnerOperationsFlat } from '@/components/owner/dashboard/OwnerOperationsFlat';
-import { ActiveDealsWidget } from '@/components/owner/dashboard/ActiveDealsWidget';
-import { UpcomingPaymentsWidget } from '@/components/owner/dashboard/UpcomingPaymentsWidget';
-import { CrmTasksWidget } from '@/components/owner/dashboard/CrmTasksWidget';
-import { YourDayFeed } from '@/components/owner/dashboard/YourDayFeed';
-import { BusinessKPIWidget } from '@/components/owner/dashboard/BusinessKPIWidget';
-import { RevenueInsightsWidget } from '@/components/owner/dashboard/RevenueInsightsWidget';
-import { TodayBriefingWidget } from '@/components/owner/dashboard/TodayBriefingWidget';
+
+// Eager — render in the initial sections (Greeting, header chrome).
 import { BusinessRoleSwitcher } from '@/components/owner/dashboard/BusinessRoleSwitcher';
 import { DashboardGreeting } from '@/components/owner/dashboard/DashboardGreeting';
 import { RoleQuickActions } from '@/components/owner/dashboard/RoleQuickActions';
-import { ChannelSyncWidget } from '@/components/owner/dashboard/ChannelSyncWidget';
-import { UnifiedInboxWidget } from '@/components/owner/dashboard/UnifiedInboxWidget';
-import { PropertyInquiriesWidget } from '@/components/owner/dashboard/PropertyInquiriesWidget';
-import { AIAgentStatusWidget } from '@/components/owner/dashboard/AIAgentStatusWidget';
-import { FounderQuickActions } from '@/components/owner/dashboard/FounderQuickActions';
-import { FounderInboxWidget } from '@/components/owner/dashboard/FounderInboxWidget';
-import { MaintenanceHealthWidget } from '@/components/owner/dashboard/MaintenanceHealthWidget';
-import { TodayActionsWidget } from '@/components/owner/dashboard/TodayActionsWidget';
 import { DashboardPropertyFilter } from '@/components/owner/dashboard/DashboardPropertyFilter';
-import { PortfolioHealthWidget } from '@/components/owner/dashboard/PortfolioHealthWidget';
-import { CleaningDashboard } from '@/components/owner/dashboard/CleaningDashboard';
-import { MorningBriefing } from '@/components/owner/dashboard/MorningBriefing';
-import { PropertyPriorityWidget } from '@/components/owner/dashboard/PropertyPriorityWidget';
 import { CollapsibleWidget } from '@/components/owner/dashboard/CollapsibleWidget';
 import { QuickTaskDialog } from '@/components/owner/dashboard/QuickTaskDialog';
 import { OverviewSection } from '@/components/owner/dashboard/OverviewSection';
 import { WidgetErrorBoundary } from '@/components/owner/dashboard/WidgetErrorBoundary';
-import { BusinessHealthCard } from '@/components/owner/dashboard/BusinessHealthCard';
-import { TopActionsWidget } from '@/components/owner/dashboard/TopActionsWidget';
+
+// Lazy — every widget below the fold gets its own chunk so the
+// MC dashboard FCP no longer pays for 30+ Supabase calls upfront.
+const ActiveStaysWidget = lazy(() => import('@/components/owner/dashboard/ActiveStaysWidget').then(m => ({ default: m.ActiveStaysWidget })));
+const OwnerPropertiesList = lazy(() => import('@/components/owner/dashboard/OwnerPropertiesList').then(m => ({ default: m.OwnerPropertiesList })));
+const OwnerOperationsFlat = lazy(() => import('@/components/owner/dashboard/OwnerOperationsFlat').then(m => ({ default: m.OwnerOperationsFlat })));
+const ActiveDealsWidget = lazy(() => import('@/components/owner/dashboard/ActiveDealsWidget').then(m => ({ default: m.ActiveDealsWidget })));
+const UpcomingPaymentsWidget = lazy(() => import('@/components/owner/dashboard/UpcomingPaymentsWidget').then(m => ({ default: m.UpcomingPaymentsWidget })));
+const CrmTasksWidget = lazy(() => import('@/components/owner/dashboard/CrmTasksWidget').then(m => ({ default: m.CrmTasksWidget })));
+const YourDayFeed = lazy(() => import('@/components/owner/dashboard/YourDayFeed').then(m => ({ default: m.YourDayFeed })));
+const BusinessKPIWidget = lazy(() => import('@/components/owner/dashboard/BusinessKPIWidget').then(m => ({ default: m.BusinessKPIWidget })));
+const RevenueInsightsWidget = lazy(() => import('@/components/owner/dashboard/RevenueInsightsWidget').then(m => ({ default: m.RevenueInsightsWidget })));
+const TodayBriefingWidget = lazy(() => import('@/components/owner/dashboard/TodayBriefingWidget').then(m => ({ default: m.TodayBriefingWidget })));
+const ChannelSyncWidget = lazy(() => import('@/components/owner/dashboard/ChannelSyncWidget').then(m => ({ default: m.ChannelSyncWidget })));
+const UnifiedInboxWidget = lazy(() => import('@/components/owner/dashboard/UnifiedInboxWidget').then(m => ({ default: m.UnifiedInboxWidget })));
+const PropertyInquiriesWidget = lazy(() => import('@/components/owner/dashboard/PropertyInquiriesWidget').then(m => ({ default: m.PropertyInquiriesWidget })));
+const AIAgentStatusWidget = lazy(() => import('@/components/owner/dashboard/AIAgentStatusWidget').then(m => ({ default: m.AIAgentStatusWidget })));
+const FounderQuickActions = lazy(() => import('@/components/owner/dashboard/FounderQuickActions').then(m => ({ default: m.FounderQuickActions })));
+const FounderInboxWidget = lazy(() => import('@/components/owner/dashboard/FounderInboxWidget').then(m => ({ default: m.FounderInboxWidget })));
+const MaintenanceHealthWidget = lazy(() => import('@/components/owner/dashboard/MaintenanceHealthWidget').then(m => ({ default: m.MaintenanceHealthWidget })));
+const TodayActionsWidget = lazy(() => import('@/components/owner/dashboard/TodayActionsWidget').then(m => ({ default: m.TodayActionsWidget })));
+const PortfolioHealthWidget = lazy(() => import('@/components/owner/dashboard/PortfolioHealthWidget').then(m => ({ default: m.PortfolioHealthWidget })));
+const CleaningDashboard = lazy(() => import('@/components/owner/dashboard/CleaningDashboard').then(m => ({ default: m.CleaningDashboard })));
+const MorningBriefing = lazy(() => import('@/components/owner/dashboard/MorningBriefing').then(m => ({ default: m.MorningBriefing })));
+const PropertyPriorityWidget = lazy(() => import('@/components/owner/dashboard/PropertyPriorityWidget').then(m => ({ default: m.PropertyPriorityWidget })));
+const BusinessHealthCard = lazy(() => import('@/components/owner/dashboard/BusinessHealthCard').then(m => ({ default: m.BusinessHealthCard })));
+const TopActionsWidget = lazy(() => import('@/components/owner/dashboard/TopActionsWidget').then(m => ({ default: m.TopActionsWidget })));
+const SellSignalWidget = lazy(() => import('@/components/owner/dashboard/SellSignalWidget').then(m => ({ default: m.SellSignalWidget })));
 import { AlertTriangle, Briefcase, CircleDollarSign, HeartPulse, Sun } from 'lucide-react';
 
 function SectionSkeleton() {
@@ -270,6 +279,12 @@ function DashboardWidget({ widgetKey, role }: { widgetKey: DashboardWidgetKey; r
           <TopActionsWidget />
         </Suspense>
       );
+    case 'sell_signal':
+      return (
+        <Suspense fallback={skeleton}>
+          <SellSignalWidget />
+        </Suspense>
+      );
     case 'menu':
       return null;
     default:
@@ -297,6 +312,7 @@ const HALF_WIDTH_WIDGETS: Set<DashboardWidgetKey> = new Set([
   'active_deals', 'crm_tasks',
   'ai_agents_status', 'founder_quick_actions',
   'business_health', 'top_actions',
+  'sell_signal',
 ]);
 
 const OVERVIEW_SUPPRESSED_WIDGETS: Set<DashboardWidgetKey> = new Set([
@@ -318,6 +334,9 @@ export default function OwnerDashboard() {
   const isDesktop = useIsDesktop();
   const { role, setRole, config, mcRole, mcRoleLabel } = useBusinessRole();
   const [quickTaskOpen, setQuickTaskOpen] = useState(false);
+  const { allProperties, isLoading: propsLoading } = useMyProperties();
+  const { activeCompany, isLoading: companyLoading } = useActiveCompany();
+  const { data: onboardingProgress } = useMcOnboarding();
 
   const visibleWidgets = isDesktop
     ? config.widgets.filter((w) => w !== 'menu' && !OVERVIEW_SUPPRESSED_WIDGETS.has(w))
@@ -346,7 +365,7 @@ export default function OwnerDashboard() {
       titleEn: 'Sales & CRM',
       titleRu: 'Продажи и CRM',
       icon: Briefcase,
-      widgets: ['active_deals', 'crm_tasks', 'founder_inbox', 'operations'] as DashboardWidgetKey[],
+      widgets: ['active_deals', 'sell_signal', 'crm_tasks', 'founder_inbox', 'operations'] as DashboardWidgetKey[],
     },
     exceptions: {
       titleEn: 'Exceptions',
@@ -380,6 +399,74 @@ export default function OwnerDashboard() {
           <Button variant="outline" onClick={() => navigate('/auth?mode=signup')} size="lg" className="h-12">
             {isRu ? 'Создать аккаунт' : 'Create Account'}
           </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // First-time MC empty state — no properties yet → render onboarding checklist
+  // instead of skeleton-then-blank widget grid.
+  const isFirstTimeMC =
+    !propsLoading && !companyLoading && allProperties.length === 0 && !!activeCompany;
+
+  if (isFirstTimeMC) {
+    const percent = onboardingProgress ? computeProgress(onboardingProgress) : 0;
+    const total = 7;
+    const completed = Math.round((percent / 100) * total);
+    return (
+      <div className="px-4 md:px-6 lg:px-8 pt-10 pb-24 max-w-2xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="text-center mb-8"
+        >
+          <div className="w-16 h-16 mx-auto rounded-none bg-primary/10 flex items-center justify-center mb-4">
+            <Rocket className="h-8 w-8 text-primary" />
+          </div>
+          <h1 className="text-2xl font-bold mb-2">
+            {isRu ? 'Добро пожаловать в myUNO' : 'Welcome to myUNO'}
+          </h1>
+          <p className="text-muted-foreground max-w-md mx-auto">
+            {isRu
+              ? 'Завершите настройку, чтобы открыть полный дашборд управления.'
+              : 'Finish setup to unlock the full management dashboard.'}
+          </p>
+        </motion.div>
+
+        <div className="rounded-none border bg-card p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">
+              {isRu ? 'Прогресс настройки' : 'Setup progress'}
+            </span>
+            <span className="text-sm text-muted-foreground">
+              {completed} / {total}
+            </span>
+          </div>
+          <div className="h-2 bg-muted overflow-hidden">
+            <div
+              className="h-full bg-primary transition-all"
+              style={{ width: `${percent}%` }}
+            />
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3 pt-2">
+            <Button
+              onClick={() => navigate('/mc/onboarding/wizard')}
+              size="lg"
+              className="flex-1 h-12"
+            >
+              {isRu ? 'Открыть мастер настройки' : 'Open setup wizard'}
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => navigate('/mc/properties/new')}
+              size="lg"
+              className="flex-1 h-12"
+            >
+              {isRu ? 'Добавить объект' : 'Add property'}
+            </Button>
+          </div>
         </div>
       </div>
     );
