@@ -58,6 +58,7 @@ export function IntakeQueue({
   const [approvingItemId, setApprovingItemId] = useState<string | null>(null);
   const [confirmDiscardId, setConfirmDiscardId] = useState<string | null>(null);
   const [confirmApproveAll, setConfirmApproveAll] = useState(false);
+  const [retryingId, setRetryingId] = useState<string | null>(null);
 
   // Pending sorted worst-first by health-score so operator fixes the broken ones first.
   const pendingItems = useMemo(() => {
@@ -69,6 +70,21 @@ export function IntakeQueue({
   }, [session.items]);
   const createdItems = session.items.filter(i => i.status === 'created');
   const discardedItems = session.items.filter(i => i.status === 'discarded');
+  const failedItems = useMemo(
+    () => session.items
+      .filter(i => i.status === 'failed')
+      .sort((a, b) => (b.lastError?.occurredAt || '').localeCompare(a.lastError?.occurredAt || '')),
+    [session.items]
+  );
+
+  const handleRetry = async (itemId: string) => {
+    setRetryingId(itemId);
+    try {
+      await onRetry(itemId);
+    } finally {
+      setRetryingId(null);
+    }
+  };
 
   const handleApprove = async (itemId: string) => {
     setApprovingItemId(itemId);
