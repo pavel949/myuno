@@ -38,6 +38,7 @@ import {
   useTogglePublishDueDiligence,
 } from '@/hooks/useDueDiligence';
 import { useClearViewAccess } from '@/hooks/useClearViewPurchase';
+import { useIsProjectDeveloper } from '@/hooks/useIsProjectDeveloper';
 import { ClearViewBadge } from '@/components/clearview/ClearViewBadge';
 import { ClearViewGauge } from '@/components/clearview/ClearViewGauge';
 import { ClearViewRadar } from '@/components/clearview/ClearViewRadar';
@@ -61,6 +62,7 @@ export function ClearViewReport({ projectId, isBrokered }: Props) {
   const isRu = language === 'ru';
   const { data: report, isLoading } = useDueDiligenceReport(projectId);
   const { data: access } = useClearViewAccess(projectId);
+  const { data: isProjectDeveloper = false } = useIsProjectDeveloper(projectId);
   const generate = useGenerateDueDiligence();
   const togglePublish = useTogglePublishDueDiligence();
   const { track } = useIPPLeadEvent();
@@ -95,7 +97,8 @@ export function ClearViewReport({ projectId, isBrokered }: Props) {
   }, [user?.id]);
 
   const brokered = isBrokered ?? report?.is_brokered_project ?? false;
-  const hasFullAccess = isAdmin || (access?.hasAccess ?? false);
+  const hasFullAccess = isAdmin || isProjectDeveloper || (access?.hasAccess ?? false);
+  const ownerView = !isAdmin && isProjectDeveloper;
 
   return (
     <section className="border border-border bg-card p-5 sm:p-6 space-y-5 rounded-none">
