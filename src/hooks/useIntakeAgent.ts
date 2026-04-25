@@ -87,6 +87,7 @@ export interface IntakeSummary {
   avgConfidence: number;
   readyToApprove: number;
   needsReview: number;
+  failedCount: number;
 }
 
 export function useIntakeAgent() {
@@ -468,6 +469,19 @@ export function useIntakeAgent() {
     } : prev);
   }, [updateItem]);
 
+  /**
+   * Retry a failed item: clear error, restore to pending, re-run approveItem.
+   * Used by the admin "Failed" queue once the operator has fixed the underlying issue
+   * (edited fields, fixed taxonomy, etc.) — or simply wants to retry a network glitch.
+   */
+  const retryItem = useCallback(async (itemId: string) => {
+    if (!session) return false;
+    updateItem(itemId, { status: 'pending', lastError: undefined });
+    // Allow state to flush before re-validating
+    await Promise.resolve();
+    return approveItem(itemId);
+  }, [session, updateItem, approveItem]);
+
   // Approve all pending items — skips invalid, tracks progress
   const approveAll = useCallback(async () => {
     if (!session) return;
@@ -529,12 +543,13 @@ export function useIntakeAgent() {
     avgConfidence: session.items.length > 0
       ? session.items.reduce((sum, item) => sum + item.overallConfidence, 0) / session.items.length
       : 0,
-    readyToApprove: session.items.filter(i => 
+    readyToApprove: session.items.filter(i =>
       i.status === 'pending' && validateIntakeItem(i).valid
     ).length,
-    needsReview: session.items.filter(i => 
+    needsReview: session.items.filter(i =>
       i.status === 'pending' && (!validateIntakeItem(i).valid || i.overallConfidence < 0.7)
     ).length,
+    failedCount: session.items.filter(i => i.status === 'failed').length,
   } : null;
 
   // Reset session
@@ -555,6 +570,7 @@ export function useIntakeAgent() {
     updateItem,
     approveItem,
     discardItem,
+    retryItem,
     approveAll,
     reset,
   };
