@@ -25,7 +25,8 @@ import NotFound from '@/pages/NotFound';
 import { Button } from '@/components/ui/button';
 import LandingSeoHead from '@/components/seo/LandingSeoHead';
 import { tokenColor } from '@/lib/utils/hslAlpha';
-import { ArrowRight, CheckCircle2, MapPin, Sparkles } from 'lucide-react';
+import { ArrowRight, CheckCircle2, MapPin, Sparkles, Grid3x3 } from 'lucide-react';
+import { getAppsForPersona, withPersonaParam } from '@/lib/landings/personaTagMap';
 
 interface PersonaLandingViewProps {
   landing: PersonaLanding;
