@@ -18,12 +18,12 @@ import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 type SizeVariant = { price?: number | null };
 type Bouquet = {
   id: string;
-  image: string | null;
-  name_en: string | null;
-  name_ru: string | null;
-  short_description_en: string | null;
-  short_description_ru: string | null;
-  price: number | null;
+  image?: string | null;
+  name_en?: string | null;
+  name_ru?: string | null;
+  short_description_en?: string | null;
+  short_description_ru?: string | null;
+  price?: number | null;
   size_variants?: SizeVariant[] | null;
   is_popular?: boolean | null;
   box_type?: string | null;
@@ -32,9 +32,9 @@ type Bouquet = {
 };
 type PetService = {
   id: string;
-  name_en: string | null;
-  name_ru: string | null;
-  cover_image: string | null;
+  name_en?: string | null;
+  name_ru?: string | null;
+  cover_image?: string | null;
   is_verified?: boolean | null;
   rating?: number | null;
   address?: string | null;
@@ -42,9 +42,9 @@ type PetService = {
 };
 type Restaurant = {
   id: string;
-  name_en: string | null;
-  name_ru: string | null;
-  cover_image: string | null;
+  name_en?: string | null;
+  name_ru?: string | null;
+  cover_image?: string | null;
   rating?: number | null;
   cuisine_tags?: string[] | null;
   price_band?: string | null;
@@ -55,9 +55,9 @@ type Restaurant = {
 type Salon = PetService;
 type Gym = {
   id: string;
-  name_en: string | null;
-  name_ru: string | null;
-  cover_image: string | null;
+  name_en?: string | null;
+  name_ru?: string | null;
+  cover_image?: string | null;
   is_verified?: boolean | null;
   rating?: number | null;
   address?: string | null;
@@ -66,18 +66,18 @@ type Gym = {
 };
 type EducationProvider = {
   id: string;
-  name_en: string | null;
-  name_ru: string | null;
-  cover_image: string | null;
+  name_en?: string | null;
+  name_ru?: string | null;
+  cover_image?: string | null;
   rating?: number | null;
   provider_type?: string | null;
   price_per_hour?: number | null;
 };
 type CleaningService = {
   id: string;
-  name_en: string | null;
-  name_ru: string | null;
-  cover_image: string | null;
+  name_en?: string | null;
+  name_ru?: string | null;
+  cover_image?: string | null;
   is_verified?: boolean | null;
   rating?: number | null;
   price_fixed?: number | null;
@@ -87,9 +87,9 @@ type CleaningService = {
 };
 type EventItem = {
   id: string;
-  title_en: string | null;
-  title_ru: string | null;
-  cover_image: string | null;
+  title_en?: string | null;
+  title_ru?: string | null;
+  cover_image?: string | null;
   is_featured?: boolean | null;
   event_date?: string | null;
   location_name?: string | null;
@@ -97,9 +97,9 @@ type EventItem = {
 };
 type Clinic = {
   id: string;
-  name_en: string | null;
-  name_ru: string | null;
-  cover_image: string | null;
+  name_en?: string | null;
+  name_ru?: string | null;
+  cover_image?: string | null;
   rating?: number | null;
   address?: string | null;
   is_24h?: boolean | null;
