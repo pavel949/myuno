@@ -294,8 +294,16 @@ export function useGenerateReport() {
       const allowedIncomeCategories = input.incomeCategories;
       const allowedExpenseCategories = input.expenseCategories;
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (financials || []).forEach((f: any) => {
+      type FinancialRow = {
+        id: string;
+        category: string | null;
+        transaction_type: 'income' | 'expense' | string;
+        transaction_date: string;
+        amount: number | string;
+        description: string | null;
+        vendor_name: string | null;
+      };
+      ((financials || []) as unknown as FinancialRow[]).forEach((f) => {
         const cat = (f.category as string) || 'other';
         if (f.transaction_type === 'income' && shouldIncludeIncome) {
           if (allowedIncomeCategories && !allowedIncomeCategories.includes(cat)) return;
@@ -318,7 +326,7 @@ export function useGenerateReport() {
             amount: Number(f.amount),
             category: cat,
             description: f.description || '',
-            vendor: f.vendor_name,
+            vendor: f.vendor_name ?? undefined,
           });
         }
       });
