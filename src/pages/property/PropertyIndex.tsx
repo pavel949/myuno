@@ -185,6 +185,8 @@ export default function PropertyIndex() {
     return infiniteData?.pages.flatMap(p => p.properties) || [];
   }, [infiniteData]);
 
+  const { applyFilter: applyPersonaFilter } = usePersonaFilter();
+
   // Category ribbon only — DB filters handled server-side
   const filteredProperties = useMemo(() => {
     let result = allProperties;
@@ -195,8 +197,18 @@ export default function PropertyIndex() {
       );
     }
 
+    // Persona filter — uses tags + amenities + persona_tags. Falls back to
+    // unfiltered set if no property matches so the catalog never goes empty.
+    result = applyPersonaFilter(result, (p) => {
+      const raw = p as unknown as Record<string, unknown>;
+      const tags = (raw.tags as string[] | null) ?? [];
+      const personaTags = (raw.persona_tags as string[] | null) ?? [];
+      const amenities = (raw.amenities as string[] | null) ?? [];
+      return [...personaTags, ...tags, ...amenities].filter(Boolean) as string[];
+    });
+
     return result;
-  }, [allProperties, selectedCategories]);
+  }, [allProperties, selectedCategories, applyPersonaFilter]);
 
   const handlePropertyClick = useCallback((id: string) => {
     navigate(APP_ROUTES.PROPERTY_DETAIL(id));
