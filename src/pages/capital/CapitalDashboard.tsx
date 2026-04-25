@@ -53,7 +53,7 @@ export default function CapitalDashboard() {
   return (
     <div className="p-4 md:p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">Дашборд</h1>
+        <h1 className="text-xl font-bold">{isRu ? 'Дашборд' : 'Dashboard'}</h1>
         <Badge className="bg-success/20 text-success">Ignatev Capital</Badge>
       </div>
 
