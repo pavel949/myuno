@@ -942,6 +942,7 @@ export const AnimatedRoutes: React.FC = () => {
 
         {/* ── M6 Persona Landings (B.4) ── */}
         {/* Draft slugs and unknown slugs return 404 inside the page itself. */}
+        <Route path="/for" element={<LazyPage><PersonaDirectoryPage /></LazyPage>} />
         <Route path="/for/:persona" element={<LazyPage><PersonaLandingPage /></LazyPage>} />
 
         {/* ── M10b · IPP — nested entry under Property Hub (ARCHITECTURE_V2 §13.1) ── */}
