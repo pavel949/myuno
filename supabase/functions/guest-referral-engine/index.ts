@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
 
       // Check if referral already exists
       const { data: existing } = await supabase
-        .from("guest_referral_codes")
+        .from("referral_codes")
         .select("id")
         .eq("booking_id", booking.id)
         .single();
@@ -62,7 +62,7 @@ Deno.serve(async (req) => {
       const code = `UNO-${booking.guest_name?.split(" ")[0]?.toUpperCase().slice(0, 4) || "GUEST"}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 
       // Create referral code
-      const { error: refErr } = await supabase.from("guest_referral_codes").insert({
+      const { error: refErr } = await supabase.from("referral_codes").insert({
         guest_user_id: booking.guest_user_id,
         booking_id: booking.id,
         referral_code: code,
