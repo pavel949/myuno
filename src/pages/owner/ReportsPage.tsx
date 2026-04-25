@@ -74,7 +74,7 @@ type OwnerContactRow = {
   propertyIds: string[];
 };
 
-type AccountingPolicyRow = { property_id: string } & Record<string, unknown>;
+
 
 function useOwnerContacts() {
   const { user } = useAuth();
