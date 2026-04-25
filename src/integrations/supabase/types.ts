@@ -590,30 +590,39 @@ export type Database = {
       ai_decisions_log: {
         Row: {
           agent_slug: string | null
+          confidence: number | null
           created_at: string
           decision_type: string | null
           id: string
+          outcome: string | null
           payload: Json | null
           status: string | null
           tokens_used: number | null
+          user_id: string | null
         }
         Insert: {
           agent_slug?: string | null
+          confidence?: number | null
           created_at?: string
           decision_type?: string | null
           id?: string
+          outcome?: string | null
           payload?: Json | null
           status?: string | null
           tokens_used?: number | null
+          user_id?: string | null
         }
         Update: {
           agent_slug?: string | null
+          confidence?: number | null
           created_at?: string
           decision_type?: string | null
           id?: string
+          outcome?: string | null
           payload?: Json | null
           status?: string | null
           tokens_used?: number | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -671,34 +680,52 @@ export type Database = {
       ai_task_suggestions: {
         Row: {
           acted_at: string | null
+          action_type: string | null
           created_at: string
           description: string | null
           id: string
-          kind: string
+          impact_score: number | null
+          kind: string | null
           payload: Json | null
+          priority: string | null
+          source_agent: string | null
           status: string
+          target_entity_id: string | null
+          target_entity_type: string | null
           title: string
           user_id: string | null
         }
         Insert: {
           acted_at?: string | null
+          action_type?: string | null
           created_at?: string
           description?: string | null
           id?: string
-          kind: string
+          impact_score?: number | null
+          kind?: string | null
           payload?: Json | null
+          priority?: string | null
+          source_agent?: string | null
           status?: string
+          target_entity_id?: string | null
+          target_entity_type?: string | null
           title: string
           user_id?: string | null
         }
         Update: {
           acted_at?: string | null
+          action_type?: string | null
           created_at?: string
           description?: string | null
           id?: string
-          kind?: string
+          impact_score?: number | null
+          kind?: string | null
           payload?: Json | null
+          priority?: string | null
+          source_agent?: string | null
           status?: string
+          target_entity_id?: string | null
+          target_entity_type?: string | null
           title?: string
           user_id?: string | null
         }
@@ -15010,49 +15037,70 @@ export type Database = {
       }
       owner_prospects: {
         Row: {
+          ai_score: number | null
           created_at: string
           email: string | null
+          email_sent_at: string | null
           full_name: string | null
           id: string
           last_touched_at: string | null
+          metadata: Json | null
           next_action_at: string | null
           notes: string | null
+          nurture_count: number
+          nurture_stage: string | null
           owner_user_id: string | null
           phone: string | null
           properties: Json | null
           source: string | null
           status: string
+          template_used: string | null
           updated_at: string
+          whatsapp_sent_at: string | null
         }
         Insert: {
+          ai_score?: number | null
           created_at?: string
           email?: string | null
+          email_sent_at?: string | null
           full_name?: string | null
           id?: string
           last_touched_at?: string | null
+          metadata?: Json | null
           next_action_at?: string | null
           notes?: string | null
+          nurture_count?: number
+          nurture_stage?: string | null
           owner_user_id?: string | null
           phone?: string | null
           properties?: Json | null
           source?: string | null
           status?: string
+          template_used?: string | null
           updated_at?: string
+          whatsapp_sent_at?: string | null
         }
         Update: {
+          ai_score?: number | null
           created_at?: string
           email?: string | null
+          email_sent_at?: string | null
           full_name?: string | null
           id?: string
           last_touched_at?: string | null
+          metadata?: Json | null
           next_action_at?: string | null
           notes?: string | null
+          nurture_count?: number
+          nurture_stage?: string | null
           owner_user_id?: string | null
           phone?: string | null
           properties?: Json | null
           source?: string | null
           status?: string
+          template_used?: string | null
           updated_at?: string
+          whatsapp_sent_at?: string | null
         }
         Relationships: []
       }
@@ -22524,25 +22572,49 @@ export type Database = {
       }
       referral_codes: {
         Row: {
+          booking_id: string | null
           code: string
           created_at: string
+          discount_percent: number | null
+          expires_at: string | null
+          guest_user_id: string | null
           id: string
           is_active: boolean
+          max_uses: number | null
+          referral_code: string | null
+          scope: string | null
           user_id: string
+          uses_count: number
         }
         Insert: {
+          booking_id?: string | null
           code: string
           created_at?: string
+          discount_percent?: number | null
+          expires_at?: string | null
+          guest_user_id?: string | null
           id?: string
           is_active?: boolean
+          max_uses?: number | null
+          referral_code?: string | null
+          scope?: string | null
           user_id: string
+          uses_count?: number
         }
         Update: {
+          booking_id?: string | null
           code?: string
           created_at?: string
+          discount_percent?: number | null
+          expires_at?: string | null
+          guest_user_id?: string | null
           id?: string
           is_active?: boolean
+          max_uses?: number | null
+          referral_code?: string | null
+          scope?: string | null
           user_id?: string
+          uses_count?: number
         }
         Relationships: []
       }
@@ -24171,30 +24243,36 @@ export type Database = {
           calendar_id: string | null
           content: Json | null
           created_at: string
+          error: string | null
           external_id: string | null
           id: string
           platform: string
           posted_at: string | null
+          scheduled_for: string | null
           status: string
         }
         Insert: {
           calendar_id?: string | null
           content?: Json | null
           created_at?: string
+          error?: string | null
           external_id?: string | null
           id?: string
           platform: string
           posted_at?: string | null
+          scheduled_for?: string | null
           status?: string
         }
         Update: {
           calendar_id?: string | null
           content?: Json | null
           created_at?: string
+          error?: string | null
           external_id?: string | null
           id?: string
           platform?: string
           posted_at?: string | null
+          scheduled_for?: string | null
           status?: string
         }
         Relationships: [
