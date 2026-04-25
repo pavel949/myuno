@@ -1,0 +1,39 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "src/main.tsx",
+    "src/App.tsx",
+    "src/sw.ts",
+    "vite.config.ts",
+    "tailwind.config.ts",
+    "postcss.config.js",
+    "vitest.config.ts",
+    "playwright.config.ts",
+    "playwright.ci.config.ts",
+    "capacitor.config.ts",
+    "supabase/functions/**/index.ts",
+    "scripts/**/*.{mjs,ts,js}",
+    "api/**/*.{ts,js}",
+    "e2e/**/*.spec.ts",
+    "src/test/**/*.{ts,tsx}"
+  ],
+  "project": [
+    "src/**/*.{ts,tsx}",
+    "!src/integrations/supabase/types.ts"
+  ],
+  "ignore": [
+    "src/integrations/supabase/types.ts",
+    "src/integrations/supabase/client.ts",
+    "archive/**",
+    "**/__tests__/**"
+  ],
+  "ignoreDependencies": [
+    "tailwindcss-animate",
+    "tw-animate-css",
+    "@tailwindcss/typography",
+    "autoprefixer",
+    "postcss",
+    "@rollup/plugin-terser"
+  ],
+  "ignoreBinaries": ["lovable-exec"]
+}
