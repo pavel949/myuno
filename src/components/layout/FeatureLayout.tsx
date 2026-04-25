@@ -20,6 +20,7 @@ import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
 import { UnifiedFilterRibbon, type FilterRibbonItem } from '@/components/shared/UnifiedFilterRibbon';
 import { FilterChip, FilterChipGroup } from '@/components/uno/FilterChip';
 import { BackButton } from '@/components/uno/BackButton';
+import { PersonaFilterChip } from '@/components/landings/PersonaFilterChip';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { ECOSYSTEM_MAIN_SPACING, ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
 
