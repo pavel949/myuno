@@ -334,6 +334,9 @@ export default function OwnerDashboard() {
   const isDesktop = useIsDesktop();
   const { role, setRole, config, mcRole, mcRoleLabel } = useBusinessRole();
   const [quickTaskOpen, setQuickTaskOpen] = useState(false);
+  const { allProperties, isLoading: propsLoading } = useMyProperties();
+  const { activeCompany, isLoading: companyLoading } = useActiveCompany();
+  const { data: onboardingProgress } = useMcOnboarding();
 
   const visibleWidgets = isDesktop
     ? config.widgets.filter((w) => w !== 'menu' && !OVERVIEW_SUPPRESSED_WIDGETS.has(w))
