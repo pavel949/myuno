@@ -40,6 +40,42 @@ import { cn } from '@/lib/utils';
 
 type ViewType = 'all' | 'tour' | 'activity';
 
+// Experience fields not always in generated types.
+type ExperienceExt = {
+  booking_url?: string | null;
+  source_page_url?: string | null;
+  pickup_included?: boolean | null;
+  notes?: Record<string, unknown> | null;
+};
+
+type ExperiencePayload = {
+  provider_id: string | null;
+  experience_type: ExperienceType;
+  title_en: string;
+  title_ru: string;
+  description_en: string | null;
+  description_ru: string | null;
+  category: string;
+  difficulty: string;
+  duration_minutes: number;
+  price: number | null;
+  price_per: string;
+  currency: string;
+  min_participants: number;
+  max_participants: number;
+  meeting_point: string | null;
+  location_name: string | null;
+  cover_image: string | null;
+  images: string[];
+  equipment_included: boolean;
+  is_certified: boolean;
+  is_active: boolean;
+  is_featured: boolean;
+  external_link: string | null;
+  booking_url: string | null;
+  source_page_url: string | null;
+};
+
 const getEmptyFormData = () => ({
   provider_id: '',
   experience_type: 'tour' as ExperienceType,
