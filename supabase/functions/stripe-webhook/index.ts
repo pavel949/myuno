@@ -1,5 +1,5 @@
 // Deno.serve used (native edge runtime)
-import { createStripeClient } from "../_shared/stripe.ts";
+import { createStripeClient, Stripe } from "../_shared/stripe.ts";
 import { createClient } from "../_shared/supabase.ts";
 
 const corsHeaders = {
