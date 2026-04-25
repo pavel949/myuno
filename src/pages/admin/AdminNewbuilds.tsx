@@ -266,8 +266,8 @@ export default function AdminNewbuilds() {
           </p>
           <div className="space-y-2">
             {featured
-              .sort((a: any, b: any) => (a.featured_rank || 99) - (b.featured_rank || 99))
-              .map((p: any) => (
+              .sort((a, b) => (a.featured_rank || 99) - (b.featured_rank || 99))
+              .map((p) => (
                 <FeaturedRow
                   key={p.id}
                   project={p}
