@@ -44,6 +44,7 @@ export default function BeautySpaIndex() {
   const [sortBy, setSortBy] = useState('recommended');
   const isRu = language === 'ru';
 
+  const { applyFilter: applyPersonaFilter } = usePersonaFilter();
   const { salons, isLoading } = useSalons(selectedCategory === 'all' ? undefined : selectedCategory);
 
   const filterActiveCount = useMemo(() => {
