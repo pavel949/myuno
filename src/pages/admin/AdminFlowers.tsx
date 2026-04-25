@@ -107,7 +107,7 @@ export default function AdminFlowers() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<FlowerShopRow | null>(null);
   const [formData, setFormData] = useState<FlowerShopFormData>(defaultFormData);
-  const [editingPrices, setEditingPrices] = useState<Record<string, unknown>>({});
+  const [editingPrices, setEditingPrices] = useState<Record<string, PriceEdit>>({});
 
   // Shop CRUD handlers
   const handleCreate = () => { setEditingItem(null); setFormData(defaultFormData); setIsDialogOpen(true); };
