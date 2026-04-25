@@ -93,10 +93,10 @@ export default function CapitalDashboard() {
       {/* Pipeline Funnel */}
       <div className="rounded-none border border-border/50 p-4">
         <h2 className="font-medium mb-4 flex items-center gap-2">
-          <KanbanSquare className="w-4 h-4" /> Воронка
+          <KanbanSquare className="w-4 h-4" /> {isRu ? 'Воронка' : 'Pipeline'}
         </h2>
         {chartData.every((d) => d.count === 0) ? (
-          <p className="text-sm text-muted-foreground text-center py-8">Нет данных в воронке</p>
+          <p className="text-sm text-muted-foreground text-center py-8">{isRu ? 'Нет данных в воронке' : 'No pipeline data yet'}</p>
         ) : (
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={chartData} layout="vertical" margin={{ left: 80, right: 20 }}>
