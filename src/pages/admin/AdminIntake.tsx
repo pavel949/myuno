@@ -40,6 +40,7 @@ export default function AdminIntake() {
     updateItem,
     approveItem,
     discardItem,
+    retryItem,
     approveAll,
     reset,
   } = useIntakeAgent();
@@ -166,6 +167,7 @@ export default function AdminIntake() {
           onApprove={approveItem}
           onDiscard={discardItem}
           onEdit={updateItem}
+          onRetry={retryItem}
           onApproveAll={approveAll}
           onReset={reset}
           isApproving={isApproving}
