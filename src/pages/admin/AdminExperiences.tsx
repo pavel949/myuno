@@ -174,8 +174,8 @@ export default function AdminExperiences() {
       is_active: item.is_active ?? true,
       is_featured: item.is_featured || false,
       external_link: item.external_link || '',
-      booking_url: (item as any).booking_url || '',
-      source_page_url: (item as any).source_page_url || '',
+      booking_url: (item as AdminExperience & ExperienceExt).booking_url || '',
+      source_page_url: (item as AdminExperience & ExperienceExt).source_page_url || '',
     });
     setIsDialogOpen(true);
   };
@@ -187,7 +187,7 @@ export default function AdminExperiences() {
     }
     setIsSubmitting(true);
     try {
-      const payload: any = {
+      const payload: ExperiencePayload = {
         provider_id: formData.provider_id || null,
         experience_type: formData.experience_type,
         title_en: formData.title_en.trim(),
