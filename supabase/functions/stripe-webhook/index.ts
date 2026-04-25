@@ -92,6 +92,44 @@ Deno.serve(async (req) => {
       const session = event.data.object as Stripe.Checkout.Session;
       logStep("Processing checkout.session.completed", { sessionId: redactId(session.id) });
 
+      // ===== CLEARVIEW REPORT PURCHASE =====
+      if (session.metadata?.order_type === "clearview_report") {
+        const userId = session.metadata.user_id;
+        const projectId = session.metadata.project_id;
+        const tier = session.metadata.tier ?? "single";
+        if (!userId || !projectId) {
+          logStep("ERROR", "ClearView purchase missing user_id or project_id metadata");
+          return new Response(JSON.stringify({ received: true, skipped: "missing_meta" }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 200,
+          });
+        }
+        const months = tier === "bundle3" ? 12 : 12;
+        const validUntil = new Date(Date.now() + months * 30 * 24 * 60 * 60 * 1000).toISOString();
+        const { error: cvErr } = await supabaseAdmin
+          .from("clearview_purchases")
+          .upsert({
+            user_id: userId,
+            project_id: projectId,
+            stripe_session_id: session.id,
+            amount_paid_cents: session.amount_total ?? null,
+            currency: (session.currency ?? "thb").toLowerCase(),
+            valid_until: validUntil,
+          }, { onConflict: "user_id,project_id,stripe_session_id" });
+        if (cvErr) {
+          logStep("ERROR", `ClearView purchase insert failed: ${cvErr.message}`);
+          return new Response(JSON.stringify({ error: cvErr.message }), {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        logStep("ClearView access granted", { userId: redactId(userId), projectId: redactId(projectId) });
+        return new Response(JSON.stringify({ received: true, type: "clearview_report" }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        });
+      }
+
       // ===== CANONICAL ORDER PAYMENT =====
       if (session.metadata?.order_id) {
         const orderId = session.metadata.order_id;

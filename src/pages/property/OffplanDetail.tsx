@@ -48,6 +48,7 @@ import { MuunoScoreWidget, ScoreBreakdown } from '@/components/invest';
 import { FundingProgress } from '@/components/invest/FundingProgress';
 import { DeveloperBadge } from '@/components/property/DeveloperBadge';
 import { DevelopmentUnitsSection } from '@/components/property/DevelopmentUnitsSection';
+import { ClearViewReport } from '@/components/newbuilds/ClearViewReport';
 import { UniversalLeadForm } from '@/components/leads/UniversalLeadForm';
 import { cn } from '@/lib/utils';
 
@@ -216,6 +217,12 @@ export default function OffplanDetail() {
             </div>
           </div>
         )}
+
+        {/* ClearView V3 — full due diligence block (free summary + paid full report) */}
+        <ClearViewReport
+          projectId={project.id}
+          isBrokered={!project.isClearviewRated}
+        />
 
         {/* Key metrics cards */}
         <div className="grid grid-cols-2 gap-3">

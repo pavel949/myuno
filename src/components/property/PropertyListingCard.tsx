@@ -20,6 +20,7 @@ import { surfaceFromProperty } from '@/lib/real-estate/listingViewModel';
 import type { Property } from '@/hooks/useProperties';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { TrustStrip } from './TrustStrip';
+import { ClearViewBadge } from '@/components/clearview/ClearViewBadge';
 
 interface PropertyListingCardProps {
   property: Property;
@@ -149,6 +150,17 @@ export function PropertyListingCard({
             </Badge>
           )}
         </div>
+
+        {/* ClearView grade overlay — bottom-left of image */}
+        {(() => {
+          const grade = (property as unknown as { clearview_badge?: string | null }).clearview_badge;
+          if (!grade) return null;
+          return (
+            <div className="absolute bottom-2 left-2 z-10">
+              <ClearViewBadge grade={grade as 'AAA' | 'AA' | 'A' | 'BBB' | 'BB'} size="xs" isRu={isRu} className="shadow-sm" />
+            </div>
+          );
+        })()}
       </div>
 
       {/* Content — Airbnb compact style */}
