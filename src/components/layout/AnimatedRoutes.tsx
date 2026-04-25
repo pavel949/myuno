@@ -25,6 +25,9 @@ import { useNavigationDirection } from '@/hooks/useNavigationDirection';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { NewbuildProjectToOffplanRedirect } from '@/components/routing/NewbuildLegacyRedirects';
 import { NbCompareProvider } from '@/components/newbuilds/NbCompareProvider';
+import { adminRoutes } from './routes/adminRoutes';
+import { mcRoutes } from './routes/mcRoutes';
+import { propertyHubRoutes } from './routes/propertyHubRoutes';
 
 const NewbuildsContextOutlet = () => (
   <NbCompareProvider>
@@ -38,14 +41,7 @@ const LifeFlowAlias = () => {
   return <Navigate to={`/life/${code ?? ''}`} replace />;
 };
 
-// Property Hub index: legacy `/property?…` query bookmarks → /property/browse?…
-const PropertyHubIndex = () => {
-  const search = typeof window !== 'undefined' ? window.location.search : '';
-  if (search && search.length > 1) {
-    return <Navigate to={`${APP_ROUTES.PROPERTY_BROWSE}${search}`} replace />;
-  }
-  return <Pages.PropertyLanding />;
-};
+// PropertyHubIndex moved to ./routes/propertyHubRoutes.tsx
 
 // Core pages - eagerly loaded for fast initial navigation
 import Index from '@/pages/Index';
@@ -91,7 +87,6 @@ const TransportIdRedirect = () => {
 const TourRedirect = () => { const { id } = useParams(); return <Navigate to={`/experiences/${id}`} replace />; };
 const TourBookRedirect = () => { const { id } = useParams(); return <Navigate to={`/experiences/${id}/book`} replace />; };
 const WaterDetailRedirect = () => { const { id } = useParams(); return <Navigate to={`/experiences/${id}`} replace />; };
-const PropertyProjectRedirect = () => { const { id } = useParams(); return <Navigate to={`/property/offplan/${id}`} replace />; };
 const WaterBookRedirect = () => { const { id } = useParams(); return <Navigate to={`/experiences/${id}/book`} replace />; };
 
 // Legacy redirect helpers for Property Hub migration
@@ -278,81 +273,10 @@ export const AnimatedRoutes: React.FC = () => {
           element={<Navigate to={`${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=short`} replace />}
         />
 
-        {/* ── Property Hub ── */}
+        {/* ── Property Hub (child routes extracted to ./routes/propertyHubRoutes) ── */}
         <Route path="/properties" element={<Navigate to={APP_ROUTES.PROPERTY} replace />} />
         <Route path={APP_ROUTES.PROPERTY} element={<Suspense fallback={<LoadingState />}><PropertyHub /></Suspense>}>
-          <Route index element={<LazyPage><PropertyHubIndex /></LazyPage>} />
-          <Route path="browse" element={<LazyPage><Pages.PropertyIndex /></LazyPage>} />
-          <Route
-            path="rent/short-term"
-            element={<Navigate to={`${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=short`} replace />}
-          />
-          <Route
-            path="rent/medium-term"
-            element={<Navigate to={`${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=medium`} replace />}
-          />
-          <Route
-            path="rent/long-term"
-            element={<Navigate to={`${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=long`} replace />}
-          />
-          <Route
-            path="quick-sale"
-            element={<Navigate to={`${APP_ROUTES.PROPERTY_BROWSE}?mode=buy&intent=quick_sale`} replace />}
-          />
-          <Route path="search" element={<LazyPage><Pages.PropertySearchPage /></LazyPage>} />
-          <Route path="consultation" element={<LazyPage><Pages.PropertyConsultation /></LazyPage>} />
-          <Route path="deposit-success" element={<LazyPage><Pages.PropertyDepositSuccess /></LazyPage>} />
-          <Route path="map" element={<LazyPage><Pages.PropertyMap /></LazyPage>} />
-          {/* Legacy /property/project/:id → canonical /property/offplan/:id */}
-          <Route path="project/:id" element={<PropertyProjectRedirect />} />
-          
-          {/* Off-Plan & Developers (moved from /offplan, /developers, /complexes) */}
-          <Route path="offplan" element={<LazyPage><Pages.OffplanIndex /></LazyPage>} />
-          <Route path="offplan/:id" element={<LazyPage><Pages.OffplanDetail /></LazyPage>} />
-          <Route path="developers" element={<LazyPage><Pages.DevelopersIndex /></LazyPage>} />
-          <Route path="developers/:id" element={<LazyPage><Pages.DeveloperDetail /></LazyPage>} />
-          {/* Legacy /property/projects → canonical /property/offplan */}
-          <Route path="projects" element={<Navigate to="/property/offplan" replace />} />
-          
-          {/* Resale / Secondary Market */}
-          <Route path="resale" element={<LazyPage><Pages.ResaleIndex /></LazyPage>} />
-          <Route path="resale/:id" element={<LazyPage><Pages.ResaleDetail /></LazyPage>} />
-
-          {/* RE-first revenue engine — explainer + ClearView product landing */}
-          <Route path="why-myuno" element={<LazyPage><Pages.WhyMyUno /></LazyPage>} />
-          <Route path="clearview" element={<LazyPage><Pages.ClearViewLanding /></LazyPage>} />
-          <Route path="clearview/apply" element={<LazyPage><Pages.ClearViewApplyPage /></LazyPage>} />
-
-          {/* Commercial RE — persona-gated in nav, open via URL */}
-          <Route path="commercial" element={<LazyPage><Pages.CommercialIndex /></LazyPage>} />
-          <Route path="commercial/browse" element={<LazyPage><Pages.CommercialIndex /></LazyPage>} />
-          <Route path="commercial/:id" element={<LazyPage><Pages.CommercialDetail /></LazyPage>} />
-
-          {/* Land Plots — persona-gated in nav, open via URL */}
-          <Route path="land" element={<LazyPage><Pages.LandIndex /></LazyPage>} />
-          <Route path="land/browse" element={<LazyPage><Pages.LandIndex /></LazyPage>} />
-          <Route path="land/:id" element={<LazyPage><Pages.LandDetail /></LazyPage>} />
-
-          {/* Hotels — operational hospitality (uses CommercialDetail for individual listings) */}
-          <Route path="hotels" element={<LazyPage><Pages.HotelsIndex /></LazyPage>} />
-          <Route path="hotels/:id" element={<LazyPage><Pages.CommercialDetail /></LazyPage>} />
-          
-          {/* Legacy /property/invest/* → top-level /invest/* */}
-          <Route path="invest" element={<Navigate to={APP_ROUTES.INVEST} replace />} />
-          <Route path="invest/dashboard" element={<Navigate to={APP_ROUTES.INVEST_DASHBOARD} replace />} />
-          <Route path="invest/raise" element={<Navigate to={APP_ROUTES.INVEST_RAISE} replace />} />
-          <Route path="invest/market" element={<Navigate to={APP_ROUTES.INVEST_MARKET} replace />} />
-          <Route path="invest/network" element={<Navigate to={APP_ROUTES.INVEST_NETWORK} replace />} />
-          <Route path="invest/execution" element={<Navigate to={APP_ROUTES.INVEST_EXECUTION} replace />} />
-          <Route path="invest/:id" element={<InvestIdRedirect />} />
-          
-          {/* My Property */}
-          <Route path="my" element={<LazyPage><Pages.PropertyMySection /></LazyPage>} />
-          
-          {/* Property Detail (must be last — catches :id) */}
-          <Route path=":id" element={<LazyPage><Pages.PropertyDetail /></LazyPage>} />
-          <Route path=":id/inquiry" element={<LazyPage><Pages.PropertyInquiry /></LazyPage>} />
-          <Route path="booking/manual-payment/:orderId" element={<LazyPage><Pages.ManualPaymentPending /></LazyPage>} />
+          {propertyHubRoutes}
         </Route>
         <Route path="/company/:slug" element={<LazyPage><Pages.ManagementCompanyProfile /></LazyPage>} />
         
@@ -631,94 +555,9 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/demo" element={<Navigate to="/" replace />} />
         <Route path="/demo/*" element={<Navigate to="/" replace />} />
         
-        {/* ── Admin ── */}
+        {/* ── Admin (route definitions extracted to ./routes/adminRoutes) ── */}
         <Route element={<AdminRouteLayout />}>
-          <Route path="/admin" element={<Pages.AdminDashboard />} />
-          <Route path="/admin/users" element={<Pages.AdminUsersAccess />} />
-          <Route path="/admin/catalog" element={<Pages.AdminUnifiedCatalog />} />
-          <Route path="/admin/trash" element={<Pages.AdminTrash />} />
-          <Route path="/admin/control" element={<Pages.AdminControlCenter />} />
-          <Route path="/admin/vendor-content" element={<Pages.AdminVendorContentCreator />} />
-          <Route path="/admin/analytics" element={<Navigate to="/admin/control" replace />} />
-          <Route path="/admin/providers" element={<Pages.AdminProviders />} />
-          <Route path="/admin/providers/:id" element={<Pages.AdminProviderDetail />} />
-          <Route path="/admin/services" element={<Pages.AdminServices />} />
-          <Route path="/admin/partner-applications" element={<Pages.PartnerApplicationsAdmin />} />
-          <Route path="/admin/pitch-deck" element={<Navigate to="/admin" replace />} />
-          <Route path="/admin/investor-demo" element={<Navigate to="/admin" replace />} />
-          <Route path="/admin/operations" element={<Pages.AdminOperations />} />
-          <Route path="/admin/yachts" element={<Pages.AdminYachts />} />
-          <Route path="/admin/tours" element={<Navigate to="/admin/experiences" replace />} />
-          <Route path="/admin/activities" element={<Pages.AdminActivities />} />
-          <Route path="/admin/properties" element={<Pages.AdminProperties />} />
-          <Route path="/admin/projects" element={<Pages.AdminProjects />} />
-          <Route path="/admin/investments" element={<Pages.AdminInvestments />} />
-          <Route path="/admin/developers" element={<Pages.AdminDevelopers />} />
-          <Route path="/admin/newbuilds" element={<Pages.AdminNewbuildsConsole />} />
-          <Route path="/admin/newbuilds/projects/:id/documents" element={<Pages.AdminProjectDocuments />} />
-          <Route path="/admin/pm-companies" element={<Pages.AdminPMCompanies />} />
-          <Route path="/admin/mc-dashboard" element={<Pages.AdminMCDashboard />} />
-          <Route path="/admin/contracts" element={<Pages.AdminContracts />} />
-          <Route path="/admin/restaurants" element={<Pages.AdminRestaurants />} />
-          <Route path="/admin/restaurants/data-quality" element={<Pages.AdminRestaurantDataQuality />} />
-          <Route path="/admin/salons" element={<Pages.AdminSalons />} />
-          <Route path="/admin/clinics" element={<Pages.AdminClinics />} />
-          <Route path="/admin/gyms" element={<Pages.AdminGyms />} />
-          <Route path="/admin/vehicles" element={<Pages.AdminVehicles />} />
-          <Route path="/admin/transfers" element={<Pages.AdminTransfers />} />
-          <Route path="/admin/events" element={<Pages.AdminEvents />} />
-          <Route path="/admin/education" element={<Pages.AdminEducation />} />
-          <Route path="/admin/legal" element={<Pages.AdminLegal />} />
-          <Route path="/admin/pets" element={<Pages.AdminPets />} />
-          <Route path="/admin/cleaning" element={<Pages.AdminCleaning />} />
-          <Route path="/admin/babysitters" element={<Pages.AdminBabysitters />} />
-          <Route path="/admin/flowers" element={<Pages.AdminFlowers />} />
-          <Route path="/admin/bouquets" element={<Navigate to="/admin/flowers" replace />} />
-          <Route path="/admin/lookups" element={<Pages.AdminLookups />} />
-          <Route path="/admin/taxonomy" element={<Pages.AdminTaxonomyManager />} />
-          <Route path="/admin/acquisition-metrics" element={<Pages.AcquisitionMetrics />} />
-          <Route path="/admin/tickets" element={<Pages.AdminTickets />} />
-          <Route path="/admin/tickets/:ticketId" element={<Pages.AdminTicketDetail />} />
-          <Route path="/admin/pharmacies" element={<Pages.AdminPharmacies />} />
-          <Route path="/admin/stores" element={<Pages.AdminStores />} />
-          <Route path="/admin/insurance" element={<Pages.AdminInsurance />} />
-          <Route path="/admin/quick-listings" element={<Pages.AdminQuickListings />} />
-          <Route path="/admin/water-activities" element={<Pages.AdminWaterActivities />} />
-          <Route path="/admin/experiences" element={<Pages.AdminExperiences />} />
-          <Route path="/admin/moderation" element={<Navigate to="/admin/operations?tab=moderation" replace />} />
-          <Route path="/admin/consultations" element={<Pages.AdminConsultations />} />
-          <Route path="/admin/uno-team" element={<Pages.AdminUnoTeam />} />
-          <Route path="/admin/leads" element={<Navigate to="/admin/operations" replace />} />
-          <Route path="/admin/finance" element={<Pages.AdminFinance />} />
-          <Route path="/admin/disputes" element={<Pages.AdminDisputes />} />
-          <Route path="/admin/investor-metrics" element={<Pages.AdminInvestorMetrics />} />
-          <Route path="/admin/settings" element={<Pages.AdminSystemSettings />} />
-          <Route path="/admin/cities" element={<Pages.AdminCities />} />
-          <Route path="/admin/translations" element={<Pages.AdminTranslations />} />
-          <Route path="/admin/location-knowledge" element={<Pages.AdminLocationKnowledge />} />
-          <Route path="/admin/user-analytics" element={<Navigate to="/admin/control" replace />} />
-          <Route path="/admin/marketplace/products" element={<Navigate to="/admin/catalog" replace />} />
-          <Route path="/admin/marketplace/categories" element={<Navigate to="/admin/catalog" replace />} />
-          <Route path="/admin/marketplace/subcategories" element={<Navigate to="/admin/catalog" replace />} />
-          <Route path="/admin/marketplace/vendors" element={<Navigate to="/admin/catalog" replace />} />
-          <Route path="/admin/data-import" element={<Pages.AdminDataImport />} />
-           <Route path="/admin/ai-agents" element={<Pages.AdminAIAgents />} />
-           <Route path="/admin/ai-ops" element={<Pages.AdminAIOps />} />
-           <Route path="/admin/ai-agents/:id" element={<Pages.AdminAIAgentEditor />} />
-          <Route path="/admin/add" element={<Pages.AdminAddHub />} />
-          <Route path="/admin/intake" element={<Pages.AdminIntake />} />
-          <Route path="/admin/intake-configs" element={<Pages.AdminIntakeConfigs />} />
-          <Route path="/admin/lead-configs" element={<Pages.AdminLeadConfigs />} />
-          <Route path="/admin/vendor-prospects" element={<Pages.AdminVendorProspects />} />
-          <Route path="/admin/crm" element={<Pages.AdminCRM />} />
-          <Route path="/admin/marketing" element={<Pages.MarketingDashboard />} />
-          <Route path="/admin/lifecycle-messaging" element={<Pages.LifecycleMessaging />} />
-          <Route path="/admin/experience-categories" element={<Pages.ExperienceCategoriesPage />} />
-          <Route path="/admin/life-situations" element={<Pages.AdminLifeOS />} />
-           <Route path="/admin/lifeos" element={<Navigate to="/admin/life-situations" replace />} />
-           <Route path="/admin/legal-documents" element={<Pages.AdminLegalDocuments />} />
-           <Route path="/admin/qa-test-runner" element={<Pages.AdminQATestRunner />} />
-           <Route path="/admin/api-keys" element={<Pages.AdminApiKeys />} />
+          {adminRoutes}
         </Route>
         
         {/* ── Staff ── */}
@@ -796,110 +635,9 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/mc/onboarding" element={<LazyPage><AuthGuard><Pages.MCOnboarding /></AuthGuard></LazyPage>} />
         <Route path="/mc/register" element={<LazyPage><AuthGuard><Pages.MCRegistrationPage /></AuthGuard></LazyPage>} />
         
-        {/* ── MC (Management Company) Workspace ── */}
+        {/* ── MC (Management Company) Workspace — child routes extracted to ./routes/mcRoutes ── */}
         <Route path="/mc" element={<ActiveCompanyProvider><MCGuard><MCLayout /></MCGuard></ActiveCompanyProvider>}>
-          <Route index element={<LazyPage><Pages.OwnerDashboard /></LazyPage>} />
-          <Route path="modules" element={<LazyPage><Pages.OwnerModulesPage /></LazyPage>} />
-          <Route path="properties" element={<LazyPage><Pages.OwnerProperties /></LazyPage>} />
-          <Route path="complexes" element={<LazyPage><Pages.ComplexesPage /></LazyPage>} />
-          <Route path="projects" element={<LazyPage><Pages.MCProjectsPage /></LazyPage>} />
-          <Route path="properties/new" element={<LazyPage><Pages.AddProperty /></LazyPage>} />
-          <Route path="properties/import" element={<LazyPage><Pages.OwnerPropertyImport /></LazyPage>} />
-          <Route path="properties/:id" element={<LazyPage><Pages.OwnerPropertyDetail /></LazyPage>} />
-          <Route path="properties/:id/terms" element={<LazyPage><Pages.OwnerRentalTerms /></LazyPage>} />
-          <Route path="properties/:id/setup" element={<LazyPage><Pages.PropertyQuickSetup /></LazyPage>} />
-          <Route path="properties/:id/guidebook" element={<LazyPage><Pages.OwnerGuidebookEdit /></LazyPage>} />
-          <Route path="properties/:id/editor" element={<LazyPage><Pages.PropertyEditor /></LazyPage>} />
-          <Route path="properties/:id/manage" element={<LazyPage><Pages.PropertyManage /></LazyPage>} />
-          <Route path="properties/:id/inventory" element={<LazyPage><Pages.InventoryPage /></LazyPage>} />
-          <Route path="properties/:id/juristic-requests" element={<LazyPage><Pages.JuristicRequestsPage /></LazyPage>} />
-          <Route path="properties/:id/portal-settings" element={<LazyPage><Pages.OwnerPortalSettingsPage /></LazyPage>} />
-          <Route path="calendar" element={<LazyPage><Pages.OwnerCalendar /></LazyPage>} />
-          <Route path="bookings" element={<Navigate to="/mc/bookings-list" replace />} />
-          <Route path="operations" element={<LazyPage><Pages.OwnerOperations /></LazyPage>} />
-          <Route path="finance" element={<LazyPage><Pages.FinanceOverview /></LazyPage>} />
-          <Route path="financials" element={<LazyPage><Pages.OwnerFinancials /></LazyPage>} />
-          <Route path="financials/new" element={<LazyPage><Pages.OwnerFinancialForm /></LazyPage>} />
-          <Route path="financials/:id" element={<LazyPage><Pages.OwnerFinancialForm /></LazyPage>} />
-          <Route path="budget" element={<LazyPage><Pages.BudgetPage /></LazyPage>} />
-          <Route path="finance/planning" element={<LazyPage><Pages.FinancialPlanning /></LazyPage>} />
-          <Route path="quick-expense" element={<LazyPage><Pages.QuickExpense /></LazyPage>} />
-          <Route path="expenses/quick" element={<LazyPage><Pages.QuickExpense /></LazyPage>} />
-          <Route path="income/quick" element={<LazyPage><Pages.QuickIncome /></LazyPage>} />
-          <Route path="messages" element={<LazyPage><Pages.OwnerMessages /></LazyPage>} />
-          <Route path="auto-messaging" element={<LazyPage><Pages.OwnerAutoMessaging /></LazyPage>} />
-          <Route path="chat/:type/:id" element={<LazyPage><Pages.OwnerChatRoom /></LazyPage>} />
-          <Route path="support-chat" element={<LazyPage><Pages.OwnerSupportChat /></LazyPage>} />
-          <Route path="message-templates" element={<LazyPage><Pages.MessageTemplates /></LazyPage>} />
-          <Route path="channels" element={<LazyPage><Pages.ChannelManager /></LazyPage>} />
-          <Route path="team" element={<Navigate to="/mc/staff" replace />} />
-          <Route path="reports" element={<LazyPage><Pages.ReportsPage /></LazyPage>} />
-          <Route path="transparency/:propertyId" element={<LazyPage><Pages.OwnerTransparencyDashboard /></LazyPage>} />
-          <Route path="maintenance-plan" element={<LazyPage><Pages.MaintenancePlan /></LazyPage>} />
-          <Route path="management-terms" element={<LazyPage><Pages.ManagementPortfolio /></LazyPage>} />
-          <Route path="staff" element={<LazyPage><Pages.StaffPage /></LazyPage>} />
-          <Route path="subscription" element={<LazyPage><Pages.MCSubscriptionPage /></LazyPage>} />
-          <Route path="pipelines" element={<LazyPage><Pages.PipelinesIndex /></LazyPage>} />
-          <Route path="sales" element={<LazyPage><Pages.SalesPipeline /></LazyPage>} />
-          <Route path="sales/new" element={<LazyPage><Pages.NewDealPage /></LazyPage>} />
-          <Route path="sales/analytics" element={<LazyPage><Pages.SalesAnalytics /></LazyPage>} />
-          <Route path="sales/settings" element={<Navigate to="/mc/settings?tab=crm" replace />} />
-          <Route path="settings" element={<LazyPage><Pages.MCSettingsPage /></LazyPage>} />
-          <Route path="help" element={<LazyPage><Pages.MCHelpPage /></LazyPage>} />
-          <Route path="sales/:id" element={<LazyPage><Pages.SalesDealDetail /></LazyPage>} />
-          <Route path="contacts" element={<LazyPage><Pages.ContactsList /></LazyPage>} />
-          <Route path="contacts/:id" element={<LazyPage><Pages.ContactDetail /></LazyPage>} />
-          <Route path="contacts/import" element={<LazyPage><Pages.ContactImportPage /></LazyPage>} />
-          <Route path="contacts/import-odoo" element={<LazyPage><Pages.ImportOdooContactsPage /></LazyPage>} />
-          <Route path="invoices" element={<LazyPage><Pages.InvoicesPage /></LazyPage>} />
-          <Route path="finance/owner-payouts" element={<LazyPage><Pages.OwnerPayoutsPage /></LazyPage>} />
-          <Route path="finance/ar-aging" element={<LazyPage><Pages.ArAgingPage /></LazyPage>} />
-          <Route path="finance/trust-accounts" element={<LazyPage><Pages.TrustAccountsPage /></LazyPage>} />
-          <Route path="finance/tax-center" element={<LazyPage><Pages.TaxCenterPage /></LazyPage>} />
-          <Route path="finance/statement-approvals" element={<LazyPage><Pages.StatementApprovalsPage /></LazyPage>} />
-          <Route path="documents/signatures" element={<LazyPage><Pages.SignatureRequestsPage /></LazyPage>} />
-          <Route path="approvals" element={<LazyPage><Pages.ApprovalsPage /></LazyPage>} />
-          <Route path="team/shifts" element={<LazyPage><Pages.TeamShiftsPage /></LazyPage>} />
-          <Route path="procurement" element={<LazyPage><Pages.ProcurementPage /></LazyPage>} />
-          <Route path="insights/owner-analytics" element={<LazyPage><Pages.OwnerAnalyticsPage /></LazyPage>} />
-          <Route path="developer/api-keys" element={<LazyPage><Pages.ApiKeysPage /></LazyPage>} />
-          <Route path="developer/webhooks" element={<LazyPage><Pages.WebhooksPage /></LazyPage>} />
-          <Route path="onboarding/wizard" element={<LazyPage><Pages.McOnboardingWizardPage /></LazyPage>} />
-          <Route path="tasks" element={<LazyPage><Pages.CrmTasksPage /></LazyPage>} />
-          <Route path="crm-dashboard" element={<LazyPage><Pages.CrmDashboardPage /></LazyPage>} />
-          <Route path="sequences" element={<LazyPage><Pages.CrmSequencesPage /></LazyPage>} />
-          <Route path="quotes" element={<LazyPage><Pages.CrmQuotesPage /></LazyPage>} />
-          <Route path="meetings" element={<LazyPage><Pages.CrmMeetingsPage /></LazyPage>} />
-          <Route path="crm-emails" element={<LazyPage><Pages.CrmEmailsPage /></LazyPage>} />
-          <Route path="automations" element={<LazyPage><Pages.CrmWorkflowsPage /></LazyPage>} />
-          <Route path="crm-templates" element={<LazyPage><Pages.CrmTemplatesPage /></LazyPage>} />
-          <Route path="duplicates" element={<LazyPage><Pages.CrmDuplicatesPage /></LazyPage>} />
-          <Route path="companies" element={<LazyPage><Pages.CrmCompaniesPage /></LazyPage>} />
-          <Route path="forms" element={<LazyPage><Pages.CrmWebFormsPage /></LazyPage>} />
-          <Route path="assignment" element={<LazyPage><Pages.CrmAssignmentRulesPage /></LazyPage>} />
-          <Route path="vendors" element={<LazyPage><Pages.VendorDirectoryPage /></LazyPage>} />
-          <Route path="inventory" element={<LazyPage><Pages.InventoryPage /></LazyPage>} />
-          <Route path="documents" element={<LazyPage><Pages.DocumentTemplatesPage /></LazyPage>} />
-          <Route path="marketing" element={<LazyPage><Pages.MarketingHubPage /></LazyPage>} />
-          <Route path="vendor-acquisition" element={<LazyPage><Pages.AdminVendorProspects /></LazyPage>} />
-          <Route path="vault" element={<LazyPage><Pages.OwnerVaultPage /></LazyPage>} />
-          <Route path="rates" element={<LazyPage><Pages.RateManagementPage /></LazyPage>} />
-          <Route path="reviews-management" element={<LazyPage><Pages.ReviewsManagementPage /></LazyPage>} />
-          <Route path="insurance" element={<LazyPage><Pages.DocumentsInsurancePage /></LazyPage>} />
-          <Route path="owners" element={<LazyPage><Pages.OwnerOwnersPage /></LazyPage>} />
-          <Route path="owners/:id" element={<LazyPage><Pages.OwnerDetailPage /></LazyPage>} />
-          <Route path="bookings-list" element={<LazyPage><Pages.MCBookingsPage /></LazyPage>} />
-          <Route path="performance" element={<LazyPage><Pages.OwnerPerformance /></LazyPage>} />
-          <Route path="trends" element={<LazyPage><Pages.OwnerTrendsAndTips /></LazyPage>} />
-          <Route path="account-settings" element={<LazyPage><Pages.OwnerAccountSettings /></LazyPage>} />
-          <Route path="superhost" element={<LazyPage><Pages.OwnerSuperhost /></LazyPage>} />
-          {/* Pages moved from /owner */}
-          <Route path="portfolio" element={<LazyPage><Pages.OwnerPortfolio /></LazyPage>} />
-          <Route path="guide" element={<LazyPage><Pages.OwnerGuidePage /></LazyPage>} />
-          <Route path="setup" element={<LazyPage><Pages.OwnerSetupWizard /></LazyPage>} />
-          <Route path="service-request" element={<LazyPage><Pages.ServiceRequest /></LazyPage>} />
-          <Route path="inspection" element={<LazyPage><Pages.InspectionRequest /></LazyPage>} />
-          <Route path="full-management" element={<LazyPage><Pages.FullManagement /></LazyPage>} />
+          {mcRoutes}
         </Route>
 
         {/* ── Capital CRM ── */}

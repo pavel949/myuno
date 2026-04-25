@@ -513,3 +513,26 @@ rows  table
 - 384 файла с неиспользуемыми экспортами — Волна 4
 - 441 `any`, 294 `console.*` — Волна 4
 - `AnimatedRoutes.tsx` 969 строк / 606 routes — Волна 3
+
+---
+
+## Wave 3 — Partial (2026-04-25)
+
+### Done
+
+- `AnimatedRoutes.tsx`: **969 → 707 строк** (−262, −27%)
+- 3 крупнейших секции вынесены в отдельные файлы:
+  - `src/components/layout/routes/adminRoutes.tsx` (~85 routes)
+  - `src/components/layout/routes/mcRoutes.tsx` (~100 routes)
+  - `src/components/layout/routes/propertyHubRoutes.tsx` (~30 routes)
+- Удалены неиспользуемые хелперы (`PropertyHubIndex`, `PropertyProjectRedirect`, `InvestIdRedirect`) из основного файла
+
+### Verification
+
+- ✅ `tsc --noEmit` чистый
+- ✅ `vite build` успешен (2196 entries)
+
+### Не успели в этом раунде (отложено)
+
+- Топ-4 крупных компонента (`usePropertyWizard`, `ContactDetail`, `AdminProjects`, `PropertyConsultation`) — требует отдельной волны
+- Волна 4 (logger вместо console.*, типобезопасность any → unknown) — следующая сессия
