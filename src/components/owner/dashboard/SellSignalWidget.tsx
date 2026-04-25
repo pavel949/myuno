@@ -34,7 +34,7 @@ export function SellSignalWidget() {
   const isRu = language === 'ru';
   const companyId = activeCompany?.company_id;
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading } = useQuery<SellSignalDeal[]>({
     queryKey: ['sell-signal-deals', companyId],
     queryFn: async (): Promise<SellSignalDeal[]> => {
       if (!companyId) return [];
@@ -51,7 +51,7 @@ export function SellSignalWidget() {
       return (data ?? []) as SellSignalDeal[];
     },
     enabled: !!companyId,
-    ...CACHE_PROFILES.MEDIUM,
+    ...CACHE_PROFILES.DYNAMIC,
   });
 
   if (isLoading) {
