@@ -115,6 +115,14 @@ export function ClearViewReport({ projectId, isBrokered }: Props) {
                 ? 'Институциональный рейтинг проекта · методология V3'
                 : 'Institutional project rating · V3 methodology'}
             </p>
+            {ownerView && (
+              <span className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 border border-primary/40 bg-primary/10 text-primary text-[10px] font-medium uppercase tracking-wider rounded-none">
+                <Shield className="w-3 h-3" />
+                {isRu
+                  ? 'Просмотр как владелец проекта'
+                  : 'Owner view — visible to you and admins only'}
+              </span>
+            )}
           </div>
         </div>
         {isAdmin && (
