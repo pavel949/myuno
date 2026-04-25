@@ -8,6 +8,7 @@
 import React from 'react';
 import { Shield, ShieldCheck, Droplets, FileCheck, Info, Lock } from 'lucide-react';
 import { ClearViewBadge } from '@/components/clearview/ClearViewBadge';
+import { ClearViewBadgePopover } from '@/components/clearview/ClearViewBadgePopover';
 import { cn } from '@/lib/utils';
 import { TITLE_DEED_TYPES, type TitleDeedType } from '@/lib/real-estate/saleIntentTaxonomy';
 
@@ -16,6 +17,10 @@ export interface TrustStripProps {
   escrowOffered?: boolean | null;
   clearviewBadge?: 'AAA' | 'AA' | 'A' | 'BBB' | 'BB' | string | null;
   clearviewRecommendation?: 'BUY' | 'WATCH' | 'AVOID' | string | null;
+  /** When provided, the ClearView chip becomes an interactive popover. */
+  clearviewProjectId?: string | null;
+  /** Deep link target for the popover's "see full report" CTA. */
+  clearviewDetailHref?: string | null;
   floodRisk?: 'low' | 'medium' | 'high' | string | null;
   ownerVerified?: boolean | null;
   foreignQuota?: { available: number; total: number } | null;
