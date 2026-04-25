@@ -5,6 +5,7 @@ import { Cookie, X, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { motion, AnimatePresence } from 'framer-motion';
+import { logger } from '@/lib/logger';
 
 const CONSENT_KEY = 'myuno-cookie-consent';
 
@@ -69,7 +70,7 @@ export const CookieConsentBanner = forwardRef<HTMLDivElement>(function CookieCon
     try {
       localStorage.setItem(CONSENT_KEY, JSON.stringify(final));
     } catch (error) {
-      console.warn('Failed to persist cookie consent, applying for current session only', error);
+      logger.warn('Failed to persist cookie consent, applying for current session only', error);
     } finally {
       setVisible(false);
     }

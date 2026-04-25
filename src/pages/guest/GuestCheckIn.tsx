@@ -85,7 +85,7 @@ function useGuestCheckIn(marketplaceBookingId?: string) {
         });
       }
     } catch (err) {
-      console.warn('Failed to notify owner of check-in:', err);
+      logger.warn('Failed to notify owner of check-in:', err);
     }
   };
 
@@ -249,6 +249,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import { logger } from '@/lib/logger';
 
 const countries = [
   { code: 'RU', name: { en: 'Russia', ru: 'Россия' } },

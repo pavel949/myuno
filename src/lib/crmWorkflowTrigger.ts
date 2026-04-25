@@ -3,6 +3,7 @@
  * Used by deal/contact/activity mutations to execute automated workflows.
  */
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/lib/logger';
 
 export type WorkflowTriggerType =
   | 'deal_created'
@@ -29,9 +30,9 @@ export function fireCrmWorkflowTrigger(payload: TriggerPayload): void {
   supabase.functions
     .invoke('execute-crm-workflow', { body: payload })
     .then(({ error }) => {
-      if (error) console.warn('[CRM Workflow] trigger failed:', payload.trigger_type, error.message);
+      if (error) logger.warn('[CRM Workflow] trigger failed:', payload.trigger_type, error.message);
     })
     .catch((err) => {
-      console.warn('[CRM Workflow] trigger error:', payload.trigger_type, err);
+      logger.warn('[CRM Workflow] trigger error:', payload.trigger_type, err);
     });
 }

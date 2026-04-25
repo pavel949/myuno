@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { UserPlus, Trash2, Search, Loader2, UserCheck, Mail } from 'lucide-react';
+import { logger } from '@/lib/logger';
 
 interface MCMember {
   id: string;
@@ -137,7 +138,7 @@ export function MCMemberManager({ companyId, companyName }: MCMemberManagerProps
         .from('user_roles')
         .upsert({ user_id: foundUser.id, role: 'owner' as const }, { onConflict: 'user_id,role' });
       
-      if (roleError) console.warn('Could not auto-assign role:', roleError);
+      if (roleError) logger.warn('Could not auto-assign role:', roleError);
       
       toast.success(isRu ? 'Сотрудник добавлен' : 'Member added');
       setFoundUser(null);

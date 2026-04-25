@@ -40,6 +40,7 @@ export interface OnboardingResult {
 }
 
 import { getOrCreateAnonSessionId as getOrCreateAnonId } from '@/lib/segmentation/anonSession';
+import { logger } from '@/lib/logger';
 
 /** Deterministic routing rules — first matching rule wins for primary CTA. */
 function recommend(answers: Required<StartAnswers>): OnboardingResult['items'] {
@@ -233,7 +234,7 @@ export function useStartOnboarding() {
           model = aiResp.model ?? null;
         }
       } catch (aiErr) {
-        console.warn('AI routing unavailable, using deterministic fallback', aiErr);
+        logger.warn('AI routing unavailable, using deterministic fallback', aiErr);
       }
 
       if (items.length === 0) {

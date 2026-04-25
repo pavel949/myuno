@@ -3,6 +3,7 @@ import { Input } from '@/components/ui/input';
 import { MapPin, Loader2, Search } from 'lucide-react';
 import { useGoogleMaps } from '@/contexts/GoogleMapsContext';
 import { cn } from '@/lib/utils';
+import { logger } from '@/lib/logger';
 
 interface PlaceResult {
   address: string;
@@ -183,7 +184,7 @@ export function GooglePlacesAutocomplete({
             prediction,
           }));
       } catch (error) {
-        console.warn('[GooglePlacesAutocomplete] Places autocomplete failed, using geocoder fallback.', error);
+        logger.warn('[GooglePlacesAutocomplete] Places autocomplete failed, using geocoder fallback.', error);
       }
 
       if (nextPredictions.length === 0) {
@@ -249,7 +250,7 @@ export function GooglePlacesAutocomplete({
         district: extractDistrict(hydratedPlace.addressComponents),
       });
     } catch (error) {
-      console.warn('[GooglePlacesAutocomplete] Failed to resolve selected place.', error);
+      logger.warn('[GooglePlacesAutocomplete] Failed to resolve selected place.', error);
       setErrorHint('Could not load place details from Google.');
     }
   };

@@ -15,6 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import type { UserPersona } from '@/hooks/useUserPersonas';
 import { SIGNAL_SEED } from '@/lib/roleBlend';
+import { logger } from '@/lib/logger';
 
 export interface RoleSignal {
   lead: string;
@@ -299,7 +300,7 @@ export function useRoleSignals(personas: UserPersona[]) {
             const sig = await fn(userId);
             return [p, sig] as const;
           } catch (err) {
-            console.warn('[useRoleSignals] resolver failed for', p, err);
+            logger.warn('[useRoleSignals] resolver failed for', p, err);
             return [p, null] as const;
           }
         }),

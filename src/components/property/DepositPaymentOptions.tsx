@@ -16,6 +16,7 @@ import { useRubEstimate } from '@/hooks/useRubEstimate';
 import { useOrders } from '@/hooks/useOrders';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import { logger } from '@/lib/logger';
 
 interface DepositPaymentOptionsProps {
   propertyId: string;
@@ -313,7 +314,7 @@ export const DepositPaymentOptions = forwardRef<DepositPaymentOptionsHandle, Dep
         supabase.functions.invoke('notify-manual-payment-request', {
           body: { order_id: orderResult.order_id },
         }).catch((err) => {
-          console.warn('[DepositPaymentOptions] notify-manual-payment-request failed:', err);
+          logger.warn('[DepositPaymentOptions] notify-manual-payment-request failed:', err);
         });
 
         toast.success(
