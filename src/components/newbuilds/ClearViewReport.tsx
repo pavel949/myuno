@@ -1,44 +1,53 @@
 /**
- * ClearViewReport — public-facing block on a project page.
- * Shows ClearView™ grade + 8 criteria + flags. Admins can (re)generate.
+ * ClearViewReport — full ClearView V3 due-diligence block.
  *
- * Conflict-of-interest banner when is_brokered_project = true,
- * per OPERATING_MODEL v2.0 Year 1 rule.
+ * Layout:
+ *  ┌───────────────────────────────────────────────┐
+ *  │ Header (Shield + Admin actions)              │
+ *  │ Conflict-of-interest banner (if brokered)    │
+ *  │ FREE SUMMARY                                 │
+ *  │  · Gauge + Recommendation chip              │
+ *  │  · Radar (8 categories)                      │
+ *  │  · Top-3 strengths / Top-3 risks             │
+ *  │  · Executive summary                         │
+ *  │ PAYWALL → FULL REPORT                        │
+ *  │  · Per-category findings                     │
+ *  │  · Evidence gaps                             │
+ *  │  · Modifiers                                 │
+ *  │  · All recommendations                       │
+ *  └───────────────────────────────────────────────┘
  */
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Shield, AlertTriangle, CheckCircle2, Sparkles, RefreshCw, Eye, EyeOff, FileText } from 'lucide-react';
+import {
+  Shield,
+  AlertTriangle,
+  CheckCircle2,
+  Sparkles,
+  RefreshCw,
+  Eye,
+  EyeOff,
+  ListChecks,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { APP_ROUTES } from '@/lib/config/routes';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { useIPPLeadEvent } from '@/hooks/useIPPLeadEvent';
 import {
   useDueDiligenceReport,
   useGenerateDueDiligence,
   useTogglePublishDueDiligence,
 } from '@/hooks/useDueDiligence';
-
-const CRITERION_LABELS: Record<string, { label: string; weight: number }> = {
-  legal:        { label: 'Legal & Regulatory',     weight: 20 },
-  developer:    { label: 'Developer Credibility',  weight: 20 },
-  construction: { label: 'Construction Quality',   weight: 15 },
-  location:     { label: 'Location & Market',      weight: 15 },
-  financial:    { label: 'Payment Protection',     weight: 10 },
-  returns:      { label: 'Investment Returns',     weight: 10 },
-  marketing:    { label: 'Sales & Marketing',      weight: 5 },
-  liquidity:    { label: 'Liquidity & Exit',       weight: 5 },
-};
-
-function gradeColor(grade?: string | null) {
-  switch (grade) {
-    case 'AAA': return '#10b981';
-    case 'AA':  return '#22c55e';
-    case 'A':   return '#84cc16';
-    case 'BBB': return '#f59e0b';
-    case 'BB':  return '#ef4444';
-    default:    return 'hsl(var(--nb-muted))';
-  }
-}
+import { useClearViewAccess } from '@/hooks/useClearViewPurchase';
+import { ClearViewBadge } from '@/components/clearview/ClearViewBadge';
+import { ClearViewGauge } from '@/components/clearview/ClearViewGauge';
+import { ClearViewRadar } from '@/components/clearview/ClearViewRadar';
+import { ClearViewPaywall } from '@/components/clearview/ClearViewPaywall';
+import {
+  CLEARVIEW_CATEGORIES,
+  gradeToRecommendation,
+  recommendationLabel,
+  type ClearViewGrade,
+} from '@/lib/clearview/methodology';
 
 interface Props {
   projectId: string;
@@ -48,13 +57,15 @@ interface Props {
 
 export function ClearViewReport({ projectId, isBrokered }: Props) {
   const { user } = useAuth();
+  const { language } = useLanguage();
+  const isRu = language === 'ru';
   const { data: report, isLoading } = useDueDiligenceReport(projectId);
+  const { data: access } = useClearViewAccess(projectId);
   const generate = useGenerateDueDiligence();
   const togglePublish = useTogglePublishDueDiligence();
   const { track } = useIPPLeadEvent();
   const [isAdmin, setIsAdmin] = React.useState(false);
 
-  // Track that a viewer opened the public summary (IPP §3: +20 equivalent intent).
   React.useEffect(() => {
     if (report && (report.is_published || isAdmin)) {
       track({ eventType: 'clearview_summary_open', projectId });
@@ -64,7 +75,10 @@ export function ClearViewReport({ projectId, isBrokered }: Props) {
 
   React.useEffect(() => {
     let cancel = false;
-    if (!user?.id) { setIsAdmin(false); return; }
+    if (!user?.id) {
+      setIsAdmin(false);
+      return;
+    }
     (async () => {
       const { supabase } = await import('@/integrations/supabase/client');
       const { data } = await supabase
@@ -75,22 +89,28 @@ export function ClearViewReport({ projectId, isBrokered }: Props) {
         .maybeSingle();
       if (!cancel) setIsAdmin(!!data);
     })();
-    return () => { cancel = true; };
+    return () => {
+      cancel = true;
+    };
   }, [user?.id]);
 
   const brokered = isBrokered ?? report?.is_brokered_project ?? false;
+  const hasFullAccess = isAdmin || (access?.hasAccess ?? false);
 
   return (
-    <section className="nb-glass p-5 sm:p-6 space-y-4">
+    <section className="border border-border bg-card p-5 sm:p-6 space-y-5 rounded-none">
+      {/* Header */}
       <header className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <Shield className="w-5 h-5" style={{ color: 'hsl(var(--nb-gold))' }} />
+        <div className="flex items-center gap-2.5">
+          <Shield className="w-5 h-5 text-foreground" />
           <div>
-            <h3 className="nb-display text-lg" style={{ color: 'hsl(var(--nb-text))' }}>
+            <h3 className="font-display text-lg font-semibold text-foreground">
               ClearView™ Due Diligence
             </h3>
-            <p className="text-xs" style={{ color: 'hsl(var(--nb-muted))' }}>
-              AI-powered 8-criteria assessment · v3 methodology
+            <p className="text-xs text-muted-foreground">
+              {isRu
+                ? 'Институциональный рейтинг проекта · методология V3'
+                : 'Institutional project rating · V3 methodology'}
             </p>
           </div>
         </div>
@@ -100,185 +120,241 @@ export function ClearViewReport({ projectId, isBrokered }: Props) {
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => togglePublish.mutate({
-                  id: report.id,
-                  projectId,
-                  publish: !report.is_published,
-                })}
+                className="rounded-none"
+                onClick={() =>
+                  togglePublish.mutate({
+                    id: report.id,
+                    projectId,
+                    publish: !report.is_published,
+                  })
+                }
               >
-                {report.is_published
-                  ? (<><EyeOff className="w-3.5 h-3.5 mr-1" />Скрыть</>)
-                  : (<><Eye className="w-3.5 h-3.5 mr-1" />Опубликовать</>)}
+                {report.is_published ? (
+                  <>
+                    <EyeOff className="w-3.5 h-3.5 mr-1" />
+                    {isRu ? 'Скрыть' : 'Unpublish'}
+                  </>
+                ) : (
+                  <>
+                    <Eye className="w-3.5 h-3.5 mr-1" />
+                    {isRu ? 'Опубликовать' : 'Publish'}
+                  </>
+                )}
               </Button>
             )}
             <Button
               size="sm"
+              className="rounded-none"
               onClick={() => generate.mutate({ projectId, isBrokeredProject: brokered })}
               disabled={generate.isPending}
             >
               {generate.isPending ? (
-                <><RefreshCw className="w-3.5 h-3.5 mr-1 animate-spin" />Анализируем…</>
+                <>
+                  <RefreshCw className="w-3.5 h-3.5 mr-1 animate-spin" />
+                  {isRu ? 'Анализируем…' : 'Analyzing…'}
+                </>
               ) : (
-                <><Sparkles className="w-3.5 h-3.5 mr-1" />{report ? 'Перегенерировать' : 'Сгенерировать'}</>
+                <>
+                  <Sparkles className="w-3.5 h-3.5 mr-1" />
+                  {report
+                    ? isRu
+                      ? 'Перегенерировать'
+                      : 'Regenerate'
+                    : isRu
+                      ? 'Сгенерировать'
+                      : 'Generate'}
+                </>
               )}
             </Button>
           </div>
         )}
       </header>
 
+      {/* Conflict of interest disclosure */}
       {brokered && (
-        <div
-          className="rounded-none p-3 text-xs flex items-start gap-2"
-          style={{ background: 'hsl(var(--nb-gold) / 0.08)', border: '1px solid hsl(var(--nb-gold) / 0.25)', color: 'hsl(var(--nb-text))' }}
-        >
-          <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" style={{ color: 'hsl(var(--nb-gold))' }} />
+        <div className="flex items-start gap-2 border border-amber-500/30 bg-amber-500/5 p-3 text-xs text-foreground">
+          <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" />
           <div>
-            <strong>Not Rated — Conflict of Interest Disclosure.</strong>{' '}
-            Этот проект продаётся через myUNO как брокер. В первый год работы ClearView™
-            мы не присваиваем рейтинги собственным брокерским объектам, чтобы избежать
-            конфликта интересов. Оценка приведена для прозрачности и не является официальным рейтингом.
+            <strong>
+              {isRu
+                ? 'Не оценён — раскрытие конфликта интересов.'
+                : 'Not Rated — Conflict of Interest Disclosure.'}
+            </strong>{' '}
+            {isRu
+              ? 'Этот проект продаётся через myUNO как брокер. В первый год работы ClearView™ мы не присваиваем рейтинги собственным брокерским объектам, чтобы избежать конфликта интересов.'
+              : 'This project is sold via myUNO as a broker. In ClearView™ year one we do not rate brokered projects to avoid conflict of interest.'}
           </div>
         </div>
       )}
 
-      {isLoading && (
-        <div className="text-sm" style={{ color: 'hsl(var(--nb-muted))' }}>Загружаем отчёт…</div>
-      )}
+      {isLoading && <div className="text-sm text-muted-foreground">{isRu ? 'Загружаем отчёт…' : 'Loading report…'}</div>}
 
       {!isLoading && !report && (
-        <div className="text-sm" style={{ color: 'hsl(var(--nb-muted))' }}>
+        <div className="text-sm text-muted-foreground">
           {isAdmin
-            ? 'Отчёт ещё не сгенерирован. Нажмите «Сгенерировать».'
-            : 'Due diligence отчёт для этого проекта в подготовке.'}
+            ? isRu
+              ? 'Отчёт ещё не сгенерирован. Нажмите «Сгенерировать».'
+              : 'No report yet. Click Generate.'
+            : isRu
+              ? 'ClearView отчёт для этого проекта в подготовке.'
+              : 'ClearView report for this project is in preparation.'}
         </div>
       )}
 
-      {report && (!report.is_published && !isAdmin) && (
-        <div className="text-sm" style={{ color: 'hsl(var(--nb-muted))' }}>
-          Отчёт находится на проверке у аналитика и скоро будет опубликован.
+      {report && !report.is_published && !isAdmin && (
+        <div className="text-sm text-muted-foreground">
+          {isRu
+            ? 'Отчёт находится на проверке у аналитика и скоро будет опубликован.'
+            : 'Report is under analyst review and will be published soon.'}
         </div>
       )}
 
       {report && (report.is_published || isAdmin) && (
         <>
-          {/* Score hero */}
-          <div className="grid grid-cols-3 gap-3 items-center">
-            <div className="col-span-1">
-              <div
-                className="rounded-none p-4 text-center"
-                style={{ background: 'hsl(var(--nb-bg))', border: `2px solid ${gradeColor(report.grade)}` }}
-              >
-                <div className="text-3xl font-bold nb-display" style={{ color: gradeColor(report.grade) }}>
-                  {report.grade ?? '—'}
-                </div>
-                <div className="text-xs mt-1" style={{ color: 'hsl(var(--nb-muted))' }}>
-                  {report.total_score?.toFixed(0) ?? '0'} / 100
-                </div>
-              </div>
-            </div>
-            <div className="col-span-2 space-y-1.5">
-              {Object.entries(CRITERION_LABELS).map(([key, meta]) => {
-                const score = (report as unknown as Record<string, number | null>)[`score_${key}`] ?? 0;
-                const pct = ((Number(score) || 0) / 10) * 100;
+          {/* ── FREE SUMMARY ───────────────────────────────── */}
+          <div className="grid sm:grid-cols-[180px_1fr] gap-5 items-start">
+            <div className="flex flex-col items-center sm:items-start gap-2">
+              <ClearViewGauge
+                score={Number(report.total_score) || 0}
+                grade={report.grade as ClearViewGrade | null}
+                size={170}
+                isRu={isRu}
+              />
+              {report.grade && (
+                <ClearViewBadge
+                  grade={report.grade as ClearViewGrade}
+                  size="md"
+                  showLabel={false}
+                  isRu={isRu}
+                  className="self-center"
+                />
+              )}
+              {(() => {
+                const rec = gradeToRecommendation(report.grade as ClearViewGrade | null);
+                if (!rec) return null;
+                const cls =
+                  rec === 'BUY'
+                    ? 'border-emerald-500/40 text-emerald-700 dark:text-emerald-400 bg-emerald-500/10'
+                    : rec === 'WATCH'
+                      ? 'border-amber-500/40 text-amber-700 dark:text-amber-400 bg-amber-500/10'
+                      : 'border-red-500/40 text-red-700 dark:text-red-400 bg-red-500/10';
                 return (
-                  <div key={key} className="flex items-center gap-2">
-                    <span className="text-[11px] w-32 shrink-0" style={{ color: 'hsl(var(--nb-muted))' }}>
-                      {meta.label} <span className="opacity-60">({meta.weight}%)</span>
-                    </span>
-                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: 'hsl(var(--nb-bg))' }}>
-                      <div
-                        className="h-full rounded-full transition-all"
-                        style={{ width: `${pct}%`, background: 'hsl(var(--nb-gold))' }}
-                      />
-                    </div>
-                    <span className="text-[11px] w-8 text-right tabular-nums" style={{ color: 'hsl(var(--nb-text))' }}>
-                      {Number(score).toFixed(1)}
-                    </span>
-                  </div>
+                  <span
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 border text-xs font-medium rounded-none self-center ${cls}`}
+                  >
+                    <ListChecks className="w-3.5 h-3.5" />
+                    {recommendationLabel(rec, isRu)}
+                  </span>
                 );
-              })}
+              })()}
+            </div>
+
+            <div className="space-y-3">
+              <ClearViewRadar report={report} isRu={isRu} height={240} />
+              {report.executive_summary && (
+                <p className="text-sm leading-relaxed text-foreground">{report.executive_summary}</p>
+              )}
             </div>
           </div>
 
-          {/* Executive summary */}
-          {report.executive_summary && (
-            <p className="text-sm leading-relaxed" style={{ color: 'hsl(var(--nb-text))' }}>
-              {report.executive_summary}
-            </p>
-          )}
-
-          {/* Flags */}
-          <div className="grid sm:grid-cols-2 gap-3">
+          {/* Top-3 flags */}
+          <div className="grid sm:grid-cols-2 gap-3 pt-2 border-t border-border">
             {report.green_flags?.length > 0 && (
               <div className="space-y-1.5">
-                <h4 className="text-xs uppercase tracking-wider flex items-center gap-1.5" style={{ color: '#10b981' }}>
-                  <CheckCircle2 className="w-3.5 h-3.5" />Сильные стороны
+                <h4 className="text-xs uppercase tracking-wider flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  {isRu ? 'Сильные стороны' : 'Strengths'}
                 </h4>
-                <ul className="text-xs space-y-1" style={{ color: 'hsl(var(--nb-text))' }}>
-                  {report.green_flags.map((f, i) => <li key={i}>· {f}</li>)}
+                <ul className="text-xs space-y-1 text-foreground">
+                  {report.green_flags.slice(0, 3).map((f, i) => (
+                    <li key={i}>· {f}</li>
+                  ))}
                 </ul>
               </div>
             )}
             {report.red_flags?.length > 0 && (
               <div className="space-y-1.5">
-                <h4 className="text-xs uppercase tracking-wider flex items-center gap-1.5" style={{ color: '#ef4444' }}>
-                  <AlertTriangle className="w-3.5 h-3.5" />Риски
+                <h4 className="text-xs uppercase tracking-wider flex items-center gap-1.5 text-red-700 dark:text-red-400">
+                  <AlertTriangle className="w-3.5 h-3.5" />
+                  {isRu ? 'Риски' : 'Risks'}
                 </h4>
-                <ul className="text-xs space-y-1" style={{ color: 'hsl(var(--nb-text))' }}>
-                  {report.red_flags.map((f, i) => <li key={i}>· {f}</li>)}
+                <ul className="text-xs space-y-1 text-foreground">
+                  {report.red_flags.slice(0, 3).map((f, i) => (
+                    <li key={i}>· {f}</li>
+                  ))}
                 </ul>
               </div>
             )}
           </div>
 
-          {report.recommendations?.length > 0 && (
-            <div className="space-y-1.5 pt-2 border-t" style={{ borderColor: 'hsl(var(--nb-gold) / 0.15)' }}>
-              <h4 className="text-xs uppercase tracking-wider" style={{ color: 'hsl(var(--nb-gold))' }}>
-                Рекомендации
+          {/* ── PAYWALL: FULL REPORT ───────────────────────── */}
+          <ClearViewPaywall projectId={projectId} isRu={isRu} bypass={hasFullAccess}>
+            <div className="space-y-4 pt-2 border-t border-border">
+              <h4 className="font-display text-sm font-semibold text-foreground uppercase tracking-wider">
+                {isRu ? 'Полный анализ по 8 категориям' : 'Full 8-category analysis'}
               </h4>
-              <ul className="text-xs space-y-1" style={{ color: 'hsl(var(--nb-text))' }}>
-                {report.recommendations.map((r, i) => <li key={i}>{i + 1}. {r}</li>)}
-              </ul>
-            </div>
-          )}
-
-          {/* P8 trigger — Full Report CTA. IPP §12 step 5. Hidden for admins
-              who already have raw access. */}
-          {!isAdmin && (
-            <Link
-              to={`${APP_ROUTES.CLEARVIEW_APPLY}?project=${projectId}`}
-              className="flex items-center justify-between gap-3 px-4 py-3 rounded-none border transition-colors"
-              style={{
-                borderColor: 'hsl(var(--nb-gold) / 0.4)',
-                background: 'hsl(var(--nb-gold) / 0.06)',
-              }}
-              onClick={() => track({
-                eventType: 'clearview_summary_open',
-                projectId,
-                meta: { cta: 'get_full_report' },
+              {CLEARVIEW_CATEGORIES.map((cat) => {
+                const score = Number(
+                  (report as unknown as Record<string, number | null>)[cat.scoreField] ?? 0,
+                );
+                const finding = report.analysis?.[cat.code]
+                  ?? report.analysis?.[cat.scoreField.replace('score_', '')];
+                return (
+                  <div key={cat.code} className="border border-border p-3 space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-semibold text-foreground">
+                        {isRu ? cat.nameRu : cat.nameEn}{' '}
+                        <span className="text-muted-foreground font-mono text-[11px]">
+                          ({Math.round(cat.weight * 100)}%)
+                        </span>
+                      </span>
+                      <span className="font-mono text-sm text-foreground">
+                        {score.toFixed(1)} / 100
+                      </span>
+                    </div>
+                    {finding && Array.isArray(finding.findings) && finding.findings.length > 0 && (
+                      <ul className="text-xs text-muted-foreground space-y-0.5">
+                        {finding.findings.map((f: string, i: number) => (
+                          <li key={i}>· {f}</li>
+                        ))}
+                      </ul>
+                    )}
+                    {finding && Array.isArray(finding.evidence_gaps) && finding.evidence_gaps.length > 0 && (
+                      <p className="text-[11px] text-amber-700 dark:text-amber-400">
+                        ⚠ {isRu ? 'Недостаточно данных:' : 'Evidence gaps:'}{' '}
+                        {finding.evidence_gaps.join('; ')}
+                      </p>
+                    )}
+                  </div>
+                );
               })}
-            >
-              <div className="flex items-center gap-2.5">
-                <FileText className="w-4 h-4" style={{ color: 'hsl(var(--nb-gold))' }} />
-                <div>
-                  <div className="text-sm font-semibold" style={{ color: 'hsl(var(--nb-text))' }}>
-                    Полный отчёт ClearView™ · ฿4,900
-                  </div>
-                  <div className="text-[11px]" style={{ color: 'hsl(var(--nb-muted))' }}>
-                    Глубокая верификация · 15 рабочих дней · PDF + личный кабинет
-                  </div>
-                </div>
-              </div>
-              <span className="text-xs font-mono" style={{ color: 'hsl(var(--nb-gold))' }}>→</span>
-            </Link>
-          )}
 
-          <p className="text-[10px] pt-2 border-t" style={{ color: 'hsl(var(--nb-muted))', borderColor: 'hsl(var(--nb-gold) / 0.1)' }}>
-            ClearView™ — собственная методология оценки в 8 критериях. Не является финансовым или юридическим советом.
-            Покупатель обязан провести независимый due diligence.
+              {report.recommendations?.length > 0 && (
+                <div className="space-y-1.5 pt-2 border-t border-border">
+                  <h4 className="text-xs uppercase tracking-wider text-foreground">
+                    {isRu ? 'Рекомендации' : 'Recommendations'}
+                  </h4>
+                  <ul className="text-xs space-y-1 text-foreground">
+                    {report.recommendations.map((r, i) => (
+                      <li key={i}>
+                        {i + 1}. {r}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </ClearViewPaywall>
+
+          <p className="text-[10px] pt-2 border-t border-border text-muted-foreground">
+            {isRu
+              ? 'ClearView™ — собственная методология оценки в 8 критериях. Не является финансовым или юридическим советом. Покупатель обязан провести независимый due diligence.'
+              : 'ClearView™ is a proprietary 8-criteria methodology. Not financial or legal advice. Buyer must conduct independent due diligence.'}
           </p>
         </>
       )}
     </section>
   );
 }
+
+export default ClearViewReport;
