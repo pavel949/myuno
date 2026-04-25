@@ -15,6 +15,7 @@ import { CrossSellSection } from '@/components/crosssell';
 import { mapEventToCatalogCard } from '@/lib/adapters/catalogCardAdapters';
 import { eventsFilterConfig } from '@/lib/filterRegistry';
 import type { FilterValues } from '@/components/filters/UniversalFilter';
+import { usePersonaFilter } from '@/hooks/usePersonaFilter';
 
 const CATEGORIES = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
