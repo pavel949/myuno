@@ -39,6 +39,9 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
   const theme = getPersonaTheme(landing.slug);
   const Icon = theme.icon;
 
+  // Persona context flows through every click — catalog pages will read it.
+  const wp = (href: string) => withPersonaParam(href, landing.slug);
+
   // Cross-link: areas where this persona is recommended (max 4)
   const relatedAreas = useMemo(
     () =>
@@ -47,6 +50,10 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
       ).slice(0, 4),
     [landing.slug],
   );
+
+  // "All apps for you" — pulled from the canonical app registry, filtered by
+  // persona (with show-all fallback when no specific apps match).
+  const personaApps = useMemo(() => getAppsForPersona(landing.slug), [landing.slug]);
 
   return (
     <AppLayout>
