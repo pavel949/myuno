@@ -232,7 +232,8 @@ const OWNER_SIDEBAR: SidebarNavGroup[] = [
     items: [
       { path: APP_ROUTES.MC_FINANCE,          labelEn: 'Finance Hub',      labelRu: 'Финансы',                 icon: DollarSign },
       { path: APP_ROUTES.MC_INVOICES,         labelEn: 'Invoices & AR',    labelRu: 'Инвойсы и дебиторка',     icon: Receipt },
-      { path: APP_ROUTES.MC_OWNER_PAYOUTS,    labelEn: 'Owner Payouts',    labelRu: 'Выплаты собственникам',   icon: Shuffle },
+      // Owner Payouts hidden until first owner_payouts row exists. Direct URL still works.
+      // { path: APP_ROUTES.MC_OWNER_PAYOUTS, labelEn: 'Owner Payouts',    labelRu: 'Выплаты собственникам',   icon: Shuffle },
       { path: APP_ROUTES.MC_MANAGEMENT_TERMS, labelEn: 'Management Terms', labelRu: 'Условия управления',      icon: Layers },
     ],
   },
@@ -249,7 +250,8 @@ const OWNER_SIDEBAR: SidebarNavGroup[] = [
     labelEn: 'Team & Settings', labelRu: 'Команда и настройки',
     items: [
       { path: APP_ROUTES.MC_STAFF,        labelEn: 'Staff & Access', labelRu: 'Сотрудники',       icon: Users },
-      { path: APP_ROUTES.MC_APPROVALS,    labelEn: 'Approvals',      labelRu: 'Согласования',     icon: ShieldCheck },
+      // Approvals hidden until first approval_request row exists. Direct URL still works.
+      // { path: APP_ROUTES.MC_APPROVALS,    labelEn: 'Approvals',      labelRu: 'Согласования',     icon: ShieldCheck },
       { path: APP_ROUTES.MC_SETTINGS,     labelEn: 'Settings',       labelRu: 'Настройки',        icon: Settings },
       { path: APP_ROUTES.MC_HELP,         labelEn: 'Help Center',    labelRu: 'Справочник',       icon: BookOpen },
     ],
