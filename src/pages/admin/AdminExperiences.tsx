@@ -344,7 +344,9 @@ export default function AdminExperiences() {
               </Card>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {experiences.map((item) => (
+                {experiences.map((rawItem) => {
+                  const item = rawItem as AdminExperience & ExperienceExt;
+                  return (
                   <Card
                     key={item.id}
                     className={cn(
