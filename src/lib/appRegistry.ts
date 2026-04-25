@@ -474,7 +474,7 @@ export const APP_REGISTRY: Record<string, AppEntry> = {
     labelTh: ECOSYSTEM_APP_TRIPLET['services-laundry'].th,
     icon: '👕',
     status: 'active',
-    personaTags: [],
+    personaTags: ['property_owner', 'relocation', 'family'],
     bookable: true,
   },
   'services-plumbing': {
@@ -487,7 +487,7 @@ export const APP_REGISTRY: Record<string, AppEntry> = {
     labelTh: ECOSYSTEM_APP_TRIPLET['services-plumbing'].th,
     icon: '🔧',
     status: 'active',
-    personaTags: [],
+    personaTags: ['property_owner', 'relocation', 'family'],
     bookable: true,
   },
   'services-electrical': {
@@ -500,7 +500,7 @@ export const APP_REGISTRY: Record<string, AppEntry> = {
     labelTh: ECOSYSTEM_APP_TRIPLET['services-electrical'].th,
     icon: '⚡',
     status: 'active',
-    personaTags: [],
+    personaTags: ['property_owner', 'relocation', 'family'],
     bookable: true,
   },
   'services-ac': {
@@ -513,7 +513,7 @@ export const APP_REGISTRY: Record<string, AppEntry> = {
     labelTh: ECOSYSTEM_APP_TRIPLET['services-ac'].th,
     icon: '❄️',
     status: 'active',
-    personaTags: [],
+    personaTags: ['property_owner', 'relocation', 'family'],
     bookable: true,
   },
   'services-gardening': {
@@ -526,7 +526,7 @@ export const APP_REGISTRY: Record<string, AppEntry> = {
     labelTh: ECOSYSTEM_APP_TRIPLET['services-gardening'].th,
     icon: '🌿',
     status: 'active',
-    personaTags: [],
+    personaTags: ['property_owner', 'relocation', 'family'],
     bookable: true,
   },
   'services-pest': {
@@ -539,7 +539,7 @@ export const APP_REGISTRY: Record<string, AppEntry> = {
     labelTh: ECOSYSTEM_APP_TRIPLET['services-pest'].th,
     icon: '🐜',
     status: 'active',
-    personaTags: [],
+    personaTags: ['property_owner', 'relocation', 'family'],
     bookable: true,
   },
   'services-handyman': {
@@ -552,7 +552,7 @@ export const APP_REGISTRY: Record<string, AppEntry> = {
     labelTh: ECOSYSTEM_APP_TRIPLET['services-handyman'].th,
     icon: '🛠️',
     status: 'active',
-    personaTags: [],
+    personaTags: ['property_owner', 'relocation', 'family'],
     bookable: true,
   },
   'services-locksmith': {
@@ -565,7 +565,7 @@ export const APP_REGISTRY: Record<string, AppEntry> = {
     labelTh: ECOSYSTEM_APP_TRIPLET['services-locksmith'].th,
     icon: '🔑',
     status: 'active',
-    personaTags: [],
+    personaTags: ['property_owner', 'relocation', 'family'],
     bookable: true,
   },
 
@@ -770,7 +770,7 @@ export const APP_REGISTRY: Record<string, AppEntry> = {
     labelTh: ECOSYSTEM_APP_TRIPLET['mc-reports'].th,
     icon: '📊',
     status: 'pro',
-    personaTags: [],
+    personaTags: ['property_owner', 'relocation', 'family'],
     bookable: false,
   },
   'mc-crm': {
