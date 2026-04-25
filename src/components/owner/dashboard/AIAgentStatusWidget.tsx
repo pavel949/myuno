@@ -42,6 +42,9 @@ export function AIAgentStatusWidget() {
     staleTime: 60_000,
   });
 
+  // Hide AI agents ops widget for non-admin MC users (was bouncing on AdminGuard)
+  if (!isAdmin) return null;
+
   if (isLoading) {
     return <Skeleton className="h-[120px] rounded-none" />;
   }
