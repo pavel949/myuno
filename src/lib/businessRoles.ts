@@ -51,6 +51,7 @@ export type DashboardWidgetKey =
   | 'founder_quick_actions'
   | 'business_health'
   | 'top_actions'
+  | 'sell_signal'
   | 'menu';
 
 export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
