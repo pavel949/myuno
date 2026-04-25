@@ -5,6 +5,7 @@ import { IntakeItemCard } from './IntakeItemCard';
 import { IntakeItemEditor } from './IntakeItemEditor';
 import { IntakeItemPanel } from './IntakeItemPanel';
 import { IntakeBulkActions } from './IntakeBulkActions';
+import { IntakeFailedList } from './IntakeFailedList';
 import { PersistentPanelLayout } from '@/components/uno/PersistentPanelLayout';
 import { useIsDesktop } from '@/hooks/use-desktop';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -19,7 +20,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Clock, CheckCircle, XCircle, List, Keyboard } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, List, Keyboard, AlertTriangle } from 'lucide-react';
 import { calculateHealthScore } from '@/lib/intake/healthScore';
 import { useIntakeQueueHotkeys } from '@/hooks/useIntakeQueueHotkeys';
 import { cn } from '@/lib/utils';
@@ -30,6 +31,7 @@ interface IntakeQueueProps {
   onApprove: (itemId: string) => Promise<boolean>;
   onDiscard: (itemId: string) => void;
   onEdit: (itemId: string, updates: Partial<IntakeItem>) => void;
+  onRetry: (itemId: string) => Promise<boolean>;
   onApproveAll: () => void;
   onReset: () => void;
   isApproving: boolean;
@@ -41,6 +43,7 @@ export function IntakeQueue({
   onApprove,
   onDiscard,
   onEdit,
+  onRetry,
   onApproveAll,
   onReset,
   isApproving
