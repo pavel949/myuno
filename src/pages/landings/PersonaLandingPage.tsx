@@ -262,7 +262,7 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
           </p>
           <div className="mt-4 flex flex-col gap-2 sm:flex-row">
             <Button asChild size="lg">
-              <a href={landing.primaryCta.href}>
+              <a href={wp(landing.primaryCta.href)}>
                 {t(landing.primaryCta.label)}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </a>
