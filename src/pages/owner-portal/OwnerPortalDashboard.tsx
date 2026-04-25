@@ -22,7 +22,37 @@ export default function OwnerPortalDashboard() {
   const { user } = useAuth();
   const { data: portalProperties, isLoading } = useMyPortalSettings();
 
-  if (isLoading) {
+  // Pending statement approvals count (badge for "Statements" card)
+  const { data: pendingStatements = 0 } = useQuery({
+    queryKey: ['owner-portal-pending-statements', user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from('owner_statement_approvals')
+        .select('id', { count: 'exact', head: true })
+        .eq('owner_user_id', user!.id)
+        .eq('status', 'pending');
+      if (error) return 0;
+      return count ?? 0;
+    },
+    staleTime: 60_000,
+  });
+
+  // Pending signature requests count (badge for "Documents" card)
+  const { data: pendingSignatures = 0 } = useQuery({
+    queryKey: ['owner-portal-pending-signatures', user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from('signature_signers')
+        .select('id', { count: 'exact', head: true })
+        .eq('signer_user_id', user!.id)
+        .eq('status', 'pending');
+      if (error) return 0;
+      return count ?? 0;
+    },
+    staleTime: 60_000,
+  });
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <LoadingSpinner size="lg" />
