@@ -5,6 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { Users, Megaphone, MessageCircle, TrendingUp, KanbanSquare, ArrowRight } from 'lucide-react';
 import { PIPELINE_STAGE_LABELS, PIPELINE_STAGES_ORDER, type PipelineStage } from '@/types/capital';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const STAGE_CHART_COLORS: Record<string, string> = {
   lead: '#64748b',
@@ -18,6 +19,8 @@ const STAGE_CHART_COLORS: Record<string, string> = {
 
 export default function CapitalDashboard() {
   const navigate = useNavigate();
+  const { language } = useLanguage();
+  const isRu = language === 'ru';
   const { data: stats, isLoading } = useCapitalDashboardStats();
 
   if (isLoading || !stats) {
@@ -33,10 +36,10 @@ export default function CapitalDashboard() {
   }
 
   const kpis = [
-    { label: 'Контактов', value: stats.contactsCount, icon: Users, path: '/capital/contacts' },
-    { label: 'Кампаний', value: stats.activeCampaigns, icon: Megaphone, path: '/capital/campaigns' },
-    { label: 'Касаний за неделю', value: stats.outreachThisWeek, icon: MessageCircle, path: '/capital/outreach' },
-    { label: 'Ожидаемая комиссия', value: `${stats.expectedCommission.toLocaleString()} THB`, icon: TrendingUp, path: '/capital/pipeline' },
+    { label: isRu ? 'Контактов' : 'Contacts', value: stats.contactsCount, icon: Users, path: '/capital/contacts' },
+    { label: isRu ? 'Кампаний' : 'Campaigns', value: stats.activeCampaigns, icon: Megaphone, path: '/capital/campaigns' },
+    { label: isRu ? 'Касаний за неделю' : 'Touches this week', value: stats.outreachThisWeek, icon: MessageCircle, path: '/capital/outreach' },
+    { label: isRu ? 'Ожидаемая комиссия' : 'Expected commission', value: `${stats.expectedCommission.toLocaleString()} THB`, icon: TrendingUp, path: '/capital/pipeline' },
   ];
 
   const chartData = PIPELINE_STAGES_ORDER
@@ -50,7 +53,7 @@ export default function CapitalDashboard() {
   return (
     <div className="p-4 md:p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">Дашборд</h1>
+        <h1 className="text-xl font-bold">{isRu ? 'Дашборд' : 'Dashboard'}</h1>
         <Badge className="bg-success/20 text-success">Ignatev Capital</Badge>
       </div>
 
@@ -80,7 +83,7 @@ export default function CapitalDashboard() {
       >
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="font-medium">Касания на сегодня</h2>
+            <h2 className="font-medium">{isRu ? 'Касания на сегодня' : "Today's touches"}</h2>
             <p className="text-3xl font-bold text-success mt-1">{stats.todayTouchesCount}</p>
           </div>
           <ArrowRight className="w-5 h-5 text-muted-foreground" />
@@ -90,10 +93,10 @@ export default function CapitalDashboard() {
       {/* Pipeline Funnel */}
       <div className="rounded-none border border-border/50 p-4">
         <h2 className="font-medium mb-4 flex items-center gap-2">
-          <KanbanSquare className="w-4 h-4" /> Воронка
+          <KanbanSquare className="w-4 h-4" /> {isRu ? 'Воронка' : 'Pipeline'}
         </h2>
         {chartData.every((d) => d.count === 0) ? (
-          <p className="text-sm text-muted-foreground text-center py-8">Нет данных в воронке</p>
+          <p className="text-sm text-muted-foreground text-center py-8">{isRu ? 'Нет данных в воронке' : 'No pipeline data yet'}</p>
         ) : (
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={chartData} layout="vertical" margin={{ left: 80, right: 20 }}>
@@ -116,9 +119,9 @@ export default function CapitalDashboard() {
       {/* Quick Links */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         {[
-          { label: 'Контакты', path: '/capital/contacts', icon: Users },
-          { label: 'Проекты', path: '/capital/projects', icon: Megaphone },
-          { label: 'Воронка', path: '/capital/pipeline', icon: KanbanSquare },
+          { label: isRu ? 'Контакты' : 'Contacts', path: '/capital/contacts', icon: Users },
+          { label: isRu ? 'Проекты' : 'Projects', path: '/capital/projects', icon: Megaphone },
+          { label: isRu ? 'Воронка' : 'Pipeline', path: '/capital/pipeline', icon: KanbanSquare },
         ].map((link) => (
           <div
             key={link.path}

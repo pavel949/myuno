@@ -4,10 +4,13 @@ import {
   AdminKPIGrid,
   AdminOperationalAlerts,
   AdminActivityBlock,
+  AdminRevenueBlock,
+  AdminQuickActionsGrid,
+  AdminAllVerticalsGrid,
 } from '@/components/admin/dashboard';
 import { LaunchSwitch } from '@/components/maintenance/LaunchSwitch';
 import { useUserRoles } from '@/hooks/useUserRoles';
-import { StaffDashboard } from '@/components/admin/StaffDashboard';
+import { AdminStaffOverview } from '@/components/admin/AdminStaffOverview';
 import { GoLiveChecklist } from '@/components/admin/GoLiveChecklist';
 import { PageShell, PageHeader, PageSection } from '@/components/page';
 
@@ -20,7 +23,7 @@ export default function AdminDashboard() {
 
   // Staff users see simplified dashboard
   if (!isAdmin && safeRoles.some(r => r.role === 'staff' || r.role === 'uno_team')) {
-    return <StaffDashboard />;
+    return <AdminStaffOverview />;
   }
 
   return (
@@ -35,6 +38,18 @@ export default function AdminDashboard() {
 
       <PageSection>
         <AdminKPIGrid />
+      </PageSection>
+
+      <PageSection title={isRussian ? 'Выручка платформы' : 'Platform revenue'}>
+        <AdminRevenueBlock />
+      </PageSection>
+
+      <PageSection title={isRussian ? 'Быстрые действия' : 'Quick actions'}>
+        <AdminQuickActionsGrid />
+      </PageSection>
+
+      <PageSection title={isRussian ? 'Все вертикали' : 'All verticals'}>
+        <AdminAllVerticalsGrid />
       </PageSection>
 
       <PageSection title={isRussian ? 'Операционные алерты' : 'Operational alerts'}>

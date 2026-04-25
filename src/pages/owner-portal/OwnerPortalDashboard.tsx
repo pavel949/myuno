@@ -9,8 +9,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useMyPortalSettings } from '@/hooks/useOwnerPortalSettings';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Building2, ArrowRight, Eye, MessageSquare, Shield, FileCheck, FileSignature, Lock } from 'lucide-react';
 import { LoadingSpinner } from '@/components/uno/LoadingSpinner';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function OwnerPortalDashboard() {
   const navigate = useNavigate();
@@ -18,6 +21,38 @@ export default function OwnerPortalDashboard() {
   const isRu = language === 'ru';
   const { user } = useAuth();
   const { data: portalProperties, isLoading } = useMyPortalSettings();
+
+  // Pending statement approvals count (badge for "Statements" card)
+  const { data: pendingStatements = 0 } = useQuery({
+    queryKey: ['owner-portal-pending-statements', user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const { count, error } = await (supabase as any)
+        .from('owner_statement_approvals')
+        .select('id', { count: 'exact', head: true })
+        .eq('owner_user_id', user!.id)
+        .eq('status', 'pending');
+      if (error) return 0;
+      return count ?? 0;
+    },
+    staleTime: 60_000,
+  });
+
+  // Pending signature requests count (badge for "Documents" card)
+  const { data: pendingSignatures = 0 } = useQuery({
+    queryKey: ['owner-portal-pending-signatures', user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const { count, error } = await (supabase as any)
+        .from('signature_request_signers')
+        .select('id', { count: 'exact', head: true })
+        .eq('signer_user_id', user!.id)
+        .eq('status', 'pending');
+      if (error) return 0;
+      return count ?? 0;
+    },
+    staleTime: 60_000,
+  });
 
   if (isLoading) {
     return (
@@ -70,28 +105,46 @@ export default function OwnerPortalDashboard() {
 
       {/* Quick actions for owner */}
       <div className="grid grid-cols-2 gap-3">
-        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/my-property/statements')}>
+        <Card className="cursor-pointer hover:shadow-md transition-shadow relative" onClick={() => navigate('/my-property/statements')}>
           <CardContent className="p-3 flex items-center gap-3">
             <div className="w-9 h-9 rounded-none bg-primary/10 flex items-center justify-center shrink-0">
               <FileCheck className="w-4 h-4 text-primary" />
             </div>
-            <div className="min-w-0">
-              <p className="text-sm font-semibold truncate">{isRu ? 'Отчёты' : 'Statements'}</p>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-sm font-semibold truncate">{isRu ? 'Отчёты' : 'Statements'}</p>
+                {pendingStatements > 0 && (
+                  <Badge variant="destructive" className="rounded-none px-1.5 py-0 h-5 text-[10px]">
+                    {pendingStatements}
+                  </Badge>
+                )}
+              </div>
               <p className="text-[11px] text-muted-foreground truncate">
-                {isRu ? 'На одобрение' : 'For approval'}
+                {pendingStatements > 0
+                  ? (isRu ? `${pendingStatements} на одобрение` : `${pendingStatements} for approval`)
+                  : (isRu ? 'На одобрение' : 'For approval')}
               </p>
             </div>
           </CardContent>
         </Card>
-        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/my-property/signatures')}>
+        <Card className="cursor-pointer hover:shadow-md transition-shadow relative" onClick={() => navigate('/my-property/signatures')}>
           <CardContent className="p-3 flex items-center gap-3">
             <div className="w-9 h-9 rounded-none bg-primary/10 flex items-center justify-center shrink-0">
               <FileSignature className="w-4 h-4 text-primary" />
             </div>
-            <div className="min-w-0">
-              <p className="text-sm font-semibold truncate">{isRu ? 'Документы' : 'Documents'}</p>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-sm font-semibold truncate">{isRu ? 'Документы' : 'Documents'}</p>
+                {pendingSignatures > 0 && (
+                  <Badge variant="destructive" className="rounded-none px-1.5 py-0 h-5 text-[10px]">
+                    {pendingSignatures}
+                  </Badge>
+                )}
+              </div>
               <p className="text-[11px] text-muted-foreground truncate">
-                {isRu ? 'На подпись' : 'To sign'}
+                {pendingSignatures > 0
+                  ? (isRu ? `${pendingSignatures} на подпись` : `${pendingSignatures} to sign`)
+                  : (isRu ? 'На подпись' : 'To sign')}
               </p>
             </div>
           </CardContent>
@@ -138,7 +191,19 @@ export default function OwnerPortalDashboard() {
                         <Shield className="w-3.5 h-3.5" />
                         <span>{isRu ? 'Под управлением' : 'Managed'}</span>
                       </div>
-                      <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors ml-auto" />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-2 text-xs ml-auto"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/my-property/transparency/${portal.property_id}`);
+                        }}
+                      >
+                        <Eye className="w-3.5 h-3.5 mr-1" />
+                        {isRu ? 'Прозрачность' : 'Transparency'}
+                      </Button>
+                      <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
                     </div>
                   </div>
                 </div>
@@ -147,6 +212,7 @@ export default function OwnerPortalDashboard() {
           );
         })}
       </div>
+
 
       {/* Contact MC */}
       <Card className="border-dashed">

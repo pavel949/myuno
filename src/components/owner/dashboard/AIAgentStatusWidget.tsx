@@ -7,11 +7,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useUserRoles } from '@/hooks/useUserRoles';
 
 export function AIAgentStatusWidget() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const navigate = useNavigate();
+  const { hasRole } = useUserRoles();
+  const isAdmin = hasRole('admin');
 
   const { data, isLoading } = useQuery({
     queryKey: ['ai-agents-dashboard-status'],
@@ -38,6 +41,9 @@ export function AIAgentStatusWidget() {
     },
     staleTime: 60_000,
   });
+
+  // Hide AI agents ops widget for non-admin MC users (was bouncing on AdminGuard)
+  if (!isAdmin) return null;
 
   if (isLoading) {
     return <Skeleton className="h-[120px] rounded-none" />;

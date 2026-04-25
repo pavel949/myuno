@@ -95,10 +95,11 @@ const VendorDashboard = () => {
   const chartData = useMemo(() => {
     if (!orders) return [];
     const data = [];
-    const days = Math.ceil((periodEnd.getTime() - periodStart.getTime()) / (24 * 60 * 60 * 1000));
+    const days = Math.max(1, Math.ceil((periodEnd.getTime() - periodStart.getTime()) / (24 * 60 * 60 * 1000)));
     
+    // Anchor iteration to periodEnd, not "today" — fixes window when periodEnd ≠ today
     for (let i = days - 1; i >= 0; i--) {
-      const date = subDays(new Date(), i);
+      const date = subDays(periodEnd, i);
       const dateStr = format(date, 'yyyy-MM-dd');
       const dayOrders = orders.filter(o => 
         format(new Date(o.created_at), 'yyyy-MM-dd') === dateStr
