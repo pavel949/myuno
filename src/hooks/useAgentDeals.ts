@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { fireCrmWorkflowTrigger } from '@/lib/crmWorkflowTrigger';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 
 export const DEAL_STAGES = [
   'new', 'contacted', 'showing', 'negotiation', 'contract', 'closed_won', 'closed_lost',
@@ -382,7 +383,7 @@ export function useBulkUpdateStage() {
           }));
         if (changes.length > 0) {
           supabase.from('deal_field_changes').insert(changes).then(({ error: logError }) => {
-            if (logError) console.warn('[useBulkUpdateStage] deal_field_changes insert failed:', logError);
+            if (logError) logger.warn('[useBulkUpdateStage] deal_field_changes insert failed:', logError);
           });
         }
       }

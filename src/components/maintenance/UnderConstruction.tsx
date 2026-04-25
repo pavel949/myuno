@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
+import { logger } from '@/lib/logger';
 
 export function UnderConstruction() {
   const [email, setEmail] = React.useState('');
@@ -47,7 +48,7 @@ export function UnderConstruction() {
 
       if (error) {
         // If table doesn't exist yet, still show success to user (email captured in logs)
-        console.warn('Email subscription insert failed:', error.message);
+        logger.warn('Email subscription insert failed:', error.message);
       }
 
       setSubscribed(true);

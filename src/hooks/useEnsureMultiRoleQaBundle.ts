@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { logger } from '@/lib/logger';
 
 const STORAGE_PREFIX = 'qa_multi_role_bundle_checked:';
 
@@ -28,7 +29,7 @@ export function useEnsureMultiRoleQaBundle() {
         const rpc = supabase.rpc.bind(supabase) as unknown as (name: string) => Promise<{ data: unknown; error: { message: string } | null }>;
         const { data, error } = await rpc('ensure_multi_role_qa_bundle');
         if (error) {
-          console.warn('ensure_multi_role_qa_bundle', error.message);
+          logger.warn('ensure_multi_role_qa_bundle', error.message);
           return;
         }
         const row = data as { applied?: boolean } | null;
@@ -41,7 +42,7 @@ export function useEnsureMultiRoleQaBundle() {
           await queryClient.invalidateQueries({ queryKey: ['user-companies', user.id] });
         }
       } catch (err) {
-        console.warn('ensure_multi_role_qa_bundle threw', err);
+        logger.warn('ensure_multi_role_qa_bundle threw', err);
       }
     })();
   }, [session, user?.id, queryClient]);

@@ -54,7 +54,7 @@ export function useLeadConfigs() {
           .order('popularity_score', { ascending: false });
 
         if (error) {
-          console.warn('Failed to fetch lead configs from DB, using fallback:', error.message);
+          logger.warn('Failed to fetch lead configs from DB, using fallback:', error.message);
           return LEAD_VERTICALS;
         }
 

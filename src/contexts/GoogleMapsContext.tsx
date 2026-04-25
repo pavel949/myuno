@@ -2,6 +2,7 @@ import React, { createContext, useContext, useMemo, useState, useEffect } from '
 import { useJsApiLoader } from '@react-google-maps/api';
 import { fetchGoogleMapsKey, getGoogleMapsKey } from '@/lib/googleMaps';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { logger } from '@/lib/logger';
 
 const LIBRARIES: ('places')[] = ['places'];
 
@@ -70,7 +71,7 @@ function GoogleMapsLoader({
   // Auth failures (gm_authFailure) are NOT a localization issue — don't retry those.
   useEffect(() => {
     if (loadError && language !== 'en') {
-      console.warn(`[GoogleMaps] Failed to load with language="${language}", falling back to "en"`, loadError);
+      logger.warn(`[GoogleMaps] Failed to load with language="${language}", falling back to "en"`, loadError);
       onLanguageFallback();
     }
   }, [loadError, language, onLanguageFallback]);

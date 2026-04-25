@@ -25,6 +25,7 @@ import {
   type ApprovalStatus 
 } from '@/lib/approvalStatus';
 import { cn } from '@/lib/utils';
+import { logger } from '@/lib/logger';
 
 interface ModerationItem {
   id: string;
@@ -95,7 +96,7 @@ export function VendorModerationQueue({
               .limit(limit);
 
             if (error) {
-              console.warn(`Error fetching ${tableConfig.table}:`, error.message);
+              logger.warn(`Error fetching ${tableConfig.table}:`, error.message);
               continue;
             }
 

@@ -536,3 +536,33 @@ rows  table
 
 - Топ-4 крупных компонента (`usePropertyWizard`, `ContactDetail`, `AdminProjects`, `PropertyConsultation`) — требует отдельной волны
 - Волна 4 (logger вместо console.*, типобезопасность any → unknown) — следующая сессия
+
+---
+
+## Wave 3 Final + Wave 4 (logger) — 2026-04-25
+
+### usePropertyWizard refactor
+Split 1012-line monster hook into focused modules under `src/hooks/property-wizard/`:
+- `types.ts` (180 lines) — `PropertyFormData`, `OwnershipData`, `OwnershipType`, `AssetClass`
+- `initialData.ts` (205) — defaults + `mapPropertyToFormData`
+- `applyPrefill.ts` (81) — pure `mergePrefillIntoForm` mapper
+- `buildPayload.ts` (74) — pure `buildPropertyPayload`
+- `validateStep.ts` (77) — `validateWizardStep`
+- `usePropertyWizardDraft.ts` (229) — load/persist/autosave/beforeunload
+
+Main `usePropertyWizard.ts`: **1012 → 308 lines (−70%)**, now an orchestrator only.
+Public API unchanged — type re-exports preserved for 11 consumer files.
+
+### Logger adoption
+Replaced 26 `console.warn` calls across 20 files with `logger.warn` (production-silent).
+- `console.log` already at 0 (cleanup done in earlier waves)
+- `console.error` (250) intentionally kept — Sentry needs them
+- `console.info`/`debug` already at 0
+
+### Type safety — postponed
+Audit found **1247** `any` usages (vs 441 estimated). Top offenders documented in task tracker.
+Requires file-by-file manual review; not safe for batch automation.
+
+### Verification
+- `tsc --noEmit`: clean
+- `vite build`: green (13.6 MB precache, 2196 entries)
