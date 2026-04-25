@@ -127,9 +127,9 @@ ${property.description_en ? `Description: ${(property.description_en as string).
       ? `
 GUIDEBOOK:
 ${guidebook.wifi_name ? `WiFi: ${guidebook.wifi_name} / ${guidebook.wifi_password}` : ""}
-${guidebook.arrival_instructions ? `Arrival: ${guidebook.arrival_instructions.substring(0, 300)}` : ""}
+${guidebook.directions ? `Arrival: ${guidebook.directions.substring(0, 300)}` : ""}
 ${guidebook.checkout_instructions ? `Checkout: ${guidebook.checkout_instructions.substring(0, 300)}` : ""}
-${guidebook.house_rules_custom ? `Rules: ${guidebook.house_rules_custom.substring(0, 300)}` : ""}`
+${guidebook.welcome_message ? `Welcome: ${guidebook.welcome_message.substring(0, 300)}` : ""}`
       : "";
 
     const chatHistoryText = reversedHistory.length > 0
