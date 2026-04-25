@@ -81,10 +81,19 @@ export default function YachtsIndex() {
     }
   }, [yachts, sortKey]);
 
+  const { applyFilter: applyPersonaFilter } = usePersonaFilter();
+
   const filtered = useMemo(() => {
-    if (!instantOnly) return sorted;
-    return sorted.filter(y => y.booking_flow === 'instant');
-  }, [sorted, instantOnly]);
+    let result = instantOnly ? sorted.filter(y => y.booking_flow === 'instant') : sorted;
+    // Persona filter — yacht_type + tags + features.
+    result = applyPersonaFilter(result, (y) => {
+      const raw = y as unknown as Record<string, unknown>;
+      const tags = (raw.tags as string[] | null) ?? [];
+      const features = (raw.features as string[] | null) ?? [];
+      return [...tags, ...features, y.yacht_type].filter(Boolean) as string[];
+    });
+    return result;
+  }, [sorted, instantOnly, applyPersonaFilter]);
 
   return (
     <MiniAppLayout
