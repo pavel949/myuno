@@ -157,6 +157,12 @@ const MODIFIER_RECS: Record<CanonicalModifier, ServiceRecommendation[]> = {
   medical: [],
   halal: [],
   kosher: [],
+  vegan: [{
+    id: 'mod-vegan', cluster: 'modifier', icon: '🌱',
+    title: { en: 'Plant-based dining', ru: 'Растительная кухня' },
+    description: { en: 'Vegan & vegetarian restaurants', ru: 'Веганские и вегетарианские рестораны' },
+    route: '/restaurants?persona=conscious-eaters', urgency: 'medium',
+  }],
   accessibility: [],
   lgbtq: [],
   athlete: [{
