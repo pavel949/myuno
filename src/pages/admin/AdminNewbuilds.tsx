@@ -5,7 +5,20 @@
 import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
+
+type ProjectRow = Database['public']['Tables']['property_projects']['Row'];
+type ProjectUpdate = Database['public']['Tables']['property_projects']['Update'];
+type DeveloperRow = Database['public']['Tables']['developers']['Row'];
+type DeveloperUpdate = Database['public']['Tables']['developers']['Update'];
+
+type CatalogShape = { rec?: string; type?: string; beach?: string } & Record<string, unknown>;
+type ProjectEdits = Partial<ProjectUpdate> & {
+  _catalogRec?: string;
+  _catalogType?: string;
+  _catalogBeach?: string;
+};
 import { Check, X, Star, StarOff, Shield, ShieldOff, Search, Edit2, Save, ExternalLink, ChevronDown, ChevronUp, CheckSquare, Square } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
