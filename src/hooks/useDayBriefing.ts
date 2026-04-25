@@ -101,9 +101,9 @@ type StaffTaskRow = { id: string; order_number: string | null; service_name: str
 type MyBookingRow = { id: string; status: string; booking_date: string; time_slot: string | null; total_amount: number | null; currency: string | null };
 type ReminderRow = { id: string; title: string; reminder_type: string | null; due_date: string; remind_days_before: number | null; description: string | null };
 type DocumentRow = { id: string; document_type: string; expiry_date: string; file_name: string };
-type RecommendationRow = { id: string; title: string; description: string | null; href?: string | null; cta_label?: string | null; image_url?: string | null };
-type NewsRow = { id: string; title: string; summary?: string | null; href?: string | null; published_at: string; is_pinned: boolean | null };
-type EventRow = { id: string; title: string; description?: string | null; event_date: string; href?: string | null };
+type RecommendationRow = { id: string; title?: string | null; title_ru?: string | null; title_en?: string | null; description?: string | null; description_ru?: string | null; description_en?: string | null; action_url?: string | null; category?: string | null; icon?: string | null; href?: string | null; cta_label?: string | null; image_url?: string | null };
+type NewsRow = { id: string; title?: string | null; title_ru?: string | null; title_en?: string | null; summary?: string | null; summary_ru?: string | null; summary_en?: string | null; href?: string | null; published_at: string; is_pinned: boolean | null; source_name?: string | null; source_url?: string | null; category?: string | null; cover_image?: string | null };
+type EventRow = { id: string; title?: string | null; title_ru?: string | null; title_en?: string | null; description?: string | null; description_ru?: string | null; description_en?: string | null; event_date: string; event_time?: string | null; location?: string | null; event_url?: string | null; cover_image?: string | null; category?: string | null; href?: string | null };
 
 export function useDayBriefing(options?: UseDayBriefingOptions) {
   const { user } = useAuth();
