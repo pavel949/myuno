@@ -25,6 +25,7 @@ import { RealEstateEntry } from '@/components/home/RealEstateEntry';
 import { TrustAsAService } from '@/components/home/TrustAsAService';
 import { PersonaPromptBanner } from '@/components/home/PersonaPromptBanner';
 import { PersonaAwareSections } from '@/components/home/PersonaAwareSections';
+import { PersonaDiscoveryStrip } from '@/components/home/PersonaDiscoveryStrip';
 import type { HomeSectionKey } from '@/lib/segmentation/prioritizeHomeSections';
 import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 
