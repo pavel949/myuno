@@ -83,7 +83,7 @@ export default function CapitalDashboard() {
       >
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="font-medium">Касания на сегодня</h2>
+            <h2 className="font-medium">{isRu ? 'Касания на сегодня' : "Today's touches"}</h2>
             <p className="text-3xl font-bold text-success mt-1">{stats.todayTouchesCount}</p>
           </div>
           <ArrowRight className="w-5 h-5 text-muted-foreground" />
