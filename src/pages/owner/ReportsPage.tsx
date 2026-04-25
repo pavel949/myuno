@@ -57,6 +57,25 @@ import { useQuery } from '@tanstack/react-query';
 
 type ReportScope = 'property' | 'complex' | 'owner' | 'portfolio';
 
+type ReportableProperty = {
+  id?: string;
+  property_id?: string;
+  title?: string | null;
+  title_en?: string | null;
+  title_ru?: string | null;
+  complex_id?: string | null;
+};
+
+type OwnerContactRow = {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
+  propertyIds: string[];
+};
+
+
+
 function useOwnerContacts() {
   const { user } = useAuth();
   return useQuery({
@@ -77,7 +96,7 @@ function useOwnerContacts() {
         .in('owner_contact_id', contacts.map(c => c.id));
 
       const propsByOwner = new Map<string, string[]>();
-      (props || []).forEach((p: any) => {
+      (props || []).forEach((p) => {
         if (!p.owner_contact_id) return;
         const list = propsByOwner.get(p.owner_contact_id) || [];
         list.push(p.id);
@@ -106,9 +125,9 @@ function useManagedProperties() {
         .eq('status', 'active');
       if (error) throw error;
       return (data || [])
-        .filter((d: any) => (d.permissions as Record<string, boolean>)?.financials)
-        .map((d: any) => d.properties)
-        .filter(Boolean);
+        .filter((d) => (d.permissions as Record<string, boolean> | null)?.financials)
+        .map((d) => d.properties as ReportableProperty | null)
+        .filter((p): p is ReportableProperty => Boolean(p));
     },
     enabled: !!user,
   });
@@ -162,7 +181,7 @@ export default function ReportsPage() {
     const deduped = [
       ...(ownedProperties || []),
       ...(managedProperties || []).filter(
-        (mp: any) => !(ownedProperties || []).some((op: any) => op.id === mp.id)
+        (mp: ReportableProperty) => !(ownedProperties || []).some((op: ReportableProperty) => op.id === mp.id)
       ),
     ];
     return deduped;
@@ -170,16 +189,16 @@ export default function ReportsPage() {
 
   const scopePropertyIds = useMemo<string[]>(() => {
     if (generateScope === 'property') return selectedPropertyId ? [selectedPropertyId] : [];
-    if (generateScope === 'portfolio') return allSelectableProperties.map((p: any) => p.id || p.property_id);
+    if (generateScope === 'portfolio') return allSelectableProperties.map((p: ReportableProperty) => p.id || p.property_id);
     if (generateScope === 'complex' && selectedComplexId) {
       return allSelectableProperties
-        .filter((p: any) => p.complex_id === selectedComplexId)
-        .map((p: any) => p.id || p.property_id);
+        .filter((p: ReportableProperty) => p.complex_id === selectedComplexId)
+        .map((p: ReportableProperty) => p.id || p.property_id);
     }
     if (generateScope === 'owner' && selectedOwnerId) {
       const owner = (ownerContacts || []).find(o => o.id === selectedOwnerId);
       return (owner?.propertyIds || []).filter(id =>
-        allSelectableProperties.some((p: any) => (p.id || p.property_id) === id)
+        allSelectableProperties.some((p: ReportableProperty) => (p.id || p.property_id) === id)
       );
     }
     return [];
@@ -190,8 +209,8 @@ export default function ReportsPage() {
     if (filterScope === 'all') return reports;
     if (filterScope === 'complex' && filterComplexId) {
       const complexPropIds = allSelectableProperties
-        .filter((p: any) => p.complex_id === filterComplexId)
-        .map((p: any) => p.id || p.property_id);
+        .filter((p: ReportableProperty) => p.complex_id === filterComplexId)
+        .map((p: ReportableProperty) => p.id || p.property_id);
       return reports.filter(r => complexPropIds.includes(r.property_id));
     }
     if (filterScope === 'owner' && filterOwnerId) {
@@ -346,7 +365,7 @@ export default function ReportsPage() {
       style: 'currency', currency: 'THB', minimumFractionDigits: 0,
     }).format(amount);
 
-  const portfolioRows = (managedProperties || []).map((mp: any) => {
+  const portfolioRows = (managedProperties || []).map((mp: ReportableProperty) => {
     const propReports = (reports || []).filter(r => r.property_id === mp.id);
     const totalIncome = propReports.reduce((s, r) => s + (r.data?.income?.total || 0), 0);
     const totalExpenses = propReports.reduce((s, r) => s + (r.data?.expenses?.total || 0), 0);
@@ -439,7 +458,7 @@ export default function ReportsPage() {
     if ((complexes || []).length > 0) {
       opts.push({ value: 'complex', icon: Layers, label: isRu ? 'Комплекс' : 'Complex' });
     }
-    if ((ownerContacts || []).filter((o: any) => o.propertyIds?.length > 0).length > 0) {
+    if ((ownerContacts || []).filter((o: OwnerContactRow) => o.propertyIds?.length > 0).length > 0) {
       opts.push({ value: 'owner', icon: Users, label: isRu ? 'Собственник' : 'Owner' });
     }
     if (allSelectableProperties.length > 1) {
@@ -508,7 +527,7 @@ export default function ReportsPage() {
 
         <TabsContent value="all">
           {/* Filter chips */}
-          {((complexes || []).length > 0 || (ownerContacts || []).filter((o: any) => o.propertyIds?.length > 0).length > 0) && (
+          {((complexes || []).length > 0 || (ownerContacts || []).filter((o: OwnerContactRow) => o.propertyIds?.length > 0).length > 0) && (
             <div className="flex items-center gap-1.5 mb-4 overflow-x-auto pb-1">
               <button
                 onClick={() => { setFilterScope('all'); setFilterComplexId(''); setFilterOwnerId(''); }}
@@ -520,7 +539,7 @@ export default function ReportsPage() {
               </button>
               {(complexes || []).map((c: PropertyComplex) => {
                 const count = (reports || []).filter(r => {
-                  const prop = allSelectableProperties.find((p: any) => (p.id || p.property_id) === r.property_id);
+                  const prop = allSelectableProperties.find((p: ReportableProperty) => (p.id || p.property_id) === r.property_id);
                   return prop && (prop as any).complex_id === c.id;
                 }).length;
                 if (count === 0) return null;
@@ -538,7 +557,7 @@ export default function ReportsPage() {
                   </button>
                 );
               })}
-              {(ownerContacts || []).filter((o: any) => o.propertyIds?.length > 0).map((o: any) => {
+              {(ownerContacts || []).filter((o: OwnerContactRow) => o.propertyIds?.length > 0).map((o: OwnerContactRow) => {
                 const count = (reports || []).filter(r => (o.propertyIds || []).includes(r.property_id)).length;
                 if (count === 0) return null;
                 return (
@@ -655,14 +674,14 @@ export default function ReportsPage() {
             </DialogDescription>
           </DialogHeader>
           <ReportWizard
-            properties={allSelectableProperties.map((p: any) => ({
+            properties={allSelectableProperties.map((p: ReportableProperty) => ({
               id: p.id || p.property_id,
               title: p.title || '',
               title_ru: p.title_ru,
               complex_id: p.complex_id,
             }))}
-            complexes={(complexes || []).map((c: any) => ({ id: c.id, name: c.name, name_ru: c.name_ru }))}
-            ownerContacts={(ownerContacts || []).map((o: any) => ({
+            complexes={(complexes || []).map((c: PropertyComplex) => ({ id: c.id, name: c.name, name_ru: c.name_ru }))}
+            ownerContacts={(ownerContacts || []).map((o: OwnerContactRow) => ({
               id: o.id, first_name: o.first_name, last_name: o.last_name, propertyIds: o.propertyIds || [],
             }))}
             onComplete={handleWizardComplete}
@@ -695,11 +714,11 @@ export default function ReportsPage() {
           </DialogHeader>
           <div className="space-y-3">
             {/* Quick select from CRM contacts */}
-            {(ownerContacts || []).filter((o: any) => o.email).length > 0 && (
+            {(ownerContacts || []).filter((o: OwnerContactRow) => o.email).length > 0 && (
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">{isRu ? 'Собственники' : 'Owner contacts'}</Label>
                 <div className="flex flex-wrap gap-1.5">
-                  {(ownerContacts || []).filter((o: any) => o.email).map((o: any) => (
+                  {(ownerContacts || []).filter((o: OwnerContactRow) => o.email).map((o: OwnerContactRow) => (
                     <button
                       key={o.id}
                       onClick={() => {
@@ -763,10 +782,10 @@ export default function ReportsPage() {
           onOpenChange={(open) => { if (!open) setPolicyEditorPropertyId(null); }}
           propertyId={policyEditorPropertyId}
           propertyTitle={(() => {
-            const p = allSelectableProperties.find((pr: any) => (pr.id || pr.property_id) === policyEditorPropertyId);
+            const p = allSelectableProperties.find((pr: ReportableProperty) => (pr.id || pr.property_id) === policyEditorPropertyId);
             return p ? (isRu ? p.title_ru || p.title : p.title) || '' : '';
           })()}
-          existing={(accountingPolicies || []).find((p: any) => p.property_id === policyEditorPropertyId) || null}
+          existing={(accountingPolicies || []).find((p: ReportableProperty) => p.property_id === policyEditorPropertyId) || null}
         />
       )}
     </PageContainer>

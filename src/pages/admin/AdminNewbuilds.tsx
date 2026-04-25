@@ -5,7 +5,20 @@
 import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
+
+type Project = Database['public']['Tables']['property_projects']['Row'];
+type ProjectUpdate = Database['public']['Tables']['property_projects']['Update'];
+type Developer = Database['public']['Tables']['developers']['Row'];
+type DeveloperUpdate = Database['public']['Tables']['developers']['Update'];
+
+type CatalogShape = { rec?: string; type?: string; beach?: string } & Record<string, unknown>;
+type ProjectEdits = Partial<ProjectUpdate> & {
+  _catalogRec?: string;
+  _catalogType?: string;
+  _catalogBeach?: string;
+};
 import { Check, X, Star, StarOff, Shield, ShieldOff, Search, Edit2, Save, ExternalLink, ChevronDown, ChevronUp, CheckSquare, Square } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -57,7 +70,7 @@ export default function AdminNewbuilds() {
   });
 
   const updateProject = useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: any }) => {
+    mutationFn: async ({ id, updates }: { id: string; updates: ProjectUpdate }) => {
       const { error } = await supabase.from('property_projects').update(updates).eq('id', id);
       if (error) throw error;
     },
@@ -68,7 +81,7 @@ export default function AdminNewbuilds() {
   });
 
   const updateDeveloper = useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: any }) => {
+    mutationFn: async ({ id, updates }: { id: string; updates: DeveloperUpdate }) => {
       const { error } = await supabase.from('developers').update(updates).eq('id', id);
       if (error) throw error;
     },
@@ -79,7 +92,7 @@ export default function AdminNewbuilds() {
   });
 
   const bulkUpdateProjects = useMutation({
-    mutationFn: async ({ ids, updates }: { ids: string[]; updates: any }) => {
+    mutationFn: async ({ ids, updates }: { ids: string[]; updates: ProjectUpdate }) => {
       const { error } = await supabase.from('property_projects').update(updates).in('id', ids);
       if (error) throw error;
     },
@@ -88,11 +101,11 @@ export default function AdminNewbuilds() {
       clearSelection();
       toast.success(`Обновлено ${vars.ids.length} проектов`);
     },
-    onError: (e: any) => toast.error(e?.message || 'Ошибка'),
+    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : 'Ошибка'),
   });
 
   const filtered = useMemo(() => {
-    return projects.filter((p: any) => {
+    return projects.filter((p) => {
       if (statusFilter !== 'all' && p.project_status !== statusFilter) return false;
       if (search) {
         const q = search.toLowerCase();
@@ -102,17 +115,17 @@ export default function AdminNewbuilds() {
     });
   }, [projects, search, statusFilter]);
 
-  const pending = projects.filter((p: any) => !p.is_approved);
-  const featured = projects.filter((p: any) => p.is_featured);
+  const pending = projects.filter((p) => !p.is_approved);
+  const featured = projects.filter((p) => p.is_featured);
 
   const stats = useMemo(() => ({
     total: projects.length,
-    approved: projects.filter((p: any) => p.is_approved).length,
-    withCatalog: projects.filter((p: any) => p.offplan_catalog).length,
+    approved: projects.filter((p) => p.is_approved).length,
+    withCatalog: projects.filter((p) => p.offplan_catalog).length,
     featured: featured.length,
-    offplan: projects.filter((p: any) => p.project_status === 'offplan').length,
-    construction: projects.filter((p: any) => p.project_status === 'under_construction').length,
-    completed: projects.filter((p: any) => p.project_status === 'completed').length,
+    offplan: projects.filter((p) => p.project_status === 'offplan').length,
+    construction: projects.filter((p) => p.project_status === 'under_construction').length,
+    completed: projects.filter((p) => p.project_status === 'completed').length,
   }), [projects, featured]);
 
   return (
@@ -172,7 +185,7 @@ export default function AdminNewbuilds() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.slice(0, 100).map((p: any, i: number) => (
+                {filtered.slice(0, 100).map((p, i) => (
                   <ProjectRow
                     key={p.id}
                     project={p}
@@ -199,9 +212,9 @@ export default function AdminNewbuilds() {
               <div className="sticky top-0 z-10 flex items-center justify-between gap-2 p-3 mb-3 rounded-none border bg-card shadow-sm">
                 <div className="flex items-center gap-3">
                   <Checkbox
-                    checked={selectedIds.size > 0 && pending.every((p: any) => selectedIds.has(p.id))}
+                    checked={selectedIds.size > 0 && pending.every((p) => selectedIds.has(p.id))}
                     onCheckedChange={(v) => {
-                      if (v) setSelectedIds(new Set(pending.map((p: any) => p.id)));
+                      if (v) setSelectedIds(new Set(pending.map((p) => p.id)));
                       else clearSelection();
                     }}
                     aria-label="Выбрать все"
@@ -224,7 +237,7 @@ export default function AdminNewbuilds() {
                   </div>
                 )}
               </div>
-              {pending.map((p: any) => (
+              {pending.map((p) => (
                 <div key={p.id} className="border rounded-none p-4 flex items-center gap-4">
                   <Checkbox checked={selectedIds.has(p.id)} onCheckedChange={() => toggleSelect(p.id)} aria-label={`Выбрать ${p.name_en}`} />
                   {p.cover_image && <img src={p.cover_image} className="w-16 h-16 rounded-none object-cover" alt={p.name_en} />}
@@ -253,8 +266,8 @@ export default function AdminNewbuilds() {
           </p>
           <div className="space-y-2">
             {featured
-              .sort((a: any, b: any) => (a.featured_rank || 99) - (b.featured_rank || 99))
-              .map((p: any) => (
+              .sort((a, b) => (a.featured_rank || 99) - (b.featured_rank || 99))
+              .map((p) => (
                 <FeaturedRow
                   key={p.id}
                   project={p}
@@ -270,11 +283,11 @@ export default function AdminNewbuilds() {
 
         {/* DEVELOPERS */}
         <TabsContent value="developers" className="mt-4 space-y-3">
-          {developers.map((d: any) => (
+          {developers.map((d) => (
             <DeveloperRow
               key={d.id}
               developer={d}
-              projectCount={projects.filter((p: any) => p.developer_id === d.id || p.developer_name === d.name_en).length}
+              projectCount={projects.filter((p) => p.developer_id === d.id || p.developer_name === d.name_en).length}
               onUpdate={(updates) => updateDeveloper.mutate({ id: d.id, updates })}
             />
           ))}
@@ -286,27 +299,25 @@ export default function AdminNewbuilds() {
 
 /* ─── Inline editable project row ─── */
 function ProjectRow({ project: p, index, isEditing, onEdit, onUpdate }: {
-  project: any;
+  project: Project;
   index: number;
   isEditing: boolean;
   onEdit: () => void;
-  onUpdate: (updates: any) => void;
+  onUpdate: (updates: ProjectUpdate) => void;
 }) {
-  const [edits, setEdits] = useState<any>({});
-  const catalog = p.offplan_catalog || {};
+  const [edits, setEdits] = useState<ProjectEdits>({});
+  const catalog = (p.offplan_catalog as CatalogShape | null) || {};
 
   const handleSave = () => {
-    const updates: any = { ...edits };
-    if (edits._catalogRec || edits._catalogType || edits._catalogBeach) {
+    const { _catalogRec, _catalogType, _catalogBeach, ...rest } = edits;
+    const updates: ProjectUpdate = { ...rest };
+    if (_catalogRec !== undefined || _catalogType !== undefined || _catalogBeach !== undefined) {
       updates.offplan_catalog = {
         ...catalog,
-        ...(edits._catalogRec !== undefined ? { rec: edits._catalogRec } : {}),
-        ...(edits._catalogType !== undefined ? { type: edits._catalogType } : {}),
-        ...(edits._catalogBeach !== undefined ? { beach: edits._catalogBeach } : {}),
+        ...(_catalogRec !== undefined ? { rec: _catalogRec } : {}),
+        ...(_catalogType !== undefined ? { type: _catalogType } : {}),
+        ...(_catalogBeach !== undefined ? { beach: _catalogBeach } : {}),
       };
-      delete updates._catalogRec;
-      delete updates._catalogType;
-      delete updates._catalogBeach;
     }
     onUpdate(updates);
     setEdits({});
@@ -424,7 +435,7 @@ function ProjectRow({ project: p, index, isEditing, onEdit, onUpdate }: {
 }
 
 /* ─── Featured row with rank/label editing ─── */
-function FeaturedRow({ project: p, onUpdate, onRemove }: { project: any; onUpdate: (u: any) => void; onRemove: () => void }) {
+function FeaturedRow({ project: p, onUpdate, onRemove }: { project: Project; onUpdate: (u: ProjectUpdate) => void; onRemove: () => void }) {
   return (
     <div className="border rounded-none p-4 flex items-center gap-4">
       <div className="flex items-center gap-2 w-12">
@@ -455,7 +466,7 @@ function FeaturedRow({ project: p, onUpdate, onRemove }: { project: any; onUpdat
 }
 
 /* ─── Developer row with inline editing ─── */
-function DeveloperRow({ developer: d, projectCount, onUpdate }: { developer: any; projectCount: number; onUpdate: (u: any) => void }) {
+function DeveloperRow({ developer: d, projectCount, onUpdate }: { developer: Developer; projectCount: number; onUpdate: (u: DeveloperUpdate) => void }) {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -489,8 +500,8 @@ function DeveloperRow({ developer: d, projectCount, onUpdate }: { developer: any
             <Input size={1} defaultValue={d.phone || ''} onBlur={e => e.target.value !== (d.phone || '') && onUpdate({ phone: e.target.value })} />
           </div>
           <div>
-            <Label className="text-xs">WhatsApp</Label>
-            <Input size={1} defaultValue={d.whatsapp || ''} onBlur={e => e.target.value !== (d.whatsapp || '') && onUpdate({ whatsapp: e.target.value })} />
+            <Label className="text-xs">Legal name</Label>
+            <Input size={1} defaultValue={d.legal_name || ''} onBlur={e => e.target.value !== (d.legal_name || '') && onUpdate({ legal_name: e.target.value })} />
           </div>
           <div>
             <Label className="text-xs">Score</Label>

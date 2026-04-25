@@ -89,8 +89,8 @@ export default function PropertyDetail() {
     () =>
       new Set(
         availability
-          .filter((a: any) => a.status === 'blocked' || a.status === 'booked')
-          .map((a: any) => {
+          .filter((a) => a.status === 'blocked' || a.status === 'booked')
+          .map((a) => {
             const d = a.date instanceof Date ? a.date : new Date(a.date);
             return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
           }),
@@ -133,6 +133,20 @@ export default function PropertyDetail() {
     );
   }
 
+  // Loose extension for property fields not yet in generated DB types
+  type GuestExtraFee = { name?: string; amount?: number; per?: string };
+  type PropertyExt = {
+    tenancy_modes?: string[] | null;
+    beds?: number | null;
+    title_deed_type?: string | null;
+    escrow_offered?: boolean | null;
+    installment_plan?: { milestones?: InstallmentMilestone[]; preset_id?: string } | null;
+    guest_extra_fees?: GuestExtraFee[] | null;
+    price_per_month?: number | null;
+    min_lease_months?: number | null;
+  };
+  const propertyExt = property as unknown as typeof property & PropertyExt;
+
   const images = (property.images && property.images.length > 0)
     ? property.images
     : [property.cover_image].filter(Boolean) as string[];
@@ -144,8 +158,8 @@ export default function PropertyDetail() {
   // 6-tracks: detect short/medium/long rental support. When tenancy_modes is
   // explicitly set, respect it; otherwise fall back to legacy nightly-price
   // signal so existing listings keep showing the booking card.
-  const tenancyModes: string[] = Array.isArray((property as any).tenancy_modes)
-    ? (property as any).tenancy_modes
+  const tenancyModes: string[] = Array.isArray(propertyExt.tenancy_modes)
+    ? propertyExt.tenancy_modes
     : [];
   const supportsShortStay = tenancyModes.length > 0
     ? tenancyModes.includes('short')
@@ -274,7 +288,7 @@ export default function PropertyDetail() {
                 {/* Hero facts — Airbnb-style sub-title (e.g. "4 guests · 2 bedrooms · 1 bath") */}
                 <PropertyHeroFacts
                   bedrooms={property.bedrooms}
-                  beds={(property as any).beds ?? null}
+                  beds={propertyExt.beds ?? null}
                   bathrooms={property.bathrooms}
                   maxGuests={property.max_guests || rentalTerms?.max_guests}
                 />
@@ -327,15 +341,15 @@ export default function PropertyDetail() {
 
               {/* Trust signals: title deed, escrow, ClearView, owner verified */}
               <TrustStrip
-                titleDeedType={(property as any).title_deed_type}
-                escrowOffered={(property as any).escrow_offered}
+                titleDeedType={propertyExt.title_deed_type}
+                escrowOffered={propertyExt.escrow_offered}
                 ownerVerified={property.is_verified}
                 isRu={isRu}
               />
 
               {/* Payment schedule (sale / assignment) */}
               {(() => {
-                const plan = (property as any).installment_plan as { milestones?: InstallmentMilestone[]; preset_id?: string } | null;
+                const plan = propertyExt.installment_plan as { milestones?: InstallmentMilestone[]; preset_id?: string } | null;
                 if (!plan || !Array.isArray(plan.milestones) || plan.milestones.length === 0) return null;
                 const preset = plan.preset_id ? getInstallmentPreset(plan.preset_id) : null;
                 const presetLabel = preset ? (isRu ? preset.labelRu : preset.labelEn) : undefined;
@@ -471,10 +485,10 @@ export default function PropertyDetail() {
               {/* Guest extra fees — host-configurable: metered electricity/water,
                   internet, cleaning, etc. Informational only; settled at the moment
                   the host specifies (usually check-out). */}
-              {(property as any).guest_extra_fees && (
+              {propertyExt.guest_extra_fees && (
                 <>
                   <Separator />
-                  <GuestExtraFeesDisplay fees={(property as any).guest_extra_fees} />
+                  <GuestExtraFeesDisplay fees={propertyExt.guest_extra_fees} />
                 </>
               )}
 
@@ -598,19 +612,19 @@ export default function PropertyDetail() {
                             ? (isRu ? 'Долгосрочная аренда' : 'Long-term rental')
                             : (isRu ? 'Среднесрочная аренда' : 'Medium-term rental')}
                         </p>
-                        {(property as any).price_per_month && (
+                        {propertyExt.price_per_month && (
                           <p className="text-2xl font-bold">
-                            {formatPrice((property as any).price_per_month)}
+                            {formatPrice(propertyExt.price_per_month)}
                             <span className="text-sm font-normal text-muted-foreground ml-1">
                               /{isRu ? 'мес' : 'mo'}
                             </span>
                           </p>
                         )}
-                        {(property as any).min_lease_months && (
+                        {propertyExt.min_lease_months && (
                           <p className="text-xs text-muted-foreground">
                             {isRu
-                              ? `Минимальный срок: ${(property as any).min_lease_months} мес.`
-                              : `Minimum lease: ${(property as any).min_lease_months} months`}
+                              ? `Минимальный срок: ${propertyExt.min_lease_months} мес.`
+                              : `Minimum lease: ${propertyExt.min_lease_months} months`}
                           </p>
                         )}
                       </>

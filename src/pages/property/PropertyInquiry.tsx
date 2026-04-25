@@ -54,17 +54,43 @@ export default function PropertyInquiry() {
   // Determine booking mode from property data
   const { data: property } = usePropertyWithRentalTerms(id);
   const rentalTerms = property?.rentalTerms;
+
+  // Loose extension typings — fields exist in DB but aren't in generated types yet.
+  type PropertyExt = {
+    tenancy_modes?: string[] | null;
+    currency?: string | null;
+    seasonal_pricing?: unknown;
+    cleaning_fee?: number | null;
+    provider_id?: string | null;
+    owner_id?: string | null;
+  };
+  type RentalTermsExt = {
+    currency?: string | null;
+    price_per_night?: number | null;
+    early_booking_discount?: number | null;
+    early_booking_days?: number | null;
+    last_minute_discount?: number | null;
+    last_minute_days?: number | null;
+    custom_length_discounts?: unknown;
+    payment_policy?: string | null;
+    prepay_percent?: number | null;
+    manager_email?: string | null;
+    manager_phone?: string | null;
+  };
+  const propertyExt = (property ?? null) as (typeof property & PropertyExt) | null;
+  const rentalExt = (rentalTerms ?? null) as (typeof rentalTerms & RentalTermsExt) | null;
+
   const isInstantBooking = !!(property?.instant_booking || rentalTerms?.instant_booking);
 
   // 6-tracks guard: STR booking flow only supports short-stay listings.
   // If owner has switched the listing to medium/long-only or sale-only, redirect
   // back to the detail page (which renders the correct lead-form CTA).
-  const tenancyModes: string[] = Array.isArray((property as any)?.tenancy_modes)
-    ? ((property as any).tenancy_modes as string[])
+  const tenancyModes: string[] = Array.isArray(propertyExt?.tenancy_modes)
+    ? (propertyExt!.tenancy_modes as string[])
     : [];
   const supportsShortStay = tenancyModes.length > 0
     ? tenancyModes.includes('short')
-    : !!(property?.price_per_night || (rentalTerms as any)?.price_per_night);
+    : !!(property?.price_per_night || rentalExt?.price_per_night);
   useEffect(() => {
     if (!property) return;
     if (!supportsShortStay) {
@@ -133,8 +159,8 @@ export default function PropertyInquiry() {
   // Listing currency — pulled out so we can also display it in the Total tooltip.
   const listingCurrency = useMemo(
     () =>
-      ((property as any)?.currency?.trim?.() ||
-        (rentalTerms as any)?.currency?.trim?.() ||
+      (propertyExt?.currency?.trim?.() ||
+        rentalExt?.currency?.trim?.() ||
         'THB') as string,
     [property, rentalTerms],
   );
@@ -234,15 +260,15 @@ export default function PropertyInquiry() {
             price_per_night: pricePerNight,
             weekly_discount: rentalTerms?.weekly_discount,
             monthly_discount: rentalTerms?.monthly_discount,
-            early_booking_discount: (rentalTerms as any)?.early_booking_discount,
-            early_booking_days: (rentalTerms as any)?.early_booking_days,
-            last_minute_discount: (rentalTerms as any)?.last_minute_discount,
-            last_minute_days: (rentalTerms as any)?.last_minute_days,
-            custom_length_discounts: (rentalTerms as any)?.custom_length_discounts,
+            early_booking_discount: rentalExt?.early_booking_discount,
+            early_booking_days: rentalExt?.early_booking_days,
+            last_minute_discount: rentalExt?.last_minute_discount,
+            last_minute_days: rentalExt?.last_minute_days,
+            custom_length_discounts: rentalExt?.custom_length_discounts,
             deposit_amount: rentalTerms?.deposit_amount,
             deposit_currency: rentalTerms?.deposit_currency || 'THB',
-            payment_policy: (rentalTerms as any)?.payment_policy || 'prepay_10',
-            prepay_percent: (rentalTerms as any)?.prepay_percent,
+            payment_policy: rentalExt?.payment_policy || 'prepay_10',
+            prepay_percent: rentalExt?.prepay_percent,
           },
           rateSeasons,
         )
@@ -250,16 +276,16 @@ export default function PropertyInquiry() {
           pricePerNight,
           weeklyDiscount: rentalTerms?.weekly_discount,
           monthlyDiscount: rentalTerms?.monthly_discount,
-          earlyBookingDiscount: (rentalTerms as any)?.early_booking_discount,
-          earlyBookingDays: (rentalTerms as any)?.early_booking_days,
-          lastMinuteDiscount: (rentalTerms as any)?.last_minute_discount,
-          lastMinuteDays: (rentalTerms as any)?.last_minute_days,
-          customLengthDiscounts: (rentalTerms as any)?.custom_length_discounts,
-          seasonalPricing: (property as any)?.seasonal_pricing,
+          earlyBookingDiscount: rentalExt?.early_booking_discount,
+          earlyBookingDays: rentalExt?.early_booking_days,
+          lastMinuteDiscount: rentalExt?.last_minute_discount,
+          lastMinuteDays: rentalExt?.last_minute_days,
+          customLengthDiscounts: rentalExt?.custom_length_discounts,
+          seasonalPricing: propertyExt?.seasonal_pricing,
           depositAmount: rentalTerms?.deposit_amount,
           depositCurrency: rentalTerms?.deposit_currency || 'THB',
-          paymentPolicy: (rentalTerms as any)?.payment_policy || 'prepay_10',
-          prepayPercent: (rentalTerms as any)?.prepay_percent,
+          paymentPolicy: rentalExt?.payment_policy || 'prepay_10',
+          prepayPercent: rentalExt?.prepay_percent,
         };
 
     if (!checkIn || !checkOut || nights <= 0 || !pricePerNight) {
@@ -718,12 +744,12 @@ export default function PropertyInquiry() {
                 prepayAmount={pricing.prepayAmount}
                 prepayPercent={pricing.prepayPercent}
                 payInFull={!!rentalTerms?.allow_pay_later && payWhen === 'full'}
-                cleaningFee={rentalTerms?.extra_cleaning_price || (property as any)?.cleaning_fee || 0}
+                cleaningFee={rentalTerms?.extra_cleaning_price || propertyExt?.cleaning_fee || 0}
                 guestName={formData.name}
                 guestPhone={formData.phone}
                 guestEmail={formData.email}
-                providerOrgId={(property as any)?.provider_id || undefined}
-                ownerUserId={(property as any)?.owner_id || undefined}
+                providerOrgId={propertyExt?.provider_id || undefined}
+                ownerUserId={propertyExt?.owner_id || undefined}
                 onMethodChange={setPaymentMethod}
               />
             </section>
@@ -838,7 +864,7 @@ export default function PropertyInquiry() {
                   // 2. Create order for booking tracking
                   const result = await createOrder({
                     order_type: 'property',
-                    provider_org_id: (property as any)?.provider_id || undefined,
+                    provider_org_id: propertyExt?.provider_id || undefined,
                     start_at: checkIn!,
                     end_at: checkOut!,
                     total_amount: pricing.total,
@@ -862,8 +888,8 @@ export default function PropertyInquiry() {
                       prepay_amount: pricing.prepayAmount,
                       prepay_percent: pricing.prepayPercent,
                       booking_mode: 'request',
-                      ...((rentalTerms as any)?.manager_email ? { manager_email: (rentalTerms as any).manager_email } : {}),
-                      ...((rentalTerms as any)?.manager_phone ? { manager_phone: (rentalTerms as any).manager_phone } : {}),
+                      ...(rentalExt?.manager_email ? { manager_email: rentalExt.manager_email } : {}),
+                      ...(rentalExt?.manager_phone ? { manager_phone: rentalExt.manager_phone } : {}),
                     },
                     items: [{
                       item_name: propertyTitle || 'Property booking',
