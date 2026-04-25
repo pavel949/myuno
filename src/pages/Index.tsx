@@ -99,6 +99,9 @@ const Index = () => {
         {/* 1. Hero — search-first entry, with desktop popular preview */}
         <HeroIntro />
 
+        {/* 1b. Persona discovery strip — surface the 26 tailored landings */}
+        <PersonaDiscoveryStrip />
+
         {/* 2. Tasks — what do I need to do */}
         {popularTasksOn ? <PopularTasks /> : <PrimaryActions />}
 
