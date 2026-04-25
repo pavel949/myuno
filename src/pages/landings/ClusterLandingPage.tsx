@@ -5,9 +5,11 @@
  * landings (arrival/lifestyle/operations/...) via slugAliases.
  */
 import { useMemo } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { withPersonaParam } from '@/lib/landings/personaTagMap';
+import { resolvePersonaSlug } from '@/lib/landings/slugAliases';
 import {
   findClusterLandingBySlug,
   isLiveClusterLanding,
