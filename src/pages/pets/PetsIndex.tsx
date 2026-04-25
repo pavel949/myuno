@@ -11,6 +11,8 @@ import { MiniAppLayout, CatalogCard } from '@/components/miniapp';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/uno/EmptyState';
 import { mapPetServiceToCatalogCard } from '@/lib/adapters/catalogCardAdapters';
+import { usePersonaFilter } from '@/hooks/usePersonaFilter';
+import { PersonaFilterChip } from '@/components/landings/PersonaFilterChip';
 
 const CATEGORIES = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -29,6 +31,7 @@ export default function PetsIndex() {
   const { services: petServices, isLoading } = usePetServices();
   const [selectedCategory, setSelectedCategory] = useState(() => searchParams.get('category') || 'all');
   const isRu = language === 'ru';
+  const { applyFilter: applyPersonaFilter } = usePersonaFilter();
 
   useEffect(() => {
     const cat = searchParams.get('category');
@@ -36,9 +39,15 @@ export default function PetsIndex() {
   }, [searchParams]);
 
   const filteredServices = useMemo(() => {
-    if (selectedCategory === 'all') return petServices;
-    return petServices.filter(s => s.service_type === selectedCategory);
-  }, [petServices, selectedCategory]);
+    const base = selectedCategory === 'all' ? petServices : petServices.filter(s => s.service_type === selectedCategory);
+    // Persona pool: service_type + tags. Pet-owners persona will always match
+    // (every entry has `pet`-aligned tags); other personas fall back to all.
+    return applyPersonaFilter(base, (s) => {
+      const raw = s as unknown as Record<string, unknown>;
+      const tags = (raw.tags as string[] | null) ?? [];
+      return [...tags, s.service_type, 'pet', 'pet-friendly'].filter(Boolean) as string[];
+    });
+  }, [petServices, selectedCategory, applyPersonaFilter]);
 
   return (
     <MiniAppLayout
@@ -52,6 +61,7 @@ export default function PetsIndex() {
       onCategoryChange={setSelectedCategory}
       showFilter={false}
     >
+      <PersonaFilterChip className="mb-3" />
       {isLoading ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {Array.from({ length: 8 }).map((_, i) => (

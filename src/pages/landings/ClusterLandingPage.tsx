@@ -5,9 +5,11 @@
  * landings (arrival/lifestyle/operations/...) via slugAliases.
  */
 import { useMemo } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { withPersonaParam } from '@/lib/landings/personaTagMap';
+import { resolveClusterSlug, resolvePersonaSlug } from '@/lib/landings/slugAliases';
 import {
   findClusterLandingBySlug,
   isLiveClusterLanding,
@@ -16,7 +18,6 @@ import {
 } from '@/lib/landings/types';
 import { CLUSTER_LANDINGS } from '@/content/landings/clusterLandings';
 import { PERSONA_LANDINGS } from '@/content/landings/personaLandings';
-import { resolveClusterSlug } from '@/lib/landings/slugAliases';
 import NotFound from '@/pages/NotFound';
 import { Button } from '@/components/ui/button';
 import LandingSeoHead from '@/components/seo/LandingSeoHead';
@@ -62,10 +63,19 @@ interface ClusterLandingViewProps {
 
 const ClusterLandingView = ({ landing }: ClusterLandingViewProps) => {
   const { language } = useLanguage();
+  const [searchParams] = useSearchParams();
   const isRu = language === 'ru';
   const t = <T,>(pair: { ru: T; en: T }): T => (isRu ? pair.ru : pair.en);
   const theme = getClusterTheme(landing.slug);
   const Icon = theme.icon;
+
+  const personaSlug = useMemo(() => {
+    const raw = searchParams.get('persona');
+    return raw ? resolvePersonaSlug(raw) : null;
+  }, [searchParams]);
+
+  const withPersona = (href: string) =>
+    personaSlug ? withPersonaParam(href, personaSlug) : href;
 
   const livePersonaLinks = useMemo(() => {
     const codes = new Set(landing.relatedPersonas);
@@ -108,14 +118,14 @@ const ClusterLandingView = ({ landing }: ClusterLandingViewProps) => {
           </p>
           <div className="mt-7 flex flex-col gap-3 sm:flex-row">
             <Button asChild size="lg" className="shadow-lg">
-              <a href={landing.primaryCta.href}>
+              <a href={withPersona(landing.primaryCta.href)}>
                 {t(landing.primaryCta.label)}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </a>
             </Button>
             {landing.secondaryCta ? (
               <Button asChild size="lg" variant="outline">
-                <a href={landing.secondaryCta.href}>{t(landing.secondaryCta.label)}</a>
+                <a href={withPersona(landing.secondaryCta.href)}>{t(landing.secondaryCta.label)}</a>
               </Button>
             ) : null}
           </div>
@@ -155,7 +165,7 @@ const ClusterLandingView = ({ landing }: ClusterLandingViewProps) => {
               {landing.services.map((service) => (
                 <li key={service.slug}>
                   <a
-                    href={service.href}
+                    href={withPersona(service.href)}
                     className="group flex h-full items-start gap-3 border border-border bg-card p-4 transition-all hover:border-primary/60 hover:[box-shadow:var(--shadow-elevation-2)]"
                   >
                     <Sparkles
@@ -250,14 +260,14 @@ const ClusterLandingView = ({ landing }: ClusterLandingViewProps) => {
           </p>
           <div className="mt-4 flex flex-col gap-2 sm:flex-row">
             <Button asChild size="lg">
-              <a href={landing.primaryCta.href}>
+              <a href={withPersona(landing.primaryCta.href)}>
                 {t(landing.primaryCta.label)}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </a>
             </Button>
             {landing.secondaryCta ? (
               <Button asChild size="lg" variant="ghost">
-                <a href={landing.secondaryCta.href}>{t(landing.secondaryCta.label)}</a>
+                <a href={withPersona(landing.secondaryCta.href)}>{t(landing.secondaryCta.label)}</a>
               </Button>
             ) : null}
           </div>
@@ -267,7 +277,7 @@ const ClusterLandingView = ({ landing }: ClusterLandingViewProps) => {
       {/* ─── STICKY MOBILE CTA ─────────────────────────────────── */}
       <div className="sticky bottom-0 z-30 border-t border-border bg-background/95 p-3 backdrop-blur sm:hidden">
         <Button asChild size="lg" className="w-full">
-          <a href={landing.primaryCta.href}>{t(landing.primaryCta.label)}</a>
+          <a href={withPersona(landing.primaryCta.href)}>{t(landing.primaryCta.label)}</a>
         </Button>
       </div>
     </AppLayout>

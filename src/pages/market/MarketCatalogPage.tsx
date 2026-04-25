@@ -12,6 +12,7 @@ import { Search, ArrowLeft, ChevronRight, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CategoryDrawer } from '@/components/market/CategoryDrawer';
 import { MarketComingSoonOverlay } from '@/components/market/MarketComingSoonOverlay';
+import { PersonaFilterChip } from '@/components/landings/PersonaFilterChip';
 
 // Fallback icons
 const getCategoryIcon = (slug: string): string => {
@@ -123,6 +124,7 @@ const MarketCatalogPage = () => {
 
         {/* Categories List */}
         <div className="p-4">
+          <PersonaFilterChip className="mb-3" />
           {isLoading ? (
             <div className="space-y-2">
               {[...Array(8)].map((_, i) => (

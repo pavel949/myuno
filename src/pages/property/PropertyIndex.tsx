@@ -27,6 +27,8 @@ import { UniversalFilter, FilterValues } from '@/components/filters/UniversalFil
 import { usePropertyFilterOptions } from '@/hooks/usePropertyFilterOptions';
 import { filterValuesToPropertyFilters } from '@/lib/propertyCatalogServerFilters';
 import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
+import { usePersonaFilter } from '@/hooks/usePersonaFilter';
+import { PersonaFilterChip } from '@/components/landings/PersonaFilterChip';
 import {
   serializeFilters,
   parseFiltersFromParams,
@@ -183,6 +185,8 @@ export default function PropertyIndex() {
     return infiniteData?.pages.flatMap(p => p.properties) || [];
   }, [infiniteData]);
 
+  const { applyFilter: applyPersonaFilter } = usePersonaFilter();
+
   // Category ribbon only — DB filters handled server-side
   const filteredProperties = useMemo(() => {
     let result = allProperties;
@@ -193,8 +197,18 @@ export default function PropertyIndex() {
       );
     }
 
+    // Persona filter — uses tags + amenities + persona_tags. Falls back to
+    // unfiltered set if no property matches so the catalog never goes empty.
+    result = applyPersonaFilter(result, (p) => {
+      const raw = p as unknown as Record<string, unknown>;
+      const tags = (raw.tags as string[] | null) ?? [];
+      const personaTags = (raw.persona_tags as string[] | null) ?? [];
+      const amenities = (raw.amenities as string[] | null) ?? [];
+      return [...personaTags, ...tags, ...amenities].filter(Boolean) as string[];
+    });
+
     return result;
-  }, [allProperties, selectedCategories]);
+  }, [allProperties, selectedCategories, applyPersonaFilter]);
 
   const handlePropertyClick = useCallback((id: string) => {
     navigate(APP_ROUTES.PROPERTY_DETAIL(id));
@@ -315,6 +329,9 @@ export default function PropertyIndex() {
 
         {/* Content */}
         <div className="pt-4">
+          <div className={cn(ECOSYSTEM_PAGE_CONTAINER, "mb-3")}>
+            <PersonaFilterChip />
+          </div>
           <div className={ECOSYSTEM_PAGE_CONTAINER}>
             <VerticalContextBanner verticalId="property" />
           </div>
