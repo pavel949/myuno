@@ -16606,6 +16606,10 @@ export type Database = {
           children_friendly: boolean | null
           cleaning_frequency: string | null
           cleaning_included: boolean | null
+          clearview_badge: string | null
+          clearview_recommendation: string | null
+          clearview_score: number | null
+          clearview_synced_at: string | null
           commercial_terms_redacted: boolean | null
           commission_rate: number | null
           complex_id: string | null
@@ -16885,6 +16889,10 @@ export type Database = {
           children_friendly?: boolean | null
           cleaning_frequency?: string | null
           cleaning_included?: boolean | null
+          clearview_badge?: string | null
+          clearview_recommendation?: string | null
+          clearview_score?: number | null
+          clearview_synced_at?: string | null
           commercial_terms_redacted?: boolean | null
           commission_rate?: number | null
           complex_id?: string | null
@@ -17164,6 +17172,10 @@ export type Database = {
           children_friendly?: boolean | null
           cleaning_frequency?: string | null
           cleaning_included?: boolean | null
+          clearview_badge?: string | null
+          clearview_recommendation?: string | null
+          clearview_score?: number | null
+          clearview_synced_at?: string | null
           commercial_terms_redacted?: boolean | null
           commission_rate?: number | null
           complex_id?: string | null
@@ -31882,6 +31894,10 @@ export type Database = {
             Returns: boolean
           }
       cleanup_old_sync_logs: { Args: never; Returns: undefined }
+      clearview_grade_to_recommendation: {
+        Args: { _grade: string }
+        Returns: string
+      }
       create_booking_with_wallet_payment: {
         Args: {
           p_booking_type: string
@@ -32490,6 +32506,10 @@ export type Database = {
       start_simulation_run: {
         Args: { p_config?: Json; p_label: string }
         Returns: string
+      }
+      sync_properties_clearview_for_project: {
+        Args: { _project_id: string }
+        Returns: undefined
       }
       topup_wallet_atomic: {
         Args: {
