@@ -155,7 +155,11 @@ export function useCreateOwnerProperty() {
         _companyId?: string;
         _silent?: boolean;
         management_company_id?: string | null;
+        description?: string;
         description_en?: string;
+        description_ru?: string;
+        title?: string;
+        title_ru?: string;
       };
       const companyIdFromData = dataExt.management_company_id || data._companyId || activeCompanyId || null;
       const [profileRes, membershipRes] = await Promise.all([
