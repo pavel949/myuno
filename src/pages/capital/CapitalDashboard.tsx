@@ -5,6 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { Users, Megaphone, MessageCircle, TrendingUp, KanbanSquare, ArrowRight } from 'lucide-react';
 import { PIPELINE_STAGE_LABELS, PIPELINE_STAGES_ORDER, type PipelineStage } from '@/types/capital';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const STAGE_CHART_COLORS: Record<string, string> = {
   lead: '#64748b',
