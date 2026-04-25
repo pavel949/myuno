@@ -1,293 +1,140 @@
 
-# Комплексный план блока недвижимости myUNO
+# План: интеграция ClearView V3 как полноценного продукта
 
-Сравнение с Airbnb / Дом.РФ / Циан / distressed-платформами (Auction.com, RealtyTrac), синхронизация с PROJECT.md, и план интеграции с Базой Знаний.
-
----
-
-## 1. Где мы сейчас (по факту кода + БД)
-
-| Под-блок | URL | Статус | Покрытие vs эталон |
-|---|---|---|---|
-| Краткосрочная аренда (STR) | `/property/browse?tenancy=short` + `PropertyDetail` + `PropertyInquiry` | Работает: календарь, цены сезонами, инстант/запрос, депозит, iCal sync, Stripe | ~70% Airbnb |
-| Среднесрочная (MTR) | `?tenancy=medium` (редирект в browse) | Каркас данных есть, UI лидформы нет | ~20% |
-| Долгосрочная (LTR) | `?tenancy=long` | Поля БД есть (`min_lease_months`, `deposit_months_long`), отдельного флоу нет | ~20% |
-| Новостройки (Off-plan) | `/property/offplan`, `OffplanDetail`, `/newbuilds/*` | Каталог + ClearView badge + Compare + Calculator + Map + DueDiligence-страница | ~50% Дом.РФ |
-| Вторичка | `/property/resale` | Каталог + табы Assignment/Ready, карточки | ~40% Циан |
-| Distressed/Quick Sale | поле `is_quick_sale` в БД, страницы нет | 0% |
-| База знаний | `/knowledge`, `/knowledge/pillar/*` | Гайды есть, но **не привязаны к карточкам объектов** | ~30% |
-| Полный цикл покупки (PROJECT.md §9, 8 этапов) | частично: ContractAI/FloodScore/DD упомянуты, snagging/milestones/furnishing — нет | ~25% |
-
-**Данные:** 24 активных объекта, все STR; 0 продажных, 0 переуступок, 0 quick sale, 0 с installment plan. То есть «треки» инфраструктурно готовы, но **витрин и контента под них нет**.
+Цель: превратить ClearView из «карточки в углу» в основной знак доверия для покупателей off-plan и в отдельный SaaS-продукт для девелоперов. Вся работа разбита на 5 этапов (F1–F5). Можно реализовать целиком за один заход или поэтапно — итоговая структура одна.
 
 ---
 
-## 2. Что есть у эталонов и чего нам не хватает
+## F1 · Нормализация методологии и данных
 
-### 2.1 Airbnb (STR)
-| Функция | У нас | Gap |
+**Проблема:** в БД две параллельные системы (`due_diligence_reports` + `clearview_projects/scores/categories`), веса категорий не совпадают с Canon V3, `TrustStrip` обращается к несуществующим полям (`clearview_badge`, `clearview_recommendation`).
+
+**Что делаем:**
+1. Создаём единый конфиг `src/lib/clearview/methodology.ts` — 8 категорий, веса по Canon V3 (LRC 20, DCF 20, CQP 15, LMA 15, FRC 10, ROI 10, MAS 5, LRT 5), пороги грейдов AAA/AA/A/BBB/BB, маппинг рекомендаций BUY/WATCH/AVOID.
+2. Миграция БД:
+   - Синхронизируем веса в `clearview_categories` с Canon V3.
+   - Добавляем view `v_clearview_public` поверх `due_diligence_reports`, отдающую только публичные поля (grade, total_score, recommendation, top-3 risks/strengths, executive_summary).
+   - Добавляем computed-колонки на `properties`: `clearview_grade`, `clearview_recommendation`, `clearview_score` (через trigger от последнего published `due_diligence_reports.project_id = properties.project_id`) — чтобы `TrustStrip` и каталог читали без N+1.
+   - Помечаем `clearview_projects/scores` как deprecated (оставляем для обратной совместимости, далее дропнем отдельной миграцией).
+3. RLS:
+   - `due_diligence_reports`: SELECT публично только при `is_published = true`; админы/девелоперы — свои отчёты.
+   - Полные `analysis`, `evidence_gaps`, `red_flags` (всё) — отдаются только покупателям отчёта (см. F3) или владельцу проекта.
+
+---
+
+## F2 · Визуализация рейтинга
+
+Создаём 3 переиспользуемых компонента в `src/components/clearview/`:
+
+1. **`<ClearViewBadge />`** — компактный значок (grade + цвет). Размеры `xs / sm / md`. Используется в:
+   - `TrustStrip` (заменяет текущую заглушку)
+   - `PropertyListingCard` (правый верхний угол изображения)
+   - `PropertyMapView` InfoWindow (рядом с ценой)
+   - `OffplanCard`
+2. **`<ClearViewGauge />`** — полукруговой gauge 0–100 с цветовой шкалой и подписью грейда. Для шапки `ClearViewReport` и `OffplanDetail` hero.
+3. **`<ClearViewRadar />`** — radar chart (recharts) по 8 категориям. Используется в публичной превью отчёта (free) и полной версии (paid).
+
+Дизайн: токены `tokens.css` (никаких хексов), grade-цвета:
+- AAA `--success`, AA `--success-soft`, A `--info`, BBB `--warning`, BB `--destructive`.
+
+**Интеграции:**
+- `PropertyListingCard.tsx` — добавить overlay-badge на превью.
+- `PropertyMapView.tsx` — chip в InfoWindow.
+- `OffplanDetail.tsx` — секция «ClearView Rating» с Gauge + Radar + 3 Top Risks (free).
+- `TrustStrip.tsx` — переписать чип `clearview_badge` на `<ClearViewBadge />`.
+
+---
+
+## F3 · Free vs Paid (paywall)
+
+Единый принцип «что показываем публично, что нет»:
+
+| Поле | Public (free) | Premium (paid) |
 |---|---|---|
-| Календарь + инстант-бронь | ✅ | — |
-| Wishlist | ✅ `useFavorites` | — |
-| Reviews (рейтинги после стэя) | ❌ нет | **Критично** |
-| Superhost-статус | ❌ нет (есть Verified vendor) | средне |
-| Карта с ценами | ✅ `/property/map` | — |
-| Гибкие даты ("± 3 дня") | ❌ | средне |
-| Фильтр amenities + property type | ✅ `UniversalFilter` | — |
-| Сплит-оплата | ✅ `PayWhenSelector` | — |
-| Гид/чат с хостом | ✅ `MessageHostButton` | — |
-| Cancellation policies | ✅ `cancellation_policy` | — |
-| Translation reviews | ❌ | низко |
-| Trip planning | частично `/trip-planner` | средне |
+| Grade (AAA…BB) | ✅ | ✅ |
+| Total score 0–100 | ✅ | ✅ |
+| Recommendation BUY/WATCH/AVOID | ✅ | ✅ |
+| Radar по 8 категориям (баллы) | ✅ | ✅ |
+| Top-3 red flags / green flags | ✅ | ✅ |
+| Executive summary (1 параграф) | ✅ | ✅ |
+| Полные findings по каждой категории | ❌ | ✅ |
+| Evidence gaps + источники | ❌ | ✅ |
+| Maturity levels | ❌ | ✅ |
+| Modifiers и история ревизий | ❌ | ✅ |
+| PDF-выгрузка | ❌ | ✅ |
 
-**Главный gap STR:** нет публичных отзывов после поездки → нет soсial proof → конверсия ниже Airbnb на 30-40%.
-
-### 2.2 Дом.РФ + Циан (новостройки)
-| Функция | У нас | Gap |
-|---|---|---|
-| Карточка ЖК с планировками | частично (нет планировок-чертежей) | **Критично** |
-| Шкала строительства + фотоотчёты по месяцам | ❌ | **Критично** (это PROJECT.md §9 этап 3) |
-| Эскроу-индикатор | поле `escrow_offered` есть, UI badge нет | средне |
-| Платёжные вехи (milestones) | поле `installment_plan` есть, визуализации нет | **Критично** |
-| Рейтинг застройщика | ✅ `DeveloperDetail` + ClearView AAA-BB | сильнее эталонов |
-| Сравнение проектов | ✅ `NewbuildsCompare` | — |
-| Калькулятор доходности/ипотеки | ✅ `NewbuildsCalculator` | — |
-| Квота иностранцев (живой счётчик) | ❌ | средне (для Пхукета критично) |
-| Виртуальный тур / 360° | ❌ только видео-URL | средне |
-| Документы проекта (SPA template, Title) | частично `AdminProjectDocuments` (admin only) | **Критично** для buyer |
-| Due Diligence отчёт | ✅ `NewbuildsDueDiligence` | — |
-| Площадь по типам юнитов с фильтром | ❌ | средне |
-
-**Главный gap новостроек:** покупатель не видит, как идёт стройка после депозита (§9 этап 3 PROJECT.md), и не может скачать SPA-шаблон / читать платёжные вехи в карточке.
-
-### 2.3 Циан (вторичка)
-| Функция | У нас | Gap |
-|---|---|---|
-| Каталог + assignment/ready табы | ✅ | — |
-| История цены | ❌ | **Критично** для investor trust |
-| Карточка с премией к первоначальной цене (`premiumPercent`) | ✅ есть | — |
-| Виртуальный показ (видео walkthrough) | поле есть, но нет загрузчика | средне |
-| Запрос показа (viewing) | частично через `MessageHostButton` | средне |
-| Title verification badge (Чанот/Лизхолд) | поле `title_deed_type` есть, в карточке не отображается | **Критично** |
-| Encumbrances / залоги | ❌ | средне |
-| Юридический отчёт по объекту | ❌ (есть ContractAI как продукт, но не привязан к карточке) | средне |
-
-### 2.4 Distressed / Quick Sale (Auction.com, RealtyTrac, Avito-Срочно)
-| Функция | У нас | Gap |
-|---|---|---|
-| Дисконт vs market value (badge) | ❌ | **Критично** |
-| Срок действия предложения (countdown) | ❌ | **Критично** |
-| Сценарий продажи (развод, переезд, кэш-флоу) | ❌ | средне |
-| NDA-gated детали | ❌ (актуально для $1M+) | средне |
-| Pre-approved buyers list | ❌ | средне |
-| Closed-bid форма | ❌ | средне |
-| Эскроу обязательно | поле есть | средне |
-
-**Сейчас этого блока нет вообще** — а это `PROJECT.md` тип сделки #03 переуступка и #04 вторичка с потенциальным средним чеком ฿2M-80M.
-
-### 2.5 База знаний
-**Что есть:** `/knowledge` с pillar guides, sections, articles.
-**Чего нет:**
-- Связи «гайд ↔ карточка объекта» (на странице `/property/offplan/:id` нет ссылки на гайд "Как покупать off-plan", хотя §10 PROJECT.md прямо требует "Право и собственность ведёт во все Слой-4 инструменты")
-- Связи «инструмент ↔ гайд» (ContractAI/FloodScore/DueDiligence упомянуты в PROJECT.md §10, в коде ссылок из карточки на инструмент нет)
-- Lead Intelligence трекинга чтения (PROJECT.md §11: "+15 баллов за 3 статьи о покупке" — функционала скоринга по контенту нет)
+**Реализация:**
+- Рефактор `src/components/newbuilds/ClearViewReport.tsx`:
+  - Часть 1 «Free Summary» — всегда видна.
+  - Часть 2 «Full Report» — показывается только если у юзера есть запись в `clearview_purchases (user_id, project_id, expires_at)` или роль `admin/developer-owner`.
+  - Заглушка-paywall с CTA «Купить полный отчёт ฿2,900» / «Корпоративная подписка».
+- Подключаем `ClearViewReport` в `OffplanDetail` (сейчас не используется нигде).
+- Новая таблица `clearview_purchases` + RLS (юзер видит только свои покупки).
 
 ---
 
-## 3. Как всё должно работать вместе (карта взаимодействия)
+## F4 · Монетизация
 
-```text
-                 ┌────────────────────────────────────┐
-                 │  ВХОД: /property (PropertyHub)     │
-                 │  Табы: Nightly · Monthly · Buy ·   │
-                 │  New · Resale · Commercial · Land  │
-                 └──────────────────┬─────────────────┘
-                                    │
-        ┌───────────────────────────┼─────────────────────────┐
-        ▼                           ▼                         ▼
-   ┌──────────┐              ┌──────────────┐         ┌──────────────┐
-   │  АРЕНДА  │              │   ПОКУПКА    │         │   QUICK      │
-   │ STR/MTR  │              │ Offplan ·    │         │   SALE       │
-   │  / LTR   │              │ Resale ·     │         │ (приоритет)  │
-   └────┬─────┘              │ Assignment   │         └──────┬───────┘
-        │                    └──────┬───────┘                │
-        │                           │                        │
-        │   ┌───────────────────────┼────────────────────────┘
-        │   │                       │
-        ▼   ▼                       ▼
-   ┌─────────────────────────────────────────────────┐
-   │   КАРТОЧКА ОБЪЕКТА (PropertyDetail)             │
-   │   ┌──────────────────────────────────────────┐  │
-   │   │ Trust Strip: ClearView · FloodScore ·    │  │
-   │   │ Title type · Escrow · Verified owner    │  │
-   │   ├──────────────────────────────────────────┤  │
-   │   │ Sticky CTA по треку:                     │  │
-   │   │  STR  → BookingCard (даты+оплата)        │  │
-   │   │  MTR/LTR → "Запросить аренду" (lead)     │  │
-   │   │  Offplan → "Запросить просмотр" + DD     │  │
-   │   │  Resale  → "Запросить показ" + ContractAI│  │
-   │   │  Quick   → countdown + offer-form (NDA)  │  │
-   │   ├──────────────────────────────────────────┤  │
-   │   │ "Что почитать" (auto-pull из Knowledge   │  │
-   │   │  по тегам track + zone + audience)       │  │
-   │   ├──────────────────────────────────────────┤  │
-   │   │ "Связанные инструменты" (ContractAI,     │  │
-   │   │  FinanceGuide, FloodScore, ClearView)    │  │
-   │   └──────────────────────────────────────────┘  │
-   └─────────────┬───────────────────────────────────┘
-                 │
-                 ▼
-   ┌─────────────────────────────────────────────────┐
-   │  LEAD SCORING (PROJECT.md §11)                  │
-   │  Просмотр 3+ раз → +35 → WhatsApp Павлу        │
-   │  Чтение 3 статей → +15                         │
-   │  ClearView Report куплен → +50                 │
-   └─────────────────────────────────────────────────┘
-```
+**B2C — продажа отчётов покупателям:**
+- Новая Edge Function `create-clearview-checkout` (по шаблону `_shared/checkout-handler.ts`):
+  - One-off Stripe payment, `mode: 'payment'`.
+  - Два price_id: Single Report ฿2,900 / Bundle 3 ฿7,500.
+  - На `payment_intent.succeeded` через `stripe-webhook` создаём запись в `clearview_purchases` (12 мес).
+- Хук `useClearViewPurchase(projectId)` — проверка доступа, инициация чекаута через `useStripeUnifiedCheckout`.
 
-База знаний **не отдельный остров**, а **подложка для каждой карточки**:
-- Под каждым объектом — блок "Что важно знать перед сделкой" (3-5 статей по тегам)
-- В каждой статье — "Объекты по теме" (если статья про переуступку → подборка assignments)
+**B2B — продажа оценок девелоперам:**
+- Доводим `ClearViewApplyPage` (intake-форма): сохраняем заявку в `clearview_applications`, шлём admin-уведомление через WhatsApp/Email (`_shared/admin-config.ts`).
+- Тарифы из `06-clearview-methodology.md`: Standard ฿150K, Premium ฿300K, Annual Subscription ฿500K/year. Без онлайн-оплаты — это sales-led.
+
+**CTA-сетка** (везде единая):
+- Public: «Открыть полный отчёт» → checkout.
+- Developer: «Получить рейтинг проекта» → `/clearview/apply`.
+- Inside report: «Подписаться на обновления проекта» (free, lead capture).
 
 ---
 
-## 4. Комплексный план — 5 этапов, 30 задач
+## F5 · Публичная директория и SEO
 
-### Этап A — Критические фиксы и видимость (1-2 недели)
-
-**A1. Видимость Title Deed / Escrow / Installment в карточке**
-- Файл: `PropertyDetail.tsx` + `OffplanDetail.tsx` + `ResaleDetail.tsx`
-- Добавить **TrustStrip** компонент: chip-ленту с `title_deed_type` (Chanote/Leasehold/Nor Sor), `escrow_offered`, foreign quota %, ClearView score, FloodScore.
-- Использует существующие поля БД, новых миграций не нужно.
-
-**A2. Визуализация платёжных вех (`installment_plan` jsonb)**
-- Новый компонент `InstallmentTimeline.tsx` — горизонтальная шкала с %/датами/суммами.
-- Подключить в `OffplanDetail` и `ResaleDetail` (для assignments).
-- Загрузчик плана в визарде (`PricingStep.tsx`) — пресеты из `installmentPresets.ts` уже есть, не подключены к UI.
-
-**A3. Фикс табов PropertyHub под фактические треки**
-- В `PropertyHub.tsx` уже есть табы `rent_short/rent_long/buy/newbuild/resale` — но `mode=buy` ничего не фильтрует в `PropertyIndex` (нет логики).
-- Добавить в `PropertyIndex.tsx` чтение `mode/tenancy` URL-параметров и фильтрацию по `tenancy_modes` / `sale_intent`.
-
-**A4. Storage bucket для STR-видео-туров**
-- Bucket `property-videos` уже создан миграцией, нужен компонент `PropertyVideoUploader.tsx` (max 500MB, .mp4) — подключить в визард шага "Медиа".
-
-### Этап B — STR на уровне Airbnb (2-3 недели)
-
-**B1. Reviews после стэя**
-- Миграция: `property_reviews (id, property_id, order_id, reviewer_id, rating_overall, rating_cleanliness, rating_location, rating_value, comment, comment_translated, created_at)`.
-- Триггер: после `order.status='completed'` через 24ч → создаётся pending review request.
-- UI: `ReviewForm.tsx` (modal на `/me/bookings`), `ReviewsBlock.tsx` в `PropertyDetail`.
-- Bilingual: автоперевод через Lovable AI (gemini-2.5-flash) on demand.
-
-**B2. Гибкие даты + map view с ценами**
-- В `useStaysSearch.ts` добавить параметр `flexibility: 0|3|7` дней.
-- `PropertyMap.tsx` уже есть, добавить ценовые pins (зелёный/красный/жёлтый по категории цены).
-
-**B3. Superhost эквивалент: "myUNO Verified Host"**
-- Использовать существующий `VendorVerificationBadge` + критерии: `>10 завершённых брони`, `rating >= 4.7`, `response_time < 1h`. Считать триггером, флаг в `providers.is_superhost`.
-
-### Этап C — Off-plan Buyer Journey (PROJECT.md §9) (3-4 недели)
-
-**C1. Шкала строительства + фотоотчёты (этап 3 PROJECT.md)**
-- Миграция: `project_construction_updates (project_id, month, photos[], description, ai_progress_estimate, posted_by)`.
-- Уже есть `NbUpdatesTab` — расширить: галерея с timeline, AI-краткое резюме каждого обновления (Claude Vision).
-- На `OffplanDetail` — sticky тред "Стройка" видимый покупателям с депозитом.
-
-**C2. Документы проекта в карточке (не только admin)**
-- Миграция: `project_documents.is_public boolean default false`.
-- В `OffplanDetail` блок "Документы": SPA шаблон, схема юнитов, разрешения, лицензии — публично (с ClearView watermark) либо после `Lead`.
-
-**C3. Foreign quota live-counter**
-- Если есть `foreign_quota_units / foreign_quota_sold` в проекте → показать "Осталось X из Y юнитов в иностранной квоте" + цвет (зелёный/жёлтый/красный).
-- Это PROJECT.md §10 "freehold vs leasehold, иностранная квота".
-
-**C4. Snagging checklist (этап 4 PROJECT.md)**
-- Миграция: `property_snagging_items (property_id, location_room, defect_type, status, photos[], reported_by, fixed_at)`.
-- UI на `/owner-portal/property/:id/snagging` — пользователь видит чек-лист, добавляет дефекты, статус устранения.
-
-**C5. Furniture packages (этап 5 PROJECT.md)**
-- Уже есть `marketplace`/`stores`, нужен tag `furniture_package` + страница `/property/furnishing` с фиксированными пакетами.
-
-### Этап D — Resale + Quick Sale + Distressed (2-3 недели)
-
-**D1. История цены для resale**
-- Миграция: `property_price_history (property_id, price, currency, recorded_at, source)` + триггер на изменение `properties.price`.
-- График в `ResaleDetail` — 12-месячная динамика.
-
-**D2. Quick Sale страница и фильтры**
-- Новый роут `/property/quick-sale` (или `?intent=quick_sale` на `/property/browse`).
-- Карточка quick-sale: discount-badge ("-25% к рыночной"), countdown ("осталось 7 дней"), сценарий ("причина: переезд").
-- Миграция (поля уже есть — `is_quick_sale`, `discount_percent`, `quick_sale_expires_at`): добавить в SELECT хука.
-- Запрос-форма: NDA-gate для тикетов от ฿20M, для остальных — обычный lead.
-
-**D3. Title type / encumbrance badge в Resale карточке**
-- Использовать `title_deed_type` (поле есть). На `ResalePropertyCard` добавить чип "Чанот" / "Лизхолд 30+30+30".
-
-**D4. Closed-bid форма для distressed $500K+**
-- Миграция: `distressed_offers (property_id, bidder_id, amount, currency, conditions, expires_at, status, nda_signed_at)`.
-- Edge-function `notify-distressed-offer` → WhatsApp Павлу.
-
-### Этап E — База знаний как подложка (1-2 недели)
-
-**E1. Линковка статья ↔ объекты**
-- Миграция: `knowledge_articles.related_property_tags text[]` + `properties.knowledge_tags text[]`.
-- Хук `useRelatedKnowledge(property)` — top-3 статьи по пересечению тегов + zone.
-
-**E2. Блок "Что почитать перед сделкой" в `PropertyDetail`/`OffplanDetail`**
-- Под трек: STR → "Правила гостевого этикета Пхукета", "Visa overstay"; Offplan → "Freehold vs Leasehold", "Платёжные вехи и FET", "Как читать ClearView"; Resale → "Переуступка прав в Таиланде", "Налог при перепродаже".
-
-**E3. Lead-scoring по чтению (PROJECT.md §11)**
-- Edge-function `track-knowledge-read` (POST из `KnowledgeArticlePage` after 30s scroll).
-- Записывает в `user_engagement_events` → агрегирует в `lead_score`.
-
-**E4. CTA в конце каждой статьи**
-- §10 PROJECT.md: "каждая статья заканчивается одним конкретным следующим шагом".
-- Компонент `KnowledgeArticleCTA` — выбирает CTA по pillar: статья про FET → "Запустить FinanceGuide"; статья про DD → "Запросить ClearView отчёт"; статья про переуступку → "Смотреть переуступки".
+- Новая страница `/clearview/projects` — каталог опубликованных рейтингов (фильтр по grade, району, девелоперу), карточки с `<ClearViewBadge />` и линком на проект.
+- Sitemap: добавить URL'ы опубликованных отчётов в `public/sitemap-pillars.xml`.
+- Линк в шапке `ClearViewLanding` → «Смотреть рейтинги проектов».
+- На `OffplanIndex` — фильтр «Только с ClearView рейтингом».
 
 ---
 
-## 5. Приоритизация по интересам ЦА (из PROJECT.md §13)
+## Технические детали
 
-| Этап | Кому критично | Почему | Когда |
-|---|---|---|---|
-| A1-A4 | Все ЦА | Базовая видимость trust-сигналов; без этого не работает ничего | Сейчас |
-| B1 (Reviews) | Турист, Семья, Snowbirds | Без отзывов конверсия STR ниже Airbnb | Спринт 2 |
-| C1-C4 (Off-plan journey) | HNW investor, Монг./Бангл./Европ. инвестор, Пассивный инвестор | Главный revenue (PROJECT.md §1: 70% выручки от RE/Invest) | Спринт 3-4 |
-| D2 (Quick Sale) | HNW investor, Capital | $500K+ deals с быстрым циклом | Спринт 5 |
-| E1-E4 (Knowledge link) | Все ЦА, особенно Новый экспат | Lead scoring + удержание + SEO | Спринт 5-6 |
+**Файлы создаются:**
+- `src/lib/clearview/methodology.ts` — single source of truth по весам/грейдам
+- `src/components/clearview/ClearViewBadge.tsx`
+- `src/components/clearview/ClearViewGauge.tsx`
+- `src/components/clearview/ClearViewRadar.tsx`
+- `src/components/clearview/ClearViewPaywall.tsx`
+- `src/hooks/useClearViewPurchase.ts`
+- `src/pages/clearview/ClearViewProjects.tsx`
+- `supabase/functions/create-clearview-checkout/index.ts`
+- Миграции: sync весов, `v_clearview_public` view, `clearview_purchases` table + RLS, computed columns на `properties`, обновление `stripe-webhook` для clearview-purchase
 
----
+**Файлы редактируются:**
+- `src/components/property/TrustStrip.tsx` — использовать `<ClearViewBadge />`, читать из computed columns
+- `src/components/property/PropertyListingCard.tsx` — overlay badge
+- `src/components/property/PropertyMapView.tsx` — chip в InfoWindow
+- `src/components/newbuilds/ClearViewReport.tsx` — split free/paid + Radar/Gauge
+- `src/pages/property/OffplanDetail.tsx` — встроить `ClearViewReport`
+- `src/pages/clearview/ClearViewLanding.tsx` — линк на директорию
+- `src/lib/config/routes.ts` — добавить `CLEARVIEW_PROJECTS`
+- `supabase/functions/stripe-webhook/index.ts` — обработка clearview-purchase
 
-## 6. Тест против 5 правил PROJECT.md §16
-
-| Тест | Этапы A-E |
-|---|---|
-| Revenue Line (90 дней) | A,B,D — yes; C — частично; E — длинный хвост |
-| Funnel Proximity | Все этапы строго на пути турист→арендатор→покупатель |
-| Asset Leverage | C,D используют отношения с Sansiri/Rhom Bho и омбудсмен; E использует контентный актив |
-| Founder Bandwidth | Не требуется новый найм; всё реализуемо текущей командой |
-| Narrative Coherence | Полностью укладывается в "инфраструктура + доверенный оператор" |
-
-**Все 5 этапов проходят 3+ "да" → строить.**
-
----
-
-## 7. Что НЕ делаем сейчас (явно)
-
-- Не трогаем рабочий STR-флоу (orders, ledger, Stripe, iCal, pricingEngine).
-- Не строим white-label SaaS для PM (в Defer списке PROJECT.md §15).
-- Не добавляем ипотечный калькулятор (в Таиланде иностранцам ипотеку не дают; вместо — installment plan от застройщика, что C-этап и закрывает).
-- Не делаем верификацию источника средств (KYC) — пользователь явно сказал.
+**Стек:** recharts (уже в проекте) для Radar/Gauge, Stripe one-off через `_shared/checkout-handler.ts`, RLS на новых таблицах, токены `tokens.css`.
 
 ---
 
-## 8. Что нужно подтвердить, прежде чем стартовать
+## Порядок реализации (рекомендуемый)
 
-Готов начать с **Этапа A** (1-2 недели работы, дает быстрый visible impact). Подтвердите либо скорректируйте:
+1. F1 (миграция + methodology config) — критично, без этого данные несогласованы
+2. F2 (Badge/Gauge/Radar) — даёт мгновенный визуальный эффект на всех карточках
+3. F3 (paywall split) — готовит монетизацию
+4. F4 (Stripe + B2B intake) — включает деньги
+5. F5 (директория + SEO) — рост органики
 
-1. Стартуем с **Этапа A** (TrustStrip + Installment Timeline + табы PropertyHub + видеоуплоадер) — самое срочное и видимое?
-2. Или с **Этапа C** (off-plan buyer journey — главный revenue)?
-3. Или с **Этапа E** (Knowledge link — long-term moat)?
-
-Если согласны с порядком A → B → C → D → E — стартую с A.
+Подтвердите — иду реализовывать **все 5 этапов** одним проходом, либо назовите конкретные (например только F1+F2 сейчас, остальное позже).
