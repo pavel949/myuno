@@ -105,7 +105,7 @@ export default function AdminNewbuilds() {
   });
 
   const filtered = useMemo(() => {
-    return projects.filter((p: any) => {
+    return projects.filter((p) => {
       if (statusFilter !== 'all' && p.project_status !== statusFilter) return false;
       if (search) {
         const q = search.toLowerCase();
@@ -115,17 +115,17 @@ export default function AdminNewbuilds() {
     });
   }, [projects, search, statusFilter]);
 
-  const pending = projects.filter((p: any) => !p.is_approved);
-  const featured = projects.filter((p: any) => p.is_featured);
+  const pending = projects.filter((p) => !p.is_approved);
+  const featured = projects.filter((p) => p.is_featured);
 
   const stats = useMemo(() => ({
     total: projects.length,
-    approved: projects.filter((p: any) => p.is_approved).length,
-    withCatalog: projects.filter((p: any) => p.offplan_catalog).length,
+    approved: projects.filter((p) => p.is_approved).length,
+    withCatalog: projects.filter((p) => p.offplan_catalog).length,
     featured: featured.length,
-    offplan: projects.filter((p: any) => p.project_status === 'offplan').length,
-    construction: projects.filter((p: any) => p.project_status === 'under_construction').length,
-    completed: projects.filter((p: any) => p.project_status === 'completed').length,
+    offplan: projects.filter((p) => p.project_status === 'offplan').length,
+    construction: projects.filter((p) => p.project_status === 'under_construction').length,
+    completed: projects.filter((p) => p.project_status === 'completed').length,
   }), [projects, featured]);
 
   return (
