@@ -18,6 +18,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { MarketComingSoonOverlay } from '@/components/market/MarketComingSoonOverlay';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
+import { usePersonaFilter } from '@/hooks/usePersonaFilter';
+import { PersonaFilterChip } from '@/components/landings/PersonaFilterChip';
 
 // Special virtual categories
 const SPECIAL_CATEGORIES = {
@@ -111,8 +113,10 @@ const MarketCategoryPage = () => {
   const cartItems = getItemsByType('product');
   const cartItemCount = cartItems.reduce((sum, i) => sum + i.quantity, 0);
 
+  const { applyFilter: applyPersonaFilter } = usePersonaFilter();
+
   const filteredProducts = useMemo(() => {
-    return categoryProducts.filter(product => {
+    const base = categoryProducts.filter(product => {
       // Subcategory filter (only for regular categories)
       if (!isSpecialCategory && selectedSubcategory !== 'all' && product.subcategory !== selectedSubcategory) {
         return false;
@@ -123,7 +127,7 @@ const MarketCategoryPage = () => {
         const query = searchQuery.toLowerCase();
         const name = language === 'ru' ? product.name_ru : product.name_en;
         const desc = language === 'ru' ? product.description_ru : product.description_en;
-        if (!name.toLowerCase().includes(query) && 
+        if (!name.toLowerCase().includes(query) &&
             !(desc && desc.toLowerCase().includes(query))) {
           return false;
         }
@@ -131,7 +135,15 @@ const MarketCategoryPage = () => {
 
       return true;
     });
-  }, [categoryProducts, selectedSubcategory, searchQuery, language, isSpecialCategory]);
+    // Persona filter — uses the product's `tags` column (kebab-case keywords
+    // like halal/vegan/pet/eco). Falls back to full set if no match so the
+    // catalog never goes empty.
+    return applyPersonaFilter(base, (p) => {
+      const raw = p as unknown as Record<string, unknown>;
+      const tags = (raw.tags as string[] | null) ?? [];
+      return [...tags, p.subcategory ?? '', p.category_slug ?? ''].filter(Boolean) as string[];
+    });
+  }, [categoryProducts, selectedSubcategory, searchQuery, language, isSpecialCategory, applyPersonaFilter]);
 
   const getQuantity = (productId: string) => {
     return cartItems.find(i => i.id === productId)?.quantity || 0;
@@ -241,6 +253,9 @@ const MarketCategoryPage = () => {
             className="mb-4"
           />
         )}
+
+        {/* Persona-filter chip */}
+        <PersonaFilterChip className="mb-3" />
 
         {/* Results Count & View Toggle */}
         <div className="flex items-center justify-between mb-4">
