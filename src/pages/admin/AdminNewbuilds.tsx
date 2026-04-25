@@ -500,8 +500,8 @@ function DeveloperRow({ developer: d, projectCount, onUpdate }: { developer: Dev
             <Input size={1} defaultValue={d.phone || ''} onBlur={e => e.target.value !== (d.phone || '') && onUpdate({ phone: e.target.value })} />
           </div>
           <div>
-            <Label className="text-xs">WhatsApp</Label>
-            <Input size={1} defaultValue={d.whatsapp || ''} onBlur={e => e.target.value !== (d.whatsapp || '') && onUpdate({ whatsapp: e.target.value })} />
+            <Label className="text-xs">Telegram</Label>
+            <Input size={1} defaultValue={d.telegram || ''} onBlur={e => e.target.value !== (d.telegram || '') && onUpdate({ telegram: e.target.value })} />
           </div>
           <div>
             <Label className="text-xs">Score</Label>
