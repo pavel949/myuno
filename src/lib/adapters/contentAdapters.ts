@@ -317,6 +317,18 @@ function isOwnerProperty(property: OwnerProperty | VendorProperty): property is 
   return 'title' in property && !('title_en' in property);
 }
 
+// Optional fields stored on the property row but not always present in legacy
+// OwnerProperty / VendorProperty types. Avoid `any` by narrowing locally.
+type PropertyOptionalAttrs = {
+  floor?: number;
+  unit_number?: string;
+  plot_size_sqm?: number;
+  pool_type?: string;
+  total_floors?: number;
+  instant_booking?: boolean;
+  approval_status?: string;
+};
+
 /**
  * Maps an OwnerProperty or VendorProperty to unified card props
  * Used by: PropertyListItem, AdminProperties, OwnerProperties
