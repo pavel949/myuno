@@ -95,6 +95,7 @@ export default function ServicesIndex() {
         />
 
         <main className={cn(ECOSYSTEM_PAGE_CONTAINER, "py-4 pb-24")}>
+          <PersonaFilterChip className="mb-4" />
           {/* Popular Section */}
           {selectedCategory === 'all' && !searchQuery && (
             <div className="mb-6">
