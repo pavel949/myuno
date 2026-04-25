@@ -133,7 +133,19 @@ export default function PropertyDetail() {
     );
   }
 
-  const images = (property.images && property.images.length > 0)
+  // Loose extension for property fields not yet in generated DB types
+  type GuestExtraFee = { name?: string; amount?: number; per?: string };
+  type PropertyExt = {
+    tenancy_modes?: string[] | null;
+    beds?: number | null;
+    title_deed_type?: string | null;
+    escrow_offered?: boolean | null;
+    installment_plan?: { milestones?: InstallmentMilestone[]; preset_id?: string } | null;
+    guest_extra_fees?: GuestExtraFee[] | null;
+    price_per_month?: number | null;
+    min_lease_months?: number | null;
+  };
+  const propertyExt = property as unknown as typeof property & PropertyExt;
     ? property.images
     : [property.cover_image].filter(Boolean) as string[];
   const amenities = property.amenities || [];
