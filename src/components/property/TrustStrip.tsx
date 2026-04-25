@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { Shield, ShieldCheck, Award, Droplets, FileCheck, Info, Lock } from 'lucide-react';
+import { Shield, ShieldCheck, Droplets, FileCheck, Info, Lock } from 'lucide-react';
+import { ClearViewBadge } from '@/components/clearview/ClearViewBadge';
 import { cn } from '@/lib/utils';
 import { TITLE_DEED_TYPES, type TitleDeedType } from '@/lib/real-estate/saleIntentTaxonomy';
 
@@ -100,15 +101,15 @@ export function TrustStrip({
     );
   }
 
-  // ClearView score
+  // ClearView score (uses unified ClearViewBadge with V3 grade colors)
   if (clearviewBadge) {
     chips.push(
-      <Chip
+      <ClearViewBadge
         key="cv-badge"
-        icon={Award}
-        label={`ClearView ${clearviewBadge}`}
-        tooltip={isRu ? 'Институциональный рейтинг проекта по методологии ClearView V3' : 'Institutional ClearView V3 rating'}
-        className="border-primary/40 text-primary bg-primary/10"
+        grade={clearviewBadge as 'AAA' | 'AA' | 'A' | 'BBB' | 'BB'}
+        size="sm"
+        showLabel
+        isRu={isRu}
       />,
     );
   }
