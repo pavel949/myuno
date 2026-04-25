@@ -18,7 +18,14 @@ import { ProviderSelector } from '@/components/admin/ProviderSelector';
 import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import type { Database } from '@/integrations/supabase/types';
+
+type SizeVariant = { size: string; price: number };
+type BouquetRow = Database['public']['Tables']['bouquets']['Row'] & {
+  size_variants?: SizeVariant[] | null;
+  shop?: { name_en: string | null; name_ru: string | null } | null;
+};
+type FlowerShopRow = Database['public']['Tables']['flower_shops']['Row'];
 
 // ==================== SHOPS TAB (existing) ====================
 
