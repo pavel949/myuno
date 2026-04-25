@@ -312,6 +312,7 @@ const HALF_WIDTH_WIDGETS: Set<DashboardWidgetKey> = new Set([
   'active_deals', 'crm_tasks',
   'ai_agents_status', 'founder_quick_actions',
   'business_health', 'top_actions',
+  'sell_signal',
 ]);
 
 const OVERVIEW_SUPPRESSED_WIDGETS: Set<DashboardWidgetKey> = new Set([
@@ -361,7 +362,7 @@ export default function OwnerDashboard() {
       titleEn: 'Sales & CRM',
       titleRu: 'Продажи и CRM',
       icon: Briefcase,
-      widgets: ['active_deals', 'crm_tasks', 'founder_inbox', 'operations'] as DashboardWidgetKey[],
+      widgets: ['active_deals', 'sell_signal', 'crm_tasks', 'founder_inbox', 'operations'] as DashboardWidgetKey[],
     },
     exceptions: {
       titleEn: 'Exceptions',
