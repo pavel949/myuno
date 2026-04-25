@@ -1,10 +1,12 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
+export type LeadPriority = 'ready' | 'hot' | 'warm' | 'cold';
+
 export interface LeadScoreResult {
   score: number;
-  priority: 'hot' | 'warm' | 'cold';
+  priority: LeadPriority;
   reasoning: string;
   recommended_action: string;
   followup?: {
