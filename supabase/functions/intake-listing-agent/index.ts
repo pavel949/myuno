@@ -1,10 +1,20 @@
 // Deno.serve used (native edge runtime)
 import { createClient } from "../_shared/supabase.ts";
+import { getCorsHeaders } from "../_shared/cors.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://myuno.app",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
+/**
+ * Build CORS headers from the canonical helper, then extend Allow-Headers
+ * with the supabase-js client-info headers this function sees in practice.
+ */
+function buildCors(req: Request): Record<string, string> {
+  const base = getCorsHeaders(req);
+  return {
+    ...base,
+    "Access-Control-Allow-Headers":
+      "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+  };
+}
+
 
 // Vertical configurations - loaded from database with static fallback
 interface VerticalConfig {
