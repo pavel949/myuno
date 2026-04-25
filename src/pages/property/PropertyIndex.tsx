@@ -329,6 +329,9 @@ export default function PropertyIndex() {
 
         {/* Content */}
         <div className="pt-4">
+          <div className={cn(ECOSYSTEM_PAGE_CONTAINER, "mb-3")}>
+            <PersonaFilterChip />
+          </div>
           <div className={ECOSYSTEM_PAGE_CONTAINER}>
             <VerticalContextBanner verticalId="property" />
           </div>
