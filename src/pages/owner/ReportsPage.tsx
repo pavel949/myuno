@@ -57,6 +57,25 @@ import { useQuery } from '@tanstack/react-query';
 
 type ReportScope = 'property' | 'complex' | 'owner' | 'portfolio';
 
+type ReportableProperty = {
+  id?: string;
+  property_id?: string;
+  title?: string | null;
+  title_en?: string | null;
+  title_ru?: string | null;
+  complex_id?: string | null;
+};
+
+type OwnerContactRow = {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
+  propertyIds: string[];
+};
+
+type AccountingPolicyRow = { property_id: string } & Record<string, unknown>;
+
 function useOwnerContacts() {
   const { user } = useAuth();
   return useQuery({
