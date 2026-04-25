@@ -11,6 +11,101 @@ import type { Experience } from '@/hooks/useExperiences';
 import { formatDuration } from '@/hooks/useExperiences';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 
+// ─── Local input shapes for catalog adapters ─────────────
+// Narrow, hand-rolled — many of these tables are accessed via dynamic select()
+// strings and are not always covered by generated DB types.
+
+type SizeVariant = { price?: number | null };
+type Bouquet = {
+  id: string;
+  image?: string | null;
+  name_en?: string | null;
+  name_ru?: string | null;
+  short_description_en?: string | null;
+  short_description_ru?: string | null;
+  price?: number | null;
+  size_variants?: SizeVariant[] | null;
+  is_popular?: boolean | null;
+  box_type?: string | null;
+  scarcity_level?: string | null;
+  social_proof_badge?: string | null;
+};
+type PetService = {
+  id: string;
+  name_en?: string | null;
+  name_ru?: string | null;
+  cover_image?: string | null;
+  is_verified?: boolean | null;
+  rating?: number | null;
+  address?: string | null;
+  price_from?: number | null;
+};
+type Restaurant = {
+  id: string;
+  name_en?: string | null;
+  name_ru?: string | null;
+  cover_image?: string | null;
+  rating?: number | null;
+  cuisine_tags?: string[] | null;
+  price_band?: string | null;
+  reservation_url?: string | null;
+  hero_image_url?: string | null;
+  area?: string | null;
+};
+type Salon = PetService;
+type Gym = {
+  id: string;
+  name_en?: string | null;
+  name_ru?: string | null;
+  cover_image?: string | null;
+  is_verified?: boolean | null;
+  rating?: number | null;
+  address?: string | null;
+  price_day_pass?: number | null;
+  price_month_pass?: number | null;
+};
+type EducationProvider = {
+  id: string;
+  name_en?: string | null;
+  name_ru?: string | null;
+  cover_image?: string | null;
+  rating?: number | null;
+  provider_type?: string | null;
+  price_per_hour?: number | null;
+};
+type CleaningService = {
+  id: string;
+  name_en?: string | null;
+  name_ru?: string | null;
+  cover_image?: string | null;
+  is_verified?: boolean | null;
+  rating?: number | null;
+  price_fixed?: number | null;
+  price_per_hour?: number | null;
+  duration_hours?: number | null;
+  service_type?: string | null;
+};
+type EventItem = {
+  id: string;
+  title_en?: string | null;
+  title_ru?: string | null;
+  cover_image?: string | null;
+  is_featured?: boolean | null;
+  event_date?: string | null;
+  location_name?: string | null;
+  price?: number | null;
+};
+type Clinic = {
+  id: string;
+  name_en?: string | null;
+  name_ru?: string | null;
+  cover_image?: string | null;
+  rating?: number | null;
+  address?: string | null;
+  is_24h?: boolean | null;
+  languages?: string[] | null;
+};
+
 // ─── Yacht ───────────────────────────────────────────────
 
 export function mapYachtToCatalogCard(
@@ -98,7 +193,7 @@ export function mapExperienceToCatalogCard(
 // ─── Bouquet (Flowers) ───────────────────────────────────
 
 export function mapBouquetToCatalogCard(
-  bouquet: any,
+  bouquet: Bouquet,
   language: string,
   navigate: (path: string) => void
 ): CatalogCardProps {
@@ -107,7 +202,7 @@ export function mapBouquetToCatalogCard(
   const shortDesc = isRu ? bouquet.short_description_ru : bouquet.short_description_en;
   const hasVariants = bouquet.size_variants?.length;
   const displayPrice = hasVariants
-    ? (bouquet.size_variants as any[])[0]?.price || bouquet.price
+    ? (bouquet.size_variants as SizeVariant[])[0]?.price || bouquet.price
     : bouquet.price;
 
   const badges: CatalogBadge[] = [];
@@ -144,7 +239,7 @@ export function mapBouquetToCatalogCard(
 // ─── Pet Service ─────────────────────────────────────────
 
 export function mapPetServiceToCatalogCard(
-  service: any,
+  service: PetService,
   language: string,
   navigate: (path: string) => void,
   formatPrice: (price: number) => string
@@ -174,12 +269,12 @@ const PRICE_BAND_LABEL: Record<string, string> = {
 };
 
 export function mapRestaurantToCatalogCard(
-  restaurant: any,
+  restaurant: Restaurant,
   language: string,
   navigate: (path: string) => void
 ): CatalogCardProps {
   const isRu = language === 'ru';
-  const r = restaurant as any;
+  const r = restaurant;
   const cuisineTags = r.cuisine_tags as string[] | null;
   const priceBand = r.price_band as string | null;
   const reservationUrl = r.reservation_url as string | null;
@@ -212,7 +307,7 @@ export function mapRestaurantToCatalogCard(
 // ─── Salon (Beauty & Spa) ────────────────────────────────
 
 export function mapSalonToCatalogCard(
-  salon: any,
+  salon: Salon,
   language: string,
   navigate: (path: string) => void
 ): CatalogCardProps {
@@ -237,7 +332,7 @@ export function mapSalonToCatalogCard(
 // ─── Gym (Fitness) ───────────────────────────────────────
 
 export function mapGymToCatalogCard(
-  gym: any,
+  gym: Gym,
   language: string,
   navigate: (path: string) => void
 ): CatalogCardProps {
@@ -267,7 +362,7 @@ export function mapGymToCatalogCard(
 // ─── Education Provider ──────────────────────────────────
 
 export function mapEducationToCatalogCard(
-  provider: any,
+  provider: EducationProvider,
   language: string,
   navigate: (path: string) => void
 ): CatalogCardProps {
@@ -296,7 +391,7 @@ export function mapEducationToCatalogCard(
 // ─── Cleaning Service ────────────────────────────────────
 
 export function mapCleaningToCatalogCard(
-  service: any,
+  service: CleaningService,
   language: string,
   navigate: (path: string) => void
 ): CatalogCardProps {
@@ -326,7 +421,7 @@ export function mapCleaningToCatalogCard(
 // ─── Event ───────────────────────────────────────────────
 
 export function mapEventToCatalogCard(
-  event: any,
+  event: EventItem,
   language: string,
   navigate: (path: string) => void,
   formatDate: (dateStr: string | null) => string
@@ -355,7 +450,7 @@ export function mapEventToCatalogCard(
 // ─── Clinic (Medical) ────────────────────────────────────
 
 export function mapClinicToCatalogCard(
-  clinic: any,
+  clinic: Clinic,
   language: string,
   navigate: (path: string) => void,
   isOpen: boolean

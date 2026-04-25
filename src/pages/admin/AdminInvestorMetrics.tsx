@@ -12,6 +12,10 @@ import {
 } from 'recharts';
 import { format, subDays, startOfDay } from 'date-fns';
 
+type OrderRow = { total_amount: number | string | null; currency: string | null; status: string; created_at: string };
+type ProfileRow = { created_at: string };
+type EventRow = { event_name: string; created_at: string };
+
 function useInvestorMetrics() {
   return useQuery({
     queryKey: ['investor-metrics'],
@@ -32,24 +36,28 @@ function useInvestorMetrics() {
           .gte('created_at', subDays(now, 90).toISOString()),
       ]);
 
+      const ordersList: OrderRow[] = (orders.data || []) as OrderRow[];
+      const profilesList: ProfileRow[] = (profiles.data || []) as ProfileRow[];
+      const eventsList: EventRow[] = (events.data || []) as EventRow[];
+
       // GMV
-      const paidOrders = orders.data?.filter((o: any) => o.status === 'paid' || o.status === 'completed') || [];
-      const gmvTotal = paidOrders.reduce((s: number, o: any) => s + (Number(o.total_amount) || 0), 0);
+      const paidOrders = ordersList.filter(o => o.status === 'paid' || o.status === 'completed');
+      const gmvTotal = paidOrders.reduce((s, o) => s + (Number(o.total_amount) || 0), 0);
       const gmvLast30 = paidOrders
-        .filter((o: any) => new Date(o.created_at) >= new Date(thirtyDaysAgo))
-        .reduce((s: number, o: any) => s + (Number(o.total_amount) || 0), 0);
+        .filter(o => new Date(o.created_at) >= new Date(thirtyDaysAgo))
+        .reduce((s, o) => s + (Number(o.total_amount) || 0), 0);
 
       // Users
-      const totalUsers = profiles.data?.length || 0;
-      const newUsersLast30 = profiles.data?.filter(
-        (p: any) => new Date(p.created_at) >= new Date(thirtyDaysAgo)
-      ).length || 0;
-      const newUsersLast7 = profiles.data?.filter(
-        (p: any) => new Date(p.created_at) >= new Date(sevenDaysAgo)
-      ).length || 0;
+      const totalUsers = profilesList.length;
+      const newUsersLast30 = profilesList.filter(
+        p => new Date(p.created_at) >= new Date(thirtyDaysAgo)
+      ).length;
+      const newUsersLast7 = profilesList.filter(
+        p => new Date(p.created_at) >= new Date(sevenDaysAgo)
+      ).length;
 
       // Page views (MAU proxy)
-      const pageViews = events.data?.filter((e: any) => e.event_name === 'page_view').length || 0;
+      const pageViews = eventsList.filter(e => e.event_name === 'page_view').length;
 
       // GMV trend (last 30 days, grouped by day)
       const gmvByDay: Record<string, number> = {};
@@ -58,8 +66,8 @@ function useInvestorMetrics() {
         gmvByDay[day] = 0;
       }
       paidOrders
-        .filter((o: any) => new Date(o.created_at) >= new Date(thirtyDaysAgo))
-        .forEach((o: any) => {
+        .filter(o => new Date(o.created_at) >= new Date(thirtyDaysAgo))
+        .forEach(o => {
           const day = format(new Date(o.created_at), 'MM/dd');
           if (gmvByDay[day] !== undefined) gmvByDay[day] += Number(o.total_amount) || 0;
         });
@@ -67,7 +75,7 @@ function useInvestorMetrics() {
 
       // Orders by status
       const statusCounts: Record<string, number> = {};
-      (orders.data || []).forEach((o: any) => {
+      ordersList.forEach(o => {
         statusCounts[o.status] = (statusCounts[o.status] || 0) + 1;
       });
       const ordersByStatus = Object.entries(statusCounts).map(([name, value]) => ({ name, value }));
@@ -82,7 +90,7 @@ function useInvestorMetrics() {
         newUsersLast30,
         newUsersLast7,
         pageViews,
-        totalOrders: orders.data?.length || 0,
+        totalOrders: ordersList.length,
         paidOrders: paidOrders.length,
         avgOrderValue,
         gmvTrend,
@@ -219,7 +227,7 @@ export default function AdminInvestorMetrics() {
                   nameKey="name"
                   label={({ name, value }) => `${name}: ${value}`}
                 >
-                  {m.ordersByStatus.map((_: any, i: number) => (
+                  {m.ordersByStatus.map((_, i) => (
                     <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
                   ))}
                 </Pie>
