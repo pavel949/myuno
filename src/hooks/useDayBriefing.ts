@@ -236,7 +236,7 @@ export function useDayBriefing(options?: UseDayBriefingOptions) {
         queries.push(
           q(supabase.from('service_orders').select('id, order_number, service_name, status, priority, scheduled_at, property_id')
             .eq('assigned_to', user.id)
-            .in('status', ['assigned', 'in_progress'] as any[])
+            .in('status', ['assigned', 'in_progress'])
             .order('scheduled_at', { ascending: true, nullsFirst: false })
             .limit(20))
         );
@@ -248,7 +248,7 @@ export function useDayBriefing(options?: UseDayBriefingOptions) {
         queries.push(
           q(supabase.from('bookings').select('id, status, booking_date, time_slot, total_amount, currency')
             .eq('user_id', user.id)
-            .in('status', ['confirmed', 'submitted'] as any[])
+            .in('status', ['confirmed', 'submitted'])
             .gte('booking_date', todayStr)
             .order('booking_date')
             .limit(10))
@@ -323,7 +323,7 @@ export function useDayBriefing(options?: UseDayBriefingOptions) {
           } catch { return false; }
         };
 
-        for (const c of (dataMap.contacts || []) as any[]) {
+        for (const c of (dataMap.contacts || []) as ContactRow[]) {
           if (!c.birthday || !matchesBirthday(c.birthday)) continue;
           const md = c.birthday.slice(5);
           const isToday_ = md === todayMD;
@@ -337,7 +337,7 @@ export function useDayBriefing(options?: UseDayBriefingOptions) {
           });
         }
 
-        for (const s of (dataMap.staff || []) as any[]) {
+        for (const s of (dataMap.staff || []) as StaffRow[]) {
           if (!s.date_of_birth || !matchesBirthday(s.date_of_birth)) continue;
           const md = s.date_of_birth.slice(5);
           const isToday_ = md === todayMD;
@@ -353,7 +353,7 @@ export function useDayBriefing(options?: UseDayBriefingOptions) {
 
         // ─── Bookings (check-in/out) ───
         const propNameMap = new Map(allProperties.map(p => [p.property_id, p.title || 'Property']));
-        for (const b of (dataMap.bookings || []) as any[]) {
+        for (const b of (dataMap.bookings || []) as BookingRow[]) {
           const ci = new Date(b.check_in);
           const co = new Date(b.check_out);
           const pName = propNameMap.get(b.property_id) || 'Property';
@@ -388,7 +388,7 @@ export function useDayBriefing(options?: UseDayBriefingOptions) {
         }
 
         // ─── CRM scheduled activities ───
-        for (const a of (dataMap.activities || []) as any[]) {
+        for (const a of (dataMap.activities || []) as ActivityRow[]) {
           const activityPropertyId = a.deal?.property_id || null;
           if (selectedPropertyId && activityPropertyId && activityPropertyId !== selectedPropertyId) {
             continue;
@@ -407,7 +407,7 @@ export function useDayBriefing(options?: UseDayBriefingOptions) {
         }
 
         // ─── CRM Tasks ───
-        for (const t of (dataMap.crmTasks || []) as any[]) {
+        for (const t of (dataMap.crmTasks || []) as CrmTaskRow[]) {
           const isOverdue = t.due_date && t.due_date < todayStr;
           items.push({
             id: `task-${t.id}`,
@@ -421,7 +421,7 @@ export function useDayBriefing(options?: UseDayBriefingOptions) {
 
       // ─── Vendor orders ───
       if (isVendor) {
-        for (const o of (dataMap.vendorOrders || []) as any[]) {
+        for (const o of (dataMap.vendorOrders || []) as VendorOrderRow[]) {
           const isPending = o.status === 'pending';
           items.push({
             id: `vo-${o.id}`, type: 'vendor_order',
@@ -436,7 +436,7 @@ export function useDayBriefing(options?: UseDayBriefingOptions) {
 
       // ─── Staff tasks ───
       if (isStaff) {
-        for (const t of (dataMap.staffTasks || []) as any[]) {
+        for (const t of (dataMap.staffTasks || []) as StaffTaskRow[]) {
           const isInProgress = t.status === 'in_progress';
           items.push({
             id: `st-${t.id}`, type: 'staff_task',
@@ -453,7 +453,7 @@ export function useDayBriefing(options?: UseDayBriefingOptions) {
 
       // ─── Client bookings ───
       if (isClient) {
-        for (const b of (dataMap.myBookings || []) as any[]) {
+        for (const b of (dataMap.myBookings || []) as MyBookingRow[]) {
           const days = differenceInCalendarDays(new Date(b.booking_date), now);
           items.push({
             id: `mb-${b.id}`, type: 'my_booking',
@@ -469,7 +469,7 @@ export function useDayBriefing(options?: UseDayBriefingOptions) {
       }
 
       // ─── Personal reminders (all roles) ───
-      for (const r of (dataMap.reminders || []) as any[]) {
+      for (const r of (dataMap.reminders || []) as ReminderRow[]) {
         const days = differenceInCalendarDays(new Date(r.due_date), now);
         if (days > (r.remind_days_before || 14)) continue;
         items.push({
@@ -481,7 +481,7 @@ export function useDayBriefing(options?: UseDayBriefingOptions) {
       }
 
       // ─── Document expiries (all roles) ───
-      for (const d of (dataMap.documents || []) as any[]) {
+      for (const d of (dataMap.documents || []) as DocumentRow[]) {
         const days = differenceInCalendarDays(new Date(d.expiry_date), now);
         items.push({
           id: `doc-${d.id}`, type: 'document_expiry',
@@ -494,7 +494,7 @@ export function useDayBriefing(options?: UseDayBriefingOptions) {
 
       // ─── Platform content ───
       if (showContent) {
-        for (const r of (dataMap.recommendations || []) as any[]) {
+        for (const r of (dataMap.recommendations || []) as RecommendationRow[]) {
           items.push({
             id: `rec-${r.id}`, type: 'recommendation', sectionOrder: ORDER.recommendations,
             title: r.title_ru || r.title_en,
@@ -504,7 +504,7 @@ export function useDayBriefing(options?: UseDayBriefingOptions) {
           });
         }
 
-        for (const n of (dataMap.news || []) as any[]) {
+        for (const n of (dataMap.news || []) as NewsRow[]) {
           items.push({
             id: `news-${n.id}`, type: 'news', sectionOrder: ORDER.news,
             title: n.title_ru || n.title_en,
@@ -514,7 +514,7 @@ export function useDayBriefing(options?: UseDayBriefingOptions) {
           });
         }
 
-        for (const e of (dataMap.events || []) as any[]) {
+        for (const e of (dataMap.events || []) as EventRow[]) {
           const days = differenceInCalendarDays(new Date(e.event_date), now);
           items.push({
             id: `evt-${e.id}`, type: 'event', sectionOrder: ORDER.events,
