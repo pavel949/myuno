@@ -25,6 +25,7 @@ export default function FlowersIndex() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [filterValues, setFilterValues] = useState<FilterValues>({});
   const isRu = language === 'ru';
+  const { applyFilter: applyPersonaFilter } = usePersonaFilter();
 
   const { categoryRibbon, filterConfig, isLoading: filtersLoading } = useFlowerFilterOptions();
   const categories = useMemo(() => categoryRibbon.map(opt => ({
