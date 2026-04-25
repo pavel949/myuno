@@ -279,6 +279,12 @@ function DashboardWidget({ widgetKey, role }: { widgetKey: DashboardWidgetKey; r
           <TopActionsWidget />
         </Suspense>
       );
+    case 'sell_signal':
+      return (
+        <Suspense fallback={skeleton}>
+          <SellSignalWidget />
+        </Suspense>
+      );
     case 'menu':
       return null;
     default:
