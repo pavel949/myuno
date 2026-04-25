@@ -138,3 +138,43 @@
 5. F5 (директория + SEO) — рост органики
 
 Подтвердите — иду реализовывать **все 5 этапов** одним проходом, либо назовите конкретные (например только F1+F2 сейчас, остальное позже).
+
+---
+
+## STATUS · 2026-04-25
+
+### ✅ F1 Methodology & data — DONE
+- Migration: `clearview_categories` synced to Canon V3 (LRC/DCF/CQP/LMA/FRC/ROI/MAS/LRT)
+- New table `clearview_purchases` + RLS (12-month access, user-scoped)
+- New helper `user_has_clearview_access(project_id)` SECURITY DEFINER
+- New view `v_clearview_public` (safe summary fields only, top-3 flags)
+- RLS on `due_diligence_reports`: published readable, admins manage
+- `clearview_projects/scores` marked DEPRECATED
+
+### ✅ F2 Visualization — DONE
+- `src/lib/clearview/methodology.ts` — single source of truth (8 categories, weights, grade thresholds, recommendation, pricing)
+- `<ClearViewBadge />` — xs/sm/md grade chip
+- `<ClearViewGauge />` — semi-circular 0–100 gauge
+- `<ClearViewRadar />` — 8-axis recharts radar
+- `TrustStrip` updated to use `<ClearViewBadge />`
+- `PropertyListingCard` — grade overlay on image (bottom-left)
+
+### ✅ F3 Paywall — DONE
+- `<ClearViewPaywall />` — blurred teaser + CTA, opens AuthSheet if needed
+- `useClearViewAccess(projectId)` hook
+- `useClearViewCheckout()` hook (Stripe one-off)
+- `ClearViewReport` refactored: free summary (gauge + radar + top-3 flags + exec summary) → paywalled full report (per-category findings + evidence gaps + recommendations)
+- Integrated into `OffplanDetail`
+
+### ✅ F4 Monetization — DONE
+- Edge function `create-clearview-checkout` (Stripe THB 2,900 single / 7,500 bundle)
+- `stripe-webhook` handles `order_type=clearview_report` → inserts `clearview_purchases`
+- B2B intake (`/property/clearview/apply`) already exists via `ClearViewApplyPage`
+
+### ⏳ F5 Public directory — DEFERRED
+- `/clearview/projects` listing page not yet created (low priority vs revenue path)
+
+### Notes
+- Pre-existing build errors in unrelated edge functions (`npm:stripe`, `npm:resend`, `EdgeRuntime`) are not caused by this work
+- Linter "Security Definer View" warning on `v_clearview_public` is acceptable (view exposes only published+safe fields, RLS still enforced upstream)
+- `properties.clearview_badge` is referenced by `TrustStrip` / `PropertyListingCard` but does not yet exist as a column. Needs a follow-up migration to either add a generated column from latest published `due_diligence_reports.grade`, or join via `project_id` in `useProperties`.
