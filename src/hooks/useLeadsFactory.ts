@@ -1,10 +1,12 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
+export type LeadPriority = 'ready' | 'hot' | 'warm' | 'cold';
+
 export interface LeadScoreResult {
   score: number;
-  priority: 'hot' | 'warm' | 'cold';
+  priority: LeadPriority;
   reasoning: string;
   recommended_action: string;
   followup?: {
@@ -121,9 +123,81 @@ export function useLeadsFactory() {
   };
 }
 
+// ----------------------------------------------------------------------
+// Lead Intelligence v1 (PROJECT.md §11) — deterministic event-weighted score
+// ----------------------------------------------------------------------
+
+export interface LeadScoreEvent {
+  event_key: string;
+  weight: number;
+  label_ru: string;
+  label_en: string;
+  description: string | null;
+  is_active: boolean;
+}
+
+export interface ApplyLeadScoreEventResponse {
+  success: boolean;
+  contact_id: string;
+  score_before: number;
+  score_after: number;
+  temperature_before: LeadPriority | null;
+  temperature_after: LeadPriority;
+  crossed_ready: boolean;
+  alert_sent: boolean;
+}
+
+/** List the active scoring events (cached for 5 min). */
+export function useLeadScoreEvents() {
+  return useQuery({
+    queryKey: ['lead-score-events'],
+    staleTime: 5 * 60 * 1000,
+    queryFn: async (): Promise<LeadScoreEvent[]> => {
+      const { data, error } = await supabase.functions.invoke('score-lead/events', {
+        method: 'GET',
+      });
+      if (error) throw error;
+      return (data?.events ?? []) as LeadScoreEvent[];
+    },
+  });
+}
+
+/** Fire one event for a contact (idempotency is the caller's responsibility). */
+export function useApplyLeadScoreEvent() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (params: {
+      contact_id: string;
+      event_key: string;
+      source?: string;
+      meta?: Record<string, unknown>;
+    }): Promise<ApplyLeadScoreEventResponse> => {
+      const { data, error } = await supabase.functions.invoke('score-lead', {
+        body: params,
+      });
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || 'Score event failed');
+      return data as ApplyLeadScoreEventResponse;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['crm-contacts'] });
+      queryClient.invalidateQueries({ queryKey: ['crm-contact', data.contact_id] });
+      if (data.crossed_ready) {
+        toast.success(`Лид перешёл в Ready (${data.score_after}). Алерт отправлен.`);
+      }
+    },
+    onError: (error) => {
+      console.error('Apply lead score event error:', error);
+      toast.error('Не удалось применить событие скоринга');
+    },
+  });
+}
+
 // Helper to get priority color
 export function getPriorityColor(priority: string | null): string {
   switch (priority) {
+    case 'ready':
+      return 'text-destructive bg-destructive/15 ring-1 ring-destructive/40';
     case 'hot':
       return 'text-red-600 bg-red-100';
     case 'warm':
@@ -138,6 +212,7 @@ export function getPriorityColor(priority: string | null): string {
 // Helper to get score color
 export function getScoreColor(score: number | null): string {
   if (score === null) return 'text-muted-foreground';
+  if (score >= 86) return 'text-destructive';
   if (score >= 70) return 'text-red-600';
   if (score >= 40) return 'text-accent';
   return 'text-primary';

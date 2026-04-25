@@ -1,4 +1,4 @@
-import { Flame, Thermometer, Snowflake, Brain, Loader2, Copy, MessageCircle, Mail } from 'lucide-react';
+import { Flame, Thermometer, Snowflake, Brain, Loader2, Copy, MessageCircle, Mail, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -29,11 +29,14 @@ export function LeadAIInsights({
   const { analyzeLead, generateFollowUp } = useLeadsFactory();
   const [followUpMessage, setFollowUpMessage] = useState<string | null>(null);
 
-  const PriorityIcon = aiPriority === 'hot' 
-    ? Flame 
-    : aiPriority === 'warm' 
-      ? Thermometer 
-      : Snowflake;
+  const priorityMeta: Record<string, { Icon: typeof Flame; labelRu: string }> = {
+    ready: { Icon: Sparkles, labelRu: 'Готов' },
+    hot: { Icon: Flame, labelRu: 'Горячий' },
+    warm: { Icon: Thermometer, labelRu: 'Тёплый' },
+    cold: { Icon: Snowflake, labelRu: 'Холодный' },
+  };
+  const meta = priorityMeta[aiPriority ?? 'cold'] ?? priorityMeta.cold;
+  const PriorityIcon = meta.Icon;
 
   const handleAnalyze = () => {
     analyzeLead.mutate(leadId);
@@ -115,7 +118,7 @@ export function LeadAIInsights({
               </div>
               <Badge className={getPriorityColor(aiPriority)}>
                 <PriorityIcon className="h-3 w-3 mr-1" />
-                {aiPriority === 'hot' ? 'Горячий' : aiPriority === 'warm' ? 'Тёплый' : 'Холодный'}
+                {meta.labelRu}
               </Badge>
             </div>
 

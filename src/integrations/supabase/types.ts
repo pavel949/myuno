@@ -9566,6 +9566,92 @@ export type Database = {
           },
         ]
       }
+      lead_score_events: {
+        Row: {
+          created_at: string
+          description: string | null
+          event_key: string
+          is_active: boolean
+          label_en: string
+          label_ru: string
+          updated_at: string
+          weight: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          event_key: string
+          is_active?: boolean
+          label_en: string
+          label_ru: string
+          updated_at?: string
+          weight: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          event_key?: string
+          is_active?: boolean
+          label_en?: string
+          label_ru?: string
+          updated_at?: string
+          weight?: number
+        }
+        Relationships: []
+      }
+      lead_score_events_log: {
+        Row: {
+          contact_id: string
+          created_at: string
+          created_by: string | null
+          event_key: string
+          id: string
+          meta: Json | null
+          score_after: number
+          score_before: number
+          source: string | null
+          temperature_after: string | null
+          temperature_before: string | null
+          weight_applied: number
+        }
+        Insert: {
+          contact_id: string
+          created_at?: string
+          created_by?: string | null
+          event_key: string
+          id?: string
+          meta?: Json | null
+          score_after: number
+          score_before: number
+          source?: string | null
+          temperature_after?: string | null
+          temperature_before?: string | null
+          weight_applied: number
+        }
+        Update: {
+          contact_id?: string
+          created_at?: string
+          created_by?: string | null
+          event_key?: string
+          id?: string
+          meta?: Json | null
+          score_after?: number
+          score_before?: number
+          source?: string | null
+          temperature_after?: string | null
+          temperature_before?: string | null
+          weight_applied?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_score_events_log_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ledger_accounts: {
         Row: {
           account_type: string
@@ -31801,6 +31887,22 @@ export type Database = {
         }
         Returns: number
       }
+      apply_lead_score_event: {
+        Args: {
+          p_contact_id: string
+          p_event_key: string
+          p_meta?: Json
+          p_source?: string
+        }
+        Returns: {
+          contact_id: string
+          crossed_ready: boolean
+          score_after: number
+          score_before: number
+          temperature_after: string
+          temperature_before: string
+        }[]
+      }
       apply_referral_code: {
         Args: { p_code: string; p_referred_id: string }
         Returns: boolean
@@ -32304,6 +32406,10 @@ export type Database = {
       is_verified_purchase: {
         Args: { p_item_id: string; p_item_type: string; p_user_id: string }
         Returns: boolean
+      }
+      lead_temperature_from_score: {
+        Args: { p_score: number }
+        Returns: string
       }
       link_simulation_entity: {
         Args: { p_entity_id: string; p_entity_type: string; p_run_id: string }
