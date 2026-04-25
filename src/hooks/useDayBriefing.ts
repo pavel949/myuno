@@ -90,6 +90,21 @@ interface UseDayBriefingOptions {
   role?: AppRole;
 }
 
+/* ─── Row shapes (loose) for the briefing aggregator ─── */
+type ContactRow = { id: string; first_name: string; last_name: string; birthday: string | null; contact_type: string | null; avatar_url: string | null };
+type StaffRow = { id: string; name: string; date_of_birth: string | null; role: string | null; photo_url: string | null };
+type BookingRow = { id: string; guest_name: string | null; property_id: string; check_in: string; check_out: string; status: string };
+type ActivityRow = { id: string; summary: string; activity_type: string | null; due_date: string; due_time: string | null; deal_id: string; deal: { property_id: string | null } | null };
+type CrmTaskRow = { id: string; title: string; task_type: string | null; priority: string | null; status: string; due_date: string | null };
+type VendorOrderRow = { id: string; order_number: string | null; status: string; total_amount: number | null; currency: string | null; created_at: string; scheduled_date: string | null };
+type StaffTaskRow = { id: string; order_number: string | null; service_name: string | null; status: string; priority: string | null; scheduled_at: string | null; property_id: string | null };
+type MyBookingRow = { id: string; status: string; booking_date: string; time_slot: string | null; total_amount: number | null; currency: string | null };
+type ReminderRow = { id: string; title: string; reminder_type: string | null; due_date: string; remind_days_before: number | null; description: string | null };
+type DocumentRow = { id: string; document_type: string; expiry_date: string; file_name: string };
+type RecommendationRow = { id: string; title: string; description: string | null; href?: string | null; cta_label?: string | null; image_url?: string | null };
+type NewsRow = { id: string; title: string; summary?: string | null; href?: string | null; published_at: string; is_pinned: boolean | null };
+type EventRow = { id: string; title: string; description?: string | null; event_date: string; href?: string | null };
+
 export function useDayBriefing(options?: UseDayBriefingOptions) {
   const { user } = useAuth();
   const { activeRole: contextRole, activeOrgId } = useUserContext();
