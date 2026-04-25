@@ -299,27 +299,25 @@ export default function AdminNewbuilds() {
 
 /* ─── Inline editable project row ─── */
 function ProjectRow({ project: p, index, isEditing, onEdit, onUpdate }: {
-  project: any;
+  project: ProjectRow;
   index: number;
   isEditing: boolean;
   onEdit: () => void;
-  onUpdate: (updates: any) => void;
+  onUpdate: (updates: ProjectUpdate) => void;
 }) {
-  const [edits, setEdits] = useState<any>({});
-  const catalog = p.offplan_catalog || {};
+  const [edits, setEdits] = useState<ProjectEdits>({});
+  const catalog = (p.offplan_catalog as CatalogShape | null) || {};
 
   const handleSave = () => {
-    const updates: any = { ...edits };
-    if (edits._catalogRec || edits._catalogType || edits._catalogBeach) {
+    const { _catalogRec, _catalogType, _catalogBeach, ...rest } = edits;
+    const updates: ProjectUpdate = { ...rest };
+    if (_catalogRec !== undefined || _catalogType !== undefined || _catalogBeach !== undefined) {
       updates.offplan_catalog = {
         ...catalog,
-        ...(edits._catalogRec !== undefined ? { rec: edits._catalogRec } : {}),
-        ...(edits._catalogType !== undefined ? { type: edits._catalogType } : {}),
-        ...(edits._catalogBeach !== undefined ? { beach: edits._catalogBeach } : {}),
+        ...(_catalogRec !== undefined ? { rec: _catalogRec } : {}),
+        ...(_catalogType !== undefined ? { type: _catalogType } : {}),
+        ...(_catalogBeach !== undefined ? { beach: _catalogBeach } : {}),
       };
-      delete updates._catalogRec;
-      delete updates._catalogType;
-      delete updates._catalogBeach;
     }
     onUpdate(updates);
     setEdits({});
