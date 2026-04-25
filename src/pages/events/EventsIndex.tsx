@@ -42,6 +42,7 @@ export default function EventsIndex() {
   const [filterValues, setFilterValues] = useState<FilterValues>({});
   const [sortBy, setSortBy] = useState('date_asc');
   const isRu = language === 'ru';
+  const { applyFilter: applyPersonaFilter } = usePersonaFilter();
 
   const { events, isLoading } = useEvents({ category: selectedCategory !== 'all' ? selectedCategory : undefined });
 
