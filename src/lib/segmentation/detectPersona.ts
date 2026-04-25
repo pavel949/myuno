@@ -35,6 +35,7 @@ export type CanonicalModifier =
   | 'medical'
   | 'halal'
   | 'kosher'
+  | 'vegan'
   | 'accessibility'
   | 'lgbtq'
   | 'athlete'
