@@ -151,7 +151,13 @@ export function useCreateOwnerProperty() {
       if (!user) throw new Error('Not authenticated');
       
       // Priority: explicit data > active company context > DB fallback
-      const companyIdFromData = (data as any).management_company_id || data._companyId || activeCompanyId || null;
+      const dataExt = data as Partial<OwnerProperty> & {
+        _companyId?: string;
+        _silent?: boolean;
+        management_company_id?: string | null;
+        description_en?: string;
+      };
+      const companyIdFromData = dataExt.management_company_id || data._companyId || activeCompanyId || null;
       const [profileRes, membershipRes] = await Promise.all([
         supabase.from('profiles').select('full_name, email').eq('id', user.id).single(),
         !companyIdFromData
@@ -162,10 +168,10 @@ export function useCreateOwnerProperty() {
       const profile = profileRes.data;
       const managementCompanyId = companyIdFromData || membershipRes.data?.company_id || null;
 
-      const { _companyId, _silent, title, title_ru, description, description_ru, ...restData } = data as any;
+      const { _companyId, _silent, title, title_ru, description, description_ru, ...restData } = dataExt;
       
       // Clean undefined values to prevent potential DB column mismatch
-      const cleanRest: Record<string, any> = {};
+      const cleanRest: Record<string, unknown> = {};
       for (const [key, val] of Object.entries(restData)) {
         if (val !== undefined) cleanRest[key] = val;
       }
@@ -177,7 +183,7 @@ export function useCreateOwnerProperty() {
         is_active: data.approval_status === 'draft' ? false : true,
         title_en: title || data.address || 'New Property',
         title_ru: title_ru || title || 'Новый объект',
-        description_en: description || (data as any).description_en || '',
+        description_en: description || dataExt.description_en || '',
         description_ru: description_ru || '',
         listing_type: 'rent',
         listing_modes: data.listing_modes || ['rent'],
@@ -186,7 +192,7 @@ export function useCreateOwnerProperty() {
       
       const { data: result, error } = await supabase
         .from('properties')
-        .insert(insertData as any)
+        .insert(insertData as never)
         .select()
         .single();
       
