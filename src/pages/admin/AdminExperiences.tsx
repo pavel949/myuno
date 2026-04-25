@@ -426,7 +426,8 @@ export default function AdminExperiences() {
                       </div>
                     </CardContent>
                   </Card>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
