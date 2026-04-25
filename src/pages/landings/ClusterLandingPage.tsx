@@ -63,10 +63,19 @@ interface ClusterLandingViewProps {
 
 const ClusterLandingView = ({ landing }: ClusterLandingViewProps) => {
   const { language } = useLanguage();
+  const [searchParams] = useSearchParams();
   const isRu = language === 'ru';
   const t = <T,>(pair: { ru: T; en: T }): T => (isRu ? pair.ru : pair.en);
   const theme = getClusterTheme(landing.slug);
   const Icon = theme.icon;
+
+  const personaSlug = useMemo(() => {
+    const raw = searchParams.get('persona');
+    return raw ? resolvePersonaSlug(raw) : null;
+  }, [searchParams]);
+
+  const withPersona = (href: string) =>
+    personaSlug ? withPersonaParam(href, personaSlug) : href;
 
   const livePersonaLinks = useMemo(() => {
     const codes = new Set(landing.relatedPersonas);
