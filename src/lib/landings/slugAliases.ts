@@ -43,6 +43,12 @@ export const PERSONA_ALIASES: Record<string, string> = {
   athlete: 'athletes',
   tourist: 'tourists',
   snowbird: 'snowbirds',
+  // P26 dietary cluster — single canonical persona, multiple intents
+  vegan: 'conscious-eaters',
+  vegetarian: 'conscious-eaters',
+  'plant-based': 'conscious-eaters',
+  'gluten-free': 'conscious-eaters',
+  diet: 'conscious-eaters',
 };
 
 export function resolveClusterSlug(slug: string): string {
