@@ -184,6 +184,43 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
           </section>
         ) : null}
 
+        {/* ─── ALL APPS FOR YOU ──────────────────────────────────── */}
+        {personaApps.length > 0 ? (
+          <section className="mb-12">
+            <h2 className="mb-2 flex items-center gap-2 text-2xl font-semibold text-foreground">
+              <Grid3x3 className="h-5 w-5" style={{ color: tokenColor(theme.color) }} />
+              {isRu ? 'Все приложения для вас' : 'All apps for you'}
+            </h2>
+            <p className="mb-5 text-sm text-muted-foreground">
+              {isRu
+                ? 'Любое приложение знает, что вы пришли с этой страницы — каталог откроется уже отфильтрованным.'
+                : 'Every app knows you came from this page — the catalogue opens pre-filtered.'}
+            </p>
+            <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+              {personaApps.slice(0, 16).map((app) => (
+                <li key={app.id}>
+                  <a
+                    href={wp(app.route)}
+                    className="group flex h-full flex-col items-start gap-1 border border-border bg-card p-3 transition-all hover:border-primary/60"
+                  >
+                    <span className="text-xl" aria-hidden>{app.icon}</span>
+                    <span className="text-sm font-medium text-foreground">
+                      {isRu ? app.labelRu : app.labelEn}
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+            {personaApps.length > 16 ? (
+              <p className="mt-3 text-xs text-muted-foreground">
+                {isRu
+                  ? `И ещё ${personaApps.length - 16} приложений в разделе «Все сервисы».`
+                  : `And ${personaApps.length - 16} more in “All services”.`}
+              </p>
+            ) : null}
+          </section>
+        ) : null}
+
         {/* ─── BUNDLE PRICING ────────────────────────────────────── */}
         {landing.bundle ? (
           <section
