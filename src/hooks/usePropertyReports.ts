@@ -375,7 +375,7 @@ export function useGenerateReport() {
       let secTotalReturned = 0;
       let secTotalDeductions = 0;
       const securityDepositItems: ReportData['security_deposits']['items'] = [];
-      (bookings || []).forEach((b: any) => {
+      (bookings || []).forEach((b) => {
         const op = opsMap.get(b.id);
         if (!op) return;
         const received = Number(op.deposit_amount || 0);
