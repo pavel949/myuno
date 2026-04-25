@@ -19,6 +19,8 @@ const STAGE_CHART_COLORS: Record<string, string> = {
 
 export default function CapitalDashboard() {
   const navigate = useNavigate();
+  const { language } = useLanguage();
+  const isRu = language === 'ru';
   const { data: stats, isLoading } = useCapitalDashboardStats();
 
   if (isLoading || !stats) {
