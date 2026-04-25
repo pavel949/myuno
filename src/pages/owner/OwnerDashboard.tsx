@@ -286,6 +286,14 @@ function DashboardWidget({ widgetKey, role }: { widgetKey: DashboardWidgetKey; r
           <SellSignalWidget />
         </Suspense>
       );
+    case 'crm_snapshot':
+      return (
+        <div data-tour="crm-snapshot">
+          <Suspense fallback={skeleton}>
+            <SalesAgentCrmSnapshot />
+          </Suspense>
+        </div>
+      );
     case 'menu':
       return null;
     default:
