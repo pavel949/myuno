@@ -179,9 +179,30 @@ export function IntakeQueue({
         discardedCount={session.discardedCount}
       />
 
+      {/* Persistent failure banner — shown above tabs whenever any item failed */}
+      {failedItems.length > 0 && activeTab !== 'failed' && (
+        <button
+          type="button"
+          onClick={() => setActiveTab('failed')}
+          className="w-full flex items-center justify-between gap-3 border-l-4 border-destructive bg-destructive/5 hover:bg-destructive/10 transition-colors px-3 py-2 text-left"
+        >
+          <span className="flex items-center gap-2 text-sm">
+            <AlertTriangle className="h-4 w-4 text-destructive" />
+            <span className="font-medium">
+              {isRu
+                ? `${failedItems.length} ошибк${failedItems.length === 1 ? 'а' : failedItems.length < 5 ? 'и' : 'ок'} в очереди`
+                : `${failedItems.length} error${failedItems.length === 1 ? '' : 's'} in queue`}
+            </span>
+          </span>
+          <span className="text-xs text-muted-foreground">
+            {isRu ? 'Открыть →' : 'Open →'}
+          </span>
+        </button>
+      )}
+
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="w-full grid grid-cols-4">
+        <TabsList className="w-full grid grid-cols-5">
           <TabsTrigger value="all" className="gap-1">
             <List className="h-4 w-4" />
             {isRu ? 'Все' : 'All'}
@@ -197,6 +218,17 @@ export function IntakeQueue({
             {isRu ? 'Созданы' : 'Created'}
             <span className="text-xs text-muted-foreground">({createdItems.length})</span>
           </TabsTrigger>
+          <TabsTrigger
+            value="failed"
+            className={cn(
+              'gap-1',
+              failedItems.length > 0 && 'data-[state=inactive]:text-destructive'
+            )}
+          >
+            <AlertTriangle className="h-4 w-4" />
+            {isRu ? 'Ошибки' : 'Failed'}
+            <span className="text-xs text-muted-foreground">({failedItems.length})</span>
+          </TabsTrigger>
           <TabsTrigger value="discarded" className="gap-1">
             <XCircle className="h-4 w-4" />
             {isRu ? 'Отклонены' : 'Discarded'}
@@ -209,7 +241,7 @@ export function IntakeQueue({
         </TabsContent>
 
         <TabsContent value="pending" className="mt-4">
-          {pendingItems.length === 0 
+          {pendingItems.length === 0
             ? emptyState(<Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />, isRu ? 'Нет ожидающих объектов' : 'No pending items')
             : renderItems(pendingItems, true)
           }
@@ -220,6 +252,16 @@ export function IntakeQueue({
             ? emptyState(<CheckCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />, isRu ? 'Пока нет созданных листингов' : 'No created listings yet')
             : renderItems(createdItems, false)
           }
+        </TabsContent>
+
+        <TabsContent value="failed" className="mt-4">
+          <IntakeFailedList
+            items={failedItems}
+            onRetry={handleRetry}
+            onEdit={(it) => setEditingItem(it)}
+            onDiscard={(id) => setConfirmDiscardId(id)}
+            retryingId={retryingId}
+          />
         </TabsContent>
 
         <TabsContent value="discarded" className="mt-4">
