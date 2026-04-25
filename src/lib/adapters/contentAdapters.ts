@@ -338,6 +338,7 @@ export function mapPropertyToCardProps(
   language: string
 ): UnifiedPropertyCardProps {
   const isRu = language === 'ru';
+  const ext = property as typeof property & PropertyOptionalAttrs;
 
   if (isOwnerProperty(property)) {
     // OwnerProperty format (title, title_ru)
@@ -364,11 +365,11 @@ export function mapPropertyToCardProps(
       approvalStatus: property.approval_status,
       marketplacePropertyId: property.marketplace_property_id,
       highlights: property.highlights,
-      floor: (property as any).floor,
-      unitNumber: (property as any).unit_number,
-      plotSizeSqm: (property as any).plot_size_sqm,
-      poolType: (property as any).pool_type,
-      totalFloors: (property as any).total_floors,
+      floor: ext.floor,
+      unitNumber: ext.unit_number,
+      plotSizeSqm: ext.plot_size_sqm,
+      poolType: ext.pool_type,
+      totalFloors: ext.total_floors,
     };
   } else {
     // VendorProperty format (title_en, title_ru)
@@ -395,13 +396,13 @@ export function mapPropertyToCardProps(
       reviewCount: property.review_count,
       isActive: property.is_active,
       isFeatured: property.is_featured,
-      instantBooking: (property as any).instant_booking,
-      approvalStatus: (property as any).approval_status,
-      floor: (property as any).floor,
-      unitNumber: (property as any).unit_number,
-      plotSizeSqm: (property as any).plot_size_sqm,
-      poolType: (property as any).pool_type,
-      totalFloors: (property as any).total_floors,
+      instantBooking: ext.instant_booking,
+      approvalStatus: ext.approval_status,
+      floor: ext.floor,
+      unitNumber: ext.unit_number,
+      plotSizeSqm: ext.plot_size_sqm,
+      poolType: ext.pool_type,
+      totalFloors: ext.total_floors,
     };
   }
 }
