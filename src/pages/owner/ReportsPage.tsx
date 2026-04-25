@@ -125,9 +125,9 @@ function useManagedProperties() {
         .eq('status', 'active');
       if (error) throw error;
       return (data || [])
-        .filter((d: any) => (d.permissions as Record<string, boolean>)?.financials)
-        .map((d: any) => d.properties)
-        .filter(Boolean);
+        .filter((d) => (d.permissions as Record<string, boolean> | null)?.financials)
+        .map((d) => d.properties as ReportableProperty | null)
+        .filter((p): p is ReportableProperty => Boolean(p));
     },
     enabled: !!user,
   });
