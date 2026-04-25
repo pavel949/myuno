@@ -119,9 +119,9 @@ export default function CapitalDashboard() {
       {/* Quick Links */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         {[
-          { label: 'Контакты', path: '/capital/contacts', icon: Users },
-          { label: 'Проекты', path: '/capital/projects', icon: Megaphone },
-          { label: 'Воронка', path: '/capital/pipeline', icon: KanbanSquare },
+          { label: isRu ? 'Контакты' : 'Contacts', path: '/capital/contacts', icon: Users },
+          { label: isRu ? 'Проекты' : 'Projects', path: '/capital/projects', icon: Megaphone },
+          { label: isRu ? 'Воронка' : 'Pipeline', path: '/capital/pipeline', icon: KanbanSquare },
         ].map((link) => (
           <div
             key={link.path}
