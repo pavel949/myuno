@@ -185,7 +185,7 @@ export default function AdminNewbuilds() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.slice(0, 100).map((p: any, i: number) => (
+                {filtered.slice(0, 100).map((p, i) => (
                   <ProjectRow
                     key={p.id}
                     project={p}
