@@ -52,6 +52,7 @@ const PropertyPriorityWidget = lazy(() => import('@/components/owner/dashboard/P
 const BusinessHealthCard = lazy(() => import('@/components/owner/dashboard/BusinessHealthCard').then(m => ({ default: m.BusinessHealthCard })));
 const TopActionsWidget = lazy(() => import('@/components/owner/dashboard/TopActionsWidget').then(m => ({ default: m.TopActionsWidget })));
 const SellSignalWidget = lazy(() => import('@/components/owner/dashboard/SellSignalWidget').then(m => ({ default: m.SellSignalWidget })));
+const SalesAgentCrmSnapshot = lazy(() => import('@/components/owner/dashboard/SalesAgentCrmSnapshot').then(m => ({ default: m.SalesAgentCrmSnapshot })));
 import { AlertTriangle, Briefcase, CircleDollarSign, HeartPulse, Sun } from 'lucide-react';
 
 function SectionSkeleton() {
@@ -284,6 +285,14 @@ function DashboardWidget({ widgetKey, role }: { widgetKey: DashboardWidgetKey; r
         <Suspense fallback={skeleton}>
           <SellSignalWidget />
         </Suspense>
+      );
+    case 'crm_snapshot':
+      return (
+        <div data-tour="crm-snapshot">
+          <Suspense fallback={skeleton}>
+            <SalesAgentCrmSnapshot />
+          </Suspense>
+        </div>
       );
     case 'menu':
       return null;
