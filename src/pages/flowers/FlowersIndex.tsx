@@ -49,32 +49,39 @@ export default function FlowersIndex() {
   }, [filterValues]);
 
   const filteredBouquets = useMemo(() => {
-    if (activeFilterCount === 0) return bouquets;
-    return bouquets.filter(b => {
-      const priceLevel = filterValues.priceLevel as string | null;
-      if (priceLevel) {
-        const ranges: Record<string, [number, number]> = { '1': [0, 1500], '2': [1500, 3000], '3': [3000, 5000], '4': [5000, Infinity] };
-        const [min, max] = ranges[priceLevel] || [0, Infinity];
-        if (b.price < min || b.price >= max) return false;
-      }
-      const occasions = filterValues.occasion as string[] | undefined;
-      if (occasions?.length && !(b.occasion_tags || []).some((o: string) => occasions.includes(o))) return false;
-      const styles = filterValues.style as string[] | undefined;
-      if (styles?.length && (!b.style || !styles.some(s => s.toLowerCase() === b.style?.toLowerCase()))) return false;
-      const colors = filterValues.colorPalette as string[] | undefined;
-      if (colors?.length) {
-        const palette = b.color_palette?.toLowerCase() || '';
-        const bColors = b.colors || [];
-        if (!colors.some(c => palette.includes(c.toLowerCase()) || bColors.some((bc: string) => bc.toLowerCase().includes(c.toLowerCase())))) return false;
-      }
-      const flowerTypes = filterValues.flowerType as string[] | undefined;
-      if (flowerTypes?.length) {
-        const flowers = b.flowers || [];
-        if (!flowerTypes.some(ft => flowers.some((f: string) => f.toLowerCase().includes(ft.toLowerCase())))) return false;
-      }
-      return true;
+    let result = bouquets;
+    if (activeFilterCount > 0) {
+      result = bouquets.filter(b => {
+        const priceLevel = filterValues.priceLevel as string | null;
+        if (priceLevel) {
+          const ranges: Record<string, [number, number]> = { '1': [0, 1500], '2': [1500, 3000], '3': [3000, 5000], '4': [5000, Infinity] };
+          const [min, max] = ranges[priceLevel] || [0, Infinity];
+          if (b.price < min || b.price >= max) return false;
+        }
+        const occasions = filterValues.occasion as string[] | undefined;
+        if (occasions?.length && !(b.occasion_tags || []).some((o: string) => occasions.includes(o))) return false;
+        const styles = filterValues.style as string[] | undefined;
+        if (styles?.length && (!b.style || !styles.some(s => s.toLowerCase() === b.style?.toLowerCase()))) return false;
+        const colors = filterValues.colorPalette as string[] | undefined;
+        if (colors?.length) {
+          const palette = b.color_palette?.toLowerCase() || '';
+          const bColors = b.colors || [];
+          if (!colors.some(c => palette.includes(c.toLowerCase()) || bColors.some((bc: string) => bc.toLowerCase().includes(c.toLowerCase())))) return false;
+        }
+        const flowerTypes = filterValues.flowerType as string[] | undefined;
+        if (flowerTypes?.length) {
+          const flowers = b.flowers || [];
+          if (!flowerTypes.some(ft => flowers.some((f: string) => f.toLowerCase().includes(ft.toLowerCase())))) return false;
+        }
+        return true;
+      });
+    }
+    // Persona filter — uses occasion_tags + style as the synthetic tag pool.
+    return applyPersonaFilter(result, (b) => {
+      const tags = (b.occasion_tags as string[] | null) ?? [];
+      return [...tags, b.style].filter(Boolean) as string[];
     });
-  }, [bouquets, filterValues, activeFilterCount]);
+  }, [bouquets, filterValues, activeFilterCount, applyPersonaFilter]);
 
   const handleRemoveFilter = useCallback((sectionId: string, optionId?: string) => {
     setFilterValues(prev => {
