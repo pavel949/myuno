@@ -223,12 +223,12 @@ export function useCreateOwnerProperty() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['owner-properties'] });
       queryClient.invalidateQueries({ queryKey: ['company-properties'] });
-      if (!(variables as any)?._silent) {
+      if (!(variables as { _silent?: boolean })?._silent) {
         toast.success('Объект добавлен!');
       }
     },
     onError: (error, variables) => {
-      if (!(variables as any)?._silent) {
+      if (!(variables as { _silent?: boolean })?._silent) {
         toast.error('Ошибка: ' + error.message);
       }
     },
@@ -250,7 +250,7 @@ export function useUpdateOwnerProperty() {
       // Try update as owner first
       const { data: result } = await supabase
         .from('properties')
-        .update(data as any)
+        .update(data as never)
         .eq('id', id)
         .eq('owner_id', user.id)
         .select()
@@ -271,7 +271,7 @@ export function useUpdateOwnerProperty() {
       if (!hasAccess) throw new Error('Property not found or access denied');
 
       // Scoped update: filter by company if available, otherwise by assignment-verified id
-      let query = supabase.from('properties').update(data as any).eq('id', id);
+      let query = supabase.from('properties').update(data as never).eq('id', id);
       if (propertyCheck.data?.management_company_id) {
         query = query.eq('management_company_id', propertyCheck.data.management_company_id);
       }
@@ -285,7 +285,7 @@ export function useUpdateOwnerProperty() {
       queryClient.invalidateQueries({ queryKey: ['owner-property'] });
       queryClient.invalidateQueries({ queryKey: ['properties'] });
       queryClient.invalidateQueries({ queryKey: ['assigned-properties'] });
-      if (!(variables as any)?._silent) {
+      if (!(variables as { _silent?: boolean })?._silent) {
         toast.success('Объект обновлён!');
       }
     },
@@ -421,7 +421,7 @@ export function useCreateInspection() {
       
       const { data: result, error } = await supabase
         .from('property_inspections')
-        .insert({ ...data, owner_id: user.id } as any)
+        .insert({ ...data, owner_id: user.id } as never)
         .select()
         .single();
       
@@ -485,7 +485,7 @@ export function useCreateServiceRequest() {
       
       const { data: result, error } = await supabase
         .from('property_service_requests')
-        .insert({ ...data, owner_id: user.id } as any)
+        .insert({ ...data, owner_id: user.id } as never)
         .select()
         .single();
       
