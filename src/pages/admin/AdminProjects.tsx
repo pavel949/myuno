@@ -198,15 +198,15 @@ export default function AdminProjects() {
     try {
       const { error } = await supabase
         .from('property_projects')
-        .update({ developer_id: bulkDeveloperId, needs_review: false } as any)
+        .update({ developer_id: bulkDeveloperId, needs_review: false })
         .in('id', Array.from(selectedIds));
       if (error) throw error;
       toast.success(isRu ? `Назначен застройщик: ${selectedIds.size}` : `Developer assigned: ${selectedIds.size}`);
       queryClient.invalidateQueries({ queryKey: ['admin-property-projects'] });
       clearSelection();
       setBulkDeveloperId('');
-    } catch (e: any) {
-      toast.error(e.message || 'Bulk assign failed');
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Bulk assign failed');
     } finally {
       setIsBulkProcessing(false);
     }
@@ -218,14 +218,14 @@ export default function AdminProjects() {
     try {
       const { error } = await supabase
         .from('property_projects')
-        .update({ is_approved: true, needs_review: false } as any)
+        .update({ is_approved: true, needs_review: false })
         .in('id', Array.from(selectedIds));
       if (error) throw error;
       toast.success(isRu ? `Одобрено: ${selectedIds.size}` : `Approved: ${selectedIds.size}`);
       queryClient.invalidateQueries({ queryKey: ['admin-property-projects'] });
       clearSelection();
-    } catch (e: any) {
-      toast.error(e.message || 'Bulk approve failed');
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Bulk approve failed');
     } finally {
       setIsBulkProcessing(false);
     }
