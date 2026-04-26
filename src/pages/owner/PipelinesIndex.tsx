@@ -107,12 +107,17 @@ export default function PipelinesIndex() {
 
   if (isLoading) {
     return (
-      <div className="p-4 md:p-6 space-y-4">
-        <Skeleton className="h-8 w-48" />
+      <MiniAppLayout
+        title={isRu ? 'Воронки CRM' : 'CRM Pipelines'}
+        showSearch={false}
+        showBottomNav={false}
+        showEcosystemHint={false}
+        fallbackPath="/mc"
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="h-48 rounded-none" />)}
         </div>
-      </div>
+      </MiniAppLayout>
     );
   }
 
@@ -120,21 +125,21 @@ export default function PipelinesIndex() {
   const totalValue = deals.reduce((s, d) => s + Number(d.deal_value || d.budget_max || 0), 0);
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">{isRu ? 'Воронки' : 'Pipelines'}</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {totalDeals} {isRu ? 'сделок' : 'deals'} · {formatValue(totalValue)} {isRu ? 'итого' : 'total'}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <TrendingUp className="h-5 w-5 text-primary" />
-        </div>
-      </div>
-
-      {/* Pipeline Grid */}
+    <MiniAppLayout
+      title={isRu ? 'Воронки CRM' : 'CRM Pipelines'}
+      subtitle={`${totalDeals} ${isRu ? 'сделок' : 'deals'} · ${formatValue(totalValue)} ${isRu ? 'итого' : 'total'}`}
+      showSearch={false}
+      showBottomNav={false}
+      showEcosystemHint={false}
+      fallbackPath="/mc"
+      heroIcon={Layers}
+      heroTitle={isRu ? 'Воронки продаж' : 'Sales pipelines'}
+      heroSubtitle={
+        isRu
+          ? 'Все каналы Capital, Estate и myUNO в одном представлении.'
+          : 'Capital, Estate and myUNO channels in one view.'
+      }
+    >
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {pipelines.map(p => {
           const stats = pipelineStats.get(p.id) || { count: 0, value: 0 };
@@ -157,6 +162,6 @@ export default function PipelinesIndex() {
           <p className="text-muted-foreground">{isRu ? 'Воронки не найдены' : 'No pipelines found'}</p>
         </div>
       )}
-    </div>
+    </MiniAppLayout>
   );
 }
