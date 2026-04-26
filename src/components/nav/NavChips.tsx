@@ -36,6 +36,13 @@ export interface NavChipsProps {
   stickyTop?: number;
   className?: string;
   ariaLabel?: string;
+  /**
+   * Background tone the chips sit on. `default` = cream/page surface,
+   * `onNavy` = canonical navy brand band (used by the home header).
+   * Anything other than `default` swaps the active/inactive contract so
+   * the chips read as part of the band, not stranded on top of it.
+   */
+  tone?: 'default' | 'onNavy';
 }
 
 export function NavChips({
@@ -46,7 +53,9 @@ export function NavChips({
   stickyTop = 0,
   className,
   ariaLabel,
+  tone = 'default',
 }: NavChipsProps) {
+  const isOnNavy = tone === 'onNavy';
   const content = (
     <div
       role="tablist"
@@ -74,12 +83,18 @@ export function NavChips({
               'text-[13px] font-medium whitespace-nowrap',
               'transition-colors duration-150',
               'border',
-              active
-                ? 'bg-primary text-primary-foreground border-primary'
-                : 'bg-[hsl(var(--bg-elevated))] text-muted-foreground border-border/60 hover:text-foreground hover:border-border',
+              isOnNavy
+                ? active
+                  // Inverted: cream pill on navy reads as the strongest CTA
+                  // without breaking the canonical navy/cream/orange triad.
+                  ? 'bg-primary-foreground text-primary border-primary-foreground shadow-sm'
+                  : 'bg-primary-foreground/[0.08] text-primary-foreground/85 border-primary-foreground/15 hover:bg-primary-foreground/[0.14] hover:text-primary-foreground hover:border-primary-foreground/25'
+                : active
+                  ? 'bg-primary text-primary-foreground border-primary'
+                  : 'bg-[hsl(var(--bg-elevated))] text-muted-foreground border-border/60 hover:text-foreground hover:border-border',
             )}
             style={
-              active && accent
+              active && accent && !isOnNavy
                 ? { background: accent, borderColor: accent, color: '#fff' }
                 : undefined
             }
@@ -91,8 +106,12 @@ export function NavChips({
                 className={cn(
                   'inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-mono',
                   active
-                    ? 'bg-white/25 text-current'
-                    : 'bg-muted text-muted-foreground',
+                    ? isOnNavy
+                      ? 'bg-primary/10 text-primary'
+                      : 'bg-white/25 text-current'
+                    : isOnNavy
+                      ? 'bg-primary-foreground/10 text-primary-foreground/70'
+                      : 'bg-muted text-muted-foreground',
                 )}
               >
                 {item.count}
@@ -108,10 +127,16 @@ export function NavChips({
 
   return (
     <div
-      className="sticky z-30 bg-[hsl(var(--bg-base)/0.85)] border-b border-border/40"
+      className={cn(
+        'sticky z-30 border-b',
+        isOnNavy
+          ? 'bg-primary border-primary-foreground/10'
+          : 'bg-[hsl(var(--bg-base)/0.85)] border-border/40',
+      )}
       style={{ top: stickyTop }}
     >
       {content}
     </div>
   );
 }
+

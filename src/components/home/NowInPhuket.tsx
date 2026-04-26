@@ -104,7 +104,10 @@ function DataCell({ label, value, sub, border }: { label: string; value: string;
   return (
     <div className={cn('px-3.5', border && 'border-l border-border/[0.05] -ml-px')}>
       <div className="text-[10px] tracking-[0.1em] uppercase text-muted-foreground/50 font-semibold mb-1.5">{label}</div>
-      <div className="font-mono text-[18px] font-medium text-foreground leading-none">{value}</div>
+      {/* Faint navy underline turns the trio into instrumentation rather
+          than placeholder dashes. Decorative — `inline-block` keeps the
+          underline tight to the value. */}
+      <div className="font-mono text-[18px] font-medium text-foreground leading-none inline-block border-b border-primary/15 pb-0.5">{value}</div>
       <div className="text-[11px] text-muted-foreground mt-1">{sub}</div>
     </div>
   );

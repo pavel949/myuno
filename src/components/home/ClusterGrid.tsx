@@ -51,11 +51,13 @@ export function ClusterGrid({ personas }: ClusterGridProps) {
             <button
               key={c.id}
               onClick={() => navigate(c.homeRoute)}
-              className="relative text-left rounded-none bg-card border border-border p-[14px] pl-4 min-h-[86px] flex flex-col justify-between hover:border-border transition-colors overflow-hidden"
+              className="group relative text-left rounded-none bg-card border border-border p-[14px] pl-4 min-h-[86px] flex flex-col justify-between hover:border-primary/30 hover:bg-primary/[0.02] transition-colors overflow-hidden"
             >
-              {/* 2px left spine */}
+              {/* 3px left spine — promoted from 2px so the cluster colour
+                  reads on a quick scan and creates a stronger visual rhythm
+                  across the grid. */}
               <div
-                className="absolute top-3.5 bottom-3.5 left-0 w-0.5 rounded-none"
+                className="absolute top-3 bottom-3 left-0 w-[3px] rounded-none transition-all group-hover:top-2 group-hover:bottom-2"
                 style={{ background: c.color }}
               />
               <div>

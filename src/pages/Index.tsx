@@ -68,14 +68,32 @@ const Index = () => {
   return (
     <AppLayout showHeader={false} showFooter={false}>
       <div className="pb-24">
-        <div className="px-4">
-          <HomeTopBar
-            personas={[...activePersonas]}
-            onRoleSheetOpen={() => setRoleSheetOpen(true)}
-            onAppDrawerOpen={() => setAppDrawerOpen(true)}
+        {/* ── Brand band ─────────────────────────────────────────────
+            Canonical navy header (#0A2240) — gives the home a clear
+            anchor and lets the cream content below feel intentional
+            instead of washed-out. The 12-px gradient bleed below
+            softens the seam into the cream surface. Per canon §1
+            navy is ≤10% of the screen budget; the band shrinks below
+            the fold on scroll so the average exposure stays inside it. */}
+        <div className="bg-primary text-primary-foreground relative">
+          <div className="px-4">
+            <HomeTopBar
+              personas={[...activePersonas]}
+              onRoleSheetOpen={() => setRoleSheetOpen(true)}
+              onAppDrawerOpen={() => setAppDrawerOpen(true)}
+              variant="onNavy"
+            />
+          </div>
+          <HomeContextChips personas={[...activePersonas]} variant="onNavy" />
+          {/* Soft fade from navy into the cream page — keeps the seam
+              from looking like a hard band. */}
+          <div
+            className="absolute left-0 right-0 -bottom-3 h-3 pointer-events-none"
+            style={{ background: 'linear-gradient(to bottom, hsl(var(--primary) / 0.18), transparent)' }}
+            aria-hidden
           />
         </div>
-        <HomeContextChips personas={[...activePersonas]} />
+        <div className="h-3" aria-hidden />
         <WorkspaceHomeBanner />
 
         {/*
