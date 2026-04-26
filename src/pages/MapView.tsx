@@ -159,9 +159,21 @@ export default function MapView() {
   }, [properties, salons, restaurants]);
 
   const filteredMarkers = useMemo(() => {
-    if (selectedVertical === 'all') return allMarkers;
-    return allMarkers.filter((m) => m.vertical === selectedVertical);
-  }, [allMarkers, selectedVertical]);
+    return allMarkers.filter((m) => {
+      if (selectedVertical !== 'all' && m.vertical !== selectedVertical) return false;
+      if (selectedPrice !== 'all') {
+        const [min, max] = PRICE_RANGES[selectedPrice];
+        // Only filter by price when the marker actually has a price (>0).
+        // Verticals without pricing data (e.g. restaurants) are kept visible.
+        if (m.priceFrom > 0 && (m.priceFrom < min || m.priceFrom >= max)) return false;
+      }
+      if (selectedAvailability === 'open_now') {
+        // Only restaurants currently expose working hours; others fall through.
+        if (m.workingHours && !isOpenNow(m.workingHours)) return false;
+      }
+      return true;
+    });
+  }, [allMarkers, selectedVertical, selectedPrice, selectedAvailability]);
 
   const defaultCenter = useMemo(() => {
     const cityConfig = getCityConfig();
