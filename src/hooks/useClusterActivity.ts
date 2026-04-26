@@ -45,19 +45,21 @@ const EMPTY: ClusterActivityCounts = {
 const ARRIVE_ORDER_TYPES = ['tour', 'vehicle', 'yacht', 'flowers', 'food'];
 const LIVE_ORDER_TYPES = ['beauty', 'cleaning', 'service'];
 // Statuses that mean "user still owes an action or is waiting on us".
+// Narrow literal tuples — match the generated Database enums for each table.
 const OPEN_ORDER_STATUSES = [
   'pending',
   'awaiting_client_payment',
   'pending_deposit',
   'in_progress',
-];
+] as const;
 const OPEN_AIRPORT_STATUSES = ['pending', 'assigned'];
 const OPEN_PROPERTY_BOOKING_STATUSES = ['pending', 'awaiting_payment'];
 const OPEN_PROPERTY_INQUIRY_STATUSES = ['new', 'pending', 'open'];
 const OPEN_TICKET_STATUSES = ['open', 'pending', 'awaiting_response'];
-const OPEN_INVESTOR_STATUSES = ['new', 'pending', 'in_review'];
+const OPEN_INVESTOR_STATUSES = ['new', 'qualified', 'contacted'] as const;
 const OPEN_VISA_STATUSES = ['pending', 'submitted', 'in_progress', 'review'];
-const OPEN_APPLICATION_STATUSES = ['pending', 'in_review'];
+const OPEN_LISTING_APPLICATION_STATUSES = ['pending', 'under_review', 'revision_requested'] as const;
+const OPEN_PARTNER_APPLICATION_STATUSES = ['pending', 'in_review'];
 const OPEN_TASK_STATUSES = ['pending', 'open', 'in_progress'];
 
 /** Safely run a head-count query; resolve to 0 on any error. */
