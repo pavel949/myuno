@@ -25,7 +25,13 @@ interface PhuketConditions {
   aqiBand: 'good' | 'moderate' | 'unhealthy' | 'hazardous' | 'unknown';
   rateDelta: string;  // "+0.12" — change vs prev day
   isLoading: boolean;
+  /** True after at least one source returned a value (cache or network). */
+  hasAnyData: boolean;
+  /** Set when a network round-trip completed but every source failed. */
+  hasError: boolean;
   fetchedAt: number | null;
+  /** Force a fresh network round-trip (bypasses the 30-min cache). */
+  retry: () => void;
 }
 
 // Bumped to v3 (2026-04-24) when FX source switched away from
