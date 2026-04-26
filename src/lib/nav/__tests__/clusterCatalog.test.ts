@@ -9,6 +9,7 @@ import {
   filterCatalogForUser,
   isClusterVisibleToUser,
   getClusterById,
+  getClusterHeaderLabel,
   getClusterServiceLocalizedLabel,
 } from '../clusterCatalog';
 import { CATEGORIES } from '@/lib/catalog';
@@ -125,6 +126,15 @@ describe('filterCatalogForUser', () => {
       expect(cursor, `cluster ${id} is out of canonical order`).toBeGreaterThanOrEqual(0);
       cursor += 1;
     }
+  });
+});
+
+describe('getClusterHeaderLabel — catalog SSOT labels', () => {
+  it('renders canonical cluster labels instead of drawer aliases', () => {
+    expect(getClusterHeaderLabel(getClusterById('live')!, 'en')).toBe('Live');
+    expect(getClusterHeaderLabel(getClusterById('live')!, 'ru')).toBe('Жизнь');
+    expect(getClusterHeaderLabel(getClusterById('invest')!, 'en')).toBe('Invest');
+    expect(getClusterHeaderLabel(getClusterById('legal')!, 'en')).toBe('Legal & Visa');
   });
 });
 
