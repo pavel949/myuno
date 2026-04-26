@@ -26,14 +26,14 @@ export function usePortalChat(propertyId: string | undefined) {
     queryKey,
     queryFn: async (): Promise<PortalMessage[]> => {
       if (!propertyId) return [];
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('portal_messages')
         .select('*')
         .eq('property_id', propertyId)
         .order('created_at', { ascending: true })
         .limit(200);
       if (error) throw error;
-      return (data || []) as PortalMessage[];
+      return (data || []) as unknown as PortalMessage[];
     },
     enabled: !!propertyId && !!user,
   });
