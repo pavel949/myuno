@@ -85,7 +85,11 @@ export default function MapView() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const initialVertical = (searchParams.get('vertical') as VerticalFilter) || 'all';
+  const initialPrice = (searchParams.get('price') as PriceFilter) || 'all';
+  const initialAvailability = (searchParams.get('availability') as AvailabilityFilter) || 'all';
   const [selectedVertical, setSelectedVertical] = useState<VerticalFilter>(initialVertical);
+  const [selectedPrice, setSelectedPrice] = useState<PriceFilter>(initialPrice);
+  const [selectedAvailability, setSelectedAvailability] = useState<AvailabilityFilter>(initialAvailability);
   const [selectedMarker, setSelectedMarker] = useState<UniversalMarker | null>(null);
   const mapRef = useRef<google.maps.Map | null>(null);
 
