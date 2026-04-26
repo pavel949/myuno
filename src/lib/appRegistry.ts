@@ -860,8 +860,8 @@ export const APP_REGISTRY: Record<string, AppEntry> = {
   wedding: {
     id: 'wedding',
     route: APP_ROUTES.WEDDING,
-    groupId: 'enjoy',
-    clusterIds: ['enjoy'],
+    groupId: 'live',
+    clusterIds: ['live'],
     labelEn: ECOSYSTEM_APP_TRIPLET.wedding.en,
     labelRu: ECOSYSTEM_APP_TRIPLET.wedding.ru,
     labelTh: ECOSYSTEM_APP_TRIPLET.wedding.th,
