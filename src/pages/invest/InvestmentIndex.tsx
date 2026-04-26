@@ -125,6 +125,20 @@ export default function InvestmentIndex() {
       <MiniAppLayout
         title={isRu ? 'Инвестиции' : 'Investment Hub'}
         showSearch={false}
+        heroIcon={TrendingUp}
+        heroTitle={isRu ? 'muUNO Investment Hub' : 'muUNO Investment Hub'}
+        heroSubtitle={
+          isRu
+            ? 'Инвестируйте в проверенные проекты Пхукета с экспертной оценкой рисков'
+            : 'Invest in verified Phuket projects with expert risk assessment'
+        }
+        heroGradientFrom="from-success/30"
+        heroGradientVia="via-success/15"
+        heroGradientTo="to-background"
+        categories={layoutCategories}
+        selectedCategory={selectedCategory ?? 'all'}
+        onCategoryChange={(id) => setSelectedCategory(id === 'all' ? null : id)}
+        crossSellVertical="invest"
         headerActions={
           user ? (
             <Button
