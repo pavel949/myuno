@@ -145,7 +145,7 @@ export function useUpsertProjectUnit() {
         if (error) throw error;
       } else {
         const { id: _id, ...insertFields } = unit;
-        const { error } = await supabase.from('project_units').insert(insertFields);
+        const { error } = await supabase.from('project_units').insert(insertFields as never);
         if (error) throw error;
       }
     },

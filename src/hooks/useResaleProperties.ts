@@ -143,7 +143,7 @@ export function useCreateResaleProperty() {
     mutationFn: async (data: Partial<ResaleProperty>) => {
       const { data: result, error } = await supabase
         .from('resale_properties')
-        .insert({ ...data, created_by: user?.id })
+        .insert({ ...data, created_by: user?.id } as never)
         .select()
         .single();
       if (error) throw error;
@@ -164,7 +164,7 @@ export function useUpdateResaleProperty() {
     mutationFn: async ({ id, ...data }: Partial<ResaleProperty> & { id: string }) => {
       const { data: result, error } = await supabase
         .from('resale_properties')
-        .update({ ...data, updated_at: new Date().toISOString() })
+        .update({ ...data, updated_at: new Date().toISOString() } as never)
         .eq('id', id)
         .select()
         .single();
