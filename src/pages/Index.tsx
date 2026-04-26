@@ -13,6 +13,7 @@ import { HomeContextChips } from '@/components/home/HomeContextChips';
 import { AppDrawer } from '@/components/nav/AppDrawer';
 import { WorkspaceHomeBanner } from '@/components/home/WorkspaceHomeBanner';
 import { HeroIntro } from '@/components/home/HeroIntro';
+import { AudienceEntries } from '@/components/home/AudienceEntries';
 import { PrimaryActions } from '@/components/home/PrimaryActions';
 import { PopularTasks } from '@/components/home/PopularTasks';
 import { ActiveSituation } from '@/components/home/ActiveSituation';
