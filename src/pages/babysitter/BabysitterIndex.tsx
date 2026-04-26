@@ -105,7 +105,6 @@ const babysitters = [
 
 export default function BabysitterIndex() {
   const { language } = useLanguage();
-  const { formatPrice } = useCurrency();
   const navigate = useNavigate();
   const [selectedAgeGroup, setSelectedAgeGroup] = useState('all');
   const isRu = language === 'ru';
@@ -126,6 +125,13 @@ export default function BabysitterIndex() {
       showHero={false}
       showSearch={false}
       showFilter={false}
+      seoTitle={isRu ? 'Няни на Пхукете | myUNO' : 'Babysitters in Phuket | myUNO'}
+      seoDescription={
+        isRu
+          ? 'Проверенные русскоязычные няни на Пхукете: первая помощь, сертификации, почасовая оплата.'
+          : 'Verified English/Russian-speaking babysitters in Phuket: first-aid certified, hourly rates.'
+      }
+      crossSellVertical="babysitter"
     >
       {filteredBabysitters.length === 0 ? (
         <EmptyState
@@ -138,52 +144,33 @@ export default function BabysitterIndex() {
           {filteredBabysitters.map(bs => {
             const name = isRu ? bs.nameRu : bs.nameEn;
             const desc = isRu ? bs.descRu : bs.descEn;
+            const badges = [];
+            if (bs.isFeatured) {
+              badges.push({
+                text: isRu ? 'Топ' : 'Top',
+                className: 'bg-primary text-primary-foreground',
+              });
+            }
             return (
-              <div
+              <CatalogCard
                 key={bs.id}
-                className="cursor-pointer group"
+                image={bs.image}
+                title={name}
+                subtitle={desc}
+                aspectRatio="3:4"
                 onClick={() => navigate(`/babysitter/${bs.id}`)}
-              >
-                <div className="relative aspect-[3/4] rounded-none overflow-hidden mb-2">
-                  <OptimizedImage
-                    src={bs.image}
-                    alt={name}
-                    width={400}
-                    height={533}
-                    className="w-full h-full transition-transform duration-300"
-                    quality={80}
-                  />
-                  {bs.isFeatured && (
-                    <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground text-[10px]">
-                      {isRu ? 'Топ' : 'Top'}
-                    </Badge>
-                  )}
-                  {!bs.available && (
-                    <Badge className="absolute top-2 right-2 bg-muted text-muted-foreground text-[10px]">
-                      {isRu ? 'Занята' : 'Busy'}
-                    </Badge>
-                  )}
-                </div>
-                <div className="space-y-0.5">
-                  <div className="flex items-center justify-between gap-1">
-                    <h3 className="font-semibold text-sm truncate">{name}</h3>
-                    {bs.rating > 0 && (
-                      <span className="flex items-center gap-0.5 text-xs font-medium shrink-0">
-                        <Star className="w-3 h-3 fill-foreground" />
-                        {bs.rating.toFixed(1)}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xs text-muted-foreground truncate">{desc}</p>
-                  <p className="text-xs text-muted-foreground flex items-center gap-0.5">
-                    <Shield className="w-3 h-3 shrink-0" />
-                    {isRu ? bs.experienceRu : bs.experienceEn}
-                  </p>
-                  <p className="text-sm font-semibold">
-                    {formatPrice(bs.pricePerHour)}/{isRu ? 'час' : 'hr'}
-                  </p>
-                </div>
-              </div>
+                rating={bs.rating > 0 ? bs.rating : undefined}
+                reviewCount={bs.reviewCount}
+                badges={badges}
+                statusBadge={
+                  !bs.available
+                    ? { text: isRu ? 'Занята' : 'Busy', className: 'bg-muted text-muted-foreground' }
+                    : undefined
+                }
+                meta={[{ icon: Shield, label: isRu ? bs.experienceRu : bs.experienceEn }]}
+                price={bs.pricePerHour}
+                priceSuffix={`/${isRu ? 'час' : 'hr'}`}
+              />
             );
           })}
         </div>
