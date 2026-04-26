@@ -255,6 +255,14 @@ function MiniappMode({
 
   return (
     <AppLayout showBottomNav={showBottomNav} showHeader={false} className="max-w-full min-w-0">
+      {(seoTitle || seoDescription) && (
+        <SEOHead
+          title={seoTitle}
+          description={seoDescription}
+          image={seoImage}
+          noindex={seoNoindex}
+        />
+      )}
       <div className="sticky top-0 z-40">
         <UnifiedHeader
           title={title}
