@@ -89,7 +89,7 @@ function buildChips(personas: UserPersona[], isRu: boolean): ContextChip[] {
   return chips.slice(0, 6);
 }
 
-export function HomeContextChips({ personas }: HomeContextChipsProps) {
+export function HomeContextChips({ personas, variant = 'default' }: HomeContextChipsProps) {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -105,6 +105,7 @@ export function HomeContextChips({ personas }: HomeContextChipsProps) {
           if (chip) navigate(chip.path);
         }}
         ariaLabel={isRu ? 'Быстрые действия' : 'Quick actions'}
+        tone={variant === 'onNavy' ? 'onNavy' : 'default'}
       />
     </div>
   );
