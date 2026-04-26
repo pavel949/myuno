@@ -6,6 +6,7 @@ import {
   Zap, ArrowRight, Box, ShoppingBag, FileText
 } from 'lucide-react';
 import { MiniAppLayout } from '@/components/miniapp/MiniAppLayout';
+import { CatalogCard } from '@/components/miniapp/CatalogCard';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
