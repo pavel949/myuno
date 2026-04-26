@@ -211,7 +211,7 @@ export default defineConfig(({ mode }) => {
         'react-router-dom',
         'react-helmet-async',
         '@tanstack/react-query',
-        '@tanstack/react-query-devtools',
+        
         '@supabase/supabase-js',
         '@lovable.dev/cloud-auth-js',
         'framer-motion',
