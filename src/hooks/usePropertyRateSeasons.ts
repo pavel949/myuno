@@ -22,7 +22,7 @@ async function logActivity(params: {
       action: params.action,
       entity_type: params.entityType || null,
       entity_id: params.entityId || null,
-      details: params.details as any,
+      details: (params.details ?? null) as Json,
     });
   } catch (err) {
     console.error('Failed to log activity:', err);
