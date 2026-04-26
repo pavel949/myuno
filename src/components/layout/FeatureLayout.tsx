@@ -23,6 +23,8 @@ import { BackButton } from '@/components/uno/BackButton';
 import { PersonaFilterChip } from '@/components/landings/PersonaFilterChip';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { ECOSYSTEM_MAIN_SPACING, ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
+import { SEOHead } from '@/components/seo';
+import { CrossSellSection } from '@/components/crosssell/CrossSellSection';
 
 // ── Mini-app (catalog) types & implementation ─────────────────────────────
 
@@ -95,6 +97,13 @@ export interface MiniAppLayoutProps {
   stickySubHeader?: ReactNode;
   showQuickFiltersInSubHeader?: boolean;
   showEcosystemHint?: boolean;
+  /** Auto-renders <SEOHead> at the top when provided. */
+  seoTitle?: string;
+  seoDescription?: string;
+  seoImage?: string;
+  seoNoindex?: boolean;
+  /** Auto-renders <CrossSellSection> at the bottom of children when provided. */
+  crossSellVertical?: string;
 }
 
 function MiniappMode({
@@ -141,6 +150,11 @@ function MiniappMode({
   stickySubHeader,
   showQuickFiltersInSubHeader = true,
   showEcosystemHint = true,
+  seoTitle,
+  seoDescription,
+  seoImage,
+  seoNoindex,
+  crossSellVertical,
 }: MiniAppLayoutProps) {
   const navigate = useNavigate();
   const { language, t } = useLanguage();
@@ -241,6 +255,14 @@ function MiniappMode({
 
   return (
     <AppLayout showBottomNav={showBottomNav} showHeader={false} className="max-w-full min-w-0">
+      {(seoTitle || seoDescription) && (
+        <SEOHead
+          title={seoTitle}
+          description={seoDescription}
+          image={seoImage}
+          noindex={seoNoindex}
+        />
+      )}
       <div className="sticky top-0 z-40">
         <UnifiedHeader
           title={title}
@@ -372,6 +394,10 @@ function MiniappMode({
         )}
 
         {children}
+
+        {crossSellVertical && (
+          <CrossSellSection currentVertical={crossSellVertical} />
+        )}
       </div>
     </AppLayout>
   );

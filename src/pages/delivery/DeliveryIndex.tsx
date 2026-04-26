@@ -6,6 +6,7 @@ import {
   Zap, ArrowRight, Box, ShoppingBag, FileText
 } from 'lucide-react';
 import { MiniAppLayout } from '@/components/miniapp/MiniAppLayout';
+import { CatalogCard } from '@/components/miniapp/CatalogCard';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -121,6 +122,13 @@ export default function DeliveryIndex() {
       showSearch={false}
       showCategories={false}
       showFilter={false}
+      seoTitle={language === 'ru' ? 'Доставка по Пхукету | myUNO' : 'Delivery in Phuket | myUNO'}
+      seoDescription={
+        language === 'ru'
+          ? 'Экспресс, в день заказа, документы, посылки и крупногабарит — доставка по всему Пхукету.'
+          : 'Express, same-day, documents, parcels and large items — island-wide Phuket delivery.'
+      }
+      crossSellVertical="delivery"
     >
       {/* Hero */}
       <div className="relative overflow-hidden rounded-none bg-gradient-to-br from-warning/20 via-warning/10 to-background p-6">
@@ -193,35 +201,17 @@ export default function DeliveryIndex() {
         <h2 className="text-lg font-semibold font-display mb-3">
           {language === 'ru' ? 'Популярные услуги' : 'Popular Services'}
         </h2>
-        <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
-          {popularServices.map((service) => {
-            const Icon = service.icon;
-            return (
-              <button
-                key={service.id}
-                onClick={() => navigate(`/delivery?service=${service.id}`)}
-                className="flex-shrink-0 w-40 bg-card rounded-none overflow-hidden border border-border/50 hover:border-primary/30 transition-all [box-shadow:var(--shadow-elevation-1)]"
-              >
-                <div className="h-24 relative">
-                  <img
-                    src={service.image}
-                    alt=""
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                  <Icon className="absolute bottom-2 left-2 w-6 h-6 text-white" />
-                </div>
-                <div className="p-3">
-                  <h3 className="font-medium text-sm truncate">
-                    {language === 'ru' ? service.nameRu : service.nameEn}
-                  </h3>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {language === 'ru' ? service.descRu : service.descEn}
-                  </p>
-                </div>
-              </button>
-            );
-          })}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          {popularServices.map((service) => (
+            <CatalogCard
+              key={service.id}
+              image={service.image}
+              title={language === 'ru' ? service.nameRu : service.nameEn}
+              subtitle={language === 'ru' ? service.descRu : service.descEn}
+              aspectRatio="4:3"
+              onClick={() => navigate(`/delivery?service=${service.id}`)}
+            />
+          ))}
         </div>
       </div>
 

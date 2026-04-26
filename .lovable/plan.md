@@ -1,89 +1,61 @@
-## Что не так сейчас
+## Цель
 
-Навигация на главной = две одинаковые горизонтальные ленты:
-1. `HomeTopBar` — иконки справа вверху (меню, роли-стек, колокольчик, аватар).
-2. `HomeContextChips` — лента «капсул» (Найти услугу · Маркет · Мои брони…) на навигационной полосе.
+Унифицировать каталоги мини-аппов вокруг `MiniAppLayout` и канонических примитивов (`CatalogCard`, `SEOHead`, `CrossSellSection`), повысив консистентность с ~85% до ~98%. Property/real-estate трогаем **минимально** — только формальная фиксация исключения, без рефакторинга витрин.
 
-Обе — стандартные «pills in a row». На узком экране (Telegram WebView) выглядят как технический тулбар, а не как фирменный продукт. Аудитория не понимает, *где она находится* и *куда идти дальше*.
+---
 
-## Фишка: Persona Halo (строгий «госуслуги-про» регистр)
+## Объём работ (6 шагов)
 
-Главная навигация на хоуме превращается в **компактный приборный модуль** под navy-баннером:
+### 1. InvestmentIndex — починить header props
+Передать `heroIcon`, `heroTitle`, `heroSubtitle`, `categories`, `selectedCategory`, `onCategoryChange` в `MiniAppLayout` вместо собственного inline-hero и собственного `CategoryChips`. Сохранить горячие предложения / Real Estate / Business секции и Raise CTA. Hero-блок с градиентом и кнопками Market/Deals/Network/Execution оставить как доп. секцию ниже шапки (это спецфункционал хаба, не дублирует MiniAppHero).
 
-- В центре — крупный квадратный плиток-аватар пользователя с инициалами (или фото).
-- Сверху над аватаром — короткая статусная строка: имя/«Гость», текущий контекст («Пхукет · понедельник, утро»).
-- Вокруг аватара — **строгая сетка из 6 секторов** (по числу кластеров: Arrive · Live · Manage · Invest · Legal · Build). Каждый сектор — это плотный квадратный квант с:
-  - 2-px цветным spine-акцентом слева (цвет кластера из таксономии);
-  - иконкой Lucide 18px;
-  - подписью в 1 строку;
-  - тонкой подпёркой со счётчиком («3 задачи», «новое»);
-  - аккуратной точкой-индикатором (orange-400 на навy), если в этом кластере есть событие/непрочитанное.
-- Сектора, не входящие в активные роли пользователя, отображаются приглушённо (opacity 50%, без счётчика) — пользователь видит весь мир myUNO, но «свои миры» подсвечены.
-- Тап по сектору → дип-линк в кластер. Долгий тап / тап по аватару → открытие RoleSheet (переключение ролей).
+### 2. KnowledgePillarsIndex → MiniAppLayout
+Заменить ручную связку `PageContainer + BackButton + SEOHead + Input` на `MiniAppLayout` с `searchValue/onSearchChange/searchPlaceholder`, `heroIcon=BookOpen`, `heroTitle/Subtitle`. Поиск становится канонической строкой в шапке. Группировка pillars по `cluster` сохраняется в `children`.
 
-### Почему это «фишка»
+### 3. PipelinesIndex → MiniAppLayout (CRM-context)
+Обернуть в `MiniAppLayout` с `heroIcon=Layers`, `heroTitle="Воронки CRM"`, `showSearch=false`, `fallbackPath` на CRM-хаб. Карточки `PipelineCard` остаются — это уже корректный канонический паттерн.
 
-1. **Узнаваемо**: 6-квантовая сетка с центральным «Я» — фирменный графический паттерн, такого нет ни у госуслуг, ни у Booking. При этом форма строгая (квадраты, навy/cream, 0 анимаций) — не воспринимается как игрушка.
-2. **Самоидентификация за 1 секунду**: подсвечены роли пользователя — он мгновенно видит «мой мир здесь».
-3. **Один тап до цели**: 6 главных направлений + аккаунт всегда в видимости, без скролла.
-4. **Большой палец-friendly**: модуль занимает верхнюю треть, но каждая кнопка ≥56×56 px — попасть проще, чем в текущие 26-px чипы.
-5. **Реактивность без шума**: точки-индикаторы вместо badge с цифрами — спокойный, «госуслуги-про» язык.
+### 4. Babysitter & Delivery → CatalogCard
+Создать тонкие мапперы внутри файлов: babysitter → `CatalogCard` (image, title, subtitle=experience, price=`pricePerHour`/hr, badges=verified/featured, rating). Delivery `popularServices` → `CatalogCard` тем же путём. Inline кастомные карточки удалить. `deliveryTypes` (4 крупных tile с градиентами) **оставить как hero-блок** — это intent picker, а не каталог.
 
-## Раскладка
+### 5. SEO-юнификация в MiniAppLayout
+Добавить опциональные props `seoTitle?: string`, `seoDescription?: string`, `seoImage?: string`, `seoCanonical?: string` в `MiniAppLayoutProps` + `MiniappMode`. При наличии — рендерим `<SEOHead>` внутри. Прокинуть на 6-8 ключевых каталогов (Yachts, Flowers, Beauty, Cleaning, Medical, Pharmacy, Experiences, Restaurants), у которых сейчас нет SEO.
 
-```text
-┌─────────────────────────────────────────┐
-│  myUNO                    🔔   PA   ☰   │  ← упрощённый HomeTopBar (только бренд + 3 икон)
-│                                         │
-│         Павел · Пхукет · 09:14          │  ← статус-строка
-│                                         │
-│  ┌─────────┬─────────┬─────────┐        │
-│  │ Arrive  │  Live   │ Manage  │        │
-│  │   ✈     │   🏠    │   🏢•   │        │  ← • = есть событие
-│  ├─────────┼─────────┼─────────┤        │
-│  │ Invest  │  Legal  │  Build  │        │
-│  │   📈    │   ⚖    │   🏗    │        │
-│  └─────────┴─────────┴─────────┘        │
-│                                         │
-│      [ Поиск по myUNO ────────── ⌕ ]    │  ← остаётся HeroIntro ниже
-└─────────────────────────────────────────┘
-```
+### 6. CrossSell в MiniAppLayout
+Добавить prop `crossSellCluster?: 'arrive' | 'live' | 'manage' | 'invest' | 'legal' | 'build'` в `MiniAppLayoutProps`. Если задан — снизу `children` рендерим `<CrossSellSection cluster={...} />`. Прокинуть на каталоги, где он сейчас отсутствует (по аудиту ~60%).
 
-На мобильном — сетка 3×2 (6 квантов), на ≥sm — 6×1 в одну линию, на ≥md — увеличенный padding и подписи в 2 строки.
+### 7. Property / Real Estate — НЕ трогаем код
+- Никаких изменений в `src/pages/property/*`, `OffPlanCatalog`, `PropertyHub`, `Rent/Buy/Resale`, owner-витрине.
+- Только обновляем `mem://architecture/canonical-catalog-and-card-standard`: добавляем секцию **"Documented exceptions"** с указанием, что property-family использует Airbnb-style hub-shell как осознанное архитектурное решение (см. `mem://architecture/property-hub-intent-based-navigation`).
+- Это исключение фиксируем в комментарии-шапке у `PropertyHub.tsx` (одна docstring), без изменения логики/UI.
 
-## Что меняется в коде
+---
 
-### Новый компонент
-`src/components/home/PersonaHalo.tsx` — главный модуль:
-- Принимает `personas: UserPersona[]`, `onRoleSheetOpen`, `language`, `userName`, `initials`.
-- Использует `CLUSTER_CATALOG` (SSOT кластеров) и `CLUSTER_SCORES` из `roleBlend.ts` для определения «активных» секторов.
-- Цвета кластеров — из существующих токенов (`--cluster-arrive`, `--cluster-live` и т.д., если их нет — добавим в `tokens.css` через семантические HSL).
-- Индикатор событий (точка) подключается к существующему `useHasUnread` (расширим до per-cluster позже; в первой итерации — общая точка на Manage, если есть pending orders/tasks).
-- Вёрстка: CSS Grid, `rounded-none` (госуслуги-канон), `border border-border`, hover = `border-primary/40 bg-primary/[0.04]`. Без motion, без теней — только чёткие границы и навy spine.
+## Не входит
 
-### Изменения существующих файлов
-- **`src/pages/Index.tsx`**: убрать `<HomeContextChips …>` из navy-band; добавить `<PersonaHalo …/>` сразу под `HomeTopBar`. `HomeContextChips` остаётся в кодовой базе (используется в других местах) — просто не подключается к Home.
-- **`src/components/home/HomeTopBar.tsx`**: упростить — убрать «role-pill stack» (его функцию забирает PersonaHalo), оставить только `Menu`, `Bell`, `Avatar`. Это разгружает узкий хедер и устраняет старую проблему с переполнением. Сам `RoleSheet` теперь открывается тапом по аватару PersonaHalo или по аватару в TopBar.
-- **`src/lib/nav/clusterCatalog.ts`** (read-only сверка): убедимся, что у каждого из 6 кластеров есть `id`, `labelRu/En`, `route`, `icon`, `accentVar`. Если чего-то не хватает — допишем минимум.
+- Рефакторинг property-family витрин.
+- Изменение поведения InvestmentIndex (категории, фильтры, кнопки хаба остаются).
+- Замена `deliveryTypes` интент-блока в Delivery.
+- Перевёрстка `PipelineCard` (она уже канонична).
+- Любые изменения шрифтов/цветов/токенов.
 
-### Тон (выбран «госуслуги-про»)
-- Никаких анимаций появления, scale, parallax. Только мгновенный hover-цвет.
-- Прямые углы (`rounded-none`), 1-px бордеры, navy spine 2 px.
-- Шрифты: Golos Text для подписей, JetBrains Mono для счётчиков.
-- Подписи кластеров — существительные, без призывов («Жить», «Управлять», «Инвестировать»).
+---
 
-## Acceptance criteria
+## Технические детали
 
-1. На главной под navy-баннером появляется PersonaHalo: статус-строка + сетка 3×2 из 6 кластеров.
-2. Активные кластеры (по `personas`) визуально подсвечены (полная opacity + цветной spine), неактивные — приглушены.
-3. Тап по сектору → переход на route кластера. Тап по аватару → открывается RoleSheet.
-4. На viewport 339px ничего не обрезается, каждая кнопка ≥44 px по короткой стороне.
-5. `HomeContextChips` больше не рендерится в `Index.tsx` (но файл остаётся для других страниц).
-6. `HomeTopBar` теряет role-pill, остаются Menu / Bell / Avatar — хедер становится тоньше и спокойнее.
-7. Тёмный/светлый режим, RU/EN — без хардкод-цветов, всё через семантические токены.
+**Файлы (изменяем):**
+- `src/components/layout/FeatureLayout.tsx` — добавить `seoTitle/seoDescription/seoImage/seoCanonical` и `crossSellCluster` props + рендер `<SEOHead>` (top) и `<CrossSellSection>` (bottom of children) в `MiniappMode`.
+- `src/components/miniapp/MiniAppLayout.tsx` — реэкспорт типов уже идёт через `FeatureLayout`, дополнительных правок не нужно.
+- `src/pages/invest/InvestmentIndex.tsx` — передать `heroIcon=TrendingUp`, `heroTitle`, `heroSubtitle`, `categories=INVESTMENT_CATEGORIES.slice(0,6)` (адаптер id→{labelEn,labelRu}), `selectedCategory`, `onCategoryChange`. Удалить локальный `CategoryChips`.
+- `src/pages/knowledge/KnowledgePillarsIndex.tsx` — переписать рендер на `MiniAppLayout`. Group-by-cluster блок остаётся.
+- `src/pages/owner/PipelinesIndex.tsx` — обернуть в `MiniAppLayout`.
+- `src/pages/babysitter/BabysitterIndex.tsx` — карточки через `CatalogCard` маппер.
+- `src/pages/delivery/DeliveryIndex.tsx` — `popularServices` через `CatalogCard`. `deliveryTypes` остаётся.
+- 6-8 каталогов получают `seoTitle`/`seoDescription` props в `MiniAppLayout` (точечная правка одного-двух блоков на файл).
+- 4-6 каталогов получают `crossSellCluster` prop.
 
-## Вне scope (вторая итерация, если зайдёт)
+**Файлы (создаём):** нет.
 
-- Per-cluster счётчики событий из БД (сейчас — общий индикатор Manage).
-- Долгий тап = быстрое меню под-задач кластера.
-- Анимация «дыхания» индикатора (отключено в строгом тоне).
+**Память:** обновить `mem://architecture/canonical-catalog-and-card-standard` с секцией "Documented exceptions" (Property hub).
+
+**Риски:** (a) `INVESTMENT_CATEGORIES` имеет поле `key`, а `MiniAppCategory` ждёт `id` — нужен лёгкий мап `{id: cat.key, labelEn: cat.en, labelRu: cat.ru, icon: cat.icon}`. (b) `KnowledgePillarsIndex` ранее использовал `PageContainer`-padding — после `MiniAppLayout` отступы возьмутся из `ECOSYSTEM_PAGE_CONTAINER`, проверим визуально.
