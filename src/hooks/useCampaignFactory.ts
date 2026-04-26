@@ -114,7 +114,7 @@ export function useCreateCampaign() {
       const { data, error } = await supabase
         .from('mcc_campaigns')
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .insert([insertPayload] as any)
+        .insert([insertPayload] as never)
         .select()
         .single();
 
@@ -151,7 +151,7 @@ export function useUpdateCampaign() {
       const { data: result, error } = await supabase
         .from('mcc_campaigns')
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .update(updatePayload as any)
+        .update(updatePayload as never)
         .eq('id', id)
         .select()
         .single();
@@ -238,7 +238,7 @@ export function useDuplicateCampaign() {
       const { data, error } = await supabase
         .from('mcc_campaigns')
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .insert([duplicatePayload] as any)
+        .insert([duplicatePayload] as never)
         .select()
         .single();
 
