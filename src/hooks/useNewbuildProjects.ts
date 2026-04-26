@@ -250,7 +250,7 @@ export function useNewbuildLocations() {
         .eq('is_approved', true);
       
       const areas = new Set<string>();
-      (data || []).forEach((p: any) => {
+      (data || []).forEach((p) => {
         if (p.location_area) areas.add(p.location_area);
         else if (p.district) areas.add(p.district);
       });
