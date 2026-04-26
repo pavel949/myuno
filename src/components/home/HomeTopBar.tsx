@@ -6,7 +6,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import type { UserPersona } from '@/hooks/useUserPersonas';
-import { ROLE_META } from '@/lib/roleBlend';
 import { BrandWordmark } from '@/components/uno/BrandWordmark';
 import { cn } from '@/lib/utils';
 
@@ -56,20 +55,9 @@ export function HomeTopBar({
     : 'U';
 
   const { data: hasUnread = false } = useHasUnread(user?.id);
-  // On very narrow phones (Telegram WebView ≈ 339px) the role pill +
-  // bell + avatar starve the wordmark column. Cap to 2 avatars below
-  // sm so a 3rd persona folds into the existing `+N` counter, then
-  // restore 3 from sm up.
   const isOnNavy = variant === 'onNavy';
-  const maxAvatarsXs = 2;
-  const maxAvatarsSm = 3;
-  const overflowXs = Math.max(0, personas.length - maxAvatarsXs);
-  const overflowSm = Math.max(0, personas.length - maxAvatarsSm);
-  const displayPersonas = personas.slice(0, maxAvatarsSm);
 
   // Style atoms — keeps the JSX readable while the two contracts diverge.
-  // On navy: cream-tinted icons, translucent borders, glassy hover surfaces.
-  // On cream (default): existing greyscale chrome unchanged.
   const iconButtonCls = isOnNavy
     ? 'text-primary-foreground/90 hover:bg-primary-foreground/10 hover:text-primary-foreground'
     : 'text-foreground hover:bg-muted/40';
@@ -79,16 +67,15 @@ export function HomeTopBar({
   const subtitleCls = isOnNavy
     ? 'text-primary-foreground/65'
     : 'text-muted-foreground/60';
-  const rolePillCls = isOnNavy
-    ? 'border border-primary-foreground/20 bg-primary-foreground/[0.08] hover:bg-primary-foreground/[0.14] hover:border-primary-foreground/30'
-    : 'border border-border bg-card/40 hover:border-border-strong hover:bg-card/60';
-  const roleAvatarBorder = isOnNavy ? 'border-primary' : 'border-background';
-  const rolePillCountCls = isOnNavy ? 'text-primary-foreground/70' : 'text-muted-foreground';
+
+  // Suppress unused-personas-prop warning while keeping the API stable for
+  // callers — PersonaHalo now owns the role-stack affordance.
+  void personas;
+  void onRoleSheetOpen;
 
   return (
     <div className="flex items-center justify-between pt-2 pb-3 gap-2 sm:gap-3">
-      {/* Drawer trigger + logo cluster — does NOT shrink; the wordmark
-          must always render on a single line. */}
+      {/* Drawer trigger + logo cluster — does NOT shrink. */}
       <div className="flex items-center gap-2 flex-shrink-0">
         {onAppDrawerOpen && (
           <button
@@ -108,9 +95,6 @@ export function HomeTopBar({
             as="static"
             tone={isOnNavy ? 'onNavy' : 'default'}
           />
-          {/* Subtitle competes with the wordmark on narrow phones (it forced
-              the wordmark to truncate as "myUNO — P…" in the user-reported
-              Telegram WebView). Hide below sm; show from tablet up. */}
           <span
             className={cn(
               'hidden sm:block text-[10px] tracking-[0.14em] uppercase font-semibold mt-1 truncate',
@@ -122,59 +106,9 @@ export function HomeTopBar({
         </div>
       </div>
 
-      {/* Right cluster — allowed to shrink so the logo always wins. */}
+      {/* Right cluster — compact: bell + avatar. Role switching now lives
+          inside PersonaHalo (tap on identity tile). */}
       <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-        {/* Role stack pill — min 44px touch target */}
-        {displayPersonas.length > 0 && (
-          <button
-            onClick={onRoleSheetOpen}
-            aria-label="Manage roles"
-            className={cn(
-              'flex items-center gap-0 min-h-[44px] px-2 sm:px-2.5 rounded-full transition-colors',
-              rolePillCls,
-            )}
-          >
-            <div className="flex">
-              {displayPersonas.map((p, i) => {
-                const meta = ROLE_META[p];
-                if (!meta) return null;
-                // Hide the 3rd avatar below sm (Telegram WebView ≈339px) —
-                // it folds into the `+N` counter so the affordance stays.
-                const hideOnXs = i >= maxAvatarsXs;
-                return (
-                  <div
-                    key={p}
-                    className={cn(
-                      'w-[26px] h-[26px] rounded-full flex items-center justify-center font-display text-[11px] font-bold border-2 bg-muted shadow-sm',
-                      roleAvatarBorder,
-                      hideOnXs && 'hidden sm:flex',
-                    )}
-                    style={{ color: meta.color, marginLeft: i === 0 ? 0 : -9, zIndex: 10 - i }}
-                  >
-                    {meta.glyph}
-                  </div>
-                );
-              })}
-            </div>
-            {/* Two responsive counters: shows `+N` based on how many avatars
-                are actually visible at the current breakpoint. */}
-            {overflowXs > 0 && (
-              <span className={cn('sm:hidden text-[10px] tabular-nums ml-1.5 font-sans', rolePillCountCls)}>
-                +{overflowXs}
-              </span>
-            )}
-            {overflowSm > 0 && (
-              <span className={cn('hidden sm:inline text-[10px] tabular-nums ml-1.5 font-sans', rolePillCountCls)}>
-                +{overflowSm}
-              </span>
-            )}
-            {/* Caret hidden on xs to save ~18px; the role pill is still
-                tappable and the avatar stack reads as a switcher. */}
-            <svg className="hidden sm:block ml-2 opacity-50" width="10" height="10" viewBox="0 0 10 10" fill="none">
-              <path d="M2 4l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
-        )}
 
         {/* Bell — 44px tap target, badge only when there's something pending */}
         <button

@@ -1,40 +1,89 @@
-## Issue
+## Что не так сейчас
 
-On a 339-px viewport (Telegram WebView / narrow Chrome) the navy header breaks:
+Навигация на главной = две одинаковые горизонтальные ленты:
+1. `HomeTopBar` — иконки справа вверху (меню, роли-стек, колокольчик, аватар).
+2. `HomeContextChips` — лента «капсул» (Найти услугу · Маркет · Мои брони…) на навигационной полосе.
 
-- **`myUNO` wordmark wraps to two lines** as `m UN / y O`. Cause: in `HomeTopBar` the static `BrandWordmark` lives inside a `min-w-0` flex column, and the `static` variant of `BrandWordmark` does not have `whitespace-nowrap` (only the `link` variant does). The right-side cluster (drawer + role pill + bell + avatar = ~250 px) starves the logo column and the wordmark gets squeezed past its intrinsic width.
-- **Context chips below partly hidden** behind the floating concierge avatar (cosmetic side-effect of the same overflow — chips can scroll, that's fine).
-- The role pill is heavy on tiny screens: 3 stacked role avatars (~56 px) + chevron + 14 px caret + 20 px padding. Combined with bell + avatar (44 px each) the right cluster eats >60 % of the width.
+Обе — стандартные «pills in a row». На узком экране (Telegram WebView) выглядят как технический тулбар, а не как фирменный продукт. Аудитория не понимает, *где она находится* и *куда идти дальше*.
 
-## Fix (minimal, scoped)
+## Фишка: Persona Halo (строгий «госуслуги-про» регистр)
 
-### 1. `BrandWordmark.tsx` — never wrap
-- Add `whitespace-nowrap` and `flex-shrink-0` to the `static` branch, matching the `link` branch. The wordmark is 6 chars max — letting it shrink the column was the only reason it ever wrapped.
+Главная навигация на хоуме превращается в **компактный приборный модуль** под navy-баннером:
 
-### 2. `HomeTopBar.tsx` — give the logo column priority, slim the right cluster on tiny screens
-- Drop `min-w-0` from the logo cluster wrapper (it forced shrinking).
-- Add `min-w-0` and `gap-1.5` (was 2) on the right cluster so it shrinks first if anything must give.
-- On `< sm` (≤640 px):
-  - Hide the **chevron caret** in the role pill (saves ~18 px).
-  - Cap visible role avatars to **2** instead of 3 on `< sm` (saves ~17 px). 3rd+ folds into the existing `+N` counter so the affordance is preserved.
-  - Tighten role-pill horizontal padding from `px-2.5` to `px-2` on `< sm`.
-- Keep all 44 px tap targets intact (bell, avatar, drawer trigger unchanged).
+- В центре — крупный квадратный плиток-аватар пользователя с инициалами (или фото).
+- Сверху над аватаром — короткая статусная строка: имя/«Гость», текущий контекст («Пхукет · понедельник, утро»).
+- Вокруг аватара — **строгая сетка из 6 секторов** (по числу кластеров: Arrive · Live · Manage · Invest · Legal · Build). Каждый сектор — это плотный квадратный квант с:
+  - 2-px цветным spine-акцентом слева (цвет кластера из таксономии);
+  - иконкой Lucide 18px;
+  - подписью в 1 строку;
+  - тонкой подпёркой со счётчиком («3 задачи», «новое»);
+  - аккуратной точкой-индикатором (orange-400 на навy), если в этом кластере есть событие/непрочитанное.
+- Сектора, не входящие в активные роли пользователя, отображаются приглушённо (opacity 50%, без счётчика) — пользователь видит весь мир myUNO, но «свои миры» подсвечены.
+- Тап по сектору → дип-линк в кластер. Долгий тап / тап по аватару → открытие RoleSheet (переключение ролей).
 
-### 3. `HomeContextChips.tsx` — no code change needed
-The chips are already horizontally scrollable; once the wordmark stops wrapping, the band height settles and the strip reads correctly. The "hidden behind chat bubble" effect in the screenshot is the floating concierge — outside scope of this fix.
+### Почему это «фишка»
 
-## Files touched
+1. **Узнаваемо**: 6-квантовая сетка с центральным «Я» — фирменный графический паттерн, такого нет ни у госуслуг, ни у Booking. При этом форма строгая (квадраты, навy/cream, 0 анимаций) — не воспринимается как игрушка.
+2. **Самоидентификация за 1 секунду**: подсвечены роли пользователя — он мгновенно видит «мой мир здесь».
+3. **Один тап до цели**: 6 главных направлений + аккаунт всегда в видимости, без скролла.
+4. **Большой палец-friendly**: модуль занимает верхнюю треть, но каждая кнопка ≥56×56 px — попасть проще, чем в текущие 26-px чипы.
+5. **Реактивность без шума**: точки-индикаторы вместо badge с цифрами — спокойный, «госуслуги-про» язык.
+
+## Раскладка
 
 ```text
-src/components/uno/BrandWordmark.tsx     – add whitespace-nowrap to `static` branch
-src/components/home/HomeTopBar.tsx       – right-cluster slimming + logo column doesn't shrink
+┌─────────────────────────────────────────┐
+│  myUNO                    🔔   PA   ☰   │  ← упрощённый HomeTopBar (только бренд + 3 икон)
+│                                         │
+│         Павел · Пхукет · 09:14          │  ← статус-строка
+│                                         │
+│  ┌─────────┬─────────┬─────────┐        │
+│  │ Arrive  │  Live   │ Manage  │        │
+│  │   ✈     │   🏠    │   🏢•   │        │  ← • = есть событие
+│  ├─────────┼─────────┼─────────┤        │
+│  │ Invest  │  Legal  │  Build  │        │
+│  │   📈    │   ⚖    │   🏗    │        │
+│  └─────────┴─────────┴─────────┘        │
+│                                         │
+│      [ Поиск по myUNO ────────── ⌕ ]    │  ← остаётся HeroIntro ниже
+└─────────────────────────────────────────┘
 ```
 
-No design tokens, no new colors, no DB. Type-check stays green.
+На мобильном — сетка 3×2 (6 квантов), на ≥sm — 6×1 в одну линию, на ≥md — увеличенный padding и подписи в 2 строки.
 
-## Verification
+## Что меняется в коде
 
-- Browser viewport set to 339×577 (matching the user's screenshot).
-- Confirm `myUNO` renders on a single line with the orange `my` + cream `UNO`.
-- Confirm role pill, bell, avatar all stay on one row, no horizontal scroll on the header itself.
-- Re-check at 375 px (iPhone SE) and 414 px (iPhone Plus) for regressions.
+### Новый компонент
+`src/components/home/PersonaHalo.tsx` — главный модуль:
+- Принимает `personas: UserPersona[]`, `onRoleSheetOpen`, `language`, `userName`, `initials`.
+- Использует `CLUSTER_CATALOG` (SSOT кластеров) и `CLUSTER_SCORES` из `roleBlend.ts` для определения «активных» секторов.
+- Цвета кластеров — из существующих токенов (`--cluster-arrive`, `--cluster-live` и т.д., если их нет — добавим в `tokens.css` через семантические HSL).
+- Индикатор событий (точка) подключается к существующему `useHasUnread` (расширим до per-cluster позже; в первой итерации — общая точка на Manage, если есть pending orders/tasks).
+- Вёрстка: CSS Grid, `rounded-none` (госуслуги-канон), `border border-border`, hover = `border-primary/40 bg-primary/[0.04]`. Без motion, без теней — только чёткие границы и навy spine.
+
+### Изменения существующих файлов
+- **`src/pages/Index.tsx`**: убрать `<HomeContextChips …>` из navy-band; добавить `<PersonaHalo …/>` сразу под `HomeTopBar`. `HomeContextChips` остаётся в кодовой базе (используется в других местах) — просто не подключается к Home.
+- **`src/components/home/HomeTopBar.tsx`**: упростить — убрать «role-pill stack» (его функцию забирает PersonaHalo), оставить только `Menu`, `Bell`, `Avatar`. Это разгружает узкий хедер и устраняет старую проблему с переполнением. Сам `RoleSheet` теперь открывается тапом по аватару PersonaHalo или по аватару в TopBar.
+- **`src/lib/nav/clusterCatalog.ts`** (read-only сверка): убедимся, что у каждого из 6 кластеров есть `id`, `labelRu/En`, `route`, `icon`, `accentVar`. Если чего-то не хватает — допишем минимум.
+
+### Тон (выбран «госуслуги-про»)
+- Никаких анимаций появления, scale, parallax. Только мгновенный hover-цвет.
+- Прямые углы (`rounded-none`), 1-px бордеры, navy spine 2 px.
+- Шрифты: Golos Text для подписей, JetBrains Mono для счётчиков.
+- Подписи кластеров — существительные, без призывов («Жить», «Управлять», «Инвестировать»).
+
+## Acceptance criteria
+
+1. На главной под navy-баннером появляется PersonaHalo: статус-строка + сетка 3×2 из 6 кластеров.
+2. Активные кластеры (по `personas`) визуально подсвечены (полная opacity + цветной spine), неактивные — приглушены.
+3. Тап по сектору → переход на route кластера. Тап по аватару → открывается RoleSheet.
+4. На viewport 339px ничего не обрезается, каждая кнопка ≥44 px по короткой стороне.
+5. `HomeContextChips` больше не рендерится в `Index.tsx` (но файл остаётся для других страниц).
+6. `HomeTopBar` теряет role-pill, остаются Menu / Bell / Avatar — хедер становится тоньше и спокойнее.
+7. Тёмный/светлый режим, RU/EN — без хардкод-цветов, всё через семантические токены.
+
+## Вне scope (вторая итерация, если зайдёт)
+
+- Per-cluster счётчики событий из БД (сейчас — общий индикатор Manage).
+- Долгий тап = быстрое меню под-задач кластера.
+- Анимация «дыхания» индикатора (отключено в строгом тоне).
