@@ -28,6 +28,8 @@ interface ContextChip extends NavChipItem {
 
 interface HomeContextChipsProps {
   personas: UserPersona[];
+  /** Background tone — pass `onNavy` when the strip sits on the brand band. */
+  variant?: 'default' | 'onNavy';
 }
 
 function buildChips(personas: UserPersona[], isRu: boolean): ContextChip[] {
