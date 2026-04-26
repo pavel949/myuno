@@ -53,10 +53,6 @@ project_id = "erfwtoavipwjqmylpizt"
     verify_jwt = false
   [functions.enrich-projects]
     verify_jwt = false
-  [functions.fazwaz-discover-projects]
-    verify_jwt = false
-  [functions.fazwaz-scrape-project]
-    verify_jwt = false
   [functions.firecrawl-scrape]
     verify_jwt = false
   [functions.generate-booking-voucher]
@@ -109,8 +105,6 @@ project_id = "erfwtoavipwjqmylpizt"
     verify_jwt = false
   [functions.send-property-report]
     verify_jwt = false
-  [functions.stays-subscribe]
-    verify_jwt = true
   [functions.stripe-webhook]
     verify_jwt = false
   [functions.submit-web-form]
