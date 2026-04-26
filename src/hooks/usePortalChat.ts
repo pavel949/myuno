@@ -71,14 +71,14 @@ export function usePortalChat(propertyId: string | undefined) {
   const sendMessage = useMutation({
     mutationFn: async (args: { message: string; senderRole: 'owner' | 'mc' }) => {
       if (!propertyId || !user) throw new Error('Missing context');
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('portal_messages')
         .insert({
           property_id: propertyId,
           sender_id: user.id,
           sender_role: args.senderRole,
           message: args.message,
-        })
+        } as never)
         .select()
         .single();
       if (error) throw error;
@@ -89,9 +89,9 @@ export function usePortalChat(propertyId: string | undefined) {
   const markAsRead = useMutation({
     mutationFn: async (messageIds: string[]) => {
       if (!messageIds.length) return;
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('portal_messages')
-        .update({ is_read: true })
+        .update({ is_read: true } as never)
         .in('id', messageIds);
       if (error) throw error;
     },
