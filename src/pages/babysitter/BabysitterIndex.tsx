@@ -3,12 +3,12 @@
  */
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Baby, Star, Shield } from 'lucide-react';
+import { Baby, Shield } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useCurrency } from '@/contexts/CurrencyContext';
 import { MiniAppLayout } from '@/components/miniapp/MiniAppLayout';
-import { Badge } from '@/components/ui/badge';
+import { CatalogCard } from '@/components/miniapp/CatalogCard';
 import { EmptyState } from '@/components/uno/EmptyState';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 
