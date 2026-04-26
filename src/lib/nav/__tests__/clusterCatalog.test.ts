@@ -9,7 +9,9 @@ import {
   filterCatalogForUser,
   isClusterVisibleToUser,
   getClusterById,
+  getClusterServiceLocalizedLabel,
 } from '../clusterCatalog';
+import { CATEGORIES } from '@/lib/catalog';
 
 describe('clusterCatalog — audience model invariants', () => {
   it('every cluster has a stable id, label pair, and at least one service', () => {
