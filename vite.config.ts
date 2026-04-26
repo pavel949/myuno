@@ -25,10 +25,25 @@ export default defineConfig(({ mode }) => {
       // `true` is more reliable than `::` on Windows / embedded browser previews (Cursor Simple Browser).
       host: true,
       port: 8080,
+      // Avoid timing-out clients while Vite is still pre-bundling on first hit.
+      // The Lovable iframe preview and Playwright otherwise see HTTP 504 from
+      // the dev server middleware on cold start with our large module graph.
+      hmr: {
+        overlay: false,
+      },
       // OneDrive-synced folders can miss file events; polling avoids stale HMR and odd Vite cache behavior.
       watch: {
         usePolling: true,
         interval: 1000,
+      },
+      // Warm common entry points at startup so the first request doesn't pay
+      // the entire transform cost. Keep this list short — only top-of-graph.
+      warmup: {
+        clientFiles: [
+          './src/main.tsx',
+          './src/App.tsx',
+          './src/pages/Index.tsx',
+        ],
       },
     },
     preview: {
@@ -183,7 +198,65 @@ export default defineConfig(({ mode }) => {
       dedupe: ['react', 'react-dom', 'react/jsx-runtime'],
     },
     optimizeDeps: {
-      include: ['react', 'react-dom', 'react/jsx-runtime'],
+      // Eagerly pre-bundle the heavy hitters used across hundreds of files.
+      // Without this, Vite discovers them lazily on the first request to each
+      // route and clients (incl. Playwright + Lovable preview) hit 504 because
+      // the dev server is busy esbuild-bundling 1000+ modules mid-request.
+      include: [
+        'react',
+        'react-dom',
+        'react-dom/client',
+        'react/jsx-runtime',
+        'react/jsx-dev-runtime',
+        'react-router-dom',
+        'react-helmet-async',
+        '@tanstack/react-query',
+        
+        '@supabase/supabase-js',
+        '@lovable.dev/cloud-auth-js',
+        'framer-motion',
+        'lucide-react',
+        'date-fns',
+        'clsx',
+        'class-variance-authority',
+        'tailwind-merge',
+        'sonner',
+        'zod',
+        'react-hook-form',
+        '@hookform/resolvers/zod',
+        'dompurify',
+        '@sentry/react',
+        '@react-google-maps/api',
+        '@radix-ui/react-accordion',
+        '@radix-ui/react-alert-dialog',
+        '@radix-ui/react-avatar',
+        '@radix-ui/react-checkbox',
+        '@radix-ui/react-collapsible',
+        '@radix-ui/react-dialog',
+        '@radix-ui/react-dropdown-menu',
+        '@radix-ui/react-label',
+        '@radix-ui/react-popover',
+        '@radix-ui/react-progress',
+        '@radix-ui/react-radio-group',
+        '@radix-ui/react-scroll-area',
+        '@radix-ui/react-select',
+        '@radix-ui/react-separator',
+        '@radix-ui/react-slider',
+        '@radix-ui/react-slot',
+        '@radix-ui/react-switch',
+        '@radix-ui/react-tabs',
+        '@radix-ui/react-toggle',
+        '@radix-ui/react-toggle-group',
+        '@radix-ui/react-tooltip',
+        '@radix-ui/react-visually-hidden',
+      ],
+      // Tell esbuild to crawl the actual entry once at startup so most deps
+      // are discovered up-front, not lazily on first request per route.
+      entries: ['./index.html', './src/main.tsx'],
+      // Increase esbuild's concurrency budget on large graphs.
+      esbuildOptions: {
+        target: 'es2020',
+      },
     },
     build: {
       rollupOptions: {
