@@ -3,32 +3,27 @@
  * Accessible from bottom nav "Navigator" tab
  */
 import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Search, LayoutGrid, X } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useUserPersonas } from '@/hooks/useUserPersonas';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { cn } from '@/lib/utils';
 import { NavChips, type NavChipItem } from '@/components/nav/NavChips';
 import {
-  CLUSTER_CATALOG,
-  CLUSTER_CATALOG_AVAILABLE,
-  CLUSTER_CATALOG_SOON,
-  CLUSTER_CATALOG_TOTAL_AVAILABLE,
+  filterCatalogForUser,
   getClusterHeaderLabel,
   getClusterServiceLocalizedLabel,
   getClusterValueLine,
   type ClusterService,
+  type ClusterCatalogEntry,
 } from '@/lib/nav/clusterCatalog';
+import { resolveNavRole } from '@/lib/nav/navigationModel';
 import { pickTriplet } from '@/lib/ecosystemGlossary';
 import type { Language } from '@/i18n';
-
-// Local aliases — keep call-sites readable; SSOT lives in clusterCatalog.ts
-const CLUSTERS = CLUSTER_CATALOG;
-const ALL_SERVICES = CLUSTER_CATALOG_AVAILABLE;
-const SOON_SERVICES = CLUSTER_CATALOG_SOON;
-const TOTAL_NAVIGATOR_SERVICES = CLUSTER_CATALOG_TOTAL_AVAILABLE;
 
 function NavigatorStatsFooter({
   stats,
