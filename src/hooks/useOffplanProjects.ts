@@ -252,7 +252,7 @@ export function useOffplanProjects(filters?: OffplanFilters) {
       }
 
       if (!rich.error && rich.data && rich.data.length > 0) {
-        return rich.data.map((p: any) => mapRich(p));
+        return (rich.data as unknown as ProjectRow[]).map((p) => mapRich(p));
       }
 
       if (!rich.error && rich.data) {
