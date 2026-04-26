@@ -98,11 +98,11 @@ export function useGovernanceConfig() {
         const key = row.key as keyof GovernanceConfig;
         if (key in config) {
           try {
-            (config as any)[key] = typeof row.value === 'string' 
+            (config as Record<string, unknown>)[key] = typeof row.value === 'string' 
               ? JSON.parse(row.value as string) 
               : row.value;
           } catch {
-            (config as any)[key] = row.value;
+            (config as Record<string, unknown>)[key] = row.value;
           }
         }
       }
@@ -213,7 +213,7 @@ export async function validateMapping(
   // 4. Check scenario primary count
   const scenarioMappings = await getScenarioMappings(mapping.life_situation_id);
   const currentPrimaryCount = scenarioMappings.filter(
-    m => (m.rules as any)?.priority_type === 'primary' && m.id !== existingMappingId
+    m => (m.rules as { priority_type?: string } | null)?.priority_type === 'primary' && m.id !== existingMappingId
   ).length;
 
   if (isPrimary && currentPrimaryCount >= config.MAX_PRIMARY_BLOCKS) {
@@ -253,13 +253,13 @@ export async function validateDelete(
     return { isValid: true, blocked: false, warnings: [], errors: [] };
   }
 
-  const isPrimary = (mapping.rules as any)?.priority_type === 'primary';
-  const situationTitle = (mapping.life_situations as any)?.title_en || 'Unknown';
+  const isPrimary = (mapping.rules as { priority_type?: string } | null)?.priority_type === 'primary';
+  const situationTitle = (mapping.life_situations as { title_en?: string } | null)?.title_en || 'Unknown';
 
   // Get scenario health
   const scenarioMappings = await getScenarioMappings(mapping.life_situation_id);
   const primaryCount = scenarioMappings.filter(
-    m => (m.rules as any)?.priority_type === 'primary'
+    m => (m.rules as { priority_type?: string } | null)?.priority_type === 'primary'
   ).length;
   const totalCount = scenarioMappings.length;
 
@@ -312,7 +312,7 @@ export async function calculateChangeImpact(
   const scenarioMappings = await getScenarioMappings(mapping.life_situation_id);
   const currentTotal = scenarioMappings.length;
   const currentPrimary = scenarioMappings.filter(
-    m => (m.rules as any)?.priority_type === 'primary'
+    m => (m.rules as { priority_type?: string } | null)?.priority_type === 'primary'
   ).length;
 
   const isPrimary = mapping.priority_type === 'primary';
