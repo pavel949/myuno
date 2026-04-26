@@ -82,6 +82,35 @@ function timeOfDay(isRu: boolean): string {
 // stub that previously hard-coded a single `manage` signal was removed in
 // favor of the canonical multi-table probe.
 
+/**
+ * Cluster → deep-link to the user's open items for that cluster, with the
+ * matching filter applied. Mirrors `useClusterActivity` source mapping so a
+ * tap on the badge lands on a list pre-filtered to exactly the rows that
+ * fed the count.
+ */
+function getClusterDestination(clusterId: string): string | null {
+  switch (clusterId) {
+    case 'arrive':
+      return '/me/bookings?cluster=arrive&status=open';
+    case 'live':
+      return '/me/bookings?cluster=live&status=open';
+    case 'manage':
+      // Owner-side bookings list filtered to pending. Falls back gracefully
+      // if the user has no MC scope (page renders an empty state).
+      return '/mc/bookings-list?status=pending';
+    case 'invest':
+      return '/me/requests?source=order';
+    case 'legal':
+      return '/me/requests?source=visa';
+    case 'build':
+      // No canonical "my partner applications" page yet — fall back to the
+      // unified requests board without a source filter.
+      return '/me/requests';
+    default:
+      return null;
+  }
+}
+
 interface PersonaHaloProps {
   personas: UserPersona[];
   onRoleSheetOpen: () => void;
