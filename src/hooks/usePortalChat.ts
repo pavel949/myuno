@@ -26,14 +26,14 @@ export function usePortalChat(propertyId: string | undefined) {
     queryKey,
     queryFn: async (): Promise<PortalMessage[]> => {
       if (!propertyId) return [];
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('portal_messages')
         .select('*')
         .eq('property_id', propertyId)
         .order('created_at', { ascending: true })
         .limit(200);
       if (error) throw error;
-      return (data || []) as PortalMessage[];
+      return (data || []) as unknown as PortalMessage[];
     },
     enabled: !!propertyId && !!user,
   });
@@ -53,10 +53,11 @@ export function usePortalChat(propertyId: string | undefined) {
         },
         (payload) => {
           queryClient.setQueryData(queryKey, (old: PortalMessage[] | undefined) => {
-            if (!old) return [payload.new as PortalMessage];
+            const newMsg = payload.new as PortalMessage;
+            if (!old) return [newMsg];
             // Avoid duplicates
-            if (old.some(m => m.id === (payload.new as any).id)) return old;
-            return [...old, payload.new as PortalMessage];
+            if (old.some(m => m.id === newMsg.id)) return old;
+            return [...old, newMsg];
           });
         }
       )
@@ -70,14 +71,14 @@ export function usePortalChat(propertyId: string | undefined) {
   const sendMessage = useMutation({
     mutationFn: async (args: { message: string; senderRole: 'owner' | 'mc' }) => {
       if (!propertyId || !user) throw new Error('Missing context');
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('portal_messages')
         .insert({
           property_id: propertyId,
           sender_id: user.id,
           sender_role: args.senderRole,
           message: args.message,
-        })
+        } as never)
         .select()
         .single();
       if (error) throw error;
@@ -88,9 +89,9 @@ export function usePortalChat(propertyId: string | undefined) {
   const markAsRead = useMutation({
     mutationFn: async (messageIds: string[]) => {
       if (!messageIds.length) return;
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('portal_messages')
-        .update({ is_read: true })
+        .update({ is_read: true } as never)
         .in('id', messageIds);
       if (error) throw error;
     },

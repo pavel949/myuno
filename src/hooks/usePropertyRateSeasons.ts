@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { Json } from '@/integrations/supabase/types';
 import { type RateSeasonRecord, rateSeasonsToJsonb } from '@/lib/pricingEngine';
 
 export type { RateSeasonRecord };
@@ -21,7 +22,7 @@ async function logActivity(params: {
       action: params.action,
       entity_type: params.entityType || null,
       entity_id: params.entityId || null,
-      details: params.details as any,
+      details: (params.details ?? null) as Json,
     });
   } catch (err) {
     console.error('Failed to log activity:', err);
@@ -88,7 +89,7 @@ export async function syncRateSeasonsToProperty(propertyId: string, basePricePer
 
   const { error: updateErr } = await supabase
     .from('properties')
-    .update({ seasonal_pricing: jsonb as any })
+    .update({ seasonal_pricing: jsonb as Json })
     .eq('id', propertyId);
 
   if (updateErr) throw updateErr;
@@ -108,7 +109,7 @@ export function useSaveRateSeason() {
     }) => {
       const { season, id, basePricePerNight } = params;
       if (id) {
-        const { error } = await supabase.from('property_rate_seasons').update(season as any).eq('id', id);
+        const { error } = await supabase.from('property_rate_seasons').update(season as never).eq('id', id);
         if (error) throw error;
 
         // Log update
@@ -121,7 +122,7 @@ export function useSaveRateSeason() {
           details: { name: season.name_en, nightly_rate: season.nightly_rate, start_date: season.start_date, end_date: season.end_date },
         });
       } else {
-        const { data, error } = await supabase.from('property_rate_seasons').insert(season as any).select('id').single();
+        const { data, error } = await supabase.from('property_rate_seasons').insert(season as never).select('id').single();
         if (error) throw error;
 
         // Log creation
