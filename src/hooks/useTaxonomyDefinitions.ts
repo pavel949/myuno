@@ -85,10 +85,9 @@ export function useTaxonomyDefinitions() {
         countMap[item.lookup_type] = (countMap[item.lookup_type] || 0) + 1;
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return (definitions || []).map((def: any) => ({
-        ...def,
-        value_count: countMap[def.type_key] || 0,
+      return (definitions || []).map((def) => ({
+        ...(def as unknown as TaxonomyDefinition),
+        value_count: countMap[(def as { type_key: string }).type_key] || 0,
       })) as TaxonomyWithCount[];
     },
     staleTime: 5 * 60 * 1000,
