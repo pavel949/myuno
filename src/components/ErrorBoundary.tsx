@@ -138,7 +138,13 @@ export function withErrorBoundary<P extends object>(
 export function useGlobalErrorHandler() {
   useEffect(() => {
     const lang = getLang();
-    
+
+    // Clear stale-chunk reload marker after a successful mount — the next
+    // chunk failure should be allowed exactly one fresh auto-reload attempt.
+    if (typeof window !== 'undefined') {
+      try { sessionStorage.removeItem('__myuno_chunk_reload__'); } catch { /* ignore */ }
+    }
+
     const handleRejection = (event: PromiseRejectionEvent) => {
       errorLog.silent(event.reason, 'unhandled_rejection');
       
