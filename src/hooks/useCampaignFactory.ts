@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
 import type { 
   Campaign, 
@@ -14,9 +15,10 @@ import type {
   TargetSegment
 } from '@/types/marketing';
 
+type CampaignRow = Database['public']['Tables']['mcc_campaigns']['Row'];
+
 // Transform database row to Campaign type
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const transformCampaign = (row: any): Campaign => ({
+const transformCampaign = (row: CampaignRow): Campaign => ({
   id: row.id,
   name: row.name,
   description: row.description,
