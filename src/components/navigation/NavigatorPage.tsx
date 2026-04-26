@@ -378,7 +378,7 @@ export default function NavigatorPage() {
                   <ServiceTile
                     key={`search-${service.path}-${service.labelEn}`}
                     service={service}
-                    clusterColor={service.clusterColor}
+                    clusterId={service.clusterId}
                     language={language}
                     onNavigate={navigate}
                   />
