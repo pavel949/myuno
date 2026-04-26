@@ -94,50 +94,95 @@ function NavigatorStatsFooter({
   return <p className="text-xs text-muted-foreground leading-relaxed">{out}</p>;
 }
 
+// DS2.0: map taxonomy cluster id → semantic Tailwind token name (literal classes only)
+type ClusterTokenId = 'arrive' | 'live' | 'manage' | 'invest' | 'legal' | 'build';
+
+const CLUSTER_TILE_BG: Record<ClusterTokenId, string> = {
+  arrive: 'bg-cluster-arrive/10',
+  live: 'bg-cluster-live/10',
+  manage: 'bg-cluster-manage/10',
+  invest: 'bg-cluster-invest/10',
+  legal: 'bg-cluster-legal/10',
+  build: 'bg-cluster-build/10',
+};
+
+const CLUSTER_TILE_BORDER: Record<ClusterTokenId, string> = {
+  arrive: 'border-cluster-arrive/15',
+  live: 'border-cluster-live/15',
+  manage: 'border-cluster-manage/15',
+  invest: 'border-cluster-invest/15',
+  legal: 'border-cluster-legal/15',
+  build: 'border-cluster-build/15',
+};
+
+const CLUSTER_HEADER_BG: Record<ClusterTokenId, string> = {
+  arrive: 'bg-cluster-arrive/15',
+  live: 'bg-cluster-live/15',
+  manage: 'bg-cluster-manage/15',
+  invest: 'bg-cluster-invest/15',
+  legal: 'bg-cluster-legal/15',
+  build: 'bg-cluster-build/15',
+};
+
+const CLUSTER_FG: Record<ClusterTokenId, string> = {
+  arrive: 'text-cluster-arrive',
+  live: 'text-cluster-live',
+  manage: 'text-cluster-manage',
+  invest: 'text-cluster-invest',
+  legal: 'text-cluster-legal',
+  build: 'text-cluster-build',
+};
+
+function resolveClusterToken(id: string): ClusterTokenId {
+  return (['arrive', 'live', 'manage', 'invest', 'legal', 'build'] as ClusterTokenId[]).includes(
+    id as ClusterTokenId,
+  )
+    ? (id as ClusterTokenId)
+    : 'live';
+}
+
 function ServiceTile({
   service,
-  clusterColor,
+  clusterId,
   language,
   onNavigate,
 }: {
   service: ClusterService;
-  clusterColor: string;
+  clusterId: string;
   language: Language;
   onNavigate: (path: string) => void;
 }) {
   const SIcon = service.icon;
   const isSoon = service.status === 'soon';
   const isPro = service.status === 'pro';
+  const token = resolveClusterToken(clusterId);
 
   return (
     <button
       onClick={() => !isSoon && onNavigate(service.path)}
       className={cn(
-        'relative flex flex-col items-center justify-center gap-1.5',
-        'w-[72px] min-w-[72px] h-[72px] rounded-none',
-        'transition-all duration-150 snap-start shrink-0',
+        'relative flex flex-col items-center justify-start gap-1.5 p-2',
+        'w-[88px] min-w-[88px] h-[96px] rounded-sm border',
+        'shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)]',
+        'transition-all duration-150 snap-start shrink-0 active:scale-[0.98]',
+        CLUSTER_TILE_BG[token],
+        CLUSTER_TILE_BORDER[token],
         isSoon && 'opacity-40 pointer-events-none',
       )}
-      style={{ background: clusterColor + '14' }}
       disabled={isSoon}
+      aria-label={getClusterServiceLocalizedLabel(service, language)}
     >
-      <SIcon className="w-5 h-5" style={{ color: clusterColor }} />
-      <span className="text-[10px] font-medium text-foreground leading-tight text-center px-1 line-clamp-1">
+      <SIcon className={cn('w-6 h-6 shrink-0 mt-1', CLUSTER_FG[token])} />
+      <span className="text-[11px] font-medium text-foreground leading-[1.15] text-center line-clamp-2 w-full">
         {getClusterServiceLocalizedLabel(service, language)}
       </span>
       {isPro && (
-        <span
-          className="absolute top-1 right-1 text-[7px] font-bold px-1 py-px rounded-full"
-          style={{ background: '#F59E0B22', color: '#F59E0B' }}
-        >
+        <span className="absolute top-1 right-1 text-[7px] font-bold px-1 py-px rounded-sm bg-amber-500/15 text-amber-500">
           PRO
         </span>
       )}
       {isSoon && (
-        <span
-          className="absolute top-1 right-1 text-[7px] font-medium px-1 py-px rounded-full"
-          style={{ background: 'hsl(0 0% 100% / 0.08)', color: 'hsl(var(--muted-foreground))' }}
-        >
+        <span className="absolute top-1 right-1 text-[7px] font-medium px-1 py-px rounded-sm bg-muted/40 text-muted-foreground">
           Soon
         </span>
       )}
