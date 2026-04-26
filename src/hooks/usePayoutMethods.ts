@@ -55,7 +55,7 @@ export function usePayoutMethods() {
 
       // Direct query with type assertion since table was just created
       const { data, error } = await supabase
-        .from('provider_payout_methods' as any)
+        .from('provider_payout_methods')
         .select('*')
         .eq('provider_id', providerId)
         .order('is_default', { ascending: false })
@@ -74,13 +74,13 @@ export function usePayoutMethods() {
       // If setting as default, first unset all others
       if (data.is_default) {
         await supabase
-          .from('provider_payout_methods' as any)
+          .from('provider_payout_methods')
           .update({ is_default: false })
           .eq('provider_id', providerId);
       }
 
       const { data: result, error } = await supabase
-        .from('provider_payout_methods' as any)
+        .from('provider_payout_methods')
         .insert({ provider_id: providerId, ...data })
         .select()
         .single();
@@ -103,13 +103,13 @@ export function usePayoutMethods() {
 
       // Unset all defaults first
       await supabase
-        .from('provider_payout_methods' as any)
+        .from('provider_payout_methods')
         .update({ is_default: false })
         .eq('provider_id', providerId);
 
       // Set new default
       const { error } = await supabase
-        .from('provider_payout_methods' as any)
+        .from('provider_payout_methods')
         .update({ is_default: true })
         .eq('id', methodId)
         .eq('provider_id', providerId);
@@ -130,7 +130,7 @@ export function usePayoutMethods() {
       if (!providerId) throw new Error('Provider not found');
 
       const { error } = await supabase
-        .from('provider_payout_methods' as any)
+        .from('provider_payout_methods')
         .delete()
         .eq('id', methodId)
         .eq('provider_id', providerId);
