@@ -15,8 +15,31 @@ import { useRestaurants } from '@/hooks/useRestaurants';
 import { createMapPopupHtml } from '@/lib/sanitize';
 import { getMapCenter, DEFAULT_CITY } from '@/lib/config';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { isOpenNow } from '@/lib/filterUtils';
 
 type VerticalFilter = 'all' | 'property' | 'commercial' | 'land' | 'beauty' | 'restaurant';
+type PriceFilter = 'all' | 'budget' | 'mid' | 'premium' | 'luxury';
+type AvailabilityFilter = 'all' | 'open_now';
+
+const PRICE_RANGES: Record<Exclude<PriceFilter, 'all'>, [number, number]> = {
+  budget: [0, 500],
+  mid: [500, 1500],
+  premium: [1500, 5000],
+  luxury: [5000, Number.POSITIVE_INFINITY],
+};
+
+const PRICE_OPTIONS: { value: PriceFilter; labelEn: string; labelRu: string; icon: string }[] = [
+  { value: 'all', labelEn: 'Any price', labelRu: 'Любая цена', icon: '💰' },
+  { value: 'budget', labelEn: '< ฿500', labelRu: '< ฿500', icon: '💵' },
+  { value: 'mid', labelEn: '฿500–1.5k', labelRu: '฿500–1.5k', icon: '💴' },
+  { value: 'premium', labelEn: '฿1.5k–5k', labelRu: '฿1.5k–5k', icon: '💶' },
+  { value: 'luxury', labelEn: '฿5k+', labelRu: '฿5k+', icon: '💎' },
+];
+
+const AVAILABILITY_OPTIONS: { value: AvailabilityFilter; labelEn: string; labelRu: string; icon: string }[] = [
+  { value: 'all', labelEn: 'Anytime', labelRu: 'В любое время', icon: '🕒' },
+  { value: 'open_now', labelEn: 'Open now', labelRu: 'Открыто сейчас', icon: '🟢' },
+];
 
 interface UniversalMarker {
   id: string;
@@ -28,6 +51,7 @@ interface UniversalMarker {
   priceFrom: number;
   image?: string;
   vertical: VerticalFilter;
+  workingHours?: Record<string, string> | null;
 }
 
 const VERTICAL_CONFIG: Record<
@@ -61,7 +85,11 @@ export default function MapView() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const initialVertical = (searchParams.get('vertical') as VerticalFilter) || 'all';
+  const initialPrice = (searchParams.get('price') as PriceFilter) || 'all';
+  const initialAvailability = (searchParams.get('availability') as AvailabilityFilter) || 'all';
   const [selectedVertical, setSelectedVertical] = useState<VerticalFilter>(initialVertical);
+  const [selectedPrice, setSelectedPrice] = useState<PriceFilter>(initialPrice);
+  const [selectedAvailability, setSelectedAvailability] = useState<AvailabilityFilter>(initialAvailability);
   const [selectedMarker, setSelectedMarker] = useState<UniversalMarker | null>(null);
   const mapRef = useRef<google.maps.Map | null>(null);
 
@@ -123,6 +151,7 @@ export default function MapView() {
           priceFrom: 0,
           image: r.cover_image || undefined,
           vertical: 'restaurant',
+          workingHours: r.working_hours ?? null,
         });
       }
     });
@@ -130,9 +159,21 @@ export default function MapView() {
   }, [properties, salons, restaurants]);
 
   const filteredMarkers = useMemo(() => {
-    if (selectedVertical === 'all') return allMarkers;
-    return allMarkers.filter((m) => m.vertical === selectedVertical);
-  }, [allMarkers, selectedVertical]);
+    return allMarkers.filter((m) => {
+      if (selectedVertical !== 'all' && m.vertical !== selectedVertical) return false;
+      if (selectedPrice !== 'all') {
+        const [min, max] = PRICE_RANGES[selectedPrice];
+        // Only filter by price when the marker actually has a price (>0).
+        // Verticals without pricing data (e.g. restaurants) are kept visible.
+        if (m.priceFrom > 0 && (m.priceFrom < min || m.priceFrom >= max)) return false;
+      }
+      if (selectedAvailability === 'open_now') {
+        // Only restaurants currently expose working hours; others fall through.
+        if (m.workingHours && !isOpenNow(m.workingHours)) return false;
+      }
+      return true;
+    });
+  }, [allMarkers, selectedVertical, selectedPrice, selectedAvailability]);
 
   const defaultCenter = useMemo(() => {
     const cityConfig = getCityConfig();
@@ -157,15 +198,47 @@ export default function MapView() {
     mapRef.current.fitBounds(bounds, { top: 60, right: 60, bottom: 60, left: 60 });
   }, [filteredMarkers]);
 
+  const updateParam = useCallback(
+    (key: string, value: string) => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          if (!value || value === 'all') next.delete(key);
+          else next.set(key, value);
+          return next;
+        },
+        { replace: true },
+      );
+    },
+    [setSearchParams],
+  );
+
   const handleFilterChange = (value: VerticalFilter) => {
     setSelectedVertical(value);
     setSelectedMarker(null);
-    if (value === 'all') {
-      searchParams.delete('vertical');
-    } else {
-      searchParams.set('vertical', value);
-    }
-    setSearchParams(searchParams, { replace: true });
+    updateParam('vertical', value);
+  };
+
+  const handlePriceChange = (value: PriceFilter) => {
+    setSelectedPrice(value);
+    updateParam('price', value);
+  };
+
+  const handleAvailabilityChange = (value: AvailabilityFilter) => {
+    setSelectedAvailability(value);
+    updateParam('availability', value);
+  };
+
+  const activeFilterCount =
+    (selectedVertical !== 'all' ? 1 : 0) +
+    (selectedPrice !== 'all' ? 1 : 0) +
+    (selectedAvailability !== 'all' ? 1 : 0);
+
+  const resetAllFilters = () => {
+    setSelectedVertical('all');
+    setSelectedPrice('all');
+    setSelectedAvailability('all');
+    setSearchParams(new URLSearchParams(), { replace: true });
   };
 
   const mapError = !hasKey ? (language === 'ru' ? 'Ключ Google Maps не задан' : 'Google Maps key not set') : loadError?.message ?? null;
@@ -174,23 +247,81 @@ export default function MapView() {
   return (
     <AppLayout>
       <div className="flex flex-col h-[calc(100vh-8rem)]">
-        <div className="px-4 py-3 bg-background/95 border-b border-border z-10">
-          <FilterChipGroup scrollable>
-            {FILTER_OPTIONS.map((opt) => (
-              <FilterChip
-                key={opt.value}
-                label={language === 'ru' ? opt.labelRu : opt.labelEn}
-                icon={opt.icon}
-                isActive={selectedVertical === opt.value}
-                onToggle={() => handleFilterChange(opt.value)}
-                size="md"
-              />
-            ))}
-          </FilterChipGroup>
-          {!showLoading && (
-            <p className="text-xs text-muted-foreground mt-1.5">
-              {filteredMarkers.length} {language === 'ru' ? 'локаций' : 'locations'}
+        <div className="px-4 py-3 bg-background/95 border-b border-border z-10 space-y-2">
+          {/* Category */}
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+              {language === 'ru' ? 'Категория' : 'Category'}
             </p>
+            <FilterChipGroup scrollable>
+              {FILTER_OPTIONS.map((opt) => (
+                <FilterChip
+                  key={opt.value}
+                  label={language === 'ru' ? opt.labelRu : opt.labelEn}
+                  icon={opt.icon}
+                  isActive={selectedVertical === opt.value}
+                  onToggle={() => handleFilterChange(opt.value)}
+                  size="md"
+                />
+              ))}
+            </FilterChipGroup>
+          </div>
+
+          {/* Price range */}
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+              {language === 'ru' ? 'Цена' : 'Price'}
+            </p>
+            <FilterChipGroup scrollable>
+              {PRICE_OPTIONS.map((opt) => (
+                <FilterChip
+                  key={opt.value}
+                  label={language === 'ru' ? opt.labelRu : opt.labelEn}
+                  icon={opt.icon}
+                  isActive={selectedPrice === opt.value}
+                  onToggle={() => handlePriceChange(opt.value)}
+                  size="md"
+                />
+              ))}
+            </FilterChipGroup>
+          </div>
+
+          {/* Availability */}
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+              {language === 'ru' ? 'Доступность' : 'Availability'}
+            </p>
+            <FilterChipGroup scrollable>
+              {AVAILABILITY_OPTIONS.map((opt) => (
+                <FilterChip
+                  key={opt.value}
+                  label={language === 'ru' ? opt.labelRu : opt.labelEn}
+                  icon={opt.icon}
+                  isActive={selectedAvailability === opt.value}
+                  onToggle={() => handleAvailabilityChange(opt.value)}
+                  size="md"
+                />
+              ))}
+            </FilterChipGroup>
+          </div>
+
+          {!showLoading && (
+            <div className="flex items-center justify-between gap-2 pt-1">
+              <p className="text-xs text-muted-foreground">
+                {filteredMarkers.length} {language === 'ru' ? 'локаций' : 'locations'}
+              </p>
+              {activeFilterCount > 0 && (
+                <button
+                  type="button"
+                  onClick={resetAllFilters}
+                  className="text-xs text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary/40 rounded-sm px-1"
+                >
+                  {language === 'ru'
+                    ? `Сбросить (${activeFilterCount})`
+                    : `Clear (${activeFilterCount})`}
+                </button>
+              )}
+            </div>
           )}
         </div>
 
