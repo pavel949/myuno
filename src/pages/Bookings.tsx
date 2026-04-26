@@ -508,6 +508,36 @@ export default function Bookings() {
     setExpandedTimelines((prev) => ({ ...prev, [bookingId]: !prev[bookingId] }));
   }, []);
 
+  /**
+   * URL-driven filter. Two query params:
+   *  - `cluster=arrive|live|manage` → restricts booking_type to the cluster
+   *  - `status=open` → restricts status to open/awaiting buckets
+   *
+   * Drives the deep-link from the PersonaHalo activity badge so a tap on
+   * "3 open in Arrive" lands on the bookings list pre-filtered to those
+   * exact rows.
+   */
+  const allowedTypes = clusterParam ? CLUSTER_BOOKING_TYPES[clusterParam] : null;
+  const filterIsActive = !!(allowedTypes || statusParam === 'open');
+
+  const filteredBookings = useMemo(() => {
+    if (!filterIsActive) return bookings;
+    return bookings.filter((b) => {
+      if (allowedTypes && !allowedTypes.includes(b.type)) return false;
+      if (statusParam === 'open' && !OPEN_BOOKING_STATUSES.has(b.status)) return false;
+      return true;
+    });
+  }, [bookings, allowedTypes, statusParam, filterIsActive]);
+
+  const clearFilter = useCallback(() => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.delete('cluster');
+      next.delete('status');
+      return next;
+    }, { replace: true });
+  }, [setSearchParams]);
+
   if (authLoading || isLoading) {
     return (
       <AppLayout>
