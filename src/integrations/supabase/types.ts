@@ -17872,6 +17872,44 @@ export type Database = {
           },
         ]
       }
+      property_booking_status_history: {
+        Row: {
+          booking_id: string
+          changed_by: string | null
+          created_at: string
+          from_status: string | null
+          id: string
+          notes: string | null
+          to_status: string
+        }
+        Insert: {
+          booking_id: string
+          changed_by?: string | null
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          notes?: string | null
+          to_status: string
+        }
+        Update: {
+          booking_id?: string
+          changed_by?: string | null
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          notes?: string | null
+          to_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_booking_status_history_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "property_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       property_bookings: {
         Row: {
           cancellation_policy: string | null
