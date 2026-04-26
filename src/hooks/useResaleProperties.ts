@@ -70,7 +70,7 @@ export function useResaleProperties(filters?: ResaleFilters) {
     queryKey: ['resale-properties', filters],
     queryFn: async (): Promise<ResaleProperty[]> => {
       let query = supabase
-        .from('resale_properties' as any)
+        .from('resale_properties')
         .select('*')
         .eq('status', 'active')
         .order('featured', { ascending: false })
@@ -124,7 +124,7 @@ export function useResaleProperty(id?: string) {
     queryFn: async (): Promise<ResaleProperty | null> => {
       if (!id) return null;
       const { data, error } = await supabase
-        .from('resale_properties' as any)
+        .from('resale_properties')
         .select('*')
         .eq('id', id)
         .single();
@@ -142,7 +142,7 @@ export function useCreateResaleProperty() {
   return useMutation({
     mutationFn: async (data: Partial<ResaleProperty>) => {
       const { data: result, error } = await supabase
-        .from('resale_properties' as any)
+        .from('resale_properties')
         .insert({ ...data, created_by: user?.id })
         .select()
         .single();
@@ -163,7 +163,7 @@ export function useUpdateResaleProperty() {
   return useMutation({
     mutationFn: async ({ id, ...data }: Partial<ResaleProperty> & { id: string }) => {
       const { data: result, error } = await supabase
-        .from('resale_properties' as any)
+        .from('resale_properties')
         .update({ ...data, updated_at: new Date().toISOString() })
         .eq('id', id)
         .select()
