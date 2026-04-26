@@ -750,3 +750,20 @@ Files refactored:
 - Global `any` count (canonical pattern, by line): **772 → 748** (-24).
 - Cumulative since Wave 4.2d start: **1247 → 748** (-499 / -40.0%).
 - Build: ✅ green (`tsc --noEmit` clean, `bun run build` OK).
+
+### Wave 4.2d · Pass #11 (2026-04-26)
+**Scope**: 6 hooks across property care, newbuilds, marketing campaigns, manager assignments, admin experiences, wizard payload builder.
+
+- `src/hooks/usePropertyCare.ts` — 7 → 0 `any`. `(variables as any)?._silent` → typed `{ _silent?: boolean }`; `.update(data as any)` and `.insert({...} as any)` → `as never` for generated insert/update overloads.
+- `src/hooks/useNewbuildProjects.ts` — 4 → 0 `any`. Imported `Database['public']['Tables']['property_projects']['Row']` as `ProjectRow`; mappers in list/single fetchers and `useNewbuildLocations` `forEach` typed via row inference; `payment_plan` narrowed (`Array.isArray ? as unknown[] : null`) for backward compat with `NewbuildProject`.
+- `src/hooks/useCampaignFactory.ts` — 4 → 0 `any`. Introduced `CampaignRow` from generated `mcc_campaigns`; `transformCampaign(row: any)` → `(row: CampaignRow)`; budget/schedule/kpi/performance double-cast via `unknown` to satisfy structural overlap; insert/update calls switched to `as never`.
+- `src/hooks/useAssignedProperties.ts` — 4 → 0 `any`. Introduced narrow `PropertyEmbed` and `AssignmentPermissions` interfaces; `assignment.properties as any` → `as PropertyEmbed | null`; permissions now built via per-key `??` fallback to satisfy required-fields contract.
+- `src/hooks/useAdminExperiences.ts` — 4 → 0 `any`. `useSupabaseCRUD<any>` → typed `ListingRow`; `(raw: any)` map callback → narrow `Record<string, unknown>` aliases (`r`, `a`); `mapToListing(...) as any` → `as never`.
+- `src/hooks/property-wizard/buildPayload.ts` — 4 → 0 `any`. `(cleanData as any).sale_intent / tenancy_modes` → IIFE with narrow `{ sale_intent?: unknown; tenancy_modes?: string[] }` cast; modes arithmetic now type-safe.
+- Side fix: `src/components/newbuilds/NewbuildProjectDeepTabs.tsx` — `paymentPlan` prop cast to `ProjectMarketingTab` prop type to bridge `unknown[] → PaymentPlanStep[]`.
+- Side fix: `src/hooks/useSupabaseCRUD.ts` — `insert/update` payloads (`Record<string, unknown>`) now `as never` to satisfy generated overload after table cast change in Pass #10.
+
+**Updated metrics**
+- Global `any` count (canonical pattern, by line): **748 → 721** (-27).
+- Cumulative since Wave 4.2d start: **1247 → 721** (-526 / -42.2%).
+- Build: ✅ green (`tsc --noEmit` clean, `bun run build` OK).
