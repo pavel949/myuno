@@ -41,7 +41,12 @@ function useHasUnread(userId: string | undefined) {
   });
 }
 
-export function HomeTopBar({ personas, onRoleSheetOpen, onAppDrawerOpen }: HomeTopBarProps) {
+export function HomeTopBar({
+  personas,
+  onRoleSheetOpen,
+  onAppDrawerOpen,
+  variant = 'default',
+}: HomeTopBarProps) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { language } = useLanguage();
@@ -52,6 +57,25 @@ export function HomeTopBar({ personas, onRoleSheetOpen, onAppDrawerOpen }: HomeT
 
   const { data: hasUnread = false } = useHasUnread(user?.id);
   const displayPersonas = personas.slice(0, 3);
+  const isOnNavy = variant === 'onNavy';
+
+  // Style atoms — keeps the JSX readable while the two contracts diverge.
+  // On navy: cream-tinted icons, translucent borders, glassy hover surfaces.
+  // On cream (default): existing greyscale chrome unchanged.
+  const iconButtonCls = isOnNavy
+    ? 'text-primary-foreground/90 hover:bg-primary-foreground/10 hover:text-primary-foreground'
+    : 'text-foreground hover:bg-muted/40';
+  const borderedButtonCls = isOnNavy
+    ? 'border border-primary-foreground/20 text-primary-foreground/90 hover:bg-primary-foreground/10 hover:border-primary-foreground/30 hover:text-primary-foreground'
+    : 'border border-border text-muted-foreground hover:text-foreground';
+  const subtitleCls = isOnNavy
+    ? 'text-primary-foreground/65'
+    : 'text-muted-foreground/60';
+  const rolePillCls = isOnNavy
+    ? 'border border-primary-foreground/20 bg-primary-foreground/[0.08] hover:bg-primary-foreground/[0.14] hover:border-primary-foreground/30'
+    : 'border border-border bg-card/40 hover:border-border-strong hover:bg-card/60';
+  const roleAvatarBorder = isOnNavy ? 'border-primary' : 'border-background';
+  const rolePillCountCls = isOnNavy ? 'text-primary-foreground/70' : 'text-muted-foreground';
 
   return (
     <div className="flex items-center justify-between pt-2 pb-3 gap-3">
@@ -62,17 +86,29 @@ export function HomeTopBar({ personas, onRoleSheetOpen, onAppDrawerOpen }: HomeT
             type="button"
             onClick={onAppDrawerOpen}
             aria-label={isRu ? 'Открыть меню' : 'Open menu'}
-            className="w-11 h-11 -ml-2 rounded-full flex items-center justify-center text-foreground hover:bg-muted/40 transition-colors"
+            className={cn(
+              'w-11 h-11 -ml-2 rounded-full flex items-center justify-center transition-colors',
+              iconButtonCls,
+            )}
           >
             <Menu className="w-[19px] h-[19px]" />
           </button>
         )}
         <div className="flex flex-col min-w-0 leading-none">
-          <BrandWordmark as="static" className="min-w-0" />
+          <BrandWordmark
+            as="static"
+            className="min-w-0"
+            tone={isOnNavy ? 'onNavy' : 'default'}
+          />
           {/* Subtitle competes with the wordmark on narrow phones (it forced
               the wordmark to truncate as "myUNO — P…" in the user-reported
               Telegram WebView). Hide below sm; show from tablet up. */}
-          <span className="hidden sm:block text-[10px] tracking-[0.14em] uppercase text-muted-foreground/60 font-semibold mt-1 truncate">
+          <span
+            className={cn(
+              'hidden sm:block text-[10px] tracking-[0.14em] uppercase font-semibold mt-1 truncate',
+              subtitleCls,
+            )}
+          >
             {isRu ? 'Инфраструктура для жизни на Пхукете' : 'Infrastructure for life on Phuket'}
           </span>
         </div>
@@ -85,7 +121,10 @@ export function HomeTopBar({ personas, onRoleSheetOpen, onAppDrawerOpen }: HomeT
           <button
             onClick={onRoleSheetOpen}
             aria-label="Manage roles"
-            className="flex items-center gap-0 min-h-[44px] px-2.5 rounded-full border border-border bg-card/40 hover:border-border-strong hover:bg-card/60 transition-colors"
+            className={cn(
+              'flex items-center gap-0 min-h-[44px] px-2.5 rounded-full transition-colors',
+              rolePillCls,
+            )}
           >
             <div className="flex">
               {displayPersonas.map((p, i) => {
@@ -94,7 +133,10 @@ export function HomeTopBar({ personas, onRoleSheetOpen, onAppDrawerOpen }: HomeT
                 return (
                   <div
                     key={p}
-                    className="w-[26px] h-[26px] rounded-full flex items-center justify-center font-display text-[11px] font-bold border-2 border-background bg-muted shadow-sm"
+                    className={cn(
+                      'w-[26px] h-[26px] rounded-full flex items-center justify-center font-display text-[11px] font-bold border-2 bg-muted shadow-sm',
+                      roleAvatarBorder,
+                    )}
                     style={{ color: meta.color, marginLeft: i === 0 ? 0 : -9, zIndex: 10 - i }}
                   >
                     {meta.glyph}
@@ -103,9 +145,11 @@ export function HomeTopBar({ personas, onRoleSheetOpen, onAppDrawerOpen }: HomeT
               })}
             </div>
             {personas.length > 3 && (
-              <span className="text-[10px] tabular-nums text-muted-foreground ml-1.5 font-sans">+{personas.length - 3}</span>
+              <span className={cn('text-[10px] tabular-nums ml-1.5 font-sans', rolePillCountCls)}>
+                +{personas.length - 3}
+              </span>
             )}
-            <svg className="ml-2 opacity-40" width="10" height="10" viewBox="0 0 10 10" fill="none">
+            <svg className="ml-2 opacity-50" width="10" height="10" viewBox="0 0 10 10" fill="none">
               <path d="M2 4l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
@@ -115,11 +159,21 @@ export function HomeTopBar({ personas, onRoleSheetOpen, onAppDrawerOpen }: HomeT
         <button
           onClick={() => navigate('/account?tab=notifications')}
           aria-label="Notifications"
-          className="relative w-11 h-11 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+          className={cn(
+            'relative w-11 h-11 rounded-full flex items-center justify-center transition-colors',
+            borderedButtonCls,
+          )}
         >
           <Bell className="w-[17px] h-[17px]" />
           {hasUnread && (
-            <span className="absolute top-[9px] right-[10px] w-[6px] h-[6px] rounded-full bg-primary" />
+            <span
+              className={cn(
+                'absolute top-[9px] right-[10px] w-[6px] h-[6px] rounded-full',
+                // On navy the navy dot would disappear — switch to the
+                // canonical orange-400 accent so the cue stays visible.
+                isOnNavy ? 'bg-[hsl(var(--brand-orange-400))]' : 'bg-primary',
+              )}
+            />
           )}
         </button>
 
@@ -127,7 +181,12 @@ export function HomeTopBar({ personas, onRoleSheetOpen, onAppDrawerOpen }: HomeT
         <button
           onClick={() => navigate('/account')}
           aria-label="Account"
-          className="w-11 h-11 rounded-full border border-border flex items-center justify-center text-[12px] font-semibold text-foreground font-sans bg-gradient-to-br from-card to-secondary shadow-inner"
+          className={cn(
+            'w-11 h-11 rounded-full flex items-center justify-center text-[12px] font-semibold font-sans shadow-inner',
+            isOnNavy
+              ? 'border border-primary-foreground/25 bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/15'
+              : 'border border-border text-foreground bg-gradient-to-br from-card to-secondary',
+          )}
         >
           {initials}
         </button>
@@ -135,3 +194,4 @@ export function HomeTopBar({ personas, onRoleSheetOpen, onAppDrawerOpen }: HomeT
     </div>
   );
 }
+
