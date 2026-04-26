@@ -167,20 +167,31 @@ export function useGlobalErrorHandler() {
         return;
       }
 
-      if (message.includes('dynamically imported') || 
+      if (message.includes('dynamically imported') ||
           message.includes('Failed to fetch') ||
           message.includes('Loading chunk')) {
-        toast.error(
-          lang === 'ru' 
-            ? 'Не удалось загрузить компонент. Обновите страницу.' 
-            : 'Failed to load component. Please refresh the page.',
-          {
-            action: {
-              label: lang === 'ru' ? 'Обновить' : 'Refresh',
-              onClick: () => window.location.reload(),
-            },
-          }
-        );
+        // Stale-chunk auto-reload (one shot, guarded). Same logic as
+        // ErrorBoundary.componentDidCatch — handles cases where the failed
+        // import bubbles as an unhandled rejection instead of a render
+        // error (e.g. an awaited dynamic import outside a Suspense tree).
+        const RELOAD_KEY = '__myuno_chunk_reload__';
+        const alreadyReloaded = sessionStorage.getItem(RELOAD_KEY);
+        if (!alreadyReloaded) {
+          sessionStorage.setItem(RELOAD_KEY, String(Date.now()));
+          window.location.reload();
+        } else {
+          toast.error(
+            lang === 'ru'
+              ? 'Не удалось загрузить компонент. Обновите страницу.'
+              : 'Failed to load component. Please refresh the page.',
+            {
+              action: {
+                label: lang === 'ru' ? 'Обновить' : 'Refresh',
+                onClick: () => window.location.reload(),
+              },
+            }
+          );
+        }
       } else {
         toast.error(
           lang === 'ru'
