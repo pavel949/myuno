@@ -85,13 +85,13 @@ export function useMySignatureRequests() {
     queryKey: ['my-signature-requests', user?.id],
     queryFn: async () => {
       if (!user) return [];
-      const { data: signers, error: sErr } = await (supabase as any)
+      const { data: signers, error: sErr } = await supabase
         .from('signature_request_signers')
         .select('*, signature_requests(*)')
         .eq('signer_user_id', user.id)
         .order('created_at', { ascending: false });
       if (sErr) throw sErr;
-      return (signers || []) as (SignatureSigner & { signature_requests: SignatureRequest })[];
+      return (signers || []) as unknown as (SignatureSigner & { signature_requests: SignatureRequest })[];
     },
     enabled: !!user,
   });
