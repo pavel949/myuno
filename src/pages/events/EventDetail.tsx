@@ -360,7 +360,8 @@ const EventDetail = () => {
           )}
         </div>
       </div>
-    </div>
+      </div>
+    </AppLayout>
   );
 };
 
