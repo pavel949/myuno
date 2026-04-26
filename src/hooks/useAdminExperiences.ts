@@ -187,8 +187,8 @@ export function useAdminExperiences(options: UseAdminExperiencesOptions = {}) {
       ...data,
       experience_type: data.experience_type || 'tour',
       is_active: data.is_active ?? true,
-    }) as any),
-    updateExperience: async (id: string, updates: Partial<AdminExperience>) => update(id, mapToListing(updates) as any),
+    }) as never),
+    updateExperience: async (id: string, updates: Partial<AdminExperience>) => update(id, mapToListing(updates) as never),
     deleteExperience: async (id: string) => remove(id),
     refetch,
   };
