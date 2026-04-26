@@ -79,6 +79,47 @@ export interface OffplanFilters {
   investmentOnly?: boolean;
 }
 
+type ProjectRow = Record<string, unknown> & {
+  id: string;
+  name_en: string;
+  name_ru: string;
+  district: string | null;
+  is_active?: boolean | null;
+  developer_id?: string | null;
+  developer_name?: string | null;
+  developers?: DeveloperEmbed | null;
+  project_status?: string | null;
+  completion_date?: string | null;
+  construction_progress?: number | null;
+  price_from?: number | null;
+  price_to?: number | null;
+  cover_image?: string | null;
+  is_featured?: boolean | null;
+  investment_enabled?: boolean | null;
+  funding_goal?: number | null;
+  min_investment?: number | null;
+  roi_projected?: number | null;
+  muuno_score?: number | null;
+  risk_level?: string | null;
+  units_available?: number | null;
+  units_sold?: number | null;
+  amenities?: string[] | null;
+  offplan_catalog?: unknown;
+  featured_rank?: number | null;
+  featured_label?: string | null;
+  description_summary?: string | null;
+  yield_estimate?: string | null;
+  source_url?: string | null;
+  is_clearview_rated?: boolean | null;
+};
+
+type DeveloperEmbed = {
+  name_en?: string;
+  logo_url?: string | null;
+  muuno_score?: number | null;
+  is_verified?: boolean;
+};
+
 export function useOffplanProjects(filters?: OffplanFilters) {
   return useQuery({
     queryKey: ['offplan-projects', filters],
@@ -94,7 +135,7 @@ export function useOffplanProjects(filters?: OffplanFilters) {
         investmentOnly: filters?.investmentOnly,
       };
 
-      const mapMinimal = (p: any): OffplanProject => ({
+      const mapMinimal = (p: ProjectRow): OffplanProject => ({
         id: p.id,
         nameEn: p.name_en,
         nameRu: p.name_ru,
@@ -103,44 +144,44 @@ export function useOffplanProjects(filters?: OffplanFilters) {
         isFeatured: false,
         isActive: p.is_active || false,
         developerId: null,
-        developerName: p.developer_name,
+        developerName: p.developer_name ?? null,
         developerLogo: null,
         developerScore: null,
         developerVerified: false,
         projectStatus: (p.project_status as ProjectStatus) || 'offplan',
-        completionDate: p.completion_date,
+        completionDate: p.completion_date ?? null,
         constructionProgress: p.construction_progress || 0,
-        priceFrom: p.price_from,
+        priceFrom: p.price_from ?? null,
         priceTo: null,
         investmentEnabled: false,
         fundingGoal: null,
         amountRaised: null,
         minInvestment: null,
-        roiProjected: p.roi_projected,
-        muunoScore: p.muuno_score,
-        riskLevel: p.risk_level,
+        roiProjected: p.roi_projected ?? null,
+        muunoScore: p.muuno_score ?? null,
+        riskLevel: p.risk_level ?? null,
         unitsAvailable: 0,
         unitsSold: 0,
-        amenities: p.amenities,
-        offplanCatalog: parseOffplanCatalog((p as { offplan_catalog?: unknown }).offplan_catalog),
+        amenities: p.amenities ?? null,
+        offplanCatalog: parseOffplanCatalog(p.offplan_catalog),
         featuredRank: p.featured_rank ?? null,
         featuredLabel: p.featured_label ?? null,
         descriptionSummary: p.description_summary ?? null,
         yieldEstimate: p.yield_estimate ?? null,
         sourceUrl: p.source_url ?? null,
-        isClearviewRated: p.is_clearview_rated !== false, // default true when column missing
+        isClearviewRated: p.is_clearview_rated !== false,
       });
 
-      const mapRich = (p: any): OffplanProject => {
-        const developer = p.developers as any;
+      const mapRich = (p: ProjectRow): OffplanProject => {
+        const developer = p.developers ?? null;
         return {
           ...mapMinimal(p),
           coverImage: p.cover_image ?? null,
           isFeatured: Boolean(p.is_featured),
           developerId: p.developer_id ?? null,
-          developerName: (developer?.name_en as string | undefined) || p.developer_name,
-          developerLogo: (developer?.logo_url as string | null | undefined) || null,
-          developerScore: (developer?.muuno_score as number | null | undefined) ?? null,
+          developerName: developer?.name_en || p.developer_name || null,
+          developerLogo: developer?.logo_url ?? null,
+          developerScore: developer?.muuno_score ?? null,
           developerVerified: Boolean(developer?.is_verified),
           priceTo: p.price_to ?? null,
           investmentEnabled: Boolean(p.investment_enabled),
