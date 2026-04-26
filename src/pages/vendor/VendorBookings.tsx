@@ -27,10 +27,15 @@ import {
   CheckCircle,
   XCircle,
   Loader2,
-  MessageSquare
+  MessageSquare,
+  History,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import { BookingStatusTimeline, BookingStatusTimelineSkeleton } from '@/components/bookings/BookingStatusTimeline';
+import { useBookingStatusHistory } from '@/hooks/useBookingStatusHistory';
 
 const VendorBookings = () => {
   const navigate = useNavigate();
