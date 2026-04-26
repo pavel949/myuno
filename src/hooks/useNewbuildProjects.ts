@@ -202,7 +202,7 @@ export function useNewbuildProject(slugOrId?: string) {
         muuno_score: p.muuno_score,
         created_at: p.created_at,
         commission_pct: p.commission_pct ?? null,
-        payment_plan: p.payment_plan ?? null,
+        payment_plan: Array.isArray(p.payment_plan) ? (p.payment_plan as unknown[]) : null,
         marketing_materials: p.marketing_materials ?? [],
         exclusive: p.exclusive ?? false,
         management_company_id: p.management_company_id ?? null,
