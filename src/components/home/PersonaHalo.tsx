@@ -194,7 +194,11 @@ export function PersonaHalo({ personas, onRoleSheetOpen, variant = 'default' }: 
         {/* 6 cluster quanta */}
         {clusters.map((c) => {
           const isActive = activeIds.has(c.id) || personas.length === 0;
-          const hasSignal = !!signals[c.id];
+          // `signals` is keyed by ClusterId; some cluster ids in the
+          // catalog may sit outside that union (future-proofing) — fall
+          // back to 0 in that case.
+          const count = signals?.[c.id as keyof typeof signals] ?? 0;
+          const hasSignal = count > 0;
           const Icon = c.icon;
           const label = isRu ? c.labelRu : c.labelEn;
 
@@ -203,13 +207,17 @@ export function PersonaHalo({ personas, onRoleSheetOpen, variant = 'default' }: 
               key={c.id}
               type="button"
               onClick={() => navigate(c.homeRoute)}
-              aria-label={label}
+              aria-label={
+                hasSignal
+                  ? `${label} · ${count} ${isRu ? 'активн.' : 'open'}`
+                  : label
+              }
               className={cn(
                 'group relative flex flex-col justify-between p-3 min-h-[72px] sm:min-h-[70px] text-left transition-colors',
                 isOnNavy
                   ? 'bg-primary/95 hover:bg-primary/80'
                   : 'bg-card hover:bg-muted/40',
-                !isActive && 'opacity-50 hover:opacity-75',
+                !isActive && !hasSignal && 'opacity-50 hover:opacity-75',
               )}
             >
               {/* Cluster spine — 2px accent of cluster color */}
@@ -218,15 +226,31 @@ export function PersonaHalo({ personas, onRoleSheetOpen, variant = 'default' }: 
                 className="absolute inset-y-2 left-0 w-[2px]"
                 style={{ background: c.color }}
               />
-              {/* Signal dot */}
-              {hasSignal && isActive && (
-                <span
-                  aria-hidden
-                  className={cn(
-                    'absolute top-2 right-2 w-1.5 h-1.5 rounded-full',
-                    isOnNavy ? 'bg-[hsl(var(--brand-orange-400))]' : 'bg-primary',
-                  )}
-                />
+              {/* Activity badge — single dot for one open item, numeric
+                  pill from 2 onwards. Always orange-400 on navy so it
+                  stays inside the canonical palette. */}
+              {hasSignal && (
+                count === 1 ? (
+                  <span
+                    aria-hidden
+                    className={cn(
+                      'absolute top-2 right-2 w-1.5 h-1.5 rounded-full',
+                      isOnNavy ? 'bg-[hsl(var(--brand-orange-400))]' : 'bg-primary',
+                    )}
+                  />
+                ) : (
+                  <span
+                    aria-hidden
+                    className={cn(
+                      'absolute top-1.5 right-1.5 min-w-[16px] h-[16px] px-1 flex items-center justify-center text-[10px] font-mono font-semibold tabular-nums',
+                      isOnNavy
+                        ? 'bg-[hsl(var(--brand-orange-400))] text-primary'
+                        : 'bg-primary text-primary-foreground',
+                    )}
+                  >
+                    {count > 99 ? '99+' : count}
+                  </span>
+                )
               )}
               <Icon
                 className={cn(
