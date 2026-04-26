@@ -78,22 +78,9 @@ function timeOfDay(isRu: boolean): string {
   return isRu ? 'ночь' : 'night';
 }
 
-function useClusterSignals(userId: string | undefined) {
-  return useQuery({
-    queryKey: ['persona-halo-signals', userId],
-    queryFn: async () => {
-      if (!userId) return { manage: false } as Record<string, boolean>;
-      const { count } = await supabase
-        .from('orders')
-        .select('id', { count: 'exact', head: true })
-        .eq('customer_user_id', userId)
-        .in('status', ['pending', 'awaiting_client_payment', 'pending_deposit']);
-      return { manage: (count ?? 0) > 0 } as Record<string, boolean>;
-    },
-    enabled: !!userId,
-    staleTime: 60_000,
-  });
-}
+// Real cluster activity counts now live in `useClusterActivity`. The local
+// stub that previously hard-coded a single `manage` signal was removed in
+// favor of the canonical multi-table probe.
 
 interface PersonaHaloProps {
   personas: UserPersona[];
@@ -118,7 +105,7 @@ export function PersonaHalo({ personas, onRoleSheetOpen, variant = 'default' }: 
     : (isRu ? 'Г' : 'G');
 
   const activeIds = useMemo(() => getActiveClusterIds(personas), [personas]);
-  const { data: signals = {} } = useClusterSignals(user?.id);
+  const { data: signals } = useClusterActivity(user?.id);
 
   // Pull all 6 canonical clusters in stable taxonomy order.
   const clusters: ClusterCatalogEntry[] = CLUSTER_CATALOG;
