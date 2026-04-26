@@ -76,14 +76,16 @@ const EventDetail = () => {
 
   if (!event) {
     return (
-      <div className="flex flex-col min-h-screen bg-background items-center justify-center p-4">
-        <p className="text-muted-foreground mb-4">
-          {language === 'ru' ? 'Событие не найдено' : 'Event not found'}
-        </p>
-        <Button onClick={() => navigate('/events')}>
-          {language === 'ru' ? 'К событиям' : 'Back to Events'}
-        </Button>
-      </div>
+      <AppLayout showHeader={false} showBottomNav>
+        <div className="flex flex-col items-center justify-center p-4 min-h-[60vh]">
+          <p className="text-muted-foreground mb-4">
+            {language === 'ru' ? 'Событие не найдено' : 'Event not found'}
+          </p>
+          <Button onClick={() => navigate('/events')}>
+            {language === 'ru' ? 'К событиям' : 'Back to Events'}
+          </Button>
+        </div>
+      </AppLayout>
     );
   }
 
