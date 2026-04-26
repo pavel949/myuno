@@ -89,7 +89,7 @@ export async function syncRateSeasonsToProperty(propertyId: string, basePricePer
 
   const { error: updateErr } = await supabase
     .from('properties')
-    .update({ seasonal_pricing: jsonb as any })
+    .update({ seasonal_pricing: jsonb as Json })
     .eq('id', propertyId);
 
   if (updateErr) throw updateErr;
