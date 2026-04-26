@@ -3,9 +3,15 @@
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { toast } from 'sonner';
+
+type SignatureRequestInsert = Database['public']['Tables']['signature_requests']['Insert'];
+type SignatureRequestUpdate = Database['public']['Tables']['signature_requests']['Update'];
+type SignatureSignerInsert = Database['public']['Tables']['signature_request_signers']['Insert'];
+type SignatureSignerUpdate = Database['public']['Tables']['signature_request_signers']['Update'];
 
 export type SignatureRequestStatus =
   | 'draft' | 'sent' | 'partially_signed' | 'completed' | 'declined' | 'expired' | 'cancelled';
@@ -60,13 +66,13 @@ export function useCompanySignatureRequests() {
     queryKey: ['company-signature-requests', activeCompany?.company_id],
     queryFn: async () => {
       if (!activeCompany) return [];
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('signature_requests')
         .select('*, signature_request_signers(*)')
         .eq('company_id', activeCompany.company_id)
         .order('created_at', { ascending: false });
       if (error) throw error;
-      return (data || []) as (SignatureRequest & { signature_request_signers: SignatureSigner[] })[];
+      return (data || []) as unknown as (SignatureRequest & { signature_request_signers: SignatureSigner[] })[];
     },
     enabled: !!activeCompany,
   });
@@ -79,13 +85,13 @@ export function useMySignatureRequests() {
     queryKey: ['my-signature-requests', user?.id],
     queryFn: async () => {
       if (!user) return [];
-      const { data: signers, error: sErr } = await (supabase as any)
+      const { data: signers, error: sErr } = await supabase
         .from('signature_request_signers')
         .select('*, signature_requests(*)')
         .eq('signer_user_id', user.id)
         .order('created_at', { ascending: false });
       if (sErr) throw sErr;
-      return (signers || []) as (SignatureSigner & { signature_requests: SignatureRequest })[];
+      return (signers || []) as unknown as (SignatureSigner & { signature_requests: SignatureRequest })[];
     },
     enabled: !!user,
   });
@@ -110,14 +116,14 @@ export function useSignRequest() {
     mutationFn: async (args: { signerId: string; signatureDataUrl: string }) => {
       if (!user) throw new Error('Not authenticated');
       const url = await uploadSignature(user.id, args.signatureDataUrl, `sigreq-${args.signerId}`);
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('signature_request_signers')
         .update({
           status: 'signed',
           signature_image_url: url,
           signed_at: new Date().toISOString(),
           signer_user_agent: navigator.userAgent,
-        })
+        } as SignatureSignerUpdate)
         .eq('id', args.signerId);
       if (error) throw error;
     },
@@ -126,7 +132,7 @@ export function useSignRequest() {
       qc.invalidateQueries({ queryKey: ['my-signature-requests'] });
       qc.invalidateQueries({ queryKey: ['company-signature-requests'] });
     },
-    onError: (e: any) => toast.error(e.message || 'Sign failed'),
+    onError: (e: Error) => toast.error(e.message || 'Sign failed'),
   });
 }
 
@@ -134,13 +140,13 @@ export function useDeclineSignRequest() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (args: { signerId: string; reason: string }) => {
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('signature_request_signers')
         .update({
           status: 'declined',
           declined_at: new Date().toISOString(),
           decline_reason: args.reason,
-        })
+        } as SignatureSignerUpdate)
         .eq('id', args.signerId);
       if (error) throw error;
     },
@@ -149,7 +155,7 @@ export function useDeclineSignRequest() {
       qc.invalidateQueries({ queryKey: ['my-signature-requests'] });
       qc.invalidateQueries({ queryKey: ['company-signature-requests'] });
     },
-    onError: (e: any) => toast.error(e.message || 'Decline failed'),
+    onError: (e: Error) => toast.error(e.message || 'Decline failed'),
   });
 }
 
@@ -178,7 +184,7 @@ export function useCreateSignatureRequest() {
       const expires_at = args.expires_in_days
         ? new Date(Date.now() + args.expires_in_days * 86400000).toISOString()
         : null;
-      const { data: req, error } = await (supabase as any)
+      const { data: req, error } = await supabase
         .from('signature_requests')
         .insert({
           company_id: activeCompany.company_id,
@@ -191,11 +197,11 @@ export function useCreateSignatureRequest() {
           status: 'sent',
           sent_at: new Date().toISOString(),
           expires_at,
-        })
+        } as SignatureRequestInsert)
         .select()
         .single();
       if (error) throw error;
-      const signerRows = args.signers.map((s, i) => ({
+      const signerRows: SignatureSignerInsert[] = args.signers.map((s, i) => ({
         request_id: req.id,
         signer_user_id: s.signer_user_id ?? null,
         signer_email: s.signer_email ?? null,
@@ -203,7 +209,7 @@ export function useCreateSignatureRequest() {
         signer_role: s.signer_role ?? 'owner',
         sign_order: s.sign_order ?? i + 1,
       }));
-      const { error: signersErr } = await (supabase as any)
+      const { error: signersErr } = await supabase
         .from('signature_request_signers')
         .insert(signerRows);
       if (signersErr) throw signersErr;
@@ -213,7 +219,7 @@ export function useCreateSignatureRequest() {
       toast.success('Signature request sent');
       qc.invalidateQueries({ queryKey: ['company-signature-requests'] });
     },
-    onError: (e: any) => toast.error(e.message || 'Failed to create request'),
+    onError: (e: Error) => toast.error(e.message || 'Failed to create request'),
   });
 }
 
@@ -221,13 +227,13 @@ export function useCancelSignatureRequest() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (args: { id: string; reason?: string }) => {
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('signature_requests')
         .update({
           status: 'cancelled',
           cancelled_at: new Date().toISOString(),
           cancellation_reason: args.reason ?? null,
-        })
+        } as SignatureRequestUpdate)
         .eq('id', args.id);
       if (error) throw error;
     },

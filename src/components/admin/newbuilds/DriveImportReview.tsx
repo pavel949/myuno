@@ -20,8 +20,19 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { DriveJob } from '@/hooks/useDriveImport';
 
+interface ExtractedUnit {
+  unit_code?: string | null;
+  unit_type?: string | null;
+  bedrooms?: number | null;
+  area_sqm?: number | null;
+  price?: number | null;
+  currency?: string | null;
+  view_type?: string | null;
+  [k: string]: unknown;
+}
+
 interface Props {
-  job: DriveJob & { ai_project_patch?: any; ai_extracted_units?: any[] };
+  job: DriveJob & { ai_project_patch?: Record<string, unknown> | null; ai_extracted_units?: ExtractedUnit[] };
   projectId: string;
   open: boolean;
   onClose: () => void;
@@ -30,7 +41,7 @@ interface Props {
 export function DriveImportReview({ job, projectId, open, onClose }: Props) {
   const qc = useQueryClient();
   const projectPatch = job.ai_project_patch || null;
-  const extractedUnits = job.ai_extracted_units || [];
+  const extractedUnits: ExtractedUnit[] = (job.ai_extracted_units as ExtractedUnit[] | undefined) || [];
 
   const projectFields = useMemo(() => {
     if (!projectPatch) return [];

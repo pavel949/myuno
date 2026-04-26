@@ -123,7 +123,7 @@ export default function AdminProjects() {
       );
       queryClient.invalidateQueries({ queryKey: ['admin-property-projects'] });
       queryClient.invalidateQueries({ queryKey: ['offplan-projects'] });
-    } catch (err: any) {
+    } catch (err) {
       console.error('Enrich error:', err);
       toast.error(isRu ? 'Ошибка обогащения данных' : 'Enrichment failed');
     } finally {
@@ -198,15 +198,15 @@ export default function AdminProjects() {
     try {
       const { error } = await supabase
         .from('property_projects')
-        .update({ developer_id: bulkDeveloperId, needs_review: false } as any)
+        .update({ developer_id: bulkDeveloperId, needs_review: false })
         .in('id', Array.from(selectedIds));
       if (error) throw error;
       toast.success(isRu ? `Назначен застройщик: ${selectedIds.size}` : `Developer assigned: ${selectedIds.size}`);
       queryClient.invalidateQueries({ queryKey: ['admin-property-projects'] });
       clearSelection();
       setBulkDeveloperId('');
-    } catch (e: any) {
-      toast.error(e.message || 'Bulk assign failed');
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Bulk assign failed');
     } finally {
       setIsBulkProcessing(false);
     }
@@ -218,14 +218,14 @@ export default function AdminProjects() {
     try {
       const { error } = await supabase
         .from('property_projects')
-        .update({ is_approved: true, needs_review: false } as any)
+        .update({ is_approved: true, needs_review: false })
         .in('id', Array.from(selectedIds));
       if (error) throw error;
       toast.success(isRu ? `Одобрено: ${selectedIds.size}` : `Approved: ${selectedIds.size}`);
       queryClient.invalidateQueries({ queryKey: ['admin-property-projects'] });
       clearSelection();
-    } catch (e: any) {
-      toast.error(e.message || 'Bulk approve failed');
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Bulk approve failed');
     } finally {
       setIsBulkProcessing(false);
     }
@@ -307,7 +307,25 @@ export default function AdminProjects() {
       infrastructure: project.infrastructure || [],
     });
     // Load juristic data from project (if extended type exists)
-    const p = project as any;
+    const p = project as PropertyProject & Partial<{
+      juristic_person_name: string | null;
+      juristic_person_name_ru: string | null;
+      juristic_email: string | null;
+      juristic_phone: string | null;
+      juristic_line_id: string | null;
+      juristic_whatsapp: string | null;
+      juristic_address: string | null;
+      juristic_office_hours: string | null;
+      juristic_contact_person: string | null;
+      juristic_contact_position: string | null;
+      juristic_bank_name: string | null;
+      juristic_bank_account_name: string | null;
+      juristic_bank_account_number: string | null;
+      juristic_promptpay_id: string | null;
+      cam_fee_per_sqm: number | null;
+      cam_payment_day: number | null;
+      cam_includes: string[] | null;
+    }>;
     setJuristicData({
       juristic_person_name: p.juristic_person_name || '',
       juristic_person_name_ru: p.juristic_person_name_ru || '',
@@ -345,7 +363,7 @@ export default function AdminProjects() {
 
     try {
       if (editingProject) {
-        await updateProject.mutateAsync({ id: editingProject.id, ...payload } as any);
+        await updateProject.mutateAsync({ id: editingProject.id, ...payload } as Partial<CreatePropertyProjectData> & { id: string });
         toast.success(isRu ? 'Проект обновлён' : 'Project updated');
       } else {
         await createProject.mutateAsync(payload as CreatePropertyProjectData);
@@ -358,27 +376,27 @@ export default function AdminProjects() {
     }
   };
 
-  const handleAIIntakeComplete = (extractedData: any) => {
+  const handleAIIntakeComplete = (extractedData: Partial<CreatePropertyProjectData> & Record<string, unknown>) => {
     // Map AI extracted data to form
     setFormData(prev => ({
       ...prev,
-      name_en: extractedData.name_en || prev.name_en,
-      name_ru: extractedData.name_ru || prev.name_ru,
-      description_en: extractedData.description_en || prev.description_en,
-      description_ru: extractedData.description_ru || prev.description_ru,
-      address: extractedData.address || prev.address,
-      district: extractedData.district || prev.district,
-      developer_name: extractedData.developer_name || prev.developer_name,
-      year_built: extractedData.year_built || prev.year_built,
-      total_units: extractedData.total_units || prev.total_units,
-      amenities: extractedData.amenities || prev.amenities,
-      infrastructure: extractedData.infrastructure || prev.infrastructure,
+      name_en: (extractedData.name_en as string) || prev.name_en,
+      name_ru: (extractedData.name_ru as string) || prev.name_ru,
+      description_en: (extractedData.description_en as string) || prev.description_en,
+      description_ru: (extractedData.description_ru as string) || prev.description_ru,
+      address: (extractedData.address as string) || prev.address,
+      district: (extractedData.district as string) || prev.district,
+      developer_name: (extractedData.developer_name as string) || prev.developer_name,
+      year_built: (extractedData.year_built as number) || prev.year_built,
+      total_units: (extractedData.total_units as number) || prev.total_units,
+      amenities: (extractedData.amenities as string[]) || prev.amenities,
+      infrastructure: (extractedData.infrastructure as string[]) || prev.infrastructure,
     }));
     setIsAIIntakeOpen(false);
     toast.success(isRu ? 'Данные заполнены из AI' : 'Data populated from AI');
   };
 
-  const updateFormField = (field: string, value: any) => {
+  const updateFormField = (field: string, value: unknown) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -455,7 +473,7 @@ export default function AdminProjects() {
                 key={f.id}
                 size="sm"
                 variant={moderationFilter === f.id ? 'default' : 'outline'}
-                onClick={() => setModerationFilter(f.id as any)}
+                onClick={() => setModerationFilter(f.id as typeof moderationFilter)}
               >
                 {f.label}
                 {'count' in f && f.count !== undefined && (

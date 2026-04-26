@@ -53,7 +53,7 @@ export interface FieldDef {
   options?: SelectOption[];
   placeholder?: string;
   /** Default value */
-  defaultValue?: any;
+  defaultValue?: unknown;
 }
 
 export interface AdminVerticalConfig {
@@ -74,15 +74,20 @@ export interface AdminVerticalConfig {
   typeOptions?: SelectOption[];
 }
 
+// Permissive shapes — consumer hooks (useAdminContent) return Record<string, any>.
+// Keep both items and form data permissive to maintain back-compat.
+export type AdminVerticalItem = Record<string, any>;
+export type AdminVerticalFormData = Record<string, any>;
+
 interface AdminVerticalCRUDProps {
   config: AdminVerticalConfig;
   /** The admin hook result */
   hook: {
-    items: any[];
+    items: AdminVerticalItem[];
     isLoading: boolean;
-    createItem: (data: any) => Promise<any>;
-    updateItem: (data: any) => Promise<any>;
-    deleteItem: (id: string) => Promise<any>;
+    createItem: (data: AdminVerticalFormData) => Promise<unknown>;
+    updateItem: (data: AdminVerticalFormData & { id: string }) => Promise<unknown>;
+    deleteItem: (id: string) => Promise<unknown>;
   };
 }
 

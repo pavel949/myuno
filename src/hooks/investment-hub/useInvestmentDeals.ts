@@ -1,8 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 import type {
   CapitalRangeKey, DealIntent, DealPipelineStatus, DealStage, InvestorType,
 } from '@/lib/investment/dealTaxonomy';
+
+type InvestmentDealRow = Database['public']['Tables']['investment_deals']['Row'];
+type InvestmentDealUpdate = Database['public']['Tables']['investment_deals']['Update'];
+type InvestorInquiryRow = Database['public']['Tables']['investor_inquiries']['Row'];
 
 export interface InvestmentDealPublic {
   id: string;
@@ -91,13 +96,13 @@ export function usePublicInvestmentDeals(filters?: {
   return useQuery({
     queryKey: ['investment-deals-public', filters],
     queryFn: async () => {
-      let q = (supabase.from('v_investment_deals_public' as any) as any).select('*');
+      let q = supabase.from('v_investment_deals_public').select('*');
       if (filters?.intents?.length) q = q.in('deal_intent', filters.intents);
       if (filters?.categories?.length) q = q.in('category', filters.categories);
       if (filters?.ranges?.length) q = q.in('capital_range', filters.ranges);
       const { data, error } = await q.order('published_at', { ascending: false }).limit(60);
       if (error) throw error;
-      return (data ?? []) as InvestmentDealPublic[];
+      return (data ?? []) as unknown as InvestmentDealPublic[];
     },
   });
 }
@@ -107,10 +112,13 @@ export function usePublicInvestmentDeal(id: string | undefined) {
     enabled: !!id,
     queryKey: ['investment-deal-public', id],
     queryFn: async () => {
-      const { data, error } = await (supabase.from('v_investment_deals_public' as any) as any)
-        .select('*').eq('id', id).maybeSingle();
+      const { data, error } = await supabase
+        .from('v_investment_deals_public')
+        .select('*')
+        .eq('id', id!)
+        .maybeSingle();
       if (error) throw error;
-      return data as InvestmentDealPublic | null;
+      return data as unknown as InvestmentDealPublic | null;
     },
   });
 }
@@ -125,8 +133,9 @@ export function useSubmitInvestmentDeal() {
         submitter_user_id: userData.user?.id ?? null,
         documents_urls: input.documents_urls ?? [],
       };
-      const { data, error } = await (supabase.from('investment_deals' as any) as any)
-        .insert(payload)
+      const { data, error } = await supabase
+        .from('investment_deals')
+        .insert(payload as unknown as Database['public']['Tables']['investment_deals']['Insert'])
         .select('id')
         .single();
       if (error) throw error;
@@ -143,8 +152,9 @@ export function useSubmitInquiry() {
   return useMutation({
     mutationFn: async (input: SubmitInquiryInput) => {
       const { data: userData } = await supabase.auth.getUser();
-      const { data, error } = await (supabase.from('investor_inquiries' as any) as any)
-        .insert({ ...input, inquirer_user_id: userData.user?.id ?? null })
+      const { data, error } = await supabase
+        .from('investor_inquiries')
+        .insert({ ...input, inquirer_user_id: userData.user?.id ?? null } as unknown as Database['public']['Tables']['investor_inquiries']['Insert'])
         .select('id')
         .single();
       if (error) throw error;
@@ -161,11 +171,11 @@ export function useAdminInvestmentDeals(status?: DealPipelineStatus) {
   return useQuery({
     queryKey: ['investment-deals-admin', status],
     queryFn: async () => {
-      let q = (supabase.from('investment_deals' as any) as any).select('*');
+      let q = supabase.from('investment_deals').select('*');
       if (status) q = q.eq('status', status);
       const { data, error } = await q.order('created_at', { ascending: false }).limit(200);
       if (error) throw error;
-      return (data ?? []) as InvestmentDealAdmin[];
+      return (data ?? []) as unknown as InvestmentDealAdmin[];
     },
   });
 }
@@ -175,10 +185,13 @@ export function useAdminInvestmentDeal(id: string | undefined) {
     enabled: !!id,
     queryKey: ['investment-deal-admin', id],
     queryFn: async () => {
-      const { data, error } = await (supabase.from('investment_deals' as any) as any)
-        .select('*').eq('id', id).maybeSingle();
+      const { data, error } = await supabase
+        .from('investment_deals')
+        .select('*')
+        .eq('id', id!)
+        .maybeSingle();
       if (error) throw error;
-      return data as InvestmentDealAdmin | null;
+      return data as unknown as InvestmentDealAdmin | null;
     },
   });
 }
@@ -188,13 +201,15 @@ export function useUpdateInvestmentDeal() {
   return useMutation({
     mutationFn: async ({ id, patch }: { id: string; patch: Partial<InvestmentDealAdmin> }) => {
       // If publishing, set published_at
-      const finalPatch: any = { ...patch };
+      const finalPatch: Record<string, unknown> = { ...patch };
       if (patch.is_published === true) {
         finalPatch.published_at = new Date().toISOString();
         if (!patch.status) finalPatch.status = 'published';
       }
-      const { error } = await (supabase.from('investment_deals' as any) as any)
-        .update(finalPatch).eq('id', id);
+      const { error } = await supabase
+        .from('investment_deals')
+        .update(finalPatch as InvestmentDealUpdate)
+        .eq('id', id);
       if (error) throw error;
     },
     onSuccess: (_d, vars) => {
@@ -210,10 +225,13 @@ export function useDealInquiries(dealId: string | undefined) {
     enabled: !!dealId,
     queryKey: ['investment-deal-inquiries', dealId],
     queryFn: async () => {
-      const { data, error } = await (supabase.from('investor_inquiries' as any) as any)
-        .select('*').eq('deal_id', dealId).order('created_at', { ascending: false });
+      const { data, error } = await supabase
+        .from('investor_inquiries')
+        .select('*')
+        .eq('deal_id', dealId!)
+        .order('created_at', { ascending: false });
       if (error) throw error;
-      return data as Array<{
+      return (data ?? []) as InvestorInquiryRow[] as unknown as Array<{
         id: string; created_at: string; deal_id: string;
         investor_name: string; investor_email: string; investor_whatsapp: string | null;
         investor_type: InvestorType; investment_capacity_usd: number | null;
@@ -227,8 +245,10 @@ export function useUpdateInquiry() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, patch }: { id: string; patch: Record<string, unknown> }) => {
-      const { error } = await (supabase.from('investor_inquiries' as any) as any)
-        .update(patch).eq('id', id);
+      const { error } = await supabase
+        .from('investor_inquiries')
+        .update(patch as Database['public']['Tables']['investor_inquiries']['Update'])
+        .eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -242,10 +262,11 @@ export function useInvestmentPipelineStats() {
   return useQuery({
     queryKey: ['investment-pipeline-stats'],
     queryFn: async () => {
-      const { data, error } = await (supabase.from('investment_deals' as any) as any)
+      const { data, error } = await supabase
+        .from('investment_deals')
         .select('status,deal_size_midpoint_usd,expected_value_usd,platform_fee_estimate_usd,is_published');
       if (error) throw error;
-      const rows = (data ?? []) as Array<{
+      const rows = (data ?? []) as unknown as Array<{
         status: DealPipelineStatus;
         deal_size_midpoint_usd: number;
         expected_value_usd: number;
@@ -272,3 +293,5 @@ export function useInvestmentPipelineStats() {
     },
   });
 }
+
+export type { InvestmentDealRow };
