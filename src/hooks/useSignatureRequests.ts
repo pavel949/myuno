@@ -184,7 +184,7 @@ export function useCreateSignatureRequest() {
       const expires_at = args.expires_in_days
         ? new Date(Date.now() + args.expires_in_days * 86400000).toISOString()
         : null;
-      const { data: req, error } = await (supabase as any)
+      const { data: req, error } = await supabase
         .from('signature_requests')
         .insert({
           company_id: activeCompany.company_id,
@@ -197,11 +197,11 @@ export function useCreateSignatureRequest() {
           status: 'sent',
           sent_at: new Date().toISOString(),
           expires_at,
-        })
+        } as SignatureRequestInsert)
         .select()
         .single();
       if (error) throw error;
-      const signerRows = args.signers.map((s, i) => ({
+      const signerRows: SignatureSignerInsert[] = args.signers.map((s, i) => ({
         request_id: req.id,
         signer_user_id: s.signer_user_id ?? null,
         signer_email: s.signer_email ?? null,
@@ -209,7 +209,7 @@ export function useCreateSignatureRequest() {
         signer_role: s.signer_role ?? 'owner',
         sign_order: s.sign_order ?? i + 1,
       }));
-      const { error: signersErr } = await (supabase as any)
+      const { error: signersErr } = await supabase
         .from('signature_request_signers')
         .insert(signerRows);
       if (signersErr) throw signersErr;
@@ -219,7 +219,7 @@ export function useCreateSignatureRequest() {
       toast.success('Signature request sent');
       qc.invalidateQueries({ queryKey: ['company-signature-requests'] });
     },
-    onError: (e: any) => toast.error(e.message || 'Failed to create request'),
+    onError: (e: Error) => toast.error(e.message || 'Failed to create request'),
   });
 }
 
