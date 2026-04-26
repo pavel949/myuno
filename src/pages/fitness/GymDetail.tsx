@@ -52,21 +52,25 @@ const GymDetail = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
+      <AppLayout showHeader={false} showBottomNav>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      </AppLayout>
     );
   }
 
   if (!gym) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-background gap-4">
-        <Dumbbell className="w-16 h-16 text-muted-foreground" />
-        <h2 className="text-xl font-semibold">{language === 'ru' ? 'Зал не найден' : 'Gym not found'}</h2>
-        <Button onClick={() => navigate('/fitness')}>
-          {language === 'ru' ? 'К списку залов' : 'Back to gyms'}
-        </Button>
-      </div>
+      <AppLayout showHeader={false} showBottomNav>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+          <Dumbbell className="w-16 h-16 text-muted-foreground" />
+          <h2 className="text-xl font-semibold">{language === 'ru' ? 'Зал не найден' : 'Gym not found'}</h2>
+          <Button onClick={() => navigate('/fitness')}>
+            {language === 'ru' ? 'К списку залов' : 'Back to gyms'}
+          </Button>
+        </div>
+      </AppLayout>
     );
   }
 
