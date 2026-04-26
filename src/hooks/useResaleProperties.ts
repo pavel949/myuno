@@ -34,7 +34,7 @@ export interface ResaleProperty {
   price_negotiable: boolean;
   is_assignment: boolean;
   assignment_premium: number | null;
-  remaining_payments: any;
+  remaining_payments: unknown;
   transfer_fee_paid_by: string | null;
   current_rental_income: number | null;
   estimated_roi: number | null;
@@ -42,7 +42,7 @@ export interface ResaleProperty {
   lease_years_remaining: number | null;
   description: string | null;
   description_ru: string | null;
-  media: any[];
+  media: unknown[];
   cover_image: string | null;
   featured: boolean;
   status: string;
