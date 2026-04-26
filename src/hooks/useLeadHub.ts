@@ -3,6 +3,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { createErrorHandler } from '@/lib/errorHandler';
 import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
+import type { Database } from '@/integrations/supabase/types';
+
+type MccLeadRow = Database['public']['Tables']['mcc_leads']['Row'];
+type ConsultationRow = Database['public']['Tables']['consultation_requests']['Row'];
+type ProfileRow = Database['public']['Tables']['profiles']['Row'];
 
 const errorLog = createErrorHandler('useLeadHub');
 
@@ -105,15 +110,14 @@ export function useLeadHub(filters: LeadHubFilters = {}) {
         if (mccError) {
           errorLog.silent(mccError, 'fetch_mcc_leads');
         } else if (mccLeads) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          mccLeads.forEach((lead: any) => {
+          mccLeads.forEach((lead: MccLeadRow) => {
             unifiedLeads.push({
               id: lead.id,
               source_table: 'mcc_leads',
               name: lead.name || '',
               email: lead.email,
               phone: lead.phone,
-              priority: lead.priority || 'warm',
+              priority: (lead.priority as LeadPriority) || 'warm',
               status: lead.status || 'new',
               score: lead.score,
               ai_score: null,
@@ -146,8 +150,7 @@ export function useLeadHub(filters: LeadHubFilters = {}) {
         if (consultationsError) {
           errorLog.silent(consultationsError, 'fetch_consultations');
         } else if (consultations) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          consultations.forEach((consultation: any) => {
+          consultations.forEach((consultation: ConsultationRow) => {
             const mappedPriority = mapAiPriorityToLeadPriority(consultation.ai_priority);
             const mappedStatus = mapConsultationStatus(consultation.status);
 
@@ -199,7 +202,7 @@ export function useLeadHub(filters: LeadHubFilters = {}) {
           // Collect existing lead emails to avoid duplicates
           const existingEmails = new Set(unifiedLeads.map(l => l.email?.toLowerCase()).filter(Boolean));
 
-          profiles.forEach((profile: any) => {
+          (profiles as ProfileRow[]).forEach((profile) => {
             // Skip if already exists as a lead
             if (profile.email && existingEmails.has(profile.email.toLowerCase())) return;
             // Skip priority/status filters for registered users (they're all "warm" / "new" by default)
