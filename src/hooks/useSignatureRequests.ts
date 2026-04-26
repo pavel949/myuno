@@ -66,13 +66,13 @@ export function useCompanySignatureRequests() {
     queryKey: ['company-signature-requests', activeCompany?.company_id],
     queryFn: async () => {
       if (!activeCompany) return [];
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('signature_requests')
         .select('*, signature_request_signers(*)')
         .eq('company_id', activeCompany.company_id)
         .order('created_at', { ascending: false });
       if (error) throw error;
-      return (data || []) as (SignatureRequest & { signature_request_signers: SignatureSigner[] })[];
+      return (data || []) as unknown as (SignatureRequest & { signature_request_signers: SignatureSigner[] })[];
     },
     enabled: !!activeCompany,
   });
