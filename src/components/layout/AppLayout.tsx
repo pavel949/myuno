@@ -78,11 +78,20 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
 
     const consumerChrome = !isWorkspace;
 
+    // Consumer surfaces (Home, marketing, public catalogs) must NOT inherit the
+    // workspace SideRail even when the user has an `owner` / `admin` / `vendor`
+    // active role. Otherwise mobile visitors land on a desktop sidebar shell
+    // instead of the consumer home. Force `guest` role for the nav shell on
+    // consumer pages; workspace pages opt-in via `variant="workspace"` + `navRole`.
+    const effectiveNavRole: NavRoleKey | undefined = isWorkspace
+      ? navRole
+      : 'guest';
+
     return (
       <NavShell
-        role={navRole}
-        activeRole={navRole ? undefined : activeRole}
-        isMCPortal={navRole ? undefined : isMCPortal}
+        role={effectiveNavRole}
+        activeRole={effectiveNavRole ? undefined : activeRole}
+        isMCPortal={effectiveNavRole ? undefined : isMCPortal}
         title={title}
         showHeader={showHeader}
         showBottomNav={showBottomNav}
