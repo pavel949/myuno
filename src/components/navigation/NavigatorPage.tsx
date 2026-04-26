@@ -148,29 +148,76 @@ function ServiceTile({
 export default function NavigatorPage() {
   const { language } = useLanguage();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { user } = useAuth();
+  const { personas } = useUserPersonas();
   const [query, setQuery] = useState('');
   const [activeCluster, setActiveCluster] = useState<string>('all');
+
+  // SSOT-driven audience filter: workspace clusters (manage) hidden from
+  // bare guests; investor/owner/developer personas unlock their own clusters.
+  // Same contract as AppDrawer/AllAppsDrawer — see clusterCatalog.test.ts.
+  const role = useMemo(
+    () =>
+      resolveNavRole({
+        activeRole: (user?.user_metadata as { role?: string } | undefined)?.role ?? null,
+        pathname: location.pathname,
+      }),
+    [user, location.pathname],
+  );
+
+  const audienceClusters: ClusterCatalogEntry[] = useMemo(
+    () => filterCatalogForUser({ personas, role }),
+    [personas, role],
+  );
+
+  // Flat lists derived from audience-filtered set (counts + search corpus)
+  const audienceServicesAll = useMemo(
+    () =>
+      audienceClusters.flatMap((c) =>
+        c.services.map((s) => ({
+          ...s,
+          clusterId: c.id,
+          clusterColor: c.color,
+          clusterLabelRu: c.labelRu,
+          clusterLabelEn: c.labelEn,
+        })),
+      ),
+    [audienceClusters],
+  );
+  const audienceAvailable = useMemo(
+    () => audienceServicesAll.filter((s) => s.status !== 'soon'),
+    [audienceServicesAll],
+  );
+  const audienceSoon = useMemo(
+    () => audienceServicesAll.filter((s) => s.status === 'soon'),
+    [audienceServicesAll],
+  );
+  const totalAvailable = audienceAvailable.length;
 
   const clusterChips: NavChipItem[] = useMemo(
     () => [
       {
         id: 'all',
         label: pickTriplet({ ru: 'Все', en: 'All', th: 'ทั้งหมด' }, language),
-        count: TOTAL_NAVIGATOR_SERVICES,
+        count: totalAvailable,
       },
-      ...CLUSTERS.map((c) => ({
+      ...audienceClusters.map((c) => ({
         id: c.id,
         label: getClusterHeaderLabel(c, language),
         accentColor: c.color,
         count: c.services.filter((s) => s.status !== 'soon').length,
       })),
     ],
-    [language],
+    [language, audienceClusters, totalAvailable],
   );
 
   const visibleClusters = useMemo(
-    () => (activeCluster === 'all' ? CLUSTERS : CLUSTERS.filter((c) => c.id === activeCluster)),
-    [activeCluster],
+    () =>
+      activeCluster === 'all'
+        ? audienceClusters
+        : audienceClusters.filter((c) => c.id === activeCluster),
+    [activeCluster, audienceClusters],
   );
 
   const { data: stats } = useQuery({
