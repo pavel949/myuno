@@ -13,6 +13,7 @@ import { useSupabaseSingle } from "@/hooks/useSupabaseQuery";
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { useCallback } from "react";
 import { RelatedServicesSection } from '@/components/crosssell';
+import { AppLayout } from '@/components/layout/AppLayout';
 
 interface EducationProvider {
   id: string;
@@ -70,15 +71,21 @@ export default function CourseDetail() {
   }, [course?.id]);
 
   if (isLoading) {
-    return <div className="flex items-center justify-center min-h-screen"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
+    return (
+      <AppLayout showHeader={false} showBottomNav usePageContainer={false}>
+        <div className="flex items-center justify-center min-h-[60vh]"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
+      </AppLayout>
+    );
   }
 
   if (!course) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-        <p className="text-muted-foreground">{language === "ru" ? "Курс не найден" : "Course not found"}</p>
-        <Button onClick={() => navigate('/education')}>{language === "ru" ? "К курсам" : "Back to courses"}</Button>
-      </div>
+      <AppLayout showHeader={false} showBottomNav usePageContainer={false}>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+          <p className="text-muted-foreground">{language === "ru" ? "Курс не найден" : "Course not found"}</p>
+          <Button onClick={() => navigate('/education')}>{language === "ru" ? "К курсам" : "Back to courses"}</Button>
+        </div>
+      </AppLayout>
     );
   }
 
@@ -90,6 +97,7 @@ export default function CourseDetail() {
   const isKids = course.age_groups?.includes('kids');
 
   return (
+    <AppLayout showHeader={false} showBottomNav usePageContainer={false}>
     <div className="min-h-screen bg-background pb-24">
       <div className="relative h-72">
         <img src={heroImage} alt={title} className="w-full h-full object-cover" />
@@ -185,5 +193,6 @@ export default function CourseDetail() {
         </Button>
       </div>
     </div>
+    </AppLayout>
   );
 }

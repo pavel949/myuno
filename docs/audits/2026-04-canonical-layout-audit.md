@@ -1,4 +1,9 @@
-# Canonical Layout Audit — 2026-04-26
+# Canonical Layout Audit — 2026-04-26 (updated post-implementation)
+
+> **Status:** Wave 1 (8 detail pages) ✅ done · Wave 3 (4 catalogs → MiniAppLayout) ✅ done.
+> Detail pages now inherit bottom-nav, PWA banners, and email-verification banner via `AppLayout`.
+> Catalog pages now share sticky `UnifiedHeader`, persona-filter ribbon, and ecosystem hint via `MiniAppLayout`.
+
 
 ## Canonical hierarchy (per CLAUDE.md §1.5 + ARCHITECTURE_V2 §13)
 

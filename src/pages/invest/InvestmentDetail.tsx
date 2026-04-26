@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { AppLayout } from '@/components/layout/AppLayout';
 
 export default function InvestmentDetail() {
   const { id } = useParams<{ id: string }>();
@@ -43,30 +44,32 @@ export default function InvestmentDetail() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
-        <div className="p-4 space-y-4">
+      <AppLayout showHeader={false} showBottomNav usePageContainer={false}>
+        <div className="min-h-[60vh] p-4 space-y-4">
           <Skeleton className="h-8 w-32" />
           <Skeleton className="h-64 w-full rounded-none" />
           <Skeleton className="h-32 w-full" />
           <Skeleton className="h-48 w-full" />
         </div>
-      </div>
+      </AppLayout>
     );
   }
 
   if (error || !project) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="text-center space-y-4">
-          <p className="text-muted-foreground">
-            {isRu ? 'Проект не найден' : 'Project not found'}
-          </p>
-          <Button variant="outline" onClick={() => navigate(APP_ROUTES.INVEST)}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            {isRu ? 'Назад к каталогу' : 'Back to catalog'}
-          </Button>
+      <AppLayout showHeader={false} showBottomNav usePageContainer={false}>
+        <div className="min-h-[60vh] flex items-center justify-center p-4">
+          <div className="text-center space-y-4">
+            <p className="text-muted-foreground">
+              {isRu ? 'Проект не найден' : 'Project not found'}
+            </p>
+            <Button variant="outline" onClick={() => navigate(APP_ROUTES.INVEST)}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              {isRu ? 'Назад к каталогу' : 'Back to catalog'}
+            </Button>
+          </div>
         </div>
-      </div>
+      </AppLayout>
     );
   }
 
@@ -77,7 +80,7 @@ export default function InvestmentDetail() {
   const categoryIcon = category?.icon || '💼';
 
   return (
-    <>
+    <AppLayout showHeader={false} showBottomNav usePageContainer={false}>
       <Helmet>
         <title>{title} | {isRu ? 'Инвестиции' : 'Invest'} | myUNO</title>
         <meta name="description" content={description || title} />
@@ -363,6 +366,6 @@ export default function InvestmentDetail() {
           projectTitle={title}
         />
       </div>
-    </>
+    </AppLayout>
   );
 }

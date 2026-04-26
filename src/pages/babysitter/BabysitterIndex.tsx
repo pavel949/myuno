@@ -3,18 +3,14 @@
  */
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Baby, Star, Shield, Languages } from 'lucide-react';
+import { Baby, Star, Shield } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
-import { AppLayout } from '@/components/layout/AppLayout';
-import { CatalogHeader } from '@/components/shared/CatalogHeader';
+import { MiniAppLayout } from '@/components/miniapp/MiniAppLayout';
 import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/uno/EmptyState';
 import { OptimizedImage } from '@/components/ui/optimized-image';
-import { cn } from '@/lib/utils';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
-import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
 
 const AGE_GROUPS = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -122,80 +118,78 @@ export default function BabysitterIndex() {
   }, [selectedAgeGroup]);
 
   return (
-    <AppLayout showHeader={false} showBottomNav>
-      <CatalogHeader
-        title={isRu ? 'Няни' : 'Babysitters'}
-        subtitle={`${filteredBabysitters.length} ${isRu ? 'нянь' : 'babysitters'}`}
-        fallbackPath="/discover"
-        categories={AGE_GROUPS.map(c => ({ id: c.id, label: isRu ? c.labelRu : c.labelEn }))}
-        selectedCategory={selectedAgeGroup}
-        onCategoryChange={setSelectedAgeGroup}
-      />
-
-      {/* Content */}
-      <div className={cn(ECOSYSTEM_PAGE_CONTAINER, "py-4 pb-24")}>
-        {filteredBabysitters.length === 0 ? (
-          <EmptyState
-            icon={Baby}
-            title={isRu ? 'Няни не найдены' : 'No babysitters found'}
-            description={isRu ? 'Попробуйте изменить фильтры' : 'Try adjusting your filters'}
-          />
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {filteredBabysitters.map(bs => {
-              const name = isRu ? bs.nameRu : bs.nameEn;
-              const desc = isRu ? bs.descRu : bs.descEn;
-              return (
-                <div
-                  key={bs.id}
-                  className="cursor-pointer group"
-                  onClick={() => navigate(`/babysitter/${bs.id}`)}
-                >
-                  <div className="relative aspect-[3/4] rounded-none overflow-hidden mb-2">
-                    <OptimizedImage
-                      src={bs.image}
-                      alt={name}
-                      width={400}
-                      height={533}
-                      className="w-full h-full transition-transform duration-300"
-                      quality={80}
-                    />
-                    {bs.isFeatured && (
-                      <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground text-[10px]">
-                        {isRu ? 'Топ' : 'Top'}
-                      </Badge>
-                    )}
-                    {!bs.available && (
-                      <Badge className="absolute top-2 right-2 bg-muted text-muted-foreground text-[10px]">
-                        {isRu ? 'Занята' : 'Busy'}
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="space-y-0.5">
-                    <div className="flex items-center justify-between gap-1">
-                      <h3 className="font-semibold text-sm truncate">{name}</h3>
-                      {bs.rating > 0 && (
-                        <span className="flex items-center gap-0.5 text-xs font-medium shrink-0">
-                          <Star className="w-3 h-3 fill-foreground" />
-                          {bs.rating.toFixed(1)}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground truncate">{desc}</p>
-                    <p className="text-xs text-muted-foreground flex items-center gap-0.5">
-                      <Shield className="w-3 h-3 shrink-0" />
-                      {isRu ? bs.experienceRu : bs.experienceEn}
-                    </p>
-                    <p className="text-sm font-semibold">
-                      {formatPrice(bs.pricePerHour)}/{isRu ? 'час' : 'hr'}
-                    </p>
-                  </div>
+    <MiniAppLayout
+      title={isRu ? 'Няни' : 'Babysitters'}
+      subtitle={`${filteredBabysitters.length} ${isRu ? 'нянь' : 'babysitters'}`}
+      fallbackPath="/discover"
+      categories={AGE_GROUPS}
+      selectedCategory={selectedAgeGroup}
+      onCategoryChange={setSelectedAgeGroup}
+      showHero={false}
+      showSearch={false}
+      showFilter={false}
+    >
+      {filteredBabysitters.length === 0 ? (
+        <EmptyState
+          icon={Baby}
+          title={isRu ? 'Няни не найдены' : 'No babysitters found'}
+          description={isRu ? 'Попробуйте изменить фильтры' : 'Try adjusting your filters'}
+        />
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          {filteredBabysitters.map(bs => {
+            const name = isRu ? bs.nameRu : bs.nameEn;
+            const desc = isRu ? bs.descRu : bs.descEn;
+            return (
+              <div
+                key={bs.id}
+                className="cursor-pointer group"
+                onClick={() => navigate(`/babysitter/${bs.id}`)}
+              >
+                <div className="relative aspect-[3/4] rounded-none overflow-hidden mb-2">
+                  <OptimizedImage
+                    src={bs.image}
+                    alt={name}
+                    width={400}
+                    height={533}
+                    className="w-full h-full transition-transform duration-300"
+                    quality={80}
+                  />
+                  {bs.isFeatured && (
+                    <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground text-[10px]">
+                      {isRu ? 'Топ' : 'Top'}
+                    </Badge>
+                  )}
+                  {!bs.available && (
+                    <Badge className="absolute top-2 right-2 bg-muted text-muted-foreground text-[10px]">
+                      {isRu ? 'Занята' : 'Busy'}
+                    </Badge>
+                  )}
                 </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-    </AppLayout>
+                <div className="space-y-0.5">
+                  <div className="flex items-center justify-between gap-1">
+                    <h3 className="font-semibold text-sm truncate">{name}</h3>
+                    {bs.rating > 0 && (
+                      <span className="flex items-center gap-0.5 text-xs font-medium shrink-0">
+                        <Star className="w-3 h-3 fill-foreground" />
+                        {bs.rating.toFixed(1)}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground truncate">{desc}</p>
+                  <p className="text-xs text-muted-foreground flex items-center gap-0.5">
+                    <Shield className="w-3 h-3 shrink-0" />
+                    {isRu ? bs.experienceRu : bs.experienceEn}
+                  </p>
+                  <p className="text-sm font-semibold">
+                    {formatPrice(bs.pricePerHour)}/{isRu ? 'час' : 'hr'}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </MiniAppLayout>
   );
 }
