@@ -23,11 +23,10 @@
  */
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { supabase } from '@/integrations/supabase/client';
 import { CLUSTER_CATALOG, type ClusterCatalogEntry } from '@/lib/nav/clusterCatalog';
+import { useClusterActivity } from '@/hooks/useClusterActivity';
 import type { UserPersona } from '@/hooks/useUserPersonas';
 import { cn } from '@/lib/utils';
 
