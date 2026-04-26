@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useMyCompanyId, useAgentDeals, formatValue } from '@/hooks/useAgentDeals';
 import { useCrmPipelines, PipelineWithStages } from '@/hooks/useCrmPipelines';
+import { MiniAppLayout } from '@/components/miniapp/MiniAppLayout';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TrendingUp, Layers, DollarSign, ArrowRight, Briefcase, Home, Building2 } from 'lucide-react';
