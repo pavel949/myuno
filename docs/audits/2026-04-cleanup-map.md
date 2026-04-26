@@ -736,3 +736,17 @@ Files refactored:
 - Global `any` count (canonical pattern): **797 → 772** (-25 / -3.1%).
 - Cumulative since Wave 4.2d start: **1247 → 772** (-475 / -38.1%).
 - Build: ✅ green (`tsc --noEmit` clean).
+
+### Wave 4.2d · Pass #10 (2026-04-26)
+**Scope**: 5 hooks across taxonomy, generic CRUD, task comments, rate seasons, portal chat.
+
+- `src/hooks/useTaxonomyDefinitions.ts` — 5 → 0 `any`. Map callback typed via narrow `{ type_key }` cast; insert/update/soft-delete payloads use `as never` (instead of `as any`) to satisfy generated overloads.
+- `src/hooks/useTaskComments.ts` — 4 → 0 `any`. Introduced local `TaskCommentRow` for raw DB row; dropped `(c: any)` callbacks; insert payload uses `as never`.
+- `src/hooks/useSupabaseCRUD.ts` — 5 → 0 `any`. Generic dynamic-table helper: replaced 4× `.from(table as any)` with `.from(table as never)`; removed redundant `eslint-disable no-explicit-any` directives.
+- `src/hooks/usePropertyRateSeasons.ts` — 4 → 0 `any`. `details`/`seasonal_pricing` now cast to `Json`; rate-season insert/update use `as never`.
+- `src/hooks/usePortalChat.ts` — 4 → 0 `any`. Dropped 3× `(supabase as any)` and `(payload.new as any)` casts; insert/update payloads use `as never`; `portal_messages` is in generated types.
+
+**Updated metrics**
+- Global `any` count (canonical pattern, by line): **772 → 748** (-24).
+- Cumulative since Wave 4.2d start: **1247 → 748** (-499 / -40.0%).
+- Build: ✅ green (`tsc --noEmit` clean, `bun run build` OK).
