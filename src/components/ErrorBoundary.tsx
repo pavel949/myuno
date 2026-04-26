@@ -45,6 +45,26 @@ export class ErrorBoundary extends Component<Props, State> {
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     errorLog.silent(error, 'component_error');
     this.props.onError?.(error, errorInfo);
+
+    // Stale chunk auto-recovery: when a deploy invalidates the previous
+    // bundle, lazy-loaded routes throw "Failed to fetch dynamically
+    // imported module". A one-shot reload pulls the new index.html and
+    // re-resolves the chunk hashes. We guard against loops with a session
+    // marker — if we already reloaded once and still hit the error, fall
+    // through to the manual UI so the user isn't stuck reloading.
+    const msg = error?.message ?? '';
+    const isChunkError =
+      msg.includes('dynamically imported') ||
+      msg.includes('Failed to fetch') ||
+      msg.includes('Loading chunk');
+    if (isChunkError && typeof window !== 'undefined') {
+      const RELOAD_KEY = '__myuno_chunk_reload__';
+      const alreadyReloaded = sessionStorage.getItem(RELOAD_KEY);
+      if (!alreadyReloaded) {
+        sessionStorage.setItem(RELOAD_KEY, String(Date.now()));
+        window.location.reload();
+      }
+    }
   }
 
   private handleReset = () => {
@@ -118,7 +138,13 @@ export function withErrorBoundary<P extends object>(
 export function useGlobalErrorHandler() {
   useEffect(() => {
     const lang = getLang();
-    
+
+    // Clear stale-chunk reload marker after a successful mount — the next
+    // chunk failure should be allowed exactly one fresh auto-reload attempt.
+    if (typeof window !== 'undefined') {
+      try { sessionStorage.removeItem('__myuno_chunk_reload__'); } catch { /* ignore */ }
+    }
+
     const handleRejection = (event: PromiseRejectionEvent) => {
       errorLog.silent(event.reason, 'unhandled_rejection');
       
@@ -141,20 +167,31 @@ export function useGlobalErrorHandler() {
         return;
       }
 
-      if (message.includes('dynamically imported') || 
+      if (message.includes('dynamically imported') ||
           message.includes('Failed to fetch') ||
           message.includes('Loading chunk')) {
-        toast.error(
-          lang === 'ru' 
-            ? 'Не удалось загрузить компонент. Обновите страницу.' 
-            : 'Failed to load component. Please refresh the page.',
-          {
-            action: {
-              label: lang === 'ru' ? 'Обновить' : 'Refresh',
-              onClick: () => window.location.reload(),
-            },
-          }
-        );
+        // Stale-chunk auto-reload (one shot, guarded). Same logic as
+        // ErrorBoundary.componentDidCatch — handles cases where the failed
+        // import bubbles as an unhandled rejection instead of a render
+        // error (e.g. an awaited dynamic import outside a Suspense tree).
+        const RELOAD_KEY = '__myuno_chunk_reload__';
+        const alreadyReloaded = sessionStorage.getItem(RELOAD_KEY);
+        if (!alreadyReloaded) {
+          sessionStorage.setItem(RELOAD_KEY, String(Date.now()));
+          window.location.reload();
+        } else {
+          toast.error(
+            lang === 'ru'
+              ? 'Не удалось загрузить компонент. Обновите страницу.'
+              : 'Failed to load component. Please refresh the page.',
+            {
+              action: {
+                label: lang === 'ru' ? 'Обновить' : 'Refresh',
+                onClick: () => window.location.reload(),
+              },
+            }
+          );
+        }
       } else {
         toast.error(
           lang === 'ru'
