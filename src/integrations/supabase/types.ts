@@ -3711,35 +3711,6 @@ export type Database = {
           },
         ]
       }
-      clearview_bundle_slots: {
-        Row: {
-          consumed_at: string
-          id: string
-          project_id: string
-          purchase_id: string
-        }
-        Insert: {
-          consumed_at?: string
-          id?: string
-          project_id: string
-          purchase_id: string
-        }
-        Update: {
-          consumed_at?: string
-          id?: string
-          project_id?: string
-          purchase_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "clearview_bundle_slots_purchase_id_fkey"
-            columns: ["purchase_id"]
-            isOneToOne: false
-            referencedRelation: "clearview_purchases"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       clearview_categories: {
         Row: {
           code: string
@@ -3877,51 +3848,6 @@ export type Database = {
           valid_until?: string
         }
         Relationships: []
-      }
-      clearview_scores: {
-        Row: {
-          category_id: string
-          created_at: string
-          evidence: string | null
-          id: string
-          project_id: string
-          score: number
-          updated_at: string
-        }
-        Insert: {
-          category_id: string
-          created_at?: string
-          evidence?: string | null
-          id?: string
-          project_id: string
-          score: number
-          updated_at?: string
-        }
-        Update: {
-          category_id?: string
-          created_at?: string
-          evidence?: string | null
-          id?: string
-          project_id?: string
-          score?: number
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "clearview_scores_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "clearview_categories"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "clearview_scores_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "clearview_projects"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       cluster_life_situations: {
         Row: {
@@ -6693,60 +6619,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "deal_field_changes_deal_id_fkey"
-            columns: ["deal_id"]
-            isOneToOne: false
-            referencedRelation: "agent_deals"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      deal_parties: {
-        Row: {
-          commission_amount: number | null
-          commission_pct: number | null
-          contact_id: string | null
-          created_at: string | null
-          deal_id: string
-          id: string
-          notes: string | null
-          role: string
-          signed_agreement_url: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          commission_amount?: number | null
-          commission_pct?: number | null
-          contact_id?: string | null
-          created_at?: string | null
-          deal_id: string
-          id?: string
-          notes?: string | null
-          role?: string
-          signed_agreement_url?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          commission_amount?: number | null
-          commission_pct?: number | null
-          contact_id?: string | null
-          created_at?: string | null
-          deal_id?: string
-          id?: string
-          notes?: string | null
-          role?: string
-          signed_agreement_url?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "deal_parties_contact_id_fkey"
-            columns: ["contact_id"]
-            isOneToOne: false
-            referencedRelation: "crm_contacts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "deal_parties_deal_id_fkey"
             columns: ["deal_id"]
             isOneToOne: false
             referencedRelation: "agent_deals"
@@ -9902,59 +9774,6 @@ export type Database = {
           weight?: number
         }
         Relationships: []
-      }
-      lead_score_events_log: {
-        Row: {
-          contact_id: string
-          created_at: string
-          created_by: string | null
-          event_key: string
-          id: string
-          meta: Json | null
-          score_after: number
-          score_before: number
-          source: string | null
-          temperature_after: string | null
-          temperature_before: string | null
-          weight_applied: number
-        }
-        Insert: {
-          contact_id: string
-          created_at?: string
-          created_by?: string | null
-          event_key: string
-          id?: string
-          meta?: Json | null
-          score_after: number
-          score_before: number
-          source?: string | null
-          temperature_after?: string | null
-          temperature_before?: string | null
-          weight_applied: number
-        }
-        Update: {
-          contact_id?: string
-          created_at?: string
-          created_by?: string | null
-          event_key?: string
-          id?: string
-          meta?: Json | null
-          score_after?: number
-          score_before?: number
-          source?: string | null
-          temperature_after?: string | null
-          temperature_before?: string | null
-          weight_applied?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "lead_score_events_log_contact_id_fkey"
-            columns: ["contact_id"]
-            isOneToOne: false
-            referencedRelation: "crm_contacts"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       ledger_accounts: {
         Row: {
@@ -27268,66 +27087,6 @@ export type Database = {
         }
         Relationships: []
       }
-      user_tax_profile: {
-        Row: {
-          cfc_jurisdictions: string[] | null
-          created_at: string
-          files_3ndfl: boolean
-          has_cfc: boolean
-          id: string
-          is_self_employed_ru: boolean
-          notes: string | null
-          primary_residency: string | null
-          reviewed_by_partner: string | null
-          reviewed_by_partner_at: string | null
-          secondary_residency: string | null
-          th_tax_resident_days_ytd: number | null
-          tin_other: Json | null
-          tin_ru: string | null
-          tin_th: string | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          cfc_jurisdictions?: string[] | null
-          created_at?: string
-          files_3ndfl?: boolean
-          has_cfc?: boolean
-          id?: string
-          is_self_employed_ru?: boolean
-          notes?: string | null
-          primary_residency?: string | null
-          reviewed_by_partner?: string | null
-          reviewed_by_partner_at?: string | null
-          secondary_residency?: string | null
-          th_tax_resident_days_ytd?: number | null
-          tin_other?: Json | null
-          tin_ru?: string | null
-          tin_th?: string | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          cfc_jurisdictions?: string[] | null
-          created_at?: string
-          files_3ndfl?: boolean
-          has_cfc?: boolean
-          id?: string
-          is_self_employed_ru?: boolean
-          notes?: string | null
-          primary_residency?: string | null
-          reviewed_by_partner?: string | null
-          reviewed_by_partner_at?: string | null
-          secondary_residency?: string | null
-          th_tax_resident_days_ytd?: number | null
-          tin_other?: Json | null
-          tin_ru?: string | null
-          tin_th?: string | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       user_visa_status: {
         Row: {
           created_at: string
@@ -27387,13 +27146,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_passports"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_visa_status_passport_id_fkey"
-            columns: ["passport_id"]
-            isOneToOne: false
-            referencedRelation: "v_myuno_id"
-            referencedColumns: ["primary_passport_id"]
           },
         ]
       }
@@ -31095,32 +30847,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      v_myuno_id: {
-        Row: {
-          active_obligations_count: number | null
-          country: string | null
-          current_visa_expiry: string | null
-          current_visa_id: string | null
-          current_visa_type: string | null
-          email: string | null
-          files_3ndfl: boolean | null
-          full_name: string | null
-          has_cfc: boolean | null
-          languages_spoken: string[] | null
-          myuno_id_version: number | null
-          nationality: string | null
-          phone: string | null
-          preferred_language: string | null
-          primary_passport_expiry: string | null
-          primary_passport_id: string | null
-          primary_passport_number: string | null
-          tax_residency: string | null
-          user_id: string | null
-          vault_documents_count: number | null
-          vault_pin_set: boolean | null
-        }
-        Relationships: []
       }
       v_outreach_campaigns_unified: {
         Row: {
