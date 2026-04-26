@@ -45,13 +45,17 @@ export function buildPropertyPayload({
     rental_platform: rental_platforms?.length ? rental_platforms[0] : undefined,
     // listing_modes is a denormalised cache mirrored from tenancy_modes/sale_intent
     // so legacy consumers (useStaysSearch, PropertyCard) keep working.
-    listing_modes: Array.from(new Set([
-      ...(platform_listed ? ['platform'] : []),
-      ...((is_for_sale || (cleanData as any).sale_intent) ? ['sale'] : []),
-      ...((cleanData as any).tenancy_modes?.includes?.('short')  ? ['rent', 'short'] : (price_per_night ? ['rent', 'short'] : [])),
-      ...((cleanData as any).tenancy_modes?.includes?.('medium') ? ['medium'] : []),
-      ...((cleanData as any).tenancy_modes?.includes?.('long')   ? ['long']   : []),
-    ])),
+    listing_modes: (() => {
+      const ext = cleanData as { sale_intent?: unknown; tenancy_modes?: string[] };
+      const tenancy = Array.isArray(ext.tenancy_modes) ? ext.tenancy_modes : [];
+      return Array.from(new Set([
+        ...(platform_listed ? ['platform'] : []),
+        ...((is_for_sale || ext.sale_intent) ? ['sale'] : []),
+        ...(tenancy.includes('short')  ? ['rent', 'short'] : (price_per_night ? ['rent', 'short'] : [])),
+        ...(tenancy.includes('medium') ? ['medium'] : []),
+        ...(tenancy.includes('long')   ? ['long']   : []),
+      ]));
+    })(),
     created_on_behalf: isOnBehalf,
     ownership_type: ownershipData.ownership_type,
     actual_owner_email: isOnBehalf ? ownershipData.actual_owner_email : undefined,
