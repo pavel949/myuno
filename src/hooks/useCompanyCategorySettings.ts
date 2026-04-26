@@ -31,7 +31,7 @@ export function useCompanyCategorySettings(type: 'expense' | 'income') {
     queryFn: async () => {
       if (!companyId) return null;
       const { data, error } = await supabase
-        .from('company_category_settings' as any)
+        .from('company_category_settings')
         .select('*')
         .eq('company_id', companyId)
         .eq('category_type', type);
@@ -67,14 +67,14 @@ export function useToggleCategorySetting() {
       const companyId = activeCompany.company_id;
 
       const { error } = await supabase
-        .from('company_category_settings' as any)
+        .from('company_category_settings')
         .upsert(
           {
             company_id: companyId,
             category_type: data.category_type,
             category_code: data.category_code,
             is_enabled: data.is_enabled,
-          } as any,
+          },
           { onConflict: 'company_id,category_type,category_code' }
         );
       if (error) throw error;
@@ -112,8 +112,8 @@ export function useBulkToggleCategorySettings() {
       }));
 
       const { error } = await supabase
-        .from('company_category_settings' as any)
-        .upsert(rows as any, { onConflict: 'company_id,category_type,category_code' });
+        .from('company_category_settings')
+        .upsert(rows, { onConflict: 'company_id,category_type,category_code' });
       if (error) throw error;
     },
     onSuccess: () => {
@@ -148,7 +148,7 @@ export function useUpdateCategoryOverrides() {
       const companyId = activeCompany.company_id;
 
       const { error } = await supabase
-        .from('company_category_settings' as any)
+        .from('company_category_settings')
         .upsert(
           {
             company_id: companyId,
@@ -156,7 +156,7 @@ export function useUpdateCategoryOverrides() {
             category_code: data.category_code,
             is_enabled: true,
             ...data,
-          } as any,
+          },
           { onConflict: 'company_id,category_type,category_code' }
         );
       if (error) throw error;
@@ -193,8 +193,8 @@ export function useInitCategorySettings() {
       }));
 
       const { error } = await supabase
-        .from('company_category_settings' as any)
-        .upsert(rows as any, { onConflict: 'company_id,category_type,category_code' });
+        .from('company_category_settings')
+        .upsert(rows, { onConflict: 'company_id,category_type,category_code' });
       if (error) throw error;
     },
     onSuccess: () => {
