@@ -1,6 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
+
+type ManagementCompanyRow = Database['public']['Tables']['management_companies']['Row'];
 
 export interface PMCompany {
   id: string;
@@ -39,39 +42,40 @@ export interface PMCompany {
 export type PMCompanyInsert = Omit<PMCompany, 'id' | 'slug' | 'created_at' | 'updated_at' | 'verified_at' | 'review_count' | 'properties_managed'>;
 export type PMCompanyUpdate = Partial<PMCompanyInsert>;
 
-function mapRow(row: Record<string, unknown>): PMCompany {
+function mapRow(row: ManagementCompanyRow): PMCompany {
+  const r = row as unknown as Record<string, unknown>;
   return {
-    id: row.id,
-    slug: row.slug,
-    name: row.name_en,
-    name_ru: row.name_ru,
-    description: row.description_en,
-    description_ru: row.description_ru,
-    logo_url: row.logo,
-    cover_image: row.cover_image,
-    phone: row.phone,
-    email: row.email,
-    website: row.website,
-    address: row.address,
-    license_number: row.license_number,
-    tax_id: row.tax_id,
-    established_year: row.founded_year,
-    service_districts: row.service_districts || [],
-    service_types: row.services || [],
-    languages: row.languages || [],
-    has_24_7_support: row.has_24_7_support ?? false,
-    has_emergency_service: row.has_emergency_service ?? false,
-    default_commission_rate: row.default_commission_rate ?? 10,
-    min_contract_months: row.min_contract_months ?? 12,
-    is_active: row.is_active ?? true,
-    is_verified: row.is_verified ?? false,
-    verified_at: row.verified_at,
-    rating: row.rating,
-    review_count: row.review_count ?? 0,
-    properties_managed: row.properties_count ?? 0,
-    director_name: row.director_name,
-    created_at: row.created_at,
-    updated_at: row.updated_at,
+    id: r.id as string,
+    slug: r.slug as string,
+    name: r.name_en as string,
+    name_ru: r.name_ru as string | undefined,
+    description: r.description_en as string | undefined,
+    description_ru: r.description_ru as string | undefined,
+    logo_url: r.logo as string | undefined,
+    cover_image: r.cover_image as string | undefined,
+    phone: r.phone as string | undefined,
+    email: r.email as string | undefined,
+    website: r.website as string | undefined,
+    address: r.address as string | undefined,
+    license_number: r.license_number as string | undefined,
+    tax_id: r.tax_id as string | undefined,
+    established_year: r.founded_year as number | undefined,
+    service_districts: (r.service_districts as string[] | null) || [],
+    service_types: (r.services as string[] | null) || [],
+    languages: (r.languages as string[] | null) || [],
+    has_24_7_support: (r.has_24_7_support as boolean | null) ?? false,
+    has_emergency_service: (r.has_emergency_service as boolean | null) ?? false,
+    default_commission_rate: (r.default_commission_rate as number | null) ?? 10,
+    min_contract_months: (r.min_contract_months as number | null) ?? 12,
+    is_active: (r.is_active as boolean | null) ?? true,
+    is_verified: (r.is_verified as boolean | null) ?? false,
+    verified_at: r.verified_at as string | undefined,
+    rating: r.rating as number | undefined,
+    review_count: (r.review_count as number | null) ?? 0,
+    properties_managed: (r.properties_count as number | null) ?? 0,
+    director_name: r.director_name as string | undefined,
+    created_at: r.created_at as string,
+    updated_at: r.updated_at as string,
   };
 }
 
