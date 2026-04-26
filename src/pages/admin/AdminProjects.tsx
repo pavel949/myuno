@@ -363,7 +363,7 @@ export default function AdminProjects() {
 
     try {
       if (editingProject) {
-        await updateProject.mutateAsync({ id: editingProject.id, ...payload } as any);
+        await updateProject.mutateAsync({ id: editingProject.id, ...payload } as Partial<CreatePropertyProjectData> & { id: string });
         toast.success(isRu ? 'Проект обновлён' : 'Project updated');
       } else {
         await createProject.mutateAsync(payload as CreatePropertyProjectData);
@@ -376,27 +376,27 @@ export default function AdminProjects() {
     }
   };
 
-  const handleAIIntakeComplete = (extractedData: any) => {
+  const handleAIIntakeComplete = (extractedData: Partial<CreatePropertyProjectData> & Record<string, unknown>) => {
     // Map AI extracted data to form
     setFormData(prev => ({
       ...prev,
-      name_en: extractedData.name_en || prev.name_en,
-      name_ru: extractedData.name_ru || prev.name_ru,
-      description_en: extractedData.description_en || prev.description_en,
-      description_ru: extractedData.description_ru || prev.description_ru,
-      address: extractedData.address || prev.address,
-      district: extractedData.district || prev.district,
-      developer_name: extractedData.developer_name || prev.developer_name,
-      year_built: extractedData.year_built || prev.year_built,
-      total_units: extractedData.total_units || prev.total_units,
-      amenities: extractedData.amenities || prev.amenities,
-      infrastructure: extractedData.infrastructure || prev.infrastructure,
+      name_en: (extractedData.name_en as string) || prev.name_en,
+      name_ru: (extractedData.name_ru as string) || prev.name_ru,
+      description_en: (extractedData.description_en as string) || prev.description_en,
+      description_ru: (extractedData.description_ru as string) || prev.description_ru,
+      address: (extractedData.address as string) || prev.address,
+      district: (extractedData.district as string) || prev.district,
+      developer_name: (extractedData.developer_name as string) || prev.developer_name,
+      year_built: (extractedData.year_built as number) || prev.year_built,
+      total_units: (extractedData.total_units as number) || prev.total_units,
+      amenities: (extractedData.amenities as string[]) || prev.amenities,
+      infrastructure: (extractedData.infrastructure as string[]) || prev.infrastructure,
     }));
     setIsAIIntakeOpen(false);
     toast.success(isRu ? 'Данные заполнены из AI' : 'Data populated from AI');
   };
 
-  const updateFormField = (field: string, value: any) => {
+  const updateFormField = (field: string, value: unknown) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
