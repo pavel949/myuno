@@ -72,8 +72,15 @@ export function useAdminExperiences(options: UseAdminExperiencesOptions = {}) {
     additionalFilters.push({ column: 'attributes->>experience_type', value: experienceType });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { items: rawItems, isLoading, create, update, remove, refetch } = useSupabaseCRUD<any>({
+  type ListingRow = Record<string, unknown> & {
+    id: string;
+    provider_id?: string;
+    attributes?: Record<string, unknown>;
+    created_at: string;
+    updated_at: string;
+  };
+
+  const { items: rawItems, isLoading, create, update, remove, refetch } = useSupabaseCRUD<ListingRow>({
     table: 'listings',
     providerId,
     providerIdField: 'provider_id',
@@ -84,9 +91,10 @@ export function useAdminExperiences(options: UseAdminExperiencesOptions = {}) {
   });
 
   // Transform raw listings to AdminExperience shape
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const experiences: AdminExperience[] = (rawItems || []).map((raw: any) => {
-    const attrs = raw.attributes || {};
+  const experiences: AdminExperience[] = (rawItems || []).map((raw) => {
+    const attrs = (raw.attributes as Record<string, unknown> | undefined) || {};
+    const r = raw as Record<string, unknown>;
+    const a = attrs as Record<string, unknown>;
     return {
       id: raw.id,
       provider_id: raw.provider_id,
