@@ -82,6 +82,35 @@ function timeOfDay(isRu: boolean): string {
 // stub that previously hard-coded a single `manage` signal was removed in
 // favor of the canonical multi-table probe.
 
+/**
+ * Cluster → deep-link to the user's open items for that cluster, with the
+ * matching filter applied. Mirrors `useClusterActivity` source mapping so a
+ * tap on the badge lands on a list pre-filtered to exactly the rows that
+ * fed the count.
+ */
+function getClusterDestination(clusterId: string): string | null {
+  switch (clusterId) {
+    case 'arrive':
+      return '/me/bookings?cluster=arrive&status=open';
+    case 'live':
+      return '/me/bookings?cluster=live&status=open';
+    case 'manage':
+      // Owner-side bookings list filtered to pending. Falls back gracefully
+      // if the user has no MC scope (page renders an empty state).
+      return '/mc/bookings-list?status=pending';
+    case 'invest':
+      return '/me/requests?source=order';
+    case 'legal':
+      return '/me/requests?source=visa';
+    case 'build':
+      // No canonical "my partner applications" page yet — fall back to the
+      // unified requests board without a source filter.
+      return '/me/requests';
+    default:
+      return null;
+  }
+}
+
 interface PersonaHaloProps {
   personas: UserPersona[];
   onRoleSheetOpen: () => void;
@@ -202,18 +231,31 @@ export function PersonaHalo({ personas, onRoleSheetOpen, variant = 'default' }: 
           const Icon = c.icon;
           const label = isRu ? c.labelRu : c.labelEn;
 
+          const badgeDestination = hasSignal ? getClusterDestination(c.id) : null;
+          // Outer tile uses div+role="button" (instead of <button>) so we
+          // can nest a real <button> for the activity badge — nested
+          // <button> inside <button> is invalid HTML and gets sanitized
+          // away by some browsers, breaking the deep-link tap.
+          const handleTileActivate = () => navigate(c.homeRoute);
           return (
-            <button
+            <div
               key={c.id}
-              type="button"
-              onClick={() => navigate(c.homeRoute)}
+              role="button"
+              tabIndex={0}
+              onClick={handleTileActivate}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleTileActivate();
+                }
+              }}
               aria-label={
                 hasSignal
                   ? `${label} · ${count} ${isRu ? 'активн.' : 'open'}`
                   : label
               }
               className={cn(
-                'group relative flex flex-col justify-between p-3 min-h-[72px] sm:min-h-[70px] text-left transition-colors',
+                'group relative flex flex-col justify-between p-3 min-h-[72px] sm:min-h-[70px] text-left transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1',
                 isOnNavy
                   ? 'bg-primary/95 hover:bg-primary/80'
                   : 'bg-card hover:bg-muted/40',
@@ -226,31 +268,42 @@ export function PersonaHalo({ personas, onRoleSheetOpen, variant = 'default' }: 
                 className="absolute inset-y-2 left-0 w-[2px]"
                 style={{ background: c.color }}
               />
-              {/* Activity badge — single dot for one open item, numeric
-                  pill from 2 onwards. Always orange-400 on navy so it
-                  stays inside the canonical palette. */}
-              {hasSignal && (
-                count === 1 ? (
-                  <span
-                    aria-hidden
-                    className={cn(
-                      'absolute top-2 right-2 w-1.5 h-1.5 rounded-full',
-                      isOnNavy ? 'bg-[hsl(var(--brand-orange-400))]' : 'bg-primary',
-                    )}
-                  />
-                ) : (
-                  <span
-                    aria-hidden
-                    className={cn(
-                      'absolute top-1.5 right-1.5 min-w-[16px] h-[16px] px-1 flex items-center justify-center text-[10px] font-mono font-semibold tabular-nums',
-                      isOnNavy
-                        ? 'bg-[hsl(var(--brand-orange-400))] text-primary'
-                        : 'bg-primary text-primary-foreground',
-                    )}
-                  >
-                    {count > 99 ? '99+' : count}
-                  </span>
-                )
+              {/* Activity badge — clickable when a destination exists. Tap
+                  routes to a pre-filtered list of the user's open items
+                  for this cluster (e.g. /me/bookings?cluster=arrive&status=open).
+                  Single dot for one open item, numeric pill from 2 onwards. */}
+              {hasSignal && badgeDestination && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(badgeDestination);
+                  }}
+                  aria-label={
+                    isRu
+                      ? `Открыть ${count} активн. в разделе ${label}`
+                      : `Open ${count} active in ${label}`
+                  }
+                  className={cn(
+                    'absolute top-1 right-1 min-w-[22px] h-[22px] px-1 flex items-center justify-center text-[10px] font-mono font-semibold tabular-nums transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+                    isOnNavy
+                      ? 'bg-[hsl(var(--brand-orange-400))] text-primary hover:bg-[hsl(var(--brand-orange-400))]/85'
+                      : 'bg-primary text-primary-foreground hover:bg-primary/85',
+                  )}
+                >
+                  {count > 99 ? '99+' : count}
+                </button>
+              )}
+              {/* Fallback: signal exists but no canonical destination — keep
+                  a passive dot so the user still sees the indicator. */}
+              {hasSignal && !badgeDestination && (
+                <span
+                  aria-hidden
+                  className={cn(
+                    'absolute top-2 right-2 w-1.5 h-1.5 rounded-full',
+                    isOnNavy ? 'bg-[hsl(var(--brand-orange-400))]' : 'bg-primary',
+                  )}
+                />
               )}
               <Icon
                 className={cn(
@@ -269,7 +322,7 @@ export function PersonaHalo({ personas, onRoleSheetOpen, variant = 'default' }: 
                   {label}
                 </span>
               </div>
-            </button>
+            </div>
           );
         })}
       </div>

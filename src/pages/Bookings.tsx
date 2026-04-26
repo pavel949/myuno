@@ -1,6 +1,6 @@
-import React, { useEffect, useCallback, useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Calendar, Package, Scissors, Home, Car, Ship, Ticket, Flower2, Stethoscope, Clock, ChevronRight, Dumbbell, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import React, { useEffect, useCallback, useMemo, useState, useRef } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Calendar, Package, Scissors, Home, Car, Ship, Ticket, Flower2, Stethoscope, Clock, ChevronRight, Dumbbell, AlertCircle, ChevronDown, ChevronUp, X } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -99,10 +99,40 @@ const getBookingTypeLabel = (type: string, language: string) => {
   return labels[type]?.[language === 'ru' ? 'ru' : 'en'] || type;
 };
 
+/**
+ * Cluster → booking_type mapping for the PersonaHalo "open items" deep-link.
+ * Mirrors `useClusterActivity`'s ARRIVE/LIVE order-type buckets, translated
+ * into the `bookings.booking_type` vocabulary.
+ */
+const CLUSTER_BOOKING_TYPES: Record<string, string[]> = {
+  arrive: ['tour', 'transport', 'water', 'flower', 'food', 'event'],
+  live: ['beauty', 'service', 'medical', 'fitness'],
+  manage: ['property'],
+};
+
+/** Statuses considered "open / awaiting action" for the ?status=open filter. */
+const OPEN_BOOKING_STATUSES = new Set([
+  'pending',
+  'awaiting_payment',
+  'awaiting_client_payment',
+  'pending_deposit',
+  'confirmed',
+  'in_progress',
+]);
+
+const CLUSTER_FILTER_LABEL: Record<string, { en: string; ru: string }> = {
+  arrive: { en: 'Arrive', ru: 'Приезд' },
+  live: { en: 'Live', ru: 'Жизнь' },
+  manage: { en: 'Manage', ru: 'Управление' },
+};
+
 export default function Bookings() {
   const { t, language } = useLanguage();
   const { user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const clusterParam = searchParams.get('cluster') ?? '';
+  const statusParam = searchParams.get('status') ?? '';
   const [bookings, setBookings] = useState<BookingItem[]>([]);
   const [statusHistory, setStatusHistory] = useState<Record<string, BookingStatusEvent[]>>({});
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -478,6 +508,36 @@ export default function Bookings() {
     setExpandedTimelines((prev) => ({ ...prev, [bookingId]: !prev[bookingId] }));
   }, []);
 
+  /**
+   * URL-driven filter. Two query params:
+   *  - `cluster=arrive|live|manage` → restricts booking_type to the cluster
+   *  - `status=open` → restricts status to open/awaiting buckets
+   *
+   * Drives the deep-link from the PersonaHalo activity badge so a tap on
+   * "3 open in Arrive" lands on the bookings list pre-filtered to those
+   * exact rows.
+   */
+  const allowedTypes = clusterParam ? CLUSTER_BOOKING_TYPES[clusterParam] : null;
+  const filterIsActive = !!(allowedTypes || statusParam === 'open');
+
+  const filteredBookings = useMemo(() => {
+    if (!filterIsActive) return bookings;
+    return bookings.filter((b) => {
+      if (allowedTypes && !allowedTypes.includes(b.type)) return false;
+      if (statusParam === 'open' && !OPEN_BOOKING_STATUSES.has(b.status)) return false;
+      return true;
+    });
+  }, [bookings, allowedTypes, statusParam, filterIsActive]);
+
+  const clearFilter = useCallback(() => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.delete('cluster');
+      next.delete('status');
+      return next;
+    }, { replace: true });
+  }, [setSearchParams]);
+
   if (authLoading || isLoading) {
     return (
       <AppLayout>
@@ -507,7 +567,34 @@ export default function Bookings() {
             title={t('nav.bookings')}
             actions={<RealtimeIndicator status={realtimeStatus} language={language} />}
           />
-          
+
+          {/* Active filter pill — surfaces deep-link context from PersonaHalo. */}
+          {filterIsActive && (
+            <div className="flex items-center gap-2 mb-3 px-1">
+              <span className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground font-semibold">
+                {language === 'ru' ? 'Фильтр' : 'Filter'}
+              </span>
+              <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary text-xs font-medium border border-primary/20">
+                {clusterParam && CLUSTER_FILTER_LABEL[clusterParam]
+                  ? (language === 'ru'
+                      ? CLUSTER_FILTER_LABEL[clusterParam].ru
+                      : CLUSTER_FILTER_LABEL[clusterParam].en)
+                  : null}
+                {clusterParam && statusParam === 'open' ? ' · ' : ''}
+                {statusParam === 'open' ? (language === 'ru' ? 'Открытые' : 'Open') : null}
+              </span>
+              <button
+                type="button"
+                onClick={clearFilter}
+                className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+                aria-label={language === 'ru' ? 'Сбросить фильтр' : 'Clear filter'}
+              >
+                <X className="w-3 h-3" />
+                {language === 'ru' ? 'Сбросить' : 'Clear'}
+              </button>
+            </div>
+          )}
+
           {loadError ? (
             <EmptyState
               icon={AlertCircle}
@@ -519,20 +606,28 @@ export default function Bookings() {
                 </PremiumButton>
               }
             />
-          ) : bookings.length === 0 ? (
+          ) : filteredBookings.length === 0 ? (
             <EmptyState
               icon={Calendar}
-              title={t('booking.noBookings')}
-              description={t('booking.noBookingsDesc')}
-              action={
+              title={filterIsActive
+                ? (language === 'ru' ? 'Ничего не найдено' : 'Nothing found')
+                : t('booking.noBookings')}
+              description={filterIsActive
+                ? (language === 'ru' ? 'По выбранному фильтру нет заказов.' : 'No orders match the selected filter.')
+                : t('booking.noBookingsDesc')}
+              action={filterIsActive ? (
+                <PremiumButton onClick={clearFilter}>
+                  {language === 'ru' ? 'Сбросить фильтр' : 'Clear filter'}
+                </PremiumButton>
+              ) : (
                 <PremiumButton onClick={() => navigate('/discover')}>
                   {t('nav.discover')}
                 </PremiumButton>
-              }
+              )}
             />
           ) : (
             <div className="space-y-3">
-              {bookings.map((booking) => {
+              {filteredBookings.map((booking) => {
                 const Icon = getBookingIcon(booking.type);
                 const isExpanded = !!expandedTimelines[booking.id];
                 const events = statusHistory[booking.id] ?? [];
