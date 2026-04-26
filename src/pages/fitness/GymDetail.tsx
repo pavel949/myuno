@@ -226,7 +226,8 @@ const GymDetail = () => {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </AppLayout>
   );
 };
 
