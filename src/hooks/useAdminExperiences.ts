@@ -72,15 +72,8 @@ export function useAdminExperiences(options: UseAdminExperiencesOptions = {}) {
     additionalFilters.push({ column: 'attributes->>experience_type', value: experienceType });
   }
 
-  type ListingRow = Record<string, unknown> & {
-    id: string;
-    provider_id?: string;
-    attributes?: Record<string, unknown>;
-    created_at: string;
-    updated_at: string;
-  };
-
-  const { items: rawItems, isLoading, create, update, remove, refetch } = useSupabaseCRUD<ListingRow>({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { items: rawItems, isLoading, create, update, remove, refetch } = useSupabaseCRUD<any>({
     table: 'listings',
     providerId,
     providerIdField: 'provider_id',
@@ -91,61 +84,61 @@ export function useAdminExperiences(options: UseAdminExperiencesOptions = {}) {
   });
 
   // Transform raw listings to AdminExperience shape
-  const experiences: AdminExperience[] = (rawItems || []).map((raw) => {
-    const r = raw as Record<string, unknown>;
-    const a = (r.attributes as Record<string, unknown> | undefined) || {};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const experiences: AdminExperience[] = (rawItems || []).map((raw: any) => {
+    const attrs = raw.attributes || {};
     return {
-      id: r.id,
-      provider_id: r.provider_id,
-      experience_type: a.experience_type || 'tour',
-      title_en: r.name_en,
-      title_ru: r.name_ru || '',
-      description_en: r.description_en,
-      description_ru: r.description_ru,
-      category: r.category || a.category,
-      difficulty: a.difficulty,
-      duration_minutes: a.duration_minutes,
-      price: r.price,
-      price_per: r.price_period || a.price_per,
-      currency: r.currency,
-      min_participants: a.min_participants,
-      max_participants: a.max_participants,
-      meeting_point: r.address || a.meeting_point,
-      meeting_point_lat: r.lat || a.meeting_point_lat,
-      meeting_point_lng: r.lng || a.meeting_point_lng,
-      location_name: a.location_name,
-      includes: a.includes,
-      excludes: a.excludes,
-      highlights: a.highlights,
-      requirements: a.requirements,
-      itinerary: a.itinerary,
-      cover_image: r.cover_image,
-      images: r.images,
-      available_days: a.available_days,
-      start_times: a.start_times,
-      tags: r.tags,
-      equipment_included: a.equipment_included,
-      is_certified: a.is_certified,
-      certification_details: a.certification_details,
-      safety_briefing_required: a.safety_briefing_required,
-      age_restriction: a.age_restriction,
-      is_active: r.is_active,
-      is_featured: r.is_featured,
-      rating: r.rating,
-      review_count: r.review_count,
-      approval_status: r.approval_status,
-      external_link: a.external_link,
-      booking_url: a.booking_url,
-      source_page_url: a.source_page_url,
-      pickup_included: a.pickup_included,
-      inclusions: a.inclusions,
-      exclusions: a.exclusions,
-      slug: r.slug,
-      status: a.status,
-      notes: r.notes,
-      booking_model: a.booking_model,
-      created_at: r.created_at,
-      updated_at: r.updated_at,
+      id: raw.id,
+      provider_id: raw.provider_id,
+      experience_type: attrs.experience_type || 'tour',
+      title_en: raw.name_en,
+      title_ru: raw.name_ru || '',
+      description_en: raw.description_en,
+      description_ru: raw.description_ru,
+      category: raw.category || attrs.category,
+      difficulty: attrs.difficulty,
+      duration_minutes: attrs.duration_minutes,
+      price: raw.price,
+      price_per: raw.price_period || attrs.price_per,
+      currency: raw.currency,
+      min_participants: attrs.min_participants,
+      max_participants: attrs.max_participants,
+      meeting_point: raw.address || attrs.meeting_point,
+      meeting_point_lat: raw.lat || attrs.meeting_point_lat,
+      meeting_point_lng: raw.lng || attrs.meeting_point_lng,
+      location_name: attrs.location_name,
+      includes: attrs.includes,
+      excludes: attrs.excludes,
+      highlights: attrs.highlights,
+      requirements: attrs.requirements,
+      itinerary: attrs.itinerary,
+      cover_image: raw.cover_image,
+      images: raw.images,
+      available_days: attrs.available_days,
+      start_times: attrs.start_times,
+      tags: raw.tags,
+      equipment_included: attrs.equipment_included,
+      is_certified: attrs.is_certified,
+      certification_details: attrs.certification_details,
+      safety_briefing_required: attrs.safety_briefing_required,
+      age_restriction: attrs.age_restriction,
+      is_active: raw.is_active,
+      is_featured: raw.is_featured,
+      rating: raw.rating,
+      review_count: raw.review_count,
+      approval_status: raw.approval_status,
+      external_link: attrs.external_link,
+      booking_url: attrs.booking_url,
+      source_page_url: attrs.source_page_url,
+      pickup_included: attrs.pickup_included,
+      inclusions: attrs.inclusions,
+      exclusions: attrs.exclusions,
+      slug: raw.slug,
+      status: attrs.status,
+      notes: raw.notes,
+      booking_model: attrs.booking_model,
+      created_at: raw.created_at,
+      updated_at: raw.updated_at,
     } as AdminExperience;
   });
 
@@ -187,8 +180,8 @@ export function useAdminExperiences(options: UseAdminExperiencesOptions = {}) {
       ...data,
       experience_type: data.experience_type || 'tour',
       is_active: data.is_active ?? true,
-    }) as never),
-    updateExperience: async (id: string, updates: Partial<AdminExperience>) => update(id, mapToListing(updates) as never),
+    }) as any),
+    updateExperience: async (id: string, updates: Partial<AdminExperience>) => update(id, mapToListing(updates) as any),
     deleteExperience: async (id: string) => remove(id),
     refetch,
   };

@@ -203,7 +203,7 @@ export function NewbuildProjectDeepTabs({ project, variant }: NewbuildProjectDee
           {activeTab === 'marketing' && (
             <ProjectMarketingTab
               commissionPct={project.commission_pct}
-              paymentPlan={project.payment_plan as React.ComponentProps<typeof ProjectMarketingTab>['paymentPlan']}
+              paymentPlan={project.payment_plan}
               marketingMaterials={project.marketing_materials}
               ownershipTypes={project.ownership_types}
               exclusive={project.exclusive}

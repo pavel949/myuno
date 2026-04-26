@@ -751,19 +751,17 @@ Files refactored:
 - Cumulative since Wave 4.2d start: **1247 → 748** (-499 / -40.0%).
 - Build: ✅ green (`tsc --noEmit` clean, `bun run build` OK).
 
-### Wave 4.2d · Pass #11 (2026-04-26)
-**Scope**: 6 hooks across property care, newbuilds, marketing campaigns, manager assignments, admin experiences, wizard payload builder.
+### Wave 4.2d · Pass #12 (2026-04-26)
+**Scope**: 5 hooks — investment-deals/inquiries (Capital), investment-hub opportunities/intro requests, universal taxonomy CRUD, user-personas enum casts, PM-companies row mapper.
 
-- `src/hooks/usePropertyCare.ts` — 7 → 0 `any`. `(variables as any)?._silent` → typed `{ _silent?: boolean }`; `.update(data as any)` and `.insert({...} as any)` → `as never` for generated insert/update overloads.
-- `src/hooks/useNewbuildProjects.ts` — 4 → 0 `any`. Imported `Database['public']['Tables']['property_projects']['Row']` as `ProjectRow`; mappers in list/single fetchers and `useNewbuildLocations` `forEach` typed via row inference; `payment_plan` narrowed (`Array.isArray ? as unknown[] : null`) for backward compat with `NewbuildProject`.
-- `src/hooks/useCampaignFactory.ts` — 4 → 0 `any`. Introduced `CampaignRow` from generated `mcc_campaigns`; `transformCampaign(row: any)` → `(row: CampaignRow)`; budget/schedule/kpi/performance double-cast via `unknown` to satisfy structural overlap; insert/update calls switched to `as never`.
-- `src/hooks/useAssignedProperties.ts` — 4 → 0 `any`. Introduced narrow `PropertyEmbed` and `AssignmentPermissions` interfaces; `assignment.properties as any` → `as PropertyEmbed | null`; permissions now built via per-key `??` fallback to satisfy required-fields contract.
-- `src/hooks/useAdminExperiences.ts` — 4 → 0 `any`. `useSupabaseCRUD<any>` → typed `ListingRow`; `(raw: any)` map callback → narrow `Record<string, unknown>` aliases (`r`, `a`); `mapToListing(...) as any` → `as never`.
-- `src/hooks/property-wizard/buildPayload.ts` — 4 → 0 `any`. `(cleanData as any).sale_intent / tenancy_modes` → IIFE with narrow `{ sale_intent?: unknown; tenancy_modes?: string[] }` cast; modes arithmetic now type-safe.
-- Side fix: `src/components/newbuilds/NewbuildProjectDeepTabs.tsx` — `paymentPlan` prop cast to `ProjectMarketingTab` prop type to bridge `unknown[] → PaymentPlanStep[]`.
-- Side fix: `src/hooks/useSupabaseCRUD.ts` — `insert/update` payloads (`Record<string, unknown>`) now `as never` to satisfy generated overload after table cast change in Pass #10.
+- `src/hooks/capital/useCapitalInvestmentDeals.ts` — 4 → 0 `any`. Dropped 4× `(supabase.from('investment_deals' as any) as any)` chains (table now in generated types); added typed `InvestorInquiryRow`; update payload uses `as never`.
+- `src/hooks/investment-hub/useInvestmentHub.ts` — 4 → 0 `any`. Migrated `investment_opportunities` and `intro_requests` (untyped tables) to `typedFrom()`; introduced narrow `OpportunityRow`/`IntroRequestRow` types for `.map()` callbacks.
+- `src/hooks/useTaxonomy.ts` — 3 → 0 `any`. Lookup-values insert/update/bulk-update payload casts switched from `as any` to `as never` (generated overload-safe).
+- `src/hooks/useUserPersonas.ts` — 3 → 0 `any`. `persona: persona as any` (enum cast) replaced with `persona as never` across delete-eq, upsert, and bulk-insert paths — avoids the explicit-any while keeping the runtime enum mapping intact.
+- `src/hooks/usePMCompanies.ts` — 3 → 0 `any`. `mapRow(row: any)` retyped via `Database['public']['Tables']['management_companies']['Row']` plus a narrow `Record<string, unknown>` projection for cross-column aliasing (`name_en→name`, `properties_count→properties_managed`); insert/update use `as never`; removed both `eslint-disable no-explicit-any` lines.
+- **Side fix**: `src/hooks/useSupabaseCRUD.ts` — added `as never` to `.insert(insertData)`/`.update(updateData)` payloads after the dynamic-table refactor exposed two new TS2769/TS2345 errors (caught by repo type-check on first try).
 
 **Updated metrics**
-- Global `any` count (canonical pattern, by line): **748 → 721** (-27).
-- Cumulative since Wave 4.2d start: **1247 → 721** (-526 / -42.2%).
-- Build: ✅ green (`tsc --noEmit` clean, `bun run build` OK).
+- Global `any` count (canonical pattern, by line): **748 → 733** (-15).
+- Cumulative since Wave 4.2d start: **1247 → 733** (-514 / -41.2%).
+- Build: ✅ green (`tsc --noEmit` clean).

@@ -1,8 +1,32 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { typedFrom } from '@/lib/untypedTables';
 import { IntroRequest, InvestmentHubZone, InvestmentOpportunity } from '@/types/investmentHub';
 import { useInvestmentProjects } from '@/hooks/useInvestmentProjects';
+
+interface OpportunityRow {
+  id: string;
+  title: string;
+  asset_class: string;
+  stage: string;
+  fit_score: number | null;
+  reliability_score: number | null;
+  execution_score: number | null;
+  target_raise_usd: number | null;
+  min_ticket_usd: number | null;
+  zone: InvestmentHubZone;
+  metadata: Record<string, unknown> | null;
+}
+
+interface IntroRequestRow {
+  id: string;
+  opportunity_id: string;
+  investor_entity_id: string;
+  project_entity_id: string;
+  intro_status: string;
+  fee_type: string;
+  created_at: string;
+}
 
 function getZoneFromProjectType(projectType: string): InvestmentHubZone {
   if (projectType.startsWith('real_estate')) return 'market';
@@ -17,7 +41,7 @@ export function useHubOpportunities(zone: InvestmentHubZone) {
   const opportunitiesQuery = useQuery({
     queryKey: ['investment-hub-opportunities', zone],
     queryFn: async () => {
-      const { data, error } = await (supabase.from('investment_opportunities' as any) as any)
+      const { data, error } = await typedFrom('investment_opportunities')
         .select('id,title,asset_class,stage,fit_score,reliability_score,execution_score,target_raise_usd,min_ticket_usd,zone,metadata')
         .eq('zone', zone)
         .order('fit_score', { ascending: false, nullsFirst: false })
@@ -25,7 +49,7 @@ export function useHubOpportunities(zone: InvestmentHubZone) {
 
       if (error) throw error;
 
-      return ((data ?? []) as any[]).map((item) => ({
+      return ((data ?? []) as OpportunityRow[]).map((item) => ({
         id: item.id,
         title: item.title,
         metadata: item.metadata,
@@ -81,14 +105,14 @@ export function useHubIntroRequests() {
   return useQuery({
     queryKey: ['investment-hub-intro-requests'],
     queryFn: async () => {
-      const { data, error } = await (supabase.from('intro_requests' as any) as any)
+      const { data, error } = await typedFrom('intro_requests')
         .select('id,opportunity_id,investor_entity_id,project_entity_id,intro_status,fee_type,created_at')
         .order('created_at', { ascending: false })
         .limit(20);
 
       if (error) throw error;
 
-      return ((data ?? []) as any[]).map((item) => ({
+      return ((data ?? []) as IntroRequestRow[]).map((item) => ({
         id: item.id,
         opportunityId: item.opportunity_id,
         investorEntityId: item.investor_entity_id,

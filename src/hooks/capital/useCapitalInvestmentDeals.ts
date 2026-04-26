@@ -27,16 +27,29 @@ export interface CapitalInvestmentDeal {
   inquiry_count?: number;
 }
 
+export interface InvestorInquiryRow {
+  id: string;
+  created_at: string;
+  investor_name: string;
+  investor_email: string;
+  investor_whatsapp: string | null;
+  investor_type: string;
+  investment_capacity_usd: number | null;
+  message: string | null;
+  status: string;
+}
+
 export function useCapitalInvestmentDeals() {
   return useQuery({
     queryKey: ['capital-investment-deals'],
     queryFn: async () => {
-      const { data, error } = await (supabase.from('investment_deals' as any) as any)
+      const { data, error } = await supabase
+        .from('investment_deals')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(500);
       if (error) throw error;
-      return (data ?? []) as CapitalInvestmentDeal[];
+      return (data ?? []) as unknown as CapitalInvestmentDeal[];
     },
     staleTime: 15_000,
   });
@@ -47,10 +60,13 @@ export function useCapitalInvestmentDeal(id: string | undefined) {
     enabled: !!id,
     queryKey: ['capital-investment-deal', id],
     queryFn: async () => {
-      const { data, error } = await (supabase.from('investment_deals' as any) as any)
-        .select('*').eq('id', id).maybeSingle();
+      const { data, error } = await supabase
+        .from('investment_deals')
+        .select('*')
+        .eq('id', id!)
+        .maybeSingle();
       if (error) throw error;
-      return data as CapitalInvestmentDeal | null;
+      return data as unknown as CapitalInvestmentDeal | null;
     },
   });
 }
@@ -63,8 +79,10 @@ export function useUpdateCapitalInvestmentDeal() {
       if (patch.is_published === true && !patch.published_at) {
         finalPatch.published_at = new Date().toISOString();
       }
-      const { error } = await (supabase.from('investment_deals' as any) as any)
-        .update(finalPatch).eq('id', id);
+      const { error } = await supabase
+        .from('investment_deals')
+        .update(finalPatch as never)
+        .eq('id', id);
       if (error) throw error;
     },
     onSuccess: (_d, vars) => {
@@ -80,14 +98,13 @@ export function useCapitalInvestmentDealInquiries(dealId: string | undefined) {
     enabled: !!dealId,
     queryKey: ['capital-investment-deal-inquiries', dealId],
     queryFn: async () => {
-      const { data, error } = await (supabase.from('investor_inquiries' as any) as any)
-        .select('*').eq('deal_id', dealId).order('created_at', { ascending: false });
+      const { data, error } = await supabase
+        .from('investor_inquiries')
+        .select('*')
+        .eq('deal_id', dealId!)
+        .order('created_at', { ascending: false });
       if (error) throw error;
-      return data as Array<{
-        id: string; created_at: string; investor_name: string; investor_email: string;
-        investor_whatsapp: string | null; investor_type: string;
-        investment_capacity_usd: number | null; message: string | null; status: string;
-      }>;
+      return (data ?? []) as unknown as InvestorInquiryRow[];
     },
   });
 }

@@ -139,14 +139,14 @@ export function useUserPersonas() {
           .from('user_personas')
           .delete()
           .eq('user_id', user.id)
-          .eq('persona', persona as any);
+          .eq('persona', persona as never);
         
         if (error) throw error;
       } else {
         const { error } = await supabase
           .from('user_personas')
           .upsert(
-            { user_id: user.id, persona: persona as any, is_active: true },
+            { user_id: user.id, persona: persona as never, is_active: true },
             { onConflict: 'user_id,persona' }
           );
         
@@ -194,7 +194,7 @@ export function useUserPersonas() {
           .from('user_personas')
           .insert(newPersonas.map(persona => ({
             user_id: user.id,
-            persona: persona as any,
+            persona: persona as never,
             is_active: true,
           })));
         
