@@ -567,7 +567,34 @@ export default function Bookings() {
             title={t('nav.bookings')}
             actions={<RealtimeIndicator status={realtimeStatus} language={language} />}
           />
-          
+
+          {/* Active filter pill — surfaces deep-link context from PersonaHalo. */}
+          {filterIsActive && (
+            <div className="flex items-center gap-2 mb-3 px-1">
+              <span className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground font-semibold">
+                {language === 'ru' ? 'Фильтр' : 'Filter'}
+              </span>
+              <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary text-xs font-medium border border-primary/20">
+                {clusterParam && CLUSTER_FILTER_LABEL[clusterParam]
+                  ? (language === 'ru'
+                      ? CLUSTER_FILTER_LABEL[clusterParam].ru
+                      : CLUSTER_FILTER_LABEL[clusterParam].en)
+                  : null}
+                {clusterParam && statusParam === 'open' ? ' · ' : ''}
+                {statusParam === 'open' ? (language === 'ru' ? 'Открытые' : 'Open') : null}
+              </span>
+              <button
+                type="button"
+                onClick={clearFilter}
+                className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+                aria-label={language === 'ru' ? 'Сбросить фильтр' : 'Clear filter'}
+              >
+                <X className="w-3 h-3" />
+                {language === 'ru' ? 'Сбросить' : 'Clear'}
+              </button>
+            </div>
+          )}
+
           {loadError ? (
             <EmptyState
               icon={AlertCircle}
@@ -579,20 +606,28 @@ export default function Bookings() {
                 </PremiumButton>
               }
             />
-          ) : bookings.length === 0 ? (
+          ) : filteredBookings.length === 0 ? (
             <EmptyState
               icon={Calendar}
-              title={t('booking.noBookings')}
-              description={t('booking.noBookingsDesc')}
-              action={
+              title={filterIsActive
+                ? (language === 'ru' ? 'Ничего не найдено' : 'Nothing found')
+                : t('booking.noBookings')}
+              description={filterIsActive
+                ? (language === 'ru' ? 'По выбранному фильтру нет заказов.' : 'No orders match the selected filter.')
+                : t('booking.noBookingsDesc')}
+              action={filterIsActive ? (
+                <PremiumButton onClick={clearFilter}>
+                  {language === 'ru' ? 'Сбросить фильтр' : 'Clear filter'}
+                </PremiumButton>
+              ) : (
                 <PremiumButton onClick={() => navigate('/discover')}>
                   {t('nav.discover')}
                 </PremiumButton>
-              }
+              )}
             />
           ) : (
             <div className="space-y-3">
-              {bookings.map((booking) => {
+              {filteredBookings.map((booking) => {
                 const Icon = getBookingIcon(booking.type);
                 const isExpanded = !!expandedTimelines[booking.id];
                 const events = statusHistory[booking.id] ?? [];
