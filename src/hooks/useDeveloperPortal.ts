@@ -141,11 +141,11 @@ export function useUpsertProjectUnit() {
     mutationFn: async (unit: Partial<DeveloperProjectUnit> & { project_id: string }) => {
       if (unit.id) {
         const { id, project_id, ...fields } = unit;
-        const { error } = await (supabase.from('project_units') as any).update(fields).eq('id', id);
+        const { error } = await supabase.from('project_units').update(fields).eq('id', id);
         if (error) throw error;
       } else {
         const { id: _id, ...insertFields } = unit;
-        const { error } = await (supabase.from('project_units') as any).insert(insertFields);
+        const { error } = await supabase.from('project_units').insert(insertFields);
         if (error) throw error;
       }
     },
@@ -282,7 +282,7 @@ export function useFloorPlans(projectId?: string) {
     queryKey: ['floor-plans', projectId],
     queryFn: async (): Promise<FloorPlan[]> => {
       if (!projectId) return [];
-      const { data, error } = await (supabase.from('floor_plans' as any) as any)
+      const { data, error } = await supabase.from('floor_plans')
         .select('*')
         .eq('project_id', projectId)
         .order('display_order', { ascending: true });
@@ -299,11 +299,11 @@ export function useUpsertFloorPlan() {
     mutationFn: async (plan: Partial<FloorPlan> & { project_id: string; name: string; image_url: string; image_width_px: number; image_height_px: number }) => {
       if (plan.id) {
         const { id, project_id, ...fields } = plan;
-        const { error } = await (supabase.from('floor_plans' as any) as any).update(fields).eq('id', id);
+        const { error } = await supabase.from('floor_plans').update(fields).eq('id', id);
         if (error) throw error;
       } else {
         const { id: _id, ...insertFields } = plan;
-        const { data, error } = await (supabase.from('floor_plans' as any) as any).insert(insertFields).select('id').single();
+        const { data, error } = await supabase.from('floor_plans').insert(insertFields).select('id').single();
         if (error) throw error;
         return (data as { id: string }).id;
       }
@@ -320,7 +320,7 @@ export function useDeleteFloorPlan() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, project_id }: { id: string; project_id: string }) => {
-      const { error } = await (supabase.from('floor_plans' as any) as any).delete().eq('id', id);
+      const { error } = await supabase.from('floor_plans').delete().eq('id', id);
       if (error) throw error;
       return project_id;
     },
