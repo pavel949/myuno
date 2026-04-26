@@ -398,7 +398,7 @@ export default function NavigatorPage() {
         )}
 
         {/* Coming soon */}
-        {searchResults === null && SOON_SERVICES.length > 0 && (
+        {searchResults === null && audienceSoon.length > 0 && (
           <div
             className="rounded-none p-4 space-y-3"
             style={{ background: 'hsl(var(--bg-elevated))', border: '1px solid hsl(0 0% 100% / 0.05)' }}
@@ -407,7 +407,7 @@ export default function NavigatorPage() {
               {pickTriplet({ ru: 'Скоро', en: 'Coming soon', th: 'เร็ว ๆ นี้' }, language)}
             </p>
             <div className="flex flex-wrap gap-2">
-              {SOON_SERVICES.map(s => {
+              {audienceSoon.map(s => {
                 const SIcon = s.icon;
                 return (
                   <div
