@@ -187,34 +187,36 @@ export function VerticalCTA({
       className
     )}>
       <CardContent className="py-4">
-        <div className="flex items-center gap-4">
-          {/* Avatar/Icon */}
-          <div className="relative flex-shrink-0">
-            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center border-2 border-primary/30">
-              {(() => { const Icon = resolveIcon(verticalConfig.icon); return <Icon className="w-7 h-7 text-primary" />; })()}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+          <div className="flex items-start gap-3 sm:flex-1 sm:min-w-0">
+            {/* Avatar/Icon */}
+            <div className="relative flex-shrink-0">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center border-2 border-primary/30">
+                {(() => { const Icon = resolveIcon(verticalConfig.icon); return <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-primary" />; })()}
+              </div>
+              {/* Online indicator */}
+              <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-success rounded-full border-2 border-background flex items-center justify-center">
+                <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+              </div>
             </div>
-            {/* Online indicator */}
-            <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-success rounded-full border-2 border-background flex items-center justify-center">
-              <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-sm mb-0.5 break-words">
+                {text.title}
+              </h3>
+              <p className="text-xs text-muted-foreground break-words">
+                {text.subtitle}
+              </p>
             </div>
           </div>
-          
-          <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-sm mb-0.5">
-              {text.title}
-            </h3>
-            <p className="text-xs text-muted-foreground">
-              {text.subtitle}
-            </p>
-          </div>
-          
-          <Button 
+
+          <Button
             size="sm"
             onClick={() => setIsOpen(true)}
-            className="flex-shrink-0 relative overflow-hidden group"
+            className="w-full sm:w-auto flex-shrink-0 relative overflow-hidden group"
           >
             <span className="absolute inset-0 rounded-none animate-ping bg-primary/30 opacity-75" style={{ animationDuration: '2s' }} />
-            <span className="relative flex items-center">
+            <span className="relative flex items-center justify-center">
               {text.button}
               <ArrowRight className="w-4 h-4 ml-1 transition-transform" />
             </span>
