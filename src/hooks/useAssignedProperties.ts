@@ -8,6 +8,30 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
 
+interface PropertyEmbed {
+  deleted_at?: string | null;
+  management_company_id?: string | null;
+  title_en?: string | null;
+  title_ru?: string | null;
+  cover_image?: string | null;
+  address?: string | null;
+  district?: string | null;
+  is_active?: boolean | null;
+  bedrooms?: number | null;
+  bathrooms?: number | null;
+  price_per_night?: number | null;
+  currency?: string | null;
+  complex_id?: string | null;
+  project_id?: string | null;
+}
+
+interface AssignmentPermissions {
+  calendar?: boolean;
+  pricing?: boolean;
+  bookings?: boolean;
+  guests?: boolean;
+}
+
 export interface AssignedProperty {
   id: string;
   property_id: string;
