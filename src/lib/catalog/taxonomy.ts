@@ -169,6 +169,7 @@ export const CLUSTERS: ClusterEntry[] = [
     audience: 'workspace',
     personas: ['property_owner', 'local_services_provider'],
     roles: ['owner', 'admin', 'team', 'vendor'],
+    homeRoute: '/mc',
   },
   {
     id: 'invest',
@@ -181,6 +182,7 @@ export const CLUSTERS: ClusterEntry[] = [
     color: '#A855F7',
     sortOrder: 4,
     audience: 'public',
+    homeRoute: '/invest',
   },
   {
     id: 'legal',
@@ -193,6 +195,7 @@ export const CLUSTERS: ClusterEntry[] = [
     color: '#F59E0B',
     sortOrder: 5,
     audience: 'public',
+    homeRoute: '/life/relocation',
   },
   {
     id: 'build',
