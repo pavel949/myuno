@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { resolveIcon } from '@/lib/iconMap';
+
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useLanguage } from '@/contexts/LanguageContext';
