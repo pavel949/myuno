@@ -125,11 +125,10 @@ const CLUSTER_FILTER_LABEL: Record<string, { en: string; ru: string }> = {
   live: { en: 'Live', ru: 'Жизнь' },
   manage: { en: 'Manage', ru: 'Управление' },
 };
-
-export default function Bookings() {
-  const { t, language } = useLanguage();
-  const { user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const clusterParam = searchParams.get('cluster') ?? '';
+  const statusParam = searchParams.get('status') ?? '';
   const [bookings, setBookings] = useState<BookingItem[]>([]);
   const [statusHistory, setStatusHistory] = useState<Record<string, BookingStatusEvent[]>>({});
   const [historyLoading, setHistoryLoading] = useState(false);
