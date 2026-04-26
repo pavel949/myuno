@@ -6,7 +6,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import type { UserPersona } from '@/hooks/useUserPersonas';
-import { ROLE_META } from '@/lib/roleBlend';
 import { BrandWordmark } from '@/components/uno/BrandWordmark';
 import { cn } from '@/lib/utils';
 
