@@ -118,6 +118,11 @@ export interface ClusterEntry {
   personas?: string[];
   /** Role keys that grant access for `workspace` clusters */
   roles?: string[];
+  /**
+   * Canonical landing route for the cluster card on Home (`ClusterGrid`).
+   * Different from per-service paths — this is the umbrella entry-point.
+   */
+  homeRoute: string;
 }
 
 // ─────────────────────────────────────────────────────────────────────────
