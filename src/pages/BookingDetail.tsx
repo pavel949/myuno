@@ -101,6 +101,16 @@ export default function BookingDetail() {
   const [booking, setBooking] = useState<BookingData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isCancelling, setIsCancelling] = useState(false);
+  const {
+    events: historyEvents,
+    isLoading: historyLoading,
+    highlightIds: historyHighlightIds,
+  } = useBookingStatusHistory({
+    table: 'booking_status_history',
+    bookingId: id,
+    enabled: !!user && !!id,
+  });
+
 
   const loadBooking = useCallback(async () => {
     if (!user || !id) return;
