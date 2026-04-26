@@ -123,7 +123,7 @@ export default function AdminProjects() {
       );
       queryClient.invalidateQueries({ queryKey: ['admin-property-projects'] });
       queryClient.invalidateQueries({ queryKey: ['offplan-projects'] });
-    } catch (err: any) {
+    } catch (err) {
       console.error('Enrich error:', err);
       toast.error(isRu ? 'Ошибка обогащения данных' : 'Enrichment failed');
     } finally {
