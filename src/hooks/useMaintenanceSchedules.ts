@@ -35,8 +35,7 @@ export function useMaintenanceSchedules(propertyId?: string) {
     queryKey,
     enabled: !!user,
     queryFn: async () => {
-      let q = supabase
-        .from('property_maintenance_schedules' as any)
+      let q = typedFrom('property_maintenance_schedules')
         .select('*, property:properties!property_id(title)')
         .eq('is_active', true)
         .order('next_due_date', { ascending: true });
@@ -64,8 +63,7 @@ export function useMaintenanceSchedules(propertyId?: string) {
       currency?: string;
       priority?: string;
     }) => {
-      const { error } = await supabase
-        .from('property_maintenance_schedules' as any)
+      const { error } = await typedFrom('property_maintenance_schedules')
         .insert({ ...schedule, created_by: user!.id });
       if (error) throw error;
     },
@@ -78,8 +76,7 @@ export function useMaintenanceSchedules(propertyId?: string) {
 
   const markCompleted = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('property_maintenance_schedules' as any)
+      const { error } = await typedFrom('property_maintenance_schedules')
         .update({ last_completed_at: new Date().toISOString() })
         .eq('id', id);
       if (error) throw error;
@@ -102,8 +99,7 @@ export function useMaintenanceSchedules(propertyId?: string) {
       notes?: string | null;
     }) => {
       const { id, ...fields } = updates;
-      const { error } = await supabase
-        .from('property_maintenance_schedules' as any)
+      const { error } = await typedFrom('property_maintenance_schedules')
         .update(fields)
         .eq('id', id);
       if (error) throw error;
@@ -117,8 +113,7 @@ export function useMaintenanceSchedules(propertyId?: string) {
 
   const deleteSchedule = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('property_maintenance_schedules' as any)
+      const { error } = await typedFrom('property_maintenance_schedules')
         .update({ is_active: false })
         .eq('id', id);
       if (error) throw error;
