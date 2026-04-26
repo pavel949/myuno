@@ -40,7 +40,7 @@ export interface NewbuildProject {
   created_at: string;
   // New sales/CRM fields
   commission_pct: number | null;
-  payment_plan: any[] | null;
+  payment_plan: unknown[] | null;
   marketing_materials: string[] | null;
   exclusive: boolean;
   management_company_id: string | null;
