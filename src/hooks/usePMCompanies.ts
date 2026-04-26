@@ -134,8 +134,7 @@ export function usePMCompanies() {
       dbData.name_ru = company.name_ru || company.name;
       const { data, error } = await supabase
         .from('management_companies')
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .insert(dbData as any)
+        .insert(dbData as never)
         .select()
         .single();
 
@@ -157,8 +156,7 @@ export function usePMCompanies() {
       const dbData = mapToDb(data);
       const { data: result, error } = await supabase
         .from('management_companies')
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .update(dbData as any)
+        .update(dbData as never)
         .eq('id', id)
         .select()
         .single();
