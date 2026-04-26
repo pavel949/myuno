@@ -15,8 +15,31 @@ import { useRestaurants } from '@/hooks/useRestaurants';
 import { createMapPopupHtml } from '@/lib/sanitize';
 import { getMapCenter, DEFAULT_CITY } from '@/lib/config';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { isOpenNow } from '@/lib/filterUtils';
 
 type VerticalFilter = 'all' | 'property' | 'commercial' | 'land' | 'beauty' | 'restaurant';
+type PriceFilter = 'all' | 'budget' | 'mid' | 'premium' | 'luxury';
+type AvailabilityFilter = 'all' | 'open_now';
+
+const PRICE_RANGES: Record<Exclude<PriceFilter, 'all'>, [number, number]> = {
+  budget: [0, 500],
+  mid: [500, 1500],
+  premium: [1500, 5000],
+  luxury: [5000, Number.POSITIVE_INFINITY],
+};
+
+const PRICE_OPTIONS: { value: PriceFilter; labelEn: string; labelRu: string; icon: string }[] = [
+  { value: 'all', labelEn: 'Any price', labelRu: 'Любая цена', icon: '💰' },
+  { value: 'budget', labelEn: '< ฿500', labelRu: '< ฿500', icon: '💵' },
+  { value: 'mid', labelEn: '฿500–1.5k', labelRu: '฿500–1.5k', icon: '💴' },
+  { value: 'premium', labelEn: '฿1.5k–5k', labelRu: '฿1.5k–5k', icon: '💶' },
+  { value: 'luxury', labelEn: '฿5k+', labelRu: '฿5k+', icon: '💎' },
+];
+
+const AVAILABILITY_OPTIONS: { value: AvailabilityFilter; labelEn: string; labelRu: string; icon: string }[] = [
+  { value: 'all', labelEn: 'Anytime', labelRu: 'В любое время', icon: '🕒' },
+  { value: 'open_now', labelEn: 'Open now', labelRu: 'Открыто сейчас', icon: '🟢' },
+];
 
 interface UniversalMarker {
   id: string;
