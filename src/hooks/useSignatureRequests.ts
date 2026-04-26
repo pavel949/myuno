@@ -116,14 +116,14 @@ export function useSignRequest() {
     mutationFn: async (args: { signerId: string; signatureDataUrl: string }) => {
       if (!user) throw new Error('Not authenticated');
       const url = await uploadSignature(user.id, args.signatureDataUrl, `sigreq-${args.signerId}`);
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('signature_request_signers')
         .update({
           status: 'signed',
           signature_image_url: url,
           signed_at: new Date().toISOString(),
           signer_user_agent: navigator.userAgent,
-        })
+        } as SignatureSignerUpdate)
         .eq('id', args.signerId);
       if (error) throw error;
     },
@@ -132,7 +132,7 @@ export function useSignRequest() {
       qc.invalidateQueries({ queryKey: ['my-signature-requests'] });
       qc.invalidateQueries({ queryKey: ['company-signature-requests'] });
     },
-    onError: (e: any) => toast.error(e.message || 'Sign failed'),
+    onError: (e: Error) => toast.error(e.message || 'Sign failed'),
   });
 }
 
