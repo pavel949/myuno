@@ -56,8 +56,16 @@ export function HomeTopBar({
     : 'U';
 
   const { data: hasUnread = false } = useHasUnread(user?.id);
-  const displayPersonas = personas.slice(0, 3);
+  // On very narrow phones (Telegram WebView ≈ 339px) the role pill +
+  // bell + avatar starve the wordmark column. Cap to 2 avatars below
+  // sm so a 3rd persona folds into the existing `+N` counter, then
+  // restore 3 from sm up.
   const isOnNavy = variant === 'onNavy';
+  const maxAvatarsXs = 2;
+  const maxAvatarsSm = 3;
+  const overflowXs = Math.max(0, personas.length - maxAvatarsXs);
+  const overflowSm = Math.max(0, personas.length - maxAvatarsSm);
+  const displayPersonas = personas.slice(0, maxAvatarsSm);
 
   // Style atoms — keeps the JSX readable while the two contracts diverge.
   // On navy: cream-tinted icons, translucent borders, glassy hover surfaces.

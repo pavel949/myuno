@@ -47,7 +47,14 @@ export function BrandWordmark({ className, as = 'link', tone = 'default' }: Bran
 
   if (as === 'static') {
     return (
-      <div className={cn('group flex items-center gap-0.5 min-w-0', className)}>{inner}</div>
+      <div
+        className={cn(
+          'group flex items-center gap-0.5 flex-shrink-0 whitespace-nowrap',
+          className,
+        )}
+      >
+        {inner}
+      </div>
     );
   }
 
