@@ -266,9 +266,9 @@ export default function NavigatorPage() {
           <p className="text-sm text-muted-foreground leading-snug">
             {pickTriplet(
               {
-                ru: `${TOTAL_NAVIGATOR_SERVICES} сервисов · один суперапп myUNO`,
-                en: `${TOTAL_NAVIGATOR_SERVICES} services · one myUNO superapp`,
-                th: `${TOTAL_NAVIGATOR_SERVICES} บริการ · ซูเปอร์แอป myUNO แอปเดียวจบ`,
+                ru: `${totalAvailable} сервисов · один суперапп myUNO`,
+                en: `${totalAvailable} services · one myUNO superapp`,
+                th: `${totalAvailable} บริการ · ซูเปอร์แอป myUNO แอปเดียวจบ`,
               },
               language
             )}
