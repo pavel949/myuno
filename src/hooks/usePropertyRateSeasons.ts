@@ -122,7 +122,7 @@ export function useSaveRateSeason() {
           details: { name: season.name_en, nightly_rate: season.nightly_rate, start_date: season.start_date, end_date: season.end_date },
         });
       } else {
-        const { data, error } = await supabase.from('property_rate_seasons').insert(season as any).select('id').single();
+        const { data, error } = await supabase.from('property_rate_seasons').insert(season as never).select('id').single();
         if (error) throw error;
 
         // Log creation
