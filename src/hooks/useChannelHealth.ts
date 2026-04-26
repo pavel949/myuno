@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { typedFrom } from '@/lib/untypedTables';
 import { useAuth } from '@/contexts/AuthContext';
 import { ExternalCalendar } from './useExternalCalendars';
 
@@ -260,8 +261,7 @@ export function useBookingConflictsFromTable(propertyId?: string) {
     queryFn: async () => {
       if (!user?.id) return { conflicts: [], unresolvedCount: 0 };
 
-      let q = (supabase
-        .from('booking_conflicts') as unknown as { select: (q: string) => ReturnType<typeof supabase.from<'booking_conflicts'>>['select'] extends (q: string) => infer R ? R : never })
+      let q = typedFrom('booking_conflicts')
         .select(`
           id,
           property_id,
