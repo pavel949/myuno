@@ -266,6 +266,24 @@ export default function BookingDetail() {
             </div>
           </div>
 
+          {/* Status history timeline */}
+          <div className="bg-card border border-border rounded-none p-4">
+            <h3 className="font-medium mb-3 flex items-center gap-2">
+              <History className="w-4 h-4 text-primary" />
+              {language === 'ru' ? 'История статусов' : 'Status history'}
+            </h3>
+            {historyLoading ? (
+              <BookingStatusTimelineSkeleton rows={3} compact />
+            ) : (
+              <BookingStatusTimeline
+                events={historyEvents}
+                currentStatus={booking.status}
+                createdAt={booking.created_at}
+                highlightIds={historyHighlightIds}
+              />
+            )}
+          </div>
+
           {/* Schedule */}
           {booking.scheduled_at && (
             <div className="bg-card border border-border rounded-none p-4">
