@@ -147,20 +147,20 @@ export function useAssignedProperties() {
       });
 
       let visibleAssignments = assignments.filter((assignment) => {
-        const property = assignment.properties as any;
+        const property = assignment.properties as PropertyEmbed | null;
         return !property?.deleted_at;
       });
 
       // In MC mode, only show assignments for properties belonging to the active company
       if (activeCompanyId) {
         visibleAssignments = visibleAssignments.filter((assignment) => {
-          const property = assignment.properties as any;
+          const property = assignment.properties as PropertyEmbed | null;
           return property?.management_company_id === activeCompanyId;
         });
       }
 
       return visibleAssignments.map(assignment => {
-        const property = assignment.properties as any;
+        const property = assignment.properties as PropertyEmbed | null;
         const propStats = bookingsByProperty.get(assignment.property_id) || { upcoming: 0, today: 'available' as const };
         
         return {
@@ -176,7 +176,7 @@ export function useAssignedProperties() {
           bathrooms: property.bathrooms,
           price_per_night: property.price_per_night,
           currency: property.currency || 'THB',
-          permissions: (assignment.permissions as any) || {
+          permissions: (assignment.permissions as AssignmentPermissions | null) || {
             calendar: true,
             pricing: true,
             bookings: true,
