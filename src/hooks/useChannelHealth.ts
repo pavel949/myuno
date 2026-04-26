@@ -203,8 +203,20 @@ export function useBookingConflicts(propertyId?: string) {
 
       if (error) throw error;
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return (data || []).map((c: any): ConflictInfo => ({
+      type ConflictRpcRow = {
+        booking_id_1: string;
+        booking_id_2: string;
+        guest_name_1: string;
+        guest_name_2: string;
+        source_1: string;
+        source_2: string;
+        check_in_1: string;
+        check_out_1: string;
+        check_in_2: string;
+        check_out_2: string;
+        overlap_days: number;
+      };
+      return ((data ?? []) as ConflictRpcRow[]).map((c): ConflictInfo => ({
         bookingId1: c.booking_id_1,
         bookingId2: c.booking_id_2,
         guestName1: c.guest_name_1,
@@ -248,7 +260,7 @@ export function useBookingConflictsFromTable(propertyId?: string) {
     queryFn: async () => {
       if (!user?.id) return { conflicts: [], unresolvedCount: 0 };
 
-      let q = (supabase as any)
+      let q = supabase
         .from('booking_conflicts')
         .select(`
           id,
@@ -275,7 +287,8 @@ export function useBookingConflictsFromTable(propertyId?: string) {
       const { data, error } = await q;
       if (error) throw error;
 
-      const conflicts = (data || []).map((r: any) => ({
+      type RawConflict = BookingConflictRow & { properties?: BookingConflictRow['property'] };
+      const conflicts = ((data ?? []) as unknown as RawConflict[]).map((r) => ({
         ...r,
         property: r.properties,
       }));
@@ -289,14 +302,14 @@ export function useBookingConflictsFromTable(propertyId?: string) {
 
   const markResolved = useMutation({
     mutationFn: async ({ id, note }: { id: string; note?: string }) => {
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('booking_conflicts')
         .update({
           resolved: true,
           resolved_at: new Date().toISOString(),
           resolved_by: user?.id,
           note: note || null,
-        })
+        } as never)
         .eq('id', id);
 
       if (error) throw error;
@@ -341,8 +354,15 @@ export function useAllBookingConflicts() {
         });
 
         if (data) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          allConflicts.push(...data.map((c: any) => ({
+          type ConflictRpcRow = {
+            booking_id_1: string; booking_id_2: string;
+            guest_name_1: string; guest_name_2: string;
+            source_1: string; source_2: string;
+            check_in_1: string; check_out_1: string;
+            check_in_2: string; check_out_2: string;
+            overlap_days: number;
+          };
+          allConflicts.push(...(data as ConflictRpcRow[]).map((c) => ({
             propertyId: prop.id,
             bookingId1: c.booking_id_1,
             bookingId2: c.booking_id_2,
