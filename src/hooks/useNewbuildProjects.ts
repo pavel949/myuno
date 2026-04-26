@@ -167,7 +167,7 @@ export function useNewbuildProject(slugOrId?: string) {
       if (error) throw error;
       if (!data) return null;
 
-      const p = data as any;
+      const p = data as ProjectRow;
       return {
         id: p.id,
         slug: p.slug,
