@@ -90,7 +90,7 @@ const MODIFIER_CLUSTERS: Record<CanonicalModifier, ClusterId[]> = {
   accessibility:   ['live'],
   lgbtq:           [],
   athlete:         ['live'],
-  wedding:         ['arrive'],
+  wedding:         ['live'],
   'family-young':  ['live'],
   'family-school': ['live'],
 };

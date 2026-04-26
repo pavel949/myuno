@@ -1,84 +1,70 @@
-## Цель
+## Проблема
 
-После 5 волн чистки (удалено 15 edge-функций, миграции, рефактор `AppLayout`, `vite.config.ts`) — провести сквозную диагностику и убедиться, что приложение полностью работоспособно. Никаких новых фич — только проверки и точечные фиксы найденных регрессий.
+В блоке "Operations / Управление" на Home отображается вертикаль **Weddings** — это визуально некорректно, т.к. кластер `manage` предназначен для собственников и управляющих (PMS, брони, финансы, операции).
 
-## Что уже подтверждено в плане-моде
+## Глубокий аудит mapping (3 источника, все расходятся)
 
-- TypeScript `tsc --noEmit` — **0 ошибок**
-- `rg` по удалённым функциям (`ai-concierge`, `create-service-checkout`, `claude-chat`, `firecrawl-*`, `etagi-*`, `process-guest-messages`, `document-reminder-check`, `auto-social-publish`, `generate-report-pdf`, `generate-sitemap`, `remove-bouquet-backgrounds`, `rentals-united-sync`, `create-order`, `create-refund`) в `src/`, `supabase/functions/`, `scripts/` — **0 stale-ссылок**
-- Dev-сервер отвечает на `/` и `/src/main.tsx` за ~10 ms
-- `supabase/config.toml` содержит 72 блока `[functions.*]` — нужно сверить с реально присутствующими 157 функциями
-- В репозитории есть Vitest (50+ test-файлов) и Playwright-сценарии в `e2e/`, но в `package.json` **нет npm-скриптов `test` / `test:e2e`** — поэтому E2E запустятся только через прямой вызов `npx`
+| Источник | Файл | Кластер для wedding | Назначение |
+|---|---|---|---|
+| **SSOT-таксономия (catalog)** | `src/lib/catalog/taxonomy.ts:378` | **`manage`** (cat-wedding-events) | Каталог Home / Discover — **источник, который рендерит блок "Operations"** |
+| Persona-сегментация | `src/lib/segmentation/detectPersona.ts:93` | **`arrive`** | Подсказки онбординга |
+| App registry (legacy) | `src/lib/appRegistry.ts:864` | **`enjoy`** (несуществующий кластер) | Адаптер для старых блоков |
 
-## Объём диагностики
+### Почему Weddings оказался в Operations
 
-### 1. Статика и типы
-- `npx tsc --noEmit` (повторный прогон, фиксируем 0 ошибок)
-- `npm run lint` — собираем ESLint-предупреждения, чинить только новые/блокирующие
-- `npx knip --no-progress` — найти dead exports/файлы, появившиеся после Wave 5
-- `rg` повторно по списку удалённых функций + по удалённым таблицам из `docs/audits/2026-04-wave5-dead-code.md`
+Кластер `manage` в SSOT (`taxonomy.ts:153`) описан как:
+> "Hosts & managers: bookings, money, operations, events — one workspace"
+> `audience: 'workspace'`, `personas: ['property_owner', 'local_services_provider']`
 
-### 2. Конфиг Supabase
-- Сравнить `supabase/config.toml` (72 `[functions.*]`) со списком директорий в `supabase/functions/` (157). Удалить осиротевшие блоки конфига для уже удалённых функций; пометить функции без блока (используют дефолты — это ок)
-- `supabase--linter` — security/RLS-предупреждения
-- `supabase--edge_function_logs` для последних cron-функций (`booking-reminders`, `ical-scheduled-sync`, `task-reminders`, `execute-campaign-rules`, `update-user-segments`, `post-order-autopilot`) — убедиться, что `Boot` / `Shutdown` без ошибок (по последнему срезу — чисто)
-- `supabase--analytics_query` по `function_edge_logs` — выбрать все 5xx за последние 24 ч, сгруппировать по функции
+Из-за слова **"events"** в описании, при последней унификации каталога (M10b, 2026-04-24) категорию `cat-wedding-events` положили под `manage`. Но на публичном Home `manage` рендерится как блок «Operations / Управление недвижимостью», и Weddings там выглядит чужеродно.
 
-### 3. Unit/Integration тесты (Vitest)
-- `npx vitest run --reporter=basic` — полный прогон, особое внимание:
-  - `src/test/layout/home-consumer-shell.test.tsx` (новый, должен быть зелёным)
-  - `src/test/mc-hard-suite/*` (booking engine, RLS, ical, тарифы)
-  - `src/test/catalog/taxonomy-coverage.test.ts`
-  - `src/test/semantic/*`
-- Чинить только реальные регрессии, связанные с Wave 5
+При этом весь кластер `manage` в публичной таксономии содержит **ровно одну категорию** — `cat-wedding-events`. Реальные операционные модули (PMS, финансы, команда) живут в `/mc/*` и `/owner/*` workspace-роутах и не представлены как services-категории.
 
-### 4. Build sanity
-- `npm run build` — production-сборка должна пройти без ошибок и без missing dynamic imports
-- Проверить, что vite-плагин не ругается на удалённые модули (PWA / SW)
+Дополнительно: `appRegistry.ts:864` ссылается на `clusterIds: ['enjoy']` — кластера `enjoy` в канонических 6 (arrive/live/manage/invest/legal/build) нет вообще. Это мёртвая ссылка.
 
-### 5. Smoke-тест ключевых роутов (через curl + `code--fetch_website`)
-Маршруты, на которых концентрировались правки последних волн:
-- `/` (consumer home — после фикса AppLayout)
-- `/discover`
-- `/auth`
-- `/property`, `/property/rent`, `/property/buy`
-- `/yachts`, `/transport`, `/flowers`, `/market`
-- `/me`, `/wallet`
-- `/mc` (workspace для owner)
-- `/admin` (workspace для admin)
+## План исправления
 
-Проверяем: HTTP 200, наличие `<div id="root">`, отсутствие "App configuration error" в HTML, отсутствие 404 на `main.tsx`/`index.css`.
+### 1. Перенести `cat-wedding-events` из `manage` в `live`
+`src/lib/catalog/taxonomy.ts`
+- Изменить `clusterId: 'manage'` → `clusterId: 'live'` для `cat-wedding-events`.
+- Свадьба — это lifestyle-событие гостя, а не операционный модуль УК. Кластер `live` ("Home, health, food, family, pets — everyday life sorted") покрывает family/celebration темы.
+- Альтернатива: `arrive` (как в persona-системе), если PM подтвердит, что свадьба = destination-туризм. Уточним вопросом.
 
-### 6. Playwright E2E (опционально, по флагу)
-Если хватит времени и дев-сервер стабилен, запустить headless suite:
-```
-npx playwright install chromium --with-deps
-PLAYWRIGHT_BASE_URL=http://localhost:8080 npx playwright test --config=playwright.ci.config.ts --project=chromium
-```
-Полный booking-flow требует тестового аккаунта (`test@myuno.app` / `TestPassword123!`) — если он не существует в проде-БД, помечаем тест как skipped, а не fail. Это не блокер диагностики.
+### 2. Решить судьбу пустого кластера `manage` в публичной выдаче
+После переноса в `manage` не остаётся ни одной публичной категории. Варианты:
+- **A. Скрыть `manage` для не-workspace аудитории** на Home/Discover (фильтр по `audience !== 'workspace'`). Тогда блок «Operations» исчезнет из публичного UI и будет виден только в кабинете УК.
+- **B. Добавить под `manage` реальные workspace-категории** (PMS, Finance, Team, Bookings) со ссылками на `/mc/*`. Это сделает блок осмысленным, но требует расширения SSOT.
 
-### 7. Сводный отчёт
-Записать результат в `docs/audits/2026-04-wave5-e2e-diagnostic.md`:
-- Таблица: статика / типы / lint / vitest / build / smoke / supabase-логи — статус ✅/⚠️/❌
-- Список найденных регрессий с приоритетом (P0 — блокер прод, P1 — UX, P2 — cosmetic)
-- Список применённых фиксов в этой же сессии
-- Открытые вопросы / рекомендации (например: "удалить блоки `[functions.X]` из config.toml", "добавить `npm run test` и `npm run test:e2e` в package.json")
+Рекомендация: **A** — быстрее, не требует новых сущностей, согласуется с `audience: 'workspace'`.
+
+### 3. Починить `appRegistry.ts`
+`src/lib/appRegistry.ts:864` — заменить `groupId: 'enjoy', clusterIds: ['enjoy']` на канонический `clusterIds: ['live']` (или `arrive`, согласно решению по п.1) для устранения дрейфа.
+
+### 4. Синхронизировать persona-mapping
+`src/lib/segmentation/detectPersona.ts:93` — `wedding: ['arrive']`. Если по п.1 выбираем `live`, обновить и здесь, чтобы все три источника совпадали.
+
+### 5. Регрессия
+Расширить `src/test/catalog/taxonomy-coverage.test.ts`:
+- Тест: каждый `clusterId` сервиса должен совпадать с `clusterIds` соответствующей записи в `appRegistry.ts` (если запись существует).
+- Тест: `clusterIds` в `appRegistry` ⊂ канонических 6 кластеров (отлавливает «enjoy» и подобный мусор).
 
 ## Технические детали
 
-- **Порт dev-сервера**: `8080` (из `package.json`), Playwright-конфиг `playwright.ci.config.ts` использует тот же порт — несоответствия с `playwright.config.ts` (5173) обходим переменной `PLAYWRIGHT_BASE_URL`
-- **Lovable Cloud статус**: проверить `cloud_status` перед запросами к БД, чтобы отличить "проект просыпается" от реальной ошибки
-- **Браузер-инструменты НЕ используем** — для диагностики достаточно `curl`, `tsc`, `vitest`, `eslint`, `supabase--*`. Браузер только если пользователь явно попросит визуальной проверки
-- **`src/integrations/supabase/types.ts`** — авто-генерируется, не трогаем
-- **Финальные правки в коде** допустимы только для регрессий Wave 5 (например, осиротевший импорт удалённой функции). Любая значимая переработка — отдельный план
+**Файлы к правке:**
+- `src/lib/catalog/taxonomy.ts` — clusterId `cat-wedding-events`
+- `src/lib/appRegistry.ts` — `wedding.clusterIds`, `wedding.groupId`
+- `src/lib/segmentation/detectPersona.ts` — `MODIFIER_CLUSTERS.wedding`
+- (опционально) фильтр `audience !== 'workspace'` в компоненте, который рендерит Home cluster grid из `CLUSTERS`
+- `src/test/catalog/taxonomy-coverage.test.ts` — два новых теста
 
-## Что НЕ входит
+**Не трогаем:**
+- `src/pages/wedding/*` — страницы остаются на `/wedding`
+- `src/lib/landings/*` — SEO landings для wedding не зависят от cluster-маппинга
 
-- Новые фичи, рефакторинг ради рефакторинга
-- Удаление "подозрительных" таблиц из аудита (требует отдельного миграционного плана с бэкапом)
-- Чистка `[functions.*]` в `config.toml` для функций, которые ещё существуют (только для уже удалённых)
-- Полный Playwright-прогон в CI (только локальный smoke)
+## Уточняющий вопрос
 
-## Итог для пользователя
+Куда логичнее перенести Weddings:
+- **`live`** — как family/lifestyle событие (рекомендую)
+- **`arrive`** — как destination-туризм (соответствует persona-mapping)
 
-Один markdown-отчёт `docs/audits/2026-04-wave5-e2e-diagnostic.md` + перечень применённых фиксов + чёткий вердикт «всё чисто» / «найдено N регрессий, M пофикшено, K требуют решения».
+Если ответите — соберу финальный PR одним проходом.

@@ -46,11 +46,11 @@ export type ClusterId = 'arrive' | 'live' | 'manage' | 'invest' | 'legal' | 'bui
 export type CategoryId =
   // Arrive (3)
   | 'cat-emergency' | 'cat-transport' | 'cat-tourism'
-  // Live (7)
+  // Live (8)
   | 'cat-home-living' | 'cat-food-entertainment' | 'cat-health-wellness'
   | 'cat-family-kids' | 'cat-pet-services' | 'cat-sports' | 'cat-community'
-  // Manage (1)
   | 'cat-wedding-events'
+  // Manage (0 public — workspace-only cluster, see /mc/* routes)
   // Invest (1)
   | 'cat-real-estate'
   // Legal (3)
@@ -373,10 +373,14 @@ export const CATEGORIES: CategoryEntry[] = [
     ],
   },
 
-  // ============== MANAGE ==============
+  // ─── Wedding & Events sits in LIVE (lifestyle / family celebration),
+  //     not MANAGE. The MANAGE cluster is workspace-only (PMS, finance,
+  //     team, bookings) and is exposed via /mc/* routes, not the public
+  //     services catalog. Persona system (detectPersona.ts) and the
+  //     legacy appRegistry adapter mirror this 'live' assignment.
   {
     id: 'cat-wedding-events',
-    clusterId: 'manage',
+    clusterId: 'live',
     labelRu: 'Свадьбы и события',
     labelEn: 'Wedding & Events',
     valueRu: 'Destination-свадьбы, корпоративы, MICE — координация поставщиков.',
@@ -387,6 +391,10 @@ export const CATEGORIES: CategoryEntry[] = [
       { id: 'wedding', path: '/wedding', labelRu: 'Свадьбы', labelEn: 'Weddings', icon: CalendarDays, status: 'available' },
     ],
   },
+
+  // ============== MANAGE (workspace-only, no public categories) ==============
+  // Real management modules live under /mc/* and /owner/* workspace routes
+  // and are not exposed as public services in this catalog.
 
   // ============== INVEST ==============
   {
