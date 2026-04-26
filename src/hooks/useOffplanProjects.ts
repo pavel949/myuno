@@ -373,8 +373,8 @@ export function useOffplanProject(id?: string) {
       if (error) throw error;
       if (!data) return null;
 
-      const p = data as any;
-      const developer = p.developers as any;
+      const p = data as unknown as ProjectRow;
+      const developer = p.developers ?? null;
       return {
         id: p.id,
         nameEn: p.name_en,
