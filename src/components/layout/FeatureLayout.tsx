@@ -394,6 +394,10 @@ function MiniappMode({
         )}
 
         {children}
+
+        {crossSellVertical && (
+          <CrossSellSection currentVertical={crossSellVertical} />
+        )}
       </div>
     </AppLayout>
   );
