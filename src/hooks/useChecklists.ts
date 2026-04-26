@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { typedFrom } from '@/lib/untypedTables';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMyCompanyId } from '@/hooks/useAgentDeals';
 import type { Json } from '@/integrations/supabase/types';
@@ -87,8 +88,7 @@ export function useChecklistCompletions(propertyId: string | undefined) {
     queryKey: ['checklist-completions', propertyId],
     queryFn: async () => {
       if (!propertyId) return [];
-      const { data, error } = await supabase
-        .from('checklist_completions')
+      const { data, error } = await typedFrom('checklist_completions')
         .select('*')
         .eq('property_id', propertyId)
         .order('completed_at', { ascending: false })
@@ -114,8 +114,7 @@ export function useSubmitChecklist() {
       photos?: string[];
       notes?: string;
     }) => {
-      const { error } = await supabase
-        .from('checklist_completions')
+      const { error } = await typedFrom('checklist_completions')
         .insert({
           template_id: input.template_id ?? null,
           property_id: input.property_id,
