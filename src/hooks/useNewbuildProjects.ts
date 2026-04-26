@@ -3,7 +3,10 @@
  */
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 import { normalizeProjectFacilityIds } from '@/lib/propertyAttributeRegistry';
+
+type ProjectRow = Database['public']['Tables']['property_projects']['Row'];
 
 export interface NewbuildProject {
   id: string;
