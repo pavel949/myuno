@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, Clock, MapPin, Phone, User, Package, XCircle, CheckCircle, AlertCircle, Loader2, ClipboardCheck, Home } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, MapPin, Phone, User, Package, XCircle, CheckCircle, AlertCircle, Loader2, ClipboardCheck, Home, History } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -22,6 +22,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { BookingStatusTimeline, BookingStatusTimelineSkeleton } from '@/components/bookings/BookingStatusTimeline';
+import { useBookingStatusHistory } from '@/hooks/useBookingStatusHistory';
 
 interface BookingData {
   id: string;
@@ -152,20 +154,13 @@ export default function BookingDetail() {
 
     setIsCancelling(true);
     try {
+      // Trigger `trg_bookings_status_history` will record the transition.
       const { error } = await supabase
         .from('bookings')
         .update({ status: 'cancelled_by_user' })
         .eq('id', booking.id);
 
       if (error) throw error;
-
-      // Add status history
-      await supabase.from('booking_status_history').insert([{
-        booking_id: booking.id,
-        from_status: booking.status as any,
-        to_status: 'cancelled_by_user' as const,
-        notes: 'Cancelled by user',
-      }]);
 
       toast.success(language === 'ru' ? 'Бронирование отменено' : 'Booking cancelled');
       setBooking({ ...booking, status: 'cancelled_by_user' });
