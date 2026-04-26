@@ -27,10 +27,61 @@ import {
   CheckCircle,
   XCircle,
   Loader2,
-  MessageSquare
+  MessageSquare,
+  History,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import { BookingStatusTimeline, BookingStatusTimelineSkeleton } from '@/components/bookings/BookingStatusTimeline';
+import { useBookingStatusHistory } from '@/hooks/useBookingStatusHistory';
+
+/**
+ * Inline status-history block for a single vendor booking.
+ * Subscribes to the master `booking_status_history` table via the booking_id
+ * link on `vendor_bookings`. Renders only when expanded so we don't open
+ * a realtime channel per row by default.
+ */
+function VendorBookingHistory({
+  masterBookingId,
+  currentStatus,
+  createdAt,
+  isRussian,
+}: {
+  masterBookingId: string | null | undefined;
+  currentStatus: string;
+  createdAt: string;
+  isRussian: boolean;
+}) {
+  const { events, isLoading, highlightIds } = useBookingStatusHistory({
+    table: 'booking_status_history',
+    bookingId: masterBookingId ?? undefined,
+    enabled: !!masterBookingId,
+  });
+
+  if (!masterBookingId) {
+    return (
+      <p className="text-xs text-muted-foreground">
+        {isRussian ? 'История недоступна' : 'No history available'}
+      </p>
+    );
+  }
+
+  if (isLoading) {
+    return <BookingStatusTimelineSkeleton rows={3} compact />;
+  }
+
+  return (
+    <BookingStatusTimeline
+      events={events}
+      currentStatus={currentStatus}
+      createdAt={createdAt}
+      highlightIds={highlightIds}
+      compact
+    />
+  );
+}
 
 const VendorBookings = () => {
   const navigate = useNavigate();
@@ -43,6 +94,7 @@ const VendorBookings = () => {
   const [actionType, setActionType] = useState<'confirm' | 'cancel' | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
+  const [expandedHistory, setExpandedHistory] = useState<Record<string, boolean>>({});
 
   const isRussian = language === 'ru';
 
@@ -237,6 +289,39 @@ const VendorBookings = () => {
                         <CheckCircle className="h-4 w-4 mr-1" />
                         {isRussian ? 'Завершить' : 'Complete'}
                       </Button>
+                    )}
+                  </div>
+
+                  {/* Status history toggle */}
+                  <div className="mt-3 pt-3 border-t">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setExpandedHistory((prev) => ({
+                          ...prev,
+                          [booking.id]: !prev[booking.id],
+                        }))
+                      }
+                      className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+                      aria-expanded={!!expandedHistory[booking.id]}
+                    >
+                      <History className="h-3.5 w-3.5" />
+                      {isRussian ? 'История статусов' : 'Status history'}
+                      {expandedHistory[booking.id] ? (
+                        <ChevronUp className="h-3.5 w-3.5" />
+                      ) : (
+                        <ChevronDown className="h-3.5 w-3.5" />
+                      )}
+                    </button>
+                    {expandedHistory[booking.id] && (
+                      <div className="mt-3">
+                        <VendorBookingHistory
+                          masterBookingId={(booking as { booking_id?: string | null }).booking_id ?? null}
+                          currentStatus={booking.status}
+                          createdAt={booking.created_at}
+                          isRussian={isRussian}
+                        />
+                      </div>
                     )}
                   </div>
                 </CardContent>

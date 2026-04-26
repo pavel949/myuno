@@ -42,10 +42,13 @@ const STATUS_CONFIG: Record<
   submitted: { icon: Send, en: 'Submitted', ru: 'Отправлено', tone: 'text-info' },
   confirmed: { icon: CheckCircle2, en: 'Confirmed', ru: 'Подтверждено', tone: 'text-info' },
   in_progress: { icon: PlayCircle, en: 'In Progress', ru: 'В процессе', tone: 'text-accent-purple' },
+  checked_in: { icon: PlayCircle, en: 'Checked in', ru: 'Заселён', tone: 'text-info' },
+  checked_out: { icon: CheckCircle2, en: 'Checked out', ru: 'Выехал', tone: 'text-success' },
   completed: { icon: PartyPopper, en: 'Completed', ru: 'Завершено', tone: 'text-success' },
   cancelled: { icon: XCircle, en: 'Cancelled', ru: 'Отменено', tone: 'text-destructive' },
   cancelled_by_user: { icon: XCircle, en: 'Cancelled by you', ru: 'Отменено вами', tone: 'text-destructive' },
   cancelled_by_provider: { icon: XCircle, en: 'Declined', ru: 'Отклонено', tone: 'text-destructive' },
+  no_show: { icon: AlertTriangle, en: 'No-show', ru: 'Не пришёл', tone: 'text-destructive' },
   expired: { icon: AlertTriangle, en: 'Expired', ru: 'Истекло', tone: 'text-muted-foreground' },
 };
 
