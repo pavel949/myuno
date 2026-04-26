@@ -260,13 +260,13 @@ export function useStartOnboarding() {
       }
 
       const { data: session, error: sessionError } = await supabase
-        .from('concierge_sessions' as any)
-        .insert(sessionPayload as any)
+        .from('concierge_sessions')
+        .insert(sessionPayload as never)
         .select('id')
         .single();
 
       if (sessionError) throw sessionError;
-      const sessionId = (session as any).id as string;
+      const sessionId = (session as { id: string }).id;
 
       const primary = items[0] ?? { route: '/discover', title: { en: 'Discover', ru: 'Найти' } };
 
@@ -282,8 +282,8 @@ export function useStartOnboarding() {
       if (user?.id) journeyPayload.user_id = user.id;
 
       const { error: journeyError } = await supabase
-        .from('concierge_journeys' as any)
-        .insert(journeyPayload as any);
+        .from('concierge_journeys')
+        .insert(journeyPayload as never);
 
       if (journeyError) throw journeyError;
 
