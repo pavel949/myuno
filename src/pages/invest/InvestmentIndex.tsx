@@ -55,30 +55,16 @@ export default function InvestmentIndex() {
   const realEstateProjects = allProjects?.filter(p => p.project_type.startsWith('real_estate')) || [];
   const businessProjects = allProjects?.filter(p => !p.project_type.startsWith('real_estate')) || [];
 
-  const CategoryChips = () => (
-    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide touch-pan-y">
-      <Button
-        variant={selectedCategory === null ? 'default' : 'outline'}
-        size="sm"
-        onClick={() => setSelectedCategory(null)}
-        className="flex-shrink-0 rounded-full"
-      >
-        {isRu ? 'Все' : 'All'}
-      </Button>
-      {INVESTMENT_CATEGORIES.slice(0, 6).map((cat) => (
-        <Button
-          key={cat.key}
-          variant={selectedCategory === cat.key ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setSelectedCategory(cat.key)}
-          className="flex-shrink-0 rounded-full gap-1.5"
-        >
-          {(() => { const Icon = resolveIcon(cat.icon); return <Icon className="w-4 h-4" />; })()}
-          <span>{isRu ? cat.ru : cat.en}</span>
-        </Button>
-      ))}
-    </div>
-  );
+  // Map investment categories to canonical MiniAppCategory shape (id/labelEn/labelRu/icon)
+  const layoutCategories = [
+    { id: 'all', labelEn: 'All', labelRu: 'Все' },
+    ...INVESTMENT_CATEGORIES.slice(0, 6).map((cat) => ({
+      id: cat.key,
+      labelEn: cat.en,
+      labelRu: cat.ru,
+      icon: cat.icon,
+    })),
+  ];
 
   const ProjectsCarousel = ({ 
     projects, 
