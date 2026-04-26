@@ -105,7 +105,7 @@ export function useTaxonomy(
         .insert({
           ...value,
           lookup_type: lookupType,
-        } as any)
+        } as never)
         .select()
         .single();
 
@@ -122,7 +122,7 @@ export function useTaxonomy(
     mutationFn: async ({ id, ...updates }: Partial<TaxonomyValue> & { id: string }) => {
       const { data, error } = await supabase
         .from('lookup_values')
-        .update(updates as any)
+        .update(updates as never)
         .eq('id', id)
         .select()
         .single();
@@ -154,7 +154,7 @@ export function useTaxonomy(
   const bulkUpdateMutation = useMutation({
     mutationFn: async (updates: Array<{ id: string; sort_order?: number; is_active?: boolean }>) => {
       const promises = updates.map(({ id, ...data }) =>
-        supabase.from('lookup_values').update(data as any).eq('id', id)
+        supabase.from('lookup_values').update(data as never).eq('id', id)
       );
       await Promise.all(promises);
     },

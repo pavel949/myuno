@@ -39,8 +39,7 @@ export interface PMCompany {
 export type PMCompanyInsert = Omit<PMCompany, 'id' | 'slug' | 'created_at' | 'updated_at' | 'verified_at' | 'review_count' | 'properties_managed'>;
 export type PMCompanyUpdate = Partial<PMCompanyInsert>;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function mapRow(row: any): PMCompany {
+function mapRow(row: Record<string, unknown>): PMCompany {
   return {
     id: row.id,
     slug: row.slug,
