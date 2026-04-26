@@ -61,7 +61,10 @@ export function HomeTopBar({ personas, onRoleSheetOpen, onAppDrawerOpen }: HomeT
         )}
         <div className="flex flex-col min-w-0 leading-none">
           <BrandWordmark as="static" className="min-w-0" />
-          <span className="text-[9px] sm:text-[10px] tracking-[0.14em] uppercase text-muted-foreground/60 font-semibold mt-1 truncate">
+          {/* Subtitle competes with the wordmark on narrow phones (it forced
+              the wordmark to truncate as "myUNO — P…" in the user-reported
+              Telegram WebView). Hide below sm; show from tablet up. */}
+          <span className="hidden sm:block text-[10px] tracking-[0.14em] uppercase text-muted-foreground/60 font-semibold mt-1 truncate">
             {isRu ? 'Инфраструктура для жизни на Пхукете' : 'Infrastructure for life on Phuket'}
           </span>
         </div>
