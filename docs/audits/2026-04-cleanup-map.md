@@ -750,3 +750,18 @@ Files refactored:
 - Global `any` count (canonical pattern, by line): **772 → 748** (-24).
 - Cumulative since Wave 4.2d start: **1247 → 748** (-499 / -40.0%).
 - Build: ✅ green (`tsc --noEmit` clean, `bun run build` OK).
+
+### Wave 4.2d · Pass #12 (2026-04-26)
+**Scope**: 5 hooks — investment-deals/inquiries (Capital), investment-hub opportunities/intro requests, universal taxonomy CRUD, user-personas enum casts, PM-companies row mapper.
+
+- `src/hooks/capital/useCapitalInvestmentDeals.ts` — 4 → 0 `any`. Dropped 4× `(supabase.from('investment_deals' as any) as any)` chains (table now in generated types); added typed `InvestorInquiryRow`; update payload uses `as never`.
+- `src/hooks/investment-hub/useInvestmentHub.ts` — 4 → 0 `any`. Migrated `investment_opportunities` and `intro_requests` (untyped tables) to `typedFrom()`; introduced narrow `OpportunityRow`/`IntroRequestRow` types for `.map()` callbacks.
+- `src/hooks/useTaxonomy.ts` — 3 → 0 `any`. Lookup-values insert/update/bulk-update payload casts switched from `as any` to `as never` (generated overload-safe).
+- `src/hooks/useUserPersonas.ts` — 3 → 0 `any`. `persona: persona as any` (enum cast) replaced with `persona as never` across delete-eq, upsert, and bulk-insert paths — avoids the explicit-any while keeping the runtime enum mapping intact.
+- `src/hooks/usePMCompanies.ts` — 3 → 0 `any`. `mapRow(row: any)` retyped via `Database['public']['Tables']['management_companies']['Row']` plus a narrow `Record<string, unknown>` projection for cross-column aliasing (`name_en→name`, `properties_count→properties_managed`); insert/update use `as never`; removed both `eslint-disable no-explicit-any` lines.
+- **Side fix**: `src/hooks/useSupabaseCRUD.ts` — added `as never` to `.insert(insertData)`/`.update(updateData)` payloads after the dynamic-table refactor exposed two new TS2769/TS2345 errors (caught by repo type-check on first try).
+
+**Updated metrics**
+- Global `any` count (canonical pattern, by line): **748 → 733** (-15).
+- Cumulative since Wave 4.2d start: **1247 → 733** (-514 / -41.2%).
+- Build: ✅ green (`tsc --noEmit` clean).
