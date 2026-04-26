@@ -395,22 +395,27 @@ export default function NavigatorPage() {
               const Icon = cluster.icon;
               const services = cluster.services;
               const availableCount = services.filter(s => s.status !== 'soon').length;
+              const token = resolveClusterToken(cluster.id);
 
               return (
                 <section key={cluster.id}>
                   {/* Cluster header */}
                   <div className="flex items-center gap-2.5 mb-2.5">
                     <div
-                      className="w-8 h-8 rounded-none flex items-center justify-center shrink-0"
-                      style={{ background: cluster.color + '1A' }}
+                      className={cn(
+                        'w-9 h-9 rounded-sm flex items-center justify-center shrink-0',
+                        CLUSTER_HEADER_BG[token],
+                      )}
                     >
-                      <Icon className="w-4 h-4" style={{ color: cluster.color }} />
+                      <Icon className={cn('w-5 h-5', CLUSTER_FG[token])} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <h3
-                          className="text-[13px] font-display font-bold tracking-wide"
-                          style={{ color: cluster.color }}
+                          className={cn(
+                            'text-[13px] font-display font-bold tracking-wide',
+                            CLUSTER_FG[token],
+                          )}
                         >
                           {getClusterHeaderLabel(cluster, language)}
                         </h3>
@@ -425,12 +430,12 @@ export default function NavigatorPage() {
                   </div>
 
                   {/* Tile row — horizontal scroll */}
-                  <div className="flex gap-2 overflow-x-auto scrollbar-hide snap-x snap-mandatory -mx-4 px-4 pb-1">
+                  <div className="flex gap-2.5 overflow-x-auto scrollbar-hide snap-x snap-mandatory -mx-4 px-4 pb-1">
                     {services.map(service => (
                       <ServiceTile
                         key={`${cluster.id}-${service.path}-${service.labelEn}`}
                         service={service}
-                        clusterColor={cluster.color}
+                        clusterId={cluster.id}
                         language={language}
                         onNavigate={navigate}
                       />
@@ -444,24 +449,25 @@ export default function NavigatorPage() {
 
         {/* Coming soon */}
         {searchResults === null && audienceSoon.length > 0 && (
-          <div
-            className="rounded-none p-4 space-y-3"
-            style={{ background: 'hsl(var(--bg-elevated))', border: '1px solid hsl(0 0% 100% / 0.05)' }}
-          >
+          <div className="rounded-sm p-4 space-y-3 bg-bg-elevated border border-border/40">
             <p className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-wider">
               {pickTriplet({ ru: 'Скоро', en: 'Coming soon', th: 'เร็ว ๆ นี้' }, language)}
             </p>
             <div className="flex flex-wrap gap-2">
               {audienceSoon.map(s => {
                 const SIcon = s.icon;
+                const soonToken = resolveClusterToken(s.clusterId);
                 return (
                   <div
                     key={`soon-${s.labelEn}`}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full opacity-50"
-                    style={{ background: s.clusterColor + '14', border: `1px solid ${s.clusterColor}20` }}
+                    className={cn(
+                      'flex items-center gap-1.5 px-3 py-1.5 rounded-sm border opacity-60',
+                      CLUSTER_TILE_BG[soonToken],
+                      CLUSTER_TILE_BORDER[soonToken],
+                    )}
                   >
-                    <SIcon className="w-3.5 h-3.5" style={{ color: s.clusterColor }} />
-                    <span className="text-[11px] font-medium" style={{ color: s.clusterColor }}>
+                    <SIcon className={cn('w-3.5 h-3.5', CLUSTER_FG[soonToken])} />
+                    <span className={cn('text-[11px] font-medium', CLUSTER_FG[soonToken])}>
                       {getClusterServiceLocalizedLabel(s, language)}
                     </span>
                   </div>
