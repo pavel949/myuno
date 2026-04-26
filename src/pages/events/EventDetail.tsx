@@ -95,9 +95,10 @@ const EventDetail = () => {
   const hasTicketUrl = event.ticket_url && event.ticket_url.length > 0;
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
-      {/* Header Image */}
-      <div className="relative h-72">
+    <AppLayout showHeader={false} showBottomNav>
+      <div className="flex flex-col">
+        {/* Header Image */}
+        <div className="relative h-72">
         <img src={images[selectedImage]} alt={event.title_en} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         
