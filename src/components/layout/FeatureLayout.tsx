@@ -150,6 +150,11 @@ function MiniappMode({
   stickySubHeader,
   showQuickFiltersInSubHeader = true,
   showEcosystemHint = true,
+  seoTitle,
+  seoDescription,
+  seoImage,
+  seoNoindex,
+  crossSellVertical,
 }: MiniAppLayoutProps) {
   const navigate = useNavigate();
   const { language, t } = useLanguage();
