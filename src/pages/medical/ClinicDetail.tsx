@@ -222,7 +222,8 @@ const ClinicDetail = () => {
           </Button>
         </div>
       </div>
-    </div>
+      </div>
+    </AppLayout>
   );
 };
 
