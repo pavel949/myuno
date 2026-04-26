@@ -3,9 +3,12 @@
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database, Json } from '@/integrations/supabase/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { toast } from 'sonner';
+
+type WebhookEndpointInsert = Database['public']['Tables']['webhook_endpoints']['Insert'];
 
 export interface WebhookEndpoint {
   id: string;
@@ -26,7 +29,7 @@ export interface WebhookDelivery {
   id: string;
   endpoint_id: string;
   event_type: string;
-  payload: any;
+  payload: Json;
   response_status: number | null;
   attempt_count: number;
   delivered_at: string | null;
@@ -60,13 +63,13 @@ export function useWebhookEndpoints() {
     queryKey: ['webhook-endpoints', activeCompany?.company_id],
     queryFn: async (): Promise<WebhookEndpoint[]> => {
       if (!activeCompany) return [];
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('webhook_endpoints')
         .select('*')
         .eq('company_id', activeCompany.company_id)
         .order('created_at', { ascending: false });
       if (error) throw error;
-      return (data || []) as WebhookEndpoint[];
+      return (data || []) as unknown as WebhookEndpoint[];
     },
     enabled: !!activeCompany,
   });
@@ -77,14 +80,14 @@ export function useWebhookDeliveries(endpointId: string | undefined) {
     queryKey: ['webhook-deliveries', endpointId],
     queryFn: async (): Promise<WebhookDelivery[]> => {
       if (!endpointId) return [];
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('webhook_deliveries')
         .select('*')
         .eq('endpoint_id', endpointId)
         .order('created_at', { ascending: false })
         .limit(100);
       if (error) throw error;
-      return (data || []) as WebhookDelivery[];
+      return (data || []) as unknown as WebhookDelivery[];
     },
     enabled: !!endpointId,
   });
@@ -97,21 +100,22 @@ export function useCreateWebhook() {
   return useMutation({
     mutationFn: async (args: { url: string; description?: string; events: string[] }) => {
       if (!user || !activeCompany) throw new Error('Missing context');
-      const { error } = await (supabase as any).from('webhook_endpoints').insert({
+      const payload: WebhookEndpointInsert = {
         company_id: activeCompany.company_id,
         url: args.url,
         description: args.description ?? null,
         events: args.events,
         secret: generateSecret(),
         created_by: user.id,
-      });
+      };
+      const { error } = await supabase.from('webhook_endpoints').insert(payload);
       if (error) throw error;
     },
     onSuccess: () => {
       toast.success('Webhook created');
       qc.invalidateQueries({ queryKey: ['webhook-endpoints'] });
     },
-    onError: (e: any) => toast.error(e.message || 'Failed'),
+    onError: (e: Error) => toast.error(e.message || 'Failed'),
   });
 }
 
@@ -119,14 +123,14 @@ export function useToggleWebhook() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (args: { id: string; is_active: boolean }) => {
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('webhook_endpoints')
         .update({ is_active: args.is_active })
         .eq('id', args.id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['webhook-endpoints'] }),
-    onError: (e: any) => toast.error(e.message || 'Failed'),
+    onError: (e: Error) => toast.error(e.message || 'Failed'),
   });
 }
 
@@ -134,13 +138,13 @@ export function useDeleteWebhook() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await (supabase as any).from('webhook_endpoints').delete().eq('id', id);
+      const { error } = await supabase.from('webhook_endpoints').delete().eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
       toast.success('Webhook deleted');
       qc.invalidateQueries({ queryKey: ['webhook-endpoints'] });
     },
-    onError: (e: any) => toast.error(e.message || 'Failed'),
+    onError: (e: Error) => toast.error(e.message || 'Failed'),
   });
 }
