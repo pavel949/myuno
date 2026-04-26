@@ -1766,44 +1766,6 @@ export type Database = {
           },
         ]
       }
-      booking_participants: {
-        Row: {
-          booking_id: string
-          created_at: string
-          email: string | null
-          id: string
-          is_primary: boolean | null
-          name: string
-          phone: string | null
-        }
-        Insert: {
-          booking_id: string
-          created_at?: string
-          email?: string | null
-          id?: string
-          is_primary?: boolean | null
-          name: string
-          phone?: string | null
-        }
-        Update: {
-          booking_id?: string
-          created_at?: string
-          email?: string | null
-          id?: string
-          is_primary?: boolean | null
-          name?: string
-          phone?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "booking_participants_booking_id_fkey"
-            columns: ["booking_id"]
-            isOneToOne: false
-            referencedRelation: "bookings"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       booking_payments: {
         Row: {
           amount: number
@@ -2574,60 +2536,6 @@ export type Database = {
         }
         Relationships: []
       }
-      cancellation_policy_rules: {
-        Row: {
-          created_at: string | null
-          deposit_refundable: boolean | null
-          description_en: string | null
-          description_ru: string | null
-          full_refund_hours: number | null
-          id: string
-          is_active: boolean | null
-          name_en: string
-          name_ru: string
-          no_refund_hours: number | null
-          non_refundable_discount: number | null
-          partial_refund_hours: number | null
-          partial_refund_percent: number | null
-          policy_code: string
-          sort_order: number | null
-        }
-        Insert: {
-          created_at?: string | null
-          deposit_refundable?: boolean | null
-          description_en?: string | null
-          description_ru?: string | null
-          full_refund_hours?: number | null
-          id?: string
-          is_active?: boolean | null
-          name_en: string
-          name_ru: string
-          no_refund_hours?: number | null
-          non_refundable_discount?: number | null
-          partial_refund_hours?: number | null
-          partial_refund_percent?: number | null
-          policy_code: string
-          sort_order?: number | null
-        }
-        Update: {
-          created_at?: string | null
-          deposit_refundable?: boolean | null
-          description_en?: string | null
-          description_ru?: string | null
-          full_refund_hours?: number | null
-          id?: string
-          is_active?: boolean | null
-          name_en?: string
-          name_ru?: string
-          no_refund_hours?: number | null
-          non_refundable_discount?: number | null
-          partial_refund_hours?: number | null
-          partial_refund_percent?: number | null
-          policy_code?: string
-          sort_order?: number | null
-        }
-        Relationships: []
-      }
       capital_campaigns: {
         Row: {
           created_at: string
@@ -3279,22 +3187,8 @@ export type Database = {
             foreignKeyName: "catalog_life_map_life_situation_id_fkey"
             columns: ["life_situation_id"]
             isOneToOne: false
-            referencedRelation: "catalog_life_map_v2"
-            referencedColumns: ["life_situation_id"]
-          },
-          {
-            foreignKeyName: "catalog_life_map_life_situation_id_fkey"
-            columns: ["life_situation_id"]
-            isOneToOne: false
             referencedRelation: "life_situations"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "catalog_life_map_life_situation_id_fkey"
-            columns: ["life_situation_id"]
-            isOneToOne: false
-            referencedRelation: "lifeos_health_view"
-            referencedColumns: ["situation_id"]
           },
         ]
       }
@@ -3886,22 +3780,8 @@ export type Database = {
             foreignKeyName: "cluster_life_situations_life_situation_id_fkey"
             columns: ["life_situation_id"]
             isOneToOne: false
-            referencedRelation: "catalog_life_map_v2"
-            referencedColumns: ["life_situation_id"]
-          },
-          {
-            foreignKeyName: "cluster_life_situations_life_situation_id_fkey"
-            columns: ["life_situation_id"]
-            isOneToOne: false
             referencedRelation: "life_situations"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cluster_life_situations_life_situation_id_fkey"
-            columns: ["life_situation_id"]
-            isOneToOne: false
-            referencedRelation: "lifeos_health_view"
-            referencedColumns: ["situation_id"]
           },
         ]
       }
@@ -6549,42 +6429,6 @@ export type Database = {
           target_currency?: string
           updated_at?: string
           updated_by?: string | null
-        }
-        Relationships: []
-      }
-      data_provenance: {
-        Row: {
-          created_at: string
-          entity_id: string
-          entity_type: string
-          field_name: string
-          field_value: string | null
-          id: string
-          scraped_at: string
-          source_type: string | null
-          source_url: string
-        }
-        Insert: {
-          created_at?: string
-          entity_id: string
-          entity_type: string
-          field_name: string
-          field_value?: string | null
-          id?: string
-          scraped_at?: string
-          source_type?: string | null
-          source_url: string
-        }
-        Update: {
-          created_at?: string
-          entity_id?: string
-          entity_type?: string
-          field_name?: string
-          field_value?: string | null
-          id?: string
-          scraped_at?: string
-          source_type?: string | null
-          source_url?: string
         }
         Relationships: []
       }
@@ -10163,22 +10007,8 @@ export type Database = {
             foreignKeyName: "life_scenarios_life_situation_id_fkey"
             columns: ["life_situation_id"]
             isOneToOne: false
-            referencedRelation: "catalog_life_map_v2"
-            referencedColumns: ["life_situation_id"]
-          },
-          {
-            foreignKeyName: "life_scenarios_life_situation_id_fkey"
-            columns: ["life_situation_id"]
-            isOneToOne: false
             referencedRelation: "life_situations"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "life_scenarios_life_situation_id_fkey"
-            columns: ["life_situation_id"]
-            isOneToOne: false
-            referencedRelation: "lifeos_health_view"
-            referencedColumns: ["situation_id"]
           },
         ]
       }
@@ -10527,22 +10357,8 @@ export type Database = {
             foreignKeyName: "lifeos_routes_life_situation_id_fkey"
             columns: ["life_situation_id"]
             isOneToOne: true
-            referencedRelation: "catalog_life_map_v2"
-            referencedColumns: ["life_situation_id"]
-          },
-          {
-            foreignKeyName: "lifeos_routes_life_situation_id_fkey"
-            columns: ["life_situation_id"]
-            isOneToOne: true
             referencedRelation: "life_situations"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "lifeos_routes_life_situation_id_fkey"
-            columns: ["life_situation_id"]
-            isOneToOne: true
-            referencedRelation: "lifeos_health_view"
-            referencedColumns: ["situation_id"]
           },
         ]
       }
@@ -14364,39 +14180,6 @@ export type Database = {
           },
         ]
       }
-      owner_commission_tiers: {
-        Row: {
-          benefits: Json | null
-          commission_percent: number
-          created_at: string | null
-          id: string
-          is_active: boolean | null
-          min_gmv_thb: number
-          tier_name: string
-          tier_order: number
-        }
-        Insert: {
-          benefits?: Json | null
-          commission_percent?: number
-          created_at?: string | null
-          id?: string
-          is_active?: boolean | null
-          min_gmv_thb?: number
-          tier_name: string
-          tier_order: number
-        }
-        Update: {
-          benefits?: Json | null
-          commission_percent?: number
-          created_at?: string | null
-          id?: string
-          is_active?: boolean | null
-          min_gmv_thb?: number
-          tier_name?: string
-          tier_order?: number
-        }
-        Relationships: []
-      }
       owner_invoices: {
         Row: {
           company_id: string
@@ -15860,50 +15643,6 @@ export type Database = {
           title_ru?: string
         }
         Relationships: []
-      }
-      platform_fees: {
-        Row: {
-          applies_to: string[] | null
-          created_at: string
-          fee_type: string
-          fee_value: number
-          id: string
-          is_active: boolean | null
-          max_fee: number | null
-          min_fee: number | null
-          plan_id: string | null
-        }
-        Insert: {
-          applies_to?: string[] | null
-          created_at?: string
-          fee_type: string
-          fee_value?: number
-          id?: string
-          is_active?: boolean | null
-          max_fee?: number | null
-          min_fee?: number | null
-          plan_id?: string | null
-        }
-        Update: {
-          applies_to?: string[] | null
-          created_at?: string
-          fee_type?: string
-          fee_value?: number
-          id?: string
-          is_active?: boolean | null
-          max_fee?: number | null
-          min_fee?: number | null
-          plan_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "platform_fees_plan_id_fkey"
-            columns: ["plan_id"]
-            isOneToOne: false
-            referencedRelation: "subscription_plans"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       platform_metrics: {
         Row: {
@@ -23948,88 +23687,6 @@ export type Database = {
           },
         ]
       }
-      simulation_entity_links: {
-        Row: {
-          created_at: string
-          entity_id: string
-          entity_type: string
-          id: string
-          run_id: string
-        }
-        Insert: {
-          created_at?: string
-          entity_id: string
-          entity_type: string
-          id?: string
-          run_id: string
-        }
-        Update: {
-          created_at?: string
-          entity_id?: string
-          entity_type?: string
-          id?: string
-          run_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "simulation_entity_links_run_id_fkey"
-            columns: ["run_id"]
-            isOneToOne: false
-            referencedRelation: "simulation_runs"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      simulation_events: {
-        Row: {
-          actor_role: string | null
-          actor_user_id: string | null
-          duration_ms: number | null
-          entity_id: string | null
-          entity_type: string | null
-          error: string | null
-          event_type: string
-          id: string
-          payload: Json | null
-          run_id: string
-          ts: string
-        }
-        Insert: {
-          actor_role?: string | null
-          actor_user_id?: string | null
-          duration_ms?: number | null
-          entity_id?: string | null
-          entity_type?: string | null
-          error?: string | null
-          event_type: string
-          id?: string
-          payload?: Json | null
-          run_id: string
-          ts?: string
-        }
-        Update: {
-          actor_role?: string | null
-          actor_user_id?: string | null
-          duration_ms?: number | null
-          entity_id?: string | null
-          entity_type?: string | null
-          error?: string | null
-          event_type?: string
-          id?: string
-          payload?: Json | null
-          run_id?: string
-          ts?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "simulation_events_run_id_fkey"
-            columns: ["run_id"]
-            isOneToOne: false
-            referencedRelation: "simulation_runs"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       simulation_runs: {
         Row: {
           completed_at: string | null
@@ -24397,68 +24054,6 @@ export type Database = {
           stripe_price_id?: string | null
         }
         Relationships: []
-      }
-      store_products: {
-        Row: {
-          category: string | null
-          created_at: string
-          currency: string | null
-          description_en: string | null
-          description_ru: string | null
-          id: string
-          image: string | null
-          is_active: boolean | null
-          is_popular: boolean | null
-          name_en: string
-          name_ru: string
-          price: number
-          stock_quantity: number | null
-          store_id: string
-          unit: string | null
-        }
-        Insert: {
-          category?: string | null
-          created_at?: string
-          currency?: string | null
-          description_en?: string | null
-          description_ru?: string | null
-          id?: string
-          image?: string | null
-          is_active?: boolean | null
-          is_popular?: boolean | null
-          name_en: string
-          name_ru: string
-          price: number
-          stock_quantity?: number | null
-          store_id: string
-          unit?: string | null
-        }
-        Update: {
-          category?: string | null
-          created_at?: string
-          currency?: string | null
-          description_en?: string | null
-          description_ru?: string | null
-          id?: string
-          image?: string | null
-          is_active?: boolean | null
-          is_popular?: boolean | null
-          name_en?: string
-          name_ru?: string
-          price?: number
-          stock_quantity?: number | null
-          store_id?: string
-          unit?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "store_products_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       stores: {
         Row: {
@@ -24938,53 +24533,6 @@ export type Database = {
           task_source?: string
         }
         Relationships: []
-      }
-      task_entity_map: {
-        Row: {
-          created_at: string
-          entity_id: string
-          entity_type: string
-          id: string
-          is_active: boolean
-          life_task_id: string
-          relevance_weight: number
-          role_scope: string[] | null
-          rules: Json | null
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          entity_id: string
-          entity_type: string
-          id?: string
-          is_active?: boolean
-          life_task_id: string
-          relevance_weight?: number
-          role_scope?: string[] | null
-          rules?: Json | null
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          entity_id?: string
-          entity_type?: string
-          id?: string
-          is_active?: boolean
-          life_task_id?: string
-          relevance_weight?: number
-          role_scope?: string[] | null
-          rules?: Json | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "task_entity_map_life_task_id_fkey"
-            columns: ["life_task_id"]
-            isOneToOne: false
-            referencedRelation: "life_tasks"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       tax_filings: {
         Row: {
@@ -28089,47 +27637,6 @@ export type Database = {
         }
         Relationships: []
       }
-      vertical_life_tasks: {
-        Row: {
-          context_notes: string | null
-          created_at: string
-          id: string
-          is_active: boolean
-          life_task_id: string
-          priority_weight: number
-          updated_at: string
-          vertical_code: string
-        }
-        Insert: {
-          context_notes?: string | null
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          life_task_id: string
-          priority_weight?: number
-          updated_at?: string
-          vertical_code: string
-        }
-        Update: {
-          context_notes?: string | null
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          life_task_id?: string
-          priority_weight?: number
-          updated_at?: string
-          vertical_code?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "vertical_life_tasks_life_task_id_fkey"
-            columns: ["life_task_id"]
-            isOneToOne: false
-            referencedRelation: "life_tasks"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       veterinary_clinics: {
         Row: {
           address: string | null
@@ -29103,22 +28610,6 @@ export type Database = {
           },
         ]
       }
-      catalog_life_map_v2: {
-        Row: {
-          entity_id: string | null
-          entity_type: string | null
-          id: string | null
-          life_situation_id: string | null
-          role_scope: string[] | null
-          rules: Json | null
-          scenario_code: string | null
-          task_code: string | null
-          task_type: string | null
-          urgency_level: string | null
-          weight: number | null
-        }
-        Relationships: []
-      }
       cleaning_providers: {
         Row: {
           address: string | null
@@ -29693,27 +29184,6 @@ export type Database = {
           title: string | null
           title_ru: string | null
           trust_level: string | null
-        }
-        Relationships: []
-      }
-      lifeos_health_view: {
-        Row: {
-          entity_overuse_count: number | null
-          flag_no_entities: boolean | null
-          flag_no_scenarios: boolean | null
-          flag_no_tasks: boolean | null
-          health_score: number | null
-          is_active: boolean | null
-          legacy_entity_count: number | null
-          new_entity_count: number | null
-          orphan_scenario_count: number | null
-          orphan_task_count: number | null
-          scenario_count: number | null
-          situation_code: string | null
-          situation_id: string | null
-          task_count: number | null
-          title_en: string | null
-          title_ru: string | null
         }
         Relationships: []
       }
@@ -31972,17 +31442,6 @@ export type Database = {
           },
         ]
       }
-      vertical_task_coverage: {
-        Row: {
-          contextual_tasks: number | null
-          core_tasks: number | null
-          support_tasks: number | null
-          task_codes: string[] | null
-          task_count: number | null
-          vertical_code: string | null
-        }
-        Relationships: []
-      }
       yachts: {
         Row: {
           addons: Json | null
@@ -32675,7 +32134,6 @@ export type Database = {
         Args: { p_property_id: string; p_user_id: string }
         Returns: string
       }
-      get_simulation_report: { Args: { p_run_id: string }; Returns: Json }
       get_subscription_revenue: {
         Args: { p_days?: number }
         Returns: {
@@ -32755,10 +32213,6 @@ export type Database = {
         Args: { _property_id: string; _user_id: string }
         Returns: boolean
       }
-      is_simulation_entity: {
-        Args: { p_entity_id: string; p_entity_type: string }
-        Returns: boolean
-      }
       is_team_member: { Args: { check_user_id: string }; Returns: boolean }
       is_verified_purchase: {
         Args: { p_item_id: string; p_item_type: string; p_user_id: string }
@@ -32768,10 +32222,6 @@ export type Database = {
         Args: { p_score: number }
         Returns: string
       }
-      link_simulation_entity: {
-        Args: { p_entity_id: string; p_entity_type: string; p_run_id: string }
-        Returns: undefined
-      }
       log_security_event: {
         Args: {
           p_details?: Json
@@ -32779,19 +32229,6 @@ export type Database = {
           p_ip_address?: string
           p_user_agent?: string
           p_user_id?: string
-        }
-        Returns: string
-      }
-      log_simulation_event: {
-        Args: {
-          p_actor_role?: string
-          p_duration_ms?: number
-          p_entity_id?: string
-          p_entity_type?: string
-          p_error?: string
-          p_event_type: string
-          p_payload?: Json
-          p_run_id: string
         }
         Returns: string
       }
@@ -32847,7 +32284,6 @@ export type Database = {
         Args: { p_owner_property_id: string }
         Returns: string
       }
-      purge_simulation_run: { Args: { p_run_id: string }; Returns: Json }
       recalc_developer_project_counters: {
         Args: { _developer_id: string }
         Returns: undefined
@@ -32932,70 +32368,9 @@ export type Database = {
           urgency_level: string
         }[]
       }
-      resolve_life_tasks: {
-        Args: { p_locale?: string; p_scenario_code: string }
-        Returns: {
-          code: string
-          entity_count: number
-          id: string
-          priority: number
-          task_type: string
-          title: string
-        }[]
-      }
-      resolve_task_entities: {
-        Args: {
-          p_limit?: number
-          p_locale?: string
-          p_task_code: string
-          p_user_role?: string
-        }
-        Returns: {
-          currency: string
-          entity_id: string
-          entity_type: string
-          location: string
-          price: number
-          provider_id: string
-          relevance_weight: number
-          role_scope: string[]
-          rules: Json
-          title: string
-          title_localized: string
-          trust_level: string
-        }[]
-      }
-      resolve_tasks_for_vertical: {
-        Args: { p_vertical_code: string }
-        Returns: {
-          priority_weight: number
-          scenario_code: string
-          situation_code: string
-          task_code: string
-          task_title_en: string
-          task_type: string
-        }[]
-      }
       resolve_user_context: {
         Args: { p_entity_id?: string; p_mode?: string; p_user_id: string }
         Returns: Json
-      }
-      resolve_verticals_for_situation: {
-        Args: { p_situation_code: string }
-        Returns: {
-          max_priority: number
-          task_count: number
-          tasks: string[]
-          vertical_code: string
-        }[]
-      }
-      resolve_verticals_for_task: {
-        Args: { p_task_code: string }
-        Returns: {
-          context_notes: string
-          priority_weight: number
-          vertical_code: string
-        }[]
       }
       rotate_ical_token: { Args: { p_property_id: string }; Returns: string }
       set_user_pin: {
@@ -33007,10 +32382,6 @@ export type Database = {
       staff_can_access_property: {
         Args: { p_property_id: string; p_user_id: string }
         Returns: boolean
-      }
-      start_simulation_run: {
-        Args: { p_config?: Json; p_label: string }
-        Returns: string
       }
       sync_properties_clearview_for_project: {
         Args: { _project_id: string }
