@@ -13,6 +13,7 @@ import { HomeContextChips } from '@/components/home/HomeContextChips';
 import { AppDrawer } from '@/components/nav/AppDrawer';
 import { WorkspaceHomeBanner } from '@/components/home/WorkspaceHomeBanner';
 import { HeroIntro } from '@/components/home/HeroIntro';
+import { AudienceEntries } from '@/components/home/AudienceEntries';
 import { PrimaryActions } from '@/components/home/PrimaryActions';
 import { PopularTasks } from '@/components/home/PopularTasks';
 import { ActiveSituation } from '@/components/home/ActiveSituation';
@@ -117,10 +118,15 @@ const Index = () => {
         {/* 1. Hero — search-first entry, with desktop popular preview */}
         <HeroIntro />
 
-        {/* 1b. Persona discovery strip — surface the 26 tailored landings */}
+        {/* 2. Audience entries — gov-style "find your door".
+            Each audience has 3 concrete linked tasks + a primary CTA, so
+            users self-identify in <3s and reach the right surface in 1 tap. */}
+        <AudienceEntries />
+
+        {/* 3. Persona discovery strip — surface the 26 tailored landings */}
         <PersonaDiscoveryStrip />
 
-        {/* 2. Tasks — what do I need to do */}
+        {/* 4. Tasks — what do I need to do right now */}
         {popularTasksOn ? <PopularTasks /> : <PrimaryActions />}
 
         {/* 4. Trust / discovery — story blocks */}
