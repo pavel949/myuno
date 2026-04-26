@@ -9,7 +9,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { useUserPersonas } from '@/hooks/useUserPersonas';
 
 import { HomeTopBar } from '@/components/home/HomeTopBar';
-import { HomeContextChips } from '@/components/home/HomeContextChips';
+import { PersonaHalo } from '@/components/home/PersonaHalo';
 import { AppDrawer } from '@/components/nav/AppDrawer';
 import { WorkspaceHomeBanner } from '@/components/home/WorkspaceHomeBanner';
 import { HeroIntro } from '@/components/home/HeroIntro';
@@ -84,8 +84,14 @@ const Index = () => {
               onAppDrawerOpen={() => setAppDrawerOpen(true)}
               variant="onNavy"
             />
+            {/* PersonaHalo — signature home navigation: identity tile +
+                6 cluster quanta. Replaces the generic chip strip. */}
+            <PersonaHalo
+              personas={[...activePersonas]}
+              onRoleSheetOpen={() => setRoleSheetOpen(true)}
+              variant="onNavy"
+            />
           </div>
-          <HomeContextChips personas={[...activePersonas]} variant="onNavy" />
           {/* Soft fade from navy into the cream page — keeps the seam
               from looking like a hard band. */}
           <div
