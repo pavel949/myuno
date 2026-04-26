@@ -45,6 +45,26 @@ export class ErrorBoundary extends Component<Props, State> {
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     errorLog.silent(error, 'component_error');
     this.props.onError?.(error, errorInfo);
+
+    // Stale chunk auto-recovery: when a deploy invalidates the previous
+    // bundle, lazy-loaded routes throw "Failed to fetch dynamically
+    // imported module". A one-shot reload pulls the new index.html and
+    // re-resolves the chunk hashes. We guard against loops with a session
+    // marker — if we already reloaded once and still hit the error, fall
+    // through to the manual UI so the user isn't stuck reloading.
+    const msg = error?.message ?? '';
+    const isChunkError =
+      msg.includes('dynamically imported') ||
+      msg.includes('Failed to fetch') ||
+      msg.includes('Loading chunk');
+    if (isChunkError && typeof window !== 'undefined') {
+      const RELOAD_KEY = '__myuno_chunk_reload__';
+      const alreadyReloaded = sessionStorage.getItem(RELOAD_KEY);
+      if (!alreadyReloaded) {
+        sessionStorage.setItem(RELOAD_KEY, String(Date.now()));
+        window.location.reload();
+      }
+    }
   }
 
   private handleReset = () => {
