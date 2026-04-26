@@ -14,12 +14,14 @@ import {
 import { CATEGORIES } from '@/lib/catalog';
 
 describe('clusterCatalog — audience model invariants', () => {
-  it('every cluster has a stable id, label pair, and at least one service', () => {
+  it('every cluster has a stable id and label pair; public clusters expose services', () => {
     for (const c of CLUSTER_CATALOG) {
       expect(c.id, `cluster ${c.id} missing id`).toBeTruthy();
       expect(c.labelEn).toBeTruthy();
       expect(c.labelRu).toBeTruthy();
-      expect(c.services.length).toBeGreaterThan(0);
+      if (c.audience === 'public') {
+        expect(c.services.length, `public cluster ${c.id} has no services`).toBeGreaterThan(0);
+      }
     }
   });
 
@@ -55,7 +57,6 @@ describe('isClusterVisibleToUser', () => {
 
   it('hides workspace clusters from a bare guest with no personas', () => {
     expect(isClusterVisibleToUser(manageCluster, { role: 'guest' })).toBe(false);
-    expect(isClusterVisibleToUser(buildCluster, { role: 'guest' })).toBe(false);
   });
 
   it('shows the manage cluster to a property owner persona', () => {
@@ -68,16 +69,16 @@ describe('isClusterVisibleToUser', () => {
     expect(isClusterVisibleToUser(manageCluster, { role: 'owner' })).toBe(true);
   });
 
-  it('shows the build cluster only to developer persona or admin/team role', () => {
+  it('shows the build cluster as a public developer-facing catalog cluster', () => {
     expect(
       isClusterVisibleToUser(buildCluster, { personas: ['real_estate_developer'] }),
     ).toBe(true);
     expect(isClusterVisibleToUser(buildCluster, { role: 'admin' })).toBe(true);
     expect(isClusterVisibleToUser(buildCluster, { role: 'team' })).toBe(true);
-    expect(isClusterVisibleToUser(buildCluster, { role: 'guest' })).toBe(false);
+    expect(isClusterVisibleToUser(buildCluster, { role: 'guest' })).toBe(true);
     expect(
       isClusterVisibleToUser(buildCluster, { personas: ['tourist'], role: 'guest' }),
-    ).toBe(false);
+    ).toBe(true);
   });
 });
 
@@ -86,7 +87,7 @@ describe('filterCatalogForUser', () => {
     const visible = filterCatalogForUser({ role: 'guest' });
     expect(visible.every((c) => c.audience !== 'workspace')).toBe(true);
     expect(visible.some((c) => c.id === 'manage')).toBe(false);
-    expect(visible.some((c) => c.id === 'build')).toBe(false);
+    expect(visible.some((c) => c.id === 'build')).toBe(true);
   });
 
   it('exposes the manage cluster to a property owner', () => {
