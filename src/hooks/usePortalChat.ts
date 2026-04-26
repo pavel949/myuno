@@ -53,10 +53,11 @@ export function usePortalChat(propertyId: string | undefined) {
         },
         (payload) => {
           queryClient.setQueryData(queryKey, (old: PortalMessage[] | undefined) => {
-            if (!old) return [payload.new as PortalMessage];
+            const newMsg = payload.new as PortalMessage;
+            if (!old) return [newMsg];
             // Avoid duplicates
-            if (old.some(m => m.id === (payload.new as any).id)) return old;
-            return [...old, payload.new as PortalMessage];
+            if (old.some(m => m.id === newMsg.id)) return old;
+            return [...old, newMsg];
           });
         }
       )
