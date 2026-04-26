@@ -23,6 +23,8 @@ import { BackButton } from '@/components/uno/BackButton';
 import { PersonaFilterChip } from '@/components/landings/PersonaFilterChip';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { ECOSYSTEM_MAIN_SPACING, ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
+import { SEOHead } from '@/components/seo';
+import { CrossSellSection } from '@/components/crosssell/CrossSellSection';
 
 // ── Mini-app (catalog) types & implementation ─────────────────────────────
 
