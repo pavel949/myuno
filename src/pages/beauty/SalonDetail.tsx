@@ -203,6 +203,7 @@ export default function SalonDetail() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </AppLayout>
   );
 }
