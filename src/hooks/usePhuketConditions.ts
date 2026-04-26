@@ -25,7 +25,13 @@ interface PhuketConditions {
   aqiBand: 'good' | 'moderate' | 'unhealthy' | 'hazardous' | 'unknown';
   rateDelta: string;  // "+0.12" — change vs prev day
   isLoading: boolean;
+  /** True after at least one source returned a value (cache or network). */
+  hasAnyData: boolean;
+  /** Set when a network round-trip completed but every source failed. */
+  hasError: boolean;
   fetchedAt: number | null;
+  /** Force a fresh network round-trip (bypasses the 30-min cache). */
+  retry: () => void;
 }
 
 // Bumped to v3 (2026-04-24) when FX source switched away from
@@ -97,42 +103,66 @@ async function fetchRate(): Promise<{ rate: string; rateDelta: string }> {
   return { rate: r.toFixed(2), rateDelta: delta };
 }
 
+/** Internal data shape persisted to localStorage (no transient flags). */
+type PhuketData = Pick<
+  PhuketConditions,
+  'temp' | 'aqi' | 'rate' | 'weatherCode' | 'aqiBand' | 'rateDelta' | 'fetchedAt'
+>;
+
+const EMPTY_DATA: PhuketData = {
+  temp: '—',
+  aqi: '—',
+  rate: '—',
+  weatherCode: null,
+  aqiBand: 'unknown',
+  rateDelta: '',
+  fetchedAt: null,
+};
+
 export function usePhuketConditions(): PhuketConditions {
-  const [data, setData] = useState<Omit<PhuketConditions, 'isLoading'>>({
-    temp: '—',
-    aqi: '—',
-    rate: '—',
-    weatherCode: null,
-    aqiBand: 'unknown',
-    rateDelta: '',
-    fetchedAt: null,
-  });
+  const [data, setData] = useState<PhuketData>(EMPTY_DATA);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasAnyData, setHasAnyData] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  // Bumped to force a refetch when the user taps "Retry".
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
 
-    // 1) Hydrate from cache for instant paint
-    try {
-      const cached = localStorage.getItem(CACHE_KEY);
-      if (cached) {
-        const { ts, value } = JSON.parse(cached) as { ts: number; value: Omit<PhuketConditions, 'isLoading'> };
-        if (value && typeof ts === 'number') {
-          setData(value);
-          setIsLoading(false);
-          // If cache is fresh, do not refetch.
-          if (Date.now() - ts < CACHE_TTL) return () => { cancelled = true; };
+    // 1) Hydrate from cache for instant paint (skip on explicit retry — the
+    //    user is asking for fresh data, so we don't want to mask a network
+    //    success with an old cached value).
+    if (retryCount === 0) {
+      try {
+        const cached = localStorage.getItem(CACHE_KEY);
+        if (cached) {
+          const { ts, value } = JSON.parse(cached) as { ts: number; value: PhuketData };
+          if (value && typeof ts === 'number') {
+            setData(value);
+            setHasAnyData(true);
+            setIsLoading(false);
+            // If cache is fresh, do not refetch.
+            if (Date.now() - ts < CACHE_TTL) return () => { cancelled = true; };
+          }
         }
-      }
-    } catch { /* ignore */ }
+      } catch { /* ignore */ }
+    } else {
+      // Retry: clear error flag and show loading state.
+      setHasError(false);
+      setIsLoading(true);
+    }
 
     // 2) Refresh from network in parallel; partial failures are OK.
     (async () => {
       const [w, a, r] = await Promise.allSettled([fetchWeather(), fetchAqi(), fetchRate()]);
       if (cancelled) return;
 
+      const anySuccess =
+        w.status === 'fulfilled' || a.status === 'fulfilled' || r.status === 'fulfilled';
+
       setData(prev => {
-        const next = {
+        const next: PhuketData = {
           temp:        w.status === 'fulfilled' ? w.value.temp        : prev.temp,
           weatherCode: w.status === 'fulfilled' ? w.value.weatherCode : prev.weatherCode,
           aqi:         a.status === 'fulfilled' ? a.value.aqi         : prev.aqi,
@@ -141,16 +171,25 @@ export function usePhuketConditions(): PhuketConditions {
           rateDelta:   r.status === 'fulfilled' ? r.value.rateDelta   : prev.rateDelta,
           fetchedAt:   Date.now(),
         };
-        try {
-          localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), value: next }));
-        } catch { /* ignore */ }
+        if (anySuccess) {
+          try {
+            localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), value: next }));
+          } catch { /* ignore */ }
+        }
         return next;
       });
+      // Only flip hasError when the network attempt yielded nothing AND we
+      // had nothing cached — otherwise we still have something to show.
+      setHasError(!anySuccess && !hasAnyData);
+      if (anySuccess) setHasAnyData(true);
       setIsLoading(false);
     })();
 
     return () => { cancelled = true; };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [retryCount]);
 
-  return { ...data, isLoading };
+  const retry = () => setRetryCount((n) => n + 1);
+
+  return { ...data, isLoading, hasAnyData, hasError, retry };
 }
