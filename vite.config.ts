@@ -25,10 +25,25 @@ export default defineConfig(({ mode }) => {
       // `true` is more reliable than `::` on Windows / embedded browser previews (Cursor Simple Browser).
       host: true,
       port: 8080,
+      // Avoid timing-out clients while Vite is still pre-bundling on first hit.
+      // The Lovable iframe preview and Playwright otherwise see HTTP 504 from
+      // the dev server middleware on cold start with our large module graph.
+      hmr: {
+        overlay: false,
+      },
       // OneDrive-synced folders can miss file events; polling avoids stale HMR and odd Vite cache behavior.
       watch: {
         usePolling: true,
         interval: 1000,
+      },
+      // Warm common entry points at startup so the first request doesn't pay
+      // the entire transform cost. Keep this list short — only top-of-graph.
+      warmup: {
+        clientFiles: [
+          './src/main.tsx',
+          './src/App.tsx',
+          './src/pages/Index.tsx',
+        ],
       },
     },
     preview: {
