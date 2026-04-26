@@ -122,6 +122,13 @@ export default function DeliveryIndex() {
       showSearch={false}
       showCategories={false}
       showFilter={false}
+      seoTitle={language === 'ru' ? 'Доставка по Пхукету | myUNO' : 'Delivery in Phuket | myUNO'}
+      seoDescription={
+        language === 'ru'
+          ? 'Экспресс, в день заказа, документы, посылки и крупногабарит — доставка по всему Пхукету.'
+          : 'Express, same-day, documents, parcels and large items — island-wide Phuket delivery.'
+      }
+      crossSellVertical="delivery"
     >
       {/* Hero */}
       <div className="relative overflow-hidden rounded-none bg-gradient-to-br from-warning/20 via-warning/10 to-background p-6">
