@@ -3,9 +3,15 @@
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { toast } from 'sonner';
+
+type SignatureRequestInsert = Database['public']['Tables']['signature_requests']['Insert'];
+type SignatureRequestUpdate = Database['public']['Tables']['signature_requests']['Update'];
+type SignatureSignerInsert = Database['public']['Tables']['signature_request_signers']['Insert'];
+type SignatureSignerUpdate = Database['public']['Tables']['signature_request_signers']['Update'];
 
 export type SignatureRequestStatus =
   | 'draft' | 'sent' | 'partially_signed' | 'completed' | 'declined' | 'expired' | 'cancelled';
