@@ -227,13 +227,13 @@ export function useCancelSignatureRequest() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (args: { id: string; reason?: string }) => {
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('signature_requests')
         .update({
           status: 'cancelled',
           cancelled_at: new Date().toISOString(),
           cancellation_reason: args.reason ?? null,
-        })
+        } as SignatureRequestUpdate)
         .eq('id', args.id);
       if (error) throw error;
     },
