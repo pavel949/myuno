@@ -97,6 +97,13 @@ export interface MiniAppLayoutProps {
   stickySubHeader?: ReactNode;
   showQuickFiltersInSubHeader?: boolean;
   showEcosystemHint?: boolean;
+  /** Auto-renders <SEOHead> at the top when provided. */
+  seoTitle?: string;
+  seoDescription?: string;
+  seoImage?: string;
+  seoNoindex?: boolean;
+  /** Auto-renders <CrossSellSection> at the bottom of children when provided. */
+  crossSellVertical?: string;
 }
 
 function MiniappMode({
