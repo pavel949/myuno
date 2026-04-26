@@ -56,8 +56,16 @@ export function HomeTopBar({
     : 'U';
 
   const { data: hasUnread = false } = useHasUnread(user?.id);
-  const displayPersonas = personas.slice(0, 3);
+  // On very narrow phones (Telegram WebView ≈ 339px) the role pill +
+  // bell + avatar starve the wordmark column. Cap to 2 avatars below
+  // sm so a 3rd persona folds into the existing `+N` counter, then
+  // restore 3 from sm up.
   const isOnNavy = variant === 'onNavy';
+  const maxAvatarsXs = 2;
+  const maxAvatarsSm = 3;
+  const overflowXs = Math.max(0, personas.length - maxAvatarsXs);
+  const overflowSm = Math.max(0, personas.length - maxAvatarsSm);
+  const displayPersonas = personas.slice(0, maxAvatarsSm);
 
   // Style atoms — keeps the JSX readable while the two contracts diverge.
   // On navy: cream-tinted icons, translucent borders, glassy hover surfaces.
@@ -78,9 +86,10 @@ export function HomeTopBar({
   const rolePillCountCls = isOnNavy ? 'text-primary-foreground/70' : 'text-muted-foreground';
 
   return (
-    <div className="flex items-center justify-between pt-2 pb-3 gap-3">
-      {/* Drawer trigger + logo cluster */}
-      <div className="flex items-center gap-2 min-w-0">
+    <div className="flex items-center justify-between pt-2 pb-3 gap-2 sm:gap-3">
+      {/* Drawer trigger + logo cluster — does NOT shrink; the wordmark
+          must always render on a single line. */}
+      <div className="flex items-center gap-2 flex-shrink-0">
         {onAppDrawerOpen && (
           <button
             type="button"
@@ -94,10 +103,9 @@ export function HomeTopBar({
             <Menu className="w-[19px] h-[19px]" />
           </button>
         )}
-        <div className="flex flex-col min-w-0 leading-none">
+        <div className="flex flex-col leading-none">
           <BrandWordmark
             as="static"
-            className="min-w-0"
             tone={isOnNavy ? 'onNavy' : 'default'}
           />
           {/* Subtitle competes with the wordmark on narrow phones (it forced
@@ -114,15 +122,15 @@ export function HomeTopBar({
         </div>
       </div>
 
-      {/* Right cluster */}
-      <div className="flex items-center gap-2 shrink-0">
+      {/* Right cluster — allowed to shrink so the logo always wins. */}
+      <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
         {/* Role stack pill — min 44px touch target */}
         {displayPersonas.length > 0 && (
           <button
             onClick={onRoleSheetOpen}
             aria-label="Manage roles"
             className={cn(
-              'flex items-center gap-0 min-h-[44px] px-2.5 rounded-full transition-colors',
+              'flex items-center gap-0 min-h-[44px] px-2 sm:px-2.5 rounded-full transition-colors',
               rolePillCls,
             )}
           >
@@ -130,12 +138,16 @@ export function HomeTopBar({
               {displayPersonas.map((p, i) => {
                 const meta = ROLE_META[p];
                 if (!meta) return null;
+                // Hide the 3rd avatar below sm (Telegram WebView ≈339px) —
+                // it folds into the `+N` counter so the affordance stays.
+                const hideOnXs = i >= maxAvatarsXs;
                 return (
                   <div
                     key={p}
                     className={cn(
                       'w-[26px] h-[26px] rounded-full flex items-center justify-center font-display text-[11px] font-bold border-2 bg-muted shadow-sm',
                       roleAvatarBorder,
+                      hideOnXs && 'hidden sm:flex',
                     )}
                     style={{ color: meta.color, marginLeft: i === 0 ? 0 : -9, zIndex: 10 - i }}
                   >
@@ -144,12 +156,21 @@ export function HomeTopBar({
                 );
               })}
             </div>
-            {personas.length > 3 && (
-              <span className={cn('text-[10px] tabular-nums ml-1.5 font-sans', rolePillCountCls)}>
-                +{personas.length - 3}
+            {/* Two responsive counters: shows `+N` based on how many avatars
+                are actually visible at the current breakpoint. */}
+            {overflowXs > 0 && (
+              <span className={cn('sm:hidden text-[10px] tabular-nums ml-1.5 font-sans', rolePillCountCls)}>
+                +{overflowXs}
               </span>
             )}
-            <svg className="ml-2 opacity-50" width="10" height="10" viewBox="0 0 10 10" fill="none">
+            {overflowSm > 0 && (
+              <span className={cn('hidden sm:inline text-[10px] tabular-nums ml-1.5 font-sans', rolePillCountCls)}>
+                +{overflowSm}
+              </span>
+            )}
+            {/* Caret hidden on xs to save ~18px; the role pill is still
+                tappable and the avatar stack reads as a switcher. */}
+            <svg className="hidden sm:block ml-2 opacity-50" width="10" height="10" viewBox="0 0 10 10" fill="none">
               <path d="M2 4l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>

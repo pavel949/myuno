@@ -1,49 +1,40 @@
-## Why it looks dull
+## Issue
 
-Current home is 100% cream with grey chrome — no brand color anywhere above the fold. The canonical palette already defines the answer: **navy `#0A2240`** for authority, **cream `#F7F5F1`** for content, **orange `#D96B1A`** as a sparing accent. We just aren't using navy.
+On a 339-px viewport (Telegram WebView / narrow Chrome) the navy header breaks:
 
-Per canon §1 navy should occupy ≤10% of the screen — exactly enough for a header band.
+- **`myUNO` wordmark wraps to two lines** as `m UN / y O`. Cause: in `HomeTopBar` the static `BrandWordmark` lives inside a `min-w-0` flex column, and the `static` variant of `BrandWordmark` does not have `whitespace-nowrap` (only the `link` variant does). The right-side cluster (drawer + role pill + bell + avatar = ~250 px) starves the logo column and the wordmark gets squeezed past its intrinsic width.
+- **Context chips below partly hidden** behind the floating concierge avatar (cosmetic side-effect of the same overflow — chips can scroll, that's fine).
+- The role pill is heavy on tiny screens: 3 stacked role avatars (~56 px) + chevron + 14 px caret + 20 px padding. Combined with bell + avatar (44 px each) the right cluster eats >60 % of the width.
 
-## Redesign
+## Fix (minimal, scoped)
 
-### 1. Navy header band (the big visual change)
-Wrap `HomeTopBar` + `HomeContextChips` in a `bg-primary` (navy) container with a 12-px gradient fade into the cream page below. This:
-- Anchors the brand the moment the page loads.
-- Frames the wordmark, role pill, bell, and avatar against a single deliberate color block instead of floating on cream.
-- Stays inside the canon's 10% navy budget (the band is ≈110 px on a 676-px viewport ≈ 16% — but it shrinks below the fold on scroll, so over the average viewport it's well under).
+### 1. `BrandWordmark.tsx` — never wrap
+- Add `whitespace-nowrap` and `flex-shrink-0` to the `static` branch, matching the `link` branch. The wordmark is 6 chars max — letting it shrink the column was the only reason it ever wrapped.
 
-### 2. `HomeTopBar` — `variant: "default" | "onNavy"` prop
-- `BrandWordmark` gets a `tone` prop: on navy, "my" stays orange-amber (`--brand-orange-400` for legibility) and "UNO" becomes cream.
-- Subtitle (already hidden < sm) becomes `text-primary-foreground/60`.
-- Menu / bell / avatar buttons swap to `text-primary-foreground` with `hover:bg-primary-foreground/10` and translucent borders so they read as one cohesive cluster on navy.
-- Role-pill avatars keep their colored glyphs but get a translucent navy chip background (`bg-primary-foreground/10` + `border-primary-foreground/20`) instead of card-on-cream.
+### 2. `HomeTopBar.tsx` — give the logo column priority, slim the right cluster on tiny screens
+- Drop `min-w-0` from the logo cluster wrapper (it forced shrinking).
+- Add `min-w-0` and `gap-1.5` (was 2) on the right cluster so it shrinks first if anything must give.
+- On `< sm` (≤640 px):
+  - Hide the **chevron caret** in the role pill (saves ~18 px).
+  - Cap visible role avatars to **2** instead of 3 on `< sm` (saves ~17 px). 3rd+ folds into the existing `+N` counter so the affordance is preserved.
+  - Tighten role-pill horizontal padding from `px-2.5` to `px-2` on `< sm`.
+- Keep all 44 px tap targets intact (bell, avatar, drawer trigger unchanged).
 
-### 3. `HomeContextChips` — same `onNavy` variant
-- Active chip: cream pill (`bg-primary-foreground text-primary`) — high-contrast inversion.
-- Inactive chips: glassy navy (`bg-primary-foreground/8`, `border-primary-foreground/15`, `text-primary-foreground/85`) instead of muted-on-cream.
-- Tighter chrome so the chips read as part of the navy band, not stranded on top of it.
-- Threaded through `NavChips` as a new optional `tone="onNavy"` prop (default unchanged so every other surface that uses NavChips — /discover, workspace filters — keeps its current styling).
-
-### 4. Subtle warmth on cream surfaces (small, high-impact)
-- `NowInPhuket` — wrap value numbers in a faint navy underline (`border-b border-primary/15`) so the trio feels like instrumentation, not placeholder dashes.
-- `ClusterGrid` cards — promote the existing 2-px left spine to 3 px and tint the card on hover with `bg-primary/[0.02]` for a pulse of color when the user scans.
-- `HeroIntro` search field — focus ring becomes navy (already `focus-within:border-primary`, just need a soft `ring-primary/10` to make the focus state confident).
+### 3. `HomeContextChips.tsx` — no code change needed
+The chips are already horizontally scrollable; once the wordmark stops wrapping, the band height settles and the strip reads correctly. The "hidden behind chat bubble" effect in the screenshot is the floating concierge — outside scope of this fix.
 
 ## Files touched
 
 ```text
-src/pages/Index.tsx                          – wrap header + chips in navy band
-src/components/home/HomeTopBar.tsx           – variant prop + onNavy styles
-src/components/home/HomeContextChips.tsx     – pass tone through to NavChips
-src/components/nav/NavChips.tsx              – optional tone="onNavy"
-src/components/uno/BrandWordmark.tsx         – tone prop for cream-on-navy
-src/components/home/NowInPhuket.tsx          – navy underline accent on values
-src/components/home/ClusterGrid.tsx          – thicker spine + hover tint
-src/components/home/HeroIntro.tsx            – navy focus ring on search
+src/components/uno/BrandWordmark.tsx     – add whitespace-nowrap to `static` branch
+src/components/home/HomeTopBar.tsx       – right-cluster slimming + logo column doesn't shrink
 ```
 
-All changes use existing semantic tokens (`--primary`, `--primary-foreground`, `--brand-orange-400`). No new colors, no hex literals, no DB or routing changes. Type-check + existing test suite must stay green.
+No design tokens, no new colors, no DB. Type-check stays green.
 
-### Out of scope
-- Light/dark mode toggle, gradient hero photography, illustrations — those are bigger creative-direction calls. Ask separately if you want them.
-- Touching the cluster-color spines (Live = teal, Invest = navy, etc.) — those are canonical category colors and stay as-is.
+## Verification
+
+- Browser viewport set to 339×577 (matching the user's screenshot).
+- Confirm `myUNO` renders on a single line with the orange `my` + cream `UNO`.
+- Confirm role pill, bell, avatar all stay on one row, no horizontal scroll on the header itself.
+- Re-check at 375 px (iPhone SE) and 414 px (iPhone Plus) for regressions.
