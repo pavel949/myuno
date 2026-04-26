@@ -307,7 +307,25 @@ export default function AdminProjects() {
       infrastructure: project.infrastructure || [],
     });
     // Load juristic data from project (if extended type exists)
-    const p = project as any;
+    const p = project as PropertyProject & Partial<{
+      juristic_person_name: string | null;
+      juristic_person_name_ru: string | null;
+      juristic_email: string | null;
+      juristic_phone: string | null;
+      juristic_line_id: string | null;
+      juristic_whatsapp: string | null;
+      juristic_address: string | null;
+      juristic_office_hours: string | null;
+      juristic_contact_person: string | null;
+      juristic_contact_position: string | null;
+      juristic_bank_name: string | null;
+      juristic_bank_account_name: string | null;
+      juristic_bank_account_number: string | null;
+      juristic_promptpay_id: string | null;
+      cam_fee_per_sqm: number | null;
+      cam_payment_day: number | null;
+      cam_includes: string[] | null;
+    }>;
     setJuristicData({
       juristic_person_name: p.juristic_person_name || '',
       juristic_person_name_ru: p.juristic_person_name_ru || '',
