@@ -44,7 +44,7 @@ export function useDriveSources(projectId?: string) {
     queryFn: async (): Promise<DriveSource[]> => {
       if (!projectId) return [];
       const { data, error } = await supabase
-        .from('project_drive_sources' as any)
+        .from('project_drive_sources')
         .select('*')
         .eq('project_id', projectId)
         .order('created_at', { ascending: false });
@@ -81,7 +81,7 @@ export function useDriveJobs(projectId?: string, limit = 10) {
     queryFn: async (): Promise<DriveJob[]> => {
       if (!projectId) return [];
       const { data, error } = await supabase
-        .from('drive_import_jobs' as any)
+        .from('drive_import_jobs')
         .select('*')
         .eq('project_id', projectId)
         .order('created_at', { ascending: false })
@@ -129,7 +129,7 @@ export function useToggleDriveWatch() {
   return useMutation({
     mutationFn: async (input: { sourceId: string; projectId: string; enabled: boolean }) => {
       const { error } = await supabase
-        .from('project_drive_sources' as any)
+        .from('project_drive_sources')
         .update({ watch_enabled: input.enabled })
         .eq('id', input.sourceId);
       if (error) throw error;
@@ -148,7 +148,7 @@ export function useDeleteDriveSource() {
   return useMutation({
     mutationFn: async (input: { sourceId: string; projectId: string }) => {
       const { error } = await supabase
-        .from('project_drive_sources' as any)
+        .from('project_drive_sources')
         .delete()
         .eq('id', input.sourceId);
       if (error) throw error;
