@@ -722,3 +722,17 @@ Files refactored:
 - Global `any` count (canonical pattern): **890 → 797** (-93 / -10.4%).
 - Cumulative since Wave 4.2d start: **1247 → 797** (-450 / -36.1%).
 - Build: ✅ green (`tsc --noEmit` clean).
+
+### Wave 4.2d · Pass #9 (2026-04-26)
+**Scope**: 5 hooks tied to typed Database tables (`api_keys`, `agent_deals`, `mcc_leads`, `consultation_requests`, `profiles`, `concierge_sessions/journeys`, `booking_conflicts`).
+
+- `src/hooks/useStartOnboarding.ts` — 5 → 0 `any`. Concierge inserts (`concierge_sessions`, `concierge_journeys`) use typed `.from()` with `as never` payload cast; `(session as any).id` → `(session as { id: string }).id`.
+- `src/hooks/useLeadHub.ts` — 5 → 0 `any`. Imported `MccLeadRow`/`ConsultationRow`/`ProfileRow` from `Database`; `.forEach((x: any))` callbacks now strongly typed across both queries and the `useRecentLeads` helper.
+- `src/hooks/useChannelHealth.ts` — 5 → 0 `any`. RPC `detect_booking_conflicts` rows typed via local `ConflictRpcRow` (used in two places); `(supabase as any).from('booking_conflicts')` migrated to `typedFrom('booking_conflicts')` for both select and update — avoids deep-instantiation TS2589 from chained selects with embeds.
+- `src/hooks/useApiKeys.ts` — 5 → 0 `any`. All `(supabase as any).from('api_keys')` casts dropped; `onError: (e: any)` → `Error`.
+- `src/hooks/useAgentDeals.ts` — 5 → 0 `any`. Insert/update/bulk-update casts switched from `as any` to `as never` (avoids generated array-Insert overload); `current.filter((d: any))` typed via local `StageRow`.
+
+**Updated metrics**
+- Global `any` count (canonical pattern): **797 → 772** (-25 / -3.1%).
+- Cumulative since Wave 4.2d start: **1247 → 772** (-475 / -38.1%).
+- Build: ✅ green (`tsc --noEmit` clean).

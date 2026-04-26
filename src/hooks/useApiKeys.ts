@@ -41,13 +41,13 @@ export function useApiKeys() {
     queryKey: ['api-keys', activeCompany?.company_id],
     queryFn: async (): Promise<ApiKey[]> => {
       if (!activeCompany) return [];
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('api_keys')
         .select('*')
         .eq('company_id', activeCompany.company_id)
         .order('created_at', { ascending: false });
       if (error) throw error;
-      return (data || []) as ApiKey[];
+      return (data ?? []) as unknown as ApiKey[];
     },
     enabled: !!activeCompany,
   });
@@ -62,7 +62,7 @@ export function useCreateApiKey() {
       if (!user || !activeCompany) throw new Error('Missing context');
       const { full, prefix } = generateKey();
       const hash = await sha256(full);
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('api_keys')
         .insert({
           company_id: activeCompany.company_id,
@@ -72,17 +72,17 @@ export function useCreateApiKey() {
           scopes: args.scopes ?? ['read'],
           created_by: user.id,
           expires_at: args.expires_at ?? null,
-        })
+        } as never)
         .select()
         .single();
       if (error) throw error;
-      return { record: data as ApiKey, plaintext: full };
+      return { record: data as unknown as ApiKey, plaintext: full };
     },
     onSuccess: () => {
       toast.success('API key created');
       qc.invalidateQueries({ queryKey: ['api-keys'] });
     },
-    onError: (e: any) => toast.error(e.message || 'Failed'),
+    onError: (e: Error) => toast.error(e.message || 'Failed'),
   });
 }
 
@@ -90,9 +90,9 @@ export function useRevokeApiKey() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('api_keys')
-        .update({ revoked_at: new Date().toISOString() })
+        .update({ revoked_at: new Date().toISOString() } as never)
         .eq('id', id);
       if (error) throw error;
     },
@@ -100,6 +100,6 @@ export function useRevokeApiKey() {
       toast.success('API key revoked');
       qc.invalidateQueries({ queryKey: ['api-keys'] });
     },
-    onError: (e: any) => toast.error(e.message || 'Failed'),
+    onError: (e: Error) => toast.error(e.message || 'Failed'),
   });
 }

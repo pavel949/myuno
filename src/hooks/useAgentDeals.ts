@@ -262,7 +262,7 @@ export function useCreateDeal() {
     mutationFn: async (deal: AgentDealInsert) => {
       const { data, error } = await supabase
         .from('agent_deals')
-        .insert(deal as any)
+        .insert(deal as never)
         .select()
         .single();
       if (error) throw error;
@@ -307,7 +307,7 @@ export function useUpdateDeal() {
 
       const { data, error } = await supabase
         .from('agent_deals')
-        .update(updates as any)
+        .update(updates as never)
         .eq('id', id)
         .select()
         .single();
@@ -366,15 +366,16 @@ export function useBulkUpdateStage() {
 
       const { error } = await supabase
         .from('agent_deals')
-        .update({ stage } as any)
+        .update({ stage } as never)
         .in('id', ids);
       if (error) throw error;
 
       // Non-blocking: log field changes for each deal that actually changed
       if (current && user) {
-        const changes = current
-          .filter((d: any) => d.stage !== stage)
-          .map((d: any) => ({
+        type StageRow = { id: string; stage: string };
+        const changes = (current as StageRow[])
+          .filter((d) => d.stage !== stage)
+          .map((d) => ({
             deal_id: d.id,
             field_name: 'stage',
             old_value: d.stage,
