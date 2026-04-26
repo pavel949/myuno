@@ -9,8 +9,6 @@ import { MiniAppLayout } from '@/components/miniapp/MiniAppLayout';
 import { CatalogCard } from '@/components/miniapp/CatalogCard';
 import { EmptyState } from '@/components/uno/EmptyState';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
-import { OptimizedImage } from '@/components/ui/optimized-image';
-import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 
 const AGE_GROUPS = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
