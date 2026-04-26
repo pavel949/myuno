@@ -8,6 +8,30 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
 
+interface PropertyEmbed {
+  deleted_at?: string | null;
+  management_company_id?: string | null;
+  title_en?: string | null;
+  title_ru?: string | null;
+  cover_image?: string | null;
+  address?: string | null;
+  district?: string | null;
+  is_active?: boolean | null;
+  bedrooms?: number | null;
+  bathrooms?: number | null;
+  price_per_night?: number | null;
+  currency?: string | null;
+  complex_id?: string | null;
+  project_id?: string | null;
+}
+
+interface AssignmentPermissions {
+  calendar?: boolean;
+  pricing?: boolean;
+  bookings?: boolean;
+  guests?: boolean;
+}
+
 export interface AssignedProperty {
   id: string;
   property_id: string;
@@ -123,20 +147,20 @@ export function useAssignedProperties() {
       });
 
       let visibleAssignments = assignments.filter((assignment) => {
-        const property = assignment.properties as any;
+        const property = assignment.properties as PropertyEmbed | null;
         return !property?.deleted_at;
       });
 
       // In MC mode, only show assignments for properties belonging to the active company
       if (activeCompanyId) {
         visibleAssignments = visibleAssignments.filter((assignment) => {
-          const property = assignment.properties as any;
+          const property = assignment.properties as PropertyEmbed | null;
           return property?.management_company_id === activeCompanyId;
         });
       }
 
       return visibleAssignments.map(assignment => {
-        const property = assignment.properties as any;
+        const property = assignment.properties as PropertyEmbed | null;
         const propStats = bookingsByProperty.get(assignment.property_id) || { upcoming: 0, today: 'available' as const };
         
         return {
@@ -152,11 +176,11 @@ export function useAssignedProperties() {
           bathrooms: property.bathrooms,
           price_per_night: property.price_per_night,
           currency: property.currency || 'THB',
-          permissions: (assignment.permissions as any) || {
-            calendar: true,
-            pricing: true,
-            bookings: true,
-            guests: true,
+          permissions: {
+            calendar: (assignment.permissions as AssignmentPermissions | null)?.calendar ?? true,
+            pricing: (assignment.permissions as AssignmentPermissions | null)?.pricing ?? true,
+            bookings: (assignment.permissions as AssignmentPermissions | null)?.bookings ?? true,
+            guests: (assignment.permissions as AssignmentPermissions | null)?.guests ?? true,
           },
           owner_name: null,
           complex_id: property.complex_id || null,

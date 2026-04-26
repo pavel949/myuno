@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
 import type { 
   Campaign, 
@@ -14,20 +15,21 @@ import type {
   TargetSegment
 } from '@/types/marketing';
 
+type CampaignRow = Database['public']['Tables']['mcc_campaigns']['Row'];
+
 // Transform database row to Campaign type
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const transformCampaign = (row: any): Campaign => ({
+const transformCampaign = (row: CampaignRow): Campaign => ({
   id: row.id,
   name: row.name,
   description: row.description,
   goal: row.goal as CampaignGoal,
   target_segment: row.target_segment as TargetSegment | null,
   channels: (row.channels || []) as CampaignChannel[],
-  budget: row.budget as CampaignBudget | null,
-  schedule: row.schedule as CampaignSchedule | null,
-  kpi_targets: row.kpi_targets as CampaignKPI | null,
-  ab_variants: row.ab_variants,
-  performance_data: row.performance_data as CampaignPerformance | null,
+  budget: row.budget as unknown as CampaignBudget | null,
+  schedule: row.schedule as unknown as CampaignSchedule | null,
+  kpi_targets: row.kpi_targets as unknown as CampaignKPI | null,
+  ab_variants: (Array.isArray(row.ab_variants) ? row.ab_variants : null) as Campaign['ab_variants'],
+  performance_data: row.performance_data as unknown as CampaignPerformance | null,
   status: row.status as CampaignStatus,
   created_by: row.created_by,
   created_at: row.created_at,
@@ -112,7 +114,7 @@ export function useCreateCampaign() {
       const { data, error } = await supabase
         .from('mcc_campaigns')
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .insert([insertPayload] as any)
+        .insert([insertPayload] as never)
         .select()
         .single();
 
@@ -149,7 +151,7 @@ export function useUpdateCampaign() {
       const { data: result, error } = await supabase
         .from('mcc_campaigns')
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .update(updatePayload as any)
+        .update(updatePayload as never)
         .eq('id', id)
         .select()
         .single();
@@ -236,7 +238,7 @@ export function useDuplicateCampaign() {
       const { data, error } = await supabase
         .from('mcc_campaigns')
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .insert([duplicatePayload] as any)
+        .insert([duplicatePayload] as never)
         .select()
         .single();
 

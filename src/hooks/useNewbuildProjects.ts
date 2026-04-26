@@ -3,7 +3,10 @@
  */
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 import { normalizeProjectFacilityIds } from '@/lib/propertyAttributeRegistry';
+
+type ProjectRow = Database['public']['Tables']['property_projects']['Row'];
 
 export interface NewbuildProject {
   id: string;
@@ -40,7 +43,7 @@ export interface NewbuildProject {
   created_at: string;
   // New sales/CRM fields
   commission_pct: number | null;
-  payment_plan: any[] | null;
+  payment_plan: unknown[] | null;
   marketing_materials: string[] | null;
   exclusive: boolean;
   management_company_id: string | null;
@@ -93,7 +96,7 @@ export function useNewbuildProjects(filters?: NewbuildFilters) {
       const { data, error } = await query;
       if (error) throw error;
 
-      return (data || []).map((p: any) => ({
+      return (data || []).map((p: ProjectRow) => ({
         id: p.id,
         slug: p.slug,
         name_en: p.name_en,
@@ -127,7 +130,7 @@ export function useNewbuildProjects(filters?: NewbuildFilters) {
         muuno_score: p.muuno_score,
         created_at: p.created_at,
         commission_pct: p.commission_pct ?? null,
-        payment_plan: p.payment_plan ?? null,
+        payment_plan: Array.isArray(p.payment_plan) ? (p.payment_plan as unknown[]) : null,
         marketing_materials: p.marketing_materials ?? [],
         exclusive: p.exclusive ?? false,
         management_company_id: p.management_company_id ?? null,
@@ -164,7 +167,7 @@ export function useNewbuildProject(slugOrId?: string) {
       if (error) throw error;
       if (!data) return null;
 
-      const p = data as any;
+      const p = data as ProjectRow;
       return {
         id: p.id,
         slug: p.slug,
@@ -199,7 +202,7 @@ export function useNewbuildProject(slugOrId?: string) {
         muuno_score: p.muuno_score,
         created_at: p.created_at,
         commission_pct: p.commission_pct ?? null,
-        payment_plan: p.payment_plan ?? null,
+        payment_plan: Array.isArray(p.payment_plan) ? (p.payment_plan as unknown[]) : null,
         marketing_materials: p.marketing_materials ?? [],
         exclusive: p.exclusive ?? false,
         management_company_id: p.management_company_id ?? null,
@@ -247,7 +250,7 @@ export function useNewbuildLocations() {
         .eq('is_approved', true);
       
       const areas = new Set<string>();
-      (data || []).forEach((p: any) => {
+      (data || []).forEach((p) => {
         if (p.location_area) areas.add(p.location_area);
         else if (p.district) areas.add(p.district);
       });

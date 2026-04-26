@@ -175,7 +175,7 @@ export function useSupabaseCRUD<T extends { id: string }>({
        
       const { data: result, error: insertError } = await supabase
         .from(table as never)
-        .insert(insertData)
+        .insert(insertData as never)
         .select()
         .single();
 
@@ -202,7 +202,7 @@ export function useSupabaseCRUD<T extends { id: string }>({
        
       const { data: result, error: updateError } = await supabase
         .from(table as never)
-        .update(updateData)
+        .update(updateData as never)
         .eq('id', id)
         .select()
         .single();
