@@ -12,6 +12,7 @@ import { FavoriteButton } from '@/components/uno/FavoriteButton';
 import { useViewHistory } from '@/hooks/useViewHistory';
 import { useClinic, useDoctors, useMedicalServices } from '@/hooks/useClinics';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
+import { AppLayout } from '@/components/layout/AppLayout';
 
 const ClinicDetail = () => {
   const { id } = useParams();
@@ -39,21 +40,25 @@ const ClinicDetail = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
+      <AppLayout showHeader={false} showBottomNav>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      </AppLayout>
     );
   }
 
   if (!clinic) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-background gap-4">
-        <Stethoscope className="w-16 h-16 text-muted-foreground" />
-        <h2 className="text-xl font-semibold">{language === 'ru' ? 'Клиника не найдена' : 'Clinic not found'}</h2>
-        <Button onClick={() => navigate('/medical')}>
-          {language === 'ru' ? 'К списку клиник' : 'Back to clinics'}
-        </Button>
-      </div>
+      <AppLayout showHeader={false} showBottomNav>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+          <Stethoscope className="w-16 h-16 text-muted-foreground" />
+          <h2 className="text-xl font-semibold">{language === 'ru' ? 'Клиника не найдена' : 'Clinic not found'}</h2>
+          <Button onClick={() => navigate('/medical')}>
+            {language === 'ru' ? 'К списку клиник' : 'Back to clinics'}
+          </Button>
+        </div>
+      </AppLayout>
     );
   }
 
@@ -64,8 +69,9 @@ const ClinicDetail = () => {
   const specialties = clinic.specialty || [];
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
-      <div className="relative h-64">
+    <AppLayout showHeader={false} showBottomNav>
+      <div className="flex flex-col">
+        <div className="relative h-64">
         <img src={images[selectedImage]} alt={name} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         
@@ -216,7 +222,8 @@ const ClinicDetail = () => {
           </Button>
         </div>
       </div>
-    </div>
+      </div>
+    </AppLayout>
   );
 };
 

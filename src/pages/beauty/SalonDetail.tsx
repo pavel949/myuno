@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
 import { RelatedServicesSection } from '@/components/crosssell';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
+import { AppLayout } from '@/components/layout/AppLayout';
 
 export default function SalonDetail() {
   const { id } = useParams<{ id: string }>();
@@ -40,21 +41,25 @@ export default function SalonDetail() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
+      <AppLayout showHeader={false} showBottomNav>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      </AppLayout>
     );
   }
 
   if (!salon) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-background gap-4">
-        <Scissors className="w-16 h-16 text-muted-foreground" />
-        <h2 className="text-xl font-semibold">{language === 'ru' ? 'Салон не найден' : 'Salon not found'}</h2>
-        <Button onClick={() => navigate('/beauty')}>
-          {language === 'ru' ? 'К списку салонов' : 'Back to salons'}
-        </Button>
-      </div>
+      <AppLayout showHeader={false} showBottomNav>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+          <Scissors className="w-16 h-16 text-muted-foreground" />
+          <h2 className="text-xl font-semibold">{language === 'ru' ? 'Салон не найден' : 'Salon not found'}</h2>
+          <Button onClick={() => navigate('/beauty')}>
+            {language === 'ru' ? 'К списку салонов' : 'Back to salons'}
+          </Button>
+        </div>
+      </AppLayout>
     );
   }
 
@@ -72,9 +77,10 @@ export default function SalonDetail() {
   const totalDuration = services.filter(s => selectedServices.includes(s.id)).reduce((sum, s) => sum + s.duration_minutes, 0);
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Hero Image */}
-      <div className="relative h-72 sm:h-96">
+    <AppLayout showHeader={false} showBottomNav>
+      <div>
+        {/* Hero Image */}
+        <div className="relative h-72 sm:h-96">
         <img src={heroImage} alt={name} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
         
@@ -197,6 +203,7 @@ export default function SalonDetail() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </AppLayout>
   );
 }

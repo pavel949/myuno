@@ -15,6 +15,7 @@ import { useEvent } from '@/hooks/useEvents';
 import { useVenue, VENUE_TYPES } from '@/hooks/useVenues';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
 import { useViewHistory } from '@/hooks/useViewHistory';
+import { AppLayout } from '@/components/layout/AppLayout';
 
 const AGE_POLICY_LABELS: Record<string, { en: string; ru: string }> = {
   'all_ages': { en: 'All Ages', ru: 'Все возрасты' },
@@ -62,27 +63,29 @@ const EventDetail = () => {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col min-h-screen bg-background">
+      <AppLayout showHeader={false} showBottomNav>
         <Skeleton className="h-72 w-full" />
         <div className="p-4 space-y-4">
           <Skeleton className="h-8 w-3/4" />
           <Skeleton className="h-20 w-full" />
           <Skeleton className="h-32 w-full" />
         </div>
-      </div>
+      </AppLayout>
     );
   }
 
   if (!event) {
     return (
-      <div className="flex flex-col min-h-screen bg-background items-center justify-center p-4">
-        <p className="text-muted-foreground mb-4">
-          {language === 'ru' ? 'Событие не найдено' : 'Event not found'}
-        </p>
-        <Button onClick={() => navigate('/events')}>
-          {language === 'ru' ? 'К событиям' : 'Back to Events'}
-        </Button>
-      </div>
+      <AppLayout showHeader={false} showBottomNav>
+        <div className="flex flex-col items-center justify-center p-4 min-h-[60vh]">
+          <p className="text-muted-foreground mb-4">
+            {language === 'ru' ? 'Событие не найдено' : 'Event not found'}
+          </p>
+          <Button onClick={() => navigate('/events')}>
+            {language === 'ru' ? 'К событиям' : 'Back to Events'}
+          </Button>
+        </div>
+      </AppLayout>
     );
   }
 
@@ -92,9 +95,10 @@ const EventDetail = () => {
   const hasTicketUrl = event.ticket_url && event.ticket_url.length > 0;
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
-      {/* Header Image */}
-      <div className="relative h-72">
+    <AppLayout showHeader={false} showBottomNav>
+      <div className="flex flex-col">
+        {/* Header Image */}
+        <div className="relative h-72">
         <img src={images[selectedImage]} alt={event.title_en} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         
@@ -356,7 +360,8 @@ const EventDetail = () => {
           )}
         </div>
       </div>
-    </div>
+      </div>
+    </AppLayout>
   );
 };
 
