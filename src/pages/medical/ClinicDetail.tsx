@@ -69,8 +69,9 @@ const ClinicDetail = () => {
   const specialties = clinic.specialty || [];
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
-      <div className="relative h-64">
+    <AppLayout showHeader={false} showBottomNav>
+      <div className="flex flex-col">
+        <div className="relative h-64">
         <img src={images[selectedImage]} alt={name} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         
