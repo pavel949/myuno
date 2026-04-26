@@ -103,7 +103,16 @@ export function useOwnerAccounts() {
       const allFinancials = financialsRes.data || [];
       const allBookings = bookingsRes.data || [];
 
-      return contacts.map(c => {
+      type ContactExt = (typeof contacts)[number] & {
+        linked_user_id?: string | null;
+        special_notes?: string | null;
+        emergency_contact_name?: string | null;
+        emergency_contact_phone?: string | null;
+        emergency_contact_relation?: string | null;
+      };
+
+      return contacts.map(rawC => {
+        const c = rawC as ContactExt;
         const ownerProps = (properties || []).filter(p => p.owner_contact_id === c.id);
         const ownerPropIds = ownerProps.map(p => p.id);
         const ownerDocs = docs.filter(d => d.contact_id === c.id);
