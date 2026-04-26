@@ -182,8 +182,19 @@ function normalizeServicePath(p: string): string {
 }
 
 function findAppEntryByServicePath(path: string) {
-  const base = normalizeServicePath(path);
-  return Object.values(APP_REGISTRY).find((e) => normalizeServicePath(e.route) === base);
+  // Exact match first — preserves query-string discriminators
+  // (e.g. `/services?category=laundry` vs `/services?category=plumbing`).
+  const exact = Object.values(APP_REGISTRY).find((e) => e.route === path);
+  if (exact) return exact;
+
+  // Fallback: base-path match ONLY when the incoming path has no query.
+  // This keeps the umbrella entry winning for plain `/services`, but never
+  // collapses sub-routes onto it (which would force every sub-service to
+  // inherit the same label — see All Services drawer regression 2026-04-26).
+  if (path.includes('?')) return undefined;
+  return Object.values(APP_REGISTRY).find(
+    (e) => normalizeServicePath(e.route) === path,
+  );
 }
 
 export function getClusterHeaderLabel(entry: ClusterCatalogEntry, lang: Language): string {

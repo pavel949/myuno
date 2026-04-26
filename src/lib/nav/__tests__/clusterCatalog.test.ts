@@ -9,7 +9,9 @@ import {
   filterCatalogForUser,
   isClusterVisibleToUser,
   getClusterById,
+  getClusterServiceLocalizedLabel,
 } from '../clusterCatalog';
+import { CATEGORIES } from '@/lib/catalog';
 
 describe('clusterCatalog — audience model invariants', () => {
   it('every cluster has a stable id, label pair, and at least one service', () => {
@@ -124,3 +126,63 @@ describe('filterCatalogForUser', () => {
     }
   });
 });
+
+describe('getClusterServiceLocalizedLabel — query-string disambiguation', () => {
+  // Regression for 2026-04-26: the All Services drawer collapsed every
+  // sub-route in `cat-home-living` and `cat-tourism` to a single label
+  // because `findAppEntryByServicePath` stripped the query string before
+  // matching. We assert per-category label uniqueness in both languages.
+
+  function labelsFor(categoryId: string, lang: 'en' | 'ru'): string[] {
+    const cat = CATEGORIES.find((c) => c.id === categoryId);
+    if (!cat) throw new Error(`category ${categoryId} not found in SSOT`);
+    return cat.services.map((s) =>
+      getClusterServiceLocalizedLabel(
+        {
+          labelEn: s.labelEn,
+          labelRu: s.labelRu,
+          labelTh: s.labelTh,
+          icon: s.icon,
+          path: s.path,
+          status: s.status,
+        },
+        lang,
+      ),
+    );
+  }
+
+  it('Home & Living renders 12 distinct EN labels (no "Home services" duplication)', () => {
+    const labels = labelsFor('cat-home-living', 'en');
+    expect(labels.length).toBeGreaterThanOrEqual(10);
+    expect(new Set(labels).size, `dup labels: ${labels.join(' | ')}`).toBe(labels.length);
+  });
+
+  it('Home & Living renders distinct RU labels', () => {
+    const labels = labelsFor('cat-home-living', 'ru');
+    expect(new Set(labels).size, `dup labels: ${labels.join(' | ')}`).toBe(labels.length);
+  });
+
+  it('Tourism & Activities renders distinct EN labels (no "Experiences" duplication)', () => {
+    const labels = labelsFor('cat-tourism', 'en');
+    expect(new Set(labels).size, `dup labels: ${labels.join(' | ')}`).toBe(labels.length);
+  });
+
+  it('plain umbrella route /services still resolves via APP_REGISTRY', () => {
+    const cat = CATEGORIES.find((c) => c.id === 'cat-home-living')!;
+    const umbrella = cat.services.find((s) => s.path === '/services');
+    expect(umbrella, '/services umbrella entry missing from SSOT').toBeTruthy();
+    const label = getClusterServiceLocalizedLabel(
+      {
+        labelEn: umbrella!.labelEn,
+        labelRu: umbrella!.labelRu,
+        icon: umbrella!.icon,
+        path: umbrella!.path,
+        status: umbrella!.status,
+      },
+      'en',
+    );
+    expect(label).toBeTruthy();
+    expect(label.length).toBeGreaterThan(0);
+  });
+});
+
