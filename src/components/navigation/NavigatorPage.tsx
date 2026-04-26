@@ -449,7 +449,7 @@ export default function NavigatorPage() {
 
         {/* Coming soon */}
         {searchResults === null && audienceSoon.length > 0 && (
-          <div className="rounded-sm p-4 space-y-3 bg-bg-elevated border border-border/40">
+          <div className="rounded-sm p-4 space-y-3 bg-card-elevated border border-border/40">
             <p className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-wider">
               {pickTriplet({ ru: 'Скоро', en: 'Coming soon', th: 'เร็ว ๆ นี้' }, language)}
             </p>
