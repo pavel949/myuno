@@ -35,11 +35,24 @@ describe('catalog SSOT — clusters', () => {
     expect(new Set(orders).size).toBe(orders.length);
   });
 
-  it('every cluster has at least one category', () => {
+  it('every public-audience cluster has at least one category', () => {
+    // `manage` is workspace-only (audience: 'workspace') — its modules live
+    // under /mc/* and /owner/* and are not exposed in the public services
+    // catalog. All other clusters must surface at least one category.
     for (const c of CLUSTERS) {
+      if (c.audience === 'workspace') continue;
       const cats = getCategoriesByCluster(c.id);
-      expect(cats.length, `cluster ${c.id} has no categories`).toBeGreaterThan(0);
+      expect(cats.length, `public cluster ${c.id} has no categories`).toBeGreaterThan(0);
     }
+  });
+
+  it('wedding lives in the LIVE cluster (lifestyle), not MANAGE (workspace)', () => {
+    // Regression guard for 2026-04-26 fix: cat-wedding-events used to sit
+    // under `manage`, which made Weddings appear in the public "Operations"
+    // block on Home. Wedding is a lifestyle/family event — it belongs in
+    // `live`. Persona system + appRegistry mirror this assignment.
+    const wedding = CATEGORIES.find((c) => c.id === 'cat-wedding-events');
+    expect(wedding?.clusterId).toBe('live');
   });
 });
 
