@@ -141,6 +141,7 @@ export const CLUSTERS: ClusterEntry[] = [
     color: '#00D68F',
     sortOrder: 1,
     audience: 'public',
+    homeRoute: '/life/arrival',
   },
   {
     id: 'live',
