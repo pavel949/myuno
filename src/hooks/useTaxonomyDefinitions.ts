@@ -106,7 +106,7 @@ export function useTaxonomyDefinitions() {
     mutationFn: async (definition: Omit<TaxonomyDefinition, 'id' | 'created_at' | 'updated_at'>) => {
       const { data, error } = await supabase
         .from('taxonomy_definitions')
-        .insert(definition as any)
+        .insert(definition as never)
         .select()
         .single();
 
@@ -123,7 +123,7 @@ export function useTaxonomyDefinitions() {
     mutationFn: async ({ id, ...updates }: Partial<TaxonomyDefinition> & { id: string }) => {
       const { data, error } = await supabase
         .from('taxonomy_definitions')
-        .update(updates as any)
+        .update(updates as never)
         .eq('id', id)
         .select()
         .single();
@@ -141,7 +141,7 @@ export function useTaxonomyDefinitions() {
     mutationFn: async (id: string) => {
       const { error } = await supabase
         .from('taxonomy_definitions')
-        .update({ is_active: false } as any)
+        .update({ is_active: false } as never)
         .eq('id', id);
 
       if (error) throw error;
