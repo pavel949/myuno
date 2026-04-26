@@ -154,54 +154,34 @@ export default function InvestmentIndex() {
         }
       >
         <div className="space-y-6">
-          {/* Hero section */}
-          <div className="relative overflow-hidden rounded-none bg-gradient-to-br from-success to-success p-6 text-white">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2" />
-            
-            <div className="relative z-10 space-y-3">
-              <div className="flex items-center gap-2">
-                <TrendingUp className="h-6 w-6" />
-                <h1 className="text-xl font-bold">
-                  {isRu ? 'muUNO Investment Hub' : 'muUNO Investment Hub'}
-                </h1>
-              </div>
-              <p className="text-white/90 text-sm">
-                {isRu 
-                  ? 'Инвестируйте в проверенные проекты Пхукета с экспертной оценкой рисков'
-                  : 'Invest in verified Phuket projects with expert risk assessment'
-                }
-              </p>
-              
-              <div className="flex flex-wrap gap-2 pt-2">
-                <Badge className="bg-white/20 text-white border-0">
-                  <Shield className="h-3 w-3 mr-1" />
-                  muUNO Scoring
-                </Badge>
-                <Badge className="bg-white/20 text-white border-0">
-                  <FileText className="h-3 w-3 mr-1" />
-                  Due Diligence
-                </Badge>
-              </div>
-              <div className="grid grid-cols-2 gap-2 pt-1">
-                <Button size="sm" variant="secondary" onClick={() => navigate(APP_ROUTES.INVEST_MARKET)}>
-                  Market
-                </Button>
-                <Button size="sm" variant="secondary" onClick={() => navigate(APP_ROUTES.INVEST_DEALS)}>
-                  Deals
-                </Button>
-                <Button size="sm" variant="secondary" onClick={() => navigate(APP_ROUTES.INVEST_NETWORK)}>
-                  Network
-                </Button>
-                <Button size="sm" variant="secondary" onClick={() => navigate(APP_ROUTES.INVEST_EXECUTION)}>
-                  Execution
-                </Button>
-              </div>
+          {/* Trust badges + Hub navigation */}
+          <div className="rounded-none border border-border/60 bg-card/70 p-4 space-y-3">
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="secondary" className="gap-1">
+                <Shield className="h-3 w-3" />
+                muUNO Scoring
+              </Badge>
+              <Badge variant="secondary" className="gap-1">
+                <FileText className="h-3 w-3" />
+                Due Diligence
+              </Badge>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <Button size="sm" variant="outline" onClick={() => navigate(APP_ROUTES.INVEST_MARKET)}>
+                Market
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => navigate(APP_ROUTES.INVEST_DEALS)}>
+                Deals
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => navigate(APP_ROUTES.INVEST_NETWORK)}>
+                Network
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => navigate(APP_ROUTES.INVEST_EXECUTION)}>
+                Execution
+              </Button>
             </div>
           </div>
 
-          {/* Category filter */}
-          <CategoryChips />
 
           {/* Hot Deals section */}
           {!selectedCategory && featured && featured.length > 0 && (
