@@ -161,7 +161,7 @@ async function fetchClusterActivity(userId: string): Promise<ClusterActivityCoun
         .from('listing_applications')
         .select('id', { count: 'exact', head: true })
         .eq('user_id', userId)
-        .in('status', OPEN_APPLICATION_STATUSES) as unknown as PromiseLike<{ count: number | null; error: unknown }>,
+        .in('status', OPEN_LISTING_APPLICATION_STATUSES) as unknown as PromiseLike<{ count: number | null; error: unknown }>,
     ),
 
     // legal — visa pipeline
@@ -179,7 +179,7 @@ async function fetchClusterActivity(userId: string): Promise<ClusterActivityCoun
         .from('partner_applications')
         .select('id', { count: 'exact', head: true })
         .eq('user_id', userId)
-        .in('status', OPEN_APPLICATION_STATUSES) as unknown as PromiseLike<{ count: number | null; error: unknown }>,
+        .in('status', OPEN_PARTNER_APPLICATION_STATUSES) as unknown as PromiseLike<{ count: number | null; error: unknown }>,
     ),
   ]);
 
