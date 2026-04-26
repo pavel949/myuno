@@ -1,6 +1,6 @@
-import React, { useEffect, useCallback, useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Calendar, Package, Scissors, Home, Car, Ship, Ticket, Flower2, Stethoscope, Clock, ChevronRight, Dumbbell, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import React, { useEffect, useCallback, useMemo, useState, useRef } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Calendar, Package, Scissors, Home, Car, Ship, Ticket, Flower2, Stethoscope, Clock, ChevronRight, Dumbbell, AlertCircle, ChevronDown, ChevronUp, X } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
