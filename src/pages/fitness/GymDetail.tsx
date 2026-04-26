@@ -82,9 +82,10 @@ const GymDetail = () => {
   const currentPrice = selectedPrice || prices[0];
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
-      {/* Header Image */}
-      <div className="relative h-72">
+    <AppLayout showHeader={false} showBottomNav>
+      <div className="flex flex-col">
+        {/* Header Image */}
+        <div className="relative h-72">
         <img src={images[selectedImage]} alt={name} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         
