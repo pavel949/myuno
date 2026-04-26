@@ -92,9 +92,8 @@ export function useAdminExperiences(options: UseAdminExperiencesOptions = {}) {
 
   // Transform raw listings to AdminExperience shape
   const experiences: AdminExperience[] = (rawItems || []).map((raw) => {
-    const attrs = (r.attributes as Record<string, unknown> | undefined) || {};
     const r = raw as Record<string, unknown>;
-    const a = attrs as Record<string, unknown>;
+    const a = (r.attributes as Record<string, unknown> | undefined) || {};
     return {
       id: r.id,
       provider_id: r.provider_id,
