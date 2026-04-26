@@ -689,3 +689,21 @@ Build: ✅ green (`tsc --noEmit` clean, `bun run build` clean — 1m 12s, 2196 P
 Cumulative `any` count by primary metric (`: any|as any|<any>|any[]`): **prior baseline 992 → 1029 measurement-method drift; the three files above moved from 34 → 7 measured offenders (-27).** The aggregate counter switched scripts mid-wave; subsequent passes will use the canonical `rg ': any\b|<any>|as any\b|any\[\]'` pattern as the single baseline going forward.
 
 Build: ✅ green (`tsc --noEmit` clean, `bun run build` clean — 266ms sw build).
+
+### Wave 4.2d — Pass #6 (2026-04-26)
+
+Removed `(supabase as any)` and ambient `any` from the next batch of top offenders. All targeted tables (`investment_deals`, `investor_inquiries`, `signature_requests`, `signature_request_signers`, `webhook_endpoints`, `webhook_deliveries`, `company_category_settings`, `project_drive_sources`, `drive_import_jobs`, `property_projects`) are present in `Database` types — replaced casts with direct `.from('table')` calls and narrow `Insert`/`Update` types.
+
+Files refactored:
+- `src/hooks/investment-hub/useInvestmentDeals.ts` — 11 → 0 `any`. Imported `Database` types; replaced all `(supabase.from('investment_deals' as any) as any)` and `finalPatch: any` with typed equivalents.
+- `src/hooks/useSignatureRequests.ts` — 10 → 0 `any`. All 6 `(supabase as any)` casts dropped; `onError: any` → `onError: Error`.
+- `src/pages/admin/AdminProjects.tsx` — 10 → 0 `any`. Introduced narrow `JuristicFields` intersection for `project as PropertyProject & Partial<{...}>`; `extractedData: any` → `Partial<CreatePropertyProjectData> & Record<string, unknown>`; `e.id as any` → `as typeof moderationFilter`.
+- `src/components/admin/AdminVerticalCRUD.tsx` — kept permissive `Record<string, any>` for back-compat with `AdminRecord` consumers (verified across 5 admin pages).
+- `src/hooks/useWebhooks.ts` — 9 → 0 `any`. Typed `WebhookEndpointInsert`; `payload: any` → `Json`; `onError: any` → `Error`.
+- `src/hooks/useCompanyCategorySettings.ts` — 9 → 0 `any`. All 4 `as any` upsert/from casts dropped.
+- `src/hooks/useDriveImport.ts` — 8 → 0 `any` in hook + cascading fix in `DriveImportReview.tsx` (introduced `ExtractedUnit` type).
+
+**Updated metrics**
+- Global `any` count (canonical pattern): **1029 → 890** (-139 / -13.5%).
+- Cumulative since Wave 4.2d start: **1247 → 890** (-357 / -28.6%).
+- Build: ✅ green (`tsc --noEmit` clean, `bun run build` 355ms sw, full client OK).
