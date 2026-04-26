@@ -2,6 +2,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import type { Database } from '@/integrations/supabase/types';
+
+type VisaRecordRow = Database['public']['Tables']['visa_records']['Row'];
+type VisaRecordInsert = Database['public']['Tables']['visa_records']['Insert'];
+type VisaRecordUpdate = Database['public']['Tables']['visa_records']['Update'];
 
 export interface VisaRecord {
   id: string;
@@ -32,20 +37,21 @@ export function useVisaRecords() {
     queryKey: ['visa-records', user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('visa_records' as any)
+        .from('visa_records')
         .select('*')
         .order('expiry_date', { ascending: true });
       if (error) throw error;
-      return (data || []) as unknown as VisaRecord[];
+      return (data ?? []) as unknown as VisaRecord[];
     },
     enabled: !!user,
   });
 
   const create = useMutation({
     mutationFn: async (input: CreateVisaInput) => {
+      const payload: VisaRecordInsert = { ...input, user_id: user!.id } as VisaRecordInsert;
       const { data, error } = await supabase
-        .from('visa_records' as any)
-        .insert({ ...input, user_id: user!.id } as any)
+        .from('visa_records')
+        .insert(payload)
         .select()
         .single();
       if (error) throw error;
@@ -61,8 +67,8 @@ export function useVisaRecords() {
   const update = useMutation({
     mutationFn: async ({ id, ...input }: Partial<CreateVisaInput> & { id: string }) => {
       const { data, error } = await supabase
-        .from('visa_records' as any)
-        .update(input as any)
+        .from('visa_records')
+        .update(input as VisaRecordUpdate)
         .eq('id', id)
         .select()
         .single();
@@ -79,7 +85,7 @@ export function useVisaRecords() {
   const remove = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from('visa_records' as any)
+        .from('visa_records')
         .delete()
         .eq('id', id);
       if (error) throw error;
@@ -91,5 +97,5 @@ export function useVisaRecords() {
     onError: () => toast.error('Failed to delete visa record'),
   });
 
-  return { records: query.data || [], isLoading: query.isLoading, create, update, remove };
+  return { records: query.data ?? [] as VisaRecordRow[] as unknown as VisaRecord[], isLoading: query.isLoading, create, update, remove };
 }

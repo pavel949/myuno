@@ -1,7 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { typedFrom } from '@/lib/untypedTables';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMyCompanyId } from '@/hooks/useAgentDeals';
+import type { Json } from '@/integrations/supabase/types';
 
 export interface ChecklistTemplate {
   id: string;
@@ -48,12 +50,12 @@ export function useChecklistTemplates() {
     queryFn: async () => {
       if (!companyId) return [];
       const { data, error } = await supabase
-        .from('property_checklist_templates' as any)
+        .from('property_checklist_templates')
         .select('*')
         .eq('company_id', companyId)
         .order('created_at', { ascending: false });
       if (error) throw error;
-      return (data || []) as unknown as ChecklistTemplate[];
+      return (data ?? []) as unknown as ChecklistTemplate[];
     },
     enabled: !!companyId,
   });
@@ -68,8 +70,13 @@ export function useCreateChecklistTemplate() {
       const companyId = company?.company_id;
       if (!companyId) throw new Error('No company');
       const { error } = await supabase
-        .from('property_checklist_templates' as any)
-        .insert({ ...input, company_id: companyId, items: input.items as any });
+        .from('property_checklist_templates')
+        .insert({
+          name: input.name,
+          checklist_type: input.checklist_type,
+          company_id: companyId,
+          items: input.items as unknown as Json,
+        });
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['checklist-templates'] }),
@@ -81,14 +88,13 @@ export function useChecklistCompletions(propertyId: string | undefined) {
     queryKey: ['checklist-completions', propertyId],
     queryFn: async () => {
       if (!propertyId) return [];
-      const { data, error } = await supabase
-        .from('checklist_completions' as any)
+      const { data, error } = await typedFrom('checklist_completions')
         .select('*')
         .eq('property_id', propertyId)
         .order('completed_at', { ascending: false })
         .limit(20);
       if (error) throw error;
-      return (data || []) as unknown as ChecklistCompletion[];
+      return (data ?? []) as unknown as ChecklistCompletion[];
     },
     enabled: !!propertyId,
   });
@@ -108,13 +114,16 @@ export function useSubmitChecklist() {
       photos?: string[];
       notes?: string;
     }) => {
-      const { error } = await supabase
-        .from('checklist_completions' as any)
+      const { error } = await typedFrom('checklist_completions')
         .insert({
-          ...input,
-          completed_by: user?.id,
-          items: input.items as any,
-          photos: input.photos || [],
+          template_id: input.template_id ?? null,
+          property_id: input.property_id,
+          booking_id: input.booking_id ?? null,
+          task_id: input.task_id ?? null,
+          notes: input.notes ?? null,
+          completed_by: user?.id ?? null,
+          items: input.items as unknown as Json,
+          photos: input.photos ?? [],
         });
       if (error) throw error;
     },

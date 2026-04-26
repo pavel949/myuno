@@ -34,7 +34,7 @@ export interface ResaleProperty {
   price_negotiable: boolean;
   is_assignment: boolean;
   assignment_premium: number | null;
-  remaining_payments: any;
+  remaining_payments: unknown;
   transfer_fee_paid_by: string | null;
   current_rental_income: number | null;
   estimated_roi: number | null;
@@ -42,7 +42,7 @@ export interface ResaleProperty {
   lease_years_remaining: number | null;
   description: string | null;
   description_ru: string | null;
-  media: any[];
+  media: unknown[];
   cover_image: string | null;
   featured: boolean;
   status: string;
@@ -70,7 +70,7 @@ export function useResaleProperties(filters?: ResaleFilters) {
     queryKey: ['resale-properties', filters],
     queryFn: async (): Promise<ResaleProperty[]> => {
       let query = supabase
-        .from('resale_properties' as any)
+        .from('resale_properties')
         .select('*')
         .eq('status', 'active')
         .order('featured', { ascending: false })
@@ -124,7 +124,7 @@ export function useResaleProperty(id?: string) {
     queryFn: async (): Promise<ResaleProperty | null> => {
       if (!id) return null;
       const { data, error } = await supabase
-        .from('resale_properties' as any)
+        .from('resale_properties')
         .select('*')
         .eq('id', id)
         .single();
@@ -142,8 +142,8 @@ export function useCreateResaleProperty() {
   return useMutation({
     mutationFn: async (data: Partial<ResaleProperty>) => {
       const { data: result, error } = await supabase
-        .from('resale_properties' as any)
-        .insert({ ...data, created_by: user?.id })
+        .from('resale_properties')
+        .insert({ ...data, created_by: user?.id } as never)
         .select()
         .single();
       if (error) throw error;
@@ -163,8 +163,8 @@ export function useUpdateResaleProperty() {
   return useMutation({
     mutationFn: async ({ id, ...data }: Partial<ResaleProperty> & { id: string }) => {
       const { data: result, error } = await supabase
-        .from('resale_properties' as any)
-        .update({ ...data, updated_at: new Date().toISOString() })
+        .from('resale_properties')
+        .update({ ...data, updated_at: new Date().toISOString() } as never)
         .eq('id', id)
         .select()
         .single();
