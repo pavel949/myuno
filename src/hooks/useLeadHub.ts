@@ -375,17 +375,15 @@ export function useRecentLeads(limit: number = 5) {
         .limit(limit);
 
       const combined = [
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ...(mccLeads || []).map((l: any) => ({
+        ...(mccLeads ?? []).map((l) => ({
           id: l.id,
           name: l.name || l.email?.split('@')[0] || 'Unknown',
-          priority: l.priority || 'warm',
+          priority: (l.priority as LeadPriority) || 'warm',
           source: l.source || 'MCC',
           created_at: l.created_at,
           source_table: 'mcc_leads' as const,
         })),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ...(consultations || []).map((c: any) => ({
+        ...(consultations ?? []).map((c) => ({
           id: c.id,
           name: c.name || c.email?.split('@')[0] || 'Unknown',
           priority: mapAiPriorityToLeadPriority(c.ai_priority),
