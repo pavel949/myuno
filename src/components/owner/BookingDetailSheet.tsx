@@ -166,6 +166,26 @@ export function BookingDetailSheet({ open, onOpenChange, booking, propertyTitle 
           </div>
         </>
       )}
+
+      {/* Status history */}
+      <Separator />
+      <div className="space-y-2">
+        <h4 className="text-sm font-medium flex items-center gap-1.5">
+          <History className="h-4 w-4" />
+          {isRu ? 'История статусов' : 'Status history'}
+        </h4>
+        {historyLoading ? (
+          <BookingStatusTimelineSkeleton rows={3} compact />
+        ) : (
+          <BookingStatusTimeline
+            events={historyEvents}
+            currentStatus={booking.status ?? undefined}
+            createdAt={booking.created_at}
+            highlightIds={historyHighlightIds}
+            compact
+          />
+        )}
+      </div>
     </ResponsiveModal>
   );
 }
