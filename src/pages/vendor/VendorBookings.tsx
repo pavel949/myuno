@@ -37,6 +37,52 @@ import { ru } from 'date-fns/locale';
 import { BookingStatusTimeline, BookingStatusTimelineSkeleton } from '@/components/bookings/BookingStatusTimeline';
 import { useBookingStatusHistory } from '@/hooks/useBookingStatusHistory';
 
+/**
+ * Inline status-history block for a single vendor booking.
+ * Subscribes to the master `booking_status_history` table via the booking_id
+ * link on `vendor_bookings`. Renders only when expanded so we don't open
+ * a realtime channel per row by default.
+ */
+function VendorBookingHistory({
+  masterBookingId,
+  currentStatus,
+  createdAt,
+  isRussian,
+}: {
+  masterBookingId: string | null | undefined;
+  currentStatus: string;
+  createdAt: string;
+  isRussian: boolean;
+}) {
+  const { events, isLoading, highlightIds } = useBookingStatusHistory({
+    table: 'booking_status_history',
+    bookingId: masterBookingId ?? undefined,
+    enabled: !!masterBookingId,
+  });
+
+  if (!masterBookingId) {
+    return (
+      <p className="text-xs text-muted-foreground">
+        {isRussian ? 'История недоступна' : 'No history available'}
+      </p>
+    );
+  }
+
+  if (isLoading) {
+    return <BookingStatusTimelineSkeleton rows={3} compact />;
+  }
+
+  return (
+    <BookingStatusTimeline
+      events={events}
+      currentStatus={currentStatus}
+      createdAt={createdAt}
+      highlightIds={highlightIds}
+      compact
+    />
+  );
+}
+
 const VendorBookings = () => {
   const navigate = useNavigate();
   const { user, isLoading: authLoading } = useAuth();
