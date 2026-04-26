@@ -1,0 +1,268 @@
+/**
+ * PersonaHalo — signature home navigation module ("госуслуги-про" tone).
+ *
+ * Replaces the generic horizontal chip strip with a calm, dashboard-like
+ * grid of 6 cluster quanta orbiting the user identity tile.
+ *
+ *  - Center-left: square identity tile (initials/avatar) + status line
+ *    (name · place · time-of-day). Tap → opens RoleSheet.
+ *  - 6 sector quanta (Arrive · Live · Manage · Invest · Legal · Build)
+ *    laid out as a strict grid. Active clusters (via CLUSTER_SCORES vs
+ *    user personas) render at full opacity with a 2px navy spine; passive
+ *    ones dim to 50% so the user still sees the whole world but their
+ *    own surfaces are highlighted.
+ *  - One soft orange-400 dot indicator when there's pending activity in
+ *    a cluster (initial wiring: Manage gets the dot when there are open
+ *    bookings/orders for the user; future iterations can wire per-cluster
+ *    counters from real DB signals).
+ *
+ * Visual rules (governance):
+ *  - rounded-none, 1px borders, 2px navy spine — no shadows, no motion.
+ *  - All colors via semantic tokens (`hsl(var(--primary))`, cluster vars).
+ *  - Tap targets ≥ 56px; module fits 339px Telegram WebView without clip.
+ */
+import React, { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { supabase } from '@/integrations/supabase/client';
+import { CLUSTER_CATALOG, type ClusterCatalogEntry } from '@/lib/nav/clusterCatalog';
+import type { UserPersona } from '@/hooks/useUserPersonas';
+import { cn } from '@/lib/utils';
+
+// Persona → cluster affinity (mirrors CLUSTER_SCORES in roleBlend.ts).
+// Local copy keeps PersonaHalo independent from the heavier blendClusters
+// pipeline; if a persona scores ≥ 3 on a cluster we light it up.
+const PERSONA_CLUSTER_AFFINITY: Record<UserPersona, Record<string, number>> = {
+  tourist:                 { arrive: 5, live: 4, legal: 1 },
+  resident:                { live: 5, legal: 4, manage: 3, invest: 2 },
+  property_owner:          { manage: 5, invest: 4, legal: 3, live: 2 },
+  investor:                { invest: 5, legal: 3, manage: 2, build: 2 },
+  real_estate_developer:   { build: 5, invest: 4, legal: 3, manage: 2 },
+  local_services_provider: { live: 5, manage: 4, legal: 2 },
+  family:                  { live: 4, legal: 3, arrive: 2 },
+  couple:                  { live: 5, arrive: 3 },
+  nightlife:               { live: 5, arrive: 2 },
+  active:                  { live: 4, arrive: 3 },
+  business:                { live: 3, legal: 4, manage: 3, invest: 2 },
+  nomad:                   { live: 4, legal: 3, arrive: 2 },
+  pet_owner:               { live: 5, manage: 2 },
+  relocation:              { arrive: 5, legal: 4, live: 3, manage: 2 },
+};
+
+const ACTIVE_THRESHOLD = 3;
+
+function getActiveClusterIds(personas: UserPersona[]): Set<string> {
+  const scores: Record<string, number> = {};
+  personas.forEach((p, i) => {
+    const weight = i === 0 ? 3 : i === 1 ? 2 : 1;
+    const aff = PERSONA_CLUSTER_AFFINITY[p];
+    if (!aff) return;
+    Object.entries(aff).forEach(([k, v]) => {
+      scores[k] = (scores[k] ?? 0) + v * weight;
+    });
+  });
+  return new Set(
+    Object.entries(scores)
+      .filter(([, v]) => v >= ACTIVE_THRESHOLD)
+      .map(([k]) => k),
+  );
+}
+
+function timeOfDay(isRu: boolean): string {
+  const h = new Date().getHours();
+  if (h < 5)   return isRu ? 'ночь' : 'night';
+  if (h < 12)  return isRu ? 'утро' : 'morning';
+  if (h < 17)  return isRu ? 'день' : 'afternoon';
+  if (h < 22)  return isRu ? 'вечер' : 'evening';
+  return isRu ? 'ночь' : 'night';
+}
+
+function useClusterSignals(userId: string | undefined) {
+  return useQuery({
+    queryKey: ['persona-halo-signals', userId],
+    queryFn: async () => {
+      if (!userId) return { manage: false } as Record<string, boolean>;
+      const { count } = await supabase
+        .from('orders')
+        .select('id', { count: 'exact', head: true })
+        .eq('customer_user_id', userId)
+        .in('status', ['pending', 'awaiting_client_payment', 'pending_deposit']);
+      return { manage: (count ?? 0) > 0 } as Record<string, boolean>;
+    },
+    enabled: !!userId,
+    staleTime: 60_000,
+  });
+}
+
+interface PersonaHaloProps {
+  personas: UserPersona[];
+  onRoleSheetOpen: () => void;
+  /** Background tone — `onNavy` keeps it inside the canonical brand band. */
+  variant?: 'default' | 'onNavy';
+}
+
+export function PersonaHalo({ personas, onRoleSheetOpen, variant = 'default' }: PersonaHaloProps) {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { language } = useLanguage();
+  const isRu = language === 'ru';
+  const isOnNavy = variant === 'onNavy';
+
+  const fullName = (user?.user_metadata?.full_name as string | undefined)?.trim();
+  const greeting = fullName
+    ? fullName.split(' ')[0]
+    : isRu ? 'Гость' : 'Guest';
+  const initials = fullName
+    ? fullName.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
+    : (isRu ? 'Г' : 'G');
+
+  const activeIds = useMemo(() => getActiveClusterIds(personas), [personas]);
+  const { data: signals = {} } = useClusterSignals(user?.id);
+
+  // Pull all 6 canonical clusters in stable taxonomy order.
+  const clusters: ClusterCatalogEntry[] = CLUSTER_CATALOG;
+
+  // Tone-locked atoms.
+  const surfaceCls = isOnNavy
+    ? 'bg-primary-foreground/[0.04] border-primary-foreground/15'
+    : 'bg-card border-border';
+  const subtitleCls = isOnNavy ? 'text-primary-foreground/65' : 'text-muted-foreground';
+  const labelCls = isOnNavy ? 'text-primary-foreground' : 'text-foreground';
+  const dimLabelCls = isOnNavy ? 'text-primary-foreground/50' : 'text-muted-foreground';
+  const identityCls = isOnNavy
+    ? 'bg-primary-foreground text-primary border-primary-foreground'
+    : 'bg-primary text-primary-foreground border-primary';
+
+  return (
+    <section
+      aria-label={isRu ? 'Навигация по разделам' : 'Section navigation'}
+      className="px-1 pb-2"
+    >
+      {/* Status line — name · place · time-of-day */}
+      <div className="flex items-baseline gap-2 px-1 pb-2">
+        <span className={cn('font-display text-[13px] font-semibold tracking-tight', labelCls)}>
+          {greeting}
+        </span>
+        <span className={cn('text-[11px] font-mono tabular-nums uppercase tracking-[0.12em]', subtitleCls)}>
+          {isRu ? 'Пхукет' : 'Phuket'} · {timeOfDay(isRu)}
+        </span>
+      </div>
+
+      {/* Halo grid: identity tile (col-span-2 on mobile, col-span-1 from sm) + 6 quanta */}
+      <div
+        className={cn(
+          'grid gap-[1px] border',
+          surfaceCls,
+          // Mobile: identity full-width row, then 3×2 quanta.
+          // sm+: identity left tile, quanta 3×2 to the right.
+          'grid-cols-3 sm:grid-cols-4',
+        )}
+      >
+        {/* Identity tile */}
+        <button
+          type="button"
+          onClick={onRoleSheetOpen}
+          aria-label={isRu ? 'Управлять ролями' : 'Manage roles'}
+          className={cn(
+            'col-span-3 sm:col-span-1 sm:row-span-2 relative flex sm:flex-col items-center sm:items-start justify-between sm:justify-center gap-3 p-3 sm:p-4 min-h-[64px] sm:min-h-[140px] transition-colors',
+            isOnNavy
+              ? 'bg-primary hover:bg-primary/90'
+              : 'bg-card hover:bg-muted/40',
+          )}
+        >
+          <div className="flex items-center gap-3 sm:flex-col sm:items-start sm:gap-3">
+            <div
+              className={cn(
+                'w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center font-display text-[18px] sm:text-[22px] font-bold border-2 flex-shrink-0',
+                identityCls,
+              )}
+            >
+              {initials}
+            </div>
+            <div className="flex flex-col leading-tight text-left">
+              <span className={cn('text-[11px] uppercase tracking-[0.14em] font-semibold', subtitleCls)}>
+                {isRu ? 'Мой профиль' : 'My profile'}
+              </span>
+              <span className={cn('text-[13px] font-semibold mt-0.5 truncate max-w-[160px]', labelCls)}>
+                {personas.length === 0
+                  ? (isRu ? 'Выбрать роль' : 'Pick a role')
+                  : personas.length === 1
+                    ? (isRu ? '1 активная роль' : '1 active role')
+                    : (isRu ? `${personas.length} роли` : `${personas.length} roles`)}
+              </span>
+            </div>
+          </div>
+          {/* Edit affordance */}
+          <span
+            className={cn(
+              'hidden sm:inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.14em] font-semibold mt-2',
+              subtitleCls,
+            )}
+          >
+            {isRu ? 'Изменить' : 'Edit'} →
+          </span>
+        </button>
+
+        {/* 6 cluster quanta */}
+        {clusters.map((c) => {
+          const isActive = activeIds.has(c.id) || personas.length === 0;
+          const hasSignal = !!signals[c.id];
+          const Icon = c.icon;
+          const label = isRu ? c.labelRu : c.labelEn;
+
+          return (
+            <button
+              key={c.id}
+              type="button"
+              onClick={() => navigate(c.homeRoute)}
+              aria-label={label}
+              className={cn(
+                'group relative flex flex-col justify-between p-3 min-h-[72px] sm:min-h-[70px] text-left transition-colors',
+                isOnNavy
+                  ? 'bg-primary/95 hover:bg-primary/80'
+                  : 'bg-card hover:bg-muted/40',
+                !isActive && 'opacity-50 hover:opacity-75',
+              )}
+            >
+              {/* Cluster spine — 2px accent of cluster color */}
+              <span
+                aria-hidden
+                className="absolute inset-y-2 left-0 w-[2px]"
+                style={{ background: c.color }}
+              />
+              {/* Signal dot */}
+              {hasSignal && isActive && (
+                <span
+                  aria-hidden
+                  className={cn(
+                    'absolute top-2 right-2 w-1.5 h-1.5 rounded-full',
+                    isOnNavy ? 'bg-[hsl(var(--brand-orange-400))]' : 'bg-primary',
+                  )}
+                />
+              )}
+              <Icon
+                className={cn(
+                  'w-[18px] h-[18px]',
+                  isActive ? labelCls : dimLabelCls,
+                )}
+                aria-hidden
+              />
+              <div className="flex items-end justify-between gap-2 mt-2">
+                <span
+                  className={cn(
+                    'text-[12px] font-semibold leading-tight tracking-tight',
+                    isActive ? labelCls : dimLabelCls,
+                  )}
+                >
+                  {label}
+                </span>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
