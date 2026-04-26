@@ -241,7 +241,7 @@ export default function NavigatorPage() {
 
   const searchResults = useMemo(() => {
     if (!trimmedQuery) return null;
-    return ALL_SERVICES.filter((s) => {
+    return audienceAvailable.filter((s) => {
       const label = getClusterServiceLocalizedLabel(s, language);
       const cluster = pickTriplet(
         { ru: s.clusterLabelRu, en: s.clusterLabelEn, th: s.clusterLabelEn },
