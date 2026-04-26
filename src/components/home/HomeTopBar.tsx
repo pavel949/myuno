@@ -14,6 +14,13 @@ interface HomeTopBarProps {
   onRoleSheetOpen: () => void;
   /** Open the global app drawer (left-side launcher). */
   onAppDrawerOpen?: () => void;
+  /**
+   * Background tone the bar sits on.
+   *  - `default` — cream page surface (existing behaviour).
+   *  - `onNavy`  — placed inside the canonical navy brand band; flips text,
+   *    icons, and pill chrome to cream-on-navy contracts.
+   */
+  variant?: 'default' | 'onNavy';
 }
 
 function useHasUnread(userId: string | undefined) {
