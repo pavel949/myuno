@@ -63,14 +63,14 @@ const EventDetail = () => {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col min-h-screen bg-background">
+      <AppLayout showHeader={false} showBottomNav>
         <Skeleton className="h-72 w-full" />
         <div className="p-4 space-y-4">
           <Skeleton className="h-8 w-3/4" />
           <Skeleton className="h-20 w-full" />
           <Skeleton className="h-32 w-full" />
         </div>
-      </div>
+      </AppLayout>
     );
   }
 
