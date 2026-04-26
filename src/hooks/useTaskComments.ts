@@ -13,21 +13,33 @@ export interface TaskComment {
   author_name?: string;
 }
 
+interface TaskCommentRow {
+  id: string;
+  task_id: string;
+  task_source: string;
+  author_id: string;
+  content: string;
+  photos: string[] | null;
+  created_at: string;
+}
+
 export function useTaskComments(taskId: string | undefined, taskSource: 'crm' | 'ops') {
   return useQuery({
     queryKey: ['task-comments', taskId, taskSource],
     queryFn: async () => {
       if (!taskId) return [];
       const { data, error } = await supabase
-        .from('task_comments' as any)
+        .from('task_comments')
         .select('*')
         .eq('task_id', taskId)
         .eq('task_source', taskSource)
         .order('created_at', { ascending: true });
       if (error) throw error;
 
+      const rows = (data || []) as unknown as TaskCommentRow[];
+
       // Fetch author names
-      const authorIds = [...new Set((data || []).map((c: any) => c.author_id))];
+      const authorIds = [...new Set(rows.map((c) => c.author_id))];
       const profileMap: Record<string, string> = {};
       if (authorIds.length > 0) {
         const { data: profiles } = await supabase
@@ -39,8 +51,10 @@ export function useTaskComments(taskId: string | undefined, taskSource: 'crm' | 
         }
       }
 
-      return (data || []).map((c: any) => ({
+      return rows.map((c) => ({
         ...c,
+        photos: c.photos ?? [],
+        task_source: c.task_source as 'crm' | 'ops',
         author_name: profileMap[c.author_id] || 'User',
       })) as TaskComment[];
     },
@@ -56,14 +70,14 @@ export function useAddTaskComment() {
     mutationFn: async (input: { task_id: string; task_source: 'crm' | 'ops'; content: string; photos?: string[] }) => {
       if (!user) throw new Error('Not authenticated');
       const { error } = await supabase
-        .from('task_comments' as any)
+        .from('task_comments')
         .insert({
           task_id: input.task_id,
           task_source: input.task_source,
           author_id: user.id,
           content: input.content,
           photos: input.photos || [],
-        });
+        } as never);
       if (error) throw error;
     },
     onSuccess: (_, vars) => {
