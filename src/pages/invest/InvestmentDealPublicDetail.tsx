@@ -13,6 +13,7 @@ import {
   getCategoryLabel, getIntentLabel, getCapitalRangeLabel,
 } from '@/lib/investment/dealTaxonomy';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { AppLayout } from '@/components/layout/AppLayout';
 
 export default function InvestmentDealPublicDetail() {
   const { id } = useParams<{ id: string }>();
@@ -22,21 +23,25 @@ export default function InvestmentDealPublicDetail() {
 
   if (isLoading) {
     return (
-      <div className="container max-w-3xl mx-auto p-4 space-y-4">
-        <Skeleton className="h-8 w-32" />
-        <Skeleton className="h-64 w-full rounded-none" />
-        <Skeleton className="h-32 w-full rounded-none" />
-      </div>
+      <AppLayout showHeader={false} showBottomNav usePageContainer={false}>
+        <div className="container max-w-3xl mx-auto p-4 space-y-4">
+          <Skeleton className="h-8 w-32" />
+          <Skeleton className="h-64 w-full rounded-none" />
+          <Skeleton className="h-32 w-full rounded-none" />
+        </div>
+      </AppLayout>
     );
   }
 
   if (!deal) {
     return (
-      <div className="container max-w-3xl mx-auto p-8 text-center">
-        <h1 className="text-2xl font-bold mb-2">Deal not found</h1>
-        <p className="text-muted-foreground mb-4">This opportunity may have been delisted or moved.</p>
-        <Button onClick={() => navigate(APP_ROUTES.INVEST_DEALS_BOARD)}>Browse all opportunities</Button>
-      </div>
+      <AppLayout showHeader={false} showBottomNav usePageContainer={false}>
+        <div className="container max-w-3xl mx-auto p-8 text-center">
+          <h1 className="text-2xl font-bold mb-2">Deal not found</h1>
+          <p className="text-muted-foreground mb-4">This opportunity may have been delisted or moved.</p>
+          <Button onClick={() => navigate(APP_ROUTES.INVEST_DEALS_BOARD)}>Browse all opportunities</Button>
+        </div>
+      </AppLayout>
     );
   }
 
@@ -45,7 +50,7 @@ export default function InvestmentDealPublicDetail() {
   const rangeLabel = getCapitalRangeLabel(deal.capital_range);
 
   return (
-    <>
+    <AppLayout showHeader={false} showBottomNav usePageContainer={false}>
       <Helmet>
         <title>{`${categoryLabel} — ${rangeLabel} | myUNO Capital`}</title>
         <meta
@@ -189,6 +194,6 @@ export default function InvestmentDealPublicDetail() {
           dealTitle={`${categoryLabel} — ${rangeLabel}`}
         />
       </div>
-    </>
+    </AppLayout>
   );
 }
