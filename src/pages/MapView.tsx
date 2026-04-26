@@ -147,6 +147,7 @@ export default function MapView() {
           priceFrom: 0,
           image: r.cover_image || undefined,
           vertical: 'restaurant',
+          workingHours: r.working_hours ?? null,
         });
       }
     });
