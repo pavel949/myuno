@@ -96,7 +96,7 @@ export function useNewbuildProjects(filters?: NewbuildFilters) {
       const { data, error } = await query;
       if (error) throw error;
 
-      return (data || []).map((p: Record<string, unknown> & { amenities?: unknown }) => ({
+      return (data || []).map((p: ProjectRow) => ({
         id: p.id,
         slug: p.slug,
         name_en: p.name_en,
