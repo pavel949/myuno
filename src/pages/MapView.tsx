@@ -247,23 +247,81 @@ export default function MapView() {
   return (
     <AppLayout>
       <div className="flex flex-col h-[calc(100vh-8rem)]">
-        <div className="px-4 py-3 bg-background/95 border-b border-border z-10">
-          <FilterChipGroup scrollable>
-            {FILTER_OPTIONS.map((opt) => (
-              <FilterChip
-                key={opt.value}
-                label={language === 'ru' ? opt.labelRu : opt.labelEn}
-                icon={opt.icon}
-                isActive={selectedVertical === opt.value}
-                onToggle={() => handleFilterChange(opt.value)}
-                size="md"
-              />
-            ))}
-          </FilterChipGroup>
-          {!showLoading && (
-            <p className="text-xs text-muted-foreground mt-1.5">
-              {filteredMarkers.length} {language === 'ru' ? 'локаций' : 'locations'}
+        <div className="px-4 py-3 bg-background/95 border-b border-border z-10 space-y-2">
+          {/* Category */}
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+              {language === 'ru' ? 'Категория' : 'Category'}
             </p>
+            <FilterChipGroup scrollable>
+              {FILTER_OPTIONS.map((opt) => (
+                <FilterChip
+                  key={opt.value}
+                  label={language === 'ru' ? opt.labelRu : opt.labelEn}
+                  icon={opt.icon}
+                  isActive={selectedVertical === opt.value}
+                  onToggle={() => handleFilterChange(opt.value)}
+                  size="md"
+                />
+              ))}
+            </FilterChipGroup>
+          </div>
+
+          {/* Price range */}
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+              {language === 'ru' ? 'Цена' : 'Price'}
+            </p>
+            <FilterChipGroup scrollable>
+              {PRICE_OPTIONS.map((opt) => (
+                <FilterChip
+                  key={opt.value}
+                  label={language === 'ru' ? opt.labelRu : opt.labelEn}
+                  icon={opt.icon}
+                  isActive={selectedPrice === opt.value}
+                  onToggle={() => handlePriceChange(opt.value)}
+                  size="md"
+                />
+              ))}
+            </FilterChipGroup>
+          </div>
+
+          {/* Availability */}
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+              {language === 'ru' ? 'Доступность' : 'Availability'}
+            </p>
+            <FilterChipGroup scrollable>
+              {AVAILABILITY_OPTIONS.map((opt) => (
+                <FilterChip
+                  key={opt.value}
+                  label={language === 'ru' ? opt.labelRu : opt.labelEn}
+                  icon={opt.icon}
+                  isActive={selectedAvailability === opt.value}
+                  onToggle={() => handleAvailabilityChange(opt.value)}
+                  size="md"
+                />
+              ))}
+            </FilterChipGroup>
+          </div>
+
+          {!showLoading && (
+            <div className="flex items-center justify-between gap-2 pt-1">
+              <p className="text-xs text-muted-foreground">
+                {filteredMarkers.length} {language === 'ru' ? 'локаций' : 'locations'}
+              </p>
+              {activeFilterCount > 0 && (
+                <button
+                  type="button"
+                  onClick={resetAllFilters}
+                  className="text-xs text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary/40 rounded-sm px-1"
+                >
+                  {language === 'ru'
+                    ? `Сбросить (${activeFilterCount})`
+                    : `Clear (${activeFilterCount})`}
+                </button>
+              )}
+            </div>
           )}
         </div>
 
