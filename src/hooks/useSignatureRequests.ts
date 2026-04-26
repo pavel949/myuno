@@ -140,13 +140,13 @@ export function useDeclineSignRequest() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (args: { signerId: string; reason: string }) => {
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('signature_request_signers')
         .update({
           status: 'declined',
           declined_at: new Date().toISOString(),
           decline_reason: args.reason,
-        })
+        } as SignatureSignerUpdate)
         .eq('id', args.signerId);
       if (error) throw error;
     },
@@ -155,7 +155,7 @@ export function useDeclineSignRequest() {
       qc.invalidateQueries({ queryKey: ['my-signature-requests'] });
       qc.invalidateQueries({ queryKey: ['company-signature-requests'] });
     },
-    onError: (e: any) => toast.error(e.message || 'Decline failed'),
+    onError: (e: Error) => toast.error(e.message || 'Decline failed'),
   });
 }
 
