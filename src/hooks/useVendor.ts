@@ -604,14 +604,31 @@ export function useVendorBookings(vendorId?: string, options?: { status?: string
   }, [vendorId, options?.status, options?.limit]);
 
   const updateBookingStatus = async (bookingId: string, status: string) => {
+    // Update the vendor mirror first.
     const { data, error } = await supabase
       .from('vendor_bookings')
       .update({ status })
       .eq('id', bookingId)
-      .select()
+      .select('*, booking_id')
       .single();
 
-    if (!error) await fetchBookings();
+    if (!error) {
+      // Mirror onto the master `bookings` row so the trigger
+      // `trg_bookings_status_history` records the transition and the
+      // user/staff timelines stay in sync. Failure to mirror is non-fatal —
+      // log and proceed; the vendor mirror has already been updated.
+      const masterBookingId = (data as { booking_id?: string | null } | null)?.booking_id;
+      if (masterBookingId) {
+        const { error: masterErr } = await supabase
+          .from('bookings')
+          .update({ status: status as never })
+          .eq('id', masterBookingId);
+        if (masterErr) {
+          errorLog.silent(masterErr, 'mirror_vendor_booking_status_to_master');
+        }
+      }
+      await fetchBookings();
+    }
     return { data, error };
   };
 
