@@ -51,30 +51,36 @@ export function ClusterGrid({ personas }: ClusterGridProps) {
             <button
               key={c.id}
               onClick={() => navigate(c.homeRoute)}
-              className="group relative text-left rounded-none bg-card border border-border p-[14px] pl-4 min-h-[86px] flex flex-col justify-between hover:border-primary/30 hover:bg-primary/[0.02] transition-colors overflow-hidden"
+              className="group relative text-left rounded-none bg-card border border-border p-[14px] pl-[18px] min-h-[92px] flex flex-col justify-between hover:border-primary/40 hover:bg-primary/[0.035] hover:shadow-[0_6px_18px_-12px_hsl(var(--primary)/0.45)] hover:-translate-y-[1px] transition-all duration-200 overflow-hidden"
             >
-              {/* 3px left spine — promoted from 2px so the cluster colour
-                  reads on a quick scan and creates a stronger visual rhythm
-                  across the grid. */}
+              {/* Navy spine (full-height) — anchors the card with the brand
+                  primary; cluster accent sits to its right as a thin hairline
+                  so colour identity is preserved without competing. */}
+              <div className="absolute inset-y-0 left-0 w-[4px] bg-primary transition-all group-hover:w-[5px]" />
               <div
-                className="absolute top-3 bottom-3 left-0 w-[3px] rounded-none transition-all group-hover:top-2 group-hover:bottom-2"
+                className="absolute inset-y-[10px] left-[4px] w-[2px] opacity-70 transition-opacity group-hover:opacity-100"
                 style={{ background: c.color }}
               />
-              <div>
+              {/* Soft navy corner wash — lifts the card off the cream
+                  background and intensifies on hover. */}
+              <div
+                className="pointer-events-none absolute -top-8 -right-8 w-24 h-24 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                style={{ background: 'radial-gradient(circle, hsl(var(--primary) / 0.10), transparent 70%)' }}
+              />
+              <div className="relative">
                 <div className="text-[10px] tracking-[0.1em] uppercase text-muted-foreground/50 font-semibold">
                   {isRu ? 'Направление' : 'Cluster'}
                 </div>
-                <div className="font-display text-[17px] font-semibold text-foreground mt-0.5 tracking-[-0.01em]">
+                <div className="font-display text-[17px] font-semibold text-foreground mt-0.5 tracking-[-0.01em] group-hover:text-primary transition-colors">
                   {getClusterHeaderLabel(c, language)}
                 </div>
               </div>
-              <div className="flex items-end justify-between mt-2 gap-2">
+              <div className="relative flex items-end justify-between mt-2 gap-2">
                 <div className="text-[11px] text-muted-foreground leading-snug line-clamp-2 flex-1">
                   {getClusterValueLine(c, language)}
                 </div>
-                <div
-                  className="font-mono text-[10.5px] font-medium shrink-0"
-                  style={{ color: c.color }}
+                <div className="font-mono text-[10.5px] font-semibold shrink-0 px-1.5 py-0.5 bg-primary/8 text-primary border-l-2 transition-colors group-hover:bg-primary/15"
+                  style={{ borderLeftColor: c.color }}
                 >
                   {availableCount}
                 </div>
