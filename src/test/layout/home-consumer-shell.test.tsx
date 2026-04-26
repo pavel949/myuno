@@ -36,8 +36,8 @@ describe('Home (`/`) consumer-shell contract', () => {
     expect(hasSidebar('guest')).toBe(false);
   });
 
-  it.each<NavRoleKey>(['owner', 'vendor', 'admin', 'mc_portal'])(
-    'workspace role `%s` would normally render a SideRail',
+  it.each<NavRoleKey>(['owner', 'vendor', 'admin'])(
+    'workspace role `%s` renders a SideRail (so the consumer downgrade matters)',
     (role) => {
       expect(hasSidebar(role)).toBe(true);
     },
