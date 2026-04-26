@@ -119,12 +119,15 @@ export function useLifeOSHealth() {
   return useQuery({
     queryKey: ['lifeos-health'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // lifeos_health_view does not exist in current schema — return empty until view is created
+      const { data, error } = await (supabase as unknown as {
+        from: (t: string) => { select: (s: string) => Promise<{ data: unknown; error: unknown }> };
+      })
         .from('lifeos_health_view')
         .select('*');
 
-      if (error) throw error;
-      return (data || []) as HealthMetrics[];
+      if (error) return [] as HealthMetrics[];
+      return ((data as HealthMetrics[]) || []);
     },
     staleTime: 30 * 1000,
   });

@@ -107,10 +107,7 @@ export default function BookingDetail() {
     try {
       const { data, error } = await supabase
         .from('bookings')
-        .select(`
-          *,
-          booking_participants(*)
-        `)
+        .select('*')
         .eq('id', id)
         .eq('user_id', user.id)
         .single();
@@ -127,7 +124,7 @@ export default function BookingDetail() {
         notes: data.notes,
         created_at: data.created_at,
         items: [],
-        participants: data.booking_participants || [],
+        participants: [],
         addresses: [],
       });
     } catch (error) {

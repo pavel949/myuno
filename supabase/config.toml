@@ -7,8 +7,6 @@ project_id = "erfwtoavipwjqmylpizt"
     verify_jwt = true
   [functions.ai-agent]
     verify_jwt = false
-  [functions.ai-concierge]
-    verify_jwt = false
   [functions.concierge-intent]
     verify_jwt = false
   [functions.ai-content-planner]
@@ -33,8 +31,6 @@ project_id = "erfwtoavipwjqmylpizt"
     verify_jwt = false
   [functions.auto-lifecycle-actions]
     verify_jwt = false
-  [functions.auto-social-publish]
-    verify_jwt = false
   [functions.auto-vendor-nurture]
     verify_jwt = false
   [functions.booking-reminders]
@@ -55,25 +51,15 @@ project_id = "erfwtoavipwjqmylpizt"
     verify_jwt = false
   [functions.detect-crm-duplicates]
     verify_jwt = false
-  [functions.document-reminder-check]
-    verify_jwt = false
   [functions.enrich-projects]
-    verify_jwt = false
-  [functions.etagi-scrape-projects]
     verify_jwt = false
   [functions.fazwaz-discover-projects]
     verify_jwt = false
   [functions.fazwaz-scrape-project]
     verify_jwt = false
-  [functions.firecrawl-map]
-    verify_jwt = false
   [functions.firecrawl-scrape]
     verify_jwt = false
   [functions.generate-booking-voucher]
-    verify_jwt = false
-  [functions.generate-report-pdf]
-    verify_jwt = false
-  [functions.generate-sitemap]
     verify_jwt = false
   [functions.geocode-address]
     verify_jwt = false
@@ -150,10 +136,6 @@ project_id = "erfwtoavipwjqmylpizt"
   [functions.notify-vendor-order]
     verify_jwt = false
   [functions.supplier-discovery]
-    verify_jwt = false
-  [functions.firecrawl-search]
-    verify_jwt = false
-  [functions.rentals-united-sync]
     verify_jwt = false
   [functions.scheduled-mc-backup]
     verify_jwt = false
