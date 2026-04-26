@@ -109,7 +109,7 @@ export function useSaveRateSeason() {
     }) => {
       const { season, id, basePricePerNight } = params;
       if (id) {
-        const { error } = await supabase.from('property_rate_seasons').update(season as any).eq('id', id);
+        const { error } = await supabase.from('property_rate_seasons').update(season as never).eq('id', id);
         if (error) throw error;
 
         // Log update
