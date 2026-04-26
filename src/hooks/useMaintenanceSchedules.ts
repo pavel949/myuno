@@ -66,7 +66,7 @@ export function useMaintenanceSchedules(propertyId?: string) {
     }) => {
       const { error } = await supabase
         .from('property_maintenance_schedules' as any)
-        .insert({ ...schedule, created_by: user!.id } as any);
+        .insert({ ...schedule, created_by: user!.id });
       if (error) throw error;
     },
     onSuccess: () => {
@@ -80,7 +80,7 @@ export function useMaintenanceSchedules(propertyId?: string) {
     mutationFn: async (id: string) => {
       const { error } = await supabase
         .from('property_maintenance_schedules' as any)
-        .update({ last_completed_at: new Date().toISOString() } as any)
+        .update({ last_completed_at: new Date().toISOString() })
         .eq('id', id);
       if (error) throw error;
     },
@@ -104,7 +104,7 @@ export function useMaintenanceSchedules(propertyId?: string) {
       const { id, ...fields } = updates;
       const { error } = await supabase
         .from('property_maintenance_schedules' as any)
-        .update(fields as any)
+        .update(fields)
         .eq('id', id);
       if (error) throw error;
     },
@@ -119,7 +119,7 @@ export function useMaintenanceSchedules(propertyId?: string) {
     mutationFn: async (id: string) => {
       const { error } = await supabase
         .from('property_maintenance_schedules' as any)
-        .update({ is_active: false } as any)
+        .update({ is_active: false })
         .eq('id', id);
       if (error) throw error;
     },
