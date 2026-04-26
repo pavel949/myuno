@@ -208,6 +208,7 @@ export const CLUSTERS: ClusterEntry[] = [
     color: '#F43F5E',
     sortOrder: 6,
     audience: 'public',
+    homeRoute: '/property/offplan',
   },
 ];
 
