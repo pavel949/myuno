@@ -198,15 +198,47 @@ export default function MapView() {
     mapRef.current.fitBounds(bounds, { top: 60, right: 60, bottom: 60, left: 60 });
   }, [filteredMarkers]);
 
+  const updateParam = useCallback(
+    (key: string, value: string) => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          if (!value || value === 'all') next.delete(key);
+          else next.set(key, value);
+          return next;
+        },
+        { replace: true },
+      );
+    },
+    [setSearchParams],
+  );
+
   const handleFilterChange = (value: VerticalFilter) => {
     setSelectedVertical(value);
     setSelectedMarker(null);
-    if (value === 'all') {
-      searchParams.delete('vertical');
-    } else {
-      searchParams.set('vertical', value);
-    }
-    setSearchParams(searchParams, { replace: true });
+    updateParam('vertical', value);
+  };
+
+  const handlePriceChange = (value: PriceFilter) => {
+    setSelectedPrice(value);
+    updateParam('price', value);
+  };
+
+  const handleAvailabilityChange = (value: AvailabilityFilter) => {
+    setSelectedAvailability(value);
+    updateParam('availability', value);
+  };
+
+  const activeFilterCount =
+    (selectedVertical !== 'all' ? 1 : 0) +
+    (selectedPrice !== 'all' ? 1 : 0) +
+    (selectedAvailability !== 'all' ? 1 : 0);
+
+  const resetAllFilters = () => {
+    setSelectedVertical('all');
+    setSelectedPrice('all');
+    setSelectedAvailability('all');
+    setSearchParams(new URLSearchParams(), { replace: true });
   };
 
   const mapError = !hasKey ? (language === 'ru' ? 'Ключ Google Maps не задан' : 'Google Maps key not set') : loadError?.message ?? null;
