@@ -176,11 +176,11 @@ export function useAssignedProperties() {
           bathrooms: property.bathrooms,
           price_per_night: property.price_per_night,
           currency: property.currency || 'THB',
-          permissions: (assignment.permissions as AssignmentPermissions | null) || {
-            calendar: true,
-            pricing: true,
-            bookings: true,
-            guests: true,
+          permissions: {
+            calendar: (assignment.permissions as AssignmentPermissions | null)?.calendar ?? true,
+            pricing: (assignment.permissions as AssignmentPermissions | null)?.pricing ?? true,
+            bookings: (assignment.permissions as AssignmentPermissions | null)?.bookings ?? true,
+            guests: (assignment.permissions as AssignmentPermissions | null)?.guests ?? true,
           },
           owner_name: null,
           complex_id: property.complex_id || null,
