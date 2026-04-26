@@ -15,6 +15,7 @@ import { useEvent } from '@/hooks/useEvents';
 import { useVenue, VENUE_TYPES } from '@/hooks/useVenues';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
 import { useViewHistory } from '@/hooks/useViewHistory';
+import { AppLayout } from '@/components/layout/AppLayout';
 
 const AGE_POLICY_LABELS: Record<string, { en: string; ru: string }> = {
   'all_ages': { en: 'All Ages', ru: 'Все возрасты' },
