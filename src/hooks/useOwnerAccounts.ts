@@ -88,14 +88,14 @@ export function useOwnerAccounts() {
       const [termsRes, docsRes, financialsRes, bookingsRes] = await Promise.all([
         propertyIds.length > 0
           ? supabase.from('property_management_terms').select('property_id, commission_rate, commission_type, commission_amount').in('property_id', propertyIds)
-          : Promise.resolve({ data: [] as any[] }),
+          : Promise.resolve({ data: [] as { property_id: string; commission_rate: number | null; commission_type: string | null; commission_amount: number | null }[] }),
         supabase.from('crm_documents').select('contact_id, document_type').eq('company_id', companyId).in('contact_id', contactIds),
         propertyIds.length > 0
           ? supabase.from('property_financials').select('property_id, transaction_type, amount').in('property_id', propertyIds)
-          : Promise.resolve({ data: [] as any[] }),
+          : Promise.resolve({ data: [] as { property_id: string; transaction_type: string; amount: number | null }[] }),
         propertyIds.length > 0
           ? supabase.from('property_bookings').select('property_id, check_in, check_out, status').in('property_id', propertyIds).in('status', ['confirmed', 'completed', 'checked_in'])
-          : Promise.resolve({ data: [] as any[] }),
+          : Promise.resolve({ data: [] as { property_id: string; check_in: string | null; check_out: string | null; status: string }[] }),
       ]);
 
       const terms = termsRes.data || [];
