@@ -707,3 +707,18 @@ Files refactored:
 - Global `any` count (canonical pattern): **1029 → 890** (-139 / -13.5%).
 - Cumulative since Wave 4.2d start: **1247 → 890** (-357 / -28.6%).
 - Build: ✅ green (`tsc --noEmit` clean, `bun run build` 355ms sw, full client OK).
+
+### Wave 4.2d · Pass #8 (2026-04-26)
+**Scope**: 6 hooks tied to typed Database tables — drop `as any` table-name casts and refine row maps.
+
+- `src/hooks/useVisaRecords.ts` — 6 → 0 `any`. Typed via `Database['public']['Tables']['visa_records']` Insert/Update; all four `.from('visa_records' as any)` casts dropped.
+- `src/hooks/useResaleProperties.ts` — 6 → 0 `any` in own surface (insert/update keep `as never` to satisfy generated array-Insert overload). `remaining_payments`/`media` switched from `any`/`any[]` to `unknown`/`unknown[]`.
+- `src/hooks/usePayoutMethods.ts` — 6 → 0 `any`. All 6 `.from('provider_payout_methods' as any)` casts dropped (table now in generated types).
+- `src/hooks/useChecklists.ts` — 6 → 0 `any`. `property_checklist_templates` migrated to typed `.from()`; `checklist_completions` uses `typedFrom()` helper (still untyped). Item arrays cast to `Json`.
+- `src/hooks/useDeveloperPortal.ts` — 6 → 0 `any`. `floor_plans`/`project_units` `(supabase.from(... as any) as any)` chains collapsed to typed `.from()`; one `insertFields as never` retained for array-Insert overload.
+- `src/hooks/useOffplanProjects.ts` — 6 → 0 `any`. Introduced narrow `ProjectRow` and `DeveloperEmbed` types; `mapMinimal`/`mapRich` and single-row fetcher now typed end-to-end.
+
+**Updated metrics**
+- Global `any` count (canonical pattern): **890 → 797** (-93 / -10.4%).
+- Cumulative since Wave 4.2d start: **1247 → 797** (-450 / -36.1%).
+- Build: ✅ green (`tsc --noEmit` clean).
