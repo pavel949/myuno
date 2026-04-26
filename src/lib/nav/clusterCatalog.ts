@@ -19,19 +19,10 @@ import type { Language } from '@/i18n';
 import {
   CLUSTERS,
   CATEGORIES,
-  visibleClustersForUser,
-  isClusterVisibleToUser as isClusterVisibleSsot,
   type ClusterEntry,
   type ServiceEntry,
-  type ClusterId,
-  type AudienceContext,
 } from '@/lib/catalog';
-import {
-  ECOSYSTEM_CLUSTER_HEADER_TRIPLET,
-  getAppEntryLabel,
-  pickTriplet,
-} from '@/lib/ecosystemGlossary';
-import { APP_REGISTRY } from '@/lib/appRegistry';
+import { pickTriplet } from '@/lib/ecosystemGlossary';
 
 // ─────────────────────────────────────────────────────────────
 // Types — kept identical to legacy shape for back-compat
@@ -176,30 +167,7 @@ export function filterCatalogForUser(
 // Localization helpers (unchanged public API)
 // ─────────────────────────────────────────────────────────────
 
-function normalizeServicePath(p: string): string {
-  const q = p.indexOf('?');
-  return q >= 0 ? p.slice(0, q) : p;
-}
-
-function findAppEntryByServicePath(path: string) {
-  // Exact match first — preserves query-string discriminators
-  // (e.g. `/services?category=laundry` vs `/services?category=plumbing`).
-  const exact = Object.values(APP_REGISTRY).find((e) => e.route === path);
-  if (exact) return exact;
-
-  // Fallback: base-path match ONLY when the incoming path has no query.
-  // This keeps the umbrella entry winning for plain `/services`, but never
-  // collapses sub-routes onto it (which would force every sub-service to
-  // inherit the same label — see All Services drawer regression 2026-04-26).
-  if (path.includes('?')) return undefined;
-  return Object.values(APP_REGISTRY).find(
-    (e) => normalizeServicePath(e.route) === path,
-  );
-}
-
 export function getClusterHeaderLabel(entry: ClusterCatalogEntry, lang: Language): string {
-  const trip = ECOSYSTEM_CLUSTER_HEADER_TRIPLET[entry.id as keyof typeof ECOSYSTEM_CLUSTER_HEADER_TRIPLET];
-  if (trip) return pickTriplet(trip, lang);
   return pickTriplet(
     { ru: entry.labelRu, en: entry.labelEn, th: entry.labelTh ?? entry.labelEn },
     lang,
@@ -210,8 +178,6 @@ export function getClusterServiceLocalizedLabel(
   service: ClusterService,
   lang: Language,
 ): string {
-  const app = findAppEntryByServicePath(service.path);
-  if (app) return getAppEntryLabel(app, lang);
   return pickTriplet(
     {
       ru: service.labelRu,
