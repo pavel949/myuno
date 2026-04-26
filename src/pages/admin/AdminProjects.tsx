@@ -473,7 +473,7 @@ export default function AdminProjects() {
                 key={f.id}
                 size="sm"
                 variant={moderationFilter === f.id ? 'default' : 'outline'}
-                onClick={() => setModerationFilter(f.id as any)}
+                onClick={() => setModerationFilter(f.id as typeof moderationFilter)}
               >
                 {f.label}
                 {'count' in f && f.count !== undefined && (
