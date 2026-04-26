@@ -99,6 +99,33 @@ const getBookingTypeLabel = (type: string, language: string) => {
   return labels[type]?.[language === 'ru' ? 'ru' : 'en'] || type;
 };
 
+/**
+ * Cluster → booking_type mapping for the PersonaHalo "open items" deep-link.
+ * Mirrors `useClusterActivity`'s ARRIVE/LIVE order-type buckets, translated
+ * into the `bookings.booking_type` vocabulary.
+ */
+const CLUSTER_BOOKING_TYPES: Record<string, string[]> = {
+  arrive: ['tour', 'transport', 'water', 'flower', 'food', 'event'],
+  live: ['beauty', 'service', 'medical', 'fitness'],
+  manage: ['property'],
+};
+
+/** Statuses considered "open / awaiting action" for the ?status=open filter. */
+const OPEN_BOOKING_STATUSES = new Set([
+  'pending',
+  'awaiting_payment',
+  'awaiting_client_payment',
+  'pending_deposit',
+  'confirmed',
+  'in_progress',
+]);
+
+const CLUSTER_FILTER_LABEL: Record<string, { en: string; ru: string }> = {
+  arrive: { en: 'Arrive', ru: 'Приезд' },
+  live: { en: 'Live', ru: 'Жизнь' },
+  manage: { en: 'Manage', ru: 'Управление' },
+};
+
 export default function Bookings() {
   const { t, language } = useLanguage();
   const { user, isLoading: authLoading } = useAuth();
