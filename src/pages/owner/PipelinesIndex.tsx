@@ -6,7 +6,7 @@ import { useCrmPipelines, PipelineWithStages } from '@/hooks/useCrmPipelines';
 import { MiniAppLayout } from '@/components/miniapp/MiniAppLayout';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { TrendingUp, Layers, DollarSign, ArrowRight, Briefcase, Home, Building2 } from 'lucide-react';
+import { Layers, DollarSign, ArrowRight, Briefcase, Home, Building2 } from 'lucide-react';
 
 const divisionConfig: Record<string, { icon: React.ElementType; color: string; label: { en: string; ru: string } }> = {
   capital: { icon: Briefcase, color: 'bg-warning/15 text-warning border-warning/30', label: { en: 'Capital', ru: 'Капитал' } },
