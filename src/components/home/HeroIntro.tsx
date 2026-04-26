@@ -143,9 +143,11 @@ export function HeroIntro() {
             : 'Housing, services, documents — in one app.'}
         </p>
 
-        {/* Search bar — canon §8.2 (Input): bg white, 1.5px border, square corners. */}
+        {/* Search bar — canon §8.2 (Input): bg white, 1.5px border, square corners.
+            Soft navy halo on focus turns the field into a confident CTA without
+            breaking the squared-corner editorial style. */}
         <div
-          className="mt-4 lg:mt-6 flex items-center gap-2 rounded-none px-3.5 h-11 bg-card border-[1.5px] border-border focus-within:border-primary transition-colors lg:max-w-[480px]"
+          className="mt-4 lg:mt-6 flex items-center gap-2 rounded-none px-3.5 h-11 bg-card border-[1.5px] border-border focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/10 transition-all lg:max-w-[480px]"
         >
           <Search className="w-4 h-4 text-muted-foreground shrink-0" />
           <input
