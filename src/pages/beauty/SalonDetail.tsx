@@ -41,21 +41,25 @@ export default function SalonDetail() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
+      <AppLayout showHeader={false} showBottomNav>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      </AppLayout>
     );
   }
 
   if (!salon) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-background gap-4">
-        <Scissors className="w-16 h-16 text-muted-foreground" />
-        <h2 className="text-xl font-semibold">{language === 'ru' ? 'Салон не найден' : 'Salon not found'}</h2>
-        <Button onClick={() => navigate('/beauty')}>
-          {language === 'ru' ? 'К списку салонов' : 'Back to salons'}
-        </Button>
-      </div>
+      <AppLayout showHeader={false} showBottomNav>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+          <Scissors className="w-16 h-16 text-muted-foreground" />
+          <h2 className="text-xl font-semibold">{language === 'ru' ? 'Салон не найден' : 'Salon not found'}</h2>
+          <Button onClick={() => navigate('/beauty')}>
+            {language === 'ru' ? 'К списку салонов' : 'Back to salons'}
+          </Button>
+        </div>
+      </AppLayout>
     );
   }
 
