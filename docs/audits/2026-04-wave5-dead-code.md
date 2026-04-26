@@ -96,3 +96,69 @@ Saves ~870 lines of edge function code; reduces deploy surface.
 ### Phase 3 (DB cleanup) — **NEEDS DATA CHECK**
 - For each of 17 candidate tables: SELECT count + last write timestamp.
 - Empty tables with no writes in 90+ days → drop in next migration.
+
+---
+
+## ✅ Phase 1 EXECUTED (2026-04-26)
+
+### Edge Functions Deleted (7)
+Removed from `supabase/functions/` and from deployed Supabase project:
+- `claude-chat` (133 LOC)
+- `auto-social-publish` (75 LOC)
+- `firecrawl-map` (73 LOC)
+- `firecrawl-search` (70 LOC)
+- `etagi-scrape-projects` (350 LOC)
+- `process-guest-messages` (81 LOC)
+- `document-reminder-check` (84 LOC)
+
+**Total: 866 LOC removed.** Edge function count: 169 → 162.
+
+### Tables Dropped (5)
+Migration applied — all 5 confirmed empty (0 rows) before drop:
+- `clearview_bundle_slots`
+- `clearview_scores`
+- `deal_parties`
+- `lead_score_events_log`
+- `user_tax_profile`
+
+Public schema base tables: 417 → 412.
+
+---
+
+## 🟨 Pending User Decision (Phase 2)
+
+Need user confirmation before deletion:
+
+### Edge Functions — likely-but-not-confirmed dead (8)
+| Function | Question |
+|---|---|
+| `ai-concierge` | Используется ли где-то на фронте? Не нашёл вызовов. |
+| `create-order` | Активна ли? Заказы вроде идут через `useCart` + `stripe-checkout`. |
+| `create-refund` | Используется в админке? |
+| `create-service-checkout` | Заменена unified `stripe-checkout`? |
+| `generate-report-pdf` | Где вызывается? Возможно, из админки PDF-отчётов. |
+| `generate-sitemap` | Build-time? |
+| `rentals-united-sync` | По memory: Channel Manager не в проде — удаляем? |
+| `remove-bouquet-backgrounds` | Активный admin-tool для bouquets? |
+
+### Edge Functions — внешние webhook'и (НЕ удалять без проверки внешней системы)
+- `auth-email-hook` — Supabase Auth Hook
+- `whatsapp-incoming-webhook` — Meta WhatsApp
+- `devmod-stripe-webhook` — Stripe (devmod)
+- `nb-lead-notify`, `concierge-intent`, `peylaa-nurture`, `scrape-phuket-insider`, `external-data-api` — могут вызываться извне
+
+### Tables — есть данные, нужна проверка владельца (12)
+| Table | Rows | Comment |
+|---|---|---|
+| `task_entity_map` | 662 | Активная связь задач — НЕ удалять. |
+| `vertical_life_tasks` | 65 | LifeOS taxonomy — keep. |
+| `data_provenance` | 21 | Audit trail — likely DB-only writes. |
+| `simulation_events` | 20 | QA. |
+| `cancellation_policy_rules` | 5 | Policy rules. |
+| `owner_commission_tiers` | 4 | Commission tiers. |
+| `user_loyalty_status` | 4 | Loyalty (per memory: not active). |
+| `platform_fees` | 3 | Fee config. |
+| `rate_limit_log` | 2 | Edge-function-internal. |
+| `simulation_entity_links` | 1 | QA. |
+| `booking_participants` | 1 | Bookings. |
+| `store_products` | 1 | Marketplace. |
