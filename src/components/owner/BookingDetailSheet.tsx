@@ -4,8 +4,10 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { format, differenceInDays } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import { User, CalendarDays, Phone, Mail, CreditCard, Hash, StickyNote, Clock } from 'lucide-react';
+import { User, CalendarDays, Phone, Mail, CreditCard, Hash, StickyNote, Clock, History } from 'lucide-react';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
+import { BookingStatusTimeline, BookingStatusTimelineSkeleton } from '@/components/bookings/BookingStatusTimeline';
+import { useBookingStatusHistory } from '@/hooks/useBookingStatusHistory';
 
 interface BookingDetailSheetProps {
   open: boolean;
@@ -25,6 +27,16 @@ const statusMap: Record<string, { label: string; labelRu: string; variant: 'defa
 export function BookingDetailSheet({ open, onOpenChange, booking, propertyTitle }: BookingDetailSheetProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+
+  const {
+    events: historyEvents,
+    isLoading: historyLoading,
+    highlightIds: historyHighlightIds,
+  } = useBookingStatusHistory({
+    table: 'property_booking_status_history',
+    bookingId: booking?.id,
+    enabled: open && !!booking?.id,
+  });
 
   if (!booking) return null;
 
