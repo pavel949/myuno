@@ -53,7 +53,7 @@ export interface FieldDef {
   options?: SelectOption[];
   placeholder?: string;
   /** Default value */
-  defaultValue?: any;
+  defaultValue?: unknown;
 }
 
 export interface AdminVerticalConfig {
@@ -74,15 +74,18 @@ export interface AdminVerticalConfig {
   typeOptions?: SelectOption[];
 }
 
+export type AdminVerticalItem = Record<string, unknown> & { id: string; provider_id?: string | null; cover_image?: string | null; is_active?: boolean | null };
+export type AdminVerticalFormData = Record<string, unknown> & { provider_id?: string };
+
 interface AdminVerticalCRUDProps {
   config: AdminVerticalConfig;
   /** The admin hook result */
   hook: {
-    items: any[];
+    items: AdminVerticalItem[];
     isLoading: boolean;
-    createItem: (data: any) => Promise<any>;
-    updateItem: (data: any) => Promise<any>;
-    deleteItem: (id: string) => Promise<any>;
+    createItem: (data: AdminVerticalFormData) => Promise<unknown>;
+    updateItem: (data: AdminVerticalFormData & { id: string }) => Promise<unknown>;
+    deleteItem: (id: string) => Promise<unknown>;
   };
 }
 
