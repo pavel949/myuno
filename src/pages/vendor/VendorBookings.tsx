@@ -94,6 +94,7 @@ const VendorBookings = () => {
   const [actionType, setActionType] = useState<'confirm' | 'cancel' | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
+  const [expandedHistory, setExpandedHistory] = useState<Record<string, boolean>>({});
 
   const isRussian = language === 'ru';
 
@@ -288,6 +289,39 @@ const VendorBookings = () => {
                         <CheckCircle className="h-4 w-4 mr-1" />
                         {isRussian ? 'Завершить' : 'Complete'}
                       </Button>
+                    )}
+                  </div>
+
+                  {/* Status history toggle */}
+                  <div className="mt-3 pt-3 border-t">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setExpandedHistory((prev) => ({
+                          ...prev,
+                          [booking.id]: !prev[booking.id],
+                        }))
+                      }
+                      className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+                      aria-expanded={!!expandedHistory[booking.id]}
+                    >
+                      <History className="h-3.5 w-3.5" />
+                      {isRussian ? 'История статусов' : 'Status history'}
+                      {expandedHistory[booking.id] ? (
+                        <ChevronUp className="h-3.5 w-3.5" />
+                      ) : (
+                        <ChevronDown className="h-3.5 w-3.5" />
+                      )}
+                    </button>
+                    {expandedHistory[booking.id] && (
+                      <div className="mt-3">
+                        <VendorBookingHistory
+                          masterBookingId={(booking as { booking_id?: string | null }).booking_id ?? null}
+                          currentStatus={booking.status}
+                          createdAt={booking.created_at}
+                          isRussian={isRussian}
+                        />
+                      </div>
                     )}
                   </div>
                 </CardContent>
