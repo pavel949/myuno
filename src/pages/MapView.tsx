@@ -51,6 +51,7 @@ interface UniversalMarker {
   priceFrom: number;
   image?: string;
   vertical: VerticalFilter;
+  workingHours?: Record<string, string> | null;
 }
 
 const VERTICAL_CONFIG: Record<
