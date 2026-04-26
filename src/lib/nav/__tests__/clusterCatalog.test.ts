@@ -130,8 +130,8 @@ describe('filterCatalogForUser', () => {
 describe('getClusterServiceLocalizedLabel — query-string disambiguation', () => {
   // Regression for 2026-04-26: the All Services drawer collapsed every
   // sub-route in `cat-home-living` and `cat-tourism` to a single label
-  // because `findAppEntryByServicePath` stripped the query string before
-  // matching. We assert per-category label uniqueness in both languages.
+  // because route labels could fall back from the catalog SSOT to umbrella
+  // app entries. We assert per-category label uniqueness in both languages.
 
   function labelsFor(categoryId: string, lang: 'en' | 'ru'): string[] {
     const cat = CATEGORIES.find((c) => c.id === categoryId);
@@ -155,19 +155,36 @@ describe('getClusterServiceLocalizedLabel — query-string disambiguation', () =
     const labels = labelsFor('cat-home-living', 'en');
     expect(labels.length).toBeGreaterThanOrEqual(10);
     expect(new Set(labels).size, `dup labels: ${labels.join(' | ')}`).toBe(labels.length);
+    expect(labels).toContain('Services hub');
+    expect(labels).toContain('Laundry');
+    expect(labels).not.toContain('Home services');
   });
 
   it('Home & Living renders distinct RU labels', () => {
     const labels = labelsFor('cat-home-living', 'ru');
     expect(new Set(labels).size, `dup labels: ${labels.join(' | ')}`).toBe(labels.length);
+    expect(labels).toContain('Все услуги');
+    expect(labels).toContain('Прачечная');
+    expect(labels).not.toContain('Услуги для дома');
   });
 
   it('Tourism & Activities renders distinct EN labels (no "Experiences" duplication)', () => {
     const labels = labelsFor('cat-tourism', 'en');
     expect(new Set(labels).size, `dup labels: ${labels.join(' | ')}`).toBe(labels.length);
+    expect(labels).toContain('Experiences');
+    expect(labels).toContain('Tours');
+    expect(labels).toContain('Water & activities');
   });
 
-  it('plain umbrella route /services still resolves via APP_REGISTRY', () => {
+  it('Tourism & Activities renders distinct RU labels', () => {
+    const labels = labelsFor('cat-tourism', 'ru');
+    expect(new Set(labels).size, `dup labels: ${labels.join(' | ')}`).toBe(labels.length);
+    expect(labels).toContain('Впечатления');
+    expect(labels).toContain('Туры');
+    expect(labels).toContain('Вода и активности');
+  });
+
+  it('plain umbrella route /services keeps its catalog SSOT label', () => {
     const cat = CATEGORIES.find((c) => c.id === 'cat-home-living')!;
     const umbrella = cat.services.find((s) => s.path === '/services');
     expect(umbrella, '/services umbrella entry missing from SSOT').toBeTruthy();
@@ -181,8 +198,7 @@ describe('getClusterServiceLocalizedLabel — query-string disambiguation', () =
       },
       'en',
     );
-    expect(label).toBeTruthy();
-    expect(label.length).toBeGreaterThan(0);
+    expect(label).toBe('Services hub');
   });
 });
 
