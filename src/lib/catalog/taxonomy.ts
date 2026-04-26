@@ -154,6 +154,7 @@ export const CLUSTERS: ClusterEntry[] = [
     color: '#4E7BFF',
     sortOrder: 2,
     audience: 'public',
+    homeRoute: '/discover',
   },
   {
     id: 'manage',
