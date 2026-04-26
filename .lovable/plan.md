@@ -1,69 +1,76 @@
-## Goal
-Refactor `ServiceTile` (and the matching cluster headers / "Coming soon" chips) in `src/components/navigation/NavigatorPage.tsx` so it complies with DS2.0:
+## Problem
 
-- No hardcoded hex colors / opacity hacks (`color + '14'`, `+ '20'`, `+ '1A'`, `'#F59E0B22'`).
-- 24px icon size (current 20px).
-- Bigger, breathable tile with typography that doesn't truncate the label.
-- Proper touch target (≥44px, comfortable 88px).
-- Surface, border, and elevation pulled from semantic tokens.
+In the **All Services** drawer (screenshots) categories with query-string sub-routes show all items as the same label:
 
-## Scope
-Single file: **`src/components/navigation/NavigatorPage.tsx`** — only the visual layer for `ServiceTile`, the cluster header bubble, and the "Coming soon" chip. No routing, taxonomy, or filter logic changes.
+- **Home & Living** → 12 entries all shown as "Home services" (should be Cleaning, Laundry, Handyman, Plumbing, Electrical, AC repair, Gardening, Pest control, Locksmith, Storage, Flowers, Services hub).
+- **Tourism & Activities** → "Experiences / Tours / Water & activities" all shown as "Experiences".
 
-## Design changes
+The data in the SSOT (`src/lib/catalog/taxonomy.ts`) is correct — the **rendering** layer collapses them.
 
-### 1. Tile sizing & layout
-- From `w-[72px] h-[72px]` (cramped, label clipped) → `w-[88px] h-[96px]` with `p-2`.
-- Switch from `rounded-none` → `rounded-2xl` to match DS2.0 card radius.
-- Two-line label (`line-clamp-2`) at `text-[11px] leading-[1.15]` so localized RU labels ("Перевозки", "Документы") don't get cut.
-- Icon block: `w-6 h-6` (24px), centered above label, with `gap-1.5`.
+## Root cause
 
-### 2. Color tokenization (no inline `style`)
-Replace per-cluster inline hex with the existing semantic cluster tokens already defined in `src/styles/tokens.css` and exposed in `tailwind.config.ts` (`bg-cluster-arrive`, `text-cluster-live`, etc.). Map taxonomy cluster id → token via a small lookup:
+`src/lib/nav/clusterCatalog.ts` → `getClusterServiceLocalizedLabel()` calls `findAppEntryByServicePath(service.path)`, and that helper strips the query string from BOTH sides of the comparison:
 
 ```ts
-const CLUSTER_TOKEN: Record<string, string> = {
-  arrive: 'arrive', live: 'live', manage: 'manage',
-  invest: 'invest', legal: 'legal', build: 'build',
-};
+function normalizeServicePath(p: string) {
+  const q = p.indexOf('?');
+  return q >= 0 ? p.slice(0, q) : p;
+}
+function findAppEntryByServicePath(path: string) {
+  const base = normalizeServicePath(path);
+  return Object.values(APP_REGISTRY).find(
+    (e) => normalizeServicePath(e.route) === base   // ← bug
+  );
+}
 ```
 
-Then compose Tailwind classes:
-- Tile bg: `bg-cluster-{token}/8` (was `clusterColor + '14'`)
-- Tile border: `border border-cluster-{token}/15`
-- Icon: `text-cluster-{token}`
-- Header bubble: `bg-cluster-{token}/10`
-- Header title: `text-cluster-{token}`
-- "Coming soon" chip: `bg-cluster-{token}/8 border-cluster-{token}/15`
+So `/services?category=laundry`, `/services?category=handyman`, `/services?category=plumbing`, … all reduce to `/services` and match the umbrella `services` registry entry → every sub-service inherits its label ("Home services"). Same pattern collapses every `/experiences?type=…` into "Experiences".
 
-Because Tailwind needs literal class names, we'll use a static map (`bg-cluster-arrive/8` etc.) instead of dynamic interpolation.
+This also affects the secondary localization triplet path (the `getAppEntryLabel` override masks the per-service `labelEn/Ru` that the SSOT provides).
 
-### 3. Status badges using tokens
-- PRO badge `'#F59E0B22'/'#F59E0B'` → `bg-amber-500/15 text-amber-500` (or semantic `bg-warning/15 text-warning` if defined).
-- Soon badge keeps `bg-muted/40 text-muted-foreground`.
+## Fix
 
-### 4. Elevation & interaction
-- Default: `shadow-[var(--shadow-card)]`.
-- Hover/active (where touch supports): `hover:shadow-[var(--shadow-card-hover)] active:scale-[0.98]`.
-- Disabled (`isSoon`) keeps `opacity-40 pointer-events-none`.
+**1. Make path matching exact, with a safe fallback.**
 
-### 5. Cluster header bubble
-- `w-9 h-9 rounded-xl` (was `w-8 h-8 rounded-none`) for visual parity with the new tile radius.
-- Icon `w-5 h-5` using `text-cluster-{token}`.
+In `src/lib/nav/clusterCatalog.ts`:
 
-### 6. Horizontal rail
-- Bump gap from `gap-2` → `gap-2.5` for the new wider tiles.
-- Keep snap + scrollbar-hide; no other rail changes.
+```ts
+function findAppEntryByServicePath(path: string) {
+  // Exact match first (preserves ?category=…, ?type=…)
+  const exact = Object.values(APP_REGISTRY).find((e) => e.route === path);
+  if (exact) return exact;
 
-## Out of scope
-- Filtering / persona logic (already done in the previous wave).
-- Navigation copy / routes.
-- Replacing the rail with a fade-mask grid (deferred per existing plan).
+  // Fallback: base-path match ONLY when the incoming path has no query
+  // (so the umbrella entry still wins for plain "/services" but never
+  // for "/services?category=laundry").
+  if (path.includes('?')) return undefined;
+  return Object.values(APP_REGISTRY).find(
+    (e) => normalizeServicePath(e.route) === path,
+  );
+}
+```
+
+This restores per-service labels from the SSOT (`labelRu`/`labelEn` already defined in `taxonomy.ts`) while keeping registry-driven labels for routes that genuinely match in `APP_REGISTRY`.
+
+**2. Add a regression test** in `src/lib/nav/__tests__/clusterCatalog.test.ts` that asserts:
+- Every service in `cat-home-living` resolves to a unique localized label (no duplicates).
+- Every service in `cat-tourism` resolves to a unique label.
+- Plain `/services` still resolves to the umbrella "Services hub / Home services" label.
+
+**3. Tighten `cat-home-living` SSOT labels** so the drawer reads naturally even when the registry lookup is bypassed. The existing values are already specific (Cleaning / Laundry / Handyman / …) — just verify and keep.
 
 ## Verification
-1. `bunx tsc --noEmit` — must stay clean.
-2. Visual QA on `/navigator` at 384px viewport: tiles align, two-line RU labels visible, no overflow, cluster colors readable in dark + light mode.
-3. `bunx vitest run src/test/catalog/taxonomy-coverage.test.ts` — confirm no regression in cluster ↔ service mapping.
+
+- Open the bottom **All Services** drawer on `/`, expand "Home & Living" → expect 12 distinct labels matching screenshots' intended content.
+- Expand "Tourism & Activities" → expect Experiences, Tours, Water & activities, Yachts, Events.
+- Run `bunx vitest run src/lib/nav` and `src/test/catalog/taxonomy-coverage.test.ts` — both green.
+- Confirm Home grid and `/discover` are unaffected (they read directly from SSOT, not via the registry override).
+
+## Out of scope (noted, will not change in this pass)
+
+- The crammed `/me` tab strip in screenshot 4 is a separate cosmetic issue (7 pills inside a `flex gap-1 overflow-x-auto` row that visually collide on the 384 px viewport). Worth a follow-up to either (a) collapse the active pill to icon-only on `<sm`, or (b) add `min-w-max` to each NavLink so they always reserve their full width before scrolling. Flag it now, fix in a dedicated UX pass.
 
 ## Files touched
-- `src/components/navigation/NavigatorPage.tsx` (only)
+
+- `src/lib/nav/clusterCatalog.ts` — fix `findAppEntryByServicePath`.
+- `src/lib/nav/__tests__/clusterCatalog.test.ts` — add label-uniqueness assertions.
