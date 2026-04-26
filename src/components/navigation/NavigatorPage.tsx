@@ -3,32 +3,27 @@
  * Accessible from bottom nav "Navigator" tab
  */
 import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Search, LayoutGrid, X } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useUserPersonas } from '@/hooks/useUserPersonas';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { cn } from '@/lib/utils';
 import { NavChips, type NavChipItem } from '@/components/nav/NavChips';
 import {
-  CLUSTER_CATALOG,
-  CLUSTER_CATALOG_AVAILABLE,
-  CLUSTER_CATALOG_SOON,
-  CLUSTER_CATALOG_TOTAL_AVAILABLE,
+  filterCatalogForUser,
   getClusterHeaderLabel,
   getClusterServiceLocalizedLabel,
   getClusterValueLine,
   type ClusterService,
+  type ClusterCatalogEntry,
 } from '@/lib/nav/clusterCatalog';
+import { resolveNavRole } from '@/lib/nav/navigationModel';
 import { pickTriplet } from '@/lib/ecosystemGlossary';
 import type { Language } from '@/i18n';
-
-// Local aliases — keep call-sites readable; SSOT lives in clusterCatalog.ts
-const CLUSTERS = CLUSTER_CATALOG;
-const ALL_SERVICES = CLUSTER_CATALOG_AVAILABLE;
-const SOON_SERVICES = CLUSTER_CATALOG_SOON;
-const TOTAL_NAVIGATOR_SERVICES = CLUSTER_CATALOG_TOTAL_AVAILABLE;
 
 function NavigatorStatsFooter({
   stats,
@@ -153,29 +148,76 @@ function ServiceTile({
 export default function NavigatorPage() {
   const { language } = useLanguage();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { user } = useAuth();
+  const { personas } = useUserPersonas();
   const [query, setQuery] = useState('');
   const [activeCluster, setActiveCluster] = useState<string>('all');
+
+  // SSOT-driven audience filter: workspace clusters (manage) hidden from
+  // bare guests; investor/owner/developer personas unlock their own clusters.
+  // Same contract as AppDrawer/AllAppsDrawer — see clusterCatalog.test.ts.
+  const role = useMemo(
+    () =>
+      resolveNavRole({
+        activeRole: (user?.user_metadata as { role?: string } | undefined)?.role ?? null,
+        pathname: location.pathname,
+      }),
+    [user, location.pathname],
+  );
+
+  const audienceClusters: ClusterCatalogEntry[] = useMemo(
+    () => filterCatalogForUser({ personas, role }),
+    [personas, role],
+  );
+
+  // Flat lists derived from audience-filtered set (counts + search corpus)
+  const audienceServicesAll = useMemo(
+    () =>
+      audienceClusters.flatMap((c) =>
+        c.services.map((s) => ({
+          ...s,
+          clusterId: c.id,
+          clusterColor: c.color,
+          clusterLabelRu: c.labelRu,
+          clusterLabelEn: c.labelEn,
+        })),
+      ),
+    [audienceClusters],
+  );
+  const audienceAvailable = useMemo(
+    () => audienceServicesAll.filter((s) => s.status !== 'soon'),
+    [audienceServicesAll],
+  );
+  const audienceSoon = useMemo(
+    () => audienceServicesAll.filter((s) => s.status === 'soon'),
+    [audienceServicesAll],
+  );
+  const totalAvailable = audienceAvailable.length;
 
   const clusterChips: NavChipItem[] = useMemo(
     () => [
       {
         id: 'all',
         label: pickTriplet({ ru: 'Все', en: 'All', th: 'ทั้งหมด' }, language),
-        count: TOTAL_NAVIGATOR_SERVICES,
+        count: totalAvailable,
       },
-      ...CLUSTERS.map((c) => ({
+      ...audienceClusters.map((c) => ({
         id: c.id,
         label: getClusterHeaderLabel(c, language),
         accentColor: c.color,
         count: c.services.filter((s) => s.status !== 'soon').length,
       })),
     ],
-    [language],
+    [language, audienceClusters, totalAvailable],
   );
 
   const visibleClusters = useMemo(
-    () => (activeCluster === 'all' ? CLUSTERS : CLUSTERS.filter((c) => c.id === activeCluster)),
-    [activeCluster],
+    () =>
+      activeCluster === 'all'
+        ? audienceClusters
+        : audienceClusters.filter((c) => c.id === activeCluster),
+    [activeCluster, audienceClusters],
   );
 
   const { data: stats } = useQuery({
@@ -199,7 +241,7 @@ export default function NavigatorPage() {
 
   const searchResults = useMemo(() => {
     if (!trimmedQuery) return null;
-    return ALL_SERVICES.filter((s) => {
+    return audienceAvailable.filter((s) => {
       const label = getClusterServiceLocalizedLabel(s, language);
       const cluster = pickTriplet(
         { ru: s.clusterLabelRu, en: s.clusterLabelEn, th: s.clusterLabelEn },
@@ -224,9 +266,9 @@ export default function NavigatorPage() {
           <p className="text-sm text-muted-foreground leading-snug">
             {pickTriplet(
               {
-                ru: `${TOTAL_NAVIGATOR_SERVICES} сервисов · один суперапп myUNO`,
-                en: `${TOTAL_NAVIGATOR_SERVICES} services · one myUNO superapp`,
-                th: `${TOTAL_NAVIGATOR_SERVICES} บริการ · ซูเปอร์แอป myUNO แอปเดียวจบ`,
+                ru: `${totalAvailable} сервисов · один суперапп myUNO`,
+                en: `${totalAvailable} services · one myUNO superapp`,
+                th: `${totalAvailable} บริการ · ซูเปอร์แอป myUNO แอปเดียวจบ`,
               },
               language
             )}
@@ -356,7 +398,7 @@ export default function NavigatorPage() {
         )}
 
         {/* Coming soon */}
-        {searchResults === null && SOON_SERVICES.length > 0 && (
+        {searchResults === null && audienceSoon.length > 0 && (
           <div
             className="rounded-none p-4 space-y-3"
             style={{ background: 'hsl(var(--bg-elevated))', border: '1px solid hsl(0 0% 100% / 0.05)' }}
@@ -365,7 +407,7 @@ export default function NavigatorPage() {
               {pickTriplet({ ru: 'Скоро', en: 'Coming soon', th: 'เร็ว ๆ นี้' }, language)}
             </p>
             <div className="flex flex-wrap gap-2">
-              {SOON_SERVICES.map(s => {
+              {audienceSoon.map(s => {
                 const SIcon = s.icon;
                 return (
                   <div

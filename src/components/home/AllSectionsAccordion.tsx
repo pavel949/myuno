@@ -3,6 +3,11 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { UserPersona } from '@/hooks/useUserPersonas';
 import { ClusterGrid } from './ClusterGrid';
+import {
+  CLUSTER_CATALOG,
+  CLUSTER_CATALOG_TOTAL_AVAILABLE,
+  filterCatalogForUser,
+} from '@/lib/nav/clusterCatalog';
 
 interface AllSectionsAccordionProps {
   personas: UserPersona[];
@@ -10,11 +15,24 @@ interface AllSectionsAccordionProps {
 
 /**
  * AllSectionsAccordion — progressive disclosure for the full cluster catalog.
- * Hidden by default; experienced users open it to access all 6 clusters.
+ * Hidden by default; experienced users open it to access all clusters.
+ *
+ * Counts come from SSOT, not hardcoded — keeps Home/Discover/Footer in sync.
+ * Cluster count is audience-aware so guests don't see "+1 cluster you can't open".
  */
 export function AllSectionsAccordion({ personas }: AllSectionsAccordionProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+
+  const visibleClusters = React.useMemo(
+    () => filterCatalogForUser({ personas, role: null }),
+    [personas],
+  );
+  const visibleClusterCount = visibleClusters.length;
+  const totalServices = CLUSTER_CATALOG_TOTAL_AVAILABLE;
+  const summary = isRu
+    ? `${visibleClusterCount} направлений · ${totalServices} сервисов`
+    : `${visibleClusterCount} clusters · ${totalServices} services`;
 
   return (
     <div className="px-4 pb-3">
@@ -25,9 +43,7 @@ export function AllSectionsAccordion({ personas }: AllSectionsAccordionProps) {
               <span className="text-[14px] font-semibold text-foreground">
                 {isRu ? 'Все разделы' : 'All sections'}
               </span>
-              <span className="text-[11.5px] text-muted-foreground mt-0.5">
-                {isRu ? '6 направлений · 45 сервисов' : '6 clusters · 45 services'}
-              </span>
+              <span className="text-[11.5px] text-muted-foreground mt-0.5">{summary}</span>
             </div>
           </AccordionTrigger>
           <AccordionContent className="pt-1">
@@ -40,3 +56,4 @@ export function AllSectionsAccordion({ personas }: AllSectionsAccordionProps) {
     </div>
   );
 }
+

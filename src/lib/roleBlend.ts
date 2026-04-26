@@ -1,4 +1,10 @@
 import type { UserPersona } from '@/hooks/useUserPersonas';
+import {
+  CLUSTER_CATALOG,
+  filterCatalogForUser,
+  type ClusterCatalogEntry,
+  type ClusterAudienceContext,
+} from '@/lib/nav/clusterCatalog';
 
 /**
  * ROLE_META — canonical visual + textual metadata for every persona.
@@ -35,17 +41,14 @@ export const ROLE_META: Record<UserPersona, {
 
 export type ClusterId = 'live' | 'manage' | 'invest' | 'legal' | 'arrive' | 'build';
 
-export const CLUSTERS = [
-  // Service-cabinet tone (см. mem://style/gov-tone-standard).
-  // Имя раздела + перечисление сервисов внутри. Без обещаний, без жаргона, аббревиатуры расшифрованы.
-  { id: 'arrive' as ClusterId, labelEn: 'Arrival',     labelRu: 'Прибытие',     sub: 'Transfer, SIM card, currency exchange, check-in',                       subRu: 'Трансфер, SIM-карта, обмен валюты, заселение',                                  accent: '#00D68F', route: '/life/arrival',     items: '5'  },
-  { id: 'live'   as ClusterId, labelEn: 'Daily life',  labelRu: 'Повседневные сервисы', sub: 'Cleaning, delivery, schools, clinics, vet care',                subRu: 'Уборка, доставка, школы, клиники, ветеринария',                                 accent: '#4E7BFF', route: '/discover',         items: '14' },
-  { id: 'manage' as ClusterId, labelEn: 'Property management', labelRu: 'Управление объектом', sub: 'Bookings, housekeeping, owner statements, payouts',     subRu: 'Бронирования, обслуживание, отчёты собственнику, выплаты',                      accent: '#16BDCA', route: '/mc',               items: '9'  },
-  { id: 'invest' as ClusterId, labelEn: 'Investments', labelRu: 'Инвестиции',   sub: 'Properties under construction, yield models, exit timelines',           subRu: 'Объекты на стадии строительства, модели доходности, сроки выхода',              accent: '#A78BFA', route: '/invest',           items: '7'  },
-  { id: 'legal'  as ClusterId, labelEn: 'Documents',   labelRu: 'Документы',    sub: 'Visa, place-of-stay notice (TM30), contracts, annual filings',         subRu: 'Виза, уведомление о месте пребывания (TM30), договоры, годовая отчётность',     accent: '#F59E0B', route: '/life/relocation',  items: '6'  },
-  { id: 'build'  as ClusterId, labelEn: 'Development', labelRu: 'Размещение проектов', sub: 'Project listing, inbound applications, applicant analytics',    subRu: 'Размещение проекта, входящие заявки, аналитика по заявкам',                     accent: '#EF4444', route: '/property/offplan', items: '4' },
-];
-
+/**
+ * Persona → cluster scoring matrix. Drives ordering on Home `ClusterGrid`
+ * (primary persona ×3, secondary ×2, tertiary ×1).
+ *
+ * NOTE: cluster labels / routes / counts no longer live here — they come
+ * from the SSOT (`src/lib/catalog/taxonomy.ts`) via `CLUSTER_CATALOG`.
+ * This file owns ONLY the persona-weighting model.
+ */
 const CLUSTER_SCORES: Record<UserPersona, Record<ClusterId, number>> = {
   tourist:                 { arrive: 5, live: 4, legal: 1, manage: 0, invest: 0, build: 0 },
   resident:                { live: 5, legal: 4, manage: 3, arrive: 1, invest: 2, build: 0 },
@@ -80,16 +83,45 @@ export const SIGNAL_ROUTE: Record<UserPersona, string> = {
   relocation:              '/life/relocation',
 };
 
-export function blendClusters(personas: UserPersona[]) {
+/**
+ * Persona-weighted cluster ordering, returning **SSOT cluster entries**.
+ *
+ * - Primary persona (index 0) gets weight ×3, secondary ×2, tertiary ×1.
+ * - Audience filter applied first: workspace clusters (e.g. `manage`) hidden
+ *   from users who don't own them. Same contract as `filterCatalogForUser`.
+ * - Number of available services per cluster:
+ *   `entry.services.filter(s => s.status !== 'soon').length`.
+ *
+ * Pass `audienceCtx` when you also have an `NavRoleKey` (e.g. owner shell);
+ * by default we use `personas` only, treating the user as a guest.
+ */
+export function blendClusters(
+  personas: UserPersona[],
+  audienceCtx?: ClusterAudienceContext,
+): ClusterCatalogEntry[] {
   const scores: Record<ClusterId, number> = { live: 0, manage: 0, invest: 0, legal: 0, arrive: 0, build: 0 };
   personas.forEach((p, i) => {
     const weight = i === 0 ? 3 : i === 1 ? 2 : 1;
     const s = CLUSTER_SCORES[p];
     if (!s) return;
-    (Object.entries(s) as [ClusterId, number][]).forEach(([k, v]) => { scores[k] += v * weight; });
+    (Object.entries(s) as [ClusterId, number][]).forEach(([k, v]) => {
+      scores[k] += v * weight;
+    });
   });
-  return [...CLUSTERS].sort((a, b) => scores[b.id] - scores[a.id]);
+
+  const ctx: ClusterAudienceContext =
+    audienceCtx ?? { personas: personas as unknown as string[], role: null };
+  const visible = filterCatalogForUser(ctx);
+  return [...visible].sort(
+    (a, b) => (scores[b.id as ClusterId] ?? 0) - (scores[a.id as ClusterId] ?? 0),
+  );
 }
+
+/**
+ * @deprecated since 2026-04-26 — kept as backwards-compat shim while
+ * downstream imports migrate. Reads straight from SSOT.
+ */
+export const CLUSTERS = CLUSTER_CATALOG;
 
 // Signal seed data per role — shown when real DB data is loading
 export const SIGNAL_SEED: Record<UserPersona, { lead: string; leadRu: string; value: string; tail: string; tailRu: string; state: 'live' | 'warn' | 'active' }> = {

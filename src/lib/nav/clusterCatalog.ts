@@ -62,6 +62,8 @@ export interface ClusterCatalogEntry {
   audience?: 'public' | 'workspace';
   personas?: string[];
   roles?: string[];
+  /** Canonical landing route for the cluster card (Home/ClusterGrid). */
+  homeRoute: string;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -98,6 +100,7 @@ function buildClusterEntry(cluster: ClusterEntry): ClusterCatalogEntry {
     audience: cluster.audience,
     personas: cluster.personas,
     roles: cluster.roles,
+    homeRoute: cluster.homeRoute,
   };
 }
 

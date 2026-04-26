@@ -118,6 +118,11 @@ export interface ClusterEntry {
   personas?: string[];
   /** Role keys that grant access for `workspace` clusters */
   roles?: string[];
+  /**
+   * Canonical landing route for the cluster card on Home (`ClusterGrid`).
+   * Different from per-service paths — this is the umbrella entry-point.
+   */
+  homeRoute: string;
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -136,6 +141,7 @@ export const CLUSTERS: ClusterEntry[] = [
     color: '#00D68F',
     sortOrder: 1,
     audience: 'public',
+    homeRoute: '/life/arrival',
   },
   {
     id: 'live',
@@ -148,6 +154,7 @@ export const CLUSTERS: ClusterEntry[] = [
     color: '#4E7BFF',
     sortOrder: 2,
     audience: 'public',
+    homeRoute: '/discover',
   },
   {
     id: 'manage',
@@ -162,6 +169,7 @@ export const CLUSTERS: ClusterEntry[] = [
     audience: 'workspace',
     personas: ['property_owner', 'local_services_provider'],
     roles: ['owner', 'admin', 'team', 'vendor'],
+    homeRoute: '/mc',
   },
   {
     id: 'invest',
@@ -174,6 +182,7 @@ export const CLUSTERS: ClusterEntry[] = [
     color: '#A855F7',
     sortOrder: 4,
     audience: 'public',
+    homeRoute: '/invest',
   },
   {
     id: 'legal',
@@ -186,6 +195,7 @@ export const CLUSTERS: ClusterEntry[] = [
     color: '#F59E0B',
     sortOrder: 5,
     audience: 'public',
+    homeRoute: '/life/relocation',
   },
   {
     id: 'build',
@@ -198,6 +208,7 @@ export const CLUSTERS: ClusterEntry[] = [
     color: '#F43F5E',
     sortOrder: 6,
     audience: 'public',
+    homeRoute: '/property/offplan',
   },
 ];
 
