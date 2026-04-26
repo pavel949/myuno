@@ -38,13 +38,13 @@ export function useMyStatementApprovals() {
     queryKey: ['my-statement-approvals', user?.id],
     queryFn: async (): Promise<StatementApproval[]> => {
       if (!user) return [];
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('owner_statement_approvals')
         .select('*')
         .eq('owner_user_id', user.id)
         .order('created_at', { ascending: false });
       if (error) throw error;
-      return (data || []) as StatementApproval[];
+      return (data || []) as unknown as StatementApproval[];
     },
     enabled: !!user,
   });
@@ -57,13 +57,13 @@ export function useCompanyStatementApprovals() {
     queryKey: ['company-statement-approvals', activeCompany?.company_id],
     queryFn: async (): Promise<StatementApproval[]> => {
       if (!activeCompany) return [];
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('owner_statement_approvals')
         .select('*')
         .eq('company_id', activeCompany.company_id)
         .order('created_at', { ascending: false });
       if (error) throw error;
-      return (data || []) as StatementApproval[];
+      return (data || []) as unknown as StatementApproval[];
     },
     enabled: !!activeCompany,
   });
@@ -88,7 +88,7 @@ export function useSignStatement() {
     mutationFn: async (args: { id: string; signatureDataUrl: string; comment?: string }) => {
       if (!user) throw new Error('Not authenticated');
       const url = await uploadSignature(user.id, args.signatureDataUrl, `stmt-${args.id}`);
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('owner_statement_approvals')
         .update({
           status: 'approved',
@@ -105,7 +105,7 @@ export function useSignStatement() {
       qc.invalidateQueries({ queryKey: ['my-statement-approvals'] });
       qc.invalidateQueries({ queryKey: ['company-statement-approvals'] });
     },
-    onError: (e: any) => toast.error(e.message || 'Failed to sign'),
+    onError: (e: Error) => toast.error(e.message || 'Failed to sign'),
   });
 }
 
@@ -113,7 +113,7 @@ export function useRejectStatement() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (args: { id: string; reason: string }) => {
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('owner_statement_approvals')
         .update({
           status: 'rejected',
@@ -128,7 +128,7 @@ export function useRejectStatement() {
       qc.invalidateQueries({ queryKey: ['my-statement-approvals'] });
       qc.invalidateQueries({ queryKey: ['company-statement-approvals'] });
     },
-    onError: (e: any) => toast.error(e.message || 'Failed to reject'),
+    onError: (e: Error) => toast.error(e.message || 'Failed to reject'),
   });
 }
 
@@ -151,7 +151,7 @@ export function useCreateStatementApproval() {
       const expires_at = args.expires_in_days
         ? new Date(Date.now() + args.expires_in_days * 86400000).toISOString()
         : null;
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('owner_statement_approvals')
         .insert({
           company_id: activeCompany.company_id,
@@ -174,6 +174,6 @@ export function useCreateStatementApproval() {
       toast.success('Statement sent to owner');
       qc.invalidateQueries({ queryKey: ['company-statement-approvals'] });
     },
-    onError: (e: any) => toast.error(e.message || 'Failed to send'),
+    onError: (e: Error) => toast.error(e.message || 'Failed to send'),
   });
 }

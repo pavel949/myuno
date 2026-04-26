@@ -37,7 +37,7 @@ export function useMcOnboarding() {
     queryKey: ['mc-onboarding', activeCompany?.company_id],
     queryFn: async (): Promise<McOnboardingProgress | null> => {
       if (!activeCompany) return null;
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('mc_onboarding_progress')
         .select('*')
         .eq('company_id', activeCompany.company_id)
@@ -45,7 +45,7 @@ export function useMcOnboarding() {
       if (error) throw error;
       // Auto-create row if missing
       if (!data) {
-        const { data: created, error: insErr } = await (supabase as any)
+        const { data: created, error: insErr } = await supabase
           .from('mc_onboarding_progress')
           .insert({ company_id: activeCompany.company_id })
           .select()
@@ -65,8 +65,8 @@ export function useUpdateOnboardingStep() {
   return useMutation({
     mutationFn: async (args: { step: OnboardingStepKey; value: boolean }) => {
       if (!activeCompany) throw new Error('No company');
-      const updates: any = { [args.step]: args.value };
-      const { error } = await (supabase as any)
+      const updates: Partial<Record<OnboardingStepKey, boolean>> = { [args.step]: args.value };
+      const { error } = await supabase
         .from('mc_onboarding_progress')
         .update(updates)
         .eq('company_id', activeCompany.company_id);
@@ -82,7 +82,7 @@ export function useDismissOnboarding() {
   return useMutation({
     mutationFn: async () => {
       if (!activeCompany) throw new Error('No company');
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('mc_onboarding_progress')
         .update({ dismissed_at: new Date().toISOString() })
         .eq('company_id', activeCompany.company_id);
@@ -98,7 +98,7 @@ export function useCompleteOnboarding() {
   return useMutation({
     mutationFn: async () => {
       if (!activeCompany) throw new Error('No company');
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('mc_onboarding_progress')
         .update({ completed_at: new Date().toISOString() })
         .eq('company_id', activeCompany.company_id);
@@ -111,7 +111,7 @@ export function useCompleteOnboarding() {
 /** Compute % progress 0-100 */
 export function computeProgress(p: McOnboardingProgress | null | undefined): number {
   if (!p) return 0;
-  const flags = ONBOARDING_STEPS.map((s) => (p as any)[s.key] === true);
+  const flags = ONBOARDING_STEPS.map((s) => p[s.key] === true);
   const done = flags.filter(Boolean).length;
   return Math.round((done / ONBOARDING_STEPS.length) * 100);
 }

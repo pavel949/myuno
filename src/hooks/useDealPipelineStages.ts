@@ -91,7 +91,7 @@ export function usePipelineStages(companyId: string | undefined, dealType?: stri
         const inserts = slice.map((s) => ({ ...s, company_id: companyId! }));
         const { data: seeded, error: seedErr } = await supabase
           .from('deal_pipeline_stages')
-          .insert(inserts as any)
+          .insert(inserts)
           .select();
         if (seedErr) throw seedErr;
         return (seeded || []) as unknown as PipelineStage[];
@@ -120,7 +120,7 @@ export function useAllPipelineStages(companyId: string | undefined) {
         const inserts = FULL_DEFAULT_STAGES.map((s) => ({ ...s, company_id: companyId! }));
         const { data: seeded, error: seedErr } = await supabase
           .from('deal_pipeline_stages')
-          .insert(inserts as any)
+          .insert(inserts)
           .select();
         if (seedErr) throw seedErr;
         return (seeded || []) as unknown as PipelineStage[];
@@ -133,7 +133,7 @@ export function useAllPipelineStages(companyId: string | undefined) {
           ...s,
           company_id: companyId!,
         }));
-        const { error: insErr } = await supabase.from('deal_pipeline_stages').insert(toInsert as any);
+        const { error: insErr } = await supabase.from('deal_pipeline_stages').insert(toInsert);
         if (insErr) throw insErr;
         const { data: again, error: e2 } = await supabase
           .from('deal_pipeline_stages')
@@ -156,7 +156,7 @@ export function useCreatePipelineStage() {
     mutationFn: async (stage: Omit<PipelineStage, 'id'>) => {
       const { data, error } = await supabase
         .from('deal_pipeline_stages')
-        .insert(stage as any)
+        .insert(stage)
         .select()
         .single();
       if (error) throw error;
@@ -175,7 +175,7 @@ export function useUpdatePipelineStage() {
     mutationFn: async ({ id, ...updates }: Partial<PipelineStage> & { id: string }) => {
       const { data, error } = await supabase
         .from('deal_pipeline_stages')
-        .update(updates as any)
+        .update(updates)
         .eq('id', id)
         .select()
         .single();
@@ -195,7 +195,7 @@ export function useDeletePipelineStage() {
     mutationFn: async (id: string) => {
       const { error } = await supabase
         .from('deal_pipeline_stages')
-        .update({ is_active: false } as any)
+        .update({ is_active: false })
         .eq('id', id);
       if (error) throw error;
     },

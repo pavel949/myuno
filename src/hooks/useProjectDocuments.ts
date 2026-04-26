@@ -55,7 +55,7 @@ export function useProjectDocuments(projectId?: string, opts?: { onlyCurrent?: b
     queryFn: async (): Promise<ProjectDocument[]> => {
       if (!projectId) return [];
       let q = supabase
-        .from('project_documents' as any)
+        .from('project_documents')
         .select('*')
         .eq('project_id', projectId)
         .order('category', { ascending: true })
@@ -63,7 +63,7 @@ export function useProjectDocuments(projectId?: string, opts?: { onlyCurrent?: b
       if (opts?.onlyCurrent !== false) q = q.eq('is_current', true);
       const { data, error } = await q;
       if (error) throw error;
-      return (data || []) as unknown as ProjectDocument[];
+      return (data || []) as ProjectDocument[];
     },
     enabled: !!projectId,
   });
@@ -100,16 +100,16 @@ export function useUploadProjectDocument() {
       let version = 1;
       if (replacesDocumentId) {
         const { data: prev } = await supabase
-          .from('project_documents' as any)
+          .from('project_documents')
           .select('version')
           .eq('id', replacesDocumentId)
           .maybeSingle();
-        version = ((prev as any)?.version || 1) + 1;
+        version = ((prev as { version?: number } | null)?.version || 1) + 1;
       }
 
       const { data: { user } } = await supabase.auth.getUser();
 
-      const { error: insErr } = await supabase.from('project_documents' as any).insert({
+      const { error: insErr } = await supabase.from('project_documents').insert({
         project_id: projectId,
         category,
         title,
@@ -129,7 +129,7 @@ export function useUploadProjectDocument() {
       qc.invalidateQueries({ queryKey: ['project-documents', projectId] });
       toast.success('Документ загружен');
     },
-    onError: (e: any) => toast.error(e.message || 'Ошибка загрузки'),
+    onError: (e: Error) => toast.error(e.message || 'Ошибка загрузки'),
   });
 }
 
@@ -138,7 +138,7 @@ export function useUpdateProjectDocument() {
   return useMutation({
     mutationFn: async (input: { id: string; projectId: string; updates: Partial<Pick<ProjectDocument, 'title' | 'description' | 'visibility' | 'category'>> }) => {
       const { error } = await supabase
-        .from('project_documents' as any)
+        .from('project_documents')
         .update(input.updates)
         .eq('id', input.id);
       if (error) throw error;
@@ -157,7 +157,7 @@ export function useDeleteProjectDocument() {
   return useMutation({
     mutationFn: async (input: { id: string; projectId: string }) => {
       const { error } = await supabase
-        .from('project_documents' as any)
+        .from('project_documents')
         .delete()
         .eq('id', input.id);
       if (error) throw error;

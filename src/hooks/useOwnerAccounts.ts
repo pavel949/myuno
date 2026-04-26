@@ -88,14 +88,14 @@ export function useOwnerAccounts() {
       const [termsRes, docsRes, financialsRes, bookingsRes] = await Promise.all([
         propertyIds.length > 0
           ? supabase.from('property_management_terms').select('property_id, commission_rate, commission_type, commission_amount').in('property_id', propertyIds)
-          : Promise.resolve({ data: [] as any[] }),
+          : Promise.resolve({ data: [] as { property_id: string; commission_rate: number | null; commission_type: string | null; commission_amount: number | null }[] }),
         supabase.from('crm_documents').select('contact_id, document_type').eq('company_id', companyId).in('contact_id', contactIds),
         propertyIds.length > 0
           ? supabase.from('property_financials').select('property_id, transaction_type, amount').in('property_id', propertyIds)
-          : Promise.resolve({ data: [] as any[] }),
+          : Promise.resolve({ data: [] as { property_id: string; transaction_type: string; amount: number | null }[] }),
         propertyIds.length > 0
           ? supabase.from('property_bookings').select('property_id, check_in, check_out, status').in('property_id', propertyIds).in('status', ['confirmed', 'completed', 'checked_in'])
-          : Promise.resolve({ data: [] as any[] }),
+          : Promise.resolve({ data: [] as { property_id: string; check_in: string | null; check_out: string | null; status: string }[] }),
       ]);
 
       const terms = termsRes.data || [];
@@ -103,7 +103,16 @@ export function useOwnerAccounts() {
       const allFinancials = financialsRes.data || [];
       const allBookings = bookingsRes.data || [];
 
-      return contacts.map(c => {
+      type ContactExt = (typeof contacts)[number] & {
+        linked_user_id?: string | null;
+        special_notes?: string | null;
+        emergency_contact_name?: string | null;
+        emergency_contact_phone?: string | null;
+        emergency_contact_relation?: string | null;
+      };
+
+      return contacts.map(rawC => {
+        const c = rawC as ContactExt;
         const ownerProps = (properties || []).filter(p => p.owner_contact_id === c.id);
         const ownerPropIds = ownerProps.map(p => p.id);
         const ownerDocs = docs.filter(d => d.contact_id === c.id);
@@ -164,7 +173,7 @@ export function useOwnerAccounts() {
 
         return {
           id: c.id,
-          linked_user_id: (c as any).linked_user_id ?? null,
+          linked_user_id: c.linked_user_id ?? null,
           first_name: c.first_name,
           last_name: c.last_name,
           email: c.email,
@@ -174,11 +183,11 @@ export function useOwnerAccounts() {
           birthday: c.birthday,
           nationality: c.nationality,
           notes: c.notes,
-          special_notes: (c as any).special_notes ?? null,
+          special_notes: c.special_notes ?? null,
           family_info: c.family_info,
-          emergency_contact_name: (c as any).emergency_contact_name ?? null,
-          emergency_contact_phone: (c as any).emergency_contact_phone ?? null,
-          emergency_contact_relation: (c as any).emergency_contact_relation ?? null,
+          emergency_contact_name: c.emergency_contact_name ?? null,
+          emergency_contact_phone: c.emergency_contact_phone ?? null,
+          emergency_contact_relation: c.emergency_contact_relation ?? null,
           avatar_url: c.avatar_url,
           tags: c.tags,
           created_at: c.created_at,
