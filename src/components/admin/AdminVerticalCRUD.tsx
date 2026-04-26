@@ -74,8 +74,10 @@ export interface AdminVerticalConfig {
   typeOptions?: SelectOption[];
 }
 
-export type AdminVerticalItem = Record<string, unknown> & { id: string; provider_id?: string | null; cover_image?: string | null; is_active?: boolean | null };
-export type AdminVerticalFormData = Record<string, unknown> & { provider_id?: string };
+// Permissive shapes — consumer hooks (useAdminContent) return Record<string, any>.
+// Keep both items and form data permissive to maintain back-compat.
+export type AdminVerticalItem = Record<string, any>;
+export type AdminVerticalFormData = Record<string, any>;
 
 interface AdminVerticalCRUDProps {
   config: AdminVerticalConfig;
