@@ -80,8 +80,7 @@ export function useSupabaseCRUD<T extends { id: string }>({
     setError(null);
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let query = supabase.from(table as any).select(select);
+      let query = supabase.from(table as never).select(select);
       
       // Apply provider filter
       if (providerId) {
@@ -175,7 +174,7 @@ export function useSupabaseCRUD<T extends { id: string }>({
 
        
       const { data: result, error: insertError } = await supabase
-        .from(table as any)
+        .from(table as never)
         .insert(insertData)
         .select()
         .single();
@@ -202,7 +201,7 @@ export function useSupabaseCRUD<T extends { id: string }>({
       } as Record<string, unknown>);
        
       const { data: result, error: updateError } = await supabase
-        .from(table as any)
+        .from(table as never)
         .update(updateData)
         .eq('id', id)
         .select()
@@ -222,7 +221,7 @@ export function useSupabaseCRUD<T extends { id: string }>({
     try {
        
       const { error: deleteError } = await supabase
-        .from(table as any)
+        .from(table as never)
         .delete()
         .eq('id', id);
 
