@@ -134,6 +134,7 @@ export function ComplexFormDialog({ open, onOpenChange, complex }: ComplexFormDi
       if (error) throw error;
       const ex = data?.extracted;
       if (!ex) throw new Error('Empty result');
+      const meta = data?.meta;
 
       const filled: string[] = [];
       setForm(prev => {
@@ -165,14 +166,49 @@ export function ComplexFormDialog({ open, onOpenChange, complex }: ComplexFormDi
         setIf('juristic_phone', ex.juristic_phone, isRu ? 'Телефон' : 'Phone');
         setIf('juristic_email', ex.juristic_email, 'Email');
         setIf('video_url', ex.video_url, 'Video');
+
+        // Photos imported from Drive — merge with any existing
+        if (Array.isArray(ex.images) && ex.images.length > 0) {
+          const existing = new Set(prev.images || []);
+          const merged = [...(prev.images || [])];
+          for (const url of ex.images) {
+            if (!existing.has(url)) {
+              merged.push(url);
+              existing.add(url);
+            }
+          }
+          next.images = merged;
+          filled.push(isRu ? `Фото (${ex.images.length})` : `Photos (${ex.images.length})`);
+        }
+        if (ex.cover_image && !next.cover_image) {
+          next.cover_image = ex.cover_image;
+        }
         return next;
       });
+
+      // Append meta-derived chips (maps resolved, drive stats)
+      if (meta?.maps_url && (typeof ex.lat === 'number' && typeof ex.lng === 'number')) {
+        filled.push(isRu ? 'Карта 📍' : 'Map 📍');
+      }
+      if (meta?.drive?.error) {
+        toast.warning(
+          isRu
+            ? `Drive: ${meta.drive.error}. Убедитесь, что папка расшарена «Anyone with the link».`
+            : `Drive: ${meta.drive.error}. Make sure folder is shared "Anyone with the link".`
+        );
+      } else if (meta?.drive?.tried > 0 && meta?.drive?.saved === 0) {
+        toast.warning(
+          isRu
+            ? 'Не удалось скачать фото с Drive — проверьте права доступа к папке.'
+            : 'Could not download photos from Drive — check folder sharing settings.'
+        );
+      }
 
       setAiSummary(filled);
       toast.success(
         isRu
-          ? `Заполнено полей: ${filled.length}`
-          : `Filled ${filled.length} fields`
+          ? `Заполнено полей: ${filled.length}${meta?.drive?.saved ? `, фото: ${meta.drive.saved}` : ''}`
+          : `Filled ${filled.length} fields${meta?.drive?.saved ? `, photos: ${meta.drive.saved}` : ''}`
       );
     } catch (e: any) {
       console.error('AI parse error:', e);
@@ -252,16 +288,16 @@ export function ComplexFormDialog({ open, onOpenChange, complex }: ComplexFormDi
                   onChange={e => setAiText(e.target.value)}
                   placeholder={
                     isRu
-                      ? 'Вставьте сюда сообщение из WhatsApp / email / брошюру...\n\nНапример:\nGreetings from Verdana Pool Villa.\nProject infos: ...\n📍 Pru Jumpa, Thalang, Phuket\n💰 Starting from 12.5 MB\n☎️ +66...'
-                      : 'Paste WhatsApp message / email / brochure here...\n\nExample:\nGreetings from Verdana Pool Villa.\n📍 Pru Jumpa, Thalang, Phuket\n💰 Starting from 12.5 MB'
+                      ? 'Вставьте сообщение из WhatsApp / email / брошюру.\nAI распознает поля, скачает фото с Google Drive (если папка расшарена «Anyone with the link»), и определит координаты по ссылке Google Maps.\n\nПример:\nGreetings from Verdana Pool Villa.\nProject infos: https://drive.google.com/drive/folders/1dvN9K7vY-Q0iwhdyxR1ALFD1Ol1E_TFU\n📍 Pru Jumpa, Thalang, Phuket\n   Google Maps: https://maps.app.goo.gl/k7BU5n517Fe8HJeUA\n💰 Starting from 12.5 MB\n☎️ +66...'
+                      : 'Paste WhatsApp message / email / brochure.\nAI fills fields, imports photos from Google Drive (folder must be shared "Anyone with the link"), and resolves coordinates from Google Maps link.\n\nExample:\nGreetings from Verdana Pool Villa.\nProject infos: https://drive.google.com/drive/folders/...\n📍 Pru Jumpa, Thalang, Phuket\n   Google Maps: https://maps.app.goo.gl/...\n💰 Starting from 12.5 MB'
                   }
                   className="text-sm"
                 />
                 <div className="flex items-center justify-between gap-2">
                   <p className="text-xs text-muted-foreground">
                     {isRu
-                      ? 'Заполнит название, локацию, удобства, контакты — вы проверите и сохраните.'
-                      : 'Fills name, location, amenities, contacts — you review and save.'}
+                      ? 'Заполнит название, описание, удобства, координаты с Maps и подгрузит фото из Drive.'
+                      : 'Fills name, description, amenities, Maps coords + imports photos from Drive.'}
                   </p>
                   <Button
                     size="sm"
