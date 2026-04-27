@@ -1,21 +1,22 @@
 /**
  * usePhuketConditions — real-time weather, AQI and FX rate for Phuket.
  *
- * Sources (all keyless / public, CORS-enabled):
- *  - Weather (temp + condition):   Open-Meteo  https://open-meteo.com/en/docs
- *  - Air quality (US AQI):         Open-Meteo  https://open-meteo.com/en/docs/air-quality-api
+ * Strategy:
+ *  1. Primary: call the `phuket-conditions` edge function (server-side proxy).
+ *     This works in the Lovable preview iframe where direct browser calls to
+ *     open-meteo / jsdelivr are blocked by CORS / CSP.
+ *  2. Fallback: hit the public APIs directly (works on myuno.app).
+ *
+ * Sources (all keyless / public):
+ *  - Weather (temp + condition):   Open-Meteo
+ *  - Air quality (US AQI):         Open-Meteo
  *  - FX rate THB/USD:              fawazahmed0/currency-api (jsDelivr CDN)
- *                                  https://github.com/fawazahmed0/exchange-api
  *
- * Note: previously used exchangerate.host, which started returning 403
- * "missing_access_key" in 2026 after switching to a paid model. The new
- * source is fully open and updated daily.
- *
- * Cached in localStorage for 30 minutes to avoid re-fetching on every mount.
- * If a request fails, we fall back to the last-known cached value, then to
- * an em-dash placeholder (—). Never returns hard-coded mock data.
+ * Cached in localStorage for 30 minutes. Em-dash placeholders are NEVER
+ * cached, so a transient network failure cannot poison subsequent reloads.
  */
 import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface PhuketConditions {
   temp: string;       // "29°"
