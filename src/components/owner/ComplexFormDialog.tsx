@@ -115,6 +115,73 @@ export function ComplexFormDialog({ open, onOpenChange, complex }: ComplexFormDi
     }
   };
 
+  const handleAiParse = async () => {
+    if (!aiText.trim()) {
+      toast.error(isRu ? 'Вставьте текст сообщения' : 'Paste message text first');
+      return;
+    }
+    setAiLoading(true);
+    setAiSummary(null);
+    try {
+      const { data, error } = await supabase.functions.invoke('ai-intake-extract', {
+        body: {
+          input: aiText.trim(),
+          inputType: 'text',
+          entityType: 'property_project',
+          language,
+        },
+      });
+      if (error) throw error;
+      const ex = data?.extracted;
+      if (!ex) throw new Error('Empty result');
+
+      const filled: string[] = [];
+      setForm(prev => {
+        const next: ComplexFormData = { ...prev };
+        const setIf = <K extends keyof ComplexFormData>(k: K, v: ComplexFormData[K] | undefined | null, label: string) => {
+          if (v === undefined || v === null || v === '') return;
+          if (Array.isArray(v) && v.length === 0) return;
+          next[k] = v as ComplexFormData[K];
+          filled.push(label);
+        };
+        setIf('name', ex.name_en, isRu ? 'Название EN' : 'Name EN');
+        setIf('name_ru', ex.name_ru, isRu ? 'Название RU' : 'Name RU');
+        setIf('description_en', ex.description_en, isRu ? 'Описание EN' : 'Description EN');
+        setIf('description_ru', ex.description_ru, isRu ? 'Описание RU' : 'Description RU');
+        setIf('complex_type', ex.complex_type, isRu ? 'Тип' : 'Type');
+        setIf('address', ex.address, isRu ? 'Адрес' : 'Address');
+        setIf('district', ex.district, isRu ? 'Район' : 'District');
+        setIf('lat', typeof ex.lat === 'number' ? ex.lat : undefined, 'Lat');
+        setIf('lng', typeof ex.lng === 'number' ? ex.lng : undefined, 'Lng');
+        setIf('year_built', ex.year_built, isRu ? 'Год' : 'Year');
+        setIf('total_units', ex.total_units, isRu ? 'Юниты' : 'Units');
+        setIf('total_buildings', ex.total_buildings, isRu ? 'Корпусы' : 'Buildings');
+        setIf('total_floors', ex.total_floors, isRu ? 'Этажи' : 'Floors');
+        setIf('amenities', ex.amenities, isRu ? 'Удобства' : 'Amenities');
+        setIf('services', ex.services, isRu ? 'Услуги' : 'Services');
+        setIf('security_features', ex.security_features, isRu ? 'Безопасность' : 'Security');
+        setIf('infrastructure', ex.infrastructure, isRu ? 'Инфраструктура' : 'Infrastructure');
+        setIf('juristic_person_name', ex.juristic_person_name, isRu ? 'Юрлицо' : 'Juristic');
+        setIf('juristic_phone', ex.juristic_phone, isRu ? 'Телефон' : 'Phone');
+        setIf('juristic_email', ex.juristic_email, 'Email');
+        setIf('video_url', ex.video_url, 'Video');
+        return next;
+      });
+
+      setAiSummary(filled);
+      toast.success(
+        isRu
+          ? `Заполнено полей: ${filled.length}`
+          : `Filled ${filled.length} fields`
+      );
+    } catch (e: any) {
+      console.error('AI parse error:', e);
+      toast.error(e?.message || (isRu ? 'Ошибка AI разбора' : 'AI parse failed'));
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   const isPending = createMutation.isPending || updateMutation.isPending;
 
   const renderChipGroup = (
