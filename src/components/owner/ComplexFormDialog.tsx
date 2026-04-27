@@ -47,6 +47,10 @@ export function ComplexFormDialog({ open, onOpenChange, complex }: ComplexFormDi
   const createMutation = useCreateComplex();
   const updateMutation = useUpdateComplex();
   const [form, setForm] = useState<ComplexFormData>(emptyForm);
+  const [aiOpen, setAiOpen] = useState(false);
+  const [aiText, setAiText] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiSummary, setAiSummary] = useState<string[] | null>(null);
 
   useEffect(() => {
     if (complex) {
