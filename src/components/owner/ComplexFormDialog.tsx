@@ -227,6 +227,66 @@ export function ComplexFormDialog({ open, onOpenChange, complex }: ComplexFormDi
           </DialogTitle>
         </DialogHeader>
 
+        {/* AI Intake panel — only for new complexes */}
+        {!complex && (
+          <div className="px-6 pb-2">
+            <button
+              type="button"
+              onClick={() => setAiOpen(o => !o)}
+              className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg border border-primary/30 bg-primary/5 hover:bg-primary/10 transition-colors text-sm"
+            >
+              <span className="flex items-center gap-2 font-medium text-primary">
+                <Sparkles className="h-4 w-4" />
+                {isRu
+                  ? 'AI распознавание (вставьте сообщение от застройщика)'
+                  : 'AI Intake — paste developer message'}
+              </span>
+              {aiOpen ? <ChevronUp className="h-4 w-4 text-primary" /> : <ChevronDown className="h-4 w-4 text-primary" />}
+            </button>
+
+            {aiOpen && (
+              <div className="mt-2 space-y-2 p-3 rounded-lg border border-border bg-muted/30">
+                <Textarea
+                  rows={6}
+                  value={aiText}
+                  onChange={e => setAiText(e.target.value)}
+                  placeholder={
+                    isRu
+                      ? 'Вставьте сюда сообщение из WhatsApp / email / брошюру...\n\nНапример:\nGreetings from Verdana Pool Villa.\nProject infos: ...\n📍 Pru Jumpa, Thalang, Phuket\n💰 Starting from 12.5 MB\n☎️ +66...'
+                      : 'Paste WhatsApp message / email / brochure here...\n\nExample:\nGreetings from Verdana Pool Villa.\n📍 Pru Jumpa, Thalang, Phuket\n💰 Starting from 12.5 MB'
+                  }
+                  className="text-sm"
+                />
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-xs text-muted-foreground">
+                    {isRu
+                      ? 'Заполнит название, локацию, удобства, контакты — вы проверите и сохраните.'
+                      : 'Fills name, location, amenities, contacts — you review and save.'}
+                  </p>
+                  <Button
+                    size="sm"
+                    onClick={handleAiParse}
+                    disabled={aiLoading || !aiText.trim()}
+                    className="gap-2 shrink-0"
+                  >
+                    {aiLoading
+                      ? <Loader2 className="h-4 w-4 animate-spin" />
+                      : <Sparkles className="h-4 w-4" />}
+                    {isRu ? 'Разобрать' : 'Parse'}
+                  </Button>
+                </div>
+                {aiSummary && aiSummary.length > 0 && (
+                  <div className="flex flex-wrap gap-1 pt-1">
+                    {aiSummary.map((f, i) => (
+                      <Badge key={i} variant="secondary" className="text-[10px]">{f}</Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         <Tabs defaultValue="general" className="flex-1">
           <div className="px-6 overflow-x-auto">
             <TabsList className="w-full grid grid-cols-3 sm:grid-cols-5 h-auto gap-1">
