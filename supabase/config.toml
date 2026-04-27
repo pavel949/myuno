@@ -63,6 +63,8 @@ project_id = "erfwtoavipwjqmylpizt"
     verify_jwt = false
   [functions.get-weather]
     verify_jwt = false
+  [functions.phuket-conditions]
+    verify_jwt = false
   [functions.ical-sync]
     verify_jwt = false
   [functions.image-resize]

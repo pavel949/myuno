@@ -1,21 +1,22 @@
 /**
  * usePhuketConditions — real-time weather, AQI and FX rate for Phuket.
  *
- * Sources (all keyless / public, CORS-enabled):
- *  - Weather (temp + condition):   Open-Meteo  https://open-meteo.com/en/docs
- *  - Air quality (US AQI):         Open-Meteo  https://open-meteo.com/en/docs/air-quality-api
+ * Strategy:
+ *  1. Primary: call the `phuket-conditions` edge function (server-side proxy).
+ *     This works in the Lovable preview iframe where direct browser calls to
+ *     open-meteo / jsdelivr are blocked by CORS / CSP.
+ *  2. Fallback: hit the public APIs directly (works on myuno.app).
+ *
+ * Sources (all keyless / public):
+ *  - Weather (temp + condition):   Open-Meteo
+ *  - Air quality (US AQI):         Open-Meteo
  *  - FX rate THB/USD:              fawazahmed0/currency-api (jsDelivr CDN)
- *                                  https://github.com/fawazahmed0/exchange-api
  *
- * Note: previously used exchangerate.host, which started returning 403
- * "missing_access_key" in 2026 after switching to a paid model. The new
- * source is fully open and updated daily.
- *
- * Cached in localStorage for 30 minutes to avoid re-fetching on every mount.
- * If a request fails, we fall back to the last-known cached value, then to
- * an em-dash placeholder (—). Never returns hard-coded mock data.
+ * Cached in localStorage for 30 minutes. Em-dash placeholders are NEVER
+ * cached, so a transient network failure cannot poison subsequent reloads.
  */
 import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface PhuketConditions {
   temp: string;       // "29°"
@@ -34,9 +35,9 @@ interface PhuketConditions {
   retry: () => void;
 }
 
-// Bumped to v3 (2026-04-24) when FX source switched away from
-// exchangerate.host — old cached "—" entries should not survive the change.
-const CACHE_KEY = 'myuno-phuket-conditions-v3';
+// Bumped to v4 (2026-04-27) when the hook stopped caching em-dash
+// placeholders — old v3 entries with empty values must not survive.
+const CACHE_KEY = 'myuno-phuket-conditions-v4';
 const CACHE_TTL = 30 * 60 * 1000; // 30 min
 
 // Phuket city centre
@@ -153,35 +154,83 @@ export function usePhuketConditions(): PhuketConditions {
       setIsLoading(true);
     }
 
-    // 2) Refresh from network in parallel; partial failures are OK.
+    // 2) Refresh from network. Try the edge proxy first (works in preview
+    //    iframes); on failure, fall back to direct browser fetches.
+    //    A "fulfilled" promise that returned the em-dash placeholder is
+    //    treated as a soft-failure — we don't want to show three blank cells
+    //    and pretend everything is fine. This also stops us from caching a
+    //    useless `{ temp:'—', aqi:'—', rate:'—' }` payload that survives
+    //    across reloads (the bug seen in the user's screenshot).
     (async () => {
-      const [w, a, r] = await Promise.allSettled([fetchWeather(), fetchAqi(), fetchRate()]);
+      let next: PhuketData | null = null;
+
+      // 2a) Edge proxy
+      try {
+        const { data: ed, error } = await supabase.functions.invoke('phuket-conditions');
+        if (!error && ed && typeof ed === 'object') {
+          const e = ed as {
+            temp: number | null;
+            weatherCode: number | null;
+            aqi: number | null;
+            rate: number | null;
+            rateYesterday: number | null;
+          };
+          const tempOk = typeof e.temp === 'number';
+          const aqiOk = typeof e.aqi === 'number';
+          const rateOk = typeof e.rate === 'number';
+          if (tempOk || aqiOk || rateOk) {
+            const delta =
+              rateOk && typeof e.rateYesterday === 'number'
+                ? (() => { const d = e.rate! - e.rateYesterday!; return `${d >= 0 ? '+' : ''}${d.toFixed(2)}`; })()
+                : '';
+            next = {
+              temp:        tempOk ? `${e.temp}°` : data.temp,
+              weatherCode: tempOk ? e.weatherCode : data.weatherCode,
+              aqi:         aqiOk ? String(e.aqi) : data.aqi,
+              aqiBand:     aqiOk ? aqiBandFor(e.aqi!) : data.aqiBand,
+              rate:        rateOk ? e.rate!.toFixed(2) : data.rate,
+              rateDelta:   rateOk ? delta : data.rateDelta,
+              fetchedAt:   Date.now(),
+            };
+          }
+        }
+      } catch { /* fall through to direct fetch */ }
+
+      // 2b) Direct fetch fallback
+      if (!next) {
+        const [w, a, r] = await Promise.allSettled([fetchWeather(), fetchAqi(), fetchRate()]);
+        if (cancelled) return;
+        const wOk = w.status === 'fulfilled' && w.value.temp !== '—';
+        const aOk = a.status === 'fulfilled' && a.value.aqi !== '—';
+        const rOk = r.status === 'fulfilled' && r.value.rate !== '—';
+        if (wOk || aOk || rOk) {
+          next = {
+            temp:        wOk ? w.value.temp        : data.temp,
+            weatherCode: wOk ? w.value.weatherCode : data.weatherCode,
+            aqi:         aOk ? a.value.aqi         : data.aqi,
+            aqiBand:     aOk ? a.value.aqiBand     : data.aqiBand,
+            rate:        rOk ? r.value.rate        : data.rate,
+            rateDelta:   rOk ? r.value.rateDelta   : data.rateDelta,
+            fetchedAt:   Date.now(),
+          };
+        }
+      }
+
       if (cancelled) return;
 
-      const anySuccess =
-        w.status === 'fulfilled' || a.status === 'fulfilled' || r.status === 'fulfilled';
-
-      setData(prev => {
-        const next: PhuketData = {
-          temp:        w.status === 'fulfilled' ? w.value.temp        : prev.temp,
-          weatherCode: w.status === 'fulfilled' ? w.value.weatherCode : prev.weatherCode,
-          aqi:         a.status === 'fulfilled' ? a.value.aqi         : prev.aqi,
-          aqiBand:     a.status === 'fulfilled' ? a.value.aqiBand     : prev.aqiBand,
-          rate:        r.status === 'fulfilled' ? r.value.rate        : prev.rate,
-          rateDelta:   r.status === 'fulfilled' ? r.value.rateDelta   : prev.rateDelta,
-          fetchedAt:   Date.now(),
-        };
-        if (anySuccess) {
-          try {
-            localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), value: next }));
-          } catch { /* ignore */ }
-        }
-        return next;
-      });
-      // Only flip hasError when the network attempt yielded nothing AND we
-      // had nothing cached — otherwise we still have something to show.
-      setHasError(!anySuccess && !hasAnyData);
-      if (anySuccess) setHasAnyData(true);
+      if (next) {
+        setData(next);
+        try {
+          localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), value: next }));
+        } catch { /* ignore */ }
+        setHasAnyData(true);
+        setHasError(false);
+      } else {
+        setHasAnyData(prev => {
+          setHasError(!prev);
+          return prev;
+        });
+      }
       setIsLoading(false);
     })();
 
