@@ -154,21 +154,28 @@ export function usePhuketConditions(): PhuketConditions {
     }
 
     // 2) Refresh from network in parallel; partial failures are OK.
+    //    A "fulfilled" promise that returned the em-dash placeholder is
+    //    treated as a soft-failure — we don't want to show three blank cells
+    //    and pretend everything is fine. This also stops us from caching a
+    //    useless `{ temp:'—', aqi:'—', rate:'—' }` payload that survives
+    //    across reloads (the bug seen in the user's screenshot).
     (async () => {
       const [w, a, r] = await Promise.allSettled([fetchWeather(), fetchAqi(), fetchRate()]);
       if (cancelled) return;
 
-      const anySuccess =
-        w.status === 'fulfilled' || a.status === 'fulfilled' || r.status === 'fulfilled';
+      const wOk = w.status === 'fulfilled' && w.value.temp !== '—';
+      const aOk = a.status === 'fulfilled' && a.value.aqi !== '—';
+      const rOk = r.status === 'fulfilled' && r.value.rate !== '—';
+      const anySuccess = wOk || aOk || rOk;
 
       setData(prev => {
         const next: PhuketData = {
-          temp:        w.status === 'fulfilled' ? w.value.temp        : prev.temp,
-          weatherCode: w.status === 'fulfilled' ? w.value.weatherCode : prev.weatherCode,
-          aqi:         a.status === 'fulfilled' ? a.value.aqi         : prev.aqi,
-          aqiBand:     a.status === 'fulfilled' ? a.value.aqiBand     : prev.aqiBand,
-          rate:        r.status === 'fulfilled' ? r.value.rate        : prev.rate,
-          rateDelta:   r.status === 'fulfilled' ? r.value.rateDelta   : prev.rateDelta,
+          temp:        wOk ? w.value.temp        : prev.temp,
+          weatherCode: wOk ? w.value.weatherCode : prev.weatherCode,
+          aqi:         aOk ? a.value.aqi         : prev.aqi,
+          aqiBand:     aOk ? a.value.aqiBand     : prev.aqiBand,
+          rate:        rOk ? r.value.rate        : prev.rate,
+          rateDelta:   rOk ? r.value.rateDelta   : prev.rateDelta,
           fetchedAt:   Date.now(),
         };
         if (anySuccess) {
@@ -178,10 +185,14 @@ export function usePhuketConditions(): PhuketConditions {
         }
         return next;
       });
-      // Only flip hasError when the network attempt yielded nothing AND we
-      // had nothing cached — otherwise we still have something to show.
-      setHasError(!anySuccess && !hasAnyData);
-      if (anySuccess) setHasAnyData(true);
+
+      // Decide error state by inspecting the *resulting* data, not the
+      // closed-over `hasAnyData` (which may be stale on first paint).
+      setHasAnyData(prevHad => {
+        const haveSomething = prevHad || anySuccess;
+        setHasError(!haveSomething);
+        return haveSomething;
+      });
       setIsLoading(false);
     })();
 
