@@ -9,6 +9,9 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Sparkles, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { UnifiedMediaUploader } from '@/components/upload/UnifiedMediaUploader';
 import {
@@ -44,6 +47,10 @@ export function ComplexFormDialog({ open, onOpenChange, complex }: ComplexFormDi
   const createMutation = useCreateComplex();
   const updateMutation = useUpdateComplex();
   const [form, setForm] = useState<ComplexFormData>(emptyForm);
+  const [aiOpen, setAiOpen] = useState(false);
+  const [aiText, setAiText] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiSummary, setAiSummary] = useState<string[] | null>(null);
 
   useEffect(() => {
     if (complex) {
@@ -108,6 +115,73 @@ export function ComplexFormDialog({ open, onOpenChange, complex }: ComplexFormDi
     }
   };
 
+  const handleAiParse = async () => {
+    if (!aiText.trim()) {
+      toast.error(isRu ? 'Вставьте текст сообщения' : 'Paste message text first');
+      return;
+    }
+    setAiLoading(true);
+    setAiSummary(null);
+    try {
+      const { data, error } = await supabase.functions.invoke('ai-intake-extract', {
+        body: {
+          input: aiText.trim(),
+          inputType: 'text',
+          entityType: 'property_project',
+          language,
+        },
+      });
+      if (error) throw error;
+      const ex = data?.extracted;
+      if (!ex) throw new Error('Empty result');
+
+      const filled: string[] = [];
+      setForm(prev => {
+        const next: ComplexFormData = { ...prev };
+        const setIf = <K extends keyof ComplexFormData>(k: K, v: ComplexFormData[K] | undefined | null, label: string) => {
+          if (v === undefined || v === null || v === '') return;
+          if (Array.isArray(v) && v.length === 0) return;
+          next[k] = v as ComplexFormData[K];
+          filled.push(label);
+        };
+        setIf('name', ex.name_en, isRu ? 'Название EN' : 'Name EN');
+        setIf('name_ru', ex.name_ru, isRu ? 'Название RU' : 'Name RU');
+        setIf('description_en', ex.description_en, isRu ? 'Описание EN' : 'Description EN');
+        setIf('description_ru', ex.description_ru, isRu ? 'Описание RU' : 'Description RU');
+        setIf('complex_type', ex.complex_type, isRu ? 'Тип' : 'Type');
+        setIf('address', ex.address, isRu ? 'Адрес' : 'Address');
+        setIf('district', ex.district, isRu ? 'Район' : 'District');
+        setIf('lat', typeof ex.lat === 'number' ? ex.lat : undefined, 'Lat');
+        setIf('lng', typeof ex.lng === 'number' ? ex.lng : undefined, 'Lng');
+        setIf('year_built', ex.year_built, isRu ? 'Год' : 'Year');
+        setIf('total_units', ex.total_units, isRu ? 'Юниты' : 'Units');
+        setIf('total_buildings', ex.total_buildings, isRu ? 'Корпусы' : 'Buildings');
+        setIf('total_floors', ex.total_floors, isRu ? 'Этажи' : 'Floors');
+        setIf('amenities', ex.amenities, isRu ? 'Удобства' : 'Amenities');
+        setIf('services', ex.services, isRu ? 'Услуги' : 'Services');
+        setIf('security_features', ex.security_features, isRu ? 'Безопасность' : 'Security');
+        setIf('infrastructure', ex.infrastructure, isRu ? 'Инфраструктура' : 'Infrastructure');
+        setIf('juristic_person_name', ex.juristic_person_name, isRu ? 'Юрлицо' : 'Juristic');
+        setIf('juristic_phone', ex.juristic_phone, isRu ? 'Телефон' : 'Phone');
+        setIf('juristic_email', ex.juristic_email, 'Email');
+        setIf('video_url', ex.video_url, 'Video');
+        return next;
+      });
+
+      setAiSummary(filled);
+      toast.success(
+        isRu
+          ? `Заполнено полей: ${filled.length}`
+          : `Filled ${filled.length} fields`
+      );
+    } catch (e: any) {
+      console.error('AI parse error:', e);
+      toast.error(e?.message || (isRu ? 'Ошибка AI разбора' : 'AI parse failed'));
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   const isPending = createMutation.isPending || updateMutation.isPending;
 
   const renderChipGroup = (
@@ -152,6 +226,66 @@ export function ComplexFormDialog({ open, onOpenChange, complex }: ComplexFormDi
             }
           </DialogTitle>
         </DialogHeader>
+
+        {/* AI Intake panel — only for new complexes */}
+        {!complex && (
+          <div className="px-6 pb-2">
+            <button
+              type="button"
+              onClick={() => setAiOpen(o => !o)}
+              className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg border border-primary/30 bg-primary/5 hover:bg-primary/10 transition-colors text-sm"
+            >
+              <span className="flex items-center gap-2 font-medium text-primary">
+                <Sparkles className="h-4 w-4" />
+                {isRu
+                  ? 'AI распознавание (вставьте сообщение от застройщика)'
+                  : 'AI Intake — paste developer message'}
+              </span>
+              {aiOpen ? <ChevronUp className="h-4 w-4 text-primary" /> : <ChevronDown className="h-4 w-4 text-primary" />}
+            </button>
+
+            {aiOpen && (
+              <div className="mt-2 space-y-2 p-3 rounded-lg border border-border bg-muted/30">
+                <Textarea
+                  rows={6}
+                  value={aiText}
+                  onChange={e => setAiText(e.target.value)}
+                  placeholder={
+                    isRu
+                      ? 'Вставьте сюда сообщение из WhatsApp / email / брошюру...\n\nНапример:\nGreetings from Verdana Pool Villa.\nProject infos: ...\n📍 Pru Jumpa, Thalang, Phuket\n💰 Starting from 12.5 MB\n☎️ +66...'
+                      : 'Paste WhatsApp message / email / brochure here...\n\nExample:\nGreetings from Verdana Pool Villa.\n📍 Pru Jumpa, Thalang, Phuket\n💰 Starting from 12.5 MB'
+                  }
+                  className="text-sm"
+                />
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-xs text-muted-foreground">
+                    {isRu
+                      ? 'Заполнит название, локацию, удобства, контакты — вы проверите и сохраните.'
+                      : 'Fills name, location, amenities, contacts — you review and save.'}
+                  </p>
+                  <Button
+                    size="sm"
+                    onClick={handleAiParse}
+                    disabled={aiLoading || !aiText.trim()}
+                    className="gap-2 shrink-0"
+                  >
+                    {aiLoading
+                      ? <Loader2 className="h-4 w-4 animate-spin" />
+                      : <Sparkles className="h-4 w-4" />}
+                    {isRu ? 'Разобрать' : 'Parse'}
+                  </Button>
+                </div>
+                {aiSummary && aiSummary.length > 0 && (
+                  <div className="flex flex-wrap gap-1 pt-1">
+                    {aiSummary.map((f, i) => (
+                      <Badge key={i} variant="secondary" className="text-[10px]">{f}</Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         <Tabs defaultValue="general" className="flex-1">
           <div className="px-6 overflow-x-auto">
