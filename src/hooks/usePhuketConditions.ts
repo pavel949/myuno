@@ -34,9 +34,9 @@ interface PhuketConditions {
   retry: () => void;
 }
 
-// Bumped to v3 (2026-04-24) when FX source switched away from
-// exchangerate.host — old cached "—" entries should not survive the change.
-const CACHE_KEY = 'myuno-phuket-conditions-v3';
+// Bumped to v4 (2026-04-27) when the hook stopped caching em-dash
+// placeholders — old v3 entries with empty values must not survive.
+const CACHE_KEY = 'myuno-phuket-conditions-v4';
 const CACHE_TTL = 30 * 60 * 1000; // 30 min
 
 // Phuket city centre
