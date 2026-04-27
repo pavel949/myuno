@@ -154,46 +154,83 @@ export function usePhuketConditions(): PhuketConditions {
       setIsLoading(true);
     }
 
-    // 2) Refresh from network in parallel; partial failures are OK.
+    // 2) Refresh from network. Try the edge proxy first (works in preview
+    //    iframes); on failure, fall back to direct browser fetches.
     //    A "fulfilled" promise that returned the em-dash placeholder is
     //    treated as a soft-failure — we don't want to show three blank cells
     //    and pretend everything is fine. This also stops us from caching a
     //    useless `{ temp:'—', aqi:'—', rate:'—' }` payload that survives
     //    across reloads (the bug seen in the user's screenshot).
     (async () => {
-      const [w, a, r] = await Promise.allSettled([fetchWeather(), fetchAqi(), fetchRate()]);
+      let next: PhuketData | null = null;
+
+      // 2a) Edge proxy
+      try {
+        const { data: ed, error } = await supabase.functions.invoke('phuket-conditions');
+        if (!error && ed && typeof ed === 'object') {
+          const e = ed as {
+            temp: number | null;
+            weatherCode: number | null;
+            aqi: number | null;
+            rate: number | null;
+            rateYesterday: number | null;
+          };
+          const tempOk = typeof e.temp === 'number';
+          const aqiOk = typeof e.aqi === 'number';
+          const rateOk = typeof e.rate === 'number';
+          if (tempOk || aqiOk || rateOk) {
+            const delta =
+              rateOk && typeof e.rateYesterday === 'number'
+                ? (() => { const d = e.rate! - e.rateYesterday!; return `${d >= 0 ? '+' : ''}${d.toFixed(2)}`; })()
+                : '';
+            next = {
+              temp:        tempOk ? `${e.temp}°` : data.temp,
+              weatherCode: tempOk ? e.weatherCode : data.weatherCode,
+              aqi:         aqiOk ? String(e.aqi) : data.aqi,
+              aqiBand:     aqiOk ? aqiBandFor(e.aqi!) : data.aqiBand,
+              rate:        rateOk ? e.rate!.toFixed(2) : data.rate,
+              rateDelta:   rateOk ? delta : data.rateDelta,
+              fetchedAt:   Date.now(),
+            };
+          }
+        }
+      } catch { /* fall through to direct fetch */ }
+
+      // 2b) Direct fetch fallback
+      if (!next) {
+        const [w, a, r] = await Promise.allSettled([fetchWeather(), fetchAqi(), fetchRate()]);
+        if (cancelled) return;
+        const wOk = w.status === 'fulfilled' && w.value.temp !== '—';
+        const aOk = a.status === 'fulfilled' && a.value.aqi !== '—';
+        const rOk = r.status === 'fulfilled' && r.value.rate !== '—';
+        if (wOk || aOk || rOk) {
+          next = {
+            temp:        wOk ? w.value.temp        : data.temp,
+            weatherCode: wOk ? w.value.weatherCode : data.weatherCode,
+            aqi:         aOk ? a.value.aqi         : data.aqi,
+            aqiBand:     aOk ? a.value.aqiBand     : data.aqiBand,
+            rate:        rOk ? r.value.rate        : data.rate,
+            rateDelta:   rOk ? r.value.rateDelta   : data.rateDelta,
+            fetchedAt:   Date.now(),
+          };
+        }
+      }
+
       if (cancelled) return;
 
-      const wOk = w.status === 'fulfilled' && w.value.temp !== '—';
-      const aOk = a.status === 'fulfilled' && a.value.aqi !== '—';
-      const rOk = r.status === 'fulfilled' && r.value.rate !== '—';
-      const anySuccess = wOk || aOk || rOk;
-
-      setData(prev => {
-        const next: PhuketData = {
-          temp:        wOk ? w.value.temp        : prev.temp,
-          weatherCode: wOk ? w.value.weatherCode : prev.weatherCode,
-          aqi:         aOk ? a.value.aqi         : prev.aqi,
-          aqiBand:     aOk ? a.value.aqiBand     : prev.aqiBand,
-          rate:        rOk ? r.value.rate        : prev.rate,
-          rateDelta:   rOk ? r.value.rateDelta   : prev.rateDelta,
-          fetchedAt:   Date.now(),
-        };
-        if (anySuccess) {
-          try {
-            localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), value: next }));
-          } catch { /* ignore */ }
-        }
-        return next;
-      });
-
-      // Decide error state by inspecting the *resulting* data, not the
-      // closed-over `hasAnyData` (which may be stale on first paint).
-      setHasAnyData(prevHad => {
-        const haveSomething = prevHad || anySuccess;
-        setHasError(!haveSomething);
-        return haveSomething;
-      });
+      if (next) {
+        setData(next);
+        try {
+          localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), value: next }));
+        } catch { /* ignore */ }
+        setHasAnyData(true);
+        setHasError(false);
+      } else {
+        setHasAnyData(prev => {
+          setHasError(!prev);
+          return prev;
+        });
+      }
       setIsLoading(false);
     })();
 
