@@ -69,10 +69,10 @@ export function EmptyState({
         </div>
       )}
       <h3 className={cn('font-semibold text-foreground mb-2', compact ? 'text-base' : 'text-xl')}>
-        {title}
+        {displayTitle}
       </h3>
-      {description && (
-        <p className="text-sm text-muted-foreground max-w-sm mb-6">{description}</p>
+      {displayDesc && (
+        <p className="text-sm text-muted-foreground max-w-sm mb-6">{displayDesc}</p>
       )}
       {action}
     </div>
