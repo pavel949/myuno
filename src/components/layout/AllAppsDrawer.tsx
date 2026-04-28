@@ -37,9 +37,11 @@ export function AllAppsDrawer({ open, onOpenChange }: AllAppsDrawerProps) {
     pathname: location.pathname,
   });
 
+  const audienceCtx = useMemo(() => ({ personas, role }), [personas, role]);
+  const { catalog: liveCatalog } = useLiveClusterCatalog();
   const visibleClusters = useMemo(
-    () => filterCatalogForUser({ personas, role }),
-    [personas, role],
+    () => liveCatalog.filter((c) => isClusterVisibleToUser(c, audienceCtx)),
+    [liveCatalog, audienceCtx],
   );
 
   const miniApps = flatCategories
