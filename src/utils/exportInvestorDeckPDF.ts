@@ -1,11 +1,17 @@
 /**
  * Generate a branded PDF investor deck using jsPDF.
  * Layout: Cover → Executive Summary → KPIs → DCF table → Charts (rendered as text/tables, no images)
+ *
+ * NOTE: jspdf + jspdf-autotable are heavy (~400KB gz). They are loaded dynamically
+ * so they're excluded from the route chunk and only fetched when the user clicks Export PDF.
  */
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import type jsPDFType from 'jspdf';
 import type { ComputedPnL } from '@/lib/finance/financialModelMath';
 import type { DcfResult } from '@/lib/finance/dcfMath';
+
+// Resolved at runtime; typed for the helpers below.
+type JsPDFCtor = typeof jsPDFType;
+type AutoTableFn = (doc: jsPDFType, options: Record<string, unknown>) => void;
 
 export interface InvestorDeckInput {
   language?: 'ru' | 'en';
