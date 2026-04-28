@@ -262,13 +262,27 @@ export default function NavigatorPage() {
     [language, audienceClusters, totalAvailable],
   );
 
-  const visibleClusters = useMemo(
-    () =>
-      activeCluster === 'all'
-        ? audienceClusters
-        : audienceClusters.filter((c) => c.id === activeCluster),
-    [activeCluster, audienceClusters],
-  );
+  const matchesTagFilters = (s: ClusterService): boolean => {
+    if (activeJtbd !== 'all') {
+      const jtbd = s.jtbdClusters ?? [];
+      if (!jtbd.includes(activeJtbd)) return false;
+    }
+    if (activePersona !== 'all') {
+      const personas = s.personaTags ?? [];
+      if (!personas.includes(activePersona)) return false;
+    }
+    return true;
+  };
+
+  const visibleClusters = useMemo(() => {
+    const byCluster = activeCluster === 'all'
+      ? audienceClusters
+      : audienceClusters.filter((c) => c.id === activeCluster);
+    if (activeJtbd === 'all' && activePersona === 'all') return byCluster;
+    return byCluster
+      .map((c) => ({ ...c, services: c.services.filter(matchesTagFilters) }))
+      .filter((c) => c.services.length > 0);
+  }, [activeCluster, audienceClusters, activeJtbd, activePersona]);
 
   const { data: stats } = useQuery({
     queryKey: ['navigator-stats'],
@@ -292,6 +306,7 @@ export default function NavigatorPage() {
   const searchResults = useMemo(() => {
     if (!trimmedQuery) return null;
     return audienceAvailable.filter((s) => {
+      if (!matchesTagFilters(s)) return false;
       const label = getClusterServiceLocalizedLabel(s, language);
       const cluster = pickTriplet(
         { ru: s.clusterLabelRu, en: s.clusterLabelEn, th: s.clusterLabelEn },
@@ -302,7 +317,7 @@ export default function NavigatorPage() {
         cluster.toLowerCase().includes(trimmedQuery)
       );
     });
-  }, [trimmedQuery, language]);
+  }, [trimmedQuery, language, audienceAvailable, activeJtbd, activePersona]);
 
   return (
     <AppLayout>
