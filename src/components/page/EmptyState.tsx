@@ -12,11 +12,17 @@ import type { LucideIcon } from 'lucide-react';
 interface EmptyStateProps {
   icon?: LucideIcon | ReactNode;
   title: string;
+  /** Russian title — when `isRu` is true takes precedence over `title`. Backwards-compat with legacy uno/EmptyState. */
+  titleRu?: string;
   description?: string;
+  /** Russian description — when `isRu` is true takes precedence over `description`. */
+  descriptionRu?: string;
   action?: ReactNode;
   className?: string;
   /** Reduce vertical padding (for inline use inside cards). */
   compact?: boolean;
+  /** When true, renders Russian variants of title/description if provided. */
+  isRu?: boolean;
 }
 
 function isLucideIcon(icon: unknown): icon is LucideIcon {
@@ -28,11 +34,16 @@ function isLucideIcon(icon: unknown): icon is LucideIcon {
 export function EmptyState({
   icon,
   title,
+  titleRu,
   description,
+  descriptionRu,
   action,
   className,
   compact = false,
+  isRu = false,
 }: EmptyStateProps) {
+  const displayTitle = isRu ? (titleRu || title) : title;
+  const displayDesc = isRu ? (descriptionRu || description) : description;
   return (
     <div
       className={cn(
@@ -58,10 +69,10 @@ export function EmptyState({
         </div>
       )}
       <h3 className={cn('font-semibold text-foreground mb-2', compact ? 'text-base' : 'text-xl')}>
-        {title}
+        {displayTitle}
       </h3>
-      {description && (
-        <p className="text-sm text-muted-foreground max-w-sm mb-6">{description}</p>
+      {displayDesc && (
+        <p className="text-sm text-muted-foreground max-w-sm mb-6">{displayDesc}</p>
       )}
       {action}
     </div>
