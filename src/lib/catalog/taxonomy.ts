@@ -46,10 +46,17 @@ export type ClusterId = 'arrive' | 'live' | 'manage' | 'invest' | 'legal' | 'bui
 export type CategoryId =
   // Arrive (3)
   | 'cat-emergency' | 'cat-transport' | 'cat-tourism'
-  // Live (8)
-  | 'cat-home-living' | 'cat-food-entertainment' | 'cat-health-wellness'
-  | 'cat-family-kids' | 'cat-pet-services' | 'cat-sports' | 'cat-community'
-  | 'cat-wedding-events'
+  // Live (10) — повседневная жизнь, разбитая на узкие подгруппы вместо «свалки»
+  | 'cat-home-cleaning'      // Уборка и быт
+  | 'cat-home-repair'        // Ремонт и техника
+  | 'cat-home-outdoor'       // Двор, сад, цветы
+  | 'cat-home-logistics'     // Логистика и хранение
+  | 'cat-food-delivery'      // Еда и доставка
+  | 'cat-health-wellness'    // Здоровье и велнес
+  | 'cat-family-kids'        // Семья и дети
+  | 'cat-pet-services'       // Питомцы
+  | 'cat-leisure'            // Досуг, события, спорт, сообщество
+  | 'cat-wedding-events'     // Свадьбы и премиум-события
   // Manage (0 public — workspace-only cluster, see /mc/* routes)
   // Invest (1)
   | 'cat-real-estate'
