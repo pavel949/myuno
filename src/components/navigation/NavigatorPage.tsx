@@ -4,7 +4,7 @@
  */
 import React, { useState, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Search, LayoutGrid, X } from 'lucide-react';
+import { Search, LayoutGrid, X, Filter } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserPersonas } from '@/hooks/useUserPersonas';
@@ -24,6 +24,7 @@ import {
 } from '@/lib/nav/clusterCatalog';
 import { resolveNavRole } from '@/lib/nav/navigationModel';
 import { pickTriplet } from '@/lib/ecosystemGlossary';
+import { JTBD_CLUSTERS, PERSONAS, type JtbdClusterId, type PersonaCode } from '@/lib/taxonomies/master';
 import type { Language } from '@/i18n';
 
 function NavigatorStatsFooter({
