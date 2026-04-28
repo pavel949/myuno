@@ -135,9 +135,9 @@ export default function FinancialPlanning() {
     } catch (e) { toast.error('Export error: ' + (e as Error).message); }
   };
 
-  const handleExportPDF = () => {
+  const handleExportPDF = async () => {
     try {
-      const blob = generateInvestorDeckPDF({
+      const blob = await generateInvestorDeckPDF({
         language: isRu ? 'ru' : 'en',
         property: propMeta, year, scenario: String(scenario),
         computed, dcf: dcfResult,

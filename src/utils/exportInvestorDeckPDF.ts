@@ -269,7 +269,7 @@ function buildDeck(input: InvestorDeckInput, jsPDF: JsPDFCtor, autoTable: AutoTa
   return doc.output('blob');
 }
 
-function drawHeader(doc: jsPDF, title: string, input: InvestorDeckInput) {
+function drawHeader(doc: jsPDFType, title: string, input: InvestorDeckInput) {
   const W = doc.internal.pageSize.getWidth();
   doc.setFillColor(...BRAND.primary);
   doc.rect(0, 0, W, 6, 'F');
@@ -286,7 +286,7 @@ function drawHeader(doc: jsPDF, title: string, input: InvestorDeckInput) {
   doc.line(15, 30, W - 15, 30);
 }
 
-function drawFooter(doc: jsPDF, pageNum: number) {
+function drawFooter(doc: jsPDFType, pageNum: number) {
   const W = doc.internal.pageSize.getWidth();
   const H = doc.internal.pageSize.getHeight();
   doc.setTextColor(...BRAND.muted);
