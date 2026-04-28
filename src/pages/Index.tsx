@@ -15,6 +15,8 @@ import { useUserPersonas } from '@/hooks/useUserPersonas';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 import { HomeTopBar } from '@/components/home/HomeTopBar';
+import { HeroGreeting } from '@/components/home/HeroGreeting';
+import { PendingPaymentsChip } from '@/components/home/PendingPaymentsChip';
 import { PersonaHalo } from '@/components/home/PersonaHalo';
 import { AppDrawer } from '@/components/nav/AppDrawer';
 import { WorkspaceHomeBanner } from '@/components/home/WorkspaceHomeBanner';
@@ -67,30 +69,28 @@ const Index = () => {
     return (
       <AppLayout showHeader={false} showFooter={false}>
         <div className="pb-24">
-          {/* 1. TopBar (logo · bell · avatar) */}
-          <div className="bg-primary text-primary-foreground">
-            <div className="px-4">
-              <HomeTopBar
-                personas={[...activePersonas]}
-                onRoleSheetOpen={() => setRoleSheetOpen(true)}
-                onAppDrawerOpen={() => setAppDrawerOpen(true)}
-                variant="onNavy"
-              />
-            </div>
-          </div>
+          {/* 1. Hero — navy gradient, greeting, persona chip, AI search */}
+          <HeroGreeting
+            personas={[...activePersonas]}
+            onRoleSheetOpen={() => setRoleSheetOpen(true)}
+            onAppDrawerOpen={() => setAppDrawerOpen(true)}
+          />
 
           <WorkspaceHomeBanner />
 
-          {/* 2. Greeting + ActiveSituation (one card: «what's happening now») */}
+          {/* 2. Pending payments — single compact chip (only renders if count>0) */}
+          <PendingPaymentsChip />
+
+          {/* 3. ActiveSituation — live signals for the active persona (only when real data) */}
           <ActiveSituation
             personas={[...activePersonas]}
             onRoleSheetOpen={() => setRoleSheetOpen(true)}
           />
 
-          {/* 3. PrimaryGrid — 4 large persona-aware tiles. The hero of the screen. */}
+          {/* 4. PrimaryGrid — Bento: 1 hero CTA + 3 mini tiles */}
           <PrimaryGrid />
 
-          {/* 4. Now in Phuket — narrow ambient strip */}
+          {/* 5. Now in Phuket — narrow ambient strip */}
           <NowInPhuket />
 
           {/* 5. «Все приложения» — single explicit door to everything else */}
