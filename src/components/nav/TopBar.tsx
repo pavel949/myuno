@@ -23,9 +23,11 @@ import { Button } from '@/components/ui/button';
 import { GlobalSearchModal } from '@/components/search/GlobalSearchModal';
 import { UserAvatarMenu } from '@/components/layout/UserAvatarMenu';
 import { BrandWordmark } from '@/components/uno/BrandWordmark';
+import { Breadcrumbs } from '@/components/nav/Breadcrumbs';
 import { useScrolled } from '@/hooks/useScrollBehavior';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { ECOSYSTEM_HEADER_INNER } from '@/design-system/ecosystemLayout';
+import { shouldShowBreadcrumbs } from '@/lib/config/routeMeta';
 import {
   PRIMARY_NAV,
   hasSidebar,
