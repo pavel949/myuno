@@ -261,43 +261,47 @@ export default defineConfig(({ mode }) => {
     build: {
       rollupOptions: {
         output: {
-          manualChunks: {
-            // ── Core React stack ──────────────────────────────────────────
-            'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          /**
+           * Code-splitting strategy:
+           *  - Heavy 3rd-party libs go into named `vendor-*` chunks for stable long-term caching.
+           *  - Lazy-only deps (jspdf, exceljs, html2canvas) get their own chunks so they
+           *    are NEVER bundled into the initial App graph or any route chunk.
+           *  - Everything else from node_modules falls into `vendor-misc`.
+           *  - Application code (`src/**`) is left to Rollup's automatic splitting,
+           *    which respects per-route lazy() boundaries from pageRegistry.ts.
+           */
+          manualChunks(id: string) {
+            if (!id.includes('node_modules')) return undefined;
 
-            // ── All Radix UI primitives in one shared chunk ───────────────
-            'vendor-radix': [
-              '@radix-ui/react-accordion',
-              '@radix-ui/react-alert-dialog',
-              '@radix-ui/react-avatar',
-              '@radix-ui/react-checkbox',
-              '@radix-ui/react-collapsible',
-              '@radix-ui/react-dialog',
-              '@radix-ui/react-dropdown-menu',
-              '@radix-ui/react-label',
-              '@radix-ui/react-popover',
-              '@radix-ui/react-progress',
-              '@radix-ui/react-radio-group',
-              '@radix-ui/react-scroll-area',
-              '@radix-ui/react-select',
-              '@radix-ui/react-separator',
-              '@radix-ui/react-slider',
-              '@radix-ui/react-slot',
-              '@radix-ui/react-switch',
-              '@radix-ui/react-tabs',
-              '@radix-ui/react-toggle',
-              '@radix-ui/react-toggle-group',
-              '@radix-ui/react-tooltip',
-            ],
+            // Core React stack — required on every page.
+            if (/[\\/]node_modules[\\/](react|react-dom|react-router-dom|scheduler)[\\/]/.test(id)) {
+              return 'vendor-react';
+            }
 
-            // ── Heavy third-party libs ────────────────────────────────────
-            'vendor-motion': ['framer-motion'],
-            'vendor-query': ['@tanstack/react-query'],
-            'vendor-charts': ['recharts'],
-            'vendor-map': ['@react-google-maps/api'],
-            // jspdf, jspdf-autotable, exceljs are lazy-imported — no manual chunk needed
-            'vendor-form': ['react-hook-form', '@hookform/resolvers', 'zod'],
+            // Radix UI primitives — shared across most pages.
+            if (id.includes('@radix-ui/')) return 'vendor-radix';
 
+            // Heavy single-purpose libs (lazy-imported) — isolate so they only
+            // download when the feature is actually used.
+            if (id.includes('jspdf-autotable')) return 'vendor-pdf';
+            if (id.includes('node_modules/jspdf')) return 'vendor-pdf';
+            if (id.includes('html2canvas')) return 'vendor-html2canvas';
+            if (id.includes('exceljs')) return 'vendor-excel';
+
+            // Other heavy libs already split out by name.
+            if (id.includes('framer-motion')) return 'vendor-motion';
+            if (id.includes('@tanstack/react-query')) return 'vendor-query';
+            if (id.includes('recharts') || id.includes('d3-')) return 'vendor-charts';
+            if (id.includes('@react-google-maps')) return 'vendor-map';
+            if (id.includes('react-hook-form') || id.includes('@hookform') || id.includes('node_modules/zod/')) {
+              return 'vendor-form';
+            }
+            if (id.includes('@supabase/')) return 'vendor-supabase';
+            if (id.includes('date-fns') || id.includes('lodash')) return 'vendor-utils';
+            if (id.includes('lucide-react')) return 'vendor-icons';
+
+            // Everything else — one stable shared chunk.
+            return 'vendor-misc';
           },
         },
       },

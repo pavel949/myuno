@@ -1,11 +1,17 @@
 /**
  * Generate a branded PDF investor deck using jsPDF.
  * Layout: Cover → Executive Summary → KPIs → DCF table → Charts (rendered as text/tables, no images)
+ *
+ * NOTE: jspdf + jspdf-autotable are heavy (~400KB gz). They are loaded dynamically
+ * so they're excluded from the route chunk and only fetched when the user clicks Export PDF.
  */
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import type jsPDFType from 'jspdf';
 import type { ComputedPnL } from '@/lib/finance/financialModelMath';
 import type { DcfResult } from '@/lib/finance/dcfMath';
+
+// Resolved at runtime; typed for the helpers below.
+type JsPDFCtor = typeof jsPDFType;
+type AutoTableFn = (doc: jsPDFType, options: Record<string, unknown>) => void;
 
 export interface InvestorDeckInput {
   language?: 'ru' | 'en';
@@ -43,7 +49,17 @@ function pct(v: number | null | undefined, d = 1): string {
   return `${(v * 100).toFixed(d)}%`;
 }
 
-export function generateInvestorDeckPDF(input: InvestorDeckInput): Blob {
+export async function generateInvestorDeckPDF(input: InvestorDeckInput): Promise<Blob> {
+  // Dynamic import — keeps jspdf (~390KB) out of the route chunk.
+  const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([
+    import('jspdf') as Promise<{ default: JsPDFCtor }>,
+    import('jspdf-autotable') as Promise<{ default: AutoTableFn }>,
+  ]);
+
+  return buildDeck(input, jsPDF, autoTable);
+}
+
+function buildDeck(input: InvestorDeckInput, jsPDF: JsPDFCtor, autoTable: AutoTableFn): Blob {
   const isRu = input.language === 'ru';
   const T = (ru: string, en: string) => isRu ? ru : en;
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
@@ -253,7 +269,7 @@ export function generateInvestorDeckPDF(input: InvestorDeckInput): Blob {
   return doc.output('blob');
 }
 
-function drawHeader(doc: jsPDF, title: string, input: InvestorDeckInput) {
+function drawHeader(doc: jsPDFType, title: string, input: InvestorDeckInput) {
   const W = doc.internal.pageSize.getWidth();
   doc.setFillColor(...BRAND.primary);
   doc.rect(0, 0, W, 6, 'F');
@@ -270,7 +286,7 @@ function drawHeader(doc: jsPDF, title: string, input: InvestorDeckInput) {
   doc.line(15, 30, W - 15, 30);
 }
 
-function drawFooter(doc: jsPDF, pageNum: number) {
+function drawFooter(doc: jsPDFType, pageNum: number) {
   const W = doc.internal.pageSize.getWidth();
   const H = doc.internal.pageSize.getHeight();
   doc.setTextColor(...BRAND.muted);
