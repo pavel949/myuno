@@ -1,141 +1,219 @@
 
-# Мобильная главная — визуальный апгрейд (без изменения структуры)
+## Цель
 
-## Что не так сейчас (по скриншоту 384×676)
+Единая, читаемая карта навигации под 6 пользовательских ролей. Документ становится контрактом для NavShell, BottomBar, SideRail, TopBar и хлебных крошек. Никакой код в этом плане не правится — это спецификация. После approve можно отдельными задачами приводить `navigationModel.ts` и компоненты в соответствие.
 
-1. **Монохром** — кремовый фон + чёрный Playfair-серифный заголовок + одинаковые белые карточки. Нулевой цветовой ритм.
-2. **Нет иерархии** — все 4 тайла PrimaryGrid одного размера и одного нейтрального цвета. Глаз не знает, куда смотреть первым.
-3. **«Pending payment» доминирует** — вместо приветствия и навигации первое, что видит юзер — две жёлтые карточки оплаты.
-4. **Pill-табы наезжают друг на друга** (`Bookings/Services/Documents...` слипаются).
-5. **Нет визуального якоря** (фото, градиент, паттерн, иллюстрация) — экран выглядит как админка, а не как «суперапп для жизни».
-6. **Иконки одинаковые** — мелкие, серые, без цветовой кодировки кластеров (хотя в системе уже есть `--cluster-*` токены).
+## 1. Маппинг ролей: бизнес ↔ технические
 
-## План — 4 точечных правки, не трогая 5-зонную архитектуру
+В коде сейчас 7 `NavRoleKey`. Сводим к 6 пользовательским ролям:
 
-### Шаг 1 · Hero-Greeting вместо «голого» TopBar
+| Бизнес-роль | NavRoleKey (код)            | Шелл           | Кто это                                  |
+|-------------|------------------------------|----------------|------------------------------------------|
+| Guest       | `guest` (анон)               | Consumer       | Не залогинен, публичные страницы         |
+| User        | `guest` (auth) / `investor`  | Consumer       | Залогинен как покупатель/инвестор/жилец  |
+| Partner     | `vendor`                     | Workspace      | Поставщик услуг, девелопер, агент        |
+| Owner       | `owner` + `mc_portal`        | Workspace + Consumer-portal | Собственник / УК           |
+| Staff       | `team`                       | Workspace lite | Сотрудник myUNO (контент, модерация)     |
+| Admin       | `admin`                      | Workspace      | Платформенный админ                      |
 
-Заменить плоский `bg-primary` хедер на **hero-блок с градиентом + персонализацией**:
+Правила переключения:
+- Anon → User: появляются `/me/*`, Wallet, Bookings, Favorites.
+- User с `roles_stack` содержит `vendor|owner|admin|team` → в `UserAvatarMenu` появляется switcher «Перейти в рабочее пространство».
+- Workspace = другой шелл (SideRail), не подменяет публичный сайт.
 
-```
-┌─────────────────────────────┐
-│ ☰  myUNO         🔔  [P]    │  ← TopBar
-│                             │
-│ Добрый день, Pavel          │  ← H1, cream-on-navy
-│ Турист · 3-й день в Пхукете │  ← persona+contextual chip
-│                             │
-│ [🔍 Что вам нужно?      →]  │  ← inline AI search bar
-└─────────────────────────────┘
-   ↓ мягкий градиент navy→bg
-```
+## 2. Три уровня навигации (для всех ролей одинаково)
 
-- Фон: `linear-gradient(180deg, hsl(var(--primary)) 0%, hsl(var(--primary)/0.85) 60%, hsl(var(--background)) 100%)`
-- Опциональный subtle pattern overlay (SVG noise / dots) на 4% opacity для «текстуры»
-- Search bar — крупный, glass-style (`bg-primary-foreground/10 backdrop-blur`) — единая точка входа в AI-консьерж
-
-### Шаг 2 · PrimaryGrid → асимметричная сетка с цветом кластеров
-
-Сейчас: 2×2 одинаковых нейтральных тайла.
-Станет: **1 large hero-tile + 3 small** (Bento-style), каждый окрашен в семантический цвет своего кластера.
-
-```
-┌───────────────┬──────────┐
-│               │  🏖 Stay │  ← cluster-arrive (mint)
-│  ✨ AI        ├──────────┤
-│  Concierge    │  📅 Tour │  ← cluster-arrive
-│  «Спросите»   ├──────────┤
-│               │  🚗 Car  │  ← cluster-live (blue)
-└───────────────┴──────────┘
+```text
+┌──────────────────────────────────────────────────────────┐
+│ TopBar: лого · breadcrumbs · ⌘K поиск · уведомления · 👤 │
+├──────────────────────────────────────────────────────────┤
+│ SideRail (только workspace) │  Контент                   │
+│  · группы по доменам        │  · H1 + breadcrumbs        │
+│  · бейджи (tasks/messages)  │  · экран                   │
+├──────────────────────────────────────────────────────────┤
+│ BottomBar: 5 слотов под роль (мобайл) / Top-pills (≥md)  │
+└──────────────────────────────────────────────────────────┘
 ```
 
-Конкретно:
-- **Hero-tile (col-span-1, row-span-3)** — крупная карточка AI-консьержа с градиентом `from-accent/20 to-primary/10`, иконкой 32px, заголовком + подсказкой («Спросите что угодно про Пхукет»)
-- **3 mini-tiles** — каждый с цветной иконкой на фоне `bg-cluster-{name}/10`, иконка `text-cluster-{name}`, рамка `border-cluster-{name}/20`
-- Сохранить персона-логику (TILES.travel/live/invest/business/universal) — меняется только визуальный шаблон
+- **TopBar**: всегда виден. Лого слева, breadcrumbs (только ≥md), ⌘K поиск (центр), bell + аватар (право).
+- **BottomBar/Top-pills**: ровно 5 слотов на роль. Источник — `BOTTOM_BAR_BY_ROLE`.
+- **SideRail**: только workspace роли (Partner/Owner/Staff/Admin). Сворачивается в иконки.
+- **Breadcrumbs**: `Surface › Раздел › Подраздел › Сущность`. Кликабельны до текущего узла.
+- **BackButton**: только на детальных страницах (depth ≥ 2 в том же модуле). Логика — `useNavigationDirection`.
 
-Цветовая привязка по существующим токенам:
-- Stay/Property → `--cluster-arrive` (mint)
-- Events/Tours → `--accent-orange`
-- Transfer/Car → `--cluster-live` (blue)
-- Help/SOS → `--destructive`
-- Home/Cleaning → `--cluster-manage` (cyan)
-- Documents → `--cluster-legal` (amber)
-- Wellness → `--accent-teal`
+## 3. Карта навигации по ролям
 
-### Шаг 3 · «Pending payments» спрятать в ActiveSituation как inline-чип
+### 3.1 GUEST (анон)
 
-Сейчас `ActiveSituation` рендерит полноразмерные карточки `Pending payment: tour 2800 THB` — они визуально доминируют над навигацией.
+**BottomBar / Top-pills (5):** Главная · Поиск · Каталог · Избранное · Войти
 
-Заменить на **компактный single-line alert-чип** под hero-блоком:
+**Header right:** «Войти / Регистрация».
 
-```
-┌─────────────────────────────┐
-│ 🔔 2 платежа ожидают · ฿28 300  Оплатить → │
-└─────────────────────────────┘
-```
+**Куда ведут:**
+- Главная `/` — hero с 3 дверями (Investor / Relocator / Second-home), полосы по JTBD.
+- Поиск `/search` — глобальный ⌘K, выдача по 21+ таблице.
+- Каталог: единая точка входа в Surfaces (Arrive/Live/Manage/Invest/Legal/Build).
+- Избранное `/favorites` — локально (localStorage) до логина.
+- Войти `/auth` → после `/auth/account-type` (выбор сегмента).
 
-- Один цветной чип (`bg-warning/10 border-warning/30`) с агрегированной суммой
-- Tap → ведёт на `/me/payments` (полный список)
-- Если 0 pending — чип скрыт, ничего не показывается
+**SideRail:** нет.
+**Breadcrumbs:** только на детальных карточках, `Главная › Раздел › Объект`.
 
-### Шаг 4 · NowInPhuket → визуальный «pulse» вместо 3 серых ячеек
+### 3.2 USER (залогинен, потребитель)
 
-Сейчас: 3 одинаковых текстовых ячейки `28°C / AQI 42 / 36.2 ฿`.
+**BottomBar (5):** Главная · Поиск · Услуги · `/me` · Профиль
 
-Станет: горизонтальный «живой» strip с **цветными точками-индикаторами** + опциональной мини-иконкой погоды:
+**Header right:** уведомления, Wallet (значок), аватар.
 
-```
-┌─────────────────────────────────┐
-│ ☀️ 28°  ●green AQI 42  ฿ 36.2 ↑│  ← цвет точки = состояние AQI
-└─────────────────────────────────┘
-```
+**Главные «дома» (через `/me` Hub, как Госуслуги):**
+| Слот /me        | Что внутри                                                   |
+|-----------------|--------------------------------------------------------------|
+| `/me`           | Лента: активные задачи, рекомендации AI Concierge            |
+| `/me/services`  | Мои подписки/услуги, активные брони, ClearView отчёты        |
+| `/me/documents` | Визы, договоры, инвойсы, паспорта семьи                      |
+| `/me/payments`  | Wallet, история, карты, рефанды                              |
+| `/me/requests`  | Заявки в CRM (viewing requests, leads, support tickets)      |
+| `/me/bookings`  | Все бронирования (тур, авто, ресторан, апартаменты)          |
 
-- Иконка погоды по WMO-коду (sun/cloud/rain) — `text-accent-amber/teal/sky`
-- AQI dot: green/amber/red в зависимости от band
-- Курс с микро-стрелкой ↑/↓ (`text-success/destructive`)
+**Куда ведут разделы каталога (Surfaces):**
+- Arrive (`/arrive`) → Transfer, SIM, Exchange, Visa-on-arrival.
+- Live (`/discover`) → Restaurants, Beauty, Fitness, Medical, Pets, Education, Services.
+- Invest (`/invest`) → Investment Hub + Real Estate (Buy/Rent/Newbuilds).
+- Legal (`/stay-legal`) → Visa, Tax, Contracts, Insurance.
+- Manage (`/property` для арендаторов) → история заездов, договор аренды.
+- Build (`/newbuilds`) → каталог новостроек, ClearView, devs.
 
-### Дополнительно (low-effort, high-impact)
+**SideRail:** нет.
 
-- **Fix pill-табы overflow** в верхнем pill-баре (`Bookings/Services/Documents...`) — `overflow-x-auto` + `scroll-snap-x` + `flex-shrink-0`. Сейчас они слипаются.
-- **«Все приложения» CTA** → добавить мини-превью 4 цветных точек кластеров справа (визуальный teaser):
-  ```
-  Все приложения              ●●●●●● →
-  6 кластеров · 80+ сервисов
-  ```
+**Breadcrumbs пример:**
+`Главная › Каталог › Beauty › Salon "X"` или `/me › Документы › Виза 2026`.
 
-## Технические детали
+### 3.3 PARTNER (vendor / agent / developer)
 
-### Файлы
+**Шелл:** Workspace (`/vendor/*`).
+**BottomBar (5):** Dashboard · Bookings · Services · Payouts · Profile.
 
-| Файл | Действие |
-|---|---|
-| `src/components/home/HeroGreeting.tsx` | **NEW** — hero-блок с градиентом, приветствием, AI search bar |
-| `src/components/home/PrimaryGrid.tsx` | **REWRITE** — Bento-сетка 1+3, цвета кластеров, добавить `accent` поле в TILES |
-| `src/components/home/PendingPaymentsChip.tsx` | **NEW** — компактный alert-чип под hero |
-| `src/components/home/NowInPhuket.tsx` | **EDIT** — добавить иконки погоды, цветную AQI-точку, стрелку курса |
-| `src/pages/Index.tsx` | **EDIT** — заменить `HomeTopBar` голый на `HeroGreeting`, добавить `PendingPaymentsChip`, оставить остальное |
-| `src/styles/tokens.css` | **EDIT** — проверить, что все нужные `--cluster-*` и `--accent-*` токены есть (они есть по `DESIGN_TOKENS.md`) |
+**SideRail (3 группы):**
+- **Main**: Dashboard `/vendor` · Bookings · Services · Products · Locations.
+- **Performance**: Analytics · Payouts · Messages.
+- **Settings**: Settings.
 
-### Безопасность
+**Onboarding-фуннел (отдельный, без шелла):**
+`/vendor/join` → `/vendor/onboarding` → `/vendor` (после approve).
 
-- Новый layout под тем же флагом `home_simplified_v1` (уже включён) — legacy сохранён.
-- Дополнительный sub-flag `home_visual_v2` (`default=true`) — на случай быстрого rollback нового визуала отдельно от 5-зонной структуры.
-- Никаких хардкод-цветов — только `hsl(var(--cluster-*))` и `hsl(var(--accent-*))`.
-- Touch target 44px сохраняется на всех тайлах.
-- RU/EN строки — добавить в существующие `isRu ? '…' : '…'` паттерны.
+**Breadcrumbs:** `Vendor › Bookings › #ORD-123 › Refund`.
 
-### Что НЕ меняем
+**Куда ведут ключевые экраны:**
+- Dashboard — KPI (revenue 30d, conversion, rating), Top 5 Now.
+- Bookings — Kanban (new/confirmed/done/disputed) + детальная сделка.
+- Services/Products — каталог + редактор листинга (3 фото, RU+EN, THB).
+- Payouts — расчёты, Stripe Connect, ledger marker.
+- Messages — чат с клиентами + AI moderation.
 
-- Структуру 5 зон (TopBar / ActiveSituation / PrimaryGrid / NowInPhuket / All Apps)
-- Навигацию (`AppDrawer`, `RoleSheet`, маршруты)
-- Логику персон (`useUserPersonas`, `pickSet`)
-- Шрифты и базовые токены
+### 3.4 OWNER (собственник / УК)
 
-## Что увидит пользователь после
+Две подроли — два шелла:
 
-- Тёплое цветное приветствие сверху вместо плоской navy-полоски
-- Один большой AI-тайл как явный «герой» экрана + 3 цветных action-тайла
-- Pending payments — один компактный чип, а не доминирующие карточки
-- Живой pulse-strip снизу с погодой и курсом в цвете
-- Узнаваемый цветовой код кластеров (mint/blue/amber/cyan) — суперапп начинает «звучать»
+**(a) MC Director (`owner` NavRoleKey, шелл Workspace, `/mc/*`):**
 
-Скажи «ок» — начинаю реализацию. Или укажи: (а) другой акцент в hero (фото/иллюстрация вместо градиента), (б) другой состав цветов, (в) пропустить какой-то из 4 шагов.
+BottomBar (5): Dashboard · Properties · Calendar · Finance · Messages.
+
+SideRail (6 групп, как в `OWNER_SIDEBAR`):
+- **Control Tower**: Dashboard · Bookings · Calendar · Tasks · Messages.
+- **Properties**: Properties · Performance · Reviews.
+- **Operations**: Rates & Channels · Inventory · Insurance · Templates.
+- **Finance**: Finance Hub · Invoices · Management Terms.
+- **CRM & Sales**: CRM Dashboard · Contacts · Owners · Vendor Acquisition.
+- **Team & Settings**: Staff · Settings · Help.
+
+Persona-фильтр (см. `getOwnerSidebarForRole`): single-property owner видит обрезанный набор без CRM/Staff.
+
+**(b) Property Owner Portal (`mc_portal`, шелл Consumer, `/my-property/*`):**
+
+BottomBar (5): My Properties · Statements · Documents · Messages · Me.
+
+Это read-only портал для собственников, чьи объекты ведёт MC. Никакого SideRail.
+
+**Switcher:** в `UserAvatarMenu` пункты «Director Mode» ↔ «Owner Portal» при наличии обеих ролей.
+
+**Breadcrumbs:** `MC › Properties › "Villa A" › Calendar` или `/my-property › Statements › Q1 2026`.
+
+### 3.5 STAFF (`team`, сотрудники myUNO)
+
+**Шелл:** Workspace lite (TeamLayout + TeamSidebar, без глобального SideRail).
+**BottomBar (5):** Dashboard · Content · Moderation · CRM · Profile.
+
+**Группы в TeamSidebar:**
+- **Work**: Dashboard `/team` · Content `/team/content` · Leaderboard.
+- **Comms**: Team Chat.
+- **Moderation**: очередь Catalog & Reviews.
+
+**Куда ведут:**
+- Content Hub — статьи (Knowledge), переводы RU/EN, semantic-валидация.
+- Moderation — pending listings/reviews/vendors, бейдж `pendingContent`.
+- CRM — read-only доступ к контактам и сделкам (без денежных операций).
+
+**Breadcrumbs:** `Team › Content › Pillar "Visa" › Article`.
+
+### 3.6 ADMIN
+
+**Шелл:** Workspace (`/admin/*`).
+**BottomBar (5):** Dashboard · CRM · Tickets · Moderation · Profile.
+
+**SideRail (3 группы):**
+- **Platform**: Add · Dashboard · Catalog & Content · Operations · CRM · Partners.
+- **Finance & Analytics**: Finance · Analytics.
+- **System**: LifeOS · New Developments · Users & Access · Settings.
+
+**Куда ведут:**
+- `/admin/add` — универсальная точка добавления сущностей.
+- `/admin/operations` — заказы, рефанды, споры.
+- `/admin/finance` — ledger, reconciliation alerts, payouts.
+- `/admin/users` — RBAC, role assignments.
+- `/admin/newbuilds` — модерация ClearView, девелоперов, проектов.
+
+**Breadcrumbs:** `Admin › Catalog › Vendors › "Acme" › Verification`.
+
+## 4. Поведение хлебных крошек (универсальные правила)
+
+1. На L1 (Surface root) — крошек нет, только H1.
+2. На L2+ — `Surface › Раздел › ... › Текущий` (текущий не кликается).
+3. Workspace роли: первый узел = роль (`MC` / `Vendor` / `Admin` / `Team`).
+4. На детальных модальных шагах (checkout, wizard) — крошки скрыты, показан StepByStepNav.
+5. Локализация — `i18n/uiStrings.ts`, ключи `nav.crumb.*`.
+
+## 5. Где навигация **скрыта**
+
+| Контекст                          | TopBar | BottomBar | SideRail |
+|-----------------------------------|:------:|:---------:|:--------:|
+| `/auth/*`, `/checkout`, `/cart`   |   −    |     −     |    −     |
+| Wizards (`/onboarding`, `/sell`)  |  лого  |     −     |    −     |
+| Workspace operational routes      |   ✓    |     ✓     |    ✓     |
+| Consumer routes                   |   ✓    |     ✓     |    −     |
+
+Уже зашито в `NavShell` через `FULLSCREEN_PREFIXES` и `hasSidebar()`.
+
+## 6. Что из этого уже есть, а что — gap
+
+**Есть:**
+- 7 NavRoleKey, BOTTOM_BAR_BY_ROLE, OWNER/ADMIN/VENDOR sidebars, NavShell с двумя режимами.
+- `useNavigationDirection`, `BackButton`, `UserAvatarMenu` switcher.
+- `APP_ROUTES` SSOT, `routeMeta.ts` (customer vs workspace).
+
+**Gap (фиксим отдельной задачей после approve):**
+1. Нет единого компонента **Breadcrumbs** на уровне NavShell — генерится точечно. → ввести `<Breadcrumbs source="route-meta" />` в TopBar.
+2. На consumer routes top-pills (≥md) не показываются — есть только bottom-bar. → добавить `<TopPills />` в TopBar для guest/user.
+3. `/me` Hub есть, но 6 слотов не унифицированы как BottomBar — есть отдельный MeShell. → выровнять под общий контракт.
+4. Нет визуальной разницы Guest vs User в BottomBar — оба используют `GUEST_NAV`. → User должен получать слот `/me` вместо `/account`.
+5. Owner switcher (Director ↔ Owner Portal) в `UserAvatarMenu` есть, но без явных лейблов — добавить.
+
+## 7. Что делать после approve
+
+В режиме build:
+1. Документ `docs/NAVIGATION_MAP.md` с таблицами выше (источник истины для дизайнера).
+2. Добавить в `navigationModel.ts` константу `USER_NAV` (отдельно от `GUEST_NAV`) и переключение в `resolveNavRole`.
+3. Внедрить общий `<Breadcrumbs />` в `TopBar` на основе `routeMeta` + `APP_ROUTES`.
+4. Добавить `<TopPills />` (≥md) для consumer ролей.
+5. Smoke-тесты в `src/test/layout/` — по одному на каждую из 6 ролей: проверка количества слотов, наличия sidebar, видимости back/breadcrumbs.
+
+Каждый шаг — отдельный merge, под merge-gate (a) tech debt + (h) Hub page.
