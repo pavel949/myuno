@@ -191,6 +191,9 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.DISCOVER} element={<LazyPage><Pages.Discover /></LazyPage>} />
         <Route path="/catalog" element={<LazyPage><Pages.PlatformCatalog /></LazyPage>} />
         <Route path="/categories" element={<Navigate to={APP_ROUTES.DISCOVER} replace />} />
+        {/* Cluster surface aliases — Master Taxonomy v1.0 */}
+        <Route path={APP_ROUTES.ARRIVE_CLUSTER} element={<Navigate to={`${APP_ROUTES.DISCOVER}?cluster=arrive`} replace />} />
+        <Route path={APP_ROUTES.LEGAL_CLUSTER} element={<Navigate to={`${APP_ROUTES.DISCOVER}?cluster=legal`} replace />} />
         <Route path={APP_ROUTES.MAP} element={<LazyPage><Pages.MapView /></LazyPage>} />
         <Route path={APP_ROUTES.BOOKINGS} element={<LazyPage><Pages.Bookings /></LazyPage>} />
         <Route path="/bookings/:id" element={<LazyPage><Pages.BookingDetail /></LazyPage>} />
