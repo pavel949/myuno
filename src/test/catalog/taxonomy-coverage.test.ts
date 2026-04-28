@@ -69,8 +69,8 @@ describe('catalog SSOT — categories', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it('expects 16 canonical categories', () => {
-    expect(CATEGORIES).toHaveLength(16);
+  it('expects 17 canonical categories (Live broken into 6 narrow groups)', () => {
+    expect(CATEGORIES).toHaveLength(17);
   });
 });
 

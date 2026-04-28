@@ -46,10 +46,17 @@ export type ClusterId = 'arrive' | 'live' | 'manage' | 'invest' | 'legal' | 'bui
 export type CategoryId =
   // Arrive (3)
   | 'cat-emergency' | 'cat-transport' | 'cat-tourism'
-  // Live (8)
-  | 'cat-home-living' | 'cat-food-entertainment' | 'cat-health-wellness'
-  | 'cat-family-kids' | 'cat-pet-services' | 'cat-sports' | 'cat-community'
-  | 'cat-wedding-events'
+  // Live (10) — повседневная жизнь, разбитая на узкие подгруппы вместо «свалки»
+  | 'cat-home-cleaning'      // Уборка и быт
+  | 'cat-home-repair'        // Ремонт и техника
+  | 'cat-home-outdoor'       // Двор, сад, цветы
+  | 'cat-home-logistics'     // Логистика и хранение
+  | 'cat-food-delivery'      // Еда и доставка
+  | 'cat-health-wellness'    // Здоровье и велнес
+  | 'cat-family-kids'        // Семья и дети
+  | 'cat-pet-services'       // Питомцы
+  | 'cat-leisure'            // Досуг, события, спорт, сообщество
+  | 'cat-wedding-events'     // Свадьбы и премиум-события
   // Manage (0 public — workspace-only cluster, see /mc/* routes)
   // Invest (1)
   | 'cat-real-estate'
@@ -273,44 +280,82 @@ export const CATEGORIES: CategoryEntry[] = [
     ],
   },
 
-  // ============== LIVE ==============
+  // ============== LIVE — повседневность, разбитая на узкие категории ==============
+  // Дом и быт раньше был одной свалкой из 12 сервисов в одну ленту.
+  // Теперь — 4 отдельные категории: Уборка / Ремонт / Двор / Логистика.
   {
-    id: 'cat-home-living',
+    id: 'cat-home-cleaning',
     clusterId: 'live',
-    labelRu: 'Дом и быт',
-    labelEn: 'Home & Living',
-    valueRu: 'Уборка, прачечная, мастер на час, сад, кондиционеры.',
-    valueEn: 'Cleaning, laundry, handyman, gardening, AC repair.',
-    icon: HomeIcon,
+    labelRu: 'Уборка и быт',
+    labelEn: 'Cleaning & Household',
+    valueRu: 'Регулярная уборка, прачечная, дезинсекция.',
+    valueEn: 'Regular cleaning, laundry, pest control.',
+    icon: Sparkles,
     color: '#10B981',
     services: [
-      { id: 'cleaning',         path: APP_ROUTES.CLEANING,                          labelRu: 'Уборка',         labelEn: 'Cleaning',       icon: Sparkles,    status: 'available', verticalId: 'cleaning' },
-      { id: 'services',         path: SERVICES_URL,                                  labelRu: 'Все услуги',     labelEn: 'Services hub',   icon: Wrench,      status: 'available' },
-      { id: 'laundry',          path: `${SERVICES_URL}?category=laundry`,            labelRu: 'Прачечная',      labelEn: 'Laundry',        icon: Package,     status: 'available' },
-      { id: 'handyman',         path: `${SERVICES_URL}?category=handyman`,           labelRu: 'Мастер на час',  labelEn: 'Handyman',       icon: Hammer,      status: 'available' },
-      { id: 'plumbing',         path: `${SERVICES_URL}?category=plumbing`,           labelRu: 'Сантехника',     labelEn: 'Plumbing',       icon: Wrench,      status: 'available' },
-      { id: 'electrical',       path: `${SERVICES_URL}?category=electrical`,         labelRu: 'Электрика',      labelEn: 'Electrical',     icon: Zap,         status: 'available' },
-      { id: 'ac-repair',        path: `${SERVICES_URL}?category=ac-repair`,          labelRu: 'Кондиционеры',   labelEn: 'AC repair',      icon: Wind,        status: 'available' },
-      { id: 'gardening',        path: `${SERVICES_URL}?category=gardening`,          labelRu: 'Сад',            labelEn: 'Gardening',      icon: TreePine,    status: 'available' },
-      { id: 'pest-control',     path: `${SERVICES_URL}?category=pest-control`,       labelRu: 'Дезинсекция',    labelEn: 'Pest control',   icon: Bug,         status: 'available' },
-      { id: 'locksmith',        path: `${SERVICES_URL}?category=locksmith`,          labelRu: 'Замки',          labelEn: 'Locksmith',      icon: KeyRound,    status: 'available' },
-      { id: 'storage',          path: `${SERVICES_URL}?category=storage`,            labelRu: 'Хранение',       labelEn: 'Storage',        icon: Warehouse,   status: 'available' },
-      { id: 'flowers',          path: APP_ROUTES.FLOWERS,                            labelRu: 'Цветы',          labelEn: 'Flowers',        icon: Sparkles,    status: 'available', verticalId: 'flower' },
+      { id: 'cleaning',     path: APP_ROUTES.CLEANING,                       labelRu: 'Уборка',      labelEn: 'Cleaning',     icon: Sparkles, status: 'available', verticalId: 'cleaning' },
+      { id: 'laundry',      path: `${SERVICES_URL}?category=laundry`,        labelRu: 'Прачечная',   labelEn: 'Laundry',      icon: Package,  status: 'available' },
+      { id: 'pest-control', path: `${SERVICES_URL}?category=pest-control`,   labelRu: 'Дезинсекция', labelEn: 'Pest control', icon: Bug,      status: 'available' },
     ],
   },
   {
-    id: 'cat-food-entertainment',
+    id: 'cat-home-repair',
     clusterId: 'live',
-    labelRu: 'Еда и развлечения',
-    labelEn: 'Food & Entertainment',
-    valueRu: 'Рестораны, доставка, маркет, шопинг.',
-    valueEn: 'Restaurants, delivery, market, shopping.',
+    labelRu: 'Ремонт и техника',
+    labelEn: 'Repair & Maintenance',
+    valueRu: 'Мастер на час, сантехник, электрик, кондиционеры, замки.',
+    valueEn: 'Handyman, plumber, electrician, AC, locksmith.',
+    icon: Wrench,
+    color: '#3B82F6',
+    services: [
+      { id: 'handyman',   path: `${SERVICES_URL}?category=handyman`,   labelRu: 'Мастер на час', labelEn: 'Handyman',    icon: Hammer,   status: 'available' },
+      { id: 'plumbing',   path: `${SERVICES_URL}?category=plumbing`,   labelRu: 'Сантехника',    labelEn: 'Plumbing',    icon: Wrench,   status: 'available' },
+      { id: 'electrical', path: `${SERVICES_URL}?category=electrical`, labelRu: 'Электрика',     labelEn: 'Electrical',  icon: Zap,      status: 'available' },
+      { id: 'ac-repair',  path: `${SERVICES_URL}?category=ac-repair`,  labelRu: 'Кондиционеры',  labelEn: 'AC repair',   icon: Wind,     status: 'available' },
+      { id: 'locksmith',  path: `${SERVICES_URL}?category=locksmith`,  labelRu: 'Замки',         labelEn: 'Locksmith',   icon: KeyRound, status: 'available' },
+    ],
+  },
+  {
+    id: 'cat-home-outdoor',
+    clusterId: 'live',
+    labelRu: 'Двор и сад',
+    labelEn: 'Garden & Outdoor',
+    valueRu: 'Сад, бассейн, цветы — внешняя территория.',
+    valueEn: 'Garden, pool, flowers — outside the home.',
+    icon: TreePine,
+    color: '#22C55E',
+    services: [
+      { id: 'gardening', path: `${SERVICES_URL}?category=gardening`, labelRu: 'Сад',    labelEn: 'Gardening', icon: TreePine, status: 'available' },
+      { id: 'flowers',   path: APP_ROUTES.FLOWERS,                   labelRu: 'Цветы',  labelEn: 'Flowers',   icon: Sparkles, status: 'available', verticalId: 'flower' },
+    ],
+  },
+  {
+    id: 'cat-home-logistics',
+    clusterId: 'live',
+    labelRu: 'Логистика и хранение',
+    labelEn: 'Logistics & Storage',
+    valueRu: 'Хранение вещей, переезды, все домашние услуги одной точкой.',
+    valueEn: 'Storage, moving, all home services in one place.',
+    icon: Truck,
+    color: '#0EA5E9',
+    services: [
+      { id: 'storage',  path: `${SERVICES_URL}?category=storage`, labelRu: 'Хранение',   labelEn: 'Storage',      icon: Warehouse, status: 'available' },
+      { id: 'services', path: SERVICES_URL,                        labelRu: 'Все услуги', labelEn: 'Services hub', icon: Wrench,    status: 'available' },
+    ],
+  },
+  {
+    id: 'cat-food-delivery',
+    clusterId: 'live',
+    labelRu: 'Еда и доставка',
+    labelEn: 'Food & Delivery',
+    valueRu: 'Рестораны, маркет, доставка еды и продуктов.',
+    valueEn: 'Restaurants, market, food & grocery delivery.',
     icon: Utensils,
     color: '#F59E0B',
     services: [
-      { id: 'restaurant',  path: APP_ROUTES.RESTAURANTS, labelRu: 'Рестораны',     labelEn: 'Restaurants', icon: Utensils,    status: 'available', verticalId: 'restaurant' },
-      { id: 'market',      path: APP_ROUTES.MARKET,      labelRu: 'Маркет',         labelEn: 'Market',      icon: ShoppingBag, status: 'available' },
-      { id: 'delivery',    path: APP_ROUTES.DELIVERY,    labelRu: 'Доставка',       labelEn: 'Delivery',    icon: Truck,       status: 'available' },
+      { id: 'restaurant', path: APP_ROUTES.RESTAURANTS, labelRu: 'Рестораны', labelEn: 'Restaurants', icon: Utensils,    status: 'available', verticalId: 'restaurant' },
+      { id: 'delivery',   path: APP_ROUTES.DELIVERY,    labelRu: 'Доставка',  labelEn: 'Delivery',    icon: Truck,       status: 'available' },
+      { id: 'market',     path: APP_ROUTES.MARKET,      labelRu: 'Маркет',    labelEn: 'Market',      icon: ShoppingBag, status: 'available' },
     ],
   },
   {
@@ -318,14 +363,15 @@ export const CATEGORIES: CategoryEntry[] = [
     clusterId: 'live',
     labelRu: 'Здоровье и велнес',
     labelEn: 'Health & Wellness',
-    valueRu: 'Медицина, аптеки, красота, страховки.',
-    valueEn: 'Medical, pharmacy, beauty & spa, insurance.',
+    valueRu: 'Медицина, аптеки, красота, фитнес, страховки.',
+    valueEn: 'Medical, pharmacy, beauty, fitness, insurance.',
     icon: Stethoscope,
     color: '#EC4899',
     services: [
       { id: 'medical',   path: APP_ROUTES.MEDICAL,   labelRu: 'Медицина',  labelEn: 'Medical',   icon: Stethoscope, status: 'available', verticalId: 'medical' },
       { id: 'pharmacy',  path: APP_ROUTES.PHARMACY,  labelRu: 'Аптеки',    labelEn: 'Pharmacy',  icon: Bandage,     status: 'available', verticalId: 'pharmacy' },
       { id: 'beauty',    path: APP_ROUTES.BEAUTY,    labelRu: 'Красота',   labelEn: 'Beauty',    icon: Palette,     status: 'available', verticalId: 'beauty' },
+      { id: 'fitness',   path: APP_ROUTES.FITNESS,   labelRu: 'Фитнес',    labelEn: 'Fitness',   icon: Dumbbell,    status: 'available', verticalId: 'fitness' },
       { id: 'insurance', path: APP_ROUTES.INSURANCE, labelRu: 'Страховка', labelEn: 'Insurance', icon: Shield,      status: 'available', verticalId: 'insurance' },
     ],
   },
@@ -348,8 +394,8 @@ export const CATEGORIES: CategoryEntry[] = [
   {
     id: 'cat-pet-services',
     clusterId: 'live',
-    labelRu: 'Сервисы для питомцев',
-    labelEn: 'Pet Services',
+    labelRu: 'Питомцы',
+    labelEn: 'Pets',
     valueRu: 'Уход, ветеринары, груминг, ввоз/вывоз питомца.',
     valueEn: 'Pet care, veterinary, grooming, import/export.',
     icon: PawPrint,
@@ -359,30 +405,23 @@ export const CATEGORIES: CategoryEntry[] = [
       { id: 'veterinary', path: APP_ROUTES.VETERINARY, labelRu: 'Ветеринары', labelEn: 'Veterinary',  icon: Bandage,  status: 'available', personaTags: ['pet_owner'] },
     ],
   },
+  // События и досуг — теперь часть повседневной ЖИЗНИ резидента (а не только
+  // туристического "Прибытия"). Events дублируется здесь — Arrive остаётся
+  // для туристического сценария, Live — для местного жителя.
   {
-    id: 'cat-sports',
+    id: 'cat-leisure',
     clusterId: 'live',
-    labelRu: 'Спорт и тренировки',
-    labelEn: 'Sports & Athletic',
-    valueRu: 'Фитнес, бойцовские школы, дайвинг, серфинг.',
-    valueEn: 'Fitness, martial arts, diving, surfing.',
-    icon: Dumbbell,
-    color: '#22C55E',
-    services: [
-      { id: 'fitness', path: APP_ROUTES.FITNESS, labelRu: 'Фитнес', labelEn: 'Fitness', icon: Dumbbell, status: 'available', verticalId: 'fitness' },
-    ],
-  },
-  {
-    id: 'cat-community',
-    clusterId: 'live',
-    labelRu: 'Сообщество',
-    labelEn: 'Community',
-    valueRu: 'Клубы, события, знакомства, нетворкинг.',
-    valueEn: 'Clubs, meetups, community events, networking.',
-    icon: Users,
+    labelRu: 'Досуг и события',
+    labelEn: 'Leisure & Events',
+    valueRu: 'Что делать вечером и на выходных: события, активности, сообщество.',
+    valueEn: 'What to do tonight or this weekend: events, activities, community.',
+    icon: CalendarDays,
     color: '#0EA5E9',
     services: [
-      { id: 'community', path: APP_ROUTES.HOME, labelRu: 'Скоро', labelEn: 'Coming soon', icon: Users, status: 'soon' },
+      { id: 'event-live',   path: APP_ROUTES.EVENTS,                    labelRu: 'События',      labelEn: 'Events',           icon: CalendarDays, status: 'available', verticalId: 'event' },
+      { id: 'experience-live', path: EXPERIENCES_URL,                   labelRu: 'Впечатления',  labelEn: 'Experiences',      icon: Compass,      status: 'available', verticalId: 'experience' },
+      { id: 'water-live',   path: `${EXPERIENCES_URL}?type=activity`,   labelRu: 'Активности',   labelEn: 'Activities',       icon: Waves,        status: 'available', verticalId: 'water_activity' },
+      { id: 'community',    path: APP_ROUTES.HOME,                      labelRu: 'Сообщество',   labelEn: 'Community',        icon: Users,        status: 'soon' },
     ],
   },
 
