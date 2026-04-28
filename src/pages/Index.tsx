@@ -1,12 +1,18 @@
 /**
- * Index — myUNO Home (task-first ordering)
+ * Index — myUNO Home.
  *
- * Order optimized for returning users: get to "what do I need" fast,
- * then "what's already in progress", then trust/discovery blocks.
+ * Поведение управляется флагом `feature_flag:home_simplified_v1`:
+ *  - ON  → 5-зонная упрощённая главная (PrimaryGrid + ActiveSituation + NowInPhuket).
+ *  - OFF → исторический layout с 15 блоками (regression-safe).
+ *
+ * См. план: .lovable/plan.md, Шаг 1.
  */
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useUserPersonas } from '@/hooks/useUserPersonas';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 import { HomeTopBar } from '@/components/home/HomeTopBar';
 import { PersonaHalo } from '@/components/home/PersonaHalo';
@@ -27,14 +33,10 @@ import { TrustAsAService } from '@/components/home/TrustAsAService';
 import { PersonaPromptBanner } from '@/components/home/PersonaPromptBanner';
 import { PersonaAwareSections } from '@/components/home/PersonaAwareSections';
 import { PersonaDiscoveryStrip } from '@/components/home/PersonaDiscoveryStrip';
+import { PrimaryGrid } from '@/components/home/PrimaryGrid';
 import type { HomeSectionKey } from '@/lib/segmentation/prioritizeHomeSections';
 import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 
-/**
- * M6 · D.4 — priority-zone keys, в каноническом дефолтном порядке.
- * Это секции, участвующие в перестановке `prioritizeHomeSections()`.
- * Hero, HomeTopBar, Footer и т.п. фиксированы вне priority-зоны.
- */
 const PRIORITY_DEFAULT_ORDER: readonly HomeSectionKey[] = [
   'PersonaPromptBanner',
   'ActiveSituation',
@@ -42,20 +44,107 @@ const PRIORITY_DEFAULT_ORDER: readonly HomeSectionKey[] = [
 
 const Index = () => {
   const { personas, togglePersona, setPersonas } = useUserPersonas();
+  const { language } = useLanguage();
   const [roleSheetOpen, setRoleSheetOpen] = useState(false);
   const [appDrawerOpen, setAppDrawerOpen] = useState(false);
+
+  // Simplified home gate (Step 1 of план: .lovable/plan.md)
+  const simplifiedOn = useFeatureFlag('home_simplified_v1', true);
+
+  // Legacy flags (используются только в legacy-режиме)
   const reEngineOn = useFeatureFlag('re_revenue_engine', true);
   const trustOn = useFeatureFlag('trust_as_service', true);
   const popularTasksOn = useFeatureFlag('popular_tasks_block', false);
-  // M6 · D.4 — gated за `feature_flag:home_persona_aware_v1` (default OFF).
-  // Включается одной строкой в `system_settings` без релиза.
   const personaAwareOn = useFeatureFlag('home_persona_aware_v1', false);
 
   const activePersonas = personas.length > 0 ? personas : (['tourist'] as const);
+  const isRu = language === 'ru';
 
-  // Готовые JSX-элементы для priority-зоны. Передаются в PersonaAwareSections
-  // как Partial<Record<HomeSectionKey, ReactNode>>; отсутствующие ключи
-  // безопасно пропускаются.
+  // ─────────────────────────────────────────────────────────────────
+  // Simplified layout (5 zones, max ~2 screens of scroll)
+  // ─────────────────────────────────────────────────────────────────
+  if (simplifiedOn) {
+    return (
+      <AppLayout showHeader={false} showFooter={false}>
+        <div className="pb-24">
+          {/* 1. TopBar (logo · bell · avatar) */}
+          <div className="bg-primary text-primary-foreground">
+            <div className="px-4">
+              <HomeTopBar
+                personas={[...activePersonas]}
+                onRoleSheetOpen={() => setRoleSheetOpen(true)}
+                onAppDrawerOpen={() => setAppDrawerOpen(true)}
+                variant="onNavy"
+              />
+            </div>
+          </div>
+
+          <WorkspaceHomeBanner />
+
+          {/* 2. Greeting + ActiveSituation (one card: «what's happening now») */}
+          <ActiveSituation
+            personas={[...activePersonas]}
+            onRoleSheetOpen={() => setRoleSheetOpen(true)}
+          />
+
+          {/* 3. PrimaryGrid — 4 large persona-aware tiles. The hero of the screen. */}
+          <PrimaryGrid />
+
+          {/* 4. Now in Phuket — narrow ambient strip */}
+          <NowInPhuket />
+
+          {/* 5. «Все приложения» — single explicit door to everything else */}
+          <div className="px-4 mt-6">
+            <button
+              type="button"
+              onClick={() => setAppDrawerOpen(true)}
+              className="w-full flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-4 text-left hover:border-primary/40 hover:bg-primary/5 transition-colors"
+            >
+              <span>
+                <span className="block text-[15px] font-semibold tracking-tight text-foreground">
+                  {isRu ? 'Все приложения' : 'All apps'}
+                </span>
+                <span className="block text-[12px] text-muted-foreground mt-0.5">
+                  {isRu ? '6 кластеров · 80+ сервисов' : '6 clusters · 80+ services'}
+                </span>
+              </span>
+              <ArrowRight className="w-5 h-5 text-muted-foreground" strokeWidth={2} />
+            </button>
+          </div>
+
+          {/* Tiny link to switch role — keeps progressive disclosure */}
+          <div className="px-4 mt-3 text-center">
+            <button
+              type="button"
+              onClick={() => setRoleSheetOpen(true)}
+              className="text-[12px] text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {isRu ? 'Изменить роль' : 'Change role'}
+            </button>
+          </div>
+        </div>
+
+        <RoleSheet
+          open={roleSheetOpen}
+          personas={personas}
+          onClose={() => setRoleSheetOpen(false)}
+          onToggle={togglePersona}
+          onReorder={setPersonas}
+        />
+
+        <AppDrawer
+          open={appDrawerOpen}
+          onOpenChange={setAppDrawerOpen}
+          personas={[...activePersonas]}
+          onSwitchRole={() => setRoleSheetOpen(true)}
+        />
+      </AppLayout>
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────────
+  // Legacy layout (kept for rollback). См. оригинальный комментарий ниже.
+  // ─────────────────────────────────────────────────────────────────
   const prioritySections: Partial<Record<HomeSectionKey, React.ReactNode>> = {
     PersonaPromptBanner: <PersonaPromptBanner />,
     ActiveSituation: (
@@ -69,13 +158,6 @@ const Index = () => {
   return (
     <AppLayout showHeader={false} showFooter={false}>
       <div className="pb-24">
-        {/* ── Brand band ─────────────────────────────────────────────
-            Canonical navy header (#0A2240) — gives the home a clear
-            anchor and lets the cream content below feel intentional
-            instead of washed-out. The 12-px gradient bleed below
-            softens the seam into the cream surface. Per canon §1
-            navy is ≤10% of the screen budget; the band shrinks below
-            the fold on scroll so the average exposure stays inside it. */}
         <div className="bg-primary text-primary-foreground relative">
           <div className="px-4">
             <HomeTopBar
@@ -84,16 +166,12 @@ const Index = () => {
               onAppDrawerOpen={() => setAppDrawerOpen(true)}
               variant="onNavy"
             />
-            {/* PersonaHalo — signature home navigation: identity tile +
-                6 cluster quanta. Replaces the generic chip strip. */}
             <PersonaHalo
               personas={[...activePersonas]}
               onRoleSheetOpen={() => setRoleSheetOpen(true)}
               variant="onNavy"
             />
           </div>
-          {/* Soft fade from navy into the cream page — keeps the seam
-              from looking like a hard band. */}
           <div
             className="absolute left-0 right-0 -bottom-3 h-3 pointer-events-none"
             style={{ background: 'linear-gradient(to bottom, hsl(var(--primary) / 0.18), transparent)' }}
@@ -103,43 +181,19 @@ const Index = () => {
         <div className="h-3" aria-hidden />
         <WorkspaceHomeBanner />
 
-        {/*
-          M6 · D.4 — priority-zone (PersonaPromptBanner + ActiveSituation).
-          Под флагом `home_persona_aware_v1` обёртка перестраивает порядок
-          по канонической персоне (`useCanonicalProfile` → `prioritizeHomeSections`).
-          Если флаг OFF / loading / anon → дефолтный порядок (regression-safe).
-          Hero и tasks-блок остаются на фиксированных позициях ниже.
-        */}
         <PersonaAwareSections
           defaultOrder={PRIORITY_DEFAULT_ORDER}
           sections={prioritySections}
           disabled={!personaAwareOn}
         />
 
-        {/* "Now in Phuket" — ambient pulse strip (weather · AQI · FX), per design v5.
-            Positioned right after the role signals so the home page feels rooted in
-            real-time local context, even when no personalized signals are active. */}
         <NowInPhuket />
-
-        {/* 1. Hero — search-first entry, with desktop popular preview */}
         <HeroIntro />
-
-        {/* 2. Audience entries — gov-style "find your door".
-            Each audience has 3 concrete linked tasks + a primary CTA, so
-            users self-identify in <3s and reach the right surface in 1 tap. */}
         <AudienceEntries />
-
-        {/* 3. Persona discovery strip — surface the 26 tailored landings */}
         <PersonaDiscoveryStrip />
-
-        {/* 4. Tasks — what do I need to do right now */}
         {popularTasksOn ? <PopularTasks /> : <PrimaryActions />}
-
-        {/* 4. Trust / discovery — story blocks */}
         {reEngineOn && <RealEstateEntry />}
         {trustOn && <TrustAsAService />}
-
-        {/* 5. Catalog — everything else */}
         <AllSectionsAccordion personas={[...activePersonas]} />
         <TrustFooter />
       </div>
