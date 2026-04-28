@@ -68,6 +68,15 @@ export {
   type ClearViewGrade,
 } from './master';
 
+// Service ↔ JTBD bridge (DB-backed, Master Taxonomy v1.0)
+export {
+  useServiceJtbdMap,
+  getJtbdsForService,
+  getPrimaryJtbd,
+  getServicesByJtbd,
+  type ServiceJtbdMapping,
+} from './serviceJtbd';
+
 // ============= STATIC NAMESPACE EXPORTS =============
 // Use for backward compatibility and type definitions only
 export * as PropertyTaxonomy from '../propertyTaxonomy';
