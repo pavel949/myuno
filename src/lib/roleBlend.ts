@@ -98,6 +98,13 @@ export const SIGNAL_ROUTE: Record<UserPersona, string> = {
 export function blendClusters(
   personas: UserPersona[],
   audienceCtx?: ClusterAudienceContext,
+  /**
+   * Optional live catalog override. When provided (typically from
+   * `useLiveClusterCatalog` reading `public.category_groups`/`categories`),
+   * persona ordering is applied on top of the DB-driven clusters instead
+   * of the static SSOT.
+   */
+  catalogOverride?: ClusterCatalogEntry[],
 ): ClusterCatalogEntry[] {
   const scores: Record<ClusterId, number> = { live: 0, manage: 0, invest: 0, legal: 0, arrive: 0, build: 0 };
   personas.forEach((p, i) => {
@@ -111,7 +118,15 @@ export function blendClusters(
 
   const ctx: ClusterAudienceContext =
     audienceCtx ?? { personas: personas as unknown as string[], role: null };
-  const visible = filterCatalogForUser(ctx);
+  const source = catalogOverride ?? filterCatalogForUser(ctx);
+  const visible = catalogOverride
+    ? source.filter((c) =>
+        // re-apply audience filter on the override (safety net for workspace clusters)
+        c.audience !== 'workspace' ||
+        (c.personas ?? []).some((p) => (ctx.personas ?? []).includes(p)) ||
+        (!!ctx.role && (c.roles ?? []).includes(ctx.role)),
+      )
+    : source;
   return [...visible].sort(
     (a, b) => (scores[b.id as ClusterId] ?? 0) - (scores[a.id as ClusterId] ?? 0),
   );

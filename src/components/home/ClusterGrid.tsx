@@ -7,6 +7,7 @@ import {
   getClusterHeaderLabel,
   getClusterValueLine,
   CLUSTER_CATALOG_TOTAL_AVAILABLE,
+  useLiveClusterCatalog,
 } from '@/lib/nav/clusterCatalog';
 
 interface ClusterGridProps {
@@ -16,16 +17,21 @@ interface ClusterGridProps {
 /**
  * ClusterGrid — Home "All sections" grid.
  *
- * Reads cluster meta (label, route, color, services count, value-line) from
- * the SSOT (`src/lib/catalog/taxonomy.ts`) via `clusterCatalog` adapter.
- * Persona ordering comes from `blendClusters` (also audience-filtered, so
- * workspace-only clusters like `manage` stay hidden from guests).
+ * Reads cluster meta (label, route, color, services count, value-line) live
+ * from `public.category_groups` / `public.categories` via `useLiveClusterCatalog`,
+ * with persona-weighted ordering layered on top by `blendClusters`.
+ * Falls back to the static SSOT (`src/lib/catalog/taxonomy.ts`) when the DB
+ * query is loading or errors out.
  */
 export function ClusterGrid({ personas }: ClusterGridProps) {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const clusters = useMemo(() => blendClusters(personas), [personas]);
+  const { catalog: liveCatalog } = useLiveClusterCatalog();
+  const clusters = useMemo(
+    () => blendClusters(personas, undefined, liveCatalog),
+    [personas, liveCatalog],
+  );
 
   const totalLabel = isRu
     ? `${CLUSTER_CATALOG_TOTAL_AVAILABLE} сервисов`
