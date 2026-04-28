@@ -4,7 +4,7 @@
  */
 import React, { useState, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Search, LayoutGrid, X } from 'lucide-react';
+import { Search, LayoutGrid, X, Filter } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserPersonas } from '@/hooks/useUserPersonas';
@@ -24,6 +24,7 @@ import {
 } from '@/lib/nav/clusterCatalog';
 import { resolveNavRole } from '@/lib/nav/navigationModel';
 import { pickTriplet } from '@/lib/ecosystemGlossary';
+import { JTBD_CLUSTERS, PERSONAS, type JtbdClusterId, type PersonaCode } from '@/lib/taxonomies/master';
 import type { Language } from '@/i18n';
 
 function NavigatorStatsFooter({
@@ -199,6 +200,8 @@ export default function NavigatorPage() {
   const { personas } = useUserPersonas();
   const [query, setQuery] = useState('');
   const [activeCluster, setActiveCluster] = useState<string>('all');
+  const [activeJtbd, setActiveJtbd] = useState<JtbdClusterId | 'all'>('all');
+  const [activePersona, setActivePersona] = useState<PersonaCode | 'all'>('all');
 
   // SSOT-driven audience filter: workspace clusters (manage) hidden from
   // bare guests; investor/owner/developer personas unlock their own clusters.
@@ -259,13 +262,27 @@ export default function NavigatorPage() {
     [language, audienceClusters, totalAvailable],
   );
 
-  const visibleClusters = useMemo(
-    () =>
-      activeCluster === 'all'
-        ? audienceClusters
-        : audienceClusters.filter((c) => c.id === activeCluster),
-    [activeCluster, audienceClusters],
-  );
+  const matchesTagFilters = (s: ClusterService): boolean => {
+    if (activeJtbd !== 'all') {
+      const jtbd = s.jtbdClusters ?? [];
+      if (!jtbd.includes(activeJtbd)) return false;
+    }
+    if (activePersona !== 'all') {
+      const personas = s.personaTags ?? [];
+      if (!personas.includes(activePersona)) return false;
+    }
+    return true;
+  };
+
+  const visibleClusters = useMemo(() => {
+    const byCluster = activeCluster === 'all'
+      ? audienceClusters
+      : audienceClusters.filter((c) => c.id === activeCluster);
+    if (activeJtbd === 'all' && activePersona === 'all') return byCluster;
+    return byCluster
+      .map((c) => ({ ...c, services: c.services.filter(matchesTagFilters) }))
+      .filter((c) => c.services.length > 0);
+  }, [activeCluster, audienceClusters, activeJtbd, activePersona]);
 
   const { data: stats } = useQuery({
     queryKey: ['navigator-stats'],
@@ -289,6 +306,7 @@ export default function NavigatorPage() {
   const searchResults = useMemo(() => {
     if (!trimmedQuery) return null;
     return audienceAvailable.filter((s) => {
+      if (!matchesTagFilters(s)) return false;
       const label = getClusterServiceLocalizedLabel(s, language);
       const cluster = pickTriplet(
         { ru: s.clusterLabelRu, en: s.clusterLabelEn, th: s.clusterLabelEn },
@@ -299,7 +317,7 @@ export default function NavigatorPage() {
         cluster.toLowerCase().includes(trimmedQuery)
       );
     });
-  }, [trimmedQuery, language]);
+  }, [trimmedQuery, language, audienceAvailable, activeJtbd, activePersona]);
 
   return (
     <AppLayout>
@@ -363,6 +381,46 @@ export default function NavigatorPage() {
             )}
           />
         )}
+
+        {/* JTBD + Persona filter row (Master Taxonomy v1.0) */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <Filter className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+          <select
+            value={activeJtbd}
+            onChange={(e) => setActiveJtbd(e.target.value as JtbdClusterId | 'all')}
+            className="text-xs h-8 px-2 rounded-sm bg-[hsl(var(--bg-elevated))] border border-border text-foreground"
+            aria-label="JTBD"
+          >
+            <option value="all">{language === 'ru' ? 'Все JTBD' : 'All JTBDs'}</option>
+            {JTBD_CLUSTERS.map((j) => (
+              <option key={j.id} value={j.id}>
+                {j.id} · {language === 'ru' ? j.shortRu : j.shortEn}
+              </option>
+            ))}
+          </select>
+          <select
+            value={activePersona}
+            onChange={(e) => setActivePersona(e.target.value as PersonaCode | 'all')}
+            className="text-xs h-8 px-2 rounded-sm bg-[hsl(var(--bg-elevated))] border border-border text-foreground max-w-[200px]"
+            aria-label="Persona"
+          >
+            <option value="all">{language === 'ru' ? 'Все персоны' : 'All personas'}</option>
+            {Object.values(PERSONAS).map((p) => (
+              <option key={p.code} value={p.code}>
+                {p.shortCode} · {language === 'ru' ? p.labelRu : p.labelEn}
+              </option>
+            ))}
+          </select>
+          {(activeJtbd !== 'all' || activePersona !== 'all') && (
+            <button
+              onClick={() => { setActiveJtbd('all'); setActivePersona('all'); }}
+              className="text-xs h-8 px-2 rounded-sm border border-border text-muted-foreground hover:text-foreground inline-flex items-center"
+            >
+              <X className="w-3 h-3 mr-1" />
+              {language === 'ru' ? 'Сброс' : 'Clear'}
+            </button>
+          )}
+        </div>
 
         {/* Search results — grid of tiles */}
         {searchResults !== null && (

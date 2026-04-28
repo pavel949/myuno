@@ -142,6 +142,7 @@ function adaptRowToService(
     status: ((row.status as ServiceEntry['status']) ?? staticService?.status ?? 'available'),
     verticalId: staticService?.verticalId ?? row.mini_app_type ?? undefined,
     personaTags: row.persona_codes ?? staticService?.personaTags,
+    jtbdClusters: row.jtbd_clusters ?? staticService?.jtbdClusters,
   };
 }
 

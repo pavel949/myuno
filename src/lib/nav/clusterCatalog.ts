@@ -37,6 +37,10 @@ export interface ClusterService {
   icon: React.ElementType;
   path: string;
   status: ClusterServiceStatus;
+  /** Persona codes (P01..P25) — Master Taxonomy v1.0 */
+  personaTags?: string[];
+  /** JTBD cluster codes (A..J) — Master Taxonomy v1.0 */
+  jtbdClusters?: string[];
 }
 
 export interface ClusterCatalogEntry {
@@ -69,6 +73,8 @@ function ssotServiceToCluster(svc: ServiceEntry): ClusterService {
     icon: svc.icon,
     path: svc.path,
     status: svc.status,
+    personaTags: svc.personaTags,
+    jtbdClusters: svc.jtbdClusters,
   };
 }
 

@@ -77,8 +77,10 @@ export interface ServiceEntry {
   status: ServiceStatus;
   /** Optional vertical id (links to VERTICALS for bookings/orders) */
   verticalId?: string;
-  /** Personas that should see this in personalized feeds */
+  /** Personas that should see this in personalized feeds (P01..P25 codes) */
   personaTags?: string[];
+  /** JTBD cluster codes (A..J) from Master Taxonomy v1.0 */
+  jtbdClusters?: string[];
 }
 
 export interface CategoryEntry {
