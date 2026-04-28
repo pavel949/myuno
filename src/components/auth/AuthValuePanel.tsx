@@ -14,6 +14,7 @@ import { Plane, Home, Briefcase, TrendingUp, Scale, Hammer, Check, MapPin } from
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { BrandWordmark } from '@/components/uno/BrandWordmark';
+import { useCatalogFromDB } from '@/lib/catalog/useCatalogFromDB';
 
 interface AuthValuePanelProps {
   compact?: boolean;
