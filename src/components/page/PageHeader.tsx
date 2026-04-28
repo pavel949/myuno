@@ -41,6 +41,8 @@ interface PageHeaderProps {
   className?: string;
   /** Sticky header (collapses on scroll). */
   sticky?: boolean;
+  /** @deprecated Legacy `uno/PageHeader` API. Use `sticky` boolean instead. `'transparent'` is treated as `'default'`. */
+  variant?: 'default' | 'sticky' | 'transparent';
 }
 
 export function PageHeader({
@@ -53,9 +55,12 @@ export function PageHeader({
   fallbackPath = '/',
   className,
   sticky = false,
+  variant,
 }: PageHeaderProps) {
   const navigate = useNavigate();
   const { isMobile } = useBreakpoint();
+  // Backwards-compat: legacy `variant="sticky"` maps to `sticky={true}`.
+  const isSticky = sticky || variant === 'sticky';
 
   const isActionArray = Array.isArray(actions);
   const actionList = isActionArray ? (actions as PageAction[]) : [];
