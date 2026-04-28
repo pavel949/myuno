@@ -200,6 +200,8 @@ export default function NavigatorPage() {
   const { personas } = useUserPersonas();
   const [query, setQuery] = useState('');
   const [activeCluster, setActiveCluster] = useState<string>('all');
+  const [activeJtbd, setActiveJtbd] = useState<JtbdClusterId | 'all'>('all');
+  const [activePersona, setActivePersona] = useState<PersonaCode | 'all'>('all');
 
   // SSOT-driven audience filter: workspace clusters (manage) hidden from
   // bare guests; investor/owner/developer personas unlock their own clusters.
