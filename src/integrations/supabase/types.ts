@@ -3194,6 +3194,7 @@ export type Database = {
       }
       categories: {
         Row: {
+          app_path: string | null
           color: string | null
           created_at: string
           group_id: string | null
@@ -3202,14 +3203,18 @@ export type Database = {
           is_active: boolean | null
           is_hot: boolean | null
           is_new: boolean | null
+          jtbd_clusters: Database["public"]["Enums"]["jtbd_cluster"][]
           mini_app_type: string | null
           name_en: string
           name_ru: string
           parent_id: string | null
+          persona_codes: Database["public"]["Enums"]["app_persona"][]
           slug: string
           sort_order: number | null
+          status: string
         }
         Insert: {
+          app_path?: string | null
           color?: string | null
           created_at?: string
           group_id?: string | null
@@ -3218,14 +3223,18 @@ export type Database = {
           is_active?: boolean | null
           is_hot?: boolean | null
           is_new?: boolean | null
+          jtbd_clusters?: Database["public"]["Enums"]["jtbd_cluster"][]
           mini_app_type?: string | null
           name_en: string
           name_ru: string
           parent_id?: string | null
+          persona_codes?: Database["public"]["Enums"]["app_persona"][]
           slug: string
           sort_order?: number | null
+          status?: string
         }
         Update: {
+          app_path?: string | null
           color?: string | null
           created_at?: string
           group_id?: string | null
@@ -3234,12 +3243,15 @@ export type Database = {
           is_active?: boolean | null
           is_hot?: boolean | null
           is_new?: boolean | null
+          jtbd_clusters?: Database["public"]["Enums"]["jtbd_cluster"][]
           mini_app_type?: string | null
           name_en?: string
           name_ru?: string
           parent_id?: string | null
+          persona_codes?: Database["public"]["Enums"]["app_persona"][]
           slug?: string
           sort_order?: number | null
+          status?: string
         }
         Relationships: [
           {
@@ -3260,34 +3272,49 @@ export type Database = {
       }
       category_groups: {
         Row: {
+          color: string | null
           created_at: string
+          description_en: string | null
+          description_ru: string | null
           icon: string | null
           id: string
           is_active: boolean | null
+          is_surface: boolean
           name_en: string
           name_ru: string
           slug: string
           sort_order: number | null
+          surface_id: string | null
         }
         Insert: {
+          color?: string | null
           created_at?: string
+          description_en?: string | null
+          description_ru?: string | null
           icon?: string | null
           id?: string
           is_active?: boolean | null
+          is_surface?: boolean
           name_en: string
           name_ru: string
           slug: string
           sort_order?: number | null
+          surface_id?: string | null
         }
         Update: {
+          color?: string | null
           created_at?: string
+          description_en?: string | null
+          description_ru?: string | null
           icon?: string | null
           id?: string
           is_active?: boolean | null
+          is_surface?: boolean
           name_en?: string
           name_ru?: string
           slug?: string
           sort_order?: number | null
+          surface_id?: string | null
         }
         Relationships: []
       }

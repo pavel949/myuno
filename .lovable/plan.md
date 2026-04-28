@@ -1,61 +1,117 @@
+# Phase 6 — Frontend ↔ Backend Sync (Master Taxonomy v1.0)
+
+## Что обнаружено
+
+**База данных** уже содержит всё нужное:
+
+| Таблица | Записей | Что хранит |
+|---|---|---|
+| `category_groups` | 15 | Кластеры/группы (включая 6 surfaces: arrive/live/manage/invest/legal/build + 9 sub-групп) |
+| `categories` | 55 | Сервисы/категории с `slug`, `name_en/ru`, `icon`, `color`, `mini_app_type`, `group_id` |
+| `lookup_values` | 406 | Таксономии (типы, районы, удобства) |
+| `taxonomy_definitions` | 41 | Метаданные таксономий |
+| `service_jtbd_clusters` | 56 | **Master Taxonomy bridge** — service → JTBD A..J (создан в Phase 4) |
+| `cluster_life_situations` | 11 | LifeOS контекст |
+
+**Фронтенд** же читает каталог из **двух источников одновременно**:
+
+1. ✅ `useCategories()` (DB-driven, react-query, кешируется) — используется в админке, поиске, prefetch.
+2. ❌ Хардкод TS-каталог `src/lib/catalog/taxonomy.ts` (580 строк, 6 кластеров × 16 категорий × ~80 сервисов) — это **то, что реально рендерится** в:
+   - `AppDrawer` (главное левое меню)
+   - `AllAppsDrawer` (мобильный bottom-sheet «Apps»)
+   - `ServiceClusterAccordion` (главный аккордеон сервисов)
+   - `NavigatorPage`, `ClusterGrid`, `AllSectionsAccordion`
+   - `ClusterBreadcrumb`, `PersonaHalo`
+   - `WelcomeLanding`, `roleBlend`, `routeRegistry`
+
+**Итог:** что бы админ ни менял в БД (категории/кластеры/иконки/sort), пользователь видит хардкод. Это именно то, на что жалуется пользователь.
+
+Дополнительно: JTBD-теги (`service_jtbd_clusters`), persona-маппинг (`master.ts` P01–P25) и ClearView AAA–CCC сидят в БД/типах, но фронт их не использует для фильтрации/выдачи.
+
 ## Цель
 
-Унифицировать каталоги мини-аппов вокруг `MiniAppLayout` и канонических примитивов (`CatalogCard`, `SEOHead`, `CrossSellSection`), повысив консистентность с ~85% до ~98%. Property/real-estate трогаем **минимально** — только формальная фиксация исключения, без рефакторинга витрин.
+Один источник — БД. TS-каталог становится **fallback-only** (на случай оффлайна/первой загрузки), не SSOT. Любое изменение в `categories` / `category_groups` / `service_jtbd_clusters` сразу видно пользователю.
 
----
+## План работ
 
-## Объём работ (6 шагов)
+### Шаг 1 · Расширить DB-схему
+- Добавить колонки в `categories`: `jtbd_clusters jtbd_cluster[]`, `persona_codes app_persona[]`, `is_new boolean`, `is_hot boolean` (последние два уже есть).
+- Добавить в `category_groups`: `is_surface boolean` (отметить 6 канонических Surfaces) + `surface_id text` (один из `arrive/live/manage/invest/legal/build`).
+- Backfill: проставить `is_surface=true` для 6 записей; распределить остальные 9 sub-групп по surface (`home-living`/`transport`→`arrive` и т.п.).
 
-### 1. InvestmentIndex — починить header props
-Передать `heroIcon`, `heroTitle`, `heroSubtitle`, `categories`, `selectedCategory`, `onCategoryChange` в `MiniAppLayout` вместо собственного inline-hero и собственного `CategoryChips`. Сохранить горячие предложения / Real Estate / Business секции и Raise CTA. Hero-блок с градиентом и кнопками Market/Deals/Network/Execution оставить как доп. секцию ниже шапки (это спецфункционал хаба, не дублирует MiniAppHero).
+### Шаг 2 · Сидинг недостающих сервисов
+- Сейчас в `categories` — 55, а в TS-каталоге ~80. Найти разницу и засеять недостающие (yacht, fast-track, sim, exchange, wedding, kids, halal etc.) в `categories` со ссылкой на правильный `group_id`.
+- Перенести `path` (URL мини-аппа) в новую колонку `categories.app_path text` — сейчас он строится через хардкод `pathMap` в `useCategories.ts`.
 
-### 2. KnowledgePillarsIndex → MiniAppLayout
-Заменить ручную связку `PageContainer + BackButton + SEOHead + Input` на `MiniAppLayout` с `searchValue/onSearchChange/searchPlaceholder`, `heroIcon=BookOpen`, `heroTitle/Subtitle`. Поиск становится канонической строкой в шапке. Группировка pillars по `cluster` сохраняется в `children`.
+### Шаг 3 · Новый централизованный hook
+Создать `src/lib/catalog/useCatalogFromDB.ts`:
+- Возвращает ту же форму, что отдаёт `clusterCatalog.ts` (`CLUSTER_CATALOG`, `ClusterCatalogEntry`, `ServiceEntry`).
+- Источник: `category_groups` + `categories` + `service_jtbd_clusters` (JOIN на клиенте через react-query, кеш 10 мин).
+- Хардкод `taxonomy.ts` остаётся как **fallback**: если query ещё loading или error → отдаём statics.
+- Типы остаются те же → downstream-компоненты не меняются по контракту.
 
-### 3. PipelinesIndex → MiniAppLayout (CRM-context)
-Обернуть в `MiniAppLayout` с `heroIcon=Layers`, `heroTitle="Воронки CRM"`, `showSearch=false`, `fallbackPath` на CRM-хаб. Карточки `PipelineCard` остаются — это уже корректный канонический паттерн.
+### Шаг 4 · Миграция потребителей
+Заменить импорты `CLUSTER_CATALOG` / `getClusterById` / `filterCatalogForUser` со static на хук в 12 компонентах:
+- `AppDrawer.tsx`, `AllAppsDrawer.tsx`, `ServiceClusterAccordion.tsx`
+- `NavigatorPage.tsx`, `ClusterGrid.tsx`, `AllSectionsAccordion.tsx`
+- `ClusterBreadcrumb.tsx`, `PersonaHalo.tsx`
+- `routeRegistry.ts`, `roleBlend.ts`, `useClusterActivity.ts`, `WelcomeLanding.tsx`
 
-### 4. Babysitter & Delivery → CatalogCard
-Создать тонкие мапперы внутри файлов: babysitter → `CatalogCard` (image, title, subtitle=experience, price=`pricePerHour`/hr, badges=verified/featured, rating). Delivery `popularServices` → `CatalogCard` тем же путём. Inline кастомные карточки удалить. `deliveryTypes` (4 крупных tile с градиентами) **оставить как hero-блок** — это intent picker, а не каталог.
+Static `clusterCatalog.ts` помечается `@deprecated` и сохраняется как fallback для SSR/первой загрузки.
 
-### 5. SEO-юнификация в MiniAppLayout
-Добавить опциональные props `seoTitle?: string`, `seoDescription?: string`, `seoImage?: string`, `seoCanonical?: string` в `MiniAppLayoutProps` + `MiniappMode`. При наличии — рендерим `<SEOHead>` внутри. Прокинуть на 6-8 ключевых каталогов (Yachts, Flowers, Beauty, Cleaning, Medical, Pharmacy, Experiences, Restaurants), у которых сейчас нет SEO.
+### Шаг 5 · JTBD + Persona фильтрация в выдаче
+- В `AllAppsDrawer` и `ServiceClusterAccordion` добавить опциональный фильтр по JTBD-кластеру и persona (читает `service_jtbd_clusters` и `categories.persona_codes`).
+- Главная страница (`Home`) — Proactive AI Concierge уже использует persona; добавить чтение `getServicesByJtbd()` для подсказок.
 
-### 6. CrossSell в MiniAppLayout
-Добавить prop `crossSellCluster?: 'arrive' | 'live' | 'manage' | 'invest' | 'legal' | 'build'` в `MiniAppLayoutProps`. Если задан — снизу `children` рендерим `<CrossSellSection cluster={...} />`. Прокинуть на каталоги, где он сейчас отсутствует (по аудиту ~60%).
+### Шаг 6 · Admin UI для каталога
+В `/admin/categories` (если уже есть) или новый `/admin/catalog`:
+- CRUD по `category_groups` и `categories`.
+- Multi-select для `jtbd_clusters` (A..J) и `persona_codes` (P01..P25).
+- Toggle `is_active`, `is_new`, `is_hot`.
+- Drag-n-drop sort.
 
-### 7. Property / Real Estate — НЕ трогаем код
-- Никаких изменений в `src/pages/property/*`, `OffPlanCatalog`, `PropertyHub`, `Rent/Buy/Resale`, owner-витрине.
-- Только обновляем `mem://architecture/canonical-catalog-and-card-standard`: добавляем секцию **"Documented exceptions"** с указанием, что property-family использует Airbnb-style hub-shell как осознанное архитектурное решение (см. `mem://architecture/property-hub-intent-based-navigation`).
-- Это исключение фиксируем в комментарии-шапке у `PropertyHub.tsx` (одна docstring), без изменения логики/UI.
+Без этого админ не сможет управлять каталогом, и мы вернёмся к хардкоду.
 
----
-
-## Не входит
-
-- Рефакторинг property-family витрин.
-- Изменение поведения InvestmentIndex (категории, фильтры, кнопки хаба остаются).
-- Замена `deliveryTypes` интент-блока в Delivery.
-- Перевёрстка `PipelineCard` (она уже канонична).
-- Любые изменения шрифтов/цветов/токенов.
-
----
+### Шаг 7 · Тесты + smoke
+- Обновить `src/test/catalog/taxonomy-coverage.test.ts` — теперь сверяет static fallback с DB (snapshot-стиль).
+- Smoke в браузере: `/`, `/discover`, открыть AppDrawer, открыть AllAppsDrawer, проверить, что 6 surfaces + сервисы рендерятся из DB (через React Query DevTools).
 
 ## Технические детали
 
-**Файлы (изменяем):**
-- `src/components/layout/FeatureLayout.tsx` — добавить `seoTitle/seoDescription/seoImage/seoCanonical` и `crossSellCluster` props + рендер `<SEOHead>` (top) и `<CrossSellSection>` (bottom of children) в `MiniappMode`.
-- `src/components/miniapp/MiniAppLayout.tsx` — реэкспорт типов уже идёт через `FeatureLayout`, дополнительных правок не нужно.
-- `src/pages/invest/InvestmentIndex.tsx` — передать `heroIcon=TrendingUp`, `heroTitle`, `heroSubtitle`, `categories=INVESTMENT_CATEGORIES.slice(0,6)` (адаптер id→{labelEn,labelRu}), `selectedCategory`, `onCategoryChange`. Удалить локальный `CategoryChips`.
-- `src/pages/knowledge/KnowledgePillarsIndex.tsx` — переписать рендер на `MiniAppLayout`. Group-by-cluster блок остаётся.
-- `src/pages/owner/PipelinesIndex.tsx` — обернуть в `MiniAppLayout`.
-- `src/pages/babysitter/BabysitterIndex.tsx` — карточки через `CatalogCard` маппер.
-- `src/pages/delivery/DeliveryIndex.tsx` — `popularServices` через `CatalogCard`. `deliveryTypes` остаётся.
-- 6-8 каталогов получают `seoTitle`/`seoDescription` props в `MiniAppLayout` (точечная правка одного-двух блоков на файл).
-- 4-6 каталогов получают `crossSellCluster` prop.
+**Контракт хука:**
+```ts
+const { catalog, isLoading, isFromDB } = useCatalogFromDB();
+// catalog: ClusterCatalogEntry[]  — та же форма, что у статика
+// isFromDB: false → отдан static fallback
+```
 
-**Файлы (создаём):** нет.
+**Миграция (1 файл):** `ALTER TABLE categories ADD COLUMN jtbd_clusters jtbd_cluster[] DEFAULT '{}', ADD COLUMN persona_codes app_persona[] DEFAULT '{}', ADD COLUMN app_path text;` + аналогично для `category_groups`. + UPDATE-ы для backfill (через insert tool).
 
-**Память:** обновить `mem://architecture/canonical-catalog-and-card-standard` с секцией "Documented exceptions" (Property hub).
+**Изменяемые файлы (~14):**
+- 1 миграция (схема)
+- 1 insert (сидинг данных + JTBD-теги)
+- 1 новый хук `useCatalogFromDB.ts`
+- 1 обновлённый `useCategories.ts` (deprecate path-map, читать из колонки)
+- 12 потребителей (точечные замены импортов, контракт сохраняется)
+- 1 `clusterCatalog.ts` → `@deprecated` баннер
+- 1 admin страница (опц., можно в отдельном PR)
+- 2 теста
 
-**Риски:** (a) `INVESTMENT_CATEGORIES` имеет поле `key`, а `MiniAppCategory` ждёт `id` — нужен лёгкий мап `{id: cat.key, labelEn: cat.en, labelRu: cat.ru, icon: cat.icon}`. (b) `KnowledgePillarsIndex` ранее использовал `PageContainer`-padding — после `MiniAppLayout` отступы возьмутся из `ECOSYSTEM_PAGE_CONTAINER`, проверим визуально.
+**Что НЕ трогаем:**
+- TS типы `ClusterCatalogEntry`, `ServiceEntry` — стабильны.
+- Маршрутизация (`APP_ROUTES`) — без изменений.
+- Master Taxonomy `master.ts` — без изменений.
+- Дизайн / UI — без изменений.
+
+## Риски
+
+- **Регрессия в навигации:** если query упадёт без fallback — пустое меню. Mitigation: статик-fallback всегда отдаётся при `isLoading || error`.
+- **Гонка данных:** новый сервис в БД появится с задержкой кеша 10 мин. Mitigation: `queryClient.invalidateQueries(['catalog'])` после CRUD в админке.
+- **Иконки:** в БД хранится строка (`icon text`), на фронте маппим в `LucideIcon`. Если admin введёт несуществующее имя — показываем `Package` placeholder.
+
+## Ожидаемый эффект
+
+- Любое изменение каталога в БД сразу отражается у всех пользователей.
+- JTBD/Persona-таргетинг становится живым (AI-роутер, фильтры, лендинги).
+- Готовый фундамент для admin-UI каталога (без новых хардкодов).
+- Static `clusterCatalog.ts` ужмётся до ~50 строк fallback-данных вместо 200.
