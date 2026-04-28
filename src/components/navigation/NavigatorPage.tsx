@@ -382,6 +382,46 @@ export default function NavigatorPage() {
           />
         )}
 
+        {/* JTBD + Persona filter row (Master Taxonomy v1.0) */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <Filter className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+          <select
+            value={activeJtbd}
+            onChange={(e) => setActiveJtbd(e.target.value as JtbdClusterId | 'all')}
+            className="text-xs h-8 px-2 rounded-sm bg-[hsl(var(--bg-elevated))] border border-border text-foreground"
+            aria-label="JTBD"
+          >
+            <option value="all">{language === 'ru' ? 'Все JTBD' : 'All JTBDs'}</option>
+            {JTBD_CLUSTERS.map((j) => (
+              <option key={j.id} value={j.id}>
+                {j.id} · {language === 'ru' ? j.shortRu : j.shortEn}
+              </option>
+            ))}
+          </select>
+          <select
+            value={activePersona}
+            onChange={(e) => setActivePersona(e.target.value as PersonaCode | 'all')}
+            className="text-xs h-8 px-2 rounded-sm bg-[hsl(var(--bg-elevated))] border border-border text-foreground max-w-[200px]"
+            aria-label="Persona"
+          >
+            <option value="all">{language === 'ru' ? 'Все персоны' : 'All personas'}</option>
+            {Object.values(PERSONAS).map((p) => (
+              <option key={p.code} value={p.code}>
+                {p.shortCode} · {language === 'ru' ? p.labelRu : p.labelEn}
+              </option>
+            ))}
+          </select>
+          {(activeJtbd !== 'all' || activePersona !== 'all') && (
+            <button
+              onClick={() => { setActiveJtbd('all'); setActivePersona('all'); }}
+              className="text-xs h-8 px-2 rounded-sm border border-border text-muted-foreground hover:text-foreground inline-flex items-center"
+            >
+              <X className="w-3 h-3 mr-1" />
+              {language === 'ru' ? 'Сброс' : 'Clear'}
+            </button>
+          )}
+        </div>
+
         {/* Search results — grid of tiles */}
         {searchResults !== null && (
           <div className="space-y-2">
