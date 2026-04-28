@@ -49,7 +49,17 @@ function pct(v: number | null | undefined, d = 1): string {
   return `${(v * 100).toFixed(d)}%`;
 }
 
-export function generateInvestorDeckPDF(input: InvestorDeckInput): Blob {
+export async function generateInvestorDeckPDF(input: InvestorDeckInput): Promise<Blob> {
+  // Dynamic import — keeps jspdf (~390KB) out of the route chunk.
+  const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([
+    import('jspdf') as Promise<{ default: JsPDFCtor }>,
+    import('jspdf-autotable') as Promise<{ default: AutoTableFn }>,
+  ]);
+
+  return buildDeck(input, jsPDF, autoTable);
+}
+
+function buildDeck(input: InvestorDeckInput, jsPDF: JsPDFCtor, autoTable: AutoTableFn): Blob {
   const isRu = input.language === 'ru';
   const T = (ru: string, en: string) => isRu ? ru : en;
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
