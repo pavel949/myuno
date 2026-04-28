@@ -99,8 +99,8 @@ export default function AdminMasterCatalog() {
           status: patch.status,
           sort_order: patch.sort_order,
           app_path: patch.app_path,
-          jtbd_clusters: patch.jtbd_clusters,
-          persona_codes: patch.persona_codes,
+          jtbd_clusters: (patch.jtbd_clusters ?? []) as never,
+          persona_codes: (patch.persona_codes ?? []) as never,
           is_active: patch.is_active,
         })
         .eq('id', patch.id);
