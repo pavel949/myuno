@@ -33,7 +33,7 @@ const OwnerOperationsFlat = lazy(() => import('@/components/owner/dashboard/Owne
 const ActiveDealsWidget = lazy(() => import('@/components/owner/dashboard/ActiveDealsWidget').then(m => ({ default: m.ActiveDealsWidget })));
 const UpcomingPaymentsWidget = lazy(() => import('@/components/owner/dashboard/UpcomingPaymentsWidget').then(m => ({ default: m.UpcomingPaymentsWidget })));
 const CrmTasksWidget = lazy(() => import('@/components/owner/dashboard/CrmTasksWidget').then(m => ({ default: m.CrmTasksWidget })));
-const YourDayFeed = lazy(() => import('@/components/owner/dashboard/YourDayFeed').then(m => ({ default: m.YourDayFeed })));
+const YourDayFeed = lazy(() => import('@/components/shared/YourDayFeed').then(m => ({ default: m.YourDayFeed })));
 const BusinessKPIWidget = lazy(() => import('@/components/owner/dashboard/BusinessKPIWidget').then(m => ({ default: m.BusinessKPIWidget })));
 const RevenueInsightsWidget = lazy(() => import('@/components/owner/dashboard/RevenueInsightsWidget').then(m => ({ default: m.RevenueInsightsWidget })));
 const TodayBriefingWidget = lazy(() => import('@/components/owner/dashboard/TodayBriefingWidget').then(m => ({ default: m.TodayBriefingWidget })));
