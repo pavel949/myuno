@@ -75,7 +75,7 @@ export function PageHeader({
     <header
       className={cn(
         'mb-[var(--section-gap)]',
-        sticky && 'sticky top-0 z-30 -mx-[var(--page-padding-x)] px-[var(--page-padding-x)] py-3 bg-background/85 border-b border-border/40',
+        isSticky && 'sticky top-0 z-30 -mx-[var(--page-padding-x)] px-[var(--page-padding-x)] py-3 bg-background/85 border-b border-border/40',
         className,
       )}
     >
