@@ -70,6 +70,8 @@ describe('PERSONA_LANDINGS — Sprint 1–2 live promotions', () => {
     'smb',
     'creatives',
     'students',
+    // P26 — dietary cluster (legacy persona, outside Master Taxonomy v1.0 P01–P25 but kept live)
+    'conscious-eaters',
   ];
 
   it('has exactly the M10b live slug set', () => {
