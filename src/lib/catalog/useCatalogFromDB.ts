@@ -21,13 +21,24 @@ import { supabase } from '@/integrations/supabase/client';
 import {
   CLUSTERS as STATIC_CLUSTERS,
   CATEGORIES as STATIC_CATEGORIES,
-  CLUSTER_CATALOG as STATIC_CLUSTER_CATALOG,
   type ClusterEntry,
   type CategoryEntry,
   type ServiceEntry,
   type ClusterId,
-  type ClusterCatalogEntry,
 } from './taxonomy';
+
+/** Cluster augmented with its categories (drop-in shape for previously hand-built `CLUSTER_CATALOG`). */
+export interface ClusterCatalogEntry extends ClusterEntry {
+  categories: CategoryEntry[];
+}
+
+const STATIC_CLUSTER_CATALOG: ClusterCatalogEntry[] = STATIC_CLUSTERS
+  .slice()
+  .sort((a, b) => a.sortOrder - b.sortOrder)
+  .map((cluster) => ({
+    ...cluster,
+    categories: STATIC_CATEGORIES.filter((cat) => cat.clusterId === cluster.id),
+  }));
 
 // ─────────────────────────────────────────────────────────────────────────
 // Types
