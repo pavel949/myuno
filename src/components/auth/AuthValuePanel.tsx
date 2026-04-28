@@ -31,6 +31,8 @@ const CLUSTERS = [
 
 export function AuthValuePanel({ compact = false }: AuthValuePanelProps) {
   const { t } = useLanguage();
+  const { categories } = useCatalogFromDB();
+  const totalServices = categories.reduce((s, c) => s + c.services.length, 0);
 
   if (compact) {
     return (
@@ -87,7 +89,7 @@ export function AuthValuePanel({ compact = false }: AuthValuePanelProps) {
               <Check className="w-3 h-3 text-primary" strokeWidth={3} />
             </span>
             <span className="text-sm text-foreground/90 leading-snug">
-              {t(`auth.value.bullets.${n}`)}
+              {n === 1 ? t('auth.value.bullets.1').replace(/^\d+\+/, `${totalServices}+`) : t(`auth.value.bullets.${n}`)}
             </span>
           </li>
         ))}
