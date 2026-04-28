@@ -399,6 +399,7 @@ export const AdminContracts = lazy(() => import('@/pages/admin/AdminContracts'))
 export const AdminProviderDetail = lazy(() => import('@/pages/admin/AdminProviderDetail'));
 export const AdminDataImport = lazy(() => import('@/pages/admin/AdminDataImport'));
 export const AdminUnifiedCatalog = lazy(() => import('@/pages/admin/AdminUnifiedCatalog'));
+export const AdminMasterCatalog = lazy(() => import('@/pages/admin/AdminMasterCatalog'));
 export const AdminTrash = lazy(() => import('@/pages/admin/AdminTrash'));
 export const AdminControlCenter = lazy(() => import('@/pages/admin/AdminControlCenter'));
 export const AdminVendorContentCreator = lazy(() => import('@/pages/admin/AdminVendorContentCreator'));
