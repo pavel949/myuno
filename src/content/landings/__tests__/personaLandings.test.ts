@@ -19,8 +19,8 @@ import {
 import { PERSONA_CODES } from '@/types/canonical';
 
 describe('PERSONA_LANDINGS — coverage', () => {
-  it('contains 26 persona landings (25 canonical + 1 P22 developer-partner alias)', () => {
-    expect(PERSONA_LANDINGS).toHaveLength(26);
+  it('contains 27 persona landings (25 canonical P1..P25 + P22 developer-partner alias + P26 conscious-eaters)', () => {
+    expect(PERSONA_LANDINGS).toHaveLength(27);
   });
 
   it('covers every canonical PersonaCode P1..P25 at least once', () => {
