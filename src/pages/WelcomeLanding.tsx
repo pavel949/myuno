@@ -22,30 +22,31 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
 import { cn } from '@/lib/utils';
-import { CLUSTERS, CATEGORIES } from '@/lib/catalog/taxonomy';
+import { useCatalogFromDB } from '@/lib/catalog/useCatalogFromDB';
 import { APP_ROUTES } from '@/lib/config/routes';
 
 /**
- * Считаем сервисы и категории на каждый кластер из SSOT.
- * Числа на лендинге всегда совпадают с тем, что покажет каталог.
+ * Считаем сервисы и категории на каждый кластер из ЖИВОЙ БД (Master Taxonomy v1.0).
+ * Хук фолбечится на статический SSOT, если БД недоступна.
+ * Числа на лендинге всегда совпадают с тем, что показывает навигатор.
  */
 function useClusterStats() {
+  const { clusters, categories } = useCatalogFromDB();
   return useMemo(() => {
-    const totalServices = CATEGORIES.reduce((sum, cat) => sum + cat.services.length, 0);
-    const byCluster = CLUSTERS.map((c) => {
-      const cats = CATEGORIES.filter((cat) => cat.clusterId === c.id);
+    const totalServices = categories.reduce((sum, cat) => sum + cat.services.length, 0);
+    const byCluster = clusters.map((c) => {
+      const cats = categories.filter((cat) => cat.clusterId === c.id);
       const services = cats.reduce((sum, cat) => sum + cat.services.length, 0);
       return {
         ...c,
         categoriesCount: cats.length,
         servicesCount: services,
-        // Берём 4 самых ярких хинта из имён категорий — они уже отсортированы по доменной логике
         hintsRu: cats.slice(0, 4).map((cat) => cat.labelRu).join(' · '),
         hintsEn: cats.slice(0, 4).map((cat) => cat.labelEn).join(' · '),
       };
     });
-    return { byCluster, totalServices };
-  }, []);
+    return { byCluster, totalServices, clustersCount: clusters.length };
+  }, [clusters, categories]);
 }
 
 const TRUST = [
@@ -62,7 +63,8 @@ export default function WelcomeLanding() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const navigate = useNavigate();
-  const { byCluster, totalServices } = useClusterStats();
+  const { byCluster, totalServices, clustersCount } = useClusterStats();
+  const categoriesCount = byCluster.reduce((sum, c) => sum + c.categoriesCount, 0);
 
   return (
     <div className="min-h-screen bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary">
@@ -203,7 +205,7 @@ export default function WelcomeLanding() {
           >
             {[
               { num: String(totalServices), en: 'services in the unified catalog', ru: 'сервисов в едином каталоге' },
-              { num: String(CLUSTERS.length), en: 'canonical life clusters', ru: 'кластеров жизни' },
+              { num: String(clustersCount), en: 'canonical life clusters', ru: 'кластеров жизни' },
               { num: String(LIFE_SITUATIONS_COUNT), en: 'life situations covered', ru: 'жизненных ситуаций' },
               { num: '24/7', en: 'AI concierge & SOS', ru: 'AI-консьерж и SOS' },
             ].map((s) => (
@@ -228,7 +230,7 @@ export default function WelcomeLanding() {
               {isRu ? 'Шесть кластеров жизни' : 'Six clusters of life'}
             </h2>
             <span className="hidden sm:inline text-[12px] font-mono uppercase tracking-[0.12em] text-muted-foreground">
-              01 → {String(CLUSTERS.length).padStart(2, '0')}
+              01 → {String(clustersCount).padStart(2, '0')}
             </span>
           </div>
 
@@ -296,8 +298,8 @@ export default function WelcomeLanding() {
 
           <p className="mt-6 text-[12px] text-muted-foreground/70">
             {isRu
-              ? `Каталог объединяет ${CATEGORIES.length} категорий и ${totalServices} сервисов. Войдите, чтобы открыть полный навигатор.`
-              : `The catalog spans ${CATEGORIES.length} categories and ${totalServices} services. Sign in to open the full navigator.`}
+              ? `Каталог объединяет ${categoriesCount} категорий и ${totalServices} сервисов. Войдите, чтобы открыть полный навигатор.`
+              : `The catalog spans ${categoriesCount} categories and ${totalServices} services. Sign in to open the full navigator.`}
           </p>
         </div>
       </section>
