@@ -45,6 +45,29 @@ export {
 // ============= TAXONOMY TYPE CONSTANTS =============
 export { TAXONOMY_TYPES, type TaxonomyType } from './taxonomyTypes';
 
+// ============= MASTER TAXONOMY v1.0 (canonical SSOT) =============
+// JTBD clusters (A..J), 25 personas P01..P25, deal types, ClearView grades.
+// See docs/canonical/00-master-taxonomy.md and src/lib/taxonomies/master.ts
+// IMPORTANT: JtbdClusterId (functional) ≠ ClusterId (navigation surface).
+export {
+  JTBD_CLUSTER_CODES,
+  JTBD_CLUSTERS,
+  PERSONA_CODES as MASTER_PERSONA_CODES,
+  PERSONAS,
+  DEAL_TYPES,
+  CLEARVIEW_GRADES,
+  getJtbdCluster,
+  getPersona,
+  getPersonasByJtbd,
+  getJtbdBySurface,
+  type JtbdClusterId,
+  type JtbdCluster,
+  type PersonaCode as MasterPersonaCode,
+  type PersonaDefinition,
+  type DealType,
+  type ClearViewGrade,
+} from './master';
+
 // ============= STATIC NAMESPACE EXPORTS =============
 // Use for backward compatibility and type definitions only
 export * as PropertyTaxonomy from '../propertyTaxonomy';
