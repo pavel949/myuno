@@ -4,9 +4,9 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import type { UserPersona } from '@/hooks/useUserPersonas';
 import { ClusterGrid } from './ClusterGrid';
 import {
-  CLUSTER_CATALOG,
   CLUSTER_CATALOG_TOTAL_AVAILABLE,
-  filterCatalogForUser,
+  useLiveClusterCatalog,
+  isClusterVisibleToUser,
 } from '@/lib/nav/clusterCatalog';
 
 interface AllSectionsAccordionProps {
@@ -24,9 +24,10 @@ export function AllSectionsAccordion({ personas }: AllSectionsAccordionProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
+  const { catalog: liveCatalog } = useLiveClusterCatalog();
   const visibleClusters = React.useMemo(
-    () => filterCatalogForUser({ personas, role: null }),
-    [personas],
+    () => liveCatalog.filter((c) => isClusterVisibleToUser(c, { personas, role: null })),
+    [liveCatalog, personas],
   );
   const visibleClusterCount = visibleClusters.length;
   const totalServices = CLUSTER_CATALOG_TOTAL_AVAILABLE;
