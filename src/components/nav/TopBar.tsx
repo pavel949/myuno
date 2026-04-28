@@ -23,9 +23,11 @@ import { Button } from '@/components/ui/button';
 import { GlobalSearchModal } from '@/components/search/GlobalSearchModal';
 import { UserAvatarMenu } from '@/components/layout/UserAvatarMenu';
 import { BrandWordmark } from '@/components/uno/BrandWordmark';
+import { Breadcrumbs } from '@/components/nav/Breadcrumbs';
 import { useScrolled } from '@/hooks/useScrollBehavior';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { ECOSYSTEM_HEADER_INNER } from '@/design-system/ecosystemLayout';
+import { shouldShowBreadcrumbs } from '@/lib/config/routeMeta';
 import {
   PRIMARY_NAV,
   hasSidebar,
@@ -57,6 +59,7 @@ export const TopBar = memo(function TopBar({
   const isConsumer = !sidebarVisible;
   const cartEnabled = showCart ?? isConsumer;
   const navItems = PRIMARY_NAV[role];
+  const showCrumbs = shouldShowBreadcrumbs(location.pathname);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -186,6 +189,16 @@ export const TopBar = memo(function TopBar({
             )}
           </div>
         </div>
+
+        {/* Breadcrumbs row — depth ≥ 2 only (see routeMeta.shouldShowBreadcrumbs).
+            Hidden on /auth, /, and other top-level surfaces. */}
+        {showCrumbs && (
+          <div className="border-t border-border/40 bg-[hsl(var(--bg-surface)/0.6)]">
+            <div className={cn(ECOSYSTEM_HEADER_INNER, 'flex h-9 items-center')}>
+              <Breadcrumbs />
+            </div>
+          </div>
+        )}
       </header>
 
       <GlobalSearchModal open={searchOpen} onOpenChange={setSearchOpen} />
