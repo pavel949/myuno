@@ -189,6 +189,16 @@ export const TopBar = memo(function TopBar({
             )}
           </div>
         </div>
+
+        {/* Breadcrumbs row — depth ≥ 2 only (see routeMeta.shouldShowBreadcrumbs).
+            Hidden on /auth, /, and other top-level surfaces. */}
+        {showCrumbs && (
+          <div className="border-t border-border/40 bg-[hsl(var(--bg-surface)/0.6)]">
+            <div className={cn(ECOSYSTEM_HEADER_INNER, 'flex h-9 items-center')}>
+              <Breadcrumbs />
+            </div>
+          </div>
+        )}
       </header>
 
       <GlobalSearchModal open={searchOpen} onOpenChange={setSearchOpen} />
