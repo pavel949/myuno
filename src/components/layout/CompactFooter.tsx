@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Send, Instagram, MessageCircle, Download, Smartphone, Shield, Clock, CheckCircle } from 'lucide-react';
@@ -6,18 +6,42 @@ import { COMPANY_CONTACTS } from '@/lib/config';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
 import { useIsDesktop } from '@/hooks/use-desktop';
-import { VERTICAL_GROUPS, getVerticalGroupTitle } from '@/lib/verticalGroups';
-import { getVerticalById } from '@/lib/verticals';
-import { APP_REGISTRY } from '@/lib/appRegistry';
+import { useCatalogFromDB } from '@/lib/catalog/useCatalogFromDB';
 import {
   ECOSYSTEM_APP_TRIPLET,
   ECOSYSTEM_FOOTER_UI,
-  getAppEntryLabel,
-  getTripletForVerticalId,
   pickTriplet,
+  type LocalizedTriplet,
 } from '@/lib/ecosystemGlossary';
 import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
 import { cn } from '@/lib/utils';
+
+const FOOTER_SERVICE_SECTIONS: Array<{
+  clusterId: 'arrive' | 'live' | 'legal' | 'build';
+  fallbackTitle: LocalizedTriplet;
+  serviceIds: string[][];
+}> = [
+  {
+    clusterId: 'arrive',
+    fallbackTitle: { ru: 'Прибытие', en: 'Arrival', th: 'การเดินทาง' },
+    serviceIds: [['sos'], ['transfer'], ['fast-track'], ['sim'], ['exchange']],
+  },
+  {
+    clusterId: 'live',
+    fallbackTitle: { ru: 'Жизнь', en: 'Live', th: 'ใช้ชีวิต' },
+    serviceIds: [['services'], ['cleaning'], ['medical'], ['restaurants', 'restaurant'], ['school-finder']],
+  },
+  {
+    clusterId: 'legal',
+    fallbackTitle: { ru: 'Право и визы', en: 'Legal & Visa', th: 'กฎหมายและวีซ่า' },
+    serviceIds: [['visa'], ['legal'], ['contract-ai'], ['relocate'], ['knowledge']],
+  },
+  {
+    clusterId: 'build',
+    fallbackTitle: { ru: 'Застройщикам', en: 'Build', th: 'ผู้พัฒนา' },
+    serviceIds: [['developer-portal'], ['newbuilds'], ['program'], ['advisory']],
+  },
+];
 
 export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
   const { language } = useLanguage();
