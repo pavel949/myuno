@@ -143,7 +143,7 @@ export const CLUSTERS: ClusterEntry[] = [
     color: '#00D68F',
     sortOrder: 1,
     audience: 'public',
-    homeRoute: '/life/arrival',
+    homeRoute: APP_ROUTES.ARRIVE_CLUSTER,
   },
   {
     id: 'live',
@@ -156,7 +156,7 @@ export const CLUSTERS: ClusterEntry[] = [
     color: '#4E7BFF',
     sortOrder: 2,
     audience: 'public',
-    homeRoute: '/discover',
+    homeRoute: APP_ROUTES.DISCOVER,
   },
   {
     id: 'manage',
@@ -171,7 +171,7 @@ export const CLUSTERS: ClusterEntry[] = [
     audience: 'workspace',
     personas: ['property_owner', 'local_services_provider'],
     roles: ['owner', 'admin', 'team', 'vendor'],
-    homeRoute: '/mc',
+    homeRoute: '/for-management-companies',
   },
   {
     id: 'invest',
@@ -184,7 +184,7 @@ export const CLUSTERS: ClusterEntry[] = [
     color: '#A855F7',
     sortOrder: 4,
     audience: 'public',
-    homeRoute: '/invest',
+    homeRoute: APP_ROUTES.INVEST,
   },
   {
     id: 'legal',
@@ -197,7 +197,7 @@ export const CLUSTERS: ClusterEntry[] = [
     color: '#F59E0B',
     sortOrder: 5,
     audience: 'public',
-    homeRoute: '/life/relocation',
+    homeRoute: APP_ROUTES.LEGAL_CLUSTER,
   },
   {
     id: 'build',
@@ -210,7 +210,7 @@ export const CLUSTERS: ClusterEntry[] = [
     color: '#F43F5E',
     sortOrder: 6,
     audience: 'public',
-    homeRoute: '/property/offplan',
+    homeRoute: APP_ROUTES.FOR_REAL_ESTATE_DEVELOPERS,
   },
 ];
 
