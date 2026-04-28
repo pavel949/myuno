@@ -171,7 +171,7 @@ export const CLUSTERS: ClusterEntry[] = [
     audience: 'workspace',
     personas: ['property_owner', 'local_services_provider'],
     roles: ['owner', 'admin', 'team', 'vendor'],
-    homeRoute: '/for-management-companies',
+    homeRoute: APP_ROUTES.FOR_MANAGEMENT_COMPANIES,
   },
   {
     id: 'invest',
