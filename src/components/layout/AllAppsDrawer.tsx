@@ -11,7 +11,7 @@ import { APP_ROUTES } from '@/lib/config/routes';
 import { Compass, Construction } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { resolveNavRole } from '@/lib/nav/navigationModel';
-import { filterCatalogForUser } from '@/lib/nav/clusterCatalog';
+import { useLiveClusterCatalog, isClusterVisibleToUser } from '@/lib/nav/clusterCatalog';
 import { ServiceClusterAccordion } from '@/components/nav/ServiceClusterAccordion';
 
 interface AllAppsDrawerProps {
@@ -37,9 +37,11 @@ export function AllAppsDrawer({ open, onOpenChange }: AllAppsDrawerProps) {
     pathname: location.pathname,
   });
 
+  const audienceCtx = useMemo(() => ({ personas, role }), [personas, role]);
+  const { catalog: liveCatalog } = useLiveClusterCatalog();
   const visibleClusters = useMemo(
-    () => filterCatalogForUser({ personas, role }),
-    [personas, role],
+    () => liveCatalog.filter((c) => isClusterVisibleToUser(c, audienceCtx)),
+    [liveCatalog, audienceCtx],
   );
 
   const miniApps = flatCategories

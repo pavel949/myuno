@@ -14,7 +14,8 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { cn } from '@/lib/utils';
 import { NavChips, type NavChipItem } from '@/components/nav/NavChips';
 import {
-  filterCatalogForUser,
+  isClusterVisibleToUser,
+  useLiveClusterCatalog,
   getClusterHeaderLabel,
   getClusterServiceLocalizedLabel,
   getClusterValueLine,
@@ -211,9 +212,10 @@ export default function NavigatorPage() {
     [user, location.pathname],
   );
 
+  const { catalog: liveCatalog } = useLiveClusterCatalog();
   const audienceClusters: ClusterCatalogEntry[] = useMemo(
-    () => filterCatalogForUser({ personas, role }),
-    [personas, role],
+    () => liveCatalog.filter((c) => isClusterVisibleToUser(c, { personas, role })),
+    [liveCatalog, personas, role],
   );
 
   // Flat lists derived from audience-filtered set (counts + search corpus)

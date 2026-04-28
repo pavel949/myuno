@@ -198,3 +198,56 @@ export function getClusterValueLine(entry: ClusterCatalogEntry, lang: Language):
     lang,
   );
 }
+
+// ─────────────────────────────────────────────────────────────
+// DB-driven runtime catalog (Master Taxonomy v1.0)
+// ─────────────────────────────────────────────────────────────
+
+import { useMemo } from 'react';
+import { useCatalogFromDB } from '@/lib/catalog/useCatalogFromDB';
+
+/**
+ * Live cluster catalog hook — same `ClusterCatalogEntry[]` shape as the
+ * static `CLUSTER_CATALOG`, but sourced from `public.category_groups` /
+ * `public.categories` via `useCatalogFromDB`. Falls back to the static
+ * SSOT when the DB query is loading or errors out.
+ *
+ * Use this in any UI surface that lists clusters/services so the catalog
+ * stays in sync with admin edits without a deploy.
+ */
+export function useLiveClusterCatalog(ctx?: ClusterAudienceContext): {
+  catalog: ClusterCatalogEntry[];
+  isFromDB: boolean;
+  isLoading: boolean;
+} {
+  const { clusterCatalog: dbClusterCatalog, isFromDB, isLoading } = useCatalogFromDB();
+
+  const catalog = useMemo<ClusterCatalogEntry[]>(() => {
+    const built = dbClusterCatalog.map<ClusterCatalogEntry>((cluster) => {
+      const services: ClusterService[] = cluster.categories.flatMap((cat) =>
+        cat.services.map(ssotServiceToCluster),
+      );
+      return {
+        id: cluster.id,
+        labelRu: cluster.labelRu,
+        labelEn: cluster.labelEn,
+        labelTh: cluster.labelTh,
+        valueRu: cluster.valueRu,
+        valueEn: cluster.valueEn,
+        color: cluster.color,
+        icon: cluster.icon,
+        services,
+        audience: cluster.audience,
+        personas: cluster.personas,
+        roles: cluster.roles,
+        homeRoute: cluster.homeRoute,
+      };
+    });
+    if (built.length === 0) return CLUSTER_CATALOG;
+    if (!ctx) return built;
+    return built.filter((c) => isClusterVisibleToUser(c, ctx));
+  }, [dbClusterCatalog, ctx?.personas, ctx?.role]);
+
+  return { catalog, isFromDB, isLoading };
+}
+

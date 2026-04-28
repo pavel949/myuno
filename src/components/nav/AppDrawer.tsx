@@ -37,7 +37,7 @@ import { APP_ROUTES } from '@/lib/config/routes';
 import {
   resolveNavRole, getWorkspaceDrawerGroups, type NavRoleKey,
 } from '@/lib/nav/navigationModel';
-import { filterCatalogForUser } from '@/lib/nav/clusterCatalog';
+import { useLiveClusterCatalog, isClusterVisibleToUser } from '@/lib/nav/clusterCatalog';
 import { ROLE_META } from '@/lib/roleBlend';
 import type { UserPersona } from '@/hooks/useUserPersonas';
 
@@ -143,9 +143,13 @@ export function AppDrawer({
   );
   // SSOT-driven cluster filter — hides workspace clusters from users who
   // can't action them (e.g. /newbuilds dev portal hidden from a tourist).
+  // Sourced live from `public.category_groups` / `public.categories` via
+  // `useLiveClusterCatalog`; falls back to static SSOT on cold paint / error.
+  const audienceCtx = useMemo(() => ({ personas, role }), [personas, role]);
+  const { catalog: liveCatalog } = useLiveClusterCatalog();
   const visibleClusters = useMemo(
-    () => filterCatalogForUser({ personas, role }),
-    [personas, role],
+    () => liveCatalog.filter((c) => isClusterVisibleToUser(c, audienceCtx)),
+    [liveCatalog, audienceCtx],
   );
 
   const initials = (user?.user_metadata?.full_name as string | undefined)
