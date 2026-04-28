@@ -10158,6 +10158,39 @@ export type Database = {
           },
         ]
       }
+      lifecycle_stage_history: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          from_stage: Database["public"]["Enums"]["lifecycle_stage"] | null
+          id: string
+          reason: string | null
+          source: string | null
+          to_stage: Database["public"]["Enums"]["lifecycle_stage"]
+          user_id: string
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          from_stage?: Database["public"]["Enums"]["lifecycle_stage"] | null
+          id?: string
+          reason?: string | null
+          source?: string | null
+          to_stage: Database["public"]["Enums"]["lifecycle_stage"]
+          user_id: string
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          from_stage?: Database["public"]["Enums"]["lifecycle_stage"] | null
+          id?: string
+          reason?: string | null
+          source?: string | null
+          to_stage?: Database["public"]["Enums"]["lifecycle_stage"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       lifecycle_templates: {
         Row: {
           body_en: string
@@ -23259,6 +23292,27 @@ export type Database = {
           },
         ]
       }
+      service_jtbd_clusters: {
+        Row: {
+          cluster: Database["public"]["Enums"]["jtbd_cluster"]
+          created_at: string
+          is_primary: boolean
+          service_id: string
+        }
+        Insert: {
+          cluster: Database["public"]["Enums"]["jtbd_cluster"]
+          created_at?: string
+          is_primary?: boolean
+          service_id: string
+        }
+        Update: {
+          cluster?: Database["public"]["Enums"]["jtbd_cluster"]
+          created_at?: string
+          is_primary?: boolean
+          service_id?: string
+        }
+        Relationships: []
+      }
       service_orders: {
         Row: {
           amount: number | null
@@ -32465,6 +32519,32 @@ export type Database = {
       }
     }
     Enums: {
+      app_persona:
+        | "P01_first_time_tourist"
+        | "P02_repeat_tourist"
+        | "P03_long_stay_tourist"
+        | "P04_digital_nomad"
+        | "P05_remote_worker_family"
+        | "P06_snowbird"
+        | "P07_retiree"
+        | "P08_relocator_family"
+        | "P09_relocator_solo"
+        | "P10_returnee"
+        | "P11_student"
+        | "P12_business_owner_local"
+        | "P13_employee_expat"
+        | "P14_medical_tourist"
+        | "P15_wedding_couple"
+        | "P16_athlete_training"
+        | "P17_halal_traveler"
+        | "P18_lgbtq_traveler"
+        | "P19_accessibility_needs"
+        | "P20_passive_investor"
+        | "P21_active_investor"
+        | "P22_developer_partner"
+        | "P23_property_owner"
+        | "P24_management_company"
+        | "P25_service_vendor"
       app_role:
         | "guest"
         | "user"
@@ -32516,7 +32596,7 @@ export type Database = {
         | "500k_2m"
         | "2m_10m"
         | "10m_plus"
-      clearview_grade: "AAA" | "AA" | "A" | "BBB" | "BB"
+      clearview_grade: "AAA" | "AA" | "A" | "BBB" | "B" | "BB" | "CCC"
       clearview_recommendation: "BUY" | "WATCH" | "AVOID"
       crm_document_type:
         | "passport"
@@ -32557,6 +32637,17 @@ export type Database = {
         | "operating"
         | "profitable"
         | "exiting"
+      deal_type:
+        | "rent_short"
+        | "rent_mid"
+        | "rent_long"
+        | "buy_resale"
+        | "buy_offplan"
+        | "buy_assignment"
+        | "sell"
+        | "invest_passive"
+        | "invest_active"
+        | "urgent"
       education_entity_type: "institution" | "individual"
       household_type_enum:
         | "solo"
@@ -32581,6 +32672,7 @@ export type Database = {
       invoice_status: "draft" | "sent" | "paid" | "overdue" | "cancelled"
       invoice_type: "tenant_billing" | "owner_report" | "service_fee"
       item_condition: "new" | "like_new" | "good" | "fair" | "for_parts"
+      jtbd_cluster: "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J"
       language_code: "ru" | "en" | "th"
       lifecycle_stage:
         | "scout"
@@ -32815,6 +32907,33 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_persona: [
+        "P01_first_time_tourist",
+        "P02_repeat_tourist",
+        "P03_long_stay_tourist",
+        "P04_digital_nomad",
+        "P05_remote_worker_family",
+        "P06_snowbird",
+        "P07_retiree",
+        "P08_relocator_family",
+        "P09_relocator_solo",
+        "P10_returnee",
+        "P11_student",
+        "P12_business_owner_local",
+        "P13_employee_expat",
+        "P14_medical_tourist",
+        "P15_wedding_couple",
+        "P16_athlete_training",
+        "P17_halal_traveler",
+        "P18_lgbtq_traveler",
+        "P19_accessibility_needs",
+        "P20_passive_investor",
+        "P21_active_investor",
+        "P22_developer_partner",
+        "P23_property_owner",
+        "P24_management_company",
+        "P25_service_vendor",
+      ],
       app_role: [
         "guest",
         "user",
@@ -32865,7 +32984,7 @@ export const Constants = {
         "admin",
       ],
       capital_range: ["sub_100k", "100k_500k", "500k_2m", "2m_10m", "10m_plus"],
-      clearview_grade: ["AAA", "AA", "A", "BBB", "BB"],
+      clearview_grade: ["AAA", "AA", "A", "BBB", "B", "BB", "CCC"],
       clearview_recommendation: ["BUY", "WATCH", "AVOID"],
       crm_document_type: [
         "passport",
@@ -32904,6 +33023,18 @@ export const Constants = {
         "dead",
       ],
       deal_stage: ["idea", "pre_revenue", "operating", "profitable", "exiting"],
+      deal_type: [
+        "rent_short",
+        "rent_mid",
+        "rent_long",
+        "buy_resale",
+        "buy_offplan",
+        "buy_assignment",
+        "sell",
+        "invest_passive",
+        "invest_active",
+        "urgent",
+      ],
       education_entity_type: ["institution", "individual"],
       household_type_enum: [
         "solo",
@@ -32931,6 +33062,7 @@ export const Constants = {
       invoice_status: ["draft", "sent", "paid", "overdue", "cancelled"],
       invoice_type: ["tenant_billing", "owner_report", "service_fee"],
       item_condition: ["new", "like_new", "good", "fair", "for_parts"],
+      jtbd_cluster: ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"],
       language_code: ["ru", "en", "th"],
       lifecycle_stage: [
         "scout",
