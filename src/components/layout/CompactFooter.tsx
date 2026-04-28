@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Send, Instagram, MessageCircle, Download, Smartphone, Shield, Clock, CheckCircle } from 'lucide-react';
@@ -6,23 +6,48 @@ import { COMPANY_CONTACTS } from '@/lib/config';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
 import { useIsDesktop } from '@/hooks/use-desktop';
-import { VERTICAL_GROUPS, getVerticalGroupTitle } from '@/lib/verticalGroups';
-import { getVerticalById } from '@/lib/verticals';
-import { APP_REGISTRY } from '@/lib/appRegistry';
+import { useCatalogFromDB } from '@/lib/catalog/useCatalogFromDB';
 import {
   ECOSYSTEM_APP_TRIPLET,
   ECOSYSTEM_FOOTER_UI,
-  getAppEntryLabel,
-  getTripletForVerticalId,
   pickTriplet,
+  type LocalizedTriplet,
 } from '@/lib/ecosystemGlossary';
 import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
 import { cn } from '@/lib/utils';
+
+const FOOTER_SERVICE_SECTIONS: Array<{
+  clusterId: 'arrive' | 'live' | 'legal' | 'build';
+  fallbackTitle: LocalizedTriplet;
+  serviceIds: string[][];
+}> = [
+  {
+    clusterId: 'arrive',
+    fallbackTitle: { ru: 'Прибытие', en: 'Arrival', th: 'การเดินทาง' },
+    serviceIds: [['sos'], ['transfer'], ['fast-track'], ['sim'], ['exchange']],
+  },
+  {
+    clusterId: 'live',
+    fallbackTitle: { ru: 'Жизнь', en: 'Live', th: 'ใช้ชีวิต' },
+    serviceIds: [['services'], ['cleaning'], ['medical'], ['restaurants', 'restaurant'], ['school-finder']],
+  },
+  {
+    clusterId: 'legal',
+    fallbackTitle: { ru: 'Право и визы', en: 'Legal & Visa', th: 'กฎหมายและวีซ่า' },
+    serviceIds: [['visa'], ['legal'], ['contract-ai'], ['relocate'], ['knowledge']],
+  },
+  {
+    clusterId: 'build',
+    fallbackTitle: { ru: 'Застройщикам', en: 'Build', th: 'ผู้พัฒนา' },
+    serviceIds: [['developer-portal'], ['newbuilds'], ['program'], ['advisory']],
+  },
+];
 
 export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
   const { language } = useLanguage();
   const { isInstalled, canInstall, isIOS, install } = usePWAInstall();
   const isDesktop = useIsDesktop();
+  const { clusterCatalog } = useCatalogFromDB();
   const t = (trip: { ru: string; en: string; th: string }) => pickTriplet(trip, language);
 
   const handleInstallClick = async () => {
@@ -48,49 +73,30 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
     window.location.href = '/install';
   };
 
-  const resolveVerticalLink = (verticalId: string): { to: string; label: string } | null => {
-    const registryEntry = Object.values(APP_REGISTRY).find((e) => e.verticalId === verticalId);
-    if (registryEntry) {
-      return { to: registryEntry.route, label: getAppEntryLabel(registryEntry, language) };
-    }
-    const v = getVerticalById(verticalId);
-    if (v) {
-      const trip = getTripletForVerticalId(v.id);
-      const label = trip
-        ? pickTriplet(trip, language)
-        : pickTriplet({ ru: v.labelRu, en: v.labelEn, th: v.labelEn }, language);
-      return { to: `/${v.plural}`, label };
-    }
-    return null;
-  };
+  const footerGroups = useMemo(() => {
+    return FOOTER_SERVICE_SECTIONS.map((section) => {
+      const cluster = clusterCatalog.find((c) => c.id === section.clusterId);
+      const services = cluster?.categories.flatMap((category) => category.services) ?? [];
 
-  // Service groups for footer (SSOT clusters): arrive, live, legal.
-  // invest → dedicated Real Estate column; manage/build → workspace, hidden in footer.
-  const footerGroups = VERTICAL_GROUPS
-    .filter((g) => g.id === 'arrive' || g.id === 'live' || g.id === 'legal')
-    .map((group) => {
-      const items = group.items
-        .slice(0, 5)
-        .map((item) => {
-          if (item.verticalId) return resolveVerticalLink(item.verticalId);
-          if (item.route && item.labelRu && item.labelEn) {
-            return {
-              to: item.route,
-              label: pickTriplet(
-                { ru: item.labelRu, en: item.labelEn, th: item.labelTh ?? item.labelEn },
-                language
-              ),
-            };
-          }
-          return null;
-        })
-        .filter(Boolean) as { to: string; label: string }[];
+      const items = section.serviceIds
+        .map((ids) => services.find((service) => ids.includes(service.id) && service.status !== 'soon'))
+        .filter((service): service is NonNullable<typeof service> => Boolean(service))
+        .map((service) => ({
+          to: service.path,
+          label: pickTriplet(
+            { ru: service.labelRu, en: service.labelEn, th: service.labelTh ?? service.labelEn },
+            language,
+          ),
+        }));
 
       return {
-        title: getVerticalGroupTitle(group, language),
+        title: cluster
+          ? pickTriplet({ ru: cluster.labelRu, en: cluster.labelEn, th: cluster.labelTh ?? cluster.labelEn }, language)
+          : pickTriplet(section.fallbackTitle, language),
         items,
       };
-    });
+    }).filter((group) => group.items.length > 0);
+  }, [clusterCatalog, language]);
 
   const re = ECOSYSTEM_APP_TRIPLET;
   const realEstateLinks = [
