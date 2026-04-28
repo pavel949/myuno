@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import * as Sentry from "@sentry/react";
 import "./index.css";
 import { reportWebVitals } from "./lib/webVitals";
+import App from "./App.tsx";
 
 function renderBootstrapError(message: string) {
   const root = document.getElementById("root");
@@ -87,16 +88,14 @@ reportWebVitals(undefined, { debug: import.meta.env.DEV });
     }).catch(() => {});
   }
 })();
-void import("./App.tsx")
-  .then(({ default: App }) => {
-    createRoot(document.getElementById("root")!).render(
-      <StrictMode>
-        <App />
-      </StrictMode>
-    );
-  })
-  .catch((err: unknown) => {
-    renderBootstrapError(
-      `Failed to load application: ${err instanceof Error ? err.message : String(err)}`
-    );
-  });
+try {
+  createRoot(document.getElementById("root")!).render(
+    <StrictMode>
+      <App />
+    </StrictMode>
+  );
+} catch (err: unknown) {
+  renderBootstrapError(
+    `Failed to start application: ${err instanceof Error ? err.message : String(err)}`
+  );
+}
