@@ -3,6 +3,8 @@
 > **Purpose.** A restructuring blueprint that collapses the ad-hoc growth from Lovable/Claude-Code into one coherent system: **Roles · Clusters · Surfaces · Agents.**
 > **Audience.** Claude Code, Cursor, human engineers.
 > **Supersedes.** `docs/ARCHITECTURE.md` for structural decisions. The existing doc remains valid for current directory layout.
+>
+> **⚠️ Master Taxonomy v1.0 supersedes this document on classification.** This blueprint defines 6 surfaces and 6 colour-locked clusters (`arrive/live/manage/invest/legal/build`) — those remain canonical for **navigation**. For **functional tagging** of services, personas, and AI routing, use the 10 JTBD clusters (A..J) and 25 personas (P01–P25) from `/docs/canonical/00-master-taxonomy.md` and `src/lib/taxonomies/master.ts`. Surface ≠ JTBD; never confuse them.
 
 ## Current implementation in this repo (not the blueprint below)
 
