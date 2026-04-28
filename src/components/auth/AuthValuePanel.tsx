@@ -10,11 +10,13 @@
  * collapses to a thin wordmark + tagline strip to avoid distracting from the form.
  */
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { Plane, Home, Briefcase, TrendingUp, Scale, Hammer, Check, MapPin } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { BrandWordmark } from '@/components/uno/BrandWordmark';
 import { useCatalogFromDB } from '@/lib/catalog/useCatalogFromDB';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 interface AuthValuePanelProps {
   compact?: boolean;
@@ -29,8 +31,18 @@ const CLUSTERS = [
   { key: 'build', icon: Hammer, color: 'text-cluster-build', bg: 'bg-cluster-build/10', ring: 'ring-cluster-build/30' },
 ] as const;
 
+const CLUSTER_ROUTES: Record<(typeof CLUSTERS)[number]['key'], string> = {
+  arrive: APP_ROUTES.ARRIVE_CLUSTER,
+  live: APP_ROUTES.DISCOVER,
+  manage: APP_ROUTES.FOR_MANAGEMENT_COMPANIES,
+  invest: APP_ROUTES.INVEST,
+  legal: APP_ROUTES.LEGAL_CLUSTER,
+  build: APP_ROUTES.FOR_REAL_ESTATE_DEVELOPERS,
+};
+
 export function AuthValuePanel({ compact = false }: AuthValuePanelProps) {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const { categories } = useCatalogFromDB();
   const totalServices = categories.reduce((s, c) => s + c.services.length, 0);
 
@@ -60,13 +72,15 @@ export function AuthValuePanel({ compact = false }: AuthValuePanelProps) {
         {CLUSTERS.map((cluster, idx) => {
           const Icon = cluster.icon;
           return (
-            <motion.div
+            <motion.button
               key={cluster.key}
+              type="button"
+              onClick={() => navigate(CLUSTER_ROUTES[cluster.key])}
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.04, duration: 0.25, ease: 'easeOut' }}
               className={cn(
-                'inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full ring-1',
+                'inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full ring-1 transition-transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-primary/40',
                 cluster.bg,
                 cluster.ring,
               )}
@@ -75,7 +89,7 @@ export function AuthValuePanel({ compact = false }: AuthValuePanelProps) {
               <span className={cn('text-xs font-medium', cluster.color)}>
                 {t(`auth.value.cluster.${cluster.key}`)}
               </span>
-            </motion.div>
+            </motion.button>
           );
         })}
       </div>

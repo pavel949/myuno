@@ -37,12 +37,13 @@ function useClusterStats() {
     const byCluster = clusters.map((c) => {
       const cats = categories.filter((cat) => cat.clusterId === c.id);
       const services = cats.reduce((sum, cat) => sum + cat.services.length, 0);
+      const isWorkspaceEmpty = c.audience === 'workspace' && services === 0;
       return {
         ...c,
         categoriesCount: cats.length,
         servicesCount: services,
-        hintsRu: cats.slice(0, 4).map((cat) => cat.labelRu).join(' · '),
-        hintsEn: cats.slice(0, 4).map((cat) => cat.labelEn).join(' · '),
+        hintsRu: isWorkspaceEmpty ? c.valueRu : cats.slice(0, 4).map((cat) => cat.labelRu).join(' · '),
+        hintsEn: isWorkspaceEmpty ? c.valueEn : cats.slice(0, 4).map((cat) => cat.labelEn).join(' · '),
       };
     });
     return { byCluster, totalServices, clustersCount: clusters.length };
@@ -205,7 +206,7 @@ export default function WelcomeLanding() {
           >
             {[
               { num: String(totalServices), en: 'services in the unified catalog', ru: 'сервисов в едином каталоге' },
-              { num: String(clustersCount), en: 'canonical life clusters', ru: 'кластеров жизни' },
+              { num: String(clustersCount), en: 'platform sections', ru: 'разделов платформы' },
               { num: String(LIFE_SITUATIONS_COUNT), en: 'life situations covered', ru: 'жизненных ситуаций' },
               { num: '24/7', en: 'AI concierge & SOS', ru: 'AI-консьерж и SOS' },
             ].map((s) => (
@@ -222,12 +223,12 @@ export default function WelcomeLanding() {
         </div>
       </section>
 
-      {/* Clusters grid — 6 канонических кластеров × 3 колонки (2 ровных ряда) */}
+          {/* Clusters grid — 6 canonical navigation surfaces × 3 columns */}
       <section className="border-b border-border/40">
         <div className="mx-auto max-w-6xl px-5 py-14 sm:py-20">
           <div className="flex items-baseline justify-between mb-8">
             <h2 className="text-[22px] sm:text-[28px] font-semibold tracking-[-0.02em]">
-              {isRu ? 'Шесть кластеров жизни' : 'Six clusters of life'}
+              {isRu ? '6 разделов платформы' : '6 platform sections'}
             </h2>
             <span className="hidden sm:inline text-[12px] font-mono uppercase tracking-[0.12em] text-muted-foreground">
               01 → {String(clustersCount).padStart(2, '0')}
@@ -241,7 +242,7 @@ export default function WelcomeLanding() {
                 <motion.button
                   key={c.id}
                   type="button"
-                  onClick={() => navigate('/auth?mode=signup')}
+                  onClick={() => navigate(c.homeRoute)}
                   initial={{ opacity: 0, y: 8 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: '-50px' }}
@@ -266,23 +267,33 @@ export default function WelcomeLanding() {
                           </h3>
                         </div>
                         <span className="font-mono text-[10px] tabular-nums text-muted-foreground/70 shrink-0">
-                          {c.servicesCount} {isRu ? 'серв' : 'svc'}
+                          {c.servicesCount > 0
+                            ? `${c.servicesCount} ${isRu ? 'серв' : 'svc'}`
+                            : c.audience === 'workspace'
+                              ? (isRu ? 'кабинет' : 'workspace')
+                              : `0 ${isRu ? 'серв' : 'svc'}`}
                         </span>
                       </div>
                       <p className="mt-1 text-[13px] text-muted-foreground line-clamp-2">
                         {isRu ? c.hintsRu : c.hintsEn}
                       </p>
                       <p className="mt-2 text-[11px] text-muted-foreground/70">
-                        {c.categoriesCount}{' '}
-                        {isRu
-                          ? c.categoriesCount === 1
-                            ? 'категория'
-                            : c.categoriesCount < 5
-                            ? 'категории'
-                            : 'категорий'
-                          : c.categoriesCount === 1
-                          ? 'category'
-                          : 'categories'}
+                        {c.categoriesCount > 0 ? (
+                          <>
+                            {c.categoriesCount}{' '}
+                            {isRu
+                              ? c.categoriesCount === 1
+                                ? 'категория'
+                                : c.categoriesCount < 5
+                                ? 'категории'
+                                : 'категорий'
+                              : c.categoriesCount === 1
+                              ? 'category'
+                              : 'categories'}
+                          </>
+                        ) : (
+                          <>{isRu ? 'операционный кабинет' : 'operational workspace'}</>
+                        )}
                         {c.audience === 'workspace' && (
                           <span className="ml-2 inline-flex items-center rounded-none border border-border/60 px-1.5 py-px text-[9px] uppercase tracking-[0.08em] text-muted-foreground/80">
                             {isRu ? 'Кабинет' : 'Workspace'}

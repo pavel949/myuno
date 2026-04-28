@@ -65,6 +65,7 @@ export const APP_ROUTES = {
   BECOME_PARTNER: '/become-partner',
 
   // ── B2B landing pages (public marketing) ──
+  FOR_MANAGEMENT_COMPANIES: '/for-management-companies',
   FOR_REAL_ESTATE_DEVELOPERS: '/for-developers',
   FOR_LOCAL_SERVICE_PROVIDERS: '/for-local-services',
 

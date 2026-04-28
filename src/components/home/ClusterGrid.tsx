@@ -6,7 +6,6 @@ import { blendClusters } from '@/lib/roleBlend';
 import {
   getClusterHeaderLabel,
   getClusterValueLine,
-  CLUSTER_CATALOG_TOTAL_AVAILABLE,
   useLiveClusterCatalog,
 } from '@/lib/nav/clusterCatalog';
 
@@ -32,10 +31,17 @@ export function ClusterGrid({ personas }: ClusterGridProps) {
     () => blendClusters(personas, undefined, liveCatalog),
     [personas, liveCatalog],
   );
+  const totalAvailable = useMemo(
+    () => liveCatalog.reduce(
+      (sum, cluster) => sum + cluster.services.filter((service) => service.status !== 'soon').length,
+      0,
+    ),
+    [liveCatalog],
+  );
 
   const totalLabel = isRu
-    ? `${CLUSTER_CATALOG_TOTAL_AVAILABLE} сервисов`
-    : `${CLUSTER_CATALOG_TOTAL_AVAILABLE} services`;
+    ? `${totalAvailable} сервисов`
+    : `${totalAvailable} services`;
 
   return (
     <div className="px-4 pb-5">
