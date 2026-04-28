@@ -63,7 +63,8 @@ export default function WelcomeLanding() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const navigate = useNavigate();
-  const { byCluster, totalServices } = useClusterStats();
+  const { byCluster, totalServices, clustersCount } = useClusterStats();
+  const categoriesCount = byCluster.reduce((sum, c) => sum + c.categoriesCount, 0);
 
   return (
     <div className="min-h-screen bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary">
@@ -204,7 +205,7 @@ export default function WelcomeLanding() {
           >
             {[
               { num: String(totalServices), en: 'services in the unified catalog', ru: 'сервисов в едином каталоге' },
-              { num: String(CLUSTERS.length), en: 'canonical life clusters', ru: 'кластеров жизни' },
+              { num: String(clustersCount), en: 'canonical life clusters', ru: 'кластеров жизни' },
               { num: String(LIFE_SITUATIONS_COUNT), en: 'life situations covered', ru: 'жизненных ситуаций' },
               { num: '24/7', en: 'AI concierge & SOS', ru: 'AI-консьерж и SOS' },
             ].map((s) => (
@@ -229,7 +230,7 @@ export default function WelcomeLanding() {
               {isRu ? 'Шесть кластеров жизни' : 'Six clusters of life'}
             </h2>
             <span className="hidden sm:inline text-[12px] font-mono uppercase tracking-[0.12em] text-muted-foreground">
-              01 → {String(CLUSTERS.length).padStart(2, '0')}
+              01 → {String(clustersCount).padStart(2, '0')}
             </span>
           </div>
 
@@ -297,8 +298,8 @@ export default function WelcomeLanding() {
 
           <p className="mt-6 text-[12px] text-muted-foreground/70">
             {isRu
-              ? `Каталог объединяет ${CATEGORIES.length} категорий и ${totalServices} сервисов. Войдите, чтобы открыть полный навигатор.`
-              : `The catalog spans ${CATEGORIES.length} categories and ${totalServices} services. Sign in to open the full navigator.`}
+              ? `Каталог объединяет ${categoriesCount} категорий и ${totalServices} сервисов. Войдите, чтобы открыть полный навигатор.`
+              : `The catalog spans ${categoriesCount} categories and ${totalServices} services. Sign in to open the full navigator.`}
           </p>
         </div>
       </section>
