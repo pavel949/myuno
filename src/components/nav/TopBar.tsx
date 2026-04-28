@@ -59,6 +59,7 @@ export const TopBar = memo(function TopBar({
   const isConsumer = !sidebarVisible;
   const cartEnabled = showCart ?? isConsumer;
   const navItems = PRIMARY_NAV[role];
+  const showCrumbs = shouldShowBreadcrumbs(location.pathname);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
