@@ -45,9 +45,8 @@ export function AuthValuePanel({ compact = false }: AuthValuePanelProps) {
 
   return (
     <div className="w-full max-w-md mx-auto md:mx-0 space-y-7">
-      {/* Wordmark + headline */}
+      {/* Headline (logo lives in the page header — avoid duplication) */}
       <div className="space-y-3">
-        <BrandWordmark as="static" className="scale-125 origin-left" />
         <h1 className="font-display text-2xl md:text-3xl font-semibold leading-tight text-foreground">
           {t('auth.value.title')}
         </h1>
