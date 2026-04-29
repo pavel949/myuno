@@ -731,51 +731,6 @@ export type Database = {
         }
         Relationships: []
       }
-      airport_booking_addons: {
-        Row: {
-          addon_service_id: string
-          booking_id: string
-          created_at: string | null
-          id: string
-          quantity: number | null
-          total_price: number
-          unit_price: number
-        }
-        Insert: {
-          addon_service_id: string
-          booking_id: string
-          created_at?: string | null
-          id?: string
-          quantity?: number | null
-          total_price: number
-          unit_price: number
-        }
-        Update: {
-          addon_service_id?: string
-          booking_id?: string
-          created_at?: string | null
-          id?: string
-          quantity?: number | null
-          total_price?: number
-          unit_price?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "airport_booking_addons_addon_service_id_fkey"
-            columns: ["addon_service_id"]
-            isOneToOne: false
-            referencedRelation: "airport_services"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "airport_booking_addons_booking_id_fkey"
-            columns: ["booking_id"]
-            isOneToOne: false
-            referencedRelation: "airport_bookings"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       airport_bookings: {
         Row: {
           addons_total: number | null
@@ -890,53 +845,6 @@ export type Database = {
             columns: ["supplier_id"]
             isOneToOne: false
             referencedRelation: "airport_suppliers"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      airport_passengers: {
-        Row: {
-          booking_id: string
-          created_at: string | null
-          date_of_birth: string
-          first_name: string
-          id: string
-          is_primary: boolean | null
-          last_name: string
-          nationality: string
-          passport_number: string
-          sort_order: number | null
-        }
-        Insert: {
-          booking_id: string
-          created_at?: string | null
-          date_of_birth: string
-          first_name: string
-          id?: string
-          is_primary?: boolean | null
-          last_name: string
-          nationality: string
-          passport_number: string
-          sort_order?: number | null
-        }
-        Update: {
-          booking_id?: string
-          created_at?: string | null
-          date_of_birth?: string
-          first_name?: string
-          id?: string
-          is_primary?: boolean | null
-          last_name?: string
-          nationality?: string
-          passport_number?: string
-          sort_order?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "airport_passengers_booking_id_fkey"
-            columns: ["booking_id"]
-            isOneToOne: false
-            referencedRelation: "airport_bookings"
             referencedColumns: ["id"]
           },
         ]
@@ -1766,47 +1674,6 @@ export type Database = {
           },
         ]
       }
-      booking_payments: {
-        Row: {
-          amount: number
-          booking_id: string
-          created_at: string
-          currency: string | null
-          id: string
-          paid_at: string | null
-          payment_method: string | null
-          status: Database["public"]["Enums"]["payment_status"]
-        }
-        Insert: {
-          amount: number
-          booking_id: string
-          created_at?: string
-          currency?: string | null
-          id?: string
-          paid_at?: string | null
-          payment_method?: string | null
-          status?: Database["public"]["Enums"]["payment_status"]
-        }
-        Update: {
-          amount?: number
-          booking_id?: string
-          created_at?: string
-          currency?: string | null
-          id?: string
-          paid_at?: string | null
-          payment_method?: string | null
-          status?: Database["public"]["Enums"]["payment_status"]
-        }
-        Relationships: [
-          {
-            foreignKeyName: "booking_payments_booking_id_fkey"
-            columns: ["booking_id"]
-            isOneToOne: false
-            referencedRelation: "bookings"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       booking_status_history: {
         Row: {
           booking_id: string
@@ -1841,74 +1708,6 @@ export type Database = {
             columns: ["booking_id"]
             isOneToOne: false
             referencedRelation: "bookings"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      booking_vouchers: {
-        Row: {
-          booking_id: string | null
-          booking_type: string
-          created_at: string
-          id: string
-          is_used: boolean | null
-          metadata: Json | null
-          order_id: string | null
-          pdf_url: string | null
-          qr_code_data: string
-          status: string | null
-          updated_at: string
-          used_at: string | null
-          used_by: string | null
-          user_id: string
-          valid_from: string
-          valid_until: string | null
-          voucher_number: string
-        }
-        Insert: {
-          booking_id?: string | null
-          booking_type: string
-          created_at?: string
-          id?: string
-          is_used?: boolean | null
-          metadata?: Json | null
-          order_id?: string | null
-          pdf_url?: string | null
-          qr_code_data: string
-          status?: string | null
-          updated_at?: string
-          used_at?: string | null
-          used_by?: string | null
-          user_id: string
-          valid_from?: string
-          valid_until?: string | null
-          voucher_number: string
-        }
-        Update: {
-          booking_id?: string | null
-          booking_type?: string
-          created_at?: string
-          id?: string
-          is_used?: boolean | null
-          metadata?: Json | null
-          order_id?: string | null
-          pdf_url?: string | null
-          qr_code_data?: string
-          status?: string | null
-          updated_at?: string
-          used_at?: string | null
-          used_by?: string | null
-          user_id?: string
-          valid_from?: string
-          valid_until?: string | null
-          voucher_number?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "booking_vouchers_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders"
             referencedColumns: ["id"]
           },
         ]
@@ -3685,48 +3484,6 @@ export type Database = {
           },
         ]
       }
-      cohort_analytics: {
-        Row: {
-          active_users: number | null
-          avg_revenue_per_user: number | null
-          cohort_month: string
-          created_at: string | null
-          id: string
-          paying_users: number | null
-          period_month: string
-          period_number: number
-          retention_rate: number | null
-          total_revenue: number | null
-          total_users: number | null
-        }
-        Insert: {
-          active_users?: number | null
-          avg_revenue_per_user?: number | null
-          cohort_month: string
-          created_at?: string | null
-          id?: string
-          paying_users?: number | null
-          period_month: string
-          period_number: number
-          retention_rate?: number | null
-          total_revenue?: number | null
-          total_users?: number | null
-        }
-        Update: {
-          active_users?: number | null
-          avg_revenue_per_user?: number | null
-          cohort_month?: string
-          created_at?: string | null
-          id?: string
-          paying_users?: number | null
-          period_month?: string
-          period_number?: number
-          retention_rate?: number | null
-          total_revenue?: number | null
-          total_users?: number | null
-        }
-        Relationships: []
-      }
       commission_agreements: {
         Row: {
           created_at: string | null
@@ -4340,67 +4097,6 @@ export type Database = {
             columns: ["resale_property_id"]
             isOneToOne: false
             referencedRelation: "resale_properties"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      contact_disclosure_events: {
-        Row: {
-          buyer_id: string | null
-          disclosed_at: string | null
-          disclosed_by_user_id: string | null
-          disclosed_to_id: string | null
-          disclosed_to_type: string
-          fields_disclosed: string[]
-          id: string
-          lead_id: string | null
-          reservation_id: string | null
-          stage: string
-        }
-        Insert: {
-          buyer_id?: string | null
-          disclosed_at?: string | null
-          disclosed_by_user_id?: string | null
-          disclosed_to_id?: string | null
-          disclosed_to_type: string
-          fields_disclosed: string[]
-          id?: string
-          lead_id?: string | null
-          reservation_id?: string | null
-          stage: string
-        }
-        Update: {
-          buyer_id?: string | null
-          disclosed_at?: string | null
-          disclosed_by_user_id?: string | null
-          disclosed_to_id?: string | null
-          disclosed_to_type?: string
-          fields_disclosed?: string[]
-          id?: string
-          lead_id?: string | null
-          reservation_id?: string | null
-          stage?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "contact_disclosure_events_buyer_id_fkey"
-            columns: ["buyer_id"]
-            isOneToOne: false
-            referencedRelation: "buyers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "contact_disclosure_events_lead_id_fkey"
-            columns: ["lead_id"]
-            isOneToOne: false
-            referencedRelation: "nb_leads"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "contact_disclosure_events_reservation_id_fkey"
-            columns: ["reservation_id"]
-            isOneToOne: false
-            referencedRelation: "reservations"
             referencedColumns: ["id"]
           },
         ]
@@ -5540,54 +5236,6 @@ export type Database = {
           },
         ]
       }
-      crm_nurture_queue: {
-        Row: {
-          channel: string
-          contact_id: string | null
-          created_at: string
-          error: string | null
-          id: string
-          message_body: string
-          metadata: Json | null
-          recipient_email: string | null
-          recipient_phone: string | null
-          scheduled_at: string
-          sent_at: string | null
-          status: string
-          subject: string | null
-        }
-        Insert: {
-          channel: string
-          contact_id?: string | null
-          created_at?: string
-          error?: string | null
-          id?: string
-          message_body: string
-          metadata?: Json | null
-          recipient_email?: string | null
-          recipient_phone?: string | null
-          scheduled_at?: string
-          sent_at?: string | null
-          status?: string
-          subject?: string | null
-        }
-        Update: {
-          channel?: string
-          contact_id?: string | null
-          created_at?: string
-          error?: string | null
-          id?: string
-          message_body?: string
-          metadata?: Json | null
-          recipient_email?: string | null
-          recipient_phone?: string | null
-          scheduled_at?: string
-          sent_at?: string | null
-          status?: string
-          subject?: string | null
-        }
-        Relationships: []
-      }
       crm_pipeline_stages: {
         Row: {
           automation: Json | null
@@ -6076,64 +5724,6 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "v_properties_public"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      crm_web_form_submissions: {
-        Row: {
-          contact_id: string | null
-          created_at: string | null
-          data: Json
-          deal_id: string | null
-          form_id: string
-          id: string
-          ip_address: string | null
-          source_url: string | null
-          status: string | null
-        }
-        Insert: {
-          contact_id?: string | null
-          created_at?: string | null
-          data?: Json
-          deal_id?: string | null
-          form_id: string
-          id?: string
-          ip_address?: string | null
-          source_url?: string | null
-          status?: string | null
-        }
-        Update: {
-          contact_id?: string | null
-          created_at?: string | null
-          data?: Json
-          deal_id?: string | null
-          form_id?: string
-          id?: string
-          ip_address?: string | null
-          source_url?: string | null
-          status?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "crm_web_form_submissions_contact_id_fkey"
-            columns: ["contact_id"]
-            isOneToOne: false
-            referencedRelation: "crm_contacts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "crm_web_form_submissions_deal_id_fkey"
-            columns: ["deal_id"]
-            isOneToOne: false
-            referencedRelation: "agent_deals"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "crm_web_form_submissions_form_id_fkey"
-            columns: ["form_id"]
-            isOneToOne: false
-            referencedRelation: "crm_web_forms"
             referencedColumns: ["id"]
           },
         ]
@@ -7833,30 +7423,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      founder_daily_brief: {
-        Row: {
-          brief_date: string
-          created_at: string
-          id: string
-          payload: Json
-          updated_at: string
-        }
-        Insert: {
-          brief_date: string
-          created_at?: string
-          id?: string
-          payload?: Json
-          updated_at?: string
-        }
-        Update: {
-          brief_date?: string
-          created_at?: string
-          id?: string
-          payload?: Json
-          updated_at?: string
-        }
-        Relationships: []
       }
       goods_receipts: {
         Row: {
@@ -10025,39 +9591,6 @@ export type Database = {
           },
         ]
       }
-      lifecycle_stage_history: {
-        Row: {
-          changed_at: string
-          changed_by: string | null
-          from_stage: Database["public"]["Enums"]["lifecycle_stage"] | null
-          id: string
-          reason: string | null
-          source: string | null
-          to_stage: Database["public"]["Enums"]["lifecycle_stage"]
-          user_id: string
-        }
-        Insert: {
-          changed_at?: string
-          changed_by?: string | null
-          from_stage?: Database["public"]["Enums"]["lifecycle_stage"] | null
-          id?: string
-          reason?: string | null
-          source?: string | null
-          to_stage: Database["public"]["Enums"]["lifecycle_stage"]
-          user_id: string
-        }
-        Update: {
-          changed_at?: string
-          changed_by?: string | null
-          from_stage?: Database["public"]["Enums"]["lifecycle_stage"] | null
-          id?: string
-          reason?: string | null
-          source?: string | null
-          to_stage?: Database["public"]["Enums"]["lifecycle_stage"]
-          user_id?: string
-        }
-        Relationships: []
-      }
       lifecycle_templates: {
         Row: {
           body_en: string
@@ -11663,79 +11196,6 @@ export type Database = {
         }
         Relationships: []
       }
-      masked_channels: {
-        Row: {
-          active: boolean | null
-          buyer_id: string | null
-          created_at: string | null
-          developer_user_id: string | null
-          expires_at: string | null
-          id: string
-          lead_id: string | null
-          masked_email: string | null
-          masked_phone_twilio_sid: string | null
-          real_email_buyer: string | null
-          real_email_developer: string | null
-          real_phone_buyer: string | null
-          real_phone_developer: string | null
-          reservation_id: string | null
-        }
-        Insert: {
-          active?: boolean | null
-          buyer_id?: string | null
-          created_at?: string | null
-          developer_user_id?: string | null
-          expires_at?: string | null
-          id?: string
-          lead_id?: string | null
-          masked_email?: string | null
-          masked_phone_twilio_sid?: string | null
-          real_email_buyer?: string | null
-          real_email_developer?: string | null
-          real_phone_buyer?: string | null
-          real_phone_developer?: string | null
-          reservation_id?: string | null
-        }
-        Update: {
-          active?: boolean | null
-          buyer_id?: string | null
-          created_at?: string | null
-          developer_user_id?: string | null
-          expires_at?: string | null
-          id?: string
-          lead_id?: string | null
-          masked_email?: string | null
-          masked_phone_twilio_sid?: string | null
-          real_email_buyer?: string | null
-          real_email_developer?: string | null
-          real_phone_buyer?: string | null
-          real_phone_developer?: string | null
-          reservation_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "masked_channels_buyer_id_fkey"
-            columns: ["buyer_id"]
-            isOneToOne: false
-            referencedRelation: "buyers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "masked_channels_lead_id_fkey"
-            columns: ["lead_id"]
-            isOneToOne: false
-            referencedRelation: "nb_leads"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "masked_channels_reservation_id_fkey"
-            columns: ["reservation_id"]
-            isOneToOne: false
-            referencedRelation: "reservations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       mc_onboarding_progress: {
         Row: {
           company_id: string
@@ -13045,36 +12505,6 @@ export type Database = {
         }
         Relationships: []
       }
-      offer_history: {
-        Row: {
-          channel: string | null
-          contact_id: string | null
-          created_at: string
-          generated_by: string | null
-          id: string
-          offer_payload: Json
-          property_id: string | null
-        }
-        Insert: {
-          channel?: string | null
-          contact_id?: string | null
-          created_at?: string
-          generated_by?: string | null
-          id?: string
-          offer_payload?: Json
-          property_id?: string | null
-        }
-        Update: {
-          channel?: string | null
-          contact_id?: string | null
-          created_at?: string
-          generated_by?: string | null
-          id?: string
-          offer_payload?: Json
-          property_id?: string | null
-        }
-        Relationships: []
-      }
       order_addresses: {
         Row: {
           address_text: string
@@ -13853,128 +13283,6 @@ export type Database = {
           },
         ]
       }
-      outreach_messages: {
-        Row: {
-          audience_type: string
-          body: string | null
-          campaign_source: string | null
-          campaign_source_id: string | null
-          channel: string
-          clicked_at: string | null
-          company_id: string | null
-          created_at: string
-          created_by: string | null
-          delivered_at: string | null
-          error_message: string | null
-          followup_sequence: number
-          id: string
-          identity_id: string | null
-          metadata: Json | null
-          next_followup_at: string | null
-          opened_at: string | null
-          replied_at: string | null
-          response_type: string | null
-          scheduled_at: string | null
-          sent_at: string | null
-          source_id: string | null
-          source_table: string | null
-          status: string
-          subject: string | null
-          template_id: string | null
-          to_address: string | null
-          updated_at: string
-        }
-        Insert: {
-          audience_type: string
-          body?: string | null
-          campaign_source?: string | null
-          campaign_source_id?: string | null
-          channel: string
-          clicked_at?: string | null
-          company_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          delivered_at?: string | null
-          error_message?: string | null
-          followup_sequence?: number
-          id?: string
-          identity_id?: string | null
-          metadata?: Json | null
-          next_followup_at?: string | null
-          opened_at?: string | null
-          replied_at?: string | null
-          response_type?: string | null
-          scheduled_at?: string | null
-          sent_at?: string | null
-          source_id?: string | null
-          source_table?: string | null
-          status?: string
-          subject?: string | null
-          template_id?: string | null
-          to_address?: string | null
-          updated_at?: string
-        }
-        Update: {
-          audience_type?: string
-          body?: string | null
-          campaign_source?: string | null
-          campaign_source_id?: string | null
-          channel?: string
-          clicked_at?: string | null
-          company_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          delivered_at?: string | null
-          error_message?: string | null
-          followup_sequence?: number
-          id?: string
-          identity_id?: string | null
-          metadata?: Json | null
-          next_followup_at?: string | null
-          opened_at?: string | null
-          replied_at?: string | null
-          response_type?: string | null
-          scheduled_at?: string | null
-          sent_at?: string | null
-          source_id?: string | null
-          source_table?: string | null
-          status?: string
-          subject?: string | null
-          template_id?: string | null
-          to_address?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "outreach_messages_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "management_companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "outreach_messages_identity_id_fkey"
-            columns: ["identity_id"]
-            isOneToOne: false
-            referencedRelation: "contact_identities"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "outreach_messages_identity_id_fkey"
-            columns: ["identity_id"]
-            isOneToOne: false
-            referencedRelation: "v_unified_contacts"
-            referencedColumns: ["identity_id"]
-          },
-          {
-            foreignKeyName: "outreach_messages_template_id_fkey"
-            columns: ["template_id"]
-            isOneToOne: false
-            referencedRelation: "outreach_templates"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       outreach_templates: {
         Row: {
           audience_type: string
@@ -14616,103 +13924,6 @@ export type Database = {
           whatsapp_sent_at?: string | null
         }
         Relationships: []
-      }
-      owner_reports: {
-        Row: {
-          company_id: string | null
-          created_at: string | null
-          data: Json | null
-          file_url: string | null
-          id: string
-          owner_id: string
-          period_end: string
-          period_start: string
-          property_id: string | null
-          report_type: string
-          sent_at: string | null
-          sent_to: string[] | null
-          status: string | null
-          title: string
-          updated_at: string | null
-        }
-        Insert: {
-          company_id?: string | null
-          created_at?: string | null
-          data?: Json | null
-          file_url?: string | null
-          id?: string
-          owner_id: string
-          period_end: string
-          period_start: string
-          property_id?: string | null
-          report_type?: string
-          sent_at?: string | null
-          sent_to?: string[] | null
-          status?: string | null
-          title: string
-          updated_at?: string | null
-        }
-        Update: {
-          company_id?: string | null
-          created_at?: string | null
-          data?: Json | null
-          file_url?: string | null
-          id?: string
-          owner_id?: string
-          period_end?: string
-          period_start?: string
-          property_id?: string | null
-          report_type?: string
-          sent_at?: string | null
-          sent_to?: string[] | null
-          status?: string | null
-          title?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "owner_reports_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "management_companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "owner_reports_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "owner_properties"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "owner_reports_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "owner_reports_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "v_marketplace_listings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "owner_reports_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "v_owner_properties"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "owner_reports_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "v_properties_public"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       owner_service_vendors: {
         Row: {
@@ -30027,64 +29238,6 @@ export type Database = {
           updated_at: string | null
         }
         Relationships: []
-      }
-      v_outreach_messages_with_identity: {
-        Row: {
-          audience_type: string | null
-          campaign_source: string | null
-          campaign_source_id: string | null
-          channel: string | null
-          clicked_at: string | null
-          company_id: string | null
-          created_at: string | null
-          created_by: string | null
-          followup_sequence: number | null
-          id: string | null
-          identity_email: string | null
-          identity_id: string | null
-          identity_name: string | null
-          identity_phone: string | null
-          identity_user_id: string | null
-          next_followup_at: string | null
-          opened_at: string | null
-          replied_at: string | null
-          response_type: string | null
-          sent_at: string | null
-          status: string | null
-          subject: string | null
-          template_id: string | null
-          to_address: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "outreach_messages_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "management_companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "outreach_messages_identity_id_fkey"
-            columns: ["identity_id"]
-            isOneToOne: false
-            referencedRelation: "contact_identities"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "outreach_messages_identity_id_fkey"
-            columns: ["identity_id"]
-            isOneToOne: false
-            referencedRelation: "v_unified_contacts"
-            referencedColumns: ["identity_id"]
-          },
-          {
-            foreignKeyName: "outreach_messages_template_id_fkey"
-            columns: ["template_id"]
-            isOneToOne: false
-            referencedRelation: "outreach_templates"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       v_owner_profitability: {
         Row: {
