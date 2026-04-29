@@ -80,6 +80,10 @@ jobs:
           # Update these whenever baseline-2026-04.md is refreshed
           BASELINE_ANY: 745
           BASELINE_ROUTES: 419
+          # Wave 4+5 (2026-04-29): после чистки таблиц/edge fn
+          BASELINE_TABLES: 386
+          BASELINE_ACTIVE_EDGE_FN: 124
+          MIN_ARCHIVED_EDGE_FN: 33
         run: |
           set -e
           ANY=${{ steps.now.outputs.any }}
