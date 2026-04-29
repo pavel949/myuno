@@ -24848,45 +24848,6 @@ export type Database = {
         }
         Relationships: []
       }
-      user_analytics_daily: {
-        Row: {
-          created_at: string | null
-          date: string
-          events: number | null
-          id: string
-          orders: number | null
-          page_views: number | null
-          revenue: number | null
-          sessions: number | null
-          time_spent: number | null
-          user_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          date: string
-          events?: number | null
-          id?: string
-          orders?: number | null
-          page_views?: number | null
-          revenue?: number | null
-          sessions?: number | null
-          time_spent?: number | null
-          user_id: string
-        }
-        Update: {
-          created_at?: string | null
-          date?: string
-          events?: number | null
-          id?: string
-          orders?: number | null
-          page_views?: number | null
-          revenue?: number | null
-          sessions?: number | null
-          time_spent?: number | null
-          user_id?: string
-        }
-        Relationships: []
-      }
       user_compliance_obligations: {
         Row: {
           created_at: string
