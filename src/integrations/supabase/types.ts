@@ -2727,15 +2727,7 @@ export type Database = {
           utm_medium?: string | null
           utm_source?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "capital_intro_requests_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "business_listings"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       capital_pipeline: {
         Row: {
@@ -11997,13 +11989,7 @@ export type Database = {
       }
       mcc_automation_rules: {
         Row: {
-          action_config: Json | null
-          action_type: string | null
           actions: Json
-          condition_field: string | null
-          condition_operator: string | null
-          condition_value: string | null
-          cooldown_hours: number | null
           created_at: string | null
           created_by: string | null
           description: string | null
@@ -12014,19 +12000,12 @@ export type Database = {
           last_executed_at: string | null
           name: string
           trigger_conditions: Json
-          trigger_entity_type: string | null
           trigger_type: string
           updated_at: string | null
           user_state_filter: string[] | null
         }
         Insert: {
-          action_config?: Json | null
-          action_type?: string | null
           actions: Json
-          condition_field?: string | null
-          condition_operator?: string | null
-          condition_value?: string | null
-          cooldown_hours?: number | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
@@ -12037,19 +12016,12 @@ export type Database = {
           last_executed_at?: string | null
           name: string
           trigger_conditions: Json
-          trigger_entity_type?: string | null
           trigger_type: string
           updated_at?: string | null
           user_state_filter?: string[] | null
         }
         Update: {
-          action_config?: Json | null
-          action_type?: string | null
           actions?: Json
-          condition_field?: string | null
-          condition_operator?: string | null
-          condition_value?: string | null
-          cooldown_hours?: number | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
@@ -12060,7 +12032,6 @@ export type Database = {
           last_executed_at?: string | null
           name?: string
           trigger_conditions?: Json
-          trigger_entity_type?: string | null
           trigger_type?: string
           updated_at?: string | null
           user_state_filter?: string[] | null
@@ -12236,15 +12207,7 @@ export type Database = {
           source?: string | null
           spend?: number | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "mcc_channel_metrics_campaign_id_fkey"
-            columns: ["campaign_id"]
-            isOneToOne: false
-            referencedRelation: "mcc_campaigns"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       mcc_creatives: {
         Row: {
@@ -12301,15 +12264,7 @@ export type Database = {
           updated_at?: string | null
           variant_name?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "mcc_creatives_campaign_id_fkey"
-            columns: ["campaign_id"]
-            isOneToOne: false
-            referencedRelation: "mcc_campaigns"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       mcc_landing_events: {
         Row: {
@@ -14964,43 +14919,7 @@ export type Database = {
           tags?: string[] | null
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "owner_vault_files_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "owner_properties"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "owner_vault_files_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "owner_vault_files_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "v_marketplace_listings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "owner_vault_files_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "v_owner_properties"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "owner_vault_files_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "v_properties_public"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       page_views: {
         Row: {
@@ -15556,134 +15475,65 @@ export type Database = {
         Row: {
           active_providers: number | null
           active_users: number | null
-          avg_order_value: number | null
-          avg_session_duration_seconds: number | null
-          avg_take_rate: number | null
-          cac: number | null
           cancelled_bookings: number | null
           completed_bookings: number | null
           created_at: string
-          cross_sell_rate: number | null
-          d30_retention: number | null
-          d7_retention: number | null
           date: string
-          dau: number | null
           gmv: number | null
-          gross_margin: number | null
           id: string
-          ltv: number | null
-          ltv_cac_ratio: number | null
-          mau: number | null
           new_bookings: number | null
           new_providers: number | null
           new_users: number | null
           page_views: number | null
           platform_revenue: number | null
-          property_adr: number | null
-          property_gmv: number | null
-          property_listings_count: number | null
-          property_occupancy_rate: number | null
-          repeat_purchase_rate: number | null
-          session_count: number | null
           subscription_revenue: number | null
           total_bookings: number | null
           total_providers: number | null
           total_users: number | null
-          tours_avg_rating: number | null
-          tours_count: number | null
-          tours_gmv: number | null
           unique_visitors: number | null
           updated_at: string
-          yachts_count: number | null
-          yachts_gmv: number | null
         }
         Insert: {
           active_providers?: number | null
           active_users?: number | null
-          avg_order_value?: number | null
-          avg_session_duration_seconds?: number | null
-          avg_take_rate?: number | null
-          cac?: number | null
           cancelled_bookings?: number | null
           completed_bookings?: number | null
           created_at?: string
-          cross_sell_rate?: number | null
-          d30_retention?: number | null
-          d7_retention?: number | null
           date: string
-          dau?: number | null
           gmv?: number | null
-          gross_margin?: number | null
           id?: string
-          ltv?: number | null
-          ltv_cac_ratio?: number | null
-          mau?: number | null
           new_bookings?: number | null
           new_providers?: number | null
           new_users?: number | null
           page_views?: number | null
           platform_revenue?: number | null
-          property_adr?: number | null
-          property_gmv?: number | null
-          property_listings_count?: number | null
-          property_occupancy_rate?: number | null
-          repeat_purchase_rate?: number | null
-          session_count?: number | null
           subscription_revenue?: number | null
           total_bookings?: number | null
           total_providers?: number | null
           total_users?: number | null
-          tours_avg_rating?: number | null
-          tours_count?: number | null
-          tours_gmv?: number | null
           unique_visitors?: number | null
           updated_at?: string
-          yachts_count?: number | null
-          yachts_gmv?: number | null
         }
         Update: {
           active_providers?: number | null
           active_users?: number | null
-          avg_order_value?: number | null
-          avg_session_duration_seconds?: number | null
-          avg_take_rate?: number | null
-          cac?: number | null
           cancelled_bookings?: number | null
           completed_bookings?: number | null
           created_at?: string
-          cross_sell_rate?: number | null
-          d30_retention?: number | null
-          d7_retention?: number | null
           date?: string
-          dau?: number | null
           gmv?: number | null
-          gross_margin?: number | null
           id?: string
-          ltv?: number | null
-          ltv_cac_ratio?: number | null
-          mau?: number | null
           new_bookings?: number | null
           new_providers?: number | null
           new_users?: number | null
           page_views?: number | null
           platform_revenue?: number | null
-          property_adr?: number | null
-          property_gmv?: number | null
-          property_listings_count?: number | null
-          property_occupancy_rate?: number | null
-          repeat_purchase_rate?: number | null
-          session_count?: number | null
           subscription_revenue?: number | null
           total_bookings?: number | null
           total_providers?: number | null
           total_users?: number | null
-          tours_avg_rating?: number | null
-          tours_count?: number | null
-          tours_gmv?: number | null
           unique_visitors?: number | null
           updated_at?: string
-          yachts_count?: number | null
-          yachts_gmv?: number | null
         }
         Relationships: []
       }
@@ -23738,15 +23588,7 @@ export type Database = {
           staff_id?: string
           title?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "staff_documents_staff_id_fkey"
-            columns: ["staff_id"]
-            isOneToOne: false
-            referencedRelation: "staff_members"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       staff_members: {
         Row: {
@@ -23904,15 +23746,7 @@ export type Database = {
           role_at_property?: string | null
           staff_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "staff_property_assignments_staff_id_fkey"
-            columns: ["staff_id"]
-            isOneToOne: false
-            referencedRelation: "staff_members"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       stays_subscription_tiers: {
         Row: {
@@ -26632,15 +26466,7 @@ export type Database = {
           revenue?: number | null
           total_bookings?: number | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "vendor_analytics_provider_id_fkey"
-            columns: ["provider_id"]
-            isOneToOne: false
-            referencedRelation: "providers"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       vendor_bookings: {
         Row: {
@@ -26758,15 +26584,7 @@ export type Database = {
           title?: string | null
           vendor_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "vendor_documents_vendor_id_fkey"
-            columns: ["vendor_id"]
-            isOneToOne: false
-            referencedRelation: "owner_service_vendors"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       vendor_location_services: {
         Row: {
@@ -26799,22 +26617,7 @@ export type Database = {
           price_override?: number | null
           service_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "vendor_location_services_location_id_fkey"
-            columns: ["location_id"]
-            isOneToOne: false
-            referencedRelation: "vendor_locations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "vendor_location_services_service_id_fkey"
-            columns: ["service_id"]
-            isOneToOne: false
-            referencedRelation: "services"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       vendor_locations: {
         Row: {
