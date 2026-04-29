@@ -30658,7 +30658,6 @@ export type Database = {
             }
             Returns: boolean
           }
-      cleanup_old_sync_logs: { Args: never; Returns: undefined }
       clearview_grade_to_recommendation: {
         Args: { _grade: string }
         Returns: string
@@ -30725,75 +30724,10 @@ export type Database = {
         }
         Returns: boolean
       }
-      devmod_compute_fingerprint: {
-        Args: { p_email: string; p_passport?: string; p_phone: string }
-        Returns: string
-      }
       devmod_is_broker_or_admin: { Args: never; Returns: boolean }
       devmod_my_developer_id: { Args: never; Returns: string }
-      devmod_next_reservation_number: { Args: never; Returns: string }
-      devmod_next_rln_number: { Args: never; Returns: string }
       devmod_release_expired_holds: { Args: never; Returns: number }
-      devmod_update_foreign_quota: {
-        Args: { p_project_id: string }
-        Returns: undefined
-      }
       ensure_multi_role_qa_bundle: { Args: never; Returns: Json }
-      find_nearby_clinics: {
-        Args: { radius_km?: number; user_lat: number; user_lng: number }
-        Returns: {
-          distance_km: number
-          id: string
-          lat: number
-          lng: number
-          name_en: string
-          name_ru: string
-        }[]
-      }
-      find_nearby_flower_shops: {
-        Args: { radius_km?: number; user_lat: number; user_lng: number }
-        Returns: {
-          distance_km: number
-          id: string
-          lat: number
-          lng: number
-          name_en: string
-          name_ru: string
-        }[]
-      }
-      find_nearby_gyms: {
-        Args: { radius_km?: number; user_lat: number; user_lng: number }
-        Returns: {
-          distance_km: number
-          id: string
-          lat: number
-          lng: number
-          name_en: string
-          name_ru: string
-        }[]
-      }
-      find_nearby_restaurants: {
-        Args: { radius_km?: number; user_lat: number; user_lng: number }
-        Returns: {
-          distance_km: number
-          id: string
-          lat: number
-          lng: number
-          name_en: string
-          name_ru: string
-        }[]
-      }
-      find_nearby_salons: {
-        Args: { radius_km?: number; user_lat: number; user_lng: number }
-        Returns: {
-          distance_km: number
-          id: string
-          lat: number
-          lng: number
-          name_en: string
-          name_ru: string
-        }[]
-      }
       find_or_create_identity: {
         Args: {
           _display_name: string
