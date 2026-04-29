@@ -4,6 +4,7 @@
  * The barrel file personaLandings.ts keeps the public API stable.
  */
 import type { PersonaLanding } from '@/lib/landings/types';
+import { OG_DEFAULT } from './_shared';
 
 export const P2_CN_INVESTORS: PersonaLanding = {
   personaCode: 'P2',
