@@ -2642,6 +2642,93 @@ export type Database = {
           },
         ]
       }
+      capital_intro_requests: {
+        Row: {
+          admin_notes: string | null
+          asset_class: string | null
+          background: string | null
+          capital_range_thb: string | null
+          created_at: string
+          crm_contact_id: string | null
+          crm_deal_id: string | null
+          estimated_deal_size_thb: number | null
+          guest_email: string | null
+          guest_name: string | null
+          guest_phone: string | null
+          id: string
+          listing_id: string | null
+          message: string | null
+          preferred_language: string | null
+          project_id: string | null
+          request_type: string
+          source_route: string | null
+          status: string
+          success_probability_pct: number | null
+          timeline: string | null
+          updated_at: string
+          user_id: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          asset_class?: string | null
+          background?: string | null
+          capital_range_thb?: string | null
+          created_at?: string
+          crm_contact_id?: string | null
+          crm_deal_id?: string | null
+          estimated_deal_size_thb?: number | null
+          guest_email?: string | null
+          guest_name?: string | null
+          guest_phone?: string | null
+          id?: string
+          listing_id?: string | null
+          message?: string | null
+          preferred_language?: string | null
+          project_id?: string | null
+          request_type: string
+          source_route?: string | null
+          status?: string
+          success_probability_pct?: number | null
+          timeline?: string | null
+          updated_at?: string
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          asset_class?: string | null
+          background?: string | null
+          capital_range_thb?: string | null
+          created_at?: string
+          crm_contact_id?: string | null
+          crm_deal_id?: string | null
+          estimated_deal_size_thb?: number | null
+          guest_email?: string | null
+          guest_name?: string | null
+          guest_phone?: string | null
+          id?: string
+          listing_id?: string | null
+          message?: string | null
+          preferred_language?: string | null
+          project_id?: string | null
+          request_type?: string
+          source_route?: string | null
+          status?: string
+          success_probability_pct?: number | null
+          timeline?: string | null
+          updated_at?: string
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Relationships: []
+      }
       capital_pipeline: {
         Row: {
           amount: number | null
@@ -11843,6 +11930,108 @@ export type Database = {
           },
         ]
       }
+      mcc_ai_recommendations: {
+        Row: {
+          applied_at: string | null
+          applied_by: string | null
+          confidence: number
+          created_at: string | null
+          data_points: Json | null
+          dismissed_at: string | null
+          dismissed_reason: string | null
+          expected_impact: string | null
+          expires_at: string | null
+          id: string
+          recommendation_type: string
+          status: string | null
+          target_entity: string | null
+          what_happened: string
+          what_to_do: string
+          why_it_matters: string
+        }
+        Insert: {
+          applied_at?: string | null
+          applied_by?: string | null
+          confidence?: number
+          created_at?: string | null
+          data_points?: Json | null
+          dismissed_at?: string | null
+          dismissed_reason?: string | null
+          expected_impact?: string | null
+          expires_at?: string | null
+          id?: string
+          recommendation_type: string
+          status?: string | null
+          target_entity?: string | null
+          what_happened: string
+          what_to_do: string
+          why_it_matters: string
+        }
+        Update: {
+          applied_at?: string | null
+          applied_by?: string | null
+          confidence?: number
+          created_at?: string | null
+          data_points?: Json | null
+          dismissed_at?: string | null
+          dismissed_reason?: string | null
+          expected_impact?: string | null
+          expires_at?: string | null
+          id?: string
+          recommendation_type?: string
+          status?: string | null
+          target_entity?: string | null
+          what_happened?: string
+          what_to_do?: string
+          why_it_matters?: string
+        }
+        Relationships: []
+      }
+      mcc_automation_rules: {
+        Row: {
+          actions: Json
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          executions_count: number | null
+          id: string
+          is_active: boolean | null
+          last_executed_at: string | null
+          name: string
+          trigger_conditions: Json
+          trigger_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          actions: Json
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          executions_count?: number | null
+          id?: string
+          is_active?: boolean | null
+          last_executed_at?: string | null
+          name: string
+          trigger_conditions: Json
+          trigger_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          actions?: Json
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          executions_count?: number | null
+          id?: string
+          is_active?: boolean | null
+          last_executed_at?: string | null
+          name?: string
+          trigger_conditions?: Json
+          trigger_type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       mcc_campaign_rules: {
         Row: {
           campaign_id: string
@@ -11945,6 +12134,129 @@ export type Database = {
           status?: string | null
           target_segment?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      mcc_channel_metrics: {
+        Row: {
+          cac: number | null
+          campaign_id: string | null
+          channel: string
+          clicks: number | null
+          conversions: number | null
+          cpc: number | null
+          cpl: number | null
+          created_at: string | null
+          ctr: number | null
+          cvr: number | null
+          date: string
+          id: string
+          impressions: number | null
+          leads: number | null
+          revenue: number | null
+          roas: number | null
+          signups: number | null
+          source: string | null
+          spend: number | null
+        }
+        Insert: {
+          cac?: number | null
+          campaign_id?: string | null
+          channel: string
+          clicks?: number | null
+          conversions?: number | null
+          cpc?: number | null
+          cpl?: number | null
+          created_at?: string | null
+          ctr?: number | null
+          cvr?: number | null
+          date?: string
+          id?: string
+          impressions?: number | null
+          leads?: number | null
+          revenue?: number | null
+          roas?: number | null
+          signups?: number | null
+          source?: string | null
+          spend?: number | null
+        }
+        Update: {
+          cac?: number | null
+          campaign_id?: string | null
+          channel?: string
+          clicks?: number | null
+          conversions?: number | null
+          cpc?: number | null
+          cpl?: number | null
+          created_at?: string | null
+          ctr?: number | null
+          cvr?: number | null
+          date?: string
+          id?: string
+          impressions?: number | null
+          leads?: number | null
+          revenue?: number | null
+          roas?: number | null
+          signups?: number | null
+          source?: string | null
+          spend?: number | null
+        }
+        Relationships: []
+      }
+      mcc_creatives: {
+        Row: {
+          campaign_id: string | null
+          clicks: number | null
+          content: Json
+          conversions: number | null
+          created_at: string | null
+          creative_type: string
+          id: string
+          impressions: number | null
+          is_active: boolean | null
+          is_control: boolean | null
+          language: string | null
+          name: string
+          performance: Json | null
+          spend: number | null
+          updated_at: string | null
+          variant_name: string | null
+        }
+        Insert: {
+          campaign_id?: string | null
+          clicks?: number | null
+          content: Json
+          conversions?: number | null
+          created_at?: string | null
+          creative_type: string
+          id?: string
+          impressions?: number | null
+          is_active?: boolean | null
+          is_control?: boolean | null
+          language?: string | null
+          name: string
+          performance?: Json | null
+          spend?: number | null
+          updated_at?: string | null
+          variant_name?: string | null
+        }
+        Update: {
+          campaign_id?: string | null
+          clicks?: number | null
+          content?: Json
+          conversions?: number | null
+          created_at?: string | null
+          creative_type?: string
+          id?: string
+          impressions?: number | null
+          is_active?: boolean | null
+          is_control?: boolean | null
+          language?: string | null
+          name?: string
+          performance?: Json | null
+          spend?: number | null
+          updated_at?: string | null
+          variant_name?: string | null
         }
         Relationships: []
       }
@@ -12158,6 +12470,42 @@ export type Database = {
           term?: string | null
           touchpoints?: Json | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      mcc_state_history: {
+        Row: {
+          created_at: string | null
+          from_state: string | null
+          id: string
+          landing_id: string | null
+          metadata: Json | null
+          to_state: string
+          trigger_event: string | null
+          trigger_event_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          from_state?: string | null
+          id?: string
+          landing_id?: string | null
+          metadata?: Json | null
+          to_state: string
+          trigger_event?: string | null
+          trigger_event_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          from_state?: string | null
+          id?: string
+          landing_id?: string | null
+          metadata?: Json | null
+          to_state?: string
+          trigger_event?: string | null
+          trigger_event_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -14022,6 +14370,60 @@ export type Database = {
           },
         ]
       }
+      owner_performance_metrics: {
+        Row: {
+          avg_rating: number | null
+          avg_response_time_minutes: number | null
+          cancellation_rate: number | null
+          completed_bookings: number | null
+          created_at: string | null
+          id: string
+          is_superhost: boolean | null
+          last_evaluated_at: string | null
+          owner_id: string
+          response_rate: number | null
+          review_reply_rate: number | null
+          superhost_since: string | null
+          total_bookings: number | null
+          total_reviews: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          avg_rating?: number | null
+          avg_response_time_minutes?: number | null
+          cancellation_rate?: number | null
+          completed_bookings?: number | null
+          created_at?: string | null
+          id?: string
+          is_superhost?: boolean | null
+          last_evaluated_at?: string | null
+          owner_id: string
+          response_rate?: number | null
+          review_reply_rate?: number | null
+          superhost_since?: string | null
+          total_bookings?: number | null
+          total_reviews?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          avg_rating?: number | null
+          avg_response_time_minutes?: number | null
+          cancellation_rate?: number | null
+          completed_bookings?: number | null
+          created_at?: string | null
+          id?: string
+          is_superhost?: boolean | null
+          last_evaluated_at?: string | null
+          owner_id?: string
+          response_rate?: number | null
+          review_reply_rate?: number | null
+          superhost_since?: string | null
+          total_bookings?: number | null
+          total_reviews?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       owner_portal_settings: {
         Row: {
           company_id: string | null
@@ -14461,6 +14863,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      owner_vault_files: {
+        Row: {
+          created_at: string
+          description: string | null
+          doc_type: string
+          file_name: string
+          file_path: string
+          file_size: number | null
+          id: string
+          mime_type: string | null
+          owner_id: string
+          property_id: string | null
+          share_expires_at: string | null
+          share_token: string | null
+          tags: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          doc_type?: string
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          id?: string
+          mime_type?: string | null
+          owner_id: string
+          property_id?: string | null
+          share_expires_at?: string | null
+          share_token?: string | null
+          tags?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          doc_type?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          mime_type?: string | null
+          owner_id?: string
+          property_id?: string | null
+          share_expires_at?: string | null
+          share_token?: string | null
+          tags?: string[] | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       page_views: {
         Row: {
@@ -14954,6 +15407,237 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      platform_events: {
+        Row: {
+          category: string
+          cover_image: string | null
+          created_at: string
+          created_by: string | null
+          description_en: string | null
+          description_ru: string | null
+          end_date: string | null
+          event_date: string
+          event_time: string | null
+          event_url: string | null
+          id: string
+          is_active: boolean | null
+          is_featured: boolean | null
+          location: string | null
+          title_en: string
+          title_ru: string
+        }
+        Insert: {
+          category?: string
+          cover_image?: string | null
+          created_at?: string
+          created_by?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          end_date?: string | null
+          event_date: string
+          event_time?: string | null
+          event_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          location?: string | null
+          title_en: string
+          title_ru: string
+        }
+        Update: {
+          category?: string
+          cover_image?: string | null
+          created_at?: string
+          created_by?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          end_date?: string | null
+          event_date?: string
+          event_time?: string | null
+          event_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          location?: string | null
+          title_en?: string
+          title_ru?: string
+        }
+        Relationships: []
+      }
+      platform_metrics: {
+        Row: {
+          active_providers: number | null
+          active_users: number | null
+          cancelled_bookings: number | null
+          completed_bookings: number | null
+          created_at: string
+          date: string
+          gmv: number | null
+          id: string
+          new_bookings: number | null
+          new_providers: number | null
+          new_users: number | null
+          page_views: number | null
+          platform_revenue: number | null
+          subscription_revenue: number | null
+          total_bookings: number | null
+          total_providers: number | null
+          total_users: number | null
+          unique_visitors: number | null
+          updated_at: string
+        }
+        Insert: {
+          active_providers?: number | null
+          active_users?: number | null
+          cancelled_bookings?: number | null
+          completed_bookings?: number | null
+          created_at?: string
+          date: string
+          gmv?: number | null
+          id?: string
+          new_bookings?: number | null
+          new_providers?: number | null
+          new_users?: number | null
+          page_views?: number | null
+          platform_revenue?: number | null
+          subscription_revenue?: number | null
+          total_bookings?: number | null
+          total_providers?: number | null
+          total_users?: number | null
+          unique_visitors?: number | null
+          updated_at?: string
+        }
+        Update: {
+          active_providers?: number | null
+          active_users?: number | null
+          cancelled_bookings?: number | null
+          completed_bookings?: number | null
+          created_at?: string
+          date?: string
+          gmv?: number | null
+          id?: string
+          new_bookings?: number | null
+          new_providers?: number | null
+          new_users?: number | null
+          page_views?: number | null
+          platform_revenue?: number | null
+          subscription_revenue?: number | null
+          total_bookings?: number | null
+          total_providers?: number | null
+          total_users?: number | null
+          unique_visitors?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      platform_news: {
+        Row: {
+          category: string
+          cover_image: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean | null
+          is_pinned: boolean | null
+          published_at: string
+          source_name: string | null
+          source_url: string | null
+          summary_en: string | null
+          summary_ru: string | null
+          title_en: string
+          title_ru: string
+        }
+        Insert: {
+          category?: string
+          cover_image?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_pinned?: boolean | null
+          published_at?: string
+          source_name?: string | null
+          source_url?: string | null
+          summary_en?: string | null
+          summary_ru?: string | null
+          title_en: string
+          title_ru: string
+        }
+        Update: {
+          category?: string
+          cover_image?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_pinned?: boolean | null
+          published_at?: string
+          source_name?: string | null
+          source_url?: string | null
+          summary_en?: string | null
+          summary_ru?: string | null
+          title_en?: string
+          title_ru?: string
+        }
+        Relationships: []
+      }
+      platform_recommendations: {
+        Row: {
+          action_label_en: string | null
+          action_label_ru: string | null
+          action_url: string | null
+          category: string
+          created_at: string
+          description_en: string | null
+          description_ru: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          priority: number | null
+          target_roles: string[] | null
+          title_en: string
+          title_ru: string
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          action_label_en?: string | null
+          action_label_ru?: string | null
+          action_url?: string | null
+          category?: string
+          created_at?: string
+          description_en?: string | null
+          description_ru?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          priority?: number | null
+          target_roles?: string[] | null
+          title_en: string
+          title_ru: string
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          action_label_en?: string | null
+          action_label_ru?: string | null
+          action_url?: string | null
+          category?: string
+          created_at?: string
+          description_en?: string | null
+          description_ru?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          priority?: number | null
+          target_roles?: string[] | null
+          title_en?: string
+          title_ru?: string
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Relationships: []
       }
       portal_messages: {
         Row: {
@@ -22861,6 +23545,45 @@ export type Database = {
           },
         ]
       }
+      staff_documents: {
+        Row: {
+          created_at: string | null
+          doc_type: string | null
+          expiry_date: string | null
+          file_name: string | null
+          file_url: string | null
+          id: string
+          notes: string | null
+          owner_id: string
+          staff_id: string
+          title: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          doc_type?: string | null
+          expiry_date?: string | null
+          file_name?: string | null
+          file_url?: string | null
+          id?: string
+          notes?: string | null
+          owner_id: string
+          staff_id: string
+          title?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          doc_type?: string | null
+          expiry_date?: string | null
+          file_name?: string | null
+          file_url?: string | null
+          id?: string
+          notes?: string | null
+          owner_id?: string
+          staff_id?: string
+          title?: string | null
+        }
+        Relationships: []
+      }
       staff_members: {
         Row: {
           company_id: string | null
@@ -22931,6 +23654,93 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      staff_profiles: {
+        Row: {
+          avg_rating: number | null
+          bio: string | null
+          completed_tasks: number | null
+          created_at: string
+          display_name: string
+          id: string
+          is_active: boolean | null
+          is_available: boolean | null
+          languages: string[] | null
+          phone: string | null
+          photo: string | null
+          service_types: string[] | null
+          total_reviews: number | null
+          updated_at: string
+          user_id: string
+          working_hours: Json | null
+        }
+        Insert: {
+          avg_rating?: number | null
+          bio?: string | null
+          completed_tasks?: number | null
+          created_at?: string
+          display_name: string
+          id?: string
+          is_active?: boolean | null
+          is_available?: boolean | null
+          languages?: string[] | null
+          phone?: string | null
+          photo?: string | null
+          service_types?: string[] | null
+          total_reviews?: number | null
+          updated_at?: string
+          user_id: string
+          working_hours?: Json | null
+        }
+        Update: {
+          avg_rating?: number | null
+          bio?: string | null
+          completed_tasks?: number | null
+          created_at?: string
+          display_name?: string
+          id?: string
+          is_active?: boolean | null
+          is_available?: boolean | null
+          languages?: string[] | null
+          phone?: string | null
+          photo?: string | null
+          service_types?: string[] | null
+          total_reviews?: number | null
+          updated_at?: string
+          user_id?: string
+          working_hours?: Json | null
+        }
+        Relationships: []
+      }
+      staff_property_assignments: {
+        Row: {
+          assigned_at: string
+          id: string
+          is_primary: boolean
+          owner_id: string
+          property_id: string
+          role_at_property: string | null
+          staff_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          id?: string
+          is_primary?: boolean
+          owner_id: string
+          property_id: string
+          role_at_property?: string | null
+          staff_id: string
+        }
+        Update: {
+          assigned_at?: string
+          id?: string
+          is_primary?: boolean
+          owner_id?: string
+          property_id?: string
+          role_at_property?: string | null
+          staff_id?: string
+        }
+        Relationships: []
       }
       stays_subscription_tiers: {
         Row: {
@@ -23722,6 +24532,48 @@ export type Database = {
           name_en?: string
           name_ru?: string
           slug?: string
+        }
+        Relationships: []
+      }
+      team_gamification: {
+        Row: {
+          badges: string[] | null
+          created_at: string | null
+          id: string
+          last_activity_date: string | null
+          level: number | null
+          monthly_points: number | null
+          streak_days: number | null
+          total_points: number | null
+          updated_at: string | null
+          user_id: string
+          weekly_points: number | null
+        }
+        Insert: {
+          badges?: string[] | null
+          created_at?: string | null
+          id?: string
+          last_activity_date?: string | null
+          level?: number | null
+          monthly_points?: number | null
+          streak_days?: number | null
+          total_points?: number | null
+          updated_at?: string | null
+          user_id: string
+          weekly_points?: number | null
+        }
+        Update: {
+          badges?: string[] | null
+          created_at?: string | null
+          id?: string
+          last_activity_date?: string | null
+          level?: number | null
+          monthly_points?: number | null
+          streak_days?: number | null
+          total_points?: number | null
+          updated_at?: string | null
+          user_id?: string
+          weekly_points?: number | null
         }
         Relationships: []
       }
@@ -25565,6 +26417,51 @@ export type Database = {
           },
         ]
       }
+      vendor_analytics: {
+        Row: {
+          avg_rating: number | null
+          cancelled_bookings: number | null
+          commission: number | null
+          completed_bookings: number | null
+          created_at: string
+          date: string
+          id: string
+          net_revenue: number | null
+          new_customers: number | null
+          provider_id: string
+          revenue: number | null
+          total_bookings: number | null
+        }
+        Insert: {
+          avg_rating?: number | null
+          cancelled_bookings?: number | null
+          commission?: number | null
+          completed_bookings?: number | null
+          created_at?: string
+          date: string
+          id?: string
+          net_revenue?: number | null
+          new_customers?: number | null
+          provider_id: string
+          revenue?: number | null
+          total_bookings?: number | null
+        }
+        Update: {
+          avg_rating?: number | null
+          cancelled_bookings?: number | null
+          commission?: number | null
+          completed_bookings?: number | null
+          created_at?: string
+          date?: string
+          id?: string
+          net_revenue?: number | null
+          new_customers?: number | null
+          provider_id?: string
+          revenue?: number | null
+          total_bookings?: number | null
+        }
+        Relationships: []
+      }
       vendor_bookings: {
         Row: {
           amount: number
@@ -25643,6 +26540,78 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      vendor_documents: {
+        Row: {
+          created_at: string | null
+          doc_type: string | null
+          expiry_date: string | null
+          file_name: string | null
+          file_url: string | null
+          id: string
+          notes: string | null
+          owner_id: string
+          title: string | null
+          vendor_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          doc_type?: string | null
+          expiry_date?: string | null
+          file_name?: string | null
+          file_url?: string | null
+          id?: string
+          notes?: string | null
+          owner_id: string
+          title?: string | null
+          vendor_id: string
+        }
+        Update: {
+          created_at?: string | null
+          doc_type?: string | null
+          expiry_date?: string | null
+          file_name?: string | null
+          file_url?: string | null
+          id?: string
+          notes?: string | null
+          owner_id?: string
+          title?: string | null
+          vendor_id?: string
+        }
+        Relationships: []
+      }
+      vendor_location_services: {
+        Row: {
+          created_at: string
+          currency_override: string | null
+          duration_override: number | null
+          id: string
+          is_active: boolean | null
+          location_id: string
+          price_override: number | null
+          service_id: string
+        }
+        Insert: {
+          created_at?: string
+          currency_override?: string | null
+          duration_override?: number | null
+          id?: string
+          is_active?: boolean | null
+          location_id: string
+          price_override?: number | null
+          service_id: string
+        }
+        Update: {
+          created_at?: string
+          currency_override?: string | null
+          duration_override?: number | null
+          id?: string
+          is_active?: boolean | null
+          location_id?: string
+          price_override?: number | null
+          service_id?: string
+        }
+        Relationships: []
       }
       vendor_locations: {
         Row: {
