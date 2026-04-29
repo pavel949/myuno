@@ -30536,7 +30536,6 @@ export type Database = {
         Args: { p_achievement_code: string; p_user_id: string }
         Returns: Json
       }
-      calculate_daily_metrics: { Args: { p_date?: string }; Returns: undefined }
       calculate_distance_km: {
         Args: { lat1: number; lat2: number; lng1: number; lng2: number }
         Returns: number
@@ -30963,16 +30962,6 @@ export type Database = {
       }
       lead_temperature_from_score: {
         Args: { p_score: number }
-        Returns: string
-      }
-      log_security_event: {
-        Args: {
-          p_details?: Json
-          p_event_type: string
-          p_ip_address?: string
-          p_user_agent?: string
-          p_user_id?: string
-        }
         Returns: string
       }
       mc_can_access: {

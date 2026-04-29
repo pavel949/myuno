@@ -4,14 +4,22 @@ Snapshot после автономного прогона Волн 1, 4, 5.
 
 ## Метрики
 
-| Метрика | Baseline | В1+4.A+4.B | В4.C+5 | В5-batch1 | Δ |
+| Метрика | Baseline | В1+4.A+4.B | В4.C+5 | В5-batch2 | Δ |
 |---|---|---|---|---|---|
 | Tables `public` | 405 | 387 | 386 | **386** | −19 |
 | Edge functions (active) | 157 | 124 | 124 | **124** | −33 |
 | `personaLandings.ts` LOC | 1689 | 80 + 27 | — | — | сплит |
 | Hardcoded `navigate('/')` | 419 | 419 | 419 | 419 | 0 |
-| RPC functions (`public`) | n/a | n/a | 432 | **422** | −10 |
+| RPC functions (`public`) | n/a | n/a | 432 | **420** | −12 |
 | `any` usage | 745 | 745 | 745 | 745 | 0 |
+
+## Волна 5 — batch 2 (2026-04-29)
+
+Дропнуты 2 функции после deep-аудита `pg_depend` + текстового скана (`pg_proc.prosrc`, `pg_policy`, `pg_views`, `cron.job`):
+- `log_security_event` — 0 refs
+- `calculate_daily_metrics` — 0 refs
+
+Public RPCs: 422 → **420**.
 
 ## Волна 5 — batch 1 (2026-04-29)
 
