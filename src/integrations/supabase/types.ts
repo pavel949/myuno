@@ -1807,68 +1807,6 @@ export type Database = {
           },
         ]
       }
-      booking_scheduled_messages: {
-        Row: {
-          body: string
-          booking_id: string
-          channel: string
-          created_at: string
-          error_message: string | null
-          guest_user_id: string
-          id: string
-          metadata: Json | null
-          owner_id: string
-          property_id: string
-          rule_id: string | null
-          scheduled_at: string
-          sent_at: string | null
-          status: string
-          subject: string | null
-        }
-        Insert: {
-          body: string
-          booking_id: string
-          channel?: string
-          created_at?: string
-          error_message?: string | null
-          guest_user_id: string
-          id?: string
-          metadata?: Json | null
-          owner_id: string
-          property_id: string
-          rule_id?: string | null
-          scheduled_at: string
-          sent_at?: string | null
-          status?: string
-          subject?: string | null
-        }
-        Update: {
-          body?: string
-          booking_id?: string
-          channel?: string
-          created_at?: string
-          error_message?: string | null
-          guest_user_id?: string
-          id?: string
-          metadata?: Json | null
-          owner_id?: string
-          property_id?: string
-          rule_id?: string | null
-          scheduled_at?: string
-          sent_at?: string | null
-          status?: string
-          subject?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "booking_scheduled_messages_rule_id_fkey"
-            columns: ["rule_id"]
-            isOneToOne: false
-            referencedRelation: "booking_message_rules"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       booking_status_history: {
         Row: {
           booking_id: string
@@ -3668,63 +3606,6 @@ export type Database = {
           name_ru?: string
           updated_at?: string
           weight?: number
-        }
-        Relationships: []
-      }
-      clearview_projects: {
-        Row: {
-          created_at: string
-          developer_id: string | null
-          grade: Database["public"]["Enums"]["clearview_grade"] | null
-          id: string
-          is_published: boolean
-          location: string | null
-          maturity_step: number | null
-          name: string
-          recommendation:
-            | Database["public"]["Enums"]["clearview_recommendation"]
-            | null
-          reviewed_at: string | null
-          reviewed_by: string | null
-          slug: string
-          total_score: number | null
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          developer_id?: string | null
-          grade?: Database["public"]["Enums"]["clearview_grade"] | null
-          id?: string
-          is_published?: boolean
-          location?: string | null
-          maturity_step?: number | null
-          name: string
-          recommendation?:
-            | Database["public"]["Enums"]["clearview_recommendation"]
-            | null
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          slug: string
-          total_score?: number | null
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          developer_id?: string | null
-          grade?: Database["public"]["Enums"]["clearview_grade"] | null
-          id?: string
-          is_published?: boolean
-          location?: string | null
-          maturity_step?: number | null
-          name?: string
-          recommendation?:
-            | Database["public"]["Enums"]["clearview_recommendation"]
-            | null
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          slug?: string
-          total_score?: number | null
-          updated_at?: string
         }
         Relationships: []
       }
@@ -7089,39 +6970,6 @@ export type Database = {
           specialty?: string
           specialty_ru?: string | null
           updated_at?: string
-        }
-        Relationships: []
-      }
-      document_reminders: {
-        Row: {
-          created_at: string
-          document_id: string | null
-          fire_at: string
-          id: string
-          payload: Json | null
-          sent_at: string | null
-          status: string
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          document_id?: string | null
-          fire_at: string
-          id?: string
-          payload?: Json | null
-          sent_at?: string | null
-          status?: string
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          document_id?: string | null
-          fire_at?: string
-          id?: string
-          payload?: Json | null
-          sent_at?: string | null
-          status?: string
-          user_id?: string | null
         }
         Relationships: []
       }
@@ -20182,81 +20030,6 @@ export type Database = {
           },
           {
             foreignKeyName: "property_ownership_invites_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "v_properties_public"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      property_passport_events: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          description: string | null
-          document_ids: string[] | null
-          event_date: string
-          event_type: string
-          id: string
-          metadata: Json | null
-          property_id: string
-          title: string
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          document_ids?: string[] | null
-          event_date: string
-          event_type: string
-          id?: string
-          metadata?: Json | null
-          property_id: string
-          title: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          document_ids?: string[] | null
-          event_date?: string
-          event_type?: string
-          id?: string
-          metadata?: Json | null
-          property_id?: string
-          title?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "property_passport_events_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "owner_properties"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "property_passport_events_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "property_passport_events_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "v_marketplace_listings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "property_passport_events_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "v_owner_properties"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "property_passport_events_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "v_properties_public"
