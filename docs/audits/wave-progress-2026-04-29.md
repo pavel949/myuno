@@ -4,14 +4,25 @@ Snapshot после автономного прогона Волн 1, 4, 5.
 
 ## Метрики
 
-| Метрика | Baseline | После В1+4.A+4.B | После В4.C+5 | Δ от baseline |
-|---|---|---|---|---|
-| Tables `public` | 405 | 387 | **386** | −19 |
-| Edge functions (active) | 157 | 124 | 124 | −33 |
-| `personaLandings.ts` LOC | 1689 | 80 + 27 модулей | без изм. | сплит |
-| Hardcoded `navigate('/')` | 419 | 419 | 419 | без изм. |
-| RPC functions (`public`) | n/a | n/a | **432** (296 без явных рефов) | задокументировано |
-| `any` usage | 745 | 745 | 745 | без изм. |
+| Метрика | Baseline | В1+4.A+4.B | В4.C+5 | В5-batch1 | Δ |
+|---|---|---|---|---|---|
+| Tables `public` | 405 | 387 | 386 | **386** | −19 |
+| Edge functions (active) | 157 | 124 | 124 | **124** | −33 |
+| `personaLandings.ts` LOC | 1689 | 80 + 27 | — | — | сплит |
+| Hardcoded `navigate('/')` | 419 | 419 | 419 | 419 | 0 |
+| RPC functions (`public`) | n/a | n/a | 432 | **422** | −10 |
+| `any` usage | 745 | 745 | 745 | 745 | 0 |
+
+## Волна 5 — batch 1 (2026-04-29)
+
+Дропнуты 10 подтверждённых сирот (миграция применена):
+- `find_nearby_{clinics,flower_shops,gyms,restaurants,salons}` — geo-helpers без вызовов
+- `devmod_{compute_fingerprint,next_reservation_number,next_rln_number,update_foreign_quota}`
+- `cleanup_old_sync_logs`
+
+Придержано до ручного review (`pg_depend`): `log_security_event`, `calculate_daily_metrics`, `get_*_summary`, `notify_*` — потенциально вызываются из триггеров/cron.
+
+CI guard обновлён: `BASELINE_TABLES=386`, `BASELINE_ACTIVE_EDGE_FN=124`, `MIN_ARCHIVED_EDGE_FN=33`.
 
 ## Выполнено
 
