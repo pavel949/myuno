@@ -20,12 +20,27 @@ const MIN_PAGE_VIEWS = 3; // Show only after user has explored at least 3 pages
  */
 export function MobileInstallSheet() {
   const [open, setOpen] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
   const { isInstalled, canInstall, isIOS, isAndroid, isMobile, install } = usePWAInstall();
   const { trackInstall } = usePWATracking();
   const isMobileViewport = useIsMobile();
   const { language } = useLanguage();
 
+  // Wait for the first real user interaction before doing anything.
+  // This guarantees the sheet never covers the initial preview / first paint.
   useEffect(() => {
+    if (hasInteracted) return;
+    const events: Array<keyof WindowEventMap> = ['pointerdown', 'keydown', 'touchstart', 'scroll', 'wheel'];
+    const onFirst = () => {
+      setHasInteracted(true);
+      events.forEach((e) => window.removeEventListener(e, onFirst));
+    };
+    events.forEach((e) => window.addEventListener(e, onFirst, { passive: true, once: true }));
+    return () => events.forEach((e) => window.removeEventListener(e, onFirst));
+  }, [hasInteracted]);
+
+  useEffect(() => {
+    if (!hasInteracted) return;
     if (isInstalled) return;
 
     const shouldShow = isMobile || isIOS || isAndroid || isMobileViewport;
@@ -44,7 +59,7 @@ export function MobileInstallSheet() {
       const timer = setTimeout(() => setOpen(true), 800);
       return () => clearTimeout(timer);
     }
-  }, [isInstalled, isMobile, isIOS, isAndroid, isMobileViewport]);
+  }, [hasInteracted, isInstalled, isMobile, isIOS, isAndroid, isMobileViewport]);
 
   const handleDismiss = () => {
     localStorage.setItem(SHEET_SHOWN_KEY, Date.now().toString());
