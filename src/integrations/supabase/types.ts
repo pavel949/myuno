@@ -11996,11 +11996,13 @@ export type Database = {
           executions_count: number | null
           id: string
           is_active: boolean | null
+          landing_filter: string[] | null
           last_executed_at: string | null
           name: string
           trigger_conditions: Json
           trigger_type: string
           updated_at: string | null
+          user_state_filter: string[] | null
         }
         Insert: {
           actions: Json
@@ -12010,11 +12012,13 @@ export type Database = {
           executions_count?: number | null
           id?: string
           is_active?: boolean | null
+          landing_filter?: string[] | null
           last_executed_at?: string | null
           name: string
           trigger_conditions: Json
           trigger_type: string
           updated_at?: string | null
+          user_state_filter?: string[] | null
         }
         Update: {
           actions?: Json
@@ -12024,11 +12028,13 @@ export type Database = {
           executions_count?: number | null
           id?: string
           is_active?: boolean | null
+          landing_filter?: string[] | null
           last_executed_at?: string | null
           name?: string
           trigger_conditions?: Json
           trigger_type?: string
           updated_at?: string | null
+          user_state_filter?: string[] | null
         }
         Relationships: []
       }
