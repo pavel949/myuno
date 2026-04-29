@@ -1,0 +1,99 @@
+name: cleanup-metrics
+
+# Report-only metrics for the cleanup roadmap.
+# Runs on PR + weekly schedule.
+# Fails ONLY when 'any' or hardcoded-routes counts grow vs baseline.
+
+on:
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 6 * * 1'  # Mondays 06:00 UTC
+  workflow_dispatch:
+
+jobs:
+  audit:
+    name: Snapshot metrics
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Install ripgrep
+        run: sudo apt-get update && sudo apt-get install -y ripgrep
+
+      - name: Run baseline audit
+        run: node scripts/audit-baseline.mjs --json | tee audit-current.json
+
+      - name: knip (report-only)
+        continue-on-error: true
+        run: npx --yes knip --reporter json > knip-report.json || true
+
+      - name: ts-prune (report-only)
+        continue-on-error: true
+        run: npx --yes ts-prune > ts-prune-report.txt || true
+
+      - name: depcheck (report-only)
+        continue-on-error: true
+        run: npx --yes depcheck --json > depcheck-report.json || true
+
+      - name: Upload audit artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: cleanup-audit-${{ github.run_id }}
+          path: |
+            audit-current.json
+            knip-report.json
+            ts-prune-report.txt
+            depcheck-report.json
+          retention-days: 90
+
+  regression-guard:
+    name: Regression guard (any + hardcoded routes)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install ripgrep
+        run: sudo apt-get update && sudo apt-get install -y ripgrep
+
+      - name: Snapshot current metrics
+        id: now
+        run: |
+          node scripts/audit-baseline.mjs --json > audit-current.json
+          echo "any=$(node -e "console.log(require('./audit-current.json').frontend.any_usage)")" >> $GITHUB_OUTPUT
+          echo "routes=$(node -e "console.log(require('./audit-current.json').frontend.hardcoded_navigate)")" >> $GITHUB_OUTPUT
+
+      - name: Compare to baseline
+        env:
+          # Update these whenever baseline-2026-04.md is refreshed
+          BASELINE_ANY: 745
+          BASELINE_ROUTES: 419
+        run: |
+          set -e
+          ANY=${{ steps.now.outputs.any }}
+          ROUTES=${{ steps.now.outputs.routes }}
+          echo "Current: any=$ANY routes=$ROUTES"
+          echo "Baseline: any=$BASELINE_ANY routes=$BASELINE_ROUTES"
+
+          fail=0
+          if [ "$ANY" -gt "$BASELINE_ANY" ]; then
+            echo "::error ::any usage grew: $ANY > $BASELINE_ANY (baseline). Refactor or update baseline."
+            fail=1
+          fi
+          if [ "$ROUTES" -gt "$BASELINE_ROUTES" ]; then
+            echo "::error ::hardcoded navigate('/') grew: $ROUTES > $BASELINE_ROUTES. Use APP_ROUTES."
+            fail=1
+          fi
+          exit $fail
