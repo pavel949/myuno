@@ -57,20 +57,47 @@ Snapshot после автономного прогона Волн 1, 4, 5.
 - `docs/audits/baseline-2026-04.md`
 - `docs/audits/wave-progress-2026-04-29.md` (этот файл)
 - `docs/audits/empty-tables-refs-2026-04-29.csv` — кросс-референс 201 пустой таблицы
-- `docs/audits/orphan-rpcs-2026-04-29.txt` — 296 кандидатов RPC
+- `docs/audits/orphan-rpcs-2026-04-29.txt` — 296 кандидатов RPC (грубый список)
+- `docs/audits/rpc-deep-audit-2026-04-29.csv` — **64 кандидата с подсчётом refs (src/edge)**
+- `docs/audits/rpc-true-orphans-2026-04-29.txt` — **57 истинных сирот** для ручного review
 - `docs/audits/edge-functions-usage.md`
 - `docs/audits/db-table-classification.md`
 - `docs/cleanup/CLEANUP_ROADMAP.md`
 - `supabase/functions/_archive/README.md` — 33 архивные edge fn
 
+## Волна 5-deep — финальный результат RPC аудита
+
+Применённый детектор учёл:
+- ✅ Extension-функции (`gbt_*`, `*_dist`) — 188 шт., исключены как шум
+- ✅ Trigger-функции через `pg_trigger.tgfoid` — 98 шт., исключены
+- ✅ RLS-helpers через скан `pg_policy.qual/withcheck` — 25 шт., исключены
+- ✅ Internal callees через regex по `pg_proc.prosrc` других функций — 29 шт., исключены
+- ✅ Cross-check против `src/**/*.{ts,tsx}` и `supabase/functions/**` (исключая `_archive/`)
+
+**Итого**: из 432 функций → **57 истинных сирот** (нет refs нигде).
+
+7 функций изначально казались сиротами, но используются в активных edge functions:
+`apply_lead_score_event, check_rate_limit, devmod_release_expired_holds, outreach_throttle_check, release_event_spots, reserve_event_spots, validate_ical_token` → **держим**.
+
+### Не покрыто детектором (риск false-positive ~5%)
+
+- Динамический SQL: `EXECUTE 'SELECT ' || fn_name`
+- Materialized views с RPC в `WITH` или `CREATE INDEX`
+- Cron jobs с inline SQL вместо HTTP-вызова (например `SELECT public.devmod_release_expired_holds()` — поймал)
+- Вызовы из VIEW definitions
+
+**Рекомендация**: дроп через миграцию батчами по 10 функций с откатом на каждую. Не автоматизируем.
+
 ## Следующие шаги (рекомендация)
 
-1. **Pавел review** — `empty-tables-refs-2026-04-29.csv`: для ~100 «pending-data» таблиц решить keep/kill вместе с UI.
-2. **Волна 5-deep** — ручной аудит RPC через `pg_depend`:
-   ```sql
-   SELECT objid::regprocedure, refobjid::regclass
-   FROM pg_depend
-   WHERE objid = 'public.<fn>'::regprocedure;
+1. **Павел review** — `empty-tables-refs-2026-04-29.csv` (~100 «pending-data» таблиц): keep/kill вместе с UI-модулем.
+2. **Павел review** — `rpc-true-orphans-2026-04-29.txt` (57 fn): отметить ✅ keep / ❌ drop. Я подготовлю миграцию.
+3. **CI guard** — обновить `.github/workflows/cleanup-metrics.yml`:
+   ```yaml
+   thresholds:
+     max_tables: 386
+     max_active_edge_fn: 124
+     min_archived_edge_fn: 33
    ```
-3. **CI guard** — добавить порог 386 таблиц / 124 active edge fn в `.github/workflows/cleanup-metrics.yml` чтобы регрессия ловилась.
+4. **2026-05-13** — финальный `rm -rf supabase/functions/_archive/` после observation period.
 
