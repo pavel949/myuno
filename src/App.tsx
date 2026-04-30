@@ -168,7 +168,9 @@ const App = () => (
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
         <QueryProviders>
-          <AppContent />
+          <DeferredProvidersGate>
+            <AppContent />
+          </DeferredProvidersGate>
         </QueryProviders>
       </QueryClientProvider>
     </HelmetProvider>
