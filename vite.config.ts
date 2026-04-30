@@ -273,56 +273,19 @@ export default defineConfig(({ mode }) => {
           manualChunks(id: string) {
             if (!id.includes('node_modules')) return undefined;
 
-            // Core React runtime only. Keep router out of this chunk: router imports
-            // helper packages, and mixing them back into vendor-react creates a
-            // circular ESM graph that can leave React undefined during bootstrap.
-            if (/[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/.test(id)) {
-              return 'vendor-react';
-            }
-
-            if (
-              /[\\/]node_modules[\\/](react-router|react-router-dom)[\\/]/.test(id) ||
-              /[\\/]node_modules[\\/]@remix-run[\\/]router[\\/]/.test(id)
-            ) {
-              return 'vendor-router';
-            }
-
-            // Radix UI primitives and their tightly-coupled overlay deps — shared
-            // across most pages. Keep them together to avoid vendor-radix ↔ vendor-misc cycles.
-            if (
-              id.includes('@radix-ui/') ||
-              id.includes('@floating-ui/') ||
-              id.includes('react-remove-scroll') ||
-              id.includes('react-remove-scroll-bar') ||
-              id.includes('react-style-singleton') ||
-              id.includes('use-callback-ref') ||
-              id.includes('use-sidecar') ||
-              id.includes('aria-hidden') ||
-              id.includes('cmdk') ||
-              id.includes('vaul')
-            ) return 'vendor-radix';
-
-            // Heavy single-purpose libs (lazy-imported) — isolate so they only
-            // download when the feature is actually used.
+            // Isolate ONLY heavy lazy-loaded libs so they don't bloat the
+            // initial graph. Everything else (React, Router, Radix, lucide,
+            // supabase, query, motion, etc.) goes into a single `vendor`
+            // chunk to eliminate cross-chunk circular ESM dependencies that
+            // surface in production as "Cannot access 'X' before initialization".
             if (id.includes('jspdf-autotable')) return 'vendor-pdf';
             if (id.includes('node_modules/jspdf')) return 'vendor-pdf';
             if (id.includes('html2canvas')) return 'vendor-html2canvas';
             if (id.includes('exceljs')) return 'vendor-excel';
-
-            // Other heavy libs already split out by name.
-            if (id.includes('framer-motion')) return 'vendor-motion';
-            if (id.includes('@tanstack/react-query')) return 'vendor-query';
             if (id.includes('recharts') || id.includes('d3-')) return 'vendor-charts';
             if (id.includes('@react-google-maps')) return 'vendor-map';
-            if (id.includes('react-hook-form') || id.includes('@hookform') || id.includes('node_modules/zod/')) {
-              return 'vendor-form';
-            }
-            if (id.includes('@supabase/')) return 'vendor-supabase';
-            if (id.includes('date-fns') || id.includes('lodash')) return 'vendor-utils';
-            if (id.includes('lucide-react')) return 'vendor-icons';
 
-            // Everything else — one stable shared chunk.
-            return 'vendor-misc';
+            return 'vendor';
           },
         },
       },
