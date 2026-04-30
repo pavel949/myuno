@@ -1,26 +1,9 @@
 import React from 'react';
-import { useRegisterSW } from 'virtual:pwa-register/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { RefreshCw, X, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { logger } from '@/lib/logger';
 import { APP_VERSION } from '@/lib/appVersion';
-
-// Only register the SW on the canonical production hosts. On previews,
-// sandboxes, localhost or inside iframes the SW file is not served, which
-// produces "Failed to update a ServiceWorker ... Not found" errors.
-function isPWAHost(): boolean {
-  if (typeof window === 'undefined') return false;
-  const host = window.location.hostname;
-  if (host !== 'myuno.app' && host !== 'www.myuno.app') return false;
-  try {
-    if (window.self !== window.top) return false;
-  } catch {
-    return false;
-  }
-  return true;
-}
 
 export function PWAUpdatePrompt() {
   const { language } = useLanguage();
@@ -28,38 +11,10 @@ export function PWAUpdatePrompt() {
   const [dismissed, setDismissed] = React.useState(
     () => sessionStorage.getItem(DISMISSED_KEY) === 'true'
   );
-
-  const pwaEnabled = isPWAHost();
-
-  const {
-    needRefresh: [needRefresh, setNeedRefresh],
-    updateServiceWorker,
-  } = useRegisterSW({
-    immediate: pwaEnabled,
-    onRegisteredSW(swUrl, r) {
-      logger.log(`[PWA] SW registered: ${swUrl} | App v${APP_VERSION}`);
-      if (r) {
-        // Immediate check on registration
-        r.update();
-        // Check for updates when tab regains focus (instead of polling every 2min)
-        const handleVisibility = () => {
-          if (document.visibilityState === 'visible') {
-            logger.log('[PWA] Tab visible — checking for SW updates...');
-            r.update();
-          }
-        };
-        document.addEventListener('visibilitychange', handleVisibility);
-      }
-    },
-    onRegisterError(error) {
-      console.error('[PWA] SW registration error:', error);
-    },
-  });
+  const [needRefresh, setNeedRefresh] = React.useState(false);
 
   const handleUpdate = () => {
-    updateServiceWorker(true);
-    // Force hard reload to clear old JS from memory
-    setTimeout(() => window.location.reload(), 300);
+    window.location.reload();
   };
 
   const handleDismiss = () => {
