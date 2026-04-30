@@ -46,7 +46,10 @@ export const BottomBar = forwardRef<HTMLDivElement, BottomBarProps>(
     const [appsOpen, setAppsOpen] = useState(false);
 
     const handlePrefetch = useCallback(
-      (path: string) => prefetchRoute(path),
+      (path: string) => {
+        prefetchRouteChunk(path);
+        prefetchRoute(path);
+      },
       [prefetchRoute],
     );
 
