@@ -264,19 +264,64 @@ export default defineConfig(({ mode }) => {
           manualChunks(id: string) {
             if (!id.includes('node_modules')) return undefined;
 
-            // Isolate ONLY heavy lazy-loaded libs so they don't bloat the
-            // initial graph. Everything else (React, Router, Radix, lucide,
-            // supabase, query, motion, etc.) goes into a single `vendor`
-            // chunk to eliminate cross-chunk circular ESM dependencies that
-            // surface in production as "Cannot access 'X' before initialization".
+            // Heavy lazy-only libs — kept fully separate so they never bloat
+            // the initial graph or any route chunk.
             if (id.includes('jspdf-autotable')) return 'vendor-pdf';
             if (id.includes('node_modules/jspdf')) return 'vendor-pdf';
             if (id.includes('html2canvas')) return 'vendor-html2canvas';
             if (id.includes('exceljs')) return 'vendor-excel';
             if (id.includes('recharts') || id.includes('d3-')) return 'vendor-charts';
             if (id.includes('@react-google-maps')) return 'vendor-map';
+            if (id.includes('@sentry')) return 'vendor-sentry';
+            if (id.includes('dompurify')) return 'vendor-sanitize';
 
-            return 'vendor';
+            // Stable cache groups — change rarely → long-lived browser cache.
+            // IMPORTANT: react-core stays as ONE chunk together with scheduler
+            // and jsx-runtime to avoid TDZ / circular-init errors in prod.
+            if (
+              id.includes('node_modules/react/') ||
+              id.includes('node_modules/react-dom/') ||
+              id.includes('node_modules/scheduler/') ||
+              id.includes('react/jsx-runtime') ||
+              id.includes('react/jsx-dev-runtime')
+            ) {
+              return 'vendor-react';
+            }
+            if (id.includes('react-router') || id.includes('@remix-run/router') || id.includes('history')) {
+              return 'vendor-router';
+            }
+            if (id.includes('@supabase') || id.includes('@lovable.dev/cloud-auth-js')) {
+              return 'vendor-supabase';
+            }
+            if (id.includes('@tanstack/react-query')) {
+              return 'vendor-query';
+            }
+            if (id.includes('@radix-ui') || id.includes('react-remove-scroll') || id.includes('aria-hidden')) {
+              return 'vendor-radix';
+            }
+            if (id.includes('framer-motion') || id.includes('motion-dom') || id.includes('motion-utils')) {
+              return 'vendor-motion';
+            }
+            if (id.includes('lucide-react')) {
+              return 'vendor-icons';
+            }
+            if (
+              id.includes('react-hook-form') ||
+              id.includes('@hookform') ||
+              id.includes('node_modules/zod/')
+            ) {
+              return 'vendor-forms';
+            }
+            if (
+              id.includes('date-fns') ||
+              id.includes('node_modules/clsx/') ||
+              id.includes('class-variance-authority') ||
+              id.includes('tailwind-merge')
+            ) {
+              return 'vendor-utils';
+            }
+
+            return 'vendor-misc';
           },
         },
       },

@@ -190,7 +190,9 @@ export const defaultQueryClientOptions = {
   queries: {
     staleTime: TIME.MINUTES(1),
     gcTime: TIME.MINUTES(5),
-    retry: 3,
+    // 1 retry is enough — exponential backoff at retry: 3 leads to up to
+    // 18s of failed-state UX before the user sees the error.
+    retry: 1,
     retryDelay: (attemptIndex: number) => Math.min(1000 * 2 ** attemptIndex, 15000),
     refetchOnWindowFocus: false,
     networkMode: 'online' as const,

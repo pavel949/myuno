@@ -7,6 +7,7 @@
  *
  * @see docs/ARCHITECTURE.md for full architecture overview
  */
+import React from "react";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SkipToContent } from "@/components/a11y/SkipToContent";
@@ -50,7 +51,10 @@ const queryClient = new QueryClient({
 
 // ── Composed provider tree ──
 // Order matters: each provider can use contexts from providers above it.
-// QueryClientProvider wraps everything that needs react-query.
+// Critical providers needed for first paint (auth, theme, language, currency,
+// query) wrap the whole app; non-critical ones (maps, storefront, hints,
+// install prompt, life-situation) are mounted via DeferredProviders after
+// first paint to keep TTI low.
 const QueryProviders = composeProviders([
   ThemeProvider,
   MaintenanceProvider,
@@ -61,15 +65,39 @@ const QueryProviders = composeProviders([
   ImpersonationProvider,
   PlatformViewAsProvider,
   CartProvider,
+  TooltipProvider,
+  PrefetchProvider,
+  AuthSheetProvider,
+]);
+
+const DeferredProviders = composeProviders([
   PWAInstallProvider,
   LifeSituationProvider,
   StorefrontProvider,
   GoogleMapsProvider,
-  TooltipProvider,
   HintProvider,
-  PrefetchProvider,
-  AuthSheetProvider,
 ]);
+
+/**
+ * Mounts secondary providers after first paint. Until then, children render
+ * inside null-context fallbacks (each provider's `useX()` hook handles the
+ * undefined-context case). Cuts ~5 wrappers and several module evaluations
+ * out of the initial render path.
+ */
+function DeferredProvidersGate({ children }: { children: React.ReactNode }) {
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => {
+    // Wait one paint frame so the initial Index render commits before we
+    // evaluate ~5 extra provider modules (GoogleMaps loader, etc.). All
+    // routes that consume these providers are lazy-loaded — their chunks
+    // can't arrive sooner than the next frame, so the gap is invisible.
+    const raf = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  if (!mounted) return <>{children}</>;
+  return <DeferredProviders>{children}</DeferredProviders>;
+}
 
 /** Gate that shows Coming Soon for unauthenticated users (except /auth routes). Set VITE_BYPASS_COMING_SOON=true to test app without login. */
 function ComingSoonGate({ children }: { children: React.ReactNode }) {
@@ -131,7 +159,9 @@ const App = () => (
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
         <QueryProviders>
-          <AppContent />
+          <DeferredProvidersGate>
+            <AppContent />
+          </DeferredProvidersGate>
         </QueryProviders>
       </QueryClientProvider>
     </HelmetProvider>

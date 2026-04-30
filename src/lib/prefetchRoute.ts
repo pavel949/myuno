@@ -95,18 +95,63 @@ export function prefetchRoute(path: string | undefined | null): void {
  * Call once when a high-intent surface opens (e.g. AllAppsDrawer).
  */
 export function prefetchAllPopularRoutes(): void {
-  const run = () => {
-    for (const key of Object.keys(ROUTE_CHUNKS)) {
-      prefetchRoute(key);
+  const keys = Object.keys(ROUTE_CHUNKS);
+  let i = 0;
+  const CONCURRENCY = 2;
+
+  const pump = () => {
+    if (i >= keys.length) return;
+    const key = keys[i++];
+    const loader = ROUTE_CHUNKS[key];
+    if (!loader || inflight.has(key)) {
+      pump();
+      return;
     }
+    inflight.add(key);
+    loader()
+      .catch(() => inflight.delete(key))
+      .finally(() => setTimeout(pump, 0));
   };
+
   type IdleWin = Window & {
     requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
   };
   const w = window as IdleWin;
+  const start = () => {
+    for (let n = 0; n < CONCURRENCY; n++) pump();
+  };
   if (typeof w.requestIdleCallback === 'function') {
-    w.requestIdleCallback(run, { timeout: 1500 });
+    w.requestIdleCallback(start, { timeout: 2000 });
   } else {
-    setTimeout(run, 200);
+    setTimeout(start, 200);
   }
+}
+
+/**
+ * Returns a ref-callback that prefetches `path` when the element first
+ * scrolls into the viewport. Mobile-friendly (no hover required).
+ *
+ * Usage:
+ *   <button ref={prefetchOnVisible('/beauty')} onClick={...} />
+ */
+export function prefetchOnVisible(path: string): (el: Element | null) => void {
+  if (typeof IntersectionObserver === 'undefined') {
+    return () => undefined;
+  }
+  return (el: Element | null) => {
+    if (!el) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            prefetchRoute(path);
+            io.disconnect();
+            break;
+          }
+        }
+      },
+      { rootMargin: '200px' },
+    );
+    io.observe(el);
+  };
 }
