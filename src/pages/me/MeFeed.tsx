@@ -102,6 +102,8 @@ export default function MeFeed() {
             <Link
               key={a.to + a.en}
               to={a.to}
+              onPointerDown={() => prefetchRoute(a.to)}
+              onMouseEnter={() => prefetchRoute(a.to)}
               className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full border border-border bg-card px-3.5 py-1.5 text-sm font-medium hover:bg-muted transition-colors"
             >
               <a.icon className="h-4 w-4 text-primary" />
