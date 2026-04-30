@@ -138,7 +138,10 @@ export default tseslint.config(
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/no-explicit-any": "warn",
-      "no-console": "off",
+      // Allow console.warn / console.error everywhere (deliberate signals);
+      // forbid bare console.log to keep production logs noise-free. The two
+      // canonical loggers (logger.ts, errorHandler.ts) opt out below.
+      "no-console": ["warn", { allow: ["warn", "error", "info"] }],
       // M7 · Tone of Voice + M9.7 · Canonical synonyms + Phase 4 · Canon
       // visual regression — all at warn for the wider codebase.
       // i18n dictionaries are escalated to `error` below.
