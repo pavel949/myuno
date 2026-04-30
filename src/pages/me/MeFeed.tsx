@@ -50,7 +50,11 @@ function FeedCard({ item }: { item: MeFeedItem }) {
           {desc && <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{desc}</p>}
           {item.ctaPath && (
             <Button asChild size="sm" variant="ghost" className="mt-2 -ml-2 h-8 px-2 text-primary">
-              <Link to={item.ctaPath}>
+              <Link
+                to={item.ctaPath}
+                onPointerDown={() => prefetchRoute(item.ctaPath)}
+                onMouseEnter={() => prefetchRoute(item.ctaPath)}
+              >
                 {ctaLabel ?? (isRu ? 'Открыть' : 'Open')}
                 <ChevronRight className="h-4 w-4" />
               </Link>
