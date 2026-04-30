@@ -135,6 +135,9 @@ export function AllAppsDrawer({ open, onOpenChange }: AllAppsDrawerProps) {
                         key={app.id}
                         type="button"
                         onClick={() => handleAppClick(app.path)}
+                        onPointerDown={() => prefetchRoute(app.path)}
+                        onMouseEnter={() => prefetchRoute(app.path)}
+                        onFocus={() => prefetchRoute(app.path)}
                         className={cn(
                           'flex flex-col items-center gap-1.5 p-3 rounded-none',
                           'transition-all duration-200 ',
