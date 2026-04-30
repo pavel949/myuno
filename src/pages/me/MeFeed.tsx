@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { EmptyState, LoadingState, PageSection } from '@/components/page';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useMeFeed, type MeFeedItem } from '@/hooks/useMeFeed';
+import { prefetchRoute } from '@/lib/prefetchRoute';
 import { cn } from '@/lib/utils';
 
 const PRIORITY_STYLES = {
@@ -49,7 +50,11 @@ function FeedCard({ item }: { item: MeFeedItem }) {
           {desc && <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{desc}</p>}
           {item.ctaPath && (
             <Button asChild size="sm" variant="ghost" className="mt-2 -ml-2 h-8 px-2 text-primary">
-              <Link to={item.ctaPath}>
+              <Link
+                to={item.ctaPath}
+                onPointerDown={() => prefetchRoute(item.ctaPath)}
+                onMouseEnter={() => prefetchRoute(item.ctaPath)}
+              >
                 {ctaLabel ?? (isRu ? 'Открыть' : 'Open')}
                 <ChevronRight className="h-4 w-4" />
               </Link>
@@ -97,6 +102,8 @@ export default function MeFeed() {
             <Link
               key={a.to + a.en}
               to={a.to}
+              onPointerDown={() => prefetchRoute(a.to)}
+              onMouseEnter={() => prefetchRoute(a.to)}
               className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full border border-border bg-card px-3.5 py-1.5 text-sm font-medium hover:bg-muted transition-colors"
             >
               <a.icon className="h-4 w-4 text-primary" />

@@ -18,6 +18,7 @@ import { triggerHaptic } from '@/hooks/useHapticFeedback';
 import { playSound } from '@/hooks/useSoundEffects';
 import { getFeedbackSettings } from '@/hooks/useFeedbackSettings';
 import { usePrefetchRoute } from '@/hooks/usePrefetch';
+import { prefetchRoute as prefetchRouteChunk } from '@/lib/prefetchRoute';
 import { AllAppsDrawer } from '@/components/layout/AllAppsDrawer';
 import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 import { useUserPersonas } from '@/hooks/useUserPersonas';
@@ -45,7 +46,10 @@ export const BottomBar = forwardRef<HTMLDivElement, BottomBarProps>(
     const [appsOpen, setAppsOpen] = useState(false);
 
     const handlePrefetch = useCallback(
-      (path: string) => prefetchRoute(path),
+      (path: string) => {
+        prefetchRouteChunk(path);
+        prefetchRoute(path);
+      },
       [prefetchRoute],
     );
 
@@ -106,8 +110,10 @@ export const BottomBar = forwardRef<HTMLDivElement, BottomBarProps>(
           key={path}
           to={path}
           onClick={handleNavClick}
+          onPointerDown={() => handlePrefetch(path)}
           onMouseEnter={() => handlePrefetch(path)}
           onTouchStart={() => handlePrefetch(path)}
+          onFocus={() => handlePrefetch(path)}
           aria-label={label}
           className="flex flex-col items-center justify-center gap-[3px] relative pt-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-none"
         >
