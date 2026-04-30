@@ -174,6 +174,7 @@ export default defineConfig(({ mode }) => {
         injectManifest: {
           injectionPoint: undefined,
           globPatterns: [],
+          maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
         },
         
         devOptions: {
