@@ -141,8 +141,8 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
     return (
       <footer ref={ref} className="border-t border-border/40 bg-muted/10 mt-auto">
         <div className={cn(ECOSYSTEM_PAGE_CONTAINER, 'py-10 lg:py-12')}>
-          {/* Main grid — 6 columns */}
-          <div className="grid grid-cols-6 gap-6 xl:gap-8 mb-8">
+          {/* Main grid — 2 cols (mobile) → 3 (sm) → 6 (lg) */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 xl:gap-8 mb-8">
 
             {/* Brand column */}
             <div className="space-y-3">
