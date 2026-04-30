@@ -172,6 +172,7 @@ export default defineConfig(({ mode }) => {
         includeAssets: ['favicon.ico', 'icons/*.png'],
         
         injectManifest: {
+          injectionPoint: undefined,
           globPatterns: [],
         },
         
