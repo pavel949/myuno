@@ -87,21 +87,12 @@ const DeferredProviders = composeProviders([
 function DeferredProvidersGate({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = React.useState(false);
   React.useEffect(() => {
-    type IdleWin = Window & {
-      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
-    };
-    const w = window as IdleWin;
-    if (typeof w.requestIdleCallback === 'function') {
-      const id = w.requestIdleCallback(() => setMounted(true), { timeout: 1500 });
-      return () => {
-        // cancelIdleCallback is best-effort; not all browsers expose it
-        const cancel = (window as unknown as { cancelIdleCallback?: (id: number) => void })
-          .cancelIdleCallback;
-        if (cancel) cancel(id);
-      };
-    }
-    const t = setTimeout(() => setMounted(true), 0);
-    return () => clearTimeout(t);
+    // Wait one paint frame so the initial Index render commits before we
+    // evaluate ~5 extra provider modules (GoogleMaps loader, etc.). All
+    // routes that consume these providers are lazy-loaded — their chunks
+    // can't arrive sooner than the next frame, so the gap is invisible.
+    const raf = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(raf);
   }, []);
 
   if (!mounted) return <>{children}</>;
