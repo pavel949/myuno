@@ -182,4 +182,11 @@ export default tseslint.config(
       "no-case-declarations": "off",
     },
   },
+  // Canonical loggers — opt out of no-console (they ARE the logger).
+  {
+    files: ["src/lib/logger.ts", "src/lib/errorHandler.ts"],
+    rules: {
+      "no-console": "off",
+    },
+  },
 );
