@@ -85,4 +85,104 @@ describe('mobile layout regression', () => {
         `into desktop layout:\n  - ${offenders.join('\n  - ')}`,
     ).toEqual([]);
   });
+
+  it('inline style={{ minWidth: "Xpx" }} (X > 480) sits inside an overflow-x-auto wrapper', () => {
+    const SRC_ROOTS = ['src/components', 'src/pages'].map((p) =>
+      resolve(PROJECT_ROOT, p),
+    );
+    const offenders: string[] = [];
+
+    for (const root of SRC_ROOTS) {
+      for (const file of walk(root)) {
+        const src = readFileSync(file, 'utf-8');
+        // minWidth: '600px' | "600px" | 600
+        const matches = src.matchAll(
+          /minWidth:\s*['"]?(\d{3,4})(?:px)?['"]?/g,
+        );
+        for (const m of matches) {
+          const px = Number(m[1]);
+          if (px <= 480) continue;
+          const start = Math.max(0, m.index! - 800);
+          const window_ = src.slice(start, m.index!);
+          if (!/overflow-x-auto|overflow-auto|overflow-x-scroll|overflow:\s*['"]?(auto|scroll)/.test(window_)) {
+            offenders.push(
+              `${file.replace(PROJECT_ROOT + '/', '')}: inline minWidth:${px}px without overflow wrapper`,
+            );
+          }
+        }
+      }
+    }
+
+    expect(
+      offenders,
+      `Inline minWidth styles wider than the smallest mobile viewport (480px) ` +
+        `must sit inside an overflow-x-auto container:\n  - ${offenders.join('\n  - ')}`,
+    ).toEqual([]);
+  });
+
+  it('map pages do not lock a fixed width that exceeds the mobile viewport', () => {
+    // Map containers must use w-full / flex-1 — never w-[Npx] or min-w-[Npx]
+    // on the outermost map wrapper, otherwise the page renders in desktop mode
+    // inside in-app browsers.
+    const SRC_ROOTS = ['src/components', 'src/pages'].map((p) =>
+      resolve(PROJECT_ROOT, p),
+    );
+    const offenders: string[] = [];
+
+    for (const root of SRC_ROOTS) {
+      for (const file of walk(root)) {
+        // Only inspect files whose name suggests a map surface
+        if (!/Map|map/.test(file.split('/').pop() ?? '')) continue;
+        const src = readFileSync(file, 'utf-8');
+        // Find any width-locking class on a map wrapper > 480px
+        const matches = src.matchAll(/\bw-\[(\d{3,4})px\]/g);
+        for (const m of matches) {
+          const px = Number(m[1]);
+          if (px <= 480) continue;
+          offenders.push(
+            `${file.replace(PROJECT_ROOT + '/', '')}: w-[${px}px] on a map surface — use w-full instead`,
+          );
+        }
+      }
+    }
+
+    expect(
+      offenders,
+      `Map surfaces must be fluid (w-full / flex-1). Fixed widths break ` +
+        `mobile rendering:\n  - ${offenders.join('\n  - ')}`,
+    ).toEqual([]);
+  });
+
+  it('Dialog / Sheet / Modal content uses responsive max-w, never a fixed mobile-breaking width', () => {
+    // Modals on mobile should be capped via max-w-[Xvw] or sm:max-w-…
+    // A bare w-[600px] on a DialogContent will overflow a 360px viewport.
+    const SRC_ROOTS = ['src/components', 'src/pages'].map((p) =>
+      resolve(PROJECT_ROOT, p),
+    );
+    const offenders: string[] = [];
+
+    for (const root of SRC_ROOTS) {
+      for (const file of walk(root)) {
+        const name = file.split('/').pop() ?? '';
+        if (!/Modal|Dialog|Sheet/.test(name)) continue;
+        const src = readFileSync(file, 'utf-8');
+        // Look for w-[Npx] (>480) NOT prefixed by a breakpoint like sm:/md:/lg:
+        const matches = src.matchAll(/(?<![\w:-])w-\[(\d{3,4})px\]/g);
+        for (const m of matches) {
+          const px = Number(m[1]);
+          if (px <= 480) continue;
+          offenders.push(
+            `${file.replace(PROJECT_ROOT + '/', '')}: unbreakpointed w-[${px}px] on a modal surface — ` +
+              `use sm:w-[${px}px] or max-w-[90vw]`,
+          );
+        }
+      }
+    }
+
+    expect(
+      offenders,
+      `Modals must adapt to mobile width. Use breakpoint-prefixed widths or ` +
+        `max-w-[Xvw]:\n  - ${offenders.join('\n  - ')}`,
+    ).toEqual([]);
+  });
 });
