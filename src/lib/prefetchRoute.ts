@@ -60,7 +60,7 @@ const ROUTE_CHUNKS: Record<string, () => Promise<unknown>> = {
   '/me/profile': () => import('@/pages/me/MeProfile'),
 
   // Wallet
-  '/wallet': () => import('@/pages/wallet/WalletCards'),
+  '/wallet': () => import('@/pages/Wallet'),
 };
 
 /**
