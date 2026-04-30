@@ -35,13 +35,32 @@ const ROUTE_CHUNKS: Record<string, () => Promise<unknown>> = {
   // Marketplace / classifieds
   '/classifieds': () => import('@/pages/classifieds/ClassifiedsIndex'),
 
+  // Lifestyle
+  '/fitness': () => import('@/pages/fitness/FitnessIndex'),
+  '/pets': () => import('@/pages/pets/PetsIndex'),
+  '/pharmacy': () => import('@/pages/pharmacy/PharmacyIndex'),
+  '/education': () => import('@/pages/education/EducationIndex'),
+
   // Property hubs (heavy — biggest win from prefetch)
   '/property': () => import('@/pages/property/PropertyHub'),
   '/newbuilds': () => import('@/pages/newbuilds/NewbuildsLanding'),
 
-  // Discovery
+  // Discovery & nav hubs
   '/discover': () => import('@/components/navigation/NavigatorPage'),
   '/map': () => import('@/pages/MapView'),
+  '/bookings': () => import('@/pages/Bookings'),
+
+  // Me / profile hub
+  '/me': () => import('@/pages/me/MeFeed'),
+  '/me/services': () => import('@/pages/me/MeServices'),
+  '/me/bookings': () => import('@/pages/me/MeBookings'),
+  '/me/payments': () => import('@/pages/me/MePayments'),
+  '/me/documents': () => import('@/pages/me/MeDocuments'),
+  '/me/requests': () => import('@/pages/me/MeRequests'),
+  '/me/profile': () => import('@/pages/me/MeProfile'),
+
+  // Wallet
+  '/wallet': () => import('@/pages/wallet/WalletCards'),
 };
 
 /**
