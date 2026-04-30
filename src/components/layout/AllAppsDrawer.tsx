@@ -49,6 +49,13 @@ export function AllAppsDrawer({ open, onOpenChange }: AllAppsDrawerProps) {
     .filter((c) => c.hasMiniApp && c.isActive)
     .sort((a, b) => a.sortOrder - b.sortOrder);
 
+  // Prefetch popular mini-app chunks during idle time when the drawer opens.
+  // The chunks are usually 50-200KB; warming them up while the user scans
+  // the list eliminates the Suspense fallback after the click.
+  useEffect(() => {
+    if (open) prefetchAllPopularRoutes();
+  }, [open]);
+
   const handleAppClick = (path: string) => {
     onOpenChange(false);
     navigate(path);
