@@ -74,12 +74,13 @@ export default defineConfig(({ mode }) => {
       },
       mode === "development" && componentTagger(),
       VitePWA({
-        // injectManifest = full control over the service worker
+        // Temporary kill-switch worker: clears stale production caches that kept
+        // serving old split chunks, then unregisters itself.
         strategies: 'injectManifest',
         srcDir: 'src',
         filename: 'sw.ts',
         registerType: 'autoUpdate',
-        injectRegister: false, // We register manually via virtual:pwa-register/react
+        injectRegister: false,
         
         manifest: {
           name: 'myUNO - All Services in One',
@@ -171,19 +172,8 @@ export default defineConfig(({ mode }) => {
         includeAssets: ['favicon.ico', 'icons/*.png'],
         
         injectManifest: {
-          // Precache ONLY hashed assets — NO html
-          globPatterns: ['**/*.{js,css,ico,png,svg,woff2}'],
-          // Exclude admin/owner/vendor chunks from precache — not needed offline
-          globIgnores: [
-            '**/Admin*.js',
-            '**/Owner*.js',
-            '**/Vendor*.js',
-            '**/MC*.js',
-            '**/CRM*.js',
-            '**/agent*.js',
-          ],
-          // Maximum file size for precache (2MB)
-          maximumFileSizeToCacheInBytes: 2 * 1024 * 1024,
+          injectionPoint: undefined,
+          globPatterns: [],
         },
         
         devOptions: {
