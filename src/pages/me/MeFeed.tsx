@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { EmptyState, LoadingState, PageSection } from '@/components/page';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useMeFeed, type MeFeedItem } from '@/hooks/useMeFeed';
+import { prefetchRoute } from '@/lib/prefetchRoute';
 import { cn } from '@/lib/utils';
 
 const PRIORITY_STYLES = {
