@@ -1,5 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { prefetchRoute, prefetchAllPopularRoutes } from '@/lib/prefetchRoute';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickTriplet } from '@/lib/ecosystemGlossary';
@@ -47,6 +48,13 @@ export function AllAppsDrawer({ open, onOpenChange }: AllAppsDrawerProps) {
   const miniApps = flatCategories
     .filter((c) => c.hasMiniApp && c.isActive)
     .sort((a, b) => a.sortOrder - b.sortOrder);
+
+  // Prefetch popular mini-app chunks during idle time when the drawer opens.
+  // The chunks are usually 50-200KB; warming them up while the user scans
+  // the list eliminates the Suspense fallback after the click.
+  useEffect(() => {
+    if (open) prefetchAllPopularRoutes();
+  }, [open]);
 
   const handleAppClick = (path: string) => {
     onOpenChange(false);
@@ -127,6 +135,9 @@ export function AllAppsDrawer({ open, onOpenChange }: AllAppsDrawerProps) {
                         key={app.id}
                         type="button"
                         onClick={() => handleAppClick(app.path)}
+                        onPointerDown={() => prefetchRoute(app.path)}
+                        onMouseEnter={() => prefetchRoute(app.path)}
+                        onFocus={() => prefetchRoute(app.path)}
                         className={cn(
                           'flex flex-col items-center gap-1.5 p-3 rounded-none',
                           'transition-all duration-200 ',
