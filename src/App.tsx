@@ -65,13 +65,15 @@ const QueryProviders = composeProviders([
   ImpersonationProvider,
   PlatformViewAsProvider,
   CartProvider,
+  // PWAInstallProvider stays eager: CompactFooter (rendered on every page)
+  // calls usePWAInstallContext synchronously on mount.
+  PWAInstallProvider,
   TooltipProvider,
   PrefetchProvider,
   AuthSheetProvider,
 ]);
 
 const DeferredProviders = composeProviders([
-  PWAInstallProvider,
   LifeSituationProvider,
   StorefrontProvider,
   GoogleMapsProvider,
