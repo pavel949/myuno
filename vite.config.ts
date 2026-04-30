@@ -80,7 +80,7 @@ export default defineConfig(({ mode }) => {
         srcDir: 'src',
         filename: 'sw.ts',
         registerType: 'autoUpdate',
-        injectRegister: 'auto',
+        injectRegister: false,
         
         manifest: {
           name: 'myUNO - All Services in One',
