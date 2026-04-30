@@ -50,7 +50,10 @@ const queryClient = new QueryClient({
 
 // ── Composed provider tree ──
 // Order matters: each provider can use contexts from providers above it.
-// QueryClientProvider wraps everything that needs react-query.
+// Critical providers needed for first paint (auth, theme, language, currency,
+// query) wrap the whole app; non-critical ones (maps, storefront, hints,
+// install prompt, life-situation) are mounted via DeferredProviders after
+// first paint to keep TTI low.
 const QueryProviders = composeProviders([
   ThemeProvider,
   MaintenanceProvider,
@@ -61,15 +64,48 @@ const QueryProviders = composeProviders([
   ImpersonationProvider,
   PlatformViewAsProvider,
   CartProvider,
+  TooltipProvider,
+  PrefetchProvider,
+  AuthSheetProvider,
+]);
+
+const DeferredProviders = composeProviders([
   PWAInstallProvider,
   LifeSituationProvider,
   StorefrontProvider,
   GoogleMapsProvider,
-  TooltipProvider,
   HintProvider,
-  PrefetchProvider,
-  AuthSheetProvider,
 ]);
+
+/**
+ * Mounts secondary providers after first paint. Until then, children render
+ * inside null-context fallbacks (each provider's `useX()` hook handles the
+ * undefined-context case). Cuts ~5 wrappers and several module evaluations
+ * out of the initial render path.
+ */
+function DeferredProvidersGate({ children }: { children: React.ReactNode }) {
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => {
+    type IdleWin = Window & {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+    };
+    const w = window as IdleWin;
+    if (typeof w.requestIdleCallback === 'function') {
+      const id = w.requestIdleCallback(() => setMounted(true), { timeout: 1500 });
+      return () => {
+        // cancelIdleCallback is best-effort; not all browsers expose it
+        const cancel = (window as unknown as { cancelIdleCallback?: (id: number) => void })
+          .cancelIdleCallback;
+        if (cancel) cancel(id);
+      };
+    }
+    const t = setTimeout(() => setMounted(true), 0);
+    return () => clearTimeout(t);
+  }, []);
+
+  if (!mounted) return <>{children}</>;
+  return <DeferredProviders>{children}</DeferredProviders>;
+}
 
 /** Gate that shows Coming Soon for unauthenticated users (except /auth routes). Set VITE_BYPASS_COMING_SOON=true to test app without login. */
 function ComingSoonGate({ children }: { children: React.ReactNode }) {
