@@ -18,6 +18,7 @@ import { triggerHaptic } from '@/hooks/useHapticFeedback';
 import { playSound } from '@/hooks/useSoundEffects';
 import { getFeedbackSettings } from '@/hooks/useFeedbackSettings';
 import { usePrefetchRoute } from '@/hooks/usePrefetch';
+import { prefetchRoute as prefetchRouteChunk } from '@/lib/prefetchRoute';
 import { AllAppsDrawer } from '@/components/layout/AllAppsDrawer';
 import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 import { useUserPersonas } from '@/hooks/useUserPersonas';
