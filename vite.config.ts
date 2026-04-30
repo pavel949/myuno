@@ -273,13 +273,34 @@ export default defineConfig(({ mode }) => {
           manualChunks(id: string) {
             if (!id.includes('node_modules')) return undefined;
 
-            // Core React stack — required on every page.
-            if (/[\\/]node_modules[\\/](react|react-dom|react-router-dom|scheduler)[\\/]/.test(id)) {
+            // Core React runtime only. Keep router out of this chunk: router imports
+            // helper packages, and mixing them back into vendor-react creates a
+            // circular ESM graph that can leave React undefined during bootstrap.
+            if (/[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/.test(id)) {
               return 'vendor-react';
             }
 
-            // Radix UI primitives — shared across most pages.
-            if (id.includes('@radix-ui/')) return 'vendor-radix';
+            if (
+              /[\\/]node_modules[\\/](react-router|react-router-dom)[\\/]/.test(id) ||
+              /[\\/]node_modules[\\/]@remix-run[\\/]router[\\/]/.test(id)
+            ) {
+              return 'vendor-router';
+            }
+
+            // Radix UI primitives and their tightly-coupled overlay deps — shared
+            // across most pages. Keep them together to avoid vendor-radix ↔ vendor-misc cycles.
+            if (
+              id.includes('@radix-ui/') ||
+              id.includes('@floating-ui/') ||
+              id.includes('react-remove-scroll') ||
+              id.includes('react-remove-scroll-bar') ||
+              id.includes('react-style-singleton') ||
+              id.includes('use-callback-ref') ||
+              id.includes('use-sidecar') ||
+              id.includes('aria-hidden') ||
+              id.includes('cmdk') ||
+              id.includes('vaul')
+            ) return 'vendor-radix';
 
             // Heavy single-purpose libs (lazy-imported) — isolate so they only
             // download when the feature is actually used.
