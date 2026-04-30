@@ -58,7 +58,7 @@ export function MeShellLayout({ title, children }: MeShellLayoutProps) {
                 end={t.end}
                 className={({ isActive }) =>
                   cn(
-                    'inline-flex items-center gap-2 whitespace-nowrap rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors',
+                    'inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors',
                     isActive
                       ? 'bg-primary text-primary-foreground'
                       : 'text-muted-foreground hover:text-foreground hover:bg-muted'
