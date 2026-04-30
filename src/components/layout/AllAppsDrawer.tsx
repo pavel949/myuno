@@ -1,5 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { prefetchRoute, prefetchAllPopularRoutes } from '@/lib/prefetchRoute';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickTriplet } from '@/lib/ecosystemGlossary';
