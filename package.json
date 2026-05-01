@@ -11,10 +11,13 @@
   "scripts": {
     "dev": "vite",
     "dev:fresh": "vite --force",
+    "prebuild": "node scripts/validate-fonts.mjs",
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
+    "validate:fonts": "node scripts/validate-fonts.mjs",
+    "validate:fonts:verbose": "node scripts/validate-fonts.mjs --verbose",
     "validate:semantic": "node scripts/validate-semantic.mjs",
     "validate:semantic:verbose": "node scripts/validate-semantic.mjs --verbose",
     "validate:semantic:strict": "node scripts/validate-semantic.mjs --strict",
