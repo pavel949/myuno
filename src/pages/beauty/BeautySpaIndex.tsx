@@ -14,6 +14,8 @@ import { EmptyState } from '@/components/uno/EmptyState';
 import { CrossSellSection } from '@/components/crosssell';
 import { mapSalonToCatalogCard } from '@/lib/adapters/catalogCardAdapters';
 import { beautyFilterConfig } from '@/lib/filterRegistry';
+import { withGeoSection } from '@/components/filters';
+import { vertRowsToMarkers } from '@/lib/adapters/vertRowToMarker';
 import { APP_ROUTES } from '@/lib/config/routes';
 import type { FilterValues } from '@/components/filters/UniversalFilter';
 import { usePersonaFilter } from '@/hooks/usePersonaFilter';
@@ -105,12 +107,13 @@ export default function BeautySpaIndex() {
       categories={CATEGORIES}
       selectedCategory={selectedCategory}
       onCategoryChange={setSelectedCategory}
-      filterConfig={beautyFilterConfig}
+      filterConfig={withGeoSection(beautyFilterConfig)}
       filterValues={filterValues}
       onFilterChange={handleFilterChange}
       filterActiveCount={filterActiveCount}
-      showMapButton
-      mapPath={APP_ROUTES.BEAUTY_MAP}
+      mapMarkers={vertRowsToMarkers(filteredAndSorted)}
+      onMapMarkerSelect={(id) => navigate(`/beauty/salon/${id}`)}
+      mapIconChar="B"
       resultsCount={filteredAndSorted.length}
       resultsLabel={isRu ? 'Салоны' : 'Salons'}
       stickySubHeader={
