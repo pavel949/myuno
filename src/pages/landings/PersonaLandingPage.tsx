@@ -306,26 +306,6 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
           </section>
         ) : null}
 
-        {/* ─── REPEAT CTA ────────────────────────────────────────── */}
-        <div
-          className="mt-8 border p-6 sm:p-8"
-          style={{ borderColor: tokenColor(theme.color, 0.4), background: tokenColor(theme.color, 0.06) }}
-        >
-          <h3 className="text-xl font-semibold text-foreground">
-            {isRu ? 'Готовы начать?' : 'Ready to start?'}
-          </h3>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {isRu
-              ? 'Ответ дежурного — за 12 минут, без обязательств.'
-              : 'Reply within 12 minutes, no commitment.'}
-          </p>
-          <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-            <Button asChild size="lg">
-              <a href={wp(landing.primaryCta.href)}>
-                {t(landing.primaryCta.label)}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </a>
-            </Button>
         {/* ─── INLINE LEAD FORM (Wave 3) ─────────────────────────── */}
         {(() => {
           const cfg = PERSONA_LEAD_VERTICAL[landing.slug];
@@ -384,7 +364,9 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
             ) : null}
           </div>
         </div>
+      </article>
 
+      {/* ─── STICKY MOBILE CTA ─────────────────────────────────── */}
       <div className="sticky bottom-0 z-30 border-t border-border bg-background/95 p-3 backdrop-blur sm:hidden">
         <Button asChild size="lg" className="w-full">
           <a href={wp(landing.primaryCta.href)}>{t(landing.primaryCta.label)}</a>
