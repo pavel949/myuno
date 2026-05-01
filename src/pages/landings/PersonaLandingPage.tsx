@@ -274,7 +274,7 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
               {relatedAreas.map((a) => (
                 <a
                   key={a.slug}
-                  href={`/area/${a.slug}`}
+                  href={`/for/${landing.slug}/in/${a.slug}`}
                   className="border border-border bg-card p-3 text-center transition-colors hover:border-primary/60"
                 >
                   <div className="text-sm font-medium text-foreground">
@@ -288,6 +288,41 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
             </div>
           </section>
         ) : null}
+
+        {/* ─── RELATED PERSONAS (Wave 4 cluster cross-link) ──────── */}
+        {(() => {
+          const related = PERSONA_LANDINGS.filter(
+            (p) =>
+              p.status === 'live' &&
+              p.slug !== landing.slug &&
+              relatedAreas.some((a) => a.relatedPersonaSlugs.includes(p.slug)),
+          ).slice(0, 6);
+          if (related.length === 0) return null;
+          return (
+            <section className="mb-12">
+              <h2 className="mb-5 text-2xl font-semibold text-foreground">
+                {isRu ? 'Похожие профили' : 'Related profiles'}
+              </h2>
+              <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {related.map((p) => {
+                  const pTheme = getPersonaTheme(p.slug);
+                  const PIcon = pTheme.icon;
+                  return (
+                    <li key={p.slug}>
+                      <a
+                        href={`/for/${p.slug}`}
+                        className="group flex h-full items-start gap-2 border border-border bg-card p-3 transition-colors hover:border-primary/60"
+                      >
+                        <PIcon className="mt-0.5 h-4 w-4 shrink-0" style={{ color: tokenColor(pTheme.color) }} />
+                        <span className="text-sm font-medium text-foreground">{t(p.h1)}</span>
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          );
+        })()}
 
         {/* ─── FAQ ───────────────────────────────────────────────── */}
         {landing.faq.length > 0 ? (

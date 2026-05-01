@@ -46,6 +46,8 @@ function parsePersonaEntries(xml: string): Map<string, SitemapEntry> {
     const loc = locMatch[1].trim();
     if (!loc.startsWith(`${ORIGIN}/for/`)) continue;
     const slug = loc.slice(`${ORIGIN}/for/`.length).replace(/\/$/, '');
+    // Wave 4 — skip persona×area long-tail combos `/for/:persona/in/:area`.
+    if (slug.includes('/')) continue;
 
     const hreflangs: Record<string, string> = {};
     const altRe = /<xhtml:link\s+rel="alternate"\s+hreflang="([^"]+)"\s+href="([^"]+)"\s*\/>/g;
