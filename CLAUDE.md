@@ -71,7 +71,7 @@
 
 ## 2. ТЕКУЩИЙ СТАТУС
 
-**Версия:** 3.40.0
+**Версия:** 3.55.3
 **Ветка:** pavel/wip-current-version-20260318
 **Статус:** Активная разработка (session work, CRM improvements, Edge Functions migration)
 
