@@ -59,6 +59,7 @@ const PropertyHub = React.lazy(() => import('@/pages/property/PropertyHub'));
 // M6 · Track B.4 — persona landing route `/for/:persona`
 const PersonaLandingPage = React.lazy(() => import('@/pages/landings/PersonaLandingPage'));
 const PersonaDirectoryPage = React.lazy(() => import('@/pages/landings/PersonaDirectoryPage'));
+const PersonaAreaLandingPage = React.lazy(() => import('@/pages/landings/PersonaAreaLandingPage'));
 // M6 · Track B.5 — cluster landing route `/cluster/:cluster`
 const ClusterLandingPage = React.lazy(() => import('@/pages/landings/ClusterLandingPage'));
 // M10b · IPP §4G — Deal Room stub
@@ -691,6 +692,8 @@ export const AnimatedRoutes: React.FC = () => {
         {/* ── M6 Persona Landings (B.4) ── */}
         {/* Draft slugs and unknown slugs return 404 inside the page itself. */}
         <Route path="/for" element={<LazyPage><PersonaDirectoryPage /></LazyPage>} />
+        {/* Wave 4 — geo long-tail: must precede `/for/:persona` to match first. */}
+        <Route path="/for/:persona/in/:area" element={<LazyPage><PersonaAreaLandingPage /></LazyPage>} />
         <Route path="/for/:persona" element={<LazyPage><PersonaLandingPage /></LazyPage>} />
 
         {/* ── M10b · IPP — nested entry under Property Hub (ARCHITECTURE_V2 §13.1) ── */}
