@@ -801,7 +801,7 @@ const I_LIFESTYLE: ClusterLanding = {
     label: { ru: 'Забронировать яхту', en: 'Book a yacht' },
     href: '/yachts',
   },
-  relatedPersonas: ['P1', 'P3', 'P4', 'P5', 'P6', 'P7', 'P15', 'P16', 'P18', 'P24'],
+  relatedPersonas: ['P1', 'P3', 'P4', 'P5', 'P6', 'P7', 'P14', 'P15', 'P16', 'P17', 'P18', 'P19', 'P24'],
   seo: {
     metaTitle: { ru: 'Стиль жизни на Пхукете: рестораны, яхты, wellness — myUNO', en: 'Phuket lifestyle: dining, yachts, wellness — myUNO' },
     metaDescription: { ru: 'Wellness, ресторанные брони, аренда яхт, Muay Thai, события и приватные опыты. Лучшее на острове в одном месте.', en: 'Wellness, restaurant bookings, yacht charters, Muay Thai, events and private experiences. The best of the island in one place.' },
