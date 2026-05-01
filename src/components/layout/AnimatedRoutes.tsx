@@ -429,6 +429,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.LEGAL_CLUSTER} element={<LazyPage><Pages.LegalClusterPage /></LazyPage>} />
         <Route path={APP_ROUTES.CONTRACT_ANALYSIS} element={<LazyPage><Pages.ContractAnalysisPage /></LazyPage>} />
         <Route path={APP_ROUTES.TAX_NAV} element={<LazyPage><Pages.TaxNavPage /></LazyPage>} />
+        <Route path={APP_ROUTES.TAX_STRUCTURING} element={<LazyPage><Pages.TaxStructuringLanding /></LazyPage>} />
         
         {/* ── Investment Hub (top-level, multi-asset) ── */}
         <Route path={APP_ROUTES.INVEST} element={<LazyPage><Pages.InvestmentHubLanding /></LazyPage>} />
@@ -452,6 +453,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.INVEST_SUBMIT} element={<LazyPage><Pages.InvestmentSubmit /></LazyPage>} />
         <Route path={APP_ROUTES.INVEST_DEALS_BOARD} element={<LazyPage><Pages.InvestmentDeals /></LazyPage>} />
         <Route path={APP_ROUTES.CAPITAL_DEAL_INTAKE} element={<LazyPage><Pages.CapitalDealIntake /></LazyPage>} />
+        <Route path={APP_ROUTES.CAPITAL_ADVISORY} element={<LazyPage><Pages.CapitalAdvisoryLanding /></LazyPage>} />
         <Route path="/invest/deal/:id" element={<LazyPage><Pages.InvestmentDealPublicDetail /></LazyPage>} />
         <Route path="/invest/articles" element={<LazyPage><Pages.InvestmentArticles /></LazyPage>} />
         <Route path="/invest/articles/:slug" element={<LazyPage><Pages.InvestmentArticleDetail /></LazyPage>} />
@@ -693,6 +695,7 @@ export const AnimatedRoutes: React.FC = () => {
 
         {/* ── M10b · IPP §4G — Deal Room stub (P9 HNW invite-only) ── */}
         <Route path="/property/mandate" element={<LazyPage><MandateLanding /></LazyPage>} />
+        <Route path={APP_ROUTES.RESALE_LANDING} element={<LazyPage><Pages.ResaleAssignmentLanding /></LazyPage>} />
 
         {/* ── M6 Cluster Landings (B.5) ── */}
         {/* Same 200/404 contract as `/for/:persona`. */}
