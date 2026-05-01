@@ -1554,3 +1554,32 @@ export const vehicleFeatureOptions: FilterOption[] = [
   { id: 'driver', labelEn: 'With Driver', labelRu: 'С водителем', icon: '👨‍✈️' },
   { id: 'unlimited-km', labelEn: 'Unlimited KM', labelRu: 'Без лимита км', icon: '∞' },
 ];
+
+// ═══════════════ GeoFilters (universal — usable by any vertical with lat/lng) ═══════════════
+
+export const distanceFilterOptions: FilterOption[] = [
+  { id: '0', labelEn: 'Any distance', labelRu: 'Любое расстояние', icon: '🌐' },
+  { id: '2', labelEn: '< 2 km', labelRu: '< 2 км', icon: '📍' },
+  { id: '5', labelEn: '< 5 km', labelRu: '< 5 км', icon: '📍' },
+  { id: '10', labelEn: '< 10 km', labelRu: '< 10 км', icon: '📍' },
+  { id: '25', labelEn: '< 25 km', labelRu: '< 25 км', icon: '📍' },
+  { id: '50', labelEn: '< 50 km', labelRu: '< 50 км', icon: '📍' },
+];
+
+export const geoFilterSection = {
+  id: 'distance',
+  titleEn: 'Distance from me',
+  titleRu: 'Расстояние от меня',
+  type: 'single' as const,
+  options: distanceFilterOptions,
+};
+
+/**
+ * withGeoSection — append the universal distance filter to any FilterConfig.
+ * Use in catalogs that have lat/lng coordinates and a Map view.
+ */
+export function withGeoSection(config: FilterConfig): FilterConfig {
+  // Avoid double-adding
+  if (config.sections.some((s) => s.id === 'distance')) return config;
+  return { sections: [geoFilterSection, ...config.sections] };
+}
