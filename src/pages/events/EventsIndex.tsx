@@ -14,6 +14,8 @@ import { EmptyState } from '@/components/uno/EmptyState';
 import { CrossSellSection } from '@/components/crosssell';
 import { mapEventToCatalogCard } from '@/lib/adapters/catalogCardAdapters';
 import { eventsFilterConfig } from '@/lib/filterRegistry';
+import { withGeoSection } from '@/components/filters';
+import { vertRowsToMarkers } from '@/lib/adapters/vertRowToMarker';
 import type { FilterValues } from '@/components/filters/UniversalFilter';
 import { usePersonaFilter } from '@/hooks/usePersonaFilter';
 
@@ -137,10 +139,13 @@ export default function EventsIndex() {
       categories={CATEGORIES}
       selectedCategory={selectedCategory}
       onCategoryChange={setSelectedCategory}
-      filterConfig={eventsFilterConfig}
+      filterConfig={withGeoSection(eventsFilterConfig)}
       filterValues={filterValues}
       onFilterChange={handleFilterChange}
       filterActiveCount={filterActiveCount}
+      mapMarkers={vertRowsToMarkers(filteredAndSorted)}
+      onMapMarkerSelect={(id) => navigate(`/events/${id}`)}
+      mapIconChar="🎟"
       resultsCount={filteredAndSorted.length}
       resultsLabel={isRu ? 'События' : 'Events'}
       stickySubHeader={

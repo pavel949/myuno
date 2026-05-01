@@ -13,6 +13,8 @@ import { useRestaurants } from '@/hooks/useRestaurants';
 import { CrossSellSection } from '@/components/crosssell';
 import { mapRestaurantToCatalogCard } from '@/lib/adapters/catalogCardAdapters';
 import { restaurantFilterConfig } from '@/lib/filterRegistry';
+import { withGeoSection } from '@/components/filters';
+import { vertRowsToMarkers } from '@/lib/adapters/vertRowToMarker';
 import { APP_ROUTES } from '@/lib/config/routes';
 import type { FilterValues } from '@/components/filters/UniversalFilter';
 import { usePersonaFilter } from '@/hooks/usePersonaFilter';
@@ -146,12 +148,13 @@ export default function RestaurantsIndex() {
       categories={CUISINES}
       selectedCategory={selectedCuisine}
       onCategoryChange={setSelectedCuisine}
-      filterConfig={restaurantFilterConfig}
+      filterConfig={withGeoSection(restaurantFilterConfig)}
       filterValues={filterValues}
       onFilterChange={handleFilterChange}
       filterActiveCount={filterActiveCount}
-      showMapButton
-      mapPath={APP_ROUTES.RESTAURANT_MAP}
+      mapMarkers={vertRowsToMarkers(filteredAndSorted)}
+      onMapMarkerSelect={(id) => navigate(`/restaurants/${id}`)}
+      mapIconChar="🍴"
       resultsCount={filteredAndSorted.length}
       resultsLabel={isRu ? 'Рестораны' : 'Restaurants'}
       stickySubHeader={

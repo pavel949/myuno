@@ -15,6 +15,7 @@ import { PropertyTourPromo } from '@/components/experiences/PropertyTourPromo';
 import { useExperiences, ExperienceType } from '@/hooks/useExperiences';
 import { useExperienceCategories } from '@/hooks/useExperienceCategories';
 import { mapExperienceToCatalogCard } from '@/lib/adapters/catalogCardAdapters';
+import { vertRowsToMarkers } from '@/lib/adapters/vertRowToMarker';
 import { cn } from '@/lib/utils';
 import { VerticalContextBanner } from '@/components/vertical/VerticalContextBanner';
 import { VerticalInsightPanel } from '@/components/vertical/VerticalInsightPanel';
@@ -102,11 +103,9 @@ export default function ExperiencesIndex() {
       selectedCategory={selectedCategory}
       onCategoryChange={handleCategoryChange}
       showFilter={false}
-      headerActions={
-        <Button variant="outline" size="sm" className="gap-1.5 h-9" onClick={() => navigate('/map?vertical=experiences')}>
-          <MapPin className="w-4 h-4" />
-        </Button>
-      }
+      mapMarkers={vertRowsToMarkers(sorted, { titleFields: ['title_en', 'name_en'], titleRuFields: ['title_ru', 'name_ru'] })}
+      onMapMarkerSelect={(id) => navigate(`/experiences/${id}`)}
+      mapIconChar="🧭"
       stickySubHeader={
         <div className="px-4 py-2 flex items-center gap-2 overflow-x-auto scrollbar-hide touch-pan-y">
           {/* Type toggle */}

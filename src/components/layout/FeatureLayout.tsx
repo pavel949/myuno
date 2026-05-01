@@ -6,8 +6,8 @@
  * - `miniapp` — sticky UnifiedHeader, optional hero, filters, ecosystem container (legacy `MiniAppLayout`)
  * - `landing` — gradient hero + optional WhatsApp CTA (legacy `LandingLayout`)
  */
-import React, { ReactNode, useCallback } from 'react';
-import { LucideIcon, ShoppingCart, MapIcon, SlidersHorizontal, MessageCircle } from 'lucide-react';
+import React, { ReactNode, useCallback, useEffect, useState } from 'react';
+import { LucideIcon, ShoppingCart, MapIcon, SlidersHorizontal, MessageCircle, LayoutGrid, MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -25,6 +25,8 @@ import { APP_ROUTES } from '@/lib/config/routes';
 import { ECOSYSTEM_MAIN_SPACING, ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
 import { SEOHead } from '@/components/seo';
 import { CrossSellSection } from '@/components/crosssell/CrossSellSection';
+import { UnifiedCatalogMap, type UnifiedMapMarker } from '@/components/map/UnifiedCatalogMap';
+import { getDefaultCenter, DEFAULT_CITY } from '@/lib/config';
 
 // ── Mini-app (catalog) types & implementation ─────────────────────────────
 
@@ -104,6 +106,18 @@ export interface MiniAppLayoutProps {
   seoNoindex?: boolean;
   /** Auto-renders <CrossSellSection> at the bottom of children when provided. */
   crossSellVertical?: string;
+  /**
+   * When provided, enables the built-in List/Map toggle in the header.
+   * Pass an array of UnifiedMapMarker — one per item to plot on Google Map.
+   * Empty array still shows the toggle (with empty-state on map).
+   */
+  mapMarkers?: UnifiedMapMarker[];
+  /** Called when a marker InfoWindow is clicked. */
+  onMapMarkerSelect?: (id: string) => void;
+  /** Single-char emoji/letter for marker label. */
+  mapIconChar?: string;
+  /** Initial view when toggle is enabled. Default: 'list'. */
+  defaultMapView?: 'list' | 'map';
 }
 
 function MiniappMode({
@@ -155,9 +169,34 @@ function MiniappMode({
   seoImage,
   seoNoindex,
   crossSellVertical,
+  mapMarkers,
+  onMapMarkerSelect,
+  mapIconChar,
+  defaultMapView = 'list',
 }: MiniAppLayoutProps) {
   const navigate = useNavigate();
   const { language, t } = useLanguage();
+
+  // Built-in List/Map view state (only active when mapMarkers prop is provided)
+  const mapToggleEnabled = Array.isArray(mapMarkers);
+  const [view, setView] = useState<'list' | 'map'>(defaultMapView);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+
+  useEffect(() => {
+    if (!mapToggleEnabled || typeof navigator === 'undefined' || !navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => setUserLocation(getDefaultCenter(DEFAULT_CITY)),
+      { timeout: 5000 },
+    );
+  }, [mapToggleEnabled]);
+
+  // Read distance filter (universal `distance` section, in km) from filterValues
+  const distanceKm = (() => {
+    const v = filterValues?.distance;
+    const n = Number(Array.isArray(v) ? v[0] : v);
+    return Number.isFinite(n) && n > 0 ? n : 0;
+  })();
 
   const handleQuickFilterToggle = useCallback(
     (sectionId: string, optionId: string) => {
@@ -180,6 +219,35 @@ function MiniappMode({
 
   const buildHeaderActions = () => {
     const actions: ReactNode[] = [];
+
+    if (mapToggleEnabled) {
+      actions.push(
+        <div key="view-toggle" className="flex items-center bg-muted shrink-0">
+          <Button
+            type="button"
+            variant={view === 'list' ? 'default' : 'ghost'}
+            size="sm"
+            className="h-8 px-2 rounded-none"
+            onClick={() => setView('list')}
+            aria-label={language === 'ru' ? 'Список' : 'List'}
+            aria-pressed={view === 'list'}
+          >
+            <LayoutGrid className="w-4 h-4" />
+          </Button>
+          <Button
+            type="button"
+            variant={view === 'map' ? 'default' : 'ghost'}
+            size="sm"
+            className="h-8 px-2 rounded-none"
+            onClick={() => setView('map')}
+            aria-label={language === 'ru' ? 'Карта' : 'Map'}
+            aria-pressed={view === 'map'}
+          >
+            <MapPin className="w-4 h-4" />
+          </Button>
+        </div>
+      );
+    }
 
     if (showMapButton) {
       actions.push(
@@ -393,7 +461,25 @@ function MiniappMode({
           </div>
         )}
 
-        {children}
+        {mapToggleEnabled && view === 'map' ? (
+          <UnifiedCatalogMap
+            markers={mapMarkers ?? []}
+            userLocation={userLocation}
+            distanceKm={distanceKm}
+            onSelect={onMapMarkerSelect}
+            iconChar={mapIconChar}
+            className="h-[calc(100vh-280px)] min-h-[420px] w-full border border-border/40"
+            emptyMessage={
+              (mapMarkers?.length ?? 0) === 0
+                ? language === 'ru'
+                  ? 'Нет объектов с координатами'
+                  : 'No items with coordinates'
+                : undefined
+            }
+          />
+        ) : (
+          children
+        )}
 
         {crossSellVertical && (
           <CrossSellSection currentVertical={crossSellVertical} />

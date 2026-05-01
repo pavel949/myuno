@@ -18,6 +18,7 @@ import { APP_ROUTES } from '@/lib/config/routes';
 import { VerticalContextBanner } from '@/components/vertical/VerticalContextBanner';
 import { VerticalInsightPanel } from '@/components/vertical/VerticalInsightPanel';
 import { usePersonaFilter } from '@/hooks/usePersonaFilter';
+import { vertRowsToMarkers } from '@/lib/adapters/vertRowToMarker';
 
 type YachtTypeFilter = 'all' | 'motor_yacht' | 'catamaran' | 'speedboat' | 'superyacht';
 type SortKey = 'featured' | 'price_asc' | 'price_desc' | 'rating' | 'capacity';
@@ -106,6 +107,9 @@ export default function YachtsIndex() {
       selectedCategory={typeFilter}
       onCategoryChange={(id) => setTypeFilter(id as YachtTypeFilter)}
       showFilter={false}
+      mapMarkers={vertRowsToMarkers(filtered)}
+      onMapMarkerSelect={(id) => navigate(`/yachts/${id}`)}
+      mapIconChar="⚓"
       stickySubHeader={
         <div className="px-4 py-2 flex items-center gap-2 overflow-x-auto scrollbar-hide touch-pan-y">
           <button

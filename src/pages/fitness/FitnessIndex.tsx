@@ -14,6 +14,8 @@ import { EmptyState } from '@/components/uno/EmptyState';
 import { CrossSellSection } from '@/components/crosssell';
 import { mapGymToCatalogCard } from '@/lib/adapters/catalogCardAdapters';
 import { fitnessFilterConfig } from '@/lib/filterRegistry';
+import { withGeoSection } from '@/components/filters';
+import { vertRowsToMarkers } from '@/lib/adapters/vertRowToMarker';
 import type { FilterValues } from '@/components/filters/UniversalFilter';
 import { usePersonaFilter } from '@/hooks/usePersonaFilter';
 
@@ -112,10 +114,13 @@ export default function FitnessIndex() {
       categories={CATEGORIES}
       selectedCategory={selectedCategory}
       onCategoryChange={setSelectedCategory}
-      filterConfig={fitnessFilterConfig}
+      filterConfig={withGeoSection(fitnessFilterConfig)}
       filterValues={filterValues}
       onFilterChange={handleFilterChange}
       filterActiveCount={filterActiveCount}
+      mapMarkers={vertRowsToMarkers(filteredAndSorted)}
+      onMapMarkerSelect={(id) => navigate(`/fitness/${id}`)}
+      mapIconChar="F"
       resultsCount={filteredAndSorted.length}
       resultsLabel={isRu ? 'Залы' : 'Gyms'}
       stickySubHeader={
