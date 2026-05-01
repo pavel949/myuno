@@ -169,9 +169,34 @@ function MiniappMode({
   seoImage,
   seoNoindex,
   crossSellVertical,
+  mapMarkers,
+  onMapMarkerSelect,
+  mapIconChar,
+  defaultMapView = 'list',
 }: MiniAppLayoutProps) {
   const navigate = useNavigate();
   const { language, t } = useLanguage();
+
+  // Built-in List/Map view state (only active when mapMarkers prop is provided)
+  const mapToggleEnabled = Array.isArray(mapMarkers);
+  const [view, setView] = useState<'list' | 'map'>(defaultMapView);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+
+  useEffect(() => {
+    if (!mapToggleEnabled || typeof navigator === 'undefined' || !navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => setUserLocation(getDefaultCenter(DEFAULT_CITY)),
+      { timeout: 5000 },
+    );
+  }, [mapToggleEnabled]);
+
+  // Read distance filter (universal `distance` section, in km) from filterValues
+  const distanceKm = (() => {
+    const v = filterValues?.distance;
+    const n = Number(Array.isArray(v) ? v[0] : v);
+    return Number.isFinite(n) && n > 0 ? n : 0;
+  })();
 
   const handleQuickFilterToggle = useCallback(
     (sectionId: string, optionId: string) => {
