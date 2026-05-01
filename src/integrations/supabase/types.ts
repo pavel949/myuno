@@ -30501,6 +30501,17 @@ export type Database = {
       }
     }
     Functions: {
+      add_team_points: {
+        Args: {
+          p_action_type: string
+          p_entity_id?: string
+          p_entity_type?: string
+          p_metadata?: Json
+          p_points: number
+          p_user_id: string
+        }
+        Returns: number
+      }
       apply_lead_score_event: {
         Args: {
           p_contact_id: string
@@ -30516,6 +30527,10 @@ export type Database = {
           temperature_after: string
           temperature_before: string
         }[]
+      }
+      apply_referral_code: {
+        Args: { p_code: string; p_referred_id: string }
+        Returns: boolean
       }
       calculate_distance_km: {
         Args: { lat1: number; lat2: number; lng1: number; lng2: number }
@@ -30671,6 +30686,22 @@ export type Database = {
         Returns: Json
       }
       credit_cashback: { Args: { p_order_id: string }; Returns: Json }
+      detect_booking_conflicts: {
+        Args: { p_property_id: string }
+        Returns: {
+          booking_id_1: string
+          booking_id_2: string
+          check_in_1: string
+          check_in_2: string
+          check_out_1: string
+          check_out_2: string
+          guest_name_1: string
+          guest_name_2: string
+          overlap_days: number
+          source_1: string
+          source_2: string
+        }[]
+      }
       devmod_attempt_unit_transition: {
         Args: {
           p_expected_version: number
@@ -30694,6 +30725,7 @@ export type Database = {
         Returns: string
       }
       generate_referral_code: { Args: { p_user_id: string }; Returns: string }
+      get_all_currency_rates: { Args: never; Returns: Json }
       get_canonical_primary_role: {
         Args: { _user_id: string }
         Returns: string
@@ -30781,6 +30813,15 @@ export type Database = {
       get_property_user_role: {
         Args: { p_property_id: string; p_user_id: string }
         Returns: string
+      }
+      get_subscription_revenue: {
+        Args: { p_days?: number }
+        Returns: {
+          active_count: number
+          monthly_count: number
+          total_revenue: number
+          yearly_count: number
+        }[]
       }
       get_system_setting: { Args: { p_key: string }; Returns: Json }
       get_user_company_ids: { Args: { _user_id?: string }; Returns: string[] }
