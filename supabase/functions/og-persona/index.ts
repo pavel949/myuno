@@ -4,7 +4,10 @@
  *
  * Usage: GET /functions/v1/og-persona?persona=tourists&area=bang-tao&lang=ru
  */
-import { corsHeaders } from '@supabase/supabase-js/cors';
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
 
 const PERSONA_TITLES: Record<string, { ru: string; en: string }> = {
   tourists: { ru: 'Туристам', en: 'For Tourists' },
