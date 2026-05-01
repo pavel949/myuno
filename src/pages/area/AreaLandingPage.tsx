@@ -42,6 +42,12 @@ import {
   surfaceFromOffplanProject,
   type UnifiedListingSurface,
 } from '@/lib/real-estate/listingViewModel';
+import {
+  buildAreaOgUrl,
+  OG_IMAGE_HEIGHT,
+  OG_IMAGE_TYPE,
+  OG_IMAGE_WIDTH,
+} from '@/lib/seo/ogImage';
 
 const SEED_LISTING_LIMIT = 6;
 
@@ -190,11 +196,36 @@ const AreaLandingPage = () => {
           <link key={alt.lang} rel="alternate" hrefLang={alt.lang} href={alt.href} />
         ))}
         <link rel="alternate" hrefLang="x-default" href={canonicalUrl} />
-        <meta property="og:type" content="website" />
-        <meta property="og:title" content={seo.metaTitle[language as 'ru' | 'en']} />
-        <meta property="og:description" content={seo.metaDescription[language as 'ru' | 'en']} />
-        <meta property="og:url" content={canonicalUrl} />
-        <meta property="og:image" content={seo.ogImage} />
+        {(() => {
+          const og = buildAreaOgUrl({
+            area: area.slug,
+            areaName: isRu ? area.name_ru : area.name_en,
+            lang: isRu ? 'ru' : 'en',
+          });
+          const ogAlt = `${isRu ? area.name_ru : area.name_en} — myUNO`;
+          return (
+            <>
+              <link rel="preload" as="image" href={og} type={OG_IMAGE_TYPE} />
+              <meta property="og:type" content="website" />
+              <meta property="og:title" content={seo.metaTitle[language as 'ru' | 'en']} />
+              <meta property="og:description" content={seo.metaDescription[language as 'ru' | 'en']} />
+              <meta property="og:url" content={canonicalUrl} />
+              <meta property="og:image" content={og} />
+              <meta property="og:image:secure_url" content={og} />
+              <meta property="og:image:type" content={OG_IMAGE_TYPE} />
+              <meta property="og:image:width" content={String(OG_IMAGE_WIDTH)} />
+              <meta property="og:image:height" content={String(OG_IMAGE_HEIGHT)} />
+              <meta property="og:image:alt" content={ogAlt} />
+              <meta property="og:locale" content={isRu ? 'ru_RU' : 'en_US'} />
+              <meta property="og:site_name" content="myUNO" />
+              <meta name="twitter:card" content="summary_large_image" />
+              <meta name="twitter:title" content={seo.metaTitle[language as 'ru' | 'en']} />
+              <meta name="twitter:description" content={seo.metaDescription[language as 'ru' | 'en']} />
+              <meta name="twitter:image" content={og} />
+              <meta name="twitter:image:alt" content={ogAlt} />
+            </>
+          );
+        })()}
         <script type="application/ld+json">{JSON.stringify(placeSchema)}</script>
         <script type="application/ld+json">{JSON.stringify(breadcrumb)}</script>
       </Helmet>

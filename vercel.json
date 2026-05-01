@@ -25,6 +25,18 @@
       "has": [{ "type": "host", "value": "crm.bymyuno.com" }],
       "destination": "/index.html"
     },
+    {
+      "source": "/og/persona/:slug.svg",
+      "destination": "https://kakkwibljrjsawxgnupk.supabase.co/functions/v1/og-persona?persona=:slug"
+    },
+    {
+      "source": "/og/area/:slug.svg",
+      "destination": "https://kakkwibljrjsawxgnupk.supabase.co/functions/v1/og-persona?area=:slug"
+    },
+    {
+      "source": "/og/cluster/:slug.svg",
+      "destination": "https://kakkwibljrjsawxgnupk.supabase.co/functions/v1/og-persona?cluster=:slug"
+    },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "redirects": [

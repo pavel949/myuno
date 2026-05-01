@@ -17,6 +17,12 @@ import { getPersonaTheme } from '@/lib/landings/personaTheme';
 import { tokenColor } from '@/lib/utils/hslAlpha';
 import { LandingLeadForm } from '@/components/landings/LandingLeadForm';
 import { withPersonaParam } from '@/lib/landings/personaTagMap';
+import {
+  buildPersonaOgUrl,
+  OG_IMAGE_HEIGHT,
+  OG_IMAGE_TYPE,
+  OG_IMAGE_WIDTH,
+} from '@/lib/seo/ogImage';
 import NotFound from '@/pages/NotFound';
 
 const PersonaAreaLandingPage = () => {
@@ -39,7 +45,12 @@ const PersonaAreaLandingPage = () => {
   const Icon = theme.icon;
   const wp = (href: string) => withPersonaParam(href, persona.slug);
 
-  const og = `https://myuno.app/og/persona/${persona.slug}.svg?area=${a.slug}`;
+  const og = buildPersonaOgUrl({
+    persona: persona.slug,
+    area: a.slug,
+    areaName: isRu ? a.name_ru : a.name_en,
+    lang: isRu ? 'ru' : 'en',
+  });
   const canonical = `https://myuno.app/for/${persona.slug}/in/${a.slug}`;
   const titleRu = `${t(persona.h1)} в ${a.name_ru} · myUNO`;
   const titleEn = `${t(persona.h1)} in ${a.name_en} · myUNO`;
@@ -47,6 +58,9 @@ const PersonaAreaLandingPage = () => {
   const descRu = `${a.name_ru}: ฿${(a.avg_price_sqm / 1000).toFixed(0)}K/м², доходность ${a.avg_yield}%. Подборка под задачу: ${t(persona.h1)}.`;
   const descEn = `${a.name_en}: ฿${(a.avg_price_sqm / 1000).toFixed(0)}K/sqm, yield ${a.avg_yield}%. Curated for: ${t(persona.h1)}.`;
   const description = (isRu ? descRu : descEn).slice(0, 160);
+  const ogAlt = isRu
+    ? `${t(persona.h1)} в ${a.name_ru} — myUNO`
+    : `${t(persona.h1)} in ${a.name_en} — myUNO`;
 
   const pros = isRu ? a.pros_ru : a.pros_en;
   const cons = isRu ? a.cons_ru : a.cons_en;
@@ -61,14 +75,26 @@ const PersonaAreaLandingPage = () => {
         <link rel="alternate" hrefLang="ru" href={`${canonical}?lang=ru`} />
         <link rel="alternate" hrefLang="en" href={`${canonical}?lang=en`} />
         <link rel="alternate" hrefLang="x-default" href={canonical} />
+        {/* Preload OG so social crawlers fetch it warm and the image is ready */}
+        <link rel="preload" as="image" href={og} type={OG_IMAGE_TYPE} />
         <meta property="og:type" content="website" />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
         <meta property="og:url" content={canonical} />
         <meta property="og:image" content={og} />
+        <meta property="og:image:secure_url" content={og} />
+        <meta property="og:image:type" content={OG_IMAGE_TYPE} />
+        <meta property="og:image:width" content={String(OG_IMAGE_WIDTH)} />
+        <meta property="og:image:height" content={String(OG_IMAGE_HEIGHT)} />
+        <meta property="og:image:alt" content={ogAlt} />
+        <meta property="og:locale" content={isRu ? 'ru_RU' : 'en_US'} />
+        <meta property="og:locale:alternate" content={isRu ? 'en_US' : 'ru_RU'} />
         <meta property="og:site_name" content="myUNO" />
         <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={title} />
+        <meta name="twitter:description" content={description} />
         <meta name="twitter:image" content={og} />
+        <meta name="twitter:image:alt" content={ogAlt} />
       </Helmet>
 
       {/* HERO */}
