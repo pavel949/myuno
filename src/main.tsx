@@ -10,7 +10,7 @@ function renderBootstrapError(message: string) {
   if (!root) return;
 
   const outer = document.createElement("div");
-  outer.setAttribute("style", "min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:#fafaf9;color:#1a1a19;font-family:'DM Sans',system-ui,-apple-system,sans-serif;");
+  outer.setAttribute("style", "min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:#fafaf9;color:#1a1a19;font-family:'Golos Text',system-ui,-apple-system,sans-serif;");
 
   const card = document.createElement("div");
   card.setAttribute("style", "max-width:560px;width:100%;background:#fff;border:1px solid #e5e5e4;border-radius:14px;padding:20px;");

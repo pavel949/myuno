@@ -8,7 +8,7 @@ export const CHART_THEME = {
   /** Axis tick styling */
   axisTick: {
     fontSize: 11,
-    fontFamily: "'DM Sans', sans-serif",
+    fontFamily: "'Golos Text', sans-serif",
     fontWeight: 500,
     fill: 'hsl(var(--muted-foreground))',
     letterSpacing: '0.01em',
@@ -22,7 +22,7 @@ export const CHART_THEME = {
     boxShadow: 'var(--shadow-elevated)',
     padding: '10px 14px',
     fontSize: '12px',
-    fontFamily: "'DM Sans', sans-serif",
+    fontFamily: "'Golos Text', sans-serif",
   },
 
   /** Tooltip label */
