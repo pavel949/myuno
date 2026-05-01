@@ -5,6 +5,9 @@ export type { FilterConfig, FilterOption, FilterValues, FilterSection, Universal
 // Nearby/Geolocation filter
 export { NearbyFilter, DistanceBadge } from './NearbyFilter';
 
+// Universal geo filter (applicable to any vertical with lat/lng + Map view)
+export { geoFilterSection, distanceFilterOptions, withGeoSection } from '@/lib/filterRegistry';
+
 // All filter configs and options — consolidated in a single registry
 export {
   // Dynamic hooks
