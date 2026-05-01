@@ -1,105 +1,97 @@
-## План: подготовка к продакшну (без Stripe)
+## Wave 3 — Lifestyle Personas P14–P19
 
 ### Контекст
 
-Уже сделано в предыдущих заходах:
-- ✅ Auth Gate активирован (`bypassComingSoon` через env)
-- ✅ 5 критических RLS-уязвимостей закрыты (PII, ClearView, storage)
-- ✅ `clearview_grade_to_recommendation` — `search_path` зафиксирован
-- ✅ Wave 1 cleanup: 33 orphan edge fn в `_archive/`, 19 пустых таблиц удалены
-- ✅ Wave 5 batch 1+2: 12 RPC удалены
+Все 6 lifestyle-персон уже технически `live` — `/for/medical`, `/for/weddings`, `/for/athletes`, `/for/halal`, `/for/lgbtq`, `/for/accessibility` открываются и проходят `isLivePersonaLanding()`. Конфиги в `src/content/landings/personas/P14..P19.ts`, рендер — `src/pages/landings/PersonaLandingPage.tsx`.
 
-Остаётся: не-платёжная часть RE Audit багов, Wave 5 deep RPC аудит, удаление подтверждённых dead code edge fn, верификация Auth Gate end-to-end.
+**Проблема №1 — неравномерное качество.** `P14_MEDICAL` и `P15_WEDDINGS` уже production-grade (6 services, 6 FAQ, цены, конкретные клиники/площадки). А `P16_ATHLETES`, `P17_HALAL`, `P18_LGBTQ`, `P19_ACCESSIBILITY` — light-touch (2 FAQ, 4 services, мало конкретики).
 
----
+**Проблема №2 — нет lead-capture на самой странице.** `PersonaLandingPage` сейчас показывает только CTA-ссылки на чужие воронки (`/property/rent`, `/visa/quiz`, `/concierge`). Нет inline-формы, как в Wave 1/2 лендингах. Это режет конверсию: нишевые персоны (особенно P14/P15/P19) часто хотят оставить заявку прямо на странице, а не уходить в общий каталог.
 
-### Скоуп (что делаем)
+**Проблема №3 — нет cross-link с ClusterLandingPage.** Lifestyle-кластер (`/cluster/lifestyle`) не показывает персоны P14–P19, хотя `relatedPersonas` поле существует в `ClusterLanding`.
 
-#### 1. RE Audit баги — не-платёжная часть
-Из 5 блоков багов исключаем всё, что трогает Stripe webhook / `payment_intents` / orders creation после оплаты. Чиним:
+### Что делаем
 
-- **Auth/Role selection (Bug #5)** — edge case при первом логине: иногда роль не присваивается, юзер падает на пустой `/account`. Проверить `useEnsureMultiRoleQaBundle` + триггер `handle_new_user`, добавить fallback на `primary_role='guest'` в profile-trigger.
-- **Owner financials (Bug #4)** — non-Stripe часть: расхождения income/expense в `property_financials` дашборде. Проверить агрегацию в `usePropertyFinancials`, типизировать ответы (убрать `any`), добавить empty-state.
-- **Booking flow confirmation (Bug #3)** — non-payment edge cases: после успешной брони не обновляется UI (cache stale). Добавить invalidation `['bookings', propertyId]` после `useCreateBooking` mutation.
+#### Шаг 1. Доводим контент P16–P19 до production-grade
 
-Багов **#1 (Checkout/Payments)** и **#2 (Flowers cart)** — НЕ трогаем (требуют изменений в Stripe webhook).
+Симметрично с P14/P15: каждая персона получает **6 services** (вместо 4), **6 FAQ** (вместо 2), конкретные цены THB/USD, имена локаций/клиник/залов, типичные сроки.
 
-#### 2. Cleanup Wave 5 — deep RPC drop
-Из `docs/audits/rpc-true-orphans-2026-04-29.txt` (30 функций) ручная верификация через `pg_depend` + `pg_proc.prosrc` scan. Безопасно дропаем (миграция):
-- `find_nearby_*` остатки (если есть)
-- `get_*_summary` функции БЕЗ ссылок в RLS/триггерах/cron
-- `devmod_*` функции (dev-only)
+- **P16 ATHLETES** — добавить: nutrition coach, fight booking (любительские турниры), team retreats для club bookings, расценки по отдельным залам (Tiger ฿X/мес, AKA ฿Y/мес), FAQ про injury insurance, длительность ED Visa, питание под cut/bulk, восстановление между сессиями.
+- **P17 HALAL** — добавить: halal-yacht charter (растущий сегмент), wedding-halal сценарии, школы для детей с halal-меню, prayer kit на виллу, Ramadan packages. FAQ про сезон Хаджа, женский spa, банковские переводы по шариату, доставка halal-продуктов на виллу.
+- **P18 LGBTQ** — добавить: wedding services (легализован 2024), wellness retreats, family/IVF консультации, real-estate с couple-friendly contract. FAQ про брак-регистрацию, наследование на пару, child adoption status, friendly-developer'ы.
+- **P19 ACCESSIBILITY** — добавить: medical evacuation insurance, dialysis-clinic partnerships, sign-language interpreter, accessible diving (PADI Adaptive). FAQ про визу с инвалидностью, аренду медоборудования, страховые случаи, escort на длительных перелётах.
 
-Цель: 420 → ≤ 405 RPC.
+Все правки — только в `src/content/landings/personas/P16_ATHLETES.ts` … `P19_ACCESSIBILITY.ts`. Существующие тесты `personaLandings.test.ts` остаются зелёными (slug/status не меняем).
 
-#### 3. Cleanup — подтверждённые dead edge functions
-Из `docs/audits/2026-04-wave5-dead-code.md` категория 🟥 "Recommend DELETE":
-- `claude-chat`, `auto-social-publish`, `firecrawl-map`, `firecrawl-search`, `etagi-scrape-projects`, `process-guest-messages`, `document-reminder-check`
+#### Шаг 2. Inline lead-форма на PersonaLandingPage
 
-Действие: переместить в `supabase/functions/_archive/` + убрать из `supabase/config.toml`. Категорию 🟨 (webhook-suspects) НЕ трогаем.
+В `src/pages/landings/PersonaLandingPage.tsx` добавляем секцию `<LandingLeadForm>` (компонент из Wave 1, `src/components/landings/LandingLeadForm.tsx`) перед финальным CTA-блоком.
 
-#### 4. Типизация `any` в критичных hooks
-Узкий проход по 5-8 hooks в `src/hooks/`, связанных с финансами и бронированиями (где `any` маскирует баги):
-- `usePropertyFinancials`, `useOwnerDashboard`, `useBookingsList`, `useReservations`
-- Заменить `any` → Supabase generated types (`Database['public']['Tables'][...]['Row']`).
+- Vertical для лида определяется по `personaCode`:
+  - P14 → `health` vertical
+  - P15 → `wedding` vertical (или `events` если `wedding` нет)
+  - P16 → `fitness` vertical
+  - P17/P18/P19 → `properties` vertical (основная воронка — жильё)
+- Передаём `personaCode` в metadata лида, чтобы CRM видел источник.
+- Опциональное поле «Что вам нужно?» (свободный текст) для нишевых вопросов.
 
-Полный sweep 745 `any` — НЕ делаем (это отдельная большая работа).
+Форма скрывается, если `landing.primaryCta.href` указывает на платную воронку (`/visa/quiz` для P16 — там уже воронка с оплатой; не дублируем).
 
-#### 5. Верификация Auth Gate
-- Прогнать существующий e2e `e2e/tests/auth/login.spec.ts` мысленно по коду
-- Убедиться что `VITE_BYPASS_COMING_SOON` НЕ установлена в продакшн-сборке (проверить `.env.example`, `vercel.json`)
-- Whitelist публичных роутов: `/`, `/auth`, `/reset-password`, `/legal/*`, `/vendor/join`, `/developer-portal/apply` — проверить что все доступны без логина
+#### Шаг 3. Cross-link с ClusterLandingPage
 
-#### 6. Финальный security scan
-- Запустить `supabase--linter` и `security--run_security_scan`
-- Зафиксировать найденное: что критично — починить миграцией; что не критично (extension warnings, anon-доступ к auth-триггерам) — задокументировать в `docs/SECURITY_BASELINE.md`
+В `src/content/landings/clusterLandings.ts` находим cluster `I` (Lifestyle) и убеждаемся, что `relatedPersonas: ['P14','P15','P16','P17','P18','P19', ...]`. Если нет — добавляем. `ClusterLandingPage` уже умеет рендерить блок «Лендинги по персонам» (B.6 трек).
 
----
+#### Шаг 4. Sitemap & SEO
 
-### Что НЕ делаем (явно)
+- Убедиться что `public/sitemap.xml` (или генератор) включает 6 URL `/for/medical`, `/for/weddings`, `/for/athletes`, `/for/halal`, `/for/lgbtq`, `/for/accessibility` с `<xhtml:link rel="alternate" hreflang>`.
+- Проверить `LIVE_PERSONA_SLUGS` уже содержит все 6 (по тесту `personaLandings.test.ts:46-72` — да).
+- Добавить schema.org `Service` + `FAQPage` через существующий `<JsonLd>` если ещё не подключен в `PersonaLandingPage` (если есть — пропускаем).
 
-- ❌ Stripe webhook (`stripe-webhook/index.ts`, 1056 строк) — не трогаем
-- ❌ `payment_intents` / `orders` creation flow
-- ❌ Cart checkout (Flowers, Market, Wellness)
-- ❌ Полный sweep 745 `any`
-- ❌ Wave 1.C (419 hardcoded routes) — оппортунистически в других PR
-- ❌ Удаление 296 RPC «orphan-кандидатов» без deep verification
+### Что НЕ делаем
 
----
+- Не трогаем `ComingSoonGate` whitelist — `/for/*` уже доступен, см. `src/App.tsx`.
+- Не создаём новые роуты или страницы — `PersonaLandingPage` универсальный.
+- Не трогаем P14/P15 контент — он уже production-grade.
+- Не меняем тип `PersonaLanding` — расширяем только данные в существующих полях.
 
 ### Технические детали
 
-**Миграции:**
-- 1 миграция: drop ~10 верифицированных RPC + опц. fix `handle_new_user` trigger fallback
+```text
+Файлы (правка):
+  src/content/landings/personas/P16_ATHLETES.ts        — расширение services/faq
+  src/content/landings/personas/P17_HALAL.ts           — расширение services/faq
+  src/content/landings/personas/P18_LGBTQ.ts           — расширение services/faq
+  src/content/landings/personas/P19_ACCESSIBILITY.ts   — расширение services/faq
+  src/pages/landings/PersonaLandingPage.tsx            — встроить <LandingLeadForm/>
+  src/content/landings/clusterLandings.ts              — relatedPersonas для cluster I
+  public/sitemap.xml (или генератор)                   — проверка hreflang
 
-**Файлы (правки):**
-- `src/hooks/owner/usePropertyFinancials.ts` (типы + agg fix)
-- `src/hooks/booking/useCreateBooking.ts` (cache invalidation)
-- `src/contexts/AuthContext.tsx` или `useEnsureMultiRoleQaBundle` (role fallback)
-- `supabase/config.toml` (убрать 7 dead fn блоков)
+Файлы (без правки, для контекста):
+  src/components/landings/LandingLeadForm.tsx          — переиспользуем
+  src/lib/landings/types.ts                            — типы стабильные
+  src/components/layout/AnimatedRoutes.tsx:694-705     — роут уже есть
+```
 
-**Файлы (перемещение в `_archive/`):**
-- 7 edge functions из категории 🟥
+**Маппинг persona → lead vertical:**
+| Persona | Lead vertical | Pipeline |
+|---|---|---|
+| P14 medical | `health` | `useUniversalLead` |
+| P15 weddings | `events` (alias wedding) | `useUniversalLead` |
+| P16 athletes | `fitness` | `useUniversalLead` |
+| P17 halal | `properties` | `useUniversalLead` |
+| P18 lgbtq | `properties` | `useUniversalLead` |
+| P19 accessibility | `properties` | `useUniversalLead` |
 
-**Новые файлы:**
-- `docs/SECURITY_BASELINE.md` — что осталось из warnings и почему OK
-- `docs/audits/wave-progress-2026-05-01.md` — финальный отчёт
+### Acceptance
 
----
+1. Все 6 страниц `/for/{medical,weddings,athletes,halal,lgbtq,accessibility}` открываются с inline lead-формой.
+2. P16–P19 содержат по ≥6 services и ≥6 FAQ с конкретными цифрами/именами.
+3. Существующий тест `personaLandings.test.ts` остаётся зелёным.
+4. Лид с любой из 6 страниц долетает до соответствующей CRM pipeline c `personaCode` в metadata.
+5. `/cluster/lifestyle` показывает cross-link на P14–P19.
 
-### Критерии готовности
+### Wave 3 Out-of-scope (можно отдельной волной)
 
-1. `supabase--linter` — 0 ERROR-level findings (WARN допустимо с обоснованием)
-2. `security--run_security_scan` — 0 critical
-3. RPC count: 420 → ≤ 410
-4. Active edge fn: 124 → ≤ 117
-5. Auth Gate: незалогиненный юзер видит `UnderConstruction` на всех непубличных роутах
-6. 3 RE Audit бага (#3, #4, #5) воспроизводимо починены
-
----
-
-### Что нужно от вас
-
-После approve — переключаюсь в build mode и реализую за 1 заход. Если в процессе deep RPC аудита найдутся неоднозначные функции — оставлю их, отмечу в финальном отчёте.
-
-Stripe-блок (баги #1, #2 + переход на live keys + webhook→orders fix) — отдельным заходом по вашему сигналу.
+- Динамические OG-images per-persona (сейчас все используют `OG_DEFAULT`).
+- A/B тест inline-форма vs CTA-only.
+- Отдельные `/for/:persona/:area` гео-страницы (P14 × Bang Tao и т.п.).
