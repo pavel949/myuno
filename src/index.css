@@ -164,7 +164,7 @@ body {
     }
   }
 
-  /* Typography — Golos Text (display), DM Sans (body) — myuno-design-preview */
+  /* Typography — Golos Text (display), Golos Text (body) — myuno-design-preview */
   h1 {
     @apply font-display font-bold tracking-tight leading-[1.15];
     font-size: 1.75rem;
