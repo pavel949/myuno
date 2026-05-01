@@ -30532,16 +30532,8 @@ export type Database = {
         Args: { p_code: string; p_referred_id: string }
         Returns: boolean
       }
-      award_achievement: {
-        Args: { p_achievement_code: string; p_user_id: string }
-        Returns: Json
-      }
       calculate_distance_km: {
         Args: { lat1: number; lat2: number; lng1: number; lng2: number }
-        Returns: number
-      }
-      calculate_order_cashback: {
-        Args: { p_category?: string; p_order_id: string }
         Returns: number
       }
       calculate_order_totals:
@@ -30661,10 +30653,6 @@ export type Database = {
         Args: { _grade: string }
         Returns: string
       }
-      consume_clearview_bundle_slot: {
-        Args: { _project_id: string }
-        Returns: boolean
-      }
       create_booking_with_wallet_payment: {
         Args: {
           p_booking_type: string
@@ -30777,38 +30765,6 @@ export type Database = {
         Args: { p_base?: string; p_target?: string }
         Returns: number
       }
-      get_finance_summary_daily: {
-        Args: { _days?: number }
-        Returns: {
-          cancelled_count: number | null
-          completed_count: number | null
-          confirmed_count: number | null
-          currency: string | null
-          day: string | null
-          orders_count: number | null
-          platform_fees: number | null
-          total_revenue: number | null
-          vendor_payouts: number | null
-        }[]
-        SetofOptions: {
-          from: "*"
-          to: "mv_finance_summary_daily"
-          isOneToOne: false
-          isSetofReturn: true
-        }
-      }
-      get_gmv_summary: {
-        Args: { p_period_end?: string; p_period_start?: string }
-        Returns: Json
-      }
-      get_latest_ai_artifact: {
-        Args: {
-          p_artifact_type?: string
-          p_entity_id: string
-          p_entity_type: string
-        }
-        Returns: Json
-      }
       get_or_create_loyalty_status: {
         Args: { p_user_id: string }
         Returns: Json
@@ -30843,24 +30799,6 @@ export type Database = {
         Args: { p_metadata: Json; p_order_type: string }
         Returns: string
       }
-      get_platform_fee_percent: { Args: never; Returns: number }
-      get_portfolio_health_summary: {
-        Args: { _company_id?: string }
-        Returns: {
-          active_listings: number | null
-          company_id: string | null
-          computed_at: string | null
-          occupied_today: number | null
-          pending_tasks: number | null
-          properties_count: number | null
-        }[]
-        SetofOptions: {
-          from: "*"
-          to: "mv_portfolio_health_summary"
-          isOneToOne: false
-          isSetofReturn: true
-        }
-      }
       get_product_commission: {
         Args: { p_product_id: string; p_vertical: string }
         Returns: number
@@ -30886,8 +30824,6 @@ export type Database = {
         }[]
       }
       get_system_setting: { Args: { p_key: string }; Returns: Json }
-      get_trust_stats: { Args: never; Returns: Json }
-      get_user_analytics_summary: { Args: { p_days?: number }; Returns: Json }
       get_user_company_ids: { Args: { _user_id?: string }; Returns: string[] }
       get_yacht_availability: {
         Args: { p_month?: string; p_yacht_id: string }
@@ -30973,7 +30909,6 @@ export type Database = {
         }
         Returns: boolean
       }
-      mcc_check_inactivity: { Args: never; Returns: undefined }
       mcc_derive_user_state: {
         Args: { p_event_name: string; p_landing_id?: string; p_user_id: string }
         Returns: string

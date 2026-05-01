@@ -111,12 +111,16 @@ function ComingSoonGate({ children }: { children: React.ReactNode }) {
 
   // Allow auth and public marketing routes through
   const isPublicRoute = location.pathname.startsWith('/auth')
+    || location.pathname.startsWith('/reset-password')
+    || location.pathname.startsWith('/legal')
     || location.pathname.startsWith('/for-management-companies')
     || location.pathname.startsWith('/vendor/join')
     || location.pathname.startsWith('/vendor/onboarding')
+    || location.pathname.startsWith('/developer-portal/apply')
     || location.pathname.startsWith('/ref/')
     || location.pathname.startsWith('/newbuilds')
-    || location.pathname.startsWith('/capital');
+    || location.pathname.startsWith('/capital')
+    || location.pathname.startsWith('/clearview');
 
   if (bypassComingSoon || isPublicRoute || isLoading) return <>{children}</>;
   if (!user) return <UnderConstruction />;
