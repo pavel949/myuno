@@ -1,7 +1,7 @@
-# CLAUDE.md — myUNO SuperApp (актуальна на 2026-04-02)
+# CLAUDE.md — myUNO SuperApp (актуальна на 2026-05-01)
 
 > Единственный источник информации для AI ассистентов в этом репозитории.
-> Версия v3.40.0 | Ветка: pavel/wip-current-version-20260318 | Last sync: 2026-04-02
+> Версия v3.55.3 | Ветка: pavel/wip-current-version-20260318 | Last sync: 2026-05-01
 
 ---
 
