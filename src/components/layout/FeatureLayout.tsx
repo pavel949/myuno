@@ -118,6 +118,7 @@ export interface MiniAppLayoutProps {
   mapIconChar?: string;
   /** Initial view when toggle is enabled. Default: 'list'. */
   defaultMapView?: 'list' | 'map';
+}
 
 function MiniappMode({
   title,
