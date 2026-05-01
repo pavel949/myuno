@@ -258,8 +258,8 @@ src/
 
 ## 11. VERSION INFO
 
-- **App Version:** 3.40.0 (in `src/lib/appVersion.ts`)
-- **HTML meta tag:** `<meta name="version" content="3.40.0" />`
+- **App Version:** 3.55.3 (in `src/lib/appVersion.ts`)
+- **HTML meta tag:** `<meta name="version" content="3.55.3" />`
 - **Version endpoint:** `public/version.json`
 - **Cache busting:** Automatic on version mismatch (reload guard prevents loops)
 
