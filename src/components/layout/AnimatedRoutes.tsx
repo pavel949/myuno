@@ -175,7 +175,7 @@ export const AnimatedRoutes: React.FC = () => {
       <AnimatePresence mode="wait" initial={false}>
         <Routes location={location} key={location.pathname}>
         {/* ── Core ── */}
-        <Route path={APP_ROUTES.HOME} element={<PageTransition><HomeRouter /></PageTransition>} />
+        <Route path={APP_ROUTES.HOME} element={<Suspense fallback={<LoadingState />}><PageTransition><HomeRouter /></PageTransition></Suspense>} />
         <Route path="/index" element={<Navigate to={APP_ROUTES.HOME} replace />} />
         <Route path={APP_ROUTES.PRICING} element={<LazyPage><Pages.PricingPage /></LazyPage>} />
         <Route path="/welcome-landing" element={<LazyPage><WelcomeLanding /></LazyPage>} />
