@@ -296,8 +296,42 @@ export default defineConfig(({ mode }) => {
             if (id.includes('@tanstack/react-query')) {
               return 'vendor-query';
             }
-            if (id.includes('@radix-ui') || id.includes('react-remove-scroll') || id.includes('aria-hidden')) {
-              return 'vendor-radix';
+            // Split Radix into 3 sub-chunks so heavy overlays (dialog/popover/select/…)
+            // don't drag the rest of the UI primitives into the critical path.
+            // See .lovable/plan.md — Шаг 3 (vendor-radix split).
+            if (id.includes('@radix-ui')) {
+              if (
+                id.includes('react-dialog') ||
+                id.includes('react-alert-dialog') ||
+                id.includes('react-popover') ||
+                id.includes('react-dropdown-menu') ||
+                id.includes('react-select') ||
+                id.includes('react-tooltip') ||
+                id.includes('react-scroll-area') ||
+                id.includes('react-hover-card') ||
+                id.includes('react-context-menu') ||
+                id.includes('react-menubar') ||
+                id.includes('react-navigation-menu')
+              ) {
+                return 'vendor-radix-overlays';
+              }
+              if (
+                id.includes('react-checkbox') ||
+                id.includes('react-radio-group') ||
+                id.includes('react-switch') ||
+                id.includes('react-slider') ||
+                id.includes('react-toggle') ||
+                id.includes('react-toggle-group') ||
+                id.includes('react-label') ||
+                id.includes('react-form')
+              ) {
+                return 'vendor-radix-forms';
+              }
+              return 'vendor-radix-core';
+            }
+            if (id.includes('react-remove-scroll') || id.includes('aria-hidden')) {
+              // Used primarily by overlays — co-locate to avoid extra round-trip.
+              return 'vendor-radix-overlays';
             }
             if (id.includes('framer-motion') || id.includes('motion-dom') || id.includes('motion-utils')) {
               return 'vendor-motion';
