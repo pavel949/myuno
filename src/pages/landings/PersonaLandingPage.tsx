@@ -24,9 +24,31 @@ import { AREA_LANDINGS } from '@/content/landings/areaLandings';
 import NotFound from '@/pages/NotFound';
 import { Button } from '@/components/ui/button';
 import LandingSeoHead from '@/components/seo/LandingSeoHead';
+import { LandingLeadForm } from '@/components/landings/LandingLeadForm';
 import { tokenColor } from '@/lib/utils/hslAlpha';
 import { ArrowRight, CheckCircle2, MapPin, Sparkles, Grid3x3 } from 'lucide-react';
 import { getAppsForPersona, withPersonaParam } from '@/lib/landings/personaTagMap';
+
+/**
+ * Wave 3 — map persona slug to a Universal Lead vertical so the inline
+ * <LandingLeadForm/> drops the lead into the right CRM pipeline.
+ * Personas without an entry use the default 'properties' vertical.
+ */
+const PERSONA_LEAD_VERTICAL: Record<string, { verticalId: string; requestType: string }> = {
+  medical:        { verticalId: 'clinics',    requestType: 'medical_consultation' },
+  weddings:       { verticalId: 'other',      requestType: 'wedding_planning' },
+  athletes:       { verticalId: 'gyms',       requestType: 'training_camp' },
+  halal:          { verticalId: 'properties', requestType: 'vacation_rental' },
+  lgbtq:          { verticalId: 'properties', requestType: 'long_term_rental' },
+  accessibility: { verticalId: 'properties', requestType: 'vacation_rental' },
+};
+
+/**
+ * Personas whose primaryCta already routes to a paid funnel (Stripe checkout,
+ * paid quiz, etc.). For those we hide the lead form to avoid double-asking.
+ */
+const SKIP_LEAD_FORM = new Set<string>([]);
+
 
 interface PersonaLandingViewProps {
   landing: PersonaLanding;
@@ -283,6 +305,37 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
             </dl>
           </section>
         ) : null}
+
+        {/* ─── INLINE LEAD FORM (Wave 3) ─────────────────────────── */}
+        {(() => {
+          const cfg = PERSONA_LEAD_VERTICAL[landing.slug];
+          if (!cfg || SKIP_LEAD_FORM.has(landing.slug)) return null;
+          return (
+            <section className="mt-8">
+              <div className="mb-4">
+                <h3 className="text-xl font-semibold text-foreground">
+                  {isRu ? 'Оставьте заявку — ответим за 24 часа' : 'Leave a request — reply within 24 hours'}
+                </h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {isRu
+                    ? 'Мы соберём подборку под вашу задачу и пришлём в WhatsApp.'
+                    : 'We will curate options for your goal and send them via WhatsApp.'}
+                </p>
+              </div>
+              <LandingLeadForm
+                variant="universal"
+                verticalId={cfg.verticalId}
+                universalRequestType={cfg.requestType}
+                entryPoint={`persona-landing:${landing.slug}`}
+                leadSource="cta"
+                messagePlaceholder={{
+                  ru: 'Кратко опишите задачу: даты, состав, бюджет, особые пожелания.',
+                  en: 'Briefly describe your goal: dates, party, budget, special requests.',
+                }}
+              />
+            </section>
+          );
+        })()}
 
         {/* ─── REPEAT CTA ────────────────────────────────────────── */}
         <div
