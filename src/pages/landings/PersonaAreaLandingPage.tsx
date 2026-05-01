@@ -17,6 +17,12 @@ import { getPersonaTheme } from '@/lib/landings/personaTheme';
 import { tokenColor } from '@/lib/utils/hslAlpha';
 import { LandingLeadForm } from '@/components/landings/LandingLeadForm';
 import { withPersonaParam } from '@/lib/landings/personaTagMap';
+import {
+  buildPersonaOgUrl,
+  OG_IMAGE_HEIGHT,
+  OG_IMAGE_TYPE,
+  OG_IMAGE_WIDTH,
+} from '@/lib/seo/ogImage';
 import NotFound from '@/pages/NotFound';
 
 const PersonaAreaLandingPage = () => {
