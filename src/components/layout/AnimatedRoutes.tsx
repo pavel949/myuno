@@ -430,6 +430,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.CONTRACT_ANALYSIS} element={<LazyPage><Pages.ContractAnalysisPage /></LazyPage>} />
         <Route path={APP_ROUTES.TAX_NAV} element={<LazyPage><Pages.TaxNavPage /></LazyPage>} />
         <Route path={APP_ROUTES.TAX_STRUCTURING} element={<LazyPage><Pages.TaxStructuringLanding /></LazyPage>} />
+        <Route path={APP_ROUTES.CLEARVIEW_FOR_DEVELOPERS} element={<LazyPage><Pages.ClearViewForDevelopersLanding /></LazyPage>} />
         
         {/* ── Investment Hub (top-level, multi-asset) ── */}
         <Route path={APP_ROUTES.INVEST} element={<LazyPage><Pages.InvestmentHubLanding /></LazyPage>} />
