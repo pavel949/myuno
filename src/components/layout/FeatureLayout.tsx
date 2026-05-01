@@ -220,6 +220,35 @@ function MiniappMode({
   const buildHeaderActions = () => {
     const actions: ReactNode[] = [];
 
+    if (mapToggleEnabled) {
+      actions.push(
+        <div key="view-toggle" className="flex items-center bg-muted shrink-0">
+          <Button
+            type="button"
+            variant={view === 'list' ? 'default' : 'ghost'}
+            size="sm"
+            className="h-8 px-2 rounded-none"
+            onClick={() => setView('list')}
+            aria-label={language === 'ru' ? 'Список' : 'List'}
+            aria-pressed={view === 'list'}
+          >
+            <LayoutGrid className="w-4 h-4" />
+          </Button>
+          <Button
+            type="button"
+            variant={view === 'map' ? 'default' : 'ghost'}
+            size="sm"
+            className="h-8 px-2 rounded-none"
+            onClick={() => setView('map')}
+            aria-label={language === 'ru' ? 'Карта' : 'Map'}
+            aria-pressed={view === 'map'}
+          >
+            <MapPin className="w-4 h-4" />
+          </Button>
+        </div>
+      );
+    }
+
     if (showMapButton) {
       actions.push(
         <Button
