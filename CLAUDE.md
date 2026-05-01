@@ -240,16 +240,20 @@ npm run lint     # ESLint check
 
 ```
 src/
-├── pages/          — 366+ pages organized by vertical (owner, property, invest, admin, etc.)
-├── components/     — 1000+ components across 60+ domain folders
-├── hooks/          — 345 custom hooks (domain-specific)
-├── contexts/       — 11 global providers (Auth, Cart, Language, Theme, Location, etc.)
+├── pages/          — 510 pages organized by vertical (owner, property, invest, admin, etc.)
+├── components/     — ~992 components across 60+ domain folders
+├── hooks/          — 410 custom hooks (domain-specific)
+├── contexts/       — 15 global providers (Auth, Cart, Language, Theme, Location, etc.)
 ├── integrations/   — Supabase client + auto-generated types
 ├── lib/            — Utilities, adapters, taxonomies, appVersion.ts
 ├── design-system/  — Design tokens, component docs
 ├── i18n/           — Bilingual translations (RU/EN)
 ├── config/         — CRM types, maintenance schedules
 └── types/          — TypeScript definitions
+
+supabase/
+├── functions/      — 126 Edge Functions (Deno 2.0)
+└── migrations/     — 673 SQL migrations
 ```
 
 ---
