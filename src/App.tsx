@@ -105,7 +105,9 @@ function DeferredProvidersGate({ children }: { children: React.ReactNode }) {
 function ComingSoonGate({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
   const location = useLocation();
-  const bypassComingSoon = true; // temporarily bypass Coming Soon gate
+  // Production gate: only authenticated users + explicitly public marketing routes pass through.
+  // To temporarily disable while testing locally, set VITE_BYPASS_COMING_SOON=true in .env.
+  const bypassComingSoon = import.meta.env.VITE_BYPASS_COMING_SOON === 'true';
 
   // Allow auth and public marketing routes through
   const isPublicRoute = location.pathname.startsWith('/auth')
