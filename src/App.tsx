@@ -120,7 +120,11 @@ function ComingSoonGate({ children }: { children: React.ReactNode }) {
     || location.pathname.startsWith('/ref/')
     || location.pathname.startsWith('/newbuilds')
     || location.pathname.startsWith('/capital')
-    || location.pathname.startsWith('/clearview');
+    || location.pathname.startsWith('/clearview')
+    || location.pathname === '/invest/capital-advisory'
+    || location.pathname === '/property/resale-landing'
+    || location.pathname === '/owner/management-landing'
+    || location.pathname === '/legal/tax-structuring';
 
   if (bypassComingSoon || isPublicRoute || isLoading) return <>{children}</>;
   if (!user) return <UnderConstruction />;
