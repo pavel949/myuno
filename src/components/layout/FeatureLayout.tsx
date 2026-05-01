@@ -6,8 +6,8 @@
  * - `miniapp` — sticky UnifiedHeader, optional hero, filters, ecosystem container (legacy `MiniAppLayout`)
  * - `landing` — gradient hero + optional WhatsApp CTA (legacy `LandingLayout`)
  */
-import React, { ReactNode, useCallback } from 'react';
-import { LucideIcon, ShoppingCart, MapIcon, SlidersHorizontal, MessageCircle } from 'lucide-react';
+import React, { ReactNode, useCallback, useEffect, useState } from 'react';
+import { LucideIcon, ShoppingCart, MapIcon, SlidersHorizontal, MessageCircle, LayoutGrid, MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -25,6 +25,8 @@ import { APP_ROUTES } from '@/lib/config/routes';
 import { ECOSYSTEM_MAIN_SPACING, ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
 import { SEOHead } from '@/components/seo';
 import { CrossSellSection } from '@/components/crosssell/CrossSellSection';
+import { UnifiedCatalogMap, type UnifiedMapMarker } from '@/components/map/UnifiedCatalogMap';
+import { getDefaultCenter, DEFAULT_CITY } from '@/lib/config';
 
 // ── Mini-app (catalog) types & implementation ─────────────────────────────
 
@@ -104,7 +106,18 @@ export interface MiniAppLayoutProps {
   seoNoindex?: boolean;
   /** Auto-renders <CrossSellSection> at the bottom of children when provided. */
   crossSellVertical?: string;
-}
+  /**
+   * When provided, enables the built-in List/Map toggle in the header.
+   * Pass an array of UnifiedMapMarker — one per item to plot on Google Map.
+   * Empty array still shows the toggle (with empty-state on map).
+   */
+  mapMarkers?: UnifiedMapMarker[];
+  /** Called when a marker InfoWindow is clicked. */
+  onMapMarkerSelect?: (id: string) => void;
+  /** Single-char emoji/letter for marker label. */
+  mapIconChar?: string;
+  /** Initial view when toggle is enabled. Default: 'list'. */
+  defaultMapView?: 'list' | 'map';
 
 function MiniappMode({
   title,
