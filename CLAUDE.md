@@ -58,8 +58,10 @@
 
 ### Glossary
 
-- **Surface** — one of 6 long-lived canvases: Home · Discover · Operate · Wallet · Me · Admin
-- **Cluster** — one of 6 colour-locked groups: Arrive · Live · Manage · Invest · Legal · Build
+- **Surface (Content Cluster)** — one of 6 content clusters per Master Taxonomy v1.0: *Arrive · Live · Manage · Invest · Legal · Build*. This is the canonical meaning of «Surface» across the codebase (`src/lib/taxonomies/master.ts`).
+- **Canvas (App Shell)** — one of 6 long-lived app-shell canvases used by global navigation: *Home · Discover · Operate · Wallet · Me · Admin*. Previously also called «Surface» — renamed to remove the term collision.
+- **Cluster** — colloquial alias for Surface (content cluster). Same 6 IDs.
+- **JTBD Cluster** — one of 10 functional Jobs-To-Be-Done classifiers (A–J). Used for tagging, AI routing, SEO. **Never confuse with Surface.**
 - **Role stack** — `profiles.roles_stack` jsonb + `primary_role`, weighted `primary·3 + secondary·2 + tertiary·1`
 - **Intent** — AI agent output, user-confirmed via one-tap accept/later
 
