@@ -65,6 +65,10 @@ export const CapitalAdvisoryLanding = lazy(() => import('@/pages/invest/CapitalA
 export const ResaleAssignmentLanding = lazy(() => import('@/pages/property/ResaleAssignmentLanding'));
 export const OwnerManagementLanding = lazy(() => import('@/pages/owner/OwnerManagementLanding'));
 export const TaxStructuringLanding = lazy(() => import('@/pages/legal/TaxStructuringLanding'));
+// Wave 2 marketing landings
+export const ClearViewForDevelopersLanding = lazy(() => import('@/pages/clearview/ClearViewForDevelopersLanding'));
+export const StorefrontDemoLanding = lazy(() => import('@/pages/owner/StorefrontDemoLanding'));
+export const InvestmentCalculatorPage = lazy(() => import('@/pages/invest/InvestmentCalculatorPage'));
 export const ResaleDetail = lazy(() => import('@/pages/property/ResaleDetail'));
 export const CommercialIndex = lazy(() => import('@/pages/property/CommercialIndex'));
 export const CommercialDetail = lazy(() => import('@/pages/property/CommercialDetail'));

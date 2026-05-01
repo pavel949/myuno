@@ -430,6 +430,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.CONTRACT_ANALYSIS} element={<LazyPage><Pages.ContractAnalysisPage /></LazyPage>} />
         <Route path={APP_ROUTES.TAX_NAV} element={<LazyPage><Pages.TaxNavPage /></LazyPage>} />
         <Route path={APP_ROUTES.TAX_STRUCTURING} element={<LazyPage><Pages.TaxStructuringLanding /></LazyPage>} />
+        <Route path={APP_ROUTES.CLEARVIEW_FOR_DEVELOPERS} element={<LazyPage><Pages.ClearViewForDevelopersLanding /></LazyPage>} />
         
         {/* ── Investment Hub (top-level, multi-asset) ── */}
         <Route path={APP_ROUTES.INVEST} element={<LazyPage><Pages.InvestmentHubLanding /></LazyPage>} />
@@ -454,6 +455,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.INVEST_DEALS_BOARD} element={<LazyPage><Pages.InvestmentDeals /></LazyPage>} />
         <Route path={APP_ROUTES.CAPITAL_DEAL_INTAKE} element={<LazyPage><Pages.CapitalDealIntake /></LazyPage>} />
         <Route path={APP_ROUTES.CAPITAL_ADVISORY} element={<LazyPage><Pages.CapitalAdvisoryLanding /></LazyPage>} />
+        <Route path={APP_ROUTES.INVEST_CALCULATOR} element={<LazyPage><Pages.InvestmentCalculatorPage /></LazyPage>} />
         <Route path="/invest/deal/:id" element={<LazyPage><Pages.InvestmentDealPublicDetail /></LazyPage>} />
         <Route path="/invest/articles" element={<LazyPage><Pages.InvestmentArticles /></LazyPage>} />
         <Route path="/invest/articles/:slug" element={<LazyPage><Pages.InvestmentArticleDetail /></LazyPage>} />
@@ -674,6 +676,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/owner/service-request" element={<Navigate to="/mc/service-request" replace />} />
         <Route path="/owner/inspection" element={<Navigate to="/mc/inspection" replace />} />
         <Route path={APP_ROUTES.OWNER_MANAGEMENT_LANDING} element={<LazyPage><Pages.OwnerManagementLanding /></LazyPage>} />
+        <Route path={APP_ROUTES.STOREFRONT_DEMO} element={<LazyPage><Pages.StorefrontDemoLanding /></LazyPage>} />
         <Route path="/owner/full-management" element={<Navigate to="/mc/full-management" replace />} />
         <Route path="/owner" element={<Navigate to="/mc" replace />} />
         <Route path="/owner/*" element={<Navigate to="/mc" replace />} />

@@ -373,6 +373,10 @@ export const APP_ROUTES = {
   RESALE_LANDING: '/property/resale-landing',
   OWNER_MANAGEMENT_LANDING: '/owner/management-landing',
   TAX_STRUCTURING: '/legal/tax-structuring',
+  /** Wave 2 marketing landings. */
+  CLEARVIEW_FOR_DEVELOPERS: '/clearview/for-developers',
+  STOREFRONT_DEMO: '/owner/storefront-demo',
+  INVEST_CALCULATOR: '/invest/calculator',
 
   // ── Vendor Portal ──
   VENDOR: '/vendor',

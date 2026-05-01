@@ -122,8 +122,10 @@ function ComingSoonGate({ children }: { children: React.ReactNode }) {
     || location.pathname.startsWith('/capital')
     || location.pathname.startsWith('/clearview')
     || location.pathname === '/invest/capital-advisory'
+    || location.pathname === '/invest/calculator'
     || location.pathname === '/property/resale-landing'
     || location.pathname === '/owner/management-landing'
+    || location.pathname === '/owner/storefront-demo'
     || location.pathname === '/legal/tax-structuring';
 
   if (bypassComingSoon || isPublicRoute || isLoading) return <>{children}</>;
