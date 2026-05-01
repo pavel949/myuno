@@ -148,6 +148,14 @@ const LandingSeoHead = ({ landing, type, language, origin }: LandingSeoHeadProps
   const title = seo.metaTitle[language];
   const description = seo.metaDescription[language];
 
+  // Dynamic OG image (Wave 4) — overrides the static seo.ogImage so that
+  // each persona/cluster gets a branded, language-aware share card.
+  const ogImage =
+    type === 'persona'
+      ? buildPersonaOgUrl({ persona: landing.slug, lang: language })
+      : buildClusterOgUrl({ cluster: landing.slug, lang: language });
+  const ogAlt = `${landing.h1[language]} — myUNO`;
+
   // hreflang: используем явные alternates если заданы, иначе генерируем дефолт.
   const alternates =
     seo.hreflangAlternates && seo.hreflangAlternates.length > 0
@@ -174,12 +182,20 @@ const LandingSeoHead = ({ landing, type, language, origin }: LandingSeoHeadProps
       ))}
       <link rel="alternate" hrefLang="x-default" href={canonicalUrl} />
 
+      {/* Preload OG image so social crawlers fetch it warm. */}
+      <link rel="preload" as="image" href={ogImage} type={OG_IMAGE_TYPE} />
+
       {/* Open Graph */}
       <meta property="og:type" content="website" />
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
       <meta property="og:url" content={canonicalUrl} />
-      <meta property="og:image" content={seo.ogImage} />
+      <meta property="og:image" content={ogImage} />
+      <meta property="og:image:secure_url" content={ogImage} />
+      <meta property="og:image:type" content={OG_IMAGE_TYPE} />
+      <meta property="og:image:width" content={String(OG_IMAGE_WIDTH)} />
+      <meta property="og:image:height" content={String(OG_IMAGE_HEIGHT)} />
+      <meta property="og:image:alt" content={ogAlt} />
       <meta property="og:locale" content={language === 'ru' ? 'ru_RU' : 'en_US'} />
       <meta
         property="og:locale:alternate"
@@ -191,7 +207,8 @@ const LandingSeoHead = ({ landing, type, language, origin }: LandingSeoHeadProps
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
-      <meta name="twitter:image" content={seo.ogImage} />
+      <meta name="twitter:image" content={ogImage} />
+      <meta name="twitter:image:alt" content={ogAlt} />
 
       {/* schema.org Service */}
       <script type="application/ld+json">
