@@ -673,6 +673,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/owner/finance" element={<Navigate to="/mc/finance" replace />} />
         <Route path="/owner/service-request" element={<Navigate to="/mc/service-request" replace />} />
         <Route path="/owner/inspection" element={<Navigate to="/mc/inspection" replace />} />
+        <Route path={APP_ROUTES.OWNER_MANAGEMENT_LANDING} element={<LazyPage><Pages.OwnerManagementLanding /></LazyPage>} />
         <Route path="/owner/full-management" element={<Navigate to="/mc/full-management" replace />} />
         <Route path="/owner" element={<Navigate to="/mc" replace />} />
         <Route path="/owner/*" element={<Navigate to="/mc" replace />} />
