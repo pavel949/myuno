@@ -461,7 +461,25 @@ function MiniappMode({
           </div>
         )}
 
-        {children}
+        {mapToggleEnabled && view === 'map' ? (
+          <UnifiedCatalogMap
+            markers={mapMarkers ?? []}
+            userLocation={userLocation}
+            distanceKm={distanceKm}
+            onSelect={onMapMarkerSelect}
+            iconChar={mapIconChar}
+            className="h-[calc(100vh-280px)] min-h-[420px] w-full border border-border/40"
+            emptyMessage={
+              (mapMarkers?.length ?? 0) === 0
+                ? language === 'ru'
+                  ? 'Нет объектов с координатами'
+                  : 'No items with coordinates'
+                : undefined
+            }
+          />
+        ) : (
+          children
+        )}
 
         {crossSellVertical && (
           <CrossSellSection currentVertical={crossSellVertical} />
