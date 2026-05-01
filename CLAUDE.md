@@ -1,7 +1,7 @@
-# CLAUDE.md — myUNO SuperApp (актуальна на 2026-04-02)
+# CLAUDE.md — myUNO SuperApp (актуальна на 2026-05-01)
 
 > Единственный источник информации для AI ассистентов в этом репозитории.
-> Версия v3.40.0 | Ветка: pavel/wip-current-version-20260318 | Last sync: 2026-04-02
+> Версия v3.55.3 | Ветка: pavel/wip-current-version-20260318 | Last sync: 2026-05-01
 
 ---
 
@@ -58,8 +58,10 @@
 
 ### Glossary
 
-- **Surface** — one of 6 long-lived canvases: Home · Discover · Operate · Wallet · Me · Admin
-- **Cluster** — one of 6 colour-locked groups: Arrive · Live · Manage · Invest · Legal · Build
+- **Surface (Content Cluster)** — one of 6 content clusters per Master Taxonomy v1.0: *Arrive · Live · Manage · Invest · Legal · Build*. This is the canonical meaning of «Surface» across the codebase (`src/lib/taxonomies/master.ts`).
+- **Canvas (App Shell)** — one of 6 long-lived app-shell canvases used by global navigation: *Home · Discover · Operate · Wallet · Me · Admin*. Previously also called «Surface» — renamed to remove the term collision.
+- **Cluster** — colloquial alias for Surface (content cluster). Same 6 IDs.
+- **JTBD Cluster** — one of 10 functional Jobs-To-Be-Done classifiers (A–J). Used for tagging, AI routing, SEO. **Never confuse with Surface.**
 - **Role stack** — `profiles.roles_stack` jsonb + `primary_role`, weighted `primary·3 + secondary·2 + tertiary·1`
 - **Intent** — AI agent output, user-confirmed via one-tap accept/later
 
@@ -69,7 +71,7 @@
 
 ## 2. ТЕКУЩИЙ СТАТУС
 
-**Версия:** 3.40.0
+**Версия:** 3.55.3
 **Ветка:** pavel/wip-current-version-20260318
 **Статус:** Активная разработка (session work, CRM improvements, Edge Functions migration)
 
@@ -191,7 +193,14 @@
 **Dark mode (default):** bg `#08101E`, primary `#00D68F` (mint), accent `#4E7BFF` (blue)
 **Light mode (`html.light`):** bg `#fafaf9`, primary `#0d6e4f` (emerald), accent navy
 
-- **Fonts:** Golos Text (headings/display), DM Sans (body), JetBrains Mono (prices/data), Playfair Display (luxury RE only)
+- **Fonts (canonical, matches PROJECT.md §8 and `src/styles/tokens.css`):**
+  - RU heading: **Unbounded** → fallback Noto Serif
+  - RU body: **Golos Text** → fallback Noto Sans
+  - EN heading: **Noto Serif** → Georgia
+  - EN body: **Noto Sans** → system-ui
+  - Numerics / data: **JetBrains Mono**
+  - Luxury / `/newbuilds` only: **Cormorant Garamond** (Dark Luxury theme)
+  - ⛔ NOT used anywhere in code: Syne, DM Sans, Playfair Display (older docs may still reference these — they are stale)
 - **Components:** shadcn/ui + Radix UI. Mobile = Sheet (bottom), не Dialog
 - **Min touch target:** 44px
 - **Runtime tokens:** `src/styles/tokens.css` (source of truth). `src/design-system/tokens.json` is a deprecated DS2.0 spec.
@@ -231,16 +240,20 @@ npm run lint     # ESLint check
 
 ```
 src/
-├── pages/          — 366+ pages organized by vertical (owner, property, invest, admin, etc.)
-├── components/     — 1000+ components across 60+ domain folders
-├── hooks/          — 345 custom hooks (domain-specific)
-├── contexts/       — 11 global providers (Auth, Cart, Language, Theme, Location, etc.)
+├── pages/          — 510 pages organized by vertical (owner, property, invest, admin, etc.)
+├── components/     — ~992 components across 60+ domain folders
+├── hooks/          — 410 custom hooks (domain-specific)
+├── contexts/       — 15 global providers (Auth, Cart, Language, Theme, Location, etc.)
 ├── integrations/   — Supabase client + auto-generated types
 ├── lib/            — Utilities, adapters, taxonomies, appVersion.ts
 ├── design-system/  — Design tokens, component docs
 ├── i18n/           — Bilingual translations (RU/EN)
 ├── config/         — CRM types, maintenance schedules
 └── types/          — TypeScript definitions
+
+supabase/
+├── functions/      — 126 Edge Functions (Deno 2.0)
+└── migrations/     — 673 SQL migrations
 ```
 
 ---
@@ -256,8 +269,8 @@ src/
 
 ## 11. VERSION INFO
 
-- **App Version:** 3.40.0 (in `src/lib/appVersion.ts`)
-- **HTML meta tag:** `<meta name="version" content="3.40.0" />`
+- **App Version:** 3.55.3 (in `src/lib/appVersion.ts`)
+- **HTML meta tag:** `<meta name="version" content="3.55.3" />`
 - **Version endpoint:** `public/version.json`
 - **Cache busting:** Automatic on version mismatch (reload guard prevents loops)
 
@@ -300,7 +313,7 @@ src/
 | Code review before merging to main, security audit, pre-PR checks | `code-reviewer` | Always run before merging. Covers TypeScript strictness, Supabase RLS, Stripe security, missing error handling |
 | Bundle size, query performance, PWA caching strategy, lazy loading, chunk splitting | `performance-optimizer` | Use for Vite chunk tuning, TanStack Query optimisation, image compression, Sentry performance traces |
 | Docs, CLAUDE.md updates, onboarding guides, API documentation | `documentation-specialist` | Use after major features land or when onboarding contributors |
-| Exploring unknown parts of the codebase (1000+ components, 366+ pages) | `code-archaeologist` | Use before large refactors or audits across verticals |
+| Exploring unknown parts of the codebase (~992 components, 510 pages) | `code-archaeologist` | Use before large refactors or audits across verticals |
 | Multi-step features spanning several verticals (STAYS, DEALS, CRM, Payments) | `tech-lead-orchestrator` | Use for complex cross-domain work — splits tasks and coordinates other agents |
 
 ### Quick-start Examples
