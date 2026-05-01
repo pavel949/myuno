@@ -15,6 +15,8 @@ import { EmptyState } from '@/components/uno/EmptyState';
 import { CrossSellSection } from '@/components/crosssell';
 import { mapClinicToCatalogCard } from '@/lib/adapters/catalogCardAdapters';
 import { medicalFilterConfig } from '@/lib/filterRegistry';
+import { withGeoSection } from '@/components/filters';
+import { vertRowsToMarkers } from '@/lib/adapters/vertRowToMarker';
 import type { FilterValues } from '@/components/filters/UniversalFilter';
 import { VerticalContextBanner } from '@/components/vertical/VerticalContextBanner';
 import { VerticalInsightPanel } from '@/components/vertical/VerticalInsightPanel';
@@ -134,10 +136,13 @@ export default function MedicalIndex() {
       categories={SPECIALTIES}
       selectedCategory={selectedSpecialty}
       onCategoryChange={setSelectedSpecialty}
-      filterConfig={medicalFilterConfig}
+      filterConfig={withGeoSection(medicalFilterConfig)}
       filterValues={filterValues}
       onFilterChange={handleFilterChange}
       filterActiveCount={filterActiveCount}
+      mapMarkers={vertRowsToMarkers(filteredAndSorted)}
+      onMapMarkerSelect={(id) => navigate(`/clinics/${id}`)}
+      mapIconChar="✚"
       resultsCount={filteredAndSorted.length}
       resultsLabel={isRu ? 'Клиники' : 'Clinics'}
       quickActions={emergencyBanner}
