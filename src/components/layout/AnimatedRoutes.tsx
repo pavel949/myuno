@@ -43,12 +43,16 @@ const LifeFlowAlias = () => {
 
 // PropertyHubIndex moved to ./routes/propertyHubRoutes.tsx
 
-// Core pages - eagerly loaded for fast initial navigation
-import Index from '@/pages/Index';
+// Core pages — Auth/NotFound stay eager (small, on critical paths).
+// Index and WelcomeLanding are lazy: home is by far the heaviest route
+// (~30 home components + persona logic) and we don't want to block first
+// paint on /auth, /property/:id, deep links, etc.
 import Auth from '@/pages/Auth';
 import NotFound from '@/pages/NotFound';
-import WelcomeLanding from '@/pages/WelcomeLanding';
 import { useAuth } from '@/contexts/AuthContext';
+
+const Index = React.lazy(() => import('@/pages/Index'));
+const WelcomeLanding = React.lazy(() => import('@/pages/WelcomeLanding'));
 
 // All lazy page imports from centralized registry
 import * as Pages from './pageRegistry';
