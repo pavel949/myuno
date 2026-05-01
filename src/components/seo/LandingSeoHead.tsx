@@ -29,6 +29,13 @@ import {
   buildFaqSchema as buildFaqSchemaShared,
   SEO_CONSTANTS,
 } from '@/lib/seo/schemaBuilders';
+import {
+  buildClusterOgUrl,
+  buildPersonaOgUrl,
+  OG_IMAGE_HEIGHT,
+  OG_IMAGE_TYPE,
+  OG_IMAGE_WIDTH,
+} from '@/lib/seo/ogImage';
 
 type LandingType = 'persona' | 'cluster';
 
