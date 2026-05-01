@@ -313,7 +313,7 @@ supabase/
 | Code review before merging to main, security audit, pre-PR checks | `code-reviewer` | Always run before merging. Covers TypeScript strictness, Supabase RLS, Stripe security, missing error handling |
 | Bundle size, query performance, PWA caching strategy, lazy loading, chunk splitting | `performance-optimizer` | Use for Vite chunk tuning, TanStack Query optimisation, image compression, Sentry performance traces |
 | Docs, CLAUDE.md updates, onboarding guides, API documentation | `documentation-specialist` | Use after major features land or when onboarding contributors |
-| Exploring unknown parts of the codebase (1000+ components, 366+ pages) | `code-archaeologist` | Use before large refactors or audits across verticals |
+| Exploring unknown parts of the codebase (~992 components, 510 pages) | `code-archaeologist` | Use before large refactors or audits across verticals |
 | Multi-step features spanning several verticals (STAYS, DEALS, CRM, Payments) | `tech-lead-orchestrator` | Use for complex cross-domain work — splits tasks and coordinates other agents |
 
 ### Quick-start Examples
