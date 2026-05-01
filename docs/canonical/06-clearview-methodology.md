@@ -1,11 +1,13 @@
 # ClearView™ · Canonical Methodology v1.0
 ## Институциональная система оценки off-plan проектов myUNO
 
-> **Статус:** эталонный. Источник истины для всего, что касается ClearView™ — от развёртывания UI-бейджей до pitch застройщику, от RAG-базы AI-консьержа до PR-публикаций.
+> **⚠️ Master Taxonomy v1.0 (апрель 2026) расширила шкалу до AAA · AA · A · BBB · BB · B · CCC · unrated.** Везде, где этот документ упоминает «AAA–BB» (5 уровней) — это устаревшая версия V3. Канон шкалы — `docs/canonical/00-master-taxonomy.md` §4 и DB-enum `public.clearview_grade`. Также снято Y1-ограничение на brokered проекты — рейтинг ставится всем, дисклеймер только для unrated.
 >
-> **Версия методологии:** V3 (March 2025) · адаптация для canonical system: April 2026
+> **Статус:** эталонный для методологии (8 категорий, веса, maturity progression). Источник истины для всего, что касается ClearView™ — от развёртывания UI-бейджей до pitch застройщику, от RAG-базы AI-консьержа до PR-публикаций. **При расхождении по шкале — Master Taxonomy v1.0 побеждает.**
+>
+> **Версия методологии:** V3 (March 2025) · адаптация для canonical system: April 2026 · grade-scale extension: April 2026 (Master Taxonomy v1.0)
 > **Основа:** Ignatev Estate Co., Ltd. · Plaza Del Mar, Cherngtalay, Phuket
-> **Связанные документы:** `PROJECT.md` (моат 8, сделки 11–13), `01-segmentation-framework.md` (cluster D), `02-service-catalogue.md`, `03-tone-of-voice.md` (раздел 10.3)
+> **Связанные документы:** `00-master-taxonomy.md` (canonical scale), `PROJECT.md` (моат 8, сделки 11–13), `01-segmentation-framework.md` (cluster D), `02-service-catalogue.md`, `03-tone-of-voice.md` (раздел 10.3)
 
 ---
 
