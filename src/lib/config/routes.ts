@@ -368,6 +368,11 @@ export const APP_ROUTES = {
   CLEARVIEW_APPLY: '/property/clearview/apply',
   /** Investment-deal intake (USD 200K+) — under /invest, no new top-level. */
   CAPITAL_DEAL_INTAKE: '/invest/capital-deal',
+  /** Wave 1 marketing landings (lead-form CTAs). */
+  CAPITAL_ADVISORY: '/invest/capital-advisory',
+  RESALE_LANDING: '/property/resale-landing',
+  OWNER_MANAGEMENT_LANDING: '/owner/management-landing',
+  TAX_STRUCTURING: '/legal/tax-structuring',
 
   // ── Vendor Portal ──
   VENDOR: '/vendor',
