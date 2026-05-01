@@ -42,6 +42,12 @@ import {
   surfaceFromOffplanProject,
   type UnifiedListingSurface,
 } from '@/lib/real-estate/listingViewModel';
+import {
+  buildAreaOgUrl,
+  OG_IMAGE_HEIGHT,
+  OG_IMAGE_TYPE,
+  OG_IMAGE_WIDTH,
+} from '@/lib/seo/ogImage';
 
 const SEED_LISTING_LIMIT = 6;
 
