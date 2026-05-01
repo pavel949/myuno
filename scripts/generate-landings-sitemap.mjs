@@ -5,7 +5,7 @@
  *
  * Run: node scripts/generate-landings-sitemap.mjs
  */
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -33,29 +33,33 @@ function extractAreaPersonaMap() {
   return out;
 }
 
-const personaSlugs = extractStringArray(
-  join(ROOT, 'src/content/landings/personaLandings.ts'),
-  'LIVE_PERSONA_SLUGS',
-);
-// Fallback: parse from status==='live' mapping if needed
-const livePersonas = personaSlugs.length > 0 ? personaSlugs : (() => {
-  // Walk personas directory
-  const personas = [];
+function collectLivePersonas() {
+  const out = [];
   const dir = join(ROOT, 'src/content/landings/personas');
-  for (const file of require('node:fs').readdirSync(dir)) {
+  for (const file of readdirSync(dir)) {
     if (!file.endsWith('.ts')) continue;
     const src = readFileSync(join(dir, file), 'utf8');
     if (!src.includes("status: 'live'")) continue;
     const m = src.match(/slug:\s*'([a-z0-9-]+)'/);
-    if (m) personas.push(m[1]);
+    if (m) out.push(m[1]);
   }
-  return personas;
-})();
+  return out;
+}
 
-const clusterSlugs = extractStringArray(
-  join(ROOT, 'src/content/landings/clusterLandings.ts'),
-  'LIVE_CLUSTER_SLUGS',
-);
+function collectLiveClusters() {
+  const src = readFileSync(join(ROOT, 'src/content/landings/clusterLandings.ts'), 'utf8');
+  // Match each cluster object with status:'live' and slug
+  const out = [];
+  const re = /slug:\s*'([a-z0-9-]+)'[^}]*?status:\s*'live'|status:\s*'live'[^}]*?slug:\s*'([a-z0-9-]+)'/g;
+  let m;
+  while ((m = re.exec(src)) !== null) {
+    out.push(m[1] || m[2]);
+  }
+  return [...new Set(out)];
+}
+
+const livePersonas = collectLivePersonas();
+const clusterSlugs = collectLiveClusters();
 
 const areaPersonaMap = extractAreaPersonaMap();
 const areaSlugs = Object.keys(areaPersonaMap);
