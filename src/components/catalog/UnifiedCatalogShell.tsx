@@ -19,7 +19,7 @@
  *   />
  */
 import React, { ReactNode, useEffect, useMemo, useState } from 'react';
-import { LayoutGrid, MapPin } from 'lucide-react';
+import { LayoutGrid, MapPin, type LucideIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
@@ -61,7 +61,7 @@ export interface UnifiedCatalogShellProps<T> {
   renderItem: (item: T) => ReactNode;
   renderList?: (items: T[]) => ReactNode;
   emptyText?: string;
-  emptyIcon?: React.ComponentType<{ className?: string }>;
+  emptyIcon?: LucideIcon;
 
   // Map
   enableMap?: boolean;
