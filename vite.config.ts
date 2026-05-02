@@ -3,6 +3,23 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
+import iconClassification from "./scripts/icon-classification.json";
+
+// Lucide icon split: keep top-used icons hot, push the rest into lazy chunks
+// that load only with the routes that import them.
+// See `scripts/icon-classification.json` (regenerate via scripts/regen-icon-classification.mjs).
+const ICONS_CORE = new Set<string>(iconClassification.core);
+const ICONS_EXTENDED = new Set<string>(iconClassification.extended);
+// `rare` is the implicit fallback for everything else.
+function classifyLucideIcon(id: string): 'vendor-icons-core' | 'vendor-icons-extended' | 'vendor-icons-rare' {
+  // Match `.../lucide-react/dist/esm/icons/<name>.js` (works on Windows too — id uses /).
+  const m = id.match(/lucide-react\/dist\/esm\/icons\/([a-z0-9-]+)\.js$/);
+  if (!m) return 'vendor-icons-core'; // barrel + shared internals stay in core
+  const name = m[1];
+  if (ICONS_CORE.has(name)) return 'vendor-icons-core';
+  if (ICONS_EXTENDED.has(name)) return 'vendor-icons-extended';
+  return 'vendor-icons-rare';
+}
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -337,7 +354,7 @@ export default defineConfig(({ mode }) => {
               return 'vendor-motion';
             }
             if (id.includes('lucide-react')) {
-              return 'vendor-icons';
+              return classifyLucideIcon(id);
             }
             if (
               id.includes('react-hook-form') ||
