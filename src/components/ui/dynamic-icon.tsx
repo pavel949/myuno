@@ -1,17 +1,22 @@
 /**
  * DynamicIcon — renders a Lucide icon by name using dynamic imports.
- * Uses React.lazy + Suspense for code-split icon loading.
  *
- * Note: `lucide-react/dynamicIconImports` is itself a static object literal
- * mapping every icon to a dynamic `import()`. The map ships in whichever chunk
- * imports this module, but the icon files themselves stay async. To keep this
- * map out of the home-screen entry graph, every consumer of `DynamicIcon`
- * (`ActiveSituationBanner`, `RouteNextSteps`, LifeOS pages, etc.) must be
- * lazy-loaded from the route shell.
+ * Why we lazy-load `lucide-react/dynamicIconImports`:
+ *   That module is a static object literal mapping every icon to a dynamic
+ *   `import()`. Even though each value is async, the *map itself* is a
+ *   static module — and Vite's manualChunks classifies it as
+ *   `vendor-icons-core`. Once any entry-graph module statically imports
+ *   `dynamic-icon.tsx`, the entry chunk gains a static dependency on the map,
+ *   which in turn statically references every icon file. Result: all three
+ *   `vendor-icons-{core,extended,rare}` chunks get preloaded on the home page,
+ *   even though `DynamicIcon` is only rendered on LifeOS / LifeFlow / admin
+ *   surfaces.
+ *
+ * Loading the map via `await import(...)` makes it a code-split chunk that
+ * only ships when the first `DynamicIcon` actually mounts.
  */
 import React, { lazy, Suspense, useMemo } from 'react';
 import type { LucideProps } from 'lucide-react';
-import dynamicIconImports from 'lucide-react/dynamicIconImports';
 import { Compass } from 'lucide-react';
 
 function toKebabCase(str: string): string {
@@ -32,9 +37,15 @@ const iconCache = new Map<string, React.LazyExoticComponent<React.ComponentType<
 
 function getLazyIcon(kebabName: string) {
   if (iconCache.has(kebabName)) return iconCache.get(kebabName)!;
-  const importFn = dynamicIconImports[kebabName as keyof typeof dynamicIconImports];
-  if (!importFn) return null;
-  const LazyIcon = lazy(importFn);
+  const LazyIcon = lazy(async () => {
+    const map = (await import('lucide-react/dynamicIconImports')).default as Record<
+      string,
+      () => Promise<{ default: React.ComponentType<LucideProps> }>
+    >;
+    const importFn = map[kebabName];
+    if (!importFn) return { default: Compass as React.ComponentType<LucideProps> };
+    return importFn();
+  });
   iconCache.set(kebabName, LazyIcon);
   return LazyIcon;
 }
@@ -45,10 +56,6 @@ export function DynamicIcon({ name, fallback, ...props }: DynamicIconProps) {
     [name],
   );
   const LazyIcon = useMemo(() => getLazyIcon(kebabName), [kebabName]);
-
-  if (!LazyIcon) {
-    return fallback ? <>{fallback}</> : <Compass {...props} />;
-  }
 
   return (
     <Suspense fallback={fallback || <Compass {...props} />}>
