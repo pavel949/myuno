@@ -1,58 +1,16 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
-import fs from "fs";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
-import iconClassification from "./scripts/icon-classification.json";
 
-// Lucide icon split: keep top-used icons hot, push the rest into lazy chunks
-// that load only with the routes that import them.
-// See `scripts/icon-classification.json` (regenerate via scripts/regen-icon-classification.mjs).
-const ICONS_CORE = new Set<string>(iconClassification.core);
-const ICONS_EXTENDED = new Set<string>(iconClassification.extended);
-
-// Lucide ships ~200 alias icon files (e.g. `home.js` → `export { default } from './house.js'`).
-// If an alias lives in `core` but its target lives in `rare`, the core chunk gains a static
-// import of the rare chunk and Rollup preloads `vendor-icons-rare` from the entry HTML.
-// Resolve aliases to their terminal target so the alias and target always land in the same tier.
-const LUCIDE_ICONS_DIR = path.resolve(__dirname, "node_modules/lucide-react/dist/esm/icons");
-const aliasTarget: Record<string, string> = {};
-try {
-  for (const file of fs.readdirSync(LUCIDE_ICONS_DIR)) {
-    if (!file.endsWith(".js") || file.endsWith(".map")) continue;
-    const name = file.slice(0, -3);
-    const src = fs.readFileSync(path.join(LUCIDE_ICONS_DIR, file), "utf8");
-    const m = src.match(/export\s*\{\s*default\s*\}\s*from\s*['"]\.\/([a-z0-9-]+)\.js['"]/);
-    if (m) aliasTarget[name] = m[1];
-  }
-} catch {
-  /* lucide-react not installed yet — fall back to direct classification */
-}
-function resolveAlias(name: string, depth = 0): string {
-  if (depth > 10 || !aliasTarget[name]) return name;
-  return resolveAlias(aliasTarget[name], depth + 1);
-}
-
-function classifyLucideIcon(id: string): string {
-  // Isolate the dynamicIconImports map: it statically references every icon
-  // file. If it lands in `vendor-icons-core` (entry-graph), the browser
-  // preloads `vendor-icons-{core,extended,rare}` on the home page even though
-  // `DynamicIcon` is only rendered on LifeOS / LifeFlow / admin surfaces.
-  // Putting it in its own chunk means it's only fetched when DynamicIcon mounts.
-  if (/lucide-react\/dist\/esm\/dynamicIconImports\.js$/.test(id)) {
-    return 'vendor-icons-dynamic-map';
-  }
-  // Match `.../lucide-react/dist/esm/icons/<name>.js` (works on Windows too — id uses /).
-  const m = id.match(/lucide-react\/dist\/esm\/icons\/([a-z0-9-]+)\.js$/);
-  if (!m) return 'vendor-icons-core'; // barrel + shared internals stay in core
-  const original = m[1];
-  const target = resolveAlias(original);
-  // Promote the pair if either name is in a hotter tier.
-  if (ICONS_CORE.has(original) || ICONS_CORE.has(target)) return 'vendor-icons-core';
-  if (ICONS_EXTENDED.has(original) || ICONS_EXTENDED.has(target)) return 'vendor-icons-extended';
-  return 'vendor-icons-rare';
-}
+// Lucide icon strategy:
+// We tried tiered chunking (core/extended/rare) — it didn't reduce the entry
+// preload because lucide-react's barrel re-exports every icon, so Rollup
+// links the entry to *all* tier chunks regardless of `manualChunks` returns
+// (see /mnt/documents/perf-report-lucide-split.md). Single `vendor-icons`
+// chunk + isolated `vendor-icons-dynamic-map` for `<DynamicIcon>` lazy loads
+// gives one preload file instead of three.
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
