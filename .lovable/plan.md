@@ -1,150 +1,154 @@
-# Аудит разногласий — подтверждение источниками
+## Цель
 
-Проверил все 12 разногласий из `/mnt/documents/PLATFORM_OVERVIEW.md` против кода, миграций БД, конфигов и роутов. Ниже — точные ссылки. **Две позиции из исходного отчёта оказались неточными — отмечены ⚠️ ИСПРАВЛЕНИЕ.**
+Добавить два связанных retention-механизма для off-plan/newbuilds:
+1. **Сохранённые поиски** — пользователь сохраняет текущие фильтры каталога offplan и получает уведомления, когда появляются новые проекты/юниты под критерии.
+2. **Алерты по избранным ЖК** — когда в проекте, который пользователь добавил в favorites (`item_type='newbuild_project'`), появляется новый юнит (`project_units.status='available'`) или апдейт стройки (`nb_project_updates`) — отправляется WhatsApp/Email.
 
----
-
-## ✅ 11.4 ClearView — шкала AAA–BB vs AAA–CCC — **ПОДТВЕРЖДЕНО**
-
-| Источник | Значение |
-|---|---|
-| `docs/canonical/06-clearview-methodology.md:16` | «AAA–BB» |
-| `docs/canonical/06-clearview-methodology.md:498–512` | таблица грейдов: AAA, AA, A, BBB, BB (без B/CCC) |
-| `PROJECT.md:105, 149, 217` | трижды повторяет «AAA–BB» (но §10 на стр.10 уже признаёт расширение) |
-| `PROJECT.md:10` | сам признаёт: «ClearView расширен до AAA–CCC» (Master Taxonomy override) |
-| `supabase/migrations/20260423115350_*.sql:30` | `CREATE TYPE clearview_grade AS ENUM ('AAA','AA','A','BBB','BB')` |
-| `supabase/migrations/20260428035354_*.sql:30,33` | `ALTER TYPE … ADD VALUE 'B'`, `ADD VALUE 'CCC'` |
-| `src/lib/taxonomies/master.ts:247–250` | `CLEARVIEW_GRADES = ['AAA','AA','A','BBB','BB','B','CCC']` + `'unrated'` |
-
-**Канон: AAA · AA · A · BBB · BB · B · CCC · unrated** (7 уровней + unrated). PROJECT.md §4/§9/§13 и canonical/06 устарели.
+Каналы: Email через существующий `send-email`, WhatsApp через существующий `notify-lead-whatsapp` (UltraMSG). Настройки каналов — per-user.
 
 ---
 
-## ✅ 11.5 ClearView Y1 brokered restriction снято — **ПОДТВЕРЖДЕНО**
+## 1. БД (миграция)
 
-- `PROJECT.md:10` явно: «снято Y1-ограничение на brokered проекты».
-- Memory Core: «ClearView Y1 rule lifted: rate ALL projects on full AAA-CCC scale».
-- БД-enum допускает все значения, ограничения по brokered нет ни в RLS, ни в коде.
+### 1.1 `nb_saved_searches`
+```
+id uuid pk, user_id uuid not null (auth.users),
+name text,                              -- например «Виллы Раваи до 15M»
+filters jsonb not null,                 -- OffplanUiFilterState
+notify_email bool default true,
+notify_whatsapp bool default false,
+frequency text default 'instant',       -- instant | daily
+last_notified_at timestamptz,
+last_seen_project_ids uuid[] default '{}', -- чтобы не дублировать
+is_active bool default true,
+created_at, updated_at
+```
+RLS: владелец видит/мутирует свои.
 
----
+### 1.2 `nb_alert_preferences` (per-user глобальные настройки канала для favorites-алертов)
+```
+user_id uuid pk, email text, whatsapp_phone text,
+notify_new_units bool default true,
+notify_progress_updates bool default true,
+notify_price_changes bool default false,
+channel_email bool default true,
+channel_whatsapp bool default false,
+quiet_hours_start int, quiet_hours_end int,  -- 0..23 локально
+updated_at
+```
+RLS: own row only.
 
-## ✅ 11.7 Версии — три источника, три номера — **ПОДТВЕРЖДЕНО**
-
-| Файл | Значение |
-|---|---|
-| `package.json` | `"version": "3.43.0"` |
-| `src/lib/appVersion.ts:5` | `export const APP_VERSION = '3.55.3'` |
-| `public/version.json` | `"version":"3.55.3","buildTime":"2026-04-30…"` |
-| `CLAUDE.md` шапка + §2 | `Версия v3.40.0` (ещё старее) |
-
-Live runtime — **3.55.3**. Стейл: package.json (3.43.0) и CLAUDE.md (3.40.0).
-
----
-
-## ⚠️ 11.8 File counts — **ПОДТВЕРЖДЕНО с поправкой**
-
-Реальные счётчики (`find … | wc -l`):
-
-| Item | CLAUDE.md | Факт | Δ |
-|---|---|---|---|
-| Pages | 366+ | **510** | +144 |
-| Components | 1000+ | **992** | −8 (≈совпало) |
-| Hooks | 345 | **410** | +65 |
-| Contexts | 11 | **15** | +4 |
-| Edge Functions | n/a | **126** *(не 127)* | — |
-| Migrations | n/a | **673** | — |
-| Persona landings | n/a | **28** *(P01–P25 + 3 индексных/прочих)* | — |
-
-> ⚠️ ИСПРАВЛЕНИЕ к моему предыдущему отчёту: edge-функций **126**, не 127.
-
----
-
-## ⚠️ 11.6 Шрифты — **ПОДТВЕРЖДЕНО, но код использует Unbounded+Golos, НЕ «Golos+DM Sans»**
-
-Это самое важное исправление к моему предыдущему MD.
-
-| Источник | Display | Body | Numerics |
-|---|---|---|---|
-| Memory Core | Syne | DM Sans | — |
-| `CLAUDE.md §6` | Golos Text | DM Sans | JetBrains Mono (+ Playfair для luxury) |
-| `PROJECT.md §8` | Unbounded (RU)/Noto Serif (EN) | Golos Text (RU)/Noto Sans (EN) | JetBrains Mono |
-| **Реальный код** | **Unbounded (RU)/Noto Serif (EN)** | **Golos Text (RU)/Noto Sans (EN)** | **JetBrains Mono** |
-
-Доказательства из кода:
-- `index.html` (preload-link): загружаются `Unbounded`, `Golos Text`, `Noto Serif`, `Noto Sans`, `JetBrains Mono`. **DM Sans и Syne не загружаются вовсе.**
-- `src/styles/tokens.css:179–187, 318–325`:
-  - `--font-heading-ru: 'Unbounded', 'Noto Serif', Georgia, serif`
-  - `--font-body-ru: 'Golos Text', 'Noto Sans', system-ui, sans-serif`
-  - `--font-heading-en: 'Noto Serif', Georgia, serif`
-  - `--font-body-en: 'Noto Sans', system-ui, …`
-  - `--font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace`
-- `tailwind.config.ts:39–42`: `sans` и `display` тянут только CSS-переменные `--font-body` / `--font-display`.
-- Cormorant Garamond — только в `/newbuilds` теме (memory: «Dark Luxury theme»).
-
-> ⚠️ ИСПРАВЛЕНИЕ: код реально соответствует **PROJECT.md §8 (Unbounded+Golos+Noto+JetBrains)**, а не CLAUDE.md §6 (где указан DM Sans). Расходятся CLAUDE.md и Memory Core, а не PROJECT.md. **Memory Core «Syne (display), DM Sans (body)» — устарело и не отражает код.**
+### 1.3 `nb_alert_log` (anti-spam, аудит)
+```
+id, user_id, project_id, alert_type ('new_unit'|'progress'|'price_change'|'saved_search_match'),
+ref_id uuid,         -- unit_id / update_id / search_id
+channel text, status text, sent_at timestamptz, payload jsonb
+unique(user_id, alert_type, ref_id, channel)  -- идемпотентность
+```
+RLS: own SELECT only; инсерты через service role.
 
 ---
 
-## ✅ 11.2 «3 сегмента» vs 25 персон — **ПОДТВЕРЖДЕНО**
+## 2. Edge Functions
 
-- Memory Core: «Serve only 3 segments: Investor $2M+, Relocator $300–800K, Second-home $200–500K».
-- `src/lib/taxonomies/master.ts` — массив `PERSONAS` содержит P01…P25 (включая P14–P19 lifestyle).
-- DB enum `public.app_persona` повторяет 25 значений (Master Taxonomy).
-- `src/content/landings/personas/` — **28 файлов** (полный набор P01–P25 + индекс/общие).
-- `PROJECT.md §13` — действительно 12+ активных персон, ещё одна версия.
+### 2.1 `nb-process-alerts` (cron каждые 15 мин)
+- Тянет `project_units` созданные/перешедшие в `available` за последние 30 мин (по `created_at`/`updated_at` + `unit_status='available'`).
+- Тянет `nb_project_updates` за тот же период.
+- Для каждого изменения находит юзеров через `favorites WHERE item_type='newbuild_project' AND item_id=project_id`.
+- Применяет `nb_alert_preferences` (каналы, тихие часы), проверяет `nb_alert_log` на дубль.
+- Шлёт через `send-email` и `notify-lead-whatsapp`. Логирует результат.
 
-Резолюция остаётся: Master Taxonomy выигрывает на «кого тегируем», 4-test filter применяется на «кого активно продаём».
+### 2.2 `nb-process-saved-searches` (cron daily 09:00 локально)
+- Загружает все active `nb_saved_searches`.
+- Для каждого формирует SQL по `property_projects` + `project_units` по фильтрам (re-use логика из `useOffplanProjects.ts` — выносим в `_shared/offplanQuery.ts`).
+- Берёт project_ids, исключает уже отправленные (`last_seen_project_ids`).
+- Если есть новые → email/WhatsApp дайджест («3 новых проекта по поиску "Виллы Раваи"») + апдейт `last_seen_project_ids` и `last_notified_at`.
 
----
-
-## ✅ 11.3 LifeHub / Lifestyle apps — **ПОДТВЕРЖДЕНО**
-
-- Memory Core: «LifeHub = retention only … Superseded for P14-P19 by Master Taxonomy v1.0».
-- Лендинги для P14–P19 существуют: `src/content/landings/personas/P14_MEDICAL.ts … P19_ACCESSIBILITY.ts` (созданы в текущей сессии Wave 4).
-- Гео-страницы: `src/content/landings/personaAreaLandings.ts`, `src/pages/landings/PersonaAreaLandingPage.tsx`.
-
----
-
-## ✅ 11.9 «Surface» — два разных значения — **ПОДТВЕРЖДЕНО**
-
-- `CLAUDE.md:61`: «Surface — one of 6 long-lived canvases: Home · Discover · Operate · Wallet · Me · Admin» (app-shell canvas).
-- `src/lib/taxonomies/master.ts:9–19`: «SURFACES (NavCluster, 6) — навигационные «дома»: Arrive / Live / Manage / Invest / Legal / Build … Никогда не путай ClusterId (surface) и JtbdClusterId (functional)» (контент-кластер).
-
-Один и тот же термин, два понятия. Рекомендация прежняя: переименовать app-shell в **Canvas**.
+### 2.3 Cron планирование
+SQL через insert tool (pg_cron + pg_net) с реальным `service_role` ключом — два расписания.
 
 ---
 
-## ✅ 11.12 «No new top-level routes» vs реальность — **ПОДТВЕРЖДЕНО**
+## 3. UI
 
-`src/lib/config/routes.ts` — **305+ строковых литералов** верхнеуровневых роутов. Выборка (sort -u): `/about, /account, /admin, /area, /arrive, /auth, /babysitter, /banking, /beauty, /become-partner, /become-provider, /bookings, /capital, /cart, /categories, /cleaning, /complexes, /contact, /cookies, /cost-of-living, /delivery, /demo, /developer-portal, /developers, /discover, /dispute-resolution, /education, /events, /exchange, /experiences, …`
+### 3.1 Сохранённые поиски в каталоге offplan
+- Файл `src/pages/property/OffplanCatalog.tsx` (или где сейчас рендерятся фильтры — найти при имплементации): рядом с фильтрами кнопка **«Сохранить поиск»** → модалка (имя + чекбоксы каналов).
+- Хук `useSavedOffplanSearches.ts` (CRUD + React Query).
+- Страница `src/pages/account/SavedSearches.tsx` (`/account/saved-searches`) — список, переключатель active, удаление, «Применить» (проставляет фильтры и уходит в каталог).
 
-Правило в Memory Core forward-looking, существующие grandfather'ed. Стоит явно зафиксировать в Core.
+### 3.2 Управление избранными ЖК и каналами
+- На карточке `NbProjectCard.tsx` сделать иконку «favorite» рабочей через существующий `favorites` (item_type=`newbuild_project`, item_data — снапшот проекта).
+- Страница `src/pages/account/NewbuildAlerts.tsx` (`/account/newbuild-alerts`):
+  - Список favorited проектов с тогглами «новые юниты», «прогресс», «цены» per project (упрощённо — глобально через `nb_alert_preferences`, доп. оверрайды добавим позже).
+  - Поля Email / WhatsApp + verify (минимум — формат).
+  - Тихие часы (start/end).
+- Точка входа из `NotificationInbox` («Настроить алерты по новостройкам»).
+
+### 3.3 i18n
+RU + EN ключи в `src/i18n/uiStrings.ts` (и `LanguageContext`).
 
 ---
 
-## ✅ 11.1 / 11.10 / 11.11 — без новых данных
-- 11.1 (порядок SSOT) — административное правило, кодом не верифицируется.
-- 11.10 (Windows path в CLAUDE.md) — текстовая стейлость, не критично.
-- 11.11 (DB identity `kakkwibljrjsawxgnupk`, нет v2/PEYLAA) — подтверждено `src/integrations/supabase/client.ts` и Memory.
+## 4. Email/WhatsApp шаблоны
+
+В `_shared/email-templates.ts` добавить две функции:
+- `renderNewUnitsEmail({ projectName, units, lang })`
+- `renderSavedSearchDigestEmail({ searchName, projects, lang })`
+
+WhatsApp — короткий текст + deep link `https://myuno.app/newbuilds/projects/<slug>?utm=alert`.
+
+Соблюдаем тон-of-voice (`docs/canonical/03-tone-of-voice.md`): «спокойная уверенность», без CAPS и эмодзи-спама.
 
 ---
 
-## Итог: что реально требует правки
+## 5. Технические детали / интеграция
 
-| # | Действие | Где |
-|---|---|---|
-| 1 | Обновить ClearView шкалу до **AAA–CCC** | `docs/canonical/06-clearview-methodology.md`, `PROJECT.md §105/149/217` |
-| 2 | Обновить версию | `package.json` → 3.55.3, `CLAUDE.md` шапка → 3.55.3 |
-| 3 | Обновить счётчики файлов | `CLAUDE.md §9`: 510 pages / 410 hooks / 15 contexts / 126 edge fn / 673 migrations |
-| 4 | **Исправить шрифты в Memory Core** (Syne+DM Sans → **Unbounded+Golos+Noto+JetBrains**), привести `CLAUDE.md §6` к PROJECT.md §8 | mem-индекс + `CLAUDE.md` |
-| 5 | Развести термин «Surface»: ввести **Canvas** для app-shell | `CLAUDE.md §1.5` глоссарий |
-| 6 | Зафиксировать «existing top-level routes grandfathered, no new ones» | Memory Core |
-| 7 | Обновить `/mnt/documents/PLATFORM_OVERVIEW.md`: исправить fonts-row (код = PROJECT.md, не CLAUDE.md) и edge-fn счётчик 127→126 | PLATFORM_OVERVIEW.md §11.6 / §2 |
+- **Источник истины для фильтров offplan** — вынести построение запроса из `useOffplanProjects.ts` в чистую функцию `buildOffplanQuery(filters)` в `src/lib/offplan/query.ts`, чтобы переиспользовать в edge-функции (через клон логики на Deno — фильтры простые: zone/seg/beach/price/bedrooms/rec).
+- **Идемпотентность** — `nb_alert_log` уникальный индекс `(user_id, alert_type, ref_id, channel)`.
+- **Throttling** — не более 5 алертов одного типа на юзера в сутки (агрегируем в дайджест если больше).
+- **Тихие часы** — если попадает в quiet hours, откладываем до конца окна (cron каждые 15 мин подберёт).
+- **Feature flag** — `feature_flag:newbuild_alerts` в `system_settings`, по умолчанию on.
+- **WhatsApp opt-in** — обязательно показывать чекбокс согласия и сохранять в `nb_alert_preferences.whatsapp_opt_in_at`.
 
-**После approve** я в build-режиме:
-1. Перепишу §11.6 и §2 в `PLATFORM_OVERVIEW.md` с корректной таблицей шрифтов и счётчиком 126.
-2. Обновлю `CLAUDE.md` (версия, счётчики, шрифты, glossary).
-3. Обновлю memory-индекс (Core line «Syne/DM Sans» → актуальные шрифты).
-4. Опционально — синхронизирую `package.json` версию и единичную правку в `docs/canonical/06-clearview-methodology.md` с пометкой «Superseded by Master Taxonomy v1.0 — see grade scale AAA–CCC».
+---
 
-Подтверди, какой объём правок делать (минимум — только PLATFORM_OVERVIEW.md, максимум — все 7 пунктов).
+## 6. Что НЕ входит в этот блок
+- Двухсторонний WhatsApp inbox (только исходящие через UltraMSG).
+- Per-project granular preferences (overrides) — сейчас глобально + on/off через favorite.
+- Push-уведомления (есть `push_subscriptions`, но добавим отдельной задачей).
+- Алерт «снижение цены» — таблица истории цен ещё не наполнена; сделаем плейсхолдер UI, отключённый.
+
+---
+
+## 7. Файлы
+
+**Создаются:**
+- migration `*_nb_alerts.sql`
+- `supabase/functions/nb-process-alerts/index.ts`
+- `supabase/functions/nb-process-saved-searches/index.ts`
+- `supabase/functions/_shared/offplanFilter.ts`
+- `src/hooks/useSavedOffplanSearches.ts`
+- `src/hooks/useNewbuildAlertPreferences.ts`
+- `src/pages/account/SavedSearches.tsx`
+- `src/pages/account/NewbuildAlerts.tsx`
+- `src/components/newbuilds/SaveSearchDialog.tsx`
+- `src/components/newbuilds/FavoriteProjectButton.tsx`
+
+**Редактируются:**
+- `src/pages/property/Offplan*` (фильтр-бар: кнопка save)
+- `src/components/newbuilds/NbProjectCard.tsx` (favorite кнопка)
+- `src/lib/config/routes.ts` (маршруты)
+- `src/lib/offplan/types.ts` (тип SavedSearch)
+- `src/i18n/uiStrings.ts`
+- `supabase/functions/_shared/email-templates.ts`
+- cron schedule SQL (через insert tool с реальным ключом)
+
+---
+
+## 8. Acceptance
+
+1. Юзер на `/property/offplan` ставит фильтры → «Сохранить поиск» → видит запись в `/account/saved-searches`.
+2. На следующий день при появлении нового проекта под критерии — приходит email/WhatsApp с дайджестом, в логе строка.
+3. Юзер ставит ❤️ на ЖК → в `/account/newbuild-alerts` видит его, включает WhatsApp.
+4. Через `psql` инсертим тестовый `project_units` со status='available' → cron в течение 15 мин шлёт алерт; повторный запуск не дублирует (anti-spam).
+5. RLS: чужие saved_searches/preferences/log невидимы.

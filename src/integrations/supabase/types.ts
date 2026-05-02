@@ -12170,6 +12170,104 @@ export type Database = {
         }
         Relationships: []
       }
+      nb_alert_log: {
+        Row: {
+          alert_type: string
+          channel: string
+          error_message: string | null
+          id: string
+          payload: Json | null
+          project_id: string | null
+          ref_id: string
+          sent_at: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          alert_type: string
+          channel: string
+          error_message?: string | null
+          id?: string
+          payload?: Json | null
+          project_id?: string | null
+          ref_id: string
+          sent_at?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          alert_type?: string
+          channel?: string
+          error_message?: string | null
+          id?: string
+          payload?: Json | null
+          project_id?: string | null
+          ref_id?: string
+          sent_at?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nb_alert_log_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "property_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nb_alert_preferences: {
+        Row: {
+          channel_email: boolean
+          channel_whatsapp: boolean
+          created_at: string
+          email: string | null
+          locale: string
+          notify_new_units: boolean
+          notify_price_changes: boolean
+          notify_progress_updates: boolean
+          quiet_hours_end: number | null
+          quiet_hours_start: number | null
+          updated_at: string
+          user_id: string
+          whatsapp_opt_in_at: string | null
+          whatsapp_phone: string | null
+        }
+        Insert: {
+          channel_email?: boolean
+          channel_whatsapp?: boolean
+          created_at?: string
+          email?: string | null
+          locale?: string
+          notify_new_units?: boolean
+          notify_price_changes?: boolean
+          notify_progress_updates?: boolean
+          quiet_hours_end?: number | null
+          quiet_hours_start?: number | null
+          updated_at?: string
+          user_id: string
+          whatsapp_opt_in_at?: string | null
+          whatsapp_phone?: string | null
+        }
+        Update: {
+          channel_email?: boolean
+          channel_whatsapp?: boolean
+          created_at?: string
+          email?: string | null
+          locale?: string
+          notify_new_units?: boolean
+          notify_price_changes?: boolean
+          notify_progress_updates?: boolean
+          quiet_hours_end?: number | null
+          quiet_hours_start?: number | null
+          updated_at?: string
+          user_id?: string
+          whatsapp_opt_in_at?: string | null
+          whatsapp_phone?: string | null
+        }
+        Relationships: []
+      }
       nb_leads: {
         Row: {
           attribution_id: string | null
@@ -12307,6 +12405,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      nb_saved_searches: {
+        Row: {
+          created_at: string
+          filters: Json
+          frequency: string
+          id: string
+          is_active: boolean
+          last_notified_at: string | null
+          last_seen_project_ids: string[]
+          name: string
+          notify_email: boolean
+          notify_whatsapp: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          filters?: Json
+          frequency?: string
+          id?: string
+          is_active?: boolean
+          last_notified_at?: string | null
+          last_seen_project_ids?: string[]
+          name?: string
+          notify_email?: boolean
+          notify_whatsapp?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          filters?: Json
+          frequency?: string
+          id?: string
+          is_active?: boolean
+          last_notified_at?: string | null
+          last_seen_project_ids?: string[]
+          name?: string
+          notify_email?: boolean
+          notify_whatsapp?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       notification_deliveries: {
         Row: {
