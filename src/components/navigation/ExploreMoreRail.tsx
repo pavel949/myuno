@@ -3,10 +3,57 @@
  */
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ChevronRight } from 'lucide-react';
+import {
+  ChevronRight,
+  Car,
+  Smartphone,
+  ArrowLeftRight,
+  Zap,
+  Landmark,
+  Utensils,
+  Sparkles,
+  Stethoscope,
+  ShoppingBag,
+  Plane,
+  Calculator,
+  Shield,
+  Search,
+  Building,
+  BarChart3,
+  Building2,
+  Calendar,
+  DollarSign,
+  LineChart,
+  Circle,
+  type LucideIcon,
+} from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import * as LucideIcons from 'lucide-react';
 import { APP_ROUTES } from '@/lib/config/routes';
+
+// Static icon map — keep tree-shakable. Adding a new icon here requires
+// adding the import above (intentional friction so we never regress to
+// `import * as LucideIcons` and pull the entire 1.5k-icon barrel).
+const ICONS: Record<string, LucideIcon> = {
+  Car,
+  Smartphone,
+  ArrowLeftRight,
+  Zap,
+  Landmark,
+  Utensils,
+  Sparkles,
+  Stethoscope,
+  ShoppingBag,
+  Plane,
+  Calculator,
+  Shield,
+  Search,
+  Building,
+  BarChart3,
+  Building2,
+  Calendar,
+  DollarSign,
+  LineChart,
+};
 
 interface ServiceItem {
   labelRu: string;
