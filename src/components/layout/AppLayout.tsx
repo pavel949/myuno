@@ -1,7 +1,12 @@
-import React, { ReactNode, forwardRef } from 'react';
+import React, { ReactNode, forwardRef, lazy, Suspense } from 'react';
 import { cn } from '@/lib/utils';
 import { Footer } from './Footer';
-import { ActiveSituationBanner } from '@/components/life-os/ActiveSituationBanner';
+// Lazy: pulls DynamicIcon → keeps `vendor-icons-rare` out of the home preload.
+const ActiveSituationBanner = lazy(() =>
+  import('@/components/life-os/ActiveSituationBanner').then((m) => ({
+    default: m.ActiveSituationBanner,
+  })),
+);
 import { useIsDesktop } from '@/hooks/use-desktop';
 import { EmailVerificationBanner } from '@/components/auth/EmailVerificationBanner';
 import { useUserTracking } from '@/hooks/useUserTracking';
@@ -100,7 +105,11 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
       >
         <div ref={ref} className="contents">
           {consumerChrome && <EmailVerificationBanner />}
-          {consumerChrome && showSituationBanner && <ActiveSituationBanner />}
+          {consumerChrome && showSituationBanner && (
+            <Suspense fallback={null}>
+              <ActiveSituationBanner />
+            </Suspense>
+          )}
           {consumerChrome && <InstallBanner />}
 
           {usePageContainer ? (
