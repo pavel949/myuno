@@ -124,7 +124,7 @@ export function ExploreMoreRail({ clusterId, currentPath, className }: ExploreMo
 
       <div className="carousel-scroll gap-3 -mx-4 px-4">
         {services.map(service => {
-          const IconComp = (LucideIcons as any)[service.icon] || LucideIcons.Circle;
+          const IconComp = ICONS[service.icon] || Circle;
           return (
             <button
               key={service.path}
