@@ -1,34 +1,18 @@
 /**
- * DynamicIcon — renders a Lucide icon by name using on-demand dynamic imports.
+ * DynamicIcon — renders a Lucide icon by name using dynamic imports.
+ * Uses React.lazy + Suspense for code-split icon loading.
  *
- * Why not `lucide-react/dynamicIconImports`?
- *   That module is a static object literal referencing every icon. Even though
- *   each value is a dynamic `import()`, Vite hoists the whole map into the
- *   entry graph, which forces `vendor-icons-rare` to be preloaded on the home
- *   screen — even though `DynamicIcon` is only used on LifeOS / LifeFlow /
- *   admin pages.
- *
- * Instead we use `import.meta.glob` against `lucide-react/dist/esm/icons/*.js`
- * with `{ eager: false }`. Vite emits one async chunk per icon and never pulls
- * the map into the initial bundle. The first `DynamicIcon` render on a LifeOS
- * page triggers the icon fetch; the home screen pays nothing.
+ * Note: `lucide-react/dynamicIconImports` is itself a static object literal
+ * mapping every icon to a dynamic `import()`. The map ships in whichever chunk
+ * imports this module, but the icon files themselves stay async. To keep this
+ * map out of the home-screen entry graph, every consumer of `DynamicIcon`
+ * (`ActiveSituationBanner`, `RouteNextSteps`, LifeOS pages, etc.) must be
+ * lazy-loaded from the route shell.
  */
 import React, { lazy, Suspense, useMemo } from 'react';
 import type { LucideProps } from 'lucide-react';
+import dynamicIconImports from 'lucide-react/dynamicIconImports';
 import { Compass } from 'lucide-react';
-
-// One async import() per icon file. Vite resolves this at build time into
-// per-icon chunks — none of which land in the entry graph.
-const iconLoaders = import.meta.glob<{ default: React.ComponentType<LucideProps> }>(
-  '../../../node_modules/lucide-react/dist/esm/icons/*.js',
-);
-
-// Build a kebab-name → loader lookup once.
-const loaderByName: Record<string, () => Promise<{ default: React.ComponentType<LucideProps> }>> = {};
-for (const [path, loader] of Object.entries(iconLoaders)) {
-  const match = path.match(/\/icons\/([^/]+)\.js$/);
-  if (match) loaderByName[match[1]] = loader;
-}
 
 function toKebabCase(str: string): string {
   return str
@@ -48,9 +32,9 @@ const iconCache = new Map<string, React.LazyExoticComponent<React.ComponentType<
 
 function getLazyIcon(kebabName: string) {
   if (iconCache.has(kebabName)) return iconCache.get(kebabName)!;
-  const loader = loaderByName[kebabName];
-  if (!loader) return null;
-  const LazyIcon = lazy(loader);
+  const importFn = dynamicIconImports[kebabName as keyof typeof dynamicIconImports];
+  if (!importFn) return null;
+  const LazyIcon = lazy(importFn);
   iconCache.set(kebabName, LazyIcon);
   return LazyIcon;
 }
