@@ -139,12 +139,17 @@ Deno.serve(async (req) => {
       cover_image: p.cover_image,
     }));
 
+    // Use a date-stamped synthetic ref so the unique-log index allows daily digests.
+    // Build deterministic UUID v4-shape from search.id + YYYY-MM-DD.
+    const today = new Date().toISOString().slice(0, 10);
+    const refId = await synthRefId(`${search.id}-${today}`);
+
     const r = await sendAndLog({
       supabase,
       resend,
       recipient,
       alert_type: "saved_search_match",
-      ref_id: search.id, // dedupe per (user, search) — we update last_seen below to gate next runs
+      ref_id: refId,
       project_id: null,
       email: renderSavedSearchDigestEmail({ searchName: search.name, projects: projectInfos, lang: recipient.locale }),
       whatsapp: renderSavedSearchDigestWhatsApp({ searchName: search.name, projects: projectInfos, lang: recipient.locale }),
