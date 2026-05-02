@@ -387,7 +387,20 @@ export default defineConfig(({ mode }) => {
               return 'vendor-motion';
             }
             if (id.includes('lucide-react')) {
-              return classifyLucideIcon(id);
+              // NOTE: tiered split (core/extended/rare) was abandoned because
+              // lucide-react's barrel re-exports all icons through a single
+              // module graph: Rollup ends up co-locating every used icon
+              // regardless of the manualChunks return value, while the
+              // entry chunk gains a static import of *all three* tier
+              // chunks → triple preload on the home page (see
+              // perf-report-lucide-split.md). Keeping a single
+              // `vendor-icons` chunk preloads exactly one file. Routes that
+              // need on-demand icons should use `<DynamicIcon>` (lazy via
+              // `vendor-icons-dynamic-map`) — that path is preserved.
+              if (/lucide-react\/dist\/esm\/dynamicIconImports\.js$/.test(id)) {
+                return 'vendor-icons-dynamic-map';
+              }
+              return 'vendor-icons';
             }
             if (
               id.includes('react-hook-form') ||
