@@ -43,9 +43,11 @@ function kebab(name) {
 }
 
 const counts = new Map();
+const fileIcons = new Map(); // file → Set<iconName>
 for (const file of walk(SRC)) {
   const txt = fs.readFileSync(file, 'utf8');
   let m;
+  const set = new Set();
   while ((m = IMPORT_RE.exec(txt))) {
     for (const part of m[1].split(',')) {
       // strip `type` and ` as Alias` — we want the source identifier
@@ -55,8 +57,45 @@ for (const file of walk(SRC)) {
         .trim();
       if (!name || SKIP.has(name)) continue;
       counts.set(name, (counts.get(name) || 0) + 1);
+      set.add(name);
     }
   }
+  if (set.size) fileIcons.set(file, set);
+}
+
+// ── Entry-graph detection ───────────────────────────────────────────────
+// Any icon statically reachable from `src/main.tsx` (without crossing a
+// dynamic `import()`) lands in the initial entry chunk and forces preload
+// of its tier. Pin every such icon into `core` so the `extended` and `rare`
+// chunks are NEVER preloaded on the home screen.
+const STATIC_IMPORT_RE = /^\s*import\s+(?:[^'"]+\s+from\s+)?['"]([^'"]+)['"]/gm;
+function resolveSpec(from, spec) {
+  if (spec.startsWith('@/')) spec = path.join(SRC, spec.slice(2));
+  else if (spec.startsWith('.')) spec = path.join(path.dirname(from), spec);
+  else return null;
+  for (const ex of ['', '.ts', '.tsx', '.js', '.jsx', '/index.ts', '/index.tsx']) {
+    const p = spec + ex;
+    if (fs.existsSync(p) && fs.statSync(p).isFile()) return p;
+  }
+  return null;
+}
+const entryReachable = new Set();
+(function walkEntry(file) {
+  if (entryReachable.has(file)) return;
+  entryReachable.add(file);
+  let txt;
+  try { txt = fs.readFileSync(file, 'utf8'); } catch { return; }
+  STATIC_IMPORT_RE.lastIndex = 0;
+  let m;
+  while ((m = STATIC_IMPORT_RE.exec(txt))) {
+    const r = resolveSpec(file, m[1]);
+    if (r) walkEntry(r);
+  }
+})(path.join(SRC, 'main.tsx'));
+const ENTRY_PINNED = new Set();
+for (const f of entryReachable) {
+  const set = fileIcons.get(f);
+  if (set) for (const n of set) ENTRY_PINNED.add(n);
 }
 
 const existing = new Set(
