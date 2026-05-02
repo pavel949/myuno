@@ -122,11 +122,25 @@ const data = {
   extended: bin(3, 9),
   rare: bin(0, 2),
 };
+
+// Force entry-graph icons into `core` so they don't pull `extended`/`rare`
+// chunks into the initial preload list.
+const pinnedKebab = new Set();
+for (const name of ENTRY_PINNED) {
+  const k = REMAP[kebab(name)] ?? kebab(name);
+  if (existing.has(k)) pinnedKebab.add(k);
+}
+data.core = [...new Set([...data.core, ...pinnedKebab])].sort();
+data.extended = data.extended.filter((n) => !pinnedKebab.has(n));
+data.rare = data.rare.filter((n) => !pinnedKebab.has(n));
+
 // Dedupe across tiers (core wins).
 const seen = new Set();
 for (const tier of ['core', 'extended', 'rare']) {
   data[tier] = data[tier].filter((n) => (seen.has(n) ? false : (seen.add(n), true)));
 }
+
+console.log(`Entry-graph pinned icons: ${pinnedKebab.size}`);
 
 fs.writeFileSync(OUT, JSON.stringify(data, null, 2) + '\n');
 console.log(`Wrote ${path.relative(ROOT, OUT)}:`);
