@@ -105,7 +105,11 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
       >
         <div ref={ref} className="contents">
           {consumerChrome && <EmailVerificationBanner />}
-          {consumerChrome && showSituationBanner && <ActiveSituationBanner />}
+          {consumerChrome && showSituationBanner && (
+            <Suspense fallback={null}>
+              <ActiveSituationBanner />
+            </Suspense>
+          )}
           {consumerChrome && <InstallBanner />}
 
           {usePageContainer ? (
