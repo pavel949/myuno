@@ -162,15 +162,21 @@ Deno.serve(async (req) => {
       .update({ last_seen_project_ids: newSeen, last_notified_at: new Date().toISOString() })
       .eq("id", search.id);
 
-    if (r.email || r.whatsapp) {
-      totalSent++;
-      // Bump dedupe ref_id to allow next-day digest (insert a fresh row then delete old? no — uniqueness is per (user, ref_id, channel))
-      // Since ref_id = search.id is constant, idempotency_log will block 2nd send. Workaround: delete previous saved_search_match row for this search before next cron via UPDATE log timestamps. Simpler: include date in ref by switching to date-stamped synthetic uuid.
-    }
+    if (r.email || r.whatsapp) totalSent++;
   }
 
   return json({ ok: true, sent: totalSent, total: searches.length });
 });
+
+async function synthRefId(seed: string): Promise<string> {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(seed));
+  const b = Array.from(new Uint8Array(buf)).slice(0, 16);
+  // Force UUID v4 shape
+  b[6] = (b[6] & 0x0f) | 0x40;
+  b[8] = (b[8] & 0x3f) | 0x80;
+  const hex = b.map((x) => x.toString(16).padStart(2, "0")).join("");
+  return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20,32)}`;
+}
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
