@@ -354,7 +354,7 @@ export default defineConfig(({ mode }) => {
               return 'vendor-motion';
             }
             if (id.includes('lucide-react')) {
-              return 'vendor-icons';
+              return classifyLucideIcon(id);
             }
             if (
               id.includes('react-hook-form') ||
