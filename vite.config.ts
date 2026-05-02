@@ -34,7 +34,15 @@ function resolveAlias(name: string, depth = 0): string {
   return resolveAlias(aliasTarget[name], depth + 1);
 }
 
-function classifyLucideIcon(id: string): 'vendor-icons-core' | 'vendor-icons-extended' | 'vendor-icons-rare' {
+function classifyLucideIcon(id: string): string {
+  // Isolate the dynamicIconImports map: it statically references every icon
+  // file. If it lands in `vendor-icons-core` (entry-graph), the browser
+  // preloads `vendor-icons-{core,extended,rare}` on the home page even though
+  // `DynamicIcon` is only rendered on LifeOS / LifeFlow / admin surfaces.
+  // Putting it in its own chunk means it's only fetched when DynamicIcon mounts.
+  if (/lucide-react\/dist\/esm\/dynamicIconImports\.js$/.test(id)) {
+    return 'vendor-icons-dynamic-map';
+  }
   // Match `.../lucide-react/dist/esm/icons/<name>.js` (works on Windows too — id uses /).
   const m = id.match(/lucide-react\/dist\/esm\/icons\/([a-z0-9-]+)\.js$/);
   if (!m) return 'vendor-icons-core'; // barrel + shared internals stay in core
