@@ -52,7 +52,7 @@ export function useNbSavedSearches() {
         .insert([{
           user_id: user.id,
           name: input.name,
-          filters: input.filters as unknown as Record<string, unknown>,
+          filters: input.filters as unknown as never,
           notify_email: input.notify_email,
           notify_whatsapp: input.notify_whatsapp,
           frequency: input.frequency ?? 'daily',
