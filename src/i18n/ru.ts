@@ -414,6 +414,8 @@ export const ru: Record<string, string> = {
 
   'account.menu.bookings': 'Заказы и брони',
   'account.menu.favorites': 'Избранное',
+  'account.menu.savedSearches': 'Сохранённые поиски',
+  'account.menu.newbuildAlerts': 'Уведомления о новостройках',
   'account.menu.wallet': 'Кошелёк и оплата',
   'account.menu.referral': 'Пригласить и заработать',
   'account.menu.notifications': 'Уведомления',

@@ -14,8 +14,12 @@ import {
   HardHat,
   CheckCircle2,
   ShieldCheck,
-  ShieldAlert
+  ShieldAlert,
+  Heart,
 } from 'lucide-react';
+import { useUserCollections } from '@/hooks/useUserCollections';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -63,6 +67,9 @@ export function OffplanProjectCard({
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
+  const { user } = useAuth();
+  const { isInCollection, toggleCollection } = useUserCollections();
+  const isFav = isInCollection('newbuild_project', project.id);
 
   const surface = useMemo(() => surfaceFromOffplanProject(project), [project]);
   const name = isRu ? surface.titleRu : surface.titleEn;
@@ -71,6 +78,24 @@ export function OffplanProjectCard({
 
   const handleClick = () => {
     navigate(surface.href);
+  };
+
+  const handleFav = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!user) {
+      toast.error(isRu ? 'Войдите, чтобы добавить в избранное' : 'Sign in to favourite');
+      navigate('/auth');
+      return;
+    }
+    await toggleCollection('newbuild_project', project.id, {
+      name: isRu ? surface.titleRu : surface.titleEn,
+      name_en: surface.titleEn,
+      name_ru: surface.titleRu,
+      cover_image: project.coverImage ?? undefined,
+      district: project.district ?? undefined,
+      price: project.priceFrom ?? undefined,
+      currency: 'THB',
+    });
   };
 
   // Format completion date
@@ -157,7 +182,23 @@ export function OffplanProjectCard({
           </div>
         )}
 
-        {/* Construction progress (for non-completed) */}
+        {/* Favorite (alerts on new units) */}
+        <button
+          type="button"
+          aria-label={isRu ? 'Добавить в избранное' : 'Add to favourites'}
+          onClick={handleFav}
+          className={cn(
+            'absolute right-3 flex items-center justify-center w-8 h-8 rounded-full',
+            'bg-background/80 backdrop-blur border border-border/50 shadow-sm',
+            'hover:bg-background transition-colors',
+            project.isClearviewRated && project.muunoScore ? 'top-14' : 'top-3'
+          )}
+        >
+          <Heart
+            className={cn('w-4 h-4', isFav ? 'fill-destructive text-destructive' : 'text-foreground/70')}
+          />
+        </button>
+
         {project.projectStatus !== 'completed' && project.constructionProgress > 0 && (
           <div className="absolute bottom-0 left-0 right-0 p-3">
             <div className="flex items-center justify-between text-xs text-primary-foreground mb-1">

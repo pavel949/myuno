@@ -297,6 +297,8 @@ export const ClassifiedsSellPage = lazy(() => import('@/pages/classifieds/Classi
 
 // ── Other ──
 export const Favorites = lazy(() => import('@/pages/Favorites'));
+export const SavedSearches = lazy(() => import('@/pages/account/SavedSearches'));
+export const NewbuildAlerts = lazy(() => import('@/pages/account/NewbuildAlerts'));
 export const Search = lazy(() => import('@/pages/Search'));
 export const Notifications = lazy(() => import('@/pages/Notifications'));
 export const NotificationSettingsEnhanced = lazy(() => import('@/pages/profile/NotificationSettingsEnhanced'));

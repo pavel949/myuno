@@ -414,6 +414,8 @@ export const en: Record<string, string> = {
 
   'account.menu.bookings': 'Bookings & Orders',
   'account.menu.favorites': 'Favorites',
+  'account.menu.savedSearches': 'Saved searches',
+  'account.menu.newbuildAlerts': 'Newbuild alerts',
   'account.menu.wallet': 'Wallet & Payments',
   'account.menu.referral': 'Invite & Earn',
   'account.menu.notifications': 'Notifications',

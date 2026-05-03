@@ -23,6 +23,8 @@ import {
   ArrowRightLeft,
   TrendingUp,
   LayoutGrid,
+  Bookmark,
+  BellRing,
 } from 'lucide-react';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -36,6 +38,8 @@ interface MenuItem {
 const STANDARD_ITEMS: MenuItem[] = [
   { path: '/bookings', icon: ShoppingBag, labelKey: 'account.menu.bookings' },
   { path: '/favorites', icon: Heart, labelKey: 'account.menu.favorites' },
+  { path: '/account/saved-searches', icon: Bookmark, labelKey: 'account.menu.savedSearches' },
+  { path: '/account/newbuild-alerts', icon: BellRing, labelKey: 'account.menu.newbuildAlerts' },
   { path: '/wallet', icon: CreditCard, labelKey: 'account.menu.wallet' },
   { path: '/profile/referral', icon: Gift, labelKey: 'account.menu.referral' },
   { path: '/notifications', icon: Bell, labelKey: 'account.menu.notifications' },

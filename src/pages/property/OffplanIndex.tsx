@@ -3,7 +3,7 @@
  * Server filters + OFFPLAN-style client filters (offplan_catalog JSON when present)
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Building2,
@@ -35,6 +35,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useOffplanProjects, useProjectDistricts, type ProjectStatus } from '@/hooks/useOffplanProjects';
 import { useDevelopers } from '@/hooks/useDevelopers';
 import { OffplanProjectCard } from '@/components/property/OffplanProjectCard';
+import { SaveOffplanSearchDialog } from '@/components/property/SaveOffplanSearchDialog';
 import {
   applyOffplanUiFilters,
   activeOffplanFilterCount,
@@ -88,6 +89,17 @@ export default function OffplanIndex() {
   const [selectedDeveloper, setSelectedDeveloper] = useState<string>('');
   const [minScore, setMinScore] = useState<number>(0);
   const [ui, setUi] = useState<OffplanUiFilterState>(() => defaultOffplanUiFilterState());
+
+  // Apply saved search filters when navigated from /account/saved-searches
+  useEffect(() => {
+    const raw = sessionStorage.getItem('nb_apply_saved_search');
+    if (!raw) return;
+    sessionStorage.removeItem('nb_apply_saved_search');
+    try {
+      const f = JSON.parse(raw) as Partial<OffplanUiFilterState>;
+      setUi((prev) => ({ ...prev, ...f }));
+    } catch { /* ignore */ }
+  }, []);
 
   const { data: projects, isLoading } = useOffplanProjects({
     status: selectedStatus.length > 0 ? selectedStatus : undefined,
@@ -434,6 +446,8 @@ export default function OffplanIndex() {
               <X className="w-4 h-4" />
             </Button>
           )}
+
+          <SaveOffplanSearchDialog filters={ui} resultCount={displayedProjects.length} />
         </div>
 
         <div className="flex items-center justify-between gap-2 flex-wrap">
