@@ -435,6 +435,8 @@ export default function OffplanIndex() {
               <X className="w-4 h-4" />
             </Button>
           )}
+
+          <SaveOffplanSearchDialog filters={ui} resultCount={displayedProjects.length} />
         </div>
 
         <div className="flex items-center justify-between gap-2 flex-wrap">
