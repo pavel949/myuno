@@ -67,6 +67,9 @@ export function OffplanProjectCard({
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
+  const { user } = useAuth();
+  const { isInCollection, toggleCollection } = useUserCollections();
+  const isFav = isInCollection('newbuild_project', project.id);
 
   const surface = useMemo(() => surfaceFromOffplanProject(project), [project]);
   const name = isRu ? surface.titleRu : surface.titleEn;
@@ -75,6 +78,24 @@ export function OffplanProjectCard({
 
   const handleClick = () => {
     navigate(surface.href);
+  };
+
+  const handleFav = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!user) {
+      toast.error(isRu ? 'Войдите, чтобы добавить в избранное' : 'Sign in to favourite');
+      navigate('/auth');
+      return;
+    }
+    await toggleCollection('newbuild_project', project.id, {
+      name: isRu ? surface.titleRu : surface.titleEn,
+      name_en: surface.titleEn,
+      name_ru: surface.titleRu,
+      cover_image: project.coverImage ?? undefined,
+      district: project.district ?? undefined,
+      price: project.priceFrom ?? undefined,
+      currency: 'THB',
+    });
   };
 
   // Format completion date
