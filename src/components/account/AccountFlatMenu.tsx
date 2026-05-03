@@ -23,6 +23,8 @@ import {
   ArrowRightLeft,
   TrendingUp,
   LayoutGrid,
+  Bookmark,
+  BellRing,
 } from 'lucide-react';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { APP_ROUTES } from '@/lib/config/routes';
