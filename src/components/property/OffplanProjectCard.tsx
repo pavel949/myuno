@@ -14,8 +14,12 @@ import {
   HardHat,
   CheckCircle2,
   ShieldCheck,
-  ShieldAlert
+  ShieldAlert,
+  Heart,
 } from 'lucide-react';
+import { useUserCollections } from '@/hooks/useUserCollections';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useLanguage } from '@/contexts/LanguageContext';
