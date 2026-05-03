@@ -49,14 +49,14 @@ export function useNbSavedSearches() {
       if (!user) throw new Error('not authenticated');
       const { data, error } = await supabase
         .from('nb_saved_searches')
-        .insert({
+        .insert([{
           user_id: user.id,
           name: input.name,
           filters: input.filters as unknown as Record<string, unknown>,
           notify_email: input.notify_email,
           notify_whatsapp: input.notify_whatsapp,
           frequency: input.frequency ?? 'daily',
-        })
+        }])
         .select()
         .single();
       if (error) throw error;
