@@ -222,6 +222,8 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.ME_PROFILE} element={<LazyPage><Pages.MeProfile /></LazyPage>} />
         <Route path="/me/bookings" element={<LazyPage><Pages.MeBookings /></LazyPage>} />
         <Route path={APP_ROUTES.FAVORITES} element={<LazyPage><Pages.Favorites /></LazyPage>} />
+        <Route path="/account/saved-searches" element={<LazyPage><Pages.SavedSearches /></LazyPage>} />
+        <Route path="/account/newbuild-alerts" element={<LazyPage><Pages.NewbuildAlerts /></LazyPage>} />
         <Route path={APP_ROUTES.SEARCH} element={<LazyPage><Pages.Search /></LazyPage>} />
         <Route path={APP_ROUTES.NOTIFICATIONS} element={<LazyPage><Pages.Notifications /></LazyPage>} />
         <Route path={APP_ROUTES.NOTIFICATION_SETTINGS} element={<LazyPage><Pages.NotificationSettingsEnhanced /></LazyPage>} />
