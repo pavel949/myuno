@@ -90,6 +90,17 @@ export default function OffplanIndex() {
   const [minScore, setMinScore] = useState<number>(0);
   const [ui, setUi] = useState<OffplanUiFilterState>(() => defaultOffplanUiFilterState());
 
+  // Apply saved search filters when navigated from /account/saved-searches
+  useEffect(() => {
+    const raw = sessionStorage.getItem('nb_apply_saved_search');
+    if (!raw) return;
+    sessionStorage.removeItem('nb_apply_saved_search');
+    try {
+      const f = JSON.parse(raw) as Partial<OffplanUiFilterState>;
+      setUi((prev) => ({ ...prev, ...f }));
+    } catch { /* ignore */ }
+  }, []);
+
   const { data: projects, isLoading } = useOffplanProjects({
     status: selectedStatus.length > 0 ? selectedStatus : undefined,
     district: selectedDistrict || undefined,
