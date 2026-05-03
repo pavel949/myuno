@@ -35,6 +35,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useOffplanProjects, useProjectDistricts, type ProjectStatus } from '@/hooks/useOffplanProjects';
 import { useDevelopers } from '@/hooks/useDevelopers';
 import { OffplanProjectCard } from '@/components/property/OffplanProjectCard';
+import { SaveOffplanSearchDialog } from '@/components/property/SaveOffplanSearchDialog';
 import {
   applyOffplanUiFilters,
   activeOffplanFilterCount,
