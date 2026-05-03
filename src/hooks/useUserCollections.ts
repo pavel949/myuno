@@ -29,7 +29,8 @@ export type CollectionItemType =
   | 'vehicle'
   | 'gym'
   | 'water_activity'
-  | 'newbuild';
+  | 'newbuild'
+  | 'newbuild_project';
 
 export interface CollectionItem {
   id: string;
