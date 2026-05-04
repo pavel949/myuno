@@ -39,6 +39,7 @@ import { HintProvider } from "@/components/hints/HintProvider";
 import { AuthSheetProvider } from "@/contexts/AuthSheetContext";
 import { UnderConstruction } from "@/components/maintenance/UnderConstruction";
 import { PWAUpdatePrompt } from "@/components/pwa/PWAUpdatePrompt";
+import { VersionWatcher } from "@/components/pwa/VersionWatcher";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "react-router-dom";
 import { composeProviders } from "@/lib/composeProviders";
@@ -155,6 +156,7 @@ function AppContent() {
         <PlatformViewAsBanner />
         <Sonner />
         <PWAUpdatePrompt />
+        <VersionWatcher />
         <LegalComplianceModal />
         <BrowserRouter>
           <ComingSoonGate>
