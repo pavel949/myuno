@@ -88,6 +88,59 @@ reportWebVitals(undefined, { debug: import.meta.env.DEV });
     }).catch(() => {});
   }
 })();
+
+// ── HTTP 412 recovery (auth-bridge / preview proxy) ──
+// Lovable's preview proxy occasionally returns 412 for auth-bridge token
+// refreshes when the bundle/manifest goes stale. We can't intercept the
+// initial document 412 (React isn't mounted yet), but we CAN catch 412 on
+// runtime fetches: clear SW + caches and force a one-time hard reload so
+// the proxy hands us a fresh token. Guarded by sessionStorage to avoid
+// reload loops.
+(() => {
+  if (typeof window === "undefined" || !window.fetch) return;
+  const RELOAD_KEY = "__myuno_412_reload__";
+  const originalFetch = window.fetch.bind(window);
+
+  const recover = async () => {
+    if (sessionStorage.getItem(RELOAD_KEY)) return;
+    sessionStorage.setItem(RELOAD_KEY, String(Date.now()));
+    try {
+      if ("serviceWorker" in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map((r) => r.unregister().catch(() => {})));
+      }
+      if ("caches" in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((k) => caches.delete(k).catch(() => {})));
+      }
+    } catch {
+      /* noop */
+    }
+    window.location.reload();
+  };
+
+  window.fetch = async (...args: Parameters<typeof fetch>) => {
+    try {
+      const res = await originalFetch(...args);
+      if (res.status === 412) {
+        const url = typeof args[0] === "string" ? args[0] : (args[0] as Request)?.url ?? "";
+        // Only react to preview-proxy / auth-bridge 412s, not API 412s
+        if (/lovableproject\.com|lovable\.app|auth-bridge|\/auth\//.test(url)) {
+          void recover();
+        }
+      }
+      return res;
+    } catch (err) {
+      throw err;
+    }
+  };
+
+  // Clear the reload guard once the app boots successfully
+  window.addEventListener("load", () => {
+    setTimeout(() => sessionStorage.removeItem(RELOAD_KEY), 5000);
+  });
+})();
+
 try {
   createRoot(document.getElementById("root")!).render(
     <StrictMode>
