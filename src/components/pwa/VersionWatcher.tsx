@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import * as Sentry from '@sentry/react';
 import { APP_VERSION, forceCleanAllCaches } from '@/lib/appVersion';
 import { logger } from '@/lib/logger';
 
@@ -32,21 +33,64 @@ export function VersionWatcher() {
     if (isInIframe || isPreviewHost) return;
 
     const RELOAD_GUARD_KEY = 'version_reload_guard_ts';
+    const RELOAD_ATTEMPTS_KEY = 'version_reload_attempts';
     const POLL_INTERVAL_MS = 60_000;
-    const RELOAD_GUARD_WINDOW_MS = 30_000;
+    // Widened from 30s → 5min so a single deploy can't reload-loop a stuck
+    // client when /version.json and the bundled APP_VERSION drift on Vercel.
+    const RELOAD_GUARD_WINDOW_MS = 5 * 60_000;
+    const ATTEMPT_WINDOW_MS = 10 * 60_000;
+    const MAX_ATTEMPTS_PER_WINDOW = 2;
+
+    type AttemptLog = { ts: number; v: string };
+    const readAttempts = (): AttemptLog[] => {
+      try {
+        const raw = localStorage.getItem(RELOAD_ATTEMPTS_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw) as unknown;
+        return Array.isArray(parsed) ? (parsed as AttemptLog[]) : [];
+      } catch {
+        return [];
+      }
+    };
+    const writeAttempts = (entries: AttemptLog[]) => {
+      try {
+        localStorage.setItem(RELOAD_ATTEMPTS_KEY, JSON.stringify(entries));
+      } catch {
+        /* noop */
+      }
+    };
 
     const triggerReload = async (remoteVersion: string) => {
       if (reloadingRef.current) return;
 
-      // Guard against reload loops: if we just reloaded < 30s ago, skip
       const lastReload = Number(sessionStorage.getItem(RELOAD_GUARD_KEY) || '0');
       if (Date.now() - lastReload < RELOAD_GUARD_WINDOW_MS) {
-        logger.warn(`[VersionWatcher] Skip reload — too soon since last (${remoteVersion})`);
+        logger.warn(`[VersionWatcher] Skip reload — within 5min guard window (${remoteVersion})`);
+        return;
+      }
+
+      const now = Date.now();
+      const recent = readAttempts().filter((a) => now - a.ts < ATTEMPT_WINDOW_MS);
+      if (recent.length >= MAX_ATTEMPTS_PER_WINDOW) {
+        Sentry.captureMessage('[VersionWatcher] Reload loop detected — bailing out', {
+          level: 'warning',
+          extra: {
+            remote: remoteVersion,
+            current: APP_VERSION,
+            attempts: recent,
+          },
+        });
+        logger.warn('[VersionWatcher] Reload loop detected — bailing out', { recent });
         return;
       }
 
       reloadingRef.current = true;
-      sessionStorage.setItem(RELOAD_GUARD_KEY, String(Date.now()));
+      sessionStorage.setItem(RELOAD_GUARD_KEY, String(now));
+      writeAttempts([...recent, { ts: now, v: remoteVersion }]);
+      Sentry.captureMessage('[VersionWatcher] Reload triggered', {
+        level: 'info',
+        extra: { remote: remoteVersion, current: APP_VERSION, attemptsInWindow: recent.length + 1 },
+      });
       logger.log(`[VersionWatcher] New version ${remoteVersion} (current ${APP_VERSION}). Cleaning caches and reloading...`);
 
       try {
@@ -55,7 +99,6 @@ export function VersionWatcher() {
         logger.warn('[VersionWatcher] Cache cleanup failed:', err);
       }
 
-      // Cache-busting reload to defeat any CDN/HTML caching
       const url = new URL(window.location.href);
       url.searchParams.set('_v', remoteVersion);
       window.location.replace(url.toString());
