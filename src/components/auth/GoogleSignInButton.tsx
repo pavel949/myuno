@@ -26,8 +26,21 @@ export function GoogleSignInButton({ redirectTo, label }: GoogleSignInButtonProp
   const handleClick = async () => {
     setLoading(true);
     try {
+      const oauthCallbackUrl = `${window.location.origin}/auth/callback`;
+      if (redirectTo) {
+        try {
+          const parsed = new URL(redirectTo, window.location.origin);
+          if (parsed.origin === window.location.origin) {
+            const path = `${parsed.pathname}${parsed.search}${parsed.hash}` || '/';
+            sessionStorage.setItem('myuno_post_auth_redirect', path);
+          }
+        } catch {
+          // Ignore malformed redirect values and continue OAuth safely.
+        }
+      }
       const result = await lovable.auth.signInWithOAuth('google', {
-        redirect_uri: redirectTo || window.location.origin,
+        // Keep one stable callback URL to avoid provider redirect_uri mismatch.
+        redirect_uri: oauthCallbackUrl,
       });
       if (result.error) {
         toast.error(isRu ? 'Ошибка входа через Google' : 'Google sign-in failed');

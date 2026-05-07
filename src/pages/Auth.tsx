@@ -64,8 +64,12 @@ export default function Auth() {
   const { activeRole } = useUserContext();
   const { isMCPortal, isLoading: ownerTypeLoading } = useOwnerType();
 
+  const storedOAuthRedirect =
+    typeof window !== 'undefined' ? window.sessionStorage.getItem('myuno_post_auth_redirect') : null;
+
   const rawRedirect = (location.state as { from?: string })?.from ||
     searchParams.get('redirect') ||
+    storedOAuthRedirect ||
     APP_ROUTES.HOME;
 
   const redirectPath = React.useMemo(() => {
@@ -86,6 +90,9 @@ export default function Auth() {
 
   useEffect(() => {
     if (!user || authLoading) return;
+    if (typeof window !== 'undefined') {
+      window.sessionStorage.removeItem('myuno_post_auth_redirect');
+    }
     if (redirectPath !== APP_ROUTES.HOME) {
       navigate(redirectPath, { replace: true });
       return;
