@@ -192,22 +192,37 @@
             : 'Something went wrong. Refresh the page, or clear site data from your browser settings.';
           var btnReload = ru ? 'Обновить' : 'Reload';
           var btnReset = ru ? 'Очистить и обновить' : 'Clear & reload';
-          root.innerHTML =
-            '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:#F7F5F1;color:#1C1917;font-family:system-ui,-apple-system,sans-serif">' +
-            '<div style="max-width:520px;width:100%;background:#fff;border:1px solid #e7e5e4;border-radius:14px;padding:24px">' +
-            '<h1 style="font-size:18px;line-height:1.3;margin:0 0 10px">' + title + '</h1>' +
-            '<p style="margin:0 0 16px;line-height:1.55;color:#44403c">' + body + '</p>' +
-            '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
-            '<button id="uno-fb-reload" style="padding:10px 16px;border-radius:10px;border:1px solid #0A2240;background:#0A2240;color:#fff;font:inherit;cursor:pointer">' + btnReload + '</button>' +
-            '<button id="uno-fb-reset" style="padding:10px 16px;border-radius:10px;border:1px solid #d6d3d1;background:#fff;color:#1C1917;font:inherit;cursor:pointer">' + btnReset + '</button>' +
-            '</div></div></div>';
-          var rb = document.getElementById('uno-fb-reload');
-          if (rb) rb.addEventListener('click', function () { window.location.reload(); });
-          var rs = document.getElementById('uno-fb-reset');
-          if (rs) rs.addEventListener('click', function () {
+
+          var outer = document.createElement('div');
+          outer.style.cssText = 'min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:#F7F5F1;color:#1C1917';
+          var card = document.createElement('div');
+          card.style.cssText = 'max-width:520px;width:100%;background:#fff;border:1px solid #e7e5e4;border-radius:14px;padding:24px';
+          var h = document.createElement('h1');
+          h.style.cssText = 'font-size:18px;line-height:1.3;margin:0 0 10px';
+          h.textContent = title;
+          var p = document.createElement('p');
+          p.style.cssText = 'margin:0 0 16px;line-height:1.55;color:#44403c';
+          p.textContent = body;
+          var row = document.createElement('div');
+          row.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap';
+          var b1 = document.createElement('button');
+          b1.style.cssText = 'padding:10px 16px;border-radius:10px;border:1px solid #0A2240;background:#0A2240;color:#fff;font:inherit;cursor:pointer';
+          b1.textContent = btnReload;
+          b1.addEventListener('click', function () { window.location.reload(); });
+          var b2 = document.createElement('button');
+          b2.style.cssText = 'padding:10px 16px;border-radius:10px;border:1px solid #d6d3d1;background:#fff;color:#1C1917;font:inherit;cursor:pointer';
+          b2.textContent = btnReset;
+          b2.addEventListener('click', function () {
             try { localStorage.setItem('myuno_force_unregister_sw', '1'); } catch (e) {}
             window.location.reload();
           });
+          row.appendChild(b1);
+          row.appendChild(b2);
+          card.appendChild(h);
+          card.appendChild(p);
+          card.appendChild(row);
+          outer.appendChild(card);
+          root.replaceChildren(outer);
         }, TIMEOUT_MS);
       })();
     </script>
