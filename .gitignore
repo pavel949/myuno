@@ -32,3 +32,7 @@ tmp/
 *.sw?
 supabase/.temp/
 .gstack/
+
+# Playwright (local artifacts; never ship reports to git)
+playwright-report/
+test-results/
