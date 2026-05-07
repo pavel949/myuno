@@ -53,11 +53,39 @@ if (sentryDsn) {
   });
 }
 
+Sentry.addBreadcrumb({ category: "bootstrap", level: "info", message: "bootstrap.start" });
+
 // Supabase URL/key are public (anon). Hardcoded fallback ensures the app boots
 // on external hosts (e.g. myuno.app, Capacitor) where build-time env vars
 // might not be injected. The Lovable preview/published builds still receive
 // VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY through the platform.
 reportWebVitals(undefined, { debug: import.meta.env.DEV });
+
+// ── Manual kill-switch ──
+// If a user gets stuck behind a stale Service Worker, instructing them to run
+// `localStorage.setItem("myuno_force_unregister_sw","1")` and reload will hit
+// this branch on the next boot, force-unregister all SWs and caches, and reload
+// once. The flag is consumed (removed) so the next boot is clean.
+(() => {
+  if (typeof window === "undefined") return;
+  if (localStorage.getItem("myuno_force_unregister_sw") !== "1") return;
+  Sentry.addBreadcrumb({ category: "bootstrap", level: "warning", message: "bootstrap.kill_switch_triggered" });
+  localStorage.removeItem("myuno_force_unregister_sw");
+  (async () => {
+    try {
+      if ("serviceWorker" in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map((r) => r.unregister().catch(() => {})));
+      }
+      if ("caches" in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((k) => caches.delete(k).catch(() => {})));
+      }
+    } finally {
+      window.location.reload();
+    }
+  })();
+})();
 
 // ── Service Worker cleanup on non-production hosts ──
 // Only myuno.app / www.myuno.app should keep a registered SW. On preview,
@@ -89,15 +117,19 @@ reportWebVitals(undefined, { debug: import.meta.env.DEV });
   }
 })();
 
+Sentry.addBreadcrumb({ category: "bootstrap", level: "info", message: "bootstrap.sw_cleanup_done" });
+
 // ── HTTP 412 recovery (auth-bridge / preview proxy) ──
 // Lovable's preview proxy occasionally returns 412 for auth-bridge token
-// refreshes when the bundle/manifest goes stale. We can't intercept the
-// initial document 412 (React isn't mounted yet), but we CAN catch 412 on
-// runtime fetches: clear SW + caches and force a one-time hard reload so
-// the proxy hands us a fresh token. Guarded by sessionStorage to avoid
-// reload loops.
+// refreshes when the bundle/manifest goes stale. On production myuno.app the
+// proxy isn't in the path, so we skip the recovery entirely there to avoid
+// catching legitimate Supabase /auth/v1/token 412s and reload-looping users.
 (() => {
   if (typeof window === "undefined" || !window.fetch) return;
+  const host = window.location.hostname;
+  const isProductionHost = host === "myuno.app" || host === "www.myuno.app";
+  if (isProductionHost) return;
+
   const RELOAD_KEY = "__myuno_412_reload__";
   const originalFetch = window.fetch.bind(window);
 
@@ -124,8 +156,8 @@ reportWebVitals(undefined, { debug: import.meta.env.DEV });
       const res = await originalFetch(...args);
       if (res.status === 412) {
         const url = typeof args[0] === "string" ? args[0] : (args[0] as Request)?.url ?? "";
-        // Only react to preview-proxy / auth-bridge 412s, not API 412s
-        if (/lovableproject\.com|lovable\.app|auth-bridge|\/auth\//.test(url)) {
+        // Only react to preview-proxy / auth-bridge 412s, never to Supabase API 412s
+        if (/lovableproject\.com|lovable\.app|auth-bridge/.test(url)) {
           void recover();
         }
       }
@@ -135,19 +167,25 @@ reportWebVitals(undefined, { debug: import.meta.env.DEV });
     }
   };
 
-  // Clear the reload guard once the app boots successfully
   window.addEventListener("load", () => {
     setTimeout(() => sessionStorage.removeItem(RELOAD_KEY), 5000);
   });
 })();
 
+Sentry.addBreadcrumb({ category: "bootstrap", level: "info", message: "bootstrap.412_interceptor_installed" });
+
 try {
+  Sentry.addBreadcrumb({ category: "bootstrap", level: "info", message: "bootstrap.before_create_root" });
   createRoot(document.getElementById("root")!).render(
     <StrictMode>
       <App />
     </StrictMode>
   );
+  Sentry.addBreadcrumb({ category: "bootstrap", level: "info", message: "bootstrap.after_render" });
+  // Marker consumed by the 15s splash-timeout fallback in index.html.
+  (window as unknown as { __uno_render_marker?: boolean }).__uno_render_marker = true;
 } catch (err: unknown) {
+  Sentry.captureException(err, { tags: { phase: "bootstrap" } });
   renderBootstrapError(
     `Failed to start application: ${err instanceof Error ? err.message : String(err)}`
   );
