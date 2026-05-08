@@ -271,7 +271,7 @@ export const LEAD_VERTICALS: LeadVerticalConfig[] = [
 
   // ⚖️ Legal
   {
-    id: 'legal',
+    id: 'legal_services',
     icon: '⚖️',
     nameEn: 'Legal',
     nameRu: 'Юридические услуги',
