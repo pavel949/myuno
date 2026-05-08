@@ -16,22 +16,38 @@ export function PhotosStep({ formData, updateFormData }: PhotosStepProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
-  const handleImagesChange = (urls: string | string[]) => {
-    const imageArray = Array.isArray(urls) ? urls : urls ? [urls] : [];
-    if (imageArray.length === 0) {
-      updateFormData({ cover_image: '', images: [] });
-    } else {
-      updateFormData({
-        cover_image: imageArray[0],
-        images: imageArray.slice(1)
-      });
+  // Single ordered list — first image is the cover. We dedupe legacy data
+  // where cover_image was stored separately and may also appear in `images`.
+  const allImages: string[] = (() => {
+    const seen = new Set<string>();
+    const out: string[] = [];
+    if (formData.cover_image) {
+      out.push(formData.cover_image);
+      seen.add(formData.cover_image);
     }
-  };
+    for (const u of formData.images || []) {
+      if (u && !seen.has(u)) {
+        out.push(u);
+        seen.add(u);
+      }
+    }
+    return out;
+  })();
 
-  // Combine cover_image and images for the uploader
-  const allImages = formData.cover_image
-    ? [formData.cover_image, ...formData.images]
-    : formData.images;
+  const handleImagesChange = (urls: string | string[]) => {
+    const next = Array.isArray(urls) ? urls : urls ? [urls] : [];
+    // Dedupe while preserving order so reorder swaps the cover deterministically
+    const seen = new Set<string>();
+    const ordered = next.filter(u => {
+      if (!u || seen.has(u)) return false;
+      seen.add(u);
+      return true;
+    });
+    updateFormData({
+      cover_image: ordered[0] || '',
+      images: ordered,
+    });
+  };
 
   const photoCount = allImages.length;
   const hasEnough = photoCount >= RECOMMENDED_COUNT;

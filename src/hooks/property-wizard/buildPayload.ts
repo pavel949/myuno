@@ -26,8 +26,14 @@ export function buildPropertyPayload({
     ...cleanData
   } = formData;
 
+  // Normalize images: dedupe and ensure cover_image == images[0]
+  const dedupedImages = Array.from(new Set((cleanData.images as string[] | undefined)?.filter(Boolean) || []));
+  const derivedCover = dedupedImages[0] || (cleanData.cover_image as string | undefined) || undefined;
+
   const payload: Record<string, unknown> = {
     ...cleanData,
+    images: dedupedImages.length ? dedupedImages : undefined,
+    cover_image: derivedCover,
     area_sqm: area_sqm ? Number(area_sqm) : undefined,
     price_per_night: price_per_night ? Number(price_per_night) : undefined,
     deposit_amount: deposit_amount ? Number(deposit_amount) : undefined,

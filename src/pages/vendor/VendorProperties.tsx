@@ -104,6 +104,22 @@ const VendorProperties = () => {
       return {};
     }
 
+    // Build deduped, cover-first images list — prevents the cover from
+    // appearing twice when it's also persisted inside `images`.
+    const cover = editingProperty.cover_image || '';
+    const seen = new Set<string>();
+    const images: string[] = [];
+    if (cover) {
+      images.push(cover);
+      seen.add(cover);
+    }
+    for (const u of editingProperty.images || []) {
+      if (u && !seen.has(u)) {
+        images.push(u);
+        seen.add(u);
+      }
+    }
+
     return {
       internal_name: (editingProperty as any).internal_name || '',
       title_en: editingProperty.title_en,
@@ -124,8 +140,8 @@ const VendorProperties = () => {
       district: editingProperty.district || '',
       lat: editingProperty.lat ?? undefined,
       lng: editingProperty.lng ?? undefined,
-      cover_image: editingProperty.cover_image || '',
-      images: editingProperty.images || [],
+      cover_image: images[0] || '',
+      images,
       amenities: editingProperty.amenities || [],
       instant_booking: (editingProperty as any).instant_booking ?? false,
       is_active: editingProperty.is_active ?? true,
@@ -164,8 +180,10 @@ const VendorProperties = () => {
         district: data.district || undefined,
         lat: data.lat,
         lng: data.lng,
-        cover_image: data.cover_image || undefined,
-        images: data.images?.length ? data.images : undefined,
+        cover_image: (data.images?.[0] ?? data.cover_image) || undefined,
+        images: data.images?.length
+          ? Array.from(new Set(data.images.filter(Boolean)))
+          : undefined,
         amenities: data.amenities?.length ? data.amenities : undefined,
         is_active: data.is_active ?? true,
       };
