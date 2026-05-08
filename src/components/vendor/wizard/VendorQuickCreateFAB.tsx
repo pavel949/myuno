@@ -15,29 +15,10 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { 
-  Plus, 
-  Package,
-  Wrench,
-  Sparkles,
-  Car,
-  Utensils,
-  Ship,
-  Home,
-  Calendar,
-  Dumbbell,
-  Brush,
-  Baby,
-  Flower2,
-  Stethoscope,
-  GraduationCap,
-  Scale,
-  PawPrint,
-  Upload,
-  Wand2
-} from 'lucide-react';
+import { Plus, Package, Wrench, Upload, Wand2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { VENDOR_ENTRIES, resolveVendorAliases } from '@/lib/verticals/vendorEntries';
 
 interface QuickCreateOption {
   id: string;
@@ -55,22 +36,17 @@ const createOptions: QuickCreateOption[] = [
   { id: 'service', slug: 'service', icon: Wrench, labelEn: 'Service', labelRu: 'Услуга', color: 'text-info', path: '/vendor/services?create=true' },
 ];
 
-const verticalOptions: QuickCreateOption[] = [
-  { id: 'beauty', slug: 'beauty', icon: Sparkles, labelEn: 'Beauty', labelRu: 'Красота', color: 'text-accent-coral', path: '/vendor/beauty?create=true' },
-  { id: 'restaurants', slug: 'restaurants', icon: Utensils, labelEn: 'Restaurant', labelRu: 'Ресторан', color: 'text-warning', path: '/vendor/restaurants?create=true' },
-  { id: 'transport', slug: 'transport', icon: Car, labelEn: 'Vehicle', labelRu: 'Транспорт', color: 'text-accent-purple', path: '/vendor/transport?create=true' },
-  { id: 'yachts', slug: 'yachts', icon: Ship, labelEn: 'Boat Charter', labelRu: 'Чартер', color: 'text-accent-cyan', path: '/vendor/yachts?create=true' },
-  { id: 'properties', slug: 'properties', icon: Home, labelEn: 'Property', labelRu: 'Недвижимость', color: 'text-success', path: '/vendor/properties?create=true' },
-  { id: 'tours', slug: 'tours', icon: Calendar, labelEn: 'Tour', labelRu: 'Тур', color: 'text-info', path: '/vendor/tours?create=true' },
-  { id: 'fitness', slug: 'fitness', icon: Dumbbell, labelEn: 'Gym', labelRu: 'Фитнес', color: 'text-accent-amber', path: '/vendor/fitness?create=true' },
-  { id: 'cleaning', slug: 'cleaning', icon: Brush, labelEn: 'Cleaning', labelRu: 'Клининг', color: 'text-accent-teal', path: '/vendor/cleaning?create=true' },
-  { id: 'babysitters', slug: 'childcare', icon: Baby, labelEn: 'Babysitter', labelRu: 'Няня', color: 'text-destructive', path: '/vendor/babysitters?create=true' },
-  { id: 'flowers', slug: 'flowers', icon: Flower2, labelEn: 'Flowers', labelRu: 'Цветы', color: 'text-accent-purple', path: '/vendor/flowers?create=true' },
-  { id: 'clinics', slug: 'health', icon: Stethoscope, labelEn: 'Clinic', labelRu: 'Клиника', color: 'text-success', path: '/vendor/clinics?create=true' },
-  { id: 'education', slug: 'education', icon: GraduationCap, labelEn: 'Education', labelRu: 'Образование', color: 'text-accent-purple', path: '/vendor/education?create=true' },
-  { id: 'legal', slug: 'legal', icon: Scale, labelEn: 'Legal', labelRu: 'Юридические', color: 'text-muted-foreground', path: '/vendor/legal?create=true' },
-  { id: 'pets', slug: 'pets', icon: PawPrint, labelEn: 'Pets', labelRu: 'Питомцы', color: 'text-warning', path: '/vendor/pets?create=true' },
-];
+const verticalOptions: QuickCreateOption[] = VENDOR_ENTRIES
+  .filter(e => e.fabEnabled)
+  .map(e => ({
+    id: e.id,
+    slug: e.id,
+    icon: e.icon,
+    labelEn: e.nameEn,
+    labelRu: e.nameRu,
+    color: e.color,
+    path: `${e.vendorPath}?create=true`,
+  }));
 
 const specialActions: QuickCreateOption[] = [
   { id: 'ai-intake', slug: 'ai', icon: Wand2, labelEn: 'AI Import', labelRu: 'AI Импорт', color: 'text-primary', action: 'wizard' },
@@ -93,11 +69,10 @@ export function VendorQuickCreateFAB({
   
   const isRu = language === 'ru';
 
-  // Get vendor's verticals from org metadata
+  // Resolve vendor verticals through alias index so legacy slugs still match
   const orgMetadata = activeOrg?.metadata as { verticals?: string[] } | null;
-  const vendorVerticals = orgMetadata?.verticals || [];
+  const vendorVerticals = resolveVendorAliases(orgMetadata?.verticals);
 
-  // Filter vertical options based on vendor's selected verticals
   const availableVerticals = vendorVerticals.length > 0
     ? verticalOptions.filter(v => vendorVerticals.includes(v.slug))
     : verticalOptions;
