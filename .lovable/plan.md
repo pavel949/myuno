@@ -1,154 +1,85 @@
-## Цель
+## Problem (confirmed in code)
 
-Добавить два связанных retention-механизма для off-plan/newbuilds:
-1. **Сохранённые поиски** — пользователь сохраняет текущие фильтры каталога offplan и получает уведомления, когда появляются новые проекты/юниты под критерии.
-2. **Алерты по избранным ЖК** — когда в проекте, который пользователь добавил в favorites (`item_type='newbuild_project'`), появляется новый юнит (`project_units.status='available'`) или апдейт стройки (`nb_project_updates`) — отправляется WhatsApp/Email.
+Three independent vertical lists drift from each other, breaking handoffs:
 
-Каналы: Email через существующий `send-email`, WhatsApp через существующий `notify-lead-whatsapp` (UltraMSG). Настройки каналов — per-user.
+| Source | IDs |
+|---|---|
+| `src/lib/intakeVerticals.ts` (AI intake, 25) | `yachts, properties, owner_properties, tours, water_activities, restaurants, salons, clinics, gyms, vehicles, events, babysitters, cleaning_services, legal_services, pet_services, education_providers, pharmacies, insurance_providers, flower_shops, stores, providers, marketplace_products, marketplace_vendors, vendor_locations` |
+| `src/lib/leadVerticalConfig.ts` (Lead form, 14) | `properties, yachts, tours, vehicles, legal, clinics, babysitters, salons, gyms, water_activities, restaurants, other, home_services, property_services` |
+| `VendorQuickCreateFAB` + `VendorCategoryGrid` (Manual add, 14) | `beauty, restaurants, transport, yachts, properties, tours, fitness, cleaning, childcare, flowers, health, education, legal, pets` |
 
----
+Drift examples: `salons↔beauty`, `clinics↔health`, `babysitters↔childcare`, `gyms↔fitness`, `vehicles↔transport`, `legal_services↔legal`, `flower_shops↔flowers`. Vendor org metadata stores any of these — so when the FAB filters by it, vendors who onboarded with `flower_shops` see no Quick-Create entry, and AI intake → manual edit handoff breaks. Missing manual-add: `events`, `pharmacies`, `insurance_providers`, `water_activities` (page or hook exists but no FAB/grid entry).
 
-## 1. БД (миграция)
+Property photo bug: `owner/property-wizard/steps/PhotosStep` stores `imageArray[0]` as `cover_image` and `imageArray.slice(1)` as `images`. `VendorProperties.getInitialFormData` passes them as separate fields and `CanonicalPropertyForm` re-merges as `[cover_image, ...images]`. On edit the cover is shown twice; reordering silently swaps the cover.
 
-### 1.1 `nb_saved_searches`
-```
-id uuid pk, user_id uuid not null (auth.users),
-name text,                              -- например «Виллы Раваи до 15M»
-filters jsonb not null,                 -- OffplanUiFilterState
-notify_email bool default true,
-notify_whatsapp bool default false,
-frequency text default 'instant',       -- instant | daily
-last_notified_at timestamptz,
-last_seen_project_ids uuid[] default '{}', -- чтобы не дублировать
-is_active bool default true,
-created_at, updated_at
-```
-RLS: владелец видит/мутирует свои.
+## Plan
 
-### 1.2 `nb_alert_preferences` (per-user глобальные настройки канала для favorites-алертов)
-```
-user_id uuid pk, email text, whatsapp_phone text,
-notify_new_units bool default true,
-notify_progress_updates bool default true,
-notify_price_changes bool default false,
-channel_email bool default true,
-channel_whatsapp bool default false,
-quiet_hours_start int, quiet_hours_end int,  -- 0..23 локально
-updated_at
-```
-RLS: own row only.
+### 1. Single canonical entry registry — `src/lib/verticals/vendorEntries.ts` (NEW)
 
-### 1.3 `nb_alert_log` (anti-spam, аудит)
-```
-id, user_id, project_id, alert_type ('new_unit'|'progress'|'price_change'|'saved_search_match'),
-ref_id uuid,         -- unit_id / update_id / search_id
-channel text, status text, sent_at timestamptz, payload jsonb
-unique(user_id, alert_type, ref_id, channel)  -- идемпотентность
-```
-RLS: own SELECT only; инсерты через service role.
+One list of 18 entries. Each = canonical id (matches DB-table semantics: `salons`, `clinics`, `gyms`, `vehicles`, `babysitters`, `cleaning_services`, `legal_services`, `pet_services`, `education_providers`, `flower_shops`, `pharmacies`, `insurance_providers`, `water_activities`, `events`, `tours`, `yachts`, `restaurants`, `properties`) + `aliases[]` (legacy slugs) + `vendorPath` + Lucide icon + i18n labels + `fabEnabled / gridEnabled / leadEnabled` flags.
 
----
+Helpers: `resolveVendorAlias(slug) → canonical | null`, `resolveVendorAliases(slugs[]) → canonical[]`, `getVendorEntry(id)`.
 
-## 2. Edge Functions
+### 2. Refactor consumers to read from the registry
 
-### 2.1 `nb-process-alerts` (cron каждые 15 мин)
-- Тянет `project_units` созданные/перешедшие в `available` за последние 30 мин (по `created_at`/`updated_at` + `unit_status='available'`).
-- Тянет `nb_project_updates` за тот же период.
-- Для каждого изменения находит юзеров через `favorites WHERE item_type='newbuild_project' AND item_id=project_id`.
-- Применяет `nb_alert_preferences` (каналы, тихие часы), проверяет `nb_alert_log` на дубль.
-- Шлёт через `send-email` и `notify-lead-whatsapp`. Логирует результат.
+- **`VendorQuickCreateFAB`** — delete local `verticalOptions`, build from `VENDOR_ENTRIES.filter(fabEnabled)`. Filter by `resolveVendorAliases(orgMetadata.verticals)` so legacy slugs work.
+- **`VendorCategoryGrid`** — delete local `allCategories`, same pattern.
+- **Vendor onboarding** verticals checklist (already lists 15 slugs): write through `resolveVendorAlias` so saved metadata stays canonical going forward.
 
-### 2.2 `nb-process-saved-searches` (cron daily 09:00 локально)
-- Загружает все active `nb_saved_searches`.
-- Для каждого формирует SQL по `property_projects` + `project_units` по фильтрам (re-use логика из `useOffplanProjects.ts` — выносим в `_shared/offplanQuery.ts`).
-- Берёт project_ids, исключает уже отправленные (`last_seen_project_ids`).
-- Если есть новые → email/WhatsApp дайджест («3 новых проекта по поиску "Виллы Раваи"») + апдейт `last_seen_project_ids` и `last_notified_at`.
+### 3. Property photo fix
 
-### 2.3 Cron планирование
-SQL через insert tool (pg_cron + pg_net) с реальным `service_role` ключом — два расписания.
+- **`src/components/owner/property-wizard/steps/PhotosStep.tsx`**: stop splitting. Hold one ordered `images` array via `updateFormData({ images, cover_image: images[0] || '' })`. Read with `formData.images || []` (no `[cover_image, ...images]` re-merge).
+- **`src/pages/vendor/VendorProperties.tsx#getInitialFormData`**: build `images = editingProperty.cover_image ? [cover_image, ...images.filter(u => u !== cover_image)] : (images || [])`. Same on submit: derive `cover_image = data.images?.[0]`.
+- **`src/hooks/property-wizard/buildPayload.ts`**: ensure `cover_image = images?.[0]` written on persist.
+- Add **"Cover" badge** on first thumbnail in PhotosStep so users know reordering swaps the cover.
 
----
+### 4. New vendor pages — Pharmacy & Insurance
 
-## 3. UI
+- **`src/pages/vendor/VendorPharmacy.tsx`** — modeled on `VendorClinics.tsx`. Uses generic `useVerticalCRUD<Pharmacy>('pharmacy', profile?.id)` (registers `'pharmacy'` slug → `pharmacies` table). CRUD form: name EN/RU, description, address, phone, working_hours, delivery_available, is_24h, license_number, cover image + gallery via `UnifiedMediaUploader`.
+- **`src/pages/vendor/VendorInsurance.tsx`** — same pattern. Form: name, insurance_types[], languages[], has_24h_support, license_number, address, gallery.
+- Add `VendorPharmacy`, `VendorInsurance` lazy entries to `src/components/layout/pageRegistry.ts` and routes `/vendor/pharmacy`, `/vendor/insurance` (under existing `VendorLayout` block) in `AnimatedRoutes.tsx`. These slugs already live in `VERTICALS` registry (`PHARMACY`, `INSURANCE`).
 
-### 3.1 Сохранённые поиски в каталоге offplan
-- Файл `src/pages/property/OffplanCatalog.tsx` (или где сейчас рендерятся фильтры — найти при имплементации): рядом с фильтрами кнопка **«Сохранить поиск»** → модалка (имя + чекбоксы каналов).
-- Хук `useSavedOffplanSearches.ts` (CRUD + React Query).
-- Страница `src/pages/account/SavedSearches.tsx` (`/account/saved-searches`) — список, переключатель active, удаление, «Применить» (проставляет фильтры и уходит в каталог).
+### 5. Lead config alignment — `src/lib/leadVerticalConfig.ts`
 
-### 3.2 Управление избранными ЖК и каналами
-- На карточке `NbProjectCard.tsx` сделать иконку «favorite» рабочей через существующий `favorites` (item_type=`newbuild_project`, item_data — снапшот проекта).
-- Страница `src/pages/account/NewbuildAlerts.tsx` (`/account/newbuild-alerts`):
-  - Список favorited проектов с тогглами «новые юниты», «прогресс», «цены» per project (упрощённо — глобально через `nb_alert_preferences`, доп. оверрайды добавим позже).
-  - Поля Email / WhatsApp + verify (минимум — формат).
-  - Тихие часы (start/end).
-- Точка входа из `NotificationInbox` («Настроить алерты по новостройкам»).
+- Rename `legal → legal_services` (keep `'legal'` resolvable via `getLeadVerticalById` alias map).
+- Add new entries (compact, COMMON_FIELDS-based) for: `flower_shops`, `pet_services`, `education_providers`, `cleaning_services`, `events`, `babysitters` (already there but rename keys to canonical), and keep `restaurants, yachts, tours, vehicles, clinics, gyms, water_activities, properties`.
+- `getLeadVerticalById(id)` resolves through `resolveVendorAlias` first.
+- Update `detectVerticalFromPath` to use canonical ids.
 
-### 3.3 i18n
-RU + EN ключи в `src/i18n/uiStrings.ts` (и `LanguageContext`).
+### 6. Migration — normalize stored vendor metadata
 
----
+SQL migration that updates `providers.metadata->verticals` and `marketplace_vendors.metadata->verticals` arrays with a `CASE` map: `beauty→salons, childcare→babysitters, health→clinics, medical→clinics, fitness→gyms, transport→vehicles, flowers→flower_shops, flower→flower_shops, legal→legal_services, lawyers→legal_services, pets→pet_services, pet→pet_services, education→education_providers, cleaning→cleaning_services, water→water_activities, watersports→water_activities, pharmacy→pharmacies, insurance→insurance_providers`. Idempotent; written as a `jsonb_set` over a `SELECT` of distinct slugs.
 
-## 4. Email/WhatsApp шаблоны
+### 7. Consistency tests — extend `src/lib/__tests__/intakeVerticalConsistency.test.ts`
 
-В `_shared/email-templates.ts` добавить две функции:
-- `renderNewUnitsEmail({ projectName, units, lang })`
-- `renderSavedSearchDigestEmail({ searchName, projects, lang })`
+- Every `VENDOR_ENTRIES.id` exists in `INTAKE_VERTICALS` ids.
+- Every `fabEnabled` entry has a route in `AnimatedRoutes` (regex scan of file).
+- Every `leadEnabled` entry has a `LEAD_VERTICALS` entry by canonical id.
+- Every alias resolves to a canonical id (no orphan aliases).
 
-WhatsApp — короткий текст + deep link `https://myuno.app/newbuilds/projects/<slug>?utm=alert`.
+## Files
 
-Соблюдаем тон-of-voice (`docs/canonical/03-tone-of-voice.md`): «спокойная уверенность», без CAPS и эмодзи-спама.
+**New (4):**
+- `src/lib/verticals/vendorEntries.ts`
+- `src/pages/vendor/VendorPharmacy.tsx`
+- `src/pages/vendor/VendorInsurance.tsx`
+- `supabase/migrations/<ts>_normalize_vendor_verticals_metadata.sql`
 
----
+**Edit (8):**
+- `src/components/vendor/wizard/VendorQuickCreateFAB.tsx`
+- `src/components/vendor/VendorCategoryGrid.tsx`
+- `src/components/owner/property-wizard/steps/PhotosStep.tsx`
+- `src/pages/vendor/VendorProperties.tsx`
+- `src/hooks/property-wizard/buildPayload.ts`
+- `src/lib/leadVerticalConfig.ts`
+- `src/components/layout/pageRegistry.ts`
+- `src/components/layout/AnimatedRoutes.tsx`
 
-## 5. Технические детали / интеграция
+**Test (1):**
+- `src/lib/__tests__/intakeVerticalConsistency.test.ts`
 
-- **Источник истины для фильтров offplan** — вынести построение запроса из `useOffplanProjects.ts` в чистую функцию `buildOffplanQuery(filters)` в `src/lib/offplan/query.ts`, чтобы переиспользовать в edge-функции (через клон логики на Deno — фильтры простые: zone/seg/beach/price/bedrooms/rec).
-- **Идемпотентность** — `nb_alert_log` уникальный индекс `(user_id, alert_type, ref_id, channel)`.
-- **Throttling** — не более 5 алертов одного типа на юзера в сутки (агрегируем в дайджест если больше).
-- **Тихие часы** — если попадает в quiet hours, откладываем до конца окна (cron каждые 15 мин подберёт).
-- **Feature flag** — `feature_flag:newbuild_alerts` в `system_settings`, по умолчанию on.
-- **WhatsApp opt-in** — обязательно показывать чекбокс согласия и сохранять в `nb_alert_preferences.whatsapp_opt_in_at`.
+## Risks / Notes
 
----
-
-## 6. Что НЕ входит в этот блок
-- Двухсторонний WhatsApp inbox (только исходящие через UltraMSG).
-- Per-project granular preferences (overrides) — сейчас глобально + on/off через favorite.
-- Push-уведомления (есть `push_subscriptions`, но добавим отдельной задачей).
-- Алерт «снижение цены» — таблица истории цен ещё не наполнена; сделаем плейсхолдер UI, отключённый.
-
----
-
-## 7. Файлы
-
-**Создаются:**
-- migration `*_nb_alerts.sql`
-- `supabase/functions/nb-process-alerts/index.ts`
-- `supabase/functions/nb-process-saved-searches/index.ts`
-- `supabase/functions/_shared/offplanFilter.ts`
-- `src/hooks/useSavedOffplanSearches.ts`
-- `src/hooks/useNewbuildAlertPreferences.ts`
-- `src/pages/account/SavedSearches.tsx`
-- `src/pages/account/NewbuildAlerts.tsx`
-- `src/components/newbuilds/SaveSearchDialog.tsx`
-- `src/components/newbuilds/FavoriteProjectButton.tsx`
-
-**Редактируются:**
-- `src/pages/property/Offplan*` (фильтр-бар: кнопка save)
-- `src/components/newbuilds/NbProjectCard.tsx` (favorite кнопка)
-- `src/lib/config/routes.ts` (маршруты)
-- `src/lib/offplan/types.ts` (тип SavedSearch)
-- `src/i18n/uiStrings.ts`
-- `supabase/functions/_shared/email-templates.ts`
-- cron schedule SQL (через insert tool с реальным ключом)
-
----
-
-## 8. Acceptance
-
-1. Юзер на `/property/offplan` ставит фильтры → «Сохранить поиск» → видит запись в `/account/saved-searches`.
-2. На следующий день при появлении нового проекта под критерии — приходит email/WhatsApp с дайджестом, в логе строка.
-3. Юзер ставит ❤️ на ЖК → в `/account/newbuild-alerts` видит его, включает WhatsApp.
-4. Через `psql` инсертим тестовый `project_units` со status='available' → cron в течение 15 мин шлёт алерт; повторный запуск не дублирует (anti-spam).
-5. RLS: чужие saved_searches/preferences/log невидимы.
+- No DB schema change — `pharmacies`, `insurance_providers`, `events`, `water_activities` tables already exist with RLS.
+- The metadata migration is data-only (allowed via insert tool / migration). If any vendor relied on a non-canonical slug for filtering elsewhere, the alias resolver still accepts it at read-time, so nothing breaks.
+- `VendorClinics` etc. are NOT rewritten — the FAB navigates to existing pages with `?create=true`. Each page already responds to "Add" buttons; no per-page change needed.
