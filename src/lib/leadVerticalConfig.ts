@@ -271,7 +271,7 @@ export const LEAD_VERTICALS: LeadVerticalConfig[] = [
 
   // ⚖️ Legal
   {
-    id: 'legal',
+    id: 'legal_services',
     icon: '⚖️',
     nameEn: 'Legal',
     nameRu: 'Юридические услуги',
@@ -701,8 +701,11 @@ LEAD_VERTICALS.push({
 });
 
 // Helper functions
+import { resolveVendorAlias } from '@/lib/verticals/vendorEntries';
+
 export function getLeadVerticalById(id: string): LeadVerticalConfig | undefined {
-  return LEAD_VERTICALS.find(v => v.id === id);
+  const canonical = resolveVendorAlias(id) ?? id;
+  return LEAD_VERTICALS.find(v => v.id === canonical || v.id === id);
 }
 
 export function getLeadVerticalsSorted(): LeadVerticalConfig[] {

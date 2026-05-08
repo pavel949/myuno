@@ -461,6 +461,8 @@ export const VendorPets = lazy(() => import('@/pages/vendor/VendorPets'));
 export const VendorCleaning = lazy(() => import('@/pages/vendor/VendorCleaning'));
 export const VendorBabysitters = lazy(() => import('@/pages/vendor/VendorBabysitters'));
 export const VendorFlowers = lazy(() => import('@/pages/vendor/VendorFlowers'));
+export const VendorPharmacy = lazy(() => import('@/pages/vendor/VendorPharmacy'));
+export const VendorInsurance = lazy(() => import('@/pages/vendor/VendorInsurance'));
 export const VendorLocations = lazy(() => import('@/pages/vendor/VendorLocations'));
 export const VendorProducts = lazy(() => import('@/pages/vendor/VendorProducts'));
 export const VendorMessages = lazy(() => import('@/pages/vendor/VendorMessages'));

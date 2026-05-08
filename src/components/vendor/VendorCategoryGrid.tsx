@@ -5,27 +5,9 @@ import { useUserContext } from '@/hooks/useUserContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  ChevronDown, 
-  ChevronUp,
-  Utensils,
-  Car,
-  Sparkles,
-  Stethoscope,
-  GraduationCap,
-  Brush,
-  Baby,
-  Flower2,
-  Ship,
-  Home,
-  Calendar,
-  Dumbbell,
-  Scale,
-  PawPrint,
-  LayoutGrid,
-  AlertCircle
-} from 'lucide-react';
+import { ChevronDown, ChevronUp, LayoutGrid, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { VENDOR_ENTRIES, resolveVendorAliases } from '@/lib/verticals/vendorEntries';
 
 interface CategoryItem {
   id: string;
@@ -37,24 +19,18 @@ interface CategoryItem {
   path: string;
 }
 
-// All available verticals - must match onboarding options
-const allCategories: CategoryItem[] = [
-  { id: '1', slug: 'beauty', icon: Sparkles, title: 'Beauty & Spa', titleRu: 'Красота и спа', color: 'text-destructive', path: '/vendor/beauty' },
-  { id: '2', slug: 'fitness', icon: Dumbbell, title: 'Fitness', titleRu: 'Фитнес', color: 'text-accent-amber', path: '/vendor/fitness' },
-  { id: '3', slug: 'restaurants', icon: Utensils, title: 'Restaurants', titleRu: 'Рестораны', color: 'text-warning', path: '/vendor/restaurants' },
-  { id: '4', slug: 'tours', icon: Calendar, title: 'Tours', titleRu: 'Туры', color: 'text-info', path: '/vendor/tours' },
-  { id: '5', slug: 'yachts', icon: Ship, title: 'Yachts', titleRu: 'Яхты', color: 'text-accent-cyan', path: '/vendor/yachts' },
-  { id: '6', slug: 'transport', icon: Car, title: 'Transport', titleRu: 'Транспорт', color: 'text-accent-purple', path: '/vendor/transport' },
-  { id: '7', slug: 'health', icon: Stethoscope, title: 'Health', titleRu: 'Здоровье', color: 'text-success', path: '/vendor/clinics' },
-  { id: '8', slug: 'education', icon: GraduationCap, title: 'Education', titleRu: 'Образование', color: 'text-accent-purple', path: '/vendor/education' },
-  { id: '9', slug: 'properties', icon: Home, title: 'Properties', titleRu: 'Недвижимость', color: 'text-success', path: '/vendor/properties' },
-  { id: '10', slug: 'cleaning', icon: Brush, title: 'Cleaning', titleRu: 'Клининг', color: 'text-accent-teal', path: '/vendor/cleaning' },
-  { id: '11', slug: 'childcare', icon: Baby, title: 'Childcare', titleRu: 'Няни', color: 'text-destructive', path: '/vendor/babysitters' },
-  { id: '12', slug: 'flowers', icon: Flower2, title: 'Flowers', titleRu: 'Цветы', color: 'text-accent-purple', path: '/vendor/flowers' },
-  { id: '13', slug: 'events', icon: Calendar, title: 'Events', titleRu: 'Мероприятия', color: 'text-accent-purple', path: '/vendor/events' },
-  { id: '14', slug: 'legal', icon: Scale, title: 'Legal', titleRu: 'Юридические', color: 'text-muted-foreground', path: '/vendor/legal' },
-  { id: '15', slug: 'pets', icon: PawPrint, title: 'Pets', titleRu: 'Питомцы', color: 'text-warning', path: '/vendor/pets' },
-];
+// Sourced from canonical registry — see src/lib/verticals/vendorEntries.ts
+const allCategories: CategoryItem[] = VENDOR_ENTRIES
+  .filter(e => e.gridEnabled)
+  .map(e => ({
+    id: e.id,
+    slug: e.id,
+    icon: e.icon,
+    title: e.nameEn,
+    titleRu: e.nameRu,
+    color: e.color,
+    path: e.vendorPath,
+  }));
 
 interface VendorCategoryGridProps {
   serviceCounts?: Record<string, number>;
@@ -67,14 +43,13 @@ export function VendorCategoryGrid({ serviceCounts = {} }: VendorCategoryGridPro
   const isRu = language === 'ru';
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Get verticals from org metadata
+  // Resolve through canonical alias index so legacy onboarding slugs still match
   const orgMetadata = activeOrg?.metadata as { verticals?: string[] } | null;
-  const vendorVerticals = orgMetadata?.verticals || [];
+  const vendorVerticals = resolveVendorAliases(orgMetadata?.verticals);
 
-  // Filter categories based on vendor's selected verticals
   const vendorCategories = vendorVerticals.length > 0
     ? allCategories.filter(cat => vendorVerticals.includes(cat.slug))
-    : allCategories; // Fallback to all if none selected (shouldn't happen)
+    : allCategories;
 
   const visibleCategories = isExpanded ? vendorCategories : vendorCategories.slice(0, 6);
   const hasMore = vendorCategories.length > 6;
