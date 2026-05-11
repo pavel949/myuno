@@ -16,6 +16,7 @@ export const APP_ROUTES = {
 
   // ── Discovery & Navigation ──
   DISCOVER: '/discover',
+  NAVIGATOR: '/navigator',
   MAP: '/map',
   SEARCH: '/search',
   
@@ -250,6 +251,8 @@ export const APP_ROUTES = {
   LEGAL_BOOKING: (id: string) => `/legal/booking/${id}`,
   VISA_SERVICE: (id: string) => `/legal/visa/${id}`,
   VISA_IMMIGRATION: '/visa',
+  /** Interactive visa decision tree (public). */
+  VISA_COMPARE: '/visa/compare',
 
   // ── Insurance ──
   INSURANCE: '/insurance',
@@ -337,6 +340,11 @@ export const APP_ROUTES = {
   LANDING_RENTAL: '/rent-phuket',
   LANDING_NEW_DEVELOPMENTS: '/new-developments',
   RELOCATE: '/relocate',
+  /** Bilingual relocation guides (DB + bundled seeds). */
+  RELOCATION_GUIDES: '/relocate/guides',
+  RELOCATION_GUIDE: (slug: string) => `/relocate/guides/${slug}`,
+  RELOCATION_MY_PLAN: '/relocate/my-plan',
+  RELOCATION_AREAS: '/relocate/areas',
   WEDDING: '/wedding',
   KIDS: '/kids',
   NOMAD_GUIDE: '/nomad-guide',
@@ -555,7 +563,7 @@ export const LEGACY_REDIRECTS: Record<string, string> = {
   '/orders': APP_ROUTES.BOOKINGS,
   '/salons': '/beauty',
   '/spa': '/beauty',
-  '/categories': '/discover',
+  '/categories': '/navigator',
   '/food': '/restaurants',
   '/view-history': '/history',
   '/demo': '/',

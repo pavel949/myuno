@@ -200,10 +200,10 @@ export const AnimatedRoutes: React.FC = () => {
         
         {/* ── User ── */}
         <Route path={APP_ROUTES.DISCOVER} element={<LazyPage><Pages.Discover /></LazyPage>} />
-        <Route path="/catalog" element={<LazyPage><Pages.PlatformCatalog /></LazyPage>} />
-        <Route path="/categories" element={<Navigate to={APP_ROUTES.DISCOVER} replace />} />
+        <Route path={APP_ROUTES.NAVIGATOR} element={<LazyPage><Pages.Discover /></LazyPage>} />
+        <Route path="/catalog" element={<Navigate to={APP_ROUTES.NAVIGATOR} replace />} />
+        <Route path="/categories" element={<Navigate to={APP_ROUTES.NAVIGATOR} replace />} />
         {/* Cluster surface aliases — Master Taxonomy v1.0 */}
-        <Route path={APP_ROUTES.ARRIVE_CLUSTER} element={<Navigate to={`${APP_ROUTES.DISCOVER}?cluster=arrive`} replace />} />
         <Route path={APP_ROUTES.LEGAL_CLUSTER} element={<Navigate to={`${APP_ROUTES.DISCOVER}?cluster=legal`} replace />} />
         <Route path={APP_ROUTES.MAP} element={<LazyPage><Pages.MapView /></LazyPage>} />
         <Route path={APP_ROUTES.BOOKINGS} element={<LazyPage><Pages.Bookings /></LazyPage>} />
@@ -415,6 +415,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/legal/provider/:id" element={<LazyPage><Pages.LegalProviderDetail /></LazyPage>} />
         <Route path="/legal/visa/:id" element={<LazyPage><Pages.VisaServiceDetail /></LazyPage>} />
         <Route path="/legal/booking/:id" element={<LazyPage><Pages.LegalBooking /></LazyPage>} />
+        <Route path={APP_ROUTES.VISA_COMPARE} element={<LazyPage><Pages.VisaComparePage /></LazyPage>} />
         <Route path={APP_ROUTES.VISA_IMMIGRATION} element={<LazyPage><Pages.VisaImmigrationPage /></LazyPage>} />
         
         {/* ── Insurance ── */}
@@ -548,6 +549,10 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/classifieds/:id" element={<LazyPage><Pages.ClassifiedDetailPage /></LazyPage>} />
         
         {/* ── Monetization Landing Pages ── */}
+        <Route path={APP_ROUTES.RELOCATION_GUIDES} element={<LazyPage><Pages.RelocationGuidesHub /></LazyPage>} />
+        <Route path={`${APP_ROUTES.RELOCATION_GUIDES}/:slug`} element={<LazyPage><Pages.RelocationGuideArticle /></LazyPage>} />
+        <Route path={APP_ROUTES.RELOCATION_MY_PLAN} element={<LazyPage><Pages.RelocationDashboard /></LazyPage>} />
+        <Route path={APP_ROUTES.RELOCATION_AREAS} element={<LazyPage><Pages.RelocationAreasPage /></LazyPage>} />
         <Route path={APP_ROUTES.RELOCATE} element={<LazyPage><Pages.RelocateLandingPage /></LazyPage>} />
         <Route path={APP_ROUTES.WEDDING} element={<LazyPage><Pages.WeddingLandingPage /></LazyPage>} />
         <Route path={APP_ROUTES.KIDS} element={<LazyPage><Pages.KidsLandingPage /></LazyPage>} />

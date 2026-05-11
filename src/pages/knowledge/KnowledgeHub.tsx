@@ -1,9 +1,9 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { SEOHead } from '@/components/seo';
 import { Skeleton } from '@/components/ui/skeleton';
-import { BookOpen, MapPin, Compass, ChevronRight } from 'lucide-react';
+import { BookOpen, MapPin, Compass, ChevronRight, Globe } from 'lucide-react';
 import { BackButton } from '@/components/uno/BackButton';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { useLocation } from '@/contexts/LocationContext';
@@ -90,6 +90,29 @@ export default function KnowledgeHub() {
             </div>
             <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
           </button>
+        </section>
+
+        {/* Phuket relocation guides (bilingual articles) */}
+        <section className="mb-8">
+          <Link
+            to={APP_ROUTES.RELOCATION_GUIDES}
+            className="w-full text-left rounded-none border border-border bg-card p-5 hover:border-primary/50 transition-colors flex items-center gap-4"
+          >
+            <div className="h-12 w-12 rounded-none bg-primary/10 flex items-center justify-center shrink-0">
+              <Globe className="h-6 w-6 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-base font-semibold text-foreground">
+                {language === 'ru' ? 'Переезд на Пхукет' : 'Moving to Phuket'}
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                {language === 'ru'
+                  ? 'Визы, TM30, жильё, школы, банки — отдельные гайды с чеклистом в приложении.'
+                  : 'Visas, TM30, housing, schools, banking — dedicated guides plus in-app checklist.'}
+              </p>
+            </div>
+            <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
+          </Link>
         </section>
 
         {/* Knowledge Sections Grid */}

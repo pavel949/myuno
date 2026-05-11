@@ -3,7 +3,7 @@
  * Bible cluster: ARRIVE/RELOCATE → upsell to relocation packages
  */
 import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Calculator, Home, Utensils, Car, Stethoscope, GraduationCap, Wifi, ShoppingBag, Dumbbell, PlusCircle, MinusCircle } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
@@ -14,6 +14,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { SEOHead } from '@/components/seo';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { cn } from '@/lib/utils';
 
 interface CostCategory {
@@ -223,8 +224,11 @@ export default function CostOfLivingPage() {
 
         {/* CTA */}
         <div className="space-y-3 pt-2">
-          <Button className="w-full" onClick={() => navigate('/relocate')}>
+          <Button className="w-full" onClick={() => navigate(APP_ROUTES.RELOCATE)}>
             {isRu ? 'Узнать о релокации на Пхукет' : 'Explore Phuket Relocation'}
+          </Button>
+          <Button asChild variant="secondary" className="w-full">
+            <Link to={APP_ROUTES.RELOCATION_GUIDES}>{isRu ? 'Гайды по переезду' : 'Relocation guides'}</Link>
           </Button>
           <Button variant="outline" className="w-full" onClick={() => navigate('/property')}>
             <Home className="w-4 h-4 mr-2" />

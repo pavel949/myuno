@@ -15,7 +15,7 @@
  *  - Workspace clusters hidden unless user has matching role
  */
 import React, { useState, useMemo, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import {
   Search, LayoutGrid, X, ArrowRight,
   AlertTriangle, Plane, Home, TrendingUp, Stethoscope,
@@ -493,6 +493,7 @@ export default function NavigatorPage() {
   const isRu = language === 'ru';
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const { personas } = useUserPersonas();
 
@@ -568,6 +569,13 @@ export default function NavigatorPage() {
       }))
       .filter((c) => c.services.length > 0);
   }, [audienceClusters, activePersona]);
+
+  const clusterFromUrl = searchParams.get('cluster');
+  useEffect(() => {
+    if (!clusterFromUrl) return;
+    const match = personaClusters.find((c) => c.id === clusterFromUrl);
+    if (match) setActiveCluster(clusterFromUrl);
+  }, [clusterFromUrl, personaClusters]);
 
   const visibleClusters = useMemo(() => {
     if (activeCluster) {

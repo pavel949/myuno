@@ -21,7 +21,6 @@ import { BrandWordmark } from '@/components/uno/BrandWordmark';
 import { cn } from '@/lib/utils';
 import { useCatalogFromDB } from '@/lib/catalog/useCatalogFromDB';
 import { buildCatalogAudienceMetrics } from '@/lib/catalog/catalogMetrics';
-import { useActiveLifeSituationsCount } from '@/hooks/useActiveLifeSituationsCount';
 import { APP_ROUTES } from '@/lib/config/routes';
 
 function useWelcomeCatalogMetrics() {
@@ -72,10 +71,13 @@ export default function WelcomeLanding() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const navigate = useNavigate();
-  const { byCluster, totalEligibleServices, clustersCount, categoriesCountAcrossVisible } =
-    useWelcomeCatalogMetrics();
-  const { data: lifeSituationsActive = 0, isLoading: lifeCountLoading } =
-    useActiveLifeSituationsCount();
+  const {
+    byCluster,
+    totalEligibleServices,
+    clustersCount,
+    categoriesCountAcrossVisible,
+    totalActiveLifeSituations,
+  } = useWelcomeCatalogMetrics();
   const categoriesCount = categoriesCountAcrossVisible;
 
   return (
@@ -200,7 +202,7 @@ export default function WelcomeLanding() {
               { num: String(totalEligibleServices), en: 'services ready now', ru: 'доступных сервисов' },
               { num: String(clustersCount), en: 'platform sections', ru: 'разделов платформы' },
               {
-                num: lifeCountLoading ? '...' : String(lifeSituationsActive),
+                num: String(totalActiveLifeSituations),
                 en: 'life situations',
                 ru: 'жизненных ситуаций',
               },

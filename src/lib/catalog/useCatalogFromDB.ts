@@ -21,10 +21,13 @@ import { supabase } from '@/integrations/supabase/client';
 import {
   CLUSTERS as STATIC_CLUSTERS,
   CATEGORIES as STATIC_CATEGORIES,
+  LIFE_SITUATIONS as STATIC_LIFE_SITUATIONS,
+  buildStaticClusterLifeSituationsMap,
   type ClusterEntry,
   type CategoryEntry,
   type ServiceEntry,
   type ClusterId,
+  type LifeSituationEntry,
 } from './taxonomy';
 
 /** Cluster augmented with its categories (drop-in shape for previously hand-built `CLUSTER_CATALOG`). */
@@ -32,13 +35,25 @@ export interface ClusterCatalogEntry extends ClusterEntry {
   categories: CategoryEntry[];
 }
 
+const STATIC_CLUSTER_LIFE_MAP = buildStaticClusterLifeSituationsMap();
+
 const STATIC_CLUSTER_CATALOG: ClusterCatalogEntry[] = STATIC_CLUSTERS
   .slice()
   .sort((a, b) => a.sortOrder - b.sortOrder)
   .map((cluster) => ({
     ...cluster,
+    lifeSituations: STATIC_CLUSTER_LIFE_MAP[cluster.id] ?? [],
     categories: STATIC_CATEGORIES.filter((cat) => cat.clusterId === cluster.id),
   }));
+
+const STATIC_CLUSTERS_WITH_LIFE: ClusterEntry[] = STATIC_CLUSTERS.map((c) => ({
+  ...c,
+  lifeSituations: STATIC_CLUSTER_LIFE_MAP[c.id] ?? [],
+}));
+
+const STATIC_LIFE_SITUATIONS_ACTIVE: LifeSituationEntry[] = STATIC_LIFE_SITUATIONS.filter(
+  (s) => s.isActive,
+);
 
 // ─────────────────────────────────────────────────────────────────────────
 // Types
@@ -75,17 +90,39 @@ interface DBCategoryRow {
   mini_app_type: string | null;
 }
 
+interface DBLifeSituationRow {
+  code: string;
+  title_en: string;
+  title_ru: string;
+  description_en: string | null;
+  description_ru: string | null;
+  icon: string | null;
+  color: string | null;
+  priority: number | null;
+  is_active: boolean | null;
+}
+
+interface DBClusterLifeSituationRow {
+  cluster_id: string;
+  life_situation_id: string;
+  weight: number | null;
+  is_primary: boolean | null;
+  life_situations: DBLifeSituationRow | null;
+}
+
 export interface UseCatalogFromDBResult {
   /** Source of truth flag — true when live DB data is rendered, false on fallback. */
   isFromDB: boolean;
   isLoading: boolean;
   error: Error | null;
-  /** Cluster list, sorted. */
+  /** Cluster list, sorted. Each entry carries `lifeSituations` (M:N via bridge). */
   clusters: ClusterEntry[];
   /** All categories, flat. */
   categories: CategoryEntry[];
   /** Pre-joined cluster → categories[] → services[] tree (drop-in for `CLUSTER_CATALOG`). */
   clusterCatalog: ClusterCatalogEntry[];
+  /** Deduped flat list of all life situations attached to at least one cluster. */
+  lifeSituations: LifeSituationEntry[];
   /** Convenience helpers mirroring the static API. */
   getCluster: (id: ClusterId | string) => ClusterEntry | undefined;
   getCategoriesByCluster: (id: ClusterId | string) => CategoryEntry[];
@@ -193,8 +230,9 @@ function buildClusterCatalog(
 async function fetchCatalog(): Promise<{
   groups: DBGroupRow[];
   categories: DBCategoryRow[];
+  clusterLifeSituations: DBClusterLifeSituationRow[];
 }> {
-  const [groupsRes, categoriesRes] = await Promise.all([
+  const [groupsRes, categoriesRes, lifeRes] = await Promise.all([
     supabase
       .from('category_groups')
       .select(
@@ -210,14 +248,38 @@ async function fetchCatalog(): Promise<{
       )
       .eq('is_active', true)
       .order('sort_order', { ascending: true }),
+    // Bridge is RLS-public (`USING (true)`). `life_situations(*)` is a nested
+    // select — if RLS blocks that table for anon, the inner object is null and
+    // we silently fall back to the static SSOT for that row.
+    supabase
+      .from('cluster_life_situations')
+      .select(
+        'cluster_id, life_situation_id, weight, is_primary, life_situations(code, title_en, title_ru, description_en, description_ru, icon, color, priority, is_active)',
+      ),
   ]);
 
   if (groupsRes.error) throw groupsRes.error;
   if (categoriesRes.error) throw categoriesRes.error;
+  // Don't throw on lifeRes — it's non-essential; fall back to static silently.
 
   return {
     groups: (groupsRes.data ?? []) as DBGroupRow[],
     categories: (categoriesRes.data ?? []) as DBCategoryRow[],
+    clusterLifeSituations: (lifeRes.error ? [] : lifeRes.data ?? []) as DBClusterLifeSituationRow[],
+  };
+}
+
+function adaptLifeSituationRow(row: DBLifeSituationRow): LifeSituationEntry {
+  return {
+    code: row.code,
+    titleRu: row.title_ru || row.title_en,
+    titleEn: row.title_en || row.code,
+    descriptionRu: row.description_ru ?? undefined,
+    descriptionEn: row.description_en ?? undefined,
+    icon: row.icon ?? 'Circle',
+    color: row.color ?? '#6B7280',
+    priority: row.priority ?? 50,
+    isActive: row.is_active ?? true,
   };
 }
 
@@ -236,10 +298,11 @@ export function useCatalogFromDB(): UseCatalogFromDBResult {
       isFromDB: false,
       isLoading: query.isLoading,
       error: (query.error as Error | null) ?? null,
-      clusters: STATIC_CLUSTERS,
+      clusters: STATIC_CLUSTERS_WITH_LIFE,
       categories: STATIC_CATEGORIES,
       clusterCatalog: STATIC_CLUSTER_CATALOG,
-      getCluster: (id) => STATIC_CLUSTERS.find((c) => c.id === id),
+      lifeSituations: STATIC_LIFE_SITUATIONS_ACTIVE,
+      getCluster: (id) => STATIC_CLUSTERS_WITH_LIFE.find((c) => c.id === id),
       getCategoriesByCluster: (id) =>
         STATIC_CATEGORIES.filter((c) => c.clusterId === id),
     };
@@ -270,25 +333,65 @@ export function useCatalogFromDB(): UseCatalogFromDBResult {
       isFromDB: false,
       isLoading: false,
       error: null,
-      clusters: STATIC_CLUSTERS,
+      clusters: STATIC_CLUSTERS_WITH_LIFE,
       categories: STATIC_CATEGORIES,
       clusterCatalog: STATIC_CLUSTER_CATALOG,
-      getCluster: (id) => STATIC_CLUSTERS.find((c) => c.id === id),
+      lifeSituations: STATIC_LIFE_SITUATIONS_ACTIVE,
+      getCluster: (id) => STATIC_CLUSTERS_WITH_LIFE.find((c) => c.id === id),
       getCategoriesByCluster: (id) =>
         STATIC_CATEGORIES.filter((c) => c.clusterId === id),
     };
   }
 
-  const clusterCatalog = buildClusterCatalog(clusters, categories);
+  // Build the cluster_id → LifeSituationEntry[] map from the DB join.
+  // Cluster id in `cluster_life_situations` references `category_groups.id`,
+  // not the slug — re-key by `surface_id ?? slug` (the same shape our
+  // `ClusterEntry.id` uses) via `groupsById`.
+  const clusterLifeMap = new Map<string, LifeSituationEntry[]>();
+  for (const link of query.data.clusterLifeSituations) {
+    const group = groupsById.get(link.cluster_id);
+    if (!group) continue;
+    const clusterKey = (group.surface_id ?? group.slug) as string;
+    const raw = link.life_situations;
+    if (!raw || raw.is_active === false) continue;
+    const situation = adaptLifeSituationRow(raw);
+    const arr = clusterLifeMap.get(clusterKey) ?? [];
+    arr.push(situation);
+    clusterLifeMap.set(clusterKey, arr);
+  }
+
+  // If the DB join returned nothing (RLS blocked nested select, table empty, etc.),
+  // fall back to the static cluster→life map so the catalog stays consistent.
+  const useStaticLifeMap = clusterLifeMap.size === 0;
+  const clustersWithLife = clusters.map((c) => ({
+    ...c,
+    lifeSituations: useStaticLifeMap
+      ? STATIC_CLUSTER_LIFE_MAP[c.id] ?? []
+      : clusterLifeMap.get(c.id) ?? [],
+  }));
+
+  // Deduped flat list of active life situations across clusters.
+  const seenCodes = new Set<string>();
+  const flatLifeSituations: LifeSituationEntry[] = [];
+  for (const c of clustersWithLife) {
+    for (const s of c.lifeSituations ?? []) {
+      if (!s.isActive || seenCodes.has(s.code)) continue;
+      seenCodes.add(s.code);
+      flatLifeSituations.push(s);
+    }
+  }
+
+  const clusterCatalog = buildClusterCatalog(clustersWithLife, categories);
 
   return {
     isFromDB: true,
     isLoading: false,
     error: null,
-    clusters,
+    clusters: clustersWithLife,
     categories,
     clusterCatalog,
-    getCluster: (id) => clusters.find((c) => c.id === id),
+    lifeSituations: flatLifeSituations,
+    getCluster: (id) => clustersWithLife.find((c) => c.id === id),
     getCategoriesByCluster: (id) => categories.filter((c) => c.clusterId === id),
   };
 }

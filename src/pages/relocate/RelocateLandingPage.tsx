@@ -1,17 +1,20 @@
 import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LandingLayout } from '@/components/miniapp/LandingLayout';
 import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Globe, FileText, Home, GraduationCap, Stethoscope, Landmark, Car, Scale, Users, Check, ArrowRight, MessageCircle } from 'lucide-react';
+import { Globe, FileText, Home, GraduationCap, Stethoscope, Landmark, Car, Scale, Users, Check, ArrowRight, MessageCircle, BookOpen, ListChecks } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { StartPageLayout, StepByStepNav, type Step } from '@/components/patterns';
 import { tokenColor } from '@/lib/utils/hslAlpha';
+import { SEOHead } from '@/components/seo';
+import { getWhatsAppUrl } from '@/lib/config/contacts';
+import { useRelocationPlan } from '@/hooks/useRelocationPlan';
 
 const STEPS = [
-  { id: 'visa', icon: FileText, labelEn: 'Visas & Documents', labelRu: 'Визы и документы', descEn: 'Work permits, retirement visa, education visa — we handle paperwork', descRu: 'Рабочие разрешения, пенсионная виза, учебная виза — мы берём на себя документы', path: APP_ROUTES.VISA_IMMIGRATION, color: 'cluster-live' },
+  { id: 'visa', icon: FileText, labelEn: 'Visas & Documents', labelRu: 'Визы и документы', descEn: 'Compare DTV, ED, Non-B — then book legal help', descRu: 'Сравните DTV, ED, Non-B — затем юрист', path: APP_ROUTES.VISA_COMPARE, color: 'cluster-live' },
   { id: 'housing', icon: Home, labelEn: 'Housing', labelRu: 'Жильё', descEn: 'Long-term rentals, condos, villas — vetted by our team', descRu: 'Долгосрочная аренда, кондо, виллы — проверены нашей командой', path: `${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=long`, color: 'cluster-arrive' },
   { id: 'school', icon: GraduationCap, labelEn: 'Schools & Kindergartens', labelRu: 'Школы и сады', descEn: 'International schools, Russian schools, kindergartens', descRu: 'Международные школы, русские школы, детские сады', path: APP_ROUTES.EDUCATION, color: 'accent-amber' },
   { id: 'medical', icon: Stethoscope, labelEn: 'Medical & Insurance', labelRu: 'Медицина и страховка', descEn: 'Health insurance, clinics, dentists, pediatricians', descRu: 'Медстраховка, клиники, стоматологи, педиатры', path: APP_ROUTES.MEDICAL, color: 'destructive' },
@@ -62,6 +65,7 @@ export default function RelocateLandingPage() {
   const { language } = useLanguage();
   const t = language === 'ru';
   const navigate = useNavigate();
+  const { saveQuizAndStepsAsync, isSaving } = useRelocationPlan();
   const [timeline, setTimeline] = useState<'urgent' | 'soon' | 'planned' | 'exploring'>('soon');
   const [household, setHousehold] = useState<'solo' | 'couple' | 'family'>('solo');
   const [budget, setBudget] = useState<'low' | 'mid' | 'high' | 'premium'>('mid');
@@ -115,7 +119,34 @@ export default function RelocateLandingPage() {
       : `Need a personalized relocation roadmap. Timeline: ${timelineLabel}. Household: ${householdLabel}. Budget: ${budgetLabel}. Housing goal: ${housingLabel}. Priorities: ${prioritiesLabel || 'basic setup'}.`;
   }, [budget, household, housingGoal, priorities, t, timeline]);
 
-  const whatsappUrl = 'https://wa.me/66800000000?text=' + encodeURIComponent(requestSummary);
+  const whatsappUrl = getWhatsAppUrl(requestSummary);
+
+  const faqJsonLd = useMemo(
+    () => ({
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: FAQ.map((item) => ({
+        '@type': 'Question',
+        name: t ? item.qRu : item.qEn,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: t ? item.aRu : item.aEn,
+        },
+      })),
+    }),
+    [t],
+  );
+
+  const persistQuizAndOpenDashboard = async () => {
+    await saveQuizAndStepsAsync({
+      timeline,
+      household,
+      budget,
+      housingGoal,
+      priorities,
+    });
+    navigate(APP_ROUTES.RELOCATION_MY_PLAN);
+  };
 
   const scrollToQuiz = () => {
     document.getElementById('relocation-quiz')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -133,7 +164,20 @@ export default function RelocateLandingPage() {
     { id: 'community', title: t ? 'Войдите в комьюнити' : 'Join the community', description: t ? 'Экспат-чаты, спорт, события.' : 'Expat groups, sports, events.', status: 'todo' },
   ];
 
+  const seoTitle = t ? 'Переезд на Пхукет — гайды, визы, чеклист' : 'Relocate to Phuket — guides, visas, checklist';
+  const seoDescription = t
+    ? 'Пошаговый план: визы, жильё, школы, банк, TM30. Квиз, персональный чеклист и материалы myUNO.'
+    : 'Step-by-step plan: visas, housing, schools, banking, TM30. Quiz, personal checklist and myUNO guides.';
+
   return (
+    <>
+      <SEOHead
+        title={seoTitle}
+        description={seoDescription}
+        type="website"
+        url="https://myuno.app/relocate"
+        jsonLd={faqJsonLd}
+      />
     <LandingLayout
       icon={Globe}
       title={t ? 'Переезд на Пхукет' : 'Relocate to Phuket'}
@@ -167,6 +211,20 @@ export default function RelocateLandingPage() {
         secondaryLabel={t ? 'Спросить в WhatsApp' : 'Ask on WhatsApp'}
         onSecondary={() => window.open(whatsappUrl, '_blank')}
       />
+
+      <div className="px-4 max-w-3xl mx-auto -mt-2 mb-4 flex flex-col sm:flex-row gap-2">
+        <Button asChild variant="secondary" className="flex-1 gap-2 rounded-none">
+          <Link to={APP_ROUTES.RELOCATION_GUIDES}>
+            <BookOpen className="w-4 h-4 shrink-0" />
+            {t ? 'Читать гайды по переезду' : 'Read relocation guides'}
+          </Link>
+        </Button>
+        <Button asChild variant="outline" className="flex-1 gap-2 rounded-none">
+          <Link to={APP_ROUTES.RELOCATION_AREAS}>
+            {t ? 'Районы для жизни' : 'Neighbourhood guide'}
+          </Link>
+        </Button>
+      </div>
 
       <StepByStepNav
         title={t ? 'Что нужно сделать' : 'What you need to do'}
@@ -282,7 +340,16 @@ export default function RelocateLandingPage() {
             </p>
             <p className="text-sm text-foreground mt-2">{requestSummary}</p>
             <div className="flex flex-wrap gap-2 mt-4">
-              <Button onClick={() => window.open(whatsappUrl, '_blank')} className="gap-2">
+              <Button
+                type="button"
+                onClick={() => void persistQuizAndOpenDashboard()}
+                disabled={isSaving}
+                className="gap-2"
+              >
+                <ListChecks className="w-4 h-4" />
+                {t ? 'Сохранить и открыть чеклист' : 'Save & open checklist'}
+              </Button>
+              <Button onClick={() => window.open(whatsappUrl, '_blank')} variant="outline" className="gap-2">
                 <MessageCircle className="w-4 h-4" />
                 {t ? 'Отправить в WhatsApp' : 'Send to WhatsApp'}
               </Button>
@@ -396,5 +463,6 @@ export default function RelocateLandingPage() {
         </Accordion>
       </div>
     </LandingLayout>
+    </>
   );
 }

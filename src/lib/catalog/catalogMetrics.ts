@@ -48,6 +48,11 @@ export interface CatalogAudienceMetrics {
   clustersCount: number;
   /** Top-level categories overlapping visible clusters (for footnotes) */
   categoriesCountAcrossVisible: number;
+  /**
+   * Distinct active life situations across visible clusters
+   * (populated by `useCatalogFromDB` onto each `ClusterEntry.lifeSituations`).
+   */
+  totalActiveLifeSituations: number;
   byCluster: ClusterStatsRow[];
 }
 
@@ -65,6 +70,7 @@ export function buildCatalogAudienceMetrics(
   const sortedClusters = [...clusters].sort((a, b) => a.sortOrder - b.sortOrder);
   let totalEligibleServices = 0;
   let categoriesCountAcrossVisible = 0;
+  const seenLifeSituationCodes = new Set<string>();
 
   const byCluster: ClusterStatsRow[] = sortedClusters.map((cluster) => {
     const accessible = isClusterEntryVisibleToAudience(cluster, ctx);
@@ -76,6 +82,9 @@ export function buildCatalogAudienceMetrics(
     if (accessible) {
       totalEligibleServices += eligible.length;
       categoriesCountAcrossVisible += cats.length;
+      for (const s of cluster.lifeSituations ?? []) {
+        if (s.isActive) seenLifeSituationCodes.add(s.code);
+      }
     }
 
     const hintsSource = cats;
@@ -112,6 +121,7 @@ export function buildCatalogAudienceMetrics(
     totalEligibleServices,
     clustersCount: sortedClusters.length,
     categoriesCountAcrossVisible,
+    totalActiveLifeSituations: seenLifeSituationCodes.size,
     byCluster,
   };
 }

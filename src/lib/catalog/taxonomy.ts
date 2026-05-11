@@ -132,6 +132,45 @@ export interface ClusterEntry {
    * Different from per-service paths — this is the umbrella entry-point.
    */
   homeRoute: string;
+  /**
+   * Life situations mapped to this cluster (M:N via DB table `cluster_life_situations`).
+   * Populated by `useCatalogFromDB` — empty on the static SSOT.
+   */
+  lifeSituations?: LifeSituationEntry[];
+}
+
+/**
+ * One canonical "life situation" — a high-level user state (arrival, family,
+ * investing, etc.) used by AI routing, navigator filters, and hero counters.
+ *
+ * Mirrors `public.life_situations` row shape; codes match the migration seed
+ * `supabase/migrations/20260424012840_…sql` so static fallback ≡ live DB.
+ */
+export interface LifeSituationEntry {
+  /** Stable code (matches `life_situations.code` in DB) */
+  code: string;
+  titleRu: string;
+  titleEn: string;
+  descriptionRu?: string;
+  descriptionEn?: string;
+  /** Lucide icon name as a string (mirrors `life_situations.icon` text column) */
+  icon: string;
+  /** Hex accent — mirrors `life_situations.color` */
+  color: string;
+  /** Higher = surfaced earlier in nav (mirrors `life_situations.priority`) */
+  priority: number;
+  isActive: boolean;
+}
+
+/**
+ * Cluster ↔ life-situation bridge entry. Mirrors the seeded rows of
+ * `public.cluster_life_situations` (migration 20260424012840 §6).
+ */
+export interface ClusterLifeSituationLink {
+  clusterId: ClusterId;
+  situationCode: string;
+  weight: number;
+  isPrimary: boolean;
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -618,4 +657,97 @@ export function isClusterVisibleToUser(
 
 export function visibleClustersForUser(ctx: AudienceContext): ClusterEntry[] {
   return CLUSTERS.filter((c) => isClusterVisibleToUser(c, ctx));
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Life Situations (20) — static SSOT mirror of `public.life_situations` seed
+// ─────────────────────────────────────────────────────────────────────────
+
+export const LIFE_SITUATIONS: LifeSituationEntry[] = [
+  // Arrival
+  { code: 'arrival',        titleRu: 'Приезд',                  titleEn: 'Arrival',           icon: 'Plane',         color: '#3B82F6', priority: 100, isActive: true },
+  { code: 'tourist',        titleRu: 'Турист',                  titleEn: 'Tourist',           icon: 'Camera',        color: '#06B6D4', priority: 90,  isActive: true },
+  { code: 'first_time',     titleRu: 'Впервые на Пхукете',      titleEn: 'First time',        icon: 'MapPin',        color: '#06B6D4', priority: 85,  isActive: true },
+  { code: 'transit',        titleRu: 'Короткий визит',          titleEn: 'Short stay',        icon: 'Clock',         color: '#0EA5E9', priority: 70,  isActive: true },
+  // Live
+  { code: 'living',         titleRu: 'Жизнь на острове',        titleEn: 'Living here',       icon: 'Home',          color: '#10B981', priority: 100, isActive: true },
+  { code: 'resident',       titleRu: 'Резидент',                titleEn: 'Resident',          icon: 'Building',      color: '#10B981', priority: 95,  isActive: true },
+  { code: 'family',         titleRu: 'Переезд семьёй',          titleEn: 'Family relocation', icon: 'Users',         color: '#F472B6', priority: 90,  isActive: true },
+  { code: 'pet_owner',      titleRu: 'С питомцем',              titleEn: 'With a pet',        icon: 'PawPrint',      color: '#A78BFA', priority: 75,  isActive: true },
+  { code: 'health',         titleRu: 'Здоровье и лечение',      titleEn: 'Health & wellness', icon: 'Stethoscope',   color: '#EC4899', priority: 80,  isActive: true },
+  { code: 'leisure',        titleRu: 'Активности и досуг',      titleEn: 'Leisure',           icon: 'Compass',       color: '#22C55E', priority: 70,  isActive: true },
+  { code: 'food',           titleRu: 'Еда и доставка',          titleEn: 'Food & delivery',   icon: 'Utensils',      color: '#F59E0B', priority: 65,  isActive: true },
+  { code: 'nightlife',      titleRu: 'Ночная жизнь',            titleEn: 'Nightlife',         icon: 'Music',         color: '#8B5CF6', priority: 55,  isActive: true },
+  // Manage
+  { code: 'managing',       titleRu: 'Управление объектом',     titleEn: 'Managing property', icon: 'Building2',     color: '#0891B2', priority: 100, isActive: true },
+  { code: 'property_owner', titleRu: 'Собственник',             titleEn: 'Property owner',    icon: 'KeyRound',      color: '#0891B2', priority: 95,  isActive: true },
+  { code: 'business',       titleRu: 'Бизнес и операции',       titleEn: 'Business',          icon: 'Briefcase',     color: '#6366F1', priority: 85,  isActive: true },
+  // Invest
+  { code: 'investing',      titleRu: 'Инвестирование',          titleEn: 'Investing',         icon: 'TrendingUp',    color: '#8B5CF6', priority: 100, isActive: true },
+  { code: 'investor',       titleRu: 'Инвестор',                titleEn: 'Investor',          icon: 'LineChart',     color: '#A855F7', priority: 95,  isActive: true },
+  // Legal
+  { code: 'settling',       titleRu: 'Документы и обустройство', titleEn: 'Settling in',      icon: 'FileText',      color: '#6366F1', priority: 95,  isActive: true },
+  { code: 'visa_renewal',   titleRu: 'Виза и продление',        titleEn: 'Visa renewal',      icon: 'Stamp',         color: '#6366F1', priority: 100, isActive: true },
+  { code: 'relocation',     titleRu: 'Релокация',               titleEn: 'Relocation',        icon: 'Truck',         color: '#14B8A6', priority: 90,  isActive: true },
+  // Build
+  { code: 'developer',      titleRu: 'Застройщик',              titleEn: 'Developer',         icon: 'HardHat',       color: '#F97316', priority: 100, isActive: true },
+];
+
+/**
+ * Cluster ↔ life-situation links — mirrors migration 20260424012840 §6 seed.
+ * Codes that don't exist in `LIFE_SITUATIONS` are silently skipped (matches
+ * the migration's `JOIN situations s ON s.code = p.situation_code` semantic).
+ */
+export const CLUSTER_LIFE_SITUATIONS: ClusterLifeSituationLink[] = [
+  // ARRIVE
+  { clusterId: 'arrive', situationCode: 'arrival',        weight: 100, isPrimary: true  },
+  { clusterId: 'arrive', situationCode: 'tourist',        weight: 90,  isPrimary: true  },
+  { clusterId: 'arrive', situationCode: 'first_time',     weight: 90,  isPrimary: false },
+  { clusterId: 'arrive', situationCode: 'transit',        weight: 80,  isPrimary: false },
+  // LIVE
+  { clusterId: 'live',   situationCode: 'living',         weight: 100, isPrimary: true  },
+  { clusterId: 'live',   situationCode: 'resident',       weight: 95,  isPrimary: true  },
+  { clusterId: 'live',   situationCode: 'family',         weight: 90,  isPrimary: false },
+  { clusterId: 'live',   situationCode: 'pet_owner',      weight: 80,  isPrimary: false },
+  { clusterId: 'live',   situationCode: 'health',         weight: 85,  isPrimary: false },
+  { clusterId: 'live',   situationCode: 'leisure',        weight: 75,  isPrimary: false },
+  { clusterId: 'live',   situationCode: 'food',           weight: 70,  isPrimary: false },
+  { clusterId: 'live',   situationCode: 'nightlife',      weight: 60,  isPrimary: false },
+  // MANAGE
+  { clusterId: 'manage', situationCode: 'managing',       weight: 100, isPrimary: true  },
+  { clusterId: 'manage', situationCode: 'property_owner', weight: 95,  isPrimary: true  },
+  { clusterId: 'manage', situationCode: 'business',       weight: 90,  isPrimary: false },
+  // INVEST
+  { clusterId: 'invest', situationCode: 'investing',      weight: 100, isPrimary: true  },
+  { clusterId: 'invest', situationCode: 'investor',       weight: 95,  isPrimary: true  },
+  { clusterId: 'invest', situationCode: 'business',       weight: 70,  isPrimary: false },
+  // LEGAL
+  { clusterId: 'legal',  situationCode: 'settling',       weight: 95,  isPrimary: true  },
+  { clusterId: 'legal',  situationCode: 'visa_renewal',   weight: 100, isPrimary: true  },
+  { clusterId: 'legal',  situationCode: 'relocation',     weight: 90,  isPrimary: false },
+  { clusterId: 'legal',  situationCode: 'business',       weight: 70,  isPrimary: false },
+  // BUILD
+  { clusterId: 'build',  situationCode: 'developer',      weight: 100, isPrimary: true  },
+  { clusterId: 'build',  situationCode: 'business',       weight: 60,  isPrimary: false },
+];
+
+/** Index `LIFE_SITUATIONS` by code for O(1) lookup. */
+export const LIFE_SITUATIONS_BY_CODE: Record<string, LifeSituationEntry> = Object.fromEntries(
+  LIFE_SITUATIONS.map((s) => [s.code, s]),
+);
+
+/**
+ * Build the per-cluster life-situation map from the static SSOT.
+ * Used as the fallback in `useCatalogFromDB` when the DB has no live join data.
+ */
+export function buildStaticClusterLifeSituationsMap(): Record<ClusterId, LifeSituationEntry[]> {
+  const map: Record<string, LifeSituationEntry[]> = {};
+  for (const link of CLUSTER_LIFE_SITUATIONS) {
+    const situation = LIFE_SITUATIONS_BY_CODE[link.situationCode];
+    if (!situation || !situation.isActive) continue;
+    const arr = map[link.clusterId] ?? [];
+    arr.push(situation);
+    map[link.clusterId] = arr;
+  }
+  return map as Record<ClusterId, LifeSituationEntry[]>;
 }

@@ -215,6 +215,7 @@ export const LegalProviderDetail = lazy(() => import('@/pages/legal/LegalProvide
 export const LegalBooking = lazy(() => import('@/pages/legal/LegalBooking'));
 export const VisaServiceDetail = lazy(() => import('@/pages/legal/VisaServiceDetail'));
 export const VisaImmigrationPage = lazy(() => import('@/pages/legal/VisaImmigrationPage'));
+export const VisaComparePage = lazy(() => import('@/pages/legal/VisaComparePage'));
 
 // ── Insurance ──
 export const InsuranceIndex = lazy(() => import('@/pages/insurance/InsuranceIndex'));
@@ -602,6 +603,10 @@ export const MCRegistrationPage = lazy(() => import('@/pages/mc/MCRegistrationPa
 
 // ── Landing Pages (Monetization) ──
 export const RelocateLandingPage = lazy(() => import('@/pages/relocate/RelocateLandingPage'));
+export const RelocationGuidesHub = lazy(() => import('@/pages/relocate/RelocationGuidesHub'));
+export const RelocationGuideArticle = lazy(() => import('@/pages/relocate/RelocationGuideArticle'));
+export const RelocationDashboard = lazy(() => import('@/pages/relocate/RelocationDashboard'));
+export const RelocationAreasPage = lazy(() => import('@/pages/relocate/RelocationAreasPage'));
 export const WeddingLandingPage = lazy(() => import('@/pages/wedding/WeddingLandingPage'));
 export const KidsLandingPage = lazy(() => import('@/pages/kids/KidsLandingPage'));
 export const NomadGuidePage = lazy(() => import('@/pages/nomad/NomadGuidePage'));
