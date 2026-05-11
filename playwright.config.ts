@@ -5,19 +5,20 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 1,
-  workers: process.env.CI ? 1 : undefined,
+  workers: process.env.CI ? 1 : 2,
   reporter: [['html'], ['list']],
-  timeout: 30000,
+  timeout: 60000,
   expect: {
     timeout: 10000,
   },
   use: {
-    baseURL: 'http://localhost:5173',
+    baseURL: 'http://localhost:8099',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
     trace: 'retain-on-failure',
-    actionTimeout: 10000,
-    navigationTimeout: 15000,
+    actionTimeout: 15000,
+    // Cold Vite compile + parallel workers can exceed 15s first paint
+    navigationTimeout: 120000,
   },
   projects: [
     {
@@ -30,9 +31,12 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run dev',
-    port: 5173,
+    // Dedicated port so e2e never hijacks a developer's :8080 session; must pass bypass gate
+    command: 'vite --port 8099 --strictPort',
+    url: 'http://localhost:8099',
     reuseExistingServer: !process.env.CI,
-    timeout: 120000,
+    timeout: 180000,
+    // ComingSoonGate hides the real SPA from guests unless bypassed — required for smoke e2e
+    env: { ...process.env, VITE_BYPASS_COMING_SOON: 'true' },
   },
 });

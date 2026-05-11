@@ -13,7 +13,7 @@ import { VitePWA } from "vite-plugin-pwa";
 // gives one preload file instead of three.
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ mode, command }) => {
   const buildTimestamp = new Date().toISOString();
 
   // Public Supabase config — safe to ship in client bundle (anon key + URL).
@@ -66,9 +66,11 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       react(),
-      // Cursor / VS Code Simple Browser loads dev URLs inside an iframe; CSP
+      // Cursor / VS Code Simple Browser loads URLs inside an iframe; CSP
       // frame-ancestors 'none' in index.html blocks that and yields a blank preview.
-      mode === "development" && {
+      // Applies to `vite` and `vite preview` (both command === "serve"), not to `vite build`
+      // so production artifacts in dist/ keep the strict meta tag.
+      command === "serve" && {
         name: "csp-allow-embedded-dev-preview",
         transformIndexHtml(html: string) {
           let out = html.replace(/frame-ancestors 'none';/g, "frame-ancestors *;");

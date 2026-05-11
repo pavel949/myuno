@@ -1,11 +1,17 @@
 import { Page, Locator, expect } from '@playwright/test';
 
+/**
+ * Guest home is WelcomeLanding (marketing): cluster cards, no app search / bottom shell.
+ * Authenticated home is Index (workspace): may include category cards, bottom nav.
+ */
 export class HomePage {
   readonly page: Page;
+  readonly welcomeRoot: Locator;
   readonly logo: Locator;
   readonly searchButton: Locator;
   readonly languageSwitch: Locator;
   readonly categoryCards: Locator;
+  readonly clusterCards: Locator;
   readonly featuredSection: Locator;
   readonly bottomNav: Locator;
   readonly profileButton: Locator;
@@ -13,9 +19,11 @@ export class HomePage {
 
   constructor(page: Page) {
     this.page = page;
-    this.logo = page.locator('text=myUNO, [data-testid="logo"]');
+    this.welcomeRoot = page.getByTestId('welcome-landing');
+    this.logo = page.getByTestId('logo');
     this.searchButton = page.locator('[data-testid="search-button"], button[aria-label*="search"], button[aria-label*="поиск"]');
     this.languageSwitch = page.locator('[data-testid="language-switch"]');
+    this.clusterCards = page.getByTestId('welcome-cluster-card');
     this.categoryCards = page.locator('[data-testid="category-card"], .category-card');
     this.featuredSection = page.locator('[data-testid="featured-section"]');
     this.bottomNav = page.locator('nav[data-testid="bottom-nav"], nav.fixed.bottom-0');
@@ -24,8 +32,11 @@ export class HomePage {
   }
 
   async goto() {
-    await this.page.goto('/');
-    await this.page.waitForLoadState('networkidle');
+    await this.page.goto('/', { waitUntil: 'domcontentloaded' });
+    await Promise.all([
+      expect(this.logo).toBeVisible({ timeout: 30_000 }),
+      expect(this.welcomeRoot).toBeVisible({ timeout: 30_000 }),
+    ]);
   }
 
   async openSearch() {
@@ -54,6 +65,9 @@ export class HomePage {
   }
 
   async expectLoaded() {
-    await expect(this.logo).toBeVisible({ timeout: 10000 });
+    await Promise.all([
+      expect(this.logo).toBeVisible({ timeout: 15_000 }),
+      expect(this.welcomeRoot).toBeVisible({ timeout: 15_000 }),
+    ]);
   }
 }

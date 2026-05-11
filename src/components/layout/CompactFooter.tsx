@@ -7,6 +7,7 @@ import { APP_ROUTES } from '@/lib/config/routes';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
 import { useIsDesktop } from '@/hooks/use-desktop';
 import { useCatalogFromDB } from '@/lib/catalog/useCatalogFromDB';
+import { BrandWordmark } from '@/components/uno/BrandWordmark';
 import {
   ECOSYSTEM_APP_TRIPLET,
   ECOSYSTEM_FOOTER_UI,
@@ -146,10 +147,7 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
 
             {/* Brand column */}
             <div className="space-y-3">
-              <div className="flex items-center gap-1">
-                <span className="text-base text-muted-foreground font-light">my</span>
-                <span className="text-lg font-semibold text-foreground font-display">UNO</span>
-              </div>
+              <BrandWordmark as="static" />
               <p className="text-sm text-muted-foreground leading-relaxed">
                 {t(ECOSYSTEM_FOOTER_UI.brandTagline)}
               </p>

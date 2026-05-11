@@ -2,17 +2,26 @@
  * @module LegalComplianceModal
  * @description Blocking modal that requires users to accept updated legal documents.
  */
-import React, { useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useLegalCompliance, LegalDocument } from '@/hooks/useLegalCompliance';
+import { useLegalCompliance } from '@/hooks/useLegalCompliance';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Shield } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
+import { lazyWithRetry } from '@/lib/lazyWithRetry';
+
+type MarkdownRenderer = React.ComponentType<{ children?: string }>;
+
+// Lazy import keeps the remark stack out of first paint (workaround for a
+// production Rollup eval crash) and only fetches the chunk when a user
+// actually expands a document.
+const Markdown = lazyWithRetry(
+  () => import('react-markdown') as Promise<{ default: MarkdownRenderer }>,
+);
 
 export function LegalComplianceModal() {
   const { pendingDocs, allAccepted, isLoading, acceptDocuments } = useLegalCompliance();
@@ -104,7 +113,15 @@ export function LegalComplianceModal() {
                     </button>
                     {expandedDoc === doc.id && (
                       <div className="mt-3 p-3 bg-muted/50 rounded-none text-sm prose prose-sm max-w-none dark:prose-invert">
-                        <ReactMarkdown>{doc.content_md}</ReactMarkdown>
+                        <Suspense
+                          fallback={
+                            <p className="text-muted-foreground text-xs">
+                              {isRu ? 'Загрузка текста…' : 'Loading text…'}
+                            </p>
+                          }
+                        >
+                          <Markdown>{doc.content_md}</Markdown>
+                        </Suspense>
                       </div>
                     )}
                   </div>

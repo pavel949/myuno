@@ -53,6 +53,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 const Index = React.lazy(() => import('@/pages/Index'));
 const WelcomeLanding = React.lazy(() => import('@/pages/WelcomeLanding'));
+const OnboardingFlow = React.lazy(() => import('@/pages/onboarding/OnboardingFlow'));
 
 // All lazy page imports from centralized registry
 import * as Pages from './pageRegistry';
@@ -179,6 +180,11 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/index" element={<Navigate to={APP_ROUTES.HOME} replace />} />
         <Route path={APP_ROUTES.PRICING} element={<LazyPage><Pages.PricingPage /></LazyPage>} />
         <Route path="/welcome-landing" element={<LazyPage><WelcomeLanding /></LazyPage>} />
+        {/* Friction-removal onboarding (4 sequential screens, ported from design handoff bundle) */}
+        <Route path="/onboarding" element={<LazyPage><OnboardingFlow initialStep="welcome" /></LazyPage>} />
+        <Route path="/onboarding/destination" element={<LazyPage><OnboardingFlow initialStep="destination" /></LazyPage>} />
+        <Route path="/onboarding/questions" element={<LazyPage><OnboardingFlow initialStep="questions" /></LazyPage>} />
+        <Route path="/onboarding/map" element={<LazyPage><OnboardingFlow initialStep="map" /></LazyPage>} />
         <Route path="/start" element={<LazyPage><Pages.StartOnboarding /></LazyPage>} />
         {/* StartOnboardingV2 deprecated → consolidated into /start */}
         <Route path="/start/v2" element={<Navigate to="/start" replace />} />

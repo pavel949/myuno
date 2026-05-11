@@ -18,7 +18,7 @@
 
 | ID | Surface | Что внутри |
 |----|---------|------------|
-| `arrive` | Arrive | SIM, такси, обмен, первичная регистрация |
+| `arrive` | Planning & arrival (RU: Планирование и прибытие) | SIM, транспорт, обмен; первые шаги после прилёта. Быстрый доступ к SOS/поддержке остаётся здесь UX-wise; функционально сервисы экстренного типа дополнительно тегируются JTBD **H**. |
 | `live` | Live | Бытовые услуги, еда, школы, врачи, lifestyle |
 | `manage` | Manage | PMS, MC, vendor portal (workspace) |
 | `invest` | Invest | Недвижимость, ClearView, deals |

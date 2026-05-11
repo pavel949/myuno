@@ -171,20 +171,62 @@
   --shadow-glow-accent: none;
 
   /* ═══════════════════════════════════════════════════════════
-     8 · TYPOGRAPHY — canon §3
-     RU: Unbounded (display) + Golos Text (body)
-     EN: Noto Serif (display) + Noto Sans (body)
-     Numbers/money: JetBrains Mono everywhere
+     8 · TYPOGRAPHY — primary triad: Geist + Source Serif 4 + IBM Plex Mono
+     Source Serif 4 (variable, italic-rich) carries the editorial display voice;
+     Geist (Vercel, variable gothic) is the neutral infra-govt body sans;
+     IBM Plex Mono carries data, captions, and numerics.
+     Locale-specific stacks (Unbounded/Golos for RU, Noto for EN) remain as
+     fallbacks for any callers that still reference --font-heading-ru etc.
      ═══════════════════════════════════════════════════════════ */
-  --font-heading-ru: 'Unbounded', 'Noto Serif', Georgia, serif;
-  --font-body-ru:    'Golos Text', 'Noto Sans', system-ui, sans-serif;
-  --font-heading-en: 'Noto Serif', Georgia, serif;
-  --font-body-en:    'Noto Sans', system-ui, -apple-system, sans-serif;
-  --font-mono:       'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  --font-heading-ru: 'Source Serif 4', 'Unbounded', 'Noto Serif', Georgia, serif;
+  --font-body-ru:    'Geist', 'Golos Text', 'Noto Sans', system-ui, sans-serif;
+  --font-heading-en: 'Source Serif 4', 'Noto Serif', Georgia, serif;
+  --font-body-en:    'Geist', 'Noto Sans', system-ui, -apple-system, sans-serif;
+  --font-mono:       'IBM Plex Mono', 'JetBrains Mono', 'SF Mono', Consolas, monospace;
 
-  /* Active defaults — overridden per <html lang> below. Default = EN. */
-  --font-display:    'Noto Serif', Georgia, serif;
-  --font-body:       'Noto Sans', system-ui, -apple-system, sans-serif;
+  /* Active defaults — overridden per <html lang> below for legacy locale-aware callers.
+     Both languages now resolve to Geist/Source Serif 4 first. */
+  --font-display:    'Source Serif 4', 'Noto Serif', Georgia, serif;
+  --font-body:       'Geist', 'Noto Sans', system-ui, -apple-system, sans-serif;
+
+  /* Prototype-equivalent aliases (onboarding & related infra-govt surfaces).
+     Direct counterparts to tokens.css from the design handoff bundle. */
+  --font-sans:       var(--font-body);
+  --font-serif:      var(--font-display);
+
+  /* Brand-color aliases used by handoff prototypes (onboarding, friction-removal).
+     Map to existing canonical HSL tokens so legacy callers continue to work. */
+  --uno-deep:           hsl(var(--brand-navy));
+  --uno-deep-hover:     hsl(var(--brand-navy-700));
+  --uno-deep-pressed:   hsl(var(--brand-navy-900));
+  --uno-ink:            hsl(var(--ink));
+  --uno-amber:          hsl(var(--brand-orange));
+  --uno-amber-hover:    hsl(var(--brand-orange-700));
+  --uno-amber-soft:     hsl(var(--brand-orange-100));
+  --uno-paper:          hsl(var(--brand-cream));
+  --uno-canvas:         hsl(var(--surface-raised));
+  --uno-surface:        hsl(var(--surface-white));
+  --uno-line:           hsl(var(--border-strong));
+  --uno-line-strong:    hsl(30 6% 80%);
+  --uno-muted:          hsl(var(--text-muted));
+  --uno-subtle:         hsl(var(--text-subtle));
+  --uno-ok:             hsl(var(--success));
+  --uno-ok-soft:        hsl(var(--success-bg));
+  --uno-warn:           hsl(var(--warning));
+  --uno-warn-soft:      hsl(var(--warning-bg));
+  --uno-alert:          hsl(var(--danger));
+  --uno-alert-soft:     hsl(var(--danger-bg));
+
+  /* Easing curves used by handoff prototypes */
+  --ease-standard:    cubic-bezier(0.2, 0.0, 0.2, 1);
+  --ease-emphasized:  cubic-bezier(0.2, 0.0, 0, 1);
+
+  /* Radii aliases from prototype */
+  --r-xs: 4px;
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-xl: 20px;
 
   /* ═══════════════════════════════════════════════════════════
      9 · CHART PALETTE — canon-aligned (navy + orange + categories)
@@ -315,14 +357,14 @@
    default          → Noto Serif + Noto Sans
    ═══════════════════════════════════════════════════════════ */
 html[lang='ru'] {
-  --font-display: 'Unbounded', 'Noto Serif', Georgia, serif;
-  --font-body:    'Golos Text', 'Noto Sans', system-ui, sans-serif;
+  --font-display: 'Source Serif 4', 'Unbounded', 'Noto Serif', Georgia, serif;
+  --font-body:    'Geist', 'Golos Text', 'Noto Sans', system-ui, sans-serif;
 }
 
 html[lang='en'],
 html:not([lang]) {
-  --font-display: 'Noto Serif', Georgia, serif;
-  --font-body:    'Noto Sans', system-ui, -apple-system, sans-serif;
+  --font-display: 'Source Serif 4', 'Noto Serif', Georgia, serif;
+  --font-body:    'Geist', 'Noto Sans', system-ui, -apple-system, sans-serif;
 }
 
 /* ═══════════════════════════════════════════════════════════

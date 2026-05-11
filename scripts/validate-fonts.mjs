@@ -44,6 +44,9 @@ const CANONICAL_FAMILIES = new Set([
   'Unbounded',
   'Golos Text',
   // EN + universal fallbacks
+  'Source Serif 4',
+  'Geist',
+  'IBM Plex Mono',
   'Noto Serif',
   'Noto Sans',
   // Numerics

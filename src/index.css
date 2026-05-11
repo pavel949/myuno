@@ -6,6 +6,10 @@
    but the override layer below wins via !important + :where() pattern. */
 @import './styles/canon-overrides.css';
 
+/* Onboarding flow (friction-removal animation + 4 screens). Scoped under
+   `.onboarding-scope` so it never leaks into other surfaces. */
+@import './styles/onboarding.css';
+
 /* Fonts loaded via index.html for better performance */
 
 @keyframes shake {

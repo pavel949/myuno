@@ -164,11 +164,12 @@ function adaptCategoryRow(
     valueEn: staticMatch?.valueEn ?? '',
     icon: staticMatch?.icon ?? STATIC_CATEGORIES[0].icon,
     color: row.color ?? staticMatch?.color ?? '#10B981',
+    // DB-backed catalog: leaf rows only — never inject static SSOT phantom services.
     services: childRows.length
       ? childRows
           .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
           .map((child) => adaptRowToService(child, row.slug))
-      : staticMatch?.services ?? [],
+      : [],
   };
 }
 

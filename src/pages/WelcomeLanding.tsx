@@ -1,13 +1,6 @@
 /**
- * WelcomeLanding — первый экран для неавторизованных пользователей.
- *
- * Стиль: Vercel-минимализм + myUNO mint accent.
- *
- * Источник истины по кластерам/категориям/сервисам:
- *   `src/lib/catalog/taxonomy.ts` (SSOT, 6 кластеров × 16 категорий × ~80 сервисов).
- *
- * Все счётчики на этом экране берутся напрямую из SSOT — никаких
- * параллельных списков и магических чисел.
+ * WelcomeLanding — first touchpoint for guest users.
+ * Goal: clearly explain value and lead to one next action.
  */
 import React, { useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -17,37 +10,26 @@ import {
   Shield,
   Globe,
   Sparkles,
+  Plane,
+  Home,
+  TrendingUp,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
+import { BrandWordmark } from '@/components/uno/BrandWordmark';
 import { cn } from '@/lib/utils';
 import { useCatalogFromDB } from '@/lib/catalog/useCatalogFromDB';
+import { buildCatalogAudienceMetrics } from '@/lib/catalog/catalogMetrics';
+import { useActiveLifeSituationsCount } from '@/hooks/useActiveLifeSituationsCount';
 import { APP_ROUTES } from '@/lib/config/routes';
 
-/**
- * Считаем сервисы и категории на каждый кластер из ЖИВОЙ БД (Master Taxonomy v1.0).
- * Хук фолбечится на статический SSOT, если БД недоступна.
- * Числа на лендинге всегда совпадают с тем, что показывает навигатор.
- */
-function useClusterStats() {
+function useWelcomeCatalogMetrics() {
   const { clusters, categories } = useCatalogFromDB();
-  return useMemo(() => {
-    const totalServices = categories.reduce((sum, cat) => sum + cat.services.length, 0);
-    const byCluster = clusters.map((c) => {
-      const cats = categories.filter((cat) => cat.clusterId === c.id);
-      const services = cats.reduce((sum, cat) => sum + cat.services.length, 0);
-      const isWorkspaceEmpty = c.audience === 'workspace' && services === 0;
-      return {
-        ...c,
-        categoriesCount: cats.length,
-        servicesCount: services,
-        hintsRu: isWorkspaceEmpty ? c.valueRu : cats.slice(0, 4).map((cat) => cat.labelRu).join(' · '),
-        hintsEn: isWorkspaceEmpty ? c.valueEn : cats.slice(0, 4).map((cat) => cat.labelEn).join(' · '),
-      };
-    });
-    return { byCluster, totalServices, clustersCount: clusters.length };
-  }, [clusters, categories]);
+  return useMemo(
+    () => buildCatalogAudienceMetrics(clusters, categories, { personas: [], role: null }),
+    [clusters, categories],
+  );
 }
 
 const TRUST = [
@@ -56,31 +38,54 @@ const TRUST = [
   { icon: Sparkles, en: 'AI concierge', ru: 'AI-консьерж' },
 ];
 
-// Реальное количество жизненных ситуаций в БД (`life_situations` where is_active).
-// Проверено 2026-04-24, держим вручную — если сильно поменяется, обновим.
-const LIFE_SITUATIONS_COUNT = 17;
+const QUICK_SCENARIOS = [
+  {
+    id: 'arrive',
+    icon: Plane,
+    route: APP_ROUTES.ARRIVE_CLUSTER,
+    titleRu: 'Я только прилетел',
+    titleEn: 'I just arrived',
+    bulletsRu: ['Трансфер и Fast Track', 'SIM и обмен валют', 'Поддержка 24/7'],
+    bulletsEn: ['Transfer & Fast Track', 'SIM and exchange', '24/7 support'],
+  },
+  {
+    id: 'live',
+    icon: Home,
+    route: APP_ROUTES.DISCOVER,
+    titleRu: 'Я обустраиваю жизнь',
+    titleEn: 'I am settling in',
+    bulletsRu: ['Дом и бытовые сервисы', 'Медицина, семья, питомцы', 'Проверенные исполнители'],
+    bulletsEn: ['Home and daily services', 'Health, family, pets', 'Verified providers'],
+  },
+  {
+    id: 'invest',
+    icon: TrendingUp,
+    route: APP_ROUTES.INVEST,
+    titleRu: 'Я смотрю инвестиции',
+    titleEn: 'I explore investments',
+    bulletsRu: ['Каталог объектов', 'Сделка и due diligence', 'Юр. и финансовая поддержка'],
+    bulletsEn: ['Property catalog', 'Deal and due diligence', 'Legal and finance support'],
+  },
+] as const;
 
 export default function WelcomeLanding() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const navigate = useNavigate();
-  const { byCluster, totalServices, clustersCount } = useClusterStats();
-  const categoriesCount = byCluster.reduce((sum, c) => sum + c.categoriesCount, 0);
+  const { byCluster, totalEligibleServices, clustersCount, categoriesCountAcrossVisible } =
+    useWelcomeCatalogMetrics();
+  const { data: lifeSituationsActive = 0, isLoading: lifeCountLoading } =
+    useActiveLifeSituationsCount();
+  const categoriesCount = categoriesCountAcrossVisible;
 
   return (
-    <div className="min-h-screen bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary">
-      {/* Top bar */}
+    <div
+      data-testid="welcome-landing"
+      className="min-h-screen bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary pb-20 sm:pb-0"
+    >
       <header className="sticky top-0 z-30 border-b border-border/40 bg-background/80">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-5">
-          <Link to="/" className="flex items-center gap-2 group">
-            <div className="grid h-7 w-7 place-items-center rounded-none bg-primary/15 text-primary ring-1 ring-primary/30">
-              <span className="text-[11px] font-bold tracking-tight">M</span>
-            </div>
-            <span className="text-[15px] font-semibold tracking-tight">
-              myUNO
-            </span>
-          </Link>
-
+          <BrandWordmark />
           <div className="flex items-center gap-1.5">
             <ThemeSwitcher variant="buttons" size="sm" />
             <LanguageSwitcher />
@@ -104,7 +109,6 @@ export default function WelcomeLanding() {
         </div>
       </header>
 
-      {/* Hero */}
       <section className="relative overflow-hidden border-b border-border/40">
         <div
           aria-hidden
@@ -117,7 +121,6 @@ export default function WelcomeLanding() {
         />
 
         <div className="relative mx-auto max-w-6xl px-5 pt-12 pb-16 sm:pt-20 sm:pb-24">
-          {/* Eyebrow */}
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -125,53 +128,42 @@ export default function WelcomeLanding() {
             className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-foreground"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-            {isRu ? (
-              <>
-                <span className="font-semibold text-primary">ПХУКЕТ</span>
-                <span className="text-muted-foreground">· LIVE</span>
-              </>
-            ) : (
-              <>
-                <span className="font-semibold text-primary">PHUKET</span>
-                <span className="text-muted-foreground">· LIVE NOW</span>
-              </>
-            )}
+            <span className="font-semibold text-primary">{isRu ? 'ПХУКЕТ' : 'PHUKET'}</span>
+            <span className="text-muted-foreground">· {isRu ? 'LIVE' : 'LIVE NOW'}</span>
           </motion.div>
 
-          {/* Headline */}
           <motion.h1
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.05 }}
-            className="mt-5 text-[40px] sm:text-[64px] font-semibold leading-[1.02] tracking-[-0.035em] max-w-3xl"
+            className="mt-5 text-[34px] sm:text-[56px] font-semibold leading-[1.05] tracking-[-0.03em] max-w-3xl"
           >
             {isRu ? (
               <>
-                Жизнь за границей —<br />
-                в одном приложении
+                Решите ключевые задачи
+                <br />
+                на Пхукете в одном приложении
               </>
             ) : (
               <>
-                Your life abroad,{' '}
-                <span className="text-muted-foreground/60">simplified —</span>{' '}
-                <span className="text-primary">one account.</span>
+                Solve your key Phuket tasks
+                <br />
+                in one app
               </>
             )}
           </motion.h1>
 
-          {/* Sub */}
           <motion.p
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="mt-5 max-w-xl text-[15px] sm:text-[17px] leading-relaxed text-muted-foreground"
+            className="mt-4 max-w-2xl text-[15px] sm:text-[17px] leading-relaxed text-muted-foreground"
           >
             {isRu
-              ? `${totalServices}+ сервисов в единой платформе: переезд и документы, жильё и управление недвижимостью, транспорт, медицина и страхование, lifestyle и family-сервисы, инвестиции и юридическое сопровождение. Один аккаунт, единый платёжный контур, проверенные партнёры и поддержка 24/7.`
-              : `${totalServices}+ services in one platform: relocation and documents, housing and property management, transport, healthcare and insurance, lifestyle and family services, investments and legal support. One account, one payment layer, verified partners, and 24/7 support.`}
+              ? 'Сначала — планирование и прибытие, затем быт, документы и инвестиции. Выберите сценарий ниже и начните за 60 секунд.'
+              : 'Start with planning and arrival, then daily life, legal tasks, and investments. Pick your scenario below and begin in 60 seconds.'}
           </motion.p>
 
-          {/* CTAs */}
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
@@ -186,18 +178,18 @@ export default function WelcomeLanding() {
                 'shadow-[0_1px_0_0_hsl(var(--background))_inset,0_0_0_1px_hsl(var(--foreground))]'
               )}
             >
-              {isRu ? 'Создать аккаунт' : 'Create account'}
-              <ArrowRight className="h-4 w-4 transition-transform " strokeWidth={2.5} />
+              {isRu ? 'Начать за 60 секунд' : 'Start in 60 seconds'}
+              <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
             </Link>
-            <Link
-              to="/auth"
+            <button
+              type="button"
+              onClick={() => navigate(APP_ROUTES.DISCOVER)}
               className="inline-flex h-11 items-center rounded-none border border-border bg-card/40 px-5 text-[14px] font-medium text-foreground hover:bg-card transition-colors"
             >
-              {isRu ? 'У меня есть аккаунт' : 'I have an account'}
-            </Link>
+              {isRu ? 'Посмотреть навигатор' : 'Explore navigator'}
+            </button>
           </motion.div>
 
-          {/* Stat row — реальные числа из SSOT и БД */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -205,9 +197,13 @@ export default function WelcomeLanding() {
             className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-px overflow-hidden rounded-none border border-border bg-border/50 max-w-3xl"
           >
             {[
-              { num: String(totalServices), en: 'services in the unified catalog', ru: 'сервисов в едином каталоге' },
+              { num: String(totalEligibleServices), en: 'services ready now', ru: 'доступных сервисов' },
               { num: String(clustersCount), en: 'platform sections', ru: 'разделов платформы' },
-              { num: String(LIFE_SITUATIONS_COUNT), en: 'life situations covered', ru: 'жизненных ситуаций' },
+              {
+                num: lifeCountLoading ? '...' : String(lifeSituationsActive),
+                en: 'life situations',
+                ru: 'жизненных ситуаций',
+              },
               { num: '24/7', en: 'AI concierge & SOS', ru: 'AI-консьерж и SOS' },
             ].map((s) => (
               <div key={s.num + s.en} className="bg-background px-5 py-4">
@@ -223,7 +219,48 @@ export default function WelcomeLanding() {
         </div>
       </section>
 
-          {/* Clusters grid — 6 canonical navigation surfaces × 3 columns */}
+      <section className="border-b border-border/40">
+        <div className="mx-auto max-w-6xl px-5 py-10 sm:py-14">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-[22px] sm:text-[28px] font-semibold tracking-[-0.02em]">
+              {isRu ? 'С чего начать' : 'Where to start'}
+            </h2>
+            <span className="text-[12px] text-muted-foreground">
+              {isRu ? 'Выберите свой сценарий' : 'Choose your scenario'}
+            </span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {QUICK_SCENARIOS.map((s) => {
+              const Icon = s.icon;
+              const bullets = isRu ? s.bulletsRu : s.bulletsEn;
+              return (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => navigate(s.route)}
+                  className="text-left rounded-none border border-border bg-card p-4 hover:bg-card/70 transition-colors"
+                >
+                  <div className="flex items-center gap-2 mb-3">
+                    <Icon className="h-4.5 w-4.5 text-primary" />
+                    <h3 className="text-[15px] font-semibold">
+                      {isRu ? s.titleRu : s.titleEn}
+                    </h3>
+                  </div>
+                  <ul className="space-y-1.5 text-[13px] text-muted-foreground">
+                    {bullets.map((b) => (
+                      <li key={b} className="flex items-start gap-2">
+                        <span className="mt-[7px] h-1 w-1 rounded-full bg-primary/70 shrink-0" />
+                        <span>{b}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
       <section className="border-b border-border/40">
         <div className="mx-auto max-w-6xl px-5 py-14 sm:py-20">
           <div className="flex items-baseline justify-between mb-8">
@@ -242,6 +279,8 @@ export default function WelcomeLanding() {
                 <motion.button
                   key={c.id}
                   type="button"
+                  data-testid="welcome-cluster-card"
+                  data-cluster-id={c.id}
                   onClick={() => navigate(c.homeRoute)}
                   initial={{ opacity: 0, y: 8 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -285,11 +324,11 @@ export default function WelcomeLanding() {
                               ? c.categoriesCount === 1
                                 ? 'категория'
                                 : c.categoriesCount < 5
-                                ? 'категории'
-                                : 'категорий'
+                                  ? 'категории'
+                                  : 'категорий'
                               : c.categoriesCount === 1
-                              ? 'category'
-                              : 'categories'}
+                                ? 'category'
+                                : 'categories'}
                           </>
                         ) : (
                           <>{isRu ? 'операционный кабинет' : 'operational workspace'}</>
@@ -309,13 +348,12 @@ export default function WelcomeLanding() {
 
           <p className="mt-6 text-[12px] text-muted-foreground/70">
             {isRu
-              ? `Каталог объединяет ${categoriesCount} категорий и ${totalServices} сервисов. Войдите, чтобы открыть полный навигатор.`
-              : `The catalog spans ${categoriesCount} categories and ${totalServices} services. Sign in to open the full navigator.`}
+              ? `Каталог объединяет ${categoriesCount} категорий и ${totalEligibleServices} доступных сервисов. Войдите, чтобы открыть персональный навигатор.`
+              : `The catalog spans ${categoriesCount} categories and ${totalEligibleServices} ready-to-use services. Sign in to unlock your personalized navigator.`}
           </p>
         </div>
       </section>
 
-      {/* Trust strip */}
       <section className="border-b border-border/40">
         <div className="mx-auto max-w-6xl px-5 py-10">
           <ul className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-[13px] text-muted-foreground">
@@ -332,26 +370,27 @@ export default function WelcomeLanding() {
         </div>
       </section>
 
-      {/* Final CTA */}
       <section>
         <div className="mx-auto max-w-3xl px-5 py-16 sm:py-24 text-center">
           <h2 className="text-[28px] sm:text-[40px] font-semibold tracking-[-0.025em] leading-[1.05]">
             {isRu ? (
               <>
-                Один аккаунт.<br />
-                Вся жизнь за рубежом.
+                Один аккаунт.
+                <br />
+                Персональный маршрут по задачам.
               </>
             ) : (
               <>
-                One account.<br />
-                Everything you need.
+                One account.
+                <br />
+                One personalized action path.
               </>
             )}
           </h2>
           <p className="mt-4 text-[14px] sm:text-[15px] text-muted-foreground">
             {isRu
-              ? 'Бесплатно. 60 секунд на регистрацию.'
-              : 'Free. 60 seconds to sign up.'}
+              ? 'Создайте аккаунт и получите персональный маршрут по вашим задачам.'
+              : 'Create an account and get a personalized route for your goals.'}
           </p>
           <div className="mt-7 flex justify-center">
             <Link
@@ -363,15 +402,24 @@ export default function WelcomeLanding() {
               )}
             >
               {isRu ? 'Начать сейчас' : 'Start now'}
-              <ArrowRight className="h-4 w-4 transition-transform " strokeWidth={2.5} />
+              <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
             </Link>
           </div>
-
           <p className="mt-8 text-[11px] tracking-[0.08em] text-muted-foreground/60">
             © myUNO · Phuket · Made for foreigners
           </p>
         </div>
       </section>
+
+      <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur px-4 py-3">
+        <Link
+          to="/auth?mode=signup"
+          className="w-full inline-flex h-11 items-center justify-center gap-2 rounded-none bg-primary text-primary-foreground text-[14px] font-semibold"
+        >
+          {isRu ? 'Начать за 60 секунд' : 'Start in 60 seconds'}
+          <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
+        </Link>
+      </div>
     </div>
   );
 }

@@ -141,11 +141,11 @@ export interface ClusterEntry {
 export const CLUSTERS: ClusterEntry[] = [
   {
     id: 'arrive',
-    labelRu: 'Прибытие',
-    labelEn: 'Arrival',
+    labelRu: 'Планирование и прибытие',
+    labelEn: 'Planning & arrival',
     labelTh: 'การเดินทาง',
-    valueRu: 'Туристы и новые резиденты: дорога из аэропорта, связь, деньги, мобильность.',
-    valueEn: 'Tourists & new residents: airport, connectivity, money, getting around.',
+    valueRu: 'Дорога из аэропорта, связь, деньги и первые шаги — до того, как жизнь уляжется в быт.',
+    valueEn: 'Airport logistics, connectivity, money, and first steps before everyday life settles in.',
     icon: Plane,
     color: '#00D68F',
     sortOrder: 1,
@@ -229,22 +229,7 @@ const SERVICES_URL = APP_ROUTES.SERVICES;
 const EXPERIENCES_URL = APP_ROUTES.EXPERIENCES;
 
 export const CATEGORIES: CategoryEntry[] = [
-  // ============== ARRIVE ==============
-  {
-    id: 'cat-emergency',
-    clusterId: 'arrive',
-    labelRu: 'Экстренные случаи',
-    labelEn: 'Emergency',
-    valueRu: 'SOS-кнопка и протоколы для нестандартных ситуаций.',
-    valueEn: 'SOS button and protocols when something goes wrong.',
-    icon: AlertTriangle,
-    color: '#EF4444',
-    services: [
-      { id: 'sos',           path: APP_ROUTES.SOS,           labelRu: 'SOS',           labelEn: 'SOS',           icon: AlertTriangle, status: 'available' },
-      { id: 'vip-concierge', path: APP_ROUTES.VIP_CONCIERGE, labelRu: 'VIP-консьерж',   labelEn: 'VIP Concierge', icon: Sparkles,      status: 'available' },
-      { id: 'support',       path: APP_ROUTES.SUPPORT,       labelRu: 'Поддержка',      labelEn: 'Support',       icon: ClipboardList, status: 'available' },
-    ],
-  },
+  // ============== ARRIVE (planning & arrival flow: logistics first; emergency last) ==============
   {
     id: 'cat-transport',
     clusterId: 'arrive',
@@ -255,11 +240,11 @@ export const CATEGORIES: CategoryEntry[] = [
     icon: Car,
     color: '#3B82F6',
     services: [
-      { id: 'transfer',   path: APP_ROUTES.AIRPORT_TRANSFER, labelRu: 'Трансферы',  labelEn: 'Transfers',  icon: Car,         status: 'available', verticalId: 'transfer', personaTags: ['tourist'] },
-      { id: 'fast-track', path: APP_ROUTES.FAST_TRACK,        labelRu: 'Fast Track',  labelEn: 'Fast Track', icon: Zap,         status: 'available', personaTags: ['tourist'] },
-      { id: 'vehicle',    path: APP_ROUTES.TRANSPORT,         labelRu: 'Авто и байки',labelEn: 'Car & bike', icon: Car,         status: 'available', verticalId: 'vehicle' },
-      { id: 'sim',        path: APP_ROUTES.SIM_START,         labelRu: 'SIM-карты',   labelEn: 'SIM cards',  icon: Smartphone,  status: 'available' },
-      { id: 'exchange',   path: APP_ROUTES.EXCHANGE,          labelRu: 'Курсы валют', labelEn: 'Exchange',   icon: ArrowLeftRight, status: 'available' },
+      { id: 'transfer',   path: APP_ROUTES.AIRPORT_TRANSFER, labelRu: 'Трансферы',  labelEn: 'Transfers',  icon: Car,         status: 'available', verticalId: 'transfer', personaTags: ['tourist'], jtbdClusters: ['A'] },
+      { id: 'fast-track', path: APP_ROUTES.FAST_TRACK,        labelRu: 'Fast Track',  labelEn: 'Fast Track', icon: Zap,         status: 'available', personaTags: ['tourist'], jtbdClusters: ['A'] },
+      { id: 'vehicle',    path: APP_ROUTES.TRANSPORT,         labelRu: 'Авто и байки',labelEn: 'Car & bike', icon: Car,         status: 'available', verticalId: 'vehicle', jtbdClusters: ['A'] },
+      { id: 'sim',        path: APP_ROUTES.SIM_START,         labelRu: 'SIM-карты',   labelEn: 'SIM cards',  icon: Smartphone,  status: 'available', jtbdClusters: ['A'] },
+      { id: 'exchange',   path: APP_ROUTES.EXCHANGE,          labelRu: 'Курсы валют', labelEn: 'Exchange',   icon: ArrowLeftRight, status: 'available', jtbdClusters: ['A'] },
     ],
   },
   {
@@ -272,11 +257,26 @@ export const CATEGORIES: CategoryEntry[] = [
     icon: Compass,
     color: '#06B6D4',
     services: [
-      { id: 'experience', path: EXPERIENCES_URL,                          labelRu: 'Впечатления',  labelEn: 'Experiences',   icon: Compass,      status: 'available', verticalId: 'experience' },
-      { id: 'tours',      path: `${EXPERIENCES_URL}?type=tour`,           labelRu: 'Туры',          labelEn: 'Tours',         icon: Route,        status: 'available' },
-      { id: 'water',      path: `${EXPERIENCES_URL}?type=activity`,       labelRu: 'Вода и активности', labelEn: 'Water & activities', icon: Waves, status: 'available', verticalId: 'water_activity' },
-      { id: 'yacht',      path: APP_ROUTES.YACHTS,                        labelRu: 'Яхты',          labelEn: 'Yachts',        icon: Anchor,       status: 'available', verticalId: 'yacht' },
-      { id: 'event',      path: APP_ROUTES.EVENTS,                        labelRu: 'События',       labelEn: 'Events',        icon: CalendarDays, status: 'available', verticalId: 'event' },
+      { id: 'experience', path: EXPERIENCES_URL,                          labelRu: 'Впечатления',  labelEn: 'Experiences',   icon: Compass,      status: 'available', verticalId: 'experience', jtbdClusters: ['A', 'I'] },
+      { id: 'tours',      path: `${EXPERIENCES_URL}?type=tour`,           labelRu: 'Туры',          labelEn: 'Tours',         icon: Route,        status: 'available', jtbdClusters: ['A', 'I'] },
+      { id: 'water',      path: `${EXPERIENCES_URL}?type=activity`,       labelRu: 'Вода и активности', labelEn: 'Water & activities', icon: Waves, status: 'available', verticalId: 'water_activity', jtbdClusters: ['A', 'I'] },
+      { id: 'yacht',      path: APP_ROUTES.YACHTS,                        labelRu: 'Яхты',          labelEn: 'Yachts',        icon: Anchor,       status: 'available', verticalId: 'yacht', jtbdClusters: ['A', 'I'] },
+      { id: 'event',      path: APP_ROUTES.EVENTS,                        labelRu: 'События',       labelEn: 'Events',        icon: CalendarDays, status: 'available', verticalId: 'event', jtbdClusters: ['A', 'I'] },
+    ],
+  },
+  {
+    id: 'cat-emergency',
+    clusterId: 'arrive',
+    labelRu: 'Экстренные случаи',
+    labelEn: 'Emergency',
+    valueRu: 'SOS-кнопка и протоколы для нестандартных ситуаций.',
+    valueEn: 'SOS button and protocols when something goes wrong.',
+    icon: AlertTriangle,
+    color: '#EF4444',
+    services: [
+      { id: 'sos',           path: APP_ROUTES.SOS,           labelRu: 'SOS',           labelEn: 'SOS',           icon: AlertTriangle, status: 'available', jtbdClusters: ['H', 'A'] },
+      { id: 'vip-concierge', path: APP_ROUTES.VIP_CONCIERGE, labelRu: 'VIP-консьерж',   labelEn: 'VIP Concierge', icon: Sparkles,      status: 'available', jtbdClusters: ['H', 'A'] },
+      { id: 'support',       path: APP_ROUTES.SUPPORT,       labelRu: 'Поддержка',      labelEn: 'Support',       icon: ClipboardList, status: 'available', jtbdClusters: ['H', 'A'] },
     ],
   },
 

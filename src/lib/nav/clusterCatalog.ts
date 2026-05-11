@@ -22,6 +22,8 @@ import {
   type ClusterEntry,
   type ServiceEntry,
 } from '@/lib/catalog';
+
+export type ClusterVisibilityFields = Pick<ClusterEntry, 'audience' | 'personas' | 'roles'>;
 import { pickTriplet } from '@/lib/ecosystemGlossary';
 
 // ─────────────────────────────────────────────────────────────
@@ -31,6 +33,8 @@ import { pickTriplet } from '@/lib/ecosystemGlossary';
 export type ClusterServiceStatus = 'available' | 'soon' | 'pro';
 
 export interface ClusterService {
+  /** Stable service id (matches ServiceEntry.id and categories.slug) */
+  id?: string;
   labelRu: string;
   labelEn: string;
   labelTh?: string;
@@ -59,6 +63,13 @@ export interface ClusterCatalogEntry {
   roles?: string[];
   /** Canonical landing route for the cluster card (Home/ClusterGrid). */
   homeRoute: string;
+  /** Grouped categories for Navigator (parity with DB / SSOT taxonomy order). */
+  sectionCategories?: Array<{
+    id: string;
+    labelRu: string;
+    labelEn: string;
+    services: ClusterService[];
+  }>;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -67,6 +78,7 @@ export interface ClusterCatalogEntry {
 
 function ssotServiceToCluster(svc: ServiceEntry): ClusterService {
   return {
+    id: svc.id,
     labelRu: svc.labelRu,
     labelEn: svc.labelEn,
     labelTh: svc.labelTh,
@@ -84,6 +96,13 @@ function buildClusterEntry(cluster: ClusterEntry): ClusterCatalogEntry {
     .filter((cat) => cat.clusterId === cluster.id)
     .flatMap((cat) => cat.services.map(ssotServiceToCluster));
 
+  const sectionCategories = CATEGORIES.filter((cat) => cat.clusterId === cluster.id).map((cat) => ({
+    id: cat.id,
+    labelRu: cat.labelRu,
+    labelEn: cat.labelEn,
+    services: cat.services.map(ssotServiceToCluster),
+  }));
+
   return {
     id: cluster.id,
     labelRu: cluster.labelRu,
@@ -98,6 +117,7 @@ function buildClusterEntry(cluster: ClusterEntry): ClusterCatalogEntry {
     personas: cluster.personas,
     roles: cluster.roles,
     homeRoute: cluster.homeRoute,
+    sectionCategories,
   };
 }
 
@@ -152,8 +172,8 @@ export interface ClusterAudienceContext {
   role?: string | null;
 }
 
-export function isClusterVisibleToUser(
-  cluster: ClusterCatalogEntry,
+export function isClusterEntryVisibleToAudience(
+  cluster: ClusterVisibilityFields,
   ctx: ClusterAudienceContext,
 ): boolean {
   if (cluster.audience !== 'workspace') return true;
@@ -161,6 +181,13 @@ export function isClusterVisibleToUser(
   const personaMatch = (cluster.personas ?? []).some((p) => personas.includes(p));
   const roleMatch = !!role && (cluster.roles ?? []).includes(role);
   return personaMatch || roleMatch;
+}
+
+export function isClusterVisibleToUser(
+  cluster: ClusterCatalogEntry,
+  ctx: ClusterAudienceContext,
+): boolean {
+  return isClusterEntryVisibleToAudience(cluster, ctx);
 }
 
 export function filterCatalogForUser(
@@ -230,9 +257,21 @@ export function useLiveClusterCatalog(ctx?: ClusterAudienceContext): {
 
   const catalog = useMemo<ClusterCatalogEntry[]>(() => {
     const built = dbClusterCatalog.map<ClusterCatalogEntry>((cluster) => {
-      const services: ClusterService[] = cluster.categories.flatMap((cat) =>
-        cat.services.map(ssotServiceToCluster),
-      );
+      const sectionCategories =
+        cluster.categories.length > 0
+          ? cluster.categories.map((cat) => ({
+              id: cat.id,
+              labelRu: cat.labelRu,
+              labelEn: cat.labelEn,
+              services: cat.services.map(ssotServiceToCluster),
+            }))
+          : undefined;
+
+      const services: ClusterService[] =
+        sectionCategories?.flatMap((sc) => sc.services) ??
+        CLUSTER_CATALOG.find((c) => c.id === cluster.id)?.services ??
+        cluster.categories.flatMap((cat) => cat.services.map(ssotServiceToCluster));
+
       return {
         id: cluster.id,
         labelRu: cluster.labelRu,
@@ -247,6 +286,7 @@ export function useLiveClusterCatalog(ctx?: ClusterAudienceContext): {
         personas: cluster.personas,
         roles: cluster.roles,
         homeRoute: cluster.homeRoute,
+        sectionCategories,
       };
     });
     if (built.length === 0) return CLUSTER_CATALOG;

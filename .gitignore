@@ -36,3 +36,6 @@ supabase/.temp/
 # Playwright (local artifacts; never ship reports to git)
 playwright-report/
 test-results/
+.vercel
+.tmp-design/
+design-archive/
