@@ -17,7 +17,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import {
-  Search, LayoutGrid, X, ArrowRight,
+  Search, LayoutGrid, X,
   AlertTriangle, Plane, Home, TrendingUp, Stethoscope,
   MapPin, Smartphone, ArrowLeftRight, DollarSign,
   Crown, MessageCircle, Car, Zap, Anchor, Route, Waves, CalendarDays, Compass,
@@ -51,11 +51,11 @@ import type { Language } from '@/i18n';
 
 const CAT_COLOR: Record<string, { dot: string; iconBg: string; iconFg: string }> = {
   arrive: { dot: '#5B8FCC', iconBg: 'rgba(91,143,204,0.18)',  iconFg: '#8FB6E5' },
-  live:   { dot: '#4EB883', iconBg: 'rgba(31,122,76,0.18)',   iconFg: '#4EB883' },
-  manage: { dot: '#1F7A4C', iconBg: 'rgba(31,122,76,0.18)',   iconFg: '#4EB883' },
-  invest: { dot: '#D96B1A', iconBg: 'rgba(217,107,26,0.18)', iconFg: '#D96B1A' },
-  legal:  { dot: '#8FB6E5', iconBg: 'rgba(107,143,204,0.18)', iconFg: '#9BB5D9' },
-  build:  { dot: '#B09FCC', iconBg: 'rgba(110,90,140,0.18)', iconFg: '#C0B2DC' },
+  live:   { dot: '#B6CFE9', iconBg: 'rgba(127,167,216,0.15)', iconFg: '#B6CFE9' },
+  manage: { dot: '#1F7A4C', iconBg: 'rgba(31,122,76,0.20)',   iconFg: '#6FCB99' },
+  invest: { dot: '#D96B1A', iconBg: 'rgba(217,107,26,0.18)',  iconFg: '#F3924A' },
+  legal:  { dot: '#0A2240', iconBg: 'rgba(10,34,64,0.50)',    iconFg: '#C8D6E8' },
+  build:  { dot: '#6E5A8C', iconBg: 'rgba(110,90,140,0.25)',  iconFg: '#C9B6E2' },
 };
 
 function catColor(clusterId: string) {
@@ -374,10 +374,11 @@ function ServiceTile({
     <button
       onClick={() => !isSoon && onNavigate(service.path)}
       disabled={isSoon}
-      className="relative flex flex-col gap-2 p-3 rounded-[10px] text-left transition-all duration-150 active:scale-[0.97] disabled:cursor-default"
+      className="relative flex flex-col gap-2.5 p-3.5 rounded-[10px] text-left transition-all duration-150 hover:bg-white/[0.06] hover:border-white/20 hover:-translate-y-px active:scale-[0.97] disabled:cursor-default disabled:hover:translate-y-0"
       style={{
-        background: '#14202E',
-        border: '1px solid rgba(255,255,255,0.07)',
+        background: 'rgba(255,255,255,0.03)',
+        border: '1px solid rgba(255,255,255,0.08)',
+        minHeight: '116px',
         opacity: isSoon ? 0.65 : 1,
       }}
       aria-label={label}
@@ -415,36 +416,38 @@ function FeaturedTile({
   return (
     <button
       onClick={() => onNavigate(data.path)}
-      className="relative col-span-2 row-span-2 flex flex-col justify-between p-4 rounded-[10px] text-left transition-all duration-150 active:scale-[0.98]"
+      className="relative col-span-2 row-span-2 flex flex-col justify-between p-[22px] rounded-[10px] text-left transition-all duration-150 hover:-translate-y-px active:scale-[0.98]"
       style={{
-        background: 'linear-gradient(145deg, #0A2240 0%, #143055 100%)',
-        backgroundImage: 'radial-gradient(circle at 85% 10%, rgba(217,107,26,0.35) 0%, transparent 55%), linear-gradient(145deg, #0A2240, #143055)',
-        border: '1px solid rgba(255,255,255,0.10)',
+        background: 'linear-gradient(135deg, rgba(217,107,26,0.18), rgba(217,107,26,0.04))',
+        border: '1px solid rgba(217,107,26,0.3)',
+        minHeight: '240px',
       }}
     >
       <BadgePill badge={data.badge} />
       <div
-        className="flex items-center justify-center w-8 h-8 rounded-[8px]"
+        className="flex items-center justify-center w-9 h-9 rounded-[8px]"
         style={{ background: 'rgba(217,107,26,0.2)' }}
       >
-        <Icon className="w-4.5 h-4.5" style={{ color: '#D96B1A' }} />
+        <Icon className="w-[18px] h-[18px]" style={{ color: '#F3924A' }} />
       </div>
-      <div className="flex flex-col gap-1.5">
+      <div className="flex flex-col gap-1">
         <h6
-          className="text-[17px] font-bold leading-tight text-white"
-          style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic' }}
+          className="text-[18px] leading-[23px] text-white"
+          style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontWeight: 500 }}
         >
           {language === 'ru' ? data.nameRu : data.nameEn}
         </h6>
-        <p className="text-[11px] text-white/65 leading-snug">
+        <p className="text-[12px] text-white/60 leading-[17px]">
           {language === 'ru' ? data.descRu : data.descEn}
         </p>
-        <div className="mt-1">
-          <span className="font-mono text-[28px] font-bold text-white leading-none">{data.stat}</span>
-          <p className="font-mono text-[8.5px] uppercase tracking-[0.07em] text-white/40 mt-1">
-            {language === 'ru' ? data.statLabelRu : data.statLabelEn}
-          </p>
-        </div>
+      </div>
+      <div>
+        <span className="font-mono text-[22px] font-medium text-white tracking-[-0.02em] leading-none">
+          {data.stat}
+        </span>
+        <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-white/45 mt-1">
+          {language === 'ru' ? data.statLabelRu : data.statLabelEn}
+        </p>
       </div>
     </button>
   );
@@ -630,49 +633,20 @@ export default function NavigatorPage() {
     <AppLayout>
       <div
         className="min-h-full -mx-4 px-4 pb-28"
-        style={{ background: '#0B1320', color: '#F5F4F0' }}
+        style={{ background: '#0A2240', color: '#E8ECF2' }}
       >
-
-        {/* ── SOS strip ─────────────────────────────────────── */}
-        <button
-          onClick={() => navigate(APP_ROUTES.SOS)}
-          className="w-full flex items-center justify-between gap-3 px-4 py-2.5 text-left transition-opacity hover:opacity-90"
-          style={{ background: 'rgba(180,35,24,0.15)', borderBottom: '1px solid rgba(180,35,24,0.25)' }}
-        >
-          <div className="flex items-center gap-2.5 min-w-0">
-            <span
-              className="w-2 h-2 rounded-full shrink-0 animate-pulse"
-              style={{ background: '#B42318' }}
-            />
-            <span className="font-semibold text-[13px]" style={{ color: '#F5A5A0' }}>
-              {isRu ? 'SOS · 24/7 на русском' : 'SOS · 24/7 in English'}
-            </span>
-            <span className="font-mono text-[10px] text-white/45 hidden sm:inline truncate">
-              {isRu
-                ? 'врач · авария · полиция · ввоз питомца — одно касание'
-                : 'doctor · accident · police · pet import — one tap'}
-            </span>
-          </div>
-          <span
-            className="shrink-0 font-mono text-[10px] uppercase tracking-[0.1em] font-bold px-3 py-1.5 rounded-none"
-            style={{ background: '#B42318', color: '#fff' }}
-          >
-            {isRu ? 'ВЫЗВАТЬ →' : 'CALL →'}
-          </span>
-        </button>
-
         <div className="max-w-[1280px] mx-auto py-6 space-y-6">
 
           {/* ── Hero ──────────────────────────────────────── */}
-          <div className="space-y-2">
+          <div className="space-y-3">
             <p
               className="font-mono text-[10px] uppercase tracking-[0.14em]"
-              style={{ color: '#D96B1A' }}
+              style={{ color: 'rgba(217,107,26,0.9)' }}
             >
               {isRu ? 'PHUKET EDITION · LIVE' : 'PHUKET EDITION · LIVE'}
             </p>
             <h1
-              className="text-[28px] sm:text-[36px] font-bold leading-[1.1] tracking-[-0.02em]"
+              className="text-[28px] sm:text-[36px] lg:text-[40px] font-semibold leading-[1.12] tracking-[-0.025em] text-white max-w-3xl"
             >
               {isRu ? (
                 <>
@@ -692,79 +666,127 @@ export default function NavigatorPage() {
                 </>
               )}
             </h1>
-            <p className="text-[13px] sm:text-[15px] text-white/60 leading-relaxed max-w-lg">
+            <p className="text-[13px] sm:text-[16px] text-white/65 leading-[1.5] max-w-xl">
               {isRu
                 ? `${totalServices} сервисов, ${stats?.providers ?? 48}+ проверенных партнёров. Найдите своё за 30 секунд — или нажмите ситуацию ниже.`
                 : `${totalServices} services, ${stats?.providers ?? 48}+ verified partners. Find yours in 30 seconds — or tap your situation below.`}
             </p>
           </div>
 
-          {/* ── Persona toggle ──────────────────────────── */}
-          <div className="flex gap-1.5 flex-wrap">
-            {personaTabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActivePersona(tab.id)}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-[13px] font-medium transition-all duration-150"
-                style={
-                  activePersona === tab.id
-                    ? { background: '#D96B1A', color: '#fff' }
-                    : { background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.65)', border: '1px solid rgba(255,255,255,0.08)' }
-                }
-              >
-                {isRu ? tab.labelRu : tab.labelEn}
-                <span
-                  className="font-mono text-[10px]"
-                  style={{ color: activePersona === tab.id ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.35)' }}
-                >
-                  {tab.count}
+          {/* ── SOS strip ─────────────────────────────────────── */}
+          <button
+            onClick={() => navigate(APP_ROUTES.SOS)}
+            className="w-full flex items-center justify-between gap-3 px-4 sm:px-5 py-3 text-left rounded-[10px] transition-opacity hover:opacity-95 active:scale-[0.99]"
+            style={{
+              background: 'linear-gradient(180deg, rgba(180,35,24,0.15), rgba(180,35,24,0.06))',
+              border: '1px solid rgba(180,35,24,0.45)',
+            }}
+          >
+            <div className="flex items-center gap-3.5 min-w-0">
+              <span
+                className="w-2.5 h-2.5 rounded-full shrink-0 animate-pulse"
+                style={{ background: '#E45F50', boxShadow: '0 0 0 4px rgba(228,95,80,0.25)' }}
+              />
+              <div className="flex flex-col sm:flex-row sm:items-baseline sm:gap-2 min-w-0">
+                <span className="font-semibold text-[14px] text-white">
+                  {isRu ? 'SOS · 24/7 на русском' : 'SOS · 24/7 in English'}
                 </span>
-              </button>
-            ))}
+                <span className="text-[12px] text-white/65 truncate">
+                  {isRu
+                    ? 'врач · авария · полиция · ввоз питомца — одно касание'
+                    : 'doctor · accident · police · pet import — one tap'}
+                </span>
+              </div>
+            </div>
+            <span
+              className="shrink-0 font-mono text-[11px] uppercase tracking-[0.1em] font-medium text-white px-3 py-2 rounded-[6px]"
+              style={{ border: '1px solid rgba(255,255,255,0.4)' }}
+            >
+              {isRu ? 'Вызвать →' : 'Call →'}
+            </span>
+          </button>
+
+          {/* ── Persona toggle ──────────────────────────── */}
+          <div
+            className="inline-flex gap-1 p-1 flex-wrap"
+            style={{
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: '12px',
+              width: 'fit-content',
+              maxWidth: '100%',
+            }}
+          >
+            {personaTabs.map((tab) => {
+              const active = activePersona === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActivePersona(tab.id)}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-[8px] text-[13px] font-medium leading-none tracking-[-0.005em] transition-all duration-150"
+                  style={
+                    active
+                      ? { background: '#D96B1A', color: '#fff' }
+                      : { background: 'transparent', color: 'rgba(255,255,255,0.6)' }
+                  }
+                >
+                  {isRu ? tab.labelRu : tab.labelEn}
+                  <span
+                    className="font-mono text-[10px]"
+                    style={{ opacity: active ? 0.7 : 0.5 }}
+                  >
+                    {tab.count}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
           {/* ── Search ──────────────────────────────────── */}
-          <div className="space-y-2">
+          <div className="space-y-2.5 max-w-[720px]">
             <div className="relative">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-none" />
+              <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-white/50 pointer-events-none" />
               <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={isRu ? 'Найти сервис, партнёра или ситуацию…' : 'Find service, partner or situation…'}
-                className="w-full h-11 pl-10 pr-10 rounded-none text-[14px] bg-transparent outline-none"
+                className="w-full text-[15px] outline-none placeholder:text-white/45"
                 style={{
                   background: 'rgba(255,255,255,0.06)',
-                  border: '1px solid rgba(255,255,255,0.1)',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  borderRadius: '14px',
                   color: '#F5F4F0',
                   caretColor: '#D96B1A',
+                  padding: '16px 60px 16px 50px',
                 }}
               />
               <kbd
-                className="absolute right-3 top-1/2 -translate-y-1/2 font-mono text-[10px] px-1.5 py-0.5 rounded-none"
-                style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.3)', border: '1px solid rgba(255,255,255,0.08)' }}
+                className="absolute right-4 top-1/2 -translate-y-1/2 font-mono text-[10px] px-1.5 py-[3px] rounded-[3px]"
+                style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)' }}
               >
                 ⌘K
               </kbd>
               {query && (
                 <button
                   onClick={() => setQuery('')}
-                  className="absolute right-10 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70"
+                  className="absolute right-14 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70"
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <X className="w-4 h-4" />
                 </button>
               )}
             </div>
             {!query && (
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-mono text-[9px] uppercase tracking-[0.12em] text-white/30">
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-white/40">
                   {isRu ? 'СЕЙЧАС ИЩУТ' : 'POPULAR'}
                 </span>
                 {(isRu ? POPULAR.ru : POPULAR.en).map((term) => (
                   <button
                     key={term}
                     onClick={() => setQuery(term)}
-                    className="text-[12px] font-medium text-white/55 hover:text-white/85 transition-colors underline decoration-white/20 underline-offset-2"
+                    className="text-[12px] text-white/75 hover:text-white transition-colors pb-px"
+                    style={{ borderBottom: '1px dotted rgba(255,255,255,0.3)' }}
                   >
                     {term}
                   </button>
@@ -814,34 +836,30 @@ export default function NavigatorPage() {
                     <button
                       key={s.id}
                       onClick={() => setActiveCluster(s.filterId)}
-                      className="flex flex-col gap-2.5 p-4 rounded-[10px] text-left transition-all duration-150 hover:border-white/15 active:scale-[0.98]"
-                      style={{ background: '#14202E', border: '1px solid rgba(255,255,255,0.07)' }}
+                      className="relative flex flex-col justify-between gap-3 p-[18px] rounded-[12px] text-left transition-all duration-150 hover:bg-white/[0.06] hover:border-white/20 hover:-translate-y-px active:scale-[0.98]"
+                      style={{
+                        background: 'rgba(255,255,255,0.03)',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        minHeight: '130px',
+                      }}
                     >
-                      <div className="flex items-center justify-between">
+                      <span className="absolute top-[18px] right-[18px] text-base text-white/40">→</span>
+                      <div>
                         <div
-                          className="w-7 h-7 rounded-[7px] flex items-center justify-center"
+                          className="w-[30px] h-[30px] rounded-[7px] flex items-center justify-center"
                           style={{ background: 'rgba(217,107,26,0.18)' }}
                         >
                           <Icon className="w-4 h-4" style={{ color: '#D96B1A' }} />
                         </div>
-                        <ArrowRight className="w-3.5 h-3.5 text-white/25" />
-                      </div>
-                      <div>
-                        <h6 className="text-[13px] font-semibold text-white leading-tight">
+                        <h6 className="text-[15px] font-semibold text-white leading-[19px] tracking-[-0.01em] mt-3.5">
                           {isRu ? s.titleRu : s.titleEn}
                         </h6>
-                        <p className="text-[10.5px] text-white/45 leading-snug mt-1">
+                        <p className="text-[12px] text-white/55 leading-[17px] mt-1.5">
                           {isRu ? s.stepsRu : s.stepsEn}
                         </p>
                       </div>
-                      <div className="flex items-center gap-2 mt-auto">
-                        <span className="font-mono text-[8.5px] text-white/30 uppercase tracking-[0.08em]">
-                          {isRu ? s.svcRu : s.svcEn}
-                        </span>
-                        <span className="text-white/20">·</span>
-                        <span className="font-mono text-[8.5px] text-white/30 uppercase tracking-[0.08em]">
-                          {isRu ? s.timeRu : s.timeEn}
-                        </span>
+                      <div className="font-mono text-[10px] text-white/40 uppercase tracking-[0.06em]">
+                        {isRu ? `${s.svcRu} · ${s.timeRu}` : `${s.svcEn} · ${s.timeEn}`}
                       </div>
                     </button>
                   );
@@ -870,33 +888,36 @@ export default function NavigatorPage() {
                   const hasFeature = !!featured;
 
                   return (
-                    <section key={cluster.id}>
+                    <section key={cluster.id} className="pt-2">
                       {/* Section header */}
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
+                      <div
+                        className="flex items-end justify-between gap-3 pb-2.5 mb-4"
+                        style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}
+                      >
+                        <div className="space-y-1.5 min-w-0">
+                          <div className="flex items-baseline gap-3.5 flex-wrap">
                             <span
-                              className="w-3 h-3 rounded-none shrink-0"
+                              className="w-2.5 h-2.5 rounded-[2px] inline-block translate-y-px shrink-0"
                               style={{ background: col.dot }}
                             />
                             <h2
-                              className="text-[18px] sm:text-[20px] font-bold leading-none"
+                              className="text-[18px] sm:text-[20px] font-semibold leading-none tracking-[-0.005em] text-white"
                               style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic' }}
                             >
                               {getClusterHeaderLabel(cluster, language)}
                             </h2>
-                            <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-white/35">
+                            <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-white/40">
                               {eligible.length} {isRu ? 'СЕРВИСОВ' : 'SERVICES'}
                             </span>
                           </div>
-                          <p className="text-[12px] text-white/45 ml-5 leading-snug max-w-md">
+                          <p className="text-[13px] text-white/55 leading-snug max-w-[520px]">
                             {language === 'ru' ? cluster.valueRu : cluster.valueEn}
                           </p>
                         </div>
                         <button
                           onClick={() => setActiveCluster(activeCluster === cluster.id ? null : cluster.id)}
-                          className="shrink-0 font-mono text-[10px] uppercase tracking-[0.08em] transition-colors"
-                          style={{ color: '#D96B1A' }}
+                          className="shrink-0 text-[12px] text-white/60 hover:text-white/85 transition-colors pb-px"
+                          style={{ borderBottom: '1px dotted rgba(255,255,255,0.3)' }}
                         >
                           {isRu ? `Все ${eligible.length} →` : `All ${eligible.length} →`}
                         </button>
@@ -949,30 +970,30 @@ export default function NavigatorPage() {
 
               {/* ── Trust strip ───────────────────────────── */}
               <div
-                className="flex flex-wrap items-center justify-between gap-4 py-4 px-0"
-                style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}
+                className="flex flex-wrap items-center justify-between gap-4 px-5 sm:px-6 py-[18px] rounded-[10px]"
+                style={{
+                  background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                }}
               >
-                <div className="flex flex-wrap gap-6">
+                <div className="flex flex-wrap gap-x-8 gap-y-2 font-mono text-[11px] tracking-[0.06em] text-white/60">
                   {[
                     { num: `${stats?.properties ?? 23}+`, labelRu: 'ОБЪЕКТОВ',   labelEn: 'PROPERTIES' },
                     { num: `${stats?.providers ?? 48}+`,  labelRu: 'ПАРТНЁРОВ',  labelEn: 'PARTNERS' },
                     { num: '24/7',                        labelRu: 'ПОДДЕРЖКА',  labelEn: 'SUPPORT' },
                     { num: '100%',                        labelRu: 'ПРОВЕРЕНО',  labelEn: 'VERIFIED' },
                   ].map((t) => (
-                    <div key={t.num + t.labelEn} className="flex items-baseline gap-1.5">
-                      <span className="font-mono text-[20px] font-bold" style={{ color: '#D96B1A' }}>
+                    <span key={t.num + t.labelEn} className="flex items-baseline gap-1.5">
+                      <b className="text-[18px] font-semibold" style={{ color: '#D96B1A' }}>
                         {t.num}
-                      </span>
-                      <span className="font-mono text-[9px] uppercase tracking-[0.1em] text-white/35">
-                        {isRu ? t.labelRu : t.labelEn}
-                      </span>
-                    </div>
+                      </b>
+                      <span>{isRu ? t.labelRu : t.labelEn}</span>
+                    </span>
                   ))}
                 </div>
                 <button
                   onClick={() => window.dispatchEvent(new CustomEvent('navigator:open-apps-drawer'))}
-                  className="flex items-center gap-1.5 text-[12px] font-medium transition-opacity hover:opacity-80"
-                  style={{ color: '#D96B1A' }}
+                  className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.1em] text-white/70 hover:text-white transition-colors"
                 >
                   <LayoutGrid className="w-3.5 h-3.5" />
                   {isRu ? 'Все сервисы →' : 'All services →'}
