@@ -36,9 +36,8 @@ function rowToRecord(row: RelocationArticleRow): RelocationArticleRecord {
 
 async function fetchPublishedArticles(): Promise<RelocationArticleRecord[]> {
   // Table added in migration — regenerate Supabase types when convenient.
-  // @ts-expect-error relocation_articles not yet in generated Database type
   const { data, error } = await supabase
-    .from('relocation_articles')
+    .from('relocation_articles' as never)
     .select('slug, category, title_en, title_ru, summary_en, summary_ru, content_en, content_ru, related_route, sort_order')
     .eq('is_published', true)
     .order('sort_order', { ascending: true });
