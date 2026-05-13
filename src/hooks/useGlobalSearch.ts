@@ -404,7 +404,7 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
         return (b.rating || 0) - (a.rating || 0);
       });
 
-      const finalResults = allResults.slice(0, 15);
+      const finalResults = allResults.slice(0, 25);
 
       // Cache results
       cacheRef.current.set(searchTerm, { results: finalResults, timestamp: Date.now() });
