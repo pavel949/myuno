@@ -42,9 +42,8 @@ export function useRelocationPlan() {
     queryKey: ['relocation_plan', user?.id ?? 'anon'],
     queryFn: async (): Promise<RelocationPlanLocal | null> => {
       if (user?.id) {
-        // @ts-expect-error relocation_plans not yet in generated Database type
         const { data, error } = await supabase
-          .from('relocation_plans')
+          .from('relocation_plans' as never)
           .select('quiz_answers, steps, updated_at')
           .eq('user_id', user.id)
           .maybeSingle();
