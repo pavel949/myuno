@@ -174,29 +174,37 @@ export function useCompanyMembers(companyId: string | undefined) {
   });
 }
 
-/** Check for duplicate client by phone or email */
+/**
+ * Check for duplicate client by phone (digits-only LIKE match) or email (case-insensitive).
+ * Phone matching strips formatting on both sides so "+66 81 234-5678" and "0812345678"
+ * collide when they share ≥7 trailing digits.
+ */
 export function useDuplicateCheck(companyId: string | undefined, phone: string, email: string) {
+  const phoneDigitsValue = (phone || '').replace(/\D/g, '');
+  const emailValue = (email || '').trim().toLowerCase();
   return useQuery({
-    queryKey: ['deal-duplicate', companyId, phone, email],
+    queryKey: ['deal-duplicate', companyId, phoneDigitsValue, emailValue],
     queryFn: async (): Promise<AgentDeal[]> => {
       if (!companyId) return [];
       let results: AgentDeal[] = [];
-      if (phone && phone.length >= 6) {
+      if (phoneDigitsValue.length >= 7) {
+        // Match by trailing 7 digits (national number) so country-code variants collide.
+        const tail = phoneDigitsValue.slice(-9);
         const { data } = await supabase
           .from('agent_deals')
           .select('*')
           .eq('company_id', companyId)
-          .eq('client_phone', phone)
-          .limit(3);
+          .ilike('client_phone', `%${tail}%`)
+          .limit(5);
         if (data) results = [...results, ...(data as unknown as AgentDeal[])];
       }
-      if (email && email.includes('@')) {
+      if (emailValue && emailValue.includes('@')) {
         const { data } = await supabase
           .from('agent_deals')
           .select('*')
           .eq('company_id', companyId)
-          .eq('client_email', email)
-          .limit(3);
+          .ilike('client_email', emailValue)
+          .limit(5);
         if (data) {
           const ids = new Set(results.map(r => r.id));
           results = [...results, ...(data as unknown as AgentDeal[]).filter(d => !ids.has(d.id))];
@@ -204,7 +212,7 @@ export function useDuplicateCheck(companyId: string | undefined, phone: string, 
       }
       return results;
     },
-    enabled: !!companyId && ((!!phone && phone.length >= 6) || (!!email && email.includes('@'))),
+    enabled: !!companyId && (phoneDigitsValue.length >= 7 || (!!emailValue && emailValue.includes('@'))),
   });
 }
 
