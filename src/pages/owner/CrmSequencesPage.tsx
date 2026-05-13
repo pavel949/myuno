@@ -144,19 +144,7 @@ export default function CrmSequencesPage() {
                     className="h-7 w-7 shrink-0"
                     onClick={e => {
                       e.stopPropagation();
-                      if (confirm(isRu ? 'Удалить последовательность?' : 'Delete sequence?')) {
-                        deleteSequence.mutate(seq.id, {
-                          onSuccess: () => {
-                            toast(isRu ? 'Последовательность удалена' : 'Sequence deleted');
-                          },
-                          onError: (deleteError: any) => {
-                            toast.error(isRu ? 'Не удалось удалить последовательность' : 'Failed to delete sequence', {
-                              description: deleteError?.message || String(deleteError),
-                            });
-                          },
-                        });
-                        if (selectedId === seq.id) setSelectedId(null);
-                      }
+                      setConfirmId(seq.id);
                     }}
                   >
                     <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
@@ -181,6 +169,25 @@ export default function CrmSequencesPage() {
           )}
         </div>
       </div>
+
+      <ConfirmDialog
+        open={!!confirmId}
+        onOpenChange={(o) => !o && setConfirmId(null)}
+        onConfirm={() => {
+          const id = confirmId;
+          setConfirmId(null);
+          if (!id) return;
+          deleteSequence.mutate(id, {
+            onSuccess: () => toast(isRu ? 'Последовательность удалена' : 'Sequence deleted'),
+            onError: (deleteError: Error) =>
+              toast.error(isRu ? 'Не удалось удалить последовательность' : 'Failed to delete sequence', {
+                description: deleteError?.message || String(deleteError),
+              }),
+          });
+          if (selectedId === id) setSelectedId(null);
+        }}
+        title={isRu ? 'Удалить последовательность?' : 'Delete sequence?'}
+      />
     </div>
   );
 }
