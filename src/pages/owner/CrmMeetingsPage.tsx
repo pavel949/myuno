@@ -150,9 +150,7 @@ export default function CrmMeetingsPage() {
                   variant="ghost"
                   size="icon"
                   className="h-7 w-7"
-                  onClick={() => {
-                    if (confirm(isRu ? 'Удалить?' : 'Delete?')) deleteMeeting.mutate(m.id);
-                  }}
+                  onClick={() => setConfirmId(m.id)}
                 >
                   <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
                 </Button>
