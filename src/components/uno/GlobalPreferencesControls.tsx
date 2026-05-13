@@ -29,7 +29,7 @@ export function GlobalPreferencesControls({
       data-testid="global-preferences-controls"
     >
       <ThemeSwitcher variant={themeVariant === 'buttons' ? 'buttons' : 'dropdown'} size={size} />
-      <LanguageSwitcher size={size} />
+      <LanguageSwitcher size={size === 'default' ? 'md' : size} />
       {showCurrency ? <CurrencySwitcher size={size} /> : null}
     </div>
   );

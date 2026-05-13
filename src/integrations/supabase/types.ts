@@ -9019,6 +9019,159 @@ export type Database = {
           },
         ]
       }
+      lead_magnet_submissions: {
+        Row: {
+          context_payload: Json
+          context_slug: string | null
+          context_type: string | null
+          created_at: string
+          crm_contact_id: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+          landing_path: string | null
+          language: string | null
+          magnet_id: string | null
+          magnet_slug: string
+          nb_lead_id: string | null
+          notes: string | null
+          persona: string | null
+          phone: string | null
+          preferred_channel: string | null
+          referer: string | null
+          score: number
+          status: string
+          updated_at: string
+          user_id: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          context_payload?: Json
+          context_slug?: string | null
+          context_type?: string | null
+          created_at?: string
+          crm_contact_id?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          landing_path?: string | null
+          language?: string | null
+          magnet_id?: string | null
+          magnet_slug: string
+          nb_lead_id?: string | null
+          notes?: string | null
+          persona?: string | null
+          phone?: string | null
+          preferred_channel?: string | null
+          referer?: string | null
+          score?: number
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          context_payload?: Json
+          context_slug?: string | null
+          context_type?: string | null
+          created_at?: string
+          crm_contact_id?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          landing_path?: string | null
+          language?: string | null
+          magnet_id?: string | null
+          magnet_slug?: string
+          nb_lead_id?: string | null
+          notes?: string | null
+          persona?: string | null
+          phone?: string | null
+          preferred_channel?: string | null
+          referer?: string | null
+          score?: number
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_magnet_submissions_magnet_id_fkey"
+            columns: ["magnet_id"]
+            isOneToOne: false
+            referencedRelation: "lead_magnets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_magnet_submissions_nb_lead_id_fkey"
+            columns: ["nb_lead_id"]
+            isOneToOne: false
+            referencedRelation: "nb_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_magnets: {
+        Row: {
+          asset_url: string | null
+          created_at: string
+          default_score: number
+          description_en: string | null
+          description_ru: string | null
+          id: string
+          is_active: boolean
+          magnet_type: string
+          slug: string
+          title_en: string
+          title_ru: string
+          updated_at: string
+        }
+        Insert: {
+          asset_url?: string | null
+          created_at?: string
+          default_score?: number
+          description_en?: string | null
+          description_ru?: string | null
+          id?: string
+          is_active?: boolean
+          magnet_type: string
+          slug: string
+          title_en: string
+          title_ru: string
+          updated_at?: string
+        }
+        Update: {
+          asset_url?: string | null
+          created_at?: string
+          default_score?: number
+          description_en?: string | null
+          description_ru?: string | null
+          id?: string
+          is_active?: boolean
+          magnet_type?: string
+          slug?: string
+          title_en?: string
+          title_ru?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       lead_score_events: {
         Row: {
           created_at: string
