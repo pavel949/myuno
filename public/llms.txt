@@ -1,0 +1,40 @@
+# myUNO
+
+> myUNO — цифровая инфраструктура для жизни, аренды и инвестиций иностранца на Пхукете. Один аккаунт объединяет 40+ микро-приложений: недвижимость, услуги, юридическая помощь, образ жизни.
+
+myUNO is a Russian-speaking super-app for foreigners in Phuket, Thailand. The platform serves three core segments: investors ($2M+), relocators ($300–800K) and second-home buyers ($200–500K). It combines property discovery (resale, off-plan with the proprietary ClearView™ rating, long-term rentals), property management for owners, legal/visa/tax advisory, lifestyle services (cleaning, transfers, beauty, fitness, pets, kids, weddings), and an investor capital desk.
+
+## Pages
+
+- [Home](/): Super-app entry point with personalized recommendations.
+- [Property](/property): Buy, rent, or browse new builds in Phuket.
+- [New Builds](/newbuilds): Off-plan developments rated by ClearView™ (AAA–CCC).
+- [Invest](/invest): Real estate and business investment opportunities for capital clients.
+- [Capital](/capital): Concierge advisory for investors $2M+.
+- [Legal](/legal): Visas, taxes, company formation, contracts.
+- [Relocate](/relocate): Step-by-step relocation guide for families and digital nomads.
+- [Services](/services): Marketplace of vetted local providers.
+- [Beauty](/beauty), [Fitness](/fitness), [Pets](/pets), [Kids](/kids), [Wedding](/wedding): Lifestyle verticals.
+- [Map](/map): Universal map of properties, services and venues.
+- [ClearView](/clearview): Methodology for rating off-plan developers.
+- [List With Us](/list-with-us): Onboarding for owners, vendors and developers.
+- [Pricing](/pricing): Subscription tiers for property managers and vendors.
+
+## Guides
+
+- [Buying Property in Thailand](/guides/buying-property-thailand): Foreign ownership, freehold vs leasehold, due diligence.
+- [Foreign Ownership](/guides/foreign-ownership-thailand): Legal structures available to non-Thais.
+- [Visas](/guides/visas-thailand): DTV, LTR, Elite, Education and other visa routes.
+- [Taxes for Foreigners](/guides/taxes-thailand-foreigner): Personal income tax, rental tax, remittance rules.
+- [Property Management Phuket](/guides/property-management-phuket): How professional PMS works on the island.
+- [Off-plan Due Diligence](/guides/off-plan-due-diligence): What to verify before signing a reservation.
+- [TM30](/guides/tm30-thailand): Address reporting obligations for foreigners.
+- [Rental Phuket STR vs LTR](/guides/rental-phuket-str-ltr): Short-term vs long-term rental economics.
+- [Bank Account Thailand](/guides/bank-account-thailand): Opening a Thai bank account as a foreigner.
+- [Where to Live in Phuket](/guides/areas/where-to-live-phuket): Area guide by lifestyle and budget.
+
+## Optional
+
+- [Sitemap](/sitemap.xml): Full machine-readable site index.
+- [Pillar guides sitemap](/sitemap-pillars.xml)
+- [Persona landings sitemap](/sitemap-landings.xml)
