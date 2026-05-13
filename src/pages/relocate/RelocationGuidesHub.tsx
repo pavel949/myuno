@@ -129,8 +129,8 @@ export default function RelocationGuidesHub() {
                     <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                       {cat ? (isRu ? cat.label_ru : cat.label_en) : a.category}
                     </p>
-                    <h2 className="text-base font-semibold text-foreground mt-0.5">{isRu ? a.title_ru : a.title_en}</h2>
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{isRu ? a.summary_ru : a.summary_en}</p>
+                    <h2 className="text-base font-semibold text-foreground mt-0.5">{highlight(isRu ? a.title_ru : a.title_en, query)}</h2>
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{highlight(isRu ? a.summary_ru : a.summary_en, query)}</p>
                   </div>
                   <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0 mt-1" aria-hidden />
                 </Link>
