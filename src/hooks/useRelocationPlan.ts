@@ -65,7 +65,7 @@ export function useRelocationPlan() {
     mutationFn: async (next: RelocationPlanLocal) => {
       writeLocal(next);
       if (user?.id) {
-        const { error } = await supabase.from('relocation_plans' as never).upsert(
+        const { error } = await (supabase as any).from('relocation_plans').upsert(
           {
             user_id: user.id,
             quiz_answers: next.quiz_answers,
