@@ -50,9 +50,8 @@ async function fetchPublishedArticles(): Promise<RelocationArticleRecord[]> {
 }
 
 async function fetchArticleBySlug(slug: string): Promise<RelocationArticleRecord | null> {
-  // @ts-expect-error relocation_articles not yet in generated Database type
   const { data, error } = await supabase
-    .from('relocation_articles')
+    .from('relocation_articles' as never)
     .select('slug, category, title_en, title_ru, summary_en, summary_ru, content_en, content_ru, related_route, sort_order')
     .eq('slug', slug)
     .eq('is_published', true)
