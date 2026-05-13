@@ -168,11 +168,29 @@ export default function Search() {
                   <h3 className="font-semibold mb-1">
                     {isRu ? 'Ничего не найдено' : 'No results found'}
                   </h3>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground mb-6">
                     {isRu
-                      ? 'Попробуйте изменить запрос или фильтры'
-                      : 'Try different keywords or filters'}
+                      ? 'Попробуйте изменить запрос или выберите раздел ниже'
+                      : 'Try different keywords or pick a section below'}
                   </p>
+                  <div className="flex flex-wrap justify-center gap-2">
+                    {[
+                      { ru: 'Виза', en: 'Visa', path: '/visa/quiz' },
+                      { ru: 'Жильё', en: 'Stay', path: '/property' },
+                      { ru: 'Услуги', en: 'Services', path: '/services' },
+                      { ru: 'Транспорт', en: 'Transport', path: '/transport' },
+                      { ru: 'Медицина', en: 'Medical', path: '/medical' },
+                      { ru: 'Юристы', en: 'Legal', path: '/legal' },
+                    ].map((c) => (
+                      <button
+                        key={c.path}
+                        onClick={() => navigate(c.path)}
+                        className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm hover:bg-primary/20 transition-colors"
+                      >
+                        {isRu ? c.ru : c.en}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               ) : (
                 <AnimatedList className="space-y-3">
