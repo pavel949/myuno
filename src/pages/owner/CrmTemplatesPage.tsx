@@ -13,8 +13,9 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, FileText, Trash2, Copy, Mail, MessageCircle, MessageSquare, Send } from 'lucide-react';
-
 import { toast } from 'sonner';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+
 const channelIcons: Record<string, React.ElementType> = {
   email: Mail,
   whatsapp: MessageCircle,
@@ -32,7 +33,8 @@ export default function CrmTemplatesPage() {
   const { data: templates = [], isLoading, isError: templatesError, refetch: refetchTemplates } = useCrmTemplates(companyId, channelFilter === 'all' ? undefined : channelFilter);
   const createTemplate = useCreateTemplate();
   const deleteTemplate = useDeleteTemplate();
-const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [confirmId, setConfirmId] = useState<string | null>(null);
   const [form, setForm] = useState({ name: '', channel: 'email', subject: '', body: '', language: 'en' });
 
   const handleCreate = async () => {
@@ -197,9 +199,7 @@ const [open, setOpen] = useState(false);
                     </div>
                     <Button
                       variant="ghost" size="icon" className="h-7 w-7 shrink-0"
-                      onClick={() => {
-                        if (confirm(isRu ? 'Удалить?' : 'Delete?')) deleteTemplate.mutate(tpl.id);
-                      }}
+                      onClick={() => setConfirmId(tpl.id)}
                     >
                       <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
                     </Button>
@@ -210,6 +210,16 @@ const [open, setOpen] = useState(false);
           })}
         </div>
       )}
+
+      <ConfirmDialog
+        open={!!confirmId}
+        onOpenChange={(o) => !o && setConfirmId(null)}
+        onConfirm={() => {
+          if (confirmId) deleteTemplate.mutate(confirmId);
+          setConfirmId(null);
+        }}
+        title={isRu ? 'Удалить шаблон?' : 'Delete template?'}
+      />
     </div>
   );
 }

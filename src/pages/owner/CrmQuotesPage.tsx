@@ -1,36 +1,31 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useAuth } from '@/contexts/AuthContext';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
-import { useCrmQuotes, useCreateQuote, useUpdateQuote, useDeleteQuote, CrmQuoteItem } from '@/hooks/useCrmQuotes';
+import { useCrmQuotes, useDeleteQuote } from '@/hooks/useCrmQuotes';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Plus, FileText, Trash2, Send, Check } from 'lucide-react';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { FileText, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 
-import { toast } from 'sonner';
-const STATUS_COLORS: Record<string, string> = {
+const STATUS_VARIANT: Record<string, 'default' | 'secondary' | 'destructive' | 'success' | 'warning' | 'outline'> = {
   draft: 'secondary',
   sent: 'default',
-  accepted: 'default',
+  accepted: 'success',
   rejected: 'destructive',
 };
 
 export default function CrmQuotesPage() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const { user } = useAuth();
   const { activeCompany } = useActiveCompany();
   const companyId = activeCompany?.company_id;
   const { data: quotes = [], isLoading, isError: quotesError, refetch: refetchQuotes } = useCrmQuotes(companyId);
-  const createQuote = useCreateQuote();
-  const updateQuote = useUpdateQuote();
   const deleteQuote = useDeleteQuote();
-const statusLabel = (s: string) => {
+  const [confirmId, setConfirmId] = useState<string | null>(null);
+
+  const statusLabel = (s: string) => {
     const map: Record<string, [string, string]> = {
       draft: ['Draft', 'Черновик'],
       sent: ['Sent', 'Отправлено'],
@@ -81,7 +76,7 @@ const statusLabel = (s: string) => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium">{q.quote_number}</span>
-                    <Badge variant={STATUS_COLORS[q.status] as any || 'secondary'} className="text-[10px]">
+                    <Badge variant={STATUS_VARIANT[q.status] ?? 'secondary'} className="text-[10px]">
                       {statusLabel(q.status)}
                     </Badge>
                   </div>
@@ -99,9 +94,7 @@ const statusLabel = (s: string) => {
                   variant="ghost"
                   size="icon"
                   className="h-7 w-7"
-                  onClick={() => {
-                    if (confirm(isRu ? 'Удалить?' : 'Delete?')) deleteQuote.mutate(q.id);
-                  }}
+                  onClick={() => setConfirmId(q.id)}
                 >
                   <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
                 </Button>
@@ -110,6 +103,16 @@ const statusLabel = (s: string) => {
           ))}
         </div>
       )}
+
+      <ConfirmDialog
+        open={!!confirmId}
+        onOpenChange={(o) => !o && setConfirmId(null)}
+        onConfirm={() => {
+          if (confirmId) deleteQuote.mutate(confirmId);
+          setConfirmId(null);
+        }}
+        title={isRu ? 'Удалить КП?' : 'Delete quote?'}
+      />
     </div>
   );
 }

@@ -85,12 +85,12 @@ export default function SalesPipeline() {
 
     // Status filter (default: active)
     if (filterStatus !== 'all') {
-      result = result.filter(d => (d as any).deal_status === filterStatus || (!( d as any).deal_status && filterStatus === 'active'));
+      result = result.filter(d => d.deal_status === filterStatus || (!d.deal_status && filterStatus === 'active'));
     }
 
     // Type filter
     if (filterType !== 'all') {
-      result = result.filter(d => (d as any).deal_type === filterType || (!(d as any).deal_type && filterType === 'sale'));
+      result = result.filter(d => d.deal_type === filterType || (!d.deal_type && filterType === 'sale'));
     }
 
     // Agent filter
