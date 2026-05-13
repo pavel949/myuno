@@ -12,8 +12,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Plus, Zap, Users, Trash2, Play, Pause } from 'lucide-react';
 import { SequenceBuilder } from '@/components/owner/sequences/SequenceBuilder';
-
 import { toast } from 'sonner';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+
 export default function CrmSequencesPage() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
