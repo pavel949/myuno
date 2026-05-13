@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -79,6 +80,10 @@ export function useRelocationPlan() {
     },
     onSuccess: (_, next) => {
       queryClient.setQueryData(['relocation_plan', user?.id ?? 'anon'], next);
+    },
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : 'Не удалось сохранить план';
+      toast.error('Не удалось синхронизировать план', { description: msg });
     },
   });
 
