@@ -248,7 +248,7 @@ export default function CrmDashboardPage() {
         {(['active', 'on_hold', 'archived', 'all'] as const).map(s => (
           <button
             key={s}
-            onClick={() => setFilterStatus(s === 'all' ? 'all' : s)}
+            onClick={() => setFilterStatus(s)}
             className={cn(
               'shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
               filterStatus === s ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-muted-foreground',
