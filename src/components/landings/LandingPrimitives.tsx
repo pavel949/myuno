@@ -54,7 +54,7 @@ export function LandingTrustRow({
   items,
   isRu,
 }: {
-  items: { icon: React.ComponentType<{ className?: string; strokeWidth?: number }>; en: string; ru: string }[];
+  items: { icon: React.ComponentType<React.SVGProps<SVGSVGElement>>; en: string; ru: string }[];
   isRu: boolean;
 }) {
   return (
