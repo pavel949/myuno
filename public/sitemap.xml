@@ -2,43 +2,43 @@
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <!-- Static pages: all public routes with hreflang -->
   <sitemap>
-    <loc>https://myuno.app/sitemap-static.xml</loc>
+    <loc>https://www.myuno.app/sitemap-static.xml</loc>
     <lastmod>2026-04-08</lastmod>
   </sitemap>
 
   <!-- Dynamic: property listings from database -->
   <sitemap>
-    <loc>https://erfwtoavipwjqmylpizt.supabase.co/functions/v1/generate-sitemap?type=properties</loc>
+    <loc>https://kakkwibljrjsawxgnupk.supabase.co/functions/v1/generate-sitemap?type=properties</loc>
     <lastmod>2026-04-08</lastmod>
   </sitemap>
 
   <!-- Dynamic: experience listings from database -->
   <sitemap>
-    <loc>https://erfwtoavipwjqmylpizt.supabase.co/functions/v1/generate-sitemap?type=experiences</loc>
+    <loc>https://kakkwibljrjsawxgnupk.supabase.co/functions/v1/generate-sitemap?type=experiences</loc>
     <lastmod>2026-04-08</lastmod>
   </sitemap>
 
   <!-- Dynamic: yacht listings from database -->
   <sitemap>
-    <loc>https://erfwtoavipwjqmylpizt.supabase.co/functions/v1/generate-sitemap?type=yachts</loc>
+    <loc>https://kakkwibljrjsawxgnupk.supabase.co/functions/v1/generate-sitemap?type=yachts</loc>
     <lastmod>2026-04-08</lastmod>
   </sitemap>
 
   <!-- Dynamic: restaurant listings from database -->
   <sitemap>
-    <loc>https://erfwtoavipwjqmylpizt.supabase.co/functions/v1/generate-sitemap?type=restaurants</loc>
+    <loc>https://kakkwibljrjsawxgnupk.supabase.co/functions/v1/generate-sitemap?type=restaurants</loc>
     <lastmod>2026-04-08</lastmod>
   </sitemap>
 
   <!-- M6 · Track B.9 — persona/cluster landings (LIVE only) -->
   <sitemap>
-    <loc>https://myuno.app/sitemap-landings.xml</loc>
+    <loc>https://www.myuno.app/sitemap-landings.xml</loc>
     <lastmod>2026-04-23</lastmod>
   </sitemap>
 
   <!-- M9 · §4.1 — pillar / cluster guides (placeholder URLs) -->
   <sitemap>
-    <loc>https://myuno.app/sitemap-pillars.xml</loc>
+    <loc>https://www.myuno.app/sitemap-pillars.xml</loc>
     <lastmod>2026-04-23</lastmod>
   </sitemap>
 </sitemapindex>
