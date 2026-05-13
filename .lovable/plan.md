@@ -1,85 +1,67 @@
-## Problem (confirmed in code)
+## Проблема
 
-Three independent vertical lists drift from each other, breaking handoffs:
+На `/discover` (NavigatorPage v2) сетки сервисов в каждой секции кластера накладываются друг на друга и на следующие секции (видно на скриншоте: «Build / B2B: developer portal…», «Visas», «Taxes» и тайлы рендерятся в одном вертикальном слое).
 
-| Source | IDs |
-|---|---|
-| `src/lib/intakeVerticals.ts` (AI intake, 25) | `yachts, properties, owner_properties, tours, water_activities, restaurants, salons, clinics, gyms, vehicles, events, babysitters, cleaning_services, legal_services, pet_services, education_providers, pharmacies, insurance_providers, flower_shops, stores, providers, marketplace_products, marketplace_vendors, vendor_locations` |
-| `src/lib/leadVerticalConfig.ts` (Lead form, 14) | `properties, yachts, tours, vehicles, legal, clinics, babysitters, salons, gyms, water_activities, restaurants, other, home_services, property_services` |
-| `VendorQuickCreateFAB` + `VendorCategoryGrid` (Manual add, 14) | `beauty, restaurants, transport, yachts, properties, tours, fitness, cleaning, childcare, flowers, health, education, legal, pets` |
+## Корень бага
 
-Drift examples: `salons↔beauty`, `clinics↔health`, `babysitters↔childcare`, `gyms↔fitness`, `vehicles↔transport`, `legal_services↔legal`, `flower_shops↔flowers`. Vendor org metadata stores any of these — so when the FAB filters by it, vendors who onboarded with `flower_shops` see no Quick-Create entry, and AI intake → manual edit handoff breaks. Missing manual-add: `events`, `pharmacies`, `insurance_providers`, `water_activities` (page or hook exists but no FAB/grid entry).
+В `src/components/navigation/NavigatorPage.tsx`, строки **936–974**, внутри каждой `<section>` есть **двойная обёртка grid**:
 
-Property photo bug: `owner/property-wizard/steps/PhotosStep` stores `imageArray[0]` as `cover_image` and `imageArray.slice(1)` as `images`. `VendorProperties.getInitialFormData` passes them as separate fields and `CanonicalPropertyForm` re-merges as `[cover_image, ...images]`. On edit the cover is shown twice; reordering silently swaps the cover.
+```tsx
+<div className="grid gap-2"
+     style={{ gridTemplateColumns: 'repeat(3, 1fr)', gridAutoRows: '132px' }}>
+  <style>{`@media ... { .nav-v2-grid-${cluster.id} { ... } }`}</style>
+  <div
+    className={`nav-v2-grid-${cluster.id} grid gap-2`}
+    style={{ gridColumn: '1 / -1',
+             gridTemplateColumns: 'repeat(3, 1fr)',
+             gridAutoRows: '132px' }}
+  >
+    {hasFeature && <FeaturedTile … />}
+    {eligible.map(...ServiceTile)}
+  </div>
+</div>
+```
 
-## Plan
+Внешний grid имеет `gridAutoRows: 132px` и единственного ребёнка (внутренний grid). Внутренний выставлен `gridColumn: '1 / -1'` и реально вырастает на N строк (4–8 рядов тайлов). Внешний при этом резервирует под него только **одну строку 132px** → весь излишек контента **визуально вываливается за границу секции**, и следующая `<section>` стартует через 132px, накладываясь на хвост предыдущей.
 
-### 1. Single canonical entry registry — `src/lib/verticals/vendorEntries.ts` (NEW)
+Эффект ровно тот, что на скриншоте: тайлы предыдущего кластера наезжают на заголовок и описание следующего.
 
-One list of 18 entries. Each = canonical id (matches DB-table semantics: `salons`, `clinics`, `gyms`, `vehicles`, `babysitters`, `cleaning_services`, `legal_services`, `pet_services`, `education_providers`, `flower_shops`, `pharmacies`, `insurance_providers`, `water_activities`, `events`, `tours`, `yachts`, `restaurants`, `properties`) + `aliases[]` (legacy slugs) + `vendorPath` + Lucide icon + i18n labels + `fabEnabled / gridEnabled / leadEnabled` flags.
+## Решение
 
-Helpers: `resolveVendorAlias(slug) → canonical | null`, `resolveVendorAliases(slugs[]) → canonical[]`, `getVendorEntry(id)`.
+Удалить лишнюю внешнюю grid-обёртку — оставить только внутренний `nav-v2-grid-{id}` с `<style>`-блоком. Внутренний div уже реализует адаптивные колонки (3 → 4 → 5 → 6) через media-queries по своему классу.
 
-### 2. Refactor consumers to read from the registry
+### Diff (концептуально)
 
-- **`VendorQuickCreateFAB`** — delete local `verticalOptions`, build from `VENDOR_ENTRIES.filter(fabEnabled)`. Filter by `resolveVendorAliases(orgMetadata.verticals)` so legacy slugs work.
-- **`VendorCategoryGrid`** — delete local `allCategories`, same pattern.
-- **Vendor onboarding** verticals checklist (already lists 15 slugs): write through `resolveVendorAlias` so saved metadata stays canonical going forward.
+```tsx
+{/* Service grid */}
+<>
+  <style>{`
+    .nav-v2-grid-${cluster.id} { grid-template-columns: repeat(3,1fr); grid-auto-rows: 132px; }
+    @media (min-width:640px)  { .nav-v2-grid-${cluster.id} { grid-template-columns: repeat(4,1fr) !important; } }
+    @media (min-width:1024px) { .nav-v2-grid-${cluster.id} { grid-template-columns: repeat(5,1fr) !important; } }
+    @media (min-width:1280px) { .nav-v2-grid-${cluster.id} { grid-template-columns: repeat(6,1fr) !important; } }
+  `}</style>
+  <div className={`nav-v2-grid-${cluster.id} grid gap-2`}>
+    {hasFeature && <FeaturedTile data={featured!} language={language} onNavigate={navigate} />}
+    {eligible.map(svc => (
+      <ServiceTile key={`${cluster.id}-${svc.path}`} service={svc}
+                   clusterId={cluster.id} language={language} onNavigate={navigate} />
+    ))}
+  </div>
+</>
+```
 
-### 3. Property photo fix
+Базовые `grid-template-columns` и `grid-auto-rows` переехали внутрь того же `<style>`, чтобы не зависеть от inline-стилей и сохранить mobile-first значение по умолчанию.
 
-- **`src/components/owner/property-wizard/steps/PhotosStep.tsx`**: stop splitting. Hold one ordered `images` array via `updateFormData({ images, cover_image: images[0] || '' })`. Read with `formData.images || []` (no `[cover_image, ...images]` re-merge).
-- **`src/pages/vendor/VendorProperties.tsx#getInitialFormData`**: build `images = editingProperty.cover_image ? [cover_image, ...images.filter(u => u !== cover_image)] : (images || [])`. Same on submit: derive `cover_image = data.images?.[0]`.
-- **`src/hooks/property-wizard/buildPayload.ts`**: ensure `cover_image = images?.[0]` written on persist.
-- Add **"Cover" badge** on first thumbnail in PhotosStep so users know reordering swaps the cover.
+## Объём правок
 
-### 4. New vendor pages — Pharmacy & Insurance
+- 1 файл: `src/components/navigation/NavigatorPage.tsx` (строки ~935–974).
+- Логика, данные, фильтры, поиск, persona-табы — без изменений.
+- Никаких миграций / правок схемы / других страниц.
 
-- **`src/pages/vendor/VendorPharmacy.tsx`** — modeled on `VendorClinics.tsx`. Uses generic `useVerticalCRUD<Pharmacy>('pharmacy', profile?.id)` (registers `'pharmacy'` slug → `pharmacies` table). CRUD form: name EN/RU, description, address, phone, working_hours, delivery_available, is_24h, license_number, cover image + gallery via `UnifiedMediaUploader`.
-- **`src/pages/vendor/VendorInsurance.tsx`** — same pattern. Form: name, insurance_types[], languages[], has_24h_support, license_number, address, gallery.
-- Add `VendorPharmacy`, `VendorInsurance` lazy entries to `src/components/layout/pageRegistry.ts` and routes `/vendor/pharmacy`, `/vendor/insurance` (under existing `VendorLayout` block) in `AnimatedRoutes.tsx`. These slugs already live in `VERTICALS` registry (`PHARMACY`, `INSURANCE`).
+## Проверка после
 
-### 5. Lead config alignment — `src/lib/leadVerticalConfig.ts`
-
-- Rename `legal → legal_services` (keep `'legal'` resolvable via `getLeadVerticalById` alias map).
-- Add new entries (compact, COMMON_FIELDS-based) for: `flower_shops`, `pet_services`, `education_providers`, `cleaning_services`, `events`, `babysitters` (already there but rename keys to canonical), and keep `restaurants, yachts, tours, vehicles, clinics, gyms, water_activities, properties`.
-- `getLeadVerticalById(id)` resolves through `resolveVendorAlias` first.
-- Update `detectVerticalFromPath` to use canonical ids.
-
-### 6. Migration — normalize stored vendor metadata
-
-SQL migration that updates `providers.metadata->verticals` and `marketplace_vendors.metadata->verticals` arrays with a `CASE` map: `beauty→salons, childcare→babysitters, health→clinics, medical→clinics, fitness→gyms, transport→vehicles, flowers→flower_shops, flower→flower_shops, legal→legal_services, lawyers→legal_services, pets→pet_services, pet→pet_services, education→education_providers, cleaning→cleaning_services, water→water_activities, watersports→water_activities, pharmacy→pharmacies, insurance→insurance_providers`. Idempotent; written as a `jsonb_set` over a `SELECT` of distinct slugs.
-
-### 7. Consistency tests — extend `src/lib/__tests__/intakeVerticalConsistency.test.ts`
-
-- Every `VENDOR_ENTRIES.id` exists in `INTAKE_VERTICALS` ids.
-- Every `fabEnabled` entry has a route in `AnimatedRoutes` (regex scan of file).
-- Every `leadEnabled` entry has a `LEAD_VERTICALS` entry by canonical id.
-- Every alias resolves to a canonical id (no orphan aliases).
-
-## Files
-
-**New (4):**
-- `src/lib/verticals/vendorEntries.ts`
-- `src/pages/vendor/VendorPharmacy.tsx`
-- `src/pages/vendor/VendorInsurance.tsx`
-- `supabase/migrations/<ts>_normalize_vendor_verticals_metadata.sql`
-
-**Edit (8):**
-- `src/components/vendor/wizard/VendorQuickCreateFAB.tsx`
-- `src/components/vendor/VendorCategoryGrid.tsx`
-- `src/components/owner/property-wizard/steps/PhotosStep.tsx`
-- `src/pages/vendor/VendorProperties.tsx`
-- `src/hooks/property-wizard/buildPayload.ts`
-- `src/lib/leadVerticalConfig.ts`
-- `src/components/layout/pageRegistry.ts`
-- `src/components/layout/AnimatedRoutes.tsx`
-
-**Test (1):**
-- `src/lib/__tests__/intakeVerticalConsistency.test.ts`
-
-## Risks / Notes
-
-- No DB schema change — `pharmacies`, `insurance_providers`, `events`, `water_activities` tables already exist with RLS.
-- The metadata migration is data-only (allowed via insert tool / migration). If any vendor relied on a non-canonical slug for filtering elsewhere, the alias resolver still accepts it at read-time, so nothing breaks.
-- `VendorClinics` etc. are NOT rewritten — the FAB navigates to existing pages with `?create=true`. Each page already responds to "Add" buttons; no per-page change needed.
+1. Открыть `/discover` на 390×844 (мобильный).
+2. Прокрутить вниз: секции «Прибытие», «Жизнь», «Инвестиции», «Право», «Стройка» идут друг под другом без наложений; тайлы в строгой 3-колоночной сетке.
+3. Проверить десктоп (≥1024): 5 колонок без скачков.
+4. Featured-тайл (Виза-пакет / ROI Hub) занимает 2×2 и не ломает поток.

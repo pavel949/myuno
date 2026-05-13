@@ -14,8 +14,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Workflow, Trash2, Play, Pause, ArrowRight, Clock } from 'lucide-react';
-
 import { toast } from 'sonner';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+
 export default function CrmWorkflowsPage() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -26,7 +27,8 @@ export default function CrmWorkflowsPage() {
   const createWorkflow = useCreateWorkflow();
   const deleteWorkflow = useDeleteWorkflow();
   const updateWorkflow = useUpdateWorkflow();
-const [createOpen, setCreateOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [confirmId, setConfirmId] = useState<string | null>(null);
   const [form, setForm] = useState({ name: '', trigger_type: 'deal_created' });
 
   const handleCreate = async () => {
@@ -154,9 +156,7 @@ const [createOpen, setCreateOpen] = useState(false);
                     </Button>
                     <Button
                       variant="ghost" size="icon" className="h-8 w-8"
-                      onClick={() => {
-                        if (confirm(isRu ? 'Удалить?' : 'Delete?')) deleteWorkflow.mutate(wf.id);
-                      }}
+                      onClick={() => setConfirmId(wf.id)}
                     >
                       <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
                     </Button>
@@ -167,6 +167,16 @@ const [createOpen, setCreateOpen] = useState(false);
           ))}
         </div>
       )}
+
+      <ConfirmDialog
+        open={!!confirmId}
+        onOpenChange={(o) => !o && setConfirmId(null)}
+        onConfirm={() => {
+          if (confirmId) deleteWorkflow.mutate(confirmId);
+          setConfirmId(null);
+        }}
+        title={isRu ? 'Удалить автоматизацию?' : 'Delete workflow?'}
+      />
     </div>
   );
 }

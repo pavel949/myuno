@@ -12,8 +12,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Plus, Zap, Users, Trash2, Play, Pause } from 'lucide-react';
 import { SequenceBuilder } from '@/components/owner/sequences/SequenceBuilder';
-
 import { toast } from 'sonner';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+
 export default function CrmSequencesPage() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -23,8 +24,9 @@ export default function CrmSequencesPage() {
   const { data: sequences = [], isLoading, isError, error, refetch } = useCrmSequences(companyId);
   const createSequence = useCreateSequence();
   const deleteSequence = useDeleteSequence();
-const [createOpen, setCreateOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [confirmId, setConfirmId] = useState<string | null>(null);
   const [form, setForm] = useState({ name: '', description: '' });
 
   const handleCreate = async () => {
@@ -142,19 +144,7 @@ const [createOpen, setCreateOpen] = useState(false);
                     className="h-7 w-7 shrink-0"
                     onClick={e => {
                       e.stopPropagation();
-                      if (confirm(isRu ? 'Удалить последовательность?' : 'Delete sequence?')) {
-                        deleteSequence.mutate(seq.id, {
-                          onSuccess: () => {
-                            toast(isRu ? 'Последовательность удалена' : 'Sequence deleted');
-                          },
-                          onError: (deleteError: any) => {
-                            toast.error(isRu ? 'Не удалось удалить последовательность' : 'Failed to delete sequence', {
-                              description: deleteError?.message || String(deleteError),
-                            });
-                          },
-                        });
-                        if (selectedId === seq.id) setSelectedId(null);
-                      }
+                      setConfirmId(seq.id);
                     }}
                   >
                     <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
@@ -179,6 +169,25 @@ const [createOpen, setCreateOpen] = useState(false);
           )}
         </div>
       </div>
+
+      <ConfirmDialog
+        open={!!confirmId}
+        onOpenChange={(o) => !o && setConfirmId(null)}
+        onConfirm={() => {
+          const id = confirmId;
+          setConfirmId(null);
+          if (!id) return;
+          deleteSequence.mutate(id, {
+            onSuccess: () => toast(isRu ? 'Последовательность удалена' : 'Sequence deleted'),
+            onError: (deleteError: Error) =>
+              toast.error(isRu ? 'Не удалось удалить последовательность' : 'Failed to delete sequence', {
+                description: deleteError?.message || String(deleteError),
+              }),
+          });
+          if (selectedId === id) setSelectedId(null);
+        }}
+        title={isRu ? 'Удалить последовательность?' : 'Delete sequence?'}
+      />
     </div>
   );
 }

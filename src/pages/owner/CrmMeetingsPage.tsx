@@ -11,8 +11,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Plus, Calendar, Trash2, MapPin, Clock } from 'lucide-react';
 import { format } from 'date-fns';
-
 import { toast } from 'sonner';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+
 export default function CrmMeetingsPage() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -22,7 +23,8 @@ export default function CrmMeetingsPage() {
   const { data: meetings = [], isLoading, isError: meetingsError, refetch: refetchMeetings } = useCrmMeetings(companyId);
   const createMeeting = useCreateMeeting();
   const deleteMeeting = useDeleteMeeting();
-const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [confirmId, setConfirmId] = useState<string | null>(null);
   const [form, setForm] = useState({ title: '', scheduled_at: '', duration_minutes: '30', location: '' });
 
   const handleCreate = async () => {
@@ -49,7 +51,7 @@ const [open, setOpen] = useState(false);
     }
   };
 
-  const statusColor = (s: string) => {
+  const statusVariant = (s: string): 'default' | 'secondary' | 'destructive' => {
     if (s === 'completed') return 'default';
     if (s === 'cancelled') return 'destructive';
     return 'secondary';
@@ -128,7 +130,7 @@ const [open, setOpen] = useState(false);
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium">{m.title}</span>
-                    <Badge variant={statusColor(m.status) as any} className="text-[10px]">
+                    <Badge variant={statusVariant(m.status)} className="text-[10px]">
                       {m.status}
                     </Badge>
                   </div>
@@ -148,9 +150,7 @@ const [open, setOpen] = useState(false);
                   variant="ghost"
                   size="icon"
                   className="h-7 w-7"
-                  onClick={() => {
-                    if (confirm(isRu ? 'Удалить?' : 'Delete?')) deleteMeeting.mutate(m.id);
-                  }}
+                  onClick={() => setConfirmId(m.id)}
                 >
                   <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
                 </Button>
@@ -159,6 +159,16 @@ const [open, setOpen] = useState(false);
           ))}
         </div>
       )}
+
+      <ConfirmDialog
+        open={!!confirmId}
+        onOpenChange={(o) => !o && setConfirmId(null)}
+        onConfirm={() => {
+          if (confirmId) deleteMeeting.mutate(confirmId);
+          setConfirmId(null);
+        }}
+        title={isRu ? 'Удалить встречу?' : 'Delete meeting?'}
+      />
     </div>
   );
 }

@@ -21362,6 +21362,84 @@ export type Database = {
         }
         Relationships: []
       }
+      relocation_articles: {
+        Row: {
+          category: string
+          content_en: string | null
+          content_ru: string | null
+          created_at: string
+          id: string
+          is_published: boolean
+          related_route: string | null
+          slug: string
+          sort_order: number
+          summary_en: string | null
+          summary_ru: string | null
+          title_en: string
+          title_ru: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          content_en?: string | null
+          content_ru?: string | null
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          related_route?: string | null
+          slug: string
+          sort_order?: number
+          summary_en?: string | null
+          summary_ru?: string | null
+          title_en: string
+          title_ru: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          content_en?: string | null
+          content_ru?: string | null
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          related_route?: string | null
+          slug?: string
+          sort_order?: number
+          summary_en?: string | null
+          summary_ru?: string | null
+          title_en?: string
+          title_ru?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      relocation_plans: {
+        Row: {
+          created_at: string
+          id: string
+          quiz_answers: Json
+          steps: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          quiz_answers?: Json
+          steps?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          quiz_answers?: Json
+          steps?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       resale_properties: {
         Row: {
           address: string | null
@@ -31067,6 +31145,7 @@ export type Database = {
       }
       normalize_developer_name: { Args: { input: string }; Returns: string }
       normalize_phone: { Args: { p: string }; Returns: string }
+      normalize_phone_text: { Args: { p: string }; Returns: string }
       outreach_throttle_check: {
         Args: { _channel: string; _identity_id: string; _window?: string }
         Returns: boolean

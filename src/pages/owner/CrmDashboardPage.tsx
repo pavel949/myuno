@@ -96,10 +96,10 @@ export default function CrmDashboardPage() {
   const filtered = useMemo(() => {
     let result = deals;
     if (filterStatus !== 'all') {
-      result = result.filter(d => (d as any).deal_status === filterStatus || (!(d as any).deal_status && filterStatus === 'active'));
+      result = result.filter(d => d.deal_status === filterStatus || (!d.deal_status && filterStatus === 'active'));
     }
     if (filterType !== 'all') {
-      result = result.filter(d => (d as any).deal_type === filterType || (!(d as any).deal_type && filterType === 'sale'));
+      result = result.filter(d => d.deal_type === filterType || (!d.deal_type && filterType === 'sale'));
     }
     if (agentFilter !== 'all') {
       result = result.filter(d => d.agent_id === agentFilter);
@@ -248,7 +248,7 @@ export default function CrmDashboardPage() {
         {(['active', 'on_hold', 'archived', 'all'] as const).map(s => (
           <button
             key={s}
-            onClick={() => setFilterStatus(s === 'all' ? 'all' : s)}
+            onClick={() => setFilterStatus(s)}
             className={cn(
               'shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
               filterStatus === s ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-muted-foreground',

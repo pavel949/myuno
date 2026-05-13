@@ -31,6 +31,8 @@ interface TableConfig {
   pathPrefix: string;
   idField: string;
   hasApprovalStatus: boolean;
+  /** Extra columns also matched against the search term via OR ilike */
+  extraSearchFields?: string[];
 }
 
 // Vertical-to-path mapping for listings table
@@ -50,18 +52,18 @@ const LISTING_VERTICAL_PATHS: Record<string, string> = {
 
 // Tables NOT migrated to listings (still queried individually)
 const searchTables: TableConfig[] = [
-  { table: 'properties', type: 'property', titleEn: 'title_en', titleRu: 'title_ru', image: 'cover_image', price: 'price', locationEn: 'district', locationRu: 'district', rating: 'rating', pathPrefix: '/property/', idField: 'id', hasApprovalStatus: true },
-  { table: 'salons', type: 'beauty', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: null, locationEn: 'district', locationRu: 'district', rating: 'rating', pathPrefix: '/beauty/salon/', idField: 'id', hasApprovalStatus: true },
-  { table: 'gyms', type: 'fitness', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: 'price_day_pass', locationEn: 'district', locationRu: 'district', rating: 'rating', pathPrefix: '/fitness/gym/', idField: 'id', hasApprovalStatus: true },
-  { table: 'events', type: 'events', titleEn: 'title_en', titleRu: 'title_ru', image: 'cover_image', price: 'price', locationEn: 'location_name', locationRu: 'location_ru', rating: 'rating', pathPrefix: '/events/', idField: 'id', hasApprovalStatus: true },
-  { table: 'water_activities', type: 'water', titleEn: 'title_en', titleRu: 'title_ru', image: 'cover_image', price: 'price', locationEn: 'location_name', locationRu: 'location_name', rating: 'rating', pathPrefix: '/water/', idField: 'id', hasApprovalStatus: true },
+  { table: 'properties', type: 'property', titleEn: 'title_en', titleRu: 'title_ru', image: 'cover_image', price: 'price', locationEn: 'district', locationRu: 'district', rating: 'rating', pathPrefix: '/property/', idField: 'id', hasApprovalStatus: true, extraSearchFields: ['description_en', 'description_ru', 'address'] },
+  { table: 'salons', type: 'beauty', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: null, locationEn: 'district', locationRu: 'district', rating: 'rating', pathPrefix: '/beauty/salon/', idField: 'id', hasApprovalStatus: true, extraSearchFields: ['description_en', 'description_ru', 'address'] },
+  { table: 'gyms', type: 'fitness', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: 'price_day_pass', locationEn: 'district', locationRu: 'district', rating: 'rating', pathPrefix: '/fitness/gym/', idField: 'id', hasApprovalStatus: true, extraSearchFields: ['description_en', 'description_ru'] },
+  { table: 'events', type: 'events', titleEn: 'title_en', titleRu: 'title_ru', image: 'cover_image', price: 'price', locationEn: 'location_name', locationRu: 'location_ru', rating: 'rating', pathPrefix: '/events/', idField: 'id', hasApprovalStatus: true, extraSearchFields: ['description_en', 'description_ru'] },
+  { table: 'water_activities', type: 'water', titleEn: 'title_en', titleRu: 'title_ru', image: 'cover_image', price: 'price', locationEn: 'location_name', locationRu: 'location_name', rating: 'rating', pathPrefix: '/water/', idField: 'id', hasApprovalStatus: true, extraSearchFields: ['description_en', 'description_ru'] },
   // tours: migrated to listings.experience — searched via unified listings query above
-  { table: 'legal_services', type: 'legal', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: 'price_consultation', locationEn: 'district', locationRu: 'district', rating: 'rating', pathPrefix: '/legal/provider/', idField: 'id', hasApprovalStatus: true },
-  { table: 'flower_shops', type: 'flowers', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: null, locationEn: 'address', locationRu: 'address', rating: 'rating', pathPrefix: '/flowers/shop/', idField: 'id', hasApprovalStatus: true },
-  { table: 'pharmacies', type: 'pharmacy', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: null, locationEn: 'address', locationRu: 'address', rating: 'rating', pathPrefix: '/pharmacy/', idField: 'id', hasApprovalStatus: true },
-  { table: 'stores', type: 'market', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: null, locationEn: 'address', locationRu: 'address', rating: 'rating', pathPrefix: '/market/store/', idField: 'id', hasApprovalStatus: true },
-  { table: 'services', type: 'services', titleEn: 'name_en', titleRu: 'name_ru', image: null, price: 'price', locationEn: null, locationRu: null, rating: null, pathPrefix: '/services/provider/', idField: 'id', hasApprovalStatus: true },
-  { table: 'marketplace_products', type: 'product', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: 'price', locationEn: 'vendor_name', locationRu: 'vendor_name_ru', rating: 'rating', pathPrefix: '/market/product/', idField: 'id', hasApprovalStatus: false },
+  { table: 'legal_services', type: 'legal', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: 'price_consultation', locationEn: 'district', locationRu: 'district', rating: 'rating', pathPrefix: '/legal/provider/', idField: 'id', hasApprovalStatus: true, extraSearchFields: ['description_en', 'description_ru'] },
+  { table: 'flower_shops', type: 'flowers', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: null, locationEn: 'address', locationRu: 'address', rating: 'rating', pathPrefix: '/flowers/shop/', idField: 'id', hasApprovalStatus: true, extraSearchFields: ['address'] },
+  { table: 'pharmacies', type: 'pharmacy', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: null, locationEn: 'address', locationRu: 'address', rating: 'rating', pathPrefix: '/pharmacy/', idField: 'id', hasApprovalStatus: true, extraSearchFields: ['address'] },
+  { table: 'stores', type: 'market', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: null, locationEn: 'address', locationRu: 'address', rating: 'rating', pathPrefix: '/market/store/', idField: 'id', hasApprovalStatus: true, extraSearchFields: ['address'] },
+  { table: 'services', type: 'services', titleEn: 'name_en', titleRu: 'name_ru', image: null, price: 'price', locationEn: null, locationRu: null, rating: null, pathPrefix: '/services/provider/', idField: 'id', hasApprovalStatus: true, extraSearchFields: ['description_en', 'description_ru'] },
+  { table: 'marketplace_products', type: 'product', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: 'price', locationEn: 'vendor_name', locationRu: 'vendor_name_ru', rating: 'rating', pathPrefix: '/market/product/', idField: 'id', hasApprovalStatus: false, extraSearchFields: ['description_en', 'description_ru'] },
   { table: 'marketplace_categories', type: 'marketCategory', titleEn: 'name_en', titleRu: 'name_ru', image: 'image_url', price: null, locationEn: null, locationRu: null, rating: null, pathPrefix: '/market/category/', idField: 'slug', hasApprovalStatus: false },
 ];
 
@@ -126,6 +128,82 @@ const SEARCH_SYNONYM_ENTRIES: SynonymEntry[] = [
   { keywords: ['massage'], priority: 5, result: mkCat('cat-massage', 'Massage & Spa', 'Массаж и спа', '/beauty') },
   { keywords: ['spa'], priority: 5, result: mkCat('cat-spa', 'Spa', 'Спа', '/beauty') },
   { keywords: ['спа'], priority: 5, result: mkCat('cat-spa', 'Spa', 'Спа', '/beauty') },
+  // Medical extras
+  { keywords: ['доктор'], priority: 5, result: mkCat('cat-medical', 'Medical Clinics', 'Клиники', '/medical') },
+  { keywords: ['поликлиник'], priority: 5, result: mkCat('cat-medical', 'Medical Clinics', 'Клиники', '/medical') },
+  { keywords: ['аптек'], priority: 5, result: mkCat('cat-pharmacy', 'Pharmacy', 'Аптека', '/pharmacy') },
+  { keywords: ['pharmacy'], priority: 5, result: mkCat('cat-pharmacy', 'Pharmacy', 'Аптека', '/pharmacy') },
+  // Legal / finance
+  { keywords: ['налог'], priority: 8, result: mkCat('cat-tax', 'Taxes', 'Налоги', '/legal?service=tax') },
+  { keywords: ['tax'], priority: 8, result: mkCat('cat-tax', 'Taxes', 'Налоги', '/legal?service=tax') },
+  { keywords: ['accountant'], priority: 8, result: mkCat('cat-tax', 'Accountant', 'Бухгалтер', '/legal?service=tax') },
+  { keywords: ['бухгалтер'], priority: 8, result: mkCat('cat-tax', 'Accountant', 'Бухгалтер', '/legal?service=tax') },
+  { keywords: ['юрист'], priority: 8, result: mkCat('cat-legal', 'Legal Services', 'Юристы', '/legal') },
+  { keywords: ['lawyer'], priority: 8, result: mkCat('cat-legal', 'Legal Services', 'Юристы', '/legal') },
+  { keywords: ['legal'], priority: 5, result: mkCat('cat-legal', 'Legal Services', 'Юристы', '/legal') },
+  { keywords: ['контракт'], priority: 8, result: mkCat('cat-contract', 'Contracts', 'Контракты', '/legal?service=contract') },
+  { keywords: ['договор'], priority: 8, result: mkCat('cat-contract', 'Contracts', 'Контракты', '/legal?service=contract') },
+  { keywords: ['contract'], priority: 8, result: mkCat('cat-contract', 'Contracts', 'Контракты', '/legal?service=contract') },
+  { keywords: ['банк'], priority: 8, result: mkCat('cat-bank', 'Bank Account', 'Банковский счёт', '/legal?service=banking') },
+  { keywords: ['bank'], priority: 8, result: mkCat('cat-bank', 'Bank Account', 'Банковский счёт', '/legal?service=banking') },
+  { keywords: ['страхов'], priority: 8, result: mkCat('cat-insurance', 'Insurance', 'Страхование', '/legal?service=insurance') },
+  { keywords: ['insurance'], priority: 8, result: mkCat('cat-insurance', 'Insurance', 'Страхование', '/legal?service=insurance') },
+  // Visa
+  { keywords: ['виз'], priority: 9, result: mkCat('cat-visa', 'Visa', 'Виза', '/visa/quiz') },
+  { keywords: ['visa'], priority: 9, result: mkCat('cat-visa', 'Visa', 'Виза', '/visa/quiz') },
+  { keywords: ['dtv'], priority: 10, result: mkCat('cat-visa', 'DTV Visa', 'Виза DTV', '/visa/quiz') },
+  { keywords: ['elite'], priority: 8, result: mkCat('cat-visa', 'Elite Visa', 'Elite виза', '/visa/quiz') },
+  // Education
+  { keywords: ['школ'], priority: 8, result: mkCat('cat-school', 'Schools', 'Школы', '/school-finder') },
+  { keywords: ['school'], priority: 8, result: mkCat('cat-school', 'Schools', 'Schools', '/school-finder') },
+  { keywords: ['садик'], priority: 8, result: mkCat('cat-school', 'Kindergarten', 'Детский сад', '/school-finder') },
+  { keywords: ['детский', 'сад'], priority: 10, result: mkCat('cat-school', 'Kindergarten', 'Детский сад', '/school-finder') },
+  { keywords: ['kindergarten'], priority: 8, result: mkCat('cat-school', 'Kindergarten', 'Детский сад', '/school-finder') },
+  // Home services
+  { keywords: ['ремонт'], priority: 7, result: mkCat('cat-handyman', 'Handyman', 'Ремонт и мастер', '/services?category=handyman') },
+  { keywords: ['handyman'], priority: 7, result: mkCat('cat-handyman', 'Handyman', 'Ремонт и мастер', '/services?category=handyman') },
+  { keywords: ['электрик'], priority: 8, result: mkCat('cat-electrical', 'Electrician', 'Электрик', '/services?category=electrical') },
+  { keywords: ['electrician'], priority: 8, result: mkCat('cat-electrical', 'Electrician', 'Электрик', '/services?category=electrical') },
+  { keywords: ['сантехник'], priority: 8, result: mkCat('cat-plumbing', 'Plumber', 'Сантехник', '/services?category=plumbing') },
+  { keywords: ['plumber'], priority: 8, result: mkCat('cat-plumbing', 'Plumber', 'Сантехник', '/services?category=plumbing') },
+  { keywords: ['кондиционер'], priority: 8, result: mkCat('cat-ac', 'AC Repair', 'Кондиционеры', '/services?category=ac-repair') },
+  { keywords: ['ac', 'repair'], priority: 9, result: mkCat('cat-ac', 'AC Repair', 'Кондиционеры', '/services?category=ac-repair') },
+  { keywords: ['уборк'], priority: 7, result: mkCat('cat-cleaning', 'Cleaning', 'Уборка', '/cleaning') },
+  { keywords: ['клининг'], priority: 7, result: mkCat('cat-cleaning', 'Cleaning', 'Клининг', '/cleaning') },
+  { keywords: ['cleaning'], priority: 7, result: mkCat('cat-cleaning', 'Cleaning', 'Уборка', '/cleaning') },
+  // Food
+  { keywords: ['кафе'], priority: 6, result: mkCat('cat-rest', 'Restaurants', 'Рестораны и кафе', '/restaurants') },
+  { keywords: ['ресторан'], priority: 6, result: mkCat('cat-rest', 'Restaurants', 'Рестораны', '/restaurants') },
+  { keywords: ['restaurant'], priority: 6, result: mkCat('cat-rest', 'Restaurants', 'Рестораны', '/restaurants') },
+  { keywords: ['еда'], priority: 5, result: mkCat('cat-food', 'Food Delivery', 'Доставка еды', '/food-delivery') },
+  { keywords: ['food'], priority: 5, result: mkCat('cat-food', 'Food Delivery', 'Доставка еды', '/food-delivery') },
+  { keywords: ['доставк'], priority: 6, result: mkCat('cat-food', 'Food Delivery', 'Доставка', '/food-delivery') },
+  { keywords: ['delivery'], priority: 6, result: mkCat('cat-food', 'Food Delivery', 'Доставка', '/food-delivery') },
+  { keywords: ['продукт'], priority: 6, result: mkCat('cat-market', 'Grocery', 'Продукты', '/market') },
+  { keywords: ['grocery'], priority: 6, result: mkCat('cat-market', 'Grocery', 'Продукты', '/market') },
+  { keywords: ['market'], priority: 5, result: mkCat('cat-market', 'Market', 'Маркет', '/market') },
+  // Fitness / beauty
+  { keywords: ['фитнес'], priority: 7, result: mkCat('cat-fitness', 'Fitness', 'Фитнес', '/fitness') },
+  { keywords: ['gym'], priority: 7, result: mkCat('cat-fitness', 'Gym', 'Спортзал', '/fitness') },
+  { keywords: ['спортзал'], priority: 7, result: mkCat('cat-fitness', 'Gym', 'Спортзал', '/fitness') },
+  { keywords: ['fitness'], priority: 7, result: mkCat('cat-fitness', 'Fitness', 'Фитнес', '/fitness') },
+  { keywords: ['маникюр'], priority: 7, result: mkCat('cat-nails', 'Nails', 'Маникюр', '/beauty') },
+  { keywords: ['nails'], priority: 7, result: mkCat('cat-nails', 'Nails', 'Маникюр', '/beauty') },
+  { keywords: ['hair'], priority: 7, result: mkCat('cat-hair', 'Hair', 'Парикмахер', '/beauty') },
+  { keywords: ['парикмахер'], priority: 7, result: mkCat('cat-hair', 'Hair', 'Парикмахер', '/beauty') },
+  { keywords: ['салон'], priority: 5, result: mkCat('cat-salon', 'Beauty Salon', 'Салон красоты', '/beauty') },
+  // Transport extras
+  { keywords: ['такси'], priority: 7, result: mkCat('cat-taxi', 'Taxi', 'Такси', '/transport') },
+  { keywords: ['taxi'], priority: 7, result: mkCat('cat-taxi', 'Taxi', 'Такси', '/transport') },
+  { keywords: ['тур'], priority: 6, result: mkCat('cat-tour', 'Tours', 'Туры', '/tours') },
+  { keywords: ['экскурс'], priority: 7, result: mkCat('cat-tour', 'Tours', 'Экскурсии', '/tours') },
+  { keywords: ['tour'], priority: 6, result: mkCat('cat-tour', 'Tours', 'Туры', '/tours') },
+  // Utility
+  { keywords: ['сим'], priority: 7, result: mkCat('cat-sim', 'SIM Card', 'SIM-карта', '/sim') },
+  { keywords: ['sim'], priority: 7, result: mkCat('cat-sim', 'SIM Card', 'SIM-карта', '/sim') },
+  { keywords: ['обмен'], priority: 7, result: mkCat('cat-exchange', 'Exchange', 'Обмен валют', '/exchange') },
+  { keywords: ['валют'], priority: 7, result: mkCat('cat-exchange', 'Exchange', 'Обмен валют', '/exchange') },
+  { keywords: ['exchange'], priority: 7, result: mkCat('cat-exchange', 'Exchange', 'Обмен валют', '/exchange') },
 ];
 
 const CACHE_TTL_MS = 5000;
@@ -223,11 +301,21 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
 
       // 3. Unified listings search (migrated verticals)
       try {
+        const listingOrFields = [
+          'name_en', 'name_ru', 'category',
+          'description_en', 'description_ru',
+          'district', 'address',
+        ];
+        const listingsOr = listingOrFields
+          .map((f) => `${f}.ilike.%${searchTermLower}%`)
+          .join(',');
+
         const { data: listingsData } = await supabase
           .from('listings')
           .select('id, vertical, name_en, name_ru, cover_image, price, address, district, rating')
           .eq('is_active', true)
-          .or(`name_en.ilike.%${searchTermLower}%,name_ru.ilike.%${searchTermLower}%,category.ilike.%${searchTermLower}%`)
+          .eq('approval_status', PUBLIC_CATALOG_APPROVAL_STATUS)
+          .or(listingsOr)
           .limit(10);
 
         if (controller.signal.aborted) return;
@@ -264,15 +352,17 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
 
           const uniqueFields = [...new Set(selectFields)];
 
-          // Build OR filter — always search title fields, plus extra fields for some tables
-          const orParts = [`${config.titleEn}.ilike.%${searchTermLower}%,${config.titleRu}.ilike.%${searchTermLower}%`];
+          // Build OR filter — title fields + optional extra fields per table
+          const orFields = [config.titleEn, config.titleRu, ...(config.extraSearchFields ?? [])];
+          const uniqueOr = [...new Set(orFields)];
+          const orParts = uniqueOr.map((f) => `${f}.ilike.%${searchTermLower}%`);
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           let queryBuilder = (supabase.from as any)(config.table)
             .select(uniqueFields.join(','))
             .eq('is_active', true)
             .or(orParts.join(','))
-            .limit(3);
+            .limit(5);
 
           if (config.hasApprovalStatus) {
             queryBuilder = queryBuilder.eq('approval_status', PUBLIC_CATALOG_APPROVAL_STATUS);
@@ -314,7 +404,7 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
         return (b.rating || 0) - (a.rating || 0);
       });
 
-      const finalResults = allResults.slice(0, 15);
+      const finalResults = allResults.slice(0, 25);
 
       // Cache results
       cacheRef.current.set(searchTerm, { results: finalResults, timestamp: Date.now() });

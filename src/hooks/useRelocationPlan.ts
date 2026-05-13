@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -42,9 +43,8 @@ export function useRelocationPlan() {
     queryKey: ['relocation_plan', user?.id ?? 'anon'],
     queryFn: async (): Promise<RelocationPlanLocal | null> => {
       if (user?.id) {
-        // @ts-expect-error relocation_plans not yet in generated Database type
         const { data, error } = await supabase
-          .from('relocation_plans')
+          .from('relocation_plans' as never)
           .select('quiz_answers, steps, updated_at')
           .eq('user_id', user.id)
           .maybeSingle();
@@ -66,8 +66,7 @@ export function useRelocationPlan() {
     mutationFn: async (next: RelocationPlanLocal) => {
       writeLocal(next);
       if (user?.id) {
-        // @ts-expect-error relocation_plans not yet in generated Database type
-        const { error } = await supabase.from('relocation_plans').upsert(
+        const { error } = await (supabase as any).from('relocation_plans').upsert(
           {
             user_id: user.id,
             quiz_answers: next.quiz_answers,
@@ -81,6 +80,10 @@ export function useRelocationPlan() {
     },
     onSuccess: (_, next) => {
       queryClient.setQueryData(['relocation_plan', user?.id ?? 'anon'], next);
+    },
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : 'Не удалось сохранить план';
+      toast.error('Не удалось синхронизировать план', { description: msg });
     },
   });
 
@@ -147,4 +150,3 @@ export function useRelocationPlan() {
   };
 }
 
-export type { RelocationPlanLocal };
