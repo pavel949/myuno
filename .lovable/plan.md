@@ -1,85 +1,135 @@
-## Problem (confirmed in code)
 
-Three independent vertical lists drift from each other, breaking handoffs:
+# Аудит CRM myUNO — куда пишутся данные, что ломается, что улучшить
 
-| Source | IDs |
-|---|---|
-| `src/lib/intakeVerticals.ts` (AI intake, 25) | `yachts, properties, owner_properties, tours, water_activities, restaurants, salons, clinics, gyms, vehicles, events, babysitters, cleaning_services, legal_services, pet_services, education_providers, pharmacies, insurance_providers, flower_shops, stores, providers, marketplace_products, marketplace_vendors, vendor_locations` |
-| `src/lib/leadVerticalConfig.ts` (Lead form, 14) | `properties, yachts, tours, vehicles, legal, clinics, babysitters, salons, gyms, water_activities, restaurants, other, home_services, property_services` |
-| `VendorQuickCreateFAB` + `VendorCategoryGrid` (Manual add, 14) | `beauty, restaurants, transport, yachts, properties, tours, fitness, cleaning, childcare, flowers, health, education, legal, pets` |
+## 1. Карта данных (что куда пишется)
 
-Drift examples: `salons↔beauty`, `clinics↔health`, `babysitters↔childcare`, `gyms↔fitness`, `vehicles↔transport`, `legal_services↔legal`, `flower_shops↔flowers`. Vendor org metadata stores any of these — so when the FAB filters by it, vendors who onboarded with `flower_shops` see no Quick-Create entry, and AI intake → manual edit handoff breaks. Missing manual-add: `events`, `pharmacies`, `insurance_providers`, `water_activities` (page or hook exists but no FAB/grid entry).
+В проекте уже **четыре параллельные «CRM-таблицы»** в `public`:
 
-Property photo bug: `owner/property-wizard/steps/PhotosStep` stores `imageArray[0]` as `cover_image` and `imageArray.slice(1)` as `images`. `VendorProperties.getInitialFormData` passes them as separate fields and `CanonicalPropertyForm` re-merges as `[cover_image, ...images]`. On edit the cover is shown twice; reordering silently swaps the cover.
+| Источник записи | Таблица | Где пишется |
+|---|---|---|
+| Owner CRM (Sales, /mc) | `crm_contacts`, `agent_deals`, `crm_contact_notes`, `crm_activities`, `crm_tasks`, `crm_meetings`, `crm_documents`, `crm_emails`, `crm_quotes` | `useCrmContacts`, `useAgentDeals`, `useCrmContactNotes`, `useCrm*` |
+| Admin CRM (/admin/crm) | `vendor_prospects`, `mcc_leads`, `owner_prospects` | `useAdminCrmStats`, `VendorProspectsPipeline`, `MCCLeadsTab`, `AdminOwnerProspects` |
+| Newbuilds (developer-portal) | `nb_leads` | `useNewbuildLeads` |
+| Capital / Invest | `investment_deals` | `Capital*` |
 
-## Plan
+**Важное наблюдение:** один и тот же человек (например, инвестор-партнёр, который потом купил для себя) может существовать одновременно в `vendor_prospects` + `crm_contacts` + `nb_leads` + `investment_deals` без связи между записями. Сейчас нет ни RPC, ни UI «promote prospect → contact», ни уникальных ключей `(company_id, phone)` / `(company_id, email)` — БД дубли не блокирует.
 
-### 1. Single canonical entry registry — `src/lib/verticals/vendorEntries.ts` (NEW)
+## 2. Конкретные проблемы экрана «New Deal» (на скриншоте)
 
-One list of 18 entries. Each = canonical id (matches DB-table semantics: `salons`, `clinics`, `gyms`, `vehicles`, `babysitters`, `cleaning_services`, `legal_services`, `pet_services`, `education_providers`, `flower_shops`, `pharmacies`, `insurance_providers`, `water_activities`, `events`, `tours`, `yachts`, `restaurants`, `properties`) + `aliases[]` (legacy slugs) + `vendorPath` + Lucide icon + i18n labels + `fabEnabled / gridEnabled / leadEnabled` flags.
+Файл: `src/components/owner/sales/CreateDealSheet.tsx` + `src/pages/owner/NewDealPage.tsx`.
 
-Helpers: `resolveVendorAlias(slug) → canonical | null`, `resolveVendorAliases(slugs[]) → canonical[]`, `getVendorEntry(id)`.
+### 2.1 Дублирование одних и тех же данных в двух таблицах
+В сделке `agent_deals` сохраняются `client_name/phone/email/budget_min/budget_max/currency/preferred_districts/preferred_types/bedrooms_min/client_source` — **те же** поля живут в `crm_contacts`. При создании сделки они пишутся в **обе** таблицы (lines 144-198), но:
+- При редактировании сделки (`EditDealSheet`) контакт **не обновляется**.
+- Если поменялся бюджет/предпочтения у контакта — сделка живёт со снапшотом.
+- При выборе уже существующего `selectedContact` (lines 257-271) форма заполняется из контакта, но если пользователь меняет бюджет/предпочтения в форме сделки, **в контакт это не пишется** → расхождение.
 
-### 2. Refactor consumers to read from the registry
+→ Нет «источника правды» для предпочтений клиента.
 
-- **`VendorQuickCreateFAB`** — delete local `verticalOptions`, build from `VENDOR_ENTRIES.filter(fabEnabled)`. Filter by `resolveVendorAliases(orgMetadata.verticals)` so legacy slugs work.
-- **`VendorCategoryGrid`** — delete local `allCategories`, same pattern.
-- **Vendor onboarding** verticals checklist (already lists 15 slugs): write through `resolveVendorAlias` so saved metadata stays canonical going forward.
+### 2.2 Авто-создание контакта хрупкое
+Lines 144-172: контакт создаётся **только если** заполнены `client_phone || client_email` И не выбран `selectedContact`. Если оператор ввёл только имя — сделка попадает в БД с `contact_id = null` (orphan), запись клиента нигде не остаётся.
 
-### 3. Property photo fix
+Дубль-проверка (`useDuplicateCheck`, `useAgentDeals.ts:178`) работает по **точному** совпадению `eq('client_phone', phone)` без нормализации (+7 / 8 / пробелы / `+66 81…`). Реальные дубли пройдут.
 
-- **`src/components/owner/property-wizard/steps/PhotosStep.tsx`**: stop splitting. Hold one ordered `images` array via `updateFormData({ images, cover_image: images[0] || '' })`. Read with `formData.images || []` (no `[cover_image, ...images]` re-merge).
-- **`src/pages/vendor/VendorProperties.tsx#getInitialFormData`**: build `images = editingProperty.cover_image ? [cover_image, ...images.filter(u => u !== cover_image)] : (images || [])`. Same on submit: derive `cover_image = data.images?.[0]`.
-- **`src/hooks/property-wizard/buildPayload.ts`**: ensure `cover_image = images?.[0]` written on persist.
-- Add **"Cover" badge** on first thumbnail in PhotosStep so users know reordering swaps the cover.
+### 2.3 VIP-флаг задвоен
+Два независимых поля «VIP»: `agent_deals.is_vip` и тег `'VIP'` в `crm_contacts.tags` (+ `crm_contacts.is_vip`). В UI рядом стоят надписи «VIP client (deal)» и «Контакт отмечен как VIP», синхронизация — частичная (lines 68, 258-267).
 
-### 4. New vendor pages — Pharmacy & Insurance
+### 2.4 prefilledContact перетирает ввод
+Lines 53-71: `useEffect([prefilledContact, open])` перезаписывает форму каждый раз при `open === true`. Если пользователь открыл шит, начал править, что-то его перерендерило — теряются ручные правки.
 
-- **`src/pages/vendor/VendorPharmacy.tsx`** — modeled on `VendorClinics.tsx`. Uses generic `useVerticalCRUD<Pharmacy>('pharmacy', profile?.id)` (registers `'pharmacy'` slug → `pharmacies` table). CRUD form: name EN/RU, description, address, phone, working_hours, delivery_available, is_24h, license_number, cover image + gallery via `UnifiedMediaUploader`.
-- **`src/pages/vendor/VendorInsurance.tsx`** — same pattern. Form: name, insurance_types[], languages[], has_24h_support, license_number, address, gallery.
-- Add `VendorPharmacy`, `VendorInsurance` lazy entries to `src/components/layout/pageRegistry.ts` and routes `/vendor/pharmacy`, `/vendor/insurance` (under existing `VendorLayout` block) in `AnimatedRoutes.tsx`. These slugs already live in `VERTICALS` registry (`PHARMACY`, `INSURANCE`).
+### 2.5 Дубль поля «Проект»
+В UI два контрола для одного и того же:
+- `PropertySearchInput` с `includeProjects` (lines 319-337) → пишет в `property_project_id`.
+- Отдельный `Select` «Project (offplan / newbuild)» (lines 341-363) → тоже пишет в `property_project_id`.
 
-### 5. Lead config alignment — `src/lib/leadVerticalConfig.ts`
+Если оператор выберет в обоих — побеждает ветка из `selectedProperty?.is_project`. Конфликт незаметен пользователю.
 
-- Rename `legal → legal_services` (keep `'legal'` resolvable via `getLeadVerticalById` alias map).
-- Add new entries (compact, COMMON_FIELDS-based) for: `flower_shops`, `pet_services`, `education_providers`, `cleaning_services`, `events`, `babysitters` (already there but rename keys to canonical), and keep `restaurants, yachts, tours, vehicles, clinics, gyms, water_activities, properties`.
-- `getLeadVerticalById(id)` resolves through `resolveVendorAlias` first.
-- Update `detectVerticalFromPath` to use canonical ids.
+### 2.6 Вёрстка чипов «Deal Type» на 384px
+Скриншот показывает: 8 чипов в один ряд → каждый сжат до 1 буквы по вертикали ("S/a/l/e", "Sh/ort-/Ter/m/Re/nt"). Не читается. Нужен flex-wrap или горизонтальный скролл.
 
-### 6. Migration — normalize stored vendor metadata
+### 2.7 Нет валидации телефона
+Email валидируется regex'ом, телефон принимает что угодно. Дубль-проверка из-за этого не срабатывает.
 
-SQL migration that updates `providers.metadata->verticals` and `marketplace_vendors.metadata->verticals` arrays with a `CASE` map: `beauty→salons, childcare→babysitters, health→clinics, medical→clinics, fitness→gyms, transport→vehicles, flowers→flower_shops, flower→flower_shops, legal→legal_services, lawyers→legal_services, pets→pet_services, pet→pet_services, education→education_providers, cleaning→cleaning_services, water→water_activities, watersports→water_activities, pharmacy→pharmacies, insurance→insurance_providers`. Idempotent; written as a `jsonb_set` over a `SELECT` of distinct slugs.
+### 2.8 Поля БД, до которых форма не дотягивается
+В таблице `agent_deals` есть `pipeline_id`, `co_agent_id`, `co_agent_commission_pct`, `campaign_id`, `priority`, `tags`, `won_reason` — в New Deal **нет** ни одного. Их можно задать только через `EditDealSheet` после создания.
 
-### 7. Consistency tests — extend `src/lib/__tests__/intakeVerticalConsistency.test.ts`
+В `crm_contacts` Create-форма не пишет: `outreach_status`, `lead_score`, `pipeline_stage`, `pipeline_type`, `key_dates`, `linked_user_id`, `owner_user_id`, `last_activity_at`, `ai_summary` (но они есть в БД и местами читаются). Часть управляется триггерами/AI — это ок, но `owner_user_id` (ответственный) задавать вручную **надо** и нельзя.
 
-- Every `VENDOR_ENTRIES.id` exists in `INTAKE_VERTICALS` ids.
-- Every `fabEnabled` entry has a route in `AnimatedRoutes` (regex scan of file).
-- Every `leadEnabled` entry has a `LEAD_VERTICALS` entry by canonical id.
-- Every alias resolves to a canonical id (no orphan aliases).
+## 3. Архитектурные проблемы CRM в целом
 
-## Files
+### 3.1 Нет уникальных индексов
+В `crm_contacts` ровно 1 дубль по `phone` уже есть (видно в БД). Нужен:
+```
+CREATE UNIQUE INDEX crm_contacts_company_phone_uq ON crm_contacts(company_id, phone) WHERE phone IS NOT NULL AND phone != '' AND is_archived = false;
+CREATE UNIQUE INDEX crm_contacts_company_email_uq ON crm_contacts(company_id, lower(email)) WHERE email IS NOT NULL AND email != '' AND is_archived = false;
+```
++ нормализация телефона перед записью (только цифры).
 
-**New (4):**
-- `src/lib/verticals/vendorEntries.ts`
-- `src/pages/vendor/VendorPharmacy.tsx`
-- `src/pages/vendor/VendorInsurance.tsx`
-- `supabase/migrations/<ts>_normalize_vendor_verticals_metadata.sql`
+### 3.2 Нет триггера auto-link deal→contact
+Логика «сделка без contact_id → найти/создать контакт» сейчас живёт **только** во фронте (CreateDealSheet). API-вход (импорт, edge-функция, web-form) даёт orphan-сделки. Нужен trigger BEFORE INSERT/UPDATE на `agent_deals`.
 
-**Edit (8):**
-- `src/components/vendor/wizard/VendorQuickCreateFAB.tsx`
-- `src/components/vendor/VendorCategoryGrid.tsx`
-- `src/components/owner/property-wizard/steps/PhotosStep.tsx`
-- `src/pages/vendor/VendorProperties.tsx`
-- `src/hooks/property-wizard/buildPayload.ts`
-- `src/lib/leadVerticalConfig.ts`
-- `src/components/layout/pageRegistry.ts`
-- `src/components/layout/AnimatedRoutes.tsx`
+### 3.3 Admin CRM ↔ Owner CRM не сшиты
+Нет UI «конвертировать `vendor_prospect` / `mcc_lead` / `owner_prospect` в `crm_contacts`». На дашборде в `useAdminCrmStats` метрика «overall conversion» считается без понимания, что `won` vendor может стать `crm_contact`.
 
-**Test (1):**
-- `src/lib/__tests__/intakeVerticalConsistency.test.ts`
+### 3.4 Источник правды для «предпочтения клиента»
+Сейчас бюджет/районы/типы/спален хранятся И в контакте, И в каждой сделке. Решение: вынести «требования» (`requirement`) в отдельную таблицу `crm_requirements` (контакт ↔ N требований) и на сделке хранить `requirement_id`. Минимум — снять дубль и сделать сделку «снимком в момент создания», а контакт — актуальной картиной.
 
-## Risks / Notes
+### 3.5 Audit / change-log
+В БД есть `deal_field_changes`, `deal_stage_history`, `lead_activity_log`, `crm_access_log` — но в UI ContactDetail / SalesDealDetail таймлайн неполный. Надо проверить, что триггеры пишут (миграция аудита).
 
-- No DB schema change — `pharmacies`, `insurance_providers`, `events`, `water_activities` tables already exist with RLS.
-- The metadata migration is data-only (allowed via insert tool / migration). If any vendor relied on a non-canonical slug for filtering elsewhere, the alias resolver still accepts it at read-time, so nothing breaks.
-- `VendorClinics` etc. are NOT rewritten — the FAB navigates to existing pages with `?create=true`. Each page already responds to "Add" buttons; no per-page change needed.
+## 4. План правок (приоритет по влиянию)
+
+### Wave A — баги и UX «New Deal» (frontend-only)
+1. **Чипы Deal Type**: `flex-wrap gap-1.5` или `overflow-x-auto whitespace-nowrap`, чтобы на 384px не ломались.
+2. **Убрать дубль «Project»**: оставить только `PropertySearchInput` (он уже умеет проекты), удалить отдельный Select «Project (offplan / newbuild)».
+3. **Убрать перезапись формы**: `useEffect([prefilledContact])` срабатывает только при первом открытии (флаг `hasInitialized`), не при `open` каждый раз.
+4. **VIP**: один тогл, источник правды — `agent_deals.is_vip` для сделки; галочка «также пометить контакт VIP» отдельно. Убрать дублирующий блок.
+5. **Валидация телефона**: нормализация через `phone` (`+\d{8,15}`), показ ошибки.
+6. **Дубль-проверка**: нормализованный поиск `phone like %digits-only%` + по email `ilike`.
+7. **Создавать контакт всегда**, если введён хотя бы `client_name` (или name+phone/email). Сделка без `contact_id` запрещена в UI.
+8. **При выборе существующего контакта**: блокировать редактирование name/phone/email на форме (показывать «Edit contact →»), чтобы не было silent drift.
+9. **Sync назад в контакт**: если оператор поменял `budget_*`/`preferred_*` — спросить «обновить и контакт?» (один чекбокс).
+
+### Wave B — backend целостности (миграция)
+10. Уникальные индексы по `(company_id, phone-normalized)` и `(company_id, lower(email))`.
+11. Триггер `agent_deals_autolink_contact()`: BEFORE INSERT, если `contact_id IS NULL` и есть `client_phone/email` → найти в `crm_contacts`, иначе вставить и привязать.
+12. Триггер `crm_contacts_normalize_phone()`: перед INSERT/UPDATE приводить `phone`/`whatsapp`/`mobile` к `+digits`.
+13. Скрипт-миграция: смерджить найденный 1 дубль (вызвать `useDeduplicate` из `useCrmDuplicates`).
+
+### Wave C — единая модель «requirements»
+14. Новая таблица `crm_requirements (id, company_id, contact_id, deal_id, budget_min, budget_max, currency, preferred_districts, preferred_types, bedrooms_min, source, snapshot_at)`.
+15. Адаптеры: `agent_deals` показывает требования через join, не хранит дубль; `crm_contacts` — «активный requirement».
+16. Backfill из текущих полей.
+
+### Wave D — связка Admin↔Owner CRM
+17. RPC `convert_prospect_to_contact(prospect_id, prospect_type)` — копирует данные в `crm_contacts`, ставит `source_entity_type/_id`, статус prospect → `converted`.
+18. Кнопка «Перевести в клиенты» в `VendorProspectDetail`, `MCC lead`, `OwnerProspect`.
+19. Фильтр в `ContactsList`: «Только конвертированные из prospect».
+
+### Wave E — полнота полей в Create-формах
+20. В `CreateDealSheet`: добавить `pipeline_id` (если company пользуется кастомными pipelines), `priority`, `tags`, `co_agent_id` (опционально, collapsable «advanced»).
+21. В `CreateContactSheet`: добавить `owner_user_id` (ответственный менеджер), `lifecycle_stage` (выбор), `lead_temperature`.
+
+## 5. Технические детали
+
+```text
+Файлы под правку (Wave A):
+- src/components/owner/sales/CreateDealSheet.tsx  (UX, дубль project, VIP, init-effect, валидация)
+- src/hooks/useAgentDeals.ts                      (useDuplicateCheck → нормализация)
+- src/lib/phone.ts (новый)                        (normalizePhone)
+
+Файлы Wave B (миграции):
+- supabase/migrations/* — uniq indexes + триггеры
+
+Файлы Wave C-E — отдельный roadmap, требуют согласования модели данных перед стартом.
+```
+
+**Out of scope сейчас:** редизайн Admin CRM, sequences/workflows engine, миграция Capital deals в общий контейнер.
+
+## 6. Что я хочу подтвердить перед стартом
+
+1. Стартуем с **Wave A + B** одной итерацией (UX + целостность БД), Wave C-E — отдельными PR-ами после твоего апрува модели?
+2. Нужно ли при выборе существующего контакта **блокировать** редактирование его контактных данных в форме сделки (рекомендую: да), или оставить «editable + warning»?
+3. Подтверди: единый источник правды для «предпочтений клиента» — это `crm_contacts` (на сделке хранится снимок только для исторической сделки)?
+
+**Рекомендую:** да на (1), да на (2), да на (3). Это снимает 80% текущей путаницы за минимум кода.
