@@ -24,8 +24,9 @@ export default function CrmSequencesPage() {
   const { data: sequences = [], isLoading, isError, error, refetch } = useCrmSequences(companyId);
   const createSequence = useCreateSequence();
   const deleteSequence = useDeleteSequence();
-const [createOpen, setCreateOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [confirmId, setConfirmId] = useState<string | null>(null);
   const [form, setForm] = useState({ name: '', description: '' });
 
   const handleCreate = async () => {
