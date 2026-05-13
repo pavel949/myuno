@@ -51,7 +51,7 @@ export default function CrmMeetingsPage() {
     }
   };
 
-  const statusColor = (s: string) => {
+  const statusVariant = (s: string): 'default' | 'secondary' | 'destructive' => {
     if (s === 'completed') return 'default';
     if (s === 'cancelled') return 'destructive';
     return 'secondary';
