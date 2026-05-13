@@ -130,7 +130,7 @@ export default function CrmMeetingsPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium">{m.title}</span>
-                    <Badge variant={statusColor(m.status) as any} className="text-[10px]">
+                    <Badge variant={statusVariant(m.status)} className="text-[10px]">
                       {m.status}
                     </Badge>
                   </div>
