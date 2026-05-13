@@ -12,6 +12,26 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { ChevronRight, BookOpen, Search } from 'lucide-react';
 
+function escapeRegExp(s: string) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function highlight(text: string | null | undefined, query: string) {
+  const value = text ?? '';
+  const q = query.trim();
+  if (!q) return value;
+  const parts = value.split(new RegExp(`(${escapeRegExp(q)})`, 'gi'));
+  return parts.map((part, i) =>
+    part.toLowerCase() === q.toLowerCase() ? (
+      <mark key={i} className="bg-primary/20 text-foreground rounded-sm px-0.5">
+        {part}
+      </mark>
+    ) : (
+      <span key={i}>{part}</span>
+    ),
+  );
+}
+
 export default function RelocationGuidesHub() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
