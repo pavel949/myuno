@@ -12,6 +12,26 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { ChevronRight, BookOpen, Search } from 'lucide-react';
 
+function escapeRegExp(s: string) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function highlight(text: string | null | undefined, query: string) {
+  const value = text ?? '';
+  const q = query.trim();
+  if (!q) return value;
+  const parts = value.split(new RegExp(`(${escapeRegExp(q)})`, 'gi'));
+  return parts.map((part, i) =>
+    part.toLowerCase() === q.toLowerCase() ? (
+      <mark key={i} className="bg-primary/20 text-foreground rounded-sm px-0.5">
+        {part}
+      </mark>
+    ) : (
+      <span key={i}>{part}</span>
+    ),
+  );
+}
+
 export default function RelocationGuidesHub() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -129,8 +149,8 @@ export default function RelocationGuidesHub() {
                     <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                       {cat ? (isRu ? cat.label_ru : cat.label_en) : a.category}
                     </p>
-                    <h2 className="text-base font-semibold text-foreground mt-0.5">{isRu ? a.title_ru : a.title_en}</h2>
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{isRu ? a.summary_ru : a.summary_en}</p>
+                    <h2 className="text-base font-semibold text-foreground mt-0.5">{highlight(isRu ? a.title_ru : a.title_en, query)}</h2>
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{highlight(isRu ? a.summary_ru : a.summary_en, query)}</p>
                   </div>
                   <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0 mt-1" aria-hidden />
                 </Link>
