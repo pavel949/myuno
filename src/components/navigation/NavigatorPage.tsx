@@ -799,9 +799,18 @@ export default function NavigatorPage() {
           {searchResults !== null && (
             <div>
               {searchResults.length === 0 ? (
-                <p className="text-white/45 text-sm py-6 text-center">
-                  {isRu ? 'Ничего не найдено' : 'No results found'}
-                </p>
+                <div className="py-6 text-center space-y-3">
+                  <p className="text-white/45 text-sm">
+                    {isRu ? 'Ничего не найдено в навигаторе' : 'Nothing matched in the navigator'}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/search?q=${encodeURIComponent(query.trim())}`)}
+                    className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] bg-white/10 hover:bg-white/15 text-white transition"
+                  >
+                    {isRu ? 'Искать в каталоге →' : 'Search the catalogue →'}
+                  </button>
+                </div>
               ) : (
                 <div className="space-y-2">
                   <p className="font-mono text-[9px] uppercase tracking-[0.12em] text-white/30">
