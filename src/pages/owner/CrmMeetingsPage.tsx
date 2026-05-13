@@ -23,7 +23,8 @@ export default function CrmMeetingsPage() {
   const { data: meetings = [], isLoading, isError: meetingsError, refetch: refetchMeetings } = useCrmMeetings(companyId);
   const createMeeting = useCreateMeeting();
   const deleteMeeting = useDeleteMeeting();
-const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [confirmId, setConfirmId] = useState<string | null>(null);
   const [form, setForm] = useState({ title: '', scheduled_at: '', duration_minutes: '30', location: '' });
 
   const handleCreate = async () => {
