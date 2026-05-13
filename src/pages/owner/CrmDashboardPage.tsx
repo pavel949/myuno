@@ -96,10 +96,10 @@ export default function CrmDashboardPage() {
   const filtered = useMemo(() => {
     let result = deals;
     if (filterStatus !== 'all') {
-      result = result.filter(d => (d as any).deal_status === filterStatus || (!(d as any).deal_status && filterStatus === 'active'));
+      result = result.filter(d => d.deal_status === filterStatus || (!d.deal_status && filterStatus === 'active'));
     }
     if (filterType !== 'all') {
-      result = result.filter(d => (d as any).deal_type === filterType || (!(d as any).deal_type && filterType === 'sale'));
+      result = result.filter(d => d.deal_type === filterType || (!d.deal_type && filterType === 'sale'));
     }
     if (agentFilter !== 'all') {
       result = result.filter(d => d.agent_id === agentFilter);
