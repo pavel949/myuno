@@ -19,9 +19,17 @@ interface ContactTagPickerProps {
   onToggle: (tagName: string) => void;
   readonly?: boolean;
   size?: 'sm' | 'md';
+  /** Tag names (case-insensitive) hidden from chips + picker — controlled elsewhere (e.g. VIP switch). */
+  tagsManagedElsewhere?: string[];
 }
 
-export function ContactTagPicker({ companyId, selectedTags, onToggle, readonly, size = 'md' }: ContactTagPickerProps) {
+function isManagedElsewhere(name: string, managed?: string[]): boolean {
+  if (!managed?.length) return false;
+  const up = name.toUpperCase();
+  return managed.some((m) => m.toUpperCase() === up);
+}
+
+export function ContactTagPicker({ companyId, selectedTags, onToggle, readonly, size = 'md', tagsManagedElsewhere }: ContactTagPickerProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { data: tags = [] } = useContactTags(companyId);
@@ -71,9 +79,11 @@ const [open, setOpen] = useState(false);
 
   if (readonly) {
     if (!selectedTags?.length) return null;
+    const visibleReadonly = selectedTags.filter((n) => !isManagedElsewhere(n, tagsManagedElsewhere));
+    if (!visibleReadonly.length) return null;
     return (
       <div className="flex flex-wrap gap-1">
-        {selectedTags.map(name => (
+        {visibleReadonly.map(name => (
           <Badge
             key={name}
             variant="outline"
@@ -93,9 +103,9 @@ const [open, setOpen] = useState(false);
 
   return (
     <div className="space-y-2">
-      {/* Selected tags */}
+      {/* Selected tags (omit tagsManagedElsewhere — e.g. VIP from VIP switch) */}
       <div className="flex flex-wrap gap-1.5">
-        {selectedTags.map(name => (
+        {selectedTags.filter((n) => !isManagedElsewhere(n, tagsManagedElsewhere)).map(name => (
           <Badge
             key={name}
             variant="outline"
@@ -137,7 +147,7 @@ const [open, setOpen] = useState(false);
                 {/* Existing tags */}
                 {tags.length > 0 && (
                   <div className="max-h-40 overflow-y-auto space-y-0.5">
-                    {tags.map(tag => {
+                    {tags.filter((tag) => !isManagedElsewhere(tag.name, tagsManagedElsewhere)).map(tag => {
                       const isSelected = selectedTags.includes(tag.name);
                       return (
                         <button

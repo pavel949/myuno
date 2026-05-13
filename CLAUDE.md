@@ -193,14 +193,14 @@
 **Dark mode (default):** bg `#08101E`, primary `#00D68F` (mint), accent `#4E7BFF` (blue)
 **Light mode (`html.light`):** bg `#fafaf9`, primary `#0d6e4f` (emerald), accent navy
 
-- **Fonts (canonical, matches PROJECT.md §8 and `src/styles/tokens.css`):**
-  - RU heading: **Unbounded** → fallback Noto Serif
-  - RU body: **Golos Text** → fallback Noto Sans
-  - EN heading: **Noto Serif** → Georgia
-  - EN body: **Noto Sans** → system-ui
-  - Numerics / data: **JetBrains Mono**
+- **Fonts (canonical, matches Design Bible v2 + `src/styles/tokens.css`):**
+  - Display / headings: **Source Serif 4** (both languages, primary)
+  - Body / UI: **Geist** (both languages, primary)
+  - Numerics / data / mono: **IBM Plex Mono**
+  - Locale fallback (RU): Unbounded → Golos Text → Noto Serif / Noto Sans
+  - Locale fallback (EN): Noto Serif → Noto Sans → Georgia / system-ui
   - Luxury / `/newbuilds` only: **Cormorant Garamond** (Dark Luxury theme)
-  - ⛔ NOT used anywhere in code: Syne, DM Sans, Playfair Display (older docs may still reference these — they are stale)
+  - ⛔ NOT used anywhere in code: Syne, DM Sans, Playfair Display, JetBrains Mono (older docs may still reference these — they are stale)
 - **Components:** shadcn/ui + Radix UI. Mobile = Sheet (bottom), не Dialog
 - **Min touch target:** 44px
 - **Runtime tokens:** `src/styles/tokens.css` (source of truth). `src/design-system/tokens.json` is a deprecated DS2.0 spec.

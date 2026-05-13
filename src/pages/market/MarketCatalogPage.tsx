@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { CategoryDrawer } from '@/components/market/CategoryDrawer';
 import { MarketComingSoonOverlay } from '@/components/market/MarketComingSoonOverlay';
 import { PersonaFilterChip } from '@/components/landings/PersonaFilterChip';
+import { GlobalPreferencesControls } from '@/components/uno/GlobalPreferencesControls';
 
 // Fallback icons
 const getCategoryIcon = (slug: string): string => {
@@ -89,7 +90,7 @@ const MarketCatalogPage = () => {
               <ArrowLeft className="w-5 h-5" />
             </Button>
             
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <h1 className="text-xl font-bold">
                 {language === 'ru' ? 'Каталог' : 'Catalog'}
               </h1>
@@ -97,7 +98,9 @@ const MarketCatalogPage = () => {
                 {sortedCategories.length} {language === 'ru' ? 'категорий' : 'categories'}
               </p>
             </div>
-            
+
+            <GlobalPreferencesControls size="sm" themeVariant="dropdown" className="shrink-0" />
+
             {/* Drawer Trigger */}
             <CategoryDrawer 
               trigger={

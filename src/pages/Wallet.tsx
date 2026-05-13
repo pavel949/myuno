@@ -348,6 +348,15 @@ const Wallet = () => {
                           locale: language === 'ru' ? ru : enUS
                         })}
                       </p>
+                      {/* Bible-v2 §00 H06: audit marker on money-moving rows.
+                          tx_id · ledger_entry_id (via reference_type) · UTC timestamp. */}
+                      <p className="font-mono text-[10px] text-muted-foreground/70 mt-1 tracking-wide">
+                        <span title={tx.id}>tx · {tx.id.slice(0, 8)}</span>
+                        <span className="mx-1.5 opacity-50">·</span>
+                        <span>ledger · —</span>
+                        <span className="mx-1.5 opacity-50">·</span>
+                        <span>{new Date(tx.created_at).toISOString().slice(0, 16).replace('T', ' ')} UTC</span>
+                      </p>
                     </div>
                     <div className={`font-semibold whitespace-nowrap ${
                       tx.type === 'payment' ? 'text-red-500' : 'text-success'

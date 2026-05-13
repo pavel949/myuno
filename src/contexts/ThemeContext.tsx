@@ -63,7 +63,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const updateTheme = () => {
       const resolved = resolveTheme(theme);
-      void applyTheme(resolved);
+      void applyTheme(resolved, { skipLocalStorage: theme === 'system' });
       setResolvedTheme(resolved);
     };
 

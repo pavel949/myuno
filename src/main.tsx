@@ -9,11 +9,13 @@ function renderBootstrapError(message: string) {
   const root = document.getElementById("root");
   if (!root) return;
 
+  // Bootstrap error UI — runs only when React mount fails. Uses CSS variables
+  // from tokens.css (imported via index.css on line 4) so colors stay canonical.
   const outer = document.createElement("div");
-  outer.setAttribute("style", "min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:#fafaf9;color:#1a1a19;font-family:'Golos Text',system-ui,-apple-system,sans-serif;");
+  outer.setAttribute("style", "min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:hsl(var(--surface-raised));color:hsl(var(--ink));font-family:'Geist','Golos Text',system-ui,-apple-system,sans-serif;");
 
   const card = document.createElement("div");
-  card.setAttribute("style", "max-width:560px;width:100%;background:#fff;border:1px solid #e5e5e4;border-radius:14px;padding:20px;");
+  card.setAttribute("style", "max-width:560px;width:100%;background:hsl(var(--surface-white));border:1px solid hsl(var(--border-strong));border-radius:14px;padding:20px;");
 
   const heading = document.createElement("h1");
   heading.setAttribute("style", "font-size:18px;line-height:1.3;margin:0 0 10px;");

@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
 import { Upload, FileSpreadsheet, UserPlus, CheckCircle2, AlertCircle, MessageCircle } from 'lucide-react';
 import { parseSpreadsheetFile } from '@/lib/parseSpreadsheet';
@@ -264,6 +265,15 @@ export default function ContactImportPage() {
         else out[targetKey] = val;
       }
     }
+    // Single source of truth for hotness: UI uses `scoring`; `lead_score` stays aligned for legacy/Odoo CSV.
+    const sRaw = out.scoring;
+    const lRaw = out.lead_score;
+    const s = typeof sRaw === 'number' && !Number.isNaN(sRaw) ? sRaw : null;
+    const l = typeof lRaw === 'number' && !Number.isNaN(lRaw) ? lRaw : null;
+    if (s != null && l == null) out.lead_score = s;
+    else if (l != null && s == null) out.scoring = l;
+    else if (s != null && l != null && s !== l) out.lead_score = s;
+
     return out;
   };
 
@@ -444,6 +454,14 @@ export default function ContactImportPage() {
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm">{t('columnMappingTitle', lang)}</CardTitle>
                 <p className="text-xs text-muted-foreground">{t('columnMappingHint', lang)}</p>
+                <Alert className="mt-3 border-muted-foreground/25 bg-muted/30">
+                  <AlertCircle className="h-4 w-4 text-muted-foreground" />
+                  <AlertDescription className="text-xs text-muted-foreground">
+                    {isRu
+                      ? 'В списках и карточке MC используется «Скоринг». Колонку Lead score при импорте подстраиваем под скоринг; при конфликте двух колонок приоритет у скоринга.'
+                      : 'MC lists and cards use Score. On import, Lead score is aligned to Score; if both columns differ, Score wins.'}
+                  </AlertDescription>
+                </Alert>
               </CardHeader>
               <CardContent className="space-y-2 max-h-[40vh] overflow-y-auto">
                 {CONTACT_IMPORT_FIELDS.map((f) => (

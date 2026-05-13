@@ -123,9 +123,12 @@ const CATEGORIES = [
       { slug:'banking', en:'Banking', ru:'Банк',   icon:'Landmark',   path:'/banking', status:'available' },
       { slug:'tax',     en:'Taxes',   ru:'Налоги', icon:'Calculator', path:'/tax',     status:'available' },
     ]},
-  { cluster:'legal', slug:'cat-halal-faith',      en:'Halal & Faith',       ru:'Халяль и вероисповедание',icon:'Heart',      color:'#84CC16', jtbd:['D'],     personas:['P18'],
+  { cluster:'legal', slug:'cat-halal-faith',      en:'Halal & Faith',       ru:'Халяль и вероисповедание',icon:'Heart',      color:'#84CC16', jtbd:['D'],     personas:['P17'],
     services:[
-      { slug:'faith', en:'Coming soon', ru:'Скоро', icon:'Heart', path:'/', status:'soon' },
+      { slug:'halal-persona', en:'Halal traveller hub', ru:'Халяль-путешественник', icon:'Compass', path:'/for/halal', status:'available' },
+      { slug:'halal-stay', en:'Halal-friendly stay', ru:'Жильё с учётом практик', icon:'Home', path:'/property/for/halal', status:'available' },
+      { slug:'halal-dining', en:'Halal dining', ru:'Рестораны (халяль)', icon:'Utensils', path:'/restaurants', status:'available' },
+      { slug:'halal-knowledge', en:'Faith & customs guides', ru:'Вера и обычаи', icon:'BookOpen', path:'/knowledge', status:'available' },
     ]},
   // BUILD
   { cluster:'build', slug:'cat-partner-portal',   en:'Partner Portal',      ru:'Партнёры и B2B',        icon:'Building',     color:'#F97316', jtbd:['J'],     personas:['P22','P25'],

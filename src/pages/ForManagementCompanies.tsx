@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Helmet } from 'react-helmet-async';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { LandingChrome } from '@/components/landings';
 import {
   Building2, BarChart3, Users, Calendar, FileText,
   MessageSquare, Shield, Zap, Check, ArrowRight,
@@ -70,6 +71,7 @@ const ForManagementCompanies: React.FC = () => {
       </Helmet>
 
       <div className="min-h-screen bg-background">
+        <LandingChrome isRu={isRu} />
         {/* Hero */}
         <section className="relative overflow-hidden py-20 md:py-32 px-4">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-accent/10" />

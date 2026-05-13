@@ -25,6 +25,10 @@ export function GoogleSignInButton({ redirectTo, label }: GoogleSignInButtonProp
 
   const handleClick = async () => {
     setLoading(true);
+    // Bible-v2 audit B3: re-arm the post-auth redirect cleanly on every click
+    // so a stale value from a previous cancelled OAuth attempt cannot leak
+    // into the next sign-in. The timestamp lets Auth.tsx ignore expired values.
+    sessionStorage.removeItem('myuno_post_auth_redirect');
     try {
       const oauthCallbackUrl = `${window.location.origin}/auth/callback`;
       if (redirectTo) {
@@ -32,7 +36,10 @@ export function GoogleSignInButton({ redirectTo, label }: GoogleSignInButtonProp
           const parsed = new URL(redirectTo, window.location.origin);
           if (parsed.origin === window.location.origin) {
             const path = `${parsed.pathname}${parsed.search}${parsed.hash}` || '/';
-            sessionStorage.setItem('myuno_post_auth_redirect', path);
+            sessionStorage.setItem(
+              'myuno_post_auth_redirect',
+              JSON.stringify({ path, ts: Date.now() }),
+            );
           }
         } catch {
           // Ignore malformed redirect values and continue OAuth safely.
@@ -43,12 +50,14 @@ export function GoogleSignInButton({ redirectTo, label }: GoogleSignInButtonProp
         redirect_uri: oauthCallbackUrl,
       });
       if (result.error) {
+        sessionStorage.removeItem('myuno_post_auth_redirect');
         toast.error(isRu ? 'Ошибка входа через Google' : 'Google sign-in failed');
         console.error('Google OAuth error:', result.error);
         setLoading(false);
       }
       // On success: browser redirects to Google, no further action needed.
     } catch (e) {
+      sessionStorage.removeItem('myuno_post_auth_redirect');
       console.error('Google OAuth exception:', e);
       toast.error(isRu ? 'Ошибка входа через Google' : 'Google sign-in failed');
       setLoading(false);

@@ -217,6 +217,25 @@
   --uno-alert:          hsl(var(--danger));
   --uno-alert-soft:     hsl(var(--danger-bg));
 
+  /* ClearView sub-brand tokens — bible-v2 §15.
+     Onyx + Paper + Ink Blue + single Signal Red, 5-grade financial spectrum.
+     Used by /clearview pages and ClearView Report PDFs. */
+  --cv-onyx:          230  13%  6%;    /* #0E0F12 — primary ink */
+  --cv-onyx-soft:     228  12% 12%;    /* #1A1C22 — hover / cards */
+  --cv-paper:          40  17% 92%;    /* #EFECE6 — archival paper */
+  --cv-paper-2:        39  17% 87%;    /* #E5E1D6 — paper stroke */
+  --cv-ink-blue:      221  39% 19%;    /* #1E2A44 — cold secondary */
+  --cv-signal:          2  64% 46%;    /* #C1292E — single red accent */
+  --cv-signal-soft:    10  47% 91%;    /* #F5E0DD */
+  --cv-hairline:       38  21% 80%;    /* #D5CFC3 — printed rule */
+  --cv-muted:          41   4% 33%;    /* #5A5952 */
+  /* 5-grade spectrum — financial, not marketing */
+  --cv-grade-aplus:   158  72% 13%;    /* #0A3A2A — deep forest */
+  --cv-grade-a:       152  56% 25%;    /* #1B6147 */
+  --cv-grade-b:        43  68% 33%;    /* #8C6C1A — ochre */
+  --cv-grade-c:        20  75% 37%;    /* #A54B18 — burnt amber */
+  --cv-grade-d:         2  62% 29%;    /* #7A1E1A — deep red */
+
   /* Easing curves used by handoff prototypes */
   --ease-standard:    cubic-bezier(0.2, 0.0, 0.2, 1);
   --ease-emphasized:  cubic-bezier(0.2, 0.0, 0, 1);
@@ -425,4 +444,20 @@ html:not([lang]) {
   --color-skeleton-base:      213 73% 15%;
   --color-skeleton-highlight: 213 73% 18%;
   --ring-offset:              214 78% 9%;
+
+  /* ClearView dark inversion — onyx ↔ paper, grades brightened for low-contrast bg */
+  --cv-onyx:          40  17% 92%;
+  --cv-onyx-soft:    228  12% 12%;
+  --cv-paper:        228  10%  8%;
+  --cv-paper-2:      225  12% 14%;
+  --cv-ink-blue:     219  31% 71%;
+  --cv-signal:         3  68% 62%;
+  --cv-signal-soft:  357  47% 15%;
+  --cv-hairline:     224   8% 19%;
+  --cv-muted:         40   4% 57%;
+  --cv-grade-aplus:  152 36% 49%;
+  --cv-grade-a:      150 33% 54%;
+  --cv-grade-b:       42 60% 56%;
+  --cv-grade-c:       18 67% 62%;
+  --cv-grade-d:        3 64% 64%;
 }

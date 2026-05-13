@@ -9,6 +9,8 @@ import { useRevenueRates } from '@/hooks/useRevenueRates';
 import { TRUST_ITEMS, TRANSACTION_ITEMS, POST_TX_ITEMS, formatRevenueRate, formatWhoPays } from '@/lib/monetization/realEstateEngine';
 import type { RevenueLineItem } from '@/lib/monetization/realEstateEngine';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { LandingContainer } from '@/components/landings';
+import { GlobalPreferencesControls } from '@/components/uno/GlobalPreferencesControls';
 import { ArrowLeft } from 'lucide-react';
 
 function Section({
@@ -25,7 +27,7 @@ function Section({
   const { language } = useLanguage();
   const isRu = language === 'ru';
   return (
-    <section id={id} className="px-4 py-5 border-t border-border first:border-t-0">
+    <section id={id} className="py-5 border-t border-border first:border-t-0">
       <h2 className="font-display text-[18px] font-semibold text-foreground tracking-[-0.01em]">
         {isRu ? title.ru : title.en}
       </h2>
@@ -76,23 +78,27 @@ export default function PricingPage() {
   const { withResolvedRate } = useRevenueRates();
 
   return (
-    <div className="min-h-screen bg-background pb-16">
+    <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-10 bg-background/95 border-b border-border">
-        <div className="px-4 py-3 flex items-center gap-3">
-          <Link to={APP_ROUTES.HOME} aria-label={isRu ? 'Назад' : 'Back'}>
-            <ArrowLeft className="w-5 h-5 text-foreground" />
-          </Link>
-          <div className="min-w-0">
-            <h1 className="font-display text-[16px] font-semibold text-foreground truncate">
-              {isRu ? 'Тарифы и комиссии' : 'Pricing and fees'}
-            </h1>
-            <p className="text-[11.5px] text-muted-foreground">
-              {isRu ? 'Оператор: myUNO Pte. Ltd.' : 'Operator: myUNO Pte. Ltd.'}
-            </p>
+        <LandingContainer className="flex items-center justify-between gap-3 py-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <Link to={APP_ROUTES.HOME} aria-label={isRu ? 'Назад' : 'Back'}>
+              <ArrowLeft className="h-5 w-5 shrink-0 text-foreground" />
+            </Link>
+            <div className="min-w-0">
+              <h1 className="truncate font-display text-[16px] font-semibold text-foreground">
+                {isRu ? 'Тарифы и комиссии' : 'Pricing and fees'}
+              </h1>
+              <p className="text-[11.5px] text-muted-foreground">
+                {isRu ? 'Оператор: myUNO Pte. Ltd.' : 'Operator: myUNO Pte. Ltd.'}
+              </p>
+            </div>
           </div>
-        </div>
+          <GlobalPreferencesControls size="sm" themeVariant="dropdown" className="shrink-0" />
+        </LandingContainer>
       </header>
 
+      <LandingContainer className="pb-16">
       <Section
         id="trust"
         title={{ ru: 'Покупателям и инвесторам', en: 'For buyers and investors' }}
@@ -122,6 +128,7 @@ export default function PricingPage() {
         }}
         items={POST_TX_ITEMS.map(withResolvedRate)}
       />
+      </LandingContainer>
     </div>
   );
 }

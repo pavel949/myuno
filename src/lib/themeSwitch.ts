@@ -6,7 +6,7 @@
  * the DOM may not yet reflect the new class, and `tokens.css` variables that
  * key off `html.light` / `html.dark` may not have been recomputed. Snapshot
  * tools need a single deterministic call that resolves only after:
- *   1. localStorage is updated (so a reload would pick up the same theme),
+ *   1. localStorage is updated when not skipped (reload stays consistent with semantic mode),
  *   2. the `<html>` class is swapped synchronously,
  *   3. the browser has applied styles AND painted (two rAFs),
  *   4. document fonts have settled (so text doesn't reflow mid-screenshot).
@@ -14,6 +14,11 @@
  * On completion we set `data-theme-ready="<theme>"` on `<html>` and dispatch
  * a `myuno:theme-ready` CustomEvent. Capture scripts can either await the
  * returned Promise or wait for the attribute / event.
+ *
+ * When `skipLocalStorage` is true, the `<html>` class is still updated but
+ * `localStorage['myuno-theme']` is left unchanged. ThemeProvider uses this when
+ * the semantic preference is `system` so the key stays `system` instead of
+ * being overwritten by the resolved `light`/`dark` value.
  */
 
 import { logger } from '@/lib/logger';
@@ -23,22 +28,34 @@ const STORAGE_KEY = 'myuno-theme';
 const READY_ATTR = 'data-theme-ready';
 const READY_EVENT = 'myuno:theme-ready';
 
+export interface ApplyThemeOptions {
+  /** When true, do not write `myuno-theme` (semantic mode may be `system`). */
+  skipLocalStorage?: boolean;
+}
+
 function nextFrame(): Promise<void> {
   return new Promise((resolve) => requestAnimationFrame(() => resolve()));
 }
 
-export async function applyTheme(theme: ResolvedTheme): Promise<ResolvedTheme> {
+export async function applyTheme(
+  theme: ResolvedTheme,
+  options?: ApplyThemeOptions,
+): Promise<ResolvedTheme> {
   if (typeof window === 'undefined' || typeof document === 'undefined') {
     return theme;
   }
 
   const root = document.documentElement;
+  const skipLs = options?.skipLocalStorage === true;
 
-  // 1. Persist first so any reload during the swap stays consistent.
-  try {
-    localStorage.setItem(STORAGE_KEY, theme);
-  } catch {
-    // Private mode / quota — ignore, the class swap below still applies.
+  // 1. Persist first so any reload during the swap stays consistent (unless
+  //    ThemeProvider is applying a resolved palette while mode is `system`).
+  if (!skipLs) {
+    try {
+      localStorage.setItem(STORAGE_KEY, theme);
+    } catch {
+      // Private mode / quota — ignore, the class swap below still applies.
+    }
   }
 
   // 2. Swap class synchronously. Mark not-ready until paint settles.

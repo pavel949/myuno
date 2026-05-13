@@ -87,6 +87,18 @@ export function TransactionCard({ item, isRu, getCategoryLabel, onEdit, onDelete
                 </Badge>
               )}
             </div>
+
+            {/* Bible-v2 §00 H06: audit marker on money-moving rows.
+                tx_id · ledger_entry_id (via reference_id) · UTC timestamp. */}
+            <p className="font-mono text-[10px] text-muted-foreground/70 mt-2 tracking-wide">
+              <span title={item.id}>tx · {item.id.slice(0, 8)}</span>
+              <span className="mx-1.5 opacity-50">·</span>
+              <span title={item.reference_id ?? undefined}>
+                ledger · {item.reference_id ? item.reference_id.slice(0, 8) : '—'}
+              </span>
+              <span className="mx-1.5 opacity-50">·</span>
+              <span>{new Date(item.transaction_date).toISOString().slice(0, 10)} UTC</span>
+            </p>
           </div>
 
           <DropdownMenu>

@@ -10,12 +10,14 @@
  * collapses to a thin wordmark + tagline strip to avoid distracting from the form.
  */
 import { motion } from 'framer-motion';
+import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plane, Home, Briefcase, TrendingUp, Scale, Hammer, Check, MapPin } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { BrandWordmark } from '@/components/uno/BrandWordmark';
 import { useCatalogFromDB } from '@/lib/catalog/useCatalogFromDB';
+import { getTotalEligibleServicesForAudience } from '@/lib/catalog/catalogMetrics';
 import { APP_ROUTES } from '@/lib/config/routes';
 
 interface AuthValuePanelProps {
@@ -43,8 +45,11 @@ const CLUSTER_ROUTES: Record<(typeof CLUSTERS)[number]['key'], string> = {
 export function AuthValuePanel({ compact = false }: AuthValuePanelProps) {
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const { categories } = useCatalogFromDB();
-  const totalServices = categories.reduce((s, c) => s + c.services.length, 0);
+  const { categories, clusters } = useCatalogFromDB();
+  const headlineServiceCount = useMemo(
+    () => getTotalEligibleServicesForAudience(clusters, categories, {}),
+    [clusters, categories],
+  );
 
   if (compact) {
     return (
@@ -102,7 +107,9 @@ export function AuthValuePanel({ compact = false }: AuthValuePanelProps) {
               <Check className="w-3 h-3 text-primary" strokeWidth={3} />
             </span>
             <span className="text-sm text-foreground/90 leading-snug">
-              {n === 1 ? t('auth.value.bullets.1').replace(/^\d+\+/, `${totalServices}+`) : t(`auth.value.bullets.${n}`)}
+              {n === 1
+                ? t('auth.value.bullets.1').replace(/\{\{count\}\}/g, String(headlineServiceCount))
+                : t(`auth.value.bullets.${n}`)}
             </span>
           </li>
         ))}

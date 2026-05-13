@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { EmptyState } from '@/components/page/EmptyState';
 import { toast } from 'sonner';
 import { 
   Wifi, Key, Phone, MapPin, Utensils, Coffee, Palmtree, ShoppingBag, Camera, Car,
@@ -341,9 +342,16 @@ export default function PublicGuidebook() {
           <TabsContent value="directions" className="space-y-4">
             {guidebook.directions.length === 0 ? (
               <Card>
-                <CardContent className="p-8 text-center">
-                  <Navigation className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">{isRu ? 'Инструкции скоро появятся' : 'Directions coming soon'}</p>
+                <CardContent className="p-2">
+                  <EmptyState
+                    icon={Navigation}
+                    compact
+                    isRu={isRu}
+                    title="Directions planned · Q3 2026"
+                    titleRu="Инструкции запланировано · Q3 2026"
+                    description="The host will add step-by-step arrival instructions before your check-in."
+                    descriptionRu="Хозяин добавит пошаговые инструкции к заезду до вашего прибытия."
+                  />
                 </CardContent>
               </Card>
             ) : (
@@ -386,9 +394,16 @@ export default function PublicGuidebook() {
           <TabsContent value="local" className="space-y-4">
             {Object.keys(groupedTips).length === 0 ? (
               <Card>
-                <CardContent className="p-8 text-center">
-                  <MapPin className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">{isRu ? 'Рекомендации скоро появятся' : 'Recommendations coming soon'}</p>
+                <CardContent className="p-2">
+                  <EmptyState
+                    icon={MapPin}
+                    compact
+                    isRu={isRu}
+                    title="Local recommendations planned · Q3 2026"
+                    titleRu="Рекомендации запланировано · Q3 2026"
+                    description="The host curates a list of nearby restaurants, beaches and shops before each booking."
+                    descriptionRu="Хозяин добавит подборку ближайших ресторанов, пляжей и магазинов до начала проживания."
+                  />
                 </CardContent>
               </Card>
             ) : (

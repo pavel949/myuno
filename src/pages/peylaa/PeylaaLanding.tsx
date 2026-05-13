@@ -19,6 +19,8 @@ import { usePeylaaProject, usePeylaaStats, usePeylaaAmenities, usePeylaaGallery,
 import { PeylaaLeadForm } from './components/PeylaaLeadForm';
 import { PeylaaUnitCatalog } from './components/PeylaaUnitCatalog';
 import { PeylaaROICalculator } from './components/PeylaaROICalculator';
+import { LandingContainer } from '@/components/landings';
+import { GlobalPreferencesControls } from '@/components/uno/GlobalPreferencesControls';
 
 const STORAGE_BASE = 'https://bhmvnorkswapjkmbvykk.supabase.co/storage/v1/object/public/media';
 const HERO_BG = `${STORAGE_BASE}/exterior/peylaa_drone-shot-with-3d-building.jpg`;
@@ -183,7 +185,8 @@ export default function PeylaaLanding() {
             <a href="#roi" className="hover:text-white transition-colors">Инвестиции</a>
             <a href="#payment" className="hover:text-white transition-colors">Условия</a>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <GlobalPreferencesControls size="sm" themeVariant="dropdown" className="shrink-0" />
             <Button
               size="sm"
               variant="outline"
@@ -213,7 +216,7 @@ export default function PeylaaLanding() {
         />
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a]/80 via-[#0a0a0a]/60 to-[#0a0a0a]" />
 
-        <div className="relative z-10 max-w-5xl mx-auto px-4 text-center space-y-8">
+        <LandingContainer className="relative z-10 max-w-5xl text-center space-y-8">
           <Badge className="bg-accent/20 text-accent border-accent/40 px-4 py-1.5 text-xs">
             ПЕРВЫЕ В АЗИАТСКО-ТИХООКЕАНСКОМ РЕГИОНЕ
           </Badge>
@@ -289,10 +292,8 @@ export default function PeylaaLanding() {
             <span className="flex items-center gap-1"><Check className="w-3 h-3 text-success" /> Финансирование до 50%</span>
             <span className="flex items-center gap-1"><Check className="w-3 h-3 text-success" /> Полная отделка</span>
           </div>
-        </div>
+        </LandingContainer>
       </section>
-
-      {/* ── KEY FEATURES ── */}
       <section className="py-20 px-4">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-4" style={{ fontFamily: 'Unbounded, sans-serif' }}>

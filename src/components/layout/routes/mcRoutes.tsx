@@ -10,9 +10,9 @@ import { PageTransition } from '../PageTransition';
 
 // Local LazyPage helper — kept private to avoid leaking layout helpers across files
 const LazyPage = ({ children }: { children: React.ReactNode }) => (
-  <Suspense fallback={<LoadingState />}>
-    <PageTransition>{children}</PageTransition>
-  </Suspense>
+  <PageTransition>
+    <Suspense fallback={<LoadingState />}>{children}</Suspense>
+  </PageTransition>
 );
 
 export const mcRoutes = (

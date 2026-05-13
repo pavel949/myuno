@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
-import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
+import { GlobalPreferencesControls } from '@/components/uno/GlobalPreferencesControls';
 import { Printer } from 'lucide-react';
 import {
   GuideCover,
@@ -35,7 +35,7 @@ export default function OwnerGuidePage() {
           <p className="text-xs text-muted-foreground">myUNO v2.0</p>
         </div>
         <div className="flex items-center gap-2">
-          <LanguageSwitcher variant="dropdown" size="sm" />
+          <GlobalPreferencesControls size="sm" themeVariant="dropdown" className="shrink-0" />
           <Button variant="outline" size="sm" onClick={handlePrint} className="gap-2">
             <Printer className="w-4 h-4" />
             <span className="hidden sm:inline">{isRu ? 'Печать / PDF' : 'Print / PDF'}</span>

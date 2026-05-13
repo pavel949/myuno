@@ -8,6 +8,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { getTranslations, loadTranslations as loadI18n, type Language } from '@/i18n';
+import { STORAGE_KEYS } from '@/lib/constants';
+import { logger } from '@/lib/logger';
 
 export type { Language };
 
@@ -29,23 +31,37 @@ interface CachedTranslations {
   [key: string]: { ru: string; en: string; th: string | null };
 }
 
+const LANGUAGE_LS_KEY = STORAGE_KEYS.LANGUAGE;
+
+const isValidLanguage = (value: string | null | undefined): value is Language =>
+  value === 'ru' || value === 'en' || value === 'th';
+
 const normalizeLanguage = (value: string | null): Language => {
-  if (value === 'ru' || value === 'en' || value === 'th') return value;
+  if (isValidLanguage(value)) return value;
   return 'ru';
 };
 
+function readLanguageFromLocalStorage(): Language {
+  try {
+    return normalizeLanguage(localStorage.getItem(LANGUAGE_LS_KEY));
+  } catch {
+    return 'ru';
+  }
+}
+
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<Language>(() => {
-    const saved = localStorage.getItem('myuno-language');
-    return normalizeLanguage(saved);
-  });
+  const [language, setLanguageState] = useState<Language>(() => readLanguageFromLocalStorage());
   const [customTranslations, setCustomTranslations] = useState<CachedTranslations>({});
   const [isLoadingTranslations, setIsLoadingTranslations] = useState(true);
 
   const setLanguage = useCallback((lang: Language) => {
     // Persist and update state immediately to avoid language flicker on fast navigation.
     setLanguageState(lang);
-    localStorage.setItem('myuno-language', lang);
+    try {
+      localStorage.setItem(LANGUAGE_LS_KEY, lang);
+    } catch {
+      // Private mode / quota — UI language still updates for this session.
+    }
     void loadI18n(lang);
   }, []);
 
@@ -99,7 +115,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
         localStorage.setItem(TRANSLATIONS_CACHE_TIMESTAMP, Date.now().toString());
         return true;
       } catch (err) {
-        console.error('Failed to load translations from DB:', err);
+        logger.warn('Failed to load translations from DB', { err });
         // Fallback to static translations (already in the component)
         return false;
       } finally {
@@ -139,8 +155,10 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const handleStorage = (event: StorageEvent) => {
-      if (event.key !== 'myuno-language') return;
-      setLanguageState(normalizeLanguage(event.newValue));
+      if (event.key !== LANGUAGE_LS_KEY) return;
+      // Another tab cleared the key or wrote garbage — do not reset to default `ru`.
+      if (!isValidLanguage(event.newValue)) return;
+      setLanguageState(event.newValue);
     };
 
     window.addEventListener('storage', handleStorage);

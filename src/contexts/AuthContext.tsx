@@ -9,6 +9,7 @@
  */
 import React, { createContext, useContext, useEffect, useState, useCallback, useMemo, useRef, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
+import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { getPasswordResetRedirectUrl } from '@/lib/config/routes';
 import { clearAdminCache } from '@/hooks/useIsAdmin';
@@ -52,6 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const refreshFailureCountRef = useRef(0);
+  const queryClient = useQueryClient();
 
   const clearStoredAuthSession = useCallback(() => {
     if (typeof window !== 'undefined') {
@@ -203,8 +205,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await supabase.auth.signOut({ scope: 'local' });
     } finally {
       clearStoredAuthSession();
+      // Bible-v2 audit B1: drop every cached query so user A's data
+      // (wallet, bookings, orders) cannot render to user B on the same tab.
+      queryClient.clear();
     }
-  }, [clearStoredAuthSession]);
+  }, [clearStoredAuthSession, queryClient]);
 
   const resetPassword = useCallback(async (email: string) => {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {

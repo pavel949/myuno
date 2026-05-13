@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTeamPermissions, type ModuleKey } from '@/hooks/useTeamPermissions';
@@ -91,11 +92,14 @@ const MODULE_GROUPS: ModuleGroup[] = [
   },
 ];
 
+const CRM_MORE_MODULE_IDS = new Set(['sequences', 'quotes']);
+
 export default function OwnerModulesPage() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { canAccess } = useTeamPermissions();
+  const [crmMoreOpen, setCrmMoreOpen] = useState(false);
 
   return (
     <div className="px-4 md:px-6 lg:px-8 pt-6 pb-24 space-y-7 max-w-lg md:max-w-[1536px] mx-auto">
@@ -115,6 +119,14 @@ export default function OwnerModulesPage() {
         });
         if (visibleModules.length === 0) return null;
 
+        const isCrmGroup = group.titleEn === 'CRM & Sales';
+        const primaryModules = isCrmGroup
+          ? visibleModules.filter((m) => !CRM_MORE_MODULE_IDS.has(m.id))
+          : visibleModules;
+        const secondaryModules = isCrmGroup
+          ? visibleModules.filter((m) => CRM_MORE_MODULE_IDS.has(m.id))
+          : [];
+
         return (
           <motion.div
             key={group.titleEn}
@@ -126,11 +138,12 @@ export default function OwnerModulesPage() {
               {isRu ? group.titleRu : group.titleEn}
             </p>
             <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
-              {visibleModules.map((mod) => {
+              {primaryModules.map((mod) => {
                 const Icon = mod.icon;
                 return (
                   <button
                     key={mod.id}
+                    type="button"
                     onClick={() => navigate(mod.path)}
                     className="flex flex-col items-center gap-1.5 p-3 rounded-none transition-all hover:bg-muted/50 group"
                   >
@@ -148,7 +161,43 @@ export default function OwnerModulesPage() {
                   </button>
                 );
               })}
+              {isCrmGroup && secondaryModules.length > 0 && crmMoreOpen
+                ? secondaryModules.map((mod) => {
+                    const Icon = mod.icon;
+                    return (
+                      <button
+                        key={mod.id}
+                        type="button"
+                        onClick={() => navigate(mod.path)}
+                        className="flex flex-col items-center gap-1.5 p-3 rounded-none transition-all hover:bg-muted/50 group"
+                      >
+                        <div className={cn(
+                          'w-12 h-12 rounded-none flex items-center justify-center',
+                          'shadow-sm ring-1 ring-black/[0.04] dark:ring-white/[0.06]',
+                          'transition-transform ',
+                          mod.tint,
+                        )}>
+                          <Icon className={cn('h-6 w-6', mod.textColor)} strokeWidth={2} />
+                        </div>
+                        <span className="text-[11px] font-medium text-center leading-tight text-foreground/80 line-clamp-2">
+                          {isRu ? mod.labelRu : mod.labelEn}
+                        </span>
+                      </button>
+                    );
+                  })
+                : null}
             </div>
+            {isCrmGroup && secondaryModules.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setCrmMoreOpen((o) => !o)}
+                className="mt-2 w-full text-center text-xs font-medium text-muted-foreground hover:text-foreground py-2 rounded-none border border-dashed border-muted-foreground/30 bg-muted/20"
+              >
+                {crmMoreOpen
+                  ? (isRu ? 'Свернуть' : 'Show less')
+                  : (isRu ? `Ещё (${secondaryModules.length})` : `More (${secondaryModules.length})`)}
+              </button>
+            )}
           </motion.div>
         );
       })}

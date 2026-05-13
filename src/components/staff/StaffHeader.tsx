@@ -11,8 +11,7 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
-import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
+import { GlobalPreferencesControls } from '@/components/uno/GlobalPreferencesControls';
 
 const routeLabels: Record<string, { en: string; ru: string }> = {
   '/staff': { en: 'Dashboard', ru: 'Обзор' },
@@ -74,10 +73,7 @@ export function StaffHeader() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      <div className="flex items-center gap-1">
-        <ThemeSwitcher />
-        <LanguageSwitcher />
-      </div>
+      <GlobalPreferencesControls size="sm" themeVariant="dropdown" className="shrink-0" />
     </header>
   );
 }

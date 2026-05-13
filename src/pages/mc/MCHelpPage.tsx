@@ -40,6 +40,13 @@ interface FeatureSection {
 
 const FAQ_ITEMS: FAQItem[] = [
   {
+    q: { en: 'MC CRM vs Capital — where do I work deals?', ru: 'MC CRM и Capital — где что вести?' },
+    a: {
+      en: 'Use MC (/mc/…) for day-to-day operations: rentals, property management, owners, and service-related pipeline. Use Capital (/capital/…) for off-plan, viewing requests, mandates, and the investor pipeline. The same person can exist in both; open the banner on a contact card to jump between pipelines.',
+      ru: 'MC (/mc/…) — повседневные операции: аренда, управление объектами, собственники и сервисная воронка. Capital (/capital/…) — newbuild, запросы на показы, мандаты и инвестиционный пайплайн. Один человек может быть в обеих CRM — на карточке контакта откройте баннер, чтобы перейти в другую воронку.',
+    },
+  },
+  {
     q: { en: 'How do I add a new property?', ru: 'Как добавить новый объект?' },
     a: { en: 'Go to Properties → click "Add Property". Fill in the details, upload photos, and save. Once saved, activate the property slot in the Subscription section to enable PMS features (calendar, bookings, finances).', ru: 'Перейдите в Объекты → нажмите «Добавить объект». Заполните информацию, загрузите фото и сохраните. После сохранения активируйте слот объекта в разделе Подписка, чтобы включить PMS-функции (календарь, бронирования, финансы).' },
   },
@@ -124,7 +131,10 @@ const FEATURE_SECTIONS: FeatureSection[] = [
     id: 'crm',
     icon: Users,
     title: { en: 'CRM & Sales', ru: 'CRM и продажи' },
-    description: { en: 'Lead management and sales automation', ru: 'Управление лидами и автоматизация продаж' },
+    description: {
+      en: 'Lead management in MC. For newbuild and investor deals, switch to Capital — see FAQ «MC CRM vs Capital».',
+      ru: 'Управление лидами в MC. Сделки по newbuild и инвестициям — в Capital; см. FAQ «MC CRM и Capital».',
+    },
     features: [
       { en: 'Contact database with segmentation and tags', ru: 'База контактов с сегментацией и тегами' },
       { en: 'Customizable sales pipelines with drag-and-drop stages', ru: 'Настраиваемые воронки продаж с перетаскиванием этапов' },

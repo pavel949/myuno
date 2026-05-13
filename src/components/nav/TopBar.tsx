@@ -16,8 +16,7 @@ import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
-import { CurrencySwitcher } from '@/components/uno/CurrencySwitcher';
+import { GlobalPreferencesControls } from '@/components/uno/GlobalPreferencesControls';
 import { MiniCart } from '@/components/market/MiniCart';
 import { Button } from '@/components/ui/button';
 import { GlobalSearchModal } from '@/components/search/GlobalSearchModal';
@@ -171,8 +170,7 @@ export const TopBar = memo(function TopBar({
             >
               <Search className="size-5 text-muted-foreground" />
             </button>
-            <LanguageSwitcher size="sm" />
-            <CurrencySwitcher size="sm" />
+            <GlobalPreferencesControls size="sm" themeVariant="dropdown" />
             {cartEnabled && (
               <MiniCart className="rounded-none hover:bg-muted/40 transition-colors" />
             )}

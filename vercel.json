@@ -37,6 +37,8 @@
       "source": "/og/cluster/:slug.svg",
       "destination": "https://kakkwibljrjsawxgnupk.supabase.co/functions/v1/og-persona?cluster=:slug"
     },
+    { "source": "/bible", "destination": "/bible/index.html" },
+    { "source": "/bible/", "destination": "/bible/index.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "redirects": [

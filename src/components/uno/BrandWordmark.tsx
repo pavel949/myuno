@@ -7,10 +7,8 @@ import { APP_ROUTES } from '@/lib/config/routes';
  * SSOT for logo typography and colors.
  *
  * Tone variants:
- *  - `default` — ink "my" prefix on cream, foreground "UNO" (page chrome).
- *  - `onNavy`  — orange-400 "my" + cream "UNO" for placement on the navy
- *                brand band (home header). Uses the canonical
- *                `--brand-orange-400` so the lockup stays in the palette.
+ *  - `default` — prefix `my` in primary, `UNO` in foreground; one type scale + font-display.
+ *  - `onNavy`  — orange-400 `my` + cream `UNO` on the navy brand band (home header).
  */
 interface BrandWordmarkProps {
   className?: string;
@@ -20,23 +18,25 @@ interface BrandWordmarkProps {
   tone?: 'default' | 'onNavy';
 }
 
+/** One scale + display face for the full lockup (prefix colour only). */
+const LOCKUP_TYPE =
+  'font-display text-base lg:text-xl font-bold tracking-tight leading-none';
+
 export function BrandWordmark({ className, as = 'link', tone = 'default' }: BrandWordmarkProps) {
   const isOnNavy = tone === 'onNavy';
   const inner = (
     <>
       <span
         className={cn(
-          'text-sm lg:text-base font-bold transition-all duration-200 group-hover:tracking-wider',
-          isOnNavy
-            ? 'text-[hsl(var(--brand-orange-400))]'
-            : 'text-primary',
+          LOCKUP_TYPE,
+          isOnNavy ? 'text-[hsl(var(--brand-orange-400))]' : 'text-primary',
         )}
       >
         my
       </span>
       <span
         className={cn(
-          'text-base lg:text-xl font-bold font-display tracking-tight',
+          LOCKUP_TYPE,
           isOnNavy ? 'text-primary-foreground' : 'text-foreground',
         )}
       >
@@ -45,14 +45,12 @@ export function BrandWordmark({ className, as = 'link', tone = 'default' }: Bran
     </>
   );
 
+  const rowClass =
+    'flex items-baseline gap-0.5 flex-shrink-0 whitespace-nowrap tracking-tight transition-[letter-spacing] duration-200';
+
   if (as === 'static') {
     return (
-      <div
-        className={cn(
-          'group flex items-center gap-0.5 flex-shrink-0 whitespace-nowrap',
-          className,
-        )}
-      >
+      <div className={cn(rowClass, className)}>
         {inner}
       </div>
     );
@@ -61,7 +59,7 @@ export function BrandWordmark({ className, as = 'link', tone = 'default' }: Bran
   return (
     <Link
       to={APP_ROUTES.HOME}
-      className={cn('flex items-center gap-0.5 flex-shrink-0 whitespace-nowrap group mr-1', className)}
+      className={cn(rowClass, 'group mr-1 hover:tracking-wide', className)}
     >
       {inner}
     </Link>

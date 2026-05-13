@@ -1,0 +1,222 @@
+/* =========================================================
+   myUNO Design Tokens — v1.0
+   Инфраструктурный digital-govt (e-Estonia × Gosuslugi)
+   ========================================================= */
+
+/* ---------- TYPEFACES ----------
+   Sans:   Geist  — Vercel, variable gothic. Neutral infra-govt tone, not overused.
+   Serif:  Source Serif 4 — Adobe, variable. Editorial/institutional, replaces Noto.
+   Mono:   IBM Plex Mono — kept. Authentic infra-govt grade.
+   ClearView pairs Source Serif 4 (italic-rich) + Söhne-alike (Geist) + Plex Mono.
+-------------------------------- */
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
+
+:root {
+  /* ---------- BRAND COLORS ---------- */
+  --uno-deep: #0A2240;          /* authority, primary */
+  --uno-deep-hover: #143055;
+  --uno-deep-pressed: #061630;
+  --uno-ink: #0B1320;           /* text primary */
+  --uno-amber: #D96B1A;         /* human accent */
+  --uno-amber-hover: #C25D13;
+  --uno-amber-soft: #FBEEE0;
+
+  /* ---------- NEUTRALS ---------- */
+  --uno-paper: #F5F4F0;         /* background */
+  --uno-canvas: #FAFAF7;
+  --uno-surface: #FFFFFF;
+  --uno-line: #E4E2DB;
+  --uno-line-strong: #CFCBC0;
+  --uno-muted: #6B6A65;
+  --uno-subtle: #8E8D86;
+
+  /* ---------- SEMANTIC ---------- */
+  --uno-ok: #1F7A4C;
+  --uno-ok-soft: #E3F1E8;
+  --uno-warn: #B7791F;
+  --uno-warn-soft: #FAEFD4;
+  --uno-alert: #B42318;
+  --uno-alert-soft: #FBE6E3;
+  --uno-info: #1B5FB0;
+  --uno-info-soft: #E2EBF7;
+
+  /* ---------- CLEARVIEW SUBBRAND ----------
+     Палитра: Onyx (чернила) + Paper (archival off-white) + Ink blue (cold secondary)
+     + Signal red (единственный акцент — как у Economist/FT).
+     Grade colors перетянуты в «финансовый» спектр.
+  ---------------------------------------- */
+  --cv-onyx: #0E0F12;           /* primary ink */
+  --cv-onyx-soft: #1A1C22;      /* hover / cards */
+  --cv-paper: #EFECE6;          /* archival paper, warm off-white */
+  --cv-paper-2: #E5E1D6;        /* paper stroke */
+  --cv-ink-blue: #1E2A44;       /* cold secondary */
+  --cv-signal: #C1292E;         /* red accent — rating important */
+  --cv-signal-soft: #F5E0DD;
+  --cv-hairline: #D5CFC3;       /* printed rule */
+  --cv-muted: #5A5952;
+
+  /* Grade spectrum — financial, not marketing */
+  --cv-grade-aplus: #0A3A2A;    /* deep forest */
+  --cv-grade-a:     #1B6147;
+  --cv-grade-b:     #8C6C1A;    /* ochre */
+  --cv-grade-c:     #A54B18;    /* burnt amber */
+  --cv-grade-d:     #7A1E1A;    /* deep red */
+
+  /* Back-compat aliases for any legacy refs */
+  --cv-graphite: var(--cv-onyx);
+  --cv-bronze: var(--cv-signal);
+  --cv-bronze-soft: var(--cv-signal-soft);
+  --cv-verified: var(--cv-grade-a);
+
+  /* ---------- TYPOGRAPHY ---------- */
+  --font-sans:  'Geist', 'Söhne', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-serif: 'Source Serif 4', 'GT Sectra', 'Charter', Georgia, serif;
+  --font-mono:  'IBM Plex Mono', 'JetBrains Mono', ui-monospace, monospace;
+
+  /* ClearView display uses Source Serif 4 with heavier optical size */
+  --font-cv-display: 'Source Serif 4', 'GT Sectra', Georgia, serif;
+
+  /* Type scale — 1.125 ratio, mobile-first */
+  --text-xs: 12px;    --lh-xs: 16px;
+  --text-sm: 13px;    --lh-sm: 18px;
+  --text-base: 15px;  --lh-base: 22px;
+  --text-md: 17px;    --lh-md: 24px;
+  --text-lg: 20px;    --lh-lg: 28px;
+  --text-xl: 24px;    --lh-xl: 32px;
+  --text-2xl: 30px;   --lh-2xl: 38px;
+  --text-3xl: 38px;   --lh-3xl: 44px;
+  --text-4xl: 48px;   --lh-4xl: 54px;
+
+  /* ---------- SPACING (4px base) ---------- */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-7: 32px;
+  --sp-8: 40px;
+  --sp-9: 56px;
+  --sp-10: 72px;
+  --sp-11: 96px;
+
+  /* ---------- RADII ---------- */
+  --r-xs: 4px;
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-xl: 20px;
+  --r-pill: 999px;
+
+  /* ---------- SHADOWS ---------- */
+  --shadow-1: 0 1px 2px rgba(10,34,64,0.06);
+  --shadow-2: 0 2px 8px rgba(10,34,64,0.08), 0 1px 2px rgba(10,34,64,0.04);
+  --shadow-3: 0 8px 24px rgba(10,34,64,0.10), 0 2px 6px rgba(10,34,64,0.05);
+  --shadow-focus: 0 0 0 3px rgba(217,107,26,0.30);
+
+  /* ---------- DURATIONS ---------- */
+  --dur-1: 120ms;
+  --dur-2: 200ms;
+  --dur-3: 320ms;
+  --ease-standard: cubic-bezier(0.2, 0.0, 0.2, 1);
+  --ease-emphasized: cubic-bezier(0.2, 0.0, 0, 1);
+
+  /* ---------- LAYOUT ---------- */
+  --container-narrow: 720px;
+  --container-default: 1120px;
+  --container-wide: 1320px;
+  --mobile-width: 390px;
+}
+
+/* ---------- DARK MODE ---------- */
+[data-theme="dark"] {
+  --uno-deep: #7FA7D8;
+  --uno-deep-hover: #9BBAE1;
+  --uno-deep-pressed: #658DBF;
+  --uno-ink: #F3F3EF;
+  --uno-amber: #F3924A;
+  --uno-amber-hover: #F6A668;
+  --uno-amber-soft: #3A2512;
+
+  --uno-paper: #0B0F15;
+  --uno-canvas: #111722;
+  --uno-surface: #151C28;
+  --uno-line: #28303E;
+  --uno-line-strong: #3A4455;
+  --uno-muted: #A6A8AE;
+  --uno-subtle: #7F8188;
+
+  --uno-ok: #4CAF7D;
+  --uno-ok-soft: #0F2C1F;
+  --uno-warn: #E6B04B;
+  --uno-warn-soft: #2D2111;
+  --uno-alert: #E06A60;
+  --uno-alert-soft: #2F1311;
+  --uno-info: #6FA0DC;
+  --uno-info-soft: #0F1F33;
+
+  /* ClearView dark */
+  --cv-onyx: #EFECE6;
+  --cv-onyx-soft: #1A1C22;
+  --cv-paper: #14151A;
+  --cv-paper-2: #1E2029;
+  --cv-ink-blue: #9FB2D0;
+  --cv-signal: #E45A5F;
+  --cv-signal-soft: #3A1416;
+  --cv-hairline: #2A2C34;
+  --cv-muted: #9A968A;
+  --cv-grade-aplus: #4CAF7D;
+  --cv-grade-a:     #5DB68D;
+  --cv-grade-b:     #D4A84A;
+  --cv-grade-c:     #E18858;
+  --cv-grade-d:     #E06A60;
+  --cv-graphite: var(--cv-onyx);
+  --cv-bronze: var(--cv-signal);
+  --cv-bronze-soft: var(--cv-signal-soft);
+  --cv-verified: var(--cv-grade-a);
+
+  --shadow-1: 0 1px 2px rgba(0,0,0,0.4);
+  --shadow-2: 0 2px 8px rgba(0,0,0,0.5);
+  --shadow-3: 0 8px 24px rgba(0,0,0,0.6);
+  --shadow-focus: 0 0 0 3px rgba(243,146,74,0.40);
+}
+
+/* ---------- RESET & BASE ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--lh-base);
+  color: var(--uno-ink);
+  background: var(--uno-paper);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "ss01", "cv11";
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4, h5, h6 { margin: 0; font-weight: 700; letter-spacing: -0.015em; color: var(--uno-ink); }
+h1 { font-size: var(--text-3xl); line-height: var(--lh-3xl); letter-spacing: -0.025em; }
+h2 { font-size: var(--text-2xl); line-height: var(--lh-2xl); letter-spacing: -0.02em; }
+h3 { font-size: var(--text-xl); line-height: var(--lh-xl); }
+h4 { font-size: var(--text-lg); line-height: var(--lh-lg); }
+h5 { font-size: var(--text-md); line-height: var(--lh-md); font-weight: 600; }
+p { margin: 0; }
+a { color: var(--uno-deep); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+a:hover { color: var(--uno-amber); }
+code, .mono { font-family: var(--font-mono); font-size: 0.92em; }
+
+/* ---------- UTILITIES ---------- */
+.mono-num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.text-muted { color: var(--uno-muted); }
+.text-subtle { color: var(--uno-subtle); }
+.hairline { height: 1px; background: var(--uno-line); border: 0; margin: 0; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--uno-line-strong); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--uno-muted); }

@@ -14,6 +14,7 @@ import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { AppLayout } from '@/components/layout/AppLayout';
 import {
   useStartOnboarding,
@@ -101,10 +102,10 @@ const COPY = {
   redo: { en: 'Redo questions', ru: 'Пройти заново' },
   skip: { en: 'Skip onboarding', ru: 'Пропустить' },
   errorPrefix: { en: 'Could not save — please retry:', ru: 'Не удалось сохранить — попробуйте ещё раз:' },
-  flagOffTitle: { en: 'Onboarding coming soon', ru: 'Онбординг скоро' },
+  flagOffTitle: { en: 'Onboarding planned · Q3 2026', ru: 'Онбординг запланировано · Q3 2026' },
   flagOffBody: {
-    en: 'This guided flow is being prepared. Meanwhile you can explore the platform.',
-    ru: 'Этот мастер скоро будет доступен. Пока — изучите платформу.',
+    en: 'The guided 3-question flow ships in Q3 2026. Meanwhile you can explore the platform directly.',
+    ru: 'Гайд из трёх вопросов выходит в Q3 2026. Пока — изучите платформу самостоятельно.',
   },
   goHome: { en: 'Go to home', ru: 'На главную' },
 };
@@ -196,7 +197,7 @@ export default function StartOnboarding() {
   // Feature flag gating — show a polite placeholder so the route is always discoverable
   if (!flagOn) {
     return (
-      <AppLayout showHeader={false}>
+      <AppLayout showFooter={false}>
         <main className="min-h-[80vh] bg-background flex items-center justify-center p-6">
           <Helmet>
             <title>{T(COPY.flagOffTitle, lang)} · myUNO</title>
@@ -207,7 +208,7 @@ export default function StartOnboarding() {
             </div>
             <h1 className="text-xl font-bold">{T(COPY.flagOffTitle, lang)}</h1>
             <p className="text-sm text-muted-foreground">{T(COPY.flagOffBody, lang)}</p>
-            <Button onClick={() => navigate('/')} className="w-full">
+            <Button onClick={() => navigate(APP_ROUTES.HOME)} className="w-full">
               {T(COPY.goHome, lang)}
             </Button>
           </Card>
@@ -220,7 +221,8 @@ export default function StartOnboarding() {
     (step === 0 && !!answers.who) || (step === 1 && !!answers.goal) || (step === 2 && !!answers.intensity);
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-background via-background to-primary/5">
+    <AppLayout showFooter={false}>
+      <main className="min-h-screen bg-gradient-to-b from-background via-background to-primary/5">
       <Helmet>
         <title>{T(COPY.title, lang)} · myUNO</title>
         <meta name="description" content={T(COPY.subtitle, lang)} />
@@ -352,7 +354,7 @@ export default function StartOnboarding() {
                   >
                     {T(COPY.primaryCta, lang)}
                   </Button>
-                  <Button variant="outline" className="flex-1" onClick={() => navigate('/discover')}>
+                  <Button variant="outline" className="flex-1" onClick={() => navigate(APP_ROUTES.DISCOVER)}>
                     {T(COPY.exploreLater, lang)}
                   </Button>
                 </div>
@@ -416,7 +418,7 @@ export default function StartOnboarding() {
           <div className="mt-4 text-center">
             <button
               type="button"
-              onClick={() => navigate('/')}
+              onClick={() => navigate(APP_ROUTES.HOME)}
               className="text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
               {T(COPY.skip, lang)}
@@ -425,5 +427,6 @@ export default function StartOnboarding() {
         )}
       </div>
     </main>
+    </AppLayout>
   );
 }

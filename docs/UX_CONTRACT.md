@@ -85,6 +85,12 @@ import { AdaptiveBottomNav } from '@/components/layout/AdaptiveBottomNav';
 import { BottomNav } from '@/components/layout/BottomNav';
 ```
 
+### 2.4 Route-level transitions (🟡 SHOULD)
+
+- **Implementation**: `AnimatedRoutes` mounts `ScrollToTop` on `pathname` change (window scroll). `PageTransition` wraps lazy route content and reads `useNavigationDirection` for slide direction; `useReducedMotion()` short-circuits to instant transitions (duration `0`).
+- **Rule**: Prefer **one** `PageTransition` per full route swap at the shell outlet. Nested `AdminLayout` / `VendorLayout` / `MCLayout` outlets use `Suspense` only — avoid stacking `PageTransition` inside a child that is already inside `LazyPage`.
+- **Tab switches** (same canvas, e.g. bottom nav): direction `left` / `right` when both paths map to `tabOrder` in `useNavigationDirection.ts`; deeper paths in the same module use `forward` / `backward`.
+
 ---
 
 ## 3. Header Components

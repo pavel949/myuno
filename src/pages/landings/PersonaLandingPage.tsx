@@ -25,6 +25,7 @@ import NotFound from '@/pages/NotFound';
 import { Button } from '@/components/ui/button';
 import LandingSeoHead from '@/components/seo/LandingSeoHead';
 import { LandingLeadForm } from '@/components/landings/LandingLeadForm';
+import { LandingContainer } from '@/components/landings/LandingPrimitives';
 import { tokenColor } from '@/lib/utils/hslAlpha';
 import { ArrowRight, CheckCircle2, MapPin, Sparkles, Grid3x3 } from 'lucide-react';
 import { getAppsForPersona, withPersonaParam } from '@/lib/landings/personaTagMap';
@@ -94,7 +95,7 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
           className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full blur-3xl"
           style={{ background: tokenColor(theme.color, 0.25) }}
         />
-        <div className="relative mx-auto w-full max-w-3xl px-4 py-12 sm:px-6 sm:py-20">
+        <LandingContainer className="relative max-w-3xl px-4 py-12 sm:px-6 sm:py-20">
           <div
             className="mb-5 inline-flex items-center gap-2 border border-border bg-background/60 px-3 py-1.5 backdrop-blur"
             style={{ borderColor: tokenColor(theme.color, 0.4) }}
@@ -128,7 +129,7 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
               {t(landing.primaryCta.subtitle)}
             </p>
           ) : null}
-        </div>
+        </LandingContainer>
       </header>
 
       {/* ─── TRUST STRIP ────────────────────────────────────────── */}

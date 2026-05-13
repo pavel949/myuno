@@ -42,6 +42,7 @@ import { VendorFormWizard, WizardStep, WizardStepContent } from '@/components/ve
 import { VendorFormSection } from '@/components/vendor/VendorFormSection';
 import { FormFieldWithHelp } from '@/components/vendor/FormFieldWithHelp';
 import { DraftRestorationBanner, DraftIndicator } from '@/components/vendor/DraftIndicator';
+import { ServiceBilingualHint } from '@/components/services/ServiceBilingualHint';
 
 const DRAFT_KEY = 'vendor-service-draft';
 
@@ -405,6 +406,8 @@ const VendorServices = () => {
                 )}
               </div>
             </DialogHeader>
+
+            <ServiceBilingualHint isRu={isRussian} className="mt-2 flex-shrink-0 mx-0" />
 
             <div className="grid md:grid-cols-[1fr,280px] gap-6 flex-1 min-h-0 overflow-hidden py-4">
               {/* Form Wizard: min-h-0 keeps footer nav visible inside max-h dialog */}

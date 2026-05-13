@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { LandingChrome } from '@/components/landings';
 import {
   Store, CalendarDays, Banknote, ShieldCheck, ArrowRight, Wrench,
 } from 'lucide-react';
@@ -70,6 +71,7 @@ export default function ForLocalServices() {
       </Helmet>
 
       <div className="min-h-screen bg-background">
+        <LandingChrome isRu={isRu} />
         <section className="relative overflow-hidden py-16 md:py-24 px-4">
           <div className="absolute inset-0 bg-gradient-to-br from-accent/10 via-background to-primary/10" />
           <div className="relative max-w-3xl mx-auto text-center">

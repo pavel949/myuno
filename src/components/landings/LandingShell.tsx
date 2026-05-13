@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { SEOHead } from '@/components/seo';
+import { GlobalPreferencesControls } from '@/components/uno/GlobalPreferencesControls';
 
 export interface LandingBenefit {
   icon: React.ComponentType<{ className?: string }>;
@@ -51,11 +52,12 @@ export function LandingShell({
       <SEOHead title={t(seoTitle)} description={t(seoDescription)} />
 
       <header className="sticky top-0 z-30 border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-        <div className="mx-auto max-w-6xl px-4 h-14 flex items-center">
-          <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
+        <div className="mx-auto max-w-6xl px-4 h-14 flex items-center justify-between gap-3">
+          <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="shrink-0">
             <ArrowLeft className="h-4 w-4 mr-1.5" />
             {t({ ru: 'Назад', en: 'Back' })}
           </Button>
+          <GlobalPreferencesControls size="sm" themeVariant="dropdown" className="shrink-0" />
         </div>
       </header>
 

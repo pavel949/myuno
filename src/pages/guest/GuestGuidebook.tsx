@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
+import { EmptyState } from '@/components/page/EmptyState';
 import { toast } from 'sonner';
 import { 
   Wifi, 
@@ -396,11 +397,16 @@ export default function GuestGuidebook() {
         <TabsContent value="local" className="space-y-4">
           {Object.keys(groupedTips).length === 0 ? (
             <Card>
-              <CardContent className="p-8 text-center">
-                <MapPin className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">
-                  {isRu ? 'Рекомендации скоро появятся' : 'Recommendations coming soon'}
-                </p>
+              <CardContent className="p-2">
+                <EmptyState
+                  icon={MapPin}
+                  compact
+                  isRu={isRu}
+                  title="Local recommendations planned · Q3 2026"
+                  titleRu="Рекомендации запланировано · Q3 2026"
+                  description="The host curates a list of nearby restaurants, beaches and shops before each booking."
+                  descriptionRu="Хозяин добавит подборку ближайших ресторанов, пляжей и магазинов до начала проживания."
+                />
               </CardContent>
             </Card>
           ) : (

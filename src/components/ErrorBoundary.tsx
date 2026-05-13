@@ -1,4 +1,5 @@
 import React, { Component, ErrorInfo, ReactNode, useEffect } from 'react';
+import * as Sentry from '@sentry/react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -44,6 +45,13 @@ export class ErrorBoundary extends Component<Props, State> {
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     errorLog.silent(error, 'component_error');
+    // Bible-v2 audit C1: forward to Sentry so boundary-caught crashes show
+    // up in ops dashboards alongside unhandled rejections. componentStack
+    // gives Sentry a React-aware trace for the failed subtree.
+    Sentry.captureException(error, {
+      contexts: { react: { componentStack: errorInfo.componentStack ?? '' } },
+      tags: { source: 'ErrorBoundary' },
+    });
     this.props.onError?.(error, errorInfo);
 
     // Stale chunk auto-recovery: when a deploy invalidates the previous

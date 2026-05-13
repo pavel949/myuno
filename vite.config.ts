@@ -64,6 +64,9 @@ export default defineConfig(({ mode, command }) => {
       "import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY": JSON.stringify(supabaseKey),
       "import.meta.env.VITE_SUPABASE_PROJECT_ID": JSON.stringify(supabaseProjectId),
     },
+    // Bible-v2 §00 H14: no console in production. Strip console.* + debugger
+    // statements at build time; dev server keeps them for local debugging.
+    esbuild: command === "build" ? { drop: ["console", "debugger"] } : undefined,
     plugins: [
       react(),
       // Cursor / VS Code Simple Browser loads URLs inside an iframe; CSP
@@ -96,7 +99,13 @@ export default defineConfig(({ mode, command }) => {
           name: 'myUNO - All Services in One',
           short_name: 'myUNO',
           description: 'Все услуги в одном приложении',
+          // PWA manifest spec (https://www.w3.org/TR/appmanifest/#theme_color-member)
+          // requires literal CSS color strings; CSS variables are not resolved at
+          // install time. Leaving as hex; if the canonical brand palette changes,
+          // update these to match tokens.css --brand-navy / --brand-cream.
+          // eslint-disable-next-line no-restricted-syntax
           theme_color: '#00D68F',
+          // eslint-disable-next-line no-restricted-syntax
           background_color: '#08101E',
           display: 'standalone',
           orientation: 'portrait-primary',

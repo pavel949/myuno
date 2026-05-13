@@ -9,16 +9,17 @@ interface PageTransitionProps {
 const getVariants = (direction: NavigationDirection): Variants => {
   switch (direction) {
     case 'right':
+      // No scale — keeps route-level spinners from visually "resizing" at enter
       return {
-        initial: { opacity: 0, x: 50, scale: 0.98 },
-        animate: { opacity: 1, x: 0, scale: 1 },
-        exit: { opacity: 0, x: -50, scale: 0.98 },
+        initial: { opacity: 0, x: 50 },
+        animate: { opacity: 1, x: 0 },
+        exit: { opacity: 0, x: -50 },
       };
     case 'left':
       return {
-        initial: { opacity: 0, x: -50, scale: 0.98 },
-        animate: { opacity: 1, x: 0, scale: 1 },
-        exit: { opacity: 0, x: 50, scale: 0.98 },
+        initial: { opacity: 0, x: -50 },
+        animate: { opacity: 1, x: 0 },
+        exit: { opacity: 0, x: 50 },
       };
     case 'forward':
       // Push: new page slides in from right, old slides out left (iOS-style)
@@ -49,6 +50,12 @@ const pageTransition = {
   duration: 0.25,
 };
 
+const reducedMotionTransition = {
+  type: 'tween' as const,
+  ease: 'linear' as const,
+  duration: 0,
+};
+
 export const PageTransition = forwardRef<HTMLDivElement, PageTransitionProps>(
   function PageTransition({ children }, ref) {
     const reduceMotion = useReducedMotion();
@@ -63,7 +70,7 @@ export const PageTransition = forwardRef<HTMLDivElement, PageTransitionProps>(
         animate="animate"
         exit="exit"
         variants={variants}
-        transition={pageTransition}
+        transition={reduceMotion ? reducedMotionTransition : pageTransition}
         className="min-h-full w-full min-w-0 will-change-transform"
       >
         {children}

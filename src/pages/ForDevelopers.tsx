@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { LandingChrome, LandingContainer, LandingSection } from '@/components/landings';
 import {
   Building2, LineChart, Users, Megaphone, ArrowRight, HardHat, LayoutGrid, PenLine,
   CheckCircle2,
@@ -71,9 +72,10 @@ export default function ForDevelopers() {
       </Helmet>
 
       <div className="min-h-screen bg-background">
-        <section className="relative overflow-hidden py-16 md:py-24 px-4">
+        <LandingChrome isRu={isRu} />
+        <section className="relative overflow-hidden py-16 md:py-24">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-accent/10" />
-          <div className="relative max-w-3xl mx-auto text-center">
+          <LandingContainer className="relative max-w-3xl text-center">
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
@@ -110,10 +112,11 @@ export default function ForDevelopers() {
                 </Button>
               </div>
             </motion.div>
-          </div>
+          </LandingContainer>
         </section>
 
-        <section className="max-w-5xl mx-auto px-4 pb-16 grid sm:grid-cols-2 gap-4">
+        <LandingSection>
+          <LandingContainer className="max-w-5xl pb-16 grid sm:grid-cols-2 gap-4">
           {benefits.map((b, i) => (
             <motion.div
               key={b.titleEn}
@@ -132,10 +135,12 @@ export default function ForDevelopers() {
               </Card>
             </motion.div>
           ))}
-        </section>
+          </LandingContainer>
+        </LandingSection>
 
         {/* How it works */}
-        <section className="max-w-3xl mx-auto px-4 pb-16">
+        <LandingSection>
+          <LandingContainer className="max-w-3xl pb-16">
           <h2 className="text-2xl font-display font-bold text-center mb-8">
             {isRu ? 'Как это работает' : 'How it works'}
           </h2>
@@ -180,10 +185,12 @@ export default function ForDevelopers() {
               </motion.div>
             ))}
           </div>
-        </section>
+          </LandingContainer>
+        </LandingSection>
 
         {/* Bottom CTA */}
-        <section className="max-w-3xl mx-auto px-4 pb-20 text-center">
+        <LandingSection border={false}>
+          <LandingContainer className="max-w-3xl pb-20 text-center">
           <div className="rounded-none border border-border/80 bg-card p-8">
             <h3 className="text-xl font-display font-bold mb-2">
               {isRu ? 'Готовы разместить проект?' : 'Ready to list your project?'}
@@ -205,7 +212,7 @@ export default function ForDevelopers() {
             </div>
             <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground flex-wrap">
               {[
-                isRu ? '120+ инвесторов ежемесячно' : '120+ investors monthly',
+                isRu ? 'Спрос инвесторов — в кабинете' : 'Investor demand in your portal',
                 isRu ? 'Выход на рынок за 48ч' : 'Live in 48h',
                 isRu ? 'Без скрытых платежей' : 'No hidden fees',
               ].map((item) => (
@@ -221,7 +228,8 @@ export default function ForDevelopers() {
               ? 'Нужна индивидуальная интеграция — напишите через поддержку в приложении.'
               : 'Need a custom integration — contact support in the app.'}
           </p>
-        </section>
+          </LandingContainer>
+        </LandingSection>
       </div>
     </AppLayout>
   );

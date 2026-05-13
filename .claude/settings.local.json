@@ -5,7 +5,13 @@
       "Bash(npx tsc *)",
       "mcp__claude_ai_Supabase__execute_sql",
       "mcp__claude_ai_Supabase__get_publishable_keys",
-      "Bash(npx supabase *)"
+      "Bash(npx supabase *)",
+      "Bash(mkdir -p /tmp/design_DK53)",
+      "Bash(tar -xzf \"C:\\\\Users\\\\pavel\\\\.claude\\\\projects\\\\c--Users-pavel-OneDrive-Apps-myUNO-myuno\\\\9abc8033-63a8-44a2-970f-49f7d26cf6bf\\\\tool-results\\\\webfetch-1778470756052-sdzcmv.bin\" -C /tmp/design_DK53)",
+      "Bash(mkdir -p /tmp/design-bundle)",
+      "Bash(cp \"C:\\\\Users\\\\pavel\\\\.claude\\\\projects\\\\c--Users-pavel-OneDrive-Apps-myUNO-myuno\\\\c09d778b-f727-4f3c-8fb3-7b20bc1ec3b1\\\\tool-results\\\\webfetch-1778570652299-k509w8.bin\" ./bundle.tar.gz)",
+      "Bash(tar -tzf bundle.tar.gz)",
+      "PowerShell(npm run build 2>&1)"
     ]
   }
 }

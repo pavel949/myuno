@@ -46,6 +46,8 @@ export const CONTACT_IMPORT_FIELDS: ContactImportFieldConfig[] = [
   { key: 'budget_max', labelEn: 'Budget Max', labelRu: 'Бюджет до', required: false },
   { key: 'bedrooms_min', labelEn: 'Bedrooms Min', labelRu: 'Спален от', required: false },
   { key: 'tax_id', labelEn: 'Tax ID / VAT', labelRu: 'ИНН / НДС', required: false },
+  { key: 'scoring', labelEn: 'Score (primary)', labelRu: 'Скоринг (основной)', required: false },
+  { key: 'lead_score', labelEn: 'Lead score (legacy)', labelRu: 'Lead score (наследие)', required: false },
 ];
 
 /** Keys that are required for a valid contact row (at least one of first_name or last_name in practice). */
@@ -143,6 +145,8 @@ export const CONTACT_IMPORT_ALIASES: Record<string, string[]> = {
   budget_max: ['budgetmax', 'budget_max', 'бюджетдо', 'maxbudget'],
   bedrooms_min: ['bedrooms', 'bedroomsmin', 'спален', 'спаленот', 'bedrooms_min'],
   tax_id: ['vat', 'taxid', 'tax_id', 'inn', 'taxnumber', 'nds'],
+  scoring: ['scoring', 'score', 'crmscore', 'hotness', 'quality', 'x_scoring'],
+  lead_score: ['leadscore', 'lead_score', 'x_lead_score', 'leadquality', 'probability'],
 };
 
 /**

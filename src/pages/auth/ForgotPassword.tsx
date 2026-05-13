@@ -4,8 +4,7 @@ import { Mail, ArrowLeft, CheckCircle } from 'lucide-react';
 import { z } from 'zod';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { PremiumButton } from '@/components/uno/PremiumButton';
-import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
-import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
+import { GlobalPreferencesControls } from '@/components/uno/GlobalPreferencesControls';
 import { BrandWordmark } from '@/components/uno/BrandWordmark';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
@@ -67,13 +66,13 @@ export default function ForgotPassword() {
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 pointer-events-none" />
       
       <header className="relative z-10 p-4 flex justify-between items-center">
-        <Link to={APP_ROUTES.HOME} className="h-10 px-3 rounded-none bg-primary/10 ring-1 ring-primary/30 flex items-center justify-center transition-transform">
-          <BrandWordmark as="static" />
-        </Link>
-        <div className="flex items-center gap-2">
-          <ThemeSwitcher variant="buttons" className="scale-90" />
-          <LanguageSwitcher size="sm" />
-        </div>
+        <BrandWordmark />
+        <GlobalPreferencesControls
+          size="sm"
+          showCurrency={false}
+          themeVariant="buttons"
+          className="shrink-0"
+        />
       </header>
 
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 py-8">

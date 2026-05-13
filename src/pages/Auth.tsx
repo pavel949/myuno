@@ -8,7 +8,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useOwnerType } from '@/hooks/useOwnerType';
 import { useUserContext } from '@/hooks/useUserContext';
 import { PremiumButton } from '@/components/uno/PremiumButton';
-import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
+import { GlobalPreferencesControls } from '@/components/uno/GlobalPreferencesControls';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -64,8 +64,27 @@ export default function Auth() {
   const { activeRole } = useUserContext();
   const { isMCPortal, isLoading: ownerTypeLoading } = useOwnerType();
 
-  const storedOAuthRedirect =
-    typeof window !== 'undefined' ? window.sessionStorage.getItem('myuno_post_auth_redirect') : null;
+  // Bible-v2 audit B3: parse sessionStorage payload `{ path, ts }` and ignore
+  // entries older than 5 minutes. Falls back to legacy plain-string format for
+  // backward compatibility with in-flight OAuth round-trips during deploy.
+  const storedOAuthRedirect = React.useMemo<string | null>(() => {
+    if (typeof window === 'undefined') return null;
+    const raw = window.sessionStorage.getItem('myuno_post_auth_redirect');
+    if (!raw) return null;
+    const FIVE_MIN_MS = 5 * 60 * 1000;
+    try {
+      const parsed = JSON.parse(raw) as { path?: string; ts?: number };
+      if (!parsed.path || typeof parsed.ts !== 'number') return null;
+      if (Date.now() - parsed.ts > FIVE_MIN_MS) {
+        window.sessionStorage.removeItem('myuno_post_auth_redirect');
+        return null;
+      }
+      return parsed.path;
+    } catch {
+      // Legacy plain-string format — treat as valid this run, then clear.
+      return raw;
+    }
+  }, []);
 
   const rawRedirect = (location.state as { from?: string })?.from ||
     searchParams.get('redirect') ||
@@ -376,12 +395,10 @@ export default function Auth() {
     </div>
   );
 
-  // Logo component used in signup steps — neutral mint badge (no gold gradient)
+  // Logo — same typographic lockup as WelcomeLanding / TopBar (no pill chrome)
   const AppLogo = () => (
     <div className="flex justify-center mb-4">
-      <Link to={APP_ROUTES.HOME} className="h-16 px-4 rounded-none bg-primary/10 ring-1 ring-primary/30 flex items-center justify-center transition-transform">
-        <BrandWordmark as="static" className="scale-110" />
-      </Link>
+      <BrandWordmark className="scale-110" />
     </div>
   );
 
@@ -402,12 +419,13 @@ export default function Auth() {
 
       {/* Header */}
       <header className="relative z-10 p-4 flex justify-between items-center">
-        <Link to={APP_ROUTES.HOME} className="h-10 px-3 rounded-none bg-primary/10 ring-1 ring-primary/30 flex items-center justify-center transition-transform">
-          <BrandWordmark as="static" />
-        </Link>
-        <div className="flex items-center gap-2">
-          <LanguageSwitcher size="sm" />
-        </div>
+        <BrandWordmark />
+        <GlobalPreferencesControls
+          size="sm"
+          showCurrency={false}
+          themeVariant="buttons"
+          className="shrink-0"
+        />
       </header>
 
       {/* Main content — 2-column on md+, stacked on mobile */}

@@ -14,7 +14,7 @@
  *  - text-wrap:balance + word-break:keep-all prevents mid-word breaks
  *  - Workspace clusters hidden unless user has matching role
  */
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import {
   Search, LayoutGrid, X,
@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserPersonas } from '@/hooks/useUserPersonas';
 import { useQuery } from '@tanstack/react-query';
@@ -46,20 +47,33 @@ import { resolveNavRole } from '@/lib/nav/navigationModel';
 import { isEligibleLeafService } from '@/lib/catalog/catalogMetrics';
 import { APP_ROUTES } from '@/lib/config/routes';
 import type { Language } from '@/i18n';
+import { cn } from '@/lib/utils';
 
 // ─── Category color palettes (spec §04.1) ───────────────────────────────────
 
-const CAT_COLOR: Record<string, { dot: string; iconBg: string; iconFg: string }> = {
-  arrive: { dot: '#5B8FCC', iconBg: 'rgba(91,143,204,0.18)',  iconFg: '#8FB6E5' },
-  live:   { dot: '#B6CFE9', iconBg: 'rgba(127,167,216,0.15)', iconFg: '#B6CFE9' },
-  manage: { dot: '#1F7A4C', iconBg: 'rgba(31,122,76,0.20)',   iconFg: '#6FCB99' },
-  invest: { dot: '#D96B1A', iconBg: 'rgba(217,107,26,0.18)',  iconFg: '#F3924A' },
-  legal:  { dot: '#0A2240', iconBg: 'rgba(10,34,64,0.50)',    iconFg: '#C8D6E8' },
-  build:  { dot: '#6E5A8C', iconBg: 'rgba(110,90,140,0.25)',  iconFg: '#C9B6E2' },
+/** Cluster accent — dark shell: light tints on navy canvas (spec §04.1). */
+const CAT_COLOR_DARK: Record<string, { dot: string; iconBg: string; iconFg: string }> = {
+  arrive: { dot: 'bg-navy-500', iconBg: 'bg-navy-500/20', iconFg: 'text-navy-100' },
+  live:   { dot: 'bg-navy-100', iconBg: 'bg-navy-100/15', iconFg: 'text-navy-50' },
+  manage: { dot: 'bg-success', iconBg: 'bg-success/20', iconFg: 'text-emerald-200' },
+  invest: { dot: 'bg-orange', iconBg: 'bg-orange/20', iconFg: 'text-orange-400' },
+  legal:  { dot: 'bg-navy', iconBg: 'bg-navy/50', iconFg: 'text-navy-50' },
+  build:  { dot: 'bg-purple-500', iconBg: 'bg-purple-500/25', iconFg: 'text-purple-200' },
 };
 
-function catColor(clusterId: string) {
-  return CAT_COLOR[clusterId] ?? CAT_COLOR.live;
+/** Light shell: dark ink + soft chips on `bg-card` (canon 05 — readable on stone). */
+const CAT_COLOR_LIGHT: Record<string, { dot: string; iconBg: string; iconFg: string }> = {
+  arrive: { dot: 'bg-navy-700', iconBg: 'bg-navy-100', iconFg: 'text-navy-800' },
+  live:   { dot: 'bg-navy-600', iconBg: 'bg-muted', iconFg: 'text-navy-800' },
+  manage: { dot: 'bg-emerald-600', iconBg: 'bg-emerald-100', iconFg: 'text-emerald-900' },
+  invest: { dot: 'bg-orange', iconBg: 'bg-orange/15', iconFg: 'text-orange-800' },
+  legal:  { dot: 'bg-navy-800', iconBg: 'bg-navy-50', iconFg: 'text-navy-900' },
+  build:  { dot: 'bg-purple-600', iconBg: 'bg-purple-100', iconFg: 'text-purple-900' },
+};
+
+function catColor(clusterId: string, shell: NavigatorShell) {
+  const map = shell === 'light' ? CAT_COLOR_LIGHT : CAT_COLOR_DARK;
+  return map[clusterId] ?? (shell === 'light' ? CAT_COLOR_LIGHT.live : CAT_COLOR_DARK.live);
 }
 
 // ─── Status badges (spec §04.2) ─────────────────────────────────────────────
@@ -71,20 +85,195 @@ const BADGE_LABEL: Record<Badge, string> = {
   kyc: 'KYC', vip: 'VIP', live: 'LIVE', '24-7': '24/7',
 };
 
-const BADGE_BG: Record<Badge, string> = {
-  free:    'rgba(31,122,76,0.3)',
-  partner: 'rgba(107,143,204,0.22)',
-  new:     '#D96B1A',
-  soon:    'rgba(255,255,255,0.12)',
-  kyc:     'rgba(217,107,26,0.22)',
-  vip:     '#D96B1A',
-  live:    'rgba(31,122,76,0.3)',
-  '24-7':  'rgba(217,107,26,0.22)',
+const BADGE_CLASS_DARK: Record<Badge, string> = {
+  free:    'bg-success/30 text-emerald-200',
+  partner: 'bg-navy-500/25 text-navy-100',
+  new:     'bg-orange text-white',
+  soon:    'bg-white/10 text-white/70',
+  kyc:     'bg-orange/25 text-orange-400',
+  vip:     'bg-orange text-white',
+  live:    'bg-success/30 text-emerald-200',
+  '24-7':  'bg-orange/25 text-orange-400',
 };
 
-const BADGE_TEXT: Record<Badge, string> = {
-  free: '#4EB883', partner: '#8FB6E5', new: '#fff', soon: 'rgba(255,255,255,0.65)',
-  kyc: '#D96B1A', vip: '#fff', live: '#4EB883', '24-7': '#D96B1A',
+const BADGE_CLASS_LIGHT: Record<Badge, string> = {
+  free:    'bg-success/20 text-emerald-800',
+  partner: 'bg-primary/15 text-foreground',
+  new:     'bg-orange text-white',
+  soon:    'bg-muted text-muted-foreground',
+  kyc:     'bg-orange/20 text-orange-700',
+  vip:     'bg-orange text-white',
+  live:    'bg-success/20 text-emerald-800',
+  '24-7':  'bg-orange/20 text-orange-700',
+};
+
+type NavigatorShell = 'light' | 'dark';
+
+/** Theme-adaptive chrome for Discover (navy editorial in dark; semantic surfaces in light). */
+interface NavigatorAppearance {
+  shell: NavigatorShell;
+  root: string;
+  heroEyebrow: string;
+  heroTitle: string;
+  heroTitleEm: string;
+  heroLead: string;
+  heroHint: string;
+  sosHeadline: string;
+  sosSub: string;
+  sosCta: string;
+  personaRail: string;
+  personaInactive: string;
+  personaActive: string;
+  personaCountInactive: string;
+  personaCountActive: string;
+  searchIcon: string;
+  searchInput: string;
+  searchKbd: string;
+  searchClear: string;
+  popularLabel: string;
+  popularLink: string;
+  emptySearch: string;
+  resultsLabel: string;
+  sitCard: string;
+  sitCardHover: string;
+  sitActionHint: string;
+  sitIconWrap: string;
+  sitTitle: string;
+  sitDesc: string;
+  sitMeta: string;
+  filterLink: string;
+  sectionBorder: string;
+  clusterTitle: string;
+  clusterCount: string;
+  clusterDesc: string;
+  clusterAllLink: string;
+  trustBar: string;
+  trustStats: string;
+  trustStatNum: string;
+  trustCta: string;
+  tile: string;
+  tileLabel: string;
+  tileMeta: string;
+  badgeClass: Record<Badge, string>;
+}
+
+const NAV_APPEARANCE: Record<NavigatorShell, NavigatorAppearance> = {
+  dark: {
+    shell: 'dark',
+    root: 'min-h-full -mx-4 px-4 pb-28 bg-navy text-navy-50',
+    heroEyebrow: 'font-mono text-[10px] uppercase tracking-[0.14em] text-orange-400/90',
+    heroTitle:
+      'text-[28px] sm:text-[36px] lg:text-[40px] font-semibold leading-[1.12] tracking-[-0.025em] text-white max-w-3xl',
+    heroTitleEm: 'italic font-serif text-orange font-normal',
+    heroLead: 'text-[13px] sm:text-[16px] text-navy-50/70 leading-[1.5] max-w-xl',
+    heroHint: 'text-[11px] text-navy-100/80 max-w-xl leading-snug',
+    sosHeadline: 'font-semibold text-[14px] text-white',
+    sosSub: 'text-[12px] text-white/65 truncate',
+    sosCta:
+      'shrink-0 font-mono text-[11px] uppercase tracking-[0.1em] font-medium text-white px-3 py-2 rounded-[6px] border border-white/40',
+    personaRail: 'inline-flex gap-1 p-1 flex-wrap rounded-xl border border-white/10 bg-white/[0.04] w-fit max-w-full',
+    personaInactive: 'bg-transparent text-white/60',
+    personaActive: 'bg-orange text-white',
+    personaCountInactive: 'font-mono text-[10px] opacity-50',
+    personaCountActive: 'font-mono text-[10px] opacity-70',
+    searchIcon: 'absolute left-5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-white/50 pointer-events-none',
+    searchInput:
+      'w-full text-[15px] outline-none placeholder:text-white/45 bg-white/[0.06] border border-white/10 rounded-2xl text-navy-50 caret-orange pl-[50px] pr-[60px] py-4',
+    searchKbd: 'absolute right-4 top-1/2 -translate-y-1/2 font-mono text-[10px] px-1.5 py-[3px] rounded-[3px] bg-white/10 text-white/60',
+    searchClear: 'absolute right-14 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70',
+    popularLabel: 'font-mono text-[10px] uppercase tracking-[0.1em] text-white/40',
+    popularLink: 'text-[12px] text-white/75 hover:text-white transition-colors pb-px border-b border-dotted border-white/30',
+    emptySearch: 'text-white/45 text-sm py-6 text-center',
+    resultsLabel: 'font-mono text-[9px] uppercase tracking-[0.12em] text-white/30',
+    sitCard:
+      'relative flex flex-col justify-between gap-3 p-[18px] rounded-xl text-left transition-all duration-150 border border-white/10 bg-white/[0.03] min-h-[130px]',
+    sitCardHover: 'hover:bg-white/[0.06] hover:border-white/20 hover:-translate-y-px active:scale-[0.98]',
+    sitActionHint:
+      'text-[11px] font-medium leading-snug text-white/55 mt-2 max-w-[16rem]',
+    sitIconWrap:
+      'size-[var(--touch-target)] shrink-0 rounded-[7px] flex items-center justify-center bg-orange/20 md:size-[30px]',
+    sitTitle: 'text-[15px] font-semibold text-white leading-[19px] tracking-[-0.01em] mt-3.5',
+    sitDesc: 'text-[12px] text-white/55 leading-[17px] mt-1.5',
+    sitMeta: 'font-mono text-[10px] text-white/40 uppercase tracking-[0.06em]',
+    filterLink: 'flex items-center gap-1 text-[11px] text-white/50 hover:text-white/80 transition-colors',
+    sectionBorder: 'flex items-end justify-between gap-3 pb-2.5 mb-4 border-b border-white/10',
+    clusterTitle:
+      'text-[18px] sm:text-[20px] font-semibold leading-none tracking-[-0.005em] text-white',
+    clusterCount: 'font-mono text-[11px] uppercase tracking-[0.08em] text-white/40',
+    clusterDesc: 'text-[13px] text-white/55 leading-snug max-w-[520px]',
+    clusterAllLink:
+      'shrink-0 text-[12px] text-white/60 hover:text-white/85 transition-colors pb-px border-b border-dotted border-white/30',
+    trustBar:
+      'flex flex-wrap items-center justify-between gap-4 px-5 sm:px-6 py-[18px] rounded-[10px] border border-white/10 bg-white/[0.03]',
+    trustStats: 'flex flex-wrap gap-x-8 gap-y-2 font-mono text-[11px] tracking-[0.06em] text-white/60',
+    trustStatNum: 'text-[18px] font-semibold text-orange-400',
+    trustCta:
+      'flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.1em] text-white/70 hover:text-white transition-colors',
+    tile:
+      'relative flex flex-col gap-2.5 p-3.5 rounded-[10px] text-left transition-all duration-150 border border-white/10 bg-white/[0.03] min-h-[116px] hover:bg-white/[0.06] hover:border-white/20 hover:-translate-y-px active:scale-[0.97] disabled:cursor-default disabled:hover:translate-y-0',
+    tileLabel: 'text-[12px] font-semibold leading-tight text-navy-50 break-words',
+    tileMeta: 'font-mono text-[9px] uppercase tracking-[0.05em] text-white/40 leading-tight',
+    badgeClass: BADGE_CLASS_DARK,
+  },
+  light: {
+    shell: 'light',
+    root: 'min-h-full -mx-4 px-4 pb-28 bg-muted/45 text-foreground border-y border-border/50',
+    heroEyebrow: 'font-mono text-[10px] uppercase tracking-[0.14em] text-orange-600',
+    heroTitle:
+      'text-[28px] sm:text-[36px] lg:text-[40px] font-semibold leading-[1.12] tracking-[-0.025em] text-foreground max-w-3xl',
+    heroTitleEm: 'italic font-serif text-orange font-normal',
+    heroLead: 'text-[13px] sm:text-[16px] text-muted-foreground leading-[1.5] max-w-xl',
+    heroHint: 'text-[11px] text-muted-foreground max-w-xl leading-snug',
+    sosHeadline: 'font-semibold text-[14px] text-foreground',
+    sosSub: 'text-[12px] text-muted-foreground truncate',
+    sosCta:
+      'shrink-0 font-mono text-[11px] uppercase tracking-[0.1em] font-medium text-foreground px-3 py-2 rounded-[6px] border border-border bg-background/80',
+    personaRail: 'inline-flex gap-1 p-1 flex-wrap rounded-xl border border-border bg-background/90 w-fit max-w-full',
+    personaInactive: 'bg-transparent text-muted-foreground',
+    personaActive: 'bg-orange text-white',
+    personaCountInactive: 'font-mono text-[10px] opacity-60',
+    personaCountActive: 'font-mono text-[10px] opacity-80',
+    searchIcon: 'absolute left-5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-muted-foreground pointer-events-none',
+    searchInput:
+      'w-full text-[15px] outline-none placeholder:text-muted-foreground bg-background border border-input rounded-2xl text-foreground caret-primary pl-[50px] pr-[60px] py-4',
+    searchKbd:
+      'absolute right-4 top-1/2 -translate-y-1/2 font-mono text-[10px] px-1.5 py-[3px] rounded-[3px] bg-muted text-muted-foreground',
+    searchClear: 'absolute right-14 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground',
+    popularLabel: 'font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground',
+    popularLink:
+      'text-[12px] text-foreground/80 hover:text-foreground transition-colors pb-px border-b border-dotted border-border',
+    emptySearch: 'text-muted-foreground text-sm py-6 text-center',
+    resultsLabel: 'font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground',
+    sitCard:
+      'relative flex flex-col justify-between gap-3 p-[18px] rounded-xl text-left transition-all duration-150 border border-border bg-card min-h-[130px]',
+    sitCardHover: 'hover:bg-muted/60 hover:border-border hover:-translate-y-px active:scale-[0.98]',
+    sitActionHint:
+      'text-[11px] font-medium leading-snug text-muted-foreground mt-2 max-w-[16rem]',
+    sitIconWrap:
+      'size-[var(--touch-target)] shrink-0 rounded-[7px] flex items-center justify-center bg-orange/20 md:size-[30px]',
+    sitTitle: 'text-[15px] font-semibold text-foreground leading-[19px] tracking-[-0.01em] mt-3.5',
+    sitDesc: 'text-[12px] text-muted-foreground leading-[17px] mt-1.5',
+    sitMeta: 'font-mono text-[10px] text-muted-foreground uppercase tracking-[0.06em]',
+    filterLink: 'flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors',
+    sectionBorder: 'flex items-end justify-between gap-3 pb-2.5 mb-4 border-b border-border',
+    clusterTitle:
+      'text-[18px] sm:text-[20px] font-semibold leading-none tracking-[-0.005em] text-foreground',
+    clusterCount: 'font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground',
+    clusterDesc: 'text-[13px] text-muted-foreground leading-snug max-w-[520px]',
+    clusterAllLink:
+      'shrink-0 text-[12px] text-muted-foreground hover:text-foreground transition-colors pb-px border-b border-dotted border-border',
+    trustBar:
+      'flex flex-wrap items-center justify-between gap-4 px-5 sm:px-6 py-[18px] rounded-[10px] border border-border bg-card',
+    trustStats: 'flex flex-wrap gap-x-8 gap-y-2 font-mono text-[11px] tracking-[0.06em] text-muted-foreground',
+    trustStatNum: 'text-[18px] font-semibold text-orange-700',
+    trustCta:
+      'flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors',
+    tile:
+      'relative flex flex-col gap-2.5 p-3.5 rounded-[10px] text-left transition-all duration-150 border border-border bg-card min-h-[116px] hover:bg-muted/70 hover:border-border hover:-translate-y-px active:scale-[0.97] disabled:cursor-default disabled:hover:translate-y-0',
+    tileLabel: 'text-[12px] font-semibold leading-tight text-foreground break-words',
+    tileMeta: 'font-mono text-[9px] uppercase tracking-[0.05em] text-muted-foreground leading-tight',
+    badgeClass: BADGE_CLASS_LIGHT,
+  },
 };
 
 // ─── Icon overrides by service ID (unique icon per service, spec §04.3) ─────
@@ -346,11 +535,19 @@ const POPULAR = {
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
 
-const BadgePill = React.memo(function BadgePill({ badge }: { badge: Badge }) {
+const BadgePill = React.memo(function BadgePill({
+  badge,
+  appearance,
+}: {
+  badge: Badge;
+  appearance: NavigatorAppearance;
+}) {
   return (
     <span
-      className="absolute top-2 right-2 rounded-none px-1 py-px font-mono text-[7.5px] font-bold tracking-[0.06em]"
-      style={{ background: BADGE_BG[badge], color: BADGE_TEXT[badge] }}
+      className={cn(
+        'absolute top-2 right-2 rounded-none px-1 py-px font-mono text-[7.5px] font-bold tracking-[0.06em]',
+        appearance.badgeClass[badge],
+      )}
     >
       {BADGE_LABEL[badge]}
     </span>
@@ -358,15 +555,19 @@ const BadgePill = React.memo(function BadgePill({ badge }: { badge: Badge }) {
 });
 
 function ServiceTile({
-  service, clusterId, language, onNavigate,
+  service, clusterId, language, onNavigate, appearance,
 }: {
-  service: ClusterService; clusterId: string; language: Language; onNavigate: (p: string) => void;
+  service: ClusterService;
+  clusterId: string;
+  language: Language;
+  onNavigate: (p: string) => void;
+  appearance: NavigatorAppearance;
 }) {
   const meta = SERVICE_META[service.id ?? ''] ?? {};
   const badge = meta.badge;
   const metaText = language === 'ru' ? meta.metaRu : meta.metaEn;
   const isSoon = service.status === 'soon';
-  const col = catColor(clusterId);
+  const col = catColor(clusterId, appearance.shell);
   const Icon = ICON_BY_ID[service.id ?? ''] ?? service.icon;
   const label = getClusterServiceLocalizedLabel(service, language);
 
@@ -374,33 +575,30 @@ function ServiceTile({
     <button
       onClick={() => !isSoon && onNavigate(service.path)}
       disabled={isSoon}
-      className="relative flex flex-col gap-2.5 p-3.5 rounded-[10px] text-left transition-all duration-150 hover:bg-white/[0.06] hover:border-white/20 hover:-translate-y-px active:scale-[0.97] disabled:cursor-default disabled:hover:translate-y-0"
-      style={{
-        background: 'rgba(255,255,255,0.03)',
-        border: '1px solid rgba(255,255,255,0.08)',
-        minHeight: '116px',
-        opacity: isSoon ? 0.65 : 1,
-      }}
+      className={cn(
+        appearance.tile,
+        isSoon ? 'opacity-65' : 'opacity-100',
+      )}
       aria-label={label}
     >
-      {badge && <BadgePill badge={badge} />}
+      {badge && <BadgePill badge={badge} appearance={appearance} />}
       <div
-        className="flex items-center justify-center w-7 h-7 rounded-[7px] shrink-0"
-        style={{ background: col.iconBg }}
+        className={cn(
+          'flex items-center justify-center shrink-0 rounded-[7px] size-[var(--touch-target)] md:size-7',
+          col.iconBg,
+        )}
       >
-        <Icon className="w-4 h-4 shrink-0" style={{ color: col.iconFg }} />
+        <Icon className={cn('size-6 shrink-0 md:size-4', col.iconFg)} />
       </div>
       <div className="flex-1 flex flex-col justify-end gap-0.5 min-w-0">
         <span
-          className="text-[12px] font-semibold leading-tight text-[#F5F4F0] break-words"
+          className={cn(appearance.tileLabel)}
           style={{ wordBreak: 'keep-all', textWrap: 'balance' } as React.CSSProperties}
         >
           {label}
         </span>
         {metaText && (
-          <span className="font-mono text-[9px] uppercase tracking-[0.05em] text-white/40 leading-tight">
-            {metaText}
-          </span>
+          <span className={appearance.tileMeta}>{metaText}</span>
         )}
       </div>
     </button>
@@ -408,44 +606,78 @@ function ServiceTile({
 }
 
 function FeaturedTile({
-  data, language, onNavigate,
+  data,
+  language,
+  onNavigate,
+  appearance,
 }: {
-  data: FeaturedTileData; language: Language; onNavigate: (p: string) => void;
+  data: FeaturedTileData;
+  language: Language;
+  onNavigate: (p: string) => void;
+  appearance: NavigatorAppearance;
 }) {
   const Icon = data.icon;
+  const isLight = appearance.shell === 'light';
   return (
     <button
       onClick={() => onNavigate(data.path)}
-      className="relative col-span-2 row-span-2 flex flex-col justify-between p-[22px] rounded-[10px] text-left transition-all duration-150 hover:-translate-y-px active:scale-[0.98]"
-      style={{
-        background: 'linear-gradient(135deg, rgba(217,107,26,0.18), rgba(217,107,26,0.04))',
-        border: '1px solid rgba(217,107,26,0.3)',
-        minHeight: '240px',
-      }}
+      className={cn(
+        'relative col-span-2 row-span-2 flex flex-col justify-between p-[22px] rounded-[10px] text-left transition-all duration-150',
+        'min-h-[240px] border border-orange/30',
+        isLight
+          ? 'bg-card border-orange/35 shadow-sm hover:border-orange/50 hover:bg-muted/30'
+          : 'bg-gradient-to-br from-orange/20 to-orange/5',
+        'hover:-translate-y-px active:scale-[0.98]',
+      )}
     >
-      <BadgePill badge={data.badge} />
+      <BadgePill badge={data.badge} appearance={appearance} />
       <div
-        className="flex items-center justify-center w-9 h-9 rounded-[8px]"
-        style={{ background: 'rgba(217,107,26,0.2)' }}
+        className={cn(
+          'flex items-center justify-center shrink-0 rounded-[8px] size-[var(--touch-target)] md:size-9',
+          isLight ? 'bg-orange/15' : 'bg-orange/20',
+        )}
       >
-        <Icon className="w-[18px] h-[18px]" style={{ color: '#F3924A' }} />
+        <Icon
+          className={cn(
+            'size-6 md:size-[18px]',
+            isLight ? 'text-orange-700' : 'text-orange-400',
+          )}
+        />
       </div>
       <div className="flex flex-col gap-1">
         <h6
-          className="text-[18px] leading-[23px] text-white"
-          style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontWeight: 500 }}
+          className={cn(
+            'text-[18px] leading-[23px]',
+            isLight ? 'text-foreground' : 'text-white',
+          )}
+          style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 500 }}
         >
           {language === 'ru' ? data.nameRu : data.nameEn}
         </h6>
-        <p className="text-[12px] text-white/60 leading-[17px]">
+        <p
+          className={cn(
+            'text-[12px] leading-[17px]',
+            isLight ? 'text-muted-foreground' : 'text-white/60',
+          )}
+        >
           {language === 'ru' ? data.descRu : data.descEn}
         </p>
       </div>
       <div>
-        <span className="font-mono text-[22px] font-medium text-white tracking-[-0.02em] leading-none">
+        <span
+          className={cn(
+            'font-mono text-[22px] font-medium tracking-[-0.02em] leading-none',
+            isLight ? 'text-foreground' : 'text-white',
+          )}
+        >
           {data.stat}
         </span>
-        <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-white/45 mt-1">
+        <p
+          className={cn(
+            'font-mono text-[10px] uppercase tracking-[0.1em] mt-1',
+            isLight ? 'text-muted-foreground' : 'text-white/45',
+          )}
+        >
           {language === 'ru' ? data.statLabelRu : data.statLabelEn}
         </p>
       </div>
@@ -462,17 +694,17 @@ const PERSONA_CONFIG: Record<
   { clusterOrder: string[]; hiddenServiceIds: string[]; situationIds: string[] }
 > = {
   foreigner: {
-    clusterOrder: ['arrive', 'live', 'invest', 'legal', 'build'],
+    clusterOrder: ['arrive', 'live', 'manage', 'invest', 'legal', 'build'],
     hiddenServiceIds: [],
     situationIds: ['arrived', 'renting', 'buying', 'medical'],
   },
   resident: {
-    clusterOrder: ['live', 'legal', 'arrive', 'invest', 'build'],
+    clusterOrder: ['live', 'legal', 'manage', 'arrive', 'invest', 'build'],
     hiddenServiceIds: ['tours', 'water', 'yacht', 'experience', 'event', 'event-live', 'experience-live', 'water-live'],
     situationIds: ['visa-extend', 'renting', 'banking', 'medical'],
   },
   investor: {
-    clusterOrder: ['invest', 'legal', 'build', 'arrive', 'live'],
+    clusterOrder: ['invest', 'legal', 'manage', 'build', 'arrive', 'live'],
     hiddenServiceIds: [
       'cleaning', 'laundry', 'pest-control', 'handyman', 'plumbing', 'electrical',
       'ac-repair', 'locksmith', 'gardening', 'flowers', 'storage', 'services',
@@ -482,7 +714,7 @@ const PERSONA_CONFIG: Record<
     situationIds: ['buying', 'due-diligence', 'roi', 'legal-support'],
   },
   owner: {
-    clusterOrder: ['invest', 'legal', 'live', 'arrive', 'build'],
+    clusterOrder: ['invest', 'legal', 'manage', 'live', 'arrive', 'build'],
     hiddenServiceIds: [
       'tours', 'water', 'yacht', 'experience', 'event', 'event-live', 'experience-live',
       'water-live', 'community', 'wedding', 'babysitter', 'kids',
@@ -491,22 +723,67 @@ const PERSONA_CONFIG: Record<
   },
 };
 
+/** Short labels for situation cards + aria (filter targets surface cluster ids). */
+const NAV_CLUSTER_FILTER_LABEL: Record<string, { ru: string; en: string }> = {
+  arrive: { ru: 'Прибытие', en: 'Arrive' },
+  live: { ru: 'Жизнь на острове', en: 'Live' },
+  manage: { ru: 'Управление', en: 'Manage' },
+  invest: { ru: 'Инвестиции', en: 'Invest' },
+  legal: { ru: 'Право и документы', en: 'Legal' },
+  build: { ru: 'Стройка', en: 'Build' },
+};
+
 export default function NavigatorPage() {
   const { language } = useLanguage();
+  const { resolvedTheme } = useTheme();
+  const appearance = NAV_APPEARANCE[resolvedTheme === 'dark' ? 'dark' : 'light'];
   const isRu = language === 'ru';
   const navigate = useNavigate();
   const location = useLocation();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
   const { personas } = useUserPersonas();
 
   const [activePersona, setActivePersona] = useState<PersonaId>('foreigner');
   const [query, setQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
   const [activeCluster, setActiveCluster] = useState<string | null>(null);
+  const prevPersonaRef = useRef<PersonaId>(activePersona);
 
   useEffect(() => {
+    const t = window.setTimeout(() => setDebouncedQuery(query.trim()), 200);
+    return () => window.clearTimeout(t);
+  }, [query]);
+
+  useEffect(() => {
+    if (prevPersonaRef.current === activePersona) return;
+    prevPersonaRef.current = activePersona;
     setActiveCluster(null);
-  }, [activePersona]);
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete('cluster');
+        return next;
+      },
+      { replace: true },
+    );
+  }, [activePersona, setSearchParams]);
+
+  const setClusterFilter = useCallback(
+    (next: string | null) => {
+      setActiveCluster(next);
+      setSearchParams(
+        (prev) => {
+          const out = new URLSearchParams(prev);
+          if (next) out.set('cluster', next);
+          else out.delete('cluster');
+          return out;
+        },
+        { replace: true },
+      );
+    },
+    [setSearchParams],
+  );
 
   const role = useMemo(
     () =>
@@ -553,10 +830,10 @@ export default function NavigatorPage() {
   const totalServices = personaServiceCounts[activePersona] ?? 0;
 
   const personaTabs = useMemo(() => [
-    { id: 'foreigner' as PersonaId, labelRu: 'Иностранец', labelEn: 'Foreigner', count: personaServiceCounts.foreigner },
-    { id: 'resident'  as PersonaId, labelRu: 'Резидент',   labelEn: 'Resident',  count: personaServiceCounts.resident },
-    { id: 'investor'  as PersonaId, labelRu: 'Инвестор',   labelEn: 'Investor',  count: personaServiceCounts.investor },
-    { id: 'owner'     as PersonaId, labelRu: 'Собственник', labelEn: 'Owner',    count: personaServiceCounts.owner },
+    { id: 'foreigner' as PersonaId, labelRu: 'Турист', labelEn: 'Tourist', count: personaServiceCounts.foreigner },
+    { id: 'resident'  as PersonaId, labelRu: 'Резидент', labelEn: 'Resident', count: personaServiceCounts.resident },
+    { id: 'investor'  as PersonaId, labelRu: 'Инвестор', labelEn: 'Investor', count: personaServiceCounts.investor },
+    { id: 'owner'     as PersonaId, labelRu: 'Собственник', labelEn: 'Owner', count: personaServiceCounts.owner },
   ], [personaServiceCounts]);
 
   const personaClusters = useMemo(() => {
@@ -574,11 +851,42 @@ export default function NavigatorPage() {
   }, [audienceClusters, activePersona]);
 
   const clusterFromUrl = searchParams.get('cluster');
+
   useEffect(() => {
-    if (!clusterFromUrl) return;
+    if (!clusterFromUrl) {
+      if (activeCluster !== null) {
+        setActiveCluster(null);
+      }
+      return;
+    }
+    if (personaClusters.length === 0) return;
+
     const match = personaClusters.find((c) => c.id === clusterFromUrl);
-    if (match) setActiveCluster(clusterFromUrl);
-  }, [clusterFromUrl, personaClusters]);
+    if (match) {
+      if (activeCluster !== clusterFromUrl) {
+        setActiveCluster(clusterFromUrl);
+      }
+      return;
+    }
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete('cluster');
+        return next;
+      },
+      { replace: true },
+    );
+    setActiveCluster(null);
+  }, [clusterFromUrl, personaClusters, activeCluster, setSearchParams]);
+
+  useEffect(() => {
+    if (debouncedQuery || !activeCluster) return;
+    const el = document.getElementById(`navigator-cluster-${activeCluster}`);
+    if (!el) return;
+    requestAnimationFrame(() => {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }, [activeCluster, debouncedQuery]);
 
   const visibleClusters = useMemo(() => {
     if (activeCluster) {
@@ -607,14 +915,23 @@ export default function NavigatorPage() {
   );
 
   const searchResults = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = debouncedQuery.toLowerCase();
     if (!q) return null;
     return allEligible.filter((s) => {
       const label = getClusterServiceLocalizedLabel(s, language).toLowerCase();
       const cluster = isRu ? s.clusterLabelRu.toLowerCase() : s.clusterLabelEn.toLowerCase();
-      return label.includes(q) || cluster.includes(q);
+      const idMatch = (s.id ?? '').toLowerCase().includes(q);
+      const jtbdMatch = (s.jtbdClusters ?? []).some((j) => j.toLowerCase().includes(q));
+      const personaMatch = (s.personaTags ?? []).some((p) => p.toLowerCase().includes(q));
+      return (
+        label.includes(q) ||
+        cluster.includes(q) ||
+        idMatch ||
+        jtbdMatch ||
+        personaMatch
+      );
     });
-  }, [query, allEligible, language, isRu]);
+  }, [debouncedQuery, allEligible, language, isRu]);
 
   const { data: stats } = useQuery({
     queryKey: ['navigator-v2-stats'],
@@ -631,27 +948,22 @@ export default function NavigatorPage() {
 
   return (
     <AppLayout>
-      <div
-        className="min-h-full -mx-4 px-4 pb-28"
-        style={{ background: '#0A2240', color: '#E8ECF2' }}
-      >
+      <div className={appearance.root}>
         <div className="max-w-[1280px] mx-auto py-6 space-y-6">
 
           {/* ── Hero ──────────────────────────────────────── */}
           <div className="space-y-3">
-            <p
-              className="font-mono text-[10px] uppercase tracking-[0.14em]"
-              style={{ color: 'rgba(217,107,26,0.9)' }}
-            >
+            <p className={appearance.heroEyebrow}>
               {isRu ? 'PHUKET EDITION · LIVE' : 'PHUKET EDITION · LIVE'}
             </p>
-            <h1
-              className="text-[28px] sm:text-[36px] lg:text-[40px] font-semibold leading-[1.12] tracking-[-0.025em] text-white max-w-3xl"
-            >
+            <h1 className={appearance.heroTitle}>
               {isRu ? (
                 <>
                   Карта острова{' '}
-                  <em style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', color: '#D96B1A', fontWeight: 400 }}>
+                  <em
+                    className={appearance.heroTitleEm}
+                    style={{ fontFamily: 'var(--font-serif)' }}
+                  >
                     для жизни
                   </em>
                   . Один поток.
@@ -659,81 +971,75 @@ export default function NavigatorPage() {
               ) : (
                 <>
                   Island map{' '}
-                  <em style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', color: '#D96B1A', fontWeight: 400 }}>
+                  <em
+                    className={appearance.heroTitleEm}
+                    style={{ fontFamily: 'var(--font-serif)' }}
+                  >
                     for life
                   </em>
                   . One stream.
                 </>
               )}
             </h1>
-            <p className="text-[13px] sm:text-[16px] text-white/65 leading-[1.5] max-w-xl">
+            <p className={appearance.heroLead}>
               {isRu
                 ? `${totalServices} сервисов, ${stats?.providers ?? 48}+ проверенных партнёров. Найдите своё за 30 секунд — или нажмите ситуацию ниже.`
                 : `${totalServices} services, ${stats?.providers ?? 48}+ verified partners. Find yours in 30 seconds — or tap your situation below.`}
+            </p>
+            <p className={appearance.heroHint}>
+              {isRu
+                ? 'Число у вкладки — сколько сервисов доступно в этом представлении (фильтр по роли).'
+                : 'The number on each tab is how many services are available in this view (persona filter).'}
             </p>
           </div>
 
           {/* ── SOS strip ─────────────────────────────────────── */}
           <button
             onClick={() => navigate(APP_ROUTES.SOS)}
-            className="w-full flex items-center justify-between gap-3 px-4 sm:px-5 py-3 text-left rounded-[10px] transition-opacity hover:opacity-95 active:scale-[0.99]"
-            style={{
-              background: 'linear-gradient(180deg, rgba(180,35,24,0.15), rgba(180,35,24,0.06))',
-              border: '1px solid rgba(180,35,24,0.45)',
-            }}
+            className="w-full flex items-center justify-between gap-3 px-4 sm:px-5 py-3 text-left rounded-[10px] transition-opacity hover:opacity-95 active:scale-[0.99] border border-destructive/45 bg-gradient-to-b from-destructive/15 to-destructive/5"
           >
             <div className="flex items-center gap-3.5 min-w-0">
-              <span
-                className="w-2.5 h-2.5 rounded-full shrink-0 animate-pulse"
-                style={{ background: '#E45F50', boxShadow: '0 0 0 4px rgba(228,95,80,0.25)' }}
-              />
+              <span className="w-2.5 h-2.5 rounded-full shrink-0 animate-pulse bg-destructive shadow-[0_0_0_4px_hsl(var(--destructive)/0.25)]" />
               <div className="flex flex-col sm:flex-row sm:items-baseline sm:gap-2 min-w-0">
-                <span className="font-semibold text-[14px] text-white">
+                <span className={appearance.sosHeadline}>
                   {isRu ? 'SOS · 24/7 на русском' : 'SOS · 24/7 in English'}
                 </span>
-                <span className="text-[12px] text-white/65 truncate">
+                <span className={appearance.sosSub}>
                   {isRu
                     ? 'врач · авария · полиция · ввоз питомца — одно касание'
                     : 'doctor · accident · police · pet import — one tap'}
                 </span>
               </div>
             </div>
-            <span
-              className="shrink-0 font-mono text-[11px] uppercase tracking-[0.1em] font-medium text-white px-3 py-2 rounded-[6px]"
-              style={{ border: '1px solid rgba(255,255,255,0.4)' }}
-            >
+            <span className={appearance.sosCta}>
               {isRu ? 'Вызвать →' : 'Call →'}
             </span>
           </button>
 
           {/* ── Persona toggle ──────────────────────────── */}
-          <div
-            className="inline-flex gap-1 p-1 flex-wrap"
-            style={{
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              borderRadius: '12px',
-              width: 'fit-content',
-              maxWidth: '100%',
-            }}
-          >
+          <div className={appearance.personaRail}>
             {personaTabs.map((tab) => {
               const active = activePersona === tab.id;
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActivePersona(tab.id)}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-[8px] text-[13px] font-medium leading-none tracking-[-0.005em] transition-all duration-150"
-                  style={
-                    active
-                      ? { background: '#D96B1A', color: '#fff' }
-                      : { background: 'transparent', color: 'rgba(255,255,255,0.6)' }
+                  type="button"
+                  title={
+                    isRu
+                      ? `${tab.count} сервисов в фильтре «${tab.labelRu}»`
+                      : `${tab.count} services in the “${tab.labelEn}” filter`
                   }
+                  onClick={() => setActivePersona(tab.id)}
+                  className={cn(
+                    'flex items-center gap-2 px-4 py-2.5 rounded-lg text-[13px] font-medium leading-none tracking-[-0.005em] transition-all duration-150',
+                    active ? appearance.personaActive : appearance.personaInactive,
+                  )}
                 >
                   {isRu ? tab.labelRu : tab.labelEn}
                   <span
-                    className="font-mono text-[10px]"
-                    style={{ opacity: active ? 0.7 : 0.5 }}
+                    className={cn(
+                      active ? appearance.personaCountActive : appearance.personaCountInactive,
+                    )}
                   >
                     {tab.count}
                   </span>
@@ -745,32 +1051,22 @@ export default function NavigatorPage() {
           {/* ── Search ──────────────────────────────────── */}
           <div className="space-y-2.5 max-w-[720px]">
             <div className="relative">
-              <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-white/50 pointer-events-none" />
+              <Search className={appearance.searchIcon} />
               <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={isRu ? 'Найти сервис, партнёра или ситуацию…' : 'Find service, partner or situation…'}
-                className="w-full text-[15px] outline-none placeholder:text-white/45"
-                style={{
-                  background: 'rgba(255,255,255,0.06)',
-                  border: '1px solid rgba(255,255,255,0.12)',
-                  borderRadius: '14px',
-                  color: '#F5F4F0',
-                  caretColor: '#D96B1A',
-                  padding: '16px 60px 16px 50px',
-                }}
+                className={appearance.searchInput}
+                autoComplete="off"
               />
-              <kbd
-                className="absolute right-4 top-1/2 -translate-y-1/2 font-mono text-[10px] px-1.5 py-[3px] rounded-[3px]"
-                style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)' }}
-              >
+              <kbd className={appearance.searchKbd}>
                 ⌘K
               </kbd>
               {query && (
                 <button
                   onClick={() => setQuery('')}
-                  className="absolute right-14 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70"
+                  className={appearance.searchClear}
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -778,15 +1074,14 @@ export default function NavigatorPage() {
             </div>
             {!query && (
               <div className="flex items-center gap-2.5 flex-wrap">
-                <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-white/40">
+                <span className={appearance.popularLabel}>
                   {isRu ? 'СЕЙЧАС ИЩУТ' : 'POPULAR'}
                 </span>
                 {(isRu ? POPULAR.ru : POPULAR.en).map((term) => (
                   <button
                     key={term}
                     onClick={() => setQuery(term)}
-                    className="text-[12px] text-white/75 hover:text-white transition-colors pb-px"
-                    style={{ borderBottom: '1px dotted rgba(255,255,255,0.3)' }}
+                    className={appearance.popularLink}
                   >
                     {term}
                   </button>
@@ -799,12 +1094,12 @@ export default function NavigatorPage() {
           {searchResults !== null && (
             <div>
               {searchResults.length === 0 ? (
-                <p className="text-white/45 text-sm py-6 text-center">
+                <p className={appearance.emptySearch}>
                   {isRu ? 'Ничего не найдено' : 'No results found'}
                 </p>
               ) : (
                 <div className="space-y-2">
-                  <p className="font-mono text-[9px] uppercase tracking-[0.12em] text-white/30">
+                  <p className={appearance.resultsLabel}>
                     {searchResults.length} {isRu ? 'РЕЗУЛЬТАТОВ' : 'RESULTS'}
                   </p>
                   <div
@@ -818,6 +1113,7 @@ export default function NavigatorPage() {
                         clusterId={s.clusterId}
                         language={language}
                         onNavigate={navigate}
+                        appearance={appearance}
                       />
                     ))}
                   </div>
@@ -832,33 +1128,38 @@ export default function NavigatorPage() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                 {activeSituations.map((s) => {
                   const Icon = s.icon;
+                  const sectionLbl = NAV_CLUSTER_FILTER_LABEL[s.filterId] ?? {
+                    ru: s.filterId,
+                    en: s.filterId,
+                  };
+                  const sectionName = isRu ? sectionLbl.ru : sectionLbl.en;
+                  const actionHint = isRu
+                    ? `Показать раздел «${sectionName}»`
+                    : `Show “${sectionName}” section`;
+                  const aria = isRu
+                    ? `${actionHint}. Фильтр каталога, не переход в сервис.`
+                    : `${actionHint}. Catalog filter; does not open a service.`;
                   return (
                     <button
                       key={s.id}
-                      onClick={() => setActiveCluster(s.filterId)}
-                      className="relative flex flex-col justify-between gap-3 p-[18px] rounded-[12px] text-left transition-all duration-150 hover:bg-white/[0.06] hover:border-white/20 hover:-translate-y-px active:scale-[0.98]"
-                      style={{
-                        background: 'rgba(255,255,255,0.03)',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        minHeight: '130px',
-                      }}
+                      type="button"
+                      aria-label={aria}
+                      onClick={() => setClusterFilter(s.filterId)}
+                      className={cn(appearance.sitCard, appearance.sitCardHover)}
                     >
-                      <span className="absolute top-[18px] right-[18px] text-base text-white/40">→</span>
                       <div>
-                        <div
-                          className="w-[30px] h-[30px] rounded-[7px] flex items-center justify-center"
-                          style={{ background: 'rgba(217,107,26,0.18)' }}
-                        >
-                          <Icon className="w-4 h-4" style={{ color: '#D96B1A' }} />
+                        <div className={appearance.sitIconWrap}>
+                          <Icon className="size-6 text-orange md:size-4" />
                         </div>
-                        <h6 className="text-[15px] font-semibold text-white leading-[19px] tracking-[-0.01em] mt-3.5">
+                        <h6 className={appearance.sitTitle}>
                           {isRu ? s.titleRu : s.titleEn}
                         </h6>
-                        <p className="text-[12px] text-white/55 leading-[17px] mt-1.5">
+                        <p className={appearance.sitDesc}>
                           {isRu ? s.stepsRu : s.stepsEn}
                         </p>
                       </div>
-                      <div className="font-mono text-[10px] text-white/40 uppercase tracking-[0.06em]">
+                      <p className={appearance.sitActionHint}>{actionHint}</p>
+                      <div className={appearance.sitMeta}>
                         {isRu ? `${s.svcRu} · ${s.timeRu}` : `${s.svcEn} · ${s.timeEn}`}
                       </div>
                     </button>
@@ -870,8 +1171,9 @@ export default function NavigatorPage() {
               {activeCluster && (
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => setActiveCluster(null)}
-                    className="flex items-center gap-1 text-[11px] text-white/50 hover:text-white/80 transition-colors"
+                    type="button"
+                    onClick={() => setClusterFilter(null)}
+                    className={appearance.filterLink}
                   >
                     <X className="w-3 h-3" />
                     {isRu ? 'Все разделы' : 'All sections'}
@@ -882,86 +1184,69 @@ export default function NavigatorPage() {
               {/* ── Cluster sections ──────────────────────── */}
               <div className="space-y-10">
                 {visibleClusters.map((cluster) => {
-                  const col = catColor(cluster.id);
+                  const col = catColor(cluster.id, appearance.shell);
                   const eligible = cluster.services.filter(isEligibleLeafService);
                   const featured = CLUSTER_FEATURED[cluster.id];
                   const hasFeature = !!featured;
 
                   return (
-                    <section key={cluster.id} className="pt-2">
+                    <section
+                      key={cluster.id}
+                      id={`navigator-cluster-${cluster.id}`}
+                      className="scroll-mt-[72px] pt-2"
+                    >
                       {/* Section header */}
-                      <div
-                        className="flex items-end justify-between gap-3 pb-2.5 mb-4"
-                        style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}
-                      >
+                      <div className={appearance.sectionBorder}>
                         <div className="space-y-1.5 min-w-0">
                           <div className="flex items-baseline gap-3.5 flex-wrap">
                             <span
-                              className="w-2.5 h-2.5 rounded-[2px] inline-block translate-y-px shrink-0"
-                              style={{ background: col.dot }}
+                              className={cn('w-2.5 h-2.5 rounded-[2px] inline-block translate-y-px shrink-0', col.dot)}
                             />
                             <h2
-                              className="text-[18px] sm:text-[20px] font-semibold leading-none tracking-[-0.005em] text-white"
+                              className={appearance.clusterTitle}
                               style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic' }}
                             >
                               {getClusterHeaderLabel(cluster, language)}
                             </h2>
-                            <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-white/40">
+                            <span className={appearance.clusterCount}>
                               {eligible.length} {isRu ? 'СЕРВИСОВ' : 'SERVICES'}
                             </span>
                           </div>
-                          <p className="text-[13px] text-white/55 leading-snug max-w-[520px]">
+                          <p className={appearance.clusterDesc}>
                             {language === 'ru' ? cluster.valueRu : cluster.valueEn}
                           </p>
                         </div>
                         <button
-                          onClick={() => setActiveCluster(activeCluster === cluster.id ? null : cluster.id)}
-                          className="shrink-0 text-[12px] text-white/60 hover:text-white/85 transition-colors pb-px"
-                          style={{ borderBottom: '1px dotted rgba(255,255,255,0.3)' }}
+                          type="button"
+                          onClick={() =>
+                            setClusterFilter(activeCluster === cluster.id ? null : cluster.id)
+                          }
+                          className={appearance.clusterAllLink}
                         >
                           {isRu ? `Все ${eligible.length} →` : `All ${eligible.length} →`}
                         </button>
                       </div>
 
-                      {/* Service grid — responsive columns, fixed row height */}
-                      <div
-                        className="grid gap-2"
-                        style={{
-                          gridTemplateColumns: 'repeat(3, 1fr)',
-                          gridAutoRows: '132px',
-                        }}
-                      >
-                        <style>{`
-                          @media (min-width:640px)  { .nav-v2-grid-${cluster.id} { grid-template-columns: repeat(4,1fr) !important; } }
-                          @media (min-width:1024px) { .nav-v2-grid-${cluster.id} { grid-template-columns: repeat(5,1fr) !important; } }
-                          @media (min-width:1280px) { .nav-v2-grid-${cluster.id} { grid-template-columns: repeat(6,1fr) !important; } }
-                        `}</style>
-                        {/* Apply responsive class via wrapper trick */}
-                        <div
-                          className={`nav-v2-grid-${cluster.id} grid gap-2`}
-                          style={{
-                            gridColumn: '1 / -1',
-                            gridTemplateColumns: 'repeat(3, 1fr)',
-                            gridAutoRows: '132px',
-                          }}
-                        >
-                          {hasFeature && (
-                            <FeaturedTile
-                              data={featured!}
-                              language={language}
-                              onNavigate={navigate}
-                            />
-                          )}
-                          {eligible.map((svc) => (
-                            <ServiceTile
-                              key={`${cluster.id}-${svc.path}`}
-                              service={svc}
-                              clusterId={cluster.id}
-                              language={language}
-                              onNavigate={navigate}
-                            />
-                          ))}
-                        </div>
+                      {/* Service grid — single container (nested grid + inline <style> broke layout in some engines) */}
+                      <div className="grid grid-cols-3 gap-2 auto-rows-[132px] sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+                        {hasFeature && (
+                          <FeaturedTile
+                            data={featured!}
+                            language={language}
+                            onNavigate={navigate}
+                            appearance={appearance}
+                          />
+                        )}
+                        {eligible.map((svc) => (
+                          <ServiceTile
+                            key={`${cluster.id}-${svc.path}`}
+                            service={svc}
+                            clusterId={cluster.id}
+                            language={language}
+                            onNavigate={navigate}
+                            appearance={appearance}
+                          />
+                        ))}
                       </div>
                     </section>
                   );
@@ -969,14 +1254,8 @@ export default function NavigatorPage() {
               </div>
 
               {/* ── Trust strip ───────────────────────────── */}
-              <div
-                className="flex flex-wrap items-center justify-between gap-4 px-5 sm:px-6 py-[18px] rounded-[10px]"
-                style={{
-                  background: 'rgba(255,255,255,0.03)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                }}
-              >
-                <div className="flex flex-wrap gap-x-8 gap-y-2 font-mono text-[11px] tracking-[0.06em] text-white/60">
+              <div className={appearance.trustBar}>
+                <div className={appearance.trustStats}>
                   {[
                     { num: `${stats?.properties ?? 23}+`, labelRu: 'ОБЪЕКТОВ',   labelEn: 'PROPERTIES' },
                     { num: `${stats?.providers ?? 48}+`,  labelRu: 'ПАРТНЁРОВ',  labelEn: 'PARTNERS' },
@@ -984,7 +1263,7 @@ export default function NavigatorPage() {
                     { num: '100%',                        labelRu: 'ПРОВЕРЕНО',  labelEn: 'VERIFIED' },
                   ].map((t) => (
                     <span key={t.num + t.labelEn} className="flex items-baseline gap-1.5">
-                      <b className="text-[18px] font-semibold" style={{ color: '#D96B1A' }}>
+                      <b className={appearance.trustStatNum}>
                         {t.num}
                       </b>
                       <span>{isRu ? t.labelRu : t.labelEn}</span>
@@ -993,7 +1272,7 @@ export default function NavigatorPage() {
                 </div>
                 <button
                   onClick={() => window.dispatchEvent(new CustomEvent('navigator:open-apps-drawer'))}
-                  className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.1em] text-white/70 hover:text-white transition-colors"
+                  className={appearance.trustCta}
                 >
                   <LayoutGrid className="w-3.5 h-3.5" />
                   {isRu ? 'Все сервисы →' : 'All services →'}

@@ -18,7 +18,7 @@ import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
 import { cn } from '@/lib/utils';
 
 const FOOTER_SERVICE_SECTIONS: Array<{
-  clusterId: 'arrive' | 'live' | 'legal' | 'build';
+  clusterId: 'arrive' | 'live' | 'invest' | 'legal' | 'build';
   fallbackTitle: LocalizedTriplet;
   serviceIds: string[][];
 }> = [
@@ -31,6 +31,11 @@ const FOOTER_SERVICE_SECTIONS: Array<{
     clusterId: 'live',
     fallbackTitle: { ru: 'Жизнь', en: 'Live', th: 'ใช้ชีวิต' },
     serviceIds: [['services'], ['cleaning'], ['medical'], ['restaurants', 'restaurant'], ['school-finder']],
+  },
+  {
+    clusterId: 'invest',
+    fallbackTitle: { ru: 'Инвестиции', en: 'Invest', th: 'การลงทุน' },
+    serviceIds: [['property'], ['offplan'], ['resale'], ['roi-hub']],
   },
   {
     clusterId: 'legal',
@@ -132,18 +137,17 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
     { icon: Shield, trip: ECOSYSTEM_FOOTER_UI.trustData },
   ];
 
-  // Desktop: professional multi-column footer
+  // Desktop: professional multi-column footer (≥ md breakpoint)
   if (isDesktop) {
-    // Left: arrive, live, enjoy (first 3 journey groups)
-    // Right: health, settle (remaining groups)
     const leftGroups = footerGroups.slice(0, 3);
     const rightGroups = footerGroups.slice(3);
+    const servicesNavId = 'compact-footer-services-nav';
 
     return (
       <footer ref={ref} className="border-t border-border/40 bg-muted/10 mt-auto">
-        <div className={cn(ECOSYSTEM_PAGE_CONTAINER, 'py-10 lg:py-12')}>
-          {/* Main grid — 2 cols (mobile) → 3 (sm) → 6 (lg) */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 xl:gap-8 mb-8">
+        <div className={cn(ECOSYSTEM_PAGE_CONTAINER, 'py-6 lg:py-8')}>
+          {/* Main grid — 2 cols → 3 (sm) → 6 (lg); services spans 2 cols on lg */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 xl:gap-6 mb-5">
 
             {/* Brand column */}
             <div className="space-y-3">
@@ -167,94 +171,117 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
               </div>
             </div>
 
-            {/* Services — left (Home, Transport, Leisure) */}
-            <div className="space-y-4">
-              <h4 className="text-sm font-semibold text-foreground">
+            {/* Services — one landmark nav, two sub-columns (no duplicate / invisible headings) */}
+            <div className="space-y-3 sm:col-span-2 lg:col-span-2">
+              <h4 id={servicesNavId} className="text-sm font-semibold text-foreground">
                 {t(ECOSYSTEM_FOOTER_UI.servicesHeading)}
               </h4>
-              <nav className="flex flex-col gap-4">
-                {leftGroups.map((group) => (
-                  <div key={group.title} className="space-y-1.5">
-                    <span className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wider">
-                      {group.title}
-                    </span>
-                    {group.items.map((link) => (
-                      <Link key={link.to} to={link.to} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
-                        {link.label}
-                      </Link>
-                    ))}
-                  </div>
-                ))}
-              </nav>
-            </div>
-
-            {/* Services — right (Wellness, Docs & Finance) */}
-            <div className="space-y-4">
-              <h4 className="text-sm font-semibold text-foreground invisible">&nbsp;</h4>
-              <nav className="flex flex-col gap-4">
-                {rightGroups.map((group) => (
-                  <div key={group.title} className="space-y-1.5">
-                    <span className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wider">
-                      {group.title}
-                    </span>
-                    {group.items.map((link) => (
-                      <Link key={link.to} to={link.to} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
-                        {link.label}
-                      </Link>
-                    ))}
-                  </div>
-                ))}
+              <nav aria-labelledby={servicesNavId} className="grid grid-cols-1 min-[480px]:grid-cols-2 gap-x-6 gap-y-3">
+                <div className="flex flex-col gap-3">
+                  {leftGroups.map((group) => (
+                    <div key={group.title} className="space-y-1.5">
+                      <span className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wider">
+                        {group.title}
+                      </span>
+                      <ul className="flex flex-col gap-1.5 list-none p-0 m-0">
+                        {group.items.map((link) => (
+                          <li key={link.to}>
+                            <Link
+                              to={link.to}
+                              className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                            >
+                              {link.label}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex flex-col gap-3">
+                  {rightGroups.map((group) => (
+                    <div key={group.title} className="space-y-1.5">
+                      <span className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wider">
+                        {group.title}
+                      </span>
+                      <ul className="flex flex-col gap-1.5 list-none p-0 m-0">
+                        {group.items.map((link) => (
+                          <li key={link.to}>
+                            <Link
+                              to={link.to}
+                              className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                            >
+                              {link.label}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
               </nav>
             </div>
 
             {/* Real Estate column */}
             <div className="space-y-3">
-              <h4 className="text-sm font-semibold text-foreground">
+              <h4 id="compact-footer-re" className="text-sm font-semibold text-foreground">
                 {t(ECOSYSTEM_FOOTER_UI.realEstateHeading)}
               </h4>
-              <nav className="flex flex-col gap-2.5">
-                {realEstateLinks.map((link) => (
-                  <Link key={link.to} to={link.to} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                    {link.label}
-                  </Link>
-                ))}
+              <nav aria-labelledby="compact-footer-re" className="flex flex-col gap-2.5">
+                <ul className="flex flex-col gap-2.5 list-none p-0 m-0">
+                  {realEstateLinks.map((link) => (
+                    <li key={link.to}>
+                      <Link
+                        to={link.to}
+                        className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
               </nav>
             </div>
 
             {/* Company column */}
             <div className="space-y-3">
-              <h4 className="text-sm font-semibold text-foreground">
+              <h4 id="compact-footer-company" className="text-sm font-semibold text-foreground">
                 {t(ECOSYSTEM_FOOTER_UI.companyHeading)}
               </h4>
-              <nav className="flex flex-col gap-2.5">
-                {companyLinks.map((link) => (
-                  <Link key={link.to} to={link.to} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                    {link.label}
-                  </Link>
-                ))}
+              <nav aria-labelledby="compact-footer-company" className="flex flex-col gap-2.5">
+                <ul className="flex flex-col gap-2.5 list-none p-0 m-0">
+                  {companyLinks.map((link) => (
+                    <li key={link.to}>
+                      <Link
+                        to={link.to}
+                        className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
               </nav>
             </div>
 
             {/* Trust column */}
             <div className="space-y-3">
-              <h4 className="text-sm font-semibold text-foreground">
+              <h4 id="compact-footer-trust" className="text-sm font-semibold text-foreground">
                 {t(ECOSYSTEM_FOOTER_UI.trustHeading)}
               </h4>
-              <div className="flex flex-col gap-3">
+              <ul className="flex flex-col gap-3 list-none p-0 m-0" aria-labelledby="compact-footer-trust">
                 {trustBadges.map((badge) => (
-                  <div key={badge.trip.en} className="flex items-center gap-2">
-                    <badge.icon className="w-4 h-4 text-primary shrink-0" />
-                    <span className="text-sm text-muted-foreground">
-                      {t(badge.trip)}
-                    </span>
-                  </div>
+                  <li key={badge.trip.en} className="flex items-center gap-2">
+                    <badge.icon className="w-4 h-4 text-primary shrink-0" aria-hidden />
+                    <span className="text-sm text-muted-foreground">{t(badge.trip)}</span>
+                  </li>
                 ))}
-              </div>
+              </ul>
             </div>
           </div>
 
           {/* Bottom bar */}
-          <div className="border-t border-border/30 pt-5 flex items-center justify-between">
+          <div className="border-t border-border/30 pt-4 flex items-center justify-between">
             <p className="text-sm text-muted-foreground/70">
               © {new Date().getFullYear()} myUNO · Phuket Edition
             </p>
@@ -267,10 +294,19 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
     );
   }
 
-  // Mobile: compact footer
+  // Mobile: compact footer (< md)
   return (
     <footer ref={ref} className="border-t border-border/50 bg-muted/30 mt-auto pb-20 md:pb-0">
       <div className={cn(ECOSYSTEM_PAGE_CONTAINER, 'py-6 space-y-4')}>
+        <div className="text-center space-y-2 max-w-md mx-auto">
+          <div className="flex justify-center">
+            <BrandWordmark as="static" />
+          </div>
+          <p className="text-xs text-muted-foreground leading-relaxed px-1">
+            {t(ECOSYSTEM_FOOTER_UI.brandTagline)}
+          </p>
+        </div>
+
         {!isInstalled && (
           <div className="flex justify-center">
             <button
@@ -299,18 +335,17 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
           ))}
         </div>
 
-        <div className="flex flex-wrap justify-center gap-x-4 gap-y-2">
-          {companyLinks.map((link, index) => (
-            <span key={link.to} className="flex items-center gap-4">
-              <Link to={link.to} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-                {link.label}
-              </Link>
-              {index < companyLinks.length - 1 && (
-                <span className="text-border hidden sm:inline">·</span>
-              )}
-            </span>
+        <nav aria-label={t(ECOSYSTEM_FOOTER_UI.companyHeading)} className="flex flex-wrap justify-center gap-x-3 gap-y-2">
+          {companyLinks.map((link) => (
+            <Link
+              key={link.to}
+              to={link.to}
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {link.label}
+            </Link>
           ))}
-        </div>
+        </nav>
 
         <p className="text-center text-[11px] text-muted-foreground">
           © {new Date().getFullYear()} myUNO · Phuket Edition

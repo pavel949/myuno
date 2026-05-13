@@ -99,6 +99,10 @@ function transformVehicle(raw: Record<string, any>): Vehicle {
   };
 }
 
+/**
+ * Transport inventory is unified on `public.listings` (vertical = vehicle), not `vehicles`.
+ * Public catalog visibility follows RLS: active rows need approval_status approved or NULL.
+ */
 async function fetchVehicles(vehicleType?: string): Promise<Vehicle[]> {
   let query = supabase
     .from('listings')

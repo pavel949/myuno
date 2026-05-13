@@ -195,6 +195,7 @@ function adaptCategoryRow(
   return {
     id: row.slug as CategoryEntry['id'],
     clusterId,
+    sortOrder: row.sort_order ?? undefined,
     labelRu: row.name_ru || staticMatch?.labelRu || row.name_en,
     labelEn: row.name_en || staticMatch?.labelEn || row.slug,
     valueRu: staticMatch?.valueRu ?? '',

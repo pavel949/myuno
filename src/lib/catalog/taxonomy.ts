@@ -94,6 +94,8 @@ export interface CategoryEntry {
   id: CategoryId;
   /** Owning cluster id */
   clusterId: ClusterId;
+  /** Display order within cluster (from DB `categories.sort_order`). Omitted on static SSOT. */
+  sortOrder?: number;
   labelRu: string;
   labelEn: string;
   labelTh?: string;
@@ -541,6 +543,9 @@ export const CATEGORIES: CategoryEntry[] = [
       { id: 'tax',     path: APP_ROUTES.TAX_NAV, labelRu: 'Налоги',   labelEn: 'Taxes',   icon: Calculator, status: 'available' },
     ],
   },
+  // IA: Halal & Faith stays under the Legal surface (six surfaces / canon 02
+  // category 13). Moving this pillar to Live requires PROJECT.md + IA doc
+  // alignment and a DB `group_id` migration — not a frontend-only rename.
   {
     id: 'cat-halal-faith',
     clusterId: 'legal',
@@ -551,7 +556,42 @@ export const CATEGORIES: CategoryEntry[] = [
     icon: Heart,
     color: '#84CC16',
     services: [
-      { id: 'faith', path: APP_ROUTES.HOME, labelRu: 'Скоро', labelEn: 'Coming soon', icon: Heart, status: 'soon' },
+      {
+        id: 'halal-persona',
+        path: '/for/halal',
+        labelRu: 'Халяль-путешественник',
+        labelEn: 'Halal traveller hub',
+        icon: Compass,
+        status: 'available',
+        jtbdClusters: ['I'],
+      },
+      {
+        id: 'halal-stay',
+        path: '/property/for/halal',
+        labelRu: 'Жильё с учётом практик',
+        labelEn: 'Halal-friendly stay',
+        icon: HomeIcon,
+        status: 'available',
+        jtbdClusters: ['A', 'I'],
+      },
+      {
+        id: 'halal-dining',
+        path: APP_ROUTES.RESTAURANTS,
+        labelRu: 'Рестораны (халяль)',
+        labelEn: 'Halal dining',
+        icon: Utensils,
+        status: 'available',
+        jtbdClusters: ['I'],
+      },
+      {
+        id: 'halal-knowledge',
+        path: APP_ROUTES.KNOWLEDGE,
+        labelRu: 'Вера и обычаи',
+        labelEn: 'Faith & customs guides',
+        icon: BookOpen,
+        status: 'available',
+        jtbdClusters: ['I'],
+      },
     ],
   },
 

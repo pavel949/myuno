@@ -16,6 +16,7 @@ import { resolvePersonaSlug } from '@/lib/landings/slugAliases';
 import { getPersonaTheme } from '@/lib/landings/personaTheme';
 import { tokenColor } from '@/lib/utils/hslAlpha';
 import { LandingLeadForm } from '@/components/landings/LandingLeadForm';
+import { LandingContainer } from '@/components/landings';
 import { withPersonaParam } from '@/lib/landings/personaTagMap';
 import {
   buildPersonaOgUrl,
@@ -104,7 +105,7 @@ const PersonaAreaLandingPage = () => {
           background: `linear-gradient(135deg, ${tokenColor(theme.color, 0.18)} 0%, ${tokenColor(theme.colorAccent, 0.08)} 60%, transparent 100%)`,
         }}
       >
-        <div className="relative mx-auto w-full max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
+        <LandingContainer className="relative max-w-3xl py-12 sm:py-16">
           <div
             className="mb-5 inline-flex items-center gap-2 border border-border bg-background/60 px-3 py-1.5 backdrop-blur"
             style={{ borderColor: tokenColor(theme.color, 0.4) }}
@@ -150,10 +151,11 @@ const PersonaAreaLandingPage = () => {
               </a>
             </Button>
           </div>
-        </div>
+        </LandingContainer>
       </header>
 
-      <article className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
+      <article>
+        <LandingContainer className="max-w-3xl py-10 sm:py-14">
         {/* PROS / CONS for this area */}
         <section className="mb-12 grid gap-6 sm:grid-cols-2">
           <div className="border border-border bg-card p-5">
@@ -257,6 +259,7 @@ const PersonaAreaLandingPage = () => {
             </a>
           </div>
         </section>
+        </LandingContainer>
       </article>
 
       <div className="sticky bottom-0 z-30 border-t border-border bg-background/95 p-3 backdrop-blur sm:hidden">

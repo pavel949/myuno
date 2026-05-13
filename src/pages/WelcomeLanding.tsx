@@ -15,13 +15,17 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
-import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
-import { BrandWordmark } from '@/components/uno/BrandWordmark';
 import { cn } from '@/lib/utils';
 import { useCatalogFromDB } from '@/lib/catalog/useCatalogFromDB';
 import { buildCatalogAudienceMetrics } from '@/lib/catalog/catalogMetrics';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { LandingChrome } from '@/components/landings/LandingChrome';
+import {
+  LandingContainer,
+  LandingHero,
+  LandingSection,
+  LandingTrustRow,
+} from '@/components/landings/LandingPrimitives';
 
 function useWelcomeCatalogMetrics() {
   const { clusters, categories } = useCatalogFromDB();
@@ -85,33 +89,9 @@ export default function WelcomeLanding() {
       data-testid="welcome-landing"
       className="min-h-screen bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary pb-20 sm:pb-0"
     >
-      <header className="sticky top-0 z-30 border-b border-border/40 bg-background/80">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-5">
-          <BrandWordmark />
-          <div className="flex items-center gap-1.5">
-            <ThemeSwitcher variant="buttons" size="sm" />
-            <LanguageSwitcher />
-            <Link
-              to="/auth"
-              className="hidden sm:inline-flex h-8 items-center rounded-none px-3 text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              {isRu ? 'Войти' : 'Sign in'}
-            </Link>
-            <Link
-              to="/auth?mode=signup"
-              className={cn(
-                'inline-flex h-8 items-center gap-1 rounded-none px-3 text-[13px] font-semibold',
-                'bg-foreground text-background hover:bg-foreground/90 transition-colors'
-              )}
-            >
-              {isRu ? 'Создать' : 'Get started'}
-              <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.5} />
-            </Link>
-          </div>
-        </div>
-      </header>
+      <LandingChrome isRu={isRu} />
 
-      <section className="relative overflow-hidden border-b border-border/40">
+      <LandingSection className="relative overflow-hidden">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 opacity-[0.4] [mask-image:radial-gradient(ellipse_at_top,black,transparent_70%)]"
@@ -122,7 +102,7 @@ export default function WelcomeLanding() {
           }}
         />
 
-        <div className="relative mx-auto max-w-6xl px-5 pt-12 pb-16 sm:pt-20 sm:pb-24">
+        <LandingHero>
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -173,7 +153,7 @@ export default function WelcomeLanding() {
             className="mt-8 flex flex-wrap items-center gap-3"
           >
             <Link
-              to="/auth?mode=signup"
+              to={`${APP_ROUTES.AUTH}?mode=signup`}
               className={cn(
                 'group inline-flex h-11 items-center gap-2 rounded-none px-5 text-[14px] font-semibold',
                 'bg-foreground text-background hover:bg-foreground/90 transition-all',
@@ -218,11 +198,11 @@ export default function WelcomeLanding() {
               </div>
             ))}
           </motion.div>
-        </div>
-      </section>
+        </LandingHero>
+      </LandingSection>
 
-      <section className="border-b border-border/40">
-        <div className="mx-auto max-w-6xl px-5 py-10 sm:py-14">
+      <LandingSection>
+        <LandingContainer className="py-10 sm:py-14">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-[22px] sm:text-[28px] font-semibold tracking-[-0.02em]">
               {isRu ? 'С чего начать' : 'Where to start'}
@@ -260,11 +240,11 @@ export default function WelcomeLanding() {
               );
             })}
           </div>
-        </div>
-      </section>
+        </LandingContainer>
+      </LandingSection>
 
-      <section className="border-b border-border/40">
-        <div className="mx-auto max-w-6xl px-5 py-14 sm:py-20">
+      <LandingSection>
+        <LandingContainer className="py-14 sm:py-20">
           <div className="flex items-baseline justify-between mb-8">
             <h2 className="text-[22px] sm:text-[28px] font-semibold tracking-[-0.02em]">
               {isRu ? '6 разделов платформы' : '6 platform sections'}
@@ -332,12 +312,13 @@ export default function WelcomeLanding() {
                                 ? 'category'
                                 : 'categories'}
                           </>
-                        ) : (
-                          <>{isRu ? 'операционный кабинет' : 'operational workspace'}</>
-                        )}
-                        {c.audience === 'workspace' && (
-                          <span className="ml-2 inline-flex items-center rounded-none border border-border/60 px-1.5 py-px text-[9px] uppercase tracking-[0.08em] text-muted-foreground/80">
+                        ) : c.audience === 'workspace' ? (
+                          <span className="inline-flex items-center rounded-none border border-border/60 px-1.5 py-px text-[9px] uppercase tracking-[0.08em] text-muted-foreground/80">
                             {isRu ? 'Кабинет' : 'Workspace'}
+                          </span>
+                        ) : (
+                          <span>
+                            {isRu ? 'Категории в каталоге уточняются' : 'Catalog categories are being refined'}
                           </span>
                         )}
                       </p>
@@ -353,27 +334,17 @@ export default function WelcomeLanding() {
               ? `Каталог объединяет ${categoriesCount} категорий и ${totalEligibleServices} доступных сервисов. Войдите, чтобы открыть персональный навигатор.`
               : `The catalog spans ${categoriesCount} categories and ${totalEligibleServices} ready-to-use services. Sign in to unlock your personalized navigator.`}
           </p>
-        </div>
-      </section>
+        </LandingContainer>
+      </LandingSection>
 
-      <section className="border-b border-border/40">
-        <div className="mx-auto max-w-6xl px-5 py-10">
-          <ul className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-[13px] text-muted-foreground">
-            {TRUST.map((t) => {
-              const Icon = t.icon;
-              return (
-                <li key={t.en} className="inline-flex items-center gap-2">
-                  <Icon className="h-3.5 w-3.5 text-muted-foreground/70" strokeWidth={2} />
-                  <span>{isRu ? t.ru : t.en}</span>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      </section>
+      <LandingSection>
+        <LandingContainer className="py-10">
+          <LandingTrustRow items={TRUST} isRu={isRu} />
+        </LandingContainer>
+      </LandingSection>
 
-      <section>
-        <div className="mx-auto max-w-3xl px-5 py-16 sm:py-24 text-center">
+      <LandingSection border={false}>
+        <LandingContainer className="mx-auto max-w-3xl py-16 sm:py-24 text-center">
           <h2 className="text-[28px] sm:text-[40px] font-semibold tracking-[-0.025em] leading-[1.05]">
             {isRu ? (
               <>
@@ -396,7 +367,7 @@ export default function WelcomeLanding() {
           </p>
           <div className="mt-7 flex justify-center">
             <Link
-              to="/auth?mode=signup"
+              to={`${APP_ROUTES.AUTH}?mode=signup`}
               className={cn(
                 'group inline-flex h-12 items-center gap-2 rounded-none px-6 text-[14px] font-semibold',
                 'bg-primary text-primary-foreground hover:bg-primary/90 transition-all',
@@ -410,12 +381,12 @@ export default function WelcomeLanding() {
           <p className="mt-8 text-[11px] tracking-[0.08em] text-muted-foreground/60">
             © myUNO · Phuket · Made for foreigners
           </p>
-        </div>
-      </section>
+        </LandingContainer>
+      </LandingSection>
 
       <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur px-4 py-3">
         <Link
-          to="/auth?mode=signup"
+          to={`${APP_ROUTES.AUTH}?mode=signup`}
           className="w-full inline-flex h-11 items-center justify-center gap-2 rounded-none bg-primary text-primary-foreground text-[14px] font-semibold"
         >
           {isRu ? 'Начать за 60 секунд' : 'Start in 60 seconds'}

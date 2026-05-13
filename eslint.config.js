@@ -61,6 +61,11 @@ const GLASSMORPHISM_REGEX = "\\bbackdrop-blur(?:-(?:none|sm|md|lg|xl|2xl|3xl))?\
 const LEGACY_RADII_REGEX =
   "\\brounded(?:-(?:sm|md|lg|xl|2xl|3xl))?(?![-_a-z0-9])";
 
+// Bible-v2 §00 H03 — no hardcoded hex colors outside tokens.css.
+// Matches "#RRGGBB" with word boundary; ignores 3-char shortcuts to avoid
+// hitting URL fragments / anchor IDs.
+const HEX_COLOR_REGEX = "#[0-9A-Fa-f]{6}\\b";
+
 const CANON_VISUAL_RULES = [
   {
     selector: `Literal[value=/${LEGACY_PALETTE_REGEX}/]`,
@@ -91,6 +96,16 @@ const CANON_VISUAL_RULES = [
     selector: `TemplateElement[value.raw=/${LEGACY_RADII_REGEX}/]`,
     message:
       "Canon §5: legacy rounded utility in template literal is forbidden. Use square corners or rounded-full.",
+  },
+  {
+    selector: `Literal[value=/${HEX_COLOR_REGEX}/]`,
+    message:
+      "Bible-v2 §00 H03: hardcoded hex color is forbidden. Use a token from src/styles/tokens.css (--brand-*, --uno-*, --cv-*, --cat-*, --accent-*). See public/bible/.",
+  },
+  {
+    selector: `TemplateElement[value.raw=/${HEX_COLOR_REGEX}/]`,
+    message:
+      "Bible-v2 §00 H03: hardcoded hex color in template literal. Use a token from src/styles/tokens.css.",
   },
 ];
 
@@ -187,6 +202,31 @@ export default tseslint.config(
     files: ["src/lib/logger.ts", "src/lib/errorHandler.ts"],
     rules: {
       "no-console": "off",
+    },
+  },
+  // CRM/persona/channel palette data files — typed palette extensions outside
+  // the --uno-* / --brand-* / --cat-* token scope. A proper migration needs a
+  // --pipeline-* token tier (deferred). Until then these files legitimately
+  // contain hex literals as data, so the H03 rule is suppressed here.
+  // Other no-restricted-syntax rules (ToV, canonical synonyms, legacy palette)
+  // still apply — only HEX_COLOR_REGEX bypasses for these data files.
+  {
+    files: [
+      "src/hooks/useCrmSettings.ts",
+      "src/hooks/useDealPipelineStages.ts",
+      "src/hooks/useUserPersonas.ts",
+      "src/lib/roleBlend.ts",
+      "src/lib/catalog/taxonomy.ts",
+      "src/lib/staysCalendarChannelColors.ts",
+    ],
+    rules: {
+      "no-restricted-syntax": [
+        "warn",
+        ...TONE_OF_VOICE_RULES,
+        ...CANONICAL_SYNONYM_RULES,
+        // CANON_VISUAL_RULES intentionally omitted so the palette data
+        // can keep its #RRGGBB literals until --pipeline-* tokens land.
+      ],
     },
   },
 );

@@ -6,6 +6,7 @@ import { MiniAppLayout } from '@/components/miniapp';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { EmptyState } from '@/components/page/EmptyState';
 import { Clock, ArrowRight, BookOpen } from 'lucide-react';
 
 export default function InvestmentArticles() {
@@ -29,7 +30,14 @@ export default function InvestmentArticles() {
               {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-40" />)}
             </div>
           ) : articles.length === 0 ? (
-            <p className="text-center py-12 text-muted-foreground">{isRu ? 'Статьи скоро появятся' : 'Articles coming soon'}</p>
+            <EmptyState
+              icon={BookOpen}
+              isRu={isRu}
+              title="Knowledge base planned · Q3 2026"
+              titleRu="База знаний запланировано · Q3 2026"
+              description="Investment, tax and legal-structure guides ship with the Capital launch in Q3 2026."
+              descriptionRu="Гайды по инвестициям, налогам и юридическим структурам выйдут с запуском Capital в Q3 2026."
+            />
           ) : (
             <div className="grid sm:grid-cols-2 gap-3">
               {articles.map((a) => (

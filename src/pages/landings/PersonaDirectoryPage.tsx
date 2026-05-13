@@ -18,6 +18,7 @@ import { PERSONA_LANDINGS } from '@/content/landings/personaLandings';
 import { isLivePersonaLanding } from '@/lib/landings/types';
 import { getPersonaTheme } from '@/lib/landings/personaTheme';
 import { tokenColor } from '@/lib/utils/hslAlpha';
+import { LandingContainer } from '@/components/landings';
 import { ArrowRight } from 'lucide-react';
 
 interface Group {
@@ -106,7 +107,7 @@ export default function PersonaDirectoryPage() {
 
       {/* HERO */}
       <header className="border-b border-border bg-card">
-        <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 sm:py-14">
+        <LandingContainer className="max-w-5xl py-10 sm:py-14">
           <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
             {t('myUNO · Подбор по аудитории', 'myUNO · By audience')}
           </p>
@@ -119,11 +120,12 @@ export default function PersonaDirectoryPage() {
               '26 tailored pages with services for specific audiences — pick yours or the one that fits you best.',
             )}
           </p>
-        </div>
+        </LandingContainer>
       </header>
 
       {/* GROUPS */}
-      <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 sm:py-12">
+      <main>
+        <LandingContainer className="max-w-5xl py-8 sm:py-12">
         {allGroups.map((group) => {
           const items = group.slugs
             .map((s) => liveBySlug.get(s))
@@ -190,6 +192,7 @@ export default function PersonaDirectoryPage() {
             </section>
           );
         })}
+        </LandingContainer>
       </main>
     </AppLayout>
   );

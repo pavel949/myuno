@@ -12,6 +12,7 @@ import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { AdminFormToolbar } from '@/components/admin/AdminFormToolbar';
 import { OnBehalfBanner } from '@/components/admin/OnBehalfBanner';
+import { ServiceBilingualHint } from '@/components/services/ServiceBilingualHint';
 import { VendorFormSection } from '@/components/vendor/VendorFormSection';
 import { MultiImageUpload } from '@/components/upload/ImageUpload';
 import { Card, CardContent } from '@/components/ui/card';
@@ -503,6 +504,10 @@ export default function AdminServices() {
                   : (isRussian ? 'Новая услуга' : 'New Service')}
               </DialogTitle>
             </DialogHeader>
+
+            <div className="px-6 pt-2">
+              <ServiceBilingualHint isRu={isRussian} />
+            </div>
 
             <div className="px-6 pt-4">
               <AdminFormToolbar

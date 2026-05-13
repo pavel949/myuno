@@ -10,7 +10,7 @@
  *   const { openAuthSheet } = useAuthSheet();
  *   openAuthSheet({ onSuccess: () => proceedWithBooking() });
  */
-import React, { createContext, useCallback, useContext, useMemo, useState, ReactNode } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, ReactNode } from 'react';
 import { AuthSheet } from '@/components/auth/AuthSheet';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -34,6 +34,10 @@ const AuthSheetContext = createContext<AuthSheetContextValue | undefined>(undefi
 export function AuthSheetProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [opts, setOpts] = useState<OpenAuthSheetOptions>({});
+  const optsRef = useRef(opts);
+  useEffect(() => {
+    optsRef.current = opts;
+  }, [opts]);
   const { user } = useAuth();
 
   const openAuthSheet = useCallback((options: OpenAuthSheetOptions = {}) => {
@@ -52,12 +56,13 @@ export function AuthSheetProvider({ children }: { children: ReactNode }) {
     setIsOpen(false);
     // Fire onSuccess on next tick so consumer state updates settle first.
     setTimeout(() => {
-      opts.onSuccess?.();
-      if (!opts.onSuccess && opts.redirectTo) {
-        window.location.href = opts.redirectTo;
+      const o = optsRef.current;
+      o.onSuccess?.();
+      if (!o.onSuccess && o.redirectTo) {
+        window.location.href = o.redirectTo;
       }
     }, 0);
-  }, [opts]);
+  }, []);
 
   const value = useMemo<AuthSheetContextValue>(() => ({
     openAuthSheet, closeAuthSheet, isOpen,

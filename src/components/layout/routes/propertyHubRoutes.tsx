@@ -10,9 +10,9 @@ import * as Pages from '../pageRegistry';
 import { PageTransition } from '../PageTransition';
 
 const LazyPage = ({ children }: { children: React.ReactNode }) => (
-  <Suspense fallback={<LoadingState />}>
-    <PageTransition>{children}</PageTransition>
-  </Suspense>
+  <PageTransition>
+    <Suspense fallback={<LoadingState />}>{children}</Suspense>
+  </PageTransition>
 );
 
 const PropertyProjectRedirect = () => {

@@ -62,40 +62,47 @@ export function CrossPipelineBanner({ sourceTable, sourceId, className }: Props)
 
   return (
     <Card className={cn('p-3 sm:p-4 bg-muted/40 border-dashed', className)}>
-      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-3">
         <div className="text-xs sm:text-sm text-muted-foreground shrink-0">
           {isRu
             ? 'Этот человек также присутствует в:'
             : 'This person also exists in:'}
         </div>
-        <div className="flex flex-wrap gap-2">
-          {data.otherPipelines.map((p) => {
-            const meta = PIPELINE_META[p];
-            const otherId = data.sourceIds[p];
-            const Icon = meta.icon;
-            const label = isRu ? meta.labelRu : meta.labelEn;
-            if (!otherId) {
+        <div className="flex-1 min-w-0 space-y-1">
+          <div className="flex flex-wrap gap-2">
+            {data.otherPipelines.map((p) => {
+              const meta = PIPELINE_META[p];
+              const otherId = data.sourceIds[p];
+              const Icon = meta.icon;
+              const label = isRu ? meta.labelRu : meta.labelEn;
+              if (!otherId) {
+                return (
+                  <Badge key={p} variant="outline" className={cn('gap-1', meta.tone)}>
+                    <Icon className="h-3 w-3" />{label}
+                  </Badge>
+                );
+              }
               return (
-                <Badge key={p} variant="outline" className={cn('gap-1', meta.tone)}>
-                  <Icon className="h-3 w-3" />{label}
-                </Badge>
+                <Link
+                  key={p}
+                  to={meta.href(otherId)}
+                  className={cn(
+                    'inline-flex items-center gap-1 rounded-none border px-2 py-1 text-xs font-medium transition-colors hover:opacity-80',
+                    meta.tone
+                  )}
+                >
+                  <Icon className="h-3 w-3" />
+                  {label}
+                  <ExternalLink className="h-3 w-3 opacity-60" />
+                </Link>
               );
-            }
-            return (
-              <Link
-                key={p}
-                to={meta.href(otherId)}
-                className={cn(
-                  'inline-flex items-center gap-1 rounded-none border px-2 py-1 text-xs font-medium transition-colors hover:opacity-80',
-                  meta.tone
-                )}
-              >
-                <Icon className="h-3 w-3" />
-                {label}
-                <ExternalLink className="h-3 w-3 opacity-60" />
-              </Link>
-            );
-          })}
+            })}
+          </div>
+          <p className="text-[11px] text-muted-foreground leading-snug">
+            {isRu
+              ? 'MC — аренда и property management. Capital — newbuild и инвестиционный пайплайн. Это разные воронки одной личности.'
+              : 'MC covers rentals and property management. Capital covers off-plan and the investment pipeline. Different funnels for the same person.'}
+          </p>
         </div>
       </div>
     </Card>

@@ -1,9 +1,11 @@
 import { useState, useMemo, useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import type { AgentDeal } from '@/hooks/useAgentDeals';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCrmContact, useUpdateContact, useDeleteContact } from '@/hooks/useCrmContacts';
+import { supabase } from '@/integrations/supabase/client';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { useContactNotes, useAddContactNote, useDeleteContactNote } from '@/hooks/useCrmContactNotes';
 import { useContactDeals } from '@/hooks/useCrmContacts';
@@ -28,7 +30,7 @@ import {
   Phone, Mail, MessageCircle, Send as TelegramIcon,
   Clock, Pencil, Trash2, ChevronRight, ChevronLeft, Plus, Cake, Users, Heart,
   Briefcase, Globe, Star, SendHorizonal, FileText, DollarSign, MapPin,
-  ListTodo, CheckCircle, Sparkles, CalendarDays, ShoppingCart, Receipt,
+  ListTodo, CheckCircle, Sparkles, CalendarDays, Receipt,
   Building2, User, ExternalLink, Hash, Smartphone,
 } from 'lucide-react';
 import { BackButton } from '@/components/uno/BackButton';
@@ -63,6 +65,32 @@ function isBirthdaySoon(birthday: string): boolean {
   return diff >= 0 && diff <= 30 * 24 * 60 * 60 * 1000;
 }
 
+function formatRolesStackDisplay(raw: unknown): string {
+  if (raw == null) return '';
+  if (Array.isArray(raw)) {
+    const parts = raw.map((entry) => {
+      if (entry && typeof entry === 'object') {
+        const o = entry as Record<string, unknown>;
+        const role = o.role != null ? String(o.role) : '';
+        const w = o.weight;
+        if (role && w != null && w !== '') return `${role} (${String(w)})`;
+        if (role) return role;
+      }
+      if (typeof entry === 'string') return entry;
+      return '';
+    }).filter(Boolean);
+    return parts.join(', ');
+  }
+  if (typeof raw === 'object') {
+    try {
+      return JSON.stringify(raw);
+    } catch {
+      return '';
+    }
+  }
+  return String(raw);
+}
+
 const stageDotColors: Record<DealStage, string> = {
   new: 'bg-info',
   contacted: 'bg-info/70',
@@ -91,7 +119,21 @@ export default function ContactDetail() {
   const isRu = language === 'ru';
   const locale = isRu ? ru : enUS;
   const { user } = useAuth();
-const { data: contact, isLoading, isError } = useCrmContact(id);
+  const { data: contact, isLoading, isError } = useCrmContact(id);
+  const linkedProfileUserId = contact?.linked_user_id ?? null;
+  const { data: linkedProfile, isPending: linkedProfilePending, isError: linkedProfileError } = useQuery({
+    queryKey: ['crm-contact-linked-profile', linkedProfileUserId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('primary_role, roles_stack, active_clusters, detected_persona, lifecycle_stage')
+        .eq('id', linkedProfileUserId as string)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!linkedProfileUserId,
+  });
   const { data: notes = [] } = useContactNotes(id);
   const { data: deals = [] } = useContactDeals(id);
   const { data: activities = [] } = useCrmActivities(id);
@@ -243,8 +285,9 @@ const { data: contact, isLoading, isError } = useCrmContact(id);
   const addressParts = [contact.address_street, contact.address_street2, contact.address_city, contact.address_state, contact.address_zip, contact.address_country].filter(Boolean);
   const fullAddress = addressParts.join(', ');
 
-  // Smart button counts
+  // Smart button counts — pipeline vs won (same deals tab; avoids «Сделки» vs «Продажи» confusion)
   const opportunityCount = deals.filter(d => !['closed_won', 'closed_lost'].includes(d.stage)).length;
+  const wonDealCount = deals.filter(d => d.stage === 'closed_won').length;
 
   const dealCurrency = deals[0]?.currency || 'THB';
 
@@ -314,21 +357,77 @@ const { data: contact, isLoading, isError } = useCrmContact(id);
           <div className="flex items-center gap-1 border rounded-none bg-card p-1 overflow-x-auto">
             {[
               { icon: CalendarDays, label: isRu ? 'Встречи' : 'Meetings', count: meetings.length, onClick: () => setActiveTab('timeline') },
-              { icon: Star, label: isRu ? 'Сделки' : 'Opportunities', count: opportunityCount, onClick: () => setActiveTab('deals') },
-              { icon: ShoppingCart, label: isRu ? 'Продажи' : 'Sales', count: deals.filter(d => d.stage === 'closed_won').length, onClick: () => setActiveTab('deals') },
+              {
+                icon: Star,
+                label: isRu ? 'Сделки' : 'Deals',
+                count: `${opportunityCount} / ${wonDealCount}`,
+                title: isRu ? 'В работе / выиграно (открыть вкладку «Сделки»)' : 'In pipeline / won (opens Deals tab)',
+                onClick: () => setActiveTab('deals'),
+              },
               { icon: Receipt, label: isRu ? 'Задачи' : 'Tasks', count: contactTasks.length, onClick: () => setActiveTab('tasks') },
             ].map((btn, i) => (
               <button
                 key={i}
+                type="button"
+                title={'title' in btn ? btn.title : undefined}
                 onClick={btn.onClick}
                 className="flex items-center gap-2 px-4 py-2.5 rounded-none text-sm hover:bg-muted transition-colors whitespace-nowrap flex-1 justify-center"
               >
                 <btn.icon className="h-4 w-4 text-muted-foreground" />
                 <span className="text-muted-foreground">{btn.label}</span>
-                <span className="font-semibold">{btn.count}</span>
+                <span className="font-semibold tabular-nums">{btn.count}</span>
               </button>
             ))}
           </div>
+
+          {contact.linked_user_id && (
+            <div className="rounded-none border border-dashed border-muted-foreground/35 bg-muted/25 p-3 space-y-2">
+              <p className="text-xs font-medium text-muted-foreground">
+                {isRu
+                  ? 'Персона myUNO (профиль аккаунта) — только чтение. Поля CRM ниже вводятся отдельно.'
+                  : 'myUNO profile persona (read-only). CRM fields below are maintained separately.'}
+              </p>
+              {linkedProfilePending && (
+                <div className="space-y-2">
+                  <Skeleton className="h-3 w-full max-w-md" />
+                  <Skeleton className="h-3 w-2/3 max-w-sm" />
+                </div>
+              )}
+              {!linkedProfilePending && linkedProfileError && (
+                <p className="text-xs text-muted-foreground">
+                  {isRu ? 'Не удалось загрузить профиль.' : 'Could not load linked profile.'}
+                </p>
+              )}
+              {!linkedProfilePending && !linkedProfileError && linkedProfile && (
+                <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
+                  <div className="flex flex-col gap-0.5">
+                    <dt className="text-muted-foreground">{isRu ? 'Основная роль' : 'Primary role'}</dt>
+                    <dd className="font-medium">{linkedProfile.primary_role ?? '—'}</dd>
+                  </div>
+                  <div className="flex flex-col gap-0.5">
+                    <dt className="text-muted-foreground">{isRu ? 'Стек ролей' : 'Roles stack'}</dt>
+                    <dd className="font-medium break-words">{formatRolesStackDisplay(linkedProfile.roles_stack) || '—'}</dd>
+                  </div>
+                  <div className="flex flex-col gap-0.5 sm:col-span-2">
+                    <dt className="text-muted-foreground">{isRu ? 'Кластеры (active_clusters)' : 'Clusters (active_clusters)'}</dt>
+                    <dd className="font-medium">
+                      {Array.isArray(linkedProfile.active_clusters) && linkedProfile.active_clusters.length > 0
+                        ? linkedProfile.active_clusters.join(', ')
+                        : '—'}
+                    </dd>
+                  </div>
+                  <div className="flex flex-col gap-0.5">
+                    <dt className="text-muted-foreground">{isRu ? 'Обнаруженная персона' : 'Detected persona'}</dt>
+                    <dd className="font-medium">{linkedProfile.detected_persona ?? '—'}</dd>
+                  </div>
+                  <div className="flex flex-col gap-0.5">
+                    <dt className="text-muted-foreground">{isRu ? 'Lifecycle (профиль)' : 'Lifecycle (profile)'}</dt>
+                    <dd className="font-medium">{linkedProfile.lifecycle_stage ?? '—'}</dd>
+                  </div>
+                </dl>
+              )}
+            </div>
+          )}
 
           {/* ─── Main Contact Card (Odoo-style) ─── */}
           <div className="rounded-none border bg-card overflow-hidden">

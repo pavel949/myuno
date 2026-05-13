@@ -1,8 +1,12 @@
 /**
  * AnimatedRoutes — P3 Consolidated
- * 
+ *
  * Route tree only. All lazy imports come from pageRegistry.ts.
  * ~500 lines (route definitions) vs ~980 lines before.
+ *
+ * Transitions: `ScrollToTop` on pathname; most routes use `LazyPage` → `PageTransition`
+ * + Suspense. Layout shells (Admin/Vendor/MC/Guest) wrap `<Outlet />` with Suspense only
+ * — avoid nesting another PageTransition inside their child pages.
  */
 import React, { Suspense } from 'react';
 import { Routes, Route, useLocation, Navigate, Outlet, useParams } from 'react-router-dom';
@@ -104,9 +108,9 @@ const InvestIdRedirect = () => { const { id } = useParams(); return <Navigate to
 // ── Layout Wrappers ──
 
 const LazyPage = ({ children }: { children: React.ReactNode }) => (
-  <Suspense fallback={<LoadingState />}>
-    <PageTransition>{children}</PageTransition>
-  </Suspense>
+  <PageTransition>
+    <Suspense fallback={<LoadingState />}>{children}</Suspense>
+  </PageTransition>
 );
 
 const AdminRouteLayout = () => (
@@ -176,7 +180,7 @@ export const AnimatedRoutes: React.FC = () => {
       <AnimatePresence mode="wait" initial={false}>
         <Routes location={location} key={location.pathname}>
         {/* ── Core ── */}
-        <Route path={APP_ROUTES.HOME} element={<Suspense fallback={<LoadingState />}><PageTransition><HomeRouter /></PageTransition></Suspense>} />
+        <Route path={APP_ROUTES.HOME} element={<PageTransition><Suspense fallback={<LoadingState />}><HomeRouter /></Suspense></PageTransition>} />
         <Route path="/index" element={<Navigate to={APP_ROUTES.HOME} replace />} />
         <Route path={APP_ROUTES.PRICING} element={<LazyPage><Pages.PricingPage /></LazyPage>} />
         <Route path="/welcome-landing" element={<LazyPage><WelcomeLanding /></LazyPage>} />
@@ -203,8 +207,10 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.NAVIGATOR} element={<LazyPage><Pages.Discover /></LazyPage>} />
         <Route path="/catalog" element={<Navigate to={APP_ROUTES.NAVIGATOR} replace />} />
         <Route path="/categories" element={<Navigate to={APP_ROUTES.NAVIGATOR} replace />} />
-        {/* Cluster surface aliases — Master Taxonomy v1.0 */}
-        <Route path={APP_ROUTES.LEGAL_CLUSTER} element={<Navigate to={`${APP_ROUTES.DISCOVER}?cluster=legal`} replace />} />
+        {/* Bible-v2 audit A1: the duplicate LEGAL_CLUSTER redirect that used
+            to live here was shadowing the real LegalClusterPage route declared
+            further down in the LEGAL Cluster block. `/legal` is one of the six
+            canonical surfaces (H01) and renders its own landing page. */}
         <Route path={APP_ROUTES.MAP} element={<LazyPage><Pages.MapView /></LazyPage>} />
         <Route path={APP_ROUTES.BOOKINGS} element={<LazyPage><Pages.Bookings /></LazyPage>} />
         <Route path="/bookings/:id" element={<LazyPage><Pages.BookingDetail /></LazyPage>} />
@@ -292,7 +298,7 @@ export const AnimatedRoutes: React.FC = () => {
 
         {/* ── Property Hub (child routes extracted to ./routes/propertyHubRoutes) ── */}
         <Route path="/properties" element={<Navigate to={APP_ROUTES.PROPERTY} replace />} />
-        <Route path={APP_ROUTES.PROPERTY} element={<Suspense fallback={<LoadingState />}><PropertyHub /></Suspense>}>
+        <Route path={APP_ROUTES.PROPERTY} element={<PageTransition><Suspense fallback={<LoadingState />}><PropertyHub /></Suspense></PageTransition>}>
           {propertyHubRoutes}
         </Route>
         <Route path="/company/:slug" element={<LazyPage><Pages.ManagementCompanyProfile /></LazyPage>} />
@@ -350,7 +356,7 @@ export const AnimatedRoutes: React.FC = () => {
         </Route>
 
         {/* ── Developer Portal ── */}
-        <Route path="/developer-portal" element={<Suspense fallback={<LoadingState />}><Pages.DeveloperPortalLayout /></Suspense>}>
+        <Route path="/developer-portal" element={<PageTransition><Suspense fallback={<LoadingState />}><Pages.DeveloperPortalLayout /></Suspense></PageTransition>}>
           <Route index element={<LazyPage><Pages.DeveloperOverview /></LazyPage>} />
           <Route path="projects" element={<LazyPage><Pages.DeveloperProjects /></LazyPage>} />
           <Route path="projects/new" element={<LazyPage><Pages.DeveloperProjectEditor /></LazyPage>} />
