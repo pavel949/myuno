@@ -10,6 +10,7 @@ import {
   Ship, Home, Utensils, Scissors, MapPin, Dumbbell, 
   Stethoscope, Calendar, Car, GraduationCap, Scale, 
   PawPrint, SprayCan, Baby, Flower2, Pill, Store, Shield, Waves,
+  BookOpen,
   ChevronDown, Grid3X3
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -35,6 +36,7 @@ const ALL_VERTICALS = [
   { key: 'stores', icon: Store, label: 'Stores', labelRu: 'Магазины', href: '/admin/stores', color: 'text-info' },
   { key: 'insurance', icon: Shield, label: 'Insurance', labelRu: 'Страхование', href: '/admin/insurance', color: 'text-success' },
   { key: 'waterActivities', icon: Waves, label: 'Water', labelRu: 'Вода', href: '/admin/water-activities', color: 'text-accent-cyan' },
+  { key: 'relocationArticles', icon: BookOpen, label: 'Relocation Guides', labelRu: 'Гайды переезда', href: '/admin/relocation-articles', color: 'text-primary' },
 ];
 
 export function AdminAllVerticalsGrid() {

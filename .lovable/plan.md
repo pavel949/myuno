@@ -1,62 +1,72 @@
-## Текущее состояние
+## Цель
+Добавить админский экран `/admin/relocation-articles` для CRUD статей переезда (`relocation_articles`) и управления категориями.
 
-- В репозитории есть `supabase/migrations/20260511120000_relocation_articles_and_plans.sql` с корректным DDL: таблицы, RLS, политики, индексы, триггеры `updated_at`.
-- В реальной БД (`kakkwibljrjsawxgnupk`) ни `public.relocation_articles`, ни `public.relocation_plans` **не существуют** — миграция никогда не применялась.
-- Поэтому в `src/integrations/supabase/types.ts` их тоже нет → пришлось обходить `as never`/`(supabase as any)`.
-- Из-за этого:
-  - `useRelocationArticles` молча падает на `error` и всегда отдаёт bundled-сиды (13 статей из `src/data/relocationArticles.seed.ts`) — пользователь думает, что данные есть, но БД пуста.
-  - `useRelocationPlan` не может сохранить план в БД — упсерты возвращают ошибку, которая игнорируется, и план живёт только в `localStorage`. При смене устройства/браузера прогресс теряется.
+## Что строим
 
-Роли `admin`, `uno_team`, `staff` уже присутствуют в enum `app_role` — политики из миграции применятся без правок.
+### 1. Страница `src/pages/admin/AdminRelocationArticles.tsx`
+- Список всех статей (включая неопубликованные) — таблица: title_ru, slug, category, sort_order, is_published, updated_at.
+- Фильтр по категории + поиск по slug/title.
+- Кнопки: «Создать», «Редактировать», «Опубликовать/Снять с публикации», «Удалить».
+- Toggle для быстрого `is_published`.
 
-## Что нужно сделать
+### 2. Редактор (Sheet/Dialog) `AdminRelocationArticleEditor.tsx`
+Поля формы (React Hook Form + Zod):
+- `slug` (auto-generate из title_en, редактируемый)
+- `category` (Select из текущих 10 категорий + динамические из БД)
+- `title_en`, `title_ru` (input)
+- `summary_en`, `summary_ru` (textarea)
+- `content_en`, `content_ru` (textarea с markdown, моно-шрифт)
+- `related_route` (input)
+- `sort_order` (number)
+- `is_published` (switch)
 
-### Шаг 1 — Применить миграцию схемы (один SQL-запуск)
+Save → upsert по `slug`.
 
-Содержимое — ровно то, что лежит в `20260511120000_relocation_articles_and_plans.sql`:
+### 3. Управление категориями
+Категории сейчас живут как enum-литералы в `src/data/relocationArticles.seed.ts` (10 шт., колонка `category` в БД — text, не enum). Делаем легковесно, без новой таблицы:
+- В UI таб «Категории» — список из `RELOCATION_ARTICLE_CATEGORIES` + категории, реально встречающиеся в БД (UNION).
+- Показываем счётчик статей на категорию.
+- Кнопка «Переименовать» делает массовый UPDATE `category` со старого ID на новый по всем статьям (для ребрендинга).
+- Добавить новую категорию = просто использовать новый id при создании статьи (free-text + datalist подсказок). Помечаем «новая, не в seed» — напоминание добавить лейбл в seed для двуязычного отображения на публичной части.
 
-**`public.relocation_articles`**
-- Поля: `slug` (UNIQUE), `category`, `title_en/ru`, `summary_en/ru`, `content_en/ru`, `related_route`, `sort_order`, `is_published` (default true), `created_at/updated_at`.
-- Индексы: `idx_relocation_articles_category`, partial `idx_relocation_articles_published WHERE is_published = true`.
-- RLS ON.
-  - SELECT: anyone, если `is_published = true`.
-  - ALL: пользователи с ролью `admin` / `uno_team` / `staff`.
-- Триггер `update_relocation_articles_updated_at`.
+> Полноценная таблица `relocation_article_categories` сейчас избыточна — её можно завести позже отдельной задачей, если потребуется управление лейблами RU/EN из UI.
 
-**`public.relocation_plans`**
-- Поля: `user_id` → `auth.users(id) ON DELETE CASCADE` (UNIQUE), `quiz_answers` jsonb, `steps` jsonb, `created_at/updated_at`.
-- Индекс: `idx_relocation_plans_user`.
-- RLS ON, политики per-user (SELECT/INSERT/UPDATE/DELETE через `auth.uid() = user_id`).
-- Триггер `update_relocation_plans_updated_at`.
+### 4. Хук `src/hooks/admin/useAdminRelocationArticles.ts`
+- `useAdminRelocationArticlesList()` — все строки без фильтра `is_published`.
+- `useUpsertRelocationArticle()` — upsert по `slug`.
+- `useDeleteRelocationArticle()` — delete by id.
+- `useTogglePublishRelocationArticle()` — update `is_published`.
+- `useRenameCategory(oldId, newId)` — массовый update.
+- Все мутации инвалидируют `['relocation_articles']` и `['admin_relocation_articles']`.
+- Toasts через `sonner`.
 
-### Шаг 2 — Засеять статьи из bundled-сидов
+### 5. Регистрация
+- Добавить `AdminRelocationArticles` в `src/components/layout/pageRegistry.ts` (lazy import).
+- Добавить маршрут `/admin/relocation-articles` в `src/components/layout/routes/adminRoutes.tsx`.
+- Добавить пункт в админ-навигацию (там, где сгруппированы `AdminClinics`, `AdminEducation` — найдём конкретный navConfig по ходу) под группой «Контент» или рядом с Education/Legal.
 
-13 статей из `src/data/relocationArticles.seed.ts` залить в `relocation_articles` через `INSERT … ON CONFLICT (slug) DO UPDATE` (идемпотентно). Так главная страница `/relocate` сразу покажет реальные данные из БД, а не fallback.
+### 6. Доступ и безопасность
+- Полагаемся на существующие RLS политики таблицы (write: `admin`/`uno_team`/`staff`, read: published для всех — для админа делаем `select` через RLS, у admin-роли есть полный доступ согласно миграции).
+- Страница защищена `AdminGuard` через `AdminRouteLayout`.
 
-### Шаг 3 — Обновить frontend под честные типы
+### 7. Чистка кастов
+В рамках этой задачи **не трогаем** `as never`/`(supabase as any)` — типы `relocation_articles` ещё не регенерированы. Используем тот же приём в новом хуке + TODO-коммент.
 
-После применения миграции запустить регенерацию типов Supabase (автоматически по триггеру Lovable Cloud). Затем:
-- Убрать `as never` в `src/hooks/useRelocationArticles.ts` (строки 39, 55).
-- Убрать `(supabase as any)` и `as never` в `src/hooks/useRelocationPlan.ts` (строки 46, 69).
-- В `useRelocationPlan` перестать молча игнорировать ошибки апсерта — пробрасывать через toast (sonner), чтобы пользователь знал, если sync не сработал.
+## Файлы
 
-### Шаг 4 — Проверка
+Новые:
+- `src/pages/admin/AdminRelocationArticles.tsx`
+- `src/components/admin/relocation/AdminRelocationArticleEditor.tsx`
+- `src/components/admin/relocation/AdminRelocationCategoriesPanel.tsx`
+- `src/hooks/admin/useAdminRelocationArticles.ts`
 
-- `SELECT count(*) FROM relocation_articles WHERE is_published = true` → 13.
-- Залогинившись, заполнить квиз → перезагрузить страницу → план подгружается из БД.
-- Проверить, что неавторизованный юзер видит статьи, но НЕ видит чужие планы (RLS).
+Изменения:
+- `src/components/layout/pageRegistry.ts` — lazy import.
+- `src/components/layout/routes/adminRoutes.tsx` — маршрут.
+- Админ-навигация (точный файл найдём при имплементации; кандидаты: `src/components/admin/navigation/*` или `src/lib/nav/*`).
 
-## Что НЕ делаем
-
-- Не меняем структуру таблиц / поля / типы — миграция уже подписана и хорошо спроектирована.
-- Не трогаем сиды как fallback — они остаются на случай сетевой ошибки.
-- Не добавляем edit-UI для статей в этом плане (админка статей — отдельная задача).
-
-## Риски
-
-- Минимальные: таблицы новые, конфликтов с существующими данными нет.
-- `ON DELETE CASCADE` от `auth.users` корректен — план должен удаляться вместе с юзером.
-
-## Рекомендую
-
-Идти всеми тремя шагами сразу (миграция + сид + чистка типов в хуках). Применять только Шаг 1 без сида — даст пустую страницу `/relocate` для неавторизованных, пока контент не зальют вручную; чистка `as never` без миграции — оставит TypeScript-ложь.
+## Out of scope
+- Богатый markdown-редактор (используем простой textarea + monospaced; апгрейд на TipTap — отдельной задачей).
+- Создание отдельной таблицы `relocation_article_categories` с RU/EN лейблами.
+- Загрузка картинок к статьям (схема не предусматривает поле image сейчас).
+- Удаление seed-fallback из публичного хука.
