@@ -81,6 +81,10 @@ export function useRelocationPlan() {
     onSuccess: (_, next) => {
       queryClient.setQueryData(['relocation_plan', user?.id ?? 'anon'], next);
     },
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : 'Не удалось сохранить план';
+      toast.error('Не удалось синхронизировать план', { description: msg });
+    },
   });
 
   const setStepStatus = useCallback(
