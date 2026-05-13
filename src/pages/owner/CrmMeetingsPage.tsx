@@ -159,6 +159,16 @@ export default function CrmMeetingsPage() {
           ))}
         </div>
       )}
+
+      <ConfirmDialog
+        open={!!confirmId}
+        onOpenChange={(o) => !o && setConfirmId(null)}
+        onConfirm={() => {
+          if (confirmId) deleteMeeting.mutate(confirmId);
+          setConfirmId(null);
+        }}
+        title={isRu ? 'Удалить встречу?' : 'Delete meeting?'}
+      />
     </div>
   );
 }
