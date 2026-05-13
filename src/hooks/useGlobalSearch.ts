@@ -301,11 +301,21 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
 
       // 3. Unified listings search (migrated verticals)
       try {
+        const listingOrFields = [
+          'name_en', 'name_ru', 'category',
+          'description_en', 'description_ru',
+          'district', 'address',
+        ];
+        const listingsOr = listingOrFields
+          .map((f) => `${f}.ilike.%${searchTermLower}%`)
+          .join(',');
+
         const { data: listingsData } = await supabase
           .from('listings')
           .select('id, vertical, name_en, name_ru, cover_image, price, address, district, rating')
           .eq('is_active', true)
-          .or(`name_en.ilike.%${searchTermLower}%,name_ru.ilike.%${searchTermLower}%,category.ilike.%${searchTermLower}%`)
+          .eq('approval_status', PUBLIC_CATALOG_APPROVAL_STATUS)
+          .or(listingsOr)
           .limit(10);
 
         if (controller.signal.aborted) return;
@@ -342,15 +352,17 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
 
           const uniqueFields = [...new Set(selectFields)];
 
-          // Build OR filter — always search title fields, plus extra fields for some tables
-          const orParts = [`${config.titleEn}.ilike.%${searchTermLower}%,${config.titleRu}.ilike.%${searchTermLower}%`];
+          // Build OR filter — title fields + optional extra fields per table
+          const orFields = [config.titleEn, config.titleRu, ...(config.extraSearchFields ?? [])];
+          const uniqueOr = [...new Set(orFields)];
+          const orParts = uniqueOr.map((f) => `${f}.ilike.%${searchTermLower}%`);
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           let queryBuilder = (supabase.from as any)(config.table)
             .select(uniqueFields.join(','))
             .eq('is_active', true)
             .or(orParts.join(','))
-            .limit(3);
+            .limit(5);
 
           if (config.hasApprovalStatus) {
             queryBuilder = queryBuilder.eq('approval_status', PUBLIC_CATALOG_APPROVAL_STATUS);
