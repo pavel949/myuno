@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useMemo } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { BackButton } from '@/components/uno/BackButton';
 import { SEOHead } from '@/components/seo';
@@ -8,8 +8,9 @@ import { APP_ROUTES } from '@/lib/config/routes';
 import { useRelocationArticles } from '@/hooks/useRelocationArticles';
 import { RELOCATION_ARTICLE_CATEGORIES, type RelocationArticleCategory } from '@/data/relocationArticles.seed';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { ChevronRight, BookOpen } from 'lucide-react';
+import { ChevronRight, BookOpen, Search } from 'lucide-react';
 
 export default function RelocationGuidesHub() {
   const { language } = useLanguage();
