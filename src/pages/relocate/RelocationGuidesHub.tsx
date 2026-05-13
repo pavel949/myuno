@@ -66,6 +66,18 @@ export default function RelocationGuidesHub() {
           </div>
         </div>
 
+        <div className="relative mb-3">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden />
+          <Input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={isRu ? 'Поиск по гайдам…' : 'Search guides…'}
+            className="pl-9"
+            aria-label={isRu ? 'Поиск гайдов' : 'Search guides'}
+          />
+        </div>
+
         <div className="flex flex-wrap gap-2 mb-6">
           <button
             type="button"
