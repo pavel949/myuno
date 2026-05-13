@@ -210,6 +210,16 @@ export default function CrmTemplatesPage() {
           })}
         </div>
       )}
+
+      <ConfirmDialog
+        open={!!confirmId}
+        onOpenChange={(o) => !o && setConfirmId(null)}
+        onConfirm={() => {
+          if (confirmId) deleteTemplate.mutate(confirmId);
+          setConfirmId(null);
+        }}
+        title={isRu ? 'Удалить шаблон?' : 'Delete template?'}
+      />
     </div>
   );
 }
