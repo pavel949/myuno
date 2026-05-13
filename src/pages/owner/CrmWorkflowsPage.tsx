@@ -14,8 +14,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Workflow, Trash2, Play, Pause, ArrowRight, Clock } from 'lucide-react';
-
 import { toast } from 'sonner';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+
 export default function CrmWorkflowsPage() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
