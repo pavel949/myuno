@@ -10,6 +10,7 @@ import {
   Ship, Home, Utensils, Scissors, MapPin, Dumbbell, 
   Stethoscope, Calendar, Car, GraduationCap, Scale, 
   PawPrint, SprayCan, Baby, Flower2, Pill, Store, Shield, Waves,
+  BookOpen,
   ChevronDown, Grid3X3
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
