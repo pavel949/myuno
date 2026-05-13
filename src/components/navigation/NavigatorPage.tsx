@@ -957,6 +957,10 @@ export default function NavigatorPage() {
                           />
                         ))}
                       </div>
+                    </section>
+                  );
+                })}
+              </div>
 
               {/* ── Trust strip ───────────────────────────── */}
               <div
