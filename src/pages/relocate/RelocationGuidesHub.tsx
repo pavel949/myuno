@@ -110,6 +110,12 @@ export default function RelocationGuidesHub() {
               <Skeleton key={i} className="h-20 w-full rounded-none" />
             ))}
 
+          {!isLoading && filtered.length === 0 && (
+            <div className="rounded-none border border-border bg-muted/20 p-6 text-center text-sm text-muted-foreground">
+              {isRu ? 'Ничего не найдено. Попробуйте другой запрос или категорию.' : 'No guides found. Try another query or category.'}
+            </div>
+          )}
+
           {!isLoading &&
             filtered.map((a) => {
               const cat = RELOCATION_ARTICLE_CATEGORIES.find((c) => c.id === a.category);
