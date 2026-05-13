@@ -11,8 +11,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Plus, Calendar, Trash2, MapPin, Clock } from 'lucide-react';
 import { format } from 'date-fns';
-
 import { toast } from 'sonner';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+
 export default function CrmMeetingsPage() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
