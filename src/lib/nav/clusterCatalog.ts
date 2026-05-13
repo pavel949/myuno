@@ -23,7 +23,7 @@ import {
   type ServiceEntry,
 } from '@/lib/catalog';
 
-export type ClusterVisibilityFields = Pick<ClusterEntry, 'audience' | 'personas' | 'roles'>;
+export type ClusterVisibilityFields = Partial<Pick<ClusterEntry, 'audience'>> & Pick<ClusterEntry, 'personas' | 'roles'>;
 import { pickTriplet } from '@/lib/ecosystemGlossary';
 
 // ─────────────────────────────────────────────────────────────
