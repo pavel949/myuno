@@ -1,5 +1,5 @@
 # myUNO Robots.txt
-# https://myuno.app
+# https://www.myuno.app
 
 User-agent: *
 Allow: /
@@ -34,4 +34,4 @@ Disallow: /history
 Disallow: /auth/
 
 # Sitemap
-Sitemap: https://myuno.app/sitemap.xml
+Sitemap: https://www.myuno.app/sitemap.xml
