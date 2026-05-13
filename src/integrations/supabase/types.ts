@@ -31067,6 +31067,7 @@ export type Database = {
       }
       normalize_developer_name: { Args: { input: string }; Returns: string }
       normalize_phone: { Args: { p: string }; Returns: string }
+      normalize_phone_text: { Args: { p: string }; Returns: string }
       outreach_throttle_check: {
         Args: { _channel: string; _identity_id: string; _window?: string }
         Returns: boolean
