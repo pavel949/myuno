@@ -33,7 +33,8 @@ export default function CrmTemplatesPage() {
   const { data: templates = [], isLoading, isError: templatesError, refetch: refetchTemplates } = useCrmTemplates(companyId, channelFilter === 'all' ? undefined : channelFilter);
   const createTemplate = useCreateTemplate();
   const deleteTemplate = useDeleteTemplate();
-const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [confirmId, setConfirmId] = useState<string | null>(null);
   const [form, setForm] = useState({ name: '', channel: 'email', subject: '', body: '', language: 'en' });
 
   const handleCreate = async () => {
