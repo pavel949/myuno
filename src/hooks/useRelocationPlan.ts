@@ -145,4 +145,3 @@ export function useRelocationPlan() {
   };
 }
 
-export type { RelocationPlanLocal };
