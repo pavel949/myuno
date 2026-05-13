@@ -65,8 +65,7 @@ export function useRelocationPlan() {
     mutationFn: async (next: RelocationPlanLocal) => {
       writeLocal(next);
       if (user?.id) {
-        // @ts-expect-error relocation_plans not yet in generated Database type
-        const { error } = await supabase.from('relocation_plans').upsert(
+        const { error } = await supabase.from('relocation_plans' as never).upsert(
           {
             user_id: user.id,
             quiz_answers: next.quiz_answers,
