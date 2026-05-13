@@ -1,72 +1,83 @@
-## Цель
-Добавить админский экран `/admin/relocation-articles` для CRUD статей переезда (`relocation_articles`) и управления категориями.
+## Диагноз
 
-## Что строим
+«AI-консьерж» в проекте — это **поиск на /search** (хук `useGlobalSearch`), куда ведёт глянцевая кнопка «Спросите AI-консьержа» с главной (`HeroGreeting`). Параллельно есть локальный поиск на `/discover` (`NavigatorPage`), но он фильтрует только лейблы локального каталога кластеров, в БД не ходит вообще.
 
-### 1. Страница `src/pages/admin/AdminRelocationArticles.tsx`
-- Список всех статей (включая неопубликованные) — таблица: title_ru, slug, category, sort_order, is_published, updated_at.
-- Фильтр по категории + поиск по slug/title.
-- Кнопки: «Создать», «Редактировать», «Опубликовать/Снять с публикации», «Удалить».
-- Toggle для быстрого `is_published`.
+Проверил данные напрямую через анонимный REST:
 
-### 2. Редактор (Sheet/Dialog) `AdminRelocationArticleEditor.tsx`
-Поля формы (React Hook Form + Zod):
-- `slug` (auto-generate из title_en, редактируемый)
-- `category` (Select из текущих 10 категорий + динамические из БД)
-- `title_en`, `title_ru` (input)
-- `summary_en`, `summary_ru` (textarea)
-- `content_en`, `content_ru` (textarea с markdown, моно-шрифт)
-- `related_route` (input)
-- `sort_order` (number)
-- `is_published` (switch)
+- `listings` 332 строки активных, `properties` 24, `categories` 78, `services` 33, `salons` 11.
+- Запросы `ilike '%врач%'`, `'%массаж%'`, `'%юрист%'`, `'%виза%'`, `'%клининг%'`, `'%стоматолог%'` → **0 совпадений** в `listings`. Только `'уборка'` и `'аренда'` дают результаты.
+- Причина: в `listings.name_ru/name_en` нет распространённых русских ключевых слов. Сид-данные есть, но названия часто английские/нейминг бренда.
 
-Save → upsert по `slug`.
+Дополнительно:
 
-### 3. Управление категориями
-Категории сейчас живут как enum-литералы в `src/data/relocationArticles.seed.ts` (10 шт., колонка `category` в БД — text, не enum). Делаем легковесно, без новой таблицы:
-- В UI таб «Категории» — список из `RELOCATION_ARTICLE_CATEGORIES` + категории, реально встречающиеся в БД (UNION).
-- Показываем счётчик статей на категорию.
-- Кнопка «Переименовать» делает массовый UPDATE `category` со старого ID на новый по всем статьям (для ребрендинга).
-- Добавить новую категорию = просто использовать новый id при создании статьи (free-text + datalist подсказок). Помечаем «новая, не в seed» — напоминание добавить лейбл в seed для двуязычного отображения на публичной части.
+1. `useGlobalSearch` ищет в `listings` только по `name_en`, `name_ru`, `category`. Не используются `description_ru`, `description_en`, `tags`, `district`, `address`. Это срезает большинство русских запросов.
+2. Запрос к `listings` не фильтрует по `approval_status='approved'`, в выдачу попадают `pending`. Не критично для «не находит», но это утечка модерации — попутно фиксим.
+3. Словарь `SEARCH_SYNONYM_ENTRIES` маленький — нет «доктор», «налоги», «школа», «банк», «ремонт», «электрик», «сантехник», «такси», «ужин», «продукты», «фитнес», «уборка», «контракт», «бухгалтер» и т.п. Из-за этого пользователь не получает даже карточки-категории.
+4. `/discover` (NavigatorPage): встроенный поиск делает substring-фильтр по `clusterCatalog`. Если ничего не нашёл — показывает «0 результатов» и не предлагает уйти на `/search` с этим же запросом.
 
-> Полноценная таблица `relocation_article_categories` сейчас избыточна — её можно завести позже отдельной задачей, если потребуется управление лейблами RU/EN из UI.
+## План правок (frontend-only, без миграций)
 
-### 4. Хук `src/hooks/admin/useAdminRelocationArticles.ts`
-- `useAdminRelocationArticlesList()` — все строки без фильтра `is_published`.
-- `useUpsertRelocationArticle()` — upsert по `slug`.
-- `useDeleteRelocationArticle()` — delete by id.
-- `useTogglePublishRelocationArticle()` — update `is_published`.
-- `useRenameCategory(oldId, newId)` — массовый update.
-- Все мутации инвалидируют `['relocation_articles']` и `['admin_relocation_articles']`.
-- Toasts через `sonner`.
+### 1. Расширить `useGlobalSearch` (`src/hooks/useGlobalSearch.ts`)
 
-### 5. Регистрация
-- Добавить `AdminRelocationArticles` в `src/components/layout/pageRegistry.ts` (lazy import).
-- Добавить маршрут `/admin/relocation-articles` в `src/components/layout/routes/adminRoutes.tsx`.
-- Добавить пункт в админ-навигацию (там, где сгруппированы `AdminClinics`, `AdminEducation` — найдём конкретный navConfig по ходу) под группой «Контент» или рядом с Education/Legal.
+- В запросе к `listings` добавить в `.or(...)` поля `description_en`, `description_ru`, `district`, `address` и фильтр `approval_status=eq.approved`.
+- В каждой записи `searchTables` (где есть `description_*`) — добавить эти поля в OR. Применимо как минимум к `properties`, `salons`, `events`, `water_activities`, `legal_services`, `services`. Делаем универсально через расширение `TableConfig` (`extraSearchFields?: string[]`).
+- Поднять `limit(10)` для `listings` (оставляем) и `limit(5)` для остальных (сейчас 3) — больше шансов что-то показать.
+- Финальный лимит вывода поднять с 15 до 25.
 
-### 6. Доступ и безопасность
-- Полагаемся на существующие RLS политики таблицы (write: `admin`/`uno_team`/`staff`, read: published для всех — для админа делаем `select` через RLS, у admin-роли есть полный доступ согласно миграции).
-- Страница защищена `AdminGuard` через `AdminRouteLayout`.
+### 2. Сильно расширить `SEARCH_SYNONYM_ENTRIES`
 
-### 7. Чистка кастов
-В рамках этой задачи **не трогаем** `as never`/`(supabase as any)` — типы `relocation_articles` ещё не регенерированы. Используем тот же приём в новом хуке + TODO-коммент.
+Добавить порядка ~40 RU/EN ключей → существующие маршруты (`APP_ROUTES`):
 
-## Файлы
+```text
+доктор / клиника / поликлиника  →  /medical
+налог / tax / accountant         →  /legal?service=tax
+школа / school / детский сад     →  /school-finder
+банк / bank account              →  /legal?service=banking
+ремонт / handyman                →  /services?category=handyman
+электрик / electrician           →  /services?category=electrical
+сантехник / plumber              →  /services?category=plumbing
+кондиционер / ac repair          →  /services?category=ac-repair
+такси / taxi                     →  /transport
+кафе / ресторан / dinner / еда   →  /restaurants
+доставка / delivery              →  /food-delivery
+продукты / market / grocery      →  /market
+фитнес / gym / спортзал          →  /fitness
+салон / nails / маникюр / hair   →  /beauty
+визу / visa / DTV / Elite        →  /visa/quiz
+контракт / договор / contract    →  /legal?service=contract
+страховка / insurance            →  /legal?service=insurance
+сим / sim card                   →  /sim
+обмен / exchange / валюта        →  /exchange
+яхта / yacht charter             →  /yachts
+тур / экскурсия / tour           →  /tours
+бронь / booking                  →  /property/rent
+```
 
-Новые:
-- `src/pages/admin/AdminRelocationArticles.tsx`
-- `src/components/admin/relocation/AdminRelocationArticleEditor.tsx`
-- `src/components/admin/relocation/AdminRelocationCategoriesPanel.tsx`
-- `src/hooks/admin/useAdminRelocationArticles.ts`
+Каждая запись использует `mkCat(...)` с уникальным id. Это гарантирует, что при пустой выдаче из БД пользователь всегда получает релевантную «категорию-карточку», а не «Ничего не найдено».
 
-Изменения:
-- `src/components/layout/pageRegistry.ts` — lazy import.
-- `src/components/layout/routes/adminRoutes.tsx` — маршрут.
-- Админ-навигация (точный файл найдём при имплементации; кандидаты: `src/components/admin/navigation/*` или `src/lib/nav/*`).
+### 3. Fallback в `NavigatorPage` (`/discover`)
 
-## Out of scope
-- Богатый markdown-редактор (используем простой textarea + monospaced; апгрейд на TipTap — отдельной задачей).
-- Создание отдельной таблицы `relocation_article_categories` с RU/EN лейблами.
-- Загрузка картинок к статьям (схема не предусматривает поле image сейчас).
-- Удаление seed-fallback из публичного хука.
+В блоке «0 результатов» добавить кнопку **«Искать в каталоге →»**, которая ведёт на `/search?q=<query>` (RU/EN текст). Сейчас этой кнопки нет — пользователь упирается в тупик. Это однострочное изменение в JSX рядом с line ~801.
+
+### 4. Empty-state на `/search`
+
+Когда `filteredResults.length === 0`, показывать 4 «популярных» категории-кнопки (`Виза`, `Жильё`, `Услуги`, `Транспорт`) ведущие на соответствующие хабы — чтобы запрос вроде «помоги» или опечатка не давали мёртвый экран.
+
+## Технические детали
+
+- Файлы: `src/hooks/useGlobalSearch.ts` (главный), `src/components/navigation/NavigatorPage.tsx`, `src/pages/Search.tsx`.
+- Миграции БД не нужны.
+- `sanitizeSearchTerm` оставляем как есть — он корректен.
+- Регрессий не ожидаю: расширение `.or(...)` обратно совместимо; синонимы — чистое добавление; fallback-кнопки — UI-only.
+
+## Что НЕ делаем (вне scope)
+
+- Не вводим `tsvector` / pg_trgm индексы и материализованные view — это отдельный большой кусок и требует миграции.
+- Не дописываем сид-данные. Если хочешь — вторым шагом могу прогнать AI-обогащение `name_ru` / `description_ru` по существующим 332 листингам.
+- Не меняем `concierge-route` edge function (она для онбординга, не для поиска).
+
+## Проверка после правок
+
+1. На `/search` ввести: `врач`, `массаж`, `юрист`, `визу`, `школа`, `банк`, `ремонт` — каждый запрос должен показать минимум 1 карточку-категорию + (где есть в БД) реальные карточки.
+2. На `/discover` ввести то же самое → должна появиться кнопка «Искать в каталоге →» при 0 результатов.
+3. Network: запрос к `listings` теперь содержит `approval_status=eq.approved` и расширенный `or(...)`.
