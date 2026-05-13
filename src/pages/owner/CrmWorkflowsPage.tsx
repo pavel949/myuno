@@ -167,6 +167,16 @@ export default function CrmWorkflowsPage() {
           ))}
         </div>
       )}
+
+      <ConfirmDialog
+        open={!!confirmId}
+        onOpenChange={(o) => !o && setConfirmId(null)}
+        onConfirm={() => {
+          if (confirmId) deleteWorkflow.mutate(confirmId);
+          setConfirmId(null);
+        }}
+        title={isRu ? 'Удалить автоматизацию?' : 'Delete workflow?'}
+      />
     </div>
   );
 }
