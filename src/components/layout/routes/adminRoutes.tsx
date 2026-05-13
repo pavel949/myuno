@@ -50,6 +50,7 @@ export const adminRoutes = (
     <Route path="/admin/cleaning" element={<Pages.AdminCleaning />} />
     <Route path="/admin/babysitters" element={<Pages.AdminBabysitters />} />
     <Route path="/admin/flowers" element={<Pages.AdminFlowers />} />
+    <Route path="/admin/relocation-articles" element={<Pages.AdminRelocationArticles />} />
     <Route path="/admin/bouquets" element={<Navigate to="/admin/flowers" replace />} />
     <Route path="/admin/lookups" element={<Pages.AdminLookups />} />
     <Route path="/admin/taxonomy" element={<Pages.AdminTaxonomyManager />} />
