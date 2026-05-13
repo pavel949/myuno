@@ -199,9 +199,7 @@ export default function CrmTemplatesPage() {
                     </div>
                     <Button
                       variant="ghost" size="icon" className="h-7 w-7 shrink-0"
-                      onClick={() => {
-                        if (confirm(isRu ? 'Удалить?' : 'Delete?')) deleteTemplate.mutate(tpl.id);
-                      }}
+                      onClick={() => setConfirmId(tpl.id)}
                     >
                       <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
                     </Button>
