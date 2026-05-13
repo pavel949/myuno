@@ -16,13 +16,35 @@ export default function RelocationGuidesHub() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { data: articles, isLoading } = useRelocationArticles();
-  const [filter, setFilter] = useState<RelocationArticleCategory | 'all'>('all');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const filter = (searchParams.get('cat') ?? 'all') as RelocationArticleCategory | 'all';
+  const query = searchParams.get('q') ?? '';
+
+  const setFilter = (next: RelocationArticleCategory | 'all') => {
+    const params = new URLSearchParams(searchParams);
+    if (next === 'all') params.delete('cat'); else params.set('cat', next);
+    setSearchParams(params, { replace: true });
+  };
+  const setQuery = (next: string) => {
+    const params = new URLSearchParams(searchParams);
+    if (!next) params.delete('q'); else params.set('q', next);
+    setSearchParams(params, { replace: true });
+  };
 
   const filtered = useMemo(() => {
     if (!articles) return [];
-    if (filter === 'all') return articles;
-    return articles.filter((a) => a.category === filter);
-  }, [articles, filter]);
+    const q = query.trim().toLowerCase();
+    return articles.filter((a) => {
+      if (filter !== 'all' && a.category !== filter) return false;
+      if (!q) return true;
+      return (
+        a.title_ru.toLowerCase().includes(q) ||
+        a.title_en.toLowerCase().includes(q) ||
+        (a.summary_ru ?? '').toLowerCase().includes(q) ||
+        (a.summary_en ?? '').toLowerCase().includes(q)
+      );
+    });
+  }, [articles, filter, query]);
 
   const title = isRu ? 'Гайды по переезду на Пхукет' : 'Phuket relocation guides';
   const description = isRu
