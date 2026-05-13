@@ -933,49 +933,30 @@ export default function NavigatorPage() {
                       </div>
 
                       {/* Service grid — responsive columns, fixed row height */}
-                      <div
-                        className="grid gap-2"
-                        style={{
-                          gridTemplateColumns: 'repeat(3, 1fr)',
-                          gridAutoRows: '132px',
-                        }}
-                      >
-                        <style>{`
-                          @media (min-width:640px)  { .nav-v2-grid-${cluster.id} { grid-template-columns: repeat(4,1fr) !important; } }
-                          @media (min-width:1024px) { .nav-v2-grid-${cluster.id} { grid-template-columns: repeat(5,1fr) !important; } }
-                          @media (min-width:1280px) { .nav-v2-grid-${cluster.id} { grid-template-columns: repeat(6,1fr) !important; } }
-                        `}</style>
-                        {/* Apply responsive class via wrapper trick */}
-                        <div
-                          className={`nav-v2-grid-${cluster.id} grid gap-2`}
-                          style={{
-                            gridColumn: '1 / -1',
-                            gridTemplateColumns: 'repeat(3, 1fr)',
-                            gridAutoRows: '132px',
-                          }}
-                        >
-                          {hasFeature && (
-                            <FeaturedTile
-                              data={featured!}
-                              language={language}
-                              onNavigate={navigate}
-                            />
-                          )}
-                          {eligible.map((svc) => (
-                            <ServiceTile
-                              key={`${cluster.id}-${svc.path}`}
-                              service={svc}
-                              clusterId={cluster.id}
-                              language={language}
-                              onNavigate={navigate}
-                            />
-                          ))}
-                        </div>
+                      <style>{`
+                        .nav-v2-grid-${cluster.id} { grid-template-columns: repeat(3,1fr); grid-auto-rows: 132px; }
+                        @media (min-width:640px)  { .nav-v2-grid-${cluster.id} { grid-template-columns: repeat(4,1fr) !important; } }
+                        @media (min-width:1024px) { .nav-v2-grid-${cluster.id} { grid-template-columns: repeat(5,1fr) !important; } }
+                        @media (min-width:1280px) { .nav-v2-grid-${cluster.id} { grid-template-columns: repeat(6,1fr) !important; } }
+                      `}</style>
+                      <div className={`nav-v2-grid-${cluster.id} grid gap-2`}>
+                        {hasFeature && (
+                          <FeaturedTile
+                            data={featured!}
+                            language={language}
+                            onNavigate={navigate}
+                          />
+                        )}
+                        {eligible.map((svc) => (
+                          <ServiceTile
+                            key={`${cluster.id}-${svc.path}`}
+                            service={svc}
+                            clusterId={cluster.id}
+                            language={language}
+                            onNavigate={navigate}
+                          />
+                        ))}
                       </div>
-                    </section>
-                  );
-                })}
-              </div>
 
               {/* ── Trust strip ───────────────────────────── */}
               <div
