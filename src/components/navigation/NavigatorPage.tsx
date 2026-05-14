@@ -1246,9 +1246,9 @@ export default function NavigatorPage() {
                             appearance={appearance}
                           />
                         )}
-                        {eligible.map((svc) => (
+                        {eligible.map((svc, idx) => (
                           <ServiceTile
-                            key={`${cluster.id}-${svc.path}`}
+                            key={`${cluster.id}-${svc.id ?? svc.path}-${idx}`}
                             service={svc}
                             clusterId={cluster.id}
                             language={language}
