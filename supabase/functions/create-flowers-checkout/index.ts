@@ -59,14 +59,18 @@ Deno.serve(
         });
       }
 
+      // Helper to check if a string is a valid UUID
+      const isUUID = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
+
       const orderItems: any[] = items.map((item: any) => ({
-        product_id: item.id,
+        product_id: item.id && isUUID(item.id) ? item.id : null,
         item_name: item.name,
         item_type: "flower",
         qty: item.quantity,
         unit_price: item.price,
         amount: item.quantity * item.price,
         status: "pending",
+        metadata: !isUUID(item.id) ? { original_product_id: item.id } : {},
       }));
 
       if (delivery_fee > 0) {
@@ -94,8 +98,9 @@ Deno.serve(
       return {
         order: {
           order_type: "flowers",
+          vertical: "flowers",
           customer_user_id: user.id,
-          provider_org_id: provider_id || null,
+          provider_org_id: provider_id && isUUID(provider_id) ? provider_id : null,
           status: "pending",
           total_amount,
           currency,
@@ -109,6 +114,7 @@ Deno.serve(
             message_card: message || "",
             gift_wrap,
             provider_name: provider_name || "",
+            original_provider_id: provider_id && !isUUID(provider_id) ? provider_id : undefined,
           },
         },
         items: orderItems,

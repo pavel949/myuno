@@ -176,9 +176,9 @@ export function createCheckoutHandler(config: CheckoutConfig) {
           .single();
 
         if (orderError || !order) {
-          console.error(`[${config.endpoint}] Order insert error:`, orderError);
+          console.error(`[${config.endpoint}] Order insert error:`, JSON.stringify(orderError));
           if (result.onOrderFailure) await result.onOrderFailure();
-          throw new Error("Failed to create order");
+          throw new Error(`Failed to create order: ${orderError?.message || 'Unknown error'}`);
         }
 
         orderId = order.id;
@@ -190,10 +190,11 @@ export function createCheckoutHandler(config: CheckoutConfig) {
           const items = result.items.map((item) => ({ ...item, order_id: orderId! }));
           const { error: itemsError } = await supabaseAdmin.from("order_items").insert(items);
           if (itemsError) {
-            console.error(`[${config.endpoint}] Items insert error:`, itemsError);
+            console.error(`[${config.endpoint}] Items insert error:`, JSON.stringify(itemsError));
             if (result.onOrderFailure) await result.onOrderFailure();
+            // Attempt to clean up the order if items fail
             await supabaseAdmin.from("orders").delete().eq("id", orderId);
-            throw new Error("Failed to create order items");
+            throw new Error(`Failed to create order items: ${itemsError?.message || 'Unknown error'}`);
           }
         }
 
