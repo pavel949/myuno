@@ -156,32 +156,38 @@ const FlowersOrder = () => {
     try {
       // For card payments, redirect to Stripe Checkout
       if (formData.paymentMethod === 'card') {
-        const success = await createCheckout('create-flowers-checkout', {
-          items: cartItems.map(item => ({
-            id: item.id,
-            name: language === 'ru' ? item.nameRu : item.name,
-            quantity: item.quantity,
-            price: item.price,
-          })),
-          delivery_fee: deliveryFee,
-          gift_wrap_fee: giftWrapFee,
-          total_amount: finalTotal,
-          currency: 'THB',
-          recipient_name: formData.recipientName,
-          recipient_phone: formData.recipientPhone,
-          delivery_address: formData.address,
-          delivery_date: formData.deliveryDate,
-          delivery_slot: formData.deliverySlot,
-          message: formData.message,
-          gift_wrap: formData.giftWrap,
-          provider_id: firstProvider?.providerId,
-          provider_name: firstProvider?.providerName,
-        });
-        
-        // If redirect is successful, Stripe will handle the rest
-        // The page will redirect, so we don't need to do anything else here
-        if (!success) {
-          toast.error(language === 'ru' ? 'Ошибка при создании платежа' : 'Failed to create payment');
+        try {
+          const success = await createCheckout('create-flowers-checkout', {
+            items: cartItems.map(item => ({
+              id: item.id,
+              name: language === 'ru' ? item.nameRu : item.name,
+              quantity: item.quantity,
+              price: item.price,
+            })),
+            delivery_fee: deliveryFee,
+            gift_wrap_fee: giftWrapFee,
+            total_amount: finalTotal,
+            currency: 'THB',
+            recipient_name: formData.recipientName,
+            recipient_phone: formData.recipientPhone,
+            delivery_address: formData.address,
+            delivery_date: formData.deliveryDate,
+            delivery_slot: formData.deliverySlot,
+            message: formData.message,
+            gift_wrap: formData.giftWrap,
+            provider_id: firstProvider?.providerId,
+            provider_name: firstProvider?.providerName,
+          });
+
+          // If redirect is successful, Stripe will handle the rest
+          // The page will redirect, so we don't need to do anything else here
+          if (!success) {
+            // Error is already logged by useStripeUnifiedCheckout, but we add a specific toast here
+            toast.error(language === 'ru' ? 'Не удалось создать платежную сессию. Попробуйте еще раз.' : 'Failed to create payment session. Please try again.');
+          }
+        } catch (checkoutErr: any) {
+          console.error('Checkout error:', checkoutErr);
+          toast.error(language === 'ru' ? `Ошибка: ${checkoutErr.message || 'неизвестная ошибка'}` : `Error: ${checkoutErr.message || 'unknown error'}`);
         }
         return;
       }
