@@ -11,7 +11,8 @@
       "Bash(mkdir -p /tmp/design-bundle)",
       "Bash(cp \"C:\\\\Users\\\\pavel\\\\.claude\\\\projects\\\\c--Users-pavel-OneDrive-Apps-myUNO-myuno\\\\c09d778b-f727-4f3c-8fb3-7b20bc1ec3b1\\\\tool-results\\\\webfetch-1778570652299-k509w8.bin\" ./bundle.tar.gz)",
       "Bash(tar -tzf bundle.tar.gz)",
-      "PowerShell(npm run build 2>&1)"
+      "PowerShell(npm run build 2>&1)",
+      "mcp__7a49d2c0-ef40-489e-a94f-ab08b1bacd20__deploy_to_vercel"
     ]
   }
 }
