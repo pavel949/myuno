@@ -50,6 +50,7 @@ export default function MarketingDashboard() {
     { id: 'control-tower', label: 'Control Tower', icon: Activity },
     { id: 'overview', label: isRu ? 'Обзор' : 'Overview', icon: LayoutDashboard },
     { id: 'landings', label: isRu ? 'Лендинги' : 'Landings', icon: Globe },
+    { id: 'magnets', label: isRu ? 'Магниты' : 'Magnets', icon: Magnet },
     { id: 'states', label: isRu ? 'Состояния' : 'States', icon: UserCog },
     { id: 'funnel-diag', label: isRu ? 'Воронка' : 'Funnel Diag', icon: Search },
     { id: 'campaigns', label: isRu ? 'Кампании' : 'Campaigns', icon: Megaphone },
@@ -95,6 +96,7 @@ export default function MarketingDashboard() {
           <TabsContent value="control-tower" className="mt-4"><MCCControlTowerTab /></TabsContent>
           <TabsContent value="overview" className="mt-4"><MCCOverviewTab /></TabsContent>
           <TabsContent value="landings" className="mt-4"><MCCLandingControlTab /></TabsContent>
+          <TabsContent value="magnets" className="mt-4"><MCCMagnetsTab /></TabsContent>
           <TabsContent value="states" className="mt-4"><MCCUserStatesTab /></TabsContent>
           <TabsContent value="funnel-diag" className="mt-4"><MCCFunnelDiagnosticsTab /></TabsContent>
           <TabsContent value="campaigns" className="mt-4"><MCCCampaignsTab /></TabsContent>
