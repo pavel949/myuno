@@ -10,6 +10,8 @@
  */
 
 :root {
+  color-scheme: light;
+
   /* ═══════════════════════════════════════════════════════════
      1 · BRAND COLOURS — three signature colours, used sparingly
      ═══════════════════════════════════════════════════════════ */
@@ -392,6 +394,7 @@ html:not([lang]) {
    No mint, no glassmorphism, no glow — same restraint as light mode.
    ═══════════════════════════════════════════════════════════ */
 .dark {
+  color-scheme: dark;
   --background:           214 78%  9%;     /* navy-900 */
   --foreground:           36 27% 96%;      /* cream */
 
