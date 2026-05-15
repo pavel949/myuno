@@ -51,6 +51,7 @@ export default function MarketingDashboard() {
     { id: 'control-tower', label: 'Control Tower', icon: Activity },
     { id: 'overview', label: isRu ? 'Обзор' : 'Overview', icon: LayoutDashboard },
     { id: 'landings', label: isRu ? 'Лендинги' : 'Landings', icon: Globe },
+    { id: 'builder', label: isRu ? 'Конструктор' : 'Builder', icon: LayoutTemplate },
     { id: 'magnets', label: isRu ? 'Магниты' : 'Magnets', icon: Magnet },
     { id: 'states', label: isRu ? 'Состояния' : 'States', icon: UserCog },
     { id: 'funnel-diag', label: isRu ? 'Воронка' : 'Funnel Diag', icon: Search },
