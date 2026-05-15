@@ -73,6 +73,8 @@ const PersonaAreaLandingPage = React.lazy(() => import('@/pages/landings/Persona
 const ClusterLandingPage = React.lazy(() => import('@/pages/landings/ClusterLandingPage'));
 // M10b · IPP §4G — Deal Room stub
 const MandateLanding = React.lazy(() => import('@/pages/property/MandateLanding'));
+// Magnet visual-builder landings (`/l/:slug`)
+const MagnetLandingPage = React.lazy(() => import('@/pages/landings/MagnetLandingPage'));
 
 // Home router: guests see marketing landing, authed users see Index
 const HomeRouter = () => {
