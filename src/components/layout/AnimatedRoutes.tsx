@@ -723,6 +723,9 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/for/:persona/in/:area" element={<LazyPage><PersonaAreaLandingPage /></LazyPage>} />
         <Route path="/for/:persona" element={<LazyPage><PersonaLandingPage /></LazyPage>} />
 
+        {/* Magnet visual-builder landings */}
+        <Route path="/l/:slug" element={<LazyPage><MagnetLandingPage /></LazyPage>} />
+
         {/* ── M10b · IPP — nested entry under Property Hub (ARCHITECTURE_V2 §13.1) ── */}
         {/* Same content as /for/:persona, accessible from PropertyHub navigation. */}
         <Route path="/property/for/:persona" element={<LazyPage><PersonaLandingPage /></LazyPage>} />
