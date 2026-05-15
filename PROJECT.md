@@ -202,7 +202,7 @@ myUNO должна восприниматься как надёжная госу
 
 **Цвета:** глубокий тёмно-синий (#0A2240) как основной авторитетный цвет, тёплый оранжевый (#D96B1A) как акцент человечности, светло-серый (#F5F4F0) как нейтральный фон.
 
-**Типографика:** мультиязычная система. Для русского: Unbounded (заголовки) + Golos Text (тело). Для английского/международного: Noto Serif (заголовки) + Noto Sans (тело). JetBrains Mono для числовых данных.
+**Типографика:** единая для обоих языков (см. Design Bible v2 §05.2 и `src/styles/tokens.css`). Display/headings — **Source Serif 4** (400–700). Body/UI — **Geist** (400–700). Числовые данные — **IBM Plex Mono** (tabular-nums). Luxury-вертикаль `/newbuilds` — **Cormorant Garamond**. Локальные fallback для RU: Unbounded → Golos Text → Noto. Для EN: Noto Serif/Sans → Georgia / system-ui. (Старые ссылки на Unbounded+Golos / DM Sans / JetBrains Mono — stale.)
 
 **Стек:** Tailwind CSS + shadcn/ui.
 
@@ -348,9 +348,12 @@ myUNO должна восприниматься как надёжная госу
 | Notifications | WhatsApp Cloud API + Telegram Bot (grammy) + Resend | Основные каналы |
 | Analytics | PostHog + Sentry + Better Uptime | |
 | UI | Tailwind CSS + shadcn/ui | |
-| Fonts (RU) | Unbounded + Golos Text | Кириллица-приоритет |
-| Fonts (EN/INT) | Noto Serif + Noto Sans | Мультиязычность |
-| Data (числа) | JetBrains Mono | |
+| Fonts (display) | Source Serif 4 | Оба языка, primary (см. `tokens.css`) |
+| Fonts (body) | Geist | Оба языка, primary |
+| Data (числа) | IBM Plex Mono | tabular-nums |
+| Fonts (luxury) | Cormorant Garamond | Только `/newbuilds` Dark Luxury |
+| Fonts (RU fallback) | Unbounded → Golos Text → Noto | Только когда primary не загрузился |
+| Fonts (EN fallback) | Noto Serif / Noto Sans | Только когда primary не загрузился |
 
 **Правила, которые нельзя нарушать:** один Supabase public schema; единый SSO (один user_id через все субдомены); TypeScript strict, no `any`; mobile-first 375px; bilingual UI (RU/EN); error handling и loading states везде; conventional commits, English; каждый merge в main — фиксит баг, приносит деньги или снижает техдолг.
 

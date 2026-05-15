@@ -1,7 +1,9 @@
-# myUNO · Visual Design System v1.0
+# myUNO · Visual Design System v1.1
 ## Канонический документ дизайн-системы
 
 > **Статус:** эталонный. Источник истины для всех визуальных решений в продукте — UI, лендинги, email, документы, презентации, партнёрские материалы.
+>
+> **v1.1 (2026-05-15):** типографика приведена в соответствие с `src/styles/tokens.css` SSOT и `docs/DESIGN_BIBLE.md` v2 §05.2 (Source Serif 4 / Geist / IBM Plex Mono / Cormorant Garamond для luxury). Старые ссылки на Unbounded/Golos + DM Sans + JetBrains Mono демонтированы; legacy alias-переменные оставлены ради обратной совместимости.
 >
 > **Назначение.** Один файл, в который заглядывает любой дизайнер, разработчик или AI-агент (Lovable, Cursor, v0) и получает полный ответ: какой цвет, какой шрифт, какой отступ, какой компонент. Без импровизации.
 >
@@ -132,52 +134,69 @@ Nine steps. Всё серое и чёрное в интерфейсе — отс
 
 ## 3 · Типографика
 
-### 3.1 · Две системы шрифтов — по языку
+> **Источник истины — `src/styles/tokens.css` + Design Bible v2 §05.2.** Эта секция приведена в соответствие 2026-05-15.
 
-**Русская кириллица:**
-- Заголовки — **Unbounded** (весы 400, 500, 600)
-- Body — **Golos Text** (весы 400, 500)
+### 3.1 · Единая система шрифтов (оба языка)
 
-**Латиница и международные языки (EN, DE, CN, и т.д.):**
-- Заголовки — **Noto Serif** (весы 400, 600, 700)
-- Body — **Noto Sans** (весы 300, 400, 500, 600, 700)
+**Display / заголовки:**
+- **Source Serif 4** (весы 400–700) — оба языка, primary. Cyrillic-aware, editorial feel.
+
+**Body / UI:**
+- **Geist** (весы 400–700) — оба языка, primary. Geometric sans, отличное покрытие глифов.
 
 **Числа, деньги, коды, технические значения:**
-- Везде — **JetBrains Mono** (весы 400, 500). tabular-nums.
+- **IBM Plex Mono** (весы 400–500). tabular-nums.
+
+**Luxury (`/newbuilds` Dark Luxury theme только):**
+- **Cormorant Garamond** (весы 400–700, italic).
+
+**Locale fallback (когда primary не загрузился):**
+- RU: Unbounded → Golos Text → Noto Serif / Noto Sans.
+- EN: Noto Serif → Noto Sans → Georgia / system-ui.
+
+**⛔ НЕ используется в коде:** Syne · DM Sans · Playfair Display · JetBrains Mono · Sarabun. Старые доки могут ссылаться — они stale.
 
 ### 3.2 · Подключение шрифтов
 
-Google Fonts URL (единый):
+Google Fonts URL (единый, в `index.html`):
 ```
-https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600&family=Golos+Text:wght@400;500&family=Noto+Serif:wght@400;600;700&family=Noto+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap
+https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;500;600;700&family=Geist:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap
 ```
 
-CSS font-family fallback stacks:
+CSS font-family fallback stacks (см. `src/styles/tokens.css` для актуальных значений):
 ```css
---font-heading-ru: 'Unbounded', 'Noto Serif', Georgia, serif;
---font-body-ru: 'Golos Text', 'Noto Sans', system-ui, sans-serif;
---font-heading-en: 'Noto Serif', Georgia, serif;
---font-body-en: 'Noto Sans', system-ui, -apple-system, sans-serif;
---font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+--font-display:    'Source Serif 4', 'Unbounded', 'Noto Serif', Georgia, serif;
+--font-body:       'Geist', 'Golos Text', 'Noto Sans', system-ui, sans-serif;
+--font-mono:       'IBM Plex Mono', 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+--font-serif:      'Cormorant Garamond', 'Source Serif 4', Georgia, serif; /* luxury only */
+
+/* Legacy aliases — для обратной совместимости со старыми каллерами */
+--font-heading-ru: 'Source Serif 4', 'Unbounded', 'Noto Serif', Georgia, serif;
+--font-body-ru:    'Geist', 'Golos Text', 'Noto Sans', system-ui, sans-serif;
+--font-heading-en: 'Source Serif 4', 'Noto Serif', Georgia, serif;
+--font-body-en:    'Geist', 'Noto Sans', system-ui, -apple-system, sans-serif;
 ```
 
 ### 3.3 · Типографическая шкала
 
-Единая шкала. Все размеры берутся отсюда — не придумывай свои.
+Единая шкала. Все размеры берутся отсюда — не придумывай свои. Соответствует Bible §05.2.
 
-| Токен | Size | Line-height | Weight | Использование |
-|---|---|---|---|---|
-| `display` | 48px (3rem) | 1.1 | 400 | Hero на главной, очень редко |
-| `h1` | 36px (2.25rem) | 1.2 | 400 | Заголовок страницы |
-| `h2` | 28px (1.75rem) | 1.25 | 400 | Раздел страницы |
-| `h3` | 22px (1.375rem) | 1.3 | 500 | Под-раздел, заголовок карточки |
-| `h4` | 18px (1.125rem) | 1.4 | 500 | Блок внутри карточки |
-| `body-lg` | 17px | 1.6 | 400 | Lead paragraph, intro |
-| `body` | 15px | 1.7 | 400 | Основной текст |
-| `body-sm` | 13px | 1.6 | 400 | Вторичный текст, описания |
-| `caption` | 11px | 1.5 | 500 | Metadata, timestamps, footer |
-| `label` | 10px | 1.4 | 600 | Labels с letter-spacing 0.25em uppercase |
-| `mono` | 12px | 1.5 | 500 | JetBrains Mono для чисел и кодов |
+| Токен | Size | Line-height | Weight | Font | Использование |
+|---|---|---|---|---|---|
+| `display-xl` | 48px (3rem) | 1.1 | 700 | Source Serif 4 | Hero на главной, очень редко |
+| `display-lg` | 40px (2.5rem) | 1.1 | 700 | Source Serif 4 | Заголовок landing-секции |
+| `display-md` | 32px (2rem) | 1.2 | 600 | Source Serif 4 | Заголовок страницы |
+| `heading-lg` | 24px (1.5rem) | 1.25 | 600 | Source Serif 4 | Раздел страницы |
+| `heading-md` | 20px (1.25rem) | 1.3 | 600 | Source Serif 4 | Под-раздел, заголовок карточки |
+| `heading-sm` | 18px (1.125rem) | 1.4 | 600 | Geist | Блок внутри карточки |
+| `body-lg` | 16px (1rem) | 1.5 | 400 | Geist | Lead paragraph, основной body |
+| `body-md` | 14px (0.875rem) | 1.5 | 400 | Geist | Вторичный body, описания |
+| `body-sm` | 13px (0.8125rem) | 1.5 | 400 | Geist | Третичный текст |
+| `caption` | 12px (0.75rem) | 1.4 | 500 | Geist | Metadata, timestamps |
+| `overline` | 10px (0.625rem) | 1.4 | 600 | Geist | Labels с letter-spacing 0.08em uppercase |
+| `mono-lg` | 16px (1rem) | 1.5 | 400 | IBM Plex Mono | Большие суммы, IDs |
+| `mono-md` | 14px (0.875rem) | 1.5 | 400 | IBM Plex Mono | Обычные числа и коды |
+| `mono-sm` | 12px (0.75rem) | 1.4 | 500 | IBM Plex Mono | Мелкие timestamps, tx_id |
 
 ### 3.4 · Правила использования
 
@@ -472,7 +491,7 @@ Hover:
   bg: #FAFAF9
 
 Numbers / currency:
-  font: JetBrains Mono, tabular-nums
+  font: IBM Plex Mono, tabular-nums
   align: right
 ```
 
@@ -816,7 +835,7 @@ Emoji используются **только** как маркеры катег
 
 - **Никаких 3D-графиков.** Никогда.
 - **Никакой красоты без данных.** Нет данных — нет графика, а empty state.
-- Шрифт в графиках — **JetBrains Mono** для чисел, sans-serif для labels.
+- Шрифт в графиках — **IBM Plex Mono** для чисел, **Geist** для labels.
 - Tooltip — белый фон, 1px border, shadow-sm, 13px body.
 - Legend всегда внизу или справа, никогда сверху.
 - Decimal places — минимально необходимое. Не «23.00%», а «23%».
@@ -830,8 +849,8 @@ Column alignment:
   - Дата — right (чтобы выровнялась)
 
 Font:
-  - Числа — JetBrains Mono, tabular-nums
-  - Текст — body
+  - Числа — IBM Plex Mono, tabular-nums
+  - Текст — body (Geist)
 
 Форматирование:
   - Валюта: 15 500 THB  (пробел разделитель, не запятая)
@@ -993,12 +1012,17 @@ outline-offset: 2px
   --space-20: 80px;
   --space-24: 96px;
 
-  /* Typography */
-  --font-heading-ru: 'Unbounded', 'Noto Serif', Georgia, serif;
-  --font-body-ru: 'Golos Text', 'Noto Sans', system-ui, sans-serif;
-  --font-heading-en: 'Noto Serif', Georgia, serif;
-  --font-body-en: 'Noto Sans', system-ui, -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  /* Typography — synced with src/styles/tokens.css and Design Bible v2 §05.2 */
+  --font-display:    'Source Serif 4', 'Unbounded', 'Noto Serif', Georgia, serif;
+  --font-body:       'Geist', 'Golos Text', 'Noto Sans', system-ui, sans-serif;
+  --font-mono:       'IBM Plex Mono', 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  --font-serif:      'Cormorant Garamond', 'Source Serif 4', Georgia, serif; /* /newbuilds only */
+
+  /* Legacy aliases — kept for backwards compatibility with older callers */
+  --font-heading-ru: 'Source Serif 4', 'Unbounded', 'Noto Serif', Georgia, serif;
+  --font-body-ru:    'Geist', 'Golos Text', 'Noto Sans', system-ui, sans-serif;
+  --font-heading-en: 'Source Serif 4', 'Noto Serif', Georgia, serif;
+  --font-body-en:    'Geist', 'Noto Sans', system-ui, -apple-system, sans-serif;
 
   /* Shadows */
   --shadow-xs: 0 1px 2px rgba(28, 25, 23, 0.04);
@@ -1051,11 +1075,15 @@ const config: Config = {
         },
       },
       fontFamily: {
-        'heading-ru': ['Unbounded', 'Noto Serif', 'Georgia', 'serif'],
-        'body-ru': ['Golos Text', 'Noto Sans', 'system-ui', 'sans-serif'],
-        'heading-en': ['Noto Serif', 'Georgia', 'serif'],
-        'body-en': ['Noto Sans', 'system-ui', '-apple-system', 'sans-serif'],
-        mono: ['JetBrains Mono', 'SF Mono', 'Consolas', 'monospace'],
+        display: ['Source Serif 4', 'Unbounded', 'Noto Serif', 'Georgia', 'serif'],
+        sans: ['Geist', 'Golos Text', 'Noto Sans', 'system-ui', 'sans-serif'],
+        mono: ['IBM Plex Mono', 'JetBrains Mono', 'SF Mono', 'Consolas', 'monospace'],
+        serif: ['Cormorant Garamond', 'Source Serif 4', 'Georgia', 'serif'], // luxury only
+        // Legacy aliases — older callers
+        'heading-ru': ['Source Serif 4', 'Unbounded', 'Noto Serif', 'Georgia', 'serif'],
+        'body-ru':    ['Geist', 'Golos Text', 'Noto Sans', 'system-ui', 'sans-serif'],
+        'heading-en': ['Source Serif 4', 'Noto Serif', 'Georgia', 'serif'],
+        'body-en':    ['Geist', 'Noto Sans', 'system-ui', '-apple-system', 'sans-serif'],
       },
       borderRadius: {
         none: '0',
@@ -1084,9 +1112,9 @@ export default config;
 - [ ] Orange используется точечно (<3% площади)
 
 **Типографика**
-- [ ] Шрифт по языку выбран правильно (RU — Unbounded/Golos, EN — Noto)
+- [ ] Заголовки — **Source Serif 4** (`font-display`), body — **Geist** (`font-sans`)
 - [ ] Размеры из типошкалы (раздел 3.3), никаких произвольных
-- [ ] Числа в JetBrains Mono
+- [ ] Числа в **IBM Plex Mono** (`font-mono`) с `tabular-nums`
 
 **Spacing и layout**
 - [ ] Отступы кратны 4 (раздел 4)
