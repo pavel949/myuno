@@ -73,6 +73,8 @@ const PersonaAreaLandingPage = React.lazy(() => import('@/pages/landings/Persona
 const ClusterLandingPage = React.lazy(() => import('@/pages/landings/ClusterLandingPage'));
 // M10b · IPP §4G — Deal Room stub
 const MandateLanding = React.lazy(() => import('@/pages/property/MandateLanding'));
+// Magnet visual-builder landings (`/l/:slug`)
+const MagnetLandingPage = React.lazy(() => import('@/pages/landings/MagnetLandingPage'));
 
 // Home router: guests see marketing landing, authed users see Index
 const HomeRouter = () => {
@@ -720,6 +722,9 @@ export const AnimatedRoutes: React.FC = () => {
         {/* Wave 4 — geo long-tail: must precede `/for/:persona` to match first. */}
         <Route path="/for/:persona/in/:area" element={<LazyPage><PersonaAreaLandingPage /></LazyPage>} />
         <Route path="/for/:persona" element={<LazyPage><PersonaLandingPage /></LazyPage>} />
+
+        {/* Magnet visual-builder landings */}
+        <Route path="/l/:slug" element={<LazyPage><MagnetLandingPage /></LazyPage>} />
 
         {/* ── M10b · IPP — nested entry under Property Hub (ARCHITECTURE_V2 §13.1) ── */}
         {/* Same content as /for/:persona, accessible from PropertyHub navigation. */}
