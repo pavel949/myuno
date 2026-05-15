@@ -33,6 +33,10 @@ export default defineConfig(({ mode, command }) => {
       // `true` is more reliable than `::` on Windows / embedded browser previews (Cursor Simple Browser).
       host: true,
       port: 8080,
+      // When 8080 is taken Vite picks the next free port. Embedded previews (Cursor / Lovable)
+      // often probe :8080 first — if something else is bound there you get a blank iframe while
+      // Vite is actually on :8081+. Free 8080 or stop the other process.
+      //
       // Avoid timing-out clients while Vite is still pre-bundling on first hit.
       // The Lovable iframe preview and Playwright otherwise see HTTP 504 from
       // the dev server middleware on cold start with our large module graph.
@@ -76,13 +80,12 @@ export default defineConfig(({ mode, command }) => {
       command === "serve" && {
         name: "csp-allow-embedded-dev-preview",
         transformIndexHtml(html: string) {
-          let out = html.replace(/frame-ancestors 'none';/g, "frame-ancestors *;");
-          // Vite HMR uses ws: to the dev server; strict connect-src can block it in embedded previews.
-          out = out.replace(
-            /connect-src 'self'/,
-            "connect-src 'self' ws://127.0.0.1:* ws://localhost:* wss://127.0.0.1:* wss://localhost:*"
+          // Replace the whole CSP for dev/preview: partial connect-src patches miss
+          // `host: true` (LAN IP) + alternate ports, which leaves Simple Browser / iframes blank.
+          return html.replace(
+            /<meta\s+http-equiv="Content-Security-Policy"\s+content="[^"]*"\s*\/>/i,
+            '<meta http-equiv="Content-Security-Policy" content="default-src \'self\'; script-src \'self\' \'unsafe-inline\' \'unsafe-eval\' https://maps.googleapis.com https://maps.gstatic.com; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; img-src \'self\' data: https: blob:; font-src \'self\' https://fonts.gstatic.com; connect-src * blob: data:; worker-src \'self\' blob:; frame-ancestors *; base-uri \'self\'; form-action \'self\';" />',
           );
-          return out;
         },
       },
       mode === "development" && componentTagger(),
