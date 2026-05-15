@@ -264,9 +264,12 @@ export const ECOSYSTEM_FOOTER_UI = {
 } as const satisfies Record<string, LocalizedTriplet>;
 
 export function pickTriplet(t: LocalizedTriplet, lang: Language): string {
-  if (lang === 'ru') return t.ru;
-  if (lang === 'th') return t.th;
-  return t.en;
+  const ru = t.ru ?? '';
+  const en = t.en ?? '';
+  const th = t.th ?? '';
+  if (lang === 'ru') return ru || en || th;
+  if (lang === 'th') return th || en || ru;
+  return en || ru || th;
 }
 
 /** Label for an app registry entry (must have id + label fields). */

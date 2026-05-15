@@ -226,8 +226,8 @@ export const CLUSTERS: ClusterEntry[] = [
     labelRu: 'Инвестиции',
     labelEn: 'Invest',
     labelTh: 'การลงทุน',
-    valueRu: 'Недвижимость: каталог, новостройки, вторичка, ROI, due diligence.',
-    valueEn: 'Real estate: search, off-plan, resale, ROI, due diligence.',
+    valueRu: 'Недвижимость и капитал: поиск, новостройки, бизнес-вложения, ROI, база знаний.',
+    valueEn: 'Property and capital: search, off-plan, business deals, ROI, knowledge base.',
     icon: TrendingUp,
     color: '#A855F7',
     sortOrder: 4,
@@ -263,7 +263,7 @@ export const CLUSTERS: ClusterEntry[] = [
 ];
 
 // ─────────────────────────────────────────────────────────────────────────
-// Categories with Services (16 categories, ~80 active services)
+// Categories with Services (18 categories, ~80 active services)
 // ─────────────────────────────────────────────────────────────────────────
 
 const SERVICES_URL = APP_ROUTES.SERVICES;
@@ -501,13 +501,14 @@ export const CATEGORIES: CategoryEntry[] = [
     color: '#8B5CF6',
     services: [
       { id: 'property',     path: APP_ROUTES.PROPERTY,    labelRu: 'Поиск',          labelEn: 'Property',     icon: Search,    status: 'available', verticalId: 'property' },
-      { id: 'rent-short',   path: '/property/rent/short-term', labelRu: 'Краткосрочная аренда', labelEn: 'Short rent', icon: KeyRound, status: 'available' },
-      { id: 'rent-long',    path: '/property/rent/long-term',  labelRu: 'Долгосрочная аренда',  labelEn: 'Long rent',  icon: HomeIcon, status: 'available' },
+      { id: 'rent-short',   path: APP_ROUTES.PROPERTY_RENT_SHORT, labelRu: 'Краткосрочная аренда', labelEn: 'Short rent', icon: KeyRound, status: 'available' },
+      { id: 'rent-long',    path: APP_ROUTES.PROPERTY_RENT_LONG,  labelRu: 'Долгосрочная аренда',  labelEn: 'Long rent',  icon: HomeIcon, status: 'available' },
       { id: 'offplan',      path: APP_ROUTES.OFFPLAN,     labelRu: 'Новостройки',    labelEn: 'Off-plan',     icon: Building2, status: 'available' },
       { id: 'resale',       path: APP_ROUTES.RESALE,      labelRu: 'Вторичка',       labelEn: 'Resale',       icon: Building2, status: 'available' },
       { id: 'developers',   path: APP_ROUTES.DEVELOPERS,  labelRu: 'Застройщики',    labelEn: 'Developers',   icon: Users,     status: 'available' },
-      { id: 'roi-hub',      path: APP_ROUTES.INVEST,      labelRu: 'ROI Hub',        labelEn: 'ROI Hub',      icon: BarChart3, status: 'available' },
-      { id: 'due-diligence',path: APP_ROUTES.INVEST,      labelRu: 'Due Diligence',  labelEn: 'Due Diligence',icon: Shield,    status: 'soon' },
+      { id: 'business-invest', path: APP_ROUTES.INVEST_BUSINESS, labelRu: 'Бизнес и франшизы', labelEn: 'Business & franchises', icon: Briefcase, status: 'available' },
+      { id: 'roi-hub',      path: APP_ROUTES.INVEST_DASHBOARD, labelRu: 'Портфель и ROI', labelEn: 'Portfolio & ROI', icon: BarChart3, status: 'available' },
+      { id: 'due-diligence',path: APP_ROUTES.INVEST_KNOWLEDGE, labelRu: 'База знаний',    labelEn: 'Knowledge base', icon: BookOpen, status: 'available' },
     ],
   },
 
@@ -770,6 +771,21 @@ export const CLUSTER_LIFE_SITUATIONS: ClusterLifeSituationLink[] = [
   { clusterId: 'build',  situationCode: 'developer',      weight: 100, isPrimary: true  },
   { clusterId: 'build',  situationCode: 'business',       weight: 60,  isPrimary: false },
 ];
+
+/**
+ * Dominant catalog cluster for a life-situation code (SSOT `CLUSTER_LIFE_SITUATIONS`).
+ * Used for marketing deep links (`/discover?cluster=…`) when the same code maps to several clusters.
+ */
+export function resolvePrimaryClusterForLifeSituation(situationCode: string): ClusterId | null {
+  const links = CLUSTER_LIFE_SITUATIONS.filter((l) => l.situationCode === situationCode);
+  if (links.length === 0) return null;
+  const sorted = [...links].sort((a, b) => {
+    if (b.weight !== a.weight) return b.weight - a.weight;
+    if (a.isPrimary !== b.isPrimary) return a.isPrimary ? -1 : 1;
+    return String(a.clusterId).localeCompare(String(b.clusterId));
+  });
+  return sorted[0].clusterId;
+}
 
 /** Index `LIFE_SITUATIONS` by code for O(1) lookup. */
 export const LIFE_SITUATIONS_BY_CODE: Record<string, LifeSituationEntry> = Object.fromEntries(

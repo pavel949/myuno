@@ -5,3 +5,4 @@
  * Always import from here, not from individual files inside `src/lib/catalog/`.
  */
 export * from './taxonomy';
+export * from './serviceLookup';

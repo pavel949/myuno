@@ -445,4 +445,69 @@ export const ru: Record<string, string> = {
   'auth.trust.free': 'Аккаунт бесплатно',
   'auth.social.users': 'Тысячи семей',
   'auth.social.location': 'Phuket, Thailand · с 2017',
+
+  // Welcome — быстрый доступ как на Госуслугах
+  'welcome.gosuslugi.title': 'Популярное на платформе',
+  'welcome.gosuslugi.subtitle':
+    'Разделы, жизненные ситуации и категории. Откроется навигатор с фильтром и поиском.',
+  'welcome.gosuslugi.sections': 'Разделы',
+  'welcome.gosuslugi.situations': 'Жизненные ситуации',
+  'welcome.gosuslugi.categories': 'Категории',
+  'welcome.gosuslugi.scrollHint': 'Листайте длинные ряды вбок',
+
+  // Welcome — hero, persona paths, benefits, footer (single-narrative layout)
+  'welcome.hero.kickerAccent': 'ПХУКЕТ',
+  'welcome.hero.kickerRest': '· LIVE',
+  'welcome.hero.titleLine1': 'Один аккаунт —',
+  'welcome.hero.titleLine2': 'вся жизнь за границей',
+  'welcome.hero.subtitle':
+    'Услуги, впечатления, аренда и покупка, инвестиции и управление активами — и кабинет под вашу роль. Всё проверено, прозрачно, под одним аккаунтом.',
+  'welcome.hero.ctaSignup': 'Начать за 60 секунд',
+  'welcome.hero.ctaInvestor': 'Я инвестор',
+  'welcome.hero.statServices': 'доступных сервисов',
+  'welcome.hero.statSections': 'разделов платформы',
+  'welcome.hero.statSituations': 'жизненных ситуаций',
+  'welcome.hero.statSupport': 'AI-консьерж и SOS',
+  'welcome.persona.sectionTitle': 'Куда зайти в первую очередь',
+  'welcome.persona.sectionLead':
+    'Три входа по смыслу: прилёт, быт на месте или капитал и недвижимость. Подсказка под карточкой — куда перейдёте.',
+  'welcome.persona.arrive.title': 'Я только прилетел',
+  'welcome.persona.arrive.subline': 'Трансфер, SIM, визы, быт на месте, поддержка 24/7',
+  'welcome.persona.arrive.hint': 'Раздел «Прибытие»',
+  'welcome.persona.arrive.aria':
+    'Сценарий прилёта: трансфер, SIM, визы, быт, поддержка. Перейти в раздел Прибытие.',
+  'welcome.persona.live.title': 'Я обустраиваю жизнь',
+  'welcome.persona.live.subline': 'Дом, услуги, медицина, еда, развлечения, поиск людей',
+  'welcome.persona.live.hint': 'Каталог Discover — все вертикали',
+  'welcome.persona.live.aria':
+    'Сценарий жизни на месте: дом, сервисы, медицина, еда. Открыть каталог Discover.',
+  'welcome.persona.invest.title': 'Недвижимость и вложения',
+  'welcome.persona.invest.subline': 'Dealbooks, ROI-расчёты, управление имуществом, юридика',
+  'welcome.persona.invest.hint': 'Раздел «Инвестиции»',
+  'welcome.persona.invest.aria':
+    'Сценарий инвестора: сделки, ROI, управление, юристы. Перейти в раздел Инвестиции.',
+  'welcome.benefits.title': 'Почему один аккаунт удобнее?',
+  'welcome.benefits.lead':
+    'Меньше хаоса в переписках — больше прозрачности в заказах и активах.',
+  'welcome.benefits.oneAccount.title': 'Всё в одном месте',
+  'welcome.benefits.oneAccount.body':
+    'Заказы, чаты с провайдерами и кабинеты под роль — в одном аккаунте, без разрозненных приложений.',
+  'welcome.benefits.history.title': 'История не теряется',
+  'welcome.benefits.history.body':
+    'Действия и привязки к объектам сохраняются при смене телефона — не начинаете с нуля.',
+  'welcome.benefits.ai.title': 'AI собирает маршрут',
+  'welcome.benefits.ai.body':
+    'Помощник предлагает цепочку сервисов под вашу цель — вы подтверждаете шаги.',
+  'welcome.clusters.lead':
+    'Каждая карточка ведёт в раздел каталога: направление → мини-приложение с рабочим маршрутом.',
+  'welcome.closing.title.line1': 'Один аккаунт.',
+  'welcome.closing.title.line2': 'Маршрут под вашу роль и задачи.',
+  'welcome.closing.subtitle':
+    'Войдите — навигатор и кабинеты подстроятся под туриста, резидента, собственника или инвестора.',
+  'welcome.closing.cta': 'Начать сейчас',
+  'welcome.footer.linkPrivacy': 'Конфиденциальность',
+  'welcome.footer.linkTerms': 'Условия',
+  'welcome.footer.linkSupport': 'Поддержка',
+  'welcome.footer.linkContact': 'Контакты',
+  'welcome.footer.copyright': '© myUNO · Phuket · Для жизни и дел за рубежом',
 };

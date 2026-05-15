@@ -38,11 +38,11 @@ function buildClusterHintStrings(
   const seen = new Set<string>();
 
   const push = (ru: string, en: string) => {
-    const key = en.trim().toLowerCase();
+    const key = (en ?? '').trim().toLowerCase();
     if (!key || seen.has(key)) return;
     seen.add(key);
-    tokensRu.push(ru);
-    tokensEn.push(en);
+    tokensRu.push(ru ?? '');
+    tokensEn.push(en ?? '');
   };
 
   for (const cat of catsWithEligibleLeaves.slice(0, MAX_CLUSTER_HINT_TOKENS)) {

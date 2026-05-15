@@ -10,9 +10,8 @@
  */
 import { LucideIcon } from 'lucide-react';
 import { BackButton } from '@/components/uno/BackButton';
+import type { ClusterId } from '@/lib/catalog';
 import { cn } from '@/lib/utils';
-
-export type ClusterId = 'arrive' | 'live' | 'manage' | 'invest' | 'legal' | 'build';
 
 interface CalmClusterHeroProps {
   clusterId: ClusterId;
@@ -56,18 +55,20 @@ export function CalmClusterHero({
         <div className="flex items-center gap-3">
           <div
             className={cn(
-              'w-11 h-11 rounded-none flex items-center justify-center flex-shrink-0',
+              'w-12 h-12 rounded-none flex items-center justify-center flex-shrink-0',
               ACCENT_BG[clusterId],
             )}
           >
-            <Icon className={cn('w-5 h-5', ACCENT_TEXT[clusterId])} />
+            <Icon className={cn('h-[22px] w-[22px]', ACCENT_TEXT[clusterId])} />
           </div>
           <div className="min-w-0 flex-1">
-            <h1 className="text-lg font-semibold text-foreground leading-tight tracking-[-0.01em]">
+            <h1 className="font-display text-h2 font-normal tracking-tight text-foreground leading-[1.1] sm:text-h1">
               {title}
             </h1>
             {subtitle && (
-              <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{subtitle}</p>
+              <p className="mt-1.5 font-sans text-body-sm leading-relaxed text-muted-foreground sm:text-body">
+                {subtitle}
+              </p>
             )}
           </div>
         </div>

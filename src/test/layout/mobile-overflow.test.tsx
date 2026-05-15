@@ -4,11 +4,12 @@
  * Background: in April 2026 `CompactFooter` shipped a static `grid-cols-6`
  * which pushed the page width past 390px on phones, forcing in-app browsers
  * (YouTube, Instagram) to fall back to a desktop-style render. We fixed it
- * to `grid-cols-2 sm:grid-cols-3 lg:grid-cols-6`. This test locks two
+ * to `grid-cols-2 sm:grid-cols-3 lg:grid-cols-6`. In May 2026 the footer
+ * was rebuilt as a slim flex layout (no grids at all). This test locks two
  * invariants in source so the regression cannot return:
  *
- *   1. Footer grids start at `grid-cols-1` or `grid-cols-2` and only widen
- *      at sm/md/lg breakpoints.
+ *   1. If the footer uses any grid, the mobile baseline column count stays
+ *      ≤ 2; a grid-less flex layout is also fine.
  *   2. Wide elements (tables, scrollers) wider than ~480px MUST sit inside
  *      a parent with `overflow-x-auto` so they scroll, not push the page.
  *
@@ -33,17 +34,17 @@ function walk(dir: string, out: string[] = []): string[] {
 }
 
 describe('mobile layout regression', () => {
-  it('CompactFooter top grid starts at grid-cols-1 or grid-cols-2', () => {
+  it('CompactFooter does not ship a mobile-breaking grid (none or ≤ 2 cols at base)', () => {
     const src = readFileSync(
       resolve(PROJECT_ROOT, 'src/components/layout/CompactFooter.tsx'),
       'utf-8',
     );
-    // Find the main grid line; assert mobile-first column count is sane.
+    // Footer may be flex-only (no grids) — that's the new canon. If it does
+    // declare grids, the mobile baseline must stay ≤ 2 columns; wider variants
+    // must hide behind sm:/md:/lg: prefixes.
     const gridMatches = src.match(/className="[^"]*\bgrid-cols-\d+[^"]*"/g) ?? [];
-    expect(gridMatches.length).toBeGreaterThan(0);
 
     for (const cls of gridMatches) {
-      // Extract base (mobile, no breakpoint prefix) grid-cols-N
       const base = cls.match(/(?<![\w:])grid-cols-(\d+)/);
       if (!base) continue;
       const n = Number(base[1]);

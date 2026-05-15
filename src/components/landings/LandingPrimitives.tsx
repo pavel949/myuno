@@ -58,7 +58,7 @@ export function LandingTrustRow({
   isRu: boolean;
 }) {
   return (
-    <ul className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-[13px] text-muted-foreground">
+    <ul className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 font-sans text-body-sm text-muted-foreground">
       {items.map((t) => {
         const Icon = t.icon;
         return (

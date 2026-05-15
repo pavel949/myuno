@@ -1,35 +1,79 @@
-import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { CalmClusterHero } from '@/components/uno/CalmClusterHero';
+import { ClusterAppCard } from '@/components/uno/ClusterAppCard';
 import { APP_ROUTES } from '@/lib/config/routes';
-import { Scale, Plane, Calculator, FileSearch, Shield, FileText } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { getServiceCatalogStatus, getServiceIcon, type ServiceStatus } from '@/lib/catalog';
+import { Scale, Plane, Calculator, FileSearch, Shield, FileText, type LucideIcon } from 'lucide-react';
 import { ClusterBreadcrumb } from '@/components/navigation/ClusterBreadcrumb';
 import { ExploreMoreRail } from '@/components/navigation/ExploreMoreRail';
 
 interface ClusterApp {
-  icon: React.ElementType;
+  serviceId: string;
   label: string;
   labelRu: string;
   desc: string;
   descRu: string;
   path: string;
-  ready: boolean;
+  fallbackIcon: LucideIcon;
+  statusOverride?: ServiceStatus;
 }
 
 const APPS: ClusterApp[] = [
-  { icon: Plane, label: 'VisaTrack', labelRu: 'Визы', desc: 'Track visa expiry & renewals', descRu: 'Отслеживайте сроки визы', path: APP_ROUTES.VISA_IMMIGRATION, ready: true },
-  { icon: Calculator, label: 'TaxNav', labelRu: 'Налоги', desc: 'Tax obligations navigator', descRu: 'Навигатор налоговых обязательств', path: APP_ROUTES.TAX_NAV, ready: true },
-  { icon: FileSearch, label: 'ContractAI', labelRu: 'Анализ договоров', desc: 'AI contract analysis', descRu: 'AI-анализ договоров', path: APP_ROUTES.CONTRACT_ANALYSIS, ready: true },
-  { icon: Shield, label: 'Insurance', labelRu: 'Страхование', desc: 'Health & property insurance', descRu: 'Медицинское и имущественное', path: APP_ROUTES.INSURANCE, ready: true },
-  { icon: FileText, label: 'Legal Services', labelRu: 'Юридические услуги', desc: 'Lawyers & notaries', descRu: 'Юристы и нотариусы', path: APP_ROUTES.LEGAL, ready: true },
+  {
+    serviceId: 'visa',
+    label: 'VisaTrack',
+    labelRu: 'Визы',
+    desc: 'Track visa expiry & renewals',
+    descRu: 'Отслеживайте сроки визы',
+    path: APP_ROUTES.VISA_IMMIGRATION,
+    fallbackIcon: Plane,
+  },
+  {
+    serviceId: 'tax',
+    label: 'TaxNav',
+    labelRu: 'Налоги',
+    desc: 'Tax obligations navigator',
+    descRu: 'Навигатор налоговых обязательств',
+    path: APP_ROUTES.TAX_NAV,
+    fallbackIcon: Calculator,
+  },
+  {
+    serviceId: 'contract-ai',
+    label: 'ContractAI',
+    labelRu: 'Анализ договоров',
+    desc: 'AI contract analysis',
+    descRu: 'AI-анализ договоров',
+    path: APP_ROUTES.CONTRACT_ANALYSIS,
+    fallbackIcon: FileSearch,
+  },
+  {
+    serviceId: 'insurance',
+    label: 'Insurance',
+    labelRu: 'Страхование',
+    desc: 'Health & property insurance',
+    descRu: 'Медицинское и имущественное',
+    path: APP_ROUTES.INSURANCE,
+    fallbackIcon: Shield,
+  },
+  {
+    serviceId: 'legal',
+    label: 'Legal Services',
+    labelRu: 'Юридические услуги',
+    desc: 'Lawyers & notaries',
+    descRu: 'Юристы и нотариусы',
+    path: APP_ROUTES.LEGAL,
+    fallbackIcon: FileText,
+  },
 ];
+
+function resolveStatus(app: ClusterApp): ServiceStatus {
+  return app.statusOverride ?? getServiceCatalogStatus(app.serviceId) ?? 'available';
+}
 
 export default function LegalClusterPage() {
   const { language } = useLanguage();
   const t = language === 'ru';
-  const navigate = useNavigate();
 
   return (
     <AppLayout>
@@ -45,35 +89,24 @@ export default function LegalClusterPage() {
         <div className="px-4 py-3">
           <ClusterBreadcrumb clusterId="legal" serviceLabelRu="Все сервисы" serviceLabelEn="All services" />
         </div>
-        <div className="px-4 space-y-3">
-          {APPS.map(app => {
-            const Icon = app.icon;
+        <div className="grid grid-cols-1 gap-3 px-4 md:grid-cols-2 xl:grid-cols-3">
+          {APPS.map((app) => {
+            const Icon = getServiceIcon(app.serviceId, app.fallbackIcon);
             return (
-              <button
-                key={app.label}
-                onClick={() => navigate(app.path)}
-                className={cn(
-                  'w-full flex items-center gap-4 p-4 rounded-none border border-border bg-card text-left',
-                  'transition-all hover:border-cluster-legal/40 hover:[box-shadow:var(--shadow-elevation-2)] ',
-                  !app.ready && 'opacity-50 pointer-events-none'
-                )}
-              >
-                <div className="w-11 h-11 rounded-none bg-cluster-legal/10 flex items-center justify-center flex-shrink-0">
-                  <Icon className="w-5 h-5 text-cluster-legal" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h3 className="font-semibold text-sm text-foreground">{t ? app.labelRu : app.label}</h3>
-                  <p className="text-xs text-muted-foreground truncate">{t ? app.descRu : app.desc}</p>
-                </div>
-                {!app.ready && (
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">Soon</span>
-                )}
-              </button>
+              <ClusterAppCard
+                key={app.path}
+                clusterId="legal"
+                icon={Icon}
+                title={t ? app.labelRu : app.label}
+                description={t ? app.descRu : app.desc}
+                path={app.path}
+                status={resolveStatus(app)}
+              />
             );
           })}
         </div>
 
-        <div className="px-4 mt-6">
+        <div className="mt-6 px-4">
           <ExploreMoreRail clusterId="legal" />
         </div>
       </div>

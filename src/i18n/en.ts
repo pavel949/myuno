@@ -445,4 +445,69 @@ export const en: Record<string, string> = {
   'auth.trust.free': 'Free account',
   'auth.social.users': 'Thousands of families',
   'auth.social.location': 'Phuket, Thailand · since 2017',
+
+  // Welcome — Gosuslugi-style catalog strips
+  'welcome.gosuslugi.title': 'Popular on the platform',
+  'welcome.gosuslugi.subtitle':
+    'Sections, life situations, and categories. Opens the navigator with the right filter and search.',
+  'welcome.gosuslugi.sections': 'Sections',
+  'welcome.gosuslugi.situations': 'Life situations',
+  'welcome.gosuslugi.categories': 'Categories',
+  'welcome.gosuslugi.scrollHint': 'Swipe long rows sideways',
+
+  // Welcome — hero, persona paths, benefits, footer (single-narrative layout)
+  'welcome.hero.kickerAccent': 'PHUKET',
+  'welcome.hero.kickerRest': '· LIVE NOW',
+  'welcome.hero.titleLine1': 'One account —',
+  'welcome.hero.titleLine2': 'your whole life abroad',
+  'welcome.hero.subtitle':
+    'Services, experiences, stays, investments and asset management — with a workspace tuned to your role. Verified, clear, and under one account.',
+  'welcome.hero.ctaSignup': 'Start in 60 seconds',
+  'welcome.hero.ctaInvestor': "I'm an investor",
+  'welcome.hero.statServices': 'services ready now',
+  'welcome.hero.statSections': 'platform sections',
+  'welcome.hero.statSituations': 'life situations',
+  'welcome.hero.statSupport': 'AI concierge & SOS',
+  'welcome.persona.sectionTitle': 'Where to step in first',
+  'welcome.persona.sectionLead':
+    'Three meaningful entry points: arrival, daily life, or capital and property. The line under each card shows where you will land.',
+  'welcome.persona.arrive.title': 'I just arrived',
+  'welcome.persona.arrive.subline': 'Transfer, SIM, visas, daily setup, 24/7 support',
+  'welcome.persona.arrive.hint': 'Arrive section',
+  'welcome.persona.arrive.aria':
+    'Arrival scenario: transfer, SIM, visas, daily setup, support. Open the Arrive section.',
+  'welcome.persona.live.title': 'I am settling in',
+  'welcome.persona.live.subline': 'Home, services, health, food, leisure, finding people',
+  'welcome.persona.live.hint': 'Discover catalog — all verticals',
+  'welcome.persona.live.aria':
+    'Settling-in scenario: home, services, health, food. Open the Discover catalog.',
+  'welcome.persona.invest.title': 'Property & investing',
+  'welcome.persona.invest.subline': 'Dealbooks, ROI math, asset management, legal cover',
+  'welcome.persona.invest.hint': 'Invest section',
+  'welcome.persona.invest.aria':
+    'Investor scenario: deals, ROI, management, legal. Open the Invest section.',
+  'welcome.benefits.title': 'Why one account is easier',
+  'welcome.benefits.lead':
+    'Less chat-thread chaos — more transparency in orders and assets.',
+  'welcome.benefits.oneAccount.title': 'Everything in one place',
+  'welcome.benefits.oneAccount.body':
+    'Orders, provider chats, and role-based workspaces — in a single account, no scattered apps.',
+  'welcome.benefits.history.title': 'Your history stays put',
+  'welcome.benefits.history.body':
+    'Actions and links to your assets persist when you change phone — you never start from scratch.',
+  'welcome.benefits.ai.title': 'AI assembles the path',
+  'welcome.benefits.ai.body':
+    'The assistant suggests a chain of services for your goal — you confirm each step.',
+  'welcome.clusters.lead':
+    'Each card opens a catalog area: direction → mini-app with a working path.',
+  'welcome.closing.title.line1': 'One account.',
+  'welcome.closing.title.line2': 'A path matched to your role and goals.',
+  'welcome.closing.subtitle':
+    'Sign in — the navigator and workspaces adapt to tourist, resident, owner, or investor.',
+  'welcome.closing.cta': 'Start now',
+  'welcome.footer.linkPrivacy': 'Privacy',
+  'welcome.footer.linkTerms': 'Terms',
+  'welcome.footer.linkSupport': 'Support',
+  'welcome.footer.linkContact': 'Contact',
+  'welcome.footer.copyright': '© myUNO · Phuket · Made for life abroad',
 };

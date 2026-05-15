@@ -3,8 +3,9 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Activity, LayoutDashboard, Megaphone, Users, GitBranch, Sparkles,
-  BarChart3, Zap, Globe, UserCog, Search, Target, User
+  BarChart3, Zap, Globe, UserCog, Search, Target, User, Magnet
 } from 'lucide-react';
+import { MCCMagnetsTab } from '@/components/admin/marketing/MCCMagnetsTab';
 import { MCCControlTowerTab } from '@/components/admin/marketing/MCCControlTowerTab';
 import { MCCOverviewTab } from '@/components/admin/marketing/MCCOverviewTab';
 import { MCCCampaignsTab } from '@/components/admin/marketing/MCCCampaignsTab';
@@ -49,6 +50,7 @@ export default function MarketingDashboard() {
     { id: 'control-tower', label: 'Control Tower', icon: Activity },
     { id: 'overview', label: isRu ? 'Обзор' : 'Overview', icon: LayoutDashboard },
     { id: 'landings', label: isRu ? 'Лендинги' : 'Landings', icon: Globe },
+    { id: 'magnets', label: isRu ? 'Магниты' : 'Magnets', icon: Magnet },
     { id: 'states', label: isRu ? 'Состояния' : 'States', icon: UserCog },
     { id: 'funnel-diag', label: isRu ? 'Воронка' : 'Funnel Diag', icon: Search },
     { id: 'campaigns', label: isRu ? 'Кампании' : 'Campaigns', icon: Megaphone },
@@ -94,6 +96,7 @@ export default function MarketingDashboard() {
           <TabsContent value="control-tower" className="mt-4"><MCCControlTowerTab /></TabsContent>
           <TabsContent value="overview" className="mt-4"><MCCOverviewTab /></TabsContent>
           <TabsContent value="landings" className="mt-4"><MCCLandingControlTab /></TabsContent>
+          <TabsContent value="magnets" className="mt-4"><MCCMagnetsTab /></TabsContent>
           <TabsContent value="states" className="mt-4"><MCCUserStatesTab /></TabsContent>
           <TabsContent value="funnel-diag" className="mt-4"><MCCFunnelDiagnosticsTab /></TabsContent>
           <TabsContent value="campaigns" className="mt-4"><MCCCampaignsTab /></TabsContent>

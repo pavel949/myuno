@@ -718,4 +718,65 @@ export const th: Record<string, string> = {
   'auth.trust.free': 'บัญชีฟรี',
   'auth.social.users': 'หลายพันครอบครัว',
   'auth.social.location': 'ภูเก็ต ประเทศไทย · ตั้งแต่ปี 2017',
+
+  'welcome.gosuslugi.title': 'ยอดนิยมบนแพลตฟอร์ม',
+  'welcome.gosuslugi.subtitle':
+    'หมวด สถานการณ์ชีวิต และหมวดหมู่ เปิดตัวนำทางพร้อมตัวกรองและการค้นหา',
+  'welcome.gosuslugi.sections': 'หมวดหลัก',
+  'welcome.gosuslugi.situations': 'สถานการณ์ชีวิต',
+  'welcome.gosuslugi.categories': 'หมวดหมู่',
+  'welcome.gosuslugi.scrollHint': 'เลื่อนแถวยาวๆ ด้านข้าง',
+
+  // Welcome — hero, persona paths, benefits, footer (single-narrative layout)
+  'welcome.hero.kickerAccent': 'ภูเก็ต',
+  'welcome.hero.kickerRest': '· LIVE',
+  'welcome.hero.titleLine1': 'บัญชีเดียว —',
+  'welcome.hero.titleLine2': 'ครอบคลุมชีวิตในต่างประเทศ',
+  'welcome.hero.subtitle':
+    'บริการ ประสบการณ์ ที่พัก การลงทุน และการจัดการสินทรัพย์ — พร้อมพื้นที่ทำงานตามบทบาทของคุณ ตรวจสอบแล้ว โปร่งใส ในบัญชีเดียว',
+  'welcome.hero.ctaSignup': 'เริ่มใน 60 วินาที',
+  'welcome.hero.ctaInvestor': 'ฉันเป็นนักลงทุน',
+  'welcome.hero.statServices': 'บริการพร้อมใช้',
+  'welcome.hero.statSections': 'หมวดบนแพลตฟอร์ม',
+  'welcome.hero.statSituations': 'สถานการณ์ชีวิต',
+  'welcome.hero.statSupport': 'AI คอนเซียร์จ & SOS',
+  'welcome.persona.sectionTitle': 'เริ่มต้นที่ไหนก่อน',
+  'welcome.persona.sectionLead':
+    'สามทางเข้าที่ตรงกับความต้องการ: การมาถึง การใช้ชีวิตประจำวัน หรือเงินทุนและอสังหา ดูคำใบ้ใต้การ์ดเพื่อรู้ว่าจะไปหน้าใด',
+  'welcome.persona.arrive.title': 'ฉันเพิ่งมาถึง',
+  'welcome.persona.arrive.subline': 'รถรับส่ง ซิม วีซ่า การตั้งหลัก ซัพพอร์ต 24/7',
+  'welcome.persona.arrive.hint': 'หมวด «การมาถึง»',
+  'welcome.persona.arrive.aria': 'สถานการณ์การมาถึง: รถรับส่ง ซิม วีซ่า การตั้งหลัก ซัพพอร์ต เปิดหมวดการมาถึง',
+  'welcome.persona.live.title': 'ฉันกำลังตั้งรกราก',
+  'welcome.persona.live.subline': 'บ้าน บริการ สุขภาพ อาหาร พักผ่อน หาคน',
+  'welcome.persona.live.hint': 'แคตตาล็อก Discover — ทุกหมวด',
+  'welcome.persona.live.aria': 'สถานการณ์ตั้งรกราก: บ้าน บริการ สุขภาพ อาหาร เปิดแคตตาล็อก Discover',
+  'welcome.persona.invest.title': 'อสังหาและการลงทุน',
+  'welcome.persona.invest.subline': 'Dealbooks คำนวณ ROI บริหารทรัพย์สิน งานกฎหมาย',
+  'welcome.persona.invest.hint': 'หมวด «การลงทุน»',
+  'welcome.persona.invest.aria': 'สถานการณ์นักลงทุน: ดีล ROI การจัดการ งานกฎหมาย เปิดหมวดการลงทุน',
+  'welcome.benefits.title': 'ทำไมบัญชีเดียวสะดวกกว่า',
+  'welcome.benefits.lead':
+    'ลดความวุ่นวายในแชต — เพิ่มความโปร่งใสในออเดอร์และทรัพย์สิน',
+  'welcome.benefits.oneAccount.title': 'ทุกอย่างในที่เดียว',
+  'welcome.benefits.oneAccount.body':
+    'ออเดอร์ แชตกับผู้ให้บริการ และพื้นที่ทำงานตามบทบาท — ในบัญชีเดียว ไม่กระจัดกระจาย',
+  'welcome.benefits.history.title': 'ประวัติไม่หาย',
+  'welcome.benefits.history.body':
+    'การกระทำและการเชื่อมโยงกับทรัพย์สินจะคงอยู่เมื่อเปลี่ยนเบอร์ — ไม่ต้องเริ่มใหม่',
+  'welcome.benefits.ai.title': 'AI ประกอบเส้นทางให้',
+  'welcome.benefits.ai.body':
+    'ผู้ช่วยจะเสนอชุดบริการตามเป้าหมายของคุณ — คุณยืนยันแต่ละขั้น',
+  'welcome.clusters.lead':
+    'แต่ละการ์ดเปิดหมวดในแคตตาล็อก: ทิศทาง → มินิแอปพร้อมเส้นทางใช้งานจริง',
+  'welcome.closing.title.line1': 'บัญชีเดียว',
+  'welcome.closing.title.line2': 'เส้นทางที่เหมาะกับบทบาทและเป้าหมายของคุณ',
+  'welcome.closing.subtitle':
+    'เข้าสู่ระบบ — นาวิเกเตอร์และพื้นที่ทำงานจะปรับตามนักท่องเที่ยว ผู้พำนัก เจ้าของ หรือผู้ลงทุน',
+  'welcome.closing.cta': 'เริ่มเลย',
+  'welcome.footer.linkPrivacy': 'ความเป็นส่วนตัว',
+  'welcome.footer.linkTerms': 'ข้อกำหนด',
+  'welcome.footer.linkSupport': 'ซัพพอร์ต',
+  'welcome.footer.linkContact': 'ติดต่อ',
+  'welcome.footer.copyright': '© myUNO · ภูเก็ต · เพื่อชีวิตและธุรกิจในต่างประเทศ',
 };
