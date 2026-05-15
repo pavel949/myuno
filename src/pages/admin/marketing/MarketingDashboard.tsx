@@ -3,9 +3,10 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Activity, LayoutDashboard, Megaphone, Users, GitBranch, Sparkles,
-  BarChart3, Zap, Globe, UserCog, Search, Target, User, Magnet
+  BarChart3, Zap, Globe, UserCog, Search, Target, User, Magnet, LayoutTemplate
 } from 'lucide-react';
 import { MCCMagnetsTab } from '@/components/admin/marketing/MCCMagnetsTab';
+import { MCCLandingBuilderTab } from '@/components/admin/marketing/MCCLandingBuilderTab';
 import { MCCControlTowerTab } from '@/components/admin/marketing/MCCControlTowerTab';
 import { MCCOverviewTab } from '@/components/admin/marketing/MCCOverviewTab';
 import { MCCCampaignsTab } from '@/components/admin/marketing/MCCCampaignsTab';
