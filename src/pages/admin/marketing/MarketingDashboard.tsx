@@ -98,6 +98,7 @@ export default function MarketingDashboard() {
           <TabsContent value="control-tower" className="mt-4"><MCCControlTowerTab /></TabsContent>
           <TabsContent value="overview" className="mt-4"><MCCOverviewTab /></TabsContent>
           <TabsContent value="landings" className="mt-4"><MCCLandingControlTab /></TabsContent>
+          <TabsContent value="builder" className="mt-4"><MCCLandingBuilderTab /></TabsContent>
           <TabsContent value="magnets" className="mt-4"><MCCMagnetsTab /></TabsContent>
           <TabsContent value="states" className="mt-4"><MCCUserStatesTab /></TabsContent>
           <TabsContent value="funnel-diag" className="mt-4"><MCCFunnelDiagnosticsTab /></TabsContent>
