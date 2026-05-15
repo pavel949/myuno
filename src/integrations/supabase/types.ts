@@ -10345,6 +10345,83 @@ export type Database = {
           },
         ]
       }
+      magnet_landings: {
+        Row: {
+          blocks: Json
+          created_at: string
+          created_by: string | null
+          hero_image_url: string | null
+          id: string
+          magnet_slug: string | null
+          pdf_url: string | null
+          published_at: string | null
+          seo_description_en: string | null
+          seo_description_ru: string | null
+          seo_title_en: string | null
+          seo_title_ru: string | null
+          slug: string
+          status: string
+          subtitle_en: string | null
+          subtitle_ru: string | null
+          theme: Json
+          title_en: string
+          title_ru: string
+          updated_at: string
+        }
+        Insert: {
+          blocks?: Json
+          created_at?: string
+          created_by?: string | null
+          hero_image_url?: string | null
+          id?: string
+          magnet_slug?: string | null
+          pdf_url?: string | null
+          published_at?: string | null
+          seo_description_en?: string | null
+          seo_description_ru?: string | null
+          seo_title_en?: string | null
+          seo_title_ru?: string | null
+          slug: string
+          status?: string
+          subtitle_en?: string | null
+          subtitle_ru?: string | null
+          theme?: Json
+          title_en?: string
+          title_ru?: string
+          updated_at?: string
+        }
+        Update: {
+          blocks?: Json
+          created_at?: string
+          created_by?: string | null
+          hero_image_url?: string | null
+          id?: string
+          magnet_slug?: string | null
+          pdf_url?: string | null
+          published_at?: string | null
+          seo_description_en?: string | null
+          seo_description_ru?: string | null
+          seo_title_en?: string | null
+          seo_title_ru?: string | null
+          slug?: string
+          status?: string
+          subtitle_en?: string | null
+          subtitle_ru?: string | null
+          theme?: Json
+          title_en?: string
+          title_ru?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "magnet_landings_magnet_slug_fkey"
+            columns: ["magnet_slug"]
+            isOneToOne: false
+            referencedRelation: "lead_magnets"
+            referencedColumns: ["slug"]
+          },
+        ]
+      }
       management_companies: {
         Row: {
           address: string | null
