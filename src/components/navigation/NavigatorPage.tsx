@@ -866,6 +866,16 @@ export default function NavigatorPage() {
 
   const clusterFromUrl = searchParams.get('cluster');
 
+  // Cluster the role can see, but the active persona has emptied via hiddenServiceIds.
+  // Drives an empty-state UI instead of silently stripping the URL param.
+  const personaEmptyClusterId = useMemo(() => {
+    if (!clusterFromUrl) return null;
+    const roleVisible = audienceClusters.some((c) => c.id === clusterFromUrl);
+    if (!roleVisible) return null;
+    const inPersona = personaClusters.some((c) => c.id === clusterFromUrl);
+    return inPersona ? null : clusterFromUrl;
+  }, [clusterFromUrl, audienceClusters, personaClusters]);
+
   useEffect(() => {
     if (!clusterFromUrl) {
       if (activeCluster !== null) {
@@ -873,12 +883,18 @@ export default function NavigatorPage() {
       }
       return;
     }
-    if (personaClusters.length === 0) return;
+    if (audienceClusters.length === 0) return;
 
     const match = personaClusters.find((c) => c.id === clusterFromUrl);
     if (match) {
       if (activeCluster !== clusterFromUrl) {
         setActiveCluster(clusterFromUrl);
+      }
+      return;
+    }
+    if (personaEmptyClusterId) {
+      if (activeCluster !== null) {
+        setActiveCluster(null);
       }
       return;
     }
@@ -891,7 +907,7 @@ export default function NavigatorPage() {
       { replace: true },
     );
     setActiveCluster(null);
-  }, [clusterFromUrl, personaClusters, activeCluster, setSearchParams]);
+  }, [clusterFromUrl, audienceClusters, personaClusters, personaEmptyClusterId, activeCluster, setSearchParams]);
 
   useEffect(() => {
     if (debouncedQuery || !activeCluster) return;
@@ -1219,6 +1235,37 @@ export default function NavigatorPage() {
                   </button>
                 </div>
               )}
+
+              {/* Persona-empty cluster notice: deep-link arrived for a section
+                  the active persona has no services in. */}
+              {personaEmptyClusterId && (() => {
+                const target = audienceClusters.find((c) => c.id === personaEmptyClusterId);
+                const label = target
+                  ? (isRu ? target.labelRu : target.labelEn)
+                  : personaEmptyClusterId;
+                return (
+                  <div className="border border-border bg-card p-6 space-y-3">
+                    <p className={appearance.emptySearch}>
+                      {isRu
+                        ? `Раздел «${label}» недоступен для выбранного профиля.`
+                        : `The “${label}” section is unavailable for the selected profile.`}
+                    </p>
+                    <p className={cn(appearance.heroHint, 'max-w-md')}>
+                      {isRu
+                        ? 'Переключите профиль на вкладках выше или вернитесь ко всем разделам — ниже показано то, что подходит вам сейчас.'
+                        : 'Switch the profile via the tabs above or return to all sections — what fits your current profile is shown below.'}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setClusterFilter(null)}
+                      className={appearance.filterLink}
+                    >
+                      <X className="w-3 h-3" />
+                      {isRu ? 'Все разделы' : 'All sections'}
+                    </button>
+                  </div>
+                );
+              })()}
 
               {/* ── Cluster sections ──────────────────────── */}
               <div className="space-y-10">

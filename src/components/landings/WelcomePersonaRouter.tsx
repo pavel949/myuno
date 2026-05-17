@@ -3,12 +3,12 @@
  */
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plane, Home, TrendingUp } from 'lucide-react';
+import { Plane, Home, TrendingUp, Building2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { cn } from '@/lib/utils';
 
-export type WelcomeEntryId = 'arrive' | 'live' | 'invest';
+export type WelcomeEntryId = 'arrive' | 'live' | 'invest' | 'manage';
 
 /**
  * Deep-link helper: marks traffic from Welcome so downstream surfaces can tune defaults.
@@ -70,10 +70,19 @@ export function WelcomePersonaRouter() {
       target: buildWelcomeNavigatorHref(APP_ROUTES.INVEST_CLUSTER, 'invest'),
       Icon: TrendingUp,
     },
+    {
+      id: 'manage',
+      title: t('welcome.persona.manage.title'),
+      subline: t('welcome.persona.manage.subline'),
+      hint: t('welcome.persona.manage.hint'),
+      aria: t('welcome.persona.manage.aria'),
+      target: buildWelcomeNavigatorHref(APP_ROUTES.FOR_MANAGEMENT_COMPANIES, 'manage'),
+      Icon: Building2,
+    },
   ];
 
   return (
-    <div className="grid grid-cols-1 gap-px overflow-hidden rounded-none border border-border bg-border/50 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-px overflow-hidden rounded-none border border-border bg-border/50 sm:grid-cols-2 lg:grid-cols-4">
       {cards.map(({ id, title, subline, hint, aria, target, Icon }) => (
         <button
           key={id}

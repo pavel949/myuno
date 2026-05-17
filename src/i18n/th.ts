@@ -755,6 +755,11 @@ export const th: Record<string, string> = {
   'welcome.persona.invest.subline': 'Dealbooks คำนวณ ROI บริหารทรัพย์สิน งานกฎหมาย',
   'welcome.persona.invest.hint': 'หมวด «การลงทุน»',
   'welcome.persona.invest.aria': 'สถานการณ์นักลงทุน: ดีล ROI การจัดการ งานกฎหมาย เปิดหมวดการลงทุน',
+  'welcome.persona.manage.title': 'ฉันบริหารอสังหาริมทรัพย์',
+  'welcome.persona.manage.subline': 'ปล่อยเช่า งานปฏิบัติการ รายงานเจ้าของ การจ่ายเงิน',
+  'welcome.persona.manage.hint': 'หมวด «การบริหาร»',
+  'welcome.persona.manage.aria':
+    'สถานการณ์เจ้าของและผู้ดำเนินการ: เช่า รายงาน การจ่ายเงิน เปิดพอร์ทัลบริษัทบริหารทรัพย์สิน',
   'welcome.benefits.title': 'ทำไมบัญชีเดียวสะดวกกว่า',
   'welcome.benefits.lead':
     'ลดความวุ่นวายในแชต — เพิ่มความโปร่งใสในออเดอร์และทรัพย์สิน',

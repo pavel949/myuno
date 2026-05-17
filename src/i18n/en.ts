@@ -486,6 +486,11 @@ export const en: Record<string, string> = {
   'welcome.persona.invest.hint': 'Invest section',
   'welcome.persona.invest.aria':
     'Investor scenario: deals, ROI, management, legal. Open the Invest section.',
+  'welcome.persona.manage.title': 'I manage property',
+  'welcome.persona.manage.subline': 'Rentals, operations, owner reports, payouts',
+  'welcome.persona.manage.hint': 'Manage section',
+  'welcome.persona.manage.aria':
+    'Owner and operator scenario: rentals, reports, payouts. Open the property-management portal.',
   'welcome.benefits.title': 'Why one account is easier',
   'welcome.benefits.lead':
     'Less chat-thread chaos — more transparency in orders and assets.',

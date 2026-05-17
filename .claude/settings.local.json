@@ -11,7 +11,13 @@
       "Bash(mkdir -p /tmp/design-bundle)",
       "Bash(cp \"C:\\\\Users\\\\pavel\\\\.claude\\\\projects\\\\c--Users-pavel-OneDrive-Apps-myUNO-myuno\\\\c09d778b-f727-4f3c-8fb3-7b20bc1ec3b1\\\\tool-results\\\\webfetch-1778570652299-k509w8.bin\" ./bundle.tar.gz)",
       "Bash(tar -tzf bundle.tar.gz)",
-      "PowerShell(npm run build 2>&1)"
+      "PowerShell(npm run build 2>&1)",
+      "Bash(PowerShell -Command \"Get-ChildItem 'c:\\\\Users\\\\pavel\\\\OneDrive\\\\Apps\\\\myUNO\\\\myuno\\\\src\\\\i18n' | Select-Object Name\")",
+      "Bash(PowerShell -Command \"Get-Content 'c:\\\\Users\\\\pavel\\\\OneDrive\\\\Apps\\\\myUNO\\\\myuno\\\\src\\\\styles\\\\onboarding.css' | Select-String -Pattern 'z-index|--z-' | Select-Object -First 10\")",
+      "PowerShell(cd 'c:\\\\Users\\\\pavel\\\\OneDrive\\\\Apps\\\\myUNO\\\\myuno'; Get-ChildItem src/components -Recurse -Directory | Where-Object { $_.Name -match 'welcome|landing|hero' })",
+      "PowerShell(cd 'c:\\\\Users\\\\pavel\\\\OneDrive\\\\Apps\\\\myUNO\\\\myuno'; Get-ChildItem src -File | Where-Object { $_.Name -match 'App|Routes|Navigator' })",
+      "PowerShell(cd 'c:\\\\Users\\\\pavel\\\\OneDrive\\\\Apps\\\\myUNO\\\\myuno'; Get-ChildItem docs -Recurse -File 2>/dev/null | Where-Object { $_.Name -match 'segmentation|catalogue|canonical' } | Select-Object FullName)",
+      "PowerShell(npx tsc --noEmit 2>&1)"
     ]
   }
 }

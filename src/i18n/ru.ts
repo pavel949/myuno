@@ -486,6 +486,11 @@ export const ru: Record<string, string> = {
   'welcome.persona.invest.hint': 'Раздел «Инвестиции»',
   'welcome.persona.invest.aria':
     'Сценарий инвестора: сделки, ROI, управление, юристы. Перейти в раздел Инвестиции.',
+  'welcome.persona.manage.title': 'Управляю недвижимостью',
+  'welcome.persona.manage.subline': 'Сдача в аренду, операционка, отчёты владельцам, выплаты',
+  'welcome.persona.manage.hint': 'Раздел «Управление»',
+  'welcome.persona.manage.aria':
+    'Сценарий собственника и оператора: аренда, отчёты, выплаты. Открыть портал для управляющих компаний.',
   'welcome.benefits.title': 'Почему один аккаунт удобнее?',
   'welcome.benefits.lead':
     'Меньше хаоса в переписках — больше прозрачности в заказах и активах.',
