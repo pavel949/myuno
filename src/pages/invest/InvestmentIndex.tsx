@@ -252,7 +252,7 @@ export default function InvestmentIndex() {
             </section>
           )}
 
-          {/* Raise funding CTA */}
+          {/* Developer project submission CTA */}
           <section className="rounded-none bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 p-5 space-y-3">
             <div className="flex items-start gap-3">
               <div className="p-2 rounded-none bg-primary/20">
@@ -260,21 +260,21 @@ export default function InvestmentIndex() {
               </div>
               <div className="flex-1">
                 <h3 className="font-bold">
-                  {isRu ? 'Хотите привлечь инвестиции?' : 'Looking to Raise Funding?'}
+                  {isRu ? 'Разместить проект на myUNO?' : 'List your project with myUNO?'}
                 </h3>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {isRu 
-                    ? 'Разместите свой проект на платформе muUNO и получите доступ к инвесторам'
-                    : 'List your project on muUNO platform and get access to investors'
+                  {isRu
+                    ? 'Подайте проект девелопера — мы анонимизируем профиль и покажем релевантным членам buyer club.'
+                    : 'Submit your developer project — we anonymise the profile and show it to relevant buyer club members.'
                   }
                 </p>
               </div>
             </div>
-            <Button 
+            <Button
               onClick={() => navigate(APP_ROUTES.INVEST_RAISE)}
               className="w-full gap-2"
             >
-              {isRu ? 'Подать заявку' : 'Submit Application'}
+              {isRu ? 'Подать проект' : 'Submit project'}
               <ArrowRight className="h-4 w-4" />
             </Button>
           </section>

@@ -20,7 +20,7 @@ const STEPS = ['type', 'financials', 'use', 'contact'] as const;
 type Step = typeof STEPS[number];
 
 const PITCH_TYPE_OPTIONS: { v: BusinessListingType; en: string; ru: string; icon: string }[] = [
-  { v: 'developer_raise', en: 'Real Estate project — raise capital', ru: 'Девелопер: привлечь капитал', icon: '🏗️' },
+  { v: 'developer_raise', en: 'Real Estate developer — list project', ru: 'Девелопер: разместить проект', icon: '🏗️' },
   { v: 'developer_inventory', en: 'Sell remaining units / inventory', ru: 'Продать остатки квартир', icon: '🏢' },
   { v: 'business_for_sale', en: 'Sell my operating business', ru: 'Продать действующий бизнес', icon: '🏪' },
   { v: 'startup_pitch', en: 'New business / Startup idea', ru: 'Новый бизнес / Стартап', icon: '💡' },
@@ -84,8 +84,8 @@ export default function InvestmentPitch() {
             </h2>
             <p className="text-muted-foreground text-sm">
               {isRu
-                ? 'Наша команда рассмотрит ваш проект и свяжется в течение 48 часов. После подписания NDA — выведем в анонимный листинг.'
-                : 'Our team will review your project and reach out within 48 hours. After NDA — we publish as an anonymous listing.'}
+                ? 'Наша команда рассмотрит проект и свяжется в течение 48 часов. После подписания NDA — опубликуем анонимизированный профиль проекта в deal room.'
+                : 'Our team will review the project and reach out within 48 hours. After NDA — we publish an anonymised project profile in the deal room.'}
             </p>
             <div className="flex flex-col sm:flex-row gap-2 justify-center">
               <Button onClick={() => navigate(APP_ROUTES.INVEST)} variant="outline">
@@ -104,9 +104,9 @@ export default function InvestmentPitch() {
   return (
     <>
       <Helmet>
-        <title>{isRu ? 'Pitch your project | myUNO' : 'Pitch your project | myUNO'}</title>
+        <title>{isRu ? 'Подать проект | myUNO' : 'Submit your project | myUNO'}</title>
       </Helmet>
-      <MiniAppLayout title={isRu ? 'Подать проект' : 'Pitch project'} showSearch={false}>
+      <MiniAppLayout title={isRu ? 'Подать проект' : 'Submit project'} showSearch={false}>
         <div className="space-y-4 pb-10">
           {/* Progress */}
           <div className="flex gap-1.5">
@@ -174,7 +174,7 @@ export default function InvestmentPitch() {
                 <h2 className="font-bold text-lg">{isRu ? 'Финансы' : 'Financials'}</h2>
 
                 <div className="space-y-1.5">
-                  <Label>{isRu ? 'Объём (тикет / привлечение)' : 'Ask amount / raise size'}</Label>
+                  <Label>{isRu ? 'Размер проекта (бюджет)' : 'Project size (budget)'}</Label>
                   <Select value={askRange} onValueChange={(v) => setAskRange(v as CapitalRangeBand)}>
                     <SelectTrigger>
                       <SelectValue placeholder={isRu ? 'Выберите диапазон' : 'Select range'} />
@@ -283,7 +283,7 @@ export default function InvestmentPitch() {
                 disabled={mutation.isPending || !name || !email}
               >
                 {mutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                {isRu ? 'Подать проект' : 'Submit pitch'}
+                {isRu ? 'Подать проект' : 'Submit project'}
               </Button>
             )}
           </div>

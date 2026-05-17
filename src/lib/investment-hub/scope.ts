@@ -23,8 +23,8 @@ export const INVESTMENT_HUB_ROLES: Array<{
     labelEn: 'Project Owner',
     labelRu: 'Владелец проекта',
     labelTh: 'เจ้าของโครงการ',
-    primaryGoalEn: 'Raise capital and strategic partners with clear execution support.',
-    primaryGoalRu: 'Привлечь капитал и партнеров с прозрачной поддержкой сделки.',
+    primaryGoalEn: 'List the project for buyers and strategic partners, with clear execution support.',
+    primaryGoalRu: 'Разместить проект для покупателей и партнёров с прозрачной поддержкой сделки.',
     primaryGoalTh: 'ระดมทุนและหาพาร์ทเนอร์เชิงกลยุทธ์พร้อมการสนับสนุนการดำเนินงานที่ชัดเจน',
   },
   {

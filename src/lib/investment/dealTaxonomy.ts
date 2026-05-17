@@ -31,10 +31,10 @@ export interface DealIntentOption {
 }
 
 export const DEAL_INTENTS: DealIntentOption[] = [
-  { key: 'raise_capital',  icon: '💰', labelEn: 'Raise capital for a project', labelRu: 'Привлечь капитал в проект', descriptionEn: 'Looking for investors to fund a project', descriptionRu: 'Ищу инвесторов для проекта' },
+  { key: 'raise_capital',  icon: '💰', labelEn: 'List a developer project', labelRu: 'Разместить проект девелопера', descriptionEn: 'Developer project profile for buyer club introductions', descriptionRu: 'Профиль проекта девелопера для представлений buyer club' },
   { key: 'find_buyer',     icon: '🤝', labelEn: 'Find a buyer / exit',         labelRu: 'Найти покупателя / выход',  descriptionEn: 'Selling a business or asset',           descriptionRu: 'Продаю бизнес или актив' },
-  { key: 'find_partner',   icon: '🧩', labelEn: 'Find a partner / co-investor', labelRu: 'Найти партнёра / соинвестора', descriptionEn: 'Looking for an operating or financial partner', descriptionRu: 'Ищу операционного или финансового партнёра' },
-  { key: 'pitch_idea',     icon: '💡', labelEn: 'Pitch an idea / startup',     labelRu: 'Питч идеи / стартапа',      descriptionEn: 'Early-stage concept seeking funding',   descriptionRu: 'Ранняя идея ищет финансирование' },
+  { key: 'find_partner',   icon: '🧩', labelEn: 'Find a partner / co-buyer',   labelRu: 'Найти партнёра / соинвестора', descriptionEn: 'Looking for an operating or capital partner', descriptionRu: 'Ищу операционного или финансового партнёра' },
+  { key: 'pitch_idea',     icon: '💡', labelEn: 'Submit an idea / startup',    labelRu: 'Подать идею / стартап',     descriptionEn: 'Early-stage concept project profile',   descriptionRu: 'Профиль проекта на ранней стадии' },
   { key: 'business_sale',  icon: '🏪', labelEn: 'List a business for sale',    labelRu: 'Выставить бизнес на продажу', descriptionEn: 'Operating business for sale',         descriptionRu: 'Действующий бизнес на продажу' },
   { key: 'other',          icon: '⚙️', labelEn: 'Other',                       labelRu: 'Другое',                    descriptionEn: 'Custom deal type',                      descriptionRu: 'Другой тип сделки' },
 ];
@@ -84,7 +84,7 @@ export const DEAL_CATEGORIES: DealCategoryGroup[] = [
       { key: 'startup_early',    labelEn: 'Early-stage startup',     labelRu: 'Стартап ранней стадии' },
       { key: 'tech_app',         labelEn: 'Tech / App',              labelRu: 'Tech / App' },
       { key: 'social_enterprise', labelEn: 'Social enterprise',      labelRu: 'Социальное предприятие' },
-      { key: 'project_pitch',    labelEn: 'Project pitch (pre-ideation)', labelRu: 'Питч идеи' },
+      { key: 'project_pitch',    labelEn: 'Project profile (pre-ideation)', labelRu: 'Профиль проекта (пре-идея)' },
     ],
   },
   {

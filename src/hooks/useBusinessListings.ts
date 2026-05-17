@@ -68,9 +68,9 @@ export const BUSINESS_ASSET_CLASSES: { key: BusinessAssetClass; en: string; ru: 
 
 export const LISTING_TYPE_LABELS: Record<BusinessListingType, { en: string; ru: string }> = {
   business_for_sale: { en: 'Business for sale', ru: 'Готовый бизнес' },
-  developer_raise: { en: 'Developer raising capital', ru: 'Девелопер привлекает капитал' },
+  developer_raise: { en: 'Developer project listing', ru: 'Проект девелопера' },
   developer_inventory: { en: 'Developer inventory sale', ru: 'Остатки от девелопера' },
-  startup_pitch: { en: 'Startup pitch', ru: 'Стартап / идея' },
+  startup_pitch: { en: 'Startup / idea', ru: 'Стартап / идея' },
   operating_partner_wanted: { en: 'Operating partner wanted', ru: 'Ищу управляющего партнёра' },
 };
 
