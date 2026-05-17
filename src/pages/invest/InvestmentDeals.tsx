@@ -46,8 +46,8 @@ export default function InvestmentDeals() {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>Investment Opportunities Thailand — myUNO Hub</title>
-        <meta name="description" content="Curated, anonymized investment opportunities in Thailand: real estate, hospitality, businesses, and ventures. Express interest privately through myUNO." />
+        <title>Featured Listings Thailand — myUNO Deal Rooms</title>
+        <meta name="description" content="Curated, anonymised project profiles in Thailand: real estate, hospitality, operating businesses. Express interest privately through myUNO." />
       </Helmet>
 
       {/* Hero */}
@@ -64,15 +64,15 @@ export default function InvestmentDeals() {
             Invest in Thailand
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl">
-            Curated opportunities across real estate, business, and ventures. All deals anonymized — submit interest privately.
+            Curated featured listings across real estate, operating businesses, and project profiles. All deal rooms are anonymised — submit interest privately.
           </p>
 
           <div className="mt-6 flex flex-wrap gap-3">
             <Button onClick={() => navigate(APP_ROUTES.INVEST_PITCH)} variant="outline">
-              Pitch your project
+              Submit your project
             </Button>
             <Button onClick={() => navigate('/invest/submit')} className="bg-success hover:bg-success">
-              Submit opportunity
+              List a project
             </Button>
           </div>
         </div>
@@ -125,7 +125,7 @@ export default function InvestmentDeals() {
           </div>
         ) : filteredDeals.length === 0 ? (
           <Card className="p-12 text-center">
-            <p className="text-muted-foreground mb-4">No opportunities match your filters yet.</p>
+            <p className="text-muted-foreground mb-4">No projects match your filters yet.</p>
             <Button onClick={() => { setSelectedIntent('all'); setSelectedCategory('all'); setSelectedRange('all'); setSearch(''); }} variant="outline">
               Clear filters
             </Button>

@@ -53,6 +53,23 @@ export const FORBIDDEN_SYNONYMS: readonly ForbiddenSynonym[] = [
   // From 03-tone-of-voice §15 (kept here so validate-semantic carries one map)
   // Exclusion: 'пользователь' / 'юзер' / 'лид' / 'поставщик' / 'вендор' would be too noisy
   // for the existing codebase. Will be raised after M9b content sweep.
+
+  // ── Regulatory language guard (docs/business/regulatory-language.md §3-§4) ──
+  // Scoped to `commercial` so it fires only inside public landings / i18n /
+  // marketing surfaces, not in internal CRM / ops / type / route names.
+  { forbidden: 'investment opportunity', canonical: 'featured listing / project profile', contexts: ['commercial', 'en'], source: 'business/regulatory-language §3' },
+  { forbidden: 'investment opportunities', canonical: 'featured listings / project profiles', contexts: ['commercial', 'en'], source: 'business/regulatory-language §3' },
+  { forbidden: 'guaranteed return', canonical: '(never used)', contexts: ['commercial', 'en'], source: 'business/regulatory-language §3' },
+  { forbidden: 'guaranteed returns', canonical: '(never used)', contexts: ['commercial', 'en'], source: 'business/regulatory-language §3' },
+  { forbidden: 'guaranteed yield', canonical: '(never used)', contexts: ['commercial', 'en'], source: 'business/regulatory-language §3' },
+  { forbidden: 'expected returns', canonical: 'historical comparable yield', contexts: ['commercial', 'en'], source: 'business/regulatory-language §3' },
+  { forbidden: 'Raise Funding', canonical: 'Submit your project', contexts: ['commercial', 'en'], source: 'business/regulatory-language §3' },
+  { forbidden: 'Pitch your project', canonical: 'Submit your project', contexts: ['commercial', 'en'], source: 'business/regulatory-language §3' },
+  { forbidden: 'Привлечь инвестиции', canonical: 'Подать проект', contexts: ['commercial', 'ru'], source: 'business/regulatory-language §4' },
+  { forbidden: 'Привлечь финансирование', canonical: 'Подать проект', contexts: ['commercial', 'ru'], source: 'business/regulatory-language §4' },
+  { forbidden: 'инвестиционная возможность', canonical: 'объект каталога / профиль проекта', contexts: ['commercial', 'ru'], source: 'business/regulatory-language §4' },
+  { forbidden: 'гарантированная доходность', canonical: '(никогда не используем)', contexts: ['commercial', 'ru'], source: 'business/regulatory-language §4' },
+  { forbidden: 'ожидаемая доходность', canonical: 'историческая доходность сопоставимых объектов', contexts: ['commercial', 'ru'], source: 'business/regulatory-language §4' },
 ];
 
 /** Regex-friendly flat list (helper for tooling that doesn't import full objects). */

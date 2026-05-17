@@ -4,6 +4,7 @@
  */
 import React, { useState, useMemo } from 'react';
 import { Calculator, TrendingUp, DollarSign, Clock, Copy, Check } from 'lucide-react';
+import { DisclaimerNote } from '@/components/legal/DisclaimerNote';
 
 interface Props {
   /** Pre-fill purchase price */
@@ -247,6 +248,8 @@ export function NbROICalculator({ defaultPrice, defaultRoi, defaultCamFee, compa
         >
           {copied ? <><Check className="w-4 h-4" /> Скопировано</> : <><Copy className="w-4 h-4" /> Копировать результаты</>}
         </button>
+
+        <DisclaimerNote variant="card" className="mt-3" />
       </div>
     </div>
   );

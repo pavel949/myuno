@@ -108,9 +108,9 @@ ${description}
             {isRu ? 'Спасибо за заявку!' : 'Thank You!'}
           </h2>
           <p className="text-muted-foreground max-w-sm">
-            {isRu 
-              ? 'Наш инвестиционный эксперт свяжется с вами в течение 24 часов для обсуждения деталей.'
-              : 'Our investment expert will contact you within 24 hours to discuss details.'
+            {isRu
+              ? 'Наш менеджер свяжется с вами в течение 24 часов для обсуждения деталей проекта.'
+              : 'Our team will contact you within 24 hours to discuss the project.'
             }
           </p>
           <Button onClick={() => navigate(APP_ROUTES.INVEST)} className="mt-4">
@@ -124,11 +124,11 @@ ${description}
   return (
     <>
       <Helmet>
-        <title>{isRu ? 'Привлечь инвестиции | myUNO' : 'Raise Funding | myUNO'}</title>
+        <title>{isRu ? 'Подать проект девелопера | myUNO' : 'Submit your project | myUNO'}</title>
       </Helmet>
 
       <MiniAppLayout
-        title={isRu ? 'Привлечь инвестиции' : 'Raise Funding'}
+        title={isRu ? 'Подать проект' : 'Submit your project'}
         showSearch={false}
       >
         <div className="space-y-6">
@@ -245,7 +245,7 @@ ${description}
 
                 <div className="space-y-2">
                   <Label htmlFor="fundingGoal">
-                    {isRu ? 'Цель финансирования (USD) *' : 'Funding Goal (USD) *'}
+                    {isRu ? 'Бюджет проекта (USD) *' : 'Project budget (USD) *'}
                   </Label>
                   <Input
                     id="fundingGoal"
@@ -262,9 +262,9 @@ ${description}
                   </Label>
                   <Textarea
                     id="description"
-                    placeholder={isRu 
-                      ? 'Расскажите о проекте, его преимуществах и планируемой доходности...'
-                      : 'Tell us about the project, its advantages and expected returns...'
+                    placeholder={isRu
+                      ? 'Расскажите о проекте, его преимуществах и сопоставимых объектах в локации...'
+                      : 'Tell us about the project, its advantages and comparable units in the area...'
                     }
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
@@ -364,9 +364,9 @@ ${description}
               </div>
 
               <p className="text-xs text-center text-muted-foreground">
-                {isRu 
-                  ? 'Наш инвестиционный эксперт свяжется с вами в течение 24 часов'
-                  : 'Our investment expert will contact you within 24 hours'
+                {isRu
+                  ? 'Наш менеджер свяжется с вами в течение 24 часов'
+                  : 'Our team will contact you within 24 hours'
                 }
               </p>
             </div>

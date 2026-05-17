@@ -180,7 +180,7 @@ export default function InvestInThailand() {
             </CardContent>
           </Card>
 
-          {/* CTA: Pitch */}
+          {/* CTA: Developer project submission */}
           <Card className="bg-gradient-to-br from-primary/10 to-accent/5 border-primary/20">
             <CardContent className="p-5 space-y-3">
               <div className="flex items-center gap-2">
@@ -191,11 +191,11 @@ export default function InvestInThailand() {
               </div>
               <p className="text-sm text-muted-foreground">
                 {isRu
-                  ? 'Девелоперы, операторы, основатели: подайте проект — мы покажем его релевантным инвесторам анонимно.'
-                  : 'Developers, operators, founders: pitch your project — we match anonymously to relevant investors.'}
+                  ? 'Девелоперы, операторы, основатели: подайте проект — мы анонимизируем профиль и покажем релевантным членам buyer club.'
+                  : 'Developers, operators, founders: submit your project — we anonymise the profile and show it to relevant buyer club members.'}
               </p>
               <Button onClick={() => navigate('/invest/submit')} className="w-full gap-1.5">
-                {isRu ? 'Подать проект' : 'Pitch your project'} <ArrowRight className="h-4 w-4" />
+                {isRu ? 'Подать проект' : 'Submit your project'} <ArrowRight className="h-4 w-4" />
               </Button>
             </CardContent>
           </Card>

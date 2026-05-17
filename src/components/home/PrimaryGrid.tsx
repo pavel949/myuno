@@ -79,7 +79,7 @@ const SETS: Record<string, TileSet> = {
     },
     mini: [
       { to: '/clearview',         icon: ScanSearch, labelEn: 'ClearView', labelRu: 'ClearView' },
-      { to: APP_ROUTES.PROPERTY,  icon: TrendingUp, labelEn: 'Returns',   labelRu: 'Доходность' },
+      { to: APP_ROUTES.PROPERTY,  icon: TrendingUp, labelEn: 'Yield data', labelRu: 'Доходность' },
       { to: APP_ROUTES.SUPPORT,   icon: Banknote,   labelEn: 'Capital',   labelRu: 'Капитал' },
     ],
   },

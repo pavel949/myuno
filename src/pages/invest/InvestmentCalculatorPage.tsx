@@ -305,8 +305,8 @@ export default function InvestmentCalculatorPage() {
                 </Button>
                 <p className="text-[11px] text-muted-foreground text-center">
                   {t({
-                    ru: 'Расчёт ориентировочный. Не является инвестиционной рекомендацией.',
-                    en: 'Indicative calculation. Not an investment recommendation.',
+                    ru: 'Только историческая статистика и сопоставимые объекты. Это не финансовый совет и не обещание будущих результатов. myUNO — площадка по недвижимости, а не инвестиционный консультант.',
+                    en: 'Historical and comparable data only. Not financial advice and not a guarantee of future performance. myUNO is a real-estate marketplace, not an investment adviser.',
                   })}
                 </p>
               </CardContent>

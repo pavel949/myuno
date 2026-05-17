@@ -14,6 +14,7 @@ import {
 } from '@/lib/investment/dealTaxonomy';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { DisclaimerNote } from '@/components/legal/DisclaimerNote';
 
 export default function InvestmentDealPublicDetail() {
   const { id } = useParams<{ id: string }>();
@@ -38,8 +39,8 @@ export default function InvestmentDealPublicDetail() {
       <AppLayout showHeader={false} showBottomNav usePageContainer={false}>
         <div className="container max-w-3xl mx-auto p-8 text-center">
           <h1 className="text-2xl font-bold mb-2">Deal not found</h1>
-          <p className="text-muted-foreground mb-4">This opportunity may have been delisted or moved.</p>
-          <Button onClick={() => navigate(APP_ROUTES.INVEST_DEALS_BOARD)}>Browse all opportunities</Button>
+          <p className="text-muted-foreground mb-4">This project may have been delisted or moved.</p>
+          <Button onClick={() => navigate(APP_ROUTES.INVEST_DEALS_BOARD)}>Browse all projects</Button>
         </div>
       </AppLayout>
     );
@@ -55,7 +56,7 @@ export default function InvestmentDealPublicDetail() {
         <title>{`${categoryLabel} — ${rangeLabel} | myUNO Capital`}</title>
         <meta
           name="description"
-          content={deal.teaser_public ?? `Anonymized investment opportunity in ${deal.location_display ?? 'Thailand'}`}
+          content={deal.teaser_public ?? `Anonymised project profile in ${deal.location_display ?? 'Thailand'}`}
         />
       </Helmet>
 
@@ -69,7 +70,7 @@ export default function InvestmentDealPublicDetail() {
             className="gap-1.5 -ml-2"
           >
             <ArrowLeft className="h-4 w-4" />
-            All opportunities
+            All projects
           </Button>
 
           {/* Hero */}
@@ -141,9 +142,10 @@ export default function InvestmentDealPublicDetail() {
               <Card>
                 <CardContent className="p-4 space-y-1">
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <TrendingUp className="h-3.5 w-3.5" /> Target IRR
+                    <TrendingUp className="h-3.5 w-3.5" /> Comparable IRR
                   </div>
                   <div className="font-semibold text-sm">{Number(deal.expected_irr).toFixed(1)}%</div>
+                  <p className="text-[10px] text-muted-foreground leading-snug">Based on comparable units. Not a forecast.</p>
                 </CardContent>
               </Card>
             )}
@@ -153,7 +155,7 @@ export default function InvestmentDealPublicDetail() {
           {deal.description_public && (
             <Card>
               <CardContent className="p-5 space-y-3">
-                <h2 className="font-bold text-lg">About this opportunity</h2>
+                <h2 className="font-bold text-lg">About this project</h2>
                 <p className="whitespace-pre-line text-sm leading-relaxed text-foreground/85">
                   {deal.description_public}
                 </p>
@@ -161,12 +163,15 @@ export default function InvestmentDealPublicDetail() {
             </Card>
           )}
 
+          {/* Regulatory disclaimer near any yield / IRR / capital-related block */}
+          <DisclaimerNote variant="card" />
+
           {/* Anonymity disclosure */}
           <Card className="border-primary/40 bg-primary/5">
             <CardContent className="p-4 flex gap-3">
               <Shield className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
               <div className="space-y-1">
-                <div className="font-semibold text-sm">All opportunities are anonymized</div>
+                <div className="font-semibold text-sm">All project profiles are anonymised</div>
                 <p className="text-xs text-muted-foreground">
                   Identifying details (company name, exact address, financials) are shared only after
                   myUNO qualifies your interest. All communication runs through our team — we never
@@ -180,9 +185,9 @@ export default function InvestmentDealPublicDetail() {
 
           {/* Secondary CTA */}
           <div className="text-center space-y-2">
-            <p className="text-sm text-muted-foreground">Have a similar opportunity to list?</p>
+            <p className="text-sm text-muted-foreground">Have a similar project to list?</p>
             <Button variant="outline" onClick={() => navigate(APP_ROUTES.INVEST_SUBMIT)} className="gap-2">
-              Submit your opportunity
+              Submit your project
             </Button>
           </div>
         </div>

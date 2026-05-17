@@ -100,17 +100,17 @@ export default function InvestmentSubmit() {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>Submit your opportunity — myUNO Investment Hub</title>
-        <meta name="description" content="Привлеките капитал, найдите покупателя или партнёра в Таиланде. Анонимная подача заявки в myUNO Investment Hub." />
+        <title>Submit your project — myUNO Deal Rooms</title>
+        <meta name="description" content="Подайте проект девелопера, найдите покупателя или партнёра в Таиланде. Анонимизированный профиль проекта в deal room myUNO." />
       </Helmet>
 
       <div className="max-w-3xl mx-auto px-4 py-8">
         <button onClick={() => navigate(APP_ROUTES.INVEST)} className="mb-4 text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-2">
-          <ArrowLeft className="w-4 h-4" /> Investment Hub
+          <ArrowLeft className="w-4 h-4" /> Deal Rooms
         </button>
 
         <div className="mb-6">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">Submit your opportunity</h1>
+          <h1 className="text-3xl md:text-4xl font-bold mb-2">Submit your project</h1>
           <p className="text-muted-foreground">Шаг {step} из {totalSteps}</p>
           <div className="mt-3 h-1 bg-muted rounded-full overflow-hidden">
             <motion.div className="h-full bg-primary" initial={{ width: 0 }} animate={{ width: `${pct}%` }} />
@@ -140,7 +140,7 @@ export default function InvestmentSubmit() {
           {step === 2 && (
             <div className="space-y-3">
               <h2 className="text-xl font-semibold mb-2">Category</h2>
-              <p className="text-sm text-muted-foreground mb-3">Выберите класс актива или тип возможности</p>
+              <p className="text-sm text-muted-foreground mb-3">Выберите класс актива или тип проекта</p>
               <Select value={form.category} onValueChange={(v) => set('category', v)}>
                 <SelectTrigger><SelectValue placeholder="Выберите категорию" /></SelectTrigger>
                 <SelectContent className="max-h-[60vh]">
@@ -159,13 +159,13 @@ export default function InvestmentSubmit() {
 
           {step === 3 && (
             <div className="space-y-4">
-              <h2 className="text-xl font-semibold">Opportunity details</h2>
+              <h2 className="text-xl font-semibold">Project details</h2>
               <div>
                 <Label>Title (internal — для админа) *</Label>
                 <Input value={form.title_private} onChange={(e) => set('title_private', e.target.value)} placeholder="Phuket beachfront restaurant — owner exit" maxLength={150} />
               </div>
               <div>
-                <Label>One-line public teaser * (макс. 150 символов, будет показано инвесторам)</Label>
+                <Label>One-line public teaser * (макс. 150 символов, будет показано членам buyer club)</Label>
                 <Input value={form.teaser_public} onChange={(e) => set('teaser_public', e.target.value)} placeholder="Profitable beachfront F&B venue, $2M EBITDA, owner exit" maxLength={150} />
               </div>
               <div>
@@ -174,7 +174,7 @@ export default function InvestmentSubmit() {
               </div>
               <div>
                 <Label>Description (приватная, до 1000 символов)</Label>
-                <Textarea value={form.description_private} onChange={(e) => set('description_private', e.target.value)} maxLength={1000} rows={5} placeholder="Расскажите подробнее о возможности — финансы, команда, причины, юр. структура..." />
+                <Textarea value={form.description_private} onChange={(e) => set('description_private', e.target.value)} maxLength={1000} rows={5} placeholder="Расскажите подробнее о проекте — финансы, команда, причины, юр. структура..." />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -209,8 +209,9 @@ export default function InvestmentSubmit() {
                   <Input type="number" value={form.target_timeline_months} onChange={(e) => set('target_timeline_months', e.target.value)} placeholder="6" />
                 </div>
                 <div>
-                  <Label>Expected IRR (%)</Label>
+                  <Label>Historical comparable IRR (%) — для внутреннего ревью</Label>
                   <Input type="number" step="0.1" value={form.expected_irr} onChange={(e) => set('expected_irr', e.target.value)} placeholder="15" />
+                  <p className="text-[11px] text-muted-foreground mt-1">Based on comparable units. Not shown publicly as a forecast.</p>
                 </div>
               </div>
             </div>
@@ -272,7 +273,7 @@ export default function InvestmentSubmit() {
               </div>
               <Label className="flex items-start gap-3 p-4 border rounded-none cursor-pointer">
                 <Checkbox checked={form.consent} onCheckedChange={(v) => set('consent', !!v)} className="mt-0.5" />
-                <span className="text-sm">My opportunity will be <strong>anonymized</strong> by the myUNO team before being shown to investors. Personal details, exact location and identity remain private until I approve an introduction.</span>
+                <span className="text-sm">My project profile will be <strong>anonymised</strong> by the myUNO team before being shown to buyer club members. Personal details, exact location and identity remain private until I approve an introduction.</span>
               </Label>
             </div>
           )}
@@ -288,7 +289,7 @@ export default function InvestmentSubmit() {
             ) : (
               <Button disabled={!canNext() || submitMutation.isPending} onClick={handleSubmit}>
                 {submitMutation.isPending ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Check className="w-4 h-4 mr-1" />}
-                Submit opportunity
+                Submit project
               </Button>
             )}
           </div>
