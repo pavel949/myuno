@@ -12,8 +12,11 @@ dist
 dist-ssr
 *.local
 
-# Export data (large JSON files)
+# Export data (large JSON files) and generated artifacts
 tmp/
+mnt/
+.design-audit/
+.audit/
 
 # Environment variables
 .env

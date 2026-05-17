@@ -311,7 +311,6 @@ export const WalletCards = lazy(() => import('@/pages/wallet/WalletCards'));
 export const SOS = lazy(() => import('@/pages/SOS'));
 export const VipConcierge = lazy(() => import('@/pages/VipConcierge'));
 export const StartOnboarding = lazy(() => import('@/pages/StartOnboarding'));
-export const StartOnboardingV2 = lazy(() => import('@/pages/StartOnboardingV2'));
 export const Support = lazy(() => import('@/pages/Support'));
 export const OrderTracking = lazy(() => import('@/pages/orders/OrderTracking'));
 export const AdvanceRequested = lazy(() => import('@/pages/booking/AdvanceRequested'));
