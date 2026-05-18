@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from '@/components/ui/sheet';
 import { supabase } from '@/integrations/supabase/client';
+import { getOrCreateContactByEmail } from '@/lib/crm/getOrCreateContact';
 import { toast } from 'sonner';
 
 interface Props {
