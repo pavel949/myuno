@@ -1,68 +1,72 @@
-# План: полный аудит дубликатов myUNO
+# Wave 1 · UNIQUE на `crm_contacts.email`
 
-Аудит **только на чтение**. Никаких правок кода/БД в этом проходе — на выходе отчёт + ранжированный список рекомендаций. Решение по каждому пункту примешь ты, потом отдельным заходом будем чистить волнами.
+Цель: убрать существующие дубли по email и предотвратить новые — так, чтобы прод не падал на «duplicate key» при повторном лиде.
 
-## Что уже видно из быстрого скана (предварительные находки)
+## Текущее состояние (по факту БД)
 
-### 1. Дубликаты страниц/лендингов (код)
-- **3 главные:** `src/pages/Index.tsx`, `IndexLegacy.tsx`, `IndexSimplified.tsx` — нужен один.
-- **Два каталога лендингов:** `src/pages/landing/` (4 файла, старая система) vs `src/pages/landings/` (новая, Magnet/Cluster/Persona). Сейчас сосуществуют.
-- **Пересекающиеся системы лендингов:**
-  - `mcc_landing_registry` (5 записей) — старая Marketing Command Center
-  - `magnet_landings` (0 записей) — новый визуальный билдер магнитов (только что сделали)
-  - `personaLandings.ts` / `areaLandings.ts` / `clusterLandings.ts` — code-generated
-  - Жёсткие `*Landing.tsx` файлы по вертикалям (~25 шт.)
-  → как минимум 4 параллельные системы лендингов делают одно и то же.
-- **8 пар компонентов с одинаковыми именами** в разных папках: `TaskDetailSheet`, `ReferralCard`, `PricingStep`, `PhotosStep`, `PageHeader`, `EmptyState`, `CancellationPolicySelector`, `BasicInfoStep`.
+6 групп дублей, всего 7 «лишних» строк:
+- `matthenss@me.com` ×3
+- `compliance@sidracap.com`, `info@shuaa.com`, `info@squadroncapital.com`, `pavel@ignatevestate.com`, `sasitorn.suppasak@ignatevestate.com` — по 2
 
-### 2. Дубликаты роутов
-- В `AnimatedRoutes.tsx` путь `"projects"` объявлен дважды (строки 363 и 684): `DeveloperProjects` и `CapitalProjects`. Один точно затирает другой в своём parent-роуте — нужно проверить, к каким родителям прибиты.
+FK на `crm_contacts` нет, но 22 таблицы держат «мягкие» ссылки (`contact_id`, `owner_contact_id`, `crm_contact_id`, `buyer_contact_id`, `vendor_contact_id`) — нужно перенаправить до удаления.
 
-### 3. Дубликаты хуков-«лидов»
-В `src/hooks/`: `useLeadConfigs`, `useLeadHub`, `useLeadMagnets`, `useLeadsFactory`, `useUniversalLead`, `useTeamLeads`, `useNewbuildLeads`, `useUnifiedContact`, `useCrmContacts` — **9 хуков**, частично перекрывающихся (Universal vs Factory vs Hub).
+## План
 
-### 4. Дубликаты в БД (данные)
-- **`crm_contacts` по email:** найдено 5 групп дубликатов (matthenss@me.com — 3 раза, pavel@ignatevestate.com — 2 и т.д.). UNIQUE индекса нет.
-- **Параллельные таблицы лидов:** `consultation_requests` (9), `lead_magnet_submissions` (0), `mcc_leads` (0), `nb_leads` (4) — четыре «свалки» под лиды.
-- **Параллельные таблицы недвижимости:** `properties` (32), `listings` (500), `owner_properties` (32), `inventory_listings` (0), `business_listings` (0).
-- **Vendors:** `providers` (48) vs `marketplace_vendors` (36) — известное двойное хранение.
+### Шаг 1. Миграция `merge + index + trigger` (один файл)
 
-### 5. Hub vs Index дубли
-`property/PropertyHub.tsx` + `property/PropertyIndex.tsx`, `knowledge/KnowledgeHub.tsx` + `KnowledgePillarsIndex.tsx`, `team/TeamContentHub.tsx` + другие — формально разные, но часто решают одну задачу.
+1. **Нормализация:** `UPDATE crm_contacts SET email = lower(trim(email)) WHERE email IS NOT NULL;`
+2. **Канонизация дублей:** для каждой группы `lower(email)` выбираем самый старый `id` как canonical, остальные — `duplicates[]`.
+3. **Repoint ссылок** во всех 22 таблицах (UPDATE … SET col = canonical WHERE col = ANY(duplicates)).
+4. **Слияние данных:** в canonical докатываем непустые поля из дубликатов (`COALESCE`), складываем `tags` через `array_cat + DISTINCT`.
+5. **Удаление дубликатов** из `crm_contacts`.
+6. **Партиальный UNIQUE-индекс:**
+   ```sql
+   CREATE UNIQUE INDEX crm_contacts_email_unique
+   ON public.crm_contacts (lower(email))
+   WHERE email IS NOT NULL AND email <> '';
+   ```
+7. **BEFORE INSERT/UPDATE триггер `crm_contacts_normalize_email`:** `NEW.email = lower(trim(NEW.email))` если не NULL. Гарантирует, что индекс реально ловит коллизии по любому регистру.
 
----
+### Шаг 2. Код — защита от падений
 
-## Что сделает аудит-проход
+Точки записи в `crm_contacts` сейчас используют `.insert()` без `onConflict`:
+- `src/hooks/useCrmContacts.ts:246` — основной create
+- `src/hooks/useUniversalLead.ts:84` — лид-формы
+- intake/import flows (`useIntakeAgent`, `ContactImportPage`, `ImportOdooContactsPage`, `VendorOutreachPanel`, `HotelManagementLeadSheet`, `MCCLeadsTab`)
 
-| Wave | Что проверяю | Метод |
-|---|---|---|
-| **A. Код-дубли** | Identical-by-name components (8 пар), Index*.tsx, landing/ vs landings/, осиротевшие импорты | `rg`, AST-сравнение по shape (имена пропсов/строк), git-blame для давности |
-| **B. Хуки** | 9 lead-хуков: какие где импортируются, какой реально вызывает БД, какие — обёртки | `rg "from '@/hooks/useLead"` + список call sites |
-| **C. Роуты** | Дубли `path=`, конфликты родителей, мёртвые роуты без линков | Парс `AnimatedRoutes.tsx` + `APP_ROUTES`, проверка ссылок |
-| **D. Лендинг-системы** | 4 параллельные системы (mcc_landing_registry / magnet_landings / personaLandings.ts / hardcoded *Landing.tsx) — кто живой, кто мёртвый, что лучше консолидировать | SQL counts + git activity + рендер-карта |
-| **E. БД: контакты/лиды** | Дубли в `crm_contacts`, `consultation_requests`, `providers` ↔ `marketplace_vendors` по email/phone/name | SQL GROUP BY + similarity (Levenshtein на name) |
-| **F. БД: недвижимость** | `properties` vs `listings` vs `owner_properties` — overlap по external_id/title/location | SQL + проверка FK |
-| **G. Технические таблицы** | Пустые/осиротевшие таблицы (тех. долг из Cleanup Roadmap 2026-Q2) | информация из `docs/cleanup/CLEANUP_ROADMAP.md` + текущий counts |
+Меняем `.insert(...).select().single()` → `.upsert(..., { onConflict: 'email', ignoreDuplicates: false }).select().single()` **только там, где email — естественный ключ дедупа** (create-from-form, лиды, intake). Для ручного «Add contact» в CRM оставляем `insert`, но ловим Postgres код `23505` и показываем тост «Контакт с таким email уже существует, открыть?» + переход на карточку существующего.
 
-## Формат отчёта (`/mnt/documents/duplicates-audit.md`)
+> Партиальный UNIQUE по `lower(email)` не даёт прямой `onConflict: 'email'`. Решение: вместо `upsert` использовать паттерн «select-then-insert»:
+> ```ts
+> const { data: existing } = await supabase
+>   .from('crm_contacts').select('id').ilike('email', email).maybeSingle();
+> if (existing) return existing;            // merge into existing
+> const { data, error } = await supabase.from('crm_contacts').insert(...).select().single();
+> ```
+> Обернуть в один helper `getOrCreateContactByEmail(email, payload)` в `src/lib/crm/getOrCreateContact.ts` и применить во всех 5 публичных точках записи. Чисто, тестируемо, не зависит от deferrable constraints.
 
-Для каждой находки:
-- **ID** (например `DUP-CODE-01`)
-- **Что**: ссылка на файлы/таблицы
-- **Серьёзность**: 🔴 high (ломает) / 🟡 medium (тех. долг) / 🟢 low (косметика)
-- **Доказательство** (counts, конкретные строки)
-- **Рекомендация** (что оставить, что удалить, что смержить)
-- **Риск удаления** (что сломается)
+### Шаг 3. Smoke-проверка
 
-Плюс **топ-10 «убить первым»** — с явной приоритизацией.
+- `psql` SELECT по 6 email — должно быть по 1 строке.
+- Симуляция: повторная отправка лид-формы с тем же email → возвращает существующий контакт, ошибки нет, в `crm_contacts` не плодится.
+- Build/типы зелёные.
 
-## Что НЕ делаю в этом проходе
-- Не правлю код.
-- Не удаляю таблицы/строки.
-- Не сливаю CRM-контакты (это отдельная операция через `useDetectDuplicates` / `detect-crm-duplicates` edge fn, которые уже есть).
-- Не трогаю `magnet_landings` (только что построили — даём ему время наполниться).
+## Технические детали
 
-## Рекомендую: начать с этого аудита
-Это даёт цельную картину за один проход (~10–15 минут работы) и материал для волн чистки. Альтернативы — точечно по одному типу — растянут процесс на несколько итераций без общей карты.
+**Файлы:**
+- `supabase/migrations/<timestamp>_crm_contacts_email_unique.sql` — нормализация, merge, repoint в 22 таблицах, UNIQUE-индекс, триггер.
+- `src/lib/crm/getOrCreateContact.ts` — новый helper.
+- Точечная правка 5 хуков/страниц на helper.
 
-После твоего «ок» — запускаю аудит и кладу отчёт в `/mnt/documents/duplicates-audit.md`.
+**Риски и митигация:**
+- *Длинный UPDATE на 22 таблицах* — данных мало (десятки строк затронуты), миграция в одной транзакции безопасна.
+- *Email с регистром в legacy-коде* — триггер нормализует, ilike в helper'е страхует.
+- *Конкурентная вставка двух одинаковых email* — UNIQUE-индекс ловит на DB-уровне; helper ловит `23505` и повторяет SELECT.
+
+## Что НЕ делаю в этой волне
+
+- Не трогаю `phone` (там тоже дубли — отдельная задача, нужен формат E.164 нормализатор).
+- Не сливаю `owner_properties` ↔ `properties` (DB-01 — Wave 2).
+- Не переписываю архитектуру лид-хуков (LEAD-01 — Wave 3).
+
+После approve — запускаю миграцию через `supabase--migration`, затем правлю код и проверяю билд.
