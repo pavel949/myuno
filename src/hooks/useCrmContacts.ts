@@ -240,13 +240,11 @@ export function useCreateContact() {
     mutationFn: async (contact: CrmContactInsert) => {
       // Strip legacy/virtual fields that exist in the TS type but not in the DB schema
       const { crm_role: _crm_role, key_dates: _key_dates, ...cleanContact } = contact as CrmContactInsert & Record<string, unknown>;
-      const { data, error } = await (supabase.from('crm_contacts') as unknown as {
-        insert: (v: unknown) => { select: () => { single: () => Promise<{ data: unknown; error: { message: string } | null }> } }
-      })
-        .insert(cleanContact)
-        .select()
-        .single();
-      if (error) throw error;
+      const { getOrCreateContactByEmail } = await import('@/lib/crm/getOrCreateContact');
+      const { contact: data, existed } = await getOrCreateContactByEmail(cleanContact as Record<string, unknown>);
+      if (existed) {
+        toast.info('Контакт с таким email уже существует — открыт существующий');
+      }
       return data;
     },
     onSuccess: (data) => {
