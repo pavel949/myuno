@@ -51,7 +51,7 @@ export function HotelManagementLeadSheet({ open, onOpenChange }: Props) {
       const firstName = nameParts[0];
       const lastName = nameParts.slice(1).join(' ') || null;
 
-      const { error } = await supabase.from('crm_contacts').insert({
+      await getOrCreateContactByEmail({
         first_name: firstName,
         last_name: lastName,
         email: form.email,
@@ -67,9 +67,7 @@ export function HotelManagementLeadSheet({ open, onOpenChange }: Props) {
           .filter(Boolean)
           .join('\n'),
         tags: ['hotel', 'hma'],
-      } as never);
-
-      if (error) throw error;
+      });
 
       // Fire-and-forget Telegram alert via existing edge function (if available)
       try {
