@@ -129,8 +129,8 @@ const updateProspect = useUpdateProspect();
         'ai_discovery',
       ].filter(Boolean) as string[];
 
-      // Rich CRM mapping
-      const { error } = await supabase.from('crm_contacts').insert({
+      // Rich CRM mapping (idempotent by email)
+      const { existed } = await getOrCreateContactByEmail({
         company_id: myCompany.company_id,
         first_name: firstName,
         last_name: lastName || null,
@@ -158,9 +158,10 @@ const updateProspect = useUpdateProspect();
           sd.description_ru ? `RU: ${sd.description_ru}` : null,
         ].filter(Boolean).join(' | '),
         lifecycle_stage: 'lead',
-      } as any);
-
-      if (error) throw error;
+      });
+      if (existed) {
+        toast.info(isRussian ? 'Контакт уже был в CRM — открыт существующий' : 'Contact already in CRM — opened existing');
+      }
 
       // Mark prospect as converted
       updateProspect.mutate({ id: prospect.id, status: 'won' });
