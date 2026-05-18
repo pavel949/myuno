@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { statusConfig, priorityConfig, useUpdateProspect, useScoreProspect, useGenerateOutreach, useLogActivity, type VendorProspect } from '@/hooks/useVendorAcquisition';
 import { supabase } from '@/integrations/supabase/client';
+import { getOrCreateContactByEmail } from '@/lib/crm/getOrCreateContact';
 import { useMyCompanyId } from '@/hooks/useAgentDeals';
 import { 
   MapPin, Phone, Mail, Globe, Instagram, Star, 
