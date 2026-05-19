@@ -70,3 +70,12 @@ FK на `crm_contacts` нет, но 22 таблицы держат «мягки�
 - Не переписываю архитектуру лид-хуков (LEAD-01 — Wave 3).
 
 После approve — запускаю миграцию через `supabase--migration`, затем правлю код и проверяю билд.
+
+## Wave 2 cleanup — done 2026-05-19 (soft deprecation)
+
+- **owner_properties: NOT a duplicate.** Confirmed VIEW over `properties` (compat layer for 8+ edge functions). Audit was wrong. Kept as-is.
+- **TaskDetailSheet ×2**: smaller 187-line variant renamed `owner/TaskDetailSheet.tsx` → `owner/LegacyTaskDetailSheet.tsx`. Two importers (CalendarDayEventsSheet, MultiPropertyTimeline) updated. Canonical `owner/tasks/TaskDetailSheet.tsx` untouched. JSDoc @deprecated added.
+- **landing/ vs landings/**: 4 legacy files moved to `src/pages/landings/legacy/`. `pageRegistry.ts` updated. Old `landing/` folder removed.
+- **mcc_landing_registry**: `useLandingRegistry` hook marked @deprecated. DB unchanged (5 live records). Data migration → magnet_landings deferred to Wave 3.
+
+Wave 3 candidates (NOT done this round): nb_leads→consultation_requests merge, 9-lead-hooks consolidation, 210 empty tables drop.

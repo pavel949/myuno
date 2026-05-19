@@ -163,10 +163,11 @@ export const TransferSuccess = lazy(() => import('@/pages/transport/TransferSucc
 export const AirportFastTrackPage = lazy(() => import('@/pages/transport/AirportFastTrackPage'));
 
 // ── Landing Pages ──
-export const AirportTransferLanding = lazy(() => import('@/pages/landing/AirportTransferLanding'));
-export const FlowerDeliveryLanding = lazy(() => import('@/pages/landing/FlowerDeliveryLanding'));
-export const RentalLanding = lazy(() => import('@/pages/landing/RentalLanding'));
-export const NewDevelopmentsLanding = lazy(() => import('@/pages/landing/NewDevelopmentsLanding'));
+// Legacy hand-coded landings (pre-MagnetLandingRenderer). New magnets use /l/:slug + magnet_landings table.
+export const AirportTransferLanding = lazy(() => import('@/pages/landings/legacy/AirportTransferLanding'));
+export const FlowerDeliveryLanding = lazy(() => import('@/pages/landings/legacy/FlowerDeliveryLanding'));
+export const RentalLanding = lazy(() => import('@/pages/landings/legacy/RentalLanding'));
+export const NewDevelopmentsLanding = lazy(() => import('@/pages/landings/legacy/NewDevelopmentsLanding'));
 
 // ── Fitness ──
 export const FitnessIndex = lazy(() => import('@/pages/fitness/FitnessIndex'));

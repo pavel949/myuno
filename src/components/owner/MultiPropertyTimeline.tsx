@@ -8,7 +8,7 @@ import { useOperationalTasks } from '@/hooks/useOperationalTasks';
 import { usePropertyProjects } from '@/hooks/usePropertyProjects';
 import { CalendarDayEventsSheet } from './CalendarDayEventsSheet';
 import { BookingDetailSheet } from './BookingDetailSheet';
-import { TaskDetailSheet } from './TaskDetailSheet';
+import { TaskDetailSheet } from './LegacyTaskDetailSheet';
 import { type PropertyBooking } from '@/hooks/usePropertyBookings';
 import { type OperationalTask } from '@/hooks/useOperationalTasks';
 import { type PropertyComplex } from '@/hooks/usePropertyComplexes';

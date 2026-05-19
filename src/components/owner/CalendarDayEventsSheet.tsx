@@ -4,7 +4,7 @@ import { PropertyBooking } from '@/hooks/usePropertyBookings';
 import { OperationalTask } from '@/hooks/useOperationalTasks';
 import { AvailabilityEntry } from '@/components/property/PropertyCalendar';
 import { BookingDetailSheet } from './BookingDetailSheet';
-import { TaskDetailSheet } from './TaskDetailSheet';
+import { TaskDetailSheet } from './LegacyTaskDetailSheet';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';

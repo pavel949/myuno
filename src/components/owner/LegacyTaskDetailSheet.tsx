@@ -1,3 +1,8 @@
+/**
+ * @deprecated Legacy task sheet used by CalendarDayEventsSheet + MultiPropertyTimeline.
+ * Canonical sheet lives in `./tasks/TaskDetailSheet.tsx` (richer UnifiedTask model).
+ * Migrate calendar usages to the canonical version, then remove this file.
+ */
 import { OperationalTask } from '@/hooks/useOperationalTasks';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Badge } from '@/components/ui/badge';
