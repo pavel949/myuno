@@ -1,3 +1,8 @@
+/**
+ * @deprecated Use `useMagnetLandings` (table `magnet_landings`) for new landing pages.
+ * This hook reads from legacy `mcc_landing_registry` (5 records, frozen).
+ * Slated for removal after data migration in Wave 3 cleanup (2026-Q2).
+ */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
