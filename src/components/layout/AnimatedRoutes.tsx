@@ -206,6 +206,7 @@ export const AnimatedRoutes: React.FC = () => {
         
         {/* ── User ── */}
         <Route path={APP_ROUTES.DISCOVER} element={<LazyPage><Pages.Discover /></LazyPage>} />
+        <Route path={`${APP_ROUTES.DISCOVER}/:code`} element={<LazyPage><Pages.SituationDetail /></LazyPage>} />
         <Route path={APP_ROUTES.NAVIGATOR} element={<LazyPage><Pages.Discover /></LazyPage>} />
         <Route path="/catalog" element={<Navigate to={APP_ROUTES.NAVIGATOR} replace />} />
         <Route path="/categories" element={<Navigate to={APP_ROUTES.NAVIGATOR} replace />} />
