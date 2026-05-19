@@ -59,14 +59,15 @@ export const BottomBar = forwardRef<HTMLDivElement, BottomBarProps>(
       return () => window.removeEventListener('navigator:open-apps-drawer', handler);
     }, []);
 
-    if (FULLSCREEN_PREFIXES.some((p) => location.pathname.startsWith(p))) return null;
-
     // Phase A5: feature-flagged swap of guest nav to Gosuslugi-style /me hub.
     const meHubEnabled = useFeatureFlag('me_shell_v1', false);
     // Wave 13 (M13.A): pro-shell tabbar (Home · Operate · Wallet · Me) for
     // guest users with at least one professional persona active.
     const proShellEnabled = useFeatureFlag('pro_shell_tabbar_v1', false);
     const { personas } = useUserPersonas();
+    
+    if (FULLSCREEN_PREFIXES.some((p) => location.pathname.startsWith(p))) return null;
+
     const PRO_PERSONAS = new Set([
       'property_owner', 'investor', 'real_estate_developer',
       'local_services_provider',

@@ -160,6 +160,22 @@ export default function ContactDetail() {
 
   const contactTasks = allTasks.filter(t => t.contact_id === id);
 
+  const contactDealEconomics = useMemo(() => {
+    const amount = (d: AgentDeal) => Number(d.deal_value ?? d.budget_max ?? 0);
+    let pipeline = 0;
+    let wonValue = 0;
+    let commissionEarned = 0;
+    for (const d of deals) {
+      if (d.stage === 'closed_lost') continue;
+      if (d.stage === 'closed_won') {
+        wonValue += amount(d);
+        commissionEarned += Number(d.commission_amount ?? 0);
+      } else {
+        pipeline += amount(d);
+      }
+    }
+    return { pipeline, wonValue, commissionEarned };
+  }, [deals]);
   // Unified timeline: notes + activities + deals
   const timelineItems = useMemo(() => [
     ...notes.map(n => ({ type: 'note' as const, date: n.created_at, data: n })),
@@ -291,22 +307,7 @@ export default function ContactDetail() {
 
   const dealCurrency = deals[0]?.currency || 'THB';
 
-  const contactDealEconomics = useMemo(() => {
-    const amount = (d: AgentDeal) => Number(d.deal_value ?? d.budget_max ?? 0);
-    let pipeline = 0;
-    let wonValue = 0;
-    let commissionEarned = 0;
-    for (const d of deals) {
-      if (d.stage === 'closed_lost') continue;
-      if (d.stage === 'closed_won') {
-        wonValue += amount(d);
-        commissionEarned += Number(d.commission_amount ?? 0);
-      } else {
-        pipeline += amount(d);
-      }
-    }
-    return { pipeline, wonValue, commissionEarned };
-  }, [deals]);
+
 
   return (
     <div className="px-4 md:px-6 lg:px-8 pt-4 pb-24 md:pb-8 max-w-[1536px] mx-auto">

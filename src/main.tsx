@@ -122,19 +122,15 @@ reportWebVitals(undefined, { debug: import.meta.env.DEV });
   };
 
   window.fetch = async (...args: Parameters<typeof fetch>) => {
-    try {
-      const res = await originalFetch(...args);
-      if (res.status === 412) {
-        const url = typeof args[0] === "string" ? args[0] : (args[0] as Request)?.url ?? "";
-        // Only react to preview-proxy / auth-bridge 412s, not API 412s
-        if (/lovableproject\.com|lovable\.app|auth-bridge|\/auth\//.test(url)) {
-          void recover();
-        }
+    const res = await originalFetch(...args);
+    if (res.status === 412) {
+      const url = typeof args[0] === "string" ? args[0] : (args[0] as Request)?.url ?? "";
+      // Only react to preview-proxy / auth-bridge 412s, not API 412s
+      if (/lovableproject\.com|lovable\.app|auth-bridge|\/auth\//.test(url)) {
+        void recover();
       }
-      return res;
-    } catch (err) {
-      throw err;
     }
+    return res;
   };
 
   // Clear the reload guard once the app boots successfully
