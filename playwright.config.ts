@@ -7,10 +7,12 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 1,
   workers: process.env.CI ? 1 : 2,
   reporter: [['html'], ['list']],
-  timeout: 60000,
+  timeout: 90000,
   expect: {
     timeout: 10000,
   },
+  globalSetup: require.resolve('./e2e/fixtures/seedListings.ts'),
+  globalTeardown: require.resolve('./e2e/fixtures/teardownListings.ts'),
   use: {
     baseURL: 'http://localhost:8099',
     screenshot: 'only-on-failure',

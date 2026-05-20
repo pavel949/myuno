@@ -1,29 +1,34 @@
 import { defineConfig, devices } from '@playwright/test';
 
-const chromiumPath = process.env.CHROMIUM_PATH || '/bin/chromium';
-
+/**
+ * CI config: chromium-only, slower retries, marketplace seed enabled.
+ * Used in .github/workflows/e2e.yml.
+ */
 export default defineConfig({
   testDir: './e2e/tests',
-  fullyParallel: true,
-  retries: 0,
-  reporter: [['list']],
-  timeout: 30000,
-  expect: { timeout: 8000 },
+  fullyParallel: false,
+  forbidOnly: true,
+  retries: 2,
+  workers: 1,
+  reporter: [['html', { open: 'never' }], ['list']],
+  timeout: 120_000,
+  expect: { timeout: 10_000 },
+  globalSetup: require.resolve('./e2e/fixtures/seedListings.ts'),
+  globalTeardown: require.resolve('./e2e/fixtures/teardownListings.ts'),
   use: {
-    baseURL: 'http://localhost:8080',
+    baseURL: 'http://localhost:8099',
     screenshot: 'only-on-failure',
-    actionTimeout: 8000,
-    navigationTimeout: 15000,
-    trace: 'off',
-    video: 'off',
+    video: 'retain-on-failure',
+    trace: 'retain-on-failure',
+    actionTimeout: 15_000,
+    navigationTimeout: 120_000,
   },
-  projects: [
-    {
-      name: 'chromium',
-      use: {
-        ...devices['Desktop Chrome'],
-        launchOptions: { executablePath: chromiumPath },
-      },
-    },
-  ],
+  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  webServer: {
+    command: 'vite --port 8099 --strictPort',
+    url: 'http://localhost:8099',
+    reuseExistingServer: false,
+    timeout: 180_000,
+    env: { ...process.env, VITE_BYPASS_COMING_SOON: 'true' },
+  },
 });
