@@ -4609,7 +4609,6 @@ export type Database = {
           interests: string[] | null
           is_archived: boolean
           is_company: boolean
-          is_vip: boolean
           job_title: string | null
           key_dates: Json | null
           language: string | null
@@ -4621,7 +4620,6 @@ export type Database = {
           line_id: string | null
           linked_user_id: string | null
           linkedin: string | null
-          marital_status: string | null
           mobile: string | null
           nationality: string | null
           notes: string | null
@@ -4690,7 +4688,6 @@ export type Database = {
           interests?: string[] | null
           is_archived?: boolean
           is_company?: boolean
-          is_vip?: boolean
           job_title?: string | null
           key_dates?: Json | null
           language?: string | null
@@ -4702,7 +4699,6 @@ export type Database = {
           line_id?: string | null
           linked_user_id?: string | null
           linkedin?: string | null
-          marital_status?: string | null
           mobile?: string | null
           nationality?: string | null
           notes?: string | null
@@ -4771,7 +4767,6 @@ export type Database = {
           interests?: string[] | null
           is_archived?: boolean
           is_company?: boolean
-          is_vip?: boolean
           job_title?: string | null
           key_dates?: Json | null
           language?: string | null
@@ -4783,7 +4778,6 @@ export type Database = {
           line_id?: string | null
           linked_user_id?: string | null
           linkedin?: string | null
-          marital_status?: string | null
           mobile?: string | null
           nationality?: string | null
           notes?: string | null
