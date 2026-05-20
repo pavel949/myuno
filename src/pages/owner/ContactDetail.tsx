@@ -639,7 +639,7 @@ export default function ContactDetail() {
                       value={contact.phone}
                       type="tel"
                       placeholder="+7 ..."
-                      onSave={(next) => updateContact.mutateAsync({ id: contact.id, phone: next || null })}
+                      onSave={async (next) => { await updateContact.mutateAsync({ id: contact.id, phone: next || null }); }}
                       renderDisplay={(v) => (
                         <a href={`tel:${v}`} className="text-primary hover:underline">{v}</a>
                       )}
@@ -650,7 +650,7 @@ export default function ContactDetail() {
                       value={contact.mobile}
                       type="tel"
                       placeholder="+7 ..."
-                      onSave={(next) => updateContact.mutateAsync({ id: contact.id, mobile: next || null })}
+                      onSave={async (next) => { await updateContact.mutateAsync({ id: contact.id, mobile: next || null }); }}
                       renderDisplay={(v) => (
                         <a href={`tel:${v}`} className="text-primary hover:underline">{v}</a>
                       )}
@@ -661,7 +661,7 @@ export default function ContactDetail() {
                       value={contact.email}
                       type="email"
                       placeholder="name@example.com"
-                      onSave={(next) => updateContact.mutateAsync({ id: contact.id, email: next || null })}
+                      onSave={async (next) => { await updateContact.mutateAsync({ id: contact.id, email: next || null }); }}
                       renderDisplay={(v) => (
                         <a href={`mailto:${v}`} className="text-primary hover:underline">{v}</a>
                       )}
