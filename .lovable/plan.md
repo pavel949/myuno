@@ -81,3 +81,39 @@ playwright.ci.config.ts                    (edit) chromium-only
 - README в `e2e/README.md` с инструкцией запуска.
 
 **Рекомендую** именно этот объём: пользователь явно попросил полный loop по всем 11 вертикалям, а параметризация и edge-mock держат stability и время прогона в разумных пределах (~10-12 мин в CI).
+
+---
+
+## Implementation log (2026-05-20)
+
+**Status:** scaffolded, awaiting first CI run + `E2E_TEST_TOKEN` secret.
+
+### Created
+- `e2e/fixtures/marketplaceVerticals.ts` — 20 verticals (17 full-loop + 3 smoke)
+- `e2e/fixtures/serviceClient.ts` — service-role client + helpers
+- `e2e/fixtures/seedListings.ts` — globalSetup, auto-skips without service key
+- `e2e/fixtures/teardownListings.ts` — deletes by `metadata->>e2e_run_id`
+- `e2e/fixtures/multiActor.ts` — `loginAs(role)` returns isolated context
+- `e2e/flows/marketplaceFlow.ts` — parametrised guest→partner→admin loop
+- `e2e/tests/marketplace/discover-filters.spec.ts` — 20 smokes
+- `e2e/tests/marketplace/vertical-loops.spec.ts` — 17 full loops
+- `supabase/functions/e2e-mark-paid/index.ts` — gated mock-pay edge fn
+- `supabase/functions/e2e-mark-paid/index.test.ts` — token + 404 tests
+- `playwright.ci.config.ts` — chromium-only, workers=1
+- `.github/workflows/e2e.yml` — PR gate
+- `e2e/README.md` — runbook
+
+### Edited
+- `playwright.config.ts` — added `globalSetup`/`globalTeardown`, timeout 60→90s
+
+### Follow-ups (NOT done — user action required)
+- Add Supabase Edge Function secret `E2E_TEST_TOKEN` (random 32+ chars)
+- Add same value as GitHub Actions secret + `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
+- Seed test users (P01 tourist / P04 vendor / admin) must already exist in DB — they're listed in `e2e/fixtures/testUsers.ts` with fixed UUIDs
+- First green run will likely require selector tweaks per vertical (the flow uses tolerant fallbacks but some CTAs may need `data-testid="primary-cta"` added)
+- Real Stripe e2e and refund/cancel paths — next wave
+
+### Out of scope (intentional)
+- Stripe live redirect (mocked via `e2e-mark-paid`)
+- Mobile viewport in CI (local only)
+- ClearView / Newbuilds (separate suite)
