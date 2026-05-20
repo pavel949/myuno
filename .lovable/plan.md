@@ -1,81 +1,83 @@
-# Wave 1 · UNIQUE на `crm_contacts.email`
+## Цель
 
-Цель: убрать существующие дубли по email и предотвратить новые — так, чтобы прод не падал на «duplicate key» при повторном лиде.
+Перед коммерческим запуском закрыть Playwright-тестами полный transaction loop для всех 11 marketplace-вертикалей: **поиск → фильтр → карта → карточка → создание заявки/брони → приём партнёром → смена статуса админом**. Запуск локально и в CI на каждый PR (chromium-only).
 
-## Текущее состояние (по факту БД)
+## Архитектура
 
-6 групп дублей, всего 7 «лишних» строк:
-- `matthenss@me.com` ×3
-- `compliance@sidracap.com`, `info@shuaa.com`, `info@squadroncapital.com`, `pavel@ignatevestate.com`, `sasitorn.suppasak@ignatevestate.com` — по 2
+### 1. Seed данные (`e2e/fixtures/seedListings.ts`)
+Один `globalSetup` создаёт по 1-2 тестовых листинга в каждой из 11 вертикалей с маркером `metadata.e2e_seed = true` (через service-role insert в `public.listings` или вертикальные таблицы где это ещё требуется). Привязываем к `test-vendor` (P04 partner) и публикуем (`status='active'`). `globalTeardown` чистит по маркеру.
 
-FK на `crm_contacts` нет, но 22 таблицы держат «мягкие» ссылки (`contact_id`, `owner_contact_id`, `crm_contact_id`, `buyer_contact_id`, `vendor_contact_id`) — нужно перенаправить до удаления.
+### 2. Параметризованный flow (`e2e/flows/marketplaceFlow.ts`)
+Один абстрактный helper `runVerticalFlow(vertical: VerticalKey)`, использующий `VERTICALS` из `src/lib/verticals.ts`. Внутри:
+- guest: `/discover` → клик по category chip вертикали → проверка фильтр-панели и счётчика результатов → переключение на `/map?vertical=…` → клик по pin → детальная карточка (`data-testid="listing-detail"`) → CTA «Забронировать/Запросить» → форма заявки → submit.
+- утверждаем: появилась запись в `orders` (или `service_requests` для non-bookable) со статусом `pending` и `metadata.e2e_run_id`.
 
-## План
+### 3. Spec-файлы (`e2e/tests/marketplace/`)
+- `discover-filters.spec.ts` — для каждой вертикали проверка search-input, фильтров и карты (быстрый smoke без бронирования).
+- `vertical-loops.spec.ts` — параметризованный `for (const v of MARKETPLACE_VERTICALS) test(v.id, …)` прогоняет полный 3-actor loop. 11 тестов из одного файла.
+- `events.spec.ts`, `transfer.spec.ts` — переопределения для вертикалей с нестандартным flow (event inventory; transfer pickup-form).
 
-### Шаг 1. Миграция `merge + index + trigger` (один файл)
+### 4. Multi-actor оркестрация
+В каждом vertical-тесте — три изолированных browser-контекста (`browser.newContext()`):
+- **Guest** (`test-tourist`) создаёт заявку → берём `order_id` из toast/URL/DOM.
+- **Partner** (`test-vendor`) логинится, идёт в `/vendor/requests`, находит заявку по `order_id`, нажимает «Принять» → статус `confirmed`.
+- **Admin** (`test-admin`) логинится, идёт в `/admin/orders`, меняет статус на `completed` → проверяем финальный статус через `supabase.from('orders').select` под service-role.
 
-1. **Нормализация:** `UPDATE crm_contacts SET email = lower(trim(email)) WHERE email IS NOT NULL;`
-2. **Канонизация дублей:** для каждой группы `lower(email)` выбираем самый старый `id` как canonical, остальные — `duplicates[]`.
-3. **Repoint ссылок** во всех 22 таблицах (UPDATE … SET col = canonical WHERE col = ANY(duplicates)).
-4. **Слияние данных:** в canonical докатываем непустые поля из дубликатов (`COALESCE`), складываем `tags` через `array_cat + DISTINCT`.
-5. **Удаление дубликатов** из `crm_contacts`.
-6. **Партиальный UNIQUE-индекс:**
-   ```sql
-   CREATE UNIQUE INDEX crm_contacts_email_unique
-   ON public.crm_contacts (lower(email))
-   WHERE email IS NOT NULL AND email <> '';
-   ```
-7. **BEFORE INSERT/UPDATE триггер `crm_contacts_normalize_email`:** `NEW.email = lower(trim(NEW.email))` если не NULL. Гарантирует, что индекс реально ловит коллизии по любому регистру.
+### 5. Мок Stripe checkout
+Новая edge function `supabase/functions/e2e-mark-paid/index.ts`:
+- Проверяет header `x-e2e-token` против секрета `E2E_TEST_TOKEN` (gating; никакого фича-флага в проде).
+- Принимает `{ order_id }`, валидирует наличие `metadata.e2e_seed = true` или `metadata.e2e_run_id`, иначе 403 — чтобы по чистой случайности не отметить prod-ордер.
+- Вызывает существующий `record_ledger_entries` RPC, проставляет `paid_at`, `status='paid'`, создаёт `payment_intents` запись со штампом `provider='e2e_mock'`.
+- В spec вместо клика «Pay with card» зовём `request.post('/functions/v1/e2e-mark-paid', …)` с тестовым токеном.
 
-### Шаг 2. Код — защита от падений
+### 6. CI (`.github/workflows/e2e.yml`)
+Новый workflow:
+- `node 20`, `bun install`, `bunx playwright install chromium`, `bunx playwright test --project=chromium`.
+- Артефакты: `playwright-report/`, видео/трейсы при падении.
+- Секреты: `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (для seed/teardown/проверок), `E2E_TEST_TOKEN`.
+- Триггер: `pull_request` + `workflow_dispatch`. Mobile project отключаем в CI флагом `--project=chromium`.
 
-Точки записи в `crm_contacts` сейчас используют `.insert()` без `onConflict`:
-- `src/hooks/useCrmContacts.ts:246` — основной create
-- `src/hooks/useUniversalLead.ts:84` — лид-формы
-- intake/import flows (`useIntakeAgent`, `ContactImportPage`, `ImportOdooContactsPage`, `VendorOutreachPanel`, `HotelManagementLeadSheet`, `MCCLeadsTab`)
+### 7. Конфиг
+- `playwright.config.ts`: добавить `globalSetup`/`globalTeardown`, выкрутить timeout per-spec до 90s (loop multi-actor длиннее), оставить mobile project для локалки.
+- `playwright.ci.config.ts`: только chromium, `workers: 1`, `retries: 2`.
 
-Меняем `.insert(...).select().single()` → `.upsert(..., { onConflict: 'email', ignoreDuplicates: false }).select().single()` **только там, где email — естественный ключ дедупа** (create-from-form, лиды, intake). Для ручного «Add contact» в CRM оставляем `insert`, но ловим Postgres код `23505` и показываем тост «Контакт с таким email уже существует, открыть?» + переход на карточку существующего.
+## Объём по вертикалям
 
-> Партиальный UNIQUE по `lower(email)` не даёт прямой `onConflict: 'email'`. Решение: вместо `upsert` использовать паттерн «select-then-insert»:
-> ```ts
-> const { data: existing } = await supabase
->   .from('crm_contacts').select('id').ilike('email', email).maybeSingle();
-> if (existing) return existing;            // merge into existing
-> const { data, error } = await supabase.from('crm_contacts').insert(...).select().single();
-> ```
-> Обернуть в один helper `getOrCreateContactByEmail(email, payload)` в `src/lib/crm/getOrCreateContact.ts` и применить во всех 5 публичных точках записи. Чисто, тестируемо, не зависит от deferrable constraints.
+Параметризованный тест покрывает: `property, yacht, vehicle, experience, cleaning, babysitter, beauty, restaurant, medical, legal, education, fitness, event, water_activity, pet_service, flower, transfer` — берём из `VERTICALS`. Не-bookable (`insurance, pharmacy, bank`) получают облегчённый flow «заявка вместо брони» (без partner accept), помечается `test.skip` в loop-файле, отдельный smoke в `discover-filters.spec.ts`.
 
-### Шаг 3. Smoke-проверка
+## Не входит в этот этап
 
-- `psql` SELECT по 6 email — должно быть по 1 строке.
-- Симуляция: повторная отправка лид-формы с тем же email → возвращает существующий контакт, ошибки нет, в `crm_contacts` не плодится.
-- Build/типы зелёные.
+- Реальный Stripe redirect (мок через edge function).
+- Mobile viewport в CI (только локалка).
+- Edge cases отказа партнёра / возвратов — следующая волна.
+- Тесты ClearView / Newbuilds (отдельная вертикаль `/newbuilds`).
 
-## Технические детали
+## Структура файлов
 
-**Файлы:**
-- `supabase/migrations/<timestamp>_crm_contacts_email_unique.sql` — нормализация, merge, repoint в 22 таблицах, UNIQUE-индекс, триггер.
-- `src/lib/crm/getOrCreateContact.ts` — новый helper.
-- Точечная правка 5 хуков/страниц на helper.
+```text
+e2e/
+├── fixtures/
+│   ├── seedListings.ts          (new) globalSetup/teardown
+│   ├── multiActor.ts            (new) makeGuestContext/PartnerContext/AdminContext
+│   └── testUsers.ts             (existing)
+├── flows/
+│   └── marketplaceFlow.ts       (new) параметризованный 3-actor loop
+├── tests/marketplace/
+│   ├── discover-filters.spec.ts (new) 11 smoke
+│   ├── vertical-loops.spec.ts   (new) 11 full-loop
+│   ├── events.spec.ts           (new) event inventory override
+│   └── transfer.spec.ts         (new) transfer pickup override
+supabase/functions/e2e-mark-paid/index.ts  (new) gated mock-pay
+.github/workflows/e2e.yml                  (new) PR gate
+playwright.ci.config.ts                    (edit) chromium-only
+```
 
-**Риски и митигация:**
-- *Длинный UPDATE на 22 таблицах* — данных мало (десятки строк затронуты), миграция в одной транзакции безопасна.
-- *Email с регистром в legacy-коде* — триггер нормализует, ilike в helper'е страхует.
-- *Конкурентная вставка двух одинаковых email* — UNIQUE-индекс ловит на DB-уровне; helper ловит `23505` и повторяет SELECT.
+## DoD
 
-## Что НЕ делаю в этой волне
+- Все 11 specs зелёные локально (`bunx playwright test`).
+- CI green на PR.
+- Teardown оставляет 0 `e2e_seed` записей в `listings`/`orders`.
+- `e2e-mark-paid` отклоняет вызовы без токена и без `e2e_seed`-маркера (тест в `supabase/functions/e2e-mark-paid/index.test.ts`).
+- README в `e2e/README.md` с инструкцией запуска.
 
-- Не трогаю `phone` (там тоже дубли — отдельная задача, нужен формат E.164 нормализатор).
-- Не сливаю `owner_properties` ↔ `properties` (DB-01 — Wave 2).
-- Не переписываю архитектуру лид-хуков (LEAD-01 — Wave 3).
-
-После approve — запускаю миграцию через `supabase--migration`, затем правлю код и проверяю билд.
-
-## Wave 2 cleanup — done 2026-05-19 (soft deprecation)
-
-- **owner_properties: NOT a duplicate.** Confirmed VIEW over `properties` (compat layer for 8+ edge functions). Audit was wrong. Kept as-is.
-- **TaskDetailSheet ×2**: smaller 187-line variant renamed `owner/TaskDetailSheet.tsx` → `owner/LegacyTaskDetailSheet.tsx`. Two importers (CalendarDayEventsSheet, MultiPropertyTimeline) updated. Canonical `owner/tasks/TaskDetailSheet.tsx` untouched. JSDoc @deprecated added.
-- **landing/ vs landings/**: 4 legacy files moved to `src/pages/landings/legacy/`. `pageRegistry.ts` updated. Old `landing/` folder removed.
-- **mcc_landing_registry**: `useLandingRegistry` hook marked @deprecated. DB unchanged (5 live records). Data migration → magnet_landings deferred to Wave 3.
-
-Wave 3 candidates (NOT done this round): nb_leads→consultation_requests merge, 9-lead-hooks consolidation, 210 empty tables drop.
+**Рекомендую** именно этот объём: пользователь явно попросил полный loop по всем 11 вертикалям, а параметризация и edge-mock держат stability и время прогона в разумных пределах (~10-12 мин в CI).
