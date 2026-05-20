@@ -661,7 +661,7 @@ export default function ContactDetail() {
                       value={contact.email}
                       type="email"
                       placeholder="name@example.com"
-                      onSave={(next) => updateContact.mutateAsync({ id: contact.id, email: next || null })}
+                      onSave={async (next) => { await updateContact.mutateAsync({ id: contact.id, email: next || null }); }}
                       renderDisplay={(v) => (
                         <a href={`mailto:${v}`} className="text-primary hover:underline">{v}</a>
                       )}
