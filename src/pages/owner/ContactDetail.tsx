@@ -16,6 +16,9 @@ import { InlineTaskCreator } from '@/components/owner/contacts/InlineTaskCreator
 import { useMyCompanyId, DEAL_STAGE_LABELS, DealStage } from '@/hooks/useAgentDeals';
 import { CreateDealSheet } from '@/components/owner/sales/CreateDealSheet';
 import { CrmDocumentsSection } from '@/components/owner/contacts/CrmDocumentsSection';
+import { ContactLinksSection } from '@/components/owner/contacts/ContactLinksSection';
+import { ContactEmailsSection } from '@/components/owner/contacts/ContactEmailsSection';
+import { useCrmEmails } from '@/hooks/useCrmEmails';
 import { LifecycleStageBar } from '@/components/owner/contacts/LifecycleStageBar';
 import { CrmAiAssistantPanel } from '@/components/owner/contacts/CrmAiAssistantPanel';
 import { Button } from '@/components/ui/button';
@@ -112,6 +115,74 @@ function FieldRow({ label, children, className }: { label: string; children: Rea
   );
 }
 
+// ─── Odoo-style inline editable text (hover to reveal pencil, click pencil to edit) ───
+function InlineEditableText({
+  value,
+  onSave,
+  placeholder,
+  type = 'text',
+  renderDisplay,
+}: {
+  value: string | null;
+  onSave: (next: string) => Promise<void> | void;
+  placeholder?: string;
+  type?: 'text' | 'email' | 'tel';
+  renderDisplay?: (v: string) => React.ReactNode;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value ?? '');
+
+  const commit = async () => {
+    const next = draft.trim();
+    if (next !== (value ?? '')) {
+      await onSave(next);
+    }
+    setEditing(false);
+  };
+
+  if (editing) {
+    return (
+      <input
+        autoFocus
+        type={type}
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') commit();
+          if (e.key === 'Escape') {
+            setDraft(value ?? '');
+            setEditing(false);
+          }
+        }}
+        className="w-full bg-transparent border-b border-primary outline-none text-sm py-0.5"
+        placeholder={placeholder}
+      />
+    );
+  }
+
+  return (
+    <div className="group flex items-center gap-1.5">
+      {value ? (
+        <span className="flex-1 min-w-0">{renderDisplay ? renderDisplay(value) : value}</span>
+      ) : (
+        <span className="flex-1 min-w-0 text-muted-foreground/50">—</span>
+      )}
+      <button
+        type="button"
+        onClick={() => {
+          setDraft(value ?? '');
+          setEditing(true);
+        }}
+        className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-primary shrink-0"
+        aria-label="Edit"
+      >
+        <Pencil className="h-3 w-3" />
+      </button>
+    </div>
+  );
+}
+
 export default function ContactDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -140,6 +211,7 @@ export default function ContactDetail() {
   const { data: allTasks = [] } = useCrmTasks({ status: 'pending' });
   const { data: membership } = useMyCompanyId();
   const { data: meetings = [] } = useCrmMeetings(membership?.company_id, { contactId: id });
+  const { data: emails = [] } = useCrmEmails(contact?.company_id, id);
   const updateContact = useUpdateContact();
   const deleteContact = useDeleteContact();
   const addNote = useAddContactNote();
@@ -176,12 +248,13 @@ export default function ContactDetail() {
     }
     return { pipeline, wonValue, commissionEarned };
   }, [deals]);
-  // Unified timeline: notes + activities + deals
+  // Unified timeline: notes + activities + deals + emails
   const timelineItems = useMemo(() => [
     ...notes.map(n => ({ type: 'note' as const, date: n.created_at, data: n })),
     ...activities.map(a => ({ type: 'activity' as const, date: a.activity_date, data: a })),
     ...deals.map(d => ({ type: 'deal' as const, date: d.updated_at, data: d })),
-  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()), [notes, activities, deals]);
+    ...emails.map(e => ({ type: 'email' as const, date: e.sent_at ?? e.created_at, data: e })),
+  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()), [notes, activities, deals, emails]);
 
   const handleLogCrmActivity = useCallback(async () => {
     if (!user || !contact || !logActSubject.trim()) {
@@ -562,21 +635,37 @@ export default function ContactDetail() {
                 {/* Right column: Contact info */}
                 <div>
                   <FieldRow label={isRu ? 'Телефон' : 'Phone'}>
-                    {contact.phone ? (
-                      <a href={`tel:${contact.phone}`} className="text-primary hover:underline">{contact.phone}</a>
-                    ) : <span className="text-muted-foreground/50">—</span>}
+                    <InlineEditableText
+                      value={contact.phone}
+                      type="tel"
+                      placeholder="+7 ..."
+                      onSave={(next) => updateContact.mutateAsync({ id: contact.id, phone: next || null })}
+                      renderDisplay={(v) => (
+                        <a href={`tel:${v}`} className="text-primary hover:underline">{v}</a>
+                      )}
+                    />
                   </FieldRow>
                   <FieldRow label={isRu ? 'Мобильный' : 'Mobile'}>
-                    {(contact.mobile || contact.whatsapp) ? (
-                      <a href={`tel:${contact.mobile || contact.whatsapp}`} className="text-primary hover:underline">
-                        {contact.mobile || contact.whatsapp}
-                      </a>
-                    ) : <span className="text-muted-foreground/50">—</span>}
+                    <InlineEditableText
+                      value={contact.mobile}
+                      type="tel"
+                      placeholder="+7 ..."
+                      onSave={(next) => updateContact.mutateAsync({ id: contact.id, mobile: next || null })}
+                      renderDisplay={(v) => (
+                        <a href={`tel:${v}`} className="text-primary hover:underline">{v}</a>
+                      )}
+                    />
                   </FieldRow>
                   <FieldRow label="Email">
-                    {contact.email ? (
-                      <a href={`mailto:${contact.email}`} className="text-primary hover:underline">{contact.email}</a>
-                    ) : <span className="text-muted-foreground/50">—</span>}
+                    <InlineEditableText
+                      value={contact.email}
+                      type="email"
+                      placeholder="name@example.com"
+                      onSave={(next) => updateContact.mutateAsync({ id: contact.id, email: next || null })}
+                      renderDisplay={(v) => (
+                        <a href={`mailto:${v}`} className="text-primary hover:underline">{v}</a>
+                      )}
+                    />
                   </FieldRow>
                   <FieldRow label="Website">
                     {contact.website ? (
@@ -642,6 +731,7 @@ export default function ContactDetail() {
                 { value: 'dates', label: isRu ? 'Даты' : 'Dates & Reminders', icon: CalendarDays },
                 { value: 'deals', label: `${isRu ? 'Сделки' : 'Deals'}${deals.length > 0 ? ` (${deals.length})` : ''}`, icon: DollarSign },
                 { value: 'tasks', label: `${isRu ? 'Задачи' : 'Tasks'}${contactTasks.length > 0 ? ` (${contactTasks.length})` : ''}`, icon: ListTodo },
+                { value: 'emails', label: `${isRu ? 'Письма' : 'Emails'}${emails.length > 0 ? ` (${emails.length})` : ''}`, icon: Mail },
                 { value: 'documents', label: isRu ? 'Документы' : 'Documents', icon: FileText },
                 { value: 'kyc', label: 'KYC', icon: User },
                 { value: 'ai', label: 'AI', icon: Sparkles },
@@ -723,6 +813,8 @@ export default function ContactDetail() {
                     <p className="text-sm text-muted-foreground whitespace-pre-wrap">{contact.notes}</p>
                   </div>
                 )}
+
+                <ContactLinksSection contactId={contact.id} companyId={contact.company_id} />
               </div>
             </TabsContent>
 
@@ -825,6 +917,32 @@ export default function ContactDetail() {
                               {activity.description && <p className="text-xs text-muted-foreground mt-0.5">{activity.description}</p>}
                               <p className="text-[11px] text-muted-foreground mt-0.5">
                                 {formatDistanceToNow(new Date(activity.activity_date), { addSuffix: true, locale })}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      } else if (item.type === 'email') {
+                        const email = item.data as { id: string; direction: string; subject: string; to_email: string; body_html: string | null; status: string; sent_at: string | null; created_at: string };
+                        const inbound = email.direction === 'inbound';
+                        const excerpt = email.body_html?.replace(/<[^>]+>/g, ' ').trim().slice(0, 120) || '';
+                        return (
+                          <div key={`email-${email.id}`} className="flex gap-2.5 p-2 rounded-none hover:bg-muted/30 relative">
+                            <span className={cn(
+                              'flex h-[26px] w-[26px] items-center justify-center rounded-full bg-card border-2 text-xs shrink-0 z-10',
+                              email.status === 'sent' ? 'border-success' : email.status === 'failed' ? 'border-destructive' : 'border-border',
+                            )}>
+                              📧
+                            </span>
+                            <div className="flex-1 min-w-0 pt-0.5">
+                              <span className="text-xs font-medium text-muted-foreground">
+                                {inbound ? (isRu ? 'Письмо (входящее)' : 'Email (in)') : (isRu ? 'Письмо (исходящее)' : 'Email (out)')}
+                                {' · '}
+                                {email.to_email}
+                              </span>
+                              <p className="text-sm font-medium mt-0.5 truncate">{email.subject}</p>
+                              {excerpt && <p className="text-xs text-muted-foreground mt-0.5 truncate">{excerpt}</p>}
+                              <p className="text-[11px] text-muted-foreground mt-0.5">
+                                {formatDistanceToNow(new Date(email.sent_at ?? email.created_at), { addSuffix: true, locale })}
                               </p>
                             </div>
                           </div>
@@ -960,29 +1078,56 @@ export default function ContactDetail() {
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {contactTasks.map(task => (
-                    <div key={task.id} className="flex items-center gap-3 p-3 rounded-none border bg-card">
-                      <button onClick={() => handleCompleteTask(task.id)} className="shrink-0">
-                        <CheckCircle className={cn('h-5 w-5', task.status === 'completed' ? 'text-success' : 'text-muted-foreground/30 hover:text-success/60')} />
-                      </button>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium">{task.title}</p>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <Badge variant="outline" className="text-[10px]">{task.task_type}</Badge>
-                          {task.due_date && (
-                            <span className="text-xs text-muted-foreground">
-                              {format(new Date(task.due_date), 'd MMM', { locale })}
-                            </span>
-                          )}
-                          <Badge variant={task.priority === 'high' ? 'destructive' : 'secondary'} className="text-[10px]">
-                            {task.priority}
-                          </Badge>
+                  {contactTasks.map(task => {
+                    const now = new Date();
+                    const due = task.due_date ? new Date(task.due_date) : null;
+                    const isOverdue = due ? due < new Date(now.getFullYear(), now.getMonth(), now.getDate()) : false;
+                    const isToday = due
+                      ? due.getFullYear() === now.getFullYear()
+                        && due.getMonth() === now.getMonth()
+                        && due.getDate() === now.getDate()
+                      : false;
+                    const isFuture = due ? !isOverdue && !isToday : false;
+                    const dueState = isOverdue ? 'border-l-destructive bg-destructive/5'
+                      : isToday ? 'border-l-warning bg-warning/5'
+                      : isFuture ? 'border-l-info' : '';
+                    const dueLabel = isOverdue ? (isRu ? 'просрочена' : 'overdue')
+                      : isToday ? (isRu ? 'сегодня' : 'today')
+                      : null;
+                    return (
+                      <div key={task.id} className={cn('flex items-center gap-3 p-3 rounded-none border border-l-4 bg-card', dueState)}>
+                        <button onClick={() => handleCompleteTask(task.id)} className="shrink-0">
+                          <CheckCircle className={cn('h-5 w-5', task.status === 'completed' ? 'text-success' : 'text-muted-foreground/30 hover:text-success/60')} />
+                        </button>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium">{task.title}</p>
+                          <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                            <Badge variant="outline" className="text-[10px]">{task.task_type}</Badge>
+                            {due && (
+                              <span className={cn('text-xs', isOverdue ? 'text-destructive font-medium' : isToday ? 'text-warning font-medium' : 'text-muted-foreground')}>
+                                {format(due, 'd MMM', { locale })}
+                                {dueLabel && <span className="ml-1">· {dueLabel}</span>}
+                              </span>
+                            )}
+                            <Badge variant={task.priority === 'high' ? 'destructive' : 'secondary'} className="text-[10px]">
+                              {task.priority}
+                            </Badge>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
+            </TabsContent>
+
+            {/* Emails */}
+            <TabsContent value="emails" className="mt-4">
+              <ContactEmailsSection
+                contactId={contact.id}
+                companyId={contact.company_id}
+                contactEmail={contact.email}
+              />
             </TabsContent>
 
             {/* Documents */}
@@ -1195,6 +1340,30 @@ export default function ContactDetail() {
                           {activity.description && <p className="text-xs text-muted-foreground mt-0.5">{activity.description}</p>}
                           <p className="text-[11px] text-muted-foreground mt-0.5">
                             {formatDistanceToNow(new Date(activity.activity_date), { addSuffix: true, locale })}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  } else if (item.type === 'email') {
+                    const email = item.data as { id: string; direction: string; subject: string; to_email: string; status: string; sent_at: string | null; created_at: string };
+                    const inbound = email.direction === 'inbound';
+                    return (
+                      <div key={`email-${email.id}`} className="flex gap-2.5 p-2 rounded-none hover:bg-muted/30 transition-colors relative">
+                        <div className="relative z-10 shrink-0 mt-1">
+                          <span className={cn(
+                            'flex h-[26px] w-[26px] items-center justify-center rounded-full bg-card border-2 text-xs',
+                            email.status === 'sent' ? 'border-success' : email.status === 'failed' ? 'border-destructive' : 'border-border',
+                          )}>
+                            📧
+                          </span>
+                        </div>
+                        <div className="flex-1 min-w-0 pt-0.5">
+                          <span className="text-xs font-medium text-muted-foreground">
+                            {inbound ? (isRu ? 'Письмо (вх.)' : 'Email (in)') : (isRu ? 'Письмо (исх.)' : 'Email (out)')}
+                          </span>
+                          <p className="text-sm font-medium mt-0.5 truncate">{email.subject}</p>
+                          <p className="text-[11px] text-muted-foreground mt-0.5">
+                            {formatDistanceToNow(new Date(email.sent_at ?? email.created_at), { addSuffix: true, locale })}
                           </p>
                         </div>
                       </div>
