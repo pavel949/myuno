@@ -650,7 +650,7 @@ export default function ContactDetail() {
                       value={contact.mobile}
                       type="tel"
                       placeholder="+7 ..."
-                      onSave={(next) => updateContact.mutateAsync({ id: contact.id, mobile: next || null })}
+                      onSave={async (next) => { await updateContact.mutateAsync({ id: contact.id, mobile: next || null }); }}
                       renderDisplay={(v) => (
                         <a href={`tel:${v}`} className="text-primary hover:underline">{v}</a>
                       )}
