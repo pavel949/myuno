@@ -18,7 +18,9 @@ export function SituationCard({ situation, serviceCount, className }: SituationC
 
   const title = isRu ? situation.title_ru : situation.title_en;
   const description = isRu ? situation.description_ru : situation.description_en;
-  const color = situation.color || '#0A2240';
+  const color = situation.color ?? null;
+  const tint = color && color.startsWith('#') ? `${color}20` : 'hsl(var(--primary) / 0.12)';
+  const iconColor = color ?? 'hsl(var(--primary))';
 
   return (
     <Link
@@ -35,12 +37,12 @@ export function SituationCard({ situation, serviceCount, className }: SituationC
       <div className="flex items-start justify-between gap-3">
         <div
           className="w-12 h-12 flex items-center justify-center shrink-0"
-          style={{ backgroundColor: `${color}20` }}
+          style={{ backgroundColor: tint }}
         >
           <DynamicIcon
             name={situation.icon || 'Compass'}
             className="w-6 h-6"
-            style={{ color }}
+            style={{ color: iconColor }}
             strokeWidth={1.75}
           />
         </div>

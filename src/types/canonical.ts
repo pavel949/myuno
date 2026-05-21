@@ -302,6 +302,19 @@ export function getCanonicalRoleMeta(role: CanonicalRole | null | undefined): Ca
   return CANONICAL_ROLE_META[role] ?? null;
 }
 
+/**
+ * Default content cluster (Arrive/Live/Manage/Invest/Legal/Build) for a
+ * canonical role. Used by routing layers (Welcome, post-login landing,
+ * role switch) so every role has a non-empty home surface — see
+ * `docs/canonical/01-segmentation-framework.md` § 0.4 and
+ * `src/lib/catalog/taxonomy.ts:CLUSTERS`. Returns `null` for unknown roles
+ * so callers can fall back to a generic landing instead of dead-ending.
+ */
+export function getDefaultClusterForRole(role: CanonicalRole | null | undefined): ClusterId | null {
+  if (!role) return null;
+  return CANONICAL_ROLE_META[role]?.defaultCluster ?? null;
+}
+
 export function nextLifecycleStage(stage: LifecycleStage | null): LifecycleStage | null {
   if (!stage) return null;
   const idx = LIFECYCLE_PROGRESSION.indexOf(stage);

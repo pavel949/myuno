@@ -15,6 +15,13 @@
  *
  * Static `taxonomy.ts` is now treated as a frozen fallback: it must not be
  * imported directly by UI components anymore — go through this hook.
+ *
+ * LifeOS scope: this hook currently hydrates only LifeOS **level 1**
+ * (`life_situations` via the `cluster_life_situations` bridge). Levels 2–4
+ * (`life_scenarios`, `life_tasks`, `task_entity_map`) exist in the schema
+ * but are not yet read here — consume them through `useLifeOS` hooks
+ * (`useResolveLifeOSContext`) and `life_os_catalog` VIEW until this hook
+ * is extended.
  */
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -155,7 +162,7 @@ function adaptGroupToCluster(row: DBGroupRow): ClusterEntry {
     valueRu: row.description_ru ?? staticMatch?.valueRu ?? '',
     valueEn: row.description_en ?? staticMatch?.valueEn ?? '',
     icon: staticMatch?.icon ?? STATIC_CLUSTERS[0].icon,
-    color: row.color ?? staticMatch?.color ?? '#00D68F',
+    color: row.color ?? staticMatch?.color ?? 'hsl(var(--cluster-live))',
     sortOrder: row.sort_order ?? staticMatch?.sortOrder ?? 99,
     audience: staticMatch?.audience ?? 'public',
     personas: staticMatch?.personas,
@@ -201,7 +208,7 @@ function adaptCategoryRow(
     valueRu: staticMatch?.valueRu ?? '',
     valueEn: staticMatch?.valueEn ?? '',
     icon: staticMatch?.icon ?? STATIC_CATEGORIES[0].icon,
-    color: row.color ?? staticMatch?.color ?? '#10B981',
+    color: row.color ?? staticMatch?.color ?? 'hsl(var(--cat-health))',
     // DB-backed catalog: leaf rows only — never inject static SSOT phantom services.
     services: childRows.length
       ? childRows
@@ -278,7 +285,7 @@ function adaptLifeSituationRow(row: DBLifeSituationRow): LifeSituationEntry {
     descriptionRu: row.description_ru ?? undefined,
     descriptionEn: row.description_en ?? undefined,
     icon: row.icon ?? 'Circle',
-    color: row.color ?? '#6B7280',
+    color: row.color ?? 'hsl(var(--text-muted))',
     priority: row.priority ?? 50,
     isActive: row.is_active ?? true,
   };

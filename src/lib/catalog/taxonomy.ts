@@ -116,7 +116,11 @@ export interface ClusterEntry {
   valueRu: string;
   valueEn: string;
   icon: LucideIcon;
-  /** Hex accent color (matches DS cluster palette) */
+  /**
+   * CSS color for inline `style` use. Resolves to `hsl(var(--cluster-X))`
+   * tokens defined in `src/styles/tokens.css` §11 so theme switching
+   * follows DS 2.1 (no DS 2.0 mint/blue/cyan rainbow).
+   */
   color: string;
   /** Display order in nav */
   sortOrder: number;
@@ -188,7 +192,7 @@ export const CLUSTERS: ClusterEntry[] = [
     valueRu: 'Дорога из аэропорта, связь, деньги и первые шаги — до того, как жизнь уляжется в быт.',
     valueEn: 'Airport logistics, connectivity, money, and first steps before everyday life settles in.',
     icon: Plane,
-    color: '#00D68F',
+    color: 'hsl(var(--cluster-arrive))',
     sortOrder: 1,
     audience: 'public',
     homeRoute: APP_ROUTES.ARRIVE_CLUSTER,
@@ -201,7 +205,7 @@ export const CLUSTERS: ClusterEntry[] = [
     valueRu: 'Дом, здоровье, еда, семья, питомцы — повседневность без хаоса.',
     valueEn: 'Home, health, food, family, pets — everyday life sorted.',
     icon: HomeIcon,
-    color: '#4E7BFF',
+    color: 'hsl(var(--cluster-live))',
     sortOrder: 2,
     audience: 'public',
     homeRoute: APP_ROUTES.DISCOVER,
@@ -214,7 +218,7 @@ export const CLUSTERS: ClusterEntry[] = [
     valueRu: 'Собственники и управляющие: брони, финансы, операции, события — один кабинет.',
     valueEn: 'Hosts & managers: bookings, money, operations, events — one workspace.',
     icon: Building2,
-    color: '#06B6D4',
+    color: 'hsl(var(--cluster-manage))',
     sortOrder: 3,
     audience: 'workspace',
     personas: ['property_owner', 'local_services_provider'],
@@ -229,7 +233,7 @@ export const CLUSTERS: ClusterEntry[] = [
     valueRu: 'Недвижимость и капитал: поиск, новостройки, бизнес-вложения, ROI, база знаний.',
     valueEn: 'Property and capital: search, off-plan, business deals, ROI, knowledge base.',
     icon: TrendingUp,
-    color: '#A855F7',
+    color: 'hsl(var(--cluster-invest))',
     sortOrder: 4,
     audience: 'public',
     homeRoute: APP_ROUTES.INVEST,
@@ -242,7 +246,7 @@ export const CLUSTERS: ClusterEntry[] = [
     valueRu: 'Визы, налоги, договоры, страховки, банк, образование, релокация.',
     valueEn: 'Visa, taxes, contracts, insurance, banking, education, relocation.',
     icon: Scale,
-    color: '#F59E0B',
+    color: 'hsl(var(--cluster-legal))',
     sortOrder: 5,
     audience: 'public',
     homeRoute: APP_ROUTES.LEGAL_CLUSTER,
@@ -255,7 +259,7 @@ export const CLUSTERS: ClusterEntry[] = [
     valueRu: 'B2B: портал застройщика, лиды, витрина проектов, консультации.',
     valueEn: 'B2B: developer portal, leads, project showcase, advisory.',
     icon: HardHat,
-    color: '#F43F5E',
+    color: 'hsl(var(--cluster-build))',
     sortOrder: 6,
     audience: 'public',
     homeRoute: APP_ROUTES.FOR_REAL_ESTATE_DEVELOPERS,
@@ -683,7 +687,9 @@ export interface AudienceContext {
 /**
  * `public` clusters always visible. `workspace` clusters require a matching
  * persona OR role. Empty context hides workspace clusters (safer default —
- * a guest doesn't accidentally see operator surfaces).
+ * a guest doesn't accidentally see operator canvases). "Canvas" is the app
+ * shell (Home/Discover/Operate/Wallet/Me/Admin) — see `src/types/canvas.ts`
+ * — distinct from the content "cluster"/"surface" defined above.
  */
 export function isClusterVisibleToUser(
   cluster: ClusterEntry,

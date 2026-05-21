@@ -64,6 +64,8 @@
 - **JTBD Cluster** — one of 10 functional Jobs-To-Be-Done classifiers (A–J). Used for tagging, AI routing, SEO. **Never confuse with Surface.**
 - **Role stack** — `profiles.roles_stack` jsonb + `primary_role`, weighted `primary·3 + secondary·2 + tertiary·1`
 - **Intent** — AI agent output, user-confirmed via one-tap accept/later
+- **Navigator v2 / v3** — `/discover` рендерит `NavigatorEntry` ([src/components/navigation/NavigatorEntry.tsx](src/components/navigation/NavigatorEntry.tsx)), который feature-flag-switch'ит между v2 (cluster grid, default) и v3 (situation-first grid: `NavigatorPageV3` + `SituationCard` + `SituationDetailPage` + `useSituationServiceCounts`). v3 живёт за `feature_flag:navigator_v3` в `system_settings` (default OFF) до прохождения QA на role-aware ranking и пустых-ситуаций edge cases; включается переключением row, без деплоя.
+- **Canvas type** — `src/types/canvas.ts` экспортирует `CanvasId` + `CANVAS_META` (Home/Discover/Operate/Wallet/Me/Admin) с aud-ience tier'ом. Используйте этот type в новых routing/permission слоях, не строковые литералы.
 
 <!-- updated: 2026-04-22 — handoff/ moved to docs/canonical/architecture/ during repo cleanup -->
 

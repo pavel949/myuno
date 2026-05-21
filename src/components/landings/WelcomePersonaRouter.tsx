@@ -1,14 +1,26 @@
 /**
- * WelcomePersonaRouter — three primary entry paths on WelcomeLanding.
+ * WelcomePersonaRouter — one entry card per canonical content cluster.
+ *
+ * Cards mirror the 6 surfaces from `src/lib/catalog/taxonomy.ts` (Arrive,
+ * Live, Invest, Manage, Legal, Build) so every canonical role
+ * (`src/types/canonical.ts:CANONICAL_ROLE_META.defaultCluster`) lands on a
+ * non-empty home. Workspace-audience clusters (Manage, Build) are still
+ * surfaced — gating happens downstream by role/persona.
  */
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plane, Home, TrendingUp, Building2 } from 'lucide-react';
+import { Plane, Home, TrendingUp, Building2, Scale, HardHat } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { cn } from '@/lib/utils';
 
-export type WelcomeEntryId = 'arrive' | 'live' | 'invest' | 'manage';
+/**
+ * IDs identifying the 6 Welcome entry cards — one per **content cluster**
+ * (see `src/lib/catalog/taxonomy.ts:ClusterId`), not per canonical role.
+ * Each canonical role lands on its `defaultCluster` (see `CANONICAL_ROLE_META`
+ * in `src/types/canonical.ts`), so cluster-keyed entries cover all 6 roles.
+ */
+export type WelcomeEntryId = 'arrive' | 'live' | 'invest' | 'manage' | 'legal' | 'build';
 
 /**
  * Deep-link helper: marks traffic from Welcome so downstream surfaces can tune defaults.
@@ -30,8 +42,7 @@ export function buildWelcomeNavigatorHref(path: string, entry: WelcomeEntryId): 
 }
 
 export function WelcomePersonaRouter() {
-  const { language, t } = useLanguage();
-  const isRu = language === 'ru';
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const cards: {
@@ -79,10 +90,28 @@ export function WelcomePersonaRouter() {
       target: buildWelcomeNavigatorHref(APP_ROUTES.FOR_MANAGEMENT_COMPANIES, 'manage'),
       Icon: Building2,
     },
+    {
+      id: 'legal',
+      title: t('welcome.persona.legal.title'),
+      subline: t('welcome.persona.legal.subline'),
+      hint: t('welcome.persona.legal.hint'),
+      aria: t('welcome.persona.legal.aria'),
+      target: buildWelcomeNavigatorHref(APP_ROUTES.LEGAL_CLUSTER, 'legal'),
+      Icon: Scale,
+    },
+    {
+      id: 'build',
+      title: t('welcome.persona.build.title'),
+      subline: t('welcome.persona.build.subline'),
+      hint: t('welcome.persona.build.hint'),
+      aria: t('welcome.persona.build.aria'),
+      target: buildWelcomeNavigatorHref(APP_ROUTES.FOR_REAL_ESTATE_DEVELOPERS, 'build'),
+      Icon: HardHat,
+    },
   ];
 
   return (
-    <div className="grid grid-cols-1 gap-px overflow-hidden rounded-none border border-border bg-border/50 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-1 gap-px overflow-hidden rounded-none border border-border bg-border/50 sm:grid-cols-2 lg:grid-cols-3">
       {cards.map(({ id, title, subline, hint, aria, target, Icon }) => (
         <button
           key={id}
@@ -102,7 +131,7 @@ export function WelcomePersonaRouter() {
           <p className="mt-2 font-sans text-body-sm leading-relaxed text-muted-foreground">{subline}</p>
           <p className="mt-4 font-sans text-caption font-medium uppercase tracking-wide text-primary">{hint}</p>
           <p className="mt-1 font-sans text-caption text-muted-foreground">
-            {isRu ? 'Нажмите, чтобы перейти' : 'Tap to continue'}
+            {t('welcome.persona.tapToContinue')}
           </p>
         </button>
       ))}

@@ -570,6 +570,7 @@ export const CrmSequencesPage = lazy(() => import('@/pages/owner/CrmSequencesPag
 export const CrmQuotesPage = lazy(() => import('@/pages/owner/CrmQuotesPage'));
 export const CrmMeetingsPage = lazy(() => import('@/pages/owner/CrmMeetingsPage'));
 export const CrmEmailsPage = lazy(() => import('@/pages/owner/CrmEmailsPage'));
+export const CrmEmailSettingsPage = lazy(() => import('@/pages/owner/CrmEmailSettingsPage'));
 export const CrmWorkflowsPage = lazy(() => import('@/pages/owner/CrmWorkflowsPage'));
 export const CrmTemplatesPage = lazy(() => import('@/pages/owner/CrmTemplatesPage'));
 export const CrmDuplicatesPage = lazy(() => import('@/pages/owner/CrmDuplicatesPage'));

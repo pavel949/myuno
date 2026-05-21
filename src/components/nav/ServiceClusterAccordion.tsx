@@ -10,6 +10,21 @@ import {
 } from '@/lib/nav/clusterCatalog';
 import type { Language } from '@/i18n';
 
+/**
+ * Token-driven cluster tints. Keep in sync with `--cluster-*` in tokens.css
+ * and the `cluster-*` palette entry in tailwind.config.ts. Static map so
+ * Tailwind keeps these utilities in the production CSS.
+ */
+const CLUSTER_TINT: Record<string, { icon: string; bg: string }> = {
+  arrive: { icon: 'text-cluster-arrive', bg: 'bg-cluster-arrive/10' },
+  live:   { icon: 'text-cluster-live',   bg: 'bg-cluster-live/10' },
+  manage: { icon: 'text-cluster-manage', bg: 'bg-cluster-manage/10' },
+  invest: { icon: 'text-cluster-invest', bg: 'bg-cluster-invest/10' },
+  legal:  { icon: 'text-cluster-legal',  bg: 'bg-cluster-legal/10' },
+  build:  { icon: 'text-cluster-build',  bg: 'bg-cluster-build/10' },
+};
+const FALLBACK_TINT = { icon: 'text-muted-foreground', bg: 'bg-muted' };
+
 export interface ServiceClusterAccordionProps {
   /** Pre-filtered clusters (e.g. `filterCatalogForUser`) */
   clusters: ClusterCatalogEntry[];
@@ -40,6 +55,7 @@ export function ServiceClusterAccordion({
           const Icon = cluster.icon;
           const links = cluster.services.filter((s) => s.status !== 'soon');
           if (links.length === 0) return null;
+          const tint = CLUSTER_TINT[cluster.id] ?? FALLBACK_TINT;
           return (
             <AccordionItem
               key={cluster.id}
@@ -48,11 +64,8 @@ export function ServiceClusterAccordion({
             >
               <AccordionTrigger className="py-3 hover:no-underline">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div
-                    className="w-8 h-8 rounded-none flex items-center justify-center shrink-0"
-                    style={{ background: cluster.color + '1A' }}
-                  >
-                    <Icon className="w-4 h-4" style={{ color: cluster.color }} />
+                  <div className={cn('w-8 h-8 rounded-none flex items-center justify-center shrink-0', tint.bg)}>
+                    <Icon className={cn('w-4 h-4', tint.icon)} />
                   </div>
                   <span className="text-[13px] font-semibold text-foreground">
                     {getClusterHeaderLabel(cluster, language)}

@@ -132,17 +132,24 @@ export default function SituationDetailPage() {
         {situation && (
           <>
             <header className="mb-8 md:mb-10">
-              <div
-                className="w-16 h-16 flex items-center justify-center mb-5"
-                style={{ backgroundColor: `${situation.color || '#0A2240'}20` }}
-              >
-                <DynamicIcon
-                  name={situation.icon || 'Compass'}
-                  className="w-8 h-8"
-                  style={{ color: situation.color || '#0A2240' }}
-                  strokeWidth={1.5}
-                />
-              </div>
+              {(() => {
+                const c = situation.color ?? null;
+                const tint = c && c.startsWith('#') ? `${c}20` : 'hsl(var(--primary) / 0.12)';
+                const iconColor = c ?? 'hsl(var(--primary))';
+                return (
+                  <div
+                    className="w-16 h-16 flex items-center justify-center mb-5"
+                    style={{ backgroundColor: tint }}
+                  >
+                    <DynamicIcon
+                      name={situation.icon || 'Compass'}
+                      className="w-8 h-8"
+                      style={{ color: iconColor }}
+                      strokeWidth={1.5}
+                    />
+                  </div>
+                );
+              })()}
               <h1 className="text-[28px] sm:text-[36px] font-serif font-semibold leading-[1.1] tracking-[-0.02em] text-foreground">
                 {isRu ? situation.title_ru : situation.title_en}
               </h1>

@@ -87,24 +87,24 @@ const BADGE_LABEL: Record<Badge, string> = {
 
 const BADGE_CLASS_DARK: Record<Badge, string> = {
   free:    'bg-success/30 text-success-foreground',
-  partner: 'bg-navy-500/25 text-navy-100',
-  new:     'bg-orange text-white',
-  soon:    'bg-white/10 text-white/70',
-  kyc:     'bg-orange/25 text-orange-400',
-  vip:     'bg-orange text-white',
+  partner: 'bg-primary/20 text-foreground',
+  new:     'bg-accent text-accent-foreground',
+  soon:    'bg-muted/60 text-muted-foreground',
+  kyc:     'bg-accent/25 text-accent',
+  vip:     'bg-accent text-accent-foreground',
   live:    'bg-success/30 text-success-foreground',
-  '24-7':  'bg-orange/25 text-orange-400',
+  '24-7':  'bg-accent/25 text-accent',
 };
 
 const BADGE_CLASS_LIGHT: Record<Badge, string> = {
   free:    'bg-success/20 text-success',
   partner: 'bg-primary/15 text-foreground',
-  new:     'bg-orange text-white',
+  new:     'bg-accent text-accent-foreground',
   soon:    'bg-muted text-muted-foreground',
-  kyc:     'bg-orange/20 text-orange-700',
-  vip:     'bg-orange text-white',
+  kyc:     'bg-accent/20 text-accent',
+  vip:     'bg-accent text-accent-foreground',
   live:    'bg-success/20 text-success',
-  '24-7':  'bg-orange/20 text-orange-700',
+  '24-7':  'bg-accent/20 text-accent',
 };
 
 type NavigatorShell = 'light' | 'dark';
@@ -160,68 +160,68 @@ interface NavigatorAppearance {
 const NAV_APPEARANCE: Record<NavigatorShell, NavigatorAppearance> = {
   dark: {
     shell: 'dark',
-    root: 'min-h-full -mx-4 px-4 pb-28 bg-navy text-navy-50',
-    heroEyebrow: 'font-mono text-[10px] uppercase tracking-[0.14em] text-orange-400/90',
+    root: 'min-h-full -mx-4 px-4 pb-28 bg-background text-foreground',
+    heroEyebrow: 'font-mono text-[10px] uppercase tracking-[0.14em] text-accent',
     heroTitle:
-      'text-[28px] sm:text-[36px] lg:text-[40px] font-semibold leading-[1.12] tracking-[-0.025em] text-white max-w-3xl',
-    heroTitleEm: 'italic font-serif text-orange font-normal',
-    heroLead: 'text-[13px] sm:text-[16px] text-navy-50/70 leading-[1.5] max-w-xl',
-    heroHint: 'text-[11px] text-navy-100/80 max-w-xl leading-snug',
-    sosHeadline: 'font-semibold text-[14px] text-white',
-    sosSub: 'text-[12px] text-white/65 truncate',
+      'text-[28px] sm:text-[36px] lg:text-[40px] font-semibold leading-[1.12] tracking-[-0.025em] text-foreground max-w-3xl',
+    heroTitleEm: 'italic font-serif text-accent font-normal',
+    heroLead: 'text-[13px] sm:text-[16px] text-muted-foreground leading-[1.5] max-w-xl',
+    heroHint: 'text-[11px] text-muted-foreground max-w-xl leading-snug',
+    sosHeadline: 'font-semibold text-[14px] text-foreground',
+    sosSub: 'text-[12px] text-muted-foreground truncate',
     sosCta:
-      'shrink-0 font-mono text-[11px] uppercase tracking-[0.1em] font-medium text-white px-3 py-2 rounded-none border border-white/40',
-    personaRail: 'inline-flex gap-1 p-1 flex-wrap rounded-none border border-white/10 bg-white/[0.04] w-fit max-w-full',
-    personaInactive: 'bg-transparent text-white/60',
-    personaActive: 'bg-orange text-white',
+      'shrink-0 font-mono text-[11px] uppercase tracking-[0.1em] font-medium text-foreground px-3 py-2 rounded-none border border-border',
+    personaRail: 'inline-flex gap-1 p-1 flex-wrap rounded-none border border-border bg-card w-fit max-w-full',
+    personaInactive: 'bg-transparent text-muted-foreground',
+    personaActive: 'bg-accent text-accent-foreground',
     personaCountInactive: 'font-mono text-[10px] opacity-50',
     personaCountActive: 'font-mono text-[10px] opacity-70',
-    searchIcon: 'absolute left-5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-white/50 pointer-events-none',
+    searchIcon: 'absolute left-5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-muted-foreground pointer-events-none',
     searchInput:
-      'w-full text-[15px] outline-none placeholder:text-white/45 bg-white/[0.06] border border-white/10 rounded-none text-navy-50 caret-orange pl-[50px] pr-[60px] py-4',
-    searchKbd: 'absolute right-4 top-1/2 -translate-y-1/2 font-mono text-[10px] px-1.5 py-[3px] rounded-none bg-white/10 text-white/60',
-    searchClear: 'absolute right-14 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70',
-    popularLabel: 'font-mono text-[10px] uppercase tracking-[0.1em] text-white/40',
-    popularLink: 'text-[12px] text-white/75 hover:text-white transition-colors pb-px border-b border-dotted border-white/30',
-    emptySearch: 'text-white/45 text-sm py-6 text-center',
-    resultsLabel: 'font-mono text-[9px] uppercase tracking-[0.12em] text-white/30',
+      'w-full text-[15px] outline-none placeholder:text-muted-foreground bg-card border border-border rounded-none text-foreground caret-accent pl-[50px] pr-[60px] py-4',
+    searchKbd: 'absolute right-4 top-1/2 -translate-y-1/2 font-mono text-[10px] px-1.5 py-[3px] rounded-none bg-muted/60 text-muted-foreground',
+    searchClear: 'absolute right-14 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground',
+    popularLabel: 'font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground',
+    popularLink: 'text-[12px] text-foreground/80 hover:text-foreground transition-colors pb-px border-b border-dotted border-border',
+    emptySearch: 'text-muted-foreground text-sm py-6 text-center',
+    resultsLabel: 'font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground',
     sitCard:
-      'relative flex flex-col justify-between gap-3 p-[18px] rounded-none text-left transition-all duration-150 border border-white/10 bg-white/[0.03] min-h-[130px]',
-    sitCardHover: 'hover:bg-white/[0.06] hover:border-white/20 hover:-translate-y-px active:scale-[0.98]',
+      'relative flex flex-col justify-between gap-3 p-[18px] rounded-none text-left transition-all duration-150 border border-border bg-card min-h-[130px]',
+    sitCardHover: 'hover:bg-muted/40 hover:border-border hover:-translate-y-px active:scale-[0.98]',
     sitActionHint:
-      'text-[11px] font-medium leading-snug text-white/55 mt-2 max-w-[16rem]',
+      'text-[11px] font-medium leading-snug text-muted-foreground mt-2 max-w-[16rem]',
     sitIconWrap:
-      'size-[var(--touch-target)] shrink-0 rounded-none flex items-center justify-center bg-orange/20 md:size-[30px]',
-    sitTitle: 'text-[15px] font-semibold text-white leading-[19px] tracking-[-0.01em] mt-3.5',
-    sitDesc: 'text-[12px] text-white/55 leading-[17px] mt-1.5',
-    sitMeta: 'font-mono text-[10px] text-white/40 uppercase tracking-[0.06em]',
-    filterLink: 'flex items-center gap-1 text-[11px] text-white/50 hover:text-white/80 transition-colors',
-    sectionBorder: 'flex items-end justify-between gap-3 pb-2.5 mb-4 border-b border-white/10',
+      'size-[var(--touch-target)] shrink-0 rounded-none flex items-center justify-center bg-accent/20 md:size-[30px]',
+    sitTitle: 'text-[15px] font-semibold text-foreground leading-[19px] tracking-[-0.01em] mt-3.5',
+    sitDesc: 'text-[12px] text-muted-foreground leading-[17px] mt-1.5',
+    sitMeta: 'font-mono text-[10px] text-muted-foreground uppercase tracking-[0.06em]',
+    filterLink: 'flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors',
+    sectionBorder: 'flex items-end justify-between gap-3 pb-2.5 mb-4 border-b border-border',
     clusterTitle:
-      'text-[18px] sm:text-[20px] font-semibold leading-none tracking-[-0.005em] text-white',
-    clusterCount: 'font-mono text-[11px] uppercase tracking-[0.08em] text-white/40',
-    clusterDesc: 'text-[13px] text-white/55 leading-snug max-w-[520px]',
+      'text-[18px] sm:text-[20px] font-semibold leading-none tracking-[-0.005em] text-foreground',
+    clusterCount: 'font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground',
+    clusterDesc: 'text-[13px] text-muted-foreground leading-snug max-w-[520px]',
     clusterAllLink:
-      'shrink-0 text-[12px] text-white/60 hover:text-white/85 transition-colors pb-px border-b border-dotted border-white/30',
+      'shrink-0 text-[12px] text-muted-foreground hover:text-foreground transition-colors pb-px border-b border-dotted border-border',
     trustBar:
-      'flex flex-wrap items-center justify-between gap-4 px-5 sm:px-6 py-[18px] rounded-none border border-white/10 bg-white/[0.03]',
-    trustStats: 'flex flex-wrap gap-x-8 gap-y-2 font-mono text-[11px] tracking-[0.06em] text-white/60',
-    trustStatNum: 'text-[18px] font-semibold text-orange-400',
+      'flex flex-wrap items-center justify-between gap-4 px-5 sm:px-6 py-[18px] rounded-none border border-border bg-card',
+    trustStats: 'flex flex-wrap gap-x-8 gap-y-2 font-mono text-[11px] tracking-[0.06em] text-muted-foreground',
+    trustStatNum: 'text-[18px] font-semibold text-accent',
     trustCta:
-      'flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.1em] text-white/70 hover:text-white transition-colors',
+      'flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.1em] text-foreground/80 hover:text-foreground transition-colors',
     tile:
-      'relative flex flex-col gap-2.5 p-3.5 rounded-none text-left transition-all duration-150 border border-white/10 bg-white/[0.03] min-h-[116px] hover:bg-white/[0.06] hover:border-white/20 hover:-translate-y-px active:scale-[0.97] disabled:cursor-default disabled:hover:translate-y-0',
-    tileLabel: 'text-[12px] font-semibold leading-tight text-navy-50 break-words',
-    tileMeta: 'font-mono text-[9px] uppercase tracking-[0.05em] text-white/40 leading-tight',
+      'relative flex flex-col gap-2.5 p-3.5 rounded-none text-left transition-all duration-150 border border-border bg-card min-h-[116px] hover:bg-muted/40 hover:border-border hover:-translate-y-px active:scale-[0.97] disabled:cursor-default disabled:hover:translate-y-0',
+    tileLabel: 'text-[12px] font-semibold leading-tight text-foreground break-words',
+    tileMeta: 'font-mono text-[9px] uppercase tracking-[0.05em] text-muted-foreground leading-tight',
     badgeClass: BADGE_CLASS_DARK,
   },
   light: {
     shell: 'light',
     root: 'min-h-full -mx-4 px-4 pb-28 bg-muted/45 text-foreground border-y border-border/50',
-    heroEyebrow: 'font-mono text-[10px] uppercase tracking-[0.14em] text-orange-600',
+    heroEyebrow: 'font-mono text-[10px] uppercase tracking-[0.14em] text-accent',
     heroTitle:
       'text-[28px] sm:text-[36px] lg:text-[40px] font-semibold leading-[1.12] tracking-[-0.025em] text-foreground max-w-3xl',
-    heroTitleEm: 'italic font-serif text-orange font-normal',
+    heroTitleEm: 'italic font-serif text-accent font-normal',
     heroLead: 'text-[13px] sm:text-[16px] text-muted-foreground leading-[1.5] max-w-xl',
     heroHint: 'text-[11px] text-muted-foreground max-w-xl leading-snug',
     sosHeadline: 'font-semibold text-[14px] text-foreground',
@@ -230,7 +230,7 @@ const NAV_APPEARANCE: Record<NavigatorShell, NavigatorAppearance> = {
       'shrink-0 font-mono text-[11px] uppercase tracking-[0.1em] font-medium text-foreground px-3 py-2 rounded-none border border-border bg-background/80',
     personaRail: 'inline-flex gap-1 p-1 flex-wrap rounded-none border border-border bg-background/90 w-fit max-w-full',
     personaInactive: 'bg-transparent text-muted-foreground',
-    personaActive: 'bg-orange text-white',
+    personaActive: 'bg-accent text-accent-foreground',
     personaCountInactive: 'font-mono text-[10px] opacity-60',
     personaCountActive: 'font-mono text-[10px] opacity-80',
     searchIcon: 'absolute left-5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-muted-foreground pointer-events-none',
@@ -250,7 +250,7 @@ const NAV_APPEARANCE: Record<NavigatorShell, NavigatorAppearance> = {
     sitActionHint:
       'text-[11px] font-medium leading-snug text-muted-foreground mt-2 max-w-[16rem]',
     sitIconWrap:
-      'size-[var(--touch-target)] shrink-0 rounded-none flex items-center justify-center bg-orange/20 md:size-[30px]',
+      'size-[var(--touch-target)] shrink-0 rounded-none flex items-center justify-center bg-accent/20 md:size-[30px]',
     sitTitle: 'text-[15px] font-semibold text-foreground leading-[19px] tracking-[-0.01em] mt-3.5',
     sitDesc: 'text-[12px] text-muted-foreground leading-[17px] mt-1.5',
     sitMeta: 'font-mono text-[10px] text-muted-foreground uppercase tracking-[0.06em]',
@@ -265,7 +265,7 @@ const NAV_APPEARANCE: Record<NavigatorShell, NavigatorAppearance> = {
     trustBar:
       'flex flex-wrap items-center justify-between gap-4 px-5 sm:px-6 py-[18px] rounded-none border border-border bg-card',
     trustStats: 'flex flex-wrap gap-x-8 gap-y-2 font-mono text-[11px] tracking-[0.06em] text-muted-foreground',
-    trustStatNum: 'text-[18px] font-semibold text-orange-700',
+    trustStatNum: 'text-[18px] font-semibold text-accent',
     trustCta:
       'flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors',
     tile:
@@ -624,10 +624,10 @@ function FeaturedTile({
       onClick={() => onNavigate(data.path)}
       className={cn(
         'relative col-span-2 row-span-2 flex flex-col justify-between p-[22px] rounded-none text-left transition-all duration-150',
-        'min-h-[240px] border border-orange/30',
+        'min-h-[240px] border border-accent/30',
         isLight
-          ? 'bg-card border-orange/35 shadow-sm hover:border-orange/50 hover:bg-muted/30'
-          : 'bg-gradient-to-br from-orange/20 to-orange/5',
+          ? 'bg-card border-accent/35 shadow-sm hover:border-accent/50 hover:bg-muted/30'
+          : 'bg-accent/15 hover:bg-accent/20 hover:border-accent/50',
         'hover:-translate-y-px active:scale-[0.98]',
       )}
     >
@@ -635,50 +635,29 @@ function FeaturedTile({
       <div
         className={cn(
           'flex items-center justify-center shrink-0 rounded-none size-[var(--touch-target)] md:size-9',
-          isLight ? 'bg-orange/15' : 'bg-orange/20',
+          isLight ? 'bg-accent/15' : 'bg-accent/20',
         )}
       >
         <Icon
-          className={cn(
-            'size-6 md:size-[18px]',
-            isLight ? 'text-orange-700' : 'text-orange-400',
-          )}
+          className="size-6 md:size-[18px] text-accent"
         />
       </div>
       <div className="flex flex-col gap-1">
         <h6
-          className={cn(
-            'text-[18px] leading-[23px]',
-            isLight ? 'text-foreground' : 'text-white',
-          )}
+          className="text-[18px] leading-[23px] text-foreground"
           style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 500 }}
         >
           {language === 'ru' ? data.nameRu : data.nameEn}
         </h6>
-        <p
-          className={cn(
-            'text-[12px] leading-[17px]',
-            isLight ? 'text-muted-foreground' : 'text-white/60',
-          )}
-        >
+        <p className="text-[12px] leading-[17px] text-muted-foreground">
           {language === 'ru' ? data.descRu : data.descEn}
         </p>
       </div>
       <div>
-        <span
-          className={cn(
-            'font-mono text-[22px] font-medium tracking-[-0.02em] leading-none',
-            isLight ? 'text-foreground' : 'text-white',
-          )}
-        >
+        <span className="font-mono text-[22px] font-medium tracking-[-0.02em] leading-none text-foreground">
           {data.stat}
         </span>
-        <p
-          className={cn(
-            'font-mono text-[10px] uppercase tracking-[0.1em] mt-1',
-            isLight ? 'text-muted-foreground' : 'text-white/45',
-          )}
-        >
+        <p className="font-mono text-[10px] uppercase tracking-[0.1em] mt-1 text-muted-foreground">
           {language === 'ru' ? data.statLabelRu : data.statLabelEn}
         </p>
       </div>
@@ -1037,7 +1016,7 @@ export default function NavigatorPage() {
                 : 'SOS: 24/7 emergency help — doctor, accident, police, pet import'
             }
             onClick={() => navigate(APP_ROUTES.SOS)}
-            className="w-full flex items-center justify-between gap-3 px-4 sm:px-5 py-3 text-left rounded-none transition-opacity hover:opacity-95 active:scale-[0.99] border border-destructive/45 bg-gradient-to-b from-destructive/15 to-destructive/5"
+            className="w-full flex items-center justify-between gap-3 px-4 sm:px-5 py-3 text-left rounded-none transition-opacity hover:opacity-95 active:scale-[0.99] border border-destructive/45 bg-destructive/10"
           >
             <div className="flex items-center gap-3.5 min-w-0">
               <span className="w-2.5 h-2.5 rounded-full shrink-0 animate-pulse bg-destructive shadow-[0_0_0_4px_hsl(var(--destructive)/0.25)]" />
@@ -1147,7 +1126,7 @@ export default function NavigatorPage() {
                   <button
                     type="button"
                     onClick={() => navigate(`/search?q=${encodeURIComponent(query.trim())}`)}
-                    className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] bg-white/10 hover:bg-white/15 text-white transition"
+                    className="inline-flex items-center gap-2 rounded-none px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] bg-muted/60 hover:bg-muted/80 text-foreground transition"
                   >
                     {isRu ? 'Искать в каталоге →' : 'Search the catalogue →'}
                   </button>

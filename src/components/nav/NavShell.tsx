@@ -24,6 +24,7 @@ import {
   resolveNavRole,
   type NavRoleKey,
 } from '@/lib/nav/navigationModel';
+import { canvasFromPath } from '@/types/canvas';
 
 interface NavShellProps {
   /** Optional explicit role; otherwise resolved from auth + URL. */
@@ -59,6 +60,7 @@ export function NavShell({
   const location = useLocation();
   const resolvedRole: NavRoleKey =
     role ?? resolveNavRole({ activeRole, isMCPortal, pathname: location.pathname });
+  const canvas = canvasFromPath(location.pathname);
 
   const isFullscreen = FULLSCREEN_PREFIXES.some((p) =>
     location.pathname.startsWith(p),
@@ -73,7 +75,7 @@ export function NavShell({
     return (
       <NavShellContext.Provider value={{ active: true }}>
         <SidebarProvider>
-          <div className={cn('flex min-h-screen w-full bg-background', className)}>
+          <div data-canvas={canvas} className={cn('flex min-h-screen w-full bg-background', className)}>
             <SideRail role={resolvedRole} badges={badges} />
             <SidebarInset className="flex min-w-0 flex-1 flex-col">
               {renderHeader && <TopBar role={resolvedRole} title={title} />}
@@ -98,7 +100,7 @@ export function NavShell({
   // Consumer shell: no sidebar, just header + content + bottom-bar.
   return (
     <NavShellContext.Provider value={{ active: true }}>
-      <div className={cn('flex min-h-screen flex-col bg-background', className)}>
+      <div data-canvas={canvas} className={cn('flex min-h-screen flex-col bg-background', className)}>
         {renderHeader && <TopBar role={resolvedRole} title={title} />}
         <main
           className={cn(
