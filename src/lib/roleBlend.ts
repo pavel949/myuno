@@ -14,43 +14,39 @@ import {
  * sentence each: nominal phrases describing the user's life-context, not
  * promises. Keep < 40 chars where possible to fit single-line on 375px.
  *
- * @deprecated `color` field (raw hex) — kept for backward compat with the few
- * remaining call sites that haven't been migrated yet. NEW CODE: use
- * `personaColor(persona)` which returns a theme-aware `hsl(var(--persona-*))`
- * string. The raw-hex field will be removed in a future pass once all
- * consumers (SignalStack, PersonaHalo, HeroGreeting) are migrated.
+ * Color access is via `personaColor(persona)` below — it returns a
+ * theme-aware `hsl(var(--persona-*))` string. The previous raw-hex `color`
+ * field was removed 2026-05-21 after all consumers migrated.
  */
 export const ROLE_META: Record<UserPersona, {
   short: string;
   glyph: string;
-  /** @deprecated Use `personaColor(persona)` instead. */
-  color: string;
   label: string;
   labelRu: string;
   descEn: string;
   descRu: string;
 }> = {
-  tourist:                 { short: 'Tourist',   glyph: 'T', color: '#4E7BFF', label: 'Visiting Phuket',    labelRu: 'Турист',        descEn: 'Arrival, stays, experiences',           descRu: 'Прилёт, аренда, впечатления' },
-  resident:                { short: 'Resident',  glyph: 'R', color: '#00D68F', label: 'Living in Phuket',   labelRu: 'Резидент',      descEn: 'Visa, housing, daily services',         descRu: 'Виза, жильё, ежедневные сервисы' },
-  property_owner:          { short: 'Owner',     glyph: 'O', color: '#16BDCA', label: 'Property owner',     labelRu: 'Собственник',   descEn: 'Property and income management',        descRu: 'Управление недвижимостью и доходом' },
-  investor:                { short: 'Investor',  glyph: 'I', color: '#A78BFA', label: 'Investor',           labelRu: 'Инвестор',      descEn: 'Pipeline, partners, capital',           descRu: 'Pipeline, партнёры, капитал' },
-  real_estate_developer:   { short: 'Developer', glyph: 'D', color: '#EF4444', label: 'Property developer', labelRu: 'Застройщик',    descEn: 'Projects, reservations, sales',         descRu: 'Проекты, бронирования, продажи' },
-  local_services_provider: { short: 'Provider',  glyph: 'P', color: '#F59E0B', label: 'Local business',     labelRu: 'Поставщик',     descEn: 'Storefront, bookings, payouts',         descRu: 'Витрина, брони, выплаты' },
-  family:                  { short: 'Family',    glyph: 'F', color: '#EC4899', label: 'Family',             labelRu: 'Семья',         descEn: 'Schools, clinics, family logistics',    descRu: 'Школы, клиники, семейная логистика' },
-  couple:                  { short: 'Couple',    glyph: 'C', color: '#F43F5E', label: 'Couple',             labelRu: 'Пара',          descEn: 'Restaurants, getaways, moments',        descRu: 'Рестораны, выезды, моменты' },
-  nightlife:               { short: 'Night',     glyph: 'N', color: '#D946EF', label: 'Nightlife',          labelRu: 'Ночная жизнь',  descEn: 'Clubs, bars, late-night transfers',     descRu: 'Клубы, бары, ночной трансфер' },
-  active:                  { short: 'Active',    glyph: 'A', color: '#F97316', label: 'Active',             labelRu: 'Спорт',         descEn: 'Training, gear, sports facilities',     descRu: 'Тренировки, экипировка, спортзалы' },
-  business:                { short: 'Business',  glyph: 'B', color: '#64748B', label: 'Business',           labelRu: 'Бизнес',        descEn: 'Companies, accounting, contracts',      descRu: 'Компании, бухгалтерия, договоры' },
-  nomad:                   { short: 'Nomad',     glyph: 'M', color: '#14B8A6', label: 'Nomad',              labelRu: 'Номад',         descEn: 'Co-working, SIM, long-term housing',    descRu: 'Коворкинг, SIM, долгосрочное жильё' },
-  pet_owner:               { short: 'Pets',      glyph: 'X', color: '#FB923C', label: 'Pet owner',          labelRu: 'С питомцем',    descEn: 'Vets, pet-friendly housing, transfer',  descRu: 'Ветеринар, жильё с животными, перевозка' },
-  relocation:              { short: 'Relocate',  glyph: 'L', color: '#6366F1', label: 'Relocating',         labelRu: 'Переезд',       descEn: 'Visa, housing search, paperwork',       descRu: 'Виза, поиск жилья, документы' },
+  tourist:                 { short: 'Tourist',   glyph: 'T', label: 'Visiting Phuket',    labelRu: 'Турист',        descEn: 'Arrival, stays, experiences',           descRu: 'Прилёт, аренда, впечатления' },
+  resident:                { short: 'Resident',  glyph: 'R', label: 'Living in Phuket',   labelRu: 'Резидент',      descEn: 'Visa, housing, daily services',         descRu: 'Виза, жильё, ежедневные сервисы' },
+  property_owner:          { short: 'Owner',     glyph: 'O', label: 'Property owner',     labelRu: 'Собственник',   descEn: 'Property and income management',        descRu: 'Управление недвижимостью и доходом' },
+  investor:                { short: 'Investor',  glyph: 'I', label: 'Investor',           labelRu: 'Инвестор',      descEn: 'Pipeline, partners, capital',           descRu: 'Pipeline, партнёры, капитал' },
+  real_estate_developer:   { short: 'Developer', glyph: 'D', label: 'Property developer', labelRu: 'Застройщик',    descEn: 'Projects, reservations, sales',         descRu: 'Проекты, бронирования, продажи' },
+  local_services_provider: { short: 'Provider',  glyph: 'P', label: 'Local business',     labelRu: 'Поставщик',     descEn: 'Storefront, bookings, payouts',         descRu: 'Витрина, брони, выплаты' },
+  family:                  { short: 'Family',    glyph: 'F', label: 'Family',             labelRu: 'Семья',         descEn: 'Schools, clinics, family logistics',    descRu: 'Школы, клиники, семейная логистика' },
+  couple:                  { short: 'Couple',    glyph: 'C', label: 'Couple',             labelRu: 'Пара',          descEn: 'Restaurants, getaways, moments',        descRu: 'Рестораны, выезды, моменты' },
+  nightlife:               { short: 'Night',     glyph: 'N', label: 'Nightlife',          labelRu: 'Ночная жизнь',  descEn: 'Clubs, bars, late-night transfers',     descRu: 'Клубы, бары, ночной трансфер' },
+  active:                  { short: 'Active',    glyph: 'A', label: 'Active',             labelRu: 'Спорт',         descEn: 'Training, gear, sports facilities',     descRu: 'Тренировки, экипировка, спортзалы' },
+  business:                { short: 'Business',  glyph: 'B', label: 'Business',           labelRu: 'Бизнес',        descEn: 'Companies, accounting, contracts',      descRu: 'Компании, бухгалтерия, договоры' },
+  nomad:                   { short: 'Nomad',     glyph: 'M', label: 'Nomad',              labelRu: 'Номад',         descEn: 'Co-working, SIM, long-term housing',    descRu: 'Коворкинг, SIM, долгосрочное жильё' },
+  pet_owner:               { short: 'Pets',      glyph: 'X', label: 'Pet owner',          labelRu: 'С питомцем',    descEn: 'Vets, pet-friendly housing, transfer',  descRu: 'Ветеринар, жильё с животными, перевозка' },
+  relocation:              { short: 'Relocate',  glyph: 'L', label: 'Relocating',         labelRu: 'Переезд',       descEn: 'Visa, housing search, paperwork',       descRu: 'Виза, поиск жилья, документы' },
 };
 
 /**
  * Canonical persona color accessor. Returns a theme-aware HSL string referencing
  * the `--persona-*` token in `src/styles/tokens.css`. Use this everywhere
- * personas need a tint (avatar bg, status dot, active-card tint), instead of
- * reading the deprecated `ROLE_META[p].color` hex field.
+ * personas need a tint (avatar bg, status dot, active-card tint). The previous
+ * raw-hex `ROLE_META[p].color` field was removed 2026-05-21.
  *
  * @example
  *   <span style={{ background: personaColor(p) }} />

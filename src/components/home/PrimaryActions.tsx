@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserPersonas } from '@/hooks/useUserPersonas';
-import { ROLE_META } from '@/lib/roleBlend';
+import { personaColor } from '@/lib/roleBlend';
 import { SectionHead } from './SectionHead';
 
 /**
@@ -51,9 +51,7 @@ export function PrimaryActions() {
 
   // Role tag dot color — primary persona drives accent across the row.
   const primary = personas[0];
-  const dotColor = primary && ROLE_META[primary]?.color
-    ? ROLE_META[primary].color
-    : 'hsl(var(--primary))';
+  const dotColor = primary ? personaColor(primary) : 'hsl(var(--primary))';
 
   return (
     <section className="px-4 pb-5">

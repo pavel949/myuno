@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { UserPersona } from '@/hooks/useUserPersonas';
-import { ROLE_META, SIGNAL_ROUTE } from '@/lib/roleBlend';
+import { ROLE_META, SIGNAL_ROUTE, personaColor } from '@/lib/roleBlend';
 import { useRoleSignals, type RoleSignal } from '@/hooks/useRoleSignals';
 
 interface SignalStackProps {
@@ -60,7 +60,7 @@ function SignalHero({ persona, sig, isRu }: { persona: UserPersona; sig: RoleSig
       className="w-full text-left relative overflow-hidden rounded-none bg-card border border-border p-[18px] transition-transform"
     >
       {/* 2px left spine */}
-      <div className="absolute top-4 bottom-4 left-0 w-0.5 rounded-none" style={{ background: meta.color }} />
+      <div className="absolute top-4 bottom-4 left-0 w-0.5 rounded-none" style={{ background: personaColor(persona) }} />
 
       <div className="flex items-center justify-between gap-2 mb-1.5 min-w-0">
         <div className="flex items-center gap-2 min-w-0">
@@ -70,7 +70,7 @@ function SignalHero({ persona, sig, isRu }: { persona: UserPersona; sig: RoleSig
           </span>
           {!sig.isLive && <DemoBadge isRu={isRu} />}
         </div>
-        <StateChip label={stateLabel} color={meta.color} />
+        <StateChip label={stateLabel} persona={persona} />
       </div>
       <div className="font-display text-2xl font-bold text-foreground mb-1 leading-tight tracking-[-0.02em]">
         {sig.value}
@@ -92,7 +92,7 @@ function SignalSlim({ persona, sig, isRu }: { persona: UserPersona; sig: RoleSig
       onClick={() => navigate(SIGNAL_ROUTE[persona])}
       className="w-full text-left relative overflow-hidden rounded-none bg-card/60 border border-border grid grid-cols-[auto_1fr_auto] gap-2.5 items-center px-3.5 py-2.5 transition-transform"
     >
-      <div className="absolute top-2.5 bottom-2.5 left-0 w-0.5 rounded-none" style={{ background: meta.color }} />
+      <div className="absolute top-2.5 bottom-2.5 left-0 w-0.5 rounded-none" style={{ background: personaColor(persona) }} />
       <RoleChip persona={persona} meta={meta} compact />
       <div className="overflow-hidden">
         <div className="text-[12.5px] font-medium text-foreground whitespace-nowrap overflow-hidden text-ellipsis">
@@ -118,40 +118,43 @@ function DemoBadge({ isRu }: { isRu: boolean }) {
   );
 }
 
-function RoleChip({ meta }: {
-  persona?: UserPersona;
+function RoleChip({ persona, meta }: {
+  persona: UserPersona;
   meta: typeof ROLE_META[UserPersona];
   compact?: boolean;
 }) {
+  const tint = personaColor(persona);
   return (
     <div
       className="inline-flex items-center gap-1.5 h-[22px] px-1 pr-[7px] rounded-full flex-shrink-0 whitespace-nowrap"
-      style={{ background: `${meta.color}18`, border: `1px solid ${meta.color}33` }}
+      style={{ background: personaColor(persona, 0.09), border: `1px solid ${personaColor(persona, 0.2)}` }}
     >
       <div
         className="w-3.5 h-3.5 rounded-full flex items-center justify-center font-display text-[9px] font-bold text-background"
-        style={{ background: meta.color }}
+        style={{ background: tint }}
       >
         {meta.glyph}
       </div>
-      <span className="text-[10px] font-semibold tracking-[0.04em] uppercase" style={{ color: meta.color }}>
+      <span className="text-[10px] font-semibold tracking-[0.04em] uppercase" style={{ color: tint }}>
         {meta.short}
       </span>
     </div>
   );
 }
 
-function StateChip({ label, color }: { label: string; color: string }) {
+// `boxShadow: 0 0 8px <hue>` glow removed per DS 2.1 §Aesthetic ("No glow").
+function StateChip({ label, persona }: { label: string; persona: UserPersona }) {
+  const tint = personaColor(persona);
   return (
     <div
       className="inline-flex items-center gap-1.5 px-[9px] py-1 rounded-full flex-shrink-0 whitespace-nowrap"
-      style={{ background: `${color}18`, border: `1px solid ${color}33` }}
+      style={{ background: personaColor(persona, 0.09), border: `1px solid ${personaColor(persona, 0.2)}` }}
     >
       <span
         className="w-1.5 h-1.5 rounded-full"
-        style={{ background: color, boxShadow: `0 0 8px ${color}` }}
+        style={{ background: tint }}
       />
-      <span className="text-[10.5px] font-semibold tracking-[0.04em] uppercase" style={{ color }}>
+      <span className="text-[10.5px] font-semibold tracking-[0.04em] uppercase" style={{ color: tint }}>
         {label}
       </span>
     </div>
