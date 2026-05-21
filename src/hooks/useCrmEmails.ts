@@ -15,11 +15,24 @@ export interface CrmEmail {
   to_email: string;
   subject: string;
   body_html: string | null;
+  body_text: string | null;
   status: string;
   sent_at: string | null;
   opened_at: string | null;
   sent_by: string | null;
   created_at: string;
+  // Gmail integration fields (nullable for pre-Gmail rows)
+  provider: 'gmail' | 'resend';
+  from_email: string | null;
+  gmail_message_id: string | null;
+  gmail_thread_id: string | null;
+  in_reply_to: string | null;
+  references_ids: string[] | null;
+  snippet: string | null;
+  has_attachments: boolean;
+  cc: string[] | null;
+  bcc: string[] | null;
+  email_account_id: string | null;
 }
 
 export function useCrmEmails(companyId: string | undefined, contactId?: string) {
@@ -72,12 +85,16 @@ export function useUpdateCrmEmail() {
 export function useSendCrmEmail() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (emailId: string) => {
+    mutationFn: async (
+      input: string | { emailId: string; replyToEmailId?: string | null },
+    ) => {
+      const emailId = typeof input === 'string' ? input : input.emailId;
+      const replyToEmailId = typeof input === 'string' ? null : input.replyToEmailId ?? null;
       const { data, error } = await supabase.functions.invoke('send-crm-email', {
-        body: { email_id: emailId },
+        body: { email_id: emailId, reply_to_email_id: replyToEmailId },
       });
       if (error) throw error;
-      return data;
+      return data as { success: boolean; provider: 'gmail' | 'resend' };
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['crm-emails'] });
