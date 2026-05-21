@@ -130,50 +130,70 @@ export function useUserPersonas() {
 
   const togglePersonaMutation = useMutation({
     mutationFn: async (persona: UserPersona) => {
-      if (!user?.id) throw new Error('User not authenticated');
-      
+      // Layer 2 — pre-flight auth check. `useAuth().user.id` can be stale right
+      // after sign-in or a token refresh; `auth.getUser()` hits the live session
+      // state so we catch the post-refresh window before the upsert runs and
+      // returns an opaque RLS 42501.
+      const { data: live, error: liveErr } = await supabase.auth.getUser();
+      if (liveErr || !live.user?.id) {
+        throw new Error('Сессия истекла. Войдите снова, чтобы изменить роль.');
+      }
+      const userId = live.user.id;
+
       const isActive = dbPersonas.includes(persona);
-      
+
       if (isActive) {
+        // Layer 3 — drop `as never` cast. The auto-generated types lag the DB
+        // enum (lifestyle personas were added in 4 separate migrations); using
+        // `as DbPersona` keeps the call type-safe AND lets a real enum mismatch
+        // surface as the actual Postgres 22P02 instead of getting silenced.
         const { error } = await supabase
           .from('user_personas')
           .delete()
-          .eq('user_id', user.id)
-          .eq('persona', persona as never);
-        
+          .eq('user_id', userId)
+          .eq('persona', persona as DbPersona);
+
         if (error) throw error;
       } else {
         const { error } = await supabase
           .from('user_personas')
           .upsert(
-            { user_id: user.id, persona: persona as never, is_active: true },
+            { user_id: userId, persona: persona as DbPersona, is_active: true },
             { onConflict: 'user_id,persona' }
           );
-        
+
         if (error) throw error;
       }
-      
+
       return { persona, wasActive: isActive };
     },
     onMutate: async (persona) => {
       await queryClient.cancelQueries({ queryKey });
       const previousPersonas = queryClient.getQueryData<UserPersona[]>(queryKey);
-      
+
       queryClient.setQueryData<UserPersona[]>(queryKey, (old = []) => {
         const next = old.includes(persona)
           ? old.filter(p => p !== persona)
           : [...old, persona];
         return sortPersonasStable(next);
       });
-      
+
       return { previousPersonas };
     },
     onError: (err, persona, context) => {
       if (context?.previousPersonas) {
         queryClient.setQueryData(queryKey, context.previousPersonas);
       }
-      console.error('togglePersona', err);
-      toast.error('Не удалось обновить роль. Попробуйте ещё раз.');
+      // Layer 1 — surface the real Postgres error. supabase-js wraps PostgREST
+      // failures in objects with `message` / `code` / `details` / `hint`; the
+      // generic toast ("Не удалось обновить роль…") was swallowing all of these
+      // and made the role sheet feel non-responsive.
+      const pgErr = err as { message?: string; code?: string; details?: string; hint?: string } | Error;
+      const code = 'code' in pgErr && pgErr.code ? ` [${pgErr.code}]` : '';
+      const detail = 'details' in pgErr && pgErr.details ? ` — ${pgErr.details}` : '';
+      const message = pgErr.message ?? 'Unknown error';
+      console.error('togglePersona', { persona, err });
+      toast.error(`Не удалось обновить роль${code}: ${message}${detail}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
@@ -182,25 +202,29 @@ export function useUserPersonas() {
 
   const setPersonasMutation = useMutation({
     mutationFn: async (newPersonas: UserPersona[]) => {
-      if (!user?.id) throw new Error('User not authenticated');
-      
+      const { data: live, error: liveErr } = await supabase.auth.getUser();
+      if (liveErr || !live.user?.id) {
+        throw new Error('Сессия истекла. Войдите снова, чтобы сохранить роли.');
+      }
+      const userId = live.user.id;
+
       await supabase
         .from('user_personas')
         .delete()
-        .eq('user_id', user.id);
-      
+        .eq('user_id', userId);
+
       if (newPersonas.length > 0) {
         const { error } = await supabase
           .from('user_personas')
           .insert(newPersonas.map(persona => ({
-            user_id: user.id,
-            persona: persona as never,
+            user_id: userId,
+            persona: persona as DbPersona,
             is_active: true,
           })));
-        
+
         if (error) throw error;
       }
-      
+
       return newPersonas;
     },
     onMutate: async (newPersonas) => {
@@ -209,11 +233,16 @@ export function useUserPersonas() {
       queryClient.setQueryData<UserPersona[]>(queryKey, sortPersonasStable(newPersonas));
       return { previousPersonas };
     },
-    onError: (_err, _newPersonas, context) => {
+    onError: (err, _newPersonas, context) => {
       if (context?.previousPersonas) {
         queryClient.setQueryData(queryKey, context.previousPersonas);
       }
-      toast.error('Не удалось сохранить роль. Попробуйте ещё раз.');
+      const pgErr = err as { message?: string; code?: string; details?: string } | Error;
+      const code = 'code' in pgErr && pgErr.code ? ` [${pgErr.code}]` : '';
+      const detail = 'details' in pgErr && pgErr.details ? ` — ${pgErr.details}` : '';
+      const message = pgErr.message ?? 'Unknown error';
+      console.error('setPersonas', err);
+      toast.error(`Не удалось сохранить роли${code}: ${message}${detail}`);
     },
     onSuccess: (newPersonas) => {
       queryClient.setQueryData(queryKey, sortPersonasStable(newPersonas));

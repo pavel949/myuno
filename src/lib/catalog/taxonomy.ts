@@ -22,6 +22,16 @@
  * Older modules (`verticalGroups.ts`, `nav/clusterCatalog.ts`,
  * `appRegistry.ts`) are now thin adapters that re-derive their shape
  * from this SSOT.
+ *
+ * **Drift note (2026-05-21):** the live `category_groups` / `categories`
+ * tables on the production Supabase project diverge from this static SSOT.
+ * Drawer currently shows `Arrive=14 · Live=27 · Invest=7 · Legal=7 · Build=4`
+ * (DB) vs `12 / 30 / 9 / 11 / 4` here. DB reconciliation deferred until a
+ * live-data audit can run (writing a blind UPSERT migration risks
+ * overwriting curated DB rows). Sports & Athletic Training (spec §15,
+ * 14 services) is fully absent in both — see canonical doc §15 for the
+ * tracked gap. Hardcoded paths for `kids`, `wedding`, `halal-persona`,
+ * `halal-stay` were migrated to `APP_ROUTES` constants in the same pass.
  */
 import {
   Plane, Home as HomeIcon, Heart, Scale, TrendingUp, Building2, HardHat, Baby,
@@ -433,7 +443,7 @@ export const CATEGORIES: CategoryEntry[] = [
       { id: 'babysitter',     path: APP_ROUTES.BABYSITTER,     labelRu: 'Няни',         labelEn: 'Babysitters',  icon: Baby,          status: 'available', verticalId: 'babysitter' },
       { id: 'school-finder',  path: APP_ROUTES.SCHOOL_FINDER,  labelRu: 'Школы',        labelEn: 'School finder',icon: Search,        status: 'available' },
       { id: 'education',      path: APP_ROUTES.EDUCATION,      labelRu: 'Образование',  labelEn: 'Education',    icon: GraduationCap, status: 'available', verticalId: 'education' },
-      { id: 'kids',           path: '/kids',                   labelRu: 'Дети',         labelEn: 'Kids',         icon: Baby,          status: 'available' },
+      { id: 'kids',           path: APP_ROUTES.KIDS,           labelRu: 'Дети',         labelEn: 'Kids',         icon: Baby,          status: 'available' },
     ],
   },
   {
@@ -485,7 +495,7 @@ export const CATEGORIES: CategoryEntry[] = [
     icon: CalendarDays,
     color: '#F43F5E',
     services: [
-      { id: 'wedding', path: '/wedding', labelRu: 'Свадьбы', labelEn: 'Weddings', icon: CalendarDays, status: 'available' },
+      { id: 'wedding', path: APP_ROUTES.WEDDING, labelRu: 'Свадьбы', labelEn: 'Weddings', icon: CalendarDays, status: 'available' },
     ],
   },
 
@@ -563,7 +573,7 @@ export const CATEGORIES: CategoryEntry[] = [
     services: [
       {
         id: 'halal-persona',
-        path: '/for/halal',
+        path: APP_ROUTES.HALAL_PERSONA,
         labelRu: 'Халяль-путешественник',
         labelEn: 'Halal traveller hub',
         icon: Compass,
@@ -572,7 +582,7 @@ export const CATEGORIES: CategoryEntry[] = [
       },
       {
         id: 'halal-stay',
-        path: '/property/for/halal',
+        path: APP_ROUTES.HALAL_STAY,
         labelRu: 'Жильё с учётом практик',
         labelEn: 'Halal-friendly stay',
         icon: HomeIcon,

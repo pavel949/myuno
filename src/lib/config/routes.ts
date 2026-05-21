@@ -348,6 +348,10 @@ export const APP_ROUTES = {
   WEDDING: '/wedding',
   KIDS: '/kids',
   NOMAD_GUIDE: '/nomad-guide',
+  /** Halal traveller persona hub (faith & customs guides, hospitality matches). */
+  HALAL_PERSONA: '/for/halal',
+  /** Halal-friendly accommodation index. */
+  HALAL_STAY: '/property/for/halal',
 
   // ── Area landings (public, indexable) ──
   AREA_INDEX: '/area',
