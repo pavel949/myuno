@@ -38,7 +38,7 @@ import {
   resolveNavRole, getWorkspaceDrawerGroups, type NavRoleKey,
 } from '@/lib/nav/navigationModel';
 import { useLiveClusterCatalog, isClusterVisibleToUser } from '@/lib/nav/clusterCatalog';
-import { ROLE_META } from '@/lib/roleBlend';
+import { ROLE_META, personaColor } from '@/lib/roleBlend';
 import type { UserPersona } from '@/hooks/useUserPersonas';
 
 // ─────────────────────────────────────────────────────────────
@@ -195,11 +195,11 @@ export function AppDrawer({
               <div className="text-[14px] font-semibold text-foreground truncate">
                 {displayName}
               </div>
-              {personaMeta && (
+              {personaMeta && primaryPersona && (
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <span
                     className="w-2 h-2 rounded-full"
-                    style={{ background: personaMeta.color }}
+                    style={{ background: personaColor(primaryPersona) }}
                   />
                   <span className="text-[11px] text-muted-foreground">
                     {isRu ? personaMeta.labelRu : personaMeta.label}

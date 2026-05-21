@@ -13,10 +13,17 @@ import {
  * and are surfaced in `RoleSheet` as a sub-line under each role name. One
  * sentence each: nominal phrases describing the user's life-context, not
  * promises. Keep < 40 chars where possible to fit single-line on 375px.
+ *
+ * @deprecated `color` field (raw hex) — kept for backward compat with the few
+ * remaining call sites that haven't been migrated yet. NEW CODE: use
+ * `personaColor(persona)` which returns a theme-aware `hsl(var(--persona-*))`
+ * string. The raw-hex field will be removed in a future pass once all
+ * consumers (SignalStack, PersonaHalo, HeroGreeting) are migrated.
  */
 export const ROLE_META: Record<UserPersona, {
   short: string;
   glyph: string;
+  /** @deprecated Use `personaColor(persona)` instead. */
   color: string;
   label: string;
   labelRu: string;
@@ -38,6 +45,23 @@ export const ROLE_META: Record<UserPersona, {
   pet_owner:               { short: 'Pets',      glyph: 'X', color: '#FB923C', label: 'Pet owner',          labelRu: 'С питомцем',    descEn: 'Vets, pet-friendly housing, transfer',  descRu: 'Ветеринар, жильё с животными, перевозка' },
   relocation:              { short: 'Relocate',  glyph: 'L', color: '#6366F1', label: 'Relocating',         labelRu: 'Переезд',       descEn: 'Visa, housing search, paperwork',       descRu: 'Виза, поиск жилья, документы' },
 };
+
+/**
+ * Canonical persona color accessor. Returns a theme-aware HSL string referencing
+ * the `--persona-*` token in `src/styles/tokens.css`. Use this everywhere
+ * personas need a tint (avatar bg, status dot, active-card tint), instead of
+ * reading the deprecated `ROLE_META[p].color` hex field.
+ *
+ * @example
+ *   <span style={{ background: personaColor(p) }} />
+ *   <div style={{ borderColor: personaColor(p, 0.35) }} />
+ */
+export function personaColor(persona: UserPersona, alpha?: number): string {
+  const slug = persona.replace(/_/g, '-');
+  return alpha !== undefined
+    ? `hsl(var(--persona-${slug}) / ${alpha})`
+    : `hsl(var(--persona-${slug}))`;
+}
 
 export type ClusterId = 'live' | 'manage' | 'invest' | 'legal' | 'arrive' | 'build';
 

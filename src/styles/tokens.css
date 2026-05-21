@@ -314,6 +314,26 @@
   --cluster-enjoy:    22  79% 47%;   /* brand-orange — was rose */
   --cluster-family:   211 67% 32%;   /* navy-700 — was family blue */
 
+  /* Persona hues — DS 2.1 canon §6.3: each of the 14 personas keeps a
+     distinct avatar tint so an at-a-glance scan still reads role identity,
+     but every value is ~20–30% less saturated than the pre-DS-2.1 rainbow
+     palette (retires `#00D68F` mint, vivid hex, etc.). Consume via
+     `personaColor(p)` from `src/lib/roleBlend.ts`, never as raw hex. */
+  --persona-tourist:                 213 60% 55%;   /* muted blue */
+  --persona-resident:                165 50% 40%;   /* muted emerald — retires #00D68F mint */
+  --persona-property-owner:          185 50% 40%;   /* muted teal */
+  --persona-investor:                260 40% 55%;   /* muted purple */
+  --persona-real-estate-developer:   0   55% 50%;   /* muted red */
+  --persona-local-services-provider: 38  70% 50%;   /* muted amber */
+  --persona-family:                  330 55% 55%;   /* muted rose */
+  --persona-couple:                  350 60% 55%;   /* muted rose-red */
+  --persona-nightlife:               290 55% 55%;   /* muted fuchsia */
+  --persona-active:                  25  70% 50%;   /* muted orange — distinct from --accent */
+  --persona-business:                220 12% 45%;   /* slate */
+  --persona-nomad:                   175 50% 38%;   /* muted teal-cyan */
+  --persona-pet-owner:               28  75% 55%;   /* muted peach */
+  --persona-relocation:              230 50% 55%;   /* muted indigo */
+
   /* Removed/zeroed — these used to drive mint accents and luxury gold. */
   --gold:             22 79% 47%;             /* gold tokens collapse to brand-orange */
   --gold-light:       25 89% 65%;
@@ -443,6 +463,23 @@ html:not([lang]) {
   --bg-card:    var(--card);
   --bg-elevated: var(--card-elevated);
   --inset:      213 73% 11%;
+
+  /* Persona hues — dark inversion: same hue/saturation as light, lightness
+     +5–8% so each tint reads cleanly against navy-900 background. */
+  --persona-tourist:                 213 60% 62%;
+  --persona-resident:                165 50% 48%;
+  --persona-property-owner:          185 50% 48%;
+  --persona-investor:                260 45% 63%;
+  --persona-real-estate-developer:   0   60% 58%;
+  --persona-local-services-provider: 38  75% 58%;
+  --persona-family:                  330 60% 63%;
+  --persona-couple:                  350 65% 63%;
+  --persona-nightlife:               290 60% 63%;
+  --persona-active:                  25  75% 58%;
+  --persona-business:                220 14% 58%;
+  --persona-nomad:                   175 50% 46%;
+  --persona-pet-owner:               28  80% 63%;
+  --persona-relocation:              230 55% 63%;
 
   --color-skeleton-base:      213 73% 15%;
   --color-skeleton-highlight: 213 73% 18%;

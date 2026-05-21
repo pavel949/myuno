@@ -1,9 +1,11 @@
 import React from 'react';
+import { ChevronUp, ChevronDown } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { cn } from '@/lib/utils';
 import type { UserPersona } from '@/hooks/useUserPersonas';
 import { PERSONA_OPTIONS_PRIMARY, PERSONA_OPTIONS_LIFESTYLE } from '@/hooks/useUserPersonas';
-import { ROLE_META } from '@/lib/roleBlend';
+import { ROLE_META, personaColor } from '@/lib/roleBlend';
 
 interface RoleSheetProps {
   open: boolean;
@@ -43,10 +45,10 @@ export function RoleSheet({ open, personas, onClose, onToggle, onReorder }: Role
           {/* Drag handle */}
           <div className="w-9 h-1 rounded-full bg-border/60 mx-auto mb-5" />
 
-          <h2 className="font-display text-[22px] font-bold text-foreground tracking-[-0.02em] mb-1">
+          <h2 className="font-display text-h3 font-normal text-foreground tracking-[-0.02em] mb-1">
             {isRu ? 'Ваши роли' : 'Your roles'}
           </h2>
-          <p className="text-[13px] text-muted-foreground leading-relaxed mb-5">
+          <p className="text-body-sm text-muted-foreground leading-relaxed mb-5">
             {isRu
               ? 'На Пхукете люди носят много шляп. Выберите актуальные — myUNO объединит их. Порядок = приоритет.'
               : "Phuket is a place where people wear many hats. Pick what's true today — myUNO blends them. Order = priority."}
@@ -55,55 +57,69 @@ export function RoleSheet({ open, personas, onClose, onToggle, onReorder }: Role
           {/* Active roles */}
           {personas.length > 0 && (
             <>
-              <div className="text-[10.5px] tracking-[0.1em] uppercase text-muted-foreground/50 font-semibold mb-2">
+              <div className="text-label text-muted-foreground/70 mb-2">
                 {isRu ? 'Активные · порядок = приоритет' : 'Active · order = priority'}
               </div>
               <div className="flex flex-col gap-1.5 mb-5">
                 {personas.map((p, i) => {
                   const meta = ROLE_META[p];
                   if (!meta) return null;
+                  const isPrimary = i === 0;
                   return (
                     <div
                       key={p}
-                      className="flex items-center gap-2.5 p-3 rounded-none border"
-                      style={i === 0
-                        ? { borderColor: `${meta.color}55`, background: `${meta.color}0d` }
-                        : { borderColor: 'var(--border)' }}
+                      className={cn(
+                        'flex items-center gap-2.5 p-3 rounded-none border',
+                        !isPrimary && 'border-border',
+                      )}
+                      style={isPrimary
+                        ? { borderColor: personaColor(p, 0.35), background: personaColor(p, 0.06) }
+                        : undefined}
                     >
                       <div
-                        className="w-[26px] h-[26px] rounded-full flex items-center justify-center font-display text-[11px] font-bold text-background flex-shrink-0"
-                        style={{ background: meta.color }}
+                        className="w-7 h-7 rounded-full flex items-center justify-center font-display text-label font-semibold text-background flex-shrink-0"
+                        style={{ background: personaColor(p) }}
                       >
                         {meta.glyph}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-[13px] font-medium text-foreground flex items-center gap-1.5">
+                        <div className="text-body-sm font-medium text-foreground flex items-center gap-1.5">
                           {isRu ? meta.labelRu : meta.short}
-                          {i === 0 && (
-                            <span className="text-[9px] font-bold tracking-[0.08em] uppercase" style={{ color: meta.color }}>
+                          {isPrimary && (
+                            <span
+                              className="text-[10px] font-semibold tracking-[0.1em] uppercase"
+                              style={{ color: personaColor(p) }}
+                            >
                               Primary
                             </span>
                           )}
                         </div>
-                        <div className="text-[11px] text-muted-foreground leading-snug">
+                        <div className="text-caption text-muted-foreground leading-snug">
                           {isRu ? meta.descRu : meta.descEn}
                         </div>
                       </div>
-                      <div className="flex flex-col gap-0.5">
+                      {/* WCAG-compliant reorder controls — 44×44 hit target each */}
+                      <div className="flex flex-col">
                         <button
                           onClick={() => moveUp(i)}
                           disabled={i === 0}
-                          className="text-[8px] px-1.5 py-0.5 rounded-none border border-border text-muted-foreground disabled:opacity-30"
-                        >▲</button>
+                          aria-label={isRu ? 'Выше' : 'Move up'}
+                          className="h-11 w-11 inline-flex items-center justify-center text-muted-foreground/70 hover:text-foreground disabled:opacity-30 disabled:hover:text-muted-foreground/70 transition-colors"
+                        >
+                          <ChevronUp className="w-4 h-4" strokeWidth={2} aria-hidden />
+                        </button>
                         <button
                           onClick={() => moveDown(i)}
                           disabled={i === personas.length - 1}
-                          className="text-[8px] px-1.5 py-0.5 rounded-none border border-border text-muted-foreground disabled:opacity-30"
-                        >▼</button>
+                          aria-label={isRu ? 'Ниже' : 'Move down'}
+                          className="h-11 w-11 inline-flex items-center justify-center text-muted-foreground/70 hover:text-foreground disabled:opacity-30 disabled:hover:text-muted-foreground/70 transition-colors"
+                        >
+                          <ChevronDown className="w-4 h-4" strokeWidth={2} aria-hidden />
+                        </button>
                       </div>
                       <button
                         onClick={() => onToggle(p)}
-                        className="text-[10px] font-medium px-2 py-1 rounded-none border border-border text-muted-foreground"
+                        className="h-11 px-3 inline-flex items-center text-caption font-medium rounded-none border border-border text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
                       >
                         {isRu ? 'Убрать' : 'Remove'}
                       </button>
@@ -117,7 +133,7 @@ export function RoleSheet({ open, personas, onClose, onToggle, onReorder }: Role
           {/* Add roles */}
           {availableRoles.length > 0 && (
             <>
-              <div className="text-[10.5px] tracking-[0.1em] uppercase text-muted-foreground/50 font-semibold mb-2">
+              <div className="text-label text-muted-foreground/70 mb-2">
                 {isRu ? 'Добавить роль' : 'Add a role'}
               </div>
               <div className="flex flex-col gap-1.5">
@@ -128,21 +144,21 @@ export function RoleSheet({ open, personas, onClose, onToggle, onReorder }: Role
                     <button
                       key={p}
                       onClick={() => onToggle(p)}
-                      className="flex items-center gap-3 p-3 rounded-none border border-border text-left hover:border-border/80 transition-colors"
+                      className="flex items-center gap-3 p-3 rounded-none border border-border text-left hover:border-border/80 transition-colors min-h-[44px]"
                     >
                       <div
-                        className="w-[22px] h-[22px] rounded-full flex items-center justify-center font-display text-[10px] font-bold text-background flex-shrink-0"
-                        style={{ background: meta.color }}
+                        className="w-6 h-6 rounded-full flex items-center justify-center font-display text-label font-semibold text-background flex-shrink-0"
+                        style={{ background: personaColor(p) }}
                       >
                         {meta.glyph}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className="text-[12.5px] font-medium text-foreground">{isRu ? meta.labelRu : meta.short}</div>
-                        <div className="text-[11px] text-muted-foreground leading-snug">
+                        <div className="text-body-sm font-medium text-foreground">{isRu ? meta.labelRu : meta.short}</div>
+                        <div className="text-caption text-muted-foreground leading-snug">
                           {isRu ? meta.descRu : meta.descEn}
                         </div>
                       </div>
-                      <div className="ml-auto text-[14px] text-muted-foreground/60 leading-none">+</div>
+                      <div className="ml-auto text-body text-muted-foreground/60 leading-none">+</div>
                     </button>
                   );
                 })}
@@ -152,7 +168,7 @@ export function RoleSheet({ open, personas, onClose, onToggle, onReorder }: Role
 
           <button
             onClick={onClose}
-            className="mt-5 w-full py-3.5 rounded-none bg-foreground text-background text-[14px] font-semibold"
+            className="mt-5 w-full h-12 rounded-none bg-foreground text-background text-body font-semibold"
           >
             {isRu ? 'Готово' : 'Done'}
           </button>

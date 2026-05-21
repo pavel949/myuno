@@ -214,6 +214,25 @@ export default {
           enjoy:  "hsl(var(--cluster-enjoy))",
           family: "hsl(var(--cluster-family))",
         },
+        // Persona hues (DS 2.1 canon §6.3). Mirrors the cluster pattern so
+        // `bg-persona-tourist`, `text-persona-investor/30` etc. all purge
+        // correctly. Token source: `--persona-*` in `src/styles/tokens.css`.
+        persona: {
+          tourist:                  "hsl(var(--persona-tourist))",
+          resident:                 "hsl(var(--persona-resident))",
+          "property-owner":         "hsl(var(--persona-property-owner))",
+          investor:                 "hsl(var(--persona-investor))",
+          "real-estate-developer":  "hsl(var(--persona-real-estate-developer))",
+          "local-services-provider":"hsl(var(--persona-local-services-provider))",
+          family:                   "hsl(var(--persona-family))",
+          couple:                   "hsl(var(--persona-couple))",
+          nightlife:                "hsl(var(--persona-nightlife))",
+          active:                   "hsl(var(--persona-active))",
+          business:                 "hsl(var(--persona-business))",
+          nomad:                    "hsl(var(--persona-nomad))",
+          "pet-owner":              "hsl(var(--persona-pet-owner))",
+          relocation:               "hsl(var(--persona-relocation))",
+        },
       },
       borderRadius: {
         // Canon §5 — almost no rounding. 0 is the default.
