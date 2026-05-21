@@ -51,6 +51,8 @@ import { ContactRelationshipsCard } from '@/components/owner/contacts/ContactRel
 import { KeyDatesCard } from '@/components/owner/contacts/KeyDatesCard';
 import { RemindersList } from '@/components/owner/contacts/RemindersList';
 import { CRM_ROLE_LABELS, isCrmRole, HNW_TIER_LABELS, type HnwTier, CONTACT_SEGMENT_LABELS, type ContactSegment, KYC_STATUS_LABELS, type KycStatus } from '@/types/contact';
+import { RelationshipTierBadge } from '@/components/owner/crm/RelationshipTierBadge';
+import { ActivityTimeline } from '@/components/owner/crm/ActivityTimeline';
 import { CrossPipelineBanner } from '@/components/crm/CrossPipelineBanner';
 import { isMaritalStatus, MARITAL_STATUS_LABELS } from '@/lib/crmContactFormPresets';
 
@@ -124,7 +126,7 @@ function InlineEditableText({
   renderDisplay,
 }: {
   value: string | null;
-  onSave: (next: string) => Promise<void> | void;
+  onSave: (next: string) => Promise<unknown> | unknown;
   placeholder?: string;
   type?: 'text' | 'email' | 'tel';
   renderDisplay?: (v: string) => React.ReactNode;
@@ -548,6 +550,11 @@ export default function ContactDetail() {
                         {HNW_TIER_LABELS[contact.hnw_tier as HnwTier]?.en || contact.hnw_tier}
                       </Badge>
                     )}
+                    <RelationshipTierBadge
+                      tier={(contact as typeof contact & { relationship_tier?: 'A' | 'B' | 'C' | null }).relationship_tier ?? null}
+                      size="md"
+                      hideEmpty
+                    />
                   </div>
                   {/* Segment badges */}
                   {(contact.segment ?? []).length > 0 && (
@@ -864,7 +871,13 @@ export default function ContactDetail() {
             {/* Timeline */}
             <TabsContent value="timeline" className="mt-4">
               <div className="space-y-4">
-                <p className="text-sm font-medium">{isRu ? 'Активность' : 'Activity'}</p>
+                {contact.company_id && (
+                  <ActivityTimeline
+                    companyId={contact.company_id}
+                    contactId={contact.id}
+                  />
+                )}
+                <p className="text-sm font-medium">{isRu ? 'Активность (заметки)' : 'Activity (notes)'}</p>
                 {timelineItems.length === 0 ? (
                   <div className="text-center py-12 rounded-none border bg-card">
                     <Clock className="h-10 w-10 mx-auto text-muted-foreground/30 mb-2" />

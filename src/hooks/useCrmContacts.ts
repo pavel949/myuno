@@ -129,6 +129,8 @@ export function useCrmContacts(
     hnwTier?: string;
     /** Segment filter */
     segment?: string;
+    /** A/B/C engagement tier (independent from HNW wealth tier) */
+    relationshipTier?: 'A' | 'B' | 'C' | 'all';
   }
 ) {
   return useQuery({
@@ -201,6 +203,10 @@ export function useCrmContacts(
 
       if (filters?.segment) {
         q = q.contains('segment', [filters.segment]);
+      }
+
+      if (filters?.relationshipTier && filters.relationshipTier !== 'all') {
+        q = q.eq('relationship_tier', filters.relationshipTier);
       }
 
       const { data, error, count } = await (q as unknown as Promise<{ data: unknown[] | null; error: { message: string } | null; count: number | null }>);

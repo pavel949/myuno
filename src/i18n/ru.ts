@@ -471,6 +471,7 @@ export const ru: Record<string, string> = {
   'welcome.persona.sectionTitle': 'Куда зайти в первую очередь',
   'welcome.persona.sectionLead':
     'Три входа по смыслу: прилёт, быт на месте или капитал и недвижимость. Подсказка под карточкой — куда перейдёте.',
+  'welcome.persona.tapToContinue': 'Нажмите, чтобы перейти',
   'welcome.persona.arrive.title': 'Я только прилетел',
   'welcome.persona.arrive.subline': 'Трансфер, SIM, визы, быт на месте, поддержка 24/7',
   'welcome.persona.arrive.hint': 'Раздел «Прибытие»',
@@ -491,6 +492,16 @@ export const ru: Record<string, string> = {
   'welcome.persona.manage.hint': 'Раздел «Управление»',
   'welcome.persona.manage.aria':
     'Сценарий собственника и оператора: аренда, отчёты, выплаты. Открыть портал для управляющих компаний.',
+  'welcome.persona.legal.title': 'Визы и юридика',
+  'welcome.persona.legal.subline': 'Продление виз, договоры, налоги, страхование, банк',
+  'welcome.persona.legal.hint': 'Раздел «Право и визы»',
+  'welcome.persona.legal.aria':
+    'Сценарий юридики и виз: продление, налоги, договоры, банк. Открыть раздел «Право и визы».',
+  'welcome.persona.build.title': 'Я застройщик',
+  'welcome.persona.build.subline': 'Витрина проектов, поток лидов, рейтинги ClearView, B2B-портал',
+  'welcome.persona.build.hint': 'Build / B2B-портал',
+  'welcome.persona.build.aria':
+    'Сценарий застройщика и поставщика: лиды, витрина проектов, B2B-портал. Открыть раздел Build.',
   'welcome.benefits.title': 'Почему один аккаунт удобнее?',
   'welcome.benefits.lead':
     'Меньше хаоса в переписках — больше прозрачности в заказах и активах.',
@@ -515,4 +526,81 @@ export const ru: Record<string, string> = {
   'welcome.footer.linkSupport': 'Поддержка',
   'welcome.footer.linkContact': 'Контакты',
   'welcome.footer.copyright': '© myUNO · Phuket · Для жизни и дел за рубежом',
+
+  // ─── CRM (MC Boutique Real Estate Advisory) ──────────────────────────
+  // Уровень отношений (вовлечённость, независимо от HNW)
+  'crm.tier.a.label': 'A · Стратегический',
+  'crm.tier.a.description': 'Высший приоритет. Контакт раз в неделю. Большая часть выручки или рефералов.',
+  'crm.tier.b.label': 'B · Активный',
+  'crm.tier.b.description': 'Активные отношения. Контакт раз в месяц. Реальная воронка сделок.',
+  'crm.tier.c.label': 'C · Наблюдение',
+  'crm.tier.c.description': 'Длинный хвост или спящий. Контакт раз в квартал. Держим тёплым.',
+  'crm.tier.unset': 'Без уровня',
+
+  // Сторона воронки (покупка / продажа / все)
+  'crm.side.all.label': 'Все стороны',
+  'crm.side.buy.label': 'Покупка',
+  'crm.side.buy.short': 'Покуп',
+  'crm.side.sell.label': 'Продажа',
+  'crm.side.sell.short': 'Прод',
+
+  // Time-series комиссионный прогноз
+  'crm.timeSeries.title': 'Комиссия — прогноз по сторонам',
+  'crm.timeSeries.subtitle': 'Последние 6 мес. (факт) · следующие 6 мес. (взвеш.)',
+  'crm.timeSeries.earned': 'Заработано',
+  'crm.timeSeries.weighted': 'Взвеш. прогноз',
+  'crm.timeSeries.forecastBand': 'Прогноз',
+  'crm.timeSeries.empty': 'Пока нет данных по комиссии',
+
+  // Виджет холодных контактов
+  'crm.cold.title': 'Холодные контакты',
+  'crm.cold.subtitle': 'Нет касания 30+ дней',
+  'crm.cold.empty': 'Холодных контактов нет — все отношения тёплые.',
+  'crm.cold.daysSince': '{{days}}д',
+  'crm.cold.viewAll': 'Все',
+
+  // Редактор сплитов комиссии
+  'crm.split.title': 'Сплит комиссии',
+  'crm.split.agent': 'Доля агента',
+  'crm.split.firm': 'Доля компании',
+  'crm.split.referral': 'Реферальный сбор',
+  'crm.split.referralContact': 'Источник реферала',
+  'crm.split.referralContactPlaceholder': 'Найти контакт…',
+  'crm.split.totalLabel': 'Итого',
+  'crm.split.totalError': 'Сумма сплитов не должна превышать 100%.',
+  'crm.split.grossLabel': 'Брутто-комиссия',
+  'crm.split.netAgent': 'Агенту',
+  'crm.split.netFirm': 'Компании',
+  'crm.split.netReferral': 'Рефералу',
+
+  // Лента активности
+  'crm.activity.title': 'Активность',
+  'crm.activity.empty': 'Пока нет активности. Залогируйте первый звонок, встречу или заметку.',
+  'crm.activity.call': 'Звонок',
+  'crm.activity.meeting': 'Встреча',
+  'crm.activity.email': 'Email',
+  'crm.activity.note': 'Заметка',
+  'crm.activity.sms': 'SMS',
+  'crm.activity.whatsapp': 'WhatsApp',
+  'crm.activity.site_visit': 'Просмотр объекта',
+  'crm.activity.compose.placeholder': 'Что произошло?',
+  'crm.activity.compose.titlePlaceholder': 'Заголовок (необязательно)',
+  'crm.activity.compose.save': 'Записать',
+  'crm.activity.compose.saving': 'Запись…',
+  'crm.activity.compose.duration': 'Длительность (мин)',
+  'crm.activity.byAgent': 'от {{name}}',
+  'crm.activity.delete': 'Удалить',
+  'crm.activity.deleteConfirm': 'Удалить эту запись?',
+
+  // Бизнес-пульс
+  'crm.pulse.leadsMonth': 'Новые лиды · MTD',
+  'crm.pulse.closing30d': 'Закрытие 30д',
+  'crm.pulse.coldCount': 'Холодные контакты',
+  'crm.pulse.commissionMtd': 'Комиссия · MTD',
+  'crm.pulse.commissionQtd': 'Комиссия · QTD',
+  'crm.pulse.commissionRolling12': 'Скольз. 12 мес',
+  'crm.pulse.activeDeals': 'Активные сделки',
+  'crm.pulse.pipelineValue': 'Объём воронки',
+  'crm.pulse.weightedForecast': 'Взвеш. прогноз',
+  'crm.pulse.winRate': 'Win-rate',
 };

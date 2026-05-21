@@ -218,6 +218,12 @@ export interface CrmContact {
   tax_residency: string | null;
   segment: string[] | null;
   hnw_tier: string | null;
+  /**
+   * Engagement / strategic-importance tier (A/B/C), independent from `hnw_tier`.
+   * A = strategic (weekly touch), B = active (monthly touch), C = watch (quarterly).
+   * Added 2026-05-21 by the boutique-real-estate CRM deepening migration.
+   */
+  relationship_tier: 'A' | 'B' | 'C' | null;
   aml_kyc_status: string | null;
   aml_kyc_date: string | null;
   pep_flag: boolean;
@@ -236,7 +242,7 @@ export type CrmContactInsert = Omit<
   'tax_id' | 'website' | 'lead_score' | 'lead_temperature' | 'lifecycle_stage' | 'linked_user_id' |
   'special_notes' | 'emergency_contact_name' | 'emergency_contact_phone' | 'emergency_contact_relation' |
   'instagram' | 'facebook' | 'linkedin' | 'is_vip' | 'marital_status' | 'contact_category' |
-  'passport_country' | 'tax_residency' | 'segment' | 'hnw_tier' | 'aml_kyc_status' | 'aml_kyc_date' |
+  'passport_country' | 'tax_residency' | 'segment' | 'hnw_tier' | 'relationship_tier' | 'aml_kyc_status' | 'aml_kyc_date' |
   'pep_flag' | 'sanctions_flag' | 'preferences' | 'ai_summary' | 'last_activity_at' | 'owner_user_id'
 > & {
   job_title?: string | null;
@@ -272,6 +278,7 @@ export type CrmContactInsert = Omit<
   tax_residency?: string | null;
   segment?: string[] | null;
   hnw_tier?: string | null;
+  relationship_tier?: 'A' | 'B' | 'C' | null;
   aml_kyc_status?: string | null;
   aml_kyc_date?: string | null;
   pep_flag?: boolean;

@@ -743,6 +743,7 @@ export const th: Record<string, string> = {
   'welcome.persona.sectionTitle': 'เริ่มต้นที่ไหนก่อน',
   'welcome.persona.sectionLead':
     'สามทางเข้าที่ตรงกับความต้องการ: การมาถึง การใช้ชีวิตประจำวัน หรือเงินทุนและอสังหา ดูคำใบ้ใต้การ์ดเพื่อรู้ว่าจะไปหน้าใด',
+  'welcome.persona.tapToContinue': 'แตะเพื่อไปต่อ',
   'welcome.persona.arrive.title': 'ฉันเพิ่งมาถึง',
   'welcome.persona.arrive.subline': 'รถรับส่ง ซิม วีซ่า การตั้งหลัก ซัพพอร์ต 24/7',
   'welcome.persona.arrive.hint': 'หมวด «การมาถึง»',
@@ -760,6 +761,16 @@ export const th: Record<string, string> = {
   'welcome.persona.manage.hint': 'หมวด «การบริหาร»',
   'welcome.persona.manage.aria':
     'สถานการณ์เจ้าของและผู้ดำเนินการ: เช่า รายงาน การจ่ายเงิน เปิดพอร์ทัลบริษัทบริหารทรัพย์สิน',
+  'welcome.persona.legal.title': 'วีซ่าและกฎหมาย',
+  'welcome.persona.legal.subline': 'ต่อวีซ่า สัญญา ภาษี ประกัน ธนาคาร',
+  'welcome.persona.legal.hint': 'หมวด «กฎหมายและวีซ่า»',
+  'welcome.persona.legal.aria':
+    'สถานการณ์กฎหมายและวีซ่า: ต่อวีซ่า ภาษี สัญญา ธนาคาร เปิดหมวดกฎหมายและวีซ่า',
+  'welcome.persona.build.title': 'ฉันเป็นผู้พัฒนาโครงการ',
+  'welcome.persona.build.subline': 'โชว์โครงการ ลีดไปป์ไลน์ เรตติ้ง ClearView พอร์ทัล B2B',
+  'welcome.persona.build.hint': 'Build / พอร์ทัล B2B',
+  'welcome.persona.build.aria':
+    'สถานการณ์ผู้พัฒนาและผู้ให้บริการ: ลีด โชว์โครงการ พอร์ทัล B2B เปิดหมวด Build',
   'welcome.benefits.title': 'ทำไมบัญชีเดียวสะดวกกว่า',
   'welcome.benefits.lead':
     'ลดความวุ่นวายในแชต — เพิ่มความโปร่งใสในออเดอร์และทรัพย์สิน',

@@ -471,6 +471,7 @@ export const en: Record<string, string> = {
   'welcome.persona.sectionTitle': 'Where to step in first',
   'welcome.persona.sectionLead':
     'Three meaningful entry points: arrival, daily life, or capital and property. The line under each card shows where you will land.',
+  'welcome.persona.tapToContinue': 'Tap to continue',
   'welcome.persona.arrive.title': 'I just arrived',
   'welcome.persona.arrive.subline': 'Transfer, SIM, visas, daily setup, 24/7 support',
   'welcome.persona.arrive.hint': 'Arrive section',
@@ -491,6 +492,16 @@ export const en: Record<string, string> = {
   'welcome.persona.manage.hint': 'Manage section',
   'welcome.persona.manage.aria':
     'Owner and operator scenario: rentals, reports, payouts. Open the property-management portal.',
+  'welcome.persona.legal.title': 'Visa & legal',
+  'welcome.persona.legal.subline': 'Visa runs, contracts, tax structuring, insurance, banking',
+  'welcome.persona.legal.hint': 'Legal & Visa section',
+  'welcome.persona.legal.aria':
+    'Legal and visa scenario: extensions, tax, contracts, banking. Open the Legal & Visa section.',
+  'welcome.persona.build.title': "I'm a developer",
+  'welcome.persona.build.subline': 'Project showcase, lead pipeline, ClearView ratings, B2B portal',
+  'welcome.persona.build.hint': 'Build / B2B portal',
+  'welcome.persona.build.aria':
+    'Developer and provider scenario: leads, project showcase, B2B portal. Open the Build section.',
   'welcome.benefits.title': 'Why one account is easier',
   'welcome.benefits.lead':
     'Less chat-thread chaos — more transparency in orders and assets.',
@@ -515,4 +526,81 @@ export const en: Record<string, string> = {
   'welcome.footer.linkSupport': 'Support',
   'welcome.footer.linkContact': 'Contact',
   'welcome.footer.copyright': '© myUNO · Phuket · Made for life abroad',
+
+  // ─── CRM (MC Boutique Real Estate Advisory) ──────────────────────────
+  // Relationship tier (engagement / strategic importance, independent from HNW wealth tier)
+  'crm.tier.a.label': 'A · Strategic',
+  'crm.tier.a.description': 'Highest priority. Weekly touch. Drives most revenue or referrals.',
+  'crm.tier.b.label': 'B · Active',
+  'crm.tier.b.description': 'Engaged relationship. Monthly touch. Real deal pipeline.',
+  'crm.tier.c.label': 'C · Watch',
+  'crm.tier.c.description': 'Long-tail or dormant. Quarterly touch. Keep warm.',
+  'crm.tier.unset': 'Untiered',
+
+  // Pipeline side (buy / sell / all)
+  'crm.side.all.label': 'All sides',
+  'crm.side.buy.label': 'Buy-Side',
+  'crm.side.buy.short': 'Buy',
+  'crm.side.sell.label': 'Sell-Side',
+  'crm.side.sell.short': 'Sell',
+
+  // Time-series commission chart
+  'crm.timeSeries.title': 'Commission forecast — by side',
+  'crm.timeSeries.subtitle': 'Last 6 months earned · next 6 months weighted',
+  'crm.timeSeries.earned': 'Earned',
+  'crm.timeSeries.weighted': 'Weighted forecast',
+  'crm.timeSeries.forecastBand': 'Forecast',
+  'crm.timeSeries.empty': 'No commission data yet',
+
+  // Cold-contacts widget
+  'crm.cold.title': 'Cold contacts',
+  'crm.cold.subtitle': 'No touch in 30+ days',
+  'crm.cold.empty': 'No cold contacts — every relationship is warm.',
+  'crm.cold.daysSince': '{{days}}d',
+  'crm.cold.viewAll': 'View all',
+
+  // Commission split editor
+  'crm.split.title': 'Commission splits',
+  'crm.split.agent': 'Agent split',
+  'crm.split.firm': 'Firm split',
+  'crm.split.referral': 'Referral fee',
+  'crm.split.referralContact': 'Referral source',
+  'crm.split.referralContactPlaceholder': 'Search contact…',
+  'crm.split.totalLabel': 'Total',
+  'crm.split.totalError': 'Splits must sum to 100% or less.',
+  'crm.split.grossLabel': 'Gross commission',
+  'crm.split.netAgent': 'Net to agent',
+  'crm.split.netFirm': 'Net to firm',
+  'crm.split.netReferral': 'Net to referral',
+
+  // Activity timeline
+  'crm.activity.title': 'Activity',
+  'crm.activity.empty': 'No activity yet. Log the first call, meeting or note.',
+  'crm.activity.call': 'Call',
+  'crm.activity.meeting': 'Meeting',
+  'crm.activity.email': 'Email',
+  'crm.activity.note': 'Note',
+  'crm.activity.sms': 'SMS',
+  'crm.activity.whatsapp': 'WhatsApp',
+  'crm.activity.site_visit': 'Site visit',
+  'crm.activity.compose.placeholder': 'What happened?',
+  'crm.activity.compose.titlePlaceholder': 'Title (optional)',
+  'crm.activity.compose.save': 'Log',
+  'crm.activity.compose.saving': 'Logging…',
+  'crm.activity.compose.duration': 'Duration (min)',
+  'crm.activity.byAgent': 'by {{name}}',
+  'crm.activity.delete': 'Delete',
+  'crm.activity.deleteConfirm': 'Delete this entry?',
+
+  // Business Pulse strip
+  'crm.pulse.leadsMonth': 'New leads · MTD',
+  'crm.pulse.closing30d': 'Closing 30d',
+  'crm.pulse.coldCount': 'Cold contacts',
+  'crm.pulse.commissionMtd': 'Commission · MTD',
+  'crm.pulse.commissionQtd': 'Commission · QTD',
+  'crm.pulse.commissionRolling12': 'Rolling 12mo',
+  'crm.pulse.activeDeals': 'Active deals',
+  'crm.pulse.pipelineValue': 'Pipeline value',
+  'crm.pulse.weightedForecast': 'Weighted forecast',
+  'crm.pulse.winRate': 'Win rate',
 };

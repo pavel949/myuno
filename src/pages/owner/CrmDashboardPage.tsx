@@ -1,10 +1,8 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useAgentDeals, useMyCompanyId, useCompanyMembers, DEAL_TYPES, DEAL_TYPE_LABELS, DealType, DEAL_STATUS_LABELS, DealStatus, formatValue } from '@/hooks/useAgentDeals';
+import { useAgentDeals, useMyCompanyId, useCompanyMembers, DEAL_TYPES, DEAL_TYPE_LABELS, DealType, DEAL_STATUS_LABELS, DealStatus } from '@/hooks/useAgentDeals';
 import { useDynamicPipelineStages } from '@/hooks/useDynamicPipelineStages';
-import { useCrmContacts } from '@/hooks/useCrmContacts';
-import { useTodayTasksCount } from '@/hooks/useCrmTasks';
 import { KanbanBoard } from '@/components/owner/sales/KanbanBoard';
 import { CreateDealSheet } from '@/components/owner/sales/CreateDealSheet';
 import { DealSearchBar } from '@/components/owner/sales/DealSearchBar';
@@ -13,14 +11,16 @@ import { CrmQuickActions } from '@/components/owner/crm/CrmQuickActions';
 import { CommissionForecast } from '@/components/owner/crm/CommissionForecast';
 import { WonLostSummary } from '@/components/owner/crm/WonLostSummary';
 import { HotLeadsWidget } from '@/components/owner/crm/HotLeadsWidget';
+import { BusinessPulseStrip } from '@/components/owner/crm/BusinessPulseStrip';
+import { CommissionTimeSeriesChart } from '@/components/owner/crm/CommissionTimeSeriesChart';
+import { ColdContactsWidget } from '@/components/owner/crm/ColdContactsWidget';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
-  Plus, Settings, Target, Users, ListTodo, DollarSign,
-  Percent, BarChart3, Mail, Zap, FileText, Globe,
-  Calendar, Building2, Copy, UserCog, TrendingUp,
+  Plus, Settings, BarChart3, Mail, Zap, FileText, Globe,
+  Calendar, Building2, Copy, UserCog,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -34,11 +34,10 @@ export default function CrmDashboardPage() {
   const { data: dealsResult, isLoading, isError: dealsError, error: dealsErrorDetails, refetch: refetchDeals } = useAgentDeals(companyId);
   const deals = dealsResult?.data || [];
   const { data: members = [] } = useCompanyMembers(companyId);
-  const { data: contactsResult } = useCrmContacts(companyId, 0, 1);
-  const { data: todayCount = 0 } = useTodayTasksCount();
 
   const [selectedPipelineId, setSelectedPipelineId] = useState<string | null>(null);
-  const pipelineData = useDynamicPipelineStages(companyId, selectedPipelineId);
+  const [sideFilter, setSideFilter] = useState<'buy' | 'sell' | null>(null);
+  const pipelineData = useDynamicPipelineStages(companyId, selectedPipelineId, sideFilter);
   const { stages, pipelines } = pipelineData;
 
   const [showCreate, setShowCreate] = useState(false);
@@ -69,32 +68,16 @@ export default function CrmDashboardPage() {
     return { won, lost, closed: [...won, ...lost] };
   }, [stages]);
 
-  // KPIs
-  const kpis = useMemo(() => {
-    const activeDeals = deals.filter(d => !wonLostKeys.closed.includes(d.stage));
-    const wonDeals = deals.filter(d => wonLostKeys.won.includes(d.stage));
-    const lostDeals = deals.filter(d => wonLostKeys.lost.includes(d.stage));
-    const closedCount = wonDeals.length + lostDeals.length;
-    const winRate = closedCount > 0 ? Math.round((wonDeals.length / closedCount) * 100) : 0;
-    const totalPipeline = activeDeals.reduce((s, d) => s + Number(d.deal_value || d.budget_max || 0), 0);
-    const weighted = activeDeals.reduce((s, d) => {
-      const val = Number(d.deal_value || d.budget_max || 0);
-      return s + val * pipelineData.getProbability(d.stage);
-    }, 0);
-    return {
-      activeCount: activeDeals.length,
-      totalPipeline,
-      weighted,
-      wonCount: wonDeals.length,
-      winRate,
-      totalContacts: contactsResult?.count || 0,
-      todayTasks: todayCount,
-    };
-  }, [deals, wonLostKeys, pipelineData, contactsResult, todayCount]);
+  // KPIs are now computed inside <BusinessPulseStrip> and
+  // <CommissionForecast>; the dashboard no longer recomputes them locally.
 
   // Filtered deals
   const filtered = useMemo(() => {
     let result = deals;
+    // Buy/Sell side filter — pipeline_side comes from the join in useAgentDeals
+    if (sideFilter) {
+      result = result.filter((d) => (d.pipeline_side ?? 'buy') === sideFilter);
+    }
     if (filterStatus !== 'all') {
       result = result.filter(d => d.deal_status === filterStatus || (!d.deal_status && filterStatus === 'active'));
     }
@@ -126,7 +109,7 @@ export default function CrmDashboardPage() {
       });
     }
     return result;
-  }, [deals, filterType, filterStatus, search, agentFilter, dealVipFilter, contactVipFilter]);
+  }, [deals, filterType, filterStatus, search, agentFilter, dealVipFilter, contactVipFilter, sideFilter]);
 
   if (membershipLoading || isLoading) {
     return (
@@ -163,21 +146,38 @@ export default function CrmDashboardPage() {
     );
   }
 
-  const kpiItems = [
-    { label: isRu ? 'В работе' : 'Active', value: String(kpis.activeCount), icon: Target, color: 'text-primary' },
-    { label: isRu ? 'Воронка' : 'Pipeline', value: formatValue(kpis.totalPipeline), icon: DollarSign, color: 'text-primary' },
-    { label: isRu ? 'Прогноз' : 'Forecast', value: formatValue(kpis.weighted), icon: TrendingUp, color: 'text-warning' },
-    { label: isRu ? 'Конверсия' : 'Win Rate', value: `${kpis.winRate}%`, icon: Percent, color: 'text-success' },
-    { label: isRu ? 'Контакты' : 'Contacts', value: String(kpis.totalContacts), icon: Users, color: 'text-info', onClick: () => navigate(APP_ROUTES.MC_CONTACTS) },
-    { label: isRu ? 'Задачи' : 'Tasks', value: String(kpis.todayTasks), icon: ListTodo, color: 'text-warning', onClick: () => navigate(APP_ROUTES.MC_TASKS) },
-  ];
-
   return (
     <div className="p-4 md:p-6 space-y-4 w-full">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <h1 className="text-xl font-bold">CRM</h1>
+          {/* Side filter — drives both pipeline list & deal list */}
+          <div className="inline-flex border border-border bg-card">
+            {([
+              { v: null, label: isRu ? 'Все' : 'All' },
+              { v: 'buy' as const, label: isRu ? 'Покупка' : 'Buy' },
+              { v: 'sell' as const, label: isRu ? 'Продажа' : 'Sell' },
+            ]).map((opt) => (
+              <button
+                key={String(opt.v)}
+                type="button"
+                onClick={() => {
+                  setSideFilter(opt.v);
+                  // Clear pipeline selection so the default pipeline for the new side is picked.
+                  setSelectedPipelineId(null);
+                }}
+                className={cn(
+                  'px-2.5 h-8 text-[11px] font-medium border-r border-border last:border-r-0 transition-colors',
+                  sideFilter === opt.v
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:bg-muted/40',
+                )}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
           {pipelines.length > 1 && (
             <Select value={selectedPipelineId || ''} onValueChange={v => setSelectedPipelineId(v || null)}>
               <SelectTrigger className="w-[160px] h-8 text-xs">
@@ -210,29 +210,19 @@ export default function CrmDashboardPage() {
       {/* Quick Actions */}
       <CrmQuickActions />
 
-      {/* Compact KPI Strip */}
-      <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
-        {kpiItems.map(k => (
-          <button
-            key={k.label}
-            onClick={k.onClick}
-            className={cn(
-              'flex items-center gap-2 p-2.5 rounded-none border bg-card text-left transition-colors',
-              k.onClick && 'hover:bg-accent/50 cursor-pointer',
-              !k.onClick && 'cursor-default',
-            )}
-          >
-            <k.icon className={cn('h-4 w-4 shrink-0', k.color)} />
-            <div className="min-w-0">
-              <p className="text-[10px] text-muted-foreground truncate">{k.label}</p>
-              <p className="text-sm font-bold leading-tight">{k.value}</p>
-            </div>
-          </button>
-        ))}
-      </div>
+      {/* Business Pulse — replaces legacy KPI strip */}
+      <BusinessPulseStrip
+        companyId={companyId}
+        deals={filtered}
+        pipelineData={pipelineData}
+        wonLostKeys={wonLostKeys}
+      />
 
-      {/* Commission Forecast */}
-      <CommissionForecast deals={deals} pipelineData={pipelineData} wonLostKeys={wonLostKeys} />
+      {/* Commission Forecast (now with Buy/Sell sub-totals) */}
+      <CommissionForecast deals={filtered} pipelineData={pipelineData} wonLostKeys={wonLostKeys} />
+
+      {/* Time-series chart — last 6 mo earned + next 6 mo weighted, split by side */}
+      <CommissionTimeSeriesChart companyId={companyId} />
 
       {/* My Day + Won/Lost row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -299,6 +289,9 @@ export default function CrmDashboardPage() {
         onQuickCreate={() => setShowCreate(true)}
       />
 
+      {/* Cold contacts — the daily "who needs a touch" prompt */}
+      <ColdContactsWidget companyId={companyId} />
+
       {/* CRM Tools */}
       <div className="pt-4 border-t">
         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
@@ -331,7 +324,12 @@ export default function CrmDashboardPage() {
         </div>
       </div>
 
-      <CreateDealSheet open={showCreate} onOpenChange={setShowCreate} companyId={membership.company_id} />
+      <CreateDealSheet
+        open={showCreate}
+        onOpenChange={setShowCreate}
+        companyId={membership.company_id}
+        pipelineId={pipelineData.activePipeline?.id ?? selectedPipelineId ?? null}
+      />
     </div>
   );
 }

@@ -106,11 +106,25 @@ export interface DynamicPipelineResult {
 
 export function useDynamicPipelineStages(
   companyId: string | undefined,
-  selectedPipelineId?: string | null
+  selectedPipelineId?: string | null,
+  /**
+   * Optional side filter. When set, only pipelines with the matching `side`
+   * are considered for `pipelines` / `activePipeline` resolution. `null` /
+   * `undefined` returns every pipeline (current behavior).
+   */
+  sideFilter?: 'buy' | 'sell' | null,
 ): DynamicPipelineResult {
-  const { data: pipelines = [], isLoading } = useCrmPipelines(companyId);
+  const { data: rawPipelines = [], isLoading } = useCrmPipelines(companyId);
 
   return useMemo(() => {
+    // Side filter applied at the source so downstream consumers (switcher,
+    // dashboard counts) only see pipelines that match.
+    const pipelines = sideFilter
+      ? rawPipelines.filter(
+          (p) => (p as PipelineWithStages & { side?: 'buy' | 'sell' | null }).side === sideFilter,
+        )
+      : rawPipelines;
+
     // Find active pipeline
     let activePipeline: PipelineWithStages | null = null;
     if (selectedPipelineId) {
@@ -150,5 +164,5 @@ export function useDynamicPipelineStages(
         return s ? (isRu ? s.shortRu : s.shortEn) : key;
       },
     };
-  }, [pipelines, selectedPipelineId, isLoading]);
+  }, [rawPipelines, selectedPipelineId, sideFilter, isLoading]);
 }

@@ -25,6 +25,12 @@ interface Props {
   companyId: string;
   prefilledContact?: CrmContact | null;
   prefilledStage?: string;
+  /**
+   * If set, the new deal is created in this pipeline. Pass the currently
+   * selected pipeline from the CRM dashboard so buy/sell-side flows route
+   * the deal into the right stage set.
+   */
+  pipelineId?: string | null;
 }
 
 const CONTACT_TYPE_BY_DEAL_TYPE: Record<string, string> = {
@@ -38,7 +44,7 @@ const CONTACT_TYPE_BY_DEAL_TYPE: Record<string, string> = {
   offplan: 'buyer',
 };
 
-export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContact, prefilledStage = 'new' }: Props) {
+export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContact, prefilledStage = 'new', pipelineId = null }: Props) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { user } = useAuth();
@@ -235,6 +241,7 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
         client_email: normalizedEmail,
         client_source: form.client_source,
         stage: prefilledStage as any,
+        pipeline_id: pipelineId,
         deal_type: form.deal_type,
         deal_status: 'active',
         budget_min: form.budget_min ? Number(form.budget_min) : null,

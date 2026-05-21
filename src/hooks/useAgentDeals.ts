@@ -111,6 +111,15 @@ export interface AgentDeal {
   tags: string[];
   priority: number;
   pipeline_id: string | null;
+  /** Derived from pipeline join — undefined when pipeline_id is null or pipeline has no side. */
+  pipeline_side?: 'buy' | 'sell' | null;
+  /** Commission splits (sum must be ≤ 100 — DB CHECK constraint). */
+  agent_split_percent: number | null;
+  firm_split_percent: number | null;
+  referral_fee_percent: number | null;
+  referral_contact_id: string | null;
+  /** Deal-specific property notes (asking-price override, exclusivity, etc.) */
+  deal_property_notes: Record<string, unknown> | null;
   is_vip: boolean;
   created_at: string;
   updated_at: string;
@@ -216,6 +225,39 @@ export function useDuplicateCheck(companyId: string | undefined, phone: string, 
   });
 }
 
+/**
+ * Build pipeline_id → side map by fetching the (small) crm_pipelines list for
+ * the company once and reading the optional `side` column off each row. Works
+ * both before AND after the side-column migration applies — when the column
+ * doesn't exist yet, every row resolves to `null` and `pipeline_side` is null
+ * on every deal.
+ *
+ * Kept separate from the deals query so a missing `side` column doesn't crash
+ * the entire deal list with a 400.
+ */
+async function fetchPipelineSideMap(companyId: string): Promise<Map<string, 'buy' | 'sell' | null>> {
+  const { data, error } = await supabase
+    .from('crm_pipelines')
+    .select('id, side')
+    .eq('company_id', companyId);
+  if (error) {
+    // Column-missing or other transient error — degrade gracefully (no side info).
+    return new Map();
+  }
+  const rows = (data || []) as unknown as Array<{ id: string; side?: 'buy' | 'sell' | null }>;
+  return new Map(rows.map((r) => [r.id, (r.side ?? null) as 'buy' | 'sell' | null]));
+}
+
+function attachPipelineSide(
+  row: unknown,
+  sideByPipelineId: Map<string, 'buy' | 'sell' | null>,
+): AgentDeal {
+  if (!row || typeof row !== 'object') return row as AgentDeal;
+  const r = row as Record<string, unknown> & { pipeline_id?: string | null };
+  const side = r.pipeline_id ? sideByPipelineId.get(r.pipeline_id) ?? null : null;
+  return { ...r, pipeline_side: side } as unknown as AgentDeal;
+}
+
 /** Fetch all deals for the user's company with optional server-side pagination */
 export function useAgentDeals(companyId: string | undefined, page?: number, pageSize = 50) {
   return useQuery({
@@ -233,9 +275,17 @@ export function useAgentDeals(companyId: string | undefined, page?: number, page
         q = q.range(from, to);
       }
 
-      const { data, error, count } = await q;
-      if (error) throw error;
-      return { data: (data || []) as unknown as AgentDeal[], count: count || 0 };
+      // Parallel: deals + side map. Side map is tiny (one row per pipeline).
+      const [dealsRes, sideMap] = await Promise.all([
+        q,
+        fetchPipelineSideMap(companyId!),
+      ]);
+
+      if (dealsRes.error) throw dealsRes.error;
+      return {
+        data: (dealsRes.data || []).map((row) => attachPipelineSide(row, sideMap)),
+        count: dealsRes.count || 0,
+      };
     },
     enabled: !!companyId,
   });
@@ -257,7 +307,10 @@ export function useAgentDeal(dealId: string | undefined) {
         .eq('id', dealId!)
         .maybeSingle();
       if (error) throw error;
-      return data as unknown as AgentDeal | null;
+      if (!data) return null;
+      const companyId = (data as Record<string, unknown>).company_id as string | undefined;
+      const sideMap = companyId ? await fetchPipelineSideMap(companyId) : new Map();
+      return attachPipelineSide(data, sideMap);
     },
     enabled: isValidId,
   });
