@@ -91,9 +91,9 @@ const WelcomeScreen: React.FC<WelcomeProps> = ({ isRu, onSkip, onSignIn, onStart
       <div className="onb-w-head">
         <div className="onb-w-mark">
           <svg width="22" height="22" viewBox="0 0 32 32" fill="none" aria-hidden>
-            <rect width="32" height="32" rx="7" fill="#0A2240" />
-            <path d="M10 10v9.5a2.5 2.5 0 0 0 5 0V10" stroke="#F5F4F0" strokeWidth="2" strokeLinecap="square" />
-            <path d="M17 22V12.5a2.5 2.5 0 0 1 5 0V22" stroke="#D96B1A" strokeWidth="2" strokeLinecap="square" />
+            <rect width="32" height="32" rx="7" className="fill-primary" />
+            <path d="M10 10v9.5a2.5 2.5 0 0 0 5 0V10" className="stroke-primary-foreground" strokeWidth="2" strokeLinecap="square" />
+            <path d="M17 22V12.5a2.5 2.5 0 0 1 5 0V22" className="stroke-accent" strokeWidth="2" strokeLinecap="square" />
           </svg>
           <span>myUNO</span>
         </div>
@@ -125,8 +125,8 @@ const WelcomeScreen: React.FC<WelcomeProps> = ({ isRu, onSkip, onSignIn, onStart
             <div className="onb-core-ring" />
             <div className="onb-core-mark">
               <svg viewBox="0 0 32 32" fill="none">
-                <path d="M10 8v11a3 3 0 0 0 6 0V8" stroke="#F5F4F0" strokeWidth="2.4" strokeLinecap="square" />
-                <path d="M17 24V11a3 3 0 0 1 6 0V24" stroke="#D96B1A" strokeWidth="2.4" strokeLinecap="square" />
+                <path d="M10 8v11a3 3 0 0 0 6 0V8" className="stroke-primary-foreground" strokeWidth="2.4" strokeLinecap="square" />
+                <path d="M17 24V11a3 3 0 0 1 6 0V24" className="stroke-accent" strokeWidth="2.4" strokeLinecap="square" />
               </svg>
             </div>
           </div>

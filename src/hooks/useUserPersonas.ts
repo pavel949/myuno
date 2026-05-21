@@ -319,24 +319,6 @@ export const PERSONA_ICONS: Record<string, LucideIcon> = {
   Dumbbell, Briefcase, Laptop, PawPrint, Globe, HardHat, Store,
 };
 
-/** CSS gradient per persona — used for active state styling in persona switcher */
-export const PERSONA_GRADIENTS: Partial<Record<UserPersona, string>> = {
-  tourist:                 'linear-gradient(135deg, #06b6d4, #0891b2)',
-  resident:                'linear-gradient(135deg, #10b981, #059669)',
-  relocation:              'linear-gradient(135deg, #6366f1, #4f46e5)',
-  property_owner:          'linear-gradient(135deg, #f59e0b, #d97706)',
-  investor:                'linear-gradient(135deg, #a855f7, #7c3aed)',
-  pet_owner:               'linear-gradient(135deg, #f59e0b, #ea580c)',
-  family:                  'linear-gradient(135deg, #ec4899, #db2777)',
-  couple:                  'linear-gradient(135deg, #f43f5e, #e11d48)',
-  nightlife:               'linear-gradient(135deg, #d946ef, #a855f7)',
-  active:                  'linear-gradient(135deg, #f97316, #ea580c)',
-  business:                'linear-gradient(135deg, #64748b, #475569)',
-  nomad:                   'linear-gradient(135deg, #14b8a6, #0d9488)',
-  real_estate_developer:   'linear-gradient(135deg, #78716c, #57534e)',
-  local_services_provider: 'linear-gradient(135deg, #22d3ee, #06b6d4)',
-};
-
 export const PERSONA_INFO: Record<UserPersona, {
   labelEn: string;
   labelRu: string;

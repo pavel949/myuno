@@ -26,8 +26,9 @@ import {
   Tooltip,
   Legend,
 } from 'recharts';
+import { CHART_THEME } from '@/lib/chartTheme';
 
-const CHART_COLORS = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
+const CHART_COLORS = CHART_THEME.palette;
 
 export default function OwnerPortfolio() {
   const { language } = useLanguage();
