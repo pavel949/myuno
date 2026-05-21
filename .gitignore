@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Local Claude Code agent state (per-machine, never committed)
+.claude/
+
 # Export data (large JSON files)
 tmp/
 
