@@ -1,14 +1,14 @@
 /**
- * Unified Chart Theme — DS 2.0 Navy Premium
+ * Unified Chart Theme — DS 2.1 civic infrastructure
  * Uses CSS variables from tokens.css; stays in sync with design-system.
- * All colors reference var(--primary), var(--chart-*), etc.
+ * Fonts resolve via --font-body (Geist) so locale-switching JustWorks.
  */
 
 export const CHART_THEME = {
   /** Axis tick styling */
   axisTick: {
     fontSize: 11,
-    fontFamily: "'Golos Text', sans-serif",
+    fontFamily: 'var(--font-body)',
     fontWeight: 500,
     fill: 'hsl(var(--muted-foreground))',
     letterSpacing: '0.01em',
@@ -22,7 +22,7 @@ export const CHART_THEME = {
     boxShadow: 'var(--shadow-elevated)',
     padding: '10px 14px',
     fontSize: '12px',
-    fontFamily: "'Golos Text', sans-serif",
+    fontFamily: 'var(--font-body)',
   },
 
   /** Tooltip label */

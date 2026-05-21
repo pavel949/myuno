@@ -71,7 +71,7 @@ export function PeylaaLeadForm({ source, utm, unitId, onClose }: Props) {
       <div className="relative bg-[#141414] border border-white/10 rounded-none sm:rounded-none w-full max-w-md max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-white/10">
-          <h3 className="text-lg font-bold text-white" style={{ fontFamily: 'Unbounded, sans-serif' }}>
+          <h3 className="text-lg font-bold text-white">
             {submitted ? 'Заявка отправлена!' : 'Получить консультацию'}
           </h3>
           <button onClick={onClose} className="text-white/40 hover:text-white">

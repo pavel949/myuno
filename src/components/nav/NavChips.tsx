@@ -95,7 +95,7 @@ export function NavChips({
             )}
             style={
               active && accent && !isOnNavy
-                ? { background: accent, borderColor: accent, color: '#fff' }
+                ? { background: accent, borderColor: accent, color: 'hsl(var(--primary-foreground))' }
                 : undefined
             }
           >

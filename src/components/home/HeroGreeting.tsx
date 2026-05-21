@@ -1,14 +1,12 @@
 /**
  * HeroGreeting — насыщенный hero-блок главной.
  *
- * Заменяет плоский HomeTopBar на полноценный навигационный экран:
- *  - Glass TopBar поверх navy-градиента
- *  - Большое приветствие (Playfair) + контекст персоны
- *  - AI search bar (glass) — единая точка входа
- *  - Декоративный radial-gradient для «глубины»
+ * Полноценный навигационный экран:
+ *  - TopBar поверх navy-фона
+ *  - Большое приветствие (font-display = Source Serif 4) + контекст персоны
+ *  - AI search bar — единая точка входа
  *
- * Соблюдает каноническую палитру: только navy + orange + cream.
- * Цвет здесь — не пёстрый «kid-tech», а контраст крупных surface'ов.
+ * DS 2.1: каноническая палитра navy + orange + cream, без glass/glow.
  */
 import React from 'react';
 import { Search, Sparkles } from 'lucide-react';

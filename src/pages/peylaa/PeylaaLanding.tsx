@@ -171,7 +171,7 @@ export default function PeylaaLanding() {
       <header className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/90 border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="text-xl font-bold tracking-wider" style={{ fontFamily: 'Unbounded, sans-serif' }}>
+            <span className="font-display text-xl font-bold tracking-wider">
               PEYLAA
             </span>
             <Badge variant="outline" className="text-[10px] border-accent/40 text-accent">
@@ -222,8 +222,7 @@ export default function PeylaaLanding() {
           </Badge>
 
           <h1
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight"
-            style={{ fontFamily: 'Unbounded, sans-serif' }}
+            className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight"
           >
             <span className="text-white">PEYLAA</span>{' '}
             <span className="text-accent">Phuket</span>
@@ -233,7 +232,7 @@ export default function PeylaaLanding() {
             </span>
           </h1>
 
-          <p className="text-lg md:text-xl text-white/60 max-w-2xl mx-auto" style={{ fontFamily: 'Golos Text, sans-serif' }}>
+          <p className="text-lg md:text-xl text-white/60 max-w-2xl mx-auto">
             408 премиальных резиденций в Bang Tao. Бренд Marriott.
             {minPrice && (
               <span className="block mt-2 text-accent font-semibold">
@@ -246,7 +245,7 @@ export default function PeylaaLanding() {
           <div className="flex flex-wrap justify-center gap-6 md:gap-10 py-4">
             {STATS.map((s) => (
               <div key={s.label} className="text-center">
-                <div className="text-2xl md:text-3xl font-bold text-white" style={{ fontFamily: 'Unbounded, sans-serif' }}>
+                <div className="font-display text-2xl md:text-3xl font-bold text-white">
                   {s.value}
                 </div>
                 <div className="text-xs text-white/50 mt-1">{s.label}</div>
@@ -254,7 +253,7 @@ export default function PeylaaLanding() {
             ))}
             {totalAvailable > 0 && (
               <div className="text-center">
-                <div className="text-2xl md:text-3xl font-bold text-success" style={{ fontFamily: 'Unbounded, sans-serif' }}>
+                <div className="font-display text-2xl md:text-3xl font-bold text-success">
                   {totalAvailable}
                 </div>
                 <div className="text-xs text-white/50 mt-1">В продаже</div>
@@ -296,7 +295,7 @@ export default function PeylaaLanding() {
       </section>
       <section className="py-20 px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4" style={{ fontFamily: 'Unbounded, sans-serif' }}>
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
             Почему <span className="text-accent">PEYLAA</span>
           </h2>
           <p className="text-center text-white/50 mb-12 max-w-2xl mx-auto">
@@ -322,7 +321,7 @@ export default function PeylaaLanding() {
       {gallery && gallery.length > 0 && (
         <section id="gallery" className="py-20 px-4 bg-white/[0.02]">
           <div className="max-w-7xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-4" style={{ fontFamily: 'Unbounded, sans-serif' }}>
+            <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
               <span className="text-accent">Галерея</span> проекта
             </h2>
             <p className="text-center text-white/50 mb-10">
@@ -401,7 +400,7 @@ export default function PeylaaLanding() {
       {/* ── UNIT TYPES ── */}
       <section className="py-20 px-4 bg-white/[0.02]">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4" style={{ fontFamily: 'Unbounded, sans-serif' }}>
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
             Типы <span className="text-accent">резиденций</span>
           </h2>
           <p className="text-center text-white/50 mb-12">
@@ -451,7 +450,7 @@ export default function PeylaaLanding() {
                 )}
                 <CardContent className="p-6 space-y-4">
                   <div className="space-y-1">
-                    <h3 className="text-xl font-bold text-white" style={{ fontFamily: 'Unbounded, sans-serif' }}>
+                    <h3 className="text-xl font-bold text-white">
                       {unit.type}
                     </h3>
                     <div className="flex items-center gap-2 text-sm text-white/50">
@@ -473,7 +472,7 @@ export default function PeylaaLanding() {
                     {unit.priceFrom ? (
                       <>
                         <div className="text-xs text-white/40">от</div>
-                        <div className="text-2xl font-bold text-accent" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
+                        <div className="font-mono text-2xl font-bold text-accent">
                           {formatThb(unit.priceFrom)}
                         </div>
                         <div className="text-xs text-white/40">
@@ -507,7 +506,7 @@ export default function PeylaaLanding() {
       {/* ── UNIT CATALOG ── */}
       <section id="units" className="py-20 px-4">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4" style={{ fontFamily: 'Unbounded, sans-serif' }}>
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
             Выберите <span className="text-accent">резиденцию</span>
           </h2>
           <p className="text-center text-white/50 mb-8">
@@ -523,7 +522,7 @@ export default function PeylaaLanding() {
       {/* ── AMENITIES ── */}
       <section id="amenities" className="py-20 px-4 bg-white/[0.02]">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4" style={{ fontFamily: 'Unbounded, sans-serif' }}>
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
             <span className="text-accent">Инфраструктура</span> мирового уровня
           </h2>
           <p className="text-center text-white/50 mb-12">
@@ -561,7 +560,7 @@ export default function PeylaaLanding() {
       {/* ── ROI CALCULATOR ── */}
       <section id="roi" className="py-20 px-4">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4" style={{ fontFamily: 'Unbounded, sans-serif' }}>
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
             Калькулятор <span className="text-accent">доходности</span>
           </h2>
           <p className="text-center text-white/50 mb-8">
@@ -574,7 +573,7 @@ export default function PeylaaLanding() {
       {/* ── PAYMENT TERMS ── */}
       <section id="payment" className="py-20 px-4 bg-white/[0.02]">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4" style={{ fontFamily: 'Unbounded, sans-serif' }}>
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
             Условия <span className="text-accent">покупки</span>
           </h2>
           <p className="text-center text-white/50 mb-12">
@@ -595,7 +594,7 @@ export default function PeylaaLanding() {
                 </div>
                 <div className="text-right">
                   {s.pct && (
-                    <div className="text-lg font-bold text-accent" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
+                    <div className="font-mono text-lg font-bold text-accent">
                       {s.pct}
                     </div>
                   )}
@@ -635,19 +634,19 @@ export default function PeylaaLanding() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
               <div className="flex justify-between text-white/60">
                 <span>Sinking Fund (единоразово)</span>
-                <span className="text-white font-medium" style={{ fontFamily: 'JetBrains Mono, monospace' }}>฿700/м²</span>
+                <span className="font-mono text-white font-medium">฿700/м²</span>
               </div>
               <div className="flex justify-between text-white/60">
                 <span>Обслуживание (1-й год)</span>
-                <span className="text-white font-medium" style={{ fontFamily: 'JetBrains Mono, monospace' }}>฿120/м²/мес</span>
+                <span className="font-mono text-white font-medium">฿120/м²/мес</span>
               </div>
               <div className="flex justify-between text-white/60">
                 <span>Обслуживание (2-й год)</span>
-                <span className="text-white font-medium" style={{ fontFamily: 'JetBrains Mono, monospace' }}>฿135/м²/мес</span>
+                <span className="font-mono text-white font-medium">฿135/м²/мес</span>
               </div>
               <div className="flex justify-between text-white/60">
                 <span>Сбор за трансфер</span>
-                <span className="text-white font-medium" style={{ fontFamily: 'JetBrains Mono, monospace' }}>2% (50/50)</span>
+                <span className="font-mono text-white font-medium">2% (50/50)</span>
               </div>
             </div>
           </div>
@@ -657,7 +656,7 @@ export default function PeylaaLanding() {
       {/* ── DEVELOPER ── */}
       <section className="py-20 px-4">
         <div className="max-w-4xl mx-auto text-center space-y-6">
-          <h2 className="text-3xl md:text-4xl font-bold" style={{ fontFamily: 'Unbounded, sans-serif' }}>
+          <h2 className="text-3xl md:text-4xl font-bold">
             Девелопер
           </h2>
           <div className="space-y-4 text-white/60">
@@ -675,7 +674,7 @@ export default function PeylaaLanding() {
       {/* ── LOCATION ── */}
       <section className="py-20 px-4 bg-white/[0.02]">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12" style={{ fontFamily: 'Unbounded, sans-serif' }}>
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
             Локация: <span className="text-accent">Bang Tao</span>
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -702,7 +701,7 @@ export default function PeylaaLanding() {
       {/* ── FINAL CTA ── */}
       <section className="py-24 px-4">
         <div className="max-w-3xl mx-auto text-center space-y-8">
-          <h2 className="text-3xl md:text-4xl font-bold" style={{ fontFamily: 'Unbounded, sans-serif' }}>
+          <h2 className="text-3xl md:text-4xl font-bold">
             Готовы выбрать свою <span className="text-accent">резиденцию</span>?
           </h2>
           <p className="text-white/50 text-lg">

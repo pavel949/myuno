@@ -40,7 +40,6 @@ const NB_MAP_PALETTE = {
   // Status colors — hex mirror of platform cluster tokens
   amber: '#F59E0B',      // mirrors --accent-amber / --cluster-legal
   blue: '#4E7BFF',       // mirrors --cluster-live
-  mint: '#00D68F',       // mirrors --success / --cluster-arrive
 } as const;
 
 // Dark luxury map style matching newbuilds theme
