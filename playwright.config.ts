@@ -15,8 +15,8 @@ export default defineConfig({
   expect: {
     timeout: 10000,
   },
-  globalSetup: require.resolve('./e2e/fixtures/seedListings.ts'),
-  globalTeardown: require.resolve('./e2e/fixtures/teardownListings.ts'),
+  globalSetup: path.resolve(__dirname, './e2e/fixtures/seedListings.ts'),
+  globalTeardown: path.resolve(__dirname, './e2e/fixtures/teardownListings.ts'),
   use: {
     baseURL: 'http://localhost:8099',
     screenshot: 'only-on-failure',
