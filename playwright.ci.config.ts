@@ -1,4 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /**
  * CI config: chromium-only, slower retries, marketplace seed enabled.
@@ -13,8 +17,8 @@ export default defineConfig({
   reporter: [['html', { open: 'never' }], ['list']],
   timeout: 120_000,
   expect: { timeout: 10_000 },
-  globalSetup: require.resolve('./e2e/fixtures/seedListings.ts'),
-  globalTeardown: require.resolve('./e2e/fixtures/teardownListings.ts'),
+  globalSetup: path.resolve(__dirname, './e2e/fixtures/seedListings.ts'),
+  globalTeardown: path.resolve(__dirname, './e2e/fixtures/teardownListings.ts'),
   use: {
     baseURL: 'http://localhost:8099',
     screenshot: 'only-on-failure',
