@@ -56,7 +56,7 @@ export function useCrmEmails(companyId: string | undefined, contactId?: string) 
 export function useCreateCrmEmail() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (email: Omit<CrmEmail, 'id' | 'created_at'>) => {
+    mutationFn: async (email: Partial<Omit<CrmEmail, 'id' | 'created_at'>>) => {
       const { data, error } = await typedFrom('crm_emails').insert(email).select().single();
       if (error) throw error;
       return data as CrmEmail;

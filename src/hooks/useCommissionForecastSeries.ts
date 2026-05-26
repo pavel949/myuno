@@ -105,7 +105,7 @@ export function useCommissionForecastSeries(
       const stages = (stagesRes.data || []) as unknown as StageRow[];
       const stageById = new Map(stages.map((s) => [s.id, s] as const));
       const sideByPipelineId = new Map<string, 'buy' | 'sell' | null>(
-        ((pipelinesRes.error ? [] : pipelinesRes.data) as
+        ((pipelinesRes.error ? [] : pipelinesRes.data) as unknown as
           | Array<{ id: string; side?: 'buy' | 'sell' | null }>
           | null
           ?? []).map((r) => [r.id, (r.side ?? null) as 'buy' | 'sell' | null]),
