@@ -4,7 +4,8 @@
  *
  * Hierarchy:
  *
- *   Cluster (6)  →  Category (16)  →  Service / App (~80 active in code)
+ *   Cluster (6)  →  Category (18)  →  Service / App (~68 active in code)
+ *   Per cluster: arrive=3 · live=10 · manage=0 (workspace) · invest=1 · legal=3 · build=1
  *        │
  *        └────────►  LifeSituation[] (M:N via DB table `cluster_life_situations`)
  *
