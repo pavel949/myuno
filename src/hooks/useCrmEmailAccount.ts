@@ -41,14 +41,13 @@ export function useCrmEmailAccount() {
     queryKey: ['crm-email-account', user?.id],
     queryFn: async (): Promise<CrmEmailAccount | null> => {
       if (!user?.id) return null;
-      const { data, error } = await supabase
-        .from('crm_email_accounts')
+      const { data, error } = await typedFrom('crm_email_accounts')
         .select(SELECT_COLS)
         .eq('user_id', user.id)
         .eq('is_active', true)
         .maybeSingle();
       if (error) throw error;
-      return (data as CrmEmailAccount | null) ?? null;
+      return (data as unknown as CrmEmailAccount | null) ?? null;
     },
     enabled: !!user?.id,
     staleTime: 60 * 1000,
