@@ -385,7 +385,7 @@ export function useContactDeals(contactId: string | undefined) {
         .eq('contact_id', contactId!)
         .order('created_at', { ascending: false });
       if (error) throw error;
-      return (data || []) as import('@/hooks/useAgentDeals').AgentDeal[];
+      return (data || []) as unknown as import('@/hooks/useAgentDeals').AgentDeal[];
     },
     enabled: !!contactId,
   });
