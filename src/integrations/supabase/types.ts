@@ -142,6 +142,7 @@ export type Database = {
       agent_deals: {
         Row: {
           agent_id: string
+          agent_split_percent: number | null
           ai_next_best_action: string | null
           bedrooms_min: number | null
           budget_max: number | null
@@ -163,11 +164,13 @@ export type Database = {
           contact_id: string | null
           created_at: string
           currency: string | null
+          deal_property_notes: string | null
           deal_source_detail: string | null
           deal_status: string
           deal_type: string
           deal_value: number | null
           expected_close_date: string | null
+          firm_split_percent: number | null
           id: string
           is_vip: boolean
           lost_reason: string | null
@@ -180,6 +183,8 @@ export type Database = {
           priority: number | null
           property_id: string | null
           property_project_id: string | null
+          referral_contact_id: string | null
+          referral_fee_percent: number | null
           service_line: string | null
           stage: string
           tags: string[] | null
@@ -188,6 +193,7 @@ export type Database = {
         }
         Insert: {
           agent_id: string
+          agent_split_percent?: number | null
           ai_next_best_action?: string | null
           bedrooms_min?: number | null
           budget_max?: number | null
@@ -209,11 +215,13 @@ export type Database = {
           contact_id?: string | null
           created_at?: string
           currency?: string | null
+          deal_property_notes?: string | null
           deal_source_detail?: string | null
           deal_status?: string
           deal_type?: string
           deal_value?: number | null
           expected_close_date?: string | null
+          firm_split_percent?: number | null
           id?: string
           is_vip?: boolean
           lost_reason?: string | null
@@ -226,6 +234,8 @@ export type Database = {
           priority?: number | null
           property_id?: string | null
           property_project_id?: string | null
+          referral_contact_id?: string | null
+          referral_fee_percent?: number | null
           service_line?: string | null
           stage?: string
           tags?: string[] | null
@@ -234,6 +244,7 @@ export type Database = {
         }
         Update: {
           agent_id?: string
+          agent_split_percent?: number | null
           ai_next_best_action?: string | null
           bedrooms_min?: number | null
           budget_max?: number | null
@@ -255,11 +266,13 @@ export type Database = {
           contact_id?: string | null
           created_at?: string
           currency?: string | null
+          deal_property_notes?: string | null
           deal_source_detail?: string | null
           deal_status?: string
           deal_type?: string
           deal_value?: number | null
           expected_close_date?: string | null
+          firm_split_percent?: number | null
           id?: string
           is_vip?: boolean
           lost_reason?: string | null
@@ -272,6 +285,8 @@ export type Database = {
           priority?: number | null
           property_id?: string | null
           property_project_id?: string | null
+          referral_contact_id?: string | null
+          referral_fee_percent?: number | null
           service_line?: string | null
           stage?: string
           tags?: string[] | null
@@ -5102,16 +5117,80 @@ export type Database = {
           },
         ]
       }
+      crm_email_accounts: {
+        Row: {
+          access_token: string | null
+          company_id: string | null
+          created_at: string
+          display_name: string | null
+          email: string
+          id: string
+          is_active: boolean
+          last_sync_at: string | null
+          provider: string
+          refresh_token: string | null
+          scopes: string[] | null
+          sync_error: string | null
+          sync_status: string | null
+          token_expires_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token?: string | null
+          company_id?: string | null
+          created_at?: string
+          display_name?: string | null
+          email: string
+          id?: string
+          is_active?: boolean
+          last_sync_at?: string | null
+          provider?: string
+          refresh_token?: string | null
+          scopes?: string[] | null
+          sync_error?: string | null
+          sync_status?: string | null
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string | null
+          company_id?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string
+          id?: string
+          is_active?: boolean
+          last_sync_at?: string | null
+          provider?: string
+          refresh_token?: string | null
+          scopes?: string[] | null
+          sync_error?: string | null
+          sync_status?: string | null
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       crm_emails: {
         Row: {
+          attachment_count: number | null
+          attachment_ids: string[] | null
           body_html: string | null
+          body_text: string | null
           company_id: string
           contact_id: string
           created_at: string | null
           deal_id: string | null
           direction: string
+          from_email: string | null
+          gmail_message_id: string | null
+          gmail_thread_id: string | null
           id: string
           opened_at: string | null
+          provider: string | null
           sent_at: string | null
           sent_by: string | null
           status: string | null
@@ -5119,14 +5198,21 @@ export type Database = {
           to_email: string
         }
         Insert: {
+          attachment_count?: number | null
+          attachment_ids?: string[] | null
           body_html?: string | null
+          body_text?: string | null
           company_id: string
           contact_id: string
           created_at?: string | null
           deal_id?: string | null
           direction?: string
+          from_email?: string | null
+          gmail_message_id?: string | null
+          gmail_thread_id?: string | null
           id?: string
           opened_at?: string | null
+          provider?: string | null
           sent_at?: string | null
           sent_by?: string | null
           status?: string | null
@@ -5134,14 +5220,21 @@ export type Database = {
           to_email: string
         }
         Update: {
+          attachment_count?: number | null
+          attachment_ids?: string[] | null
           body_html?: string | null
+          body_text?: string | null
           company_id?: string
           contact_id?: string
           created_at?: string | null
           deal_id?: string | null
           direction?: string
+          from_email?: string | null
+          gmail_message_id?: string | null
+          gmail_thread_id?: string | null
           id?: string
           opened_at?: string | null
+          provider?: string | null
           sent_at?: string | null
           sent_by?: string | null
           status?: string | null
@@ -5311,6 +5404,7 @@ export type Database = {
           name_en: string
           name_ru: string
           pipeline_type: string
+          side: string | null
           sort_order: number | null
         }
         Insert: {
@@ -5325,6 +5419,7 @@ export type Database = {
           name_en: string
           name_ru: string
           pipeline_type?: string
+          side?: string | null
           sort_order?: number | null
         }
         Update: {
@@ -5339,6 +5434,7 @@ export type Database = {
           name_en?: string
           name_ru?: string
           pipeline_type?: string
+          side?: string | null
           sort_order?: number | null
         }
         Relationships: [
