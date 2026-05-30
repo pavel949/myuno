@@ -43,11 +43,13 @@ import PersonaLandingPage from '../PersonaLandingPage';
 
 const renderAt = (path: string) =>
   render(
-    <MemoryRouter initialEntries={[path]}>
-      <Routes>
-        <Route path="/for/:persona" element={<PersonaLandingPage />} />
-      </Routes>
-    </MemoryRouter>,
+    <HelmetProvider>
+      <MemoryRouter initialEntries={[path]}>
+        <Routes>
+          <Route path="/for/:persona" element={<PersonaLandingPage />} />
+        </Routes>
+      </MemoryRouter>
+    </HelmetProvider>,
   );
 
 const liveLanding: PersonaLanding = {
