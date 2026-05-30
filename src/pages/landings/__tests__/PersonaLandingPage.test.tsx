@@ -13,6 +13,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import type { PersonaLanding } from '@/lib/landings/types';
 
 // Минимальные моки контекстов / heavy components, чтобы изолировать роут.
