@@ -10,6 +10,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import type { ClusterLanding, PersonaLanding } from '@/lib/landings/types';
 
 vi.mock('@/contexts/LanguageContext', () => ({
