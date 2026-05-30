@@ -45,11 +45,13 @@ import ClusterLandingPage from '../ClusterLandingPage';
 
 const renderAt = (path: string) =>
   render(
-    <MemoryRouter initialEntries={[path]}>
-      <Routes>
-        <Route path="/cluster/:cluster" element={<ClusterLandingPage />} />
-      </Routes>
-    </MemoryRouter>,
+    <HelmetProvider>
+      <MemoryRouter initialEntries={[path]}>
+        <Routes>
+          <Route path="/cluster/:cluster" element={<ClusterLandingPage />} />
+        </Routes>
+      </MemoryRouter>
+    </HelmetProvider>,
   );
 
 const liveCluster: ClusterLanding = {
