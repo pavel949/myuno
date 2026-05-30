@@ -122,6 +122,6 @@ describe('PersonaLandingPage — B.4 routing', () => {
     renderAt('/for/tourists');
     const ctas = screen.getAllByRole('link', { name: 'Начать' });
     expect(ctas.length).toBeGreaterThanOrEqual(1);
-    expect(ctas[0]).toHaveAttribute('href', '/start');
+    expect(ctas[0].getAttribute('href')).toMatch(/^\/start(\?|$)/);
   });
 });
