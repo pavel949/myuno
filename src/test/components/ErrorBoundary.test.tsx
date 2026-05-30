@@ -72,7 +72,7 @@ describe('ErrorBoundary', () => {
       </ErrorBoundary>
     );
     
-    expect(container.textContent).toContain('Something went wrong');
+    expect(container.textContent).toContain('This page failed to load');
     
     // Check that try again button exists
     const tryAgainButton = container.querySelector('button');
