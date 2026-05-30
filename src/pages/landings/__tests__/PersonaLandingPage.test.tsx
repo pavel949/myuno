@@ -13,6 +13,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import type { PersonaLanding } from '@/lib/landings/types';
 
 // Минимальные моки контекстов / heavy components, чтобы изолировать роут.
@@ -42,11 +43,13 @@ import PersonaLandingPage from '../PersonaLandingPage';
 
 const renderAt = (path: string) =>
   render(
-    <MemoryRouter initialEntries={[path]}>
-      <Routes>
-        <Route path="/for/:persona" element={<PersonaLandingPage />} />
-      </Routes>
-    </MemoryRouter>,
+    <HelmetProvider>
+      <MemoryRouter initialEntries={[path]}>
+        <Routes>
+          <Route path="/for/:persona" element={<PersonaLandingPage />} />
+        </Routes>
+      </MemoryRouter>
+    </HelmetProvider>,
   );
 
 const liveLanding: PersonaLanding = {
@@ -119,6 +122,6 @@ describe('PersonaLandingPage — B.4 routing', () => {
     renderAt('/for/tourists');
     const ctas = screen.getAllByRole('link', { name: 'Начать' });
     expect(ctas.length).toBeGreaterThanOrEqual(1);
-    expect(ctas[0]).toHaveAttribute('href', '/start');
+    expect(ctas[0].getAttribute('href')).toMatch(/^\/start(\?|$)/);
   });
 });

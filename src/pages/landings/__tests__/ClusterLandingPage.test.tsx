@@ -10,6 +10,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import type { ClusterLanding, PersonaLanding } from '@/lib/landings/types';
 
 vi.mock('@/contexts/LanguageContext', () => ({
@@ -44,11 +45,13 @@ import ClusterLandingPage from '../ClusterLandingPage';
 
 const renderAt = (path: string) =>
   render(
-    <MemoryRouter initialEntries={[path]}>
-      <Routes>
-        <Route path="/cluster/:cluster" element={<ClusterLandingPage />} />
-      </Routes>
-    </MemoryRouter>,
+    <HelmetProvider>
+      <MemoryRouter initialEntries={[path]}>
+        <Routes>
+          <Route path="/cluster/:cluster" element={<ClusterLandingPage />} />
+        </Routes>
+      </MemoryRouter>
+    </HelmetProvider>,
   );
 
 const liveCluster: ClusterLanding = {
@@ -171,14 +174,14 @@ describe('ClusterLandingPage — cross-link «По персонам»', () => {
     MOCK_CLUSTERS = [liveCluster];
     MOCK_PERSONAS = [draftPersonaP9];
     renderAt('/cluster/arrival');
-    expect(screen.queryByText('По персонам')).not.toBeInTheDocument();
+    expect(screen.queryByText('Кому актуально')).not.toBeInTheDocument();
   });
 
   it('renders only live related personas as links', () => {
     MOCK_CLUSTERS = [liveCluster];
     MOCK_PERSONAS = [livePersonaP1, draftPersonaP9];
     renderAt('/cluster/arrival');
-    expect(screen.getByText('По персонам')).toBeInTheDocument();
+    expect(screen.getByText('Кому актуально')).toBeInTheDocument();
 
     const link = screen.getByRole('link', { name: 'Туристы' });
     expect(link).toHaveAttribute('href', '/for/tourists');

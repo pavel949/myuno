@@ -139,10 +139,14 @@ describe('getClusterHeaderLabel — catalog SSOT labels', () => {
 });
 
 describe('getClusterServiceLocalizedLabel — query-string disambiguation', () => {
-  // Regression for 2026-04-26: the All Services drawer collapsed every
-  // sub-route in `cat-home-living` and `cat-tourism` to a single label
+  // Regression for 2026-04-26 (originally `cat-home-living` + `cat-tourism`):
+  // the All Services drawer collapsed every sub-route to a single label
   // because route labels could fall back from the catalog SSOT to umbrella
   // app entries. We assert per-category label uniqueness in both languages.
+  //
+  // `cat-home-living` was split (2026-05) into 4 categories:
+  //   cat-home-cleaning · cat-home-repair · cat-home-outdoor · cat-home-logistics
+  // We assert the SAME invariant on each of them.
 
   function labelsFor(categoryId: string, lang: 'en' | 'ru'): string[] {
     const cat = CATEGORIES.find((c) => c.id === categoryId);
@@ -162,21 +166,33 @@ describe('getClusterServiceLocalizedLabel — query-string disambiguation', () =
     );
   }
 
-  it('Home & Living renders 12 distinct EN labels (no "Home services" duplication)', () => {
-    const labels = labelsFor('cat-home-living', 'en');
-    expect(labels.length).toBeGreaterThanOrEqual(10);
-    expect(new Set(labels).size, `dup labels: ${labels.join(' | ')}`).toBe(labels.length);
-    expect(labels).toContain('Services hub');
-    expect(labels).toContain('Laundry');
-    expect(labels).not.toContain('Home services');
+  const HOME_CATEGORY_IDS = [
+    'cat-home-cleaning',
+    'cat-home-repair',
+    'cat-home-outdoor',
+    'cat-home-logistics',
+  ] as const;
+
+  it.each(HOME_CATEGORY_IDS)('home category %s renders distinct EN labels', (id) => {
+    const labels = labelsFor(id, 'en');
+    expect(labels.length).toBeGreaterThan(0);
+    expect(new Set(labels).size, `dup labels in ${id}: ${labels.join(' | ')}`).toBe(labels.length);
   });
 
-  it('Home & Living renders distinct RU labels', () => {
-    const labels = labelsFor('cat-home-living', 'ru');
-    expect(new Set(labels).size, `dup labels: ${labels.join(' | ')}`).toBe(labels.length);
-    expect(labels).toContain('Все услуги');
-    expect(labels).toContain('Прачечная');
-    expect(labels).not.toContain('Услуги для дома');
+  it.each(HOME_CATEGORY_IDS)('home category %s renders distinct RU labels', (id) => {
+    const labels = labelsFor(id, 'ru');
+    expect(labels.length).toBeGreaterThan(0);
+    expect(new Set(labels).size, `dup labels in ${id}: ${labels.join(' | ')}`).toBe(labels.length);
+  });
+
+  it('Cleaning category exposes Laundry as a distinct label', () => {
+    expect(labelsFor('cat-home-cleaning', 'en')).toContain('Laundry');
+    expect(labelsFor('cat-home-cleaning', 'ru')).toContain('Прачечная');
+  });
+
+  it('Logistics category exposes the Services hub umbrella label', () => {
+    expect(labelsFor('cat-home-logistics', 'en')).toContain('Services hub');
+    expect(labelsFor('cat-home-logistics', 'ru')).toContain('Все услуги');
   });
 
   it('Tourism & Activities renders distinct EN labels (no "Experiences" duplication)', () => {

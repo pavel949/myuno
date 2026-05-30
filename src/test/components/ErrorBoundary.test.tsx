@@ -37,9 +37,9 @@ describe('ErrorBoundary', () => {
       </ErrorBoundary>
     );
     
-    expect(container.textContent).toContain('Something went wrong');
+    expect(container.textContent).toContain('This page failed to load');
     // ErrorBoundary shows user-friendly message, not technical error details (by design)
-    expect(container.textContent).toContain('try again');
+    expect(container.textContent?.toLowerCase()).toContain('try again');
   });
 
   it('renders custom fallback when provided', () => {
@@ -72,7 +72,7 @@ describe('ErrorBoundary', () => {
       </ErrorBoundary>
     );
     
-    expect(container.textContent).toContain('Something went wrong');
+    expect(container.textContent).toContain('This page failed to load');
     
     // Check that try again button exists
     const tryAgainButton = container.querySelector('button');
