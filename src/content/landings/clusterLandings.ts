@@ -741,7 +741,7 @@ const E_TRANSACTION: ClusterLanding = {
   },
   relatedPersonas: ['P2', 'P8', 'P9', 'P11', 'P12'],
   seo: {
-    metaTitle: { ru: 'Сделка с недвижимостью на Пхукете: due diligence — myUNO', en: 'Phuket property transactions: due diligence to closing — myUNO' },
+    metaTitle: { ru: 'Сделка с недвижимостью на Пхукете: due diligence — myUNO', en: 'Phuket property deals: due diligence to closing — myUNO' },
     metaDescription: { ru: 'Reservation, due diligence, FET, SPA и Land Office, налоги. Сопровождение юристом по-русски от задатка до ключей.', en: 'Reservation, due diligence, FET, SPA, Land Office and taxes. Russian-speaking lawyer from deposit to keys.' },
     ogImage: OG_DEFAULT,
     canonicalPath: '/cluster/transaction',
