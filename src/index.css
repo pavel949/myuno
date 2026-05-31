@@ -220,6 +220,16 @@ body {
       font-size: 16px !important;
     }
   }
+
+  /* PWA standalone — hide the marketing footer so the installed app feels
+   * native (no "About / FAQ / Cookies" link strip + copyright row).
+   * Page-level navigation is still reachable via the side drawer + bottom nav.
+   */
+  @media (display-mode: standalone) {
+    body > #root footer {
+      display: none !important;
+    }
+  }
 }
 
 @layer components {
