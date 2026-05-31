@@ -15,7 +15,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { COMPANY_CONTACTS } from '@/lib/config';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
-import { useIsDesktop } from '@/hooks/use-desktop';
+import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { BrandWordmark } from '@/components/uno/BrandWordmark';
 import { ECOSYSTEM_FOOTER_UI, pickTriplet } from '@/lib/ecosystemGlossary';
 import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
