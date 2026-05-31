@@ -15,7 +15,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { COMPANY_CONTACTS } from '@/lib/config';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
-import { useIsDesktop } from '@/hooks/use-desktop';
+import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { BrandWordmark } from '@/components/uno/BrandWordmark';
 import { ECOSYSTEM_FOOTER_UI, pickTriplet } from '@/lib/ecosystemGlossary';
 import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
@@ -24,7 +24,9 @@ import { cn } from '@/lib/utils';
 export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
   const { language } = useLanguage();
   const { isInstalled, canInstall, isIOS, install } = usePWAInstall();
-  const isDesktop = useIsDesktop();
+  // Use ≥1024px (true laptop/desktop) for the wide footer — phones in PWA
+  // standalone sometimes report ≥768px and were getting the desktop layout.
+  const { isLargeDesktop } = useBreakpoint();
   const t = (trip: { ru: string; en: string; th: string }) => pickTriplet(trip, language);
 
   const handleInstallClick = async () => {
@@ -68,7 +70,7 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
   ];
 
   // ─── Desktop: slim 3-row footer ────────────────────────────────────────
-  if (isDesktop) {
+  if (isLargeDesktop) {
     return (
       <footer ref={ref} className="border-t border-border bg-background mt-auto">
         <div className={cn(ECOSYSTEM_PAGE_CONTAINER, 'py-8 lg:py-10')}>
