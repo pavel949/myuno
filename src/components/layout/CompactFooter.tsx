@@ -70,7 +70,7 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
   ];
 
   // ─── Desktop: slim 3-row footer ────────────────────────────────────────
-  if (isDesktop) {
+  if (isLargeDesktop) {
     return (
       <footer ref={ref} className="border-t border-border bg-background mt-auto">
         <div className={cn(ECOSYSTEM_PAGE_CONTAINER, 'py-8 lg:py-10')}>
