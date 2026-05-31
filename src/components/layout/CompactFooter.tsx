@@ -24,7 +24,9 @@ import { cn } from '@/lib/utils';
 export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
   const { language } = useLanguage();
   const { isInstalled, canInstall, isIOS, install } = usePWAInstall();
-  const isDesktop = useIsDesktop();
+  // Use ≥1024px (true laptop/desktop) for the wide footer — phones in PWA
+  // standalone sometimes report ≥768px and were getting the desktop layout.
+  const { isLargeDesktop } = useBreakpoint();
   const t = (trip: { ru: string; en: string; th: string }) => pickTriplet(trip, language);
 
   const handleInstallClick = async () => {
