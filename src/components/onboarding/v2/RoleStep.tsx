@@ -47,7 +47,7 @@ export function RoleStep({ value, onChange, lang }: Props) {
                 {lang === 'ru' ? meta.labelRu : meta.labelEn}
               </span>
               <span className="mt-0.5 block text-xs text-muted-foreground">
-                {meta.descriptionRu /* RU-only one-liner; acceptable for both since EN reads role label */}
+                {lang === 'ru' ? meta.descriptionRu : meta.descriptionEn}
               </span>
             </span>
             {isActive && (
