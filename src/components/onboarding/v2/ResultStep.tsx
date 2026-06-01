@@ -88,7 +88,7 @@ export function ResultStep({ result, lang, onReset }: Props) {
             {COPY.openPrefix[lang]} · {primary.title[lang]}
           </Button>
         )}
-        <Button variant="outline" className="flex-1" onClick={() => navigate('/discover')}>
+        <Button variant="outline" className="flex-1" onClick={() => navigate(APP_ROUTES.DISCOVER)}>
           {COPY.exploreLater[lang]}
         </Button>
       </div>
