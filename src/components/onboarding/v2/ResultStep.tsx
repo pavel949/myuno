@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { CanonicalOnboardingResult } from '@/hooks/useCanonicalOnboarding';
 import { CLUSTER_META, LIFECYCLE_STAGE_LABELS } from '@/types/canonical';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 interface Props {
   result: CanonicalOnboardingResult;
