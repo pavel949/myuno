@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { CanonicalOnboardingResult } from '@/hooks/useCanonicalOnboarding';
 import { CLUSTER_META, LIFECYCLE_STAGE_LABELS } from '@/types/canonical';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 interface Props {
   result: CanonicalOnboardingResult;
@@ -87,7 +88,7 @@ export function ResultStep({ result, lang, onReset }: Props) {
             {COPY.openPrefix[lang]} · {primary.title[lang]}
           </Button>
         )}
-        <Button variant="outline" className="flex-1" onClick={() => navigate('/discover')}>
+        <Button variant="outline" className="flex-1" onClick={() => navigate(APP_ROUTES.DISCOVER)}>
           {COPY.exploreLater[lang]}
         </Button>
       </div>
