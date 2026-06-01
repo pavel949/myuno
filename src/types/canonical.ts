@@ -66,6 +66,8 @@ export interface CanonicalRoleMeta {
   labelRu: string;
   /** One-line elevator pitch in RU — see segmentation-framework § 0.4 */
   descriptionRu: string;
+  /** One-line elevator pitch in EN — mirrors descriptionRu */
+  descriptionEn: string;
   /** Default cluster surface for this role (Arrive/Live/Manage/Invest/Build) */
   defaultCluster: ClusterId;
 }
@@ -76,6 +78,7 @@ export const CANONICAL_ROLE_META: Record<CanonicalRole, CanonicalRoleMeta> = {
     labelEn: 'Consumer',
     labelRu: 'Потребитель',
     descriptionRu: 'Покупает услуги и впечатления, без длинных обязательств.',
+    descriptionEn: 'Buys services and experiences without long-term commitments.',
     defaultCluster: 'arrive',
   },
   'resident-user': {
@@ -83,6 +86,7 @@ export const CANONICAL_ROLE_META: Record<CanonicalRole, CanonicalRoleMeta> = {
     labelEn: 'Resident',
     labelRu: 'Резидент',
     descriptionRu: 'Живёт на острове, нужны бытовые сервисы и легализация.',
+    descriptionEn: 'Lives on the island — needs daily services and legal status.',
     defaultCluster: 'live',
   },
   'investor-passive': {
@@ -90,6 +94,7 @@ export const CANONICAL_ROLE_META: Record<CanonicalRole, CanonicalRoleMeta> = {
     labelEn: 'Passive Investor',
     labelRu: 'Пассивный инвестор',
     descriptionRu: 'Покупает доходные юниты под управлением УК.',
+    descriptionEn: 'Buys income units managed by a property management company.',
     defaultCluster: 'invest',
   },
   'investor-active': {
@@ -97,6 +102,7 @@ export const CANONICAL_ROLE_META: Record<CanonicalRole, CanonicalRoleMeta> = {
     labelEn: 'Active Investor',
     labelRu: 'Активный инвестор',
     descriptionRu: 'Структурирует сделки, перепродажи, broker-уровень.',
+    descriptionEn: 'Structures deals, flips and broker-level transactions.',
     defaultCluster: 'invest',
   },
   operator: {
@@ -104,6 +110,7 @@ export const CANONICAL_ROLE_META: Record<CanonicalRole, CanonicalRoleMeta> = {
     labelEn: 'Operator',
     labelRu: 'Оператор',
     descriptionRu: 'Управляет своим/чужим объектом — STR, аренда, MC.',
+    descriptionEn: 'Runs own or third-party properties — STR, rental, MC.',
     defaultCluster: 'manage',
   },
   provider: {
@@ -111,6 +118,7 @@ export const CANONICAL_ROLE_META: Record<CanonicalRole, CanonicalRoleMeta> = {
     labelEn: 'Provider',
     labelRu: 'Поставщик',
     descriptionRu: 'Поставщик услуг и контента в маркетплейсе.',
+    descriptionEn: 'Supplies services and content into the marketplace.',
     defaultCluster: 'build',
   },
 };
