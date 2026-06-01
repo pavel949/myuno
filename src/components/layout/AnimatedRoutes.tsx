@@ -186,14 +186,14 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/index" element={<Navigate to={APP_ROUTES.HOME} replace />} />
         <Route path={APP_ROUTES.PRICING} element={<LazyPage><Pages.PricingPage /></LazyPage>} />
         <Route path="/welcome-landing" element={<LazyPage><WelcomeLanding /></LazyPage>} />
-        {/* Friction-removal onboarding (4 sequential screens, ported from design handoff bundle) */}
-        <Route path="/onboarding" element={<LazyPage><OnboardingFlow initialStep="welcome" /></LazyPage>} />
-        <Route path="/onboarding/destination" element={<LazyPage><OnboardingFlow initialStep="destination" /></LazyPage>} />
-        <Route path="/onboarding/questions" element={<LazyPage><OnboardingFlow initialStep="questions" /></LazyPage>} />
-        <Route path="/onboarding/map" element={<LazyPage><OnboardingFlow initialStep="map" /></LazyPage>} />
+        {/* Legacy /onboarding (Flow A) — deprecated, redirects preserve query/hash to /start */}
+        <Route path="/onboarding" element={<Navigate to="/start" replace />} />
+        <Route path="/onboarding/destination" element={<Navigate to="/start" replace />} />
+        <Route path="/onboarding/questions" element={<Navigate to="/start" replace />} />
+        <Route path="/onboarding/map" element={<Navigate to="/start" replace />} />
         <Route path="/start" element={<LazyPage><Pages.StartOnboarding /></LazyPage>} />
-        {/* StartOnboardingV2 deprecated → consolidated into /start */}
-        <Route path="/start/v2" element={<Navigate to="/start" replace />} />
+        {/* Canonical M5 3-question flow (lifecycle · role · modifiers) */}
+        <Route path="/start/v2" element={<LazyPage><Pages.StartOnboardingV2 /></LazyPage>} />
         <Route path={APP_ROUTES.AUTH} element={<PageTransition><Auth /></PageTransition>} />
         {/* OAuth providers may return to callback-style paths; render Auth instead of 404 */}
         <Route path="/auth/callback" element={<PageTransition><Auth /></PageTransition>} />
