@@ -176,7 +176,7 @@ export default function StartOnboarding() {
   const { language } = useLanguage();
   const lang = (language === 'ru' ? 'ru' : 'en') as L;
   const navigate = useNavigate();
-  const flagOn = useFeatureFlag('concierge_routing_v1', false);
+  const flagOn = useFeatureFlag('concierge_routing_v1', true);
 
   const {
     step,
