@@ -24,8 +24,10 @@ import { APP_ROUTES } from '@/lib/config/routes';
 export default function OwnerManagementLanding() {
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const { user } = useAuth();
   const isRu = language === 'ru';
   const t = <T,>(p: { ru: T; en: T }): T => (isRu ? p.ru : p.en);
+
 
   return (
     <LandingShell
