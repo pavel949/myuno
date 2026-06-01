@@ -84,7 +84,7 @@ export default function StartOnboardingV2() {
   const lang = (language === 'ru' ? 'ru' : 'en') as L;
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const flagOn = useFeatureFlag('concierge_routing_v2_canonical', false);
+  const flagOn = useFeatureFlag('concierge_routing_v2_canonical', true);
 
   const returnTo = useMemo(
     () => sanitizeReturnPath(searchParams.get('return')),
