@@ -17,12 +17,17 @@ import { Button } from '@/components/ui/button';
 import { LandingShell, LandingChecklist } from '@/components/landings/LandingShell';
 import { LandingLeadForm } from '@/components/landings/LandingLeadForm';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { APP_ROUTES } from '@/lib/config/routes';
+
 
 export default function OwnerManagementLanding() {
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const { user } = useAuth();
   const isRu = language === 'ru';
   const t = <T,>(p: { ru: T; en: T }): T => (isRu ? p.ru : p.en);
+
 
   return (
     <LandingShell
@@ -129,14 +134,26 @@ export default function OwnerManagementLanding() {
           ]}
         />
         <div className="mt-6 flex flex-wrap gap-3">
-          <Button onClick={() => navigate('/mc/full-management')}>
-            {t({ ru: 'Заполнить детальную заявку', en: 'Submit detailed request' })}
+          <Button
+            onClick={() => {
+              if (user) {
+                navigate(`${APP_ROUTES.AUTH_ACCOUNT_TYPE}?redirect=/mc/full-management`);
+              } else {
+                navigate(`/auth?redirect=${encodeURIComponent(APP_ROUTES.AUTH_ACCOUNT_TYPE)}`);
+              }
+            }}
+          >
+            {t({ ru: 'Стать собственником / УК', en: 'Become owner / MC' })}
             <ArrowRight className="h-4 w-4 ml-1" />
           </Button>
-          <Button variant="outline" onClick={() => navigate('/pricing')}>
+          <Button variant="outline" onClick={() => navigate('/mc/full-management')}>
+            {t({ ru: 'Заполнить детальную заявку', en: 'Submit detailed request' })}
+          </Button>
+          <Button variant="ghost" onClick={() => navigate('/pricing')}>
             {t({ ru: 'Тарифы и подписки', en: 'Pricing & subscriptions' })}
           </Button>
         </div>
+
       </div>
     </LandingShell>
   );
