@@ -23,7 +23,7 @@
     "dev": "vite",
     "dev:open": "vite --open",
     "dev:fresh": "vite --force",
-    "prebuild": "node scripts/validate-fonts.mjs",
+    "prebuild": "node scripts/validate-fonts.mjs && node scripts/generate-version.mjs",
     "build": "node --max-old-space-size=8192 node_modules/vite/bin/vite.js build",
     "build:dev": "node --max-old-space-size=8192 node_modules/vite/bin/vite.js build --mode development",
     "lint": "eslint .",
