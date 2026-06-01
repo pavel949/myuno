@@ -57,7 +57,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 const Index = React.lazy(() => import('@/pages/Index'));
 const WelcomeLanding = React.lazy(() => import('@/pages/WelcomeLanding'));
-const OnboardingFlow = React.lazy(() => import('@/pages/onboarding/OnboardingFlow'));
+
 
 // All lazy page imports from centralized registry
 import * as Pages from './pageRegistry';
