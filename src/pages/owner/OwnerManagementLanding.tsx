@@ -17,6 +17,9 @@ import { Button } from '@/components/ui/button';
 import { LandingShell, LandingChecklist } from '@/components/landings/LandingShell';
 import { LandingLeadForm } from '@/components/landings/LandingLeadForm';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { APP_ROUTES } from '@/lib/config/routes';
+
 
 export default function OwnerManagementLanding() {
   const navigate = useNavigate();
