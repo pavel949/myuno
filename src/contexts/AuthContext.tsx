@@ -127,12 +127,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Set up auth state listener before fetching session
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      (event, session) => {
         if (isMounted) {
           refreshFailureCountRef.current = 0;
           setSession(session);
           setUser(session?.user ?? null);
           setIsLoading(false);
+        }
+
+        // M5 H.7 — OAuth signups never pass anon_session_id through
+        // raw_user_meta_data, so handle_new_user() can't claim the anon
+        // onboarding data. After SIGNED_IN we call the idempotent RPC.
+        if (event === 'SIGNED_IN' && session?.user) {
+          const anonId = readAnonSessionId();
+          if (anonId) {
+            void supabase.rpc('claim_anon_session', { p_anon_session_id: anonId })
+              .then(({ error }) => {
+                if (!error) clearAnonSessionId();
+              });
+          }
         }
       }
     );

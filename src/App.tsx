@@ -113,6 +113,9 @@ function ComingSoonGate({ children }: { children: React.ReactNode }) {
 
   // Allow auth and public marketing routes through
   const isPublicRoute = location.pathname.startsWith('/auth')
+    || location.pathname === '/start'
+    || location.pathname.startsWith('/start/')
+    || location.pathname.startsWith('/onboarding')
     || location.pathname.startsWith('/reset-password')
     || location.pathname.startsWith('/legal')
     || location.pathname.startsWith('/for-management-companies')
