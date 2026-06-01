@@ -31202,6 +31202,10 @@ export type Database = {
             }
             Returns: boolean
           }
+      claim_anon_session: {
+        Args: { p_anon_session_id: string }
+        Returns: undefined
+      }
       clearview_grade_to_recommendation: {
         Args: { _grade: string }
         Returns: string
