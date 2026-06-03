@@ -3768,13 +3768,6 @@ export type Database = {
             referencedRelation: "compliance_obligation_types"
             referencedColumns: ["code"]
           },
-          {
-            foreignKeyName: "compliance_filings_obligation_id_fkey"
-            columns: ["obligation_id"]
-            isOneToOne: false
-            referencedRelation: "user_compliance_obligations"
-            referencedColumns: ["id"]
-          },
         ]
       }
       compliance_obligation_types: {
@@ -13255,13 +13248,6 @@ export type Database = {
             referencedRelation: "orgs"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "order_items_resource_id_fkey"
-            columns: ["resource_id"]
-            isOneToOne: false
-            referencedRelation: "resources"
-            referencedColumns: ["id"]
-          },
         ]
       }
       order_participants: {
@@ -22073,62 +22059,6 @@ export type Database = {
           },
         ]
       }
-      resources: {
-        Row: {
-          capacity: number | null
-          created_at: string | null
-          id: string
-          is_available: boolean | null
-          lat: number | null
-          lng: number | null
-          location: string | null
-          metadata: Json | null
-          name_en: string
-          name_ru: string | null
-          org_id: string | null
-          resource_type: string
-          updated_at: string | null
-        }
-        Insert: {
-          capacity?: number | null
-          created_at?: string | null
-          id?: string
-          is_available?: boolean | null
-          lat?: number | null
-          lng?: number | null
-          location?: string | null
-          metadata?: Json | null
-          name_en: string
-          name_ru?: string | null
-          org_id?: string | null
-          resource_type: string
-          updated_at?: string | null
-        }
-        Update: {
-          capacity?: number | null
-          created_at?: string | null
-          id?: string
-          is_available?: boolean | null
-          lat?: number | null
-          lng?: number | null
-          location?: string | null
-          metadata?: Json | null
-          name_en?: string
-          name_ru?: string | null
-          org_id?: string | null
-          resource_type?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "resources_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "orgs"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       restaurant_menu_categories: {
         Row: {
           created_at: string
@@ -25413,57 +25343,6 @@ export type Database = {
           postal_code?: string | null
           recipient_name?: string
           updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
-      user_compliance_obligations: {
-        Row: {
-          created_at: string
-          id: string
-          last_filed_at: string | null
-          managed_by: string | null
-          metadata: Json
-          next_deadline: string | null
-          obligation_code: string
-          partner_id: string | null
-          property_id: string | null
-          recurrence: string | null
-          scope: string | null
-          status: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          last_filed_at?: string | null
-          managed_by?: string | null
-          metadata?: Json
-          next_deadline?: string | null
-          obligation_code: string
-          partner_id?: string | null
-          property_id?: string | null
-          recurrence?: string | null
-          scope?: string | null
-          status?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          last_filed_at?: string | null
-          managed_by?: string | null
-          metadata?: Json
-          next_deadline?: string | null
-          obligation_code?: string
-          partner_id?: string | null
-          property_id?: string | null
-          recurrence?: string | null
-          scope?: string | null
-          status?: string
-          updated_at?: string
           user_id?: string
         }
         Relationships: []
