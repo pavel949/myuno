@@ -595,10 +595,7 @@ export const AnimatedRoutes: React.FC = () => {
           {adminRoutes}
         </Route>
         
-        {/* ── Staff ── */}
-        <Route path="/staff" element={<StaffGuard><StaffLayout /></StaffGuard>}>
-          <Route index element={<LazyPage><Pages.StaffDashboard /></LazyPage>} />
-        </Route>
+        {/* ── Staff (dashboard removed 2026-06-05; HRIS out of Y1) ── */}
         
         {/* ── Team ── */}
         <Route path="/team" element={<LazyPage><TeamGuard><Pages.TeamDashboard /></TeamGuard></LazyPage>} />

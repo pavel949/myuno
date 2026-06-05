@@ -70,43 +70,4 @@ export function useVendorDocuments(vendorId: string | undefined) {
   return { documents, isLoading, addDocument, deleteDocument };
 }
 
-// Reuse the same pattern for staff documents
-export function useStaffDocuments(staffId: string | undefined) {
-  const { user } = useAuth();
-  const qc = useQueryClient();
-  const key = ['staff-documents', staffId];
-
-  const { data: documents, isLoading } = useQuery({
-    queryKey: key,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('staff_documents')
-        .select('*')
-        .eq('staff_id', staffId!)
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      return data as VendorDocument[];
-    },
-    enabled: !!staffId && !!user,
-  });
-
-  const addDocument = useMutation({
-    mutationFn: async (input: { staff_id: string; doc_type: string; title?: string; file_url?: string; file_name?: string; expiry_date?: string; notes?: string }) => {
-      const { error } = await supabase
-        .from('staff_documents')
-        .insert({ ...input, owner_id: user!.id });
-      if (error) throw error;
-    },
-    onSuccess: () => qc.invalidateQueries({ queryKey: key }),
-  });
-
-  const deleteDocument = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from('staff_documents').delete().eq('id', id);
-      if (error) throw error;
-    },
-    onSuccess: () => qc.invalidateQueries({ queryKey: key }),
-  });
-
-  return { documents, isLoading, addDocument, deleteDocument };
-}
+// useStaffDocuments removed (staff_documents table dropped 2026-06-05; Y1 HRIS scope cut).

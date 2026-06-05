@@ -550,11 +550,11 @@ export const AnalyticsPage = lazy(() => import('@/pages/owner/AnalyticsPage'));
 export const FinanceOverview = lazy(() => import('@/pages/owner/FinanceOverview'));
 export const OwnerPayoutsPage = lazy(() => import('@/pages/mc/finance/OwnerPayoutsPage'));
 export const ArAgingPage = lazy(() => import('@/pages/mc/finance/ArAgingPage'));
-export const TrustAccountsPage = lazy(() => import('@/pages/mc/finance/TrustAccountsPage'));
+// TrustAccountsPage removed 2026-06-05
 export const TaxCenterPage = lazy(() => import('@/pages/mc/finance/TaxCenterPage'));
 export const StatementApprovalsPage = lazy(() => import('@/pages/mc/finance/StatementApprovalsPage'));
 export const SignatureRequestsPage = lazy(() => import('@/pages/mc/documents/SignatureRequestsPage'));
-export const ApprovalsPage = lazy(() => import('@/pages/mc/operations/ApprovalsPage'));
+// ApprovalsPage removed 2026-06-05
 export const TeamShiftsPage = lazy(() => import('@/pages/mc/team/TeamShiftsPage'));
 export const ProcurementPage = lazy(() => import('@/pages/mc/operations/ProcurementPage'));
 export const OwnerAnalyticsPage = lazy(() => import('@/pages/mc/insights/OwnerAnalyticsPage'));
@@ -584,8 +584,7 @@ export const OwnerPortalSettingsPage = lazy(() => import('@/pages/owner/OwnerPor
 export const OwnerPortalDashboard = lazy(() => import('@/pages/owner-portal/OwnerPortalDashboard'));
 export const OwnerPortalPropertyView = lazy(() => import('@/pages/owner-portal/OwnerPortalPropertyView'));
 
-// ── Staff ──
-export const StaffDashboard = lazy(() => import('@/pages/staff/StaffDashboard'));
+// ── Staff (StaffDashboard removed 2026-06-05) ──
 
 // ── Team (UNO) ──
 export const TeamDashboard = lazy(() => import('@/pages/team/TeamDashboard'));
