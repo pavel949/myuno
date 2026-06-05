@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useVendorDocuments, useStaffDocuments, VENDOR_DOC_TYPES, type VendorDocType } from '@/hooks/useVendorDocuments';
+import { useVendorDocuments, VENDOR_DOC_TYPES, type VendorDocType } from '@/hooks/useVendorDocuments';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,9 +21,9 @@ interface VendorDocumentsTabProps {
 export function VendorDocumentsTab({ vendorId, docSource = 'vendor' }: VendorDocumentsTabProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const vendorDocs = useVendorDocuments(docSource === 'vendor' ? vendorId : undefined);
-  const staffDocs = useStaffDocuments(docSource === 'staff' ? vendorId : undefined);
-  const { documents, isLoading, addDocument, deleteDocument } = docSource === 'staff' ? staffDocs : vendorDocs;
+  // Staff documents removed 2026-06-05 — vendor-only now
+  const vendorDocs = useVendorDocuments(vendorId);
+  const { documents, isLoading, addDocument, deleteDocument } = vendorDocs;
   const [addOpen, setAddOpen] = useState(false);
   const [form, setForm] = useState({ doc_type: 'other' as string, title: '', file_url: '', file_name: '', expiry_date: '', notes: '' });
 
@@ -41,11 +41,7 @@ export function VendorDocumentsTab({ vendorId, docSource = 'vendor' }: VendorDoc
         expiry_date: form.expiry_date || null,
         notes: form.notes || null,
       };
-      if (docSource === 'staff') {
-        await addDocument.mutateAsync({ staff_id: vendorId, ...basePayload } as any);
-      } else {
-        await addDocument.mutateAsync({ vendor_id: vendorId, ...basePayload } as any);
-      }
+      await addDocument.mutateAsync({ vendor_id: vendorId, ...basePayload } as any);
       toast.success(isRu ? 'Документ добавлен' : 'Document added');
       setAddOpen(false);
       setForm({ doc_type: 'other', title: '', file_url: '', file_name: '', expiry_date: '', notes: '' });
