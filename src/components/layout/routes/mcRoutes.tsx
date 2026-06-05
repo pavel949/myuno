@@ -73,11 +73,11 @@ export const mcRoutes = (
     <Route path="invoices" element={<LazyPage><Pages.InvoicesPage /></LazyPage>} />
     <Route path="finance/owner-payouts" element={<LazyPage><Pages.OwnerPayoutsPage /></LazyPage>} />
     <Route path="finance/ar-aging" element={<LazyPage><Pages.ArAgingPage /></LazyPage>} />
-    <Route path="finance/trust-accounts" element={<LazyPage><Pages.TrustAccountsPage /></LazyPage>} />
+    {/* finance/trust-accounts removed 2026-06-05 (Y1 scope cut) */}
     <Route path="finance/tax-center" element={<LazyPage><Pages.TaxCenterPage /></LazyPage>} />
     <Route path="finance/statement-approvals" element={<LazyPage><Pages.StatementApprovalsPage /></LazyPage>} />
     <Route path="documents/signatures" element={<LazyPage><Pages.SignatureRequestsPage /></LazyPage>} />
-    <Route path="approvals" element={<LazyPage><Pages.ApprovalsPage /></LazyPage>} />
+    {/* approvals removed 2026-06-05 (Y1 scope cut) */}
     <Route path="team/shifts" element={<LazyPage><Pages.TeamShiftsPage /></LazyPage>} />
     <Route path="procurement" element={<LazyPage><Pages.ProcurementPage /></LazyPage>} />
     <Route path="insights/owner-analytics" element={<LazyPage><Pages.OwnerAnalyticsPage /></LazyPage>} />

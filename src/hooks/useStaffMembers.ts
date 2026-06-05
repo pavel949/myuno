@@ -25,18 +25,7 @@ export interface StaffMember {
   updated_at: string;
 }
 
-export interface StaffPropertyAssignment {
-  id: string;
-  staff_id: string;
-  property_id: string;
-  owner_id: string;
-  role_at_property?: string;
-  is_primary: boolean;
-  assigned_at: string;
-}
-
 export type StaffMemberInsert = Omit<StaffMember, 'id' | 'owner_id' | 'created_at' | 'updated_at'>;
-// Type-safe: staff_members & staff_property_assignments exist in Database schema
 const db = supabase;
 
 export function useStaffMembers() {
@@ -175,76 +164,7 @@ export function useDeactivateStaffMember() {
   });
 }
 
-/** Staff assignments to properties */
-export function useStaffPropertyAssignments(staffId?: string) {
-  const { user } = useAuth();
-
-  return useQuery({
-    queryKey: ['staff-assignments', staffId],
-    enabled: !!user,
-    queryFn: async () => {
-      let q = db
-        .from('staff_property_assignments')
-        .select('*');
-      if (staffId) q = q.eq('staff_id', staffId);
-      const { data, error } = await q;
-      if (error) throw error;
-      return (data || []) as StaffPropertyAssignment[];
-    },
-  });
-}
-
-export function useAssignStaffToProperty() {
-  const { user } = useAuth();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async ({
-      staffId,
-      propertyId,
-      roleAtProperty,
-      isPrimary = false,
-    }: {
-      staffId: string;
-      propertyId: string;
-      roleAtProperty?: string;
-      isPrimary?: boolean;
-    }) => {
-      if (!user) throw new Error('Not authenticated');
-      const { error } = await db
-        .from('staff_property_assignments')
-        .upsert({
-          staff_id: staffId,
-          property_id: propertyId,
-          owner_id: user.id,
-          role_at_property: roleAtProperty,
-          is_primary: isPrimary,
-        }, { onConflict: 'staff_id,property_id' });
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['staff-assignments'] });
-      toast.success('Назначение сохранено');
-    },
-  });
-}
-
-export function useRemoveStaffAssignment() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (assignmentId: string) => {
-      const { error } = await db
-        .from('staff_property_assignments')
-        .delete()
-        .eq('id', assignmentId);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['staff-assignments'] });
-    },
-  });
-}
+// Staff property assignments removed (table dropped 2026-06-05; Y1 HRIS scope cut).
 
 export const STAFF_ROLES: { value: StaffRole; labelRu: string; labelEn: string }[] = [
   { value: 'cleaner', labelRu: 'Уборщик/ца', labelEn: 'Cleaner' },
