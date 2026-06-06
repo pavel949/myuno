@@ -3,8 +3,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { FinanceCategorySettings } from '@/components/mc/settings/FinanceCategorySettings';
 import { CompanyProfileSettings } from '@/components/mc/settings/CompanyProfileSettings';
 import { DataBackupSettings } from '@/components/mc/settings/DataBackupSettings';
-import { AutomationRulesBuilder } from '@/components/mc/settings/AutomationRulesBuilder';
-import { Settings, DollarSign, Target, Wrench, Building2, HardDrive, Zap } from 'lucide-react';
+import { Settings, DollarSign, Target, Wrench, Building2, HardDrive } from 'lucide-react';
 import React, { Suspense } from 'react';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 
@@ -44,12 +43,6 @@ export default function MCSettingsPage() {
       icon: HardDrive,
       title: isRu ? 'Данные и бэкап' : 'Data & Backup',
       desc: isRu ? 'Экспорт данных, автоматический бэкап' : 'Data export, automatic backups',
-    },
-    {
-      id: 'automation',
-      icon: Zap,
-      title: isRu ? 'Автоматизация' : 'Automation',
-      desc: isRu ? 'Бизнес-правила и триггеры без кода' : 'Business rules and triggers without code',
     },
   ];
 
@@ -104,7 +97,6 @@ export default function MCSettingsPage() {
                 </div>
               )}
               {id === 'data' && <DataBackupSettings />}
-              {id === 'automation' && <AutomationRulesBuilder />}
             </AccordionContent>
           </AccordionItem>
         ))}

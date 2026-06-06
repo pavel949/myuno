@@ -14,9 +14,6 @@ import {
   usePulseKPIs,
   useLandingFunnelBoard,
   useMCCAlerts,
-  useAIRecommendations,
-  useApplyRecommendation,
-  useDismissRecommendation,
 } from '@/hooks/useMCCControlTower';
 import { cn } from '@/lib/utils';
 
@@ -43,9 +40,6 @@ export function MCCControlTowerTab() {
   const { data: pulse, isLoading: pulseLoading } = usePulseKPIs(period);
   const { data: funnel, isLoading: funnelLoading } = useLandingFunnelBoard(period);
   const alerts = useMCCAlerts();
-  const { data: recommendations } = useAIRecommendations();
-  const applyMut = useApplyRecommendation();
-  const dismissMut = useDismissRecommendation();
 
   const isLoading = pulseLoading || funnelLoading;
 
@@ -150,7 +144,6 @@ export function MCCControlTowerTab() {
                   className="shrink-0 h-7 text-xs"
                   onClick={() => {
                     if (alert.landing_id) navigateTo('funnel-diag', { landingId: alert.landing_id });
-                    else if (alert.action === 'Campaign') navigateTo('campaign-rules');
                     else navigateTo('states');
                   }}
                 >
@@ -249,63 +242,6 @@ export function MCCControlTowerTab() {
             {Object.keys(pulse?.stateDistribution || {}).length === 0 && (
               <p className="text-sm text-muted-foreground text-center py-4">
                 {isRu ? 'Нет данных по состояниям' : 'No state data yet'}
-              </p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* AI Recommendations */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-primary" />
-              {isRu ? 'AI Рекомендации' : 'AI Recommendations'}
-              {recommendations && recommendations.length > 0 && (
-                <Badge variant="secondary" className="text-xs">{recommendations.length}</Badge>
-              )}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {recommendations && recommendations.length > 0 ? (
-              recommendations.map((rec: any) => (
-                <div key={rec.id} className="p-3 rounded-none bg-muted/50 space-y-2">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium">{rec.what_happened}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{rec.why_it_matters}</p>
-                      <p className="text-xs font-medium text-primary mt-1">{rec.what_to_do}</p>
-                    </div>
-                    <Badge variant="outline" className="text-xs shrink-0">
-                      {(rec.confidence * 100).toFixed(0)}%
-                    </Badge>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="default"
-                      className="h-7 text-xs"
-                      onClick={() => applyMut.mutate(rec.id)}
-                      disabled={applyMut.isPending}
-                    >
-                      <Check className="h-3 w-3 mr-1" />
-                      {isRu ? 'Применить' : 'Apply'}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-7 text-xs"
-                      onClick={() => dismissMut.mutate({ id: rec.id })}
-                      disabled={dismissMut.isPending}
-                    >
-                      <X className="h-3 w-3 mr-1" />
-                      {isRu ? 'Отклонить' : 'Dismiss'}
-                    </Button>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-sm text-muted-foreground text-center py-4">
-                {isRu ? 'Нет активных рекомендаций' : 'No active recommendations'}
               </p>
             )}
           </CardContent>

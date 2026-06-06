@@ -43,22 +43,7 @@ function useUnifiedActivity(typeFilter?: string) {
         });
       }
 
-      // MCC leads activity
-      if (!typeFilter || typeFilter === 'user') {
-        const { data } = await typedFrom('mcc_leads')
-          .select('id, full_name, status, created_at')
-          .order('created_at', { ascending: false })
-          .limit(20);
-        (data || []).forEach((l: Record<string, unknown>) => {
-          entries.push({
-            id: `u-${l.id}`,
-            type: 'user',
-            action: `lead_${(l.status as string) || 'created'}`,
-            entity_name: (l.full_name as string) || 'Unknown',
-            created_at: l.created_at as string,
-          });
-        });
-      }
+      // MCC leads activity removed — mcc_leads table dropped 2026-06-06.
 
       // Owner prospects
       if (!typeFilter || typeFilter === 'owner') {

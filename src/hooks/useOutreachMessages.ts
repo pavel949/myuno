@@ -49,7 +49,7 @@ export function useOutreachMessages(audience?: OutreachAudience, limit = 100) {
 export interface UnifiedCampaign {
   id: string;
   name: string;
-  campaign_source: 'capital_campaigns' | 'mcc_campaigns' | 'crm_sequences';
+  campaign_source: 'capital_campaigns' | 'crm_sequences';
   status: string | null;
   campaign_type: string | null;
   goal: string | null;

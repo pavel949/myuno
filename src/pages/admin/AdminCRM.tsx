@@ -5,11 +5,10 @@ import { AdminCrmDashboard } from '@/components/admin/crm/AdminCrmDashboard';
 import { VendorProspectsPipeline } from '@/components/admin/prospects/VendorProspectsPipeline';
 import { VendorProspectsTable } from '@/components/admin/prospects/VendorProspectsTable';
 import { VendorProspectsStats } from '@/components/admin/prospects/VendorProspectsStats';
-import { MCCLeadsTab } from '@/components/admin/marketing/MCCLeadsTab';
 import { AdminOwnerProspects } from '@/components/admin/crm/AdminOwnerProspects';
 import { AdminCrmActivityLog } from '@/components/admin/crm/AdminCrmActivityLog';
 import { VendorOutreachPanel } from '@/components/admin/crm/VendorOutreachPanel';
-import { BarChart3, Target, Users, Building2, Activity, Kanban, Table, Send } from 'lucide-react';
+import { BarChart3, Target, Building2, Activity, Kanban, Table, Send } from 'lucide-react';
 
 export default function AdminCRM() {
   const { language } = useLanguage();
@@ -35,10 +34,6 @@ export default function AdminCRM() {
           <TabsTrigger value="vendors" className="gap-2 data-[state=active]:bg-background">
             <Target className="h-4 w-4" />
             <span className="hidden sm:inline">{isRu ? 'Вендоры' : 'Vendors'}</span>
-          </TabsTrigger>
-          <TabsTrigger value="users" className="gap-2 data-[state=active]:bg-background">
-            <Users className="h-4 w-4" />
-            <span className="hidden sm:inline">{isRu ? 'Пользователи' : 'Users'}</span>
           </TabsTrigger>
           <TabsTrigger value="owners" className="gap-2 data-[state=active]:bg-background">
             <Building2 className="h-4 w-4" />
@@ -75,10 +70,6 @@ export default function AdminCRM() {
             {vendorView === 'table' && <VendorProspectsTable />}
             {vendorView === 'stats' && <VendorProspectsStats />}
           </div>
-        </TabsContent>
-
-        <TabsContent value="users" className="mt-4">
-          <MCCLeadsTab />
         </TabsContent>
 
         <TabsContent value="owners" className="mt-4">
