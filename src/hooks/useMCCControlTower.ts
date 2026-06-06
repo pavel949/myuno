@@ -189,50 +189,9 @@ export function useMCCAlerts() {
   }, [funnel, pulse]);
 }
 
-// ── AI Recommendations ──
-export function useAIRecommendations() {
-  return useQuery({
-    queryKey: ['mcc-ai-recommendations'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('mcc_ai_recommendations')
-        .select('*')
-        .eq('status', 'pending')
-        .order('created_at', { ascending: false })
-        .limit(5);
-      if (error) throw error;
-      return data || [];
-    },
-  });
-}
+// AI Recommendations hooks removed — mcc_ai_recommendations table dropped 2026-06-06.
 
-export function useApplyRecommendation() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('mcc_ai_recommendations')
-        .update({ status: 'applied', applied_at: new Date().toISOString() })
-        .eq('id', id);
-      if (error) throw error;
-    },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['mcc-ai-recommendations'] }),
-  });
-}
 
-export function useDismissRecommendation() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ id, reason }: { id: string; reason?: string }) => {
-      const { error } = await supabase
-        .from('mcc_ai_recommendations')
-        .update({ status: 'dismissed', dismissed_at: new Date().toISOString(), dismissed_reason: reason || '' })
-        .eq('id', id);
-      if (error) throw error;
-    },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['mcc-ai-recommendations'] }),
-  });
-}
 
 // ── State History (transitions over time) ──
 export function useStateTransitions(days: number = 7) {
@@ -281,79 +240,9 @@ export function useUserTimeline(userId: string) {
   });
 }
 
-// ── Campaign Rules ──
-export function useCampaignRules() {
-  return useQuery({
-    queryKey: ['mcc-campaign-rules'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('mcc_campaign_rules')
-        .select('*')
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      return data || [];
-    },
-  });
-}
+// Campaign Rules hooks removed — mcc_campaign_rules table dropped 2026-06-06.
 
-export function useCreateCampaignRule() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async (rule: {
-      campaign_id: string;
-      trigger_event: string;
-      target_state?: string;
-      channel?: string;
-      cooldown_hours?: number;
-      message_template?: Record<string, string>;
-    }) => {
-      const { data, error } = await supabase
-        .from('mcc_campaign_rules')
-        .insert({
-          campaign_id: rule.campaign_id,
-          trigger_event: rule.trigger_event,
-          target_state: rule.target_state || null,
-          channel: rule.channel || 'push',
-          cooldown_hours: rule.cooldown_hours || 48,
-          message_template: rule.message_template || null,
-          is_active: true,
-        })
-        .select()
-        .single();
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['mcc-campaign-rules'] }),
-  });
-}
 
-export function useToggleCampaignRule() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ id, is_active }: { id: string; is_active: boolean }) => {
-      const { error } = await supabase
-        .from('mcc_campaign_rules')
-        .update({ is_active })
-        .eq('id', id);
-      if (error) throw error;
-    },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['mcc-campaign-rules'] }),
-  });
-}
-
-export function useDeleteCampaignRule() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('mcc_campaign_rules')
-        .delete()
-        .eq('id', id);
-      if (error) throw error;
-    },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['mcc-campaign-rules'] }),
-  });
-}
 
 // ── Churn Risk Users ──
 export function useChurnRiskUsers() {

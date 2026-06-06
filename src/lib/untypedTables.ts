@@ -255,6 +255,6 @@ export const untypedTables = {
   crmCompanies: () => supabase.from('crm_companies'),
   crmAssignmentRules: () => supabase.from('crm_assignment_rules'),
   crmActivities: () => supabase.from('crm_activities'),
-  mccLeads: () => supabase.from('mcc_leads'),
+  // mccLeads removed — table dropped 2026-06-06
   vendorOutreachLog: () => supabase.from('vendor_outreach_log'),
 } as const;

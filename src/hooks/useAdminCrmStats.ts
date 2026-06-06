@@ -15,33 +15,28 @@ export function useAdminCrmStats() {
   return useQuery({
     queryKey: ['admin-crm-stats'],
     queryFn: async (): Promise<AdminCrmStats> => {
-      const [vendorRes, leadsRes, ownerRes] = await Promise.all([
+      const [vendorRes, ownerRes] = await Promise.all([
         supabase.from('vendor_prospects').select('status'),
-        typedFrom('mcc_leads').select('priority, status'),
         typedFrom('owner_prospects').select('status'),
       ]);
 
       const vendors = (vendorRes.data || []) as { status: string }[];
-      const leads = (leadsRes.data || []) as { priority: string; status: string }[];
       const owners = (ownerRes.data || []) as { status: string }[];
 
       const vWon = vendors.filter(v => v.status === 'won').length;
       const vActive = vendors.filter(v => !['won', 'lost', 'not_interested'].includes(v.status)).length;
       const vContacted = vendors.filter(v => !['new', 'researching'].includes(v.status)).length;
 
-      const uHot = leads.filter(l => l.priority === 'hot').length;
-      const uConverted = leads.filter(l => l.status === 'converted').length;
-
       const oInterested = owners.filter(o => o.status === 'interested').length;
       const oConverted = owners.filter(o => o.status === 'converted').length;
 
-      const totalLeads = vendors.length + leads.length + owners.length;
-      const totalConverted = vWon + uConverted + oConverted;
-      const activeLeads = vActive + leads.filter(l => !['converted', 'lost'].includes(l.status)).length + owners.filter(o => !['converted', 'lost'].includes(o.status)).length;
+      const totalLeads = vendors.length + owners.length;
+      const totalConverted = vWon + oConverted;
+      const activeLeads = vActive + owners.filter(o => !['converted', 'lost'].includes(o.status)).length;
 
       return {
         vendors: { total: vendors.length, active: vActive, won: vWon, conversionRate: vContacted > 0 ? Math.round((vWon / vContacted) * 100) : 0 },
-        users: { total: leads.length, hot: uHot, converted: uConverted },
+        users: { total: 0, hot: 0, converted: 0 },
         owners: { total: owners.length, interested: oInterested, converted: oConverted },
         totalLeads,
         activeLeads,
