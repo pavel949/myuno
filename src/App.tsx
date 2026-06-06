@@ -103,13 +103,51 @@ function DeferredProvidersGate({ children }: { children: React.ReactNode }) {
   return <DeferredProviders>{children}</DeferredProviders>;
 }
 
-/** Gate that shows Coming Soon for unauthenticated users (except /auth routes). Set VITE_BYPASS_COMING_SOON=true to test app without login. */
+/**
+ * Gate that shows Coming Soon for unauthenticated users (except /auth routes).
+ *
+ * Ways to bypass for smoke tests / preview QA:
+ *  - Build-time:  set `VITE_BYPASS_COMING_SOON=true` in .env (used by Playwright in playwright.config.ts)
+ *  - Runtime URL: append `?smoke=1` (or `?bypass_gate=1`) to any URL — persists via localStorage
+ *  - Runtime URL: append `?smoke=0` to clear the persisted bypass
+ *  - Hostname:    automatic on `*.lovable.app` / `*.lovable.dev` / `localhost` previews
+ *  - Manual:      `localStorage.setItem('myuno_bypass_coming_soon','true')` in DevTools
+ */
 function ComingSoonGate({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
   const location = useLocation();
-  // Production gate: only authenticated users + explicitly public marketing routes pass through.
-  // To temporarily disable while testing locally, set VITE_BYPASS_COMING_SOON=true in .env.
-  const bypassComingSoon = import.meta.env.VITE_BYPASS_COMING_SOON === 'true';
+
+  const bypassComingSoon = React.useMemo(() => {
+    if (import.meta.env.VITE_BYPASS_COMING_SOON === 'true') return true;
+    if (typeof window === 'undefined') return false;
+
+    const BYPASS_KEY = 'myuno_bypass_coming_soon';
+    const params = new URLSearchParams(window.location.search);
+
+    // Explicit opt-out clears persisted bypass
+    if (params.get('smoke') === '0' || params.get('bypass_gate') === '0') {
+      try { localStorage.removeItem(BYPASS_KEY); } catch { /* noop */ }
+      return false;
+    }
+    // Explicit opt-in via query param — persist for the session
+    if (params.get('smoke') === '1' || params.get('bypass_gate') === '1') {
+      try { localStorage.setItem(BYPASS_KEY, 'true'); } catch { /* noop */ }
+      return true;
+    }
+    // Persisted opt-in
+    try {
+      if (localStorage.getItem(BYPASS_KEY) === 'true') return true;
+    } catch { /* noop */ }
+
+    // Auto-bypass on preview / local dev hostnames (never on myuno.app production)
+    const host = window.location.hostname;
+    const isPreviewHost =
+      host === 'localhost' ||
+      host === '127.0.0.1' ||
+      host.endsWith('.lovable.app') ||
+      host.endsWith('.lovable.dev');
+    return isPreviewHost;
+  }, []);
 
   // Allow auth and public marketing routes through
   const isPublicRoute = location.pathname.startsWith('/auth')
@@ -142,6 +180,7 @@ function ComingSoonGate({ children }: { children: React.ReactNode }) {
   if (!user) return <UnderConstruction />;
   return <>{children}</>;
 }
+
 
 // Inner component to use hooks
 function AppContent() {
