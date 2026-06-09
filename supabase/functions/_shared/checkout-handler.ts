@@ -225,6 +225,17 @@ export function createCheckoutHandler(config: CheckoutConfig) {
           reason: result.statusReason || "Order created",
         });
 
+        // Vertical-specific child rows (e.g. order_item_yacht_details)
+        if (result.afterOrderCreated) {
+          try {
+            await result.afterOrderCreated(orderId, supabaseAdmin);
+          } catch (hookErr) {
+            console.error(`[${config.endpoint}] afterOrderCreated error:`, hookErr);
+          }
+        }
+
+
+
         // Payment intent
         const { data: pi } = await supabaseAdmin
           .from("payment_intents")
