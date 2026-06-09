@@ -12,6 +12,7 @@ import { Check, Loader2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { WhatsAppOrderContact } from '@/components/contact/WhatsAppOrderContact';
 
 interface UnifiedSuccessLayoutProps {
   isLoading?: boolean;
