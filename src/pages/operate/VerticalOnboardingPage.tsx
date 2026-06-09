@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getVerticalSpec } from '@/lib/vertical-specs';
-import { formToDb } from '@/lib/vertical-specs/adapters/restaurantAdapter';
+import { adapterFormToDb } from '@/lib/vertical-specs/adapters';
 import { VerticalWizard } from '@/components/vertical-wizard/VerticalWizard';
 import { BackButton } from '@/components/uno/BackButton';
 
@@ -32,7 +32,7 @@ export default function VerticalOnboardingPage() {
   const handleSubmit = async (row: Record<string, unknown>) => {
     setSubmitting(true);
     try {
-      const dbRow = formToDb(row, vertical);
+      const dbRow = adapterFormToDb(vertical, row);
       const { data, error } = await supabase
         .from('listings')
         .insert(dbRow as never)

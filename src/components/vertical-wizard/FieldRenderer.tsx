@@ -7,6 +7,9 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { UnifiedMediaUploader } from '@/components/upload/UnifiedMediaUploader';
+import { GooglePlacesAutocomplete } from '@/components/shared/GooglePlacesAutocomplete';
+import { WeeklyHoursEditor } from './WeeklyHoursEditor';
 
 interface Props {
   field: FieldSpec;
@@ -174,80 +177,80 @@ export const FieldRenderer = ({ field, row, onChange }: Props) => {
         </div>
       );
 
-    // Complex types — minimal first-pass UI; to be upgraded to dedicated widgets.
-    case 'address':
+    case 'address': {
+      const addr = (value as { line?: string; lat?: number; lng?: number; district?: string }) ?? {};
       return (
         <div className="space-y-1.5">
           {label}
-          <Input
-            placeholder="Address line"
-            value={(value as { line?: string })?.line ?? ''}
-            onChange={(e) =>
-              set({ ...(value as object), line: e.target.value })
-            }
+          <GooglePlacesAutocomplete
+            value={addr.line ?? ''}
+            onChange={(line) => set({ ...addr, line })}
+            onPlaceSelect={(p) => set({ line: p.address, lat: p.lat, lng: p.lng, district: p.district })}
+            placeholder={field.placeholder ? t(field.placeholder, lang) : (lang === 'ru' ? 'Начните вводить адрес…' : 'Start typing address…')}
           />
-          <div className="grid grid-cols-2 gap-2">
-            <Input
-              placeholder="Lat"
-              type="number"
-              step="any"
-              value={(value as { lat?: number })?.lat ?? ''}
-              onChange={(e) => set({ ...(value as object), lat: Number(e.target.value) })}
-            />
-            <Input
-              placeholder="Lng"
-              type="number"
-              step="any"
-              value={(value as { lng?: number })?.lng ?? ''}
-              onChange={(e) => set({ ...(value as object), lng: Number(e.target.value) })}
-            />
-          </div>
-          <p className="text-xs text-muted-foreground">
-            {lang === 'ru' ? 'Google Places-виджет подключим в следующей итерации.' : 'Google Places widget pending.'}
-          </p>
+          {typeof addr.lat === 'number' && typeof addr.lng === 'number' && (
+            <p className="text-[11px] text-muted-foreground font-mono">
+              {addr.lat.toFixed(5)}, {addr.lng.toFixed(5)}
+            </p>
+          )}
+          {hint}
         </div>
       );
+    }
 
     case 'hours':
       return (
         <div className="space-y-1.5">
           {label}
-          <Textarea
-            rows={3}
-            placeholder={lang === 'ru' ? 'Например: Пн-Вс 11:00–23:00' : 'E.g. Mon-Sun 11:00–23:00'}
-            value={(value as string) ?? ''}
-            onChange={(e) => set(e.target.value)}
+          <WeeklyHoursEditor
+            value={value as Record<string, { open?: string; close?: string; closed?: boolean } | undefined> | undefined}
+            onChange={(v) => set(v)}
           />
           {hint}
         </div>
       );
 
     case 'media_single':
+      return (
+        <div className="space-y-1.5">
+          {label}
+          <UnifiedMediaUploader
+            mode="single"
+            value={(value as string) ?? ''}
+            onChange={(v) => set(typeof v === 'string' ? v : (v[0] ?? ''))}
+            folder={`vertical/${field.key}`}
+          />
+          {hint}
+        </div>
+      );
+
     case 'media_gallery':
+      return (
+        <div className="space-y-1.5">
+          {label}
+          <UnifiedMediaUploader
+            mode="gallery"
+            value={Array.isArray(value) ? (value as string[]) : []}
+            onChange={(v) => set(Array.isArray(v) ? v : [v])}
+            folder={`vertical/${field.key}`}
+            maxItems={30}
+          />
+          {hint}
+        </div>
+      );
+
     case 'license_upload':
       return (
         <div className="space-y-1.5">
           {label}
-          <Textarea
-            rows={3}
-            placeholder={
-              lang === 'ru'
-                ? 'Вставьте URL фото (по одному на строку)'
-                : 'Paste image URLs (one per line)'
-            }
-            value={
-              field.type === 'media_single'
-                ? ((value as string) ?? '')
-                : Array.isArray(value) ? (value as string[]).join('\n') : ''
-            }
-            onChange={(e) => {
-              if (field.type === 'media_single') set(e.target.value);
-              else set(e.target.value.split('\n').map((s) => s.trim()).filter(Boolean));
-            }}
+          <UnifiedMediaUploader
+            mode="document"
+            value={(value as string) ?? ''}
+            onChange={(v) => set(typeof v === 'string' ? v : (v[0] ?? ''))}
+            folder={`vertical/license/${field.key}`}
+            documentType="other"
           />
-          <p className="text-xs text-muted-foreground">
-            {lang === 'ru' ? 'WebP-аплоадер подключим в следующей итерации.' : 'WebP uploader pending.'}
-          </p>
+          {hint}
         </div>
       );
 

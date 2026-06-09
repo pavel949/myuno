@@ -4,9 +4,13 @@
  */
 import type { VerticalSpec } from './types';
 import { restaurantSpec } from './restaurant';
+import { propertySpec } from './property';
+import { yachtSpec } from './yacht';
 
 export const verticalSpecs: Record<string, VerticalSpec> = {
   restaurant: restaurantSpec,
+  property: propertySpec,
+  yacht: yachtSpec,
 };
 
 export function getVerticalSpec(id: string): VerticalSpec | undefined {
