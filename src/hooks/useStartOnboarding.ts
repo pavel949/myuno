@@ -287,6 +287,29 @@ export function useStartOnboarding() {
 
       if (journeyError) throw journeyError;
 
+      // Best-effort admin notification (Telegram-style + email via Resend)
+      try {
+        let intentSegment: string | null = null;
+        try { intentSegment = localStorage.getItem('intent_segment'); } catch { /* noop */ }
+        await supabase.functions.invoke('notify-admin-onboarding', {
+          body: {
+            session_id: sessionId,
+            who: filled.who,
+            goal: filled.goal,
+            intensity: filled.intensity,
+            language,
+            intent_segment: intentSegment,
+            user_id: user?.id ?? null,
+            user_email: user?.email ?? null,
+            anon_session_id: user?.id ? null : getOrCreateAnonId(),
+            primary_route: primary.route,
+            source: 'web_start',
+          },
+        });
+      } catch (notifyErr) {
+        logger.warn('Admin onboarding notification failed (non-blocking)', notifyErr);
+      }
+
       setResult({
         sessionId,
         primaryCta: { route: primary.route, label: primary.title },

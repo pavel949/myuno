@@ -132,6 +132,7 @@ export default function WelcomeLanding() {
           >
             <Link
               to={`${APP_ROUTES.AUTH}?mode=signup`}
+              data-testid="welcome-cta-signup"
               className={cn(
                 'group inline-flex h-11 items-center gap-2 rounded-none px-5 font-sans text-body font-semibold',
                 'bg-foreground text-background hover:bg-foreground/90 transition-all',
@@ -144,16 +145,77 @@ export default function WelcomeLanding() {
             </Link>
             <button
               type="button"
-              onClick={() =>
-                navigate(
-                  buildWelcomeNavigatorHref(`${APP_ROUTES.DISCOVER}?cluster=invest`, 'invest'),
-                )
-              }
-              data-testid="welcome-cta-investor"
+              onClick={() => {
+                try { localStorage.setItem('intent_segment', 'explore'); } catch { /* noop */ }
+                navigate(APP_ROUTES.DISCOVER);
+              }}
+              data-testid="welcome-cta-explore"
               className="inline-flex h-11 items-center rounded-none border border-border bg-card/40 px-5 font-sans text-body font-medium text-foreground hover:bg-card transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
-              {t('welcome.hero.ctaInvestor')}
+              {t('welcome.hero.pickExplore')}
             </button>
+          </motion.div>
+
+          {/* Segment picker — 3 entry points (Relocator · Second-home · Investor) */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, delay: 0.2 }}
+            className="mt-6 max-w-3xl"
+          >
+            <p className="mb-3 font-sans text-caption uppercase tracking-[0.14em] text-muted-foreground">
+              {t('welcome.hero.pickIntro')}
+            </p>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+              {[
+                {
+                  id: 'relocator' as const,
+                  segment: 'relocator',
+                  href: buildWelcomeNavigatorHref(APP_ROUTES.ARRIVE_CLUSTER, 'arrive'),
+                  title: t('welcome.hero.pickRelocator.title'),
+                  sub: t('welcome.hero.pickRelocator.sub'),
+                },
+                {
+                  id: 'secondhome' as const,
+                  segment: 'secondhome',
+                  href: buildWelcomeNavigatorHref(APP_ROUTES.DISCOVER, 'live'),
+                  title: t('welcome.hero.pickSecondHome.title'),
+                  sub: t('welcome.hero.pickSecondHome.sub'),
+                },
+                {
+                  id: 'investor' as const,
+                  segment: 'investor',
+                  href: buildWelcomeNavigatorHref(APP_ROUTES.INVEST_CLUSTER, 'invest'),
+                  title: t('welcome.hero.pickInvestor.title'),
+                  sub: t('welcome.hero.pickInvestor.sub'),
+                },
+              ].map((opt) => (
+                <button
+                  key={opt.id}
+                  type="button"
+                  data-testid={`welcome-cta-${opt.id}`}
+                  onClick={() => {
+                    try { localStorage.setItem('intent_segment', opt.segment); } catch { /* noop */ }
+                    navigate(opt.href);
+                  }}
+                  className={cn(
+                    'group flex flex-col items-start gap-1 rounded-none border border-border bg-card px-4 py-3 text-left',
+                    'transition-colors hover:border-primary hover:bg-card/80',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+                  )}
+                >
+                  <span className="flex w-full items-center justify-between gap-2">
+                    <span className="font-sans text-body font-semibold text-foreground">
+                      {opt.title}
+                    </span>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" strokeWidth={2} />
+                  </span>
+                  <span className="font-sans text-caption text-muted-foreground">
+                    {opt.sub}
+                  </span>
+                </button>
+              ))}
+            </div>
           </motion.div>
 
           <motion.div
