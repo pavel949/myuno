@@ -174,6 +174,13 @@ export const CatalogCard = memo(function CatalogCard({
 
         {/* Title */}
         <h3 className="font-semibold text-sm leading-tight line-clamp-2 text-foreground">{title}</h3>
+        {autoTranslatedFrom && (
+          <AutoTranslatedBadge
+            sourceLang={autoTranslatedFrom}
+            uiLang={language === 'ru' ? 'ru' : 'en'}
+            className="text-[9px] py-0 h-4"
+          />
+        )}
 
         {/* Subtitle */}
         {subtitle && (
