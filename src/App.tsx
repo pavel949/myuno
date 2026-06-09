@@ -157,6 +157,8 @@ function ComingSoonGate({ children }: { children: React.ReactNode }) {
     || location.pathname.startsWith('/reset-password')
     || location.pathname.startsWith('/legal')
     || location.pathname.startsWith('/for-management-companies')
+    || location.pathname === '/for-business'
+    || location.pathname === '/for-local-services'
     || location.pathname.startsWith('/vendor/join')
     || location.pathname.startsWith('/vendor/onboarding')
     || location.pathname.startsWith('/developer-portal/apply')
