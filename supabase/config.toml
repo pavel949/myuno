@@ -151,3 +151,6 @@ project_id = "erfwtoavipwjqmylpizt"
     verify_jwt = false
   [functions.drive-watch-cron]
     verify_jwt = false
+
+[functions.process-email-queue]
+verify_jwt = true
