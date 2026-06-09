@@ -180,6 +180,16 @@ const FlowersSuccess = () => {
       extras={<CrossSellRecommendations orderType="flowers" />}
       primaryHref="/bookings"
       secondaryHref="/flowers"
+      totalAmount={order?.total_amount}
+      currency={order?.currency}
+      whatsappSummary={
+        order
+          ? {
+              ru: `Цветы · ${order.items?.length ?? 0} поз.${meta.delivery_date ? ` · доставка ${meta.delivery_date as string}` : ''}`,
+              en: `Flowers · ${order.items?.length ?? 0} item(s)${meta.delivery_date ? ` · delivery ${meta.delivery_date as string}` : ''}`,
+            }
+          : undefined
+      }
     />
   );
 };
