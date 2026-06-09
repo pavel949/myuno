@@ -27,9 +27,10 @@ export function ProviderDetailHeader({ provider, onUpdate }: Props) {
   const toggleField = async (field: 'is_active' | 'is_verified', value: boolean) => {
     setUpdating(field);
     try {
+      const payload = field === 'is_active' ? { is_active: value } : { is_verified: value };
       const { error } = await supabase
         .from('providers')
-        .update({ [field]: value } as never)
+        .update(payload)
         .eq('id', provider.id);
       if (error) throw error;
       toast.success(isRu ? 'Обновлено' : 'Updated');
