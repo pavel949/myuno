@@ -118,6 +118,15 @@ export function UnifiedSuccessLayout({
             >
               {isRu ? secondaryLabel.ru : secondaryLabel.en}
             </Button>
+            {!hideWhatsApp && (
+              <WhatsAppOrderContact
+                orderNumber={orderNumber}
+                summary={whatsappSummary}
+                totalAmount={totalAmount}
+                currency={currency}
+                className="w-full"
+              />
+            )}
           </div>
         </div>
       </div>
