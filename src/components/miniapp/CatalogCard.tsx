@@ -18,6 +18,8 @@ import { Badge } from '@/components/ui/badge';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
+import { AutoTranslatedBadge } from '@/components/i18n/AutoTranslatedBadge';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export interface CatalogBadge {
   text: string;
@@ -47,6 +49,8 @@ export interface CatalogCardProps {
   priceSuffix?: string;
   subtitle?: string;
   className?: string;
+  /** Source language if the title was auto-translated; renders a small badge under the title. */
+  autoTranslatedFrom?: 'ru' | 'en' | 'th';
 }
 
 const ASPECT_MAP = {
@@ -78,8 +82,10 @@ export const CatalogCard = memo(function CatalogCard({
   priceSuffix,
   subtitle,
   className,
+  autoTranslatedFrom,
 }: CatalogCardProps) {
   const { formatPrice } = useCurrency();
+  const { language } = useLanguage();
   const dims = ASPECT_DIMENSIONS[aspectRatio];
 
   return (
@@ -168,6 +174,13 @@ export const CatalogCard = memo(function CatalogCard({
 
         {/* Title */}
         <h3 className="font-semibold text-sm leading-tight line-clamp-2 text-foreground">{title}</h3>
+        {autoTranslatedFrom && (
+          <AutoTranslatedBadge
+            sourceLang={autoTranslatedFrom}
+            uiLang={language === 'ru' ? 'ru' : 'en'}
+            className="text-[9px] py-0 h-4"
+          />
+        )}
 
         {/* Subtitle */}
         {subtitle && (
