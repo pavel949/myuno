@@ -195,22 +195,22 @@ export default function Bookings() {
 
     try {
       // Phase 1: Load bookings — render cards as soon as this resolves.
+      // Note: `bookings` is a flat table; there is no `booking_items` relation.
       const { data: allBookingsData, error } = await supabase
         .from('bookings')
-        .select('*, booking_items(*)')
+        .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
       const formattedBookings: BookingItem[] = (allBookingsData || []).map((b) => {
-        const items = b.booking_items || [];
-        const firstItem = items[0];
+        const label = getBookingTypeLabel(b.booking_type, language);
         return {
           id: b.id,
           type: b.booking_type,
-          title: firstItem?.item_name || getBookingTypeLabel(b.booking_type, language),
-          subtitle: getBookingTypeLabel(b.booking_type, language),
+          title: label,
+          subtitle: label,
           date: b.scheduled_at || b.created_at,
           createdAt: b.created_at,
           status: b.status,
@@ -221,6 +221,7 @@ export default function Bookings() {
 
       setBookings(formattedBookings);
       setIsLoading(false);
+
 
       // Phase 2: Status history.
       const bookingIds = formattedBookings.map((b) => b.id);
