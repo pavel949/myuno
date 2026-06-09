@@ -18,6 +18,9 @@ const LazyPage = ({ children }: { children: React.ReactNode }) => (
 export const mcRoutes = (
   <>
     <Route index element={<LazyPage><Pages.OwnerDashboard /></LazyPage>} />
+    {/* Wave 0 — universal vertical-spec onboarding + editor */}
+    <Route path="listings/new/:vertical" element={<LazyPage><Pages.VerticalOnboardingPage /></LazyPage>} />
+    <Route path="listings/:id/edit" element={<LazyPage><Pages.ListingEditorPage /></LazyPage>} />
     <Route path="modules" element={<LazyPage><Pages.OwnerModulesPage /></LazyPage>} />
     <Route path="properties" element={<LazyPage><Pages.OwnerProperties /></LazyPage>} />
     <Route path="complexes" element={<LazyPage><Pages.ComplexesPage /></LazyPage>} />
