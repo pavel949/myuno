@@ -47,7 +47,11 @@ export function useVerticalListings({ spec, filters, sort, limit = 60, enabled =
     queryKey: ['vertical-listings', vertical, filters, sort, limit],
     enabled,
     queryFn: async (): Promise<CatalogRow[]> => {
-      let q = supabase
+      // Cast to a permissive filter-builder type — the spec-driven chain has too
+      // many possible operator calls for TS to resolve generically (TS2589).
+      // We still validate the operator set explicitly in the switch below.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let q: any = supabase
         .from('listings')
         .select('id,vertical,name_en,name_ru,description_en,description_ru,cover_image,images,address,district,lat,lng,price,rating,review_count,attributes,slug')
         .eq('vertical', vertical)
