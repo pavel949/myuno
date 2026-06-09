@@ -84,6 +84,11 @@ export interface CheckoutResult {
   rpc?: { name: string; params: Record<string, unknown> };
   /** Called if order creation fails, for cleanup (e.g., releasing reserved spots). */
   onOrderFailure?: () => Promise<void>;
+  /** Called after order + items inserted, for vertical-specific child rows (e.g., order_item_yacht_details). */
+  afterOrderCreated?: (
+    orderId: string,
+    supabaseAdmin: ReturnType<typeof createServiceClient>,
+  ) => Promise<void>;
 }
 
 export interface CheckoutConfig {
@@ -219,6 +224,17 @@ export function createCheckoutHandler(config: CheckoutConfig) {
           actor_user_id: user.id,
           reason: result.statusReason || "Order created",
         });
+
+        // Vertical-specific child rows (e.g. order_item_yacht_details)
+        if (result.afterOrderCreated) {
+          try {
+            await result.afterOrderCreated(orderId, supabaseAdmin);
+          } catch (hookErr) {
+            console.error(`[${config.endpoint}] afterOrderCreated error:`, hookErr);
+          }
+        }
+
+
 
         // Payment intent
         const { data: pi } = await supabaseAdmin
