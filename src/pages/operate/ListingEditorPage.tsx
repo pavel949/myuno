@@ -7,7 +7,7 @@ import { getVerticalSpec } from '@/lib/vertical-specs';
 import { dbToForm, formToDb } from '@/lib/vertical-specs/adapters/restaurantAdapter';
 import { ListingEditor } from '@/components/vertical-wizard/ListingEditor';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
-import { BackButton } from '@/components/ui/BackButton';
+import { BackButton } from '@/components/uno/BackButton';
 
 /**
  * Pro tab-style editor for an existing listing.

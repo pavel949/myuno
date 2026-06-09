@@ -6,7 +6,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { getVerticalSpec } from '@/lib/vertical-specs';
 import { formToDb } from '@/lib/vertical-specs/adapters/restaurantAdapter';
 import { VerticalWizard } from '@/components/vertical-wizard/VerticalWizard';
-import { BackButton } from '@/components/ui/BackButton';
+import { BackButton } from '@/components/uno/BackButton';
 
 /**
  * Industry-specific onboarding wizard.
