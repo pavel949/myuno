@@ -88,7 +88,7 @@ export function useChatModeration(propertyId?: string) {
     mutationFn: async (params: { propertyId: string; enabled: boolean }) => {
       const { error } = await supabase
         .from('properties')
-        .update({ chat_delegated_to_platform: params.enabled } as Record<string, unknown>)
+        .update({ chat_delegated_to_platform: params.enabled } as never)
         .eq('id', params.propertyId);
 
       if (error) throw error;

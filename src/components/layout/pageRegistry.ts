@@ -15,6 +15,7 @@ export const ResetPassword = lazy(() => import('@/pages/auth/ResetPassword'));
 export const ForManagementCompanies = lazy(() => import('@/pages/ForManagementCompanies'));
 export const ForDevelopers = lazy(() => import('@/pages/ForDevelopers'));
 export const ForLocalServiceProviders = lazy(() => import('@/pages/ForLocalServices'));
+export const ForBusinessPage = lazy(() => import('@/pages/ForBusinessPage'));
 export const Discover = lazy(() => import('@/components/navigation/NavigatorEntry'));
 export const SituationDetail = lazy(() => import('@/components/navigation/v3/SituationDetailPage'));
 export const PlatformCatalog = lazy(() => import('@/pages/PlatformCatalog'));

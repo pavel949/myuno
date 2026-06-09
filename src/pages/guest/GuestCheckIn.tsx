@@ -155,7 +155,7 @@ function useGuestCheckIn(marketplaceBookingId?: string) {
         // Update existing
         const { data, error } = await supabase
           .from('guest_check_in_data')
-          .update(payload)
+          .update(payload as never)
           .eq('id', checkInData.id)
           .select()
           .single();
@@ -166,7 +166,7 @@ function useGuestCheckIn(marketplaceBookingId?: string) {
         // Create new
         const { data, error } = await supabase
           .from('guest_check_in_data')
-          .insert(payload)
+          .insert(payload as never)
           .select()
           .single();
 

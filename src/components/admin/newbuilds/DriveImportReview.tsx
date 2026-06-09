@@ -62,7 +62,7 @@ export function DriveImportReview({ job, projectId, open, onClose }: Props) {
         for (const [k, v] of projectFields) patch[k] = v;
         const { error } = await supabase
           .from('property_projects')
-          .update(patch)
+          .update(patch as never)
           .eq('id', projectId);
         if (error) throw error;
       }

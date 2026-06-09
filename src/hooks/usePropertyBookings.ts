@@ -422,7 +422,7 @@ export function usePropertyBookings(propertyId?: string) {
 
       const { data, error } = await supabase
         .from('orders')
-        .update(orderUpdates)
+        .update(orderUpdates as never)
         .eq('id', id)
         .is('deleted_at', null)
         .select()

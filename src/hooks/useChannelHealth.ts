@@ -159,7 +159,7 @@ export function useChannelHealth(propertyId?: string) {
 
       const { error } = await supabase
         .from('property_external_calendars')
-        .update(updates)
+        .update(updates as never)
         .eq('id', id);
 
       if (error) throw error;

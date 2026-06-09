@@ -146,7 +146,7 @@ export function useUpdateSubmissionStatus() {
       if (notes !== undefined) patch.notes = notes;
       const { error } = await supabase
         .from('lead_magnet_submissions')
-        .update(patch)
+        .update(patch as never)
         .eq('id', id);
       if (error) throw error;
     },

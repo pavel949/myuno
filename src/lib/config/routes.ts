@@ -69,6 +69,7 @@ export const APP_ROUTES = {
   FOR_MANAGEMENT_COMPANIES: '/for-management-companies',
   FOR_REAL_ESTATE_DEVELOPERS: '/for-developers',
   FOR_LOCAL_SERVICE_PROVIDERS: '/for-local-services',
+  FOR_BUSINESS: '/for-business',
 
   // ── Beauty & Spa ──
   BEAUTY: '/beauty',
@@ -603,7 +604,7 @@ export const ROUTE_OWNERSHIP = {
     '/rent-phuket', '/new-developments', '/how-it-works', '/privacy', '/terms', '/cookies',
     '/refund-policy', '/ip-policy', '/partner-agreement', '/dispute-resolution',
     '/vendor/onboarding', '/provider/onboarding', '/owner/landing', '/owner/guide',
-    '/list-with-us', '/property/invest', '/property/offplan', '/property/developers', '/property/projects',
+    '/list-with-us', '/for-business', '/property/invest', '/property/offplan', '/property/developers', '/property/projects',
     '/arrive', '/stay-legal', '/invest-hub', '/tax', '/legal/contract-analysis', '/visa',
     '/visa/quiz', '/school-finder', '/cost-of-living',
     '/newbuilds', '/relocate', '/wedding', '/kids', '/nomad-guide'],

@@ -81,7 +81,7 @@ Description:
 ${description}
           `.trim(),
           status: 'new',
-        });
+        } as never);
 
       if (error) throw error;
 

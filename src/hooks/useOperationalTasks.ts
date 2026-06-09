@@ -203,7 +203,7 @@ export function useOperationalTasks(options?: {
 
       const { data, error } = await supabase
         .from('property_operational_tasks')
-        .update(updates)
+        .update(updates as never)
         .eq('id', taskId)
         .select()
         .single();

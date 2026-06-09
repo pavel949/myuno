@@ -106,7 +106,7 @@ export function useCreateDeveloper() {
           is_active: data.is_active ?? true,
           is_verified: data.is_verified ?? false,
           is_featured: data.is_featured ?? false,
-        })
+        } as never)
         .select()
         .single();
 
@@ -134,7 +134,7 @@ export function useUpdateDeveloper() {
         .update({
           ...data,
           updated_at: new Date().toISOString(),
-        })
+        } as never)
         .eq('id', id)
         .select()
         .single();

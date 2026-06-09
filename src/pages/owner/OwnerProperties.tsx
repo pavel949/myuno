@@ -249,7 +249,7 @@ const queryClient = useQueryClient();
     const ids = Array.from(selectedIds);
     const { error } = await supabase
       .from('properties')
-      .update({ deleted_at: new Date().toISOString(), deleted_by: user?.id ?? null, is_active: false } as Record<string, unknown>)
+      .update({ deleted_at: new Date().toISOString(), deleted_by: user?.id ?? null, is_active: false } as never)
       .in('id', ids);
     setBulkProcessing(false);
     setBulkDeleteOpen(false);
@@ -342,7 +342,7 @@ const queryClient = useQueryClient();
     if (!deleteTarget) return;
     const { error } = await supabase
       .from('properties')
-      .update({ deleted_at: new Date().toISOString(), deleted_by: user?.id ?? null, is_active: false } as Record<string, unknown>)
+      .update({ deleted_at: new Date().toISOString(), deleted_by: user?.id ?? null, is_active: false } as never)
       .eq('id', deleteTarget);
     if (error) {
       toast.error(isRu ? 'Ошибка удаления' : 'Delete failed', {

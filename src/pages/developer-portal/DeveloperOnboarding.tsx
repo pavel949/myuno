@@ -205,7 +205,7 @@ export default function DeveloperOnboarding() {
           description_ru: step2Data.description_ru,
           logo_url: logoUrl || developer?.logo_url || null,
           devmod_status: 'pending',
-        } as Record<string, unknown>)
+        } as never)
         .eq('id', developerId);
       if (updateErr) throw updateErr;
 

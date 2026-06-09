@@ -111,7 +111,7 @@ export function useResolveDispute() {
       updates.updated_at = new Date().toISOString();
 
       const { error } = await untypedTables.disputes()
-        .update(updates)
+        .update(updates as never)
         .eq('id', disputeId);
       if (error) throw error;
     },

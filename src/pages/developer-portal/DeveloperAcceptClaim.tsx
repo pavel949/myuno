@@ -72,7 +72,7 @@ export default function DeveloperAcceptClaim() {
       // Bind user_id (only succeeds if still NULL — RLS / app rule)
       const { error: updErr } = await supabase
         .from('developers')
-        .update({ user_id: user.id } as Record<string, unknown>)
+        .update({ user_id: user.id } as never)
         .eq('id', developerId)
         .is('user_id', null);
       if (updErr) throw updErr;

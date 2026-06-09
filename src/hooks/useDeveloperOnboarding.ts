@@ -136,7 +136,7 @@ export function useRejectDeveloper() {
     mutationFn: async ({ developerId, reason }: { developerId: string; reason?: string }) => {
       const { error } = await supabase
         .from('developers')
-        .update({ devmod_status: 'suspended' } as Record<string, unknown>)
+        .update({ devmod_status: 'suspended' } as never)
         .eq('id', developerId);
       if (error) throw error;
       // Optionally notify developer via edge function here

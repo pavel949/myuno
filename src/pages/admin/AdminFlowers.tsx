@@ -77,7 +77,7 @@ function useBouquetsAdmin() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Record<string, unknown> }) => {
-      const { error } = await supabase.from('bouquets').update(updates).eq('id', id);
+      const { error } = await supabase.from('bouquets').update(updates as never).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-bouquets'] }),

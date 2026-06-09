@@ -350,7 +350,7 @@ export function usePublishToMarketplace() {
 
       const { data: result, error: updateError } = await supabase
         .from('properties')
-        .update(updateData)
+        .update(updateData as never)
         .eq('id', data.ownerPropertyId)
         .select()
         .single();

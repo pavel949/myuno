@@ -180,3 +180,28 @@ export const PAY_TYPES: { value: PayType; labelRu: string; labelEn: string }[] =
   { value: 'daily', labelRu: 'Дневная ставка', labelEn: 'Daily Rate' },
   { value: 'per_task', labelRu: 'За задачу', labelEn: 'Per Task' },
 ];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Property-assignment stubs (Wave 1 cleanup removed the underlying tables).
+// Kept as no-op exports so `StaffPage.tsx` and similar consumers still compile.
+// Re-enable when the multi-property staff assignment feature is rebuilt.
+// ─────────────────────────────────────────────────────────────────────────────
+export function useStaffPropertyAssignments(_staffId?: string) {
+  return { data: [] as Array<{ id: string; property_id: string; role?: string }>, isLoading: false, error: null };
+}
+export function useAssignStaffToProperty() {
+  return {
+    mutate: (_args: unknown) => undefined,
+    mutateAsync: async (_args: unknown) => undefined,
+    isPending: false,
+    isLoading: false,
+  };
+}
+export function useRemoveStaffAssignment() {
+  return {
+    mutate: (_args: unknown) => undefined,
+    mutateAsync: async (_args: unknown) => undefined,
+    isPending: false,
+    isLoading: false,
+  };
+}
