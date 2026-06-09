@@ -99,7 +99,10 @@ export default function ForLocalServices() {
                   {isRu ? 'Стать партнёром' : 'Become a partner'}
                   <ArrowRight className="w-4 h-4" />
                 </Button>
-                <Button size="lg" variant="outline" onClick={() => navigate(APP_ROUTES.BECOME_PARTNER)}>
+                <Button size="lg" variant="outline" onClick={() => navigate(APP_ROUTES.FOR_BUSINESS)}>
+                  {isRu ? 'Услуги для вашего бизнеса' : 'Services for your business'}
+                </Button>
+                <Button size="lg" variant="ghost" onClick={() => navigate(APP_ROUTES.BECOME_PARTNER)}>
                   {isRu ? 'Корпоративное партнёрство' : 'Corporate partnership'}
                 </Button>
               </div>
