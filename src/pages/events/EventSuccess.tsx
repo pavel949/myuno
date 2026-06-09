@@ -105,6 +105,21 @@ export default function EventSuccess() {
     </div>
   ) : null;
 
+  const eventTitle = meta.event_title ? String(meta.event_title) : '';
+  const eventWhen = [meta.event_date && String(meta.event_date), meta.event_time && String(meta.event_time)]
+    .filter(Boolean).join(' · ');
+  const ticketCount = meta.ticket_count != null ? String(meta.ticket_count) : '';
+  const summaryRu = [
+    eventTitle && `Событие: ${eventTitle}`,
+    ticketCount && `Билетов: ${ticketCount}`,
+    eventWhen && `Когда: ${eventWhen}`,
+  ].filter(Boolean).join('\n');
+  const summaryEn = [
+    eventTitle && `Event: ${eventTitle}`,
+    ticketCount && `Tickets: ${ticketCount}`,
+    eventWhen && `When: ${eventWhen}`,
+  ].filter(Boolean).join('\n');
+
   return (
     <UnifiedSuccessLayout
       isLoading={loading}
@@ -118,6 +133,9 @@ export default function EventSuccess() {
       primaryHref="/orders"
       secondaryHref="/events"
       secondaryLabel={{ ru: 'К событиям', en: 'Browse events' }}
+      totalAmount={order?.total_amount}
+      currency={order?.currency}
+      whatsappSummary={summaryRu || summaryEn ? { ru: summaryRu, en: summaryEn } : undefined}
     />
   );
 }

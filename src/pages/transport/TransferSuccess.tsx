@@ -126,6 +126,19 @@ export default function TransferSuccess() {
     </div>
   ) : null;
 
+  const routeStr = [pickupAddress, dropoffAddress].filter(Boolean).join(' → ');
+  const whenStr = [scheduledDate, scheduledTime].filter(Boolean).join(' ');
+  const summaryRu = [
+    flightNumber && `Рейс ${flightNumber}`,
+    whenStr && `Когда: ${whenStr}`,
+    routeStr && `Маршрут: ${routeStr}`,
+  ].filter(Boolean).join('\n');
+  const summaryEn = [
+    flightNumber && `Flight ${flightNumber}`,
+    whenStr && `When: ${whenStr}`,
+    routeStr && `Route: ${routeStr}`,
+  ].filter(Boolean).join('\n');
+
   return (
     <UnifiedSuccessLayout
       isLoading={isLoading}
@@ -138,6 +151,9 @@ export default function TransferSuccess() {
       extras={<CrossSellRecommendations orderType="transport" />}
       primaryHref={APP_ROUTES.BOOKINGS}
       secondaryHref={APP_ROUTES.TRANSPORT}
+      totalAmount={order?.total_amount}
+      currency={order?.currency}
+      whatsappSummary={summaryRu || summaryEn ? { ru: summaryRu, en: summaryEn } : undefined}
     />
   );
 }
