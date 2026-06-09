@@ -68,18 +68,17 @@ export function useApproveApplication() {
 
       // 2. Patch the listing
       if (listingId) {
-        const patch: Record<string, unknown> = {
-          i18n: i18n as unknown as Json,
-          name_en: draft.title_en ?? primary,
-          name_ru: draft.title_ru ?? primary,
-          description_en: draft.description_en ?? primaryDesc,
-          description_ru: draft.description_ru ?? primaryDesc,
-          approval_status: 'approved',
-          reviewed_at: new Date().toISOString(),
-        };
         const { error: lErr } = await supabase
           .from('listings')
-          .update(patch)
+          .update({
+            i18n: i18n as unknown as Json,
+            name_en: draft.title_en ?? primary,
+            name_ru: draft.title_ru ?? primary,
+            description_en: draft.description_en ?? primaryDesc,
+            description_ru: draft.description_ru ?? primaryDesc,
+            approval_status: 'approved',
+            reviewed_at: new Date().toISOString(),
+          })
           .eq('id', listingId);
         if (lErr) throw lErr;
       }
