@@ -82,8 +82,10 @@ export const CatalogCard = memo(function CatalogCard({
   priceSuffix,
   subtitle,
   className,
+  autoTranslatedFrom,
 }: CatalogCardProps) {
   const { formatPrice } = useCurrency();
+  const { language } = useLanguage();
   const dims = ASPECT_DIMENSIONS[aspectRatio];
 
   return (
