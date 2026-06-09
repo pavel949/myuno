@@ -189,18 +189,30 @@ function useUnifiedCatalog(filters: UnifiedCatalogFilters = {}) {
   };
 
   const bulkUpdateFeatured = async (ids: string[], type: CatalogItemType, isFeatured: boolean) => {
-    // Different tables use different field names for featured
-    const table = type === 'service' ? 'services' : type === 'product' ? 'marketplace_products' : 'properties';
-    const fieldName = type === 'product' ? 'is_popular' : 'is_featured';
+    // Each table has a different "featured" column (and `services` has none).
+    // Branch by type so TS sees a concrete object literal per table — the
+    // previous `{ [field]: value } as never` cast tripped the strict
+    // RejectExcessProperties check on the discriminated union.
+    if (type === 'service') {
+      // `services` table has no featured/popular flag — no-op.
+      return { error: null };
+    }
 
-    const { error } = await supabase
-      .from(table)
-      .update({ [fieldName]: isFeatured } as never)
-      .in('id', ids);
+    const { error } =
+      type === 'product'
+        ? await supabase
+            .from('marketplace_products')
+            .update({ is_popular: isFeatured })
+            .in('id', ids)
+        : await supabase
+            .from('properties')
+            .update({ is_featured: isFeatured })
+            .in('id', ids);
 
     if (!error) await fetchItems();
     return { error };
   };
+
 
   const bulkDelete = async (ids: string[], type: CatalogItemType) => {
     const table = type === 'service' ? 'services' : type === 'product' ? 'marketplace_products' : 'properties';
