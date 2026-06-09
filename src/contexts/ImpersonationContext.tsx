@@ -58,7 +58,7 @@ export function ImpersonationProvider({ children }: { children: ReactNode }) {
           developer_id: developerId,
           action: 'enter',
           context: { url: typeof window !== 'undefined' ? window.location.pathname : null },
-        });
+        } as never);
       } catch {
         // ignore audit failure
       }

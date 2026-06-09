@@ -166,7 +166,7 @@ function useGuestCheckIn(marketplaceBookingId?: string) {
         // Create new
         const { data, error } = await supabase
           .from('guest_check_in_data')
-          .insert(payload)
+          .insert(payload as never)
           .select()
           .single();
 
