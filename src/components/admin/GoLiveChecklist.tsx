@@ -67,7 +67,7 @@ const checks: CheckItem[] = [
       const { count } = await (supabase as any)
         .from('reconciliation_alerts')
         .select('id', { count: 'exact', head: true })
-        .eq('resolved', false);
+        .is('resolved_at', null);
       return (count ?? 0) === 0;
     },
   },
