@@ -114,9 +114,10 @@ const AUDIENCES: Audience[] = [
     taglineEn: 'Registration, listings, bookings & payouts',
     primary: { ru: 'Кабинет поставщика', en: 'Vendor workspace', to: '/vendor' },
     links: [
+      { ru: 'Услуги для местного бизнеса', en: 'Services for local business', to: '/for-business' },
       { ru: 'Стать партнёром', en: 'Become a partner', to: '/list-with-us' },
       { ru: 'Юр. оформление', en: 'Legal setup', to: '/stay-legal' },
-      { ru: 'Решения для бизнеса', en: 'Business solutions', to: '/for-local-services' },
+      { ru: 'Маркетплейс поставщиков', en: 'Provider marketplace', to: '/for-local-services' },
     ],
   },
 ];
