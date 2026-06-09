@@ -29,6 +29,13 @@ interface UnifiedSuccessLayoutProps {
   secondaryLabel?: { ru: string; en: string };
   /** Optional one-line note shown under the title. */
   note?: { ru: string; en: string };
+  /** Краткое описание заказа для подстановки в WhatsApp-сообщение (опционально). */
+  whatsappSummary?: { ru?: string; en?: string };
+  /** Сумма для отображения в WhatsApp-сообщении. */
+  totalAmount?: number;
+  currency?: string;
+  /** Скрыть кнопку WhatsApp (по умолчанию показывается). */
+  hideWhatsApp?: boolean;
 }
 
 const DEFAULT_PRIMARY = { ru: 'Мои заказы', en: 'My orders' };
