@@ -122,6 +122,7 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
           {finalShowFooter && <Footer />}
           {consumerChrome && <MobileInstallSheet />}
           {consumerChrome && <FloatingInstallButton />}
+          {consumerChrome && <FloatingWhatsAppContact />}
         </div>
       </NavShell>
     );
