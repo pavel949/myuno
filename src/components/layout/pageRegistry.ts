@@ -494,9 +494,11 @@ export const InspectionRequest = lazy(() => import('@/pages/owner/InspectionRequ
 export const OwnerRentalTerms = lazy(() => import('@/pages/owner/OwnerRentalTerms'));
 // EditProperty removed — use PropertyEditor instead
 
-// ── Vertical-spec onboarding / editor (Wave 0) ──
+// ── Vertical-spec onboarding / editor / catalog (Waves 0-2) ──
 export const VerticalOnboardingPage = lazy(() => import('@/pages/operate/VerticalOnboardingPage'));
 export const ListingEditorPage = lazy(() => import('@/pages/operate/ListingEditorPage'));
+export const VerticalCatalogPage = lazy(() => import('@/pages/operate/VerticalCatalogPage'));
+export const VerticalCatalogDetailPage = lazy(() => import('@/pages/operate/VerticalCatalogDetailPage'));
 export const PropertyEditor = lazy(() => import('@/pages/owner/PropertyEditor'));
 export const PropertyManage = lazy(() => import('@/pages/owner/PropertyManage'));
 export const FullManagement = lazy(() => import('@/pages/owner/FullManagement'));
