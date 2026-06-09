@@ -51,6 +51,10 @@ export function UnifiedSuccessLayout({
   secondaryHref,
   secondaryLabel = DEFAULT_SECONDARY,
   note,
+  whatsappSummary,
+  totalAmount,
+  currency,
+  hideWhatsApp = false,
 }: UnifiedSuccessLayoutProps) {
   const navigate = useNavigate();
   const { language } = useLanguage();
