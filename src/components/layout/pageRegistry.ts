@@ -386,6 +386,7 @@ export const AdminCleaning = lazy(() => import('@/pages/admin/AdminCleaning'));
 export const AdminBabysitters = lazy(() => import('@/pages/admin/AdminBabysitters'));
 export const AdminFlowers = lazy(() => import('@/pages/admin/AdminFlowers'));
 export const AdminRelocationArticles = lazy(() => import('@/pages/admin/AdminRelocationArticles'));
+export const AdminBulkPublish = lazy(() => import('@/pages/admin/AdminBulkPublish'));
 
 export const AdminLookups = lazy(() => import('@/pages/admin/AdminLookups'));
 export const AdminTaxonomyManager = lazy(() => import('@/pages/admin/AdminTaxonomyManager'));

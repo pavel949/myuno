@@ -64,6 +64,7 @@ export const adminRoutes = (
     <Route path="/admin/water-activities" element={<Pages.AdminWaterActivities />} />
     <Route path="/admin/experiences" element={<Pages.AdminExperiences />} />
     <Route path="/admin/moderation" element={<Navigate to="/admin/operations?tab=moderation" replace />} />
+    <Route path="/admin/bulk-publish" element={<Pages.AdminBulkPublish />} />
     <Route path="/admin/consultations" element={<Pages.AdminConsultations />} />
     <Route path="/admin/uno-team" element={<Pages.AdminUnoTeam />} />
     <Route path="/admin/leads" element={<Navigate to="/admin/operations" replace />} />
