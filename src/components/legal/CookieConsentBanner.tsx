@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { logger } from '@/lib/logger';
 
 const CONSENT_KEY = 'myuno-cookie-consent';
+const CONSENT_COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
 
 interface CookiePreferences {
   essential: boolean; // always true
@@ -17,13 +18,50 @@ interface CookiePreferences {
   timestamp: string;
 }
 
+// Module-level session flag — guards against repeat-show if storage is unavailable
+// (private mode, blocked cookies, sandboxed iframe, quota errors).
+let inMemoryConsent: CookiePreferences | null = null;
+
+function readCookie(name: string): string | null {
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie.split('; ').find((row) => row.startsWith(name + '='));
+  return match ? decodeURIComponent(match.slice(name.length + 1)) : null;
+}
+
+function writeCookie(name: string, value: string) {
+  if (typeof document === 'undefined') return;
+  try {
+    document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${CONSENT_COOKIE_MAX_AGE}; SameSite=Lax`;
+  } catch {
+    /* ignore */
+  }
+}
+
 function getStoredConsent(): CookiePreferences | null {
+  if (inMemoryConsent) return inMemoryConsent;
+  // localStorage first
   try {
     const stored = localStorage.getItem(CONSENT_KEY);
-    return stored ? JSON.parse(stored) : null;
+    if (stored) {
+      const parsed = JSON.parse(stored) as CookiePreferences;
+      inMemoryConsent = parsed;
+      return parsed;
+    }
   } catch {
-    return null;
+    /* fall through to cookie */
   }
+  // Cookie fallback (works even if localStorage is blocked)
+  const cookieVal = readCookie(CONSENT_KEY);
+  if (cookieVal) {
+    try {
+      const parsed = JSON.parse(cookieVal) as CookiePreferences;
+      inMemoryConsent = parsed;
+      return parsed;
+    } catch {
+      /* ignore */
+    }
+  }
+  return null;
 }
 
 export const CookieConsentBanner = forwardRef<HTMLDivElement>(function CookieConsentBanner(_props, ref) {
@@ -40,41 +78,50 @@ export const CookieConsentBanner = forwardRef<HTMLDivElement>(function CookieCon
   });
 
   useEffect(() => {
-    const existing = getStoredConsent();
-    if (!existing) {
-      let intervalId: ReturnType<typeof setInterval> | null = null;
-      const timer = setTimeout(() => {
-        const hasBlockingModal = document.querySelector('[data-radix-dialog-overlay]');
-        if (hasBlockingModal) {
-          const pollStart = Date.now();
-          intervalId = setInterval(() => {
-            if (!document.querySelector('[data-radix-dialog-overlay]') || Date.now() - pollStart > 10000) {
-              setVisible(true);
-              if (intervalId) clearInterval(intervalId);
-              intervalId = null;
-            }
-          }, 1000);
-          return;
-        }
-        setVisible(true);
-      }, 5000);
-      return () => {
-        clearTimeout(timer);
-        if (intervalId) clearInterval(intervalId);
-      };
-    }
+    if (getStoredConsent()) return; // already consented — never show again
+    let intervalId: ReturnType<typeof setInterval> | null = null;
+    const timer = setTimeout(() => {
+      if (getStoredConsent()) return; // re-check just before showing
+      const hasBlockingModal = document.querySelector('[data-radix-dialog-overlay]');
+      if (hasBlockingModal) {
+        const pollStart = Date.now();
+        intervalId = setInterval(() => {
+          if (getStoredConsent()) {
+            if (intervalId) clearInterval(intervalId);
+            intervalId = null;
+            return;
+          }
+          if (!document.querySelector('[data-radix-dialog-overlay]') || Date.now() - pollStart > 10000) {
+            setVisible(true);
+            if (intervalId) clearInterval(intervalId);
+            intervalId = null;
+          }
+        }, 1000);
+        return;
+      }
+      setVisible(true);
+    }, 5000);
+    return () => {
+      clearTimeout(timer);
+      if (intervalId) clearInterval(intervalId);
+    };
   }, []);
 
   const saveConsent = useCallback((prefs: CookiePreferences) => {
     const final = { ...prefs, essential: true, timestamp: new Date().toISOString() };
+    // 1) In-memory (always succeeds, guarantees no re-show this session)
+    inMemoryConsent = final;
+    // 2) localStorage (preferred for cross-tab persistence)
     try {
       localStorage.setItem(CONSENT_KEY, JSON.stringify(final));
     } catch (error) {
-      logger.warn('Failed to persist cookie consent, applying for current session only', error);
-    } finally {
-      setVisible(false);
+      logger.warn('Failed to persist cookie consent to localStorage, falling back to cookie', error);
     }
+    // 3) Cookie fallback (works when localStorage is blocked / sandboxed)
+    writeCookie(CONSENT_KEY, JSON.stringify(final));
+    setVisible(false);
   }, []);
+
 
   const acceptAll = () => {
     saveConsent({ essential: true, analytics: true, functional: true, marketing: true, timestamp: '' });
