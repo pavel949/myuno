@@ -10,6 +10,7 @@ import type { Yacht } from '@/hooks/useYachts';
 import type { Experience } from '@/hooks/useExperiences';
 import { formatDuration } from '@/hooks/useExperiences';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
+import { getLocalizedField } from '@/hooks/useLocalizedField';
 
 // ─── Local input shapes for catalog adapters ─────────────
 // Narrow, hand-rolled — many of these tables are accessed via dynamic select()
