@@ -91,10 +91,16 @@ export const BottomBar = forwardRef<HTMLDivElement, BottomBarProps>(
     const isActive = (item: NavItem) =>
       activeItem !== null && activeItem.path === item.path;
 
-    // 5-slot grid: 4 nav + apps launcher OR 5 nav.
-    const visibleItems = showAppsButton ? navItems.slice(0, 4) : navItems;
+    // 5-slot grid layout when Apps launcher is shown:
+    //   [nav[0], nav[1], AppsLauncher, nav[-2], nav[-1]]
+    // This preserves the "Me/Profile" tab (always last item) instead of dropping it.
+    // Middle items (e.g. Property) remain reachable via the Apps drawer.
+    const visibleItems = showAppsButton
+      ? [...navItems.slice(0, 2), ...navItems.slice(-2)]
+      : navItems;
     const leftItems = showAppsButton ? visibleItems.slice(0, 2) : visibleItems;
     const rightItems = showAppsButton ? visibleItems.slice(2) : [];
+
 
     const totalCols = leftItems.length + rightItems.length + (showAppsButton ? 1 : 0);
     const gridCols =
