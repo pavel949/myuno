@@ -261,6 +261,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/for-management-companies" element={<LazyPage><Pages.ForManagementCompanies /></LazyPage>} />
         <Route path={APP_ROUTES.FOR_REAL_ESTATE_DEVELOPERS} element={<LazyPage><Pages.ForDevelopers /></LazyPage>} />
         <Route path={APP_ROUTES.FOR_LOCAL_SERVICE_PROVIDERS} element={<LazyPage><Pages.ForLocalServiceProviders /></LazyPage>} />
+        <Route path={APP_ROUTES.FOR_BUSINESS} element={<LazyPage><Pages.ForBusinessPage /></LazyPage>} />
         <Route path={APP_ROUTES.DEVELOPER_PORTAL_APPLY} element={<LazyPage><Pages.DeveloperApply /></LazyPage>} />
         <Route path={APP_ROUTES.DEVELOPER_PORTAL_ONBOARDING} element={<LazyPage><Pages.DeveloperOnboarding /></LazyPage>} />
         <Route path="/developer-portal/onboarding/:step" element={<LazyPage><Pages.DeveloperOnboarding /></LazyPage>} />
