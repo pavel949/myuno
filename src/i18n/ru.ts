@@ -79,7 +79,7 @@ export const ru: Record<string, string> = {
   
   // Categories
   'category.beauty-spa': 'Красота',
-  'category.restaurants': 'Еда',
+  'category.restaurants': 'Рестораны',
   'category.flowers': 'Цветы',
   'category.fitness': 'Фитнес',
   'category.medical': 'Медицина',
