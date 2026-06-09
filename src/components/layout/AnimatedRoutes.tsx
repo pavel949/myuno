@@ -28,6 +28,8 @@ import { StaffLayout } from '@/components/staff/StaffLayout';
 import { useNavigationDirection } from '@/hooks/useNavigationDirection';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { NewbuildProjectToOffplanRedirect } from '@/components/routing/NewbuildLegacyRedirects';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import ForBusinessSkeleton from '@/components/landings/ForBusinessSkeleton';
 import { NbCompareProvider } from '@/components/newbuilds/NbCompareProvider';
 import { adminRoutes } from './routes/adminRoutes';
 import { mcRoutes } from './routes/mcRoutes';
