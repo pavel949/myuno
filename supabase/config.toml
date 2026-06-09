@@ -45,6 +45,8 @@ project_id = "erfwtoavipwjqmylpizt"
     verify_jwt = false
   [functions.create-restaurant-checkout]
     verify_jwt = false
+  [functions.create-yacht-checkout]
+    verify_jwt = false
   [functions.create-vendor-subscription]
     verify_jwt = false
   [functions.crm-ai-assistant]
