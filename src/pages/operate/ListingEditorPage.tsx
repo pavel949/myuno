@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getVerticalSpec } from '@/lib/vertical-specs';
-import { dbToForm, formToDb } from '@/lib/vertical-specs/adapters/restaurantAdapter';
+import { adapterDbToForm, adapterFormToDb } from '@/lib/vertical-specs/adapters';
 import { ListingEditor } from '@/components/vertical-wizard/ListingEditor';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 import { BackButton } from '@/components/uno/BackButton';
@@ -35,7 +35,7 @@ export default function ListingEditorPage() {
   const save = useMutation({
     mutationFn: async (row: Record<string, unknown>) => {
       const vertical = (listing as { vertical?: string } | undefined)?.vertical ?? 'restaurant';
-      const dbRow = formToDb(row, vertical);
+      const dbRow = adapterFormToDb(vertical, row);
       const { error } = await supabase
         .from('listings')
         .update(dbRow as never)
@@ -68,7 +68,7 @@ export default function ListingEditorPage() {
       <BackButton />
       <ListingEditor
         spec={spec}
-        initial={dbToForm(listing as Record<string, unknown>)}
+        initial={adapterDbToForm((listing as { vertical: string }).vertical, listing as Record<string, unknown>)}
         saving={save.isPending}
         onSave={(row) => save.mutateAsync(row)}
       />
