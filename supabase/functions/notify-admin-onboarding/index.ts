@@ -97,27 +97,35 @@ Deno.serve(async (req) => {
 
     const [emails, whatsapp] = await Promise.all([getAdminEmails(), getAdminWhatsApp()]);
 
-    // Send one email per admin recipient through Lovable Emails queue
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    );
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+    const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
     const results = await Promise.allSettled(
-      emails.map((to) =>
-        supabase.functions.invoke("send-transactional-email", {
-          body: {
+      emails.map(async (to) => {
+        const r = await fetch(`${SUPABASE_URL}/functions/v1/send-transactional-email`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${SERVICE_KEY}`,
+            "apikey": SERVICE_KEY,
+          },
+          body: JSON.stringify({
             templateName: "admin-onboarding",
             recipientEmail: to,
             idempotencyKey: `onboarding-${p.session_id}-${to}`,
             templateData,
-          },
-        }),
-      ),
+          }),
+        });
+        const body = await r.text();
+        if (!r.ok) throw new Error(`send-transactional-email ${r.status}: ${body}`);
+        console.log(`[notify-admin-onboarding] queued for ${to}: ${body}`);
+        return body;
+      }),
     );
     results.forEach((r, i) => {
       if (r.status === "rejected") console.error(`[notify-admin-onboarding] email failed for ${emails[i]}`, r.reason);
     });
+
 
     const waBody = [
       "🧭 *New onboarding*",
