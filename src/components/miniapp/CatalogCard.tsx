@@ -18,6 +18,8 @@ import { Badge } from '@/components/ui/badge';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
+import { AutoTranslatedBadge } from '@/components/i18n/AutoTranslatedBadge';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export interface CatalogBadge {
   text: string;
@@ -47,6 +49,8 @@ export interface CatalogCardProps {
   priceSuffix?: string;
   subtitle?: string;
   className?: string;
+  /** Source language if the title was auto-translated; renders a small badge under the title. */
+  autoTranslatedFrom?: 'ru' | 'en' | 'th';
 }
 
 const ASPECT_MAP = {
