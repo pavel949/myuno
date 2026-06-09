@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { AnimatedList, AnimatedItem, AnimatedGrid, AnimatedCard } from '@/components/layout/AnimatedList';
 import { useGlobalSearch, SearchResult } from '@/hooks/useGlobalSearch';
+import { useBrowseByType } from '@/hooks/useBrowseByType';
 import { searchTypeConfig, trendingSearches } from '@/lib/searchData';
 
 export default function Search() {
@@ -21,14 +22,25 @@ export default function Search() {
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const isRu = language === 'ru';
 
-  // Real database search
-  const { results: dbResults, isLoading } = useGlobalSearch(query, true);
+  const hasQuery = query.trim().length >= 2;
+
+  // Real database search (when user types)
+  const { results: dbResults, isLoading: searchLoading } = useGlobalSearch(query, hasQuery);
+  // Browse-by-type fallback (when user picks a chip without typing)
+  const { results: browseResults, isLoading: browseLoading } = useBrowseByType(
+    !hasQuery ? selectedType : null,
+    !hasQuery && !!selectedType,
+  );
+
+  const isLoading = hasQuery ? searchLoading : browseLoading;
 
   // Filter by selected type
   const filteredResults = useMemo(() => {
-    if (!selectedType) return dbResults;
-    return dbResults.filter(item => item.type === selectedType);
-  }, [dbResults, selectedType]);
+    const source = hasQuery ? dbResults : browseResults;
+    if (!selectedType) return source;
+    return source.filter(item => item.type === selectedType);
+  }, [dbResults, browseResults, selectedType, hasQuery]);
+
 
   const popularCategories = Object.keys(searchTypeConfig).filter(k => k !== 'category' && k !== 'marketCategory');
 
@@ -144,7 +156,7 @@ export default function Search() {
           )}
 
           {/* Loading */}
-          {isLoading && query.trim().length >= 2 && (
+          {isLoading && (hasQuery || selectedType) && (
             <div className="text-center py-12">
               <Loader2 className="w-8 h-8 text-primary mx-auto mb-3 animate-spin" />
               <p className="text-muted-foreground">
