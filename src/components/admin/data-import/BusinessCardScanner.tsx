@@ -203,9 +203,6 @@ const isRu = language === 'ru';
       // Prepare provider data
       const providerData = {
         name: editedData.company_name,
-        name_en: editedData.company_name,
-        name_ru: editedData.company_name_thai || editedData.company_name,
-        contact_name: editedData.contact_person || null,
         phone: editedData.phone?.[0] || null,
         email: editedData.email || null,
         website: editedData.website || null,
@@ -220,7 +217,7 @@ const isRu = language === 'ru';
 
       const { data, error } = await supabase
         .from('providers')
-        .insert([providerData] as never)
+        .insert([providerData])
         .select('id')
         .single();
 
