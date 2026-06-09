@@ -40,7 +40,7 @@ export async function sendEmail(opts: SendEmailOptions): Promise<{ success: bool
   try {
     const resend = getResend();
     const { error } = await resend.emails.send({
-      from: opts.from ?? "myUNO <notifications@myuno.app>",
+      from: opts.from ?? "myUNO <onboarding@resend.dev>",
       to: Array.isArray(opts.to) ? opts.to : [opts.to],
       subject: opts.subject,
       html: opts.html,
