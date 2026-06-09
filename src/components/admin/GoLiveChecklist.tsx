@@ -84,6 +84,19 @@ const checks: CheckItem[] = [
     },
   },
   {
+    key: 'has_published_properties',
+    labelRu: 'Опубликованы объекты (≥5)',
+    labelEn: 'Published properties (≥5)',
+    check: async () => {
+      const { count } = await supabase
+        .from('properties')
+        .select('id', { count: 'exact', head: true })
+        .eq('approval_status', 'approved')
+        .eq('is_active', true);
+      return (count ?? 0) >= 5;
+    },
+  },
+  {
     key: 'feature_flags_active',
     labelRu: 'Вертикали включены',
     labelEn: 'Verticals enabled',
