@@ -67,19 +67,20 @@ export function BasicInfoStep({ draft, onChange, onNext, onBack }: BasicInfoStep
     if (!sourceTitle.trim()) return;
     const targets: SourceLang[] = (['en', 'ru', 'th'] as SourceLang[]).filter((l) => l !== sourceLang);
 
-    const updates: Partial<ListingApplicationDraft> = {};
+    const updates: Record<string, string> = {};
     for (const target of targets) {
       const fields: Record<string, string> = {};
       if (sourceTitle.trim()) fields.title = sourceTitle;
       if (sourceDesc.trim()) fields.description = sourceDesc;
       if (Object.keys(fields).length === 0) continue;
       const result = await translateMultiple(fields, target);
-      if (result.title) updates[TITLE_KEY[target]] = result.title;
-      if (result.description) updates[DESC_KEY[target]] = result.description;
+      if (result.title) updates[TITLE_KEY[target] as string] = result.title;
+      if (result.description) updates[DESC_KEY[target] as string] = result.description;
     }
-    onChange(updates);
+    onChange(updates as Partial<ListingApplicationDraft>);
     setHasTranslated(true);
   };
+
 
   const isValid = sourceTitle.length >= 5;
 
