@@ -69,6 +69,7 @@ export const APP_ROUTES = {
   FOR_MANAGEMENT_COMPANIES: '/for-management-companies',
   FOR_REAL_ESTATE_DEVELOPERS: '/for-developers',
   FOR_LOCAL_SERVICE_PROVIDERS: '/for-local-services',
+  FOR_BUSINESS: '/for-business',
 
   // ── Beauty & Spa ──
   BEAUTY: '/beauty',
