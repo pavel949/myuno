@@ -11,10 +11,14 @@ export type ApplicationStatus = 'draft' | 'pending' | 'under_review' | 'approved
 export interface ListingApplicationDraft {
   // Common fields
   listing_type: ListingType;
+  // Source language the vendor filled the form in (defaults to EN)
+  source_lang?: 'en' | 'ru' | 'th';
   title_en?: string;
   title_ru?: string;
+  title_th?: string;
   description_en?: string;
   description_ru?: string;
+  description_th?: string;
   cover_image?: string;
   images?: string[];
   city?: string;
@@ -22,27 +26,28 @@ export interface ListingApplicationDraft {
   address?: string;
   price?: number;
   currency?: string;
-  
+
   // Property-specific
   property_type?: string;
   bedrooms?: number;
   bathrooms?: number;
   max_guests?: number;
   amenities?: string[];
-  
+
   // Service-specific
   service_category?: string;
   duration_minutes?: number;
-  
+
   // Product-specific
   product_category?: string;
   stock_quantity?: number;
-  
+
   // Applicant info (for non-auth users)
   applicant_name?: string;
   applicant_email?: string;
   applicant_phone?: string;
 }
+
 
 interface UseListingApplicationReturn {
   draft: ListingApplicationDraft;
