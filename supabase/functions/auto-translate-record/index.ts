@@ -8,7 +8,7 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const ALLOWED_TABLES = new Set(["listings", "providers", "marketplace_products", "services"]);
+const ALLOWED_TABLES = new Set(["listings", "providers", "marketplace_products", "services", "bouquets"]);
 const LANGS = ["ru", "en", "th"] as const;
 type Lang = typeof LANGS[number];
 

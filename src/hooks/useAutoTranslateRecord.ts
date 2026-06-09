@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 type Lang = "ru" | "en" | "th";
-type Table = "listings" | "providers" | "marketplace_products" | "services";
+type Table = "listings" | "providers" | "marketplace_products" | "services" | "bouquets";
 
 export interface AutoTranslateInput {
   table: Table;
