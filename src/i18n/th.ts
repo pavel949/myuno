@@ -795,4 +795,110 @@ export const th: Record<string, string> = {
   'welcome.footer.linkSupport': 'ซัพพอร์ต',
   'welcome.footer.linkContact': 'ติดต่อ',
   'welcome.footer.copyright': '© myUNO · ภูเก็ต · เพื่อชีวิตและธุรกิจในต่างประเทศ',
+
+  // Property form (parity with ru/en)
+  'propertyForm.furnishingLevelDesign': 'ระดับเฟอร์นิเจอร์และการออกแบบ',
+  'propertyForm.furnishingOption.unfurnished': 'ไม่มีเฟอร์นิเจอร์',
+  'propertyForm.furnishingOption.basic_furnishing': 'เฟอร์นิเจอร์พื้นฐาน',
+  'propertyForm.furnishingOption.full_furnishing': 'เฟอร์นิเจอร์ครบชุด',
+  'propertyForm.furnishingOption.designer_interior': 'ดีไซเนอร์ออกแบบ',
+  'propertyForm.furnishingOption.premium_designer_interior': 'ดีไซน์พรีเมียม',
+  'propertyForm.viewType': 'วิวจากห้อง',
+  'propertyForm.saved': 'บันทึกแล้ว',
+  'propertyForm.unsavedChanges': 'ยังไม่ได้บันทึก',
+  'propertyForm.saving': 'กำลังบันทึก...',
+
+  // Property hub landing (parity)
+  'propertyHub.landing.sectionCapital': 'สำหรับธุรกิจและนักลงทุน',
+  'propertyHub.landing.commercial.title': 'อสังหาริมทรัพย์เชิงพาณิชย์',
+  'propertyHub.landing.commercial.desc': 'สำนักงาน ร้านค้าปลีก คลังสินค้า สถานที่สำหรับ F&B — ให้เช่าและขาย',
+  'propertyHub.landing.land.title': 'ที่ดิน',
+  'propertyHub.landing.land.desc': 'ไร่ · งาน · วา, โฉนด, ผังเมือง และหน้ากว้างติดถนน',
+  'propertyHub.landing.investmentGrade.title': 'สินทรัพย์เกรดลงทุน',
+  'propertyHub.landing.investmentGrade.desc': 'Cap rate ≥ 6%, ตรวจสอบ NOI แล้ว, อายุสัญญาเช่าที่เหลือ',
+  'propertyHub.landing.personaPrompt.title': 'ปลดล็อกหมวดเชิงพาณิชย์และที่ดิน',
+  'propertyHub.landing.personaPrompt.desc': 'เปิดบทบาท «ธุรกิจ» หรือ «นักลงทุน» เพื่อแสดงอสังหาริมทรัพย์เชิงพาณิชย์ ที่ดิน และสินทรัพย์ที่สร้างรายได้ในเมนูของคุณ',
+  'propertyHub.landing.personaPrompt.enableBusiness': 'ฉันเป็นธุรกิจ',
+  'propertyHub.landing.personaPrompt.enableInvestor': 'ฉันเป็นนักลงทุน',
+  'propertyHub.landing.proBadge': 'Pro',
+
+  // Account menu (parity)
+  'account.menu.savedSearches': 'รายการค้นหาที่บันทึก',
+  'account.menu.newbuildAlerts': 'แจ้งเตือนโครงการใหม่',
+
+  // CRM tiers
+  'crm.tier.a.label': 'A · ระดับกลยุทธ์',
+  'crm.tier.a.description': 'ลำดับความสำคัญสูงสุด ติดต่อรายสัปดาห์ สร้างรายได้หรือลีดแนะนำเป็นส่วนใหญ่',
+  'crm.tier.b.label': 'B · ระดับใช้งาน',
+  'crm.tier.b.description': 'ความสัมพันธ์ที่ดี ติดต่อรายเดือน มีดีลในไปป์ไลน์จริง',
+  'crm.tier.c.label': 'C · ระดับเฝ้าดู',
+  'crm.tier.c.description': 'ลองเทล หรือหยุดนิ่ง ติดต่อรายไตรมาส คงสายสัมพันธ์ไว้',
+  'crm.tier.unset': 'ยังไม่ได้จัดระดับ',
+
+  // CRM deal side
+  'crm.side.all.label': 'ทุกฝั่ง',
+  'crm.side.buy.label': 'ฝั่งซื้อ',
+  'crm.side.buy.short': 'ซื้อ',
+  'crm.side.sell.label': 'ฝั่งขาย',
+  'crm.side.sell.short': 'ขาย',
+
+  // CRM time series
+  'crm.timeSeries.title': 'คอมมิชชั่น — พยากรณ์ตามฝั่ง',
+  'crm.timeSeries.subtitle': '6 เดือนล่าสุด (จริง) · 6 เดือนถัดไป (ถ่วงน้ำหนัก)',
+  'crm.timeSeries.earned': 'รับจริง',
+  'crm.timeSeries.weighted': 'พยากรณ์ถ่วงน้ำหนัก',
+  'crm.timeSeries.forecastBand': 'พยากรณ์',
+  'crm.timeSeries.empty': 'ยังไม่มีข้อมูลคอมมิชชั่น',
+
+  // CRM cold contacts
+  'crm.cold.title': 'ผู้ติดต่อเย็น',
+  'crm.cold.subtitle': 'ไม่ได้ติดต่อเกิน 30 วัน',
+  'crm.cold.empty': 'ไม่มีผู้ติดต่อเย็น — ทุกความสัมพันธ์ยังอบอุ่น',
+  'crm.cold.daysSince': '{{days}}ว',
+  'crm.cold.viewAll': 'ดูทั้งหมด',
+
+  // CRM splits
+  'crm.split.title': 'แบ่งคอมมิชชั่น',
+  'crm.split.agent': 'ส่วนของเอเจนต์',
+  'crm.split.firm': 'ส่วนของบริษัท',
+  'crm.split.referral': 'ค่าแนะนำ',
+  'crm.split.referralContact': 'แหล่งแนะนำ',
+  'crm.split.referralContactPlaceholder': 'ค้นหาผู้ติดต่อ…',
+  'crm.split.totalLabel': 'รวม',
+  'crm.split.totalError': 'ผลรวมของส่วนแบ่งต้องไม่เกิน 100%',
+  'crm.split.grossLabel': 'คอมมิชชั่นรวม',
+  'crm.split.netAgent': 'สุทธิให้เอเจนต์',
+  'crm.split.netFirm': 'สุทธิให้บริษัท',
+  'crm.split.netReferral': 'สุทธิให้ผู้แนะนำ',
+
+  // CRM activity log
+  'crm.activity.title': 'กิจกรรม',
+  'crm.activity.empty': 'ยังไม่มีกิจกรรม บันทึกสาย ประชุม หรือโน้ตแรกได้เลย',
+  'crm.activity.call': 'โทร',
+  'crm.activity.meeting': 'ประชุม',
+  'crm.activity.email': 'อีเมล',
+  'crm.activity.note': 'โน้ต',
+  'crm.activity.sms': 'SMS',
+  'crm.activity.whatsapp': 'WhatsApp',
+  'crm.activity.site_visit': 'ดูสถานที่',
+  'crm.activity.compose.placeholder': 'เกิดอะไรขึ้น?',
+  'crm.activity.compose.titlePlaceholder': 'หัวข้อ (ไม่บังคับ)',
+  'crm.activity.compose.save': 'บันทึก',
+  'crm.activity.compose.saving': 'กำลังบันทึก…',
+  'crm.activity.compose.duration': 'ระยะเวลา (นาที)',
+  'crm.activity.byAgent': 'โดย {{name}}',
+  'crm.activity.delete': 'ลบ',
+  'crm.activity.deleteConfirm': 'ลบรายการนี้?',
+
+  // CRM pulse KPIs
+  'crm.pulse.leadsMonth': 'ลีดใหม่ · MTD',
+  'crm.pulse.closing30d': 'ปิดใน 30 วัน',
+  'crm.pulse.coldCount': 'ผู้ติดต่อเย็น',
+  'crm.pulse.commissionMtd': 'คอมมิชชั่น · MTD',
+  'crm.pulse.commissionQtd': 'คอมมิชชั่น · QTD',
+  'crm.pulse.commissionRolling12': 'หมุนเวียน 12 เดือน',
+  'crm.pulse.activeDeals': 'ดีลที่ดำเนินอยู่',
+  'crm.pulse.pipelineValue': 'มูลค่าไปป์ไลน์',
+  'crm.pulse.weightedForecast': 'พยากรณ์ถ่วงน้ำหนัก',
+  'crm.pulse.winRate': 'อัตราชนะ',
 };
