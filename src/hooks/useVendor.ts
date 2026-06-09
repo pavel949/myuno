@@ -260,7 +260,7 @@ export function useVendorProfile() {
 
     const { data, error } = await supabase
       .from('providers')
-      .update(dbUpdates)
+      .update(dbUpdates as never)
       .eq('id', profile.id)
       .select()
       .single();

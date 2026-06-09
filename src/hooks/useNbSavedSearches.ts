@@ -69,7 +69,7 @@ export function useNbSavedSearches() {
     mutationFn: async ({ id, patch }: { id: string; patch: Partial<NbSavedSearch> }) => {
       const { error } = await supabase
         .from('nb_saved_searches')
-        .update(patch as Record<string, unknown>)
+        .update(patch as never)
         .eq('id', id);
       if (error) throw error;
     },

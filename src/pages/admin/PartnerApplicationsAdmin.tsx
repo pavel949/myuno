@@ -230,7 +230,7 @@ export default function PartnerApplicationsAdmin() {
         }
         const { error } = await supabase
           .from('partner_applications')
-          .update(updateData)
+          .update(updateData as never)
           .eq('id', selectedApp.id);
         if (error) throw error;
         setApplications(prev =>

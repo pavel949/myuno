@@ -29,7 +29,7 @@ export function ProviderDetailHeader({ provider, onUpdate }: Props) {
     try {
       const { error } = await supabase
         .from('providers')
-        .update({ [field]: value })
+        .update({ [field]: value } as never)
         .eq('id', provider.id);
       if (error) throw error;
       toast.success(isRu ? 'Обновлено' : 'Updated');

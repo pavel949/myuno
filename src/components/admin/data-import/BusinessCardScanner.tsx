@@ -220,7 +220,7 @@ const isRu = language === 'ru';
 
       const { data, error } = await supabase
         .from('providers')
-        .insert([providerData])
+        .insert([providerData] as never)
         .select('id')
         .single();
 

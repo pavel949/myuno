@@ -85,7 +85,7 @@ export function useCreateNewbuildLead() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (data: Partial<NewbuildLead>) => {
-      const { error } = await supabase.from('nb_leads').insert(data);
+      const { error } = await supabase.from('nb_leads').insert(data as never);
       if (error) throw error;
     },
     onSuccess: () => {

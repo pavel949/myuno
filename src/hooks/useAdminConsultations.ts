@@ -63,7 +63,7 @@ export function useAdminConsultations(filters?: ConsultationFilters) {
 
       const { data, error } = await supabase
         .from('consultation_requests')
-        .update(updateData)
+        .update(updateData as never)
         .eq('id', id)
         .select()
         .single();

@@ -122,7 +122,7 @@ const queryClient = useQueryClient();
 
       const { error } = await supabase
         .from('support_tickets')
-        .update(updateData)
+        .update(updateData as never)
         .eq('id', ticketId);
 
       if (error) throw error;
@@ -158,7 +158,7 @@ const queryClient = useQueryClient();
 
       const { error } = await supabase
         .from('support_tickets')
-        .update(updateData)
+        .update(updateData as never)
         .eq('id', ticketId);
 
       if (error) throw error;

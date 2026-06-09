@@ -195,7 +195,7 @@ function useUnifiedCatalog(filters: UnifiedCatalogFilters = {}) {
 
     const { error } = await supabase
       .from(table)
-      .update({ [fieldName]: isFeatured })
+      .update({ [fieldName]: isFeatured } as never)
       .in('id', ids);
 
     if (!error) await fetchItems();

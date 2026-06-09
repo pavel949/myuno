@@ -156,7 +156,7 @@ export function useUpdateManagementTerms() {
 
       const { data, error } = await db
         .from('property_management_terms')
-        .update(payload)
+        .update(payload as never)
         .eq('id', id)
         .select()
         .single();
