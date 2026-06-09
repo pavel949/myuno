@@ -105,6 +105,13 @@ export default function ServiceOrderSuccess() {
     </div>
   ) : null;
 
+  const serviceLabel = order?.metadata?.provider_name || functionName;
+  const whenStr = order?.start_at ? format(new Date(order.start_at), 'dd MMM yyyy, HH:mm') : '';
+  const summaryRu = [serviceLabel && `Услуга: ${serviceLabel}`, whenStr && `Время: ${whenStr}`]
+    .filter(Boolean).join(' · ');
+  const summaryEn = [serviceLabel && `Service: ${serviceLabel}`, whenStr && `When: ${whenStr}`]
+    .filter(Boolean).join(' · ');
+
   return (
     <UnifiedSuccessLayout
       isLoading={loading}
@@ -119,6 +126,9 @@ export default function ServiceOrderSuccess() {
       primaryLabel={{ ru: 'Заказать ещё', en: 'Order more' }}
       secondaryHref="/bookings"
       secondaryLabel={{ ru: 'Мои заказы', en: 'My orders' }}
+      totalAmount={order?.total_amount}
+      currency={order?.currency || undefined}
+      whatsappSummary={summaryRu || summaryEn ? { ru: summaryRu, en: summaryEn } : undefined}
     />
   );
 }
