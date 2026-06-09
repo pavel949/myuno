@@ -198,8 +198,11 @@ export function mapBouquetToCatalogCard(
   navigate: (path: string) => void
 ): CatalogCardProps {
   const isRu = language === 'ru';
-  const name = isRu ? bouquet.name_ru : bouquet.name_en;
-  const shortDesc = isRu ? bouquet.short_description_ru : bouquet.short_description_en;
+  const lang = (language === 'ru' || language === 'th') ? language : 'en';
+  const nameRes = getLocalizedField(bouquet as Record<string, any>, 'name', lang as 'ru' | 'en' | 'th');
+  const descRes = getLocalizedField(bouquet as Record<string, any>, 'short_description', lang as 'ru' | 'en' | 'th');
+  const name = nameRes.value || (isRu ? bouquet.name_ru : bouquet.name_en) || '';
+  const shortDesc = descRes.value || (isRu ? bouquet.short_description_ru : bouquet.short_description_en) || undefined;
   const hasVariants = bouquet.size_variants?.length;
   const displayPrice = hasVariants
     ? (bouquet.size_variants as SizeVariant[])[0]?.price || bouquet.price
@@ -232,7 +235,8 @@ export function mapBouquetToCatalogCard(
     socialProof,
     price: displayPrice,
     pricePrefix: hasVariants ? (isRu ? 'от' : 'from') : undefined,
-    subtitle: shortDesc || undefined,
+    subtitle: shortDesc,
+    autoTranslatedFrom: (nameRes.isAutoTranslated || descRes.isAutoTranslated) ? nameRes.sourceLang ?? descRes.sourceLang : undefined,
   };
 }
 
