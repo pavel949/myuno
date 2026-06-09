@@ -10069,6 +10069,7 @@ export type Database = {
           district: string | null
           email: string | null
           features: string[] | null
+          i18n: Json | null
           id: string
           images: string[] | null
           is_active: boolean | null
@@ -10111,6 +10112,7 @@ export type Database = {
           district?: string | null
           email?: string | null
           features?: string[] | null
+          i18n?: Json | null
           id?: string
           images?: string[] | null
           is_active?: boolean | null
@@ -10153,6 +10155,7 @@ export type Database = {
           district?: string | null
           email?: string | null
           features?: string[] | null
+          i18n?: Json | null
           id?: string
           images?: string[] | null
           is_active?: boolean | null
@@ -10986,6 +10989,7 @@ export type Database = {
           description_ru: string | null
           expires_at: string | null
           flash_deal_ends_at: string | null
+          i18n: Json | null
           id: string
           images: string[] | null
           in_stock: boolean | null
@@ -11040,6 +11044,7 @@ export type Database = {
           description_ru?: string | null
           expires_at?: string | null
           flash_deal_ends_at?: string | null
+          i18n?: Json | null
           id?: string
           images?: string[] | null
           in_stock?: boolean | null
@@ -11094,6 +11099,7 @@ export type Database = {
           description_ru?: string | null
           expires_at?: string | null
           flash_deal_ends_at?: string | null
+          i18n?: Json | null
           id?: string
           images?: string[] | null
           in_stock?: boolean | null
@@ -20562,6 +20568,7 @@ export type Database = {
           has_guarantee: boolean | null
           has_insurance: boolean | null
           has_machine_translation: boolean | null
+          i18n: Json | null
           id: string
           is_active: boolean | null
           is_demo: boolean | null
@@ -20603,6 +20610,7 @@ export type Database = {
           has_guarantee?: boolean | null
           has_insurance?: boolean | null
           has_machine_translation?: boolean | null
+          i18n?: Json | null
           id?: string
           is_active?: boolean | null
           is_demo?: boolean | null
@@ -20644,6 +20652,7 @@ export type Database = {
           has_guarantee?: boolean | null
           has_insurance?: boolean | null
           has_machine_translation?: boolean | null
+          i18n?: Json | null
           id?: string
           is_active?: boolean | null
           is_demo?: boolean | null
@@ -22393,6 +22402,7 @@ export type Database = {
           description_ru: string | null
           duration_minutes: number | null
           high_risk_service: boolean | null
+          i18n: Json | null
           id: string
           images: string[] | null
           is_active: boolean | null
@@ -22427,6 +22437,7 @@ export type Database = {
           description_ru?: string | null
           duration_minutes?: number | null
           high_risk_service?: boolean | null
+          i18n?: Json | null
           id?: string
           images?: string[] | null
           is_active?: boolean | null
@@ -22461,6 +22472,7 @@ export type Database = {
           description_ru?: string | null
           duration_minutes?: number | null
           high_risk_service?: boolean | null
+          i18n?: Json | null
           id?: string
           images?: string[] | null
           is_active?: boolean | null
