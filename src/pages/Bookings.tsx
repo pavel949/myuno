@@ -86,7 +86,7 @@ const getBookingTypeLabel = (type: string, language: string) => {
   const labels: Record<string, { en: string; ru: string }> = {
     beauty: { en: 'Beauty', ru: 'Красота' },
     service: { en: 'Service', ru: 'Услуга' },
-    food: { en: 'Food', ru: 'Еда' },
+    food: { en: 'Restaurants', ru: 'Рестораны' },
     flower: { en: 'Flowers', ru: 'Цветы' },
     transport: { en: 'Transport', ru: 'Транспорт' },
     tour: { en: 'Tour', ru: 'Тур' },

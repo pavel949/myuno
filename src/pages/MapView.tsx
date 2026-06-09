@@ -71,7 +71,7 @@ const FILTER_OPTIONS: { value: VerticalFilter; labelEn: string; labelRu: string;
   { value: 'commercial', labelEn: 'Commercial', labelRu: 'Коммерч.', icon: '🏢' },
   { value: 'land', labelEn: 'Land', labelRu: 'Земля', icon: '🌾' },
   { value: 'beauty', labelEn: 'Beauty', labelRu: 'Красота', icon: '💇' },
-  { value: 'restaurant', labelEn: 'Food', labelRu: 'Еда', icon: '🍽️' },
+  { value: 'restaurant', labelEn: 'Restaurants', labelRu: 'Рестораны', icon: '🍽️' },
 ];
 
 const mapContainerStyle: React.CSSProperties = { width: '100%', height: '100%' };
