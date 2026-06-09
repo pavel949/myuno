@@ -156,7 +156,7 @@ export default function Search() {
           )}
 
           {/* Loading */}
-          {isLoading && query.trim().length >= 2 && (
+          {isLoading && (hasQuery || selectedType) && (
             <div className="text-center py-12">
               <Loader2 className="w-8 h-8 text-primary mx-auto mb-3 animate-spin" />
               <p className="text-muted-foreground">
