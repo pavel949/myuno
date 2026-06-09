@@ -126,21 +126,22 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     let channel: ReturnType<typeof supabase.channel> | null = null;
 
     loadTranslations().then((success) => {
-      if (!success) return;
-      // Only subscribe to realtime changes after initial load succeeds
-      channel = supabase
-        .channel('translations_realtime')
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: 'translations' },
-          () => {
-            // Invalidate cache and reload
-            localStorage.removeItem(TRANSLATIONS_CACHE_KEY);
-            localStorage.removeItem(TRANSLATIONS_CACHE_TIMESTAMP);
-            loadTranslations();
-          }
-        )
-        .subscribe();
+      if (!success || cancelled) return;
+      // Use a unique channel name per mount — reusing the same topic across
+      // React StrictMode double-mounts returns the already-subscribed channel,
+      // which rejects further `.on('postgres_changes', ...)` calls.
+      const topic = `translations_realtime_${Math.random().toString(36).slice(2, 10)}`;
+      const ch = supabase.channel(topic);
+      ch.on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'translations' },
+        () => {
+          localStorage.removeItem(TRANSLATIONS_CACHE_KEY);
+          localStorage.removeItem(TRANSLATIONS_CACHE_TIMESTAMP);
+          loadTranslations();
+        }
+      ).subscribe();
+      channel = ch;
     });
 
     return () => {
