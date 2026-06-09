@@ -1651,6 +1651,7 @@ export type Database = {
           description_ru: string | null
           emotional_trigger_tag: string | null
           flowers: string[] | null
+          i18n: Json
           id: string
           image: string | null
           images: string[] | null
@@ -1697,6 +1698,7 @@ export type Database = {
           description_ru?: string | null
           emotional_trigger_tag?: string | null
           flowers?: string[] | null
+          i18n?: Json
           id?: string
           image?: string | null
           images?: string[] | null
@@ -1743,6 +1745,7 @@ export type Database = {
           description_ru?: string | null
           emotional_trigger_tag?: string | null
           flowers?: string[] | null
+          i18n?: Json
           id?: string
           image?: string | null
           images?: string[] | null
