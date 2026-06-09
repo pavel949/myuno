@@ -84,6 +84,11 @@ export interface CheckoutResult {
   rpc?: { name: string; params: Record<string, unknown> };
   /** Called if order creation fails, for cleanup (e.g., releasing reserved spots). */
   onOrderFailure?: () => Promise<void>;
+  /** Called after order + items inserted, for vertical-specific child rows (e.g., order_item_yacht_details). */
+  afterOrderCreated?: (
+    orderId: string,
+    supabaseAdmin: ReturnType<typeof createServiceClient>,
+  ) => Promise<void>;
 }
 
 export interface CheckoutConfig {
