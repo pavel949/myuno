@@ -8,7 +8,13 @@
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, ArrowRight, Sparkles, Check, Loader2 } from 'lucide-react';
+import {
+  ArrowLeft, ArrowRight, Sparkles, Check, Loader2,
+  Palmtree, PlaneLanding, Briefcase, Building2,
+  Compass, Home, TrendingUp, Wrench,
+  Calendar, CalendarDays, House,
+  type LucideIcon,
+} from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 import { Button } from '@/components/ui/button';
@@ -18,6 +24,7 @@ import { APP_ROUTES } from '@/lib/config/routes';
 import { AppLayout } from '@/components/layout/AppLayout';
 import {
   useStartOnboarding,
+  resolveOnboardingIcon,
   type WhoAnswer,
   type GoalAnswer,
   type IntensityAnswer,
@@ -28,56 +35,56 @@ type Copy = { en: string; ru: string };
 
 const T = (c: Copy, l: L) => c[l] ?? c.en;
 
-const WHO_OPTIONS: { value: WhoAnswer; label: Copy; icon: string; desc: Copy }[] = [
+const WHO_OPTIONS: { value: WhoAnswer; label: Copy; icon: LucideIcon; desc: Copy }[] = [
   {
     value: 'tourist',
-    icon: '🏝️',
+    icon: Palmtree,
     label: { en: 'Visitor / tourist', ru: 'Турист' },
     desc: { en: 'I’m here for a holiday', ru: 'Приехал отдохнуть' },
   },
   {
     value: 'relocator',
-    icon: '🛬',
+    icon: PlaneLanding,
     label: { en: 'Relocating / digital nomad', ru: 'Переезжаю / номад' },
     desc: { en: 'Long-term living in Phuket', ru: 'Долгосрочно жить на Пхукете' },
   },
   {
     value: 'investor',
-    icon: '💼',
+    icon: Briefcase,
     label: { en: 'Investor', ru: 'Инвестор' },
     desc: { en: 'Buying property or business', ru: 'Покупаю недвижимость или бизнес' },
   },
   {
     value: 'owner',
-    icon: '🏢',
+    icon: Building2,
     label: { en: 'Property owner', ru: 'Собственник' },
     desc: { en: 'I already own here', ru: 'У меня уже есть объект' },
   },
 ];
 
-const GOAL_OPTIONS: { value: GoalAnswer; label: Copy; icon: string }[] = [
-  { value: 'visit', icon: '🧭', label: { en: 'Enjoy a great trip', ru: 'Хорошо провести время' } },
-  { value: 'live', icon: '🏠', label: { en: 'Live & settle in', ru: 'Жить и обустроиться' } },
-  { value: 'invest', icon: '📈', label: { en: 'Invest & earn', ru: 'Инвестировать и зарабатывать' } },
-  { value: 'manage', icon: '🛠️', label: { en: 'Manage what I own', ru: 'Управлять активами' } },
+const GOAL_OPTIONS: { value: GoalAnswer; label: Copy; icon: LucideIcon }[] = [
+  { value: 'visit', icon: Compass, label: { en: 'Enjoy a great trip', ru: 'Хорошо провести время' } },
+  { value: 'live', icon: Home, label: { en: 'Live & settle in', ru: 'Жить и обустроиться' } },
+  { value: 'invest', icon: TrendingUp, label: { en: 'Invest & earn', ru: 'Инвестировать и зарабатывать' } },
+  { value: 'manage', icon: Wrench, label: { en: 'Manage what I own', ru: 'Управлять активами' } },
 ];
 
-const INTENSITY_OPTIONS: { value: IntensityAnswer; label: Copy; icon: string; desc: Copy }[] = [
+const INTENSITY_OPTIONS: { value: IntensityAnswer; label: Copy; icon: LucideIcon; desc: Copy }[] = [
   {
     value: 'short',
-    icon: '📅',
+    icon: Calendar,
     label: { en: 'Up to 30 days', ru: 'До 30 дней' },
     desc: { en: 'Short visit', ru: 'Короткий визит' },
   },
   {
     value: 'long',
-    icon: '🗓️',
+    icon: CalendarDays,
     label: { en: '1–12 months', ru: '1–12 месяцев' },
     desc: { en: 'Extended stay', ru: 'Долгий приезд' },
   },
   {
     value: 'permanent',
-    icon: '🏡',
+    icon: House,
     label: { en: '12 months +', ru: 'Больше года' },
     desc: { en: 'Permanent base', ru: 'На постоянной основе' },
   },
@@ -111,7 +118,7 @@ const COPY = {
 };
 
 interface OptionGridProps<T extends string> {
-  options: { value: T; label: Copy; icon: string; desc?: Copy }[];
+  options: { value: T; label: Copy; icon: LucideIcon; desc?: Copy }[];
   selected: T | null;
   onSelect: (v: T) => void;
   lang: L;
@@ -122,6 +129,7 @@ function OptionGrid<T extends string>({ options, selected, onSelect, lang }: Opt
     <div className="grid gap-3 sm:grid-cols-2">
       {options.map((opt) => {
         const isActive = selected === opt.value;
+        const Icon = opt.icon;
         return (
           <motion.button
             key={opt.value}
@@ -135,8 +143,8 @@ function OptionGrid<T extends string>({ options, selected, onSelect, lang }: Opt
             )}
             aria-pressed={isActive}
           >
-            <span className="text-2xl shrink-0" aria-hidden>
-              {opt.icon}
+            <span className="shrink-0 text-primary" aria-hidden>
+              <Icon className="h-6 w-6" strokeWidth={1.75} />
             </span>
             <span className="flex-1">
               <span className="block text-sm font-semibold text-foreground">{T(opt.label, lang)}</span>
@@ -330,9 +338,14 @@ export default function StartOnboarding() {
                           idx === 0 && 'border-primary/60 bg-primary/5',
                         )}
                       >
-                        <span className="text-2xl shrink-0" aria-hidden>
-                          {item.icon}
-                        </span>
+                        {(() => {
+                          const ItemIcon = resolveOnboardingIcon(item.icon);
+                          return (
+                            <span className="shrink-0 text-primary" aria-hidden>
+                              <ItemIcon className="h-6 w-6" strokeWidth={1.75} />
+                            </span>
+                          );
+                        })()}
                         <span className="flex-1">
                           <span className="block text-sm font-semibold text-foreground">
                             {T(item.title, lang)}

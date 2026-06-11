@@ -10,9 +10,36 @@
  * conversion-to-user later (post-signup) can be backfilled by a trigger.
  */
 import { useCallback, useMemo, useState } from 'react';
+import {
+  Construction, Briefcase, PlaneLanding, BadgeCheck, Home, Building2,
+  Palmtree, Plane, Compass, IdCard, Repeat, GraduationCap, Scale, Sparkles, HelpCircle,
+  type LucideIcon,
+} from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+
+const ICON_MAP: Record<string, LucideIcon> = {
+  construction: Construction,
+  briefcase: Briefcase,
+  'plane-landing': PlaneLanding,
+  'badge-check': BadgeCheck,
+  home: Home,
+  'building-2': Building2,
+  palmtree: Palmtree,
+  plane: Plane,
+  compass: Compass,
+  'id-card': IdCard,
+  repeat: Repeat,
+  'graduation-cap': GraduationCap,
+  scale: Scale,
+  sparkles: Sparkles,
+};
+
+export function resolveOnboardingIcon(key: string | undefined | null): LucideIcon {
+  if (!key) return HelpCircle;
+  return ICON_MAP[key] ?? HelpCircle;
+}
 
 export type WhoAnswer = 'tourist' | 'relocator' | 'investor' | 'owner';
 export type GoalAnswer = 'live' | 'invest' | 'visit' | 'manage';
@@ -55,7 +82,7 @@ function recommend(answers: Required<StartAnswers>): OnboardingResult['items'] {
         ru: 'Новостройки и переуступки с рейтингом ClearView',
       },
       route: '/property/offplan',
-      icon: '🏗️',
+      icon: 'construction',
       urgency: 'high',
     });
     items.push({
@@ -65,7 +92,7 @@ function recommend(answers: Required<StartAnswers>): OnboardingResult['items'] {
         ru: 'Связаться с инвестиционной командой',
       },
       route: '/invest',
-      icon: '💼',
+      icon: 'briefcase',
       urgency: 'medium',
     });
   }
@@ -79,7 +106,7 @@ function recommend(answers: Required<StartAnswers>): OnboardingResult['items'] {
         ru: 'Виза, школы, банки и медицина в одном месте',
       },
       route: '/relocate',
-      icon: '🛬',
+      icon: 'plane-landing',
       urgency: 'high',
     });
     items.push({
@@ -89,14 +116,14 @@ function recommend(answers: Required<StartAnswers>): OnboardingResult['items'] {
         ru: '4 вопроса → подходящий тип визы',
       },
       route: '/visa/quiz',
-      icon: '🛂',
+      icon: 'badge-check',
       urgency: 'high',
     });
     items.push({
       title: { en: 'Long-term rentals', ru: 'Долгосрочная аренда' },
       description: { en: 'Houses & condos for 6m+', ru: 'Дома и кондо от 6 месяцев' },
       route: '/property/rent',
-      icon: '🏠',
+      icon: 'home',
       urgency: 'medium',
     });
   }
@@ -110,7 +137,7 @@ function recommend(answers: Required<StartAnswers>): OnboardingResult['items'] {
         ru: 'Разместить и управлять своей недвижимостью',
       },
       route: '/mc',
-      icon: '🏢',
+      icon: 'building-2',
       urgency: 'high',
     });
   }
@@ -121,14 +148,14 @@ function recommend(answers: Required<StartAnswers>): OnboardingResult['items'] {
       title: { en: 'Short-term stays', ru: 'Краткосрочное жильё' },
       description: { en: 'Villas, condos, hotels with PMS-grade trust', ru: 'Виллы, кондо, отели от УК' },
       route: '/property/rent',
-      icon: '🏝️',
+      icon: 'palmtree',
       urgency: 'high',
     });
     items.push({
       title: { en: 'Airport transfer', ru: 'Трансфер из аэропорта' },
       description: { en: 'Meet & greet, fast-track', ru: 'Встреча, fast-track' },
       route: '/airport',
-      icon: '✈️',
+      icon: 'plane',
       urgency: 'medium',
     });
     items.push({
@@ -138,7 +165,7 @@ function recommend(answers: Required<StartAnswers>): OnboardingResult['items'] {
         ru: 'Яхты, рестораны, спа, аптеки',
       },
       route: '/discover',
-      icon: '🧭',
+      icon: 'compass',
       urgency: 'low',
     });
   }
@@ -151,7 +178,7 @@ function recommend(answers: Required<StartAnswers>): OnboardingResult['items'] {
       ru: 'Единый профиль для визы, налогов, объектов и документов',
     },
     route: '/account',
-    icon: '🪪',
+    icon: 'id-card',
     urgency: 'medium',
   });
 

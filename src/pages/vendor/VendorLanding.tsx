@@ -13,7 +13,8 @@ import { Badge } from '@/components/ui/badge';
 import { 
   ArrowRight, CheckCircle2, Users, Shield, Zap, Globe, 
   Star, Clock, TrendingUp, BadgeCheck, Crown, Award,
-  Loader2, MessageCircle
+  Loader2, MessageCircle, Rocket, Wallet, Lock, BarChart3, Gift,
+  type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getWhatsAppUrl } from '@/lib/config/contacts';
@@ -91,8 +92,8 @@ export default function VendorLanding() {
       border: 'border-primary/30',
       desc: isRu ? 'Документы + лицензия' : 'Documents + license',
       perks: isRu 
-        ? ['Значок ✓ Проверено', 'Приоритет в поиске', 'Защита G-Trust']
-        : ['✓ Verified badge', 'Search priority', 'G-Trust protection'],
+        ? ['Значок «Проверено»', 'Приоритет в поиске', 'Защита G-Trust']
+        : ['Verified badge', 'Search priority', 'G-Trust protection'],
     },
     {
       icon: Crown,
@@ -127,8 +128,9 @@ export default function VendorLanding() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <Badge variant="secondary" className="mb-4 text-xs px-3 py-1">
-              {isRu ? '🚀 Бесплатная регистрация' : '🚀 Free registration'}
+            <Badge variant="secondary" className="mb-4 text-xs px-3 py-1 inline-flex items-center gap-1.5">
+              <Rocket className="h-3.5 w-3.5" strokeWidth={1.75} />
+              {isRu ? 'Бесплатная регистрация' : 'Free registration'}
             </Badge>
             <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">
               {isRu ? 'Продавайте услуги' : 'Sell your services'}
@@ -253,16 +255,16 @@ export default function VendorLanding() {
         </h2>
         <Card>
           <CardContent className="p-5 space-y-3">
-            {[
-              { icon: '💰', text: isRu ? 'Комиссия обсуждается индивидуально и фиксируется в договоре' : 'Commission is discussed individually and fixed in the contract' },
-              { icon: '⏱', text: isRu ? 'Выплаты каждую пятницу на ваш счёт' : 'Payouts every Friday to your account' },
-              { icon: '🔒', text: isRu ? 'Escrow: деньги защищены до завершения услуги' : 'Escrow: money is protected until service completion' },
-              { icon: '📊', text: isRu ? 'Прозрачная аналитика: заказы, выручка, рейтинг в реальном времени' : 'Transparent analytics: orders, revenue, rating in real time' },
-              { icon: '🆓', text: isRu ? 'Регистрация бесплатна. 0% комиссии в первый месяц' : 'Registration is free. 0% commission in the first month' },
-            ].map((item, i) => (
+            {([
+              { Icon: Wallet, text: isRu ? 'Комиссия обсуждается индивидуально и фиксируется в договоре' : 'Commission is discussed individually and fixed in the contract' },
+              { Icon: Clock, text: isRu ? 'Выплаты каждую пятницу на ваш счёт' : 'Payouts every Friday to your account' },
+              { Icon: Lock, text: isRu ? 'Escrow: деньги защищены до завершения услуги' : 'Escrow: money is protected until service completion' },
+              { Icon: BarChart3, text: isRu ? 'Прозрачная аналитика: заказы, выручка, рейтинг в реальном времени' : 'Transparent analytics: orders, revenue, rating in real time' },
+              { Icon: Gift, text: isRu ? 'Регистрация бесплатна. 0% комиссии в первый месяц' : 'Registration is free. 0% commission in the first month' },
+            ] as { Icon: LucideIcon; text: string }[]).map(({ Icon, text }, i) => (
               <div key={i} className="flex items-start gap-3">
-                <span className="text-lg shrink-0">{item.icon}</span>
-                <p className="text-sm">{item.text}</p>
+                <Icon className="h-5 w-5 shrink-0 text-primary mt-0.5" strokeWidth={1.75} />
+                <p className="text-sm">{text}</p>
               </div>
             ))}
           </CardContent>
