@@ -46,6 +46,8 @@ const APPROVED_TOP_LEVEL = new Set<string>([
   '/admin', '/staff', '/capital', '/operate', '/developer-portal',
   '/developers', '/peylaa', '/my-property', '/my-stay', '/guest',
   '/outreach', '/stays',
+  // ── Invest sub-hubs (Wave-2 invest IA consolidation) ──
+  '/invest-hub',
   // ── Partner / marketing ──
   '/for', '/for-management-companies', '/become-partner',
   '/list-with-us', '/partners', '/pricing', '/referral', '/g-trust',
