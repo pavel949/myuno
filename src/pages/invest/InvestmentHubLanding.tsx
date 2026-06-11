@@ -32,6 +32,8 @@ import {
   Sparkles,
   User,
   ShieldCheck,
+  Wrench,
+  Calculator,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
