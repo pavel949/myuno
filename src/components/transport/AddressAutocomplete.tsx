@@ -142,6 +142,8 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
                 name: r.address.split(',')[0]?.trim() || r.address,
                 address: r.address,
                 type: 'address',
+                lat: r.lat,
+                lng: r.lng,
               }))
             ),
           ]);
@@ -180,6 +182,8 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
       name: isRu ? p.name_ru : p.name_en,
       address: p.address || p.district || '',
       source: 'project' as const,
+      lat: typeof p.lat === 'number' ? p.lat : undefined,
+      lng: typeof p.lng === 'number' ? p.lng : undefined,
     }));
     if (!query || query.length < 1) return items.slice(0, 4);
     const q = query.toLowerCase();
@@ -206,6 +210,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
       name: r.name,
       address: r.address,
       source: 'hotel' as const,
+      placeId: r.place_id,
     })),
     [hotelResults]
   );
@@ -217,19 +222,58 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
       name: r.name,
       address: r.address,
       source: 'google' as const,
+      lat: r.lat,
+      lng: r.lng,
+      placeId: r.place_id,
     })),
     [geocodeResults]
   );
 
-  const handleSelect = (s: Suggestion) => {
+  // Fetch lat/lng for a Place by id (Places API New) — needed for hotel selections
+  const fetchPlaceLocation = useCallback(async (placeId: string): Promise<{ lat: number; lng: number; formattedAddress?: string } | null> => {
+    try {
+      const g = (window as unknown as { google?: { maps?: { importLibrary?: (n: string) => Promise<unknown> } } }).google;
+      if (!g?.maps?.importLibrary) return null;
+      const placesLib = await g.maps.importLibrary('places') as {
+        Place: new (opts: { id: string; requestedLanguage?: string }) => {
+          fetchFields: (req: { fields: string[] }) => Promise<unknown>;
+          location?: { lat: () => number; lng: () => number } | null;
+          formattedAddress?: string | null;
+        };
+      };
+      const place = new placesLib.Place({ id: placeId, requestedLanguage: isRu ? 'ru' : 'en' });
+      await place.fetchFields({ fields: ['location', 'formattedAddress'] });
+      const loc = place.location;
+      if (!loc) return null;
+      return { lat: loc.lat(), lng: loc.lng(), formattedAddress: place.formattedAddress ?? undefined };
+    } catch (err) {
+      console.warn('[AddressAutocomplete] Place details fetch failed:', err);
+      return null;
+    }
+  }, [isRu]);
+
+  const handleSelect = async (s: Suggestion) => {
     const full = s.address && s.address !== s.name ? `${s.name}, ${s.address}` : s.name;
-    onChange(full);
+    let meta: AddressMeta = { lat: s.lat, lng: s.lng, placeId: s.placeId };
+
+    // Hotels come without coords from autocomplete suggestions — resolve via Place Details
+    if (s.source === 'hotel' && s.placeId && (s.lat == null || s.lng == null)) {
+      setIsSearching(true);
+      const details = await fetchPlaceLocation(s.placeId);
+      setIsSearching(false);
+      if (details) {
+        meta = { lat: details.lat, lng: details.lng, placeId: s.placeId };
+      }
+    }
+
+    onChange(full, meta);
     setQuery('');
     setGeocodeResults([]);
     setHotelResults([]);
     sessionTokenRef.current = null; // burn the session token after a selection
     setIsFocused(false);
   };
+
 
   const handleFocus = () => {
     setIsFocused(true);
