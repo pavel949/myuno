@@ -10937,6 +10937,8 @@ export type Database = {
           id: string
           manager_user_id: string | null
           metadata: Json | null
+          myuno_advance_approved_by: string | null
+          myuno_advance_limit_thb: number | null
           order_id: string
           payment_method_actual: string | null
           proof_file_path: string | null
@@ -10944,6 +10946,7 @@ export type Database = {
           rejected_at: string | null
           rejected_by: string | null
           rejected_reason: string | null
+          rub_sber_phone: string | null
           status: string
           updated_at: string
           user_id: string
@@ -10967,6 +10970,8 @@ export type Database = {
           id?: string
           manager_user_id?: string | null
           metadata?: Json | null
+          myuno_advance_approved_by?: string | null
+          myuno_advance_limit_thb?: number | null
           order_id: string
           payment_method_actual?: string | null
           proof_file_path?: string | null
@@ -10974,6 +10979,7 @@ export type Database = {
           rejected_at?: string | null
           rejected_by?: string | null
           rejected_reason?: string | null
+          rub_sber_phone?: string | null
           status?: string
           updated_at?: string
           user_id: string
@@ -10997,6 +11003,8 @@ export type Database = {
           id?: string
           manager_user_id?: string | null
           metadata?: Json | null
+          myuno_advance_approved_by?: string | null
+          myuno_advance_limit_thb?: number | null
           order_id?: string
           payment_method_actual?: string | null
           proof_file_path?: string | null
@@ -11004,6 +11012,7 @@ export type Database = {
           rejected_at?: string | null
           rejected_by?: string | null
           rejected_reason?: string | null
+          rub_sber_phone?: string | null
           status?: string
           updated_at?: string
           user_id?: string
@@ -12775,6 +12784,50 @@ export type Database = {
           },
         ]
       }
+      order_attachments: {
+        Row: {
+          bucket: string
+          created_at: string
+          file_path: string
+          id: string
+          kind: Database["public"]["Enums"]["order_attachment_kind"]
+          mime_type: string | null
+          order_id: string
+          size_bytes: number | null
+          uploaded_by: string | null
+        }
+        Insert: {
+          bucket?: string
+          created_at?: string
+          file_path: string
+          id?: string
+          kind?: Database["public"]["Enums"]["order_attachment_kind"]
+          mime_type?: string | null
+          order_id: string
+          size_bytes?: number | null
+          uploaded_by?: string | null
+        }
+        Update: {
+          bucket?: string
+          created_at?: string
+          file_path?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["order_attachment_kind"]
+          mime_type?: string | null
+          order_id?: string
+          size_bytes?: number | null
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_attachments_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_item_flower_details: {
         Row: {
           created_at: string | null
@@ -13067,6 +13120,44 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "order_status_history_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_translations: {
+        Row: {
+          created_at: string
+          field: string
+          id: string
+          lang: string
+          model: string | null
+          order_id: string
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          field: string
+          id?: string
+          lang: string
+          model?: string | null
+          order_id: string
+          value: string
+        }
+        Update: {
+          created_at?: string
+          field?: string
+          id?: string
+          lang?: string
+          model?: string | null
+          order_id?: string
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_translations_order_id_fkey"
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders"
@@ -24306,6 +24397,159 @@ export type Database = {
           },
         ]
       }
+      transfer_meeting_points: {
+        Row: {
+          airport_code: string
+          apple_maps_url: string | null
+          code: string
+          created_at: string
+          description_en: string | null
+          description_ru: string | null
+          description_th: string | null
+          google_maps_url: string | null
+          id: string
+          is_active: boolean
+          is_default: boolean
+          lat: number | null
+          lng: number | null
+          name_en: string
+          name_ru: string
+          name_th: string | null
+          photo_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          airport_code: string
+          apple_maps_url?: string | null
+          code: string
+          created_at?: string
+          description_en?: string | null
+          description_ru?: string | null
+          description_th?: string | null
+          google_maps_url?: string | null
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          lat?: number | null
+          lng?: number | null
+          name_en: string
+          name_ru: string
+          name_th?: string | null
+          photo_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          airport_code?: string
+          apple_maps_url?: string | null
+          code?: string
+          created_at?: string
+          description_en?: string | null
+          description_ru?: string | null
+          description_th?: string | null
+          google_maps_url?: string | null
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          lat?: number | null
+          lng?: number | null
+          name_en?: string
+          name_ru?: string
+          name_th?: string | null
+          photo_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      transfer_night_surcharge_config: {
+        Row: {
+          created_at: string
+          end_time: string
+          id: string
+          is_active: boolean
+          sedan_gross: number
+          sedan_net: number
+          start_time: string
+          updated_at: string
+          van_gross: number
+          van_net: number
+        }
+        Insert: {
+          created_at?: string
+          end_time?: string
+          id?: string
+          is_active?: boolean
+          sedan_gross?: number
+          sedan_net?: number
+          start_time?: string
+          updated_at?: string
+          van_gross?: number
+          van_net?: number
+        }
+        Update: {
+          created_at?: string
+          end_time?: string
+          id?: string
+          is_active?: boolean
+          sedan_gross?: number
+          sedan_net?: number
+          start_time?: string
+          updated_at?: string
+          van_gross?: number
+          van_net?: number
+        }
+        Relationships: []
+      }
+      transfer_operators: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          is_active: boolean
+          is_primary: boolean
+          languages: string[]
+          name: string
+          notes: string | null
+          phone_whatsapp: string
+          shift_end: string | null
+          shift_start: string | null
+          telegram_chat_id: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          is_primary?: boolean
+          languages?: string[]
+          name: string
+          notes?: string | null
+          phone_whatsapp: string
+          shift_end?: string | null
+          shift_start?: string | null
+          telegram_chat_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          is_primary?: boolean
+          languages?: string[]
+          name?: string
+          notes?: string | null
+          phone_whatsapp?: string
+          shift_end?: string | null
+          shift_start?: string | null
+          telegram_chat_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       transfers: {
         Row: {
           availability_note: string | null
@@ -24511,8 +24755,10 @@ export type Database = {
       }
       transport_destinations: {
         Row: {
+          aliases: Json
           base_price: number
           created_at: string
+          display_order: number
           duration_minutes: number | null
           id: string
           is_active: boolean | null
@@ -24521,12 +24767,18 @@ export type Database = {
           lng: number | null
           name_en: string
           name_ru: string
+          sedan_net: number | null
+          sedan_price: number | null
           sort_order: number | null
           type: string
+          van_net: number | null
+          van_price: number | null
         }
         Insert: {
+          aliases?: Json
           base_price: number
           created_at?: string
+          display_order?: number
           duration_minutes?: number | null
           id?: string
           is_active?: boolean | null
@@ -24535,12 +24787,18 @@ export type Database = {
           lng?: number | null
           name_en: string
           name_ru: string
+          sedan_net?: number | null
+          sedan_price?: number | null
           sort_order?: number | null
           type?: string
+          van_net?: number | null
+          van_price?: number | null
         }
         Update: {
+          aliases?: Json
           base_price?: number
           created_at?: string
+          display_order?: number
           duration_minutes?: number | null
           id?: string
           is_active?: boolean | null
@@ -24549,8 +24807,12 @@ export type Database = {
           lng?: number | null
           name_en?: string
           name_ru?: string
+          sedan_net?: number | null
+          sedan_price?: number | null
           sort_order?: number | null
           type?: string
+          van_net?: number | null
+          van_price?: number | null
         }
         Relationships: []
       }
@@ -24565,9 +24827,11 @@ export type Database = {
           icon: string | null
           id: string
           is_active: boolean | null
+          markup_pct: number
           max_passengers: number | null
           name_en: string
           name_ru: string
+          net_price: number | null
           price_multiplier: number | null
           price_per_km: number | null
           sort_order: number | null
@@ -24583,9 +24847,11 @@ export type Database = {
           icon?: string | null
           id?: string
           is_active?: boolean | null
+          markup_pct?: number
           max_passengers?: number | null
           name_en: string
           name_ru: string
+          net_price?: number | null
           price_multiplier?: number | null
           price_per_km?: number | null
           sort_order?: number | null
@@ -24601,9 +24867,11 @@ export type Database = {
           icon?: string | null
           id?: string
           is_active?: boolean | null
+          markup_pct?: number
           max_passengers?: number | null
           name_en?: string
           name_ru?: string
+          net_price?: number | null
           price_multiplier?: number | null
           price_per_km?: number | null
           sort_order?: number | null
@@ -30492,6 +30760,7 @@ export type Database = {
         Args: { p_code: string; p_referred_id: string }
         Returns: boolean
       }
+      assign_transfer_operator: { Args: never; Returns: string }
       calculate_distance_km: {
         Args: { lat1: number; lat2: number; lng1: number; lng2: number }
         Returns: number
@@ -30796,6 +31065,14 @@ export type Database = {
         }[]
       }
       get_system_setting: { Args: { p_key: string }; Returns: Json }
+      get_transfer_quote: {
+        Args: {
+          p_destination_id: string
+          p_pickup_time?: string
+          p_vehicle_class: string
+        }
+        Returns: Json
+      }
       get_user_company_ids: { Args: { _user_id?: string }; Returns: string[] }
       get_yacht_price_for_date: {
         Args: { p_charter_type?: string; p_date: string; p_yacht_id: string }
@@ -31191,6 +31468,12 @@ export type Database = {
         | "revision_requested"
       listing_type: "property" | "service" | "product"
       marketplace_seller_type: "business" | "individual"
+      order_attachment_kind:
+        | "hotel_booking"
+        | "address_photo"
+        | "passport"
+        | "flight_ticket"
+        | "other"
       order_item_status:
         | "pending"
         | "confirmed"
@@ -31585,6 +31868,13 @@ export const Constants = {
       ],
       listing_type: ["property", "service", "product"],
       marketplace_seller_type: ["business", "individual"],
+      order_attachment_kind: [
+        "hotel_booking",
+        "address_photo",
+        "passport",
+        "flight_ticket",
+        "other",
+      ],
       order_item_status: [
         "pending",
         "confirmed",
