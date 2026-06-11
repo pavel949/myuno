@@ -347,17 +347,47 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
     <div ref={containerRef} className={cn("relative", className)}>
       <div className="relative flex gap-1.5">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+          {isSelectionActive && selectedSuggestion ? (
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+              {selectedSuggestion.source === 'hotel' ? (
+                <Hotel className="w-4 h-4 text-primary" />
+              ) : selectedSuggestion.source === 'project' ? (
+                <Building2 className="w-4 h-4 text-accent-amber" />
+              ) : (
+                <MapPin className="w-4 h-4 text-primary" />
+              )}
+            </div>
+          ) : (
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+          )}
           <Input
             value={value}
             onChange={handleInputChange}
             onFocus={handleFocus}
             placeholder={placeholder || (isRu ? 'Отель, вилла или адрес' : 'Hotel, villa or address')}
-            className="h-11 pl-9 pr-9"
+            className={cn("h-11 pl-9", isSelectionActive ? "pr-16" : "pr-9")}
             autoComplete="off"
           />
           {isSearching && (
             <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-muted-foreground" />
+          )}
+          {!isSearching && isSelectionActive && (
+            <>
+              <span
+                className="absolute right-8 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-success/15 flex items-center justify-center"
+                title={isRu ? 'Адрес подтверждён через Google' : 'Address verified via Google'}
+              >
+                <Check className="w-3 h-3 text-success" />
+              </span>
+              <button
+                type="button"
+                onClick={clearSelection}
+                title={isRu ? 'Очистить' : 'Clear'}
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center text-muted-foreground hover:text-foreground"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </>
           )}
         </div>
         {value && value.length >= 3 && (
@@ -366,7 +396,9 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
             title={isRu ? 'Открыть на карте' : 'Open on map'}
             className="h-11 w-11 shrink-0 rounded-none border border-border bg-background flex items-center justify-center hover:bg-accent transition-colors"
             onClick={() => {
-              const mapQuery = encodeURIComponent(value);
+              const mapQuery = selectedSuggestion?.lat != null && selectedSuggestion?.lng != null
+                ? `${selectedSuggestion.lat},${selectedSuggestion.lng}`
+                : encodeURIComponent(value);
               const mapUrl = isRu
                 ? `https://yandex.ru/maps/?text=${mapQuery}`
                 : `https://www.google.com/maps/search/?api=1&query=${mapQuery}`;
@@ -377,6 +409,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
           </button>
         )}
       </div>
+
 
       {showDropdown && (
         <div className="absolute z-[100] left-0 right-0 mt-1 bg-popover border border-border rounded-none shadow-lg max-h-[60vh] overflow-y-auto touch-pan-y">
