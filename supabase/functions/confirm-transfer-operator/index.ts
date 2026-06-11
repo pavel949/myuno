@@ -132,7 +132,7 @@ Deno.serve(async (req) => {
 
     const { data: mp } = await sb()
       .from('transfer_meeting_points')
-      .select('name_ru, name_en, name_th, address_ru, address_en, address_th, photo_url, instructions_ru, instructions_en, instructions_th, contact_phone')
+      .select('name_ru, name_en, name_th, description_ru, description_en, description_th, photo_url, google_maps_url')
       .eq('is_default', true)
       .maybeSingle();
 
