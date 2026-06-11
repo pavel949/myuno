@@ -152,6 +152,36 @@ ${messageBody.slice(0, 500)}
       } catch { /* ignore */ }
     }
 
+    // Best-effort: route the message through concierge-intent so the
+    // customer receives a deep-link to the right product (Trust Stack §A5).
+    let deepLink: { route: string; label: string } | null = null;
+    try {
+      const intentUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/concierge-intent`;
+      const intentRes = await fetch(intentUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Deno.env.get("SUPABASE_ANON_KEY") ?? ""}`,
+        },
+        body: JSON.stringify({
+          messages: [{ role: "user", content: messageBody.slice(0, 2000) }],
+          language: "ru",
+        }),
+      });
+      if (intentRes.ok) {
+        const intent = await intentRes.json();
+        if (intent?.route && intent?.route_label) {
+          deepLink = { route: intent.route, label: String(intent.route_label) };
+        }
+      }
+    } catch (e) {
+      console.warn("[WhatsApp Incoming] concierge-intent failed:", e);
+    }
+
+    const deepLinkBlock = deepLink
+      ? `\n\n👉 ${deepLink.label}: https://myuno.app${deepLink.route}\n👉 ${deepLink.label}: https://myuno.app${deepLink.route}`
+      : "";
+
     // Send auto-reply to the customer
     const autoReply = `Hello ${pushName || ""}! 👋
 
@@ -168,7 +198,7 @@ For urgent matters, feel free to call: +66 92 240 7355
 
 Наша команда получила ваше сообщение и скоро ответит.
 
-По срочным вопросам: +66 92 240 7355`;
+По срочным вопросам: +66 92 240 7355${deepLinkBlock}`;
 
     await sendWhatsApp({ to: phone, body: autoReply });
 
