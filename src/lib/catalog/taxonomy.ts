@@ -383,7 +383,7 @@ export const CATEGORIES: CategoryEntry[] = [
     color: '#22C55E',
     services: [
       { id: 'gardening', path: `${SERVICES_URL}?category=gardening`, labelRu: 'Сад',    labelEn: 'Gardening', icon: TreePine, status: 'available' },
-      { id: 'flowers',   path: APP_ROUTES.FLOWERS,                   labelRu: 'Цветы',  labelEn: 'Flowers',   icon: Sparkles, status: 'available', verticalId: 'flower' },
+      { id: 'flowers',   path: APP_ROUTES.FLOWERS,                   labelRu: 'Цветы',  labelEn: 'Flowers',   icon: Flower2,  status: 'available', verticalId: 'flower' },
     ],
   },
   {
