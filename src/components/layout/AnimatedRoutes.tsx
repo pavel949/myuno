@@ -17,6 +17,7 @@ import { ScrollToTop } from './ScrollToTop';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 import { AdminGuard, VendorGuard, TeamGuard, AuthGuard, StaffGuard, MCGuard } from '@/components/auth';
 import { MCPortalGuard } from '@/components/auth/MCPortalGuard';
+import ManageHubGate from '@/components/layout/ManageHubGate';
 
 import { CapitalLayout } from '@/components/capital/CapitalLayout';
 import { AdminLayout } from '@/components/admin/AdminLayout';
