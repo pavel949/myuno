@@ -174,37 +174,34 @@ Deno.serve(async (req) => {
     const totalStr = `${order.currency} ${Number(order.total_amount).toLocaleString()}`;
     const localMp = pickMeetingPoint(mp, customerLang);
 
-    // Customer email — localized, via verified domain when configured.
-    const resendKey = Deno.env.get('RESEND_API_KEY');
-    if (resendKey && order.customer_email) {
-      const resend = new Resend(resendKey);
-      const mailFrom = await getMailFrom();
-      const html = `
-<div style="font-family:Arial;color:#333;max-width:600px;margin:0 auto">
-  <div style="background:linear-gradient(135deg,#059669,#10b981);color:#fff;padding:24px;border-radius:12px 12px 0 0">
-    <h1 style="margin:0">✅ ${t.title}</h1>
-    <p style="margin:6px 0 0;opacity:.9">#${order.order_number}</p>
-  </div>
-  <div style="background:#fff;padding:20px;border:1px solid #eee;border-top:none;border-radius:0 0 12px 12px">
-    <p>${t.greet(order.customer_name || '')}</p>
-    <p>${t.confirmedBy(opName, totalStr)}</p>
-    ${localMp ? `
-    <h3 style="margin-top:20px">${t.meetingPoint}</h3>
-    <p><b>${localMp.name || ''}</b></p>
-    ${localMp.photo_url ? `<img src="${localMp.photo_url}" alt="Meeting point" style="max-width:100%;border-radius:8px;margin:8px 0"/>` : ''}
-    ${localMp.description ? `<p style="background:#fffbeb;padding:12px;border-radius:8px">${localMp.description}</p>` : ''}
-    ${localMp.google_maps_url ? `<p><a href="${localMp.google_maps_url}" target="_blank">Google Maps →</a></p>` : ''}
-    ` : ''}
-    <h3>${t.operatorContact}</h3>
-    <p><b>${opName}</b><br/>WhatsApp: <a href="https://wa.me/${opPhone}">+${opWa || ''}</a></p>
-  </div>
-</div>`;
-      await resend.emails.send({
-        from: mailFrom,
-        to: [order.customer_email],
-        subject: t.emailSubject(order.order_number),
-        html,
-      }).catch(e => console.error('[email] customer confirm failed', e));
+    // Customer email — via Lovable Emails (queue + retries + suppression).
+    if (order.customer_email) {
+      // Strip <b>/</b> from localized strings since template renders plain React text.
+      const stripBold = (s: string) => s.replace(/<\/?b>/g, '');
+      const { error: emailErr } = await sb().functions.invoke('send-transactional-email', {
+        body: {
+          templateName: 'transfer-customer-confirmed',
+          recipientEmail: order.customer_email,
+          idempotencyKey: `transfer-confirmed-${orderId}`,
+          templateData: {
+            subjectText: t.emailSubject(order.order_number),
+            title: t.title,
+            orderNumber: order.order_number,
+            greet: t.greet(order.customer_name || ''),
+            confirmedLine: stripBold(t.confirmedBy(opName, totalStr)),
+            meetingPointLabel: t.meetingPoint,
+            meetingPointName: localMp?.name || '',
+            meetingPointPhoto: localMp?.photo_url || '',
+            meetingPointDescription: localMp?.description || '',
+            meetingPointMapUrl: localMp?.google_maps_url || '',
+            operatorContactLabel: t.operatorContact,
+            operatorName: opName,
+            operatorWa: opWa,
+            operatorWaLink: opPhone ? `https://wa.me/${opPhone}` : '',
+          },
+        },
+      });
+      if (emailErr) console.error('[email] customer confirm failed', emailErr);
     }
 
     // WhatsApp customer — localized
