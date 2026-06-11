@@ -32,6 +32,8 @@ import {
   Sparkles,
   User,
   ShieldCheck,
+  Wrench,
+  Calculator,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -209,20 +211,29 @@ export default function InvestmentHubLanding() {
                 <Handshake className="h-3 w-3 mr-1" /> Advisory
               </Badge>
             </div>
-            <div className="grid grid-cols-2 gap-2 pt-1">
+            <div className="grid grid-cols-3 gap-2 pt-1">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => navigate(APP_ROUTES.INVEST_TOOLS)}
+                className="gap-1"
+              >
+                <Calculator className="h-3.5 w-3.5" />
+                {isRu ? 'Инструменты' : 'Tools'}
+              </Button>
               <Button
                 size="sm"
                 variant="outline"
                 onClick={() => navigate(APP_ROUTES.INVEST_DEALS_BOARD)}
               >
-                {isRu ? 'Список сделок' : 'Deal list'}
+                {isRu ? 'Сделки' : 'Deals'}
               </Button>
               <Button
                 size="sm"
                 variant="outline"
                 onClick={() => navigate(APP_ROUTES.INVEST_SUBMIT)}
               >
-                {isRu ? 'Подача проекта' : 'Project submission'}
+                {isRu ? 'Подать' : 'Submit'}
               </Button>
             </div>
           </div>
@@ -233,7 +244,7 @@ export default function InvestmentHubLanding() {
 
           {/* 5 Zones */}
           <section className="space-y-3">
-            <h2 className="text-lg font-bold px-1">{isRu ? '5 направлений хаба' : 'Hub Zones'}</h2>
+            <h2 className="text-lg font-bold px-1">{isRu ? 'Направления хаба' : 'Hub Zones'}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <ZoneCard
                 icon={Building2}
@@ -300,6 +311,23 @@ export default function InvestmentHubLanding() {
                 iconBgClass="bg-primary/10 text-primary dark:text-primary"
               />
               <ZoneCard
+                icon={Wrench}
+                titleRu="Инструменты инвестора"
+                titleEn="Investor tools"
+                descRu="ClearView рейтинг, калькулятор, advisory, DD-пакеты"
+                descEn="ClearView rating, calculator, advisory, DD packs"
+                bullets={[
+                  { ru: 'ClearView™ — рейтинг AAA–CCC', en: 'ClearView™ — AAA–CCC rating' },
+                  { ru: 'Калькулятор ROI и yield', en: 'ROI & yield calculator' },
+                  { ru: 'Due diligence отчёты', en: 'Due diligence reports' },
+                ]}
+                ctaPath={APP_ROUTES.INVEST_TOOLS}
+                accentClass="hover:bg-primary/5"
+                iconBgClass="bg-primary/10 text-primary dark:text-primary"
+                badgeRu="Moat"
+                badgeEn="Moat"
+              />
+              <ZoneCard
                 icon={Megaphone}
                 titleRu="Привлечь капитал"
                 titleEn="Raise Capital"
@@ -314,6 +342,7 @@ export default function InvestmentHubLanding() {
                 accentClass="hover:bg-accent/5 sm:col-span-2"
                 iconBgClass="bg-accent/10 text-accent dark:text-accent"
               />
+
             </div>
           </section>
 

@@ -166,6 +166,7 @@ export const APP_ROUTES = {
   INVEST_DEALS: '/invest/ops/deals',
   INVEST_NETWORK: '/invest/ops/network',
   INVEST_EXECUTION: '/invest/ops/execution',
+  INVEST_TOOLS: '/invest/tools',
 
   // ── STAYS (guest short-term search, Russian UI) ──
   STAYS_SEARCH: '/stays/search',
