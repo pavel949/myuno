@@ -124,6 +124,11 @@ Deno.serve(async (req) => {
       note: 'Confirmed by operator via signed link',
     }).catch(() => {});
 
+    // Record ledger entries (idempotent) so admin Финансы panel reflects this booking.
+    await sb().rpc('record_ledger_entries', { p_order_id: orderId }).then(({ error }) => {
+      if (error) console.error('[confirm] record_ledger_entries failed', error);
+    });
+
     const meta = (order.metadata || {}) as Record<string, unknown>;
     const customerLang: Lang = (meta.language === 'en' || meta.language === 'th' || meta.language === 'ru')
       ? (meta.language as Lang)
@@ -136,16 +141,19 @@ Deno.serve(async (req) => {
       .eq('is_default', true)
       .maybeSingle();
 
+    // NOTE: column is `phone_whatsapp` in transfer_operators.
     const { data: op } = await sb()
       .from('transfer_operators')
-      .select('name, whatsapp_number')
+      .select('name, phone_whatsapp')
       .eq('is_active', true)
+      .order('is_primary', { ascending: false })
       .order('created_at', { ascending: true })
       .limit(1)
       .maybeSingle();
 
     const opName = op?.name || 'Klod';
-    const opPhone = (op?.whatsapp_number || '').replace(/[^0-9]/g, '');
+    const opWa = op?.phone_whatsapp || '';
+    const opPhone = opWa.replace(/[^0-9]/g, '');
     const totalStr = `${order.currency} ${Number(order.total_amount).toLocaleString()}`;
     const localMp = pickMeetingPoint(mp, customerLang);
 
@@ -170,7 +178,7 @@ Deno.serve(async (req) => {
     ${localMp.google_maps_url ? `<p><a href="${localMp.google_maps_url}" target="_blank">Google Maps →</a></p>` : ''}
     ` : ''}
     <h3>${t.operatorContact}</h3>
-    <p><b>${opName}</b><br/>WhatsApp: <a href="https://wa.me/${opPhone}">+${op?.whatsapp_number || ''}</a></p>
+    <p><b>${opName}</b><br/>WhatsApp: <a href="https://wa.me/${opPhone}">+${opWa || ''}</a></p>
   </div>
 </div>`;
       await resend.emails.send({

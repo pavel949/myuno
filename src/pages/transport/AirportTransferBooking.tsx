@@ -63,6 +63,8 @@ export default function AirportTransferBooking() {
   const [createdOrderId, setCreatedOrderId] = useState<string | null>(null);
   const [createdOrderNumber, setCreatedOrderNumber] = useState<string | null>(null);
   const [isReverseGeocoding, setIsReverseGeocoding] = useState(false);
+  const [pickupCoords, setPickupCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [nightSurchargeCfg, setNightSurchargeCfg] = useState<{ start: string; end: string; sedan: number; van: number } | null>(null);
   
   const [formData, setFormData] = useState({
     direction: (searchParams.get('direction') as TransferDirection) || 'from-airport',
@@ -83,9 +85,30 @@ export default function AirportTransferBooking() {
     paymentMethod: 'stripe' as TransferPaymentMethod,
   });
 
+  // Load night surcharge config once
+  useEffect(() => {
+    supabase
+      .from('transfer_night_surcharge_config')
+      .select('start_time, end_time, sedan_gross, sedan_net, van_gross, van_net')
+      .eq('is_active', true)
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) {
+          setNightSurchargeCfg({
+            start: data.start_time,
+            end: data.end_time,
+            sedan: Number(data.sedan_gross) - Number(data.sedan_net),
+            van: Number(data.van_gross) - Number(data.van_net),
+          });
+        }
+      });
+  }, []);
+
   // Reverse geocode when location is obtained
   useEffect(() => {
     if (hasLocation && latitude && longitude && isReverseGeocoding) {
+      setPickupCoords({ lat: latitude, lng: longitude });
       fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`)
         .then(res => res.json())
         .then(data => {
@@ -144,9 +167,28 @@ export default function AirportTransferBooking() {
 
   const routeBasePrice = selectedDestination?.base_price || 0;
   const vehicleMultiplier = selectedVehicle?.price_multiplier || 1;
-  const totalPrice = routeBasePrice > 0 
-    ? Math.round(routeBasePrice * vehicleMultiplier) 
+  const basePrice = routeBasePrice > 0
+    ? Math.round(routeBasePrice * vehicleMultiplier)
     : (selectedVehicle?.base_price || 800);
+
+  // Night surcharge: arrivalTime falls within [start..end] (Asia/Bangkok window).
+  const isNightArrival = useMemo(() => {
+    if (!formData.arrivalTime || !nightSurchargeCfg) return false;
+    const t = formData.arrivalTime; // "HH:mm"
+    const { start, end } = nightSurchargeCfg; // "HH:mm:ss"
+    // Window crosses midnight (e.g. 22:00..06:00) → either t >= start OR t < end
+    if (start > end) return t >= start.slice(0, 5) || t < end.slice(0, 5);
+    return t >= start.slice(0, 5) && t < end.slice(0, 5);
+  }, [formData.arrivalTime, nightSurchargeCfg]);
+
+  const isVan = (selectedVehicle?.max_passengers || 4) >= 6;
+  const nightSurcharge = isNightArrival && nightSurchargeCfg
+    ? (isVan ? nightSurchargeCfg.van : nightSurchargeCfg.sedan)
+    : 0;
+  const totalPrice = basePrice + nightSurcharge;
+  // Vendor markup 35% → vendor_payout = total / 1.35, platform_fee = remainder
+  const vendorPayout = Math.round(totalPrice / 1.35);
+  const platformFee = totalPrice - vendorPayout;
 
   const handleDirectionChange = (dir: TransferDirection) => {
     setFormData(prev => ({ ...prev, direction: dir }));
@@ -193,10 +235,19 @@ export default function AirportTransferBooking() {
         flight_number: formData.flightNumber,
         vehicle_type: formData.vehicleType,
         vehicle_name: vehicleName,
+        vehicle_class: isVan ? 'van' : 'sedan',
         passengers: parseInt(formData.passengers),
         luggage: parseInt(formData.luggage),
         meeting_sign_name: formData.meetingSignName,
         language,
+        // Financial split (also re-stamped by notify-transfer-booking server-side)
+        base_price: basePrice,
+        night_surcharge_applied: nightSurcharge > 0,
+        night_surcharge_amount: nightSurcharge,
+        vendor_payout_amount: vendorPayout,
+        platform_fee_amount: platformFee,
+        pickup_lat: formData.direction === 'to-airport' ? pickupCoords?.lat ?? null : null,
+        pickup_lng: formData.direction === 'to-airport' ? pickupCoords?.lng ?? null : null,
       },
       items: [{
         item_name: `Airport Transfer - ${vehicleName}`,
@@ -244,30 +295,45 @@ export default function AirportTransferBooking() {
         ? formData.destinationAddress
         : `Phuket Airport - ${formData.terminal === 'domestic' ? 'Domestic' : 'International'} Terminal`;
 
-      supabase.functions.invoke('notify-transfer-booking', {
-        body: {
-          order_id: result.order_id,
-          order_number: result.order_number || '',
-          direction: formData.direction,
-          terminal: formData.terminal,
-          flight_number: formData.flightNumber,
-          vehicle_name: vehicleName,
-          meeting_sign_name: formData.meetingSignName || formData.name,
-          passengers: parseInt(formData.passengers),
-          luggage: parseInt(formData.luggage),
-          pickup_address: pickupAddr,
-          dropoff_address: dropoffAddr,
-          scheduled_at: scheduledAt,
-          total_amount: totalPrice,
-          currency: 'THB',
-          payment_method: formData.paymentMethod,
-          customer_name: formData.name,
-          customer_phone: formData.phone,
-          customer_email: formData.email,
-          customer_language: language,
-          notes: formData.notes || undefined,
-        },
-      }).catch(err => console.error('[Notify] Transfer notification error:', err));
+      // Fire-and-await with one retry on failure so Klod always gets pinged.
+      const notifyPayload = {
+        order_id: result.order_id,
+        order_number: result.order_number || '',
+        direction: formData.direction,
+        terminal: formData.terminal,
+        flight_number: formData.flightNumber,
+        vehicle_name: vehicleName,
+        meeting_sign_name: formData.meetingSignName || formData.name,
+        passengers: parseInt(formData.passengers),
+        luggage: parseInt(formData.luggage),
+        pickup_address: pickupAddr,
+        dropoff_address: dropoffAddr,
+        scheduled_at: scheduledAt,
+        total_amount: totalPrice,
+        currency: 'THB',
+        payment_method: formData.paymentMethod,
+        customer_name: formData.name,
+        customer_phone: formData.phone,
+        customer_email: formData.email,
+        customer_language: language,
+        notes: formData.notes || undefined,
+      };
+      const sendNotify = async (attempt = 0): Promise<void> => {
+        const { error } = await supabase.functions.invoke('notify-transfer-booking', { body: notifyPayload });
+        if (error && attempt < 1) {
+          console.warn('[Notify] retry transfer notification', error);
+          await new Promise(r => setTimeout(r, 1200));
+          return sendNotify(attempt + 1);
+        }
+        if (error) console.error('[Notify] Transfer notification failed (giving up):', error);
+      };
+      // Don't block redirect to Stripe — but DO wait for cash/concierge so ledger entries
+      // and operator_id are persisted before user sees success screen.
+      if (formData.paymentMethod === 'stripe') {
+        sendNotify().catch(() => {});
+      } else {
+        await sendNotify();
+      }
 
       if (formData.paymentMethod === 'stripe') {
         setIsProcessingPayment(true);
@@ -665,22 +731,45 @@ export default function AirportTransferBooking() {
               transition={{ duration: 0.25 }}
               className="space-y-5"
             >
-              <div className="p-3 rounded-none bg-muted/50 border border-border/50 flex items-center gap-3">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-0.5">
-                    {formData.direction === 'from-airport' ? (
-                      <><Plane className="w-3 h-3" /><ArrowRight className="w-2.5 h-2.5" /><MapPin className="w-3 h-3" /></>
-                    ) : (
-                      <><MapPin className="w-3 h-3" /><ArrowRight className="w-2.5 h-2.5" /><Plane className="w-3 h-3" /></>
-                    )}
+              <div className="p-3 rounded-none bg-muted/50 border border-border/50 space-y-2">
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-0.5">
+                      {formData.direction === 'from-airport' ? (
+                        <><Plane className="w-3 h-3" /><ArrowRight className="w-2.5 h-2.5" /><MapPin className="w-3 h-3" /></>
+                      ) : (
+                        <><MapPin className="w-3 h-3" /><ArrowRight className="w-2.5 h-2.5" /><Plane className="w-3 h-3" /></>
+                      )}
+                    </div>
+                    <p className="text-sm font-medium truncate">{formData.destinationAddress}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {selectedVehicle && (language === 'ru' ? selectedVehicle.name_ru : selectedVehicle.name_en)}
+                      {selectedDestination?.duration_minutes && ` · ~${selectedDestination.duration_minutes} ${language === 'ru' ? 'мин' : 'min'}`}
+                    </p>
                   </div>
-                  <p className="text-sm font-medium truncate">{formData.destinationAddress}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {selectedVehicle && (language === 'ru' ? selectedVehicle.name_ru : selectedVehicle.name_en)}
-                    {selectedDestination?.duration_minutes && ` · ~${selectedDestination.duration_minutes} ${language === 'ru' ? 'мин' : 'min'}`}
-                  </p>
+                  <p className="font-bold text-lg shrink-0">฿{totalPrice.toLocaleString()}</p>
                 </div>
-                <p className="font-bold text-lg shrink-0">฿{totalPrice.toLocaleString()}</p>
+                {(nightSurcharge > 0 || basePrice !== totalPrice) && (
+                  <div className="pt-2 border-t border-border/50 space-y-1 text-xs">
+                    <div className="flex justify-between text-muted-foreground">
+                      <span>{language === 'ru' ? 'Базовый тариф' : 'Base fare'}</span>
+                      <span>฿{basePrice.toLocaleString()}</span>
+                    </div>
+                    {nightSurcharge > 0 && (
+                      <div className="flex justify-between text-warning">
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {language === 'ru' ? 'Ночной тариф (22:00–06:00)' : 'Night surcharge (22:00–06:00)'}
+                        </span>
+                        <span>+฿{nightSurcharge.toLocaleString()}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between font-semibold text-foreground pt-1 border-t border-border/30">
+                      <span>{language === 'ru' ? 'Итого' : 'Total'}</span>
+                      <span>฿{totalPrice.toLocaleString()}</span>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <button

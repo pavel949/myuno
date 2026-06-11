@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { MapPin, Building2, Search, Loader2, Navigation, Keyboard, ExternalLink } from 'lucide-react';
+import { MapPin, Building2, Search, Loader2, Navigation, Keyboard, ExternalLink, Hotel } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePropertyProjects } from '@/hooks/usePropertyProjects';
@@ -30,7 +30,7 @@ interface Suggestion {
   id: string;
   name: string;
   address: string;
-  source: 'google' | 'project' | 'area';
+  source: 'google' | 'project' | 'area' | 'hotel';
 }
 
 interface AddressAutocompleteProps {
@@ -39,6 +39,14 @@ interface AddressAutocompleteProps {
   placeholder?: string;
   className?: string;
 }
+
+// Phuket viewport bias for Places (New)
+const PHUKET_BIAS = {
+  rectangle: {
+    low: { latitude: 7.55, longitude: 98.18 },
+    high: { latitude: 8.20, longitude: 98.55 },
+  },
+};
 
 export function AddressAutocomplete({ value, onChange, placeholder, className }: AddressAutocompleteProps) {
   const { language } = useLanguage();
@@ -50,10 +58,12 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
   const [isFocused, setIsFocused] = useState(false);
   const [query, setQuery] = useState('');
   const [geocodeResults, setGeocodeResults] = useState<GeocodeSuggestion[]>([]);
+  const [hotelResults, setHotelResults] = useState<GeocodeSuggestion[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [geolocating, setGeolocating] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const sessionTokenRef = useRef<unknown>(null);
 
   // Close on outside click
   useEffect(() => {
@@ -66,36 +76,79 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  // Geocode search (Google Maps Geocoding API only)
+  // Places API (New) — hotels & lodging (better than Geocoder for establishment names)
+  const searchPlacesHotels = useCallback(async (q: string): Promise<GeocodeSuggestion[]> => {
+    try {
+      const g = (window as unknown as { google?: { maps?: { importLibrary?: (n: string) => Promise<unknown> } } }).google;
+      if (!g?.maps?.importLibrary) return [];
+      const placesLib = await g.maps.importLibrary('places') as {
+        AutocompleteSuggestion: { fetchAutocompleteSuggestions: (req: Record<string, unknown>) => Promise<{ suggestions: unknown[] }> };
+        AutocompleteSessionToken: new () => unknown;
+      };
+      const { AutocompleteSuggestion, AutocompleteSessionToken } = placesLib;
+      if (!sessionTokenRef.current) sessionTokenRef.current = new AutocompleteSessionToken();
+      const { suggestions } = await AutocompleteSuggestion.fetchAutocompleteSuggestions({
+        input: q,
+        sessionToken: sessionTokenRef.current,
+        language: isRu ? 'ru' : 'en',
+        region: 'th',
+        includedRegionCodes: ['th'],
+        locationBias: PHUKET_BIAS,
+        includedPrimaryTypes: ['lodging'],
+      });
+      return (suggestions || [])
+        .map((s) => (s as { placePrediction?: { placeId: string; mainText?: { text: string }; secondaryText?: { text: string }; text?: { text: string } } }).placePrediction)
+        .filter(Boolean)
+        .slice(0, 5)
+        .map((p) => ({
+          place_id: p!.placeId,
+          name: p!.mainText?.text || p!.text?.text || '',
+          address: p!.secondaryText?.text || p!.text?.text || '',
+          type: 'lodging',
+        }));
+    } catch (err) {
+      console.warn('[AddressAutocomplete] Places (New) lodging fetch failed:', err);
+      return [];
+    }
+  }, [isRu]);
+
+  // Combined: hotels (Places New) + addresses (Geocoder)
   const searchGeocode = useCallback(
     async (q: string) => {
       if (q.length < 2) {
         setGeocodeResults([]);
+        setHotelResults([]);
         return;
       }
       setIsSearching(true);
       try {
         if (useGoogle) {
-          const results = await googleGeocode.searchAddress(q, { country: 'TH' });
-          setGeocodeResults(
-            results.map((r) => ({
-              place_id: r.placeId || `${r.lat},${r.lng}`,
-              name: r.address.split(',')[0]?.trim() || r.address,
-              address: r.address,
-              type: 'address',
-            }))
-          );
+          const [hotels, addresses] = await Promise.all([
+            searchPlacesHotels(q),
+            googleGeocode.searchAddress(q, { country: 'TH' }).then(res =>
+              res.map((r) => ({
+                place_id: r.placeId || `${r.lat},${r.lng}`,
+                name: r.address.split(',')[0]?.trim() || r.address,
+                address: r.address,
+                type: 'address',
+              }))
+            ),
+          ]);
+          setHotelResults(hotels);
+          setGeocodeResults(addresses);
         } else {
           setGeocodeResults([]);
+          setHotelResults([]);
         }
       } catch (err) {
         console.error('[AddressAutocomplete] geocode error:', err);
         setGeocodeResults([]);
+        setHotelResults([]);
       } finally {
         setIsSearching(false);
       }
     },
-    [useGoogle, googleGeocode]
+    [useGoogle, googleGeocode, searchPlacesHotels]
   );
 
   // Debounced search
@@ -135,6 +188,17 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
     return items.filter(s => s.name.toLowerCase().includes(q) || s.address.toLowerCase().includes(q));
   }, [query, isRu]);
 
+  // Hotel suggestions (Places API New)
+  const hotelSuggestions = useMemo((): Suggestion[] =>
+    hotelResults.map((r) => ({
+      id: r.place_id,
+      name: r.name,
+      address: r.address,
+      source: 'hotel' as const,
+    })),
+    [hotelResults]
+  );
+
   // Google geocode suggestions
   const geocodeSuggestions = useMemo((): Suggestion[] =>
     geocodeResults.map((r) => ({
@@ -151,6 +215,8 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
     onChange(full);
     setQuery('');
     setGeocodeResults([]);
+    setHotelResults([]);
+    sessionTokenRef.current = null; // burn the session token after a selection
     setIsFocused(false);
   };
 
@@ -159,7 +225,6 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
     setQuery(value);
   };
 
-  // "Use my location" via browser geolocation + reverse geocode (Google or Supabase)
   const handleUseLocation = async () => {
     if (!navigator.geolocation) return;
     setGeolocating(true);
@@ -190,10 +255,11 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
     );
   };
 
+  const hasHotels = hotelSuggestions.length > 0;
   const hasGeocode = geocodeSuggestions.length > 0;
   const hasProjects = projectSuggestions.length > 0;
   const hasAreas = areaSuggestions.length > 0;
-  const showDropdown = isFocused && (hasGeocode || hasProjects || hasAreas || isSearching || query.length === 0);
+  const showDropdown = isFocused && (hasHotels || hasGeocode || hasProjects || hasAreas || isSearching || query.length === 0);
 
   return (
     <div ref={containerRef} className={cn("relative", className)}>
@@ -245,11 +311,26 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
             <span className="text-sm font-medium">{isRu ? 'Мое местоположение' : 'Use my location'}</span>
           </button>
 
-          {/* Google geocode results */}
-          {hasGeocode && (
+          {/* Hotels — Places API (New), shown first as primary intent */}
+          {hasHotels && (
             <>
               <div className="px-3 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider bg-muted/50">
-                {isRu ? 'Результаты поиска' : 'Search results'}
+                {isRu ? 'Отели и виллы' : 'Hotels & lodging'}
+              </div>
+              {hotelSuggestions.map((s) => (
+                <SuggestionRow key={s.id} suggestion={s} onSelect={handleSelect} icon={<Hotel className="w-4 h-4 text-primary" />} iconBg="bg-primary/10" />
+              ))}
+            </>
+          )}
+
+          {/* Google geocode (addresses) */}
+          {hasGeocode && (
+            <>
+              <div className={cn(
+                "px-3 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider bg-muted/50",
+                hasHotels && "border-t border-border/50"
+              )}>
+                {isRu ? 'Адреса' : 'Addresses'}
               </div>
               {geocodeSuggestions.map((s) => (
                 <SuggestionRow key={s.id} suggestion={s} onSelect={handleSelect} icon={<MapPin className="w-4 h-4 text-primary" />} iconBg="bg-primary/10" />
@@ -269,8 +350,8 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
             </>
           )}
 
-          {/* Popular areas - only when no mapbox results */}
-          {!hasGeocode && hasAreas && (
+          {/* Popular areas — only when no other live results */}
+          {!hasHotels && !hasGeocode && hasAreas && (
             <>
               <div className="px-3 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider bg-muted/50 border-t border-border/50">
                 {isRu ? 'Популярные районы' : 'Popular areas'}
@@ -282,7 +363,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
           )}
 
           {/* Loading state */}
-          {isSearching && !hasGeocode && (
+          {isSearching && !hasHotels && !hasGeocode && (
             <div className="px-3 py-4 text-center text-sm text-muted-foreground flex items-center justify-center gap-2">
               <Loader2 className="w-4 h-4 animate-spin" />
               {isRu ? 'Поиск...' : 'Searching...'}
@@ -290,7 +371,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
           )}
 
           {/* Manual entry hint */}
-          {query.length >= 2 && !isSearching && !hasGeocode && (
+          {query.length >= 2 && !isSearching && !hasHotels && !hasGeocode && (
             <div className="px-3 py-3 text-center text-xs text-muted-foreground border-t border-border/50 flex items-center justify-center gap-1.5">
               <Keyboard className="w-3.5 h-3.5" />
               {isRu ? 'Или введите адрес вручную' : 'Or type your address manually'}
