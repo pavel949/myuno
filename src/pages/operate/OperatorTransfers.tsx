@@ -38,6 +38,9 @@ const statusColors: Record<string, string> = {
 
 export default function OperatorTransfers() {
   const queryClient = useQueryClient();
+  const { language } = useLanguage();
+  const lang: Lang = (language === 'en' || language === 'th') ? language : 'ru';
+  const t = I18N[lang];
   const [filter, setFilter] = useState<string>('active');
 
   const { data: orders, isLoading, refetch } = useQuery({
