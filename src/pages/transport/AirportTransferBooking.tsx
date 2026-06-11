@@ -85,9 +85,30 @@ export default function AirportTransferBooking() {
     paymentMethod: 'stripe' as TransferPaymentMethod,
   });
 
+  // Load night surcharge config once
+  useEffect(() => {
+    supabase
+      .from('transfer_night_surcharge_config')
+      .select('start_time, end_time, sedan_gross, sedan_net, van_gross, van_net')
+      .eq('is_active', true)
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) {
+          setNightSurchargeCfg({
+            start: data.start_time,
+            end: data.end_time,
+            sedan: Number(data.sedan_gross) - Number(data.sedan_net),
+            van: Number(data.van_gross) - Number(data.van_net),
+          });
+        }
+      });
+  }, []);
+
   // Reverse geocode when location is obtained
   useEffect(() => {
     if (hasLocation && latitude && longitude && isReverseGeocoding) {
+      setPickupCoords({ lat: latitude, lng: longitude });
       fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`)
         .then(res => res.json())
         .then(data => {
