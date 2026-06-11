@@ -511,7 +511,6 @@ export const APP_ROUTES = {
 
   // ── Owner Portal (individual owners) ──
   OWNER: '/owner',
-  OWNER_LANDING: '/owner',
   OWNER_GUIDE: '/owner/guide',
 
   // ── Provider Onboarding ──

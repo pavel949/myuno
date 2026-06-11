@@ -251,8 +251,7 @@ export const DepositVaultPage = lazy(() => import('@/pages/legal/DepositVaultPag
 export const DepositDisputePage = lazy(() => import('@/pages/legal/DepositDisputePage'));
 export const DepositRiskQuizPage = lazy(() => import('@/pages/tools/DepositRiskQuizPage'));
 
-// ── INVEST Cluster (legacy alias → InvestmentHubLanding) ──
-export const InvestClusterPage = lazy(() => import('@/pages/invest/InvestmentHubLanding'));
+
 
 // ── Experiences ──
 export const ExperiencesIndex = lazy(() => import('@/pages/experiences/ExperiencesIndex'));
