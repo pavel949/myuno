@@ -241,7 +241,7 @@ export default function OperatorTransfers() {
                         onClick={() => updateStatus.mutate({ orderId: order.id, newStatus: 'cancelled' as OrderStatus })}
                         disabled={updateStatus.isPending}
                       >
-                        <XCircle className="w-4 h-4 mr-1.5" /> Отклонить
+                        <XCircle className="w-4 h-4 mr-1.5" /> {t.reject}
                       </Button>
                     )}
                     {order.status === 'confirmed' && (
