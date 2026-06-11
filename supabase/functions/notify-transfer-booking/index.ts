@@ -205,19 +205,54 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Lookup operator (Klod by default) + admin contacts
+    // Lookup operator (Klod by default) + admin contacts.
+    // NOTE: column is `phone_whatsapp` in transfer_operators (NOT `whatsapp_number`).
     const { data: op } = await sb()
       .from('transfer_operators')
-      .select('whatsapp_number, email, name')
+      .select('id, phone_whatsapp, email, name')
       .eq('is_active', true)
+      .order('is_primary', { ascending: false })
       .order('created_at', { ascending: true })
       .limit(1)
       .maybeSingle();
+    const opWa = op?.phone_whatsapp || '';
+
+    // Persist operator_id + financial split on order so admin sees the chain.
+    // Vehicle markup_pct=35 → vendor_payout = total / 1.35, platform_fee = remainder.
+    try {
+      const { data: ord } = await sb()
+        .from('orders')
+        .select('total_amount, platform_fee_amount, metadata')
+        .eq('id', p.order_id)
+        .single();
+      if (ord) {
+        const total = Number(ord.total_amount) || p.total_amount;
+        const vendorPayout = Math.round(total / 1.35);
+        const platformFee = total - vendorPayout;
+        const meta = { ...(ord.metadata as Record<string, unknown> || {}), operator_id: op?.id || null, operator_name: op?.name || null };
+        await sb().from('orders').update({
+          metadata: meta,
+          vendor_payout_amount: vendorPayout,
+          platform_fee_amount: ord.platform_fee_amount ?? platformFee,
+        }).eq('id', p.order_id);
+      }
+    } catch (e) {
+      console.error('[Transfer] order enrich failed', e);
+    }
+
+    // For cash / concierge_advance: record ledger entries immediately so admin
+    // financial dashboard reflects revenue & vendor payout owed to Klod.
+    if (p.payment_method === 'cash' || p.payment_method === 'concierge_advance') {
+      const { error: ledgerErr } = await sb().rpc('record_ledger_entries', { p_order_id: p.order_id });
+      if (ledgerErr) console.error('[Transfer] record_ledger_entries failed', ledgerErr);
+    }
 
     const adminEmails = await getAdminEmails();
     const adminWA = await getAdminWhatsApp();
-    const { data: secondaryWaRow } = await sb().from('system_settings').select('value').eq('key', 'transfer_admin_wa_secondary').single();
-    const secondaryWA = typeof secondaryWaRow?.value === 'string' ? secondaryWaRow.value : JSON.parse(JSON.stringify(secondaryWaRow?.value));
+    const { data: secondaryWaRow } = await sb().from('system_settings').select('value').eq('key', 'transfer_admin_wa_secondary').maybeSingle();
+    const secondaryWA = secondaryWaRow?.value
+      ? (typeof secondaryWaRow.value === 'string' ? secondaryWaRow.value : JSON.parse(JSON.stringify(secondaryWaRow.value)))
+      : null;
 
     const baseUrl = Deno.env.get('PUBLIC_APP_URL') || 'https://myuno.app';
     const token = await generateConfirmToken(p.order_id);
