@@ -175,7 +175,7 @@ Recommend 3-5 routes from the whitelist. First = primary CTA.`;
       const known = KNOWN_ROUTES.find((r) => r.route === it.route);
       return {
         route: it.route,
-        icon: known?.icon ?? '✨',
+        icon: known?.icon ?? 'sparkles',
         urgency: it.urgency ?? 'medium',
         title: { en: it.title_en, ru: it.title_ru },
         description: { en: it.description_en, ru: it.description_ru },
