@@ -33,7 +33,7 @@ export default function SecondHomeLandingPage() {
       <SEOHead
         title={t ? 'Второй дом на Пхукете — myUNO' : 'Second home in Phuket — myUNO'}
         description={t ? 'Подберём виллу или кондо $200–500K, оформим, будем управлять, пока вас нет. Прозрачная комиссия 5%.' : 'We find your villa or condo $200K–$500K, handle ownership, and manage it while you are away. Transparent 5% commission.'}
-        canonical="/for/second-home"
+        url="https://www.myuno.app/for/second-home"
       />
       <LandingLayout
         icon={Sun}
