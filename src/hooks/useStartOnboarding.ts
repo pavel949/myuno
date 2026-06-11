@@ -12,7 +12,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import {
   Construction, Briefcase, PlaneLanding, BadgeCheck, Home, Building2,
-  Palmtree, Plane, Compass, IdCard, HelpCircle,
+  Palmtree, Plane, Compass, IdCard, Repeat, GraduationCap, Scale, Sparkles, HelpCircle,
   type LucideIcon,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -30,6 +30,10 @@ const ICON_MAP: Record<string, LucideIcon> = {
   plane: Plane,
   compass: Compass,
   'id-card': IdCard,
+  repeat: Repeat,
+  'graduation-cap': GraduationCap,
+  scale: Scale,
+  sparkles: Sparkles,
 };
 
 export function resolveOnboardingIcon(key: string | undefined | null): LucideIcon {
