@@ -299,16 +299,18 @@ Deno.serve(async (req) => {
           if (order.order_type === 'vehicle') {
             const { data: fullOrder } = await supabaseAdmin
               .from('orders')
-              .select('id, order_number, total_amount, currency, customer_name, customer_email, customer_phone, start_at, notes, metadata')
+              .select('id, order_number, total_amount, currency, start_at, notes, metadata, order_participants(name, email, phone, role)')
               .eq('id', orderId)
               .single();
             const om = (fullOrder?.metadata || {}) as Record<string, unknown>;
             if (fullOrder && om.transfer_type === 'airport') {
+              const participants = (fullOrder.order_participants || []) as Array<{ name?: string; email?: string; phone?: string; role?: string }>;
+              const primary = participants.find((p) => p.role === 'primary') || participants[0] || {};
               const { data: existing } = await supabaseAdmin
                 .from('booking_notifications_log')
                 .select('id')
-                .eq('order_id', orderId)
                 .in('notification_type', ['transfer_new_booking', 'transfer_new_booking_no_operator'])
+                .filter('metadata->>order_id', 'eq', orderId)
                 .limit(1);
               if (!existing || existing.length === 0) {
                 await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/notify-transfer-booking`, {
@@ -324,7 +326,7 @@ Deno.serve(async (req) => {
                     terminal: om.terminal,
                     flight_number: om.flight_number,
                     vehicle_name: om.vehicle_name,
-                    meeting_sign_name: om.meeting_sign_name || fullOrder.customer_name,
+                    meeting_sign_name: om.meeting_sign_name || primary.name,
                     passengers: Number(om.passengers) || 1,
                     luggage: Number(om.luggage) || 0,
                     pickup_address: om.direction === 'from-airport'
@@ -337,9 +339,9 @@ Deno.serve(async (req) => {
                     total_amount: Number(fullOrder.total_amount),
                     currency: fullOrder.currency,
                     payment_method: 'stripe',
-                    customer_name: fullOrder.customer_name,
-                    customer_phone: fullOrder.customer_phone,
-                    customer_email: fullOrder.customer_email,
+                    customer_name: primary.name || '',
+                    customer_phone: primary.phone || '',
+                    customer_email: primary.email || '',
                     customer_language: om.language || 'ru',
                     notes: fullOrder.notes || undefined,
                   }),
