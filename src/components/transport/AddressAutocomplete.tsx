@@ -72,9 +72,18 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
   const [hotelResults, setHotelResults] = useState<GeocodeSuggestion[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [geolocating, setGeolocating] = useState(false);
+  const [selectedSuggestion, setSelectedSuggestion] = useState<Suggestion | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   const sessionTokenRef = useRef<unknown>(null);
+
+  // Clear selection if the user edits the value away from the selected one
+  const selectedFullText = selectedSuggestion
+    ? (selectedSuggestion.address && selectedSuggestion.address !== selectedSuggestion.name
+        ? `${selectedSuggestion.name}, ${selectedSuggestion.address}`
+        : selectedSuggestion.name)
+    : null;
+  const isSelectionActive = !!selectedSuggestion && value === selectedFullText;
 
   // Close on outside click
   useEffect(() => {
