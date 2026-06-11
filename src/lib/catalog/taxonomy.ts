@@ -35,15 +35,16 @@
  * `halal-stay` were migrated to `APP_ROUTES` constants in the same pass.
  */
 import {
-  Plane, Home as HomeIcon, Heart, Scale, TrendingUp, Building2, HardHat, Baby,
-  Smartphone, ArrowLeftRight, Car, Landmark, Zap,
+  Plane, PlaneLanding, Home as HomeIcon, Heart, Scale, TrendingUp, Building2, HardHat, Baby,
+  Smartphone, ArrowLeftRight, Car, Landmark, Zap, Plug,
   Utensils, Sparkles, Stethoscope, ClipboardList, ShoppingBag, Users,
-  FileSearch, Calculator, Shield, AlertTriangle,
-  Calendar, BarChart3, Wrench, PenTool, DollarSign,
-  Building, Search, LineChart, Palette,
+  FileSearch, Calculator, Shield, ShieldCheck, AlertTriangle, LifeBuoy,
+  Calendar, BarChart3, Wrench, PenTool, DollarSign, LayoutGrid,
+  Building, Search, LineChart, Palette, Scissors, Crown, Bike, Shirt,
   Compass, Anchor, Dumbbell, CalendarDays, GraduationCap, PawPrint,
-  Hammer, Wind, TreePine, Bug, KeyRound, Warehouse, Truck, Package, Route, Waves, Bandage,
-  Briefcase, Globe, BookOpen,
+  Hammer, Wind, TreePine, Bug, KeyRound, Warehouse, Truck, Package, Route, Waves, Bandage, Pill, Flower2,
+  Briefcase, Globe, BookOpen, Heart as HeartIcon,
+  Stethoscope as VetIcon,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -296,7 +297,7 @@ export const CATEGORIES: CategoryEntry[] = [
     icon: Car,
     color: '#3B82F6',
     services: [
-      { id: 'transfer',   path: APP_ROUTES.AIRPORT_TRANSFER, labelRu: 'Трансферы',  labelEn: 'Transfers',  icon: Car,         status: 'available', verticalId: 'transfer', personaTags: ['tourist'], jtbdClusters: ['A'] },
+      { id: 'transfer',   path: APP_ROUTES.AIRPORT_TRANSFER, labelRu: 'Трансферы',  labelEn: 'Transfers',  icon: PlaneLanding, status: 'available', verticalId: 'transfer', personaTags: ['tourist'], jtbdClusters: ['A'] },
       { id: 'fast-track', path: APP_ROUTES.FAST_TRACK,        labelRu: 'Fast Track',  labelEn: 'Fast Track', icon: Zap,         status: 'available', personaTags: ['tourist'], jtbdClusters: ['A'] },
       { id: 'vehicle',    path: APP_ROUTES.TRANSPORT,         labelRu: 'Авто и байки',labelEn: 'Car & bike', icon: Car,         status: 'available', verticalId: 'vehicle', jtbdClusters: ['A'] },
       { id: 'sim',        path: APP_ROUTES.SIM_START,         labelRu: 'SIM-карты',   labelEn: 'SIM cards',  icon: Smartphone,  status: 'available', jtbdClusters: ['A'] },
@@ -331,8 +332,8 @@ export const CATEGORIES: CategoryEntry[] = [
     color: '#EF4444',
     services: [
       { id: 'sos',           path: APP_ROUTES.SOS,           labelRu: 'SOS',           labelEn: 'SOS',           icon: AlertTriangle, status: 'available', jtbdClusters: ['H', 'A'] },
-      { id: 'vip-concierge', path: APP_ROUTES.VIP_CONCIERGE, labelRu: 'VIP-консьерж',   labelEn: 'VIP Concierge', icon: Sparkles,      status: 'available', jtbdClusters: ['H', 'A'] },
-      { id: 'support',       path: APP_ROUTES.SUPPORT,       labelRu: 'Поддержка',      labelEn: 'Support',       icon: ClipboardList, status: 'available', jtbdClusters: ['H', 'A'] },
+      { id: 'vip-concierge', path: APP_ROUTES.VIP_CONCIERGE, labelRu: 'VIP-консьерж',   labelEn: 'VIP Concierge', icon: Crown,         status: 'available', jtbdClusters: ['H', 'A'] },
+      { id: 'support',       path: APP_ROUTES.SUPPORT,       labelRu: 'Поддержка',      labelEn: 'Support',       icon: LifeBuoy,      status: 'available', jtbdClusters: ['H', 'A'] },
     ],
   },
 
@@ -350,7 +351,7 @@ export const CATEGORIES: CategoryEntry[] = [
     color: '#10B981',
     services: [
       { id: 'cleaning',     path: APP_ROUTES.CLEANING,                       labelRu: 'Уборка',      labelEn: 'Cleaning',     icon: Sparkles, status: 'available', verticalId: 'cleaning' },
-      { id: 'laundry',      path: `${SERVICES_URL}?category=laundry`,        labelRu: 'Прачечная',   labelEn: 'Laundry',      icon: Package,  status: 'available' },
+      { id: 'laundry',      path: `${SERVICES_URL}?category=laundry`,        labelRu: 'Прачечная',   labelEn: 'Laundry',      icon: Shirt,    status: 'available' },
       { id: 'pest-control', path: `${SERVICES_URL}?category=pest-control`,   labelRu: 'Дезинсекция', labelEn: 'Pest control', icon: Bug,      status: 'available' },
     ],
   },
@@ -366,7 +367,7 @@ export const CATEGORIES: CategoryEntry[] = [
     services: [
       { id: 'handyman',   path: `${SERVICES_URL}?category=handyman`,   labelRu: 'Мастер на час', labelEn: 'Handyman',    icon: Hammer,   status: 'available' },
       { id: 'plumbing',   path: `${SERVICES_URL}?category=plumbing`,   labelRu: 'Сантехника',    labelEn: 'Plumbing',    icon: Wrench,   status: 'available' },
-      { id: 'electrical', path: `${SERVICES_URL}?category=electrical`, labelRu: 'Электрика',     labelEn: 'Electrical',  icon: Zap,      status: 'available' },
+      { id: 'electrical', path: `${SERVICES_URL}?category=electrical`, labelRu: 'Электрика',     labelEn: 'Electrical',  icon: Plug,     status: 'available' },
       { id: 'ac-repair',  path: `${SERVICES_URL}?category=ac-repair`,  labelRu: 'Кондиционеры',  labelEn: 'AC repair',   icon: Wind,     status: 'available' },
       { id: 'locksmith',  path: `${SERVICES_URL}?category=locksmith`,  labelRu: 'Замки',         labelEn: 'Locksmith',   icon: KeyRound, status: 'available' },
     ],
@@ -382,7 +383,7 @@ export const CATEGORIES: CategoryEntry[] = [
     color: '#22C55E',
     services: [
       { id: 'gardening', path: `${SERVICES_URL}?category=gardening`, labelRu: 'Сад',    labelEn: 'Gardening', icon: TreePine, status: 'available' },
-      { id: 'flowers',   path: APP_ROUTES.FLOWERS,                   labelRu: 'Цветы',  labelEn: 'Flowers',   icon: Sparkles, status: 'available', verticalId: 'flower' },
+      { id: 'flowers',   path: APP_ROUTES.FLOWERS,                   labelRu: 'Цветы',  labelEn: 'Flowers',   icon: Flower2,  status: 'available', verticalId: 'flower' },
     ],
   },
   {
@@ -395,8 +396,8 @@ export const CATEGORIES: CategoryEntry[] = [
     icon: Truck,
     color: '#0EA5E9',
     services: [
-      { id: 'storage',  path: `${SERVICES_URL}?category=storage`, labelRu: 'Хранение',   labelEn: 'Storage',      icon: Warehouse, status: 'available' },
-      { id: 'services', path: SERVICES_URL,                        labelRu: 'Все услуги', labelEn: 'Services hub', icon: Wrench,    status: 'available' },
+      { id: 'storage',  path: `${SERVICES_URL}?category=storage`, labelRu: 'Хранение',   labelEn: 'Storage',      icon: Warehouse,  status: 'available' },
+      { id: 'services', path: SERVICES_URL,                        labelRu: 'Все услуги', labelEn: 'Services hub', icon: LayoutGrid, status: 'available' },
     ],
   },
   {
@@ -410,7 +411,7 @@ export const CATEGORIES: CategoryEntry[] = [
     color: '#F59E0B',
     services: [
       { id: 'restaurant', path: APP_ROUTES.RESTAURANTS, labelRu: 'Рестораны', labelEn: 'Restaurants', icon: Utensils,    status: 'available', verticalId: 'restaurant' },
-      { id: 'delivery',   path: APP_ROUTES.DELIVERY,    labelRu: 'Доставка',  labelEn: 'Delivery',    icon: Truck,       status: 'available' },
+      { id: 'delivery',   path: APP_ROUTES.DELIVERY,    labelRu: 'Доставка',  labelEn: 'Delivery',    icon: Bike,        status: 'available' },
       { id: 'market',     path: APP_ROUTES.MARKET,      labelRu: 'Маркет',    labelEn: 'Market',      icon: ShoppingBag, status: 'available' },
     ],
   },
@@ -425,10 +426,10 @@ export const CATEGORIES: CategoryEntry[] = [
     color: '#EC4899',
     services: [
       { id: 'medical',   path: APP_ROUTES.MEDICAL,   labelRu: 'Медицина',  labelEn: 'Medical',   icon: Stethoscope, status: 'available', verticalId: 'medical' },
-      { id: 'pharmacy',  path: APP_ROUTES.PHARMACY,  labelRu: 'Аптеки',    labelEn: 'Pharmacy',  icon: Bandage,     status: 'available', verticalId: 'pharmacy' },
-      { id: 'beauty',    path: APP_ROUTES.BEAUTY,    labelRu: 'Красота',   labelEn: 'Beauty',    icon: Palette,     status: 'available', verticalId: 'beauty' },
+      { id: 'pharmacy',  path: APP_ROUTES.PHARMACY,  labelRu: 'Аптеки',    labelEn: 'Pharmacy',  icon: Pill,        status: 'available', verticalId: 'pharmacy' },
+      { id: 'beauty',    path: APP_ROUTES.BEAUTY,    labelRu: 'Красота',   labelEn: 'Beauty',    icon: Scissors,    status: 'available', verticalId: 'beauty' },
       { id: 'fitness',   path: APP_ROUTES.FITNESS,   labelRu: 'Фитнес',    labelEn: 'Fitness',   icon: Dumbbell,    status: 'available', verticalId: 'fitness' },
-      { id: 'insurance', path: APP_ROUTES.INSURANCE, labelRu: 'Страховка', labelEn: 'Insurance', icon: Shield,      status: 'available', verticalId: 'insurance' },
+      { id: 'insurance', path: APP_ROUTES.INSURANCE, labelRu: 'Страховка', labelEn: 'Insurance', icon: ShieldCheck, status: 'available', verticalId: 'insurance' },
     ],
   },
   {
@@ -458,7 +459,7 @@ export const CATEGORIES: CategoryEntry[] = [
     color: '#A78BFA',
     services: [
       { id: 'pets',       path: APP_ROUTES.PETS,       labelRu: 'Питомцы',    labelEn: 'Pets',        icon: PawPrint, status: 'available', verticalId: 'pet_service', personaTags: ['pet_owner'] },
-      { id: 'veterinary', path: APP_ROUTES.VETERINARY, labelRu: 'Ветеринары', labelEn: 'Veterinary',  icon: Bandage,  status: 'available', personaTags: ['pet_owner'] },
+      { id: 'veterinary', path: APP_ROUTES.VETERINARY, labelRu: 'Ветеринары', labelEn: 'Veterinary',  icon: Stethoscope, status: 'available', personaTags: ['pet_owner'] },
     ],
   },
   // События и досуг — теперь часть повседневной ЖИЗНИ резидента (а не только

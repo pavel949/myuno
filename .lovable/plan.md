@@ -1,99 +1,123 @@
-# Wave B — Edge Functions, Booking Flow, Operator/Admin UI
+## Цель
+Привести иконки приложений/вертикалей к единому стандарту: **только Lucide React**, без эмодзи, с соответствием смысла, по design bible (`docs/canonical/05-visual-design-system.md`, §730 — «Lucide React — единственная разрешённая библиотека иконок. Никаких emoji-иконок в UI»).
 
-Wave A (БД, seed Klod, Tourist Police, цены ×1.35, RPC quote) уже выполнен. Теперь — функциональная часть.
+## Что нашёл (аудит)
 
-## B1. Edge Functions (6 шт.)
+**Текущее состояние — несоответствие библии:**
 
-1. **`create-transfer-order`** — Order-First, идемпотентный
-   - Принимает: vehicle_class, destination_id, pickup_time, направление (airport→hotel / hotel→airport), пассажиры, рейс, заметки, attachments (storage paths), language=ru
-   - Считает цену через `get_transfer_quote` RPC (с ночной надбавкой)
-   - Создаёт `orders` (order_type='transfer', status='pending_operator'), `order_items`, `order_item_transport_details`, `order_attachments`
-   - `UNIQUE(orders.external_ref)` + client idempotency_key защищают от дублей
-   - Назначает оператора через `assign_transfer_operator()` → пишет в `orders.assigned_to`
-   - Триггерит `notify-transfer-booking`
+| Файл (SSOT) | Иконки | Формат | Проблема |
+|---|---|---|---|
+| `src/lib/catalog/taxonomy.ts` | 117 | ✅ Lucide (LucideIcon) | Эталон. Но не везде иконка соответствует сути (например `transfer` и `vehicle` оба `Car`; `cleaning` и `flowers` оба `Sparkles`; `services` hub и `plumbing` оба `Wrench`) |
+| `src/lib/verticals.ts` | 20 | ❌ Эмодзи (`🏠 🚤 🚗 ✨ 🧹 👶 💇 🍽️ 🏥 ⚖️ 📚 🏋️ 🎉 🏄 🐾 💐 🛡️ 🚕 💊 🏦`) | Нарушение §730 |
+| `src/lib/appRegistry.ts` | ~40 | ❌ Эмодзи | Нарушение §730. Это «SINGLE canonical inventory» микро-апп — самый видимый слой |
+| `src/lib/verticalGroups.ts` | cluster fallback `📦` | ❌ Эмодзи | Используется в Discover/All Services |
+| `src/lib/iconMap.ts` | 200+ | ✅ Lucide | Костыль-конвертер emoji→Lucide. Существует, потому что данные хранятся как эмодзи. После миграции — удалить или сузить до legacy. |
 
-2. **`notify-transfer-booking`** — трилингвальные уведомления
-   - Берёт заявку, переводит RU→EN+TH через Lovable AI Gateway (google/gemini-2.5-flash), сохраняет в `order_translations`
-   - Отправляет оператору Klod:
-     - WhatsApp (UltraMSG) на +66 62 965 5545 — карточка EN+TH с кнопкой подтверждения (deep link `/operate/transfers/:id`)
-     - Email (Resend) — RU+EN+TH
-   - Админу: WhatsApp +66 92 240 7355 + Email из `system_settings.admin_emails`
-   - Клиенту: email/WA «заявка принята, ждём подтверждения оператора»
-   - Всё логируется в `booking_notifications_log`
+**Дубликаты/семантические ошибки (примеры из `catalog/taxonomy.ts` и `appRegistry`):**
 
-3. **`confirm-transfer-operator`** — подтверждение оператором
-   - Принимает order_id + operator token (короткоживущий, подписанный)
-   - Переводит `orders.status` → `confirmed`
-   - Запускает Stripe Checkout link или PromptPay QR (зависит от выбранного payment_method)
-   - Шлёт клиенту WA+email «бронирование подтверждено», карточка с фото точки встречи (Tourist Police), телефоном Klod, deep link на оплату
+- `transfer` + `vehicle` → оба `Car` → надо `Plane`/`PlaneLanding` для трансфера, `Car` для аренды
+- `cleaning` + `flowers` → оба `Sparkles` → `flowers` должен быть `Flower2`
+- `services` hub + `plumbing` → оба `Wrench` → hub = `LayoutGrid`/`Boxes`
+- Эмодзи 🐕‍🦺 (pets) рендерится по-разному на iOS/Android/Windows → невидим на части устройств
+- 🍽️ / 🏥 / ⚖️ — variation selectors → ломаются в части шрифтов
+- Цвета/обводки не унифицированы (где-то `strokeWidth=1.6`, где-то `2`, где-то `1.75`)
 
-4. **`create-transfer-checkout`** — Stripe THB + PromptPay
-   - Создаёт Stripe Checkout session с `idempotency_key = order.id`
-   - `payment_method_types: ['card', 'promptpay']` (promptpay включён только если `system_settings.feature_flag:transfer_promptpay = true`, default OFF — требует активации в Stripe Dashboard)
-   - Success → webhook (используем существующий `stripe-webhook`) → `record_ledger_entries`
+**Места рендера:**
+`NavigatorPage.tsx`, `SituationCard.tsx`, `ExploreMoreRail.tsx`, `CategoryPicker.tsx`, `VehicleClassNav.tsx`, `LegalClusterPage.tsx`, `TicketCategoryBadge`, и десятки cluster-страниц. Все ждут либо `LucideIcon` компонент, либо строку (через `DynamicIcon`/`iconMap`).
 
-5. **`transfer-reminders`** — cron T-24h / T-2h
-   - Уже есть `pg_cron`; добавим job на каждые 15 мин
-   - Шлёт клиенту+оператору напоминания (WA+email), статус → `reminded`
+## План
 
-6. **`request-myuno-advance`** — оплата с баланса myUNO (advance)
-   - Для verified users, лимит ≤300,000 ฿ — auto-approve, иначе manual
-   - Пишет в `manual_payment_requests` + списывает с `wallets`
+**Шаг 1. Канонический справочник `src/lib/icons/registry.ts` (новое)**
+Один map `APP_ID → LucideIcon` для всех вертикалей и микро-апп. Источник истины. Используется `verticals.ts`, `appRegistry.ts`, `verticalGroups.ts`, любыми будущими каталогами.
 
-## B2. Storage RLS
+**Шаг 2. Утвердить семантическую карту (примеры выбора)**
 
-Bucket `transfer-attachments` (private, уже создан) — добавить policies:
-- Customer: insert/select собственных файлов (`order_id` в имени пути)
-- Operator/admin: select всех
+```text
+Вертикали:
+  property        → Building2            (не Home — Home занят навигацией)
+  yacht           → Anchor
+  vehicle         → Car
+  transfer        → PlaneLanding         (а не Car — отличить от аренды)
+  fast-track      → Zap
+  sim             → Smartphone
+  exchange        → ArrowLeftRight
+  experience      → Compass
+  tours           → Route
+  water_activity  → Waves
+  event           → CalendarDays
+  cleaning        → Sparkles
+  laundry         → Shirt                (а не Package)
+  pest-control    → Bug
+  handyman        → Hammer
+  plumbing        → Wrench
+  electrical      → Plug                 (а не Zap — Zap = fast-track)
+  ac-repair       → Wind
+  locksmith       → KeyRound
+  gardening       → TreePine
+  flowers         → Flower2              (а не Sparkles)
+  storage         → Warehouse
+  services-hub    → LayoutGrid           (а не Wrench)
+  restaurant      → Utensils
+  delivery        → Bike                 (а не Truck — delivery курьерами)
+  market          → ShoppingBag
+  medical         → Stethoscope
+  pharmacy        → Pill                 (а не Bandage)
+  beauty          → Scissors             (а не Palette — Palette = design)
+  babysitter      → Baby
+  fitness         → Dumbbell
+  education       → GraduationCap
+  pets            → PawPrint             (вместо 🐕‍🦺)
+  insurance       → ShieldCheck
+  legal           → Scale
+  visa            → Plane
+  tax             → Calculator
+  contract-ai     → FileSearch
+  bank            → Landmark             (а не Building/🏦)
+  sos             → AlertTriangle
+  vip-concierge   → Sparkles             (или Crown — обсудить)
+  support         → LifeBuoy             (а не ClipboardList)
+```
 
-## B3. Frontend — 5-step booking form
+**Шаг 3. Рефакторинг SSOT файлов**
+- `src/lib/verticals.ts` — `icon: string (emoji)` → `icon: LucideIcon` (импорт из registry). Удалить поле JSDoc «Emoji icon...».
+- `src/lib/appRegistry.ts` — заменить ~40 эмодзи на ссылки в registry.
+- `src/lib/verticalGroups.ts` — заменить fallback `📦` → `Boxes` icon.
+- Тип `VerticalDefinition.icon` стать `LucideIcon` (типобезопасно).
 
-`src/pages/transfer/TransferBookingPage.tsx` + шаги:
+**Шаг 4. Унификация рендера**
+- Единый компонент `<AppIcon vertical="transfer" size={24} />` обёртка над Lucide с фиксированным `strokeWidth=1.75`, `aria-hidden`, токен-цветом.
+- Заменить разнобой `strokeWidth` (`1.6` / `2` / `1.75`) на `1.75` везде (стандарт DS 2.1, civic/Geist).
+- В `VehicleClassNav.tsx` оставить (уже Lucide).
+- В `ExploreMoreRail` / `CategoryPicker` / `NavigatorPage` — читать иконку из registry, убрать обращения к `iconMap`.
 
-1. **Direction & vehicle** — airport→hotel / hotel→airport, Sedan vs Van, кол-во пассажиров/багажа
-2. **Pickup & dropoff**
-   - Если airport→hotel: dropoff = Google Places autocomplete + поиск по `property_complexes` (комплексы Пхукета) + ручной адрес
-   - Hotel booking PDF upload, фото адреса (multi), карта с draggable pin
-   - Если hotel→airport: фото точки встречи Tourist Police автоматически + телефон Klod
-3. **Date, time, flight** — pickup_time (триггерит ночной surcharge), номер рейса, кол-во детей + child seats (+200/300 ฿)
-4. **Contact & comments** — имя, телефон, WhatsApp, email, заметки оператору (RU/EN/TH автоперевод покажем превью)
-5. **Review & payment** — итоговая цена с разбивкой (base + night + child seats), выбор метода (Stripe/PromptPay/Cash/Sber/myUNO advance), submit
+**Шаг 5. Подчистка**
+- `src/lib/iconMap.ts` сузить до режима «BC для DB-данных» (situations, life-os картинки из БД, где icon хранится строкой). Все hardcoded источники мигрируют на компонент.
+- Прогнать тест `src/test/catalog/taxonomy-coverage.test.ts` + добавить тест «нет эмодзи в исходниках registry-файлов» (regex `[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]`).
 
-Hook `useTransferQuote(vehicle, destinationId, pickupTime)` → RPC.
-Хук `useCreateTransferOrder()` с idempotency_key из useId/uuid.
+**Шаг 6. Визуальная проверка**
+- Сделать скриншоты: Home, Discover, /transport, /legal, /property, AllAppsDrawer — до/после.
+- Убедиться, что иконки видны на dpr=2.8 (текущий вьюпорт пользователя) и не теряются под фон.
 
-## B4. Operator UI — `/operate/transfers`
+## Файлы, которые изменятся
 
-- Список заявок (Realtime subscription к `orders` where assigned_to=Klod)
-- Карточка: EN+TH (RU свёрнуто), фото точки встречи, attachments, кнопки **Confirm / Reject / WhatsApp guest**
-- Confirm → вызывает `confirm-transfer-operator`
-- Фильтр по статусу, дате
+```text
+NEW   src/lib/icons/registry.ts          — SSOT vertical/app → LucideIcon
+NEW   src/components/ui/AppIcon.tsx      — обёртка-рендер
+EDIT  src/lib/verticals.ts               — icon: LucideIcon
+EDIT  src/lib/appRegistry.ts             — все 40+ записей
+EDIT  src/lib/verticalGroups.ts          — fallback, типы
+EDIT  src/lib/catalog/taxonomy.ts        — устранить дубликаты иконок
+EDIT  src/lib/iconMap.ts                 — сузить scope, добавить deprecation note
+EDIT  ~10 consumer-компонентов           — использовать <AppIcon/> вместо строк/эмодзи
+NEW   src/test/design-system/no-emoji-in-registries.test.ts
+```
 
-## B5. Admin UI — `/admin/transfers`
+## Out of scope
+- Иконки в БД (`life_situations.icon` хранится строкой) — продолжают идти через `DynamicIcon` (уже Lucide).
+- Иконки логотипов брендов (yacht broker logos и т.п.).
+- Редизайн цвета/фона карточек — только сами иконки.
 
-- Полный список всех заявок, фильтры (status, operator, date, vehicle)
-- KPI: всего заявок, conv. rate, средний чек, payment mix
-- CSV export
-- Drilldown карточка: вся история (`order_status_history`), переводы, attachments, payments
-- Управление операторами (`transfer_operators` CRUD) и точками встречи (`transfer_meeting_points` CRUD)
-
-## B6. Защита от дублей в switcher
-
-Проверить `src/components/transfer/*` и `SuperSwitcher` — убедиться что нет 2 entry points на трансфер. Если есть — оставить один canonical путь `/app/arrive/transfer` + redirect.
-
-## B7. Секреты (нужно подтверждение)
-
-Уже есть: `STRIPE_SECRET_KEY`, `RESEND_API_KEY`, `ULTRAMSG_*`, `LOVABLE_API_KEY`.
-Добавить: ничего нового — Klod номер хранится в БД, токены оператора генерим сами (HMAC через `service_role`).
-
-## Open questions (не блокируют, но уточню сейчас)
-
-1. Telegram bot для Klod — chat_id неизвестен; пока шлём только WA+email, Telegram добавим когда даст chat_id.
-2. PromptPay в Stripe — оставляю флаг OFF; включишь когда активируешь в Stripe Dashboard.
-3. Фото Tourist Police — сейчас placeholder, заменим как пришлёшь файл.
-
-## Порядок выполнения
-
-Wave B1 (Edge Functions 1+2) → B3 (форма) → B4 (operator UI) → B1 (3-6) → B5 (admin) → B6 (dedup) → smoke-test через test order.
-
-**Готов начать? Нажми Implement plan.**
+## Открытые вопросы
+1. **VIP-консьерж**: `Sparkles` (текущее) или `Crown` (более luxury)?
+2. **Property**: `Building2` (точнее для условий Пхукета: кондо/виллы) или сохранить `Home`?
+3. **Дополнительный жёсткий ESLint rule** против эмодзи в `src/lib/**` — включать сейчас или после миграции?
