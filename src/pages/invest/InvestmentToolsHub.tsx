@@ -83,7 +83,7 @@ const TOOLS: ToolTile[] = [
     titleEn: 'Capital advisory',
     descRu: 'Подбор сделки, представление интересов, сопровождение через юристов и BOI.',
     descEn: 'Deal sourcing, representation, legal and BOI support.',
-    path: APP_ROUTES.INVEST_SERVICES,
+    path: APP_ROUTES.CAPITAL_ADVISORY,
     category: 'advisory',
   },
   {
