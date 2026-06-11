@@ -635,7 +635,17 @@ export default function AirportTransferBooking() {
                 <div className="flex gap-2">
                   <AddressAutocomplete
                     value={formData.destinationAddress}
-                    onChange={(val) => setFormData(prev => ({ ...prev, destinationAddress: val, selectedDestinationId: '' }))}
+                    onChange={(val, meta) => {
+                      setFormData(prev => ({ ...prev, destinationAddress: val, selectedDestinationId: '' }));
+                      if (meta?.lat != null && meta?.lng != null) {
+                        setDestinationCoords({ lat: meta.lat, lng: meta.lng, placeId: meta.placeId });
+                        if (formData.direction === 'to-airport') {
+                          setPickupCoords({ lat: meta.lat, lng: meta.lng });
+                        }
+                      } else {
+                        setDestinationCoords(null);
+                      }
+                    }}
                     placeholder={language === 'ru' ? 'Или введите свой адрес' : 'Or enter your address'}
                     className="flex-1"
                   />
