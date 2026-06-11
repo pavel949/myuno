@@ -112,10 +112,27 @@ Deno.serve(async (req) => {
       });
     }
 
-    await sb().from('orders').update({
-      status: 'confirmed',
-      confirmed_at: new Date().toISOString(),
-    }).eq('id', orderId);
+    // Atomic transition: only succeeds if status is still NOT 'confirmed'.
+    // Prevents double-click / parallel-tab race from running side-effects twice.
+    const { data: updated, error: updErr } = await sb()
+      .from('orders')
+      .update({ status: 'confirmed', confirmed_at: new Date().toISOString() })
+      .eq('id', orderId)
+      .neq('status', 'confirmed')
+      .select('id');
+
+    if (updErr) {
+      console.error('[confirm] atomic update failed', updErr);
+      return new Response(JSON.stringify({ error: 'Update failed' }), {
+        status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    if (!updated || updated.length === 0) {
+      // Someone else confirmed between our SELECT and UPDATE — treat as success, skip side effects.
+      return new Response(JSON.stringify({ success: true, already_confirmed: true, order_number: order.order_number }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     await sb().from('order_status_history').insert({
       order_id: orderId,
