@@ -218,6 +218,23 @@ export default function AirportTransferBooking() {
       return;
     }
 
+    // ── Contact validation (E.164-ish phone + RFC-lite email) ──────────────
+    const phoneDigits = (formData.phone || '').replace(/[^\d]/g, '');
+    if (phoneDigits.length < 8 || phoneDigits.length > 15) {
+      toast.error(language === 'ru'
+        ? 'Введите корректный номер телефона (8–15 цифр, с кодом страны)'
+        : 'Enter a valid phone number (8–15 digits incl. country code)');
+      return;
+    }
+    if (formData.email) {
+      const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(formData.email.trim());
+      if (!emailOk) {
+        toast.error(language === 'ru' ? 'Введите корректный email' : 'Enter a valid email');
+        return;
+      }
+    }
+
+
     // Treat input as local Phuket time (Asia/Bangkok = UTC+7) and emit
     // a timezone-aware ISO 8601 string so Postgres stores correct UTC.
     const scheduledAt = `${formData.arrivalDate}T${formData.arrivalTime}:00+07:00`;
