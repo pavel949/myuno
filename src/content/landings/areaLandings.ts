@@ -52,6 +52,9 @@ const AREA_LINKS: Record<string, {
   'cherngtalay': { personas: ['families', 'passive-investors'],                clusters: ['settlement', 'investment'] },
   'kata':        { personas: ['tourists', 'passive-investors'],                clusters: ['arrival', 'lifestyle'] },
   'phuket-town': { personas: ['digital-nomads', 'ru-expats'],                  clusters: ['settlement', 'arrival'] },
+  'patong':      { personas: ['tourists', 'passive-investors'],                clusters: ['arrival', 'investment'] },
+  'karon':       { personas: ['families', 'tourists', 'passive-investors'],    clusters: ['arrival', 'lifestyle'] },
+  'chalong':     { personas: ['families', 'ru-expats', 'retirees'],            clusters: ['settlement', 'lifestyle'] },
 };
 
 function buildSeo(area: PhuketArea): AreaLanding['seo'] {
