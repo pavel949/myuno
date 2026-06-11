@@ -37,13 +37,13 @@ Deno.serve(async (req) => {
   try {
     const { data: stale } = await sb()
       .from("orders")
-      .select("id, order_number, status, customer_email, customer_phone, customer_name, total_amount, currency, created_at, metadata")
+      .select("id, order_number, status, total_amount, currency, created_at, metadata, order_participants(name, email, phone, role)")
       .eq("order_type", "vehicle")
       .in("status", ["pending", "pending_confirmation", "awaiting_operator"])
       .lt("created_at", cutoff)
       .limit(50);
 
-    const items = (stale || []).filter((o) => {
+    const items = (stale || []).filter((o: any) => {
       const meta = (o.metadata || {}) as Record<string, unknown>;
       return meta.transfer_type === "airport" && !meta.escalated_at;
     });
@@ -58,11 +58,16 @@ Deno.serve(async (req) => {
     const adminWA = await getAdminWhatsApp();
 
     let escalated = 0;
-    for (const o of items) {
-      const msg = `⏱️ *TRANSFER NOT CONFIRMED*\n\n#${o.order_number}\nWaiting > ${ESCALATE_AFTER_MIN} min\nCustomer: ${o.customer_name || "—"} (${o.customer_phone || "—"})\nTotal: ${o.currency} ${o.total_amount}\n\nAssign manually or refund.`;
+    for (const o of items as any[]) {
+      const participants = (o.order_participants || []) as Array<{ name?: string; phone?: string; email?: string; role?: string }>;
+      const primary = participants.find((p) => p.role === "primary") || participants[0] || {};
+      const custName = primary.name || "—";
+      const custPhone = primary.phone || "—";
+      const custEmail = primary.email || "—";
+
+      const msg = `⏱️ *TRANSFER NOT CONFIRMED*\n\n#${o.order_number}\nWaiting > ${ESCALATE_AFTER_MIN} min\nCustomer: ${custName} (${custPhone})\nTotal: ${o.currency} ${o.total_amount}\n\nAssign manually or refund.`;
       await sendWA(adminWA, msg);
 
-      // Email admins via Lovable Emails (reuse transfer-operator-new template body via plain alert)
       for (const email of adminEmails) {
         await sb().functions.invoke("send-transactional-email", {
           body: {
@@ -78,32 +83,30 @@ Deno.serve(async (req) => {
               pickupRu: "", pickupEn: "Operator not responding > 30 min", pickupTh: "",
               dropoffRu: "", dropoffEn: "Please assign manually or refund", dropoffTh: "",
               notesRu: "", notesEn: msg, notesTh: "",
-              customerName: o.customer_name || "—",
-              customerPhone: o.customer_phone || "—",
-              customerEmail: o.customer_email || "—",
+              customerName: custName, customerPhone: custPhone, customerEmail: custEmail,
               customerLang: "en",
               totalLabel: `${o.currency} ${o.total_amount}`,
-              paymentMethod: "—",
-              attachments: [],
-              confirmUrl: "",
-              operatorMissing: true,
+              paymentMethod: "—", attachments: [], confirmUrl: "", operatorMissing: true,
             },
           },
         }).catch((e) => console.error("[escalate email]", e));
       }
 
-      // Mark to avoid re-alerting
       const meta = (o.metadata || {}) as Record<string, unknown>;
       await sb().from("orders").update({
         metadata: { ...meta, escalated_at: new Date().toISOString() },
       }).eq("id", o.id);
 
       await sb().from("booking_notifications_log").insert({
-        order_id: o.id,
+        channel: "whatsapp+email",
         notification_type: "transfer_escalation_30min",
-        channels: ["whatsapp", "email"],
-        recipients: { admin_wa: adminWA, admin_emails: adminEmails },
-        status: "sent",
+        sent_at: new Date().toISOString(),
+        metadata: {
+          order_id: o.id,
+          order_number: o.order_number,
+          recipients: { admin_wa: adminWA, admin_emails: adminEmails },
+          status: "sent",
+        },
       }).catch(() => {});
 
       escalated++;

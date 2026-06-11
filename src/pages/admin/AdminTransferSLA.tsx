@@ -6,24 +6,20 @@ import { Loader2, AlertTriangle, CheckCircle2, Clock } from 'lucide-react';
 
 interface LogRow {
   id: string;
-  order_id: string;
   notification_type: string;
-  channels: string[] | null;
-  recipients: Record<string, unknown> | null;
-  status: string;
-  created_at: string;
+  channel: string;
+  sent_at: string | null;
+  created_at: string | null;
+  metadata: Record<string, unknown> | null;
 }
 
 interface OrderRow {
   id: string;
-  order_number: string;
-  status: string;
+  order_number: string | null;
+  status: string | null;
   total_amount: number;
-  currency: string;
-  customer_name: string | null;
-  created_at: string;
-  confirmed_at: string | null;
-  cancelled_at: string | null;
+  currency: string | null;
+  created_at: string | null;
 }
 
 const TYPE_LABEL: Record<string, string> = {
@@ -47,20 +43,22 @@ export default function AdminTransferSLA() {
       const since = new Date(Date.now() - hours * 3600 * 1000).toISOString();
       const { data: l } = await supabase
         .from('booking_notifications_log')
-        .select('*')
+        .select('id, notification_type, channel, sent_at, created_at, metadata')
         .like('notification_type', 'transfer_%')
         .gte('created_at', since)
         .order('created_at', { ascending: false })
         .limit(500);
-      const rows = (l || []) as LogRow[];
+      const rows = (l || []) as unknown as LogRow[];
       if (cancelled) return;
       setLogs(rows);
 
-      const ids = Array.from(new Set(rows.map((r) => r.order_id))).filter(Boolean);
+      const ids = Array.from(new Set(
+        rows.map((r) => (r.metadata as { order_id?: string } | null)?.order_id).filter(Boolean) as string[]
+      ));
       if (ids.length > 0) {
         const { data: o } = await supabase
           .from('orders')
-          .select('id, order_number, status, total_amount, currency, customer_name, created_at, confirmed_at, cancelled_at')
+          .select('id, order_number, status, total_amount, currency, created_at')
           .in('id', ids);
         if (!cancelled) {
           const map: Record<string, OrderRow> = {};
@@ -73,20 +71,20 @@ export default function AdminTransferSLA() {
     return () => { cancelled = true; };
   }, [hours]);
 
+  const orderIdOf = (r: LogRow) => (r.metadata as { order_id?: string } | null)?.order_id || '';
+  const statusOf = (r: LogRow) => String((r.metadata as { status?: string } | null)?.status || 'sent');
+
   const stats = useMemo(() => {
     const byOrder = new Map<string, LogRow[]>();
     logs.forEach((r) => {
-      const arr = byOrder.get(r.order_id) || [];
+      const oid = orderIdOf(r);
+      if (!oid) return;
+      const arr = byOrder.get(oid) || [];
       arr.push(r);
-      byOrder.set(r.order_id, arr);
+      byOrder.set(oid, arr);
     });
-    let confirmed = 0;
-    let pending = 0;
-    let rejected = 0;
-    let escalated = 0;
-    let noOp = 0;
-    let avgConfirmMin = 0;
-    let confirmedCount = 0;
+    let confirmed = 0, pending = 0, rejected = 0, escalated = 0, noOp = 0;
+    let avgConfirmMin = 0, confirmedCount = 0;
     byOrder.forEach((rows) => {
       const types = new Set(rows.map((r) => r.notification_type));
       if (types.has('transfer_rejected')) rejected++;
@@ -94,7 +92,7 @@ export default function AdminTransferSLA() {
         confirmed++;
         const created = rows.find((r) => r.notification_type.startsWith('transfer_new'));
         const conf = rows.find((r) => r.notification_type === 'transfer_confirmed');
-        if (created && conf) {
+        if (created?.created_at && conf?.created_at) {
           const dt = (new Date(conf.created_at).getTime() - new Date(created.created_at).getTime()) / 60000;
           if (dt > 0 && dt < 24 * 60) { avgConfirmMin += dt; confirmedCount++; }
         }
@@ -103,8 +101,7 @@ export default function AdminTransferSLA() {
       if (types.has('transfer_new_booking_no_operator')) noOp++;
     });
     return {
-      total: byOrder.size,
-      confirmed, pending, rejected, escalated, noOp,
+      total: byOrder.size, confirmed, pending, rejected, escalated, noOp,
       avgConfirmMin: confirmedCount ? Math.round(avgConfirmMin / confirmedCount) : 0,
     };
   }, [logs]);
@@ -153,24 +150,24 @@ export default function AdminTransferSLA() {
                 <th className="p-3">Time</th>
                 <th className="p-3">Order</th>
                 <th className="p-3">Event</th>
-                <th className="p-3">Channels</th>
+                <th className="p-3">Channel</th>
                 <th className="p-3">Status</th>
                 <th className="p-3">Order status</th>
               </tr>
             </thead>
             <tbody>
               {logs.map((r) => {
-                const o = orders[r.order_id];
+                const oid = orderIdOf(r);
+                const o = oid ? orders[oid] : undefined;
+                const st = statusOf(r);
                 return (
                   <tr key={r.id} className="border-t border-border">
-                    <td className="p-3 whitespace-nowrap">{new Date(r.created_at).toLocaleString()}</td>
-                    <td className="p-3 font-mono">{o?.order_number || r.order_id.slice(0, 8)}</td>
+                    <td className="p-3 whitespace-nowrap">{r.created_at ? new Date(r.created_at).toLocaleString() : '—'}</td>
+                    <td className="p-3 font-mono">{o?.order_number || oid.slice(0, 8) || '—'}</td>
                     <td className="p-3">{TYPE_LABEL[r.notification_type] || r.notification_type}</td>
-                    <td className="p-3">{(r.channels || []).join(', ')}</td>
+                    <td className="p-3">{r.channel}</td>
                     <td className="p-3">
-                      <Badge variant={r.status === 'sent' ? 'default' : r.status === 'partial' ? 'secondary' : 'destructive'}>
-                        {r.status}
-                      </Badge>
+                      <Badge variant={st === 'sent' ? 'default' : st === 'partial' ? 'secondary' : 'destructive'}>{st}</Badge>
                     </td>
                     <td className="p-3">{o?.status || '—'}</td>
                   </tr>
