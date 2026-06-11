@@ -1,62 +1,99 @@
-# План: верификация drop-а 21 RPC + smoke-тесты
+# Wave B — Edge Functions, Booking Flow, Operator/Admin UI
 
-## Что уже проверено (read-only, до этого плана)
+Wave A (БД, seed Klod, Tourist Police, цены ×1.35, RPC quote) уже выполнен. Теперь — функциональная часть.
 
-**Code-side (rg по `src/` + `supabase/functions/`, без _archive/docs/types.ts):**
-- 0 вхождений всех 21 удалённых имён (20 dropped + `cleanup_old_sync_logs`). Никаких `.rpc('<name>')`, никаких прямых SQL-вызовов.
+## B1. Edge Functions (6 шт.)
 
-**DB-side (pg_proc / pg_trigger / cron.job):**
-- Все 21 функции отсутствуют в `public` (still_in_db = 0).
-- 0 триггеров и 0 cron-задач ссылается на них.
-- Битый cron `cleanup-sync-logs-daily` удалён.
+1. **`create-transfer-order`** — Order-First, идемпотентный
+   - Принимает: vehicle_class, destination_id, pickup_time, направление (airport→hotel / hotel→airport), пассажиры, рейс, заметки, attachments (storage paths), language=ru
+   - Считает цену через `get_transfer_quote` RPC (с ночной надбавкой)
+   - Создаёт `orders` (order_type='transfer', status='pending_operator'), `order_items`, `order_item_transport_details`, `order_attachments`
+   - `UNIQUE(orders.external_ref)` + client idempotency_key защищают от дублей
+   - Назначает оператора через `assign_transfer_operator()` → пишет в `orders.assigned_to`
+   - Триггерит `notify-transfer-booking`
 
-**LIVE RPC sanity-check (10 функций из `[LIVE]` + 4 ключевых платёжных):**
-- Все 14 присутствуют в `public`: `apply_referral_code`, `has_canonical_role`, `get_subscription_revenue`, `get_all_currency_rates`, `detect_booking_conflicts`, `add_team_points`, `rotate_ical_token`, `ensure_multi_role_qa_bundle`, `resolve_life_os_context`, `resolve_user_context`, `check_availability`, `check_yacht_availability`, `record_ledger_entries`, `process_payout`.
-- ⚠️ Замечен дубль: `check_yacht_availability` существует в 2 экземплярах (overload). Не блокер, но отметить отдельно — кандидат на дальнейший аудит сигнатур.
+2. **`notify-transfer-booking`** — трилингвальные уведомления
+   - Берёт заявку, переводит RU→EN+TH через Lovable AI Gateway (google/gemini-2.5-flash), сохраняет в `order_translations`
+   - Отправляет оператору Klod:
+     - WhatsApp (UltraMSG) на +66 62 965 5545 — карточка EN+TH с кнопкой подтверждения (deep link `/operate/transfers/:id`)
+     - Email (Resend) — RU+EN+TH
+   - Админу: WhatsApp +66 92 240 7355 + Email из `system_settings.admin_emails`
+   - Клиенту: email/WA «заявка принята, ждём подтверждения оператора»
+   - Всё логируется в `booking_notifications_log`
 
-**Вывод:** регрессии от drop-а 21 RPC нет — ни одна точка кода/инфры в них больше не упирается.
+3. **`confirm-transfer-operator`** — подтверждение оператором
+   - Принимает order_id + operator token (короткоживущий, подписанный)
+   - Переводит `orders.status` → `confirmed`
+   - Запускает Stripe Checkout link или PromptPay QR (зависит от выбранного payment_method)
+   - Шлёт клиенту WA+email «бронирование подтверждено», карточка с фото точки встречи (Tourist Police), телефоном Klod, deep link на оплату
 
----
+4. **`create-transfer-checkout`** — Stripe THB + PromptPay
+   - Создаёт Stripe Checkout session с `idempotency_key = order.id`
+   - `payment_method_types: ['card', 'promptpay']` (promptpay включён только если `system_settings.feature_flag:transfer_promptpay = true`, default OFF — требует активации в Stripe Dashboard)
+   - Success → webhook (используем существующий `stripe-webhook`) → `record_ledger_entries`
 
-## Smoke-план (что прогнать дальше)
+5. **`transfer-reminders`** — cron T-24h / T-2h
+   - Уже есть `pg_cron`; добавим job на каждые 15 мин
+   - Шлёт клиенту+оператору напоминания (WA+email), статус → `reminded`
 
-### A. Статика (быстро, ~1 мин)
-1. `tsc --noEmit` — после регена `types.ts` миграцией убедиться, что нигде не осталось импорта удалённых типов RPC.
-2. `vitest run` — полный unit + navigation suite (77/77 прошёл в предыдущем шаге, сейчас перепрогон с фиксом типов).
+6. **`request-myuno-advance`** — оплата с баланса myUNO (advance)
+   - Для verified users, лимит ≤300,000 ฿ — auto-approve, иначе manual
+   - Пишет в `manual_payment_requests` + списывает с `wallets`
 
-### B. Динамика — Playwright smoke (CI-config, chromium only)
-Минимальный набор, покрывающий потоки, где живут оставшиеся LIVE RPC:
+## B2. Storage RLS
 
-| Spec | Покрытый RPC / поток |
-|---|---|
-| `e2e/tests/auth/login.spec.ts` + `signup.spec.ts` | `has_canonical_role`, `apply_referral_code`, `ensure_multi_role_qa_bundle`, `resolve_user_context` |
-| `e2e/tests/navigation/home.spec.ts` | `resolve_life_os_context`, `get_all_currency_rates` |
-| `e2e/tests/booking/yacht-booking.spec.ts` | `check_yacht_availability` (важно — есть overload, надо убедиться что клиент бьёт в правильный) |
-| `e2e/tests/booking/tour-booking.spec.ts` + `booking-flow.spec.ts` | `check_availability`, `detect_booking_conflicts`, `record_ledger_entries` (через мок `e2e-mark-paid`) |
-| `e2e/tests/marketplace/vertical-loops.spec.ts` (1 вертикаль `yacht` или `tour`, не все 17) | order→paid→ledger полный цикл |
-| `e2e/tests/wallet/wallet.spec.ts` | `get_subscription_revenue` admin-side обходим, но wallet UI читает баланс |
+Bucket `transfer-attachments` (private, уже создан) — добавить policies:
+- Customer: insert/select собственных файлов (`order_id` в имени пути)
+- Operator/admin: select всех
 
-Команда: `bunx playwright test --config=playwright.ci.config.ts --project=chromium e2e/tests/auth e2e/tests/navigation e2e/tests/booking e2e/tests/wallet e2e/tests/marketplace/discover-filters.spec.ts`
+## B3. Frontend — 5-step booking form
 
-### C. Runtime telemetry (5 мин окно)
-- `supabase--edge_function_logs` по самым нагруженным функциям (`stripe-webhook`, `analyze-contract`, `e2e-mark-paid`) на предмет `function ... does not exist` / `42883`.
-- Браузер: `code--read_console_logs` + `code--read_network_requests` на главной (`/`), `/discover`, `/wallet`, `/yachts` — ищем 400/500 от `/rest/v1/rpc/...`.
+`src/pages/transfer/TransferBookingPage.tsx` + шаги:
 
-### D. Отчёт
-Краткая таблица: «проверено / зелёное / красное / следующий шаг». Если что-то красное — отдельный fix-PR, не смешиваем с этим аудитом.
+1. **Direction & vehicle** — airport→hotel / hotel→airport, Sedan vs Van, кол-во пассажиров/багажа
+2. **Pickup & dropoff**
+   - Если airport→hotel: dropoff = Google Places autocomplete + поиск по `property_complexes` (комплексы Пхукета) + ручной адрес
+   - Hotel booking PDF upload, фото адреса (multi), карта с draggable pin
+   - Если hotel→airport: фото точки встречи Tourist Police автоматически + телефон Klod
+3. **Date, time, flight** — pickup_time (триггерит ночной surcharge), номер рейса, кол-во детей + child seats (+200/300 ฿)
+4. **Contact & comments** — имя, телефон, WhatsApp, email, заметки оператору (RU/EN/TH автоперевод покажем превью)
+5. **Review & payment** — итоговая цена с разбивкой (base + night + child seats), выбор метода (Stripe/PromptPay/Cash/Sber/myUNO advance), submit
 
----
+Hook `useTransferQuote(vehicle, destinationId, pickupTime)` → RPC.
+Хук `useCreateTransferOrder()` с idempotency_key из useId/uuid.
 
-## Технические детали
+## B4. Operator UI — `/operate/transfers`
 
-- `playwright.ci.config.ts` уже требует секреты `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `E2E_TEST_TOKEN`. Service role на Lovable Cloud недоступен → marketplace full-loop auto-skip (`E2E_SEED_SKIPPED=1`). Discover smokes и payment mock через `e2e-mark-paid` отработают.
-- Для overload `check_yacht_availability` — НЕ дропать в этом шаге, только зафиксировать в `docs/audits/rpc-true-orphans-2026-04-29.txt` как «дальнейший аудит сигнатур», чтобы случайно не уронить `useYachtAvailability` / `useCheckYachtAvailability`.
-- При красном smoke — НЕ откатывать миграцию drop-а (она уже доказана безопасной), искать причину в самом потоке.
+- Список заявок (Realtime subscription к `orders` where assigned_to=Klod)
+- Карточка: EN+TH (RU свёрнуто), фото точки встречи, attachments, кнопки **Confirm / Reject / WhatsApp guest**
+- Confirm → вызывает `confirm-transfer-operator`
+- Фильтр по статусу, дате
 
-## Что НЕ делаем в этом плане
+## B5. Admin UI — `/admin/transfers`
 
-- Не трогаем `[LIVE]` и `[CRON]` RPC.
-- Не дропаем дубликат `check_yacht_availability` overload — отдельная задача.
-- Не запускаем полный 17-vertical full-loop (требует service role, недоступен).
+- Полный список всех заявок, фильтры (status, operator, date, vehicle)
+- KPI: всего заявок, conv. rate, средний чек, payment mix
+- CSV export
+- Drilldown карточка: вся история (`order_status_history`), переводы, attachments, payments
+- Управление операторами (`transfer_operators` CRUD) и точками встречи (`transfer_meeting_points` CRUD)
 
-**Рекомендую:** запустить Шаги A → B (auth + navigation + booking + discover-filters) → C. Если зелёное — закрываем тикет; если есть фейлы, тогда фикс отдельным заходом. — самый быстрый путь к подтверждению, что drop ничего не сломал, без раздувания scope.
+## B6. Защита от дублей в switcher
+
+Проверить `src/components/transfer/*` и `SuperSwitcher` — убедиться что нет 2 entry points на трансфер. Если есть — оставить один canonical путь `/app/arrive/transfer` + redirect.
+
+## B7. Секреты (нужно подтверждение)
+
+Уже есть: `STRIPE_SECRET_KEY`, `RESEND_API_KEY`, `ULTRAMSG_*`, `LOVABLE_API_KEY`.
+Добавить: ничего нового — Klod номер хранится в БД, токены оператора генерим сами (HMAC через `service_role`).
+
+## Open questions (не блокируют, но уточню сейчас)
+
+1. Telegram bot для Klod — chat_id неизвестен; пока шлём только WA+email, Telegram добавим когда даст chat_id.
+2. PromptPay в Stripe — оставляю флаг OFF; включишь когда активируешь в Stripe Dashboard.
+3. Фото Tourist Police — сейчас placeholder, заменим как пришлёшь файл.
+
+## Порядок выполнения
+
+Wave B1 (Edge Functions 1+2) → B3 (форма) → B4 (operator UI) → B1 (3-6) → B5 (admin) → B6 (dedup) → smoke-test через test order.
+
+**Готов начать? Нажми Implement plan.**
