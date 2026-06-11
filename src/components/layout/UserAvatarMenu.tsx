@@ -174,6 +174,7 @@ export function UserAvatarMenu() {
   const handleRoleSwitch = async (role: AppRole) => {
     const config = ROLE_SWITCH_CONFIG[role];
     if (!config) return;
+    try { localStorage.setItem('myuno:lastOperateRole', role); } catch { /* ignore */ }
     await switchContext({ role });
     navigate(config.path);
   };
