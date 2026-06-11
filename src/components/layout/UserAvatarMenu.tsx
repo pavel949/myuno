@@ -152,6 +152,19 @@ export function UserAvatarMenu() {
     [switchableRoles]
   );
 
+  // Quick Operate — single-tap shortcut for multi-role operators.
+  // Priority: last-used (localStorage) → admin → property_manager → owner → vendor → investor.
+  // Only shown when user has 2+ operational roles (otherwise Platform/Workspaces blocks already cover it).
+  const QUICK_OPERATE_PRIORITY: AppRole[] = ['admin', 'property_manager', 'owner', 'vendor', 'investor', 'uno_team', 'staff'];
+  const quickOperateRole = useMemo<AppRole | null>(() => {
+    if (switchableRoles.length < 2) return null;
+    try {
+      const last = localStorage.getItem('myuno:lastOperateRole') as AppRole | null;
+      if (last && switchableRoles.includes(last) && ROLE_SWITCH_CONFIG[last]) return last;
+    } catch { /* ignore */ }
+    return QUICK_OPERATE_PRIORITY.find((r) => switchableRoles.includes(r)) ?? null;
+  }, [switchableRoles]);
+
   if (!user) return null;
 
   const userName = user.user_metadata?.name || user.email?.split('@')[0] || 'User';
