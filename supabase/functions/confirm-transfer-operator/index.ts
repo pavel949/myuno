@@ -1,9 +1,8 @@
 // Operator confirms transfer booking via HMAC-signed link
 // GET /functions/v1/confirm-transfer-operator?id=<order_id>&t=<exp.sig>
-import { Resend } from 'npm:resend@2.0.0';
+// Email delivery via Lovable Emails (send-transactional-email).
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { NOTIFY_CORS as corsHeaders } from '../_shared/notify-utils.ts';
-import { getMailFrom } from '../_shared/admin-config.ts';
 
 type Lang = 'ru' | 'en' | 'th';
 
