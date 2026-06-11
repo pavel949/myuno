@@ -194,6 +194,7 @@ export default function AirportTransferBooking() {
         passengers: parseInt(formData.passengers),
         luggage: parseInt(formData.luggage),
         meeting_sign_name: formData.meetingSignName,
+        language,
       },
       items: [{
         item_name: `Airport Transfer - ${vehicleName}`,
