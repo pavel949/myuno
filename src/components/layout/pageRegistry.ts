@@ -125,6 +125,7 @@ export const InvestmentBusinessZone = lazy(() => import('@/pages/invest/Investme
 export const InvestmentKnowledgeZone = lazy(() => import('@/pages/invest/InvestmentKnowledgeZone'));
 export const InvestmentServicesZone = lazy(() => import('@/pages/invest/InvestmentServicesZone'));
 export const InvestmentOpsConsole = lazy(() => import('@/pages/invest/InvestmentOpsConsole'));
+export const InvestmentToolsHub = lazy(() => import('@/pages/invest/InvestmentToolsHub'));
 export const InvestmentBusinessDetail = lazy(() => import('@/pages/invest/InvestmentBusinessDetail'));
 // InvestmentPitch removed in Wave 1 — /invest/pitch redirects to /invest/raise (InvestmentSubmit).
 // RaiseFunding removed in Wave 1 — /invest/raise now uses canonical InvestmentSubmit.
