@@ -297,7 +297,7 @@ export const CATEGORIES: CategoryEntry[] = [
     icon: Car,
     color: '#3B82F6',
     services: [
-      { id: 'transfer',   path: APP_ROUTES.AIRPORT_TRANSFER, labelRu: 'Трансферы',  labelEn: 'Transfers',  icon: Car,         status: 'available', verticalId: 'transfer', personaTags: ['tourist'], jtbdClusters: ['A'] },
+      { id: 'transfer',   path: APP_ROUTES.AIRPORT_TRANSFER, labelRu: 'Трансферы',  labelEn: 'Transfers',  icon: PlaneLanding, status: 'available', verticalId: 'transfer', personaTags: ['tourist'], jtbdClusters: ['A'] },
       { id: 'fast-track', path: APP_ROUTES.FAST_TRACK,        labelRu: 'Fast Track',  labelEn: 'Fast Track', icon: Zap,         status: 'available', personaTags: ['tourist'], jtbdClusters: ['A'] },
       { id: 'vehicle',    path: APP_ROUTES.TRANSPORT,         labelRu: 'Авто и байки',labelEn: 'Car & bike', icon: Car,         status: 'available', verticalId: 'vehicle', jtbdClusters: ['A'] },
       { id: 'sim',        path: APP_ROUTES.SIM_START,         labelRu: 'SIM-карты',   labelEn: 'SIM cards',  icon: Smartphone,  status: 'available', jtbdClusters: ['A'] },
