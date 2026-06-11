@@ -736,6 +736,7 @@ export const AnimatedRoutes: React.FC = () => {
 
         {/* ── Operator confirmation landing (signed HMAC link, no auth gate) ── */}
         <Route path="/operate/transfers/confirm" element={<LazyPage><Pages.OperatorTransferConfirm /></LazyPage>} />
+        <Route path="/operate/transfers" element={<LazyPage><AuthGuard><Pages.OperatorTransfers /></AuthGuard></LazyPage>} />
 
 
 
