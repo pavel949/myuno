@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { MapPin, Building2, Search, Loader2, Navigation, Keyboard, ExternalLink, Hotel } from 'lucide-react';
+import { MapPin, Building2, Search, Loader2, Navigation, Keyboard, ExternalLink, Hotel, Check, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePropertyProjects } from '@/hooks/usePropertyProjects';
