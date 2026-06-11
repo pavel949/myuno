@@ -115,8 +115,8 @@ export const DeveloperStripeReturn = lazy(() => import('@/pages/developer-portal
 export const AdminNewbuilds = lazy(() => import('@/pages/admin/AdminNewbuilds'));
 
 // ── Investment ──
-export const InvestmentIndex = lazy(() => import('@/pages/invest/InvestmentIndex'));
-export const InvestmentHubShell = lazy(() => import('@/pages/invest/InvestmentHubShell'));
+// Wave 3 stabilize: InvestmentIndex removed (orphan — hub uses InvestmentHubLanding).
+// InvestmentHubShell stays as direct import in InvestmentOpsConsole, no Pages.* export needed.
 export const InvestmentDetail = lazy(() => import('@/pages/invest/InvestmentDetail'));
 export const InvestorDashboard = lazy(() => import('@/pages/invest/InvestorDashboard'));
 export const InvestmentHubLanding = lazy(() => import('@/pages/invest/InvestmentHubLanding'));
