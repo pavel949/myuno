@@ -97,7 +97,7 @@ Deno.serve(async (req) => {
 
     const { data: order, error: fetchErr } = await sb()
       .from('orders')
-      .select('id, order_number, status, total_amount, currency, customer_email, customer_phone, customer_name, metadata')
+      .select('id, order_number, status, total_amount, currency, metadata, order_participants(name, email, phone, role)')
       .eq('id', orderId)
       .single();
 
@@ -106,6 +106,13 @@ Deno.serve(async (req) => {
         status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+
+    // Surface customer contacts from order_participants (primary role preferred).
+    const participants = (order.order_participants || []) as Array<{ name?: string; email?: string; phone?: string; role?: string }>;
+    const primary = participants.find((p) => p.role === 'primary') || participants[0] || {};
+    const customerEmail = primary.email || null;
+    const customerPhone = primary.phone || null;
+    const customerName = primary.name || '';
 
     // ===== REJECT FLOW =====
     if (action === 'reject') {
@@ -116,7 +123,7 @@ Deno.serve(async (req) => {
       }
       const { data: rejUpd } = await sb()
         .from('orders')
-        .update({ status: 'cancelled', cancelled_at: new Date().toISOString() })
+        .update({ status: 'cancelled' })
         .eq('id', orderId)
         .not('status', 'in', '(cancelled,refunded)')
         .select('id');
@@ -142,12 +149,17 @@ Deno.serve(async (req) => {
       if (refundErr) console.error('[reject] refund failed', refundErr);
 
       await sb().from('booking_notifications_log').insert({
-        order_id: orderId,
+        channel: 'system',
         notification_type: 'transfer_rejected',
-        channels: ['system'],
-        recipients: { customer_email: order.customer_email },
-        status: refundErr ? 'partial' : 'sent',
-      }).catch(() => {});
+        sent_at: new Date().toISOString(),
+        metadata: {
+          order_id: orderId,
+          order_number: order.order_number,
+          recipients: { customer_email: customerEmail },
+          status: refundErr ? 'partial' : 'sent',
+          reject_reason: rejectReason,
+        },
+      }).catch((e) => console.error('[log]', e));
 
       return new Response(JSON.stringify({
         success: true,
@@ -168,7 +180,7 @@ Deno.serve(async (req) => {
     // Prevents double-click / parallel-tab race from running side-effects twice.
     const { data: updated, error: updErr } = await sb()
       .from('orders')
-      .update({ status: 'confirmed', confirmed_at: new Date().toISOString() })
+      .update({ status: 'confirmed' })
       .eq('id', orderId)
       .neq('status', 'confirmed')
       .select('id');
