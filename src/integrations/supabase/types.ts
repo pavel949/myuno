@@ -6068,6 +6068,101 @@ export type Database = {
           },
         ]
       }
+      deposit_vault_photos: {
+        Row: {
+          created_at: string
+          exif: Json | null
+          id: string
+          label: string | null
+          lat: number | null
+          lng: number | null
+          phase: string
+          storage_path: string
+          taken_at: string
+          user_id: string
+          vault_id: string
+        }
+        Insert: {
+          created_at?: string
+          exif?: Json | null
+          id?: string
+          label?: string | null
+          lat?: number | null
+          lng?: number | null
+          phase?: string
+          storage_path: string
+          taken_at?: string
+          user_id: string
+          vault_id: string
+        }
+        Update: {
+          created_at?: string
+          exif?: Json | null
+          id?: string
+          label?: string | null
+          lat?: number | null
+          lng?: number | null
+          phase?: string
+          storage_path?: string
+          taken_at?: string
+          user_id?: string
+          vault_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deposit_vault_photos_vault_id_fkey"
+            columns: ["vault_id"]
+            isOneToOne: false
+            referencedRelation: "deposit_vaults"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deposit_vaults: {
+        Row: {
+          checkin_at: string | null
+          checkout_at: string | null
+          created_at: string
+          deposit_amount_thb: number | null
+          id: string
+          landlord_contact: string | null
+          landlord_name: string | null
+          notes: string | null
+          property_address: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          checkin_at?: string | null
+          checkout_at?: string | null
+          created_at?: string
+          deposit_amount_thb?: number | null
+          id?: string
+          landlord_contact?: string | null
+          landlord_name?: string | null
+          notes?: string | null
+          property_address: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          checkin_at?: string | null
+          checkout_at?: string | null
+          created_at?: string
+          deposit_amount_thb?: number | null
+          id?: string
+          landlord_contact?: string | null
+          landlord_name?: string | null
+          notes?: string | null
+          property_address?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       developer_impersonation_log: {
         Row: {
           admin_id: string
@@ -6348,6 +6443,78 @@ export type Database = {
             columns: ["development_id"]
             isOneToOne: false
             referencedRelation: "property_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dispute_packs: {
+        Row: {
+          complaint_summary: string | null
+          created_at: string
+          deposit_amount_thb: number | null
+          id: string
+          landlord_contact: string | null
+          landlord_name: string | null
+          language: string
+          letter_generated_at: string | null
+          letter_storage_path: string | null
+          letter_text: string | null
+          order_id: string | null
+          paid_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          vault_id: string | null
+        }
+        Insert: {
+          complaint_summary?: string | null
+          created_at?: string
+          deposit_amount_thb?: number | null
+          id?: string
+          landlord_contact?: string | null
+          landlord_name?: string | null
+          language?: string
+          letter_generated_at?: string | null
+          letter_storage_path?: string | null
+          letter_text?: string | null
+          order_id?: string | null
+          paid_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          vault_id?: string | null
+        }
+        Update: {
+          complaint_summary?: string | null
+          created_at?: string
+          deposit_amount_thb?: number | null
+          id?: string
+          landlord_contact?: string | null
+          landlord_name?: string | null
+          language?: string
+          letter_generated_at?: string | null
+          letter_storage_path?: string | null
+          letter_text?: string | null
+          order_id?: string | null
+          paid_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          vault_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dispute_packs_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dispute_packs_vault_id_fkey"
+            columns: ["vault_id"]
+            isOneToOne: false
+            referencedRelation: "deposit_vaults"
             referencedColumns: ["id"]
           },
         ]
