@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -19,8 +19,12 @@ import {
 import { APP_ROUTES } from '@/lib/config/routes';
 import { cn } from '@/lib/utils';
 import { UnifiedFilterRibbon, type FilterRibbonItem } from '@/components/shared/UnifiedFilterRibbon';
+import { useUrlFilters } from '@/hooks/useUrlFilters';
 
-type ToolCategory = 'all' | 'rating' | 'calc' | 'advisory' | 'dd';
+const TOOL_CATEGORIES = ['all', 'rating', 'calc', 'advisory', 'dd'] as const;
+type ToolCategory = typeof TOOL_CATEGORIES[number];
+const isToolCategory = (v: string): v is ToolCategory =>
+  (TOOL_CATEGORIES as readonly string[]).includes(v);
 
 interface ToolTile {
   icon: React.ElementType;
@@ -106,7 +110,11 @@ export default function InvestmentToolsHub() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const [active, setActive] = useState<ToolCategory>('all');
+  const { getValue, setValue } = useUrlFilters();
+  const raw = getValue('cat', 'all');
+  const active: ToolCategory = isToolCategory(raw) ? raw : 'all';
+  const setActive = (id: ToolCategory) => setValue('cat', id === 'all' ? null : id);
+
 
   const filters: FilterRibbonItem[] = useMemo(
     () => [
