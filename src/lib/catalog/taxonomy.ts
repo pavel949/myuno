@@ -411,7 +411,7 @@ export const CATEGORIES: CategoryEntry[] = [
     color: '#F59E0B',
     services: [
       { id: 'restaurant', path: APP_ROUTES.RESTAURANTS, labelRu: 'Рестораны', labelEn: 'Restaurants', icon: Utensils,    status: 'available', verticalId: 'restaurant' },
-      { id: 'delivery',   path: APP_ROUTES.DELIVERY,    labelRu: 'Доставка',  labelEn: 'Delivery',    icon: Truck,       status: 'available' },
+      { id: 'delivery',   path: APP_ROUTES.DELIVERY,    labelRu: 'Доставка',  labelEn: 'Delivery',    icon: Bike,        status: 'available' },
       { id: 'market',     path: APP_ROUTES.MARKET,      labelRu: 'Маркет',    labelEn: 'Market',      icon: ShoppingBag, status: 'available' },
     ],
   },
